@@ -156,11 +156,256 @@ map::value_type create_string_functions() {
   return map::value_type{"string", std::move(string_functions)};
 }
 
+map::value_type create_int_functions() {
+  map int_functions;
+
+  class i64_binary_predicate : public named_native_function {
+   public:
+    using named_native_function::named_native_function;
+
+    virtual boolean invoke(i64 lhs, i64 rhs) const = 0;
+
+    object::ptr invoke(context ctx) final {
+      ctx.declare_named_arguments({});
+      ctx.declare_arity(2);
+      return object::as_static(
+          invoke(ctx.argument<i64>(0), ctx.argument<i64>(1)) ? w::true_
+                                                             : w::false_);
+    }
+  };
+
+  // The naming format used here matches the "operator" module in Python:
+  //    https://docs.python.org/3/library/operator.html
+  //
+  // For functions returning boolean, "?" is added to the end of the name, as
+  // convention for Whisker.
+
+  {
+    /**
+     * Checks if one i64 is lesser than another.
+     *
+     * Name: int.lt?
+     *
+     * Arguments:
+     *   - [i64] — The left-hand side of the comparison.
+     *   - [i64] — The right-hand side of the comparison.
+     *
+     * Returns:
+     *   [boolean] indicating whether the first number is lesser than the
+     *             second.
+     */
+    class int_lt final : public i64_binary_predicate {
+     public:
+      int_lt() : i64_binary_predicate("int.lt?") {}
+
+      bool invoke(i64 lhs, i64 rhs) const final { return lhs < rhs; }
+    };
+    int_functions["lt?"] = w::make_native_function<int_lt>();
+  }
+
+  {
+    /**
+     * Checks if one i64 is lesser or equal to than another.
+     *
+     * Name: int.le?
+     *
+     * Arguments:
+     *   - [i64] — The left-hand side of the comparison.
+     *   - [i64] — The right-hand side of the comparison.
+     *
+     * Returns:
+     *   [boolean] indicating whether the first number is lesser than or equal
+     *             to the second.
+     */
+    class int_le final : public i64_binary_predicate {
+     public:
+      int_le() : i64_binary_predicate("int.le?") {}
+
+      bool invoke(i64 lhs, i64 rhs) const final { return lhs <= rhs; }
+    };
+    int_functions["le?"] = w::make_native_function<int_le>();
+  }
+
+  {
+    /**
+     * Checks two i64 values for equality.
+     *
+     * Name: int.eq?
+     *
+     * Arguments:
+     *   - [i64] — The left-hand side of the comparison.
+     *   - [i64] — The right-hand side of the comparison.
+     *
+     * Returns:
+     *   [boolean] indicating whether the two values are equal.
+     */
+    class int_eq final : public i64_binary_predicate {
+     public:
+      int_eq() : i64_binary_predicate("int.eq?") {}
+
+      bool invoke(i64 lhs, i64 rhs) const final { return lhs == rhs; }
+    };
+    int_functions["eq?"] = w::make_native_function<int_eq>();
+  }
+
+  {
+    /**
+     * Checks two i64 values for inequality.
+     *
+     * Name: int.ne?
+     *
+     * Arguments:
+     *   - [i64] — The left-hand side of the comparison.
+     *   - [i64] — The right-hand side of the comparison.
+     *
+     * Returns:
+     *   [boolean] indicating whether the two values are not equal.
+     */
+    class int_ne final : public i64_binary_predicate {
+     public:
+      int_ne() : i64_binary_predicate("int.ne?") {}
+
+      bool invoke(i64 lhs, i64 rhs) const final { return lhs != rhs; }
+    };
+    int_functions["ne?"] = w::make_native_function<int_ne>();
+  }
+
+  {
+    /**
+     * Checks if one i64 is greater or equal to than another.
+     *
+     * Name: int.ge?
+     *
+     * Arguments:
+     *   - [i64] — The left-hand side of the comparison.
+     *   - [i64] — The right-hand side of the comparison.
+     *
+     * Returns:
+     *   [boolean] indicating whether the first number is greater than or equal
+     *             to the second.
+     */
+    class int_ge final : public i64_binary_predicate {
+     public:
+      int_ge() : i64_binary_predicate("int.ge?") {}
+
+      bool invoke(i64 lhs, i64 rhs) const final { return lhs >= rhs; }
+    };
+    int_functions["ge?"] = w::make_native_function<int_ge>();
+  }
+
+  {
+    /**
+     * Checks if one i64 is greater than another.
+     *
+     * Name: int.gt?
+     *
+     * Arguments:
+     *   - [i64] — The left-hand side of the comparison.
+     *   - [i64] — The right-hand side of the comparison.
+     *
+     * Returns:
+     *   [boolean] indicating whether the first number is greater than the
+     *             second.
+     */
+    class int_gt final : public i64_binary_predicate {
+     public:
+      int_gt() : i64_binary_predicate("int.gt?") {}
+
+      bool invoke(i64 lhs, i64 rhs) const final { return lhs > rhs; }
+    };
+    int_functions["gt?"] = w::make_native_function<int_gt>();
+  }
+
+  {
+    /**
+     * Adds numbers together.
+     *
+     * Name: int.add
+     *
+     * Arguments:
+     *   - [i64...] — numbers to add together.
+     *
+     * Returns:
+     *   [i64] the sum of the provided numbers. If there are no arguments, then
+     *         returns 0.
+     */
+    class int_add final : public named_native_function {
+     public:
+      int_add() : named_native_function("int.add") {}
+
+      object::ptr invoke(context ctx) override {
+        ctx.declare_named_arguments({});
+        i64 result = 0;
+        for (std::size_t i = 0; i < ctx.arity(); ++i) {
+          result += ctx.argument<i64>(i);
+        }
+        return object::owned(w::i64(result));
+      }
+    };
+    int_functions["add"] = w::make_native_function<int_add>();
+  }
+
+  {
+    /**
+     * Negates the provided number.
+     *
+     * Name: int.neg
+     *
+     * Arguments:
+     *   - [i64] — number to negate
+     *
+     * Returns:
+     *   [i64] the negative of the provided number.
+     */
+    class int_neg final : public named_native_function {
+     public:
+      int_neg() : named_native_function("int.neg") {}
+
+      object::ptr invoke(context ctx) override {
+        ctx.declare_named_arguments({});
+        ctx.declare_arity(1);
+        return object::owned(w::i64(-ctx.argument<i64>(0)));
+      }
+    };
+    int_functions["neg"] = w::make_native_function<int_neg>();
+  }
+
+  {
+    /**
+     * Subtracts one number from another.
+     *
+     * Name: int.sub
+     *
+     * Arguments:
+     *   - [i64] — number to subtract from.
+     *   - [i64] — amount to subtract.
+     *
+     * Returns:
+     *   [i64] the difference of the two numbers.
+     */
+    class int_sub final : public named_native_function {
+     public:
+      int_sub() : named_native_function("int.sub") {}
+
+      object::ptr invoke(context ctx) override {
+        ctx.declare_named_arguments({});
+        ctx.declare_arity(2);
+        return object::owned(
+            w::i64(ctx.argument<i64>(0) - ctx.argument<i64>(1)));
+      }
+    };
+    int_functions["sub"] = w::make_native_function<int_sub>();
+  }
+
+  return map::value_type{"int", std::move(int_functions)};
+}
+
 } // namespace
 
 void load_standard_library(map& module) {
   module.emplace(create_array_functions());
   module.emplace(create_string_functions());
+  module.emplace(create_int_functions());
 }
 
 } // namespace whisker

@@ -176,6 +176,20 @@ class native_object {
     virtual managed_object_ptr<> lookup_property(
         std::string_view identifier) const = 0;
 
+    /**
+     * Returns an ordered list of finitely enumerable property names of this
+     * map-like object.
+     *
+     * If property names are not enumerable (i.e. dynamically generated), then
+     * this returns the empty optional.
+     *
+     * For each name returned in this list, lookup_property must not return
+     * nullptr.
+     */
+    virtual std::optional<std::vector<std::string>> keys() const {
+      return std::nullopt;
+    }
+
    protected:
     /**
      * A default implementation of whisker::print_to for native object
@@ -481,6 +495,7 @@ class native_function {
      public:
       managed_object_ptr<> lookup_property(
           std::string_view identifier) const final;
+      std::optional<std::vector<std::string>> keys() const final;
 
       // Avoids incomplete type (whisker::object) errors on MSVC.
       ~map_like() noexcept override;

@@ -259,6 +259,24 @@ object::ptr native_function::context::map_like::lookup_property(
       });
 }
 
+std::optional<std::vector<std::string>>
+native_function::context::map_like::keys() const {
+  using result = std::optional<std::vector<std::string>>;
+  return detail::variant_match(
+      which_,
+      [&](const native_object::map_like::ptr& m) -> result {
+        return m->keys();
+      },
+      [&](const managed_object_ptr<map>& m) -> result {
+        std::vector<std::string> keys;
+        keys.reserve(m->size());
+        for (const auto& [key, _] : *m) {
+          keys.push_back(key);
+        }
+        return keys;
+      });
+}
+
 /* static */ std::optional<native_function::context::map_like>
 native_function::context::map_like::try_from(const object::ptr& o) {
   if (o->is_map()) {

@@ -119,15 +119,18 @@ class mstch_map_proxy final
     return nullptr;
   }
 
-  void print_to(tree_printer::scope scope, const object_print_options& options)
-      const override {
+  std::optional<std::vector<std::string>> keys() const override {
     std::vector<std::string> property_names;
     property_names.reserve(proxied_.size());
     for (const auto& [key, _] : proxied_) {
       property_names.push_back(key);
     }
-    default_print_to(
-        "mstch::map", std::move(property_names), std::move(scope), options);
+    return property_names;
+  }
+
+  void print_to(tree_printer::scope scope, const object_print_options& options)
+      const override {
+    default_print_to("mstch::map", *keys(), std::move(scope), options);
   }
 
   bool operator==(const native_object& untyped_other) const override {
@@ -181,6 +184,10 @@ class mstch_object_proxy
     auto [result, _] = keep_alive_.insert_or_assign(
         id_string, from_mstch(proxied_->at(id_string)));
     return object::as_static(result->second);
+  }
+
+  std::optional<std::vector<std::string>> keys() const override {
+    return proxied_->property_names();
   }
 
   void print_to(

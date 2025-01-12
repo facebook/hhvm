@@ -175,6 +175,22 @@ class native_object {
      */
     virtual managed_object_ptr<> lookup_property(
         std::string_view identifier) const = 0;
+
+   protected:
+    /**
+     * A default implementation of whisker::print_to for native object
+     * subclasses of map_like to use.
+     *
+     * For the default implementation to work, property names must be explicitly
+     * enumerated.
+     *
+     * The provided name allows the caller to expose type information.
+     */
+    void default_print_to(
+        std::string_view name,
+        std::vector<std::string> property_names,
+        tree_printer::scope,
+        const object_print_options&) const;
   };
   /**
    * Returns an implementation of map_list if this object supports map-like
@@ -219,6 +235,18 @@ class native_object {
      *   - index < size()
      */
     virtual managed_object_ptr<> at(std::size_t index) const = 0;
+
+   protected:
+    /**
+     * A default implementation of whisker::print_to for native object
+     * subclasses of array_like to use.
+     *
+     * The provided name allows the caller to expose type information.
+     */
+    void default_print_to(
+        std::string_view name,
+        tree_printer::scope,
+        const object_print_options&) const;
   };
   /**
    * Returns an implementation of array_like if this object supports array-like

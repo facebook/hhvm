@@ -134,6 +134,39 @@ class to_string_visitor {
 
 } // namespace
 
+void native_object::map_like::default_print_to(
+    std::string_view name,
+    std::vector<std::string> property_names,
+    tree_printer::scope scope,
+    const object_print_options& options) const {
+  assert(scope.semantic_depth() <= options.max_depth);
+  const auto size = property_names.size();
+  scope.println("{} (size={})", name, size);
+
+  for (const std::string& key : property_names) {
+    auto cached = lookup_property(key);
+    assert(cached != nullptr);
+    auto element_scope = scope.open_transparent_property();
+    element_scope.println("'{}'", key);
+    whisker::print_to(*cached, element_scope.open_node(), options);
+  }
+}
+
+void native_object::array_like::default_print_to(
+    std::string_view name,
+    tree_printer::scope scope,
+    const object_print_options& options) const {
+  assert(scope.semantic_depth() <= options.max_depth);
+
+  const auto sz = size();
+  scope.println("{} (size={})", name, sz);
+  for (std::size_t i = 0; i < sz; ++i) {
+    auto element_scope = scope.open_transparent_property();
+    element_scope.println("[{}]", i);
+    whisker::print_to(*at(i), element_scope.open_node(), options);
+  }
+}
+
 void native_object::print_to(
     tree_printer::scope scope, const object_print_options&) const {
   scope.println("<native_object>");

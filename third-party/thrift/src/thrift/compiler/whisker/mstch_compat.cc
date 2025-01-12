@@ -62,15 +62,7 @@ class mstch_array_proxy final
 
   void print_to(tree_printer::scope scope, const object_print_options& options)
       const override {
-    assert(scope.semantic_depth() <= options.max_depth);
-
-    const auto size = proxied_.size();
-    scope.println("mstch::array (size={})", size);
-    for (std::size_t i = 0; i < size; ++i) {
-      auto element_scope = scope.open_transparent_property();
-      element_scope.println("[{}]", i);
-      whisker::print_to(*at(i), element_scope.open_node(), options);
-    }
+    default_print_to("mstch::array", std::move(scope), options);
   }
 
   bool operator==(const native_object& untyped_other) const override {
@@ -129,17 +121,13 @@ class mstch_map_proxy final
 
   void print_to(tree_printer::scope scope, const object_print_options& options)
       const override {
-    assert(scope.semantic_depth() <= options.max_depth);
-    const auto size = proxied_.size();
-    scope.println("mstch::map (size={})", size);
-
+    std::vector<std::string> property_names;
+    property_names.reserve(proxied_.size());
     for (const auto& [key, _] : proxied_) {
-      auto cached = lookup_property(key);
-      assert(cached != nullptr);
-      auto element_scope = scope.open_transparent_property();
-      element_scope.println("'{}'", key);
-      whisker::print_to(*cached, element_scope.open_node(), options);
+      property_names.push_back(key);
     }
+    default_print_to(
+        "mstch::map", std::move(property_names), std::move(scope), options);
   }
 
   bool operator==(const native_object& untyped_other) const override {

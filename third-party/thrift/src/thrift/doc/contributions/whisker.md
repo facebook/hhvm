@@ -339,10 +339,6 @@ Whisker `{{#if}}` blocks are based on [EmberJS `{{#if}}`](https://guides.emberjs
 
 ### Each Blocks
 
-:::warning
-`{{#each}}` blocks have not been implemented yet.
-:::
-
 Whisker supports a block type for repeated rendering: `{{#each}}`. A typical repetition block might look like:
 
 ```handlebars

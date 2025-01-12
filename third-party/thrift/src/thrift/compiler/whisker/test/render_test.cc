@@ -1202,6 +1202,173 @@ TEST_F(RenderTest, with_not_map_like_native_object) {
           error_backtrace("#0 path/to/test.whisker <line:1, col:9>\n")));
 }
 
+TEST_F(RenderTest, each_block_array) {
+  auto result = render(
+      "The factorial function looks like:\n"
+      "{{#each factorials}}\n"
+      "{{.}}\n"
+      "{{/each}}",
+      w::map(
+          {{"factorials",
+            w::array(
+                {w::i64(1), w::i64(2), w::i64(6), w::i64(24), w::i64(120)})}}));
+  EXPECT_EQ(
+      *result,
+      "The factorial function looks like:\n"
+      "1\n"
+      "2\n"
+      "6\n"
+      "24\n"
+      "120\n");
+}
+
+TEST_F(RenderTest, each_block_array_with_capture) {
+  auto result = render(
+      "The factorial function looks like:\n"
+      "{{#each factorials as |value|}}\n"
+      "{{value}}\n"
+      "{{/each}}",
+      w::map(
+          {{"factorials",
+            w::array(
+                {w::i64(1), w::i64(2), w::i64(6), w::i64(24), w::i64(120)})}}));
+  EXPECT_EQ(
+      *result,
+      "The factorial function looks like:\n"
+      "1\n"
+      "2\n"
+      "6\n"
+      "24\n"
+      "120\n");
+}
+
+TEST_F(RenderTest, each_block_array_with_capture_and_index) {
+  auto result = render(
+      "The factorial function looks like:\n"
+      "{{#each factorials as |value index|}}\n"
+      "{{index}}. {{value}}\n"
+      "{{/each}}",
+      w::map(
+          {{"factorials",
+            w::array(
+                {w::i64(1), w::i64(2), w::i64(6), w::i64(24), w::i64(120)})}}));
+  EXPECT_EQ(
+      *result,
+      "The factorial function looks like:\n"
+      "0. 1\n"
+      "1. 2\n"
+      "2. 6\n"
+      "3. 24\n"
+      "4. 120\n");
+}
+
+TEST_F(RenderTest, each_block_array_iterable_native_object) {
+  auto factorials = w::map(
+      {{"factorials",
+        w::make_native_object<array_like_native_object>(array(
+            {w::map({{"value", w::i64(1)}}),
+             w::map({{"value", w::string("2")}}),
+             w::map({{"value", w::i64(6)}}),
+             w::map({{"value", w::i64(24)}}),
+             w::map({{"value", w::i64(120)}})}))}});
+  auto result = render(
+      "The factorial function looks like:\n"
+      "{{#each factorials as |entry index|}}\n"
+      "{{index}}. {{entry.value}}\n"
+      "{{/each}}",
+      factorials);
+  EXPECT_EQ(
+      *result,
+      "The factorial function looks like:\n"
+      "0. 1\n"
+      "1. 2\n"
+      "2. 6\n"
+      "3. 24\n"
+      "4. 120\n");
+}
+
+TEST_F(RenderTest, each_block_array_else) {
+  auto result = render(
+      "The factorial function looks like:\n"
+      "{{#each factorials as |value index|}}\n"
+      "{{undefined-name}}\n"
+      "{{#else}}\n"
+      "Hey! Where did they go?\n"
+      "{{/each}}",
+      w::map({{"factorials", w::array({})}}));
+  EXPECT_EQ(
+      *result,
+      "The factorial function looks like:\n"
+      "Hey! Where did they go?\n");
+}
+
+TEST_F(RenderTest, each_block_array_nested) {
+  auto result = render(
+      "{{#each . as |e i|}}\n"
+      "{{i}}({{#each e.b as |e j|}} {{i}}-{{j}}({{e.c}}) {{/each}})\n"
+      "{{/each}}",
+      w::array(
+          {w::map(
+               {{"b",
+                 w::array(
+                     {w::map({{"c", w::i64(1)}}),
+                      w::map({{"c", w::i64(2)}})})}}),
+           w::map(
+               {{"b",
+                 w::array(
+                     {w::map({{"c", w::i64(3)}}),
+                      w::map({{"c", w::i64(4)}})})}}),
+           w::map(
+               {{"b",
+                 w::array(
+                     {w::map({{"c", w::i64(5)}}),
+                      w::map({{"c", w::i64(6)}})})}})}));
+  EXPECT_EQ(
+      *result,
+      "0( 0-0(1)  0-1(2) )\n"
+      "1( 1-0(3)  1-1(4) )\n"
+      "2( 2-0(5)  2-1(6) )\n");
+}
+
+TEST_F(RenderTest, each_block_non_array) {
+  auto context = w::map({{"number", w::i64(2)}});
+
+  auto result = render(
+      "{{#each number}}\n"
+      "Should not be rendered\n"
+      "{{/each}}",
+      context);
+  EXPECT_FALSE(result.has_value());
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Expression 'number' does not evaluate to an array. The encountered value is:\n"
+          "i64(2)\n",
+          path_to_file,
+          1)));
+}
+
+TEST_F(RenderTest, each_block_pointless_native_object) {
+  auto context =
+      w::map({{"pointless", w::make_native_object<empty_native_object>()}});
+
+  auto result = render(
+      "{{#each pointless}}\n"
+      "Should not be rendered\n"
+      "{{/each}}",
+      context);
+  EXPECT_FALSE(result.has_value());
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Expression 'pointless' is a native_object which is not array-like. The encountered value is:\n"
+          "<native_object>\n",
+          path_to_file,
+          1)));
+}
+
 TEST_F(RenderTest, printable_types_strict_failure) {
   {
     auto result = render(R"({{-42}} {{"hello"}})", w::map({}));

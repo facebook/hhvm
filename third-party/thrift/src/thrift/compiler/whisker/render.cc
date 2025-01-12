@@ -842,9 +842,72 @@ class render_engine {
     eval_context_.pop_scope();
   }
 
-  [[noreturn]] void visit(const ast::each_block& each_block) {
-    report_fatal_error(
-        each_block.loc.begin, "each blocks have not been implemented yet");
+  void visit(const ast::each_block& each_block) {
+    const ast::expression& expr = each_block.iterable;
+    object::ptr result = evaluate(expr);
+
+    const auto do_visit = [this, &each_block](i64 index, const object& scope) {
+      if (const auto& captured = each_block.captured) {
+        eval_context_.push_scope(whisker::make::null);
+        eval_context_.bind_local(captured->element.name, scope);
+        if (captured->index.has_value()) {
+          eval_context_.bind_local(
+              captured->index->name, whisker::make::i64(index));
+        }
+      } else {
+        // When captures are not present, each element becomes the implicit
+        // context object (`{{.}}`).
+        eval_context_.push_scope(scope);
+      }
+      visit(each_block.body_elements);
+      eval_context_.pop_scope();
+    };
+
+    const auto do_visit_else = [this, &each_block]() {
+      if (!each_block.else_clause.has_value()) {
+        return;
+      }
+      eval_context_.push_scope(whisker::make::null);
+      visit(each_block.else_clause->body_elements);
+      eval_context_.pop_scope();
+    };
+
+    result->visit(
+        [&](const array& arr) {
+          if (arr.empty()) {
+            do_visit_else();
+            return;
+          }
+          for (std::size_t i = 0; i < arr.size(); ++i) {
+            do_visit(i64(i), arr[i]);
+          }
+        },
+        [&](const native_object::ptr& o) {
+          // array-like native objects are iterable.
+          native_object::array_like::ptr array_like = o->as_array_like();
+          if (array_like == nullptr) {
+            report_fatal_error(
+                expr.loc.begin,
+                "Expression '{}' is a native_object which is not array-like. The encountered value is:\n{}",
+                expr.to_string(),
+                to_string(*result));
+          }
+          const std::size_t size = array_like->size();
+          if (size == 0) {
+            do_visit_else();
+            return;
+          }
+          for (std::size_t i = 0; i < size; ++i) {
+            do_visit(i64(i), array_like->at(i));
+          }
+        },
+        [&](auto&&) {
+          report_fatal_error(
+              expr.loc.begin,
+              "Expression '{}' does not evaluate to an array. The encountered value is:\n{}",
+              expr.to_string(),
+              to_string(*result));
+        });
   }
 
   void visit(const ast::partial_apply& partial_apply) {

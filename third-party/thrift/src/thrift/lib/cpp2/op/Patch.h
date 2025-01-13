@@ -16,11 +16,10 @@
 
 #pragma once
 
-#include <type_traits>
-
 #include <fmt/core.h>
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/op/Encode.h>
+#include <thrift/lib/cpp2/op/PatchTraits.h>
 #include <thrift/lib/cpp2/op/detail/Patch.h>
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/lib/cpp2/type/Tag.h>
@@ -113,14 +112,6 @@ using safe_patch_value_type = typename detail::SafePatchValueType<T>::type;
 /// * patch.apply(value); // Sets value to 2;
 template <typename T>
 using patch_type = typename detail::PatchType<type::infer_tag<T>>::type;
-
-template <typename T, typename = void>
-inline constexpr bool is_patch_v = false;
-
-template <typename T>
-inline constexpr bool
-    is_patch_v<T, folly::void_t<typename T::underlying_type>> =
-        std::is_base_of_v<detail::BasePatch<typename T::underlying_type, T>, T>;
 
 template <typename T>
 inline constexpr bool is_assign_only_patch_v = false;

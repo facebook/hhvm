@@ -171,10 +171,4 @@ using object = internal::object_t<node>;
 using map = std::map<const std::string, node>;
 using array = std::vector<node>;
 
-std::string render(
-    const std::string& tmplt,
-    const node& root,
-    const std::map<std::string, std::string>& partials =
-        std::map<std::string, std::string>());
-
 } // namespace apache::thrift::mstch

@@ -32,7 +32,6 @@ SOFTWARE.
 #include <limits>
 #include <stdexcept>
 #include <fmt/core.h>
-#include <thrift/compiler/detail/mustache/render_context.h>
 
 namespace apache::thrift::mstch {
 
@@ -41,20 +40,6 @@ node::node(std::size_t i) : base(static_cast<int>(i)) {
     throw std::overflow_error(
         fmt::format("size_t greater than int max: {}", i));
   }
-}
-
-std::string render(
-    const std::string& tmplt,
-    const node& root,
-    const std::map<std::string, std::string>& partials) {
-  std::map<std::string, template_type> partial_templates;
-  for (auto& partial : partials) {
-    partial_templates.insert({partial.first, {partial.second}});
-  }
-
-  render_context ctx{root, partial_templates};
-  ctx.render(tmplt);
-  return std::move(ctx.out);
 }
 
 } // namespace apache::thrift::mstch

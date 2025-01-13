@@ -155,12 +155,6 @@ target_link_libraries(
 add_library(
   mustache
   detail/mustache/mstch.cpp
-  detail/mustache/render_context.cpp
-  detail/mustache/state/in_section.cpp
-  detail/mustache/state/outside_section.cpp
-  detail/mustache/template_type.cpp
-  detail/mustache/token.cpp
-  detail/mustache/utils.cpp
 )
 target_link_libraries(
   mustache

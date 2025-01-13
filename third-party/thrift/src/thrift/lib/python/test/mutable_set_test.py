@@ -278,6 +278,15 @@ class MutableSetTest(unittest.TestCase):
         with self.assertRaises(OverflowError):
             mutable_set.remove(2**31)
 
+    def test_set_op_return_type(self) -> None:
+        mutable_set_1 = _create_MutableSet_i32(range(4))
+        mutable_set_2 = _create_MutableSet_i32(range(2, 6))
+
+        self.assertIsInstance(mutable_set_1 & mutable_set_2, MutableSet)
+        self.assertIsInstance(mutable_set_1 | mutable_set_2, MutableSet)
+        self.assertIsInstance(mutable_set_1 ^ mutable_set_2, MutableSet)
+        self.assertIsInstance(mutable_set_1 - mutable_set_2, MutableSet)
+
     def test_pop(self) -> None:
         mutable_set = _create_MutableSet_i32(range(3))
 

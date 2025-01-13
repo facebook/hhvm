@@ -19,6 +19,8 @@ import copy
 import unittest
 from typing import AbstractSet, Sequence, Tuple
 
+import thrift.python.types as python_types
+
 from testing.types import (
     Color,
     ColorGroups,
@@ -222,22 +224,26 @@ class SetTests(unittest.TestCase):
         for sub_set in z:
             hash(sub_set)
 
+    def test_set_op_return_type(self) -> None:
+        x = SetI32({1, 3, 4, 5})
+        y = SetI32({1, 2, 4, 6})
+        expected_type = python_types.Set if is_auto_migrated() else SetI32
+
+        self.assertIsInstance(x & y, expected_type)
+        self.assertIsInstance(x | y, expected_type)
+        self.assertIsInstance(x ^ y, expected_type)
+        self.assertIsInstance(x - y, expected_type)
+
+        self.assertIsInstance(x.__rand__(y), expected_type)
+        self.assertIsInstance(x.__ror__(y), expected_type)
+        self.assertIsInstance(x.__rxor__(y), expected_type)
+        self.assertIsInstance(x.__rsub__(y), expected_type)
+
     @brokenInAutoMigrate()
     def test_is_container(self) -> None:
         self.assertIsInstance(SetI32Lists(), Container)
         self.assertIsInstance(SetSetI32Lists(), Container)
         self.assertIsInstance(SetI32(), Container)
-
-    # in thrift-python, we return the frozenset directly,
-    # which is is probably not intended.
-    @brokenInAutoMigrate()
-    def test_set_op_return_type(self) -> None:
-        x = SetI32({1, 3, 4, 5})
-        y = SetI32({1, 2, 4, 6})
-        self.assertIs(type(x & y), SetI32)
-        self.assertIs(type(x | y), SetI32)
-        self.assertIs(type(x ^ y), SetI32)
-        self.assertIs(type(x - y), SetI32)
 
     @brokenInAutoMigrate()
     def test_set_op_type_error_thrift_set(self) -> None:

@@ -2070,25 +2070,25 @@ cdef class Set(Container):
         return hash(self._fbthrift_elements)
 
     def __and__(Set self, other):
-        return self._fbthrift_elements & other
+        return Set(self._fbthrift_val_info, self._fbthrift_elements & other)
 
     def __rand__(Set self, other):
         return other & self._fbthrift_elements
 
     def __sub__(Set self, other):
-        return self._fbthrift_elements - other
+        return Set(self._fbthrift_val_info, self._fbthrift_elements - other)
 
     def __rsub__(Set self, other):
         return other - self._fbthrift_elements
 
     def __or__(Set self, other):
-        return self._fbthrift_elements | other
+        return Set(self._fbthrift_val_info, self._fbthrift_elements | other)
 
     def __ror__(Set self, other):
         return other | self._fbthrift_elements
 
     def __xor__(Set self, other):
-        return self._fbthrift_elements ^ other
+        return Set(self._fbthrift_val_info, self._fbthrift_elements ^ other)
 
     def __rxor__(Set self, other):
         return other ^ self._fbthrift_elements

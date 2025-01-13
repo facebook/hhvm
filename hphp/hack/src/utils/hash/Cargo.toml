@@ -13,4 +13,4 @@ path = "lib.rs"
 [dependencies]
 dashmap = { version = "5.5.3", features = ["rayon", "serde"] }
 indexmap = { version = "2.2.6", features = ["arbitrary", "rayon", "serde"] }
-rustc-hash = "1.1.0"
+rustc-hash = "2.1.0"

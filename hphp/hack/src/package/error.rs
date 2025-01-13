@@ -42,6 +42,12 @@ pub enum Error {
         package_name: String,
         span: (usize, usize),
     },
+    IncompleteIncludes {
+        name: String,
+        span: (usize, usize),
+        missing_pkgs: Vec<Spanned<String>>,
+        soft: bool,
+    },
 }
 
 impl Error {
@@ -91,6 +97,20 @@ impl Error {
         }
     }
 
+    pub fn incomplete_includes(
+        package_name: &Spanned<String>,
+        missing_pkgs: Vec<Spanned<String>>,
+        soft: bool,
+    ) -> Self {
+        let Range { start, end } = package_name.span();
+        Self::IncompleteIncludes {
+            name: package_name.get_ref().into(),
+            span: (start, end),
+            missing_pkgs,
+            soft,
+        }
+    }
+
     pub fn include_path_in_package_v1(package_name: &Spanned<String>) -> Self {
         let Range { start, end } = package_name.span();
         Self::IncludePathInPackageV1 {
@@ -115,7 +135,8 @@ impl Error {
             | Self::InvalidIncludePath { span, .. }
             | Self::MalformedIncludePath { span, .. }
             | Self::IncludePathInPackageV1 { span, .. }
-            | Self::UsesInPackageV2 { span, .. } => *span,
+            | Self::UsesInPackageV2 { span, .. }
+            | Self::IncompleteIncludes { span, .. } => *span,
         }
     }
 
@@ -177,6 +198,26 @@ impl Display for Error {
                 "The `uses` field is not supported by PackageV2 in package {}",
                 package_name
             )?,
+            Self::IncompleteIncludes {
+                name,
+                missing_pkgs,
+                soft,
+                ..
+            } => {
+                let soft_str = if *soft { "soft-" } else { "" };
+                write!(
+                    f,
+                    "{} must {}include all nested {}included packages. Missing ",
+                    name, soft_str, soft_str
+                )?;
+                for (i, pkg) in missing_pkgs.iter().enumerate() {
+                    if i == missing_pkgs.len() - 1 {
+                        write!(f, "{}", pkg.get_ref())?;
+                    } else {
+                        write!(f, "{}, ", pkg.get_ref())?;
+                    }
+                }
+            }
         };
         Ok(())
     }

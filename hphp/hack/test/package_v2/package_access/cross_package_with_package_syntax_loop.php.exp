@@ -1,8 +1,8 @@
-error: Typing[4472] Cannot access an element which belongs to package pkg1 from package pkg3 [1]
--> This is from cross_package_with_package_syntax_loop.php--pkg1.php [2]
--> cross_package_with_package_syntax_loop.php--pkg1.php belongs to package pkg1 [3]
+error: Typing[4472] Cannot access an element which belongs to package pkg4 from package pkg3 [1]
+-> This is from cross_package_with_package_syntax_loop.php--pkg4.php [2]
+-> cross_package_with_package_syntax_loop.php--pkg4.php belongs to package pkg4 [3]
 -> But cross_package_with_package_syntax_loop.php--pkg3.php is in package pkg3 [4]
--> And package pkg3 does not include package pkg1 [5]
+-> And package pkg3 does not include package pkg4 [5]
 
 cross_package_with_package_syntax_loop.php--pkg3.php:20:3
      1 | <?hh
@@ -12,24 +12,19 @@ cross_package_with_package_syntax_loop.php--pkg3.php:20:3
        :
     18 |   };
     19 | 
-[1] 20 |   pkg1_call(); // error; package info doesn't transfer after while statement
+[1] 20 |   pkg4_call(); // error; package info doesn't transfer after while statement
     21 | }
 
-cross_package_with_package_syntax_loop.php--pkg1.php:2:10
+cross_package_with_package_syntax_loop.php--pkg4.php:3:10
      1 | <?hh
-[2]  2 | function pkg1_call(): void {}
+[3]  2 | <<file: __PackageOverride('pkg4')>>
+[2]  3 | function pkg4_call(): void {}
 
-PACKAGES.toml:3:11
-     1 | [packages]
-     2 | 
-[3]  3 | [packages.pkg1]
-     4 | include_paths=["//"]
-     5 | 
-       :
+PACKAGES.toml:13:11
     11 | includes = ["pkg1"]
     12 | 
 [5] 13 | [packages.pkg3]
-    14 | includes = ["pkg2"]
+    14 | includes = ["pkg2", "pkg1"]
     15 | 
 
 1 error found

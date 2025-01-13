@@ -11,7 +11,7 @@ include_paths=[
 includes = ["pkg1"]
 
 [packages.pkg3]
-includes = ["pkg2"]
+includes = ["pkg2", "pkg1"]
 
 [packages.pkg4]
 

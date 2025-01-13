@@ -236,7 +236,7 @@ mod test {
     #[test]
     fn test_config_errors2() {
         let test_path = SRCDIR.as_path().join("tests/package-4.toml");
-        let info = PackageInfo::from_text(false, true, "", test_path.to_str().unwrap()).unwrap();
+        let info = PackageInfo::from_text(true, true, "", test_path.to_str().unwrap()).unwrap();
         let errors = info
             .errors
             .iter()
@@ -244,9 +244,42 @@ mod test {
             .collect::<std::collections::HashSet<_>>();
         assert_eq!(
             errors,
-            [String::from(
-                "my-prod must deploy all nested included packages. Missing e, g, h, i"
-            )]
+            [
+                String::from(
+                    "my-prod must deploy all nested included packages. Missing e, g, h, i",
+                ),
+                String::from("a must include all nested included packages. Missing c, d, e, f, g"),
+                String::from("b must include all nested included packages. Missing a, e, f, g"),
+                String::from("c must include all nested included packages. Missing b, d, f, g"),
+                String::from("d must include all nested included packages. Missing f, g"),
+                String::from("f must include all nested included packages. Missing g"),
+                String::from("g must include all nested included packages. Missing f"),
+                String::from("h must include all nested included packages. Missing i"),
+                String::from("i must include all nested included packages. Missing j"),
+                String::from("j must include all nested included packages. Missing h"),
+            ]
+            .iter()
+            .cloned()
+            .collect::<std::collections::HashSet<_>>()
+        );
+    }
+
+    #[test]
+    fn test_config_internprod() {
+        let test_path = SRCDIR.as_path().join("tests/package-internprod.toml");
+        let info = PackageInfo::from_text(true, true, "", test_path.to_str().unwrap()).unwrap();
+        let errors = info
+            .errors
+            .iter()
+            .map(|e| e.msg())
+            .collect::<std::collections::HashSet<_>>();
+        eprintln!("{:?}", errors);
+        assert_eq!(
+            errors,
+            [
+                String::from("intern3 must soft-include all nested soft-included packages. Missing prod_pulled_from_intern"),
+                String::from("prod3 must soft-deploy all nested soft-included packages. Missing prod_pulled_from_intern"),
+            ]
             .iter()
             .cloned()
             .collect::<std::collections::HashSet<_>>()
@@ -267,7 +300,7 @@ mod test {
             errors,
             [
                 String::from("f must soft-deploy all nested soft-included packages. Missing b"),
-                String::from("g must deploy all nested included packages. Missing c")
+                String::from("g must deploy all nested included packages. Missing c"),
             ]
             .iter()
             .cloned()

@@ -1,67 +1,57 @@
-error: Typing[4472] Cannot access an element which belongs to package pkg1 from package pkg3 [1]
--> This is from cross_package_with_package_syntax_if_negation.php--pkg1.php [2]
--> cross_package_with_package_syntax_if_negation.php--pkg1.php belongs to package pkg1 [3]
+error: Typing[4472] Cannot access an element which belongs to package pkg4 from package pkg3 [1]
+-> This is from cross_package_with_package_syntax_if_negation.php--pkg4.php [2]
+-> cross_package_with_package_syntax_if_negation.php--pkg4.php belongs to package pkg4 [3]
 -> But cross_package_with_package_syntax_if_negation.php--pkg3.php is in package pkg3 [4]
--> And package pkg3 does not include package pkg1 [5]
+-> And package pkg3 does not include package pkg4 [5]
 
 cross_package_with_package_syntax_if_negation.php--pkg3.php:5:5
      1 | <?hh
 [4]  2 | <<file: __PackageOverride('pkg3')>>
      3 | function test(): void {
-     4 |   if (!(package pkg1)) {
-[1]  5 |     pkg1_call();   // error; pkg1 is not loaded
+     4 |   if (!(package pkg4)) {
+[1]  5 |     pkg4_call();   // error; pkg4 is not loaded
      6 |     return;
      7 |   } else {
 
-cross_package_with_package_syntax_if_negation.php--pkg1.php:2:10
+cross_package_with_package_syntax_if_negation.php--pkg4.php:3:10
      1 | <?hh
-[2]  2 | function pkg1_call(): void {}
+[3]  2 | <<file: __PackageOverride('pkg4')>>
+[2]  3 | function pkg4_call(): void {}
 
-PACKAGES.toml:3:11
-     1 | [packages]
-     2 | 
-[3]  3 | [packages.pkg1]
-     4 | include_paths=["//"]
-     5 | 
-       :
+PACKAGES.toml:13:11
     11 | includes = ["pkg1"]
     12 | 
 [5] 13 | [packages.pkg3]
-    14 | includes = ["pkg2"]
+    14 | includes = ["pkg2", "pkg1"]
     15 | 
 
-error: Typing[4472] Cannot access an element which belongs to package pkg1 from package pkg3 [1]
--> This is from cross_package_with_package_syntax_if_negation.php--pkg1.php [2]
--> cross_package_with_package_syntax_if_negation.php--pkg1.php belongs to package pkg1 [3]
+error: Typing[4472] Cannot access an element which belongs to package pkg4 from package pkg3 [1]
+-> This is from cross_package_with_package_syntax_if_negation.php--pkg4.php [2]
+-> cross_package_with_package_syntax_if_negation.php--pkg4.php belongs to package pkg4 [3]
 -> But cross_package_with_package_syntax_if_negation.php--pkg3.php is in package pkg3 [4]
--> And package pkg3 does not include package pkg1 [5]
+-> And package pkg3 does not include package pkg4 [5]
 
 cross_package_with_package_syntax_if_negation.php--pkg3.php:10:3
      1 | <?hh
 [4]  2 | <<file: __PackageOverride('pkg3')>>
      3 | function test(): void {
-     4 |   if (!(package pkg1)) {
+     4 |   if (!(package pkg4)) {
        :
-     8 |     pkg1_call();  // ok
+     8 |     pkg4_call();  // ok
      9 |   }
-[1] 10 |   pkg1_call(); // error; pakcage info unknown outside if/else branches
+[1] 10 |   pkg4_call(); // error; pakcage info unknown outside if/else branches
     11 | }
 
-cross_package_with_package_syntax_if_negation.php--pkg1.php:2:10
+cross_package_with_package_syntax_if_negation.php--pkg4.php:3:10
      1 | <?hh
-[2]  2 | function pkg1_call(): void {}
+[3]  2 | <<file: __PackageOverride('pkg4')>>
+[2]  3 | function pkg4_call(): void {}
 
-PACKAGES.toml:3:11
-     1 | [packages]
-     2 | 
-[3]  3 | [packages.pkg1]
-     4 | include_paths=["//"]
-     5 | 
-       :
+PACKAGES.toml:13:11
     11 | includes = ["pkg1"]
     12 | 
 [5] 13 | [packages.pkg3]
-    14 | includes = ["pkg2"]
+    14 | includes = ["pkg2", "pkg1"]
     15 | 
 
 2 errors found

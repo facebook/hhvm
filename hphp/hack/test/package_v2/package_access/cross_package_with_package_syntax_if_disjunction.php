@@ -1,6 +1,7 @@
-//// pkg1.php
+//// pkg5.php
 <?hh
-function pkg1_call(): void {}
+<<file: __PackageOverride('pkg5')>>
+function pkg5_call(): void {}
 
 //// pkg4.php
 <?hh
@@ -11,9 +12,9 @@ function pkg4_call(): void {}
 <?hh
 <<file: __PackageOverride('pkg3')>>
 function test(): void {
-  if (package pkg1 || package pkg4) {
+  if (package pkg4 || package pkg5) {
       // neither is allowed because disjuction doesn't register package info
-      pkg1_call();
+      pkg5_call();
       pkg4_call();
   }
 }

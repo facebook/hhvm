@@ -25,7 +25,7 @@ PACKAGES.toml:13:11
     11 | includes = ["pkg1"]
     12 | 
 [5] 13 | [packages.pkg3]
-    14 | includes = ["pkg2"]
+    14 | includes = ["pkg2", "pkg1"]
     15 | 
 
 1 error found

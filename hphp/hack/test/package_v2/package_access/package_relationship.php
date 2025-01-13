@@ -14,5 +14,11 @@ class B {}
 <<__EntryPoint>>
 function test(): void {
    $b = new B(); // ok
-   $a = new A(); // error
+   $a = new A(); // ok by transitive inclusion
+   $d = new D(); // error
 }
+
+//// d.php
+<?hh
+<<file: __PackageOverride('pkg4')>> // package pkg4
+class D {}

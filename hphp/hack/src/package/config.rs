@@ -62,6 +62,32 @@ impl Config {
                     })
                 }
             };
+        let check_package_includes_are_transitively_closed =
+            |errors: &mut Vec<Error>, package_name: &Spanned<String>, package: &Package| {
+                let mut includes = package.includes.as_ref().unwrap_or_default().clone();
+                includes.insert(package_name.clone());
+                let soft_includes = package.soft_includes.as_ref().unwrap_or_default();
+                let (missing_pkgs, missing_soft_pkgs) =
+                    find_missing_packages_from_transitive_closure(
+                        &self.packages,
+                        &includes,
+                        soft_includes,
+                    );
+                if !missing_pkgs.is_empty() {
+                    errors.push(Error::incomplete_includes(
+                        package_name,
+                        missing_pkgs,
+                        false,
+                    ));
+                }
+                if !missing_soft_pkgs.is_empty() {
+                    errors.push(Error::incomplete_includes(
+                        package_name,
+                        missing_soft_pkgs,
+                        true,
+                    ));
+                }
+            };
         let check_deployed_packages_are_transitively_closed =
             |errors: &mut Vec<Error>,
              deployment: &Spanned<String>,
@@ -70,7 +96,11 @@ impl Config {
                 let deployed = pkgs.as_ref().unwrap_or_default();
                 let soft_deployed = soft_pkgs.as_ref().unwrap_or_default();
                 let (missing_pkgs, missing_soft_pkgs) =
-                    find_missing_packages_from_deployment(&self.packages, deployed, soft_deployed);
+                    find_missing_packages_from_transitive_closure(
+                        &self.packages,
+                        deployed,
+                        soft_deployed,
+                    );
                 if !missing_pkgs.is_empty() {
                     errors.push(Error::incomplete_deployment(
                         deployment,
@@ -90,6 +120,9 @@ impl Config {
             check_packages_are_defined(errors, &package.includes, &package.soft_includes);
             check_each_glob_is_used_once(errors, &package.uses);
             check_package_v2_fields(errors, package_name, package);
+            if package_v2 {
+                check_package_includes_are_transitively_closed(errors, package_name, package);
+            }
         }
         if let Some(deployments) = &self.deployments {
             for (positioned_name, deployment) in deployments.iter() {
@@ -154,30 +187,30 @@ fn analyze_includes<'a>(
     (included, soft_included)
 }
 
-fn find_missing_packages_from_deployment(
+fn find_missing_packages_from_transitive_closure(
     package_map: &PackageMap,
-    deployed: &NameSet,
-    soft_deployed: &NameSet,
+    regular: &NameSet,
+    soft: &NameSet,
 ) -> (Vec<Spanned<String>>, Vec<Spanned<String>>) {
     // Taking the transitive closure of all nested included packages so that the user
-    // could complete the deployment set upon the first error message they receive, as
+    // could complete the input set upon the first error message they receive, as
     // opposed to iterating upon it over multiple checks and going through a full init
     // every time they update the config.
     // TODO: simplify after incremental mode (T148526825)
 
-    let (included, soft_included) = analyze_includes(deployed, package_map);
-    let soft_or_regular_deployed = deployed.union(soft_deployed).cloned().collect();
+    let (included, soft_included) = analyze_includes(regular, package_map);
+    let soft_or_regular = regular.union(soft).cloned().collect();
 
     fn get_missing<'a>(
         included: &HashSet<&'a Spanned<String>>,
-        deployed: &NameSet,
+        set: &NameSet,
         package_map: &PackageMap,
     ) -> Vec<Spanned<String>> {
         let mut missing_pkgs = included
             .iter()
             .filter_map(|pkg| {
                 let pkg_name = pkg.get_ref().as_str();
-                if !deployed.contains(pkg_name) {
+                if !set.contains(pkg_name) {
                     let (positioned_pkg_name, _) = package_map.get_key_value(pkg_name).unwrap();
                     Some(positioned_pkg_name.clone())
                 } else {
@@ -189,7 +222,7 @@ fn find_missing_packages_from_deployment(
         missing_pkgs
     }
     (
-        get_missing(&included, deployed, package_map),
-        get_missing(&soft_included, &soft_or_regular_deployed, package_map),
+        get_missing(&included, regular, package_map),
+        get_missing(&soft_included, &soft_or_regular, package_map),
     )
 }

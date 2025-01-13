@@ -371,9 +371,10 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   /// object.
   template <class Id>
   decltype(auto) patch() {
-    using Ret = op::get_native_type<typename patch_type::underlying_type, Id>;
+    using FieldPatchType = typename patch_type::underlying_type;
+    using Ret = op::get_native_type<FieldPatchType, Id>;
     return *reinterpret_cast<Ret*>(
-        typeErasedPatchImpl<op::get_ordinal_v<T, Id>>(
+        typeErasedPatchImpl<op::get_ordinal_v<FieldPatchType, Id>>(
             static_cast<Derived&>(*this)));
   }
 

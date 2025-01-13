@@ -14,10 +14,34 @@
  * limitations under the License.
  */
 
+#include <folly/executors/SerialExecutor.h>
 #include <thrift/lib/cpp2/async/AsyncProcessorHelper.h>
 #include <thrift/lib/cpp2/server/ParallelConcurrencyController.h>
 
 namespace apache::thrift {
+
+namespace {
+template <typename Executor>
+void scheduleWithExecutor(Executor& executor, folly::Func&& task) {
+  if (executor.getNumPriorities() > 1) {
+    // By default we have 2 prios, external requests should go to
+    // lower priority queue to yield to the internal ones
+    executor.addWithPriority(std::move(task), folly::Executor::LO_PRI);
+  } else {
+    executor.add(std::move(task));
+  }
+}
+
+std::string describeRequestExecutionMode(
+    ParallelConcurrencyController::RequestExecutionMode requestExecutionMode) {
+  switch (requestExecutionMode) {
+    case ParallelConcurrencyController::RequestExecutionMode::Serial:
+      return "Serial";
+    case ParallelConcurrencyController::RequestExecutionMode::Parallel:
+      return "Parallel";
+  }
+}
+} // namespace
 
 void ParallelConcurrencyControllerBase::setExecutionLimitRequests(
     uint64_t limit) {
@@ -112,14 +136,33 @@ bool ParallelConcurrencyControllerBase::trySchedule(bool onEnqueued) {
   }
 }
 
+void ParallelConcurrencyController::scheduleWithSerialExecutor() {
+  auto keepAlive = folly::SmallSerialExecutor::create(
+      folly::Executor::getKeepAliveToken(executor_));
+  auto& executor = *keepAlive.get();
+  scheduleWithExecutor(executor, [this, ka = std::move(keepAlive)]() mutable {
+    auto req = pile_.dequeue();
+    if (req) {
+      apache::thrift::detail::ServerRequestHelper::setExecutor(
+          req.value(), std::move(ka));
+    }
+    executeRequest(std::move(req));
+  });
+}
+
+void ParallelConcurrencyController::scheduleWithoutSerialExecutor() {
+  scheduleWithExecutor(
+      executor_, [this]() { executeRequest(pile_.dequeue()); });
+}
+
 void ParallelConcurrencyController::scheduleOnExecutor() {
-  if (executor_.getNumPriorities() > 1) {
-    // By default we have 2 prios, external requests should go to
-    // lower priority queue to yield to the internal ones
-    executor_.addWithPriority(
-        [this]() { executeRequest(pile_.dequeue()); }, folly::Executor::LO_PRI);
-  } else {
-    executor_.add([this]() { executeRequest(pile_.dequeue()); });
+  switch (requestExecutionMode_) {
+    case RequestExecutionMode::Serial:
+      scheduleWithSerialExecutor();
+      break;
+    case RequestExecutionMode::Parallel:
+      scheduleWithoutSerialExecutor();
+      break;
   }
 }
 
@@ -162,8 +205,9 @@ void ParallelConcurrencyControllerBase::stop() {}
 
 std::string ParallelConcurrencyController::describe() const {
   return fmt::format(
-      "{{ParallelConcurrencyController executionLimit={}}}",
-      executionLimit_.load());
+      "{{ParallelConcurrencyController executionLimit={}, requestExecutionMode={}}}",
+      executionLimit_.load(),
+      describeRequestExecutionMode(requestExecutionMode_));
 }
 
 serverdbginfo::ConcurrencyControllerDbgInfo

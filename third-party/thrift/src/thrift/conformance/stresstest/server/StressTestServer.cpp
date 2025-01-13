@@ -25,7 +25,6 @@
 #include <scripts/rroeser/src/executor/WorkStealingExecutor.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <thrift/lib/cpp2/server/ParallelConcurrencyController.h>
-#include <thrift/lib/cpp2/server/SEParallelConcurrencyController.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 
 DEFINE_int32(port, 5000, "Server port");
@@ -211,13 +210,14 @@ std::shared_ptr<ThriftServer> createStressTestServer(
             *requestPile.get(), *executor.get());
       }
     } else if (FLAGS_se_parallel_concurrency_controller) {
-      LOG(INFO) << "SEParallelConcurrencyController enabled";
-      executor = std::make_shared<folly::CPUThreadPoolExecutor>(
-          t, folly::CPUThreadPoolExecutor::makeThrottledLifoSemQueue());
+      LOG(INFO) << "ParallelConcurrencyController with SerialExecutor enabled";
+      executor = std::make_shared<folly::CPUThreadPoolExecutor>(t);
       RoundRobinRequestPile::Options options;
       requestPile = std::make_unique<RoundRobinRequestPile>(std::move(options));
-      concurrencyController = std::make_unique<SEParallelConcurrencyController>(
-          *requestPile.get(), *executor.get());
+      concurrencyController = std::make_unique<ParallelConcurrencyController>(
+          *requestPile.get(),
+          *executor.get(),
+          ParallelConcurrencyController::RequestExecutionMode::Serial);
     }
 
     server->resourcePoolSet().setResourcePool(

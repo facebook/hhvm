@@ -14,6 +14,7 @@
  */
 include "mcrouter/lib/carbon/carbon.thrift"
 include "mcrouter/lib/carbon/carbon_result.thrift"
+include "thrift/annotation/cpp.thrift"
 include "mcrouter/lib/network/gen/Common.thrift"
 
 cpp_include "<mcrouter/lib/carbon/CarbonProtocolReader.h>"
@@ -21,11 +22,12 @@ cpp_include "<mcrouter/lib/carbon/CarbonProtocolReader.h>"
 namespace cpp2 hellogoodbye.thrift
 namespace py3 hellogoodbye.thrift
 
+@cpp.EnumType{type = cpp.EnumUnderlyingType.U32}
 enum EnumUInt32 {
   HIGH = 0,
   URGENT = 1,
   YESTERDAY = 2
-} (cpp.enum_type="uint32_t")
+}
 
 struct HelloRequest {
   1: carbon.IOBufKey key

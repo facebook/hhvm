@@ -28,11 +28,12 @@ typedef i64 CustomAdapterTypeI64
 @cpp.Adapter{name = "::carbon::test::DummyPairAdapter<::carbon::test::Timestamp,uint32_t>"}
 typedef binary (cpp.type = "::folly::IOBuf") CustomAdapterTypeBinary
 
+
 enum MyEnum {
   A = 0,
   B = 1,
   C = 2
-} (cpp.enum_type="int32_t")
+}
 
 union TestUnionThrift {
   1: i64_3264 a

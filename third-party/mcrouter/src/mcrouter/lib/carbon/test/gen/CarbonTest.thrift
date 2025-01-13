@@ -14,6 +14,7 @@
  */
 include "mcrouter/lib/carbon/carbon.thrift"
 include "mcrouter/lib/carbon/carbon_result.thrift"
+include "thrift/annotation/cpp.thrift"
 include "mcrouter/lib/network/gen/Common.thrift"
 
 cpp_include "<mcrouter/lib/carbon/CarbonProtocolReader.h>"
@@ -208,41 +209,47 @@ struct TestStdContainers {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ")
+@cpp.EnumType{type = cpp.EnumUnderlyingType.U32}
 enum EnumUInt32 {
   AAA = 0,
   BBB = 1,
   CCC = 2
-} (cpp.enum_type="uint32_t")
+}
 
+@cpp.EnumType{type = cpp.EnumUnderlyingType.U16}
 enum EnumUInt16 {
   AAA = 0,
   BBB = 1,
   CCC = 2
-} (cpp.enum_type="uint16_t")
+}
 
+@cpp.EnumType{type = cpp.EnumUnderlyingType.U8}
 enum EnumUInt8 {
   AAA = 0,
   BBB = 1,
   CCC = 2
-} (cpp.enum_type="uint8_t")
+}
+
 
 enum EnumInt32 {
   AAA = 0,
   BBB = 1,
   CCC = 2
-} (cpp.enum_type="int32_t")
+}
 
+@cpp.EnumType{type = cpp.EnumUnderlyingType.I16}
 enum EnumInt16 {
   AAA = 0,
   BBB = 1,
   CCC = 2
-} (cpp.enum_type="int16_t")
+}
 
+@cpp.EnumType{type = cpp.EnumUnderlyingType.I8}
 enum EnumInt8 {
   AAA = 0,
   BBB = 1,
   CCC = 2
-} (cpp.enum_type="int8_t")
+}
 
 struct StructWithEnumUInt32 {
   1: EnumUInt32 testEnum

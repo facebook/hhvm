@@ -14,7 +14,7 @@
  */
 include "mcrouter/lib/carbon/carbon.thrift"
 include "mcrouter/lib/carbon/carbon_result.thrift"
-
+include "thrift/annotation/cpp.thrift"
 
 cpp_include "<mcrouter/lib/carbon/CarbonProtocolReader.h>"
 

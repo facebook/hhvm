@@ -46,7 +46,7 @@ object::ptr find_property(const object& o, std::string_view identifier) {
       [](const native_function::ptr&) -> result { return nullptr; },
       [identifier](const map& m) -> result {
         if (auto it = m.find(identifier); it != m.end()) {
-          return object::as_static(it->second);
+          return manage_as_static(it->second);
         }
         return nullptr;
       });
@@ -74,7 +74,7 @@ class global_scope_object
   object::ptr lookup_property(std::string_view identifier) const override {
     if (auto property = properties_.find(identifier);
         property != properties_.end()) {
-      return object::as_static(property->second);
+      return manage_as_static(property->second);
     }
     return nullptr;
   }
@@ -98,7 +98,7 @@ class global_scope_object
 object::ptr eval_context::lexical_scope::lookup_property(
     std::string_view identifier) {
   if (auto local = locals_.find(identifier); local != locals_.end()) {
-    return object::as_static(local->second);
+    return manage_as_static(local->second);
   }
   return find_property(this_ref_, identifier);
 }
@@ -156,7 +156,7 @@ eval_context::lookup_object(const std::vector<std::string>& path) {
 
   if (path.empty()) {
     // Lookup is {{.}}
-    return object::as_static(stack_.back().this_ref());
+    return manage_as_static(stack_.back().this_ref());
   }
 
   auto current = std::invoke([&]() -> object::ptr {

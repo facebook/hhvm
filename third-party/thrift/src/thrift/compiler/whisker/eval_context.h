@@ -221,7 +221,7 @@ class eval_context {
    *     the chain of resolved whisker::objects.
    */
   expected<
-      managed_object_ptr<>,
+      object::ptr,
       std::variant<eval_scope_lookup_error, eval_property_lookup_error>>
   lookup_object(const std::vector<std::string>& path);
 

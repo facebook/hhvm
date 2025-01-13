@@ -49,12 +49,12 @@ class double_property_name
 
   object::ptr lookup_property(std::string_view id) const override {
     if (auto cached = cached_.find(id); cached != cached_.end()) {
-      return object::as_static(cached->second);
+      return manage_as_static(cached->second);
     }
     auto [result, inserted] =
         cached_.insert({std::string(id), w::string(fmt::format("{0}{0}", id))});
     assert(inserted);
-    return object::as_static(result->second);
+    return manage_as_static(result->second);
   }
 
   mutable std::map<std::string, object, std::less<>> cached_;
@@ -77,7 +77,7 @@ class delegate_to : public native_object,
   }
 
   object::ptr lookup_property(std::string_view) const override {
-    return object::as_static(delegate_);
+    return manage_as_static(delegate_);
   }
 
   whisker::object delegate_;

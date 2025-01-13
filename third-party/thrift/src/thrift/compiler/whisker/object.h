@@ -34,6 +34,7 @@
 
 #include <thrift/compiler/whisker/detail/overload.h>
 #include <thrift/compiler/whisker/diagnostic.h>
+#include <thrift/compiler/whisker/managed_ptr.h>
 #include <thrift/compiler/whisker/source_location.h>
 #include <thrift/compiler/whisker/tree_printer.h>
 
@@ -113,20 +114,6 @@ struct object_print_options {
 };
 
 /**
- * A managed_object_ptr<T> (where T is whisker::object or any of its
- * alternatives) represents one of:
- *   1. A "static"-ally managed object. See object::as_static(...).
- *   2. An owned instance of T. See object::owned(...).
- *   3. A derived instance of T, that is a sub-object of another managed object.
- *      See object::derive(...).
- *
- * All three cases are represented by shared_ptr. See `folly::MaybeManagedPtr`.
- * (1) and (3) use the aliasing constructor of shared_ptr.
- */
-template <typename T = object>
-using managed_object_ptr = std::shared_ptr<const T>;
-
-/**
  * A native_object is the most powerful type in Whisker. Its properties and
  * behavior are defined by highly customizable C++ code.
  *
@@ -155,7 +142,7 @@ class native_object {
    */
   class map_like {
    public:
-    using ptr = managed_object_ptr<map_like>;
+    using ptr = managed_ptr<map_like>;
     virtual ~map_like() = default;
     /**
      * Searches for a property on an object whose name matches the provided
@@ -173,7 +160,7 @@ class native_object {
      * Preconditions:
      *   - The provided string is a valid Whisker identifier
      */
-    virtual managed_object_ptr<> lookup_property(
+    virtual managed_ptr<object> lookup_property(
         std::string_view identifier) const = 0;
 
     /**
@@ -236,7 +223,7 @@ class native_object {
    */
   class array_like {
    public:
-    using ptr = managed_object_ptr<array_like>;
+    using ptr = managed_ptr<array_like>;
     virtual ~array_like() = default;
     /**
      * Returns the number of elements in the sequence.
@@ -248,7 +235,7 @@ class native_object {
      * Preconditions:
      *   - index < size()
      */
-    virtual managed_object_ptr<> at(std::size_t index) const = 0;
+    virtual managed_ptr<object> at(std::size_t index) const = 0;
 
    protected:
     /**
@@ -314,7 +301,7 @@ namespace detail {
  * argument<T>(...) or named_argument<T>(...).
  *
  * Small primitive types (i64, f64, boolean) are returned by value.
- * The larger primitive type (string) is returned as a managed_object_ptr<T>.
+ * The larger primitive type (string) is returned as a managed_ptr<string>.
  *
  * Maps and arrays are wrapped by helper classes, in order to abstract away
  * differences with native_object::array_like and native_object::map_like
@@ -355,7 +342,7 @@ class native_function {
    *         ctx.declare_named_arguments({});
    *         i64 a = ctx.argument<i64>(0);
    *         i64 b = ctx.argument<i64>(1);
-   *         return object::owned(whisker::make::boolean(a == b));
+   *         return manage_owned<object>(whisker::make::boolean(a == b));
    *       }
    *     };
    *
@@ -378,7 +365,7 @@ class native_function {
    *           }
    *           result += *ctx.argument<string>(i);
    *         }
-   *         return object::owned(
+   *         return manage_owned<object>(
    *             whisker::make::string(std::move(result)));
    *       }
    *     };
@@ -393,7 +380,7 @@ class native_function {
    * Postconditions:
    *  - The returned object is non-null.
    */
-  virtual managed_object_ptr<> invoke(context) = 0;
+  virtual managed_ptr<object> invoke(context) = 0;
 
   /**
    * An exception that can be thrown to indicate a fatal error in function
@@ -459,7 +446,7 @@ class native_function {
     class array_like final : public native_object::array_like {
      public:
       std::size_t size() const final;
-      managed_object_ptr<> at(std::size_t index) const final;
+      managed_ptr<object> at(std::size_t index) const final;
 
       // Avoids incomplete type (whisker::object) errors on MSVC.
       ~array_like() noexcept override;
@@ -472,14 +459,13 @@ class native_function {
        * Tries to marshal the provided object into an array-like object, if the
        * underlying type matches. Otherwise, returns an empty optional.
        */
-      static std::optional<array_like> try_from(const managed_object_ptr<>&);
+      static std::optional<array_like> try_from(const managed_ptr<object>&);
 
      private:
       explicit array_like(native_object::array_like::ptr&& arr);
-      explicit array_like(managed_object_ptr<array>&& arr);
+      explicit array_like(managed_ptr<array>&& arr);
 
-      std::variant<native_object::array_like::ptr, managed_object_ptr<array>>
-          which_;
+      std::variant<native_object::array_like::ptr, managed_ptr<array>> which_;
 
       friend class context;
     };
@@ -493,7 +479,7 @@ class native_function {
      */
     class map_like final : public native_object::map_like {
      public:
-      managed_object_ptr<> lookup_property(
+      managed_ptr<object> lookup_property(
           std::string_view identifier) const final;
       std::optional<std::vector<std::string>> keys() const final;
 
@@ -508,14 +494,13 @@ class native_function {
        * Tries to marshal the provided object into an map-like object, if the
        * underlying type matches. Otherwise, returns an empty optional.
        */
-      static std::optional<map_like> try_from(const managed_object_ptr<>&);
+      static std::optional<map_like> try_from(const managed_ptr<object>&);
 
      private:
       explicit map_like(native_object::map_like::ptr&& m);
-      explicit map_like(managed_object_ptr<map>&& m);
+      explicit map_like(managed_ptr<map>&& m);
 
-      std::variant<native_object::map_like::ptr, managed_object_ptr<map>>
-          which_;
+      std::variant<native_object::map_like::ptr, managed_ptr<map>> which_;
 
       friend class context;
     };
@@ -558,7 +543,7 @@ class native_function {
      * If the argument is not present and presence is required, then this throws
      * an error. Otherwise, returns nullptr.
      */
-    managed_object_ptr<> named_argument(
+    managed_ptr<object> named_argument(
         std::string_view name,
         named_argument_presence = named_argument_presence::required) const;
 
@@ -664,7 +649,7 @@ struct native_function_argument_result<boolean> {
 };
 template <>
 struct native_function_argument_result<string> {
-  using type = managed_object_ptr<string>;
+  using type = managed_ptr<string>;
   using optional_type = type;
 };
 template <>
@@ -733,37 +718,7 @@ class object final : private detail::object_base<object> {
     return std::get<T>(*this);
   }
 
-  using ptr = managed_object_ptr<>;
-
-  /**
-   * Returns a pointer which is an unmanaged reference to the provided
-   * object.
-   *
-   * The caller must guarantee that underlying object is kept alive for the
-   * duration of an expression evaluation in which the object is used.
-   */
-  static ptr as_static(const object& o) {
-    return ptr(managed_object_ptr<void>(), &o);
-  }
-  static ptr as_static(object&&) = delete;
-
-  /**
-   * Returns a pointer which directly owns the provided object.
-   * This allows native_function to return values that are dynamically computed.
-   */
-  static ptr owned(object&& o) {
-    return std::make_shared<const object>(std::move(o));
-  }
-
-  /**
-   * Returns a pointer where `value` is known to be a sub-object of `from`.
-   * This means that `from` must outlive `value`.
-   */
-  template <typename T, typename U>
-  static managed_object_ptr<T> derive(
-      const managed_object_ptr<U>& from, const T& value) {
-    return managed_object_ptr<T>(from, std::addressof(value));
-  }
+  using ptr = managed_ptr<object>;
 
   /* implicit */ object(null = {}) : base(std::in_place_type<null>) {}
   explicit object(boolean value) : base(bool(value)) {}
@@ -1030,7 +985,7 @@ native_function::context::argument(size_t index) const {
       error("Argument at index {} is of an unexpected type.", index);
     }
     if constexpr (std::is_same_v<T, string>) {
-      return object::derive<T>(o, o->as<T>());
+      return manage_derived_ref<T>(o, o->as<T>());
     } else {
       return o->as<T>();
     }
@@ -1068,7 +1023,7 @@ native_function::context::named_argument(
       error("Named argument '{}' is of an unexpected type.", name);
     }
     if constexpr (std::is_same_v<T, string>) {
-      return object::derive(o, o->as<T>());
+      return manage_derived_ref(o, o->as<T>());
     } else {
       return o->as<T>();
     }

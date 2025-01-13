@@ -179,8 +179,7 @@ bool native_object::operator==(const native_object& other) const {
 native_function::context::array_like::array_like(
     native_object::array_like::ptr&& arr)
     : which_(std::move(arr)) {}
-native_function::context::array_like::array_like(
-    managed_object_ptr<array>&& arr)
+native_function::context::array_like::array_like(managed_ptr<array>&& arr)
     : which_(std::move(arr)) {}
 
 native_function::context::array_like::~array_like() noexcept = default;
@@ -208,20 +207,20 @@ object::ptr native_function::context::array_like::at(std::size_t index) const {
       [&](const native_object::array_like::ptr& arr) -> object::ptr {
         return arr->at(index);
       },
-      [&](const managed_object_ptr<array>& arr) -> object::ptr {
-        return object::derive(arr, (*arr)[index]);
+      [&](const managed_ptr<array>& arr) -> object::ptr {
+        return manage_derived_ref(arr, (*arr)[index]);
       });
 }
 
 native_function::context::map_like::map_like(native_object::map_like::ptr&& m)
     : which_(std::move(m)) {}
-native_function::context::map_like::map_like(managed_object_ptr<map>&& m)
+native_function::context::map_like::map_like(managed_ptr<map>&& m)
     : which_(std::move(m)) {}
 
 /* static */ std::optional<native_function::context::array_like>
 native_function::context::array_like::try_from(const object::ptr& o) {
   if (o->is_array()) {
-    return array_like(object::derive(o, o->as_array()));
+    return array_like(manage_derived_ref(o, o->as_array()));
   }
   if (o->is_native_object()) {
     if (native_object::array_like::ptr arr =
@@ -251,9 +250,9 @@ object::ptr native_function::context::map_like::lookup_property(
       [&](const native_object::map_like::ptr& m) -> object::ptr {
         return m->lookup_property(identifier);
       },
-      [&](const managed_object_ptr<map>& m) -> object::ptr {
+      [&](const managed_ptr<map>& m) -> object::ptr {
         if (auto it = m->find(identifier); it != m->end()) {
-          return object::as_static(it->second);
+          return manage_as_static(it->second);
         }
         return nullptr;
       });
@@ -267,7 +266,7 @@ native_function::context::map_like::keys() const {
       [&](const native_object::map_like::ptr& m) -> result {
         return m->keys();
       },
-      [&](const managed_object_ptr<map>& m) -> result {
+      [&](const managed_ptr<map>& m) -> result {
         std::vector<std::string> keys;
         keys.reserve(m->size());
         for (const auto& [key, _] : *m) {
@@ -280,7 +279,7 @@ native_function::context::map_like::keys() const {
 /* static */ std::optional<native_function::context::map_like>
 native_function::context::map_like::try_from(const object::ptr& o) {
   if (o->is_map()) {
-    return map_like(object::derive(o, o->as_map()));
+    return map_like(manage_derived_ref(o, o->as_map()));
   }
   if (o->is_native_object()) {
     if (native_object::map_like::ptr m = o->as_native_object()->as_map_like()) {

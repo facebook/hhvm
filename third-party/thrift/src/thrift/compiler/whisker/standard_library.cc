@@ -63,7 +63,7 @@ map::value_type create_array_functions() {
         for (const object::ptr& arg : ctx.arguments()) {
           result.emplace_back(object(*arg));
         }
-        return object::owned(w::array(std::move(result)));
+        return manage_owned<object>(w::array(std::move(result)));
       }
     };
     array_functions["of"] = w::make_native_function<array_of>();
@@ -89,7 +89,7 @@ map::value_type create_array_functions() {
         ctx.declare_named_arguments({});
         ctx.declare_arity(1);
         auto len = i64(ctx.argument<array>(0).size());
-        return object::owned(w::i64(len));
+        return manage_owned<object>(w::i64(len));
       }
     };
     array_functions["len"] = w::make_native_function<array_len>();
@@ -114,7 +114,7 @@ map::value_type create_array_functions() {
       object::ptr invoke(context ctx) override {
         ctx.declare_named_arguments({});
         ctx.declare_arity(1);
-        return object::as_static(
+        return manage_as_static(
             ctx.argument<array>(0).size() == 0 ? w::true_ : w::false_);
       }
     };
@@ -182,7 +182,7 @@ map::value_type create_string_functions() {
         ctx.declare_named_arguments({});
         ctx.declare_arity(1);
         auto len = i64(ctx.argument<string>(0)->length());
-        return object::owned(w::i64(len));
+        return manage_owned<object>(w::i64(len));
       }
     };
     string_functions["len"] = w::make_native_function<string_len>();
@@ -203,7 +203,7 @@ map::value_type create_int_functions() {
     object::ptr invoke(context ctx) final {
       ctx.declare_named_arguments({});
       ctx.declare_arity(2);
-      return object::as_static(
+      return manage_as_static(
           invoke(ctx.argument<i64>(0), ctx.argument<i64>(1)) ? w::true_
                                                              : w::false_);
     }
@@ -374,7 +374,7 @@ map::value_type create_int_functions() {
         for (std::size_t i = 0; i < ctx.arity(); ++i) {
           result += ctx.argument<i64>(i);
         }
-        return object::owned(w::i64(result));
+        return manage_owned<object>(w::i64(result));
       }
     };
     int_functions["add"] = w::make_native_function<int_add>();
@@ -399,7 +399,7 @@ map::value_type create_int_functions() {
       object::ptr invoke(context ctx) override {
         ctx.declare_named_arguments({});
         ctx.declare_arity(1);
-        return object::owned(w::i64(-ctx.argument<i64>(0)));
+        return manage_owned<object>(w::i64(-ctx.argument<i64>(0)));
       }
     };
     int_functions["neg"] = w::make_native_function<int_neg>();
@@ -425,7 +425,7 @@ map::value_type create_int_functions() {
       object::ptr invoke(context ctx) override {
         ctx.declare_named_arguments({});
         ctx.declare_arity(2);
-        return object::owned(
+        return manage_owned<object>(
             w::i64(ctx.argument<i64>(0) - ctx.argument<i64>(1)));
       }
     };

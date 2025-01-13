@@ -17,13 +17,12 @@
 #pragma once
 
 #include <algorithm>
-#include <array>
 #include <iostream>
-#include <iterator>
 #include <random>
 #include <type_traits>
 #include <vector>
 
+#include <folly/FBString.h>
 #include <folly/Traits.h>
 #include <folly/io/Cursor.h>
 #include <thrift/lib/cpp2/FieldRefTraits.h>
@@ -211,6 +210,19 @@ struct populator_methods<type::string_t, std::string> {
   }
 };
 
+template <>
+struct populator_methods<
+    type::cpp_type<folly::fbstring, type::string_t>,
+    folly::fbstring> {
+  template <typename Rng>
+  static void populate(
+      Rng& rng, const populator_opts& opts, folly::fbstring& bin) {
+    std::string t;
+    populator_methods<type::string_t, std::string>::populate(rng, opts, t);
+    bin = folly::fbstring(std::move(t));
+  }
+};
+
 template <typename Rng, typename Binary, typename WriteFunc>
 void generate_bytes(
     Rng& rng, Binary&, const std::size_t length, const WriteFunc& write_func) {
@@ -229,6 +241,19 @@ struct populator_methods<type::binary_t, std::string> {
     bin = std::string(length, 0);
     auto iter = bin.begin();
     generate_bytes(rng, bin, length, [&](uint8_t c) { *iter++ = c; });
+  }
+};
+
+template <>
+struct populator_methods<
+    type::cpp_type<folly::fbstring, type::binary_t>,
+    folly::fbstring> {
+  template <typename Rng>
+  static void populate(
+      Rng& rng, const populator_opts& opts, folly::fbstring& bin) {
+    std::string t;
+    populator_methods<type::binary_t, std::string>::populate(rng, opts, t);
+    bin = folly::fbstring(std::move(t));
   }
 };
 

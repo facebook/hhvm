@@ -39,7 +39,12 @@ class structure_annotations {
   structure_annotations(source_manager& sm, t_program& program)
       : fm_(sm, program), sm_(sm), prog_(program) {}
 
-  std::set<std::string> visit_type(t_type_ref typeRef, const t_named& node) {
+  // if annotations_for_catch_all is non-null, type annotations will be removed
+  // and added to that map. (This only makes sense for typedefs).
+  std::set<std::string> visit_type(
+      t_type_ref typeRef,
+      const t_named& node,
+      std::map<std::string, std::string>* annotations_for_catch_all) {
     std::set<std::string> to_add;
     if (!typeRef.resolve() || typeRef->is_primitive_type() ||
         typeRef->is_container() ||
@@ -69,6 +74,9 @@ class structure_annotations {
             name == "cpp.ref" || name == "cpp2.ref" || name == "cpp.ref_type" ||
             name == "cpp2.ref_type") {
           to_remove.emplace_back(name, data);
+        } else if (annotations_for_catch_all) {
+          to_remove.emplace_back(name, data);
+          annotations_for_catch_all->emplace(name, data.value);
         }
       }
 
@@ -86,13 +94,13 @@ class structure_annotations {
   }
 
   void visit_def(const t_named& node) {
+    std::map<std::string, std::string> annotations_for_catch_all;
     std::set<std::string> to_add;
     if (auto typedf = dynamic_cast<const t_typedef*>(&node)) {
-      to_add = visit_type(typedf->type(), node);
+      to_add = visit_type(typedf->type(), node, &annotations_for_catch_all);
     } else if (auto field = dynamic_cast<const t_field*>(&node)) {
-      to_add = visit_type(field->type(), node);
+      to_add = visit_type(field->type(), node, nullptr);
     }
-    std::map<std::string, std::string> remaining;
 
     std::vector<t_annotation> to_remove;
     bool has_cpp_type = node.find_structured_annotation_or_null(kCppTypeUri);
@@ -463,7 +471,7 @@ class structure_annotations {
       // catch-all
       else {
         to_remove.emplace_back(name, data);
-        remaining.emplace(name, data.value);
+        annotations_for_catch_all.emplace(name, data.value);
       }
     }
 
@@ -475,14 +483,15 @@ class structure_annotations {
       }
     }
 
-    if (!remaining.empty()) {
-      std::vector<std::string> remaining_strs;
-      for (const auto& [name, value] : remaining) {
-        remaining_strs.push_back(fmt::format(R"("{}": "{}")", name, value));
+    if (!annotations_for_catch_all.empty()) {
+      std::vector<std::string> annotations_for_catch_all_strs;
+      for (const auto& [name, value] : annotations_for_catch_all) {
+        annotations_for_catch_all_strs.push_back(
+            fmt::format(R"("{}": "{}")", name, value));
       }
       to_add.insert(fmt::format(
           "@thrift.DeprecatedUnvalidatedAnnotations{{items = {{{}}}}}",
-          fmt::join(remaining_strs, ", ")));
+          fmt::join(annotations_for_catch_all_strs, ", ")));
       fm_.add_include("thrift/annotation/thrift.thrift");
     }
 

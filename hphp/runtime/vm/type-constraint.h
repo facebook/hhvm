@@ -669,8 +669,8 @@ struct TcUnionPieceView {
   TcUnionPieceIterator begin() const;
   TcUnionPieceIterator end() const;
 private:
-  const TypeConstraint m_tc;
-  const Kind m_kind;
+  TypeConstraint m_tc;
+  Kind m_kind;
 };
 
 static_assert(std::ranges::input_range<TcUnionPieceView>);

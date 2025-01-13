@@ -50,6 +50,13 @@ class Connection {
 
   virtual ~Connection();
 
+  // Don't allow copy or move
+  Connection(const Connection&) = delete;
+  Connection& operator=(const Connection&) = delete;
+
+  Connection(Connection&&) = delete;
+  Connection& operator=(Connection&&) = delete;
+
   // Like beginConnection, this is how you start a query.  Note that
   // ownership of the Connection is passed into this function; the
   // returned QueryOperation allows access to it (once the query
@@ -358,7 +365,7 @@ class Connection {
   }
 
   void setConnectionDyingCallback(ConnectionDyingCallback callback) {
-    conn_dying_callback_ = callback;
+    conn_dying_callback_ = std::move(callback);
   }
 
   // Note that the chained callback is invoked in the MySQL client thread
@@ -639,9 +646,6 @@ class Connection {
   // We don't track for async calls, for async calls the unique Connection
   // gets moved to the operation, so the protection is guaranteed.
   bool operation_in_progress_ = false;
-
-  Connection(const Connection&) = delete;
-  Connection& operator=(const Connection&) = delete;
 
   // Query
 

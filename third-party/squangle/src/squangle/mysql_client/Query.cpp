@@ -284,7 +284,7 @@ void appendColumnTableName(folly::fbstring* s, const QueryArgument& d) {
 }
 
 // Raise an exception for format string/value mismatches
-void formatStringParseError(
+[[noreturn]] void formatStringParseError(
     folly::StringPiece query_text,
     size_t offset,
     char format_specifier,
@@ -368,7 +368,7 @@ void Query::append(const Query& query2) {
 
 void Query::append(Query&& query2) {
   query_text_ += query2.query_text_;
-  for (const auto& param2 : query2.params_) {
+  for (auto& param2 : query2.params_) {
     params_.push_back(std::move(param2));
   }
 }

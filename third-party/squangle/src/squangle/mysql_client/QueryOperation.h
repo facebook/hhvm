@@ -29,17 +29,16 @@ class QueryOperation : public FetchOperation {
     buffered_query_callback_ = std::move(cb);
   }
   void chainCallback(QueryCallback cb) {
-    auto origCb = std::move(buffered_query_callback_);
-    if (origCb) {
-      cb = [origCb = std::move(origCb), cb = std::move(cb)](
+    if (buffered_query_callback_) {
+      cb = [old_cb = buffered_query_callback_, new_cb = std::move(cb)](
                QueryOperation& op,
                QueryResult* result,
                QueryCallbackReason reason) {
-        origCb(op, result, reason);
-        cb(op, result, reason);
+        old_cb(op, result, reason);
+        new_cb(op, result, reason);
       };
     }
-    setCallback(cb);
+    setCallback(std::move(cb));
   }
 
   // Steal all rows.  Only valid if there is no callback.  Inefficient

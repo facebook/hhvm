@@ -45,6 +45,19 @@
 
 #pragma once
 
+#include <folly/Exception.h>
+#include <folly/Portability.h>
+#include <folly/futures/Future.h>
+#include <folly/io/async/EventBase.h>
+#include <folly/ssl/OpenSSLPtrTypes.h>
+#include <atomic>
+#include <functional>
+#include <memory>
+#include <mutex>
+#include <string>
+#include <thread>
+#include <unordered_map>
+
 #include "squangle/logger/DBEventCounter.h"
 #include "squangle/logger/DBEventLogger.h"
 #include "squangle/mysql_client/Connection.h"
@@ -54,20 +67,6 @@
 #include "squangle/mysql_client/Operation.h"
 #include "squangle/mysql_client/Query.h"
 #include "squangle/mysql_client/mysql_protocol/MysqlConnection.h"
-
-#include <atomic>
-#include <functional>
-#include <memory>
-#include <mutex>
-#include <string>
-#include <thread>
-#include <unordered_map>
-
-#include <folly/Exception.h>
-#include <folly/Portability.h>
-#include <folly/futures/Future.h>
-#include <folly/io/async/EventBase.h>
-#include <folly/ssl/OpenSSLPtrTypes.h>
 
 namespace facebook::common::mysql_client {
 
@@ -90,6 +89,13 @@ class AsyncMysqlClient : public MysqlClientBase {
   AsyncMysqlClient();
   ~AsyncMysqlClient() override;
 
+  // Don't allow copy or move
+  AsyncMysqlClient(const AsyncMysqlClient&) = delete;
+  AsyncMysqlClient& operator=(const AsyncMysqlClient&) = delete;
+
+  AsyncMysqlClient(AsyncMysqlClient&&) = delete;
+  AsyncMysqlClient& operator=(AsyncMysqlClient&&) = delete;
+
   static std::unique_ptr<db::SquangleLoggerBase> adjustLogger(
       std::unique_ptr<db::SquangleLoggerBase> logger) {
     if (logger) {
@@ -106,6 +112,7 @@ class AsyncMysqlClient : public MysqlClientBase {
     // call delete. This allows the asyncmysql thread to terminate safely
     if (std::this_thread::get_id() == client->threadId()) {
       std::thread myThread{[client]() { delete client; }};
+      // @lint-ignore CLANGTIDY facebook-hte-BadCall-detach
       myThread.detach();
     } else {
       delete client;
@@ -354,9 +361,6 @@ class AsyncMysqlClient : public MysqlClientBase {
     db::ExponentialMovingAverage ioThreadIdleTime{1.0 / 16.0};
   };
   std::shared_ptr<StatsTracker> stats_tracker_;
-
-  AsyncMysqlClient(const AsyncMysqlClient&) = delete;
-  AsyncMysqlClient& operator=(const AsyncMysqlClient&) = delete;
 };
 
 // Don't these directly. Used to separate the Connection synchronization
@@ -373,6 +377,13 @@ class AsyncConnection : public AsyncConnectionHelper {
             std::move(conn)) {}
 
   virtual ~AsyncConnection() override;
+
+  // Don't allow copy or move
+  AsyncConnection(const AsyncConnection&) = delete;
+  AsyncConnection& operator=(const AsyncConnection&) = delete;
+
+  AsyncConnection(AsyncConnection&&) = delete;
+  AsyncConnection& operator=(AsyncConnection&&) = delete;
 
  protected:
   std::unique_ptr<InternalConnection> createInternalConnection() override {

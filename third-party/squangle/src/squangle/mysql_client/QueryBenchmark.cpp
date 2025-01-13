@@ -138,7 +138,7 @@ void simpleConversionDynamic(int /*count*/) {
   for (int i = 0; i < kCount; ++i) {
     uint64_t ii = q_int.isInt() ? q_int.getInt() : 0;
     double d = q_double.isDouble() ? q_double.getDouble() : 0;
-    folly::fbstring s = q_string.isString() ? q_string.getString() : "";
+    auto q_string_size = q_string.isString() ? q_string.getString().size() : 0;
     folly::doNotOptimizeAway(ii);
     folly::doNotOptimizeAway(d);
     auto b = q_pair.isObject();
@@ -148,7 +148,7 @@ void simpleConversionDynamic(int /*count*/) {
     auto s2 = q_double.asString();
     auto s3 = q_string.asString();
 
-    int hack = s.length() + s1.length() + s2.length() + s3.length();
+    int hack = q_string_size + s1.length() + s2.length() + s3.length();
     folly::doNotOptimizeAway(hack);
   }
 }
@@ -160,7 +160,7 @@ void simpleConversionQueryArgument(int /*count*/) {
   for (int i = 0; i < kCount; ++i) {
     uint64_t ii = q_int.isInt() ? q_int.getInt() : 0;
     double d = q_double.isDouble() ? q_double.getDouble() : 0;
-    folly::fbstring s = q_string.isString() ? q_string.getString() : "";
+    auto q_string_size = q_string.isString() ? q_string.getString().size() : 0;
     folly::doNotOptimizeAway(ii);
     folly::doNotOptimizeAway(d);
     auto b = q_pair.isPairList();
@@ -170,7 +170,7 @@ void simpleConversionQueryArgument(int /*count*/) {
     auto s2 = q_double.asString();
     auto s3 = q_string.asString();
 
-    int hack = s.length() + s1.length() + s2.length() + s3.length();
+    int hack = q_string_size + s1.length() + s2.length() + s3.length();
     folly::doNotOptimizeAway(hack);
   }
 }

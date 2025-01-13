@@ -98,7 +98,7 @@ class Row {
       ++current_column_number_;
     }
     const folly::StringPiece dereference() const {
-      CHECK(current_column_number_ < row_->size());
+      CHECK_LT(current_column_number_, row_->size());
       return row_->get<folly::StringPiece>(current_column_number_);
     }
     bool equal(const Iterator& other) const {
@@ -234,7 +234,7 @@ class RowBlock {
   class Iterator;
 
   explicit RowBlock(std::shared_ptr<RowFields> row_fields)
-      : row_fields_info_(row_fields) {}
+      : row_fields_info_(std::move(row_fields)) {}
 
   ~RowBlock() {}
 
@@ -419,6 +419,14 @@ class EphemeralRowFields {
   explicit EphemeralRowFields(std::unique_ptr<InternalRowMetadata> metadata)
       : metadata_(std::move(metadata)) {}
 
+  ~EphemeralRowFields() = default;
+
+  EphemeralRowFields(EphemeralRowFields const&) = delete;
+  EphemeralRowFields& operator=(EphemeralRowFields const&) = delete;
+
+  EphemeralRowFields(EphemeralRowFields&&) = default;
+  EphemeralRowFields& operator=(EphemeralRowFields&&) = default;
+
   size_t numFields() const {
     return metadata_->numFields();
   }
@@ -471,22 +479,26 @@ class EphemeralRowFields {
 
   std::shared_ptr<RowFields> makeBufferedFields() const;
 
-  EphemeralRowFields(EphemeralRowFields const&) = delete;
-  EphemeralRowFields& operator=(EphemeralRowFields const&) = delete;
-
-  EphemeralRowFields(EphemeralRowFields&&) = default;
-  EphemeralRowFields& operator=(EphemeralRowFields&&) = default;
-
  private:
   std::unique_ptr<InternalRowMetadata> metadata_;
 };
 
 class EphemeralRow {
  public:
+  EphemeralRow() = default;
+
   EphemeralRow(
       std::unique_ptr<InternalRow> row,
       std::shared_ptr<EphemeralRowFields> row_fields)
       : row_(std::move(row)), row_fields_(std::move(row_fields)) {}
+
+  ~EphemeralRow() = default;
+
+  EphemeralRow(EphemeralRow const&) = delete;
+  EphemeralRow& operator=(EphemeralRow const&) = delete;
+
+  EphemeralRow(EphemeralRow&&) = default;
+  EphemeralRow& operator=(EphemeralRow&&) = default;
 
   // Beginning simple, just give the basic indexing.
   InternalRow::Type getType(size_t col) const;
@@ -516,14 +528,6 @@ class EphemeralRow {
   const EphemeralRowFields& getRowFields() const {
     return *row_fields_;
   }
-
-  EphemeralRow(EphemeralRow const&) = delete;
-  EphemeralRow& operator=(EphemeralRow const&) = delete;
-
-  EphemeralRow(EphemeralRow&&) = default;
-  EphemeralRow& operator=(EphemeralRow&&) = default;
-
-  EphemeralRow() = default;
 
   // Attempt to convert the column specified by colName to the type specified in
   // the template.  Note: calling this on a null column will throw an exception

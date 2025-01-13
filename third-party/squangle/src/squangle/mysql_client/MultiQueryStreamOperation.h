@@ -78,7 +78,7 @@ class MultiQueryStreamOperation : public FetchOperation {
       }
     }
 
-    void operator()(Callback cb) const {
+    void operator()(const Callback& cb) const {
       if (cb != nullptr) {
         cb(op_, state_);
       }

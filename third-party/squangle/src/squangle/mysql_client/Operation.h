@@ -235,7 +235,7 @@ class OperationBase {
     return connection_context_.get();
   }
   void withOptionalConnectionContext(
-      std::function<void(db::ConnectionContextBase&)> func) const {
+      const std::function<void(db::ConnectionContextBase&)>& func) const {
     if (connection_context_) {
       func(*connection_context_);
     }
@@ -668,7 +668,6 @@ class Operation : public std::enable_shared_from_this<Operation> {
 // Helper function to build the result for a ConnectOperation in the sync
 // mode. It will block the thread and return the acquired connection, in case
 // of error, it will throw MysqlException as expected in the sync mode.
-std::unique_ptr<Connection> blockingConnectHelper(
-    std::shared_ptr<ConnectOperation> conn_op);
+std::unique_ptr<Connection> blockingConnectHelper(ConnectOperation& conn_op);
 
 } // namespace facebook::common::mysql_client

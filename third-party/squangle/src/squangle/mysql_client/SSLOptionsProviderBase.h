@@ -21,7 +21,7 @@ namespace facebook::common::mysql_client {
 /* Interface for an SSL connection options Provider */
 class SSLOptionsProviderBase {
  public:
-  virtual ~SSLOptionsProviderBase() {}
+  virtual ~SSLOptionsProviderBase() = default;
 
   // The SSL Context and Session options to be set for the connection
   virtual std::shared_ptr<folly::SSLContext> getSSLContext() = 0;

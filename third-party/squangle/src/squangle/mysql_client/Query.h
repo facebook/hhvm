@@ -260,6 +260,8 @@ class Query {
       sanityChecks();
     }
 
+    ~QueryText() = default;
+
     // Make a shallow copy of the query
     static QueryText makeShallow(folly::StringPiece query) {
       QueryText res{};
@@ -458,10 +460,10 @@ class QueryArgument {
       const std::initializer_list<QueryArgument>& list);
   /* implicit */ QueryArgument(std::vector<QueryArgument> arg_list);
   /* implicit */ QueryArgument(std::tuple<folly::fbstring, folly::fbstring> tup)
-      : value_(tup) {}
+      : value_(std::move(tup)) {}
   /* implicit */ QueryArgument(
       std::tuple<folly::fbstring, folly::fbstring, folly::fbstring> tup)
-      : value_(tup) {}
+      : value_(std::move(tup)) {}
   /* implicit */ QueryArgument(std::nullptr_t n) : value_(n) {}
 
   /* implicit */ QueryArgument(const std::optional<bool>& opt) {

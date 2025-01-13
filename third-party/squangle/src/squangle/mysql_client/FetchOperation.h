@@ -66,6 +66,12 @@ class RowStream {
   }
 
   ~RowStream() = default;
+
+  // non-copyable
+  RowStream(const RowStream&) = delete;
+  RowStream& operator=(const RowStream&) = delete;
+
+  // movable
   RowStream(RowStream&&) = default;
   RowStream& operator=(RowStream&&) = default;
 

@@ -30,7 +30,7 @@ std::unique_ptr<Connection> SyncConnectionPool::connect(
   auto op = beginConnection(host, port, database_name, user, password);
   op->setConnectionOptions(conn_opts);
   // This will throw (intended behaviour) in case the operation didn't succeed
-  return blockingConnectHelper(std::move(op));
+  return blockingConnectHelper(*op);
 }
 
 void SyncConnectionPool::openNewConnectionPrep(

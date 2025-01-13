@@ -96,13 +96,13 @@ class MysqlClientBase {
 
   void setConnectionCallback(ObserverCallback connection_cb) {
     if (connection_cb_) {
-      auto old_cb = connection_cb_;
-      connection_cb_ = [old_cb, connection_cb](Operation& op) {
+      connection_cb_ = [old_cb = connection_cb_,
+                        new_cb = std::move(connection_cb)](Operation& op) {
         old_cb(op);
-        connection_cb(op);
+        new_cb(op);
       };
     } else {
-      connection_cb_ = connection_cb;
+      connection_cb_ = std::move(connection_cb);
     }
   }
 
@@ -172,7 +172,7 @@ class MysqlClientBase {
   virtual db::SquangleLoggingData makeSquangleLoggingData(
       std::shared_ptr<const ConnectionKey> connKey,
       const db::ConnectionContextBase* connContext) {
-    return db::SquangleLoggingData(connKey, connContext);
+    return db::SquangleLoggingData(std::move(connKey), connContext);
   }
 
   virtual void addOperation(std::shared_ptr<Operation> /*op*/) {}

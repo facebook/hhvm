@@ -31,7 +31,7 @@ typedef std::shared_ptr<MultiQueryOperation> MultiQueryOperation_ptr;
 
 // SemiFuture for ConnectOperation
 FOLLY_NODISCARD folly::SemiFuture<ConnectResult> toSemiFuture(
-    ConnectOperation_ptr conn_op);
+    const ConnectOperation_ptr& conn_op);
 
 // SemiFuture for QueryOperation
 FOLLY_NODISCARD folly::SemiFuture<DbQueryResult> toSemiFuture(

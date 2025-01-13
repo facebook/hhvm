@@ -6,15 +6,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <fcntl.h>
 #include <folly/Memory.h>
 #include <folly/Singleton.h>
 #include <folly/futures/Future.h>
 #include <folly/io/async/EventBaseManager.h>
 #include <folly/system/ThreadName.h>
-#include <gflags/gflags.h>
 #include <mysql.h>
-#include <unistd.h>
 
 #include "squangle/logger/DBEventLogger.h"
 #include "squangle/mysql_client/AsyncMysqlClient.h"
@@ -141,6 +138,7 @@ void AsyncMysqlClient::shutdownClient() {
     thread_.join();
   } else {
     LOG(ERROR) << "shutdownClient() called from AsyncMysql thread";
+    // @lint-ignore CLANGTIDY facebook-hte-BadCall-detach
     thread_.detach();
   }
 }
@@ -183,7 +181,7 @@ void AsyncMysqlClient::cleanupCompletedOperations() {
     size_t num_erased = 0, before = pending.operations.size();
 
     VLOG(11) << "removing pending operations";
-    for (auto& op : pending.to_remove) {
+    for (const auto& op : pending.to_remove) {
       if (pending.operations.erase(op) > 0) {
         ++num_erased;
       } else {
@@ -207,7 +205,7 @@ folly::SemiFuture<ConnectResult> AsyncMysqlClient::connectSemiFuture(
     const ConnectionOptions& conn_opts) {
   auto op = beginConnection(host, port, database_name, user, password);
   op->setConnectionOptions(conn_opts);
-  return toSemiFuture(std::move(op));
+  return toSemiFuture(op);
 }
 
 std::unique_ptr<Connection> AsyncMysqlClient::connect(
@@ -220,7 +218,7 @@ std::unique_ptr<Connection> AsyncMysqlClient::connect(
   auto op = beginConnection(host, port, database_name, user, password);
   op->setConnectionOptions(conn_opts);
   // This will throw (intended behavour) in case the operation didn't succeed
-  auto conn = blockingConnectHelper(op);
+  auto conn = blockingConnectHelper(*op);
   return conn;
 }
 

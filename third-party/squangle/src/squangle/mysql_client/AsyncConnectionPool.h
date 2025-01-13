@@ -28,11 +28,8 @@
 #include <folly/container/F14Map.h>
 #include <folly/futures/Future.h>
 #include <folly/synchronization/Baton.h>
-#include <chrono>
-#include <list>
 #include <memory>
 
-#include "squangle/logger/DBEventCounter.h"
 #include "squangle/mysql_client/AsyncMysqlClient.h"
 #include "squangle/mysql_client/ConnectPoolOperation.h"
 #include "squangle/mysql_client/ConnectionPool.h"
@@ -59,6 +56,13 @@ class AsyncConnectionPool : public ConnectionPool<AsyncMysqlClient> {
 
   // The destructor will start the shutdown phase
   ~AsyncConnectionPool() override;
+
+  // Don't allow copy or move
+  AsyncConnectionPool(const AsyncConnectionPool&) = delete;
+  AsyncConnectionPool& operator=(const AsyncConnectionPool&) = delete;
+
+  AsyncConnectionPool(AsyncConnectionPool&&) = delete;
+  AsyncConnectionPool& operator=(AsyncConnectionPool&&) = delete;
 
   FOLLY_NODISCARD folly::SemiFuture<ConnectResult> connectSemiFuture(
       const std::string& host,
@@ -157,9 +161,6 @@ class AsyncConnectionPool : public ConnectionPool<AsyncMysqlClient> {
   void openNewConnectionFinish(
       AsyncConnectPoolOperation& /*pool_op*/,
       const PoolKey& /*pool_key*/) override {}
-
-  AsyncConnectionPool(const AsyncConnectionPool&) = delete;
-  AsyncConnectionPool& operator=(const AsyncConnectionPool&) = delete;
 };
 
 } // namespace facebook::common::mysql_client

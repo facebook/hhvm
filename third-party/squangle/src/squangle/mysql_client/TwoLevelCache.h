@@ -8,7 +8,10 @@
 
 #pragma once
 
-#include "squangle/base/Base.h"
+#include <folly/container/F14Map.h>
+#include <folly/container/F14Set.h>
+#include <glog/logging.h>
+#include <list>
 
 namespace {
 

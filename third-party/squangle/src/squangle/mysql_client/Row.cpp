@@ -352,7 +352,7 @@ std::chrono::microseconds parseTimeOnly(
   }
   if (!microseconds_str.empty()) {
     microseconds_str.resize(6, '0');
-    microseconds = folly::to<int>(microseconds_str.c_str());
+    microseconds = folly::to<int>(microseconds_str);
   }
   auto result = std::chrono::hours(hours) + std::chrono::minutes(minutes) +
       std::chrono::seconds(seconds) + std::chrono::microseconds(microseconds);
@@ -408,7 +408,7 @@ std::chrono::system_clock::time_point parseDateTime(
   }
   if (!microseconds_str.empty()) {
     microseconds_str.resize(6, '0');
-    microseconds = folly::to<int>(microseconds_str.c_str());
+    microseconds = folly::to<int>(microseconds_str);
   }
 
   if (time_tm.tm_year) {
@@ -419,6 +419,12 @@ std::chrono::system_clock::time_point parseDateTime(
     time_tm.tm_mon -= 1;
   }
 
+  // We probably need to think about replacing mktime() with timegm(), as the
+  // main difference is handling the time zone.  However, we would need to look
+  // up the current time zone (possibly storing it in a local variable) and add
+  // that information to the time_t returned.  For now, just ignore the lint
+  // warning.
+  // @lint-ignore CLANGTIDY facebook-mktime-inefficient-call-check
   auto t = mktime(&time_tm);
 
   if (t == -1) {

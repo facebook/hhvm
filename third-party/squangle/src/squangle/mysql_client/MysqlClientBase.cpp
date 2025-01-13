@@ -22,6 +22,13 @@ class InitMysqlLibrary {
   ~InitMysqlLibrary() {
     mysql_library_end();
   }
+
+  // don't allow copying or moving
+  InitMysqlLibrary(const InitMysqlLibrary&) = delete;
+  InitMysqlLibrary& operator=(const InitMysqlLibrary&) = delete;
+
+  InitMysqlLibrary(InitMysqlLibrary&&) = delete;
+  InitMysqlLibrary& operator=(InitMysqlLibrary&&) = delete;
 };
 
 } // namespace

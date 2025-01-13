@@ -41,7 +41,8 @@ void handleConnectionCompletion(
   }
 }
 
-folly::SemiFuture<ConnectResult> toSemiFuture(ConnectOperation_ptr conn_op) {
+folly::SemiFuture<ConnectResult> toSemiFuture(
+    const ConnectOperation_ptr& conn_op) {
   folly::MoveWrapper<folly::Promise<ConnectResult>> promise;
   auto future = promise->getSemiFuture();
 
@@ -99,7 +100,7 @@ folly::SemiFuture<folly::Unit> handlePreQueryCallback(Operation& op) {
 // running the query
 template <typename ResultType, typename Operation>
 folly::SemiFuture<std::pair<ResultType, AsyncPostQueryCallback>> handleRunQuery(
-    std::shared_ptr<Operation> op) {
+    const std::shared_ptr<Operation>& op) {
   folly::MoveWrapper<
       folly::Promise<std::pair<ResultType, AsyncPostQueryCallback>>>
       promise;
@@ -140,9 +141,8 @@ folly::SemiFuture<ResultType> toSemiFutureHelper(
     std::shared_ptr<Operation> op) {
   // Run pre-query callbacks
   auto sfut1 = handlePreQueryCallback<Operation>(*op);
-  auto sfut2 = std::move(sfut1).deferValue([=](auto&& /* unused */) {
-    return handleRunQuery<ResultType>(std::move(op));
-  });
+  auto sfut2 = std::move(sfut1).deferValue(
+      [=](auto&& /* unused */) { return handleRunQuery<ResultType>(op); });
 
   return std::move(sfut2).deferValue([op = std::move(op)](auto&& result) {
     // Pass `op` into this lambda to verify it's lifetime until we have handled

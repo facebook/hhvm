@@ -9,7 +9,6 @@
 #include <folly/MapUtil.h>
 #include <folly/Memory.h>
 #include <folly/synchronization/Baton.h>
-#include <mysql.h>
 #include <chrono>
 #include <cstddef>
 #include <memory>
@@ -122,7 +121,7 @@ std::unique_ptr<Connection> AsyncConnectionPool::connect(
   auto op = beginConnection(host, port, database_name, user, password);
   op->setConnectionOptions(conn_opts);
   // This will throw (intended behaviour) in case the operation didn't succeed
-  return blockingConnectHelper(std::move(op));
+  return blockingConnectHelper(*op);
 }
 
 template <>

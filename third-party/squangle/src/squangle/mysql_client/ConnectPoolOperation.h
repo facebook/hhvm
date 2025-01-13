@@ -54,6 +54,12 @@ class ConnectPoolOperation : public ConnectOperation {
     cancelPreOperation();
   }
 
+  ConnectPoolOperation(const ConnectPoolOperation&) = delete;
+  ConnectPoolOperation& operator=(const ConnectPoolOperation&) = delete;
+
+  ConnectPoolOperation(ConnectPoolOperation&&) = delete;
+  ConnectPoolOperation& operator=(ConnectPoolOperation&&) = delete;
+
   db::OperationType getOperationType() const override {
     return db::OperationType::PoolConnect;
   }

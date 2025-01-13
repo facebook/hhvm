@@ -40,6 +40,10 @@ class ConnectionHolder : public InternalConnection {
   ConnectionHolder(const ConnectionHolder&) = delete;
   ConnectionHolder& operator=(const ConnectionHolder&) = delete;
 
+  // move not allowed
+  ConnectionHolder(ConnectionHolder&&) = delete;
+  ConnectionHolder& operator=(ConnectionHolder&&) = delete;
+
   [[nodiscard]] std::unique_ptr<InternalConnection> stealInternalConnection() {
     return std::move(internalConn_);
   }

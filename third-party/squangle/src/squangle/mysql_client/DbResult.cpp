@@ -60,18 +60,8 @@ DbResult::DbResult(
 
 DbResult::~DbResult() = default;
 
-DbResult::DbResult(DbResult&& other) noexcept : OperationResultBase(other) {
-  conn_ = std::move(other.conn_);
-  result_ = other.result_;
-}
-
-DbResult& DbResult::operator=(DbResult&& other) noexcept {
-  OperationResultBase::operator=(other);
-  conn_ = std::move(other.conn_);
-  result_ = other.result_;
-
-  return *this;
-}
+DbResult::DbResult(DbResult&& other) noexcept = default;
+DbResult& DbResult::operator=(DbResult&& other) noexcept = default;
 
 std::unique_ptr<Connection> DbResult::releaseConnection() {
   return std::move(conn_);

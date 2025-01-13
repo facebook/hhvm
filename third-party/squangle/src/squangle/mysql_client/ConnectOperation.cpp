@@ -11,7 +11,6 @@
 
 #include "squangle/mysql_client/ConnectOperation.h"
 #include "squangle/mysql_client/Connection.h"
-#include "squangle/mysql_client/Flags.h"
 
 namespace facebook::common::mysql_client {
 
@@ -48,7 +47,7 @@ void ConnectOperationImpl::setConnectionOptions(
     setCertValidationCallback(conn_opts.getCertValidationCallback());
   }
   if (auto cats = conn_opts.getCryptoAuthTokenList()) {
-    setCryptoAuthTokenList(std::move(*cats));
+    setCryptoAuthTokenList(*std::move(cats));
   }
 }
 

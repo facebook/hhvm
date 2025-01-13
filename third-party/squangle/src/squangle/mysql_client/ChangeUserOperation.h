@@ -17,7 +17,7 @@ class ChangeUserOperation : public SpecialOperation {
   explicit ChangeUserOperation(
       std::unique_ptr<SpecialOperationImpl> impl,
       std::shared_ptr<const ConnectionKey> key)
-      : SpecialOperation(std::move(impl)), key_(key) {}
+      : SpecialOperation(std::move(impl)), key_(std::move(key)) {}
 
  private:
   InternalConnection::Status runSpecialOperation() override;

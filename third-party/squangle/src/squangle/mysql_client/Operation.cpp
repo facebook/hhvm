@@ -415,19 +415,18 @@ db::FailureReason operationResultToFailureReason(OperationResult result) {
   }
 }
 
-std::unique_ptr<Connection> blockingConnectHelper(
-    std::shared_ptr<ConnectOperation> conn_op) {
-  conn_op->run().wait();
-  if (!conn_op->ok()) {
+std::unique_ptr<Connection> blockingConnectHelper(ConnectOperation& conn_op) {
+  conn_op.run().wait();
+  if (!conn_op.ok()) {
     throw MysqlException(
-        conn_op->result(),
-        conn_op->mysql_errno(),
-        conn_op->mysql_error(),
-        conn_op->getKey(),
-        conn_op->opElapsed());
+        conn_op.result(),
+        conn_op.mysql_errno(),
+        conn_op.mysql_error(),
+        conn_op.getKey(),
+        conn_op.opElapsed());
   }
 
-  return conn_op->releaseConnection();
+  return conn_op.releaseConnection();
 }
 
 bool Operation::ok() const {

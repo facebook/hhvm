@@ -53,13 +53,19 @@ class SyncConnectionPool : public ConnectionPool<SyncMysqlClient> {
     scheduler_.start();
   }
 
-  ~SyncConnectionPool() {
+  ~SyncConnectionPool() override {
     VLOG(2) << "Connection pool dying";
 
     shutdown();
 
     VLOG(2) << "Connection pool shutdown completed";
   }
+
+  SyncConnectionPool(const SyncConnectionPool&) = delete;
+  SyncConnectionPool& operator=(const SyncConnectionPool&) = delete;
+
+  SyncConnectionPool(SyncConnectionPool&&) = delete;
+  SyncConnectionPool& operator=(SyncConnectionPool&&) = delete;
 
   void shutdown() override {
     bool expected = false;
@@ -102,9 +108,6 @@ class SyncConnectionPool : public ConnectionPool<SyncMysqlClient> {
   std::atomic<bool> shutting_down_{false};
 
   folly::FunctionScheduler scheduler_;
-
-  SyncConnectionPool(const SyncConnectionPool&) = delete;
-  SyncConnectionPool& operator=(const SyncConnectionPool&) = delete;
 };
 
 } // namespace facebook::common::mysql_client

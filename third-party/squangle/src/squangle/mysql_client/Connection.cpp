@@ -576,13 +576,13 @@ MultiQueryStreamHandler Connection::streamMultiQuery(
   // MultiQueryStreamHandler needs to be alive while the operation is running.
   // To accomplish that, ~MultiQueryStreamHandler waits until
   // `postOperationEnded` is called.
-  auto operation = beginAnyQuery<MultiQueryStreamOperation>(
+  auto op = beginAnyQuery<MultiQueryStreamOperation>(
       std::make_unique<OperationBase::OwnedConnection>(std::move(conn)),
       std::move(queries));
   if (attributes.size() > 0) {
-    operation->setAttributes(attributes);
+    op->setAttributes(attributes);
   }
-  return MultiQueryStreamHandler(operation);
+  return MultiQueryStreamHandler(std::move(op));
 }
 
 MultiQueryStreamHandler Connection::streamMultiQuery(
@@ -592,19 +592,19 @@ MultiQueryStreamHandler Connection::streamMultiQuery(
   auto proxy =
       std::make_unique<OperationBase::OwnedConnection>(std::move(conn));
   auto* connP = proxy->get();
-  auto ret = connP->createOperation(std::move(proxy), std::move(multi_query));
+  auto op = connP->createOperation(std::move(proxy), std::move(multi_query));
   if (attributes.size() > 0) {
-    ret->setAttributes(attributes);
+    op->setAttributes(attributes);
   }
-  Duration timeout = ret->connection()->conn_options_.getQueryTimeout();
+  Duration timeout = op->connection()->conn_options_.getQueryTimeout();
   if (timeout.count() > 0) {
-    ret->setTimeout(timeout);
+    op->setTimeout(timeout);
   }
 
   // MultiQueryStreamHandler needs to be alive while the operation is running.
   // To accomplish that, ~MultiQueryStreamHandler waits until
   // `postOperationEnded` is called.
-  return MultiQueryStreamHandler(ret);
+  return MultiQueryStreamHandler(std::move(op));
 }
 
 void Connection::mergePersistentQueryAttributes(QueryAttributes& attrs) const {

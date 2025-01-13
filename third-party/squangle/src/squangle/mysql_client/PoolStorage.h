@@ -36,6 +36,12 @@ class PoolStorageData {
   PoolStorageData(size_t conn_limit, Duration max_idle_time)
       : conn_limit_(conn_limit), max_idle_time_(max_idle_time) {}
 
+  ~PoolStorageData() = default;
+
+  // Shouldn't need the copy constructor or assignment operator
+  PoolStorageData(const PoolStorageData& other) = delete;
+  PoolStorageData& operator=(const PoolStorageData& other) = delete;
+
   // Default implementations for move constructor and assignment operator
   PoolStorageData(PoolStorageData&& other) = default;
   PoolStorageData& operator=(PoolStorageData&& other) = default;
@@ -227,10 +233,6 @@ class PoolStorageData {
   // a key having the largest number of connections
   static constexpr int kMaxKeysToCheckInLevel2 = 3;
 
-  // Shouldn't need the copy constructor or assignment operator
-  PoolStorageData(const PoolStorageData& other) = delete;
-  PoolStorageData& operator=(const PoolStorageData& other) = delete;
-
   // This pool holds weak_ptr to the operation in wait list to avoid holding
   // async client in the draining process in case the operation has already
   // been discarded by the creator before got a connection. This also serves
@@ -272,7 +274,14 @@ class PoolStorage {
   PoolStorage(size_t conn_limit, Duration max_idle_time)
       : data_(PoolStorageData<Client>(conn_limit, max_idle_time)) {}
 
-  ~PoolStorage() {}
+  ~PoolStorage() = default;
+
+  // not copyable or movable
+  PoolStorage(const PoolStorage&) = delete;
+  PoolStorage& operator=(const PoolStorage&) = delete;
+
+  PoolStorage(PoolStorage&& other) = default;
+  PoolStorage& operator=(PoolStorage&& other) = default;
 
   std::shared_ptr<ConnectPoolOperation<Client>> popOperation(
       const PoolKey& pool_key) {

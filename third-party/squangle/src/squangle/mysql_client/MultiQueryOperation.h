@@ -45,7 +45,7 @@ class MultiQueryOperation : public FetchOperation {
         cb(op, result, reason);
       };
     }
-    setCallback(cb);
+    setCallback(std::move(cb));
   }
 
   // Steal all rows. Only valid if there is no callback. Inefficient

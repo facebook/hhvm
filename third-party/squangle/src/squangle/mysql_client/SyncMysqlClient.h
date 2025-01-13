@@ -80,7 +80,13 @@ class SyncConnection : public Connection {
       std::unique_ptr<ConnectionHolder> conn = nullptr)
       : Connection(client, std::move(conn_key), std::move(conn)) {}
 
-  ~SyncConnection();
+  ~SyncConnection() override;
+
+  SyncConnection(const SyncConnection&) = delete;
+  SyncConnection& operator=(const SyncConnection&) = delete;
+
+  SyncConnection(SyncConnection&&) = delete;
+  SyncConnection& operator=(SyncConnection&&) = delete;
 
   std::shared_ptr<MultiQueryStreamOperation> createOperation(
       std::unique_ptr<OperationBase::ConnectionProxy> proxy,

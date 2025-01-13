@@ -39,6 +39,11 @@ class OperationBatch {
         creator_thread_id_(std::this_thread::get_id()),
         successful_(true) {}
 
+  // not copyable
+  OperationBatch(const OperationBatch& other) = delete;
+  OperationBatch& operator=(const OperationBatch& other) = delete;
+
+  // movable
   OperationBatch(OperationBatch&& other) = default;
   OperationBatch& operator=(OperationBatch&& other) = default;
 

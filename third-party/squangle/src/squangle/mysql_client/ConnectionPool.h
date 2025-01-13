@@ -11,7 +11,6 @@
 #include <folly/container/F14Map.h>
 #include <folly/container/F14Set.h>
 #include <folly/synchronization/Baton.h>
-#include <list>
 #include <memory>
 
 #include "squangle/base/Base.h"
@@ -165,6 +164,13 @@ class MysqlPooledHolder : public ConnectionHolder {
     removeFromPool();
   }
 
+  // Don't allow copy or move
+  MysqlPooledHolder(const MysqlPooledHolder&) = delete;
+  MysqlPooledHolder& operator=(const MysqlPooledHolder&) = delete;
+
+  MysqlPooledHolder(MysqlPooledHolder&&) = delete;
+  MysqlPooledHolder& operator=(MysqlPooledHolder&&) = delete;
+
   void setLifeDuration(Duration dur) {
     good_for_ = dur;
   }
@@ -212,6 +218,13 @@ class ConnectionPoolBase {
       : pool_options_(pool_options) {}
 
   virtual ~ConnectionPoolBase() {}
+
+  // Don't allow copy or move
+  ConnectionPoolBase(const ConnectionPoolBase&) = delete;
+  ConnectionPoolBase& operator=(const ConnectionPoolBase&) = delete;
+
+  ConnectionPoolBase(ConnectionPoolBase&&) = delete;
+  ConnectionPoolBase& operator=(ConnectionPoolBase&&) = delete;
 
   using ThrottlingCallback = std::function<void(uint32_t, const std::string&)>;
   using ShouldThrottleCallback = std::function<bool(
@@ -377,6 +390,13 @@ class ConnectionPool
 
   virtual ~ConnectionPool() override {}
 
+  // Don't allow copy or move
+  ConnectionPool(const ConnectionPool&) = delete;
+  ConnectionPool& operator=(const ConnectionPool&) = delete;
+
+  ConnectionPool(ConnectionPool&&) = delete;
+  ConnectionPool& operator=(ConnectionPool&&) = delete;
+
   virtual void shutdown() = 0;
 
   // Returns the client that this pool is using
@@ -443,7 +463,7 @@ class ConnectionPool
       ThrottlingCallback throttlingCallback) {
     return ConnectionPoolBase::tryAddOpeningConn(
         conn_key,
-        context,
+        std::move(context),
         numQueuedOperations(conn_key),
         mysql_client_->numStartedAndOpenConnections(),
         mysql_client_->getPoolsConnectionLimit(),

@@ -87,7 +87,7 @@ bool ConnectionPoolBase::tryAddOpeningConn(
 
   if (canOpen && shouldThrottleCallback_) {
     canOpen = !shouldThrottleCallback_(
-        pool_key, context, std::move(throttlingCallback));
+        pool_key, std::move(context), std::move(throttlingCallback));
     if (!canOpen) {
       // TODO(jkedgar): signal that we are getting throttled so we can start
       // returning errors to the caller.  Right now throttling will just cause

@@ -11,13 +11,11 @@
 #include "squangle/base/Base.h"
 #include "squangle/base/ConnectionKey.h"
 #include "squangle/base/ExceptionUtil.h"
-#include "squangle/logger/DBEventLogger.h"
 #include "squangle/mysql_client/Row.h"
 
 #include <folly/Exception.h>
 #include <folly/ExceptionWrapper.h>
 #include <folly/fibers/Baton.h>
-#include <chrono>
 
 namespace facebook::common::mysql_client {
 
@@ -32,6 +30,14 @@ class OperationResultBase {
       Duration elapsed_time)
       : conn_key_(std::move(conn_key)), elapsed_time_(elapsed_time) {}
   virtual ~OperationResultBase() = default;
+
+  // not copyable
+  OperationResultBase(const OperationResultBase&) = default;
+  OperationResultBase& operator=(const OperationResultBase&) = default;
+
+  // moveable
+  OperationResultBase(OperationResultBase&&) = default;
+  OperationResultBase& operator=(OperationResultBase&&) = default;
 
   std::shared_ptr<const ConnectionKey> getConnectionKey() const {
     return conn_key_;
@@ -121,6 +127,11 @@ class DbResult : public OperationResultBase {
   virtual ~DbResult() override;
 
   // Default move constructors
+  // Note that these are actually "default", but are specified in the .cpp file.
+  // If we try to mark them as "default" here, we need to know the size of
+  // Connection, but including Connection.h here causes circular dependency
+  // issues.  We need to resolve them at some point, but for now we do it this
+  // way.
   DbResult(DbResult&& other) noexcept;
   DbResult& operator=(DbResult&& other) noexcept;
 
@@ -220,8 +231,11 @@ class QueryResult {
 
   explicit QueryResult(int queryNum);
 
-  ~QueryResult() {}
+  ~QueryResult() = default;
 
+  // Copy Constructor
+  QueryResult(const QueryResult& other) = delete;
+  QueryResult& operator=(const QueryResult& other) = delete;
   // Move Constructor
   QueryResult(QueryResult&& other) noexcept;
 

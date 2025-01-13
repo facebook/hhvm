@@ -129,3 +129,4 @@ cdef shared_ptr[_fbthrift_cbindings.cStructWithString] StructWithString_convert_
 cdef object StructWithString_from_cpp(const shared_ptr[_fbthrift_cbindings.cStructWithString]& c_struct):
     return _fbthrift_ctypes.StructWithString._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
+

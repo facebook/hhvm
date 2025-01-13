@@ -21,3 +21,4 @@ cdef shared_ptr[_fbthrift_cbindings.cBigStruct] BigStruct_convert_to_cpp(object 
 cdef object BigStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cBigStruct]& c_struct):
     return _fbthrift_ctypes.BigStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
+

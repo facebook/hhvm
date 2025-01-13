@@ -9,3 +9,4 @@
 cimport my.namespacing.extend.test.extend.types as _fbthrift_ctypes
 
 
+

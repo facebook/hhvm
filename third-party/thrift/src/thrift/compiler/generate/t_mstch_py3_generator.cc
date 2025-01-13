@@ -164,6 +164,8 @@ class py3_mstch_program : public mstch_program {
              &py3_mstch_program::capi_converter},
             {"program:intercompatible?", &py3_mstch_program::intercompatible},
             {"program:auto_migrate?", &py3_mstch_program::auto_migrate},
+            {"program:gen_legacy_container_converters?",
+             &py3_mstch_program::legacy_container_converters},
             {"program:stream_types", &py3_mstch_program::getStreamTypes},
             {"program:response_and_stream_functions",
              &py3_mstch_program::response_and_stream_functions},
@@ -289,6 +291,10 @@ class py3_mstch_program : public mstch_program {
   mstch::node intercompatible() { return has_option("intercompatible"); }
 
   mstch::node auto_migrate() { return has_option("auto_migrate"); }
+
+  mstch::node legacy_container_converters() {
+    return has_option("gen_legacy_container_converters");
+  }
 
   mstch::node py_deprecated_module_path() {
     const std::string& module_path = program_->get_namespace("py");

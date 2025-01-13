@@ -18,3 +18,4 @@ cdef shared_ptr[_fbthrift_cbindings.cFoo] Foo_convert_to_cpp(object inst) except
 cdef object Foo_from_cpp(const shared_ptr[_fbthrift_cbindings.cFoo]& c_struct):
     return cpp_to_python[_fbthrift_cbindings.cFoo](deref(c_struct))
 
+

@@ -52,3 +52,17 @@ cdef object {{struct:name}}_from_cpp(const shared_ptr[_fbthrift_cbindings.{{> ty
 {{/program:auto_migrate?}}
 
 {{/program:filtered_structs}}
+
+{{#program:gen_legacy_container_converters?}}
+{{#program:containerTypes}}
+cdef {{> types/cython_cpp_type}} {{type:flat_name}}__make_instance(object items) except *:
+{{^program:auto_migrate?}}
+    return _fbthrift_ctypes.{{type:flat_name}}__make_instance(items)
+{{/program:auto_migrate?}}
+{{#program:auto_migrate?}}
+    cdef {{> types/cython_cpp_type}} ret
+    return ret
+{{/program:auto_migrate?}}
+
+{{/program:containerTypes}}
+{{/program:gen_legacy_container_converters?}}

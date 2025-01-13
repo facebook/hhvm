@@ -63,3 +63,4 @@ cdef shared_ptr[_fbthrift_cbindings.cAdaptedTypedefFields] AdaptedTypedefFields_
 cdef object AdaptedTypedefFields_from_cpp(const shared_ptr[_fbthrift_cbindings.cAdaptedTypedefFields]& c_struct):
     return cpp_to_python[_fbthrift_cbindings.cAdaptedTypedefFields](deref(c_struct))
 
+

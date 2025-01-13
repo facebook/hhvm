@@ -13,3 +13,4 @@ from cython.operator cimport dereference as deref
 cdef extern from "thrift/compiler/test/fixtures/includes/gen-python-capi/service/thrift_types_capi.h":
     pass
 
+

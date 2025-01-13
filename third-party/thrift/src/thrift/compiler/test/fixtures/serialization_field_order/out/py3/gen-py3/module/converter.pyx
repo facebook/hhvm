@@ -21,3 +21,4 @@ cdef shared_ptr[_fbthrift_cbindings.cFoo2] Foo2_convert_to_cpp(object inst) exce
 cdef object Foo2_from_cpp(const shared_ptr[_fbthrift_cbindings.cFoo2]& c_struct):
     return _fbthrift_ctypes.Foo2._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
+

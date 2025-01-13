@@ -21,3 +21,4 @@ cdef shared_ptr[_fbthrift_cbindings.cCombo] Combo_convert_to_cpp(object inst) ex
 cdef object Combo_from_cpp(const shared_ptr[_fbthrift_cbindings.cCombo]& c_struct):
     return _fbthrift_ctypes.Combo._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
+

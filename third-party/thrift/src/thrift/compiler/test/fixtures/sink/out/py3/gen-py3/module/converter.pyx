@@ -51,3 +51,4 @@ cdef shared_ptr[_fbthrift_cbindings.cSinkException2] SinkException2_convert_to_c
 cdef object SinkException2_from_cpp(const shared_ptr[_fbthrift_cbindings.cSinkException2]& c_struct):
     return _fbthrift_ctypes.SinkException2._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
+

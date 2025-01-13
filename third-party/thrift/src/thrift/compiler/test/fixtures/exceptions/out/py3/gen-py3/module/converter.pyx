@@ -51,3 +51,4 @@ cdef shared_ptr[_fbthrift_cbindings.cBanal] Banal_convert_to_cpp(object inst) ex
 cdef object Banal_from_cpp(const shared_ptr[_fbthrift_cbindings.cBanal]& c_struct):
     return _fbthrift_ctypes.Banal._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
+

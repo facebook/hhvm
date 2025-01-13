@@ -15,3 +15,4 @@ cdef shared_ptr[_fbthrift_cbindings.cA] A_convert_to_cpp(object inst) except*:
 cdef object A_from_cpp(const shared_ptr[_fbthrift_cbindings.cA]& c_struct):
     return _fbthrift_ctypes.A._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
+

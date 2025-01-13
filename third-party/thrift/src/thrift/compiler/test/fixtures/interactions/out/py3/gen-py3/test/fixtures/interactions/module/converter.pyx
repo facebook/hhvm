@@ -21,3 +21,4 @@ cdef shared_ptr[_fbthrift_cbindings.cShouldBeBoxed] ShouldBeBoxed_convert_to_cpp
 cdef object ShouldBeBoxed_from_cpp(const shared_ptr[_fbthrift_cbindings.cShouldBeBoxed]& c_struct):
     return _fbthrift_ctypes.ShouldBeBoxed._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
+

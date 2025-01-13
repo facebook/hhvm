@@ -27,3 +27,4 @@ cdef shared_ptr[_fbthrift_cbindings.cFooEx2] FooEx2_convert_to_cpp(object inst) 
 cdef object FooEx2_from_cpp(const shared_ptr[_fbthrift_cbindings.cFooEx2]& c_struct):
     return _fbthrift_ctypes.FooEx2._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
+

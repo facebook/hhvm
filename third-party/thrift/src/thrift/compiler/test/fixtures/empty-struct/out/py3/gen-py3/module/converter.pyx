@@ -21,3 +21,4 @@ cdef shared_ptr[_fbthrift_cbindings.cNada] Nada_convert_to_cpp(object inst) exce
 cdef object Nada_from_cpp(const shared_ptr[_fbthrift_cbindings.cNada]& c_struct):
     return _fbthrift_ctypes.Nada._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
+

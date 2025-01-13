@@ -207,3 +207,4 @@ cdef shared_ptr[_fbthrift_cbindings.cStructWithDoubleUnderscores] StructWithDoub
 cdef object StructWithDoubleUnderscores_from_cpp(const shared_ptr[_fbthrift_cbindings.cStructWithDoubleUnderscores]& c_struct):
     return _fbthrift_ctypes.StructWithDoubleUnderscores._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
+

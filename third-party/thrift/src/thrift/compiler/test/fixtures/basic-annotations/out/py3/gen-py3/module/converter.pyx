@@ -21,3 +21,4 @@ cdef shared_ptr[_fbthrift_cbindings.cSecretStruct] SecretStruct_convert_to_cpp(o
 cdef object SecretStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cSecretStruct]& c_struct):
     return _fbthrift_ctypes.SecretStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
+

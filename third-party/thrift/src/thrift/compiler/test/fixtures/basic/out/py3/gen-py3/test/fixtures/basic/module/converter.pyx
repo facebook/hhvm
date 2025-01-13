@@ -57,3 +57,4 @@ cdef shared_ptr[_fbthrift_cbindings.cUnionToBeRenamed] UnionToBeRenamed_convert_
 cdef object UnionToBeRenamed_from_cpp(const shared_ptr[_fbthrift_cbindings.cUnionToBeRenamed]& c_struct):
     return _fbthrift_ctypes.UnionToBeRenamed._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
+

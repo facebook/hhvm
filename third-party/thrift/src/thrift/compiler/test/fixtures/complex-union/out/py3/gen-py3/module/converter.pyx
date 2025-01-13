@@ -57,3 +57,4 @@ cdef shared_ptr[_fbthrift_cbindings.cNonCopyableUnion] NonCopyableUnion_convert_
 cdef object NonCopyableUnion_from_cpp(const shared_ptr[_fbthrift_cbindings.cNonCopyableUnion]& c_struct):
     return _fbthrift_ctypes.NonCopyableUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
+

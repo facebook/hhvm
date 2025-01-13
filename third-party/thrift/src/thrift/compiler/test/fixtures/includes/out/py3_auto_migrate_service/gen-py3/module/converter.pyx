@@ -18,3 +18,4 @@ cdef shared_ptr[_fbthrift_cbindings.cMyStruct] MyStruct_convert_to_cpp(object in
 cdef object MyStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cMyStruct]& c_struct):
     return cpp_to_python[_fbthrift_cbindings.cMyStruct](deref(c_struct))
 
+

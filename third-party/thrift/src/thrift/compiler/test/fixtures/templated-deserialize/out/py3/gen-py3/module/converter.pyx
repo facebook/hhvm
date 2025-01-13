@@ -21,3 +21,4 @@ cdef shared_ptr[_fbthrift_cbindings.ccontainerStruct] containerStruct_convert_to
 cdef object containerStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.ccontainerStruct]& c_struct):
     return _fbthrift_ctypes.containerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 
+

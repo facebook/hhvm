@@ -1956,7 +1956,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 # Log
 
 - std::string Log.File = "", UNKNOWN
-- std::string Log.FileSymLink = "", UNKNOWN, lookuppath(Log.Symlink)
+- std::string Log.FileSymLink = "", UNKNOWN, lookuppath(Log.SymLink)
 - uint16_t Log.FilePeriodMultiplier = 0, UNKNOWN, lookuppath(Log.PeriodMultiplier)
 - bool Log.AlwaysLogUnhandledExceptions = true, UNKNOWN
 - int Log.HeaderMangle = 0, UNKNOWN

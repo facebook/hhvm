@@ -128,8 +128,6 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
       return;
     }
 
-    patch::detail::logDeprecatedOperation(
-        "ListPatch::Dummy", folly::pretty_name<T>(), "");
     if (!data_.prepend()->empty()) {
       auto msg = "Prepend in ListPatch is disallowed.";
       LOG(DFATAL) << msg;

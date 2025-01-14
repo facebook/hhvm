@@ -329,7 +329,6 @@ void ApplyPatch::operator()(
     insert_set(*validate_if_set(add, "add"));
   }
 
-  patch::detail::logDeprecatedOperation("SetPatch::Dummy", "[dynamic]", "");
   if (auto* put = findOp(patch, PatchOp::Put)) {
     auto msg = "SetPatch::Put should be migrated to SetPatch::Add";
     patch::detail::logDeprecatedOperation("SetPatch::Put", "[dynamic]", msg);
@@ -412,7 +411,6 @@ void ApplyPatch::operator()(
 
 template <class Patch>
 void impl(Patch&& patch, Object& value) {
-  patch::detail::logDeprecatedOperation("StructPatch::Dummy", "[dynamic]", "");
   static_assert(std::is_same_v<folly::remove_cvref_t<Patch>, Object>);
   checkOps(
       patch,

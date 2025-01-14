@@ -104,10 +104,11 @@ struct extract_descriptor_fid {
 template <typename T, typename Enable = void>
 struct deref;
 
-// General case: methods on deref are no-op, returning their input
+// General case: we derference field_ref and return a reference to what it
+// refers to.
 template <typename T>
 struct deref<T, disable_if_smart_pointer<T>> {
-  static T& clear_and_get(T& in) { return in; }
+  static decltype(auto) clear_and_get(T& in) { return *in; }
 };
 
 // Special case: We specifically *do not* dereference a unique pointer to
@@ -424,43 +425,6 @@ struct populator_methods<type::union_t<Union>, Union> {
 template <typename Struct>
 struct populator_methods<type::struct_t<Struct>, Struct> {
  private:
-  template <
-      typename Member,
-      typename MemberType,
-      typename Methods,
-      typename Enable = void>
-  struct field_populator;
-
-  // generic field writer
-  template <typename Member, typename MemberType, typename Methods>
-  struct field_populator<
-      Member,
-      MemberType,
-      Methods,
-      detail::disable_if_smart_pointer<MemberType>> {
-    template <typename Rng>
-    static void populate(
-        Rng& rng, const populator_opts& opts, MemberType& out) {
-      Methods::populate(rng, opts, out);
-    }
-  };
-
-  // writer for default/required ref structs
-  template <typename Member, typename PtrType, typename Methods>
-  struct field_populator<
-      Member,
-      PtrType,
-      Methods,
-      detail::enable_if_smart_pointer<PtrType>> {
-    using element_type = typename PtrType::element_type;
-
-    template <typename Rng>
-    static void populate(Rng& rng, const populator_opts& opts, PtrType& out) {
-      field_populator<Member, element_type, Methods>::populate(
-          rng, opts, detail::deref<PtrType>::clear_and_get(out));
-    }
-  };
-
   class member_populator {
    public:
     template <typename Ord, typename Rng>
@@ -470,11 +434,11 @@ struct populator_methods<type::struct_t<Struct>, Struct> {
           op::get_native_type<Struct, Ord>>;
 
       auto&& got = op::get<Ord>(out);
+      using field_ref_type = std::decay_t<decltype(got)>;
 
       // Popualate optional fields with `optional_field_prob` probability.
       const auto skip = //
-          ::apache::thrift::detail::is_optional_field_ref_v<
-              std::decay_t<decltype(got)>> &&
+          ::apache::thrift::detail::is_optional_field_ref_v<field_ref_type> &&
           !detail::get_bernoulli(rng, opts.optional_field_prob);
       if (skip) {
         return;
@@ -483,10 +447,8 @@ struct populator_methods<type::struct_t<Struct>, Struct> {
       DVLOG(3) << "populating member: " << op::get_name_v<Struct, Ord>;
 
       op::ensure<Ord>(out);
-      field_populator<
-          op::get_type_tag<Struct, Ord>,
-          op::get_native_type<Struct, Ord>,
-          methods>::populate(rng, opts, *got);
+      methods::populate(
+          rng, opts, detail::deref<field_ref_type>::clear_and_get(got));
     }
   };
 

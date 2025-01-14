@@ -20,6 +20,7 @@
 #include <folly/portability/GFlags.h>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
+#include <folly/portability/Unistd.h>
 
 using namespace testing;
 using namespace wangle;

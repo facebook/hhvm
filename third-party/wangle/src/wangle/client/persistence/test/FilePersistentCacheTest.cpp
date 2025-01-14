@@ -16,6 +16,7 @@
 
 #include <folly/executors/ManualExecutor.h>
 #include <folly/futures/Barrier.h>
+#include <folly/portability/Unistd.h>
 #include <wangle/client/persistence/FilePersistentCache.h>
 #include <wangle/client/persistence/test/TestUtil.h>
 

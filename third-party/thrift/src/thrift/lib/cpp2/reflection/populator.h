@@ -515,9 +515,12 @@ struct populator_methods<type::adapted<Adapter, InnerTag>, T> {
   }
 };
 
-// cpp.type is handled transparently by each implementation
+// non-integral cpp.type is handled transparently by each implementation
 template <typename T, typename Tag>
-struct populator_methods<type::cpp_type<T, Tag>, T>
+struct populator_methods<
+    type::cpp_type<T, Tag>,
+    T,
+    std::enable_if_t<!type::is_a_v<Tag, type::integral_c>>>
     : populator_methods<Tag, T> {};
 
 /**

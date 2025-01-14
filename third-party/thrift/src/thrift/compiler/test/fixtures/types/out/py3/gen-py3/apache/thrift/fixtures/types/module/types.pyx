@@ -4137,16 +4137,17 @@ cdef class StructWithDoubleUnderscores(thrift.py3.types.Struct):
 
 cdef _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string] std_unordered_map__Map__i32_string__make_instance(object items) except *:
     cdef _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string] c_inst
+    cdef cint32_t c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, int):
             raise TypeError(f"{key!r} is not of type int")
-        key = <cint32_t> key
+        c_key = <cint32_t> key
         if not isinstance(item, str):
             raise TypeError(f"{item!r} is not of type str")
 
-        c_inst[key] = item.encode('UTF-8')
+        c_inst[c_key] = item.encode('UTF-8')
     return cmove(c_inst)
 
 cdef object std_unordered_map__Map__i32_string__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]& c_map) except *:
@@ -4179,16 +4180,18 @@ cdef object List__i64__from_cpp(const vector[cint64_t]& c_vec) except *:
 
 cdef cmap[string,cint64_t] Map__binary_i64__make_instance(object items) except *:
     cdef cmap[string,cint64_t] c_inst
+    cdef string c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, bytes):
             raise TypeError(f"{key!r} is not of type bytes")
+        c_key = key
         if not isinstance(item, int):
             raise TypeError(f"{item!r} is not of type int")
         item = <cint64_t> item
 
-        c_inst[key] = item
+        c_inst[c_key] = item
     return cmove(c_inst)
 
 cdef object Map__binary_i64__from_cpp(const cmap[string,cint64_t]& c_map) except *:
@@ -4293,13 +4296,14 @@ cdef object folly_small_vector__List__i32__from_cpp(const _apache_thrift_fixture
 
 cdef _apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t] folly_sorted_vector_set__Set__i32__make_instance(object items) except *:
     cdef _apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t] c_inst
+    cdef cint32_t c_item
     if items is None:
         return cmove(c_inst)
     for item in items:
         if not isinstance(item, int):
             raise TypeError(f"{item!r} is not of type int")
-        item = <cint32_t> item
-        c_inst.insert(item)
+        c_item = <cint32_t> item
+        c_inst.insert(c_item)
     return cmove(c_inst)
 
 cdef object folly_sorted_vector_set__Set__i32__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t]& c_set) except *:
@@ -4313,16 +4317,17 @@ cdef object folly_sorted_vector_set__Set__i32__from_cpp(const _apache_thrift_fix
 
 cdef cmap[cint32_t,string] Map__i32_string__make_instance(object items) except *:
     cdef cmap[cint32_t,string] c_inst
+    cdef cint32_t c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, int):
             raise TypeError(f"{key!r} is not of type int")
-        key = <cint32_t> key
+        c_key = <cint32_t> key
         if not isinstance(item, str):
             raise TypeError(f"{item!r} is not of type str")
 
-        c_inst[key] = item.encode('UTF-8')
+        c_inst[c_key] = item.encode('UTF-8')
     return cmove(c_inst)
 
 cdef object Map__i32_string__from_cpp(const cmap[cint32_t,string]& c_map) except *:
@@ -4355,16 +4360,18 @@ cdef object std_list_int32_t__List__i32__from_cpp(const _apache_thrift_fixtures_
 
 cdef cmap[string,cint32_t] Map__string_i32__make_instance(object items) except *:
     cdef cmap[string,cint32_t] c_inst
+    cdef string c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, str):
             raise TypeError(f"{key!r} is not of type str")
+        c_key = key.encode('UTF-8')
         if not isinstance(item, int):
             raise TypeError(f"{item!r} is not of type int")
         item = <cint32_t> item
 
-        c_inst[key.encode('UTF-8')] = item
+        c_inst[c_key] = item
     return cmove(c_inst)
 
 cdef object Map__string_i32__from_cpp(const cmap[string,cint32_t]& c_map) except *:
@@ -4398,16 +4405,17 @@ cdef object List__std_unordered_map__Map__i32_string__from_cpp(const vector[_apa
 
 cdef cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep] Map__i32_IncompleteMapDep__make_instance(object items) except *:
     cdef cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep] c_inst
+    cdef cint32_t c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, int):
             raise TypeError(f"{key!r} is not of type int")
-        key = <cint32_t> key
+        c_key = <cint32_t> key
         if not isinstance(item, IncompleteMapDep):
             raise TypeError(f"{item!r} is not of type IncompleteMapDep")
 
-        c_inst[key] = deref((<IncompleteMapDep>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        c_inst[c_key] = deref((<IncompleteMapDep>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
     return cmove(c_inst)
 
 cdef object Map__i32_IncompleteMapDep__from_cpp(const cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep]& c_map) except *:
@@ -4422,16 +4430,17 @@ cdef object Map__i32_IncompleteMapDep__from_cpp(const cmap[cint32_t,_apache_thri
 
 cdef _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep] std_unordered_map__Map__i32_CompleteMapDep__make_instance(object items) except *:
     cdef _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep] c_inst
+    cdef cint32_t c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, int):
             raise TypeError(f"{key!r} is not of type int")
-        key = <cint32_t> key
+        c_key = <cint32_t> key
         if not isinstance(item, CompleteMapDep):
             raise TypeError(f"{item!r} is not of type CompleteMapDep")
 
-        c_inst[key] = deref((<CompleteMapDep>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        c_inst[c_key] = deref((<CompleteMapDep>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
     return cmove(c_inst)
 
 cdef object std_unordered_map__Map__i32_CompleteMapDep__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep]& c_map) except *:
@@ -4514,13 +4523,14 @@ cdef object List__DependentAdaptedListDep__from_cpp(const vector[_apache_thrift_
 
 cdef cset[cint32_t] Set__i32__make_instance(object items) except *:
     cdef cset[cint32_t] c_inst
+    cdef cint32_t c_item
     if items is None:
         return cmove(c_inst)
     for item in items:
         if not isinstance(item, int):
             raise TypeError(f"{item!r} is not of type int")
-        item = <cint32_t> item
-        c_inst.insert(item)
+        c_item = <cint32_t> item
+        c_inst.insert(c_item)
     return cmove(c_inst)
 
 cdef object Set__i32__from_cpp(const cset[cint32_t]& c_set) except *:
@@ -4534,17 +4544,18 @@ cdef object Set__i32__from_cpp(const cset[cint32_t]& c_set) except *:
 
 cdef cmap[cint32_t,cint32_t] Map__i32_i32__make_instance(object items) except *:
     cdef cmap[cint32_t,cint32_t] c_inst
+    cdef cint32_t c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, int):
             raise TypeError(f"{key!r} is not of type int")
-        key = <cint32_t> key
+        c_key = <cint32_t> key
         if not isinstance(item, int):
             raise TypeError(f"{item!r} is not of type int")
         item = <cint32_t> item
 
-        c_inst[key] = item
+        c_inst[c_key] = item
     return cmove(c_inst)
 
 cdef object Map__i32_i32__from_cpp(const cmap[cint32_t,cint32_t]& c_map) except *:

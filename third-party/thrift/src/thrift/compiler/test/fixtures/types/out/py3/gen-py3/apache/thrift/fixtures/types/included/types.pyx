@@ -66,16 +66,17 @@ cdef object get_types_reflection():
 
 cdef _apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string] std_unordered_map__Map__i32_string__make_instance(object items) except *:
     cdef _apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string] c_inst
+    cdef cint32_t c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, int):
             raise TypeError(f"{key!r} is not of type int")
-        key = <cint32_t> key
+        c_key = <cint32_t> key
         if not isinstance(item, str):
             raise TypeError(f"{item!r} is not of type str")
 
-        c_inst[key] = item.encode('UTF-8')
+        c_inst[c_key] = item.encode('UTF-8')
     return cmove(c_inst)
 
 cdef object std_unordered_map__Map__i32_string__from_cpp(const _apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]& c_map) except *:

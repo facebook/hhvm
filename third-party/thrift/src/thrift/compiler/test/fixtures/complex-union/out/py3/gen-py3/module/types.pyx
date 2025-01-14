@@ -1378,16 +1378,17 @@ cdef object List__string__from_cpp(const vector[string]& c_vec) except *:
 
 cdef cmap[cint16_t,string] Map__i16_string__make_instance(object items) except *:
     cdef cmap[cint16_t,string] c_inst
+    cdef cint16_t c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, int):
             raise TypeError(f"{key!r} is not of type int")
-        key = <cint16_t> key
+        c_key = <cint16_t> key
         if not isinstance(item, str):
             raise TypeError(f"{item!r} is not of type str")
 
-        c_inst[key] = item.encode('UTF-8')
+        c_inst[c_key] = item.encode('UTF-8')
     return cmove(c_inst)
 
 cdef object Map__i16_string__from_cpp(const cmap[cint16_t,string]& c_map) except *:

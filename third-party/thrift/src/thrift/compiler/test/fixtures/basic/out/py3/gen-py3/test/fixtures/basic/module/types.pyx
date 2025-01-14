@@ -1233,12 +1233,14 @@ cdef class UnionToBeRenamed(thrift.py3.types.Union):
 
 cdef cset[float] Set__float__make_instance(object items) except *:
     cdef cset[float] c_inst
+    cdef float c_item
     if items is None:
         return cmove(c_inst)
     for item in items:
         if not isinstance(item, (float, int)):
             raise TypeError(f"{item!r} is not of type float")
-        c_inst.insert(item)
+        c_item = item
+        c_inst.insert(c_item)
     return cmove(c_inst)
 
 cdef object Set__float__from_cpp(const cset[float]& c_set) except *:
@@ -1270,6 +1272,7 @@ cdef object List__i32__from_cpp(const vector[cint32_t]& c_vec) except *:
 
 cdef cset[string] Set__string__make_instance(object items) except *:
     cdef cset[string] c_inst
+    cdef string c_item
     if items is None:
         return cmove(c_inst)
     if isinstance(items, str):
@@ -1277,7 +1280,8 @@ cdef cset[string] Set__string__make_instance(object items) except *:
     for item in items:
         if not isinstance(item, str):
             raise TypeError(f"{item!r} is not of type str")
-        c_inst.insert(item.encode('UTF-8'))
+        c_item = item.encode('UTF-8')
+        c_inst.insert(c_item)
     return cmove(c_inst)
 
 cdef object Set__string__from_cpp(const cset[string]& c_set) except *:
@@ -1291,16 +1295,18 @@ cdef object Set__string__from_cpp(const cset[string]& c_set) except *:
 
 cdef cmap[string,cint64_t] Map__string_i64__make_instance(object items) except *:
     cdef cmap[string,cint64_t] c_inst
+    cdef string c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, str):
             raise TypeError(f"{key!r} is not of type str")
+        c_key = key.encode('UTF-8')
         if not isinstance(item, int):
             raise TypeError(f"{item!r} is not of type int")
         item = <cint64_t> item
 
-        c_inst[key.encode('UTF-8')] = item
+        c_inst[c_key] = item
     return cmove(c_inst)
 
 cdef object Map__string_i64__from_cpp(const cmap[string,cint64_t]& c_map) except *:
@@ -1315,17 +1321,19 @@ cdef object Map__string_i64__from_cpp(const cmap[string,cint64_t]& c_map) except
 
 cdef cmap[string,vector[cint32_t]] Map__string_List__i32__make_instance(object items) except *:
     cdef cmap[string,vector[cint32_t]] c_inst
+    cdef string c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, str):
             raise TypeError(f"{key!r} is not of type str")
+        c_key = key.encode('UTF-8')
         if item is None:
             raise TypeError("None is not of type _typing.Sequence[int]")
         if not isinstance(item, List__i32):
             item = List__i32(item)
 
-        c_inst[key.encode('UTF-8')] = List__i32__make_instance(item)
+        c_inst[c_key] = List__i32__make_instance(item)
     return cmove(c_inst)
 
 cdef object Map__string_List__i32__from_cpp(const cmap[string,vector[cint32_t]]& c_map) except *:

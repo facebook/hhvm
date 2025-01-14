@@ -85,18 +85,19 @@ cdef object List__string__from_cpp(const vector[string]& c_vec) except *:
 
 cdef cmap[cint64_t,vector[string]] Map__i64_List__string__make_instance(object items) except *:
     cdef cmap[cint64_t,vector[string]] c_inst
+    cdef cint64_t c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, int):
             raise TypeError(f"{key!r} is not of type int")
-        key = <cint64_t> key
+        c_key = <cint64_t> key
         if item is None:
             raise TypeError("None is not of type _typing.Sequence[str]")
         if not isinstance(item, List__string):
             item = List__string(item)
 
-        c_inst[key] = List__string__make_instance(item)
+        c_inst[c_key] = List__string__make_instance(item)
     return cmove(c_inst)
 
 cdef object Map__i64_List__string__from_cpp(const cmap[cint64_t,vector[string]]& c_map) except *:

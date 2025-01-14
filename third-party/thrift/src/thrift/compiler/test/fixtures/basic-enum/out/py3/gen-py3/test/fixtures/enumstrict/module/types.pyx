@@ -198,15 +198,17 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
 cdef cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string] Map__MyEnum_string__make_instance(object items) except *:
     cdef cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string] c_inst
+    cdef _test_fixtures_enumstrict_module_cbindings.cMyEnum c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, MyEnum):
             raise TypeError(f"{key!r} is not of type MyEnum")
+        c_key = <_test_fixtures_enumstrict_module_cbindings.cMyEnum><int>key
         if not isinstance(item, str):
             raise TypeError(f"{item!r} is not of type str")
 
-        c_inst[<_test_fixtures_enumstrict_module_cbindings.cMyEnum><int>key] = item.encode('UTF-8')
+        c_inst[c_key] = item.encode('UTF-8')
     return cmove(c_inst)
 
 cdef object Map__MyEnum_string__from_cpp(const cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]& c_map) except *:

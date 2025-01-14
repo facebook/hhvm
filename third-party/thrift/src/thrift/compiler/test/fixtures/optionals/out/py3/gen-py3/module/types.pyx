@@ -577,13 +577,14 @@ cdef class Person(thrift.py3.types.Struct):
 
 cdef cset[cint64_t] Set__i64__make_instance(object items) except *:
     cdef cset[cint64_t] c_inst
+    cdef cint64_t c_item
     if items is None:
         return cmove(c_inst)
     for item in items:
         if not isinstance(item, int):
             raise TypeError(f"{item!r} is not of type int")
-        item = <cint64_t> item
-        c_inst.insert(item)
+        c_item = <cint64_t> item
+        c_inst.insert(c_item)
     return cmove(c_inst)
 
 cdef object Set__i64__from_cpp(const cset[cint64_t]& c_set) except *:
@@ -597,15 +598,17 @@ cdef object Set__i64__from_cpp(const cset[cint64_t]& c_set) except *:
 
 cdef cmap[_module_cbindings.cAnimal,string] Map__Animal_string__make_instance(object items) except *:
     cdef cmap[_module_cbindings.cAnimal,string] c_inst
+    cdef _module_cbindings.cAnimal c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, Animal):
             raise TypeError(f"{key!r} is not of type Animal")
+        c_key = <_module_cbindings.cAnimal><int>key
         if not isinstance(item, str):
             raise TypeError(f"{item!r} is not of type str")
 
-        c_inst[<_module_cbindings.cAnimal><int>key] = item.encode('UTF-8')
+        c_inst[c_key] = item.encode('UTF-8')
     return cmove(c_inst)
 
 cdef object Map__Animal_string__from_cpp(const cmap[_module_cbindings.cAnimal,string]& c_map) except *:

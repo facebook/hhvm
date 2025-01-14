@@ -92,18 +92,19 @@ cdef object List__i32__from_cpp(const vector[cint32_t]& c_vec) except *:
 
 cdef cmap[cint32_t,vector[cint32_t]] Map__i32_List__i32__make_instance(object items) except *:
     cdef cmap[cint32_t,vector[cint32_t]] c_inst
+    cdef cint32_t c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, int):
             raise TypeError(f"{key!r} is not of type int")
-        key = <cint32_t> key
+        c_key = <cint32_t> key
         if item is None:
             raise TypeError("None is not of type _typing.Sequence[int]")
         if not isinstance(item, List__i32):
             item = List__i32(item)
 
-        c_inst[key] = List__i32__make_instance(item)
+        c_inst[c_key] = List__i32__make_instance(item)
     return cmove(c_inst)
 
 cdef object Map__i32_List__i32__from_cpp(const cmap[cint32_t,vector[cint32_t]]& c_map) except *:
@@ -118,13 +119,14 @@ cdef object Map__i32_List__i32__from_cpp(const cmap[cint32_t,vector[cint32_t]]& 
 
 cdef cset[cint32_t] Set__i32__make_instance(object items) except *:
     cdef cset[cint32_t] c_inst
+    cdef cint32_t c_item
     if items is None:
         return cmove(c_inst)
     for item in items:
         if not isinstance(item, int):
             raise TypeError(f"{item!r} is not of type int")
-        item = <cint32_t> item
-        c_inst.insert(item)
+        c_item = <cint32_t> item
+        c_inst.insert(c_item)
     return cmove(c_inst)
 
 cdef object Set__i32__from_cpp(const cset[cint32_t]& c_set) except *:
@@ -138,18 +140,19 @@ cdef object Set__i32__from_cpp(const cset[cint32_t]& c_set) except *:
 
 cdef cmap[cint32_t,cset[cint32_t]] Map__i32_Set__i32__make_instance(object items) except *:
     cdef cmap[cint32_t,cset[cint32_t]] c_inst
+    cdef cint32_t c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, int):
             raise TypeError(f"{key!r} is not of type int")
-        key = <cint32_t> key
+        c_key = <cint32_t> key
         if item is None:
             raise TypeError("None is not of type _typing.AbstractSet[int]")
         if not isinstance(item, Set__i32):
             item = Set__i32(item)
 
-        c_inst[key] = Set__i32__make_instance(item)
+        c_inst[c_key] = Set__i32__make_instance(item)
     return cmove(c_inst)
 
 cdef object Map__i32_Set__i32__from_cpp(const cmap[cint32_t,cset[cint32_t]]& c_map) except *:
@@ -164,17 +167,18 @@ cdef object Map__i32_Set__i32__from_cpp(const cmap[cint32_t,cset[cint32_t]]& c_m
 
 cdef cmap[cint32_t,cint32_t] Map__i32_i32__make_instance(object items) except *:
     cdef cmap[cint32_t,cint32_t] c_inst
+    cdef cint32_t c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, int):
             raise TypeError(f"{key!r} is not of type int")
-        key = <cint32_t> key
+        c_key = <cint32_t> key
         if not isinstance(item, int):
             raise TypeError(f"{item!r} is not of type int")
         item = <cint32_t> item
 
-        c_inst[key] = item
+        c_inst[c_key] = item
     return cmove(c_inst)
 
 cdef object Map__i32_i32__from_cpp(const cmap[cint32_t,cint32_t]& c_map) except *:
@@ -227,18 +231,19 @@ cdef object List__Set__i32__from_cpp(const vector[cset[cint32_t]]& c_vec) except
 
 cdef cmap[cint32_t,cmap[cint32_t,cset[cint32_t]]] Map__i32_Map__i32_Set__i32__make_instance(object items) except *:
     cdef cmap[cint32_t,cmap[cint32_t,cset[cint32_t]]] c_inst
+    cdef cint32_t c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, int):
             raise TypeError(f"{key!r} is not of type int")
-        key = <cint32_t> key
+        c_key = <cint32_t> key
         if item is None:
             raise TypeError("None is not of type _typing.Mapping[int, _typing.AbstractSet[int]]")
         if not isinstance(item, Map__i32_Set__i32):
             item = Map__i32_Set__i32(item)
 
-        c_inst[key] = Map__i32_Set__i32__make_instance(item)
+        c_inst[c_key] = Map__i32_Set__i32__make_instance(item)
     return cmove(c_inst)
 
 cdef object Map__i32_Map__i32_Set__i32__from_cpp(const cmap[cint32_t,cmap[cint32_t,cset[cint32_t]]]& c_map) except *:

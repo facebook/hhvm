@@ -3677,16 +3677,18 @@ cdef class AllRequiredNoExceptMoveCtrStruct(thrift.py3.types.Struct):
 
 cdef cmap[string,cint64_t] Map__string_i64__make_instance(object items) except *:
     cdef cmap[string,cint64_t] c_inst
+    cdef string c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, str):
             raise TypeError(f"{key!r} is not of type str")
+        c_key = key.encode('UTF-8')
         if not isinstance(item, int):
             raise TypeError(f"{item!r} is not of type int")
         item = <cint64_t> item
 
-        c_inst[key.encode('UTF-8')] = item
+        c_inst[c_key] = item
     return cmove(c_inst)
 
 cdef object Map__string_i64__from_cpp(const cmap[string,cint64_t]& c_map) except *:
@@ -3701,15 +3703,17 @@ cdef object Map__string_i64__from_cpp(const cmap[string,cint64_t]& c_map) except
 
 cdef cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct] Map__Empty_MyStruct__make_instance(object items) except *:
     cdef cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct] c_inst
+    cdef _module_cbindings.cEmpty c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, Empty):
             raise TypeError(f"{key!r} is not of type Empty")
+        c_key = deref((<Empty>key)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         if not isinstance(item, MyStruct):
             raise TypeError(f"{item!r} is not of type MyStruct")
 
-        c_inst[deref((<Empty>key)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)] = deref((<MyStruct>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        c_inst[c_key] = deref((<MyStruct>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
     return cmove(c_inst)
 
 cdef object Map__Empty_MyStruct__from_cpp(const cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]& c_map) except *:
@@ -3798,12 +3802,14 @@ cdef object List__MyEnumA__from_cpp(const vector[_module_cbindings.cMyEnumA]& c_
 
 cdef cset[_module_cbindings.cMyStruct] Set__MyStruct__make_instance(object items) except *:
     cdef cset[_module_cbindings.cMyStruct] c_inst
+    cdef _module_cbindings.cMyStruct c_item
     if items is None:
         return cmove(c_inst)
     for item in items:
         if not isinstance(item, MyStruct):
             raise TypeError(f"{item!r} is not of type MyStruct")
-        c_inst.insert(deref((<MyStruct>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        c_item = deref((<MyStruct>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        c_inst.insert(c_item)
     return cmove(c_inst)
 
 cdef object Set__MyStruct__from_cpp(const cset[_module_cbindings.cMyStruct]& c_set) except *:
@@ -3853,6 +3859,7 @@ cdef object List__string__from_cpp(const vector[string]& c_vec) except *:
 
 cdef cset[vector[string]] Set__List__string__make_instance(object items) except *:
     cdef cset[vector[string]] c_inst
+    cdef vector[string] c_item
     if items is None:
         return cmove(c_inst)
     for item in items:
@@ -3860,7 +3867,8 @@ cdef cset[vector[string]] Set__List__string__make_instance(object items) except 
             raise TypeError("None is not of type _typing.Sequence[str]")
         if not isinstance(item, List__string):
             item = List__string(item)
-        c_inst.insert(List__string__make_instance(item))
+        c_item = List__string__make_instance(item)
+        c_inst.insert(c_item)
     return cmove(c_inst)
 
 cdef object Set__List__string__from_cpp(const cset[vector[string]]& c_set) except *:
@@ -3874,6 +3882,7 @@ cdef object Set__List__string__from_cpp(const cset[vector[string]]& c_set) excep
 
 cdef cset[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]] Set__List__List__Map__Empty_MyStruct__make_instance(object items) except *:
     cdef cset[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]] c_inst
+    cdef vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]] c_item
     if items is None:
         return cmove(c_inst)
     for item in items:
@@ -3881,7 +3890,8 @@ cdef cset[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruc
             raise TypeError("None is not of type _typing.Sequence[_typing.Sequence[_typing.Mapping[Empty, MyStruct]]]")
         if not isinstance(item, List__List__Map__Empty_MyStruct):
             item = List__List__Map__Empty_MyStruct(item)
-        c_inst.insert(List__List__Map__Empty_MyStruct__make_instance(item))
+        c_item = List__List__Map__Empty_MyStruct__make_instance(item)
+        c_inst.insert(c_item)
     return cmove(c_inst)
 
 cdef object Set__List__List__Map__Empty_MyStruct__from_cpp(const cset[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]]& c_set) except *:
@@ -3895,18 +3905,19 @@ cdef object Set__List__List__Map__Empty_MyStruct__from_cpp(const cset[vector[vec
 
 cdef cmap[cint32_t,vector[string]] Map__i32_List__string__make_instance(object items) except *:
     cdef cmap[cint32_t,vector[string]] c_inst
+    cdef cint32_t c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, int):
             raise TypeError(f"{key!r} is not of type int")
-        key = <cint32_t> key
+        c_key = <cint32_t> key
         if item is None:
             raise TypeError("None is not of type _typing.Sequence[str]")
         if not isinstance(item, List__string):
             item = List__string(item)
 
-        c_inst[key] = List__string__make_instance(item)
+        c_inst[c_key] = List__string__make_instance(item)
     return cmove(c_inst)
 
 cdef object Map__i32_List__string__from_cpp(const cmap[cint32_t,vector[string]]& c_map) except *:
@@ -4013,6 +4024,7 @@ cdef object List__List__List__List__i32__from_cpp(const vector[vector[vector[vec
 
 cdef cset[vector[cint32_t]] Set__List__i32__make_instance(object items) except *:
     cdef cset[vector[cint32_t]] c_inst
+    cdef vector[cint32_t] c_item
     if items is None:
         return cmove(c_inst)
     for item in items:
@@ -4020,7 +4032,8 @@ cdef cset[vector[cint32_t]] Set__List__i32__make_instance(object items) except *
             raise TypeError("None is not of type _typing.Sequence[int]")
         if not isinstance(item, List__i32):
             item = List__i32(item)
-        c_inst.insert(List__i32__make_instance(item))
+        c_item = List__i32__make_instance(item)
+        c_inst.insert(c_item)
     return cmove(c_inst)
 
 cdef object Set__List__i32__from_cpp(const cset[vector[cint32_t]]& c_set) except *:
@@ -4034,6 +4047,7 @@ cdef object Set__List__i32__from_cpp(const cset[vector[cint32_t]]& c_set) except
 
 cdef cset[string] Set__string__make_instance(object items) except *:
     cdef cset[string] c_inst
+    cdef string c_item
     if items is None:
         return cmove(c_inst)
     if isinstance(items, str):
@@ -4041,7 +4055,8 @@ cdef cset[string] Set__string__make_instance(object items) except *:
     for item in items:
         if not isinstance(item, str):
             raise TypeError(f"{item!r} is not of type str")
-        c_inst.insert(item.encode('UTF-8'))
+        c_item = item.encode('UTF-8')
+        c_inst.insert(c_item)
     return cmove(c_inst)
 
 cdef object Set__string__from_cpp(const cset[string]& c_set) except *:
@@ -4074,6 +4089,7 @@ cdef object List__Set__string__from_cpp(const vector[cset[string]]& c_vec) excep
 
 cdef cmap[vector[cset[string]],string] Map__List__Set__string_string__make_instance(object items) except *:
     cdef cmap[vector[cset[string]],string] c_inst
+    cdef vector[cset[string]] c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
@@ -4081,10 +4097,11 @@ cdef cmap[vector[cset[string]],string] Map__List__Set__string_string__make_insta
             raise TypeError("None is not of type _typing.Sequence[_typing.AbstractSet[str]]")
         if not isinstance(key, List__Set__string):
             key = List__Set__string(key)
+        c_key = List__Set__string__make_instance(key)
         if not isinstance(item, str):
             raise TypeError(f"{item!r} is not of type str")
 
-        c_inst[List__Set__string__make_instance(key)] = item.encode('UTF-8')
+        c_inst[c_key] = item.encode('UTF-8')
     return cmove(c_inst)
 
 cdef object Map__List__Set__string_string__from_cpp(const cmap[vector[cset[string]],string]& c_map) except *:
@@ -4099,6 +4116,7 @@ cdef object Map__List__Set__string_string__from_cpp(const cmap[vector[cset[strin
 
 cdef cmap[cset[vector[cint32_t]],cmap[vector[cset[string]],string]] Map__Set__List__i32_Map__List__Set__string_string__make_instance(object items) except *:
     cdef cmap[cset[vector[cint32_t]],cmap[vector[cset[string]],string]] c_inst
+    cdef cset[vector[cint32_t]] c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
@@ -4106,12 +4124,13 @@ cdef cmap[cset[vector[cint32_t]],cmap[vector[cset[string]],string]] Map__Set__Li
             raise TypeError("None is not of type _typing.AbstractSet[_typing.Sequence[int]]")
         if not isinstance(key, Set__List__i32):
             key = Set__List__i32(key)
+        c_key = Set__List__i32__make_instance(key)
         if item is None:
             raise TypeError("None is not of type _typing.Mapping[_typing.Sequence[_typing.AbstractSet[str]], str]")
         if not isinstance(item, Map__List__Set__string_string):
             item = Map__List__Set__string_string(item)
 
-        c_inst[Set__List__i32__make_instance(key)] = Map__List__Set__string_string__make_instance(item)
+        c_inst[c_key] = Map__List__Set__string_string__make_instance(item)
     return cmove(c_inst)
 
 cdef object Map__Set__List__i32_Map__List__Set__string_string__from_cpp(const cmap[cset[vector[cint32_t]],cmap[vector[cset[string]],string]]& c_map) except *:
@@ -4145,15 +4164,17 @@ cdef object List__binary__from_cpp(const vector[string]& c_vec) except *:
 
 cdef cmap[_module_cbindings.cMyEnumA,string] Map__MyEnumA_string__make_instance(object items) except *:
     cdef cmap[_module_cbindings.cMyEnumA,string] c_inst
+    cdef _module_cbindings.cMyEnumA c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, MyEnumA):
             raise TypeError(f"{key!r} is not of type MyEnumA")
+        c_key = <_module_cbindings.cMyEnumA><int>key
         if not isinstance(item, str):
             raise TypeError(f"{item!r} is not of type str")
 
-        c_inst[<_module_cbindings.cMyEnumA><int>key] = item.encode('UTF-8')
+        c_inst[c_key] = item.encode('UTF-8')
     return cmove(c_inst)
 
 cdef object Map__MyEnumA_string__from_cpp(const cmap[_module_cbindings.cMyEnumA,string]& c_map) except *:
@@ -4168,13 +4189,14 @@ cdef object Map__MyEnumA_string__from_cpp(const cmap[_module_cbindings.cMyEnumA,
 
 cdef cset[cint64_t] Set__i64__make_instance(object items) except *:
     cdef cset[cint64_t] c_inst
+    cdef cint64_t c_item
     if items is None:
         return cmove(c_inst)
     for item in items:
         if not isinstance(item, int):
             raise TypeError(f"{item!r} is not of type int")
-        item = <cint64_t> item
-        c_inst.insert(item)
+        c_item = <cint64_t> item
+        c_inst.insert(c_item)
     return cmove(c_inst)
 
 cdef object Set__i64__from_cpp(const cset[cint64_t]& c_set) except *:
@@ -4188,16 +4210,18 @@ cdef object Set__i64__from_cpp(const cset[cint64_t]& c_set) except *:
 
 cdef cmap[string,cint32_t] Map__string_i32__make_instance(object items) except *:
     cdef cmap[string,cint32_t] c_inst
+    cdef string c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, str):
             raise TypeError(f"{key!r} is not of type str")
+        c_key = key.encode('UTF-8')
         if not isinstance(item, int):
             raise TypeError(f"{item!r} is not of type int")
         item = <cint32_t> item
 
-        c_inst[key.encode('UTF-8')] = item
+        c_inst[c_key] = item
     return cmove(c_inst)
 
 cdef object Map__string_i32__from_cpp(const cmap[string,cint32_t]& c_map) except *:
@@ -4229,12 +4253,14 @@ cdef object List__SimpleUnion__from_cpp(const vector[_module_cbindings.cSimpleUn
 
 cdef cset[_module_cbindings.cSimpleUnion] Set__SimpleUnion__make_instance(object items) except *:
     cdef cset[_module_cbindings.cSimpleUnion] c_inst
+    cdef _module_cbindings.cSimpleUnion c_item
     if items is None:
         return cmove(c_inst)
     for item in items:
         if not isinstance(item, SimpleUnion):
             raise TypeError(f"{item!r} is not of type SimpleUnion")
-        c_inst.insert(deref((<SimpleUnion>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        c_item = deref((<SimpleUnion>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        c_inst.insert(c_item)
     return cmove(c_inst)
 
 cdef object Set__SimpleUnion__from_cpp(const cset[_module_cbindings.cSimpleUnion]& c_set) except *:
@@ -4267,15 +4293,17 @@ cdef object List__Set__SimpleUnion__from_cpp(const vector[cset[_module_cbindings
 
 cdef cmap[string,cbool] Map__string_bool__make_instance(object items) except *:
     cdef cmap[string,cbool] c_inst
+    cdef string c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, str):
             raise TypeError(f"{key!r} is not of type str")
+        c_key = key.encode('UTF-8')
         if not isinstance(item, bool):
             raise TypeError(f"{item!r} is not of type bool")
 
-        c_inst[key.encode('UTF-8')] = item
+        c_inst[c_key] = item
     return cmove(c_inst)
 
 cdef object Map__string_bool__from_cpp(const cmap[string,cbool]& c_map) except *:
@@ -4290,13 +4318,14 @@ cdef object Map__string_bool__from_cpp(const cmap[string,cbool]& c_map) except *
 
 cdef cset[cint32_t] Set__i32__make_instance(object items) except *:
     cdef cset[cint32_t] c_inst
+    cdef cint32_t c_item
     if items is None:
         return cmove(c_inst)
     for item in items:
         if not isinstance(item, int):
             raise TypeError(f"{item!r} is not of type int")
-        item = <cint32_t> item
-        c_inst.insert(item)
+        c_item = <cint32_t> item
+        c_inst.insert(c_item)
     return cmove(c_inst)
 
 cdef object Set__i32__from_cpp(const cset[cint32_t]& c_set) except *:
@@ -4310,17 +4339,19 @@ cdef object Set__i32__from_cpp(const cset[cint32_t]& c_set) except *:
 
 cdef cmap[string,cmap[string,cint32_t]] Map__string_Map__string_i32__make_instance(object items) except *:
     cdef cmap[string,cmap[string,cint32_t]] c_inst
+    cdef string c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, str):
             raise TypeError(f"{key!r} is not of type str")
+        c_key = key.encode('UTF-8')
         if item is None:
             raise TypeError("None is not of type _typing.Mapping[str, int]")
         if not isinstance(item, Map__string_i32):
             item = Map__string_i32(item)
 
-        c_inst[key.encode('UTF-8')] = Map__string_i32__make_instance(item)
+        c_inst[c_key] = Map__string_i32__make_instance(item)
     return cmove(c_inst)
 
 cdef object Map__string_Map__string_i32__from_cpp(const cmap[string,cmap[string,cint32_t]]& c_map) except *:
@@ -4335,17 +4366,19 @@ cdef object Map__string_Map__string_i32__from_cpp(const cmap[string,cmap[string,
 
 cdef cmap[string,cmap[string,cmap[string,cint32_t]]] Map__string_Map__string_Map__string_i32__make_instance(object items) except *:
     cdef cmap[string,cmap[string,cmap[string,cint32_t]]] c_inst
+    cdef string c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, str):
             raise TypeError(f"{key!r} is not of type str")
+        c_key = key.encode('UTF-8')
         if item is None:
             raise TypeError("None is not of type _typing.Mapping[str, _typing.Mapping[str, int]]")
         if not isinstance(item, Map__string_Map__string_i32):
             item = Map__string_Map__string_i32(item)
 
-        c_inst[key.encode('UTF-8')] = Map__string_Map__string_i32__make_instance(item)
+        c_inst[c_key] = Map__string_Map__string_i32__make_instance(item)
     return cmove(c_inst)
 
 cdef object Map__string_Map__string_Map__string_i32__from_cpp(const cmap[string,cmap[string,cmap[string,cint32_t]]]& c_map) except *:
@@ -4379,17 +4412,19 @@ cdef object List__Set__i32__from_cpp(const vector[cset[cint32_t]]& c_vec) except
 
 cdef cmap[string,vector[cint32_t]] Map__string_List__i32__make_instance(object items) except *:
     cdef cmap[string,vector[cint32_t]] c_inst
+    cdef string c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, str):
             raise TypeError(f"{key!r} is not of type str")
+        c_key = key.encode('UTF-8')
         if item is None:
             raise TypeError("None is not of type _typing.Sequence[int]")
         if not isinstance(item, List__i32):
             item = List__i32(item)
 
-        c_inst[key.encode('UTF-8')] = List__i32__make_instance(item)
+        c_inst[c_key] = List__i32__make_instance(item)
     return cmove(c_inst)
 
 cdef object Map__string_List__i32__from_cpp(const cmap[string,vector[cint32_t]]& c_map) except *:
@@ -4404,12 +4439,14 @@ cdef object Map__string_List__i32__from_cpp(const cmap[string,vector[cint32_t]]&
 
 cdef cset[cbool] Set__bool__make_instance(object items) except *:
     cdef cset[cbool] c_inst
+    cdef cbool c_item
     if items is None:
         return cmove(c_inst)
     for item in items:
         if not isinstance(item, bool):
             raise TypeError(f"{item!r} is not of type bool")
-        c_inst.insert(item)
+        c_item = item
+        c_inst.insert(c_item)
     return cmove(c_inst)
 
 cdef object Set__bool__from_cpp(const cset[cbool]& c_set) except *:
@@ -4423,6 +4460,7 @@ cdef object Set__bool__from_cpp(const cset[cbool]& c_set) except *:
 
 cdef cset[cset[cbool]] Set__Set__bool__make_instance(object items) except *:
     cdef cset[cset[cbool]] c_inst
+    cdef cset[cbool] c_item
     if items is None:
         return cmove(c_inst)
     for item in items:
@@ -4430,7 +4468,8 @@ cdef cset[cset[cbool]] Set__Set__bool__make_instance(object items) except *:
             raise TypeError("None is not of type _typing.AbstractSet[bool]")
         if not isinstance(item, Set__bool):
             item = Set__bool(item)
-        c_inst.insert(Set__bool__make_instance(item))
+        c_item = Set__bool__make_instance(item)
+        c_inst.insert(c_item)
     return cmove(c_inst)
 
 cdef object Set__Set__bool__from_cpp(const cset[cset[cbool]]& c_set) except *:
@@ -4444,6 +4483,7 @@ cdef object Set__Set__bool__from_cpp(const cset[cset[cbool]]& c_set) except *:
 
 cdef cset[cset[cset[cbool]]] Set__Set__Set__bool__make_instance(object items) except *:
     cdef cset[cset[cset[cbool]]] c_inst
+    cdef cset[cset[cbool]] c_item
     if items is None:
         return cmove(c_inst)
     for item in items:
@@ -4451,7 +4491,8 @@ cdef cset[cset[cset[cbool]]] Set__Set__Set__bool__make_instance(object items) ex
             raise TypeError("None is not of type _typing.AbstractSet[_typing.AbstractSet[bool]]")
         if not isinstance(item, Set__Set__bool):
             item = Set__Set__bool(item)
-        c_inst.insert(Set__Set__bool__make_instance(item))
+        c_item = Set__Set__bool__make_instance(item)
+        c_inst.insert(c_item)
     return cmove(c_inst)
 
 cdef object Set__Set__Set__bool__from_cpp(const cset[cset[cset[cbool]]]& c_set) except *:
@@ -4465,16 +4506,18 @@ cdef object Set__Set__Set__bool__from_cpp(const cset[cset[cset[cbool]]]& c_set) 
 
 cdef cmap[_module_cbindings.Bar,_module_cbindings.Baz] Map__Bar__double_Baz__i32__make_instance(object items) except *:
     cdef cmap[_module_cbindings.Bar,_module_cbindings.Baz] c_inst
+    cdef _module_cbindings.Bar c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, (float, int)):
             raise TypeError(f"{key!r} is not of type float")
+        c_key = key
         if not isinstance(item, int):
             raise TypeError(f"{item!r} is not of type int")
         item = <cint32_t> item
 
-        c_inst[key] = item
+        c_inst[c_key] = item
     return cmove(c_inst)
 
 cdef object Map__Bar__double_Baz__i32__from_cpp(const cmap[_module_cbindings.Bar,_module_cbindings.Baz]& c_map) except *:
@@ -4507,6 +4550,7 @@ cdef object folly_small_vector_int64_t_8__List__i64__from_cpp(const _module_cbin
 
 cdef _module_cbindings.folly_sorted_vector_set_std_string folly_sorted_vector_set_std_string__Set__string__make_instance(object items) except *:
     cdef _module_cbindings.folly_sorted_vector_set_std_string c_inst
+    cdef string c_item
     if items is None:
         return cmove(c_inst)
     if isinstance(items, str):
@@ -4514,7 +4558,8 @@ cdef _module_cbindings.folly_sorted_vector_set_std_string folly_sorted_vector_se
     for item in items:
         if not isinstance(item, str):
             raise TypeError(f"{item!r} is not of type str")
-        c_inst.insert(item.encode('UTF-8'))
+        c_item = item.encode('UTF-8')
+        c_inst.insert(c_item)
     return cmove(c_inst)
 
 cdef object folly_sorted_vector_set_std_string__Set__string__from_cpp(const _module_cbindings.folly_sorted_vector_set_std_string& c_set) except *:
@@ -4528,16 +4573,17 @@ cdef object folly_sorted_vector_set_std_string__Set__string__from_cpp(const _mod
 
 cdef _module_cbindings.FakeMap FakeMap__Map__i64_double__make_instance(object items) except *:
     cdef _module_cbindings.FakeMap c_inst
+    cdef cint64_t c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, int):
             raise TypeError(f"{key!r} is not of type int")
-        key = <cint64_t> key
+        c_key = <cint64_t> key
         if not isinstance(item, (float, int)):
             raise TypeError(f"{item!r} is not of type float")
 
-        c_inst[key] = item
+        c_inst[c_key] = item
     return cmove(c_inst)
 
 cdef object FakeMap__Map__i64_double__from_cpp(const _module_cbindings.FakeMap& c_map) except *:
@@ -4552,15 +4598,17 @@ cdef object FakeMap__Map__i64_double__from_cpp(const _module_cbindings.FakeMap& 
 
 cdef _module_cbindings.std_unordered_map_std_string_containerStruct std_unordered_map_std_string_containerStruct__Map__string_containerStruct__make_instance(object items) except *:
     cdef _module_cbindings.std_unordered_map_std_string_containerStruct c_inst
+    cdef string c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, str):
             raise TypeError(f"{key!r} is not of type str")
+        c_key = key.encode('UTF-8')
         if not isinstance(item, containerStruct):
             raise TypeError(f"{item!r} is not of type containerStruct")
 
-        c_inst[key.encode('UTF-8')] = deref((<containerStruct>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        c_inst[c_key] = deref((<containerStruct>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
     return cmove(c_inst)
 
 cdef object std_unordered_map_std_string_containerStruct__Map__string_containerStruct__from_cpp(const _module_cbindings.std_unordered_map_std_string_containerStruct& c_map) except *:
@@ -4612,6 +4660,7 @@ cdef object std_deque__List__string__from_cpp(const _module_cbindings.std_deque[
 
 cdef _module_cbindings.folly_sorted_vector_set[string] folly_sorted_vector_set__Set__string__make_instance(object items) except *:
     cdef _module_cbindings.folly_sorted_vector_set[string] c_inst
+    cdef string c_item
     if items is None:
         return cmove(c_inst)
     if isinstance(items, str):
@@ -4619,7 +4668,8 @@ cdef _module_cbindings.folly_sorted_vector_set[string] folly_sorted_vector_set__
     for item in items:
         if not isinstance(item, str):
             raise TypeError(f"{item!r} is not of type str")
-        c_inst.insert(item.encode('UTF-8'))
+        c_item = item.encode('UTF-8')
+        c_inst.insert(c_item)
     return cmove(c_inst)
 
 cdef object folly_sorted_vector_set__Set__string__from_cpp(const _module_cbindings.folly_sorted_vector_set[string]& c_set) except *:
@@ -4633,16 +4683,17 @@ cdef object folly_sorted_vector_set__Set__string__from_cpp(const _module_cbindin
 
 cdef _module_cbindings.folly_sorted_vector_map[cint64_t,string] folly_sorted_vector_map__Map__i64_string__make_instance(object items) except *:
     cdef _module_cbindings.folly_sorted_vector_map[cint64_t,string] c_inst
+    cdef cint64_t c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, int):
             raise TypeError(f"{key!r} is not of type int")
-        key = <cint64_t> key
+        c_key = <cint64_t> key
         if not isinstance(item, str):
             raise TypeError(f"{item!r} is not of type str")
 
-        c_inst[key] = item.encode('UTF-8')
+        c_inst[c_key] = item.encode('UTF-8')
     return cmove(c_inst)
 
 cdef object folly_sorted_vector_map__Map__i64_string__from_cpp(const _module_cbindings.folly_sorted_vector_map[cint64_t,string]& c_map) except *:
@@ -4674,13 +4725,14 @@ cdef object List__Bar__double__from_cpp(const vector[_module_cbindings.Bar]& c_v
 
 cdef cset[_module_cbindings.Baz] Set__Baz__i32__make_instance(object items) except *:
     cdef cset[_module_cbindings.Baz] c_inst
+    cdef _module_cbindings.Baz c_item
     if items is None:
         return cmove(c_inst)
     for item in items:
         if not isinstance(item, int):
             raise TypeError(f"{item!r} is not of type int")
-        item = <cint32_t> item
-        c_inst.insert(item)
+        c_item = <cint32_t> item
+        c_inst.insert(c_item)
     return cmove(c_inst)
 
 cdef object Set__Baz__i32__from_cpp(const cset[_module_cbindings.Baz]& c_set) except *:
@@ -4694,15 +4746,17 @@ cdef object Set__Baz__i32__from_cpp(const cset[_module_cbindings.Baz]& c_set) ex
 
 cdef cmap[string,_fbthrift_iobuf.cIOBuf] Map__string_folly_IOBuf__binary__make_instance(object items) except *:
     cdef cmap[string,_fbthrift_iobuf.cIOBuf] c_inst
+    cdef string c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, str):
             raise TypeError(f"{key!r} is not of type str")
+        c_key = key.encode('UTF-8')
         if not isinstance(item, _fbthrift_iobuf.IOBuf):
             raise TypeError(f"{item!r} is not of type _fbthrift_iobuf.IOBuf")
 
-        c_inst[key.encode('UTF-8')] = deref((<_fbthrift_iobuf.IOBuf?>item).c_clone())
+        c_inst[c_key] = deref((<_fbthrift_iobuf.IOBuf?>item).c_clone())
     return cmove(c_inst)
 
 cdef object Map__string_folly_IOBuf__binary__from_cpp(const cmap[string,_fbthrift_iobuf.cIOBuf]& c_map) except *:
@@ -4717,15 +4771,17 @@ cdef object Map__string_folly_IOBuf__binary__from_cpp(const cmap[string,_fbthrif
 
 cdef cmap[string,unique_ptr[_fbthrift_iobuf.cIOBuf]] Map__string_std_unique_ptr_folly_IOBuf__binary__make_instance(object items) except *:
     cdef cmap[string,unique_ptr[_fbthrift_iobuf.cIOBuf]] c_inst
+    cdef string c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, str):
             raise TypeError(f"{key!r} is not of type str")
+        c_key = key.encode('UTF-8')
         if not isinstance(item, _fbthrift_iobuf.IOBuf):
             raise TypeError(f"{item!r} is not of type _fbthrift_iobuf.IOBuf")
 
-        c_inst[key.encode('UTF-8')] = (<_fbthrift_iobuf.IOBuf?>item).c_clone()
+        c_inst[c_key] = (<_fbthrift_iobuf.IOBuf?>item).c_clone()
     return cmove(c_inst)
 
 cdef object Map__string_std_unique_ptr_folly_IOBuf__binary__from_cpp(const cmap[string,unique_ptr[_fbthrift_iobuf.cIOBuf]]& c_map) except *:
@@ -4740,16 +4796,17 @@ cdef object Map__string_std_unique_ptr_folly_IOBuf__binary__from_cpp(const cmap[
 
 cdef cmap[cint32_t,string] Map__i32_string__make_instance(object items) except *:
     cdef cmap[cint32_t,string] c_inst
+    cdef cint32_t c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, int):
             raise TypeError(f"{key!r} is not of type int")
-        key = <cint32_t> key
+        c_key = <cint32_t> key
         if not isinstance(item, str):
             raise TypeError(f"{item!r} is not of type str")
 
-        c_inst[key] = item.encode('UTF-8')
+        c_inst[c_key] = item.encode('UTF-8')
     return cmove(c_inst)
 
 cdef object Map__i32_string__from_cpp(const cmap[cint32_t,string]& c_map) except *:
@@ -4783,16 +4840,17 @@ cdef object List__Map__string_i32__from_cpp(const vector[cmap[string,cint32_t]]&
 
 cdef cmap[cint16_t,string] Map__i16_string__make_instance(object items) except *:
     cdef cmap[cint16_t,string] c_inst
+    cdef cint16_t c_key
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
         if not isinstance(key, int):
             raise TypeError(f"{key!r} is not of type int")
-        key = <cint16_t> key
+        c_key = <cint16_t> key
         if not isinstance(item, str):
             raise TypeError(f"{item!r} is not of type str")
 
-        c_inst[key] = item.encode('UTF-8')
+        c_inst[c_key] = item.encode('UTF-8')
     return cmove(c_inst)
 
 cdef object Map__i16_string__from_cpp(const cmap[cint16_t,string]& c_map) except *:

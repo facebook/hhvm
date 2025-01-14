@@ -55,6 +55,10 @@ func (r *rsocketClient) SendSetup(_ context.Context) error {
 	if err != nil {
 		return err
 	}
+	// Very important to reset the deadline! Especially when using UpgradeToRocket.
+	// We may have inherited this connection from Header protocol after an Upgrade.
+	// Deadlines may be nearing expiration, if not reset - rsocket setup may fail.
+	r.resetDeadline()
 	// See T182939211. This copies the keep alives from Java Rocket.
 	// KeepaliveLifetime = time.Duration(missedAcks = 1) * (ackTimeout = 3600000)
 	clientBuilder := rsocket.Connect().
@@ -97,7 +101,7 @@ func (r *rsocketClient) onServerMetadataPush(pay payload.Payload) {
 func transporter(conn net.Conn) func(_ context.Context) (*transport.Transport, error) {
 	return func(_ context.Context) (*transport.Transport, error) {
 		tconn := transport.NewTCPClientTransport(conn)
-		tconn.SetLifetime(time.Millisecond * 3600000)
+		tconn.SetLifetime(1 * time.Hour)
 		return tconn, nil
 	}
 }

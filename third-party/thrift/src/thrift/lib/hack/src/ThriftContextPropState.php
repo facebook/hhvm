@@ -319,6 +319,17 @@ final class ThriftContextPropState {
     return $this->storage->privacyUniverse;
   }
 
+  /**
+   * @return the privacy universe int with its designator abstraction
+   */
+  public function getPrivacyUniverseDesignator()[]: ?UniverseDesignator {
+    $universe = $this->getPrivacyUniverse();
+    if ($universe is null) {
+      return null;
+    }
+    return UniverseDesignator::fromInt($universe);
+  }
+
   public function setPrivacyUniverse(?int $universe)[write_props]: void {
     $this->storage->privacyUniverse = $universe;
     $this->dirty();

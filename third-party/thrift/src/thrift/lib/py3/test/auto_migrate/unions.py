@@ -189,3 +189,8 @@ class UnionTests(unittest.TestCase):
         self.assertEqual(x.type, ReservedUnion.Type.ok)
         self.assertEqual(x.value, "bar")
         self.assertEqual(x.ok, "bar")
+
+    @brokenInAutoMigrate()
+    def test_instance_base_class(self) -> None:
+        self.assertTrue(issubclass(ComplexUnion, Union))
+        self.assertIsInstance(ComplexUnion(tiny=1), Union)

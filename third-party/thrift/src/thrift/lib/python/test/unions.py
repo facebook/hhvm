@@ -322,3 +322,7 @@ class UnionTests(unittest.TestCase):
         # equality
         y = self.Integers(tiny=4)
         self.assertEqual(x, y)
+
+    def test_instance_base_class(self) -> None:
+        self.assertTrue(issubclass(ComplexUnion, Union))
+        self.assertIsInstance(ComplexUnion(tiny=1), Union)

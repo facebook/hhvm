@@ -489,3 +489,8 @@ class NumericalConversionsTests(unittest.TestCase):
             FANCY_CONST.color_map,
             {IncludedColour.red: Basic(), IncludedColour.blue: Basic(nom="b")},
         )
+
+    @brokenInAutoMigrate()
+    def test_instance_base_class(self) -> None:
+        self.assertTrue(issubclass(Nested1, Struct))
+        self.assertIsInstance(Nested1(), Struct)

@@ -71,7 +71,7 @@ from thrift.python.mutable_types import (
     to_thrift_set,
 )
 
-from thrift.python.types import isset, update_nested_field
+from thrift.python.types import isset, Struct, update_nested_field
 
 ListT = TypeVar("ListT")
 SetT = TypeVar("SetT")
@@ -701,3 +701,7 @@ class StructDeepcopyTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             # TODO(ffrancet): pyre should complain about this
             z < y  # noqa: B015
+
+    def test_instance_base_class(self) -> None:
+        self.assertTrue(issubclass(Nested1, Struct))
+        self.assertIsInstance(Nested1(), Struct)

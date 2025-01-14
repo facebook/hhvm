@@ -184,7 +184,7 @@ final class UpdateUniverseContextHandlerTest extends WWWTest {
   private function assertNullUniverse(): void {
     $context_prop_state = ThriftContextPropState::get();
     expect($context_prop_state)->toNotBeNull();
-    expect($context_prop_state->getPrivacyUniverse())->toBeNull();
+    expect($context_prop_state->getPrivacyUniverseDesignator())->toBeNull();
   }
 
   private function assertUniverse(

@@ -315,7 +315,14 @@ final class ThriftContextPropState {
     $this->dirty();
   }
 
-  public function getPrivacyUniverse()[]: ?int {
+  /**
+   * This should not be exposed publicly, and instead call
+   * getPrivacyUniverseDesignator
+   *
+   * @return the raw privacy universe as an int.
+   * @see getPrivacyUniverseDesignator
+   */
+  private function getPrivacyUniverse()[]: ?int {
     return $this->storage->privacyUniverse;
   }
 

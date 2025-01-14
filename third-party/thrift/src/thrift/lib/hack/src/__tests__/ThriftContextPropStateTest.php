@@ -105,9 +105,10 @@ final class ThriftContextPropStateTest extends WWWTest {
 
   public function testPrivacyUniverse(): void {
     $tcps = ThriftContextPropState::get();
-    expect($tcps->getPrivacyUniverse())->toBeNull();
+    expect($tcps->getPrivacyUniverseDesignator())->toBeNull();
     $tcps->setPrivacyUniverse(123);
-    expect($tcps->getPrivacyUniverse())->toEqual(123);
+    expect($tcps->getPrivacyUniverseDesignator()?->getValue())->toNotBeNullAnd()
+      ->toEqual(123);
   }
 
   public function testInitialization()[defaults]: void {

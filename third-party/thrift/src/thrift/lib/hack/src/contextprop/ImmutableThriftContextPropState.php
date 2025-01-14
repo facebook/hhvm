@@ -57,7 +57,7 @@ final class ImmutableThriftContextPropState {
   }
 
   public function getPrivacyUniverse()[]: ?int {
-    return $this->state->getPrivacyUniverse();
+    return $this->state->getPrivacyUniverseDesignator()?->getValue();
   }
 
   public function getRequestPriority()[]: ?RequestPriority {

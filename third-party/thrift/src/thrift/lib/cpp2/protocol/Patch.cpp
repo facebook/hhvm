@@ -28,6 +28,7 @@
 #include <thrift/lib/cpp/util/SaturatingMath.h>
 #include <thrift/lib/cpp/util/VarintUtils.h>
 #include <thrift/lib/cpp2/op/Get.h>
+#include <thrift/lib/cpp2/patch/detail/Scuba.h> // @manual=//thrift/facebook/patch:scuba
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/FieldMask.h>
@@ -328,6 +329,10 @@ void ApplyPatch::operator()(
   }
 
   if (auto* put = findOp(patch, PatchOp::Put)) {
+    patch::detail::logDeprecatedOperation(
+        "SetPatch::Put",
+        "[dynamic]",
+        "SetPatch::Put should be migrated to SetPatch::Add");
     insert_set(*validate_if_set(put, "put"));
   }
 }
@@ -499,6 +504,10 @@ void impl(Patch&& patch, Object& value) {
 
     if (const auto* p_set = to_remove->if_set()) {
       // TODO: Remove this after migrating to List
+      patch::detail::logDeprecatedOperation(
+          "StructPatch::Remove (set)",
+          "[dynamic]",
+          "StructPatch::Remove should be migrated from `set` to `list`");
       remove(*p_set);
     } else if (const auto* p_list = to_remove->if_list()) {
       remove(*p_list);

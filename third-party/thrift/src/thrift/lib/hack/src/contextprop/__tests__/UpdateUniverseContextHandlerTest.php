@@ -2,7 +2,9 @@
 // (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
 
 <<Oncalls('xdc_artillery')>>
-final class UpdateUniverseContextHandlerTest extends WWWTest {
+final class UpdateUniverseContextHandlerTest
+  extends WWWTest
+  implements IWWWTestPrivacyLibSkipPZ2Annotation {
 
   use ClassLevelTest;
 

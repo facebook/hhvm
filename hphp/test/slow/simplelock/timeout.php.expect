@@ -1,0 +1,14 @@
+thread
+thread
+thread
+thread
+Timed out waiting for lock hold
+Timed out waiting for lock hold
+Timed out waiting for lock hold
+Timed out waiting for lock hold
+Timed out: 100
+Timed out: 150
+Timed out: 200
+Timed out: 250
+Got lock
+Main done.

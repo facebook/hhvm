@@ -1,0 +1,9 @@
+
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'cannot release unheld lock' in %s/basic.php:8
+Stack trace:
+#0 %s/basic.php(8): HH\SimpleLock\unlock()
+#1 (): main()
+#2 (): Closure$__SystemLib\enter_async_entry_point()
+#3 (): HH\Asio\join()
+#4 (): __SystemLib\enter_async_entry_point()
+#5 {main}

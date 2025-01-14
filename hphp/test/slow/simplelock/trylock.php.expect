@@ -1,0 +1,16 @@
+main
+bool(true)
+bool(false)
+bool(false)
+thread
+bool(false)
+bool(false)
+bool(false)
+thread
+bool(true)
+bool(false)
+bool(false)
+main
+bool(true)
+bool(false)
+bool(false)

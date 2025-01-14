@@ -15,5 +15,16 @@
 #cmakedefine01 FIZZ_CERTIFICATE_USE_OPENSSL_CERT
 #cmakedefine01 FIZZ_HAVE_OQS
 
+#if !defined(FIZZ_ENABLE_CONTEXT_COMPATIBILITY_CHECKS)
+#if defined(NDEBUG)
+#define FIZZ_ENABLE_CONTEXT_COMPATIBILITY_CHECKS 0
+#else
+#define FIZZ_ENABLE_CONTEXT_COMPATIBILITY_CHECKS 1
+#endif
+#endif
+
+#define FIZZ_CONTEXT_VALIDATION_SHOULD_CHECK_CIPHER(x) (true)
+
 #define FIZZ_DEFAULT_FACTORY_HEADER <fizz/protocol/MultiBackendFactory.h>
 #define FIZZ_DEFAULT_FACTORY ::fizz::MultiBackendFactory
+

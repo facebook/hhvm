@@ -801,6 +801,12 @@ static ClientHello constructEncryptedClientHello(
   return chloOuter;
 }
 
+static void checkContext(std::shared_ptr<const FizzClientContext>& context) {
+#if FIZZ_ENABLE_CONTEXT_COMPATIBILITY_CHECKS
+  context->validate();
+#endif
+}
+
 Actions
 EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
     const State& /*state*/,
@@ -808,6 +814,8 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
   auto& connect = *param.asConnect();
 
   auto context = std::move(connect.context);
+
+  checkContext(context);
 
   // Set up SNI (including possible replacement ECH SNI)
   folly::Optional<std::string> echSni;

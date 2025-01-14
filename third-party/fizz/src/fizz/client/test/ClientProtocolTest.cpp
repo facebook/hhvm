@@ -33,8 +33,13 @@ namespace test {
 
 class ClientProtocolTest : public ProtocolTest<ClientTypes, Actions> {
  public:
+  class ContextWithMockValidate : public FizzClientContext {
+   public:
+    MOCK_METHOD(void, validate, (), (const override));
+  };
+
   void SetUp() override {
-    context_ = std::make_shared<FizzClientContext>();
+    context_ = std::make_shared<ContextWithMockValidate>();
     context_->setSupportedVersions({ProtocolVersion::tls_1_3});
     context_->setSupportedCiphers(
         {CipherSuite::TLS_AES_128_GCM_SHA256,
@@ -279,7 +284,13 @@ class ClientProtocolTest : public ProtocolTest<ClientTypes, Actions> {
 
   void doFinishedFlow(ClientAuthType authType);
 
-  std::shared_ptr<FizzClientContext> context_;
+  void maybeExpectValidate() {
+#if FIZZ_ENABLE_CONTEXT_COMPATIBILITY_CHECKS
+    EXPECT_CALL(*context_, validate()).Times(1);
+#endif
+  }
+
+  std::shared_ptr<ContextWithMockValidate> context_;
   MockPlaintextReadRecordLayer* mockRead_;
   MockPlaintextWriteRecordLayer* mockWrite_;
   MockEncryptedWriteRecordLayer* mockEarlyWrite_;
@@ -355,6 +366,9 @@ TEST_F(ClientProtocolTest, TestConnectFlow) {
             }));
         return ret;
       }));
+
+  maybeExpectValidate();
+
   MockKeyExchange* mockKex;
   EXPECT_CALL(
       *factory_, makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Client))
@@ -398,6 +412,22 @@ TEST_F(ClientProtocolTest, TestConnectFlow) {
   EXPECT_FALSE(state_.earlyDataParams().has_value());
 }
 
+TEST_F(ClientProtocolTest, TestConnectInvalidContext) {
+#if FIZZ_ENABLE_CONTEXT_COMPATIBILITY_CHECKS
+  EXPECT_CALL(*context_, validate()).Times(1).WillRepeatedly(Invoke([]() {
+    throw std::runtime_error("unsupported parameter");
+  }));
+
+  Connect connect;
+  connect.context = context_;
+  fizz::Param param = std::move(connect);
+
+  auto actions = detail::processEvent(state_, param);
+
+  expectError<std::runtime_error>(actions, {}, "unsupported parameter");
+#endif
+}
+
 TEST_F(ClientProtocolTest, TestConnectPskFlow) {
   auto psk = getCachedPsk();
   EXPECT_CALL(*factory_, makePlaintextReadRecordLayer())
@@ -420,6 +450,9 @@ TEST_F(ClientProtocolTest, TestConnectPskFlow) {
             }));
         return ret;
       }));
+
+  maybeExpectValidate();
+
   MockKeyExchange* mockKex;
   EXPECT_CALL(
       *factory_, makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Client))
@@ -516,6 +549,9 @@ TEST_F(ClientProtocolTest, TestConnectPskEarlyFlow) {
             }));
         return ret;
       }));
+
+  maybeExpectValidate();
+
   MockKeyExchange* mockKex;
   EXPECT_CALL(
       *factory_, makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Client))
@@ -832,6 +868,9 @@ TEST_F(ClientProtocolTest, TestConnectSniExtFirst) {
 TEST_F(ClientProtocolTest, TestConnectMultipleShares) {
   MockKeyExchange* mockKex1;
   MockKeyExchange* mockKex2;
+
+  maybeExpectValidate();
+
   EXPECT_CALL(
       *factory_, makeKeyExchange(NamedGroup::x25519, KeyExchangeRole::Client))
       .WillOnce(InvokeWithoutArgs([&mockKex1]() {
@@ -843,6 +882,7 @@ TEST_F(ClientProtocolTest, TestConnectMultipleShares) {
         mockKex1 = ret.get();
         return ret;
       }));
+
   EXPECT_CALL(
       *factory_,
       makeKeyExchange(NamedGroup::secp256r1, KeyExchangeRole::Client))
@@ -872,6 +912,9 @@ TEST_F(ClientProtocolTest, TestConnectMultipleShares) {
 
 TEST_F(ClientProtocolTest, TestConnectCachedGroup) {
   context_->setDefaultShares({NamedGroup::x25519});
+
+  maybeExpectValidate();
+
   MockKeyExchange* mockKex;
   EXPECT_CALL(
       *factory_,
@@ -1051,8 +1094,8 @@ TEST_F(ClientProtocolTest, TestConnectECH) {
   connect.sni = "www.hostname.com";
   const auto& actualChlo = getDefaultClientHello();
 
-  // Two randoms should be generated, 1 for the client hello inner and 1 for the
-  // client hello outer.
+  // Two randoms should be generated, 1 for the client hello inner and 1 for
+  // the client hello outer.
   EXPECT_CALL(*factory_, makeRandomBytes(_, 32)).Times(2);
 
   fizz::Param param = std::move(connect);
@@ -1118,8 +1161,8 @@ TEST_F(ClientProtocolTest, TestConnectECHWithHybridSupportedGroup) {
   connect.sni = "www.hostname.com";
   const auto& actualChlo = getDefaultClientHello();
 
-  // Two randoms should be generated, 1 for the client hello inner and 1 for the
-  // client hello outer.
+  // Two randoms should be generated, 1 for the client hello inner and 1 for
+  // the client hello outer.
   EXPECT_CALL(*factory_, makeRandomBytes(_, 32)).Times(2);
 
   fizz::Param param = std::move(connect);
@@ -1186,8 +1229,8 @@ TEST_F(ClientProtocolTest, TestConnectECHWithAEGIS) {
   connect.sni = "www.hostname.com";
   const auto& actualChlo = getDefaultClientHello();
 
-  // Two randoms should be generated, 1 for the client hello inner and 1 for the
-  // client hello outer.
+  // Two randoms should be generated, 1 for the client hello inner and 1 for
+  // the client hello outer.
   EXPECT_CALL(*factory_, makeRandomBytes(_, 32)).Times(2);
 
   fizz::Param param = std::move(connect);
@@ -3063,8 +3106,8 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHFlow) {
   // Add the extension to the inner one
   chlo.extensions.push_back(encodeExtension(ech::InnerECHClientHello()));
 
-  // Save this one (the real one), then blank the legacy session id and emplace
-  // OuterExtensions for AAD construction
+  // Save this one (the real one), then blank the legacy session id and
+  // emplace OuterExtensions for AAD construction
   auto encodedClientHelloInner = encodeHandshake(chlo.clone());
 
   chlo.legacy_session_id = folly::IOBuf::copyBuffer("");
@@ -3334,8 +3377,8 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHRejectedFlow) {
   // Add the extension to the inner one
   chlo.extensions.push_back(encodeExtension(ech::InnerECHClientHello()));
 
-  // Save this one (the real one), then blank the legacy session id and emplace
-  // OuterExtensions for AAD construction
+  // Save this one (the real one), then blank the legacy session id and
+  // emplace OuterExtensions for AAD construction
   auto encodedClientHelloInner = encodeHandshake(chlo.clone());
 
   chlo.legacy_session_id = folly::IOBuf::copyBuffer("");
@@ -5897,8 +5940,8 @@ TEST_F(ClientProtocolTest, TestPskWithoutCerts) {
   // Because CachedPsks can be serialized, and because certificates may fail
   // to serialize for whatever reason, there may be an instance where a client
   // uses a deserialized cached psk that does not contain either a client or
-  // a server certificate, but the PSK itself is valid (and the server accepted
-  // the offered PSK).
+  // a server certificate, but the PSK itself is valid (and the server
+  // accepted the offered PSK).
   setupExpectingServerHello();
 
   CachedPsk psk = getCachedPsk();

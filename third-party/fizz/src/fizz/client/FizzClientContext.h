@@ -208,6 +208,11 @@ class FizzClientContext {
     return factory_;
   }
 
+  /* Ensure that the TLS parameters set in this context are valid (eg.
+   * compatible with the factory, etc.). Will throw if invalid.
+   */
+  virtual void validate() const;
+
   /**
    * Sets the certificate decompression manager for server certs.
    */

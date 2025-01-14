@@ -45,10 +45,22 @@ final abstract class ThriftStreamingSerializationHelpers {
           $result->success = $payload;
         }
       }
-
-      $result->write($protocol);
-      $protocol->writeMessageEnd();
-      $transport->flush();
+      $use_accelearted_serialization =
+        JustKnobs::eval('thrift/hack:stream_accelerated_serialization');
+      if (
+        $use_accelearted_serialization &&
+        $protocol is \TBinaryProtocolAccelerated
+      ) {
+        thrift_protocol_write_binary_struct($protocol, $result);
+      } else if (
+        $use_accelearted_serialization &&
+        $protocol is \TCompactProtocolAccelerated
+      ) {
+        thrift_protocol_write_compact_struct($protocol, $result);
+      } else {
+        $result->write($protocol);
+        $transport->flush();
+      }
       $msg = $transport->getBuffer();
       $transport->resetBuffer();
       return tuple($msg, $is_application_ex);

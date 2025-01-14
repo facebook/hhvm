@@ -159,9 +159,8 @@ class t_hack_generator : public t_concat_generator {
     // legacy_arrays_ is only used to migrate away from php gen
     if (legacy_arrays_ && strict_types_) {
       throw std::runtime_error("Don't use legacy_arrays with strict_types");
-    } else if (arraysets_ && !(legacy_arrays_ || hack_collections_)) {
-      throw std::runtime_error(
-          "Don't use arraysets without either legacy_arrays or hack_collections");
+    } else if (!legacy_arrays_ && arraysets_ && !hack_collections_) {
+      throw std::runtime_error("Don't use arraysets without hack_collections");
     } else if (mangled_services_ && has_hack_namespace) {
       throw std::runtime_error(
           "Don't use mangledsvcs with hack namespaces or package.");

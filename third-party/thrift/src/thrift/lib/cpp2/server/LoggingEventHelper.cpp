@@ -46,8 +46,11 @@ void maybeLogTlsPeerCertEvent(
     case CertIPResult::SKIPPED:
       THRIFT_CONNECTION_EVENT(tls.cert_ip_skipped).log(context);
       return;
-    case CertIPResult::MATCHED:
-      THRIFT_CONNECTION_EVENT(tls.cert_ip_match).log(context);
+    case CertIPResult::MATCHED_ENFORCED:
+      THRIFT_CONNECTION_EVENT(tls.cert_ip_match_enforced).log(context);
+      return;
+    case CertIPResult::MATCHED_UNENFORCED:
+      THRIFT_CONNECTION_EVENT(tls.cert_ip_match_unenforced).log(context);
       return;
     case CertIPResult::MISMATCHED:
       THRIFT_CONNECTION_EVENT(tls.cert_ip_mismatch).log(context);

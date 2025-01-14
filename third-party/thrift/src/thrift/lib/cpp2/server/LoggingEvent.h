@@ -203,7 +203,12 @@ class LoggingEventRegistry {
   virtual ~LoggingEventRegistry() {}
 };
 
-enum class CertIPResult { SKIPPED, MATCHED, MISMATCHED };
+enum class CertIPResult {
+  SKIPPED,
+  MATCHED_ENFORCED,
+  MATCHED_UNENFORCED,
+  MISMATCHED
+};
 
 namespace detail {
 THRIFT_PLUGGABLE_FUNC_DECLARE(

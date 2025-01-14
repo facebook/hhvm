@@ -45,8 +45,13 @@ key, include the parallel CythonPythonToCppKey file instead.
 }}{{#type:string?}}item.encode('UTF-8'){{/type:string?}}{{!
 }}{{#type:binary?}}item{{/type:binary?}}{{!
 }}{{#type:struct}}{{!
+  }}{{^program:auto_migrate?}}{{!
   }}deref((<{{> types/cython_python_type}}>item).{{> types/cpp_obj}}){{!
+  }}{{/program:auto_migrate?}}{{!
+  }}{{#program:auto_migrate?}}{{!
+  }}python_to_cpp[{{> types/cython_cpp_basic_type}}](item){{!
+  }}{{/program:auto_migrate?}}{{!
 }}{{/type:struct}}{{!
-}}{{#type:container?}}{{> types/container_to_cpp }}(item){{/type:container?}}{{!
+}}{{#type:container?}}{{type:flat_name}}__make_instance(item){{/type:container?}}{{!
 }}{{#type:enum?}}<{{> types/cython_cpp_type}}><int>item{{/type:enum?}}{{!
 }}{{/type:customBinaryType?}}

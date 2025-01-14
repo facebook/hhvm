@@ -8,7 +8,6 @@
 
 cimport includes.types as _fbthrift_ctypes
 
-
 cdef shared_ptr[_fbthrift_cbindings.cAStruct] AStruct_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.AStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 

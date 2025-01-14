@@ -1572,7 +1572,7 @@ void t_mstch_py3_generator::generate_types() {
     generate_file("__init__.py", FileType::TypesFile, generateRootPath_);
   }
   for (const auto& file : converterFiles) {
-    generate_file(file, FileType::TypesFile, generateRootPath_);
+    generate_file(file, FileType::NotTypesFile, generateRootPath_);
   }
   // - if auto_migrate is present, generate types.pxd, and types.py
   // - else, just generate normal cython files

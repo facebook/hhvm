@@ -35,9 +35,14 @@ keys (conventionally used for sets, lists, and map values).
 }}{{#type:string?}}key.encode('UTF-8'){{/type:string?}}{{!
 }}{{#type:binary?}}key{{/type:binary?}}{{!
 }}{{#type:struct}}{{!
+  }}{{^program:auto_migrate?}}{{!
   }}deref((<{{> types/cython_python_type}}>key).{{> types/cpp_obj}}){{!
+  }}{{/program:auto_migrate?}}{{!
+  }}{{#program:auto_migrate?}}{{!
+  }}python_to_cpp[{{> types/cython_cpp_basic_type}}](key){{!
+  }}{{/program:auto_migrate?}}{{!
 }}{{/type:struct}}{{!
 }}{{#type:container?}}{{!
-  }}{{> types/container_to_cpp}}(key){{!
+  }}{{type:flat_name}}__make_instance(key){{!
 }}{{/type:container?}}{{!
 }}{{#type:enum?}}<{{> types/cython_cpp_type}}><int>key{{/type:enum?}}

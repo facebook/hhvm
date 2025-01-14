@@ -13,3 +13,5 @@ cimport includes.cbindings as _fbthrift_cbindings
 cdef shared_ptr[_fbthrift_cbindings.cIncluded] Included_convert_to_cpp(object inst) except*
 cdef object Included_from_cpp(const shared_ptr[_fbthrift_cbindings.cIncluded]& c_struct)
 
+cdef extern from "thrift/compiler/test/fixtures/includes/gen-python-capi/includes/thrift_types_capi.h":
+    pass

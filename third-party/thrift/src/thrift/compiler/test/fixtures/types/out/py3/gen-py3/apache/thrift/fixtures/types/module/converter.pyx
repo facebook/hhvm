@@ -8,7 +8,6 @@
 
 cimport apache.thrift.fixtures.types.module.types as _fbthrift_ctypes
 
-
 cdef shared_ptr[_fbthrift_cbindings.cempty_struct] empty_struct_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.empty_struct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 

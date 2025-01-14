@@ -9,4 +9,3 @@
 cimport s.types as _fbthrift_ctypes
 
 
-

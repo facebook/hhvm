@@ -9,4 +9,3 @@
 cimport service.types as _fbthrift_ctypes
 
 
-

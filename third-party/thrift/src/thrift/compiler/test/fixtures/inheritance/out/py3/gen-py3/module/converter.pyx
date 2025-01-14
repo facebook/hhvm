@@ -9,4 +9,3 @@
 cimport module.types as _fbthrift_ctypes
 
 
-

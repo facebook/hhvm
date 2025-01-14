@@ -13,3 +13,5 @@ cimport module.cbindings as _fbthrift_cbindings
 cdef shared_ptr[_fbthrift_cbindings.cMyStruct] MyStruct_convert_to_cpp(object inst) except*
 cdef object MyStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cMyStruct]& c_struct)
 
+cdef extern from "thrift/compiler/test/fixtures/includes/gen-python-capi/module/thrift_types_capi.h":
+    pass

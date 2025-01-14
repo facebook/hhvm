@@ -13,3 +13,5 @@ cimport transitive.cbindings as _fbthrift_cbindings
 cdef shared_ptr[_fbthrift_cbindings.cFoo] Foo_convert_to_cpp(object inst) except*
 cdef object Foo_from_cpp(const shared_ptr[_fbthrift_cbindings.cFoo]& c_struct)
 
+cdef extern from "thrift/compiler/test/fixtures/includes/gen-python-capi/transitive/thrift_types_capi.h":
+    pass

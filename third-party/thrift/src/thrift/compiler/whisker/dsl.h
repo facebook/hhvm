@@ -385,41 +385,41 @@ class function : public native_function {
 };
 
 namespace detail {
-template <>
-struct function_argument_result<i64> {
-  using type = i64;
-  using optional_type = std::optional<type>;
+
+template <typename T>
+struct by_value {
+  using type = T;
+  using optional_type = std::optional<T>;
 };
-template <>
-struct function_argument_result<f64> {
-  using type = f64;
-  using optional_type = std::optional<type>;
-};
-template <>
-struct function_argument_result<boolean> {
-  using type = boolean;
-  using optional_type = std::optional<type>;
-};
-template <>
-struct function_argument_result<string> {
-  using type = managed_ptr<string>;
+
+template <typename T>
+struct by_ptr {
+  using type = managed_ptr<T>;
   using optional_type = type;
 };
+
 template <>
-struct function_argument_result<array> {
-  using type = array_like;
-  using optional_type = std::optional<type>;
-};
+struct function_argument_result<i64> : by_value<i64> {};
+
 template <>
-struct function_argument_result<map> {
-  using type = map_like;
-  using optional_type = std::optional<type>;
-};
+struct function_argument_result<f64> : by_value<f64> {};
+
+template <>
+struct function_argument_result<boolean> : by_value<boolean> {};
+
+template <>
+struct function_argument_result<string> : by_ptr<string> {};
+
+template <>
+struct function_argument_result<array> : by_value<array_like> {};
+
+template <>
+struct function_argument_result<map> : by_value<map_like> {};
+
 template <typename T>
-struct function_argument_result<native_handle<T>> {
-  using type = native_handle<T>;
-  using optional_type = std::optional<type>;
+struct function_argument_result<native_handle<T>> : by_value<native_handle<T>> {
 };
+
 } // namespace detail
 
 } // namespace whisker::dsl

@@ -290,6 +290,12 @@ class native_object {
   virtual void print_to(tree_printer::scope, const object_print_options&) const;
 
   /**
+   * Produces a textual representation of the data type represented by this
+   * object, primarily for debugging and diagnostic purposes.
+   */
+  virtual std::string describe_type() const;
+
+  /**
    * Determines if this native_object compares equal to the other object. It is
    * the implementers's responsibility to ensure that the other object also
    * compares equal to this one and maintains the commutative property.
@@ -615,6 +621,11 @@ class native_function {
   static_assert(std::is_move_constructible_v<context>);
 
   /**
+   * Produces a textual representation of the function represented by this
+   * object, primarily for debugging and diagnostic purposes.
+   */
+  virtual std::string describe_type() const;
+  /**
    * Creates a string representation to described this function, primarily for
    * debugging and diagnostic purposes.
    */
@@ -655,6 +666,8 @@ class native_handle_base {
   managed_ptr<T> ref_;
 };
 
+std::string describe_native_handle_for_type(const std::type_info&);
+
 } // namespace detail
 
 /**
@@ -691,6 +704,18 @@ class native_handle<void> final : private detail::native_handle_base<void> {
     return native_handle<T>(std::static_pointer_cast<const T>(ptr()));
   }
 
+  /**
+   * Produces a textual representation of the underlying (C++) type represented
+   * by this handle, primarily for debugging and diagnostic purposes.
+   */
+  std::string describe_type() const;
+
+  /**
+   * Produces a textual representation of native_handle<void>, for debugging and
+   * diagnostic purposes.
+   */
+  static std::string describe_class_type();
+
  private:
   std::reference_wrapper<const std::type_info> type_;
 };
@@ -713,6 +738,14 @@ class native_handle final : private detail::native_handle_base<T> {
 
   /* implicit */ operator native_handle<void>() const noexcept {
     return native_handle<void>(ptr());
+  }
+
+  /**
+   * Produces a textual representation of native_handle<T>, for debugging and
+   * diagnostic purposes.
+   */
+  static std::string describe_class_type() {
+    return detail::describe_native_handle_for_type(typeid(T));
   }
 };
 
@@ -944,6 +977,12 @@ class object final : private detail::object_base<object> {
     return rhs.is_null();
   }
 
+  /**
+   * Produces a textual representation of the data type contained within this
+   * object, primarily for debugging and diagnostic purposes.
+   */
+  std::string describe_type() const;
+
   // Prevent implicit conversion from const char* to bool
   template <
       typename T = boolean,
@@ -1124,6 +1163,23 @@ class object final : private detail::object_base<object> {
 
 namespace detail {
 
+template <typename T>
+std::string_view describe_primitive_type() {
+  if constexpr (std::is_same_v<T, boolean>) {
+    return "boolean";
+  } else if constexpr (std::is_same_v<T, i64>) {
+    return "i64";
+  } else if constexpr (std::is_same_v<T, f64>) {
+    return "f64";
+  } else if constexpr (std::is_same_v<T, string>) {
+    return "string";
+  } else if constexpr (std::is_same_v<T, null>) {
+    return "null";
+  } else {
+    static_assert(sizeof(T) == 0, "Invalid primitive type");
+  }
+}
+
 template <typename T, typename DescribeArgumentFunc>
 native_function::context::argument_result_t<T> native_function_extract_argument(
     const native_function::context& ctx,
@@ -1133,37 +1189,52 @@ native_function::context::argument_result_t<T> native_function_extract_argument(
     if (auto arr = native_function::context::array_like::try_from(arg)) {
       return std::move(*arr);
     }
-    // Ideally, we want to output a string representation of the types here.
     ctx.error(
-        "{} is not an array or array-like native_object.", describe_argument());
+        "Expected type of {} to be `array` or `array-like native_object`, but found `{}`.",
+        describe_argument(),
+        arg->describe_type());
   } else if constexpr (std::is_same_v<T, map>) {
     if (auto m = native_function::context::map_like::try_from(arg)) {
       return std::move(*m);
     }
-    // Ideally, we want to output a string representation of the types here.
     ctx.error(
-        "{} is not a map or map-like native_object.", describe_argument());
+        "Expected type of {} to be `map` or `map-like native_object`, but found `{}`.",
+        describe_argument(),
+        arg->describe_type());
   } else if constexpr (detail::is_specialization_v<T, native_handle>) {
     using element_type = typename T::element_type;
     if (!arg->is_native_handle()) {
-      ctx.error("{} is not a native_handle.", describe_argument());
+      ctx.error(
+          "Expected type of {} to be `{}`, but found `{}`.",
+          describe_argument(),
+          T::describe_class_type(),
+          arg->describe_type());
     }
     const native_handle<>& handle = arg->as_native_handle();
     if constexpr (std::is_same_v<element_type, void>) {
       return handle;
     } else {
       if (!handle.is<element_type>()) {
-        // Ideally, we want to output a string representation of the types here.
         ctx.error(
-            "{} is a native_handle of an unexpected type.",
-            describe_argument());
+            "Expected type of {} to be `{}`, but found `{}`.",
+            describe_argument(),
+            T::describe_class_type(),
+            arg->describe_type());
       }
       return handle.as<element_type>();
     }
   } else {
+    // Primitive types
+    static_assert(
+        std::is_same_v<T, boolean> || std::is_same_v<T, i64> ||
+        std::is_same_v<T, f64> || std::is_same_v<T, string> ||
+        std::is_same_v<T, null>);
     if (!arg->is<T>()) {
-      // Ideally, we want to output a string representation of the types here.
-      ctx.error("{} is of an unexpected type.", describe_argument());
+      ctx.error(
+          "Expected type of {} to be `{}`, but found `{}`.",
+          describe_argument(),
+          detail::describe_primitive_type<T>(),
+          arg->describe_type());
     }
     if constexpr (std::is_same_v<T, string>) {
       return manage_derived_ref<T>(arg, arg->as<T>());
@@ -1180,7 +1251,7 @@ native_function::context::argument_result_t<T>
 native_function::context::argument(size_t index) const {
   return detail::native_function_extract_argument<T>(
       *this, positional_args_.at(index), [index] {
-        return fmt::format("Argument at index {}", index);
+        return fmt::format("argument at index {}", index);
       });
 }
 
@@ -1195,7 +1266,7 @@ native_function::context::named_argument(
     return {};
   }
   return detail::native_function_extract_argument<T>(
-      *this, arg, [name] { return fmt::format("Named argument '{}'", name); });
+      *this, arg, [name] { return fmt::format("named argument '{}'", name); });
 }
 
 /**

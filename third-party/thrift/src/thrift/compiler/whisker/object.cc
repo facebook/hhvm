@@ -27,9 +27,15 @@
 #include <fmt/core.h>
 #include <fmt/ranges.h>
 
+#include <boost/core/demangle.hpp>
+
 namespace whisker {
 
 namespace {
+
+std::string demangle(const std::type_info& type) {
+  return boost::core::demangle(type.name());
+}
 
 class to_string_visitor {
  public:
@@ -120,11 +126,9 @@ class to_string_visitor {
     f->print_to(std::move(scope), opts_);
   }
 
-  void visit(const native_handle<>&, tree_printer::scope scope) const {
+  void visit(const native_handle<>& handle, tree_printer::scope scope) const {
     require_within_max_depth(scope);
-    // Ideally, we would print the type information here, but there is no stable
-    // (cross-platform) way to do so.
-    scope.println("<native_handle>");
+    scope.println("<native_handle type='{}'>", demangle(handle.type()));
   }
 
   [[nodiscard]] bool at_max_depth(const tree_printer::scope& scope) const {
@@ -177,6 +181,10 @@ void native_object::array_like::default_print_to(
 void native_object::print_to(
     tree_printer::scope scope, const object_print_options&) const {
   scope.println("<native_object>");
+}
+
+std::string native_object::describe_type() const {
+  return fmt::format("<native_object type='{}'>", demangle(typeid(*this)));
 }
 
 bool native_object::operator==(const native_object& other) const {
@@ -336,6 +344,42 @@ void native_function::context::declare_named_arguments(
 void native_function::print_to(
     tree_printer::scope scope, const object_print_options&) const {
   scope.println("<native_function>");
+}
+
+std::string native_function::describe_type() const {
+  return fmt::format("<native_function type='{}'>", demangle(typeid(*this)));
+}
+
+std::string detail::describe_native_handle_for_type(
+    const std::type_info& type) {
+  return fmt::format("<native_handle type='{}'>", demangle(type));
+}
+
+std::string native_handle<void>::describe_type() const {
+  return detail::describe_native_handle_for_type(type());
+}
+/* static */ std::string native_handle<void>::describe_class_type() {
+  return "<native_handle type='void'>";
+}
+
+std::string object::describe_type() const {
+  return visit(
+      [](i64) -> std::string { return "i64"; },
+      [](f64) -> std::string { return "f64"; },
+      [](const string&) -> std::string { return "string"; },
+      [](boolean) -> std::string { return "boolean"; },
+      [](null) -> std::string { return "null"; },
+      [](const array&) -> std::string { return "array"; },
+      [](const map&) -> std::string { return "map"; },
+      [](const native_object::ptr& o) -> std::string {
+        return o->describe_type();
+      },
+      [](const native_function::ptr& f) -> std::string {
+        return f->describe_type();
+      },
+      [](const native_handle<>& h) -> std::string {
+        return h.describe_type();
+      });
 }
 
 std::string to_string(const object& obj, const object_print_options& options) {

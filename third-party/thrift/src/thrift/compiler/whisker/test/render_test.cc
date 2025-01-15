@@ -831,7 +831,7 @@ TEST_F(RenderTest, user_defined_function_type_error) {
           diagnostic(
               diagnostic_level::error,
               "Function 'add' threw an error:\n"
-              "Argument at index 1 is of an unexpected type.",
+              "Expected type of argument at index 1 to be `i64`, but found `boolean`.",
               path_to_file,
               1),
           error_backtrace("#0 path/to/test.whisker <line:1, col:5>\n")));
@@ -851,7 +851,7 @@ TEST_F(RenderTest, user_defined_function_named_argument_type_error) {
           diagnostic(
               diagnostic_level::error,
               "Function 'add' threw an error:\n"
-              "Named argument 'negate' is of an unexpected type.",
+              "Expected type of named argument 'negate' to be `boolean`, but found `i64`.",
               path_to_file,
               1),
           error_backtrace("#0 path/to/test.whisker <line:1, col:5>\n")));
@@ -947,7 +947,7 @@ TEST_F(RenderTest, user_defined_function_array_like_argument) {
         testing::ElementsAre(diagnostic(
             diagnostic_level::error,
             "Function 'len' threw an error:\n"
-            "Argument at index 0 is not an array or array-like native_object.",
+            "Expected type of argument at index 0 to be `array` or `array-like native_object`, but found `string`.",
             path_to_file,
             1)));
   }
@@ -991,7 +991,7 @@ TEST_F(RenderTest, user_defined_function_array_like_named_argument) {
         testing::ElementsAre(diagnostic(
             diagnostic_level::error,
             "Function 'describe_len' threw an error:\n"
-            "Named argument 'input' is not an array or array-like native_object.",
+            "Expected type of named argument 'input' to be `array` or `array-like native_object`, but found `string`.",
             path_to_file,
             1)));
   }
@@ -1025,7 +1025,7 @@ TEST_F(RenderTest, user_defined_function_map_like_argument) {
         testing::ElementsAre(diagnostic(
             diagnostic_level::error,
             "Function 'get' threw an error:\n"
-            "Argument at index 0 is not a map or map-like native_object.",
+            "Expected type of argument at index 0 to be `map` or `map-like native_object`, but found `string`.",
             path_to_file,
             1)));
   }
@@ -1076,23 +1076,26 @@ TEST_F(RenderTest, user_defined_function_map_like_named_argument) {
         testing::ElementsAre(diagnostic(
             diagnostic_level::error,
             "Function 'describe_get' threw an error:\n"
-            "Named argument 'input' is not a map or map-like native_object.",
+            "Expected type of named argument 'input' to be `map` or `map-like native_object`, but found `string`.",
             path_to_file,
             1)));
   }
 }
 
+// External linkage to avoid noise in demangled type name.
+struct RenderTestUnknownCppType {};
+struct RenderTestMyCppType {
+  std::string description;
+};
+
 TEST_F(RenderTest, user_defined_function_native_ref_argument) {
-  struct MyCppType {
-    std::string description;
-  };
-  const MyCppType native_instance{"Hello from C++!"};
+  const RenderTestMyCppType native_instance{"Hello from C++!"};
 
   class describe : public native_function {
     object::ptr invoke(context ctx) override {
       ctx.declare_arity(1);
       ctx.declare_named_arguments({});
-      auto cpp_type = ctx.argument<native_handle<MyCppType>>(0);
+      auto cpp_type = ctx.argument<native_handle<RenderTestMyCppType>>(0);
       return manage_derived(
           cpp_type.ptr(),
           manage_owned<object>(w::string(cpp_type->description)));
@@ -1116,7 +1119,7 @@ TEST_F(RenderTest, user_defined_function_native_ref_argument) {
         "{{ (describe wrong_native_instance) }}\n",
         w::map({
             {"wrong_native_instance",
-             w::native_handle(manage_owned<std::string>("Not MyCppType"))},
+             w::native_handle(manage_owned<RenderTestUnknownCppType>())},
             {"describe", w::make_native_function<describe>()},
         }));
     EXPECT_FALSE(result.has_value());
@@ -1125,7 +1128,7 @@ TEST_F(RenderTest, user_defined_function_native_ref_argument) {
         testing::ElementsAre(diagnostic(
             diagnostic_level::error,
             "Function 'describe' threw an error:\n"
-            "Argument at index 0 is a native_handle of an unexpected type.",
+            "Expected type of argument at index 0 to be `<native_handle type='whisker::RenderTestMyCppType'>`, but found `<native_handle type='whisker::RenderTestUnknownCppType'>`.",
             path_to_file,
             1)));
   }

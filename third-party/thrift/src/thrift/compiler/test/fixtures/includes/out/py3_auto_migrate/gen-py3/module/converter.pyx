@@ -7,15 +7,16 @@
 #
 
 from libcpp.memory cimport make_shared
-from thrift.python.capi.cpp_converter cimport cpp_to_python, python_to_cpp
 from cython.operator cimport dereference as deref
+from thrift.py3.types cimport const_pointer_cast
+cimport module.thrift_converter as _module_thrift_converter
 
-cdef extern from "thrift/compiler/test/fixtures/includes/gen-python-capi/module/thrift_types_capi.h":
-    pass
 
 cdef shared_ptr[_fbthrift_cbindings.cMyStruct] MyStruct_convert_to_cpp(object inst) except*:
-    return make_shared[_fbthrift_cbindings.cMyStruct](python_to_cpp[_fbthrift_cbindings.cMyStruct](inst))
+    return make_shared[_fbthrift_cbindings.cMyStruct](
+        _module_thrift_converter.MyStruct_convert_to_cpp(inst)
+    )
 cdef object MyStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cMyStruct]& c_struct):
-    return cpp_to_python[_fbthrift_cbindings.cMyStruct](deref(c_struct))
+    return _module_thrift_converter.MyStruct_from_cpp(deref(const_pointer_cast(c_struct)))
 
 

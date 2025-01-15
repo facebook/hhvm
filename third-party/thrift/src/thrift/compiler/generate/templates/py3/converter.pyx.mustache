@@ -20,14 +20,14 @@
 
 {{#program:auto_migrate?}}
 from libcpp.memory cimport make_shared
-from thrift.python.capi.cpp_converter cimport cpp_to_python, python_to_cpp
 from cython.operator cimport dereference as deref
+from thrift.py3.types cimport const_pointer_cast
+cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_converter as {{!
+    }}_{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter
 {{#program:gen_legacy_container_converters?}}
 from libcpp.utility cimport move as cmove
 
 import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
-cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_converter as {{!
-    }}_{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter
 {{#program:includeNamespaces}}
 {{#hasTypes?}}
 import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
@@ -41,19 +41,15 @@ cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}thrift_converter as 
 cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as _fbthrift_ctypes
 {{/program:auto_migrate?}}
 
-{{!
-    Include Constructor and Extractor specializations.
- }}
-{{#program:auto_migrate?}}
-cdef extern from "{{program:includePrefix}}gen-python-capi/{{program:name}}/thrift_types_capi.h":
-    pass
-{{/program:auto_migrate?}}
 
 {{#program:filtered_structs}}
 {{! direct replacement for ._cpp_obj }}
 cdef shared_ptr[_fbthrift_cbindings.{{> types/c_struct }}] {{struct:name}}_convert_to_cpp(object inst) except*:
 {{#program:auto_migrate?}}
-    return make_shared[_fbthrift_cbindings.{{> types/c_struct }}](python_to_cpp[_fbthrift_cbindings.{{> types/c_struct }}](inst))
+    return make_shared[_fbthrift_cbindings.{{> types/c_struct }}](
+        _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter.{{!
+        }}{{struct:name}}_convert_to_cpp(inst)
+    )
 {{/program:auto_migrate?}}
 {{^program:auto_migrate?}}
     return (<_fbthrift_ctypes.{{struct:name}}?>inst).{{> types/cpp_obj}}
@@ -62,7 +58,8 @@ cdef shared_ptr[_fbthrift_cbindings.{{> types/c_struct }}] {{struct:name}}_conve
 {{! direct replacement for ._fbthrift_create }}
 cdef object {{struct:name}}_from_cpp(const shared_ptr[_fbthrift_cbindings.{{> types/c_struct }}]& c_struct):
 {{#program:auto_migrate?}}
-    return cpp_to_python[_fbthrift_cbindings.{{> types/c_struct }}](deref(c_struct))
+    return _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter.{{!
+        }}{{struct:name}}_from_cpp(deref(const_pointer_cast(c_struct)))
 {{/program:auto_migrate?}}
 {{^program:auto_migrate?}}
     return _fbthrift_ctypes.{{struct:name}}._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)

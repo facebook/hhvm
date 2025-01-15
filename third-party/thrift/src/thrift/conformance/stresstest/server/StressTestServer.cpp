@@ -74,16 +74,30 @@ using namespace apache::thrift::rocket;
 
 namespace {
 
-bool enableResourcePools() {
+bool isResourcePoolsEnabled() {
   // These flags explicitly or implicitly enable resource pools.
   return FLAGS_enable_resource_pools || FLAGS_work_stealing ||
       FLAGS_work_stealing_executor_only ||
       FLAGS_se_parallel_concurrency_controller;
 }
 
-bool enableWorkStealing() {
+bool isWorkStealingEnabled() {
   // These flags explicitly or implicitly enable work stealing executor.
   return FLAGS_work_stealing || FLAGS_work_stealing_executor_only;
+}
+
+bool isRoundRobinRequestPileEnabled() {
+  return isResourcePoolsEnabled() && !FLAGS_work_stealing_executor_only;
+}
+
+bool isParallelConcurrencyControllerEnabled() {
+  return isResourcePoolsEnabled() && !FLAGS_work_stealing_executor_only &&
+      !FLAGS_se_parallel_concurrency_controller;
+}
+
+bool isSEParallelConcurrencyControllerEnabled() {
+  return isResourcePoolsEnabled() && !FLAGS_work_stealing_executor_only &&
+      FLAGS_se_parallel_concurrency_controller;
 }
 
 uint32_t sanitizeNumThreads(int32_t n) {
@@ -189,45 +203,54 @@ std::shared_ptr<ThriftServer> createStressTestServer(
     server->setSSLConfig(getSSLConfig());
   }
 
-  if (enableResourcePools()) {
-    LOG(INFO) << "Resource pools enabled";
-    std::shared_ptr<folly::Executor> executor;
-    std::unique_ptr<RequestPileInterface> requestPile;
-    std::unique_ptr<ConcurrencyControllerInterface> concurrencyController;
-    auto t = sanitizeNumThreads(FLAGS_cpu_threads);
-    if (enableWorkStealing()) {
-      LOG(INFO) << "Work stealing executor enabled";
-      executor =
-          std::make_shared<folly::WorkStealingExecutor>(FLAGS_cpu_threads);
-      if (FLAGS_work_stealing_executor_only) {
-        LOG(INFO) << "Request pile and concurrency controller disabled";
-      } else {
-        LOG(INFO) << "Work Stealing with controller";
-        RoundRobinRequestPile::Options options;
-        requestPile =
-            std::make_unique<RoundRobinRequestPile>(std::move(options));
-        concurrencyController = std::make_unique<ParallelConcurrencyController>(
-            *requestPile.get(), *executor.get());
-      }
-    } else if (FLAGS_se_parallel_concurrency_controller) {
-      LOG(INFO) << "ParallelConcurrencyController with SerialExecutor enabled";
-      executor = std::make_shared<folly::CPUThreadPoolExecutor>(t);
-      RoundRobinRequestPile::Options options;
-      requestPile = std::make_unique<RoundRobinRequestPile>(std::move(options));
-      concurrencyController = std::make_unique<ParallelConcurrencyController>(
-          *requestPile.get(),
-          *executor.get(),
-          ParallelConcurrencyController::RequestExecutionMode::Serial);
-    }
-
-    server->resourcePoolSet().setResourcePool(
-        ResourcePoolHandle::defaultAsync(),
-        std::move(requestPile),
-        executor,
-        std::move(concurrencyController));
-    server->ensureResourcePools();
-    server->requireResourcePools();
+  if (!isResourcePoolsEnabled()) {
+    return server;
   }
+
+  LOG(INFO) << "Resource pools enabled";
+  std::shared_ptr<folly::Executor> executor;
+  auto t = sanitizeNumThreads(FLAGS_cpu_threads);
+
+  if (isWorkStealingEnabled()) {
+    LOG(INFO) << "Work Stealing Executor enabled";
+    executor = std::make_shared<folly::WorkStealingExecutor>(FLAGS_cpu_threads);
+  } else if (isSEParallelConcurrencyControllerEnabled()) {
+    // Note that the check above causes executor to not be set in some cases. It
+    // is preserved for just this commit to keep things logically identical to
+    // the base commit, and make it obvious that it should be a simple "else".
+    // It is fixed in the following diff.
+    LOG(INFO) << "CPU Thread Pool Executor enabled";
+    executor = std::make_shared<folly::CPUThreadPoolExecutor>(
+        t, folly::CPUThreadPoolExecutor::makeThrottledLifoSemQueue());
+  }
+
+  std::unique_ptr<RequestPileInterface> requestPile;
+  if (isRoundRobinRequestPileEnabled()) {
+    LOG(INFO) << "Round Robin Request Pile enabled";
+    requestPile = std::make_unique<RoundRobinRequestPile>(
+        RoundRobinRequestPile::Options{});
+  }
+
+  std::unique_ptr<ConcurrencyControllerInterface> concurrencyController;
+  if (isParallelConcurrencyControllerEnabled()) {
+    LOG(INFO) << "Parallel Concurrency Controller enabled";
+    concurrencyController = std::make_unique<ParallelConcurrencyController>(
+        *requestPile.get(), *executor.get());
+  } else if (isSEParallelConcurrencyControllerEnabled()) {
+    LOG(INFO) << "ParallelConcurrencyController with SerialExecutor enabled";
+    concurrencyController = std::make_unique<ParallelConcurrencyController>(
+        *requestPile.get(),
+        *executor.get(),
+        ParallelConcurrencyController::RequestExecutionMode::Serial);
+  }
+
+  server->resourcePoolSet().setResourcePool(
+      ResourcePoolHandle::defaultAsync(),
+      std::move(requestPile),
+      executor,
+      std::move(concurrencyController));
+  server->ensureResourcePools();
+  server->requireResourcePools();
 
   return server;
 }

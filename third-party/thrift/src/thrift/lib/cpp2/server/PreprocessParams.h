@@ -60,6 +60,13 @@ struct PreprocessParams {
     return folly::get_ptr(headers, transport::THeader::kServiceTraceMeta);
   }
 
+  concurrency::PRIORITY getCallPriority() const {
+    if (!request_) {
+      return concurrency::NORMAL;
+    }
+    return request_->getRequestContext()->getCallPriority();
+  }
+
  private:
   const ThriftRequestCore* request_;
 };

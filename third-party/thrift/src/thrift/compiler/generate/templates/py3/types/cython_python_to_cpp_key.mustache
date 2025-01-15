@@ -43,6 +43,11 @@ keys (conventionally used for sets, lists, and map values).
   }}{{/program:auto_migrate?}}{{!
 }}{{/type:struct}}{{!
 }}{{#type:container?}}{{!
-  }}{{type:flat_name}}__make_instance(key){{!
+  }}{{^program:auto_migrate?}}{{!
+    }}{{> types/container_to_cpp }}(key){{!
+  }}{{/program:auto_migrate?}}{{!
+  }}{{#program:auto_migrate?}}{{!
+    }}{{type:flat_name}}__make_instance(key){{!
+  }}{{/program:auto_migrate?}}{{!
 }}{{/type:container?}}{{!
 }}{{#type:enum?}}<{{> types/cython_cpp_type}}><int>key{{/type:enum?}}

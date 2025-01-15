@@ -568,13 +568,13 @@ class render_engine {
                 const native_function::ptr& f =
                     lookup_result->as_native_function();
 
-                native_function::context::positional_arguments positional_args;
+                native_function::positional_arguments_t positional_args;
                 positional_args.reserve(func.positional_arguments.size());
                 for (const expression& arg : func.positional_arguments) {
                   positional_args.push_back(evaluate(arg));
                 }
 
-                native_function::context::named_arguments named_args;
+                native_function::named_arguments_t named_args;
                 for (const auto& [arg_name, entry] : func.named_arguments) {
                   [[maybe_unused]] const auto& [_, inserted] =
                       named_args.emplace(arg_name, evaluate(*entry.value));

@@ -16,20 +16,28 @@
 
 #include <thrift/compiler/whisker/standard_library.h>
 
+#include <thrift/compiler/whisker/dsl.h>
+
+#include <fmt/core.h>
+
 namespace w = whisker::make;
 
 namespace whisker {
 
 namespace {
 
-class named_native_function : public native_function {
+class named_native_function : public dsl::function {
  public:
   explicit named_native_function(std::string_view name)
       : name_(std::move(name)) {}
 
+  std::string describe_type() const final {
+    return fmt::format("<function {}>", name_);
+  }
+
   void print_to(
       tree_printer::scope scope, const object_print_options&) const final {
-    scope.println("<function {}>", name_);
+    scope.println("{}", describe_type());
   }
 
  private:
@@ -60,7 +68,7 @@ map::value_type create_array_functions() {
         ctx.declare_named_arguments({});
         array result;
         result.reserve(ctx.arity());
-        for (const object::ptr& arg : ctx.arguments()) {
+        for (const object::ptr& arg : ctx.raw().positional_arguments()) {
           result.emplace_back(object(*arg));
         }
         return manage_owned<object>(w::array(std::move(result)));
@@ -198,14 +206,14 @@ map::value_type create_int_functions() {
    public:
     using named_native_function::named_native_function;
 
-    virtual boolean invoke(i64 lhs, i64 rhs) const = 0;
+    virtual boolean compute(i64 lhs, i64 rhs) const = 0;
 
     object::ptr invoke(context ctx) final {
       ctx.declare_named_arguments({});
       ctx.declare_arity(2);
       return manage_as_static(
-          invoke(ctx.argument<i64>(0), ctx.argument<i64>(1)) ? w::true_
-                                                             : w::false_);
+          compute(ctx.argument<i64>(0), ctx.argument<i64>(1)) ? w::true_
+                                                              : w::false_);
     }
   };
 
@@ -233,7 +241,7 @@ map::value_type create_int_functions() {
      public:
       int_lt() : i64_binary_predicate("int.lt?") {}
 
-      bool invoke(i64 lhs, i64 rhs) const final { return lhs < rhs; }
+      bool compute(i64 lhs, i64 rhs) const final { return lhs < rhs; }
     };
     int_functions["lt?"] = w::make_native_function<int_lt>();
   }
@@ -256,7 +264,7 @@ map::value_type create_int_functions() {
      public:
       int_le() : i64_binary_predicate("int.le?") {}
 
-      bool invoke(i64 lhs, i64 rhs) const final { return lhs <= rhs; }
+      bool compute(i64 lhs, i64 rhs) const final { return lhs <= rhs; }
     };
     int_functions["le?"] = w::make_native_function<int_le>();
   }
@@ -278,7 +286,7 @@ map::value_type create_int_functions() {
      public:
       int_eq() : i64_binary_predicate("int.eq?") {}
 
-      bool invoke(i64 lhs, i64 rhs) const final { return lhs == rhs; }
+      bool compute(i64 lhs, i64 rhs) const final { return lhs == rhs; }
     };
     int_functions["eq?"] = w::make_native_function<int_eq>();
   }
@@ -300,7 +308,7 @@ map::value_type create_int_functions() {
      public:
       int_ne() : i64_binary_predicate("int.ne?") {}
 
-      bool invoke(i64 lhs, i64 rhs) const final { return lhs != rhs; }
+      bool compute(i64 lhs, i64 rhs) const final { return lhs != rhs; }
     };
     int_functions["ne?"] = w::make_native_function<int_ne>();
   }
@@ -323,7 +331,7 @@ map::value_type create_int_functions() {
      public:
       int_ge() : i64_binary_predicate("int.ge?") {}
 
-      bool invoke(i64 lhs, i64 rhs) const final { return lhs >= rhs; }
+      bool compute(i64 lhs, i64 rhs) const final { return lhs >= rhs; }
     };
     int_functions["ge?"] = w::make_native_function<int_ge>();
   }
@@ -346,7 +354,7 @@ map::value_type create_int_functions() {
      public:
       int_gt() : i64_binary_predicate("int.gt?") {}
 
-      bool invoke(i64 lhs, i64 rhs) const final { return lhs > rhs; }
+      bool compute(i64 lhs, i64 rhs) const final { return lhs > rhs; }
     };
     int_functions["gt?"] = w::make_native_function<int_gt>();
   }

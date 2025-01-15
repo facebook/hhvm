@@ -18,6 +18,7 @@
 #include <folly/portability/GTest.h>
 
 #include <thrift/compiler/whisker/diagnostic.h>
+#include <thrift/compiler/whisker/dsl.h>
 #include <thrift/compiler/whisker/object.h>
 #include <thrift/compiler/whisker/test/render_test_helpers.h>
 
@@ -701,7 +702,7 @@ namespace functions {
  * Adds i64 together. If the 'negate' argument is true, then the final result is
  * negated.
  */
-class add : public native_function {
+class add : public dsl::function {
   object::ptr invoke(context ctx) override {
     ctx.declare_named_arguments({"negate"});
     const bool negate = [&] {
@@ -719,7 +720,7 @@ class add : public native_function {
 /**
  * Returns a boolean indicating if two i64 are equal or not.
  */
-class i64_eq : public native_function {
+class i64_eq : public dsl::function {
   object::ptr invoke(context ctx) override {
     ctx.declare_arity(2);
     ctx.declare_named_arguments({});
@@ -733,7 +734,7 @@ class i64_eq : public native_function {
  * Concatenates a sequences of strings together. If the 'sep' argument is
  * provided, then it is used as the delimiter between elements.
  */
-class str_concat : public native_function {
+class str_concat : public dsl::function {
   object::ptr invoke(context ctx) override {
     ctx.declare_named_arguments({"sep"});
     const std::string sep = [&] {
@@ -754,7 +755,7 @@ class str_concat : public native_function {
 /**
  * Returns the length of an array.
  */
-class array_len : public native_function {
+class array_len : public dsl::function {
   object::ptr invoke(context ctx) override {
     ctx.declare_arity(1);
     ctx.declare_named_arguments({});
@@ -767,7 +768,7 @@ class array_len : public native_function {
  * Dynamically accesses a property by name in a map, throwing an error if not
  * present.
  */
-class map_get : public native_function {
+class map_get : public dsl::function {
   object::ptr invoke(context ctx) override {
     ctx.declare_arity(1);
     ctx.declare_named_arguments({"key"});
@@ -954,7 +955,7 @@ TEST_F(RenderTest, user_defined_function_array_like_argument) {
 }
 
 TEST_F(RenderTest, user_defined_function_array_like_named_argument) {
-  class describe_array_len : public native_function {
+  class describe_array_len : public dsl::function {
     object::ptr invoke(context ctx) override {
       ctx.declare_arity(0);
       ctx.declare_named_arguments({"input"});
@@ -1032,7 +1033,7 @@ TEST_F(RenderTest, user_defined_function_map_like_argument) {
 }
 
 TEST_F(RenderTest, user_defined_function_map_like_named_argument) {
-  class describe_map_get : public native_function {
+  class describe_map_get : public dsl::function {
     object::ptr invoke(context ctx) override {
       ctx.declare_arity(0);
       ctx.declare_named_arguments({"input", "key"});
@@ -1091,7 +1092,7 @@ struct RenderTestMyCppType {
 TEST_F(RenderTest, user_defined_function_native_ref_argument) {
   const RenderTestMyCppType native_instance{"Hello from C++!"};
 
-  class describe : public native_function {
+  class describe : public dsl::function {
     object::ptr invoke(context ctx) override {
       ctx.declare_arity(1);
       ctx.declare_named_arguments({});

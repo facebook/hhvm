@@ -20,7 +20,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <initializer_list>
 #include <iosfwd>
 #include <limits>
 #include <map>
@@ -305,23 +304,6 @@ class native_object {
   virtual bool operator==(const native_object& other) const;
 };
 
-namespace detail {
-/**
- * Determines the result of trying to access a typed argument via
- * argument<T>(...) or named_argument<T>(...).
- *
- * Small primitive types (i64, f64, boolean) are returned by value.
- * The larger primitive type (string) is returned as a managed_ptr<string>.
- * native_handle<T> is returned by value.
- *
- * Maps and arrays are wrapped by helper classes, in order to abstract away
- * differences with native_object::array_like and native_object::map_like
- * respectively.
- */
-template <typename T>
-struct native_function_argument_result;
-} // namespace detail
-
 /**
  * A native_function represents a user-defined function in Whisker. Its behavior
  * is defined by highly customizable C++ code but its inputs and output are
@@ -344,48 +326,8 @@ class native_function {
    *
    * Whisker's renderer calls this function when evaluating expressions.
    *
-   * Example:
-   *
-   *     class i64_eq : public native_function {
-   *       object::ptr invoke(context ctx) override {
-   *         ctx.declare_arity(2);
-   *         ctx.declare_named_arguments({});
-   *         i64 a = ctx.argument<i64>(0);
-   *         i64 b = ctx.argument<i64>(1);
-   *         return manage_owned<object>(whisker::make::boolean(a == b));
-   *       }
-   *     };
-   *
-   *     {{ (i64_eq 42 42) }}
-   *     {{! Produces true }}
-   *
-   * Example (variadic, named arguments):
-   *
-   *     class str_concat : public native_function {
-   *       object::ptr invoke(context ctx) override {
-   *         ctx.declare_named_arguments({"sep"});
-   *         const std::string sep = [&] {
-   *           auto arg = ctx.named_argument<string>("sep", context::optional);
-   *           return arg == nullptr ? "" : *arg;
-   *         }();
-   *         string result;
-   *         for (std::size_t i = 0; i < ctx.arity(); ++i) {
-   *           if (i != 0) {
-   *             result += sep;
-   *           }
-   *           result += *ctx.argument<string>(i);
-   *         }
-   *         return manage_owned<object>(
-   *             whisker::make::string(std::move(result)));
-   *       }
-   *     };
-   *
-   *     {{ (str_concat "apache" "thrift" "test" sep="::") }}
-   *     {{! Produces "apache::thrift::test" }}
-   *
-   * native_function is a low-level API and its context API provides some basic
-   * type-checking facilities. For complex native_function implementations, a
-   * higher-level DSL would be useful.
+   * native_function is a low-level API. Most native_function implements should
+   * use a higher-level dsl. See `dsl.h`.
    *
    * Postconditions:
    *  - The returned object is non-null.
@@ -401,6 +343,18 @@ class native_function {
   };
 
   /**
+   * An ordered list of positional argument values. The position is equal to
+   * the index in this vector.
+   */
+  using positional_arguments_t = std::vector<std::shared_ptr<const object>>;
+  /**
+   * A map of argument names to their values. The names are guaranteed to be a
+   * valid Whisker identifier.
+   */
+  using named_arguments_t =
+      std::unordered_map<std::string_view, std::shared_ptr<const object>>;
+
+  /**
    * A class that provides information about the executing function to
    * invoke(...).
    *
@@ -411,23 +365,11 @@ class native_function {
    */
   class context {
    public:
-    /**
-     * An ordered list of positional argument values. The position is equal to
-     * the index in this vector.
-     */
-    using positional_arguments = std::vector<std::shared_ptr<const object>>;
-    /**
-     * A map of argument names to their values. The names are guaranteed to be a
-     * valid Whisker identifier.
-     */
-    using named_arguments =
-        std::unordered_map<std::string_view, std::shared_ptr<const object>>;
-
     context(
         source_range loc,
         diagnostics_engine& diags,
-        positional_arguments&& positional_args,
-        named_arguments&& named_args)
+        positional_arguments_t&& positional_args,
+        named_arguments_t&& named_args)
         : loc_(std::move(loc)),
           diags_(diags),
           positional_args_(std::move(positional_args)),
@@ -439,184 +381,19 @@ class native_function {
     context& operator=(context&&) = default;
     ~context() noexcept = default;
 
-    /**
-     * Returns the number of positional arguments to this function call.
-     * Note that named arguments do not affect the arity.
-     */
-    std::size_t arity() const noexcept { return positional_args_.size(); }
-    const positional_arguments& arguments() const { return positional_args_; }
-
-    /**
-     * A class that abstracts over the difference between a whisker::array and a
-     * native_object::array_like object.
-     *
-     * This is useful for the common case where native_function implementations
-     * are ambivalent to the underlying array-like type.
-     */
-    class array_like final : public native_object::array_like {
-     public:
-      std::size_t size() const final;
-      managed_ptr<object> at(std::size_t index) const final;
-
-      // Avoids incomplete type (whisker::object) errors on MSVC.
-      ~array_like() noexcept override;
-      array_like(const array_like&);
-      array_like& operator=(const array_like&);
-      array_like(array_like&&) noexcept;
-      array_like& operator=(array_like&&) noexcept;
-
-      /**
-       * Tries to marshal the provided object into an array-like object, if the
-       * underlying type matches. Otherwise, returns an empty optional.
-       */
-      static std::optional<array_like> try_from(const managed_ptr<object>&);
-
-     private:
-      explicit array_like(native_object::array_like::ptr&& arr);
-      explicit array_like(managed_ptr<array>&& arr);
-
-      std::variant<native_object::array_like::ptr, managed_ptr<array>> which_;
-
-      friend class context;
-    };
-
-    /**
-     * A class that abstracts over the difference between a whisker::map and a
-     * native_object::map_like object.
-     *
-     * This is useful for the common case where native_function implementations
-     * are ambivalent to the underlying map-like type.
-     */
-    class map_like final : public native_object::map_like {
-     public:
-      managed_ptr<object> lookup_property(
-          std::string_view identifier) const final;
-      std::optional<std::vector<std::string>> keys() const final;
-
-      // Avoids incomplete type (whisker::object) errors on MSVC.
-      ~map_like() noexcept override;
-      map_like(const map_like&);
-      map_like& operator=(const map_like&);
-      map_like(map_like&&) noexcept;
-      map_like& operator=(map_like&&) noexcept;
-
-      /**
-       * Tries to marshal the provided object into an map-like object, if the
-       * underlying type matches. Otherwise, returns an empty optional.
-       */
-      static std::optional<map_like> try_from(const managed_ptr<object>&);
-
-     private:
-      explicit map_like(native_object::map_like::ptr&& m);
-      explicit map_like(managed_ptr<map>&& m);
-
-      std::variant<native_object::map_like::ptr, managed_ptr<map>> which_;
-
-      friend class context;
-    };
-
-    template <typename T>
-    using argument_result_t =
-        typename detail::native_function_argument_result<T>::type;
-    /**
-     * Returns a reference to a positional argument, checked against the desired
-     * type `T`.
-     *
-     * If the argument is not of the correct type, then this throws an error.
-     *
-     * Preconditions:
-     *  - index < arity()
-     *
-     * Postconditions:
-     *   - The returned object is non-null.
-     */
-    template <typename T>
-    argument_result_t<T> argument(std::size_t index) const;
-
-    /**
-     * Signals the intent of a named argument. Named arguments are often used as
-     * options, but not always.
-     */
-    enum class named_argument_presence : bool {
-      required,
-      optional,
-    };
-    // For convenience, we make these names available in class scope.
-    static constexpr named_argument_presence required =
-        named_argument_presence::required;
-    static constexpr named_argument_presence optional =
-        named_argument_presence::optional;
-
-    /**
-     * Returns a pointer to a named argument, if present.
-     *
-     * If the argument is not present and presence is required, then this throws
-     * an error. Otherwise, returns nullptr.
-     */
-    managed_ptr<object> named_argument(
-        std::string_view name,
-        named_argument_presence = named_argument_presence::required) const;
-
-    template <typename T>
-    using argument_result_optional_t =
-        typename detail::native_function_argument_result<T>::optional_type;
-    /**
-     * Returns a reference to a named argument, checked against the desired type
-     * `T`, if present.
-     *
-     * If the argument is not present and presence is required, then this throws
-     * an error. Otherwise, returns nullptr (or empty optional).
-     *
-     * If the argument is present but is not of the correct type, then this
-     * throws an error.
-     */
-    template <typename T>
-    argument_result_optional_t<T> named_argument(
-        std::string_view name,
-        named_argument_presence = named_argument_presence::required) const;
-
-    /**
-     * Logs a fatal error in function evaluation.
-     *
-     * Calling this function will prevent further evaluation of this function
-     * and cause text rendering to fail.
-     */
-    template <typename... T>
-    [[noreturn]] void error(fmt::format_string<T...> msg, T&&... args) const {
-      throw fatal_error{fmt::format(msg, std::forward<T>(args)...)};
+    source_range location() const noexcept { return loc_; }
+    diagnostics_engine& diagnostics() const noexcept { return diags_; }
+    const positional_arguments_t& positional_arguments() const noexcept {
+      return positional_args_;
     }
-
-    /**
-     * Logs a non-fatal warning in function evaluation.
-     */
-    template <typename... T>
-    void warning(fmt::format_string<T...> msg, T&&... args) const {
-      this->do_warning(fmt::format(msg, std::forward<T>(args)...));
+    const named_arguments_t& named_arguments() const noexcept {
+      return named_args_;
     }
-
-    /**
-     * Throws an error if arity() != expected. Otherwise, this a no-op.
-     */
-    void declare_arity(std::size_t expected) const;
-    /**
-     * Throws an error if the set of named arguments contains any names not
-     * provided here. This can catch typos in function calls. Otherwise, this is
-     * a no-op.
-     *
-     * Note that the named arguments at runtime must be a *subset* of the set
-     * provided here, NOT an exact match. This is because named arguments may be
-     * optional.
-     */
-    void declare_named_arguments(
-        std::initializer_list<std::string_view> expected) const;
-
-   private:
-    void do_warning(std::string msg) const;
 
     source_range loc_;
     std::reference_wrapper<diagnostics_engine> diags_;
-    positional_arguments positional_args_;
-    named_arguments named_args_;
+    positional_arguments_t positional_args_;
+    named_arguments_t named_args_;
   };
   static_assert(std::is_move_constructible_v<context>);
 
@@ -793,42 +570,6 @@ using object_base = std::variant<
     native_handle<>,
     std::vector<Self>,
     std::map<std::string, Self, std::less<>>>;
-
-template <>
-struct native_function_argument_result<i64> {
-  using type = i64;
-  using optional_type = std::optional<type>;
-};
-template <>
-struct native_function_argument_result<f64> {
-  using type = f64;
-  using optional_type = std::optional<type>;
-};
-template <>
-struct native_function_argument_result<boolean> {
-  using type = boolean;
-  using optional_type = std::optional<type>;
-};
-template <>
-struct native_function_argument_result<string> {
-  using type = managed_ptr<string>;
-  using optional_type = type;
-};
-template <>
-struct native_function_argument_result<array> {
-  using type = native_function::context::array_like;
-  using optional_type = std::optional<type>;
-};
-template <>
-struct native_function_argument_result<map> {
-  using type = native_function::context::map_like;
-  using optional_type = std::optional<type>;
-};
-template <typename T>
-struct native_function_argument_result<native_handle<T>> {
-  using type = native_handle<T>;
-  using optional_type = std::optional<type>;
-};
 } // namespace detail
 
 /**
@@ -1160,114 +901,6 @@ class object final : private detail::object_base<object> {
     return !(lhs == rhs);
   }
 };
-
-namespace detail {
-
-template <typename T>
-std::string_view describe_primitive_type() {
-  if constexpr (std::is_same_v<T, boolean>) {
-    return "boolean";
-  } else if constexpr (std::is_same_v<T, i64>) {
-    return "i64";
-  } else if constexpr (std::is_same_v<T, f64>) {
-    return "f64";
-  } else if constexpr (std::is_same_v<T, string>) {
-    return "string";
-  } else if constexpr (std::is_same_v<T, null>) {
-    return "null";
-  } else {
-    static_assert(sizeof(T) == 0, "Invalid primitive type");
-  }
-}
-
-template <typename T, typename DescribeArgumentFunc>
-native_function::context::argument_result_t<T> native_function_extract_argument(
-    const native_function::context& ctx,
-    const object::ptr& arg,
-    DescribeArgumentFunc&& describe_argument) {
-  if constexpr (std::is_same_v<T, array>) {
-    if (auto arr = native_function::context::array_like::try_from(arg)) {
-      return std::move(*arr);
-    }
-    ctx.error(
-        "Expected type of {} to be `array` or `array-like native_object`, but found `{}`.",
-        describe_argument(),
-        arg->describe_type());
-  } else if constexpr (std::is_same_v<T, map>) {
-    if (auto m = native_function::context::map_like::try_from(arg)) {
-      return std::move(*m);
-    }
-    ctx.error(
-        "Expected type of {} to be `map` or `map-like native_object`, but found `{}`.",
-        describe_argument(),
-        arg->describe_type());
-  } else if constexpr (detail::is_specialization_v<T, native_handle>) {
-    using element_type = typename T::element_type;
-    if (!arg->is_native_handle()) {
-      ctx.error(
-          "Expected type of {} to be `{}`, but found `{}`.",
-          describe_argument(),
-          T::describe_class_type(),
-          arg->describe_type());
-    }
-    const native_handle<>& handle = arg->as_native_handle();
-    if constexpr (std::is_same_v<element_type, void>) {
-      return handle;
-    } else {
-      if (!handle.is<element_type>()) {
-        ctx.error(
-            "Expected type of {} to be `{}`, but found `{}`.",
-            describe_argument(),
-            T::describe_class_type(),
-            arg->describe_type());
-      }
-      return handle.as<element_type>();
-    }
-  } else {
-    // Primitive types
-    static_assert(
-        std::is_same_v<T, boolean> || std::is_same_v<T, i64> ||
-        std::is_same_v<T, f64> || std::is_same_v<T, string> ||
-        std::is_same_v<T, null>);
-    if (!arg->is<T>()) {
-      ctx.error(
-          "Expected type of {} to be `{}`, but found `{}`.",
-          describe_argument(),
-          detail::describe_primitive_type<T>(),
-          arg->describe_type());
-    }
-    if constexpr (std::is_same_v<T, string>) {
-      return manage_derived_ref<T>(arg, arg->as<T>());
-    } else {
-      return arg->as<T>();
-    }
-  }
-}
-
-} // namespace detail
-
-template <typename T>
-native_function::context::argument_result_t<T>
-native_function::context::argument(size_t index) const {
-  return detail::native_function_extract_argument<T>(
-      *this, positional_args_.at(index), [index] {
-        return fmt::format("argument at index {}", index);
-      });
-}
-
-template <typename T>
-native_function::context::argument_result_optional_t<T>
-native_function::context::named_argument(
-    std::string_view name, named_argument_presence presence) const {
-  const object::ptr& arg = this->named_argument(name, presence);
-  if (arg == nullptr) {
-    assert(presence == named_argument_presence::optional);
-    // either nullptr or empty optional
-    return {};
-  }
-  return detail::native_function_extract_argument<T>(
-      *this, arg, [name] { return fmt::format("named argument '{}'", name); });
-}
 
 /**
  * An alternative to to_string() that allows printing a whisker::object within

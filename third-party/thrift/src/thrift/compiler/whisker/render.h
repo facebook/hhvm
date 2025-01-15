@@ -113,6 +113,8 @@ struct render_options {
    *   - array
    *   - map
    *   - native_object
+   *   - native_function
+   *   - native_handle
    */
   diagnostic_level strict_printable_types = diagnostic_level::error;
 

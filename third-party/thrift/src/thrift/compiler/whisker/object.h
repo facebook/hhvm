@@ -27,12 +27,14 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <typeinfo>
 #include <unordered_map>
 #include <utility>
 #include <variant>
 #include <vector>
 
 #include <thrift/compiler/whisker/detail/overload.h>
+#include <thrift/compiler/whisker/detail/type_traits.h>
 #include <thrift/compiler/whisker/diagnostic.h>
 #include <thrift/compiler/whisker/managed_ptr.h>
 #include <thrift/compiler/whisker/source_location.h>
@@ -56,6 +58,8 @@ namespace whisker {
 //               User-defined (C++) type with lazily evaluated properties.
 //   * native_function —
 //               User-defined (C++) function that operates on `whisker::object`.
+//   * native_handle —
+//               A pointer to an opaque (C++) object.
 //
 // Currently, the Whisker templating language only supports i64, null, string,
 // and boolean as literals. However, the evaluation engine can recognize all of
@@ -302,6 +306,7 @@ namespace detail {
  *
  * Small primitive types (i64, f64, boolean) are returned by value.
  * The larger primitive type (string) is returned as a managed_ptr<string>.
+ * native_handle<T> is returned by value.
  *
  * Maps and arrays are wrapped by helper classes, in order to abstract away
  * differences with native_object::array_like and native_object::map_like
@@ -312,7 +317,6 @@ struct native_function_argument_result;
 } // namespace detail
 
 /**
- *
  * A native_function represents a user-defined function in Whisker. Its behavior
  * is defined by highly customizable C++ code but its inputs and output are
  * whisker::object.
@@ -617,6 +621,130 @@ class native_function {
   virtual void print_to(tree_printer::scope, const object_print_options&) const;
 };
 
+/**
+ * A native_handle represents an opaque reference to any native (C++) data type.
+ *
+ * While whisker templates do not "understand" these types, it can pass around
+ * the handle like any other data type (such as iterating with each-loops). To
+ * extract usable information out of the handle, it can be passed as an argument
+ * into a native_function (which *can* understand the type).
+ *
+ * native_handle and native_function together enable the "opaque pointer"
+ * pattern, commonly used in languages like C:
+ *   https://en.wikipedia.org/wiki/Opaque_pointer#C
+ *
+ * native_handle always contains a non-null reference.
+ */
+template <typename T = void>
+class native_handle;
+
+namespace detail {
+
+template <typename T>
+class native_handle_base {
+ public:
+  explicit native_handle_base(managed_ptr<T> ref) noexcept
+      : ref_(std::move(ref)) {
+    assert(ref_ != nullptr);
+  }
+
+  const managed_ptr<T>& ptr() const& { return ref_; }
+  managed_ptr<T>&& ptr() && { return std::move(ref_); }
+
+ private:
+  managed_ptr<T> ref_;
+};
+
+} // namespace detail
+
+/**
+ * A native_handle<void> is a specialized handle object which additionally
+ * stores the contained type information (as std::type_info).
+ *
+ * This type forms the basis of type-safe type-erasure for native_function
+ * arguments that operate on native_handle objects.
+ */
+template <>
+class native_handle<void> final : private detail::native_handle_base<void> {
+ private:
+  using base = detail::native_handle_base<void>;
+
+ public:
+  using element_type = void;
+
+  template <typename T>
+  explicit native_handle(managed_ptr<T> ref) noexcept
+      : base(managed_ptr<void>(ref, static_cast<const void*>(ref.get()))),
+        type_(typeid(T)) {}
+
+  using base::ptr;
+  const std::type_info& type() const noexcept { return type_; }
+
+  template <typename T>
+  bool is() const noexcept {
+    return type_.get() == typeid(T);
+  }
+
+  template <typename T>
+  native_handle<T> as() const {
+    assert(is<T>());
+    return native_handle<T>(std::static_pointer_cast<const T>(ptr()));
+  }
+
+ private:
+  std::reference_wrapper<const std::type_info> type_;
+};
+
+template <typename T>
+class native_handle final : private detail::native_handle_base<T> {
+ private:
+  using base = detail::native_handle_base<T>;
+
+ public:
+  static_assert(!std::is_const_v<T>);
+  static_assert(!std::is_reference_v<T>);
+  static_assert(!std::is_void_v<T>);
+  using element_type = T;
+
+  using base::base;
+  using base::ptr;
+  const T& operator*() const noexcept { return *ptr(); }
+  const T* operator->() const noexcept { return ptr().get(); }
+
+  /* implicit */ operator native_handle<void>() const noexcept {
+    return native_handle<void>(ptr());
+  }
+};
+
+template <typename T>
+native_handle(managed_ptr<T>) -> native_handle<T>;
+
+/**
+ * Two native_handle objects are equal iff they point to the same data.
+ *
+ * Example:
+ *
+ *     native_handle handle1{manage_owned<int>(42)};
+ *     native_handle handle2{manage_owned<int>(42)};
+ *     assert(handle1 != handle2);
+ *
+ *     auto integer = manage_owned<int>(42)
+ *     native_handle handle1{integer};
+ *     native_handle handle2{integer};
+ *     assert(handle1 == handle2);
+ */
+template <typename T, typename U>
+inline bool operator==(
+    const native_handle<T>& lhs, const native_handle<U>& rhs) noexcept {
+  return lhs.ptr() == rhs.ptr();
+}
+// Before C++20, operator!= is not synthesized from operator==.
+template <typename T, typename U>
+inline bool operator!=(
+    const native_handle<T>& lhs, const native_handle<U>& rhs) noexcept {
+  return !(lhs == rhs);
+}
+
 namespace detail {
 // This only exists to form a kind-of recursive std::variant with the help of
 // forward declared types.
@@ -629,6 +757,7 @@ using object_base = std::variant<
     boolean,
     native_object::ptr,
     native_function::ptr,
+    native_handle<>,
     std::vector<Self>,
     std::map<std::string, Self, std::less<>>>;
 
@@ -660,6 +789,11 @@ struct native_function_argument_result<array> {
 template <>
 struct native_function_argument_result<map> {
   using type = native_function::context::map_like;
+  using optional_type = std::optional<type>;
+};
+template <typename T>
+struct native_function_argument_result<native_handle<T>> {
+  using type = native_handle<T>;
   using optional_type = std::optional<type>;
 };
 } // namespace detail
@@ -731,6 +865,9 @@ class object final : private detail::object_base<object> {
   explicit object(native_function::ptr&& value) : base(std::move(value)) {
     assert(as_native_function() != nullptr);
   }
+  explicit object(native_handle<>&& value) : base(std::move(value)) {
+    assert(as_native_handle().ptr() != nullptr);
+  }
   explicit object(map&& value) : base(std::move(value)) {}
   explicit object(array&& value) : base(std::move(value)) {}
 
@@ -785,6 +922,13 @@ class object final : private detail::object_base<object> {
   }
   bool is_native_function() const noexcept {
     return holds_alternative<native_function::ptr>();
+  }
+
+  const native_handle<>& as_native_handle() const {
+    return as<native_handle<>>();
+  }
+  bool is_native_handle() const noexcept {
+    return holds_alternative<native_handle<>>();
   }
 
   const array& as_array() const { return as<array>(); }
@@ -855,6 +999,15 @@ class object final : private detail::object_base<object> {
   }
   friend bool operator==(
       const native_function::ptr& lhs, const object& rhs) noexcept {
+    return rhs == lhs;
+  }
+
+  friend bool operator==(
+      const object& lhs, const native_handle<>& rhs) noexcept {
+    return lhs.is_native_handle() && lhs.as_native_handle() == rhs;
+  }
+  friend bool operator==(
+      const native_handle<>& lhs, const object& rhs) noexcept {
     return rhs == lhs;
   }
 
@@ -941,6 +1094,15 @@ class object final : private detail::object_base<object> {
     return !(lhs == rhs);
   }
 
+  friend bool operator!=(
+      const object& lhs, const native_handle<>& rhs) noexcept {
+    return !(lhs == rhs);
+  }
+  friend bool operator!=(
+      const native_handle<>& lhs, const object& rhs) noexcept {
+    return !(lhs == rhs);
+  }
+
   friend bool operator!=(const object& lhs, const array& rhs) noexcept {
     return !(lhs == rhs);
   }
@@ -960,74 +1122,80 @@ class object final : private detail::object_base<object> {
   }
 };
 
-template <typename T>
-native_function::context::argument_result_t<T>
-native_function::context::argument(size_t index) const {
-  const object::ptr& o = positional_args_.at(index);
+namespace detail {
+
+template <typename T, typename DescribeArgumentFunc>
+native_function::context::argument_result_t<T> native_function_extract_argument(
+    const native_function::context& ctx,
+    const object::ptr& arg,
+    DescribeArgumentFunc&& describe_argument) {
   if constexpr (std::is_same_v<T, array>) {
-    if (auto arr = array_like::try_from(o)) {
+    if (auto arr = native_function::context::array_like::try_from(arg)) {
       return std::move(*arr);
     }
     // Ideally, we want to output a string representation of the types here.
-    error(
-        "Argument at index {} is not an array or array-like native_object.",
-        index);
+    ctx.error(
+        "{} is not an array or array-like native_object.", describe_argument());
   } else if constexpr (std::is_same_v<T, map>) {
-    if (auto m = map_like::try_from(o)) {
+    if (auto m = native_function::context::map_like::try_from(arg)) {
       return std::move(*m);
     }
     // Ideally, we want to output a string representation of the types here.
-    error(
-        "Argument at index {} is not a map or map-like native_object.", index);
+    ctx.error(
+        "{} is not a map or map-like native_object.", describe_argument());
+  } else if constexpr (detail::is_specialization_v<T, native_handle>) {
+    using element_type = typename T::element_type;
+    if (!arg->is_native_handle()) {
+      ctx.error("{} is not a native_handle.", describe_argument());
+    }
+    const native_handle<>& handle = arg->as_native_handle();
+    if constexpr (std::is_same_v<element_type, void>) {
+      return handle;
+    } else {
+      if (!handle.is<element_type>()) {
+        // Ideally, we want to output a string representation of the types here.
+        ctx.error(
+            "{} is a native_handle of an unexpected type.",
+            describe_argument());
+      }
+      return handle.as<element_type>();
+    }
   } else {
-    if (!o->is<T>()) {
+    if (!arg->is<T>()) {
       // Ideally, we want to output a string representation of the types here.
-      error("Argument at index {} is of an unexpected type.", index);
+      ctx.error("{} is of an unexpected type.", describe_argument());
     }
     if constexpr (std::is_same_v<T, string>) {
-      return manage_derived_ref<T>(o, o->as<T>());
+      return manage_derived_ref<T>(arg, arg->as<T>());
     } else {
-      return o->as<T>();
+      return arg->as<T>();
     }
   }
+}
+
+} // namespace detail
+
+template <typename T>
+native_function::context::argument_result_t<T>
+native_function::context::argument(size_t index) const {
+  return detail::native_function_extract_argument<T>(
+      *this, positional_args_.at(index), [index] {
+        return fmt::format("Argument at index {}", index);
+      });
 }
 
 template <typename T>
 native_function::context::argument_result_optional_t<T>
 native_function::context::named_argument(
     std::string_view name, named_argument_presence presence) const {
-  const object::ptr& o = this->named_argument(name, presence);
-  if (o == nullptr) {
+  const object::ptr& arg = this->named_argument(name, presence);
+  if (arg == nullptr) {
     assert(presence == named_argument_presence::optional);
     // either nullptr or empty optional
     return {};
   }
-
-  if constexpr (std::is_same_v<T, array>) {
-    if (auto arr = array_like::try_from(o)) {
-      return std::move(*arr);
-    }
-    // Ideally, we want to output a string representation of the types here.
-    error(
-        "Named argument '{}' is not an array or array-like native_object.",
-        name);
-  } else if constexpr (std::is_same_v<T, map>) {
-    if (auto m = map_like::try_from(o)) {
-      return std::move(*m);
-    }
-    // Ideally, we want to output a string representation of the types here.
-    error("Named argument '{}' is not a map or map-like native_object.", name);
-  } else {
-    if (!o->is<T>()) {
-      // Ideally, we want to output a string representation of the types here.
-      error("Named argument '{}' is of an unexpected type.", name);
-    }
-    if constexpr (std::is_same_v<T, string>) {
-      return manage_derived_ref(o, o->as<T>());
-    } else {
-      return o->as<T>();
-    }
-  }
+  return detail::native_function_extract_argument<T>(
+      *this, arg, [name] { return fmt::format("Named argument '{}'", name); });
 }
 
 /**
@@ -1226,6 +1394,18 @@ inline object native_function(native_function::ptr value) {
 template <typename T, typename... Args>
 object make_native_function(Args&&... args) {
   return native_function(std::make_shared<T>(std::forward<Args>(args)...));
+}
+
+/**
+ * Creates a native_handle with a reference to the given arguments.
+ *
+ * Postconditions:
+ *   object::is_native_handle() == true
+ *   object::as_native_handle().ptr() == value
+ */
+template <typename T>
+object native_handle(managed_ptr<T> value) {
+  return object(whisker::native_handle<>(std::move(value)));
 }
 
 } // namespace make

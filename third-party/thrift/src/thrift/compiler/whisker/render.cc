@@ -292,6 +292,9 @@ bool coerce_to_boolean(const native_object::ptr& value) {
 bool coerce_to_boolean(const native_function::ptr&) {
   return true;
 }
+bool coerce_to_boolean(const native_handle<>&) {
+  return true;
+}
 bool coerce_to_boolean(const map&) {
   return true;
 }

@@ -1082,6 +1082,55 @@ TEST_F(RenderTest, user_defined_function_map_like_named_argument) {
   }
 }
 
+TEST_F(RenderTest, user_defined_function_native_ref_argument) {
+  struct MyCppType {
+    std::string description;
+  };
+  const MyCppType native_instance{"Hello from C++!"};
+
+  class describe : public native_function {
+    object::ptr invoke(context ctx) override {
+      ctx.declare_arity(1);
+      ctx.declare_named_arguments({});
+      auto cpp_type = ctx.argument<native_handle<MyCppType>>(0);
+      return manage_derived(
+          cpp_type.ptr(),
+          manage_owned<object>(w::string(cpp_type->description)));
+    }
+  };
+
+  {
+    auto result = render(
+        "{{ (describe native_instance) }}\n",
+        w::map({
+            {"native_instance",
+             w::native_handle(manage_as_static(native_instance))},
+            {"describe", w::make_native_function<describe>()},
+        }));
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(*result, "Hello from C++!\n");
+  }
+
+  {
+    auto result = render(
+        "{{ (describe wrong_native_instance) }}\n",
+        w::map({
+            {"wrong_native_instance",
+             w::native_handle(manage_owned<std::string>("Not MyCppType"))},
+            {"describe", w::make_native_function<describe>()},
+        }));
+    EXPECT_FALSE(result.has_value());
+    EXPECT_THAT(
+        diagnostics(),
+        testing::ElementsAre(diagnostic(
+            diagnostic_level::error,
+            "Function 'describe' threw an error:\n"
+            "Argument at index 0 is a native_handle of an unexpected type.",
+            path_to_file,
+            1)));
+  }
+}
+
 TEST_F(RenderTest, let_statement) {
   auto result = render(
       "{{#let cond = (not false)}}\n"

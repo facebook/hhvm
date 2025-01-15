@@ -17,11 +17,11 @@
 #pragma once
 
 #include <thrift/compiler/whisker/detail/overload.h>
+#include <thrift/compiler/whisker/detail/type_traits.h>
 
 #include <cassert>
 #include <exception>
 #include <initializer_list>
-#include <optional>
 #include <type_traits>
 #include <utility>
 #include <variant>
@@ -99,15 +99,6 @@ class bad_expected_access : public bad_expected_access<void> {
 
 namespace detail {
 
-// std::remove_cvref_t was added in C++20
-template <typename T>
-using remove_cvref_t = std::remove_cv_t<std::remove_reference_t<T>>;
-
-template <typename T, template <typename...> typename Template>
-constexpr inline bool is_specialization = false;
-template <template <typename...> typename Template, typename... Types>
-constexpr inline bool is_specialization<Template<Types...>, Template> = true;
-
 // https://en.cppreference.com/w/cpp/utility/expected/unexpected#Template_parameters
 template <typename E>
 constexpr bool check_valid_error_type() {
@@ -115,7 +106,7 @@ constexpr bool check_valid_error_type() {
   static_assert(!std::is_array_v<E>);
   static_assert(!std::is_const_v<E>);
   static_assert(!std::is_volatile_v<E>);
-  static_assert(!is_specialization<E, unexpected>);
+  static_assert(!is_specialization_v<E, unexpected>);
   return true;
 }
 
@@ -125,7 +116,7 @@ template <typename T>
 constexpr inline bool is_disambiguator_type =
     std::is_same_v<std::remove_cv_t<T>, std::in_place_t> ||
     std::is_same_v<std::remove_cv_t<T>, unexpect_t> ||
-    is_specialization<std::remove_cv_t<T>, unexpected>;
+    is_specialization_v<std::remove_cv_t<T>, unexpected>;
 
 // https://en.cppreference.com/w/cpp/utility/expected#Template_parameters
 template <typename T>
@@ -227,7 +218,7 @@ class expected {
       !std::is_same_v<detail::remove_cvref_t<U>, expected> &&
       // LWG-3836
       (!std::is_same_v<detail::remove_cvref_t<T>, bool> ||
-       !detail::is_specialization<detail::remove_cvref_t<U>, expected>);
+       !detail::is_specialization_v<detail::remove_cvref_t<U>, expected>);
 
   // Restrictions on constructors (4) and (5):
   template <
@@ -260,7 +251,7 @@ class expected {
       // operator=(const expected&) has own overload
       !std::is_same_v<detail::remove_cvref_t<U>, expected> &&
       // operator=(const unexpected<G>&) has own overload
-      !detail::is_specialization<detail::remove_cvref_t<U>, unexpected> &&
+      !detail::is_specialization_v<detail::remove_cvref_t<U>, unexpected> &&
       std::is_constructible_v<T, U> && std::is_assignable_v<T&, U> &&
       // re-init rollback possible in case of exception
       (std::is_nothrow_constructible_v<T, U> ||

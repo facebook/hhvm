@@ -120,6 +120,13 @@ class to_string_visitor {
     f->print_to(std::move(scope), opts_);
   }
 
+  void visit(const native_handle<>&, tree_printer::scope scope) const {
+    require_within_max_depth(scope);
+    // Ideally, we would print the type information here, but there is no stable
+    // (cross-platform) way to do so.
+    scope.println("<native_handle>");
+  }
+
   [[nodiscard]] bool at_max_depth(const tree_printer::scope& scope) const {
     return scope.semantic_depth() == opts_.max_depth;
   }

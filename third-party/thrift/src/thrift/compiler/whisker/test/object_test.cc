@@ -329,6 +329,28 @@ TEST(ObjectTest, assign_copy_alternatives) {
   }
 }
 
+TEST(ObjectTest, native_handle_equality) {
+  {
+    native_handle handle1{manage_owned<int>(42)};
+    native_handle handle2{manage_owned<int>(42)};
+    // Points to different objects, even though they have the same value.
+    EXPECT_NE(handle1, handle2);
+  }
+
+  {
+    auto integer = manage_owned<int>(42);
+    native_handle handle1{integer};
+    native_handle handle2{integer};
+    EXPECT_EQ(handle1, handle2);
+
+    // The underlying object is the same, even though the handles are of
+    // different types.
+    native_handle<void> untyped_handle{integer};
+    EXPECT_EQ(handle1, untyped_handle);
+    EXPECT_EQ(untyped_handle, handle2);
+  }
+}
+
 TEST(ObjectTest, to_string) {
   object o = w::map({
       {"foo", w::i64(1)},

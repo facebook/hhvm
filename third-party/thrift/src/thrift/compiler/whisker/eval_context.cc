@@ -44,6 +44,7 @@ object::ptr find_property(const object& o, std::string_view identifier) {
         return nullptr;
       },
       [](const native_function::ptr&) -> result { return nullptr; },
+      [](const native_handle<>&) -> result { return nullptr; },
       [identifier](const map& m) -> result {
         if (auto it = m.find(identifier); it != m.end()) {
           return manage_as_static(it->second);

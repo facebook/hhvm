@@ -214,11 +214,7 @@ std::shared_ptr<ThriftServer> createStressTestServer(
   if (isWorkStealingEnabled()) {
     LOG(INFO) << "Work Stealing Executor enabled";
     executor = std::make_shared<folly::WorkStealingExecutor>(FLAGS_cpu_threads);
-  } else if (isSEParallelConcurrencyControllerEnabled()) {
-    // Note that the check above causes executor to not be set in some cases. It
-    // is preserved for just this commit to keep things logically identical to
-    // the base commit, and make it obvious that it should be a simple "else".
-    // It is fixed in the following diff.
+  } else {
     LOG(INFO) << "CPU Thread Pool Executor enabled";
     executor = std::make_shared<folly::CPUThreadPoolExecutor>(
         t, folly::CPUThreadPoolExecutor::makeThrottledLifoSemQueue());

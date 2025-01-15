@@ -14,10 +14,21 @@
  * limitations under the License.
  */
 
+#include <filesystem>
+#include <fstream>
+#include <map>
 #include <fmt/core.h>
-#include "thrift/compiler/source_location.h"
 
-int main() {
+namespace fs = std::filesystem;
+
+int main(int argc, char** argv) {
+  if (argc != 2) {
+    fmt::print(stderr, "usage: {} templates-dir\n", argv[0]);
+    return 1;
+  }
+
+  const auto path = fs::path(argv[1]);
+
   // Print the header.
   fmt::print(
       "// {}generated\n"
@@ -26,20 +37,38 @@ int main() {
       "\n",
       '@');
 
-  // Read the file.
-  apache::thrift::compiler::source_manager sm;
-  std::string_view content = sm.get_file("scope.thrift")->text;
-  content.remove_suffix(1); // Remove trailing NUL.
+  // Read the files.
+  std::map<std::string, std::string> files;
+  for (const auto& entry : fs::directory_iterator(path)) {
+    const auto& filepath = entry.path();
+    if (filepath.extension() == ".thrift" && fs::is_regular_file(filepath)) {
+      std::ifstream file(filepath);
+      auto buf = std::string(
+          std::istreambuf_iterator<char>(file),
+          std::istreambuf_iterator<char>());
+      files[fmt::format(
+          "thrift/annotation/{}", filepath.filename().generic_string())] =
+          std::move(buf);
+    }
+  }
 
   // Print the content.
   fmt::print(
       "namespace apache::thrift::detail {{\n"
       "\n"
-      "const std::string_view bundled_annotations::scope_file_content() {{\n"
-      "  return R\"{0}({1}){0}\";\n"
+      "const std::map<std::string, std::string>& bundled_annotations::files() {{\n"
+      "  static const std::map<std::string, std::string> files = {{\n");
+  for (const auto& [path, content] : files) {
+    fmt::print(
+        "   {{\"{1}\", R\"{0}({2}){0}\"}},\n",
+        "__FBTHRIFT_TAG__",
+        path,
+        content);
+  }
+  fmt::print(
+      "  }};\n"
+      "  return files;\n"
       "}}\n"
       "\n"
-      "}} // namespace apache::thrift::detail\n",
-      "__FBTHRIFT_TAG__",
-      content);
+      "}} // namespace apache::thrift::detail\n");
 }

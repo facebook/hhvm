@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-#include <string_view>
+#include <map>
+#include <string>
 
 namespace apache::thrift::detail {
 
 struct bundled_annotations {
-  static const std::string_view scope_file_content();
+  static const std::map<std::string, std::string>& files();
 };
 
 } // namespace apache::thrift::detail

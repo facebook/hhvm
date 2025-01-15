@@ -757,15 +757,15 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
     const gen_params& gparams) {
   auto found_or_error = source_manager::path_or_error();
   if constexpr (bundle_annotations()) {
-    const std::string scope_path = "thrift/annotation/scope.thrift";
-    found_or_error = source_mgr.find_include_file(
-        scope_path, input_filename, pparams.incl_searchpath);
-    if (found_or_error.index() != 0) {
-      // Fall back to the bundled annotation file.
-      std::string_view content =
-          apache::thrift::detail::bundled_annotations::scope_file_content();
-      source_mgr.add_virtual_file(
-          scope_path, std::string(content.data(), content.size()));
+    const auto& annotation_files =
+        apache::thrift::detail::bundled_annotations::files();
+    for (const auto& [path, content] : annotation_files) {
+      found_or_error = source_mgr.find_include_file(
+          path, input_filename, pparams.incl_searchpath);
+      if (found_or_error.index() != 0) {
+        // Fall back to the bundled annotation files.
+        source_mgr.add_virtual_file(path, content);
+      }
     }
   }
 

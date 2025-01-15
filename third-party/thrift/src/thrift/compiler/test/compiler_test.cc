@@ -2346,8 +2346,8 @@ TEST(CompilerTest, not_bundled_annotation) {
   disable_relative_includes();
   check_compile(
       R"(
-      include "thrift/annotation/cpp.thrift"
-      # expected-error-1: Could not find include file thrift/annotation/cpp.thrift
+      include "thrift/annotation/baz.thrift"
+      # expected-error-1: Could not find include file thrift/annotation/baz.thrift
       )",
       {},
       options);

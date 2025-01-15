@@ -181,9 +181,9 @@ class mstch_object_proxy
       return nullptr;
     }
 
-    auto [result, _] = keep_alive_.insert_or_assign(
-        id_string, from_mstch(proxied_->at(id_string)));
-    return manage_derived_ref(shared_from_this(), result->second);
+    object::ptr converted =
+        manage_owned<object>(from_mstch(proxied_->at(id_string)));
+    return manage_derived(shared_from_this(), std::move(converted));
   }
 
   std::optional<std::vector<std::string>> keys() const override {
@@ -213,9 +213,6 @@ class mstch_object_proxy
 
  private:
   std::shared_ptr<mstch_object> proxied_;
-  // Keep the converted property objects alive. This is necessary because
-  // lookup_property returns a reference.
-  mutable std::map<std::string, object, std::less<>> keep_alive_;
 };
 
 } // namespace

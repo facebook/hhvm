@@ -186,6 +186,10 @@ TEST_F(MstchCompatTest, mstch_object) {
            {"copy", &object_impl::self_copy}});
       register_volatile_methods(
           this, {{"volatile", &object_impl::volatile_func}});
+      register_volatile_method(
+          "volatile_counter", [next = 0]() mutable -> mstch_node {
+            return mstch_map({{"next", fmt::format("{}", next++)}});
+          });
     }
 
    private:
@@ -211,6 +215,17 @@ TEST_F(MstchCompatTest, mstch_object) {
   {
     auto result = render("{{foo:bar.key}}", converted);
     EXPECT_EQ(*result, "value");
+  }
+  {
+    auto result = render(
+        "{{#let c = volatile_counter}}\n"
+        "{{volatile_counter.next}}\n"
+        "{{c.next}}\n",
+        converted);
+    EXPECT_EQ(
+        *result,
+        "1\n"
+        "0\n");
   }
   {
     auto result = render(

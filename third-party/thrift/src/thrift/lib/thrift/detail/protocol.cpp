@@ -23,7 +23,7 @@
 #include <thrift/conformance/cpp2/ThriftTypeInfo.h>
 #include <thrift/lib/thrift/gen-cpp2/protocol_detail_types.h>
 
-#include <xxhash.h>
+#include <xxhash.h> // @manual
 
 namespace apache::thrift::protocol::detail {
 

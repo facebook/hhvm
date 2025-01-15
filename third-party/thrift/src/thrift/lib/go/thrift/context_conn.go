@@ -26,7 +26,7 @@ type contextKey int
 
 const connInfoKey contextKey = 0
 
-// ConnInfo contains connection information from clients of the SimpleServer.
+// ConnInfo contains connection information from clients of the Server.
 type ConnInfo struct {
 	RemoteAddr net.Addr
 	tlsState   tlsConnectionStater // set by thrift tcp servers

@@ -29,11 +29,7 @@ import (
 )
 
 func TestServerCancellation(t *testing.T) {
-	runCancellationTestFunc := func(
-		t *testing.T,
-		serverFactoryFunc func(processor Processor, listener net.Listener, transportType TransportID, options ...ServerOption) Server,
-		serverTransport TransportID,
-	) {
+	runCancellationTestFunc := func(t *testing.T, serverTransport TransportID) {
 		listener, err := net.Listen("tcp", "[::]:0")
 		if err != nil {
 			t.Fatalf("could not create listener: %s", err)
@@ -42,7 +38,7 @@ func TestServerCancellation(t *testing.T) {
 		t.Logf("Server listening on %v", addr)
 
 		processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
-		server := serverFactoryFunc(processor, listener, serverTransport)
+		server := NewServer(processor, listener, serverTransport)
 
 		serverCtx, serverCancel := context.WithCancel(context.Background())
 		var serverEG errgroup.Group
@@ -62,21 +58,12 @@ func TestServerCancellation(t *testing.T) {
 	}
 
 	t.Run("NewServer/Header", func(t *testing.T) {
-		runCancellationTestFunc(t, NewServer, TransportIDHeader)
+		runCancellationTestFunc(t, TransportIDHeader)
 	})
 	t.Run("NewServer/UpgradeToRocket", func(t *testing.T) {
-		runCancellationTestFunc(t, NewServer, TransportIDUpgradeToRocket)
+		runCancellationTestFunc(t, TransportIDUpgradeToRocket)
 	})
 	t.Run("NewServer/Rocket", func(t *testing.T) {
-		runCancellationTestFunc(t, NewServer, TransportIDRocket)
-	})
-	t.Run("NewSimpleServer/Header", func(t *testing.T) {
-		runCancellationTestFunc(t, NewSimpleServer, TransportIDHeader)
-	})
-	t.Run("NewSimpleServer/UpgradeToRocket", func(t *testing.T) {
-		runCancellationTestFunc(t, NewSimpleServer, TransportIDUpgradeToRocket)
-	})
-	t.Run("NewSimpleServer/Rocket", func(t *testing.T) {
-		runCancellationTestFunc(t, NewSimpleServer, TransportIDRocket)
+		runCancellationTestFunc(t, TransportIDRocket)
 	})
 }

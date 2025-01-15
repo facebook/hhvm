@@ -193,3 +193,17 @@ func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
 		return
 	}
 }
+
+func newProtocolBufferFromRequest(request *requestPayload) (*protocolBuffer, error) {
+	if !request.HasMetadata() {
+		return nil, fmt.Errorf("expected metadata")
+	}
+	protocol, err := newProtocolBuffer(request.Headers(), request.ProtoID(), request.Data())
+	if err != nil {
+		return nil, err
+	}
+	if err := protocol.WriteMessageBegin(request.Name(), request.TypeID(), 0); err != nil {
+		return nil, err
+	}
+	return protocol, nil
+}

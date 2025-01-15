@@ -136,10 +136,19 @@ Options:
               values include:
                 unstructured_annotations_on_field_type
 
-                forbid_non_optional_cpp_ref_fields
-                  Enforces that struct (and exception) fields with a @cpp.Ref
-                  (or cpp[2].ref[_type]) annotation must be optional, unless
+                forbid_non_optional_cpp_ref_fields (IGNORED: set by default).
+                  Struct (and exception) fields with a @cpp.Ref (or
+                  cpp[2].ref[_type]) annotation must be optional, unless
                   annotated with @cpp.AllowLegacyNonOptionalRef.
+
+                  TEMPORARY NOTE: As of Jan 2025, this is enabled by default.
+                  As a short-term escape hatch, in case we missed any existing
+                  use case, users can specify this validator prefixed with a
+                  "-", to explicitly disable this enforcement, i.e.:
+                  "-forbid_non_optional_cpp_ref_fields"
+                  Note however that this is only a temporary, short-term option:
+                  support for "-forbid_non_optional_cpp_ref_fields" will be
+                  removed soon (and will fail if provided in the future).
 
                 implicit_field_ids (IGNORED: always present, i.e. implicit field
                   IDs are always forbidden).
@@ -416,7 +425,11 @@ std::string parse_args(
         if (validator == "unstructured_annotations_on_field_type") {
           sparams.forbid_unstructured_annotations_on_field_types = true;
         } else if (validator == "forbid_non_optional_cpp_ref_fields") {
-          sparams.forbid_non_optional_cpp_ref_fields = true;
+          // no-op
+        } else if (validator == "-forbid_non_optional_cpp_ref_fields") {
+          // DO_BEFORE(aristidis,20250201): Remove support for escape hatch:
+          // -forbid_non_optional_cpp_ref_fields
+          sparams.forbid_non_optional_cpp_ref_fields = false;
         } else if (validator == "implicit_field_ids") {
           // no-op
         } else {

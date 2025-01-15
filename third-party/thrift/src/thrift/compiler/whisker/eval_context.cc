@@ -99,18 +99,18 @@ class global_scope_object
 object::ptr eval_context::lexical_scope::lookup_property(
     std::string_view identifier) {
   if (auto local = locals_.find(identifier); local != locals_.end()) {
-    return manage_as_static(local->second);
+    return local->second;
   }
-  return find_property(this_ref_, identifier);
+  return find_property(*this_ref_, identifier);
 }
 
 eval_context::eval_context(map globals)
-    : global_scope_(
-          w::make_native_object<global_scope_object>(std::move(globals))),
+    : global_scope_(manage_owned<object>(
+          w::make_native_object<global_scope_object>(std::move(globals)))),
       stack_({lexical_scope(global_scope_)}) {}
 
 /* static */ eval_context eval_context::with_root_scope(
-    const object& root_scope, map globals) {
+    object::ptr root_scope, map globals) {
   eval_context result{std::move(globals)};
   result.push_scope(root_scope);
   return result;
@@ -124,8 +124,8 @@ std::size_t eval_context::stack_depth() const {
   return stack_.size() - 1;
 }
 
-void eval_context::push_scope(const object& object) {
-  stack_.emplace_back(object);
+void eval_context::push_scope(object::ptr object) {
+  stack_.emplace_back(std::move(object));
 }
 
 void eval_context::pop_scope() {
@@ -134,12 +134,12 @@ void eval_context::pop_scope() {
   stack_.pop_back();
 }
 
-const object& eval_context::global_scope() const {
+const object::ptr& eval_context::global_scope() const {
   return global_scope_;
 }
 
 expected<std::monostate, eval_name_already_bound_error>
-eval_context::bind_local(std::string name, object value) {
+eval_context::bind_local(std::string name, object::ptr value) {
   assert(!stack_.empty());
   if (auto [_, inserted] =
           stack_.back().locals().insert(std::pair{name, std::move(value)});
@@ -157,7 +157,7 @@ eval_context::lookup_object(const std::vector<std::string>& path) {
 
   if (path.empty()) {
     // Lookup is {{.}}
-    return manage_as_static(stack_.back().this_ref());
+    return stack_.back().this_ref();
   }
 
   auto current = std::invoke([&]() -> object::ptr {
@@ -172,7 +172,7 @@ eval_context::lookup_object(const std::vector<std::string>& path) {
   });
 
   if (current == nullptr) {
-    std::vector<object> searched_scopes;
+    std::vector<object::ptr> searched_scopes;
     searched_scopes.reserve(stack_.size());
     // Searching happened in reverse order.
     std::transform(
@@ -189,7 +189,7 @@ eval_context::lookup_object(const std::vector<std::string>& path) {
     object::ptr next = find_property(*current, *component);
     if (next == nullptr) {
       return unexpected(eval_property_lookup_error(
-          *current, /* missing_from */
+          current, /* missing_from */
           std::vector<std::string>(path.begin(), component), /* success_path */
           *component /* missing_name */));
     }

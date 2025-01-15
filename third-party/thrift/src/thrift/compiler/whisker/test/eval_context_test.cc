@@ -102,9 +102,9 @@ TEST(EvalContextTest, parent_scope) {
        {"parent", w::string("works")}});
   object child_1 = w::map({{"foo", w::map({{"abc", w::i64(5)}})}});
   object child_2 = w::map({{"bar", w::map({{"baz", w::boolean(true)}})}});
-  auto ctx = eval_context::with_root_scope(root);
-  ctx.push_scope(child_1);
-  ctx.push_scope(child_2);
+  auto ctx = eval_context::with_root_scope(manage_as_static(root));
+  ctx.push_scope(manage_as_static(child_1));
+  ctx.push_scope(manage_as_static(child_2));
 
   // Unknown top-level name should fail
   {
@@ -113,7 +113,11 @@ TEST(EvalContextTest, parent_scope) {
     EXPECT_EQ(err.property_name(), "unknown");
     EXPECT_EQ(
         err.searched_scopes(),
-        std::vector<object>({child_2, child_1, root, ctx.global_scope()}));
+        std::vector<object::ptr>(
+            {manage_as_static(child_2),
+             manage_as_static(child_1),
+             manage_as_static(root),
+             ctx.global_scope()}));
   }
 
   EXPECT_EQ(**ctx.lookup_object({}), child_2);
@@ -122,7 +126,7 @@ TEST(EvalContextTest, parent_scope) {
   {
     auto err = get_error<eval_property_lookup_error>(
         ctx.lookup_object({"foo", "bar"}));
-    EXPECT_EQ(err.missing_from(), w::map({{"abc", w::i64(5)}}));
+    EXPECT_EQ(*err.missing_from(), w::map({{"abc", w::i64(5)}}));
     EXPECT_EQ(err.property_name(), "bar");
     EXPECT_EQ(err.success_path(), std::vector<std::string>{"foo"});
   }
@@ -150,15 +154,15 @@ TEST(EvalContextTest, locals) {
   object child_1 = w::map({{"foo-2", w::string("shadowed")}});
 
   auto ctx = eval_context::with_root_scope(root);
-  ctx.push_scope(child_1);
+  ctx.push_scope(manage_as_static(child_1));
 
   EXPECT_EQ(**ctx.lookup_object({"foo-2"}), "shadowed");
   // Locals shadow objects in current scope.
-  ctx.bind_local("foo-2", w::string("local")).value();
+  ctx.bind_local("foo-2", manage_owned<object>(w::string("local"))).value();
   EXPECT_EQ(**ctx.lookup_object({"foo-2"}), "local");
 
   // Locals shadow objects in parent scopes.
-  ctx.bind_local("foo", w::string("local")).value();
+  ctx.bind_local("foo", manage_owned<object>(w::string("local"))).value();
   EXPECT_EQ(**ctx.lookup_object({"foo"}), "local");
 
   // Locals are unbound when the current scope is popped.
@@ -203,11 +207,11 @@ TEST(EvalContextTest, native_object_delegator) {
   EXPECT_EQ(**ctx.lookup_object({"foo"}), doubler);
   EXPECT_EQ(**ctx.lookup_object({"foo", "bar"}), string("barbar"));
 
-  ctx.push_scope(delegator);
+  ctx.push_scope(manage_as_static(delegator));
   EXPECT_EQ(**ctx.lookup_object({"foo"}), doubler);
   EXPECT_EQ(**ctx.lookup_object({"foo", "bar"}), string("barbar"));
 
-  ctx.push_scope(doubler);
+  ctx.push_scope(manage_as_static(doubler));
   EXPECT_EQ(**ctx.lookup_object({"foo"}), "foofoo");
 }
 
@@ -219,7 +223,7 @@ TEST(EvalContextTest, globals) {
   EXPECT_EQ(**ctx.lookup_object({"global"}), i64(1));
 
   object shadowing = w::map({{"global", w::i64(2)}});
-  ctx.push_scope(shadowing);
+  ctx.push_scope(manage_as_static(shadowing));
   EXPECT_EQ(**ctx.lookup_object({"global"}), i64(2));
 
   ctx.pop_scope();

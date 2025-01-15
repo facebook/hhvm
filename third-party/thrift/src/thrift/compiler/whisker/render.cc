@@ -456,7 +456,7 @@ class render_engine {
                   "{}#{} {}",
                   maybe_newline,
                   i,
-                  to_string(err.searched_scopes()[i], std::move(print_opts)));
+                  to_string(*err.searched_scopes()[i], std::move(print_opts)));
             }
             return result;
           }();
@@ -490,7 +490,7 @@ class render_engine {
                 "Object '{}' has no property named '{}'. The object with the missing property is:\n{}",
                 fmt::join(err.success_path(), "."),
                 err.property_name(),
-                to_string(err.missing_from(), std::move(print_opts)));
+                to_string(*err.missing_from(), std::move(print_opts)));
           });
           if (undefined_diag_level == diagnostic_level::error) {
             // Fail rendering in strict mode
@@ -602,7 +602,7 @@ class render_engine {
   void visit(const ast::let_statement& let_statement) {
     whisker::visit(
         eval_context_.bind_local(
-            let_statement.id.name, *evaluate(let_statement.value)),
+            let_statement.id.name, evaluate(let_statement.value)),
         [](std::monostate) {
           // The binding was successful
         },
@@ -705,15 +705,15 @@ class render_engine {
           *section_variable);
     };
 
-    const auto do_visit = [&](const object& scope) {
-      eval_context_.push_scope(scope);
+    const auto do_visit = [&](object::ptr scope) {
+      eval_context_.push_scope(std::move(scope));
       visit(section.body_elements);
       eval_context_.pop_scope();
     };
 
     const auto do_conditional_visit = [&](bool condition) {
       if (condition ^ section.inverted) {
-        do_visit(*section_variable);
+        do_visit(section_variable);
       }
     };
 
@@ -726,12 +726,12 @@ class render_engine {
             maybe_report_coercion();
             if (!coerce_to_boolean(value)) {
               // Empty arrays are falsy
-              do_visit(whisker::make::null);
+              do_visit(manage_as_static(whisker::make::null));
             }
             return;
           }
           for (const auto& element : value) {
-            do_visit(element);
+            do_visit(manage_derived_ref(section_variable, element));
           }
         },
         [&](const native_object::ptr& value) {
@@ -740,7 +740,7 @@ class render_engine {
             maybe_report_coercion();
             if (!coerce_to_boolean(value)) {
               // Empty array-like objects are falsy
-              do_visit(whisker::make::null);
+              do_visit(manage_as_static(whisker::make::null));
             }
             return;
           }
@@ -754,12 +754,12 @@ class render_engine {
           if (auto array_like = value->as_array_like()) {
             const std::size_t size = array_like->size();
             for (std::size_t i = 0; i < size; ++i) {
-              do_visit(*array_like->at(i));
+              do_visit(array_like->at(i));
             }
             return;
           }
           if (auto map_like = value->as_map_like()) {
-            do_visit(*section_variable);
+            do_visit(section_variable);
             return;
           }
 
@@ -767,7 +767,7 @@ class render_engine {
           // being used as a conditional
           maybe_report_coercion();
           if (coerce_to_boolean(value)) {
-            do_visit(whisker::make::null);
+            do_visit(manage_as_static(whisker::make::null));
           }
         },
         [&](const map&) {
@@ -779,7 +779,7 @@ class render_engine {
           // When maps are used in sections, they are "unpacked" into the block.
           // In other words, their properties become available in the current
           // scope.
-          do_visit(*section_variable);
+          do_visit(section_variable);
         },
         [&](boolean value) { do_conditional_visit(value); },
         [&](const auto& value) {
@@ -790,7 +790,7 @@ class render_engine {
 
   void visit(const ast::conditional_block& conditional_block) {
     const auto do_visit = [&](const ast::bodies& body_elements) {
-      eval_context_.push_scope(whisker::make::null);
+      eval_context_.push_scope(manage_as_static(whisker::make::null));
       visit(body_elements);
       eval_context_.pop_scope();
     };
@@ -840,7 +840,7 @@ class render_engine {
               expr.to_string(),
               to_string(*result));
         });
-    eval_context_.push_scope(*result);
+    eval_context_.push_scope(std::move(result));
     visit(with_block.body_elements);
     eval_context_.pop_scope();
   }
@@ -849,18 +849,19 @@ class render_engine {
     const ast::expression& expr = each_block.iterable;
     object::ptr result = evaluate(expr);
 
-    const auto do_visit = [this, &each_block](i64 index, const object& scope) {
+    const auto do_visit = [this, &each_block](i64 index, object::ptr scope) {
       if (const auto& captured = each_block.captured) {
-        eval_context_.push_scope(whisker::make::null);
-        eval_context_.bind_local(captured->element.name, scope);
+        eval_context_.push_scope(manage_as_static(whisker::make::null));
+        eval_context_.bind_local(captured->element.name, std::move(scope));
         if (captured->index.has_value()) {
           eval_context_.bind_local(
-              captured->index->name, whisker::make::i64(index));
+              captured->index->name,
+              manage_owned<object>(whisker::make::i64(index)));
         }
       } else {
         // When captures are not present, each element becomes the implicit
         // context object (`{{.}}`).
-        eval_context_.push_scope(scope);
+        eval_context_.push_scope(std::move(scope));
       }
       visit(each_block.body_elements);
       eval_context_.pop_scope();
@@ -870,7 +871,7 @@ class render_engine {
       if (!each_block.else_clause.has_value()) {
         return;
       }
-      eval_context_.push_scope(whisker::make::null);
+      eval_context_.push_scope(manage_as_static(whisker::make::null));
       visit(each_block.else_clause->body_elements);
       eval_context_.pop_scope();
     };
@@ -882,7 +883,7 @@ class render_engine {
             return;
           }
           for (std::size_t i = 0; i < arr.size(); ++i) {
-            do_visit(i64(i), arr[i]);
+            do_visit(i64(i), manage_derived_ref(result, arr[i]));
           }
         },
         [&](const native_object::ptr& o) {
@@ -901,7 +902,7 @@ class render_engine {
             return;
           }
           for (std::size_t i = 0; i < size; ++i) {
-            do_visit(i64(i), *array_like->at(i));
+            do_visit(i64(i), array_like->at(i));
           }
         },
         [&](auto&&) {

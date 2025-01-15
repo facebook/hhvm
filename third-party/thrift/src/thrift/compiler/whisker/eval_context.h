@@ -42,7 +42,7 @@ namespace whisker {
 class eval_scope_lookup_error {
  public:
   explicit eval_scope_lookup_error(
-      std::string property_name, std::vector<object> searched_scopes)
+      std::string property_name, std::vector<object::ptr> searched_scopes)
       : property_name_(std::move(property_name)),
         searched_scopes_(std::move(searched_scopes)) {}
 
@@ -57,13 +57,13 @@ class eval_scope_lookup_error {
    * The order of objects on the stack is the order of search (most to least
    * local).
    */
-  const std::vector<object>& searched_scopes() const {
+  const std::vector<object::ptr>& searched_scopes() const {
     return searched_scopes_;
   }
 
  private:
   std::string property_name_;
-  std::vector<object> searched_scopes_;
+  std::vector<object::ptr> searched_scopes_;
 };
 
 /**
@@ -77,7 +77,7 @@ class eval_scope_lookup_error {
 class eval_property_lookup_error {
  public:
   explicit eval_property_lookup_error(
-      object missing_from,
+      object::ptr missing_from,
       std::vector<std::string> success_path,
       std::string property_name)
       : missing_from_(std::move(missing_from)),
@@ -87,7 +87,7 @@ class eval_property_lookup_error {
   /**
    * The object on which the property named by property_name() was missing.
    */
-  const object& missing_from() const { return missing_from_; }
+  const object::ptr& missing_from() const { return missing_from_; }
   /**
    * The path of property lookups that succeeded before the failure.
    */
@@ -98,7 +98,7 @@ class eval_property_lookup_error {
   const std::string& property_name() const { return property_name_; }
 
  private:
-  object missing_from_;
+  object::ptr missing_from_;
   std::vector<std::string> success_path_;
   std::string property_name_;
 };
@@ -152,8 +152,11 @@ class eval_context {
    * Post-conditions:
    *   - stack_depth() == 1
    */
-  static eval_context with_root_scope(
-      const object& root_scope, map globals = {});
+  static eval_context with_root_scope(object::ptr root_scope, map globals = {});
+  static eval_context with_root_scope(object root_scope, map globals = {}) {
+    return with_root_scope(
+        manage_owned<object>(std::move(root_scope)), std::move(globals));
+  }
 
   ~eval_context() noexcept;
 
@@ -170,7 +173,7 @@ class eval_context {
    *
    * Calling push_scope() increases the stack depth by 1.
    */
-  void push_scope(const object& object);
+  void push_scope(object::ptr object);
 
   /**
    * Pops the top-most lexical scope from the stack. The previous scope becomes
@@ -190,7 +193,7 @@ class eval_context {
    *
    * The global scope cannot be popped off the stack.
    */
-  const object& global_scope() const;
+  const object::ptr& global_scope() const;
 
   /**
    * Binds a name to an object. This binding is local to the current scope,
@@ -202,7 +205,7 @@ class eval_context {
    *     the current scope.
    */
   expected<std::monostate, eval_name_already_bound_error> bind_local(
-      std::string name, object value);
+      std::string name, object::ptr value);
 
   /**
    * Performs a lexical search for an object by name (chain of properties)
@@ -251,11 +254,12 @@ class eval_context {
    */
   class lexical_scope {
    public:
-    explicit lexical_scope(const object& this_ref) : this_ref_(this_ref) {}
+    explicit lexical_scope(object::ptr this_ref)
+        : this_ref_(std::move(this_ref)) {}
 
     // The {{.}} object is always available in the current scope (or else the
     // scope couldn't exist).
-    const object& this_ref() const { return this_ref_; }
+    const object::ptr& this_ref() const { return this_ref_; }
 
     /**
      * Looks up a properties in the following order:
@@ -265,17 +269,17 @@ class eval_context {
     object::ptr lookup_property(std::string_view identifier);
 
     // Before C++20, std::unordered_map does not support heterogenous lookups
-    using locals_map = std::map<std::string, object, std::less<>>;
+    using locals_map = std::map<std::string, object::ptr, std::less<>>;
     locals_map& locals() noexcept { return locals_; }
     const locals_map& locals() const noexcept { return locals_; }
 
    private:
-    object this_ref_;
+    object::ptr this_ref_;
     locals_map locals_;
   };
 
   // The bottom of the stack that holds all global bindings.
-  object global_scope_;
+  object::ptr global_scope_;
   // We're using a deque because we want to maintain reference stability when
   // push_scope() / pop_scope() are called. This is because there may be
   // references passed around to those scope objects.

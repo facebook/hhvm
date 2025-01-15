@@ -530,6 +530,10 @@ class Exhaustive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
           shape(
           )
         ),
+        '\facebook\thrift\annotation\Exception' => \facebook\thrift\annotation\Exception::fromShape(
+          shape(
+          )
+        ),
       ],
       'fields' => dict[
       ],

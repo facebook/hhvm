@@ -432,8 +432,11 @@ class structure_annotations {
         fm_.add_include("thrift/annotation/rust.thrift");
       } else if (name == "rust.exhaustive") {
         to_remove.emplace_back(name, data);
-        to_add.insert("@rust.Exhaustive");
-        fm_.add_include("thrift/annotation/rust.thrift");
+        if (!dynamic_cast<const t_union*>(&node)) {
+          // annotation is no-op on unions
+          to_add.insert("@rust.Exhaustive");
+          fm_.add_include("thrift/annotation/rust.thrift");
+        }
       } else if (name == "rust.ord") {
         to_remove.emplace_back(name, data);
         to_add.insert("@rust.Ord");

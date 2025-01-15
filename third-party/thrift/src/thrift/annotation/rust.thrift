@@ -70,6 +70,7 @@ struct Box {
 }
 
 @scope.Struct
+@scope.Exception
 struct Exhaustive {
 // # `rust.Exhaustive`
 //

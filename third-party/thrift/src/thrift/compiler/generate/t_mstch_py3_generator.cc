@@ -612,6 +612,7 @@ class py3_mstch_type : public mstch_type {
             {"type:module_auto_migrate_path",
              &py3_mstch_type::moduleAutoMigratePath},
             {"type:cbinding_path", &py3_mstch_type::cbinding_path},
+            {"type:capi_converter_path", &py3_mstch_type::capi_converter_path},
             {"type:flat_name", &py3_mstch_type::flatName},
             {"type:cppNamespaces", &py3_mstch_type::cppNamespaces},
             {"type:cppTemplate", &py3_mstch_type::cppTemplate},
@@ -665,6 +666,14 @@ class py3_mstch_type : public mstch_type {
         "_{}",
         fmt::join(
             get_type_py3_namespace(get_type_program(), "cbindings"), "_"));
+  }
+
+  mstch::node capi_converter_path() {
+    return fmt::format(
+        "_{}",
+        fmt::join(
+            get_type_py3_namespace(get_type_program(), "thrift_converter"),
+            "_"));
   }
 
   mstch::node moduleAutoMigratePath() {

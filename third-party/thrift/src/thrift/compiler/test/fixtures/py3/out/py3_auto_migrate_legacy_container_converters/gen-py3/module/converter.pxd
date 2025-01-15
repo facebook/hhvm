@@ -89,5 +89,3 @@ cdef _module_cbindings._py3_simple_AdaptedMap _py3_simple_AdaptedMap__Map__i32_i
 cdef cmap[cint32_t,double] Map__i32_double__make_instance(object items) except *
 cdef vector[cmap[cint32_t,double]] List__Map__i32_double__make_instance(object items) except *
 cdef cmap[_module_cbindings.cAnEnumRenamed,cint32_t] Map__AnEnumRenamed_i32__make_instance(object items) except *
-cdef extern from "thrift/compiler/test/fixtures/py3/gen-python-capi/module/thrift_types_capi.h":
-    pass

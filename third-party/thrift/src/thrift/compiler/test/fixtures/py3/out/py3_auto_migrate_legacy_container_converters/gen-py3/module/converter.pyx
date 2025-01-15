@@ -12,7 +12,11 @@ from cython.operator cimport dereference as deref
 from libcpp.utility cimport move as cmove
 
 import module.types as _module_types
+cimport module.thrift_converter as _module_thrift_converter
 
+
+cdef extern from "thrift/compiler/test/fixtures/py3/gen-python-capi/module/thrift_types_capi.h":
+    pass
 
 cdef shared_ptr[_fbthrift_cbindings.cSimpleException] SimpleException_convert_to_cpp(object inst) except*:
     return make_shared[_fbthrift_cbindings.cSimpleException](python_to_cpp[_fbthrift_cbindings.cSimpleException](inst))
@@ -117,7 +121,7 @@ cdef vector[_module_cbindings.cSimpleStruct] List__SimpleStruct__make_instance(o
         for item in items:
             if not isinstance(item, _module_types.SimpleStruct):
                 raise TypeError(f"{item!r} is not of type _module_types.SimpleStruct")
-            c_inst.push_back(python_to_cpp[_module_cbindings.cSimpleStruct](item))
+            c_inst.push_back(_module_thrift_converter.SimpleStruct_convert_to_cpp(item))
         return cmove(c_inst)
 
 cdef cset[cint32_t] Set__i32__make_instance(object items) except *:
@@ -173,7 +177,7 @@ cdef cmap[string,_module_cbindings.cSimpleStruct] Map__string_SimpleStruct__make
             if not isinstance(item, _module_types.SimpleStruct):
                 raise TypeError(f"{item!r} is not of type _module_types.SimpleStruct")
     
-            c_inst[c_key] = python_to_cpp[_module_cbindings.cSimpleStruct](item)
+            c_inst[c_key] = _module_thrift_converter.SimpleStruct_convert_to_cpp(item)
         return cmove(c_inst)
 
 cdef cmap[string,cint16_t] Map__string_i16__make_instance(object items) except *:

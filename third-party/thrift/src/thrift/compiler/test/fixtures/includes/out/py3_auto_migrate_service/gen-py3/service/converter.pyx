@@ -10,4 +10,7 @@ from libcpp.memory cimport make_shared
 from thrift.python.capi.cpp_converter cimport cpp_to_python, python_to_cpp
 from cython.operator cimport dereference as deref
 
+cdef extern from "thrift/compiler/test/fixtures/includes/gen-python-capi/service/thrift_types_capi.h":
+    pass
+
 

@@ -10,5 +10,3 @@ from libcpp.memory cimport shared_ptr
 cimport service.cbindings as _fbthrift_cbindings
 
 
-cdef extern from "thrift/compiler/test/fixtures/includes/gen-python-capi/service/thrift_types_capi.h":
-    pass

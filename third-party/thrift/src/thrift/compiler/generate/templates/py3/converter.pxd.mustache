@@ -24,7 +24,6 @@ cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:
 {{#program:includeNamespaces}}
 {{#hasTypes?}}
 cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}cbindings as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}cbindings
-cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}converter as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}converter
 {{/hasTypes?}}
 {{/program:includeNamespaces}}
 {{/program:gen_legacy_container_converters?}}
@@ -45,12 +44,3 @@ cdef object {{struct:name}}_from_cpp(const shared_ptr[_fbthrift_cbindings.{{> ty
 cdef {{> types/cython_cpp_type}} {{type:flat_name}}__make_instance(object items) except *
 {{/program:containerTypes}}
 {{/program:gen_legacy_container_converters?}}
-{{!
-    Include Constructor and Extractor specializations.
-    In auto-migrate have to put this in .pxd instead of .pyx
-    for container converters transitive includes
- }}
-{{#program:auto_migrate?}}
-cdef extern from "{{program:includePrefix}}gen-python-capi/{{program:name}}/thrift_types_capi.h":
-    pass
-{{/program:auto_migrate?}}

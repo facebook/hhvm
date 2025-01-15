@@ -26,9 +26,12 @@ from cython.operator cimport dereference as deref
 from libcpp.utility cimport move as cmove
 
 import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
+cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_converter as {{!
+    }}_{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter
 {{#program:includeNamespaces}}
 {{#hasTypes?}}
 import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
+cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}thrift_converter as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}thrift_converter
 {{/hasTypes?}}
 {{/program:includeNamespaces}}
 
@@ -36,6 +39,14 @@ import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeN
 {{/program:auto_migrate?}}
 {{^program:auto_migrate?}}
 cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as _fbthrift_ctypes
+{{/program:auto_migrate?}}
+
+{{!
+    Include Constructor and Extractor specializations.
+ }}
+{{#program:auto_migrate?}}
+cdef extern from "{{program:includePrefix}}gen-python-capi/{{program:name}}/thrift_types_capi.h":
+    pass
 {{/program:auto_migrate?}}
 
 {{#program:filtered_structs}}

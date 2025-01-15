@@ -2810,6 +2810,10 @@ service EdenService extends fb303_core.BaseService {
 }
 
 // The following were automatically generated and may benefit from renaming.
-typedef map<PathString, FileAttributeDataOrErrorV2> (
-  rust.type = "sorted_vector_map::SortedVectorMap",
-) map_PathString_FileAttributeDataOrErrorV2_3516
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"rust.type": "sorted_vector_map::SortedVectorMap"},
+}
+typedef map<
+  PathString,
+  FileAttributeDataOrErrorV2
+> map_PathString_FileAttributeDataOrErrorV2_3516

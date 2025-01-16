@@ -41,7 +41,12 @@ namespace internal {
 template <class N>
 class object_t {
  public:
-  const N& at(const std::string& name) const { return methods_.at(name)(); }
+  using node_ref = std::reference_wrapper<const N>;
+  using lookup_result = std::variant<whisker::object::ptr, node_ref>;
+
+  lookup_result at(const std::string& name) const {
+    return methods_.at(name)();
+  }
 
   bool has(const std::string& name) const {
     return (methods_.find(name) != methods_.end());
@@ -56,21 +61,118 @@ class object_t {
   }
 
  protected:
-  // Volatile (uncached) methods are re-invoked every time their value is needed
-  // during a template evaluation.
+  // Uncached (formerly known as volatile) methods are re-invoked every time
+  // their value is needed during a template evaluation.
   //
   // This is potentially useful if mutating state during evaluation, but has a
   // performance cost. There are usually better ways to express such logic.
+  struct with_no_caching_t {};
+  static constexpr with_no_caching_t with_no_caching{};
+
+  using property_dispatcher = std::function<lookup_result()>;
+
+  template <typename Self>
+  struct property_descriptor {
+    using binder = std::function<property_dispatcher(Self*)>;
+    binder bind;
+
+    /* implicit */ property_descriptor(whisker::i64 (Self::*method)())
+        : bind(cached_whisker_object(method)) {}
+    /* implicit */ property_descriptor(whisker::f64 (Self::*method)())
+        : bind(cached_whisker_object(method)) {}
+    /* implicit */ property_descriptor(whisker::boolean (Self::*method)())
+        : bind(cached_whisker_object(method)) {}
+    /* implicit */ property_descriptor(whisker::string (Self::*method)())
+        : bind(cached_whisker_object(method)) {}
+    /* implicit */ property_descriptor(whisker::array (Self::*method)())
+        : bind(cached_whisker_object(method)) {}
+    /* implicit */ property_descriptor(whisker::map (Self::*method)())
+        : bind(cached_whisker_object(method)) {}
+    /* implicit */ property_descriptor(whisker::object (Self::*method)())
+        : bind(cached_whisker_object(method)) {}
+    /* implicit */ property_descriptor(
+        whisker::native_object::ptr (Self::*method)())
+        : bind(cached_whisker_object(method)) {}
+    /* implicit */ property_descriptor(
+        whisker::native_function::ptr (Self::*method)())
+        : bind(cached_whisker_object(method)) {}
+    /* implicit */ property_descriptor(
+        whisker::native_handle<> (Self::*method)())
+        : bind(cached_whisker_object(method)) {}
+    /* implicit */ property_descriptor(whisker::object::ptr (Self::*method)())
+        : bind(cached_whisker_object(method)) {}
+
+    /* implicit */ property_descriptor(N (Self::*method)())
+        : bind([method](Self* self) -> property_dispatcher {
+            return [self,
+                    method = std::move(method),
+                    cache = std::optional<N>()]() mutable -> lookup_result {
+              if (!cache) {
+                cache = (self->*method)();
+              }
+              return node_ref(*cache);
+            };
+          }) {}
+
+    property_descriptor(with_no_caching_t, N (Self::*method)())
+        : bind([method](Self* self) -> property_dispatcher {
+            return [self,
+                    method = std::move(method),
+                    uncache = std::optional<N>()]() mutable -> lookup_result {
+              uncache = (self->*method)();
+              return node_ref(*uncache);
+            };
+          }) {}
+
+    /* implicit */ property_descriptor(std::function<N()> method)
+        : bind([method = std::move(method)](Self*) -> property_dispatcher {
+            return [method = std::move(method),
+                    cache = std::optional<N>()]() mutable -> lookup_result {
+              if (!cache) {
+                cache = method();
+              }
+              return node_ref(*cache);
+            };
+          }) {}
+
+    property_descriptor(with_no_caching_t, std::function<N()> method)
+        : bind([method = std::move(method)](Self*) -> property_dispatcher {
+            return [method = std::move(method),
+                    uncache = std::optional<N>()]() mutable -> lookup_result {
+              uncache = method();
+              return node_ref(*uncache);
+            };
+          }) {}
+
+   private:
+    template <typename T>
+    static binder cached_whisker_object(T (Self::*method)()) {
+      return [method](Self* self) -> property_dispatcher {
+        return [self,
+                method,
+                cache = std::optional<whisker::object::ptr>()]() mutable
+               -> lookup_result {
+          if (!cache) {
+            if constexpr (std::is_same_v<T, whisker::object::ptr>) {
+              cache = (self->*method)();
+            } else {
+              cache = whisker::manage_owned<whisker::object>((self->*method)());
+            }
+          }
+          return *cache;
+        };
+      };
+    }
+  };
+
   template <typename F>
   std::enable_if_t<std::is_same_v<std::invoke_result_t<F>, N>>
   register_volatile_method(std::string name, F method) {
     do_register_method(
         std::move(name),
-        [method = std::move(method),
-         uncache = std::optional<N>()]() mutable -> const N& {
-          uncache = method();
-          return *uncache;
-        });
+        property_descriptor<std::monostate>(
+            with_no_caching, std::forward<F>(method))
+            .bind(nullptr));
   }
 
   // Cached methods are invoked at most once on the same object.
@@ -79,37 +181,33 @@ class object_t {
   register_cached_method(std::string name, F method) {
     do_register_method(
         std::move(name),
-        [method = std::move(method),
-         cache = std::optional<N>()]() mutable -> const N& {
-          if (!cache) {
-            cache = method();
-          }
-          return *cache;
-        });
+        property_descriptor<std::monostate>(std::forward<F>(method))
+            .bind(nullptr));
   }
 
-  template <class S>
+  template <class Self>
   void register_volatile_methods(
-      S* s, const std::unordered_map<std::string, N (S::*)()>& methods) {
+      Self* self,
+      const std::unordered_map<std::string, N (Self::*)()>& methods) {
     for (const auto& method : methods) {
-      register_volatile_method(std::move(method.first), [s, m = method.second] {
-        return (s->*m)();
-      });
+      do_register_method(
+          method.first,
+          property_descriptor<Self>(with_no_caching, method.second).bind(self));
     }
   }
 
-  template <class S>
+  template <class Self>
   void register_cached_methods(
-      S* s, const std::unordered_map<std::string, N (S::*)()>& methods) {
+      Self* self,
+      const std::unordered_map<std::string, property_descriptor<Self>>&
+          methods) {
     for (const auto& method : methods) {
-      register_cached_method(std::move(method.first), [s, m = method.second] {
-        return (s->*m)();
-      });
+      do_register_method(method.first, method.second.bind(self));
     }
   }
 
  private:
-  void do_register_method(std::string name, std::function<const N&()> method) {
+  void do_register_method(std::string name, property_dispatcher method) {
     auto result = methods_.emplace(std::move(name), std::move(method));
     if (!result.second) {
       throw std::runtime_error(
@@ -117,7 +215,7 @@ class object_t {
     }
   }
 
-  std::unordered_map<std::string, std::function<const N&()>> methods_;
+  std::unordered_map<std::string, property_dispatcher> methods_;
 };
 
 template <typename Node>

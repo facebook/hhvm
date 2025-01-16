@@ -17,6 +17,7 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
+#include <thrift/compiler/whisker/dsl.h>
 #include <thrift/compiler/whisker/eval_context.h>
 #include <thrift/compiler/whisker/mstch_compat.h>
 #include <thrift/compiler/whisker/object.h>
@@ -175,15 +176,25 @@ TEST_F(MstchCompatTest, array_iteration) {
 }
 
 TEST_F(MstchCompatTest, mstch_object) {
-  class object_impl : public mstch_object {
+  class object_impl : public mstch_object,
+                      public std::enable_shared_from_this<object_impl> {
    public:
     object_impl() {
       register_cached_methods(
           this,
-          {{"foo:bar", &object_impl::foo_bar},
-           {"array", &object_impl::array},
-           {"error", &object_impl::error_func},
-           {"copy", &object_impl::self_copy}});
+          {
+              {"foo:bar", &object_impl::foo_bar},
+              {"array", &object_impl::array},
+              {"error", &object_impl::error_func},
+              {"copy", &object_impl::self_copy},
+              {"w_i64", &object_impl::w_i64},
+              {"w_array", &object_impl::w_array},
+              {"w_object", &object_impl::w_object},
+              {"w_object_ptr", &object_impl::w_object_ptr},
+              {"w_self_handle", &object_impl::w_self_handle},
+              {"w_invoke_cpp_only_method",
+               &object_impl::w_invoke_cpp_only_method},
+          });
       register_volatile_methods(
           this, {{"volatile", &object_impl::volatile_func}});
       register_volatile_method(
@@ -201,6 +212,32 @@ TEST_F(MstchCompatTest, mstch_object) {
     int i = 1;
 
     mstch_node error_func() { throw std::runtime_error("do not call me"); }
+
+    whisker::i64 w_i64() { return 1; }
+    whisker::array w_array() {
+      return {w::i64(1), w::string("two"), w::i64(3)};
+    }
+    whisker::object w_object() { return w::string("whisker object"); }
+    whisker::object::ptr w_object_ptr() {
+      return manage_owned<object>(w::string("whisker object ptr"));
+    }
+    whisker::native_handle<> w_self_handle() {
+      return native_handle<object_impl>(shared_from_this());
+    }
+
+    std::string cpp_only_method() const { return "hello from C++"; }
+    whisker::native_function::ptr w_invoke_cpp_only_method() {
+      class func : public dsl::function {
+       public:
+        object::ptr invoke(context ctx) override {
+          ctx.declare_arity(1);
+          ctx.declare_named_arguments({});
+          return manage_owned<object>(
+              ctx.argument<native_handle<object_impl>>(0)->cpp_only_method());
+        }
+      };
+      return std::make_shared<func>();
+    }
   };
   auto mstch_obj = apache::thrift::mstch::make_shared_node<object_impl>();
   auto converted = from_mstch(mstch_obj);
@@ -215,6 +252,35 @@ TEST_F(MstchCompatTest, mstch_object) {
   {
     auto result = render("{{foo:bar.key}}", converted);
     EXPECT_EQ(*result, "value");
+  }
+  {
+    auto result = render("{{w_i64}}", converted);
+    EXPECT_EQ(*result, "1");
+  }
+  {
+    auto result = render(
+        "{{#each w_array}}\n"
+        "{{.}}\n"
+        "{{/each}}",
+        converted);
+    EXPECT_EQ(
+        *result,
+        "1\n"
+        "two\n"
+        "3\n");
+  }
+  {
+    auto result = render("{{w_object}}\n", converted);
+    EXPECT_EQ(*result, "whisker object\n");
+  }
+  {
+    auto result = render("{{w_object_ptr}}\n", converted);
+    EXPECT_EQ(*result, "whisker object ptr\n");
+  }
+  {
+    auto result =
+        render("{{(w_invoke_cpp_only_method w_self_handle)}}\n", converted);
+    EXPECT_EQ(*result, "hello from C++\n");
   }
   {
     auto result = render(
@@ -263,7 +329,8 @@ TEST_F(MstchCompatTest, mstch_object) {
           testing::HasSubstr("`-'foo:bar'\n"),
           testing::HasSubstr("`-'array'\n"),
           testing::HasSubstr("`-'error'\n"),
-          testing::HasSubstr("`-'copy'\n")));
+          testing::HasSubstr("`-'copy'\n"),
+          testing::HasSubstr("`-'w_i64'\n")));
 }
 
 } // namespace whisker

@@ -194,9 +194,13 @@ class mstch_object_proxy
       return nullptr;
     }
 
-    object::ptr converted =
-        manage_owned<object>(from_mstch(proxied_->at(id_string)));
-    return manage_derived(shared_from_this(), std::move(converted));
+    return detail::variant_match(
+        proxied_->at(id_string),
+        [&](const mstch_node& node) -> object::ptr {
+          object::ptr converted = manage_owned<object>(from_mstch(node));
+          return manage_derived(shared_from_this(), std::move(converted));
+        },
+        [](object::ptr o) -> object::ptr { return o; });
   }
 
   std::optional<std::vector<std::string>> keys() const override {

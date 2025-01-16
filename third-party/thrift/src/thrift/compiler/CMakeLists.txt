@@ -168,6 +168,7 @@ add_library(
 
   whisker/detail/string.cc
   whisker/ast.cc
+  whisker/dsl.cc
   whisker/eval_context.cc
   whisker/lexer.cc
   whisker/mstch_compat.cc

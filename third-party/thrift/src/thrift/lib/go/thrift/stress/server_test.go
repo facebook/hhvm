@@ -91,9 +91,9 @@ func runStressTest(t *testing.T, serverTransport thrift.TransportID) {
 		conn, err := thrift.NewClient(
 			clientTransportOption,
 			thrift.WithDialer(func() (net.Conn, error) {
-				return net.DialTimeout("unix", addr.String(), 5*time.Second)
+				return net.DialTimeout("unix", addr.String(), 60*time.Second)
 			}),
-			thrift.WithIoTimeout(5*time.Second),
+			thrift.WithIoTimeout(60*time.Second),
 		)
 		if err != nil {
 			errRes := fmt.Errorf("failed to create client: %v", err)

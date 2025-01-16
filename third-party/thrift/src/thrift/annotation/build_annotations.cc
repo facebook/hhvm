@@ -58,11 +58,11 @@ int main(int argc, char** argv) {
       "\n"
       "const std::map<std::string, std::string>& bundled_annotations::files() {{\n"
       "  static const std::map<std::string, std::string> files = {{\n");
-  for (const auto& [path, content] : files) {
+  for (const auto& [name, content] : files) {
     fmt::print(
         "   {{\"{1}\", R\"{0}({2}){0}\"}},\n",
         "__FBTHRIFT_TAG__",
-        path,
+        name,
         content);
   }
   fmt::print(

@@ -114,6 +114,11 @@ let system_config_path =
   in
   Filename.concat dir "hh.conf"
 
+(** Apply the following overrides in order:
+  * JuskKnobs
+  * Experiments
+  * `overrides`
+  *)
 let apply_overrides ~silent ~current_version ~config ~from ~overrides =
   (* We'll apply CLI overrides now at the start so that JustKnobs and experiments_config
      can be informed about them, e.g. "--config rollout_group=foo" will be able

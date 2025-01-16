@@ -284,7 +284,8 @@ let reasons_config_opt config =
         Option.map ~f:(fun n -> GlobalOptions.Extended n)
         @@ int_of_string_opt data_str)
 
-let load_config config options =
+let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
+    GlobalOptions.t =
   let ( >?? ) x y = Option.value x ~default:y in
   let po_opt = options.GlobalOptions.po in
   let experimental_features = config_experimental_stx_features config in
@@ -507,31 +508,28 @@ let load_config config options =
     ?class_class_type:(bool_opt "class_class_type" config)
     options
 
-let load
+(** Load local config from the following sources:
+
+  * /etc/hh.conf
+  * overridden by Knobs
+  * overridden by ExperimentsConfig
+  * overridden by command line overrides
+
+If not silent, then prints what it's doing to stderr. *)
+let load_local_config
+    (config : Config_file_common.t)
+    (version : Config_file_version.version)
+    ~(command_line_overrides : Config_file_common.t)
+    ~is_ai
     ~silent
-    ~from
-    ~(cli_config_overrides : (string * string) list)
-    ~(ai_options : Ai_options.t option) : t * ServerLocalConfig.t =
-  let command_line_overrides = Config_file.of_list cli_config_overrides in
-  let hhconfig_abs_path = Relative_path.to_absolute repo_config_path in
-  let original_config = Config_file.parse_hhconfig hhconfig_abs_path in
-  let config =
-    Config_file.apply_overrides
-      ~config:original_config
-      ~overrides:command_line_overrides
-      ~log_reason:None
+    ~from : ServerLocalConfig.t =
+  let current_rolled_out_flag_idx =
+    int_ "current_saved_state_rollout_flag_index" ~default:0 config
   in
-  process_untrusted_mode config;
-  let version =
-    Config_file.parse_version (Config_file.Getters.string_opt "version" config)
+  let deactivate_saved_state_rollout =
+    bool_ "deactivate_saved_state_rollout" ~default:false config
   in
   let local_config =
-    let current_rolled_out_flag_idx =
-      int_ "current_saved_state_rollout_flag_index" ~default:0 config
-    in
-    let deactivate_saved_state_rollout =
-      bool_ "deactivate_saved_state_rollout" ~default:false config
-    in
     ServerLocalConfigLoad.load
       ~silent
       ~current_version:version
@@ -540,53 +538,53 @@ let load
       ~from
       ~overrides:command_line_overrides
   in
+  if is_ai then
+    let open ServerLocalConfig in
+    {
+      local_config with
+      watchman =
+        {
+          local_config.watchman with
+          Watchman.enabled = false;
+          subscribe = false;
+        };
+      interrupt_on_watchman = false;
+      interrupt_on_client = false;
+      trace_parsing = false;
+    }
+  else
+    local_config
+
+let load
+    ~silent
+    ~from
+    ~(cli_config_overrides : (string * string) list)
+    ~(ai_options : Ai_options.t option) : t * ServerLocalConfig.t =
+  let command_line_overrides = Config_file.of_list cli_config_overrides in
+  let hhconfig_abs_path = Relative_path.to_absolute repo_config_path in
+  let hhconfig = Config_file.parse_hhconfig hhconfig_abs_path in
+  let config =
+    Config_file.apply_overrides
+      ~config:hhconfig
+      ~overrides:command_line_overrides
+      ~log_reason:None
+  in
+  process_untrusted_mode config;
+  let version =
+    Config_file.parse_version (Config_file.Getters.string_opt "version" config)
+  in
   let local_config =
-    if Option.is_some ai_options then
-      let open ServerLocalConfig in
-      {
-        local_config with
-        watchman =
-          {
-            local_config.watchman with
-            Watchman.enabled = false;
-            subscribe = false;
-          };
-        interrupt_on_watchman = false;
-        interrupt_on_client = false;
-        trace_parsing = false;
-      }
-    else
-      local_config
+    load_local_config
+      config
+      version
+      ~command_line_overrides
+      ~is_ai:(Option.is_some ai_options)
+      ~silent
+      ~from
   in
-  let ignored_paths = process_ignored_paths config in
-  let extra_paths = process_extra_paths config in
-  (* Since we use the unix alarm() for our timeouts, a timeout value of 0 means
-   * to wait indefinitely *)
-  let load_script_timeout = int_ "load_script_timeout" ~default:0 config in
-  let warn_on_non_opt_build =
-    bool_ "warn_on_non_opt_build" ~default:false config
-  in
-  let ide_fall_back_to_full_index =
-    bool_ "ide_fall_back_to_full_index" ~default:true config
-  in
-  let naming_table_compression_level =
-    int_ "naming_table_compression_level" ~default:6 config
-  in
-  let naming_table_compression_threads =
-    int_ "naming_table_compression_threads" ~default:1 config
-  in
-  let warnings_generated_files =
-    string_list "warnings_generated_files" ~default:[] config
-    |> List.map ~f:Str.regexp
-  in
-  let package_v2 = bool_ "package_v2" ~default:false config in
-  let formatter_override =
-    Option.map
-      (Config_file.Getters.string_opt "formatter_override" config)
-      ~f:maybe_relative_path
-  in
-  string_opt "packages_config_path" config
-  |> Option.iter ~f:Config_file_common.set_pkgconfig_path;
+  Option.iter
+    ~f:Config_file_common.set_pkgconfig_path
+    (string_opt "packages_config_path" config);
   let pkgs_config_abs_path =
     Relative_path.(
       to_absolute
@@ -594,12 +592,13 @@ let load
   in
   let config_hash =
     Config_file_common.hash
-      original_config
+      hhconfig
       ~hhconfig_contents:(Config_file.cat_hhconfig_file hhconfig_abs_path)
       ~pkgconfig_contents:(Config_file.cat_packages_file pkgs_config_abs_path)
   in
   Hh_logger.log "Parsing and loading packages config at %s" pkgs_config_abs_path;
   let package_info =
+    let package_v2 = bool_ "package_v2" ~default:false config in
     PackageConfig.load_and_parse ~strict:true ~package_v2 ~pkgs_config_abs_path
   in
   let global_opts =
@@ -612,7 +611,7 @@ let load
               default.po with
               ParserOptions.allow_unstable_features =
                 local_config.ServerLocalConfig.allow_unstable_features;
-              ParserOptions.package_info;
+              package_info;
             }
         ?so_naming_sqlite_path:local_config.naming_sqlite_path
         ?tco_log_large_fanouts_threshold:
@@ -658,22 +657,34 @@ let load
   Errors.code_agnostic_fixme := GlobalOptions.code_agnostic_fixme global_opts;
   ( {
       version;
-      load_script_timeout;
+      load_script_timeout =
+        (* Since we use the unix alarm() for our timeouts, a timeout value of 0 means
+         * to wait indefinitely *)
+        int_ "load_script_timeout" ~default:0 config;
       gc_control = make_gc_control config;
       sharedmem_config = make_sharedmem_config config local_config ?ai_options;
       tc_options = global_opts;
       parser_options = global_opts.GlobalOptions.po;
       glean_options = global_opts;
       symbol_write_options = global_opts;
-      formatter_override;
+      formatter_override =
+        Option.map
+          (Config_file.Getters.string_opt "formatter_override" config)
+          ~f:maybe_relative_path;
       config_hash = Some config_hash;
-      ignored_paths;
-      extra_paths;
-      warn_on_non_opt_build;
-      ide_fall_back_to_full_index;
-      naming_table_compression_level;
-      naming_table_compression_threads;
-      warnings_generated_files;
+      ignored_paths = process_ignored_paths config;
+      extra_paths = process_extra_paths config;
+      warn_on_non_opt_build =
+        bool_ "warn_on_non_opt_build" ~default:false config;
+      ide_fall_back_to_full_index =
+        bool_ "ide_fall_back_to_full_index" ~default:true config;
+      naming_table_compression_level =
+        int_ "naming_table_compression_level" ~default:6 config;
+      naming_table_compression_threads =
+        int_ "naming_table_compression_threads" ~default:1 config;
+      warnings_generated_files =
+        string_list "warnings_generated_files" ~default:[] config
+        |> List.map ~f:Str.regexp;
     },
     local_config )
 

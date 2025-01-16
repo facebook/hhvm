@@ -37,7 +37,7 @@ struct VisitUnionAdapter {
 
 struct ForEachFieldAdapter {
   template <class T, class F>
-  void operator()(T&& t, F f) const {
+  void operator()(T&& t, F&& f) const {
     apache::thrift::for_each_field(
         std::forward<T>(t), [&](auto&& meta, auto&& ref) {
           if (folly::to_underlying(t.getType()) == meta.id_ref()) {
@@ -148,10 +148,12 @@ TYPED_TEST(VisitUnionTest, PassCallableByReference) {
   TestPassCallableByValue f;
   Basic a;
   a.int64_ref() = 42;
-  TestFixture::adapter(a, f);
+  TestFixture::adapter(a, folly::copy(f));
   EXPECT_EQ(f.i, 0);
   TestFixture::adapter(a, std::ref(f));
   EXPECT_EQ(f.i, 1);
+  TestFixture::adapter(a, f);
+  EXPECT_EQ(f.i, 2);
 }
 
 template <class T>

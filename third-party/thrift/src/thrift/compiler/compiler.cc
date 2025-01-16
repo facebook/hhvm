@@ -883,7 +883,7 @@ std::unique_ptr<t_program_bundle> parse_and_get_program(
       sm,
       [](const diagnostic& d) { fmt::print(stderr, "{}\n", d); },
       diagnostic_params::only_errors());
-  sparams.skip_lowering_type_annotations = true;
+  sparams.skip_lowering_annotations = true;
   return parse_ast(sm, diags, filename, std::move(pparams), &sparams);
 }
 

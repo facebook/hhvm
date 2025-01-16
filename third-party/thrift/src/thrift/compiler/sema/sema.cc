@@ -451,11 +451,15 @@ void lower_deprecated_annotations(
           "Must specify at least one item in @thrift.DeprecatedUnvalidatedAnnotations.");
       return;
     }
-    deprecated_annotation_map map;
-    for (auto& [k, v] : val->get_map()) {
-      map[k->get_string()] = {{}, v->get_string()};
+    if (!ctx.sema_parameters().skip_lowering_annotations) {
+      deprecated_annotation_map map;
+      for (auto& [k, v] : val->get_map()) {
+        map[k->get_string()] = {{}, v->get_string()};
+      }
+      node.reset_annotations(std::move(map));
+    } else {
+      update_annotations(node);
     }
-    node.reset_annotations(std::move(map));
   } else {
     update_annotations(node);
   }
@@ -484,7 +488,7 @@ void lower_type_annotations(
     sema_context& ctx, mutator_context& mctx, Node& node) {
   std::map<std::string, std::string> unstructured;
 
-  if (!ctx.sema_parameters().skip_lowering_type_annotations) {
+  if (!ctx.sema_parameters().skip_lowering_annotations) {
     if (const t_const* annot =
             node.find_structured_annotation_or_null(kCppTypeUri)) {
       if (auto type =

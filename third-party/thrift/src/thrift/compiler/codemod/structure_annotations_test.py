@@ -478,6 +478,8 @@ class StructureAnnotations(unittest.TestCase):
             "foo.thrift",
             textwrap.dedent(
                 """\
+                include "thrift.thrift"
+
                 struct S {
                     1: i32 field1 (foo);
                 }(foo, bar = "baz")
@@ -486,6 +488,24 @@ class StructureAnnotations(unittest.TestCase):
 
                 enum E {QUX = 1} (foo, bar = "baz")
 
+                @DeprecatedUnvalidatedAnnotations{items = {"bar": "baz", "foo": "1"}}
+                struct AlreadyVisited {
+                    @DeprecatedUnvalidatedAnnotations{items = {"bar": "baz", "foo": "1"}}
+                    1: i32 f;
+                }
+
+                """
+            ),
+        )
+        write_file(
+            "thrift.thrift",
+            textwrap.dedent(
+                """\
+                package "facebook.com/thrift/annotation"
+
+                struct DeprecatedUnvalidatedAnnotations {
+                    1: map<string, string> items;
+                }
                 """
             ),
         )
@@ -497,6 +517,7 @@ class StructureAnnotations(unittest.TestCase):
             self.trim(read_file("foo.thrift")),
             self.trim(
                 """\
+                include "thrift.thrift"
                 include "thrift/annotation/thrift.thrift"
 
                 @thrift.DeprecatedUnvalidatedAnnotations{items = {"bar": "baz", "foo": "1"}}
@@ -506,10 +527,16 @@ class StructureAnnotations(unittest.TestCase):
                 }
 
                 @thrift.DeprecatedUnvalidatedAnnotations{items = {"bar": "baz", "foo": "1"}}
-                typedef i32 (hs.type = "hs") T (hs.category = "value")
+                typedef i32 ( hs.type = "hs") T ( hs.category = "value")
 
                 @thrift.DeprecatedUnvalidatedAnnotations{items = {"bar": "baz", "foo": "1"}}
                 enum E {QUX = 1}
+
+                @DeprecatedUnvalidatedAnnotations{items = {"bar": "baz", "foo": "1"}}
+                struct AlreadyVisited {
+                    @DeprecatedUnvalidatedAnnotations{items = {"bar": "baz", "foo": "1"}}
+                    1: i32 f;
+                }
                 """
             ),
         )

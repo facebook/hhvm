@@ -38,15 +38,15 @@ func TestServerStress(t *testing.T) {
 		runStressTest(t, thrift.TransportIDHeader)
 	})
 	// t.Run("UpgradeToRocket", func(t *testing.T) {
-	// 	runStressTest(t, TransportIDUpgradeToRocket)
+	// 	runStressTest(t, thrift.TransportIDUpgradeToRocket)
 	// })
 	// t.Run("Rocket", func(t *testing.T) {
-	// 	runStressTest(t, TransportIDRocket)
+	// 	runStressTest(t, thrift.TransportIDRocket)
 	// })
 }
 
 func runStressTest(t *testing.T, serverTransport thrift.TransportID) {
-	listener, err := net.Listen("tcp", "[::]:0")
+	listener, err := net.Listen("unix", fmt.Sprintf("/tmp/thrift_go_stress_server_test_%d.sock", os.Getpid()))
 	if err != nil {
 		t.Fatalf("could not create listener: %s", err)
 	}
@@ -91,18 +91,22 @@ func runStressTest(t *testing.T, serverTransport thrift.TransportID) {
 		conn, err := thrift.NewClient(
 			clientTransportOption,
 			thrift.WithDialer(func() (net.Conn, error) {
-				return net.Dial("tcp", addr.String())
+				return net.DialTimeout("unix", addr.String(), 5*time.Second)
 			}),
 			thrift.WithIoTimeout(5*time.Second),
 		)
 		if err != nil {
-			return fmt.Errorf("failed to create client: %v", err)
+			errRes := fmt.Errorf("failed to create client: %v", err)
+			t.Log(errRes.Error())
+			return errRes
 		}
 		client := dummy.NewDummyClient(conn)
 		defer client.Close()
 		result, err := client.Echo("hello")
 		if err != nil {
-			return fmt.Errorf("failed to make RPC: %v", err)
+			errRes := fmt.Errorf("failed to make RPC: %v", err)
+			t.Log(errRes.Error())
+			return errRes
 		}
 		if result != "hello" {
 			return fmt.Errorf("unexpected RPC result: %s", result)

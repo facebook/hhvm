@@ -44,18 +44,20 @@ class object_t {
   using node_ref = std::reference_wrapper<const N>;
   using lookup_result = std::variant<whisker::object::ptr, node_ref>;
 
-  lookup_result at(const std::string& name) const {
-    return methods_.at(name)();
+  lookup_result at(std::string_view name) const {
+    assert(has(name));
+    const auto& [_, do_lookup] = *methods_.find(name);
+    return do_lookup();
   }
 
-  bool has(const std::string& name) const {
-    return (methods_.find(name) != methods_.end());
+  bool has(std::string_view name) const {
+    return methods_.find(name) != methods_.end();
   }
 
   std::vector<std::string> property_names() const {
     std::vector<std::string> result;
-    for (auto& entry : methods_) {
-      result.push_back(entry.first);
+    for (const auto& [name, _] : methods_) {
+      result.push_back(name);
     }
     return result;
   }
@@ -200,7 +202,8 @@ class object_t {
     }
   }
 
-  std::unordered_map<std::string, property_dispatcher> methods_;
+  // Before C++20, std::unordered_map does not support heterogenous lookups
+  std::map<std::string, property_dispatcher, std::less<>> methods_;
 };
 
 template <typename Node>
@@ -211,7 +214,7 @@ using node_base = std::variant<
     double,
     bool,
     std::shared_ptr<internal::object_t<Node>>,
-    std::map<const std::string, Node>,
+    std::map<const std::string, Node, std::less<>>,
     std::vector<Node>>;
 
 } // namespace internal
@@ -246,7 +249,7 @@ node make_shared_node(A&&... a) {
 }
 
 using object = internal::object_t<node>;
-using map = std::map<const std::string, node>;
+using map = std::map<const std::string, node, std::less<>>;
 using array = std::vector<node>;
 
 } // namespace apache::thrift::mstch

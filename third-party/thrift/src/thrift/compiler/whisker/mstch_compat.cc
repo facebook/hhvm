@@ -120,12 +120,9 @@ class mstch_map_proxy final
     if (auto cached = converted_.find(id); cached != converted_.end()) {
       return manage_derived_ref(shared_from_this(), cached->second);
     }
-    // mstch does not support heterogenous lookups, so we need a temporary
-    // std::string.
-    std::string id_string{id};
-    if (auto property = proxied_.find(id_string); property != proxied_.end()) {
+    if (auto property = proxied_.find(id); property != proxied_.end()) {
       auto [result, inserted] = converted_.insert(
-          {std::move(id_string), from_mstch(std::move(property->second))});
+          {std::string(id), from_mstch(std::move(property->second))});
       assert(inserted);
       return manage_derived_ref(shared_from_this(), result->second);
     }
@@ -187,15 +184,12 @@ class mstch_object_proxy
   }
 
   object::ptr lookup_property(std::string_view id) const override {
-    // mstch does not support heterogenous lookups, so we need a temporary
-    // std::string.
-    std::string id_string{id};
-    if (!proxied_->has(id_string)) {
+    if (!proxied_->has(id)) {
       return nullptr;
     }
 
     return detail::variant_match(
-        proxied_->at(id_string),
+        proxied_->at(id),
         [&](const mstch_node& node) -> object::ptr {
           object::ptr converted = manage_owned<object>(from_mstch(node));
           return manage_derived(shared_from_this(), std::move(converted));

@@ -7,30 +7,56 @@
  *)
 open Hh_prelude
 
+let invalidate_shallow_decls symbols local_memory =
+  let FileInfo.{ n_classes; n_types; n_funs; n_consts; n_modules } = symbols in
+  let {
+    Provider_backend.decl_cache;
+    shallow_decl_cache;
+    folded_class_cache = _;
+    _;
+  } =
+    local_memory
+  in
+  let open Provider_backend.Decl_cache_entry in
+  SSet.iter
+    (fun name ->
+      Provider_backend.Decl_cache.remove decl_cache ~key:(Fun_decl name))
+    n_funs;
+  SSet.iter
+    (fun name ->
+      Provider_backend.Decl_cache.remove decl_cache ~key:(Gconst_decl name))
+    n_consts;
+  SSet.iter
+    (fun name ->
+      Provider_backend.Decl_cache.remove decl_cache ~key:(Typedef_decl name))
+    n_types;
+  SSet.iter
+    (fun name ->
+      Provider_backend.Decl_cache.remove decl_cache ~key:(Module_decl name))
+    n_modules;
+  let open Provider_backend.Shallow_decl_cache_entry in
+  SSet.iter
+    (fun name ->
+      Provider_backend.Shallow_decl_cache.remove
+        shallow_decl_cache
+        ~key:(Shallow_class_decl name))
+    n_classes;
+  ()
+
 (** This is a leftover function, because we haven't yet migrated to
 sticky decls and more correct invalidation. *)
 let invalidate_shallow_and_some_folded_decls
     (local_memory : Provider_backend.local_memory) (ids : FileInfo.ids) : unit =
-  let open FileInfo in
+  invalidate_shallow_decls (FileInfo.ids_to_names ids) local_memory;
   let open Provider_backend in
-  let open Provider_backend.Decl_cache_entry in
-  let { funs; consts; classes; typedefs; modules } = ids in
-  List.iter consts ~f:(fun id ->
-      Decl_cache.remove local_memory.decl_cache ~key:(Gconst_decl id.name));
-  List.iter funs ~f:(fun id ->
-      Decl_cache.remove local_memory.decl_cache ~key:(Fun_decl id.name));
-  List.iter typedefs ~f:(fun id ->
-      Decl_cache.remove local_memory.decl_cache ~key:(Typedef_decl id.name));
-  List.iter modules ~f:(fun id ->
-      Decl_cache.remove local_memory.decl_cache ~key:(Module_decl id.name));
-  List.iter classes ~f:(fun id ->
-      Shallow_decl_cache.remove
-        local_memory.shallow_decl_cache
-        ~key:(Shallow_decl_cache_entry.Shallow_class_decl id.name);
-      Decl_cache.remove local_memory.decl_cache ~key:(Class_decl id.name);
+  let { FileInfo.classes; _ } = ids in
+  List.iter classes ~f:(fun { FileInfo.name; _ } ->
+      Decl_cache.remove
+        local_memory.decl_cache
+        ~key:(Provider_backend.Decl_cache_entry.Class_decl name);
       Folded_class_cache.remove
         local_memory.folded_class_cache
-        ~key:(Folded_class_cache_entry.Folded_class_decl id.name));
+        ~key:(Folded_class_cache_entry.Folded_class_decl name));
   ()
 
 (** This is a leftover function, because we haven't yet migrated to
@@ -241,28 +267,8 @@ let invalidate_decls_upon_change
     end
   in
 
-  (* Invalidate all shallow decls *)
   let t_shallow = Unix.gettimeofday () in
-  let open Provider_backend.Decl_cache_entry in
-  let open Provider_backend.Shallow_decl_cache_entry in
-  SSet.iter
-    (fun name -> Decl_cache.remove decl_cache ~key:(Fun_decl name))
-    n_funs;
-  SSet.iter
-    (fun name -> Decl_cache.remove decl_cache ~key:(Gconst_decl name))
-    n_consts;
-  SSet.iter
-    (fun name -> Decl_cache.remove decl_cache ~key:(Typedef_decl name))
-    n_types;
-  SSet.iter
-    (fun name -> Decl_cache.remove decl_cache ~key:(Module_decl name))
-    n_modules;
-  SSet.iter
-    (fun name ->
-      Shallow_decl_cache.remove
-        shallow_decl_cache
-        ~key:(Shallow_class_decl name))
-    n_classes;
+  invalidate_shallow_decls symbols local_memory;
 
   (* telemetry *)
   let end_decl_count = Decl_cache.length decl_cache in
@@ -293,11 +299,11 @@ let invalidate_upon_file_changes
     ~(changes : FileInfo.change list)
     ~(entries : Provider_context.entries) : Telemetry.t =
   let start_time = Unix.gettimeofday () in
-  let sticky_quarantine =
+  let (sticky_quarantine : bool) =
     Provider_context.get_tcopt ctx |> TypecheckerOptions.tco_sticky_quarantine
   in
 
-  (* The purpose+invariants of this function are documented in the module-level comment
+  (* The purpose + invariants of this function are documented in the module-level comment
      in Provider_utils.mli. *)
 
   (* In the common scenario where a user has been working on a file and saves it,

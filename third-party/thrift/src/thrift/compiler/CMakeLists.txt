@@ -153,16 +153,6 @@ target_link_libraries(
 )
 
 add_library(
-  mustache
-  detail/mustache/mstch.cpp
-)
-target_link_libraries(
-  mustache
-  Boost::boost
-  fmt::fmt
-)
-
-add_library(
   whisker
   STATIC
 
@@ -227,7 +217,6 @@ if (BUILD_SHARED_LIBS)
     compiler_base
     compiler_lib
     compiler
-    mustache
     whisker
     compiler_generators
     PROPERTIES VERSION ${PACKAGE_VERSION}
@@ -240,7 +229,6 @@ install(
     compiler_base
     compiler_lib
     compiler
-    mustache
     whisker
   EXPORT fbthrift-exports
   RUNTIME DESTINATION ${BIN_INSTALL_DIR}

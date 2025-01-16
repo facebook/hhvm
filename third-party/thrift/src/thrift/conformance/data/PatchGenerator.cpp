@@ -520,15 +520,15 @@ Test createListSetPatchTest(
         prependSetCase.name() = makeTestName(value, "insert");
         prependSetCase.test().emplace().objectPatch_ref() =
             makeContainerInsertTC<ContainerTag, TT>(registry, protocol, value);
+      } else {
+        auto patchValue = value.value;
+        op::clear<TT>(patchValue);
+        auto& appendCase = test.testCases()->emplace_back();
+        appendCase.name() = makeTestName(value, "append");
+        appendCase.test().emplace().objectPatch_ref() =
+            makeContainerAppendTC<ContainerTag>(
+                registry, protocol, value.value, patchValue);
       }
-
-      auto patchValue = value.value;
-      op::clear<TT>(patchValue);
-      auto& appendCase = test.testCases()->emplace_back();
-      appendCase.name() = makeTestName(value, "append");
-      appendCase.test().emplace().objectPatch_ref() =
-          makeContainerAppendTC<ContainerTag>(
-              registry, protocol, value.value, patchValue);
     }
   });
 

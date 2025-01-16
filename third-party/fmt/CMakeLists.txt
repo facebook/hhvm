@@ -1,5 +1,5 @@
-find_package(fmt 8 CONFIG)
-if (TARGET fmt::fmt)
+find_package(fmt 9 CONFIG)
+if (TARGET fmt::fmt AND NOT CLANG_FORCE_LIBCPP)
   message(STATUS "Using system fmt: ${fmt_DIR}")
   add_library(fmt INTERFACE)
   add_dependencies(fmt fmt::fmt)
@@ -14,9 +14,9 @@ else()
   SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
     FMT_SOURCE_ARGS
     SOURCE_URL
-    "https://github.com/fmtlib/fmt/releases/download/8.0.0/fmt-8.0.0.zip"
+    "https://github.com/fmtlib/fmt/releases/download/11.1.1/fmt-11.1.1.zip"
     SOURCE_HASH
-    "SHA512=70848739642bebf2820d661e7547208445329325a0d8b5919d85f375d683c0f9bef763bc7e9d7823def15100134fd9a126a9e418223b20bf8d567e5084334778"
+    "SHA512=6321f29b4ddabfcd92362883ca54039f5f2f90d85d95af1410ba98607acdde02c8c02b61c4fad212337aa2938681e038cd4533013b4e1f500c6839f77a74aeca"
   )
 
   set(INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/fmt-prefix")
@@ -31,6 +31,8 @@ else()
       -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
       -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
       -DCMAKE_OSX_SYSROOT=${CMAKE_OSX_SYSROOT}
+      -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+      -DFMT_TEST=Off
   )
   cmake_minimum_required(VERSION 2.8.0)
   ExternalProject_get_property(bundled_fmt INSTALL_DIR)

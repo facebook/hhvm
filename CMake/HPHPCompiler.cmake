@@ -63,7 +63,6 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
   list(APPEND GENERAL_CXX_OPTIONS
     "std=gnu++1z"
     "fno-omit-frame-pointer"
-    "fno-operator-names"
     "Wall"
     "Werror=format-security"
     "Wno-unused-variable"

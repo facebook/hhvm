@@ -13,16 +13,20 @@ get_filename_component(BOOST_LIBRARY_DIR "${FIRST_LIB}" DIRECTORY)
 get_target_property(ZSTD_INCLUDE_DIR zstd INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(ZSTD_LIBRARY zstd INTERFACE_LINK_LIBRARIES)
 get_target_property(JEMALLOC_INCLUDE_DIR jemalloc INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(GLOG_INCLUDE_DIR glog INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(GLOG_LIBRARY glog INTERFACE_LINK_LIBRARIES)
+
+get_filename_component(GLOG_LIBRARY_DIR "${GLOG_LIBRARY}" DIRECTORY)
 
 find_package(FLEX REQUIRED)
 # Thrift uses `%code`, which isn't in 2.x
 find_package(BISON 3.0 REQUIRED)
 
-
 ExternalProject_Add(
   bundled_thrift
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/
   BUILD_ALWAYS ON
+  PATCH_COMMAND patch -p1 --force < ${CMAKE_CURRENT_SOURCE_DIR}/patches/no-cpp2-tests.patch
   CMAKE_ARGS
     "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}"
     -DCMAKE_MODULE_PATH=${CMAKE_SOURCE_DIR}/CMake
@@ -44,8 +48,8 @@ ExternalProject_Add(
     -DBoost_USE_STATIC_LIBS=${Boost_USE_STATIC_LIBS}
     -DBoost_INCLUDE_DIR=${BOOST_INCLUDE_DIR}
     "-DBOOST_LIBRARYDIR=${BOOST_LIBRARY_DIR}"
-    "-DLIBGLOG_INCLUDE_DIR=${GLOG_INCLUDE_DIR}"
-    "-DLIBGLOG_LIBRARY=${GLOG_LIBRARY}"
+    -DGLOG_INCLUDEDIR=${GLOG_INCLUDE_DIR}
+    -DGLOG_LIBRARYDIR=${GLOG_LIBRARY_DIR}
     "-DZSTD_INCLUDE_DIRS=${ZSTD_INCLUDE_DIR}"
     "-DZSTD_LIBRARIES=${ZSTD_LIBRARY}"
 
@@ -53,9 +57,12 @@ ExternalProject_Add(
     "-Dfmt_DIR=${fmt_DIR}"
     "-Dfolly_DIR=${FOLLY_INSTALL_DIR}/lib/cmake/folly"
     "-Dwangle_DIR=${WANGLE_INSTALL_DIR}/lib/cmake/wangle"
+    "-Dmvfst_DIR=${MVFST_INSTALL_DIR}/lib/cmake/mvfst"
 
     "-DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}"
     "-DCMAKE_CXX_FLAGS=-I${JEMALLOC_INCLUDE_DIR} ${CMAKE_CXX_FLAGS}"
+
+    -Denable_tests=OFF
 )
 ExternalProject_Get_property(bundled_thrift INSTALL_DIR)
 
@@ -64,6 +71,7 @@ set(
   fizz
   fmt
   folly
+  mvfst
   proxygen
   wangle
   zstd

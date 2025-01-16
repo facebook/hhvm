@@ -27,13 +27,6 @@ if (LIBDL_INCLUDE_DIRS)
   endif()
 endif()
 
-# google-glog
-find_package(Glog REQUIRED)
-if (GLOG_STATIC)
-  add_definitions("-DGOOGLE_GLOG_DLL_DECL=")
-endif()
-include_directories(${GLOG_INCLUDE_DIR})
-
 # inotify checks
 find_package(Libinotify)
 if (LIBINOTIFY_INCLUDE_DIR)
@@ -89,6 +82,9 @@ find_package(FastLZ)
 if (FASTLZ_INCLUDE_DIR)
   include_directories(${FASTLZ_INCLUDE_DIR})
 endif()
+
+# ldap
+find_package(Ldap)
 
 # ICU
 find_package(ICU REQUIRED)
@@ -242,6 +238,10 @@ if (NOT WINDOWS)
     add_definitions("-DLIBDWARF_USE_INIT_C")
   endif()
 
+  if (LIBDWARF_USE_NEW_PRODUCER_API)
+    add_definitions("-DLIBDWARF_USE_NEW_PRODUCER_API")
+  endif()
+
   find_package(LibElf REQUIRED)
   include_directories(${LIBELF_INCLUDE_DIRS})
   if (ELF_GETSHDRSTRNDX)
@@ -276,6 +276,10 @@ endif()
 
 if (APPLE)
   find_library(KERBEROS_LIB NAMES gssapi_krb5)
+endif()
+
+if (LINUX)
+  find_package(LibUnwind REQUIRED)
 endif()
 
 # This is required by Homebrew's libc. See
@@ -337,7 +341,11 @@ macro(hphp_link target)
   target_link_libraries(${target} ${VISIBILITY} ${ICU_DATA_LIBRARIES} ${ICU_I18N_LIBRARIES} ${ICU_LIBRARIES})
   target_link_libraries(${target} ${VISIBILITY} ${LIBEVENT_LIB})
   target_link_libraries(${target} ${VISIBILITY} ${CURL_LIBRARIES})
-  target_link_libraries(${target} ${VISIBILITY} glog::glog)
+  target_link_libraries(${target} ${VISIBILITY} glog)
+
+  if (LINUX)
+    target_link_libraries(${target} ${VISIBILITY} ${LIBUNWIND_LIBRARIES})
+  endif()
 
   if (LIBINOTIFY_LIBRARY)
     target_link_libraries(${target} ${VISIBILITY} ${LIBINOTIFY_LIBRARY})
@@ -406,17 +414,16 @@ macro(hphp_link target)
     target_link_libraries(${target} ${VISIBILITY} fastlz)
   endif()
 
+  target_link_libraries(${target} ${VISIBILITY} re2)
+
   target_link_libraries(${target} ${VISIBILITY} timelib)
   target_link_libraries(${target} ${VISIBILITY} folly)
   target_link_libraries(${target} ${VISIBILITY} jemalloc)
   target_link_libraries(${target} ${VISIBILITY} wangle)
+  target_link_libraries(${target} ${VISIBILITY} fizz)
   target_link_libraries(${target} ${VISIBILITY} brotli)
   target_link_libraries(${target} ${VISIBILITY} hhbc_ast_header)
-  target_link_libraries(${target} ${VISIBILITY} compiler_ffi)
-  target_link_libraries(${target} ${VISIBILITY} package_ffi)
-  target_link_libraries(${target} ${VISIBILITY} parser_ffi)
-  target_link_libraries(${target} ${VISIBILITY} hhvm_types_ffi)
-  target_link_libraries(${target} ${VISIBILITY} hhvm_hhbc_defs_ffi)
+  target_link_libraries(${target} ${VISIBILITY} hack_rust_ffi_bridge)
 
   target_link_libraries(${target} ${VISIBILITY} tbb)
 

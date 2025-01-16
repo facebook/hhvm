@@ -29,7 +29,7 @@
 #include <thrift/lib/cpp/util/SaturatingMath.h>
 #include <thrift/lib/cpp/util/VarintUtils.h>
 #include <thrift/lib/cpp2/op/Get.h>
-#include <thrift/lib/cpp2/patch/detail/Scuba.h> // @manual=//thrift/facebook/patch:scuba
+#include <thrift/lib/cpp2/patch/detail/Scuba.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/FieldMask.h>

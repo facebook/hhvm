@@ -61,10 +61,12 @@ std::string mstch_base::get_option(const std::string& option) const {
 }
 
 void mstch_base::register_has_option(std::string key, std::string option) {
-  register_cached_method(
-      std::move(key), [this, option = std::move(option)]() -> mstch::node {
-        return has_option(option);
-      });
+  register_method(
+      std::move(key),
+      std::function<mstch::node()>(
+          [this, option = std::move(option)]() -> mstch::node {
+            return has_option(option);
+          }));
 }
 
 mstch::node mstch_base::is_struct() {

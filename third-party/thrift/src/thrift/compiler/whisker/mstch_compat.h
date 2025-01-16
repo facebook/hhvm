@@ -124,25 +124,36 @@ class object_t {
             };
           }) {}
 
-    /* implicit */ property_descriptor(std::function<N()> method)
-        : bind([method = std::move(method)](Self*) -> property_dispatcher {
-            return [method = std::move(method),
-                    cache = std::optional<N>()]() mutable -> lookup_result {
-              if (!cache) {
-                cache = method();
-              }
-              return node_ref(*cache);
-            };
-          }) {}
+    template <
+        typename F,
+        std::enable_if_t<std::is_same_v<std::invoke_result_t<F>, N>>* = nullptr>
+    /* implicit */ property_descriptor(F&& method)
+        : bind(
+              [method = std::function<N()>(std::forward<F>(method))](
+                  Self*) -> property_dispatcher {
+                return [method = std::move(method),
+                        cache = std::optional<N>()]() mutable -> lookup_result {
+                  if (!cache) {
+                    cache = method();
+                  }
+                  return node_ref(*cache);
+                };
+              }) {}
 
-    property_descriptor(with_no_caching_t, std::function<N()> method)
-        : bind([method = std::move(method)](Self*) -> property_dispatcher {
-            return [method = std::move(method),
-                    uncache = std::optional<N>()]() mutable -> lookup_result {
-              uncache = method();
-              return node_ref(*uncache);
-            };
-          }) {}
+    template <
+        typename F,
+        std::enable_if_t<std::is_same_v<std::invoke_result_t<F>, N>>* = nullptr>
+    property_descriptor(with_no_caching_t, F&& method)
+        : bind(
+              [method = std::function<N()>(std::forward<F>(method))](
+                  Self*) -> property_dispatcher {
+                return
+                    [method = std::move(method),
+                     uncache = std::optional<N>()]() mutable -> lookup_result {
+                      uncache = method();
+                      return node_ref(*uncache);
+                    };
+              }) {}
 
    private:
     template <typename T>
@@ -165,39 +176,13 @@ class object_t {
     }
   };
 
-  template <typename F>
-  std::enable_if_t<std::is_same_v<std::invoke_result_t<F>, N>>
-  register_volatile_method(std::string name, F method) {
-    do_register_method(
-        std::move(name),
-        property_descriptor<std::monostate>(
-            with_no_caching, std::forward<F>(method))
-            .bind(nullptr));
-  }
-
-  // Cached methods are invoked at most once on the same object.
-  template <typename F>
-  std::enable_if_t<std::is_same_v<std::invoke_result_t<F>, N>>
-  register_cached_method(std::string name, F method) {
-    do_register_method(
-        std::move(name),
-        property_descriptor<std::monostate>(std::forward<F>(method))
-            .bind(nullptr));
+  void register_method(
+      std::string name, property_descriptor<std::monostate> method) {
+    do_register_method(std::move(name), method.bind(nullptr));
   }
 
   template <class Self>
-  void register_volatile_methods(
-      Self* self,
-      const std::unordered_map<std::string, N (Self::*)()>& methods) {
-    for (const auto& method : methods) {
-      do_register_method(
-          method.first,
-          property_descriptor<Self>(with_no_caching, method.second).bind(self));
-    }
-  }
-
-  template <class Self>
-  void register_cached_methods(
+  void register_methods(
       Self* self,
       const std::unordered_map<std::string, property_descriptor<Self>>&
           methods) {

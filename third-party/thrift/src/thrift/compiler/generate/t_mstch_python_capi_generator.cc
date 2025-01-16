@@ -297,7 +297,7 @@ class python_capi_mstch_program : public mstch_program {
   python_capi_mstch_program(
       const t_program* p, mstch_context& ctx, mstch_element_position pos)
       : mstch_program(p, ctx, pos) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"program:capi_includes",
@@ -451,7 +451,7 @@ class python_capi_mstch_struct : public mstch_struct {
   python_capi_mstch_struct(
       const t_structured* s, mstch_context& ctx, mstch_element_position pos)
       : mstch_struct(s, ctx, pos) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"struct:py_name", &python_capi_mstch_struct::py_name},
@@ -624,7 +624,7 @@ class python_capi_mstch_field : public mstch_field {
       const field_generator_context* field_context)
       : mstch_field(field, ctx, pos, field_context),
         py_name_(python::get_py3_name(*field)) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"field:cpp_name", &python_capi_mstch_field::cpp_name},
@@ -645,7 +645,7 @@ class python_capi_mstch_enum : public mstch_enum {
   python_capi_mstch_enum(
       const t_enum* e, mstch_context& ctx, mstch_element_position pos)
       : mstch_enum(e, ctx, pos) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"enum:cpp_name", &python_capi_mstch_enum::cpp_name},

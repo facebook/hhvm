@@ -70,7 +70,7 @@ class json_experimental_program : public mstch_program {
   json_experimental_program(
       const t_program* p, mstch_context& ctx, mstch_element_position pos)
       : mstch_program(p, ctx, pos) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"program:py_namespace",
@@ -89,8 +89,8 @@ class json_experimental_program : public mstch_program {
 
     // To allow rendering a brace not surrounded by whitespace, without
     // interfering with the `{{` `}}` used by the mustache syntax.
-    register_cached_method("open_object", [] { return mstch::node("{"); });
-    register_cached_method("close_object", [] { return mstch::node("}"); });
+    register_method("open_object", [] { return mstch::node("{"); });
+    register_method("close_object", [] { return mstch::node("}"); });
   }
 
   mstch::node get_py_namespace() { return program_->get_namespace("py"); }
@@ -168,7 +168,7 @@ class json_experimental_service : public mstch_service {
       mstch_element_position pos,
       json_codegen_data d)
       : mstch_service(s, ctx, pos), data_(d) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"service:lineno", &json_experimental_service::get_lineno},
@@ -199,7 +199,7 @@ class json_experimental_function : public mstch_function {
       const t_interface* iface,
       source_manager* sm)
       : mstch_function(f, ctx, pos, iface), source_mgr_(*sm) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"function:lineno", &json_experimental_function::get_lineno},
@@ -225,7 +225,7 @@ class json_experimental_struct : public mstch_struct {
       mstch_element_position pos,
       source_manager* sm)
       : mstch_struct(s, ctx, pos), source_mgr_(*sm) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"struct:lineno", &json_experimental_struct::get_lineno},
@@ -251,7 +251,7 @@ class json_experimental_type : public mstch_type {
       mstch_element_position pos,
       json_codegen_data d)
       : mstch_type(t, ctx, pos), data_(d) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"type:lineno", &json_experimental_type::get_lineno},
@@ -281,7 +281,7 @@ class json_experimental_field : public mstch_field {
       const field_generator_context* field_context,
       source_manager* sm)
       : mstch_field(f, ctx, pos, field_context), source_mgr_(*sm) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"field:lineno", &json_experimental_field::get_lineno},
@@ -307,7 +307,7 @@ class json_experimental_typedef : public mstch_typedef {
       mstch_element_position pos,
       source_manager* sm)
       : mstch_typedef(t, ctx, pos), source_mgr_(*sm) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"typedef:lineno", &json_experimental_typedef::get_lineno},
@@ -335,7 +335,7 @@ class json_experimental_enum : public mstch_enum {
       mstch_element_position pos,
       source_manager* sm)
       : mstch_enum(e, ctx, pos), source_mgr_(*sm) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"enum:empty?", &json_experimental_enum::is_empty},
@@ -361,7 +361,7 @@ class json_experimental_enum_value : public mstch_enum_value {
       mstch_element_position pos,
       source_manager* sm)
       : mstch_enum_value(ev, ctx, pos), source_mgr_(*sm) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"enum_value:lineno", &json_experimental_enum_value::get_lineno},
@@ -392,7 +392,7 @@ class json_experimental_const_value : public mstch_const_value {
       source_manager* sm)
       : mstch_const_value(cv, ctx, pos, current_const, expected_type),
         source_mgr_(*sm) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"value:integer_or_enum?",

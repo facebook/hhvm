@@ -180,7 +180,7 @@ TEST_F(MstchCompatTest, mstch_object) {
                       public std::enable_shared_from_this<object_impl> {
    public:
     object_impl() {
-      register_cached_methods(
+      register_methods(
           this,
           {
               {"foo:bar", &object_impl::foo_bar},
@@ -194,12 +194,12 @@ TEST_F(MstchCompatTest, mstch_object) {
               {"w_self_handle", &object_impl::w_self_handle},
               {"w_invoke_cpp_only_method",
                &object_impl::w_invoke_cpp_only_method},
-          });
-      register_volatile_methods(
-          this, {{"volatile", &object_impl::volatile_func}});
-      register_volatile_method(
-          "volatile_counter", [next = 0]() mutable -> mstch_node {
-            return mstch_map({{"next", fmt::format("{}", next++)}});
+              {"volatile", {with_no_caching, &object_impl::volatile_func}},
+              {"volatile_counter",
+               {with_no_caching,
+                [next = 0]() mutable -> mstch_node {
+                  return mstch_map({{"next", fmt::format("{}", next++)}});
+                }}},
           });
     }
 

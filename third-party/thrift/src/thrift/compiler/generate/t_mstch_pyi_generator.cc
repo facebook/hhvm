@@ -204,7 +204,7 @@ class pyi_mstch_program : public mstch_program {
       mstch_context& context,
       mstch_element_position position)
       : mstch_program(program, context, position) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"program:returnTypes", &pyi_mstch_program::get_return_types},
@@ -361,7 +361,7 @@ class pyi_mstch_field : public mstch_field {
       mstch_element_position position,
       const field_generator_context* field_context)
       : mstch_field(field, context, position, field_context) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"field:requireValue?", &pyi_mstch_field::get_require_value},
@@ -420,7 +420,7 @@ class pyi_mstch_type : public mstch_type {
       mstch_element_position position,
       const t_program* program)
       : mstch_type(type, context, position), program_(program) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"type:modulePath", &pyi_mstch_type::get_module_path},
@@ -469,7 +469,7 @@ class pyi_mstch_service : public mstch_service {
       mstch_element_position position,
       const t_program* program)
       : mstch_service(service, context, position), program_(program) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"service:externalProgram?",
@@ -533,7 +533,7 @@ class pyi_mstch_function : public mstch_function {
       mstch_element_position position,
       const t_interface* iface)
       : mstch_function(function, context, position, iface) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"function:isSupported?", &pyi_mstch_function::is_supported},

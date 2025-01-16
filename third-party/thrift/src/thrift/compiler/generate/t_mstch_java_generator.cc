@@ -453,7 +453,7 @@ class mstch_java_program : public mstch_program {
   mstch_java_program(
       const t_program* p, mstch_context& ctx, mstch_element_position pos)
       : mstch_program(p, ctx, pos) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"program:javaPackage", &mstch_java_program::java_package},
@@ -502,7 +502,7 @@ class mstch_java_struct : public mstch_struct {
   mstch_java_struct(
       const t_structured* s, mstch_context& ctx, mstch_element_position pos)
       : mstch_struct(s, ctx, pos) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"struct:javaPackage", &mstch_java_struct::java_package},
@@ -618,7 +618,7 @@ class mstch_java_service : public mstch_service {
       mstch_element_position pos,
       const t_service* containing_service = nullptr)
       : mstch_service(s, ctx, pos, containing_service) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"service:javaPackage", &mstch_java_service::java_package},
@@ -700,7 +700,7 @@ class mstch_java_interaction : public mstch_java_service {
       mstch_element_position pos,
       const t_service* containing_service)
       : mstch_java_service(interaction, ctx, pos, containing_service) {
-    register_cached_methods(
+    register_methods(
         this,
         {{"interaction:javaParentCapitalName",
           &mstch_java_interaction::java_parent_capital_name}});
@@ -719,29 +719,31 @@ class mstch_java_function : public mstch_function {
       mstch_element_position pos,
       const t_interface* iface)
       : mstch_function(f, ctx, pos, iface) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"function:javaName", &mstch_java_function::java_name},
             {"function:voidType", &mstch_java_function::is_void_type},
-        });
-    register_volatile_methods(
-        this,
-        {
-            {"function:nestedDepth", &mstch_java_function::get_nested_depth},
+
+            {"function:nestedDepth",
+             {with_no_caching, &mstch_java_function::get_nested_depth}},
             {"function:nestedDepth++",
-             &mstch_java_function::increment_nested_depth},
+             {with_no_caching, &mstch_java_function::increment_nested_depth}},
             {"function:nestedDepth--",
-             &mstch_java_function::decrement_nested_depth},
-            {"function:isFirstDepth?", &mstch_java_function::is_first_depth},
+             {with_no_caching, &mstch_java_function::decrement_nested_depth}},
+            {"function:isFirstDepth?",
+             {with_no_caching, &mstch_java_function::is_first_depth}},
             {"function:prevNestedDepth",
-             &mstch_java_function::preceding_nested_depth},
+             {with_no_caching, &mstch_java_function::preceding_nested_depth}},
             {"function:isNested?",
-             &mstch_java_function::get_nested_container_flag},
+             {with_no_caching,
+              &mstch_java_function::get_nested_container_flag}},
             {"function:setIsNested",
-             &mstch_java_function::set_nested_container_flag},
+             {with_no_caching,
+              &mstch_java_function::set_nested_container_flag}},
             {"function:unsetIsNested",
-             &mstch_java_function::unset_nested_container_flag},
+             {with_no_caching,
+              &mstch_java_function::unset_nested_container_flag}},
         });
   }
 
@@ -786,7 +788,7 @@ class mstch_java_field : public mstch_field {
       mstch_element_position pos,
       const field_generator_context* field_context)
       : mstch_field(f, ctx, pos, field_context) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"field:javaName", &mstch_java_field::java_name},
@@ -829,18 +831,21 @@ class mstch_java_field : public mstch_field {
              &mstch_java_field::get_field_adapter_class_name},
             {"field:FieldNameUnmangled?",
              &mstch_java_field::is_field_name_unmangled},
-        });
-    register_volatile_methods(
-        this,
-        {
-            {"field:nestedDepth", &mstch_java_field::get_nested_depth},
-            {"field:nestedDepth++", &mstch_java_field::increment_nested_depth},
-            {"field:nestedDepth--", &mstch_java_field::decrement_nested_depth},
-            {"field:isFirstDepth?", &mstch_java_field::is_first_depth},
+
+            {"field:nestedDepth",
+             {with_no_caching, &mstch_java_field::get_nested_depth}},
+            {"field:nestedDepth++",
+             {with_no_caching, &mstch_java_field::increment_nested_depth}},
+            {"field:nestedDepth--",
+             {with_no_caching, &mstch_java_field::decrement_nested_depth}},
+            {"field:isFirstDepth?",
+             {with_no_caching, &mstch_java_field::is_first_depth}},
             {"field:prevNestedDepth",
-             &mstch_java_field::preceding_nested_depth},
-            {"field:isNested?", &mstch_java_field::get_nested_container_flag},
-            {"field:setIsNested", &mstch_java_field::set_nested_container_flag},
+             {with_no_caching, &mstch_java_field::preceding_nested_depth}},
+            {"field:isNested?",
+             {with_no_caching, &mstch_java_field::get_nested_container_flag}},
+            {"field:setIsNested",
+             {with_no_caching, &mstch_java_field::set_nested_container_flag}},
         });
   }
 
@@ -1096,7 +1101,7 @@ class mstch_java_enum : public mstch_enum {
   mstch_java_enum(
       const t_enum* e, mstch_context& ctx, mstch_element_position pos)
       : mstch_enum(e, ctx, pos) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"enum:javaPackage", &mstch_java_enum::java_package},
@@ -1145,7 +1150,7 @@ class mstch_java_enum_value : public mstch_enum_value {
   mstch_java_enum_value(
       const t_enum_value* ev, mstch_context& ctx, mstch_element_position pos)
       : mstch_enum_value(ev, ctx, pos) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"enum_value:javaConstantName",
@@ -1169,7 +1174,7 @@ class mstch_java_const : public mstch_const {
       const t_type* expected_type,
       const t_field* field)
       : mstch_const(c, ctx, pos, current_const, expected_type, field) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"constant:javaCapitalName", &mstch_java_const::java_capital_name},
@@ -1225,7 +1230,7 @@ class mstch_java_const_value : public mstch_const_value {
       const t_const* current_const,
       const t_type* expected_type)
       : mstch_const_value(cv, ctx, pos, current_const, expected_type) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"value:quotedString", &mstch_java_const_value::quote_java_string},
@@ -1254,7 +1259,7 @@ class mstch_java_type : public mstch_type {
   mstch_java_type(
       const t_type* t, mstch_context& ctx, mstch_element_position pos)
       : mstch_type(t, ctx, pos) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"type:isContainer?", &mstch_java_type::is_container_type},
@@ -1265,23 +1270,33 @@ class mstch_java_type : public mstch_type {
              &mstch_java_type::get_structured_adapter_class_name},
             {"type:typeClassName",
              &mstch_java_type::get_structured_type_class_name},
-        });
-    register_volatile_methods(
-        this,
-        {
-            {"type:setIsMapKey", &mstch_java_type::set_is_map_key},
-            {"type:isMapKey?", &mstch_java_type::get_map_key_flag},
-            {"type:setIsMapValue", &mstch_java_type::set_is_map_value},
-            {"type:isMapValue?", &mstch_java_type::get_map_value_flag},
-            {"type:setIsNotMap", &mstch_java_type::set_is_not_map},
-            {"type:setAdapter", &mstch_java_type::set_adapter},
-            {"type:unsetAdapter", &mstch_java_type::unset_adapter},
-            {"type:isAdapterSet?", &mstch_java_type::is_adapter_set},
-            {"type:addAdapter", &mstch_java_type::add_type_adapter},
-            {"type:adapterDefined?", &mstch_java_type::is_type_adapter_defined},
-            {"type:lastAdapter?", &mstch_java_type::is_last_type_adapter},
-            {"type:setTypeName", &mstch_java_type::set_type_name},
-            {"type:getTypeName", &mstch_java_type::get_type_name},
+
+            {"type:setIsMapKey",
+             {with_no_caching, &mstch_java_type::set_is_map_key}},
+            {"type:isMapKey?",
+             {with_no_caching, &mstch_java_type::get_map_key_flag}},
+            {"type:setIsMapValue",
+             {with_no_caching, &mstch_java_type::set_is_map_value}},
+            {"type:isMapValue?",
+             {with_no_caching, &mstch_java_type::get_map_value_flag}},
+            {"type:setIsNotMap",
+             {with_no_caching, &mstch_java_type::set_is_not_map}},
+            {"type:setAdapter",
+             {with_no_caching, &mstch_java_type::set_adapter}},
+            {"type:unsetAdapter",
+             {with_no_caching, &mstch_java_type::unset_adapter}},
+            {"type:isAdapterSet?",
+             {with_no_caching, &mstch_java_type::is_adapter_set}},
+            {"type:addAdapter",
+             {with_no_caching, &mstch_java_type::add_type_adapter}},
+            {"type:adapterDefined?",
+             {with_no_caching, &mstch_java_type::is_type_adapter_defined}},
+            {"type:lastAdapter?",
+             {with_no_caching, &mstch_java_type::is_last_type_adapter}},
+            {"type:setTypeName",
+             {with_no_caching, &mstch_java_type::set_type_name}},
+            {"type:getTypeName",
+             {with_no_caching, &mstch_java_type::get_type_name}},
         });
   }
   bool isMapValueFlag = false;

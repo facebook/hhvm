@@ -646,7 +646,7 @@ class rust_mstch_program : public mstch_program {
       mstch_element_position pos,
       const rust_codegen_options* options)
       : mstch_program(program, ctx, pos), options_(*options) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"program:direct_dependencies?",
@@ -1010,7 +1010,7 @@ class rust_mstch_service : public mstch_service {
     for (auto function : service->get_functions()) {
       function_upcamel_names_.insert(camelcase(function->get_name()));
     }
-    register_cached_methods(
+    register_methods(
         this,
         {{"service:rust_name", &rust_mstch_service::rust_name},
          {"service:rustFunctions", &rust_mstch_service::rust_functions},
@@ -1114,7 +1114,7 @@ class rust_mstch_function : public mstch_function {
       const std::unordered_multiset<std::string>& function_upcamel_names)
       : mstch_function(function, ctx, pos, iface),
         function_upcamel_names_(function_upcamel_names) {
-    register_cached_methods(
+    register_methods(
         this,
         {{"function:rust_name", &rust_mstch_function::rust_name},
          {"function:upcamel", &rust_mstch_function::rust_upcamel},
@@ -1314,7 +1314,7 @@ class rust_mstch_struct : public mstch_struct {
       : mstch_struct(s, ctx, pos),
         options_(*options),
         adapter_annotation_(find_structured_adapter_annotation(*s)) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"struct:rust_name", &rust_mstch_struct::rust_name},
@@ -1465,7 +1465,7 @@ class rust_mstch_enum_value : public mstch_enum_value {
   rust_mstch_enum_value(
       const t_enum_value* ev, mstch_context& ctx, mstch_element_position pos)
       : mstch_enum_value(ev, ctx, pos) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"enum_value:rust_name", &rust_mstch_enum_value::rust_name},
@@ -1486,7 +1486,7 @@ class rust_mstch_enum : public mstch_enum {
       mstch_element_position pos,
       const rust_codegen_options* options)
       : mstch_enum(e, ctx, pos), options_(*options) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"enum:rust_name", &rust_mstch_enum::rust_name},
@@ -1566,7 +1566,7 @@ class rust_mstch_type : public mstch_type {
       mstch_element_position pos,
       const rust_codegen_options* options)
       : mstch_type(type, ctx, pos), options_(*options) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"type:rust_name", &rust_mstch_type::rust_name},
@@ -1623,7 +1623,7 @@ class mstch_rust_value : public mstch_base {
         type_(step_through_typedefs(type, false)),
         depth_(depth),
         options_(options) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"value:type", &mstch_rust_value::type},
@@ -1884,7 +1884,7 @@ class mstch_rust_map_entry : public mstch_base {
         value_type_(value_type),
         depth_(depth),
         options_(options) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"entry:key", &mstch_rust_map_entry::key},
@@ -1924,7 +1924,7 @@ class mstch_rust_struct_field : public mstch_base {
         depth_(depth),
         options_(options),
         adapter_annotation_(find_structured_adapter_annotation(*field)) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"field:key", &mstch_rust_struct_field::key},
@@ -2051,7 +2051,7 @@ class rust_mstch_const : public mstch_const {
       const rust_codegen_options* options)
       : mstch_const(c, ctx, pos, current_const, expected_type, field),
         options_(*options) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"constant:lazy?", &rust_mstch_const::rust_lazy},
@@ -2092,7 +2092,7 @@ class rust_mstch_field : public mstch_field {
       : mstch_field(field, ctx, pos, field_context),
         options_(*options),
         adapter_annotation_(find_structured_adapter_annotation(*field)) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"field:rust_name", &rust_mstch_field::rust_name},
@@ -2173,7 +2173,7 @@ class rust_mstch_typedef : public mstch_typedef {
       : mstch_typedef(t, ctx, pos),
         options_(*options),
         adapter_annotation_(find_structured_adapter_annotation(*t)) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"typedef:rust_name", &rust_mstch_typedef::rust_name},
@@ -2265,7 +2265,7 @@ class rust_mstch_deprecated_annotation : public mstch_deprecated_annotation {
   rust_mstch_deprecated_annotation(
       const t_annotation* a, mstch_context& ctx, mstch_element_position pos)
       : mstch_deprecated_annotation(a, ctx, pos) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"annotation:value?",

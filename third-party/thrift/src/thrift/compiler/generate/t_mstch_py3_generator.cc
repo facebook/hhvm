@@ -142,7 +142,7 @@ class py3_mstch_program : public mstch_program {
   py3_mstch_program(
       const t_program* p, mstch_context& ctx, mstch_element_position pos)
       : mstch_program(p, ctx, pos) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"program:unique_functions_by_return_type",
@@ -431,7 +431,7 @@ class py3_mstch_service : public mstch_service {
       const t_program* prog,
       const t_service* containing_service = nullptr)
       : mstch_service(service, ctx, pos, containing_service), prog_{prog} {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"service:externalProgram?", &py3_mstch_service::isExternalProgram},
@@ -529,7 +529,7 @@ class py3_mstch_interaction : public py3_mstch_service {
       const t_service* containing_service,
       const t_program* prog)
       : py3_mstch_service(interaction, ctx, pos, prog, containing_service) {
-    register_cached_methods(
+    register_methods(
         this,
         {{"interaction:parent_service_cpp_name",
           &py3_mstch_interaction::parent_service_cpp_name}});
@@ -548,7 +548,7 @@ class py3_mstch_function : public mstch_function {
       mstch_element_position pos,
       const t_interface* iface)
       : mstch_function(f, ctx, pos, iface), cppName_(cpp2::get_name(f)) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"function:eb", &py3_mstch_function::event_based},
@@ -603,7 +603,7 @@ class py3_mstch_type : public mstch_type {
       : mstch_type(type->get_true_type(), ctx, pos),
         prog_(c.program),
         cached_props_(get_cached_props(type, c)) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"type:modulePath", &py3_mstch_type::modulePath},
@@ -634,12 +634,11 @@ class py3_mstch_type : public mstch_type {
             {"type:simple?", &py3_mstch_type::isSimple},
             {"type:resolves_to_complex_return?",
              &py3_mstch_type::resolves_to_complex_return},
-        });
-    register_volatile_methods(
-        this,
-        {
-            {"type:need_module_path?", &py3_mstch_type::need_module_path},
-            {"type:need_cbinding_path?", &py3_mstch_type::need_cbinding_path},
+
+            {"type:need_module_path?",
+             {with_no_caching, &py3_mstch_type::need_module_path}},
+            {"type:need_cbinding_path?",
+             {with_no_caching, &py3_mstch_type::need_cbinding_path}},
         });
   }
 
@@ -825,7 +824,7 @@ class py3_mstch_typedef : public mstch_typedef {
   py3_mstch_typedef(
       const t_typedef* type, mstch_context& ctx, mstch_element_position pos)
       : mstch_typedef(type, ctx, pos) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"typedef:asType", &py3_mstch_typedef::asType},
@@ -842,7 +841,7 @@ class py3_mstch_struct : public mstch_struct {
   py3_mstch_struct(
       const t_structured* s, mstch_context& ctx, mstch_element_position pos)
       : mstch_struct(s, ctx, pos) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"struct:size", &py3_mstch_struct::getSize},
@@ -950,7 +949,7 @@ class py3_mstch_field : public mstch_field {
       : mstch_field(field, ctx, pos, field_context),
         pyName_(python::get_py3_name(*field)),
         cppName_(cpp2::get_name(field)) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"field:py_name", &py3_mstch_field::pyName},
@@ -1070,7 +1069,7 @@ class py3_mstch_enum : public mstch_enum {
   py3_mstch_enum(
       const t_enum* e, mstch_context& ctx, mstch_element_position pos)
       : mstch_enum(e, ctx, pos) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"enum:flags?", &py3_mstch_enum::hasFlags},
@@ -1090,7 +1089,7 @@ class py3_mstch_enum_value : public mstch_enum_value {
   py3_mstch_enum_value(
       const t_enum_value* ev, mstch_context& ctx, mstch_element_position pos)
       : mstch_enum_value(ev, ctx, pos) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"enum_value:py_name", &py3_mstch_enum_value::pyName},
@@ -1117,7 +1116,7 @@ class py3_mstch_const_value : public mstch_const_value {
       const t_const* current_const,
       const t_type* expected_type)
       : mstch_const_value(cv, ctx, pos, current_const, expected_type) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"value:value_for_bool?", &py3_mstch_const_value::is_bool_value},
@@ -1191,7 +1190,7 @@ class py3_mstch_deprecated_annotation : public mstch_deprecated_annotation {
   py3_mstch_deprecated_annotation(
       const t_annotation* a, mstch_context& ctx, mstch_element_position pos)
       : mstch_deprecated_annotation(a, ctx, pos) {
-    register_cached_methods(
+    register_methods(
         this,
         {
             {"annotation:value?", &py3_mstch_deprecated_annotation::has_value},

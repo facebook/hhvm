@@ -74,7 +74,14 @@ class structure_annotations {
             name == "cpp.ref" || name == "cpp2.ref" || name == "cpp.ref_type" ||
             name == "cpp2.ref_type") {
           to_remove.emplace_back(name, data);
-        } else if (annotations_for_catch_all) {
+        }
+
+        // haskell annotations are ignored by the main compiler
+        else if (name.find("hs.") == 0) {
+        }
+
+        // catch-all (if typedef)
+        else if (annotations_for_catch_all) {
           to_remove.emplace_back(name, data);
           annotations_for_catch_all->emplace(name, data.value);
         }
@@ -469,6 +476,10 @@ class structure_annotations {
             ranges::views::join(',') | ranges::to<std::string>;
         to_add.insert(fmt::format("@rust.Derive{{derive = [{}]}}", derives));
         fm_.add_include("thrift/annotation/rust.thrift");
+      }
+
+      // haskell annotations are ignored by the main compiler
+      else if (name.find("hs.") == 0) {
       }
 
       // catch-all

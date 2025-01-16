@@ -2291,3 +2291,16 @@ TEST(CompilerTest, circular_typedef) {
     typedef Bar Foo
   )");
 }
+
+TEST(CompilerTest, combining_unstructured_annotations) {
+  check_compile(R"(
+    include "thrift/annotation/thrift.thrift"
+
+    @thrift.DeprecatedUnvalidatedAnnotations{items = {"foo": "bar"}}
+    struct Foo {} (hs.foo)
+
+    @thrift.DeprecatedUnvalidatedAnnotations{items = {"foo": "bar"}}
+    struct Bar {} (rust.foo) 
+    # expected-error@-2: Cannot combine @thrift.DeprecatedUnvalidatedAnnotations with legacy annotation syntax.
+  )");
+}

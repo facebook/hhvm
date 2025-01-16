@@ -417,12 +417,33 @@ void mutate_inject_metadata_fields(
   }
 }
 
+// Strips haskell annotations and optionally inserts new annotations.
+void update_annotations(
+    t_named& node, std::map<std::string, std::string> new_annotations = {}) {
+  auto annotations = node.annotations();
+  // First strip any haskell annotations
+  for (auto it = annotations.begin(); it != annotations.end();) {
+    if (it->first.find("hs.") == 0) {
+      it = annotations.erase(it);
+    } else {
+      ++it;
+    }
+  }
+  for (auto& [k, v] : new_annotations) {
+    annotations[k] = {source_range{}, v};
+  }
+  node.reset_annotations(std::move(annotations));
+}
+
 void lower_deprecated_annotations(
     sema_context& ctx, mutator_context&, t_named& node) {
   if (auto cnst = node.find_structured_annotation_or_null(
           kDeprecatedUnvalidatedAnnotationsUri)) {
     ctx.check(
-        node.annotations().empty(),
+        std::all_of(
+            node.annotations().begin(),
+            node.annotations().end(),
+            [](const auto& pair) { return pair.first.find("hs.") == 0; }),
         "Cannot combine @thrift.DeprecatedUnvalidatedAnnotations with legacy annotation syntax.");
     auto val = cnst->get_value_from_structured_annotation_or_null("items");
     if (!val || val->get_map().empty()) {
@@ -435,6 +456,8 @@ void lower_deprecated_annotations(
       map[k->get_string()] = {{}, v->get_string()};
     }
     node.reset_annotations(std::move(map));
+  } else {
+    update_annotations(node);
   }
 }
 
@@ -475,20 +498,23 @@ void lower_type_annotations(
     }
   }
 
+  const t_type* node_type = node.get_type();
+
   if (unstructured.empty()) {
+    if (!node_type->annotations().empty()) {
+      update_annotations(const_cast<t_type&>(*node_type));
+    }
     return;
   }
 
-  const t_type* node_type = node.get_type();
   if (node_type->is_container() ||
       (node_type->is_typedef() &&
        static_cast<const t_typedef*>(node_type)->typedef_kind() !=
            t_typedef::kind::defined) ||
       (node_type->is_primitive_type() && !node_type->annotations().empty())) {
     // This is a new type we can modify in place
-    for (auto& pair : unstructured) {
-      const_cast<t_type*>(node_type)->set_annotation(pair.first, pair.second);
-    }
+    update_annotations(
+        const_cast<t_type&>(*node_type), std::move(unstructured));
   } else if (node_type->is_primitive_type()) {
     // Copy type as we don't handle unnamed typedefs to base types :(
     auto& program = mctx.program();

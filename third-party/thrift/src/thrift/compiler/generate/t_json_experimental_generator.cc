@@ -18,10 +18,10 @@
 #include <filesystem>
 #include <memory>
 
-#include <thrift/compiler/detail/mustache/mstch.h>
 #include <thrift/compiler/generate/json.h>
 #include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
+#include <thrift/compiler/whisker/mstch_compat.h>
 
 namespace apache::thrift::compiler {
 namespace {

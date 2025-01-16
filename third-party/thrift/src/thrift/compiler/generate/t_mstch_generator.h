@@ -22,8 +22,8 @@
 #include <stdexcept>
 #include <unordered_set>
 
-#include <thrift/compiler/detail/mustache/mstch.h>
 #include <thrift/compiler/whisker/diagnostic.h>
+#include <thrift/compiler/whisker/mstch_compat.h>
 #include <thrift/compiler/whisker/object.h>
 #include <thrift/compiler/whisker/render.h>
 

@@ -28,7 +28,6 @@
 
 #include <fmt/format.h>
 
-#include <thrift/compiler/detail/mustache/mstch.h>
 #include <thrift/compiler/whisker/ast.h>
 #include <thrift/compiler/whisker/mstch_compat.h>
 #include <thrift/compiler/whisker/parser.h>

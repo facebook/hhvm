@@ -27,9 +27,9 @@
 
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/uri.h>
-#include <thrift/compiler/detail/mustache/mstch.h>
 #include <thrift/compiler/generate/cpp/util.h>
 #include <thrift/compiler/sema/sema_context.h>
+#include <thrift/compiler/whisker/mstch_compat.h>
 
 namespace apache::thrift::compiler {
 

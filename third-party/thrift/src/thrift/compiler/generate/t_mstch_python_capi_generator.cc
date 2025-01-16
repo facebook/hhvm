@@ -27,13 +27,13 @@
 
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/uri.h>
-#include <thrift/compiler/detail/mustache/mstch.h>
 #include <thrift/compiler/generate/common.h>
 #include <thrift/compiler/generate/cpp/name_resolver.h>
 #include <thrift/compiler/generate/cpp/util.h>
 #include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/python/util.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
+#include <thrift/compiler/whisker/mstch_compat.h>
 
 namespace apache::thrift::compiler {
 

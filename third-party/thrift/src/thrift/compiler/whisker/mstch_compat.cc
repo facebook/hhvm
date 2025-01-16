@@ -18,9 +18,22 @@
 #include <thrift/compiler/whisker/mstch_compat.h>
 
 #include <cassert>
+#include <limits>
 #include <map>
 #include <memory>
+#include <stdexcept>
 #include <vector>
+
+#include <fmt/core.h>
+
+namespace apache::thrift::mstch {
+node::node(std::size_t i) : base(static_cast<int>(i)) {
+  if (i > static_cast<unsigned int>(std::numeric_limits<int>::max())) {
+    throw std::overflow_error(
+        fmt::format("size_t greater than int max: {}", i));
+  }
+}
+} // namespace apache::thrift::mstch
 
 namespace w = whisker::make;
 

@@ -63,7 +63,7 @@ const int64_t kRocketClientMinVersion = 8;
 THRIFT_FLAG_DEFINE_bool(rocket_client_new_protocol_key, true);
 THRIFT_FLAG_DEFINE_int64(rocket_client_max_version, kRocketClientMaxVersion);
 THRIFT_FLAG_DEFINE_bool(rocket_client_rocket_skip_protocol_key, false);
-THRIFT_FLAG_DEFINE_bool(rocket_client_enable_bidirectional_propagation, true);
+THRIFT_FLAG_DEFINE_bool(rocket_client_enable_bidirectional_propagation, false);
 
 using namespace apache::thrift::transport;
 

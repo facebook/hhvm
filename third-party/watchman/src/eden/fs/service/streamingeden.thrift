@@ -110,25 +110,26 @@ typedef binary EdenStartStatusUpdate
  */
 service StreamingEdenService extends eden.EdenService {
   /**
-   * Request notification about changes to the journal for
-   * the specified mountPoint.
-   *
-   * IMPORTANT: Do not use the JournalPosition values in the stream. They are
-   * meaningless. Instead, call getFilesChangedSince or
-   * getCurrentJournalPosition which will return up-to-date information and
-   * unblock future notifications on this subscription. If the subscriber
-   * never calls getFilesChangedSince or getCurrentJournalPosition in
-   * response to a notification on this stream, future notifications may not
-   * arrive.
-   *
-   * This is an implementation of the subscribe API using the
-   * new rsocket based streaming thrift protocol.
-   * The name is temporary: we want to make some API changes
-   * but want to start pushing out an implementation now because
-   * we've seen inflated memory usage for the older `subscribe`
-   * method above.
+   * subscribeStreamTemporary is deprecated. Please use streamJournalChanged.
    */
   stream<eden.JournalPosition> subscribeStreamTemporary(
+    1: eden.PathString mountPoint,
+  ) (deprecated);
+
+  /**
+   *
+   * Returns a stream of "events" indicating that the Journal has changed.
+   *
+   * IMPORTANT: Do not use the JournalPosition values in the stream. They are
+   * meaningless. Instead, call changesSinceV2 or
+   * getCurrentJournalPosition which will return up-to-date information and
+   * unblock future notifications on this subscription. If the subscriber
+   * never calls changesSinceV2 or getCurrentJournalPosition in
+   * response to a notification on this stream, future notifications may not
+   * arrive.
+
+   */
+  stream<eden.JournalPosition> streamJournalChanged(
     1: eden.PathString mountPoint,
   );
 

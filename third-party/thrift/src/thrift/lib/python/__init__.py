@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyre-unsafe
+
 try:
     # pyre-fixme[21]: Could not find module `thrift.python.abstract_types`.
     import thrift.python.abstract_types as abstract_types  # noqa: 401

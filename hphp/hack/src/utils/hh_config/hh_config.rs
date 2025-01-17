@@ -10,7 +10,6 @@ use std::io::BufRead;
 use std::io::BufReader;
 use std::path::Path;
 use std::path::PathBuf;
-use std::str::FromStr;
 
 use anyhow::Context;
 use anyhow::Result;
@@ -108,32 +107,7 @@ impl HhConfig {
         let custom_error_config_path = Self::create_custom_errors_path(hhconfig_path);
         let (contents, mut hhconfig) = ConfigFile::from_file_with_contents(hhconfig_path)
             .with_context(|| hhconfig_path.display().to_string())?;
-        // Grab extra config and use it to process the hash
-        let package_config_path_from_hhconfig =
-            Self::get_repo_packages_config_path(&hhconfig, PACKAGE_FILE_PATH_RELATIVE_TO_ROOT);
-        let package_config_path: PathBuf =
-            Self::get_repo_packages_config_path(&hhconfig, package_config_path_from_hhconfig)
-                .into();
-        let package_contents: String = if package_config_path.exists() {
-            let ctxt = || package_config_path.display().to_string();
-            let bytes = std::fs::read(package_config_path.as_path()).with_context(ctxt)?;
-            String::from_utf8(bytes).unwrap()
-        } else {
-            String::new()
-        };
-        let custom_error_contents: String = if custom_error_config_path.exists() {
-            let ctxt = || custom_error_config_path.as_path().display().to_string();
-            let bytes = std::fs::read(&custom_error_config_path).with_context(ctxt)?;
-            String::from_utf8(bytes).unwrap()
-        } else {
-            "[]".to_string()
-        };
-        let hash = Self::hash(
-            &hhconfig,
-            &contents,
-            &package_contents,
-            &custom_error_contents,
-        );
+        let hash = Self::hash_from_files(&hhconfig, contents, custom_error_config_path.as_path())?;
         hhconfig.apply_overrides(overrides);
         let hh_conf_path = hh_conf_path.as_ref();
 
@@ -150,26 +124,64 @@ impl HhConfig {
 
         hh_conf.apply_overrides(overrides);
         let custom_error_config =
-            CustomErrorConfig::from_str(&custom_error_contents).unwrap_or_default();
+            CustomErrorConfig::from_path(&custom_error_config_path).unwrap_or_default();
         Ok(Self {
             hash,
             ..Self::from_configs(root, hhconfig, hh_conf, custom_error_config)?
         })
     }
 
-    pub fn into_config_files(
+    /// Returns all config files, as well as hhconfig hash.
+    /// The hash is calculated as the sha1 hash of the concatenated
+    /// contents of the config files (hhconfig, package config, custom errors config)
+    pub fn into_config_files_with_hash(
         root: impl AsRef<Path>,
-    ) -> Result<(ConfigFile, ConfigFile, CustomErrorConfig)> {
+    ) -> Result<((ConfigFile, ConfigFile, CustomErrorConfig), String)> {
         let hhconfig_path = root.as_ref().join(FILE_PATH_RELATIVE_TO_ROOT);
         let hh_conf_path = system_config_path();
         let custom_error_config_pathbuf = Self::create_custom_errors_path(hhconfig_path.as_path());
         let custom_error_config_path = custom_error_config_pathbuf.as_path();
-        let hh_config_file = ConfigFile::from_file(&hhconfig_path)
-            .with_context(|| hhconfig_path.display().to_string())?;
+        let (hhconfig_contents, hh_config_file) =
+            ConfigFile::from_file_with_contents(&hhconfig_path)
+                .with_context(|| hhconfig_path.display().to_string())?;
+        let hash =
+            Self::hash_from_files(&hh_config_file, hhconfig_contents, custom_error_config_path)?;
         let hh_conf_file = ConfigFile::from_file(&hh_conf_path)
             .with_context(|| hh_conf_path.display().to_string())?;
         let custom_error_config = CustomErrorConfig::from_path(custom_error_config_path)?;
-        Ok((hh_conf_file, hh_config_file, custom_error_config))
+        Ok(((hh_conf_file, hh_config_file, custom_error_config), hash))
+    }
+
+    fn hash_from_files(
+        hhconfig: &ConfigFile,
+        hhconfig_contents: String,
+        custom_error_config_path: &Path,
+    ) -> Result<String> {
+        // Grab extra config and use it to process the hash
+        let package_config_path_from_hhconfig =
+            Self::get_repo_packages_config_path(hhconfig, PACKAGE_FILE_PATH_RELATIVE_TO_ROOT);
+        let package_config_path: PathBuf =
+            Self::get_repo_packages_config_path(hhconfig, package_config_path_from_hhconfig).into();
+        let package_contents: String = if package_config_path.exists() {
+            let ctxt = || package_config_path.display().to_string();
+            let bytes = std::fs::read(&package_config_path).with_context(ctxt)?;
+            String::from_utf8(bytes).unwrap()
+        } else {
+            String::new()
+        };
+        let custom_error_contents: String = if custom_error_config_path.exists() {
+            let ctxt = || custom_error_config_path.display().to_string();
+            let bytes = std::fs::read(custom_error_config_path).with_context(ctxt)?;
+            String::from_utf8(bytes).unwrap()
+        } else {
+            "[]".to_string()
+        };
+        Ok(Self::hash(
+            hhconfig,
+            &hhconfig_contents,
+            &package_contents,
+            &custom_error_contents,
+        ))
     }
 
     fn hash(

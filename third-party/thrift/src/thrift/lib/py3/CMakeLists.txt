@@ -88,15 +88,10 @@ set(cpp_tgts
   "thrift/py3/common.cpp"
   "thrift/py3/types.cpp"
   "thrift/py3/exceptions.cpp"
-  "thrift/py3/serializer.cpp"
+  "thrift/py3/Serializer.cpp"
   "thrift/py3/client.cpp"
   "thrift/py3/server.cpp"
-  "thrift/py3/ssl.cpp"
-  "thrift/py3/reflection.cpp"
 )
-if(HAVE_STREAM_SUPPORT)
-  list(APPEND cpp_tgts "thrift/py3/stream.cpp")
-endiF()
 foreach(_mod ${cpp_tgts})
   get_filename_component(_f ${_mod} NAME_WE)
   get_filename_component(_d ${_mod} DIRECTORY)
@@ -113,11 +108,7 @@ foreach(_mod ${cpp_tgts})
     DEPENDS thrift-symlinks
   )
 
-  if(${_f} STREQUAL "types")
-    python_add_module(${_module_name} "${_cxx}" "enums.cpp")
-  else()
-    python_add_module(${_module_name} "${_cxx}")
-  endif()
+  python_add_module(${_module_name} "${_cxx}")
   target_link_libraries(${_module_name} thriftcpp2)
   set_target_properties(${_module_name}
     PROPERTIES
@@ -127,6 +118,7 @@ foreach(_mod ${cpp_tgts})
 endforeach()
 
 include_directories(${PYTHON_INCLUDE_DIRS})
+set(incs "-I${CMAKE_BINARY_DIR}/thrift/lib/python/cybld")
 
 # Build and Install Thrift Python Bindings using Python setuptools
 if (UNIX)
@@ -135,7 +127,7 @@ endif ()
 
 install(CODE "
   execute_process(COMMAND
-  python3 ${CMAKE_CURRENT_SOURCE_DIR}/setup.py bdist_wheel
+  python3 ${CMAKE_CURRENT_SOURCE_DIR}/setup.py bdist_wheel ${incs}
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cybld)
   execute_process(COMMAND
   python3 ${CMAKE_CURRENT_SOURCE_DIR}/setup.py install

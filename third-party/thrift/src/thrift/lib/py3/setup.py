@@ -52,6 +52,7 @@ setup(
     cmdclass={"build_ext": copy_cmake_built_libs_build_ext},
     version="0.0.1",
     packages=["thrift", "thrift.py3"],
+    package_dir={"thrift": ".", "thrift.py3": "."},
     package_data={"": ["*.pxd", "*.h", "__init__.pyx", "*.py"]},
     zip_safe=False,
     ext_modules=extensions,

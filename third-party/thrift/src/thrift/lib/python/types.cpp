@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <thrift/lib/python/types.h>
+
 // To access Cython C APIs, such as create_IOBuf(). See `types.pxd`.
 #include <thrift/lib/python/types_api.h> // @manual
 

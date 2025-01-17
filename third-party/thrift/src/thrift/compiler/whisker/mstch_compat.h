@@ -232,15 +232,6 @@ struct node : internal::node_base<node> {
   // calls like node(int64_t) would silently disambiguate to the size_t
   // constructor, which is potentially surprising.
   /* implicit */ node(int i) : base(i) {}
-
-  template <typename... Visitor>
-  decltype(auto) visit(Visitor&&... visitor) {
-    return std::visit(visitor..., static_cast<base&>(*this));
-  }
-  template <typename... Visitor>
-  decltype(auto) visit(Visitor&&... visitor) const {
-    return std::visit(visitor..., static_cast<const base&>(*this));
-  }
 };
 
 template <typename Node, typename... A>

@@ -183,7 +183,7 @@ TEST_F(LexerTest, multiple_identifiers) {
 }
 
 TEST_F(LexerTest, ids_and_punctuations) {
-  auto lexer = make_lexer("{{ |. ! bas ^> =* ic /# }}{{()}}");
+  auto lexer = make_lexer("{{ |. ! bas ^> =*$ ic /# }}{{()}}");
   const std::vector<token_description> expected = {
       {tok::open, {}},
       {tok::pipe, {}},
@@ -194,6 +194,7 @@ TEST_F(LexerTest, ids_and_punctuations) {
       {tok::gt, {}},
       {tok::eq, {}},
       {tok::star, {}},
+      {tok::dollar, {}},
       {tok::identifier, "ic"},
       {tok::slash, {}},
       {tok::pound, {}},

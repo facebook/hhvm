@@ -1,7 +1,7 @@
 add_library(re2 INTERFACE)
 
 find_package(RE2)
-if(RE2_LIBRARY)
+if(RE2_LIBRARY AND NOT CLANG_FORCE_LIBCPP)
   target_link_libraries(re2 INTERFACE ${RE2_LIBRARY})
   target_include_directories(re2 INTERFACE ${RE2_INCLUDE_DIR})
   return() # from File
@@ -33,6 +33,7 @@ ExternalProject_Add(
     -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
     -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
     -DCMAKE_OSX_SYSROOT=${CMAKE_OSX_SYSROOT}
+    -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
 
     -DBUILD_TESTING=OFF
     -DRE2_BUILD_TESTING=OFF

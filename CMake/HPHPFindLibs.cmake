@@ -27,13 +27,6 @@ if (LIBDL_INCLUDE_DIRS)
   endif()
 endif()
 
-# google-glog
-find_package(Glog REQUIRED)
-if (GLOG_STATIC)
-  add_definitions("-DGOOGLE_GLOG_DLL_DECL=")
-endif()
-include_directories(${GLOG_INCLUDE_DIR})
-
 # inotify checks
 find_package(Libinotify)
 if (LIBINOTIFY_INCLUDE_DIR)
@@ -337,7 +330,7 @@ macro(hphp_link target)
   target_link_libraries(${target} ${VISIBILITY} ${ICU_DATA_LIBRARIES} ${ICU_I18N_LIBRARIES} ${ICU_LIBRARIES})
   target_link_libraries(${target} ${VISIBILITY} ${LIBEVENT_LIB})
   target_link_libraries(${target} ${VISIBILITY} ${CURL_LIBRARIES})
-  target_link_libraries(${target} ${VISIBILITY} glog::glog)
+  target_link_libraries(${target} ${VISIBILITY} glog)
 
   if (LIBINOTIFY_LIBRARY)
     target_link_libraries(${target} ${VISIBILITY} ${LIBINOTIFY_LIBRARY})
@@ -406,10 +399,13 @@ macro(hphp_link target)
     target_link_libraries(${target} ${VISIBILITY} fastlz)
   endif()
 
+  target_link_libraries(${target} ${VISIBILITY} re2)
+
   target_link_libraries(${target} ${VISIBILITY} timelib)
   target_link_libraries(${target} ${VISIBILITY} folly)
   target_link_libraries(${target} ${VISIBILITY} jemalloc)
   target_link_libraries(${target} ${VISIBILITY} wangle)
+  target_link_libraries(${target} ${VISIBILITY} fizz)
   target_link_libraries(${target} ${VISIBILITY} brotli)
   target_link_libraries(${target} ${VISIBILITY} hhbc_ast_header)
   target_link_libraries(${target} ${VISIBILITY} compiler_ffi)

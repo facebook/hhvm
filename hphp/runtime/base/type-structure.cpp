@@ -93,6 +93,7 @@ const StaticString
   s_classname("classname"),
   s_kind("kind"),
   s_elem_types("elem_types"),
+  s_optional_elem_types("optional_elem_types"),
   s_return_type("return_type"),
   s_variadic_type("variadic_type"),
   s_param_types("param_types"),
@@ -218,6 +219,20 @@ void tupleTypeName(const Array& arr, std::string& name,
     auto const elem = elems[i].asCArrRef();
     folly::toAppend(sep, fullName(elem, type), &name);
     sep = ", ";
+  }
+  auto optional_elems_tv = arr.lookup(s_optional_elem_types);
+  if (optional_elems_tv.is_init()) {
+    auto const sz_optional_elems = optional_elems_tv.val().parr->size();
+    for (auto i = 0; i < sz_optional_elems; i++) {
+      auto const elem = tvAsVariant(optional_elems_tv).asCArrRef()[i].asCArrRef();
+      folly::toAppend(sep, "optional ", fullName(elem, type), &name);
+      sep = ", ";
+    }
+  }
+  auto variadic_tv = arr.lookup(s_variadic_type);
+  if (variadic_tv.is_init()) {
+    auto const variadicType = tvAsVariant(variadic_tv).asCArrRef();
+    folly::toAppend(sep, fullName(variadicType, type), "...", &name);
   }
 
   name += ")";
@@ -725,6 +740,15 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
       assertx(arr.exists(s_elem_types));
       auto const elemsArr = arr[s_elem_types].asCArrRef();
       newarr.set(s_elem_types, Variant(resolveList(env, ctx, elemsArr)));
+      if (arr.exists(s_optional_elem_types)) {
+        auto const optionalElemsArr = arr[s_optional_elem_types].asCArrRef();
+        newarr.set(s_optional_elem_types, Variant(resolveList(env, ctx, optionalElemsArr)));
+      }
+      auto tv = arr.lookup(s_variadic_type);
+      if (tv.is_init()) {
+        auto const variadicArr = tvAsVariant(tv).asCArrRef();
+        newarr.set(s_variadic_type, Variant(resolveTS(env, ctx, variadicArr, nullptr)));
+      }
       break;
     }
     case TypeStructure::Kind::T_fun: {
@@ -1227,7 +1251,9 @@ bool coerceToTypeStructure(Array& arr) {
       return coerceTSListField(arr, s_fields, /*shape=*/true);
     }
     case TypeStructure::Kind::T_tuple: {
-      return coerceTSListField(arr, s_elem_types);
+      return coerceTSListField(arr, s_elem_types) &&
+      coerceOptTSListField(arr, s_optional_elem_types) &&
+      coerceOptTSField(arr, s_variadic_type);
     }
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:

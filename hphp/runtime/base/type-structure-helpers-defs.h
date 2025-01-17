@@ -22,6 +22,7 @@ namespace HPHP {
 
 const StaticString s_allows_unknown_fields("allows_unknown_fields");
 const StaticString s_elem_types("elem_types");
+const StaticString s_optional_elem_types("optional_elem_types");
 const StaticString s_param_types("param_types");
 const StaticString s_return_type("return_type");
 const StaticString s_variadic_type("variadic_type");
@@ -132,8 +133,19 @@ ALWAYS_INLINE const bool does_ts_shape_allow_unknown_fields(
   return detail::is_ts_bool(ts, s_allows_unknown_fields);
 }
 
+ALWAYS_INLINE const bool does_ts_tuple_allow_optional_or_unknown_fields(
+  const ArrayData* ts
+) {
+  return ts->exists(s_variadic_type.get())
+  || ts->exists(s_optional_elem_types.get());
+}
+
 ALWAYS_INLINE const ArrayData* get_ts_elem_types(const ArrayData* ts) {
   return detail::get_ts_varray(ts, s_elem_types);
+}
+
+ALWAYS_INLINE const ArrayData* get_ts_optional_elem_types_opt(const ArrayData* ts) {
+  return detail::get_ts_varray_opt(ts, s_optional_elem_types);
 }
 
 ALWAYS_INLINE const ArrayData* get_ts_param_types(const ArrayData* ts) {

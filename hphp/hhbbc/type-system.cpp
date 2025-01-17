@@ -4346,6 +4346,9 @@ Optional<Type> type_of_type_structure(const IIndex& index,
       case TypeStructure::Kind::T_void:
       case TypeStructure::Kind::T_null:     return TNull;
       case TypeStructure::Kind::T_tuple: {
+        // Taking a very conservative approach to open tuples analogous to shapes
+        // (see comment there)
+        if (does_ts_tuple_allow_optional_or_unknown_fields(ts)) return std::nullopt;
         auto const tsElems = get_ts_elem_types(ts);
         std::vector<Type> v;
         for (auto i = 0; i < tsElems->size(); i++) {

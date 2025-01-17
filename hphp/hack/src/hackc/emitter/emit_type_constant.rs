@@ -19,6 +19,8 @@ use oxidized::aast_defs::Hint;
 use oxidized::aast_defs::Hint_;
 use oxidized::aast_defs::NastShapeInfo;
 use oxidized::aast_defs::ShapeFieldInfo;
+use oxidized::aast_defs::TupleExtra;
+use oxidized::aast_defs::TupleExtraInfo;
 use oxidized::aast_defs::TupleInfo;
 use oxidized::ast;
 use oxidized::ast_defs;
@@ -376,14 +378,42 @@ fn hint_to_type_constant_list(
             r.append(&mut return_type);
             r
         }
-        // TODO optional and variadic components T201398626 T201398652
-        Hint_::Htuple(TupleInfo { required, .. }) => {
+        Hint_::Htuple(TupleInfo { required, extra }) => {
             let mut r = vec![];
             r.push(encode_kind(TypeStructureKind::T_tuple));
             r.push(encode_entry(
                 "elem_types",
                 hints_to_type_constant(opts, tparams, targ_map, type_refinement_in_hint, required)?,
             ));
+            match extra {
+                TupleExtra::Hextra(TupleExtraInfo { optional, variadic }) => {
+                    if !optional.is_empty() {
+                        r.push(encode_entry(
+                            "optional_elem_types",
+                            hints_to_type_constant(
+                                opts,
+                                tparams,
+                                targ_map,
+                                type_refinement_in_hint,
+                                optional,
+                            )?,
+                        ))
+                    }
+                    if let Some(ty) = variadic {
+                        r.push(encode_entry(
+                            "variadic_type",
+                            hint_to_type_constant(
+                                opts,
+                                tparams,
+                                targ_map,
+                                ty,
+                                type_refinement_in_hint,
+                            )?,
+                        ))
+                    }
+                }
+                TupleExtra::Hsplat(_) => {}
+            };
             r
         }
         Hint_::Hoption(h) => {

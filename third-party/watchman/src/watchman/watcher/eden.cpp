@@ -1068,8 +1068,19 @@ class EdenView final : public QueryableView {
       GetJournalPositionCallback& getJournalPositionCallback,
       std::chrono::milliseconds settleTimeout) {
     auto client = getEdenClient(thriftChannel_);
-    auto stream = client->sync_subscribeStreamTemporary(
-        std::string(root->root_path.data(), root->root_path.size()));
+    apache::thrift::ClientBufferedStream<::facebook::eden::JournalPosition>
+        stream;
+    try {
+      stream = client->sync_streamJournalChanged(
+          std::string(root->root_path.data(), root->root_path.size()));
+    } catch (const apache::thrift::TApplicationException& exc) {
+      log(DBG,
+          "running eden version does not have streamJournalChanged, falling back to subscribeStreamTemporary: ",
+          exc.what(),
+          "\n");
+      stream = client->sync_subscribeStreamTemporary(
+          std::string(root->root_path.data(), root->root_path.size()));
+    }
     return std::move(stream).subscribeExTry(
         &subscriberEventBase_,
         [&settleCallback,

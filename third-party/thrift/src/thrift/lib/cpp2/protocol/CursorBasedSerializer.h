@@ -44,6 +44,12 @@
  * end function, though scalars and materialized types can be read/written
  * directly.
  *
+ * endRead() may be replaced with abandonRead() if the caller doesn't intend to
+ * read any more data from the cursor. This is a faster operation than calling
+ * endRead() as it does not skip to the position of the next valid read.
+ * Once a child reader has been abandoned, abandonRead is the only method that
+ * can be called on its parents.
+ *
  * test/CursorBasedSerializerTest.cpp has several complete examples of usage.
  */
 
@@ -130,6 +136,18 @@ class CursorSerializationWrapper {
   void endRead(
       StructuredCursorReader<Tag, ProtocolReader, Contiguous>&& reader) {
     reader.finalize();
+    done();
+  }
+
+  /**
+   * A faster version of endRead for when the caller doesn't intend to read any
+   * more. Once a child reader has been abandoned, abandonRead is the only
+   * method that can be called on any of its parents.
+   */
+  template <bool Contiguous>
+  void abandonRead(
+      StructuredCursorReader<Tag, ProtocolReader, Contiguous>&& reader) {
+    reader.abandon();
     done();
   }
 
@@ -335,6 +353,18 @@ class StructuredCursorReader : detail::BaseCursorReader<ProtocolReader> {
     state_ = State::Active;
   }
 
+  /**
+   * A faster version of endRead for when the caller doesn't intend to read any
+   * more. Once a child reader has been abandoned, abandonRead is the only
+   * method that can be called on any of its parents.
+   */
+  template <typename CTag>
+  void abandonRead(
+      ContainerCursorReader<CTag, ProtocolReader, Contiguous>&& child) {
+    child.abandon();
+    state_ = State::Abandoned;
+  }
+
   /** structured types
    *
    * Note: when beginRead returns a reader, that reader must be passed to
@@ -361,6 +391,19 @@ class StructuredCursorReader : detail::BaseCursorReader<ProtocolReader> {
     child.finalize();
     afterReadField();
     state_ = State::Active;
+  }
+
+  /**
+   * A faster version of endRead for when the caller doesn't intend to read any
+   * more. Once a child reader has been abandoned, abandonRead is the only
+   * method that can be called on any of its parents.
+   */
+  template <typename CTag>
+  void abandonRead(
+      StructuredCursorReader<CTag, ProtocolReader, Contiguous>&& child) {
+    checkState(State::Child);
+    child.abandon();
+    state_ = State::Abandoned;
   }
 
   /** union type accessor */
@@ -391,6 +434,14 @@ class StructuredCursorReader : detail::BaseCursorReader<ProtocolReader> {
       protocol_->skip(TType::T_STRUCT);
     }
     readState_.readStructEnd(protocol_);
+    state_ = State::Done;
+  }
+
+  void abandon() {
+    if (state_ != State::Active && state_ != State::Abandoned) {
+      folly::throw_exception<std::runtime_error>(
+          "Unexpected state when abandoning reader");
+    }
     state_ = State::Done;
   }
 
@@ -589,6 +640,19 @@ class ContainerCursorReader : detail::BaseCursorReader<ProtocolReader> {
   }
 
   /**
+   * A faster version of endRead for when the caller doesn't intend to read any
+   * more. Once a child reader has been abandoned, abandonRead is the only
+   * method that can be called on any of its parents.
+   */
+  template <typename CTag>
+  void abandonRead(
+      ContainerCursorReader<CTag, ProtocolReader, Contiguous>&& child) {
+    checkState(State::Child);
+    child.abandon();
+    state_ = State::Abandoned;
+  }
+
+  /**
    * Manual read path for containers of structured types.
    *
    * Allows using cursor serialization on contained elements.
@@ -635,11 +699,32 @@ class ContainerCursorReader : detail::BaseCursorReader<ProtocolReader> {
     --remaining_;
   }
 
+  /**
+   * A faster version of endRead for when the caller doesn't intend to read any
+   * more. Once a child reader has been abandoned, abandonRead is the only
+   * method that can be called on any of its parents.
+   */
+  template <typename CTag>
+  void abandonRead(
+      StructuredCursorReader<CTag, ProtocolReader, Contiguous>&& child) {
+    checkState(State::Child);
+    child.abandon();
+    state_ = State::Abandoned;
+  }
+
  private:
   explicit ContainerCursorReader(ProtocolReader* p);
   ContainerCursorReader() { remaining_ = 0; }
 
   void finalize();
+
+  void abandon() {
+    if (state_ != State::Active && state_ != State::Abandoned) {
+      folly::throw_exception<std::runtime_error>(
+          "Unexpected state when abandoning reader");
+    }
+    state_ = State::Done;
+  }
 
   bool advance() {
     checkState(State::Active);

@@ -339,6 +339,27 @@ TEST(CursorSerializer, NestedStructRead) {
   wrapper.endRead(std::move(outerReader));
 }
 
+TEST(CursorSerializer, AbandonNestedStructRead) {
+  CursorSerializationWrapper<Meal> wrapper(Meal{});
+  auto outerReader = wrapper.beginRead();
+  auto innerReader = outerReader.beginRead<ident::cookie>();
+
+  outerReader.abandonRead(std::move(innerReader));
+
+  // Can't use parent reader after abandoning child.
+  EXPECT_THAT(
+      [&] { outerReader.read<ident::dessert>(); },
+      ThrowsMessage<std::runtime_error>("Reader abandoned"));
+
+  // Can't call endRead after abandoning child.
+  EXPECT_THAT(
+      [&] { wrapper.endRead(std::move(outerReader)); },
+      ThrowsMessage<std::runtime_error>("Reader abandoned"));
+
+  // @lint-ignore CLANGTIDY bugprone-use-after-move
+  wrapper.abandonRead(std::move(outerReader));
+}
+
 TEST(CursorSerializer, CursorReadInContainer) {
   Struct s;
   Stringish inner;

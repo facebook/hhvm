@@ -102,6 +102,7 @@ class BaseCursorReader {
   enum class State {
     Active,
     Child, // Reading a nested struct or container
+    Abandoned,
     Done,
   };
   State state_ = State::Active;
@@ -114,6 +115,8 @@ class BaseCursorReader {
             return "No child reader is active";
           case State::Child:
             return "Child reader not passed to endRead";
+          case State::Abandoned:
+            return "Reader abandoned";
           case State::Done:
             return "Reader already finalized";
           default:

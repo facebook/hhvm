@@ -24,7 +24,6 @@ class _fbthrift_compatible_with_Fields:
 
 
 class Fields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Fields, _fbthrift_python_abstract_types.Fields):
-
     @property
     def injected_field(self) -> str: ...
     @injected_field.setter
@@ -51,7 +50,6 @@ class _fbthrift_compatible_with_FieldsInjectedToEmptyStruct:
 
 
 class FieldsInjectedToEmptyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_FieldsInjectedToEmptyStruct, _fbthrift_python_abstract_types.FieldsInjectedToEmptyStruct):
-
     @property
     def injected_field(self) -> str: ...
     @injected_field.setter
@@ -78,12 +76,10 @@ class _fbthrift_compatible_with_FieldsInjectedToStruct:
 
 
 class FieldsInjectedToStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_FieldsInjectedToStruct, _fbthrift_python_abstract_types.FieldsInjectedToStruct):
-
     @property
     def injected_field(self) -> str: ...
     @injected_field.setter
     def injected_field(self, value: str) -> None: ...
-
 
     @property
     def string_field(self) -> str: ...
@@ -113,24 +109,20 @@ class _fbthrift_compatible_with_FieldsInjectedWithIncludedStruct:
 
 
 class FieldsInjectedWithIncludedStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_FieldsInjectedWithIncludedStruct, _fbthrift_python_abstract_types.FieldsInjectedWithIncludedStruct):
-
     @property
     def injected_unstructured_annotation_field(self) -> _typing.Optional[str]: ...
     @injected_unstructured_annotation_field.setter
     def injected_unstructured_annotation_field(self, value: _typing.Optional[str]) -> None: ...
-
 
     @property
     def injected_structured_annotation_field(self) -> _typing.Optional[str]: ...
     @injected_structured_annotation_field.setter
     def injected_structured_annotation_field(self, value: _typing.Optional[str]) -> None: ...
 
-
     @property
     def injected_field(self) -> str: ...
     @injected_field.setter
     def injected_field(self, value: str) -> None: ...
-
 
     @property
     def string_field(self) -> str: ...

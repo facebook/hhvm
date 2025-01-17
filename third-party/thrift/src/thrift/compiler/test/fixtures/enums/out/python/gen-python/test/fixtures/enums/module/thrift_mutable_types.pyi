@@ -46,24 +46,20 @@ class _fbthrift_compatible_with_SomeStruct:
 
 
 class SomeStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_SomeStruct, _fbthrift_python_abstract_types.SomeStruct):
-
     @property
     def reasonable(self) -> _fbthrift_Metasyntactic: ...
     @reasonable.setter
     def reasonable(self, value: _fbthrift_Metasyntactic) -> None: ...
-
 
     @property
     def fine(self) -> _fbthrift_Metasyntactic: ...
     @fine.setter
     def fine(self, value: _fbthrift_Metasyntactic) -> None: ...
 
-
     @property
     def questionable(self) -> _fbthrift_Metasyntactic: ...
     @questionable.setter
     def questionable(self, value: _fbthrift_Metasyntactic) -> None: ...
-
 
     @property
     def tags(self) -> _fbthrift_python_mutable_containers.MutableSet[int]: ...
@@ -97,24 +93,20 @@ class _fbthrift_compatible_with_MyStruct:
 
 
 class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_MyStruct, _fbthrift_python_abstract_types.MyStruct):
-
     @property
     def me2_3(self) -> _fbthrift_MyEnum2: ...
     @me2_3.setter
     def me2_3(self, value: _fbthrift_MyEnum2) -> None: ...
-
 
     @property
     def me3_n3(self) -> _fbthrift_MyEnum3: ...
     @me3_n3.setter
     def me3_n3(self, value: _fbthrift_MyEnum3) -> None: ...
 
-
     @property
     def me1_t1(self) -> _fbthrift_MyEnum1: ...
     @me1_t1.setter
     def me1_t1(self, value: _fbthrift_MyEnum1) -> None: ...
-
 
     @property
     def me1_t2(self) -> _fbthrift_MyEnum1: ...

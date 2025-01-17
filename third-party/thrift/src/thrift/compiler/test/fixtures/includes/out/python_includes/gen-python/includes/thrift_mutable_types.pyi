@@ -24,12 +24,10 @@ class _fbthrift_compatible_with_Included:
 
 
 class Included(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Included, _fbthrift_python_abstract_types.Included):
-
     @property
     def MyIntField(self) -> int: ...
     @MyIntField.setter
     def MyIntField(self, value: int) -> None: ...
-
 
     @property
     def MyTransitiveField(self) -> _fbthrift__transitive__thrift_mutable_types.Foo: ...

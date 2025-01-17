@@ -36,30 +36,25 @@ class _fbthrift_compatible_with_Internship:
 
 
 class Internship(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Internship, _fbthrift_python_abstract_types.Internship):
-
     @property
     def weeks(self) -> int: ...
     @weeks.setter
     def weeks(self, value: int) -> None: ...
-
 
     @property
     def title(self) -> str: ...
     @title.setter
     def title(self, value: str) -> None: ...
 
-
     @property
     def employer(self) -> _typing.Optional[_fbthrift_Company]: ...
     @employer.setter
     def employer(self, value: _typing.Optional[_fbthrift_Company]) -> None: ...
 
-
     @property
     def compensation(self) -> _typing.Optional[float]: ...
     @compensation.setter
     def compensation(self, value: _typing.Optional[float]) -> None: ...
-
 
     @property
     def school(self) -> _typing.Optional[str]: ...
@@ -95,12 +90,10 @@ class _fbthrift_compatible_with_Range:
 
 
 class Range(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Range, _fbthrift_python_abstract_types.Range):
-
     @property
     def min(self) -> int: ...
     @min.setter
     def min(self, value: int) -> None: ...
-
 
     @property
     def max(self) -> int: ...
@@ -130,12 +123,10 @@ class _fbthrift_compatible_with_struct1:
 
 
 class struct1(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_struct1, _fbthrift_python_abstract_types.struct1):
-
     @property
     def a(self) -> int: ...
     @a.setter
     def a(self, value: int) -> None: ...
-
 
     @property
     def b(self) -> str: ...
@@ -165,24 +156,20 @@ class _fbthrift_compatible_with_struct2:
 
 
 class struct2(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_struct2, _fbthrift_python_abstract_types.struct2):
-
     @property
     def a(self) -> int: ...
     @a.setter
     def a(self, value: int) -> None: ...
-
 
     @property
     def b(self) -> str: ...
     @b.setter
     def b(self, value: str) -> None: ...
 
-
     @property
     def c(self) -> _fbthrift_struct1: ...
     @c.setter
     def c(self, value: _fbthrift_struct1) -> None: ...
-
 
     @property
     def d(self) -> _fbthrift_python_mutable_containers.MutableList[int]: ...
@@ -216,18 +203,15 @@ class _fbthrift_compatible_with_struct3:
 
 
 class struct3(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_struct3, _fbthrift_python_abstract_types.struct3):
-
     @property
     def a(self) -> str: ...
     @a.setter
     def a(self, value: str) -> None: ...
 
-
     @property
     def b(self) -> int: ...
     @b.setter
     def b(self, value: int) -> None: ...
-
 
     @property
     def c(self) -> _fbthrift_struct2: ...
@@ -259,18 +243,15 @@ class _fbthrift_compatible_with_struct4:
 
 
 class struct4(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_struct4, _fbthrift_python_abstract_types.struct4):
-
     @property
     def a(self) -> int: ...
     @a.setter
     def a(self, value: int) -> None: ...
 
-
     @property
     def b(self) -> _typing.Optional[float]: ...
     @b.setter
     def b(self, value: _typing.Optional[float]) -> None: ...
-
 
     @property
     def c(self) -> _typing.Optional[int]: ...
@@ -302,12 +283,10 @@ class _fbthrift_compatible_with_union1:
 
 
 class union1(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_union1, _fbthrift_python_abstract_types.union1):
-
     @property
     def i(self) -> int: ...
     @i.setter
     def i(self, value: int) -> None: ...
-
 
     @property
     def d(self) -> float: ...
@@ -341,24 +320,20 @@ class _fbthrift_compatible_with_union2:
 
 
 class union2(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_union2, _fbthrift_python_abstract_types.union2):
-
     @property
     def i(self) -> int: ...
     @i.setter
     def i(self, value: int) -> None: ...
-
 
     @property
     def d(self) -> float: ...
     @d.setter
     def d(self, value: float) -> None: ...
 
-
     @property
     def s(self) -> _fbthrift_struct1: ...
     @s.setter
     def s(self, value: _fbthrift_struct1) -> None: ...
-
 
     @property
     def u(self) -> _fbthrift_union1: ...

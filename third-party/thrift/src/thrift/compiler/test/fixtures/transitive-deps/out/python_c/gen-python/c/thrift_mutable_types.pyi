@@ -22,7 +22,6 @@ class _fbthrift_compatible_with_C:
 
 
 class C(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_C, _fbthrift_python_abstract_types.C):
-
     @property
     def i(self) -> int: ...
     @i.setter

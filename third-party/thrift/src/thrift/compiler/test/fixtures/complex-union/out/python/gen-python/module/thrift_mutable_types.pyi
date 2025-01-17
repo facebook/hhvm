@@ -24,36 +24,30 @@ class _fbthrift_compatible_with_ComplexUnion:
 
 
 class ComplexUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_ComplexUnion, _fbthrift_python_abstract_types.ComplexUnion):
-
     @property
     def intValue(self) -> int: ...
     @intValue.setter
     def intValue(self, value: int) -> None: ...
-
 
     @property
     def intListValue(self) -> _fbthrift_python_mutable_containers.MutableList[int]: ...
     @intListValue.setter
     def intListValue(self, value: _fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper) -> None: ...
 
-
     @property
     def stringListValue(self) -> _fbthrift_python_mutable_containers.MutableList[str]: ...
     @stringListValue.setter
     def stringListValue(self, value: _fbthrift_python_mutable_containers.MutableList[str] | _fbthrift_python_mutable_types._ThriftListWrapper) -> None: ...
-
 
     @property
     def stringValue(self) -> str: ...
     @stringValue.setter
     def stringValue(self, value: str) -> None: ...
 
-
     @property
     def typedefValue(self) -> _fbthrift_python_mutable_containers.MutableMap[int, str]: ...
     @typedefValue.setter
     def typedefValue(self, value: _fbthrift_python_mutable_containers.MutableMap[int, str] | _fbthrift_python_mutable_types._ThriftMapWrapper) -> None: ...
-
 
     @property
     def stringRef(self) -> str: ...
@@ -95,12 +89,10 @@ class _fbthrift_compatible_with_ListUnion:
 
 
 class ListUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_ListUnion, _fbthrift_python_abstract_types.ListUnion):
-
     @property
     def intListValue(self) -> _fbthrift_python_mutable_containers.MutableList[int]: ...
     @intListValue.setter
     def intListValue(self, value: _fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper) -> None: ...
-
 
     @property
     def stringListValue(self) -> _fbthrift_python_mutable_containers.MutableList[str]: ...
@@ -134,12 +126,10 @@ class _fbthrift_compatible_with_DataUnion:
 
 
 class DataUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_DataUnion, _fbthrift_python_abstract_types.DataUnion):
-
     @property
     def binaryData(self) -> bytes: ...
     @binaryData.setter
     def binaryData(self, value: bytes) -> None: ...
-
 
     @property
     def stringData(self) -> str: ...
@@ -173,18 +163,15 @@ class _fbthrift_compatible_with_Val:
 
 
 class Val(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Val, _fbthrift_python_abstract_types.Val):
-
     @property
     def strVal(self) -> str: ...
     @strVal.setter
     def strVal(self, value: str) -> None: ...
 
-
     @property
     def intVal(self) -> int: ...
     @intVal.setter
     def intVal(self, value: int) -> None: ...
-
 
     @property
     def typedefValue(self) -> _fbthrift_python_mutable_containers.MutableMap[int, str]: ...
@@ -216,12 +203,10 @@ class _fbthrift_compatible_with_ValUnion:
 
 
 class ValUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_ValUnion, _fbthrift_python_abstract_types.ValUnion):
-
     @property
     def v1(self) -> _fbthrift_Val: ...
     @v1.setter
     def v1(self, value: _fbthrift_Val) -> None: ...
-
 
     @property
     def v2(self) -> _fbthrift_Val: ...
@@ -255,12 +240,10 @@ class _fbthrift_compatible_with_VirtualComplexUnion:
 
 
 class VirtualComplexUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_VirtualComplexUnion, _fbthrift_python_abstract_types.VirtualComplexUnion):
-
     @property
     def thingOne(self) -> str: ...
     @thingOne.setter
     def thingOne(self, value: str) -> None: ...
-
 
     @property
     def thingTwo(self) -> str: ...
@@ -294,7 +277,6 @@ class _fbthrift_compatible_with_NonCopyableStruct:
 
 
 class NonCopyableStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_NonCopyableStruct, _fbthrift_python_abstract_types.NonCopyableStruct):
-
     @property
     def num(self) -> int: ...
     @num.setter
@@ -321,7 +303,6 @@ class _fbthrift_compatible_with_NonCopyableUnion:
 
 
 class NonCopyableUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_NonCopyableUnion, _fbthrift_python_abstract_types.NonCopyableUnion):
-
     @property
     def s(self) -> _fbthrift_NonCopyableStruct: ...
     @s.setter

@@ -24,7 +24,6 @@ class _fbthrift_compatible_with_CustomException:
 
 
 class CustomException(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_CustomException, _fbthrift_python_abstract_types.CustomException):
-
     @property
     def message(self) -> str: ...
     @message.setter
@@ -47,7 +46,6 @@ class _fbthrift_compatible_with_ShouldBeBoxed:
 
 
 class ShouldBeBoxed(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_ShouldBeBoxed, _fbthrift_python_abstract_types.ShouldBeBoxed):
-
     @property
     def sessionId(self) -> str: ...
     @sessionId.setter

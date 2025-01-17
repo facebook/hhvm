@@ -22,7 +22,6 @@ class _fbthrift_compatible_with_Mixin1:
 
 
 class Mixin1(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Mixin1, _fbthrift_python_abstract_types.Mixin1):
-
     @property
     def field1(self) -> str: ...
     @field1.setter
@@ -49,12 +48,10 @@ class _fbthrift_compatible_with_Mixin2:
 
 
 class Mixin2(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Mixin2, _fbthrift_python_abstract_types.Mixin2):
-
     @property
     def m1(self) -> _fbthrift_Mixin1: ...
     @m1.setter
     def m1(self, value: _fbthrift_Mixin1) -> None: ...
-
 
     @property
     def field2(self) -> _typing.Optional[str]: ...
@@ -84,7 +81,6 @@ class _fbthrift_compatible_with_Mixin3Base:
 
 
 class Mixin3Base(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Mixin3Base, _fbthrift_python_abstract_types.Mixin3Base):
-
     @property
     def field3(self) -> str: ...
     @field3.setter
@@ -111,18 +107,15 @@ class _fbthrift_compatible_with_Foo:
 
 
 class Foo(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Foo, _fbthrift_python_abstract_types.Foo):
-
     @property
     def field4(self) -> str: ...
     @field4.setter
     def field4(self, value: str) -> None: ...
 
-
     @property
     def m2(self) -> _fbthrift_Mixin2: ...
     @m2.setter
     def m2(self, value: _fbthrift_Mixin2) -> None: ...
-
 
     @property
     def m3(self) -> _fbthrift_Mixin3Base: ...

@@ -33,54 +33,45 @@ class _fbthrift_compatible_with_MyStruct:
 
 
 class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_MyStruct, _fbthrift_python_abstract_types.MyStruct):
-
     @property
     def MyIntField(self) -> int: ...
     @MyIntField.setter
     def MyIntField(self, value: int) -> None: ...
-
 
     @property
     def MyStringField(self) -> str: ...
     @MyStringField.setter
     def MyStringField(self, value: str) -> None: ...
 
-
     @property
     def MyDataField(self) -> _fbthrift_MyDataItem: ...
     @MyDataField.setter
     def MyDataField(self, value: _fbthrift_MyDataItem) -> None: ...
-
 
     @property
     def myEnum(self) -> _fbthrift_MyEnum: ...
     @myEnum.setter
     def myEnum(self, value: _fbthrift_MyEnum) -> None: ...
 
-
     @property
     def oneway(self) -> bool: ...
     @oneway.setter
     def oneway(self, value: bool) -> None: ...
-
 
     @property
     def readonly(self) -> bool: ...
     @readonly.setter
     def readonly(self, value: bool) -> None: ...
 
-
     @property
     def idempotent(self) -> bool: ...
     @idempotent.setter
     def idempotent(self, value: bool) -> None: ...
 
-
     @property
     def floatSet(self) -> _fbthrift_python_mutable_containers.MutableSet[float]: ...
     @floatSet.setter
     def floatSet(self, value: _fbthrift_python_mutable_containers.MutableSet[float] | _fbthrift_python_mutable_types._ThriftSetWrapper) -> None: ...
-
 
     @property
     def no_hack_codegen_field(self) -> str: ...
@@ -124,18 +115,15 @@ class _fbthrift_compatible_with_Containers:
 
 
 class Containers(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Containers, _fbthrift_python_abstract_types.Containers):
-
     @property
     def I32List(self) -> _fbthrift_python_mutable_containers.MutableList[int]: ...
     @I32List.setter
     def I32List(self, value: _fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper) -> None: ...
 
-
     @property
     def StringSet(self) -> _fbthrift_python_mutable_containers.MutableSet[str]: ...
     @StringSet.setter
     def StringSet(self, value: _fbthrift_python_mutable_containers.MutableSet[str] | _fbthrift_python_mutable_types._ThriftSetWrapper) -> None: ...
-
 
     @property
     def StringToI64Map(self) -> _fbthrift_python_mutable_containers.MutableMap[str, int]: ...
@@ -186,24 +174,20 @@ class _fbthrift_compatible_with_MyUnion:
 
 
 class MyUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_MyUnion, _fbthrift_python_abstract_types.MyUnion):
-
     @property
     def myEnum(self) -> _fbthrift_MyEnum: ...
     @myEnum.setter
     def myEnum(self, value: _fbthrift_MyEnum) -> None: ...
-
 
     @property
     def myStruct(self) -> _fbthrift_MyStruct: ...
     @myStruct.setter
     def myStruct(self, value: _fbthrift_MyStruct) -> None: ...
 
-
     @property
     def myDataItem(self) -> _fbthrift_MyDataItem: ...
     @myDataItem.setter
     def myDataItem(self, value: _fbthrift_MyDataItem) -> None: ...
-
 
     @property
     def floatSet(self) -> _fbthrift_python_mutable_containers.MutableSet[float]: ...
@@ -241,24 +225,20 @@ class _fbthrift_compatible_with_MyException:
 
 
 class MyException(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_MyException, _fbthrift_python_abstract_types.MyException):
-
     @property
     def MyIntField(self) -> int: ...
     @MyIntField.setter
     def MyIntField(self, value: int) -> None: ...
-
 
     @property
     def MyStringField(self) -> str: ...
     @MyStringField.setter
     def MyStringField(self, value: str) -> None: ...
 
-
     @property
     def myStruct(self) -> _fbthrift_MyStruct: ...
     @myStruct.setter
     def myStruct(self, value: _fbthrift_MyStruct) -> None: ...
-
 
     @property
     def myUnion(self) -> _fbthrift_MyUnion: ...
@@ -285,24 +265,20 @@ class _fbthrift_compatible_with_MyExceptionWithMessage:
 
 
 class MyExceptionWithMessage(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_MyExceptionWithMessage, _fbthrift_python_abstract_types.MyExceptionWithMessage):
-
     @property
     def MyIntField(self) -> int: ...
     @MyIntField.setter
     def MyIntField(self, value: int) -> None: ...
-
 
     @property
     def MyStringField(self) -> str: ...
     @MyStringField.setter
     def MyStringField(self, value: str) -> None: ...
 
-
     @property
     def myStruct(self) -> _fbthrift_MyStruct: ...
     @myStruct.setter
     def myStruct(self, value: _fbthrift_MyStruct) -> None: ...
-
 
     @property
     def myUnion(self) -> _fbthrift_MyUnion: ...
@@ -329,7 +305,6 @@ class _fbthrift_compatible_with_ReservedKeyword:
 
 
 class ReservedKeyword(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_ReservedKeyword, _fbthrift_python_abstract_types.ReservedKeyword):
-
     @property
     def reserved_field(self) -> int: ...
     @reserved_field.setter
@@ -356,7 +331,6 @@ class _fbthrift_compatible_with_UnionToBeRenamed:
 
 
 class UnionToBeRenamed(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_UnionToBeRenamed, _fbthrift_python_abstract_types.UnionToBeRenamed):
-
     @property
     def reserved_field(self) -> int: ...
     @reserved_field.setter

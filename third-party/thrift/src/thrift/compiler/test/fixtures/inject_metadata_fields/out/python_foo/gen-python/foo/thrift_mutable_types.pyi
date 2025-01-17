@@ -22,18 +22,15 @@ class _fbthrift_compatible_with_Fields:
 
 
 class Fields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Fields, _fbthrift_python_abstract_types.Fields):
-
     @property
     def injected_field(self) -> str: ...
     @injected_field.setter
     def injected_field(self, value: str) -> None: ...
 
-
     @property
     def injected_structured_annotation_field(self) -> _typing.Optional[str]: ...
     @injected_structured_annotation_field.setter
     def injected_structured_annotation_field(self, value: _typing.Optional[str]) -> None: ...
-
 
     @property
     def injected_unstructured_annotation_field(self) -> _typing.Optional[str]: ...

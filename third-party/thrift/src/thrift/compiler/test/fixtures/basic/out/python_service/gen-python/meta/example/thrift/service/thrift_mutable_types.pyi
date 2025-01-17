@@ -22,7 +22,6 @@ class _fbthrift_compatible_with_EchoRequest:
 
 
 class EchoRequest(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_EchoRequest, _fbthrift_python_abstract_types.EchoRequest):
-
     @property
     def text(self) -> str: ...
     @text.setter
@@ -49,7 +48,6 @@ class _fbthrift_compatible_with_EchoResponse:
 
 
 class EchoResponse(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_EchoResponse, _fbthrift_python_abstract_types.EchoResponse):
-
     @property
     def text(self) -> str: ...
     @text.setter
@@ -76,7 +74,6 @@ class _fbthrift_compatible_with_WhisperException:
 
 
 class WhisperException(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_WhisperException, _fbthrift_python_abstract_types.WhisperException):
-
     @property
     def message(self) -> str: ...
     @message.setter

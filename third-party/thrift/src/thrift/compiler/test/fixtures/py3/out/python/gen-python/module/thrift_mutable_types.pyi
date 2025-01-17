@@ -38,7 +38,6 @@ class _fbthrift_compatible_with_SimpleException:
 
 
 class SimpleException(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_SimpleException, _fbthrift_python_abstract_types.SimpleException):
-
     @property
     def err_code(self) -> int: ...
     @err_code.setter
@@ -61,7 +60,6 @@ class _fbthrift_compatible_with_OptionalRefStruct:
 
 
 class OptionalRefStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_OptionalRefStruct, _fbthrift_python_abstract_types.OptionalRefStruct):
-
     @property
     def optional_blob(self) -> _typing.Optional[_fbthrift_iobuf.IOBuf]: ...
     @optional_blob.setter
@@ -88,54 +86,45 @@ class _fbthrift_compatible_with_SimpleStruct:
 
 
 class SimpleStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_SimpleStruct, _fbthrift_python_abstract_types.SimpleStruct):
-
     @property
     def is_on(self) -> bool: ...
     @is_on.setter
     def is_on(self, value: bool) -> None: ...
-
 
     @property
     def tiny_int(self) -> int: ...
     @tiny_int.setter
     def tiny_int(self, value: int) -> None: ...
 
-
     @property
     def small_int(self) -> int: ...
     @small_int.setter
     def small_int(self, value: int) -> None: ...
-
 
     @property
     def nice_sized_int(self) -> int: ...
     @nice_sized_int.setter
     def nice_sized_int(self, value: int) -> None: ...
 
-
     @property
     def big_int(self) -> int: ...
     @big_int.setter
     def big_int(self, value: int) -> None: ...
-
 
     @property
     def real(self) -> float: ...
     @real.setter
     def real(self, value: float) -> None: ...
 
-
     @property
     def smaller_real(self) -> float: ...
     @smaller_real.setter
     def smaller_real(self, value: float) -> None: ...
 
-
     @property
     def hidden_field(self) -> int: ...
     @hidden_field.setter
     def hidden_field(self, value: int) -> None: ...
-
 
     @property
     def something(self) -> _fbthrift_python_mutable_containers.MutableMap[int, int]: ...
@@ -179,18 +168,15 @@ class _fbthrift_compatible_with_HiddenTypeFieldsStruct:
 
 
 class HiddenTypeFieldsStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_HiddenTypeFieldsStruct, _fbthrift_python_abstract_types.HiddenTypeFieldsStruct):
-
     @property
     def field1(self) -> _fbthrift_SimpleStruct: ...
     @field1.setter
     def field1(self, value: _fbthrift_SimpleStruct) -> None: ...
 
-
     @property
     def field2(self) -> _fbthrift_python_mutable_containers.MutableList[_fbthrift_SimpleStruct]: ...
     @field2.setter
     def field2(self, value: _fbthrift_python_mutable_containers.MutableList[_fbthrift_SimpleStruct] | _fbthrift_python_mutable_types._ThriftListWrapper) -> None: ...
-
 
     @property
     def field3(self) -> _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_SimpleStruct]: ...
@@ -222,7 +208,6 @@ class _fbthrift_compatible_with_AdaptedUnion:
 
 
 class AdaptedUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_AdaptedUnion, _fbthrift_python_abstract_types.AdaptedUnion):
-
     @property
     def best(self) -> int: ...
     @best.setter
@@ -253,7 +238,6 @@ class _fbthrift_compatible_with_HiddenException:
 
 
 class HiddenException(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_HiddenException, _fbthrift_python_abstract_types.HiddenException):
-
     @property
     def test(self) -> int: ...
     @test.setter
@@ -276,54 +260,45 @@ class _fbthrift_compatible_with_ComplexStruct:
 
 
 class ComplexStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_ComplexStruct, _fbthrift_python_abstract_types.ComplexStruct):
-
     @property
     def structOne(self) -> _fbthrift_SimpleStruct: ...
     @structOne.setter
     def structOne(self, value: _fbthrift_SimpleStruct) -> None: ...
-
 
     @property
     def structTwo(self) -> _fbthrift_SimpleStruct: ...
     @structTwo.setter
     def structTwo(self, value: _fbthrift_SimpleStruct) -> None: ...
 
-
     @property
     def an_integer(self) -> int: ...
     @an_integer.setter
     def an_integer(self, value: int) -> None: ...
-
 
     @property
     def name(self) -> str: ...
     @name.setter
     def name(self, value: str) -> None: ...
 
-
     @property
     def an_enum(self) -> _fbthrift_AnEnum: ...
     @an_enum.setter
     def an_enum(self, value: _fbthrift_AnEnum) -> None: ...
-
 
     @property
     def some_bytes(self) -> bytes: ...
     @some_bytes.setter
     def some_bytes(self, value: bytes) -> None: ...
 
-
     @property
     def sender(self) -> str: ...
     @sender.setter
     def sender(self, value: str) -> None: ...
 
-
     @property
     def cdef_(self) -> str: ...
     @cdef_.setter
     def cdef_(self, value: str) -> None: ...
-
 
     @property
     def bytes_with_cpp_type(self) -> bytes: ...
@@ -367,7 +342,6 @@ class _fbthrift_compatible_with_BinaryUnion:
 
 
 class BinaryUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_BinaryUnion, _fbthrift_python_abstract_types.BinaryUnion):
-
     @property
     def iobuf_val(self) -> _fbthrift_iobuf.IOBuf: ...
     @iobuf_val.setter
@@ -398,7 +372,6 @@ class _fbthrift_compatible_with_BinaryUnionStruct:
 
 
 class BinaryUnionStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_BinaryUnionStruct, _fbthrift_python_abstract_types.BinaryUnionStruct):
-
     @property
     def u(self) -> _fbthrift_BinaryUnion: ...
     @u.setter
@@ -425,54 +398,45 @@ class _fbthrift_compatible_with_CustomFields:
 
 
 class CustomFields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_CustomFields, _fbthrift_python_abstract_types.CustomFields):
-
     @property
     def bool_field(self) -> bool: ...
     @bool_field.setter
     def bool_field(self, value: bool) -> None: ...
-
 
     @property
     def integer_field(self) -> int: ...
     @integer_field.setter
     def integer_field(self, value: int) -> None: ...
 
-
     @property
     def double_field(self) -> float: ...
     @double_field.setter
     def double_field(self, value: float) -> None: ...
-
 
     @property
     def string_field(self) -> str: ...
     @string_field.setter
     def string_field(self, value: str) -> None: ...
 
-
     @property
     def binary_field(self) -> bytes: ...
     @binary_field.setter
     def binary_field(self, value: bytes) -> None: ...
-
 
     @property
     def list_field(self) -> _fbthrift_python_mutable_containers.MutableList[int]: ...
     @list_field.setter
     def list_field(self, value: _fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper) -> None: ...
 
-
     @property
     def set_field(self) -> _fbthrift_python_mutable_containers.MutableSet[int]: ...
     @set_field.setter
     def set_field(self, value: _fbthrift_python_mutable_containers.MutableSet[int] | _fbthrift_python_mutable_types._ThriftSetWrapper) -> None: ...
 
-
     @property
     def map_field(self) -> _fbthrift_python_mutable_containers.MutableMap[int, int]: ...
     @map_field.setter
     def map_field(self, value: _fbthrift_python_mutable_containers.MutableMap[int, int] | _fbthrift_python_mutable_types._ThriftMapWrapper) -> None: ...
-
 
     @property
     def struct_field(self) -> _fbthrift_SimpleStruct: ...
@@ -516,54 +480,45 @@ class _fbthrift_compatible_with_CustomTypedefFields:
 
 
 class CustomTypedefFields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_CustomTypedefFields, _fbthrift_python_abstract_types.CustomTypedefFields):
-
     @property
     def bool_field(self) -> bool: ...
     @bool_field.setter
     def bool_field(self, value: bool) -> None: ...
-
 
     @property
     def integer_field(self) -> int: ...
     @integer_field.setter
     def integer_field(self, value: int) -> None: ...
 
-
     @property
     def double_field(self) -> float: ...
     @double_field.setter
     def double_field(self, value: float) -> None: ...
-
 
     @property
     def string_field(self) -> str: ...
     @string_field.setter
     def string_field(self, value: str) -> None: ...
 
-
     @property
     def binary_field(self) -> bytes: ...
     @binary_field.setter
     def binary_field(self, value: bytes) -> None: ...
-
 
     @property
     def list_field(self) -> _fbthrift_python_mutable_containers.MutableList[int]: ...
     @list_field.setter
     def list_field(self, value: _fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper) -> None: ...
 
-
     @property
     def set_field(self) -> _fbthrift_python_mutable_containers.MutableSet[int]: ...
     @set_field.setter
     def set_field(self, value: _fbthrift_python_mutable_containers.MutableSet[int] | _fbthrift_python_mutable_types._ThriftSetWrapper) -> None: ...
 
-
     @property
     def map_field(self) -> _fbthrift_python_mutable_containers.MutableMap[int, int]: ...
     @map_field.setter
     def map_field(self, value: _fbthrift_python_mutable_containers.MutableMap[int, int] | _fbthrift_python_mutable_types._ThriftMapWrapper) -> None: ...
-
 
     @property
     def struct_field(self) -> _fbthrift_SimpleStruct: ...
@@ -607,54 +562,45 @@ class _fbthrift_compatible_with_AdaptedTypedefFields:
 
 
 class AdaptedTypedefFields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_AdaptedTypedefFields, _fbthrift_python_abstract_types.AdaptedTypedefFields):
-
     @property
     def bool_field(self) -> bool: ...
     @bool_field.setter
     def bool_field(self, value: bool) -> None: ...
-
 
     @property
     def integer_field(self) -> int: ...
     @integer_field.setter
     def integer_field(self, value: int) -> None: ...
 
-
     @property
     def double_field(self) -> float: ...
     @double_field.setter
     def double_field(self, value: float) -> None: ...
-
 
     @property
     def string_field(self) -> str: ...
     @string_field.setter
     def string_field(self, value: str) -> None: ...
 
-
     @property
     def binary_field(self) -> bytes: ...
     @binary_field.setter
     def binary_field(self, value: bytes) -> None: ...
-
 
     @property
     def list_field(self) -> _fbthrift_python_mutable_containers.MutableList[int]: ...
     @list_field.setter
     def list_field(self, value: _fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper) -> None: ...
 
-
     @property
     def set_field(self) -> _fbthrift_python_mutable_containers.MutableSet[int]: ...
     @set_field.setter
     def set_field(self, value: _fbthrift_python_mutable_containers.MutableSet[int] | _fbthrift_python_mutable_types._ThriftSetWrapper) -> None: ...
 
-
     @property
     def map_field(self) -> _fbthrift_python_mutable_containers.MutableMap[int, int]: ...
     @map_field.setter
     def map_field(self, value: _fbthrift_python_mutable_containers.MutableMap[int, int] | _fbthrift_python_mutable_types._ThriftMapWrapper) -> None: ...
-
 
     @property
     def struct_field(self) -> _fbthrift_SimpleStruct: ...

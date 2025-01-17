@@ -22,7 +22,6 @@ class _fbthrift_compatible_with_Fiery:
 
 
 class Fiery(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_Fiery, _fbthrift_python_abstract_types.Fiery):
-
     @property
     def message(self) -> str: ...
     @message.setter
@@ -45,7 +44,6 @@ class _fbthrift_compatible_with_Serious:
 
 
 class Serious(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_Serious, _fbthrift_python_abstract_types.Serious):
-
     @property
     def not_sonnet(self) -> _typing.Optional[str]: ...
     @not_sonnet.setter
@@ -68,12 +66,10 @@ class _fbthrift_compatible_with_ComplexFieldNames:
 
 
 class ComplexFieldNames(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_ComplexFieldNames, _fbthrift_python_abstract_types.ComplexFieldNames):
-
     @property
     def error_message(self) -> str: ...
     @error_message.setter
     def error_message(self, value: str) -> None: ...
-
 
     @property
     def internal_error_message(self) -> str: ...
@@ -98,12 +94,10 @@ class _fbthrift_compatible_with_CustomFieldNames:
 
 
 class CustomFieldNames(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_CustomFieldNames, _fbthrift_python_abstract_types.CustomFieldNames):
-
     @property
     def error_message(self) -> str: ...
     @error_message.setter
     def error_message(self, value: str) -> None: ...
-
 
     @property
     def internal_error_message(self) -> str: ...
@@ -128,12 +122,10 @@ class _fbthrift_compatible_with_ExceptionWithPrimitiveField:
 
 
 class ExceptionWithPrimitiveField(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_ExceptionWithPrimitiveField, _fbthrift_python_abstract_types.ExceptionWithPrimitiveField):
-
     @property
     def message(self) -> str: ...
     @message.setter
     def message(self, value: str) -> None: ...
-
 
     @property
     def error_code(self) -> int: ...
@@ -158,12 +150,10 @@ class _fbthrift_compatible_with_ExceptionWithStructuredAnnotation:
 
 
 class ExceptionWithStructuredAnnotation(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_ExceptionWithStructuredAnnotation, _fbthrift_python_abstract_types.ExceptionWithStructuredAnnotation):
-
     @property
     def message_field(self) -> str: ...
     @message_field.setter
     def message_field(self, value: str) -> None: ...
-
 
     @property
     def error_code(self) -> int: ...

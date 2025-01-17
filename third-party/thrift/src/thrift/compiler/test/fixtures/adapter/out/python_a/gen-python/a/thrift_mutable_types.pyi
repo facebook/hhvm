@@ -29,18 +29,15 @@ class _fbthrift_compatible_with_MyStruct:
 
 
 class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_MyStruct, _fbthrift_python_abstract_types.MyStruct):
-
     @property
     def a(self) -> typeshed_one.AdapterOneType[_fbthrift__b__thrift_mutable_types.B]: ...
     @a.setter
     def a(self, value: typeshed_one.AdapterOneType[_fbthrift__b__thrift_mutable_types.B]) -> None: ...
 
-
     @property
     def b(self) -> typeshed_three.AdapterThreeType[_fbthrift__c__thrift_mutable_types.C1]: ...
     @b.setter
     def b(self, value: typeshed_three.AdapterThreeType[_fbthrift__c__thrift_mutable_types.C1]) -> None: ...
-
 
     @property
     def c(self) -> typeshed_two.AdapterTwoType[_fbthrift__c__thrift_mutable_types.C2]: ...

@@ -22,7 +22,6 @@ class _fbthrift_compatible_with_Foo:
 
 
 class Foo(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Foo, _fbthrift_python_abstract_types.Foo):
-
     @property
     def MyInt(self) -> int: ...
     @MyInt.setter

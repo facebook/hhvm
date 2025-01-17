@@ -24,18 +24,15 @@ class _fbthrift_compatible_with_MyStruct:
 
 
 class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_MyStruct, _fbthrift_python_abstract_types.MyStruct):
-
     @property
     def MyIncludedField(self) -> _fbthrift__includes__thrift_mutable_types.Included: ...
     @MyIncludedField.setter
     def MyIncludedField(self, value: _fbthrift__includes__thrift_mutable_types.Included) -> None: ...
 
-
     @property
     def MyOtherIncludedField(self) -> _fbthrift__includes__thrift_mutable_types.Included: ...
     @MyOtherIncludedField.setter
     def MyOtherIncludedField(self, value: _fbthrift__includes__thrift_mutable_types.Included) -> None: ...
-
 
     @property
     def MyIncludedInt(self) -> int: ...

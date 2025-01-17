@@ -22,7 +22,6 @@ class _fbthrift_compatible_with_HsFoo:
 
 
 class HsFoo(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_HsFoo, _fbthrift_python_abstract_types.HsFoo):
-
     @property
     def MyInt(self) -> int: ...
     @MyInt.setter

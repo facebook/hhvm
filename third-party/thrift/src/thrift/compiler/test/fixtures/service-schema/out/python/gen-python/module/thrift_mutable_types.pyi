@@ -30,12 +30,10 @@ class _fbthrift_compatible_with_CustomException:
 
 
 class CustomException(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_CustomException, _fbthrift_python_abstract_types.CustomException):
-
     @property
     def name(self) -> str: ...
     @name.setter
     def name(self, value: str) -> None: ...
-
 
     @property
     def result(self) -> _fbthrift_Result: ...

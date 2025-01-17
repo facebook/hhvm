@@ -24,24 +24,20 @@ class _fbthrift_compatible_with_SerializedStruct:
 
 
 class SerializedStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_SerializedStruct, _fbthrift_python_abstract_types.SerializedStruct):
-
     @property
     def s(self) -> str: ...
     @s.setter
     def s(self, value: str) -> None: ...
-
 
     @property
     def i(self) -> int: ...
     @i.setter
     def i(self, value: int) -> None: ...
 
-
     @property
     def os(self) -> _typing.Optional[str]: ...
     @os.setter
     def os(self, value: _typing.Optional[str]) -> None: ...
-
 
     @property
     def rs(self) -> str: ...
@@ -75,12 +71,10 @@ class _fbthrift_compatible_with_SerializedUnion:
 
 
 class SerializedUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_SerializedUnion, _fbthrift_python_abstract_types.SerializedUnion):
-
     @property
     def s(self) -> str: ...
     @s.setter
     def s(self, value: str) -> None: ...
-
 
     @property
     def i(self) -> int: ...
@@ -114,18 +108,15 @@ class _fbthrift_compatible_with_SerializedError:
 
 
 class SerializedError(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_SerializedError, _fbthrift_python_abstract_types.SerializedError):
-
     @property
     def msg(self) -> str: ...
     @msg.setter
     def msg(self, value: str) -> None: ...
 
-
     @property
     def os(self) -> _typing.Optional[str]: ...
     @os.setter
     def os(self, value: _typing.Optional[str]) -> None: ...
-
 
     @property
     def rs(self) -> str: ...
@@ -151,24 +142,20 @@ class _fbthrift_compatible_with_MarshalStruct:
 
 
 class MarshalStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_MarshalStruct, _fbthrift_python_abstract_types.MarshalStruct):
-
     @property
     def s(self) -> str: ...
     @s.setter
     def s(self, value: str) -> None: ...
-
 
     @property
     def i(self) -> int: ...
     @i.setter
     def i(self, value: int) -> None: ...
 
-
     @property
     def os(self) -> _typing.Optional[str]: ...
     @os.setter
     def os(self, value: _typing.Optional[str]) -> None: ...
-
 
     @property
     def rs(self) -> str: ...
@@ -202,12 +189,10 @@ class _fbthrift_compatible_with_MarshalUnion:
 
 
 class MarshalUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_MarshalUnion, _fbthrift_python_abstract_types.MarshalUnion):
-
     @property
     def s(self) -> str: ...
     @s.setter
     def s(self, value: str) -> None: ...
-
 
     @property
     def i(self) -> int: ...
@@ -241,18 +226,15 @@ class _fbthrift_compatible_with_MarshalError:
 
 
 class MarshalError(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_MarshalError, _fbthrift_python_abstract_types.MarshalError):
-
     @property
     def msg(self) -> str: ...
     @msg.setter
     def msg(self, value: str) -> None: ...
 
-
     @property
     def os(self) -> _typing.Optional[str]: ...
     @os.setter
     def os(self, value: _typing.Optional[str]) -> None: ...
-
 
     @property
     def rs(self) -> str: ...

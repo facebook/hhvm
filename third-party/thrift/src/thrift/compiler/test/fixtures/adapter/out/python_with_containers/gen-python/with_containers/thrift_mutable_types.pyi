@@ -23,12 +23,10 @@ class _fbthrift_compatible_with__fbthrift_unadapted_AnnotationWithContainers:
 
 
 class _fbthrift_unadapted_AnnotationWithContainers(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with__fbthrift_unadapted_AnnotationWithContainers, _fbthrift_python_abstract_types._fbthrift_unadapted_AnnotationWithContainers):
-
     @property
     def names(self) -> _fbthrift_python_mutable_containers.MutableList[str]: ...
     @names.setter
     def names(self, value: _fbthrift_python_mutable_containers.MutableList[str] | _fbthrift_python_mutable_types._ThriftListWrapper) -> None: ...
-
 
     @property
     def counts(self) -> _fbthrift_python_mutable_containers.MutableMap[str, int]: ...
@@ -59,7 +57,6 @@ class _fbthrift_compatible_with__fbthrift_unadapted_MyStruct:
 
 
 class _fbthrift_unadapted_MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with__fbthrift_unadapted_MyStruct, _fbthrift_python_abstract_types._fbthrift_unadapted_MyStruct):
-
     @property
     def abc(self) -> my.AdaptedType[int]: ...
     @abc.setter

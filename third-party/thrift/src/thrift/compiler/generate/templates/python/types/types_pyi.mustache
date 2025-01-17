@@ -74,7 +74,6 @@ class {{> structs/unadapted_name}}({{!
     }}{{#program:generate_mutable_types}}{{!
     }}{{#struct:fields_ordered_by_id}}{{!
     }}
-
     @property
     def {{field:py_name}}(self) -> {{> fields/field_type_pyi}}: ...
     @{{field:py_name}}.setter

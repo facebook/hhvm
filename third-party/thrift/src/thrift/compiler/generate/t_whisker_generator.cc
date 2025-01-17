@@ -27,7 +27,7 @@
 #include <cstddef>
 #include <fstream>
 
-#include <fmt/core.h>
+#include <fmt/ranges.h>
 
 #include <boost/algorithm/string/split.hpp>
 

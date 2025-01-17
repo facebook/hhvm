@@ -306,6 +306,12 @@ cdef class ThriftServer:
     def get_queue_timeout(self):
         return self.server.get().getQueueTimeout().count() / 1000
 
+    def set_socket_queue_timeout(self, seconds):
+        self.server.get().setSocketQueueTimeout(milliseconds(<int64_t>(seconds * 1000)))
+
+    def get_socket_queue_timeout(self):
+        return self.server.get().getSocketQueueTimeoutMs().count() / 1000
+    
     cdef void set_is_overloaded(self, cIsOverloadedFunc is_overloaded):
         self.server.get().setIsOverloaded(cmove(is_overloaded))
 

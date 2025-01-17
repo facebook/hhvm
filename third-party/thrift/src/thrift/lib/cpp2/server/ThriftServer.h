@@ -1454,12 +1454,10 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   }
 
   void setSocketQueueTimeout(
-      std::chrono::nanoseconds timeout,
+      std::chrono::milliseconds timeout,
       AttributeSource source = AttributeSource::OVERRIDE) {
     thriftConfig_.setSocketQueueTimeout(
-        folly::observer::makeStaticObserver(std::optional{
-            std::chrono::duration_cast<std::chrono::milliseconds>(timeout)}),
-        source);
+        folly::observer::makeStaticObserver(std::optional{timeout}), source);
   }
 
   /**
@@ -1485,6 +1483,14 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   const folly::observer::Observer<std::chrono::nanoseconds>&
   getSocketQueueTimeout() const {
     return thriftConfig_.getSocketQueueTimeout().getObserver();
+  }
+
+  /**
+   * Gets the current socket queue timeout in milliseconds.
+   */
+  std::chrono::milliseconds getSocketQueueTimeoutMs() const {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(
+        thriftConfig_.getSocketQueueTimeout().get());
   }
 
   /**

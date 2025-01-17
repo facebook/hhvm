@@ -127,6 +127,8 @@ cdef extern from "thrift/lib/cpp2/server/ThriftServer.h" \
         milliseconds getIdleTimeout()
         void setQueueTimeout(milliseconds timeout)
         milliseconds getQueueTimeout()
+        void setSocketQueueTimeout(milliseconds timeout)
+        milliseconds getSocketQueueTimeoutMs()
         void setIsOverloaded(cIsOverloadedFunc isOverloaded)
         void useExistingSocket(int socket) except +
         cBaseThriftServerMetadata& metadata()

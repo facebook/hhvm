@@ -794,6 +794,7 @@ The *context* provided during when rendering a template follows Whisker's *data 
 * `map` — An unordered set of key-value pairs. Keys are valid *identifiers* represented as `string`s. Values are any `object` (note the recursion). A `map` can be *unpacked* using [`{{#with}}`](#with-blocks) or accessed through [variable interpolation](#expressions).
 * `native_object` — An implementation-defined type that can behave like an `array` or `map`. A value of this type can only be created by the native runtime (e.g. C++).
 * `native_function` — An implementation-defined type that can be invoked in [Whisker templates](#expressions). A value of this type can only be created by the native runtime (e.g. C++).
+* `native_handle` — An opaque reference to an implementation-defined type that Whisker cannot directly interact with. A value of this type is meaningful only to the native runtime (e.g. C++) in conjunction with `native_function`.
 
 The following types are *printable*: `i64`, `string`.
 

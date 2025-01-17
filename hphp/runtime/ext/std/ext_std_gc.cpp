@@ -45,6 +45,10 @@ static void HHVM_FUNCTION(gc_check_heap) {
   tl_heap->checkHeap("gc_check_heap");
 }
 
+static bool HHVM_FUNCTION(gc_is_conservative) {
+  return !type_scan::hasNonConservative();
+}
+
 void StandardExtension::registerNativeGc() {
   HHVM_FE(gc_enabled);
   HHVM_FE(gc_enable);
@@ -52,6 +56,7 @@ void StandardExtension::registerNativeGc() {
   HHVM_FE(gc_collect_cycles);
   HHVM_FE(gc_mem_caches);
   HHVM_FE(gc_check_heap);
+  HHVM_FALIAS(HH\\gc_is_conservative, gc_is_conservative);
 }
 
 }

@@ -1,5 +1,7 @@
 <?hh
 
+namespace {
+
 /* Returns status of the circular reference collector.
  */
 <<__Native>>
@@ -29,3 +31,12 @@ function gc_mem_caches(): int;
  */
 <<__Native>>
 function gc_check_heap(): void;
+
+}
+
+namespace HH {
+
+<<__Native>>
+function gc_is_conservative(): bool;
+
+}

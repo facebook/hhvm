@@ -143,6 +143,35 @@ let check_happly unchecked_tparams env h =
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   env
 
+let check_splat_hint env p h =
+  let (_env, hint_pos, locl_ty) =
+    loclty_of_hint env.typedef_tparams env.tenv h
+  in
+  (* The top tuple (mixed...) *)
+  let cstr_ty =
+    mk
+      ( Reason.witness p,
+        Ttuple
+          {
+            t_required = [];
+            t_extra =
+              Textra
+                {
+                  t_optional = [];
+                  t_variadic = Typing_make_type.mixed (Reason.witness p);
+                };
+          } )
+  in
+  let (_env, err) =
+    Typing_generic_constraint.check_tparams_constraint
+      env.tenv
+      ~use_pos:hint_pos
+      Ast_defs.Constraint_as
+      ~cstr_ty
+      locl_ty
+  in
+  Option.to_list err
+
 let rec context_hint ?(in_signature = true) env (p, h) =
   Typing_type_integrity.Simple.check_well_kinded_context_hint
     ~in_signature
@@ -192,7 +221,7 @@ and hint_ ~in_signature env p h_ =
         match tup_extra with
         | Hextra { tup_optional; tup_variadic } ->
           hints env tup_optional @ hint_opt env tup_variadic
-        | Hsplat h -> hint env h
+        | Hsplat h -> hint env h @ check_splat_hint env p h
       end
   | Hclass_ptr (_, h)
   | Hoption h
@@ -203,13 +232,20 @@ and hint_ ~in_signature env p h_ =
       {
         hf_is_readonly = _;
         hf_param_tys = hl;
-        hf_param_info = _;
+        hf_param_info;
         hf_variadic_ty = variadic_hint;
         hf_ctxs;
         hf_return_ty = h;
         hf_is_readonly_return = _;
       } ->
+    let splat_err =
+      match (List.rev hl, List.rev hf_param_info) with
+      | (h :: _, Some { hfparam_splat = Some Ast_defs.Splat; _ } :: _) ->
+        check_splat_hint env p h
+      | _ -> []
+    in
     hints env hl
+    @ splat_err
     @ hint env h
     @ hint_opt env variadic_hint
     @ contexts_opt env hf_ctxs

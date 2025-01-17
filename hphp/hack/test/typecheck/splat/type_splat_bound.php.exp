@@ -1,0 +1,24 @@
+ERROR: File "type_splat_bound.php", line 4, characters 21-21:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_bound.php", line 4, characters 17-22:
+  Expected `(mixed...)`
+  File "type_splat_bound.php", line 4, characters 21-21:
+  But got `T`
+ERROR: File "type_splat_bound.php", line 4, characters 21-21:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_bound.php", line 4, characters 17-22:
+  Expected `(mixed...)`
+  File "type_splat_bound.php", line 4, characters 21-21:
+  But got `mixed` arising from an implicit `as mixed` constraint on this type
+ERROR: File "type_splat_bound.php", line 5, characters 34-34:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_bound.php", line 5, characters 17-41:
+  Expected `(mixed...)`
+  File "type_splat_bound.php", line 5, characters 34-34:
+  But got `T`
+ERROR: File "type_splat_bound.php", line 5, characters 34-34:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_bound.php", line 5, characters 17-41:
+  Expected `(mixed...)`
+  File "type_splat_bound.php", line 5, characters 34-34:
+  But got `mixed` arising from an implicit `as mixed` constraint on this type

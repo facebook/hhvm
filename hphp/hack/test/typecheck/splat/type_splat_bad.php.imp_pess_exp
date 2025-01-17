@@ -1,0 +1,46 @@
+ERROR: File "type_splat_bad.php", line 6, characters 46-53:
+A splat parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
+ERROR: File "type_splat_bad.php", line 6, characters 71-86:
+A splat parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
+ERROR: File "type_splat_bad.php", line 10, characters 46-53:
+A splat parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
+ERROR: File "type_splat_bad.php", line 10, characters 74-90:
+A splat parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
+ERROR: File "type_splat_bad.php", line 14, characters 46-53:
+A splat parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
+ERROR: File "type_splat_bad.php", line 14, characters 80-96:
+A splat parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
+ERROR: File "type_splat_bad.php", line 18, characters 36-74:
+Optional parameter cannot precede non-optional parameter (Parsing[1002])
+ERROR: File "type_splat_bad.php", line 22, characters 46-51:
+A variadic parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
+ERROR: File "type_splat_bad.php", line 22, characters 74-85:
+A variadic parameter `...` may only appear at the end of a parameter list. (Parsing[1002])
+ERROR: File "type_splat_bad.php", line 26, characters 47-76:
+A splat parameter `...` must not have a default value. (Parsing[1002])
+ERROR: File "type_splat_bad.php", line 31, characters 60-76:
+A splat parameter cannot also be optional. (Parsing[1002])
+ERROR: File "type_splat_bad.php", line 31, characters 89-113:
+A splat parameter cannot also be optional. (Parsing[1002])
+ERROR: File "type_splat_bad.php", line 33, characters 60-70:
+A splat parameter cannot also be variadic. (Parsing[1002])
+ERROR: File "type_splat_bad.php", line 33, characters 83-101:
+A splat parameter cannot also be variadic. (Parsing[1002])
+ERROR: File "type_splat_bad.php", line 37, characters 51-64:
+A splat parameter `...` cannot have a modifier that changes the calling convention, like `inout`. (Parsing[1002])
+ERROR: File "type_splat_bad.php", line 37, characters 77-96:
+A splat parameter `...` cannot have a modifier that changes the calling convention, like `inout`. (Parsing[1002])
+ERROR: File "type_splat_bad.php", line 40, characters 52-68:
+Splat parameters cannot be marked readonly (Parsing[1002])
+ERROR: File "type_splat_bad.php", line 40, characters 81-103:
+Splat parameters cannot be marked readonly (Parsing[1002])
+ERROR: File "type_splat_bad.php", line 18, characters 104-110:
+A previous parameter has a default value.
+Remove all the default values for the preceding parameters,
+or add a default value to this one. (Typing[4077])
+ERROR: File "type_splat_bad.php", line 37, characters 60-64:
+Some type arguments violate their constraints (Typing[4323])
+  File "type_splat_bad.php", line 37, characters 36-71:
+  Expected `(mixed...)`
+  File "type_splat_bad.php", line 37, characters 60-64:
+  But got `dynamic`

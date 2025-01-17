@@ -9,6 +9,7 @@
 (** This module checks wellformedness of type hints in the decls and bodies.
     Wellformedness checks include:
     - constraints on type parameters (e.g. C<string> where C requires T as arraykey)
+    - constraints on type splats (e.g. ...T requires T as (mixed...) )
     - hint well-kinded-ness
     - trivial syntactic errors:
         - writing ?nonnull instead of mixed

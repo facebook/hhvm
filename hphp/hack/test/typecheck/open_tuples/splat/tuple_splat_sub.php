@@ -42,7 +42,7 @@ function test1(
 function expectSplatFun<Ts as (mixed...)>(
   (function(int, string, ...Ts): void) $_,
 ): void {}
-function testSplatFun<T super (string, mixed...)>(
+function testSplatFun<T super (string, mixed...) as (mixed...)>(
   (function(int, ...T): void) $f,
 ): void {
   expectSplatFun($f);

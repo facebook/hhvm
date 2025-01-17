@@ -71,9 +71,6 @@ class InvariantTypes(_abc.ABC):
     FbThriftUnionFieldEnum.__name__ = "InvariantTypes"
     @_fbthrift_property
     @_abc.abstractmethod
-    def fbthrift_current_value(self) -> _typing.Union[None, _typing.Mapping[_fbthrift_StructForInvariantTypes, int], _typing.Mapping[_fbthrift_UnionForInvariantTypes, int]]: ...
-    @_fbthrift_property
-    @_abc.abstractmethod
     def fbthrift_current_field(self) -> FbThriftUnionFieldEnum: ...
 
 _fbthrift_InvariantTypes = InvariantTypes

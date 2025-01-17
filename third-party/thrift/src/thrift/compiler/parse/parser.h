@@ -35,9 +35,15 @@ class t_sink;
 class t_stream;
 class t_throws;
 
-struct identifier {
+struct identifier final {
   std::string_view str;
   source_location loc;
+
+  /**
+   * Returns the source range for this identifier, i.e. that starts at `loc` and
+   * includes `str`.
+   */
+  source_range range() const { return {loc, loc + str.size()}; }
 };
 
 struct comment {

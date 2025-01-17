@@ -81,6 +81,20 @@ class t_named : public t_node {
     doc_ = node_doc{std::move(doc), range};
   }
 
+  /**
+   * Returns the range, in Thrift source, where this instances name is defined,
+   * if any (i.e., if previously set by `set_name_range()`.
+   */
+  const std::optional<source_range>& name_range() const { return name_range_; }
+
+  /**
+   * Sets the range, in the source Thrift IDL code, corresponding to this
+   * instance's `name()`.
+   */
+  void set_name_range(source_range name_range) {
+    name_range_ = std::move(name_range);
+  }
+
  protected:
   explicit t_named(const t_program* program = nullptr, std::string name = "");
   t_named(const t_named& named);
@@ -100,6 +114,8 @@ class t_named : public t_node {
     source_range range;
   };
   std::optional<node_doc> doc_;
+
+  std::optional<source_range> name_range_;
 
   // TODO(afuller): Remove everything below this comment. It is only provided
   // for backwards compatibility.

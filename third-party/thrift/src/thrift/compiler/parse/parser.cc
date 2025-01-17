@@ -369,7 +369,7 @@ class parser {
     auto range = range_tracker(loc, end_);
     expect_and_consume(tok::kw_service);
     auto name = parse_identifier();
-    auto base = identifier();
+    identifier base;
     if (try_consume_token(tok::kw_extends)) {
       base = parse_identifier();
     }
@@ -700,11 +700,11 @@ class parser {
       qual = t_field_qualifier::none;
     }
 
-    auto type = parse_type();
-    auto name = parse_identifier();
+    t_type_ref type = parse_type();
+    const identifier name = parse_identifier();
 
     // Parse the default value.
-    auto value = std::unique_ptr<t_const_value>();
+    std::unique_ptr<t_const_value> value;
     if (try_consume_token('=')) {
       value = parse_initializer();
     }
@@ -1046,7 +1046,7 @@ class parser {
   //   | "server"
   //   | "client"
   std::optional<identifier> try_parse_identifier() {
-    auto range = track_range();
+    range_tracker range = track_range();
     switch (token_.kind) {
       case tok::identifier:
         return identifier{consume_token().string_value(), range};
@@ -1069,7 +1069,7 @@ class parser {
   }
 
   identifier parse_identifier() {
-    if (auto id = try_parse_identifier()) {
+    if (std::optional<identifier> id = try_parse_identifier()) {
       return *id;
     }
     report_expected("identifier");

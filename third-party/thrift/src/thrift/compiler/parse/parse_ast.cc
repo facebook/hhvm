@@ -584,8 +584,9 @@ class ast_builder : public parser_actions {
     };
     auto service = std::make_unique<t_service>(
         &program_, fmt::to_string(name.str), find_base_service());
+    service->set_name_range(name.range());
     set_attributes(*service, std::move(attrs), range);
-    service->set_extends_range({base.loc, base.loc + base.str.size()});
+    service->set_extends_range(base.range());
     service->set_functions(std::move(functions));
     add_definition(std::move(service));
   }
@@ -597,6 +598,7 @@ class ast_builder : public parser_actions {
       node_list<t_function> functions) override {
     auto interaction =
         std::make_unique<t_interaction>(&program_, fmt::to_string(name.str));
+    interaction->set_name_range(name.range());
     set_attributes(*interaction, std::move(attrs), range);
     interaction->set_functions(std::move(functions));
     add_definition(std::move(interaction));
@@ -621,14 +623,12 @@ class ast_builder : public parser_actions {
         return_name = qualified_name;
       }
       if (auto interaction_ptr = scope_->find<t_interaction>(return_name)) {
-        interaction = t_type_ref::from_ptr(
-            interaction_ptr, {ret.name.loc, ret.name.loc + size});
+        interaction = t_type_ref::from_ptr(interaction_ptr, ret.name.range());
       } else if (ret.type) {
         diags_.error(
             ret.name.loc, "'{}' does not name an interaction", return_name);
       } else {
-        return_type =
-            on_type({ret.name.loc, ret.name.loc + size}, return_name, {});
+        return_type = on_type(ret.name.range(), return_name, {});
       }
     }
 
@@ -648,6 +648,7 @@ class ast_builder : public parser_actions {
         nullptr,
         std::move(ret.sink_or_stream),
         interaction);
+    function->set_name_range(name.range());
     function->set_qualifier(qual);
     set_fields(function->params(), std::move(params));
     function->set_exceptions(std::move(throws));
@@ -736,6 +737,7 @@ class ast_builder : public parser_actions {
       const identifier& name) override {
     auto typedef_node = std::make_unique<t_typedef>(
         &program_, fmt::to_string(name.str), std::move(type));
+    typedef_node->set_name_range(name.range());
     set_attributes(*typedef_node, std::move(attrs), range);
     add_definition(std::move(typedef_node));
   }
@@ -747,6 +749,7 @@ class ast_builder : public parser_actions {
       t_field_list fields) override {
     auto struct_node =
         std::make_unique<t_struct>(&program_, fmt::to_string(name.str));
+    struct_node->set_name_range(name.range());
     set_attributes(*struct_node, std::move(attrs), range);
     set_fields(*struct_node, std::move(fields));
     add_definition(std::move(struct_node));
@@ -759,6 +762,7 @@ class ast_builder : public parser_actions {
       t_field_list fields) override {
     auto union_node =
         std::make_unique<t_union>(&program_, fmt::to_string(name.str));
+    union_node->set_name_range(name.range());
     set_attributes(*union_node, std::move(attrs), range);
     set_fields(*union_node, std::move(fields));
     add_definition(std::move(union_node));
@@ -774,6 +778,7 @@ class ast_builder : public parser_actions {
       t_field_list fields) override {
     auto exception =
         std::make_unique<t_exception>(&program_, fmt::to_string(name.str));
+    exception->set_name_range(name.range());
     set_attributes(*exception, std::move(attrs), range);
     exception->set_safety(safety);
     exception->set_kind(kind);
@@ -795,6 +800,7 @@ class ast_builder : public parser_actions {
                        : std::optional<t_field_id>();
     auto field = std::make_unique<t_field>(
         std::move(type), fmt::to_string(name.str), valid_id);
+    field->set_name_range(name.range());
     field->set_qualifier(qual);
     field->set_default_value(std::move(value));
     field->set_src_range(range);
@@ -824,6 +830,7 @@ class ast_builder : public parser_actions {
       t_enum_value_list values) override {
     auto enum_node =
         std::make_unique<t_enum>(&program_, fmt::to_string(name.str));
+    enum_node->set_name_range(name.range());
     set_attributes(*enum_node, std::move(attrs), range);
     enum_node->set_values(std::move(values));
 
@@ -844,6 +851,7 @@ class ast_builder : public parser_actions {
       std::optional<int64_t> value,
       std::optional<comment> doc) override {
     auto enum_value = std::make_unique<t_enum_value>(fmt::to_string(name.str));
+    enum_value->set_name_range(name.range());
     enum_value->set_src_range(range);
     set_attributes(*enum_value, std::move(attrs), range);
     if (value) {
@@ -862,6 +870,7 @@ class ast_builder : public parser_actions {
       std::unique_ptr<t_const_value> value) override {
     auto constant = std::make_unique<t_const>(
         &program_, std::move(type), fmt::to_string(name.str), std::move(value));
+    constant->set_name_range(name.range());
     set_attributes(*constant, std::move(attrs), range);
     add_definition(std::move(constant));
   }
@@ -891,7 +900,7 @@ class ast_builder : public parser_actions {
       result->set_is_enum(false);
       result->set_enum(nullptr);
       result->set_enum_value(nullptr);
-      result->set_ref_range({name.loc, name.loc + name.str.size()});
+      result->set_ref_range(name.range());
       return result;
     }
     return t_const_value::make_identifier(name.loc, name_str, program_);

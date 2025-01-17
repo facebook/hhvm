@@ -18,6 +18,7 @@
 
 #include <cassert>
 #include <limits>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -53,28 +54,29 @@ const char* get_category(const t_const_value* val) {
   return nullptr;
 }
 
-class checker {
+class compatibility_checker {
  public:
-  checker(diagnostics_engine& diags, const t_named& node, std::string name)
+  compatibility_checker(
+      diagnostics_engine& diags, const t_named& node, std::string name)
       : diags_(diags), node_(node), name_(std::move(name)) {}
 
-  void check(const t_type* type, const t_const_value* value) {
+  bool check(const t_type* type, const t_const_value* value) {
     type = type->get_true_type();
 
     if (auto primitive_type = dynamic_cast<const t_primitive_type*>(type)) {
-      check_primitive_type(primitive_type, value);
+      return check_primitive_type(primitive_type, value);
     } else if (auto enum_type = dynamic_cast<const t_enum*>(type)) {
-      check_enum(enum_type, value);
+      return check_enum(enum_type, value);
     } else if (auto structured_type = dynamic_cast<const t_structured*>(type)) {
-      check_structured(structured_type, value);
+      return check_structured(structured_type, value);
     } else if (auto map_type = dynamic_cast<const t_map*>(type)) {
-      check_map(map_type, value);
+      return check_map(map_type, value);
     } else if (auto list_type = dynamic_cast<const t_list*>(type)) {
-      check_list(list_type, value);
+      return check_list(list_type, value);
     } else if (auto set_type = dynamic_cast<const t_set*>(type)) {
-      check_set(set_type, value);
+      return check_set(set_type, value);
     } else {
-      assert(false); // Should be unreachable.
+      throw std::logic_error("compatibility_checker: unknown type");
     }
   }
 
@@ -111,10 +113,10 @@ class checker {
   }
 
   template <typename T>
-  void check_int(const t_const_value* value, const t_type* type) {
+  bool check_int(const t_const_value* value, const t_type* type) {
     if (value->kind() != t_const_value::CV_INTEGER) {
       report_incompatible(value, type);
-      return;
+      return false;
     }
     // Range check is not needed for int64_t but it makes the code simpler and
     // will be optimized away.
@@ -126,11 +128,13 @@ class checker {
           int_value,
           type->name(),
           name_);
+      return false;
     }
+    return true;
   }
 
   template <typename T>
-  void check_float(const t_const_value* value, const t_type* type) {
+  bool check_float(const t_const_value* value, const t_type* type) {
     if (value->kind() == t_const_value::CV_DOUBLE) {
       // Range check is not needed for double but it makes the code simpler and
       // will be optimized away.
@@ -142,6 +146,7 @@ class checker {
             double_value,
             type->name(),
             name_);
+        return false;
       }
     } else if (value->kind() == t_const_value::CV_INTEGER) {
       int64_t int_value = value->get_integer();
@@ -151,55 +156,54 @@ class checker {
             int_value,
             type->name(),
             name_);
+        return false;
       }
     } else {
       report_incompatible(value, type);
+      return false;
     }
+    return true;
   }
 
-  void check_primitive_type(
+  bool check_primitive_type(
       const t_primitive_type* type, const t_const_value* value) {
     const auto kind = value->kind();
     switch (type->primitive_type()) {
       case t_primitive_type::type::t_void:
-        return;
+        return true;
       case t_primitive_type::type::t_string:
       case t_primitive_type::type::t_binary:
         if (kind != t_const_value::CV_STRING) {
           report_incompatible(value, type);
+          return false;
         }
-        break;
+        return true;
       case t_primitive_type::type::t_bool:
         if (kind != t_const_value::CV_BOOL &&
             kind != t_const_value::CV_INTEGER) {
           report_incompatible(value, type);
+          return false;
         }
-        break;
+        return true;
       case t_primitive_type::type::t_byte:
-        check_int<int8_t>(value, type);
-        break;
+        return check_int<int8_t>(value, type);
       case t_primitive_type::type::t_i16:
-        check_int<int16_t>(value, type);
-        break;
+        return check_int<int16_t>(value, type);
       case t_primitive_type::type::t_i32:
-        check_int<int32_t>(value, type);
-        break;
+        return check_int<int32_t>(value, type);
       case t_primitive_type::type::t_i64:
-        check_int<int64_t>(value, type);
-        break;
+        return check_int<int64_t>(value, type);
       case t_primitive_type::type::t_double:
-        check_float<double>(value, type);
-        break;
+        return check_float<double>(value, type);
       case t_primitive_type::type::t_float:
-        check_float<float>(value, type);
-        break;
+        return check_float<float>(value, type);
     }
   }
 
-  void check_enum(const t_enum* type, const t_const_value* value) {
+  bool check_enum(const t_enum* type, const t_const_value* value) {
     if (value->kind() != t_const_value::CV_INTEGER) {
       report_incompatible(value, type);
-      return;
+      return false;
     }
 
     if (type->find_value(value->get_integer()) == nullptr) {
@@ -208,24 +212,27 @@ class checker {
           name_,
           type->name());
     }
+    return true;
   }
 
-  void check_structured(const t_structured* type, const t_const_value* value) {
+  bool check_structured(const t_structured* type, const t_const_value* value) {
     if (value->kind() != t_const_value::CV_MAP) {
       report_incompatible(value, type);
-      return;
+      return false;
     }
     const auto& map = value->get_map();
     if (map.size() > 1 && dynamic_cast<const t_union*>(type)) {
       error(
           "cannot initialize more than one field in union `{}`", type->name());
+      return false;
     }
-    check_fields(type, map);
+    return check_fields(type, map);
   }
 
-  void check_fields(
+  bool check_fields(
       const t_structured* type,
       const std::vector<std::pair<t_const_value*, t_const_value*>>& map) {
+    bool is_valid = true;
     for (auto [key, value] : map) {
       std::string field_name;
       if (key->kind() == t_const_value::CV_STRING) {
@@ -234,70 +241,196 @@ class checker {
         field_name = key->get_identifier();
       } else {
         error("{} field name must be a string or an identifier", name_);
+        is_valid = false;
         continue;
       }
       const auto* field = type->get_field_by_name(field_name);
       if (!field) {
         error("no field named `{}` in `{}`", key->get_string(), type->name());
+        is_valid = false;
         continue;
       }
       const t_type* field_type = &field->type().deref();
       std::string name =
           name_.empty() ? field_name : fmt::format("{}.{}", name_, field_name);
-      checker(diags_, node_, std::move(name)).check(field_type, value);
+      is_valid &= compatibility_checker(diags_, node_, std::move(name))
+                      .check(field_type, value);
     }
+    return is_valid;
   }
 
-  void check_map(const t_map* type, const t_const_value* value) {
+  bool check_map(const t_map* type, const t_const_value* value) {
     if (value->kind() == t_const_value::CV_LIST && value->get_list().empty()) {
       warning(
           "converting empty list to `map` in initialization of `{}`", name_);
-      return;
+      return true;
     }
     if (value->kind() != t_const_value::CV_MAP) {
       report_incompatible(value, type);
-      return;
+      return false;
     }
+
+    bool is_valid = true;
     const t_type* key_type = &type->key_type().deref();
     const t_type* val_type = &type->val_type().deref();
     for (const auto& entry : value->get_map()) {
-      check(key_type, entry.first);
-      check(val_type, entry.second);
+      is_valid &= check(key_type, entry.first);
+      is_valid &= check(val_type, entry.second);
     }
+    return is_valid;
   }
 
-  void check_list(const t_list* type, const t_const_value* value) {
+  bool check_list(const t_list* type, const t_const_value* value) {
     if (value->kind() == t_const_value::CV_MAP && value->get_map().empty()) {
       warning(
           "converting empty map to `list` in initialization of `{}`", name_);
-      return;
+      return true;
     }
     if (value->kind() != t_const_value::CV_LIST) {
       report_incompatible(value, type);
-      return;
+      return false;
     }
-    check_elements(&type->elem_type().deref(), value->get_list());
+    return check_elements(&type->elem_type().deref(), value->get_list());
   }
 
-  void check_set(const t_set* type, const t_const_value* value) {
+  bool check_set(const t_set* type, const t_const_value* value) {
     if (value->kind() == t_const_value::CV_MAP && value->get_map().empty()) {
       warning("converting empty map to `set` in initialization of `{}`", name_);
-      return;
+      return true;
     }
     if (value->kind() != t_const_value::CV_LIST) {
       report_incompatible(value, type);
-      return;
+      return false;
     }
-    check_elements(&type->elem_type().deref(), value->get_list());
+    return check_elements(&type->elem_type().deref(), value->get_list());
   }
 
-  void check_elements(
+  bool check_elements(
       const t_type* elem_type, const std::vector<t_const_value*>& list) {
+    bool is_valid = true;
     for (const auto& elem : list) {
-      check(elem_type, elem);
+      is_valid &= check(elem_type, elem);
     }
+    return is_valid;
   }
 };
+
+class default_value_checker final {
+ public:
+  explicit default_value_checker(const t_type& type)
+      : type_(*type.get_true_type()) {}
+
+  /**
+   * Returns true if the given `value` is known with certainty to be identical
+   * to the default value of this checker's `type_`.
+   *
+   * Note that this implies a possible "false negative", i.e. case where this
+   * method returns false when actually the given `value` would be equal to the
+   * default, but that could not be determined either because the (more complex)
+   * checking logic has not been implemented yet, or it relies on information
+   * that may not be taken into account yet (eg. custom default values of
+   * nested struct fields, etc.)
+   */
+  bool is_default_value(const t_const_value& value) {
+    if (const auto* primitive_type =
+            dynamic_cast<const t_primitive_type*>(&type_)) {
+      return check_primitive_type(*primitive_type, value);
+    } else if (dynamic_cast<const t_enum*>(&type_)) {
+      return check_enum(value);
+    } else if (dynamic_cast<const t_map*>(&type_)) {
+      return check_map(value);
+    } else if (
+        dynamic_cast<const t_list*>(&type_) ||
+        dynamic_cast<const t_set*>(&type_)) {
+      return check_list_or_set(value);
+    } else if (
+        const auto* structured_type =
+            dynamic_cast<const t_structured*>(&type_)) {
+      // Obvious case: empty initializer
+      // If the initializer value is an empty map (i.e., {}), then by definition
+      // it will produce the default value for any structured type (struct,
+      // exception or union).
+      if (value.get_map().empty()) {
+        return true;
+      }
+
+      // If this is a union (and, per previous test, the initializer is not
+      // empty), then it cannot be the default value, which is always empty for
+      // unions.
+      if (structured_type->is_union()) {
+        return false;
+      }
+
+      // Non-obvious cases: for non-empty maps, the given value could
+      // theoretically specify the same values for fields as the default value,
+      // making it effectively equal to the default value. We do not (yet) go
+      // into that level of checks here.
+
+      // DO_BEFORE(aristidis,20250124): Figure out recurive test of default
+      // initializer values for structs and exceptions.
+      return false;
+    } else {
+      throw std::logic_error(fmt::format(
+          "[default_value_checker] unsupported type: {}",
+          type_.get_full_name()));
+    }
+  }
+
+ private:
+  const t_type& type_;
+
+  static bool check_primitive_type(
+      const t_primitive_type& type, const t_const_value& value) {
+    switch (type.primitive_type()) {
+      case t_primitive_type::type::t_string:
+      case t_primitive_type::type::t_binary:
+        return value.get_string().empty();
+      case t_primitive_type::type::t_bool:
+        // Booleans can be initialized with integer values.
+        return (value.kind() == t_const_value::CV_INTEGER)
+            ? value.get_integer() == 0
+            : value.get_bool() == false;
+      case t_primitive_type::type::t_byte:
+      case t_primitive_type::type::t_i16:
+      case t_primitive_type::type::t_i32:
+      case t_primitive_type::type::t_i64:
+        return value.get_integer() == 0;
+      case t_primitive_type::type::t_double:
+      case t_primitive_type::type::t_float: {
+        // Floating point numbers can be initialized with integer values.
+        const double value_as_double =
+            (value.kind() == t_const_value::CV_INTEGER) ? value.get_integer()
+                                                        : value.get_double();
+        return value_as_double == 0.0;
+      }
+      case t_primitive_type::type::t_void:
+        // Should never be called for void
+        throw std::logic_error("t_void does not have a default value.");
+    }
+  }
+
+  static bool check_enum(const t_const_value& value) {
+    return value.get_integer() == 0;
+  }
+
+  static bool check_map(const t_const_value& value) {
+    // Maps can be initialized with empty list values.
+    if (value.kind() == t_const_value::CV_LIST && value.get_list().empty()) {
+      return true;
+    }
+
+    return value.get_map().empty();
+  }
+
+  bool check_list_or_set(const t_const_value& value) {
+    // Lists and sets can be initialized with empty map values.
+    if (value.kind() == t_const_value::CV_MAP && value.get_map().empty()) {
+      return true;
+    }
+    return value.get_list().empty();
+  }
+};
+
 } // namespace
 
 // (ffrancet) I managed to trace this comment all the way back to 2008 when
@@ -309,12 +442,18 @@ class checker {
 // decided to add constants, and all of a sudden that means runtime type
 // validation and inference, except the "runtime" is the code generator
 // runtime. Shit. I've been had.
-void detail::check_initializer(
+bool detail::check_initializer(
     diagnostics_engine& diags,
     const t_named& node,
     const t_type* type,
     const t_const_value* initializer) {
-  checker(diags, node, node.name()).check(type, initializer);
+  return compatibility_checker(diags, node, node.name())
+      .check(type, initializer);
+}
+
+bool detail::is_initializer_default_value(
+    const t_type& type, const t_const_value& initializer) {
+  return default_value_checker(type).is_default_value(initializer);
 }
 
 } // namespace apache::thrift::compiler

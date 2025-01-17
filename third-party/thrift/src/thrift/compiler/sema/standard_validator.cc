@@ -659,9 +659,48 @@ void validate_const_type_and_value(sema_context& ctx, const t_const& node) {
 }
 
 void validate_field_default_value(sema_context& ctx, const t_field& field) {
-  if (field.get_default_value() != nullptr) {
-    detail::check_initializer(
-        ctx, field, &field.type().deref(), field.default_value());
+  if (field.default_value() == nullptr) {
+    return;
+  }
+
+  if (!detail::check_initializer(
+          ctx, field, &field.type().deref(), field.default_value())) {
+    // If initializer is not valid to begin with, stop checks and return error.
+    return;
+  }
+
+  const t_structured& parent_node =
+      dynamic_cast<const t_structured&>(*ctx.parent());
+
+  if (detail::is_initializer_default_value(
+          field.type().deref(), *field.default_value())) {
+    ctx.warning(
+        field,
+        "Explicit default value is redundant for field: "
+        "`{}` (in `{}`).",
+        field.name(),
+        parent_node.name());
+  }
+
+  switch (field.qualifier()) {
+    case t_field_qualifier::optional:
+      ctx.warning(
+          field,
+          "Optional field should not have custom default value: "
+          "`{}` (in `{}`).",
+          field.name(),
+          parent_node.name());
+      break;
+    case t_field_qualifier::terse:
+      ctx.warning(
+          field,
+          "Terse field should not have custom default value: "
+          "`{}` (in `{}`).",
+          field.name(),
+          parent_node.name());
+      break;
+    default:
+      break;
   }
 }
 

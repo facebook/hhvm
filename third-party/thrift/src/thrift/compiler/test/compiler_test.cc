@@ -615,6 +615,7 @@ TEST(CompilerTest, struct_fields_wrong_type) {
       1: i32 badInt = "str";
         # expected-error@-1: cannot convert string to `i32` in initialization of `badInt`
       2: F badStruct = G{}; # expected-error: type mismatch: expected test.F, got test.G
+        # expected-warning@-1: Explicit default value is redundant for field: `badStruct` (in `BadFields`).
     }
   )");
 }
@@ -1942,6 +1943,7 @@ TEST(CompilerTest, terse_write_outside_experimental_mode) {
         @thrift.TerseWrite
         1: i32 field1 = 1;
           # expected-error@-2: Using @thrift.TerseWrite on field `field1` is only allowed in the experimental mode.
+          # expected-warning@-3: Terse field should not have custom default value: `field1` (in `MyStruct`).
     }
   )");
 }
@@ -2302,5 +2304,45 @@ TEST(CompilerTest, combining_unstructured_annotations) {
     @thrift.DeprecatedUnvalidatedAnnotations{items = {"foo": "bar"}}
     struct Bar {} (rust.foo) 
     # expected-error@-2: Cannot combine @thrift.DeprecatedUnvalidatedAnnotations with legacy annotation syntax.
+  )");
+}
+
+TEST(Compilertest, custom_default_values) {
+  check_compile(R"(
+    include "thrift/annotation/thrift.thrift"
+
+    union TestUnion {}
+
+    struct TestStruct {}
+
+    exception TestException {}
+
+
+    struct Widget {
+      1: i32 a = 42;
+
+      2: bool b = false;
+        # expected-warning@-1: Explicit default value is redundant for field: `b` (in `Widget`).
+
+      3: i32 c = 0;
+        # expected-warning@-1: Explicit default value is redundant for field: `c` (in `Widget`).
+
+      4: optional bool d = true;
+        # expected-warning@-1: Optional field should not have custom default value: `d` (in `Widget`).
+
+      @thrift.Experimental
+      @thrift.TerseWrite
+      5: i32 e = 43;
+        # expected-warning@-3: Terse field should not have custom default value: `e` (in `Widget`).
+
+      6: TestUnion f = {};
+        # expected-warning@-1: Explicit default value is redundant for field: `f` (in `Widget`).
+
+      7: TestStruct g = {};
+        # expected-warning@-1: Explicit default value is redundant for field: `g` (in `Widget`).
+
+      8: TestException h = {};
+        # expected-warning@-1: Explicit default value is redundant for field: `h` (in `Widget`).
+    }
   )");
 }

@@ -21,13 +21,30 @@
 namespace apache::thrift::compiler {
 namespace detail {
 
-// Checks if an initializer is compatible with a const or a field it
-// initializes.
-void check_initializer(
+/**
+ * Checks if an initializer is compatible with a const or a field it
+ * initializes.
+ *
+ * @return true if the initializer is compatible, in which case no errors were
+ *         added to `diags` (although warnings may have been added). Otherwise,
+ *         returns false.
+ */
+bool check_initializer(
     diagnostics_engine& diags,
     const t_named& node,
     const t_type* type,
     const t_const_value* initializer);
+
+/**
+ * Returns true iff the given initializer corresponds to the default value for
+ * the given `type`.
+ *
+ * Precondition:
+ * - `initializer` must be compatible with the given `type` (see
+ *   `check_initializer()` above).
+ */
+bool is_initializer_default_value(
+    const t_type& type, const t_const_value& initializer);
 
 void validate_annotation_scopes(sema_context& ctx, const t_named& node);
 

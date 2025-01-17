@@ -887,6 +887,14 @@ class parser {
   //   integer | float | string_literal | bool_literal | identifier |
   //   list_initializer | map_initializer | struct_initializer
   std::unique_ptr<t_const_value> parse_initializer() {
+    range_tracker range = track_range();
+    std::unique_ptr<t_const_value> initializer_const_value =
+        parse_initializer_const_value();
+    initializer_const_value->set_src_range(range);
+    return initializer_const_value;
+  }
+
+  std::unique_ptr<t_const_value> parse_initializer_const_value() {
     auto s = sign::plus;
     switch (token_.kind) {
       case tok::bool_literal:

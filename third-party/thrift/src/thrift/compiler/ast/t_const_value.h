@@ -184,6 +184,10 @@ class t_const_value {
     kind_ = CV_MAP;
   }
 
+  const std::optional<source_range>& src_range() const { return src_range_; }
+
+  void set_src_range(source_range range) { src_range_ = std::move(range); }
+
   t_const_value_kind kind() const { return kind_; }
 
   bool is_empty() const {
@@ -253,6 +257,8 @@ class t_const_value {
 
  private:
   t_const_value_kind kind_ = CV_BOOL;
+
+  std::optional<source_range> src_range_;
 
   struct map_value {
     // Use a vector of pairs to store the contents of the map so that we

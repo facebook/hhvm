@@ -26,128 +26,83 @@ namespace whisker {
 
 namespace {
 
-class named_native_function : public dsl::function {
- public:
-  explicit named_native_function(std::string_view name)
-      : name_(std::move(name)) {}
-
-  std::string describe_type() const final {
-    return fmt::format("<function {}>", name_);
-  }
-
-  void print_to(
-      tree_printer::scope scope, const object_print_options&) const final {
-    scope.println("{}", describe_type());
-  }
-
- private:
-  std::string_view name_;
-};
-
 map::value_type create_array_functions() {
   map array_functions;
 
-  {
-    /**
-     * Creates an array with the provided arguments in order. This function can
-     * be used to form an "array literal".
-     *
-     * Name: array.of
-     *
-     * Arguments:
-     *   0 or more objects (variadic)
-     *
-     * Returns:
-     *   [array] provided arguments in order.
-     */
-    class array_of : public named_native_function {
-     public:
-      array_of() : named_native_function("array.of") {}
-
-      object::ptr invoke(context ctx) override {
+  /**
+   * Creates an array with the provided arguments in order. This function can
+   * be used to form an "array literal".
+   *
+   * Name: array.of
+   *
+   * Arguments:
+   *   0 or more objects (variadic)
+   *
+   * Returns:
+   *   [array] provided arguments in order.
+   */
+  array_functions["of"] =
+      dsl::make_function("array.of", [](dsl::function::context ctx) -> array {
         ctx.declare_named_arguments({});
         array result;
         result.reserve(ctx.arity());
         for (const object::ptr& arg : ctx.raw().positional_arguments()) {
           result.emplace_back(object(*arg));
         }
-        return manage_owned<object>(w::array(std::move(result)));
-      }
-    };
-    array_functions["of"] = w::make_native_function<array_of>();
-  }
+        return result;
+      });
 
-  {
-    /**
-     * Produces the length of an array or array-like object.
-     *
-     * Name: array.len
-     *
-     * Arguments:
-     *   - [array] — The array to find length of.
-     *
-     * Returns:
-     *   [i64] length of the provided array.
-     */
-    class array_len : public named_native_function {
-     public:
-      array_len() : named_native_function("array.len") {}
-
-      object::ptr invoke(context ctx) override {
+  /**
+   * Produces the length of an array or array-like object.
+   *
+   * Name: array.len
+   *
+   * Arguments:
+   *   - [array] — The array to find length of.
+   *
+   * Returns:
+   *   [i64] length of the provided array.
+   */
+  array_functions["len"] =
+      dsl::make_function("array.len", [](dsl::function::context ctx) -> i64 {
         ctx.declare_named_arguments({});
         ctx.declare_arity(1);
-        auto len = i64(ctx.argument<array>(0).size());
-        return manage_owned<object>(w::i64(len));
-      }
-    };
-    array_functions["len"] = w::make_native_function<array_len>();
-  }
+        return i64(ctx.argument<array>(0).size());
+      });
 
-  {
-    /**
-     * Checks an array for emptiness.
-     *
-     * Name: array.empty?
-     *
-     * Arguments:
-     *   - [array] — The array to check for emptiness.
-     *
-     * Returns:
-     *   [boolean] indicating whether the array is empty.
-     */
-    class array_empty : public named_native_function {
-     public:
-      array_empty() : named_native_function("array.empty?") {}
-
-      object::ptr invoke(context ctx) override {
+  /**
+   * Checks an array for emptiness.
+   *
+   * Name: array.empty?
+   *
+   * Arguments:
+   *   - [array] — The array to check for emptiness.
+   *
+   * Returns:
+   *   [boolean] indicating whether the array is empty.
+   */
+  array_functions["empty?"] = dsl::make_function(
+      "array.empty?", [](dsl::function::context ctx) -> boolean {
         ctx.declare_named_arguments({});
         ctx.declare_arity(1);
-        return manage_as_static(
-            ctx.argument<array>(0).size() == 0 ? w::true_ : w::false_);
-      }
-    };
-    array_functions["empty?"] = w::make_native_function<array_empty>();
-  }
+        return ctx.argument<array>(0).size() == 0;
+      });
 
-  {
-    /**
-     * Gets the object from an array at a given index. If the index is negative,
-     * or larger than the size of the array, then an error is thrown.
-     *
-     * Name: array.at
-     *
-     * Arguments:
-     *   - [whisker::array] — The array to get from
-     *   - [i64] — The index of the item to get
-     *
-     * Returns:
-     *   [object] the item at the given index.
-     */
-    class array_at : public named_native_function {
-     public:
-      array_at() : named_native_function("array.at") {}
-
-      object::ptr invoke(context ctx) override {
+  /**
+   * Gets the object from an array at a given index. If the index is negative,
+   * or larger than the size of the array, then an error is thrown.
+   *
+   * Name: array.at
+   *
+   * Arguments:
+   *   - [whisker::array] — The array to get from
+   *   - [i64] — The index of the item to get
+   *
+   * Returns:
+   *   [object] the item at the given index.
+   */
+  array_functions["at"] = dsl::make_function(
+      "array.at", [](dsl::function::context ctx) -> object::ptr {
         ctx.declare_named_arguments({});
         ctx.declare_arity(2);
 
@@ -159,10 +114,7 @@ map::value_type create_array_functions() {
               "Index '{}' is out of bounds (size is {}).", index, a.size());
         }
         return a.at(index);
-      }
-    };
-    array_functions["at"] = w::make_native_function<array_at>();
-  }
+      });
 
   return map::value_type{"array", std::move(array_functions)};
 }
@@ -170,31 +122,23 @@ map::value_type create_array_functions() {
 map::value_type create_string_functions() {
   map string_functions;
 
-  {
-    /**
-     * Produces the length of string.
-     *
-     * Name: string.len
-     *
-     * Arguments:
-     *   - [string] — The string to find length of.
-     *
-     * Returns:
-     *   [i64] length of the provided string.
-     */
-    class string_len : public named_native_function {
-     public:
-      string_len() : named_native_function("string.len") {}
-
-      object::ptr invoke(context ctx) override {
+  /**
+   * Produces the length of string.
+   *
+   * Name: string.len
+   *
+   * Arguments:
+   *   - [string] — The string to find length of.
+   *
+   * Returns:
+   *   [i64] length of the provided string.
+   */
+  string_functions["len"] =
+      dsl::make_function("string.len", [](dsl::function::context ctx) -> i64 {
         ctx.declare_named_arguments({});
         ctx.declare_arity(1);
-        auto len = i64(ctx.argument<string>(0)->length());
-        return manage_owned<object>(w::i64(len));
-      }
-    };
-    string_functions["len"] = w::make_native_function<string_len>();
-  }
+        return i64(ctx.argument<string>(0)->length());
+      });
 
   return map::value_type{"string", std::move(string_functions)};
 }
@@ -202,19 +146,16 @@ map::value_type create_string_functions() {
 map::value_type create_int_functions() {
   map int_functions;
 
-  class i64_binary_predicate : public named_native_function {
-   public:
-    using named_native_function::named_native_function;
-
-    virtual boolean compute(i64 lhs, i64 rhs) const = 0;
-
-    object::ptr invoke(context ctx) final {
-      ctx.declare_named_arguments({});
-      ctx.declare_arity(2);
-      return manage_as_static(
-          compute(ctx.argument<i64>(0), ctx.argument<i64>(1)) ? w::true_
-                                                              : w::false_);
-    }
+  const auto make_i64_binary_predicate = [](std::string name,
+                                            auto&& predicate) {
+    using P = std::decay_t<decltype(predicate)>;
+    return dsl::make_function(
+        std::move(name),
+        [p = P(predicate)](dsl::function::context ctx) -> boolean {
+          ctx.declare_named_arguments({});
+          ctx.declare_arity(2);
+          return p(ctx.argument<i64>(0), ctx.argument<i64>(1));
+        });
   };
 
   // The naming format used here matches the "operator" module in Python:
@@ -223,222 +164,158 @@ map::value_type create_int_functions() {
   // For functions returning boolean, "?" is added to the end of the name, as
   // convention for Whisker.
 
-  {
-    /**
-     * Checks if one i64 is lesser than another.
-     *
-     * Name: int.lt?
-     *
-     * Arguments:
-     *   - [i64] — The left-hand side of the comparison.
-     *   - [i64] — The right-hand side of the comparison.
-     *
-     * Returns:
-     *   [boolean] indicating whether the first number is lesser than the
-     *             second.
-     */
-    class int_lt final : public i64_binary_predicate {
-     public:
-      int_lt() : i64_binary_predicate("int.lt?") {}
+  /**
+   * Checks if one i64 is lesser than another.
+   *
+   * Name: int.lt?
+   *
+   * Arguments:
+   *   - [i64] — The left-hand side of the comparison.
+   *   - [i64] — The right-hand side of the comparison.
+   *
+   * Returns:
+   *   [boolean] indicating whether the first number is lesser than the
+   *             second.
+   */
+  int_functions["lt?"] = make_i64_binary_predicate(
+      "int.lt?", [](i64 lhs, i64 rhs) -> bool { return lhs < rhs; });
 
-      bool compute(i64 lhs, i64 rhs) const final { return lhs < rhs; }
-    };
-    int_functions["lt?"] = w::make_native_function<int_lt>();
-  }
+  /**
+   * Checks if one i64 is lesser or equal to than another.
+   *
+   * Name: int.le?
+   *
+   * Arguments:
+   *   - [i64] — The left-hand side of the comparison.
+   *   - [i64] — The right-hand side of the comparison.
+   *
+   * Returns:
+   *   [boolean] indicating whether the first number is lesser than or equal
+   *             to the second.
+   */
+  int_functions["le?"] = make_i64_binary_predicate(
+      "int.le?", [](i64 lhs, i64 rhs) -> bool { return lhs <= rhs; });
 
-  {
-    /**
-     * Checks if one i64 is lesser or equal to than another.
-     *
-     * Name: int.le?
-     *
-     * Arguments:
-     *   - [i64] — The left-hand side of the comparison.
-     *   - [i64] — The right-hand side of the comparison.
-     *
-     * Returns:
-     *   [boolean] indicating whether the first number is lesser than or equal
-     *             to the second.
-     */
-    class int_le final : public i64_binary_predicate {
-     public:
-      int_le() : i64_binary_predicate("int.le?") {}
+  /**
+   * Checks two i64 values for equality.
+   *
+   * Name: int.eq?
+   *
+   * Arguments:
+   *   - [i64] — The left-hand side of the comparison.
+   *   - [i64] — The right-hand side of the comparison.
+   *
+   * Returns:
+   *   [boolean] indicating whether the two values are equal.
+   */
+  int_functions["eq?"] = make_i64_binary_predicate(
+      "int.eq?", [](i64 lhs, i64 rhs) -> bool { return lhs == rhs; });
 
-      bool compute(i64 lhs, i64 rhs) const final { return lhs <= rhs; }
-    };
-    int_functions["le?"] = w::make_native_function<int_le>();
-  }
+  /**
+   * Checks two i64 values for inequality.
+   *
+   * Name: int.ne?
+   *
+   * Arguments:
+   *   - [i64] — The left-hand side of the comparison.
+   *   - [i64] — The right-hand side of the comparison.
+   *
+   * Returns:
+   *   [boolean] indicating whether the two values are not equal.
+   */
+  int_functions["ne?"] = make_i64_binary_predicate(
+      "int.ne?", [](i64 lhs, i64 rhs) -> bool { return lhs != rhs; });
 
-  {
-    /**
-     * Checks two i64 values for equality.
-     *
-     * Name: int.eq?
-     *
-     * Arguments:
-     *   - [i64] — The left-hand side of the comparison.
-     *   - [i64] — The right-hand side of the comparison.
-     *
-     * Returns:
-     *   [boolean] indicating whether the two values are equal.
-     */
-    class int_eq final : public i64_binary_predicate {
-     public:
-      int_eq() : i64_binary_predicate("int.eq?") {}
+  /**
+   * Checks if one i64 is greater or equal to than another.
+   *
+   * Name: int.ge?
+   *
+   * Arguments:
+   *   - [i64] — The left-hand side of the comparison.
+   *   - [i64] — The right-hand side of the comparison.
+   *
+   * Returns:
+   *   [boolean] indicating whether the first number is greater than or equal
+   *             to the second.
+   */
+  int_functions["ge?"] = make_i64_binary_predicate(
+      "int.ge?", [](i64 lhs, i64 rhs) -> bool { return lhs >= rhs; });
 
-      bool compute(i64 lhs, i64 rhs) const final { return lhs == rhs; }
-    };
-    int_functions["eq?"] = w::make_native_function<int_eq>();
-  }
+  /**
+   * Checks if one i64 is greater than another.
+   *
+   * Name: int.gt?
+   *
+   * Arguments:
+   *   - [i64] — The left-hand side of the comparison.
+   *   - [i64] — The right-hand side of the comparison.
+   *
+   * Returns:
+   *   [boolean] indicating whether the first number is greater than the
+   *             second.
+   */
+  int_functions["gt?"] = make_i64_binary_predicate(
+      "int.gt?", [](i64 lhs, i64 rhs) -> bool { return lhs > rhs; });
 
-  {
-    /**
-     * Checks two i64 values for inequality.
-     *
-     * Name: int.ne?
-     *
-     * Arguments:
-     *   - [i64] — The left-hand side of the comparison.
-     *   - [i64] — The right-hand side of the comparison.
-     *
-     * Returns:
-     *   [boolean] indicating whether the two values are not equal.
-     */
-    class int_ne final : public i64_binary_predicate {
-     public:
-      int_ne() : i64_binary_predicate("int.ne?") {}
-
-      bool compute(i64 lhs, i64 rhs) const final { return lhs != rhs; }
-    };
-    int_functions["ne?"] = w::make_native_function<int_ne>();
-  }
-
-  {
-    /**
-     * Checks if one i64 is greater or equal to than another.
-     *
-     * Name: int.ge?
-     *
-     * Arguments:
-     *   - [i64] — The left-hand side of the comparison.
-     *   - [i64] — The right-hand side of the comparison.
-     *
-     * Returns:
-     *   [boolean] indicating whether the first number is greater than or equal
-     *             to the second.
-     */
-    class int_ge final : public i64_binary_predicate {
-     public:
-      int_ge() : i64_binary_predicate("int.ge?") {}
-
-      bool compute(i64 lhs, i64 rhs) const final { return lhs >= rhs; }
-    };
-    int_functions["ge?"] = w::make_native_function<int_ge>();
-  }
-
-  {
-    /**
-     * Checks if one i64 is greater than another.
-     *
-     * Name: int.gt?
-     *
-     * Arguments:
-     *   - [i64] — The left-hand side of the comparison.
-     *   - [i64] — The right-hand side of the comparison.
-     *
-     * Returns:
-     *   [boolean] indicating whether the first number is greater than the
-     *             second.
-     */
-    class int_gt final : public i64_binary_predicate {
-     public:
-      int_gt() : i64_binary_predicate("int.gt?") {}
-
-      bool compute(i64 lhs, i64 rhs) const final { return lhs > rhs; }
-    };
-    int_functions["gt?"] = w::make_native_function<int_gt>();
-  }
-
-  {
-    /**
-     * Adds numbers together.
-     *
-     * Name: int.add
-     *
-     * Arguments:
-     *   - [i64...] — numbers to add together.
-     *
-     * Returns:
-     *   [i64] the sum of the provided numbers. If there are no arguments, then
-     *         returns 0.
-     */
-    class int_add final : public named_native_function {
-     public:
-      int_add() : named_native_function("int.add") {}
-
-      object::ptr invoke(context ctx) override {
+  /**
+   * Adds numbers together.
+   *
+   * Name: int.add
+   *
+   * Arguments:
+   *   - [i64...] — numbers to add together.
+   *
+   * Returns:
+   *   [i64] the sum of the provided numbers. If there are no arguments, then
+   *         returns 0.
+   */
+  int_functions["add"] =
+      dsl::make_function("int.add", [](dsl::function::context ctx) -> i64 {
         ctx.declare_named_arguments({});
         i64 result = 0;
         for (std::size_t i = 0; i < ctx.arity(); ++i) {
           result += ctx.argument<i64>(i);
         }
-        return manage_owned<object>(w::i64(result));
-      }
-    };
-    int_functions["add"] = w::make_native_function<int_add>();
-  }
+        return result;
+      });
 
-  {
-    /**
-     * Negates the provided number.
-     *
-     * Name: int.neg
-     *
-     * Arguments:
-     *   - [i64] — number to negate
-     *
-     * Returns:
-     *   [i64] the negative of the provided number.
-     */
-    class int_neg final : public named_native_function {
-     public:
-      int_neg() : named_native_function("int.neg") {}
-
-      object::ptr invoke(context ctx) override {
+  /**
+   * Negates the provided number.
+   *
+   * Name: int.neg
+   *
+   * Arguments:
+   *   - [i64] — number to negate
+   *
+   * Returns:
+   *   [i64] the negative of the provided number.
+   */
+  int_functions["neg"] =
+      dsl::make_function("int.neg", [](dsl::function::context ctx) -> i64 {
         ctx.declare_named_arguments({});
         ctx.declare_arity(1);
-        return manage_owned<object>(w::i64(-ctx.argument<i64>(0)));
-      }
-    };
-    int_functions["neg"] = w::make_native_function<int_neg>();
-  }
+        return -ctx.argument<i64>(0);
+      });
 
-  {
-    /**
-     * Subtracts one number from another.
-     *
-     * Name: int.sub
-     *
-     * Arguments:
-     *   - [i64] — number to subtract from.
-     *   - [i64] — amount to subtract.
-     *
-     * Returns:
-     *   [i64] the difference of the two numbers.
-     */
-    class int_sub final : public named_native_function {
-     public:
-      int_sub() : named_native_function("int.sub") {}
-
-      object::ptr invoke(context ctx) override {
+  /**
+   * Subtracts one number from another.
+   *
+   * Name: int.sub
+   *
+   * Arguments:
+   *   - [i64] — number to subtract from.
+   *   - [i64] — amount to subtract.
+   *
+   * Returns:
+   *   [i64] the difference of the two numbers.
+   */
+  int_functions["sub"] =
+      dsl::make_function("int.sub", [](dsl::function::context ctx) -> i64 {
         ctx.declare_named_arguments({});
         ctx.declare_arity(2);
-        return manage_owned<object>(
-            w::i64(ctx.argument<i64>(0) - ctx.argument<i64>(1)));
-      }
-    };
-    int_functions["sub"] = w::make_native_function<int_sub>();
-  }
+        return ctx.argument<i64>(0) - ctx.argument<i64>(1);
+      });
 
   return map::value_type{"int", std::move(int_functions)};
 }

@@ -863,32 +863,6 @@ bool checkTypeStructureMatchesTVImpl(
       return match;
     }
 
-    case TypeStructure::Kind::T_recursiveUnion: {
-      // get the case_type, look it up and re-check
-      auto case_type = get_ts_case_type(ts.get());
-      // We could keep a map of the aliases we've already seen and look up in
-      // that - but that seems like it would be more expensive in the common
-      // case (no recursion).
-      auto alias = TypeAlias::lookup(case_type);
-      auto ts = alias->typeStructure();
-      String name{const_cast<StringData*>(case_type)};
-      bool persistent = true;
-      auto resolved = TypeStructure::resolve(
-        name,
-        /*arr*/ts,
-        persistent,
-        /*generics*/Array());
-
-      return checkTypeStructureMatchesTVImpl<gen_error>(
-        resolved,
-        c1,
-        givenType,
-        expectedType,
-        errorKey,
-        warn,
-        isOrAsOp);
-    }
-
     case TypeStructure::Kind::T_nothing:
     case TypeStructure::Kind::T_noreturn:
     case TypeStructure::Kind::T_unresolved:
@@ -901,6 +875,7 @@ bool checkTypeStructureMatchesTVImpl(
 
     case TypeStructure::Kind::T_fun:
     case TypeStructure::Kind::T_typevar:
+    case TypeStructure::Kind::T_recursiveUnion:
       // For is/as, we will not get here since we'll throw an error on the
       // resolution pass.
       // For parameter/return type verification, we don't check these types, so
@@ -1012,7 +987,6 @@ bool errorOnIsAsExpressionInvalidTypes(const Array& ts, bool dryrun,
     case TypeStructure::Kind::T_typeaccess:
     case TypeStructure::Kind::T_nonnull:
     case TypeStructure::Kind::T_xhp:
-    case TypeStructure::Kind::T_recursiveUnion:
       return false;
     case TypeStructure::Kind::T_enum:
     case TypeStructure::Kind::T_class:
@@ -1064,6 +1038,8 @@ bool errorOnIsAsExpressionInvalidTypes(const Array& ts, bool dryrun,
     case TypeStructure::Kind::T_class_or_classname:
       // same as class<T>, will not support this in is/as
       return err("a class_or_classname type");
+    case TypeStructure::Kind::T_recursiveUnion:
+      return err("a recursive case type");
   }
   not_reached();
 }

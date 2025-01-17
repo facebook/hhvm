@@ -934,7 +934,8 @@ void chain_is_type(IRGS& env, SSATmp* c, bool nullable,
  */
 bool emitIsTypeStructWithoutResolvingIfPossible(
   IRGS& env,
-  const ArrayData* ts
+  const ArrayData* ts,
+  TypeStructResolveOp op
 ) {
   // Top of the stack is the type structure, so the thing we are checking is
   // the next element
@@ -1119,6 +1120,16 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_noreturn:
       return fail();
     case TypeStructure::Kind::T_union: {
+      // Even if we can tell for sure that the type structure will or won't
+      // permit a particular value, we still need to match the runtime behavior
+      // of rejecting invalid type structures. In particular we may have a type
+      // structure that would require recursion or that contains an invalid arm
+      // of the union (even if it wasn't actually important for verifying the
+      // value at hand).
+      if (op != TypeStructResolveOp::DontResolve ||
+          !errorOnIsAsExpressionInvalidTypes(ArrNR{ts}, true)) {
+        return false;
+      }
       hphp_fast_set<Type> primitives;
       hphp_fast_set<const StringData*> instances;
       bool fallback = false;
@@ -1191,6 +1202,7 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_typevar:
     case TypeStructure::Kind::T_fun:
     case TypeStructure::Kind::T_trait:
+    case TypeStructure::Kind::T_recursiveUnion:
       // Not supported, will throw an error on these at the resolution phase
       return false;
     case TypeStructure::Kind::T_enum:
@@ -1200,7 +1212,6 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_resource:
     case TypeStructure::Kind::T_reifiedtype:
-    case TypeStructure::Kind::T_recursiveUnion:
       // TODO(T28423611): Implement these
       return false;
     case TypeStructure::Kind::T_class_ptr:
@@ -1245,7 +1256,7 @@ SSATmp* handleIsResolutionAndCommonOpts(
       staticallyResolveTypeStructure(env, ts, partial, invalidType);
     shouldDecRef = maybe_resolved != ts;
   }
-  if (emitIsTypeStructWithoutResolvingIfPossible(env, maybe_resolved)) {
+  if (emitIsTypeStructWithoutResolvingIfPossible(env, maybe_resolved, op)) {
     done = true;
     return nullptr;
   }
@@ -1256,6 +1267,9 @@ SSATmp* handleIsResolutionAndCommonOpts(
   }
   popC(env);
   if (op == TypeStructResolveOp::DontResolve) checkValid = true;
+  else {
+    checkValid = errorOnIsAsExpressionInvalidTypes(ArrNR{maybe_resolved}, true);
+  }
   return cns(env, maybe_resolved);
 }
 
@@ -1299,6 +1313,7 @@ void emitIsTypeStructC(IRGS& env, TypeStructResolveOp op, TypeStructEnforceKind 
   };
 
   if (kind == TypeStructEnforceKind::Shallow) {
+    if (checkValid) gen(env, RaiseErrorOnInvalidIsAsExpressionType, tc);
     finish(gen(env, IsTypeStructShallow, block, data, tc, c));
     return;
   }

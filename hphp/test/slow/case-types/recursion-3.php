@@ -21,20 +21,8 @@ type T4 = C7;
 <<__EntryPoint>>
 function main() :mixed{
   printf("C1: %s\n", var_export(type_structure_for_alias('C1'), true));
-  printf("5 is C1: %d\n", 5 is C1);
-  printf("'foo' is C1: %d\n", 'foo' is C1);
-  printf("shape('foo' => 5) is C1: %d\n", shape('foo' => 5) is C1);
-  printf("shape('foo' => 'abc') is C1: %d\n", shape('foo' => 'abc') is C1);
-  printf("shape('foo' => shape('foo' => 5)) is C1: %d\n", shape('foo' => shape('foo' => 5)) is C1);
-  printf("shape('foo' => shape('foo' => 'abc')) is C1: %d\n", shape('foo' => shape('foo' => 'abc')) is C1);
   printf("-----\n");
   printf("C2: %s\n", var_export(type_structure_for_alias('C2'), true));
-  printf("5 is C2: %d\n", 5 is C2);
-  printf("'foo' is C2: %d\n", 'foo' is C2);
-  printf("shape('foo' => 5) is C2: %d\n", shape('foo' => 5) is C2);
-  printf("shape('foo' => 'abc') is C2: %d\n", shape('foo' => 'abc') is C2);
-  printf("shape('foo' => shape('foo' => 5)) is C2: %d\n", shape('foo' => shape('foo' => 5)) is C2);
-  printf("shape('foo' => shape('foo' => 'abc')) is C2: %d\n", shape('foo' => shape('foo' => 'abc')) is C2);
   printf("-----\n");
   printf("C7: %s\n", var_export(type_structure_for_alias('C7'), true));
 }

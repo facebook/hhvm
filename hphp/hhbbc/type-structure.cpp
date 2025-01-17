@@ -303,7 +303,7 @@ struct Cache;
 
 // A map used to indicate aliases currently being resolved (used to find
 // recursive definitions). Maps from alias name to the type of alias.
-using ResolvingMap = SStringToOneT<AliasKind>;
+using ResolvingMap = SStringToOneT<const php::TypeAlias*>;
 
 struct ResolveCtx {
   ResolveCtx(Context ctx, const IIndex* index,
@@ -326,10 +326,10 @@ struct WithResolving {
     if (m_clsName) m_resolving->erase(m_clsName);
   }
   WithResolving(SString clsName,
-                AliasKind ak,
+                const php::TypeAlias* alias,
                 ResolvingMap* resolving) : m_clsName{clsName},
                                            m_resolving{resolving} {
-    auto it = resolving->insert_or_assign(clsName, ak);
+    auto it = resolving->insert_or_assign(clsName, alias);
     if (!it.second) {
       // The name was already in the map - we're not the one to remove it.
       m_clsName = nullptr;
@@ -528,6 +528,32 @@ Optional<std::vector<Resolution>> resolve_list_separate(ResolveCtx& ctx,
     if (out.back().type.is(BBottom)) return std::nullopt;
   }
   return out;
+}
+
+Optional<Resolution> resolve_typevar_types(ResolveCtx& ctx,
+                                           SArray ts,
+                                           const php::TypeAlias* typeAlias,
+                                           GenericsMap& genericsMap) {
+  if (typeAlias->typeStructure->exists(s_typevars) &&
+      ts->exists(s_generic_types)) {
+    auto const tv = typeAlias->typeStructure->get(s_typevars);
+    assertx(tvIsString(tv));
+    std::vector<std::string> typevars;
+    folly::split(',', val(tv).pstr->data(), typevars);
+
+    auto rgenerics = resolve_list_separate(ctx, get_ts_generic_types(ts));
+    if (!rgenerics) return Resolution{ TBottom, true };
+
+    auto d = Builder::dict();
+    auto const size = std::min<size_t>(typevars.size(), rgenerics->size());
+
+    for (size_t i = 0; i < size; ++i) {
+      d.set(makeStaticString(typevars[i]), (*rgenerics)[i]);
+      genericsMap.insert_or_assign(typevars[i], std::move((*rgenerics)[i].type));
+    }
+    return std::move(d).finish();
+  }
+  return {};
 }
 
 Resolution resolve_fun(ResolveCtx& ctx, SArray ts) {
@@ -881,7 +907,7 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
   if (ty != ctx.resolving->end()) {
     // The alias is currently being resolved and we are hitting a
     // recursion.
-    switch (ty->second) {
+    switch (ty->second->kind) {
       case AliasKind::TypeAlias: {
         // Alias recursion isn't allowed - we could just short-circuit here but
         // instead allow the "normal" code to deal with it (which will end up
@@ -891,21 +917,23 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
       case AliasKind::CaseType: {
         // This is a recursive case type. It's allowed - but we just need to
         // set a few fields.
-        return Builder::dict()
+        GenericsMap genericsMap;
+        auto typevarTypes = resolve_typevar_types(ctx, ts, ty->second,
+                                                  genericsMap);
+        auto b = Builder::dict()
           .set(s_kind, make_tv<KindOfInt64>((int64_t)TS::Kind::T_recursiveUnion))
-          .set(s_case_type, clsName)
-          .finish();
+          .set(s_case_type, clsName);
+        if (typevarTypes) b.set(s_typevar_types, *typevarTypes);
+        return std::move(b).finish();
       }
     }
   }
 
-  WithResolving withResolving(clsName, lookup.typeAlias->kind, ctx.resolving);
-
-  using TypevarTypes = std::vector<std::pair<std::string, Type>>;
+  WithResolving withResolving(clsName, lookup.typeAlias, ctx.resolving);
 
   auto const resolveTA =
-    [&, typeAlias=typeAlias] (const GenericsMap& g = {},
-                              const TypevarTypes* typevarTypes = nullptr) {
+    [&, typeAlias=typeAlias] (const GenericsMap& g,
+                              Optional<Resolution> typevarTypes) {
     auto b = [&, typeAlias=typeAlias] {
       assertx(typeAlias->typeStructure);
 
@@ -940,51 +968,14 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
       return adjustTS(std::move(b));
     }();
 
-    if (typevarTypes) {
-      auto d = Builder::dict();
-      for (auto const& kv : *typevarTypes) {
-        d.set(
-          makeStaticString(kv.first),
-          maybe_make_bespoke(Resolution { kv.second, false })
-        );
-      }
-      b.set(s_typevar_types, d.finish());
-    }
+    if (typevarTypes) b.set(s_typevar_types, *typevarTypes);
     return b.copyModifiers(ts).finish();
   };
 
-  if (typeAlias->typeStructure->exists(s_typevars) &&
-      ts->exists(s_generic_types)) {
-    auto const tv = typeAlias->typeStructure->get(s_typevars);
-    assertx(tvIsString(tv));
-    std::vector<std::string> typevars;
-    folly::split(',', val(tv).pstr->data(), typevars);
-
-    auto rgenerics = resolve_list_separate(ctx, get_ts_generic_types(ts));
-    if (!rgenerics) return fail();
-
-    auto mightFail = false;
-    auto sensitive = false;
-    for (auto const& r : *rgenerics) {
-      mightFail |= r.mightFail;
-      sensitive |= r.contextSensitive;
-      if (mightFail && sensitive) break;
-    }
-
-    auto const size = std::min<size_t>(typevars.size(), rgenerics->size());
-
-    GenericsMap genericsMap;
-    TypevarTypes typevarTypes;
-    for (size_t i = 0; i < size; ++i) {
-      typevarTypes.emplace_back(typevars[i], (*rgenerics)[i].type);
-      genericsMap.insert_or_assign(typevars[i], std::move((*rgenerics)[i].type));
-    }
-    auto r = resolveTA(genericsMap, &typevarTypes);
-    r.mightFail |= mightFail;
-    r.contextSensitive |= sensitive;
-    return r;
-  }
-  return resolveTA();
+  GenericsMap genericsMap;
+  auto typevarTypes = resolve_typevar_types(ctx, ts, typeAlias, genericsMap);
+  if (typevarTypes && typevarTypes->type.is(BBottom)) return fail();
+  return resolveTA(genericsMap, typevarTypes);
 }
 
 Resolution resolve_union(ResolveCtx& ctx, SArray ts) {
@@ -1150,7 +1141,7 @@ Resolution resolve_type_structure(const IIndex& index,
 
   Cache cache;
   ResolvingMap resolving;
-  WithResolving withResolving(typeAlias.name, typeAlias.kind, &resolving);
+  WithResolving withResolving(typeAlias.name, &typeAlias, &resolving);
   ResolveCtx ctx{Context{}, &index, &cache, &resolving};
   ctx.collect = collect;
   const StaticString& key = key_for_alias_kind(typeAlias.kind);

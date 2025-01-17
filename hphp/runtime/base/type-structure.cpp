@@ -37,6 +37,8 @@ namespace HPHP {
 struct String;
 struct StaticString;
 
+struct AliasRes { AliasKind ak; Array unres; };
+
 /*
  * NB: This resolution logic and HHBBC must always agree exactly. If
  * you change anything here, HHBBC must be changed to match.
@@ -60,10 +62,13 @@ struct TSEnv {
   bool partial{};
   // Initial value false since unless proven there are no invalid types
   bool invalidType{};
+  // In some cases we cannot allow preresolved type aliases to be reused as it
+  // could result in an extra layer of unrolling for case types.
+  bool allowPreresolved{true};
   // Vector of typestructures that need to be put in for reified generics
   const req::vector<Array>* tsList;
   // Set of type aliases currently being resolved
-  req::fast_map<String, AliasKind, hphp_string_hash, hphp_string_same> resolving;
+  req::fast_map<String, AliasRes, hphp_string_hash, hphp_string_same> resolving;
 };
 
 struct TSCtx {
@@ -79,6 +84,38 @@ struct TSCtx {
 
   // Generics for the context we're resolving in, if available.
   const ArrayData* generics = nullptr;
+};
+
+struct WithCaseType {
+  explicit WithCaseType(TSEnv& env)
+    : m_env(env)
+    , m_allowPreresolved(env.allowPreresolved)
+  {
+    for (auto it = m_env.resolving.begin(); it != m_env.resolving.end();) {
+      switch (it->second.ak) {
+      case AliasKind::CaseType:
+        ++it;
+        break;
+      case AliasKind::TypeAlias:
+        m_aliases.emplace_back(std::move(*it));
+        it = m_env.resolving.erase(it);
+        break;
+      }
+    }
+    m_env.allowPreresolved = false;
+  }
+  ~WithCaseType() {
+    for (auto& p : m_aliases) m_env.resolving.emplace(std::move(p));
+    m_env.allowPreresolved = m_allowPreresolved;
+  }
+
+  WithCaseType(WithCaseType&&) = delete;
+  WithCaseType& operator=(WithCaseType&&) = delete;
+
+private:
+  TSEnv& m_env;
+  bool m_allowPreresolved;
+  std::vector<std::pair<String, AliasRes>> m_aliases;
 };
 
 /*
@@ -553,7 +590,7 @@ std::pair<Array, bool> getAlias(TSEnv& env, const String& aliasName,
 
   env.persistent &= persistentTA;
 
-  if (usePreResolved) {
+  if (usePreResolved && env.allowPreresolved) {
     auto const& preresolved = typeAlias->resolvedTypeStructure();
     if (!preresolved.isNull()) {
       assertx(preresolved.isDict());
@@ -713,6 +750,7 @@ Array resolveGenerics(TSEnv& env, const TSCtx& ctx, const Array& arr) {
 }
 
 Array resolveUnion(TSEnv& env, const TSCtx& ctx, const Array& arr) {
+  WithCaseType _{env};
   return resolveList(env, ctx, arr[s_union_types].toArray());
 }
 
@@ -795,11 +833,34 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
       assertx(arr.exists(s_classname));
       auto const clsName = arr[s_classname].asCStrRef();
 
+      auto const resTypevars = [&] (const Array& ts) {
+        if (ts.exists(s_typevars) && arr.exists(s_generic_types)) {
+          // If the alias has typevars and the original type has typevars then
+          // we need to convert them over.
+          std::vector<std::string> typevars;
+          folly::split(',', ts[s_typevars].asCStrRef().data(), typevars);
+
+          auto generic_types = resolveGenerics(env, ctx, arr);
+
+          auto const sz = std::min(static_cast<ssize_t>(typevars.size()),
+                                   generic_types.size());
+          DictInit newarr(sz);
+          for (auto i = 0; i < sz; i++) {
+            newarr.set(String(typevars[i]), generic_types[i]);
+          }
+          auto generics = newarr.toArray();
+          return generics;
+        }
+        // Either the alias doesn't have typevars OR the original type doesn't
+        // have typevars.
+        return Array{};
+      };
+
       auto ty = env.resolving.find(clsName);
       if (ty != env.resolving.end()) {
         // The alias is currently being resolved and we are hitting a
         // recursion.
-        switch (ty->second) {
+        switch (ty->second.ak) {
           case AliasKind::TypeAlias: {
             // This is what getAlias() would do anyway.
             throw Exception(
@@ -809,9 +870,14 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
           case AliasKind::CaseType: {
             // This is a recursive case type. It's allowed - but we just need to
             // set a few fields.
-            DictInit res(2);
+            DictInit res(4);
             TypeStructure::setKind(res, TypeStructure::Kind::T_recursiveUnion);
             res.set(s_case_type, clsName);
+            if (arr.exists(s_alias)) {
+              res.set(s_alias, Variant{arr[s_alias].asCStrRef()});
+            }
+            auto const tvs = resTypevars(ty->second.unres);
+            if (!tvs.isNull()) res.set(s_typevar_types, tvs);
             return res.toArray();
           }
         }
@@ -830,7 +896,10 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
           if (ts.exists(s_case_type)) {
             ak = AliasKind::CaseType;
           }
-          auto const [_, inserted] = env.resolving.insert_or_assign(clsName, ak);
+          auto const [_, inserted] = env.resolving.insert_or_assign(
+            clsName,
+            AliasRes { ak, ts }
+          );
 
           always_assert(inserted);
           auto resolved = resolveTS(env, newCtx, ts, generics);
@@ -845,27 +914,7 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
           return resolved;
         };
 
-        if (ts.exists(s_typevars) && arr.exists(s_generic_types)) {
-          // If the alias has typevars and the original type has typevars then
-          // we need to convert them over.
-          std::vector<std::string> typevars;
-          folly::split(',', ts[s_typevars].asCStrRef().data(), typevars);
-
-          auto generic_types = resolveGenerics(env, ctx, arr);
-
-          auto const sz = std::min(static_cast<ssize_t>(typevars.size()),
-                                   generic_types.size());
-          DictInit newarr(sz);
-          for (auto i = 0; i < sz; i++) {
-            newarr.set(String(typevars[i]), generic_types[i]);
-          }
-          auto generics = newarr.toArray();
-          ts = resolveAlias(generics.get());
-        } else {
-          // Either the alias doesn't have typevars OR the original type
-          // doesn't have typevars.
-          ts = resolveAlias(nullptr);
-        }
+        ts = resolveAlias(resTypevars(ts).get());
 
         // copy the alias typestruct onto the returned typestruct.
         newarr = ts;
@@ -1070,7 +1119,7 @@ Array TypeStructure::resolve(const String& aliasName,
     : AliasKind::TypeAlias;
 
   TSEnv env;
-  env.resolving.insert_or_assign(aliasName, ak);
+  env.resolving.insert_or_assign(aliasName, AliasRes { ak, arr });
 
   TSCtx ctx;
   ctx.name = aliasName.get();

@@ -19,12 +19,6 @@ C1: dict [
   ],
   'case_type' => 'C1',
 ]
-5 is C1: 1
-'foo' is C1: 0
-shape('foo' => 5) is C1: 1
-shape('foo' => 'abc') is C1: 0
-shape('foo' => shape('foo' => 5)) is C1: 1
-shape('foo' => shape('foo' => 'abc')) is C1: 0
 -----
 C2: dict [
   'kind' => 31,
@@ -64,12 +58,6 @@ C2: dict [
   ],
   'case_type' => 'C2',
 ]
-5 is C2: 0
-'foo' is C2: 1
-shape('foo' => 5) is C2: 1
-shape('foo' => 'abc') is C2: 0
-shape('foo' => shape('foo' => 5)) is C2: 0
-shape('foo' => shape('foo' => 'abc')) is C2: 1
 -----
 C7: dict [
   'kind' => 31,

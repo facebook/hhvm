@@ -24,14 +24,15 @@ namespace py.asyncio facebook_thrift_asyncio.annotation.rust
 namespace go thrift.annotation.rust
 namespace py thrift.annotation.rust
 
+// This is scope.Definition minus scope.Const
 @scope.Function
 @scope.EnumValue
 @scope.Enum
-@scope.Struct
+@scope.Structured
 @scope.Field
 @scope.Typedef
-@scope.Union
 @scope.Service
+@scope.Interaction
 struct Name {
   // # `rust.Name`
   //

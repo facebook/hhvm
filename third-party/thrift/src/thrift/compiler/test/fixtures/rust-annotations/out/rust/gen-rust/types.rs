@@ -2046,6 +2046,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for U10 {
             return r.take();
         }
 
+        if let ::std::option::Option::Some(r) = <rust__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return ::std::option::Option::Some(r);
+        }
+
         ::std::option::Option::None
     }
 
@@ -2065,6 +2069,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for U10 {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <rust__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             _ => {}
@@ -2193,6 +2201,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for U11 {
             return r.take();
         }
 
+        if let ::std::option::Option::Some(r) = <rust__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return ::std::option::Option::Some(r);
+        }
+
         if type_id == ::std::any::TypeId::of::<rust__types::Ord>() {
             let mut tmp = ::std::option::Option::Some(rust__types::Ord {
                 ..::std::default::Default::default()
@@ -2221,6 +2233,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for U11 {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <rust__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
                 }
             },
             2 => {

@@ -92,7 +92,7 @@ class Name implements \IThriftSyncStruct, \IThriftStructMetadata {
           shape(
           )
         ),
-        '\facebook\thrift\annotation\Struct' => \facebook\thrift\annotation\Struct::fromShape(
+        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::fromShape(
           shape(
           )
         ),
@@ -104,11 +104,11 @@ class Name implements \IThriftSyncStruct, \IThriftStructMetadata {
           shape(
           )
         ),
-        '\facebook\thrift\annotation\Union' => \facebook\thrift\annotation\Union::fromShape(
+        '\facebook\thrift\annotation\Service' => \facebook\thrift\annotation\Service::fromShape(
           shape(
           )
         ),
-        '\facebook\thrift\annotation\Service' => \facebook\thrift\annotation\Service::fromShape(
+        '\facebook\thrift\annotation\Interaction' => \facebook\thrift\annotation\Interaction::fromShape(
           shape(
           )
         ),

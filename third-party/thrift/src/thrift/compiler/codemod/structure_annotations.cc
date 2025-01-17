@@ -76,6 +76,13 @@ class structure_annotations {
           to_remove.emplace_back(name, data);
         }
 
+        // rust type
+        else if (name == "rust.type") {
+          to_remove.emplace_back(name, data);
+          to_add.insert(fmt::format("@rust.Type{{name = \"{}\"}}", data.value));
+          fm_.add_include("thrift/annotation/rust.thrift");
+        }
+
         // haskell annotations are ignored by the main compiler
         else if (name.find("hs.") == 0) {
         }
@@ -454,8 +461,6 @@ class structure_annotations {
         fm_.add_include("thrift/annotation/rust.thrift");
       } else if (name == "rust.type") {
         to_remove.emplace_back(name, data);
-        to_add.insert(fmt::format("@rust.Type{{name = \"{}\"}}", data.value));
-        fm_.add_include("thrift/annotation/rust.thrift");
       } else if (name == "rust.serde") {
         to_remove.emplace_back(name, data);
         to_add.insert(fmt::format("@rust.Serde{{enabled = {}}}", data.value));

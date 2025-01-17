@@ -440,7 +440,7 @@ class StructureAnnotations(unittest.TestCase):
             textwrap.dedent(
                 """\
                 struct S {
-                    1: i32 f (rust.name = "foo", rust.box, rust.type = "foo");
+                    1: i32 (rust.type = "u32") f (rust.name = "foo", rust.box, rust.type = "foo");
                 } (rust.arc, rust.copy, rust.exhaustive, rust.ord, rust.serde = "true", rust.mod = "foo", rust.derive = "Foo, Bar")
 
                 """
@@ -466,8 +466,8 @@ class StructureAnnotations(unittest.TestCase):
                 struct S {
                   @rust.Box
                   @rust.Name{name = "foo"}
-                  @rust.Type{name = "foo"}
-                  1: i32 f ;
+                  @rust.Type{name = "u32"}
+                  1: i32  f ;
                 }
                 """
             ),

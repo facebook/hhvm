@@ -154,6 +154,7 @@ class py3_mstch_program : public mstch_program {
              &py3_mstch_program::includeNamespaces},
             {"program:cppIncludes", &py3_mstch_program::getCppIncludes},
             {"program:containerTypes", &py3_mstch_program::getContainerTypes},
+            {"program:hasConstants", &py3_mstch_program::hasConstants},
             {"program:hasContainerTypes",
              &py3_mstch_program::hasContainerTypes},
             {"program:hasEnumTypes", &py3_mstch_program::hasEnumTypes},
@@ -200,6 +201,15 @@ class py3_mstch_program : public mstch_program {
   mstch::node getContainerTypes() { return make_mstch_types(containers_); }
 
   mstch::node hasContainerTypes() { return !containers_.empty(); }
+
+  mstch::node hasConstants() {
+    for (auto constant : program_->consts()) {
+      if (!is_hidden(*constant)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   mstch::node hasEnumTypes() {
     if (!program_->enums().empty()) {
@@ -1554,6 +1564,7 @@ void t_mstch_py3_generator::generate_types() {
 
   std::vector<std::string> cythonFilesNoTypeContext{
       "builders.py",
+      "constants_FBTHRIFT_ONLY_DO_NOT_USE.py",
       "containers_FBTHRIFT_ONLY_DO_NOT_USE.py",
       "metadata.pxd",
       "metadata.pyi",

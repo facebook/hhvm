@@ -19,7 +19,6 @@
 #include <filesystem>
 #include <memory>
 #include <optional>
-#include <stdexcept>
 #include <unordered_set>
 
 #include <thrift/compiler/whisker/diagnostic.h>
@@ -28,22 +27,19 @@
 #include <thrift/compiler/whisker/render.h>
 
 #include <thrift/compiler/generate/mstch_objects.h>
-#include <thrift/compiler/generate/t_generator.h>
+#include <thrift/compiler/generate/t_whisker_generator.h>
 
 namespace apache::thrift::compiler {
 
-class t_mstch_generator : public t_generator {
+class t_mstch_generator : public t_whisker_generator {
  public:
-  using t_generator::t_generator;
+  using t_whisker_generator::t_whisker_generator;
 
   void process_options(
       const std::map<std::string, std::string>& options) override {
     options_ = options;
     mstch_context_.options = options;
-    gen_template_map();
   }
-
-  virtual std::string template_prefix() const = 0;
 
  protected:
   struct whisker_options {
@@ -74,14 +70,7 @@ class t_mstch_generator : public t_generator {
    */
   const std::string& get_template(const std::string& template_name);
 
-  /**
-   * Returns the map of (file_name, template_contents) for each template
-   * file for this generator
-   */
-  const std::map<std::string, std::string>& get_template_map() {
-    return template_map_;
-  }
-
+  using t_whisker_generator::render;
   /**
    * Render the mstch template with name `template_name` in the given context.
    */
@@ -92,7 +81,10 @@ class t_mstch_generator : public t_generator {
    * Write an output file with the given contents to a path
    * under the output directory.
    */
-  void write_output(const std::filesystem::path& path, const std::string& data);
+  void write_output(
+      const std::filesystem::path& path, const std::string& data) {
+    write_to_file(path, data);
+  }
 
   /**
    * Render the mstch template with name `template_name` in the given context
@@ -227,16 +219,8 @@ class t_mstch_generator : public t_generator {
    */
   std::map<std::string, std::string> options_;
 
-  std::map<std::string, std::string> template_map_;
-  void gen_template_map();
-
-  struct whisker_render_state {
-    whisker::diagnostics_engine diagnostic_engine;
-    std::shared_ptr<whisker::template_resolver> template_resolver;
-    whisker::render_options render_options;
-  };
-  std::optional<whisker_render_state> whisker_render_state_;
-  whisker_render_state gen_whisker_render_state(whisker_options);
+  whisker::map globals() const final;
+  strictness_options strictness() const final;
 
   /**
    * For every key in the map, prepends a prefix to that key for mstch.

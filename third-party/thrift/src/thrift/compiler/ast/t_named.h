@@ -85,7 +85,7 @@ class t_named : public t_node {
    * Returns the range, in Thrift source, where this instances name is defined,
    * if any (i.e., if previously set by `set_name_range()`.
    */
-  const std::optional<source_range>& name_range() const { return name_range_; }
+  std::optional<source_range> name_range() const { return name_range_; }
 
   /**
    * Sets the range, in the source Thrift IDL code, corresponding to this

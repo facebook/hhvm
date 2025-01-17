@@ -184,7 +184,7 @@ class t_const_value {
     kind_ = CV_MAP;
   }
 
-  const std::optional<source_range>& src_range() const { return src_range_; }
+  std::optional<source_range> src_range() const { return src_range_; }
 
   void set_src_range(source_range range) { src_range_ = std::move(range); }
 

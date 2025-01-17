@@ -106,8 +106,8 @@ class RemoveRedundantFieldCustomDefaultValues final {
     //   attributes
     //   field_id ":" [field_qualifier] type identifier
     //     [default_value] annotations [';'] [inline_doc]
-    const source_range& field_name_range = field.name_range().value();
-    const source_range& default_value_src_range =
+    const source_range field_name_range = field.name_range().value();
+    const source_range default_value_src_range =
         field.default_value()->src_range().value();
     file_manager_.add(
         {.begin_pos = field_name_range.end.offset(),

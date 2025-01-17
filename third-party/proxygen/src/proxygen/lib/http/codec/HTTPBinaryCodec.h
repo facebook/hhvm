@@ -54,6 +54,7 @@ class HTTPBinaryCodec : public HTTPCodec {
  public:
   // Default strictValidation to false for now to match existing behavior
   explicit HTTPBinaryCodec(TransportDirection direction);
+  HTTPBinaryCodec(TransportDirection direction, bool knownLength);
   ~HTTPBinaryCodec() override;
 
   HTTPBinaryCodec(HTTPBinaryCodec&&) = default;

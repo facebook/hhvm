@@ -35,11 +35,15 @@ void encodeString(folly::StringPiece str, folly::io::QueueAppender& appender) {
 }
 } // namespace
 
-HTTPBinaryCodec::HTTPBinaryCodec(TransportDirection direction) {
-  transportDirection_ = direction;
-  state_ = ParseState::FRAMING_INDICATOR;
-  parseError_ = folly::none;
-  parserPaused_ = false;
+HTTPBinaryCodec::HTTPBinaryCodec(TransportDirection direction)
+    : HTTPBinaryCodec(direction, true) {
+}
+HTTPBinaryCodec::HTTPBinaryCodec(TransportDirection direction, bool knownLength)
+    : knownLength_(knownLength),
+      state_(ParseState::FRAMING_INDICATOR),
+      parserPaused_(false),
+      parseError_(folly::none),
+      transportDirection_(direction) {
 }
 
 HTTPBinaryCodec::~HTTPBinaryCodec() {

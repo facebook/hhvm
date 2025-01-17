@@ -22,8 +22,7 @@ class HTTPBinaryCodecForTest : public HTTPBinaryCodec {
   }
   explicit HTTPBinaryCodecForTest(TransportDirection direction,
                                   bool knownLength)
-      : HTTPBinaryCodec{direction} {
-    knownLength_ = knownLength;
+      : HTTPBinaryCodec{direction, knownLength} {
   }
   ParseResult parseFramingIndicator(folly::io::Cursor& cursor,
                                     bool& request,

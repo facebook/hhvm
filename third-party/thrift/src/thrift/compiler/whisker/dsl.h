@@ -32,6 +32,9 @@
 
 namespace whisker::dsl {
 
+// This macro greatly simplifies the SFINAE tricks required by dsl.
+#define WHISKER_DSL_REQUIRES(...) std::enable_if_t<__VA_ARGS__>* = nullptr
+
 /**
  * A class that abstracts over the difference between a whisker::array and a
  * native_object::array_like object.
@@ -386,6 +389,133 @@ class function : public native_function {
 
 namespace detail {
 
+template <typename F>
+using function_return_t = std::invoke_result_t<F, function::context>;
+
+template <typename F, typename T>
+constexpr inline bool is_function_returning =
+    std::is_same_v<function_return_t<F>, T>;
+
+// This class could be moved to the body of make_function(...).
+// However, MSVC fails to compile that.
+template <
+    typename F,
+    WHISKER_DSL_REQUIRES(
+        std::is_same_v<detail::function_return_t<F>, object::ptr>)>
+class make_function_delegate final : public function {
+ public:
+  make_function_delegate(std::string name, F&& impl)
+      : name_(std::move(name)), impl_(std::forward<F>(impl)) {}
+
+  object::ptr invoke(context ctx) final { return impl_(std::move(ctx)); }
+
+  std::string describe_type() const final {
+    if (name_.empty()) {
+      // The name can be empty if one is not provided via
+      // dsl::make_function(...). That's fine because the name does not affect
+      // execution, only a small subset of debug / diagnostics information in
+      // case there is an error.
+      return "<function>";
+    }
+    return fmt::format("<function {}>", name_);
+  }
+
+  void print_to(
+      tree_printer::scope scope, const object_print_options&) const final {
+    scope.println("{}", describe_type());
+  }
+
+ private:
+  std::string name_;
+  F impl_;
+};
+
+} // namespace detail
+
+/**
+ * Creates a named function object with the provided implementation. This
+ * function provides terse syntax for dsl::function in cases where the
+ * implementing class is only used once.
+ *
+ * Example:
+ *
+ *     dsl::make_function(
+ *         "i64_eq", [](dsl::function::context ctx) -> object::ptr {
+ *           ctx.declare_arity(2);
+ *           ctx.declare_named_arguments({});
+ *           i64 a = ctx.argument<i64>(0);
+ *           i64 b = ctx.argument<i64>(1);
+ *           return manage_owned<object>(whisker::make::boolean(a == b));
+ *         });
+ *
+ *     {{ (i64_eq 42 42) }}
+ *     {{! Produces true }}
+ *
+ * The name is used for debugging only. There is an overload that omits the name
+ * which can be used in the common case.
+ */
+template <
+    typename F,
+    WHISKER_DSL_REQUIRES(detail::is_function_returning<F, object::ptr>)>
+function::ptr make_function(std::string name, F&& function) {
+  return std::make_shared<detail::make_function_delegate<F>>(
+      std::move(name), std::forward<F>(function));
+}
+
+/**
+ * An overload of make_function that allows the function to return any whisker
+ * object.
+ *
+ * The returned object is wrapped via manage_owned<object>(...) for all types
+ * except boolean and null (which are manage_static(...)).
+ *
+ * Example:
+ *
+ *     dsl::make_function(
+ *         "i64_eq", [](dsl::function::context ctx) -> whisker::boolean {
+ *           ctx.declare_arity(2);
+ *           ctx.declare_named_arguments({});
+ *           i64 a = ctx.argument<i64>(0);
+ *           i64 b = ctx.argument<i64>(1);
+ *           return a == b;
+ *         });
+ *
+ *     {{ (i64_eq 42 42) }}
+ *     {{! Produces true }}
+ */
+template <
+    typename F,
+    WHISKER_DSL_REQUIRES(
+        whisker::is_any_object_type<detail::function_return_t<F>> ||
+        detail::is_function_returning<F, object>)>
+function::ptr make_function(std::string name, F&& function) {
+  return make_function(
+      std::move(name),
+      [f = F(std::forward<F>(function))](function::context ctx) {
+        if constexpr (detail::is_function_returning<F, boolean>) {
+          return manage_as_static(
+              f(std::move(ctx)) ? whisker::make::true_ : whisker::make::false_);
+        } else if constexpr (detail::is_function_returning<F, null>) {
+          f(std::move(ctx));
+          return manage_as_static(whisker::make::null);
+        } else {
+          return manage_owned<object>(f(std::move(ctx)));
+        }
+      });
+}
+
+/**
+ * Creates an function object without a name for debugging. It will be seen as
+ * anonymous when debug printing. Omitting the name does not affect how the
+ * function behaves, nor how name lookup works in Whisker.
+ */
+template <typename F>
+function::ptr make_function(F&& function) {
+  return make_function("" /* name */, std::forward<F>(function));
+}
+
+namespace detail {
+
 template <typename T>
 struct by_value {
   using type = T;
@@ -421,5 +551,7 @@ struct function_argument_result<native_handle<T>> : by_value<native_handle<T>> {
 };
 
 } // namespace detail
+
+#undef WHISKER_DSL_REQUIRES
 
 } // namespace whisker::dsl

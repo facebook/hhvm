@@ -227,16 +227,13 @@ TEST_F(MstchCompatTest, mstch_object) {
 
     std::string cpp_only_method() const { return "hello from C++"; }
     whisker::native_function::ptr w_invoke_cpp_only_method() {
-      class func : public dsl::function {
-       public:
-        object::ptr invoke(context ctx) override {
-          ctx.declare_arity(1);
-          ctx.declare_named_arguments({});
-          return manage_owned<object>(
-              ctx.argument<native_handle<object_impl>>(0)->cpp_only_method());
-        }
-      };
-      return std::make_shared<func>();
+      return dsl::make_function(
+          [](dsl::function::context ctx) -> whisker::string {
+            ctx.declare_arity(1);
+            ctx.declare_named_arguments({});
+            return ctx.argument<native_handle<object_impl>>(0)
+                ->cpp_only_method();
+          });
     }
   };
   auto mstch_obj = apache::thrift::mstch::make_shared_node<object_impl>();

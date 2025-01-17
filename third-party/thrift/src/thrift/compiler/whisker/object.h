@@ -59,11 +59,6 @@ namespace whisker {
 //               User-defined (C++) function that operates on `whisker::object`.
 //   * native_handle —
 //               A pointer to an opaque (C++) object.
-//
-// Currently, the Whisker templating language only supports i64, null, string,
-// and boolean as literals. However, the evaluation engine can recognize all of
-// the types above as they are required for compatibility with Mustache /
-// Handlebars.
 
 using i64 = std::int64_t;
 using f64 = double;
@@ -902,6 +897,29 @@ class object final : private detail::object_base<object> {
   }
 };
 
+namespace detail {
+template <typename T, typename... Alternatives>
+static constexpr bool is_any_of = (std::is_same_v<T, Alternatives> || ...);
+}
+
+/**
+ * A type trait which checks that the provided type T is one of the possible
+ * alternatives for whisker::object.
+ */
+template <typename T>
+constexpr inline bool is_any_object_type = detail::is_any_of<
+    T,
+    i64,
+    f64,
+    string,
+    boolean,
+    null,
+    array,
+    map,
+    native_object::ptr,
+    native_function::ptr,
+    native_handle<>>;
+
 /**
  * An alternative to to_string() that allows printing a whisker::object within
  * an ongoing tree printing session. The output is appended to the provided
@@ -919,16 +937,13 @@ namespace make {
 
 namespace detail {
 
-template <typename T, typename... Alternatives>
-static constexpr bool is_any_of = (std::is_same_v<T, Alternatives> || ...);
-
 /**
  * The set of integral types that are supported by whisker::object (and are
  * therefore also implicitly convertible from).
  */
 template <typename T>
 static constexpr bool is_supported_integral_type =
-    is_any_of<T, signed char, short, int, long, long long> &&
+    whisker::detail::is_any_of<T, signed char, short, int, long, long long> &&
     sizeof(T) <= sizeof(whisker::i64);
 
 /**
@@ -937,7 +952,7 @@ static constexpr bool is_supported_integral_type =
  */
 template <typename T>
 static constexpr bool is_supported_floating_point_type =
-    is_any_of<T, float, double>;
+    whisker::detail::is_any_of<T, float, double>;
 
 } // namespace detail
 

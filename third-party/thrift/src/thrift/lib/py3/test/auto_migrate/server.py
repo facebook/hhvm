@@ -79,20 +79,24 @@ class Handler(TestingServiceInterface):
     async def renamed_func(self, ret: bool) -> bool:
         return ret
 
+    async def getPriority(self) -> int:
+        return 0
+
+    async def getRequestId(self) -> str:
+        return "Testing"
+
 
 class ServicesTests(unittest.TestCase):
     def test_handler_acontext(self) -> None:
         loop = asyncio.get_event_loop()
 
         async def inner() -> None:
-            # pyre-fixme[45]: Cannot instantiate abstract class `Handler`.
             async with Handler() as h:
                 self.assertTrue(h.initalized)
 
         loop.run_until_complete(inner())
 
     def test_get_service_name(self) -> None:
-        # pyre-fixme[45]: Cannot instantiate abstract class `Handler`.
         h = Handler()
         self.assertEqual(getServiceName(h), "TestingService")
 
@@ -102,7 +106,6 @@ class ServicesTests(unittest.TestCase):
         self.assertIsInstance(loop.run_until_complete(coro), SocketAddress)
 
     async def get_address(self, loop: asyncio.AbstractEventLoop) -> SocketAddress:
-        # pyre-fixme[45]: Cannot instantiate abstract class `Handler`.
         server = ThriftServer(Handler(), port=0)
         serve_task = loop.create_task(server.serve())
         addy = await server.get_address()
@@ -122,7 +125,6 @@ class ServicesTests(unittest.TestCase):
             TestingServiceInterface.annotations = {}
 
     def test_unittest_call(self) -> None:
-        # pyre-fixme[45]: Cannot instantiate abstract class `Handler`.
         h = Handler()
         loop = asyncio.get_event_loop()
         call = 5
@@ -130,7 +132,6 @@ class ServicesTests(unittest.TestCase):
         self.assertEqual(call, ret)
 
     def test_unittest_call_renamed_func(self) -> None:
-        # pyre-fixme[45]: Cannot instantiate abstract class `Handler`.
         h = Handler()
         loop = asyncio.get_event_loop()
         ret = loop.run_until_complete(h.renamed_func(True))
@@ -145,7 +146,6 @@ class ServicesTests(unittest.TestCase):
         QUEUE_TIMEOUT = 20.19
         SOCKET_QUEUE_TIMEOUT = 21.37
 
-        # pyre-fixme[45]: Cannot instantiate abstract class `Handler`.
         server = ThriftServer(Handler(), port=0)
         server.set_max_requests(MAX_REQUESTS)
         server.set_max_connections(MAX_CONNECTIONS)
@@ -171,7 +171,6 @@ class ServicesTests(unittest.TestCase):
         self.assertTrue(server.get_quick_exit_on_shutdown_timeout())
 
     def test_server_get_stats(self) -> None:
-        # pyre-fixme[45]: Cannot instantiate abstract class `Handler`.
         server = ThriftServer(Handler(), port=0)
 
         active_requests = server.get_active_requests()
@@ -179,7 +178,6 @@ class ServicesTests(unittest.TestCase):
         self.assertLess(active_requests, 10)
 
     def test_set_is_overloaded(self) -> None:
-        # pyre-fixme[45]: Cannot instantiate abstract class `Handler`.
         helper = OverloadTestHelper(Handler(), 0)
         helper.set_is_overload()
         self.assertTrue(helper.check_overload("overloaded_method"))
@@ -187,7 +185,6 @@ class ServicesTests(unittest.TestCase):
 
     def test_lifecycle_hooks(self) -> None:
         async def inner() -> None:
-            # pyre-fixme[45]: Cannot instantiate abstract class `Handler`.
             handler = Handler()
             self.assertFalse(handler.on_start_serving_called)
             self.assertFalse(handler.on_stop_requested_called)

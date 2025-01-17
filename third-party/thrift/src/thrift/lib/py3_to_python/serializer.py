@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyre-unsafe
+
 """
 Intermediate solution to be able to have a generic serializer from
 """

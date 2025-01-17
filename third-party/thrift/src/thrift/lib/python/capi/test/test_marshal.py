@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyre-unsafe
+
 import unittest
 from sys import float_info, getrefcount
 from typing import Callable

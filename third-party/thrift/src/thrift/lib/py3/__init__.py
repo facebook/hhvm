@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pyre-unsafe
+
 # See __init__.pyi for easier to digest types for typecheckers
 
 __all__ = []

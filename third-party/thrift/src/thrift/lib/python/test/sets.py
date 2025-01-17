@@ -299,6 +299,10 @@ class ImmutableSetTests(unittest.TestCase):
         self.assertGreaterEqual(a, d)
         self.assertGreaterEqual(f, a)
 
+    def test_set_module_name(self) -> None:
+        easy_set = EasySet({easy()})
+        self.assertEqual(easy_set.__class__.__module__, "thrift.python.types")
+
 
 # TODO: Collapse these two test cases into parameterized test above
 class SetImmutablePythonTests(unittest.TestCase):

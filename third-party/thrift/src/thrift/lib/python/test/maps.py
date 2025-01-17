@@ -315,6 +315,10 @@ class MapTests(unittest.TestCase):
 
         self.assertEqual(the_map, self.StrAtoIValueMap(the_map))
 
+    def test_map_module_name(self) -> None:
+        easy_map = self.StrEasyMap({"a": self.easy()})
+        self.assertEqual(easy_map.__class__.__module__, "thrift.python.types")
+
 
 # TODO: Collapse these two test cases into parameterized test above
 class MapImmutablePythonTests(unittest.TestCase):

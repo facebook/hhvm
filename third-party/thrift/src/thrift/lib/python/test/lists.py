@@ -277,6 +277,10 @@ class ListTests(unittest.TestCase):
         self.assertLessEqual(a, c)
         self.assertGreaterEqual(c, e)
 
+    def test_list_module_name(self) -> None:
+        easy_list = self.EasyList([self.easy()])
+        self.assertEqual(easy_list.__class__.__module__, "thrift.python.types")
+
     def test_struct_with_list_fields(self) -> None:
         s = self.Lists(
             # pyre-ignore[6]: TODO: Thrift-Container init

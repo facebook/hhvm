@@ -60,7 +60,7 @@ class MyServiceInterface(
 
     async def adapted_return(
             self
-        ) -> typeshed_one.AdapterOneType[_fbthrift__b__thrift_mutable_types.B]:
+        ) -> typeshed_one.AdapterOneType[_fbthrift__b__thrift_mutable_types._fbthrift_unadapted_B]:
         raise NotImplementedError("async def adapted_return is not implemented")
 
     async def _fbthrift__handler_adapted_return(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:

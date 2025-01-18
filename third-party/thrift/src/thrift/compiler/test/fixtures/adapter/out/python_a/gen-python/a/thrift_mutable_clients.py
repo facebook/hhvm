@@ -69,7 +69,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> typeshed_one.AdapterOneType[_fbthrift__b__thrift_mutable_types.B]:
+        ) -> typeshed_one.AdapterOneType[_fbthrift__b__thrift_mutable_types._fbthrift_unadapted_B]:
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "adapted_return",
@@ -129,7 +129,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> typeshed_one.AdapterOneType[_fbthrift__b__thrift_mutable_types.B]:
+        ) -> typeshed_one.AdapterOneType[_fbthrift__b__thrift_mutable_types._fbthrift_unadapted_B]:
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "adapted_return",

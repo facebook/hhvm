@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/php-globals.h"
+#include "hphp/runtime/base/profiling-counters.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/server/ext_server.h"
@@ -297,6 +298,9 @@ bool XboxRequestHandler::executePHPFunction(Transport *transport) {
                                      transport->getWallTime(),
                                      entry,
                                      true /*psp*/);
+  // use data logged during the request to update ODS counters for profiling
+  // e.g. memcache.get_duration_us.sum.60
+  ProfilingCounters::UpdateCountersBasedOnServerNotes();
 
   if (entry) {
     StructuredLog::log("hhvm_request_perf", *entry);

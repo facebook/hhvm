@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/profiling-counters.h"
 #include "hphp/runtime/base/request-id.h"
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -571,6 +572,9 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
                                      transport->getWallTime(),
                                      entry,
                                      true /*psp*/);
+  // use data logged during the request to update ODS counters for profiling
+  // e.g. memcache.get_duration_us.sum.60
+  ProfilingCounters::UpdateCountersBasedOnServerNotes();
   if (entry) {
     StructuredLog::log("hhvm_request_perf", *entry);
     transport->resetStructuredLogEntry();

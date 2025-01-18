@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import abc as _abc
 import typing as _typing
+import builtins as _fbthrift_builtins
 
-_fbthrift_property = property
 
 
 import folly.iobuf as _fbthrift_iobuf
@@ -20,13 +20,16 @@ import thrift.python.abstract_types as _fbthrift_python_abstract_types
 import includes.thrift_abstract_types as _fbthrift__includes__thrift_abstract_types
 
 class MyStruct(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def MyIncludedField(self) -> _fbthrift__includes__thrift_abstract_types.Included: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def MyOtherIncludedField(self) -> _fbthrift__includes__thrift_abstract_types.Included: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def MyIncludedInt(self) -> int: ...
     @_abc.abstractmethod

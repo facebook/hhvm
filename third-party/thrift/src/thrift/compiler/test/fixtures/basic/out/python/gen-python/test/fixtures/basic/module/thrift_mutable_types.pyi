@@ -212,6 +212,7 @@ class MyUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_
         floatSet: MyUnion.FbThriftUnionFieldEnum = ...
 
     fbthrift_current_value: _typing.Final[_typing.Union[None, _fbthrift_MyEnum, _fbthrift_MyStruct, _fbthrift_MyDataItem, _fbthrift_python_mutable_containers.MutableSet[float]]]
+    # pyre-ignore[15]: `fbthrift_current_field` overrides attribute defined in `_fbthrift_python_abstract_types.MyUnion` inconsistently. Type `MyUnion.FbThriftUnionFieldEnum` is not a subtype of the overridden attribute `_fbthrift_python_abstract_types.MyUnion.FbThriftUnionFieldEnum`
     fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
     def get_type(self) -> FbThriftUnionFieldEnum: ...
     def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyUnion": ...  # type: ignore
@@ -348,6 +349,7 @@ class UnionToBeRenamed(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_co
         reserved_field: UnionToBeRenamed.FbThriftUnionFieldEnum = ...
 
     fbthrift_current_value: _typing.Final[_typing.Union[None, int]]
+    # pyre-ignore[15]: `fbthrift_current_field` overrides attribute defined in `_fbthrift_python_abstract_types.UnionToBeRenamed` inconsistently. Type `UnionToBeRenamed.FbThriftUnionFieldEnum` is not a subtype of the overridden attribute `_fbthrift_python_abstract_types.UnionToBeRenamed.FbThriftUnionFieldEnum`
     fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
     def get_type(self) -> FbThriftUnionFieldEnum: ...
     def _to_python(self) -> "test.fixtures.basic.module.thrift_types.UnionToBeRenamed": ...  # type: ignore

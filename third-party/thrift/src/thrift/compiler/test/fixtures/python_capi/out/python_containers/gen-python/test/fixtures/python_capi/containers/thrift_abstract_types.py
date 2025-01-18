@@ -11,27 +11,32 @@ from __future__ import annotations
 
 import abc as _abc
 import typing as _typing
+import builtins as _fbthrift_builtins
 
-_fbthrift_property = property
 
 
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 
 class TemplateLists(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def std_string(self) -> _typing.Optional[_typing.Sequence[str]]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def deque_string(self) -> _typing.Sequence[bytes]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def small_vector_iobuf(self) -> _typing.Sequence[_fbthrift_iobuf.IOBuf]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def nested_small_vector(self) -> _typing.Sequence[_typing.Sequence[str]]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def small_vector_tensor(self) -> _typing.Sequence[_typing.Sequence[_typing.Sequence[str]]]: ...
     @_abc.abstractmethod
@@ -46,25 +51,32 @@ class TemplateLists(_abc.ABC):
     def _to_py_deprecated(self) -> "containers.ttypes.TemplateLists": ...  # type: ignore
 _fbthrift_TemplateLists = TemplateLists
 class TemplateSets(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def std_set(self) -> _typing.AbstractSet[str]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def std_unordered(self) -> _typing.AbstractSet[str]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def folly_fast(self) -> _typing.AbstractSet[str]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def folly_node(self) -> _typing.AbstractSet[str]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def folly_value(self) -> _typing.AbstractSet[str]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def folly_vector(self) -> _typing.AbstractSet[str]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def folly_sorted_vector(self) -> _typing.AbstractSet[str]: ...
     @_abc.abstractmethod
@@ -79,25 +91,32 @@ class TemplateSets(_abc.ABC):
     def _to_py_deprecated(self) -> "containers.ttypes.TemplateSets": ...  # type: ignore
 _fbthrift_TemplateSets = TemplateSets
 class TemplateMaps(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def std_map(self) -> _typing.Mapping[str, str]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def std_unordered(self) -> _typing.Mapping[str, str]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def folly_fast(self) -> _typing.Mapping[str, str]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def folly_node(self) -> _typing.Mapping[str, str]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def folly_value(self) -> _typing.Mapping[str, str]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def folly_vector(self) -> _typing.Mapping[str, str]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def folly_sorted_vector(self) -> _typing.Mapping[str, str]: ...
     @_abc.abstractmethod
@@ -112,10 +131,12 @@ class TemplateMaps(_abc.ABC):
     def _to_py_deprecated(self) -> "containers.ttypes.TemplateMaps": ...  # type: ignore
 _fbthrift_TemplateMaps = TemplateMaps
 class TWrapped(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def fieldA(self) -> str: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def fieldB(self) -> bytes: ...
     @_abc.abstractmethod
@@ -130,7 +151,8 @@ class TWrapped(_abc.ABC):
     def _to_py_deprecated(self) -> "containers.ttypes.TWrapped": ...  # type: ignore
 _fbthrift_TWrapped = TWrapped
 class IndirectionA(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def lst(self) -> _typing.Sequence[_fbthrift_TWrapped]: ...
     @_abc.abstractmethod
@@ -145,7 +167,8 @@ class IndirectionA(_abc.ABC):
     def _to_py_deprecated(self) -> "containers.ttypes.IndirectionA": ...  # type: ignore
 _fbthrift_IndirectionA = IndirectionA
 class IndirectionB(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def lst(self) -> _typing.Sequence[_fbthrift_TWrapped]: ...
     @_abc.abstractmethod
@@ -160,7 +183,8 @@ class IndirectionB(_abc.ABC):
     def _to_py_deprecated(self) -> "containers.ttypes.IndirectionB": ...  # type: ignore
 _fbthrift_IndirectionB = IndirectionB
 class IndirectionC(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def lst(self) -> _typing.Sequence[_fbthrift_TWrapped]: ...
     @_abc.abstractmethod

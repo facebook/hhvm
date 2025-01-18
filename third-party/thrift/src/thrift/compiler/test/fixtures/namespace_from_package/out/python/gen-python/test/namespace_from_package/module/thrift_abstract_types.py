@@ -11,15 +11,16 @@ from __future__ import annotations
 
 import abc as _abc
 import typing as _typing
+import builtins as _fbthrift_builtins
 
-_fbthrift_property = property
 
 
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 
 class Foo(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def MyInt(self) -> int: ...
     @_abc.abstractmethod

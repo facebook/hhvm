@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import abc as _abc
 import typing as _typing
+import builtins as _fbthrift_builtins
 
-_fbthrift_property = property
 
 import enum as _enum
 
@@ -21,16 +21,20 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 
 class SerializedStruct(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def s(self) -> str: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def i(self) -> int: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def os(self) -> _typing.Optional[str]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def rs(self) -> str: ...
     @_abc.abstractmethod
@@ -45,10 +49,12 @@ class SerializedStruct(_abc.ABC):
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.SerializedStruct": ...  # type: ignore
 _fbthrift_SerializedStruct = SerializedStruct
 class SerializedUnion(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def s(self) -> str: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def i(self) -> int: ...
     @_abc.abstractmethod
@@ -66,20 +72,25 @@ class SerializedUnion(_abc.ABC):
         i = 2
 
     FbThriftUnionFieldEnum.__name__ = "SerializedUnion"
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def fbthrift_current_value(self) -> _typing.Union[None, str, int]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def fbthrift_current_field(self) -> FbThriftUnionFieldEnum: ...
 
 _fbthrift_SerializedUnion = SerializedUnion
 class SerializedError(_fbthrift_python_abstract_types.AbstractGeneratedError):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     def msg(self) -> str: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     def os(self) -> _typing.Optional[str]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     def rs(self) -> str: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, str, str]]]: ...
     def _to_mutable_python(self) -> "test.fixtures.python_capi.serialized_dep.thrift_mutable_types.SerializedError": ...  # type: ignore
@@ -88,16 +99,20 @@ class SerializedError(_fbthrift_python_abstract_types.AbstractGeneratedError):
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.SerializedError": ...  # type: ignore
 _fbthrift_SerializedError = SerializedError
 class MarshalStruct(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def s(self) -> str: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def i(self) -> int: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def os(self) -> _typing.Optional[str]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def rs(self) -> str: ...
     @_abc.abstractmethod
@@ -112,10 +127,12 @@ class MarshalStruct(_abc.ABC):
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.MarshalStruct": ...  # type: ignore
 _fbthrift_MarshalStruct = MarshalStruct
 class MarshalUnion(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def s(self) -> str: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def i(self) -> int: ...
     @_abc.abstractmethod
@@ -133,20 +150,25 @@ class MarshalUnion(_abc.ABC):
         i = 2
 
     FbThriftUnionFieldEnum.__name__ = "MarshalUnion"
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def fbthrift_current_value(self) -> _typing.Union[None, str, int]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def fbthrift_current_field(self) -> FbThriftUnionFieldEnum: ...
 
 _fbthrift_MarshalUnion = MarshalUnion
 class MarshalError(_fbthrift_python_abstract_types.AbstractGeneratedError):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     def msg(self) -> str: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     def os(self) -> _typing.Optional[str]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     def rs(self) -> str: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, str, str]]]: ...
     def _to_mutable_python(self) -> "test.fixtures.python_capi.serialized_dep.thrift_mutable_types.MarshalError": ...  # type: ignore

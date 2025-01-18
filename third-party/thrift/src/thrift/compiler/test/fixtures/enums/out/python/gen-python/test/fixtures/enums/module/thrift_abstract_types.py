@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import abc as _abc
 import typing as _typing
+import builtins as _fbthrift_builtins
 
-_fbthrift_property = property
 
 
 import folly.iobuf as _fbthrift_iobuf
@@ -43,16 +43,20 @@ from test.fixtures.enums.module.thrift_enums import (
 )
 
 class SomeStruct(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def reasonable(self) -> _fbthrift_Metasyntactic: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def fine(self) -> _fbthrift_Metasyntactic: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def questionable(self) -> _fbthrift_Metasyntactic: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def tags(self) -> _typing.AbstractSet[int]: ...
     @_abc.abstractmethod
@@ -67,16 +71,20 @@ class SomeStruct(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.SomeStruct": ...  # type: ignore
 _fbthrift_SomeStruct = SomeStruct
 class MyStruct(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def me2_3(self) -> _fbthrift_MyEnum2: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def me3_n3(self) -> _fbthrift_MyEnum3: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def me1_t1(self) -> _fbthrift_MyEnum1: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def me1_t2(self) -> _fbthrift_MyEnum1: ...
     @_abc.abstractmethod

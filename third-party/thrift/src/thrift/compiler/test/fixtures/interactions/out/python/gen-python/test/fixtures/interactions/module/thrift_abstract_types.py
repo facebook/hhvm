@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import abc as _abc
 import typing as _typing
+import builtins as _fbthrift_builtins
 
-_fbthrift_property = property
 
 
 import folly.iobuf as _fbthrift_iobuf
@@ -20,7 +20,8 @@ import thrift.python.abstract_types as _fbthrift_python_abstract_types
 import test.fixtures.another_interactions.shared.thrift_abstract_types as _fbthrift__test__fixtures__another_interactions__shared__thrift_abstract_types
 
 class CustomException(_fbthrift_python_abstract_types.AbstractGeneratedError):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     def message(self) -> str: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
     def _to_mutable_python(self) -> "test.fixtures.interactions.module.thrift_mutable_types.CustomException": ...  # type: ignore
@@ -29,7 +30,8 @@ class CustomException(_fbthrift_python_abstract_types.AbstractGeneratedError):
     def _to_py_deprecated(self) -> "test.fixtures.interactions.ttypes.CustomException": ...  # type: ignore
 _fbthrift_CustomException = CustomException
 class ShouldBeBoxed(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def sessionId(self) -> str: ...
     @_abc.abstractmethod

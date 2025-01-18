@@ -27,6 +27,29 @@ class SpecialCasesTest(unittest.TestCase):
             # defined in a manner to cause the error above.
             TestPropertyAsField,  # noqa: F401
         )
+        from thrift.python.test.special_cases.thrift_types import (
+            TestPropertyAsField as TestPropertyAsFieldImmutable,
+        )
+
+        def make_abstract(
+            t: TestPropertyAsField,
+        ) -> TestPropertyAsField:
+            return t
+
+        class incorrect_type:
+            pass
+
+        # pyre-ignore[9]: break_unless_used_with_renamed_built_in_property is declared to have type `incorrect_type` but is used as type `str`
+        _: incorrect_type = (  # noqa: F841
+            make_abstract(
+                TestPropertyAsFieldImmutable()
+            ).break_unless_used_with_renamed_built_in_property
+        )
+        __: str = (  # noqa: F841
+            make_abstract(
+                TestPropertyAsFieldImmutable()
+            ).break_unless_used_with_renamed_built_in_property
+        )
 
     def test_field_named_register(self) -> None:
         # The purpose of this is to ensure that the Python parses the imported module

@@ -95,6 +95,7 @@ class SerializedUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_com
         i: SerializedUnion.FbThriftUnionFieldEnum = ...
 
     fbthrift_current_value: _typing.Final[_typing.Union[None, str, int]]
+    # pyre-ignore[15]: `fbthrift_current_field` overrides attribute defined in `_fbthrift_python_abstract_types.SerializedUnion` inconsistently. Type `SerializedUnion.FbThriftUnionFieldEnum` is not a subtype of the overridden attribute `_fbthrift_python_abstract_types.SerializedUnion.FbThriftUnionFieldEnum`
     fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
     def get_type(self) -> FbThriftUnionFieldEnum: ...
     def _to_python(self) -> "test.fixtures.python_capi.serialized_dep.thrift_types.SerializedUnion": ...  # type: ignore
@@ -213,6 +214,7 @@ class MarshalUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compat
         i: MarshalUnion.FbThriftUnionFieldEnum = ...
 
     fbthrift_current_value: _typing.Final[_typing.Union[None, str, int]]
+    # pyre-ignore[15]: `fbthrift_current_field` overrides attribute defined in `_fbthrift_python_abstract_types.MarshalUnion` inconsistently. Type `MarshalUnion.FbThriftUnionFieldEnum` is not a subtype of the overridden attribute `_fbthrift_python_abstract_types.MarshalUnion.FbThriftUnionFieldEnum`
     fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
     def get_type(self) -> FbThriftUnionFieldEnum: ...
     def _to_python(self) -> "test.fixtures.python_capi.serialized_dep.thrift_types.MarshalUnion": ...  # type: ignore

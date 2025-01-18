@@ -684,6 +684,7 @@ class MyUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_
         intValue: MyUnion.FbThriftUnionFieldEnum = ...
 
     fbthrift_current_value: _typing.Final[_typing.Union[None, _fbthrift_MyEnum, _fbthrift_MyStruct, _fbthrift_MyDataItem, _fbthrift_ComplexNestedStruct, int, int]]
+    # pyre-ignore[15]: `fbthrift_current_field` overrides attribute defined in `_fbthrift_python_abstract_types.MyUnion` inconsistently. Type `MyUnion.FbThriftUnionFieldEnum` is not a subtype of the overridden attribute `_fbthrift_python_abstract_types.MyUnion.FbThriftUnionFieldEnum`
     fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
     def get_type(self) -> FbThriftUnionFieldEnum: ...
     def _to_python(self) -> "module.thrift_types.MyUnion": ...  # type: ignore
@@ -735,6 +736,7 @@ class MyUnionFloatFieldThrowExp(_fbthrift_python_mutable_types.MutableUnion, _fb
         complexNestedStruct: MyUnionFloatFieldThrowExp.FbThriftUnionFieldEnum = ...
 
     fbthrift_current_value: _typing.Final[_typing.Union[None, _fbthrift_MyEnum, _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableList[float]], _fbthrift_MyDataItem, _fbthrift_ComplexNestedStruct]]
+    # pyre-ignore[15]: `fbthrift_current_field` overrides attribute defined in `_fbthrift_python_abstract_types.MyUnionFloatFieldThrowExp` inconsistently. Type `MyUnionFloatFieldThrowExp.FbThriftUnionFieldEnum` is not a subtype of the overridden attribute `_fbthrift_python_abstract_types.MyUnionFloatFieldThrowExp.FbThriftUnionFieldEnum`
     fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
     def get_type(self) -> FbThriftUnionFieldEnum: ...
     def _to_python(self) -> "module.thrift_types.MyUnionFloatFieldThrowExp": ...  # type: ignore

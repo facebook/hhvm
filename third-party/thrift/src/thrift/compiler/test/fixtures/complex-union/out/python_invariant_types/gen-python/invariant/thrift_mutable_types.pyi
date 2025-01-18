@@ -107,6 +107,7 @@ class InvariantTypes(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_comp
         union_map: InvariantTypes.FbThriftUnionFieldEnum = ...
 
     fbthrift_current_value: _typing.Final[_typing.Union[None, _fbthrift_python_mutable_containers.MutableMap[_fbthrift_StructForInvariantTypes, int], _fbthrift_python_mutable_containers.MutableMap[_fbthrift_UnionForInvariantTypes, int]]]
+    # pyre-ignore[15]: `fbthrift_current_field` overrides attribute defined in `_fbthrift_python_abstract_types.InvariantTypes` inconsistently. Type `InvariantTypes.FbThriftUnionFieldEnum` is not a subtype of the overridden attribute `_fbthrift_python_abstract_types.InvariantTypes.FbThriftUnionFieldEnum`
     fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
     def get_type(self) -> FbThriftUnionFieldEnum: ...
     def _to_python(self) -> "invariant.thrift_types.InvariantTypes": ...  # type: ignore

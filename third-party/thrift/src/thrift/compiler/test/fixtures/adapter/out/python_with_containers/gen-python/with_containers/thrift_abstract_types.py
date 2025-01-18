@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import abc as _abc
 import typing as _typing
+import builtins as _fbthrift_builtins
 
-_fbthrift_property = property
 
 
 import folly.iobuf as _fbthrift_iobuf
@@ -20,10 +20,12 @@ import thrift.python.abstract_types as _fbthrift_python_abstract_types
 import my
 
 class _fbthrift_unadapted_AnnotationWithContainers(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def names(self) -> _typing.Sequence[str]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def counts(self) -> _typing.Mapping[str, int]: ...
     @_abc.abstractmethod
@@ -40,7 +42,8 @@ class _fbthrift_unadapted_AnnotationWithContainers(_abc.ABC):
 AnnotationWithContainers = my.AdaptedType[_fbthrift_unadapted_AnnotationWithContainers]
 _fbthrift_AnnotationWithContainers = AnnotationWithContainers
 class _fbthrift_unadapted_MyStruct(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def abc(self) -> my.AdaptedType[int]: ...
     @_abc.abstractmethod

@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import abc as _abc
 import typing as _typing
+import builtins as _fbthrift_builtins
 
-_fbthrift_property = property
 
 import enum as _enum
 
@@ -21,7 +21,8 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 
 class StructForInvariantTypes(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def num(self) -> int: ...
     @_abc.abstractmethod
@@ -36,10 +37,12 @@ class StructForInvariantTypes(_abc.ABC):
     def _to_py_deprecated(self) -> "invariant.ttypes.StructForInvariantTypes": ...  # type: ignore
 _fbthrift_StructForInvariantTypes = StructForInvariantTypes
 class UnionForInvariantTypes(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def num32(self) -> int: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def num64(self) -> int: ...
     @_abc.abstractmethod
@@ -69,7 +72,8 @@ class InvariantTypes(_abc.ABC):
         union_map = 2
 
     FbThriftUnionFieldEnum.__name__ = "InvariantTypes"
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def fbthrift_current_field(self) -> FbThriftUnionFieldEnum: ...
 

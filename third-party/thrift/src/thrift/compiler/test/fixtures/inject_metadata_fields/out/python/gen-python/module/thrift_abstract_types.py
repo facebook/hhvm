@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import abc as _abc
 import typing as _typing
+import builtins as _fbthrift_builtins
 
-_fbthrift_property = property
 
 
 import folly.iobuf as _fbthrift_iobuf
@@ -20,7 +20,8 @@ import thrift.python.abstract_types as _fbthrift_python_abstract_types
 import foo.thrift_abstract_types as _fbthrift__foo__thrift_abstract_types
 
 class Fields(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def injected_field(self) -> str: ...
     @_abc.abstractmethod
@@ -35,7 +36,8 @@ class Fields(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.Fields": ...  # type: ignore
 _fbthrift_Fields = Fields
 class FieldsInjectedToEmptyStruct(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def injected_field(self) -> str: ...
     @_abc.abstractmethod
@@ -50,10 +52,12 @@ class FieldsInjectedToEmptyStruct(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedToEmptyStruct": ...  # type: ignore
 _fbthrift_FieldsInjectedToEmptyStruct = FieldsInjectedToEmptyStruct
 class FieldsInjectedToStruct(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def injected_field(self) -> str: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def string_field(self) -> str: ...
     @_abc.abstractmethod
@@ -68,16 +72,20 @@ class FieldsInjectedToStruct(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedToStruct": ...  # type: ignore
 _fbthrift_FieldsInjectedToStruct = FieldsInjectedToStruct
 class FieldsInjectedWithIncludedStruct(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def injected_unstructured_annotation_field(self) -> _typing.Optional[str]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def injected_structured_annotation_field(self) -> _typing.Optional[str]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def injected_field(self) -> str: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def string_field(self) -> str: ...
     @_abc.abstractmethod

@@ -307,6 +307,7 @@ class union1(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_w
         d: union1.FbThriftUnionFieldEnum = ...
 
     fbthrift_current_value: _typing.Final[_typing.Union[None, int, float]]
+    # pyre-ignore[15]: `fbthrift_current_field` overrides attribute defined in `_fbthrift_python_abstract_types.union1` inconsistently. Type `union1.FbThriftUnionFieldEnum` is not a subtype of the overridden attribute `_fbthrift_python_abstract_types.union1.FbThriftUnionFieldEnum`
     fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
     def get_type(self) -> FbThriftUnionFieldEnum: ...
     def _to_python(self) -> "module.thrift_types.union1": ...  # type: ignore
@@ -358,6 +359,7 @@ class union2(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_w
         u: union2.FbThriftUnionFieldEnum = ...
 
     fbthrift_current_value: _typing.Final[_typing.Union[None, int, float, _fbthrift_struct1, _fbthrift_union1]]
+    # pyre-ignore[15]: `fbthrift_current_field` overrides attribute defined in `_fbthrift_python_abstract_types.union2` inconsistently. Type `union2.FbThriftUnionFieldEnum` is not a subtype of the overridden attribute `_fbthrift_python_abstract_types.union2.FbThriftUnionFieldEnum`
     fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
     def get_type(self) -> FbThriftUnionFieldEnum: ...
     def _to_python(self) -> "module.thrift_types.union2": ...  # type: ignore

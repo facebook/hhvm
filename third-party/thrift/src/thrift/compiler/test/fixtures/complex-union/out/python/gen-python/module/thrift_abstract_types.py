@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import abc as _abc
 import typing as _typing
+import builtins as _fbthrift_builtins
 
-_fbthrift_property = property
 
 import enum as _enum
 
@@ -21,22 +21,28 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 
 class ComplexUnion(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def intValue(self) -> int: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def intListValue(self) -> _typing.Sequence[int]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def stringListValue(self) -> _typing.Sequence[str]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def stringValue(self) -> str: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def typedefValue(self) -> _typing.Mapping[int, str]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def stringRef(self) -> str: ...
     @_abc.abstractmethod
@@ -58,19 +64,23 @@ class ComplexUnion(_abc.ABC):
         stringRef = 14
 
     FbThriftUnionFieldEnum.__name__ = "ComplexUnion"
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def fbthrift_current_value(self) -> _typing.Union[None, int, _typing.Sequence[int], _typing.Sequence[str], str, _typing.Mapping[int, str], str]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def fbthrift_current_field(self) -> FbThriftUnionFieldEnum: ...
 
 _fbthrift_ComplexUnion = ComplexUnion
 class ListUnion(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def intListValue(self) -> _typing.Sequence[int]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def stringListValue(self) -> _typing.Sequence[str]: ...
     @_abc.abstractmethod
@@ -88,19 +98,23 @@ class ListUnion(_abc.ABC):
         stringListValue = 3
 
     FbThriftUnionFieldEnum.__name__ = "ListUnion"
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def fbthrift_current_value(self) -> _typing.Union[None, _typing.Sequence[int], _typing.Sequence[str]]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def fbthrift_current_field(self) -> FbThriftUnionFieldEnum: ...
 
 _fbthrift_ListUnion = ListUnion
 class DataUnion(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def binaryData(self) -> bytes: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def stringData(self) -> str: ...
     @_abc.abstractmethod
@@ -118,22 +132,27 @@ class DataUnion(_abc.ABC):
         stringData = 2
 
     FbThriftUnionFieldEnum.__name__ = "DataUnion"
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def fbthrift_current_value(self) -> _typing.Union[None, bytes, str]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def fbthrift_current_field(self) -> FbThriftUnionFieldEnum: ...
 
 _fbthrift_DataUnion = DataUnion
 class Val(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def strVal(self) -> str: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def intVal(self) -> int: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def typedefValue(self) -> _typing.Mapping[int, str]: ...
     @_abc.abstractmethod
@@ -148,10 +167,12 @@ class Val(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.Val": ...  # type: ignore
 _fbthrift_Val = Val
 class ValUnion(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def v1(self) -> _fbthrift_Val: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def v2(self) -> _fbthrift_Val: ...
     @_abc.abstractmethod
@@ -169,19 +190,23 @@ class ValUnion(_abc.ABC):
         v2 = 2
 
     FbThriftUnionFieldEnum.__name__ = "ValUnion"
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def fbthrift_current_value(self) -> _typing.Union[None, _fbthrift_Val, _fbthrift_Val]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def fbthrift_current_field(self) -> FbThriftUnionFieldEnum: ...
 
 _fbthrift_ValUnion = ValUnion
 class VirtualComplexUnion(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def thingOne(self) -> str: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def thingTwo(self) -> str: ...
     @_abc.abstractmethod
@@ -199,16 +224,19 @@ class VirtualComplexUnion(_abc.ABC):
         thingTwo = 2
 
     FbThriftUnionFieldEnum.__name__ = "VirtualComplexUnion"
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def fbthrift_current_value(self) -> _typing.Union[None, str, str]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def fbthrift_current_field(self) -> FbThriftUnionFieldEnum: ...
 
 _fbthrift_VirtualComplexUnion = VirtualComplexUnion
 class NonCopyableStruct(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def num(self) -> int: ...
     @_abc.abstractmethod
@@ -223,7 +251,8 @@ class NonCopyableStruct(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.NonCopyableStruct": ...  # type: ignore
 _fbthrift_NonCopyableStruct = NonCopyableStruct
 class NonCopyableUnion(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def s(self) -> _fbthrift_NonCopyableStruct: ...
     @_abc.abstractmethod
@@ -240,10 +269,12 @@ class NonCopyableUnion(_abc.ABC):
         s = 1
 
     FbThriftUnionFieldEnum.__name__ = "NonCopyableUnion"
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def fbthrift_current_value(self) -> _typing.Union[None, _fbthrift_NonCopyableStruct]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def fbthrift_current_field(self) -> FbThriftUnionFieldEnum: ...
 

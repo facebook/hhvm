@@ -811,6 +811,7 @@ class Onion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_wi
         adapted_int: Onion.FbThriftUnionFieldEnum = ...
 
     fbthrift_current_value: _typing.Final[_typing.Union[None, _fbthrift_MyEnum, _fbthrift_PrimitiveStruct, str, _fbthrift_python_mutable_containers.MutableSet[int], _fbthrift_python_mutable_containers.MutableList[float], _fbthrift_python_mutable_containers.MutableMap[bytes, str], int]]
+    # pyre-ignore[15]: `fbthrift_current_field` overrides attribute defined in `_fbthrift_python_abstract_types.Onion` inconsistently. Type `Onion.FbThriftUnionFieldEnum` is not a subtype of the overridden attribute `_fbthrift_python_abstract_types.Onion.FbThriftUnionFieldEnum`
     fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
     def get_type(self) -> FbThriftUnionFieldEnum: ...
     def _to_python(self) -> "test.fixtures.python_capi.module.thrift_types.Onion": ...  # type: ignore

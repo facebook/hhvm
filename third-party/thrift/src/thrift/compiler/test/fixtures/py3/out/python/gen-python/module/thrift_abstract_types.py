@@ -13,8 +13,8 @@ import __static__
 
 import abc as _abc
 import typing as _typing
+import builtins as _fbthrift_builtins
 
-_fbthrift_property = property
 
 import enum as _enum
 
@@ -35,7 +35,8 @@ from module.thrift_enums import (
 )
 
 class SimpleException(_fbthrift_python_abstract_types.AbstractGeneratedError):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     def err_code(self) -> int: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
     def _to_mutable_python(self) -> "module.thrift_mutable_types.SimpleException": ...  # type: ignore
@@ -44,7 +45,8 @@ class SimpleException(_fbthrift_python_abstract_types.AbstractGeneratedError):
     def _to_py_deprecated(self) -> "module.ttypes.SimpleException": ...  # type: ignore
 _fbthrift_SimpleException = SimpleException
 class OptionalRefStruct(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def optional_blob(self) -> _typing.Optional[_fbthrift_iobuf.IOBuf]: ...
     @_abc.abstractmethod
@@ -59,31 +61,40 @@ class OptionalRefStruct(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.OptionalRefStruct": ...  # type: ignore
 _fbthrift_OptionalRefStruct = OptionalRefStruct
 class SimpleStruct(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def is_on(self) -> bool: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def tiny_int(self) -> int: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def small_int(self) -> int: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def nice_sized_int(self) -> int: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def big_int(self) -> int: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def real(self) -> float: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def smaller_real(self) -> float: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def hidden_field(self) -> int: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def something(self) -> _typing.Mapping[int, int]: ...
     @_abc.abstractmethod
@@ -98,13 +109,16 @@ class SimpleStruct(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.SimpleStruct": ...  # type: ignore
 _fbthrift_SimpleStruct = SimpleStruct
 class HiddenTypeFieldsStruct(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def field1(self) -> _fbthrift_SimpleStruct: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def field2(self) -> _typing.Sequence[_fbthrift_SimpleStruct]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def field3(self) -> _typing.Mapping[int, _fbthrift_SimpleStruct]: ...
     @_abc.abstractmethod
@@ -119,7 +133,8 @@ class HiddenTypeFieldsStruct(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.HiddenTypeFieldsStruct": ...  # type: ignore
 _fbthrift_HiddenTypeFieldsStruct = HiddenTypeFieldsStruct
 class AdaptedUnion(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def best(self) -> int: ...
     @_abc.abstractmethod
@@ -136,16 +151,19 @@ class AdaptedUnion(_abc.ABC):
         best = 1
 
     FbThriftUnionFieldEnum.__name__ = "AdaptedUnion"
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def fbthrift_current_value(self) -> _typing.Union[None, int]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def fbthrift_current_field(self) -> FbThriftUnionFieldEnum: ...
 
 _fbthrift_AdaptedUnion = AdaptedUnion
 class HiddenException(_fbthrift_python_abstract_types.AbstractGeneratedError):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     def test(self) -> int: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
     def _to_mutable_python(self) -> "module.thrift_mutable_types.HiddenException": ...  # type: ignore
@@ -154,31 +172,40 @@ class HiddenException(_fbthrift_python_abstract_types.AbstractGeneratedError):
     def _to_py_deprecated(self) -> "module.ttypes.HiddenException": ...  # type: ignore
 _fbthrift_HiddenException = HiddenException
 class ComplexStruct(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def structOne(self) -> _fbthrift_SimpleStruct: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def structTwo(self) -> _fbthrift_SimpleStruct: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def an_integer(self) -> int: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def name(self) -> str: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def an_enum(self) -> _fbthrift_AnEnum: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def some_bytes(self) -> bytes: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def sender(self) -> str: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def cdef_(self) -> str: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def bytes_with_cpp_type(self) -> bytes: ...
     @_abc.abstractmethod
@@ -193,7 +220,8 @@ class ComplexStruct(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.ComplexStruct": ...  # type: ignore
 _fbthrift_ComplexStruct = ComplexStruct
 class BinaryUnion(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def iobuf_val(self) -> _fbthrift_iobuf.IOBuf: ...
     @_abc.abstractmethod
@@ -210,16 +238,19 @@ class BinaryUnion(_abc.ABC):
         iobuf_val = 1
 
     FbThriftUnionFieldEnum.__name__ = "BinaryUnion"
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def fbthrift_current_value(self) -> _typing.Union[None, _fbthrift_iobuf.IOBuf]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def fbthrift_current_field(self) -> FbThriftUnionFieldEnum: ...
 
 _fbthrift_BinaryUnion = BinaryUnion
 class BinaryUnionStruct(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def u(self) -> _fbthrift_BinaryUnion: ...
     @_abc.abstractmethod
@@ -234,31 +265,40 @@ class BinaryUnionStruct(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.BinaryUnionStruct": ...  # type: ignore
 _fbthrift_BinaryUnionStruct = BinaryUnionStruct
 class CustomFields(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def bool_field(self) -> bool: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def integer_field(self) -> int: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def double_field(self) -> float: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def string_field(self) -> str: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def binary_field(self) -> bytes: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def list_field(self) -> _typing.Sequence[int]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def set_field(self) -> _typing.AbstractSet[int]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def map_field(self) -> _typing.Mapping[int, int]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def struct_field(self) -> _fbthrift_SimpleStruct: ...
     @_abc.abstractmethod
@@ -273,31 +313,40 @@ class CustomFields(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.CustomFields": ...  # type: ignore
 _fbthrift_CustomFields = CustomFields
 class CustomTypedefFields(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def bool_field(self) -> bool: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def integer_field(self) -> int: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def double_field(self) -> float: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def string_field(self) -> str: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def binary_field(self) -> bytes: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def list_field(self) -> _typing.Sequence[int]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def set_field(self) -> _typing.AbstractSet[int]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def map_field(self) -> _typing.Mapping[int, int]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def struct_field(self) -> _fbthrift_SimpleStruct: ...
     @_abc.abstractmethod
@@ -312,31 +361,40 @@ class CustomTypedefFields(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.CustomTypedefFields": ...  # type: ignore
 _fbthrift_CustomTypedefFields = CustomTypedefFields
 class AdaptedTypedefFields(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def bool_field(self) -> bool: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def integer_field(self) -> int: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def double_field(self) -> float: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def string_field(self) -> str: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def binary_field(self) -> bytes: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def list_field(self) -> _typing.Sequence[int]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def set_field(self) -> _typing.AbstractSet[int]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def map_field(self) -> _typing.Mapping[int, int]: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def struct_field(self) -> _fbthrift_SimpleStruct: ...
     @_abc.abstractmethod

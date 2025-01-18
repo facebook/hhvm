@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import abc as _abc
 import typing as _typing
+import builtins as _fbthrift_builtins
 
-_fbthrift_property = property
 
 
 import folly.iobuf as _fbthrift_iobuf
@@ -24,7 +24,8 @@ import typeshed_two
 import typeshed_one
 
 class MyStruct(_abc.ABC):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
     def c(self) -> typeshed_two.AdapterTwoType[_fbthrift__c__thrift_abstract_types.C2]: ...
     @_abc.abstractmethod

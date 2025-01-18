@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import abc as _abc
 import typing as _typing
+import builtins as _fbthrift_builtins
 
-_fbthrift_property = property
 
 
 import folly.iobuf as _fbthrift_iobuf
@@ -26,9 +26,11 @@ from module.thrift_enums import (
 )
 
 class CustomException(_fbthrift_python_abstract_types.AbstractGeneratedError):
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     def name(self) -> str: ...
-    @_fbthrift_property
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     def result(self) -> _fbthrift_Result: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, _fbthrift_Result]]]: ...
     def _to_mutable_python(self) -> "module.thrift_mutable_types.CustomException": ...  # type: ignore

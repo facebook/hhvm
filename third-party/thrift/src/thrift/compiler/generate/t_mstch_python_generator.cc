@@ -145,6 +145,33 @@ bool is_invariant_container_type(const t_type* type) {
   return false;
 }
 
+bool is_invariant_adapter(
+    const t_const* adapter_annotation, const t_type* true_type) {
+  if (true_type->is_primitive_type() || !adapter_annotation) {
+    return false;
+  }
+
+  auto type_hint = get_annotation_property(adapter_annotation, "typeHint");
+  return boost::algorithm::ends_with(type_hint, "[]");
+}
+
+bool field_has_invariant_type(const t_field* field) {
+  if (is_invariant_adapter(
+          find_structured_adapter_annotation(*field),
+          field->get_type()->get_true_type())) {
+    return true;
+  }
+
+  if (is_invariant_adapter(
+          find_structured_adapter_annotation(*field->type()->get_true_type()),
+          field->get_type()->get_true_type())) {
+    return true;
+  }
+
+  return ::apache::thrift::compiler::is_invariant_container_type(
+      field->get_type());
+}
+
 class python_mstch_program : public mstch_program {
  public:
   python_mstch_program(
@@ -870,9 +897,7 @@ class python_mstch_struct : public mstch_struct {
     return std::any_of(
         struct_->fields().begin(),
         struct_->fields().end(),
-        [](const auto& field) {
-          return is_invariant_container_type(field.get_type());
-        });
+        [](const auto& field) { return field_has_invariant_type(&field); });
   }
 
   mstch::node has_exception_message() {
@@ -981,10 +1006,7 @@ class python_mstch_field : public mstch_field {
         type->get_true_type()->is_map() || type->get_true_type()->is_set();
   }
 
-  mstch::node is_invariant_type() {
-    return ::apache::thrift::compiler::is_invariant_container_type(
-        field_->get_type());
-  }
+  mstch::node is_invariant_type() { return field_has_invariant_type(field_); }
 
  private:
   const std::string py_name_;

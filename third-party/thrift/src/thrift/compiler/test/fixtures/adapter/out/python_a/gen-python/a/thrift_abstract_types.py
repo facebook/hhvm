@@ -26,15 +26,7 @@ import typeshed_one
 class MyStruct(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
-    def a(self) -> typeshed_one.AdapterOneType[_fbthrift__b__thrift_abstract_types._fbthrift_unadapted_B]: ...
-    @_fbthrift_property
-    @_abc.abstractmethod
-    def b(self) -> typeshed_three.AdapterThreeType[_fbthrift__c__thrift_abstract_types._fbthrift_unadapted_C1]: ...
-    @_fbthrift_property
-    @_abc.abstractmethod
     def c(self) -> typeshed_two.AdapterTwoType[_fbthrift__c__thrift_abstract_types.C2]: ...
-    @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[typeshed_one.AdapterOneType[_fbthrift__b__thrift_abstract_types._fbthrift_unadapted_B], typeshed_three.AdapterThreeType[_fbthrift__c__thrift_abstract_types._fbthrift_unadapted_C1], typeshed_two.AdapterTwoType[_fbthrift__c__thrift_abstract_types.C2]]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "a.thrift_mutable_types.MyStruct": ...  # type: ignore
     @_abc.abstractmethod

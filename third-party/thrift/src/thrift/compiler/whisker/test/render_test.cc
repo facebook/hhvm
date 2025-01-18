@@ -778,7 +778,7 @@ class map_get : public dsl::function {
     if (object::ptr result = m.lookup_property(*key)) {
       return result;
     }
-    ctx.error("Key '{}' not found.", *key);
+    throw ctx.make_error("Key '{}' not found.", *key);
   }
 };
 
@@ -1089,6 +1089,21 @@ struct RenderTestMyCppType {
   std::string description;
 };
 
+struct RenderTestPolyBase {
+  virtual ~RenderTestPolyBase() = default;
+
+  virtual std::string description() const = 0;
+};
+struct RenderTestPolyMid : RenderTestPolyBase {
+  std::string description() const override { return "Mid"; }
+};
+struct RenderTestPolyDerived : RenderTestPolyMid {
+  std::string description() const override { return "Derived"; }
+};
+struct RenderTestPolyAlternate : RenderTestPolyBase {
+  std::string description() const override { return "Alternate"; }
+};
+
 TEST_F(RenderTest, user_defined_function_native_ref_argument) {
   const RenderTestMyCppType native_instance{"Hello from C++!"};
 
@@ -1130,6 +1145,77 @@ TEST_F(RenderTest, user_defined_function_native_ref_argument) {
             diagnostic_level::error,
             "Function 'describe' threw an error:\n"
             "Expected type of argument at index 0 to be `<native_handle type='whisker::RenderTestMyCppType'>`, but found `<native_handle type='whisker::RenderTestUnknownCppType'>`.",
+            path_to_file,
+            1)));
+  }
+}
+
+TEST_F(RenderTest, user_defined_function_polymorphic_native_ref_argument) {
+  const auto describe =
+      dsl::make_function([](dsl::function::context ctx) -> string {
+        using base_handle = dsl::polymorphic_native_handle<
+            RenderTestPolyBase,
+            RenderTestPolyMid,
+            RenderTestPolyDerived>;
+        ctx.declare_arity(1);
+        ctx.declare_named_arguments({});
+        auto base = ctx.argument<base_handle>(0);
+        return base->description();
+      });
+
+  {
+    auto result = render(
+        "{{ (describe mid) }}\n"
+        "{{ (describe derived) }}\n",
+        w::map({
+            {"mid", w::native_handle(manage_owned<RenderTestPolyMid>())},
+            {"derived",
+             w::native_handle(manage_owned<RenderTestPolyDerived>())},
+            {"describe", w::native_function(describe)},
+        }));
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(
+        *result,
+        "Mid\n"
+        "Derived\n");
+  }
+
+  {
+    auto result = render(
+        "{{ (describe wrong_native_instance) }}\n",
+        w::map({
+            {"wrong_native_instance",
+             w::native_handle(manage_owned<RenderTestUnknownCppType>())},
+            {"describe", w::native_function(describe)},
+        }));
+    EXPECT_FALSE(result.has_value());
+    EXPECT_THAT(
+        diagnostics(),
+        testing::ElementsAre(diagnostic(
+            diagnostic_level::error,
+            "Function 'describe' threw an error:\n"
+            "Expected type of argument at index 0 to be `<native_handle type='whisker::RenderTestPolyBase'>` (polymorphic), but found `<native_handle type='whisker::RenderTestUnknownCppType'>`.",
+            path_to_file,
+            1)));
+  }
+
+  {
+    // Although the type is a subclass, it was not listed as an alternative in
+    // describe(...)
+    auto result = render(
+        "{{ (describe alternate) }}\n",
+        w::map({
+            {"alternate",
+             w::native_handle(manage_owned<RenderTestPolyAlternate>())},
+            {"describe", w::native_function(describe)},
+        }));
+    EXPECT_FALSE(result.has_value());
+    EXPECT_THAT(
+        diagnostics(),
+        testing::ElementsAre(diagnostic(
+            diagnostic_level::error,
+            "Function 'describe' threw an error:\n"
+            "Expected type of argument at index 0 to be `<native_handle type='whisker::RenderTestPolyBase'>` (polymorphic), but found `<native_handle type='whisker::RenderTestPolyAlternate'>`.",
             path_to_file,
             1)));
   }

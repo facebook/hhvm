@@ -110,7 +110,7 @@ map::value_type create_array_functions() {
         auto index = ctx.argument<i64>(1);
 
         if (index < 0 || std::size_t(index) >= a.size()) {
-          ctx.error(
+          throw ctx.make_error(
               "Index '{}' is out of bounds (size is {}).", index, a.size());
         }
         return a.at(index);

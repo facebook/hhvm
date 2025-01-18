@@ -104,7 +104,7 @@ object::ptr function::context::named_argument(
     if (presence == named_argument_presence::optional) {
       return nullptr;
     }
-    error("Missing named argument '{}'.", name);
+    throw make_error("Missing named argument '{}'.", name);
   }
   return arg->second;
 }
@@ -115,7 +115,7 @@ void function::context::do_warning(std::string msg) const {
 
 void function::context::declare_arity(std::size_t expected) const {
   if (arity() != expected) {
-    error("Expected {} argument(s) but got {}", expected, arity());
+    throw make_error("Expected {} argument(s) but got {}", expected, arity());
   }
 }
 
@@ -130,7 +130,8 @@ void function::context::declare_named_arguments(
     names.erase(name);
   }
   if (!names.empty()) {
-    error("Unknown named argument(s) provided: {}.", fmt::join(names, ", "));
+    throw make_error(
+        "Unknown named argument(s) provided: {}.", fmt::join(names, ", "));
   }
 }
 

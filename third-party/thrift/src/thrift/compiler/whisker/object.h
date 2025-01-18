@@ -463,17 +463,29 @@ class native_handle<void> final : private detail::native_handle_base<void> {
         type_(typeid(T)) {}
 
   using base::ptr;
+
+  /**
+   * Returns either:
+   *   - the exact type of the object pointed-to by this handle, or
+   *   - if the type is polymorphic, then maybe one of its base classes.
+   */
   const std::type_info& type() const noexcept { return type_; }
 
+  /**
+   * Tries to convert this handle to a handle of type T.
+   *
+   * This succeeds iff the contained type_info (as returned by type()) is
+   * exactly T. Notably, the conversion will not handle any kind of
+   * inheritance-based polymorphism.
+   *
+   * If the type does not match, returns std::nullopt.
+   */
   template <typename T>
-  bool is() const noexcept {
-    return type_.get() == typeid(T);
-  }
-
-  template <typename T>
-  native_handle<T> as() const {
-    assert(is<T>());
-    return native_handle<T>(std::static_pointer_cast<const T>(ptr()));
+  std::optional<native_handle<T>> try_as() const noexcept {
+    if (type() == typeid(T)) {
+      return native_handle<T>(std::static_pointer_cast<const T>(ptr()));
+    }
+    return std::nullopt;
   }
 
   /**

@@ -108,6 +108,75 @@ struct function_argument_result;
 } // namespace detail
 
 /**
+ * A polymorphic native_handle is intended to be used with polymorphic types to
+ * extract native_handle arguments from an inheritence chain.
+ *
+ * Since a native_handle uses type erasure, dynamic_cast-based traversal of
+ * polymorphic types cannot be performed.
+ *
+ * This class allows expressing a relevant subset of types from a hierarchy of
+ * types as potential alternatives. The argument will be checked against only
+ * those types. Note that this limits the API to strictly known types at the
+ * callsite.
+ *
+ * Example:
+ *
+ *     struct Base() {
+ *       virtual ~Base() = default;
+ *       virtual std::string describe() const = 0;
+ *     };
+ *     dsl::make_function(
+ *         "describe", [](dsl::function::context ctx) -> string {
+ *       using base_handle = dsl::polymorphic_native_handle<
+ *           Base,
+ *           Derived1,
+ *           Derived2,
+ *           DerivedN...>;
+ *       ctx.declare_arity(1);
+ *       ctx.declare_named_arguments({});
+ *       auto base = ctx.argument<base_handle>(0);
+ *       return base->description();
+ *     });
+ *
+ */
+template <typename Base, typename... SubClass>
+struct polymorphic_native_handle {
+  static_assert(std::is_polymorphic_v<Base>);
+  static_assert((std::is_base_of_v<Base, SubClass> && ...));
+
+  using element_type = Base;
+
+  /**
+   * Tries to match a dynamically-typed native handle against each of the
+   * provided sub-classes, short-circuiting at the earliest match.
+   *
+   * Returns an empty optional if no match is found.
+   */
+  static std::optional<native_handle<Base>> try_as(
+      const native_handle<>& handle) {
+    if (std::optional<native_handle<Base>> converted = handle.try_as<Base>()) {
+      return std::move(*converted);
+    }
+    std::optional<native_handle<Base>> result;
+    (
+        [&] {
+          if (result.has_value()) {
+            // match already found
+            return;
+          }
+          if (std::optional<native_handle<SubClass>> converted =
+                  handle.try_as<SubClass>()) {
+            managed_ptr<Base> upcasted = std::static_pointer_cast<const Base>(
+                std::move(*converted).ptr());
+            result = native_handle<Base>(std::move(upcasted));
+          }
+        }(),
+        ...);
+    return result;
+  }
+};
+
+/**
  * A class providing ergonomic APIs (sugar) for implementing native_functions.
  *
  * Features include:
@@ -257,14 +326,16 @@ class function : public native_function {
     }
 
     /**
-     * Logs a fatal error in function evaluation.
+     * Creates a native_function::fatal_error instance that can be thrown to
+     * indicate an error in function evaluation.
      *
      * Calling this function will prevent further evaluation of this function
      * and cause text rendering to fail.
      */
     template <typename... T>
-    [[noreturn]] void error(fmt::format_string<T...> msg, T&&... args) const {
-      throw native_function::fatal_error{
+    native_function::fatal_error make_error(
+        fmt::format_string<T...> msg, T&&... args) const {
+      return native_function::fatal_error{
           fmt::format(msg, std::forward<T>(args)...)};
     }
 
@@ -320,7 +391,7 @@ class function : public native_function {
         if (auto arr = array_like::try_from(arg)) {
           return std::move(*arr);
         }
-        error(
+        throw make_error(
             "Expected type of {} to be `array` or `array-like native_object`, but found `{}`.",
             describe_argument(),
             arg->describe_type());
@@ -328,32 +399,55 @@ class function : public native_function {
         if (auto m = map_like::try_from(arg)) {
           return std::move(*m);
         }
-        error(
+        throw make_error(
             "Expected type of {} to be `map` or `map-like native_object`, but found `{}`.",
             describe_argument(),
             arg->describe_type());
+      } else if constexpr (whisker::detail::is_specialization_v<
+                               T,
+                               polymorphic_native_handle>) {
+        // polymorpic_native_handle<T, ...> (class hierarchy match)
+        using element_type = typename T::element_type;
+        const auto abort = [&] {
+          return make_error(
+              "Expected type of {} to be `{}` (polymorphic), but found `{}`.",
+              describe_argument(),
+              native_handle<element_type>::describe_class_type(),
+              arg->describe_type());
+        };
+
+        if (!arg->is_native_handle()) {
+          throw abort();
+        }
+        const native_handle<>& handle = arg->as_native_handle();
+        if (std::optional<native_handle<element_type>> converted =
+                T::try_as(handle)) {
+          return std::move(*converted);
+        }
+        throw abort();
       } else if constexpr (whisker::detail::
                                is_specialization_v<T, native_handle>) {
+        // native_handle<T> (exact match)
         using element_type = typename T::element_type;
-        if (!arg->is_native_handle()) {
-          error(
+        const auto abort = [&] {
+          return make_error(
               "Expected type of {} to be `{}`, but found `{}`.",
               describe_argument(),
               T::describe_class_type(),
               arg->describe_type());
+        };
+
+        if (!arg->is_native_handle()) {
+          throw abort();
         }
         const native_handle<>& handle = arg->as_native_handle();
         if constexpr (std::is_same_v<element_type, void>) {
           return handle;
         } else {
-          if (!handle.is<element_type>()) {
-            error(
-                "Expected type of {} to be `{}`, but found `{}`.",
-                describe_argument(),
-                T::describe_class_type(),
-                arg->describe_type());
+          if (auto converted = handle.try_as<element_type>()) {
+            return std::move(*converted);
           }
-          return handle.as<element_type>();
+          throw abort();
         }
       } else {
         // Primitive types
@@ -362,7 +456,7 @@ class function : public native_function {
             std::is_same_v<T, f64> || std::is_same_v<T, string> ||
             std::is_same_v<T, null>);
         if (!arg->is<T>()) {
-          error(
+          throw make_error(
               "Expected type of {} to be `{}`, but found `{}`.",
               describe_argument(),
               describe_primitive_type<T>(),
@@ -549,6 +643,10 @@ struct function_argument_result<map> : by_value<map_like> {};
 template <typename T>
 struct function_argument_result<native_handle<T>> : by_value<native_handle<T>> {
 };
+
+template <typename Base, typename... SubClasses>
+struct function_argument_result<polymorphic_native_handle<Base, SubClasses...>>
+    : by_value<native_handle<Base>> {};
 
 } // namespace detail
 

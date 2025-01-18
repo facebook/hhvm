@@ -921,8 +921,8 @@ class python_mstch_field : public mstch_field {
              &python_mstch_field::user_default_value},
             {"field:has_adapter?", &python_mstch_field::adapter},
             {"field:is_container_type", &python_mstch_field::is_container_type},
-            {"field:is_invariant_container_type?",
-             &python_mstch_field::is_invariant_container_type},
+            {"field:is_invariant_type?",
+             &python_mstch_field::is_invariant_type},
         });
   }
 
@@ -981,7 +981,7 @@ class python_mstch_field : public mstch_field {
         type->get_true_type()->is_map() || type->get_true_type()->is_set();
   }
 
-  mstch::node is_invariant_container_type() {
+  mstch::node is_invariant_type() {
     return ::apache::thrift::compiler::is_invariant_container_type(
         field_->get_type());
   }

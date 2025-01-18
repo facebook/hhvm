@@ -53,6 +53,7 @@ backslash: str
 escaped_a: str
 char2ascii: __T.Dict[str, int]
 escaped_strings: __T.List[str]
+unicode_list: __T.List[str]
 false_c: bool
 true_c: bool
 zero_byte: int
@@ -69,6 +70,7 @@ empty_int_int_map: __T.Dict[int, int]
 empty_int_string_map: __T.Dict[int, str]
 empty_string_int_map: __T.Dict[str, int]
 empty_string_string_map: __T.Dict[str, str]
+unicode_map: __T.Dict[str, str]
 maxIntDec: int
 maxIntOct: int
 maxIntHex: int

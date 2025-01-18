@@ -122,6 +122,12 @@ escaped_strings = [
   "zzz\302\246yyy",
 ]
 
+unicode_list = [
+  "Bulgaria",
+  "Benin",
+  "Saint Barth\303\251lemy",
+]
+
 false_c = False
 
 true_c = True
@@ -154,6 +160,12 @@ empty_string_int_map = {
 }
 
 empty_string_string_map = {
+}
+
+unicode_map = {
+  "BG": "Bulgaria",
+  "BH": "Bahrain",
+  "B\303\211": "Saint Barth\303\251lemy",
 }
 
 maxIntDec = 9223372036854775807

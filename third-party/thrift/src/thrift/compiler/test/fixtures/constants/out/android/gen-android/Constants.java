@@ -334,6 +334,13 @@ public class Constants {
     escaped_strings.add("zzz¦yyy");
   }
 
+  public static final List<String> unicode_list = new ArrayList<String>();
+  static {
+    unicode_list.add("Bulgaria");
+    unicode_list.add("Benin");
+    unicode_list.add("Saint Barthélemy");
+  }
+
   public static final Boolean false_c = false;
 
   public static final Boolean true_c = true;
@@ -380,6 +387,13 @@ public class Constants {
 
   public static final Map<String,String> empty_string_string_map = new HashMap<String,String>();
   static {
+  }
+
+  public static final Map<String,String> unicode_map = new HashMap<String,String>();
+  static {
+    unicode_map.put("BG", "Bulgaria");
+    unicode_map.put("BH", "Bahrain");
+    unicode_map.put("BÉ", "Saint Barthélemy");
   }
 
   public static final Long maxIntDec = 9223372036854775807L;

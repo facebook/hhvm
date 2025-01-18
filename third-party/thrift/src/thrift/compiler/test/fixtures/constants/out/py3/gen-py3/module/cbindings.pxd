@@ -235,6 +235,7 @@ cdef extern from "thrift/compiler/test/fixtures/constants/gen-cpp2/module_consta
     cdef const char* cescaped_a "::cpp2::module_constants::escaped_a"()
     cdef cmap[string,cint32_t] cchar2ascii "::cpp2::module_constants::char2ascii"()
     cdef vector[string] cescaped_strings "::cpp2::module_constants::escaped_strings"()
+    cdef vector[string] cunicode_list "::cpp2::module_constants::unicode_list"()
     cdef cbool cfalse_c "::cpp2::module_constants::false_c"
     cdef cbool ctrue_c "::cpp2::module_constants::true_c"
     cdef cint8_t czero_byte "::cpp2::module_constants::zero_byte"
@@ -251,6 +252,7 @@ cdef extern from "thrift/compiler/test/fixtures/constants/gen-cpp2/module_consta
     cdef cmap[cint32_t,string] cempty_int_string_map "::cpp2::module_constants::empty_int_string_map"()
     cdef cmap[string,cint32_t] cempty_string_int_map "::cpp2::module_constants::empty_string_int_map"()
     cdef cmap[string,string] cempty_string_string_map "::cpp2::module_constants::empty_string_string_map"()
+    cdef cmap[string,string] cunicode_map "::cpp2::module_constants::unicode_map"()
     cdef cint64_t cmaxIntDec "::cpp2::module_constants::maxIntDec"
     cdef cint64_t cmaxIntOct "::cpp2::module_constants::maxIntOct"
     cdef cint64_t cmaxIntHex "::cpp2::module_constants::maxIntHex"

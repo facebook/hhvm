@@ -217,6 +217,9 @@ namespace module_constants {
   /** Glean {"constant": "escaped_strings"} */
   ::std::vector<::std::string> const& escaped_strings();
 
+  /** Glean {"constant": "unicode_list"} */
+  ::std::vector<::std::string> const& unicode_list();
+
   /** Glean {"constant": "false_c"} */
   constexpr bool const false_c_ = false;
   /** Glean {"constant": "false_c"} */
@@ -296,6 +299,9 @@ namespace module_constants {
 
   /** Glean {"constant": "empty_string_string_map"} */
   ::std::map<::std::string, ::std::string> const& empty_string_string_map();
+
+  /** Glean {"constant": "unicode_map"} */
+  ::std::map<::std::string, ::std::string> const& unicode_map();
 
   /** Glean {"constant": "maxIntDec"} */
   constexpr ::std::int64_t const maxIntDec_ = static_cast<::std::int64_t>(9223372036854775807);
@@ -450,8 +456,8 @@ namespace module_constants {
   /** Glean {"constant": "I2B_REF"} */
   ::std::map<::std::int32_t, bool> const& I2B_REF();
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_600be8feae51e639();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_600be8feae51e639_includes();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_15f49ce5899b4ce6();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_15f49ce5899b4ce6_includes();
 
 } // namespace module_constants
 } // namespace cpp2

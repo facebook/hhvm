@@ -613,6 +613,19 @@ class module_CONSTANTS implements \IThriftConstants {
 
   /**
    * Original thrift constant:-
+   * list<string> unicode_list
+   */
+  <<__Memoize>>
+  public static function unicode_list()[write_props]: \ConstVector<string>{
+    return ImmVector {
+      "Bulgaria",
+      "Benin",
+      "Saint Barth\303\251lemy",
+    };
+  }
+
+  /**
+   * Original thrift constant:-
    * bool false_c
    */
   const bool false_c = false;
@@ -736,6 +749,19 @@ class module_CONSTANTS implements \IThriftConstants {
   <<__Memoize>>
   public static function empty_string_string_map()[write_props]: \ConstMap<string, string>{
     return ImmMap {
+    };
+  }
+
+  /**
+   * Original thrift constant:-
+   * map<string, string> unicode_map
+   */
+  <<__Memoize>>
+  public static function unicode_map()[write_props]: \ConstMap<string, string>{
+    return ImmMap {
+      "BG" => "Bulgaria",
+      "BH" => "Bahrain",
+      "B\303\211" => "Saint Barth\303\251lemy",
     };
   }
 

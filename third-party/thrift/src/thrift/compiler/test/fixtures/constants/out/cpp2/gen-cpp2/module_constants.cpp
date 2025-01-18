@@ -213,6 +213,13 @@ namespace module_constants {
   return *instance;
 }
 
+::std::vector<::std::string> const& unicode_list() {
+  static folly::Indestructible<::std::vector<::std::string>> const instance{ std::initializer_list<::std::string>{ apache::thrift::StringTraits<std::string>::fromStringLiteral("Bulgaria"),
+  apache::thrift::StringTraits<std::string>::fromStringLiteral("Benin"),
+  apache::thrift::StringTraits<std::string>::fromStringLiteral("Saint Barth\303\251lemy") } };
+  return *instance;
+}
+
 
 
 
@@ -261,6 +268,13 @@ namespace module_constants {
   return *instance;
 }
 
+::std::map<::std::string, ::std::string> const& unicode_map() {
+  static folly::Indestructible<::std::map<::std::string, ::std::string>> const instance{ std::initializer_list<::std::map<::std::string, ::std::string>::value_type>{ { apache::thrift::StringTraits<std::string>::fromStringLiteral("BG"), apache::thrift::StringTraits<std::string>::fromStringLiteral("Bulgaria") },
+  { apache::thrift::StringTraits<std::string>::fromStringLiteral("BH"), apache::thrift::StringTraits<std::string>::fromStringLiteral("Bahrain") },
+  { apache::thrift::StringTraits<std::string>::fromStringLiteral("B\303\211"), apache::thrift::StringTraits<std::string>::fromStringLiteral("Saint Barth\303\251lemy") } } };
+  return *instance;
+}
+
 
 
 
@@ -296,10 +310,10 @@ namespace module_constants {
 }
 
 
-::std::string_view _fbthrift_schema_600be8feae51e639() {
+::std::string_view _fbthrift_schema_15f49ce5899b4ce6() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_600be8feae51e639_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_15f49ce5899b4ce6_includes() {
   return {};
 }
 

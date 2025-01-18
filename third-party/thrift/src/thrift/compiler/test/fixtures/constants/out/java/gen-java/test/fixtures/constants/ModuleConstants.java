@@ -292,6 +292,16 @@ public final class ModuleConstants {
         .build();
     }
 
+    public static final List<String> UNICODE_LIST = construct_UNICODE_LIST();
+
+    private static List<String> construct_UNICODE_LIST() {
+      return ImmutableList.<String>builder()
+        .add("Bulgaria")
+        .add("Benin")
+        .add("Saint Barthélemy")
+        .build();
+    }
+
     public static final boolean FALSE_C = false;
 
     public static final boolean TRUE_C = true;
@@ -361,6 +371,16 @@ public final class ModuleConstants {
 
     private static Map<String, String> construct_EMPTY_STRING_STRING_MAP() {
       return ImmutableMap.<String, String>builder()
+        .build();
+    }
+
+    public static final Map<String, String> UNICODE_MAP = construct_UNICODE_MAP();
+
+    private static Map<String, String> construct_UNICODE_MAP() {
+      return ImmutableMap.<String, String>builder()
+        .put("BG", "Bulgaria")
+        .put("BH", "Bahrain")
+        .put("BÉ", "Saint Barthélemy")
         .build();
     }
 

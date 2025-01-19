@@ -29,12 +29,12 @@ pub const {{constant:name}}{{!
 {{/constant:lazy?}}
 {{#constant:lazy?}}
 pub static {{constant:name}}{{!
-}}: ::once_cell::sync::Lazy<{{!
+}}: ::std::sync::LazyLock<{{!
 }}{{#constant:type}}{{!
     }}{{#type:has_adapter?}}{{> lib/adapter/qualified}}::AdaptedType{{/type:has_adapter?}}{{!
     }}{{^type:has_adapter?}}{{> lib/type}}{{/type:has_adapter?}}{{!
 }}{{/constant:type}}{{!
-}}> = ::once_cell::sync::Lazy::new(|| {{!
+}}> = ::std::sync::LazyLock::new(|| {{!
     }}{{#constant:type}}{{#type:has_adapter?}}{{> lib/adapter/qualified}}::from_thrift({{/type:has_adapter?}}{{/constant:type}}{{!
     }}{{> lib/value}}{{!
     }}{{#constant:type}}{{#type:has_adapter?}}).expect("constant Thrift value should adapt without error"){{/type:has_adapter?}}{{/constant:type}}{{!

@@ -5,7 +5,7 @@
 
 pub const kOne: crate::types::MyEnum = crate::types::MyEnum::ONE;
 
-pub static enumNames: ::once_cell::sync::Lazy<::std::collections::BTreeMap<crate::types::MyEnum, ::std::string::String>> = ::once_cell::sync::Lazy::new(|| {
+pub static enumNames: ::std::sync::LazyLock<::std::collections::BTreeMap<crate::types::MyEnum, ::std::string::String>> = ::std::sync::LazyLock::new(|| {
             let mut map = ::std::collections::BTreeMap::new();
             {
                 #[inline(never)]

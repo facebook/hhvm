@@ -3,7 +3,7 @@
 
 //! Thrift constant definitions for `module`.
 
-pub static myStruct: ::once_cell::sync::Lazy<crate::types::MyStruct> = ::once_cell::sync::Lazy::new(|| crate::types::MyStruct {
+pub static myStruct: ::std::sync::LazyLock<crate::types::MyStruct> = ::std::sync::LazyLock::new(|| crate::types::MyStruct {
             major: 42,
             r#abstract: "abstract".to_owned(),
             annotation_with_quote: ::std::default::Default::default(),

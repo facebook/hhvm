@@ -7,7 +7,7 @@ pub const var1: ::std::primitive::i32 = 10;
 
 pub const var2: &::std::primitive::str = "20";
 
-pub static var3: ::once_cell::sync::Lazy<crate::types::MyStruct> = ::once_cell::sync::Lazy::new(|| crate::types::MyStruct {
+pub static var3: ::std::sync::LazyLock<crate::types::MyStruct> = ::std::sync::LazyLock::new(|| crate::types::MyStruct {
             field: 30,
             set_string: <crate::types::adapters::SetWithAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default::<crate::types::MyStruct>({
                 let mut set = ::std::collections::BTreeSet::new();
@@ -22,7 +22,7 @@ pub const var4: ::std::primitive::i32 = 40;
 
 pub const var5: &::std::primitive::str = "50";
 
-pub static var6: ::once_cell::sync::Lazy<crate::types::MyStruct> = ::once_cell::sync::Lazy::new(|| crate::types::MyStruct {
+pub static var6: ::std::sync::LazyLock<crate::types::MyStruct> = ::std::sync::LazyLock::new(|| crate::types::MyStruct {
             field: 60,
             set_string: <crate::types::adapters::SetWithAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default::<crate::types::MyStruct>({
                 let mut set = ::std::collections::BTreeSet::new();
@@ -37,7 +37,7 @@ pub const timeout: ::std::primitive::i32 = 42;
 
 pub const msg: &::std::primitive::str = "hello, world";
 
-pub static person: ::once_cell::sync::Lazy<crate::types::Person2> = ::once_cell::sync::Lazy::new(|| crate::types::Person2 {
+pub static person: ::std::sync::LazyLock<crate::types::Person2> = ::std::sync::LazyLock::new(|| crate::types::Person2 {
             name: "DefaultName".to_owned(),
             ..::std::default::Default::default()
         });
@@ -46,21 +46,21 @@ pub const timeout_no_transitive: ::std::primitive::i32 = 420;
 
 pub const msg_no_transitive: &::std::primitive::str = "hello, world 2";
 
-pub static person_no_transitive: ::once_cell::sync::Lazy<crate::types::Person2> = ::once_cell::sync::Lazy::new(|| crate::types::Person2 {
+pub static person_no_transitive: ::std::sync::LazyLock<crate::types::Person2> = ::std::sync::LazyLock::new(|| crate::types::Person2 {
             name: "DefaultName 2".to_owned(),
             ..::std::default::Default::default()
         });
 
 pub const type_adapted: crate::types::AdaptedBool = true;
 
-pub static nested_adapted: ::once_cell::sync::Lazy<crate::types::MoveOnly> = ::once_cell::sync::Lazy::new(|| crate::types::MoveOnly {
+pub static nested_adapted: ::std::sync::LazyLock<crate::types::MoveOnly> = ::std::sync::LazyLock::new(|| crate::types::MoveOnly {
             ptr: crate::types::HeapAllocated {
                 ..::std::default::Default::default()
             },
             ..::std::default::Default::default()
         });
 
-pub static container_of_adapted: ::once_cell::sync::Lazy<::std::vec::Vec<crate::types::AdaptedByte>> = ::once_cell::sync::Lazy::new(|| vec![
+pub static container_of_adapted: ::std::sync::LazyLock<::std::vec::Vec<crate::types::AdaptedByte>> = ::std::sync::LazyLock::new(|| vec![
             1,
             2,
             3,

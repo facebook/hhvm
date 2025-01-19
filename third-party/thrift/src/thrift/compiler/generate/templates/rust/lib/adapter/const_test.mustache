@@ -22,7 +22,7 @@ mod tests {
     {{#program:consts_for_test}}
     #[test]
     fn test_const_{{.}}_force_does_not_panic() {
-        let _ = ::once_cell::sync::Lazy::force(&super::{{.}});
+        let _ = ::std::sync::LazyLock::force(&super::{{.}});
     }
     {{/program:consts_for_test}}
 }

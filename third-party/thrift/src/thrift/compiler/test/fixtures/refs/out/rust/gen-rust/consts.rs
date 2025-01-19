@@ -3,7 +3,7 @@
 
 //! Thrift constant definitions for `module`.
 
-pub static kStructWithRef: ::once_cell::sync::Lazy<crate::types::StructWithRef> = ::once_cell::sync::Lazy::new(|| crate::types::StructWithRef {
+pub static kStructWithRef: ::std::sync::LazyLock<crate::types::StructWithRef> = ::std::sync::LazyLock::new(|| crate::types::StructWithRef {
             def_field: crate::types::Empty {
                 ..::std::default::Default::default()
             },
@@ -16,7 +16,7 @@ pub static kStructWithRef: ::once_cell::sync::Lazy<crate::types::StructWithRef> 
             ..::std::default::Default::default()
         });
 
-pub static kStructWithRefTypeUnique: ::once_cell::sync::Lazy<crate::types::StructWithRefTypeUnique> = ::once_cell::sync::Lazy::new(|| crate::types::StructWithRefTypeUnique {
+pub static kStructWithRefTypeUnique: ::std::sync::LazyLock<crate::types::StructWithRefTypeUnique> = ::std::sync::LazyLock::new(|| crate::types::StructWithRefTypeUnique {
             def_field: crate::types::Empty {
                 ..::std::default::Default::default()
             },
@@ -29,7 +29,7 @@ pub static kStructWithRefTypeUnique: ::once_cell::sync::Lazy<crate::types::Struc
             ..::std::default::Default::default()
         });
 
-pub static kStructWithRefTypeShared: ::once_cell::sync::Lazy<crate::types::StructWithRefTypeShared> = ::once_cell::sync::Lazy::new(|| crate::types::StructWithRefTypeShared {
+pub static kStructWithRefTypeShared: ::std::sync::LazyLock<crate::types::StructWithRefTypeShared> = ::std::sync::LazyLock::new(|| crate::types::StructWithRefTypeShared {
             def_field: crate::types::Empty {
                 ..::std::default::Default::default()
             },
@@ -42,7 +42,7 @@ pub static kStructWithRefTypeShared: ::once_cell::sync::Lazy<crate::types::Struc
             ..::std::default::Default::default()
         });
 
-pub static kStructWithRefTypeSharedConst: ::once_cell::sync::Lazy<crate::types::StructWithRefTypeSharedConst> = ::once_cell::sync::Lazy::new(|| crate::types::StructWithRefTypeSharedConst {
+pub static kStructWithRefTypeSharedConst: ::std::sync::LazyLock<crate::types::StructWithRefTypeSharedConst> = ::std::sync::LazyLock::new(|| crate::types::StructWithRefTypeSharedConst {
             def_field: crate::types::Empty {
                 ..::std::default::Default::default()
             },

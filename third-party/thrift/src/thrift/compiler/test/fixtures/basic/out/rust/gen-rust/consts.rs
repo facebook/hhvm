@@ -15,14 +15,14 @@ pub const E: ::std::primitive::f64 = 2.718281828459;
 
 pub const DATE: &::std::primitive::str = "June 28, 2017";
 
-pub static AList: ::once_cell::sync::Lazy<::std::vec::Vec<::std::primitive::i32>> = ::once_cell::sync::Lazy::new(|| vec![
+pub static AList: ::std::sync::LazyLock<::std::vec::Vec<::std::primitive::i32>> = ::std::sync::LazyLock::new(|| vec![
             2,
             3,
             5,
             7,
         ]);
 
-pub static ASet: ::once_cell::sync::Lazy<::std::collections::BTreeSet<::std::string::String>> = ::once_cell::sync::Lazy::new(|| {
+pub static ASet: ::std::sync::LazyLock<::std::collections::BTreeSet<::std::string::String>> = ::std::sync::LazyLock::new(|| {
             let mut set = ::std::collections::BTreeSet::new();
             set.insert("foo".to_owned());
             set.insert("bar".to_owned());
@@ -30,7 +30,7 @@ pub static ASet: ::once_cell::sync::Lazy<::std::collections::BTreeSet<::std::str
             set
         });
 
-pub static AMap: ::once_cell::sync::Lazy<::std::collections::BTreeMap<::std::string::String, ::std::vec::Vec<::std::primitive::i32>>> = ::once_cell::sync::Lazy::new(|| {
+pub static AMap: ::std::sync::LazyLock<::std::collections::BTreeMap<::std::string::String, ::std::vec::Vec<::std::primitive::i32>>> = ::std::sync::LazyLock::new(|| {
             let mut map = ::std::collections::BTreeMap::new();
             {
                 #[inline(never)]

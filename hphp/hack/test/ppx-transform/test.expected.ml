@@ -5048,3 +5048,123 @@ end = struct
     let _ = transform
   end [@@ocaml.doc "@inline"] [@@merlin.hide]
 end
+
+module SMap = Map.Make (String)
+
+module Hack_builtins : sig
+  type t = { map: t SMap.t } [@@deriving transform]
+
+  include sig
+    [@@@ocaml.warning "-32-60"]
+
+    module Pass : sig
+      type nonrec 'ctx t = {
+        on_ty_t:
+          (t ->
+          ctx:'ctx ->
+          'ctx * [ `Stop of t | `Continue of t | `Restart of t ])
+          option;
+      }
+
+      val combine : 'ctx t -> 'ctx t -> 'ctx t
+
+      val identity : unit -> 'ctx t
+    end
+
+    val transform :
+      t -> ctx:'ctx -> top_down:'ctx Pass.t -> bottom_up:'ctx Pass.t -> t
+  end
+  [@@ocaml.doc "@inline"] [@@merlin.hide]
+end = struct
+  type t = { map: t SMap.t } [@@deriving transform]
+
+  include struct
+    [@@@ocaml.warning "-60"]
+
+    let _ = (fun (_ : t) -> ())
+
+    module Pass = struct
+      type nonrec 'ctx t = {
+        on_ty_t:
+          (t ->
+          ctx:'ctx ->
+          'ctx * [ `Stop of t | `Continue of t | `Restart of t ])
+          option;
+      }
+
+      let identity _ = { on_ty_t = None }
+
+      let _ = identity
+
+      let combine p1 p2 =
+        {
+          on_ty_t =
+            (match (p1.on_ty_t, p2.on_ty_t) with
+            | (Some t1, Some t2) ->
+              Some
+                (fun elem ~ctx ->
+                  match t1 elem ~ctx with
+                  | (ctx, `Continue elem) -> t2 elem ~ctx
+                  | otherwise -> otherwise)
+            | (None, _) -> p2.on_ty_t
+            | _ -> p1.on_ty_t);
+        }
+
+      let _ = combine
+    end
+
+    let rec (traverse :
+              t ->
+              ctx:'ctx ->
+              top_down:'ctx Pass.t ->
+              bottom_up:'ctx Pass.t ->
+              t) =
+     fun { map } ~ctx ~top_down ~bottom_up ->
+      {
+        map = SMap.map (fun map -> transform map ~ctx ~top_down ~bottom_up) map;
+      }
+
+    and (transform :
+          t -> ctx:'ctx -> top_down:'ctx Pass.t -> bottom_up:'ctx Pass.t -> t) =
+     fun elem ~ctx ~top_down ~bottom_up ->
+      match top_down.Pass.on_ty_t with
+      | Some td ->
+        (match td elem ~ctx with
+        | (_ctx, `Stop elem) -> elem
+        | (td_ctx, `Continue elem) ->
+          let elem = traverse elem ~ctx:td_ctx ~top_down ~bottom_up in
+          (match bottom_up.Pass.on_ty_t with
+          | None -> elem
+          | Some bu ->
+            (match bu elem ~ctx with
+            | (_ctx, (`Continue elem | `Stop elem)) -> elem
+            | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
+        | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up)
+      | _ ->
+        let elem = traverse elem ~ctx ~top_down ~bottom_up in
+        (match bottom_up.Pass.on_ty_t with
+        | None -> elem
+        | Some bu ->
+          (match bu elem ~ctx with
+          | (_ctx, (`Continue elem | `Stop elem)) -> elem
+          | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
+
+    let _ = traverse
+
+    and _ = transform
+  end [@@ocaml.doc "@inline"] [@@merlin.hide]
+
+  let depth_limit t ~n =
+    let on_ty_t t ~ctx =
+      if ctx >= n then
+        (ctx, `Stop { map = SMap.empty })
+      else
+        (ctx + 1, `Continue t)
+    in
+    let bottom_up = Pass.identity ()
+    and top_down =
+      let open Pass in
+      { on_ty_t = Some on_ty_t }
+    in
+    transform t ~ctx:0 ~top_down ~bottom_up
+end

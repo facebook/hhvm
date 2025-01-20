@@ -251,6 +251,9 @@ module Core_ty = struct
         "lazy_t";
         "Lazy.t";
         "Either.t";
+        "SMap.t";
+        "TShapeMap.t";
+        "fun_type";
       ]
 
   let builtin = SSet.union builtin_prims builtin_tycons
@@ -1686,6 +1689,10 @@ module Gen_traverse = struct
         aux_result ty_ok ty_err binding loc
       | (["Either"; "t"], [ty_left; ty_right]) ->
         aux_either ty_left ty_right binding loc
+      | (["SMap"; "t"], [ty]) -> aux_functor [%expr SMap.map] ty binding loc
+      | (["TShapeMap"; "t"], [ty]) ->
+        aux_functor [%expr TShapeMap.map] ty binding loc
+      | (["fun_type"], [ty]) -> aux_functor [%expr map_fun_type] ty binding loc
       | (["ref"], [ty]) -> aux_ref ty binding loc
       (* -- Commom primitives ----------------------------------------------- *)
       | ([ty], []) when SSet.mem ty Core_ty.builtin_prims ->

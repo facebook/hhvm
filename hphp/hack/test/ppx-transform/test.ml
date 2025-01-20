@@ -444,3 +444,22 @@ module MyAbstract : sig
 end = struct
   type 'a t [@@deriving transform]
 end
+
+module SMap = Map.Make (String)
+
+module Hack_builtins : sig
+  type t = { map: t SMap.t } [@@deriving transform]
+end = struct
+  type t = { map: t SMap.t } [@@deriving transform]
+
+  let depth_limit t ~n =
+    let on_ty_t t ~ctx =
+      if ctx >= n then
+        (ctx, `Stop { map = SMap.empty })
+      else
+        (ctx + 1, `Continue t)
+    in
+    let bottom_up = Pass.identity ()
+    and top_down = Pass.{ on_ty_t = Some on_ty_t } in
+    transform t ~ctx:0 ~top_down ~bottom_up
+end

@@ -177,6 +177,7 @@ type t = {
   tco_log_exhaustivity_check: bool;
   tco_sticky_quarantine: bool;
   tco_lsp_invalidation: bool;
+  invalidate_all_folded_decls_upon_file_change: bool;
   tco_autocomplete_sort_text: bool;
   tco_extended_reasons: extended_reasons_config option;
   tco_disable_physical_equality: bool;
@@ -287,6 +288,7 @@ let default =
     tco_log_exhaustivity_check = false;
     tco_sticky_quarantine = false;
     tco_lsp_invalidation = false;
+    invalidate_all_folded_decls_upon_file_change = false;
     tco_autocomplete_sort_text = false;
     tco_extended_reasons = None;
     tco_disable_physical_equality = false;
@@ -395,6 +397,7 @@ let set
     ?tco_log_exhaustivity_check
     ?tco_sticky_quarantine
     ?tco_lsp_invalidation
+    ?invalidate_all_folded_decls_upon_file_change
     ?tco_autocomplete_sort_text
     ?tco_extended_reasons
     ?tco_disable_physical_equality
@@ -656,6 +659,10 @@ let set
       setting tco_sticky_quarantine options.tco_sticky_quarantine;
     tco_lsp_invalidation =
       setting tco_lsp_invalidation options.tco_lsp_invalidation;
+    invalidate_all_folded_decls_upon_file_change =
+      setting
+        invalidate_all_folded_decls_upon_file_change
+        options.invalidate_all_folded_decls_upon_file_change;
     tco_autocomplete_sort_text =
       setting tco_autocomplete_sort_text options.tco_autocomplete_sort_text;
     tco_extended_reasons =

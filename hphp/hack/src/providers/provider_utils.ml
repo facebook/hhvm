@@ -302,6 +302,10 @@ let invalidate_upon_file_changes
   let (sticky_quarantine : bool) =
     Provider_context.get_tcopt ctx |> TypecheckerOptions.tco_sticky_quarantine
   in
+  let (must_invalidate_all_folded_decls_upon_file_change : bool) =
+    (Provider_context.get_tcopt ctx)
+      .GlobalOptions.invalidate_all_folded_decls_upon_file_change
+  in
 
   (* The purpose + invariants of this function are documented in the module-level comment
      in Provider_utils.mli. *)
@@ -360,10 +364,17 @@ let invalidate_upon_file_changes
         in
         ("precise", Some telemetry, entries)
       end else begin
-        List.iter changes ~f:(fun { FileInfo.old_ids; _ } ->
-            Option.iter old_ids ~f:(fun ids ->
-                invalidate_shallow_and_some_folded_decls local_memory ids));
-        ("imprecise", None, entries)
+        if must_invalidate_all_folded_decls_upon_file_change then (
+          let symbols = combine_old_and_new_symbols changes in
+          invalidate_shallow_decls symbols local_memory;
+          invalidate_all_folded_decls ~local_memory;
+          ("exhaustive", None, entries)
+        ) else (
+          List.iter changes ~f:(fun { FileInfo.old_ids; _ } ->
+              Option.iter old_ids ~f:(fun ids ->
+                  invalidate_shallow_and_some_folded_decls local_memory ids));
+          ("imprecise", None, entries)
+        )
       end
   in
 

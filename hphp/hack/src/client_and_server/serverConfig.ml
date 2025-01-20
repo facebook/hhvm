@@ -635,6 +635,8 @@ let load
         ~tco_custom_error_config
         ~tco_sticky_quarantine:local_config.lsp_sticky_quarantine
         ~tco_lsp_invalidation:local_config.lsp_invalidation
+        ~invalidate_all_folded_decls_upon_file_change:
+          local_config.invalidate_all_folded_decls_upon_file_change
         ~tco_autocomplete_sort_text:local_config.autocomplete_sort_text
         ~hack_warnings:
           (if local_config.hack_warnings then

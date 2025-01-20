@@ -251,6 +251,7 @@ type t = {
       (** Controls behavior of [Provider_utils.respect_but_quarantine_unsaved_changes] *)
   tco_lsp_invalidation: bool;
       (** Controls how [Provicer_utils.respect_but_quarantine_unsaved_changes] invalidates folded decls *)
+  invalidate_all_folded_decls_upon_file_change: bool;
   tco_autocomplete_sort_text: bool;
   tco_extended_reasons: extended_reasons_config option;
       (** Controls whether we retain the full path for reasons or only simple witnesses *)
@@ -372,6 +373,7 @@ val set :
   ?tco_log_exhaustivity_check:bool ->
   ?tco_sticky_quarantine:bool ->
   ?tco_lsp_invalidation:bool ->
+  ?invalidate_all_folded_decls_upon_file_change:bool ->
   ?tco_autocomplete_sort_text:bool ->
   ?tco_extended_reasons:extended_reasons_config ->
   ?tco_disable_physical_equality:bool ->

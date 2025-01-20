@@ -128,6 +128,7 @@ impl Default for GlobalOptions {
             tco_log_exhaustivity_check: false,
             tco_sticky_quarantine: false,
             tco_lsp_invalidation: false,
+            invalidate_all_folded_decls_upon_file_change: false,
             tco_autocomplete_sort_text: false,
             tco_extended_reasons: None,
             tco_disable_physical_equality: false,

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<562453e34cabca15dd803dac672379c0>>
+// @generated SignedSource<<d52ed81244e82b9f90919884ca268ddd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -754,6 +754,7 @@ pub enum Ty_ {
     ///   Tunion []  is the "nothing" type, with no values
     ///   Tunion [int;float] is the same as num
     ///   Tunion [null;t] is the same as Toption t
+    #[rust_to_ocaml(attr = "transform.explicit")]
     Tunion(Vec<Ty>),
     Tintersection(Vec<Ty>),
     /// Tvec_or_dict (ty1, ty2) => "vec_or_dict<ty1, ty2>"

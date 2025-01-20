@@ -5301,7 +5301,7 @@ module Typing_defs_core = struct
     | Ttuple : 'phase tuple_type -> 'phase ty_
     | Tshape : 'phase shape_type -> 'phase ty_
     | Tgeneric : string * 'phase ty list -> 'phase ty_
-    | Tunion : 'phase ty list -> 'phase ty_
+    | Tunion : 'phase ty list -> 'phase ty_ [@transform.explicit]
     | Tintersection : 'phase ty list -> 'phase ty_
     | Tvec_or_dict : 'phase ty * 'phase ty -> 'phase ty_
     | Taccess : 'phase taccess_type -> 'phase ty_
@@ -5479,6 +5479,16 @@ module Typing_defs_core = struct
           ctx:'ctx ->
           'ctx * [ `Stop of 'a ty_ | `Continue of 'a ty_ | `Restart of 'a ty_ ])
           option;
+        on_ctor_ty__Tunion:
+          'phase.
+          ('phase ty list ->
+          ctx:'ctx ->
+          'ctx
+          * [ `Stop of 'phase ty list
+            | `Continue of 'phase ty list
+            | `Restart of 'phase ty list
+            ])
+          option;
         on_ty_shape_field_type:
           'a.
           ('a shape_field_type ->
@@ -5521,6 +5531,7 @@ module Typing_defs_core = struct
           on_ty_exact = None;
           on_ty_taccess_type = None;
           on_ty_ty_ = None;
+          on_ctor_ty__Tunion = None;
           on_ty_shape_field_type = None;
           on_ty_locl_ty = None;
           on_ty_decl_ty = None;
@@ -5635,6 +5646,16 @@ module Typing_defs_core = struct
                   | otherwise -> otherwise)
             | (None, _) -> p2.on_ty_ty_
             | _ -> p1.on_ty_ty_);
+          on_ctor_ty__Tunion =
+            (match (p1.on_ctor_ty__Tunion, p2.on_ctor_ty__Tunion) with
+            | (Some t1, Some t2) ->
+              Some
+                (fun elem ~ctx ->
+                  match t1 elem ~ctx with
+                  | (ctx, `Continue elem) -> t2 elem ~ctx
+                  | otherwise -> otherwise)
+            | (None, _) -> p2.on_ctor_ty__Tunion
+            | _ -> p1.on_ctor_ty__Tunion);
           on_ty_shape_field_type =
             (match (p1.on_ty_shape_field_type, p2.on_ty_shape_field_type) with
             | (Some t1, Some t2) ->
@@ -6207,12 +6228,8 @@ module Typing_defs_core = struct
                (fun tgeneric_elem_1 ->
                  transform_ty_ty tgeneric_elem_1 ~ctx ~top_down ~bottom_up)
                tgeneric_elem_1 )
-       | Tunion tunion_elem ->
-         Tunion
-           (Stdlib.List.map
-              (fun tunion_elem ->
-                transform_ty_ty tunion_elem ~ctx ~top_down ~bottom_up)
-              tunion_elem)
+       | Tunion elem ->
+         Tunion (transform_ctor_ty__Tunion elem ~ctx ~top_down ~bottom_up)
        | Tintersection tintersection_elem ->
          Tintersection
            (Stdlib.List.map
@@ -6282,6 +6299,53 @@ module Typing_defs_core = struct
            | (_ctx, (`Continue elem | `Stop elem)) -> elem
            | (_ctx, `Restart elem) ->
              transform_ty_ty_ elem ~ctx ~top_down ~bottom_up))
+
+    and traverse_ctor_ty__Tunion :
+          'phase.
+          'phase ty list ->
+          ctx:'ctx ->
+          top_down:'ctx Pass.t ->
+          bottom_up:'ctx Pass.t ->
+          'phase ty list =
+     fun ty__Tunion ~ctx ~top_down ~bottom_up ->
+      Stdlib.List.map
+        (fun ty__Tunion -> transform_ty_ty ty__Tunion ~ctx ~top_down ~bottom_up)
+        ty__Tunion
+
+    and transform_ctor_ty__Tunion :
+          'phase.
+          'phase ty list ->
+          ctx:'ctx ->
+          top_down:'ctx Pass.t ->
+          bottom_up:'ctx Pass.t ->
+          'phase ty list =
+     fun elem ~ctx ~top_down ~bottom_up ->
+      match top_down.Pass.on_ctor_ty__Tunion with
+      | Some td ->
+        (match td elem ~ctx with
+        | (_ctx, `Stop elem) -> elem
+        | (td_ctx, `Continue elem) ->
+          let elem =
+            traverse_ctor_ty__Tunion elem ~ctx:td_ctx ~top_down ~bottom_up
+          in
+          (match bottom_up.Pass.on_ctor_ty__Tunion with
+          | None -> elem
+          | Some bu ->
+            (match bu elem ~ctx with
+            | (_ctx, (`Continue elem | `Stop elem)) -> elem
+            | (_ctx, `Restart elem) ->
+              transform_ctor_ty__Tunion elem ~ctx ~top_down ~bottom_up))
+        | (_ctx, `Restart elem) ->
+          transform_ctor_ty__Tunion elem ~ctx ~top_down ~bottom_up)
+      | _ ->
+        let elem = traverse_ctor_ty__Tunion elem ~ctx ~top_down ~bottom_up in
+        (match bottom_up.Pass.on_ctor_ty__Tunion with
+        | None -> elem
+        | Some bu ->
+          (match bu elem ~ctx with
+          | (_ctx, (`Continue elem | `Stop elem)) -> elem
+          | (_ctx, `Restart elem) ->
+            transform_ctor_ty__Tunion elem ~ctx ~top_down ~bottom_up))
 
     and traverse_ty_shape_field_type :
           'a.
@@ -6498,6 +6562,10 @@ module Typing_defs_core = struct
     and _ = traverse_ty_ty_
 
     and _ = transform_ty_ty_
+
+    and _ = traverse_ctor_ty__Tunion
+
+    and _ = transform_ctor_ty__Tunion
 
     and _ = traverse_ty_shape_field_type
 

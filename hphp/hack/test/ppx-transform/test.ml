@@ -595,7 +595,7 @@ module Typing_defs_core = struct
     | Ttuple : 'phase tuple_type -> 'phase ty_
     | Tshape : 'phase shape_type -> 'phase ty_
     | Tgeneric : string * 'phase ty list -> 'phase ty_
-    | Tunion : 'phase ty list -> 'phase ty_
+    | Tunion : 'phase ty list -> 'phase ty_ [@transform.explicit]
     | Tintersection : 'phase ty list -> 'phase ty_
     | Tvec_or_dict : 'phase ty * 'phase ty -> 'phase ty_
     | Taccess : 'phase taccess_type -> 'phase ty_

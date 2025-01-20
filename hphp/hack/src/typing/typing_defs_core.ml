@@ -370,7 +370,7 @@ and _ ty_ =
        * Typing_phase.add_generic_parameters_and_constraints. The list denotes
        * type arguments.
        *)
-  | Tunion : 'phase ty list -> 'phase ty_
+  | Tunion : 'phase ty list -> 'phase ty_ [@transform.explicit]
       (** Union type.
        * The values that are members of this type are the union of the values
        * that are members of the components of the union.

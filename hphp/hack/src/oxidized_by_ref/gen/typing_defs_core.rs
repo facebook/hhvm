@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f6089ce6ab363893ee42ab50a1afd4c7>>
+// @generated SignedSource<<8b9c9014a3ec5cd49ac756fa2d5ad3f8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -771,6 +771,7 @@ pub enum Ty_<'a> {
     ///   Tunion [int;float] is the same as num
     ///   Tunion [null;t] is the same as Toption t
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(attr = "transform.explicit")]
     Tunion(&'a [&'a Ty<'a>]),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tintersection(&'a [&'a Ty<'a>]),

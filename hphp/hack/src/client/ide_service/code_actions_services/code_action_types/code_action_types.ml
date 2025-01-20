@@ -41,35 +41,36 @@ type find_quickfix =
 module Type_string = struct
   type t = string Lazy.t
 
-  let deep_strip_like_types tenv ty =
-    let is_dynamic ty =
-      let (_r, ty) = Typing_defs_core.deref ty in
-      match ty with
-      | Typing_defs_core.Tdynamic -> true
-      | _ -> false
+  (** 'like types' are encoded as the union of a static type with [Tdynamic]
+       so we can remove them by filtering out [Tdynamic] from the types contained
+       in such a [Tunion]. We _shouldn't_ encounter the degenerate union cases
+       [Tunion [Tdynamic]] or [Tunion [Tdynamic, ..., Tdynamic]] since they
+       should have been simplified but we check for this just in case *)
+  let deep_strip_like_types ty =
+    let open Typing_defs_core in
+    let is_not_dynamic ty =
+      match get_node ty with
+      | Tdynamic -> false
+      | _ -> true
     in
-    let visitor =
-      object (this)
-        inherit ['env] Type_mapper_generic.deep_type_mapper as super
-
-        method! on_type env ty =
-          let (reason, ty_) = Typing_defs_core.deref ty in
-          let (env, reason) = this#on_reason env reason in
-          match ty_ with
-          | Typing_defs_core.Tunion tyl ->
-            let filtered = List.filter ~f:(Fn.non is_dynamic) tyl in
-            let tyl =
-              if List.is_empty filtered then
-                (* Avoid accidentally creating a bottom a type. Unlikely to be reached *)
-                tyl
-              else
-                filtered
-            in
-            this#on_tunion env reason tyl
-          | _ -> super#on_type env ty
-      end
+    let id = Pass.identity () in
+    let top_down =
+      Pass.
+        {
+          id with
+          on_ctor_ty__Tunion =
+            Some
+              (fun tys ~ctx ->
+                let tys =
+                  match List.filter ~f:is_not_dynamic tys with
+                  | [] -> tys
+                  | tys -> tys
+                in
+                (ctx, `Continue tys));
+        }
     in
-    snd @@ visitor#on_type tenv ty
+    let bottom_up = id in
+    transform_ty_locl_ty ty ~ctx:() ~top_down ~bottom_up
 
   (** Don't truncate types in printing unless they are really big,
      so we almost always generate valid code.
@@ -94,7 +95,7 @@ module Type_string = struct
        in
        locl_ty
        |> Tast_env.fully_expand tast_env
-       |> deep_strip_like_types typing_env
+       |> deep_strip_like_types
        |> Typing_print.full_strip_ns ~hide_internals:true typing_env)
 
   let to_string = Lazy.force

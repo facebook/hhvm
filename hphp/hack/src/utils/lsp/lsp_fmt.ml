@@ -300,6 +300,8 @@ let parse_setTraceNotification (params : json option) :
   | Some "verbose" -> SetTraceNotification.Verbose
   | _ -> SetTraceNotification.Off
 
+let parse_setTrace = parse_setTraceNotification
+
 let print_setTraceNotification (p : SetTraceNotification.params) : json =
   let s =
     match p with
@@ -307,6 +309,8 @@ let print_setTraceNotification (p : SetTraceNotification.params) : json =
     | SetTraceNotification.Off -> "off"
   in
   JSON_Object [("value", JSON_String s)]
+
+let print_setTrace = print_setTraceNotification
 
 (************************************************************************)
 let print_rage (r : RageFB.result) : json =
@@ -1449,6 +1453,7 @@ let get_uri_opt (m : lsp_message) : Lsp.DocumentUri.t option =
   | NotificationMessage InitializedNotification
   | NotificationMessage (FindReferencesPartialResultNotification _)
   | NotificationMessage (SetTraceNotification _)
+  | NotificationMessage (SetTrace _)
   | NotificationMessage LogTraceNotification
   | NotificationMessage (UnknownNotification _)
   | ResponseMessage _ ->
@@ -1545,6 +1550,7 @@ let notification_name_to_string (notification : lsp_notification) : string =
   | InitializedNotification -> "initialized"
   | FindReferencesPartialResultNotification _ -> "$/progress"
   | SetTraceNotification _ -> "$/setTraceNotification"
+  | SetTrace _ -> "$/setTrace"
   | LogTraceNotification -> "$/logTraceNotification"
   | UnknownNotification (method_, _params) -> method_
 
@@ -1639,6 +1645,7 @@ let parse_lsp_notification (method_ : string) (params : json option) :
   | "$/cancelRequest" -> CancelRequestNotification (parse_cancelRequest params)
   | "$/setTraceNotification" ->
     SetTraceNotification (parse_setTraceNotification params)
+  | "$/setTrace" -> SetTrace (parse_setTrace params)
   | "$/logTraceNotification" -> LogTraceNotification
   | "initialized" -> InitializedNotification
   | "exit" -> ExitNotification
@@ -1835,6 +1842,7 @@ let print_lsp_notification (notification : lsp_notification) : json =
     match notification with
     | CancelRequestNotification r -> print_cancelRequest r
     | SetTraceNotification r -> print_setTraceNotification r
+    | SetTrace r -> print_setTrace r
     | PublishDiagnosticsNotification r -> print_diagnostics r
     | FindReferencesPartialResultNotification (token, r) ->
       print_findReferencesPartialResult token r

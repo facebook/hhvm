@@ -1329,6 +1329,7 @@ type lsp_notification =
   | FindReferencesPartialResultNotification of
       partial_result_token * FindReferences.result
   | SetTraceNotification of SetTraceNotification.params
+  | SetTrace of SetTraceNotification.params
   | LogTraceNotification (* $/logTraceNotification *)
   | UnknownNotification of string * Hh_json.json option
 

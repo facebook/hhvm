@@ -4282,7 +4282,8 @@ let handle_client_message
       else
         exit_fail ()
     (* setTrace notification *)
-    | (_, NotificationMessage (SetTraceNotification params)) ->
+    | (_, NotificationMessage (SetTraceNotification params))
+    | (_, NotificationMessage (SetTrace params)) ->
       let value =
         match params with
         | SetTraceNotification.Verbose -> true
@@ -4737,7 +4738,7 @@ let handle_client_message
            {
              Error.code = Error.MethodNotFound;
              message =
-               "not implemented: " ^ Lsp_fmt.message_name_to_string message;
+               "not implemented: " ^ Lsp_fmt.denorm_message_to_string message;
              data = None;
            })
   in

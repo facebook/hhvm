@@ -4836,3 +4836,215 @@ end = struct
     let _ = transform
   end [@@ocaml.doc "@inline"] [@@merlin.hide]
 end
+
+module MyList : sig
+  type 'a t [@@deriving transform]
+
+  include sig
+    [@@@ocaml.warning "-32-60"]
+
+    module Pass : sig
+      type nonrec 'ctx t = {
+        on_ty_t:
+          'a.
+          ('a t ->
+          ctx:'ctx ->
+          'ctx * [ `Stop of 'a t | `Continue of 'a t | `Restart of 'a t ])
+          option;
+      }
+
+      val combine : 'ctx t -> 'ctx t -> 'ctx t
+
+      val identity : unit -> 'ctx t
+    end
+
+    val transform :
+      'a t -> ctx:'ctx -> top_down:'ctx Pass.t -> bottom_up:'ctx Pass.t -> 'a t
+  end
+  [@@ocaml.doc "@inline"] [@@merlin.hide]
+end = struct
+  type 'a t =
+    | Empty
+    | Cons of 'a * 'a t
+  [@@deriving transform]
+
+  include struct
+    [@@@ocaml.warning "-60"]
+
+    let _ = (fun (_ : 'a t) -> ())
+
+    module Pass = struct
+      type nonrec 'ctx t = {
+        on_ty_t:
+          'a.
+          ('a t ->
+          ctx:'ctx ->
+          'ctx * [ `Stop of 'a t | `Continue of 'a t | `Restart of 'a t ])
+          option;
+      }
+
+      let identity _ = { on_ty_t = None }
+
+      let _ = identity
+
+      let combine p1 p2 =
+        {
+          on_ty_t =
+            (match (p1.on_ty_t, p2.on_ty_t) with
+            | (Some t1, Some t2) ->
+              Some
+                (fun elem ~ctx ->
+                  match t1 elem ~ctx with
+                  | (ctx, `Continue elem) -> t2 elem ~ctx
+                  | otherwise -> otherwise)
+            | (None, _) -> p2.on_ty_t
+            | _ -> p1.on_ty_t);
+        }
+
+      let _ = combine
+    end
+
+    let rec traverse :
+              'a.
+              'a t ->
+              ctx:'ctx ->
+              top_down:'ctx Pass.t ->
+              bottom_up:'ctx Pass.t ->
+              'a t =
+     fun t ~ctx ~top_down ~bottom_up ->
+      match t with
+      | Cons (cons_elem_0, cons_elem_1) ->
+        Cons (cons_elem_0, transform cons_elem_1 ~ctx ~top_down ~bottom_up)
+      | t -> t
+
+    and transform :
+          'a.
+          'a t ->
+          ctx:'ctx ->
+          top_down:'ctx Pass.t ->
+          bottom_up:'ctx Pass.t ->
+          'a t =
+     fun elem ~ctx ~top_down ~bottom_up ->
+      match top_down.Pass.on_ty_t with
+      | Some td ->
+        (match td elem ~ctx with
+        | (_ctx, `Stop elem) -> elem
+        | (td_ctx, `Continue elem) ->
+          let elem = traverse elem ~ctx:td_ctx ~top_down ~bottom_up in
+          (match bottom_up.Pass.on_ty_t with
+          | None -> elem
+          | Some bu ->
+            (match bu elem ~ctx with
+            | (_ctx, (`Continue elem | `Stop elem)) -> elem
+            | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
+        | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up)
+      | _ ->
+        let elem = traverse elem ~ctx ~top_down ~bottom_up in
+        (match bottom_up.Pass.on_ty_t with
+        | None -> elem
+        | Some bu ->
+          (match bu elem ~ctx with
+          | (_ctx, (`Continue elem | `Stop elem)) -> elem
+          | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
+
+    let _ = traverse
+
+    and _ = transform
+  end [@@ocaml.doc "@inline"] [@@merlin.hide]
+end
+
+module MyAbstract : sig
+  type 'a t [@@deriving transform]
+
+  include sig
+    [@@@ocaml.warning "-32-60"]
+
+    module Pass : sig
+      type nonrec 'ctx t = {
+        on_ty_t:
+          'a.
+          ('a t ->
+          ctx:'ctx ->
+          'ctx * [ `Stop of 'a t | `Continue of 'a t | `Restart of 'a t ])
+          option;
+      }
+
+      val combine : 'ctx t -> 'ctx t -> 'ctx t
+
+      val identity : unit -> 'ctx t
+    end
+
+    val transform :
+      'a t -> ctx:'ctx -> top_down:'ctx Pass.t -> bottom_up:'ctx Pass.t -> 'a t
+  end
+  [@@ocaml.doc "@inline"] [@@merlin.hide]
+end = struct
+  type 'a t [@@deriving transform]
+
+  include struct
+    [@@@ocaml.warning "-60"]
+
+    let _ = (fun (_ : 'a t) -> ())
+
+    module Pass = struct
+      type nonrec 'ctx t = {
+        on_ty_t:
+          'a.
+          ('a t ->
+          ctx:'ctx ->
+          'ctx * [ `Stop of 'a t | `Continue of 'a t | `Restart of 'a t ])
+          option;
+      }
+
+      let identity _ = { on_ty_t = None }
+
+      let _ = identity
+
+      let combine p1 p2 =
+        {
+          on_ty_t =
+            (match (p1.on_ty_t, p2.on_ty_t) with
+            | (Some t1, Some t2) ->
+              Some
+                (fun elem ~ctx ->
+                  match t1 elem ~ctx with
+                  | (ctx, `Continue elem) -> t2 elem ~ctx
+                  | otherwise -> otherwise)
+            | (None, _) -> p2.on_ty_t
+            | _ -> p1.on_ty_t);
+        }
+
+      let _ = combine
+    end
+
+    let rec transform :
+              'a.
+              'a t ->
+              ctx:'ctx ->
+              top_down:'ctx Pass.t ->
+              bottom_up:'ctx Pass.t ->
+              'a t =
+     fun elem ~ctx ~top_down ~bottom_up ->
+      match top_down.Pass.on_ty_t with
+      | Some td ->
+        (match td elem ~ctx with
+        | (_ctx, `Stop elem) -> elem
+        | (_ctx, `Continue elem) ->
+          (match bottom_up.Pass.on_ty_t with
+          | None -> elem
+          | Some bu ->
+            (match bu elem ~ctx with
+            | (_ctx, (`Continue elem | `Stop elem)) -> elem
+            | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
+        | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up)
+      | _ ->
+        (match bottom_up.Pass.on_ty_t with
+        | None -> elem
+        | Some bu ->
+          (match bu elem ~ctx with
+          | (_ctx, (`Continue elem | `Stop elem)) -> elem
+          | (_ctx, `Restart elem) -> transform elem ~ctx ~top_down ~bottom_up))
+
+    let _ = transform
+  end [@@ocaml.doc "@inline"] [@@merlin.hide]
+end

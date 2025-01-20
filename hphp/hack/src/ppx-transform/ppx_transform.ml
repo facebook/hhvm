@@ -511,9 +511,7 @@ module Decl = struct
       | Some ty ->
         let ty = Core_ty.rename_tyvars ty ~subst in
         Alias Alias.{ name; loc; tyvars; ty; opaque }
-      | None ->
-        Unsupported
-          Unsupported.{ ident = Ident.Type name; loc; kind = Abstract })
+      | None -> Variant Variant.{ name; loc; tyvars; ctors = []; opaque })
     | Ptype_open ->
       Unsupported Unsupported.{ ident = Ident.Type name; loc; kind = Open }
 

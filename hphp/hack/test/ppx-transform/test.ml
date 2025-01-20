@@ -429,3 +429,18 @@ end = struct
     | Gadt_data_ctor : int -> string t
   [@@deriving transform]
 end
+
+module MyList : sig
+  type 'a t [@@deriving transform]
+end = struct
+  type 'a t =
+    | Empty
+    | Cons of 'a * 'a t
+  [@@deriving transform]
+end
+
+module MyAbstract : sig
+  type 'a t [@@deriving transform]
+end = struct
+  type 'a t [@@deriving transform]
+end

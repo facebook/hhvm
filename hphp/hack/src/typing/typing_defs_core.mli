@@ -154,10 +154,10 @@ type 'ty tparam = {
   tp_reified: Aast.reify_kind;
   tp_user_attributes: user_attribute list;
 }
-[@@deriving eq, show]
+[@@deriving eq, show, map]
 
 type 'ty where_constraint = 'ty * Ast_defs.constraint_kind * 'ty
-[@@deriving eq, show]
+[@@deriving eq, show, map]
 
 type enforcement =
   | Unenforced  (** The consumer doesn't enforce the type at runtime *)
@@ -212,12 +212,12 @@ and type_predicate = Reason.t * type_predicate_ [@@deriving eq, ord, hash, show]
 type 'ty capability =
   | CapDefaults of Pos_or_decl.t  (** Should not be used for lambda inference *)
   | CapTy of 'ty
-[@@deriving hash, show]
+[@@deriving hash, show, map]
 
 (** Companion to fun_params type, intended to consolidate checking of
   implicit params for functions. *)
 type 'ty fun_implicit_params = { capability: 'ty capability }
-[@@deriving hash, show]
+[@@deriving hash, show, map]
 
 type 'ty fun_param = {
   fp_pos: Pos_or_decl.t;
@@ -226,9 +226,9 @@ type 'ty fun_param = {
   fp_flags: Typing_defs_flags.FunParam.t;
   fp_def_value: string option;
 }
-[@@deriving hash, show]
+[@@deriving hash, show, map]
 
-type 'ty fun_params = 'ty fun_param list [@@deriving hash]
+type 'ty fun_params = 'ty fun_param list [@@deriving hash, map]
 
 (** The type of a function AND a method *)
 type 'ty fun_type = {
@@ -241,23 +241,25 @@ type 'ty fun_type = {
   ft_cross_package: cross_package_decl;
   ft_instantiated: bool;
 }
-[@@deriving hash, show]
+[@@deriving hash, show, map]
 
 (** = Reason.t * 'phase ty_ *)
-type 'phase ty
+type 'phase ty = ('phase Reason.t_[@transform.opaque]) * 'phase ty_
 
 and decl_ty = decl_phase ty
 
 and locl_ty = locl_phase ty
 
-(* A shape may specify whether or not fields are required. For example, consider
-   this typedef:
-
-     type ShapeWithOptionalField = shape(?'a' => ?int);
-
-   With this definition, the field 'a' may be unprovided in a shape. In this
-   case, the field 'a' would have sf_optional set to true.
-*)
+(** A shape may specify whether or not fields are required. For example, consider
+ * this typedef:
+ *
+ * ```
+ * type ShapeWithOptionalField = shape(?'a' => ?int);
+ * ```
+ *
+ * With this definition, the field 'a' may be unprovided in a shape. In this
+ * case, the field 'a' would have sf_optional set to true.
+ *)
 and 'phase shape_field_type = {
   sft_optional: bool;
   sft_ty: 'phase ty;
@@ -265,37 +267,39 @@ and 'phase shape_field_type = {
 
 and _ ty_ =
   (*========== Following Types Exist Only in the Declared Phase ==========*)
-  (* The late static bound type of a class *)
-  | Tthis : decl_phase ty_
-  (* Either an object type or a type alias, ty list are the arguments *)
-  | Tapply : pos_id * decl_ty list -> decl_phase ty_
+  | Tthis : decl_phase ty_  (** The late static bound type of a class *)
+  | Tapply : (pos_id[@transform.opaque]) * decl_ty list -> decl_phase ty_
+      (** Either an object type or a type alias, ty list are the arguments *)
   | Trefinement : decl_ty * decl_phase class_refinement -> decl_phase ty_
-  (* "Any" is the type of a variable with a missing annotation, and "mixed" is
-   * the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
-   * Any unifies with anything, i.e., it is both a supertype and subtype of any
-   * other type. You can do literally anything to it; it's the "trust me" type.
-   * Mixed, on the other hand, is only a supertype of everything. You need to do
-   * a case analysis to figure out what it is (i.e., its elimination form).
-   *
-   * Here's an example to demonstrate:
-   *
-   * function f($x): int {
-   *   return $x + 1;
-   * }
-   *
-   * In that example, $x has type Tany. This unifies with anything, so adding
-   * one to it is allowed, and returning that as int is allowed.
-   *
-   * In contrast, if $x were annotated as mixed, adding one to that would be
-   * a type error -- mixed is not a subtype of int, and you must be a subtype
-   * of int to take part in addition. (The converse is true though -- int is a
-   * subtype of mixed.) A case analysis would need to be done on $x, via
-   * is_int or similar.
-   *
-   * mixed exists only in the decl_phase phase because it is desugared into ?nonnull
-   * during the localization phase.
-   *)
+      (** 'With' refinements of the form `_ with { type T as int; type TC = C; }`. *)
   | Tmixed : decl_phase ty_
+      (** "Any" is the type of a variable with a missing annotation, and "mixed" is
+       * the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
+       * Any unifies with anything, i.e., it is both a supertype and subtype of any
+       * other type. You can do literally anything to it; it's the "trust me" type.
+       * Mixed, on the other hand, is only a supertype of everything. You need to do
+       * a case analysis to figure out what it is (i.e., its elimination form).
+       *
+       * Here's an example to demonstrate:
+       *
+       * ```
+       * function f($x): int {
+       *   return $x + 1;
+       * }
+       * ```
+       *
+       * In that example, $x has type Tany. This unifies with anything, so adding
+       * one to it is allowed, and returning that as int is allowed.
+       *
+       * In contrast, if $x were annotated as mixed, adding one to that would be
+       * a type error -- mixed is not a subtype of int, and you must be a subtype
+       * of int to take part in addition. (The converse is true though -- int is a
+       * subtype of mixed.) A case analysis would need to be done on $x, via
+       * is_int or similar.
+       *
+       * mixed exists only in the decl_phase phase because it is desugared into ?nonnull
+       * during the localization phase.
+       *)
   | Twildcard : decl_phase ty_
       (** Various intepretations, depending on context.
         *   inferred type e.g. (vec<_> $x) ==> $x[0]
@@ -304,97 +308,113 @@ and _ ty_ =
         *)
   | Tlike : decl_ty -> decl_phase ty_
   (*========== Following Types Exist in Both Phases ==========*)
-  | Tany : TanySentinel.t -> 'phase ty_
-  | Tnonnull
-  (* A dynamic type is a special type which sometimes behaves as if it were a
-   * top type; roughly speaking, where a specific value of a particular type is
-   * expected and that type is dynamic, anything can be given. We call this
-   * behaviour "coercion", in that the types "coerce" to dynamic. In other ways it
-   * behaves like a bottom type; it can be used in any sort of binary expression
-   * or even have object methods called from it. However, it is in fact neither.
-   *
-   * it captures dynamicism within function scope.
-   * See tests in typecheck/dynamic/ for more examples.
-   *)
-  | Tdynamic
-  (* Nullable, called "option" in the ML parlance. *)
+  | Tany : (TanySentinel.t[@transform.opaque]) -> 'phase ty_
+  | Tnonnull : 'phase ty_
+  | Tdynamic : 'phase ty_
+      (** A dynamic type is a special type which sometimes behaves as if it were a
+       * top type; roughly speaking, where a specific value of a particular type is
+       * expected and that type is dynamic, anything can be given. We call this
+       * behaviour "coercion", in that the types "coerce" to dynamic. In other ways it
+       * behaves like a bottom type; it can be used in any sort of binary expression
+       * or even have object methods called from it. However, it is in fact neither.
+       *
+       * it captures dynamicism within function scope.
+       * See tests in typecheck/dynamic/ for more examples.
+       *)
   | Toption : 'phase ty -> 'phase ty_
-  (* All the primitive types: int, string, void, etc. *)
-  | Tprim : Aast.tprim -> 'phase ty_
-  (* A wrapper around fun_type, which contains the full type information for a
-   * function, method, lambda, etc. *)
+      (** Nullable, called "option" in the ML parlance. *)
+  | Tprim : (Ast_defs.tprim[@transform.opaque]) -> 'phase ty_
+      (** All the primitive types: int, string, void, etc. *)
   | Tfun : 'phase ty fun_type -> 'phase ty_
-  (* A wrapper around tuple_type, which contains information about tuple elements *)
+      (** A wrapper around fun_type, which contains the full type information for a
+       * function, method, lambda, etc. *)
   | Ttuple : 'phase tuple_type -> 'phase ty_
-  (* A wrapper around shape_type, which contains information about shape fields *)
+      (** A wrapper around tuple_type, which contains information about tuple elements *)
   | Tshape : 'phase shape_type -> 'phase ty_
-  (* The type of a generic parameter. The constraints on a generic parameter
-   * are accessed through the lenv.tpenv component of the environment, which
-   * is set up when checking the body of a function or method. See uses of
-   * Typing_phase.add_generic_parameters_and_constraints. The list denotes
-   * type arguments (for higher-kinded generics).
-   *)
   | Tgeneric : string * 'phase ty list -> 'phase ty_
-  (* Union type.
-   * The values that are members of this type are the union of the values
-   * that are members of the components of the union.
-   * Some examples (writing | for binary union)
-   *   Tunion []  is the "nothing" type, with no values
-   *   Tunion [int;float] is the same as num
-   *   Tunion [null;t] is the same as Toption t
-   *)
+      (** The type of a generic parameter. The constraints on a generic parameter
+       * are accessed through the lenv.tpenv component of the environment, which
+       * is set up when checking the body of a function or method. See uses of
+       * Typing_phase.add_generic_parameters_and_constraints. The list denotes
+       * type arguments.
+       *)
   | Tunion : 'phase ty list -> 'phase ty_
+      (** Union type.
+       * The values that are members of this type are the union of the values
+       * that are members of the components of the union.
+       * Some examples (writing | for binary union)
+       *   Tunion []  is the "nothing" type, with no values
+       *   Tunion [int;float] is the same as num
+       *   Tunion [null;t] is the same as Toption t
+       *)
   | Tintersection : 'phase ty list -> 'phase ty_
-  (* Tvec_or_dict (ty1, ty2) => "vec_or_dict<ty1, ty2>" *)
   | Tvec_or_dict : 'phase ty * 'phase ty -> 'phase ty_
-  (* Name of class, name of type const, remaining names of type consts *)
+      (** Tvec_or_dict (ty1, ty2) => "vec_or_dict<ty1, ty2>" *)
   | Taccess : 'phase taccess_type -> 'phase ty_
-  (* A type of a class pointer, class<T>. To be compatible with classname<T>,
-   * it takes an arbitrary type. In the future, it should only take a string
-   * that is a class name, and be named Tclass. The current Tclass would be
-   * renamed to Tinstance, where a Tinstance is an instantiation of a Tclass
-   *)
+      (** Name of class, name of type const, remaining names of type consts *)
   | Tclass_ptr : 'phase ty -> 'phase ty_
+      (** A type of a class pointer, class<T>. To be compatible with classname<T>,
+        * it takes an arbitrary type. In the future, it should only take a string
+        * that is a class name, and be named Tclass. The current Tclass would be
+        * renamed to Tinstance, where a Tinstance is an instantiation of a Tclass *)
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
-  | Tvar : Tvid.t -> locl_phase ty_
-  (* This represents a type alias that lacks necessary type arguments. Given
-   *   type Foo<T1,T2> = ...
-   * Tunappliedalias "Foo" stands for usages of plain Foo, without supplying
-   * further type arguments. In particular, Tunappliedalias always stands for
-   * a higher-kinded type. It is never used for an alias like
-   *   type Foo2 = ...
-   * that simply doesn't require type arguments.
-   *)
+  | Tvar : (Tvid.t[@transform.opaque]) -> locl_phase ty_
   | Tnewtype : string * locl_phase ty list * locl_phase ty -> locl_phase ty_
-      (** The type of an opaque type (e.g. a "newtype" outside of the file where it
-        was defined) or enum. They are "opaque", which means that they only unify with
-        themselves. However, it is possible to have a constraint that allows us to
-        relax this. For example:
+      (** The type of an opaque type or enum. Outside their defining files or
+        when they represent enums, they are "opaque", which means that they
+        only unify with themselves. Within a file, uses of newtypes are
+        expanded to their definitions (unless the newtype is an enum).
 
-          newtype my_type as int = ...
+        However, it is possible to have a constraint that allows us to relax
+        opaqueness. For example:
+
+          newtype MyType as int = ...
+
+        or
+
+          enum MyType: int as int { ... }
 
         Outside of the file where the type was defined, this translates to:
 
-          Tnewtype ((pos, "my_type"), [], Tprim Tint)
+          Tnewtype ((pos, "MyType"), [], Tprim Tint)
 
-        Which means that my_type is abstract, but is subtype of int as well.
-      *)
+        which means that MyType is abstract, but is a subtype of int as well.
+        When the constraint is omitted, the third parameter is set to mixed.
+
+        The second parameter is the list of type arguments to the type.
+       *)
   | Tunapplied_alias : string -> locl_phase ty_
-  (* see dependent_type *)
-  | Tdependent : dependent_type * locl_ty -> locl_phase ty_
-  (* An instance of a class or interface, ty list are the arguments
-   * If exact=Exact, then this represents instances of *exactly* this class
-   * If exact=Nonexact, this also includes subclasses
-   *)
-  | Tclass : pos_id * exact * locl_ty list -> locl_phase ty_
-  | Tneg : type_predicate -> locl_phase ty_
+      (** This represents a type alias that lacks necessary type arguments. Given
+           type Foo<T1,T2> = ...
+         Tunappliedalias "Foo" stands for usages of plain Foo, without supplying
+         further type arguments. In particular, Tunappliedalias always stands for
+         a higher-kinded type. It is never used for an alias like
+           type Foo2 = ...
+         that simply doesn't require type arguments. *)
+  | Tdependent : (dependent_type[@transform.opaque]) * locl_ty -> locl_phase ty_
+      (** see dependent_type *)
+  | Tclass :
+      (pos_id[@transform.opaque]) * exact * locl_ty list
+      -> locl_phase ty_
+      (** An instance of a class or interface, ty list are the arguments
+       * If exact=Exact, then this represents instances of *exactly* this class
+       * If exact=Nonexact, this also includes subclasses
+       * TODO(T199606542) rename this to Tinstance *)
+  | Tneg : (type_predicate[@transform.opaque]) -> locl_phase ty_
+      (** The negation of the [type_predicate] *)
   | Tlabel : string -> locl_phase ty_
       (** The type of the label expression #ID *)
+
+and 'phase taccess_type = 'phase ty * (pos_id[@transform.opaque])
 
 and exact =
   | Exact
   | Nonexact of locl_phase class_refinement
 
+(** Class refinements are for type annotations like
+
+      Box with {type T = string}
+  *)
 and 'phase class_refinement = { cr_consts: 'phase refined_const SMap.t }
 
 and 'phase refined_const = {
@@ -404,23 +424,22 @@ and 'phase refined_const = {
 
 and 'phase refined_const_bound =
   | TRexact : 'phase ty -> 'phase refined_const_bound
+      (** for `=` constraints *)
   | TRloose : 'phase refined_const_bounds -> 'phase refined_const_bound
+      (** for `as` or `super` constraints *)
 
 and 'phase refined_const_bounds = {
   tr_lower: 'phase ty list;
   tr_upper: 'phase ty list;
 }
 
-and 'phase taccess_type = 'phase ty * pos_id
-
 (* Whether all fields of this shape are known, types of each of the
  * known arms. *)
 and 'phase shape_type = {
-  s_origin: type_origin;
+  s_origin: type_origin; [@transform.opaque]
   s_unknown_value: 'phase ty;
   s_fields: 'phase shape_field_type TShapeMap.t;
 }
-[@@deriving hash]
 
 (**
   Required and extra components of a tuple. Extra components
@@ -437,7 +456,6 @@ and 'phase tuple_type = {
   t_required: 'phase ty list;
   t_extra: 'phase tuple_extra;
 }
-[@@deriving hash]
 
 and 'phase tuple_extra =
   | Textra of {
@@ -445,7 +463,7 @@ and 'phase tuple_extra =
       t_variadic: 'phase ty;
     }
   | Tsplat of 'phase ty
-[@@deriving hash]
+[@@deriving hash, transform]
 
 val equal_decl_ty : decl_ty -> decl_ty -> bool
 

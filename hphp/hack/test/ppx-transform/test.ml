@@ -446,6 +446,7 @@ end = struct
 end
 
 module SMap = Map.Make (String)
+module TShapeMap = Map.Make (String)
 
 module Hack_builtins : sig
   type t = { map: t SMap.t } [@@deriving transform]
@@ -462,4 +463,189 @@ end = struct
     let bottom_up = Pass.identity ()
     and top_down = Pass.{ on_ty_t = Some on_ty_t } in
     transform t ~ctx:0 ~top_down ~bottom_up
+end
+
+module Reason = struct
+  type 'a t_
+end
+
+module TanySentinel = struct
+  type t
+end
+
+module Tvid = struct
+  type t
+end
+
+module Typing_defs_core = struct
+  type decl_phase = private Decl_Phase
+
+  type locl_phase = private Locl_Phase
+
+  type tprim
+
+  type type_predicate
+
+  type type_origin
+
+  type pos_id = string
+
+  type variance
+
+  type constraint_kind
+
+  type reify_kind
+
+  type user_attribute
+
+  type dependent_type
+
+  type 'ty tparam = {
+    tp_tparams: 'ty tparam list;
+    tp_constraints: (constraint_kind * 'ty) list;
+  }
+
+  let rec map_tparam f { tp_tparams; tp_constraints } =
+    let tp_tparams = List.map (map_tparam f) tp_tparams
+    and tp_constraints = List.map (fun (e0, e1) -> (e0, f e1)) tp_constraints in
+    { tp_tparams; tp_constraints }
+
+  type 'ty where_constraint = 'ty * constraint_kind * 'ty
+
+  let map_where_constraint f (e0, e1, e2) = (f e0, e1, f e2)
+
+  type enforcement =
+    | Unenforced
+    | Enforced
+
+  type 'ty capability =
+    | CapDefaults
+    | CapTy of 'ty
+
+  let map_capability f t =
+    match t with
+    | CapTy e0 -> CapTy (f e0)
+    | CapDefaults -> CapDefaults
+
+  (** Companion to fun_params type, intended to consolidate checking of
+ * implicit params for functions. *)
+  type 'ty fun_implicit_params = { capability: 'ty capability }
+
+  let map_fun_implicit_params f { capability } =
+    let capability = map_capability f capability in
+    { capability }
+
+  type 'ty fun_param = { fp_type: 'ty }
+
+  let map_fun_param f { fp_type } =
+    let fp_type = f fp_type in
+    { fp_type }
+
+  type 'ty fun_params = 'ty fun_param list
+
+  let map_fun_params f = List.map (map_fun_param f)
+
+  (** The type of a function AND a method. *)
+  type 'ty fun_type = {
+    ft_tparams: 'ty tparam list;
+    ft_where_constraints: 'ty where_constraint list;
+    ft_params: 'ty fun_params;
+    ft_implicit_params: 'ty fun_implicit_params;
+    ft_ret: 'ty;
+  }
+
+  let map_fun_type
+      f
+      {
+        ft_tparams;
+        ft_where_constraints;
+        ft_params;
+        ft_implicit_params;
+        ft_ret;
+      } =
+    let ft_tparams = List.map (map_tparam f) ft_tparams
+    and ft_where_constraints =
+      List.map (map_where_constraint f) ft_where_constraints
+    and ft_params = map_fun_params f ft_params
+    and ft_implicit_params = map_fun_implicit_params f ft_implicit_params
+    and ft_ret = f ft_ret in
+    { ft_tparams; ft_where_constraints; ft_params; ft_implicit_params; ft_ret }
+
+  type 'phase ty = ('phase Reason.t_[@transform.opaque]) * 'phase ty_
+
+  and decl_ty = decl_phase ty
+
+  and locl_ty = locl_phase ty
+
+  and 'phase shape_field_type = { sft_ty: 'phase ty }
+
+  and _ ty_ =
+    | Tthis : decl_phase ty_  (** The late static bound type of a class *)
+    | Tapply : (pos_id[@transform.opaque]) * decl_ty list -> decl_phase ty_
+    | Trefinement : decl_ty * decl_phase class_refinement -> decl_phase ty_
+    | Tmixed : decl_phase ty_
+    | Twildcard : decl_phase ty_
+    | Tlike : decl_ty -> decl_phase ty_
+    | Tany : (TanySentinel.t[@transform.opaque]) -> 'phase ty_
+    | Tnonnull : 'phase ty_
+    | Tdynamic : 'phase ty_
+    | Toption : 'phase ty -> 'phase ty_
+    | Tprim : (tprim[@transform.opaque]) -> 'phase ty_
+    | Tfun : 'phase ty fun_type -> 'phase ty_
+    | Ttuple : 'phase tuple_type -> 'phase ty_
+    | Tshape : 'phase shape_type -> 'phase ty_
+    | Tgeneric : string * 'phase ty list -> 'phase ty_
+    | Tunion : 'phase ty list -> 'phase ty_
+    | Tintersection : 'phase ty list -> 'phase ty_
+    | Tvec_or_dict : 'phase ty * 'phase ty -> 'phase ty_
+    | Taccess : 'phase taccess_type -> 'phase ty_
+    | Tclass_ptr : 'phase ty -> 'phase ty_
+    | Tvar : (Tvid.t[@transform.opaque]) -> locl_phase ty_
+    | Tnewtype : string * locl_phase ty list * locl_phase ty -> locl_phase ty_
+    | Tunapplied_alias : string -> locl_phase ty_
+    | Tdependent :
+        (dependent_type[@transform.opaque]) * locl_ty
+        -> locl_phase ty_
+    | Tclass :
+        (pos_id[@transform.opaque]) * exact * locl_ty list
+        -> locl_phase ty_
+    | Tneg : (type_predicate[@transform.opaque]) -> locl_phase ty_
+    | Tlabel : string -> locl_phase ty_
+
+  and 'phase taccess_type = 'phase ty * (pos_id[@transform.opaque])
+
+  and exact =
+    | Exact
+    | Nonexact of locl_phase class_refinement
+
+  and 'phase class_refinement = { cr_consts: 'phase refined_const SMap.t }
+
+  and 'phase refined_const = { rc_bound: 'phase refined_const_bound }
+
+  and 'phase refined_const_bound =
+    | TRexact : 'phase ty -> 'phase refined_const_bound
+    | TRloose : 'phase refined_const_bounds -> 'phase refined_const_bound
+
+  and 'phase refined_const_bounds = {
+    tr_lower: 'phase ty list;
+    tr_upper: 'phase ty list;
+  }
+
+  and 'phase shape_type = {
+    s_unknown_value: 'phase ty;
+    s_fields: 'phase shape_field_type TShapeMap.t;
+  }
+
+  and 'phase tuple_type = {
+    t_required: 'phase ty list;
+    t_extra: 'phase tuple_extra;
+  }
+
+  and 'phase tuple_extra =
+    | Textra of {
+        t_optional: 'phase ty list;
+        t_variadic: 'phase ty;
+      }
+    | Tsplat of 'phase ty
+  [@@deriving transform]
 end

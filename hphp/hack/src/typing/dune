@@ -50,7 +50,7 @@
     pos
     pos_or_decl)
  (preprocess
-  (pps ppx_deriving.std ppx_hash)))
+  (pps ppx_deriving.std ppx_hash ppx_transform)))
 
 (library
   (name typing_error)

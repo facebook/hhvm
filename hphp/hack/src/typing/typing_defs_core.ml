@@ -187,10 +187,10 @@ type 'ty tparam = {
   tp_reified: Ast_defs.reify_kind;
   tp_user_attributes: user_attribute list;
 }
-[@@deriving eq, hash, show]
+[@@deriving eq, hash, show, map]
 
 type 'ty where_constraint = 'ty * Ast_defs.constraint_kind * 'ty
-[@@deriving eq, hash, show]
+[@@deriving eq, hash, show, map]
 
 type enforcement =
   | Unenforced
@@ -200,12 +200,12 @@ type enforcement =
 type 'ty capability =
   | CapDefaults of (Pos_or_decl.t[@hash.ignore])
   | CapTy of 'ty
-[@@deriving eq, hash, show { with_path = false }]
+[@@deriving eq, hash, show { with_path = false }, map]
 
 (** Companion to fun_params type, intended to consolidate checking of
  * implicit params for functions. *)
 type 'ty fun_implicit_params = { capability: 'ty capability }
-[@@deriving eq, hash, show { with_path = false }]
+[@@deriving eq, hash, show { with_path = false }, map]
 
 type 'ty fun_param = {
   fp_pos: Pos_or_decl.t; [@hash.ignore] [@equal (fun _ _ -> true)]
@@ -214,10 +214,10 @@ type 'ty fun_param = {
   fp_flags: Typing_defs_flags.FunParam.t;
   fp_def_value: string option;
 }
-[@@deriving eq, hash, show { with_path = false }]
+[@@deriving eq, hash, show { with_path = false }, map]
 
 type 'ty fun_params = 'ty fun_param list
-[@@deriving eq, hash, show { with_path = false }]
+[@@deriving eq, hash, show { with_path = false }, map]
 
 (** The type of a function AND a method. *)
 type 'ty fun_type = {
@@ -230,7 +230,7 @@ type 'ty fun_type = {
   ft_cross_package: cross_package_decl;
   ft_instantiated: bool;
 }
-[@@deriving eq, hash, show { with_path = false }]
+[@@deriving eq, hash, show { with_path = false }, map]
 
 type type_tag =
   | BoolTag
@@ -276,7 +276,7 @@ and type_predicate =
 (* This is to avoid a compile error with ppx_hash "Unbound value _hash_fold_phase". *)
 let _hash_fold_phase hsv _ = hsv
 
-type 'phase ty = 'phase Reason.t_ * 'phase ty_
+type 'phase ty = ('phase Reason.t_[@transform.opaque]) * 'phase ty_
 
 and decl_ty = decl_phase ty
 
@@ -300,7 +300,7 @@ and 'phase shape_field_type = {
 and _ ty_ =
   (*========== Following Types Exist Only in the Declared Phase ==========*)
   | Tthis : decl_phase ty_  (** The late static bound type of a class *)
-  | Tapply : pos_id * decl_ty list -> decl_phase ty_
+  | Tapply : (pos_id[@transform.opaque]) * decl_ty list -> decl_phase ty_
       (** Either an object type or a type alias, ty list are the arguments *)
   | Trefinement : decl_ty * decl_phase class_refinement -> decl_phase ty_
       (** 'With' refinements of the form `_ with { type T as int; type TC = C; }`. *)
@@ -340,9 +340,9 @@ and _ ty_ =
         *)
   | Tlike : decl_ty -> decl_phase ty_
   (*========== Following Types Exist in Both Phases ==========*)
-  | Tany : TanySentinel.t -> 'phase ty_
-  | Tnonnull
-  | Tdynamic
+  | Tany : (TanySentinel.t[@transform.opaque]) -> 'phase ty_
+  | Tnonnull : 'phase ty_
+  | Tdynamic : 'phase ty_
       (** A dynamic type is a special type which sometimes behaves as if it were a
        * top type; roughly speaking, where a specific value of a particular type is
        * expected and that type is dynamic, anything can be given. We call this
@@ -355,7 +355,7 @@ and _ ty_ =
        *)
   | Toption : 'phase ty -> 'phase ty_
       (** Nullable, called "option" in the ML parlance. *)
-  | Tprim : Ast_defs.tprim -> 'phase ty_
+  | Tprim : (Ast_defs.tprim[@transform.opaque]) -> 'phase ty_
       (** All the primitive types: int, string, void, etc. *)
   | Tfun : 'phase ty fun_type -> 'phase ty_
       (** A wrapper around fun_type, which contains the full type information for a
@@ -390,7 +390,7 @@ and _ ty_ =
         * that is a class name, and be named Tclass. The current Tclass would be
         * renamed to Tinstance, where a Tinstance is an instantiation of a Tclass *)
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
-  | Tvar : Tvid.t -> locl_phase ty_
+  | Tvar : (Tvid.t[@transform.opaque]) -> locl_phase ty_
   | Tnewtype : string * locl_phase ty list * locl_phase ty -> locl_phase ty_
       (** The type of an opaque type or enum. Outside their defining files or
         when they represent enums, they are "opaque", which means that they
@@ -423,19 +423,21 @@ and _ ty_ =
          a higher-kinded type. It is never used for an alias like
            type Foo2 = ...
          that simply doesn't require type arguments. *)
-  | Tdependent : dependent_type * locl_ty -> locl_phase ty_
+  | Tdependent : (dependent_type[@transform.opaque]) * locl_ty -> locl_phase ty_
       (** see dependent_type *)
-  | Tclass : pos_id * exact * locl_ty list -> locl_phase ty_
+  | Tclass :
+      (pos_id[@transform.opaque]) * exact * locl_ty list
+      -> locl_phase ty_
       (** An instance of a class or interface, ty list are the arguments
        * If exact=Exact, then this represents instances of *exactly* this class
        * If exact=Nonexact, this also includes subclasses
        * TODO(T199606542) rename this to Tinstance *)
-  | Tneg : type_predicate -> locl_phase ty_
+  | Tneg : (type_predicate[@transform.opaque]) -> locl_phase ty_
       (** The negation of the [type_predicate] *)
   | Tlabel : string -> locl_phase ty_
       (** The type of the label expression #ID *)
 
-and 'phase taccess_type = 'phase ty * pos_id
+and 'phase taccess_type = 'phase ty * (pos_id[@transform.opaque])
 
 and exact =
   | Exact
@@ -467,11 +469,10 @@ and 'phase refined_const_bounds = {
   * known arms.
   *)
 and 'phase shape_type = {
-  s_origin: type_origin;
+  s_origin: type_origin; [@transform.opaque]
   s_unknown_value: 'phase ty;
   s_fields: 'phase shape_field_type TShapeMap.t;
 }
-[@@deriving hash]
 
 (**
   Required and extra components of a tuple. Extra components
@@ -488,7 +489,6 @@ and 'phase tuple_type = {
   t_required: 'phase ty list;
   t_extra: 'phase tuple_extra;
 }
-[@@deriving hash]
 
 and 'phase tuple_extra =
   | Textra of {
@@ -496,7 +496,7 @@ and 'phase tuple_extra =
       t_variadic: 'phase ty;
     }
   | Tsplat of 'phase ty
-[@@deriving hash]
+[@@deriving hash, transform]
 
 let nonexact = Nonexact { cr_consts = SMap.empty }
 

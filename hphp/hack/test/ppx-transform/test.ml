@@ -403,3 +403,29 @@ module Recursive_mod = struct
     type t = Two of One.t option [@@deriving transform]
   end
 end
+
+module Indexed_gadt : sig
+  type one
+
+  type 'a t = Other : one t -> 'a t [@@deriving transform]
+end = struct
+  type one
+
+  type 'a t = Other : one t -> 'a t [@@deriving transform]
+end
+
+module Mixed_adt_gadt : sig
+  type _ t =
+    | Adt_data_ctor_nullary
+    | Gadt_data_ctor_nullary : 'a t
+    | Adt_data_ctor of int
+    | Gadt_data_ctor : int -> string t
+  [@@deriving transform]
+end = struct
+  type _ t =
+    | Adt_data_ctor_nullary
+    | Gadt_data_ctor_nullary : 'a t
+    | Adt_data_ctor of int
+    | Gadt_data_ctor : int -> string t
+  [@@deriving transform]
+end

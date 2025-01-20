@@ -11,10 +11,6 @@ module Help = struct
   let smap_of_list xs =
     List.fold_left (fun acc (k, v) -> SMap.add k v acc) SMap.empty xs
 
-  let value_exn = function
-    | Some x -> x
-    | _ -> failwith "Expected `Some ...` but got `None`"
-
   (** Generate nice type variable names: `'a,'b,...,'z,'a1,...` *)
   let tyvar_name i =
     let (c, n) = (i mod 26, i / 26) in
@@ -271,8 +267,6 @@ module Core_ty = struct
           if Annot.has_opaque_attr core_type.ptyp_attributes then
             acc
           else
-            super#core_type core_type
-            @@
             match core_type.ptyp_desc with
             | Ptyp_constr ({ txt; _ }, _) ->
               let (tyname, key, path) =
@@ -283,15 +277,26 @@ module Core_ty = struct
                     path )
                 | _ -> failwith "Bad `Longident`"
               in
-              if SSet.mem tyname excluded then
+              let is_excluded = SSet.mem tyname excluded
+              and is_builtin = SSet.mem tyname builtin in
+              (* If the type is excluded it is one of the types we are deriving
+                 for so we don't need to recurse. This prevents us from picking
+                 up phantom types used in indexing a GADT *)
+              let acc =
+                if is_excluded || is_builtin then
+                  acc
+                else
+                  SMap.add key path acc
+              in
+              if is_excluded then
                 acc
               else
-                SMap.add key path acc
-            | _ -> acc
+                super#core_type core_type acc
+            | _ -> super#core_type core_type acc
       end
     in
     fun acc ty ~excluded ->
-      let visitor = visitor @@ SSet.union builtin excluded in
+      let visitor = visitor excluded in
       visitor#core_type ty acc
 end
 
@@ -441,12 +446,14 @@ module Decl = struct
     | Alias of Alias.t
     | Unsupported of Unsupported.t
 
-  let is_gadt = function
-    | [] -> false
-    | { pcd_res; _ } :: _ ->
-      (match pcd_res with
-      | Some _ -> true
-      | _ -> false)
+  (** Check if _any_ data constructor has a result type to determine if the
+      declared type should be treated as a GADT  *)
+  let is_gadt ctors =
+    List.exists
+      (function
+        | { pcd_res = Some _; _ } -> true
+        | _ -> false)
+      ctors
 
   let of_ty_decl
       {
@@ -479,9 +486,17 @@ module Decl = struct
       let ctors =
         List.map
           (fun ctor_decl ->
-            ( Variant_ctor.of_ctor_decl ctor_decl ~subst,
-              Core_ty.rename_tyvars ~subst @@ Help.value_exn ctor_decl.pcd_res
-            ))
+            (* A GADT may contain regular ADT data constructor declarations; in this case, we need
+               to construct a type based on the [ptype_name] and [ptype_params] *)
+            let ty =
+              match ctor_decl.pcd_res with
+              | Some ty -> ty
+              | None ->
+                ptyp_constr ~loc { loc; txt = lident name }
+                @@ List.map (ptyp_var ~loc) tyvars
+            in
+
+            (Variant_ctor.of_ctor_decl ctor_decl ~subst, ty))
           ctor_decls
       in
       Gadt Gadt.{ name; loc; tyvars; ctors; opaque }

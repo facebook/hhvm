@@ -148,7 +148,7 @@ impl Options {
     /// SAFETY: Only one instance per canonical path may exist process-wide.
     /// Do not have open an LMDB database twice in the same process at the same time.
     /// Not even from a plain open() call - close()ing it breaks flock() advisory locking.
-    pub fn create_file(self, path: impl AsRef<Path>, perms: u32) -> Result<Env> {
+    pub fn create_file(self, path: impl AsRef<Path>, perms: u16) -> Result<Env> {
         let Self { env, flags } = self;
         unsafe {
             let path = CString::new(path.as_ref().as_os_str().as_bytes())?;
@@ -156,7 +156,7 @@ impl Options {
                 env,
                 path.as_ptr(),
                 flags | MDB_NOSUBDIR,
-                perms,
+                perms.into(),
             ))?;
             std::mem::forget(self); // don't close our MDB_env
             Ok(Env {
@@ -166,7 +166,7 @@ impl Options {
     }
 
     /// Open a database environment
-    pub fn open_file(self, path: impl AsRef<Path>, perms: u32) -> Result<Env> {
+    pub fn open_file(self, path: impl AsRef<Path>, perms: u16) -> Result<Env> {
         let Self { env, flags } = self;
         unsafe {
             let path = CString::new(path.as_ref().as_os_str().as_bytes())?;
@@ -174,7 +174,7 @@ impl Options {
                 env,
                 path.as_ptr(),
                 flags | MDB_RDONLY | MDB_NOSUBDIR,
-                perms,
+                perms.into(),
             ))?;
             std::mem::forget(self);
             Ok(Env {
@@ -307,11 +307,11 @@ impl Env {
     }
 
     /// Change unix permissions on env and lock file
-    pub fn chmod(&self, mode: u32) -> Result<()> {
+    pub fn chmod(&self, mode: u16) -> Result<()> {
         use std::os::unix::fs::PermissionsExt;
         let (path, lockpath) = self.paths()?;
-        std::fs::set_permissions(path, PermissionsExt::from_mode(mode))?;
-        std::fs::set_permissions(lockpath, PermissionsExt::from_mode(mode))?;
+        std::fs::set_permissions(path, PermissionsExt::from_mode(mode.into()))?;
+        std::fs::set_permissions(lockpath, PermissionsExt::from_mode(mode.into()))?;
         Ok(())
     }
 

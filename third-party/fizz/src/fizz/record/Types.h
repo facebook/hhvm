@@ -364,13 +364,6 @@ enum class NamedGroup : uint16_t {
   x25519_kyber768_experimental = 65024,
   x25519_kyber512_experimental = 65025,
 
-  /**
-   * Hybrid of secp521r1 and x25519. TLS Supported Group 510 is reserved for
-   * private use, see
-   * https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-8
-   */
-  secp521r1_x25519 = 510,
-
   // Standardized algorithms. See
   // https://datatracker.ietf.org/doc/html/draft-ietf-tls-hybrid-design-05#section-5
 
@@ -381,22 +374,10 @@ enum class NamedGroup : uint16_t {
   x25519_kyber512 = 12089,
 
   /**
-   * Experimental ID, see
-   * https://github.com/aws/s2n-tls/blob/main/tls/s2n_tls_parameters.h#L70
-   */
-  secp256r1_kyber512 = 12090,
-
-  /**
    * Performance test only. Purely relying on unverified post-quantum crypto may
    * cause security flaws.
    */
   kyber512 = 511,
-
-  /**
-   * Experimental ID, see
-   * https://github.com/open-quantum-safe/boringssl/blob/master/include/openssl/ssl.h#L2410
-   */
-  secp384r1_kyber768 = 12092,
 };
 
 std::string toString(NamedGroup);

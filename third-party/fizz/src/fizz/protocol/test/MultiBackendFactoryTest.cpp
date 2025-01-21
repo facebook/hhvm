@@ -43,15 +43,13 @@ INSTANTIATE_TEST_SUITE_P(
 #if FIZZ_HAVE_OQS
         ,
         NamedGroup::x25519_kyber512,
-        NamedGroup::secp256r1_kyber512,
         NamedGroup::kyber512,
         NamedGroup::x25519_kyber768_draft00,
         NamedGroup::x25519_kyber768_experimental,
         NamedGroup::x25519_kyber512_experimental,
         NamedGroup::X25519MLKEM512_FB,
         NamedGroup::X25519MLKEM768,
-        NamedGroup::secp256r1_kyber768_draft00,
-        NamedGroup::secp384r1_kyber768
+        NamedGroup::secp256r1_kyber768_draft00
 #endif
         ),
     [](const testing::TestParamInfo<

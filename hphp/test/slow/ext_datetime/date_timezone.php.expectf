@@ -12,10 +12,10 @@ string(13) "Asia/Shanghai"
 int(28800)
 int(32400)
 string(13) "Asia/Shanghai"
-int(-1693706400)
-int(7200)
-bool(true)
-string(4) "CEST"
+int(-2840141850)
+int(1050)
+bool(false)
+string(3) "BMT"
 string(16) "America/New_York"
 string(19) "America/Los_Angeles"
 string(15) "Pacific/Chatham"

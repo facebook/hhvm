@@ -78,6 +78,7 @@ class ListTests(unittest.TestCase):
         self.is_mutable_run: bool = self.containers_types.__name__.endswith(
             "thrift_mutable_types"
         )
+        self.unicode_list: list[str] = self.lists_types.unicode_list
 
     def to_list(self, list_data: list[ListT]) -> list[ListT] | _ThriftListWrapper:
         return to_thrift_list(list_data) if self.is_mutable_run else list_data
@@ -339,3 +340,6 @@ class ListTests(unittest.TestCase):
         int_list = [1, 2, 3]
 
         self.assertEqual(int_list, self.AtoIValueList(int_list))
+
+    def test_unicode_const(self) -> None:
+        self.assertEqual(self.unicode_list, ["Bulgaria", "Benin", "Saint Barthélemy"])

@@ -54,7 +54,6 @@ impl Drop for EnvInner {
 
 // TODO Available Env flags:
 // MDB_RDONLY - change api to open/create, ala File. write txn will fail
-// MDB_NORDAHEAD - disable OS readahead for huge dbs & random read access
 
 impl Options {
     pub fn set_mapsize(self, mapsize: usize) -> Result<Self> {
@@ -108,6 +107,11 @@ impl Options {
     /// Nop with set_write_mmap(true).
     pub fn set_nomeminit(self, enable: bool) -> Self {
         self.set_flag(enable, MDB_NOMEMINIT)
+    }
+
+    /// Turn off readahead. Most operating systems perform readahead on read requests by default. This option turns it off if the OS supports it. Turning it off may help random read performance when the DB is larger than RAM and system RAM is full. The option is not implemented on Windows.
+    pub fn set_nordahead(self, enable: bool) -> Self {
+        self.set_flag(enable, MDB_NORDAHEAD)
     }
 
     /// Set the maximum number of threads/reader slots for the environment.

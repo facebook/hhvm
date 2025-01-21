@@ -414,7 +414,7 @@ option(BUILD_EXAMPLES "BUILD_EXAMPLES" ON)
 
 if(BUILD_EXAMPLES)
   add_executable(BogoShim test/BogoShim.cpp)
-  target_link_libraries(BogoShim fizz sodium)
+  target_link_libraries(BogoShim fizz)
   set_target_properties(BogoShim PROPERTIES OUTPUT_NAME fizz-bogoshim)
   install(
     TARGETS BogoShim
@@ -428,10 +428,19 @@ if(BUILD_EXAMPLES)
       tool/FizzGenerateDelegatedCredentialCommand.cpp
       tool/FizzServerBenchmarkCommand.cpp
       tool/FizzServerCommand.cpp)
-  target_link_libraries(FizzTool fizz sodium)
+  target_link_libraries(FizzTool fizz)
   set_target_properties(FizzTool PROPERTIES OUTPUT_NAME fizz)
   install(
     TARGETS FizzTool
+    DESTINATION ${BIN_INSTALL_DIR}
+  )
+  add_executable(EncryptedRecordBench record/test/EncryptedRecordBench.cpp)
+  target_link_libraries(EncryptedRecordBench fizz Folly::follybenchmark)
+  set_target_properties(
+    EncryptedRecordBench PROPERTIES OUTPUT_NAME fizz-encryptedrecordbench
+  )
+  install(
+    TARGETS EncryptedRecordBench
     DESTINATION ${BIN_INSTALL_DIR}
   )
 endif()

@@ -54,16 +54,7 @@ impl Drop for EnvInner {
 
 // TODO Available Env flags:
 // MDB_RDONLY - change api to open/create, ala File. write txn will fail
-// MDB_WRITEMAP - for writable db, use rw mmap (faster but less corruption proof)
-// MDB_NOTLS - allow Txn that are Send. also Sync if we provide locks.
-//           Maybe a different Env type with different Txn types
 // MDB_NORDAHEAD - disable OS readahead for huge dbs & random read access
-
-// TODO available env settings
-// mdb_env_set_mapsize() - may be called after mdb_env_open() if no live txns
-//   mdb_txn_begin() can fail with MDB_MAP_RESIZED if another process grew the data
-//   beyond this process map size
-// mdb_env_set_maxdbs() - only before open
 
 impl Options {
     pub fn set_mapsize(self, mapsize: usize) -> Result<Self> {

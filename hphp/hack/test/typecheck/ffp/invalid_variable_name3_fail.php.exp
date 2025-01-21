@@ -1,5 +1,7 @@
 ERROR: File "invalid_variable_name3_fail.php", line 14, characters 8-13:
 Splice syntax ${...} can only occur inside expression trees Foo``...``. (Parsing[1002])
+ERROR: File "invalid_variable_name3_fail.php", line 14, characters 8-13:
+Splicing can only occur inside expression tree literals (between backticks) (Parsing[1002])
 ERROR: File "invalid_variable_name3_fail.php", line 14, characters 10-12:
 Unbound name: `foo` (a global constant) (Naming[2049])
 ERROR: File "invalid_variable_name3_fail.php", line 14, characters 10-12:

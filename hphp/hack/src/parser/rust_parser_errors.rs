@@ -3232,7 +3232,8 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             }
 
             ETSpliceExpression(_) => {
-                if !self.context.active_expression_tree {
+                if !self.context.active_expression_tree && self.context.expression_tree_depth == 0 {
+                    // If the depth is greater than 0, then the error in et_splice_expr will be used
                     self.errors
                         .push(make_error_from_node(node, errors::splice_outside_et))
                 }
@@ -5521,6 +5522,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             | PipeVariableExpression(_)
             | ConditionalExpression(_)
             | CollectionLiteralExpression(_)
+            | ETSpliceExpression(_)
             | VariableExpression(_) => {
                 self.check_disallowed_variables(node);
                 self.dynamic_method_call_errors(node);

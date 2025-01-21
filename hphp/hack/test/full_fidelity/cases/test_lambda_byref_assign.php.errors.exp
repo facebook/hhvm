@@ -9,6 +9,7 @@
 (8,7)-(8,7) An expression is expected here.
 (9,7)-(9,7) An expression is expected here.
 (10,7)-(10,7) An expression is expected here.
+(10,7)-(10,14) Splicing can only occur inside expression tree literals (between backticks)
 (11,7)-(11,7) An expression is expected here.
 (12,7)-(12,7) An expression is expected here.
 (13,7)-(13,7) An expression is expected here.

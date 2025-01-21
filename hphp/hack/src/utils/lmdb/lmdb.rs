@@ -288,6 +288,13 @@ impl Env {
         }
     }
 
+    /// Flush the data buffers to disk.
+    /// Data is always written to disk when mdb_txn_commit() is called, but the operating system may keep it buffered. LMDB always flushes the OS buffers upon commit as well, unless the environment was opened with MDB_NOSYNC or in part MDB_NOMETASYNC. This call is not valid if the environment was opened with MDB_RDONLY.
+    /// force true, force a synchronous flush. Otherwise if the environment has the MDB_NOSYNC flag set the flushes will be omitted, and with MDB_MAPASYNC they will be asynchronous.
+    pub fn sync(&self, force: bool) -> Result<()> {
+        unsafe { check(mdb_env_sync(self.ptr(), force as c_int)) }
+    }
+
     pub fn max_key_size(&self) -> usize {
         unsafe { mdb_env_get_maxkeysize(self.ptr()) as u32 as usize }
     }

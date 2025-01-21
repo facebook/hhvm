@@ -140,6 +140,17 @@ impl<'a> Encode<'a> for Usize {
 }
 
 #[derive(Clone, Copy)]
+pub struct VecU8;
+impl<'a> Encode<'a> for VecU8 {
+    const INTKEY: bool = false;
+    const IGNORE_CASE: bool = false;
+    type Item = Vec<u8>;
+    fn encode(item: &'a Vec<u8>) -> &'a [u8] {
+        item.as_slice()
+    }
+}
+
+#[derive(Clone, Copy)]
 pub struct Str;
 impl<'a> Encode<'a> for Str {
     const INTKEY: bool = false;

@@ -370,14 +370,18 @@ class mstch_go_field : public mstch_field {
   }
   mstch::node is_compat_setter_pointer() { return is_compat_setter_pointer_(); }
   mstch::node compat_setter_value_op() {
-    if (is_pointer_() && is_compat_setter_pointer_()) {
-      return std::string("");
-    } else if (is_pointer_() && !is_compat_setter_pointer_()) {
-      return std::string("&");
-    } else if (!is_pointer_() && !is_compat_setter_pointer_()) {
-      return std::string("");
-    } else { // if (!is_pointer_() && is_compat_setter_pointer_())
-      return std::string("*");
+    if (is_pointer_()) {
+      if (is_compat_setter_pointer_()) {
+        return std::string("");
+      } else {
+        return std::string("&");
+      }
+    } else { // !is_pointer_()
+      if (is_compat_setter_pointer_()) {
+        return std::string("*");
+      } else {
+        return std::string("");
+      }
     }
   }
   mstch::node key_str() {
@@ -434,8 +438,7 @@ class mstch_go_field : public mstch_field {
     bool has_default_value = (field_->default_value() != nullptr);
     if (is_optional_() && has_default_value) {
       auto real_type = field_->type()->get_true_type();
-      bool is_container =
-          (real_type->is_list() || real_type->is_map() || real_type->is_set());
+      bool is_container = (real_type->is_map() || real_type->is_set());
       return is_container;
     }
     return is_pointer_();

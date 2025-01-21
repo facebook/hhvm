@@ -145,6 +145,11 @@ impl Options {
         self.set_flag(enable, MDB_NOMETASYNC)
     }
 
+    /// When using MDB_WRITEMAP, use asynchronous flushes to disk. As with MDB_NOSYNC, a system crash can then corrupt the database or lose the last transactions. Calling mdb_env_sync() ensures on-disk database integrity until next commit. This flag may be changed at any time using mdb_env_set_flags().
+    pub fn set_mapasync(self, enable: bool) -> Self {
+        self.set_flag(enable, MDB_MAPASYNC)
+    }
+
     /// Create a database environment in the file specified by `path`.
     ///
     /// SAFETY: Only one instance per canonical path may exist process-wide.

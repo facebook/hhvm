@@ -285,7 +285,6 @@ add_library(
   server/ResourcePoolHandle.cpp
   server/RoundRobinRequestPile.cpp
   server/WeightedRequestPileQueue.cpp
-  server/SEParallelConcurrencyController.cpp
   server/ServerAttribute.cpp
   server/ServerFlags.cpp
   server/ServerInstrumentation.cpp

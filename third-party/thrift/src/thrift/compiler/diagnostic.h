@@ -379,6 +379,10 @@ class diagnostics_engine {
   bool has_errors_ = false;
 };
 
+// Makes a diagnostics engine that prints errors to stderr and ignores other
+// kinds of diagnostics.
+diagnostics_engine make_diagnostics_printer(source_manager& sm);
+
 std::ostream& operator<<(std::ostream& out, const diagnostic&);
 
 } // namespace apache::thrift::compiler

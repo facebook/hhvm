@@ -111,6 +111,13 @@ void diagnostics_engine::do_report(
        std::move(fixit_hint)});
 }
 
+diagnostics_engine make_diagnostics_printer(source_manager& sm) {
+  return diagnostics_engine(
+      sm,
+      [](const diagnostic& d) { fmt::print(stderr, "{}\n", d); },
+      diagnostic_params::only_errors());
+}
+
 std::ostream& operator<<(std::ostream& out, const diagnostic& diag) {
   return out << diag.str();
 }

@@ -52,9 +52,6 @@ impl Drop for EnvInner {
     }
 }
 
-// TODO Available Env flags:
-// MDB_RDONLY - change api to open/create, ala File. write txn will fail
-
 impl Options {
     pub fn set_mapsize(self, mapsize: usize) -> Result<Self> {
         unsafe {
@@ -126,6 +123,11 @@ impl Options {
             check(mdb_env_set_maxreaders(self.env, readers))?;
         }
         Ok(self)
+    }
+
+    /// Open the environment in read-only mode. No write operations will be allowed. LMDB will still modify the lock file - except on read-only filesystems, where LMDB does not use locks.
+    pub fn set_rdonly(self, enable: bool) -> Self {
+        self.set_flag(enable, MDB_RDONLY)
     }
 
     /// Flush system buffers to disk only once per transaction, omit the

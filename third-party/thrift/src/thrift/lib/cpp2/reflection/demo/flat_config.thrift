@@ -16,15 +16,35 @@
 
 namespace cpp2 static_reflection.demo
 
+include "thrift/annotation/thrift.thrift"
+
 struct flat_config {
-  1: string host_name (property = "host-name");
-  2: i16 host_port (property = "host-port");
-  3: string client_name (property = "client-name");
-  4: i32 send_timeout (property = "socket-send-timeout");
-  5: i32 receive_timeout (property = "socket-receive-timeout");
-  6: i32 frame_size (property = "transport-frame-size");
-  7: bool compress (property = "apply-compression");
-  8: double log_rate (property = "log-sampling-rate");
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"property": "host-name"}}
+  1: string host_name;
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"property": "host-port"}}
+  2: i16 host_port;
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"property": "client-name"}}
+  3: string client_name;
+  @thrift.DeprecatedUnvalidatedAnnotations{
+    items = {"property": "socket-send-timeout"},
+  }
+  4: i32 send_timeout;
+  @thrift.DeprecatedUnvalidatedAnnotations{
+    items = {"property": "socket-receive-timeout"},
+  }
+  5: i32 receive_timeout;
+  @thrift.DeprecatedUnvalidatedAnnotations{
+    items = {"property": "transport-frame-size"},
+  }
+  6: i32 frame_size;
+  @thrift.DeprecatedUnvalidatedAnnotations{
+    items = {"property": "apply-compression"},
+  }
+  7: bool compress;
+  @thrift.DeprecatedUnvalidatedAnnotations{
+    items = {"property": "log-sampling-rate"},
+  }
+  8: double log_rate;
 }
 
 const flat_config example = {

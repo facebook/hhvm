@@ -7,12 +7,12 @@ final class ThriftContextPropStateScopeGuardTest extends WWWTest {
   use ClassLevelTest;
 
   private function getSerializedTFMHeaders(
-    string $overriden_request_id,
-    int $overriden_origin_id,
+    string $overridden_request_id,
+    int $overridden_origin_id,
   ): dict<string, string> {
     $tfm = ThriftFrameworkMetadata::withDefaultValues();
-    $tfm->request_id = $overriden_request_id;
-    $tfm->origin_id = $overriden_origin_id;
+    $tfm->request_id = $overridden_request_id;
+    $tfm->origin_id = $overridden_origin_id;
 
     $buf = new TMemoryBuffer();
     $prot = new TCompactProtocolAccelerated($buf);
@@ -28,10 +28,10 @@ final class ThriftContextPropStateScopeGuardTest extends WWWTest {
   public function testInitFromSerializedContext()[defaults]: void {
     $original_request_id = "9999";
     $original_origin_id = 12345;
-    $overriden_request_id_0 = "13579";
-    $overriden_origin_id_0 = 54321;
-    $overriden_request_id_1 = "00000";
-    $overriden_origin_id_1 = 89765;
+    $overridden_request_id_0 = "13579";
+    $overridden_origin_id_0 = 54321;
+    $overridden_request_id_1 = "00000";
+    $overridden_origin_id_1 = 89765;
 
     ThriftContextPropState::get()->setRequestId($original_request_id);
     ThriftContextPropState::get()->setOriginId($original_origin_id);
@@ -43,26 +43,26 @@ final class ThriftContextPropStateScopeGuardTest extends WWWTest {
       $original_origin_id,
     );
     $serialized_headers_0 = $this->getSerializedTFMHeaders(
-      $overriden_request_id_0,
-      $overriden_origin_id_0,
+      $overridden_request_id_0,
+      $overridden_origin_id_0,
     );
     $serialized_headers_1 = $this->getSerializedTFMHeaders(
-      $overriden_request_id_1,
-      $overriden_origin_id_1,
+      $overridden_request_id_1,
+      $overridden_origin_id_1,
     );
     using (ThriftContextPropStateScopeGuard::create($serialized_headers_0)) {
       expect(ThriftContextPropState::get()->getRequestId())->toEqual(
-        $overriden_request_id_0,
+        $overridden_request_id_0,
       );
       expect(ThriftContextPropState::get()->getOriginId())->toEqual(
-        $overriden_origin_id_0,
+        $overridden_origin_id_0,
       );
       using (ThriftContextPropStateScopeGuard::create($serialized_headers_1)) {
         expect(ThriftContextPropState::get()->getRequestId())->toEqual(
-          $overriden_request_id_1,
+          $overridden_request_id_1,
         );
         expect(ThriftContextPropState::get()->getOriginId())->toEqual(
-          $overriden_origin_id_1,
+          $overridden_origin_id_1,
         );
       }
 

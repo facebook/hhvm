@@ -760,15 +760,6 @@ void validate_uri_uniqueness(sema_context& ctx, const t_program& prog) {
   visit(prog);
 }
 
-void limit_terse_write_on_experimental_mode(
-    sema_context& ctx, const t_named& node) {
-  ctx.check(
-      !node.find_structured_annotation_or_null(kTerseWriteUri) ||
-          has_experimental_annotation(ctx, node),
-      "Using @thrift.TerseWrite on field `{}` is only allowed in the experimental mode.",
-      node.name());
-}
-
 void validate_field_id(sema_context& ctx, const t_field& node) {
   ctx.check(
       node.explicit_id() == node.id(),
@@ -1551,7 +1542,6 @@ ast_validator standard_validator() {
   validator.add_named_visitor(&validate_java_adapter_annotation);
   validator.add_named_visitor(&validate_java_wrapper_annotation);
   validator.add_named_visitor(&validate_java_wrapper_and_adapter_annotation);
-  validator.add_named_visitor(&limit_terse_write_on_experimental_mode);
   validator.add_named_visitor(&validate_custom_cpp_type_annotations);
   validator.add_named_visitor(&deprecate_annotations);
 

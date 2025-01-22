@@ -249,6 +249,8 @@ cdef class Struct(StructOrUnion):
     cdef _fbthrift_fully_populate_cache(Struct self)
     cdef _initStructTupleWithValues(Struct self, object kwargs) except *
 
+cdef Struct _fbthrift_struct_update_nested_field(Struct obj, list path_and_vals)
+
 cdef tuple _validate_union_init_kwargs(
     object union_class, object fields_enum_type, dict kwargs
 )

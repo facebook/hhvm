@@ -327,13 +327,11 @@ class StructTests(unittest.TestCase):
         self.assertEqual(expected, dir(easy))
         self.assertEqual(["__iter__"], dir(Struct))
 
-    @brokenInAutoMigrate()
     def test_update_nested_fields(self) -> None:
         n = Nested1(a=Nested2(b=Nested3(c=easy(val=42, name="foo"))))
         n = Struct.update_nested_field(n, {"a.b.c": easy(val=128)})
         self.assertEqual(n.a.b.c.val, 128)
 
-    @brokenInAutoMigrate()
     def test_update_multiple_nested_fields(self) -> None:
         n = Nested1(a=Nested2(b=Nested3(c=easy(val=42, name="foo"))))
         n = Struct.update_nested_field(
@@ -346,7 +344,6 @@ class StructTests(unittest.TestCase):
         self.assertEqual(n.a.b.c.name, "bar")
         self.assertEqual(n.a.b.c.val, 256)
 
-    @brokenInAutoMigrate()
     def test_update_invalid_nested_fields(self) -> None:
         n = Nested1(a=Nested2(b=Nested3(c=easy(val=42, name="foo"))))
         with self.assertRaises(ValueError):
@@ -358,7 +355,6 @@ class StructTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             Struct.update_nested_field(n, {"a.e.f": 0})
 
-    @brokenInAutoMigrate()
     def test_update_conflicting_nested_fields(self) -> None:
         n = Nested1(a=Nested2(b=Nested3(c=easy(val=42, name="foo"))))
         with self.assertRaises(ValueError):

@@ -27,11 +27,15 @@ from types import MappingProxyType
 
 from thrift.py3.exceptions cimport GeneratedError
 from thrift.py3.serializer import deserialize, serialize
-from thrift.python.types cimport BadEnum as _fbthrift_python_BadEnum
+from thrift.python.types cimport (
+    BadEnum as _fbthrift_python_BadEnum,
+    _fbthrift_struct_update_nested_field as _fbthrift_python_struct_update_nested_field,
+)
 from thrift.python.types import (
     Enum as _fbthrift_python_Enum,
     EnumMeta as _fbthrift_python_EnumMeta,
     Flag as _fbthrift_python_Flag,
+    Struct as _fbthrift_python_Struct,
     StructOrUnion as _fbthrift_python_StructOrUnion,
 )
 
@@ -84,18 +88,26 @@ cdef class StructMeta(type):
         return struct._fbthrift_isset()
 
     @staticmethod
-    def update_nested_field(Struct obj, path_to_values):
-        # There is some optimzation opportunity here for cases like this:
+    def update_nested_field(obj, path_to_values):
+        # There is an optimization opportunity here for cases like this:
         # { "a.b.c": foo, "a.b.d": var }
         try:
-            obj = _fbthrift_struct_update_nested_field(
-                obj,
-                [(p.split("."), v) for p, v in path_to_values.items()]
-            )
-            return obj
+            if isinstance(obj, _fbthrift_python_Struct):
+                return _fbthrift_python_struct_update_nested_field(
+                    obj,
+                    [(p.split("."), v) for p, v in path_to_values.items()]
+                )
+            elif isinstance(obj, Struct):
+                return _fbthrift_struct_update_nested_field(
+                    obj,
+                    [(p.split("."), v) for p, v in path_to_values.items()]
+                )
         except (AttributeError, TypeError) as e:
             # Unify different exception types to ValueError
             raise ValueError(e)
+
+        # obj is not a py3 or python Struct
+        raise TypeError("`update_nested_field` requires thrift.py3.Struct or thrift.python.Struct")
 
     # make the __module__ customizable
     # this just enables the slot; impl here is ignored

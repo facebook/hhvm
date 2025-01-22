@@ -32,6 +32,8 @@ namespace py3 ""
 namespace cpp2 cpp2
 
 const list<i16> int_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const list<string> unicode_list = ["Bulgaria", "Benin", "Saint Barthélemy"];
+const list<binary> binary_list = ["Saint Barthélemy"];
 
 const map<i16, map<i16, i16>> LocationMap = {1: {1: 1}};
 

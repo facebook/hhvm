@@ -54,6 +54,17 @@ inline bool generate_legacy_api(const t_service&) {
   return true;
 }
 
+enum class nonascii_handling { octal_escape, no_escape };
+
+/**
+ * For languages that don't support unicode with hex-escaped code points,
+ * default to octal escapes for non-ascii characters. Some
+ * languages (e.g., Python) prefer hex-escaped unicode code points in unicode
+ * literals.
+ *
+ * In any case, use octal escapes for certain non-printable characters like DEL.
+ */
+template <nonascii_handling Handling = nonascii_handling::octal_escape>
 inline std::string get_escaped_string(std::string_view str) {
   std::string escaped;
   escaped.reserve(str.size());
@@ -77,7 +88,8 @@ inline std::string get_escaped_string(std::string_view str) {
         escaped.append("\\077");
         break;
       default:
-        if (c < 0x20 || c >= 0x7F) {
+        if ((c < 0x20 || c == 0x7F) ||
+            (Handling == nonascii_handling::octal_escape && c > 0x7F)) {
           // Use octal escape sequences because they are the most portable
           // across languages. Hexadecimal ones have a problem of consuming
           // all hex digits after \x in C++, e.g. \xcafefe is a single escape

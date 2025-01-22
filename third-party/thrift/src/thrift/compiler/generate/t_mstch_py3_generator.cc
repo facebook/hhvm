@@ -1133,6 +1133,7 @@ class py3_mstch_const_value : public mstch_const_value {
             {"value:value_for_floating_point?",
              &py3_mstch_const_value::is_float_value},
             {"value:py3_binary?", &py3_mstch_const_value::is_binary},
+            {"value:unicode_value", &py3_mstch_const_value::unicode_value},
             {"value:const_enum_type", &py3_mstch_const_value::const_enum_type},
             {"value:py3_enum_value_name",
              &py3_mstch_const_value::py3_enum_value_name},
@@ -1160,6 +1161,20 @@ class py3_mstch_const_value : public mstch_const_value {
     auto& ttype = const_value_->ttype();
     return type_ == cv::CV_STRING && ttype &&
         ttype->get_true_type()->is_binary();
+  }
+
+  /*
+   * Use this function (instead of the version used by C++) to render unicode
+   * strings, i.e., normal python strings "".
+   * For binary bytes b"", use string_value, which has octal escapes for unicode
+   * characters.
+   */
+  mstch::node unicode_value() {
+    if (type_ != cv::CV_STRING) {
+      return {};
+    }
+    return get_escaped_string<nonascii_handling::no_escape>(
+        const_value_->get_string());
   }
 
   mstch::node py3_enum_value_name() {

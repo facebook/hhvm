@@ -19,6 +19,7 @@ import itertools
 import unittest
 
 from testing.types import (
+    binary_list,
     Color,
     ColorGroups,
     easy,
@@ -31,6 +32,7 @@ from testing.types import (
     StringList,
     StrList2D,
     Uint32List,
+    unicode_list,
 )
 from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
     brokenInAutoMigrate,
@@ -60,6 +62,10 @@ class ListTests(unittest.TestCase):
             # pyre-fixme[6]: Expected `Optional[typing.Sequence[int]]` for 1st param
             #  but got `List[None]`.
             List__i32([None, None, None])
+
+    def test_string_const(self) -> None:
+        self.assertEqual(unicode_list, ["Bulgaria", "Benin", "Saint Barthélemy"])
+        self.assertEqual(binary_list, [b"Saint Barth\xc3\xa9lemy"])
 
     def test_isinstance(self) -> None:
         base_cls = PythonList if is_auto_migrated() else Py3List

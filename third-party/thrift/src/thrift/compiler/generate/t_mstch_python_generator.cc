@@ -1287,8 +1287,7 @@ class python_mstch_const_value : public mstch_const_value {
             {"value:py3_enum_value_name",
              &python_mstch_const_value::py3_enum_value_name},
             {"value:py3_binary?", &python_mstch_const_value::is_binary},
-            {"value:contains_unicode?",
-             &python_mstch_const_value::contains_unicode},
+            {"value:unicode_value", &python_mstch_const_value::unicode_value},
             {"value:const_enum_type",
              &python_mstch_const_value::const_enum_type},
             {"value:value_for_bool?",
@@ -1302,21 +1301,12 @@ class python_mstch_const_value : public mstch_const_value {
         });
   }
 
-  // A unicode string that actually contains unicode requires special handling
-  // because compiler can't directly render it as python unicode literal.
-  mstch::node contains_unicode() {
-    if (!is_nonbinary_string()) {
-      return false;
+  mstch::node unicode_value() {
+    if (type_ != cv::CV_STRING) {
+      return {};
     }
-    const std::string& str = const_value_->get_string();
-    return std::any_of(
-        str.begin(), str.end(), [](signed char c) { return c < 0; });
-  }
-
-  bool is_nonbinary_string() {
-    auto& ttype = const_value_->ttype();
-    return type_ == cv::CV_STRING && ttype &&
-        ttype->get_true_type()->is_string();
+    return get_escaped_string<nonascii_handling::no_escape>(
+        const_value_->get_string());
   }
 
   mstch::node is_binary() {

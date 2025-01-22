@@ -780,9 +780,9 @@ escaped_a = "a"
 
 char2ascii = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32, { "'": 39, "\"": 34, "\\": 92, "a": 97})
 
-escaped_strings = _fbthrift_python_types.List(_fbthrift_python_types.typeinfo_string, ("\001", "\037", " ", "'", "\"", "\n", "\r", "\011", "a", b"\302\253".decode(), "j", b"\302\246".decode(), "ayyy", b"\302\253yyy".decode(), "jyyy", b"\302\246yyy".decode(), "zzza", b"zzz\302\253".decode(), "zzzj", b"zzz\302\246".decode(), "zzzayyy", b"zzz\302\253yyy".decode(), "zzzjyyy", b"zzz\302\246yyy".decode(), ))
+escaped_strings = _fbthrift_python_types.List(_fbthrift_python_types.typeinfo_string, ("\001", "\037", " ", "'", "\"", "\n", "\r", "\011", "a", "«", "j", "¦", "ayyy", "«yyy", "jyyy", "¦yyy", "zzza", "zzz«", "zzzj", "zzz¦", "zzzayyy", "zzz«yyy", "zzzjyyy", "zzz¦yyy", ))
 
-unicode_list = _fbthrift_python_types.List(_fbthrift_python_types.typeinfo_string, ("Bulgaria", "Benin", b"Saint Barth\303\251lemy".decode(), ))
+unicode_list = _fbthrift_python_types.List(_fbthrift_python_types.typeinfo_string, ("Bulgaria", "Benin", "Saint Barthélemy", ))
 
 false_c = False
 
@@ -816,7 +816,7 @@ empty_string_int_map = _fbthrift_python_types.Map(_fbthrift_python_types.typeinf
 
 empty_string_string_map = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string, { })
 
-unicode_map = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string, { "BG": "Bulgaria", "BH": "Bahrain", b"B\303\211".decode(): b"Saint Barth\303\251lemy".decode()})
+unicode_map = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string, { "BG": "Bulgaria", "BH": "Bahrain", "BÉ": "Saint Barthélemy"})
 
 maxIntDec = 9223372036854775807
 

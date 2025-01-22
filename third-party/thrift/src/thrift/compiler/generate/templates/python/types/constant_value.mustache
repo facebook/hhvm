@@ -47,12 +47,8 @@ file.
 }}{{/value:const_struct?}}{{!
 }}{{^value:const_struct?}}{{!
 }}{{#value:string?}}{{!
-    }}{{^value:contains_unicode?}}{{!
-        }}{{#value:py3_binary?}}b{{/value:py3_binary?}}"{{value:string_value}}"{{!
-    }}{{/value:contains_unicode?}}{{!
-    }}{{#value:contains_unicode?}}{{!
-        }}b"{{value:string_value}}".decode(){{!
-    }}{{/value:contains_unicode?}}{{!
+    }}{{#value:py3_binary?}}b"{{value:string_value}}"{{/value:py3_binary?}}{{!
+    }}{{^value:py3_binary?}}"{{value:unicode_value}}"{{/value:py3_binary?}}{{!
 }}{{/value:string?}}{{!
 }}{{#value:map?}}_fbthrift_python_types.Map({{!
     }}{{#value:map_key_type}}{{> types/typeinfo }}{{/value:map_key_type}}, {{!

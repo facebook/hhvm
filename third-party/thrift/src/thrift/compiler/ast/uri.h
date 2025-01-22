@@ -141,6 +141,8 @@ inline constexpr auto kPythonUseCAPIUri =
     "facebook.com/thrift/annotation/python/UseCAPI";
 inline constexpr auto kPythonPy3EnableCppAdapterUri =
     "facebook.com/thrift/annotation/python/Py3EnableCppAdapter";
+inline constexpr auto kPythonMigrationBlockingAllowInheritanceUri =
+    "facebook.com/thrift/annotation/python/MigrationBlockingAllowInheritance";
 
 // Hack:
 inline constexpr auto kHackAdapterUri =

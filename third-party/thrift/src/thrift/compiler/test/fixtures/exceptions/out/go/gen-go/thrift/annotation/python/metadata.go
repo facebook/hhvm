@@ -71,6 +71,12 @@ var (
                 SetName("python.Py3EnableCppAdapter"),
         )
     }()
+    premadeThriftType_python_MigrationBlockingAllowInheritance = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("python.MigrationBlockingAllowInheritance"),
+        )
+    }()
 )
 
 // Helper type to allow us to store Thrift types in a slice at compile time,
@@ -92,6 +98,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "bool", premadeThriftType_bool })
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "python.UseCAPI", premadeThriftType_python_UseCAPI })
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "python.Py3EnableCppAdapter", premadeThriftType_python_Py3EnableCppAdapter })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "python.MigrationBlockingAllowInheritance", premadeThriftType_python_MigrationBlockingAllowInheritance })
 
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
     for _, value := range thriftTypesWithFullName {

@@ -110,6 +110,17 @@ var (
 
         }
     }()
+    premadeCodecTypeSpec_python_MigrationBlockingAllowInheritance = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "python.MigrationBlockingAllowInheritance",
+            CodecStructSpec: &thrift.CodecStructSpec{
+    ScopedName: "python.MigrationBlockingAllowInheritance",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewMigrationBlockingAllowInheritance() },
+},
+
+        }
+    }()
 )
 
 // Premade struct specs
@@ -262,6 +273,20 @@ var (
     },
 }
     }()
+    premadeStructSpec_MigrationBlockingAllowInheritance = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
+    Name:                 "MigrationBlockingAllowInheritance",
+    ScopedName:           "python.MigrationBlockingAllowInheritance",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
+    },
+    FieldSpecIDToIndex:   map[int16]int{
+    },
+    FieldSpecNameToIndex: map[string]int{
+    },
+}
+    }()
 )
 
 // Premade slice of all struct specs
@@ -274,6 +299,7 @@ var premadeStructSpecs = func() []*thrift.StructSpec {
     fbthriftResults = append(fbthriftResults, premadeStructSpec_Adapter)
     fbthriftResults = append(fbthriftResults, premadeStructSpec_UseCAPI)
     fbthriftResults = append(fbthriftResults, premadeStructSpec_Py3EnableCppAdapter)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_MigrationBlockingAllowInheritance)
     return fbthriftResults
 }()
 
@@ -288,6 +314,7 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_UseCAPI.FullName] = premadeCodecTypeSpec_python_UseCAPI
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_Py3EnableCppAdapter.FullName] = premadeCodecTypeSpec_python_Py3EnableCppAdapter
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_MigrationBlockingAllowInheritance.FullName] = premadeCodecTypeSpec_python_MigrationBlockingAllowInheritance
     return fbthriftTypeSpecsMap
 }()
 

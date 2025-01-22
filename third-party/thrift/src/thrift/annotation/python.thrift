@@ -100,3 +100,6 @@ struct UseCAPI {
 /// It is only available for typedefs that resolve to binary, string, and container type.
 @scope.Typedef
 struct Py3EnableCppAdapter {}
+
+@scope.Structured
+struct MigrationBlockingAllowInheritance {}

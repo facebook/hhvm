@@ -21,6 +21,13 @@ struct ForEachField<::facebook::thrift::test::terse_write::deprecated::MyStruct>
 };
 
 template <>
+struct ForEachField<::facebook::thrift::test::terse_write::deprecated::MyUnion> {
+  template <typename F, typename... T>
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
+  }
+};
+
+template <>
 struct ForEachField<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct> {
   template <typename F, typename... T>
   void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
@@ -38,6 +45,7 @@ struct ForEachField<::facebook::thrift::test::terse_write::deprecated::StructLev
     f(11, static_cast<T&&>(t).set_field_ref()...);
     f(12, static_cast<T&&>(t).map_field_ref()...);
     f(13, static_cast<T&&>(t).struct_field_ref()...);
+    f(14, static_cast<T&&>(t).union_field_ref()...);
   }
 };
 
@@ -73,6 +81,16 @@ struct ForEachField<::facebook::thrift::test::terse_write::deprecated::FieldLeve
     f(25, static_cast<T&&>(t).set_field_ref()...);
     f(26, static_cast<T&&>(t).map_field_ref()...);
     f(27, static_cast<T&&>(t).struct_field_ref()...);
+    f(28, static_cast<T&&>(t).union_field_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields> {
+  template <typename F, typename... T>
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
+    f(0, static_cast<T&&>(t).primitive_ref_field_ref()...);
+    f(1, static_cast<T&&>(t).struct_ref_field_ref()...);
   }
 };
 } // namespace detail

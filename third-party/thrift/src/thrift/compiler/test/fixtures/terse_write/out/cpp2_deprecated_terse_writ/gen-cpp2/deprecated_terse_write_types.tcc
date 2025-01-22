@@ -23,6 +23,13 @@ struct TccStructTraits<::facebook::thrift::test::terse_write::deprecated::MyStru
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
+struct TccStructTraits<::facebook::thrift::test::terse_write::deprecated::MyUnion> {
+  static void translateFieldName(
+      std::string_view _fname,
+      int16_t& fid,
+      apache::thrift::protocol::TType& _ftype) noexcept;
+};
+template <>
 struct TccStructTraits<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct> {
   static void translateFieldName(
       std::string_view _fname,
@@ -31,6 +38,13 @@ struct TccStructTraits<::facebook::thrift::test::terse_write::deprecated::Struct
 };
 template <>
 struct TccStructTraits<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct> {
+  static void translateFieldName(
+      std::string_view _fname,
+      int16_t& fid,
+      apache::thrift::protocol::TType& _ftype) noexcept;
+};
+template <>
+struct TccStructTraits<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields> {
   static void translateFieldName(
       std::string_view _fname,
       int16_t& fid,
@@ -122,6 +136,80 @@ extern template void MyStruct::readNoXfer<>(apache::thrift::CompactProtocolReade
 extern template uint32_t MyStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
 extern template uint32_t MyStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 extern template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+template <class Protocol_>
+void MyUnion::readNoXfer(Protocol_* iprot) {
+  apache::thrift::detail::ProtocolReaderStructReadState<Protocol_> _readState;
+  _readState.fieldId = 0;
+
+  _readState.readStructBegin(iprot);
+
+  _readState.readFieldBegin(iprot);
+  if (_readState.atStop()) {
+    apache::thrift::clear(*this);
+  } else {
+    if (iprot->kUsesFieldNames()) {
+      _readState.template fillFieldTraitsFromName<apache::thrift::detail::TccStructTraits<MyUnion>>();
+    }
+    switch (_readState.fieldId) {
+      default:
+      {
+        _readState.skip(iprot);
+        break;
+      }
+    }
+    _readState.readFieldEnd(iprot);
+    _readState.readFieldBegin(iprot);
+    if (UNLIKELY(!_readState.atStop())) {
+      using apache::thrift::protocol::TProtocolException;
+      TProtocolException::throwUnionMissingStop();
+    }
+  }
+  _readState.readStructEnd(iprot);
+}
+template <class Protocol_>
+uint32_t MyUnion::serializedSize(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("MyUnion");
+  switch(this->getType()) {
+    case MyUnion::Type::__EMPTY__:;
+  }
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t MyUnion::serializedSizeZC(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("MyUnion");
+  switch(this->getType()) {
+    case MyUnion::Type::__EMPTY__:;
+  }
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t MyUnion::write(Protocol_* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->writeStructBegin("MyUnion");
+  switch(this->getType()) {
+    case MyUnion::Type::__EMPTY__:;
+  }
+  xfer += prot_->writeFieldStop();
+  xfer += prot_->writeStructEnd();
+  return xfer;
+}
+
+extern template void MyUnion::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+extern template uint32_t MyUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
+extern template uint32_t MyUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t MyUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template void MyUnion::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+extern template uint32_t MyUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
+extern template uint32_t MyUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+extern template uint32_t MyUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 template <class Protocol_>
@@ -317,6 +405,20 @@ _readField_struct_field:
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           14,
+          15,
+          apache::thrift::protocol::T_STRUCT))) {
+    goto _advance_failure;
+  }
+_readField_union_field:
+  {
+    _readState.beforeSubobject(iprot);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::terse_write::deprecated::MyUnion>::readWithContext(*iprot, this->__fbthrift_field_union_field, _readState);
+    _readState.afterSubobject(iprot);
+  }
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          15,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _advance_failure;
@@ -451,6 +553,14 @@ _loop:
         goto _skip;
       }
     }
+    case 15:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT))) {
+        goto _readField_union_field;
+      } else {
+        goto _skip;
+      }
+    }
     default:
     {
 _skip:
@@ -522,6 +632,10 @@ uint32_t StructLevelTerseStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("struct_field", apache::thrift::protocol::T_STRUCT, 14);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_struct_field);
   }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::union_t<::facebook::thrift::test::terse_write::deprecated::MyUnion>>(this->__fbthrift_field_union_field))) {
+    xfer += prot_->serializedFieldSize("union_field", apache::thrift::protocol::T_STRUCT, 15);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::terse_write::deprecated::MyUnion>::serializedSize<false>(*prot_, this->__fbthrift_field_union_field);
+  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -585,6 +699,10 @@ uint32_t StructLevelTerseStruct::serializedSizeZC(Protocol_ const* prot_) const 
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>>(this->__fbthrift_field_struct_field))) {
     xfer += prot_->serializedFieldSize("struct_field", apache::thrift::protocol::T_STRUCT, 14);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_struct_field);
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::union_t<::facebook::thrift::test::terse_write::deprecated::MyUnion>>(this->__fbthrift_field_union_field))) {
+    xfer += prot_->serializedFieldSize("union_field", apache::thrift::protocol::T_STRUCT, 15);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::terse_write::deprecated::MyUnion>::serializedSize<true>(*prot_, this->__fbthrift_field_union_field);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -717,6 +835,15 @@ uint32_t StructLevelTerseStruct::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 14, kPrevFieldId>(*prot_, "struct_field", previousFieldHasValue);
     previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::write(*prot_, this->__fbthrift_field_struct_field);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
+  }
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::union_t<::facebook::thrift::test::terse_write::deprecated::MyUnion>>(this->__fbthrift_field_union_field))) {
+    constexpr int16_t kPrevFieldId = 14;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 15, kPrevFieldId>(*prot_, "union_field", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::terse_write::deprecated::MyUnion>::write(*prot_, this->__fbthrift_field_union_field);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;
@@ -1122,6 +1249,21 @@ _readField_struct_field:
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           28,
+          29,
+          apache::thrift::protocol::T_STRUCT))) {
+    goto _advance_failure;
+  }
+_readField_union_field:
+  {
+    _readState.beforeSubobject(iprot);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::terse_write::deprecated::MyUnion>::readWithContext(*iprot, this->__fbthrift_field_union_field, _readState);
+    _readState.afterSubobject(iprot);
+  }
+ this->__isset.set(14, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          29,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _advance_failure;
@@ -1368,6 +1510,14 @@ _loop:
         goto _skip;
       }
     }
+    case 29:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT))) {
+        goto _readField_union_field;
+      } else {
+        goto _skip;
+      }
+    }
     default:
     {
 _skip:
@@ -1495,6 +1645,10 @@ uint32_t FieldLevelTerseStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("struct_field", apache::thrift::protocol::T_STRUCT, 28);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_struct_field);
   }
+  {
+    xfer += prot_->serializedFieldSize("union_field", apache::thrift::protocol::T_STRUCT, 29);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::terse_write::deprecated::MyUnion>::serializedSize<false>(*prot_, this->__fbthrift_field_union_field);
+  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -1614,6 +1768,10 @@ uint32_t FieldLevelTerseStruct::serializedSizeZC(Protocol_ const* prot_) const {
   {
     xfer += prot_->serializedFieldSize("struct_field", apache::thrift::protocol::T_STRUCT, 28);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_struct_field);
+  }
+  {
+    xfer += prot_->serializedFieldSize("union_field", apache::thrift::protocol::T_STRUCT, 29);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::terse_write::deprecated::MyUnion>::serializedSize<true>(*prot_, this->__fbthrift_field_union_field);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -1874,6 +2032,13 @@ uint32_t FieldLevelTerseStruct::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::write(*prot_, this->__fbthrift_field_struct_field);
     xfer += prot_->writeFieldEnd();
   }
+  {
+    constexpr int16_t kPrevFieldId = 28;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 29, kPrevFieldId>(*prot_, "union_field", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::terse_write::deprecated::MyUnion>::write(*prot_, this->__fbthrift_field_union_field);
+    xfer += prot_->writeFieldEnd();
+  }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
   return xfer;
@@ -1887,6 +2052,191 @@ extern template void FieldLevelTerseStruct::readNoXfer<>(apache::thrift::Compact
 extern template uint32_t FieldLevelTerseStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
 extern template uint32_t FieldLevelTerseStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 extern template uint32_t FieldLevelTerseStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+template <class Protocol_>
+void CppRefStructFields::readNoXfer(Protocol_* iprot) {
+  __fbthrift_clear_terse_fields();
+
+  apache::thrift::detail::ProtocolReaderStructReadState<Protocol_> _readState;
+
+  _readState.readStructBegin(iprot);
+
+  using apache::thrift::TProtocolException;
+
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          0,
+          1,
+          apache::thrift::protocol::T_I32))) {
+    goto _advance_failure;
+  }
+_readField_primitive_ref_field:
+  {
+    auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::int32_t>>();
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, *ptr, _readState);
+    this->__fbthrift_field_primitive_ref_field = std::move(ptr);
+  }
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          1,
+          2,
+          apache::thrift::protocol::T_STRUCT))) {
+    goto _advance_failure;
+  }
+_readField_struct_ref_field:
+  {
+    _readState.beforeSubobject(iprot);
+    auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>>();
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::readWithContext(*iprot, *ptr, _readState);
+    this->__fbthrift_field_struct_ref_field = std::move(ptr);
+    _readState.afterSubobject(iprot);
+  }
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          2,
+          0,
+          apache::thrift::protocol::T_STOP))) {
+    goto _advance_failure;
+  }
+
+_end:
+  _readState.readStructEnd(iprot);
+
+  return;
+
+  goto _advance_failure; // Avoid compiler warnings about unused labels.
+  _advance_failure:
+  _readState.afterAdvanceFailure(iprot);
+_loop:
+  if (_readState.atStop()) {
+    goto _end;
+  }
+  if (iprot->kUsesFieldNames()) {
+    _readState.template fillFieldTraitsFromName<apache::thrift::detail::TccStructTraits<CppRefStructFields>>();
+  }
+
+  switch (_readState.fieldId) {
+    case 1:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32))) {
+        goto _readField_primitive_ref_field;
+      } else {
+        goto _skip;
+      }
+    }
+    case 2:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT))) {
+        goto _readField_struct_ref_field;
+      } else {
+        goto _skip;
+      }
+    }
+    default:
+    {
+_skip:
+      _readState.skip(iprot);
+      _readState.readFieldEnd(iprot);
+      _readState.readFieldBeginNoInline(iprot);
+      goto _loop;
+    }
+  }
+}
+
+template <class Protocol_>
+uint32_t CppRefStructFields::serializedSize(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("CppRefStructFields");
+  if (this->__fbthrift_field_primitive_ref_field) {
+    xfer += prot_->serializedFieldSize("primitive_ref_field", apache::thrift::protocol::T_I32, 1);
+    if (this->__fbthrift_field_primitive_ref_field) {
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, *this->__fbthrift_field_primitive_ref_field);
+    }
+  }
+  if (this->__fbthrift_field_struct_ref_field) {
+    xfer += prot_->serializedFieldSize("struct_ref_field", apache::thrift::protocol::T_STRUCT, 2);
+    if (this->__fbthrift_field_struct_ref_field) {
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::serializedSize<false>(*prot_, *this->__fbthrift_field_struct_ref_field);
+    } else {
+      xfer += prot_->serializedStructSize("MyStruct");
+      xfer += prot_->serializedSizeStop();
+    }
+  }
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t CppRefStructFields::serializedSizeZC(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("CppRefStructFields");
+  if (this->__fbthrift_field_primitive_ref_field) {
+    xfer += prot_->serializedFieldSize("primitive_ref_field", apache::thrift::protocol::T_I32, 1);
+    if (this->__fbthrift_field_primitive_ref_field) {
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, *this->__fbthrift_field_primitive_ref_field);
+    }
+  }
+  if (this->__fbthrift_field_struct_ref_field) {
+    xfer += prot_->serializedFieldSize("struct_ref_field", apache::thrift::protocol::T_STRUCT, 2);
+    if (this->__fbthrift_field_struct_ref_field) {
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::serializedSize<true>(*prot_, *this->__fbthrift_field_struct_ref_field);
+    } else {
+      xfer += prot_->serializedStructSize("MyStruct");
+      xfer += prot_->serializedSizeStop();
+    }
+  }
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t CppRefStructFields::write(Protocol_* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->writeStructBegin("CppRefStructFields");
+  bool previousFieldHasValue = true;
+  if (this->__fbthrift_field_primitive_ref_field) {
+    constexpr int16_t kPrevFieldId = 0;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I32, 1, kPrevFieldId>(*prot_, "primitive_ref_field", previousFieldHasValue);
+    previousFieldHasValue = true;
+    if (this->__fbthrift_field_primitive_ref_field) {
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::write(*prot_, *this->__fbthrift_field_primitive_ref_field);
+    }
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
+  }
+  if (this->__fbthrift_field_struct_ref_field) {
+    constexpr int16_t kPrevFieldId = 1;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 2, kPrevFieldId>(*prot_, "struct_ref_field", previousFieldHasValue);
+    previousFieldHasValue = true;
+    if (this->__fbthrift_field_struct_ref_field) {
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::deprecated::MyStruct>::write(*prot_, *this->__fbthrift_field_struct_ref_field);
+    } else {
+      xfer += prot_->writeStructBegin("MyStruct");
+      xfer += prot_->writeFieldStop();
+      xfer += prot_->writeStructEnd();
+    }
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
+  }
+  xfer += prot_->writeFieldStop();
+  xfer += prot_->writeStructEnd();
+  return xfer;
+}
+
+extern template void CppRefStructFields::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+extern template uint32_t CppRefStructFields::write<>(apache::thrift::BinaryProtocolWriter*) const;
+extern template uint32_t CppRefStructFields::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t CppRefStructFields::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template void CppRefStructFields::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+extern template uint32_t CppRefStructFields::write<>(apache::thrift::CompactProtocolWriter*) const;
+extern template uint32_t CppRefStructFields::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+extern template uint32_t CppRefStructFields::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace facebook::thrift::test::terse_write::deprecated

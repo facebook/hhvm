@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
 
 @thrift.Experimental
@@ -25,6 +26,7 @@ enum MyEnum {
 }
 
 struct MyStruct {}
+union MyUnion {}
 
 @thrift.TerseWrite
 struct StructLevelTerseStruct {
@@ -42,6 +44,7 @@ struct StructLevelTerseStruct {
   12: set<i16> set_field;
   13: map<i16, i16> map_field;
   14: MyStruct struct_field;
+  15: MyUnion union_field;
 }
 
 struct FieldLevelTerseStruct {
@@ -90,4 +93,14 @@ struct FieldLevelTerseStruct {
   26: set<i16> set_field;
   27: map<i16, i16> map_field;
   28: MyStruct struct_field;
+  29: MyUnion union_field;
+}
+
+struct CppRefStructFields {
+  @cpp.AllowLegacyNonOptionalRef
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: i32 primitive_ref_field;
+  @cpp.AllowLegacyNonOptionalRef
+  @cpp.Ref{type = cpp.RefType.Unique}
+  2: MyStruct struct_ref_field;
 }

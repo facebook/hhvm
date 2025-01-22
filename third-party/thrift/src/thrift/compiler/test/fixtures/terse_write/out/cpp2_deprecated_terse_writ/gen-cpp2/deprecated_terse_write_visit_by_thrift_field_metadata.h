@@ -25,6 +25,17 @@ struct VisitByFieldId<::facebook::thrift::test::terse_write::deprecated::MyStruc
 };
 
 template <>
+struct VisitByFieldId<::facebook::thrift::test::terse_write::deprecated::MyUnion> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    default:
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::terse_write::deprecated::MyUnion");
+    }
+  }
+};
+
+template <>
 struct VisitByFieldId<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct> {
   template <typename F, typename T>
   void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
@@ -57,6 +68,8 @@ struct VisitByFieldId<::facebook::thrift::test::terse_write::deprecated::StructL
       return f(12, static_cast<T&&>(t).map_field_ref());
     case 14:
       return f(13, static_cast<T&&>(t).struct_field_ref());
+    case 15:
+      return f(14, static_cast<T&&>(t).union_field_ref());
     default:
       throwInvalidThriftId(fieldId, "::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct");
     }
@@ -124,8 +137,25 @@ struct VisitByFieldId<::facebook::thrift::test::terse_write::deprecated::FieldLe
       return f(26, static_cast<T&&>(t).map_field_ref());
     case 28:
       return f(27, static_cast<T&&>(t).struct_field_ref());
+    case 29:
+      return f(28, static_cast<T&&>(t).union_field_ref());
     default:
       throwInvalidThriftId(fieldId, "::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::facebook::thrift::test::terse_write::deprecated::CppRefStructFields> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).primitive_ref_field_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).struct_ref_field_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::terse_write::deprecated::CppRefStructFields");
     }
   }
 };

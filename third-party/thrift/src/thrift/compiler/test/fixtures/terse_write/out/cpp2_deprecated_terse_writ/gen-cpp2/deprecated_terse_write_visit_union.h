@@ -13,6 +13,18 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+template <>
+struct VisitUnion<::facebook::thrift::test::terse_write::deprecated::MyUnion> {
+
+  template <typename F, typename T>
+  decltype(auto) operator()([[maybe_unused]] F&& f, T&& t) const {
+    using Union = std::remove_reference_t<T>;
+    switch (t.getType()) {
+    case Union::Type::__EMPTY__:
+      (void)0;
+    }
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

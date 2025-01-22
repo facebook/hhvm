@@ -27,6 +27,7 @@ struct list_field;
 struct set_field;
 struct map_field;
 struct struct_field;
+struct union_field;
 struct terse_bool_field;
 struct terse_byte_field;
 struct terse_short_field;
@@ -55,6 +56,9 @@ struct list_field;
 struct set_field;
 struct map_field;
 struct struct_field;
+struct union_field;
+struct primitive_ref_field;
+struct struct_ref_field;
 } // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_bool_field
@@ -112,6 +116,10 @@ APACHE_THRIFT_DEFINE_ACCESSOR(map_field);
 #ifndef APACHE_THRIFT_ACCESSOR_struct_field
 #define APACHE_THRIFT_ACCESSOR_struct_field
 APACHE_THRIFT_DEFINE_ACCESSOR(struct_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_union_field
+#define APACHE_THRIFT_ACCESSOR_union_field
+APACHE_THRIFT_DEFINE_ACCESSOR(union_field);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_terse_bool_field
 #define APACHE_THRIFT_ACCESSOR_terse_bool_field
@@ -225,6 +233,18 @@ APACHE_THRIFT_DEFINE_ACCESSOR(map_field);
 #define APACHE_THRIFT_ACCESSOR_struct_field
 APACHE_THRIFT_DEFINE_ACCESSOR(struct_field);
 #endif
+#ifndef APACHE_THRIFT_ACCESSOR_union_field
+#define APACHE_THRIFT_ACCESSOR_union_field
+APACHE_THRIFT_DEFINE_ACCESSOR(union_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_primitive_ref_field
+#define APACHE_THRIFT_ACCESSOR_primitive_ref_field
+APACHE_THRIFT_DEFINE_ACCESSOR(primitive_ref_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_struct_ref_field
+#define APACHE_THRIFT_ACCESSOR_struct_ref_field
+APACHE_THRIFT_DEFINE_ACCESSOR(struct_ref_field);
+#endif
 } // namespace detail
 } // namespace thrift
 } // namespace apache
@@ -288,8 +308,10 @@ template <> struct TEnumTraits<::facebook::thrift::test::terse_write::deprecated
 // BEGIN forward_declare
 namespace facebook::thrift::test::terse_write::deprecated {
 class MyStruct;
+class MyUnion;
 class StructLevelTerseStruct;
 class FieldLevelTerseStruct;
+class CppRefStructFields;
 } // namespace facebook::thrift::test::terse_write::deprecated
 // END forward_declare
 namespace apache::thrift::detail::annotation {
@@ -407,6 +429,144 @@ unsigned long MyStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/deprecated_terse_write.thrift", "name": "MyUnion", "kind": "union" } */
+class MyUnion final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
+  static const char* __fbthrift_thrift_uri();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "deprecated_terse_write";
+  }
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+  >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+  >;
+
+  static constexpr std::size_t __fbthrift_field_size_v = 0;
+
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_destruct();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = MyUnion;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    true;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
+
+
+ public:
+  enum Type : int {
+    __EMPTY__ = 0,
+  } ;
+
+  MyUnion()
+      : type_(folly::to_underlying(Type::__EMPTY__)) {}
+
+  MyUnion(MyUnion&& rhs) noexcept
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    if (this == &rhs) { return; }
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    apache::thrift::clear(rhs);
+  }
+
+  MyUnion(const MyUnion& rhs);
+
+  MyUnion& operator=(MyUnion&& rhs) noexcept {
+    if (this == &rhs) { return *this; }
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        __fbthrift_clear();
+        return *this;
+      }
+      default:
+      {
+        assert(false);
+        __fbthrift_clear();
+      }
+    }
+    apache::thrift::clear(rhs);
+    return *this;
+  }
+
+  MyUnion& operator=(const MyUnion& rhs);
+
+
+  union storage_type {
+
+  } ;
+
+  bool operator==(const MyUnion&) const;
+  bool operator<(const MyUnion&) const;
+
+  Type getType() const { return static_cast<Type>(type_); }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+ protected:
+  storage_type value_;
+  std::underlying_type_t<Type> type_;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<MyUnion>;
+  friend void swap(MyUnion& a, MyUnion& b);
+};
+
+template <class Protocol_>
+unsigned long MyUnion::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
 /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/deprecated_terse_write.thrift", "name": "StructLevelTerseStruct", "kind": "struct" } */
 class StructLevelTerseStruct final  {
  private:
@@ -437,10 +597,11 @@ class StructLevelTerseStruct final  {
     ::apache::thrift::ident::list_field,
     ::apache::thrift::ident::set_field,
     ::apache::thrift::ident::map_field,
-    ::apache::thrift::ident::struct_field
+    ::apache::thrift::ident::struct_field,
+    ::apache::thrift::ident::union_field
   >;
 
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14};
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::bool_t,
     ::apache::thrift::type::byte_t,
@@ -455,10 +616,11 @@ class StructLevelTerseStruct final  {
     ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
     ::apache::thrift::type::set<::apache::thrift::type::i16_t>,
     ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>,
-    ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>
+    ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>,
+    ::apache::thrift::type::union_t<::facebook::thrift::test::terse_write::deprecated::MyUnion>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 14;
+  static constexpr std::size_t __fbthrift_field_size_v = 15;
 
   template<class T>
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
@@ -494,7 +656,7 @@ class StructLevelTerseStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  StructLevelTerseStruct(apache::thrift::FragileConstructor, bool bool_field__arg, ::std::int8_t byte_field__arg, ::std::int16_t short_field__arg, ::std::int32_t int_field__arg, ::std::int64_t long_field__arg, float float_field__arg, double double_field__arg, ::std::string string_field__arg, ::std::string binary_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyEnum enum_field__arg, ::std::vector<::std::int16_t> list_field__arg, ::std::set<::std::int16_t> set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> map_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyStruct struct_field__arg);
+  StructLevelTerseStruct(apache::thrift::FragileConstructor, bool bool_field__arg, ::std::int8_t byte_field__arg, ::std::int16_t short_field__arg, ::std::int32_t int_field__arg, ::std::int64_t long_field__arg, float float_field__arg, double double_field__arg, ::std::string string_field__arg, ::std::string binary_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyEnum enum_field__arg, ::std::vector<::std::int16_t> list_field__arg, ::std::set<::std::int16_t> set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> map_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyStruct struct_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyUnion union_field__arg);
 
   StructLevelTerseStruct(StructLevelTerseStruct&&) noexcept;
 
@@ -534,6 +696,8 @@ class StructLevelTerseStruct final  {
   ::std::map<::std::int16_t, ::std::int16_t> __fbthrift_field_map_field;
  private:
   ::facebook::thrift::test::terse_write::deprecated::MyStruct __fbthrift_field_struct_field;
+ private:
+  ::facebook::thrift::test::terse_write::deprecated::MyUnion __fbthrift_field_union_field;
 
  public:
 
@@ -1212,6 +1376,54 @@ class StructLevelTerseStruct final  {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_struct_field)};
   }
 
+  /** Glean { "field": "union_field" } */
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> union_field_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_union_field};
+  }
+
+  /** Glean { "field": "union_field" } */
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> union_field_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_union_field)};
+  }
+
+  /** Glean { "field": "union_field" } */
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> union_field_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_union_field};
+  }
+
+  /** Glean { "field": "union_field" } */
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> union_field_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_union_field)};
+  }
+
+  /** Glean { "field": "union_field" } */
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> union_field() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_union_field};
+  }
+
+  /** Glean { "field": "union_field" } */
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> union_field() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_union_field)};
+  }
+
+  /** Glean { "field": "union_field" } */
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> union_field() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_union_field};
+  }
+
+  /** Glean { "field": "union_field" } */
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> union_field() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_union_field)};
+  }
+
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
   template <class Protocol_>
@@ -1281,10 +1493,11 @@ class FieldLevelTerseStruct final  {
     ::apache::thrift::ident::list_field,
     ::apache::thrift::ident::set_field,
     ::apache::thrift::ident::map_field,
-    ::apache::thrift::ident::struct_field
+    ::apache::thrift::ident::struct_field,
+    ::apache::thrift::ident::union_field
   >;
 
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28};
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29};
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::bool_t,
     ::apache::thrift::type::byte_t,
@@ -1313,10 +1526,11 @@ class FieldLevelTerseStruct final  {
     ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
     ::apache::thrift::type::set<::apache::thrift::type::i16_t>,
     ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>,
-    ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>
+    ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>,
+    ::apache::thrift::type::union_t<::facebook::thrift::test::terse_write::deprecated::MyUnion>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 28;
+  static constexpr std::size_t __fbthrift_field_size_v = 29;
 
   template<class T>
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
@@ -1352,7 +1566,7 @@ class FieldLevelTerseStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  FieldLevelTerseStruct(apache::thrift::FragileConstructor, bool terse_bool_field__arg, ::std::int8_t terse_byte_field__arg, ::std::int16_t terse_short_field__arg, ::std::int32_t terse_int_field__arg, ::std::int64_t terse_long_field__arg, float terse_float_field__arg, double terse_double_field__arg, ::std::string terse_string_field__arg, ::std::string terse_binary_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyEnum terse_enum_field__arg, ::std::vector<::std::int16_t> terse_list_field__arg, ::std::set<::std::int16_t> terse_set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> terse_map_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyStruct terse_struct_field__arg, bool bool_field__arg, ::std::int8_t byte_field__arg, ::std::int16_t short_field__arg, ::std::int32_t int_field__arg, ::std::int64_t long_field__arg, float float_field__arg, double double_field__arg, ::std::string string_field__arg, ::std::string binary_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyEnum enum_field__arg, ::std::vector<::std::int16_t> list_field__arg, ::std::set<::std::int16_t> set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> map_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyStruct struct_field__arg);
+  FieldLevelTerseStruct(apache::thrift::FragileConstructor, bool terse_bool_field__arg, ::std::int8_t terse_byte_field__arg, ::std::int16_t terse_short_field__arg, ::std::int32_t terse_int_field__arg, ::std::int64_t terse_long_field__arg, float terse_float_field__arg, double terse_double_field__arg, ::std::string terse_string_field__arg, ::std::string terse_binary_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyEnum terse_enum_field__arg, ::std::vector<::std::int16_t> terse_list_field__arg, ::std::set<::std::int16_t> terse_set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> terse_map_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyStruct terse_struct_field__arg, bool bool_field__arg, ::std::int8_t byte_field__arg, ::std::int16_t short_field__arg, ::std::int32_t int_field__arg, ::std::int64_t long_field__arg, float float_field__arg, double double_field__arg, ::std::string string_field__arg, ::std::string binary_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyEnum enum_field__arg, ::std::vector<::std::int16_t> list_field__arg, ::std::set<::std::int16_t> set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> map_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyStruct struct_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyUnion union_field__arg);
 
   FieldLevelTerseStruct(FieldLevelTerseStruct&&) noexcept;
 
@@ -1421,7 +1635,9 @@ class FieldLevelTerseStruct final  {
  private:
   ::facebook::thrift::test::terse_write::deprecated::MyStruct __fbthrift_field_struct_field;
  private:
-  apache::thrift::detail::isset_bitset<14, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+  ::facebook::thrift::test::terse_write::deprecated::MyUnion __fbthrift_field_union_field;
+ private:
+  apache::thrift::detail::isset_bitset<15, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
@@ -2772,6 +2988,54 @@ class FieldLevelTerseStruct final  {
     return {static_cast<T&&>(this->__fbthrift_field_struct_field), __isset.at(13), __isset.bit(13)};
   }
 
+  /** Glean { "field": "union_field" } */
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> union_field_ref() const& {
+    return {this->__fbthrift_field_union_field, __isset.at(14), __isset.bit(14)};
+  }
+
+  /** Glean { "field": "union_field" } */
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> union_field_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_union_field), __isset.at(14), __isset.bit(14)};
+  }
+
+  /** Glean { "field": "union_field" } */
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> union_field_ref() & {
+    return {this->__fbthrift_field_union_field, __isset.at(14), __isset.bit(14)};
+  }
+
+  /** Glean { "field": "union_field" } */
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> union_field_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_union_field), __isset.at(14), __isset.bit(14)};
+  }
+
+  /** Glean { "field": "union_field" } */
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> union_field() const& {
+    return {this->__fbthrift_field_union_field, __isset.at(14), __isset.bit(14)};
+  }
+
+  /** Glean { "field": "union_field" } */
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> union_field() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_union_field), __isset.at(14), __isset.bit(14)};
+  }
+
+  /** Glean { "field": "union_field" } */
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> union_field() & {
+    return {this->__fbthrift_field_union_field, __isset.at(14), __isset.bit(14)};
+  }
+
+  /** Glean { "field": "union_field" } */
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> union_field() && {
+    return {static_cast<T&&>(this->__fbthrift_field_union_field), __isset.at(14), __isset.bit(14)};
+  }
+
   /** Glean { "field": "bool_field" } */
   [[deprecated("Use `FOO.bool_field().value();` instead of `FOO.get_bool_field();`")]]
   bool get_bool_field() const;
@@ -2940,6 +3204,22 @@ class FieldLevelTerseStruct final  {
     return __fbthrift_field_struct_field;
   }
 
+  /** Glean { "field": "union_field" } */
+  [[deprecated("Use `FOO.union_field().value();` instead of `FOO.get_union_field();`")]]
+  const ::facebook::thrift::test::terse_write::deprecated::MyUnion& get_union_field() const&;
+
+  /** Glean { "field": "union_field" } */
+  [[deprecated("Use `FOO.union_field().value();` instead of `FOO.get_union_field();`")]]
+  ::facebook::thrift::test::terse_write::deprecated::MyUnion get_union_field() &&;
+
+  /** Glean { "field": "union_field" } */
+  template <typename T_FieldLevelTerseStruct_union_field_struct_setter = ::facebook::thrift::test::terse_write::deprecated::MyUnion>
+  [[deprecated("Use `FOO.union_field() = BAR;` instead of `FOO.set_union_field(BAR);`")]]
+  ::facebook::thrift::test::terse_write::deprecated::MyUnion& set_union_field(T_FieldLevelTerseStruct_union_field_struct_setter&& union_field_) {
+    union_field_ref() = std::forward<T_FieldLevelTerseStruct_union_field_struct_setter>(union_field_);
+    return __fbthrift_field_union_field;
+  }
+
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
   template <class Protocol_>
@@ -2965,4 +3245,229 @@ unsigned long FieldLevelTerseStruct::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/deprecated_terse_write.thrift", "name": "CppRefStructFields", "kind": "struct" } */
+class CppRefStructFields final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
+  static const char* __fbthrift_thrift_uri();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "deprecated_terse_write";
+  }
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::primitive_ref_field,
+    ::apache::thrift::ident::struct_ref_field
+  >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>
+  >;
+
+  static constexpr std::size_t __fbthrift_field_size_v = 2;
+
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = CppRefStructFields;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
+
+
+ public:
+
+  CppRefStructFields();
+
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  CppRefStructFields(apache::thrift::FragileConstructor, ::std::unique_ptr<::std::int32_t> primitive_ref_field__arg, ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct> struct_ref_field__arg);
+
+  CppRefStructFields(CppRefStructFields&&) noexcept;
+  CppRefStructFields(const CppRefStructFields& src);
+
+
+  CppRefStructFields& operator=(CppRefStructFields&&) noexcept;
+  CppRefStructFields& operator=(const CppRefStructFields& src);
+
+  ~CppRefStructFields();
+
+ private:
+  ::std::unique_ptr<::std::int32_t> __fbthrift_field_primitive_ref_field;
+ private:
+  ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct> __fbthrift_field_struct_ref_field;
+
+ public:
+
+  bool operator==(const CppRefStructFields&) const;
+  bool operator<(const CppRefStructFields&) const;
+  /** Glean { "field": "primitive_ref_field" } */
+  template <typename ..., typename T = ::std::unique_ptr<::std::int32_t>>
+  FOLLY_ERASE T& primitive_ref_field_ref() & {
+    return __fbthrift_field_primitive_ref_field;
+  }
+
+  /** Glean { "field": "primitive_ref_field" } */
+  template <typename ..., typename T = ::std::unique_ptr<::std::int32_t>>
+  FOLLY_ERASE const T& primitive_ref_field_ref() const& {
+    return __fbthrift_field_primitive_ref_field;
+  }
+
+  /** Glean { "field": "primitive_ref_field" } */
+  template <typename ..., typename T = ::std::unique_ptr<::std::int32_t>>
+  FOLLY_ERASE T&& primitive_ref_field_ref() && {
+    return static_cast<T&&>(__fbthrift_field_primitive_ref_field);
+  }
+
+  /** Glean { "field": "primitive_ref_field" } */
+  template <typename ..., typename T = ::std::unique_ptr<::std::int32_t>>
+  FOLLY_ERASE const T&& primitive_ref_field_ref() const&& {
+    return static_cast<const T&&>(__fbthrift_field_primitive_ref_field);
+  }
+
+  /** Glean { "field": "primitive_ref_field" } */
+  template <typename ..., typename T = ::std::unique_ptr<::std::int32_t>>
+  FOLLY_ERASE T& primitive_ref_field() & {
+    return __fbthrift_field_primitive_ref_field;
+  }
+
+  /** Glean { "field": "primitive_ref_field" } */
+  template <typename ..., typename T = ::std::unique_ptr<::std::int32_t>>
+  FOLLY_ERASE const T& primitive_ref_field() const& {
+    return __fbthrift_field_primitive_ref_field;
+  }
+
+  /** Glean { "field": "primitive_ref_field" } */
+  template <typename ..., typename T = ::std::unique_ptr<::std::int32_t>>
+  FOLLY_ERASE T&& primitive_ref_field() && {
+    return static_cast<T&&>(__fbthrift_field_primitive_ref_field);
+  }
+
+  /** Glean { "field": "primitive_ref_field" } */
+  template <typename ..., typename T = ::std::unique_ptr<::std::int32_t>>
+  FOLLY_ERASE const T&& primitive_ref_field() const&& {
+    return static_cast<const T&&>(__fbthrift_field_primitive_ref_field);
+  }
+  /** Glean { "field": "struct_ref_field" } */
+  template <typename ..., typename T = ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>>
+  FOLLY_ERASE T& struct_ref_field_ref() & {
+    return __fbthrift_field_struct_ref_field;
+  }
+
+  /** Glean { "field": "struct_ref_field" } */
+  template <typename ..., typename T = ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>>
+  FOLLY_ERASE const T& struct_ref_field_ref() const& {
+    return __fbthrift_field_struct_ref_field;
+  }
+
+  /** Glean { "field": "struct_ref_field" } */
+  template <typename ..., typename T = ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>>
+  FOLLY_ERASE T&& struct_ref_field_ref() && {
+    return static_cast<T&&>(__fbthrift_field_struct_ref_field);
+  }
+
+  /** Glean { "field": "struct_ref_field" } */
+  template <typename ..., typename T = ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>>
+  FOLLY_ERASE const T&& struct_ref_field_ref() const&& {
+    return static_cast<const T&&>(__fbthrift_field_struct_ref_field);
+  }
+
+  /** Glean { "field": "struct_ref_field" } */
+  template <typename ..., typename T = ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>>
+  FOLLY_ERASE T& struct_ref_field() & {
+    return __fbthrift_field_struct_ref_field;
+  }
+
+  /** Glean { "field": "struct_ref_field" } */
+  template <typename ..., typename T = ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>>
+  FOLLY_ERASE const T& struct_ref_field() const& {
+    return __fbthrift_field_struct_ref_field;
+  }
+
+  /** Glean { "field": "struct_ref_field" } */
+  template <typename ..., typename T = ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>>
+  FOLLY_ERASE T&& struct_ref_field() && {
+    return static_cast<T&&>(__fbthrift_field_struct_ref_field);
+  }
+
+  /** Glean { "field": "struct_ref_field" } */
+  template <typename ..., typename T = ::std::unique_ptr<::facebook::thrift::test::terse_write::deprecated::MyStruct>>
+  FOLLY_ERASE const T&& struct_ref_field() const&& {
+    return static_cast<const T&&>(__fbthrift_field_struct_ref_field);
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<CppRefStructFields>;
+  friend void swap(CppRefStructFields& a, CppRefStructFields& b);
+};
+
+template <class Protocol_>
+unsigned long CppRefStructFields::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
 } // namespace facebook::thrift::test::terse_write::deprecated
+
+namespace apache { namespace thrift {
+
+template <> struct TEnumDataStorage<::facebook::thrift::test::terse_write::deprecated::MyUnion::Type>;
+
+template <> struct TEnumTraits<::facebook::thrift::test::terse_write::deprecated::MyUnion::Type> {
+  using type = ::facebook::thrift::test::terse_write::deprecated::MyUnion::Type;
+
+  static constexpr std::size_t const size = 0;
+  static folly::Range<type const*> const values;
+  static folly::Range<std::string_view const*> const names;
+
+  static bool findName(type value, std::string_view* out) noexcept;
+  static bool findValue(std::string_view name, type* out) noexcept;
+
+  static char const* findName(type value) noexcept {
+    std::string_view ret;
+    (void)findName(value, &ret);
+    return ret.data();
+  }
+};
+}} // apache::thrift

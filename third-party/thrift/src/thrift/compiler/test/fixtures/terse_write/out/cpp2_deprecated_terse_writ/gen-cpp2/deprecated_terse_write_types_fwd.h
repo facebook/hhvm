@@ -11,8 +11,10 @@
 // BEGIN forward_declare
 namespace facebook::thrift::test::terse_write::deprecated {
 class MyStruct;
+class MyUnion;
 class StructLevelTerseStruct;
 class FieldLevelTerseStruct;
+class CppRefStructFields;
 } // namespace facebook::thrift::test::terse_write::deprecated
 // END forward_declare
 

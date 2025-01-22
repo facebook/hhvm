@@ -17,10 +17,9 @@
 #include <folly/functional/Partial.h>
 
 #include <thrift/compiler/ast/ast_visitor.h>
-#include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/ast/t_structured.h>
+#include <thrift/compiler/codemod/codemod.h>
 #include <thrift/compiler/codemod/file_manager.h>
-#include <thrift/compiler/compiler.h>
 
 using namespace apache::thrift::compiler;
 
@@ -35,26 +34,17 @@ static void remove_cpp_noexcept_move(
 }
 
 int main(int argc, char** argv) {
-  auto source_mgr = source_manager();
-  auto program_bundle = parse_and_get_program(
-      source_mgr, std::vector<std::string>(argv, argv + argc));
+  return apache::thrift::compiler::run_codemod(
+      argc, argv, [](source_manager& sm, t_program& p) {
+        codemod::file_manager fm(sm, p);
 
-  if (!program_bundle) {
-    return 0;
-  }
+        const_ast_visitor visitor;
+        visitor.add_struct_visitor(
+            folly::partial(remove_cpp_noexcept_move, std::ref(fm)));
+        visitor.add_union_visitor(
+            folly::partial(remove_cpp_noexcept_move, std::ref(fm)));
+        visitor(p);
 
-  auto program = program_bundle->root_program();
-
-  codemod::file_manager fm(source_mgr, *program);
-
-  const_ast_visitor visitor;
-  visitor.add_struct_visitor(
-      folly::partial(remove_cpp_noexcept_move, std::ref(fm)));
-  visitor.add_union_visitor(
-      folly::partial(remove_cpp_noexcept_move, std::ref(fm)));
-  visitor(*program);
-
-  fm.apply_replacements();
-
-  return 0;
+        fm.apply_replacements();
+      });
 }

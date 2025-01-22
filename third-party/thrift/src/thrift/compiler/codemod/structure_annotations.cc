@@ -20,10 +20,9 @@
 
 #include <thrift/compiler/ast/ast_visitor.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
-#include <thrift/compiler/ast/t_struct.h>
-#include <thrift/compiler/ast/uri.h>
+#include <thrift/compiler/ast/t_structured.h>
+#include <thrift/compiler/codemod/codemod.h>
 #include <thrift/compiler/codemod/file_manager.h>
-#include <thrift/compiler/compiler.h>
 #include <thrift/compiler/generate/cpp/util.h>
 
 using namespace apache::thrift::compiler;
@@ -42,16 +41,16 @@ class structure_annotations {
   // if annotations_for_catch_all is non-null, type annotations will be removed
   // and added to that map. (This only makes sense for typedefs).
   std::set<std::string> visit_type(
-      t_type_ref typeRef,
+      t_type_ref type_ref,
       const t_named& node,
       std::map<std::string, std::string>* annotations_for_catch_all) {
     std::set<std::string> to_add;
-    if (!typeRef.resolve() || typeRef->is_primitive_type() ||
-        typeRef->is_container() ||
-        (typeRef->is_typedef() &&
-         static_cast<const t_typedef&>(*typeRef).typedef_kind() !=
+    if (!type_ref.resolve() || type_ref->is_primitive_type() ||
+        type_ref->is_container() ||
+        (type_ref->is_typedef() &&
+         static_cast<const t_typedef&>(*type_ref).typedef_kind() !=
              t_typedef::kind::defined)) {
-      auto type = typeRef.get_type();
+      auto type = type_ref.get_type();
       std::vector<t_annotation> to_remove;
       bool has_cpp_type = node.find_structured_annotation_or_null(kCppTypeUri);
       for (const auto& [name, data] : type->annotations()) {
@@ -538,14 +537,8 @@ class structure_annotations {
 } // namespace
 
 int main(int argc, char** argv) {
-  auto source_mgr = source_manager();
-  auto program_bundle = parse_and_get_program(
-      source_mgr, std::vector<std::string>(argv, argv + argc));
-  if (!program_bundle) {
-    return 1;
-  }
-  auto program = program_bundle->root_program();
-  structure_annotations(source_mgr, *program).run();
-
-  return 0;
+  return apache::thrift::compiler::run_codemod(
+      argc, argv, [](source_manager& sm, t_program& p) {
+        structure_annotations(sm, p).run();
+      });
 }

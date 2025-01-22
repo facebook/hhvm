@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-#include <algorithm>
 #include <string>
 #include <string_view>
 #include <fmt/core.h>
 #include <thrift/compiler/ast/ast_visitor.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/ast/t_struct.h>
+#include <thrift/compiler/codemod/codemod.h>
 #include <thrift/compiler/codemod/file_manager.h>
-#include <thrift/compiler/compiler.h>
 #include <thrift/compiler/generate/cpp/util.h>
+
+using apache::thrift::compiler::source_manager;
+using apache::thrift::compiler::t_program;
 
 namespace apache::thrift::compiler {
 namespace {
@@ -83,7 +85,6 @@ class AnnonateNonOptionalCppRefFields final {
  private:
   source_manager& source_manager_;
   t_program& program_;
-  std::unique_ptr<t_program_bundle> program_bundle_;
   codemod::file_manager file_manager_;
 
   bool maybe_annotate_field(const t_field& field) {
@@ -115,24 +116,12 @@ class AnnonateNonOptionalCppRefFields final {
   }
 };
 
-int run_main(int argc, char** argv) {
-  source_manager src_manager;
-  const std::unique_ptr<t_program_bundle> program_bundle =
-      parse_and_get_program(
-          src_manager, std::vector<std::string>(argv, argv + argc));
-
-  if (program_bundle == nullptr) {
-    return 1;
-  }
-
-  AnnonateNonOptionalCppRefFields(src_manager, *program_bundle->root_program())
-      .run();
-  return 0;
-}
-
 } // namespace
 } // namespace apache::thrift::compiler
 
 int main(int argc, char** argv) {
-  return apache::thrift::compiler::run_main(argc, argv);
+  return apache::thrift::compiler::run_codemod(
+      argc, argv, [](source_manager& sm, t_program& p) {
+        apache::thrift::compiler::AnnonateNonOptionalCppRefFields(sm, p).run();
+      });
 }

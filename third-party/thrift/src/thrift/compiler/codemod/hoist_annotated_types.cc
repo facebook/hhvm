@@ -24,8 +24,8 @@
 #include <thrift/compiler/ast/ast_visitor.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/ast/t_struct.h>
+#include <thrift/compiler/codemod/codemod.h>
 #include <thrift/compiler/codemod/file_manager.h>
-#include <thrift/compiler/compiler.h>
 #include <thrift/compiler/generate/cpp/util.h>
 
 using namespace apache::thrift::compiler;
@@ -350,12 +350,12 @@ class hoist_annotated_types {
   }
 
  private:
-  struct Typedef {
+  struct typedef_info {
     std::string type;
     t_typedef* ptr;
     std::string structured = "";
   };
-  std::map<std::string, Typedef> typedefs_;
+  std::map<std::string, typedef_info> typedefs_;
   codemod::file_manager fm_;
   source_manager sm_;
   t_program& prog_;
@@ -363,14 +363,8 @@ class hoist_annotated_types {
 } // namespace
 
 int main(int argc, char** argv) {
-  auto source_mgr = source_manager();
-  auto program_bundle = parse_and_get_program(
-      source_mgr, std::vector<std::string>(argv, argv + argc));
-  if (!program_bundle) {
-    return 1;
-  }
-  auto program = program_bundle->root_program();
-  hoist_annotated_types(source_mgr, *program).run();
-
-  return 0;
+  return apache::thrift::compiler::run_codemod(
+      argc, argv, [](source_manager& sm, t_program& p) {
+        hoist_annotated_types(sm, p).run();
+      });
 }

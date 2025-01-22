@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-#include <algorithm>
-#include <string>
-#include <string_view>
 #include <thrift/compiler/ast/ast_visitor.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/ast/t_struct.h>
+#include <thrift/compiler/codemod/codemod.h>
 #include <thrift/compiler/codemod/file_manager.h>
-#include <thrift/compiler/compiler.h>
 #include <thrift/compiler/diagnostic.h>
 #include <thrift/compiler/generate/cpp/util.h>
 #include <thrift/compiler/sema/standard_validator.h>
 #include <thrift/compiler/source_location.h>
+
+using apache::thrift::compiler::source_manager;
+using apache::thrift::compiler::t_program;
 
 namespace apache::thrift::compiler {
 namespace {
@@ -117,25 +117,13 @@ class RemoveRedundantFieldCustomDefaultValues final {
   }
 };
 
-int run_main(int argc, char** argv) {
-  source_manager src_manager;
-  const std::unique_ptr<t_program_bundle> program_bundle =
-      parse_and_get_program(
-          src_manager, std::vector<std::string>(argv, argv + argc));
-
-  if (program_bundle == nullptr) {
-    return 1;
-  }
-
-  RemoveRedundantFieldCustomDefaultValues(
-      src_manager, *program_bundle->root_program())
-      .run();
-  return 0;
-}
-
 } // namespace
 } // namespace apache::thrift::compiler
 
 int main(int argc, char** argv) {
-  return apache::thrift::compiler::run_main(argc, argv);
+  return apache::thrift::compiler::run_codemod(
+      argc, argv, [](source_manager& sm, t_program& p) {
+        apache::thrift::compiler::RemoveRedundantFieldCustomDefaultValues(sm, p)
+            .run();
+      });
 }

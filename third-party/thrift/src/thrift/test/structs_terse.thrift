@@ -95,3 +95,34 @@ struct RefsWithStringAndContainerTerseWrites {
   @cpp.AllowLegacyNonOptionalRef
   2: string string_field;
 }
+
+struct NestedStruct {
+  1: i32 int_field = 42;
+}
+
+union NestedUnion {
+  1: i32 int_field = 42;
+}
+
+exception NestedException {
+  1: i32 int_field = 42;
+}
+
+struct TerseFieldsWithCustomDefault {
+  1: bool bool_field = true;
+  2: byte byte_field = 10;
+  3: i16 short_field = 20;
+  4: i32 int_field = 30;
+  5: i64 long_field = 40;
+  6: float float_field = 50;
+  7: double double_field = 60;
+  8: binary binary_field = "70";
+  9: string string_field = "80";
+  10: list<i32> list_field = [90];
+  11: set<i32> set_field = [100];
+  12: map<i32, i32> map_field = {110: 10};
+
+  13: NestedStruct struct_field;
+  14: NestedUnion union_field;
+  15: NestedException exception_field;
+}

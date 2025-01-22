@@ -58,7 +58,10 @@ folly::AsyncSocket::ReadResult TAsyncSocketIntercepted::performReadMsg(
       res.readReturn > 0 &&
       res.readReturn >= params_->corruptLastReadByteMinSize_) {
     auto remaining = res.readReturn;
-    for (size_t i = 0; i < msg.msg_iovlen && remaining > 0; i++) {
+    // Silence -Wsign-compare due to different types of msg.msg_iovlen on
+    // macOS (int) and Linux (size_t)
+    decltype(msg.msg_iovlen) i = 0;
+    for (; i < msg.msg_iovlen && remaining > 0; i++) {
       if (static_cast<size_t>(remaining) > msg.msg_iov[i].iov_len) {
         remaining -= msg.msg_iov[i].iov_len;
         continue;

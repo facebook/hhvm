@@ -176,6 +176,48 @@ struct polymorphic_native_handle {
   }
 };
 
+namespace detail {
+template <typename...>
+struct flatten_poly_handle;
+}
+
+/**
+ * This template helper is intended to describe polymorphic_native_handle<...>
+ * type hierarchies in a clean, descriptive manner.
+ *
+ * Example:
+ *
+ *     struct t_A { ... };
+ *     struct t_B : t_A { ... };
+ *     struct t_B2 : t_B { ... };
+ *     struct t_C : t_A { ... };
+ *     struct t_C2 : t_C { ... };
+ *
+ *     // All of the names below are type aliases to
+ *     // polymorphic_native_handle<...> types.
+ *
+ *     namespace polymorphic_handles {
+ *     template <typename... Cases>
+ *     using handle = make_polymorphic_native_handle<Cases...>;
+ *
+ *     using C2 = handle<t_C2>;       // (t_C2)
+ *     using C = handle<t_C, C2>;     // (t_C, t_C2)
+ *     using B2 = handle<t_B2>;       // (t_B2)
+ *     using B = handle<t_B, B2>;     // (t_B, t_B2)
+ *     using A = handle<t_A, B, C>;   // (t_A, t_B, t_B2, t_C, t_C2)
+ *     }
+ *
+ * All of the type aliases above are some specialization of
+ * polymorphic_native_handle<...> describing all possible paths in the
+ * hierarchy.
+ *
+ * You may notice that this API requires declaring the type hierarchy in the
+ * inverse direction of the inheritance hierarchy as written in C++.
+ */
+template <typename... Cases>
+using make_polymorphic_native_handle =
+    typename detail::flatten_poly_handle<Cases...>::type;
+
 /**
  * A class providing ergonomic APIs (sugar) for implementing native_functions.
  *
@@ -647,6 +689,69 @@ struct function_argument_result<native_handle<T>> : by_value<native_handle<T>> {
 template <typename Base, typename... SubClasses>
 struct function_argument_result<polymorphic_native_handle<Base, SubClasses...>>
     : by_value<native_handle<Base>> {};
+
+} // namespace detail
+
+// flatten_poly_handle<...> works by recursively expanding
+// polymorphic_native_handle<...> types that are present in its template
+// parameter pack.
+//
+// To achieve this, we pattern match (using template specialization) against the
+// following patterns (poly<...> represents polymorphic_native_handle<...>).
+//
+// First are the base cases (one param only):
+//   1. (T)       → poly<T>
+//   2. (poly<T>) → poly<T>
+//
+// Then are the 4 permutations of (T, <poly>) pairs, and recursion:
+//   3. (T,          U,          rest...) → flatten(poly<T, U>,       rest...)
+//   4. (T,          poly<U...>, rest...) → flatten(poly<T, U...>,    rest...)
+//   5. (poly<T...>, U,          rest...) → flatten(poly<T..., U>,    rest...)
+//   6. (poly<T...>, poly<U...>, rest...) → flatten(poly<T..., U...>, rest...)
+//
+// The end result is a type where all poly<...> parameter packs to any degree of
+// depth is flattened to a single poly<...>.
+namespace detail {
+
+template <typename... T>
+using poly = polymorphic_native_handle<T...>;
+template <typename... T>
+using flatten = typename flatten_poly_handle<T...>::type;
+
+// (1): (T) → poly<T>
+template <typename T>
+struct flatten_poly_handle<T> {
+  using type = poly<T>;
+};
+// (2): (poly<T>) → poly<T>
+template <typename... T>
+struct flatten_poly_handle<poly<T...>> {
+  using type = poly<T...>;
+};
+
+// (3): (T, U, rest...) → flatten(poly<T, U>, rest...)
+template <typename T, typename U, typename... Rest>
+struct flatten_poly_handle<T, U, Rest...> {
+  using type = flatten<poly<T, U>, Rest...>;
+};
+
+// (4): (T, poly<U...>, rest...) → flatten(poly<T, U...>, rest...)
+template <typename T, typename... U, typename... Rest>
+struct flatten_poly_handle<T, poly<U...>, Rest...> {
+  using type = flatten<poly<T, U...>, Rest...>;
+};
+
+// (5): (poly<T...>, U, rest....) → flatten(poly<T..., U>, rest...)
+template <typename... T, typename U, typename... Rest>
+struct flatten_poly_handle<poly<T...>, U, Rest...> {
+  using type = flatten<poly<T..., U>, Rest...>;
+};
+
+// (6) (poly<T...>, poly<U...>, rest...) → flatten(poly<T..., U...>, rest...)
+template <typename... T, typename... U, typename... Rest>
+struct flatten_poly_handle<poly<T...>, poly<U...>, Rest...> {
+  using type = flatten<poly<T...>, U..., Rest...>;
+};
 
 } // namespace detail
 

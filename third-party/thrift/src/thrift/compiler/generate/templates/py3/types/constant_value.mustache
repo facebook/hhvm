@@ -42,7 +42,8 @@ file.
 }}{{/value:const_struct?}}{{!
 }}{{^value:const_struct?}}{{!
 }}{{#value:string?}}{{!
-    }}{{#value:py3_binary?}}b{{/value:py3_binary?}}"{{value:string_value}}"{{!
+    }}{{#value:py3_binary?}}b"{{value:string_value}}"{{/value:py3_binary?}}{{!
+    }}{{^value:py3_binary?}}"{{value:unicode_value}}"{{/value:py3_binary?}}{{!
 }}{{/value:string?}}{{!
 }}{{#value:map?}}{{!
     }}{{#value:const_container_type}}{{!

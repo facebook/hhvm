@@ -18,6 +18,9 @@ include "thrift/annotation/cpp.thrift"
 
 cpp_include "thrift/lib/py3/test/BinaryTypes.h"
 
+const string unicode_str = "Saint Barthélemy";
+const binary unicode_bytes = "Saint Barthélemy";
+
 @cpp.Type{name = "folly::IOBuf"}
 typedef binary IOBuf
 @cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}

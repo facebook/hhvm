@@ -22,7 +22,7 @@ from typing import Any
 import thrift.py3.server
 from binary.clients import BinaryService
 from binary.services import BinaryServiceInterface
-from binary.types import Binaries, BinaryUnion
+from binary.types import Binaries, BinaryUnion, unicode_bytes, unicode_str
 from folly.iobuf import IOBuf
 from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.client import get_client
@@ -48,6 +48,11 @@ class BinaryTests(unittest.TestCase):
     def test_binary_union(self) -> None:
         val = BinaryUnion(iobuf_val=IOBuf(b"mnopqr"))
         self.assertEqual(b"".join(val.iobuf_val), b"mnopqr")
+
+    def test_unicode_handling(self) -> None:
+        self.assertEqual(unicode_str, "Saint Barthélemy")
+        self.assertEqual(unicode_bytes.decode(), unicode_str)
+        self.assertEqual(unicode_str.encode(), unicode_bytes)
 
 
 class BinaryHandler(BinaryServiceInterface):

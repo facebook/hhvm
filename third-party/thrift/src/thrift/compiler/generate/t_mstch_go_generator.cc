@@ -438,7 +438,7 @@ class mstch_go_field : public mstch_field {
     bool has_default_value = (field_->default_value() != nullptr);
     if (is_optional_() && has_default_value) {
       auto real_type = field_->type()->get_true_type();
-      bool is_container = (real_type->is_map() || real_type->is_set());
+      bool is_container = real_type->is_map();
       return is_container;
     }
     return is_pointer_();

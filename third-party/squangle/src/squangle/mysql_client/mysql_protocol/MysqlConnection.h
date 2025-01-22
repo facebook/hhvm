@@ -29,9 +29,12 @@ class MysqlConnection : public InternalConnection {
   // Closes the connection in hold
   virtual ~MysqlConnection() override;
 
-  // copy not allowed
+  // copy and move not allowed
   MysqlConnection(const MysqlConnection&) = delete;
   MysqlConnection& operator=(const MysqlConnection&) = delete;
+
+  MysqlConnection(MysqlConnection&&) = delete;
+  MysqlConnection& operator=(MysqlConnection&&) = delete;
 
   void setReusable(bool reusable) override {
     canReuse_ = reusable;

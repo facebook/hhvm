@@ -451,7 +451,7 @@ uint64_t MysqlConnection::getAffectedRows() const {
 std::string MysqlConnection::getConnectStageName() const {
   auto stage = getMySqlConnectStage();
   if (auto optStageName = findConnectStageName(stage)) {
-    return std::move(*optStageName);
+    return *std::move(optStageName);
   }
 
   return fmt::format("Unexpected connect_stage: {}", (int)stage);

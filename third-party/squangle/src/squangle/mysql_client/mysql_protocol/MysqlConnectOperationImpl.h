@@ -23,6 +23,14 @@ class MysqlConnectOperationImpl : public MysqlOperationImpl,
       std::shared_ptr<const ConnectionKey> conn_key);
   virtual ~MysqlConnectOperationImpl() override;
 
+  // copy and move not allowed
+  MysqlConnectOperationImpl(const MysqlConnectOperationImpl&) = delete;
+  MysqlConnectOperationImpl& operator=(const MysqlConnectOperationImpl&) =
+      delete;
+
+  MysqlConnectOperationImpl(MysqlConnectOperationImpl&&) = delete;
+  MysqlConnectOperationImpl& operator=(MysqlConnectOperationImpl&&) = delete;
+
   static constexpr Duration kMinimumViableConnectTimeout =
       std::chrono::microseconds(50);
 
@@ -88,9 +96,15 @@ class MysqlConnectOperationImpl : public MysqlOperationImpl,
         : folly::AsyncTimeout(base), op_(connect_operation) {}
 
     ConnectTcpTimeoutHandler() = delete;
+    ~ConnectTcpTimeoutHandler() override = default;
+
+    // copy and move not allowed
     ConnectTcpTimeoutHandler(const ConnectTcpTimeoutHandler&) = delete;
     ConnectTcpTimeoutHandler& operator=(const ConnectTcpTimeoutHandler&) =
         delete;
+
+    ConnectTcpTimeoutHandler(ConnectTcpTimeoutHandler&&) = delete;
+    ConnectTcpTimeoutHandler& operator=(ConnectTcpTimeoutHandler&&) = delete;
 
     void timeoutExpired() noexcept override {
       op_->tcpConnectTimeoutTriggered();

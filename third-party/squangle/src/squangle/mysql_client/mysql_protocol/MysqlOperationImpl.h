@@ -24,8 +24,12 @@ class MysqlOperationImpl : virtual public OperationBase,
   // No public constructor.
   virtual ~MysqlOperationImpl() override = default;
 
+  // copy and move not allowed
   MysqlOperationImpl(const MysqlOperationImpl&) = delete;
   MysqlOperationImpl& operator=(const MysqlOperationImpl&) = delete;
+
+  MysqlOperationImpl(MysqlOperationImpl&&) = delete;
+  MysqlOperationImpl& operator=(MysqlOperationImpl&&) = delete;
 
   Duration getMaxThreadBlockTime() {
     return max_thread_block_time_;

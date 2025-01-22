@@ -148,7 +148,7 @@ cdef class {{struct:name}}({{> types/python_struct_class}}):
         __fbthrift_inst.{{> types/cpp_obj}} = make_shared[{{> types/current_module_cbindings}}.{{> types/c_struct }}](deref(self.{{> types/cpp_obj}}))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__{{struct:name}}_FieldsSetter._fbthrift_create(__fbthrift_inst.{{> types/cpp_obj}}.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
-            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+            (<thrift.py3.types.Struct>__fbthrift_inst)._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
         {{/struct:py3_fields?}}
     {{/struct:cpp_noncopyable?}}

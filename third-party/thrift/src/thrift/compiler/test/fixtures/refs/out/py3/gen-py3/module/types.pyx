@@ -425,7 +425,7 @@ cdef class MyField(thrift.py3.types.Struct):
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cMyField](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__MyField_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
-            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+            (<thrift.py3.types.Struct>__fbthrift_inst)._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
@@ -631,7 +631,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cMyStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__MyStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
-            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+            (<thrift.py3.types.Struct>__fbthrift_inst)._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
@@ -771,7 +771,7 @@ cdef class StructWithUnion(thrift.py3.types.Struct):
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cStructWithUnion](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__StructWithUnion_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
-            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+            (<thrift.py3.types.Struct>__fbthrift_inst)._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
@@ -910,7 +910,7 @@ cdef class RecursiveStruct(thrift.py3.types.Struct):
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cRecursiveStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__RecursiveStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
-            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+            (<thrift.py3.types.Struct>__fbthrift_inst)._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
@@ -1029,7 +1029,7 @@ cdef class StructWithContainers(thrift.py3.types.Struct):
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cStructWithContainers](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__StructWithContainers_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
-            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+            (<thrift.py3.types.Struct>__fbthrift_inst)._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
@@ -1202,7 +1202,7 @@ cdef class StructWithSharedConst(thrift.py3.types.Struct):
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cStructWithSharedConst](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__StructWithSharedConst_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
-            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+            (<thrift.py3.types.Struct>__fbthrift_inst)._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
@@ -1442,7 +1442,7 @@ cdef class StructWithRef(thrift.py3.types.Struct):
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cStructWithRef](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__StructWithRef_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
-            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+            (<thrift.py3.types.Struct>__fbthrift_inst)._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
@@ -1582,7 +1582,7 @@ cdef class StructWithBox(thrift.py3.types.Struct):
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cStructWithBox](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__StructWithBox_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
-            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+            (<thrift.py3.types.Struct>__fbthrift_inst)._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
@@ -1723,7 +1723,7 @@ cdef class StructWithInternBox(thrift.py3.types.Struct):
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cStructWithInternBox](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__StructWithInternBox_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
-            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+            (<thrift.py3.types.Struct>__fbthrift_inst)._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
@@ -1850,7 +1850,7 @@ cdef class StructWithTerseInternBox(thrift.py3.types.Struct):
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cStructWithTerseInternBox](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__StructWithTerseInternBox_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
-            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+            (<thrift.py3.types.Struct>__fbthrift_inst)._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
@@ -1975,7 +1975,7 @@ cdef class AdaptedStructWithInternBox(thrift.py3.types.Struct):
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cAdaptedStructWithInternBox](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__AdaptedStructWithInternBox_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
-            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+            (<thrift.py3.types.Struct>__fbthrift_inst)._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
@@ -2102,7 +2102,7 @@ cdef class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct):
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cAdaptedStructWithTerseInternBox](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__AdaptedStructWithTerseInternBox_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
-            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+            (<thrift.py3.types.Struct>__fbthrift_inst)._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
@@ -2227,7 +2227,7 @@ cdef class StructWithRefTypeUnique(thrift.py3.types.Struct):
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cStructWithRefTypeUnique](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__StructWithRefTypeUnique_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
-            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+            (<thrift.py3.types.Struct>__fbthrift_inst)._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
@@ -2367,7 +2367,7 @@ cdef class StructWithRefTypeShared(thrift.py3.types.Struct):
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cStructWithRefTypeShared](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__StructWithRefTypeShared_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
-            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+            (<thrift.py3.types.Struct>__fbthrift_inst)._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
@@ -2507,7 +2507,7 @@ cdef class StructWithRefTypeSharedConst(thrift.py3.types.Struct):
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cStructWithRefTypeSharedConst](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__StructWithRefTypeSharedConst_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
-            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+            (<thrift.py3.types.Struct>__fbthrift_inst)._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
@@ -2647,7 +2647,7 @@ cdef class StructWithRefAndAnnotCppNoexceptMoveCtor(thrift.py3.types.Struct):
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cStructWithRefAndAnnotCppNoexceptMoveCtor](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__StructWithRefAndAnnotCppNoexceptMoveCtor_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
-            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+            (<thrift.py3.types.Struct>__fbthrift_inst)._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:
@@ -2765,7 +2765,7 @@ cdef class StructWithString(thrift.py3.types.Struct):
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cStructWithString](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
         __fbthrift_inst._fields_setter = _fbthrift_types_fields.__StructWithString_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
-            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+            (<thrift.py3.types.Struct>__fbthrift_inst)._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
 
     cdef void _fbthrift_set_field(self, str name, object value) except *:

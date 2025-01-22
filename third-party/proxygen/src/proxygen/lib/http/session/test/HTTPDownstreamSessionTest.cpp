@@ -66,6 +66,9 @@ class HTTPDownstreamTest : public testing::Test {
     HTTPTransaction::setEgressBufferLimit(65536);
     auto codec = makeServerCodec<typename C::Codec>(C::version);
     rawCodec_ = codec.get();
+    if (dynamic_cast<HTTP1xCodec*>(rawCodec_) != nullptr) {
+      dynamic_cast<HTTP1xCodec*>(rawCodec_)->setStrictValidation(true);
+    }
 
     // If the codec is H2, getHeaderIndexingStrategy will be called when setting
     // up the codec

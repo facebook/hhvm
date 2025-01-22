@@ -30,7 +30,7 @@ from libcpp.utility cimport move as cmove
 from thrift.python.client.omni_client cimport cOmniClientResponseWithHeaders, RpcKind, cOmniInteractionClient, createOmniInteractionClient, cData, FunctionQualifier, InteractionMethodPosition
 from thrift.python.client.request_channel cimport RequestChannel
 from thrift.python.exceptions cimport create_py_exception
-from thrift.python.exceptions import ApplicationError, ApplicationErrorType
+from thrift.python.exceptions import ApplicationError, ApplicationErrorType, ProtocolError, ProtocolErrorType
 from thrift.python.serializer import serialize_iobuf, deserialize
 from thrift.python.mutable_serializer import (
     serialize_iobuf as serialize_iobuf_mutable,
@@ -255,12 +255,19 @@ cdef void _async_client_send_request_callback(
             stream_cls,
             protocol,
         )
-    py_resp = (
-        deserialize(response_cls, response_iobuf, protocol=protocol)
-        if not is_mutable_types
-        else deserialize_mutable(response_cls, response_iobuf, protocol=protocol)
-    )
-    pyfuture.set_result(py_resp if py_stream is None else (py_resp, py_stream))
+    try:
+        py_resp = (
+            deserialize(response_cls, response_iobuf, protocol=protocol)
+            if not is_mutable_types
+            else deserialize_mutable(response_cls, response_iobuf, protocol=protocol)
+        )
+        
+        pyfuture.set_result(py_resp if py_stream is None else (py_resp, py_stream))
+    except Exception as e:
+        pyfuture.set_exception(ProtocolError(
+            ProtocolErrorType.UNKNOWN,
+            "Deserialization failed, following exception thrown: " + str(e)
+        ))
 
 cdef void _interaction_client_callback(cFollyTry[unique_ptr[cOmniInteractionClient]]&& result,
     PyObject* userData,) noexcept:

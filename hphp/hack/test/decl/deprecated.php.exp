@@ -32,7 +32,8 @@
           sm_flags =
           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
             override = false; dynamicallycallable = false;
-            php_std_lib = false; support_dynamic_type = false };
+            php_std_lib = false; support_dynamic_type = false;
+            no_auto_likes = false };
           sm_attributes = []; sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([8:19-22], "bar");
            sm_type =
@@ -53,7 +54,8 @@
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
              override = false; dynamicallycallable = false;
-             php_std_lib = false; support_dynamic_type = false };
+             php_std_lib = false; support_dynamic_type = false;
+             no_auto_likes = false };
            sm_attributes = []; sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([11:19-22], "baz");
            sm_type =
@@ -74,7 +76,8 @@
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
              override = false; dynamicallycallable = false;
-             php_std_lib = false; support_dynamic_type = false };
+             php_std_lib = false; support_dynamic_type = false;
+             no_auto_likes = false };
            sm_attributes = []; sm_sort_text = None };
          { Shallow_decl_defs.sm_name = ([14:19-23], "foo2");
            sm_type =
@@ -97,7 +100,8 @@
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
              override = false; dynamicallycallable = false;
-             php_std_lib = false; support_dynamic_type = false };
+             php_std_lib = false; support_dynamic_type = false;
+             no_auto_likes = false };
            sm_attributes = []; sm_sort_text = None }
          ];
        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;

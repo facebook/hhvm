@@ -126,6 +126,7 @@ let find_method_in_shallow_class
     (ctx : Provider_context.t)
     ~(is_static : bool)
     ~(elt_origin : string)
+    ~no_auto_likes
     ~(sm_name : string) : (Typing_defs.fun_elt, member_lookup_error) result =
   let SharedMem.Uses = sh in
   match Decl_provider_internals.get_shallow_class ctx elt_origin with
@@ -142,9 +143,10 @@ let find_method_in_shallow_class
            String.equal (snd m.Shallow_decl_defs.sm_name) sm_name)
      with
     | None -> Error MLEMemberNotFound
-    | Some sm -> Ok (Members.build_method ~this_class:(Some class_) ~ctx sm))
+    | Some sm ->
+      Ok (Members.build_method ~this_class:(Some class_) ~ctx ~no_auto_likes sm))
 
-let find_method ctx ~child_class_name x =
+let find_method ctx ~child_class_name ~no_auto_likes x =
   let fun_elt =
     lookup_store_or ctx Decl_store.Method x @@ fun x ->
     let (elt_origin, sm_name) = x in
@@ -155,6 +157,7 @@ let find_method ctx ~child_class_name x =
            ~sh:SharedMem.Uses
            ~is_static:false
            ~elt_origin
+           ~no_auto_likes
            ~sm_name)
     |> unpack_member_lookup_result
          ~child_class_name
@@ -163,7 +166,7 @@ let find_method ctx ~child_class_name x =
   in
   fun_elt_to_ty fun_elt
 
-let find_static_method ctx ~child_class_name x =
+let find_static_method ctx ~child_class_name ~no_auto_likes x =
   let fun_elt =
     lookup_store_or ctx Decl_store.Static_method x @@ fun x ->
     let (elt_origin, sm_name) = x in
@@ -174,6 +177,7 @@ let find_static_method ctx ~child_class_name x =
            ~sh:SharedMem.Uses
            ~is_static:true
            ~elt_origin
+           ~no_auto_likes
            ~sm_name)
     |> unpack_member_lookup_result
          ~child_class_name
@@ -295,15 +299,28 @@ let lookup_method_type_lazy
     (element : Decl_defs.element) : Typing_defs.class_elt =
   map_element
     dc.dc_substs
-    (find_method ctx ~child_class_name:dc.Decl_defs.dc_name)
+    (find_method
+       ctx
+       ~no_auto_likes:
+         (Typing_defs_flags.ClassElt.is_no_auto_likes element.elt_flags)
+       ~child_class_name:dc.Decl_defs.dc_name)
     name
     element
 
 let lookup_static_method_type_lazy
-    (ctx : Provider_context.t option) (dc : Decl_defs.decl_class_type) =
+    (ctx : Provider_context.t option)
+    (dc : Decl_defs.decl_class_type)
+    name
+    element =
   map_element
     dc.dc_substs
-    (find_static_method ctx ~child_class_name:dc.Decl_defs.dc_name)
+    (find_static_method
+       ctx
+       ~no_auto_likes:
+         (Typing_defs_flags.ClassElt.is_no_auto_likes element.elt_flags)
+       ~child_class_name:dc.Decl_defs.dc_name)
+    name
+    element
 
 let lookup_constructor_lazy
     (ctx : Provider_context.t option)

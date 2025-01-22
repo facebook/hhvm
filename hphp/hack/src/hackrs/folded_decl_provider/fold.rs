@@ -298,6 +298,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             supports_dynamic_type: false,
             needs_init: prop_flags.needs_init(),
             safe_global_variable: false,
+            no_auto_likes: false,
         };
         let elt = FoldedElement {
             origin: self.child.name.id(),
@@ -335,6 +336,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             is_dynamicallycallable: false,
             is_readonly_prop: prop_flags.is_readonly(),
             supports_dynamic_type: false,
+            no_auto_likes: false,
             needs_init: false,
             safe_global_variable: prop_flags.is_safe_global_variable(),
         };
@@ -380,6 +382,12 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         };
 
         let meth_flags = &sm.flags;
+        let no_auto_likes = meth_flags.is_no_auto_likes()
+            || match methods.get(&meth) {
+                Some(FoldedElement { flags, .. }) => flags.contains(ClassEltFlags::NO_AUTO_LIKES),
+                _ => false,
+            };
+
         let flag_args = ClassEltFlagsArgs {
             xhp_attr: None,
             is_abstract: meth_flags.is_abstract(),
@@ -392,6 +400,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             is_dynamicallycallable: meth_flags.is_dynamicallycallable(),
             is_readonly_prop: false,
             supports_dynamic_type: meth_flags.supports_dynamic_type(),
+            no_auto_likes,
             needs_init: false,
             safe_global_variable: false,
         };
@@ -441,6 +450,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                 supports_dynamic_type: false,
                 needs_init: false,
                 safe_global_variable: false,
+                no_auto_likes: false,
             };
             FoldedElement {
                 origin: self.child.name.id(),

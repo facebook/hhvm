@@ -22,6 +22,7 @@ module Make : functor (Provider : Decl_enforceability.ShallowProvider) -> sig
   val build_method :
     ctx:Provider.t ->
     this_class:Shallow_decl_defs.shallow_class option ->
+    no_auto_likes:bool ->
     Shallow_decl_defs.shallow_method ->
     Typing_defs.fun_elt
 

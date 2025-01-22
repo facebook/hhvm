@@ -647,6 +647,8 @@ let get_ce_xhp_attr ce = Typing_defs_flags.ClassElt.get_xhp_attr ce.ce_flags
 let get_ce_safe_global_variable ce =
   ClassElt.is_safe_global_variable ce.ce_flags
 
+let get_ce_no_auto_likes ce = ClassElt.is_no_auto_likes ce.ce_flags
+
 let make_ce_flags = Typing_defs_flags.ClassElt.make
 
 (** Return true if the element is private and not marked with the __LSB

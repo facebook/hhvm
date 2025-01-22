@@ -174,7 +174,10 @@ let method_def ~is_disposable env cls m =
       env
   in
   let no_auto_likes =
-    Naming_attributes.mem SN.UserAttributes.uaNoAutoLikes m.m_user_attributes
+    match Cls.get_any_method ~is_static:m.m_static cls method_name with
+    | Some ce -> get_ce_no_auto_likes ce
+    | None ->
+      Naming_attributes.mem SN.UserAttributes.uaNoAutoLikes m.m_user_attributes
   in
   let env =
     if no_auto_likes then

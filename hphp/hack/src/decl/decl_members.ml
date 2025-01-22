@@ -59,6 +59,7 @@ module Make (Provider : Decl_enforceability.ShallowProvider) = struct
   let build_method
       ~(ctx : Provider.t)
       ~(this_class : Shallow_decl_defs.shallow_class option)
+      ~(no_auto_likes : bool)
       ({
          Shallow_decl_defs.sm_name;
          sm_type;
@@ -79,9 +80,10 @@ module Make (Provider : Decl_enforceability.ShallowProvider) = struct
         sm_attributes
     in
     let fe_no_auto_likes =
-      Typing_defs.Attributes.mem
-        Naming_special_names.UserAttributes.uaNoAutoLikes
-        sm_attributes
+      no_auto_likes
+      || Typing_defs.Attributes.mem
+           Naming_special_names.UserAttributes.uaNoAutoLikes
+           sm_attributes
     in
     {
       Typing_defs.fe_module = None;

@@ -156,6 +156,7 @@ module ClassElt : sig
     support_dynamic_type:bool ->
     needs_init:bool ->
     safe_global_variable:bool ->
+    no_auto_likes:bool ->
     t
 
   val is_abstract : t -> bool
@@ -182,6 +183,8 @@ module ClassElt : sig
   val needs_init : t -> bool
 
   val is_safe_global_variable : t -> bool
+
+  val is_no_auto_likes : t -> bool
 
   val get_xhp_attr : t -> Xhp_attribute.t option
 

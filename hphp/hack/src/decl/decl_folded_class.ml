@@ -376,6 +376,7 @@ let build_constructor
           ~readonly_prop:false
           ~support_dynamic_type:false
           ~needs_init:false
+          ~no_auto_likes:(sm_no_auto_likes method_)
           ~safe_global_variable:false;
       elt_visibility = vis;
       elt_origin = class_name;
@@ -505,7 +506,8 @@ let prop_decl_eager
           ~readonly_prop:(sp_readonly sp)
           ~support_dynamic_type:false
           ~needs_init:(sp_needs_init sp)
-          ~safe_global_variable:false;
+          ~safe_global_variable:false
+          ~no_auto_likes:false;
       elt_visibility = vis;
       elt_origin;
       elt_deprecated = None;
@@ -543,6 +545,7 @@ let static_prop_decl_eager
           ~readonly_prop:(sp_readonly sp)
           ~support_dynamic_type:false
           ~needs_init:false
+          ~no_auto_likes:false
           ~safe_global_variable:(sp_safe_global_variable sp);
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
@@ -659,8 +662,9 @@ let build_method_fun_elt
     ~(this_class : shallow_class option)
     ~(is_static : bool)
     ~(elt_origin : string)
+    ~(no_auto_likes : bool)
     (m : Shallow_decl_defs.shallow_method) : Typing_defs.fun_elt =
-  let fe = Members.build_method ~ctx ~this_class m in
+  let fe = Members.build_method ~ctx ~this_class ~no_auto_likes m in
   (if member_heaps_enabled ctx then
     let (_pos, id) = m.sm_name in
     if is_static then
@@ -700,6 +704,13 @@ let method_decl_eager
     | Some text -> Some text
     | _ -> parent_sort_text
   in
+  let parent_no_auto_likes =
+    match SMap.find_opt id acc with
+    | Some ({ elt_flags; _ }, _) ->
+      Typing_defs_flags.ClassElt.is_no_auto_likes elt_flags
+    | _ -> false
+  in
+  let no_auto_likes = parent_no_auto_likes || sm_no_auto_likes m in
   let elt =
     {
       elt_flags =
@@ -716,6 +727,7 @@ let method_decl_eager
           ~readonly_prop:false
           ~support_dynamic_type
           ~needs_init:false
+          ~no_auto_likes
           ~safe_global_variable:false;
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
@@ -730,6 +742,7 @@ let method_decl_eager
       ~this_class:(Some c)
       ~is_static
       ~elt_origin:elt.elt_origin
+      ~no_auto_likes
       m
   in
   let acc = SMap.add id (elt, Some fe) acc in

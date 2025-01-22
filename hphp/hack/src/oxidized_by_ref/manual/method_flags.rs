@@ -18,6 +18,7 @@ bitflags! {
         const DYNAMICALLYCALLABLE = 1 << 3;
         const PHP_STD_LIB         = 1 << 4;
         const SUPPORT_DYNAMIC_TYPE = 1 << 5;
+        const NO_AUTO_LIKES       = 1 << 6;
     }
 }
 
@@ -39,6 +40,9 @@ impl MethodFlags {
     }
     pub fn supports_dynamic_type(&self) -> bool {
         self.contains(Self::SUPPORT_DYNAMIC_TYPE)
+    }
+    pub fn is_no_auto_likes(&self) -> bool {
+        self.contains(Self::NO_AUTO_LIKES)
     }
 }
 

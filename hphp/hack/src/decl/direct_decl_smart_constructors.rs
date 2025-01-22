@@ -5169,6 +5169,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             MethodFlags::SUPPORT_DYNAMIC_TYPE,
             !is_constructor && attributes.support_dynamic_type,
         );
+        flags.set(MethodFlags::NO_AUTO_LIKES, attributes.no_auto_likes);
 
         // Parse the user attributes
         // in facts-mode all attributes are saved, otherwise only __NoAutoDynamic/__NoAutoLikes is

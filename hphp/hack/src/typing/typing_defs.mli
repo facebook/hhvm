@@ -378,6 +378,8 @@ val get_ce_xhp_attr : class_elt -> xhp_attr option
 
 val get_ce_safe_global_variable : class_elt -> bool
 
+val get_ce_no_auto_likes : class_elt -> bool
+
 val make_ce_flags :
   xhp_attr:xhp_attr option ->
   abstract:bool ->
@@ -392,6 +394,7 @@ val make_ce_flags :
   support_dynamic_type:bool ->
   needs_init:bool ->
   safe_global_variable:bool ->
+  no_auto_likes:bool ->
   Typing_defs_flags.ClassElt.t
 
 val class_elt_is_private_not_lsb : class_elt -> bool

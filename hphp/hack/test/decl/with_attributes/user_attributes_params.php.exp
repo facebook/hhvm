@@ -30,7 +30,8 @@
           sm_flags =
           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
             override = false; dynamicallycallable = false;
-            php_std_lib = false; support_dynamic_type = false };
+            php_std_lib = false; support_dynamic_type = false;
+            no_auto_likes = false };
           sm_attributes =
           [{ Typing_defs_core.ua_name = ([4:5-8], "\\Foo");
              ua_params = [(Typing_defs_core.String "hi there")];
@@ -56,7 +57,8 @@
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
              override = false; dynamicallycallable = false;
-             php_std_lib = false; support_dynamic_type = false };
+             php_std_lib = false; support_dynamic_type = false;
+             no_auto_likes = false };
            sm_attributes =
            [{ Typing_defs_core.ua_name = ([7:5-8], "\\Foo");
               ua_params =
@@ -83,7 +85,8 @@
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
              override = false; dynamicallycallable = false;
-             php_std_lib = false; support_dynamic_type = false };
+             php_std_lib = false; support_dynamic_type = false;
+             no_auto_likes = false };
            sm_attributes =
            [{ Typing_defs_core.ua_name = ([10:5-8], "\\Foo");
               ua_params =
@@ -111,7 +114,8 @@
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
              override = false; dynamicallycallable = false;
-             php_std_lib = false; support_dynamic_type = false };
+             php_std_lib = false; support_dynamic_type = false;
+             no_auto_likes = false };
            sm_attributes =
            [{ Typing_defs_core.ua_name = ([13:5-8], "\\Foo");
               ua_params = [(Typing_defs_core.Classname "\\SomeClass")];
@@ -137,7 +141,8 @@
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
              override = false; dynamicallycallable = false;
-             php_std_lib = false; support_dynamic_type = false };
+             php_std_lib = false; support_dynamic_type = false;
+             no_auto_likes = false };
            sm_attributes =
            [{ Typing_defs_core.ua_name = ([16:5-8], "\\Foo"); ua_params = [];
               ua_raw_val = None }
@@ -162,7 +167,8 @@
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
              override = false; dynamicallycallable = false;
-             php_std_lib = false; support_dynamic_type = false };
+             php_std_lib = false; support_dynamic_type = false;
+             no_auto_likes = false };
            sm_attributes =
            [{ Typing_defs_core.ua_name = ([19:5-8], "\\Foo");
               ua_params = [(Typing_defs_core.String "barBaz")];
@@ -188,7 +194,8 @@
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
              override = false; dynamicallycallable = false;
-             php_std_lib = false; support_dynamic_type = false };
+             php_std_lib = false; support_dynamic_type = false;
+             no_auto_likes = false };
            sm_attributes =
            [{ Typing_defs_core.ua_name = ([22:5-8], "\\Foo"); ua_params = [];
               ua_raw_val = None }
@@ -213,7 +220,8 @@
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
              override = false; dynamicallycallable = false;
-             php_std_lib = false; support_dynamic_type = false };
+             php_std_lib = false; support_dynamic_type = false;
+             no_auto_likes = false };
            sm_attributes =
            [{ Typing_defs_core.ua_name = ([25:5-8], "\\Foo"); ua_params = [];
               ua_raw_val = None }
@@ -238,7 +246,8 @@
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
              override = false; dynamicallycallable = false;
-             php_std_lib = false; support_dynamic_type = false };
+             php_std_lib = false; support_dynamic_type = false;
+             no_auto_likes = false };
            sm_attributes =
            [{ Typing_defs_core.ua_name = ([28:5-8], "\\Foo"); ua_params = [];
               ua_raw_val = None }
@@ -263,7 +272,8 @@
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
              override = false; dynamicallycallable = false;
-             php_std_lib = false; support_dynamic_type = false };
+             php_std_lib = false; support_dynamic_type = false;
+             no_auto_likes = false };
            sm_attributes =
            [{ Typing_defs_core.ua_name = ([31:5-8], "\\Foo"); ua_params = [];
               ua_raw_val = None }
@@ -288,7 +298,8 @@
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
              override = false; dynamicallycallable = false;
-             php_std_lib = false; support_dynamic_type = false };
+             php_std_lib = false; support_dynamic_type = false;
+             no_auto_likes = false };
            sm_attributes =
            [{ Typing_defs_core.ua_name = ([34:5-8], "\\Foo");
               ua_params = [(Typing_defs_core.Classname "\\SomeClass")];
@@ -314,7 +325,8 @@
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
              override = false; dynamicallycallable = false;
-             php_std_lib = false; support_dynamic_type = false };
+             php_std_lib = false; support_dynamic_type = false;
+             no_auto_likes = false };
            sm_attributes =
            [{ Typing_defs_core.ua_name = ([37:5-8], "\\Foo");
               ua_params = [(Typing_defs_core.String "barBaz")];

@@ -1742,7 +1742,8 @@ let default_constructor_ce class_ =
         ~readonly_prop:false
         ~support_dynamic_type:false
         ~needs_init:false
-        ~safe_global_variable:false;
+        ~safe_global_variable:false
+        ~no_auto_likes:false;
   }
 
 (* When an interface defines a constructor, we check that they are compatible *)

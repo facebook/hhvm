@@ -58,7 +58,7 @@
                { Shallow_decl_defs.MethodFlags.abstract = false;
                  final = false; override = false;
                  dynamicallycallable = false; php_std_lib = false;
-                 support_dynamic_type = false };
+                 support_dynamic_type = false; no_auto_likes = false };
                sm_attributes = []; sm_sort_text = None });
        sc_static_methods = [];
        sc_methods =
@@ -81,7 +81,8 @@
           sm_flags =
           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
             override = false; dynamicallycallable = false;
-            php_std_lib = false; support_dynamic_type = false };
+            php_std_lib = false; support_dynamic_type = false;
+            no_auto_likes = false };
           sm_attributes = []; sm_sort_text = None }
          ];
        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
@@ -148,7 +149,7 @@
                 { Shallow_decl_defs.MethodFlags.abstract = false;
                   final = false; override = false;
                   dynamicallycallable = false; php_std_lib = false;
-                  support_dynamic_type = false };
+                  support_dynamic_type = false; no_auto_likes = false };
                 sm_attributes = []; sm_sort_text = None });
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
         sc_enum_type = None; sc_docs_url = None; sc_package = None }));
@@ -214,7 +215,7 @@
                 { Shallow_decl_defs.MethodFlags.abstract = false;
                   final = false; override = false;
                   dynamicallycallable = false; php_std_lib = false;
-                  support_dynamic_type = false };
+                  support_dynamic_type = false; no_auto_likes = false };
                 sm_attributes = []; sm_sort_text = None });
         sc_static_methods = [];
         sc_methods =
@@ -237,7 +238,8 @@
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
              override = false; dynamicallycallable = false;
-             php_std_lib = false; support_dynamic_type = false };
+             php_std_lib = false; support_dynamic_type = false;
+             no_auto_likes = false };
            sm_attributes = []; sm_sort_text = None }
           ];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;

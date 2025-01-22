@@ -65,6 +65,7 @@ bitflags! {
         const READONLY_PROP            = 1 << 12;
         const NEEDS_INIT               = 1 << 13;
         const SAFE_GLOBAL_VARIABLE     = 1 << 14;
+        const NO_AUTO_LIKES            = 1 << 15;
 
         const XA_FLAGS_MASK = Self::XA_HAS_DEFAULT.bits() | Self::XA_TAG_REQUIRED.bits() | Self::XA_TAG_LATEINIT.bits();
     }
@@ -85,6 +86,7 @@ pub struct ClassEltFlagsArgs {
     pub supports_dynamic_type: bool,
     pub needs_init: bool,
     pub safe_global_variable: bool,
+    pub no_auto_likes: bool,
 }
 
 impl From<xhp_attribute::Tag> for ClassEltFlags {
@@ -130,6 +132,7 @@ impl ClassEltFlags {
             supports_dynamic_type,
             needs_init,
             safe_global_variable,
+            no_auto_likes,
         } = args;
         let mut flags = Self::empty();
         flags.set(Self::ABSTRACT, is_abstract);
@@ -145,6 +148,7 @@ impl ClassEltFlags {
         flags.set(Self::SUPPORT_DYNAMIC_TYPE, supports_dynamic_type);
         flags.set(Self::NEEDS_INIT, needs_init);
         flags.set(Self::SAFE_GLOBAL_VARIABLE, safe_global_variable);
+        flags.set(Self::NO_AUTO_LIKES, no_auto_likes);
         flags
     }
 

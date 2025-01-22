@@ -458,7 +458,7 @@ class StructureAnnotations(unittest.TestCase):
 
                 @rust.Arc
                 @rust.Copy
-                @rust.Derive{derive = ["Foo","Bar"]}
+                @rust.Derive{derives = ["Foo","Bar"]}
                 @rust.Exhaustive
                 @rust.Mod{name = "foo"}
                 @rust.Ord

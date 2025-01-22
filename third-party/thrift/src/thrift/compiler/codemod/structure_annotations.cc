@@ -478,7 +478,7 @@ class structure_annotations {
               return fmt::format("\"{}\"", str);
             }) |
             ranges::views::join(',') | ranges::to<std::string>;
-        to_add.insert(fmt::format("@rust.Derive{{derive = [{}]}}", derives));
+        to_add.insert(fmt::format("@rust.Derive{{derives = [{}]}}", derives));
         fm_.add_include("thrift/annotation/rust.thrift");
       }
 

@@ -18,12 +18,16 @@ package thrift
 
 import (
 	"context"
+	"errors"
 	"net"
+	"runtime"
 	"testing"
 	"time"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+
+	"golang.org/x/sync/errgroup"
 )
 
 type closeConn struct {
@@ -110,4 +114,64 @@ func TestRocketClientUnix(t *testing.T) {
 	}
 	cancel()
 	<-errChan
+}
+
+func TestFDRelease(t *testing.T) {
+	listener, err := net.Listen("tcp", "[::]:0")
+	if err != nil {
+		t.Fatalf("failed to listen: %v", err)
+	}
+
+	addr := listener.Addr().(*net.TCPAddr)
+	t.Logf("Server listening on %v", addr)
+
+	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
+	server := NewServer(processor, listener, TransportIDRocket)
+
+	serverCtx, serverCancel := context.WithCancel(context.Background())
+	var serverEG errgroup.Group
+	serverEG.Go(func() error {
+		return server.ServeContext(serverCtx)
+	})
+
+	for range 10000 {
+		proto, err := NewClient(
+			WithRocket(),
+			WithIoTimeout(60*time.Second),
+			WithDialer(func() (net.Conn, error) {
+				return net.DialTimeout("tcp", addr.String(), 60*time.Second)
+			}),
+		)
+		if err != nil {
+			t.Fatalf("failed to get client: %v", err)
+		}
+		// NOTE!!!!!!
+		// Close() call is missing intentionally!!!!
+		// We are testing that the FD is released when the client is GCed.
+		client := dummy.NewDummyClient(proto)
+		_, err = client.Echo("hello")
+		if err != nil {
+			t.Fatalf("failed to make RPC: %v", err)
+		}
+	}
+
+	// Run GC to ensure it releases the underlying FDs
+	runtime.GC()
+	fdCount, err := getNumFileDesciptors()
+	if err != nil {
+		t.Fatalf("failed to get FD count: %v", err)
+	}
+	// Because we run alongside other tests concurrently - we cannot assert zero.
+	// But it is sufficient to assert that we are down to below 200 FDs.
+	// This is a very solid assertion, given that we opened 10,000 connections (FDs)
+	// in the for-loop above.
+	if fdCount > 200 {
+		t.Fatalf("too many FDs: %d", fdCount)
+	}
+
+	serverCancel()
+	err = serverEG.Wait()
+	if err != nil && !errors.Is(err, context.Canceled) {
+		t.Fatalf("unexpected error in ServeContext: %v", err)
+	}
 }

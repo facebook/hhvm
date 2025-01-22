@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"maps"
 	"net"
+	"runtime"
 	"time"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
@@ -85,6 +86,7 @@ func newRocketClientFromRsocket(client RSocketClient, protoID types.ProtocolID, 
 	default:
 		return nil, types.NewProtocolException(fmt.Errorf("Unknown protocol id: %d", p.protoID))
 	}
+	runtime.SetFinalizer(p, (*rocketClient).Close)
 	return p, nil
 }
 
@@ -163,5 +165,7 @@ func (p *rocketClient) GetResponseHeaders() map[string]string {
 }
 
 func (p *rocketClient) Close() error {
+	// no need for a finalizer anymore
+	runtime.SetFinalizer(p, nil)
 	return p.client.Close()
 }

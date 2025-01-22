@@ -140,17 +140,17 @@ There are four categories of `template`s:
   * All blocks contain zero or more body elements inside them.
 * ***Statements*** — `{{#foo}}` — non-rendering operations like name bindings ([`{{#let}}`](#let-statements)), `{{#else}}` etc.
   * All statements are of the form `{{# ...}}`. Unlike blocks, there is no closing tag.
-* [***Partial Application***](#partial-applications) — `{{> foo}}` — for reusable templates.
+* [***Macros***](#macros) — `{{> foo}}` — for reusable templates.
 
 <Grammar>
 
 ```
-template → { interpolation | block | statement | partial-apply }
+template → { interpolation | block | statement | macro }
 
 interpolation → { <see below> }
 block         → { <see below> }
 statement     → { <see below> }
-partial-apply → { <see below> }
+macro         → { <see below> }
 ```
 
 </Grammar>
@@ -622,88 +622,36 @@ pragma-statement → { "{{" ~ "#" ~ "pragma" ~ ( "single-line" ) ~ "}}" }
 
 </Grammar>
 
-### Partial Blocks
+### Partial Blocks & Statements
 
 :::warning
-`{{#partial}}` blocks have not been implemented yet.
+`{{#let partial}}` blocks and `{{#partial}}` statements have not been implemented yet.
 :::
 
-Partial blocks allow defining reusable templates within a Whisker template. A simple example of a `{{#partial}}` block might be:
+Partial blocks allow defining reusable templates within a Whisker template. They are not rendered unless *applied* (by name). A simple example of a `{{#let partial}}` block might be:
 
 ```handlebars
-{{#partial greeting as |person|}}
+{{#let partial greeting as |person|}}
 Greetings, {{person.firstName}} {{person.lastName}}!
-{{/partial}}
-
-{{! example partial application }}
-{{> greeting person=person}}
+{{/let partial}}
 ```
 
-Partial blocks must be applied with [partial applications](#partial-applications). See below.
-
-<Grammar>
-
-```
-partial-block         → { partial-block-open ~ body* ~ partial-block-close }
-partial-block-open    → { "{{#" ~ "partial" ~ path-component ~ routine-capture? ~ "}}" }
-partial-block-capture → { "as" ~ "|" ~ identifier+ ~ "|" }
-partial-block-close   → { "{{/" ~ "partial" ~ "}}" }
-
-path-component → { <see below> }
-```
-
-</Grammar>
-
-Whisker `{{#partial}}` blocks are based on [Handlebars partial parameters](https://handlebarsjs.com/guide/partials.html#partial-parameters).
-
-### Partial Applications
-
-Partials are reusable templates that are not rendered unless *applied* (by name). A simple example of partial application might be:
+Partial blocks must be applied with `{{#partial ...}}` statements. A simple example for a `{{#partial}}` statement for the above block might be:
 
 ```handlebars
-{{> path/to/my-partial}}
+{{#partial greeting person=person}}
 ```
 
-:::note
-Currently, partials cannot be defined in Whisker — they must be provided by the runtime environment (e.g. C++).
-This will change once [`{{#partial}}` blocks](#partial-blocks) are implemented.
-:::
+The `{{#partial}}` statement must include named arguments that are [bound](#scopes) to `expression`s, matching the captures (`as |...|`) from the definition.
 
-Partial applications (without captures) assume the [scope](#scopes) at the site of application. This behavior is analogous to [C preprocessor macro expansion](https://en.wikipedia.org/wiki/C_preprocessor#Macro_definition_and_expansion). Names accessible from the site of the application are also available within the block.
-
-<Example title="Example with implied context (macro)">
-
-```handlebars title=example.whisker
-{{#partial greeting as |person|}}
-Greetings, {{person.firstName}} {{person.lastName}}!
-{{/partial}}
-
-{{> greeting}}
-```
-
-```json title=Context
-{
-  "person": {
-    "firstName": "Dave",
-    "lastName": "Grohl"
-  }
-}
-```
-
-```text title=Output
-Greetings, Dave Grohl!
-```
-
-</Example>
-
-[Partial applications (with captures)](#partial-blocks) have names (provided via `as`) [bound](#scopes) to `expression`s provided during application. The contained body is rendered with a [derived evaluation context](#derived-evaluation-context). Names accessible from the site of the application are **not** *implicitly* available within the block.
+The contained body of the `{{#let partial}}` block is rendered with a [derived evaluation context](#derived-evaluation-context). Names accessible from the site of the application are **not** *implicitly* available within the block.
 
 <Example>
 
 ```handlebars
-{{#partial greeting as |person|}}
+{{#let partial greeting as |person|}}
 Greetings, {{person.firstName}} {{person.lastName}}!
-{{/partial}}
+{{/let partial}}
 
 {{> greeting person=dave}}
 ```
@@ -723,20 +671,19 @@ Greetings, Dave Grohl!
 
 </Example>
 
-Partial applications retain the *preceding indentation* at the site of the application. Every line of the partial being applied is indented by this same amount.
+Partial statements retain the *preceding indentation* at the site of the application. Every line of the partial being applied is indented by this same amount.
 
 <Example title="Example with indentation">
 
 ```handlebars title=example.whisker
-Some historic presidents are:
-{{#each presidents as person}}
-  {{> common/president}}
-{{/each}}
-```
-
-```handlebars title=common/president.whisker
+{{#let partial president as |person|}}
 {{person.lastName}}
   {{person.firstName}}
+{{/let partial}}
+Some historic presidents are:
+{{#each presidents as person}}
+  {{#partial president person=person}}
+{{/each}}
 ```
 
 ```json title=Context
@@ -768,9 +715,68 @@ Some historic presidents are:
 <Grammar>
 
 ```
-partial-apply    → { "{{" ~ ">" ~ partial-lookup ~ partial-argument* ~ "}}" }
-partial-lookup   → { path-component ~ ("/" ~ path-component)* }
-partial-argument → { identifier ~ "=" ~ expression }
+partial-block         → { partial-block-open ~ body* ~ partial-block-close }
+partial-block-open    → { "{{#" ~ "let" ~ "partial" ~ identifier ~ partial-block-capture ~ "}}" }
+partial-block-capture → { "as" ~ "|" ~ identifier+ ~ "|" }
+partial-block-close   → { "{{/" ~ "let" ~ "partial" ~ "}}" }
+
+partial-statement → { "{{" ~ "#" ~ "partial" ~ identifier ~ partial-argument+ ~ "}}" }
+partial-argument  → { identifier ~ "=" ~ expression }
+```
+
+</Grammar>
+
+:::note
+Partial blocks may only appear at the top of a source file.
+:::
+
+Whisker `{{#let partial}}` blocks are based on [Handlebars partial parameters](https://handlebarsjs.com/guide/partials.html#partial-parameters).
+
+### Macros
+
+Macros are reusable templates that are not rendered unless *applied* (by a path). A simple example of macro application might be:
+
+```handlebars
+{{> path/to/my-partial}}
+```
+
+:::note
+Macros cannot be defined in Whisker — they must be provided by the runtime environment (e.g. C++).
+:::
+
+Macros assume the [scope](#scopes) at the site of application. This behavior is analogous to [C preprocessor macro expansion](https://en.wikipedia.org/wiki/C_preprocessor#Macro_definition_and_expansion).
+Names accessible from the site of the application are also available within the block.
+
+<Example>
+
+```handlebars title=example.whisker
+{{> greeting}}
+```
+
+```handlebars title=greeting.whisker
+Greetings, {{person.firstName}} {{person.lastName}}!
+```
+
+```json title=Context
+{
+  "person": {
+    "firstName": "Dave",
+    "lastName": "Grohl"
+  }
+}
+```
+
+```text title=Output
+Greetings, Dave Grohl!
+```
+
+</Example>
+
+<Grammar>
+
+```
+macro          → { "{{" ~ ">" ~ macro-lookup ~ "}}" }
+macro-lookup   → { path-component ~ ("/" ~ path-component)* }
 
 path-component → { <see below> }
 ```
@@ -881,13 +887,13 @@ When resolving an *identifier* like `name`, the process works as follows:
 4. Move to the previous scope in the stack and repeat (2) and (3).
     * If the bottom of the stack is reached without resolution, return an error.
 
-Local bindings can be added to the current scope using [`{{#let}}`](#let-statements), `as` captures in [`{{#each}}`](#each-blocks) or [`{{#partial}}`](#partial-blocks), and similar constructs.
+Local bindings can be added to the current scope using [`{{#let}}`](#let-statements), `as` captures in [`{{#each}}`](#each-blocks), and similar constructs.
 
 Certain scopes lack an **implicit context** `object`, which is represented by `null`. For instance, [`{{#if}}`](#if-blocks) blocks always have a `null` context. [`{{#each}}`](#each-blocks) blocks have a `null` context when captures are present.
 
 ### Derived Evaluation Context
 
-`{{#partial}}` blocks with `as` captures are rendered within a new evaluation context *derived* from the the call site. This context starts with an empty stack but retains access to the same global scope `map`.
+`{{#let partial}}` blocks are rendered within a new evaluation context *derived* from the the call site. This context starts with an empty stack but retains access to the same global scope `map`.
 
 ## Standalone Tags
 
@@ -896,9 +902,9 @@ The Mustache spec defines rules around a concept called [*standalone lines*](htt
 If a line has control flow tags, but is otherwise only whitespace, then implementations should strip the entire line from the output.
 The following tags are standalone-stripping eligible:
 * `{{! ... }}` — [comments](#comments)
-* `{{# ... }}` — blocks ([`{{#if}}`](#if-blocks), [`{{#each}}`](#each-blocks), [`{{#with}}`](#with-blocks)) and statements ([`{{#let}}`](#let-statements))
+* `{{# ... }}` — blocks ([`{{#if}}`](#if-blocks), [`{{#each}}`](#each-blocks), [`{{#with}}`](#with-blocks), [`{{#let partial}}`](#partial-blocks--statements)) and statements ([`{{#let}}`](#let-statements), [`{{#partial}}`](#partial-blocks--statements))
 * `{{/ ... }}` — closing tag for blocks listed above
-* `{{> ... }}` — [partial applications](#partial-applications)
+* `{{> ... }}` — [macros](#macros)
 
 <Example>
 
@@ -985,10 +991,10 @@ Notice that `boolean` and `.condition` are on separate lines, yet both lines wer
 
 </Example>
 
-[Partial applications](#partial-applications) have special behavior in the context of standalone line stripping, even though they perform interpolation.
-If a partial application is standalone, then the whitespace **to the left is preserved**, while the one **to the right is stripped**.
+[Partial statements](#partial-blocks--statements) and [macros](#macros) have special behavior in the context of standalone line stripping, even though they perform interpolation.
+If the application is standalone, then the whitespace **to the left is preserved**, while the one **to the right is stripped**.
 
-<Example title="Example with partial application">
+<Example title="Example with macro">
 
 ```handlebars title=example.whisker
 | *
@@ -1016,7 +1022,7 @@ hello world
 
 </Example>
 
-A standalone-stripped line can have multiple tags, as long as none of tags are [partial applications](#partial-applications).
+A standalone-stripped line can have multiple tags, as long as none of tags are [partial statements](#partial-blocks--statements) or [macros](#macros).
 
 <Example title="Example with multiple tags">
 
@@ -1044,7 +1050,7 @@ A standalone-stripped line can have multiple tags, as long as none of tags are [
 
 </Example>
 
-<Example title="Example with multiple tags and partial application">
+<Example title="Example with multiple tags and macro">
 
 ```handlebars title=example.whisker
 | *

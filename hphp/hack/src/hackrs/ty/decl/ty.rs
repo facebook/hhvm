@@ -766,7 +766,7 @@ walkable!(ModuleDefType<R> => []);
 /// When the option is `Some`, it points to the location of the `__Enforceable`
 /// attribute which caused the containing typeconst to be enforceable.
 ///
-/// The newtype allows us to implement ToOxidized and ToOcamlRep in such a way
+/// The newtype allows us to implement ToOxidizedByRef and ToOcamlRep in such a way
 /// that we produce `(Pos, bool)` tuples, which is how this is represented on
 /// the OCaml side.
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]

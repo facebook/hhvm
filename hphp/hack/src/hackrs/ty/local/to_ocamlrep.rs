@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use pos::ToOxidized;
+use pos::ToOxidizedByRef;
 
 impl<R: crate::reason::Reason> ocamlrep::ToOcamlRep for super::ty::Ty<R> {
     fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
@@ -34,7 +34,7 @@ impl<R: crate::reason::Reason> ocamlrep::ToOcamlRep for super::ty::Ty<R> {
         // (including indirectly, through macros like `ocaml_ffi`) on values
         // containing this type.
         let arena = &bumpalo::Bump::new();
-        let ty = self.to_oxidized(arena);
+        let ty = self.to_oxidized_by_ref(arena);
         // SAFETY: Transmute away the lifetime to allow the arena-allocated
         // value to be converted to OCaml. Won't break type safety in Rust, but
         // will produce broken OCaml values if used with `add_root` (see above

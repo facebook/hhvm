@@ -5,12 +5,12 @@
 
 mod debug;
 pub mod folded;
-mod from_oxidized;
+mod from_oxidized_by_ref;
 mod ocamlrep;
 mod printer;
 pub mod shallow;
 pub mod subst;
-mod to_oxidized;
+mod to_oxidized_by_ref;
 pub mod ty;
 
 pub use folded::ClassConst;

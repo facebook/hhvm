@@ -19,7 +19,7 @@ use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::ToOxidized;
+use crate::ToOxidizedByRef;
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
 #[derive(Serialize, Deserialize)]
@@ -84,10 +84,10 @@ impl EqModuloPos for Symbol {
     }
 }
 
-impl<'a> ToOxidized<'a> for Symbol {
+impl<'a> ToOxidizedByRef<'a> for Symbol {
     type Output = &'a str;
 
-    fn to_oxidized(&self, _arena: &'a bumpalo::Bump) -> &'a str {
+    fn to_oxidized_by_ref(&self, _arena: &'a bumpalo::Bump) -> &'a str {
         self.as_str()
     }
 }
@@ -192,10 +192,10 @@ impl EqModuloPos for Bytes {
     }
 }
 
-impl<'a> ToOxidized<'a> for Bytes {
+impl<'a> ToOxidizedByRef<'a> for Bytes {
     type Output = &'a [u8];
 
-    fn to_oxidized(&self, _arena: &'a bumpalo::Bump) -> &'a [u8] {
+    fn to_oxidized_by_ref(&self, _arena: &'a bumpalo::Bump) -> &'a [u8] {
         self.0.as_bytes()
     }
 }
@@ -283,10 +283,10 @@ macro_rules! common_impls {
             }
         }
 
-        impl<'a> ToOxidized<'a> for $name {
+        impl<'a> ToOxidizedByRef<'a> for $name {
             type Output = &'a str;
 
-            fn to_oxidized(&self, _arena: &'a bumpalo::Bump) -> &'a str {
+            fn to_oxidized_by_ref(&self, _arena: &'a bumpalo::Bump) -> &'a str {
                 self.as_str()
             }
         }

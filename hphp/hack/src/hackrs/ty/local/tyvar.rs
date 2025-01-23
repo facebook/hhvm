@@ -2,7 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use pos::ToOxidized;
+use pos::ToOxidizedByRef;
 use serde::Deserialize;
 use serde::Serialize;
 use utils::core::Ident;
@@ -28,10 +28,10 @@ impl From<Tyvar> for isize {
     }
 }
 
-impl<'a> ToOxidized<'a> for Tyvar {
+impl<'a> ToOxidizedByRef<'a> for Tyvar {
     type Output = isize;
 
-    fn to_oxidized(&self, _bump: &'a bumpalo::Bump) -> Self::Output {
+    fn to_oxidized_by_ref(&self, _bump: &'a bumpalo::Bump) -> Self::Output {
         self.0.into()
     }
 }

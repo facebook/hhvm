@@ -28,7 +28,7 @@ use oxidized_by_ref::decl_defs::DeclClassType;
 use pos::Prefix;
 use pos::RelativePath;
 use pos::RelativePathCtx;
-use pos::ToOxidized;
+use pos::ToOxidizedByRef;
 use pos::TypeName;
 use rayon::iter::IntoParallelIterator;
 use rayon::iter::ParallelIterator;
@@ -46,24 +46,24 @@ fn find_hack_files(path: impl AsRef<Path>) -> impl Iterator<Item = PathBuf> {
 }
 
 /// Panic if the (possibly-handwritten) impl of ToOcamlRep doesn't match the
-/// result of invoking to_oxidized followed by to_ocamlrep (since oxidized types
+/// result of invoking to_oxidized_by_ref followed by to_ocamlrep (since oxidized types
 /// have a generated ToOcamlRep impl with stronger correctness guarantees).
 fn verify_to_ocamlrep<'a, T>(bump: &'a Bump, value: &'a T)
 where
     T: ToOcamlRep + FromOcamlRep,
-    T: ToOxidized<'a> + From<<T as ToOxidized<'a>>::Output>,
+    T: ToOxidizedByRef<'a> + From<<T as ToOxidizedByRef<'a>>::Output>,
     T: std::fmt::Debug + PartialEq,
-    <T as ToOxidized<'a>>::Output: std::fmt::Debug + PartialEq + FromOcamlRepIn<'a>,
+    <T as ToOxidizedByRef<'a>>::Output: std::fmt::Debug + PartialEq + FromOcamlRepIn<'a>,
 {
     let alloc = &ocamlrep::Arena::new();
-    let oxidized_val = value.to_oxidized(bump);
+    let oxidized_val = value.to_oxidized_by_ref(bump);
     let ocaml_val = unsafe { ocamlrep::Value::from_bits(value.to_ocamlrep(alloc).to_bits()) };
     let ocamlrep_round_trip_val =
-        <T as ToOxidized<'_>>::Output::from_ocamlrep_in(ocaml_val, bump).unwrap();
+        <T as ToOxidizedByRef<'_>>::Output::from_ocamlrep_in(ocaml_val, bump).unwrap();
     let type_name = std::any::type_name::<T>();
     assert_eq!(
         ocamlrep_round_trip_val, oxidized_val,
-        "{}::to_ocamlrep does not match {}::to_oxidized",
+        "{}::to_ocamlrep does not match {}::to_oxidized_by_ref",
         type_name, type_name
     );
     let from_ocaml_val = T::from_ocamlrep(ocaml_val).unwrap();

@@ -68,6 +68,8 @@ class HTTPDownstreamTest : public testing::Test {
     rawCodec_ = codec.get();
     if (dynamic_cast<HTTP1xCodec*>(rawCodec_) != nullptr) {
       dynamic_cast<HTTP1xCodec*>(rawCodec_)->setStrictValidation(true);
+    } else if (dynamic_cast<HTTP2Codec*>(rawCodec_) != nullptr) {
+      dynamic_cast<HTTP2Codec*>(rawCodec_)->setStrictValidation(true);
     }
 
     // If the codec is H2, getHeaderIndexingStrategy will be called when setting

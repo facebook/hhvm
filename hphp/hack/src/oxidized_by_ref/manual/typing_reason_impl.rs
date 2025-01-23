@@ -156,7 +156,7 @@ impl<'a> std::fmt::Debug for T_<'a> {
             NoReason => f.debug_tuple("Rnone").finish(),
             MissingField => f.debug_tuple("RmissingField").finish(),
             FromWitnessLocl(witness) => witness.fmt(f),
-            FromWitnessDecl(witness) => witness.fmt(f),
+            FromWitnessDecl(witness) => f.debug_tuple("FromWitnessDecl").field(witness).finish(),
             Idx((p, t)) => f.debug_tuple("Ridx").field(p).field(t).finish(),
             ArithRetFloat((p, t, ap)) => f
                 .debug_tuple("RarithRetFloat")

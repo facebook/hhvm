@@ -125,4 +125,14 @@ struct TerseFieldsWithCustomDefault {
   13: NestedStruct struct_field;
   14: NestedUnion union_field;
   15: NestedException exception_field;
+
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  16: NestedStruct cpp_ref_struct_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  17: NestedUnion cpp_ref_union_field;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  18: NestedException cpp_ref_exception_field;
 }

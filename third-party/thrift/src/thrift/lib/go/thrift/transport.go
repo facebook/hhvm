@@ -29,6 +29,7 @@ const (
 	// TransportIDUnknown is the default value for TransportID
 	TransportIDUnknown TransportID = 0
 	// TransportIDHeader is the header transport
+	// Deprecated: use TransportIDUpgradeToRocket instead.
 	TransportIDHeader TransportID = 1
 	// TransportIDRocket is the Rocket transport
 	TransportIDRocket TransportID = 2

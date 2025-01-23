@@ -48,6 +48,7 @@ func WithProtocolID(id types.ProtocolID) ClientOption {
 }
 
 // WithHeader sets the transport to Header, protocol Header is implied here.
+// Deprecated: use WithUpgradeToRocket() instead.
 func WithHeader() ClientOption {
 	return func(opts *clientOptions) {
 		opts.transport = TransportIDHeader

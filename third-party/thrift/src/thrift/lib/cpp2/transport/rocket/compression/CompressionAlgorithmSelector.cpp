@@ -165,21 +165,21 @@ CompressionAlgorithmSelector::toCodecTypeAndLevel(
     case CompressionAlgorithm::ZLIB:
       return {
           folly::io::CodecType::ZLIB,
-          folly::io::COMPRESSION_LEVEL_DEFAULT};
+          folly::compression::COMPRESSION_LEVEL_DEFAULT};
     case CompressionAlgorithm::ZSTD:
       return {
           folly::io::CodecType::ZSTD,
-          folly::io::COMPRESSION_LEVEL_DEFAULT};
+          folly::compression::COMPRESSION_LEVEL_DEFAULT};
     case CompressionAlgorithm::LZ4:
       return {
           folly::io::CodecType::LZ4_VARINT_SIZE,
-          folly::io::COMPRESSION_LEVEL_DEFAULT};
+          folly::compression::COMPRESSION_LEVEL_DEFAULT};
 
     case CompressionAlgorithm::CUSTOM:
       // TODO: use custom compression implementation
       return {
           folly::io::CodecType::NO_COMPRESSION,
-          folly::io::COMPRESSION_LEVEL_DEFAULT};
+          folly::compression::COMPRESSION_LEVEL_DEFAULT};
 
     case CompressionAlgorithm::ZLIB_LESS:
       return {
@@ -216,7 +216,7 @@ CompressionAlgorithmSelector::toCodecTypeAndLevel(
     case CompressionAlgorithm::NONE:
       return {
           folly::io::CodecType::NO_COMPRESSION,
-          folly::io::COMPRESSION_LEVEL_DEFAULT};
+          folly::compression::COMPRESSION_LEVEL_DEFAULT};
   };
   // clang-format on
 

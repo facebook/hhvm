@@ -161,18 +161,63 @@ impl Value {
         }
     }
 
+    /// Gets the value and converts the value to a int16 according to HDF rules.
+    /// If the value doesn't exist, return Ok<None>.
+    pub fn get_i16(&self, name: &str) -> Result<Option<i16>> {
+        match self.get(name)? {
+            Some(v) => Ok(Some(v.inner.configGetInt16(0)?)),
+            None => Ok(None),
+        }
+    }
+
+    /// Gets the value and converts the value to a uint16 according to HDF rules.
+    /// If the value doesn't exist, return Ok<None>.
+    pub fn get_u16(&self, name: &str) -> Result<Option<u16>> {
+        match self.get(name)? {
+            Some(v) => Ok(Some(v.inner.configGetUInt16(0)?)),
+            None => Ok(None),
+        }
+    }
+
+    /// Gets the value and converts the value to a int32 according to HDF rules.
+    /// If the value doesn't exist, return Ok<None>.
+    pub fn get_i32(&self, name: &str) -> Result<Option<i32>> {
+        match self.get(name)? {
+            Some(v) => Ok(Some(v.inner.configGetInt32(0)?)),
+            None => Ok(None),
+        }
+    }
+
     /// Gets the value and converts the value to a uint32 according to HDF rules.
-    /// If the value doesn't exist, return the default value.
-    pub fn get_uint32(&self, name: &str) -> Result<Option<u32>> {
+    /// If the value doesn't exist, return Ok<None>.
+    pub fn get_u32(&self, name: &str) -> Result<Option<u32>> {
         match self.get(name)? {
             Some(v) => Ok(Some(v.inner.configGetUInt32(0)?)),
             None => Ok(None),
         }
     }
 
+    /// Gets the value and converts the value to a int64 according to HDF rules.
+    /// If the value doesn't exist, return Ok<None>.
+    pub fn get_i64(&self, name: &str) -> Result<Option<i64>> {
+        match self.get(name)? {
+            Some(v) => Ok(Some(v.inner.configGetInt64(0)?)),
+            None => Ok(None),
+        }
+    }
+
+    /// Gets the value and converts the value to a uint64 according to HDF rules.
+    /// If the value doesn't exist, return Ok<None>.
+    pub fn get_u64(&self, name: &str) -> Result<Option<u64>> {
+        match self.get(name)? {
+            Some(v) => Ok(Some(v.inner.configGetUInt64(0)?)),
+            None => Ok(None),
+        }
+    }
+
     /// Gets the value and converts the value to a i64 according to HDF rules.
     /// If the value doesn't exist, return the default value.
-    pub fn get_int64_or(&self, name: &str, or_default: i64) -> Result<i64> {
+    pub fn get_i64_or(&self, name: &str, or_default: i64) -> Result<i64> {
         match self.get(name)? {
             Some(v) => Ok(v.inner.configGetInt64(or_default)?),
             None => Ok(or_default),

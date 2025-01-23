@@ -24,7 +24,17 @@ struct Hdf;
 
 void hdfExtract(const Hdf& hdf, const char* name, bool& val, bool dv);
 
+void hdfExtract(const Hdf& hdf, const char* name, int16_t& val, int16_t dv);
+
 void hdfExtract(const Hdf& hdf, const char* name, uint16_t& val, uint16_t dv);
+
+void hdfExtract(const Hdf& hdf, const char* name, int32_t& val, int32_t dv);
+
+void hdfExtract(const Hdf& hdf, const char* name, uint32_t& val, uint32_t dv);
+
+void hdfExtract(const Hdf& hdf, const char* name, int64_t& val, int64_t dv);
+
+void hdfExtract(const Hdf& hdf, const char* name, uint64_t& val, uint64_t dv);
 
 void hdfExtract(const Hdf& hdf, const char* name, std::map<std::string, std::string>& map,
                 const std::map<std::string, std::string>& dv);

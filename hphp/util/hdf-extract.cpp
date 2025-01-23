@@ -24,8 +24,28 @@ void hdfExtract(const Hdf& hdf, const char* name, bool& val, bool dv) {
   val = hdf[name].configGetBool(dv);
 }
 
+void hdfExtract(const Hdf& hdf, const char* name, int16_t& val, int16_t dv) {
+  val = hdf[name].configGetInt16(dv);
+}
+
 void hdfExtract(const Hdf& hdf, const char* name, uint16_t& val, uint16_t dv) {
   val = hdf[name].configGetUInt16(dv);
+}
+
+void hdfExtract(const Hdf& hdf, const char* name, int32_t& val, int32_t dv) {
+  val = hdf[name].configGetInt32(dv);
+}
+
+void hdfExtract(const Hdf& hdf, const char* name, uint32_t& val, uint32_t dv) {
+  val = hdf[name].configGetUInt32(dv);
+}
+
+void hdfExtract(const Hdf& hdf, const char* name, int64_t& val, int64_t dv) {
+  val = hdf[name].configGetInt64(dv);
+}
+
+void hdfExtract(const Hdf& hdf, const char* name, uint64_t& val, uint64_t dv) {
+  val = hdf[name].configGetUInt64(dv);
 }
 
 void hdfExtract(

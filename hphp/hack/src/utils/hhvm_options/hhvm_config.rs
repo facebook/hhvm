@@ -24,11 +24,51 @@ impl HhvmConfig {
         )
     }
 
-    pub fn get_uint32(&self, key: &str) -> Result<Option<u32>> {
+    pub fn get_i16(&self, key: &str) -> Result<Option<i16>> {
         self.get_helper(
             key,
             /*prepend_hhvm=*/ true,
-            |config, key| Ok(config.get_uint32(key)?),
+            |config, key| Ok(config.get_i16(key)?),
+        )
+    }
+
+    pub fn get_u16(&self, key: &str) -> Result<Option<u16>> {
+        self.get_helper(
+            key,
+            /*prepend_hhvm=*/ true,
+            |config, key| Ok(config.get_u16(key)?),
+        )
+    }
+
+    pub fn get_i32(&self, key: &str) -> Result<Option<i32>> {
+        self.get_helper(
+            key,
+            /*prepend_hhvm=*/ true,
+            |config, key| Ok(config.get_i32(key)?),
+        )
+    }
+
+    pub fn get_u32(&self, key: &str) -> Result<Option<u32>> {
+        self.get_helper(
+            key,
+            /*prepend_hhvm=*/ true,
+            |config, key| Ok(config.get_u32(key)?),
+        )
+    }
+
+    pub fn get_i64(&self, key: &str) -> Result<Option<i64>> {
+        self.get_helper(
+            key,
+            /*prepend_hhvm=*/ true,
+            |config, key| Ok(config.get_i64(key)?),
+        )
+    }
+
+    pub fn get_u64(&self, key: &str) -> Result<Option<u64>> {
+        self.get_helper(
+            key,
+            /*prepend_hhvm=*/ true,
+            |config, key| Ok(config.get_u64(key)?),
         )
     }
 

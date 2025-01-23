@@ -205,8 +205,8 @@ fn match_shard(
     if !enable_shards || !config.contains_key("Shard")? {
         return Ok(true);
     }
-    let shard = config.get_int64_or("Shard", -1)?;
-    let nshards = config.get_int64_or("ShardCount", 100)?;
+    let shard = config.get_i64_or("Shard", -1)?;
+    let nshards = config.get_i64_or("ShardCount", 100)?;
     if shard < 0 || shard >= nshards {
         log::warn!(
             "Invalid shard number {}, must in the range [0..{})",
@@ -542,8 +542,8 @@ mod test {
         )?;
         assert_eq!(hdf.get_str("Eval.strA")?, str_a);
         assert_eq!(hdf.get_str("Eval.strB")?, str_b);
-        assert_eq!(hdf.get_uint32("Eval.intA")?, int_a);
-        assert_eq!(hdf.get_uint32("Eval.intB")?, int_b);
+        assert_eq!(hdf.get_u32("Eval.intA")?, int_a);
+        assert_eq!(hdf.get_u32("Eval.intB")?, int_b);
         assert_eq!(matched_tiers, expected_matches);
 
         Ok(())

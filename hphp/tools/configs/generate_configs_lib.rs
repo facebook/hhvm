@@ -297,6 +297,21 @@ impl ConfigType {
         }
     }
 
+    fn rs_str(&self) -> &str {
+        match *self {
+            ConfigType::Bool => "bool",
+            ConfigType::Int16t => "i16",
+            ConfigType::Int32t => "i32",
+            ConfigType::Int64t => "i64",
+            ConfigType::UInt16t => "u16",
+            ConfigType::UInt32t => "u32",
+            ConfigType::UInt64t => "u64",
+            _ => {
+                panic!("Unsupported type {} in Rust", self.str());
+            }
+        }
+    }
+
     fn includes(&self) -> Vec<Include> {
         match *self {
             ConfigType::Bool | ConfigType::Double => vec![],
@@ -890,7 +905,11 @@ pub fn generate_hackc(sections: Vec<ConfigSection>, output_dir: PathBuf) {
                 hackc_flags_rs_properties
                     .get_mut(&hackc_flag.type_)
                     .unwrap()
-                    .push(format!("    pub {}: {},", snake_case, &config.type_.str()));
+                    .push(format!(
+                        "    pub {}: {},",
+                        snake_case,
+                        &config.type_.rs_str()
+                    ));
 
                 hackc_flags_rs_defaults
                     .get_mut(&hackc_flag.type_)
@@ -910,9 +929,10 @@ pub fn generate_hackc(sections: Vec<ConfigSection>, output_dir: PathBuf) {
                     .get_mut(&hackc_flag.type_)
                     .unwrap()
                     .push(format!(
-                        r#"        if let Some(v) = config.get_bool("{}")? {{
-                flags.{} = v;
-            }}"#,
+                        r#"        if let Some(v) = config.get_{}("{}")? {{
+            flags.{} = v;
+        }}"#,
+                        config.type_.rs_str(),
                         config.hdf_path(section),
                         snake_case,
                     ));

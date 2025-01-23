@@ -413,7 +413,7 @@ dependencies = [
  "aast_parser",
  "ast_and_decl_parser",
  "bumpalo",
- "clap 4.5.20",
+ "clap 4.5.27",
  "criterion",
  "cst_and_decl_parser",
  "direct_decl_parser",
@@ -591,7 +591,7 @@ name = "cbindgen"
 version = "0.27.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "clap 4.5.20",
+ "clap 4.5.27",
  "heck 0.4.1",
  "indexmap 2.2.6",
  "log",
@@ -711,23 +711,23 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.5.20"
+version = "4.5.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b97f376d85a664d5837dbae44bf546e6477a679ff6610010f17276f686d867e8"
+checksum = "769b0145982b4b48713e01ec42d61614425f27b7058bda7180a3a41f30104796"
 dependencies = [
  "clap_builder",
- "clap_derive 4.5.18",
+ "clap_derive 4.5.24",
 ]
 
 [[package]]
 name = "clap_builder"
-version = "4.5.20"
+version = "4.5.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "19bc80abd44e4bed93ca373a0704ccbd1b710dc5749406201bb018272808dc54"
+checksum = "1b26884eb4b57140e4d2d93652abfa49498b938b3c9179f9fc487b0acc3edad7"
 dependencies = [
  "anstream",
  "anstyle",
- "clap_lex 0.7.0",
+ "clap_lex 0.7.4",
  "strsim 0.11.1",
  "terminal_size 0.4.0",
  "unicase",
@@ -749,9 +749,9 @@ dependencies = [
 
 [[package]]
 name = "clap_derive"
-version = "4.5.18"
+version = "4.5.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ac6a0c7b1a9e9a5186361f67dfa1b88213572f427fb9ab038efb2bd8c582dab"
+checksum = "54b755194d6389280185988721fffba69495eed5ee9feeee9a599b53db80318c"
 dependencies = [
  "heck 0.5.0",
  "proc-macro2",
@@ -770,9 +770,9 @@ dependencies = [
 
 [[package]]
 name = "clap_lex"
-version = "0.7.0"
+version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "98cc8fbded0c607b7ba9dd60cd98df59af97e84d24e49c8557331cfc26d301ce"
+checksum = "f46ad14479a25103f283c0f10005961cf086d8dc42205bb44c46ac563475dca6"
 
 [[package]]
 name = "closure_convert"
@@ -840,7 +840,7 @@ dependencies = [
  "bc_to_ir",
  "bstr",
  "bytecode_printer",
- "clap 4.5.20",
+ "clap 4.5.27",
  "decl_provider",
  "elab",
  "emit_unit",
@@ -998,7 +998,7 @@ dependencies = [
  "anes",
  "cast",
  "ciborium",
- "clap 4.5.20",
+ "clap 4.5.27",
  "criterion-plot",
  "csv",
  "futures",
@@ -1537,7 +1537,7 @@ name = "dump-opcodes"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "clap 4.5.20",
+ "clap 4.5.27",
  "emit_opcodes",
  "hhbc-gen",
  "quote",
@@ -1547,7 +1547,7 @@ dependencies = [
 name = "dump_saved_state_depgraph"
 version = "0.0.0"
 dependencies = [
- "clap 4.5.20",
+ "clap 4.5.27",
  "depgraph_reader",
  "indicatif",
 ]
@@ -2189,7 +2189,7 @@ dependencies = [
  "bumpalo",
  "byte-unit",
  "bytecode_printer",
- "clap 4.5.20",
+ "clap 4.5.27",
  "cmp",
  "compile",
  "decl_parser",
@@ -2422,7 +2422,7 @@ name = "hh_codegen"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "clap 4.5.20",
+ "clap 4.5.27",
  "hash",
  "proc-macro2",
  "quote",
@@ -2593,7 +2593,7 @@ name = "hhvm_options"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "clap 4.5.20",
+ "clap 4.5.27",
  "hdf",
  "hhvm_runtime_options",
 ]

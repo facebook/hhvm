@@ -184,7 +184,7 @@ CompressionAlgorithmSelector::toCodecTypeAndLevel(
     case CompressionAlgorithm::ZLIB_LESS:
       return {
           folly::io::CodecType::ZLIB,
-          folly::io::COMPRESSION_LEVEL_FASTEST};
+          folly::compression::COMPRESSION_LEVEL_FASTEST};
     case CompressionAlgorithm::ZSTD_LESS:
       // ZSTD is special in that it also uses negative (faster) levels. Due to
       // implementation details, folly segmented these negative ZSTD levels into
@@ -198,7 +198,7 @@ CompressionAlgorithmSelector::toCodecTypeAndLevel(
     case CompressionAlgorithm::LZ4_LESS:
       return {
           folly::io::CodecType::LZ4_VARINT_SIZE,
-          folly::io::COMPRESSION_LEVEL_FASTEST};
+          folly::compression::COMPRESSION_LEVEL_FASTEST};
 
     case CompressionAlgorithm::ZLIB_MORE:
       return {

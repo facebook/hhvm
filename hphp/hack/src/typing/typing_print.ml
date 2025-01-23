@@ -1772,6 +1772,22 @@ module Json = struct
     let args tys =
       [("args", JSON_Array (List.map tys ~f:(from_type env ~show_like_ty)))]
     in
+    let optional_args tys =
+      if List.is_empty tys then
+        []
+      else
+        [
+          ( "optional_args",
+            JSON_Array (List.map tys ~f:(from_type env ~show_like_ty)) );
+        ]
+    in
+    let variadic_arg ty =
+      if is_nothing ty then
+        []
+      else
+        [("variadic_arg", from_type env ~show_like_ty ty)]
+    in
+    let splat_arg ty = [("splat_arg", from_type env ~show_like_ty ty)] in
     let refs e =
       match e with
       | Exact -> []
@@ -1834,20 +1850,15 @@ module Json = struct
         | (p, Tvar _) -> obj @@ kind p "var"
         | _ -> from_type env ~show_like_ty ty
       end
-    | (p, Ttuple { t_required; t_extra = Textra { t_optional = _; t_variadic } })
-      ->
-      let fields_known = is_nothing t_variadic in
+    | (p, Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } }) ->
       obj
       @@ kind p "tuple"
       @ is_array false
-      @ [("fields_known", JSON_Bool fields_known)]
       @ args t_required
-    | (p, Ttuple { t_required; t_extra = Tsplat _ }) ->
-      obj
-      @@ kind p "tuple"
-      @ is_array false
-      @ [("fields_known", JSON_Bool false)]
-      @ args t_required
+      @ optional_args t_optional
+      @ variadic_arg t_variadic
+    | (p, Ttuple { t_required; t_extra = Tsplat ty }) ->
+      obj @@ kind p "tuple" @ is_array false @ args t_required @ splat_arg ty
     | (p, Tany _) -> obj @@ kind p "any"
     | (p, Tnonnull) -> obj @@ kind p "nonnull"
     | (p, Tdynamic) -> obj @@ kind p "dynamic"
@@ -2011,15 +2022,40 @@ module Json = struct
         (Deserialization_error
            (Hh_json.Access.access_failure_to_string access_failure))
 
+  let wrap_json_accessor_with_default ~default f x =
+    match f x with
+    | Ok value -> Ok value
+    | Error (Hh_json.Access.Missing_key_error _) -> Ok default
+    | Error access_failure ->
+      Error
+        (Deserialization_error
+           (Hh_json.Access.access_failure_to_string access_failure))
+
+  let wrap_json_accessor_with_opt f x =
+    match f x with
+    | Ok value -> Ok (Some value)
+    | Error (Hh_json.Access.Missing_key_error _) -> Ok None
+    | Error access_failure ->
+      Error
+        (Deserialization_error
+           (Hh_json.Access.access_failure_to_string access_failure))
+
   let get_string x = wrap_json_accessor (Hh_json.Access.get_string x)
 
   let get_bool x = wrap_json_accessor (Hh_json.Access.get_bool x)
 
   let get_array x = wrap_json_accessor (Hh_json.Access.get_array x)
 
+  let get_array_opt x =
+    wrap_json_accessor_with_default
+      ~default:([], [])
+      (Hh_json.Access.get_array x)
+
   let get_val x = wrap_json_accessor (Hh_json.Access.get_val x)
 
   let get_obj x = wrap_json_accessor (Hh_json.Access.get_obj x)
+
+  let get_obj_opt x = wrap_json_accessor_with_opt (Hh_json.Access.get_obj x)
 
   let deserialization_error ~message ~keytrace =
     Error
@@ -2130,21 +2166,24 @@ module Json = struct
           end
         | "tuple" ->
           get_array "args" (json, keytrace) >>= fun (args, args_keytrace) ->
-          aux_args args ~keytrace:args_keytrace >>= fun args ->
-          get_bool "fields_known" (json, keytrace)
-          >>= fun (fields_known, _fields_known_keytrace) ->
-          let t_variadic =
-            if fields_known then
-              Typing_make_type.nothing Reason.none
-            else
-              Typing_make_type.mixed Reason.none
-          in
-          ty
-            (Ttuple
-               {
-                 t_required = args;
-                 t_extra = Textra { t_optional = []; t_variadic };
-               })
+          aux_args args ~keytrace:args_keytrace >>= fun t_required ->
+          get_obj_opt "splat_arg" (json, keytrace) >>= fun splat_arg_obj_opt ->
+          begin
+            match splat_arg_obj_opt with
+            | Some (splat_arg_obj, keytrace) ->
+              aux splat_arg_obj ~keytrace >>= fun t_splat ->
+              ty (Ttuple { t_required; t_extra = Tsplat t_splat })
+            | None ->
+              get_array_opt "optional_args" (json, keytrace)
+              >>= fun (optional_args, optional_args_keytrace) ->
+              aux_args optional_args ~keytrace:optional_args_keytrace
+              >>= fun t_optional ->
+              get_obj_opt "variadic_arg" (json, keytrace) >>= fun popt ->
+              aux_variadic_arg popt >>= fun t_variadic ->
+              ty
+                (Ttuple
+                   { t_required; t_extra = Textra { t_optional; t_variadic } })
+          end
         | "nullable" ->
           get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
           begin
@@ -2379,6 +2418,11 @@ module Json = struct
         (args : Hh_json.json list) ~(keytrace : Hh_json.Access.keytrace) :
         (locl_ty list, deserialization_error) result =
       map_array args ~keytrace ~f:aux
+    and aux_variadic_arg (arg : (Hh_json.json * Hh_json.Access.keytrace) option)
+        : (locl_ty, deserialization_error) result =
+      match arg with
+      | None -> Ok (Typing_make_type.nothing Reason.none)
+      | Some (ty, keytrace) -> aux ty ~keytrace
     and aux_refs
         (refs : Hh_json.json list) ~(keytrace : Hh_json.Access.keytrace) :
         (locl_class_refinement, deserialization_error) result =

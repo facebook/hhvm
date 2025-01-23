@@ -1,0 +1,48 @@
+{
+  "actual_type": "(int, ...T)",
+  "full_actual_type": {
+    "src_pos": {
+      "filename": "/call_open_tuple.php",
+      "line": 9,
+      "char_start": 49,
+      "char_end": 59
+    },
+    "kind": "tuple",
+    "is_array": false,
+    "args": [
+      {
+        "src_pos": {
+          "filename": "/call_open_tuple.php",
+          "line": 9,
+          "char_start": 50,
+          "char_end": 52
+        },
+        "kind": "primitive",
+        "name": "int"
+      }
+    ],
+    "splat_arg": {
+      "src_pos": {
+        "filename": "/call_open_tuple.php",
+        "line": 9,
+        "char_start": 58,
+        "char_end": 58
+      },
+      "kind": "generic",
+      "is_array": true,
+      "name": "T",
+      "args": []
+    }
+  },
+  "expected_type": "int",
+  "full_expected_type": {
+    "src_pos": {
+      "filename": "/call_open_tuple.php",
+      "line": 3,
+      "char_start": 21,
+      "char_end": 23
+    },
+    "kind": "primitive",
+    "name": "int"
+  }
+}

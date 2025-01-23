@@ -92,6 +92,7 @@ class TestTypeErrorAtPos(TestCase[TypeErrorAtPosDriver]):
             ("call_unpack.php", [(7, 8)]),
             ("return_expr_only.php", [(5, 10), (5, 21)]),
             ("return_and_fn_arg.php", [(5, 10), (5, 21)]),
+            ("call_open_tuple.php", [(7, 16), (11, 16)]),
         ]
 
         for file_name, positions in cases:

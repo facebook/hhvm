@@ -1,0 +1,57 @@
+{
+  "actual_type": "(float, optional int, nonnull...)",
+  "full_actual_type": {
+    "src_pos": {
+      "filename": "/call_open_tuple.php",
+      "line": 5,
+      "char_start": 31,
+      "char_end": 63
+    },
+    "kind": "tuple",
+    "is_array": false,
+    "args": [
+      {
+        "src_pos": {
+          "filename": "/call_open_tuple.php",
+          "line": 5,
+          "char_start": 32,
+          "char_end": 36
+        },
+        "kind": "primitive",
+        "name": "float"
+      }
+    ],
+    "optional_args": [
+      {
+        "src_pos": {
+          "filename": "/call_open_tuple.php",
+          "line": 5,
+          "char_start": 48,
+          "char_end": 50
+        },
+        "kind": "primitive",
+        "name": "int"
+      }
+    ],
+    "variadic_arg": {
+      "src_pos": {
+        "filename": "/call_open_tuple.php",
+        "line": 5,
+        "char_start": 53,
+        "char_end": 59
+      },
+      "kind": "nonnull"
+    }
+  },
+  "expected_type": "int",
+  "full_expected_type": {
+    "src_pos": {
+      "filename": "/call_open_tuple.php",
+      "line": 3,
+      "char_start": 21,
+      "char_end": 23
+    },
+    "kind": "primitive",
+    "name": "int"
+  }
+}

@@ -203,15 +203,15 @@ CompressionAlgorithmSelector::toCodecTypeAndLevel(
     case CompressionAlgorithm::ZLIB_MORE:
       return {
           folly::io::CodecType::ZLIB,
-          folly::io::COMPRESSION_LEVEL_BEST};
+          folly::compression::COMPRESSION_LEVEL_BEST};
     case CompressionAlgorithm::ZSTD_MORE:
       return {
           folly::io::CodecType::ZSTD,
-          folly::io::COMPRESSION_LEVEL_BEST};
+          folly::compression::COMPRESSION_LEVEL_BEST};
     case CompressionAlgorithm::LZ4_MORE:
       return {
           folly::io::CodecType::LZ4_VARINT_SIZE,
-          folly::io::COMPRESSION_LEVEL_BEST};
+          folly::compression::COMPRESSION_LEVEL_BEST};
 
     case CompressionAlgorithm::NONE:
       return {

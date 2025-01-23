@@ -25,7 +25,7 @@
 #include <thrift/compiler/generate/cpp/util.h>
 
 using apache::thrift::compiler::source_manager;
-using apache::thrift::compiler::t_program;
+using apache::thrift::compiler::t_program_bundle;
 
 namespace apache::thrift::compiler {
 namespace {
@@ -121,7 +121,9 @@ class AnnonateNonOptionalCppRefFields final {
 
 int main(int argc, char** argv) {
   return apache::thrift::compiler::run_codemod(
-      argc, argv, [](source_manager& sm, t_program& p) {
-        apache::thrift::compiler::AnnonateNonOptionalCppRefFields(sm, p).run();
+      argc, argv, [](source_manager& sm, t_program_bundle& pb) {
+        apache::thrift::compiler::AnnonateNonOptionalCppRefFields(
+            sm, *pb.get_root_program())
+            .run();
       });
 }

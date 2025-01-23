@@ -25,7 +25,7 @@
 #include <thrift/compiler/source_location.h>
 
 using apache::thrift::compiler::source_manager;
-using apache::thrift::compiler::t_program;
+using apache::thrift::compiler::t_program_bundle;
 
 namespace apache::thrift::compiler {
 namespace {
@@ -122,8 +122,9 @@ class RemoveRedundantFieldCustomDefaultValues final {
 
 int main(int argc, char** argv) {
   return apache::thrift::compiler::run_codemod(
-      argc, argv, [](source_manager& sm, t_program& p) {
-        apache::thrift::compiler::RemoveRedundantFieldCustomDefaultValues(sm, p)
+      argc, argv, [](source_manager& sm, t_program_bundle& pb) {
+        apache::thrift::compiler::RemoveRedundantFieldCustomDefaultValues(
+            sm, *pb.get_root_program())
             .run();
       });
 }

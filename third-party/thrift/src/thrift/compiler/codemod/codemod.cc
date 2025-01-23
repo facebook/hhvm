@@ -25,7 +25,7 @@ namespace apache::thrift::compiler {
 int run_codemod(
     int argc,
     char** argv,
-    std::function<void(source_manager&, t_program&)> codemod) {
+    std::function<void(source_manager&, t_program_bundle&)> codemod) {
   if (argc <= 1) {
     fmt::print(stderr, "Usage: {} <thrift-file>\n", argv[0]);
     return 1;
@@ -52,7 +52,7 @@ int run_codemod(
   }
 
   // Run the codemod.
-  codemod(source_mgr, *program_bundle->root_program());
+  codemod(source_mgr, *program_bundle);
   return 0;
 }
 

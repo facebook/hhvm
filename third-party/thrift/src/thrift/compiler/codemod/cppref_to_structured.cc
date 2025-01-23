@@ -76,13 +76,14 @@ static void cppref_to_structured(
 
 int main(int argc, char** argv) {
   return apache::thrift::compiler::run_codemod(
-      argc, argv, [](source_manager& sm, t_program& p) {
-        codemod::file_manager fm(sm, p);
+      argc, argv, [](source_manager& sm, t_program_bundle& pb) {
+        t_program& program = *pb.get_root_program();
+        codemod::file_manager fm(sm, program);
 
         const_ast_visitor visitor;
         visitor.add_field_visitor(
             folly::partial(cppref_to_structured, std::ref(fm)));
-        visitor(p);
+        visitor(program);
 
         fm.apply_replacements();
       });

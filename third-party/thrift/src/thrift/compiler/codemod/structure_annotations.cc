@@ -542,7 +542,7 @@ class structure_annotations {
 
 int main(int argc, char** argv) {
   return apache::thrift::compiler::run_codemod(
-      argc, argv, [](source_manager& sm, t_program& p) {
-        structure_annotations(sm, p).run();
+      argc, argv, [](source_manager& sm, t_program_bundle& pb) {
+        structure_annotations(sm, *pb.get_root_program()).run();
       });
 }

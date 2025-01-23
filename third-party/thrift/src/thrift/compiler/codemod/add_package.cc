@@ -21,6 +21,7 @@
 
 using apache::thrift::compiler::source_manager;
 using apache::thrift::compiler::t_program;
+using apache::thrift::compiler::t_program_bundle;
 using apache::thrift::compiler::codemod::file_manager;
 using apache::thrift::compiler::codemod::package_name_generator;
 using apache::thrift::compiler::codemod::package_name_generator_util;
@@ -142,7 +143,7 @@ class add_package {
 
 int main(int argc, char** argv) {
   return apache::thrift::compiler::run_codemod(
-      argc, argv, [](source_manager& sm, t_program& p) {
-        add_package(sm, p).run();
+      argc, argv, [](source_manager& sm, t_program_bundle& pb) {
+        add_package(sm, *pb.get_root_program()).run();
       });
 }

@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <thrift/compiler/ast/t_program.h>
+#include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/source_location.h>
 
 namespace apache::thrift::compiler {
@@ -28,6 +29,6 @@ namespace apache::thrift::compiler {
 [[nodiscard]] int run_codemod(
     int argc,
     char** argv,
-    std::function<void(source_manager&, t_program&)> codemod);
+    std::function<void(source_manager&, t_program_bundle&)> codemod);
 
 } // namespace apache::thrift::compiler

@@ -172,6 +172,9 @@ type _ t =
       (** Handles "textDocument/typeDefinition" LSP messages *)
   | Signature_help : document * location -> Lsp.SignatureHelp.result t
       (** Handles "textDocument/signatureHelp" LSP messages *)
+  | Top_level_def_name_at_pos :
+      document * location
+      -> Lsp.TopLevelDefNameAtPos.result t
   | Code_action :
       document * Ide_api_types.range
       -> (Lsp.CodeAction.command_or_action list
@@ -248,6 +251,8 @@ let t_to_string : type a. a t -> string = function
     Printf.sprintf "Type_definition(%s)" (Path.to_string file_path)
   | Signature_help ({ file_path; _ }, _) ->
     Printf.sprintf "Signature_help(%s)" (Path.to_string file_path)
+  | Top_level_def_name_at_pos ({ file_path; _ }, _) ->
+    Printf.sprintf "Top_level_def_name_at_pos(%s)" (Path.to_string file_path)
   | Code_action ({ file_path; _ }, _) ->
     Printf.sprintf "Code_action(%s)" (Path.to_string file_path)
   | Code_action_resolve { document = { file_path; _ }; resolve_title; _ } ->

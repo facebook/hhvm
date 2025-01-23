@@ -132,6 +132,7 @@ let go_quarantined
         ~entry
         ~line:symbol_line
         ~column:symbol_char
+        ~use_declaration_spans:false
     in
     let results =
       List.filter results ~f:(fun r ->

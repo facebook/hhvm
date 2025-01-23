@@ -176,7 +176,7 @@ let handle :
       ServerSymbolDefinition.go
         ctx
         None
-        SO.{ type_; name; is_declaration = false; pos = Pos.none }
+        SO.{ type_; name; is_declaration = None; pos = Pos.none }
       |> Option.to_list
       |> List.map ~f:SymbolDefinition.to_absolute
     in
@@ -303,7 +303,7 @@ let handle :
                   SymbolOccurrence.Method
                     ( SymbolOccurrence.ClassName (Utils.add_ns class_name),
                       old_name );
-                is_declaration = false;
+                is_declaration = None;
                 pos = Pos.none;
               }
           | ServerRenameTypes.FunctionRename { old_name; _ } ->
@@ -313,7 +313,7 @@ let handle :
               {
                 SymbolOccurrence.name = Utils.add_ns old_name;
                 type_ = SymbolOccurrence.Function;
-                is_declaration = false;
+                is_declaration = None;
                 pos = Pos.none;
               }
         in

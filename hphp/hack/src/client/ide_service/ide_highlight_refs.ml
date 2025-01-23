@@ -64,7 +64,12 @@ let go_quarantined
     ~(line : int)
     ~(column : int) : Ide_api_types.range list =
   let symbol_to_highlight =
-    IdentifySymbolService.go_quarantined ~ctx ~entry ~line ~column
+    IdentifySymbolService.go_quarantined
+      ~ctx
+      ~entry
+      ~line
+      ~column
+      ~use_declaration_spans:false
   in
   let results =
     List.fold symbol_to_highlight ~init:[] ~f:(fun acc s ->

@@ -125,9 +125,9 @@ type kind =
 type 'a t = {
   name: string;
   type_: kind;
-  is_declaration: bool;
-  (* Span of the symbol itself *)
-  pos: 'a Pos.pos;
+  is_declaration: 'a Pos.pos option;
+      (** If this is a declaration, the span of the full declaration, or None otherwise *)
+  pos: 'a Pos.pos;  (** Span of the symbol name itself *)
 }
 [@@deriving ord, show]
 
@@ -146,3 +146,5 @@ val is_class : 'a t -> bool
 val is_xhp_literal_attr : 'a t -> bool
 
 val built_in_type_hover : built_in_type_hint -> string
+
+val is_top_level_definition : 'a t -> bool

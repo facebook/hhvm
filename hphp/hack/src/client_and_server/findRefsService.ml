@@ -355,7 +355,7 @@ let find_refs
         IdentifySymbolService.all_symbols ctx tast
         |> List.filter ~f:(fun symbol ->
                if omit_declaration then
-                 not symbol.SymbolOccurrence.is_declaration
+                 Option.is_none symbol.SymbolOccurrence.is_declaration
                else
                  true)
         |> List.fold ~init:Pos.Map.empty ~f:(fold_one_tast ctx target)
@@ -420,7 +420,8 @@ let find_refs_ctx
   let symbols = IdentifySymbolService.all_symbols_ctx ~ctx ~entry in
   let results =
     symbols
-    |> List.filter ~f:(fun symbol -> not symbol.SymbolOccurrence.is_declaration)
+    |> List.filter ~f:(fun symbol ->
+           Option.is_none symbol.SymbolOccurrence.is_declaration)
     |> List.fold ~init:Pos.Map.empty ~f:(fold_one_tast ctx target)
   in
   Pos.Map.fold (fun p str acc -> (str, p) :: acc) results []

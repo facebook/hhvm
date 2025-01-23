@@ -77,54 +77,47 @@ let rec filename p =
     pos_file
   | Pos_from_reason p -> filename p
 
-(** This returns a closed interval that's incorrect for multi-line spans. *)
+(** This returns `(line, start_column, end_column)`.
+    `start_column` and `end_column` form a closed interval that's incorrect for multi-line spans.
+    For compatibility with IDE positions, the column numbers are one-based. *)
 let rec info_pos p =
+  let convert_one_based_and_close_interval start end_ =
+    (* We do `start = start + 1` to convert from zero-based to one-based.
+       For `end_`, we'd do `+ 1` to convert from zero-based to one-based,
+       but then `- 1` to make the interval closed, so there's no need to do anything *)
+    let start = start + 1 in
+    (* To represent the empty interval, pos_start and pos_end are equal because
+       end_offset is exclusive. Here, it's best for error messages to the user if
+       we print characters N to N (highlighting a single character) rather than characters
+       N to (N-1), which is very unintuitive.
+    *)
+    let end_ =
+      if start = end_ + 1 then
+        start
+      else
+        end_
+    in
+    (start, end_)
+  in
   match p with
   | Pos_small { pos_start; pos_end; _ } ->
-    let (line, start_minus1, bol) = File_pos_small.line_column_beg pos_start in
-    let start = start_minus1 + 1 in
+    let (line, start, bol) = File_pos_small.line_column_beg pos_start in
     let end_offset = File_pos_small.offset pos_end in
     let end_ = end_offset - bol in
-    (* To represent the empty interval, pos_start and pos_end are equal because
-       end_offset is exclusive. Here, it's best for error messages to the user if
-       we print characters N to N (highlighting a single character) rather than characters
-       N to (N-1), which is very unintuitive.
-    *)
-    let end_ =
-      if start = end_ + 1 then
-        start
-      else
-        end_
-    in
+    let (start, end_) = convert_one_based_and_close_interval start end_ in
     (line, start, end_)
   | Pos_large { pos_start; pos_end; _ } ->
-    let (line, start_minus1, bol) = File_pos_large.line_column_beg pos_start in
-    let start = start_minus1 + 1 in
+    let (line, start, bol) = File_pos_large.line_column_beg pos_start in
     let end_offset = File_pos_large.offset pos_end in
     let end_ = end_offset - bol in
-    (* To represent the empty interval, pos_start and pos_end are equal because
-       end_offset is exclusive. Here, it's best for error messages to the user if
-       we print characters N to N (highlighting a single character) rather than characters
-       N to (N-1), which is very unintuitive.
-    *)
-    let end_ =
-      if start = end_ + 1 then
-        start
-      else
-        end_
-    in
+    let (start, end_) = convert_one_based_and_close_interval start end_ in
     (line, start, end_)
   | Pos_tiny { pos_span = span; pos_file = _ } ->
     let line = Pos_span_tiny.start_line_number span in
-    let start_column = Pos_span_tiny.start_column span + 1 in
-    let end_column = Pos_span_tiny.end_column span in
-    let end_column =
-      if start_column = end_column + 1 then
-        start_column
-      else
-        end_column
-    in
-    (line, start_column, end_column)
+    let start = Pos_span_tiny.start_column span in
+    let end_ = Pos_span_tiny.end_column span in
+    let (start, end_) = convert_one_based_and_close_interval start end_ in
+    (line, start, end_)
   | Pos_from_reason p -> info_pos p
 
 (* This returns a closed interval. *)
@@ -259,15 +252,18 @@ let rec end_line_column p =
     (Pos_span_tiny.end_line_number pos_span, Pos_span_tiny.end_column pos_span)
   | Pos_from_reason p -> end_line_column p
 
-let inside p line char_pos =
+let inside_one_based p line_one_based char_pos_one_based =
   let (first_line, first_col) = line_column p in
   let (last_line, last_col) = end_line_column p in
+  (* `pos` has one-based line numbers, zero-based character numbers *)
+  let line = line_one_based in
+  let char_pos = char_pos_one_based - 1 in
   if first_line = last_line then
-    first_line = line && first_col + 1 <= char_pos && char_pos <= last_col
+    first_line = line && first_col <= char_pos && char_pos < last_col
   else if line = first_line then
-    char_pos > first_col
+    first_col <= char_pos
   else if line = last_line then
-    char_pos <= last_col
+    char_pos < last_col
   else
     line > first_line && line < last_line
 

@@ -47,7 +47,8 @@ let go
     (*Other files can only depend on things declared in this one*)
     let declarations =
       IdentifySymbolService.all_symbols_ctx ~ctx:acc_ctx_out ~entry
-      |> List.filter ~f:(fun s -> s.SymbolOccurrence.is_declaration)
+      |> List.filter ~f:(fun s ->
+             Option.is_some s.SymbolOccurrence.is_declaration)
     in
     let target_symbols = List.filter declarations ~f:(is_target line column) in
     let deps =

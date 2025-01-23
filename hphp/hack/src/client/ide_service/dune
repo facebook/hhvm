@@ -1,7 +1,11 @@
 (library
  (name client_ide_service)
  (wrapped false)
- (modules clientIdeDaemon clientIdeIncremental clientIdeInit clientIdeService)
+ (modules
+  clientIdeDaemon
+  clientIdeIncremental
+  clientIdeInit
+  clientIdeService)
  (libraries
   client_ide_message
   client_ide_utils
@@ -19,6 +23,7 @@
   server_rewrite
   ide_diagnostics
   ide_search
+  ide_top_level_def_name_at_pos
   state_loader
   naming_table_builder_ffi_externs
   sys_utils)
@@ -125,6 +130,14 @@
   tast_provider
   typing_skeleton
   utils_core))
+
+(library
+ (name ide_top_level_def_name_at_pos)
+ (wrapped false)
+ (modules
+  ide_top_level_def_name_at_pos)
+ (libraries
+  server_symbol_definition))
 
 (library
  (name ide_diagnostics_cli_lib)

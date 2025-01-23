@@ -44,8 +44,13 @@ let go_quarantined
     ~(entry : Provider_context.entry)
     ~(line : int)
     ~(column : int) =
-  let symbols =
-    IdentifySymbolService.go_quarantined ~ctx ~entry ~line ~column
+  let (symbols : _ SymbolOccurrence.t list) =
+    IdentifySymbolService.go_quarantined
+      ~ctx
+      ~entry
+      ~line
+      ~column
+      ~use_declaration_spans:false
   in
   let symbols = take_best_suggestions (List.sort ~compare:by_nesting symbols) in
   (* TODO(ljw): shouldn't the following be quarantined also? *)

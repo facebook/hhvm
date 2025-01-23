@@ -740,6 +740,12 @@ module WillSaveWaitUntil : sig
   and result = TextEdit.t list
 end
 
+module TopLevelDefNameAtPos : sig
+  type params = TextDocumentPositionParams.t [@@deriving of_yojson]
+
+  type result = string option [@@deriving yojson_of]
+end
+
 (** Watched files changed notification, method="workspace/didChangeWatchedFiles" *)
 module DidChangeWatchedFiles : sig
   type registerOptions = { watchers: fileSystemWatcher list }
@@ -1273,6 +1279,7 @@ type lsp_request =
   | HackTestStopServerRequestFB
   | HackTestShutdownServerlessRequestFB
   | WillSaveWaitUntilRequest of WillSaveWaitUntil.params
+  | TopLevelDefNameAtPosRequest of TopLevelDefNameAtPos.params
   | UnknownRequest of string * Hh_json.json option
 
 type lsp_result =
@@ -1309,6 +1316,7 @@ type lsp_result =
   | HackTestShutdownServerlessResultFB
   | RegisterCapabilityRequestResult
   | WillSaveWaitUntilResult of WillSaveWaitUntil.result
+  | TopLevelDefNameAtPosResult of TopLevelDefNameAtPos.result
   | ErrorResult of Error.t
 
 type lsp_notification =

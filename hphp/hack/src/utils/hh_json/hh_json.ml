@@ -66,6 +66,21 @@ let rec of_yojson (t : Yojson.Safe.t) : json =
   | `Null -> JSON_Null
   | `String s -> JSON_String s
 
+let rec to_yojson (t : json) : Yojson.Safe.t =
+  match t with
+  | JSON_Null -> `Null
+  | JSON_String s -> `String s
+  | JSON_Number s ->
+    (match Stdlib.int_of_string_opt s with
+    | Some i -> `Int i
+    | None ->
+      (match Float.of_string_opt s with
+      | Some d -> `Float d
+      | None -> `Intlit s))
+  | JSON_Bool b -> `Bool b
+  | JSON_Array l -> `List (List.map l ~f:to_yojson)
+  | JSON_Object l -> `Assoc (List.map l ~f:(fun (k, v) -> (k, to_yojson v)))
+
 let of_opt of_t t =
   match t with
   | None -> JSON_Null

@@ -47,7 +47,7 @@ val line_beg_offset : t -> int * int * int
 val end_line_beg_offset : t -> int * int * int
 
 (** For spans over just one line, return the line number, start column and end column.
-    This returns a closed interval.
+    This returns a closed interval. Both line and column numbers are one-based.
     Undefined for multi-line spans. *)
 val info_pos : 'a pos -> int * int * int
 
@@ -86,7 +86,10 @@ val multiline_json : absolute -> Hh_json.json
 
 val multiline_json_no_filename : 'a pos -> Hh_json.json
 
-val inside : 'a pos -> int -> int -> bool
+(** [inside_one_based span line_one_based column_one_based] determines
+  whether the cursor at `line_one_based` and `column_one_based` is inside the `span`.
+  `line_one_based` and `column_one_based` are one-based indices. *)
+val inside_one_based : 'a pos -> int -> int -> bool
 
 val exactly_matches_range :
   'a pos ->

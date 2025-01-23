@@ -3314,6 +3314,68 @@ class TestLsp(LspTestBase):
 
         self.run_spec(spec, variables)
 
+    def test_top_level_def_name_at_pos(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("completion.php"))
+        spec = (
+            self.initialize_spec(LspTestSpec("top_level_def_name_at_pos"))
+            .ignore_notifications(method="textDocument/publishDiagnostics")
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .request(
+                line=line(),
+                method="custom/topLevelDefNameAtPos",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 17, "character": 18},
+                },
+                result="CompletionClass",
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                method="custom/topLevelDefNameAtPos",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 12, "character": 1},
+                },
+                result="CompletionInterface",
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                method="custom/topLevelDefNameAtPos",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 16, "character": 0},
+                },
+                result="CompletionClass",
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                method="custom/topLevelDefNameAtPos",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 18, "character": 1},
+                },
+                result="CompletionClass",
+                powered_by="serverless_ide",
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables)
+
     def test_did_change(self) -> None:
         variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("didchange.php"))
@@ -7704,7 +7766,7 @@ function baz<T>(readonly T $x): readonly T {
 
 
 
-class C {}
+class C2 {}
 """
         variables.update({"php_file_uri": php_file_uri, "contents": contents})
         spec = (

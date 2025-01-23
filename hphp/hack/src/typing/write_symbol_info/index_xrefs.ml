@@ -225,7 +225,7 @@ let process_xrefs ctx symbols fa : Xrefs.t * Fact_acc.t =
     symbols
     ~init:(Xrefs.empty, fa)
     ~f:(fun (xrefs, fa) (File_info.{ occ; def } as sym) ->
-      if occ.is_declaration then
+      if Option.is_some occ.is_declaration then
         (xrefs, fa)
       else
         let pos = occ.pos in

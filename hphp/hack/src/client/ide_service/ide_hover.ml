@@ -87,7 +87,7 @@ let docs_url ctx def : string option =
 
 let make_hover_doc_block ctx entry occurrence def_opt =
   match def_opt with
-  | Some def when not occurrence.SymbolOccurrence.is_declaration ->
+  | Some def when Option.is_none occurrence.SymbolOccurrence.is_declaration ->
     (* The docblock is useful at the call site, but it's redundant at
        the definition site. *)
     let base_class_name = SymbolOccurrence.enclosing_class occurrence in

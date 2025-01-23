@@ -3189,6 +3189,22 @@ let do_signatureHelp
   in
   Lwt.return signatures
 
+let do_topLevelDefNameAtPos
+    ide_service
+    tracking_id
+    ref_unblocked_time
+    editor_open_files
+    (params : TopLevelDefNameAtPos.params) =
+  let (document, location) = get_document_location editor_open_files params in
+  let%lwt result =
+    ide_rpc
+      ide_service
+      ~tracking_id
+      ~ref_unblocked_time
+      (ClientIdeMessage.Top_level_def_name_at_pos (document, location))
+  in
+  Lwt.return result
+
 let patch_to_workspace_edit_change (patch : ServerRenameTypes.patch) :
     Lsp.DocumentUri.t * TextEdit.t =
   let open ServerRenameTypes in
@@ -4611,6 +4627,21 @@ let handle_client_message
         | Some { SignatureHelp.signatures; _ } -> List.length signatures
       in
       Lwt.return_some (make_result_telemetry result_count)
+    | (_, RequestMessage (id, TopLevelDefNameAtPosRequest params)) ->
+      let%lwt () = cancel_if_stale client timestamp short_timeout in
+      let%lwt result =
+        do_topLevelDefNameAtPos
+          ide_service
+          tracking_id
+          ref_unblocked_time
+          editor_open_files
+          params
+      in
+      respond_jsonrpc
+        ~powered_by:Serverless_ide
+        id
+        (TopLevelDefNameAtPosResult result);
+      Lwt.return_none
     (* textDocument/codeAction request *)
     | (Running renv, RequestMessage (id, CodeActionRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in

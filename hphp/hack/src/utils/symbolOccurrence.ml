@@ -118,13 +118,18 @@ type kind =
 type 'a t = {
   name: string;
   type_: kind;
-  is_declaration: bool;
-  (* Span of the symbol itself *)
-  pos: 'a Pos.pos;
+  is_declaration: 'a Pos.pos option;
+      (** If this is a declaration, the span of the full declaration, or None otherwise *)
+  pos: 'a Pos.pos;  (** Span of the symbol name itself *)
 }
 [@@deriving ord, show]
 
-let to_absolute x = { x with pos = Pos.to_absolute x.pos }
+let to_absolute x =
+  {
+    x with
+    is_declaration = Option.map Pos.to_absolute x.is_declaration;
+    pos = Pos.to_absolute x.pos;
+  }
 
 let kind_to_string = function
   | Class _ -> "class"
@@ -146,6 +151,33 @@ let kind_to_string = function
   | HhFixme -> "hh_fixme"
   | HhIgnore -> "hh_ignore"
   | Module -> "module"
+
+let is_top_level_definition { name = _; type_; is_declaration; pos = _ } : bool
+    =
+  Option.is_some is_declaration
+  &&
+  match type_ with
+  | Class _
+  | Function
+  | GConst
+  | Module ->
+    true
+  | BuiltInType _
+  | Method _
+  | LocalVar
+  | Property _
+  | XhpLiteralAttr _
+  | ClassConst _
+  | Typeconst _
+  | TypeVar
+  | Attribute _
+  | EnumClassLabel _
+  | Keyword _
+  | PureFunctionContext
+  | BestEffortArgument _
+  | HhFixme
+  | HhIgnore ->
+    false
 
 let enclosing_class occurrence =
   match occurrence.type_ with

@@ -8,6 +8,7 @@
  *)
 
 open Hh_prelude
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
 type lsp_id =
   | NumberId of int
@@ -18,6 +19,12 @@ type partial_result_token = PartialResultToken of string
 module DocumentUri = struct
   module M = struct
     type t = Uri of string [@@deriving eq, ord]
+
+    let t_of_yojson (t : Yojson.Safe.t) : t =
+      match t with
+      | `String s -> Uri s
+      | _ ->
+        Ppx_yojson_conv_lib__Yojson_conv.of_yojson_error "Expected string" t
   end
 
   include M
@@ -32,7 +39,7 @@ type position = {
   line: int;
   character: int;
 }
-[@@deriving eq]
+[@@deriving eq, of_yojson]
 
 type range = {
   start: position;
@@ -81,7 +88,7 @@ module TextEdit = struct
 end
 
 module TextDocumentIdentifier = struct
-  type t = { uri: DocumentUri.t }
+  type t = { uri: DocumentUri.t } [@@deriving of_yojson]
 end
 
 module VersionedTextDocumentIdentifier = struct
@@ -124,6 +131,7 @@ module TextDocumentPositionParams = struct
     textDocument: TextDocumentIdentifier.t;
     position: position;
   }
+  [@@deriving of_yojson]
 end
 
 module DocumentFilter = struct
@@ -568,6 +576,12 @@ module WillSaveWaitUntil = struct
   }
 
   and result = TextEdit.t list
+end
+
+module TopLevelDefNameAtPos = struct
+  type params = TextDocumentPositionParams.t [@@deriving of_yojson]
+
+  type result = string option [@@deriving yojson_of]
 end
 
 module DidChangeWatchedFiles = struct
@@ -1057,6 +1071,7 @@ type lsp_request =
   | HackTestStopServerRequestFB
   | HackTestShutdownServerlessRequestFB
   | WillSaveWaitUntilRequest of WillSaveWaitUntil.params
+  | TopLevelDefNameAtPosRequest of TopLevelDefNameAtPos.params
   | UnknownRequest of string * Hh_json.json option
 
 type lsp_result =
@@ -1093,6 +1108,7 @@ type lsp_result =
   | HackTestShutdownServerlessResultFB
   | RegisterCapabilityRequestResult
   | WillSaveWaitUntilResult of WillSaveWaitUntil.result
+  | TopLevelDefNameAtPosResult of TopLevelDefNameAtPos.result
   | ErrorResult of Error.t
 
 type lsp_notification =
@@ -1185,5 +1201,6 @@ let lsp_result_to_log_string = function
   | HackTestShutdownServerlessResultFB -> "HackTestShutdownServerlessResultFB"
   | RegisterCapabilityRequestResult -> "RegisterCapabilityRequestResult"
   | WillSaveWaitUntilResult _ -> "WillSaveWaitUntilResult"
+  | TopLevelDefNameAtPosResult _ -> "TopLevelDefNameAtPosResult"
   | ErrorResult _ -> "ErrorResult"
   | AutoCloseResult _ -> "AutoCloseResult"

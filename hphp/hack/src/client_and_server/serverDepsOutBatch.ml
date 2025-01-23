@@ -26,7 +26,7 @@ let rec build_json_entry
     match def_opt with
     | None -> string_ "None"
     | Some def ->
-      if not occ.is_declaration then
+      if Option.is_none occ.is_declaration then
         build_json_def def
       else
         let body_list = body_symbols ~ctx ~entry total_occ_list occ def in
@@ -38,7 +38,10 @@ let rec build_json_entry
     [
       ("kind", kind_to_string occ.type_ |> string_);
       ("name", string_ occ.name);
-      ("declaration", bool_ occ.is_declaration);
+      ( "declaration",
+        opt_
+          (fun p -> Pos.to_absolute p |> Pos.multiline_json)
+          occ.is_declaration );
       ("position", Pos.to_absolute occ.pos |> Pos.multiline_json);
       ("depends_on", depends_json);
     ]

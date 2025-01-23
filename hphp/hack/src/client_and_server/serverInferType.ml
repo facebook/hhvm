@@ -117,7 +117,7 @@ let base_visitor ~human_friendly ~under_dynamic line_char_pairs =
     method private select_pos pos env ty =
       let correct_assumptions = self#correct_assumptions env in
       List.map line_char_pairs ~f:(fun (line, char) ->
-          if Pos.inside pos line char && correct_assumptions then
+          if Pos.inside_one_based pos line char && correct_assumptions then
             Some (pos, mk_info env ty)
           else
             None)
@@ -125,7 +125,7 @@ let base_visitor ~human_friendly ~under_dynamic line_char_pairs =
     method private select_pos_targs pos env ty targs =
       let correct_assumptions = self#correct_assumptions env in
       List.map line_char_pairs ~f:(fun (line, char) ->
-          if Pos.inside pos line char && correct_assumptions then
+          if Pos.inside_one_based pos line char && correct_assumptions then
             Some (pos, mk_info_with_targs env ty targs)
           else
             None)

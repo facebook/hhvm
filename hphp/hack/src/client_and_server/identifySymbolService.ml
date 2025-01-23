@@ -19,12 +19,29 @@ module Result_set = Stdlib.Set.Make (struct
   let compare : t -> t -> int = SymbolOccurrence.compare Relative_path.compare
 end)
 
-let is_target target_line target_char { pos; _ } =
-  let (l, start, end_) = Pos.info_pos pos in
-  l = target_line && start <= target_char && target_char - 1 <= end_
+let is_target
+    ~use_declaration_spans target_line target_char { pos; is_declaration; _ } =
+  let pos =
+    match (use_declaration_spans, is_declaration) with
+    | (true, Some pos) -> pos
+    | (true, None)
+    | (false, _) ->
+      pos
+  in
+  if use_declaration_spans then
+    Pos.inside_one_based pos target_line target_char
+  else
+    let (l, start, end_) = Pos.info_pos pos in
+    l = target_line
+    && start <= target_char
+    && (* Two facts explain the following line:
+          - [start, end_] form a closed interval. This explains the `<=`
+          - The cursor might be right at the end of a symbol span, e.g. `myvar|`,
+            and in that case we still want to consider the symbol as "target".
+            This explains the `- 1` *)
+    target_char - 1 <= end_
 
-let process_class_id
-    ?(is_declaration = false) ?(class_id_type = ClassId) (pos, cid) =
+let process_class_id ?is_declaration ?(class_id_type = ClassId) (pos, cid) =
   Result_set.singleton
     { name = cid; type_ = Class class_id_type; is_declaration; pos }
 
@@ -36,7 +53,7 @@ let process_attribute (pos, name) class_name method_ =
       Attribute (Some { class_name; method_name; is_static })
     | _ -> Attribute None
   in
-  Result_set.singleton { name; type_; is_declaration = false; pos }
+  Result_set.singleton { name; type_; is_declaration = None; pos }
 
 let process_xml_attrs class_name attrs =
   List.fold attrs ~init:Result_set.empty ~f:(fun acc attr ->
@@ -46,7 +63,7 @@ let process_xml_attrs class_name attrs =
           {
             name;
             type_ = XhpLiteralAttr (class_name, Utils.add_xhp_ns name);
-            is_declaration = false;
+            is_declaration = None;
             pos;
           }
           acc
@@ -54,7 +71,7 @@ let process_xml_attrs class_name attrs =
 
 let clean_member_name name = String_utils.lstrip name "$"
 
-let process_member ?(is_declaration = false) recv_class id ~kind =
+let process_member ?is_declaration recv_class id ~kind =
   let member_name = snd id in
   let type_ =
     match kind with
@@ -129,7 +146,7 @@ let process_arg_names recv (args : Tast.expr list) : Result_set.t =
         {
           name = "(unused)";
           type_ = BestEffortArgument (recv_name, i);
-          is_declaration = false;
+          is_declaration = None;
           pos;
         })
     |> Result_set.of_list
@@ -182,19 +199,19 @@ let process_constructor_arg_names
   in
   process_arg_names recv args
 
-let process_fun_id ?(is_declaration = false) id =
+let process_fun_id ?is_declaration id =
   Result_set.singleton
     { name = snd id; type_ = Function; is_declaration; pos = fst id }
 
-let process_global_const ?(is_declaration = false) id =
+let process_global_const ?is_declaration id =
   Result_set.singleton
     { name = snd id; type_ = GConst; is_declaration; pos = fst id }
 
-let process_lvar_id ?(is_declaration = false) id =
+let process_lvar_id id =
   Result_set.singleton
-    { name = snd id; type_ = LocalVar; is_declaration; pos = fst id }
+    { name = snd id; type_ = LocalVar; is_declaration = None; pos = fst id }
 
-let process_typeconst ?(is_declaration = false) (class_name, tconst_name, pos) =
+let process_typeconst ?is_declaration (class_name, tconst_name, pos) =
   Result_set.singleton
     {
       name = class_name ^ "::" ^ tconst_name;
@@ -204,7 +221,9 @@ let process_typeconst ?(is_declaration = false) (class_name, tconst_name, pos) =
     }
 
 let process_class class_ =
-  let acc = process_class_id ~is_declaration:true class_.Aast.c_name in
+  let acc =
+    process_class_id ~is_declaration:class_.Aast.c_span class_.Aast.c_name
+  in
   let c_name = snd class_.Aast.c_name in
   let (constructor, static_methods, methods) =
     Aast.split_methods class_.Aast.c_methods
@@ -216,7 +235,7 @@ let process_class class_ =
         @@ process_member
              (ClassName c_name)
              method_.Aast.m_name
-             ~is_declaration:true
+             ~is_declaration:method_.Aast.m_span
              ~kind:`Method)
   in
   let all_props = class_.Aast.c_vars in
@@ -226,7 +245,7 @@ let process_class class_ =
         @@ process_member
              (ClassName c_name)
              prop.Aast.cv_id
-             ~is_declaration:true
+             ~is_declaration:prop.Aast.cv_span
              ~kind:`Property)
   in
   let acc =
@@ -235,14 +254,16 @@ let process_class class_ =
         @@ process_member
              (ClassName c_name)
              const.Aast.cc_id
-             ~is_declaration:true
+             ~is_declaration:const.Aast.cc_span
              ~kind:`Const)
   in
   let acc =
     List.fold class_.Aast.c_typeconsts ~init:acc ~f:(fun acc typeconst ->
         let (pos, tconst_name) = typeconst.Aast.c_tconst_name in
         Result_set.union acc
-        @@ process_typeconst ~is_declaration:true (c_name, tconst_name, pos))
+        @@ process_typeconst
+             ~is_declaration:typeconst.Aast.c_tconst_span
+             (c_name, tconst_name, pos))
   in
   (* We don't check anything about xhp attributes, so the hooks won't fire when
      typechecking the class. Need to look at them individually. *)
@@ -257,7 +278,11 @@ let process_class class_ =
   | Some method_ ->
     let id = (fst method_.Aast.m_name, SN.Members.__construct) in
     Result_set.union acc
-    @@ process_member (ClassName c_name) id ~is_declaration:true ~kind:`Method
+    @@ process_member
+         (ClassName c_name)
+         id
+         ~is_declaration:method_.Aast.m_span
+         ~kind:`Method
   | None -> acc
 
 let typed_member_id env receiver_ty mid ~kind =
@@ -384,7 +409,7 @@ let visitor =
                 {
                   name = Utils.strip_ns enum_name ^ "#" ^ label_name;
                   type_ = EnumClassLabel (enum_name, label_name);
-                  is_declaration = false;
+                  is_declaration = None;
                   pos;
                 }
         end
@@ -540,7 +565,7 @@ let visitor =
       let (pos, name) = tp.Aast.tp_name in
       let acc =
         Result_set.singleton
-          { name; type_ = TypeVar; is_declaration = true; pos }
+          { name; type_ = TypeVar; is_declaration = Some pos; pos }
       in
       self#plus acc (super#on_tparam env tp)
 
@@ -561,14 +586,14 @@ let visitor =
         match h with
         | (pos, Aast.Habstr (name, _)) ->
           Result_set.singleton
-            { name; type_ = TypeVar; is_declaration = false; pos }
+            { name; type_ = TypeVar; is_declaration = None; pos }
         | (pos, Aast.Hprim prim) ->
           let name = Aast_defs.string_of_tprim prim in
           Result_set.singleton
             {
               name;
               type_ = BuiltInType (BIprimitive prim);
-              is_declaration = false;
+              is_declaration = None;
               pos;
             }
         | (pos, Aast.Hnothing) ->
@@ -576,7 +601,7 @@ let visitor =
             {
               name = "nothing";
               type_ = BuiltInType BInothing;
-              is_declaration = false;
+              is_declaration = None;
               pos;
             }
         | (pos, Aast.Hmixed) ->
@@ -584,7 +609,7 @@ let visitor =
             {
               name = "mixed";
               type_ = BuiltInType BImixed;
-              is_declaration = false;
+              is_declaration = None;
               pos;
             }
         | (pos, Aast.Hnonnull) ->
@@ -592,7 +617,7 @@ let visitor =
             {
               name = "nonnull";
               type_ = BuiltInType BInonnull;
-              is_declaration = false;
+              is_declaration = None;
               pos;
             }
         | (pos, Aast.Hdynamic) ->
@@ -600,7 +625,7 @@ let visitor =
             {
               name = "dynamic";
               type_ = BuiltInType BIdynamic;
-              is_declaration = false;
+              is_declaration = None;
               pos;
             }
         | (pos, Aast.Hshape _) ->
@@ -608,7 +633,7 @@ let visitor =
             {
               name = "shape";
               type_ = BuiltInType BIshape;
-              is_declaration = false;
+              is_declaration = None;
               pos;
             }
         | (pos, Aast.Hthis) ->
@@ -616,7 +641,7 @@ let visitor =
             {
               name = "this";
               type_ = BuiltInType BIthis;
-              is_declaration = false;
+              is_declaration = None;
               pos;
             }
         | (pos, Aast.Hoption _) ->
@@ -627,7 +652,7 @@ let visitor =
             {
               name = "?";
               type_ = BuiltInType BIoption;
-              is_declaration = false;
+              is_declaration = None;
               pos = qmark_pos;
             }
         | _ -> Result_set.empty
@@ -656,18 +681,18 @@ let visitor =
       let acc = process_class class_ in
 
       (*
-      Enums implicitly extend BuiltinEnum. However, BuiltinEnums also extend
-      the same Enum as a type parameter.
+        Enums implicitly extend BuiltinEnum. However, BuiltinEnums also extend
+        the same Enum as a type parameter.
 
-      Ex: enum Size extends BuiltinEnum<Size> { ... }
+        Ex: enum Size extends BuiltinEnum<Size> { ... }
 
-      This will return the definition of the enum twice when finding references
-      on it. As a result, we set the extends property of an enum's tast to an empty list.
+        This will return the definition of the enum twice when finding references
+        on it. As a result, we set the extends property of an enum's tast to an empty list.
 
-      The same situation applies to Enum classes that extends
-      BuiltinEnumClass. However in this case we just want to filter out
-      this one extends, and keep the other unchanged.
-    *)
+        The same situation applies to Enum classes that extends
+        BuiltinEnumClass. However in this case we just want to filter out
+        this one extends, and keep the other unchanged.
+      *)
       let class_ =
         let open Aast in
         let c_name = snd class_.c_name in
@@ -764,18 +789,24 @@ let visitor =
       acc
 
     method! on_fun_def env fd =
-      let acc = process_fun_id ~is_declaration:true fd.Aast.fd_name in
+      let acc =
+        process_fun_id ~is_declaration:(fst fd.Aast.fd_name) fd.Aast.fd_name
+      in
       self#plus acc (super#on_fun_def env fd)
 
     method! on_fun_ env fun_ =
       super#on_fun_ env { fun_ with Aast.f_unsafe_ctxs = None }
 
     method! on_typedef env typedef =
-      let acc = process_class_id ~is_declaration:true typedef.Aast.t_name in
+      let acc =
+        process_class_id ~is_declaration:typedef.Aast.t_span typedef.Aast.t_name
+      in
       self#plus acc (super#on_typedef env typedef)
 
     method! on_gconst env cst =
-      let acc = process_global_const ~is_declaration:true cst.Aast.cst_name in
+      let acc =
+        process_global_const ~is_declaration:cst.Aast.cst_span cst.Aast.cst_name
+      in
       self#plus acc (super#on_gconst env cst)
 
     method! on_Id env id =
@@ -822,7 +853,7 @@ let visitor =
       let (pos, id) = sm in
       let acc =
         Result_set.singleton
-          { name = id; type_ = Module; is_declaration = false; pos }
+          { name = id; type_ = Module; is_declaration = None; pos }
       in
       self#plus acc (super#on_SetModule env sm)
 
@@ -830,7 +861,7 @@ let visitor =
       let (pos, id) = md.Aast.md_name in
       let acc =
         Result_set.singleton
-          { name = id; type_ = Module; is_declaration = false; pos }
+          { name = id; type_ = Module; is_declaration = None; pos }
       in
       self#plus acc (super#on_module_def env md)
   end
@@ -867,10 +898,10 @@ let fixme_elt (t : Full_fidelity_positioned_trivia.t) : Result_set.elt option =
   match t.Full_fidelity_positioned_trivia.kind with
   | Full_fidelity_trivia_kind.FixMe ->
     let pos = trivia_pos t in
-    Some { name = "HH_FIXME"; type_ = HhFixme; is_declaration = false; pos }
+    Some { name = "HH_FIXME"; type_ = HhFixme; is_declaration = None; pos }
   | Full_fidelity_trivia_kind.Ignore ->
     let pos = trivia_pos t in
-    Some { name = "HH_IGNORE"; type_ = HhIgnore; is_declaration = false; pos }
+    Some { name = "HH_IGNORE"; type_ = HhIgnore; is_declaration = None; pos }
   | _ -> None
 
 let fixmes (tree : Full_fidelity_positioned_syntax.t) : Result_set.elt list =
@@ -915,7 +946,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
           {
             name = "enum class";
             type_ = Keyword EnumClass;
-            is_declaration = false;
+            is_declaration = None;
             pos = token_pos t;
           }
       | _ ->
@@ -923,7 +954,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
           {
             name = "class";
             type_ = Keyword Class;
-            is_declaration = false;
+            is_declaration = None;
             pos = token_pos t;
           })
     | Token.TokenKind.Interface ->
@@ -931,7 +962,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
         {
           name = "interface";
           type_ = Keyword Interface;
-          is_declaration = false;
+          is_declaration = None;
           pos = token_pos t;
         }
     | Token.TokenKind.Trait ->
@@ -939,7 +970,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
         {
           name = "trait";
           type_ = Keyword Trait;
-          is_declaration = false;
+          is_declaration = None;
           pos = token_pos t;
         }
     | Token.TokenKind.Enum ->
@@ -949,7 +980,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
           {
             name = "enum class";
             type_ = Keyword EnumClass;
-            is_declaration = false;
+            is_declaration = None;
             pos = token_pos t;
           }
       | _ ->
@@ -957,7 +988,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
           {
             name = "enum";
             type_ = Keyword Enum;
-            is_declaration = false;
+            is_declaration = None;
             pos = token_pos t;
           })
     | Token.TokenKind.Type ->
@@ -969,7 +1000,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
               (match ctx with
               | Some TypeConst -> ConstType
               | _ -> Type);
-          is_declaration = false;
+          is_declaration = None;
           pos = token_pos t;
         }
     | Token.TokenKind.Newtype ->
@@ -977,7 +1008,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
         {
           name = "newtype";
           type_ = Keyword Newtype;
-          is_declaration = false;
+          is_declaration = None;
           pos = token_pos t;
         }
     | Token.TokenKind.Attribute ->
@@ -985,7 +1016,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
         {
           name = "attribute";
           type_ = Keyword XhpAttribute;
-          is_declaration = false;
+          is_declaration = None;
           pos = token_pos t;
         }
     | Token.TokenKind.Children ->
@@ -993,7 +1024,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
         {
           name = "children";
           type_ = Keyword XhpChildren;
-          is_declaration = false;
+          is_declaration = None;
           pos = token_pos t;
         }
     | Token.TokenKind.Const ->
@@ -1006,7 +1037,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
               | None -> ConstGlobal
               | Some TypeConst -> ConstType
               | _ -> ConstOnClass);
-          is_declaration = false;
+          is_declaration = None;
           pos = token_pos t;
         }
     | Token.TokenKind.Static ->
@@ -1018,7 +1049,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
               (match ctx with
               | Some Method -> StaticOnMethod
               | _ -> StaticOnProperty);
-          is_declaration = false;
+          is_declaration = None;
           pos = token_pos t;
         }
     | Token.TokenKind.Use ->
@@ -1026,7 +1057,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
         {
           name = "use";
           type_ = Keyword Use;
-          is_declaration = false;
+          is_declaration = None;
           pos = token_pos t;
         }
     | Token.TokenKind.Function ->
@@ -1038,7 +1069,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
               (match ctx with
               | Some Method -> FunctionOnMethod
               | _ -> FunctionGlobal);
-          is_declaration = false;
+          is_declaration = None;
           pos = token_pos t;
         }
     | Token.TokenKind.Extends ->
@@ -1051,7 +1082,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
               | Some (ClassishDecl DKclass) -> ExtendsOnClass
               | Some (ClassishDecl DKinterface) -> ExtendsOnInterface
               | _ -> ExtendsOnClass);
-          is_declaration = false;
+          is_declaration = None;
           pos = token_pos t;
         }
     | Token.TokenKind.Abstract ->
@@ -1063,7 +1094,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
               (match ctx with
               | Some Method -> AbstractOnMethod
               | _ -> AbstractOnClass);
-          is_declaration = false;
+          is_declaration = None;
           pos = token_pos t;
         }
     | Token.TokenKind.Final ->
@@ -1075,7 +1106,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
               (match ctx with
               | Some Method -> FinalOnMethod
               | _ -> FinalOnClass);
-          is_declaration = false;
+          is_declaration = None;
           pos = token_pos t;
         }
     | Token.TokenKind.Public ->
@@ -1083,7 +1114,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
         {
           name = "public";
           type_ = Keyword Public;
-          is_declaration = false;
+          is_declaration = None;
           pos = token_pos t;
         }
     | Token.TokenKind.Protected ->
@@ -1091,7 +1122,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
         {
           name = "protected";
           type_ = Keyword Protected;
-          is_declaration = false;
+          is_declaration = None;
           pos = token_pos t;
         }
     | Token.TokenKind.Private ->
@@ -1099,7 +1130,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
         {
           name = "private";
           type_ = Keyword Private;
-          is_declaration = false;
+          is_declaration = None;
           pos = token_pos t;
         }
     | Token.TokenKind.Async ->
@@ -1111,7 +1142,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
               (match ctx with
               | Some AsyncBlockHeader -> AsyncBlock
               | _ -> Async);
-          is_declaration = false;
+          is_declaration = None;
           pos = token_pos t;
         }
     | Token.TokenKind.Await ->
@@ -1119,7 +1150,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
         {
           name = "await";
           type_ = Keyword Await;
-          is_declaration = false;
+          is_declaration = None;
           pos = token_pos t;
         }
     | Token.TokenKind.Concurrent ->
@@ -1127,7 +1158,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
         {
           name = "concurrent";
           type_ = Keyword Concurrent;
-          is_declaration = false;
+          is_declaration = None;
           pos = token_pos t;
         }
     | Token.TokenKind.Readonly ->
@@ -1141,7 +1172,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
               | Some Parameter -> ReadonlyOnParameter
               | Some ReturnType -> ReadonlyOnReturnType
               | _ -> ReadonlyOnExpression);
-          is_declaration = false;
+          is_declaration = None;
           pos = token_pos t;
         }
     | Token.TokenKind.Internal ->
@@ -1149,7 +1180,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
         {
           name = "internal";
           type_ = Keyword Internal;
-          is_declaration = false;
+          is_declaration = None;
           pos = token_pos t;
         }
     | Token.TokenKind.Module ->
@@ -1164,7 +1195,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
               | Some (ModuleDecl DKModuleMembershipDeclaration) ->
                 ModuleInModuleMembershipDeclaration
               | _ -> ModuleInModuleDeclaration);
-          is_declaration = false;
+          is_declaration = None;
           pos = token_pos t;
         }
     | _ -> None
@@ -1257,7 +1288,7 @@ let keywords (tree : FFP.t) : Result_set.elt list =
         {
           name = "pure function";
           type_ = PureFunctionContext;
-          is_declaration = false;
+          is_declaration = None;
           pos = syntax_pos s;
         }
         :: acc
@@ -1302,5 +1333,7 @@ let go_quarantined
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(line : int)
-    ~(column : int) : Relative_path.t SymbolOccurrence.t list =
-  all_symbols_ctx ~ctx ~entry |> List.filter ~f:(is_target line column)
+    ~(column : int)
+    ~use_declaration_spans : Relative_path.t SymbolOccurrence.t list =
+  all_symbols_ctx ~ctx ~entry
+  |> List.filter ~f:(is_target ~use_declaration_spans line column)

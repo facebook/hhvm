@@ -33,7 +33,7 @@ let process_method_cid n cid =
     {
       name = cid ^ "::" ^ snd n;
       type_ = Method (ClassName cid, snd n);
-      is_declaration = false;
+      is_declaration = None;
       pos = fst n;
     }
 
@@ -44,11 +44,11 @@ let process_method env ty n =
 
 let process_function id =
   Results.singleton
-    { name = snd id; type_ = Function; is_declaration = false; pos = fst id }
+    { name = snd id; type_ = Function; is_declaration = None; pos = fst id }
 
 let process_local id =
   Results.singleton
-    { name = snd id; type_ = LocalVar; is_declaration = false; pos = fst id }
+    { name = snd id; type_ = LocalVar; is_declaration = None; pos = fst id }
 
 let collect_in_decl =
   object (self)

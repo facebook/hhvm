@@ -22,7 +22,7 @@ let print_readable ?(short_pos = false) x =
           name
           (kind_to_string type_)
           (Pos.string_no_file pos)
-          is_declaration;
+          (Option.is_some is_declaration);
         Printf.printf "definition:";
         begin
           match definition with

@@ -1430,32 +1430,22 @@ let get_uri_opt (m : lsp_message) : Lsp.DocumentUri.t option =
     | [] -> None
     | { DidChangeWatchedFiles.uri; _ } :: _ -> Some uri
   end
-  | RequestMessage (_, HackTestStartServerRequestFB)
-  | RequestMessage (_, HackTestStopServerRequestFB)
-  | RequestMessage (_, HackTestShutdownServerlessRequestFB)
-  | RequestMessage (_, UnknownRequest _)
-  | RequestMessage (_, InitializeRequest _)
-  | RequestMessage (_, RegisterCapabilityRequest _)
-  | RequestMessage (_, ShutdownRequest)
-  | RequestMessage (_, CodeLensResolveRequest _)
-  | RequestMessage (_, CompletionItemResolveRequest _)
-  | RequestMessage (_, WorkspaceSymbolRequest _)
-  | RequestMessage (_, ShowMessageRequestRequest _)
-  | RequestMessage (_, ShowStatusRequestFB _)
-  | RequestMessage (_, RageRequestFB)
-  | RequestMessage (_, WillSaveWaitUntilRequest _)
-  | NotificationMessage ExitNotification
-  | NotificationMessage (CancelRequestNotification _)
-  | NotificationMessage (LogMessageNotification _)
-  | NotificationMessage (TelemetryNotification _)
-  | NotificationMessage (ShowMessageNotification _)
-  | NotificationMessage (ConnectionStatusNotificationFB _)
-  | NotificationMessage InitializedNotification
-  | NotificationMessage (FindReferencesPartialResultNotification _)
-  | NotificationMessage (SetTraceNotification _)
-  | NotificationMessage (SetTrace _)
-  | NotificationMessage LogTraceNotification
-  | NotificationMessage (UnknownNotification _)
+  | RequestMessage
+      ( _,
+        ( HackTestStartServerRequestFB | HackTestStopServerRequestFB
+        | HackTestShutdownServerlessRequestFB | UnknownRequest _
+        | InitializeRequest _ | RegisterCapabilityRequest _ | ShutdownRequest
+        | CodeLensResolveRequest _ | CompletionItemResolveRequest _
+        | WorkspaceSymbolRequest _ | ShowMessageRequestRequest _
+        | ShowStatusRequestFB _ | RageRequestFB | WillSaveWaitUntilRequest _
+        | TopLevelDefNameAtPosRequest _ ) )
+  | NotificationMessage
+      ( ExitNotification | CancelRequestNotification _
+      | LogMessageNotification _ | TelemetryNotification _
+      | ShowMessageNotification _ | ConnectionStatusNotificationFB _
+      | InitializedNotification | FindReferencesPartialResultNotification _
+      | SetTraceNotification _ | SetTrace _ | LogTraceNotification
+      | UnknownNotification _ )
   | ResponseMessage _ ->
     None
 
@@ -1494,6 +1484,7 @@ let request_name_to_string (request : lsp_request) : string =
   | HackTestStopServerRequestFB -> "$test/stopHhServer"
   | HackTestShutdownServerlessRequestFB -> "$test/shutdownServerlessIde"
   | WillSaveWaitUntilRequest _ -> "textDocument/willSaveWaitUntil"
+  | TopLevelDefNameAtPosRequest _ -> "custom/topLevelDefNameAtPos"
   | UnknownRequest (method_, _params) -> method_
 
 let result_name_to_string (result : lsp_result) : string =
@@ -1531,6 +1522,7 @@ let result_name_to_string (result : lsp_result) : string =
   | HackTestShutdownServerlessResultFB -> "$test/shutdownServerlessIde"
   | RegisterCapabilityRequestResult -> "client/registerCapability"
   | WillSaveWaitUntilResult _ -> "textDocument/willSaveWaitUntil"
+  | TopLevelDefNameAtPosResult _ -> "custom/topLevelDefNameAtPos"
   | ErrorResult e -> "ERROR/" ^ e.Error.message
 
 let notification_name_to_string (notification : lsp_notification) : string =
@@ -1634,6 +1626,11 @@ let parse_lsp_request (method_ : string) (params : json option) : lsp_request =
   | "$test/shutdownServerlessIde" -> HackTestShutdownServerlessRequestFB
   | "textDocument/willSaveWaitUntil" ->
     WillSaveWaitUntilRequest (parse_willSaveWaitUntil params)
+  | "custom/topLevelDefNameAtPos" ->
+    TopLevelDefNameAtPosRequest
+      (TopLevelDefNameAtPos.params_of_yojson
+      @@ Hh_json.to_yojson
+      @@ Option.value_exn params)
   | "window/showMessageRequest"
   | "window/showStatus"
   | _ ->
@@ -1701,6 +1698,7 @@ let parse_lsp_result (request : lsp_request) (result : json) : lsp_result =
   | HackTestStopServerRequestFB
   | HackTestShutdownServerlessRequestFB
   | WillSaveWaitUntilRequest _
+  | TopLevelDefNameAtPosRequest _
   | UnknownRequest _ ->
     raise
       (Error.LspException
@@ -1775,6 +1773,7 @@ let print_lsp_request (id : lsp_id) (request : lsp_request) : json =
     | HackTestStopServerRequestFB
     | HackTestShutdownServerlessRequestFB
     | WillSaveWaitUntilRequest _
+    | TopLevelDefNameAtPosRequest _
     | UnknownRequest _ ->
       failwith ("Don't know how to print request " ^ method_)
   in
@@ -1826,6 +1825,8 @@ let print_lsp_response (id : lsp_id) (result : lsp_result) : json =
     | RegisterCapabilityRequestResult ->
       failwith ("Don't know how to print result " ^ method_)
     | WillSaveWaitUntilResult r -> print_textEdits r
+    | TopLevelDefNameAtPosResult r ->
+      TopLevelDefNameAtPos.yojson_of_result r |> Hh_json.of_yojson
     | ErrorResult e -> print_error e
   in
   match result with

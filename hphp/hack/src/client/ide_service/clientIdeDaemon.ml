@@ -1154,6 +1154,13 @@ let handle_request
           ServerSignatureHelp.go_quarantined ~ctx ~entry ~line ~column)
     in
     (Initialized istate, Ok results)
+  | (Initialized istate, Top_level_def_name_at_pos (document, { line; column }))
+    ->
+    let (istate, ctx, entry, _) = update_file_ctx istate document in
+    let res =
+      Ide_top_level_def_name_at_pos.go_quarantined ctx entry ~line ~column
+    in
+    (Initialized istate, Ok res)
   (* AutoClose *)
   | (Initialized istate, AutoClose (document, { line; column })) ->
     let (istate, ctx, entry, _) = update_file_ctx istate document in

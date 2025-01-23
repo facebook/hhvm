@@ -199,14 +199,14 @@ let edit_of_candidate
 
 let refactor_of_candidate ~path ~source_text candidate =
   let edits = lazy (edit_of_candidate ~path ~source_text candidate) in
-  Code_action_types.
-    {
-      title = "Flip around comma";
-      edits;
-      kind = `Refactor;
-      selection = None;
-      trigger_inline_suggest = false;
-    }
+  Code_action_types.(
+    Refactor
+      {
+        title = "Flip around comma";
+        edits;
+        selection = None;
+        trigger_inline_suggest = false;
+      })
 
 let find ~entry pos ctx =
   if Pos.length pos = 0 then

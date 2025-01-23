@@ -25,14 +25,14 @@ let edits_of_candidate ~path ~line_to_offset candidate : Code_action_types.edits
 
 let to_refactor ~line_to_offset ~path candidate =
   let edits = lazy (edits_of_candidate ~path ~line_to_offset candidate) in
-  Code_action_types.
-    {
-      title = "Add doc comment";
-      edits;
-      kind = `Refactor;
-      selection = None;
-      trigger_inline_suggest = false;
-    }
+  Code_action_types.(
+    Refactor
+      {
+        title = "Add doc comment";
+        edits;
+        selection = None;
+        trigger_inline_suggest = false;
+      })
 
 let find_candidate pos source_text positioned_tree =
   let root = PositionedTree.root positioned_tree in

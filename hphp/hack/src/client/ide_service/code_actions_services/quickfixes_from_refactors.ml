@@ -40,27 +40,13 @@ let select_refactoring (e : Errors.error) :
   | Some fn -> Some fn
   | None -> select_refactoring_from_type_error e
 
+let quickfix_from_refactor Code_action_types.(Refactor edit_data) =
+  Code_action_types.(Quickfix edit_data)
+
 let find ctx entry (e : Errors.error) =
   select_refactoring e
   |> Option.map ~f:(fun find_refactors ->
          let e_pos = User_error.get_pos e in
          let refactors = find_refactors ~entry e_pos ctx in
-         List.map
-           refactors
-           ~f:
-             Code_action_types.(
-               fun {
-                     title;
-                     edits;
-                     kind = `Refactor;
-                     selection;
-                     trigger_inline_suggest;
-                   } ->
-                 {
-                   title;
-                   edits;
-                   kind = `Quickfix;
-                   selection;
-                   trigger_inline_suggest;
-                 }))
+         List.map refactors ~f:quickfix_from_refactor)
   |> Option.value ~default:[]

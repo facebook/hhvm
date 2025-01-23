@@ -105,14 +105,14 @@ let edits_of_candidate source_text path candidate : Code_action_types.edits =
 
 let to_refactor source_text path candidate : Code_action_types.refactor =
   let edits = lazy (edits_of_candidate source_text path candidate) in
-  Code_action_types.
-    {
-      title = "Extract interface";
-      edits;
-      kind = `Refactor;
-      selection = None;
-      trigger_inline_suggest = false;
-    }
+  Code_action_types.(
+    Refactor
+      {
+        title = "Extract interface";
+        edits;
+        selection = None;
+        trigger_inline_suggest = false;
+      })
 
 let to_refactors (source_text : Full_fidelity_source_text.t) path candidate :
     Code_action_types.refactor list =

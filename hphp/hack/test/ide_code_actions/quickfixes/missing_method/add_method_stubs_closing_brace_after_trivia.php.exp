@@ -1,9 +1,64 @@
 Code actions available:
 ------------------------------------------
-Add stubs for missing inherited methods (CodeActionKind: quickfix) SELECTED
 Add stubs for missing interface methods (CodeActionKind: quickfix) SELECTED
+Add stubs for missing inherited methods (CodeActionKind: quickfix) SELECTED
 
 Multiple code action titles match prefix: ''
+
+Code action title: Add stubs for missing interface methods
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"\n  public static function i(): int {}\n",
+          "range":{"end":{"character":0,"line":17},"start":{"character":0,"line":17}}
+        }
+      ]
+    }
+  },
+  "kind":"quickfix",
+  "title":"Add stubs for missing interface methods"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+trait FooTrait {
+  abstract public function bar(): void;
+  abstract public function baz(): void;
+}
+
+abstract class AbstractBar {
+  abstract public function baf(): void;
+}
+
+interface I {
+  public static function i(): int;
+}
+
+class Foo extends AbstractBar implements I {
+  use FooTrait;
+
+  public static function i(): int {}
+
+
+  // Calculating where the closing brace is is hard work, especially
+  // with a lot of trivia (whitespace) before it.
+  //
+  // So let's test it properly, whitespace incoming!
+
+
+
+
+
+/*range-start*/}/*range-end*/
+
 
 Code action title: Add stubs for missing inherited methods
 
@@ -53,61 +108,6 @@ class Foo extends AbstractBar implements I {
 
   <<__Override>>
   public function baz(): void {}
-
-
-  // Calculating where the closing brace is is hard work, especially
-  // with a lot of trivia (whitespace) before it.
-  //
-  // So let's test it properly, whitespace incoming!
-
-
-
-
-
-/*range-start*/}/*range-end*/
-
-
-Code action title: Add stubs for missing interface methods
-
-JSON for selected code action:
-------------------------------------------
-{
-  "diagnostics":[],
-  "edit":{
-    "changes":{
-      "FILE.php":[
-        {
-          "newText":"\n  public static function i(): int {}\n",
-          "range":{"end":{"character":0,"line":17},"start":{"character":0,"line":17}}
-        }
-      ]
-    }
-  },
-  "kind":"quickfix",
-  "title":"Add stubs for missing interface methods"
-}
-
-Applied edit for code action:
-------------------------------------------
-<?hh
-
-trait FooTrait {
-  abstract public function bar(): void;
-  abstract public function baz(): void;
-}
-
-abstract class AbstractBar {
-  abstract public function baf(): void;
-}
-
-interface I {
-  public static function i(): int;
-}
-
-class Foo extends AbstractBar implements I {
-  use FooTrait;
-
-  public static function i(): int {}
 
 
   // Calculating where the closing brace is is hard work, especially

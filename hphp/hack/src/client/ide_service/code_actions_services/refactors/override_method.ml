@@ -185,14 +185,14 @@ let refactor_action
     Code_action_types.refactor =
   let (edits, selection) = to_edits_and_selection classish_positions quickfix in
   let edits = lazy (Relative_path.Map.singleton path edits) in
-  Code_action_types.
-    {
-      title = quickfix.title;
-      edits;
-      kind = `Refactor;
-      selection;
-      trigger_inline_suggest = Option.is_some selection;
-    }
+  Code_action_types.(
+    Refactor
+      {
+        title = quickfix.title;
+        edits;
+        selection;
+        trigger_inline_suggest = Option.is_some selection;
+      })
 
 let find ~entry pos ctx =
   let (cursor_line, cursor_col) = Pos.line_column pos in

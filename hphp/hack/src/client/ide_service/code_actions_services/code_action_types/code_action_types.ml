@@ -14,19 +14,20 @@ type edit = {
 
 type edits = edit list Relative_path.Map.t
 
-type +'kind t = {
+type edit_data = {
   title: string;
   edits: edits Lazy.t;
   selection: Pos.t option;
   trigger_inline_suggest: bool;
-  kind: [< `Refactor | `Quickfix ] as 'kind;
 }
 
-type refactor = [ `Refactor ] t
+type refactor = Refactor of edit_data [@@ocaml.unboxed]
 
-type quickfix = [ `Quickfix ] t
+type quickfix = Quickfix of edit_data [@@ocaml.unboxed]
 
-type any = [ `Refactor | `Quickfix ] t
+type t =
+  | Refactor_action of edit_data
+  | Quickfix_action of edit_data
 
 type find_refactor =
   entry:Provider_context.entry -> Pos.t -> Provider_context.t -> refactor list

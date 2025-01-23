@@ -40,14 +40,14 @@ let convert_quickfix
          (text_edits classish_positions quickfix))
   in
 
-  Code_action_types.
-    {
-      title = Quickfix.get_title quickfix;
-      edits;
-      kind = `Quickfix;
-      selection = None;
-      trigger_inline_suggest = false;
-    }
+  Code_action_types.(
+    Quickfix
+      {
+        title = Quickfix.get_title quickfix;
+        edits;
+        selection = None;
+        trigger_inline_suggest = false;
+      })
 
 let quickfix_positions_for_error
     (classish_positions : Pos.t Classish_positions.t) (error : Errors.error) :

@@ -206,14 +206,14 @@ let refactor_of_candidate ctx entry path candidate =
          path
          (edits_of_candidate ctx entry candidate))
   in
-  Code_action_types.
-    {
-      title = "Extract into variable";
-      edits;
-      kind = `Refactor;
-      selection = None;
-      trigger_inline_suggest = false;
-    }
+  Code_action_types.(
+    Refactor
+      {
+        title = "Extract into variable";
+        edits;
+        selection = None;
+        trigger_inline_suggest = false;
+      })
 
 let find ~entry selection ctx =
   let path = entry.Provider_context.path in

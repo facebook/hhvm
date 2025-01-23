@@ -23,7 +23,7 @@
 namespace HPHP {
 
 struct AsioExtension final : Extension {
-  AsioExtension() : Extension("asio", "0.1", NO_ONCALL_YET) {}
+  AsioExtension() : Extension("asio", "0.1", "hphp_hphpi") {}
   void moduleInit() override;
   void moduleRegisterNative() override;
   void requestInit() override;

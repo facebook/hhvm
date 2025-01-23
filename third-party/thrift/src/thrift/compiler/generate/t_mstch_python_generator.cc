@@ -234,6 +234,7 @@ class python_mstch_program : public mstch_program {
 
   mstch::node include_namespaces() {
     std::vector<const Namespace*> namespaces;
+    namespaces.reserve(include_namespaces_.size());
     for (const auto& it : include_namespaces_) {
       namespaces.push_back(&it.second);
     }
@@ -243,7 +244,7 @@ class python_mstch_program : public mstch_program {
         });
     mstch::array a;
     for (const auto& it : namespaces) {
-      a.push_back(mstch::map{
+      a.emplace_back(mstch::map{
           {"included_module_path", it->ns},
           {"included_module_mangle", it->ns_mangle},
           {"has_services?", it->has_services},
@@ -498,7 +499,7 @@ class python_mstch_program : public mstch_program {
       const std::unordered_set<std::string_view>& modules) {
     mstch::array a;
     for (const auto& m : modules) {
-      a.push_back(mstch::map{{"module_path", m}});
+      a.emplace_back(mstch::map{{"module_path", m}});
     }
     return a;
   }
@@ -540,7 +541,7 @@ class python_mstch_service : public mstch_service {
   mstch::node program_name() { return service_->program()->name(); }
 
   std::vector<t_function*> get_supported_functions(
-      std::function<bool(const t_function*)> func_filter) {
+      const std::function<bool(const t_function*)>& func_filter) {
     std::vector<t_function*> funcs;
     for (auto func : service_->get_functions()) {
       if (func_filter(func)) {

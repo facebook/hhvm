@@ -63,7 +63,6 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
   list(APPEND GENERAL_CXX_OPTIONS
     "std=gnu++1z"
     "fno-omit-frame-pointer"
-    "fno-operator-names"
     "Wall"
     "Werror=format-security"
     "Wno-unused-variable"
@@ -166,7 +165,7 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
        CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 4.9)
       list(APPEND GENERAL_OPTIONS "fno-delete-null-pointer-checks")
     else()
-       message(FATAL_ERROR "${PROJECT_NAME} requires g++ 4.9 or greater.")
+      message(FATAL_ERROR "${PROJECT_NAME} requires g++ 4.9 or greater.")
     endif()
 
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.4)
@@ -175,7 +174,7 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
 
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 11.3 OR
        CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 11.3)
-     message(WARNING "HHVM is primarily tested on GCC 7.4-11.3. Using other versions may produce unexpected results, or may not even build at all.")
+      message(WARNING "HHVM is primarily tested on GCC 7.4-11.3. Using other versions may produce unexpected results, or may not even build at all.")
     endif()
 
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 5.1 OR
@@ -293,11 +292,11 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
     set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -mavx2 -march=core-avx2")
     set(CMAKE_ASM_FLAGS  "${CMAKE_ASM_FLAGS} -mavx2 -march=core-avx2")
   endif()
-# using Intel C++
+  # using Intel C++
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
   set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -no-ipo -fp-model precise -wd584 -wd1418 -wd1918 -wd383 -wd869 -wd981 -wd424 -wd1419 -wd444 -wd271 -wd2259 -wd1572 -wd1599 -wd82 -wd177 -wd593 -w")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -no-ipo -fp-model precise -wd584 -wd1418 -wd1918 -wd383 -wd869 -wd981 -wd424 -wd1419 -wd444 -wd271 -wd2259 -wd1572 -wd1599 -wd82 -wd177 -wd593 -fno-omit-frame-pointer -Wall -Woverloaded-virtual -Wno-deprecated -w1 -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names")
-# using Visual Studio C++
+  # using Visual Studio C++
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
   message(WARNING "MSVC support is VERY experimental. It will likely not compile, and is intended for the utterly insane.")
 

@@ -1052,6 +1052,14 @@ static std::optional<std::int64_t> getIntegral(const Value& v) {
   }
 }
 
+DynamicPatch DiffVisitorBase::createDynamicUnknownPatchWithAssign(
+    const Object& obj) {
+  DynamicUnknownPatch patch;
+  patch.doNotConvertStringToBinary(badge);
+  patch.assign(badge, obj);
+  return DynamicPatch{std::move(patch)};
+}
+
 void DiffVisitorBase::pushKey(const Value& k) {
   auto last = maskInPath_.top();
   Mask* next = nullptr;

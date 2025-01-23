@@ -832,6 +832,8 @@ class DiffVisitorBase {
       const Value& key,
       DynamicMapPatch& patch);
 
+  static DynamicPatch createDynamicUnknownPatchWithAssign(const Object& obj);
+
   void pushField(FieldId);
   void pushType(type::Type);
   void pushKey(const Value&);

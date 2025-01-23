@@ -227,6 +227,14 @@ class HTTPUpstreamTest
         param = codec->getDefaultWindowSize();
       }
     }
+
+    auto rawCodec = codec.get();
+    if (dynamic_cast<HTTP1xCodec*>(rawCodec) != nullptr) {
+      dynamic_cast<HTTP1xCodec*>(rawCodec)->setStrictValidation(true);
+    } else if (dynamic_cast<HTTP2Codec*>(rawCodec) != nullptr) {
+      dynamic_cast<HTTP2Codec*>(rawCodec)->setStrictValidation(true);
+    }
+
     httpSession_ = new HTTPUpstreamSession(
         transactionTimeouts_.get(),
         std::move(folly::AsyncTransport::UniquePtr(transport_)),

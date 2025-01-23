@@ -91,7 +91,9 @@ final class ThriftContextPropHandler extends TClientEventHandler {
   private static function ingestFrameworkMetadataOnResponse(
     string $encoded_response_tfm,
   ): void {
-    $tfmr = self::decodeFrameworkMetadataOnResponse($encoded_response_tfm);
+    $tfmr = ThriftFrameworkMetadataUtils::decodeFrameworkMetadataOnResponse(
+      $encoded_response_tfm,
+    );
     $ids_from_response = $tfmr->experiment_ids?->get_merge();
     if ($ids_from_response is nonnull && !C\is_empty($ids_from_response)) {
       $tfm = ThriftContextPropState::get();
@@ -103,16 +105,4 @@ final class ThriftContextPropHandler extends TClientEventHandler {
     }
   }
 
-  <<__Memoize>>
-  private static function decodeFrameworkMetadataOnResponse(
-    string $encoded_response_tfm,
-  ): ThriftFrameworkMetadataOnResponse {
-    $tfmr = ThriftFrameworkMetadataOnResponse::withDefaultValues();
-    $tfmr->read(
-      new TCompactProtocolAccelerated(
-        new TMemoryBuffer(Base64::decode($encoded_response_tfm)),
-      ),
-    );
-    return $tfmr;
-  }
 }

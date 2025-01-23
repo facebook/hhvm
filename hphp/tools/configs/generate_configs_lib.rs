@@ -258,7 +258,6 @@ impl Include {
 #[derive(Debug, PartialEq, Clone)]
 pub enum ConfigType {
     Bool,
-    Int,
     Double,
     Int8t,
     Int16t,
@@ -280,7 +279,6 @@ impl ConfigType {
     fn str(&self) -> &str {
         match *self {
             ConfigType::Bool => "bool",
-            ConfigType::Int => "int",
             ConfigType::Double => "double",
             ConfigType::Int8t => "int8_t",
             ConfigType::Int16t => "int16_t",
@@ -301,7 +299,7 @@ impl ConfigType {
 
     fn includes(&self) -> Vec<Include> {
         match *self {
-            ConfigType::Bool | ConfigType::Double | ConfigType::Int => vec![],
+            ConfigType::Bool | ConfigType::Double => vec![],
             ConfigType::Int8t
             | ConfigType::Int16t
             | ConfigType::Int32t
@@ -334,8 +332,7 @@ impl ConfigType {
         match *self {
             ConfigType::Bool => "false",
             ConfigType::Double => "0.0",
-            ConfigType::Int
-            | ConfigType::Int8t
+            ConfigType::Int8t
             | ConfigType::Int16t
             | ConfigType::Int32t
             | ConfigType::Int64t
@@ -386,7 +383,7 @@ fn parse_type<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, Co
             value(ConfigType::Int16t, tag("int16_t")),
             value(ConfigType::Int32t, tag("int32_t")),
             value(ConfigType::Int64t, tag("int64_t")),
-            value(ConfigType::Int, tag("int")),
+            value(ConfigType::Int32t, tag("int")),
             value(ConfigType::Double, tag("double")),
             value(ConfigType::UInt8t, tag("uint8_t")),
             value(ConfigType::UInt16t, tag("uint16_t")),

@@ -32,6 +32,7 @@ pub trait Pos:
     + std::fmt::Debug
     + Serialize
     + DeserializeOwned
+    + for<'a> From<oxidized::pos::Pos>
     + for<'a> From<&'a oxidized::pos::Pos>
     + for<'a> From<&'a oxidized_by_ref::pos::Pos<'a>>
     + for<'a> ToOxidizedByRef<'a, Output = &'a oxidized_by_ref::pos::Pos<'a>>
@@ -247,6 +248,12 @@ impl From<BPos> for oxidized::pos::Pos {
     }
 }
 
+impl From<oxidized::pos::Pos> for BPos {
+    fn from(pos: oxidized::pos::Pos) -> Self {
+        Self::from_ast(&pos)
+    }
+}
+
 impl<'a> From<&'a oxidized::pos::Pos> for BPos {
     fn from(pos: &'a oxidized::pos::Pos) -> Self {
         Self::from_ast(pos)
@@ -411,6 +418,12 @@ impl EqModuloPos for NPos {
     }
 }
 
+impl From<oxidized::pos::Pos> for NPos {
+    fn from(pos: oxidized::pos::Pos) -> Self {
+        Self::from_ast(&pos)
+    }
+}
+
 impl<'a> From<&'a oxidized::pos::Pos> for NPos {
     fn from(pos: &'a oxidized::pos::Pos) -> Self {
         Self::from_ast(pos)
@@ -487,6 +500,13 @@ impl<S: Copy, P> Positioned<S, P> {
     }
 }
 
+impl<S: From<String>, P: Pos> From<oxidized::ast_defs::Id> for Positioned<S, P> {
+    fn from(pos_id: oxidized::ast_defs::Id) -> Self {
+        let oxidized::ast_defs::Id(pos, id) = pos_id;
+        Self::new(Pos::from_ast(&pos), S::from(id))
+    }
+}
+
 impl<'a, S: From<&'a str>, P: Pos> From<&'a oxidized::ast_defs::Id> for Positioned<S, P> {
     fn from(pos_id: &'a oxidized::ast_defs::Id) -> Self {
         let oxidized::ast_defs::Id(pos, id) = pos_id;
@@ -498,6 +518,13 @@ impl<'a, S: From<&'a str>, P: Pos> From<oxidized_by_ref::ast_defs::Id<'a>> for P
     fn from(pos_id: oxidized_by_ref::ast_defs::Id<'a>) -> Self {
         let oxidized_by_ref::ast_defs::Id(pos, id) = pos_id;
         Self::new(Pos::from_decl(pos), S::from(id))
+    }
+}
+
+impl<S: From<String>, P: Pos> From<oxidized::typing_defs::PosId> for Positioned<S, P> {
+    fn from(pos_id: oxidized::typing_defs::PosId) -> Self {
+        let (pos, id) = pos_id;
+        Self::new(Pos::from_ast(&pos), S::from(id))
     }
 }
 

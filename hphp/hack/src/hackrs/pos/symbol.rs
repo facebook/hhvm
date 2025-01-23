@@ -171,8 +171,20 @@ impl From<&[u8]> for Bytes {
     }
 }
 
+impl From<bstr::BString> for Bytes {
+    fn from(s: bstr::BString) -> Self {
+        Self::new(s)
+    }
+}
+
 impl From<&bstr::BStr> for Bytes {
     fn from(s: &bstr::BStr) -> Self {
+        Self::new(s)
+    }
+}
+
+impl From<String> for Bytes {
+    fn from(s: String) -> Self {
         Self::new(s)
     }
 }

@@ -43,6 +43,7 @@ pub trait Reason:
     + Sync
     + Serialize
     + DeserializeOwned
+    + for<'a> From<oxidized::typing_reason::T_>
     + for<'a> From<oxidized_by_ref::typing_reason::T_<'a>>
     + for<'a> ToOxidizedByRef<'a, Output = oxidized_by_ref::typing_reason::T_<'a>>
     + ToOcamlRep
@@ -79,6 +80,52 @@ pub trait Reason:
     fn decl_ty_conser() -> &'static Conser<decl::Ty_<Self>>;
     fn local_ty_conser() -> &'static Conser<local::Ty_<Self, local::Ty<Self>>>;
     fn prop_conser() -> &'static Conser<PropF<Self, Prop<Self>>>;
+
+    fn from_oxidized(reason: oxidized::typing_reason::T_) -> Self {
+        Self::mk(|| {
+            use oxidized::typing_reason::WitnessDecl as WD;
+            use oxidized::typing_reason::T_ as OR;
+            use ReasonImpl as RI;
+
+            match reason {
+                OR::NoReason => RI::NoReason,
+                OR::FromWitnessDecl(WD::WitnessFromDecl(pos)) => {
+                    RI::FromWitnessDecl(WitnessDecl::WitnessFromDecl(pos.into()))
+                }
+
+                OR::FromWitnessDecl(WD::Hint(pos)) => {
+                    RI::FromWitnessDecl(WitnessDecl::Hint(pos.into()))
+                }
+
+                OR::FromWitnessDecl(WD::ClassClass(pos, s)) => RI::FromWitnessDecl(
+                    WitnessDecl::ClassClass(pos.into(), TypeName(Symbol::new(s))),
+                ),
+
+                OR::FromWitnessDecl(WD::VarParamFromDecl(pos)) => {
+                    RI::FromWitnessDecl(WitnessDecl::VarParamFromDecl(pos.into()))
+                }
+
+                OR::FromWitnessDecl(WD::TupleFromSplat(pos)) => {
+                    RI::FromWitnessDecl(WitnessDecl::TupleFromSplat(pos.into()))
+                }
+
+                OR::FromWitnessDecl(WD::VecOrDictKey(pos)) => {
+                    RI::FromWitnessDecl(WitnessDecl::VecOrDictKey(pos.into()))
+                }
+
+                OR::FromWitnessDecl(WD::RetFunKindFromDecl(pos, fun_kind)) => {
+                    RI::FromWitnessDecl(WitnessDecl::RetFunKindFromDecl(pos.into(), fun_kind))
+                }
+
+                OR::Instantiate(r1, sym, r2) => {
+                    RI::Instantiate((*r1).into(), TypeName(Symbol::new(sym)), (*r2).into())
+                }
+                _ => {
+                    panic!("Error occurred: {:#?}", reason)
+                }
+            }
+        })
+    }
 
     fn from_oxidized_by_ref(reason: oxidized_by_ref::typing_reason::T_<'_>) -> Self {
         Self::mk(|| {
@@ -241,6 +288,12 @@ impl Reason for BReason {
 
 impl Walkable<BReason> for BReason {}
 
+impl From<oxidized::typing_reason::T_> for BReason {
+    fn from(reason: oxidized::typing_reason::T_) -> Self {
+        Self::from_oxidized(reason)
+    }
+}
+
 impl<'a> From<oxidized_by_ref::typing_reason::Reason<'a>> for BReason {
     fn from(reason: oxidized_by_ref::typing_reason::Reason<'a>) -> Self {
         Self::from_oxidized_by_ref(reason)
@@ -305,6 +358,11 @@ impl Reason for NReason {
 
 impl Walkable<NReason> for NReason {}
 
+impl From<oxidized::typing_reason::T_> for NReason {
+    fn from(reason: oxidized::typing_reason::T_) -> Self {
+        Self::from_oxidized(reason)
+    }
+}
 impl<'a> From<oxidized_by_ref::typing_reason::T_<'a>> for NReason {
     fn from(reason: oxidized_by_ref::typing_reason::T_<'a>) -> Self {
         Self::from_oxidized_by_ref(reason)

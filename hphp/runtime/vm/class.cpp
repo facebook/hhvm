@@ -247,6 +247,7 @@ bool shouldUsePersistentHandles(const Class* cls) {
 unsigned loadUsedTraits(PreClass* preClass,
                         VMCompactVector<ClassPtr>& usedTraits) {
   unsigned methodCount = 0;
+  hphp_fast_set<std::pair<const StringData*, PreClass*>> seenMethods;
 
   auto const traitsFlattened = !!(preClass->attrs() & AttrNoExpandTrait);
   for (auto const& traitName : preClass->usedTraits()) {
@@ -271,8 +272,19 @@ unsigned loadUsedTraits(PreClass* preClass,
       continue;
     }
 
+    // Do not include duplicate methods due to diamond traits in methodCount.
+    auto numMethods = classPtr->numMethods();
+    for (Slot i = 0; i < classPtr->numMethods(); ++i) {
+      auto const meth = classPtr->getMethod(i);
+      auto const origin = meth->preClass();
+      if (origin && (origin->attrs() & AttrTrait) &&
+          !seenMethods.emplace(meth->name(), origin).second) {
+        numMethods--;
+      }
+    }
+
     usedTraits.push_back(ClassPtr(classPtr));
-    methodCount += classPtr->numMethods();
+    methodCount += numMethods;
 
   }
 

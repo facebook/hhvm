@@ -839,6 +839,19 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
 
 } // namespace
 
+std::optional<std::string> detail::parse_command_line_args(
+    const std::vector<std::string>& args,
+    parsing_params& parsing_params,
+    sema_params& sema_params) {
+  gen_params gen_params = {};
+  gen_params.targets.emplace_back(); // Avoid the need to pass --gen.
+  diagnostic_params diag_params = {};
+  auto filename =
+      parse_args(args, parsing_params, gen_params, diag_params, sema_params);
+  return filename.empty() ? std::nullopt
+                          : std::make_optional(std::move(filename));
+}
+
 std::pair<std::unique_ptr<t_program_bundle>, diagnostic_results>
 parse_and_mutate_program(
     source_manager& sm,

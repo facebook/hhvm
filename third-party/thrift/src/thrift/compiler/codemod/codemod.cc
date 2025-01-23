@@ -17,6 +17,8 @@
 #include <fmt/core.h>
 #include <thrift/compiler/codemod/codemod.h>
 #include <thrift/compiler/compiler.h>
+#include <thrift/compiler/parse/parse_ast.h>
+#include <thrift/compiler/sema/sema_context.h>
 
 namespace apache::thrift::compiler {
 
@@ -29,12 +31,27 @@ int run_codemod(
     return 1;
   }
 
+  // Parse command-line arguments.
+  auto parsing_params = compiler::parsing_params();
+  auto sema_params = compiler::sema_params();
+  std::optional<std::string> filename = detail::parse_command_line_args(
+      {argv, argv + argc}, parsing_params, sema_params);
+  if (!filename) {
+    return 1;
+  }
+  parsing_params.allow_missing_includes = true;
+  sema_params.skip_lowering_annotations = true;
+
+  // Parse the Thrift file.
   auto source_mgr = source_manager();
-  auto program_bundle = parse_and_get_program(
-      source_mgr, std::vector<std::string>(argv, argv + argc));
+  auto diags = make_diagnostics_printer(source_mgr);
+  auto program_bundle =
+      parse_ast(source_mgr, diags, *filename, parsing_params, &sema_params);
   if (!program_bundle) {
     return 1;
   }
+
+  // Run the codemod.
   codemod(source_mgr, *program_bundle->root_program());
   return 0;
 }

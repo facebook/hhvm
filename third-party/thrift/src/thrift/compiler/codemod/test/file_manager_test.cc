@@ -19,22 +19,19 @@
 #include <gtest/gtest.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/codemod/file_manager.h>
-#include <thrift/compiler/compiler.h>
+#include <thrift/compiler/parse/parse_ast.h>
 #include <thrift/compiler/source_location.h>
 
-namespace apache::thrift::compiler::codemod {
-
-namespace {
-
-using ::testing::Eq;
-using ::testing::IsTrue;
 using ::testing::NotNull;
 using ::testing::StrEq;
 using std::literals::string_view_literals::operator""sv;
 
-static const std::string kVirtualFileName("virtual/path/file1.thrift");
+namespace apache::thrift::compiler::codemod {
+namespace {
 
-static const std::string kVirtualFileContents(R"(
+const std::string test_file_name = "virtual/path/file1.thrift";
+
+const std::string test_file_contents = R"(
 package "test.module"
 
 namespace java test.module
@@ -42,16 +39,16 @@ namespace java test.module
 struct Foo {
   1: optional i32 bar;
 }
-)");
+)";
 } // namespace
 
 class FileManagerTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    source_ = source_manager_.add_virtual_file(
-        kVirtualFileName, kVirtualFileContents);
-    program_bundle_ = parse_and_get_program(
-        source_manager_, {"<virtual compiler>", kVirtualFileName});
+    source_ =
+        source_manager_.add_virtual_file(test_file_name, test_file_contents);
+    auto diags = make_diagnostics_printer(source_manager_);
+    program_bundle_ = parse_ast(source_manager_, diags, test_file_name, {});
     ASSERT_THAT(program_bundle_, NotNull());
 
     file_manager_ = std::make_unique<file_manager>(
@@ -65,9 +62,9 @@ class FileManagerTest : public ::testing::Test {
 };
 
 TEST_F(FileManagerTest, old_content) {
-  // NOTE: comparison is done via underlying data() using STREQ because the text
+  // NOTE: comparison is done via underlying data() using StrEq because the text
   // in the source manager is explicitly null-terminated.
-  EXPECT_THAT(file_manager_->old_content().data(), StrEq(kVirtualFileContents));
+  EXPECT_THAT(file_manager_->old_content().data(), StrEq(test_file_contents));
 }
 
 TEST_F(FileManagerTest, add_include) {

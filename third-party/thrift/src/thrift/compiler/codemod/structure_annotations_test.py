@@ -443,6 +443,8 @@ class StructureAnnotations(unittest.TestCase):
                     1: i32 (rust.type = "u32") f (rust.name = "foo", rust.box, rust.type = "foo");
                 } (rust.arc, rust.copy, rust.exhaustive, rust.ord, rust.serde = "true", rust.mod = "foo", rust.derive = "Foo, Bar")
 
+                service S {} (rust.request_context)
+
                 """
             ),
         )
@@ -469,6 +471,9 @@ class StructureAnnotations(unittest.TestCase):
                   @rust.Type{name = "u32"}
                   1: i32  f ;
                 }
+
+                @rust.RequestContext
+                service S {}
                 """
             ),
         )

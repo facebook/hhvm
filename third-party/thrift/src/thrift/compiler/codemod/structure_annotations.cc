@@ -480,6 +480,10 @@ class structure_annotations {
             ranges::views::join(',') | ranges::to<std::string>;
         to_add.insert(fmt::format("@rust.Derive{{derives = [{}]}}", derives));
         fm_.add_include("thrift/annotation/rust.thrift");
+      } else if (name == "rust.request_context") {
+        to_remove.emplace_back(name, data);
+        to_add.insert("@rust.RequestContext");
+        fm_.add_include("thrift/annotation/rust.thrift");
       }
 
       // haskell annotations are ignored by the main compiler

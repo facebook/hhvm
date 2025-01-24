@@ -235,8 +235,6 @@ std::string get_gen_type_class_with_indirection(const t_type& type);
 
 std::string sha256_hex(const std::string& in);
 
-bool is_cpp_ref_unique_either(const t_field* f);
-
 bool deprecated_terse_writes(const t_field* field);
 
 namespace detail {

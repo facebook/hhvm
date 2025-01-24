@@ -617,17 +617,12 @@ std::string sha256_hex(std::string const& in) {
   return out;
 }
 
-bool is_cpp_ref_unique_either(const t_field* f) {
-  return cpp2::is_unique_ref(f) || cpp2::is_implicit_ref(f->get_type());
-}
-
 bool deprecated_terse_writes(const t_field* field) {
   // Add terse writes for unqualified fields when comparison is cheap:
   // (e.g. i32/i64, empty strings/list/map)
   auto t = field->get_type()->get_true_type();
   return field->get_req() == t_field::e_req::opt_in_req_out &&
-      (is_cpp_ref_unique_either(field) ||
-       (!t->is_struct() && !t->is_exception()));
+      (cpp2::is_unique_ref(field) || (!t->is_struct() && !t->is_exception()));
 }
 
 t_field_id get_internal_injected_field_id(t_field_id id) {

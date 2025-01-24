@@ -290,13 +290,16 @@ class native_object {
   virtual std::string describe_type() const;
 
   /**
-   * Determines if this native_object compares equal to the other object. It is
-   * the implementers's responsibility to ensure that the other object also
-   * compares equal to this one and maintains the commutative property.
+   * Determines if this native_object compares equal to the other object.
    *
-   * The default implementation compares by object identity.
+   * This functions returns true iff:
+   *   - `*this` and `other` are the same object.
+   *   - both objects are native_object::array_like and their corresponding
+   *     elements are equal.
+   *   - both objects are native_object::map_like, they have enumerable keys,
+   *     and all key-value pairs are equal between them.
    */
-  virtual bool operator==(const native_object& other) const;
+  bool operator==(const native_object& other) const;
 };
 
 /**
@@ -563,6 +566,23 @@ inline bool operator!=(
 }
 
 namespace detail {
+// Value equality between all arrays. array_like::ptr may be nullptr.
+bool array_eq(const array&, const array&);
+bool array_eq(const array&, const native_object::array_like::ptr&);
+bool array_eq(const native_object::array_like::ptr& lhs, const array&);
+bool array_eq(
+    const native_object::array_like::ptr&,
+    const native_object::array_like::ptr&);
+
+// Value equality between all maps. map_like::ptr may be nullptr.
+bool map_eq(const map&, const map&);
+bool map_eq(const map&, const native_object::map_like::ptr&);
+bool map_eq(const native_object::map_like::ptr& lhs, const map&);
+bool map_eq(
+    const native_object::map_like::ptr&, const native_object::map_like::ptr&);
+} // namespace detail
+
+namespace detail {
 // This only exists to form a kind-of recursive std::variant with the help of
 // forward declared types.
 template <typename Self>
@@ -768,8 +788,19 @@ class object final : private detail::object_base<object> {
 
   friend bool operator==(
       const object& lhs, const native_object::ptr& rhs) noexcept {
-    return lhs.is_native_object() && rhs != nullptr &&
-        *lhs.as_native_object() == *rhs;
+    if (rhs == nullptr) {
+      return false;
+    }
+    if (lhs.is_native_object()) {
+      return *lhs.as_native_object() == *rhs;
+    }
+    if (lhs.is_array()) {
+      return detail::array_eq(lhs.as_array(), rhs->as_array_like());
+    }
+    if (lhs.is_map()) {
+      return detail::map_eq(lhs.as_map(), rhs->as_map_like());
+    }
+    return false;
   }
   friend bool operator==(
       const native_object::ptr& lhs, const object& rhs) noexcept {
@@ -799,14 +830,26 @@ class object final : private detail::object_base<object> {
   }
 
   friend bool operator==(const object& lhs, const array& rhs) noexcept {
-    return lhs.is_array() && lhs.as_array() == rhs;
+    if (lhs.is_array()) {
+      return lhs.as_array() == rhs;
+    }
+    if (lhs.is_native_object()) {
+      return detail::array_eq(lhs.as_native_object()->as_array_like(), rhs);
+    }
+    return false;
   }
   friend bool operator==(const array& lhs, const object& rhs) noexcept {
     return rhs == lhs;
   }
 
   friend bool operator==(const object& lhs, const map& rhs) noexcept {
-    return lhs.is_map() && lhs.as_map() == rhs;
+    if (lhs.is_map()) {
+      return lhs.as_map() == rhs;
+    }
+    if (lhs.is_native_object()) {
+      return detail::map_eq(lhs.as_native_object()->as_map_like(), rhs);
+    }
+    return false;
   }
   friend bool operator==(const map& lhs, const object& rhs) noexcept {
     return rhs == lhs;

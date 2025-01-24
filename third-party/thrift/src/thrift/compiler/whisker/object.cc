@@ -19,9 +19,11 @@
 #include <thrift/compiler/whisker/detail/overload.h>
 
 #include <cassert>
+#include <iterator>
 #include <ostream>
 #include <sstream>
 #include <type_traits>
+#include <unordered_set>
 
 #include <fmt/core.h>
 #include <fmt/ranges.h>
@@ -144,6 +146,122 @@ class to_string_visitor {
 
 } // namespace
 
+namespace detail {
+bool array_eq(const array& lhs, const array& rhs) {
+  return lhs == rhs;
+}
+bool array_eq(const array& lhs, const native_object::array_like::ptr& rhs) {
+  if (rhs == nullptr) {
+    return false;
+  }
+  std::size_t size = lhs.size();
+  if (size != rhs->size()) {
+    return false;
+  }
+  for (std::size_t i = 0; i < size; ++i) {
+    if (lhs[i] != *rhs->at(i)) {
+      return false;
+    }
+  }
+  return true;
+}
+bool array_eq(const native_object::array_like::ptr& lhs, const array& rhs) {
+  return array_eq(rhs, lhs);
+}
+bool array_eq(
+    const native_object::array_like::ptr& lhs,
+    const native_object::array_like::ptr& rhs) {
+  if (lhs == nullptr) {
+    return false;
+  }
+  if (rhs == nullptr) {
+    return false;
+  }
+  std::size_t size = lhs->size();
+  if (size != rhs->size()) {
+    return false;
+  }
+  for (std::size_t i = 0; i < size; ++i) {
+    object::ptr lhs_value = lhs->at(i);
+    object::ptr rhs_value = rhs->at(i);
+    // Within size so it must not be null.
+    assert(lhs_value != nullptr);
+    assert(rhs_value != nullptr);
+    if (*lhs_value != *rhs_value) {
+      return false;
+    }
+  }
+  return true;
+}
+
+namespace {
+std::optional<std::unordered_set<std::string>> unique_keys(
+    std::optional<std::vector<std::string>> keys) {
+  if (!keys.has_value()) {
+    return std::nullopt;
+  }
+  return std::unordered_set<std::string>(
+      std::make_move_iterator(keys->begin()),
+      std::make_move_iterator(keys->end()));
+}
+} // namespace
+bool map_eq(const map& lhs, const map& rhs) {
+  return lhs == rhs;
+}
+bool map_eq(const map& lhs, const native_object::map_like::ptr& rhs) {
+  if (rhs == nullptr) {
+    return false;
+  }
+  auto rhs_keys = unique_keys(rhs->keys());
+  if (!rhs_keys.has_value()) {
+    // Not enumerable
+    return false;
+  }
+  if (lhs.size() != rhs_keys->size()) {
+    return false;
+  }
+
+  for (const auto& [key, lhs_value] : lhs) {
+    if (rhs_keys->find(key) == rhs_keys->end()) {
+      return false;
+    }
+    auto rhs_value = rhs->lookup_property(key);
+    // Key was enumerated so it must not be null.
+    assert(rhs_value != nullptr);
+    if (lhs_value != *rhs_value) {
+      return false;
+    }
+  }
+  return true;
+}
+bool map_eq(const native_object::map_like::ptr& lhs, const map& rhs) {
+  return map_eq(rhs, lhs);
+}
+bool map_eq(
+    const native_object::map_like::ptr& lhs,
+    const native_object::map_like::ptr& rhs) {
+  if (lhs == nullptr || rhs == nullptr) {
+    return false;
+  }
+
+  auto lhs_keys = unique_keys(lhs->keys());
+  auto rhs_keys = unique_keys(rhs->keys());
+  const bool keys_equal =
+      lhs_keys.has_value() && rhs_keys.has_value() && *lhs_keys == *rhs_keys;
+  if (!keys_equal) {
+    return false;
+  }
+  for (const std::string& key : *lhs_keys) {
+    object::ptr lhs_value = lhs->lookup_property(key);
+    object::ptr rhs_value = rhs->lookup_property(key);
+    if (*lhs_value != *rhs_value) {
+      return false;
+    }
+  }
+  return true;
+}
+} // namespace detail
+
 void native_object::map_like::default_print_to(
     std::string_view name,
     std::vector<std::string> property_names,
@@ -187,7 +305,13 @@ std::string native_object::describe_type() const {
 }
 
 bool native_object::operator==(const native_object& other) const {
-  return &other == this;
+  if (&other == this) {
+    return true;
+  }
+  if (detail::array_eq(as_array_like(), other.as_array_like())) {
+    return true;
+  }
+  return detail::map_eq(as_map_like(), other.as_map_like());
 }
 
 void native_function::print_to(

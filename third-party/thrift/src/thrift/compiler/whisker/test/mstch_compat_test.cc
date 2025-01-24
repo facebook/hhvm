@@ -238,7 +238,6 @@ TEST_F(MstchCompatTest, mstch_object) {
   };
   auto mstch_obj = apache::thrift::mstch::make_shared_node<object_impl>();
   auto converted = from_mstch(mstch_obj);
-  EXPECT_EQ(converted, from_mstch(mstch_obj));
 
   {
     auto ctx = eval_context::with_root_scope(converted);

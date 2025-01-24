@@ -23,15 +23,6 @@ namespace w = whisker::make;
 
 namespace whisker {
 
-namespace {
-class basic_native_object : public native_object {
-  void print_to(
-      tree_printer::scope scope, const object_print_options&) const override {
-    scope.println("<basic_native_object>");
-  }
-};
-} // namespace
-
 TEST(ObjectTest, empty) {
   object o;
   EXPECT_TRUE(o.is_null());
@@ -139,7 +130,7 @@ TEST(ObjectTest, map) {
 }
 
 TEST(ObjectTest, native_object) {
-  native_object::ptr ptr = std::make_shared<basic_native_object>();
+  native_object::ptr ptr = std::make_shared<native_object>();
 
   object o = w::native_object(ptr);
   EXPECT_TRUE(o.is_native_object());
@@ -153,42 +144,109 @@ TEST(ObjectTest, native_object) {
 }
 
 TEST(ObjectTest, native_object_equality) {
-  struct integer_native_object : basic_native_object {
-    explicit integer_native_object(int value) : value(value) {}
-    int value;
+  struct always_zero_map : native_object,
+                           native_object::map_like,
+                           std::enable_shared_from_this<always_zero_map> {
+    explicit always_zero_map(std::vector<std::string> keys)
+        : keys_(std::move(keys)) {}
 
-    bool operator==(const native_object& other) const override {
-      if (auto* o = dynamic_cast<const integer_native_object*>(&other)) {
-        return value == o->value;
-      }
-      return false;
+    native_object::map_like::ptr as_map_like() const override {
+      return shared_from_this();
     }
+
+    object::ptr lookup_property(std::string_view) const override {
+      return manage_owned<object>(w::i64(0));
+    }
+
+    std::optional<std::vector<std::string>> keys() const override {
+      return keys_;
+    }
+
+    void print_to(
+        tree_printer::scope scope,
+        const object_print_options& options) const override {
+      default_print_to("always_zero_map", keys_, std::move(scope), options);
+    }
+
+   private:
+    std::vector<std::string> keys_;
   };
-  native_object::ptr o1 = std::make_shared<integer_native_object>(5);
-  native_object::ptr o2 = std::make_shared<integer_native_object>(5);
-  native_object::ptr o3 = std::make_shared<integer_native_object>(10);
 
-  object o = w::native_object(o1);
-  EXPECT_TRUE(o.is_native_object());
-  EXPECT_FALSE(o.is_i64());
+  struct always_zero_array : native_object,
+                             native_object::array_like,
+                             std::enable_shared_from_this<always_zero_array> {
+    explicit always_zero_array(std::size_t sz) : size_(sz) {}
 
-  EXPECT_EQ(o, o1);
-  EXPECT_EQ(o1, o);
-  EXPECT_EQ(o, o2);
-  EXPECT_EQ(o2, o);
-  EXPECT_NE(o, o3);
-  EXPECT_NE(o3, o);
-  EXPECT_NE(o, w::make_native_object<basic_native_object>());
-  EXPECT_NE(w::make_native_object<basic_native_object>(), o);
+    native_object::array_like::ptr as_array_like() const override {
+      return shared_from_this();
+    }
 
-  EXPECT_NE(o, native_object::ptr(nullptr));
-  EXPECT_NE(native_object::ptr(nullptr), o);
-  EXPECT_NE(o, i64(1));
-  EXPECT_EQ(o, o);
+    std::size_t size() const override { return size_; }
+
+    object::ptr at(std::size_t) const override {
+      return manage_owned<object>(w::i64(0));
+    }
+
+    void print_to(
+        tree_printer::scope scope,
+        const object_print_options& options) const override {
+      default_print_to("always_zero_array", std::move(scope), options);
+    }
+
+   private:
+    std::size_t size_;
+  };
+
+  native_object::ptr m1 =
+      std::make_shared<always_zero_map>(std::vector<std::string>{"foo"});
+  native_object::ptr m2 =
+      std::make_shared<always_zero_map>(std::vector<std::string>{"foo"});
+  native_object::ptr m3 =
+      std::make_shared<always_zero_map>(std::vector<std::string>{"foo", "bar"});
+  map raw_m3{{"foo", w::i64(0)}, {"bar", w::i64(0)}};
+
+  object o1 = w::native_object(m1);
+  EXPECT_TRUE(o1.is_native_object());
+  EXPECT_FALSE(o1.is_i64());
+  EXPECT_EQ(o1, m1);
+  EXPECT_EQ(m1, o1);
+  EXPECT_EQ(o1, m2);
+  EXPECT_EQ(m2, o1);
+  EXPECT_NE(o1, m3);
+  EXPECT_NE(m3, o1);
+  EXPECT_NE(o1, raw_m3);
+  EXPECT_EQ(raw_m3, w::native_object(m3));
+  EXPECT_EQ(w::native_object(m3), raw_m3);
+
+  native_object::ptr a1 = std::make_shared<always_zero_array>(2);
+  native_object::ptr a2 = std::make_shared<always_zero_array>(2);
+  native_object::ptr a3 = std::make_shared<always_zero_array>(3);
+  array raw_a3{w::i64(0), w::i64(0), w::i64(0)};
+
+  object o2 = w::native_object(a1);
+  EXPECT_TRUE(o2.is_native_object());
+  EXPECT_FALSE(o2.is_i64());
+  EXPECT_EQ(o2, a1);
+  EXPECT_EQ(a1, o2);
+  EXPECT_EQ(o2, a2);
+  EXPECT_EQ(a2, o2);
+  EXPECT_NE(o2, a3);
+  EXPECT_NE(a3, o2);
+  EXPECT_NE(o2, raw_a3);
+  EXPECT_EQ(raw_a3, w::native_object(a3));
+  EXPECT_EQ(w::native_object(a3), raw_a3);
+
+  EXPECT_EQ(o1, o1);
+  EXPECT_EQ(o2, o2);
+
+  EXPECT_NE(o1, w::make_native_object<native_object>());
+  EXPECT_NE(w::make_native_object<native_object>(), o1);
+  EXPECT_NE(o1, native_object::ptr(nullptr));
+  EXPECT_NE(native_object::ptr(nullptr), o1);
 }
 
 TEST(ObjectTest, copy) {
-  native_object::ptr ptr = std::make_shared<basic_native_object>();
+  native_object::ptr ptr = std::make_shared<native_object>();
 
   object o1 = w::array(
       {w::i64(1),
@@ -219,7 +277,7 @@ TEST(ObjectTest, copy) {
 }
 
 TEST(ObjectTest, move) {
-  native_object::ptr ptr = std::make_shared<basic_native_object>();
+  native_object::ptr ptr = std::make_shared<native_object>();
 
   object o1 = w::array(
       {w::i64(1),
@@ -252,8 +310,8 @@ TEST(ObjectTest, move) {
 }
 
 TEST(ObjectTest, swap) {
-  native_object::ptr ptr1 = std::make_shared<basic_native_object>();
-  native_object::ptr ptr2 = std::make_shared<basic_native_object>();
+  native_object::ptr ptr1 = std::make_shared<native_object>();
+  native_object::ptr ptr2 = std::make_shared<native_object>();
 
   object o1 = w::array(
       {w::i64(1),
@@ -322,7 +380,7 @@ TEST(ObjectTest, assign_copy_alternatives) {
     EXPECT_EQ(m, (w::map({{"foo", w::i64(3)}, {"bar", w::string("baz")}})));
   }
   {
-    native_object::ptr ptr = std::make_shared<basic_native_object>();
+    native_object::ptr ptr = std::make_shared<native_object>();
     o = ptr;
     EXPECT_EQ(ptr, o);
     EXPECT_NE(ptr, nullptr);
@@ -358,7 +416,7 @@ TEST(ObjectTest, to_string) {
        w::array(
            {w::string("foo"),
             w::boolean(true),
-            w::make_native_object<basic_native_object>()})},
+            w::make_native_object<native_object>()})},
       {"abc", w::null},
       {"fun",
        w::array(
@@ -378,7 +436,7 @@ TEST(ObjectTest, to_string) {
       "  | `-[1]\n"
       "  |   |-true\n"
       "  | `-[2]\n"
-      "  |   |-<basic_native_object>\n"
+      "  |   |-<native_object>\n"
       "`-'foo'\n"
       "  |-i64(1)\n"
       "`-'fun'\n"
@@ -455,7 +513,7 @@ TEST(ObjectTest, to_string) {
       "  | `-[1]\n"
       "  |   |-true\n"
       "  | `-[2]\n"
-      "  |   |-<basic_native_object>\n"
+      "  |   |-<native_object>\n"
       "`-'foo'\n"
       "  |-i64(1)\n"
       "`-'fun'\n"

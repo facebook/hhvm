@@ -21,8 +21,8 @@ ZstdStreamCompressor::ZstdStreamCompressor(int compressionLevel,
 
 folly::io::StreamCodec& ZstdStreamCompressor::getCodec() {
   if (!codec_) {
-    codec_ = folly::io::getStreamCodec(folly::io::CodecType::ZSTD,
-                                       compressionLevel_);
+    codec_ = folly::compression::getStreamCodec(folly::io::CodecType::ZSTD,
+                                                compressionLevel_);
   }
   return *codec_;
 }

@@ -89,7 +89,7 @@ void compressThenDecompress(unique_ptr<IOBuf> buf, bool reuseBuf) {
 
 void compressThenDecompressPieces(
     std::vector<std::unique_ptr<folly::IOBuf>> input_pieces, bool reuseBuf) {
-  auto codec = folly::io::getStreamCodec(folly::io::CodecType::ZSTD);
+  auto codec = folly::compression::getStreamCodec(folly::io::CodecType::ZSTD);
 
   std::vector<std::unique_ptr<folly::IOBuf>> compressed_pieces;
 

@@ -29,6 +29,8 @@ namespace go 'github.com/facebook/fbthrift/thrift/lib/thrift/metadata'
  * Keep synced with : thrift/compiler/generate/t_hack_generator.cc
  */
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/rust.thrift"
+include "thrift/annotation/thrift.thrift"
 
 package "facebook.com/thrift/metadata"
 
@@ -66,29 +68,36 @@ struct ThriftConstStruct {
 }
 
 struct ThriftListType {
+  @rust.Box
+  @thrift.DeprecatedUnvalidatedAnnotations{
+    items = {"swift.recursive_reference": "true"},
+  }
   @cpp.Ref{type = cpp.RefType.Unique}
-  1: optional ThriftType valueType (
-    rust.box,
-    swift.recursive_reference = "true",
-  );
+  1: optional ThriftType valueType;
 }
 
 struct ThriftSetType {
+  @rust.Box
+  @thrift.DeprecatedUnvalidatedAnnotations{
+    items = {"swift.recursive_reference": "true"},
+  }
   @cpp.Ref{type = cpp.RefType.Unique}
-  1: optional ThriftType valueType (
-    rust.box,
-    swift.recursive_reference = "true",
-  );
+  1: optional ThriftType valueType;
 }
 
 struct ThriftMapType {
+  @rust.Box
+  @thrift.DeprecatedUnvalidatedAnnotations{
+    items = {"swift.recursive_reference": "true"},
+  }
   @cpp.Ref{type = cpp.RefType.Unique}
-  1: optional ThriftType keyType (rust.box, swift.recursive_reference = "true");
+  1: optional ThriftType keyType;
+  @rust.Box
+  @thrift.DeprecatedUnvalidatedAnnotations{
+    items = {"swift.recursive_reference": "true"},
+  }
   @cpp.Ref{type = cpp.RefType.Unique}
-  2: optional ThriftType valueType (
-    rust.box,
-    swift.recursive_reference = "true",
-  );
+  2: optional ThriftType valueType;
 }
 
 struct ThriftEnumType {
@@ -105,43 +114,49 @@ struct ThriftUnionType {
 
 struct ThriftTypedefType {
   1: string name;
+  @rust.Box
+  @thrift.DeprecatedUnvalidatedAnnotations{
+    items = {"swift.recursive_reference": "true"},
+  }
   @cpp.Ref{type = cpp.RefType.Unique}
-  2: optional ThriftType underlyingType (
-    rust.box,
-    swift.recursive_reference = "true",
-  );
+  2: optional ThriftType underlyingType;
   3: list<ThriftConstStruct> structured_annotations;
 }
 
 struct ThriftStreamType {
+  @rust.Box
+  @thrift.DeprecatedUnvalidatedAnnotations{
+    items = {"swift.recursive_reference": "true"},
+  }
   @cpp.Ref{type = cpp.RefType.Unique}
-  1: optional ThriftType elemType (
-    rust.box,
-    swift.recursive_reference = "true",
-  );
+  1: optional ThriftType elemType;
+  @rust.Box
+  @thrift.DeprecatedUnvalidatedAnnotations{
+    items = {"swift.recursive_reference": "true"},
+  }
   @cpp.Ref{type = cpp.RefType.Unique}
-  2: optional ThriftType initialResponseType (
-    rust.box,
-    swift.recursive_reference = "true",
-  );
+  2: optional ThriftType initialResponseType;
 }
 
 struct ThriftSinkType {
+  @rust.Box
+  @thrift.DeprecatedUnvalidatedAnnotations{
+    items = {"swift.recursive_reference": "true"},
+  }
   @cpp.Ref{type = cpp.RefType.Unique}
-  1: optional ThriftType elemType (
-    rust.box,
-    swift.recursive_reference = "true",
-  );
+  1: optional ThriftType elemType;
+  @rust.Box
+  @thrift.DeprecatedUnvalidatedAnnotations{
+    items = {"swift.recursive_reference": "true"},
+  }
   @cpp.Ref{type = cpp.RefType.Unique}
-  2: optional ThriftType finalResponseType (
-    rust.box,
-    swift.recursive_reference = "true",
-  );
+  2: optional ThriftType finalResponseType;
+  @rust.Box
+  @thrift.DeprecatedUnvalidatedAnnotations{
+    items = {"swift.recursive_reference": "true"},
+  }
   @cpp.Ref{type = cpp.RefType.Unique}
-  3: optional ThriftType initialResponseType (
-    rust.box,
-    swift.recursive_reference = "true",
-  );
+  3: optional ThriftType initialResponseType;
 }
 
 union ThriftType {

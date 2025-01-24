@@ -26,9 +26,13 @@ namespace go thrift.lib.thrift.dynamic
 cpp_include "thrift/lib/thrift/SerializableDynamic.h"
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 
 union Dynamic {
-  1: bool boolean (java.swift.name = "_boolean");
+  @thrift.DeprecatedUnvalidatedAnnotations{
+    items = {"java.swift.name": "_boolean"},
+  }
+  1: bool boolean;
   2: i64 integer;
   3: double doubl;
   4: binary str;

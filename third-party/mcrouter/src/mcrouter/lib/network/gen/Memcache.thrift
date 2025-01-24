@@ -15,6 +15,7 @@
 include "mcrouter/lib/carbon/carbon.thrift"
 include "mcrouter/lib/carbon/carbon_result.thrift"
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 include "mcrouter/lib/network/gen/Common.thrift"
 
 cpp_include "<mcrouter/lib/carbon/CarbonProtocolReader.h>"
@@ -23,12 +24,12 @@ namespace cpp2 facebook.memcache.thrift
 namespace py3 facebook.memcache.thrift
 
 struct MemcacheRequestCommon {
-  1: optional i64_8073 beforeLatencyUs
-  2: optional i64_8073 afterLatencyUs
+  1: optional carbon.ui64 beforeLatencyUs
+  2: optional carbon.ui64 afterLatencyUs
   3: optional string bucketId
   4: optional i64 productId
   5: optional i32 regionalizationEntity
-  6: optional i32_133 usecaseId
+  6: optional carbon.ui32 usecaseId
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -42,7 +43,7 @@ struct MemcacheRequestCommon {
 
 ")
 struct MemcacheReplyCommon {
-  1: i32_133 replySourceBitMask
+  1: carbon.ui32 replySourceBitMask
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -56,9 +57,10 @@ struct MemcacheReplyCommon {
 
 ")
 struct McGetRequest {
-  -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheRequestCommon memcacheRequestCommon
   1: carbon.IOBufKey key
-  2: i64_8073 flags
+  2: carbon.ui64 flags
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -74,10 +76,11 @@ struct McGetRequest {
 cpp.virtual
 )
 struct McGetReply {
-  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
-  2: optional binary_9388 value
-  3: i64_8073 flags
+  2: optional carbon.IOBuf value
+  3: carbon.ui64 flags
   4: string message
   5: i16 appSpecificErrorCode
   6: optional i32 exptime
@@ -96,11 +99,12 @@ struct McGetReply {
 cpp.virtual
 )
 struct McSetRequest {
-  -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheRequestCommon memcacheRequestCommon
   1: carbon.IOBufKey key
   2: i32 exptime
-  3: i64_8073 flags
-  4: binary_9388 value
+  3: carbon.ui64 flags
+  4: carbon.IOBuf value
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -116,10 +120,11 @@ struct McSetRequest {
 cpp.virtual
 )
 struct McSetReply {
-  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
-  2: i64_8073 flags
-  3: binary_9388 value
+  2: carbon.ui64 flags
+  3: carbon.IOBuf value
   4: string message
   5: i16 appSpecificErrorCode
 }(cpp.methods = "
@@ -137,12 +142,13 @@ struct McSetReply {
 cpp.virtual
 )
 struct McDeleteRequest {
-  -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheRequestCommon memcacheRequestCommon
   1: carbon.IOBufKey key
-  2: i64_8073 flags
+  2: carbon.ui64 flags
   3: i32 exptime
-  4: binary_9388 value
-  5: map_string_i64_8499 attributes
+  4: carbon.IOBuf value
+  5: string_to_carbon_ui64_std_unordered_map attributes
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -158,10 +164,11 @@ struct McDeleteRequest {
 cpp.virtual
 )
 struct McDeleteReply {
-  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
-  2: i64_8073 flags
-  3: binary_9388 value
+  2: carbon.ui64 flags
+  3: carbon.IOBuf value
   4: string message
   5: i16 appSpecificErrorCode
 }(cpp.methods = "
@@ -179,9 +186,10 @@ struct McDeleteReply {
 cpp.virtual
 )
 struct McLeaseGetRequest {
-  -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheRequestCommon memcacheRequestCommon
   1: carbon.IOBufKey key
-  2: i64_8073 flags
+  2: carbon.ui64 flags
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -197,11 +205,12 @@ struct McLeaseGetRequest {
 cpp.virtual
 )
 struct McLeaseGetReply {
-  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
   2: i64 leaseToken
-  3: optional binary_9388 value
-  4: i64_8073 flags
+  3: optional carbon.IOBuf value
+  4: carbon.ui64 flags
   5: string message
   6: i16 appSpecificErrorCode
   7: optional i32 exptime
@@ -220,11 +229,12 @@ struct McLeaseGetReply {
 cpp.virtual
 )
 struct McLeaseSetRequest {
-  -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheRequestCommon memcacheRequestCommon
   1: carbon.IOBufKey key
   2: i32 exptime
-  3: i64_8073 flags
-  4: binary_9388 value
+  3: carbon.ui64 flags
+  4: carbon.IOBuf value
   5: i64 leaseToken
 }(cpp.methods = "
   template <class V>
@@ -241,7 +251,8 @@ struct McLeaseSetRequest {
 cpp.virtual
 )
 struct McLeaseSetReply {
-  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
@@ -260,11 +271,12 @@ struct McLeaseSetReply {
 cpp.virtual
 )
 struct McAddRequest {
-  -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheRequestCommon memcacheRequestCommon
   1: carbon.IOBufKey key
   2: i32 exptime
-  3: i64_8073 flags
-  4: binary_9388 value
+  3: carbon.ui64 flags
+  4: carbon.IOBuf value
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -280,7 +292,8 @@ struct McAddRequest {
 cpp.virtual
 )
 struct McAddReply {
-  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
@@ -299,11 +312,12 @@ struct McAddReply {
 cpp.virtual
 )
 struct McReplaceRequest {
-  -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheRequestCommon memcacheRequestCommon
   1: carbon.IOBufKey key
   2: i32 exptime
-  3: i64_8073 flags
-  4: binary_9388 value
+  3: carbon.ui64 flags
+  4: carbon.IOBuf value
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -319,7 +333,8 @@ struct McReplaceRequest {
 cpp.virtual
 )
 struct McReplaceReply {
-  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
@@ -338,9 +353,10 @@ struct McReplaceReply {
 cpp.virtual
 )
 struct McGetsRequest {
-  -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheRequestCommon memcacheRequestCommon
   1: carbon.IOBufKey key
-  2: i64_8073 flags
+  2: carbon.ui64 flags
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -356,11 +372,12 @@ struct McGetsRequest {
 cpp.virtual
 )
 struct McGetsReply {
-  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
-  2: i64_8073 casToken
-  3: optional binary_9388 value
-  4: i64_8073 flags
+  2: carbon.ui64 casToken
+  3: optional carbon.IOBuf value
+  4: carbon.ui64 flags
   5: string message
   6: i16 appSpecificErrorCode
 }(cpp.methods = "
@@ -378,12 +395,13 @@ struct McGetsReply {
 cpp.virtual
 )
 struct McCasRequest {
-  -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheRequestCommon memcacheRequestCommon
   1: carbon.IOBufKey key
   2: i32 exptime
-  3: i64_8073 flags
-  4: binary_9388 value
-  5: i64_8073 casToken
+  3: carbon.ui64 flags
+  4: carbon.IOBuf value
+  5: carbon.ui64 casToken
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -399,7 +417,8 @@ struct McCasRequest {
 cpp.virtual
 )
 struct McCasReply {
-  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
@@ -418,10 +437,11 @@ struct McCasReply {
 cpp.virtual
 )
 struct McIncrRequest {
-  -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheRequestCommon memcacheRequestCommon
   1: carbon.IOBufKey key
   2: i64 delta
-  3: i64_8073 flags
+  3: carbon.ui64 flags
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -437,7 +457,8 @@ struct McIncrRequest {
 cpp.virtual
 )
 struct McIncrReply {
-  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
   2: i64 delta
   3: string message
@@ -457,10 +478,11 @@ struct McIncrReply {
 cpp.virtual
 )
 struct McDecrRequest {
-  -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheRequestCommon memcacheRequestCommon
   1: carbon.IOBufKey key
   2: i64 delta
-  3: i64_8073 flags
+  3: carbon.ui64 flags
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -476,7 +498,8 @@ struct McDecrRequest {
 cpp.virtual
 )
 struct McDecrReply {
-  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
   2: i64 delta
   3: string message
@@ -496,9 +519,10 @@ struct McDecrReply {
 cpp.virtual
 )
 struct McMetagetRequest {
-  -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheRequestCommon memcacheRequestCommon
   1: carbon.IOBufKey key
-  2: i64_8073 flags
+  2: carbon.ui64 flags
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -514,7 +538,8 @@ struct McMetagetRequest {
 cpp.virtual
 )
 struct McMetagetReply {
-  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
   2: i32 age
   3: i32 exptime
@@ -537,11 +562,12 @@ struct McMetagetReply {
 cpp.virtual
 )
 struct McAppendRequest {
-  -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheRequestCommon memcacheRequestCommon
   1: carbon.IOBufKey key
   2: i32 exptime
-  3: i64_8073 flags
-  4: binary_9388 value
+  3: carbon.ui64 flags
+  4: carbon.IOBuf value
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -557,7 +583,8 @@ struct McAppendRequest {
 cpp.virtual
 )
 struct McAppendReply {
-  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
@@ -576,11 +603,12 @@ struct McAppendReply {
 cpp.virtual
 )
 struct McPrependRequest {
-  -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheRequestCommon memcacheRequestCommon
   1: carbon.IOBufKey key
   2: i32 exptime
-  3: i64_8073 flags
-  4: binary_9388 value
+  3: carbon.ui64 flags
+  4: carbon.IOBuf value
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -596,7 +624,8 @@ struct McPrependRequest {
 cpp.virtual
 )
 struct McPrependReply {
-  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
@@ -615,7 +644,8 @@ struct McPrependReply {
 cpp.virtual
 )
 struct McTouchRequest {
-  -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheRequestCommon memcacheRequestCommon
   1: carbon.IOBufKey key
   2: i32 exptime
 }(cpp.methods = "
@@ -633,7 +663,8 @@ struct McTouchRequest {
 cpp.virtual
 )
 struct McTouchReply {
-  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
@@ -652,7 +683,8 @@ struct McTouchReply {
 cpp.virtual
 )
 struct McFlushReRequest {
-  -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheRequestCommon memcacheRequestCommon
   1: carbon.IOBufKey key
 }(cpp.methods = "
   template <class V>
@@ -669,7 +701,8 @@ struct McFlushReRequest {
 cpp.virtual
 )
 struct McFlushReReply {
-  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
@@ -688,7 +721,8 @@ struct McFlushReReply {
 cpp.virtual
 )
 struct McFlushAllRequest {
-  -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheRequestCommon memcacheRequestCommon
   1: carbon.IOBufKey key
   2: i32 delay
 }(cpp.methods = "
@@ -706,7 +740,8 @@ struct McFlushAllRequest {
 cpp.virtual
 )
 struct McFlushAllReply {
-  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
@@ -725,7 +760,8 @@ struct McFlushAllReply {
 cpp.virtual
 )
 struct McGatRequest {
-  -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheRequestCommon memcacheRequestCommon
   1: i32 exptime
   2: carbon.IOBufKey key
 }(cpp.methods = "
@@ -743,10 +779,11 @@ struct McGatRequest {
 cpp.virtual
 )
 struct McGatReply {
-  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
-  2: optional binary_9388 value
-  3: i64_8073 flags
+  2: optional carbon.IOBuf value
+  3: carbon.ui64 flags
   4: string message
   5: i16 appSpecificErrorCode
 }(cpp.methods = "
@@ -764,7 +801,8 @@ struct McGatReply {
 cpp.virtual
 )
 struct McGatsRequest {
-  -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheRequestCommon memcacheRequestCommon
   1: i32 exptime
   2: carbon.IOBufKey key
 }(cpp.methods = "
@@ -782,11 +820,12 @@ struct McGatsRequest {
 cpp.virtual
 )
 struct McGatsReply {
-  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
+  @thrift.Mixin
+  -1: MemcacheReplyCommon memcacheReplyCommon
   1: carbon_result.Result result
-  2: i64_8073 casToken
-  3: optional binary_9388 value
-  4: i64_8073 flags
+  2: carbon.ui64 casToken
+  3: optional carbon.IOBuf value
+  4: carbon.ui64 flags
   5: string message
   6: i16 appSpecificErrorCode
 }(cpp.methods = "
@@ -804,8 +843,5 @@ struct McGatsReply {
 cpp.virtual
 )
 
-// The following were automatically generated and may benefit from renaming.
-typedef binary (cpp.type = "folly::IOBuf") binary_9388
-typedef i32 (cpp.type = "uint32_t") i32_133
-typedef i64 (cpp.type = "uint64_t") i64_8073
-typedef map<string, i64_8073> (cpp.type = "std::unordered_map<std::string, uint64_t>") map_string_i64_8499
+@cpp.Type{name = "std::unordered_map<std::string, uint64_t>"}
+typedef map<string, carbon.ui64> string_to_carbon_ui64_std_unordered_map

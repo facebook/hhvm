@@ -15,6 +15,7 @@
 include "mcrouter/lib/carbon/carbon.thrift"
 include "mcrouter/lib/carbon/carbon_result.thrift"
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 include "mcrouter/lib/network/gen/Common.thrift"
 
 cpp_include "<mcrouter/lib/carbon/CarbonProtocolReader.h>"
@@ -36,9 +37,9 @@ enum MyEnum {
 }
 
 union TestUnionThrift {
-  1: i64_3264 a
-  2: i32_7074 b
-  3: i16_2207 c
+  1: carbon.ui64 a
+  2: carbon.ui32 b
+  3: carbon.ui16 c
 }(cpp.methods = "
  public:
   template <class V>
@@ -86,7 +87,8 @@ struct MyBaseStruct {
 
 ")
 struct MySimpleStruct {
-  -1: MyBaseStruct myBaseStruct (cpp.mixin)
+  @thrift.Mixin
+  -1: MyBaseStruct myBaseStruct
   1: i32 int32Member
   2: string stringMember
   3: MyEnum enumMember
@@ -104,8 +106,10 @@ struct MySimpleStruct {
 
 ")
 struct ThriftTestRequest {
-  -2: TinyStruct tinyStruct (cpp.mixin)
-  -1: MySimpleStruct base (cpp.mixin)
+  @thrift.Mixin
+  -2: TinyStruct tinyStruct
+  @thrift.Mixin
+  -1: MySimpleStruct base
   1: carbon.IOBufKey key
   2: bool testBool
   3: byte testInt8
@@ -147,19 +151,19 @@ struct DummyThriftRequest {
   4: i16 testInt16
   5: i32 testInt32
   6: i64 testInt64
-  7: byte_9610 testUInt8
-  8: i16_2207 testUInt16
-  9: i32_7074 testUInt32
-  10: i64_3264 testUInt64
+  7: carbon.ui8 testUInt8
+  8: carbon.ui16 testUInt16
+  9: carbon.ui32 testUInt32
+  10: carbon.ui64 testUInt64
   11: float testFloat
   12: double testDouble
   13: string testShortString
   14: string testLongString
-  15: binary_7390 testIobuf
+  15: carbon.IOBuf testIobuf
   16: list<string> testList
   17: optional bool testOptionalKeywordBool
   18: optional string testOptionalKeywordString
-  19: optional binary_7390 testOptionalKeywordIobuf
+  19: optional carbon.IOBuf testOptionalKeywordIobuf
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -194,7 +198,7 @@ cpp.virtual
 struct CustomRequest {
   1: carbon.IOBufKey key
   2: byte testInt8
-  3: i64_7766 timestamp
+  3: Timestamp_i64 timestamp
   4: optional CustomAdapterTypeI64 customAdapterTypeI64
   5: CustomAdapterTypeBinary customAdapterTypeBinary
 }(cpp.methods = "
@@ -229,10 +233,5 @@ struct CustomReply {
 cpp.virtual
 )
 
-// The following were automatically generated and may benefit from renaming.
-typedef binary (cpp.type = "folly::IOBuf") binary_7390
-typedef byte (cpp.type = "uint8_t") byte_9610
-typedef i16 (cpp.type = "uint16_t") i16_2207
-typedef i32 (cpp.type = "uint32_t") i32_7074
-typedef i64 (cpp.type = "uint64_t") i64_3264
-typedef i64 (cpp.indirection = "1", cpp.type = "Timestamp") i64_7766
+@cpp.Type{name = "Timestamp"}
+typedef i64 (cpp.indirection) Timestamp_i64

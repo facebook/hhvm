@@ -15,6 +15,7 @@
 include "mcrouter/lib/carbon/carbon.thrift"
 include "mcrouter/lib/carbon/carbon_result.thrift"
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 include "mcrouter/lib/network/gen/Common.thrift"
 
 cpp_include "<mcrouter/lib/carbon/CarbonProtocolReader.h>"
@@ -31,13 +32,13 @@ enum EnumUInt32 {
 
 struct HelloRequest {
   1: carbon.IOBufKey key
-  2: i64_6019 shardId
-  3: i64_6019 deadlineMs
+  2: carbon.ui64 shardId
+  3: carbon.ui64 deadlineMs
   4: string message
   5: EnumUInt32 priority
-  6: i64_6019 beforeLatencyUs
-  7: i64_6019 afterLatencyUs
-  8: i32_3782 clientVersion
+  6: carbon.ui64 beforeLatencyUs
+  7: carbon.ui64 afterLatencyUs
+  8: carbon.ui32 clientVersion
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -71,7 +72,7 @@ cpp.virtual
 )
 struct GoodbyeRequest {
   1: carbon.IOBufKey key
-  2: i64_6019 shardId
+  2: carbon.ui64 shardId
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -104,6 +105,3 @@ struct GoodbyeReply {
 cpp.virtual
 )
 
-// The following were automatically generated and may benefit from renaming.
-typedef i32 (cpp.type = "uint32_t") i32_3782
-typedef i64 (cpp.type = "uint64_t") i64_6019

@@ -15,6 +15,7 @@
 include "mcrouter/lib/carbon/carbon.thrift"
 include "mcrouter/lib/carbon/carbon_result.thrift"
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 include "mcrouter/lib/network/gen/Common.thrift"
 include "graphene/ticket/if/ticket_rep.thrift"
 
@@ -28,7 +29,7 @@ namespace py3 carbon.test.B.thrift
 struct TestBRequest {
   1: carbon.IOBufKey key
   2: bool dummy2
-  3: optional TicketRep_1804 ticket
+  3: optional ticket_rep_TicketRep ticket
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -61,5 +62,5 @@ struct TestBReply {
 cpp.virtual
 )
 
-// The following were automatically generated and may benefit from renaming.
-typedef ticket_rep.TicketRep (cpp.type = "carbon::util::ThriftWrapperStruct<graphene::ticket::cpp2::TicketRep>") TicketRep_1804
+@cpp.Type{name = "carbon::util::ThriftWrapperStruct<graphene::ticket::cpp2::TicketRep>"}
+typedef ticket_rep.TicketRep ticket_rep_TicketRep

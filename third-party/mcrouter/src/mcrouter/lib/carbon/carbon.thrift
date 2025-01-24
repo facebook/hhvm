@@ -17,3 +17,18 @@ typedef binary (cpp.indirection) IOBufKey
 
 @cpp.Type{name = "carbon::Keys<std::string>"}
 typedef binary (cpp.indirection) StringKey
+
+@cpp.Type{name = "uint8_t"}
+typedef byte ui8
+
+@cpp.Type{name = "uint16_t"}
+typedef i16 ui16
+
+@cpp.Type{name = "uint32_t"}
+typedef i32 ui32
+
+@cpp.Type{name = "uint64_t"}
+typedef i64 ui64
+
+@cpp.Type{name = "folly::IOBuf"}
+typedef binary IOBuf

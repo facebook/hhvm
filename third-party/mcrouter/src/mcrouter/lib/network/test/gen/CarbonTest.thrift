@@ -15,6 +15,7 @@
 include "mcrouter/lib/carbon/carbon.thrift"
 include "mcrouter/lib/carbon/carbon_result.thrift"
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 
 cpp_include "<mcrouter/lib/carbon/CarbonProtocolReader.h>"
 
@@ -22,46 +23,46 @@ namespace cpp2 facebook.memcache.test.thrift
 namespace py3 facebook.memcache.test.thrift
 
 struct ManyFields {
-  1: binary_2265 buf1
-  2: binary_2265 buf2
-  3: binary_2265 buf3
-  4: binary_2265 buf4
-  5: binary_2265 buf5
-  6: binary_2265 buf6
-  7: binary_2265 buf7
-  8: binary_2265 buf8
-  9: binary_2265 buf9
-  10: binary_2265 buf10
-  11: binary_2265 buf11
-  12: binary_2265 buf12
-  13: binary_2265 buf13
-  14: binary_2265 buf14
-  15: binary_2265 buf15
-  16: binary_2265 buf16
-  17: binary_2265 buf17
-  18: binary_2265 buf18
-  19: binary_2265 buf19
-  20: binary_2265 buf20
-  21: binary_2265 buf21
-  22: binary_2265 buf22
-  23: binary_2265 buf23
-  24: binary_2265 buf24
-  25: binary_2265 buf25
-  26: binary_2265 buf26
-  27: binary_2265 buf27
-  28: binary_2265 buf28
-  29: binary_2265 buf29
-  30: binary_2265 buf30
-  31: binary_2265 buf31
-  32: binary_2265 buf32
-  33: binary_2265 buf33
-  34: binary_2265 buf34
-  35: binary_2265 buf35
-  36: binary_2265 buf36
-  37: binary_2265 buf37
-  38: binary_2265 buf38
-  39: binary_2265 buf39
-  40: binary_2265 buf40
+  1: carbon.IOBuf buf1
+  2: carbon.IOBuf buf2
+  3: carbon.IOBuf buf3
+  4: carbon.IOBuf buf4
+  5: carbon.IOBuf buf5
+  6: carbon.IOBuf buf6
+  7: carbon.IOBuf buf7
+  8: carbon.IOBuf buf8
+  9: carbon.IOBuf buf9
+  10: carbon.IOBuf buf10
+  11: carbon.IOBuf buf11
+  12: carbon.IOBuf buf12
+  13: carbon.IOBuf buf13
+  14: carbon.IOBuf buf14
+  15: carbon.IOBuf buf15
+  16: carbon.IOBuf buf16
+  17: carbon.IOBuf buf17
+  18: carbon.IOBuf buf18
+  19: carbon.IOBuf buf19
+  20: carbon.IOBuf buf20
+  21: carbon.IOBuf buf21
+  22: carbon.IOBuf buf22
+  23: carbon.IOBuf buf23
+  24: carbon.IOBuf buf24
+  25: carbon.IOBuf buf25
+  26: carbon.IOBuf buf26
+  27: carbon.IOBuf buf27
+  28: carbon.IOBuf buf28
+  29: carbon.IOBuf buf29
+  30: carbon.IOBuf buf30
+  31: carbon.IOBuf buf31
+  32: carbon.IOBuf buf32
+  33: carbon.IOBuf buf33
+  34: carbon.IOBuf buf34
+  35: carbon.IOBuf buf35
+  36: carbon.IOBuf buf36
+  37: carbon.IOBuf buf37
+  38: carbon.IOBuf buf38
+  39: carbon.IOBuf buf39
+  40: carbon.IOBuf buf40
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -76,8 +77,8 @@ struct ManyFields {
 ")
 struct McExpTestRequest {
   1: carbon.IOBufKey key
-  2: i64_5045 flags
-  3: i64_5045 deadlineMs
+  2: carbon.ui64 flags
+  3: carbon.ui64 deadlineMs
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);
@@ -91,6 +92,3 @@ struct McExpTestRequest {
 
 ")
 
-// The following were automatically generated and may benefit from renaming.
-typedef binary (cpp.type = "folly::IOBuf") binary_2265
-typedef i64 (cpp.type = "uint64_t") i64_5045

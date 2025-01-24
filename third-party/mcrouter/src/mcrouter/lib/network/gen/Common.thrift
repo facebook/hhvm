@@ -15,6 +15,7 @@
 include "mcrouter/lib/carbon/carbon.thrift"
 include "mcrouter/lib/carbon/carbon_result.thrift"
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 
 cpp_include "<mcrouter/lib/carbon/CarbonProtocolReader.h>"
 
@@ -63,7 +64,7 @@ cpp.virtual
 )
 struct McVersionReply {
   1: carbon_result.Result result
-  2: binary_5325 value
+  2: carbon.IOBuf value
   3: string message
   4: i16 appSpecificErrorCode
 }(cpp.methods = "
@@ -252,5 +253,3 @@ struct GoAwayRequest {
 cpp.virtual
 )
 
-// The following were automatically generated and may benefit from renaming.
-typedef binary (cpp.type = "folly::IOBuf") binary_5325

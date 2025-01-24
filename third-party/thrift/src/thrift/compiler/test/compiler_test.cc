@@ -615,7 +615,6 @@ TEST(CompilerTest, struct_fields_wrong_type) {
       1: i32 badInt = "str";
         # expected-error@-1: cannot convert string to `i32` in initialization of `badInt`
       2: F badStruct = G{}; # expected-error: type mismatch: expected test.F, got test.G
-        # expected-warning@-1: Explicit default value is redundant for field: `badStruct` (in `BadFields`).
     }
   )");
 }
@@ -2306,7 +2305,8 @@ TEST(CompilerTest, combining_unstructured_annotations) {
 }
 
 TEST(Compilertest, custom_default_values) {
-  check_compile(R"(
+  check_compile(
+      R"(
     include "thrift/annotation/thrift.thrift"
 
     union TestUnion {}
@@ -2320,10 +2320,10 @@ TEST(Compilertest, custom_default_values) {
       1: i32 a = 42;
 
       2: bool b = false;
-        # expected-warning@-1: Explicit default value is redundant for field: `b` (in `Widget`).
+        # expected-warning@-1: Explicit default value is redundant for (unqualified) field: `b` (in `Widget`).
 
       3: i32 c = 0;
-        # expected-warning@-1: Explicit default value is redundant for field: `c` (in `Widget`).
+        # expected-warning@-1: Explicit default value is redundant for (unqualified) field: `c` (in `Widget`).
 
       4: optional bool d = true;
         # expected-warning@-1: Optional field should not have custom default value: `d` (in `Widget`).
@@ -2333,15 +2333,25 @@ TEST(Compilertest, custom_default_values) {
         # expected-warning@-2: Terse field should not have custom default value: `e` (in `Widget`).
 
       6: TestUnion f = {};
-        # expected-warning@-1: Explicit default value is redundant for field: `f` (in `Widget`).
+        # expected-warning@-1: Explicit default value is redundant for (unqualified) field: `f` (in `Widget`).
 
       7: TestStruct g = {};
-        # expected-warning@-1: Explicit default value is redundant for field: `g` (in `Widget`).
+        # expected-warning@-1: Explicit default value is redundant for (unqualified) field: `g` (in `Widget`).
 
       8: TestException h = {};
-        # expected-warning@-1: Explicit default value is redundant for field: `h` (in `Widget`).
+        # expected-warning@-1: Explicit default value is redundant for (unqualified) field: `h` (in `Widget`).
+
+      @thrift.TerseWrite
+      9: i32 i = 0;
+        # expected-warning@-2: Terse field should not have custom default value: `i` (in `Widget`).
+        # expected-warning@-3: Explicit default value is redundant for (terse) field: `i` (in `Widget`).
+
+      10: optional bool j = false;
+        # expected-warning@-1: Explicit default value is redundant for (optional) field: `j` (in `Widget`).
+        # expected-warning@-2: Optional field should not have custom default value: `j` (in `Widget`).
     }
-  )");
+  )",
+      {"--extra-validation", "warn_on_redundant_custom_default_values"});
 }
 
 TEST(CompilerTest, cpp_deprecated_terse_write) {

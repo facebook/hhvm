@@ -658,6 +658,19 @@ void validate_const_type_and_value(sema_context& ctx, const t_const& node) {
       node.name());
 }
 
+std::string_view field_qualifier_to_string(t_field_qualifier qualifier) {
+  switch (qualifier) {
+    case t_field_qualifier::none:
+      return "unqualified";
+    case t_field_qualifier::required:
+      return "required";
+    case t_field_qualifier::optional:
+      return "optional";
+    case t_field_qualifier::terse:
+      return "terse";
+  }
+}
+
 void validate_field_default_value(sema_context& ctx, const t_field& field) {
   if (field.default_value() == nullptr) {
     return;
@@ -672,17 +685,21 @@ void validate_field_default_value(sema_context& ctx, const t_field& field) {
   const t_structured& parent_node =
       dynamic_cast<const t_structured&>(*ctx.parent());
 
-  if (detail::is_initializer_default_value(
+  const t_field_qualifier field_qualifier = field.qualifier();
+
+  if (ctx.sema_parameters().warn_on_redundant_custom_default_values &&
+      detail::is_initializer_default_value(
           field.type().deref(), *field.default_value())) {
     ctx.warning(
         field,
-        "Explicit default value is redundant for field: "
+        "Explicit default value is redundant for ({}) field: "
         "`{}` (in `{}`).",
+        field_qualifier_to_string(field_qualifier),
         field.name(),
         parent_node.name());
   }
 
-  switch (field.qualifier()) {
+  switch (field_qualifier) {
     case t_field_qualifier::optional:
       ctx.warning(
           field,

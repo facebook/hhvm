@@ -153,6 +153,11 @@ Options:
                 implicit_field_ids (IGNORED: always present, i.e. implicit field
                   IDs are always forbidden).
 
+                warn_on_redundant_custom_default_values
+                  Issues warnings for struct fields that have custom default
+                  values equal to the intrinsic default for that type (eg. 0
+                  for integers, false for boolean, etc.)
+
 Available generators (and options):
 )");
   for (const auto& gen : generator_registry::get_generators()) {
@@ -424,6 +429,8 @@ std::string parse_args(
       for (const auto& validator : validators) {
         if (validator == "unstructured_annotations_on_field_type") {
           sparams.forbid_unstructured_annotations_on_field_types = true;
+        } else if (validator == "warn_on_redundant_custom_default_values") {
+          sparams.warn_on_redundant_custom_default_values = true;
         } else if (validator == "forbid_non_optional_cpp_ref_fields") {
           // no-op
         } else if (validator == "-forbid_non_optional_cpp_ref_fields") {

@@ -101,6 +101,10 @@ struct sema_params {
    * @cpp.AllowLegacyNonOptionalRef).
    */
   bool forbid_non_optional_cpp_ref_fields = true;
+
+  // If true, will issue a warning if a default value is explicitly specified
+  // for a field, but that value is equal to the intrinsic default value.
+  bool warn_on_redundant_custom_default_values = false;
 };
 
 // An AST visitor context for semantic analysis. It combines diagnostics

@@ -1264,6 +1264,19 @@ _readField_union_field:
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           29,
+          30,
+          apache::thrift::protocol::T_BYTE))) {
+    goto _advance_failure;
+  }
+_readField_iobuf_ptr_field:
+  {
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, std::unique_ptr<folly::IOBuf>>::readWithContext(*iprot, this->__fbthrift_field_iobuf_ptr_field, _readState);
+  }
+ this->__isset.set(15, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          30,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _advance_failure;
@@ -1518,6 +1531,14 @@ _loop:
         goto _skip;
       }
     }
+    case 30:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_BYTE))) {
+        goto _readField_iobuf_ptr_field;
+      } else {
+        goto _skip;
+      }
+    }
     default:
     {
 _skip:
@@ -1649,6 +1670,10 @@ uint32_t FieldLevelTerseStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("union_field", apache::thrift::protocol::T_STRUCT, 29);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::terse_write::deprecated::MyUnion>::serializedSize<false>(*prot_, this->__fbthrift_field_union_field);
   }
+  if (this->__fbthrift_field_iobuf_ptr_field != std::unique_ptr<folly::IOBuf>()) {
+    xfer += prot_->serializedFieldSize("iobuf_ptr_field", apache::thrift::protocol::T_BYTE, 30);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, std::unique_ptr<folly::IOBuf>>::serializedSize<false>(*prot_, this->__fbthrift_field_iobuf_ptr_field);
+  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -1772,6 +1797,10 @@ uint32_t FieldLevelTerseStruct::serializedSizeZC(Protocol_ const* prot_) const {
   {
     xfer += prot_->serializedFieldSize("union_field", apache::thrift::protocol::T_STRUCT, 29);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::terse_write::deprecated::MyUnion>::serializedSize<true>(*prot_, this->__fbthrift_field_union_field);
+  }
+  if (this->__fbthrift_field_iobuf_ptr_field != std::unique_ptr<folly::IOBuf>()) {
+    xfer += prot_->serializedFieldSize("iobuf_ptr_field", apache::thrift::protocol::T_BYTE, 30);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, std::unique_ptr<folly::IOBuf>>::serializedSize<false>(*prot_, this->__fbthrift_field_iobuf_ptr_field);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -2038,6 +2067,15 @@ uint32_t FieldLevelTerseStruct::write(Protocol_* prot_) const {
     previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::terse_write::deprecated::MyUnion>::write(*prot_, this->__fbthrift_field_union_field);
     xfer += prot_->writeFieldEnd();
+  }
+  if (this->__fbthrift_field_iobuf_ptr_field != std::unique_ptr<folly::IOBuf>()) {
+    constexpr int16_t kPrevFieldId = 29;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_BYTE, 30, kPrevFieldId>(*prot_, "iobuf_ptr_field", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, std::unique_ptr<folly::IOBuf>>::write(*prot_, this->__fbthrift_field_iobuf_ptr_field);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();

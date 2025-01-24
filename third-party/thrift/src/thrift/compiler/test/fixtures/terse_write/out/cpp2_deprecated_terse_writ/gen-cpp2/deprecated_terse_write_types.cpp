@@ -486,7 +486,8 @@ FieldLevelTerseStruct::FieldLevelTerseStruct() :
     __fbthrift_field_long_field(),
     __fbthrift_field_float_field(),
     __fbthrift_field_double_field(),
-    __fbthrift_field_enum_field() {
+    __fbthrift_field_enum_field(),
+    __fbthrift_field_iobuf_ptr_field() {
 }
 
 
@@ -522,6 +523,7 @@ FieldLevelTerseStruct::FieldLevelTerseStruct([[maybe_unused]] FieldLevelTerseStr
     __fbthrift_field_map_field(std::move(other.__fbthrift_field_map_field)),
     __fbthrift_field_struct_field(std::move(other.__fbthrift_field_struct_field)),
     __fbthrift_field_union_field(std::move(other.__fbthrift_field_union_field)),
+    __fbthrift_field_iobuf_ptr_field(std::move(other.__fbthrift_field_iobuf_ptr_field)),
     __isset(other.__isset) {
 }
 
@@ -555,12 +557,13 @@ FieldLevelTerseStruct& FieldLevelTerseStruct::operator=([[maybe_unused]] FieldLe
     this->__fbthrift_field_map_field = std::move(other.__fbthrift_field_map_field);
     this->__fbthrift_field_struct_field = std::move(other.__fbthrift_field_struct_field);
     this->__fbthrift_field_union_field = std::move(other.__fbthrift_field_union_field);
+    this->__fbthrift_field_iobuf_ptr_field = std::move(other.__fbthrift_field_iobuf_ptr_field);
     __isset = other.__isset;
     return *this;
 }
 
 
-FieldLevelTerseStruct::FieldLevelTerseStruct(apache::thrift::FragileConstructor, bool terse_bool_field__arg, ::std::int8_t terse_byte_field__arg, ::std::int16_t terse_short_field__arg, ::std::int32_t terse_int_field__arg, ::std::int64_t terse_long_field__arg, float terse_float_field__arg, double terse_double_field__arg, ::std::string terse_string_field__arg, ::std::string terse_binary_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyEnum terse_enum_field__arg, ::std::vector<::std::int16_t> terse_list_field__arg, ::std::set<::std::int16_t> terse_set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> terse_map_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyStruct terse_struct_field__arg, bool bool_field__arg, ::std::int8_t byte_field__arg, ::std::int16_t short_field__arg, ::std::int32_t int_field__arg, ::std::int64_t long_field__arg, float float_field__arg, double double_field__arg, ::std::string string_field__arg, ::std::string binary_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyEnum enum_field__arg, ::std::vector<::std::int16_t> list_field__arg, ::std::set<::std::int16_t> set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> map_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyStruct struct_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyUnion union_field__arg) :
+FieldLevelTerseStruct::FieldLevelTerseStruct(apache::thrift::FragileConstructor, bool terse_bool_field__arg, ::std::int8_t terse_byte_field__arg, ::std::int16_t terse_short_field__arg, ::std::int32_t terse_int_field__arg, ::std::int64_t terse_long_field__arg, float terse_float_field__arg, double terse_double_field__arg, ::std::string terse_string_field__arg, ::std::string terse_binary_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyEnum terse_enum_field__arg, ::std::vector<::std::int16_t> terse_list_field__arg, ::std::set<::std::int16_t> terse_set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> terse_map_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyStruct terse_struct_field__arg, bool bool_field__arg, ::std::int8_t byte_field__arg, ::std::int16_t short_field__arg, ::std::int32_t int_field__arg, ::std::int64_t long_field__arg, float float_field__arg, double double_field__arg, ::std::string string_field__arg, ::std::string binary_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyEnum enum_field__arg, ::std::vector<::std::int16_t> list_field__arg, ::std::set<::std::int16_t> set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> map_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyStruct struct_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyUnion union_field__arg, std::unique_ptr<folly::IOBuf> iobuf_ptr_field__arg) :
     __fbthrift_field_terse_bool_field(std::move(terse_bool_field__arg)),
     __fbthrift_field_terse_byte_field(std::move(terse_byte_field__arg)),
     __fbthrift_field_terse_short_field(std::move(terse_short_field__arg)),
@@ -589,7 +592,8 @@ FieldLevelTerseStruct::FieldLevelTerseStruct(apache::thrift::FragileConstructor,
     __fbthrift_field_set_field(std::move(set_field__arg)),
     __fbthrift_field_map_field(std::move(map_field__arg)),
     __fbthrift_field_struct_field(std::move(struct_field__arg)),
-    __fbthrift_field_union_field(std::move(union_field__arg)) { 
+    __fbthrift_field_union_field(std::move(union_field__arg)),
+    __fbthrift_field_iobuf_ptr_field(std::move(iobuf_ptr_field__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -605,6 +609,7 @@ FieldLevelTerseStruct::FieldLevelTerseStruct(apache::thrift::FragileConstructor,
   __isset.set(folly::index_constant<12>(), true);
   __isset.set(folly::index_constant<13>(), true);
   __isset.set(folly::index_constant<14>(), true);
+  __isset.set(folly::index_constant<15>(), true);
 }
 
 
@@ -636,6 +641,7 @@ void FieldLevelTerseStruct::__fbthrift_clear() {
   this->__fbthrift_field_list_field.clear();
   this->__fbthrift_field_set_field.clear();
   this->__fbthrift_field_map_field.clear();
+  this->__fbthrift_field_iobuf_ptr_field = std::unique_ptr<folly::IOBuf>();
   __isset = {};
 }
 
@@ -780,6 +786,15 @@ const ::facebook::thrift::test::terse_write::deprecated::MyUnion& FieldLevelTers
   return static_cast<::facebook::thrift::test::terse_write::deprecated::MyUnion&&>(__fbthrift_field_union_field);
 }
 
+std::unique_ptr<folly::IOBuf> FieldLevelTerseStruct::get_iobuf_ptr_field() const {
+  return __fbthrift_field_iobuf_ptr_field;
+}
+
+std::unique_ptr<folly::IOBuf>& FieldLevelTerseStruct::set_iobuf_ptr_field(std::unique_ptr<folly::IOBuf> iobuf_ptr_field_) {
+  iobuf_ptr_field_ref() = iobuf_ptr_field_;
+  return __fbthrift_field_iobuf_ptr_field;
+}
+
 void swap([[maybe_unused]] FieldLevelTerseStruct& a, [[maybe_unused]] FieldLevelTerseStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_terse_bool_field, b.__fbthrift_field_terse_bool_field);
@@ -811,6 +826,7 @@ void swap([[maybe_unused]] FieldLevelTerseStruct& a, [[maybe_unused]] FieldLevel
   swap(a.__fbthrift_field_map_field, b.__fbthrift_field_map_field);
   swap(a.__fbthrift_field_struct_field, b.__fbthrift_field_struct_field);
   swap(a.__fbthrift_field_union_field, b.__fbthrift_field_union_field);
+  swap(a.__fbthrift_field_iobuf_ptr_field, b.__fbthrift_field_iobuf_ptr_field);
   swap(a.__isset, b.__isset);
 }
 

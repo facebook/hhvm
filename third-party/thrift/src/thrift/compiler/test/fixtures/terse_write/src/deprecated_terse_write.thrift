@@ -94,6 +94,8 @@ struct FieldLevelTerseStruct {
   27: map<i16, i16> map_field;
   28: MyStruct struct_field;
   29: MyUnion union_field;
+  @cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+  30: byte iobuf_ptr_field;
 }
 
 struct CppRefStructFields {

@@ -82,6 +82,7 @@ struct ForEachField<::facebook::thrift::test::terse_write::deprecated::FieldLeve
     f(26, static_cast<T&&>(t).map_field_ref()...);
     f(27, static_cast<T&&>(t).struct_field_ref()...);
     f(28, static_cast<T&&>(t).union_field_ref()...);
+    f(29, static_cast<T&&>(t).iobuf_ptr_field_ref()...);
   }
 };
 

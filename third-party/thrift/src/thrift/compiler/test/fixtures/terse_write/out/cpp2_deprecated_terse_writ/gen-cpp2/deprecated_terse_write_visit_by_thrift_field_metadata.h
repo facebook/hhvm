@@ -139,6 +139,8 @@ struct VisitByFieldId<::facebook::thrift::test::terse_write::deprecated::FieldLe
       return f(27, static_cast<T&&>(t).struct_field_ref());
     case 29:
       return f(28, static_cast<T&&>(t).union_field_ref());
+    case 30:
+      return f(29, static_cast<T&&>(t).iobuf_ptr_field_ref());
     default:
       throwInvalidThriftId(fieldId, "::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct");
     }

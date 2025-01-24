@@ -57,6 +57,7 @@ struct set_field;
 struct map_field;
 struct struct_field;
 struct union_field;
+struct iobuf_ptr_field;
 struct primitive_ref_field;
 struct struct_ref_field;
 } // namespace ident
@@ -236,6 +237,10 @@ APACHE_THRIFT_DEFINE_ACCESSOR(struct_field);
 #ifndef APACHE_THRIFT_ACCESSOR_union_field
 #define APACHE_THRIFT_ACCESSOR_union_field
 APACHE_THRIFT_DEFINE_ACCESSOR(union_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_iobuf_ptr_field
+#define APACHE_THRIFT_ACCESSOR_iobuf_ptr_field
+APACHE_THRIFT_DEFINE_ACCESSOR(iobuf_ptr_field);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_primitive_ref_field
 #define APACHE_THRIFT_ACCESSOR_primitive_ref_field
@@ -1494,10 +1499,11 @@ class FieldLevelTerseStruct final  {
     ::apache::thrift::ident::set_field,
     ::apache::thrift::ident::map_field,
     ::apache::thrift::ident::struct_field,
-    ::apache::thrift::ident::union_field
+    ::apache::thrift::ident::union_field,
+    ::apache::thrift::ident::iobuf_ptr_field
   >;
 
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29};
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30};
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::bool_t,
     ::apache::thrift::type::byte_t,
@@ -1527,10 +1533,11 @@ class FieldLevelTerseStruct final  {
     ::apache::thrift::type::set<::apache::thrift::type::i16_t>,
     ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>,
     ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>,
-    ::apache::thrift::type::union_t<::facebook::thrift::test::terse_write::deprecated::MyUnion>
+    ::apache::thrift::type::union_t<::facebook::thrift::test::terse_write::deprecated::MyUnion>,
+    ::apache::thrift::type::cpp_type<std::unique_ptr<folly::IOBuf>, ::apache::thrift::type::byte_t>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 29;
+  static constexpr std::size_t __fbthrift_field_size_v = 30;
 
   template<class T>
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
@@ -1566,7 +1573,7 @@ class FieldLevelTerseStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  FieldLevelTerseStruct(apache::thrift::FragileConstructor, bool terse_bool_field__arg, ::std::int8_t terse_byte_field__arg, ::std::int16_t terse_short_field__arg, ::std::int32_t terse_int_field__arg, ::std::int64_t terse_long_field__arg, float terse_float_field__arg, double terse_double_field__arg, ::std::string terse_string_field__arg, ::std::string terse_binary_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyEnum terse_enum_field__arg, ::std::vector<::std::int16_t> terse_list_field__arg, ::std::set<::std::int16_t> terse_set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> terse_map_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyStruct terse_struct_field__arg, bool bool_field__arg, ::std::int8_t byte_field__arg, ::std::int16_t short_field__arg, ::std::int32_t int_field__arg, ::std::int64_t long_field__arg, float float_field__arg, double double_field__arg, ::std::string string_field__arg, ::std::string binary_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyEnum enum_field__arg, ::std::vector<::std::int16_t> list_field__arg, ::std::set<::std::int16_t> set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> map_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyStruct struct_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyUnion union_field__arg);
+  FieldLevelTerseStruct(apache::thrift::FragileConstructor, bool terse_bool_field__arg, ::std::int8_t terse_byte_field__arg, ::std::int16_t terse_short_field__arg, ::std::int32_t terse_int_field__arg, ::std::int64_t terse_long_field__arg, float terse_float_field__arg, double terse_double_field__arg, ::std::string terse_string_field__arg, ::std::string terse_binary_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyEnum terse_enum_field__arg, ::std::vector<::std::int16_t> terse_list_field__arg, ::std::set<::std::int16_t> terse_set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> terse_map_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyStruct terse_struct_field__arg, bool bool_field__arg, ::std::int8_t byte_field__arg, ::std::int16_t short_field__arg, ::std::int32_t int_field__arg, ::std::int64_t long_field__arg, float float_field__arg, double double_field__arg, ::std::string string_field__arg, ::std::string binary_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyEnum enum_field__arg, ::std::vector<::std::int16_t> list_field__arg, ::std::set<::std::int16_t> set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> map_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyStruct struct_field__arg, ::facebook::thrift::test::terse_write::deprecated::MyUnion union_field__arg, std::unique_ptr<folly::IOBuf> iobuf_ptr_field__arg);
 
   FieldLevelTerseStruct(FieldLevelTerseStruct&&) noexcept;
 
@@ -1637,7 +1644,9 @@ class FieldLevelTerseStruct final  {
  private:
   ::facebook::thrift::test::terse_write::deprecated::MyUnion __fbthrift_field_union_field;
  private:
-  apache::thrift::detail::isset_bitset<15, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+  std::unique_ptr<folly::IOBuf> __fbthrift_field_iobuf_ptr_field;
+ private:
+  apache::thrift::detail::isset_bitset<16, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
@@ -3036,6 +3045,54 @@ class FieldLevelTerseStruct final  {
     return {static_cast<T&&>(this->__fbthrift_field_union_field), __isset.at(14), __isset.bit(14)};
   }
 
+  /** Glean { "field": "iobuf_ptr_field" } */
+  template <typename..., typename T = std::unique_ptr<folly::IOBuf>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> iobuf_ptr_field_ref() const& {
+    return {this->__fbthrift_field_iobuf_ptr_field, __isset.at(15), __isset.bit(15)};
+  }
+
+  /** Glean { "field": "iobuf_ptr_field" } */
+  template <typename..., typename T = std::unique_ptr<folly::IOBuf>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> iobuf_ptr_field_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_iobuf_ptr_field), __isset.at(15), __isset.bit(15)};
+  }
+
+  /** Glean { "field": "iobuf_ptr_field" } */
+  template <typename..., typename T = std::unique_ptr<folly::IOBuf>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> iobuf_ptr_field_ref() & {
+    return {this->__fbthrift_field_iobuf_ptr_field, __isset.at(15), __isset.bit(15)};
+  }
+
+  /** Glean { "field": "iobuf_ptr_field" } */
+  template <typename..., typename T = std::unique_ptr<folly::IOBuf>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> iobuf_ptr_field_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_iobuf_ptr_field), __isset.at(15), __isset.bit(15)};
+  }
+
+  /** Glean { "field": "iobuf_ptr_field" } */
+  template <typename..., typename T = std::unique_ptr<folly::IOBuf>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> iobuf_ptr_field() const& {
+    return {this->__fbthrift_field_iobuf_ptr_field, __isset.at(15), __isset.bit(15)};
+  }
+
+  /** Glean { "field": "iobuf_ptr_field" } */
+  template <typename..., typename T = std::unique_ptr<folly::IOBuf>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> iobuf_ptr_field() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_iobuf_ptr_field), __isset.at(15), __isset.bit(15)};
+  }
+
+  /** Glean { "field": "iobuf_ptr_field" } */
+  template <typename..., typename T = std::unique_ptr<folly::IOBuf>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> iobuf_ptr_field() & {
+    return {this->__fbthrift_field_iobuf_ptr_field, __isset.at(15), __isset.bit(15)};
+  }
+
+  /** Glean { "field": "iobuf_ptr_field" } */
+  template <typename..., typename T = std::unique_ptr<folly::IOBuf>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> iobuf_ptr_field() && {
+    return {static_cast<T&&>(this->__fbthrift_field_iobuf_ptr_field), __isset.at(15), __isset.bit(15)};
+  }
+
   /** Glean { "field": "bool_field" } */
   [[deprecated("Use `FOO.bool_field().value();` instead of `FOO.get_bool_field();`")]]
   bool get_bool_field() const;
@@ -3219,6 +3276,14 @@ class FieldLevelTerseStruct final  {
     union_field_ref() = std::forward<T_FieldLevelTerseStruct_union_field_struct_setter>(union_field_);
     return __fbthrift_field_union_field;
   }
+
+  /** Glean { "field": "iobuf_ptr_field" } */
+  [[deprecated("Use `FOO.iobuf_ptr_field().value();` instead of `FOO.get_iobuf_ptr_field();`")]]
+  std::unique_ptr<folly::IOBuf> get_iobuf_ptr_field() const;
+
+  /** Glean { "field": "iobuf_ptr_field" } */
+  [[deprecated("Use `FOO.iobuf_ptr_field() = BAR;` instead of `FOO.set_iobuf_ptr_field(BAR);`")]]
+  std::unique_ptr<folly::IOBuf>& set_iobuf_ptr_field(std::unique_ptr<folly::IOBuf> iobuf_ptr_field_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

@@ -83,7 +83,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::dep
 };
 
 template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct> {
-  static constexpr const std::size_t fields_size = 29;
+  static constexpr const std::size_t fields_size = 30;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;

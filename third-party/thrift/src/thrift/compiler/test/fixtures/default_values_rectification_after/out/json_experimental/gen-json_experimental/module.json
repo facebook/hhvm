@@ -1,0 +1,97 @@
+{
+  "__fbthrift": "@generated",
+  "thrift_module" : "module",
+  "package": {
+    "domain_prefix": "facebook",
+    "domain_suffix": "com",
+    "path": "thrift/compiler/test/fixtures/default_values_rectification",
+    "filename": "module"
+  },
+  "structs" :
+  {
+      "EmptyStruct" : {
+        "name" : "EmptyStruct",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 19
+      },
+      "TestStruct" : {
+        "name" : "TestStruct",
+        "fields" : {
+          "unqualified_int_field" : {
+            "name" : "unqualified_int_field",
+            "key" : 1,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : "i32"
+                  },
+          "unqualified_bool_field" : {
+            "name" : "unqualified_bool_field",
+            "key" : 2,
+            "lineno" : 24,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
+                  },
+          "unqualified_list_field" : {
+            "name" : "unqualified_list_field",
+            "key" : 3,
+            "lineno" : 26,
+            "required" : "opt-in-req-out",
+            "type" : {
+      "type" : "list",
+      "inner_type" : "i32"
+    }
+                  },
+          "unqualified_struct_field" : {
+            "name" : "unqualified_struct_field",
+            "key" : 4,
+            "lineno" : 28,
+            "required" : "opt-in-req-out",
+            "type" : {
+      "type" : "struct",
+      "name" : "EmptyStruct"
+    }
+                  },
+          "optional_int_field" : {
+            "name" : "optional_int_field",
+            "key" : 5,
+            "lineno" : 30,
+            "required" : "optional",
+            "type" : "i32"
+                  },
+          "optional_bool_field" : {
+            "name" : "optional_bool_field",
+            "key" : 6,
+            "lineno" : 32,
+            "required" : "optional",
+            "type" : "bool"
+                  },
+          "optional_list_field" : {
+            "name" : "optional_list_field",
+            "key" : 7,
+            "lineno" : 34,
+            "required" : "optional",
+            "type" : {
+      "type" : "list",
+      "inner_type" : "i32"
+    }
+                  },
+          "optional_struct_field" : {
+            "name" : "optional_struct_field",
+            "key" : 8,
+            "lineno" : 36,
+            "required" : "optional",
+            "type" : {
+      "type" : "struct",
+      "name" : "EmptyStruct"
+    }
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 21
+      }
+  },
+  "source_path" : "thrift/compiler/test/fixtures/default_values_rectification_after/src/module",
+  "py_namespace" : ""
+}

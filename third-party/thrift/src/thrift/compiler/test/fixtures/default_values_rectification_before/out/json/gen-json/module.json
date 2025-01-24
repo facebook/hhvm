@@ -1,0 +1,169 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "module",
+  "structs" : {
+    "EmptyStruct" : {
+      "lineno" : 19,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 19,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 19,
+          "column" : 22
+        }
+      }
+    },
+    "TestStruct" : {
+      "lineno" : 21,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "unqualified_int_field" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : true,
+          "default_value" : 0,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 36
+            }
+          }
+        },
+        "unqualified_bool_field" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "default_value" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 24,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 24,
+              "column" : 42
+            }
+          }
+        },
+        "unqualified_list_field" : {
+          "type_enum" : "LIST",
+          "spec_args" : { "type_enum" : "I32", "spec_args" : null} ,
+          "required" : true,
+          "default_value" : [  ],
+          "source_range" : {
+            "begin" : {
+              "line" : 26,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 26,
+              "column" : 44
+            }
+          }
+        },
+        "unqualified_struct_field" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "EmptyStruct",
+          "required" : true,
+          "default_value" : {  },
+          "source_range" : {
+            "begin" : {
+              "line" : 28,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 28,
+              "column" : 48
+            }
+          }
+        },
+        "optional_int_field" : {
+          "type_enum" : "I32",
+          "spec_args" : null,
+          "required" : false,
+          "default_value" : 42,
+          "source_range" : {
+            "begin" : {
+              "line" : 30,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 30,
+              "column" : 43
+            }
+          }
+        },
+        "optional_bool_field" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : false,
+          "default_value" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 32,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 32,
+              "column" : 47
+            }
+          }
+        },
+        "optional_list_field" : {
+          "type_enum" : "LIST",
+          "spec_args" : { "type_enum" : "I32", "spec_args" : null} ,
+          "required" : false,
+          "default_value" : [ 1, 2 ],
+          "source_range" : {
+            "begin" : {
+              "line" : 34,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 34,
+              "column" : 54
+            }
+          }
+        },
+        "optional_struct_field" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "EmptyStruct",
+          "required" : false,
+          "default_value" : {  },
+          "source_range" : {
+            "begin" : {
+              "line" : 36,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 36,
+              "column" : 54
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 21,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 37,
+          "column" : 2
+        }
+      }
+    }
+  }
+}

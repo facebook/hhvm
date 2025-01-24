@@ -626,8 +626,7 @@ template <
         detail::is_function_returning<F, object>)>
 function::ptr make_function(std::string name, F&& function) {
   return make_function(
-      std::move(name),
-      [f = F(std::forward<F>(function))](function::context ctx) {
+      std::move(name), [f = std::forward<F>(function)](function::context ctx) {
         if constexpr (detail::is_function_returning<F, boolean>) {
           return manage_as_static(
               f(std::move(ctx)) ? whisker::make::true_ : whisker::make::false_);

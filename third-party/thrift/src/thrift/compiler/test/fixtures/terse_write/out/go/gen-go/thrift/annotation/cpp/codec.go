@@ -260,6 +260,17 @@ var (
 
         }
     }()
+    premadeCodecTypeSpec_cpp_DeprecatedTerseWrite = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "cpp.DeprecatedTerseWrite",
+            CodecStructSpec: &thrift.CodecStructSpec{
+    ScopedName: "cpp.DeprecatedTerseWrite",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewDeprecatedTerseWrite() },
+},
+
+        }
+    }()
 )
 
 // Premade struct specs
@@ -670,6 +681,20 @@ var (
     },
 }
     }()
+    premadeStructSpec_DeprecatedTerseWrite = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
+    Name:                 "DeprecatedTerseWrite",
+    ScopedName:           "cpp.DeprecatedTerseWrite",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
+    },
+    FieldSpecIDToIndex:   map[int16]int{
+    },
+    FieldSpecNameToIndex: map[string]int{
+    },
+}
+    }()
 )
 
 // Premade slice of all struct specs
@@ -694,6 +719,7 @@ var premadeStructSpecs = func() []*thrift.StructSpec {
     fbthriftResults = append(fbthriftResults, premadeStructSpec_UseCursorSerialization)
     fbthriftResults = append(fbthriftResults, premadeStructSpec_GenerateDeprecatedHeaderClientMethods)
     fbthriftResults = append(fbthriftResults, premadeStructSpec_AllowLegacyNonOptionalRef)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_DeprecatedTerseWrite)
     return fbthriftResults
 }()
 
@@ -722,6 +748,7 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_UseCursorSerialization.FullName] = premadeCodecTypeSpec_cpp_UseCursorSerialization
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_GenerateDeprecatedHeaderClientMethods.FullName] = premadeCodecTypeSpec_cpp_GenerateDeprecatedHeaderClientMethods
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_AllowLegacyNonOptionalRef.FullName] = premadeCodecTypeSpec_cpp_AllowLegacyNonOptionalRef
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_DeprecatedTerseWrite.FullName] = premadeCodecTypeSpec_cpp_DeprecatedTerseWrite
     return fbthriftTypeSpecsMap
 }()
 

@@ -390,3 +390,16 @@ struct GenerateDeprecatedHeaderClientMethods {}
  */
 @scope.Field
 struct AllowLegacyNonOptionalRef {}
+
+/**
+ * Changes the serialization behavior of the field to skip serialization if its value is equal to standard default
+ * for bool, integers, enums, and floating points, and intrinsic default for string, binary, and containers.
+ * If an unqualified field with structured type has @cpp.Ref, the serilaization skips the field if the pointer is empty.
+ *
+ * This annotation is only applicable to an unqualified field with bool, integers, enums, floating points, string, binary, and containers
+ * but not for structs, unions, and exceptions.
+ *
+ * Note, this is a deprecated feature. Use @thrift.TerseWrite instead.
+ */
+@scope.Field
+struct DeprecatedTerseWrite {}

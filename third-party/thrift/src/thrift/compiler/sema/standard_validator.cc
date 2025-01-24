@@ -992,6 +992,29 @@ void validate_interaction_annotations(
   }
 }
 
+void validate_cpp_deprecated_terse_write_annotation(
+    sema_context& ctx, const t_field& field) {
+  if (field.find_structured_annotation_or_null(kCppDeprecatedTerseWrite) ==
+      nullptr) {
+    return;
+  }
+  if (field.qualifier() != t_field_qualifier::none) {
+    ctx.error(
+        field,
+        "@cpp.DeprecatedTerseWrite can be only used on unqualified field.");
+  }
+  if (gen::cpp::find_ref_type(field) == gen::cpp::reference_type::unique) {
+    return;
+  }
+  const t_type* type = field.get_type()->get_true_type();
+  if (type->is_struct() || type->is_exception() || type->is_union()) {
+    ctx.error(
+        field,
+        "@cpp.DeprecatedTerseWrite is not supported for structured types.");
+  }
+  return;
+}
+
 void validate_cpp_field_interceptor_annotation(
     sema_context& ctx, const t_field& field) {
   if (const t_const* annot =
@@ -1523,6 +1546,7 @@ ast_validator standard_validator() {
   validator.add_field_visitor(&validate_hack_field_adapter_annotation);
   validator.add_field_visitor(&validate_java_field_adapter_annotation);
   validator.add_field_visitor(&validate_cpp_field_interceptor_annotation);
+  validator.add_field_visitor(&validate_cpp_deprecated_terse_write_annotation);
   validator.add_field_visitor(&validate_required_field);
   validator.add_field_visitor(&validate_cpp_type_annotation<t_field>);
   validator.add_field_visitor(&validate_field_name);

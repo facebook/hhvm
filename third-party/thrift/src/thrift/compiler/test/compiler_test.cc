@@ -2343,3 +2343,41 @@ TEST(Compilertest, custom_default_values) {
     }
   )");
 }
+
+TEST(CompilerTest, cpp_deprecated_terse_write) {
+  check_compile(R"(
+    include "thrift/annotation/cpp.thrift"
+    include "thrift/annotation/thrift.thrift"
+
+    struct Bar {}
+
+    struct Foo {
+      @cpp.DeprecatedTerseWrite
+      1: i32 field1;
+
+      @cpp.DeprecatedTerseWrite
+      2: optional i32 field2;
+        # expected-error@-2: @cpp.DeprecatedTerseWrite can be only used on unqualified field.
+
+      @cpp.DeprecatedTerseWrite
+      3: required i32 field3;
+        # expected-warning@-2: The 'required' qualifier is deprecated and ignored by most language implementations. Leave the field unqualified instead.
+        # expected-error@-3: @cpp.DeprecatedTerseWrite can be only used on unqualified field.
+
+      @thrift.TerseWrite
+      @cpp.DeprecatedTerseWrite
+      4: i32 field4;
+        # expected-error@-3: @cpp.DeprecatedTerseWrite can be only used on unqualified field.
+
+      @cpp.DeprecatedTerseWrite
+      5: Bar field5;
+        # expected-error@-2: @cpp.DeprecatedTerseWrite is not supported for structured types.
+
+      @cpp.AllowLegacyNonOptionalRef
+      @cpp.DeprecatedTerseWrite
+      @cpp.Ref{type = cpp.RefType.Unique}
+      6: Bar field6;
+        # expected-warning@-4: Field with @cpp.Ref (or similar) annotation should be optional: `field6` (in `Foo`).
+    }
+  )");
+}

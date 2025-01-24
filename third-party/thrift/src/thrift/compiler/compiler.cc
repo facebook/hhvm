@@ -136,27 +136,18 @@ Options:
               values include:
                 unstructured_annotations_on_field_type
 
+                warn_on_redundant_custom_default_values
+                  Issues warnings for struct fields that have custom default
+                  values equal to the intrinsic default for that type (eg. 0
+                  for integers, false for boolean, etc.)
+
                 forbid_non_optional_cpp_ref_fields (IGNORED: set by default).
                   Struct (and exception) fields with a @cpp.Ref (or
                   cpp[2].ref[_type]) annotation must be optional, unless
                   annotated with @cpp.AllowLegacyNonOptionalRef.
 
-                  TEMPORARY NOTE: As of Jan 2025, this is enabled by default.
-                  As a short-term escape hatch, in case we missed any existing
-                  use case, users can specify this validator prefixed with a
-                  "-", to explicitly disable this enforcement, i.e.:
-                  "-forbid_non_optional_cpp_ref_fields"
-                  Note however that this is only a temporary, short-term option:
-                  support for "-forbid_non_optional_cpp_ref_fields" will be
-                  removed soon (and will fail if provided in the future).
-
                 implicit_field_ids (IGNORED: always present, i.e. implicit field
                   IDs are always forbidden).
-
-                warn_on_redundant_custom_default_values
-                  Issues warnings for struct fields that have custom default
-                  values equal to the intrinsic default for that type (eg. 0
-                  for integers, false for boolean, etc.)
 
 Available generators (and options):
 )");
@@ -433,10 +424,6 @@ std::string parse_args(
           sparams.warn_on_redundant_custom_default_values = true;
         } else if (validator == "forbid_non_optional_cpp_ref_fields") {
           // no-op
-        } else if (validator == "-forbid_non_optional_cpp_ref_fields") {
-          // DO_BEFORE(aristidis,20250201): Remove support for escape hatch:
-          // -forbid_non_optional_cpp_ref_fields
-          sparams.forbid_non_optional_cpp_ref_fields = false;
         } else if (validator == "implicit_field_ids") {
           // no-op
         } else {

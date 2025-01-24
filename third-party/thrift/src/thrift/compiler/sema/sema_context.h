@@ -92,16 +92,6 @@ struct sema_params {
   bool forbid_unstructured_annotations_on_field_types = true;
   bool skip_lowering_annotations = false;
 
-  // DO_BEFORE(aristidis,20250201): Remove forbid_non_optional_cpp_ref_fields
-  // option when always true.
-  /**
-   * If true, standard_validator will report an error on struct (or exception)
-   * fields that have a C++ reference annotation (@cpp.Ref, cpp[2].ref[_type])
-   * and are NOT optional (unless they are annotated with
-   * @cpp.AllowLegacyNonOptionalRef).
-   */
-  bool forbid_non_optional_cpp_ref_fields = true;
-
   // If true, will issue a warning if a default value is explicitly specified
   // for a field, but that value is equal to the intrinsic default value.
   bool warn_on_redundant_custom_default_values = false;

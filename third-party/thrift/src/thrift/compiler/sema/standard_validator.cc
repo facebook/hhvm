@@ -547,13 +547,11 @@ void validate_boxed_field_attributes(sema_context& ctx, const t_field& node) {
           "Make sure `{}` is optional.",
           node.name());
     } else if (ref) {
-      // For @cpp.Ref (and cpp[2].ref[_type]), optional fields result in either
-      // a warning on an error, depending on the validation parameters (see
-      // `forbid_non_optional_cpp_ref_fields`) and whether the field is
+      // For @cpp.Ref (and cpp[2].ref[_type]), non-optional fields result in
+      // either a warning or an error, depending on whether the field is
       // annotated with `@cpp.AllowLegacyNonOptionalRef`.
 
       const bool report_error =
-          ctx.sema_parameters().forbid_non_optional_cpp_ref_fields &&
           node.find_structured_annotation_or_null(
               kCppAllowLegacyNonOptionalRefUri) == nullptr;
 

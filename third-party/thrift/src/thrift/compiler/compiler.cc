@@ -877,29 +877,6 @@ std::unique_ptr<t_program_bundle> parse_and_dump_diagnostics(
   return programs;
 }
 
-std::unique_ptr<t_program_bundle> parse_and_get_program(
-    source_manager& sm, const std::vector<std::string>& arguments) {
-  // Parse arguments.
-  parsing_params pparams;
-  pparams.allow_missing_includes = true;
-  gen_params gparams;
-  diagnostic_params dparams;
-  sema_params sparams;
-  gparams.targets.push_back(""); // Avoid needing to pass --gen
-  std::string filename =
-      parse_args(arguments, pparams, gparams, dparams, sparams);
-  if (filename.empty()) {
-    return {};
-  }
-
-  diagnostics_engine diags(
-      sm,
-      [](const diagnostic& d) { fmt::print(stderr, "{}\n", d); },
-      diagnostic_params::only_errors());
-  sparams.skip_lowering_annotations = true;
-  return parse_ast(sm, diags, filename, std::move(pparams), &sparams);
-}
-
 compile_result compile(
     const std::vector<std::string>& arguments, source_manager& source_mgr) {
   compile_result result;

@@ -73,15 +73,6 @@ parse_and_mutate_program(
     diagnostic_params dparams = {});
 
 /**
- * Runs the Thrift parser with the specified (command-line) arguments and
- * returns the program bundle.
- * This does not run mutators and allows missing includes, as it is intended for
- * use by tooling like codemods and thrift2ast.
- */
-std::unique_ptr<t_program_bundle> parse_and_get_program(
-    source_manager& sm, const std::vector<std::string>& arguments);
-
-/**
  * Runs the Thrift compiler with the specified (command-line) arguments.
  */
 compile_result compile(

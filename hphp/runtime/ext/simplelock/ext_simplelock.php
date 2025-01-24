@@ -38,6 +38,16 @@ function unlock(string $name): void;
 function try_lock(string $name): bool;
 
 /*
+ * Checks if any thread (including the current request) is holding a lock with a
+ * unique name.
+ *
+ * @param string $name - the name of the lock
+ * @return bool - whether someone is holding the lock
+ */
+<<__Native>>
+function is_held(string $name): bool;
+
+/*
  * Acquired a cross-request mutual exclusion lock with a unique name and a
  * timeout.
  *

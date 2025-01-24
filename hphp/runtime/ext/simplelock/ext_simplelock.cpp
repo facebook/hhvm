@@ -134,6 +134,11 @@ void HHVM_FUNCTION(unlock_mutex, const String& name) {
   unlock(l);
 }
 
+bool HHVM_FUNCTION(is_held, const String& name) {
+  auto const l = get_lock(name.toCppString());
+  return l->load(std::memory_order_relaxed) != UNLOCKED;
+}
+
 struct SimpleLockExtension final : Extension {
   SimpleLockExtension() : Extension("simplelock", "1.0", "sandbox_infra") {}
 
@@ -142,6 +147,7 @@ struct SimpleLockExtension final : Extension {
   void moduleRegisterNative() override {
     HHVM_NAMED_FE(HH\\SimpleLock\\lock, HHVM_FN(lock_mutex));
     HHVM_NAMED_FE(HH\\SimpleLock\\try_lock, HHVM_FN(try_lock_mutex));
+    HHVM_NAMED_FE(HH\\SimpleLock\\is_held, HHVM_FN(is_held));
     HHVM_NAMED_FE_STR(
       "HH\\SimpleLock\\unlock", HHVM_FN(unlock_mutex), nativeFuncs()
     );

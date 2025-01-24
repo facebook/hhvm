@@ -96,8 +96,8 @@ void compressThenDecompressPieces(
   size_t i = 0;
   for (const auto& piece : input_pieces) {
     const auto end = ++i == input_pieces.size();
-    const auto op = end ? folly::io::StreamCodec::FlushOp::END
-                        : folly::io::StreamCodec::FlushOp::FLUSH;
+    const auto op = end ? folly::compression::StreamCodec::FlushOp::END
+                        : folly::compression::StreamCodec::FlushOp::FLUSH;
     auto irange = piece->coalesce();
     if (!end && irange.size() == 0) {
       continue;

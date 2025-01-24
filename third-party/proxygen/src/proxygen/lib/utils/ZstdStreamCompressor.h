@@ -56,9 +56,9 @@ class ZstdStreamCompressor : public StreamCompressor {
   }
 
  private:
-  folly::io::StreamCodec& getCodec();
+  folly::compression::StreamCodec& getCodec();
 
-  std::unique_ptr<folly::io::StreamCodec> codec_;
+  std::unique_ptr<folly::compression::StreamCodec> codec_;
   const int compressionLevel_;
   const bool independent_;
   bool error_ = false;

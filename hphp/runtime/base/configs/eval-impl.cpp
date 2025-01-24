@@ -138,4 +138,8 @@ void EvalLoader::FastMethodInterceptPostProcess(bool& val) {
   if (arch() == Arch::ARM) val = false;
 }
 
+std::string EvalLoader::PackagesTomlFileNameDefault() {
+  return "PACKAGES.toml";
+}
+
 }

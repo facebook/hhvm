@@ -518,9 +518,9 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   Describes the active deployment for selecting the set of packages
   Value is only read in repo authoritative or cli mode.
 
-- std::string Eval.PackagesTomlFileName = "PACKAGES.toml", fzn, globaldata|compileroption(PackagesTomlFileName)
+- std::string Eval.PackagesTomlFileName, fzn, globaldata|compileroption(PackagesTomlFileName)
 
-  Name of the packages TOML file to load.
+  Name of the packages TOML file to load.  Defaults to "PACKAGES.toml".
 
 - bool Eval.EnableIntrinsicsExtension = Eval.EnableIntrinsicsExtension, UNKNOWN, globaldata|unitcacheflag|hackc(hhbc, false)
 

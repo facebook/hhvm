@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/package.h"
 
+#include "hphp/runtime/base/configs/eval-loader.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/server/cli-server.h"
@@ -69,7 +70,14 @@ PackageInfo::PackageInfo(PackageMap& packages,
 
 PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
   std::ifstream file(path, std::ios::in);
-  if (!file.is_open()) return defaults();
+  if (!file.is_open()) {
+    if (Cfg::Eval::PackagesTomlFileName != Cfg::EvalLoader::PackagesTomlFileNameDefault()) {
+      Logger::FError("Could not open the package specification in {}. "
+                     "Continuing with the empty package specification.",
+                     path.string());
+    }
+    return defaults();
+  }
 
   PackageMap packages;
   DeploymentMap deployments;

@@ -31,9 +31,153 @@
 
 #include <boost/algorithm/string/split.hpp>
 
-using fs_path = std::filesystem::path;
+using whisker::map;
 
 namespace apache::thrift::compiler {
+
+map t_whisker_generator::make_functions_for_const() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_container() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_enum() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_exception() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_field() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_function() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_include() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_interaction() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_interface() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_list() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_map() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_named() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_node() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_package() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_paramlist() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_primitive_type() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_program() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_service() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_set() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_sink() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_stream() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_struct() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_structured() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_throws() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_type() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_typedef() const {
+  return {};
+}
+
+map t_whisker_generator::make_functions_for_union() const {
+  return {};
+}
+
+map t_whisker_generator::globals() const {
+  map lib;
+  // clang-format off
+  lib["t_const"]          = make_functions_for_const();
+  lib["t_container"]      = make_functions_for_container();
+  lib["t_enum"]           = make_functions_for_enum();
+  lib["t_exception"]      = make_functions_for_exception();
+  lib["t_field"]          = make_functions_for_field();
+  lib["t_function"]       = make_functions_for_function();
+  lib["t_include"]        = make_functions_for_include();
+  lib["t_interaction"]    = make_functions_for_interaction();
+  lib["t_interface"]      = make_functions_for_interface();
+  lib["t_list"]           = make_functions_for_list();
+  lib["t_map"]            = make_functions_for_map();
+  lib["t_named"]          = make_functions_for_named();
+  lib["t_node"]           = make_functions_for_node();
+  lib["t_package"]        = make_functions_for_package();
+  lib["t_paramlist"]      = make_functions_for_paramlist();
+  lib["t_primitive_type"] = make_functions_for_primitive_type();
+  lib["t_program"]        = make_functions_for_program();
+  lib["t_service"]        = make_functions_for_service();
+  lib["t_set"]            = make_functions_for_set();
+  lib["t_sink"]           = make_functions_for_sink();
+  lib["t_stream"]         = make_functions_for_stream();
+  lib["t_struct"]         = make_functions_for_struct();
+  lib["t_structured"]     = make_functions_for_structured();
+  lib["t_throws"]         = make_functions_for_throws();
+  lib["t_type"]           = make_functions_for_type();
+  lib["t_typedef"]        = make_functions_for_typedef();
+  lib["t_union"]          = make_functions_for_union();
+  // clang-format on
+  return lib;
+}
+
+using fs_path = std::filesystem::path;
 
 namespace {
 
@@ -126,8 +270,8 @@ class whisker_template_parser : public whisker::template_resolver {
 
 } // namespace
 
-/* static */ const t_whisker_generator::templates_map&
-t_whisker_generator::templates_by_path() {
+/* static */ const t_whisker_base_generator::templates_map&
+t_whisker_base_generator::templates_by_path() {
   static const auto cached_result = [] {
     templates_map result;
     for (std::size_t i = 0; i < templates_size; ++i) {
@@ -150,7 +294,8 @@ t_whisker_generator::templates_by_path() {
   return cached_result;
 }
 
-t_whisker_generator::cached_render_state& t_whisker_generator::render_state() {
+t_whisker_base_generator::cached_render_state&
+t_whisker_base_generator::render_state() {
   if (!cached_render_state_) {
     whisker::render_options options;
 
@@ -183,7 +328,7 @@ t_whisker_generator::cached_render_state& t_whisker_generator::render_state() {
   return *cached_render_state_;
 }
 
-std::string t_whisker_generator::render(
+std::string t_whisker_base_generator::render(
     std::string_view template_file, const whisker::object& context) {
   std::vector<std::string> partial_path;
   boost::algorithm::split(
@@ -206,7 +351,7 @@ std::string t_whisker_generator::render(
   return out.str();
 }
 
-void t_whisker_generator::write_to_file(
+void t_whisker_base_generator::write_to_file(
     const std::filesystem::path& output_file, std::string_view data) {
   auto abs_path = detail::make_abs_path(fs_path(get_out_dir()), output_file);
   std::filesystem::create_directories(abs_path.parent_path());
@@ -226,7 +371,7 @@ void t_whisker_generator::write_to_file(
   record_genfile(abs_path.string());
 }
 
-void t_whisker_generator::render_to_file(
+void t_whisker_base_generator::render_to_file(
     const std::filesystem::path& output_file,
     std::string_view template_file,
     const whisker::object& context) {

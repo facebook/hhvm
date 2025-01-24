@@ -364,7 +364,7 @@ std::string_view get_type(const t_type* type) {
   return value_or_empty(cpp_name_resolver::find_type(*type));
 }
 
-bool is_implicit_ref(const t_type* type) {
+bool is_binary_iobuf_unique_ptr(const t_type* type) {
   auto const* resolved_typedef = type->get_true_type();
   return resolved_typedef != nullptr && resolved_typedef->is_binary() &&
       contains(get_type(resolved_typedef), "std::unique_ptr") &&
@@ -390,7 +390,7 @@ bool field_transitively_refers_to_unique(const t_field* field) {
   while (!queue.empty()) {
     auto type = queue.front()->get_true_type();
     queue.pop();
-    if (cpp2::is_implicit_ref(type)) {
+    if (cpp2::is_binary_iobuf_unique_ptr(type)) {
       return true;
     }
     switch (type->get_type_value()) {

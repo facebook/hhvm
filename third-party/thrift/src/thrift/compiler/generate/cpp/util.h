@@ -91,10 +91,9 @@ bool is_orderable(const t_type& type);
 std::string_view get_type(const t_type* type);
 
 /**
- * If the cpp_type is std::unique_ptr<folly::IOBuf> the C++ compiler implicitly
- * assumes this is optional.
+ * Check if the cpp_type is std::unique_ptr<folly::IOBuf> on binary type.
  */
-bool is_implicit_ref(const t_type* type);
+bool is_binary_iobuf_unique_ptr(const t_type* type);
 
 /**
  * If the field has cpp.ref/cpp2.ref/cpp.ref_type/cpp2.ref_type.
@@ -105,7 +104,7 @@ inline bool is_explicit_ref(const t_field* f) {
 }
 
 inline bool is_ref(const t_field* f) {
-  return is_explicit_ref(f) || is_implicit_ref(f->get_type());
+  return is_explicit_ref(f) || is_binary_iobuf_unique_ptr(f->get_type());
 }
 
 inline bool field_has_isset(const t_field* field) {

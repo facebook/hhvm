@@ -119,6 +119,84 @@ map::value_type create_array_functions() {
   return map::value_type{"array", std::move(array_functions)};
 }
 
+map::value_type create_map_functions() {
+  map map_functions;
+
+  /**
+   * Returns a view of the provided map's items. The output is an array where
+   * each element is a map with "key" and "value" properties.
+   *
+   * This function fails if the provided map is not enumerable:
+   * - whisker::map objects are enumerable.
+   * - map-like native objects are enumerable iff map_like::keys() is provided.
+   *
+   * The order of items in the produced array matches the enumeration above.
+   * For whisker::map, properties are sorted lexicographically by name.
+   *
+   * Name: map.items
+   *
+   * Arguments:
+   *   - [map] — The map to enumerate
+   *
+   * Returns:
+   *   [array] items (key-value pairs) of the provided map.
+   */
+  map_functions["items"] = dsl::make_function(
+      "map.items", [](dsl::function::context ctx) -> object::ptr {
+        ctx.declare_named_arguments({});
+        ctx.declare_arity(1);
+
+        dsl::map_like m = ctx.argument<map>(0);
+
+        class items_view
+            : public native_object,
+              public native_object::array_like,
+              public std::enable_shared_from_this<native_object::array_like> {
+         public:
+          explicit items_view(
+              dsl::map_like&& m, std::vector<std::string>&& keys)
+              : map_like_(std::move(m)), keys_(std::move(keys)) {}
+
+          native_object::array_like::ptr as_array_like() const override {
+            return shared_from_this();
+          }
+
+          std::size_t size() const final { return keys_.size(); }
+          object::ptr at(std::size_t index) const final {
+            const std::string& property_name = keys_.at(index);
+            auto value = map_like_.lookup_property(property_name);
+            // The name is guaranteed to exist because it was enumerated
+            assert(value != nullptr);
+            return manage_owned<object>(w::map({
+                {"key", w::string(property_name)},
+                {"value", w::proxy(value)},
+            }));
+          }
+
+          void print_to(
+              tree_printer::scope scope,
+              const object_print_options& options) const final {
+            default_print_to("<map.items view>", std::move(scope), options);
+          }
+
+         private:
+          dsl::map_like map_like_;
+          std::vector<std::string> keys_;
+        };
+
+        auto keys = m.keys();
+        if (!keys.has_value()) {
+          throw ctx.make_error(
+              "map-like object does not have enumerable properties.");
+        }
+        auto view =
+            w::make_native_object<items_view>(std::move(m), std::move(*keys));
+        return manage_owned<object>(std::move(view));
+      });
+
+  return map::value_type{"map", std::move(map_functions)};
+}
+
 map::value_type create_string_functions() {
   map string_functions;
 
@@ -396,6 +474,7 @@ map::value_type create_object_functions() {
 
 void load_standard_library(map& module) {
   module.emplace(create_array_functions());
+  module.emplace(create_map_functions());
   module.emplace(create_string_functions());
   module.emplace(create_int_functions());
   module.emplace(create_object_functions());

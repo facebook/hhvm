@@ -144,6 +144,100 @@ TEST_F(StandardLibraryTest, array_at) {
   }
 }
 
+TEST_F(StandardLibraryTest, map_items) {
+  {
+    auto result = render(
+        "{{#each (map.items this) as |entry|}}\n"
+        "{{entry.key}}: {{entry.value}}\n"
+        "{{/each}}\n",
+        w::map(
+            {{"foo", w::i64(3)},
+             {"bar", w::i64(4)},
+             {"baz", w::string("qux")}}));
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(
+        *result,
+        "bar: 4\n"
+        "baz: qux\n"
+        "foo: 3\n");
+  }
+
+  {
+    auto result = render(
+        "{{#each (map.items this) as |entry|}}\n"
+        "{{entry.key}}: {{entry.value}}\n"
+        "{{#else}}"
+        "No items!\n"
+        "{{/each}}\n",
+        w::map({}));
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(*result, "No items!\n");
+  }
+
+  {
+    auto result = render(
+        "{{#each (map.items this) as |entry|}}\n"
+        "{{entry.key}}:\n"
+        "{{#each (map.items entry.value) as |entry|}}\n"
+        "  {{entry.key}}: {{entry.value}}\n"
+        "{{/each}}\n"
+        "{{/each}}\n",
+        w::map(
+            {{"nested",
+              w::map(
+                  {{"foo", w::i64(3)},
+                   {"bar", w::i64(4)},
+                   {"baz", w::string("qux")}})},
+             {"nested-2",
+              w::map(
+                  {{"a", w::string("a")},
+                   {"b", w::i64(0)},
+                   {"c", w::string("c")}})}}));
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(
+        *result,
+        "nested:\n"
+        "  bar: 4\n"
+        "  baz: qux\n"
+        "  foo: 3\n"
+        "nested-2:\n"
+        "  a: a\n"
+        "  b: 0\n"
+        "  c: c\n");
+  }
+
+  {
+    class map_not_enumerable
+        : public native_object,
+          public native_object::map_like,
+          public std::enable_shared_from_this<map_not_enumerable> {
+     public:
+      native_object::map_like::ptr as_map_like() const override {
+        return shared_from_this();
+      }
+
+      object::ptr lookup_property(std::string_view) const override {
+        return nullptr;
+      }
+    };
+
+    auto result = render(
+        "{{#each (map.items this) as |entry|}}\n"
+        "{{entry.key}}: {{entry.value}}\n"
+        "{{/each}}\n",
+        w::make_native_object<map_not_enumerable>());
+    EXPECT_FALSE(result.has_value());
+    EXPECT_THAT(
+        diagnostics(),
+        testing::ElementsAre(diagnostic(
+            diagnostic_level::error,
+            "Function 'map.items' threw an error:\n"
+            "map-like object does not have enumerable properties.",
+            path_to_file,
+            1)));
+  }
+}
+
 TEST_F(StandardLibraryTest, string_len) {
   {
     auto result = render(

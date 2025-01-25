@@ -241,6 +241,24 @@ map::value_type create_string_functions() {
       });
 
   /**
+   * Checks a string for emptiness.
+   *
+   * Name: string.empty?
+   *
+   * Arguments:
+   *   - [string] — The string to check for emptiness.
+   *
+   * Returns:
+   *   [boolean] indicating whether the string is empty.
+   */
+  string_functions["empty?"] = dsl::make_function(
+      "string.empty?", [](dsl::function::context ctx) -> boolean {
+        ctx.declare_named_arguments({});
+        ctx.declare_arity(1);
+        return ctx.argument<string>(0)->empty();
+      });
+
+  /**
    * Produces the provided string concatenated together.
    *
    * Name: string.concat

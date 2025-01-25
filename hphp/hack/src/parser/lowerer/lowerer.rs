@@ -5654,9 +5654,12 @@ fn check_effect_memoized<'a>(
             )
         }
     }
-    // #(Soft)?MakeICInaccessible can only be used on functions with defaults
     if let Some(u) = user_attributes.iter().find(|u| {
         is_memoize_attribute_with_flavor(u, Some(sn::memoize_option::MAKE_IC_INACCESSSIBLE))
+            || is_memoize_attribute_with_flavor(
+                u,
+                Some(sn::memoize_option::IC_INACCESSSIBLE_SPECIAL_CASE),
+            )
     }) {
         if !has_any_context(
             contexts,
@@ -5669,7 +5672,13 @@ fn check_effect_memoized<'a>(
             raise_parsing_error_pos(
                 &u.name.0,
                 env,
-                &syntax_error::memoize_make_ic_inaccessible_without_defaults(kind),
+                &syntax_error::memoize_make_ic_inaccessible_without_defaults(
+                    kind,
+                    is_memoize_attribute_with_flavor(
+                        u,
+                        Some(sn::memoize_option::IC_INACCESSSIBLE_SPECIAL_CASE),
+                    ),
+                ),
             )
         }
     }

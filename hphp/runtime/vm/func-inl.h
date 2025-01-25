@@ -577,10 +577,6 @@ inline bool Func::isKeyedByImplicitContextMemoize() const {
   return memoizeICType() == MemoizeICType::KeyedByIC;
 }
 
-inline bool Func::isMakeICInaccessibleMemoize() const {
-  return memoizeICType() == MemoizeICType::MakeICInaccessible;
-}
-
 
 inline bool Func::isMemoizeImpl() const {
   return isMemoizeImplName(name());

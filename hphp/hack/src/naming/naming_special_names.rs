@@ -8,7 +8,6 @@
  */
 
 /** Module consisting of the special names known to the typechecker */
-
 pub mod classes {
     pub const PARENT: &str = "parent";
 
@@ -387,7 +386,13 @@ pub mod memoize_option {
 
     pub const MAKE_IC_INACCESSSIBLE: &str = "MakeICInaccessible";
 
-    pub static _ALL: &[&str] = &[KEYED_BY_IC, MAKE_IC_INACCESSSIBLE];
+    pub const IC_INACCESSSIBLE_SPECIAL_CASE: &str = "ICInaccessibleSpecialCase";
+
+    pub static _ALL: &[&str] = &[
+        KEYED_BY_IC,
+        MAKE_IC_INACCESSSIBLE,
+        IC_INACCESSSIBLE_SPECIAL_CASE,
+    ];
 
     lazy_static! {
         static ref VALID_SET: HashSet<&'static str> = _ALL.iter().copied().collect();

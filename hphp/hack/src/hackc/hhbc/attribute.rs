@@ -86,8 +86,8 @@ pub fn is_keyed_by_ic_memoize(attrs: impl AsRef<[Attribute]>) -> bool {
     is_memoize_with(attrs, "KeyedByIC")
 }
 
-pub fn is_make_ic_inaccessible_memoize(attrs: impl AsRef<[Attribute]>) -> bool {
-    is_memoize_with(attrs, "MakeICInaccessible")
+pub fn is_inaccessible_special_case(attrs: impl AsRef<[Attribute]>) -> bool {
+    is_memoize_with(attrs, "ICInaccessibleSpecialCase")
 }
 
 fn is_foldable(attr: &Attribute) -> bool {

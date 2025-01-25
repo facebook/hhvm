@@ -93,11 +93,14 @@ pub(crate) fn emit_wrapper_function<'a, 'd>(
         .any(|tp| tp.reified.is_reified() || tp.reified.is_soft_reified());
     let coeffects = Coeffects::from_ast(f.ctxs.as_ref(), &f.params, &fd.tparams, vec![]);
     let should_emit_implicit_context = hhbc::is_keyed_by_ic_memoize(attributes.iter());
+    // #ICInaccessibleSpecialCase won't shard by IC but will access IC
+    let is_inaccessible_special_case = hhbc::is_inaccessible_special_case(attributes.iter());
 
     // This fn either has IC unoptimizable static coeffects, or has any dynamic coeffects
     let has_ic_unoptimizable_coeffects: bool = coeffects.has_ic_unoptimizable_coeffects();
-    let should_make_ic_inaccessible: bool =
-        !should_emit_implicit_context && has_ic_unoptimizable_coeffects;
+    let should_make_ic_inaccessible: bool = !is_inaccessible_special_case
+        && !should_emit_implicit_context
+        && has_ic_unoptimizable_coeffects;
 
     let mut env = Env::default(Arc::clone(&fd.namespace)).with_scope(scope);
     let (instrs, decl_vars) = make_memoize_function_code(

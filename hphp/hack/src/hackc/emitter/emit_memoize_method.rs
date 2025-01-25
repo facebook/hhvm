@@ -161,6 +161,10 @@ fn make_memoize_wrapper_method<'a, 'd>(
         Flags::SHOULD_EMIT_IMPLICIT_CONTEXT,
         hhbc::is_keyed_by_ic_memoize(attributes.iter()),
     );
+    arg_flags.set(
+        Flags::IS_IC_INACCESSIBLE_SPECIAL_CASE,
+        hhbc::is_inaccessible_special_case(attributes.iter()),
+    );
     let mut args = Args {
         info,
         method,
@@ -302,6 +306,8 @@ fn make_memoize_method_with_params_code<'a, 'd>(
     // so the first unnamed local is parameter count + 1 when there are reified generics.
     let is_reified = args.flags.contains(Flags::IS_REIFIED);
     let add_reified = usize::from(is_reified);
+    // #ICInaccessibleSpecialCase won't shard by IC but will access IC
+    let is_inaccessible_special_case = args.flags.contains(Flags::IS_IC_INACCESSIBLE_SPECIAL_CASE);
     let should_emit_implicit_context = args.flags.contains(Flags::SHOULD_EMIT_IMPLICIT_CONTEXT);
     let add_implicit_context = usize::from(should_emit_implicit_context);
     let first_unnamed_idx = param_count + add_reified;
@@ -368,8 +374,9 @@ fn make_memoize_method_with_params_code<'a, 'd>(
     let ic_stash_local = Local::new((key_count) as usize + first_unnamed_idx);
     // This fn either has IC unoptimizable static coeffects, or has any dynamic coeffects
     let has_ic_unoptimizable_coeffects: bool = coeffects.has_ic_unoptimizable_coeffects();
-    let should_make_ic_inaccessible: bool =
-        !should_emit_implicit_context && has_ic_unoptimizable_coeffects;
+    let should_make_ic_inaccessible: bool = !is_inaccessible_special_case
+        && !should_emit_implicit_context
+        && has_ic_unoptimizable_coeffects;
     let instrs = InstrSeq::gather(vec![
         begin_label,
         emit_body::emit_method_prolog(emitter, env, pos, hhas_params, args.params, &[])?,
@@ -459,9 +466,12 @@ fn make_memoize_method_no_params_code<'a, 'd>(
         },
         None,
     );
+    // #ICInaccessibleSpecialCase won't shard by IC but will access IC
+    let is_inaccessible_special_case = args.flags.contains(Flags::IS_IC_INACCESSIBLE_SPECIAL_CASE);
     let ic_stash_local = Local::new(0);
     // we are in a no parameter function that sets no zoned IC either, default to what coeffects suggest
-    let should_make_ic_inaccessible: bool = coeffects.has_ic_unoptimizable_coeffects();
+    let should_make_ic_inaccessible: bool =
+        coeffects.has_ic_unoptimizable_coeffects() && !is_inaccessible_special_case;
     let instrs = InstrSeq::gather(vec![
         deprecation_body,
         if args.method.static_ {
@@ -583,6 +593,6 @@ bitflags! {
         const IS_ASYNC = 1 << 4;
         const SHOULD_EMIT_IMPLICIT_CONTEXT = 1 << 5;
         const SHOULD_MAKE_IC_INACCESSIBLE = 1 << 6;
-        const SHOULD_SOFT_MAKE_IC_INACCESSIBLE = 1 << 7;
+        const IS_IC_INACCESSIBLE_SPECIAL_CASE = 1 << 7;
     }
 }

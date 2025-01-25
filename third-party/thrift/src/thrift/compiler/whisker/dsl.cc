@@ -68,18 +68,17 @@ object::ptr map_like::lookup_property(std::string_view identifier) const {
       });
 }
 
-std::optional<std::vector<std::string>> map_like::keys() const {
-  using result = std::optional<std::vector<std::string>>;
+std::optional<std::set<std::string>> map_like::keys() const {
+  using result = std::optional<std::set<std::string>>;
   return whisker::detail::variant_match(
       which_,
       [&](const native_object::map_like::ptr& m) -> result {
         return m->keys();
       },
       [&](const managed_ptr<map>& m) -> result {
-        std::vector<std::string> keys;
-        keys.reserve(m->size());
+        std::set<std::string> keys;
         for (const auto& [key, _] : *m) {
-          keys.push_back(key);
+          keys.insert(key);
         }
         return keys;
       });

@@ -73,7 +73,7 @@ static_assert(std::is_copy_constructible_v<array_like>);
 class map_like final : public native_object::map_like {
  public:
   object::ptr lookup_property(std::string_view identifier) const final;
-  std::optional<std::vector<std::string>> keys() const final;
+  std::optional<std::set<std::string>> keys() const final;
 
   /**
    * Tries to marshal the provided object into an map-like object, if the

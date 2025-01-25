@@ -20,6 +20,8 @@
 
 #include <fmt/core.h>
 
+#include <iterator>
+
 namespace w = whisker::make;
 
 namespace whisker {
@@ -189,8 +191,11 @@ map::value_type create_map_functions() {
           throw ctx.make_error(
               "map-like object does not have enumerable properties.");
         }
-        auto view =
-            w::make_native_object<items_view>(std::move(m), std::move(*keys));
+        auto view = w::make_native_object<items_view>(
+            std::move(m),
+            std::vector<std::string>(
+                std::make_move_iterator(keys->begin()),
+                std::make_move_iterator(keys->end())));
         return manage_owned<object>(std::move(view));
       });
 

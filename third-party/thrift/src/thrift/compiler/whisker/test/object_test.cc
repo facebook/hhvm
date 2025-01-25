@@ -147,7 +147,7 @@ TEST(ObjectTest, native_object_equality) {
   struct always_zero_map : native_object,
                            native_object::map_like,
                            std::enable_shared_from_this<always_zero_map> {
-    explicit always_zero_map(std::vector<std::string> keys)
+    explicit always_zero_map(std::set<std::string> keys)
         : keys_(std::move(keys)) {}
 
     native_object::map_like::ptr as_map_like() const override {
@@ -158,9 +158,7 @@ TEST(ObjectTest, native_object_equality) {
       return manage_owned<object>(w::i64(0));
     }
 
-    std::optional<std::vector<std::string>> keys() const override {
-      return keys_;
-    }
+    std::optional<std::set<std::string>> keys() const override { return keys_; }
 
     void print_to(
         tree_printer::scope scope,
@@ -169,7 +167,7 @@ TEST(ObjectTest, native_object_equality) {
     }
 
    private:
-    std::vector<std::string> keys_;
+    std::set<std::string> keys_;
   };
 
   struct always_zero_array : native_object,
@@ -198,11 +196,11 @@ TEST(ObjectTest, native_object_equality) {
   };
 
   native_object::ptr m1 =
-      std::make_shared<always_zero_map>(std::vector<std::string>{"foo"});
+      std::make_shared<always_zero_map>(std::set<std::string>{"foo"});
   native_object::ptr m2 =
-      std::make_shared<always_zero_map>(std::vector<std::string>{"foo"});
+      std::make_shared<always_zero_map>(std::set<std::string>{"foo"});
   native_object::ptr m3 =
-      std::make_shared<always_zero_map>(std::vector<std::string>{"foo", "bar"});
+      std::make_shared<always_zero_map>(std::set<std::string>{"foo", "bar"});
   map raw_m3{{"foo", w::i64(0)}, {"bar", w::i64(0)}};
 
   object o1 = w::native_object(m1);

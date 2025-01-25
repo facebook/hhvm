@@ -54,10 +54,10 @@ class object_t {
     return methods_.find(name) != methods_.end();
   }
 
-  std::vector<std::string> property_names() const {
-    std::vector<std::string> result;
+  std::set<std::string> property_names() const {
+    std::set<std::string> result;
     for (const auto& [name, _] : methods_) {
-      result.push_back(name);
+      result.insert(name);
     }
     return result;
   }

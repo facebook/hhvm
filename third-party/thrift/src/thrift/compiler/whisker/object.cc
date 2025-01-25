@@ -194,17 +194,6 @@ bool array_eq(
   return true;
 }
 
-namespace {
-std::optional<std::unordered_set<std::string>> unique_keys(
-    std::optional<std::vector<std::string>> keys) {
-  if (!keys.has_value()) {
-    return std::nullopt;
-  }
-  return std::unordered_set<std::string>(
-      std::make_move_iterator(keys->begin()),
-      std::make_move_iterator(keys->end()));
-}
-} // namespace
 bool map_eq(const map& lhs, const map& rhs) {
   return lhs == rhs;
 }
@@ -212,7 +201,7 @@ bool map_eq(const map& lhs, const native_object::map_like::ptr& rhs) {
   if (rhs == nullptr) {
     return false;
   }
-  auto rhs_keys = unique_keys(rhs->keys());
+  auto rhs_keys = rhs->keys();
   if (!rhs_keys.has_value()) {
     // Not enumerable
     return false;
@@ -244,8 +233,8 @@ bool map_eq(
     return false;
   }
 
-  auto lhs_keys = unique_keys(lhs->keys());
-  auto rhs_keys = unique_keys(rhs->keys());
+  auto lhs_keys = lhs->keys();
+  auto rhs_keys = rhs->keys();
   const bool keys_equal =
       lhs_keys.has_value() && rhs_keys.has_value() && *lhs_keys == *rhs_keys;
   if (!keys_equal) {
@@ -264,7 +253,7 @@ bool map_eq(
 
 void native_object::map_like::default_print_to(
     std::string_view name,
-    std::vector<std::string> property_names,
+    const std::set<std::string>& property_names,
     tree_printer::scope scope,
     const object_print_options& options) const {
   assert(scope.semantic_depth() <= options.max_depth);
@@ -430,11 +419,10 @@ object make::proxy(const object::ptr& source) {
             }
             return nullptr;
           }
-          std::optional<std::vector<std::string>> keys() const final {
-            std::vector<std::string> property_names;
-            property_names.reserve(map_->size());
+          std::optional<std::set<std::string>> keys() const final {
+            std::set<std::string> property_names;
             for (const auto& [key, _] : *map_) {
-              property_names.push_back(key);
+              property_names.insert(key);
             }
             return property_names;
           }

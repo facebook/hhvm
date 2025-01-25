@@ -24,6 +24,7 @@
 #include <limits>
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
 #include <string_view>
 #include <typeinfo>
@@ -162,16 +163,16 @@ class native_object {
         std::string_view identifier) const = 0;
 
     /**
-     * Returns an ordered list of finitely enumerable property names of this
+     * Returns an ordered set of finitely enumerable property names of this
      * map-like object.
      *
      * If property names are not enumerable (i.e. dynamically generated), then
      * this returns the empty optional.
      *
-     * For each name returned in this list, lookup_property must not return
+     * For each name returned in this set, lookup_property must not return
      * nullptr.
      */
-    virtual std::optional<std::vector<std::string>> keys() const {
+    virtual std::optional<std::set<std::string>> keys() const {
       return std::nullopt;
     }
 
@@ -187,7 +188,7 @@ class native_object {
      */
     void default_print_to(
         std::string_view name,
-        std::vector<std::string> property_names,
+        const std::set<std::string>& property_names,
         tree_printer::scope,
         const object_print_options&) const;
   };

@@ -112,11 +112,10 @@ class mstch_map_proxy final
     return nullptr;
   }
 
-  std::optional<std::vector<std::string>> keys() const override {
-    std::vector<std::string> property_names;
-    property_names.reserve(proxied_.size());
+  std::optional<std::set<std::string>> keys() const override {
+    std::set<std::string> property_names;
     for (const auto& [key, _] : proxied_) {
-      property_names.push_back(key);
+      property_names.insert(key);
     }
     return property_names;
   }
@@ -162,7 +161,7 @@ class mstch_object_proxy
         [](object::ptr o) -> object::ptr { return o; });
   }
 
-  std::optional<std::vector<std::string>> keys() const override {
+  std::optional<std::set<std::string>> keys() const override {
     return proxied_->property_names();
   }
 

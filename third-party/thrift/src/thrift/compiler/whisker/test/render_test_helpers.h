@@ -83,11 +83,10 @@ class RenderTest : public testing::Test {
       return nullptr;
     }
 
-    std::optional<std::vector<std::string>> keys() const override {
-      std::vector<std::string> keys;
-      keys.reserve(values_.size());
+    std::optional<std::set<std::string>> keys() const override {
+      std::set<std::string> keys;
       for (const auto& [key, _] : values_) {
-        keys.push_back(key);
+        keys.insert(key);
       }
       return keys;
     }

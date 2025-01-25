@@ -531,6 +531,37 @@ TEST(ObjectTest, to_string) {
       "  |   | `-'baz'\n"
       "  |   |   |-...\n");
 
+  EXPECT_EQ(
+      to_string(w::proxy(manage_as_static(o)), with_depth(3)),
+      "map (size=4)\n"
+      "`-'abc'\n"
+      "  |-null\n"
+      "`-'baz'\n"
+      "  |-array (size=3)\n"
+      "  | `-[0]\n"
+      "  |   |-'foo'\n"
+      "  | `-[1]\n"
+      "  |   |-true\n"
+      "  | `-[2]\n"
+      "  |   |-<native_object>\n"
+      "`-'foo'\n"
+      "  |-i64(1)\n"
+      "`-'fun'\n"
+      "  |-array (size=3)\n"
+      "  | `-[0]\n"
+      "  |   |-f64(2)\n"
+      "  | `-[1]\n"
+      "  |   |-array (size=1)\n"
+      "  |   | `-[0]\n"
+      "  |   |   |-'foo'\n"
+      "  | `-[2]\n"
+      "  |   |-map (size=2)\n"
+      "  |   | `-'bar'\n"
+      "  |   |   |-i64(1)\n"
+      "  |   | `-'baz'\n"
+      "  |   |   |-...\n");
+  EXPECT_EQ(w::proxy(manage_as_static(o)), o);
+
   EXPECT_EQ(to_string(o, with_depth(4)), full_output);
   EXPECT_EQ(to_string(o, with_depth(5)), full_output);
 }

@@ -1182,6 +1182,29 @@ object native_handle(managed_ptr<T> value) {
   return object(whisker::native_handle<>(std::move(value)));
 }
 
+/**
+ * Creates a "proxy" object that behaves the same as the provided object. This
+ * function is useful, for example, for storing an owning reference to existing
+ * objects in an array or map without deep-copying.
+ *
+ * For primitive types (i64, f64, string, boolean, null), this returns a copy
+ * of the object, and so behaves like a value type.
+ *
+ * For arrays and maps, the returned object uses array_like and map_like
+ * respectively, and so behaves like a reference type.
+ *
+ * For native objects, native functions, and native handles, a copy of the
+ * underlying shared_ptr is stored, meaning that the underlying object is kept
+ * alive at least as long as the returned object.
+ *
+ * The returned object keeps the source object alive, as needed. For primitive
+ * types, ownership of the source is not necessary.
+ *
+ * Postconditions:
+ *   - proxy(object) == *object
+ */
+object proxy(const object::ptr& source);
+
 } // namespace make
 
 } // namespace whisker

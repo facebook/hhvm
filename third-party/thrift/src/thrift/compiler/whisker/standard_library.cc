@@ -194,6 +194,28 @@ map::value_type create_map_functions() {
         return manage_owned<object>(std::move(view));
       });
 
+  /**
+   * Determines if the provided map contains a given key.
+   *
+   * Name: map.has_key?
+   *
+   * Arguments:
+   *   - [map] — The map to check for key
+   *   - [string] — The key to check in the map
+   *
+   * Returns:
+   *   [boolean] if the provided key is in the map.
+   */
+  map_functions["has_key?"] = dsl::make_function(
+      "map.has_key?", [](dsl::function::context ctx) -> boolean {
+        ctx.declare_named_arguments({});
+        ctx.declare_arity(2);
+
+        dsl::map_like m = ctx.argument<map>(0);
+        managed_ptr<std::string> key = ctx.argument<string>(1);
+        return m.lookup_property(*key) != nullptr;
+      });
+
   return map::value_type{"map", std::move(map_functions)};
 }
 

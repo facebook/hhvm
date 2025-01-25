@@ -140,6 +140,27 @@ map::value_type create_string_functions() {
         return i64(ctx.argument<string>(0)->length());
       });
 
+  /**
+   * Produces the provided string concatenated together.
+   *
+   * Name: string.concat
+   *
+   * Arguments:
+   *   - [string...] — The strings to concatenate together (variadic).
+   *
+   * Returns:
+   *   [string] the combined string
+   */
+  string_functions["concat"] = dsl::make_function(
+      "string.concat", [](dsl::function::context ctx) -> string {
+        ctx.declare_named_arguments({});
+        std::string result;
+        for (std::size_t i = 0; i < ctx.arity(); ++i) {
+          result += *ctx.argument<string>(i);
+        }
+        return result;
+      });
+
   return map::value_type{"string", std::move(string_functions)};
 }
 

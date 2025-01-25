@@ -28,50 +28,6 @@ namespace whisker {
 
 namespace {
 
-class empty_native_object : public native_object {};
-
-class array_like_native_object
-    : public native_object,
-      public native_object::array_like,
-      public std::enable_shared_from_this<array_like_native_object> {
- public:
-  explicit array_like_native_object(array values)
-      : values_(std::move(values)) {}
-
-  native_object::array_like::ptr as_array_like() const override {
-    return shared_from_this();
-  }
-  std::size_t size() const override { return values_.size(); }
-  object::ptr at(std::size_t index) const override {
-    return manage_as_static(values_.at(index));
-  }
-
- private:
-  array values_;
-};
-
-class map_like_native_object
-    : public native_object,
-      public native_object::map_like,
-      public std::enable_shared_from_this<map_like_native_object> {
- public:
-  explicit map_like_native_object(map values) : values_(std::move(values)) {}
-
-  native_object::map_like::ptr as_map_like() const override {
-    return shared_from_this();
-  }
-
-  object::ptr lookup_property(std::string_view id) const override {
-    if (auto value = values_.find(id); value != values_.end()) {
-      return manage_as_static(value->second);
-    }
-    return nullptr;
-  }
-
- private:
-  map values_;
-};
-
 /**
  * When looking up a property, always returns a whisker::string that is the
  * property name repeated twice.

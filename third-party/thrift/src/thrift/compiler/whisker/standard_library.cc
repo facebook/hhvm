@@ -320,12 +320,64 @@ map::value_type create_int_functions() {
   return map::value_type{"int", std::move(int_functions)};
 }
 
+map::value_type create_object_functions() {
+  map object_functions;
+
+  /**
+   * Returns true if two objects are equal in value, otherwise false.
+   *
+   * Value equality between two (unordered) pair of objects is defined as
+   * follows:
+   *   - {null, null} → equal
+   *   - {i64, i64} → equal if same value
+   *   - {f64, f64} → equal if same value
+   *   - {string, string} → equal if same value
+   *   - {boolean, boolean} → equal if same value
+   *   - {array, array}
+   *        → equal if all corresponding elements are equal (recursive)
+   *   - {array, native_object::array_like}
+   *        → equal if all corresponding elements are equal (recursive)
+   *   - {map, map}
+   *        → equal if all key-value pairs are equal between the two maps
+   *          (recursive)
+   *   - {map, native_object::map_like}
+   *        → true if native_object::keys() presents enumerable property keys
+   *          and each key-value pairs are equal between the two maps
+   *          (recursive)
+   *   - {native_object, native_object}
+   *        → equal if both are equivalent array-like or equivalent map-like
+   *   - {native_function, native_function} → equal if same pointer to function
+   *   - {native_handle, native_handle} → equal if same pointer to handle
+   *   - all other pair of objects are NOT equal
+   *
+   * Name: object.eq?
+   *
+   * Arguments:
+   *   - [object] — The left-hand side of the comparison.
+   *   - [object] — The right-hand side of the comparison.
+   *
+   * Returns:
+   *   [boolean] if the two objects are equal.
+   */
+  object_functions["eq?"] = dsl::make_function(
+      "object.eq?", [](dsl::function::context ctx) -> boolean {
+        ctx.declare_named_arguments({});
+        ctx.declare_arity(2);
+        const object::ptr& lhs = ctx.raw().positional_arguments()[0];
+        const object::ptr& rhs = ctx.raw().positional_arguments()[1];
+        return *lhs == *rhs;
+      });
+
+  return map::value_type{"object", std::move(object_functions)};
+}
+
 } // namespace
 
 void load_standard_library(map& module) {
   module.emplace(create_array_functions());
   module.emplace(create_string_functions());
   module.emplace(create_int_functions());
+  module.emplace(create_object_functions());
 }
 
 } // namespace whisker

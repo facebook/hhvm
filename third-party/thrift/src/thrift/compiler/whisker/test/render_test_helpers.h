@@ -43,6 +43,59 @@ class RenderTest : public testing::Test {
  public:
   static const inline std::string path_to_file = "path/to/test.whisker";
 
+  class empty_native_object : public native_object {};
+
+  class array_like_native_object
+      : public native_object,
+        public native_object::array_like,
+        public std::enable_shared_from_this<array_like_native_object> {
+   public:
+    explicit array_like_native_object(array values)
+        : values_(std::move(values)) {}
+
+    native_object::array_like::ptr as_array_like() const override {
+      return shared_from_this();
+    }
+    std::size_t size() const override { return values_.size(); }
+    object::ptr at(std::size_t index) const override {
+      return manage_as_static(values_.at(index));
+    }
+
+   private:
+    array values_;
+  };
+
+  class map_like_native_object
+      : public native_object,
+        public native_object::map_like,
+        public std::enable_shared_from_this<map_like_native_object> {
+   public:
+    explicit map_like_native_object(map values) : values_(std::move(values)) {}
+
+    native_object::map_like::ptr as_map_like() const override {
+      return shared_from_this();
+    }
+
+    object::ptr lookup_property(std::string_view id) const override {
+      if (auto value = values_.find(id); value != values_.end()) {
+        return manage_as_static(value->second);
+      }
+      return nullptr;
+    }
+
+    std::optional<std::vector<std::string>> keys() const override {
+      std::vector<std::string> keys;
+      keys.reserve(values_.size());
+      for (const auto& [key, _] : values_) {
+        keys.push_back(key);
+      }
+      return keys;
+    }
+
+   private:
+    map values_;
+  };
+
  private:
   struct source_state {
     source_manager src_manager;

@@ -364,4 +364,117 @@ TEST_F(StandardLibraryTest, i64_math) {
   }
 }
 
+TEST_F(StandardLibraryTest, object_eq) {
+  strict_printable_types(diagnostic_level::info);
+
+  {
+    auto result = render(
+        "{{ (object.eq? 0 1) }}\n"
+        "{{ (object.eq? 1 1) }}\n"
+        "{{ (object.eq? \"foo\" 1) }}\n"
+        "{{ (object.eq? 1 null) }}\n"
+        "{{ (object.eq? false null) }}\n"
+        "{{ (object.eq? null null) }}\n",
+        w::null);
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(
+        *result,
+        "false\n"
+        "true\n"
+        "false\n"
+        "false\n"
+        "false\n"
+        "true\n");
+  }
+
+  {
+    const array a{w::i64(1), w::string("foo"), w::boolean(true)};
+    const map m{{"foo", w::string("bar")}, {"arr", w::array(array(a))}};
+    const auto context = w::map({
+        {"raw_array", w::array(array(a))},
+        {"wrapped_array", w::make_native_object<array_like_native_object>(a)},
+        {"raw_map", w::map(map(m))},
+        {"wrapped_map", w::make_native_object<map_like_native_object>(m)},
+    });
+
+    auto result = render(
+        "{{ (object.eq? raw_array raw_array) }}\n"
+        "{{ (object.eq? raw_map raw_map) }}\n"
+        "{{ (object.eq? \"foo\" raw_array) }}\n"
+        "{{ (object.eq? null raw_map) }}\n"
+        "{{ (object.eq? raw_array raw_map) }}\n",
+        context);
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(
+        *result,
+        "true\n"
+        "true\n"
+        "false\n"
+        "false\n"
+        "false\n");
+
+    result = render(
+        "{{ (object.eq? raw_array wrapped_array) }}\n"
+        "{{ (object.eq? wrapped_array raw_array) }}\n"
+        "{{ (object.eq? raw_map wrapped_map) }}\n"
+        "{{ (object.eq? wrapped_map raw_map) }}\n",
+        context);
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(
+        *result,
+        "true\n"
+        "true\n"
+        "true\n"
+        "true\n");
+  }
+
+  {
+    const array a1{w::i64(1), w::string("foo"), w::boolean(true)};
+    const array a2{w::i64(1), w::string("bar"), w::boolean(true)};
+    const auto context = w::map({
+        {"a1", w::array(array(a1))},
+        {"wrapped_a1", w::make_native_object<array_like_native_object>(a1)},
+        {"a2", w::array(array(a2))},
+        {"wrapped_a2", w::make_native_object<array_like_native_object>(a2)},
+    });
+    auto result = render(
+        "{{ (object.eq? a1 wrapped_a1) }}\n"
+        "{{ (object.eq? a1 a2) }}\n"
+        "{{ (object.eq? wrapped_a2 a1) }}\n"
+        "{{ (object.eq? wrapped_a2 a2) }}\n",
+        context);
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(
+        *result,
+        "true\n"
+        "false\n"
+        "false\n"
+        "true\n");
+  }
+
+  {
+    const map m1{{"foo", w::string("bar")}, {"baz", w::true_}};
+    const map m2{{"foo", w::string("bar")}, {"baz", w::false_}};
+    const auto context = w::map({
+        {"m1", w::map(map(m1))},
+        {"wrapped_m1", w::make_native_object<map_like_native_object>(m1)},
+        {"m2", w::map(map(m2))},
+        {"wrapped_m2", w::make_native_object<map_like_native_object>(m2)},
+    });
+    auto result = render(
+        "{{ (object.eq? m1 wrapped_m1) }}\n"
+        "{{ (object.eq? m1 m2) }}\n"
+        "{{ (object.eq? wrapped_m2 m1) }}\n"
+        "{{ (object.eq? wrapped_m2 m2) }}\n",
+        context);
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(
+        *result,
+        "true\n"
+        "false\n"
+        "false\n"
+        "true\n");
+  }
+}
+
 } // namespace whisker

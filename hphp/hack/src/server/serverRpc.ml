@@ -406,15 +406,6 @@ let handle :
   | ServerCommandTypes.FILE_DEPENDENTS filenames ->
     let files = ServerFileDependents.go genv env filenames in
     (env, files)
-  | ServerCommandTypes.IDENTIFY_TYPES (labelled_file, line, column) ->
-    let (path, file_input) =
-      ServerCommandTypesUtils.extract_labelled_file labelled_file
-    in
-    let (ctx, entry) = single_ctx env path file_input in
-    let result =
-      ServerTypeDefinition.go_quarantined ~ctx ~entry ~line ~column
-    in
-    (env, result)
   | ServerCommandTypes.VERBOSE verbose ->
     if verbose then
       Hh_logger.Level.set_min_level Hh_logger.Level.Debug

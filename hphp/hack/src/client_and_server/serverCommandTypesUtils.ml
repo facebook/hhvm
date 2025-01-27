@@ -39,7 +39,6 @@ let debug_describe_t : type a. a t -> string = function
   | FUN_DEPS_BATCH _ -> "FUN_DEPS_BATCH"
   | LIST_FILES_WITH_ERRORS -> "LIST_FILES_WITH_ERRORS"
   | FILE_DEPENDENTS _ -> "FILE_DEPENDENTS"
-  | IDENTIFY_TYPES _ -> "IDENTIFY_TYPES"
   | VERBOSE _ -> "VERBOSE"
   | DEPS_OUT_BATCH _ -> "DEPS_OUT_BATCH"
   | DEPS_IN_BATCH _ -> "DEPS_IN_BATCH"
@@ -70,13 +69,3 @@ let debug_describe_message_type : type a. a message_type -> string = function
   | Monitor_failed_to_handoff -> "Monitor_failed_to_handoff"
   | Ping -> "Ping"
   | Response _ -> "Response"
-
-let extract_labelled_file (labelled_file : ServerCommandTypes.labelled_file) :
-    Relative_path.t * ServerCommandTypes.file_input =
-  match labelled_file with
-  | ServerCommandTypes.LabelledFileName filename ->
-    let path = Relative_path.create_detect_prefix filename in
-    (path, ServerCommandTypes.FileName filename)
-  | ServerCommandTypes.LabelledFileContent { filename; content } ->
-    let path = Relative_path.create_detect_prefix filename in
-    (path, ServerCommandTypes.FileContent content)

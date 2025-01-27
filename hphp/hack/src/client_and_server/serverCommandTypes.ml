@@ -309,14 +309,6 @@ type file_input =
   | FileContent of string
 [@@deriving show]
 
-type labelled_file =
-  | LabelledFileName of string
-  | LabelledFileContent of {
-      filename: string;
-      content: string;
-    }
-[@@deriving show]
-
 type lint_stdin_input = {
   filename: string;
   contents: string;
@@ -406,7 +398,6 @@ type _ t =
   | FUN_DEPS_BATCH : (string * int * int) list -> string list t
   | LIST_FILES_WITH_ERRORS : string list t
   | FILE_DEPENDENTS : string list -> string list t
-  | IDENTIFY_TYPES : labelled_file * int * int -> (Pos.absolute * string) list t
   | VERBOSE : bool -> unit t
   | DEPS_OUT_BATCH : (string * int * int) list -> string list t
   | DEPS_IN_BATCH :
@@ -499,7 +490,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | FUN_DEPS_BATCH _ -> false
   | DEPS_OUT_BATCH _ -> false
   | FILE_DEPENDENTS _ -> true
-  | IDENTIFY_TYPES _ -> false
   | VERBOSE _ -> false
   | DEPS_IN_BATCH _ -> true
 

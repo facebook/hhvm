@@ -296,7 +296,7 @@ struct Layout : public LayoutBase {
   static_assert(
       sizeof(T) == 0,
       "Objects of this type cannot be frozen yet.\n"
-      "Be sure to 'frozen2' cpp option was enabled and "
+      "Be sure the 'frozen2' cpp option was enabled and "
       "'#include \"..._layouts.h\"'");
 };
 

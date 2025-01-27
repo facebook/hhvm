@@ -198,11 +198,17 @@ TEST_F(ParserTest, mismatched_section_hierarchy) {
   EXPECT_FALSE(ast.has_value());
   EXPECT_THAT(
       diagnostics,
-      testing::ElementsAre(diagnostic(
-          diagnostic_level::error,
-          "section-block opening 'update.is-important?' does not match closing 'news.has-update?'",
-          path_to_file(1),
-          5)));
+      testing::ElementsAre(
+          diagnostic(
+              diagnostic_level::error,
+              "section-block opening 'update.is-important?' does not match closing 'news.has-update?'",
+              path_to_file(1),
+              5),
+          diagnostic(
+              diagnostic_level::error,
+              "section-block opening 'news.has-update?' does not match closing 'update.is-important?'",
+              path_to_file(1),
+              6)));
 }
 
 TEST_F(ParserTest, section_open_by_itself) {

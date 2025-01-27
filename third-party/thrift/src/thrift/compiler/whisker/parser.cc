@@ -23,7 +23,6 @@
 #include <fmt/core.h>
 
 #include <cassert>
-#include <cstddef>
 #include <iterator>
 #include <map>
 #include <optional>
@@ -553,6 +552,13 @@ class parser {
   std::vector<token> tokens_;
   diagnostics_engine& diags_;
   standalone_lines_scanner::result standalone_markings_;
+  /**
+   * Whether the parser has encountered non-fatal errors. This is used to signal
+   * that the parsing should eventually fail but the parser has made an attempt
+   * to recover from the error in order to provide other potentially useful
+   * diagnostics that arise from parsing.
+   */
+  bool has_non_fatal_errors_ = false;
 
   // Reports an error without failing the parse.
   template <typename... T>
@@ -560,6 +566,7 @@ class parser {
       const parser_scan_window& scan,
       fmt::format_string<T...> msg,
       T&&... args) {
+    has_non_fatal_errors_ = true;
     diags_.error(scan.head_location(), msg, std::forward<T>(args)...);
   }
 
@@ -624,6 +631,11 @@ class parser {
         } else {
           report_fatal_expected(scan, expected_types);
         }
+      }
+      if (has_non_fatal_errors_) {
+        // Even though parsing continued after failure, the error-recovered AST
+        // is not valid.
+        return std::nullopt;
       }
       return ast::root{original_scan.start_location(), std::move(bodies)};
     } catch (const parse_error&) {
@@ -1041,9 +1053,7 @@ class parser {
     ast::variable_lookup close =
         std::move(lookup_at_close).consume_and_advance(&scan);
 
-    bool should_fail = false;
     if (open != close) {
-      should_fail = true;
       report_error(
           scan,
           "section-block opening '{}' does not match closing '{}'",
@@ -1051,15 +1061,11 @@ class parser {
           close.chain_string());
     }
     if (!try_consume_token(&scan, tok::close)) {
-      should_fail = true;
       report_error(
           scan,
           "expected {} to close section-block '{}'",
           tok::close,
           open.chain_string());
-    }
-    if (should_fail) {
-      throw parse_error();
     }
 
     return {
@@ -1386,7 +1392,7 @@ class parser {
     }
     ast::expression close = {std::move(condition).consume_and_advance(&scan)};
     if (close != open) {
-      report_fatal_error(
+      report_error(
           scan,
           "conditional-block opening '{}' does not match closing '{}'",
           open.to_string(),

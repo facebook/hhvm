@@ -141,12 +141,11 @@ let replace_pos_of_id ?(strip_xhp_colon = false) (pos, text) :
   Ide_api_types.(
     let range = pos_to_range pos in
     let ed =
-      {
-        range.ed with
-        column = range.ed.column - AutocompleteTypes.autocomplete_token_length;
-      }
+      File_content.Position.move_back
+        range.ed
+        AutocompleteTypes.autocomplete_token_length
     in
-    let st = { range.st with column = ed.column - String.length name } in
+    let st = File_content.Position.move_back ed (String.length name) in
     { st; ed })
 
 let autocomplete_result_to_json res =
@@ -903,7 +902,7 @@ let autocomplete_hack_fake_arrow
     Ide_api_types.
       {
         prop_replace_pos with
-        st = { prop_start with column = prop_start.column - 2 };
+        st = File_content.Position.move_back prop_start 2;
       }
   in
 

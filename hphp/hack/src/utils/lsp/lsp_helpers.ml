@@ -139,7 +139,7 @@ let hack_pos_to_lsp_range ~(equal : 'a -> 'a -> bool) (pos : 'a Pos.pos) :
   if Pos.equal_pos equal pos (Pos.make_from (Pos.filename pos)) then
     { start = { line = 0; character = 0 }; end_ = { line = 0; character = 0 } }
   else
-    let (line1, col1, line2, col2) = Pos.destruct_range pos in
+    let (line1, col1, line2, col2) = Pos.destruct_range_one_based pos in
     {
       start = { line = line1 - 1; character = col1 - 1 };
       end_ = { line = line2 - 1; character = col2 - 1 };

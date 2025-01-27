@@ -1282,20 +1282,19 @@ let find_ide_range_exn src : Ide_api_types.range =
           String.is_substring line ~substring:marker)
     in
     let find_marker marker after_or_before =
-      let+ (line_zero_indexed, start_line_src) = find_line marker in
-      let line = line_zero_indexed + 1 in
+      let+ (line, start_line_src) = find_line marker in
       let column =
         let marker_start =
           Str.search_forward (Str.regexp_string marker) start_line_src 0
         in
         let column_adjustment =
           match after_or_before with
-          | `After -> String.length marker + 1
-          | `Before -> 1
+          | `After -> String.length marker
+          | `Before -> 0
         in
         marker_start + column_adjustment
       in
-      Ide_api_types.{ line; column }
+      File_content.Position.from_zero_based line column
     in
     let* st = find_marker start_marker `After in
     let+ ed = find_marker end_marker `Before in
@@ -1305,7 +1304,7 @@ let find_ide_range_exn src : Ide_api_types.range =
   let find_ide_range_from_caret_comment src : Ide_api_types.range option =
     let find_ide_pos marker =
       let+ (line, column) = caret_pos src marker in
-      Ide_api_types.{ line; column }
+      File_content.Position.from_one_based line column
     in
     let+ st = find_ide_pos hover_at_caret_marker in
     Ide_api_types.{ st; ed = st }

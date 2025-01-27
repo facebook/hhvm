@@ -547,7 +547,7 @@ let compare = compare_pos Relative_path.compare
 let compare_absolute = compare_pos String.compare
 
 (* This returns a half-open interval. *)
-let destruct_range (p : 'a pos) : int * int * int * int =
+let destruct_range_one_based (p : 'a pos) : int * int * int * int =
   let (line_start, col_start_minus1) = line_column p in
   let (line_end, col_end_minus1) = end_line_column p in
   (line_start, col_start_minus1 + 1, line_end, col_end_minus1 + 1)
@@ -608,7 +608,9 @@ let rec shrink_by_one_char_both_sides (p : 'a pos) : 'a pos =
 
 (* This returns a half-open interval. *)
 let multiline_string t =
-  let (line_start, char_start, line_end, char_end) = destruct_range t in
+  let (line_start, char_start, line_end, char_end) =
+    destruct_range_one_based t
+  in
   Printf.sprintf
     "File %S, line %d, character %d - line %d, character %d:"
     (String.strip (filename t))
@@ -619,7 +621,9 @@ let multiline_string t =
 
 (* This returns a half-open interval. *)
 let multiline_string_no_file t =
-  let (line_start, char_start, line_end, char_end) = destruct_range t in
+  let (line_start, char_start, line_end, char_end) =
+    destruct_range_one_based t
+  in
   Printf.sprintf
     "line %d, character %d - line %d, character %d"
     line_start
@@ -629,7 +633,9 @@ let multiline_string_no_file t =
 
 (* This returns a half-open interval. *)
 let multiline_json t =
-  let (line_start, char_start, line_end, char_end) = destruct_range t in
+  let (line_start, char_start, line_end, char_end) =
+    destruct_range_one_based t
+  in
   let fn = filename t in
   Hh_json.JSON_Object
     [
@@ -641,7 +647,9 @@ let multiline_json t =
     ]
 
 let multiline_json_no_filename t =
-  let (line_start, char_start, line_end, char_end) = destruct_range t in
+  let (line_start, char_start, line_end, char_end) =
+    destruct_range_one_based t
+  in
   Hh_json.JSON_Object
     [
       ("line_start", Hh_json.int_ line_start);

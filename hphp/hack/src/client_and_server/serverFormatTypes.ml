@@ -15,7 +15,7 @@ type result = (string, string) Stdlib.result
 type ide_action =
   | Document
   | Range of Ide_api_types.range
-  | Position of Ide_api_types.position
+  | Position of File_content.Position.t
 
 type ide_response = {
   new_text: string;

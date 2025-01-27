@@ -9,22 +9,15 @@
 
 open Hh_prelude
 
-(* 1-based position is used here *)
-type position = {
-  line: int;
-  column: int;
-}
-[@@deriving show]
-
 type range = {
-  st: position;
-  ed: position;
+  st: File_content.Position.t;
+  ed: File_content.Position.t;
 }
 [@@deriving show]
 
 type file_position = {
   filename: string;
-  position: position;
+  position: File_content.Position.t;
 }
 
 type file_range = {
@@ -38,37 +31,23 @@ type text_edit = {
 }
 [@@deriving show]
 
-let ide_pos_to_fc (x : position) : File_content.Position.t =
-  let (line, column) = (x.line, x.column) in
-  File_content.Position.from_one_based line column
+let ide_range_from_fc { File_content.st; ed } = { st; ed }
 
-let ide_range_to_fc (x : range) : File_content.range =
-  let (st, ed) = (x.st |> ide_pos_to_fc, x.ed |> ide_pos_to_fc) in
-  { File_content.st; ed }
-
-let ide_text_edit_to_fc (x : text_edit) : File_content.text_edit =
-  let (text, range) = (x.text, x.range |> Option.map ~f:ide_range_to_fc) in
-  { File_content.text; range }
-
-let ide_pos_from_fc (x : File_content.Position.t) : position =
-  let (line, column) = File_content.Position.line_column_one_based x in
-  { line; column }
-
-let ide_range_from_fc (x : File_content.range) : range =
-  let (st, ed) =
-    (x.File_content.st |> ide_pos_from_fc, x.File_content.ed |> ide_pos_from_fc)
-  in
-  { st; ed }
+let ide_range_to_fc { st; ed } = { File_content.st; ed }
 
 let pos_to_range x =
-  let (st_line, st_column, ed_line, ed_column) = Pos.destruct_range x in
+  let (st_line, st_column, ed_line, ed_column) =
+    Pos.destruct_range_one_based x
+  in
   {
-    st = { line = st_line; column = st_column };
-    ed = { line = ed_line; column = ed_column };
+    st = File_content.Position.from_one_based st_line st_column;
+    ed = File_content.Position.from_one_based ed_line ed_column;
   }
 
 let pos_to_file_range x =
   { range_filename = Pos.filename x; file_range = pos_to_range x }
 
-let range_to_string_single_line x =
-  Printf.sprintf "line %d, characters %d-%d" x.st.line x.st.column x.ed.column
+let range_to_string_single_line { st; ed } =
+  let (line, start_c) = File_content.Position.line_column_one_based st in
+  let (_, end_c) = File_content.Position.line_column_one_based ed in
+  Printf.sprintf "line %d, characters %d-%d" line start_c end_c

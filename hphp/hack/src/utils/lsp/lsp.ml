@@ -36,8 +36,8 @@ let uri_of_string (s : string) : DocumentUri.t = DocumentUri.Uri s
 let string_of_uri (DocumentUri.Uri s) : string = s
 
 type position = {
-  line: int;
-  character: int;
+  line: int;  (** zero-based *)
+  character: int;  (** zero-based *)
 }
 [@@deriving eq, of_yojson]
 

@@ -10,7 +10,7 @@ open Hh_prelude
 open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
 module Position : sig
-  type t [@@deriving eq, ord, yojson_of]
+  type t [@@deriving eq, ord, show, yojson_of]
 
   val from_one_based : int -> int -> t
 
@@ -31,12 +31,14 @@ module Position : sig
   val next_char : t -> t
 
   val to_string_one_based : t -> string
+
+  val move_back : t -> int -> t
 end = struct
   type t = {
     line: int;  (** 1-based *)
     column: int;  (** 1-based *)
   }
-  [@@deriving eq, ord, yojson_of]
+  [@@deriving eq, ord, show, yojson_of]
 
   let first_line = 1
 
@@ -62,6 +64,8 @@ end = struct
   let next_char { line; column } = { line; column = column + 1 }
 
   let to_string_one_based { line; column } = Printf.sprintf "%d:%d" line column
+
+  let move_back { line; column } n = { line; column = column - n }
 end
 
 type range = {

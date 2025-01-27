@@ -44,19 +44,8 @@ let highlight_symbol ctx entry line char symbol =
   in
   List.map res ~f:Ide_api_types.pos_to_range
 
-let compare r1 r2 =
-  Ide_api_types.(
-    let (s1, s2) = (r1.st, r2.st) in
-    if s1.line < s2.line then
-      -1
-    else if s1.line > s2.line then
-      1
-    else if s1.column < s2.column then
-      -1
-    else if s1.column > s2.column then
-      1
-    else
-      0)
+let compare_starts r1 r2 =
+  File_content.Position.compare r1.Ide_api_types.st r2.Ide_api_types.st
 
 let go_quarantined
     ~(ctx : Provider_context.t)
@@ -76,5 +65,5 @@ let go_quarantined
         let stuff = highlight_symbol ctx entry line column s in
         List.append stuff acc)
   in
-  let results = List.dedup_and_sort ~compare results in
+  let results = List.dedup_and_sort ~compare:compare_starts results in
   results

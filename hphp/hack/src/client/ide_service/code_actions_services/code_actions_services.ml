@@ -21,11 +21,13 @@ open Hh_prelude
 
 let lsp_range_of_ide_range (ide_range : Ide_api_types.range) : Lsp.range =
   let lsp_pos_of_ide_pos ide_pos =
-    Lsp.
-      {
-        line = ide_pos.Ide_api_types.line;
-        character = ide_pos.Ide_api_types.column;
-      }
+    let (line, character) =
+      (* TODO: this looks like a buck because according to documentation
+         Lsp.position is zero-based, so it should probably be `File_content.Position.line_column_zero_based`
+         here *)
+      File_content.Position.line_column_one_based ide_pos
+    in
+    Lsp.{ line; character }
   in
   Lsp.
     {

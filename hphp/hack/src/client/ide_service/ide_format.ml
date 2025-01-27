@@ -234,8 +234,7 @@ let go_ide
   | Position position ->
     (* `get_offset` returns a zero-based index, and `--at-char` takes a
        zero-based index. *)
-    let fc_position = Ide_api_types.ide_pos_to_fc position in
-    let offset = get_offset content fc_position in
+    let offset = get_offset content position in
     let args = ["--at-char"; string_of_int offset] in
     let args = args @ formatting_args in
     go_hackfmt ~filename_for_logging ~content args >>= fun lines ->

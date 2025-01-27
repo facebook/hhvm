@@ -1932,7 +1932,9 @@ let pos_or_decl_to_json pos_or_decl =
   if Pos_or_decl.is_hhi pos_or_decl then
     let pos = Pos_or_decl.unsafe_to_raw_pos pos_or_decl in
 
-    let (line_start, char_start, line_end, char_end) = Pos.destruct_range pos in
+    let (line_start, char_start, line_end, char_end) =
+      Pos.destruct_range_one_based pos
+    in
     let fn =
       let raw = Pos.filename @@ Pos.to_relative_string pos in
       match String.split raw ~on:'/' with

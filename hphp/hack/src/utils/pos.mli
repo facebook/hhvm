@@ -58,9 +58,9 @@ val info_pos_extended : 'a pos -> int * int * int * int
 (** Return start character number and end character number. *)
 val info_raw : 'a pos -> int * int
 
-(** Return start line, start column, end line and end column.
+(** Return start line, start column, end line and end column, as 1-based indices.
     This returns a half-open interval. *)
-val destruct_range : 'a pos -> int * int * int * int
+val destruct_range_one_based : 'a pos -> int * int * int * int
 
 val length : 'a pos -> int
 

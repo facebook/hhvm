@@ -8,7 +8,7 @@
  *)
 
 module Position : sig
-  type t [@@deriving ord]
+  type t [@@deriving ord, show]
 
   val beginning_of_file : t
 
@@ -25,6 +25,10 @@ module Position : sig
   val beginning_of_next_line : t -> t
 
   val is_beginning_of_line : t -> bool
+
+  val move_back : t -> int -> t
+
+  val to_string_one_based : t -> string
 end
 
 type range = {

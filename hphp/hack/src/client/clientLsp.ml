@@ -1010,16 +1010,18 @@ let lsp_uri_to_path = Lsp_helpers.lsp_uri_to_path
 
 let path_string_to_lsp_uri = Lsp_helpers.path_string_to_lsp_uri
 
-let lsp_position_to_ide (position : Lsp.position) : Ide_api_types.position =
-  { Ide_api_types.line = position.line + 1; column = position.character + 1 }
+let lsp_position_to_ide ({ Lsp.line; character } : Lsp.position) :
+    File_content.Position.t =
+  File_content.Position.from_zero_based line character
 
 let lsp_file_position_to_hack (params : Lsp.TextDocumentPositionParams.t) :
     string * int * int =
   let open Lsp.TextDocumentPositionParams in
-  let { Ide_api_types.line; column } = lsp_position_to_ide params.position in
+  let pos = lsp_position_to_ide params.position in
   let filename =
     Lsp_helpers.lsp_textDocumentIdentifier_to_filename params.textDocument
   in
+  let (line, column) = File_content.Position.line_column_one_based pos in
   (filename, line, column)
 
 let rename_params_to_document_position (params : Lsp.Rename.params) :
@@ -1051,18 +1053,19 @@ let hack_pos_to_lsp_location (pos : Pos.absolute) ~(default_path : string) :
       range = Lsp_helpers.hack_pos_to_lsp_range ~equal:String.equal pos;
     }
 
-let ide_range_to_lsp (range : Ide_api_types.range) : Lsp.range =
+let ide_range_to_lsp ({ Ide_api_types.st; ed } : Ide_api_types.range) :
+    Lsp.range =
   {
     Lsp.start =
-      {
-        Lsp.line = range.Ide_api_types.st.Ide_api_types.line - 1;
-        character = range.Ide_api_types.st.Ide_api_types.column - 1;
-      };
+      (let (line, character) =
+         File_content.Position.line_column_zero_based st
+       in
+       { Lsp.line; character });
     end_ =
-      {
-        Lsp.line = range.Ide_api_types.ed.Ide_api_types.line - 1;
-        character = range.Ide_api_types.ed.Ide_api_types.column - 1;
-      };
+      (let (line, character) =
+         File_content.Position.line_column_zero_based ed
+       in
+       { Lsp.line; character });
   }
 
 let lsp_range_to_ide (range : Lsp.range) : Ide_api_types.range =

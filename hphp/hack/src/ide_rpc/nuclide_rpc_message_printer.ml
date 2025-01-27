@@ -143,13 +143,16 @@ let symbol_by_id_response_to_json = function
 
 let highlight_references_response_to_json l =
   JSON_Array
-    (List.map l ~f:(fun x ->
-         Ide_api_types.(
-           Hh_json.JSON_Object
-             [
-               ("line", Hh_json.int_ x.st.line);
-               ("char_start", Hh_json.int_ x.st.column);
-               ("char_end", Hh_json.int_ x.ed.column);
-             ])))
+    (List.map l ~f:(fun { Ide_api_types.st; ed } ->
+         let (line, char_start) =
+           File_content.Position.line_column_one_based st
+         in
+         let (_, char_end) = File_content.Position.line_column_one_based ed in
+         Hh_json.JSON_Object
+           [
+             ("line", Hh_json.int_ line);
+             ("char_start", Hh_json.int_ char_start);
+             ("char_end", Hh_json.int_ char_end);
+           ]))
 
 let print_json json = Hh_json.json_to_string json |> print_endline

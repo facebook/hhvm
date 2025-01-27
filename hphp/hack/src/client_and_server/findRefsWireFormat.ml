@@ -16,7 +16,9 @@ type half_open_one_based = {
 }
 
 let from_absolute (pos : Pos.absolute) : half_open_one_based =
-  let (line, char_start, _line_end, char_end) = Pos.destruct_range pos in
+  let (line, char_start, _line_end, char_end) =
+    Pos.destruct_range_one_based pos
+  in
   let filename = Pos.filename pos in
   { filename; line; char_start; char_end }
 

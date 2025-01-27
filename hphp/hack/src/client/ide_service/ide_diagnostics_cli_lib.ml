@@ -60,7 +60,9 @@ let merge_underlines underlines =
   | hd :: tl -> List.sort ~compare (merge_acc [] hd tl)
 
 let pos_to_underlines source_text (pos : Pos.absolute) : underline list IMap.t =
-  let (start_line, start_col, end_line, end_col) = Pos.destruct_range pos in
+  let (start_line, start_col, end_line, end_col) =
+    Pos.destruct_range_one_based pos
+  in
 
   (* For each line, we'll have to calculate where to put the underline *)
   let num_lines = end_line - start_line + 1 in

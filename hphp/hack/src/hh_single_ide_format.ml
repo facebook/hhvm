@@ -27,17 +27,10 @@ let run_hackfmt filename : string =
   | Ok Lwt_utils.Process_success.{ stdout; _ } -> stdout
   | Error failure -> failwith (Lwt_utils.Process_failure.to_string failure)
 
-let str_of_range
-    Ide_api_types.
-      {
-        st = { line = start_line; column = start_column };
-        ed = { line = end_line; column = end_column };
-      } =
-  (Printf.sprintf "%d:%d-%d:%d (1-indexed)")
-    start_line
-    start_column
-    end_line
-    end_column
+let str_of_range Ide_api_types.{ st; ed } =
+  (Printf.sprintf "%s-%s (1-indexed)")
+    (File_content.Position.to_string_one_based st)
+    (File_content.Position.to_string_one_based ed)
 
 let with_line_numbers (code : string) : string =
   String.split_lines code
@@ -46,30 +39,20 @@ let with_line_numbers (code : string) : string =
 
 let apply_edit
     (orig_code : string)
-    ServerFormatTypes.
-      {
-        new_text;
-        range =
-          Ide_api_types.
-            (* 1-indexed *)
-          {
-            st = { line = start_line; column = start_column };
-            ed = { line = end_line; column = end_column };
-          };
-      } : string =
+    ServerFormatTypes.{ new_text; range = Ide_api_types.{ st; ed } } : string =
   (* We expect only changed lines, not column-level information. Update the test if this changes *)
-  assert (start_column = 1);
-  assert (end_column = 1);
+  assert (File_content.Position.is_beginning_of_line st);
+  assert (File_content.Position.is_beginning_of_line ed);
   let orig_lines = String.split_lines orig_code in
+  let (start_line, _) = File_content.Position.line_column_zero_based st in
+  let (end_line, _) = File_content.Position.line_column_zero_based ed in
   let before_lines =
-    List.filteri orig_lines ~f:(fun i (*0-indexed*) _orig_line ->
-        let line_number = i + 1 in
+    List.filteri orig_lines ~f:(fun line_number (*0-indexed*) _orig_line ->
         line_number < start_line)
   in
   let lines_to_insert = String.split_lines new_text in
   let after_lines =
-    List.filteri orig_lines ~f:(fun i (*0-indexed*) _orig_line ->
-        let line_number = i + 1 in
+    List.filteri orig_lines ~f:(fun line_number (*0-indexed*) _orig_line ->
         line_number >= end_line)
   in
   let updated_code_lines = before_lines @ lines_to_insert @ after_lines in

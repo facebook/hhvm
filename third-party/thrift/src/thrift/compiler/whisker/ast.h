@@ -252,7 +252,7 @@ struct expression {
      *
      * Using std::map for stable ordering when printing the AST.
      */
-    std::map<std::string_view, named_argument> named_arguments;
+    std::map<std::string, named_argument> named_arguments;
 
     /**
      * The name of the function call lookup as seen in the source code.

@@ -1150,7 +1150,7 @@ class parser {
         if (parse_result expr = parse_expression(scan.make_fresh())) {
           return {
               named_argument_entry{
-                  id.string_value(),
+                  std::string(id.string_value()),
                   function_call::named_argument{
                       make_identifier(id),
                       std::make_unique<expression>(

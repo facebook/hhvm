@@ -51,7 +51,7 @@ int JitLoader::WorkerThreadsDefault() {
 }
 
 int JitLoader::WorkerArenasDefault() {
-  return std::max(1, Process::GetCPUCount() / 4);
+  return std::max(1, Process::GetCPUCount() / 8);
 }
 
 uint32_t JitLoader::ProfileRequestsDefault() {

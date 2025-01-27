@@ -573,6 +573,7 @@ let to_string (error : Errors.finalized_error) : string =
     quickfixes = _;
     flags = _;
     is_fixmed = _;
+    function_pos = _;
   } =
     error
   in

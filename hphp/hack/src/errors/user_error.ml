@@ -39,6 +39,7 @@ type ('prim_pos, 'pos) t = {
   custom_msgs: string list;
   is_fixmed: bool;
   flags: User_error_flags.t;
+  function_pos: 'prim_pos option;
 }
 [@@deriving eq, hash, ord, show]
 
@@ -49,6 +50,7 @@ let make
     ?(quickfixes = [])
     ?(custom_msgs = [])
     ?(flags = User_error_flags.empty)
+    ?function_pos
     claim
     reasons
     explanation =
@@ -62,10 +64,19 @@ let make
     custom_msgs;
     is_fixmed;
     flags;
+    function_pos;
   }
 
 let make_err
-    code ?is_fixmed ?quickfixes ?custom_msgs ?flags claim reasons explanation =
+    code
+    ?is_fixmed
+    ?quickfixes
+    ?custom_msgs
+    ?flags
+    ?function_pos
+    claim
+    reasons
+    explanation =
   make
     Err
     code
@@ -73,6 +84,7 @@ let make_err
     ?quickfixes
     ?custom_msgs
     ?flags
+    ?function_pos
     claim
     reasons
     explanation
@@ -113,12 +125,14 @@ let to_absolute
       custom_msgs;
       is_fixmed;
       flags;
+      function_pos;
     } =
   let pos_or_decl_to_absolute_pos pos_or_decl =
     let pos = Pos_or_decl.unsafe_to_raw_pos pos_or_decl in
     Pos.to_absolute pos
   in
   let claim = (fst claim |> Pos.to_absolute, snd claim) in
+  let function_pos = Option.map ~f:Pos.to_absolute function_pos in
   let reasons =
     List.map reasons ~f:(fun (p, s) -> (pos_or_decl_to_absolute_pos p, s))
   in
@@ -137,21 +151,10 @@ let to_absolute
     custom_msgs;
     is_fixmed;
     flags;
+    function_pos;
   }
 
-let to_relative
-    {
-      severity;
-      code;
-      claim;
-      reasons;
-      explanation;
-      quickfixes;
-      custom_msgs;
-      is_fixmed;
-      flags;
-    } : (Pos.t, Pos.t) t =
-  let claim = (fst claim, snd claim) in
+let to_relative ({ reasons; explanation; _ } as t) : (Pos.t, Pos.t) t =
   let reasons =
     List.map reasons ~f:(fun (p, s) -> (p |> Pos_or_decl.unsafe_to_raw_pos, s))
   in
@@ -159,17 +162,7 @@ let to_relative
     Explanation.map explanation ~f:(fun pos ->
         Pos_or_decl.unsafe_to_raw_pos pos)
   in
-  {
-    severity;
-    code;
-    claim;
-    reasons;
-    explanation;
-    quickfixes;
-    custom_msgs;
-    is_fixmed;
-    flags;
-  }
+  { t with reasons; explanation }
 
 let make_absolute severity code = function
   | [] -> failwith "an error must have at least one message"
@@ -184,6 +177,7 @@ let make_absolute severity code = function
       custom_msgs = [];
       is_fixmed = false;
       flags = User_error_flags.empty;
+      function_pos = None;
     }
 
 let to_absolute_for_test
@@ -197,6 +191,7 @@ let to_absolute_for_test
       custom_msgs;
       is_fixmed;
       flags;
+      function_pos;
     } =
   let f (p, s) =
     let p = Pos_or_decl.unsafe_to_raw_pos p in
@@ -217,6 +212,10 @@ let to_absolute_for_test
         Pos.to_absolute @@ Pos_or_decl.unsafe_to_raw_pos pos)
   in
   let quickfixes = List.map quickfixes ~f:Quickfix.to_absolute in
+  let function_pos =
+    Option.map function_pos ~f:(fun pos ->
+        fst @@ f (Pos_or_decl.of_raw_pos pos, ()))
+  in
   {
     severity;
     code;
@@ -227,6 +226,7 @@ let to_absolute_for_test
     custom_msgs;
     is_fixmed;
     flags;
+    function_pos;
   }
 
 let error_kind error_code =
@@ -255,18 +255,7 @@ let error_code_to_string error_code =
       And this too
   *)
 let to_string
-    report_pos_from_reason
-    {
-      severity;
-      code;
-      claim;
-      reasons;
-      explanation = _;
-      custom_msgs;
-      quickfixes = _;
-      is_fixmed = _;
-      flags = _;
-    } =
+    report_pos_from_reason { severity; code; claim; reasons; custom_msgs; _ } =
   let buf = Buffer.create 50 in
   let (pos1, msg1) = claim in
   Buffer.add_string
@@ -306,17 +295,7 @@ let to_string
 
 let to_json ~(human_formatter : (_ -> string) option) ~filename_to_string error
     =
-  let {
-    severity;
-    code;
-    claim;
-    reasons;
-    explanation = _;
-    custom_msgs;
-    quickfixes = _;
-    is_fixmed = _;
-    flags;
-  } =
+  let { severity; code; claim; reasons; flags; custom_msgs; function_pos; _ } =
     error
   in
   let msgl = claim :: reasons in
@@ -339,17 +318,27 @@ let to_json ~(human_formatter : (_ -> string) option) ~filename_to_string error
   let flags = User_error_flags.to_json flags in
   let human_format = Option.map ~f:(fun f -> f error) human_formatter in
   let obj =
-    [
-      ("severity", Hh_json.JSON_String (Severity.to_string severity));
-      ("message", Hh_json.JSON_Array elts);
-      ("custom_messages", Hh_json.JSON_Array custom_msgs);
-      ("flags", flags);
-    ]
-  in
-  let obj =
-    match human_format with
-    | None -> obj
-    | Some human_format ->
-      obj @ [("human_format", Hh_json.JSON_String human_format)]
+    ("severity", Hh_json.JSON_String (Severity.to_string severity))
+    :: ("message", Hh_json.JSON_Array elts)
+    :: ("custom_messages", Hh_json.JSON_Array custom_msgs)
+    :: ("flags", flags)
+    :: List.filter_opt
+         [
+           Option.map human_format ~f:(fun human_format ->
+               ("human_format", Hh_json.JSON_String human_format));
+           Option.map function_pos ~f:(fun pos ->
+               let (line, scol, ecol) = Pos.info_pos pos in
+               ( "function_pos",
+                 Hh_json.JSON_Object
+                   [
+                     ( "path",
+                       Hh_json.JSON_String
+                         (Pos.filename pos |> filename_to_string) );
+                     ("line", Hh_json.int_ line);
+                     ("start", Hh_json.int_ scol);
+                     ("end", Hh_json.int_ ecol);
+                     ("code", Hh_json.int_ code);
+                   ] ));
+         ]
   in
   Hh_json.JSON_Object obj

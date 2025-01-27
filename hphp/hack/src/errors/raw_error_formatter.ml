@@ -57,6 +57,7 @@ let to_string (error : Errors.finalized_error) : string =
     custom_msgs = _;
     is_fixmed = _;
     flags = _;
+    function_pos = _;
   } =
     error
   in

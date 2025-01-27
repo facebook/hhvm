@@ -6158,7 +6158,9 @@ end = struct
     aux ~k:Fn.id t
 
   let make_error
-      (code, claim, reasons, explanation, quickfixes, flags) ~custom_msgs =
+      (code, claim, reasons, explanation, quickfixes, flags)
+      ~custom_msgs
+      ~function_pos =
     User_error.make_err
       (Error_code.to_enum code)
       (Lazy.force claim)
@@ -6167,6 +6169,7 @@ end = struct
       ~flags
       ~quickfixes
       ~custom_msgs
+      ~function_pos
 
   let render_custom_error
       (t : (string, Custom_error_eval.Value.t) Base.Either.t list) ~env =
@@ -6193,7 +6196,8 @@ end = struct
       List.map ~f:(render_custom_error ~env)
       @@ Custom_error_eval.eval custom_err_config ~err:t
     in
-    Eval_result.map ~f:(make_error ~custom_msgs) result
+    let function_pos = Typing_env_types.(env.genv.function_pos) in
+    Eval_result.map ~f:(make_error ~custom_msgs ~function_pos) result
 end
 
 and Eval_secondary : sig
@@ -7966,6 +7970,7 @@ let apply_callback_to_errors errors on_error ~env =
           quickfixes = _;
           flags = _;
           is_fixmed = _;
+          function_pos = _;
         } =
     let code = Option.value_exn (Error_code.of_enum code) in
     Eval_result.iter ~f:Errors.add_error
@@ -8013,6 +8018,7 @@ let ambiguous_inheritance pos class_ origin error on_error ~env =
           custom_msgs = _;
           quickfixes = _;
           is_fixmed = _;
+          function_pos = _;
         } =
     error
   in

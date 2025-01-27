@@ -36,6 +36,7 @@ impl<PP, P> UserError<PP, P> {
             custom_msgs,
             is_fixmed: false,
             flags,
+            function_pos: None,
         }
     }
 
@@ -67,6 +68,7 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> UserError<PP, P> {
             quickfixes: _,
             is_fixmed: _,
             flags: _,
+            function_pos: _,
         } = self;
         let Self {
             severity: other_severity,
@@ -78,6 +80,7 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> UserError<PP, P> {
             quickfixes: _,
             is_fixmed: _,
             flags: _,
+            function_pos: _,
         } = other;
         let self_phase = self_code / 1000;
         let other_phase = other_code / 1000;

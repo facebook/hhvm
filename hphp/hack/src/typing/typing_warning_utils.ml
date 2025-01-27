@@ -479,6 +479,7 @@ let add tcopt (type a x) ((pos, kind, warning) : (x, a) Typing_warning.t) : unit
         flags = User_error_flags.empty;
         custom_msgs = [];
         is_fixmed = false;
+        function_pos = None;
       }
 
 let add_for_migration

@@ -29,6 +29,7 @@ type ('prim_pos, 'pos) t = {
   custom_msgs: string list;
   is_fixmed: bool;
   flags: User_error_flags.t;
+  function_pos: 'prim_pos option;
 }
 [@@deriving eq, hash, ord, show]
 
@@ -39,6 +40,7 @@ val make :
   ?quickfixes:'a Quickfix.t list ->
   ?custom_msgs:string list ->
   ?flags:User_error_flags.t ->
+  ?function_pos:'a ->
   'a Message.t ->
   'b Message.t list ->
   'b Explanation.t ->
@@ -51,6 +53,7 @@ val make_err :
   ?quickfixes:'a Quickfix.t list ->
   ?custom_msgs:string list ->
   ?flags:User_error_flags.t ->
+  ?function_pos:'a ->
   'a Message.t ->
   'b Message.t list ->
   'b Explanation.t ->

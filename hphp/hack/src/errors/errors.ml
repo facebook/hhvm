@@ -199,6 +199,7 @@ let try_with_result (f1 : unit -> 'res) (f2 : 'res -> error -> 'res) : 'res =
           quickfixes;
           custom_msgs;
           flags;
+          function_pos;
           is_fixmed = _;
         } ->
     (* Remove bad position sentinel if present: we might be about to add a new primary
@@ -223,6 +224,7 @@ let try_with_result (f1 : unit -> 'res) (f2 : 'res -> error -> 'res) : 'res =
          ~quickfixes
          ~custom_msgs
          ~flags
+         ?function_pos
 
 let try_with_result_pure ~fail f g =
   let error_map_copy = !error_map in
@@ -326,6 +328,7 @@ let compare_internal (x : ('a, 'b) User_error.t) (y : ('a, 'b) User_error.t) :
           quickfixes = _;
           is_fixmed = _;
           flags = _;
+          function_pos = _;
         } =
     x
   in
@@ -340,6 +343,7 @@ let compare_internal (x : ('a, 'b) User_error.t) (y : ('a, 'b) User_error.t) :
           quickfixes = _;
           is_fixmed = _;
           flags = _;
+          function_pos = _;
         } =
     y
   in
@@ -707,6 +711,7 @@ let add_error_with_fixme_error error explanation ~fixme_pos =
           quickfixes;
           custom_msgs;
           flags;
+          function_pos;
           is_fixmed = _;
         } =
     error
@@ -722,6 +727,7 @@ let add_error_with_fixme_error error explanation ~fixme_pos =
        ~quickfixes
        ~custom_msgs
        ~flags
+       ?function_pos
 
 let add_applied_fixme error =
   let error = { error with User_error.is_fixmed = true } in
@@ -841,6 +847,7 @@ let add_error (error : error) =
           quickfixes;
           custom_msgs;
           flags;
+          function_pos;
           is_fixmed = _;
         } =
     error
@@ -856,6 +863,7 @@ let add_error (error : error) =
       ~quickfixes
       ~custom_msgs
       ~flags
+      ?function_pos
   in
 
   let pos = fst claim in
@@ -1334,6 +1342,7 @@ let convert_errors_to_string ?(include_filename = false) (errors : error list) :
               quickfixes = _;
               is_fixmed = _;
               flags = _;
+              function_pos = _;
             } =
         err
       in

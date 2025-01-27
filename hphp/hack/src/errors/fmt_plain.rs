@@ -27,6 +27,7 @@ impl<'a> std::fmt::Display for FmtPlain<'a> {
                 quickfixes: _,
                 is_fixmed: _,
                 flags: _,
+                function_pos: _,
             },
             ctx,
         ) = self;

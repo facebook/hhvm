@@ -1162,6 +1162,7 @@ let ide_diagnostics_to_lsp_diagnostics
       is_fixmed = _;
       flags = _;
       quickfixes = _;
+      function_pos = _;
     } =
       diagnostic_error
     in

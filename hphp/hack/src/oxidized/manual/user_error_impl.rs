@@ -54,6 +54,7 @@ impl<PrimPos: WithErasedLines, Pos: WithErasedLines> WithErasedLines for UserErr
             custom_msgs,
             is_fixmed,
             flags,
+            function_pos,
         } = self;
         UserError {
             severity,
@@ -68,6 +69,7 @@ impl<PrimPos: WithErasedLines, Pos: WithErasedLines> WithErasedLines for UserErr
             custom_msgs,
             is_fixmed,
             flags,
+            function_pos,
         }
     }
 }

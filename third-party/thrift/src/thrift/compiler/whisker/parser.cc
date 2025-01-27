@@ -858,8 +858,8 @@ class parser {
       ast::each_block,
       ast::let_statement,
       ast::pragma_statement,
-      ast::partial_apply>;
-  // template → { interpolation | block | statement | partial-apply }
+      ast::macro>;
+  // template → { interpolation | block | statement | macro }
   // block → { section-block | conditional-block }
   // statement → { let-statement | pragma-statement }
   parse_result<template_body> parse_template(parser_scan_window scan) {
@@ -896,13 +896,12 @@ class parser {
       templ = std::move(pragma_statement).consume_and_advance(&scan);
     } else if (parse_result section_block = parse_section_block(scan)) {
       templ = std::move(section_block).consume_and_advance(&scan);
-    } else if (parse_result partial_apply = parse_partial_apply(scan)) {
-      templ = std::move(partial_apply).consume_and_advance(&scan);
+    } else if (parse_result macro = parse_macro(scan)) {
+      templ = std::move(macro).consume_and_advance(&scan);
     }
     if (!templ.has_value()) {
       report_fatal_expected(
-          scan,
-          "interpolation, block, statement, or partial-apply in template");
+          scan, "interpolation, block, statement, or macro in template");
     }
     return {std::move(*templ), scan};
   }
@@ -928,7 +927,7 @@ class parser {
         // this is a block closing
         return no_parse_result();
       case tok::gt:
-        // this is a partial-apply
+        // this is a macro
         return no_parse_result();
       default:
         // continue parsing as a variable (and fail if it's not!)
@@ -1543,9 +1542,8 @@ class parser {
         scan};
   }
 
-  // partial-apply → { "{{" ~ ">" ~ partial-lookup ~ "}}" }
-  parse_result<ast::partial_apply> parse_partial_apply(
-      parser_scan_window scan) {
+  // macro → { "{{" ~ ">" ~ macro-lookup ~ "}}" }
+  parse_result<ast::macro> parse_macro(parser_scan_window scan) {
     assert(scan.empty());
     const auto scan_start = scan.start;
 
@@ -1554,32 +1552,28 @@ class parser {
     }
     scan = scan.make_fresh();
 
-    parse_result partial_lookup = parse_partial_lookup(scan.make_fresh());
-    if (!partial_lookup.has_value()) {
-      report_fatal_expected(scan, "partial-lookup in partial-apply");
+    parse_result macro_lookup = parse_macro_lookup(scan.make_fresh());
+    if (!macro_lookup.has_value()) {
+      report_fatal_expected(scan, "macro-lookup in macro");
     }
-    ast::partial_lookup lookup =
-        std::move(partial_lookup).consume_and_advance(&scan);
+    ast::macro_lookup lookup =
+        std::move(macro_lookup).consume_and_advance(&scan);
 
     if (!try_consume_token(&scan, tok::close)) {
       report_fatal_expected(
-          scan,
-          "{} to close partial-apply '{}'",
-          tok::close,
-          lookup.as_string());
+          scan, "{} to close macro '{}'", tok::close, lookup.as_string());
     }
 
     return {
-        ast::partial_apply{
+        ast::macro{
             scan.with_start(scan_start).range(),
             std::move(lookup),
             standalone_partial_offset(scan_start)},
         scan};
   }
 
-  // partial-lookup → { path-component ~ ("/" ~ path-component)* }
-  parse_result<ast::partial_lookup> parse_partial_lookup(
-      parser_scan_window scan) {
+  // macro-lookup → { path-component ~ ("/" ~ path-component)* }
+  parse_result<ast::macro_lookup> parse_macro_lookup(parser_scan_window scan) {
     assert(scan.empty());
     const auto scan_start = scan.start;
 
@@ -1596,14 +1590,13 @@ class parser {
       const token* component_part =
           try_consume_token(&scan, tok::path_component);
       if (component_part == nullptr) {
-        report_fatal_expected(scan, "path-component in partial-lookup");
+        report_fatal_expected(scan, "path-component in macro-lookup");
       }
       path.emplace_back(ast::path_component{
           component_part->range, std::string(component_part->string_value())});
     }
     return {
-        ast::partial_lookup{
-            scan.with_start(scan_start).range(), std::move(path)},
+        ast::macro_lookup{scan.with_start(scan_start).range(), std::move(path)},
         scan};
   }
 

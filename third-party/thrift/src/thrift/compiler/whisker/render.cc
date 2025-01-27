@@ -914,38 +914,37 @@ class render_engine {
         });
   }
 
-  void visit(const ast::partial_apply& partial_apply) {
+  void visit(const ast::macro& macro) {
     std::vector<std::string> path;
-    path.reserve(partial_apply.path.parts.size());
-    for (const ast::path_component& component : partial_apply.path.parts) {
+    path.reserve(macro.path.parts.size());
+    for (const ast::path_component& component : macro.path.parts) {
       path.push_back(component.value);
     }
 
-    auto* partial_resolver = opts_.partial_resolver.get();
-    if (partial_resolver == nullptr) {
+    auto* macro_resolver = opts_.macro_resolver.get();
+    if (macro_resolver == nullptr) {
       report_fatal_error(
-          partial_apply.loc.begin,
-          "No partial resolver was provided. Cannot resolve partial with path '{}'",
-          partial_apply.path_string());
+          macro.loc.begin,
+          "No macro resolver was provided. Cannot resolve macro with path '{}'",
+          macro.path_string());
     }
 
-    auto resolved_partial =
-        partial_resolver->resolve(path, partial_apply.loc.begin, diags_);
-    if (!resolved_partial.has_value()) {
+    auto resolved_macro =
+        macro_resolver->resolve(path, macro.loc.begin, diags_);
+    if (!resolved_macro.has_value()) {
       report_fatal_error(
-          partial_apply.loc.begin,
-          "Partial with path '{}' was not found",
-          partial_apply.path_string());
+          macro.loc.begin,
+          "Macro with path '{}' was not found",
+          macro.path_string());
     }
 
     // Partial applications stored in a stack for pragmas and debugging reasons.
-    auto source_frame_guard =
-        source_stack_.make_frame_guard(partial_apply.loc.begin);
+    auto source_frame_guard = source_stack_.make_frame_guard(macro.loc.begin);
     // Partials are "inlined" into their invocation site. In other words, they
     // execute within the scope where they are invoked.
     auto indent_guard =
-        out_.make_indent_guard(partial_apply.standalone_offset_within_line);
-    visit(resolved_partial->body_elements);
+        out_.make_indent_guard(macro.standalone_offset_within_line);
+    visit(resolved_macro->body_elements);
   }
 
   outputter out_;

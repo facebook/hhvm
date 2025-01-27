@@ -223,8 +223,8 @@ class lexer {
   class state_text;
   // parses interpolation of variables "{{ ... }}" or blocks "{{# ...}}"
   class state_template;
-  // parses interpolation of partial applications "{{> ... }}"
-  class state_partial_application;
+  // parses interpolation of macros "{{> ... }}"
+  class state_macro;
   // parses the comment syntax "{{! ...}}" or "{{!-- ... --}}"
   class state_comment;
   // forever returns the terminal token

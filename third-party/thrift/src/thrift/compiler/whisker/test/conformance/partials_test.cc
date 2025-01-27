@@ -30,8 +30,7 @@ class PartialsTest : public RenderTest {};
 TEST_F(PartialsTest, BasicBehavior) {
   EXPECT_EQ(
       "\"from partial\"",
-      render(
-          "\"{{>text}}\"", w::map({}), partials({{"text", "from partial"}})));
+      render("\"{{>text}}\"", w::map({}), macros({{"text", "from partial"}})));
 }
 
 // NOTE:
@@ -53,7 +52,7 @@ TEST_F(PartialsTest, Context) {
       *render(
           "\"{{>partial}}\"",
           w::map({{"text", w::string("content")}}),
-          partials({{"partial", "*{{text}}*"}})));
+          macros({{"partial", "*{{text}}*"}})));
 }
 
 // The greater-than operator should properly recurse.
@@ -69,7 +68,7 @@ TEST_F(PartialsTest, Recursion) {
                 w::array({w::map(
                     {{"content", w::string("Y")},
                      {"nodes", w::array({})}})})}}),
-          partials({{"node", "{{content}}<{{#nodes}}{{>node}}{{/nodes}}>"}})));
+          macros({{"node", "{{content}}<{{#nodes}}{{>node}}{{/nodes}}>"}})));
 }
 
 // The greater-than operator should work from within partials.
@@ -80,7 +79,7 @@ TEST_F(PartialsTest, Nested) {
       *render(
           "{{>outer}}",
           w::map({{"a", w::string("hello")}, {"b", w::string("world")}}),
-          partials({{"outer", "*{{a}} {{>inner}}*"}, {"inner", "{{b}}!"}})));
+          macros({{"outer", "*{{a}} {{>inner}}*"}, {"inner", "{{b}}!"}})));
 }
 
 // The greater-than operator should not alter surrounding whitespace.
@@ -88,8 +87,7 @@ TEST_F(PartialsTest, Nested) {
 TEST_F(PartialsTest, SurroundingWhitespace) {
   EXPECT_EQ(
       "| \t|\t |",
-      *render(
-          "| {{>partial}} |", w::map({}), partials({{"partial", "\t|\t"}})));
+      *render("| {{>partial}} |", w::map({}), macros({{"partial", "\t|\t"}})));
 }
 
 // Whitespace should be left untouched.
@@ -100,7 +98,7 @@ TEST_F(PartialsTest, InlineIndentation) {
       *render(
           "  {{data}}  {{> partial}}\n",
           w::map({{"data", w::string("|")}}),
-          partials({{"partial", ">\n>"}})));
+          macros({{"partial", ">\n>"}})));
 }
 
 // "\r\n" should be considered a newline for standalone tags.
@@ -109,7 +107,7 @@ TEST_F(PartialsTest, StandaloneLineEndings) {
   EXPECT_EQ(
       "|\r\n>|",
       *render(
-          "|\r\n{{>partial}}\r\n|", w::map({}), partials({{"partial", ">"}})));
+          "|\r\n{{>partial}}\r\n|", w::map({}), macros({{"partial", ">"}})));
 }
 
 // Standalone tags should not require a newline to precede them.
@@ -117,8 +115,7 @@ TEST_F(PartialsTest, StandaloneLineEndings) {
 TEST_F(PartialsTest, StandaloneWithoutPreviousLine) {
   EXPECT_EQ(
       "  >\n  >>",
-      *render(
-          "  {{>partial}}\n>", w::map({}), partials({{"partial", ">\n>"}})));
+      *render("  {{>partial}}\n>", w::map({}), macros({{"partial", ">\n>"}})));
 }
 
 // Standalone tags should not require a newline to follow them.
@@ -126,8 +123,7 @@ TEST_F(PartialsTest, StandaloneWithoutPreviousLine) {
 TEST_F(PartialsTest, StandaloneWithoutNewline) {
   EXPECT_EQ(
       ">\n  >\n  >",
-      *render(
-          ">\n  {{>partial}}", w::map({}), partials({{"partial", ">\n>"}})));
+      *render(">\n  {{>partial}}", w::map({}), macros({{"partial", ">\n>"}})));
 }
 
 // Each line of the partial should be indented before rendering.
@@ -144,7 +140,7 @@ TEST_F(PartialsTest, StandaloneIndentation) {
           " {{>partial}}\n"
           "/\n",
           w::map({{"content", w::string("<\n->")}}),
-          partials(
+          macros(
               {{"partial",
                 "|\n"
                 "{{content}}\n"
@@ -159,7 +155,7 @@ TEST_F(PartialsTest, PaddingWhitespace) {
       *render(
           "|{{> partial }}|",
           w::map({{"boolean", w::boolean(true)}}),
-          partials({{"partial", "[]"}})));
+          macros({{"partial", "[]"}})));
 }
 
 } // namespace whisker

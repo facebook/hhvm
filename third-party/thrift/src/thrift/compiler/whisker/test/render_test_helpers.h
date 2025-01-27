@@ -117,13 +117,12 @@ class RenderTest : public testing::Test {
 
    private:
     std::optional<ast::root> resolve(
-        const std::vector<std::string>& partial_path,
+        const std::vector<std::string>& macro_path,
         source_location,
         diagnostics_engine& diags) override {
       // This implementation is dumb and parses the file every time. But that's
       // ok in a test.
-      std::string virtual_path =
-          fmt::format("{}", fmt::join(partial_path, "/"));
+      std::string virtual_path = fmt::format("{}", fmt::join(macro_path, "/"));
       auto source = src_manager_.get_file(virtual_path);
       if (!source.has_value()) {
         return std::nullopt;
@@ -187,14 +186,14 @@ class RenderTest : public testing::Test {
     render_test_options_.libraries_to_load.push_back(std::move(library_loader));
   }
 
-  struct partials_by_path {
+  struct macros_by_path {
     /**
-     * Mapping of partial path (delimited by '/') to the source code.
+     * Mapping of macro path (delimited by '/') to the source code.
      */
     std::unordered_map<std::string, std::string> value;
   };
 
-  static partials_by_path partials(
+  static macros_by_path macros(
       std::initializer_list<std::pair<const std::string, std::string>>
           entries) {
     return {std::unordered_map<std::string, std::string>{std::move(entries)}};
@@ -215,7 +214,7 @@ class RenderTest : public testing::Test {
   std::optional<std::string> render(
       const std::string& source,
       const object& root_context,
-      partials_by_path partials = {},
+      const macros_by_path& macros = {},
       globals_by_name globals = {}) {
     auto& current = last_render_.emplace();
 
@@ -226,13 +225,13 @@ class RenderTest : public testing::Test {
     }
 
     render_options options;
-    if (!partials.value.empty()) {
-      auto partial_resolver =
+    if (!macros.value.empty()) {
+      auto macro_resolver =
           std::make_unique<in_memory_template_resolver>(current.src_manager);
-      for (const auto& [name, content] : partials.value) {
+      for (const auto& [name, content] : macros.value) {
         current.src_manager.add_virtual_file(name, content);
       }
-      options.partial_resolver = std::move(partial_resolver);
+      options.macro_resolver = std::move(macro_resolver);
     }
     options.globals = std::move(globals.value);
     render_test_options_.apply_to(options);

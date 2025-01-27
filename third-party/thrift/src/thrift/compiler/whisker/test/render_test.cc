@@ -1716,7 +1716,7 @@ TEST_F(RenderTest, undefined_variables_allowed) {
       "\n");
 }
 
-TEST_F(RenderTest, partials) {
+TEST_F(RenderTest, macros) {
   auto result = render(
       "{{> some/file /path}}\n"
       "{{#array}}\n"
@@ -1729,43 +1729,43 @@ TEST_F(RenderTest, partials) {
                 {w::map({{"value", w::i64(2)}}),
                  w::map({{"value", w::string("foo")}}),
                  w::map({{"value", w::string("bar")}})})}}),
-      partials({{"some/file/path", "{{value}} (from partial)\n"}}));
+      macros({{"some/file/path", "{{value}} (from macro)\n"}}));
   EXPECT_EQ(
       *result,
-      "1 (from partial)\n"
-      "2 (from partial)\n"
-      "foo (from partial)\n"
-      "bar (from partial)\n");
+      "1 (from macro)\n"
+      "2 (from macro)\n"
+      "foo (from macro)\n"
+      "bar (from macro)\n");
 }
 
-TEST_F(RenderTest, partials_missing) {
+TEST_F(RenderTest, macros_missing) {
   auto result = render(
       "{{> some/other/path}}",
       w::map({}),
-      partials({{"some/file/path", "{{value}} (from partial)"}}));
+      macros({{"some/file/path", "{{value}} (from macro)"}}));
   EXPECT_THAT(
       diagnostics(),
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "Partial with path 'some/other/path' was not found",
+          "Macro with path 'some/other/path' was not found",
           path_to_file,
           1)));
   EXPECT_FALSE(result.has_value());
 }
 
-TEST_F(RenderTest, partials_no_resolver) {
+TEST_F(RenderTest, macros_no_resolver) {
   auto result = render("{{> some/file/path}}", w::map({}));
   EXPECT_THAT(
       diagnostics(),
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "No partial resolver was provided. Cannot resolve partial with path 'some/file/path'",
+          "No macro resolver was provided. Cannot resolve macro with path 'some/file/path'",
           path_to_file,
           1)));
   EXPECT_FALSE(result.has_value());
 }
 
-TEST_F(RenderTest, partials_indentation) {
+TEST_F(RenderTest, macros_indentation) {
   auto result = render(
       "{{#array}}\n"
       "before\n"
@@ -1778,31 +1778,31 @@ TEST_F(RenderTest, partials_indentation) {
                 {w::map({{"value", w::i64(2)}}),
                  w::map({{"value", w::string("foo")}}),
                  w::map({{"value", w::string("bar")}})})}}),
-      partials(
+      macros(
           {{"some/file/path",
-            "{{value}} (from partial)\n"
+            "{{value}} (from macro)\n"
             "A second line\n"}}));
   EXPECT_EQ(
       *result,
       "before\n"
-      "  2 (from partial)\n"
+      "  2 (from macro)\n"
       "  A second line\n"
       "after\n"
       "before\n"
-      "  foo (from partial)\n"
+      "  foo (from macro)\n"
       "  A second line\n"
       "after\n"
       "before\n"
-      "  bar (from partial)\n"
+      "  bar (from macro)\n"
       "  A second line\n"
       "after\n");
 }
 
-TEST_F(RenderTest, partials_indentation_nested) {
+TEST_F(RenderTest, macros_indentation_nested) {
   auto result = render(
       "{{#array}}\n"
       "before\n"
-      "  {{>partial-1 }}\n"
+      "  {{>macro-1 }}\n"
       "after\n"
       "{{/array}}",
       w::map(
@@ -1811,39 +1811,39 @@ TEST_F(RenderTest, partials_indentation_nested) {
                 w::map({{"value", w::i64(2)}}),
                 w::map({{"value", w::string("foo")}}),
             })}}),
-      partials(
-          {{"partial-1",
-            "{{value}} (from partial-1)\n"
-            "  nested: {{> partial-2}}\n"},
-           {"partial-2",
-            "{{value}} (from partial-2)\n"
-            "second line from partial-2"}}));
+      macros(
+          {{"macro-1",
+            "{{value}} (from macro-1)\n"
+            "  nested: {{> macro-2}}\n"},
+           {"macro-2",
+            "{{value}} (from macro-2)\n"
+            "second line from macro-2"}}));
   EXPECT_EQ(
       *result,
       "before\n"
-      "  2 (from partial-1)\n"
-      "    nested: 2 (from partial-2)\n"
-      "  second line from partial-2\n"
+      "  2 (from macro-1)\n"
+      "    nested: 2 (from macro-2)\n"
+      "  second line from macro-2\n"
       "after\n"
       "before\n"
-      "  foo (from partial-1)\n"
-      "    nested: foo (from partial-2)\n"
-      "  second line from partial-2\n"
+      "  foo (from macro-1)\n"
+      "    nested: foo (from macro-2)\n"
+      "  second line from macro-2\n"
       "after\n");
 }
 
-TEST_F(RenderTest, partial_apply_preserves_whitespace_offset) {
+TEST_F(RenderTest, macro_preserves_whitespace_offset) {
   auto result = render(
-      " \t {{> partial-1}} \t \n",
+      " \t {{> macro-1}} \t \n",
       w::map({{"value", w::i64(42)}}),
-      partials(
-          {{"partial-1",
+      macros(
+          {{"macro-1",
             "\t 1\n"
-            " \t {{>partial-2}} \n"},
-           {"partial-2",
+            " \t {{>macro-2}} \n"},
+           {"macro-2",
             "\t 2\n"
-            " \t {{>partial-3}}! \n"},
-           {"partial-3", "\t{{value}}"}}));
+            " \t {{>macro-3}}! \n"},
+           {"macro-3", "\t{{value}}"}}));
   EXPECT_EQ(
       *result,
       " \t \t 1\n"
@@ -1851,18 +1851,18 @@ TEST_F(RenderTest, partial_apply_preserves_whitespace_offset) {
       " \t  \t  \t \t42! \n");
 }
 
-TEST_F(RenderTest, partial_nested_undefined_variable_trace) {
+TEST_F(RenderTest, macro_nested_undefined_variable_trace) {
   show_source_backtrace_on_failure(true);
   auto result = render(
       "\n"
-      "{{> partial-1}}\n",
+      "{{> macro-1}}\n",
       w::map({}),
-      partials(
-          {{"partial-1",
+      macros(
+          {{"macro-1",
             "\n"
-            "\t {{>partial-2}}\n"},
-           {"partial-2", "foo {{>partial-3}}\n"},
-           {"partial-3", "{{undefined}}"}}));
+            "\t {{>macro-2}}\n"},
+           {"macro-2", "foo {{>macro-3}}\n"},
+           {"macro-3", "{{undefined}}"}}));
   EXPECT_FALSE(result.has_value());
   EXPECT_THAT(
       diagnostics(),
@@ -1873,11 +1873,11 @@ TEST_F(RenderTest, partial_nested_undefined_variable_trace) {
               "#0 map (size=0)\n"
               "\n"
               "#1 <global scope> (size=0)\n",
-              "partial-3", // file name
+              "macro-3", // file name
               1),
-          error_backtrace("#0 partial-3 <line:1, col:3>\n"
-                          "#1 partial-2 <line:1, col:5>\n"
-                          "#2 partial-1 <line:2, col:3>\n"
+          error_backtrace("#0 macro-3 <line:1, col:3>\n"
+                          "#1 macro-2 <line:1, col:5>\n"
+                          "#2 macro-1 <line:2, col:3>\n"
                           "#3 path/to/test.whisker <line:2, col:1>\n")));
 }
 
@@ -1991,11 +1991,11 @@ TEST_F(
       w::map(
           {{"value", w::i64(5)},
            {"boolean", w::map({{"condition", w::true_}})}}),
-      partials({{"ineligible", "{{value}} (from partial)\n"}}));
+      macros({{"ineligible", "{{value}} (from macro)\n"}}));
   EXPECT_EQ(
       *result,
       "| This Is\n"
-      "   5 (from partial)\n"
+      "   5 (from macro)\n"
       " \n"
       "|\n"
       "| A Line\n");
@@ -2008,7 +2008,7 @@ TEST_F(RenderTest, globals) {
       "{{.}} — {{global-2}}\n"
       "{{/array}}\n",
       w::map({{"array", w::array({w::i64(1), w::i64(2)})}}),
-      partials({}),
+      macros({}),
       globals(
           {{"global", w::string("hello")}, {"global-2", w::string("hello!")}}));
   EXPECT_EQ(
@@ -2022,7 +2022,7 @@ TEST_F(RenderTest, globals_shadowing) {
   auto result = render(
       "{{global}}\n",
       w::map({{"global", w::string("good")}}),
-      partials({}),
+      macros({}),
       globals({{"global", w::string("bad")}}));
   EXPECT_EQ(*result, "good\n");
 }
@@ -2040,17 +2040,17 @@ TEST_F(RenderTest, pragma_ignore_newlines) {
   EXPECT_THAT(diagnostics(), testing::IsEmpty());
   EXPECT_EQ(*result, "This is all one line");
 
-  // Test that the pragma is scoped to the active partial/template.
+  // Test that the pragma is scoped to the active macro/template.
   result = render(
       "{{#pragma ignore-newlines}}\n"
       "This\n"
       " is\n"
-      "{{> partial }}\n"
+      "{{> macro }}\n"
       " all\n"
       " one\n"
       " line\n",
       w::map({}),
-      partials({{"partial", "\nnot\n!\n"}}));
+      macros({{"macro", "\nnot\n!\n"}}));
   EXPECT_THAT(diagnostics(), testing::IsEmpty());
   EXPECT_EQ(*result, "This is\nnot\n!\n all one line");
 }

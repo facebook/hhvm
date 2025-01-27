@@ -117,13 +117,9 @@ struct ast_visitor {
       visit(else_clause->body_elements, else_scope.open_node());
     }
   }
-  void visit(const ast::partial_apply& partial_apply, tree_printer::scope scope)
-      const {
-    scope.println(
-        " partial-apply {} '{}'",
-        location(partial_apply.loc),
-        partial_apply.path_string());
-    if (const auto& offset = partial_apply.standalone_offset_within_line;
+  void visit(const ast::macro& macro, tree_printer::scope scope) const {
+    scope.println(" macro {} '{}'", location(macro.loc), macro.path_string());
+    if (const auto& offset = macro.standalone_offset_within_line;
         offset.has_value()) {
       scope.open_property().println(
           " standalone-offset '{}'", tree_printer::escape(*offset));
@@ -215,7 +211,7 @@ WHISKER_PRINT_AST_INSTANTIATE(ast::comment);
 WHISKER_PRINT_AST_INSTANTIATE(ast::identifier);
 WHISKER_PRINT_AST_INSTANTIATE(ast::variable_lookup);
 WHISKER_PRINT_AST_INSTANTIATE(ast::section_block);
-WHISKER_PRINT_AST_INSTANTIATE(ast::partial_apply);
+WHISKER_PRINT_AST_INSTANTIATE(ast::macro);
 
 #undef WHISKER_PRINT_AST_INSTANTIATE
 

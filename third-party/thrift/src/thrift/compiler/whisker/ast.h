@@ -34,7 +34,7 @@ struct section_block;
 struct conditional_block;
 struct with_block;
 struct each_block;
-struct partial_apply;
+struct macro;
 struct interpolation;
 struct let_statement;
 struct pragma_statement;
@@ -53,7 +53,7 @@ using body = std::variant<
     each_block,
     let_statement,
     pragma_statement,
-    partial_apply>;
+    macro>;
 using bodies = std::vector<body>;
 
 // Defines operator!= in terms of operator==
@@ -461,7 +461,7 @@ struct each_block {
 };
 
 /*
- * A valid Whisker path component for partial application. See whisker::lexer
+ * A valid Whisker path component for macro application. See whisker::lexer
  * for its definition.
  */
 struct path_component {
@@ -471,9 +471,9 @@ struct path_component {
 
 /**
  * A '/' delimited series of path components representing a POSIX portable file
- * path. This is used for partial applications.
+ * path. This is used for macros.
  */
-struct partial_lookup {
+struct macro_lookup {
   source_range loc;
   std::vector<path_component> parts;
 
@@ -484,16 +484,15 @@ struct partial_lookup {
  * A Whisker construct for partially applied templates. This matches Mustache:
  *   https://mustache.github.io/mustache.5.html#Partials
  */
-struct partial_apply {
+struct macro {
   source_range loc;
-  partial_lookup path;
+  macro_lookup path;
   /**
-   * Standalone partial applications exhibit different indentation behavior:
+   * Standalone macros exhibit different indentation behavior:
    *   https://github.com/mustache/spec/blob/v1.4.2/specs/partials.yml#L13-L15
    *
-   * If this is a standalone partial application, the value is the preceeding
-   * whitespace necessary before the partial application interpolation.
-   * Otherwise, this is std::nullopt.
+   * If this is a standalone macro, the value is the preceding whitespace
+   * necessary before the macro interpolation. Otherwise, this is std::nullopt.
    *
    * The contained string is guaranteed to be whitespace only.
    */

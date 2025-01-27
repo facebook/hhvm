@@ -27,10 +27,10 @@
 namespace whisker {
 
 /**
- * A resolver of parsed AST by name, primarily used for partial applications:
- *   "{{> path/to/partial }}".
+ * A resolver of parsed AST by name, primarily used for macro applications:
+ *   "{{> path/to/macro }}".
  *
- * This class allows partials to be lazily loaded and parsed only when they are
+ * This class allows macros to be lazily loaded and parsed only when they are
  * used.
  */
 class template_resolver {
@@ -38,15 +38,15 @@ class template_resolver {
   virtual ~template_resolver() noexcept = default;
 
   /**
-   * Given a partial lookup path (corresponding to ast::partial_lookup), this
-   * function tries to resolve it to a parsed AST node.
+   * Given a lookup path (corresponding to ast::macro_lookup), this function
+   * tries to resolve it to a parsed AST node.
    *
    * If the path is not known, or if parsing fails, then this function returns
    * std::nullopt. Errors or warnings should be attached to the provided
    * diagnostics_engine.
    */
   virtual std::optional<ast::root> resolve(
-      const std::vector<std::string>& partial_path,
+      const std::vector<std::string>& path,
       source_location include_from,
       diagnostics_engine&) = 0;
 };
@@ -138,7 +138,7 @@ struct render_options {
   diagnostic_level strict_undefined_variables = diagnostic_level::error;
 
   /**
-   * The diagnostic level at which the trace of source locations of partial
+   * The diagnostic level at which the trace of source locations of macro
    * applications will be printed in case there is an error during rendering.
    *
    * This is useful for debugging and is set to the highest level by default.
@@ -146,12 +146,12 @@ struct render_options {
   diagnostic_level show_source_backtrace_on_failure = diagnostic_level::error;
 
   /**
-   * An object that can be used to resolve partial application within
-   * Whisker templates: "{{> path/to/partial }}".
+   * An object that can be used to resolve macros within Whisker templates, like
+   * "{{> path/to/macro }}".
    *
-   * If this is not set, then all partial applications will fail.
+   * If this is not set, then all macro applications will fail.
    */
-  std::shared_ptr<template_resolver> partial_resolver = nullptr;
+  std::shared_ptr<template_resolver> macro_resolver = nullptr;
 
   /**
    * A map of identifiers to objects that will be injected as global bindings,

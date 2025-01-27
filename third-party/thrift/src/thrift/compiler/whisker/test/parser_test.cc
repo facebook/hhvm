@@ -976,25 +976,25 @@ TEST_F(ParserTest, function_call_named_args_for_builtins) {
   }
 }
 
-TEST_F(ParserTest, basic_partial_apply) {
+TEST_F(ParserTest, basic_macro) {
   auto ast = parse_ast("{{> path / to / file }}");
   EXPECT_EQ(
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
-      "|- partial-apply <line:1:1, col:24> 'path/to/file'\n"
+      "|- macro <line:1:1, col:24> 'path/to/file'\n"
       "| `- standalone-offset ''\n");
 }
 
-TEST_F(ParserTest, partial_apply_single_id) {
+TEST_F(ParserTest, macro_single_id) {
   auto ast = parse_ast("{{> foo }}");
   EXPECT_EQ(
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
-      "|- partial-apply <line:1:1, col:11> 'foo'\n"
+      "|- macro <line:1:1, col:11> 'foo'\n"
       "| `- standalone-offset ''\n");
 }
 
-TEST_F(ParserTest, partial_apply_in_section) {
+TEST_F(ParserTest, macro_in_section) {
   auto ast = parse_ast(
       "{{#news.has-update?}}\n"
       "  {{> print/news}}\n"
@@ -1005,73 +1005,73 @@ TEST_F(ParserTest, partial_apply_in_section) {
       "|- section-block <line:1:1, line:3:22>\n"
       "| `- variable-lookup <line:1:4, col:20> 'news.has-update?'\n"
       "| |- text <line:2:1, col:3> '  '\n"
-      "| |- partial-apply <line:2:3, col:19> 'print/news'\n"
+      "| |- macro <line:2:3, col:19> 'print/news'\n"
       "| | `- standalone-offset '  '\n");
 }
 
-TEST_F(ParserTest, partial_apply_preserves_whitespace_offset) {
+TEST_F(ParserTest, macro_preserves_whitespace_offset) {
   auto ast = parse_ast(" \t {{> print/news}}\n");
   EXPECT_EQ(
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
       "|- text <line:1:1, col:4> ' \\t '\n"
-      "|- partial-apply <line:1:4, col:20> 'print/news'\n"
+      "|- macro <line:1:4, col:20> 'print/news'\n"
       "| `- standalone-offset ' \\t '\n");
 }
 
-TEST_F(ParserTest, partial_apply_no_id) {
+TEST_F(ParserTest, macro_no_id) {
   auto ast = parse_ast("{{> }}");
   EXPECT_FALSE(ast.has_value());
   EXPECT_THAT(
       diagnostics,
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "expected partial-lookup in partial-apply but found `}}`",
+          "expected macro-lookup in macro but found `}}`",
           path_to_file(1),
           1)));
 }
 
-TEST_F(ParserTest, partial_apply_extra_stuff) {
+TEST_F(ParserTest, macro_extra_stuff) {
   auto ast = parse_ast("{{> foo ! }}");
   EXPECT_FALSE(ast.has_value());
   EXPECT_THAT(
       diagnostics,
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "expected `}}` to close partial-apply 'foo' but found `!`",
+          "expected `}}` to close macro 'foo' but found `!`",
           path_to_file(1),
           1)));
 }
 
-TEST_F(ParserTest, partial_apply_dotted_path) {
+TEST_F(ParserTest, macro_dotted_path) {
   auto ast = parse_ast("{{> path/to.file }}");
   EXPECT_EQ(
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
-      "|- partial-apply <line:1:1, col:20> 'path/to.file'\n"
+      "|- macro <line:1:1, col:20> 'path/to.file'\n"
       "| `- standalone-offset ''\n");
 }
 
-TEST_F(ParserTest, partial_apply_empty_path_part) {
+TEST_F(ParserTest, macro_empty_path_part) {
   auto ast = parse_ast("{{> path//to.file }}");
   EXPECT_FALSE(ast.has_value());
   EXPECT_THAT(
       diagnostics,
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "expected path-component in partial-lookup but found `/`",
+          "expected path-component in macro-lookup but found `/`",
           path_to_file(1),
           1)));
 }
 
-TEST_F(ParserTest, unclosed_partial_apply) {
+TEST_F(ParserTest, unclosed_macro) {
   auto ast = parse_ast("{{> path/to/file");
   EXPECT_FALSE(ast.has_value());
   EXPECT_THAT(
       diagnostics,
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "expected `}}` to close partial-apply 'path/to/file' but found EOF",
+          "expected `}}` to close macro 'path/to/file' but found EOF",
           path_to_file(1),
           1)));
 }
@@ -1476,7 +1476,7 @@ TEST_F(
       "|- section-block <line:2:3, line:5:25>\n"
       "| `- variable-lookup <line:2:6, line:3:18> 'boolean.condition'\n"
       "| |- text <line:3:20, col:21> ' '\n"
-      "| |- partial-apply <line:3:21, col:37> 'ineligible'\n"
+      "| |- macro <line:3:21, col:37> 'ineligible'\n"
       "| |- text <line:3:37, col:38> ' '\n"
       "| |- newline <line:3:38, line:4:1> '\\n'\n"
       "| |- text <line:4:1, col:2> '|'\n"

@@ -446,7 +446,7 @@ class lexer::state_comment : public lexer::state_base {
 
 /**
  * Reads the templating language constructs in between "{{" and "}}" (except
- * partial application and comments).
+ * macros and comments).
  */
 class lexer::state_template : public lexer::state_base {
   result next(lexer& lex) override {
@@ -476,16 +476,15 @@ class lexer::state_template : public lexer::state_base {
 };
 
 /**
- * Reads the templating language constructs in between "{{>" and "}}" (partial
- * application).
+ * Reads the templating language constructs in between "{{>" and "}}" (macros).
  *
- * Partial application gets its own state primarily because identifers can be
- * ambiguous with path components. So instead we opt to emit tok::path_component
- * exclusively in partial application contexts.
+ * Macros get their own state primarily because identifers can be ambiguous with
+ * path components. So instead we opt to emit tok::path_component exclusively in
+ * macro application contexts.
  *
  * This implementation assumes we transition after "{{" but before ">".
  */
-class lexer::state_partial_application : public lexer::state_base {
+class lexer::state_macro : public lexer::state_base {
   result next(lexer& lex) override {
     auto& scan = lex.scan_window_;
     assert(scan.empty());
@@ -635,7 +634,7 @@ lexer::state_text::result lexer::state_text::next(lexer& lex) {
           return ptr(std::make_unique<lexer::state_comment>());
         }
         return scan_within.peek() == '>'
-            ? ptr(std::make_unique<lexer::state_partial_application>())
+            ? ptr(std::make_unique<lexer::state_macro>())
             : ptr(std::make_unique<lexer::state_template>());
       });
       std::vector<token> tokens = std::move(buffer).to_tokens(scan);

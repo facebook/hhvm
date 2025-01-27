@@ -301,7 +301,7 @@ t_whisker_base_generator::render_state() {
 
     auto template_parser = std::make_shared<whisker_template_parser>(
         templates_by_path(), template_prefix());
-    options.partial_resolver = template_parser;
+    options.macro_resolver = template_parser;
 
     strictness_options strict = strictness();
     const auto level_for = [](bool strict) {

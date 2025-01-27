@@ -8,10 +8,6 @@
  *)
 val internal_error : Pos.t -> string -> unit
 
-val lowercase_constant : Pos.t -> string -> unit
-
-val mk_lowercase_constant : Pos.t -> string -> Pos.t Lints_core.t
-
 val use_collection_literal : Pos.t -> string -> unit
 
 val static_string : ?no_consts:bool -> Pos.t -> unit

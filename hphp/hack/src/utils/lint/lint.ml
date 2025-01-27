@@ -10,28 +10,7 @@
 open Lints_core
 module Codes = Lint_codes
 
-let spf = Printf.sprintf
-
 let internal_error pos msg = add 0 Lint_error pos ("Internal error: " ^ msg)
-
-let mk_lowercase_constant pos cst =
-  let lower = String.lowercase_ascii cst in
-  Lints_core.
-    {
-      code = Codes.to_enum Codes.LowercaseConstant;
-      severity = Lint_warning;
-      pos;
-      message =
-        spf
-          "Please use %s instead of %s"
-          (Markdown_lite.md_codify lower)
-          (Markdown_lite.md_codify cst);
-      bypass_changed_lines = false;
-      autofix = None;
-      check_status = None;
-    }
-
-let lowercase_constant pos cst = add_lint (mk_lowercase_constant pos cst)
 
 let use_collection_literal pos coll =
   let coll = Utils.strip_ns coll in

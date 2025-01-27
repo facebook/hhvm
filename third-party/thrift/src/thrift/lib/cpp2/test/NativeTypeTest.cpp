@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <type_traits>
+
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/NativeTypeTest_types.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
@@ -21,17 +23,17 @@
 
 namespace apache::thrift::type::test {
 
-using apache::thrift::test::same_type;
-
 TEST(NativeTypeTest, InferTag) {
-  same_type<struct_t<MyStruct>, infer_tag<MyStruct>>;
-  same_type<MyStruct, native_type<struct_t<MyStruct>>>;
-  same_type<union_t<MyUnion>, infer_tag<MyUnion>>;
-  same_type<MyUnion, native_type<union_t<MyUnion>>>;
-  same_type<exception_t<MyException>, infer_tag<MyException>>;
-  same_type<MyException, native_type<exception_t<MyException>>>;
-  same_type<enum_t<MyEnum>, infer_tag<MyEnum>>;
-  same_type<MyEnum, native_type<enum_t<MyEnum>>>;
+  static_assert(std::is_same_v<struct_t<MyStruct>, infer_tag<MyStruct>>);
+  static_assert(std::is_same_v<MyStruct, native_type<struct_t<MyStruct>>>);
+  static_assert(std::is_same_v<union_t<MyUnion>, infer_tag<MyUnion>>);
+  static_assert(std::is_same_v<MyUnion, native_type<union_t<MyUnion>>>);
+  static_assert(
+      std::is_same_v<exception_t<MyException>, infer_tag<MyException>>);
+  static_assert(
+      std::is_same_v<MyException, native_type<exception_t<MyException>>>);
+  static_assert(std::is_same_v<enum_t<MyEnum>, infer_tag<MyEnum>>);
+  static_assert(std::is_same_v<MyEnum, native_type<enum_t<MyEnum>>>);
 }
 
 } // namespace apache::thrift::type::test

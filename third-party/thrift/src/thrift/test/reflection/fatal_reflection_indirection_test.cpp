@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <type_traits>
+
 #include <folly/Traits.h>
 #include <folly/Utility.h>
 #include <folly/portability/GTest.h>
@@ -184,34 +186,37 @@ TYPED_TEST_SUITE(IndirectionTypeTagTest, Types);
 TYPED_TEST(IndirectionTypeTagTest, type_tag) {
   using apache::thrift::field_ordinal;
   using apache::thrift::op::get_type_tag;
-  using apache::thrift::test::same_type;
   using namespace apache::thrift::type;
   using namespace reflection_indirection;
   using int_tag =
       apache::thrift::type::cpp_type<int, apache::thrift::type::i32_t>;
 
-  same_type<get_type_tag<TypeParam, field_ordinal<0>>, void>;
-  same_type<get_type_tag<TypeParam, field_ordinal<1>>, i32_t>;
-  same_type<
-      get_type_tag<TypeParam, field_ordinal<2>>,
-      apache::thrift::type::cpp_type<CppFakeI32, apache::thrift::type::i32_t>>;
-  same_type<
-      get_type_tag<TypeParam, field_ordinal<3>>,
-      apache::thrift::type::adapted<
-          apache::thrift::IndirectionAdapter<
-              reflection_indirection::CppHasANumber>,
-          int_tag>>;
-  same_type<
-      get_type_tag<TypeParam, field_ordinal<4>>,
-      apache::thrift::type::adapted<
-          apache::thrift::IndirectionAdapter<
-              reflection_indirection::CppHasAResult>,
-          int_tag>>;
-  same_type<
-      get_type_tag<TypeParam, field_ordinal<5>>,
-      apache::thrift::type::adapted<
-          apache::thrift::IndirectionAdapter<
-              reflection_indirection::CppHasAPhrase>,
-          apache::thrift::type::
-              cpp_type<std::string, apache::thrift::type::string_t>>>;
+  static_assert(
+      std::is_same_v<get_type_tag<TypeParam, field_ordinal<0>>, void>);
+  static_assert(
+      std::is_same_v<get_type_tag<TypeParam, field_ordinal<1>>, i32_t>);
+  static_assert(std::is_same_v<
+                get_type_tag<TypeParam, field_ordinal<2>>,
+                apache::thrift::type::
+                    cpp_type<CppFakeI32, apache::thrift::type::i32_t>>);
+  static_assert(std::is_same_v<
+                get_type_tag<TypeParam, field_ordinal<3>>,
+                apache::thrift::type::adapted<
+                    apache::thrift::IndirectionAdapter<
+                        reflection_indirection::CppHasANumber>,
+                    int_tag>>);
+  static_assert(std::is_same_v<
+                get_type_tag<TypeParam, field_ordinal<4>>,
+                apache::thrift::type::adapted<
+                    apache::thrift::IndirectionAdapter<
+                        reflection_indirection::CppHasAResult>,
+                    int_tag>>);
+  static_assert(
+      std::is_same_v<
+          get_type_tag<TypeParam, field_ordinal<5>>,
+          apache::thrift::type::adapted<
+              apache::thrift::IndirectionAdapter<
+                  reflection_indirection::CppHasAPhrase>,
+              apache::thrift::type::
+                  cpp_type<std::string, apache::thrift::type::string_t>>>);
 }

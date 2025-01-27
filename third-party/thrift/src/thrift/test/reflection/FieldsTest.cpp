@@ -403,16 +403,16 @@ TEST(FieldsTest, GetFieldRefType) {
   using test_cpp2::cpp_reflection::enum1;
   using test_cpp2::cpp_reflection::struct4;
   using test_cpp2::cpp_reflection::structA;
-  static_assert(test::same_type<
+  static_assert(std::is_same_v<
                 op::get_field_ref<struct4, ident::field0>,
                 required_field_ref<std::int32_t&>>);
-  static_assert(test::same_type<
+  static_assert(std::is_same_v<
                 op::get_field_ref<struct4, ident::field1>,
                 optional_field_ref<std::string&>>);
-  static_assert(test::same_type<
+  static_assert(std::is_same_v<
                 op::get_field_ref<struct4, ident::field2>,
                 field_ref<enum1&>>);
-  static_assert(test::same_type<
+  static_assert(std::is_same_v<
                 op::get_field_ref<struct4, ident::field3>,
                 std::unique_ptr<structA>>);
 }

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <type_traits>
+
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp/Field.h>
 #include <thrift/lib/cpp2/FieldRefTraits.h>
@@ -126,21 +128,23 @@ void testCreateWithTag() {
   auto field_and_type_adapted_field_created =
       create<field_and_type_adapted_field_tag>(object);
 
-  test::same_type<decltype(type_created), native_type<tag>>;
-  test::same_type<decltype(adapted_created), Wrapper<native_type<tag>>>;
-  test::same_type<decltype(field_created), native_type<tag>>;
-  test::same_type<
-      decltype(type_adapted_field_created),
-      Wrapper<native_type<tag>>>;
-  test::same_type<
-      decltype(field_adapted_field_created),
-      WrapperWithContext<native_type<tag>, TestThriftType, 0>>;
-  test::same_type<
-      decltype(double_type_adapted_field_created),
-      Wrapper<Wrapper<native_type<tag>>>>;
-  test::same_type<
-      decltype(field_and_type_adapted_field_created),
-      WrapperWithContext<Wrapper<native_type<tag>>, TestThriftType, 0>>;
+  static_assert(std::is_same_v<decltype(type_created), native_type<tag>>);
+  static_assert(
+      std::is_same_v<decltype(adapted_created), Wrapper<native_type<tag>>>);
+  static_assert(std::is_same_v<decltype(field_created), native_type<tag>>);
+  static_assert(std::is_same_v<
+                decltype(type_adapted_field_created),
+                Wrapper<native_type<tag>>>);
+  static_assert(std::is_same_v<
+                decltype(field_adapted_field_created),
+                WrapperWithContext<native_type<tag>, TestThriftType, 0>>);
+  static_assert(std::is_same_v<
+                decltype(double_type_adapted_field_created),
+                Wrapper<Wrapper<native_type<tag>>>>);
+  static_assert(
+      std::is_same_v<
+          decltype(field_and_type_adapted_field_created),
+          WrapperWithContext<Wrapper<native_type<tag>>, TestThriftType, 0>>);
 
   // Check if the context is correctly populated.
   EXPECT_EQ(&object.meta, field_adapted_field_created.meta);

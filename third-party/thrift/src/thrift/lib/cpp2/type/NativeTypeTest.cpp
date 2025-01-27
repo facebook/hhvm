@@ -18,6 +18,7 @@
 
 #include <list>
 #include <map>
+#include <type_traits>
 #include <unordered_set>
 
 #include <folly/portability/GTest.h>
@@ -34,38 +35,38 @@ template <typename T>
 if_not_thrift_type_tag<T, T> foo();
 
 TEST(NativeTypeTest, UndefinedOverloading) {
-  test::same_type<int, decltype(foo<int>())>;
-  test::same_type<int, decltype(foo<i32_t>())>;
+  static_assert(std::is_same_v<int, decltype(foo<int>())>);
+  static_assert(std::is_same_v<int, decltype(foo<i32_t>())>);
 }
 
 TEST(NativeTypeTest, Void) {
-  test::same_type<void, native_type<void_t>>;
-  test::same_tag<void_t, infer_tag<void>>;
-  test::same_tag<void_t, infer_tag<std::nullptr_t>>;
+  static_assert(std::is_same_v<void, native_type<void_t>>);
+  static_assert(test::same_tag<void_t, infer_tag<void>>);
+  static_assert(test::same_tag<void_t, infer_tag<std::nullptr_t>>);
 }
 
 TEST(NativeTypeTest, Bool) {
-  test::same_type<bool, native_type<bool_t>>;
-  test::same_tag<bool_t, infer_tag<bool>>;
+  static_assert(std::is_same_v<bool, native_type<bool_t>>);
+  static_assert(test::same_tag<bool_t, infer_tag<bool>>);
 }
 
 TEST(InferTagTest, Tag) {
-  test::same_tag<byte_t, infer_tag<byte_t>>;
+  static_assert(test::same_tag<byte_t, infer_tag<byte_t>>);
 }
 
 TEST(InferTagTest, Integer) {
-  test::same_type<int8_t, native_type<byte_t>>;
-  test::same_type<int16_t, native_type<i16_t>>;
-  test::same_type<int32_t, native_type<i32_t>>;
-  test::same_type<int64_t, native_type<i64_t>>;
-  test::same_tag<byte_t, infer_tag<int8_t>>;
-  test::same_tag<i16_t, infer_tag<int16_t>>;
-  test::same_tag<i32_t, infer_tag<int32_t>>;
-  test::same_tag<i64_t, infer_tag<int64_t>>;
-  test::same_tag<cpp_type<uint8_t, byte_t>, infer_tag<uint8_t>>;
-  test::same_tag<cpp_type<uint16_t, i16_t>, infer_tag<uint16_t>>;
-  test::same_tag<cpp_type<uint32_t, i32_t>, infer_tag<uint32_t>>;
-  test::same_tag<cpp_type<uint64_t, i64_t>, infer_tag<uint64_t>>;
+  static_assert(std::is_same_v<int8_t, native_type<byte_t>>);
+  static_assert(std::is_same_v<int16_t, native_type<i16_t>>);
+  static_assert(std::is_same_v<int32_t, native_type<i32_t>>);
+  static_assert(std::is_same_v<int64_t, native_type<i64_t>>);
+  static_assert(test::same_tag<byte_t, infer_tag<int8_t>>);
+  static_assert(test::same_tag<i16_t, infer_tag<int16_t>>);
+  static_assert(test::same_tag<i32_t, infer_tag<int32_t>>);
+  static_assert(test::same_tag<i64_t, infer_tag<int64_t>>);
+  static_assert(test::same_tag<cpp_type<uint8_t, byte_t>, infer_tag<uint8_t>>);
+  static_assert(test::same_tag<cpp_type<uint16_t, i16_t>, infer_tag<uint16_t>>);
+  static_assert(test::same_tag<cpp_type<uint32_t, i32_t>, infer_tag<uint32_t>>);
+  static_assert(test::same_tag<cpp_type<uint64_t, i64_t>, infer_tag<uint64_t>>);
 
   static_assert(type::is_a_v<infer_tag<char>, byte_t>);
   static_assert(type::is_a_v<infer_tag<signed char>, byte_t>);
@@ -83,34 +84,41 @@ TEST(InferTagTest, Integer) {
 }
 
 TEST(InferTagTest, Floating) {
-  test::same_type<float, native_type<float_t>>;
-  test::same_type<double, native_type<double_t>>;
-  test::same_tag<float_t, infer_tag<float>>;
-  test::same_tag<double_t, infer_tag<double>>;
+  static_assert(std::is_same_v<float, native_type<float_t>>);
+  static_assert(std::is_same_v<double, native_type<double_t>>);
+  static_assert(test::same_tag<float_t, infer_tag<float>>);
+  static_assert(test::same_tag<double_t, infer_tag<double>>);
 }
 
 TEST(InferTagTest, Strings) {
-  test::same_type<std::string, native_type<string_t>>;
-  test::same_type<std::string, native_type<binary_t>>;
+  static_assert(std::is_same_v<std::string, native_type<string_t>>);
+  static_assert(std::is_same_v<std::string, native_type<binary_t>>);
   // TODO(afuller): Allow string and binary to interoperat and infer a number of
   // string value and literals/views to be inferred as binary_t.
 }
 
 TEST(InferTagTest, Containers) {
-  test::same_tag<native_type<list<i32_t>>, std::vector<std::int32_t>>;
-  test::same_tag<list<i32_t>, infer_tag<std::vector<std::int32_t>>>;
-  test::same_tag<native_type<set<i32_t>>, std::set<std::int32_t>>;
-  test::same_tag<set<i32_t>, infer_tag<std::set<std::int32_t>>>;
-  test::same_tag<native_type<map<i32_t, bool_t>>, std::map<std::int32_t, bool>>;
-  test::same_tag<map<i32_t, bool_t>, infer_tag<std::map<std::int32_t, bool>>>;
+  static_assert(
+      test::same_tag<native_type<list<i32_t>>, std::vector<std::int32_t>>);
+  static_assert(
+      test::same_tag<list<i32_t>, infer_tag<std::vector<std::int32_t>>>);
+  static_assert(
+      test::same_tag<native_type<set<i32_t>>, std::set<std::int32_t>>);
+  static_assert(test::same_tag<set<i32_t>, infer_tag<std::set<std::int32_t>>>);
+  static_assert(test::same_tag<
+                native_type<map<i32_t, bool_t>>,
+                std::map<std::int32_t, bool>>);
+  static_assert(test::same_tag<
+                map<i32_t, bool_t>,
+                infer_tag<std::map<std::int32_t, bool>>>);
 }
 
 TEST(InferTagTest, Wrap) {
   struct FooStruct {};
   struct Foo : detail::Wrap<FooStruct, struct_t<FooStruct>> {};
-  test::same_tag<
-      infer_tag<Foo>,
-      adapted<InlineAdapter<Foo>, struct_t<FooStruct>>>;
+  static_assert(test::same_tag<
+                infer_tag<Foo>,
+                adapted<InlineAdapter<Foo>, struct_t<FooStruct>>>);
 }
 
 } // namespace

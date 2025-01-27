@@ -19,6 +19,7 @@
 #include <functional>
 #include <optional>
 #include <ostream>
+#include <type_traits>
 #include <unordered_set>
 
 #include <folly/portability/GMock.h>
@@ -306,42 +307,47 @@ TEST_F(AdaptTest, UnorderedSet) {
 }
 
 TEST_F(AdaptTest, AdaptSetKey_Ordered) {
-  test::same_type<
-      std::set<int, adapt_detail::adapted_less<test::TestAdapter, int, void>>,
-      adapt_detail::adapt_set_key_t<test::TestAdapter, std::set<int32_t>>>;
+  static_assert(
+      std::is_same_v<
+          std::set<
+              int,
+              adapt_detail::adapted_less<test::TestAdapter, int, void>>,
+          adapt_detail::adapt_set_key_t<test::TestAdapter, std::set<int32_t>>>);
 }
 
 TEST_F(AdaptTest, AdaptSetKey_Unordered) {
-  test::same_type<
-      std::unordered_set<
-          int,
-          adapt_detail::adapted_hash<test::TestAdapter, int, void>,
+  static_assert(
+      std::is_same_v<
+          std::unordered_set<
+              int,
+              adapt_detail::adapted_hash<test::TestAdapter, int, void>,
+              adapt_detail::
+                  adapted_equal<apache::thrift::test::TestAdapter, int, void>>,
           adapt_detail::
-              adapted_equal<apache::thrift::test::TestAdapter, int, void>>,
-      adapt_detail::
-          adapt_set_key_t<test::TestAdapter, std::unordered_set<int32_t>>>;
+              adapt_set_key_t<test::TestAdapter, std::unordered_set<int32_t>>>);
 }
 
 TEST_F(AdaptTest, AdpatMapKey_Ordered) {
-  test::same_type<
-      std::map<
-          int,
-          std::string,
-          adapt_detail::adapted_less<test::TestAdapter, int, void>>,
-      adapt_detail::
-          adapt_map_key_t<test::TestAdapter, std::map<int32_t, std::string>>>;
+  static_assert(std::is_same_v<
+                std::map<
+                    int,
+                    std::string,
+                    adapt_detail::adapted_less<test::TestAdapter, int, void>>,
+                adapt_detail::adapt_map_key_t<
+                    test::TestAdapter,
+                    std::map<int32_t, std::string>>>);
 }
 
 TEST_F(AdaptTest, AdpatMapKey_Unordered) {
-  test::same_type<
-      std::unordered_map<
-          int,
-          std::string,
-          adapt_detail::adapted_hash<test::TestAdapter, int, void>,
-          adapt_detail::adapted_equal<test::TestAdapter, int, void>>,
-      adapt_detail::adapt_map_key_t<
-          test::TestAdapter,
-          std::unordered_map<int32_t, std::string>>>;
+  static_assert(std::is_same_v<
+                std::unordered_map<
+                    int,
+                    std::string,
+                    adapt_detail::adapted_hash<test::TestAdapter, int, void>,
+                    adapt_detail::adapted_equal<test::TestAdapter, int, void>>,
+                adapt_detail::adapt_map_key_t<
+                    test::TestAdapter,
+                    std::unordered_map<int32_t, std::string>>>);
 }
 
 } // namespace

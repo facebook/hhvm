@@ -54,6 +54,7 @@ type env = {
 and genv = {
   tcopt: TypecheckerOptions.t;
   callable_pos: Pos.t;
+  function_pos: Pos.t;
   readonly: bool;
   return: Typing_env_return_info.t;
   params: (locl_ty * Pos.t * locl_ty option) Local_id.Map.t;
@@ -97,6 +98,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
       {
         tcopt = Provider_context.get_tcopt ctx;
         callable_pos = Pos.none;
+        function_pos = Pos.none;
         readonly = false;
         return =
           {

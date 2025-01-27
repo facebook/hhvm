@@ -555,6 +555,9 @@ let reinitialize_locals env =
 let set_env_callable_pos env callable_pos =
   { env with genv = { env.genv with callable_pos } }
 
+let set_env_function_pos env function_pos =
+  { env with genv = { env.genv with function_pos } }
+
 let set_fun_tast_info env fun_tast_info =
   { env with fun_tast_info = Some fun_tast_info }
 

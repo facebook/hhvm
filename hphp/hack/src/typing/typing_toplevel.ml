@@ -71,6 +71,7 @@ let fun_def ctx fd : Tast.fun_def Tast_with_dynamic.t option =
   let pos = fst fd.fd_name in
   let env = Env.open_tyvars env (fst fd.fd_name) in
   let env = Env.set_env_callable_pos env pos in
+  let env = Env.set_env_function_pos env f.f_span in
   let (env, user_attributes) =
     Typing.attributes_check_def env SN.AttributeKinds.fn f.f_user_attributes
   in

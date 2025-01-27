@@ -71,7 +71,10 @@ type env = {
 
 and genv = {
   tcopt: TypecheckerOptions.t;
-  callable_pos: Pos.t;  (** position of the function/method being checked *)
+  callable_pos: Pos.t;
+      (** position of the function/method name being checked *)
+  function_pos: Pos.t;
+      (** position of the full function/method being checked *)
   readonly: bool;
   (* Whether readonly analysis is needed on this function *)
   return: Typing_env_return_info.t;

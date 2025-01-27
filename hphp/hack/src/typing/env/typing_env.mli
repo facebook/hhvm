@@ -533,6 +533,8 @@ val get_tpenv_tparams : env -> SSet.t
 
 val set_env_callable_pos : env -> Pos.t -> env
 
+val set_env_function_pos : env -> Pos.t -> env
+
 val fun_is_constructor : env -> bool
 
 val set_fun_is_constructor : env -> bool -> env

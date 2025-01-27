@@ -514,6 +514,7 @@ let genv_as_value env genv =
   let {
     tcopt = _;
     callable_pos;
+    function_pos;
     readonly;
     return;
     params;
@@ -537,6 +538,7 @@ let genv_as_value env genv =
        ("readonly", bool_as_value readonly);
        ("return", return_info_as_value env return);
        ("callable_pos", pos_as_value callable_pos);
+       ("function_pos", pos_as_value function_pos);
        ("params", local_id_map_as_value (param_as_value env) params);
        ("static", bool_as_value static);
        ("val_kind", string_as_value (val_kind_to_string val_kind));

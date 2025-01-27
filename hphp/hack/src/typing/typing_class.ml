@@ -160,6 +160,7 @@ let method_def ~is_disposable env cls m =
   let env = Env.open_tyvars env (fst m.m_name) in
   let env = Env.reinitialize_locals env in
   let env = Env.set_env_callable_pos env pos in
+  let env = Env.set_env_function_pos env m.m_span in
   let (env, user_attributes) =
     Typing.attributes_check_def env SN.AttributeKinds.mthd m.m_user_attributes
   in

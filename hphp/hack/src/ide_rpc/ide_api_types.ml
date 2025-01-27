@@ -38,9 +38,9 @@ type text_edit = {
 }
 [@@deriving show]
 
-let ide_pos_to_fc (x : position) : File_content.position =
+let ide_pos_to_fc (x : position) : File_content.Position.t =
   let (line, column) = (x.line, x.column) in
-  { File_content.line; column }
+  File_content.Position.from_one_based line column
 
 let ide_range_to_fc (x : range) : File_content.range =
   let (st, ed) = (x.st |> ide_pos_to_fc, x.ed |> ide_pos_to_fc) in
@@ -50,8 +50,8 @@ let ide_text_edit_to_fc (x : text_edit) : File_content.text_edit =
   let (text, range) = (x.text, x.range |> Option.map ~f:ide_range_to_fc) in
   { File_content.text; range }
 
-let ide_pos_from_fc (x : File_content.position) : position =
-  let (line, column) = (x.File_content.line, x.File_content.column) in
+let ide_pos_from_fc (x : File_content.Position.t) : position =
+  let (line, column) = File_content.Position.line_column_one_based x in
   { line; column }
 
 let ide_range_from_fc (x : File_content.range) : range =

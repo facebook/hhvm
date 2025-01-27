@@ -27,7 +27,7 @@ val go_at_auto332_ctx :
 
 val get_autocomplete_context :
   file_content:string ->
-  pos:File_content.position ->
+  pos:File_content.Position.t ->
   is_manually_invoked:bool ->
   AutocompleteTypes.legacy_autocomplete_context
 

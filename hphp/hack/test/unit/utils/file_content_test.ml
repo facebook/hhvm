@@ -18,7 +18,8 @@ let test_basic_edit () =
   let edit =
     {
       range =
-        Some { st = { line = 1; column = 1 }; ed = { line = 1; column = 1 } };
+        Some
+          { st = Position.beginning_of_file; ed = Position.beginning_of_file };
       text = "just ";
     }
   in
@@ -30,7 +31,8 @@ let test_basic_edit2 () =
   let edit =
     {
       range =
-        Some { st = { line = 1; column = 2 }; ed = { line = 1; column = 4 } };
+        Some
+          { st = Position.from_one_based 1 2; ed = Position.from_one_based 1 4 };
       text = "ree";
     }
   in
@@ -42,7 +44,8 @@ let test_multi_line_edit () =
   let edit =
     {
       range =
-        Some { st = { line = 1; column = 4 }; ed = { line = 2; column = 2 } };
+        Some
+          { st = Position.from_one_based 1 4; ed = Position.from_one_based 2 2 };
       text = "b\nbbbb\nb";
     }
   in
@@ -54,7 +57,8 @@ let test_multi_line_edit2 () =
   let edit =
     {
       range =
-        Some { st = { line = 1; column = 1 }; ed = { line = 3; column = 1 } };
+        Some
+          { st = Position.from_one_based 1 1; ed = Position.from_one_based 3 1 };
       text = "";
     }
   in
@@ -66,7 +70,8 @@ let test_special_edit () =
   let edit =
     {
       range =
-        Some { st = { line = 2; column = 1 }; ed = { line = 3; column = 1 } };
+        Some
+          { st = Position.from_one_based 2 1; ed = Position.from_one_based 3 1 };
       text = "aaa\nbbb\n";
     }
   in
@@ -78,14 +83,16 @@ let test_multiple_edits () =
   let edit1 =
     {
       range =
-        Some { st = { line = 1; column = 2 }; ed = { line = 3; column = 1 } };
+        Some
+          { st = Position.from_one_based 1 2; ed = Position.from_one_based 3 1 };
       text = "aaa\ncccc\n";
     }
   in
   let edit2 =
     {
       range =
-        Some { st = { line = 1; column = 4 }; ed = { line = 2; column = 2 } };
+        Some
+          { st = Position.from_one_based 1 4; ed = Position.from_one_based 2 2 };
       text = "b\nbbbb\nb";
     }
   in
@@ -97,7 +104,11 @@ let test_invalid_edit () =
   let edit =
     {
       range =
-        Some { st = { line = 1; column = 15 }; ed = { line = 2; column = 1 } };
+        Some
+          {
+            st = Position.from_one_based 1 15;
+            ed = Position.from_one_based 2 1;
+          };
       text = "just ";
     }
   in
@@ -110,7 +121,8 @@ let test_empty_edit () =
   let edit =
     {
       range =
-        Some { st = { line = 1; column = 1 }; ed = { line = 1; column = 1 } };
+        Some
+          { st = Position.from_one_based 1 1; ed = Position.from_one_based 1 1 };
       text = "lol";
     }
   in
@@ -122,7 +134,8 @@ let test_end_of_line_edit () =
   let edit =
     {
       range =
-        Some { st = { line = 1; column = 2 }; ed = { line = 1; column = 2 } };
+        Some
+          { st = Position.from_one_based 1 2; ed = Position.from_one_based 1 2 };
       text = "a";
     }
   in
@@ -137,7 +150,11 @@ let utf8 x =
 let delete_nth x =
   {
     range =
-      Some { st = { line = 1; column = x }; ed = { line = 1; column = x + 1 } };
+      Some
+        {
+          st = Position.from_one_based 1 x;
+          ed = Position.from_one_based 1 (x + 1);
+        };
     text = "";
   }
 
@@ -176,62 +193,68 @@ let test_offsets () =
   let check ~offset position =
     let result = offset_to_position s offset in
     if Poly.(result <> position) then
+      let (position_line, position_column) =
+        Position.line_column_one_based position
+      in
+      let (result_line, result_column) =
+        Position.line_column_one_based result
+      in
       failwith
         (Printf.sprintf
            "Expected offset %i to be {line=%i,col=%i} not {line=%i,col=%i}"
            offset
-           position.line
-           position.column
-           result.line
-           result.column)
+           position_line
+           position_column
+           result_line
+           result_column)
   in
-  check ~offset:0 { line = 1; column = 1 };
+  check ~offset:0 (Position.from_one_based 1 1);
 
   (* "h" *)
-  check ~offset:1 { line = 1; column = 2 };
+  check ~offset:1 (Position.from_one_based 1 2);
 
   (* "i" *)
-  check ~offset:2 { line = 1; column = 3 };
+  check ~offset:2 (Position.from_one_based 1 3);
 
   (* "\n" *)
-  check ~offset:3 { line = 2; column = 1 };
+  check ~offset:3 (Position.from_one_based 2 1);
 
   (* "g" *)
-  check ~offset:4 { line = 2; column = 2 };
+  check ~offset:4 (Position.from_one_based 2 2);
 
   (* c2[0] *)
-  check ~offset:5 { line = 2; column = 3 };
+  check ~offset:5 (Position.from_one_based 2 3);
 
   (* c2[1] *)
-  check ~offset:6 { line = 2; column = 3 };
+  check ~offset:6 (Position.from_one_based 2 3);
 
   (* "\n" *)
-  check ~offset:7 { line = 3; column = 1 };
+  check ~offset:7 (Position.from_one_based 3 1);
 
   (* c3[0] *)
-  check ~offset:8 { line = 3; column = 2 };
+  check ~offset:8 (Position.from_one_based 3 2);
 
   (* c3[1] *)
-  check ~offset:9 { line = 3; column = 2 };
+  check ~offset:9 (Position.from_one_based 3 2);
 
   (* c3[2] *)
-  check ~offset:10 { line = 3; column = 2 };
+  check ~offset:10 (Position.from_one_based 3 2);
 
   (* c4[0] *)
-  check ~offset:11 { line = 3; column = 3 };
+  check ~offset:11 (Position.from_one_based 3 3);
 
   (* c4[1] *)
-  check ~offset:12 { line = 3; column = 3 };
+  check ~offset:12 (Position.from_one_based 3 3);
 
   (* c4[2] *)
-  check ~offset:13 { line = 3; column = 3 };
+  check ~offset:13 (Position.from_one_based 3 3);
 
   (* c4[3] *)
-  check ~offset:14 { line = 3; column = 3 };
+  check ~offset:14 (Position.from_one_based 3 3);
 
   (* EOF *)
   try
-    check ~offset:15 { line = 0; column = 0 };
+    check ~offset:15 (Position.from_one_based 0 0);
     false
   with
   | Failure _ -> true

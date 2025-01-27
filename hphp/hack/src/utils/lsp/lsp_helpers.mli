@@ -35,7 +35,7 @@ val path_string_to_lsp_uri : string -> default_path:string -> Lsp.DocumentUri.t
 val lsp_textDocumentIdentifier_to_filename :
   Lsp.TextDocumentIdentifier.t -> string
 
-val lsp_position_to_fc : Lsp.position -> File_content.position
+val lsp_position_to_fc : Lsp.position -> File_content.Position.t
 
 val lsp_range_to_fc : Lsp.range -> File_content.range
 

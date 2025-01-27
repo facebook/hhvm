@@ -1,4 +1,9 @@
 (library
  (name file_content)
  (wrapped false)
- (libraries utils_core))
+ (libraries
+  utils_core)
+ (preprocess
+  (pps
+   ppx_deriving.std
+   ppx_yojson_conv)))

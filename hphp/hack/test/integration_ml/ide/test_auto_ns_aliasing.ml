@@ -139,8 +139,7 @@ let test () =
       Str.global_replace (Str.regexp_string "AUTO332") "" contents
     in
     let position = File_content.offset_to_position contents offset in
-    let line = position.File_content.line in
-    let column = position.File_content.column in
+    let (line, column) = File_content.Position.line_column_one_based position in
     let (env, _diagnostics) = Test.Client.open_file env path in
     let (env, response) =
       ClientIdeDaemon.Test.handle

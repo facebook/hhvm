@@ -85,21 +85,23 @@ let expand_range_to_whole_rows content (range : File_content.range) :
   File_content.(
     (* It's easy to expand the start of the range if necessary, but to expand *)
     (* the end of the range requires more work... *)
-    let range = { range with st = { range.st with column = 1 } } in
+    let range =
+      { range with st = File_content.Position.beginning_of_line range.st }
+    in
     let (from0, to0) = get_offsets content (range.st, range.ed) in
-    if range.ed.column = 1 || to0 = String.length content then
+    if
+      File_content.Position.is_beginning_of_line range.ed
+      || to0 = String.length content
+    then
       (range, from0, to0)
     (* common case is performant. *)
     else
       (* First guess: we'll extend range.ed to the end of the line. *)
-      let ed = { line = range.ed.line + 1; column = 1 } in
+      let ed = File_content.Position.beginning_of_next_line range.ed in
       (* But if this is longer than the length of the file, pull back. *)
       let ed_file = offset_to_position content (String.length content) in
       let ed =
-        if
-          ed.line < ed_file.line
-          || (ed.line = ed_file.line && ed.column <= ed_file.column)
-        then
+        if Position.compare ed ed_file <= 0 then
           ed
         else
           ed_file
@@ -150,8 +152,8 @@ let drop_tail (xs : 'a list) (n : int) : 'a list =
 let noop_edit =
   let range =
     {
-      File_content.st = { File_content.line = 1; column = 1 };
-      ed = { File_content.line = 1; column = 1 };
+      File_content.st = File_content.Position.beginning_of_file;
+      ed = File_content.Position.beginning_of_file;
     }
   in
   {
@@ -187,15 +189,12 @@ let minimal_edit (old_src : string) (new_src : string) :
       else
         (String.concat ~sep:"\n" new_src_novel_lines ^ "\n", 0)
     in
-    let range_start_line_1_indexed =
-      range_start_line + 1 + start_line_adjustment
-    in
-    let range_end_line_1_indexed = range_end_line + 1 in
+    let range_start_line = range_start_line + start_line_adjustment in
     let range =
       {
         File_content.st =
-          { File_content.line = range_start_line_1_indexed; column = 1 };
-        ed = { File_content.line = range_end_line_1_indexed; column = 1 };
+          File_content.Position.from_zero_based range_start_line 0;
+        ed = File_content.Position.from_zero_based range_end_line 0;
       }
     in
     {

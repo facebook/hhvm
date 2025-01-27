@@ -79,3 +79,15 @@
   unix)
  (preprocess
   (pps ppx_deriving.std)))
+
+(executable
+ (name file_content_test)
+ (modules
+  file_content_test)
+ (libraries
+  file_content
+  full_fidelity
+  relative_path
+  test_injector_config
+  unit_test
+  utils_core))

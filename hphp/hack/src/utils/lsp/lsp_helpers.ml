@@ -59,12 +59,9 @@ let lsp_textDocumentIdentifier_to_filename
     (identifier : Lsp.TextDocumentIdentifier.t) : string =
   Lsp.TextDocumentIdentifier.(lsp_uri_to_path identifier.uri)
 
-let lsp_position_to_fc (pos : Lsp.position) : File_content.position =
-  {
-    File_content.line = pos.Lsp.line + 1;
-    (* LSP is 0-based; File_content is 1-based. *)
-    column = pos.Lsp.character + 1;
-  }
+let lsp_position_to_fc ({ Lsp.line; character } : Lsp.position) :
+    File_content.Position.t =
+  File_content.Position.from_zero_based line character
 
 let lsp_range_to_fc (range : Lsp.range) : File_content.range =
   {
@@ -354,9 +351,9 @@ let update_diagnostics_due_to_change
         let pos =
           File_content.offset_to_position change.DidChange.text offset
         in
-        (* 1-based *)
-        let insert_lines = pos.File_content.line - 1 in
-        let insert_chars_on_final_line = pos.File_content.column - 1 in
+        let (insert_lines, insert_chars_on_final_line) =
+          File_content.Position.line_column_zero_based pos
+        in
         Some { remove_range; insert_lines; insert_chars_on_final_line }
     in
     let apply_replace diagnostic_opt replace_opt =

@@ -43,13 +43,13 @@ let get_signature (ctx : Provider_context.t) (name : string) : string option =
 
 let get_autocomplete_context
     ~(file_content : string)
-    ~(pos : File_content.position)
+    ~(pos : File_content.Position.t)
     ~(is_manually_invoked : bool) :
     AutocompleteTypes.legacy_autocomplete_context =
   (* This function retrieves the current line of text up to the position,   *)
   (* and determines whether it's something like "<nt:te" or "->:attr".      *)
   (* This is a dumb implementation. Would be better to replace it with FFP. *)
-  if pos.File_content.column = 1 then
+  if File_content.Position.is_beginning_of_line pos then
     {
       AutocompleteTypes.is_manually_invoked;
       is_after_single_colon = false;
@@ -61,7 +61,7 @@ let get_autocomplete_context
       char_at_pos = ' ';
     }
   else
-    let pos_start = { pos with File_content.column = 1 } in
+    let pos_start = File_content.Position.beginning_of_line pos in
     let (offset_start, offset) =
       File_content.get_offsets file_content (pos_start, pos)
     in
@@ -136,17 +136,17 @@ let go_ctx
     ~(column : int) : AutocompleteTypes.ide_result =
   (* Be sure to fix tcopt on all entry points of this file *)
   let ctx = Provider_context.with_tcopt_for_autocomplete ctx in
-  let open File_content in
   (* We have to edit the file content to add the text AUTO332.
      TODO: Switch to FFP Autocomplete to avoid doing this file edit *)
   let file_content = Provider_context.read_file_contents_exn entry in
-  let pos = { line; column } in
+  let pos = File_content.Position.from_one_based line column in
   let edits =
     [
-      {
-        range = Some { st = pos; ed = pos };
-        text = AutocompleteTypes.autocomplete_token;
-      };
+      File_content.
+        {
+          range = Some { st = pos; ed = pos };
+          text = AutocompleteTypes.autocomplete_token;
+        };
     ]
   in
   let auto332_content = File_content.edit_file_unsafe file_content edits in

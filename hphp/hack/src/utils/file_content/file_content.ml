@@ -7,16 +7,66 @@
  *
  *)
 open Hh_prelude
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
-type position = {
-  line: int;
-  (* 1-based *)
-  column: int; (* 1-based *)
-}
+module Position : sig
+  type t [@@deriving eq, ord, yojson_of]
+
+  val from_one_based : int -> int -> t
+
+  val from_zero_based : int -> int -> t
+
+  val line_column_one_based : t -> int * int
+
+  val line_column_zero_based : t -> int * int
+
+  val beginning_of_file : t
+
+  val beginning_of_line : t -> t
+
+  val beginning_of_next_line : t -> t
+
+  val is_beginning_of_line : t -> bool
+
+  val next_char : t -> t
+
+  val to_string_one_based : t -> string
+end = struct
+  type t = {
+    line: int;  (** 1-based *)
+    column: int;  (** 1-based *)
+  }
+  [@@deriving eq, ord, yojson_of]
+
+  let first_line = 1
+
+  let first_column = 1
+
+  let beginning_of_file = { line = first_line; column = first_column }
+
+  let from_one_based line column = { line; column }
+
+  let from_zero_based line column = { line = line + 1; column = column + 1 }
+
+  let line_column_one_based { line; column } = (line, column)
+
+  let line_column_zero_based { line; column } = (line - 1, column - 1)
+
+  let beginning_of_line { line; column = _ } = { line; column = first_column }
+
+  let beginning_of_next_line { line; column = _ } =
+    { line = line + 1; column = first_column }
+
+  let is_beginning_of_line { line = _; column } = Int.equal column first_column
+
+  let next_char { line; column } = { line; column = column + 1 }
+
+  let to_string_one_based { line; column } = Printf.sprintf "%d:%d" line column
+end
 
 type range = {
-  st: position;
-  ed: position;
+  st: Position.t;
+  ed: Position.t;
 }
 
 type text_edit = {
@@ -49,7 +99,8 @@ let get_char_length c =
   else
     raise (Failure (Printf.sprintf "Invalid UTF-8 leading byte: %d" c))
 
-let is_target t line column = t.line = line && t.column = column
+let is_target t line column =
+  Position.equal t (Position.from_one_based line column)
 
 let get_char content offset =
   (* sentinel newline to make things easier *)
@@ -77,12 +128,12 @@ let invalid_position p =
   raise
     (Failure
        (Printf.sprintf
-          "Invalid position: {line: %d; column: %d}"
-          p.line
-          p.column))
+          "Invalid position: %s"
+          (Position.yojson_of_t p |> Yojson.Safe.to_string)))
 
 (* this returns 0-based offsets *)
-let get_offsets (content : string) (queries : position * position) : int * int =
+let get_offsets (content : string) (queries : Position.t * Position.t) :
+    int * int =
   match get_offsets content queries 1 1 0 (None, None) with
   | (Some r1, Some r2) -> (r1, r2)
   | (None, _) -> invalid_position (fst queries)
@@ -90,7 +141,7 @@ let get_offsets (content : string) (queries : position * position) : int * int =
 
 (* This returns a 0-based offset. If you need to get two offsets, use
    `get_offsets` instead. *)
-let get_offset (content : string) (position : position) : int =
+let get_offset (content : string) (position : Position.t) : int =
   fst (get_offsets content (position, position))
 
 (* This takes 0-based offsets and returns 1-based positions.                  *)
@@ -100,22 +151,22 @@ let get_offset (content : string) (position : position) : int =
 (* It is okay to ask for the position of the offset of the end of the file.   *)
 (* In case of multi-byte characters, if you give an offset inside a character,*)
 (* it still gives the position immediately after.                             *)
-let offset_to_position (content : string) (offset : int) : position =
-  let rec helper ~(line : int) ~(column : int) ~(index : int) =
+let offset_to_position (content : string) (offset : int) : Position.t =
+  let rec helper (p : Position.t) ~(index : int) =
     if index >= offset then
-      { line; column }
+      p
     else
       let c = get_char content index in
       let clen = get_char_length c in
       if Char.equal c '\n' then
-        helper ~line:(line + 1) ~column:1 ~index:(index + clen)
+        helper (Position.beginning_of_next_line p) ~index:(index + clen)
       else
-        helper ~line ~column:(column + 1) ~index:(index + clen)
+        helper (Position.next_char p) ~index:(index + clen)
   in
   if offset > String.length content then
     raise (Failure (Printf.sprintf "Invalid offset: %d" offset))
   else
-    helper ~line:1 ~column:1 ~index:0
+    helper Position.beginning_of_file ~index:0
 
 let apply_edit content { range; text } =
   match range with
@@ -132,11 +183,9 @@ let print_edit b edit =
     | None -> "None"
     | Some range ->
       Printf.sprintf
-        "%d:%d - %d:%d"
-        range.st.line
-        range.st.column
-        range.ed.line
-        range.ed.column
+        "%s - %s"
+        (Position.to_string_one_based range.st)
+        (Position.to_string_one_based range.ed)
   in
   Printf.bprintf b "range = %s\n text = \n%s\n" range edit.text
 

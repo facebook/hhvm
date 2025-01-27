@@ -45,7 +45,7 @@ public class ContextPropagationRegistry {
     // Register `ContextPropRunnable` and `ContextPropSubscriber` on first invocation.
     if (!hooksRegistered) {
       Schedulers.onScheduleHook("context.propagation", ContextPropRunnable::new);
-      Hooks.onEachOperator(
+      Hooks.onLastOperator(
           Operators.lift((scannable, subscriber) -> new ContextPropSubscriber<>(subscriber)));
       hooksRegistered = true;
     }

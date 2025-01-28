@@ -26,18 +26,18 @@ import typing
 from pathlib import Path
 from typing import Optional
 
-from thrift.compiler.test import fixture_utils
+from xplat.thrift.compiler.test import fixture_utils
 
 """
-* Invoke from the `/fbsource/fbcode/` directory using `buck run`:
+* Invoke from the `fbsource` directory using `buck run`:
 
-    buck run thrift/compiler/test:build_fixtures
+    buck run xplat/thrift/compiler/test:build_fixtures
 
-will build all fixtures under `thrift/compiler/test/fixtures`. Or
+will build all fixtures under `xplat/thrift/compiler/test/fixtures`. Or
 
-    buck run thrift/compiler/test:build_fixtures -- --fixture-names [$FIXTURENAMES]
+    buck run xplat/thrift/compiler/test:build_fixtures -- --fixture-names [$FIXTURENAMES]
 
-will only build selected fixtures under `thrift/compiler/test/fixtures`.
+will only build selected fixtures under `xplat/thrift/compiler/test/fixtures`.
 
 $FIXTURENAMES is a space-separated list of fixture names to build specifically
 (default is to build all fixtures).
@@ -191,6 +191,7 @@ async def main() -> int:
 
     repo_root_dir_abspath = Path(args.repo_root_dir).resolve(strict=True)
     assert repo_root_dir_abspath.is_dir()
+    repo_root_dir_abspath = repo_root_dir_abspath / "xplat"
 
     # Directory that contains all fixture directories (one fixture per sub-dir).
     fixtures_root_dir_abspath = repo_root_dir_abspath / "thrift/compiler/test/fixtures"

@@ -27,7 +27,7 @@ import typing
 import unittest
 from pathlib import Path
 
-from thrift.compiler.test import fixture_utils
+from xplat.thrift.compiler.test import fixture_utils
 
 
 _THRIFT_BIN_PATH = fixture_utils.get_thrift_binary_path(thrift_bin_arg=None)
@@ -108,7 +108,7 @@ class FixtureTest(unittest.TestCase):
         self.maxDiff = None
 
     def runTest(self, fixture_name: str) -> None:
-        repo_root_dir_abspath = Path.cwd()
+        repo_root_dir_abspath = Path.cwd() / "xplat"
         fixture_dir_abspath = (
             repo_root_dir_abspath / _FIXTURES_ROOT_DIR_RELPATH / fixture_name
         )
@@ -132,6 +132,7 @@ class FixtureTest(unittest.TestCase):
             subprocess.check_call(
                 fixture_cmd.build_command_args,
                 close_fds=True,
+                cwd=repo_root_dir_abspath,
             )
 
         # Compare generated code to fixture code
@@ -150,7 +151,9 @@ def _add_fixture(klazz, fixture_name: str) -> None:
     setattr(klazz, test_method.__name__, test_method)
 
 
-for fixture_name in fixture_utils.get_all_fixture_names(_FIXTURES_ROOT_DIR_RELPATH):
+for fixture_name in fixture_utils.get_all_fixture_names(
+    "xplat" / _FIXTURES_ROOT_DIR_RELPATH
+):
     _add_fixture(FixtureTest, fixture_name)
 
 if __name__ == "__main__":

@@ -29,16 +29,6 @@
 
 namespace apache::thrift::test {
 
-// Helper to check if the tags matches.
-// For example:
-//   static_assert(same_tag<bool_t, void_t>);
-// Will produce an error message similar to:
-//   static assertion failed due to requirement
-//   test::same_tag<apache::thrift::type::bool_t, apache::thrift::type::void_t>
-//   static_assert(test::same_tag<bool_t, void_t>);
-template <typename Expected, typename Actual>
-constexpr bool same_tag = std::is_same_v<Expected, Actual>;
-
 template <typename T>
 struct TestValue {
   T value;

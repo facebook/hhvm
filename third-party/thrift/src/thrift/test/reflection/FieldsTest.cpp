@@ -40,15 +40,17 @@ TEST(FieldsTest, Get) {
   EXPECT_EQ((op::get<field_id<2>, Struct>(s)), 10);
   op::get<field_id<2>, Struct>(s) = 20;
   EXPECT_EQ(*s.fieldA(), 20);
-  test::
-      same_tag<decltype(s.fieldA()), decltype(op::get<field_id<2>, Struct>(s))>;
+  static_assert(std::is_same_v<
+                decltype(s.fieldA()),
+                decltype(op::get<field_id<2>, Struct>(s))>);
 
   s.fieldE()->ui_ref() = 10;
   EXPECT_EQ((op::get<field_id<5>, Struct>(s)->ui_ref()), 10);
   op::get<field_id<5>, Struct>(s)->us_ref() = "20";
   EXPECT_EQ(s.fieldE()->us_ref(), "20");
-  test::
-      same_tag<decltype(s.fieldE()), decltype(op::get<field_id<5>, Struct>(s))>;
+  static_assert(std::is_same_v<
+                decltype(s.fieldE()),
+                decltype(op::get<field_id<5>, Struct>(s))>);
 }
 
 TEST(FieldsTest, field_id_by_ordinal) {
@@ -64,8 +66,9 @@ TEST(UnionFieldsTest, Get) {
   u.ui_ref() = 10;
   EXPECT_EQ((op::get<field_id<1>, Union>(u)), 10);
   EXPECT_THROW((*op::get<field_id<2>, Union>(u)), bad_field_access);
-  test::
-      same_tag<decltype(u.ui_ref()), decltype(op::get<field_id<1>, Union>(u))>;
+  static_assert(std::is_same_v<
+                decltype(u.ui_ref()),
+                decltype(op::get<field_id<1>, Union>(u))>);
   EXPECT_EQ(&(*op::get<field_id<1>, Union>(u)), &*u.ui_ref());
 
   op::get<field_id<1>, Union>(u) = 20;
@@ -74,8 +77,9 @@ TEST(UnionFieldsTest, Get) {
 
   u.us_ref() = "foo";
   EXPECT_EQ((*op::get<field_id<3>, Union>(u)), "foo");
-  test::
-      same_tag<decltype(u.us_ref()), decltype(op::get<field_id<3>, Union>(u))>;
+  static_assert(std::is_same_v<
+                decltype(u.us_ref()),
+                decltype(op::get<field_id<3>, Union>(u))>);
   EXPECT_THROW((*op::get<field_id<1>, Union>(u)), bad_field_access);
 }
 
@@ -89,55 +93,60 @@ template <
     class FieldTag>
 void checkField(const char* identName) {
   if constexpr (Ordinal::value != Ordinal{}) {
-    test::same_tag<Id, private_access::field_id<Struct, Ordinal>>;
+    static_assert(
+        std::is_same_v<Id, private_access::field_id<Struct, Ordinal>>);
   }
-  test::same_tag<TypeTag, private_access::type_tag<Struct, Ordinal>>;
-  test::same_tag<Ident, private_access::ident<Struct, Ordinal>>;
-  test::same_tag<Ordinal, private_access::ordinal<Struct, Id>>;
-  test::same_tag<Ordinal, private_access::ordinal<Struct, Ident>>;
+  static_assert(
+      std::is_same_v<TypeTag, private_access::type_tag<Struct, Ordinal>>);
+  static_assert(std::is_same_v<Ident, private_access::ident<Struct, Ordinal>>);
+  static_assert(std::is_same_v<Ordinal, private_access::ordinal<Struct, Id>>);
+  static_assert(
+      std::is_same_v<Ordinal, private_access::ordinal<Struct, Ident>>);
 
   if constexpr (is_type_tag_unique) {
-    test::same_tag<Ordinal, private_access::ordinal<Struct, TypeTag>>;
+    static_assert(
+        std::is_same_v<Ordinal, private_access::ordinal<Struct, TypeTag>>);
   }
 
-  test::same_tag<op::get_ordinal<Struct, Ordinal>, Ordinal>;
-  test::same_tag<op::get_field_id<Struct, Ordinal>, Id>;
-  test::same_tag<op::get_type_tag<Struct, Ordinal>, TypeTag>;
-  test::same_tag<op::get_ident<Struct, Ordinal>, Ident>;
-  test::same_tag<op::get_field_tag<Struct, Ordinal>, FieldTag>;
+  static_assert(std::is_same_v<op::get_ordinal<Struct, Ordinal>, Ordinal>);
+  static_assert(std::is_same_v<op::get_field_id<Struct, Ordinal>, Id>);
+  static_assert(std::is_same_v<op::get_type_tag<Struct, Ordinal>, TypeTag>);
+  static_assert(std::is_same_v<op::get_ident<Struct, Ordinal>, Ident>);
+  static_assert(std::is_same_v<op::get_field_tag<Struct, Ordinal>, FieldTag>);
   EXPECT_EQ((op::get_name_v<Struct, Ordinal>), identName);
 
-  test::same_tag<op::get_ordinal<Struct, Id>, Ordinal>;
-  test::same_tag<op::get_field_id<Struct, Id>, Id>;
-  test::same_tag<op::get_type_tag<Struct, Id>, TypeTag>;
-  test::same_tag<op::get_ident<Struct, Id>, Ident>;
-  test::same_tag<op::get_field_tag<Struct, Id>, FieldTag>;
+  static_assert(std::is_same_v<op::get_ordinal<Struct, Id>, Ordinal>);
+  static_assert(std::is_same_v<op::get_field_id<Struct, Id>, Id>);
+  static_assert(std::is_same_v<op::get_type_tag<Struct, Id>, TypeTag>);
+  static_assert(std::is_same_v<op::get_ident<Struct, Id>, Ident>);
+  static_assert(std::is_same_v<op::get_field_tag<Struct, Id>, FieldTag>);
   EXPECT_EQ((op::get_name_v<Struct, Id>), identName);
 
   if constexpr (is_type_tag_unique && !std::is_void_v<TypeTag>) {
-    test::same_tag<op::get_ordinal<Struct, TypeTag>, Ordinal>;
-    test::same_tag<op::get_field_id<Struct, TypeTag>, Id>;
-    test::same_tag<op::get_type_tag<Struct, TypeTag>, TypeTag>;
-    test::same_tag<op::get_ident<Struct, TypeTag>, Ident>;
-    test::same_tag<op::get_field_tag<Struct, TypeTag>, FieldTag>;
+    static_assert(std::is_same_v<op::get_ordinal<Struct, TypeTag>, Ordinal>);
+    static_assert(std::is_same_v<op::get_field_id<Struct, TypeTag>, Id>);
+    static_assert(std::is_same_v<op::get_type_tag<Struct, TypeTag>, TypeTag>);
+    static_assert(std::is_same_v<op::get_ident<Struct, TypeTag>, Ident>);
+    static_assert(std::is_same_v<op::get_field_tag<Struct, TypeTag>, FieldTag>);
     EXPECT_EQ((op::get_name_v<Struct, TypeTag>), identName);
   }
 
   if constexpr (!std::is_void_v<Ident>) {
-    test::same_tag<op::get_ordinal<Struct, Ident>, Ordinal>;
-    test::same_tag<op::get_field_id<Struct, Ident>, Id>;
-    test::same_tag<op::get_type_tag<Struct, Ident>, TypeTag>;
-    test::same_tag<op::get_ident<Struct, Ident>, Ident>;
-    test::same_tag<op::get_field_tag<Struct, Ident>, FieldTag>;
+    static_assert(std::is_same_v<op::get_ordinal<Struct, Ident>, Ordinal>);
+    static_assert(std::is_same_v<op::get_field_id<Struct, Ident>, Id>);
+    static_assert(std::is_same_v<op::get_type_tag<Struct, Ident>, TypeTag>);
+    static_assert(std::is_same_v<op::get_ident<Struct, Ident>, Ident>);
+    static_assert(std::is_same_v<op::get_field_tag<Struct, Ident>, FieldTag>);
     EXPECT_EQ((op::get_name_v<Struct, Ident>), identName);
   }
 
   if constexpr (!std::is_void_v<FieldTag>) {
-    test::same_tag<op::get_ordinal<Struct, FieldTag>, Ordinal>;
-    test::same_tag<op::get_field_id<Struct, FieldTag>, Id>;
-    test::same_tag<op::get_type_tag<Struct, FieldTag>, TypeTag>;
-    test::same_tag<op::get_ident<Struct, FieldTag>, Ident>;
-    test::same_tag<op::get_field_tag<Struct, FieldTag>, FieldTag>;
+    static_assert(std::is_same_v<op::get_ordinal<Struct, FieldTag>, Ordinal>);
+    static_assert(std::is_same_v<op::get_field_id<Struct, FieldTag>, Id>);
+    static_assert(std::is_same_v<op::get_type_tag<Struct, FieldTag>, TypeTag>);
+    static_assert(std::is_same_v<op::get_ident<Struct, FieldTag>, Ident>);
+    static_assert(
+        std::is_same_v<op::get_field_tag<Struct, FieldTag>, FieldTag>);
     EXPECT_EQ((op::get_name_v<Struct, FieldTag>), identName);
   }
 }
@@ -273,29 +282,40 @@ TEST(FieldsTest, IsReflectionMetadata) {
 TEST(FieldsTest, NotFoundFieldInfo) {
   using Struct = test_cpp2::cpp_reflection::struct3;
 
-  test::same_tag<op::get_ordinal<Struct, field_ordinal<0>>, field_ordinal<0>>;
-  test::same_tag<op::get_field_id<Struct, field_ordinal<0>>, field_id<0>>;
-  test::same_tag<op::get_type_tag<Struct, field_ordinal<0>>, void>;
-  test::same_tag<op::get_ident<Struct, field_ordinal<0>>, void>;
-  test::same_tag<op::get_field_tag<Struct, field_ordinal<0>>, void>;
+  static_assert(std::is_same_v<
+                op::get_ordinal<Struct, field_ordinal<0>>,
+                field_ordinal<0>>);
+  static_assert(
+      std::is_same_v<op::get_field_id<Struct, field_ordinal<0>>, field_id<0>>);
+  static_assert(
+      std::is_same_v<op::get_type_tag<Struct, field_ordinal<0>>, void>);
+  static_assert(std::is_same_v<op::get_ident<Struct, field_ordinal<0>>, void>);
+  static_assert(
+      std::is_same_v<op::get_field_tag<Struct, field_ordinal<0>>, void>);
 
-  test::same_tag<op::get_ordinal<Struct, field_id<200>>, field_ordinal<0>>;
-  test::same_tag<op::get_field_id<Struct, field_id<200>>, field_id<0>>;
-  test::same_tag<op::get_type_tag<Struct, field_id<200>>, void>;
-  test::same_tag<op::get_ident<Struct, field_id<200>>, void>;
-  test::same_tag<op::get_field_tag<Struct, field_id<200>>, void>;
+  static_assert(
+      std::is_same_v<op::get_ordinal<Struct, field_id<200>>, field_ordinal<0>>);
+  static_assert(
+      std::is_same_v<op::get_field_id<Struct, field_id<200>>, field_id<0>>);
+  static_assert(std::is_same_v<op::get_type_tag<Struct, field_id<200>>, void>);
+  static_assert(std::is_same_v<op::get_ident<Struct, field_id<200>>, void>);
+  static_assert(std::is_same_v<op::get_field_tag<Struct, field_id<200>>, void>);
 
-  test::same_tag<op::get_ordinal<Struct, binary_t>, field_ordinal<0>>;
-  test::same_tag<op::get_field_id<Struct, binary_t>, field_id<0>>;
-  test::same_tag<op::get_type_tag<Struct, binary_t>, void>;
-  test::same_tag<op::get_ident<Struct, binary_t>, void>;
-  test::same_tag<op::get_field_tag<Struct, binary_t>, void>;
+  static_assert(
+      std::is_same_v<op::get_ordinal<Struct, binary_t>, field_ordinal<0>>);
+  static_assert(
+      std::is_same_v<op::get_field_id<Struct, binary_t>, field_id<0>>);
+  static_assert(std::is_same_v<op::get_type_tag<Struct, binary_t>, void>);
+  static_assert(std::is_same_v<op::get_ident<Struct, binary_t>, void>);
+  static_assert(std::is_same_v<op::get_field_tag<Struct, binary_t>, void>);
 
-  test::same_tag<op::get_ordinal<Struct, ident::a>, field_ordinal<0>>;
-  test::same_tag<op::get_field_id<Struct, ident::a>, field_id<0>>;
-  test::same_tag<op::get_type_tag<Struct, ident::a>, void>;
-  test::same_tag<op::get_ident<Struct, ident::a>, void>;
-  test::same_tag<op::get_field_tag<Struct, ident::a>, void>;
+  static_assert(
+      std::is_same_v<op::get_ordinal<Struct, ident::a>, field_ordinal<0>>);
+  static_assert(
+      std::is_same_v<op::get_field_id<Struct, ident::a>, field_id<0>>);
+  static_assert(std::is_same_v<op::get_type_tag<Struct, ident::a>, void>);
+  static_assert(std::is_same_v<op::get_ident<Struct, ident::a>, void>);
+  static_assert(std::is_same_v<op::get_field_tag<Struct, ident::a>, void>);
 }
 
 template <typename Ident>
@@ -306,11 +326,14 @@ bool isIdentTag(folly::tag_t<Ident>) {
 TEST(FieldsTest, HelperAPIs) {
   using Struct = test_cpp2::cpp_reflection::struct3;
 
-  test::same_tag<op::get_native_type<Struct, field_ordinal<1>>, std::int32_t>;
-  test::same_tag<op::get_native_type<Struct, ident::fieldA>, std::int32_t>;
-  test::same_tag<
-      op::get_native_type<Struct, field_id<11>>,
-      std::deque<std::string>>;
+  static_assert(std::is_same_v<
+                op::get_native_type<Struct, field_ordinal<1>>,
+                std::int32_t>);
+  static_assert(
+      std::is_same_v<op::get_native_type<Struct, ident::fieldA>, std::int32_t>);
+  static_assert(std::is_same_v<
+                op::get_native_type<Struct, field_id<11>>,
+                std::deque<std::string>>);
   EXPECT_EQ((op::get_field_id_v<Struct, field_ordinal<1>>), FieldId{2});
   EXPECT_EQ((op::get_ordinal_v<Struct, field_id<2>>), FieldOrdinal{1});
 

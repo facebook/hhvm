@@ -41,17 +41,17 @@ TEST(NativeTypeTest, UndefinedOverloading) {
 
 TEST(NativeTypeTest, Void) {
   static_assert(std::is_same_v<void, native_type<void_t>>);
-  static_assert(test::same_tag<void_t, infer_tag<void>>);
-  static_assert(test::same_tag<void_t, infer_tag<std::nullptr_t>>);
+  static_assert(std::is_same_v<void_t, infer_tag<void>>);
+  static_assert(std::is_same_v<void_t, infer_tag<std::nullptr_t>>);
 }
 
 TEST(NativeTypeTest, Bool) {
   static_assert(std::is_same_v<bool, native_type<bool_t>>);
-  static_assert(test::same_tag<bool_t, infer_tag<bool>>);
+  static_assert(std::is_same_v<bool_t, infer_tag<bool>>);
 }
 
 TEST(InferTagTest, Tag) {
-  static_assert(test::same_tag<byte_t, infer_tag<byte_t>>);
+  static_assert(std::is_same_v<byte_t, infer_tag<byte_t>>);
 }
 
 TEST(InferTagTest, Integer) {
@@ -59,14 +59,14 @@ TEST(InferTagTest, Integer) {
   static_assert(std::is_same_v<int16_t, native_type<i16_t>>);
   static_assert(std::is_same_v<int32_t, native_type<i32_t>>);
   static_assert(std::is_same_v<int64_t, native_type<i64_t>>);
-  static_assert(test::same_tag<byte_t, infer_tag<int8_t>>);
-  static_assert(test::same_tag<i16_t, infer_tag<int16_t>>);
-  static_assert(test::same_tag<i32_t, infer_tag<int32_t>>);
-  static_assert(test::same_tag<i64_t, infer_tag<int64_t>>);
-  static_assert(test::same_tag<cpp_type<uint8_t, byte_t>, infer_tag<uint8_t>>);
-  static_assert(test::same_tag<cpp_type<uint16_t, i16_t>, infer_tag<uint16_t>>);
-  static_assert(test::same_tag<cpp_type<uint32_t, i32_t>, infer_tag<uint32_t>>);
-  static_assert(test::same_tag<cpp_type<uint64_t, i64_t>, infer_tag<uint64_t>>);
+  static_assert(std::is_same_v<byte_t, infer_tag<int8_t>>);
+  static_assert(std::is_same_v<i16_t, infer_tag<int16_t>>);
+  static_assert(std::is_same_v<i32_t, infer_tag<int32_t>>);
+  static_assert(std::is_same_v<i64_t, infer_tag<int64_t>>);
+  static_assert(std::is_same_v<cpp_type<uint8_t, byte_t>, infer_tag<uint8_t>>);
+  static_assert(std::is_same_v<cpp_type<uint16_t, i16_t>, infer_tag<uint16_t>>);
+  static_assert(std::is_same_v<cpp_type<uint32_t, i32_t>, infer_tag<uint32_t>>);
+  static_assert(std::is_same_v<cpp_type<uint64_t, i64_t>, infer_tag<uint64_t>>);
 
   static_assert(type::is_a_v<infer_tag<char>, byte_t>);
   static_assert(type::is_a_v<infer_tag<signed char>, byte_t>);
@@ -86,8 +86,8 @@ TEST(InferTagTest, Integer) {
 TEST(InferTagTest, Floating) {
   static_assert(std::is_same_v<float, native_type<float_t>>);
   static_assert(std::is_same_v<double, native_type<double_t>>);
-  static_assert(test::same_tag<float_t, infer_tag<float>>);
-  static_assert(test::same_tag<double_t, infer_tag<double>>);
+  static_assert(std::is_same_v<float_t, infer_tag<float>>);
+  static_assert(std::is_same_v<double_t, infer_tag<double>>);
 }
 
 TEST(InferTagTest, Strings) {
@@ -99,16 +99,16 @@ TEST(InferTagTest, Strings) {
 
 TEST(InferTagTest, Containers) {
   static_assert(
-      test::same_tag<native_type<list<i32_t>>, std::vector<std::int32_t>>);
+      std::is_same_v<native_type<list<i32_t>>, std::vector<std::int32_t>>);
   static_assert(
-      test::same_tag<list<i32_t>, infer_tag<std::vector<std::int32_t>>>);
+      std::is_same_v<list<i32_t>, infer_tag<std::vector<std::int32_t>>>);
   static_assert(
-      test::same_tag<native_type<set<i32_t>>, std::set<std::int32_t>>);
-  static_assert(test::same_tag<set<i32_t>, infer_tag<std::set<std::int32_t>>>);
-  static_assert(test::same_tag<
+      std::is_same_v<native_type<set<i32_t>>, std::set<std::int32_t>>);
+  static_assert(std::is_same_v<set<i32_t>, infer_tag<std::set<std::int32_t>>>);
+  static_assert(std::is_same_v<
                 native_type<map<i32_t, bool_t>>,
                 std::map<std::int32_t, bool>>);
-  static_assert(test::same_tag<
+  static_assert(std::is_same_v<
                 map<i32_t, bool_t>,
                 infer_tag<std::map<std::int32_t, bool>>>);
 }
@@ -116,7 +116,7 @@ TEST(InferTagTest, Containers) {
 TEST(InferTagTest, Wrap) {
   struct FooStruct {};
   struct Foo : detail::Wrap<FooStruct, struct_t<FooStruct>> {};
-  static_assert(test::same_tag<
+  static_assert(std::is_same_v<
                 infer_tag<Foo>,
                 adapted<InlineAdapter<Foo>, struct_t<FooStruct>>>);
 }

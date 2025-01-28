@@ -46,7 +46,7 @@ inline void CertUtils::verify<KeyType::P256>(
     CertificateVerifyContext context,
     folly::ByteRange toBeSigned,
     folly::ByteRange signature) {
-  auto signData = CertUtils::prepareSignData(context, toBeSigned);
+  auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   switch (scheme) {
     case SignatureScheme::ecdsa_secp256r1_sha256:
       return certSignature.verify<SignatureScheme::ecdsa_secp256r1_sha256>(
@@ -63,7 +63,7 @@ inline void CertUtils::verify<KeyType::P384>(
     CertificateVerifyContext context,
     folly::ByteRange toBeSigned,
     folly::ByteRange signature) {
-  auto signData = CertUtils::prepareSignData(context, toBeSigned);
+  auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   switch (scheme) {
     case SignatureScheme::ecdsa_secp384r1_sha384:
       return certSignature.verify<SignatureScheme::ecdsa_secp384r1_sha384>(
@@ -80,7 +80,7 @@ inline void CertUtils::verify<KeyType::P521>(
     CertificateVerifyContext context,
     folly::ByteRange toBeSigned,
     folly::ByteRange signature) {
-  auto signData = CertUtils::prepareSignData(context, toBeSigned);
+  auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   switch (scheme) {
     case SignatureScheme::ecdsa_secp521r1_sha512:
       return certSignature.verify<SignatureScheme::ecdsa_secp521r1_sha512>(
@@ -97,7 +97,7 @@ inline void CertUtils::verify<KeyType::ED25519>(
     CertificateVerifyContext context,
     folly::ByteRange toBeSigned,
     folly::ByteRange signature) {
-  auto signData = CertUtils::prepareSignData(context, toBeSigned);
+  auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   switch (scheme) {
     case SignatureScheme::ed25519:
       return certSignature.verify<SignatureScheme::ed25519>(
@@ -114,7 +114,7 @@ inline void CertUtils::verify<KeyType::RSA>(
     CertificateVerifyContext context,
     folly::ByteRange toBeSigned,
     folly::ByteRange signature) {
-  auto signData = CertUtils::prepareSignData(context, toBeSigned);
+  auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   switch (scheme) {
     case SignatureScheme::rsa_pss_sha256:
       return certSignature.verify<SignatureScheme::rsa_pss_sha256>(

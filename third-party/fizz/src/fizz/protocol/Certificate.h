@@ -49,6 +49,18 @@ enum class CertificateVerifyContext {
   ServerDelegatedCredential
 };
 
+namespace certverify {
+
+/**
+ * Adds the appropriate context data to prepare toBeSigned for a signature
+ * scheme's signing function.
+ */
+Buf prepareSignData(
+    CertificateVerifyContext context,
+    folly::ByteRange toBeSigned);
+
+} // namespace certverify
+
 class IdentityCert : public IdentityCertBase {
  public:
   explicit IdentityCert(std::string identity);

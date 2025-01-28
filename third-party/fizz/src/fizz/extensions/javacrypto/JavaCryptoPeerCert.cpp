@@ -6,9 +6,9 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
-#include <fizz/backend/openssl/certificate/CertUtils.h>
 #include <fizz/extensions/javacrypto/JavaCryptoPeerCert.h>
 #include <fizz/extensions/javacrypto/JniUtils.h>
+#include <fizz/protocol/Certificate.h>
 
 namespace fizz {
 
@@ -71,7 +71,7 @@ void JavaCryptoPeerCert::verify(
       throw std::runtime_error("Unsupported signature scheme");
   }
   auto jAlgorithm = env->NewStringUTF(algorithm.c_str());
-  auto signData = openssl::CertUtils::prepareSignData(context, toBeSigned);
+  auto signData = fizz::certverify::prepareSignData(context, toBeSigned);
   auto jSignData = jni::createByteArray(env, std::move(signData));
   auto jSignature = jni::createByteArray(env, signature);
 

@@ -24,14 +24,6 @@ namespace openssl {
 
 class CertUtils {
  public:
-  /**
-   * Adds the appropriate context data to prepare toBeSigned for a signature
-   * scheme's signing function.
-   */
-  static Buf prepareSignData(
-      CertificateVerifyContext context,
-      folly::ByteRange toBeSigned);
-
   static CertificateMsg getCertMessage(
       const std::vector<folly::ssl::X509UniquePtr>& certs,
       Buf certificateRequestContext);

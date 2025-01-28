@@ -87,7 +87,7 @@ TEST(CertTest, GetCertMessage) {
 TEST(CertTest, PrepareSignData) {
   std::array<uint8_t, 32> toBeSigned;
   memset(toBeSigned.data(), 1, toBeSigned.size());
-  auto out = openssl::CertUtils::prepareSignData(
+  auto out = fizz::certverify::prepareSignData(
       CertificateVerifyContext::Server, folly::range(toBeSigned));
   auto hex = hexlify(out->moveToFbString());
   std::string expected =

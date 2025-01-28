@@ -893,6 +893,32 @@ struct TypeIntersectionConstraint {
 
   HPHP::Optional<TypedValue> defaultValue() const;
 
+  #define isX(name) \
+  bool is##name() const { \
+    return std::all_of(range().begin(), range().end(), [&](const TypeConstraint& tc) {return tc.is##name(); }); \
+  }
+  isX(String)
+  isX(Int)
+  isX(Vec)
+  #undef isX
+
+  bool validForProp() const {
+    return std::all_of(
+      range().begin(),
+      range().end(),
+      [&](const TypeConstraint& tc) {
+        return tc.validForProp();
+      }
+    );
+  }
+
+  template<typename T>
+  bool alwaysPasses(T value) const {
+   return std::all_of(range().begin(), range().end(),
+       [&](const TypeConstraint& tc) {return tc.alwaysPasses(value);}
+   );
+  }
+
   private:
   folly::Range<TypeConstraint*> mutableRange() {
     if (isSimple()) {
@@ -912,7 +938,6 @@ struct TypeIntersectionConstraint {
     ~TypeConstraints() {}
   } m_u;
 };
-
 
 static_assert(CheckSize<TypeIntersectionConstraint, use_lowptr ? 16 : 32>(), "");
 

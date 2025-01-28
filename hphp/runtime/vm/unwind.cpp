@@ -256,14 +256,20 @@ DEBUG_ONLY bool throwable_has_expected_props() {
   // Check that we have the expected type-hints on these props so we don't need
   // to verify anything when setting. If someone changes the type-hint we want
   // to know.
-  auto const isException = [&](const TypeConstraint& tc) {
-    if (!tc.isUnresolved() && !tc.isSubObject()) return false;
-    auto const cls = tc.anyNamedType()->getCachedClass();
-    return cls && cls == SystemLib::getThrowableClass();
+  auto const isException = [&](const TypeIntersectionConstraint& tic) {
+    auto const check =  [&](const TypeConstraint& tc) {
+      if (!tc.isUnresolved() && !tc.isSubObject()) return false;
+      auto const cls = tc.anyNamedType()->getCachedClass();
+      return cls && cls == SystemLib::getThrowableClass();
+    };
+    return std::all_of(
+      tic.range().begin(),
+      tic.range().end(),
+      [&](const TypeConstraint& tc) {return check(tc);}
+    );
   };
 
-  return
-    isException(erCls->declPropTypeConstraint(s_previousIdx)) &&
+  return isException(erCls->declPropTypeConstraint(s_previousIdx)) &&
     isException(exCls->declPropTypeConstraint(s_previousIdx));
 }
 

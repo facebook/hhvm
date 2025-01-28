@@ -70,7 +70,7 @@ Array get_tspec(const Class* cls) {
 
 // Check if the field-spec implies that the field's type-constraint will
 // always be satisfied. We don't need to do type verification if so.
-bool typeSatisfiesConstraint(const TypeConstraint& tc,
+bool typeSatisfiesConstraint(const TypeIntersectionConstraint& tc,
                              TType type,
                              const Array& spec) {
   switch (type) {

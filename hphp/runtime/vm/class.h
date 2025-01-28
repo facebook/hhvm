@@ -895,8 +895,8 @@ public:
   RepoAuthType declPropRepoAuthType(Slot index) const;
   RepoAuthType staticPropRepoAuthType(Slot index) const;
 
-  const TypeConstraint& declPropTypeConstraint(Slot index) const;
-  const TypeConstraint& staticPropTypeConstraint(Slot index) const;
+  const TypeIntersectionConstraint& declPropTypeConstraint(Slot index) const;
+  const TypeIntersectionConstraint& staticPropTypeConstraint(Slot index) const;
 
   /*
    * Whether this class has any properties that require deep initialization.

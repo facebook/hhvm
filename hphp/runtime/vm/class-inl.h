@@ -452,12 +452,14 @@ inline RepoAuthType Class::staticPropRepoAuthType(Slot index) const {
   return m_staticProperties[index].repoAuthType;
 }
 
-inline const TypeConstraint& Class::declPropTypeConstraint(Slot index) const {
-  return m_declProperties[index].typeConstraints.main();
+inline const TypeIntersectionConstraint& Class::declPropTypeConstraint(
+  Slot index) const {
+  return m_declProperties[index].typeConstraints;
 }
 
-inline const TypeConstraint& Class::staticPropTypeConstraint(Slot index) const {
-  return m_staticProperties[index].typeConstraints.main();
+inline const TypeIntersectionConstraint& Class::staticPropTypeConstraint(
+  Slot index) const {
+  return m_staticProperties[index].typeConstraints;
 }
 
 inline bool Class::hasDeepInitProps() const {

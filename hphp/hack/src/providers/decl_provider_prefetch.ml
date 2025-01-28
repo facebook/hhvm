@@ -225,7 +225,10 @@ let next_missing_types
       |> do_sc_ancestors d `Fold sc.sc_implements
       |> do_sc_ancestors d `Fold sc.sc_req_extends
       |> do_sc_ancestors d `Fold sc.sc_req_implements
-      |> do_sc_ancestors d `Fold sc.sc_req_class
+      |> do_sc_ancestors
+           d
+           `Fold
+           (List.map sc.sc_req_constraints ~f:to_decl_constraint)
       |> do_sc_ancestors d `Fold sc.sc_xhp_attr_uses
       |> do_sc_members d `Ty (List.map sc.sc_props ~f:prop_)
       |> do_sc_members d `Ty (List.map sc.sc_sprops ~f:prop_)

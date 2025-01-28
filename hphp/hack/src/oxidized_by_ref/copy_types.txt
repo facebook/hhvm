@@ -171,6 +171,7 @@ s_map::SMap
 s_set::SSet
 saved_state_rollouts::Flag
 shallow_decl_defs::Decl
+shallow_decl_defs::DeclConstraintRequirement
 shallow_decl_defs::NamedDecl
 tany_sentinel::TanySentinel
 tast::MutabilityEnv
@@ -230,6 +231,7 @@ typing_defs::ClassConstRef
 typing_defs::CollectionStyle
 typing_defs::ConsistentKind
 typing_defs::ConstraintType
+typing_defs::ConstraintRequirement
 typing_defs::DeserializationError
 typing_defs::DestructureKind
 typing_defs::Exact

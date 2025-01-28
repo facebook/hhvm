@@ -171,6 +171,14 @@ pub struct Requirement<R: Reason> {
 
 #[derive(Clone, Debug, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
 #[derive(ToOcamlRep, FromOcamlRep)]
+#[serde(bound = "R: Reason")]
+pub enum ConstraintRequirement<R: Reason> {
+    CREqual(Requirement<R>),
+    CRSubtype(Requirement<R>),
+}
+
+#[derive(Clone, Debug, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
 pub struct Constructor {
     pub elt: Option<FoldedElement>,
     pub consistency: ConsistentKind,
@@ -212,14 +220,11 @@ pub struct FoldedClass<R: Reason> {
     pub xhp_attr_deps: IndexSet<TypeName>,
     pub req_ancestors: Box<[Requirement<R>]>,
     pub req_ancestors_extends: IndexSet<TypeName>,
-    /// `req_class_ancestors` gathers all the `require class` requirements
-    /// declared in self and ancestors. Note that `require class` requirements
+    /// `req_constraints_ancestors` gathers all the `require class` and
+    /// `require this as` requirements declared in self and ancestors.
+    /// Note that `require class` and `require this as` requirements
     /// are _not_ stored in `req_ancestors` or `req_ancestors_extends` fields.
-    pub req_class_ancestors: Box<[Requirement<R>]>,
-    /// `req_this_as_ancestors` gathers all the `require this as` requirements
-    /// declared in self and ancestors. Note that `require this as` requirements
-    /// are _not_ stored in `req_ancestors` or `req_ancestors_extends` fields.
-    pub req_this_as_ancestors: Box<[Requirement<R>]>,
+    pub req_constraints_ancestors: Box<[ConstraintRequirement<R>]>,
     pub sealed_whitelist: Option<IndexSet<TypeName>>,
     pub deferred_init_members: IndexSet<PropName>,
     pub decl_errors: Box<[DeclError<R::Pos>]>,

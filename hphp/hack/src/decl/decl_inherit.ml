@@ -709,7 +709,9 @@ end = struct
      * used in decl_folded_class.ml *)
     [
       (Parent, parents_which_provide_members c |> List.rev);
-      (Requirement, c.sc_req_class @ c.sc_req_extends);
+      ( Requirement,
+        List.map c.sc_req_constraints ~f:(fun dcr -> to_decl_constraint dcr)
+        @ c.sc_req_extends );
       (Trait, c.sc_uses);
     ]
 

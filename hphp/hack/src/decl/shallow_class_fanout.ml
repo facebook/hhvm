@@ -355,8 +355,7 @@ let get_parent_changes_fanout
       implements_changes;
       req_extends_changes;
       req_implements_changes;
-      req_class_changes;
-      req_this_as_changes;
+      req_constraints_changes;
       uses_changes;
       xhp_attr_changes;
     } =
@@ -374,8 +373,7 @@ let get_parent_changes_fanout
           implements_changes;
           req_extends_changes;
           req_implements_changes;
-          req_class_changes;
-          req_this_as_changes;
+          (* req_constraints_changes; *)
           uses_changes;
           xhp_attr_changes;
         ]
@@ -406,7 +404,7 @@ let get_parent_changes_fanout
                     let added_parents = SSet.add added_parents name in
                     (added_parents, removed_parents))))
     in
-    if not (SSet.is_empty removed_parents) then
+    if (not (SSet.is_empty removed_parents)) || req_constraints_changes then
       FM.Max_fanout
     else
       FM.Fanout

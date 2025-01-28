@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<23f065bbc041cb7f8891d08a76dfaf93>>
+// @generated SignedSource<<50c6b3058a9aa9354af9bcceb56d4f59>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -297,7 +297,7 @@ arena_deserializer::impl_deserialize_in_arena!(ModuleDefType<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C)]
 pub struct Requirement<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -306,6 +306,35 @@ pub struct Requirement<'a>(
 );
 impl<'a> TrivialDrop for Requirement<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Requirement<'arena>);
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[repr(C, u8)]
+pub enum ConstraintRequirement<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "CR_Equal")]
+    CREqual(&'a Requirement<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "CR_Subtype")]
+    CRSubtype(&'a Requirement<'a>),
+}
+impl<'a> TrivialDrop for ConstraintRequirement<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(ConstraintRequirement<'arena>);
 
 #[derive(
     Clone,

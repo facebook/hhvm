@@ -144,16 +144,11 @@ type decl_class_type = {
           possibly inherited from interface or trait ancestors,
           plus some extends and other ancestors of these.
           Does not include `require class` *)
-  dc_req_class_ancestors: requirement list;
-      (** dc_req_class_ancestors gathers all the `require class`
-          requirements declared in ancestors.  Remark that `require class`
-          requirements are _not_ stored in `dc_req_ancestors` or
-         `dc_req_ancestors_extends` fields. *)
-  dc_req_this_as_ancestors: requirement list;
-      (** dc_req_this_as_ancestors gathers all the `require this as`
-          requirements declared in ancestors.  Remark that `require this as`
-          requirements are _not_ stored in `dc_req_ancestors` or
-         `dc_req_ancestors_extends` fields. *)
+  dc_req_constraints_ancestors: constraint_requirement list;
+      (** dc_req_constraints_ancestors gathers all the `require class` and 
+          `require this as` requirements declared in ancestors.  Remark that
+          `require class` and `require this as` requirements are _not_ stored
+           in `dc_req_ancestors` or `dc_req_ancestors_extends` fields. *)
   dc_extends: SSet.t;
   dc_sealed_whitelist: SSet.t option;
   dc_xhp_attr_deps: SSet.t;
@@ -174,8 +169,7 @@ type decl_class_type = {
 type class_requirements = {
   cr_req_ancestors: Typing_defs.requirement list;
   cr_req_ancestors_extends: SSet.t;
-  cr_req_class_ancestors: Typing_defs.requirement list;
-  cr_req_this_as_ancestors: Typing_defs.requirement list;
+  cr_req_constraints_ancestors: Typing_defs.constraint_requirement list;
 }
 [@@deriving show]
 

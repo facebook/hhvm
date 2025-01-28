@@ -19,8 +19,7 @@ module Parents = struct
     implements: Typing_defs.decl_ty list;
     req_extends: Typing_defs.decl_ty list;
     req_implements: Typing_defs.decl_ty list;
-    req_class: Typing_defs.decl_ty list;
-    req_this_as: Typing_defs.decl_ty list;
+    req_constraints: Shallow_decl_defs.decl_constraint_requirement list;
     uses: Typing_defs.decl_ty list;
     xhp_attr_uses: Typing_defs.decl_ty list;
   }
@@ -32,8 +31,7 @@ module Parents = struct
       sc_implements;
       sc_req_extends;
       sc_req_implements;
-      sc_req_class;
-      sc_req_this_as;
+      sc_req_constraints;
       sc_uses;
       sc_xhp_attr_uses;
       sc_mode = _;
@@ -68,8 +66,7 @@ module Parents = struct
       implements = sc_implements;
       req_extends = sc_req_extends;
       req_implements = sc_req_implements;
-      req_class = sc_req_class;
-      req_this_as = sc_req_this_as;
+      req_constraints = sc_req_constraints;
       uses = sc_uses;
       xhp_attr_uses = sc_xhp_attr_uses;
     }
@@ -650,6 +647,15 @@ let diff_parents (c1 : Parents.t) (c2 : Parents.t) : parent_changes option =
   if Parents.equal c1 c2 then
     None
   else
+    let rec equal_req_constraints rc1 rc2 =
+      match (rc1, rc2) with
+      | (DCR_Equal c1 :: tl1, DCR_Equal c2 :: tl2)
+      | (DCR_Subtype c1 :: tl1, DCR_Subtype c2 :: tl2) ->
+        Typing_defs.ty_equal c1 c2 && equal_req_constraints tl1 tl2
+      | ([], []) -> true
+      | _ -> false
+    in
+
     Some
       {
         extends_changes = diff_type_lists c1.Parents.extends c2.Parents.extends;
@@ -659,10 +665,11 @@ let diff_parents (c1 : Parents.t) (c2 : Parents.t) : parent_changes option =
           diff_type_lists c1.Parents.req_extends c2.Parents.req_extends;
         req_implements_changes =
           diff_type_lists c1.Parents.req_implements c2.Parents.req_implements;
-        req_class_changes =
-          diff_type_lists c1.Parents.req_class c2.Parents.req_class;
-        req_this_as_changes =
-          diff_type_lists c1.Parents.req_this_as c2.Parents.req_this_as;
+        req_constraints_changes =
+          not
+            (equal_req_constraints
+               c1.Parents.req_constraints
+               c2.Parents.req_constraints);
         uses_changes = diff_type_lists c1.Parents.uses c2.Parents.uses;
         xhp_attr_changes =
           diff_type_lists c1.Parents.xhp_attr_uses c2.Parents.xhp_attr_uses;

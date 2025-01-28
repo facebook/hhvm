@@ -28,6 +28,7 @@ use serde::Serialize;
 use crate::decl::ty::ClassConstKind;
 use crate::decl::ty::ClassConstRef;
 pub use crate::decl::ty::ConstDecl;
+use crate::decl::ty::DeclConstraintRequirement;
 use crate::decl::ty::Enforceable;
 use crate::decl::ty::EnumType;
 use crate::decl::ty::FunElt;
@@ -168,8 +169,7 @@ pub struct ShallowClass<R: Reason> {
     pub xhp_marked_empty: bool,
     pub req_extends: Box<[Ty<R>]>,
     pub req_implements: Box<[Ty<R>]>,
-    pub req_class: Box<[Ty<R>]>,
-    pub req_this_as: Box<[Ty<R>]>,
+    pub req_constraints: Box<[DeclConstraintRequirement<R>]>,
     pub implements: Box<[Ty<R>]>,
     pub support_dynamic_type: bool,
     pub consts: Box<[ShallowClassConst<R>]>,
@@ -188,7 +188,7 @@ pub struct ShallowClass<R: Reason> {
 walkable!(ShallowClass<R> as visit_shallow_class => [
     mode, is_final, is_abstract, is_xhp, is_internal, has_xhp_keyword, kind,
     module, name, tparams, extends, uses, xhp_attr_uses,
-    xhp_enum_values, req_extends, req_implements, req_class, implements,
+    xhp_enum_values, req_extends, req_implements, req_constraints, implements,
     support_dynamic_type, consts, typeconsts, props, static_props, constructor,
     static_methods, methods, user_attributes, enum_type, docs_url, package,
 ]);

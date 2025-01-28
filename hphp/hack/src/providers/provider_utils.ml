@@ -127,7 +127,9 @@ let invalidate_folded_decls_by_checking_each_ones_ancestor_list
     || SSet.mem changed_class_name dc.dc_xhp_attr_deps
     || SMap.mem changed_class_name dc.dc_ancestors
     || List.exists dc.dc_req_ancestors ~f:(fun (_, ty) -> matches_ty ty)
-    || List.exists dc.dc_req_class_ancestors ~f:(fun (_, ty) -> matches_ty ty)
+    || List.exists dc.dc_req_constraints_ancestors ~f:(fun cr ->
+           let ty = snd (Typing_defs.to_requirement cr) in
+           matches_ty ty)
   in
 
   let (to_remove, to_keep) =

@@ -296,22 +296,35 @@ module ApiEager = struct
     let (c, _) = t in
     c.Decl_defs.dc_req_ancestors
 
-  let all_ancestor_req_class_requirements (decl, t, _ctx) =
+  let all_ancestor_req_constraints_requirements (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.All_ancestor_reqs
     @@ fun () ->
     let (c, _) = t in
-    c.Decl_defs.dc_req_class_ancestors
+    c.Decl_defs.dc_req_constraints_ancestors
+
+  let all_ancestor_req_class_requirements (decl, t, _ctx) =
+    List.filter_map
+      (all_ancestor_req_constraints_requirements (decl, t, _ctx))
+      ~f:(fun r ->
+        match r with
+        | CR_Equal c -> Some c
+        | CR_Subtype _ -> None)
 
   let all_ancestor_req_this_as_requirements (decl, t, _ctx) =
-    Decl_counters.count_subdecl decl Decl_counters.All_ancestor_reqs
-    @@ fun () ->
-    let (c, _) = t in
-    c.Decl_defs.dc_req_this_as_ancestors
+    List.filter_map
+      (all_ancestor_req_constraints_requirements (decl, t, _ctx))
+      ~f:(fun r ->
+        match r with
+        | CR_Equal _ -> None
+        | CR_Subtype c -> Some c)
 
   let upper_bounds_on_this t =
     (* tally is already done by all_ancestors and upper_bounds *)
     List.map ~f:(fun req -> snd req) (all_ancestor_reqs t)
-    |> List.append (List.map ~f:snd (all_ancestor_req_class_requirements t))
+    |> List.append
+         (List.map
+            ~f:(fun cr -> snd (to_requirement cr))
+            (all_ancestor_req_constraints_requirements t))
 
   let consts (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Consts @@ fun () ->

@@ -92,6 +92,13 @@ type module_def_type = { mdt_pos: Pos_or_decl.t } [@@deriving show]
 
 type requirement = Pos_or_decl.t * decl_ty [@@deriving show]
 
+type constraint_requirement =
+  | CR_Equal of requirement
+  | CR_Subtype of requirement
+[@@deriving eq, show]
+
+val to_requirement : constraint_requirement -> requirement
+
 type abstract_typeconst = {
   atc_as_constraint: decl_ty option;
   atc_super_constraint: decl_ty option;

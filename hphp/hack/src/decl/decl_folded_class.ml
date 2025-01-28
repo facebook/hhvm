@@ -941,8 +941,7 @@ and class_decl
   let {
     cr_req_ancestors;
     cr_req_ancestors_extends;
-    cr_req_class_ancestors;
-    cr_req_this_as_ancestors;
+    cr_req_constraints_ancestors;
   } =
     Decl_requirements.get_class_requirements env parents c
   in
@@ -1043,8 +1042,7 @@ and class_decl
       dc_xhp_marked_empty = c.sc_xhp_marked_empty;
       dc_req_ancestors = cr_req_ancestors;
       dc_req_ancestors_extends = cr_req_ancestors_extends;
-      dc_req_class_ancestors = cr_req_class_ancestors;
-      dc_req_this_as_ancestors = cr_req_this_as_ancestors;
+      dc_req_constraints_ancestors = cr_req_constraints_ancestors;
       dc_enum_type = enum;
       dc_decl_errors = decl_errors;
       dc_docs_url = c.sc_docs_url;

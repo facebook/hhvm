@@ -6,9 +6,8 @@
        sc_name = ([3:11-34], "\\WithLowerThenUpperBound"); sc_tparams = [];
        sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
        sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
-       sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-       sc_req_this_as = []; sc_implements = [];
-       sc_support_dynamic_type = false; sc_consts = [];
+       sc_req_extends = []; sc_req_implements = []; sc_req_constraints = [];
+       sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
        sc_typeconsts =
        [{ Shallow_decl_defs.stc_name = ([4:22-23], "C");
           stc_kind =
@@ -40,9 +39,8 @@
         sc_name = ([7:11-34], "\\WithUpperThenLowerBound"); sc_tparams = [];
         sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
         sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
-        sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-        sc_req_this_as = []; sc_implements = [];
-        sc_support_dynamic_type = false; sc_consts = [];
+        sc_req_extends = []; sc_req_implements = []; sc_req_constraints = [];
+        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
         sc_typeconsts =
         [{ Shallow_decl_defs.stc_name = ([8:22-23], "C");
            stc_kind =

@@ -121,6 +121,13 @@ type shallow_method = {
 
 type xhp_enum_values = Ast_defs.xhp_enum_value list SMap.t [@@deriving eq, show]
 
+type decl_constraint_requirement =
+  | DCR_Equal of decl_ty
+  | DCR_Subtype of decl_ty
+[@@deriving eq, show]
+
+val to_decl_constraint : decl_constraint_requirement -> decl_ty
+
 type shallow_class = {
   sc_mode: FileInfo.mode;
   sc_final: bool;
@@ -139,8 +146,7 @@ type shallow_class = {
   sc_xhp_marked_empty: bool;
   sc_req_extends: decl_ty list;
   sc_req_implements: decl_ty list;
-  sc_req_class: decl_ty list;
-  sc_req_this_as: decl_ty list;
+  sc_req_constraints: decl_constraint_requirement list;
   sc_implements: decl_ty list;
   sc_support_dynamic_type: bool;
   sc_consts: shallow_class_const list;

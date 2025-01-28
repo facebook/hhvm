@@ -45,6 +45,7 @@ use oxidized_by_ref::relative_path::RelativePath;
 use oxidized_by_ref::s_map::SMap;
 use oxidized_by_ref::shallow_decl_defs;
 use oxidized_by_ref::shallow_decl_defs::Decl;
+use oxidized_by_ref::shallow_decl_defs::DeclConstraintRequirement;
 use oxidized_by_ref::shallow_decl_defs::ShallowClassConst;
 use oxidized_by_ref::shallow_decl_defs::ShallowMethod;
 use oxidized_by_ref::shallow_decl_defs::ShallowProp;
@@ -4589,8 +4590,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let mut xhp_marked_empty = false;
         let mut req_extends_len = 0;
         let mut req_implements_len = 0;
-        let mut req_class_len = 0;
-        let mut req_this_as_len = 0;
+        let mut req_constraints_len = 0;
         let mut consts_len = 0;
         let mut typeconsts_len = 0;
         let mut props_len = 0;
@@ -4628,11 +4628,11 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 Node::RequireClause(require) => match require.require_type.token_kind() {
                     Some(TokenKind::Extends) => req_extends_len += 1,
                     Some(TokenKind::Implements) => req_implements_len += 1,
-                    Some(TokenKind::Class) => req_class_len += 1,
+                    Some(TokenKind::Class) => req_constraints_len += 1,
                     _ => {}
                 },
                 Node::RequireClauseConstraint(_) => {
-                    req_this_as_len += 1;
+                    req_constraints_len += 1;
                 }
                 Node::List(consts @ [Node::Const(..), ..]) => consts_len += consts.len(),
                 Node::Property(&PropertyNode { decls, is_static }) => {
@@ -4662,8 +4662,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let mut xhp_attr_uses = bump::Vec::with_capacity_in(xhp_attr_uses_len, self.arena);
         let mut req_extends = bump::Vec::with_capacity_in(req_extends_len, self.arena);
         let mut req_implements = bump::Vec::with_capacity_in(req_implements_len, self.arena);
-        let mut req_class = bump::Vec::with_capacity_in(req_class_len, self.arena);
-        let mut req_this_as = bump::Vec::with_capacity_in(req_this_as_len, self.arena);
+        let mut req_constraints = bump::Vec::with_capacity_in(req_constraints_len, self.arena);
         let mut consts = bump::Vec::with_capacity_in(consts_len, self.arena);
         let mut typeconsts = bump::Vec::with_capacity_in(typeconsts_len, self.arena);
         let mut props = bump::Vec::with_capacity_in(props_len, self.arena);
@@ -4722,12 +4721,16 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                         req_implements.extend(self.node_to_ty(require.name).iter())
                     }
                     Some(TokenKind::Class) => {
-                        req_class.extend(self.node_to_ty(require.name).iter())
+                        if let Some(ty) = self.node_to_ty(require.name) {
+                            req_constraints.push(DeclConstraintRequirement::DCREqual(ty))
+                        }
                     }
                     _ => {}
                 },
                 Node::RequireClauseConstraint(require) => {
-                    req_this_as.extend(self.node_to_ty(require.name).iter())
+                    if let Some(ty) = self.node_to_ty(require.name) {
+                        req_constraints.push(DeclConstraintRequirement::DCRSubtype(ty))
+                    }
                 }
                 Node::List(&const_nodes @ [Node::Const(..), ..]) => {
                     for node in const_nodes {
@@ -4806,8 +4809,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let xhp_enum_values = xhp_enum_values;
         let req_extends = req_extends.into_bump_slice();
         let req_implements = req_implements.into_bump_slice();
-        let req_class = req_class.into_bump_slice();
-        let req_this_as = req_this_as.into_bump_slice();
+        let req_constraints = req_constraints.into_bump_slice();
         let consts = consts.into_bump_slice();
         let typeconsts = typeconsts.into_bump_slice();
         let props = props.into_bump_slice();
@@ -4842,8 +4844,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             xhp_marked_empty,
             req_extends,
             req_implements,
-            req_class,
-            req_this_as,
+            req_constraints,
             implements,
             support_dynamic_type,
             consts,
@@ -5320,8 +5321,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             xhp_marked_empty: false,
             req_extends: &[],
             req_implements: &[],
-            req_class: &[],
-            req_this_as: &[],
+            req_constraints: &[],
             implements: &[],
             support_dynamic_type: parsed_attributes.support_dynamic_type,
             consts,
@@ -5540,8 +5540,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             xhp_marked_empty: false,
             req_extends: &[],
             req_implements: &[],
-            req_class: &[],
-            req_this_as: &[],
+            req_constraints: &[],
             implements: &[],
             support_dynamic_type,
             consts,

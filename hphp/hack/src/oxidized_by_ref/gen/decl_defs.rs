@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a185a0f371fd02e076f337d1095a241f>>
+// @generated SignedSource<<4ad7bc9d5d34449fdc16d6879ab9fe6e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -237,18 +237,12 @@ pub struct DeclClassType<'a> {
     /// Does not include `require class`
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub req_ancestors_extends: s_set::SSet<'a>,
-    /// dc_req_class_ancestors gathers all the `require class`
-    /// requirements declared in ancestors.  Remark that `require class`
-    /// requirements are _not_ stored in `dc_req_ancestors` or
-    /// `dc_req_ancestors_extends` fields.
+    /// dc_req_constraints_ancestors gathers all the `require class` and
+    /// `require this as` requirements declared in ancestors.  Remark that
+    /// `require class` and `require this as` requirements are _not_ stored
+    /// in `dc_req_ancestors` or `dc_req_ancestors_extends` fields.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub req_class_ancestors: &'a [&'a Requirement<'a>],
-    /// dc_req_this_as_ancestors gathers all the `require this as`
-    /// requirements declared in ancestors.  Remark that `require this as`
-    /// requirements are _not_ stored in `dc_req_ancestors` or
-    /// `dc_req_ancestors_extends` fields.
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub req_this_as_ancestors: &'a [&'a Requirement<'a>],
+    pub req_constraints_ancestors: &'a [ConstraintRequirement<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub extends: s_set::SSet<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -300,9 +294,7 @@ pub struct ClassRequirements<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub ancestors_extends: s_set::SSet<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub class_ancestors: &'a [&'a typing_defs::Requirement<'a>],
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub this_as_ancestors: &'a [&'a typing_defs::Requirement<'a>],
+    pub constraints_ancestors: &'a [typing_defs::ConstraintRequirement<'a>],
 }
 impl<'a> TrivialDrop for ClassRequirements<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(ClassRequirements<'arena>);

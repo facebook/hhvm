@@ -10,6 +10,7 @@ use std::hash::Hash;
 use oxidized as o;
 use pos::Pos;
 
+use super::ty::DeclConstraintRequirement;
 use super::ty::TypedefCaseTypeVariant;
 use crate::decl;
 use crate::decl::folded;
@@ -446,8 +447,7 @@ impl<R: Reason> From<o::shallow_decl_defs::ClassDecl> for shallow::ShallowClass<
             xhp_marked_empty,
             req_extends,
             req_implements,
-            req_class,
-            req_this_as,
+            req_constraints,
             implements,
             support_dynamic_type,
             consts,
@@ -482,8 +482,7 @@ impl<R: Reason> From<o::shallow_decl_defs::ClassDecl> for shallow::ShallowClass<
             xhp_marked_empty,
             req_extends: slice(req_extends),
             req_implements: slice(req_implements),
-            req_class: slice(req_class),
-            req_this_as: slice(req_this_as),
+            req_constraints: slice(req_constraints),
             implements: slice(implements),
             support_dynamic_type,
             consts: slice(consts),
@@ -663,6 +662,28 @@ impl<R: Reason> From<o::decl_defs::Requirement> for folded::Requirement<R> {
     }
 }
 
+impl<R: Reason> From<o::shallow_decl_defs::DeclConstraintRequirement>
+    for DeclConstraintRequirement<R>
+{
+    fn from(dcr: o::shallow_decl_defs::DeclConstraintRequirement) -> Self {
+        use o::shallow_decl_defs::DeclConstraintRequirement as O;
+        match dcr {
+            O::DCREqual(ty) => DeclConstraintRequirement::DCREqual(ty.into()),
+            O::DCRSubtype(ty) => DeclConstraintRequirement::DCRSubtype(ty.into()),
+        }
+    }
+}
+
+impl<R: Reason> From<o::decl_defs::ConstraintRequirement> for folded::ConstraintRequirement<R> {
+    fn from(cr: o::decl_defs::ConstraintRequirement) -> Self {
+        use o::decl_defs::ConstraintRequirement as O;
+        match cr {
+            O::CREqual(r) => folded::ConstraintRequirement::CREqual(r.into()),
+            O::CRSubtype(r) => folded::ConstraintRequirement::CRSubtype(r.into()),
+        }
+    }
+}
+
 impl From<(Option<o::decl_defs::Element>, ty::ConsistentKind)> for folded::Constructor {
     fn from(construct: (Option<o::decl_defs::Element>, ty::ConsistentKind)) -> Self {
         Self::new(construct.0.map(Into::into), construct.1)
@@ -741,8 +762,7 @@ impl<R: Reason> From<o::decl_defs::DeclClassType> for folded::FoldedClass<R> {
             deferred_init_members,
             req_ancestors,
             req_ancestors_extends,
-            req_class_ancestors,
-            req_this_as_ancestors,
+            req_constraints_ancestors,
             extends,
             sealed_whitelist,
             xhp_attr_deps,
@@ -785,8 +805,7 @@ impl<R: Reason> From<o::decl_defs::DeclClassType> for folded::FoldedClass<R> {
             xhp_attr_deps: map_k(xhp_attr_deps),
             req_ancestors: slice(req_ancestors),
             req_ancestors_extends: map_k(req_ancestors_extends),
-            req_class_ancestors: slice(req_class_ancestors),
-            req_this_as_ancestors: slice(req_this_as_ancestors),
+            req_constraints_ancestors: slice(req_constraints_ancestors),
             sealed_whitelist: sealed_whitelist.map(map_k),
             deferred_init_members: map_k(deferred_init_members),
             decl_errors: slice(decl_errors),

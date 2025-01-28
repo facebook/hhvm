@@ -58,6 +58,7 @@ use hhbc::Unit;
 use oxidized::ast;
 use oxidized::namespace_env;
 use oxidized::pos::Pos;
+use oxidized_by_ref::shallow_decl_defs::DeclConstraintRequirement;
 use oxidized_by_ref::typing_defs;
 use oxidized_by_ref::typing_defs_core::Exact;
 
@@ -130,7 +131,10 @@ where
                     .extends
                     .iter()
                     .chain(class_decl.implements.iter())
-                    .chain(class_decl.req_class.iter())
+                    .chain(class_decl.req_constraints.iter().map(|dcr| match dcr {
+                        DeclConstraintRequirement::DCREqual(r) => r,
+                        DeclConstraintRequirement::DCRSubtype(r) => r,
+                    }))
                     .chain(class_decl.req_extends.iter())
                     .chain(class_decl.req_implements.iter())
                     .chain(class_decl.uses.iter())

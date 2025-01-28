@@ -1603,8 +1603,8 @@ let check_sealed env c =
   let is_enum = is_enum_or_enum_class c.c_kind in
   sealed_subtype (Env.get_ctx env) c ~is_enum ~hard_error ~env
 
-let check_class_where_require_class_constraints env c =
-  let req_class_constraints =
+let check_class_require_non_strict_constraints env c =
+  let req_non_strict_constraints =
     List.filter_map c.c_reqs ~f:(fun req ->
         match req with
         | (t, RequireClass) ->
@@ -1620,7 +1620,7 @@ let check_class_where_require_class_constraints env c =
       env
       ~ignore_errors:false
       c.c_tparams
-      req_class_constraints
+      req_non_strict_constraints
   in
   Option.iter ty_err_opt1 ~f:(Typing_error_utils.add_typing_error ~env);
   env
@@ -1722,7 +1722,7 @@ let check_class_attributes env ~cls =
 
 (** Check type parameter definition, including variance, and add constraints to the environment. *)
 let check_class_type_parameters_add_constraints env c =
-  let env = check_class_where_require_class_constraints env c in
+  let env = check_class_require_non_strict_constraints env c in
   Typing_variance.class_def env c;
   env
 

@@ -97,16 +97,17 @@ val all_ancestor_reqs : t -> requirement list
 
 val all_ancestor_req_names : t -> string list
 
-(** All the require class requirements
-    * These requirements impose an equality constraint and are not
-    * included in all_ancestor_reqs or all_ancestor_req_names
+(** All the require class and require this as requirements
+    * These requirements impose non-strict subtype constraint
+    * and are not included in all_ancestor_reqs or
+    * all_ancestor_req_names.
     *)
+val all_ancestor_req_constraints_requirements : t -> constraint_requirement list
+
+(** Projection out of all_ancestor_req_constraints_requirements *)
 val all_ancestor_req_class_requirements : t -> requirement list
 
-(** All the require this as requirements
-    * These requirements impose a non-strict subtype constraint 
-    * and are not included in all_ancestor_reqs or all_ancestor_req_names
-    *)
+(** Projection out of all_ancestor_req_constraints_requirements *)
 val all_ancestor_req_this_as_requirements : t -> requirement list
 
 val get_const : t -> string -> class_const option

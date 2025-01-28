@@ -1227,25 +1227,38 @@ let check_class_get
     | Decl_entry.DoesNotExist ->
       ()
     | Decl_entry.Found cd ->
-      let req_class = Cls.all_ancestor_req_class_requirements cd in
-      if Ast_defs.is_c_trait (Cls.kind cd) && not (List.is_empty req_class) then
-        Typing_error_utils.add_typing_error
-          ~env
-          Typing_error.(
-            primary
-            @@ Primary.Static_call_on_trait_require_class
-                 {
-                   trait_name = class_name;
-                   meth_name = mid;
-                   req_class_name =
-                     (match
-                        TUtils.try_unwrap_class_type
-                          (snd (List.hd_exn req_class))
-                      with
-                     | None -> ""
-                     | Some (_r, (_p, req_name), _paraml) -> req_name);
-                   pos = p;
-                 }))
+      let req_non_strict = Cls.all_ancestor_req_constraints_requirements cd in
+      if Ast_defs.is_c_trait (Cls.kind cd) && not (List.is_empty req_non_strict)
+      then begin
+        let elab ty =
+          match TUtils.try_unwrap_class_type ty with
+          | None -> None
+          | Some (_r, (_p, req_name), _paraml) -> Some req_name
+        in
+        let ty_kind =
+          match List.hd req_non_strict with
+          | Some (CR_Equal (_, ty)) -> (elab ty, `class_)
+          | Some (CR_Subtype (_, ty)) -> (elab ty, `this_as)
+          | None ->
+            (* cannot happen *)
+            (None, `class_)
+        in
+        match ty_kind with
+        | (Some req_constraint_name, req_constraint_kind) ->
+          Typing_error_utils.add_typing_error
+            ~env
+            Typing_error.(
+              primary
+              @@ Primary.Static_call_on_trait_require_non_strict
+                   {
+                     trait_name = class_name;
+                     meth_name = mid;
+                     req_constraint_name;
+                     req_constraint_kind;
+                     pos = p;
+                   })
+        | _ -> ()
+      end)
   | _ -> ()
 
 let polymorphic_fun_type_of_id env ((use_pos, name) as fn_id) =
@@ -1551,7 +1564,11 @@ let trait_most_concrete_req_class trait env =
       | Decl_entry.NotYetAvailable
       | Decl_entry.DoesNotExist ->
         [])
-    | [] -> List.map (Cls.all_ancestor_reqs trait) ~f:snd
+    | [] ->
+      List.map
+        (Cls.all_ancestor_reqs trait
+        @ Cls.all_ancestor_req_this_as_requirements trait)
+        ~f:snd
   in
   List.fold
     ancestors
@@ -11471,9 +11488,12 @@ end = struct
           }
         in
         let get_smember_from_constraints env class_info =
-          (* Extract the upper bounds on this from where and require class constraints. *)
+          (* Extract the upper bounds on this from `require class` and `require this as`
+           * constraints. *)
           let upper_bounds_from_require_class_constraints =
-            List.map (Cls.all_ancestor_req_class_requirements class_info) ~f:snd
+            List.map
+              (Cls.all_ancestor_req_constraints_requirements class_info)
+              ~f:(fun cr -> snd (to_requirement cr))
           in
           let (env, ty_err_opt, upper_bounds) =
             let ((env, ty_err_opt), upper_bounds) =

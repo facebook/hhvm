@@ -8,7 +8,7 @@ class C {
 
 trait T {
     require this as C;
-
+    
     public function foo(): void {
         $this->bar();
     }

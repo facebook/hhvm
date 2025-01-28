@@ -34,8 +34,7 @@ impl<R: Reason> fmt::Debug for ShallowClass<R> {
             xhp_marked_empty,
             req_extends,
             req_implements,
-            req_class,
-            req_this_as,
+            req_constraints,
             implements,
             support_dynamic_type,
             consts,
@@ -104,11 +103,8 @@ impl<R: Reason> fmt::Debug for ShallowClass<R> {
         if !req_implements.is_empty() {
             s.field("req_implements", req_implements);
         }
-        if !req_class.is_empty() {
-            s.field("req_class", req_class);
-        }
-        if !req_this_as.is_empty() {
-            s.field("req_this_as", req_this_as);
+        if !req_constraints.is_empty() {
+            s.field("req_constraints", req_constraints);
         }
         if !implements.is_empty() {
             s.field("implements", implements);
@@ -187,8 +183,7 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
             xhp_attr_deps,
             req_ancestors,
             req_ancestors_extends,
-            req_class_ancestors,
-            req_this_as_ancestors,
+            req_constraints_ancestors,
             sealed_whitelist,
             deferred_init_members,
             decl_errors,
@@ -283,11 +278,8 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
         if !req_ancestors_extends.is_empty() {
             s.field("req_ancestors_extends", req_ancestors_extends);
         }
-        if !req_class_ancestors.is_empty() {
-            s.field("req_class_ancestors", req_class_ancestors);
-        }
-        if !req_this_as_ancestors.is_empty() {
-            s.field("req_this_as_ancestors", req_class_ancestors);
+        if !req_constraints_ancestors.is_empty() {
+            s.field("req_constraints_ancestors", req_constraints_ancestors);
         }
         if let Some(sealed_whitelist) = sealed_whitelist {
             s.field("sealed_whitelist", sealed_whitelist);

@@ -12,6 +12,7 @@ use oxidized_by_ref::file_info::Mode;
 use oxidized_by_ref::shallow_decl_defs::AbstractTypeconst;
 use oxidized_by_ref::shallow_decl_defs::ClassConstKind;
 use oxidized_by_ref::shallow_decl_defs::ConcreteTypeconst;
+use oxidized_by_ref::shallow_decl_defs::DeclConstraintRequirement;
 use oxidized_by_ref::shallow_decl_defs::ShallowClass;
 use oxidized_by_ref::shallow_decl_defs::ShallowClassConst;
 use oxidized_by_ref::shallow_decl_defs::ShallowMethod;
@@ -336,7 +337,7 @@ fn get_class_impl(class: &ShallowClass<'_>) -> ExtDeclClass {
         implements: extract_type_name_vec(class.implements),
         require_extends: extract_type_name_vec(class.req_extends),
         require_implements: extract_type_name_vec(class.req_implements),
-        require_class: extract_type_name_vec(class.req_class),
+        require_class: extract_type_name_cr_vec(class.req_constraints),
         xhp_attr_uses: extract_type_name_vec(class.xhp_attr_uses),
 
         // Nested Types
@@ -720,6 +721,15 @@ fn extract_type_name(t: &Ty<'_>) -> String {
 
 fn extract_type_name_vec(arr: &[&Ty<'_>]) -> Vec<String> {
     arr.iter().map(|t| extract_type_name(t)).collect()
+}
+
+fn extract_type_name_cr_vec(arr: &[DeclConstraintRequirement<'_>]) -> Vec<String> {
+    arr.iter()
+        .filter_map(|cr| match cr {
+            DeclConstraintRequirement::DCREqual(t) => Some(extract_type_name(t)),
+            DeclConstraintRequirement::DCRSubtype(_) => None,
+        })
+        .collect()
 }
 
 fn fmt_type(original_name: &str) -> String {

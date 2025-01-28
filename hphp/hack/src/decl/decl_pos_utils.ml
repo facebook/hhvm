@@ -184,9 +184,8 @@ struct
       dc_xhp_marked_empty = dc.dc_xhp_marked_empty;
       dc_req_ancestors = List.map dc.dc_req_ancestors ~f:requirement;
       dc_req_ancestors_extends = dc.dc_req_ancestors_extends;
-      dc_req_class_ancestors = List.map dc.dc_req_class_ancestors ~f:requirement;
-      dc_req_this_as_ancestors =
-        List.map dc.dc_req_this_as_ancestors ~f:requirement;
+      dc_req_constraints_ancestors =
+        List.map dc.dc_req_constraints_ancestors ~f:constraint_requirement;
       dc_tparams = List.map dc.dc_tparams ~f:type_param;
       dc_substs =
         SMap.map
@@ -213,6 +212,11 @@ struct
     }
 
   and requirement (p, t) = (pos_or_decl p, ty t)
+
+  and constraint_requirement cr =
+    match cr with
+    | CR_Equal r -> CR_Equal (requirement r)
+    | CR_Subtype r -> CR_Subtype (requirement r)
 
   and enum_type te =
     {
@@ -260,8 +264,8 @@ struct
       sc_xhp_marked_empty = sc.sc_xhp_marked_empty;
       sc_req_extends = List.map sc.sc_req_extends ~f:ty;
       sc_req_implements = List.map sc.sc_req_implements ~f:ty;
-      sc_req_class = List.map sc.sc_req_class ~f:ty;
-      sc_req_this_as = List.map sc.sc_req_this_as ~f:ty;
+      sc_req_constraints =
+        List.map sc.sc_req_constraints ~f:shallow_req_constraint;
       sc_implements = List.map sc.sc_implements ~f:ty;
       sc_support_dynamic_type = sc.sc_support_dynamic_type;
       sc_consts = List.map sc.sc_consts ~f:shallow_class_const;
@@ -315,6 +319,11 @@ struct
       sm_attributes = sm.sm_attributes;
       sm_sort_text = sm.sm_sort_text;
     }
+
+  and shallow_req_constraint src =
+    match src with
+    | DCR_Equal cr -> DCR_Equal (ty cr)
+    | DCR_Subtype cr -> DCR_Subtype (ty cr)
 end
 
 (*****************************************************************************)

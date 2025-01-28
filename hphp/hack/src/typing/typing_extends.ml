@@ -1459,9 +1459,7 @@ let eager_resolve_member_via_req_class
              * require class constraint, perform eager fetch of the element via the required class.
              *)
             let member_element_in_req_class =
-              List.find_map
-                (Cls.all_ancestor_req_class_requirements class_)
-                ~f:(fun (_, req_ty) ->
+              List.find_map req_class_constraints ~f:(fun (_, req_ty) ->
                   let (_, (_, cn), _) = TUtils.unwrap_class_type req_ty in
                   Decl_provider.get_class (Env.get_ctx env) cn
                   |> Decl_entry.to_option

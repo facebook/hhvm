@@ -20,6 +20,7 @@ pub use oxidized::ast_defs::ClassishKind;
 pub use oxidized::ast_defs::ConstraintKind;
 pub use oxidized::ast_defs::Visibility;
 pub use oxidized::typing_defs::ClassConstKind;
+pub use oxidized::typing_defs::Requirement;
 pub use oxidized::typing_defs_core::ConsistentKind;
 pub use oxidized::typing_defs_core::Enforcement;
 pub use oxidized::typing_defs_core::ParamMode;
@@ -168,6 +169,19 @@ impl<P> UserAttribute<P> {
 }
 
 walkable!(impl<R: Reason> for UserAttribute<R::Pos> => [name, params]);
+
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
+#[serde(bound = "R: Reason")]
+pub enum DeclConstraintRequirement<R: Reason> {
+    DCREqual(Ty<R>),
+    DCRSubtype(Ty<R>),
+}
+
+walkable!(impl<R: Reason> for DeclConstraintRequirement<R> => {
+    Self::DCREqual(ty) => [ty],
+    Self::DCRSubtype(ty) => [ty],
+});
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[derive(ToOcamlRep, FromOcamlRep)]

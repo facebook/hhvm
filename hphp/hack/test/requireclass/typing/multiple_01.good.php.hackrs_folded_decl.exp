@@ -1,0 +1,163 @@
+--- ocaml
++++ rupro
+@@ -1,158 +1,158 @@
+ FoldedClass {
+     name: "\\T1",
+     pos: Pos(root|multiple_01.good.php, 6:7-9),
+     kind: Ctrait,
+     methods: {
+         "foo": FoldedElement {
+             flags: ClassEltFlags(
+                 0,
+             ),
+             origin: "\\T1",
+             visibility: Public,
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|multiple_01.good.php, 6:7-9),
+             ty: HH\classname<this>,
+             origin: "\\T1",
+             refs: [],
+         },
+     },
+     req_constraints_ancestors: [
+         CREqual(
+             Requirement(
+                 Pos(root|multiple_01.good.php, 7:17-18),
+                 C,
+             ),
+         ),
+     ],
+ }
+ FoldedClass {
+     name: "\\T2",
+     pos: Pos(root|multiple_01.good.php, 14:7-9),
+     kind: Ctrait,
+     methods: {
+         "bar": FoldedElement {
+             flags: ClassEltFlags(
+                 0,
+             ),
+             origin: "\\T2",
+             visibility: Public,
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|multiple_01.good.php, 14:7-9),
+             ty: HH\classname<this>,
+             origin: "\\T2",
+             refs: [],
+         },
+     },
+     req_constraints_ancestors: [
+         CREqual(
+             Requirement(
+                 Pos(root|multiple_01.good.php, 15:17-18),
+                 C,
+             ),
+         ),
+     ],
+ }
+ FoldedClass {
+     name: "\\C",
+     pos: Pos(root|multiple_01.good.php, 22:13-14),
+     kind: Cclass(
+         Concrete,
+     ),
+     is_final: true,
+     substs: {
+         "\\T1": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\C",
+             from_req_extends: false,
+         },
+         "\\T2": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\C",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\T1": T1,
+         "\\T2": T2,
+     },
+     methods: {
+         "bar": FoldedElement {
+             flags: ClassEltFlags(
+                 0,
+             ),
+             origin: "\\T2",
+             visibility: Public,
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+         "foo": FoldedElement {
+             flags: ClassEltFlags(
+                 0,
+             ),
+             origin: "\\T1",
+             visibility: Public,
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+         "gee": FoldedElement {
+             flags: ClassEltFlags(
+                 0,
+             ),
+             origin: "\\C",
+             visibility: Public,
+             deprecated: None,
+             sort_text: None,
+             overlapping_tparams: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|multiple_01.good.php, 22:13-14),
+             ty: HH\classname<this>,
+             origin: "\\C",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\T1",
+         "\\T2",
+     },
+     req_constraints_ancestors: [
+         CREqual(
+             Requirement(
+-                Pos(root|multiple_01.good.php, 23:11-13),
++                Pos(root|multiple_01.good.php, 23:7-9),
+                 C,
+             ),
+         ),
+         CREqual(
+             Requirement(
+-                Pos(root|multiple_01.good.php, 23:7-9),
++                Pos(root|multiple_01.good.php, 23:11-13),
+                 C,
+             ),
+         ),
+     ],
+ }

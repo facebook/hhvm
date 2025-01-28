@@ -4660,26 +4660,42 @@ end = struct
       [],
       User_error_flags.empty )
 
-  let static_call_on_trait_require_class
-      call_pos meth_name trait_name req_class_name =
+  let static_call_on_trait_require_non_strict
+      call_pos meth_name trait_name req_constraint_name req_constraint_kind =
     let trait_name = Render.strip_ns trait_name in
-    let req_class_name = Render.strip_ns req_class_name in
-    ( Error_code.StaticCallOnTraitRequireClass,
-      lazy
-        ( call_pos,
-          "Invoking static methods on traits is dangerous and must be avoided. Since trait "
-          ^ trait_name
-          ^ " has a "
-          ^ Markdown_lite.md_codify ("require class " ^ req_class_name)
-          ^ " constraint, replace "
-          ^ Markdown_lite.md_codify (trait_name ^ "::" ^ meth_name ^ "(...)")
-          ^ " with "
-          ^ Markdown_lite.md_codify (req_class_name ^ "::" ^ meth_name ^ "(...)")
-          ^ "." ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    let req_constraint_name = Render.strip_ns req_constraint_name in
+    match req_constraint_kind with
+    | `class_ ->
+      ( Error_code.StaticCallOnTraitRequireClass,
+        lazy
+          ( call_pos,
+            "Invoking static methods on traits is dangerous and must be avoided. Since trait "
+            ^ trait_name
+            ^ " has a "
+            ^ Markdown_lite.md_codify ("require class " ^ req_constraint_name)
+            ^ " constraint, replace "
+            ^ Markdown_lite.md_codify (trait_name ^ "::" ^ meth_name ^ "(...)")
+            ^ " with "
+            ^ Markdown_lite.md_codify
+                (req_constraint_name ^ "::" ^ meth_name ^ "(...)")
+            ^ "." ),
+        lazy [],
+        lazy Explanation.empty,
+        [],
+        User_error_flags.empty )
+    | `this_as ->
+      ( Error_code.StaticCallOnTraitRequireThisAs,
+        lazy
+          ( call_pos,
+            "Invoking static methods on traits is dangerous and is forbidden on trait "
+            ^ trait_name
+            ^ " because it has a "
+            ^ Markdown_lite.md_codify ("require this as " ^ req_constraint_name)
+            ^ " constraint." ),
+        lazy [],
+        lazy Explanation.empty,
+        [],
+        User_error_flags.empty )
 
   let isset_in_strict pos =
     ( Error_code.IssetEmptyInStrict,
@@ -5978,9 +5994,15 @@ end = struct
       classname_abstract_call pos meth_name class_name decl_pos
     | Static_synthetic_method { pos; meth_name; class_name; decl_pos } ->
       static_synthetic_method pos meth_name class_name decl_pos
-    | Static_call_on_trait_require_class
-        { pos; meth_name; trait_name; req_class_name } ->
-      static_call_on_trait_require_class pos meth_name trait_name req_class_name
+    | Static_call_on_trait_require_non_strict
+        { pos; meth_name; trait_name; req_constraint_name; req_constraint_kind }
+      ->
+      static_call_on_trait_require_non_strict
+        pos
+        meth_name
+        trait_name
+        req_constraint_name
+        req_constraint_kind
     | Isset_in_strict pos -> isset_in_strict pos
     | Isset_inout_arg pos -> isset_inout_arg pos
     | Unpacking_disallowed_builtin_function { pos; fn_name } ->

@@ -268,9 +268,8 @@ type parent_changes = {
     unit NamedItemsListChange.t NamedItemsListChange.t option;
   req_implements_changes:
     unit NamedItemsListChange.t NamedItemsListChange.t option;
-  req_class_changes: unit NamedItemsListChange.t NamedItemsListChange.t option;
-  req_this_as_changes:
-    unit NamedItemsListChange.t NamedItemsListChange.t option;
+  (* For req constraints a coarse-grained analysis is sufficient *)
+  req_constraints_changes: bool;
   uses_changes: unit NamedItemsListChange.t NamedItemsListChange.t option;
   xhp_attr_changes: unit NamedItemsListChange.t NamedItemsListChange.t option;
 }
@@ -385,6 +384,18 @@ module ClassShellChangeCategory = struct
           | ValueChange.Modified _ -> { acc with some_modified = true })
         changes
         { no_change with order_change }
+
+    let of_bool b =
+      if b then
+        Some
+          {
+            some_added = true;
+            some_removed = true;
+            some_modified = true;
+            order_change = true;
+          }
+      else
+        None
   end
 
   module ParentsChangeCategory = struct
@@ -393,8 +404,7 @@ module ClassShellChangeCategory = struct
       implements_changes_category: ListChange.t option;
       req_extends_changes_category: ListChange.t option;
       req_implements_changes_category: ListChange.t option;
-      req_class_changes_category: ListChange.t option;
-      req_this_as_changes_category: ListChange.t option;
+      req_constraints_changes_category: ListChange.t option;
       uses_changes_category: ListChange.t option;
       xhp_attr_changes_category: ListChange.t option;
     }
@@ -406,8 +416,7 @@ module ClassShellChangeCategory = struct
           implements_changes;
           req_extends_changes;
           req_implements_changes;
-          req_class_changes;
-          req_this_as_changes;
+          req_constraints_changes;
           uses_changes;
           xhp_attr_changes;
         } =
@@ -420,10 +429,8 @@ module ClassShellChangeCategory = struct
           Option.map ListChange.of_list_change_map req_extends_changes;
         req_implements_changes_category =
           Option.map ListChange.of_list_change_map req_implements_changes;
-        req_class_changes_category =
-          Option.map ListChange.of_list_change_map req_class_changes;
-        req_this_as_changes_category =
-          Option.map ListChange.of_list_change_map req_this_as_changes;
+        req_constraints_changes_category =
+          ListChange.of_bool req_constraints_changes;
         uses_changes_category =
           Option.map ListChange.of_list_change_map uses_changes;
         xhp_attr_changes_category =

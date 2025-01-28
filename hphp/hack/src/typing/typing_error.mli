@@ -1054,11 +1054,12 @@ module Primary : sig
         class_name: string;
         decl_pos: Pos_or_decl.t;
       }
-    | Static_call_on_trait_require_class of {
+    | Static_call_on_trait_require_non_strict of {
         pos: Pos.t;
         meth_name: string;
         trait_name: string;
-        req_class_name: string;
+        req_constraint_name: string;
+        req_constraint_kind: [ `class_ | `this_as ];
       }
     | Isset_in_strict of Pos.t
     | Isset_inout_arg of Pos.t

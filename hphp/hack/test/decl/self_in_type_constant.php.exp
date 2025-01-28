@@ -6,9 +6,8 @@
        sc_module = None; sc_name = ([3:7-8], "\\C"); sc_tparams = [];
        sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
        sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
-       sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-       sc_req_this_as = []; sc_implements = [];
-       sc_support_dynamic_type = false; sc_consts = [];
+       sc_req_extends = []; sc_req_implements = []; sc_req_constraints = [];
+       sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
        sc_typeconsts =
        [{ Shallow_decl_defs.stc_name = ([4:14-15], "T");
           stc_kind =
@@ -39,8 +38,8 @@
         sc_name = ([8:11-12], "\\I"); sc_tparams = []; sc_extends = [];
         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
         sc_xhp_marked_empty = false; sc_req_extends = [];
-        sc_req_implements = []; sc_req_class = []; sc_req_this_as = [];
-        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
+        sc_req_implements = []; sc_req_constraints = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = [];
         sc_typeconsts =
         [{ Shallow_decl_defs.stc_name = ([9:14-15], "V");
            stc_kind =
@@ -73,10 +72,10 @@
         sc_xhp_marked_empty = false;
         sc_req_extends =
         [(Rhint ([14:19-20]), (Tapply (([14:19-20], "\\C"), [])))];
-        sc_req_implements = []; sc_req_class = []; sc_req_this_as = [];
-        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-        sc_typeconsts = []; sc_props = []; sc_sprops = [];
-        sc_constructor = None; sc_static_methods = [];
+        sc_req_implements = []; sc_req_constraints = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([15:28-29], "f");
            sm_type =

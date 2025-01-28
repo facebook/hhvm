@@ -775,6 +775,7 @@ module Typing = struct
     | InvalidXhpAttributeValue [@value 4483]
     | OptionalParameterNotSupported [@value 4484]
     | InvalidRecursiveType [@value 4485]
+    | StaticCallOnTraitRequireThisAs [@value 4486]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

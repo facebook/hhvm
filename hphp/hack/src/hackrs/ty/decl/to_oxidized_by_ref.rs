@@ -469,6 +469,18 @@ impl<'a, R: Reason> ToOxidizedByRef<'a> for folded::Requirement<R> {
     }
 }
 
+impl<'a, R: Reason> ToOxidizedByRef<'a> for folded::ConstraintRequirement<R> {
+    type Output = obr::decl_defs::ConstraintRequirement<'a>;
+
+    fn to_oxidized_by_ref(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        use obr::decl_defs::ConstraintRequirement as Obr;
+        match self {
+            Self::CREqual(r) => Obr::CREqual(arena.alloc(r.to_oxidized_by_ref(arena))),
+            Self::CRSubtype(r) => Obr::CRSubtype(arena.alloc(r.to_oxidized_by_ref(arena))),
+        }
+    }
+}
+
 impl<'a> ToOxidizedByRef<'a> for folded::Constructor {
     type Output = (Option<&'a obr::decl_defs::Element<'a>>, ConsistentKind);
 
@@ -509,8 +521,7 @@ impl<'a, R: Reason> ToOxidizedByRef<'a> for folded::FoldedClass<R> {
             deferred_init_members,
             req_ancestors,
             req_ancestors_extends,
-            req_class_ancestors,
-            req_this_as_ancestors,
+            req_constraints_ancestors,
             extends,
             sealed_whitelist,
             xhp_attr_deps,
@@ -553,8 +564,7 @@ impl<'a, R: Reason> ToOxidizedByRef<'a> for folded::FoldedClass<R> {
             deferred_init_members: deferred_init_members.to_oxidized_by_ref(arena),
             req_ancestors: req_ancestors.to_oxidized_by_ref(arena),
             req_ancestors_extends: req_ancestors_extends.to_oxidized_by_ref(arena),
-            req_class_ancestors: req_class_ancestors.to_oxidized_by_ref(arena),
-            req_this_as_ancestors: req_this_as_ancestors.to_oxidized_by_ref(arena),
+            req_constraints_ancestors: req_constraints_ancestors.to_oxidized_by_ref(arena),
             extends: extends.to_oxidized_by_ref(arena),
             sealed_whitelist: sealed_whitelist.to_oxidized_by_ref(arena),
             xhp_attr_deps: xhp_attr_deps.to_oxidized_by_ref(arena),
@@ -744,8 +754,7 @@ impl<'a, R: Reason> ToOxidizedByRef<'a> for shallow::ClassDecl<R> {
             xhp_marked_empty,
             req_extends,
             req_implements,
-            req_class,
-            req_this_as,
+            req_constraints,
             implements,
             support_dynamic_type,
             consts,
@@ -782,8 +791,7 @@ impl<'a, R: Reason> ToOxidizedByRef<'a> for shallow::ClassDecl<R> {
             xhp_marked_empty: *xhp_marked_empty,
             req_extends: req_extends.to_oxidized_by_ref(arena),
             req_implements: req_implements.to_oxidized_by_ref(arena),
-            req_class: req_class.to_oxidized_by_ref(arena),
-            req_this_as: req_this_as.to_oxidized_by_ref(arena),
+            req_constraints: req_constraints.to_oxidized_by_ref(arena),
             implements: implements.to_oxidized_by_ref(arena),
             support_dynamic_type: *support_dynamic_type,
             consts: consts.to_oxidized_by_ref(arena),
@@ -875,6 +883,22 @@ impl<'a, R: Reason> ToOxidizedByRef<'a> for shallow::TypedefDecl<R> {
             docs_url: docs_url.as_deref().to_oxidized_by_ref(arena),
             package: package.as_ref().map(|p| p.to_arena_allocated(arena)),
         })
+    }
+}
+
+impl<'a, R: Reason> ToOxidizedByRef<'a> for DeclConstraintRequirement<R> {
+    type Output = obr::shallow_decl_defs::DeclConstraintRequirement<'a>;
+
+    fn to_oxidized_by_ref(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        use obr::shallow_decl_defs::DeclConstraintRequirement as Obr;
+        match self {
+            DeclConstraintRequirement::DCREqual(ty) => {
+                Obr::DCREqual(arena.alloc(ty.to_oxidized_by_ref(arena)))
+            }
+            DeclConstraintRequirement::DCRSubtype(ty) => {
+                Obr::DCRSubtype(arena.alloc(ty.to_oxidized_by_ref(arena)))
+            }
+        }
     }
 }
 

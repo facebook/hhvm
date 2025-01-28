@@ -1,0 +1,93 @@
+--- ocaml
++++ rupro
+@@ -1,86 +1,86 @@
+ FoldedClass {
+     name: "\\T1",
+     pos: Pos(root|trait_require_class.php, 6:7-9),
+     kind: Ctrait,
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_require_class.php, 6:7-9),
+             ty: HH\classname<this>,
+             origin: "\\T1",
+             refs: [],
+         },
+     },
+     req_constraints_ancestors: [
+         CREqual(
+             Requirement(
+                 Pos(root|trait_require_class.php, 7:17-18),
+                 C,
+             ),
+         ),
+     ],
+ }
+ FoldedClass {
+     name: "\\T2",
+     pos: Pos(root|trait_require_class.php, 10:7-9),
+     kind: Ctrait,
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_require_class.php, 10:7-9),
+             ty: HH\classname<this>,
+             origin: "\\T2",
+             refs: [],
+         },
+     },
+     req_constraints_ancestors: [
+         CREqual(
+             Requirement(
+-                Pos(root|trait_require_class.php, 12:17-18),
+-                D,
++                Pos(root|trait_require_class.php, 11:17-18),
++                C,
+             ),
+         ),
+         CREqual(
+             Requirement(
+-                Pos(root|trait_require_class.php, 11:17-18),
+-                C,
++                Pos(root|trait_require_class.php, 12:17-18),
++                D,
+             ),
+         ),
+     ],
+ }
+ FoldedClass {
+     name: "\\C",
+     pos: Pos(root|trait_require_class.php, 15:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_require_class.php, 15:7-8),
+             ty: HH\classname<this>,
+             origin: "\\C",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\D",
+     pos: Pos(root|trait_require_class.php, 16:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|trait_require_class.php, 16:7-8),
+             ty: HH\classname<this>,
+             origin: "\\D",
+             refs: [],
+         },
+     },
+ }

@@ -65,9 +65,7 @@ type parent_changes = {
     unit NamedItemsListChange.t NamedItemsListChange.t option;
   req_implements_changes:
     unit NamedItemsListChange.t NamedItemsListChange.t option;
-  req_class_changes: unit NamedItemsListChange.t NamedItemsListChange.t option;
-  req_this_as_changes:
-    unit NamedItemsListChange.t NamedItemsListChange.t option;
+  req_constraints_changes: bool;
   uses_changes: unit NamedItemsListChange.t NamedItemsListChange.t option;
   xhp_attr_changes: unit NamedItemsListChange.t NamedItemsListChange.t option;
 }

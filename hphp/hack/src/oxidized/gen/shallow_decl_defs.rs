@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4daa44696eb43a3bd03831366cc45937>>
+// @generated SignedSource<<4f19bca9d104726a886fb8ccba49f19b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -154,6 +154,30 @@ pub type XhpEnumValues = s_map::SMap<Vec<ast_defs::XhpEnumValue>>;
     ToOcamlRep
 )]
 #[rust_to_ocaml(attr = "deriving (eq, show)")]
+#[repr(C, u8)]
+pub enum DeclConstraintRequirement {
+    #[rust_to_ocaml(name = "DCR_Equal")]
+    DCREqual(Ty),
+    #[rust_to_ocaml(name = "DCR_Subtype")]
+    DCRSubtype(Ty),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[rust_to_ocaml(prefix = "sc_")]
 #[repr(C)]
 pub struct ShallowClass {
@@ -174,8 +198,7 @@ pub struct ShallowClass {
     pub xhp_marked_empty: bool,
     pub req_extends: Vec<Ty>,
     pub req_implements: Vec<Ty>,
-    pub req_class: Vec<Ty>,
-    pub req_this_as: Vec<Ty>,
+    pub req_constraints: Vec<DeclConstraintRequirement>,
     pub implements: Vec<Ty>,
     pub support_dynamic_type: bool,
     pub consts: Vec<ShallowClassConst>,

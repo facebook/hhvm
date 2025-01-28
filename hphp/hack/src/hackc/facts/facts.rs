@@ -15,6 +15,7 @@ use oxidized_by_ref::ast_defs::Abstraction;
 use oxidized_by_ref::ast_defs::ClassishKind;
 use oxidized_by_ref::direct_decl_parser::ParsedFile;
 use oxidized_by_ref::shallow_decl_defs::ClassDecl;
+use oxidized_by_ref::shallow_decl_defs::DeclConstraintRequirement;
 use oxidized_by_ref::shallow_decl_defs::TypedefDecl;
 use oxidized_by_ref::typing_defs::Ty;
 use oxidized_by_ref::typing_defs::Ty_;
@@ -241,7 +242,7 @@ impl TypeFacts {
             final_,
             req_implements,
             req_extends,
-            req_class,
+            req_constraints,
             uses,
             extends,
             implements,
@@ -319,11 +320,14 @@ impl TypeFacts {
                 }
             })
             .collect();
-        let require_class = req_class
+        let require_class = req_constraints
             .iter()
-            .filter_map(|&ty| {
+            .filter_map(|&dcr| {
                 if check_require {
-                    Some(extract_type_name(ty))
+                    match dcr {
+                        DeclConstraintRequirement::DCREqual(ty) => Some(extract_type_name(ty)),
+                        DeclConstraintRequirement::DCRSubtype(_) => None,
+                    }
                 } else {
                     None
                 }

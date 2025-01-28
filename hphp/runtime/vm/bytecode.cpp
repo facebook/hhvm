@@ -1783,7 +1783,7 @@ OPTBLD_INLINE void iopClassHasReifiedGenerics() {
     auto const cls = vmStack().topC();
     if (LIKELY(tvIsClass(cls))) return cls->m_data.pclass;
     if (tvIsLazyClass(cls)) return Class::load(cls->m_data.plazyclass.name());
-    raise_error("ClassHasReified generics called on non-class object");
+    raise_error("ClassHasReifiedGenerics called on non-class object");
   }();
   vmStack().replaceC<KindOfBoolean>(class_->hasReifiedGenerics());
 }
@@ -1805,7 +1805,7 @@ OPTBLD_INLINE void iopHasReifiedParent() {
     auto const cls = vmStack().topC();
     if (tvIsClass(cls)) return cls->m_data.pclass;
     if (tvIsLazyClass(cls)) return Class::load(cls->m_data.plazyclass.name());
-    raise_error("ClassHasReified generics called on non-class object");
+    raise_error("HasReifiedParent called on non-class object");
   }();
   vmStack().replaceC<KindOfBoolean>(class_->hasReifiedParent());
 }

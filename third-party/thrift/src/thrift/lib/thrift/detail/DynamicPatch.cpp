@@ -841,6 +841,38 @@ DynamicMapPatch DiffVisitorBase::diffMap(
   return patch;
 }
 
+// Check whether value should not be serialized due to deprecated_terse_writes,
+// but serialized in languages other than C++.
+static bool maybeEmptyDeprecatedTerseField(const Value& value) {
+  switch (value.getType()) {
+    case Value::Type::boolValue:
+    case Value::Type::byteValue:
+    case Value::Type::i16Value:
+    case Value::Type::i32Value:
+    case Value::Type::i64Value:
+    case Value::Type::floatValue:
+    case Value::Type::doubleValue:
+      // Numeric fields maybe empty terse field regardless the value, since it
+      // honors custom default
+      return true;
+    case Value::Type::stringValue:
+    case Value::Type::binaryValue:
+    case Value::Type::listValue:
+    case Value::Type::setValue:
+    case Value::Type::mapValue:
+      // string/binary and containers fields don't honor custom default.
+      // It can only be empty if it is intrinsic default
+      return protocol::isIntrinsicDefault(value);
+    case Value::Type::objectValue:
+      // struct/union/exception can never be empty terse field
+      return false;
+    case Value::Type::__EMPTY__:
+      folly::throw_exception<std::runtime_error>("value is empty.");
+    default:
+      notImpl();
+  }
+}
+
 void DiffVisitorBase::diffElement(
     const ValueMap& src,
     const ValueMap& dst,
@@ -879,7 +911,8 @@ DynamicPatch DiffVisitorBase::diffStructured(
   if (src.size() <= 1 && dst.size() <= 1) {
     // If same field is set, use normal Object diff logic.
     if (src.empty() || dst.empty() ||
-        src.begin()->first != dst.begin()->first) {
+        src.begin()->first != dst.begin()->first ||
+        maybeEmptyDeprecatedTerseField(src.begin()->second)) {
       DynamicUnknownPatch patch;
       patch.doNotConvertStringToBinary(badge);
       patch.assign(badge, dst);
@@ -1015,6 +1048,9 @@ void DiffVisitorBase::diffField(
 
   pushField(id);
   auto guard = folly::makeGuard([&] { pop(); });
+  if (maybeEmptyDeprecatedTerseField(src.at(id))) {
+    patch.ensure(badge, id, emptyValue(src.at(id).getType()));
+  }
   auto subPatch = diff(badge, src.at(id), dst.at(id));
   if (!subPatch.empty(badge)) {
     patch.patchIfSet(badge, id).merge(badge, DynamicPatch{std::move(subPatch)});

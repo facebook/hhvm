@@ -17,9 +17,10 @@
 #include <gtest/gtest.h>
 #include <thrift/lib/cpp2/patch/DynamicPatch.h>
 #include <thrift/lib/cpp2/patch/detail/PatchBadge.h>
-#include <thrift/lib/thrift/gen-cpp2/any_patch_types.h>
-
 #include <thrift/lib/cpp2/patch/test/gen-cpp2/gen_patch_DynamicPatchTest_types.h>
+#include <thrift/lib/cpp2/patch/test/gen-cpp2/gen_patch_OldTerseWrite_types.h>
+#include <thrift/lib/cpp2/protocol/Serializer.h>
+#include <thrift/lib/thrift/gen-cpp2/any_patch_types.h>
 
 namespace apache::thrift::protocol {
 using detail::badge;
@@ -1002,6 +1003,54 @@ TEST(DynamicPatchTest, MergeMovedStructPatch) {
     obj[static_cast<FieldId>(i)].emplace_i32(-i);
   }
   testMergeMovedPatch<DynamicStructPatch>(obj);
+}
+
+TEST(DemoDiffVisitor, TerseWriteFieldMismatch1) {
+  using test::Foo;
+  Foo src, dst;
+  dst.bar() = "123";
+
+  // Field exists when generating the patch but not when applying the diff
+  auto srcObj = protocol::asValueStruct<type::struct_t<Foo>>(src).as_object();
+  auto dstObj = protocol::asValueStruct<type::struct_t<Foo>>(dst).as_object();
+
+  DemoDiffVisitor visitor;
+  auto patch = visitor.diff(srcObj, dstObj);
+
+  auto srcBuf = CompactSerializer::serialize<folly::IOBufQueue>(src).move();
+  auto dstBuf = CompactSerializer::serialize<folly::IOBufQueue>(dst).move();
+
+  auto srcVal = protocol::parseValue<CompactProtocolReader>(
+      *srcBuf, type::BaseType::Struct);
+  auto dstVal = protocol::parseValue<CompactProtocolReader>(
+      *dstBuf, type::BaseType::Struct);
+
+  protocol::applyPatch(patch.toObject(), srcVal);
+
+  EXPECT_EQ(srcVal, dstVal);
+}
+
+TEST(DemoDiffVisitor, TerseWriteFieldMismatch2) {
+  using test::Foo;
+  Foo src, dst;
+  dst.bar() = "123";
+
+  // Field exists when applying the patch but not when generating the diff
+  auto srcBuf = CompactSerializer::serialize<folly::IOBufQueue>(src).move();
+  auto dstBuf = CompactSerializer::serialize<folly::IOBufQueue>(dst).move();
+
+  auto srcObj = protocol::parseObject<CompactProtocolReader>(*srcBuf);
+  auto dstObj = protocol::parseObject<CompactProtocolReader>(*dstBuf);
+
+  DemoDiffVisitor visitor;
+  auto patch = visitor.diff(srcObj, dstObj);
+
+  auto srcVal = protocol::asValueStruct<type::struct_t<Foo>>(src);
+  auto dstVal = protocol::asValueStruct<type::struct_t<Foo>>(dst);
+
+  protocol::applyPatch(patch.toObject(), srcVal);
+
+  EXPECT_EQ(srcVal, dstVal);
 }
 
 } // namespace apache::thrift::protocol

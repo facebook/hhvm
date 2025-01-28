@@ -1,3 +1,4 @@
+5
 (*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
@@ -318,7 +319,12 @@ let test () =
     let { Tast_provider.Compute_tast.tast; _ } =
       Tast_provider.compute_tast_unquarantined ~ctx ~entry
     in
-    let ty = ServerInferType.type_at_pos ctx tast line col in
+    let ty =
+      ServerInferType.type_at_pos
+        ctx
+        tast
+        (File_content.Position.from_one_based line col)
+    in
     compare_type expected_type ty
   in
   List.iter cases ~f:test_case

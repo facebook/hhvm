@@ -11,17 +11,10 @@ open Hh_prelude
 open Typing_defs
 
 let go_common
-    (ctx : Provider_context.t)
-    (tast : Tast.program Tast_with_dynamic.t)
-    ~(line : int)
-    ~(column : int) : ServerCommandTypes.Go_to_type_definition.result =
+    (ctx : Provider_context.t) (tast : Tast.program Tast_with_dynamic.t) pos :
+    ServerCommandTypes.Go_to_type_definition.result =
   let info_opt =
-    ServerInferType.human_friendly_type_at_pos
-      ~under_dynamic:false
-      ctx
-      tast
-      line
-      column
+    ServerInferType.human_friendly_type_at_pos ~under_dynamic:false ctx tast pos
   in
   match info_opt with
   | None -> []
@@ -54,11 +47,9 @@ let go_common
 
 (* For serverless ide *)
 let go_quarantined
-    ~(ctx : Provider_context.t)
-    ~(entry : Provider_context.entry)
-    ~(line : int)
-    ~(column : int) : ServerCommandTypes.Go_to_type_definition.result =
+    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) pos :
+    ServerCommandTypes.Go_to_type_definition.result =
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
-  go_common ctx tast ~line ~column
+  go_common ctx tast pos

@@ -8,7 +8,7 @@
  *)
 
 module Position : sig
-  type t [@@deriving ord, show]
+  type t [@@deriving eq, ord, show]
 
   val beginning_of_file : t
 

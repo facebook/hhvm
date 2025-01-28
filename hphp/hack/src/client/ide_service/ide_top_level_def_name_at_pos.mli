@@ -9,6 +9,5 @@
 val go_quarantined :
   Provider_context.t ->
   Provider_context.entry ->
-  line:int ->
-  column:int ->
+  File_content.Position.t ->
   string option

@@ -13,8 +13,7 @@ val go_ctx :
   sienv_ref:SearchUtils.si_env ref ->
   naming_table:Naming_table.t ->
   is_manually_invoked:bool ->
-  line:int ->
-  column:int ->
+  File_content.Position.t ->
   AutocompleteTypes.ide_result
 
 val go_at_auto332_ctx :

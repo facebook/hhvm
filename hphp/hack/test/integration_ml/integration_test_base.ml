@@ -361,10 +361,6 @@ let doc (suffix : string) (file_contents : string) : ClientIdeMessage.document =
     file_contents;
   }
 
-let loc (line : int) (column : int) : ClientIdeMessage.location =
-  (* 1-based line and column *)
-  { ClientIdeMessage.line; column }
-
 module Client = struct
   type env = ClientIdeDaemon.Test.env
 

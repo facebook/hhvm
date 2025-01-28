@@ -36,7 +36,7 @@ val get_position_for_symbol :
   Provider_context.t ->
   string ->
   FileInfo.si_kind ->
-  (Relative_path.t * int * int) option
+  (Relative_path.t * File_content.Position.t) option
 
 (* Take an item and produce a position, or none if it cannot be found *)
 val get_pos_for_item_opt :

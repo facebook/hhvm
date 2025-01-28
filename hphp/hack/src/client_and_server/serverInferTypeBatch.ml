@@ -9,9 +9,11 @@
 
 open Hh_prelude
 
-type pos = Relative_path.t * int * int * (int * int) option
+type pos =
+  Relative_path.t * File_content.Position.t * File_content.Position.t option
 
-type spos = string * int * int * (int * int) option [@@deriving eq, ord]
+type spos = string * File_content.Position.t * File_content.Position.t option
+[@@deriving eq, ord]
 
 let recheck_typing ctx (path_list : Relative_path.t list) =
   let files_to_check =
@@ -41,7 +43,8 @@ let get_tast_map ctx path_list =
   in
   (ctx, tasts)
 
-let result_to_string result (fn, line, char, range_end) =
+let result_to_string result (fn, range_start, range_end) =
+  let (line, char) = File_content.Position.line_column_one_based range_start in
   Hh_json.(
     let obj =
       JSON_Object
@@ -52,7 +55,10 @@ let result_to_string result (fn, line, char, range_end) =
               @
               match range_end with
               | None -> [("line", int_ line); ("character", int_ char)]
-              | Some (end_line, end_char) ->
+              | Some range_end ->
+                let (end_line, end_char) =
+                  File_content.Position.line_column_one_based range_end
+                in
                 let pos l c =
                   JSON_Object [("line", int_ l); ("character", int_ c)]
                 in
@@ -64,7 +70,7 @@ let result_to_string result (fn, line, char, range_end) =
     in
     json_to_string obj)
 
-let helper ctx acc pos_list =
+let helper ctx acc (pos_list : pos list) =
   let empty_map = Relative_path.Map.empty in
   let (at_pos_map, at_range_map) =
     List.fold
@@ -72,7 +78,7 @@ let helper ctx acc pos_list =
       ~init:(empty_map, empty_map)
       ~f:
         begin
-          fun (at_pos_map, at_range_map) (fn, line, char, range_end) ->
+          fun (at_pos_map, at_range_map) (fn, range_start, range_end) ->
             let add map ~data =
               Relative_path.Map.update
                 fn
@@ -82,12 +88,10 @@ let helper ctx acc pos_list =
                 map
             in
             match range_end with
-            | Some (end_line, end_char) ->
-              let data = (line, char, end_line, end_char) in
+            | Some range_end ->
+              let data = (range_start, range_end) in
               (at_pos_map, add at_range_map ~data)
-            | None ->
-              let data = (line, char) in
-              (add at_pos_map ~data, at_range_map)
+            | None -> (add at_pos_map ~data:range_start, at_range_map)
         end
   in
   let path_list =
@@ -98,16 +102,16 @@ let helper ctx acc pos_list =
     Relative_path.Map.mapi at_range_map ~f:(fun fn pos_list ->
         match Relative_path.Map.find_opt tasts fn with
         | None ->
-          List.map pos_list ~f:(fun (line, char, end_line, end_char) ->
+          List.map pos_list ~f:(fun (range_start, range_end) ->
               let result = "No such file or directory" in
-              let pos = (fn, line, char, Some (end_line, end_char)) in
+              let pos = (fn, range_start, Some range_end) in
               result_to_string (Result.Error result) pos)
         | Some tast ->
           let results = ServerInferType.type_at_range_fused ctx tast pos_list in
           List.map2_exn
             pos_list
             results
-            ~f:(fun (line, char, end_line, end_char) info_opt ->
+            ~f:(fun (range_start, range_end) info_opt ->
               let result =
                 info_opt
                 |> Option.map ~f:(fun info ->
@@ -115,7 +119,7 @@ let helper ctx acc pos_list =
                          (ServerInferType.get_env info)
                          (ServerInferType.get_type info))
               in
-              let pos = (fn, line, char, Some (end_line, end_char)) in
+              let pos = (fn, range_start, Some range_end) in
               result_to_string (Result.Ok result) pos))
   in
   let acc =
@@ -125,13 +129,13 @@ let helper ctx acc pos_list =
     Relative_path.Map.mapi at_pos_map ~f:(fun fn pos_list ->
         match Relative_path.Map.find_opt tasts fn with
         | None ->
-          List.map pos_list ~f:(fun (line, char) ->
+          List.map pos_list ~f:(fun range_start ->
               let result = "No such file or directory" in
-              let pos = (fn, line, char, None) in
+              let pos = (fn, range_start, None) in
               result_to_string (Result.Error result) pos)
         | Some tast ->
           let results = ServerInferType.type_at_pos_fused ctx tast pos_list in
-          List.map2_exn pos_list results ~f:(fun (line, char) info_opt ->
+          List.map2_exn pos_list results ~f:(fun range_start info_opt ->
               let result =
                 info_opt
                 |> Option.map ~f:(fun info ->
@@ -139,7 +143,7 @@ let helper ctx acc pos_list =
                          (ServerInferType.get_env info)
                          (ServerInferType.get_type info))
               in
-              let pos = (fn, line, char, None) in
+              let pos = (fn, range_start, None) in
               result_to_string (Result.Ok result) pos))
   in
   let acc = List.concat (Relative_path.Map.values type_at_pos_results) @ acc in
@@ -152,7 +156,7 @@ let parallel_helper
     (ctx : Provider_context.t)
     (pos_list : pos list) : string list =
   let add_pos_to_map map pos =
-    let (path, _, _, _) = pos in
+    let (path, _, _) = pos in
     Relative_path.Map.update
       path
       (function
@@ -177,7 +181,7 @@ let parallel_helper
 (* Entry Point *)
 let go :
     MultiWorker.worker list option ->
-    (string * int * int * (int * int) option) list ->
+    (string * File_content.Position.t * File_content.Position.t option) list ->
     ServerEnv.env ->
     string list =
  fun workers pos_list env ->
@@ -188,13 +192,13 @@ let go :
     |> List.sort ~compare:compare_spos
     (* Dedup identical queries *)
     |> List.remove_consecutive_duplicates ~equal:equal_spos
-    |> List.map ~f:(fun (fn, line, char, range_end) ->
+    |> List.map ~f:(fun (fn, range_start, range_end) ->
            let fn = Relative_path.create_detect_prefix fn in
-           (fn, line, char, range_end))
+           (fn, range_start, range_end))
   in
   let num_files =
     pos_list
-    |> List.map ~f:(fun (path, _, _, _) -> path)
+    |> List.map ~f:(fun (path, _, _) -> path)
     |> Relative_path.Set.of_list
     |> Relative_path.Set.cardinal
   in

@@ -21,33 +21,30 @@ val get_env : t -> Tast_env.env
 val type_at_pos_fused :
   Provider_context.t ->
   Tast.program Tast_with_dynamic.t ->
-  (int * int) list ->
+  File_content.Position.t list ->
   t option list
 
 val type_at_pos :
   Provider_context.t ->
   Tast.program Tast_with_dynamic.t ->
-  int ->
-  int ->
+  File_content.Position.t ->
   t option
 
 val human_friendly_type_at_pos :
   under_dynamic:bool ->
   Provider_context.t ->
   Tast.program Tast_with_dynamic.t ->
-  int ->
-  int ->
+  File_content.Position.t ->
   t option
 
 val type_at_range_fused :
   Provider_context.t ->
   Tast.program Tast_with_dynamic.t ->
-  (int * int * int * int) list ->
+  (File_content.Position.t * File_content.Position.t) list ->
   t option list
 
 val go_ctx :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
-  line:int ->
-  column:int ->
+  File_content.Position.t ->
   (string * string) option

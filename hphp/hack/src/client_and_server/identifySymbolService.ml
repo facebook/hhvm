@@ -20,13 +20,18 @@ module Result_set = Stdlib.Set.Make (struct
 end)
 
 let is_target
-    ~use_declaration_spans target_line target_char { pos; is_declaration; _ } =
+    ~use_declaration_spans
+    (cursor : File_content.Position.t)
+    { pos; is_declaration; _ } =
   let pos =
     match (use_declaration_spans, is_declaration) with
     | (true, Some pos) -> pos
     | (true, None)
     | (false, _) ->
       pos
+  in
+  let (target_line, target_char) =
+    File_content.Position.line_column_one_based cursor
   in
   if use_declaration_spans then
     Pos.inside_one_based pos target_line target_char
@@ -1332,8 +1337,7 @@ let all_symbols_ctx
 let go_quarantined
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
-    ~(line : int)
-    ~(column : int)
+    (cursor : File_content.Position.t)
     ~use_declaration_spans : Relative_path.t SymbolOccurrence.t list =
   all_symbols_ctx ~ctx ~entry
-  |> List.filter ~f:(is_target ~use_declaration_spans line column)
+  |> List.filter ~f:(is_target ~use_declaration_spans cursor)

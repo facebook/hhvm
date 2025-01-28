@@ -218,8 +218,7 @@ let test_docblock_finder (harness : Test_harness.t) : bool =
     ServerDocblockAt.go_docblock_ctx
       ~ctx
       ~entry
-      ~line:6
-      ~column:7
+      (File_content.Position.from_one_based 6 7)
       ~kind:FileInfo.SI_Trait
   in
   assert_docblock_markdown

@@ -106,8 +106,9 @@ let class_id_ty env (id : Ast_defs.id) : Tast.ty =
  * cannot assume that the structure of the CST is reflected in the TAST.
  *)
 
-let base_visitor ~human_friendly ~under_dynamic line_char_pairs =
-  let size = List.length line_char_pairs in
+let base_visitor
+    ~human_friendly ~under_dynamic (cursors : File_content.Position.t list) =
+  let size = List.length cursors in
   let zero = List.init size ~f:(fun _ -> None) in
   object (self)
     inherit [_] Tast_visitor.reduce as super
@@ -116,7 +117,10 @@ let base_visitor ~human_friendly ~under_dynamic line_char_pairs =
 
     method private select_pos pos env ty =
       let correct_assumptions = self#correct_assumptions env in
-      List.map line_char_pairs ~f:(fun (line, char) ->
+      List.map cursors ~f:(fun cursor ->
+          let (line, char) =
+            File_content.Position.line_column_one_based cursor
+          in
           if Pos.inside_one_based pos line char && correct_assumptions then
             Some (pos, mk_info env ty)
           else
@@ -124,7 +128,10 @@ let base_visitor ~human_friendly ~under_dynamic line_char_pairs =
 
     method private select_pos_targs pos env ty targs =
       let correct_assumptions = self#correct_assumptions env in
-      List.map line_char_pairs ~f:(fun (line, char) ->
+      List.map cursors ~f:(fun cursor ->
+          let (line, char) =
+            File_content.Position.line_column_one_based cursor
+          in
           if Pos.inside_one_based pos line char && correct_assumptions then
             Some (pos, mk_info_with_targs env ty targs)
           else
@@ -331,8 +338,8 @@ let base_visitor ~human_friendly ~under_dynamic line_char_pairs =
     When more than one node has the given range, return the type of the first
     node visited in a preorder traversal.
 *)
-let range_visitor line_char_pairs =
-  let size = List.length line_char_pairs in
+let range_visitor cursors =
+  let size = List.length cursors in
   let zero = List.init size ~f:(fun _ -> None) in
   object (self)
     inherit [_] Tast_visitor.reduce as super
@@ -340,7 +347,11 @@ let range_visitor line_char_pairs =
     inherit [_ option list] Visitors_runtime.monoid
 
     method private select_pos pos env ty =
-      List.map line_char_pairs ~f:(fun (startl, startc, endl, endc) ->
+      List.map cursors ~f:(fun (start, end_) ->
+          let (startl, startc) =
+            File_content.Position.line_column_one_based start
+          in
+          let (endl, endc) = File_content.Position.line_column_one_based end_ in
           if
             Pos.exactly_matches_range
               pos
@@ -376,8 +387,8 @@ let range_visitor line_char_pairs =
 let type_at_pos_fused
     (ctx : Provider_context.t)
     (tast : Tast.program Tast_with_dynamic.t)
-    (line_char_pairs : (int * int) list) : t option list =
-  (base_visitor ~human_friendly:false ~under_dynamic:false line_char_pairs)#go
+    (cursors : File_content.Position.t list) : t option list =
+  (base_visitor ~human_friendly:false ~under_dynamic:false cursors)#go
     ctx
     tast.Tast_with_dynamic.under_normal_assumptions
   |> List.map ~f:(Option.map ~f:snd)
@@ -385,9 +396,8 @@ let type_at_pos_fused
 let type_at_pos
     (ctx : Provider_context.t)
     (tast : Tast.program Tast_with_dynamic.t)
-    (line : int)
-    (char : int) : t option =
-  type_at_pos_fused ctx tast [(line, char)] |> function
+    (cursor : File_content.Position.t) : t option =
+  type_at_pos_fused ctx tast [cursor] |> function
   | [res] -> res
   | _ -> None
 
@@ -404,15 +414,14 @@ let human_friendly_type_at_pos
     ~under_dynamic
     (ctx : Provider_context.t)
     (tast : Tast.program Tast_with_dynamic.t)
-    (line : int)
-    (char : int) : t option =
+    pos : t option =
   let tast =
     if under_dynamic then
       Option.value ~default:[] tast.Tast_with_dynamic.under_dynamic_assumptions
     else
       tast.Tast_with_dynamic.under_normal_assumptions
   in
-  (base_visitor ~human_friendly:true ~under_dynamic [(line, char)])#go ctx tast
+  (base_visitor ~human_friendly:true ~under_dynamic [pos])#go ctx tast
   |> function
   | [Some (_, info)] -> Some info
   | _ -> None
@@ -420,20 +429,18 @@ let human_friendly_type_at_pos
 let type_at_range_fused
     (ctx : Provider_context.t)
     (tast : Tast.program Tast_with_dynamic.t)
-    (line_char_pairs : (int * int * int * int) list) : t option list =
-  (range_visitor line_char_pairs)#go
-    ctx
-    tast.Tast_with_dynamic.under_normal_assumptions
+    (cursors : (File_content.Position.t * File_content.Position.t) list) :
+    t option list =
+  (range_visitor cursors)#go ctx tast.Tast_with_dynamic.under_normal_assumptions
 
 let go_ctx
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
-    ~(line : int)
-    ~(column : int) : (string * string) option =
+    (cursor : File_content.Position.t) : (string * string) option =
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
-  type_at_pos ctx tast line column >>| fun info ->
+  type_at_pos ctx tast cursor >>| fun info ->
   let env = get_env info in
   let ty = get_type info in
   ( Tast_env.print_ty env ty,

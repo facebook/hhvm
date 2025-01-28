@@ -8,13 +8,9 @@
 open Hh_prelude
 
 let go_quarantined
-    ~(ctx : Provider_context.t)
-    ~(entry : Provider_context.entry)
-    ~(line : int)
-    ~(column : int) : ServerCommandTypes.Go_to_definition.result =
-  let results =
-    ServerIdentifyFunction.go_quarantined ~ctx ~entry ~line ~column
-  in
+    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) pos :
+    ServerCommandTypes.Go_to_definition.result =
+  let results = ServerIdentifyFunction.go_quarantined ~ctx ~entry pos in
   let results = List.filter_map results ~f:Utils.unwrap_snd in
   (* What's it like when we return multiple definitions? For instance, if you ask
    * for the definition of "new C()" then we've now got the definition of the

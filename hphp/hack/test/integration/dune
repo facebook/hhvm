@@ -1,0 +1,19 @@
+(executable
+ (name symbol_index_test)
+ (modules
+  symbol_index_test
+  test_harness
+  test_harness_common_args)
+ (libraries
+  asserter
+  process
+  process_types
+  provider_utils
+  search
+  search_utils
+  server_command_types
+  server_docblock_at
+  server_env_build
+  test_injector_config
+  unit_test
+  utils_core))

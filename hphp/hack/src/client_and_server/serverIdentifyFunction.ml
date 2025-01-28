@@ -40,16 +40,12 @@ let rec take_best_suggestions l =
   | [] -> []
 
 let go_quarantined
-    ~(ctx : Provider_context.t)
-    ~(entry : Provider_context.entry)
-    ~(line : int)
-    ~(column : int) =
+    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) pos =
   let (symbols : _ SymbolOccurrence.t list) =
     IdentifySymbolService.go_quarantined
       ~ctx
       ~entry
-      ~line
-      ~column
+      pos
       ~use_declaration_spans:false
   in
   let symbols = take_best_suggestions (List.sort ~compare:by_nesting symbols) in
@@ -62,12 +58,9 @@ let go_quarantined
       (symbol, symbol_definition))
 
 let go_quarantined_absolute
-    ~(ctx : Provider_context.t)
-    ~(entry : Provider_context.entry)
-    ~(line : int)
-    ~(column : int) :
+    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) pos :
     (string SymbolOccurrence.t * string SymbolDefinition.t option) list =
-  go_quarantined ~ctx ~entry ~line ~column
+  go_quarantined ~ctx ~entry pos
   |> List.map ~f:(fun (occurrence, definition) ->
          let occurrence = SymbolOccurrence.to_absolute occurrence in
          let definition =

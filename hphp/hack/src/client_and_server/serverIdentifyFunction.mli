@@ -9,8 +9,7 @@
 val go_quarantined :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
-  line:int ->
-  column:int ->
+  File_content.Position.t ->
   (Relative_path.t SymbolOccurrence.t
   * Relative_path.t SymbolDefinition.t option)
   list
@@ -18,6 +17,5 @@ val go_quarantined :
 val go_quarantined_absolute :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
-  line:int ->
-  column:int ->
+  File_content.Position.t ->
   (string SymbolOccurrence.t * string SymbolDefinition.t option) list

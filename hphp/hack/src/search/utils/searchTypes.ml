@@ -161,8 +161,7 @@ module Find_refs = struct
     | LocalVar of {
         filename: Relative_path.t;
         file_content: string;
-        line: int;
-        char: int;
+        pos: File_content.Position.t;
       }
   [@@deriving show]
 end

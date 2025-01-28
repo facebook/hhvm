@@ -50,7 +50,7 @@ let test () =
       ClientIdeMessage.(
         Completion
           ( Test.doc bar_name bar_contents,
-            Test.loc 3 5,
+            File_content.Position.from_one_based 3 5,
             { is_manually_invoked = true } ))
   in
   Test.assert_ide_completions response ["foo"];
@@ -67,7 +67,7 @@ let test () =
       ClientIdeMessage.(
         Completion
           ( Test.doc bar_name bar_new_contents,
-            Test.loc 4 5,
+            File_content.Position.from_one_based 4 5,
             { is_manually_invoked = true } ))
   in
   Test.assert_ide_completions response ["foo"; "foo2"];

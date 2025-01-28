@@ -93,7 +93,8 @@ let get_member_def (ctx : Provider_context.t) (x : class_element) =
 
 let get_local_var_def ast name p =
   let (line, char, _) = Pos.info_pos p in
-  let def = List.hd (ServerFindLocals.go_from_ast ~ast ~line ~char) in
+  let pos = File_content.Position.from_one_based line char in
+  let def = List.hd (ServerFindLocals.go_from_ast ~ast pos) in
   Option.map def ~f:(FileOutline.summarize_local name)
 
 (* summarize a class, typedef or record *)

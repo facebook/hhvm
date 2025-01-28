@@ -19,8 +19,7 @@ val go_comments_for_symbol_ctx :
 val go_docblock_ctx :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
-  line:int ->
-  column:int ->
+  File_content.Position.t ->
   kind:FileInfo.si_kind ->
   DocblockService.result
 

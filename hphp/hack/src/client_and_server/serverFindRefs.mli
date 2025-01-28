@@ -56,8 +56,7 @@ val go_for_single_file :
 val go_from_file_ctx_with_symbol_definition :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
-  line:int ->
-  column:int ->
+  File_content.Position.t ->
   (Relative_path.t SymbolDefinition.t * action) option
 
 (**
@@ -67,8 +66,7 @@ val go_from_file_ctx_with_symbol_definition :
 val go_from_file_ctx :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
-  line:int ->
-  column:int ->
+  File_content.Position.t ->
   (string * action) option
 
 (**

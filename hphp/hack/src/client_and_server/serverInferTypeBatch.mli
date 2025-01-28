@@ -6,7 +6,8 @@
  *
  *)
 
-type pos = Relative_path.t * int * int * (int * int) option
+type pos =
+  Relative_path.t * File_content.Position.t * File_content.Position.t option
 
 val get_tast_map :
   Provider_context.t ->
@@ -15,6 +16,6 @@ val get_tast_map :
 
 val go :
   MultiWorker.worker list option ->
-  (string * int * int * (int * int) option) list ->
+  (string * File_content.Position.t * File_content.Position.t option) list ->
   ServerEnv.env ->
   string list

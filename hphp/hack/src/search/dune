@@ -1,7 +1,9 @@
 (library
  (name search_core)
  (wrapped false)
- (modules localSearchService symbolIndexCore)
+ (modules
+  localSearchService
+  symbolIndexCore)
  (libraries
   ast
   decl_provider

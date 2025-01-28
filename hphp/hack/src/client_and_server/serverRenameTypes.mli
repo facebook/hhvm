@@ -32,8 +32,7 @@ type action =
   | LocalVarRename of {
       filename: Relative_path.t;
       file_content: string;
-      line: int;
-      char: int;
+      pos: File_content.Position.t;
       new_name: string;
     }
 

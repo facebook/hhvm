@@ -29,7 +29,7 @@ module Syntax = Full_fidelity_positioned_syntax
     Returns None if the given offset is not inside a function call.
 *)
 let get_positional_info (cst : Syntax.t) (file_offset : int) :
-    ((int * int) * int) option =
+    (File_content.Position.t * int) option =
   Syntax.(
     let parent_tree = parentage cst file_offset in
     (* Search upwards through the parent tree.
@@ -68,6 +68,7 @@ let get_positional_info (cst : Syntax.t) (file_offset : int) :
         SourceText.offset_to_position
           callee_trailing_token.Token.source_text
           function_symbol_offset
+        |> fun (l, c) -> File_content.Position.from_one_based l c
       in
       let arguments = children argument_list in
       (* Add 1 to counteract the -1 in trailing_end_offset. *)
@@ -114,24 +115,25 @@ let get_occurrence_info
   ServerSymbolDefinition.go ctx (Some nast) full_occurrence
 
 let go_quarantined
-    ~(ctx : Provider_context.t)
-    ~(entry : Provider_context.entry)
-    ~(line : int)
-    ~(column : int) : Lsp.SignatureHelp.result =
+    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) pos :
+    Lsp.SignatureHelp.result =
   let source_text = Ast_provider.compute_source_text ~entry in
-  let offset = SourceText.position_to_offset source_text (line, column) in
+  let offset =
+    SourceText.position_to_offset
+      source_text
+      (File_content.Position.line_column_one_based pos)
+  in
   let cst = Ast_provider.compute_cst ~ctx ~entry in
   match
     get_positional_info (Provider_context.PositionedSyntaxTree.root cst) offset
   with
   | None -> None
-  | Some ((symbol_line, symbol_char), argument_idx) ->
+  | Some (symbol_pos, argument_idx) ->
     let results =
       IdentifySymbolService.go_quarantined
         ~ctx
         ~entry
-        ~line:symbol_line
-        ~column:symbol_char
+        symbol_pos
         ~use_declaration_spans:false
     in
     let results =
@@ -156,8 +158,7 @@ let go_quarantined
           ~under_dynamic:false
           ctx
           tast
-          symbol_line
-          symbol_char
+          symbol_pos
       in
       let def_opt = get_occurrence_info ctx ast occurrence in
       let open Typing_defs in

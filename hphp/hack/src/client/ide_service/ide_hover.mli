@@ -12,6 +12,5 @@
 val go_quarantined :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
-  line:int ->
-  column:int ->
+  File_content.Position.t ->
   HoverService.result

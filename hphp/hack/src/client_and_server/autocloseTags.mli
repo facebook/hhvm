@@ -18,6 +18,5 @@ end
 val go_xhp_close_tag :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
-  line:int ->
-  column:int ->
+  File_content.Position.t ->
   string option

@@ -16,8 +16,7 @@ type result = docblock_element list
 (* Represents a symbol location determined by the docblock service *)
 type dbs_symbol_location = {
   dbs_filename: string;
-  dbs_line: int;
-  dbs_column: int;
+  dbs_pos: File_content.Position.t;
   dbs_base_class: string option;
 }
 

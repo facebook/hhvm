@@ -342,9 +342,11 @@ type _ t =
       -> ((Errors.finalized_error list * int)
          * Tast.program Tast_with_dynamic.t Relative_path.Map.t option)
          t
-  | INFER_TYPE : file_input * int * int -> InferAtPosService.result t
+  | INFER_TYPE :
+      file_input * File_content.Position.t
+      -> InferAtPosService.result t
   | INFER_TYPE_BATCH :
-      (string * int * int * (int * int) option) list
+      (string * File_content.Position.t * File_content.Position.t option) list
       -> string list t
   | INFER_TYPE_ERROR : file_input * int * int -> InferErrorAtPosService.result t
   | IS_SUBTYPE : string -> (string, string) result t
@@ -352,7 +354,7 @@ type _ t =
   | TAST_HOLES_BATCH : string list -> TastHolesService.result t
   | IDENTIFY_SYMBOL : string -> string SymbolDefinition.t list t
   | IDENTIFY_FUNCTION :
-      string * file_input * int * int
+      string * file_input * File_content.Position.t
       -> Identify_symbol.result t
   | METHOD_JUMP :
       (string * Method_jumps.filter * bool)

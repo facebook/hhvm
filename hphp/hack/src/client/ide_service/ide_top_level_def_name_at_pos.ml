@@ -18,13 +18,12 @@ let first_top_level_def symbols =
         else
           None)
 
-let go_quarantined ctx entry ~line ~column : string option =
+let go_quarantined ctx entry pos : string option =
   let (symbols : _ SymbolOccurrence.t list) =
     IdentifySymbolService.go_quarantined
       ~ctx
       ~entry
-      ~line
-      ~column
+      pos
       ~use_declaration_spans:true
   in
   match first_top_level_def symbols with

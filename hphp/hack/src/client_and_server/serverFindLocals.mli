@@ -11,10 +11,9 @@ position. *)
 val go :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
-  line:int ->
-  char:int ->
+  File_content.Position.t ->
   Pos.t list
 
 (** Same as [go], but with an AST provided explicitly. Prefer [go] when
 possible to make use of caching. *)
-val go_from_ast : ast:Nast.program -> line:int -> char:int -> Pos.t list
+val go_from_ast : ast:Nast.program -> File_content.Position.t -> Pos.t list

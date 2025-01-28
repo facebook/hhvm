@@ -89,7 +89,7 @@ let remove_files ~(sienv : SearchUtils.si_env) ~(paths : Relative_path.Set.t) :
 (* Fetch best available position information for a symbol *)
 let get_position_for_symbol
     (ctx : Provider_context.t) (symbol : string) (kind : FileInfo.si_kind) :
-    (Relative_path.t * int * int) option =
+    (Relative_path.t * File_content.Position.t) option =
   (* Symbols can only be found if they are properly namespaced.
    * Even XHP classes must start with a backslash. *)
   let name_with_ns = Utils.add_ns symbol in
@@ -102,7 +102,8 @@ let get_position_for_symbol
         let (pos, _) = resolve_pos ctx (fileinfo_pos, name_with_ns) in
         let relpath = FileInfo.get_pos_filename fileinfo_pos in
         let (line, col, _) = Pos.info_pos pos in
-        (relpath, line, col))
+        let pos = File_content.Position.from_one_based line col in
+        (relpath, pos))
   in
   let open FileInfo in
   match kind with
@@ -138,8 +139,9 @@ let get_pos_for_item_opt (ctx : Provider_context.t) (item : si_item) :
   let result = get_position_for_symbol ctx item.si_fullname item.si_kind in
   match result with
   | None -> None
-  | Some (relpath, line, col) ->
+  | Some (relpath, pos) ->
     let symbol_len = String.length item.si_fullname in
+    let (line, col) = File_content.Position.line_column_one_based pos in
     let pos =
       Pos.make_from_lnum_bol_offset
         ~pos_file:relpath

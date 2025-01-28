@@ -521,6 +521,7 @@ let main_internal
   | ClientEnv.MODE_IDENTIFY_SYMBOL2 arg
   | ClientEnv.MODE_IDENTIFY_SYMBOL3 arg ->
     let (line, char) = parse_position_string ~split_on:":" arg in
+    let pos = File_content.Position.from_one_based line char in
     let file =
       match args.ClientEnv.stdin_name with
       | None -> ""
@@ -530,8 +531,7 @@ let main_internal
       ServerCommandTypes.FileContent (Sys_utils.read_stdin_to_string ())
     in
     let%lwt (result, telemetry) =
-      rpc args
-      @@ ServerCommandTypes.IDENTIFY_FUNCTION (file, content, line, char)
+      rpc args @@ ServerCommandTypes.IDENTIFY_FUNCTION (file, content, pos)
     in
     ClientGetDefinition.go result args.ClientEnv.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
@@ -556,8 +556,9 @@ let main_internal
         Printf.eprintf "Invalid position\n";
         raise Exit_status.(Exit_with Input_error)
     in
+    let pos = File_content.Position.from_one_based line char in
     let%lwt (ty, telemetry) =
-      rpc args @@ ServerCommandTypes.INFER_TYPE (fn, line, char)
+      rpc args @@ ServerCommandTypes.INFER_TYPE (fn, pos)
     in
     ClientTypeAtPos.go ty args.ClientEnv.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
@@ -568,8 +569,9 @@ let main_internal
             match Str.split (Str.regexp ":") pos with
             | [filename; line; char] ->
               ( expand_path filename,
-                int_of_string line,
-                int_of_string char,
+                File_content.Position.from_one_based
+                  (int_of_string line)
+                  (int_of_string char),
                 None )
             | [filename; start_line; start_char; end_line; end_char] ->
               let filename = expand_path filename in
@@ -577,7 +579,13 @@ let main_internal
               let start_char = int_of_string start_char in
               let end_line = int_of_string end_line in
               let end_char = int_of_string end_char in
-              (filename, start_line, start_char, Some (end_line, end_char))
+              let start_pos =
+                File_content.Position.from_one_based start_line start_char
+              in
+              let end_pos =
+                File_content.Position.from_one_based end_line end_char
+              in
+              (filename, start_pos, Some end_pos)
             | _ -> raise Exit
           with
           | _ ->

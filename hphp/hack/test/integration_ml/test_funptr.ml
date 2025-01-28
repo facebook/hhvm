@@ -35,22 +35,24 @@ function test() : void {
 }
 "
 
-let go_identify expected ~ctx ~entry ~line ~column =
+let go_identify expected ~ctx ~entry pos =
   let actual =
-    ServerIdentifyFunction.go_quarantined_absolute ~ctx ~entry ~line ~column
+    ServerIdentifyFunction.go_quarantined_absolute ~ctx ~entry pos
     |> Nuclide_rpc_message_printer.identify_symbol_response_to_json
   in
+  let (line, column) = File_content.Position.line_column_one_based pos in
   Asserter.Hh_json_json_asserter.assert_equals
     (expected |> Hh_json.json_of_string)
     actual
     (Printf.sprintf "ServerIdentifyFunction at line %d, column %d" line column);
   ()
 
-let go_hover expected ~ctx ~entry ~line ~column =
+let go_hover expected ~ctx ~entry pos =
   let hovers_to_string h =
     List.map h ~f:HoverService.string_of_result |> String.concat ~sep:"; "
   in
-  let actual = Ide_hover.go_quarantined ~ctx ~entry ~line ~column in
+  let actual = Ide_hover.go_quarantined ~ctx ~entry pos in
+  let (line, column) = File_content.Position.line_column_one_based pos in
   Asserter.String_asserter.assert_equals
     (expected |> hovers_to_string)
     (actual |> hovers_to_string)
@@ -159,8 +161,8 @@ let test () =
   in
 
   List.iter identify_tests ~f:(fun ((line, column), go) ->
+      let pos = File_content.Position.from_one_based line column in
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          go ~ctx ~entry ~line ~column);
+          go ~ctx ~entry pos);
       ());
-  (* Ide_hover.go_quarantined ~ctx ~entry ~line ~column *)
   ()

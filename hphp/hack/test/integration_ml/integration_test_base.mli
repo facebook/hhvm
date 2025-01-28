@@ -66,11 +66,6 @@ end
 val doc :
   string (* file-suffix *) -> string (* content *) -> ClientIdeMessage.document
 
-val loc :
-  int (* 1-based line *) ->
-  int (* 1-based column *) ->
-  ClientIdeMessage.location
-
 (* Helpers for asserting things *)
 
 (** This helper is designed to make tests that work with TestDisk roots

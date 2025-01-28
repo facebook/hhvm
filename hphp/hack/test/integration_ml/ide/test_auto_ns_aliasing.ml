@@ -147,7 +147,7 @@ let test () =
         ClientIdeMessage.(
           Completion
             ( Test.doc path clean_contents,
-              Test.loc line column,
+              File_content.Position.from_one_based line column,
               { is_manually_invoked = true } ))
     in
     Test.assert_ide_completions response expected;

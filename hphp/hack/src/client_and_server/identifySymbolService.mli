@@ -23,7 +23,6 @@ val all_symbols_ctx :
 val go_quarantined :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
-  line:int ->
-  column:int ->
+  File_content.Position.t ->
   use_declaration_spans:bool ->
   Relative_path.t SymbolOccurrence.t list

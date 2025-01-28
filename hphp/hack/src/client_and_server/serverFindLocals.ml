@@ -151,17 +151,15 @@ module LocalMap = struct
   type t = {
     scopechains: ScopeChains.t;
     locals: LocalPositions.t;
-    target_line: int;
-    target_char: int;
+    target_pos: File_content.Position.t;
     target_ident: Ident.t option;
   }
 
-  let make target_line target_char =
+  let make target_pos =
     {
       scopechains = [ScopeChain.empty];
       locals = LocalPositions.empty;
-      target_line;
-      target_char;
+      target_pos;
       target_ident = None;
     }
 
@@ -192,12 +190,15 @@ module LocalMap = struct
     { localmap with scopechains }
 
   let overlaps pos localmap =
+    let (target_line, target_char) =
+      File_content.Position.line_column_one_based localmap.target_pos
+    in
     let (pos_line, pos_start, pos_end) = Pos.info_pos pos in
     (* Pos.t uses zero-indexed offsets, whereas the IDE target char is one-indexed. *)
-    let target_end_offset = localmap.target_char - 1 in
+    let target_end_offset = target_char - 1 in
 
-    pos_line = localmap.target_line
-    && pos_start <= localmap.target_char
+    pos_line = target_line
+    && pos_start <= target_char
     && target_end_offset <= pos_end
 
   let get_target_ident ident pos localmap =
@@ -496,8 +497,8 @@ class local_finding_visitor =
   end
   [@alert "-deprecated"]
 
-let go_from_ast ~ast ~line ~char =
-  let empty = LocalMap.make line char in
+let go_from_ast ~ast (pos : File_content.Position.t) =
+  let empty = LocalMap.make pos in
   let visitor = new local_finding_visitor in
   let localmap = visitor#on_program empty ast in
   LocalMap.results localmap
@@ -507,17 +508,18 @@ let go_from_ast ~ast ~line ~char =
   * the contents of a file, and a position within it, identifying a local, are given.
   * The result is a list of the positions of other uses of that local in the file.
   *)
-let go ~ctx ~entry ~line ~char =
+let go ~ctx ~entry pos =
   try
     let ast =
       Ast_provider.compute_ast ~popt:(Provider_context.get_popt ctx) ~entry
     in
-    let results_list = go_from_ast ~ast ~line ~char in
+    let results_list = go_from_ast ~ast pos in
     List.map results_list ~f:(fun pos ->
         Pos.set_file entry.Provider_context.path pos)
   with
   | Failure error ->
     let contents = Provider_context.read_file_contents_exn entry in
+    let (line, char) = File_content.Position.line_column_one_based pos in
     failwith
       (Printf.sprintf "Find locals service failed with error %s:\n" error
       ^ Printf.sprintf "line %d char %d\ncontent: \n%s\n" line char contents)

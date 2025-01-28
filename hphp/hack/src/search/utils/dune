@@ -8,8 +8,12 @@
 
 (library
  (name search_types)
- (modules searchTypes)
+ (modules
+  searchTypes)
  (wrapped false)
- (libraries file_info relative_path)
+ (libraries
+  file_content
+  file_info
+  relative_path)
  (preprocess
   (pps ppx_deriving.std)))

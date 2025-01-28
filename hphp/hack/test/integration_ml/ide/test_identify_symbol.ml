@@ -25,7 +25,9 @@ function test() {
 
 let identify_foo_request =
   ServerCommandTypes.IDENTIFY_FUNCTION
-    ("", ServerCommandTypes.FileContent bar_contents, 4, 4)
+    ( "",
+      ServerCommandTypes.FileContent bar_contents,
+      File_content.Position.from_one_based 4 4 )
 
 let check_identify_foo_response = function
   | [(_, def)] ->
@@ -41,7 +43,8 @@ let test () =
     ClientIdeDaemon.Test.handle
       env
       (ClientIdeMessage.Definition
-         (Test.doc "bar.php" bar_contents, Test.loc 4 4))
+         ( Test.doc "bar.php" bar_contents,
+           File_content.Position.from_one_based 4 4 ))
   in
   check_identify_foo_response response;
 

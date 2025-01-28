@@ -85,7 +85,7 @@ let test () =
       ClientIdeMessage.(
         Completion
           ( Test.doc "test.php" autocomplete_contents,
-            Test.loc 4 9,
+            File_content.Position.from_one_based 4 9,
             { is_manually_invoked = true } ))
   in
   Test.assert_ide_completions response [];

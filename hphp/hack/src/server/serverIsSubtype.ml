@@ -9,7 +9,7 @@
 open Hh_prelude
 open Typing_defs
 
-type pos = Relative_path.t * int * int
+type pos = Relative_path.t * File_content.Position.t
 
 type type_spec =
   | TSpos of pos
@@ -34,9 +34,9 @@ let expand_path file =
 
 let get_type_at_pos ctx tast_map pos :
     (Typing_env_types.env * locl_ty, string) result =
-  let (path, line, col) = pos in
+  let (path, pos) = pos in
   let tast = Relative_path.Map.find tast_map path in
-  match ServerInferType.type_at_pos ctx tast line col with
+  match ServerInferType.type_at_pos ctx tast pos with
   | Some info ->
     Ok
       ( Tast_env.tast_env_as_typing_env (ServerInferType.get_env info),
@@ -44,10 +44,9 @@ let get_type_at_pos ctx tast_map pos :
   | _ ->
     Error
       (Printf.sprintf
-         "Failed to get type for pos %s:%d:%d"
+         "Failed to get type for pos %s:%s"
          (Relative_path.to_absolute path)
-         line
-         col)
+         (File_content.Position.to_string_one_based pos))
 
 (* Returns list of error strings *)
 let rec validate_free_type env locl_ty =
@@ -139,7 +138,12 @@ let get_type_spec_from_json json : (type_spec, string) result =
           (match expand_path file with
           | Ok file ->
             let path = Relative_path.create_detect_prefix file in
-            Ok (TSpos (path, int_of_string line, int_of_string col))
+            let pos =
+              File_content.Position.from_one_based
+                (int_of_string line)
+                (int_of_string col)
+            in
+            Ok (TSpos (path, pos))
           | Error e -> Error e)
         | _ ->
           Error
@@ -267,11 +271,11 @@ let check workers str env =
     let (query_with_path_alist, error_alist) =
       List.partition_map spec_pair_result_alist ~f:(fun (i, x) ->
           match x with
-          | Ok (TSpos ((path, _, _) as pos), TSjson json) ->
+          | Ok (TSpos ((path, _) as pos), TSjson json) ->
             Either.first (i, Some path, PosJson (pos, json))
           | Ok (TSjson json_l, TSjson json_r) ->
             Either.first (i, None, JsonJson (json_l, json_r))
-          | Ok (TSjson json, TSpos ((path, _, _) as pos)) ->
+          | Ok (TSjson json, TSpos ((path, _) as pos)) ->
             Either.first (i, Some path, JsonPos (json, pos))
           | Ok (TSpos _, TSpos _) ->
             Either.second

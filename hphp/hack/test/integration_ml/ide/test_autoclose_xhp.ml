@@ -30,7 +30,8 @@ let test () =
     ClientIdeDaemon.Test.handle
       env
       (ClientIdeMessage.AutoClose
-         (Test.doc "foo.php" foo_contents, Test.loc 4 12))
+         ( Test.doc "foo.php" foo_contents,
+           File_content.Position.from_one_based 4 12 ))
   in
   check_identify_foo_response response;
 

@@ -535,29 +535,16 @@ let make_hover_info_with_fallback under_dynamic_result results =
 let go_quarantined
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
-    ~(line : int)
-    ~(column : int) : HoverService.result =
-  let identities =
-    ServerIdentifyFunction.go_quarantined ~ctx ~entry ~line ~column
-  in
+    (pos : File_content.Position.t) : HoverService.result =
+  let identities = ServerIdentifyFunction.go_quarantined ~ctx ~entry pos in
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
   let info_opt =
-    ServerInferType.human_friendly_type_at_pos
-      ~under_dynamic:false
-      ctx
-      tast
-      line
-      column
+    ServerInferType.human_friendly_type_at_pos ~under_dynamic:false ctx tast pos
   in
   let info_dynamic_opt =
-    ServerInferType.human_friendly_type_at_pos
-      ~under_dynamic:true
-      ctx
-      tast
-      line
-      column
+    ServerInferType.human_friendly_type_at_pos ~under_dynamic:true ctx tast pos
   in
   let under_dynamic_result =
     match info_dynamic_opt with

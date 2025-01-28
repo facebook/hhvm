@@ -123,7 +123,7 @@ let handle :
         None
     in
     (env, (errors, tasts))
-  | ServerCommandTypes.INFER_TYPE (file_input, line, column) ->
+  | ServerCommandTypes.INFER_TYPE (file_input, pos) ->
     let path =
       match file_input with
       | ServerCommandTypes.FileName fn -> Relative_path.create_detect_prefix fn
@@ -133,7 +133,7 @@ let handle :
     let (ctx, entry) = single_ctx env path file_input in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          ServerInferType.go_ctx ~ctx ~entry ~line ~column)
+          ServerInferType.go_ctx ~ctx ~entry pos)
     in
     (env, result)
   | ServerCommandTypes.INFER_TYPE_BATCH positions ->
@@ -206,17 +206,13 @@ let handle :
       | _ -> []
     in
     (env, results)
-  | ServerCommandTypes.IDENTIFY_FUNCTION (filename, file_input, line, column) ->
+  | ServerCommandTypes.IDENTIFY_FUNCTION (filename, file_input, pos) ->
     let (ctx, entry) =
       single_ctx env (Relative_path.create_detect_prefix filename) file_input
     in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          ServerIdentifyFunction.go_quarantined_absolute
-            ~ctx
-            ~entry
-            ~line
-            ~column)
+          ServerIdentifyFunction.go_quarantined_absolute ~ctx ~entry pos)
     in
     (env, result)
   | ServerCommandTypes.METHOD_JUMP (class_, filter, find_children) ->

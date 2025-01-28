@@ -894,7 +894,7 @@ end
 module SignatureHelp = struct
   type params = TextDocumentPositionParams.t
 
-  and result = t option
+  type result = t option
 
   and t = {
     signatures: signature_information list;

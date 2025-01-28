@@ -807,19 +807,18 @@ let handle_request
   (***********************************************************)
   (************************* NORMAL HANDLING AFTER INIT ******)
   (***********************************************************)
-  | (Initialized istate, Hover (document, { line; column })) ->
+  | (Initialized istate, Hover (document, pos)) ->
     let (istate, ctx, entry, _) = update_file_ctx istate document in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          Ide_hover.go_quarantined ~ctx ~entry ~line ~column)
+          Ide_hover.go_quarantined ~ctx ~entry pos)
     in
     (Initialized istate, Ok result)
-  | ( Initialized istate,
-      Go_to_implementation (document, { line; column }, document_list) ) ->
+  | (Initialized istate, Go_to_implementation (document, pos, document_list)) ->
     let (istate, ctx, entry, _) = update_file_ctx istate document in
     let (istate, result) =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          match ServerFindRefs.go_from_file_ctx ~ctx ~entry ~line ~column with
+          match ServerFindRefs.go_from_file_ctx ~ctx ~entry pos with
           | Some (_name, action)
             when not @@ ServerGoToImpl.is_searchable ~action ->
             (istate, ClientIdeMessage.Invalid_symbol_impl)
@@ -874,8 +873,7 @@ let handle_request
     in
     (Initialized istate, Ok result)
     (* textDocument/rename *)
-  | ( Initialized istate,
-      Rename (document, { line; column }, new_name, document_list) ) ->
+  | (Initialized istate, Rename (document, pos, new_name, document_list)) ->
     let (istate, ctx, entry, _errors) = update_file_ctx istate document in
     let (istate, result) =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
@@ -883,8 +881,7 @@ let handle_request
             ServerFindRefs.go_from_file_ctx_with_symbol_definition
               ~ctx
               ~entry
-              ~line
-              ~column
+              pos
           with
           | None -> (istate, ClientIdeMessage.Not_renameable_position)
           | Some (_definition, action) when ServerFindRefs.is_local action ->
@@ -945,14 +942,13 @@ let handle_request
     in
     (Initialized istate, Ok result)
     (* textDocument/references - localvar only *)
-  | ( Initialized istate,
-      Find_references (document, { line; column }, document_list) ) ->
+  | (Initialized istate, Find_references (document, pos, document_list)) ->
     let open Result.Monad_infix in
     (* Update the state of the world with the document as it exists in the IDE *)
     let (istate, ctx, entry, _) = update_file_ctx istate document in
     let (istate, result) =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          match ServerFindRefs.go_from_file_ctx ~ctx ~entry ~line ~column with
+          match ServerFindRefs.go_from_file_ctx ~ctx ~entry pos with
           | Some (name, action) when ServerFindRefs.is_local action ->
             let result =
               ServerFindRefs.go_for_localvar ctx action
@@ -1091,9 +1087,7 @@ let handle_request
     (Initialized istate, Ok result)
   (* Autocomplete *)
   | ( Initialized istate,
-      Completion
-        (document, { line; column }, { ClientIdeMessage.is_manually_invoked })
-    ) ->
+      Completion (document, pos, { ClientIdeMessage.is_manually_invoked }) ) ->
     (* Update the state of the world with the document as it exists in the IDE *)
     let (istate, ctx, entry, _) = update_file_ctx istate document in
     let sienv_ref = ref istate.sienv in
@@ -1103,8 +1097,7 @@ let handle_request
         ~entry
         ~sienv_ref
         ~is_manually_invoked
-        ~line
-        ~column
+        pos
         ~naming_table:istate.naming_table
     in
     let istate = { istate with sienv = !sienv_ref } in
@@ -1119,8 +1112,7 @@ let handle_request
     (Initialized istate, Ok Completion_resolve.{ docblock = result; signature })
   (* Autocomplete docblock resolve *)
   | ( Initialized istate,
-      Completion_resolve_location (file_path, fullname, { line; column }, kind)
-    ) ->
+      Completion_resolve_location (file_path, fullname, pos, kind) ) ->
     (* We're given a location but it often won't be an opened file.
        We will only serve autocomplete docblocks as of truth on disk.
        Hence, we construct temporary entry to reflect the file which
@@ -1133,38 +1125,35 @@ let handle_request
     let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          ServerDocblockAt.go_docblock_ctx ~ctx ~entry ~line ~column ~kind)
+          ServerDocblockAt.go_docblock_ctx ~ctx ~entry pos ~kind)
     in
     let (Full_name s) = fullname in
     let signature = ServerAutoComplete.get_signature ctx s in
     (Initialized istate, Ok Completion_resolve.{ docblock = result; signature })
   (* Document highlighting *)
-  | (Initialized istate, Document_highlight (document, { line; column })) ->
+  | (Initialized istate, Document_highlight (document, pos)) ->
     let (istate, ctx, entry, _) = update_file_ctx istate document in
     let results =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          Ide_highlight_refs.go_quarantined ~ctx ~entry ~line ~column)
+          Ide_highlight_refs.go_quarantined ~ctx ~entry pos)
     in
     (Initialized istate, Ok results)
   (* Signature help *)
-  | (Initialized istate, Signature_help (document, { line; column })) ->
+  | (Initialized istate, Signature_help (document, pos)) ->
     let (istate, ctx, entry, _) = update_file_ctx istate document in
     let results =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          ServerSignatureHelp.go_quarantined ~ctx ~entry ~line ~column)
+          ServerSignatureHelp.go_quarantined ~ctx ~entry pos)
     in
     (Initialized istate, Ok results)
-  | (Initialized istate, Top_level_def_name_at_pos (document, { line; column }))
-    ->
+  | (Initialized istate, Top_level_def_name_at_pos (document, pos)) ->
     let (istate, ctx, entry, _) = update_file_ctx istate document in
-    let res =
-      Ide_top_level_def_name_at_pos.go_quarantined ctx entry ~line ~column
-    in
+    let res = Ide_top_level_def_name_at_pos.go_quarantined ctx entry pos in
     (Initialized istate, Ok res)
   (* AutoClose *)
-  | (Initialized istate, AutoClose (document, { line; column })) ->
+  | (Initialized istate, AutoClose (document, pos)) ->
     let (istate, ctx, entry, _) = update_file_ctx istate document in
-    let close_tag = AutocloseTags.go_xhp_close_tag ~ctx ~entry ~line ~column in
+    let close_tag = AutocloseTags.go_xhp_close_tag ~ctx ~entry pos in
     (Initialized istate, Ok close_tag)
   (* Code actions (refactorings, quickfixes) *)
   | (Initialized istate, Code_action (document, range)) ->
@@ -1233,19 +1222,19 @@ let handle_request
     in
     (Initialized istate, Ok result)
   (* Go to definition *)
-  | (Initialized istate, Definition (document, { line; column })) ->
+  | (Initialized istate, Definition (document, pos)) ->
     let (istate, ctx, entry, _) = update_file_ctx istate document in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          ServerGoToDefinition.go_quarantined ~ctx ~entry ~line ~column)
+          ServerGoToDefinition.go_quarantined ~ctx ~entry pos)
     in
     (Initialized istate, Ok result)
   (* Type Definition *)
-  | (Initialized istate, Type_definition (document, { line; column })) ->
+  | (Initialized istate, Type_definition (document, pos)) ->
     let (istate, ctx, entry, _) = update_file_ctx istate document in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          ServerTypeDefinition.go_quarantined ~ctx ~entry ~line ~column)
+          ServerTypeDefinition.go_quarantined ~ctx ~entry pos)
     in
     (Initialized istate, Ok result)
   (* Workspace Symbol *)

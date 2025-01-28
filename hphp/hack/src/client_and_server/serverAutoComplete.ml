@@ -132,14 +132,12 @@ let go_ctx
     ~(sienv_ref : SearchUtils.si_env ref)
     ~(naming_table : Naming_table.t)
     ~(is_manually_invoked : bool)
-    ~(line : int)
-    ~(column : int) : AutocompleteTypes.ide_result =
+    pos : AutocompleteTypes.ide_result =
   (* Be sure to fix tcopt on all entry points of this file *)
   let ctx = Provider_context.with_tcopt_for_autocomplete ctx in
   (* We have to edit the file content to add the text AUTO332.
      TODO: Switch to FFP Autocomplete to avoid doing this file edit *)
   let file_content = Provider_context.read_file_contents_exn entry in
-  let pos = File_content.Position.from_one_based line column in
   let edits =
     [
       File_content.

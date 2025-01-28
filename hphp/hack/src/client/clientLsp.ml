@@ -1015,14 +1015,13 @@ let lsp_position_to_ide ({ Lsp.line; character } : Lsp.position) :
   File_content.Position.from_zero_based line character
 
 let lsp_file_position_to_hack (params : Lsp.TextDocumentPositionParams.t) :
-    string * int * int =
+    string * File_content.Position.t =
   let open Lsp.TextDocumentPositionParams in
   let pos = lsp_position_to_ide params.position in
   let filename =
     Lsp_helpers.lsp_textDocumentIdentifier_to_filename params.textDocument
   in
-  let (line, column) = File_content.Position.line_column_one_based pos in
-  (filename, line, column)
+  (filename, pos)
 
 let rename_params_to_document_position (params : Lsp.Rename.params) :
     Lsp.TextDocumentPositionParams.t =
@@ -1290,15 +1289,14 @@ Raises an LSP [InvalidRequest] exception if the file isn't currently open. *)
 let get_document_location
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Lsp.TextDocumentPositionParams.t) :
-    ClientIdeMessage.document * ClientIdeMessage.location =
-  let (file_path, line, column) = lsp_file_position_to_hack params in
+    ClientIdeMessage.document * File_content.Position.t =
+  let (file_path, pos) = lsp_file_position_to_hack params in
   let uri =
     params.TextDocumentPositionParams.textDocument.TextDocumentIdentifier.uri
   in
   let file_path = Path.make file_path in
   let file_contents = get_document_contents editor_open_files uri in
-  ( { ClientIdeMessage.file_path; file_contents },
-    { ClientIdeMessage.line; column } )
+  ({ ClientIdeMessage.file_path; file_contents }, pos)
 
 (** Parses output of "hh --ide-find-references" and "hh --ide-go-to-impl".
 If the output is malformed, raises an exception. *)
@@ -2510,11 +2508,12 @@ let do_resolve
           let ranking_detail = Jget.string_opt data "ranking_detail" in
           let ranking_source = Jget.int_opt data "ranking_source" in
           if line = 0 && column = 0 then failwith "NoFileLineColumnData";
+          let pos = File_content.Position.from_one_based line column in
           let request =
             ClientIdeMessage.Completion_resolve_location
               ( file_path,
                 ClientIdeMessage.Full_name fullname,
-                { ClientIdeMessage.line; column },
+                pos,
                 resolve_ranking_source kind ranking_source )
           in
           let%lwt raw_docblock =

@@ -416,8 +416,8 @@ let go
       (Types.Member (class_name, Types.Method old_name), new_name)
     | FunctionRename { old_name; new_name; _ } ->
       (Types.Function old_name, new_name)
-    | LocalVarRename { filename; file_content; line; char; new_name } ->
-      (Types.LocalVar { filename; file_content; line; char }, new_name)
+    | LocalVarRename { filename; file_content; pos; new_name } ->
+      (Types.LocalVar { filename; file_content; pos }, new_name)
   in
   let include_defs = true in
   ServerFindRefs.go

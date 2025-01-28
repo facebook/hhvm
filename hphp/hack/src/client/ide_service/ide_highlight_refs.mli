@@ -11,6 +11,5 @@
 val go_quarantined :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
-  line:int ->
-  column:int ->
+  File_content.Position.t ->
   Ide_api_types.range list

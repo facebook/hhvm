@@ -55,14 +55,14 @@ let all_tags (tree : FFP.t) : AutocloseTag.result list =
   aux None [] tree
 
 let go_xhp_tags
-    ~(ctx : Provider_context.t)
-    ~(entry : Provider_context.entry)
-    ~(line : int)
-    ~(column : int) : AutocloseTag.result option =
+    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) pos :
+    AutocloseTag.result option =
   let open Full_fidelity_positioned_syntax in
   let source_text = Ast_provider.compute_source_text ~entry in
   let target_offset =
-    Full_fidelity_source_text.position_to_offset source_text (line, column)
+    Full_fidelity_source_text.position_to_offset
+      source_text
+      (File_content.Position.line_column_one_based pos)
   in
   let cst = Ast_provider.compute_cst ~ctx ~entry in
   let tree = Provider_context.PositionedSyntaxTree.root cst in
@@ -88,11 +88,9 @@ let go_xhp_tags
     None
 
 let go_xhp_close_tag
-    ~(ctx : Provider_context.t)
-    ~(entry : Provider_context.entry)
-    ~(line : int)
-    ~(column : int) : string option =
-  let tags = go_xhp_tags ~ctx ~entry ~line ~column in
+    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) pos :
+    string option =
+  let tags = go_xhp_tags ~ctx ~entry pos in
   match tags with
   | Some
       AutocloseTag.

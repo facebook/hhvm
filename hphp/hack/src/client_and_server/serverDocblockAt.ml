@@ -111,18 +111,15 @@ let clean_comments (s : string) : string =
 let go_comments_from_source_text
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
-    ~(line : int)
-    ~(column : int)
+    pos
     ~(kind : SymbolDefinition.kind) : string option =
   let _ = ctx in
   let filename = Relative_path.to_absolute entry.Provider_context.path in
   let lp =
-    {
-      Lexing.pos_fname = filename;
-      pos_lnum = line;
-      pos_cnum = column;
-      pos_bol = 0;
-    }
+    let (pos_lnum, pos_cnum) =
+      File_content.Position.line_column_one_based pos
+    in
+    { Lexing.pos_fname = filename; pos_lnum; pos_cnum; pos_bol = 0 }
   in
   let pos = Pos.make_from_lexing_pos filename lp lp in
   let ffps_opt =
@@ -168,7 +165,7 @@ let go_locate_symbol
   (* Look up this class name *)
   match SymbolIndexCore.get_position_for_symbol ctx symbol kind with
   | None -> None
-  | Some (path, line, column) ->
+  | Some (path, pos) ->
     let filename = Relative_path.to_absolute path in
     (* Determine base class properly *)
     let base_class_name =
@@ -187,8 +184,7 @@ let go_locate_symbol
     Some
       {
         DocblockService.dbs_filename = filename;
-        dbs_line = line;
-        dbs_column = column;
+        dbs_pos = pos;
         dbs_base_class = base_class_name;
       }
 
@@ -217,17 +213,14 @@ let symboldefinition_kind_from_si_kind (kind : FileInfo.si_kind) :
 let rec go_docblock_ctx
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
-    ~(line : int)
-    ~(column : int)
+    pos
     ~(kind : FileInfo.si_kind) : DocblockService.result =
   let def_kind = symboldefinition_kind_from_si_kind kind in
-  match
-    go_comments_from_source_text ~ctx ~entry ~line ~column ~kind:def_kind
-  with
+  match go_comments_from_source_text ~ctx ~entry pos ~kind:def_kind with
   | None ->
     (* Special case: Classes with an assumed default constructor *)
     if FileInfo.equal_si_kind kind FileInfo.SI_Constructor then
-      go_docblock_ctx ~ctx ~entry ~line ~column ~kind:FileInfo.SI_Class
+      go_docblock_ctx ~ctx ~entry pos ~kind:FileInfo.SI_Class
     else
       []
   | Some "" -> []
@@ -261,9 +254,4 @@ let go_docblock_for_symbol
             ~ctx
             ~path:(Relative_path.create_detect_prefix location.dbs_filename)
         in
-        go_docblock_ctx
-          ~ctx
-          ~entry
-          ~line:location.dbs_line
-          ~column:location.dbs_column
-          ~kind)
+        go_docblock_ctx ~ctx ~entry location.dbs_pos ~kind)

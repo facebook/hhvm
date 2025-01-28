@@ -47,10 +47,10 @@ val sub : t -> int -> int -> string
 (** get a substring corresponding to a position. [length] defaults to the length of the position. *)
 val sub_of_pos : ?length:int -> t -> Pos.t -> string
 
-(** convert an absolute offset into a (line number, column) pair *)
+(** convert an absolute offset into a one-based (line number, column) pair *)
 val offset_to_position : t -> int -> int * int
 
-(** convert a (line number, column) pair into an absolute offset *)
+(** convert a (line number, column) pair (1-based) into an absolute offset *)
 val position_to_offset : t -> int * int -> int
 
 (** construct a relative position associated with the source_text.t virtual file *)

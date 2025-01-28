@@ -104,11 +104,11 @@ let line_text (source_text : t) (line_number : int) : string =
   with
   | _ -> ""
 
-(* Take a zero-based offset, produce a one-based (line, char) pair. *)
+(** Take a zero-based offset, produce a one-based (line, char) pair. *)
 let offset_to_position source_text offset =
   OffsetMap.offset_to_position source_text.offset_map offset
 
-(* Take a one-based (line, char) pair, produce a zero-based offset *)
+(** Take a one-based (line, char) pair, produce a zero-based offset *)
 let position_to_offset source_text position =
   OffsetMap.position_to_offset source_text.offset_map position
 

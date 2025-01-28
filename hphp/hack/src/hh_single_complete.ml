@@ -592,13 +592,7 @@ let handle_xhp_close ctx _ _ filename =
       in
       let offset = String_utils.substring_index "AUTOCLOSE332" contents in
       let position = File_content.offset_to_position contents offset in
-      let (line, column) =
-        File_content.Position.line_column_one_based position
-      in
-
-      let close_tag =
-        AutocloseTags.go_xhp_close_tag ~ctx ~entry ~line ~column
-      in
+      let close_tag = AutocloseTags.go_xhp_close_tag ~ctx ~entry position in
       match close_tag with
       | Some close_tag -> Printf.printf "Close Tag: %s\n" close_tag
       | None -> Printf.printf "Close Tag: None")

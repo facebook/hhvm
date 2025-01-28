@@ -16,6 +16,5 @@ it may return both the definition for the class being constructed, and the
 val go_quarantined :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
-  line:int ->
-  column:int ->
+  File_content.Position.t ->
   ServerCommandTypes.Go_to_definition.result

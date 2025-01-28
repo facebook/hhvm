@@ -243,8 +243,8 @@ let search_single_file_for_class ctx class_name filename include_all_ci_types =
   in
   search_single_file ctx target filename
 
-let search_localvar ~ctx ~entry ~line ~char =
-  let results = ServerFindLocals.go ~ctx ~entry ~line ~char in
+let search_localvar ~ctx ~entry pos =
+  let results = ServerFindLocals.go ~ctx ~entry pos in
   match results with
   | first_pos :: _ ->
     let content = Provider_context.read_file_contents_exn entry in
@@ -294,14 +294,14 @@ let go ctx action include_defs ~stream_file ~hints genv env =
       env
   | GConst cst_name ->
     search_gconst ctx cst_name include_defs ~stream_file ~hints genv env
-  | LocalVar { filename; file_content; line; char } ->
+  | LocalVar { filename; file_content; pos } ->
     let (ctx, entry) =
       Provider_context.add_or_overwrite_entry_contents
         ~ctx
         ~path:filename
         ~contents:file_content
     in
-    (env, Done (search_localvar ~ctx ~entry ~line ~char))
+    (env, Done (search_localvar ~ctx ~entry pos))
 
 let go_for_single_file
     ~(ctx : Provider_context.t)
@@ -322,30 +322,30 @@ let go_for_single_file
     let include_all_ci_types = false in
     search_single_file_for_class ctx class_name filename include_all_ci_types
   | GConst cst_name -> search_single_file_for_gconst ctx cst_name filename
-  | LocalVar { filename; file_content; line; char } ->
+  | LocalVar { filename; file_content; pos } ->
     let (ctx, entry) =
       Provider_context.add_or_overwrite_entry_contents
         ~ctx
         ~path:filename
         ~contents:file_content
     in
-    search_localvar ~ctx ~entry ~line ~char
+    search_localvar ~ctx ~entry pos
 
 let go_for_localvar ctx action =
   match action with
-  | LocalVar { filename; file_content; line; char } ->
+  | LocalVar { filename; file_content; pos } ->
     let (ctx, entry) =
       Provider_context.add_or_overwrite_entry_contents
         ~ctx
         ~path:filename
         ~contents:file_content
     in
-    Ok (search_localvar ~ctx ~entry ~line ~char)
+    Ok (search_localvar ~ctx ~entry pos)
   | _ -> Error action
 
 let to_absolute res = List.map res ~f:(fun (r, pos) -> (r, Pos.to_absolute pos))
 
-let get_action symbol (filename, file_content, line, char) =
+let get_action symbol (filename, file_content, pos) =
   let module SO = SymbolOccurrence in
   let name = symbol.SymbolOccurrence.name in
   match symbol.SymbolOccurrence.type_ with
@@ -361,7 +361,7 @@ let get_action symbol (filename, file_content, line, char) =
   | SO.Typeconst (class_name, tconst_name) ->
     Some (Member (class_name, Typeconst tconst_name))
   | SO.GConst -> Some (GConst name)
-  | SO.LocalVar -> Some (LocalVar { filename; file_content; line; char })
+  | SO.LocalVar -> Some (LocalVar { filename; file_content; pos })
   | SO.TypeVar -> None
   | SO.Attribute _ -> Some (Class name)
   | SO.Keyword _
@@ -379,14 +379,11 @@ let get_action symbol (filename, file_content, line, char) =
   | SO.EnumClassLabel _ -> None
 
 let go_from_file_ctx_with_symbol_definition
-    ~(ctx : Provider_context.t)
-    ~(entry : Provider_context.entry)
-    ~(line : int)
-    ~(column : int) :
+    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) pos :
     (Relative_path.t SymbolDefinition.t * ServerCommandTypes.Find_refs.action)
     option =
   (* Find the symbol at given position *)
-  ServerIdentifyFunction.go_quarantined ~ctx ~entry ~line ~column
+  ServerIdentifyFunction.go_quarantined ~ctx ~entry pos
   |> (* If there are few, arbitrarily pick the first *)
   List.hd
   >>= fun (occurrence, definition) ->
@@ -397,15 +394,12 @@ let go_from_file_ctx_with_symbol_definition
     occurrence
     ( entry.Provider_context.path,
       source_text.Full_fidelity_source_text.text,
-      line,
-      column )
+      pos )
   >>= fun action -> Some (definition, action)
 
 let go_from_file_ctx
-    ~(ctx : Provider_context.t)
-    ~(entry : Provider_context.entry)
-    ~(line : int)
-    ~(column : int) : (string * ServerCommandTypes.Find_refs.action) option =
-  go_from_file_ctx_with_symbol_definition ~ctx ~entry ~line ~column
+    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) pos :
+    (string * ServerCommandTypes.Find_refs.action) option =
+  go_from_file_ctx_with_symbol_definition ~ctx ~entry pos
   |> Option.map ~f:(fun (def, action) ->
          (def.SymbolDefinition.full_name, action))

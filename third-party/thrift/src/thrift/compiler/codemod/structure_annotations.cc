@@ -204,6 +204,13 @@ class structure_annotations {
           to_add.insert("@thrift.Serial");
           fm_.add_include("thrift/annotation/thrift.thrift");
         }
+      } else if (name == "thrift.uri") {
+        to_remove.emplace_back(name, data);
+        if (!node.find_structured_annotation_or_null(kUriUri)) {
+          to_add.insert(
+              fmt::format("@thrift.Uri{{value = \"{}\"}}", data.value));
+          fm_.add_include("thrift/annotation/thrift.thrift");
+        }
       }
 
       // cpp

@@ -167,6 +167,7 @@ class StructureAnnotations(unittest.TestCase):
                     void f() (thread = "eb", priority = "HIGH")
                     void j() (thread = "tm", priority = "ZUCK-LEVEL")
                 } (priority = "BEST_EFFORT")
+                struct MyStructWithUri {} (thrift.uri="my/path/here")
 
                 """
             ),
@@ -237,6 +238,8 @@ class StructureAnnotations(unittest.TestCase):
                     void f()
                     void j()
                 } (priority = "BEST_EFFORT")
+                @thrift.Uri{value = "my/path/here"}
+                struct MyStructWithUri {}
                 """
             ),
         )

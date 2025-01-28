@@ -818,7 +818,7 @@ using OptType = Optional<Type>;
  */
 Type typeFromTV(tv_rval tv, const Class* ctx);
 Type typeFromRAT(RepoAuthType ty, const Class* ctx);
-Type typeFromPropTC(const HPHP::TypeConstraint& tc,
+Type typeFromPropTC(const HPHP::TypeIntersectionConstraint& tc,
                     const Class* propCls,
                     const Class* ctx,
                     bool isSProp);

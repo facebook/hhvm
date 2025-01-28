@@ -113,7 +113,7 @@ Type knownTypeForProp(const Class::Prop& prop,
                       bool ignoreLateInit) {
   auto knownType = TCell;
   if (Cfg::Eval::CheckPropTypeHints >= 3) {
-    knownType = typeFromPropTC(prop.typeConstraints.main(), propCls, ctx, false);
+    knownType = typeFromPropTC(prop.typeConstraints, propCls, ctx, false);
     if (!(prop.attrs & AttrNoImplicitNullable)) knownType |= TInitNull;
   }
   knownType &= typeFromRAT(prop.repoAuthType, ctx);
@@ -2121,12 +2121,12 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
     auto const fast = [&]{
       if (Cfg::Eval::CheckPropTypeHints <= 0) return true;
       if (!propInfo->typeConstraints ||
-          !propInfo->typeConstraints->main().isCheckable()) {
+          !propInfo->typeConstraints->isCheckable()) {
         return true;
       }
       if (op != SetOpOp::ConcatEqual) return false;
       if (propInfo->knownType <= TStr) return true;
-      return propInfo->typeConstraints->main().alwaysPasses(KindOfString);
+      return propInfo->typeConstraints->alwaysPasses(KindOfString);
     }();
 
     if (!fast) {

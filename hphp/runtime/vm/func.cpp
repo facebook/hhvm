@@ -619,7 +619,7 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
       out << " Param: " << localVarName(i)->data();
       for (auto const& tc : param.typeConstraints.range()) {
         if (tc.hasConstraint()) {
-          out << " " << param.typeConstraints.main().displayName(cls(), true);
+          out << " " << tc.displayName(cls(), true);
         }
       }
       if (param.userType) {
@@ -634,11 +634,12 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
       out << std::endl;
     }
 
-    if (returnTypeConstraints().main().hasConstraint() ||
-        (returnUserType() && !returnUserType()->empty())) {
+    if (returnUserType() && !returnUserType()->empty()) {
       out << " Ret: ";
-      if (returnTypeConstraints().main().hasConstraint()) {
-        out << " " << returnTypeConstraints().main().displayName(cls(), true);
+      for (auto const& tc : returnTypeConstraints().range()) {
+        if (tc.hasConstraint()) {
+          out << " " << tc.displayName(cls(), true);
+        }
       }
       if (returnUserType() && !returnUserType()->empty()) {
         out << " (" << returnUserType()->data() << ")";

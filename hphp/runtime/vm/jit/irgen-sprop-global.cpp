@@ -68,7 +68,7 @@ ClsPropLookup ldClsPropAddrKnown(IRGS& env,
 
   auto knownType = TCell;
   if (Cfg::Eval::CheckPropTypeHints >= 3) {
-    knownType = typeFromPropTC(prop.typeConstraints.main(), cls, ctx, true);
+    knownType = typeFromPropTC(prop.typeConstraints, cls, ctx, true);
     if (!(prop.attrs & AttrNoImplicitNullable)) knownType |= TInitNull;
   }
   knownType &= typeFromRAT(prop.repoAuthType, ctx);

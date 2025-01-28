@@ -52,8 +52,10 @@ void pretty_print(const FuncEmitter* fe, std::ostream& out) {
   for (uint32_t i = 0; i < params.size(); ++i) {
     auto const& param = params[i];
     out << " Param: " << fe->localNameMap()[i]->data();
-    if (param.typeConstraints.main().hasConstraint()) {
-      out << " " << param.typeConstraints.main().displayName();
+    for (auto const& tc : param.typeConstraints.range()) {
+      if (tc.hasConstraint()) {
+        out << " " << tc.displayName();
+      }
     }
     if (param.userType) {
       out << " (" << param.userType->data() << ")";

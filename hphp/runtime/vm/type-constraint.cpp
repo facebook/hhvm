@@ -1694,8 +1694,8 @@ void TypeConstraint::verifyStaticProperty(tv_lval val,
 void TypeConstraint::verifyReturnNonNull(TypedValue* tv,
                                          const Class* ctx,
                                          const Func* func) const {
-  const auto DEBUG_ONLY tc = func->returnTypeConstraints().main();
-  assertx(!tc.isNullable());
+  const auto DEBUG_ONLY tcs = func->returnTypeConstraints();
+  assertx(!tcs.isNullable());
   if (UNLIKELY(tvIsNull(tv))) {
     verifyReturnFail(tv, ctx, func);
   } else if (debug) {
@@ -2100,9 +2100,9 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
 //////////////////////////////////////////////////////////////////////
 
 bool tcCouldBeReified(const Func* func, uint32_t paramId) {
-  auto const& tc = paramId == TypeConstraint::ReturnId
-    ? func->returnTypeConstraints().main()
-    : func->params()[paramId].typeConstraints.main();
+  auto const& tcs = paramId == TypeConstraint::ReturnId
+    ? func->returnTypeConstraints()
+    : func->params()[paramId].typeConstraints;
   auto const isReifiedGenericInClosure = [&] {
     if (!func->isClosureBody()) return false;
     auto const lNames = func->localNames();
@@ -2116,7 +2116,7 @@ bool tcCouldBeReified(const Func* func, uint32_t paramId) {
     }
     return false;
   };
-  return tc.isTypeVar() &&
+  return tcs.isTypeVar() &&
          (func->hasReifiedGenerics() ||
           (func->cls() && func->cls()->hasReifiedGenerics()) ||
           isReifiedGenericInClosure());

@@ -8070,20 +8070,21 @@ Index::ReturnType context_sensitive_return_type(IndexData& data,
   returnType.t = return_with_context(std::move(returnType.t), adjustedCtx);
 
   auto const checkParam = [&] (int i) {
-    auto const& constraint = finfo->func->params[i].typeConstraints.main();
-    if (constraint.hasConstraint() &&
-        !constraint.isTypeVar() &&
-        !constraint.isTypeConstant()) {
-      auto const ctx = Context {
-        finfo->func->unit,
-        finfo->func,
-        finfo->func->cls
-      };
-      return callCtx.args[i].strictlyMoreRefined(
-        lookup_constraint(IndexAdaptor { *data.m_index }, ctx, constraint).upper
-      );
-    }
-    return callCtx.args[i].strictSubtypeOf(TInitCell);
+    auto check = [&](const TypeConstraint& tc) {
+      if (tc.hasConstraint() && !tc.isTypeVar() && !tc.isTypeConstant()) {
+        return callCtx.args[i].strictlyMoreRefined(
+          lookup_constraint(
+            IndexAdaptor { *data.m_index },
+            Context {finfo->func->unit, finfo->func, finfo->func->cls},
+            tc
+          ).upper
+        );
+      }
+      return callCtx.args[i].strictSubtypeOf(TInitCell);
+    };
+
+    auto const& tcs = finfo->func->params[i].typeConstraints.range();
+    return std::all_of(tcs.begin(), tcs.end(), check);
   };
 
   // TODO(#3788877): more heuristics here would be useful.
@@ -8211,19 +8212,21 @@ Index::ReturnType context_sensitive_return_type(AnalysisIndex::IndexData& data,
   returnType.t = return_with_context(std::move(returnType.t), adjustedCtx);
 
   auto const checkParam = [&] (size_t i) {
-    auto const& constraint = func.params[i].typeConstraints.main();
-    if (constraint.hasConstraint() &&
-        !constraint.isTypeVar() &&
-        !constraint.isTypeConstant()) {
-      return callCtx.args[i].strictlyMoreRefined(
-        lookup_constraint(
-          AnalysisIndexAdaptor { data.index },
-          Context { func.unit, &func, func.cls },
-          constraint
-        ).upper
-      );
-    }
-    return callCtx.args[i].strictSubtypeOf(TInitCell);
+    auto check = [&](const TypeConstraint& tc) {
+      if (tc.hasConstraint() && !tc.isTypeVar() && !tc.isTypeConstant()) {
+        return callCtx.args[i].strictlyMoreRefined(
+          lookup_constraint(
+            AnalysisIndexAdaptor { data.index },
+            Context { func.unit, &func, func.cls },
+            tc
+          ).upper
+        );
+      }
+      return callCtx.args[i].strictSubtypeOf(TInitCell);
+    };
+
+    auto const& tcs = func.params[i].typeConstraints.range();
+    return std::all_of(tcs.begin(), tcs.end(), check);
   };
 
   // TODO(#3788877): more heuristics here would be useful.
@@ -8476,7 +8479,7 @@ PropMergeResult prop_tc_effects(const Index& index,
                                 const php::Prop& prop,
                                 const Type& val,
                                 bool checkUB) {
-  assertx(prop.typeConstraints.main().validForProp());
+  assertx(prop.typeConstraints.validForProp());
 
   using R = PropMergeResult;
 
@@ -8503,24 +8506,18 @@ PropMergeResult prop_tc_effects(const Index& index,
     return R{ std::move(adjusted), throws };
   };
 
-  // First check the main type-constraint.
-  auto result = check(prop.typeConstraints.main(), val);
-  // If we're not checking generics upper-bounds, or if we already
-  // know we'll fail, we're done.
-  if (!checkUB || result.throws == TriBool::Yes) {
-    return result;
+  R result(val, TriBool::No);
+  for (auto const& tc : prop.typeConstraints.range()) {
+    if (checkUB || !tc.isUpperBound()) {
+      // Otherwise check every eligible type constraint. We'll feed the
+      // narrowed type into each successive round. If we reach the point
+      // where we'll know we'll definitely fail, just stop.
+      auto r = check(tc, result.adjusted);
+      result.throws &= r.throws;
+      result.adjusted = std::move(r.adjusted);
+		  if (result.throws == TriBool::Yes) break;
+    }
   }
-
-  // Otherwise check every generic upper-bound. We'll feed the
-  // narrowed type into each successive round. If we reach the point
-  // where we'll know we'll definitely fail, just stop.
-  for (auto const& ub : prop.typeConstraints.ubs()) {
-    auto r = check(ub, result.adjusted);
-    result.throws &= r.throws;
-    result.adjusted = std::move(r.adjusted);
-    if (result.throws == TriBool::Yes) break;
-  }
-
   return result;
 }
 

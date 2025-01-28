@@ -3292,7 +3292,7 @@ void parse_default_value(Func::ParamInfo& param, const StringData* str) {
   } else if (str->size() == 5 && !tstrcmp("false", str->data())) {
     tv = make_tv<KindOfBoolean>(false);
   }
-  auto utype = param.typeConstraints.main().underlyingDataType();
+  auto utype = param.typeConstraints.underlyingDataType();
   if (tv.m_type == KindOfUninit &&
       (!utype || *utype == KindOfInt64 || *utype == KindOfDouble)) {
     int64_t ival;

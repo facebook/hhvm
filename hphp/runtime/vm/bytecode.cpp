@@ -3493,7 +3493,7 @@ OPTBLD_INLINE void iopIncDecS(IncDecOp op) {
   auto const checkable_sprop = [&]() -> const Class::SProp* {
     if (Cfg::Eval::CheckPropTypeHints <= 0) return nullptr;
     auto const& sprop = ss.cls->staticProperties()[ss.slot];
-    return sprop.typeConstraints.main().isCheckable() ? &sprop : nullptr;
+    return sprop.typeConstraints.isCheckable() ? &sprop : nullptr;
   }();
 
   auto const val = ss.val;

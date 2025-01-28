@@ -790,6 +790,33 @@ struct TypeIntersectionConstraint {
   }
 
   template<typename T>
+  bool alwaysPasses(T value) const {
+    return std::all_of(
+        range().begin(),
+        range().end(),
+        [&](const TypeConstraint& tc) {return tc.alwaysPasses(value);}
+    );
+  }
+
+  MaybeDataType underlyingDataType() const {
+    for (auto const& tc : range()) {
+      if (tc.underlyingDataType() != std::nullopt) {
+        return tc.underlyingDataType();
+      }
+    }
+    return std::nullopt;
+  }
+
+  MaybeDataType asSystemlibType() const {
+    for (auto const& tc : range()) {
+      if (tc.asSystemlibType() != std::nullopt) {
+        return tc.asSystemlibType();
+      }
+    }
+    return std::nullopt;
+  }
+
+  template<typename T>
   static std::vector<TypeConstraint> ubs(const T& tcs) {
     std::vector<TypeConstraint> ubs;
     if (tcs.size() > 1) {
@@ -912,11 +939,42 @@ struct TypeIntersectionConstraint {
     );
   }
 
-  template<typename T>
-  bool alwaysPasses(T value) const {
-   return std::all_of(range().begin(), range().end(),
-       [&](const TypeConstraint& tc) {return tc.alwaysPasses(value);}
-   );
+  void validForPropResolved(const Class* declCls,
+                            const StringData* propName) const {
+    for (auto const& tc : range()) {
+      tc.validForPropResolved(declCls, propName);
+    }
+  }
+
+  bool isTypeVar() const {
+    return std::any_of(
+      range().begin(),
+      range().end(),
+      [&](const TypeConstraint& tc) {
+        return tc.isTypeVar();
+      }
+    );
+  }
+
+  bool isNullable() const {
+    return std::all_of(
+        range().begin(),
+        range().end(),
+        [&](const TypeConstraint& tc) {
+          return tc.isNullable();
+        }
+    );
+  }
+
+  bool isCheckable() const {
+    // If any constraint is checkable, then the whole intersection is checkable
+    return std::any_of(
+      range().begin(),
+      range().end(),
+      [&](const TypeConstraint& tc) {
+        return tc.isCheckable();
+      }
+    );
   }
 
   private:

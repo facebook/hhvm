@@ -981,7 +981,7 @@ void Class::initSProps() const {
   // Perform scalar inits.
   for (Slot slot = 0, n = m_staticProperties.size(); slot < n; ++slot) {
     auto const& sProp = m_staticProperties[slot];
-    assertx(sProp.typeConstraints.main().validForProp());
+    assertx(sProp.typeConstraints.validForProp());
 
     if (m_sPropCache[slot].isPersistent()) continue;
 
@@ -990,7 +990,7 @@ void Class::initSProps() const {
     auto val = sProp.val;
 
     if (declaredOnThisClass(sProp)) {
-      sProp.typeConstraints.main().validForPropResolved(sProp.cls, sProp.name);
+      sProp.typeConstraints.validForPropResolved(sProp.cls, sProp.name);
       if (Cfg::Eval::CheckPropTypeHints > 0 &&
           !(sProp.attrs & (AttrInitialSatisfiesTC|AttrSystemInitialValue)) &&
           sProp.val.m_type != KindOfUninit) {
@@ -1450,18 +1450,14 @@ Class::PropValLookup Class::getSPropIgnoreLateInit(
 
       if (Cfg::Eval::CheckPropTypeHints > 2) {
         auto const typeOk = [&]{
-          auto skipCheck =
-            !decl.typeConstraints.main().isCheckable() ||
-            decl.typeConstraints.main().isSoft() ||
-            (sProp->m_type == KindOfNull &&
+          auto skipCheck = (sProp->m_type == KindOfNull &&
              !(decl.attrs & AttrNoImplicitNullable));
 
-          auto res = skipCheck
-            ? true
-            : decl.typeConstraints.main().assertCheck(sProp);
-          for (auto const& ub : decl.typeConstraints.ubs()) {
-            if (ub.isCheckable() && !ub.isSoft()) {
-              res = res && ub.assertCheck(sProp);
+          auto res = true;
+          if (skipCheck) return res;
+          for (auto const& tc : decl.typeConstraints.range()) {
+            if (tc.isCheckable() && !tc.isSoft()) {
+              res = res && tc.assertCheck(sProp);
             }
           }
           return res;

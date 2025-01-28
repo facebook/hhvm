@@ -128,7 +128,7 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData, bool pure) {
     // need to do any validation when we re-create the object.
     if (propsDontNeedCheck) {
       propsDontNeedCheck
-        = propInfo[slot].typeConstraints.main().alwaysPasses(objProp);
+        = propInfo[slot].typeConstraints.alwaysPasses(objProp);
     }
 
     auto val = APCHandle::Create(const_variant_ref{objProp},

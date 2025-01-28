@@ -991,12 +991,10 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
 namespace {
 
 template<class TGetThisType>
-Type typeFromTCImpl(const HPHP::TypeConstraint& tc,
+Type typeFromTCImpl(const HPHP::TypeIntersectionConstraint& tcs,
                     TGetThisType getThisType,
                     const Class* ctx,
                     bool useObjectForUnresolved = false) {
-  if (!tc.isCheckable() || tc.isSoft()) return TCell;
-
   using A = AnnotType;
   auto const atToType = [&](AnnotType at) {
     assertx(at != A::SubObject && at != A::Unresolved);
@@ -1101,27 +1099,34 @@ Type typeFromTCImpl(const HPHP::TypeConstraint& tc,
     return TCell;
   };
 
-  if (tc.isUnion()) {
+  auto type =  TCell;
+  for (auto const& tc : tcs.range()) {
+    if (!tc.isCheckable() || tc.isSoft()) continue;
     auto ty = TBottom;
-    for (auto& innerTc : eachTypeConstraintInUnion(tc)) {
-      ty |= baseForTC(innerTc);
-      if (innerTc.isNullable()) ty |= TInitNull;
+    auto nullable = false;
+    if (tc.isUnion()) {
+      for (auto& innerTc : eachTypeConstraintInUnion(tc)) {
+        ty |= baseForTC(innerTc);
+        if (innerTc.isNullable()) nullable = true;
+      }
+    } else {
+      ty |= baseForTC(tc);
+      if (tc.isNullable()) nullable = true;
     }
-    return ty;
+    // Intersect types from each constraint
+    if (nullable) ty |= TInitNull;
+    type &= ty;
   }
-
-  Type base = baseForTC(tc);
-  if (tc.isNullable()) base |= TInitNull;
-  return base;
+  return type;
 }
 
 } // namespace
 
-Type typeFromPropTC(const HPHP::TypeConstraint& tc,
+Type typeFromPropTC(const HPHP::TypeIntersectionConstraint& tcs,
                     const Class* propCls,
                     const Class* ctx,
                     bool isSProp) {
-  assertx(tc.validForProp());
+  assertx(tcs.validForProp());
 
   auto const getThisType = [&] {
     always_assert(propCls != nullptr);
@@ -1130,7 +1135,7 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
       : Type::SubObj(propCls);
   };
 
-  return typeFromTCImpl(tc, getThisType, ctx);
+  return typeFromTCImpl(tcs, getThisType, ctx);
 }
 
 
@@ -1141,19 +1146,15 @@ Type typeFromFuncParam(const Func* func, uint32_t paramId) {
     return func->cls() ? Type::SubObj(func->cls()) : TBottom;
   };
 
-  auto t = TInitCell;
-  for (auto const& tc : func->params()[paramId].typeConstraints.range()) {
-    t &= typeFromTCImpl(tc, getThisType, func->cls());
-  }
-
-  return t;
+  auto const& tcs = func->params()[paramId].typeConstraints;
+  return typeFromTCImpl(tcs, getThisType, func->cls());
 }
 
 Type typeFromFuncReturn(const Func* func) {
   // Assert this here since we're modifying the behaviour of
   // typeFromTCImpl below which should only be done for builtins
   assertx(func->isCPPBuiltin());
-  auto& tc = func->returnTypeConstraints().main();
+  auto const& tc = func->returnTypeConstraints();
   auto const getThisType = [&] {
     return func->cls() ? Type::SubObj(func->cls()) : TBottom;
   };

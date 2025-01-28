@@ -1129,7 +1129,7 @@ Type typeFromPropTC(const HPHP::TypeIntersectionConstraint& tcs,
   assertx(tcs.validForProp());
 
   auto const getThisType = [&] {
-    always_assert(propCls != nullptr);
+    if (!propCls) return TObj;
     return isSProp && (propCls->attrs() & AttrNoMock)
       ? Type::ExactObj(propCls)
       : Type::SubObj(propCls);

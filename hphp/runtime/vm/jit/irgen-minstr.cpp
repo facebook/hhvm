@@ -1805,8 +1805,6 @@ bool propertyMayBeCountable(const Class::Prop& prop) {
   // here because the classes they refer to may not yet be defined. We return
   // `true` for these cases. Doing so doesn't cause unnecessary pessimization,
   // because subtypes of Object are going to be countable anyway.
-  auto const& tc = prop.typeConstraints.main();
-  if (tc.isSubObject() || tc.isThis() || tc.isUnresolved()) return true;
   if (prop.repoAuthType.name()) return true;
   auto const type = knownTypeForProp(prop, nullptr, nullptr, true);
   return type.maybe(jit::TCounted);

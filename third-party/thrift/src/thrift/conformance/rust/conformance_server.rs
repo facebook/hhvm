@@ -76,8 +76,11 @@ fn main(fb: fbinit::FacebookInit) -> Result<()> {
     let thrift_server = srserver::ThriftServerBuilder::new(fb)
         .with_port(args.port)
         .with_allow_plaintext_on_loopback()
-        .with_metadata(ConformanceService_metadata_sys::create_metadata())
-        .with_factory(runtime.handle().clone(), move || service)
+        .add_factory(
+            runtime.handle().clone(),
+            move || service,
+            Some(ConformanceService_metadata_sys::create_metadata()),
+        )
         .build();
 
     let mut svc_framework = srserver::service_framework::ServiceFramework::from_server(

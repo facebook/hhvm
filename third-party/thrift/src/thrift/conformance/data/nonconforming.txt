@@ -17878,21 +17878,15 @@ rust/ThriftRPCServerTest/SinkChunkTimeout/Success.SinkChunkTimeoutTest
 
 # rpc-client-test
 
-# This test is implemented, it is a genuine nonconformance failure.
+# These tests are implemented, but are genuine nonconformance failures.
 rust/ThriftRPCClientTest/RequestResponseTimeout/Success.RequestResponseTimeoutTest
-
-rust/ThriftRPCClientTest/StreamBasic/Success.StreamBasicTest
-rust/ThriftRPCClientTest/StreamFragmentation/Success.StreamFragmentationTest
-rust/ThriftRPCClientTest/StreamInitialResponse/Success.StreamInitialResponseTest
-rust/ThriftRPCClientTest/StreamSubsequentCredits/Success.StreamSubsequentCreditsTest
-rust/ThriftRPCClientTest/StreamDeclaredException/Success.StreamDeclaredExceptionTest
-rust/ThriftRPCClientTest/StreamUndeclaredException/Success.StreamUndeclaredExceptionTest
-rust/ThriftRPCClientTest/StreamInitialDeclaredException/Success.StreamInitialDeclaredExceptionTest
-rust/ThriftRPCClientTest/StreamInitialUndeclaredException/Success.StreamInitialUndeclaredExceptionTest
 rust/ThriftRPCClientTest/StreamChunkTimeout/Success.StreamChunkTimeoutTest
 rust/ThriftRPCClientTest/StreamCreditTimeout/Success.StreamCreditTimeoutTest
 rust/ThriftRPCClientTest/StreamInitialTimeout/Success.StreamInitialTimeoutTest
 
+# These are unable to be implemented due to missing Rust functionality
+rust/ThriftRPCClientTest/StreamFragmentation/Success.StreamFragmentationTest
+rust/ThriftRPCClientTest/StreamSubsequentCredits/Success.StreamSubsequentCreditsTest
 rust/ThriftRPCClientTest/SinkBasic/Success.SinkBasicTest
 rust/ThriftRPCClientTest/SinkFragmentation/Success.SinkFragmentationTest
 rust/ThriftRPCClientTest/SinkSubsequestCredits/Success.SinkSubsequentCreditsTest

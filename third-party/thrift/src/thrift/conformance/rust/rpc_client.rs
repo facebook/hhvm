@@ -16,10 +16,32 @@
 
 use std::net::SocketAddr;
 use std::sync::Arc;
+use std::time::Duration;
 
 use anyhow::anyhow;
 use anyhow::Result;
 use clap::Parser;
+use futures::stream::StreamExt;
+use rpc::rpc::StreamBasicClientInstruction;
+use rpc::rpc::StreamBasicClientTestResult;
+use rpc::rpc::StreamChunkTimeoutClientInstruction;
+use rpc::rpc::StreamChunkTimeoutClientTestResult;
+use rpc::rpc::StreamCreditTimeoutClientInstruction;
+use rpc::rpc::StreamCreditTimeoutClientTestResult;
+use rpc::rpc::StreamDeclaredExceptionClientInstruction;
+use rpc::rpc::StreamDeclaredExceptionClientTestResult;
+use rpc::rpc::StreamInitialDeclaredExceptionClientInstruction;
+use rpc::rpc::StreamInitialDeclaredExceptionClientTestResult;
+use rpc::rpc::StreamInitialResponseClientInstruction;
+use rpc::rpc::StreamInitialResponseClientTestResult;
+use rpc::rpc::StreamInitialTimeoutClientInstruction;
+use rpc::rpc::StreamInitialTimeoutClientTestResult;
+use rpc::rpc::StreamInitialUndeclaredExceptionClientInstruction;
+use rpc::rpc::StreamInitialUndeclaredExceptionClientTestResult;
+use rpc::rpc::StreamUndeclaredExceptionClientInstruction;
+use rpc::rpc::StreamUndeclaredExceptionClientTestResult;
+use rpc_clients::rpc::errors::r_p_c_conformance_service::StreamDeclaredExceptionStreamError;
+use rpc_clients::rpc::errors::r_p_c_conformance_service::StreamInitialDeclaredExceptionError;
 use rpc_clients::rpc::make_RPCConformanceService;
 use rpc_clients::rpc::RPCConformanceService;
 use tracing_glog::Glog;
@@ -50,6 +72,10 @@ async fn get_client(
     fb: fbinit::FacebookInit,
     port: u16,
 ) -> Result<Arc<dyn RPCConformanceService + Send + Sync + 'static>> {
+    // TODO: Why aren't we using the SRclient builder here? It has more functionality it seems
+    // over the bareclient (specifically the ability to configure the RPC options without specying
+    // a serialization protocol)
+
     thriftclient::ThriftChannelBuilder::from_sock_addr(
         fb,
         SocketAddr::new(std::net::Ipv6Addr::LOCALHOST.into(), port),
@@ -102,6 +128,7 @@ use rpc_clients::rpc::BasicInteraction;
 
 async fn test(client: &dyn RPCConformanceService) -> Result<()> {
     use ClientInstruction::*;
+    #[allow(unused)]
     match &client.getTestCase().await?.clientInstruction {
         requestResponseBasic(i) => request_response_basic(client, i).await,
         requestResponseDeclaredException(i) => request_response_declared_exn(client, i).await,
@@ -112,16 +139,21 @@ async fn test(client: &dyn RPCConformanceService) -> Result<()> {
         interactionFactoryFunction(i) => interaction_factory_function(client, i).await,
         interactionPersistsState(i) => interaction_persists_state(client, i).await,
         interactionTermination(i) => interaction_termination(client, i).await,
-        streamBasic(_) => not_implemented(),
-        streamChunkTimeout(_) => not_implemented(),
-        streamInitialResponse(_) => not_implemented(),
-        streamCreditTimeout(_) => not_implemented(),
-        streamDeclaredException(_) => not_implemented(),
-        streamUndeclaredException(_) => not_implemented(),
-        streamInitialDeclaredException(_) => not_implemented(),
-        streamInitialUndeclaredException(_) => not_implemented(),
-        streamInitialTimeout(_) => not_implemented(),
-        i => Err(anyhow!(format!("not supported: {:?}", i))),
+        streamBasic(i) => stream_basic(client, i).await,
+        streamChunkTimeout(i) => stream_chunk_timeout(client, i).await,
+        streamInitialResponse(i) => stream_initial_response(client, i).await,
+        streamCreditTimeout(i) => stream_credit_timeout(client, i).await,
+        streamDeclaredException(i) => stream_declared_exception(client, i).await,
+        streamUndeclaredException(i) => stream_undeclared_exception(client, i).await,
+        streamInitialDeclaredException(i) => stream_initial_declared_exception(client, i).await,
+        streamInitialUndeclaredException(i) => stream_initial_undeclared_exception(client, i).await,
+        streamInitialTimeout(i) => stream_initial_timeout(client, i).await,
+        sinkBasic(i) => not_implemented(),
+        sinkChunkTimeout(i) => not_implemented(),
+        sinkInitialResponse(i) => not_implemented(),
+        sinkDeclaredException(i) => not_implemented(),
+        sinkUndeclaredException(i) => not_implemented(),
+        UnknownField(i) => Err(anyhow!(format!("not supported: {:?}", i))),
     }
 }
 
@@ -307,5 +339,205 @@ async fn interaction_termination(
             ..Default::default()
         });
     client.sendTestResult(&test_result).await?;
+    Ok(())
+}
+
+async fn stream_basic(
+    client: &dyn RPCConformanceService,
+    instr: &StreamBasicClientInstruction,
+) -> Result<()> {
+    // TODO: configure rpc_options buffer?
+    let mut stream = client.streamBasic(&instr.request).await?;
+    let mut test_result = StreamBasicClientTestResult {
+        streamPayloads: vec![],
+        ..Default::default()
+    };
+    while let Some(response) = stream.next().await {
+        test_result.streamPayloads.push(response?);
+    }
+    client
+        .sendTestResult(&ClientTestResult::streamBasic(test_result))
+        .await?;
+    Ok(())
+}
+
+async fn stream_chunk_timeout(
+    client: &dyn RPCConformanceService,
+    instr: &StreamChunkTimeoutClientInstruction,
+) -> Result<()> {
+    let mut stream = client.streamChunkTimeout(&instr.request).await?;
+    let mut test_result = StreamChunkTimeoutClientTestResult {
+        chunkTimeoutException: false,
+        streamPayloads: vec![],
+        ..Default::default()
+    };
+
+    while let Some(response) = stream.next().await {
+        match response {
+            Ok(r) => {
+                test_result.streamPayloads.push(r);
+            }
+            Err(exn) => {
+                test_result.chunkTimeoutException |=
+                    exn.to_string().contains("TTransportException");
+            }
+        }
+    }
+
+    client
+        .sendTestResult(&ClientTestResult::streamChunkTimeout(test_result))
+        .await?;
+    Ok(())
+}
+
+async fn stream_initial_response(
+    client: &dyn RPCConformanceService,
+    instr: &StreamInitialResponseClientInstruction,
+) -> Result<()> {
+    let (initial_response, mut stream) = client.streamInitialResponse(&instr.request).await?;
+    let mut test_result = StreamInitialResponseClientTestResult {
+        initialResponse: initial_response,
+        streamPayloads: vec![],
+        ..Default::default()
+    };
+
+    while let Some(response) = stream.next().await {
+        test_result.streamPayloads.push(response?);
+    }
+
+    client
+        .sendTestResult(&ClientTestResult::streamInitialResponse(test_result))
+        .await?;
+
+    Ok(())
+}
+
+async fn stream_credit_timeout(
+    client: &dyn RPCConformanceService,
+    instr: &StreamCreditTimeoutClientInstruction,
+) -> Result<()> {
+    let mut stream = client.streamCreditTimeout(&instr.request).await?;
+    let mut test_result = StreamCreditTimeoutClientTestResult {
+        creditTimeoutException: false,
+        ..Default::default()
+    };
+
+    while let Some(response) = stream.next().await {
+        match response {
+            Err(exn) if exn.to_string().contains("TTransportException") => {
+                test_result.creditTimeoutException = true;
+            }
+            _ => {
+                // Sleep longer than the stream expiration time so that the server
+                // will run out of credit and throw a credit timeout exception
+                tokio::time::sleep(Duration::from_millis(instr.creditTimeoutMs as u64)).await;
+            }
+        }
+    }
+
+    client
+        .sendTestResult(&ClientTestResult::streamCreditTimeout(test_result))
+        .await?;
+
+    Ok(())
+}
+
+async fn stream_declared_exception(
+    client: &dyn RPCConformanceService,
+    instr: &StreamDeclaredExceptionClientInstruction,
+) -> Result<()> {
+    let mut stream = client.streamDeclaredException(&instr.request).await?;
+    let mut test_result = StreamDeclaredExceptionClientTestResult {
+        userException: None,
+        ..Default::default()
+    };
+    while let Some(result) = stream.next().await {
+        if let Err(StreamDeclaredExceptionStreamError::e(user_error)) = result {
+            test_result.userException = Some(Box::new(user_error));
+        };
+    }
+    client
+        .sendTestResult(&ClientTestResult::streamDeclaredException(test_result))
+        .await?;
+    Ok(())
+}
+
+async fn stream_undeclared_exception(
+    client: &dyn RPCConformanceService,
+    instr: &StreamUndeclaredExceptionClientInstruction,
+) -> Result<()> {
+    let mut stream = client.streamUndeclaredException(&instr.request).await?;
+    let mut test_result = StreamUndeclaredExceptionClientTestResult {
+        exceptionMessage: "".to_string(),
+        ..Default::default()
+    };
+    while let Some(result) = stream.next().await {
+        if let Err(err) = result {
+            test_result.exceptionMessage = err.to_string();
+        };
+    }
+    client
+        .sendTestResult(&ClientTestResult::streamUndeclaredException(test_result))
+        .await?;
+    Ok(())
+}
+
+async fn stream_initial_declared_exception(
+    client: &dyn RPCConformanceService,
+    instr: &StreamInitialDeclaredExceptionClientInstruction,
+) -> Result<()> {
+    let result = client.streamInitialDeclaredException(&instr.request).await;
+    let mut test_result = StreamInitialDeclaredExceptionClientTestResult {
+        userException: None,
+        ..Default::default()
+    };
+    if let Err(StreamInitialDeclaredExceptionError::e(user_error)) = result {
+        test_result.userException = Some(Box::new(user_error));
+    };
+    client
+        .sendTestResult(&ClientTestResult::streamInitialDeclaredException(
+            test_result,
+        ))
+        .await?;
+    Ok(())
+}
+
+async fn stream_initial_undeclared_exception(
+    client: &dyn RPCConformanceService,
+    instr: &StreamInitialUndeclaredExceptionClientInstruction,
+) -> Result<()> {
+    let result = client
+        .streamInitialUndeclaredException(&instr.request)
+        .await;
+    let mut test_result = StreamInitialUndeclaredExceptionClientTestResult {
+        exceptionMessage: "".to_string(),
+        ..Default::default()
+    };
+    if let Err(err) = result {
+        test_result.exceptionMessage = err.to_string();
+    };
+    client
+        .sendTestResult(&ClientTestResult::streamInitialUndeclaredException(
+            test_result,
+        ))
+        .await?;
+    Ok(())
+}
+
+async fn stream_initial_timeout(
+    client: &dyn RPCConformanceService,
+    instr: &StreamInitialTimeoutClientInstruction,
+) -> Result<()> {
+    let result = client.streamInitialTimeout(&instr.request).await;
+    let mut test_result = StreamInitialTimeoutClientTestResult {
+        timeoutException: false,
+        ..Default::default()
+    };
+    if let Err(_err) = result {
+        test_result.timeoutException = true;
+    }
+    client
+        .sendTestResult(&ClientTestResult::streamInitialTimeout(test_result))
+        .await?;
     Ok(())
 }

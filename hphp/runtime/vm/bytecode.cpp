@@ -3435,7 +3435,7 @@ OPTBLD_INLINE void iopSetOpS(SetOpOp op) {
     throw_cannot_modify_static_const_prop(cls->name()->data(), name->data());
   }
   auto const& sprop = cls->staticProperties()[slot];
-  if (setOpNeedsTypeCheck(sprop.typeConstraints.main(), op, val)) {
+  if (setOpNeedsTypeCheck(sprop.typeConstraints, op, val)) {
     TypedValue temp;
     tvDup(*val, temp);
     SCOPE_FAIL { tvDecRefGen(&temp); };

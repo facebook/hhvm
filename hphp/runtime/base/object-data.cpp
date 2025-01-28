@@ -1445,12 +1445,8 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
       throwMutateConstProp(lookup.slot);
     }
 
-    auto const needsCheck = lookup.prop && [&] {
-      for (auto& tc : lookup.prop->typeConstraints.range()) {
-        if (setOpNeedsTypeCheck(tc, op, prop)) return true;
-      }
-      return false;
-    }();
+    auto const needsCheck = lookup.prop &&
+      setOpNeedsTypeCheck(lookup.prop->typeConstraints, op, prop);
 
     if (needsCheck) {
       /*

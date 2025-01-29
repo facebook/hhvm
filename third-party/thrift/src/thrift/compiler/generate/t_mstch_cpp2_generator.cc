@@ -2906,6 +2906,20 @@ void validate_lazy_fields(sema_context& ctx, const t_field& field) {
   }
 }
 
+// TODO(dokwon): Remove this validation once `deprecated_terse_writes` cpp2
+// options are completely removed.
+void validate_deprecated_terse_writes(
+    sema_context& ctx,
+    const t_field& field,
+    const std::map<std::string, std::string>& options) {
+  if (options.count("deprecated_terse_writes") != 0 &&
+      field.find_structured_annotation_or_null(kCppDeprecatedTerseWriteUri) !=
+          nullptr) {
+    ctx.error(
+        "Cannot use thrift_cpp2_options `deprecated_terse_writes` with @cpp.DeprecatedTerseWrite.");
+  }
+}
+
 void t_mstch_cpp2_generator::fill_validator_visitors(
     ast_validator& validator) const {
   validator.add_structured_definition_visitor(std::bind(
@@ -2916,6 +2930,11 @@ void t_mstch_cpp2_generator::fill_validator_visitors(
   validator.add_program_visitor(
       validate_splits(get_split_count(options()), client_name_to_split_count_));
   validator.add_field_visitor(validate_lazy_fields);
+  validator.add_field_visitor(std::bind(
+      validate_deprecated_terse_writes,
+      std::placeholders::_1,
+      std::placeholders::_2,
+      options()));
 }
 
 THRIFT_REGISTER_GENERATOR(

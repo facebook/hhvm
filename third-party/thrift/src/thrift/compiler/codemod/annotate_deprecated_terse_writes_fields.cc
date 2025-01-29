@@ -61,8 +61,13 @@ class AnnonateDeprecatedTerseWriteFields final {
     bool any_annotated = false;
 
     const_ast_visitor visitor;
-    visitor.add_field_visitor([&](const t_field& field) {
-      any_annotated |= maybe_annotate_field(field);
+    visitor.add_structured_definition_visitor([&](const t_structured& strct) {
+      if (strct.is_union()) {
+        return;
+      }
+      for (const t_field& field : strct.fields()) {
+        any_annotated |= maybe_annotate_field(field);
+      }
     });
     visitor(program_);
 

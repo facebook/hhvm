@@ -56,7 +56,18 @@ class AnnotateDeprecatedTerseWritesFieldsTest(unittest.TestCase):
                     7: MyStruct g (cpp.ref_type = "shared");
                 }
 
+                union NoOpFieldsUnion {
+                    1: i32 a;
+                }
+
                 struct ShouldAnnotateFields {
+                    1: string a;
+                    2: string b (cpp.ref = "true");
+                    3: MyStruct c (cpp.ref = "true");
+                    4: string d (cpp.ref_type = "shared");
+                }
+
+                exception ShouldAnnotateFieldsException {
                     1: string a;
                     2: string b (cpp.ref = "true");
                     3: MyStruct c (cpp.ref = "true");
@@ -92,7 +103,22 @@ class AnnotateDeprecatedTerseWritesFieldsTest(unittest.TestCase):
                     7: MyStruct g (cpp.ref_type = "shared");
                 }
 
+                union NoOpFieldsUnion {
+                    1: i32 a;
+                }
+
                 struct ShouldAnnotateFields {
+                    @cpp.DeprecatedTerseWrite
+                    1: string a;
+                    @cpp.DeprecatedTerseWrite
+                    2: string b (cpp.ref = "true");
+                    @cpp.DeprecatedTerseWrite
+                    3: MyStruct c (cpp.ref = "true");
+                    @cpp.DeprecatedTerseWrite
+                    4: string d (cpp.ref_type = "shared");
+                }
+
+                exception ShouldAnnotateFieldsException {
                     @cpp.DeprecatedTerseWrite
                     1: string a;
                     @cpp.DeprecatedTerseWrite

@@ -1009,7 +1009,7 @@ void validate_interaction_annotations(
 
 void validate_cpp_deprecated_terse_write_annotation(
     sema_context& ctx, const t_field& field) {
-  if (field.find_structured_annotation_or_null(kCppDeprecatedTerseWrite) ==
+  if (field.find_structured_annotation_or_null(kCppDeprecatedTerseWriteUri) ==
       nullptr) {
     return;
   }

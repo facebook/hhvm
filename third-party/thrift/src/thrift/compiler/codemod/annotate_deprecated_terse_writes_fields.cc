@@ -31,7 +31,7 @@ namespace apache::thrift::compiler {
 namespace {
 
 constexpr std::string_view kAnnotation = "@cpp.DeprecatedTerseWrite";
-constexpr const char* const kAnnotationUri = kCppDeprecatedTerseWrite;
+constexpr const char* const kAnnotationUri = kCppDeprecatedTerseWriteUri;
 
 bool should_annotate_field(const t_field& field) {
   if (field.qualifier() != t_field_qualifier::none) {

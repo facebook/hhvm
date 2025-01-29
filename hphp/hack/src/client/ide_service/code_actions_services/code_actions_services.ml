@@ -22,9 +22,13 @@ open Hh_prelude
 let lsp_range_of_ide_range (ide_range : Ide_api_types.range) : Lsp.range =
   let lsp_pos_of_ide_pos ide_pos =
     let (line, character) =
-      (* TODO: this looks like a buck because according to documentation
-         Lsp.position is zero-based, so it should probably be `File_content.Position.line_column_zero_based`
-         here *)
+      (* Explanation for WTF: Lsp.position is zero-based, so theoretically this should be
+         `File_content.Position.line_column_zero_based`.
+         Yet we fail to show code actions correctly if we switch to zero-based.
+         There is likely a bug somewhere else that this compensates.
+         Good (current behavior, using one-based): https://pxl.cl/6rGmJ
+         Bad: https://pxl.cl/6rGmz
+         Relevant tests: https://www.internalfb.com/code/fbsource/[01c48061456e]/fbcode/hphp/hack/test/ide_code_actions/extract_method *)
       File_content.Position.line_column_one_based ide_pos
     in
     Lsp.{ line; character }

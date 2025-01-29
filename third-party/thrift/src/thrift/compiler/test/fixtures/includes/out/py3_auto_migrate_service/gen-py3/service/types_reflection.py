@@ -23,7 +23,7 @@ import includes.types as _includes_types
 import module.types as _module_types
 import transitive.types as _transitive_types
 
-import service.thrift_types as _service_types
+import service.types as _service_types
 
 
 

@@ -42,7 +42,6 @@ from thrift.py3.reflection import (
 
 class ReflectionTests(unittest.TestCase):
     # Fails due to containers not working
-    @brokenInAutoMigrate()
     def test_struct(self) -> None:
         x = easy(val=1, an_int=Integers(small=300), name="foo", val_list=[1, 2, 3, 4])
         self.assertTrue(inspectable(x))

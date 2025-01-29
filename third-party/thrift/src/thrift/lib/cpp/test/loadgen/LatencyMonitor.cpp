@@ -22,6 +22,8 @@
 #include <thrift/lib/cpp/concurrency/Util.h>
 #include <thrift/lib/cpp/test/loadgen/WeightedLoadConfig.h>
 
+#include <gflags/gflags.h>
+
 DEFINE_double(
     thriftLatencyMonPct,
     99,

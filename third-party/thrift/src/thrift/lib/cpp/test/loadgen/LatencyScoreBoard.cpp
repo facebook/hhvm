@@ -20,6 +20,8 @@
 
 #include <math.h>
 
+#include <gflags/gflags.h>
+
 DEFINE_int64(thriftLatencyBucketMax, 5000, "Maximum latency bucket in ms.");
 
 namespace apache {

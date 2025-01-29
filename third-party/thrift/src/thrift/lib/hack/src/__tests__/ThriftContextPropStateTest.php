@@ -126,6 +126,107 @@ final class ThriftContextPropStateTest extends WWWTest {
     expect($tcps->getRequestId())->toEqual("13579");
   }
 
+  public async function testInitializationWithUserIds(
+  )[defaults]: Awaitable<void> {
+    $tfm = ThriftFrameworkMetadata::withDefaultValues();
+    $tfm->baggage = ContextProp\Baggage::withDefaultValues();
+    $tfm->baggage->user_ids = ContextProp\UserIds::fromShape(
+      shape('fb_user_id' => 123, 'ig_user_id' => 456),
+    );
+
+    $buf = new TMemoryBuffer();
+    $prot = new TCompactProtocolAccelerated($buf);
+    $tfm->write($prot);
+    $s = $buf->getBuffer();
+    $e = Base64::encode($s);
+
+    ThriftContextPropState::initFromString($e);
+    $tcps = ThriftContextPropState::get();
+    expect($tcps->getUserIds()?->fb_user_id)->toEqual(123);
+    expect($tcps->getUserIds()?->ig_user_id)->toEqual(456);
+  }
+
+  public async function testInitializationWithVC()[defaults]: Awaitable<void> {
+    $tfm = ThriftFrameworkMetadata::withDefaultValues();
+    $tfm->baggage = ContextProp\Baggage::withDefaultValues();
+    $tfm->baggage->user_ids = ContextProp\UserIds::fromShape(
+      shape('fb_user_id' => null, 'ig_user_id' => null),
+    );
+
+    // set up mocks for VC
+    $fb_vc = mock(IFBViewerContext::class)->mockReturn('getUserID', fbid(1));
+    $ig_vc = mock(IIGViewerContext::class)->mockReturn('getViewerID', fbid(2));
+
+    $buf = new TMemoryBuffer();
+    $prot = new TCompactProtocolAccelerated($buf);
+    $tfm->write($prot);
+    $s = $buf->getBuffer();
+    $e = Base64::encode($s);
+
+    ThriftContextPropState::initFromString($e);
+    ThriftContextPropState::updateFromVC($fb_vc);
+    ThriftContextPropState::updateFromVC($ig_vc);
+
+    $tcps = ThriftContextPropState::get();
+    // expect user ids were set from fetched values
+    expect($tcps->getUserIds()?->fb_user_id)->toEqual(1);
+    expect($tcps->getUserIds()?->ig_user_id)->toEqual(2);
+  }
+
+  public async function testInitializationWithBothTFMandVC(
+  )[defaults]: Awaitable<void> {
+    $tfm = ThriftFrameworkMetadata::withDefaultValues();
+    $tfm->baggage = ContextProp\Baggage::withDefaultValues();
+    $tfm->baggage->user_ids = ContextProp\UserIds::fromShape(
+      shape('fb_user_id' => null, 'ig_user_id' => 456),
+    );
+
+    // set up mocks for VC
+    $fb_vc = mock(IFBViewerContext::class)->mockReturn('getUserID', fbid(123));
+
+    $buf = new TMemoryBuffer();
+    $prot = new TCompactProtocolAccelerated($buf);
+    $tfm->write($prot);
+    $s = $buf->getBuffer();
+    $e = Base64::encode($s);
+
+    ThriftContextPropState::initFromString($e);
+    ThriftContextPropState::updateFromVC($fb_vc);
+
+    $tcps = ThriftContextPropState::get();
+    // expect fb user id to be populated
+    expect($tcps->getUserIds()?->fb_user_id)->toEqual(123);
+    expect($tcps->getUserIds()?->ig_user_id)->toEqual(456);
+  }
+
+  public async function testInitializationUserIdsNotOverwritten(
+  )[defaults]: Awaitable<void> {
+    $tfm = ThriftFrameworkMetadata::withDefaultValues();
+    $tfm->baggage = ContextProp\Baggage::withDefaultValues();
+    $tfm->baggage->user_ids = ContextProp\UserIds::fromShape(
+      shape('fb_user_id' => 123, 'ig_user_id' => 456),
+    );
+
+    // set up mocks for VC
+    $fb_vc = mock(IFBViewerContext::class)->mockReturn('getUserID', fbid(1));
+    $ig_vc = mock(IIGViewerContext::class)->mockReturn('getViewerID', fbid(2));
+
+    $buf = new TMemoryBuffer();
+    $prot = new TCompactProtocolAccelerated($buf);
+    $tfm->write($prot);
+    $s = $buf->getBuffer();
+    $e = Base64::encode($s);
+
+    ThriftContextPropState::initFromString($e);
+    // expect these to be no-op if TFM already has user ids
+    ThriftContextPropState::updateFromVC($fb_vc);
+    ThriftContextPropState::updateFromVC($ig_vc);
+
+    $tcps = ThriftContextPropState::get();
+    expect($tcps->getUserIds()?->fb_user_id)->toEqual(123);
+    expect($tcps->getUserIds()?->ig_user_id)->toEqual(456);
+  }
+
   public function testGen()[defaults]: void {
     ThriftContextPropState::initFromString(null);
     $tcps = ThriftContextPropState::get();

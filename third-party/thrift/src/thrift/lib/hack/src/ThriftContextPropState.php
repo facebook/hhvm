@@ -106,6 +106,51 @@ final class ThriftContextPropState {
     }
   }
 
+  public static function updateFromVC(?IViewerContextBase $vc): void {
+    if ($vc is IFBViewerContext) {
+      self::updateFBUserIdFromVC($vc);
+    } else if ($vc is IIGViewerContext) {
+      self::updateIGUserIdFromVC($vc);
+    }
+  }
+
+  private static function updateFBUserIdFromVC(IFBViewerContext $vc): void {
+    $tcps_fb_user_id = self::get()->getFBUserId();
+    // don't overwrite if TCPS already has a valid fb user id
+    if (self::coerceId($tcps_fb_user_id) is nonnull) {
+      return;
+    }
+
+    $fb_user_id = self::coerceId($vc->getUserID());
+    if ($fb_user_id is nonnull) {
+      self::get()->setFBUserId($fb_user_id);
+    }
+  }
+
+  private static function updateIGUserIdFromVC(IIGViewerContext $vc): void {
+    // don't overwrite if TCPS already has a valid ig user id
+    $tcps_ig_user_id = self::get()->getIGUserId();
+    if (self::coerceId($tcps_ig_user_id) is nonnull) {
+      return;
+    }
+
+    $ig_user_id = self::coerceId($vc->getViewerID());
+    if ($ig_user_id is nonnull) {
+      self::get()->setIGUserId($ig_user_id);
+    }
+  }
+
+  // returns id if it is valid (non-null, positive)
+  private static function coerceId(?int $id): ?int {
+    if ($id is null) {
+      return null;
+    }
+    if ($id > 0) {
+      return $id;
+    }
+    return null;
+  }
+
   /**
    * Returns the ThriftContextPropState singleton
    */

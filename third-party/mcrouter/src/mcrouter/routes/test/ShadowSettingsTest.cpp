@@ -5,16 +5,15 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <memory>
-
 #include <gtest/gtest.h>
 
 #include <folly/Range.h>
 #include <folly/json/json.h>
 
+#include "configerator/distribution/api/ScopedConfigeratorFake.h"
 #include "mcrouter/CarbonRouterInstance.h"
+#include "mcrouter/facebook/FbConfigApi.h"
 #include "mcrouter/lib/network/gen/MemcacheRouterInfo.h"
-#include "mcrouter/options.h"
 #include "mcrouter/routes/ShadowSettings.h"
 
 using namespace facebook::memcache;
@@ -29,7 +28,18 @@ class ShadowSettingsTest : public ::testing::Test {
         folly::to<std::string>("TestRouter:", kRouterInfoName);
     auto router =
         CarbonRouterInstance<RouterInfo>::init(kInstanceName, getOpts());
-    CHECK(router != nullptr) << "router shouldn't be nullptr";
+    CHECK_NE(router, nullptr) << "router shouldn't be nullptr";
+    return *router;
+  }
+
+  template <class RouterInfo>
+  CarbonRouterInstance<RouterInfo>& getRouter(
+      const McrouterOptions& opts) const {
+    constexpr folly::StringPiece kRouterInfoName(RouterInfo::name);
+    const std::string kInstanceName =
+        folly::to<std::string>("TestRouter:", kRouterInfoName);
+    auto router = CarbonRouterInstance<RouterInfo>::init(kInstanceName, opts);
+    CHECK_NE(router, nullptr) << "router shouldn't be nullptr";
     return *router;
   }
 
@@ -172,4 +182,43 @@ TEST_F(ShadowSettingsTest, shouldRouteByBucket) {
         shadowSettings->shouldShadow(req, i, randomGenerator()),
         i >= 19 && i <= 59);
   }
+}
+
+TEST_F(ShadowSettingsTest, keyFractionRangeRV) {
+  // configure RuntimeVarsFile
+  facebook::configerator::ScopedConfigeratorFake configeratorFake;
+
+  constexpr folly::StringPiece kRuntimeVarsFile = "runtimeVarsDummy";
+
+  std::string rv_vars_configs = R"(
+  {
+    "key_fractions": {
+      "ucache.test": 0.1
+    }
+  }
+  )";
+  configeratorFake.setConfig(kRuntimeVarsFile.str(), rv_vars_configs);
+
+  // configure router
+  auto opts = defaultTestOptions();
+  opts.config = "{ \"route\": \"NullRoute\" }";
+  opts.runtime_vars_file =
+      FbConfigApi::kConfigeratorPrefix + kRuntimeVarsFile.str();
+
+  auto& router = getRouter<MemcacheRouterInfo>(opts);
+
+  constexpr folly::StringPiece kConfig = R"(
+  {
+    "key_fraction_range_rv": "key_fraction_range_ucache.test"
+  }
+  )";
+  const auto json = folly::parseJson(kConfig);
+
+  // create shadow settings
+  auto shadowSettings = ShadowSettings::create(json, router);
+  ASSERT_TRUE(shadowSettings != nullptr);
+
+  auto keyFraction = std::get<1>(shadowSettings->keyRange());
+  uint32_t expectedKeyFraction = 0.1 * std::numeric_limits<uint32_t>::max();
+  ASSERT_TRUE(keyFraction == expectedKeyFraction);
 }

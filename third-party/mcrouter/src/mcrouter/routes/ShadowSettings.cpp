@@ -128,25 +128,46 @@ void ShadowSettings::registerOnUpdateCallback(
         if (!newVars || keyFractionRangeRv_.empty()) {
           return;
         }
-        auto val = newVars->getVariableByName(keyFractionRangeRv_);
-        if (val != nullptr) {
-          checkLogic(
-              val.isArray(),
-              "runtime vars: {} is not an array",
-              keyFractionRangeRv_);
-          checkLogic(
-              val.size() == 2,
-              "runtime vars: size of {} is not 2",
-              keyFractionRangeRv_);
-          checkLogic(
-              val[0].isNumber(),
-              "runtime vars: {}#0 is not a number",
-              keyFractionRangeRv_);
-          checkLogic(
-              val[1].isNumber(),
-              "runtime vars: {}#1 is not a number",
-              keyFractionRangeRv_);
-          setKeyRange(val[0].asDouble(), val[1].asDouble());
+
+        // read value from "key_fractions" object
+        auto keyFractions = newVars->getVariableByName("key_fractions");
+        if (keyFractions != nullptr && keyFractions.isObject()) {
+          std::string_view tiername{keyFractionRangeRv_};
+          if (tiername.starts_with("key_fraction_range_")) {
+            tiername.remove_prefix(19);
+          }
+
+          auto val = keyFractions.get_ptr(tiername);
+          if (val != nullptr) {
+            checkLogic(
+                val->isNumber(),
+                "runtime vars: {} fraction is not a number",
+                tiername);
+            setKeyRange(0.0, val->asDouble());
+          }
+
+        } else {
+          // fallback to reading KFR from the root-level variables
+          auto val = newVars->getVariableByName(keyFractionRangeRv_);
+          if (val != nullptr) {
+            checkLogic(
+                val.isArray(),
+                "runtime vars: {} is not an array",
+                keyFractionRangeRv_);
+            checkLogic(
+                val.size() == 2,
+                "runtime vars: size of {} is not 2",
+                keyFractionRangeRv_);
+            checkLogic(
+                val[0].isNumber(),
+                "runtime vars: {}#0 is not a number",
+                keyFractionRangeRv_);
+            checkLogic(
+                val[1].isNumber(),
+                "runtime vars: {}#1 is not a number",
+                keyFractionRangeRv_);
+            setKeyRange(val[0].asDouble(), val[1].asDouble());
+          }
         }
       });
 }

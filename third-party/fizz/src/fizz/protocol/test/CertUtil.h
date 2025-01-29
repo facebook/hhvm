@@ -32,7 +32,26 @@ void throwIfNull(const A& a, const std::string& msg) {
   }
 }
 
-inline CertAndKey createCert(std::string cn, bool ca, CertAndKey* issuer) {
+struct CreateCertOptions {
+  std::string cn;
+  bool ca{false};
+  CertAndKey* issuer{nullptr};
+  std::optional<std::chrono::system_clock::time_point> notBefore;
+  std::optional<std::chrono::system_clock::time_point> notAfter;
+};
+
+inline folly::ssl::ASN1TimeUniquePtr asn1(
+    std::chrono::system_clock::time_point tp) {
+  folly::ssl::ASN1TimeUniquePtr ret(ASN1_TIME_new());
+  ASN1_TIME_set(ret.get(), std::chrono::system_clock::to_time_t(tp));
+  return ret;
+}
+
+inline CertAndKey createCert(CreateCertOptions options) {
+  const auto& cn = options.cn;
+  bool ca = options.ca;
+  const auto& issuer = options.issuer;
+
   folly::ssl::EvpPkeyUniquePtr pk(EVP_PKEY_new());
   throwIfNull(pk, "private key creation failed");
 
@@ -63,8 +82,20 @@ inline CertAndKey createCert(std::string cn, bool ca, CertAndKey* issuer) {
   X509_set_version(crt.get(), 2);
   static int serial = 0;
   ASN1_INTEGER_set(X509_get_serialNumber(crt.get()), serial++);
-  X509_gmtime_adj(X509_get_notBefore(crt.get()), 0);
-  X509_gmtime_adj(X509_get_notAfter(crt.get()), 31536000);
+  using clock = std::chrono::system_clock;
+
+  auto notBefore = clock::now();
+  if (options.notBefore.has_value()) {
+    notBefore = *options.notBefore;
+  }
+
+  auto notAfter = notBefore + std::chrono::seconds(31536000);
+  if (options.notAfter.has_value()) {
+    notAfter = *options.notAfter;
+  }
+
+  X509_set_notBefore(crt.get(), asn1(notBefore).get());
+  X509_set_notAfter(crt.get(), asn1(notAfter).get());
 
   throwIfNeq(
       X509_set_pubkey(crt.get(), pk.get()), 1, "public key assignment failed");
@@ -95,8 +126,8 @@ inline CertAndKey createCert(std::string cn, bool ca, CertAndKey* issuer) {
 
   std::string configuration = R"(
 [fizz]
-subjectKeyIdentifier    = hash                                            
-authorityKeyIdentifier  = keyid:always, issuer                     
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid:always, issuer
 extendedKeyUsage        = critical, serverAuth, clientAuth
 )";
   if (ca) {
@@ -135,6 +166,10 @@ extendedKeyUsage        = critical, serverAuth, clientAuth
   }
 
   return {std::move(crt), std::move(pk)};
+}
+
+inline CertAndKey createCert(std::string cn, bool ca, CertAndKey* issuer) {
+  return createCert({.cn = std::move(cn), .ca = ca, .issuer = issuer});
 }
 
 inline std::shared_ptr<PeerCert> getPeerCert(const CertAndKey& cert) {

@@ -1620,6 +1620,8 @@ class cpp_mstch_struct : public mstch_struct {
              has_option("deprecated_terse_writes")](auto& field) {
           return (!enabled_terse_write ||
                   !cpp2::deprecated_terse_writes(&field)) &&
+              field.find_structured_annotation_or_null(
+                  kCppDeprecatedTerseWrite) == nullptr &&
               field.get_req() != t_field::e_req::optional &&
               field.get_req() != t_field::e_req::terse;
         });
@@ -2069,8 +2071,10 @@ class cpp_mstch_field : public mstch_field {
         : mstch::node("");
   }
   mstch::node deprecated_terse_writes() {
-    return has_option("deprecated_terse_writes") &&
-        cpp2::deprecated_terse_writes(field_);
+    return field_->find_structured_annotation_or_null(
+               kCppDeprecatedTerseWrite) != nullptr ||
+        (has_option("deprecated_terse_writes") &&
+         cpp2::deprecated_terse_writes(field_));
   }
   mstch::node zero_copy_arg() {
     switch (field_->get_type()->get_type_value()) {

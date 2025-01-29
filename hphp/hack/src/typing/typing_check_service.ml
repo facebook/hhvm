@@ -637,6 +637,8 @@ module ErrorStats = struct
     }
 end
 
+(** If [discard_warnings], [add_warnings_to_ss mergebase_warning_hashes errors ~discard_warnings]
+  adds the hashes of the warnings in `error` to `mergebase_warning_hashes`. *)
 let add_warnings_to_ss mergebase_warning_hashes errors ~discard_warnings :
     Warnings_saved_state.t option =
   Option.map mergebase_warning_hashes ~f:(fun mergebase_warning_hashes ->
@@ -803,21 +805,40 @@ let on_cancelled (next : unit -> 'a Bucket.bucket) (todo : Todo.t) :
   in
   add_next []
 
-let rec drain_events (done_count, total_count, handle, check_info) =
+let rec drain_events
+    warnings_saved_state (done_count, total_count, handle, check_info) :
+    (Warnings_saved_state.t option * (int * int), _) result =
   match Hh_distc_ffi.recv handle with
   | Ok (Some (Hh_distc_types.Errors errors)) ->
+    let (warnings_saved_state, errors) =
+      filter_out_warnings
+        warnings_saved_state
+        errors
+        ~discard_warnings:check_info.discard_warnings
+    in
     if check_info.log_errors then Server_progress.ErrorsWrite.report errors;
-    drain_events (done_count, total_count, handle, check_info)
+    drain_events
+      warnings_saved_state
+      (done_count, total_count, handle, check_info)
   | Ok (Some (Hh_distc_types.TypingStart total_count)) ->
-    drain_events (done_count, total_count, handle, check_info)
+    drain_events
+      warnings_saved_state
+      (done_count, total_count, handle, check_info)
   | Ok (Some (Hh_distc_types.TypingProgress n)) ->
     let done_count = done_count + n in
-    drain_events (done_count, total_count, handle, check_info)
-  | Ok None -> Ok (done_count, total_count)
+    drain_events
+      warnings_saved_state
+      (done_count, total_count, handle, check_info)
+  | Ok None -> Ok (warnings_saved_state, (done_count, total_count))
   | Error error -> Error error
 
 type 'env distc_outcome =
-  | Success of Errors.t * Map_reduce.t * Typing_deps.dep_edges * 'env
+  | Success of
+      Errors.t
+      * Map_reduce.t
+      * Typing_deps.dep_edges
+      * Warnings_saved_state.t option
+      * 'env
   | DistCError of log_message
   | Cancel of 'env * MultiThreadedCall.cancel_reason
 
@@ -841,7 +862,8 @@ let rec event_loop
     ~(fd_distc : Unix.file_descr)
     ~(handle : Hh_distc_ffi.handle)
     ~(check_info : check_info)
-    ~(hhdg_path : string) : _ distc_outcome =
+    ~(hhdg_path : string)
+    ~warnings_saved_state : _ distc_outcome =
   let handler_fds = List.map handlers ~f:fst in
   (* hh_distc sends a byte each time new events are ready. *)
   let ready_fds =
@@ -861,11 +883,16 @@ let rec event_loop
           ( errors,
             Map_reduce.of_ffi map_reduce_data,
             Typing_deps.dep_edges_make (),
+            warnings_saved_state,
             interrupt.MultiThreadedCall.env )
       | Error error -> DistCError error)
     | Some _ ->
-      (match drain_events (done_count, total_count, handle, check_info) with
-      | Ok (done_count, total_count) ->
+      (match
+         drain_events
+           warnings_saved_state
+           (done_count, total_count, handle, check_info)
+       with
+      | Ok (warnings_saved_state, (done_count, total_count)) ->
         Server_progress.write_percentage
           ~operation:"hh_distc checking"
           ~done_count
@@ -881,6 +908,7 @@ let rec event_loop
           ~handle
           ~check_info
           ~hhdg_path
+          ~warnings_saved_state
       | Error error -> DistCError error)
   else
     let (env, decision, handlers) =
@@ -921,6 +949,7 @@ let rec event_loop
         ~handle
         ~check_info
         ~hhdg_path
+        ~warnings_saved_state
 
 (**
   This is the main process function that triggers a full init via hh_distc.
@@ -941,7 +970,8 @@ let process_with_hh_distc
     ~(root : Path.t option)
     ~(interrupt : 'a MultiThreadedCall.interrupt_config)
     ~(check_info : check_info)
-    ~(tcopt : TypecheckerOptions.t) : _ distc_outcome =
+    ~(tcopt : TypecheckerOptions.t)
+    ~warnings_saved_state : _ distc_outcome =
   (* We don't want to use with_tempdir because we need to keep the folder around
      for subseqent typechecks that will read the dep graph in the folder *)
   let root = Option.value_exn root in
@@ -970,6 +1000,7 @@ let process_with_hh_distc
     ~handle:hh_distc_handle
     ~check_info
     ~hhdg_path
+    ~warnings_saved_state
 
 (**
   `next` and `merge` both run in the master process and update mutable
@@ -1213,14 +1244,16 @@ let go_with_interrupt
       (* TODO(ljw): time_first_error isn't properly calculated in this path *)
       (* distc doesn't yet give any profiling_info about how its workers fared *)
       let profiling_info = Telemetry.create () in
-      match process_with_hh_distc ~root ~interrupt ~check_info ~tcopt with
-      | Success (errors, map_reduce_data, dep_edges, env) ->
-        let (warnings_saved_state, errors) =
-          filter_out_warnings
-            warnings_saved_state
-            errors
-            ~discard_warnings:check_info.discard_warnings
-        in
+      match
+        process_with_hh_distc
+          ~root
+          ~interrupt
+          ~check_info
+          ~tcopt
+          ~warnings_saved_state
+      with
+      | Success (errors, map_reduce_data, dep_edges, warnings_saved_state, env)
+        ->
         ( warnings_saved_state,
           { errors; map_reduce_data; dep_edges; profiling_info },
           telemetry,

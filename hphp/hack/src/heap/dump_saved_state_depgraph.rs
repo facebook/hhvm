@@ -144,8 +144,10 @@ fn comp_depgraph64(
                     add_edges(&mut in_r_not_l, dependency, &dependents);
                     r_dependency_opt = r_dependencies_iter.next();
                     rproc += 1;
-                    if bar.is_some() && rnum_keys > lnum_keys {
-                        bar.as_ref().unwrap().inc(1); // We advanced `r` and there are more keys in `r` than `l`.
+                    if let Some(bar) = bar.as_ref() {
+                        if rnum_keys > lnum_keys {
+                            bar.inc(1); // We advanced `r` and there are more keys in `r` than `l`.
+                        }
                     }
                 }
                 (Some(l_dependency), None) => {
@@ -156,8 +158,10 @@ fn comp_depgraph64(
                     ledge_count += dependents.len();
                     add_edges(&mut in_l_not_r, dependency, &dependents);
                     lproc += 1;
-                    if bar.is_some() && lnum_keys > rnum_keys {
-                        bar.as_ref().unwrap().inc(1); // We advanced `l` and there are more keys in `l` than `r`.
+                    if let Some(bar) = bar.as_ref() {
+                        if lnum_keys > rnum_keys {
+                            bar.inc(1); // We advanced `l` and there are more keys in `l` than `r`.
+                        }
                     }
                 }
                 (Some(l_dependency), Some(r_dependency)) => {
@@ -171,8 +175,10 @@ fn comp_depgraph64(
                         add_edges(&mut in_l_not_r, l_dependency, &l_dependencies);
                         l_dependency_opt = l_dependencies_iter.next();
                         lproc += 1;
-                        if bar.is_some() && lnum_keys >= rnum_keys {
-                            bar.as_ref().unwrap().inc(1); // We advanced `l` and there are more keys in `l` than `r`.
+                        if let Some(bar) = bar.as_ref() {
+                            if lnum_keys >= rnum_keys {
+                                bar.inc(1); // We advanced `l` and there are more keys in `l` than `r`.
+                            }
                         }
                         continue;
                     }
@@ -182,8 +188,10 @@ fn comp_depgraph64(
                         add_edges(&mut in_r_not_l, r_dependency, &r_dependencies);
                         r_dependency_opt = r_dependencies_iter.next();
                         rproc += 1;
-                        if bar.is_some() && rnum_keys > lnum_keys {
-                            bar.as_ref().unwrap().inc(1); // We advanced `r` and there are more keys in `r` than `l`.
+                        if let Some(bar) = bar.as_ref() {
+                            if rnum_keys > lnum_keys {
+                                bar.inc(1); // We advanced `r` and there are more keys in `r` than `l`.
+                            }
                         }
                         continue;
                     }
@@ -208,8 +216,8 @@ fn comp_depgraph64(
                     r_dependency_opt = r_dependencies_iter.next();
                     lproc += 1;
                     rproc += 1;
-                    if bar.is_some() {
-                        bar.as_ref().unwrap().inc(1)
+                    if let Some(bar) = bar.as_ref() {
+                        bar.inc(1)
                     }; // No matter whether `l` or `r` has more keys, progress was made.
                 }
                 (None, None) => panic!("The impossible happened!"),
@@ -278,7 +286,7 @@ Common usage is to provide two file arguments to compare, 'test' and 'control'.
 
 Example invocation:
 
-  dump_saved_state_depgraph --bitness 32 \\
+  dump_saved_state_depgraph \\
       --test path/to/test.bin --control path/to/control.bin
 
 Exit code will be 0 if 'test' >= 'control' and 1 if 'test' < 'control'."

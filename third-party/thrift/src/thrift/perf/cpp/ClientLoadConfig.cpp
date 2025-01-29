@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#define __STDC_FORMAT_MACROS
-
 #include <thrift/perf/cpp/ClientLoadConfig.h>
+
+#include <folly/portability/Stdlib.h>
 
 #include <gflags/gflags.h>
 #include <glog/logging.h>

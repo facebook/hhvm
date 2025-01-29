@@ -17885,8 +17885,6 @@ rust/ThriftRPCClientTest/StreamCreditTimeout/Success.StreamCreditTimeoutTest
 rust/ThriftRPCClientTest/StreamInitialTimeout/Success.StreamInitialTimeoutTest
 
 # These are unable to be implemented due to missing Rust functionality
-rust/ThriftRPCClientTest/StreamFragmentation/Success.StreamFragmentationTest
-rust/ThriftRPCClientTest/StreamSubsequentCredits/Success.StreamSubsequentCreditsTest
 rust/ThriftRPCClientTest/SinkBasic/Success.SinkBasicTest
 rust/ThriftRPCClientTest/SinkFragmentation/Success.SinkFragmentationTest
 rust/ThriftRPCClientTest/SinkSubsequestCredits/Success.SinkSubsequentCreditsTest

@@ -44,6 +44,28 @@ class DefaultCertificateVerifierTest : public testing::Test {
   std::unique_ptr<DefaultCertificateVerifier> verifier_;
 };
 
+template <class F1, class F2>
+void expectThrowSuchThat(F1 f, F2 g) {
+  try {
+    f();
+    FAIL() << "Expected to throw";
+  } catch (const std::exception& ex) {
+    g(ex);
+  } catch (...) {
+    FAIL() << "non std::exception thrown";
+  }
+}
+
+template <class F>
+static void expectThrowWithAlert(F f, AlertDescription ad) {
+  return expectThrowSuchThat(std::move(f), [ad](const auto& ex) {
+    auto fe = dynamic_cast<const fizz::FizzException*>(&ex);
+    ASSERT_TRUE(fe);
+    ASSERT_TRUE(fe->getAlert().has_value());
+    EXPECT_EQ(fe->getAlert().value(), ad);
+  });
+}
+
 TEST_F(DefaultCertificateVerifierTest, TestVerifySuccess) {
   verifier_->verify({getPeerCert(leafCertAndKey_)});
 
@@ -69,9 +91,9 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifyWithIntermediates) {
 
 TEST_F(DefaultCertificateVerifierTest, TestVerifySelfSignedCert) {
   auto selfsigned = createCert("self", false, nullptr);
-  EXPECT_THROW(
-      std::ignore = verifier_->verify({getPeerCert(selfsigned)}),
-      std::runtime_error);
+  expectThrowWithAlert(
+      [&] { verifier_->verify({getPeerCert(selfsigned)}); },
+      AlertDescription::bad_certificate);
 }
 
 TEST_F(DefaultCertificateVerifierTest, TestVerifySelfSignedCertWithOverride) {
@@ -90,7 +112,9 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifySelfSignedCertWithOverride) {
 TEST_F(DefaultCertificateVerifierTest, TestVerifyWithIntermediateMissing) {
   auto subauth = createCert("subauth", true, &rootCertAndKey_);
   auto subleaf = createCert("subleaf", false, &subauth);
-  EXPECT_THROW(verifier_->verify({getPeerCert(subleaf)}), std::runtime_error);
+  expectThrowWithAlert(
+      [&] { verifier_->verify({getPeerCert(subleaf)}); },
+      AlertDescription::bad_certificate);
 }
 
 TEST_F(
@@ -101,22 +125,53 @@ TEST_F(
   verifier_->setCustomVerifyCallback(
       &DefaultCertificateVerifierTest::allowSelfSignedLeafCertCallback);
   // The override is irrelevant to the error here. So exception is expected.
-  EXPECT_THROW(verifier_->verify({getPeerCert(subleaf)}), std::runtime_error);
+  expectThrowWithAlert(
+      [&] { verifier_->verify({getPeerCert(subleaf)}); },
+      AlertDescription::bad_certificate);
 }
 
 TEST_F(DefaultCertificateVerifierTest, TestVerifyWithBadIntermediate) {
   auto subauth = createCert("badsubauth", false, &rootCertAndKey_);
   auto subleaf = createCert("badsubleaf", false, &subauth);
-  EXPECT_THROW(verifier_->verify({getPeerCert(subleaf)}), std::runtime_error);
+  expectThrowWithAlert(
+      [&] { verifier_->verify({getPeerCert(subleaf)}); },
+      AlertDescription::bad_certificate);
 }
 
 TEST_F(DefaultCertificateVerifierTest, TestVerifyWithBadRoot) {
   auto newroot = createCert("root2", true, nullptr);
   auto subauth = createCert("subauth2", true, &newroot);
   auto subleaf = createCert("leaf2", false, &subauth);
-  EXPECT_THROW(
-      verifier_->verify({getPeerCert(subleaf), getPeerCert(subauth)}),
-      std::runtime_error);
+  expectThrowWithAlert(
+      [&] { verifier_->verify({getPeerCert(subleaf), getPeerCert(subauth)}); },
+      AlertDescription::bad_certificate);
+}
+TEST_F(DefaultCertificateVerifierTest, TestVerifyWithExpiredLeafTooOld) {
+  auto now = std::chrono::system_clock::now();
+  auto newLeaf = createCert({
+      .cn = "expiredLeaf",
+      .issuer = &rootCertAndKey_,
+      .notBefore = now - std::chrono::hours(24),
+      .notAfter = now - std::chrono::hours(23),
+  });
+
+  expectThrowWithAlert(
+      [&] { verifier_->verify({getPeerCert(newLeaf)}); },
+      AlertDescription::certificate_expired);
+}
+
+TEST_F(DefaultCertificateVerifierTest, TestVerifyWithExpiredLeafTooNew) {
+  auto now = std::chrono::system_clock::now();
+  auto newLeaf = createCert({
+      .cn = "expiredLeaf",
+      .issuer = &rootCertAndKey_,
+      .notBefore = now + std::chrono::hours(24),
+      .notAfter = now + std::chrono::hours(25),
+  });
+
+  expectThrowWithAlert(
+      [&] { verifier_->verify({getPeerCert(newLeaf)}); },
+      AlertDescription::certificate_expired);
 }
 } // namespace test
 } // namespace fizz

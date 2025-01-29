@@ -2234,6 +2234,10 @@ AsyncActions EventHandler<
     } else {
       newCert = std::move(leafCert);
     }
+  } catch (const FizzVerificationException& e) {
+    throw FizzVerificationException(
+        folly::to<std::string>("client certificate failure: ", e.what()),
+        e.getAlert());
   } catch (const FizzException&) {
     throw;
   } catch (const std::exception& e) {

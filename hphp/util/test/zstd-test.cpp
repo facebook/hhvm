@@ -97,7 +97,7 @@ TEST(ZstdTest, Chunks) {
 }
 
 TEST(ZstdTest, ContextReuseSingleShot) {
-  auto codec = folly::io::getCodec(folly::io::CodecType::ZSTD);
+  auto codec = folly::compression::getCodec(folly::io::CodecType::ZSTD);
 
   size_t len1;
   size_t len2;
@@ -138,7 +138,7 @@ TEST(ZstdTest, ContextReuseSingleShot) {
 }
 
 TEST(ZstdTest, ContextReuseStreamed) {
-  auto codec = folly::io::getCodec(folly::io::CodecType::ZSTD);
+  auto codec = folly::compression::getCodec(folly::io::CodecType::ZSTD);
 
   size_t full_len1;
   size_t full_len2;
@@ -197,7 +197,7 @@ TEST(ZstdTest, ContextReuseStreamed) {
 }
 
 TEST(ZstdTest, Checksumming) {
-  auto codec = folly::io::getCodec(folly::io::CodecType::ZSTD);
+  auto codec = folly::compression::getCodec(folly::io::CodecType::ZSTD);
   size_t len1;
   size_t len2;
 
@@ -237,7 +237,7 @@ TEST(ZstdTest, Checksumming) {
 }
 
 TEST(ZstdTest, Superblock) {
-  auto codec = folly::io::getCodec(folly::io::CodecType::ZSTD);
+  auto codec = folly::compression::getCodec(folly::io::CodecType::ZSTD);
   size_t len1;
   size_t len2;
 

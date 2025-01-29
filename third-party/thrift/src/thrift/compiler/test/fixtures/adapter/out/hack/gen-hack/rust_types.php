@@ -933,6 +933,14 @@ class Serde implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapi
           shape(
           )
         ),
+        '\facebook\thrift\annotation\Enum' => \facebook\thrift\annotation\Enum::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\Union' => \facebook\thrift\annotation\Union::fromShape(
+          shape(
+          )
+        ),
       ],
       'fields' => dict[
       ],

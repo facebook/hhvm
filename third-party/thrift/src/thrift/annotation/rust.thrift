@@ -272,6 +272,8 @@ struct Type {
 // Selectively enable/disable derivation of serde serialization functions for a
 // given type.
 @scope.Struct
+@scope.Enum
+@scope.Union
 struct Serde {
   1: bool enabled;
 }

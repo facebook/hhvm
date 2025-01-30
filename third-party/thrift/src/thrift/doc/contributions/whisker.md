@@ -624,36 +624,180 @@ pragma-statement → { "{{" ~ "#" ~ "pragma" ~ ( "single-line" ) ~ "}}" }
 
 ### Partial Blocks & Statements
 
-:::warning
-`{{#let partial}}` blocks and `{{#partial}}` statements have not been implemented yet.
-:::
-
-Partial blocks allow defining reusable templates within a Whisker template. They are not rendered unless *applied* (by name). A simple example of a `{{#let partial}}` block might be:
+Partial blocks allow defining reusable templates within a Whisker template. They are not rendered unless *applied* (by name).
+The following example of a `{{#let partial}}` block defines a partial named `greeting` that accepts a single argument named `person`:
 
 ```handlebars
-{{#let partial greeting as |person|}}
+{{#let partial greeting |person|}}
 Greetings, {{person.firstName}} {{person.lastName}}!
 {{/let partial}}
 ```
 
-Partial blocks must be applied with `{{#partial ...}}` statements. A simple example for a `{{#partial}}` statement for the above block might be:
+Partial blocks must be rendered using `{{#partial ...}}` statements. A simple example of a `{{#partial}}` statement for the above block might be:
 
 ```handlebars
 {{#partial greeting person=person}}
 ```
 
-The `{{#partial}}` statement must include named arguments that are [bound](#scopes) to `expression`s, matching the captures (`as |...|`) from the definition.
+The `{{#partial}}` statement must include all named arguments from the partial block being applied.
+Each named argument is an `expression`, which is [bound](#scopes) to the corresponding argument (matching `|...|`) from the partial block.
 
 The contained body of the `{{#let partial}}` block is rendered with a [derived evaluation context](#derived-evaluation-context). Names accessible from the site of the application are **not** *implicitly* available within the block.
 
 <Example>
 
 ```handlebars
-{{#let partial greeting as |person|}}
+{{#let partial greeting |person|}}
 Greetings, {{person.firstName}} {{person.lastName}}!
 {{/let partial}}
 
-{{> greeting person=dave}}
+{{#partial greeting person=dave}}
+```
+
+```json title=Context
+{
+  "dave": {
+    "firstName": "Dave",
+    "lastName": "Grohl"
+  }
+}
+```
+
+```text title=Output
+Greetings, Dave Grohl!
+```
+
+</Example>
+
+To implement recursive partials, a partial can access itself by name.
+
+<Example title="Example with recursion">
+
+```handlebars
+{{! https://en.wikipedia.org/wiki/Collatz_conjecture }}
+{{#let partial collatz |n|}}
+{{n}}
+  {{#if (ne? n 1)}}
+    {{#if (even? n)}}
+{{#partial collatz n=(div n 2)}}
+    {{#else}}
+{{#partial collatz n=(add (mul 3 n) 1)}}
+    {{/if (even? n)}}
+  {{/if (ne? n 1)}}
+{{/let partial}}
+{{#partial collatz n=6}}
+```
+
+```javascript title=Globals
+{
+  "even?": (n) => n % 2 == 0,
+  "mul": (a, b) => a * b,
+  "div": (a, b) => a / b,
+  "ne?": (a, b) => a != b,
+  "add": (a, b) => a + b,
+}
+```
+
+```text title=Output
+6
+3
+10
+5
+16
+8
+4
+2
+1
+```
+
+</Example>
+
+Partial blocks and statements do not require arguments.
+
+<Example title="Example without arguments">
+
+```handlebars
+{{#let partial copyright}}
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+{{/let partial}}
+{{#partial copyright}}
+```
+
+```text title=Output
+/*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+```
+
+</Example>
+
+Partial blocks may have multiple arguments. The arguments may be provided in any order.
+
+<Example title="Example with multiple arguments">
+
+```handlebars
+{{#let partial greeting |firstName lastName|}}
+Greetings, {{firstName}} {{lastName}}!
+{{/let partial}}
+
+{{#partial greeting lastName=dave.lastName firstName=dave.firstName}}
+```
+
+```json title=Context
+{
+  "dave": {
+    "firstName": "Dave",
+    "lastName": "Grohl"
+  }
+}
+```
+
+```text title=Output
+Greetings, Dave Grohl!
+```
+
+</Example>
+
+The name of a partial block is [bound](#scopes) to an [object](#data-model) in the current evaluation context, meaning it follows normal [name resolution rules](#evaluation-context). As a result, a partial block can be passed around like any other object.
+
+<Example title="Example with partial as object">
+
+```handlebars
+{{#let partial greeting |firstName lastName|}}
+Greetings, {{firstName}} {{lastName}}!
+{{/let partial}}
+
+{{#let partial with-firstName-lastName |person action|}}
+{{#partial action firstName=person.firstName lastName=person.lastName}}
+{{/let partial}}
+
+{{#partial with-firstName-lastName person=dave action=greeting}}
 ```
 
 ```json title=Context
@@ -676,7 +820,7 @@ Partial statements retain the *preceding indentation* at the site of the applica
 <Example title="Example with indentation">
 
 ```handlebars title=example.whisker
-{{#let partial president as |person|}}
+{{#let partial president |person|}}
 {{person.lastName}}
   {{person.firstName}}
 {{/let partial}}
@@ -715,20 +859,16 @@ Some historic presidents are:
 <Grammar>
 
 ```
-partial-block         → { partial-block-open ~ body* ~ partial-block-close }
-partial-block-open    → { "{{#" ~ "let" ~ "partial" ~ identifier ~ partial-block-capture ~ "}}" }
-partial-block-capture → { "as" ~ "|" ~ identifier+ ~ "|" }
-partial-block-close   → { "{{/" ~ "let" ~ "partial" ~ "}}" }
+partial-block           → { partial-block-open ~ body* ~ partial-block-close }
+partial-block-open      → { "{{#" ~ "let" ~ "partial" ~ identifier ~ partial-block-arguments? ~ "}}" }
+partial-block-arguments → { "|" ~ identifier+ ~ "|" }
+partial-block-close     → { "{{/" ~ "let" ~ "partial" ~ "}}" }
 
-partial-statement → { "{{" ~ "#" ~ "partial" ~ identifier ~ partial-argument+ ~ "}}" }
+partial-statement → { "{{" ~ "#" ~ "partial" ~ expression ~ partial-argument* ~ "}}" }
 partial-argument  → { identifier ~ "=" ~ expression }
 ```
 
 </Grammar>
-
-:::note
-Partial blocks may only appear at the top of a source file.
-:::
 
 Whisker `{{#let partial}}` blocks are based on [Handlebars partial parameters](https://handlebarsjs.com/guide/partials.html#partial-parameters).
 

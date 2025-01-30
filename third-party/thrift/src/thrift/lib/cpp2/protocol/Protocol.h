@@ -20,15 +20,15 @@
 #include <sys/types.h>
 
 #include <cstdint>
-#include <map>
 #include <memory>
 #include <string>
-#include <vector>
 
 #include <glog/logging.h>
 
+#include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
+#include <folly/memory/UninitializedMemoryHacks.h>
 #include <folly/portability/GFlags.h>
 #include <thrift/lib/cpp/Thrift.h>
 #include <thrift/lib/cpp/protocol/TProtocol.h>
@@ -399,6 +399,47 @@ struct StringTraits<std::unique_ptr<folly::IOBuf>> {
     return folly::IOBufLess{}(lhs, rhs);
   }
 };
+
+namespace detail {
+
+template <typename StrType>
+inline void readStringBody(StrType& str, folly::io::Cursor& in, size_t size) {
+  // Catch empty string case
+  if (size == 0) {
+    str.clear();
+    return;
+  }
+
+  if (in.length() < size) {
+    if (!in.canAdvance(size)) {
+      protocol::TProtocolException::throwTruncatedData();
+    }
+    str.reserve(size); // only reserve for multi iter case below
+  }
+  str.clear();
+  size_t size_left = size;
+  while (size_left > 0) {
+    auto data = in.peekBytes();
+    auto data_avail = std::min(data.size(), size_left);
+    if (data.empty()) {
+      TProtocolException::throwTruncatedData();
+    }
+
+    str.append((const char*)data.data(), data_avail);
+    size_left -= data_avail;
+    in.skipNoAdvance(data_avail);
+  }
+}
+
+inline void readStringBody(
+    std::string& str, folly::io::Cursor& in, size_t size) {
+  folly::resizeWithoutInitialization(str, size);
+  if (in.pullAtMost(str.data(), size) < size) {
+    str.clear();
+    protocol::TProtocolException::throwTruncatedData();
+  }
+}
+} // namespace detail
 
 } // namespace apache::thrift
 

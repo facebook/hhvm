@@ -321,6 +321,14 @@ class ExampleDsl {
   ): ExampleDsl::TAst {
     return "\${".($splice_val->visit($this))."}";
   }
+
+  public function visitShape(
+    ?ExprPos $_,
+    vec<(ExampleDsl::TAst, ExampleDsl::TAst)> $operand
+  )[]: ExampleDsl::TAst {
+    $v = HH\Lib\Vec\map($operand, $kv ==> $kv[0]."=>".$kv[1]);
+    return "shape(".concat_arg_list($v).")";
+  }
 }
 
 // Type declarations used when checking DSL expressions.

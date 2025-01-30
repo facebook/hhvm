@@ -777,11 +777,7 @@ impl RewriteState {
             // Desugared: $0v->visitString(new ExprPos(...), 'foo')
             String(_) => {
                 let virtual_expr = static_meth_call(visitor_name, et::STRING_TYPE, vec![], &pos);
-                let desugar_expr = v_meth_call(
-                    et::VISIT_STRING,
-                    vec![pos_expr, Expr((), pos.clone(), expr_)],
-                    &pos,
-                );
+                let desugar_expr = mk_visit_string(&pos, expr_);
                 RewriteResult {
                     virtual_expr,
                     desugar_expr,
@@ -1590,6 +1586,49 @@ impl RewriteState {
                     desugar_expr,
                 }
             }
+            // Source: MyDsl`shape('key1' => value1, 'key2' => value2)`
+            // Virtualized: shape('key1' => virtualized(value1), 'key2' => virtualized(value2))
+            // Desugared: $0v->visitShape(pos, vec[tuple($0->visitString(pos, 'key1'), desugared(value1))])
+            Shape(fields) => {
+                let mut virtual_shape_fields = vec![];
+                let mut desugar_shape_fields = vec![];
+                for (shape_key, shape_value) in fields {
+                    if let ShapeFieldName::SFlitStr((shape_key_pos, shape_key_name)) = &shape_key {
+                        let value_expr = self.rewrite_expr(shape_value, visitor_name);
+                        // we virtualize using the original Hack shape key expression...
+                        virtual_shape_fields.push((shape_key.clone(), value_expr.virtual_expr));
+                        desugar_shape_fields.push(Expr::new(
+                            (),
+                            shape_key_pos.clone(),
+                            Expr_::Tuple(vec![
+                                // ...however, we desuger the key into a string expression, to keep the key desugaring
+                                // generic and more akin to other collections.
+                                mk_visit_string(
+                                    shape_key_pos,
+                                    Expr_::String(shape_key_name.clone()),
+                                ),
+                                value_expr.desugar_expr,
+                            ]),
+                        ));
+                    } else {
+                        self.errors.push((
+                            pos.clone(),
+                            "Expression trees only support string literal shape field names."
+                                .into(),
+                        ));
+                    }
+                }
+                let virtual_expr = Expr((), pos.clone(), Shape(virtual_shape_fields));
+                let desugar_expr = v_meth_call(
+                    et::VISIT_SHAPE,
+                    vec![pos_expr, vec_literal(desugar_shape_fields)],
+                    &pos,
+                );
+                RewriteResult {
+                    virtual_expr,
+                    desugar_expr,
+                }
+            }
             ClassConst(_) => {
                 self.errors.push((
                 pos,
@@ -2005,5 +2044,13 @@ fn static_meth_ptr(pos: &Pos, cid: &ClassId, meth: &Pstring) -> Expr {
             aast::FunctionPtrId::FPClassConst(cid.clone(), meth.clone()),
             vec![],
         ),
+    )
+}
+
+fn mk_visit_string(pos: &Pos, str: Expr_) -> Expr {
+    v_meth_call(
+        et::VISIT_STRING,
+        vec![exprpos(pos), Expr((), pos.clone(), str)],
+        pos,
     )
 }

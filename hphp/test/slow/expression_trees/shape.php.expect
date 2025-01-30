@@ -1,0 +1,2 @@
+shape()
+shape("x"=>1,"y"=>shape("z"=>2))

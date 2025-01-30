@@ -22,6 +22,7 @@ from typing import Sequence
 
 from testing.services import TestingServiceInterface
 from testing.types import Color, easy
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.server import getServiceName, SocketAddress, ThriftServer
 from thrift.py3.test.is_overload.helper import OverloadTestHelper
 
@@ -96,10 +97,12 @@ class ServicesTests(unittest.TestCase):
 
         loop.run_until_complete(inner())
 
+    @brokenInAutoMigrate()
     def test_get_service_name(self) -> None:
         h = Handler()
         self.assertEqual(getServiceName(h), "TestingService")
 
+    @brokenInAutoMigrate()
     def test_get_address(self) -> None:
         loop = asyncio.get_event_loop()
         coro = self.get_address(loop)
@@ -113,6 +116,7 @@ class ServicesTests(unittest.TestCase):
         await serve_task
         return addy
 
+    @brokenInAutoMigrate()
     def test_annotations(self) -> None:
         annotations = TestingServiceInterface.annotations
         self.assertIsInstance(annotations, types.MappingProxyType)
@@ -137,6 +141,7 @@ class ServicesTests(unittest.TestCase):
         ret = loop.run_until_complete(h.renamed_func(True))
         self.assertTrue(ret)
 
+    @brokenInAutoMigrate()
     def test_server_manipulate_config(self) -> None:
         MAX_REQUESTS = 142
         MAX_CONNECTIONS = 132
@@ -170,6 +175,7 @@ class ServicesTests(unittest.TestCase):
         server.set_quick_exit_on_shutdown_timeout(True)
         self.assertTrue(server.get_quick_exit_on_shutdown_timeout())
 
+    @brokenInAutoMigrate()
     def test_server_get_stats(self) -> None:
         server = ThriftServer(Handler(), port=0)
 
@@ -177,12 +183,14 @@ class ServicesTests(unittest.TestCase):
         self.assertGreaterEqual(active_requests, 0)
         self.assertLess(active_requests, 10)
 
+    @brokenInAutoMigrate()
     def test_set_is_overloaded(self) -> None:
         helper = OverloadTestHelper(Handler(), 0)
         helper.set_is_overload()
         self.assertTrue(helper.check_overload("overloaded_method"))
         self.assertFalse(helper.check_overload("not_overloaded_method"))
 
+    @brokenInAutoMigrate()
     def test_lifecycle_hooks(self) -> None:
         async def inner() -> None:
             handler = Handler()

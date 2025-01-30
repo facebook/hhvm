@@ -831,6 +831,9 @@ TEST_F(StructTest, TerseFields) {
   EXPECT_TRUE(serializedField<ident::exception_field>(terse));
   EXPECT_TRUE(serializedField<ident::cpp_ref_struct_field>(terse));
   EXPECT_TRUE(serializedField<ident::cpp_ref_union_field>(terse));
+  EXPECT_TRUE(serializedField<ident::cpp_shared_ref_struct_field>(terse));
+  EXPECT_TRUE(serializedField<ident::cpp_shared_ref_union_field>(terse));
+  EXPECT_TRUE(serializedField<ident::cpp_shared_ref_exception_field>(terse));
 
   // cpp.ref exceptions are nullptr by default
   EXPECT_FALSE(serializedField<ident::cpp_ref_exception_field>(terse));
@@ -842,6 +845,9 @@ TEST_F(StructTest, TerseFields) {
   terse.cpp_ref_struct_field() = nullptr;
   terse.cpp_ref_union_field() = nullptr;
   terse.cpp_ref_exception_field() = nullptr;
+  terse.cpp_shared_ref_struct_field() = nullptr;
+  terse.cpp_shared_ref_union_field() = nullptr;
+  terse.cpp_shared_ref_exception_field() = nullptr;
 
   // Numeric fields are serialized if they don't equal custom default
   EXPECT_TRUE(serializedField<ident::bool_field>(terse));
@@ -864,7 +870,11 @@ TEST_F(StructTest, TerseFields) {
   EXPECT_TRUE(serializedField<ident::struct_field>(terse));
   EXPECT_TRUE(serializedField<ident::union_field>(terse));
   EXPECT_TRUE(serializedField<ident::exception_field>(terse));
+  EXPECT_TRUE(serializedField<ident::cpp_shared_ref_struct_field>(terse));
+  EXPECT_TRUE(serializedField<ident::cpp_shared_ref_union_field>(terse));
+  EXPECT_TRUE(serializedField<ident::cpp_shared_ref_exception_field>(terse));
 
+  // @cpp.Ref has special logic that it skips nullptr fields
   EXPECT_FALSE(serializedField<ident::cpp_ref_struct_field>(terse));
   EXPECT_FALSE(serializedField<ident::cpp_ref_union_field>(terse));
   EXPECT_FALSE(serializedField<ident::cpp_ref_exception_field>(terse));

@@ -170,16 +170,29 @@ struct TerseFieldsWithCustomDefault {
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @cpp.DeprecatedTerseWrite
+  @cpp.AllowLegacyDeprecatedTerseWritesRef
   16: NestedStruct cpp_ref_struct_field;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @cpp.DeprecatedTerseWrite
+  @cpp.AllowLegacyDeprecatedTerseWritesRef
   17: NestedUnion cpp_ref_union_field;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   @cpp.DeprecatedTerseWrite
+  @cpp.AllowLegacyDeprecatedTerseWritesRef
   18: NestedException cpp_ref_exception_field;
 
   @cpp.DeprecatedTerseWrite
   19: i32 redundant_custom_default = 0;
+
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  20: NestedStruct cpp_shared_ref_struct_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  21: NestedUnion cpp_shared_ref_union_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
+  22: NestedException cpp_shared_ref_exception_field;
 }

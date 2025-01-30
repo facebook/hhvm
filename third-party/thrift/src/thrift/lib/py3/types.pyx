@@ -26,6 +26,7 @@ from folly.iobuf import IOBuf
 from types import MappingProxyType
 
 from thrift.py3.exceptions cimport GeneratedError
+from thrift.python.exceptions cimport GeneratedError as _fbthrift_python_GeneratedError
 from thrift.py3.serializer import deserialize, serialize
 from thrift.python.types cimport (
     BadEnum as _fbthrift_python_BadEnum,
@@ -37,6 +38,7 @@ from thrift.python.types import (
     Flag as _fbthrift_python_Flag,
     Struct as _fbthrift_python_Struct,
     StructOrUnion as _fbthrift_python_StructOrUnion,
+    isset as _fbthrift_python_isset,
     Union as _fbthrift_python_Union,
 )
 
@@ -48,10 +50,6 @@ __all__ = ['Struct', 'BadEnum', 'Union', 'Enum', 'Flag', 'EnumMeta']
 
 
 _fbthrift__module_name__ = "thrift.py3.types"
-
-# This isn't exposed to the module dict
-Object = cython.fused_type(Struct, GeneratedError)
-
 
 cdef list_eq(List self, object other):
     if (
@@ -85,8 +83,13 @@ cdef class StructMeta(type):
     We set helper functions here since they can't possibly confict with field names
     """
     @staticmethod
-    def isset(Object struct):
-        return struct._fbthrift_isset()
+    def isset(struct):
+        if isinstance(struct, (_fbthrift_python_Struct, _fbthrift_python_GeneratedError, _fbthrift_python_Union)):
+            return _IsSet(type(struct).__name__, _fbthrift_python_isset(struct))
+        elif isinstance(struct, Struct):
+            return (<Struct>struct)._fbthrift_isset()
+        elif isinstance(struct, GeneratedError):
+            return (<GeneratedError>struct)._fbthrift_isset()
 
     @staticmethod
     def update_nested_field(obj, path_to_values):

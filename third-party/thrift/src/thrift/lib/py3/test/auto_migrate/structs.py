@@ -51,7 +51,6 @@ from thrift.py3.types import Struct
 
 
 class StructTests(unittest.TestCase):
-    @brokenInAutoMigrate()
     def test_isset_Struct(self) -> None:
         serialized = b'{"name":"/dev/null","type":8}'
         file = deserialize(File, serialized, protocol=Protocol.JSON)
@@ -73,7 +72,6 @@ class StructTests(unittest.TestCase):
         #  param but got `File`.
         self.assertFalse(Struct.isset(file).type)
 
-    @brokenInAutoMigrate()
     def test_isset_repr(self) -> None:
         serialized = b'{"name":"/dev/null","type":8}'
         file = deserialize(File, serialized, protocol=Protocol.JSON)
@@ -97,7 +95,6 @@ class StructTests(unittest.TestCase):
             #  1st param but got `Integers`.
             Struct.isset(i).large
 
-    @brokenInAutoMigrate()
     def test_isset_Error(self) -> None:
         e = UnusedError()
         # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.types._T]]` for 1st

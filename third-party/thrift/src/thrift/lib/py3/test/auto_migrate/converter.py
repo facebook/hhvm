@@ -418,7 +418,6 @@ class PythonToPy3ConverterTest(unittest.TestCase):
         self.assertEqual(complex_union.type, py3_types.Union.Type.simple_)
         self.assertEqual(complex_union.simple_.intField, 42)
 
-    @brokenInAutoMigrate()
     def test_optional_defaults(self) -> None:
         converted = python_types.OptionalDefaultsStruct()._to_py3()
         # pyre-fixme[6]: Expected `HasIsSet[Variable[thrift.py3.py3_types._T]]` for 1st

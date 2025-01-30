@@ -71,6 +71,15 @@ struct GeneratePatchNew {}
 @scope.Structured
 struct AssignOnlyPatch {}
 
+/**
+ * Do not use.
+ *
+ * An annotation to allow usage of pre-eixsting deprecated terse write fields
+ * with custom default not equal to the intrinsic default in Thrift Patch.
+ */
+@scope.Field
+struct DeprecatedTerseWriteCustomDefaultDoNotUse {}
+
 /** A patch for a boolean value. */
 @cpp.Adapter{
   underlyingName = "BoolPatchStruct",

@@ -212,6 +212,73 @@ class AssignOnlyPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
 }
 
 /**
+ * Do not use.
+ * 
+ * An annotation to allow usage of pre-eixsting deprecated terse write fields
+ * with custom default not equal to the intrinsic default in Thrift Patch.
+ *
+ * Original thrift struct:-
+ * DeprecatedTerseWriteCustomDefaultDoNotUse
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/op/DeprecatedTerseWriteCustomDefaultDoNotUse'))>>
+class DeprecatedTerseWriteCustomDefaultDoNotUse implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'DeprecatedTerseWriteCustomDefaultDoNotUse';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "patch.DeprecatedTerseWriteCustomDefaultDoNotUse",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+/**
  * A patch for a boolean value.
  *
  * Original thrift struct:-

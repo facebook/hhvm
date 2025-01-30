@@ -47,6 +47,16 @@ class StructMetadata<::facebook::thrift::test::terse_write::deprecated::CppRefSt
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
+template <>
+class StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
 } // namespace md
 } // namespace detail
 } // namespace thrift

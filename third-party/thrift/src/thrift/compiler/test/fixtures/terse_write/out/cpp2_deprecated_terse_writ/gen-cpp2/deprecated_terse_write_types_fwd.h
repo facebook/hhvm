@@ -15,6 +15,8 @@ class MyUnion;
 class StructLevelTerseStruct;
 class FieldLevelTerseStruct;
 class CppRefStructFields;
+class DeprecatedTerseWriteWithCustomDefault;
+class DeprecatedTerseWriteWithRedundantCustomDefault;
 } // namespace facebook::thrift::test::terse_write::deprecated
 // END forward_declare
 

@@ -122,3 +122,61 @@ struct CppRefStructFields {
   @cpp.Ref{type = cpp.RefType.Unique}
   2: MyStruct struct_ref_field;
 }
+
+struct DeprecatedTerseWriteWithCustomDefault {
+  @cpp.DeprecatedTerseWrite
+  1: bool bool_field = true;
+  @cpp.DeprecatedTerseWrite
+  2: byte byte_field = 42;
+  @cpp.DeprecatedTerseWrite
+  3: i16 short_field = 42;
+  @cpp.DeprecatedTerseWrite
+  4: i32 int_field = 42;
+  @cpp.DeprecatedTerseWrite
+  5: i64 long_field = 42;
+  @cpp.DeprecatedTerseWrite
+  6: float float_field = 42.0;
+  @cpp.DeprecatedTerseWrite
+  7: double double_field = 42.0;
+  @cpp.DeprecatedTerseWrite
+  8: string string_field = "hello";
+  @cpp.DeprecatedTerseWrite
+  9: binary binary_field = "world";
+  @cpp.DeprecatedTerseWrite
+  10: MyEnum enum_field = MyEnum.ME1;
+  @cpp.DeprecatedTerseWrite
+  11: list<i16> list_field = [1];
+  @cpp.DeprecatedTerseWrite
+  12: set<i16> set_field = [1];
+  @cpp.DeprecatedTerseWrite
+  13: map<i16, i16> map_field = {1: 1};
+}
+
+struct DeprecatedTerseWriteWithRedundantCustomDefault {
+  @cpp.DeprecatedTerseWrite
+  1: bool bool_field = false;
+  @cpp.DeprecatedTerseWrite
+  2: byte byte_field = 0;
+  @cpp.DeprecatedTerseWrite
+  3: i16 short_field = 0;
+  @cpp.DeprecatedTerseWrite
+  4: i32 int_field = 0;
+  @cpp.DeprecatedTerseWrite
+  5: i64 long_field = 0;
+  @cpp.DeprecatedTerseWrite
+  6: float float_field = 0.0;
+  @cpp.DeprecatedTerseWrite
+  7: double double_field = 0.0;
+  @cpp.DeprecatedTerseWrite
+  8: string string_field = "";
+  @cpp.DeprecatedTerseWrite
+  9: binary binary_field = "";
+  @cpp.DeprecatedTerseWrite
+  10: MyEnum enum_field = MyEnum.ME0;
+  @cpp.DeprecatedTerseWrite
+  11: list<i16> list_field = [];
+  @cpp.DeprecatedTerseWrite
+  12: set<i16> set_field = [];
+  @cpp.DeprecatedTerseWrite
+  13: map<i16, i16> map_field = {};
+}

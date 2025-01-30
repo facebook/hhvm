@@ -130,6 +130,52 @@ StructMetadata<::facebook::thrift::test::terse_write::deprecated::CppRefStructFi
   }
   return res.first->second;
 }
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("deprecated_terse_write.DeprecatedTerseWriteWithCustomDefault", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& deprecated_terse_write_DeprecatedTerseWriteWithCustomDefault = res.first->second;
+  deprecated_terse_write_DeprecatedTerseWriteWithCustomDefault.name() = "deprecated_terse_write.DeprecatedTerseWriteWithCustomDefault";
+  deprecated_terse_write_DeprecatedTerseWriteWithCustomDefault.is_union() = false;
+  static const auto* const
+  deprecated_terse_write_DeprecatedTerseWriteWithCustomDefault_fields = new std::array<EncodedThriftField, 13>{ {
+    { 1, "bool_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},    { 2, "byte_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},    { 3, "short_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},    { 4, "int_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},    { 5, "long_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},    { 6, "float_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},    { 7, "double_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},    { 8, "string_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},    { 9, "binary_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},    { 10, "enum_field", false, std::make_unique<Enum<::facebook::thrift::test::terse_write::deprecated::MyEnum>>("deprecated_terse_write.MyEnum"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},    { 11, "list_field", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},    { 12, "set_field", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},    { 13, "map_field", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},  }};
+  for (const auto& f : *deprecated_terse_write_DeprecatedTerseWriteWithCustomDefault_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    deprecated_terse_write_DeprecatedTerseWriteWithCustomDefault.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithRedundantCustomDefault>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("deprecated_terse_write.DeprecatedTerseWriteWithRedundantCustomDefault", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& deprecated_terse_write_DeprecatedTerseWriteWithRedundantCustomDefault = res.first->second;
+  deprecated_terse_write_DeprecatedTerseWriteWithRedundantCustomDefault.name() = "deprecated_terse_write.DeprecatedTerseWriteWithRedundantCustomDefault";
+  deprecated_terse_write_DeprecatedTerseWriteWithRedundantCustomDefault.is_union() = false;
+  static const auto* const
+  deprecated_terse_write_DeprecatedTerseWriteWithRedundantCustomDefault_fields = new std::array<EncodedThriftField, 13>{ {
+    { 1, "bool_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},    { 2, "byte_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},    { 3, "short_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},    { 4, "int_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},    { 5, "long_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},    { 6, "float_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},    { 7, "double_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},    { 8, "string_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},    { 9, "binary_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},    { 10, "enum_field", false, std::make_unique<Enum<::facebook::thrift::test::terse_write::deprecated::MyEnum>>("deprecated_terse_write.MyEnum"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},    { 11, "list_field", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},    { 12, "set_field", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},    { 13, "map_field", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.DeprecatedTerseWrite", {  }).cv_struct_ref(), }},  }};
+  for (const auto& f : *deprecated_terse_write_DeprecatedTerseWriteWithRedundantCustomDefault_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    deprecated_terse_write_DeprecatedTerseWriteWithRedundantCustomDefault.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
 
 } // namespace md
 } // namespace detail

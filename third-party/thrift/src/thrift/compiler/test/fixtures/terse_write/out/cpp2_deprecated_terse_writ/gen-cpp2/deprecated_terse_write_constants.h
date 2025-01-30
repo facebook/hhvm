@@ -14,8 +14,8 @@ namespace facebook::thrift::test::terse_write::deprecated {
 /** Glean {"file": "thrift/compiler/test/fixtures/terse_write/src/deprecated_terse_write.thrift"} */
 namespace deprecated_terse_write_constants {
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_a4403c601bb38b4b();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_a4403c601bb38b4b_includes();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_fdf9c457eda6d727();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_fdf9c457eda6d727_includes();
 
 } // namespace deprecated_terse_write_constants
 } // namespace facebook::thrift::test::terse_write::deprecated

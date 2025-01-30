@@ -26,7 +26,7 @@ from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
 )
 from thrift.py3.common import Protocol
 from thrift.py3.serializer import deserialize
-from thrift.py3.types import Union
+from thrift.py3.types import Struct, Union
 
 
 class UnionTests(unittest.TestCase):
@@ -97,7 +97,6 @@ class UnionTests(unittest.TestCase):
         self.assertEqual(ComplexUnion.__module__, expected)
         self.assertEqual(ComplexUnion().__class__.__module__, expected)
 
-    @brokenInAutoMigrate()
     def test_union_usage(self) -> None:
         value = hash("i64")
         x = Integers(large=value)
@@ -170,7 +169,6 @@ class UnionTests(unittest.TestCase):
         self.assertEqual(union.type, IOBufUnion.Type.buf)
         self.assertEqual(bytes(union.buf), bytes(abuf))
 
-    @brokenInAutoMigrate()
     def test_reserved_union(self) -> None:
         x = ReservedUnion(from_="foo")
         self.assertIsInstance(x, Union)
@@ -190,7 +188,17 @@ class UnionTests(unittest.TestCase):
         self.assertEqual(x.value, "bar")
         self.assertEqual(x.ok, "bar")
 
-    @brokenInAutoMigrate()
     def test_instance_base_class(self) -> None:
-        self.assertTrue(issubclass(ComplexUnion, Union))
         self.assertIsInstance(ComplexUnion(tiny=1), Union)
+        self.assertIsInstance(ComplexUnion(tiny=1), Struct)
+        self.assertIsInstance(ComplexUnion(tiny=1), ComplexUnion)
+        self.assertNotIsInstance(ComplexUnion(tiny=1), ReservedUnion)
+        self.assertNotIsInstance(3, Union)
+        self.assertNotIsInstance(3, ComplexUnion)
+        self.assertTrue(issubclass(ComplexUnion, Union))
+        self.assertTrue(issubclass(ComplexUnion, Struct))
+        self.assertFalse(issubclass(int, Union))
+        self.assertFalse(issubclass(int, ComplexUnion))
+        self.assertFalse(issubclass(Union, ComplexUnion))
+        self.assertFalse(issubclass(Struct, ComplexUnion))
+        self.assertFalse(issubclass(ComplexUnion, ReservedUnion))

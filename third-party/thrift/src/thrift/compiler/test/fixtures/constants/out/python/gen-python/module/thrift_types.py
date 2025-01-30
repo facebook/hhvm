@@ -95,6 +95,10 @@ class Internship(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_Internship()
@@ -161,6 +165,10 @@ class Range(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_Range()
@@ -226,6 +234,10 @@ class struct1(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
 
     @staticmethod
     def __get_metadata__():
@@ -315,6 +327,10 @@ class struct2(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_struct2()
@@ -391,6 +407,10 @@ class struct3(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
 
     @staticmethod
     def __get_metadata__():
@@ -469,6 +489,10 @@ class struct4(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_struct4()
@@ -537,6 +561,10 @@ class union1(metaclass=_fbthrift_python_types.UnionMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
 
     @staticmethod
     def __get_metadata__():
@@ -628,6 +656,10 @@ class union2(metaclass=_fbthrift_python_types.UnionMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
 
     @staticmethod
     def __get_metadata__():

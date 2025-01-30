@@ -42,6 +42,10 @@ class Fiery(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     def __get_thrift_uri__():
         return None
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__exception_Fiery()
@@ -104,6 +108,10 @@ class Serious(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
 
     @staticmethod
     def __get_metadata__():
@@ -179,6 +187,10 @@ class ComplexFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta
     def __get_thrift_uri__():
         return None
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__exception_ComplexFieldNames()
@@ -252,6 +264,10 @@ class CustomFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
 
     @staticmethod
     def __get_metadata__():
@@ -327,6 +343,10 @@ class ExceptionWithPrimitiveField(metaclass=_fbthrift_python_exceptions.Generate
     def __get_thrift_uri__():
         return None
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__exception_ExceptionWithPrimitiveField()
@@ -401,6 +421,10 @@ class ExceptionWithStructuredAnnotation(metaclass=_fbthrift_python_exceptions.Ge
     def __get_thrift_uri__():
         return None
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__exception_ExceptionWithStructuredAnnotation()
@@ -452,6 +476,10 @@ class Banal(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
 
     @staticmethod
     def __get_metadata__():

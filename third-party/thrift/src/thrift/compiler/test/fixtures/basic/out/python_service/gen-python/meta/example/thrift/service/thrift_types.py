@@ -39,6 +39,10 @@ class EchoRequest(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_EchoRequest()
@@ -93,6 +97,10 @@ class EchoResponse(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
 
     @staticmethod
     def __get_metadata__():
@@ -151,6 +159,10 @@ class WhisperException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
 
     @staticmethod
     def __get_metadata__():

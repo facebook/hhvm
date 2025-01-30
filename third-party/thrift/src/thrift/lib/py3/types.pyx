@@ -37,6 +37,7 @@ from thrift.python.types import (
     Flag as _fbthrift_python_Flag,
     Struct as _fbthrift_python_Struct,
     StructOrUnion as _fbthrift_python_StructOrUnion,
+    Union as _fbthrift_python_Union,
 )
 
 # ensures that common classes can be reliably imported from thrift.py3.types
@@ -120,6 +121,16 @@ cdef class StructMeta(type):
 
     def __dir__(cls):
         return tuple(name for name, _ in cls) + ("__iter__", )
+
+    def __instancecheck__(cls, inst):
+        if isinstance(inst, _fbthrift_python_StructOrUnion):
+            return inst._fbthrift_auto_migrate_enabled()
+        return super().__instancecheck__(inst)
+
+    def __subclasscheck__(cls, sub):
+        if issubclass(sub, _fbthrift_python_StructOrUnion):
+            return sub._fbthrift_auto_migrate_enabled()
+        return super().__subclasscheck__(sub)
 
 
 cdef Struct _fbthrift_struct_update_nested_field(Struct obj, list path_and_vals):
@@ -300,6 +311,17 @@ cdef class UnionMeta(type):
     # this just enables the slot; impl here is ignored
     def __module__(cls):
         pass
+
+    def __instancecheck__(cls, inst):
+        if isinstance(inst, _fbthrift_python_Union):
+            return inst._fbthrift_auto_migrate_enabled()
+        return super().__instancecheck__(inst)
+
+    def __subclasscheck__(cls, sub):
+        if issubclass(sub, _fbthrift_python_Union):
+            return sub._fbthrift_auto_migrate_enabled()
+        return super().__subclasscheck__(sub)
+
 
 
 SetMetaClass(<PyTypeObject*> Union, <PyTypeObject*> UnionMeta)

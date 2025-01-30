@@ -93,6 +93,10 @@ class {{> structs/unadapted_name}}{{!
             }}{{^struct:thrift_uri}}None{{/struct:thrift_uri}}
 
 {{#program:generate_immutable_types}}
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return {{#program:py3_auto_migrate?}}True{{/program:py3_auto_migrate?}}{{^program:py3_auto_migrate?}}False{{/program:py3_auto_migrate?}}
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__{{#struct:exception?}}exception{{/struct:exception?}}{{^struct:exception?}}struct{{/struct:exception?}}_{{> structs/unadapted_name}}()

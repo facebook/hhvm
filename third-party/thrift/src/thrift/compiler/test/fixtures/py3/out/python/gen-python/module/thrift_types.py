@@ -56,6 +56,10 @@ class SimpleException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     def __get_thrift_uri__():
         return None
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return True
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__exception_SimpleException()
@@ -111,6 +115,10 @@ class OptionalRefStruct(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return True
 
     @staticmethod
     def __get_metadata__():
@@ -258,6 +266,10 @@ class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return True
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_SimpleStruct()
@@ -338,6 +350,10 @@ class HiddenTypeFieldsStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return True
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_HiddenTypeFieldsStruct()
@@ -399,6 +415,10 @@ class AdaptedUnion(metaclass=_fbthrift_python_types.UnionMeta):
     def __get_thrift_uri__():
         return None
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return True
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_AdaptedUnion()
@@ -459,6 +479,10 @@ class HiddenException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return True
 
     @staticmethod
     def __get_metadata__():
@@ -604,6 +628,10 @@ class ComplexStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return True
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_ComplexStruct()
@@ -665,6 +693,10 @@ class BinaryUnion(metaclass=_fbthrift_python_types.UnionMeta):
     def __get_thrift_uri__():
         return None
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return True
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_BinaryUnion()
@@ -722,6 +754,10 @@ class BinaryUnionStruct(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return True
 
     @staticmethod
     def __get_metadata__():
@@ -869,6 +905,10 @@ class CustomFields(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return True
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_CustomFields()
@@ -1015,6 +1055,10 @@ class CustomTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return None
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return True
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_CustomTypedefFields()
@@ -1160,6 +1204,10 @@ class AdaptedTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return None
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return True
 
     @staticmethod
     def __get_metadata__():

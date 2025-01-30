@@ -1011,6 +1011,10 @@ cdef class StructOrUnion:
     cdef _fbthrift_get_field_value(self, int16_t index):
         raise NotImplementedError("Not implemented on base StructOrUnion class")
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
 def _unpickle_struct(klass, bytes data):
     cdef IOBuf iobuf = IOBuf(data)
     inst = klass.__new__(klass)

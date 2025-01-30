@@ -43,6 +43,10 @@ class empty_struct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/empty_struct"
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_empty_struct()
@@ -97,6 +101,10 @@ class decorated_struct(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/decorated_struct"
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
 
     @staticmethod
     def __get_metadata__():
@@ -230,6 +238,10 @@ class ContainerStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/ContainerStruct"
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_ContainerStruct()
@@ -285,6 +297,10 @@ class CppTypeStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/CppTypeStruct"
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_CppTypeStruct()
@@ -339,6 +355,10 @@ class VirtualStruct(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/VirtualStruct"
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
 
     @staticmethod
     def __get_metadata__():
@@ -406,6 +426,10 @@ class MyStructWithForwardRefEnum(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/MyStructWithForwardRefEnum"
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_MyStructWithForwardRefEnum()
@@ -471,6 +495,10 @@ class TrivialNumeric(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/TrivialNumeric"
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
 
     @staticmethod
     def __get_metadata__():
@@ -538,6 +566,10 @@ class TrivialNestedWithDefault(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/TrivialNestedWithDefault"
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_TrivialNestedWithDefault()
@@ -604,6 +636,10 @@ class ComplexString(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/ComplexString"
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_ComplexString()
@@ -669,6 +705,10 @@ class ComplexNestedWithDefault(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/ComplexNestedWithDefault"
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
 
     @staticmethod
     def __get_metadata__():
@@ -769,6 +809,10 @@ class MinPadding(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/MinPadding"
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_MinPadding()
@@ -868,6 +912,10 @@ class MinPaddingWithCustomType(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/MinPaddingWithCustomType"
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_MinPaddingWithCustomType()
@@ -956,6 +1004,10 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/MyStruct"
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_MyStruct()
@@ -999,6 +1051,10 @@ class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/MyDataItem"
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
 
     @staticmethod
     def __get_metadata__():
@@ -1054,6 +1110,10 @@ class Renaming(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/Renaming"
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
 
     @staticmethod
     def __get_metadata__():
@@ -1121,6 +1181,10 @@ class AnnotatedTypes(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/AnnotatedTypes"
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_AnnotatedTypes()
@@ -1187,6 +1251,10 @@ class ForwardUsageRoot(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/ForwardUsageRoot"
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_ForwardUsageRoot()
@@ -1241,6 +1309,10 @@ class ForwardUsageStruct(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/ForwardUsageStruct"
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
 
     @staticmethod
     def __get_metadata__():
@@ -1297,6 +1369,10 @@ class ForwardUsageByRef(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/ForwardUsageByRef"
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_ForwardUsageByRef()
@@ -1352,6 +1428,10 @@ class IncompleteMap(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/IncompleteMap"
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_IncompleteMap()
@@ -1395,6 +1475,10 @@ class IncompleteMapDep(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/IncompleteMapDep"
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
 
     @staticmethod
     def __get_metadata__():
@@ -1451,6 +1535,10 @@ class CompleteMap(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/CompleteMap"
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_CompleteMap()
@@ -1494,6 +1582,10 @@ class CompleteMapDep(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/CompleteMapDep"
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
 
     @staticmethod
     def __get_metadata__():
@@ -1550,6 +1642,10 @@ class IncompleteList(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/IncompleteList"
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_IncompleteList()
@@ -1593,6 +1689,10 @@ class IncompleteListDep(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/IncompleteListDep"
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
 
     @staticmethod
     def __get_metadata__():
@@ -1649,6 +1749,10 @@ class CompleteList(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/CompleteList"
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_CompleteList()
@@ -1692,6 +1796,10 @@ class CompleteListDep(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/CompleteListDep"
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
 
     @staticmethod
     def __get_metadata__():
@@ -1748,6 +1856,10 @@ class AdaptedList(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/AdaptedList"
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_AdaptedList()
@@ -1802,6 +1914,10 @@ class AdaptedListDep(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/AdaptedListDep"
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
 
     @staticmethod
     def __get_metadata__():
@@ -1858,6 +1974,10 @@ class DependentAdaptedList(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/DependentAdaptedList"
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_DependentAdaptedList()
@@ -1912,6 +2032,10 @@ class DependentAdaptedListDep(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/DependentAdaptedListDep"
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
 
     @staticmethod
     def __get_metadata__():
@@ -2034,6 +2158,10 @@ class AllocatorAware(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/AllocatorAware"
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_AllocatorAware()
@@ -2099,6 +2227,10 @@ class AllocatorAware2(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/AllocatorAware2"
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
 
     @staticmethod
     def __get_metadata__():
@@ -2177,6 +2309,10 @@ class TypedefStruct(metaclass=_fbthrift_python_types.StructMeta):
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/TypedefStruct"
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     @staticmethod
     def __get_metadata__():
         return _fbthrift_metadata__struct_TypedefStruct()
@@ -2231,6 +2367,10 @@ class StructWithDoubleUnderscores(metaclass=_fbthrift_python_types.StructMeta):
     @staticmethod
     def __get_thrift_uri__():
         return "apache.org/thrift/fixtures/types/StructWithDoubleUnderscores"
+
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
 
     @staticmethod
     def __get_metadata__():

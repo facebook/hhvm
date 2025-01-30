@@ -119,7 +119,6 @@ class PyDeprecatedToPy3ConverterTest(unittest.TestCase):
         self.assertEqual(union_with_list.type, py3_types.Union.Type.intList)
         self.assertEqual(union_with_list.value, [1, 2, 3])
 
-    @brokenInAutoMigrate()
     def test_complex_union(self) -> None:
         complex_union = py_deprecated_types.Union(
             simpleField=py_deprecated_types.Simple(

@@ -486,7 +486,14 @@ class NumericalConversionsTests(unittest.TestCase):
             {IncludedColour.red: Basic(), IncludedColour.blue: Basic(nom="b")},
         )
 
-    @brokenInAutoMigrate()
     def test_instance_base_class(self) -> None:
-        self.assertTrue(issubclass(Nested1, Struct))
         self.assertIsInstance(Nested1(), Struct)
+        self.assertIsInstance(Nested1(), Nested1)
+        self.assertNotIsInstance(Nested1(), Nested2)
+        self.assertNotIsInstance(3, Nested1)
+        self.assertNotIsInstance(3, Struct)
+        self.assertTrue(issubclass(Nested1, Struct))
+        self.assertFalse(issubclass(int, Struct))
+        self.assertFalse(issubclass(int, Nested1))
+        self.assertFalse(issubclass(Struct, Nested1))
+        self.assertFalse(issubclass(Nested1, Nested2))

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b0a10e694b1a4bcd8cfd1d3c77fc5b2c>>
+// @generated SignedSource<<32775031f330ddb2b26f181e89d91f31>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -489,7 +489,6 @@ pub struct TypedefCaseTypeVariant(pub Ty, pub Vec<WhereConstraint>);
 
 #[derive(
     Clone,
-    Debug,
     Deserialize,
     Eq,
     EqModuloPos,

@@ -5,6 +5,7 @@
 
 use crate::ast_defs::Id;
 use crate::pos::Pos;
+use crate::typing_defs::TypedefTypeAssignment;
 use crate::typing_defs_core::ConsistentKind;
 use crate::typing_defs_core::PosId;
 use crate::typing_defs_core::Ty;
@@ -106,6 +107,20 @@ impl std::fmt::Debug for Ty_ {
                 .field(tys)
                 .finish(),
             TclassPtr(ty) => f.debug_tuple("TclassPtr").field(ty).finish(),
+        }
+    }
+}
+
+// Add an extra tuple to match oxidized_by_ref. Can remove once we remove o_b_r.
+impl std::fmt::Debug for TypedefTypeAssignment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            TypedefTypeAssignment::SimpleTypeDef(x, y) => {
+                f.debug_tuple("SimpleTypeDef").field(&(x, y)).finish()
+            }
+            TypedefTypeAssignment::CaseType(x, y) => {
+                f.debug_tuple("CaseType").field(&(x, y)).finish()
+            }
         }
     }
 }

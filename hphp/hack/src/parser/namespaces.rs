@@ -9,7 +9,7 @@ use naming_special_names_rust as sn;
 use oxidized::ast::*;
 use oxidized::namespace_env;
 
-trait NamespaceEnv {
+pub trait NamespaceEnv {
     fn disable_xhp_element_mangling(&self) -> bool;
     fn is_codegen(&self) -> bool;
     fn name(&self) -> Option<&str>;
@@ -115,7 +115,7 @@ fn elaborate_into_ns(ns_name: Option<&str>, id: &str) -> String {
     }
 }
 
-fn elaborate_into_current_ns(nsenv: &impl NamespaceEnv, id: &str) -> String {
+pub fn elaborate_into_current_ns(nsenv: &impl NamespaceEnv, id: &str) -> String {
     elaborate_into_ns(nsenv.name(), id)
 }
 
@@ -143,7 +143,7 @@ pub fn elaborate_xhp_namespace(id: &str) -> Option<String> {
 /// not, just relying on the idempotence of this function to make sure everything
 /// works out. (Fully qualifying identifiers is of course idempotent, but there
 /// used to be other schemes here.)
-fn elaborate_raw_id<'a>(
+pub fn elaborate_raw_id<'a>(
     nsenv: &impl NamespaceEnv,
     kind: ElaborateKind,
     id: &'a str,

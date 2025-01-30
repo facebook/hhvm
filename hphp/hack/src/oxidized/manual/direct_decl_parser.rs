@@ -39,6 +39,9 @@ pub struct ParsedFile {
     /// are detected in a second pass over the CST, and this field does not
     /// indicate whether errors would be detected in that second pass.
     pub has_first_pass_parse_errors: bool,
+
+    /// The module this file is a part of, if any.
+    pub module_membership: Option<String>,
 }
 
 /// This is a store of decls. It allows iteration of decls in forward lexical order,

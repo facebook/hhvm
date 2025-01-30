@@ -1541,7 +1541,7 @@ module GenerateRustDirectDeclSmartConstructors = struct
       x.type_name
       fwd_args
 
-  let direct_decl_smart_constructors_template : string =
+  let direct_decl_smart_constructors_template_obr : string =
     make_header CStyle ""
     ^ "
 use flatten_smart_constructors::*;
@@ -1604,6 +1604,72 @@ CONSTRUCTOR_METHODS}
       ~filename:
         (full_fidelity_path_prefix
         ^ "../decl/direct_decl_smart_constructors_generated_obr.rs")
+      ~template:direct_decl_smart_constructors_template_obr
+      ()
+
+  let direct_decl_smart_constructors_template : string =
+    make_header CStyle ""
+    ^ "
+use flatten_smart_constructors::*;
+use parser_core_types::compact_token::CompactToken;
+use parser_core_types::token_factory::SimpleTokenFactoryImpl;
+use smart_constructors::SmartConstructors;
+
+use crate::{DirectDeclSmartConstructors, Node};
+
+impl<'o, 't> SmartConstructors for DirectDeclSmartConstructors<'o, 't> {
+    type State = Self;
+    type Factory = SimpleTokenFactoryImpl<CompactToken>;
+    type Output = Node;
+
+    fn state_mut(&mut self) -> &mut Self {
+        self
+    }
+
+    fn into_state(self) -> Self {
+        self
+    }
+
+    fn token_factory_mut(&mut self) -> &mut Self::Factory {
+        &mut self.token_factory
+    }
+
+    fn make_missing(&mut self, offset: usize) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_missing(self, offset)
+    }
+
+    fn make_token(&mut self, token: CompactToken) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_token(self, token)
+    }
+
+    fn make_list(&mut self, items: Vec<Self::Output>, offset: usize) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_list(self, items, offset)
+    }
+
+    fn begin_enumerator(&mut self) {
+        <Self as FlattenSmartConstructors>::begin_enumerator(self)
+    }
+
+    fn begin_enum_class_enumerator(&mut self) {
+        <Self as FlattenSmartConstructors>::begin_enum_class_enumerator(self)
+    }
+
+    fn begin_constant_declarator(&mut self) {
+        <Self as FlattenSmartConstructors>::begin_constant_declarator(self)
+    }
+
+
+
+CONSTRUCTOR_METHODS}
+"
+
+  let direct_decl_smart_constructors =
+    Full_fidelity_schema.make_template_file
+      ~transformations:
+        [{ pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }]
+      ~filename:
+        (full_fidelity_path_prefix
+        ^ "../decl/direct_decl_smart_constructors_generated.rs")
       ~template:direct_decl_smart_constructors_template
       ()
 end
@@ -2941,6 +3007,7 @@ let templates =
     GenerateFFRustDeclModeSmartConstructors.decl_mode_smart_constructors;
     GenerateRustFlattenSmartConstructors.flatten_smart_constructors;
     GenerateRustDirectDeclSmartConstructors.direct_decl_smart_constructors_obr;
+    GenerateRustDirectDeclSmartConstructors.direct_decl_smart_constructors;
     GenerateRustPairSmartConstructors.pair_smart_constructors;
     GenerateFFSmartConstructorsWrappers
     .full_fidelity_smart_constructors_wrappers;

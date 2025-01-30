@@ -193,7 +193,10 @@ end = struct
     | "typing_defs_core::ConstraintType" when is_by_ref ->
       ["Eq"; "PartialEq"; "Ord"; "PartialOrd"]
     | "typing_defs_core::TshapeFieldName" when is_by_ref -> ["Debug"]
-    | "file_info::Change" -> ["EqModuloPos"]
+    | "file_info::Change" ->
+      ["EqModuloPos"]
+      (* Allow us to write a bespoke debugger to match o_b_r. Can remove with o_b_r. *)
+    | "typing_defs::TypedefTypeAssignment" when not is_by_ref -> ["Debug"]
     | _ -> []
 
   let skip_list_for_trait trait =

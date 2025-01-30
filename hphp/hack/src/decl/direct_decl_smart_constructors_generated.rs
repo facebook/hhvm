@@ -21,12 +21,12 @@ use parser_core_types::compact_token::CompactToken;
 use parser_core_types::token_factory::SimpleTokenFactoryImpl;
 use smart_constructors::SmartConstructors;
 
-use crate::{DirectDeclSmartConstructors, Node, SourceTextAllocator};
+use crate::{DirectDeclSmartConstructors, Node};
 
-impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDeclSmartConstructors<'a, 'o, 't, S> {
+impl<'o, 't> SmartConstructors for DirectDeclSmartConstructors<'o, 't> {
     type State = Self;
     type Factory = SimpleTokenFactoryImpl<CompactToken>;
-    type Output = Node<'a>;
+    type Output = Node;
 
     fn state_mut(&mut self) -> &mut Self {
         self

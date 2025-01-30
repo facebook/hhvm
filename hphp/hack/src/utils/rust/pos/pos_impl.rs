@@ -292,6 +292,37 @@ impl Pos {
         ))
     }
 
+    /// Return the smallest position containing both given positions (if they
+    /// are both in the same file). The returned position will have the
+    /// filename of the first Pos argument.
+    ///
+    /// For merging positions that may not occur within the same file, use
+    /// `Pos::merge`.
+    pub fn merge_without_checking_filename(x1: &Self, x2: &Self) -> Self {
+        let span1 = x1.to_raw_span();
+        let span2 = x2.to_raw_span();
+
+        let start = if span1.start.is_dummy() {
+            span2.start
+        } else if span2.start.is_dummy() || span1.start.offset() < span2.start.offset() {
+            span1.start
+        } else {
+            span2.start
+        };
+
+        let end = if span1.end.is_dummy() {
+            span2.end
+        } else if span2.end.is_dummy() {
+            span1.end
+        } else if span1.end.offset() < span2.end.offset() {
+            span2.end
+        } else {
+            span1.end
+        };
+
+        Self::from_raw_span(x1.filename_rc(), PosSpanRaw { start, end })
+    }
+
     pub fn last_char(&self) -> Cow<'_, Self> {
         if self.is_none() {
             Cow::Borrowed(self)
@@ -379,7 +410,44 @@ impl std::fmt::Display for Pos {
 
 impl std::fmt::Debug for Pos {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{self}")
+        use PosImpl::*;
+        fn do_fmt<P: FilePos>(
+            f: &mut std::fmt::Formatter<'_>,
+            file: &RelativePath,
+            start: &P,
+            end: &P,
+        ) -> std::fmt::Result {
+            let (start_line, start_col, _) = start.line_column_beg();
+            let (end_line, end_col, _) = end.line_column_beg();
+            // Use a format string rather than Formatter::debug_tuple to prevent
+            // adding line breaks. Positions occur very frequently in ASTs and
+            // types, so the Debug implementation of those data structures is
+            // more readable if we minimize the vertical space taken up by
+            // positions. Depends upon RelativePath's implementation of Display
+            // also being single-line.
+            if start_line == end_line {
+                write!(f, "{}({}:{}-{})", &file, &start_line, &start_col, &end_col,)
+            } else {
+                write!(
+                    f,
+                    "{}({}:{}-{}:{})",
+                    &file, &start_line, &start_col, &end_line, &end_col,
+                )
+            }
+        }
+        match &self.0 {
+            Small { file, start, end } => do_fmt(f, file, start, end),
+            Large { file, start, end } => do_fmt(f, file, &**start, &**end),
+            Tiny { file, span } => {
+                if self.is_none() {
+                    return write!(f, "Pos::NONE");
+                }
+                let file = file.as_deref().unwrap_or(&RelativePath::EMPTY);
+                let PosSpanRaw { start, end } = span.to_raw_span();
+                do_fmt(f, file, &start, &end)
+            }
+            FromReason(_) => unimplemented!(),
+        }
     }
 }
 

@@ -1483,6 +1483,7 @@ name = "direct_decl_parser"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "direct_decl_smart_constructors",
  "direct_decl_smart_constructors_obr",
  "mode_parser",
  "oxidized",
@@ -1490,6 +1491,24 @@ dependencies = [
  "parser",
  "parser_core_types",
  "relative_path",
+]
+
+[[package]]
+name = "direct_decl_smart_constructors"
+version = "0.0.0"
+dependencies = [
+ "bstr",
+ "escaper",
+ "flatten_smart_constructors",
+ "hash",
+ "hh_autoimport_rust",
+ "itertools 0.14.0",
+ "namespaces_rust",
+ "naming_special_names_rust",
+ "oxidized",
+ "parser_core_types",
+ "relative_path",
+ "smart_constructors",
 ]
 
 [[package]]

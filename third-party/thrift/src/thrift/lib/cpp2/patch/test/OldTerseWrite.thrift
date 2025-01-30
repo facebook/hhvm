@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
+include "thrift/lib/thrift/patch.thrift"
+
 package "apache.org/thrift/test"
 
 struct Foo {
+  @cpp.DeprecatedTerseWrite
   1: string bar;
 }
 
 struct FooWithDef {
+  @cpp.DeprecatedTerseWrite
+  @patch.DeprecatedTerseWriteCustomDefaultDoNotUse
   1: i32 bar = 100;
 }

@@ -663,6 +663,23 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 404
+      },
+      "AllowLegacyDeprecatedTerseWritesRef" : {
+        "name" : "AllowLegacyDeprecatedTerseWritesRef",
+        "structured_annotations": {
+          "scope.Field" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Field",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
+        },
+        "docstring" : "Allows the field to be annotated @cpp.Ref (or cpp[2].ref[_type]) even if it\nis deprecated_terse_writes field.\n\nThis annotation is provided for a limited time, to exempt pre-existing fields\nwhile rolling out a stricter enforcement of the condition above.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 414
       }
   },
   "source_path" : "thrift/annotation/cpp",

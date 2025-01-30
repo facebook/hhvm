@@ -161,6 +161,12 @@ var (
                 SetName("cpp.DeprecatedTerseWrite"),
         )
     }()
+    premadeThriftType_cpp_AllowLegacyDeprecatedTerseWritesRef = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("cpp.AllowLegacyDeprecatedTerseWritesRef"),
+        )
+    }()
 )
 
 // Helper type to allow us to store Thrift types in a slice at compile time,
@@ -197,6 +203,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.GenerateDeprecatedHeaderClientMethods", premadeThriftType_cpp_GenerateDeprecatedHeaderClientMethods })
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.AllowLegacyNonOptionalRef", premadeThriftType_cpp_AllowLegacyNonOptionalRef })
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.DeprecatedTerseWrite", premadeThriftType_cpp_DeprecatedTerseWrite })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.AllowLegacyDeprecatedTerseWritesRef", premadeThriftType_cpp_AllowLegacyDeprecatedTerseWritesRef })
 
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
     for _, value := range thriftTypesWithFullName {

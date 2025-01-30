@@ -403,3 +403,13 @@ struct AllowLegacyNonOptionalRef {}
  */
 @scope.Field
 struct DeprecatedTerseWrite {}
+
+/**
+ * Allows the field to be annotated @cpp.Ref (or cpp[2].ref[_type]) even if it
+ * is deprecated_terse_writes field.
+ *
+ * This annotation is provided for a limited time, to exempt pre-existing fields
+ * while rolling out a stricter enforcement of the condition above.
+ */
+@scope.Field
+struct AllowLegacyDeprecatedTerseWritesRef {}

@@ -158,8 +158,8 @@ class ParseURL {
 
   FB_EXPORT void stripBrackets() noexcept;
 
-  FOLLY_NODISCARD folly::Optional<folly::StringPiece> getQueryParam(
-      folly::StringPiece name) const noexcept;
+  FOLLY_NODISCARD static folly::Optional<folly::StringPiece> getQueryParam(
+      folly::StringPiece query, const folly::StringPiece name) noexcept;
 
  private:
   void moveHostAndAuthority(ParseURL&& goner) {

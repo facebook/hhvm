@@ -268,11 +268,12 @@ TEST(ParseURL, PortOverflow) {
 
 TEST(ParseURL, GetQueryParam) {
   auto u = ParseURL::parseURL("localhost/?foo=1&bar=2&baz&bazz=3&bak=");
+  auto q = u->query();
   ASSERT_TRUE(u.hasValue());
-  EXPECT_EQ(u->getQueryParam("foo"), "1");
-  EXPECT_EQ(u->getQueryParam("bar"), "2");
-  EXPECT_EQ(u->getQueryParam("baz"), "");
-  EXPECT_EQ(u->getQueryParam("bazz"), "3");
-  EXPECT_EQ(u->getQueryParam("bak"), "");
-  EXPECT_FALSE(u->getQueryParam("fooo").has_value());
+  EXPECT_EQ(ParseURL::getQueryParam(q, "foo"), "1");
+  EXPECT_EQ(ParseURL::getQueryParam(q, "bar"), "2");
+  EXPECT_EQ(ParseURL::getQueryParam(q, "baz"), "");
+  EXPECT_EQ(ParseURL::getQueryParam(q, "bazz"), "3");
+  EXPECT_EQ(ParseURL::getQueryParam(q, "bak"), "");
+  EXPECT_FALSE(ParseURL::getQueryParam(q, "fooo").has_value());
 }

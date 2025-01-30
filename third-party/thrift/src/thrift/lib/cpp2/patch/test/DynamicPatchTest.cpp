@@ -100,6 +100,7 @@ void testOneWay(T src, T dst) {
   auto other =
       detail::createPatchFromObject<PatchType>(badge, patch.toObject());
   EXPECT_EQ(other.toObject(), patch.toObject());
+  EXPECT_EQ(patch.empty(), src == dst);
 }
 
 TEST(DynamicPatchTest, Binary) {
@@ -162,6 +163,7 @@ void testMapAndObject(
   auto patch = DiffVisitorBase{}.diff(objSrc, objDst);
   applyPatch(patch.toObject(), objSrc);
   EXPECT_EQ(objSrc, objDst);
+  EXPECT_EQ(patch.empty(), src == dst);
 
   if (mightBeUnion) {
     EXPECT_TRUE(patch.holds_alternative<DynamicUnknownPatch>(badge));

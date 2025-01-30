@@ -36,11 +36,6 @@ type ServiceClientInterface interface {
     Func(arg1 StringWithAdapter_7208, arg2 string, arg3 *Foo) (MyI32_4873, error)
 }
 
-type ServiceContextClientInterface interface {
-    ServiceClientInterface
-    FuncContext(ctx context.Context, arg1 StringWithAdapter_7208, arg2 string, arg3 *Foo) (MyI32_4873, error)
-}
-
 type ServiceChannelClient struct {
     ch thrift.RequestChannel
 }
@@ -62,7 +57,6 @@ type ServiceClient struct {
 }
 // Compile time interface enforcer
 var _ ServiceClientInterface = (*ServiceClient)(nil)
-var _ ServiceContextClientInterface = (*ServiceClient)(nil)
 
 func NewServiceClient(prot thrift.Protocol) *ServiceClient {
     return &ServiceClient{
@@ -214,12 +208,6 @@ type AdapterServiceClientInterface interface {
     AdaptedTypes(arg *HeapAllocated) (*HeapAllocated, error)
 }
 
-type AdapterServiceContextClientInterface interface {
-    AdapterServiceClientInterface
-    CountContext(ctx context.Context) (*CountingStruct, error)
-    AdaptedTypesContext(ctx context.Context, arg *HeapAllocated) (*HeapAllocated, error)
-}
-
 type AdapterServiceChannelClient struct {
     ch thrift.RequestChannel
 }
@@ -241,7 +229,6 @@ type AdapterServiceClient struct {
 }
 // Compile time interface enforcer
 var _ AdapterServiceClientInterface = (*AdapterServiceClient)(nil)
-var _ AdapterServiceContextClientInterface = (*AdapterServiceClient)(nil)
 
 func NewAdapterServiceClient(prot thrift.Protocol) *AdapterServiceClient {
     return &AdapterServiceClient{

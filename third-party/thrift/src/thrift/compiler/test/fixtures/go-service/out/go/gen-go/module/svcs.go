@@ -78,32 +78,6 @@ type GetEntityClientInterface interface {
     GetErr1Collision(err int64, err1 int64) (int32, error)
 }
 
-type GetEntityContextClientInterface interface {
-    GetEntityClientInterface
-    GetEntityContext(ctx context.Context, r *GetEntityRequest) (*GetEntityResponse, error)
-    GetBoolContext(ctx context.Context) (bool, error)
-    GetByteContext(ctx context.Context) (int8, error)
-    GetI16Context(ctx context.Context) (int16, error)
-    GetI32Context(ctx context.Context) (int32, error)
-    GetI64Context(ctx context.Context) (int64, error)
-    GetDoubleContext(ctx context.Context) (float64, error)
-    GetStringContext(ctx context.Context) (string, error)
-    GetBinaryContext(ctx context.Context) ([]byte, error)
-    GetMapContext(ctx context.Context) (map[string]string, error)
-    GetSetContext(ctx context.Context) ([]string, error)
-    GetListContext(ctx context.Context) ([]string, error)
-    GetLegacyStuffContext(ctx context.Context, numPos int64, numNeg1 int64, numNeg2 int64) (int32, error)
-    GetCtxCollisionContext(ctx1 context.Context, ctx int64) (int32, error)
-    GetCtx1CollisionContext(ctx2 context.Context, ctx int64, ctx1 int64) (int32, error)
-    GetContextCollisionContext(ctx context.Context, context_ int64) (int32, error)
-    GetOutCollisionContext(ctx context.Context, out int64) (int32, error)
-    GetOut1CollisionContext(ctx context.Context, out int64, out1 int64) (int32, error)
-    GetInCollisionContext(ctx context.Context, in int64) (int32, error)
-    GetIn1CollisionContext(ctx context.Context, in int64, in1 int64) (int32, error)
-    GetErrCollisionContext(ctx context.Context, err int64) (int32, error)
-    GetErr1CollisionContext(ctx context.Context, err int64, err1 int64) (int32, error)
-}
-
 type GetEntityChannelClient struct {
     ch thrift.RequestChannel
 }
@@ -125,7 +99,6 @@ type GetEntityClient struct {
 }
 // Compile time interface enforcer
 var _ GetEntityClientInterface = (*GetEntityClient)(nil)
-var _ GetEntityContextClientInterface = (*GetEntityClient)(nil)
 
 func NewGetEntityClient(prot thrift.Protocol) *GetEntityClient {
     return &GetEntityClient{

@@ -38,12 +38,6 @@ type CClientInterface interface {
     Thing(a int32, b string, c []int32) (string, error)
 }
 
-type CContextClientInterface interface {
-    CClientInterface
-    FContext(ctx context.Context) (error)
-    ThingContext(ctx context.Context, a int32, b string, c []int32) (string, error)
-}
-
 type CChannelClient struct {
     ch thrift.RequestChannel
 }
@@ -65,7 +59,6 @@ type CClient struct {
 }
 // Compile time interface enforcer
 var _ CClientInterface = (*CClient)(nil)
-var _ CContextClientInterface = (*CClient)(nil)
 
 func NewCClient(prot thrift.Protocol) *CClient {
     return &CClient{

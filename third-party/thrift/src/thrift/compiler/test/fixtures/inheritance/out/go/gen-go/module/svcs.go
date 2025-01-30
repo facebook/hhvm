@@ -36,11 +36,6 @@ type MyRootClientInterface interface {
     DoRoot() (error)
 }
 
-type MyRootContextClientInterface interface {
-    MyRootClientInterface
-    DoRootContext(ctx context.Context) (error)
-}
-
 type MyRootChannelClient struct {
     ch thrift.RequestChannel
 }
@@ -62,7 +57,6 @@ type MyRootClient struct {
 }
 // Compile time interface enforcer
 var _ MyRootClientInterface = (*MyRootClient)(nil)
-var _ MyRootContextClientInterface = (*MyRootClient)(nil)
 
 func NewMyRootClient(prot thrift.Protocol) *MyRootClient {
     return &MyRootClient{
@@ -213,14 +207,6 @@ type MyNodeClientInterface interface {
     DoMid() (error)
 }
 
-type MyNodeContextClientInterface interface {
-    MyNodeClientInterface
-    // Inherited/extended service
-    MyRootContextClientInterface
-
-    DoMidContext(ctx context.Context) (error)
-}
-
 type MyNodeChannelClient struct {
     // Inherited/extended service
     *MyRootChannelClient
@@ -247,7 +233,6 @@ type MyNodeClient struct {
 }
 // Compile time interface enforcer
 var _ MyNodeClientInterface = (*MyNodeClient)(nil)
-var _ MyNodeContextClientInterface = (*MyNodeClient)(nil)
 
 func NewMyNodeClient(prot thrift.Protocol) *MyNodeClient {
     return &MyNodeClient{
@@ -372,14 +357,6 @@ type MyLeafClientInterface interface {
     DoLeaf() (error)
 }
 
-type MyLeafContextClientInterface interface {
-    MyLeafClientInterface
-    // Inherited/extended service
-    MyNodeContextClientInterface
-
-    DoLeafContext(ctx context.Context) (error)
-}
-
 type MyLeafChannelClient struct {
     // Inherited/extended service
     *MyNodeChannelClient
@@ -406,7 +383,6 @@ type MyLeafClient struct {
 }
 // Compile time interface enforcer
 var _ MyLeafClientInterface = (*MyLeafClient)(nil)
-var _ MyLeafContextClientInterface = (*MyLeafClient)(nil)
 
 func NewMyLeafClient(prot thrift.Protocol) *MyLeafClient {
     return &MyLeafClient{

@@ -36,11 +36,6 @@ type HsTestServiceClientInterface interface {
     Init(int1 int64) (int64, error)
 }
 
-type HsTestServiceContextClientInterface interface {
-    HsTestServiceClientInterface
-    InitContext(ctx context.Context, int1 int64) (int64, error)
-}
-
 type HsTestServiceChannelClient struct {
     ch thrift.RequestChannel
 }
@@ -62,7 +57,6 @@ type HsTestServiceClient struct {
 }
 // Compile time interface enforcer
 var _ HsTestServiceClientInterface = (*HsTestServiceClient)(nil)
-var _ HsTestServiceContextClientInterface = (*HsTestServiceClient)(nil)
 
 func NewHsTestServiceClient(prot thrift.Protocol) *HsTestServiceClient {
     return &HsTestServiceClient{

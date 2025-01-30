@@ -48,17 +48,6 @@ type MyServiceClientInterface interface {
     GoDoNothing() (error)
 }
 
-type MyServiceContextClientInterface interface {
-    MyServiceClientInterface
-    PingContext(ctx context.Context) (error)
-    GetRandomDataContext(ctx context.Context) (string, error)
-    HasDataByIdContext(ctx context.Context, id int64) (bool, error)
-    GoGetDataByIdContext(ctx context.Context, id int64) (string, error)
-    PutDataByIdContext(ctx context.Context, id int64, data string) (error)
-    LobDataByIdContext(ctx context.Context, id int64, data string) (error)
-    GoDoNothingContext(ctx context.Context) (error)
-}
-
 type MyServiceChannelClient struct {
     ch thrift.RequestChannel
 }
@@ -80,7 +69,6 @@ type MyServiceClient struct {
 }
 // Compile time interface enforcer
 var _ MyServiceClientInterface = (*MyServiceClient)(nil)
-var _ MyServiceContextClientInterface = (*MyServiceClient)(nil)
 
 func NewMyServiceClient(prot thrift.Protocol) *MyServiceClient {
     return &MyServiceClient{
@@ -672,12 +660,6 @@ type MyServicePrioParentClientInterface interface {
     Pong() (error)
 }
 
-type MyServicePrioParentContextClientInterface interface {
-    MyServicePrioParentClientInterface
-    PingContext(ctx context.Context) (error)
-    PongContext(ctx context.Context) (error)
-}
-
 type MyServicePrioParentChannelClient struct {
     ch thrift.RequestChannel
 }
@@ -699,7 +681,6 @@ type MyServicePrioParentClient struct {
 }
 // Compile time interface enforcer
 var _ MyServicePrioParentClientInterface = (*MyServicePrioParentClient)(nil)
-var _ MyServicePrioParentContextClientInterface = (*MyServicePrioParentClient)(nil)
 
 func NewMyServicePrioParentClient(prot thrift.Protocol) *MyServicePrioParentClient {
     return &MyServicePrioParentClient{
@@ -921,14 +902,6 @@ type MyServicePrioChildClientInterface interface {
     Pang() (error)
 }
 
-type MyServicePrioChildContextClientInterface interface {
-    MyServicePrioChildClientInterface
-    // Inherited/extended service
-    MyServicePrioParentContextClientInterface
-
-    PangContext(ctx context.Context) (error)
-}
-
 type MyServicePrioChildChannelClient struct {
     // Inherited/extended service
     *MyServicePrioParentChannelClient
@@ -955,7 +928,6 @@ type MyServicePrioChildClient struct {
 }
 // Compile time interface enforcer
 var _ MyServicePrioChildClientInterface = (*MyServicePrioChildClient)(nil)
-var _ MyServicePrioChildContextClientInterface = (*MyServicePrioChildClient)(nil)
 
 func NewMyServicePrioChildClient(prot thrift.Protocol) *MyServicePrioChildClient {
     return &MyServicePrioChildClient{
@@ -1074,11 +1046,6 @@ type BadServiceClientInterface interface {
     Bar() (int32, error)
 }
 
-type BadServiceContextClientInterface interface {
-    BadServiceClientInterface
-    BarContext(ctx context.Context) (int32, error)
-}
-
 type BadServiceChannelClient struct {
     ch thrift.RequestChannel
 }
@@ -1100,7 +1067,6 @@ type BadServiceClient struct {
 }
 // Compile time interface enforcer
 var _ BadServiceClientInterface = (*BadServiceClient)(nil)
-var _ BadServiceContextClientInterface = (*BadServiceClient)(nil)
 
 func NewBadServiceClient(prot thrift.Protocol) *BadServiceClient {
     return &BadServiceClient{
@@ -1250,13 +1216,6 @@ type FooBarBazServiceClientInterface interface {
     Baz() (error)
 }
 
-type FooBarBazServiceContextClientInterface interface {
-    FooBarBazServiceClientInterface
-    FooStructuredContext(ctx context.Context) (error)
-    BarNonStructuredContext(ctx context.Context) (error)
-    BazContext(ctx context.Context) (error)
-}
-
 type FooBarBazServiceChannelClient struct {
     ch thrift.RequestChannel
 }
@@ -1278,7 +1237,6 @@ type FooBarBazServiceClient struct {
 }
 // Compile time interface enforcer
 var _ FooBarBazServiceClientInterface = (*FooBarBazServiceClient)(nil)
-var _ FooBarBazServiceContextClientInterface = (*FooBarBazServiceClient)(nil)
 
 func NewFooBarBazServiceClient(prot thrift.Protocol) *FooBarBazServiceClient {
     return &FooBarBazServiceClient{

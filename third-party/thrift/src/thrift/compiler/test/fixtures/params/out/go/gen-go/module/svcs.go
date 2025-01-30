@@ -44,15 +44,6 @@ type NestedContainersClientInterface interface {
     Turtles(foo [][]map[int32]map[int32][]int32) (error)
 }
 
-type NestedContainersContextClientInterface interface {
-    NestedContainersClientInterface
-    MapListContext(ctx context.Context, foo map[int32][]int32) (error)
-    MapSetContext(ctx context.Context, foo map[int32][]int32) (error)
-    ListMapContext(ctx context.Context, foo []map[int32]int32) (error)
-    ListSetContext(ctx context.Context, foo [][]int32) (error)
-    TurtlesContext(ctx context.Context, foo [][]map[int32]map[int32][]int32) (error)
-}
-
 type NestedContainersChannelClient struct {
     ch thrift.RequestChannel
 }
@@ -74,7 +65,6 @@ type NestedContainersClient struct {
 }
 // Compile time interface enforcer
 var _ NestedContainersClientInterface = (*NestedContainersClient)(nil)
-var _ NestedContainersContextClientInterface = (*NestedContainersClient)(nil)
 
 func NewNestedContainersClient(prot thrift.Protocol) *NestedContainersClient {
     return &NestedContainersClient{

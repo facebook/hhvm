@@ -36,11 +36,6 @@ type FooServiceClientInterface interface {
     SimpleRPC() (error)
 }
 
-type FooServiceContextClientInterface interface {
-    FooServiceClientInterface
-    SimpleRPCContext(ctx context.Context) (error)
-}
-
 type FooServiceChannelClient struct {
     ch thrift.RequestChannel
 }
@@ -62,7 +57,6 @@ type FooServiceClient struct {
 }
 // Compile time interface enforcer
 var _ FooServiceClientInterface = (*FooServiceClient)(nil)
-var _ FooServiceContextClientInterface = (*FooServiceClient)(nil)
 
 func NewFooServiceClient(prot thrift.Protocol) *FooServiceClient {
     return &FooServiceClient{
@@ -207,11 +201,6 @@ type FB303ServiceClientInterface interface {
     SimpleRPC(intParameter int32) (*ReservedKeyword, error)
 }
 
-type FB303ServiceContextClientInterface interface {
-    FB303ServiceClientInterface
-    SimpleRPCContext(ctx context.Context, intParameter int32) (*ReservedKeyword, error)
-}
-
 type FB303ServiceChannelClient struct {
     ch thrift.RequestChannel
 }
@@ -233,7 +222,6 @@ type FB303ServiceClient struct {
 }
 // Compile time interface enforcer
 var _ FB303ServiceClientInterface = (*FB303ServiceClient)(nil)
-var _ FB303ServiceContextClientInterface = (*FB303ServiceClient)(nil)
 
 func NewFB303ServiceClient(prot thrift.Protocol) *FB303ServiceClient {
     return &FB303ServiceClient{
@@ -399,20 +387,6 @@ type MyServiceClientInterface interface {
     RpcSkippedCodegen() (error)
 }
 
-type MyServiceContextClientInterface interface {
-    MyServiceClientInterface
-    PingContext(ctx context.Context) (error)
-    GetRandomDataContext(ctx context.Context) (string, error)
-    SinkContext(ctx context.Context, sink int64) (error)
-    PutDataByIdContext(ctx context.Context, id int64, data string) (error)
-    HasDataByIdContext(ctx context.Context, id int64) (bool, error)
-    GetDataByIdContext(ctx context.Context, id int64) (string, error)
-    DeleteDataByIdContext(ctx context.Context, id int64) (error)
-    LobDataByIdContext(ctx context.Context, id int64, data string) (error)
-    InvalidReturnForHackContext(ctx context.Context) ([]float32, error)
-    RpcSkippedCodegenContext(ctx context.Context) (error)
-}
-
 type MyServiceChannelClient struct {
     ch thrift.RequestChannel
 }
@@ -434,7 +408,6 @@ type MyServiceClient struct {
 }
 // Compile time interface enforcer
 var _ MyServiceClientInterface = (*MyServiceClient)(nil)
-var _ MyServiceContextClientInterface = (*MyServiceClient)(nil)
 
 func NewMyServiceClient(prot thrift.Protocol) *MyServiceClient {
     return &MyServiceClient{
@@ -1232,12 +1205,6 @@ type DbMixedStackArgumentsClientInterface interface {
     GetDataByKey1(key string) ([]byte, error)
 }
 
-type DbMixedStackArgumentsContextClientInterface interface {
-    DbMixedStackArgumentsClientInterface
-    GetDataByKey0Context(ctx context.Context, key string) ([]byte, error)
-    GetDataByKey1Context(ctx context.Context, key string) ([]byte, error)
-}
-
 type DbMixedStackArgumentsChannelClient struct {
     ch thrift.RequestChannel
 }
@@ -1259,7 +1226,6 @@ type DbMixedStackArgumentsClient struct {
 }
 // Compile time interface enforcer
 var _ DbMixedStackArgumentsClientInterface = (*DbMixedStackArgumentsClient)(nil)
-var _ DbMixedStackArgumentsContextClientInterface = (*DbMixedStackArgumentsClient)(nil)
 
 func NewDbMixedStackArgumentsClient(prot thrift.Protocol) *DbMixedStackArgumentsClient {
     return &DbMixedStackArgumentsClient{

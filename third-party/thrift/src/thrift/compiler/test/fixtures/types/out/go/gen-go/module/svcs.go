@@ -40,12 +40,6 @@ type SomeServiceClientInterface interface {
     BinaryKeyedMap(r []int64) (map[*TBinary]int64, error)
 }
 
-type SomeServiceContextClientInterface interface {
-    SomeServiceClientInterface
-    BounceMapContext(ctx context.Context, m included.SomeMap) (included.SomeMap, error)
-    BinaryKeyedMapContext(ctx context.Context, r []int64) (map[*TBinary]int64, error)
-}
-
 type SomeServiceChannelClient struct {
     ch thrift.RequestChannel
 }
@@ -67,7 +61,6 @@ type SomeServiceClient struct {
 }
 // Compile time interface enforcer
 var _ SomeServiceClientInterface = (*SomeServiceClient)(nil)
-var _ SomeServiceContextClientInterface = (*SomeServiceClient)(nil)
 
 func NewSomeServiceClient(prot thrift.Protocol) *SomeServiceClient {
     return &SomeServiceClient{

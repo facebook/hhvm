@@ -34,10 +34,6 @@ type InteractLocallyClientInterface interface {
     thrift.ClientInterface
 }
 
-type InteractLocallyContextClientInterface interface {
-    InteractLocallyClientInterface
-}
-
 type InteractLocallyChannelClient struct {
     ch thrift.RequestChannel
 }
@@ -59,7 +55,6 @@ type InteractLocallyClient struct {
 }
 // Compile time interface enforcer
 var _ InteractLocallyClientInterface = (*InteractLocallyClient)(nil)
-var _ InteractLocallyContextClientInterface = (*InteractLocallyClient)(nil)
 
 func NewInteractLocallyClient(prot thrift.Protocol) *InteractLocallyClient {
     return &InteractLocallyClient{

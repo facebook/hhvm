@@ -57,7 +57,6 @@ type {{service:go_name}}Client struct {
 }
 // Compile time interface enforcer
 var _ {{service:go_name}}ClientInterface = (*{{service:go_name}}Client)(nil)
-var _ {{service:go_name}}ContextClientInterface = (*{{service:go_name}}Client)(nil)
 
 func New{{service:go_name}}Client(prot thrift.Protocol) *{{service:go_name}}Client {
     return &{{service:go_name}}Client{

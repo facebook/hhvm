@@ -44,13 +44,6 @@ type FinderClientInterface interface {
     PreviousPlate(plate Plate) (Plate, error)
 }
 
-type FinderContextClientInterface interface {
-    FinderClientInterface
-    ByPlateContext(ctx context.Context, plate Plate) (*Automobile, error)
-    AliasByPlateContext(ctx context.Context, plate Plate) (*Car, error)
-    PreviousPlateContext(ctx context.Context, plate Plate) (Plate, error)
-}
-
 type FinderChannelClient struct {
     ch thrift.RequestChannel
 }
@@ -72,7 +65,6 @@ type FinderClient struct {
 }
 // Compile time interface enforcer
 var _ FinderClientInterface = (*FinderClient)(nil)
-var _ FinderContextClientInterface = (*FinderClient)(nil)
 
 func NewFinderClient(prot thrift.Protocol) *FinderClient {
     return &FinderClient{

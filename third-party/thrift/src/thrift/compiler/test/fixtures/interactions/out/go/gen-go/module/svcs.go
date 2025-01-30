@@ -38,11 +38,6 @@ type MyServiceClientInterface interface {
     Foo() (error)
 }
 
-type MyServiceContextClientInterface interface {
-    MyServiceClientInterface
-    FooContext(ctx context.Context) (error)
-}
-
 type MyServiceChannelClient struct {
     ch thrift.RequestChannel
 }
@@ -64,7 +59,6 @@ type MyServiceClient struct {
 }
 // Compile time interface enforcer
 var _ MyServiceClientInterface = (*MyServiceClient)(nil)
-var _ MyServiceContextClientInterface = (*MyServiceClient)(nil)
 
 func NewMyServiceClient(prot thrift.Protocol) *MyServiceClient {
     return &MyServiceClient{
@@ -209,11 +203,6 @@ type FactoriesClientInterface interface {
     Foo() (error)
 }
 
-type FactoriesContextClientInterface interface {
-    FactoriesClientInterface
-    FooContext(ctx context.Context) (error)
-}
-
 type FactoriesChannelClient struct {
     ch thrift.RequestChannel
 }
@@ -235,7 +224,6 @@ type FactoriesClient struct {
 }
 // Compile time interface enforcer
 var _ FactoriesClientInterface = (*FactoriesClient)(nil)
-var _ FactoriesContextClientInterface = (*FactoriesClient)(nil)
 
 func NewFactoriesClient(prot thrift.Protocol) *FactoriesClient {
     return &FactoriesClient{
@@ -380,11 +368,6 @@ type PerformClientInterface interface {
     Foo() (error)
 }
 
-type PerformContextClientInterface interface {
-    PerformClientInterface
-    FooContext(ctx context.Context) (error)
-}
-
 type PerformChannelClient struct {
     ch thrift.RequestChannel
 }
@@ -406,7 +389,6 @@ type PerformClient struct {
 }
 // Compile time interface enforcer
 var _ PerformClientInterface = (*PerformClient)(nil)
-var _ PerformContextClientInterface = (*PerformClient)(nil)
 
 func NewPerformClient(prot thrift.Protocol) *PerformClient {
     return &PerformClient{
@@ -551,11 +533,6 @@ type InteractWithSharedClientInterface interface {
     DoSomeSimilarThings() (*shared.DoSomethingResult, error)
 }
 
-type InteractWithSharedContextClientInterface interface {
-    InteractWithSharedClientInterface
-    DoSomeSimilarThingsContext(ctx context.Context) (*shared.DoSomethingResult, error)
-}
-
 type InteractWithSharedChannelClient struct {
     ch thrift.RequestChannel
 }
@@ -577,7 +554,6 @@ type InteractWithSharedClient struct {
 }
 // Compile time interface enforcer
 var _ InteractWithSharedClientInterface = (*InteractWithSharedClient)(nil)
-var _ InteractWithSharedContextClientInterface = (*InteractWithSharedClient)(nil)
 
 func NewInteractWithSharedClient(prot thrift.Protocol) *InteractWithSharedClient {
     return &InteractWithSharedClient{
@@ -721,10 +697,6 @@ type BoxServiceClientInterface interface {
     thrift.ClientInterface
 }
 
-type BoxServiceContextClientInterface interface {
-    BoxServiceClientInterface
-}
-
 type BoxServiceChannelClient struct {
     ch thrift.RequestChannel
 }
@@ -746,7 +718,6 @@ type BoxServiceClient struct {
 }
 // Compile time interface enforcer
 var _ BoxServiceClientInterface = (*BoxServiceClient)(nil)
-var _ BoxServiceContextClientInterface = (*BoxServiceClient)(nil)
 
 func NewBoxServiceClient(prot thrift.Protocol) *BoxServiceClient {
     return &BoxServiceClient{

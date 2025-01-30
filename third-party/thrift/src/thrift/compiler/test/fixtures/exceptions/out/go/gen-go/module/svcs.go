@@ -42,14 +42,6 @@ type RaiserClientInterface interface {
     Get500() (string, error)
 }
 
-type RaiserContextClientInterface interface {
-    RaiserClientInterface
-    DoBlandContext(ctx context.Context) (error)
-    DoRaiseContext(ctx context.Context) (error)
-    Get200Context(ctx context.Context) (string, error)
-    Get500Context(ctx context.Context) (string, error)
-}
-
 type RaiserChannelClient struct {
     ch thrift.RequestChannel
 }
@@ -71,7 +63,6 @@ type RaiserClient struct {
 }
 // Compile time interface enforcer
 var _ RaiserClientInterface = (*RaiserClient)(nil)
-var _ RaiserContextClientInterface = (*RaiserClient)(nil)
 
 func NewRaiserClient(prot thrift.Protocol) *RaiserClient {
     return &RaiserClient{

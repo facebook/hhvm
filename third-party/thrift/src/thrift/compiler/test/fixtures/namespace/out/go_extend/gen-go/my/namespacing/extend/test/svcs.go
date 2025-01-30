@@ -44,14 +44,6 @@ type ExtendTestServiceClientInterface interface {
     Check(struct1 *test0.HsFoo) (bool, error)
 }
 
-type ExtendTestServiceContextClientInterface interface {
-    ExtendTestServiceClientInterface
-    // Inherited/extended service
-    test0.HsTestServiceContextClientInterface
-
-    CheckContext(ctx context.Context, struct1 *test0.HsFoo) (bool, error)
-}
-
 type ExtendTestServiceChannelClient struct {
     // Inherited/extended service
     *test0.HsTestServiceChannelClient
@@ -78,7 +70,6 @@ type ExtendTestServiceClient struct {
 }
 // Compile time interface enforcer
 var _ ExtendTestServiceClientInterface = (*ExtendTestServiceClient)(nil)
-var _ ExtendTestServiceContextClientInterface = (*ExtendTestServiceClient)(nil)
 
 func NewExtendTestServiceClient(prot thrift.Protocol) *ExtendTestServiceClient {
     return &ExtendTestServiceClient{

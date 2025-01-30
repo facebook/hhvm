@@ -1011,6 +1011,12 @@ cdef class StructOrUnion:
     cdef _fbthrift_get_field_value(self, int16_t index):
         raise NotImplementedError("Not implemented on base StructOrUnion class")
 
+    @staticmethod
+    def from_python(obj: StructOrUnion) -> StructOrUnion:
+        if not isinstance(obj, StructOrUnion):
+            raise TypeError(f'value {obj} expected to be a thrift-python Struct or Union, was actually of type ' f'{type(obj)}')
+        return obj
+
     @classmethod
     def _fbthrift_auto_migrate_enabled(cls):
         return False

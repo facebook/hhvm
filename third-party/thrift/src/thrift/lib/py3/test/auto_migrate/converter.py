@@ -309,7 +309,6 @@ class PythonToPy3ConverterTest(unittest.TestCase):
             evil_cls.__module__, "thrift.lib.py3.test.auto_migrate.converter"
         )
 
-    @brokenInAutoMigrate()
     def test_simple_capi(self) -> None:
         self.assert_simple(py3_types.Simple.from_python(self.make_simple_python()))
 
@@ -358,7 +357,6 @@ class PythonToPy3ConverterTest(unittest.TestCase):
             nested.colorToSimpleMap[py3_types.Color.BLUE].color, py3_types.Color.BLUE
         )
 
-    @brokenInAutoMigrate()
     def test_nested_capi(self) -> None:
         self.assertEqual(
             self.make_nested_python()._to_py3(),
@@ -370,7 +368,6 @@ class PythonToPy3ConverterTest(unittest.TestCase):
         self.assertEqual(simple_union.type, py3_types.Union.Type.intField)
         self.assertEqual(simple_union.value, 42)
 
-    @brokenInAutoMigrate()
     def test_simple_union_capi(self) -> None:
         simple_union = py3_types.Union.from_python(python_types.Union(intField=42))
         self.assertEqual(simple_union.type, py3_types.Union.Type.intField)
@@ -381,7 +378,6 @@ class PythonToPy3ConverterTest(unittest.TestCase):
         self.assertEqual(simple_union.type, py3_types.Union.Type.name_)
         self.assertEqual(simple_union.value, "myname")
 
-    @brokenInAutoMigrate()
     def test_union_with_py3_name_annotation_capi(self) -> None:
         simple_union = py3_types.Union.from_python(python_types.Union(name_="myname"))
         self.assertEqual(simple_union.type, py3_types.Union.Type.name_)
@@ -392,7 +388,6 @@ class PythonToPy3ConverterTest(unittest.TestCase):
         self.assertEqual(union_with_list.type, py3_types.Union.Type.intList)
         self.assertEqual(union_with_list.value, [1, 2, 3])
 
-    @brokenInAutoMigrate()
     def test_union_with_containers_capi(self) -> None:
         union_with_list = py3_types.Union.from_python(
             python_types.Union(intList=[1, 2, 3])
@@ -407,7 +402,6 @@ class PythonToPy3ConverterTest(unittest.TestCase):
         self.assertEqual(complex_union.type, py3_types.Union.Type.simple_)
         self.assertEqual(complex_union.simple_.intField, 42)
 
-    @brokenInAutoMigrate()
     def test_complex_union_capi(self) -> None:
         complex_union = py3_types.Union.from_python(
             python_types.Union(

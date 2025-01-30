@@ -29,6 +29,12 @@ for ($i = 0; $i < 10; $i++) {
   $y++;
 }
 
+$v = vec[1, 2, 3];
+$a = 0;
+foreach($v as $u) {
+  $a = $a + $u;
+}
+
 hphp_debug_break();
 
 $dir = dirname(__FILE__);

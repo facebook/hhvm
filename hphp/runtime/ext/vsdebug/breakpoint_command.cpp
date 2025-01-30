@@ -125,7 +125,7 @@ bool SetBreakpointsCommand::executeImpl(
   // Make a map of line -> breakpoint for all breakpoints in this file before
   // this set breakpoints operation.
   std::unordered_map<int, Breakpoint*> oldBpLines;
-  const auto oldBpIds = bpMgr->getBreakpointIdsForPath(filePath);
+  const auto oldBpIds = bpMgr->getBreakpointIdsForPath(path);
   for (auto it = oldBpIds.begin(); it != oldBpIds.end(); it++) {
     Breakpoint* bp = bpMgr->getBreakpointById(*it);
     std::pair<int, Breakpoint*> pair;

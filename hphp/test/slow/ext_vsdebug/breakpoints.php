@@ -150,6 +150,18 @@ checkObjEqualRecursively($msg, dict[
   "body" => dict[
       "breakpoints" => vec[]
   ]]);
+
+$breakpoints = vec[
+  dict[
+    "path" => __FILE__ . ".test",
+    "breakpoints" => vec[
+      dict["line" => 34, "calibratedLine" => 34, "condition" => ""],
+    ]]
+  ];
+setBreakpoints($breakpoints, true);
+resumeTarget();
+
+verifyBpHit($breakpoints[0]['path'], $breakpoints[0]['breakpoints'][0]);
 resumeTarget();
 
 // Verify hard break was hit.

@@ -528,24 +528,30 @@ bool phpAddBreakPointLine(const Unit* unit, int line) {
     return false;
   }
 
-  // One source line may refer to multiple bytecodes. We want to set the
-  // breakpoint only on the first bytecode. There is one exeption:
-  // If the bytecodes refer to different functions, set breakpoints on
-  // one bytecode of each function. This can happen for lambdas.
+  // One source line may refer to multiple blocks of bytecodes, possibly in
+  // different functions (in case of lambdas).
+  // We want to set the breakpoint only on the first bytecode of each block,
+  // unless they are overlapping or contiguous.
   // Add to the breakpoint filter and the line filter.
   assertx(funcOffsets.size() > 0);
-  DEBUG_ONLY std::unordered_set<const Func*> seenFuncs;
   for (auto const& offsets : funcOffsets) {
     auto f = offsets.first;
-    assertx(seenFuncs.find(f) == seenFuncs.end());
-    if (!offsets.second.empty()) {
-      auto bpOffset = offsets.second.front().base;
+    auto currPast = -1;
+    // offsets are sorted.
+    for (auto const& offset : offsets.second) {
+      auto bpOffset = offset.base;
+      if (bpOffset <= currPast) {
+        // Overlapping or contiguous bytecode blocks for the same source line.
+        // Do not add a breakpoint, only update the currPast.
+        currPast = offset.past > currPast ? offset.past : currPast;
+        continue;
+      }
+      currPast = offset.past;
       TRACE(3, "Adding breakpoint at %s::%d, Op %s.\n",
             f->name()->data(), bpOffset, opcodeToName(f->getOp(bpOffset)));
       phpAddBreakPoint(f, bpOffset);
       auto pc = f->at(bpOffset);
       RID().m_lineBreakPointFilter.addPC(pc);
-      if (debug) seenFuncs.insert(f);
     }
   }
   return true;

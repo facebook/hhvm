@@ -330,6 +330,7 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = vec[
       '-vEval.JitDisabledByVSDebug='.$disable_jit,
       '-vEval.JitPGO=false',
       '-vHack.Lang.OptimizeLocalLifetimes=0',
+      '-vHack.Lang.OptimizeLocalIterators = true',
       $scriptPath,
     ];
   } else {

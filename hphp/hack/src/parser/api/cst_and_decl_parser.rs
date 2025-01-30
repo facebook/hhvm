@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use bumpalo::Bump;
-use direct_decl_smart_constructors::DirectDeclSmartConstructors;
-use direct_decl_smart_constructors::NoSourceTextAllocator;
+use direct_decl_smart_constructors_obr::DirectDeclSmartConstructors;
+use direct_decl_smart_constructors_obr::NoSourceTextAllocator;
 use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized_by_ref::direct_decl_parser::ParsedFile;
 use oxidized_by_ref::file_info;

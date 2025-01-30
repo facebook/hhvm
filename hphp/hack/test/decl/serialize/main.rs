@@ -41,7 +41,7 @@ fn main() -> ::anyhow::Result<()> {
         let relative_path = RelativePath::make(relative_path::Prefix::Dummy, path.to_path_buf());
 
         let arena = bumpalo::Bump::new();
-        let parsed_file = direct_decl_parser::parse_decls_for_typechecking(
+        let parsed_file = direct_decl_parser::parse_decls_for_typechecking_obr(
             &Default::default(),
             relative_path,
             &content,
@@ -73,7 +73,7 @@ fn main() -> ::anyhow::Result<()> {
     use std::collections::HashMap;
 
     let aggrate_by_provider = profiles.into_iter().fold(HashMap::new(), |mut m, p| {
-        if m.get(p.provider).is_none() {
+        if !m.contains_key(p.provider) {
             m.insert(
                 p.provider,
                 Profile {
@@ -104,11 +104,7 @@ fn read_file(filepath: &Path) -> Result<Vec<u8>> {
     Ok(text)
 }
 
-fn round_trip<'a, X, P: Provider>(
-    arena: &'a bumpalo::Bump,
-    filepath: &Path,
-    x: X,
-) -> Result<Profile, Error>
+fn round_trip<'a, X, P>(arena: &'a bumpalo::Bump, filepath: &Path, x: X) -> Result<Profile, Error>
 where
     X: Deserialize<'a> + Serialize + Eq + std::fmt::Debug,
     P: Provider,
@@ -129,7 +125,7 @@ where
     let data_size_in_bytes = P::get_bytes(&data).len();
 
     let s = SystemTime::now();
-    let y = P::de(&arena, data).map_err(mk_err)?;
+    let y = P::de(arena, data).map_err(mk_err)?;
     let de_in_ns = SystemTime::now().duration_since(s).unwrap().as_nanos();
 
     if x == y {

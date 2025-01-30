@@ -193,7 +193,7 @@ fn parse_file_with_hashes<'a>(
 ) -> anyhow::Result<ParsedFileWithHashes<'a>> {
     let prefix = path.prefix();
     let parsed_file =
-        direct_decl_parser::parse_decls_for_typechecking(decl_opts, path, text, arena);
+        direct_decl_parser::parse_decls_for_typechecking_obr(decl_opts, path, text, arena);
     let with_hashes =
         ParsedFileWithHashes::new(parsed_file, opts.deregister_php_stdlib, prefix, arena);
     Ok(with_hashes)

@@ -2,7 +2,7 @@
 ; contains "external" function definition in .ml and
 ; the symbol is provided by the ocaml-rs Rust package via caml! macro
 
-(data_only_dirs cargo rust_decl_ffi direct_decl_smart_constructors)
+(data_only_dirs cargo rust_decl_ffi direct_decl_smart_constructors_obr)
 
 ; so dune doesn't look at rust stuff
 

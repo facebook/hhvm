@@ -70,7 +70,7 @@ impl<R: Reason> DeclParser<R> {
         let opts = &self.decl_parser_opts;
         let deregister_php_stdlib_if_hhi = opts.deregister_php_stdlib;
         let parsed_file =
-            direct_decl_parser::parse_decls_for_typechecking(opts, path.into(), text, arena);
+            direct_decl_parser::parse_decls_for_typechecking_obr(opts, path.into(), text, arena);
         ParsedFileWithHashes::new(parsed_file, deregister_php_stdlib_if_hhi, prefix, arena)
     }
 }

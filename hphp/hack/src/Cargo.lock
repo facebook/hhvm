@@ -1154,7 +1154,7 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "direct_decl_parser",
- "direct_decl_smart_constructors",
+ "direct_decl_smart_constructors_obr",
  "oxidized",
  "oxidized_by_ref",
  "pair_smart_constructors",
@@ -1483,7 +1483,7 @@ name = "direct_decl_parser"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "direct_decl_smart_constructors",
+ "direct_decl_smart_constructors_obr",
  "mode_parser",
  "oxidized",
  "oxidized_by_ref",
@@ -1493,7 +1493,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "direct_decl_smart_constructors"
+name = "direct_decl_smart_constructors_obr"
 version = "0.0.0"
 dependencies = [
  "arena_collections",

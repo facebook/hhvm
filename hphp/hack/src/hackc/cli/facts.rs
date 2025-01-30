@@ -40,7 +40,7 @@ pub(crate) fn extract_facts(
         let filename = RelativePath::make(Prefix::Root, path.clone());
         let arena = bumpalo::Bump::new();
         let parsed_file =
-            direct_decl_parser::parse_decls_for_bytecode(&dp_opts, filename, &text, &arena);
+            direct_decl_parser::parse_decls_for_bytecode_obr(&dp_opts, filename, &text, &arena);
 
         // Decls to facts
         if parsed_file.has_first_pass_parse_errors {

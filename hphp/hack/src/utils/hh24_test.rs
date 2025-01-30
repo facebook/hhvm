@@ -78,7 +78,7 @@ pub fn create_naming_table(path: &Path, files: &BTreeMap<&str, &str>) -> Result<
 
 pub fn parse_and_summarize(relpath: &RelativePath, text: &str) -> Result<FileSummary> {
     let arena = &Bump::new();
-    let parsed_file = direct_decl_parser::parse_decls_for_typechecking(
+    let parsed_file = direct_decl_parser::parse_decls_for_typechecking_obr(
         &Default::default(),
         relpath.clone(),
         text.as_bytes(),

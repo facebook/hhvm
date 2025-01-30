@@ -100,7 +100,7 @@ ocaml_ffi! {
 
                 let arena = Bump::new();
 
-                let parsed_file = direct_decl_parser::parse_decls_for_typechecking(
+                let parsed_file = direct_decl_parser::parse_decls_for_typechecking_obr(
                     &parser_options,
                     relpath.clone(),
                     &contents,

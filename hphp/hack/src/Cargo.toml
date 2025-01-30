@@ -7,7 +7,7 @@ members = [
     "client/ide_service/cargo/rust_batch_index_ffi",
     "custom_error/cargo/custom_error_config_ffi",
     "decl/cargo/rust_decl_ffi",
-    "decl/direct_decl_smart_constructors",
+    "decl/direct_decl_smart_constructors_obr",
     "deps/cargo/deps_rust",
     "deps/cargo/deps_rust_ffi",
     "deps/cargo/typing_deps_hash",

@@ -6,10 +6,10 @@
 use std::sync::Arc;
 
 use bumpalo::Bump;
-use direct_decl_smart_constructors::ArenaSourceTextAllocator;
-use direct_decl_smart_constructors::DirectDeclSmartConstructors;
-use direct_decl_smart_constructors::NoSourceTextAllocator;
-use direct_decl_smart_constructors::SourceTextAllocator;
+use direct_decl_smart_constructors_obr::ArenaSourceTextAllocator;
+use direct_decl_smart_constructors_obr::DirectDeclSmartConstructors;
+use direct_decl_smart_constructors_obr::NoSourceTextAllocator;
+use direct_decl_smart_constructors_obr::SourceTextAllocator;
 use mode_parser::parse_mode;
 pub use oxidized::decl_parser_options::DeclParserOptions;
 pub use oxidized_by_ref::direct_decl_parser::Decls;
@@ -30,7 +30,7 @@ use relative_path::RelativePath;
 /// decls from hhi files, (2) produces decls in reverse order, (3) includes subsequent decls
 /// in case of name-clash, rather than just the first. Unless you the caller have thought
 /// through your desired semantics in these cases, you're probably buggy.
-pub fn parse_decls_for_typechecking<'a>(
+pub fn parse_decls_for_typechecking_obr<'a>(
     opts: &DeclParserOptions,
     filename: RelativePath,
     text: &'a [u8],
@@ -46,38 +46,13 @@ pub fn parse_decls_for_typechecking<'a>(
     )
 }
 
-/// The same as 'parse_decls_for_typechecking' except
-/// - Returns decls without reference to the source text to avoid the need to
-///   keep the source text in memory when caching decls.
-///
-/// WARNING
-/// This function (1) doesn't respect po_deregister_php_stdlib which filters+adjusts certain
-/// decls from hhi files, (2) produces decls in reverse order, (3) includes subsequent decls
-/// in case of name-clash, rather than just the first. Unless you the caller have thought
-/// through your desired semantics in these cases, you're probably buggy.
-pub fn parse_decls_for_typechecking_without_reference_text<'a, 'text>(
-    opts: &DeclParserOptions,
-    filename: RelativePath,
-    text: &'text [u8],
-    arena: &'a Bump,
-) -> ParsedFile<'a> {
-    parse_script_with_text_allocator(
-        opts,
-        filename,
-        text,
-        arena,
-        ArenaSourceTextAllocator(arena),
-        false, // elaborate_xhp_namespaces_for_facts
-    )
-}
-
 /// Parse decls for bytecode compilation.
 /// - Returns decls without reference to the source text to avoid the need to
 ///   keep the source text in memory when caching decls.
 /// - Expects the keep_user_attributes option to be set as it is necessary for
 ///   producing facts. (This means that you'll get decl_hash answers that differ
 ///   from parse_decls).
-pub fn parse_decls_for_bytecode<'a, 'text>(
+pub fn parse_decls_for_bytecode_obr<'a, 'text>(
     opts: &DeclParserOptions,
     filename: RelativePath,
     text: &'text [u8],

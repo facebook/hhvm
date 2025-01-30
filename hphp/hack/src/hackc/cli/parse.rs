@@ -79,7 +79,7 @@ pub fn run_bench_command(bench_opts: BenchOpts) -> Result<()> {
                 ParserKind::DirectDecl => {
                     let arena = bumpalo::Bump::new();
                     let opts = Default::default();
-                    let _ = direct_decl_parser::parse_decls_for_typechecking(
+                    let _ = direct_decl_parser::parse_decls_for_typechecking_obr(
                         &opts, filepath, &content, &arena,
                     );
                 }

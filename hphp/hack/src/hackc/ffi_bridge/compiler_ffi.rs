@@ -656,7 +656,7 @@ pub fn parse_decls(
     let alloc: &'static bumpalo::Bump =
         unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&arena) };
     let parsed_file: ParsedFile<'static> =
-        direct_decl_parser::parse_decls_for_bytecode(&decl_opts, relpath, text, alloc);
+        direct_decl_parser::parse_decls_for_bytecode_obr(&decl_opts, relpath, text, alloc);
     let holder = Box::new(DeclsHolder {
         parsed_file,
         _arena: arena,

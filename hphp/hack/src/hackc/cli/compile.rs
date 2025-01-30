@@ -246,7 +246,7 @@ pub(crate) fn test_decl_compile(hackc_opts: &mut crate::Opts, w: &mut impl Write
         let decl_opts = hackc_opts.decl_opts();
         let filename = RelativePath::make(Prefix::Root, path.clone());
         let arena = bumpalo::Bump::new();
-        let parsed_file = direct_decl_parser::parse_decls_for_bytecode(
+        let parsed_file = direct_decl_parser::parse_decls_for_bytecode_obr(
             &decl_opts,
             filename,
             &source_text,

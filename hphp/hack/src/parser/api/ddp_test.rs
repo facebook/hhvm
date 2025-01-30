@@ -34,13 +34,13 @@ fn main() -> Result<()> {
     let arena = Bump::new();
     println!(
         "{:#?}",
-        direct_decl_parser::parse_decls_for_bytecode(&dp_opts, rpath.clone(), &text, &arena)
+        direct_decl_parser::parse_decls_for_bytecode_obr(&dp_opts, rpath.clone(), &text, &arena)
     );
     drop(arena);
     let arena = Bump::new();
     println!(
         "{:#?}",
-        direct_decl_parser::parse_decls_for_typechecking(&dp_opts, rpath, &text, &arena)
+        direct_decl_parser::parse_decls_for_typechecking_obr(&dp_opts, rpath, &text, &arena)
     );
     Ok(())
 }

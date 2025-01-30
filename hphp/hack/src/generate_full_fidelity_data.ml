@@ -1597,13 +1597,13 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDec
 CONSTRUCTOR_METHODS}
 "
 
-  let direct_decl_smart_constructors =
+  let direct_decl_smart_constructors_obr =
     Full_fidelity_schema.make_template_file
       ~transformations:
         [{ pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }]
       ~filename:
         (full_fidelity_path_prefix
-        ^ "../decl/direct_decl_smart_constructors_generated.rs")
+        ^ "../decl/direct_decl_smart_constructors_generated_obr.rs")
       ~template:direct_decl_smart_constructors_template
       ()
 end
@@ -2940,7 +2940,7 @@ let templates =
     .full_fidelity_syntax_smart_constructors;
     GenerateFFRustDeclModeSmartConstructors.decl_mode_smart_constructors;
     GenerateRustFlattenSmartConstructors.flatten_smart_constructors;
-    GenerateRustDirectDeclSmartConstructors.direct_decl_smart_constructors;
+    GenerateRustDirectDeclSmartConstructors.direct_decl_smart_constructors_obr;
     GenerateRustPairSmartConstructors.pair_smart_constructors;
     GenerateFFSmartConstructorsWrappers
     .full_fidelity_smart_constructors_wrappers;

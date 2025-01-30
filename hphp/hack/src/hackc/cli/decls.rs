@@ -29,7 +29,7 @@ pub(crate) fn binary_decls(hackc_opts: crate::Opts, opts: Opts) -> Result<()> {
         let text = std::fs::read(&path)?;
         let filename = RelativePath::make(Prefix::Root, path.clone());
         let parsed_file =
-            direct_decl_parser::parse_decls_for_bytecode(&dp_opts, filename, &text, &arena);
+            direct_decl_parser::parse_decls_for_bytecode_obr(&dp_opts, filename, &text, &arena);
         parsed_files.insert(path.to_path_buf(), parsed_file);
     }
     let mut data = Vec::new();
@@ -47,7 +47,7 @@ pub(crate) fn json_decls(hackc_opts: crate::Opts, opts: Opts) -> Result<()> {
         let arena = bumpalo::Bump::new();
         let filename = RelativePath::make(Prefix::Root, path.clone());
         let parsed_file =
-            direct_decl_parser::parse_decls_for_bytecode(&dp_opts, filename, &text, &arena);
+            direct_decl_parser::parse_decls_for_bytecode_obr(&dp_opts, filename, &text, &arena);
         serde_json::to_writer_pretty(&mut std::io::stdout(), &parsed_file)?;
     }
     Ok(())

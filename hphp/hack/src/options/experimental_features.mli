@@ -60,6 +60,7 @@ type feature_name =
   | ExpressionTreeNestedBindings
   | LikeTypeHints
   | ShapeDestructure
+  | ExpressionTreeShapeCreation
 [@@deriving eq, ord, show]
 
 val feature_status_from_string : string -> feature_status option

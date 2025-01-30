@@ -1,6 +1,6 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('expression_trees')>>
+<<file:__EnableUnstableFeatures('expression_trees', 'expression_tree_shape_creation')>>
 
 <<__EntryPoint>>
 function test(): void {

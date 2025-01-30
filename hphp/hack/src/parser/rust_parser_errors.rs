@@ -3266,6 +3266,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 }
             }
             ShapeExpression(x) => {
+                if self.context.active_expression_tree {
+                    self.check_can_use_feature(node, &FeatureName::ExpressionTreeShapeCreation)
+                }
                 for f in syntax_to_list_no_separators(&x.fields).rev() {
                     self.invalid_shape_field_check(f)
                 }

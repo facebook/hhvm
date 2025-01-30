@@ -66,6 +66,7 @@ type feature_name =
   | ExpressionTreeNestedBindings
   | LikeTypeHints
   | ShapeDestructure
+  | ExpressionTreeShapeCreation
 [@@deriving eq, ord, show]
 
 let feature_name_map =
@@ -108,6 +109,7 @@ let feature_name_map =
       ("expression_tree_nested_bindings", ExpressionTreeNestedBindings);
       ("like_type_hints", LikeTypeHints);
       ("shape_destructure", ShapeDestructure);
+      ("expression_tree_shape_creation", ExpressionTreeShapeCreation);
     ]
 
 let feature_name_from_string s = SMap.find_opt s feature_name_map

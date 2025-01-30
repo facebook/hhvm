@@ -51,6 +51,7 @@ impl FeatureName {
             ExpressionTreeNestedBindings => Unstable,
             LikeTypeHints => Unstable,
             ShapeDestructure => Unstable,
+            ExpressionTreeShapeCreation => Preview,
         }
     }
 

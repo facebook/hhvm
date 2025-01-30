@@ -1088,6 +1088,32 @@ namespace apache::thrift::detail::annotation {
 
 namespace apache::thrift::detail::qualifier {
 template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::MyStruct,::apache::thrift::type::field_id<2>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::MyStruct,::apache::thrift::type::field_id<3>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::MyStruct,::apache::thrift::type::field_id<9>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::AnException,::apache::thrift::type::field_id<3>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::containerStruct,::apache::thrift::type::field_id<3>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::containerStruct,::apache::thrift::type::field_id<5>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::containerStruct,::apache::thrift::type::field_id<6>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::containerStruct,::apache::thrift::type::field_id<9>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::containerStruct,::apache::thrift::type::field_id<10>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::containerStruct,::apache::thrift::type::field_id<18>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::containerStruct,::apache::thrift::type::field_id<19>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::containerStruct,::apache::thrift::type::field_id<22>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::MyIncludedStruct,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
 struct is_cpp_ref_field_optional<::some::valid::ns::AnnotatedStruct,::apache::thrift::type::field_id<8>> : std::true_type{};
 template<>
 struct is_cpp_ref_field_optional<::some::valid::ns::AnnotatedStruct,::apache::thrift::type::field_id<9>> : std::true_type{};
@@ -1099,6 +1125,10 @@ template<>
 struct is_cpp_ref_field_optional<::some::valid::ns::AnnotatedStruct,::apache::thrift::type::field_id<18>> : std::true_type{};
 template<>
 struct is_cpp_ref_field_optional<::some::valid::ns::AnnotatedStruct,::apache::thrift::type::field_id<19>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::AnnotatedStruct,::apache::thrift::type::field_id<38>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::some::valid::ns::AnnotatedStruct,::apache::thrift::type::field_id<39>> : std::true_type{};
 } // namespace apache::thrift::detail::qualifier
 
 // BEGIN hash_and_equal_to

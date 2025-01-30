@@ -179,4 +179,7 @@ struct TerseFieldsWithCustomDefault {
   @cpp.AllowLegacyNonOptionalRef
   @cpp.DeprecatedTerseWrite
   18: NestedException cpp_ref_exception_field;
+
+  @cpp.DeprecatedTerseWrite
+  19: i32 redundant_custom_default = 0;
 }

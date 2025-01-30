@@ -766,6 +766,16 @@ bool serializedField(const T& t) {
 TEST_F(StructTest, TerseFields) {
   TerseFieldsWithCustomDefault terse;
 
+  static_assert(apache::thrift::detail::qualifier::
+                    is_deprecated_terse_writes_with_custom_default_field<
+                        TerseFieldsWithCustomDefault,
+                        type::field_id<4>>::value);
+  // redundant custom default
+  static_assert(!apache::thrift::detail::qualifier::
+                    is_deprecated_terse_writes_with_custom_default_field<
+                        TerseFieldsWithCustomDefault,
+                        type::field_id<19>>::value);
+
   // Primitive types
   EXPECT_EQ(terse.bool_field(), true);
   EXPECT_EQ(terse.byte_field(), 10);

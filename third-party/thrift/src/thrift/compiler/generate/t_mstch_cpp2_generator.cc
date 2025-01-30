@@ -38,6 +38,7 @@
 #include <thrift/compiler/sema/ast_validator.h>
 #include <thrift/compiler/sema/schematizer.h>
 #include <thrift/compiler/sema/sema_context.h>
+#include <thrift/compiler/sema/standard_validator.h>
 
 using apache::thrift::compiler::detail::schematizer;
 
@@ -1863,6 +1864,9 @@ class cpp_mstch_field : public mstch_field {
             {"field:enum_has_value", &cpp_mstch_field::enum_has_value},
             {"field:deprecated_terse_writes?",
              &cpp_mstch_field::deprecated_terse_writes},
+            {"field:deprecated_terse_writes_with_non_redundant_custom_default?",
+             &cpp_mstch_field::
+                 deprecated_terse_writes_with_non_redundant_custom_default},
             {"field:fatal_annotations?",
              &cpp_mstch_field::has_fatal_annotations},
             {"field:fatal_annotations", &cpp_mstch_field::fatal_annotations},
@@ -2075,6 +2079,12 @@ class cpp_mstch_field : public mstch_field {
                kCppDeprecatedTerseWriteUri) != nullptr ||
         (has_option("deprecated_terse_writes") &&
          cpp2::deprecated_terse_writes(field_));
+  }
+  mstch::node deprecated_terse_writes_with_non_redundant_custom_default() {
+    return std::get<bool>(deprecated_terse_writes()) &&
+        field_->default_value() &&
+        !detail::is_initializer_default_value(
+               field_->type().deref(), *field_->default_value());
   }
   mstch::node zero_copy_arg() {
     switch (field_->get_type()->get_type_value()) {

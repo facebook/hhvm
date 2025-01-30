@@ -455,6 +455,32 @@ namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation
 
 namespace apache::thrift::detail::qualifier {
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<1>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<2>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<3>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<4>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<5>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<6>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<7>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<8>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<9>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<10>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<11>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<12>> : std::true_type{};
+template<>
+struct is_deprecated_terse_writes_with_custom_default_field<::facebook::thrift::test::terse_write::deprecated::DeprecatedTerseWriteWithCustomDefault,::apache::thrift::type::field_id<13>> : std::true_type{};
 } // namespace apache::thrift::detail::qualifier
 
 // BEGIN hash_and_equal_to

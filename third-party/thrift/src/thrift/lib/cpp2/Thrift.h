@@ -451,6 +451,12 @@ template <class Struct, class Id>
 struct is_cpp_ref_field_terse : std::false_type {
   static_assert(sizeof(Struct), "Struct must be a complete type.");
 };
+// Identify a field has deprecated terse write optimization with custom default
+// value specified in IDL which differs from the intrinsic default value.
+template <class Struct, class Id>
+struct is_deprecated_terse_writes_with_custom_default_field : std::false_type {
+  static_assert(sizeof(Struct), "Struct must be a complete type.");
+};
 } // namespace qualifier
 
 } // namespace detail

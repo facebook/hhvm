@@ -310,6 +310,10 @@ cdef class GeneratedError(Error):
             )
         self._fbthrift_populate_field_values()
 
+    @classmethod
+    def _fbthrift_auto_migrate_enabled(cls):
+        return False
+
     def __iter__(self):
         cdef StructInfo info = self._fbthrift_struct_info
         for name, index in info.name_to_index.items():

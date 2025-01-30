@@ -25,7 +25,6 @@ from folly.cast cimport down_cast_ptr
 from folly.iobuf import IOBuf
 from types import MappingProxyType
 
-from thrift.py3.exceptions cimport GeneratedError
 from thrift.python.exceptions cimport GeneratedError as _fbthrift_python_GeneratedError
 from thrift.py3.serializer import deserialize, serialize
 from thrift.python.types cimport (

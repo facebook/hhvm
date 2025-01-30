@@ -12,11 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+cimport cython
 from cpython.object cimport Py_LT, Py_EQ, Py_NE
 from thrift.python.common import RpcOptions
 from thrift.python.exceptions import (
     ApplicationError,
     ApplicationErrorType,
+    GeneratedError as _fbthrift_python_GeneratedError,
     Error,
     LibraryError,
     ProtocolError,
@@ -26,6 +28,18 @@ from thrift.python.exceptions import (
     TransportOptions,
 )
 
+@cython.internal
+@cython.auto_pickle(False)
+cdef class ErrorMeta(type):
+    def __instancecheck__(cls, inst):
+        if isinstance(inst, _fbthrift_python_GeneratedError):
+            return inst._fbthrift_auto_migrate_enabled()
+        return super().__instancecheck__(inst)
+
+    def __subclasscheck__(cls, sub):
+        if issubclass(sub, _fbthrift_python_GeneratedError):
+            return sub._fbthrift_auto_migrate_enabled()
+        return super().__subclasscheck__(sub)
 
 cdef class GeneratedError(BaseError):
     """This is the base class for all Generated Thrift Exceptions"""
@@ -104,3 +118,5 @@ cdef class GeneratedError(BaseError):
     @staticmethod
     def __get_thrift_name__():
         raise NotImplementedError()
+
+SetMetaClass(<PyTypeObject*> GeneratedError, <PyTypeObject*> ErrorMeta)

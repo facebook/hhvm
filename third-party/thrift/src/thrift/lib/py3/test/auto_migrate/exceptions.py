@@ -27,6 +27,7 @@ from thrift.py3.exceptions import (
     ApplicationError,
     ApplicationErrorType,
     Error,
+    GeneratedError,
     ProtocolError,
     ProtocolErrorType,
     TransportError,
@@ -34,6 +35,7 @@ from thrift.py3.exceptions import (
     TransportOptions,
 )
 from thrift.py3.serializer import deserialize, serialize_iobuf
+from thrift.py3.types import Struct
 
 
 class ExceptionTests(unittest.TestCase):
@@ -163,3 +165,19 @@ class ExceptionTests(unittest.TestCase):
         deserialized = deserialize(HardError, serialized)
         self.assertIsNot(err, deserialized)
         self.assertEqual(err, deserialized)
+
+    def test_instance(self) -> None:
+        self.assertIsInstance(HardError(errortext="err", code=2), GeneratedError)
+        self.assertIsInstance(HardError(errortext="err", code=2), Error)
+        self.assertIsInstance(HardError(errortext="err", code=2), HardError)
+        self.assertNotIsInstance(HardError(errortext="err", code=2), SimpleError)
+        self.assertNotIsInstance(3, HardError)
+        self.assertNotIsInstance(3, GeneratedError)
+        self.assertNotIsInstance(HardError(errortext="err", code=2), Struct)
+        self.assertTrue(issubclass(HardError, GeneratedError))
+        self.assertTrue(issubclass(HardError, Error))
+        self.assertTrue(issubclass(HardError, HardError))
+        self.assertFalse(issubclass(HardError, SimpleError))
+        self.assertFalse(issubclass(int, HardError))
+        self.assertFalse(issubclass(int, GeneratedError))
+        self.assertFalse(issubclass(HardError, Struct))

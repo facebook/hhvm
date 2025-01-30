@@ -24,6 +24,7 @@ from libcpp.optional cimport optional
 from libcpp.vector cimport vector
 from libcpp.pair cimport pair
 
+from thrift.py3.exceptions cimport GeneratedError, SetMetaClass
 from thrift.py3.std_libcpp cimport string_view, sv_to_str
 from thrift.python.common cimport cThriftMetadata
 from thrift.python.protocol cimport Protocol
@@ -33,25 +34,6 @@ cdef extern from "<memory>" namespace "std" nogil:
     unique_ptr[T] make_unique[T](...)
     shared_ptr[T] make_shared[T](...)
     shared_ptr[const T] make_const_shared "std::make_shared"[T](...)
-
-cdef extern from *:
-    """
-    // Py_SET_TYPE is new in Python 3.9 and this is a suggested replacement for
-    // older versions.
-    #if defined(Py_SET_TYPE)
-    #define APACHE_THRIFT_DETAIL_Py_SET_TYPE(obj, type) \
-        Py_SET_TYPE(obj, type)
-    #else
-    #define APACHE_THRIFT_DETAIL_Py_SET_TYPE(obj, type) \
-        ((Py_TYPE(obj) = (type)), (void)0)
-    #endif
-    static CYTHON_INLINE void SetMetaClass(PyTypeObject* t, PyTypeObject* m)
-    {
-        APACHE_THRIFT_DETAIL_Py_SET_TYPE(t, m);
-        PyType_Modified(t);
-    }
-    """
-    void SetMetaClass(PyTypeObject* t, PyTypeObject* m)
 
 cdef extern from "<memory>" namespace "std" nogil:
     cdef shared_ptr[const T] const_pointer_cast "std::const_pointer_cast"[T](shared_ptr[T])

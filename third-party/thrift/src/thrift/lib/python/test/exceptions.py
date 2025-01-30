@@ -44,9 +44,11 @@ from thrift.python.exceptions import (
     ApplicationError,
     ApplicationErrorType,
     Error,
+    GeneratedError,
     TransportError,
     TransportErrorType,
 )
+from thrift.python.types import Struct
 
 
 class TypeIndependentTests(unittest.TestCase):
@@ -289,3 +291,21 @@ class ExceptionTests(unittest.TestCase):
         )
         self.assertIsNot(err, deserialized_direct)
         self.assertEqual(err, deserialized_direct)
+
+    def test_instance(self) -> None:
+        self.assertIsInstance(HardErrorType(errortext="err", code=2), GeneratedError)
+        self.assertIsInstance(HardErrorType(errortext="err", code=2), Error)
+        self.assertIsInstance(HardErrorType(errortext="err", code=2), HardErrorType)
+        self.assertNotIsInstance(
+            HardErrorType(errortext="err", code=2), SimpleErrorType
+        )
+        self.assertNotIsInstance(3, HardErrorType)
+        self.assertNotIsInstance(3, GeneratedError)
+        self.assertNotIsInstance(HardErrorType(errortext="err", code=2), Struct)
+        self.assertTrue(issubclass(HardErrorType, GeneratedError))
+        self.assertTrue(issubclass(HardErrorType, Error))
+        self.assertTrue(issubclass(HardErrorType, HardErrorType))
+        self.assertFalse(issubclass(HardErrorType, SimpleErrorType))
+        self.assertFalse(issubclass(int, HardErrorType))
+        self.assertFalse(issubclass(int, GeneratedError))
+        self.assertFalse(issubclass(HardErrorType, Struct))

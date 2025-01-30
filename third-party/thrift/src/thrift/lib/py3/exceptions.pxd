@@ -16,6 +16,7 @@
 
 from libcpp.string cimport string
 from cpython.ref cimport PyObject
+from cpython.object cimport PyObject, PyTypeObject
 from folly cimport cFollyExceptionWrapper
 from folly.iobuf cimport IOBuf, cIOBuf
 from libc.stdint cimport uint32_t
@@ -29,6 +30,26 @@ from thrift.python.protocol cimport Protocol
 cdef extern from "Python.h":
     ctypedef extern class builtins.Exception[object PyBaseExceptionObject]:
         pass
+
+
+cdef extern from *:
+    """
+    // Py_SET_TYPE is new in Python 3.9 and this is a suggested replacement for
+    // older versions.
+    #if defined(Py_SET_TYPE)
+    #define APACHE_THRIFT_DETAIL_Py_SET_TYPE(obj, type) \
+        Py_SET_TYPE(obj, type)
+    #else
+    #define APACHE_THRIFT_DETAIL_Py_SET_TYPE(obj, type) \
+        ((Py_TYPE(obj) = (type)), (void)0)
+    #endif
+    static CYTHON_INLINE void SetMetaClass(PyTypeObject* t, PyTypeObject* m)
+    {
+        APACHE_THRIFT_DETAIL_Py_SET_TYPE(t, m);
+        PyType_Modified(t);
+    }
+    """
+    void SetMetaClass(PyTypeObject* t, PyTypeObject* m)
 
 
 cdef extern from "thrift/lib/py3/exceptions.h" namespace "::thrift::py3::exception":

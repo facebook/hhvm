@@ -107,7 +107,6 @@ def get_reflection__{{struct:name}}() -> __StructSpec:
 {{/struct:py3_fields}}
     return spec
 {{/program:filtered_structs}}
-{{^program:auto_migrate?}}
 {{#program:containerTypes}}
 {{#type:list?}}
 def get_reflection__{{type:flat_name}}() -> __ListSpec :
@@ -138,4 +137,3 @@ def get_reflection__{{type:flat_name}}() -> __MapSpec:
 {{/type:map?}}
 
 {{/program:containerTypes}}
-{{/program:auto_migrate?}}

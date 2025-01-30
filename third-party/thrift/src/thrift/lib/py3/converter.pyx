@@ -22,7 +22,8 @@ from thrift.py3.reflection cimport FieldSpec, MapSpec, Qualifier, StructType
 from thrift.python.types cimport BadEnum
 from thrift.py3.types cimport Container, Struct
 from thrift.py3.types import CompiledEnum
-from thrift.python.types cimport Struct as PythonStruct, Union as PythonUnion
+from thrift.python.types cimport Struct as PythonStruct, Union as PythonUnion, List as PythonList, Map as PythonMap, Set as PythonSet
+from thrift.python.types import Enum as PythonEnum
 
 def to_py3_struct(cls, obj):
     if obj is None:
@@ -85,7 +86,7 @@ cdef object _to_py3_field(object cls, object obj):
         return None
     if issubclass(cls, Struct):
         return _to_py3_struct(cls, obj)
-    elif issubclass(cls, Container):
+    elif issubclass(cls, (Container, PythonList, PythonMap, PythonSet)):
         container_spec = inspect(cls)
         if isinstance(container_spec, MapSpec):
             return {

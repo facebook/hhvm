@@ -728,3 +728,211 @@ def get_reflection__AdaptedTypedefFields() -> __StructSpec:
         ),
     )
     return spec
+def get_reflection__List__i16() -> __ListSpec :
+    return __ListSpec._fbthrift_create(
+        value=int,
+        kind=__NumberType.I16,
+    )
+
+def get_reflection__List__i32() -> __ListSpec :
+    return __ListSpec._fbthrift_create(
+        value=int,
+        kind=__NumberType.I32,
+    )
+
+def get_reflection__List__i64() -> __ListSpec :
+    return __ListSpec._fbthrift_create(
+        value=int,
+        kind=__NumberType.I64,
+    )
+
+def get_reflection__List__string() -> __ListSpec :
+    return __ListSpec._fbthrift_create(
+        value=str,
+        kind=__NumberType.NOT_A_NUMBER,
+    )
+
+def get_reflection__List__SimpleStruct() -> __ListSpec :
+    return __ListSpec._fbthrift_create(
+        value=_module_types.SimpleStruct,
+        kind=__NumberType.NOT_A_NUMBER,
+    )
+
+def get_reflection__Set__i32() -> __SetSpec:
+    return __SetSpec._fbthrift_create(
+        value=int,
+        kind=__NumberType.I32,
+     )
+
+def get_reflection__Set__string() -> __SetSpec:
+    return __SetSpec._fbthrift_create(
+        value=str,
+        kind=__NumberType.NOT_A_NUMBER,
+     )
+
+def get_reflection__Map__string_string() -> __MapSpec:
+    return __MapSpec._fbthrift_create(
+        key=str,
+        key_kind=__NumberType.NOT_A_NUMBER,
+        value=str,
+        value_kind=__NumberType.NOT_A_NUMBER,
+    )
+
+def get_reflection__Map__string_SimpleStruct() -> __MapSpec:
+    return __MapSpec._fbthrift_create(
+        key=str,
+        key_kind=__NumberType.NOT_A_NUMBER,
+        value=_module_types.SimpleStruct,
+        value_kind=__NumberType.NOT_A_NUMBER,
+    )
+
+def get_reflection__Map__string_i16() -> __MapSpec:
+    return __MapSpec._fbthrift_create(
+        key=str,
+        key_kind=__NumberType.NOT_A_NUMBER,
+        value=int,
+        value_kind=__NumberType.I16,
+    )
+
+def get_reflection__List__List__i32() -> __ListSpec :
+    return __ListSpec._fbthrift_create(
+        value=_module_types.List__i32,
+        kind=__NumberType.NOT_A_NUMBER,
+    )
+
+def get_reflection__Map__string_i32() -> __MapSpec:
+    return __MapSpec._fbthrift_create(
+        key=str,
+        key_kind=__NumberType.NOT_A_NUMBER,
+        value=int,
+        value_kind=__NumberType.I32,
+    )
+
+def get_reflection__Map__string_Map__string_i32() -> __MapSpec:
+    return __MapSpec._fbthrift_create(
+        key=str,
+        key_kind=__NumberType.NOT_A_NUMBER,
+        value=_module_types.Map__string_i32,
+        value_kind=__NumberType.NOT_A_NUMBER,
+    )
+
+def get_reflection__List__Set__string() -> __ListSpec :
+    return __ListSpec._fbthrift_create(
+        value=_module_types.Set__string,
+        kind=__NumberType.NOT_A_NUMBER,
+    )
+
+def get_reflection__Map__string_List__SimpleStruct() -> __MapSpec:
+    return __MapSpec._fbthrift_create(
+        key=str,
+        key_kind=__NumberType.NOT_A_NUMBER,
+        value=_module_types.List__SimpleStruct,
+        value_kind=__NumberType.NOT_A_NUMBER,
+    )
+
+def get_reflection__List__List__string() -> __ListSpec :
+    return __ListSpec._fbthrift_create(
+        value=_module_types.List__string,
+        kind=__NumberType.NOT_A_NUMBER,
+    )
+
+def get_reflection__List__Set__i32() -> __ListSpec :
+    return __ListSpec._fbthrift_create(
+        value=_module_types.Set__i32,
+        kind=__NumberType.NOT_A_NUMBER,
+    )
+
+def get_reflection__List__Map__string_string() -> __ListSpec :
+    return __ListSpec._fbthrift_create(
+        value=_module_types.Map__string_string,
+        kind=__NumberType.NOT_A_NUMBER,
+    )
+
+def get_reflection__List__binary() -> __ListSpec :
+    return __ListSpec._fbthrift_create(
+        value=bytes,
+        kind=__NumberType.NOT_A_NUMBER,
+    )
+
+def get_reflection__Set__binary() -> __SetSpec:
+    return __SetSpec._fbthrift_create(
+        value=bytes,
+        kind=__NumberType.NOT_A_NUMBER,
+     )
+
+def get_reflection__List__AnEnum() -> __ListSpec :
+    return __ListSpec._fbthrift_create(
+        value=_module_types.AnEnum,
+        kind=__NumberType.NOT_A_NUMBER,
+    )
+
+def get_reflection___std_unordered_map__Map__i32_i32() -> __MapSpec:
+    return __MapSpec._fbthrift_create(
+        key=int,
+        key_kind=__NumberType.I32,
+        value=int,
+        value_kind=__NumberType.I32,
+    )
+
+def get_reflection___MyType__List__i32() -> __ListSpec :
+    return __ListSpec._fbthrift_create(
+        value=int,
+        kind=__NumberType.I32,
+    )
+
+def get_reflection___MyType__Set__i32() -> __SetSpec:
+    return __SetSpec._fbthrift_create(
+        value=int,
+        kind=__NumberType.I32,
+     )
+
+def get_reflection___MyType__Map__i32_i32() -> __MapSpec:
+    return __MapSpec._fbthrift_create(
+        key=int,
+        key_kind=__NumberType.I32,
+        value=int,
+        value_kind=__NumberType.I32,
+    )
+
+def get_reflection___py3_simple_AdaptedList__List__i32() -> __ListSpec :
+    return __ListSpec._fbthrift_create(
+        value=int,
+        kind=__NumberType.I32,
+    )
+
+def get_reflection___py3_simple_AdaptedSet__Set__i32() -> __SetSpec:
+    return __SetSpec._fbthrift_create(
+        value=int,
+        kind=__NumberType.I32,
+     )
+
+def get_reflection___py3_simple_AdaptedMap__Map__i32_i32() -> __MapSpec:
+    return __MapSpec._fbthrift_create(
+        key=int,
+        key_kind=__NumberType.I32,
+        value=int,
+        value_kind=__NumberType.I32,
+    )
+
+def get_reflection__Map__i32_double() -> __MapSpec:
+    return __MapSpec._fbthrift_create(
+        key=int,
+        key_kind=__NumberType.I32,
+        value=float,
+        value_kind=__NumberType.DOUBLE,
+    )
+
+def get_reflection__List__Map__i32_double() -> __ListSpec :
+    return __ListSpec._fbthrift_create(
+        value=_module_types.Map__i32_double,
+        kind=__NumberType.NOT_A_NUMBER,
+    )
+
+def get_reflection__Map__AnEnumRenamed_i32() -> __MapSpec:
+    return __MapSpec._fbthrift_create(
+        key=_module_types.AnEnumRenamed,
+        key_kind=__NumberType.NOT_A_NUMBER,
+        value=int,
+        value_kind=__NumberType.I32,
+    )
+

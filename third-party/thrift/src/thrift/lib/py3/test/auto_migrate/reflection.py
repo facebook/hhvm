@@ -104,7 +104,6 @@ class ReflectionTests(unittest.TestCase):
         self.assertEqual(r.kind, StructType.EXCEPTION)
         self.assertEqual(r.annotations, {})
 
-    @brokenInAutoMigrate()
     def test_list_element(self) -> None:
         x = List__i32([1, 2, 3])
         self.assertTrue(inspectable(x))
@@ -113,7 +112,6 @@ class ReflectionTests(unittest.TestCase):
         self.assertEqual(r.value, int)
         self.assertEqual(r.kind, NumberType.I32)
 
-    @brokenInAutoMigrate()
     def test_set_element(self) -> None:
         x = Set__Color({Color.red, Color.blue})
         self.assertTrue(inspectable(x))

@@ -5,8 +5,13 @@
 #  @generated
 #
 from module.thrift_types import *
+import importlib
 import thrift.python.types as _fbthrift_python_types
 import module.thrift_types as _module_thrift_types
+def get_types_reflection():
+    return importlib.import_module(
+        "module.types_reflection"
+    )
 class List__i16__Meta(type):
     def _fbthrift_type_info(cls):
         return (
@@ -26,6 +31,10 @@ class List__i16(_fbthrift_python_types.List, metaclass=List__i16__Meta):
             *args,
             **kwargs,
         )
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__List__i16()
 
 class List__i32__Meta(type):
     def _fbthrift_type_info(cls):
@@ -47,6 +56,10 @@ class List__i32(_fbthrift_python_types.List, metaclass=List__i32__Meta):
             **kwargs,
         )
 
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__List__i32()
+
 class List__i64__Meta(type):
     def _fbthrift_type_info(cls):
         return (
@@ -66,6 +79,10 @@ class List__i64(_fbthrift_python_types.List, metaclass=List__i64__Meta):
             *args,
             **kwargs,
         )
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__List__i64()
 
 class List__string__Meta(type):
     def _fbthrift_type_info(cls):
@@ -87,6 +104,10 @@ class List__string(_fbthrift_python_types.List, metaclass=List__string__Meta):
             **kwargs,
         )
 
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__List__string()
+
 class List__SimpleStruct__Meta(type):
     def _fbthrift_type_info(cls):
         return (
@@ -106,6 +127,10 @@ class List__SimpleStruct(_fbthrift_python_types.List, metaclass=List__SimpleStru
             *args,
             **kwargs,
         )
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__List__SimpleStruct()
 
 class Set__i32__Meta(type):
     def _fbthrift_type_info(cls):
@@ -127,6 +152,10 @@ class Set__i32(_fbthrift_python_types.Set, metaclass=Set__i32__Meta):
             **kwargs,
         )
 
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Set__i32()
+
 class Set__string__Meta(type):
     def _fbthrift_type_info(cls):
         return (
@@ -146,6 +175,10 @@ class Set__string(_fbthrift_python_types.Set, metaclass=Set__string__Meta):
             *args,
             **kwargs,
         )
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Set__string()
 
 class Map__string_string__Meta(type):
     def _fbthrift_type_info(cls):
@@ -168,6 +201,10 @@ class Map__string_string(_fbthrift_python_types.Map, metaclass=Map__string_strin
             **kwargs,
         )
 
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Map__string_string()
+
 class Map__string_SimpleStruct__Meta(type):
     def _fbthrift_type_info(cls):
         return (
@@ -188,6 +225,10 @@ class Map__string_SimpleStruct(_fbthrift_python_types.Map, metaclass=Map__string
             *args,
             **kwargs,
         )
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Map__string_SimpleStruct()
 
 class Map__string_i16__Meta(type):
     def _fbthrift_type_info(cls):
@@ -210,6 +251,10 @@ class Map__string_i16(_fbthrift_python_types.Map, metaclass=Map__string_i16__Met
             **kwargs,
         )
 
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Map__string_i16()
+
 class List__List__i32__Meta(type):
     def _fbthrift_type_info(cls):
         return (
@@ -229,6 +274,10 @@ class List__List__i32(_fbthrift_python_types.List, metaclass=List__List__i32__Me
             *args,
             **kwargs,
         )
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__List__List__i32()
 
 class Map__string_i32__Meta(type):
     def _fbthrift_type_info(cls):
@@ -251,6 +300,10 @@ class Map__string_i32(_fbthrift_python_types.Map, metaclass=Map__string_i32__Met
             **kwargs,
         )
 
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Map__string_i32()
+
 class Map__string_Map__string_i32__Meta(type):
     def _fbthrift_type_info(cls):
         return (
@@ -272,6 +325,10 @@ class Map__string_Map__string_i32(_fbthrift_python_types.Map, metaclass=Map__str
             **kwargs,
         )
 
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Map__string_Map__string_i32()
+
 class List__Set__string__Meta(type):
     def _fbthrift_type_info(cls):
         return (
@@ -291,6 +348,10 @@ class List__Set__string(_fbthrift_python_types.List, metaclass=List__Set__string
             *args,
             **kwargs,
         )
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__List__Set__string()
 
 class Map__string_List__SimpleStruct__Meta(type):
     def _fbthrift_type_info(cls):
@@ -313,6 +374,10 @@ class Map__string_List__SimpleStruct(_fbthrift_python_types.Map, metaclass=Map__
             **kwargs,
         )
 
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Map__string_List__SimpleStruct()
+
 class List__List__string__Meta(type):
     def _fbthrift_type_info(cls):
         return (
@@ -332,6 +397,10 @@ class List__List__string(_fbthrift_python_types.List, metaclass=List__List__stri
             *args,
             **kwargs,
         )
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__List__List__string()
 
 class List__Set__i32__Meta(type):
     def _fbthrift_type_info(cls):
@@ -353,6 +422,10 @@ class List__Set__i32(_fbthrift_python_types.List, metaclass=List__Set__i32__Meta
             **kwargs,
         )
 
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__List__Set__i32()
+
 class List__Map__string_string__Meta(type):
     def _fbthrift_type_info(cls):
         return (
@@ -372,6 +445,10 @@ class List__Map__string_string(_fbthrift_python_types.List, metaclass=List__Map_
             *args,
             **kwargs,
         )
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__List__Map__string_string()
 
 class List__binary__Meta(type):
     def _fbthrift_type_info(cls):
@@ -393,6 +470,10 @@ class List__binary(_fbthrift_python_types.List, metaclass=List__binary__Meta):
             **kwargs,
         )
 
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__List__binary()
+
 class Set__binary__Meta(type):
     def _fbthrift_type_info(cls):
         return (
@@ -413,6 +494,10 @@ class Set__binary(_fbthrift_python_types.Set, metaclass=Set__binary__Meta):
             **kwargs,
         )
 
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Set__binary()
+
 class List__AnEnum__Meta(type):
     def _fbthrift_type_info(cls):
         return (
@@ -432,6 +517,10 @@ class List__AnEnum(_fbthrift_python_types.List, metaclass=List__AnEnum__Meta):
             *args,
             **kwargs,
         )
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__List__AnEnum()
 
 class _std_unordered_map__Map__i32_i32__Meta(type):
     def _fbthrift_type_info(cls):
@@ -454,6 +543,10 @@ class _std_unordered_map__Map__i32_i32(_fbthrift_python_types.Map, metaclass=_st
             **kwargs,
         )
 
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection___std_unordered_map__Map__i32_i32()
+
 class _MyType__List__i32__Meta(type):
     def _fbthrift_type_info(cls):
         return (
@@ -474,6 +567,10 @@ class _MyType__List__i32(_fbthrift_python_types.List, metaclass=_MyType__List__i
             **kwargs,
         )
 
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection___MyType__List__i32()
+
 class _MyType__Set__i32__Meta(type):
     def _fbthrift_type_info(cls):
         return (
@@ -493,6 +590,10 @@ class _MyType__Set__i32(_fbthrift_python_types.Set, metaclass=_MyType__Set__i32_
             *args,
             **kwargs,
         )
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection___MyType__Set__i32()
 
 class _MyType__Map__i32_i32__Meta(type):
     def _fbthrift_type_info(cls):
@@ -515,6 +616,10 @@ class _MyType__Map__i32_i32(_fbthrift_python_types.Map, metaclass=_MyType__Map__
             **kwargs,
         )
 
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection___MyType__Map__i32_i32()
+
 class _py3_simple_AdaptedList__List__i32__Meta(type):
     def _fbthrift_type_info(cls):
         return (
@@ -535,6 +640,10 @@ class _py3_simple_AdaptedList__List__i32(_fbthrift_python_types.List, metaclass=
             **kwargs,
         )
 
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection___py3_simple_AdaptedList__List__i32()
+
 class _py3_simple_AdaptedSet__Set__i32__Meta(type):
     def _fbthrift_type_info(cls):
         return (
@@ -554,6 +663,10 @@ class _py3_simple_AdaptedSet__Set__i32(_fbthrift_python_types.Set, metaclass=_py
             *args,
             **kwargs,
         )
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection___py3_simple_AdaptedSet__Set__i32()
 
 class _py3_simple_AdaptedMap__Map__i32_i32__Meta(type):
     def _fbthrift_type_info(cls):
@@ -576,6 +689,10 @@ class _py3_simple_AdaptedMap__Map__i32_i32(_fbthrift_python_types.Map, metaclass
             **kwargs,
         )
 
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection___py3_simple_AdaptedMap__Map__i32_i32()
+
 class Map__i32_double__Meta(type):
     def _fbthrift_type_info(cls):
         return (
@@ -597,6 +714,10 @@ class Map__i32_double(_fbthrift_python_types.Map, metaclass=Map__i32_double__Met
             **kwargs,
         )
 
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Map__i32_double()
+
 class List__Map__i32_double__Meta(type):
     def _fbthrift_type_info(cls):
         return (
@@ -616,6 +737,10 @@ class List__Map__i32_double(_fbthrift_python_types.List, metaclass=List__Map__i3
             *args,
             **kwargs,
         )
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__List__Map__i32_double()
 
 class Map__AnEnumRenamed_i32__Meta(type):
     def _fbthrift_type_info(cls):
@@ -637,4 +762,8 @@ class Map__AnEnumRenamed_i32(_fbthrift_python_types.Map, metaclass=Map__AnEnumRe
             *args,
             **kwargs,
         )
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Map__AnEnumRenamed_i32()
 

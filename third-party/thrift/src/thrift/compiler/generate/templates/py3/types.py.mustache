@@ -36,6 +36,7 @@ want to include.
 {{#program:auto_migrate?}}
 from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types import *
 {{#program:hasContainerTypes}}
+import importlib
 import thrift.python.types as _fbthrift_python_types
 import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types as {{!
 }}_{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_thrift_types
@@ -49,6 +50,12 @@ import {{#includeNamespace}}{{value}}.{{/includeNamespace}}thrift_types as _{{#i
 py3-container "flat name" name aliases for backwards-compatibility
 
 }}
+{{#program:hasContainerTypes}}
+def get_types_reflection():
+    return importlib.import_module(
+        "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types_reflection"
+    )
+{{/program:hasContainerTypes}}
 {{#program:containerTypes}}
 {{#type:container?}}
 class {{type:flat_name}}__Meta(type):
@@ -79,6 +86,10 @@ class {{type:flat_name}}(_fbthrift_python_types.{{> types/container_base}}, meta
             *args,
             **kwargs,
         )
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__{{type:flat_name}}()
 
 {{/type:container?}}
 {{/program:containerTypes}}

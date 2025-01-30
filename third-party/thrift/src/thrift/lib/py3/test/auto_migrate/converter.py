@@ -53,7 +53,6 @@ class PyDeprecatedToPy3ConverterTest(unittest.TestCase):
         self.assertEqual(simple.color, py3_types.Color.GREEN)
         self.assertEqual(simple.name_, "myname")
 
-    @brokenInAutoMigrate()
     def test_nested(self) -> None:
         nested = py_deprecated_types.Nested(
             simpleField=py_deprecated_types.Simple(

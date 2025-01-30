@@ -1,12 +1,12 @@
 ERROR: File "type_structure_hack_array.php", line 8, characters 6-16:
 This shape doesn't have a field `classname` (Typing[4108])
-  File "typestructure.hhi", line 55, characters 31-621:
+  File "typestructure.hhi", line 55, characters 31-697:
   The shape is defined here
 ERROR: File "type_structure_hack_array.php", line 9, characters 6-16:
 This shape doesn't have a field `classname` (Typing[4108])
-  File "typestructure.hhi", line 55, characters 31-621:
+  File "typestructure.hhi", line 55, characters 31-697:
   The shape is defined here
 ERROR: File "type_structure_hack_array.php", line 10, characters 6-16:
 This shape doesn't have a field `classname` (Typing[4108])
-  File "typestructure.hhi", line 55, characters 31-621:
+  File "typestructure.hhi", line 55, characters 31-697:
   The shape is defined here

@@ -117,10 +117,10 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
       | _ -> false
     in
     let supportdyn = supportdyn || supportdyn_bound in
-    let transform_shape_field field { sft_ty; _ } (env, shape) =
+    let transform_shape_field field { sft_ty; sft_optional } (env, shape) =
       (* Accumulates the provided type for this iteration of the fold, adding
          it to the accumulation ShapeMap for the current field. Since the
-         field must have been explicitly set, we set sft_optional to true. *)
+         field must have been explicitly set, we set sft_optional to false. *)
       let acc_field_with_type sft_ty =
         TShapeMap.add field { sft_optional = false; sft_ty } shape
       in
@@ -133,19 +133,35 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
       | (TSFlit_str (_, "classname"), (_, Toption fty), _)
         when is_enum_or_classish ty ->
         (env, acc_field_with_type fty)
+      (* Required elements in a tuple type *)
       | ( TSFlit_str (_, "elem_types"),
           _,
-          (r, Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } })
-        ) ->
+          (r, Ttuple { t_required; t_extra = _ }) ) ->
         let (env, t_required) = List.map_env env t_required ~f:make_ts in
+        (env, acc_field_with_type (MakeType.tuple r t_required))
+      (* Optional elements in a tuple type *)
+      | ( TSFlit_str (_, "optional_elem_types"),
+          _,
+          ( r,
+            Ttuple
+              {
+                t_required = _;
+                t_extra = Textra { t_optional; t_variadic = _ };
+              } ) )
+        when not (List.is_empty t_optional) ->
         let (env, t_optional) = List.map_env env t_optional ~f:make_ts in
-        ( env,
-          acc_field_with_type
-            (mk
-               ( r,
-                 Ttuple
-                   { t_required; t_extra = Textra { t_optional; t_variadic } }
-               )) )
+        (env, acc_field_with_type (MakeType.tuple r t_optional))
+      | ( TSFlit_str (_, "variadic_type"),
+          _,
+          ( _r,
+            Ttuple
+              {
+                t_required = _;
+                t_extra = Textra { t_optional = _; t_variadic };
+              } ) )
+        when not (is_nothing t_variadic) ->
+        let (env, t_variadic) = make_ts env t_variadic in
+        (env, acc_field_with_type t_variadic)
       | (TSFlit_str (_, "param_types"), _, (r, Tfun funty)) ->
         let tyl = List.map funty.ft_params ~f:(fun x -> x.fp_type) in
         let (env, tyl) = List.map_env env tyl ~f:make_ts in
@@ -196,6 +212,14 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
         (env, acc_field_with_type (MakeType.tuple r tyl))
       | (TSFlit_str (_, ("kind" | "name" | "alias")), _, _) ->
         (env, acc_field_with_type sft_ty)
-      | (_, _, _) -> (env, shape)
+      | _ ->
+        (* If the field is marked optional (as it should be, apart from kind)
+         * then leave it alone
+         *)
+        ( env,
+          if sft_optional then
+            TShapeMap.add field { sft_optional; sft_ty } shape
+          else
+            shape )
     in
     TShapeMap.fold transform_shape_field shape (env, TShapeMap.empty)

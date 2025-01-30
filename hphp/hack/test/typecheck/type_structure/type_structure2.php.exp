@@ -1,4 +1,4 @@
 ERROR: File "type_structure2.php", line 6, characters 3-26:
 Too few arguments (required 2 but got 1) (Typing[4104])
-  File "typestructure.hhi", line 110, characters 12-25:
+  File "typestructure.hhi", line 115, characters 12-25:
   Definition is here

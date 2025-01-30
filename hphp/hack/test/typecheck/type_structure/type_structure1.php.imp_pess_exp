@@ -30,9 +30,9 @@ File "type_structure1.php", line 44, characters 5-56:
   TypeStructure<num>
 ERROR: File "type_structure1.php", line 38, characters 36-46:
 This shape doesn't have a field `classname` (Typing[4108])
-  File "typestructure.hhi", line 55, characters 31-621:
+  File "typestructure.hhi", line 55, characters 31-697:
   The shape is defined here
 ERROR: File "type_structure1.php", line 39, characters 36-50:
 This shape doesn't have a field `generic_types` (Typing[4108])
-  File "typestructure.hhi", line 55, characters 31-621:
+  File "typestructure.hhi", line 55, characters 31-697:
   The shape is defined here

@@ -211,8 +211,9 @@ ExportedTimeSeries* createTimeSeries(
 /*
  * Create a histogram counter named 'name'. Return an existing one if it has
  * already been created.
+ * The number of buckets is (max - min) / bucketSize
  *
- * 'bucketSize' specifies how many buckets to track for the histogram.
+ * 'bucketSize' specifies the size of each bucket
  * 'min' is the minimal value in the histogram.
  * 'max' is the maximal value in the histogram.
  * 'exportPercentile' specifies at what percentile values we should report the

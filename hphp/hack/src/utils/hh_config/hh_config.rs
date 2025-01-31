@@ -402,7 +402,6 @@ impl HhConfig {
             tco_disallow_discarded_nullable_awaitables: default
                 .tco_disallow_discarded_nullable_awaitables,
             tco_higher_kinded_types: default.tco_higher_kinded_types,
-            tco_report_pos_from_reason: default.tco_report_pos_from_reason,
             tco_typecheck_sample_rate: hhconfig
                 .get_float_or("typecheck_sample_rate", default.tco_typecheck_sample_rate)?,
             tco_enable_sound_dynamic: hhconfig.get_bool_or(

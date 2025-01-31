@@ -556,9 +556,7 @@ let format_summary
     else
       None
 
-let report_pos_from_reason = ref false
-
-let to_string error = User_error.to_string !report_pos_from_reason error
+let to_string error = User_error.to_string error
 
 let log_unexpected error path desc =
   HackEventLogger.invariant_violation_bug
@@ -787,11 +785,6 @@ let try_apply_fixme pos code severity : fixme_outcome =
         Not_fixmed (Some { explanation; fixme_pos })
       else if Relative_path.(is_hhi (prefix (Pos.filename pos))) then
         Fixmed
-      else if !report_pos_from_reason && Pos.get_from_reason pos then
-        let explanation =
-          "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress an error whose position was derived from reason information"
-        in
-        Not_fixmed (Some { explanation; fixme_pos })
       else if forbidden_decl_fixme then
         let explanation =
           Printf.sprintf

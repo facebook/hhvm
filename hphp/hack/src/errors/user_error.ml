@@ -254,32 +254,24 @@ let error_code_to_string error_code =
       path/to/other/file.php ...
       And this too
   *)
-let to_string
-    report_pos_from_reason { severity; code; claim; reasons; custom_msgs; _ } =
+let to_string { severity; code; claim; reasons; custom_msgs; _ } =
   let buf = Buffer.create 50 in
   let (pos1, msg1) = claim in
   Buffer.add_string
     buf
     begin
       let error_code = error_code_to_string code in
-      let reason_msg =
-        if report_pos_from_reason && Pos.get_from_reason pos1 then
-          " [FROM REASON INFO]"
-        else
-          ""
-      in
       Printf.sprintf
         (* /!\ WARNING!!!!!
            Changing this might break emacs and vim.
            These are not officially supported, but breaking will piss off users.
            Fix Emacs at fbcode/emacs_config/emacs-packages/compile-mode-regexes.el
            Fix Vim at fbcode/shellconfigs/rc_deprecated/vim/plugin/hack.vim, variable hack_errorformat *)
-        "%s: %s\n%s (%s)%s\n"
+        "%s: %s\n%s (%s)\n"
         (Severity.to_all_caps_string severity)
         (Pos.string pos1)
         msg1
         error_code
-        reason_msg
     end;
   let (_ : unit) =
     List.iter reasons ~f:(fun (p, w) ->

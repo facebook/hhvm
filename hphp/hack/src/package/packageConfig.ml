@@ -33,7 +33,6 @@ let parse (package_v2 : bool) (strict : bool) (path : string) =
           in
           User_error.(
             to_string
-              true
               (to_absolute
                  Parsing_error.(
                    to_user_error @@ Package_config_error { pos; msg; reasons }))))

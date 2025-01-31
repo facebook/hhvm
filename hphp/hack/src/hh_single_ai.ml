@@ -115,8 +115,6 @@ let parse_options () =
   in
   Errors.allowed_fixme_codes_strict :=
     GlobalOptions.allowed_fixme_codes_strict tcopt;
-  Errors.report_pos_from_reason :=
-    TypecheckerOptions.report_pos_from_reason tcopt;
   ( { files = fns; extra_builtins = !extra_builtins; ai_options; tcopt },
     Ai_options.modify_shared_mem ai_options SharedMem.default_config )
 

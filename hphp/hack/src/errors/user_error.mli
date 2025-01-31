@@ -104,7 +104,7 @@ val error_code_to_string : int -> string
       path/to/other/file.php pos...
       And this too
   *)
-val to_string : bool -> (Pos.absolute, Pos.absolute) t -> string
+val to_string : (Pos.absolute, Pos.absolute) t -> string
 
 val to_json :
   human_formatter:(('a Pos.pos, 'a Pos.pos) t -> string) option ->

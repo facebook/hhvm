@@ -2196,12 +2196,7 @@ let rec to_json_help : type a. a t_ -> Hh_json.json list -> Hh_json.json list =
 and to_json : type a. a t_ -> Hh_json.json =
  (fun t -> Hh_json.JSON_Array (List.rev @@ to_json_help t []))
 
-let to_pos : type ph. ph t_ -> Pos_or_decl.t =
- fun r ->
-  if !Errors.report_pos_from_reason then
-    Pos_or_decl.set_from_reason (to_raw_pos r)
-  else
-    to_raw_pos r
+let to_pos : type ph. ph t_ -> Pos_or_decl.t = (fun r -> to_raw_pos r)
 
 let rec flow_contains_tyvar = function
   | Flow

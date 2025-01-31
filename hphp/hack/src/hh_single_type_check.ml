@@ -946,7 +946,6 @@ let parse_options () =
         !disallow_discarded_nullable_awaitables
       ~glean_reponame:!glean_reponame
       ~tco_higher_kinded_types:!enable_higher_kinded_types
-      ~tco_report_pos_from_reason:!report_pos_from_reason
       ~tco_enable_sound_dynamic:true
       ~tco_skip_check_under_dynamic:!skip_check_under_dynamic
       ~tco_global_access_check_enabled:!enable_global_access_check
@@ -975,8 +974,6 @@ let parse_options () =
 
   Errors.allowed_fixme_codes_strict :=
     GlobalOptions.allowed_fixme_codes_strict tcopt;
-  Errors.report_pos_from_reason :=
-    TypecheckerOptions.report_pos_from_reason tcopt;
 
   let tco_experimental_features =
     tcopt.GlobalOptions.tco_experimental_features

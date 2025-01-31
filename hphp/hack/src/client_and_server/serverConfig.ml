@@ -428,7 +428,6 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
     ?tco_error_php_lambdas:(bool_opt "error_php_lambdas" config)
     ?tco_disallow_discarded_nullable_awaitables:
       (bool_opt "disallow_discarded_nullable_awaitables" config)
-    ?tco_report_pos_from_reason:(bool_opt "report_pos_from_reason" config)
     ?tco_typecheck_sample_rate:(float_opt "typecheck_sample_rate" config)
     ?tco_enable_sound_dynamic:(bool_opt "enable_sound_dynamic_type" config)
     ?tco_pessimise_builtins:(bool_opt "pessimise_builtins" config)
@@ -654,8 +653,6 @@ let load
   in
   Errors.allowed_fixme_codes_strict :=
     GlobalOptions.allowed_fixme_codes_strict global_opts;
-  Errors.report_pos_from_reason :=
-    TypecheckerOptions.report_pos_from_reason global_opts;
   Errors.code_agnostic_fixme := GlobalOptions.code_agnostic_fixme global_opts;
   ( {
       version;

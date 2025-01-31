@@ -169,9 +169,6 @@ type t = {
       (** Flag to error on using discarded nullable awaitables *)
   tco_higher_kinded_types: bool;
       (** Controls if higher-kinded types are supported *)
-  tco_report_pos_from_reason: bool;
-      (** If set, then positions derived from reason information are tainted, and primary errors
-         with such positions are flagged *)
   tco_typecheck_sample_rate: float;
       (** Type check this proportion of all files. Default is 1.0.
         DO NOT set to any other value except for testing purposes. *)
@@ -337,7 +334,6 @@ val set :
   ?tco_error_php_lambdas:bool ->
   ?tco_disallow_discarded_nullable_awaitables:bool ->
   ?tco_higher_kinded_types:bool ->
-  ?tco_report_pos_from_reason:bool ->
   ?tco_typecheck_sample_rate:float ->
   ?tco_enable_sound_dynamic:bool ->
   ?tco_pessimise_builtins:bool ->

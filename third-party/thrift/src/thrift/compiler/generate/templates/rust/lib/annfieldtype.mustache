@@ -27,25 +27,12 @@
 }}{{/type:struct}}{{!
 }}{{#type:enum}}{{enum:package}}::{{enum:rust_name}}{{/type:enum}}{{!
 }}{{#type:list?}}
-    }}::std::vec::Vec<{{#type:list_elem_type}}{{> lib/type}}{{/type:list_elem_type}}>{{!
+    }}::std::vec::Vec{{> lib/type_generics}}{{!
 }}{{/type:list?}}{{!
 }}{{#type:set?}}{{!
-    }}::{{field:type_rust}}{{!
-    }}<{{!
-        }}{{#type:set_elem_type}}{{!
-        }}{{#type:floating_point?}}::fbthrift::export::OrderedFloat<{{> lib/type}}>{{/type:floating_point?}}{{!
-        }}{{^type:floating_point?}}{{> lib/type}}{{/type:floating_point?}}{{!
-        }}{{/type:set_elem_type}}{{!
-    }}>{{!
+    }}::{{field:type_rust}}{{> lib/type_generics}}{{!
 }}{{/type:set?}}{{!
 }}{{#type:map?}}{{!
-    }}::{{field:type_rust}}{{!
-    }}<{{!
-        }}{{#type:key_type}}{{!
-        }}{{#type:floating_point?}}::fbthrift::export::OrderedFloat<{{> lib/type}}>{{/type:floating_point?}}{{!
-        }}{{^type:floating_point?}}{{> lib/type}}{{/type:floating_point?}}{{!
-        }}{{/type:key_type}}, {{!
-        }}{{#type:value_type}}{{> lib/type}}{{/type:value_type}}{{!
-    }}>{{!
+    }}::{{field:type_rust}}{{> lib/type_generics}}{{!
 }}{{/type:map?}}{{!
 }}

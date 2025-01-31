@@ -27,6 +27,7 @@
 
 #include "proxygen/lib/http/HTTPHeaders.h"
 
+#include <chrono>
 #include <list>
 #include <string>
 #include <utility>
@@ -121,8 +122,17 @@ public:
 
   void onRequestStart(const timespec &queueTime);
   const timespec &getQueueTime() const { return m_queueTime; }
+  const std::chrono::steady_clock::time_point getQueueTimePoint() const {
+    return timespecToSteadyTimePoint(m_queueTime);
+  }
   const timespec &getWallTime() const { return m_wallTime; }
+  const std::chrono::steady_clock::time_point getWallTimePoint() const {
+    return timespecToSteadyTimePoint(m_wallTime);
+  }
   const timespec &getCpuTime() const { return m_cpuTime; }
+  const std::chrono::steady_clock::time_point getCpuTimePoint() const {
+    return timespecToSteadyTimePoint(m_cpuTime);
+  }
   const int64_t &getInstructions() const { return m_instructions; }
   const int64_t &getSleepTime() const { return m_sleepTime; }
   void incSleepTime(unsigned int seconds) { m_sleepTime += seconds; }
@@ -442,6 +452,13 @@ public:
   virtual void sendStreamResponse(const void* /*data*/, int /*size*/) {}
   virtual void sendStreamEOM() {}
 private:
+  const std::chrono::steady_clock::time_point timespecToSteadyTimePoint(const  timespec &ts) const {
+    auto duration = std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+      std::chrono::seconds{ts.tv_sec} + std::chrono::nanoseconds{ts.tv_nsec}
+    );
+    return std::chrono::steady_clock::time_point(duration);
+  }
+
   void sendRawInternal(const char *data, int size, int code = 200,
                        bool precompressed = false,
                        const char *codeInfo = nullptr);

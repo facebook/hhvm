@@ -181,13 +181,13 @@ inline void reset_field<::apache::thrift::fixtures::types::MinPaddingWithCustomT
       obj.small_ref().copy_from(default_inst<::apache::thrift::fixtures::types::MinPaddingWithCustomType>().small_ref());
       return;
     case 1:
-      obj.big_ref().copy_from(default_inst<::apache::thrift::fixtures::types::MinPaddingWithCustomType>().big_ref());
+      obj.biggish_ref().copy_from(default_inst<::apache::thrift::fixtures::types::MinPaddingWithCustomType>().biggish_ref());
       return;
     case 2:
       obj.medium_ref().copy_from(default_inst<::apache::thrift::fixtures::types::MinPaddingWithCustomType>().medium_ref());
       return;
     case 3:
-      obj.biggish_ref().copy_from(default_inst<::apache::thrift::fixtures::types::MinPaddingWithCustomType>().biggish_ref());
+      obj.big_ref().copy_from(default_inst<::apache::thrift::fixtures::types::MinPaddingWithCustomType>().big_ref());
       return;
     case 4:
       obj.tiny_ref().copy_from(default_inst<::apache::thrift::fixtures::types::MinPaddingWithCustomType>().tiny_ref());

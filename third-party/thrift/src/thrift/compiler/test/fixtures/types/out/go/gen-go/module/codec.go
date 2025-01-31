@@ -1189,11 +1189,11 @@ var (
             MustBeSetToSerialize: false,
         },        {
             ID:                   2,
-            WireType:             thrift.I64,
-            Name:                 "big",
+            WireType:             thrift.I32,
+            Name:                 "biggish",
             ReflectIndex:         1,
             IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_i64,
+            ValueTypeSpec:        premadeCodecTypeSpec_i32,
             MustBeSetToSerialize: false,
         },        {
             ID:                   3,
@@ -1205,11 +1205,11 @@ var (
             MustBeSetToSerialize: false,
         },        {
             ID:                   4,
-            WireType:             thrift.I32,
-            Name:                 "biggish",
+            WireType:             thrift.I64,
+            Name:                 "big",
             ReflectIndex:         3,
             IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_i32,
+            ValueTypeSpec:        premadeCodecTypeSpec_i64,
             MustBeSetToSerialize: false,
         },        {
             ID:                   5,
@@ -1229,9 +1229,9 @@ var (
     },
     FieldSpecNameToIndex: map[string]int{
         "small": 0,
-        "big": 1,
+        "biggish": 1,
         "medium": 2,
-        "biggish": 3,
+        "big": 3,
         "tiny": 4,
     },
 }

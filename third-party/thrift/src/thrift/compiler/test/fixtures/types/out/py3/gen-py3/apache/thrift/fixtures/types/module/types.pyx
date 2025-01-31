@@ -1535,12 +1535,12 @@ cdef class MinPaddingWithCustomType(thrift.py3.types.Struct):
     def small(self):
         return self.small_impl()
 
-    cdef inline big_impl(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).big_ref().value()
+    cdef inline biggish_impl(self):
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).biggish_ref().value()
 
     @property
-    def big(self):
-        return self.big_impl()
+    def biggish(self):
+        return self.biggish_impl()
 
     cdef inline medium_impl(self):
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).medium_ref().value()
@@ -1549,12 +1549,12 @@ cdef class MinPaddingWithCustomType(thrift.py3.types.Struct):
     def medium(self):
         return self.medium_impl()
 
-    cdef inline biggish_impl(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).biggish_ref().value()
+    cdef inline big_impl(self):
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).big_ref().value()
 
     @property
-    def biggish(self):
-        return self.biggish_impl()
+    def big(self):
+        return self.big_impl()
 
     cdef inline tiny_impl(self):
         return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).tiny_ref().value()

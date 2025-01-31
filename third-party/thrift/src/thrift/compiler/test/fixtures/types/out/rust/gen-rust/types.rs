@@ -173,9 +173,9 @@ pub struct MinPadding {
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MinPaddingWithCustomType {
     pub small: ::std::primitive::i8,
-    pub big: ::std::primitive::i64,
-    pub medium: ::std::primitive::i16,
     pub biggish: ::std::primitive::i32,
+    pub medium: ::std::primitive::i16,
+    pub big: ::std::primitive::i64,
     pub tiny: ::std::primitive::i8,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
@@ -2309,9 +2309,9 @@ impl ::std::default::Default for self::MinPaddingWithCustomType {
     fn default() -> Self {
         Self {
             small: ::std::default::Default::default(),
-            big: ::std::default::Default::default(),
-            medium: ::std::default::Default::default(),
             biggish: ::std::default::Default::default(),
+            medium: ::std::default::Default::default(),
+            big: ::std::default::Default::default(),
             tiny: ::std::default::Default::default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
@@ -2323,9 +2323,9 @@ impl ::std::fmt::Debug for self::MinPaddingWithCustomType {
         formatter
             .debug_struct("MinPaddingWithCustomType")
             .field("small", &self.small)
-            .field("big", &self.big)
-            .field("medium", &self.medium)
             .field("biggish", &self.biggish)
+            .field("medium", &self.medium)
+            .field("big", &self.big)
             .field("tiny", &self.tiny)
             .finish()
     }
@@ -2363,14 +2363,14 @@ where
         p.write_field_begin("small", ::fbthrift::TType::Byte, 1);
         ::fbthrift::Serialize::write(&self.small, p);
         p.write_field_end();
-        p.write_field_begin("big", ::fbthrift::TType::I64, 2);
-        ::fbthrift::Serialize::write(&self.big, p);
+        p.write_field_begin("biggish", ::fbthrift::TType::I32, 2);
+        ::fbthrift::Serialize::write(&self.biggish, p);
         p.write_field_end();
         p.write_field_begin("medium", ::fbthrift::TType::I16, 3);
         ::fbthrift::Serialize::write(&self.medium, p);
         p.write_field_end();
-        p.write_field_begin("biggish", ::fbthrift::TType::I32, 4);
-        ::fbthrift::Serialize::write(&self.biggish, p);
+        p.write_field_begin("big", ::fbthrift::TType::I64, 4);
+        ::fbthrift::Serialize::write(&self.big, p);
         p.write_field_end();
         p.write_field_begin("tiny", ::fbthrift::TType::Byte, 5);
         ::fbthrift::Serialize::write(&self.tiny, p);
@@ -2387,16 +2387,16 @@ where
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
-            ::fbthrift::Field::new("big", ::fbthrift::TType::I64, 2),
-            ::fbthrift::Field::new("biggish", ::fbthrift::TType::I32, 4),
+            ::fbthrift::Field::new("big", ::fbthrift::TType::I64, 4),
+            ::fbthrift::Field::new("biggish", ::fbthrift::TType::I32, 2),
             ::fbthrift::Field::new("medium", ::fbthrift::TType::I16, 3),
             ::fbthrift::Field::new("small", ::fbthrift::TType::Byte, 1),
             ::fbthrift::Field::new("tiny", ::fbthrift::TType::Byte, 5),
         ];
         let mut field_small = ::std::option::Option::None;
-        let mut field_big = ::std::option::Option::None;
-        let mut field_medium = ::std::option::Option::None;
         let mut field_biggish = ::std::option::Option::None;
+        let mut field_medium = ::std::option::Option::None;
+        let mut field_big = ::std::option::Option::None;
         let mut field_tiny = ::std::option::Option::None;
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a MinPaddingWithCustomType")?;
         loop {
@@ -2404,9 +2404,9 @@ where
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
                 (::fbthrift::TType::Byte, 1) => field_small = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I64, 2) => field_big = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I32, 2) => field_biggish = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::I16, 3) => field_medium = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I32, 4) => field_biggish = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I64, 4) => field_big = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Byte, 5) => field_tiny = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
@@ -2415,9 +2415,9 @@ where
         p.read_struct_end()?;
         ::std::result::Result::Ok(Self {
             small: field_small.unwrap_or_default(),
-            big: field_big.unwrap_or_default(),
-            medium: field_medium.unwrap_or_default(),
             biggish: field_biggish.unwrap_or_default(),
+            medium: field_medium.unwrap_or_default(),
+            big: field_big.unwrap_or_default(),
             tiny: field_tiny.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })

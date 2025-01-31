@@ -194,11 +194,11 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::MinPaddingWithCustomTyp
     case 1:
       return f(0, static_cast<T&&>(t).small_ref());
     case 2:
-      return f(1, static_cast<T&&>(t).big_ref());
+      return f(1, static_cast<T&&>(t).biggish_ref());
     case 3:
       return f(2, static_cast<T&&>(t).medium_ref());
     case 4:
-      return f(3, static_cast<T&&>(t).biggish_ref());
+      return f(3, static_cast<T&&>(t).big_ref());
     case 5:
       return f(4, static_cast<T&&>(t).tiny_ref());
     default:

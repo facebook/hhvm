@@ -2027,9 +2027,9 @@ class MinPaddingWithCustomType implements \IThriftSyncStruct, \IThriftStructMeta
       'type' => \TType::BYTE,
     ),
     2 => shape(
-      'var' => 'big',
+      'var' => 'biggish',
       'is_terse' => true,
-      'type' => \TType::I64,
+      'type' => \TType::I32,
     ),
     3 => shape(
       'var' => 'medium',
@@ -2037,9 +2037,9 @@ class MinPaddingWithCustomType implements \IThriftSyncStruct, \IThriftStructMeta
       'type' => \TType::I16,
     ),
     4 => shape(
-      'var' => 'biggish',
+      'var' => 'big',
       'is_terse' => true,
-      'type' => \TType::I32,
+      'type' => \TType::I64,
     ),
     5 => shape(
       'var' => 'tiny',
@@ -2049,21 +2049,21 @@ class MinPaddingWithCustomType implements \IThriftSyncStruct, \IThriftStructMeta
   ];
   const dict<string, int> FIELDMAP = dict[
     'small' => 1,
-    'big' => 2,
+    'biggish' => 2,
     'medium' => 3,
-    'biggish' => 4,
+    'big' => 4,
     'tiny' => 5,
   ];
 
   const type TConstructorShape = shape(
     ?'small' => ?int,
-    ?'big' => ?int,
-    ?'medium' => ?int,
     ?'biggish' => ?int,
+    ?'medium' => ?int,
+    ?'big' => ?int,
     ?'tiny' => ?int,
   );
 
-  const int STRUCTURAL_ID = 7925816223011912416;
+  const int STRUCTURAL_ID = 3599217345572234846;
   /**
    * Original thrift field:-
    * 1: byte small
@@ -2071,9 +2071,9 @@ class MinPaddingWithCustomType implements \IThriftSyncStruct, \IThriftStructMeta
   public int $small;
   /**
    * Original thrift field:-
-   * 2: i64 big
+   * 2: i32 biggish
    */
-  public int $big;
+  public int $biggish;
   /**
    * Original thrift field:-
    * 3: i16 medium
@@ -2081,20 +2081,20 @@ class MinPaddingWithCustomType implements \IThriftSyncStruct, \IThriftStructMeta
   public int $medium;
   /**
    * Original thrift field:-
-   * 4: i32 biggish
+   * 4: i64 big
    */
-  public int $biggish;
+  public int $big;
   /**
    * Original thrift field:-
    * 5: byte tiny
    */
   public int $tiny;
 
-  public function __construct(?int $small = null, ?int $big = null, ?int $medium = null, ?int $biggish = null, ?int $tiny = null)[] {
+  public function __construct(?int $small = null, ?int $biggish = null, ?int $medium = null, ?int $big = null, ?int $tiny = null)[] {
     $this->small = $small ?? 0;
-    $this->big = $big ?? 0;
-    $this->medium = $medium ?? 0;
     $this->biggish = $biggish ?? 0;
+    $this->medium = $medium ?? 0;
+    $this->big = $big ?? 0;
     $this->tiny = $tiny ?? 0;
   }
 
@@ -2105,9 +2105,9 @@ class MinPaddingWithCustomType implements \IThriftSyncStruct, \IThriftStructMeta
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'small'),
-      Shapes::idx($shape, 'big'),
-      Shapes::idx($shape, 'medium'),
       Shapes::idx($shape, 'biggish'),
+      Shapes::idx($shape, 'medium'),
+      Shapes::idx($shape, 'big'),
       Shapes::idx($shape, 'tiny'),
     );
   }
@@ -2118,9 +2118,9 @@ class MinPaddingWithCustomType implements \IThriftSyncStruct, \IThriftStructMeta
 
   public function clearTerseFields()[write_props]: void {
     $this->small = 0;
-    $this->big = 0;
-    $this->medium = 0;
     $this->biggish = 0;
+    $this->medium = 0;
+    $this->big = 0;
     $this->tiny = 0;
   }
 
@@ -2145,10 +2145,10 @@ class MinPaddingWithCustomType implements \IThriftSyncStruct, \IThriftStructMeta
               "id" => 2,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                 )
               ),
-              "name" => "big",
+              "name" => "biggish",
             )
           ),
           \tmeta_ThriftField::fromShape(
@@ -2167,10 +2167,10 @@ class MinPaddingWithCustomType implements \IThriftSyncStruct, \IThriftStructMeta
               "id" => 4,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
-                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
                 )
               ),
-              "name" => "biggish",
+              "name" => "big",
             )
           ),
           \tmeta_ThriftField::fromShape(
@@ -2240,24 +2240,24 @@ class MinPaddingWithCustomType implements \IThriftSyncStruct, \IThriftStructMeta
         $this->small = (int)$_tmp0;
       }
     }
-    if (idx($parsed, 'big') !== null) {
-      $this->big = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['big']);
+    if (idx($parsed, 'biggish') !== null) {
+      $_tmp1 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['biggish']);
+      if ($_tmp1 > 0x7fffffff) {
+        throw new \TProtocolException("number exceeds limit in field");
+      } else {
+        $this->biggish = (int)$_tmp1;
+      }
     }
     if (idx($parsed, 'medium') !== null) {
-      $_tmp1 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['medium']);
-      if ($_tmp1 > 0x7fff) {
+      $_tmp2 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['medium']);
+      if ($_tmp2 > 0x7fff) {
         throw new \TProtocolException("number exceeds limit in field");
       } else {
-        $this->medium = (int)$_tmp1;
+        $this->medium = (int)$_tmp2;
       }
     }
-    if (idx($parsed, 'biggish') !== null) {
-      $_tmp2 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['biggish']);
-      if ($_tmp2 > 0x7fffffff) {
-        throw new \TProtocolException("number exceeds limit in field");
-      } else {
-        $this->biggish = (int)$_tmp2;
-      }
+    if (idx($parsed, 'big') !== null) {
+      $this->big = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['big']);
     }
     if (idx($parsed, 'tiny') !== null) {
       $_tmp3 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['tiny']);

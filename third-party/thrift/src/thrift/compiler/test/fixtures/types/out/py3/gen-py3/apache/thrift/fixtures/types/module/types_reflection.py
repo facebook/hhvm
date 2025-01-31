@@ -477,10 +477,10 @@ def get_reflection__MinPaddingWithCustomType() -> __StructSpec:
     spec.add_field(
         __FieldSpec._fbthrift_create(
             id=2,
-            name="big",
-            py_name="big",
+            name="biggish",
+            py_name="biggish",
             type=int,
-            kind=__NumberType.I64,
+            kind=__NumberType.I32,
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
@@ -503,10 +503,10 @@ def get_reflection__MinPaddingWithCustomType() -> __StructSpec:
     spec.add_field(
         __FieldSpec._fbthrift_create(
             id=4,
-            name="biggish",
-            py_name="biggish",
+            name="big",
+            py_name="big",
             type=int,
-            kind=__NumberType.I32,
+            kind=__NumberType.I64,
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={

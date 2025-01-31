@@ -593,9 +593,9 @@ cdef extern from "thrift/compiler/test/fixtures/types/gen-cpp2/module_types_cust
         bint operator<=(cMinPaddingWithCustomType&)
         bint operator>=(cMinPaddingWithCustomType&)
         __terse_field_ref[cint8_t] small_ref "small_ref" ()
-        __terse_field_ref[cint64_t] big_ref "big_ref" ()
-        __terse_field_ref[cint16_t] medium_ref "medium_ref" ()
         __terse_field_ref[cint32_t] biggish_ref "biggish_ref" ()
+        __terse_field_ref[cint16_t] medium_ref "medium_ref" ()
+        __terse_field_ref[cint64_t] big_ref "big_ref" ()
         __terse_field_ref[cint8_t] tiny_ref "tiny_ref" ()
 
 

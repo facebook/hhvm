@@ -197,9 +197,9 @@ cdef class MinPaddingWithCustomType(thrift.py3.types.Struct):
     cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cMinPaddingWithCustomType] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__MinPaddingWithCustomType_FieldsSetter _fields_setter
     cdef inline object small_impl(self)
-    cdef inline object big_impl(self)
-    cdef inline object medium_impl(self)
     cdef inline object biggish_impl(self)
+    cdef inline object medium_impl(self)
+    cdef inline object big_impl(self)
     cdef inline object tiny_impl(self)
 
     @staticmethod

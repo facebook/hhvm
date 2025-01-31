@@ -345,12 +345,12 @@ def _fbthrift_gen_metadata_struct_MinPaddingWithCustomType(metadata_struct: _fbt
     fields = [
         _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BYTE_TYPE), name="small", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I64_TYPE), name="big", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE), name="biggish", is_optional=False, structured_annotations=[
         ]),
         _fbthrift_metadata.ThriftField(id=3, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I16_TYPE), name="medium", is_optional=False, structured_annotations=[
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Adapter"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="::my::Adapter"),  }),
         ]),
-        _fbthrift_metadata.ThriftField(id=4, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE), name="biggish", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=4, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I64_TYPE), name="big", is_optional=False, structured_annotations=[
         ]),
         _fbthrift_metadata.ThriftField(id=5, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BYTE_TYPE), name="tiny", is_optional=False, structured_annotations=[
         ]),
@@ -366,9 +366,9 @@ def _fbthrift_gen_metadata_struct_MinPaddingWithCustomType(metadata_struct: _fbt
     new_struct = metadata_struct(structs=struct_dict)
 
     # small
-        # big
-        # medium
         # biggish
+        # medium
+        # big
         # tiny
     
     return new_struct

@@ -275,7 +275,7 @@ class MinPaddingWithCustomType(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def big(self) -> int: ...
+    def biggish(self) -> int: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
@@ -283,7 +283,7 @@ class MinPaddingWithCustomType(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def biggish(self) -> int: ...
+    def big(self) -> int: ...
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
     @_fbthrift_builtins.property
     @_abc.abstractmethod

@@ -445,26 +445,26 @@ class MinPaddingWithCustomType(thrift.py3.types.Struct, _typing.Hashable):
         pass
 
     small: _typing.Final[int] = ...
-    big: _typing.Final[int] = ...
-    medium: _typing.Final[int] = ...
     biggish: _typing.Final[int] = ...
+    medium: _typing.Final[int] = ...
+    big: _typing.Final[int] = ...
     tiny: _typing.Final[int] = ...
 
     def __init__(
         self, *,
         small: _typing.Optional[int]=None,
-        big: _typing.Optional[int]=None,
-        medium: _typing.Optional[int]=None,
         biggish: _typing.Optional[int]=None,
+        medium: _typing.Optional[int]=None,
+        big: _typing.Optional[int]=None,
         tiny: _typing.Optional[int]=None
     ) -> None: ...
 
     def __call__(
         self, *,
         small: _typing.Union[int, None]=None,
-        big: _typing.Union[int, None]=None,
-        medium: _typing.Union[int, None]=None,
         biggish: _typing.Union[int, None]=None,
+        medium: _typing.Union[int, None]=None,
+        big: _typing.Union[int, None]=None,
         tiny: _typing.Union[int, None]=None
     ) -> MinPaddingWithCustomType: ...
 

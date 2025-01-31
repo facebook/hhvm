@@ -121,9 +121,9 @@ struct ForEachField<::apache::thrift::fixtures::types::MinPaddingWithCustomType>
   template <typename F, typename... T>
   void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
     f(0, static_cast<T&&>(t).small_ref()...);
-    f(1, static_cast<T&&>(t).big_ref()...);
+    f(1, static_cast<T&&>(t).biggish_ref()...);
     f(2, static_cast<T&&>(t).medium_ref()...);
-    f(3, static_cast<T&&>(t).biggish_ref()...);
+    f(3, static_cast<T&&>(t).big_ref()...);
     f(4, static_cast<T&&>(t).tiny_ref()...);
   }
 };

@@ -162,16 +162,16 @@ class MinPaddingWithCustomType_Builder(thrift.py3.builder.StructBuilder):
 
     def __init__(self):
         self.small: _typing.Optional[int] = None
-        self.big: _typing.Optional[int] = None
-        self.medium: _typing.Optional[int] = None
         self.biggish: _typing.Optional[int] = None
+        self.medium: _typing.Optional[int] = None
+        self.big: _typing.Optional[int] = None
         self.tiny: _typing.Optional[int] = None
 
     def __iter__(self):
         yield "small", self.small
-        yield "big", self.big
-        yield "medium", self.medium
         yield "biggish", self.biggish
+        yield "medium", self.medium
+        yield "big", self.big
         yield "tiny", self.tiny
 
 _fbthrift_struct_type__MyStruct = _apache_thrift_fixtures_types_module_types.MyStruct

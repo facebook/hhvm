@@ -1440,7 +1440,7 @@ MinPaddingWithCustomType& MinPaddingWithCustomType::operator=([[maybe_unused]] M
 }
 
 
-MinPaddingWithCustomType::MinPaddingWithCustomType(apache::thrift::FragileConstructor, ::std::int8_t small__arg, ::std::int64_t big__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::std::int16_t, MinPaddingWithCustomType> medium__arg, ::std::int32_t biggish__arg, ::std::int8_t tiny__arg) :
+MinPaddingWithCustomType::MinPaddingWithCustomType(apache::thrift::FragileConstructor, ::std::int8_t small__arg, ::std::int32_t biggish__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::std::int16_t, MinPaddingWithCustomType> medium__arg, ::std::int64_t big__arg, ::std::int8_t tiny__arg) :
     __fbthrift_field_medium(std::move(medium__arg)),
     __fbthrift_field_big(std::move(big__arg)),
     __fbthrift_field_biggish(std::move(biggish__arg)),
@@ -1453,25 +1453,25 @@ MinPaddingWithCustomType::MinPaddingWithCustomType(apache::thrift::FragileConstr
 void MinPaddingWithCustomType::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_small = ::std::int8_t();
-  this->__fbthrift_field_big = ::std::int64_t();
-  ::apache::thrift::adapt_detail::clear<::my::Adapter, 3>(__fbthrift_field_medium, *this);
   this->__fbthrift_field_biggish = ::std::int32_t();
+  ::apache::thrift::adapt_detail::clear<::my::Adapter, 3>(__fbthrift_field_medium, *this);
+  this->__fbthrift_field_big = ::std::int64_t();
   this->__fbthrift_field_tiny = ::std::int8_t();
 }
 
 void MinPaddingWithCustomType::__fbthrift_clear_terse_fields() {
   this->__fbthrift_field_small = ::std::int8_t();
-  this->__fbthrift_field_big = ::std::int64_t();
-  ::apache::thrift::adapt_detail::clear<::my::Adapter, 3>(__fbthrift_field_medium, *this);
   this->__fbthrift_field_biggish = ::std::int32_t();
+  ::apache::thrift::adapt_detail::clear<::my::Adapter, 3>(__fbthrift_field_medium, *this);
+  this->__fbthrift_field_big = ::std::int64_t();
   this->__fbthrift_field_tiny = ::std::int8_t();
 }
 
 bool MinPaddingWithCustomType::__fbthrift_is_empty() const {
   return ::apache::thrift::op::isEmpty<::apache::thrift::type::byte_t>(this->__fbthrift_field_small) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::i64_t>(this->__fbthrift_field_big) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<MinPaddingWithCustomType, ::apache::thrift::field_id<3>>>(this->__fbthrift_field_medium) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::i32_t>(this->__fbthrift_field_biggish) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<MinPaddingWithCustomType, ::apache::thrift::field_id<3>>>(this->__fbthrift_field_medium) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::i64_t>(this->__fbthrift_field_big) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::byte_t>(this->__fbthrift_field_tiny);
 }
 

@@ -1536,9 +1536,9 @@ class MinPaddingWithCustomType:
   r"""
   Attributes:
    - small
-   - big
-   - medium
    - biggish
+   - medium
+   - big
    - tiny
   """
 
@@ -1568,8 +1568,8 @@ class MinPaddingWithCustomType:
         else:
           iprot.skip(ftype)
       elif fid == 2:
-        if ftype == TType.I64:
-          self.big = iprot.readI64()
+        if ftype == TType.I32:
+          self.biggish = iprot.readI32()
         else:
           iprot.skip(ftype)
       elif fid == 3:
@@ -1578,8 +1578,8 @@ class MinPaddingWithCustomType:
         else:
           iprot.skip(ftype)
       elif fid == 4:
-        if ftype == TType.I32:
-          self.biggish = iprot.readI32()
+        if ftype == TType.I64:
+          self.big = iprot.readI64()
         else:
           iprot.skip(ftype)
       elif fid == 5:
@@ -1604,17 +1604,17 @@ class MinPaddingWithCustomType:
       oprot.writeFieldBegin('small', TType.BYTE, 1)
       oprot.writeByte(self.small)
       oprot.writeFieldEnd()
-    if self.big != None:
-      oprot.writeFieldBegin('big', TType.I64, 2)
-      oprot.writeI64(self.big)
+    if self.biggish != None:
+      oprot.writeFieldBegin('biggish', TType.I32, 2)
+      oprot.writeI32(self.biggish)
       oprot.writeFieldEnd()
     if self.medium != None:
       oprot.writeFieldBegin('medium', TType.I16, 3)
       oprot.writeI16(self.medium)
       oprot.writeFieldEnd()
-    if self.biggish != None:
-      oprot.writeFieldBegin('biggish', TType.I32, 4)
-      oprot.writeI32(self.biggish)
+    if self.big != None:
+      oprot.writeFieldBegin('big', TType.I64, 4)
+      oprot.writeI64(self.big)
       oprot.writeFieldEnd()
     if self.tiny != None:
       oprot.writeFieldBegin('tiny', TType.BYTE, 5)
@@ -1630,18 +1630,18 @@ class MinPaddingWithCustomType:
       value = pprint.pformat(self.small, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    small=%s' % (value))
-    if self.big is not None:
-      value = pprint.pformat(self.big, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    big=%s' % (value))
-    if self.medium is not None:
-      value = pprint.pformat(self.medium, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    medium=%s' % (value))
     if self.biggish is not None:
       value = pprint.pformat(self.biggish, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    biggish=%s' % (value))
+    if self.medium is not None:
+      value = pprint.pformat(self.medium, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    medium=%s' % (value))
+    if self.big is not None:
+      value = pprint.pformat(self.big, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    big=%s' % (value))
     if self.tiny is not None:
       value = pprint.pformat(self.tiny, indent=0)
       value = padding.join(value.splitlines(True))
@@ -1660,9 +1660,9 @@ class MinPaddingWithCustomType:
   def __dir__(self):
     return (
       'small',
-      'big',
-      'medium',
       'biggish',
+      'medium',
+      'big',
       'tiny',
     )
 
@@ -4543,9 +4543,9 @@ MinPadding.__setstate__ = MinPadding__setstate__
 all_structs.append(MinPaddingWithCustomType)
 MinPaddingWithCustomType.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.BYTE, 'small', None, None, 3, ), # 1
-  (2, TType.I64, 'big', None, None, 3, ), # 2
+  (2, TType.I32, 'biggish', None, None, 3, ), # 2
   (3, TType.I16, 'medium', None, None, 3, ), # 3
-  (4, TType.I32, 'biggish', None, None, 3, ), # 4
+  (4, TType.I64, 'big', None, None, 3, ), # 4
   (5, TType.BYTE, 'tiny', None, None, 3, ), # 5
 )))
 
@@ -4554,20 +4554,20 @@ MinPaddingWithCustomType.thrift_struct_annotations = {
 MinPaddingWithCustomType.thrift_field_annotations = {
 }
 
-def MinPaddingWithCustomType__init__(self, small=None, big=None, medium=None, biggish=None, tiny=None,):
+def MinPaddingWithCustomType__init__(self, small=None, biggish=None, medium=None, big=None, tiny=None,):
   self.small = small
-  self.big = big
-  self.medium = medium
   self.biggish = biggish
+  self.medium = medium
+  self.big = big
   self.tiny = tiny
 
 MinPaddingWithCustomType.__init__ = MinPaddingWithCustomType__init__
 
 def MinPaddingWithCustomType__setstate__(self, state):
   state.setdefault('small', None)
-  state.setdefault('big', None)
-  state.setdefault('medium', None)
   state.setdefault('biggish', None)
+  state.setdefault('medium', None)
+  state.setdefault('big', None)
   state.setdefault('tiny', None)
   self.__dict__ = state
 

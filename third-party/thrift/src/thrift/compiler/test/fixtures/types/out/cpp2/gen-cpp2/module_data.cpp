@@ -298,9 +298,9 @@ THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::apache::thrift:
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::name = "MinPaddingWithCustomType";
 THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::fields_names = { {
   "small"sv,
-  "big"sv,
-  "medium"sv,
   "biggish"sv,
+  "medium"sv,
+  "big"sv,
   "tiny"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::fields_ids = { {
@@ -312,16 +312,16 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 5> TStructDataStorage<::apache::thr
 }};
 THRIFT_DATA_MEMBER const std::array<protocol::TType, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::fields_types = { {
   TType::T_BYTE,
-  TType::T_I64,
-  TType::T_I16,
   TType::T_I32,
+  TType::T_I16,
+  TType::T_I64,
   TType::T_BYTE,
 }};
 THRIFT_DATA_MEMBER const std::array<std::string_view, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::storage_names = { {
   "__fbthrift_field_small"sv,
-  "__fbthrift_field_big"sv,
-  "__fbthrift_field_medium"sv,
   "__fbthrift_field_biggish"sv,
+  "__fbthrift_field_medium"sv,
+  "__fbthrift_field_big"sv,
   "__fbthrift_field_tiny"sv,
 }};
 THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::isset_indexes = { {

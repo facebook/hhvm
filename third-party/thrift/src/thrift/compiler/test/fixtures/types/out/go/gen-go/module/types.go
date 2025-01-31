@@ -3011,9 +3011,9 @@ func (x *MinPadding) setDefaults() *MinPadding {
 
 type MinPaddingWithCustomType struct {
     Small int8 `thrift:"small,1" json:"small" db:"small"`
-    Big int64 `thrift:"big,2" json:"big" db:"big"`
+    Biggish int32 `thrift:"biggish,2" json:"biggish" db:"biggish"`
     Medium int16 `thrift:"medium,3" json:"medium" db:"medium"`
-    Biggish int32 `thrift:"biggish,4" json:"biggish" db:"biggish"`
+    Big int64 `thrift:"big,4" json:"big" db:"big"`
     Tiny int8 `thrift:"tiny,5" json:"tiny" db:"tiny"`
 }
 // Compile time interface enforcer
@@ -3027,16 +3027,16 @@ func (x *MinPaddingWithCustomType) GetSmall() int8 {
     return x.Small
 }
 
-func (x *MinPaddingWithCustomType) GetBig() int64 {
-    return x.Big
+func (x *MinPaddingWithCustomType) GetBiggish() int32 {
+    return x.Biggish
 }
 
 func (x *MinPaddingWithCustomType) GetMedium() int16 {
     return x.Medium
 }
 
-func (x *MinPaddingWithCustomType) GetBiggish() int32 {
-    return x.Biggish
+func (x *MinPaddingWithCustomType) GetBig() int64 {
+    return x.Big
 }
 
 func (x *MinPaddingWithCustomType) GetTiny() int8 {
@@ -3053,13 +3053,13 @@ func (x *MinPaddingWithCustomType) SetSmall(value int8) *MinPaddingWithCustomTyp
     return x
 }
 
-func (x *MinPaddingWithCustomType) SetBigNonCompat(value int64) *MinPaddingWithCustomType {
-    x.Big = value
+func (x *MinPaddingWithCustomType) SetBiggishNonCompat(value int32) *MinPaddingWithCustomType {
+    x.Biggish = value
     return x
 }
 
-func (x *MinPaddingWithCustomType) SetBig(value int64) *MinPaddingWithCustomType {
-    x.Big = value
+func (x *MinPaddingWithCustomType) SetBiggish(value int32) *MinPaddingWithCustomType {
+    x.Biggish = value
     return x
 }
 
@@ -3073,13 +3073,13 @@ func (x *MinPaddingWithCustomType) SetMedium(value int16) *MinPaddingWithCustomT
     return x
 }
 
-func (x *MinPaddingWithCustomType) SetBiggishNonCompat(value int32) *MinPaddingWithCustomType {
-    x.Biggish = value
+func (x *MinPaddingWithCustomType) SetBigNonCompat(value int64) *MinPaddingWithCustomType {
+    x.Big = value
     return x
 }
 
-func (x *MinPaddingWithCustomType) SetBiggish(value int32) *MinPaddingWithCustomType {
-    x.Biggish = value
+func (x *MinPaddingWithCustomType) SetBig(value int64) *MinPaddingWithCustomType {
+    x.Big = value
     return x
 }
 
@@ -3109,13 +3109,13 @@ func (x *MinPaddingWithCustomType) writeField1(p thrift.Encoder) error {  // Sma
     return nil
 }
 
-func (x *MinPaddingWithCustomType) writeField2(p thrift.Encoder) error {  // Big
-    if err := p.WriteFieldBegin("big", thrift.I64, 2); err != nil {
+func (x *MinPaddingWithCustomType) writeField2(p thrift.Encoder) error {  // Biggish
+    if err := p.WriteFieldBegin("biggish", thrift.I32, 2); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.Big
-    if err := p.WriteI64(item); err != nil {
+    item := x.Biggish
+    if err := p.WriteI32(item); err != nil {
         return err
     }
 
@@ -3141,13 +3141,13 @@ func (x *MinPaddingWithCustomType) writeField3(p thrift.Encoder) error {  // Med
     return nil
 }
 
-func (x *MinPaddingWithCustomType) writeField4(p thrift.Encoder) error {  // Biggish
-    if err := p.WriteFieldBegin("biggish", thrift.I32, 4); err != nil {
+func (x *MinPaddingWithCustomType) writeField4(p thrift.Encoder) error {  // Big
+    if err := p.WriteFieldBegin("big", thrift.I64, 4); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.Biggish
-    if err := p.WriteI32(item); err != nil {
+    item := x.Big
+    if err := p.WriteI64(item); err != nil {
         return err
     }
 
@@ -3184,13 +3184,13 @@ func (x *MinPaddingWithCustomType) readField1(p thrift.Decoder) error {  // Smal
     return nil
 }
 
-func (x *MinPaddingWithCustomType) readField2(p thrift.Decoder) error {  // Big
-    result, err := p.ReadI64()
+func (x *MinPaddingWithCustomType) readField2(p thrift.Decoder) error {  // Biggish
+    result, err := p.ReadI32()
     if err != nil {
         return err
     }
 
-    x.Big = result
+    x.Biggish = result
     return nil
 }
 
@@ -3204,13 +3204,13 @@ func (x *MinPaddingWithCustomType) readField3(p thrift.Decoder) error {  // Medi
     return nil
 }
 
-func (x *MinPaddingWithCustomType) readField4(p thrift.Decoder) error {  // Biggish
-    result, err := p.ReadI32()
+func (x *MinPaddingWithCustomType) readField4(p thrift.Decoder) error {  // Big
+    result, err := p.ReadI64()
     if err != nil {
         return err
     }
 
-    x.Biggish = result
+    x.Big = result
     return nil
 }
 
@@ -3277,11 +3277,11 @@ func (x *MinPaddingWithCustomType) Read(p thrift.Decoder) error {
         switch {
         case ((id == 1 && wireType == thrift.BYTE) || (id == thrift.NO_FIELD_ID && fieldName == "small")):  // small
             fieldReadErr = x.readField1(p)
-        case ((id == 2 && wireType == thrift.I64) || (id == thrift.NO_FIELD_ID && fieldName == "big")):  // big
+        case ((id == 2 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "biggish")):  // biggish
             fieldReadErr = x.readField2(p)
         case ((id == 3 && wireType == thrift.I16) || (id == thrift.NO_FIELD_ID && fieldName == "medium")):  // medium
             fieldReadErr = x.readField3(p)
-        case ((id == 4 && wireType == thrift.I32) || (id == thrift.NO_FIELD_ID && fieldName == "biggish")):  // biggish
+        case ((id == 4 && wireType == thrift.I64) || (id == thrift.NO_FIELD_ID && fieldName == "big")):  // big
             fieldReadErr = x.readField4(p)
         case ((id == 5 && wireType == thrift.BYTE) || (id == thrift.NO_FIELD_ID && fieldName == "tiny")):  // tiny
             fieldReadErr = x.readField5(p)
@@ -3312,9 +3312,9 @@ func (x *MinPaddingWithCustomType) String() string {
 func (x *MinPaddingWithCustomType) setDefaults() *MinPaddingWithCustomType {
     return x.
         SetSmallNonCompat(0).
-        SetBigNonCompat(0).
-        SetMediumNonCompat(0).
         SetBiggishNonCompat(0).
+        SetMediumNonCompat(0).
+        SetBigNonCompat(0).
         SetTinyNonCompat(0)
 }
 

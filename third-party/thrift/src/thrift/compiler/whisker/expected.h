@@ -53,7 +53,7 @@ namespace whisker {
  *     - transform_error
  */
 template <typename T, typename E>
-class expected;
+class [[nodiscard]] expected;
 
 /**
  * A type that mimics std::unexpected<E>:

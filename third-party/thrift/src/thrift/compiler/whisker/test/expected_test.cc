@@ -274,7 +274,8 @@ TEST(ExpectedTest, emplace_never_empty) {
       throw std::runtime_error("throw_on_construct");
     }
   };
-  EXPECT_THROW((expected<throw_on_construct, int>()), std::runtime_error);
+  EXPECT_THROW(
+      (std::ignore = expected<throw_on_construct, int>()), std::runtime_error);
   expected<throw_on_construct, int> e = unexpected(1);
   EXPECT_EQ(e.error(), 1);
 

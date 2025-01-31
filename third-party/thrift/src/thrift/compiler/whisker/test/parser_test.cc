@@ -1085,7 +1085,7 @@ TEST_F(ParserTest, partial_block_empty_arguments) {
       diagnostics,
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "expected at least one argument in partial-block 'foo' but found `|`",
+          "expected at least one argument in partial-block 'foo' but found none",
           path_to_file(1),
           1)));
 }
@@ -1110,7 +1110,7 @@ TEST_F(ParserTest, partial_block_empty_captures) {
       diagnostics,
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "expected at least one capture in partial-block 'foo' but found `|`",
+          "expected at least one capture in partial-block 'foo' but found none",
           path_to_file(1),
           1)));
 }

@@ -1615,8 +1615,10 @@ class parser {
     if (try_consume_token(&scan, tok::pipe)) {
       const token* first_argument = try_consume_token(&scan, tok::identifier);
       if (first_argument == nullptr) {
-        report_fatal_expected(
-            scan, "at least one argument in partial-block '{}'", id.name);
+        report_fatal_error(
+            scan,
+            "expected at least one argument in partial-block '{}' but found none",
+            id.name);
       }
       arguments.insert(make_identifier(*first_argument));
       while (const token* argument =
@@ -1656,8 +1658,10 @@ class parser {
 
       const token* first_capture = try_consume_token(&scan, tok::identifier);
       if (first_capture == nullptr) {
-        report_fatal_expected(
-            scan, "at least one capture in partial-block '{}'", id.name);
+        report_fatal_error(
+            scan,
+            "expected at least one capture in partial-block '{}' but found none",
+            id.name);
       }
       insert_capture(make_identifier(*first_capture));
       while (const token* capture = try_consume_token(&scan, tok::identifier)) {

@@ -33,6 +33,22 @@ bool is_container(const t_type& type) {
   return true_type && true_type->is_container();
 }
 
+std::string quote(std::string_view str) {
+  if (str.find('"') == std::string::npos) {
+    return fmt::format("\"{}\"", str);
+  } else if (str.find('\'') == std::string::npos) {
+    return fmt::format("'{}'", str);
+  } else {
+    std::string out(str);
+    size_t start_pos = 0;
+    while ((start_pos = out.find('"', start_pos)) != std::string::npos) {
+      out.replace(start_pos, 1, "\\\"");
+      start_pos += 2;
+    }
+    return fmt::format("\"{}\"", out);
+  }
+}
+
 class structure_annotations {
  public:
   structure_annotations(source_manager& sm, t_program& program)
@@ -516,7 +532,7 @@ class structure_annotations {
       std::vector<std::string> annotations_for_catch_all_strs;
       for (const auto& [name, value] : annotations_for_catch_all) {
         annotations_for_catch_all_strs.push_back(
-            fmt::format(R"("{}": "{}")", name, value));
+            fmt::format(R"("{}": {})", name, quote(value)));
       }
       to_add.insert(fmt::format(
           "@thrift.DeprecatedUnvalidatedAnnotations{{items = {{{}}}}}",

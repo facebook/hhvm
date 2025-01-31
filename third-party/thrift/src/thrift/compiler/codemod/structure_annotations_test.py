@@ -489,7 +489,7 @@ class StructureAnnotations(unittest.TestCase):
                 include "thrift.thrift"
 
                 struct S {
-                    1: i32 field1 (foo);
+                    1: i32 field1 (foo, quote = '"', both_quotes = "'\\"'");
                 }(foo, bar = "baz")
 
                 typedef i32 (foo, hs.type = "hs") T (bar = "baz", hs.category = "value")
@@ -530,7 +530,7 @@ class StructureAnnotations(unittest.TestCase):
 
                 @thrift.DeprecatedUnvalidatedAnnotations{items = {"bar": "baz", "foo": "1"}}
                 struct S {
-                    @thrift.DeprecatedUnvalidatedAnnotations{items = {"foo": "1"}}
+                    @thrift.DeprecatedUnvalidatedAnnotations{items = {"both_quotes": "'\\"'", "foo": "1", "quote": '"'}}
                     1: i32 field1 ;
                 }
 

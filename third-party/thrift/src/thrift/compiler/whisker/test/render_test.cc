@@ -1897,28 +1897,35 @@ TEST_F(RenderTest, partials_mutually_recursive) {
   use_library(load_standard_library);
 
   auto result = render(
-      "{{#let partial even |n odd|}}\n"
+      "{{#let partial even-helper |n odd|}}\n"
       "even: {{n}}\n"
       "{{#if (int.gt? n 1)}}\n"
-      "{{#partial odd n=(int.sub n 1) even=even}}\n"
+      "{{#partial odd n=(int.sub n 1)}}\n"
       "{{/if (int.gt? n 1)}}\n"
       "{{/let partial}}\n"
       ""
-      "{{#let partial odd |n even|}}\n"
+      "{{#let partial odd |n| captures |even-helper|}}\n"
       "odd: {{n}}\n"
-      "{{#partial even n=(int.sub n 1) odd=odd}}\n"
+      "{{#partial even-helper n=(int.sub n 1) odd=odd}}\n"
       "{{/let partial}}\n"
       ""
-      "{{#partial even n=10 odd=odd}}\n",
+      "{{#let partial even |n| captures |even-helper odd|}}\n"
+      "{{#partial even-helper n=n odd=odd}}\n"
+      "{{/let partial}}\n"
+      ""
+      "{{#partial even n=6}}\n"
+      "{{#partial odd n=5}}\n",
       w::map({}));
   EXPECT_THAT(diagnostics(), testing::IsEmpty());
   EXPECT_EQ(
       *result,
-      "even: 10\n"
-      "odd: 9\n"
-      "even: 8\n"
-      "odd: 7\n"
       "even: 6\n"
+      "odd: 5\n"
+      "even: 4\n"
+      "odd: 3\n"
+      "even: 2\n"
+      "odd: 1\n"
+      "even: 0\n"
       "odd: 5\n"
       "even: 4\n"
       "odd: 3\n"
@@ -2014,6 +2021,27 @@ TEST_F(RenderTest, partial_nested_backtrace) {
                           "#2 foo @ path/to/test.whisker <line:8, col:3>\n"
                           "#3 path/to/test.whisker <line:10, col:1>\n")));
   EXPECT_FALSE(result.has_value());
+}
+
+TEST_F(RenderTest, partials_capture_error) {
+  show_source_backtrace_on_failure(true);
+
+  auto result = render(
+      "{{#let partial foo captures |bar|}}\n"
+      "{{/let partial}}\n",
+      w::map({}));
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(
+          diagnostic(
+              diagnostic_level::error,
+              "Name 'bar' was not found in the current scope. Tried to search through the following scopes:\n"
+              "#0 map (size=0)\n"
+              "\n"
+              "#1 <global scope> (size=0)\n",
+              path_to_file,
+              1),
+          error_backtrace("#0 path/to/test.whisker <line:1, col:30>\n")));
 }
 
 TEST_F(RenderTest, macros) {

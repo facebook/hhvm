@@ -182,6 +182,8 @@ class partial_definition final {
   source_range loc;
   std::string name;
   std::set<std::string> arguments;
+  std::map<ast::identifier, object::ptr, ast::identifier::compare_by_name>
+      captures;
   // The AST's lifetime is managed by the renderer.
   std::reference_wrapper<const ast::bodies> bodies;
 };
@@ -1045,11 +1047,20 @@ class render_engine {
       }
     }
 
+    std::map<ast::identifier, object::ptr, ast::identifier::compare_by_name>
+        captures;
+    for (const ast::identifier& capture : partial_block.captures) {
+      object::ptr captured_object = lookup_variable(
+          ast::variable_lookup{capture.loc, std::vector{capture}});
+      captures.emplace(std::pair{capture, std::move(captured_object)});
+    }
+
     partial_definition::ptr definition =
         manage_owned<partial_definition>(partial_definition{
             partial_block.loc,
             name,
             std::move(arguments),
+            std::move(captures),
             std::cref(partial_block.body_elements),
         });
     bind_local(
@@ -1118,6 +1129,10 @@ class render_engine {
       const ast::identifier& id = arg->second.name;
       const ast::expression& expr = arg->second.value;
       bind_local(derived_ctx, id.loc.begin, argument, evaluate(expr));
+    }
+
+    for (const auto& [capture, value] : partial->captures) {
+      bind_local(derived_ctx, capture.loc.begin, capture.name, value);
     }
 
     auto source_frame_guard = source_stack_.make_frame_guard(

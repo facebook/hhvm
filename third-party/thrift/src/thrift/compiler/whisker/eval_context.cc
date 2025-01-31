@@ -104,10 +104,13 @@ object::ptr eval_context::lexical_scope::lookup_property(
   return find_property(*this_ref_, identifier);
 }
 
-eval_context::eval_context(map globals)
-    : global_scope_(manage_owned<object>(
-          w::make_native_object<global_scope_object>(std::move(globals)))),
+eval_context::eval_context(object::ptr globals)
+    : global_scope_(std::move(globals)),
       stack_({lexical_scope(global_scope_)}) {}
+
+eval_context::eval_context(map globals)
+    : eval_context(manage_owned<object>(
+          w::make_native_object<global_scope_object>(std::move(globals)))) {}
 
 /* static */ eval_context eval_context::with_root_scope(
     object::ptr root_scope, map globals) {

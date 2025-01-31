@@ -20,6 +20,7 @@
 #include <thrift/compiler/whisker/diagnostic.h>
 #include <thrift/compiler/whisker/dsl.h>
 #include <thrift/compiler/whisker/object.h>
+#include <thrift/compiler/whisker/standard_library.h>
 #include <thrift/compiler/whisker/test/render_test_helpers.h>
 
 namespace w = whisker::make;
@@ -1714,6 +1715,253 @@ TEST_F(RenderTest, undefined_variables_allowed) {
       "\n"
       "xyz\n"
       "\n");
+}
+
+TEST_F(RenderTest, partials) {
+  auto result = render(
+      "{{#let partial foo}}\n"
+      "  indented\n"
+      "{{/let partial}}\n"
+      "  {{#partial foo}}\n"
+      "{{#let bar = foo}}\n"
+      "{{#partial bar}}\n",
+      w::map({}));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(
+      *result,
+      "    indented\n"
+      "  indented\n");
+}
+
+TEST_F(RenderTest, partials_with_arguments) {
+  auto result = render(
+      "{{#let partial println |txt|}}\n"
+      "{{txt}}\n"
+      "{{/let partial}}\n"
+      "{{#partial println txt=\"hello\"}}\n"
+      "{{#let another-name = println}}\n"
+      "{{#partial another-name txt=5}}\n",
+      w::map({}));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(
+      *result,
+      "hello\n"
+      "5\n");
+}
+
+TEST_F(RenderTest, partials_with_arguments_out_of_order) {
+  auto result = render(
+      "{{#let partial foo |arg1 arg2|}}\n"
+      "{{arg1}} {{arg2}}\n"
+      "{{/let partial}}\n"
+      "{{#partial foo arg2=2 arg1=1}}\n",
+      w::map({}));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(*result, "1 2\n");
+}
+
+TEST_F(RenderTest, partials_with_missing_arguments) {
+  auto result = render(
+      "{{#let partial foo |arg1 arg2|}}\n"
+      "{{arg1}} {{arg2}}\n"
+      "{{/let partial}}\n"
+      "{{#partial foo arg1=\"hello\"}}\n",
+      w::map({}));
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Partial 'foo' is missing named arguments: arg2",
+          path_to_file,
+          4)));
+  EXPECT_FALSE(result.has_value());
+}
+
+TEST_F(RenderTest, partials_with_extra_arguments) {
+  auto result = render(
+      "{{#let partial foo |arg1|}}\n"
+      "{{arg1}}\n"
+      "{{/let partial}}\n"
+      "{{#partial foo arg1=\"hello\" arg2=null}}\n",
+      w::map({}));
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Partial 'foo' received unexpected named arguments: arg2",
+          path_to_file,
+          4)));
+  EXPECT_FALSE(result.has_value());
+}
+
+TEST_F(RenderTest, partials_with_wrong_type) {
+  auto result = render("{{#partial true}}\n", w::map({}));
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Expression 'true' does not evaluate to a partial. The encountered value is:\n"
+          "true\n",
+          path_to_file,
+          1)));
+  EXPECT_FALSE(result.has_value());
+}
+
+TEST_F(RenderTest, partials_nested) {
+  auto result = render(
+      "{{#let partial foo |arg|}}\n"
+      "  {{#let partial bar |arg|}}\n"
+      "    {{arg}}\n"
+      "  {{/let partial}}\n"
+      "  {{#partial bar arg=arg}}\n"
+      "{{/let partial}}\n"
+      "{{#partial foo arg=\"hello\"}}\n",
+      w::map({}));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(*result, "      hello\n");
+}
+
+TEST_F(RenderTest, partials_recursive) {
+  use_library(load_standard_library);
+
+  const auto is_even =
+      dsl::make_function([](dsl::function::context ctx) -> boolean {
+        ctx.declare_arity(1);
+        ctx.declare_named_arguments({});
+        auto n = ctx.argument<i64>(0);
+        return n % 2 == 0;
+      });
+  const auto mul = dsl::make_function([](dsl::function::context ctx) -> i64 {
+    ctx.declare_arity(2);
+    ctx.declare_named_arguments({});
+    auto lhs = ctx.argument<i64>(0);
+    auto rhs = ctx.argument<i64>(1);
+    return lhs * rhs;
+  });
+  const auto div = dsl::make_function([](dsl::function::context ctx) -> i64 {
+    ctx.declare_arity(2);
+    ctx.declare_named_arguments({});
+    auto numerator = ctx.argument<i64>(0);
+    auto denominator = ctx.argument<i64>(1);
+    assert(numerator % denominator == 0);
+    return numerator / denominator;
+  });
+
+  // https://en.wikipedia.org/wiki/Collatz_conjecture
+  auto result = render(
+      "{{#let partial collatz |n|}}\n"
+      "{{n}}\n"
+      "  {{#if (int.ne? n 1)}}\n"
+      "    {{#if (even? n)}}\n"
+      "{{#partial collatz n=(div n 2)}}\n"
+      "    {{#else}}\n"
+      "{{#partial collatz n=(int.add (mul 3 n) 1)}}\n"
+      "    {{/if (even? n)}}\n"
+      "  {{/if (int.ne? n 1)}}\n"
+      "{{/let partial}}\n"
+      "{{#partial collatz n=6}}\n",
+      w::map({}),
+      macros({}),
+      globals({
+          {"even?", w::native_function(is_even)},
+          {"mul", w::native_function(mul)},
+          {"div", w::native_function(div)},
+      }));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(
+      *result,
+      "6\n"
+      "3\n"
+      "10\n"
+      "5\n"
+      "16\n"
+      "8\n"
+      "4\n"
+      "2\n"
+      "1\n");
+}
+
+TEST_F(RenderTest, partials_mutually_recursive) {
+  use_library(load_standard_library);
+
+  auto result = render(
+      "{{#let partial even |n odd|}}\n"
+      "even: {{n}}\n"
+      "{{#if (int.gt? n 1)}}\n"
+      "{{#partial odd n=(int.sub n 1) even=even}}\n"
+      "{{/if (int.gt? n 1)}}\n"
+      "{{/let partial}}\n"
+      ""
+      "{{#let partial odd |n even|}}\n"
+      "odd: {{n}}\n"
+      "{{#partial even n=(int.sub n 1) odd=odd}}\n"
+      "{{/let partial}}\n"
+      ""
+      "{{#partial even n=10 odd=odd}}\n",
+      w::map({}));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(
+      *result,
+      "even: 10\n"
+      "odd: 9\n"
+      "even: 8\n"
+      "odd: 7\n"
+      "even: 6\n"
+      "odd: 5\n"
+      "even: 4\n"
+      "odd: 3\n"
+      "even: 2\n"
+      "odd: 1\n"
+      "even: 0\n");
+}
+
+TEST_F(RenderTest, partial_derived_context) {
+  auto result = render(
+      "{{#let x = 1}}\n"
+      "{{#let partial foo}}\n"
+      "{{x}}\n"
+      "{{/let partial}}\n"
+      "{{#partial foo}}\n",
+      w::map({}),
+      macros({}),
+      globals({{"global", w::i64(42)}}));
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Name 'x' was not found in the current scope. Tried to search through the following scopes:\n"
+          "#0 <global scope> (size=1)\n"
+          "`-'global'\n"
+          "  |-i64(42)\n",
+          path_to_file,
+          3)));
+  EXPECT_FALSE(result.has_value());
+}
+
+TEST_F(RenderTest, partial_derived_context_no_leak) {
+  auto result = render(
+      "{{#let partial foo}}\n"
+      "{{#let x = 1}}\n"
+      "{{x}}\n"
+      "{{/let partial}}\n"
+      "{{#partial foo}}\n"
+      "{{x}}\n",
+      w::map({}),
+      macros({}),
+      globals({{"global", w::i64(42)}}));
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Name 'x' was not found in the current scope. Tried to search through the following scopes:\n"
+          "#0 map (size=0)\n"
+          "\n"
+          "#1 <global scope> (size=1)\n"
+          "`-'global'\n"
+          "  |-i64(42)\n",
+          path_to_file,
+          6)));
+  EXPECT_FALSE(result.has_value());
 }
 
 TEST_F(RenderTest, macros) {

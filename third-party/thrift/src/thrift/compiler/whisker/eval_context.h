@@ -23,6 +23,7 @@
 #include <deque>
 #include <functional>
 #include <string>
+#include <type_traits>
 #include <variant>
 #include <vector>
 
@@ -204,8 +205,8 @@ class eval_context {
    *   - eval_name_already_bound_error if the name already exists as a local in
    *     the current scope.
    */
-  expected<std::monostate, eval_name_already_bound_error> bind_local(
-      std::string name, object::ptr value);
+  [[nodiscard]] expected<std::monostate, eval_name_already_bound_error>
+  bind_local(std::string name, object::ptr value);
 
   /**
    * Performs a lexical search for an object by name (chain of properties)
@@ -228,7 +229,17 @@ class eval_context {
       std::variant<eval_scope_lookup_error, eval_property_lookup_error>>
   lookup_object(const std::vector<std::string>& path);
 
+  /**
+   * Creates a new "derived" eval_context from the current one.
+   *
+   * A derived eval_context has a fresh stack (empty) but retains the same
+   * global scope from the current one.
+   */
+  eval_context make_derived() const { return eval_context(global_scope_); }
+
  private:
+  explicit eval_context(object::ptr globals);
+
   /**
    * A lexical scope which determines how name lookups are performed within the
    * Whisker templating language.
@@ -285,5 +296,7 @@ class eval_context {
   // references passed around to those scope objects.
   std::deque<lexical_scope> stack_;
 };
+static_assert(std::is_copy_constructible_v<eval_context>);
+static_assert(std::is_move_constructible_v<eval_context>);
 
 } // namespace whisker

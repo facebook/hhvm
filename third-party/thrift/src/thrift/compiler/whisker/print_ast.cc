@@ -173,6 +173,23 @@ struct ast_visitor {
     }
     visit(partial_block.body_elements, scope.open_node());
   }
+  void visit(
+      const ast::partial_statement& partial_statement,
+      tree_printer::scope scope) const {
+    scope.println(
+        " partial-statement {} '{}'",
+        location(partial_statement.loc),
+        partial_statement.partial.to_string());
+    if (const auto& offset = partial_statement.standalone_offset_within_line;
+        offset.has_value()) {
+      scope.open_property().println(
+          " standalone-offset '{}'", tree_printer::escape(*offset));
+    }
+    for (const auto& [name, arg] : partial_statement.named_arguments) {
+      scope.open_property().println(
+          " argument '{}={}'", name, arg.value.to_string());
+    }
+  }
 
   // Prevent implicit conversion to ast::body. Otherwise, we can silently
   // compile an infinitely recursive visit() chain if there is a missing

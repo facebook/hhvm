@@ -1169,6 +1169,131 @@ TEST_F(ParserTest, partial_block_inside_body) {
       "| `- argument 'arg2'\n");
 }
 
+TEST_F(ParserTest, partial_statement_basic) {
+  auto ast = parse_ast("{{#partial foo}}\n");
+  EXPECT_THAT(diagnostics, testing::IsEmpty());
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- partial-statement <line:1:1, col:17> 'foo'\n"
+      "| `- standalone-offset ''\n");
+}
+
+TEST_F(ParserTest, partial_statement_with_args) {
+  auto ast = parse_ast("{{#partial foo bar=1234}}\n");
+  EXPECT_THAT(diagnostics, testing::IsEmpty());
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- partial-statement <line:1:1, col:26> 'foo'\n"
+      "| `- standalone-offset ''\n"
+      "| `- argument 'bar=1234'\n");
+}
+
+TEST_F(ParserTest, partial_statement_expression) {
+  auto ast =
+      parse_ast("{{#partial (fetch-partial \"foo\" bar=1234) arg1=true}}\n");
+  EXPECT_THAT(diagnostics, testing::IsEmpty());
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- partial-statement <line:1:1, col:54> '(fetch-partial \"foo\" bar=1234)'\n"
+      "| `- standalone-offset ''\n"
+      "| `- argument 'arg1=true'\n");
+}
+
+TEST_F(ParserTest, partial_statement_empty) {
+  auto ast = parse_ast("{{#partial}}\n");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected partial name (expression) in partial-statement but found `}}`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, partial_statement_missing_name) {
+  auto ast =
+      parse_ast("{{#partial arg1=(some-expression 1 2 3 4) arg2=true}}\n");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected partial name (expression) in partial-statement but found `=`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, partial_statement_argument_without_name) {
+  auto ast = parse_ast("{{#partial foo (some-expression 1 2 3 4)}}\n");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected argument name in partial-statement but found `(`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, partial_statement_missing_close) {
+  auto ast = parse_ast("{{#partial foo arg1=true");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `}}` to close partial-statement but found EOF",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, partial_statement_standalone) {
+  auto ast = parse_ast(" \t {{#partial foo arg1=true}} \t \n");
+  EXPECT_THAT(diagnostics, testing::IsEmpty());
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- text <line:1:1, col:4> ' \\t '\n"
+      "|- partial-statement <line:1:4, col:30> 'foo'\n"
+      "| `- standalone-offset ' \\t '\n"
+      "| `- argument 'arg1=true'\n");
+}
+
+TEST_F(ParserTest, partial_statement_not_standalone) {
+  {
+    auto ast = parse_ast(" \t {{#partial foo arg1=true}} \t {{> foo}}\n");
+    EXPECT_THAT(diagnostics, testing::IsEmpty());
+    EXPECT_EQ(
+        to_string(*ast),
+        "root [path/to/test-1.whisker]\n"
+        "|- text <line:1:1, col:4> ' \\t '\n"
+        "|- partial-statement <line:1:4, col:30> 'foo'\n"
+        "| `- argument 'arg1=true'\n"
+        "|- text <line:1:30, col:33> ' \\t '\n"
+        "|- macro <line:1:33, col:42> 'foo'\n"
+        "|- newline <line:1:42, line:2:1> '\\n'\n");
+  }
+
+  {
+    auto ast = parse_ast(
+        "{{#if true}} \t {{#partial foo arg1=true}} \t {{/if true}}\n");
+    EXPECT_THAT(diagnostics, testing::IsEmpty());
+    EXPECT_EQ(
+        to_string(*ast),
+        "root [path/to/test-2.whisker]\n"
+        "|- if-block <line:1:1, col:57>\n"
+        "| `- expression <line:1:7, col:11> 'true'\n"
+        "| |- text <line:1:13, col:16> ' \\t '\n"
+        "| |- partial-statement <line:1:16, col:42> 'foo'\n"
+        "| | `- argument 'arg1=true'\n"
+        "| |- text <line:1:42, col:45> ' \\t '\n"
+        "|- newline <line:1:57, line:2:1> '\\n'\n");
+  }
+}
+
 TEST_F(ParserTest, basic_macro) {
   auto ast = parse_ast("{{> path / to / file }}");
   EXPECT_EQ(

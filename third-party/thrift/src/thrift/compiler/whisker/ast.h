@@ -37,6 +37,7 @@ struct with_block;
 struct each_block;
 struct macro;
 struct partial_block;
+struct partial_statement;
 struct interpolation;
 struct let_statement;
 struct pragma_statement;
@@ -54,6 +55,7 @@ using body = std::variant<
     with_block,
     each_block,
     partial_block,
+    partial_statement,
     let_statement,
     pragma_statement,
     macro>;
@@ -485,6 +487,38 @@ struct partial_block {
   identifier name;
   std::set<identifier, identifier::compare_by_name> arguments;
   bodies body_elements;
+};
+
+/**
+ * A Whisker construct for partial application of a partial block (defined
+ * above).
+ *
+ * The partial block is applied with a set of arguments and the result is
+ * printed to the output.
+ */
+struct partial_statement {
+  source_range loc;
+  /**
+   * An expression that evaluates to an (implemented-defintion) partial block
+   * instance.
+   */
+  expression partial;
+  struct named_argument {
+    identifier name;
+    expression value;
+  };
+  std::map<std::string, named_argument> named_arguments;
+  /**
+   * Standalone partials exhibit different indentation behavior:
+   *   https://github.com/mustache/spec/blob/v1.4.2/specs/partials.yml#L13-L15
+   *
+   * If this is a standalone partial, the value is the preceding whitespace
+   * necessary before the partial interpolation. Otherwise, this is
+   * std::nullopt.
+   *
+   * The contained string is guaranteed to be whitespace only.
+   */
+  std::optional<std::string> standalone_offset_within_line;
 };
 
 /*

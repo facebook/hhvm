@@ -486,8 +486,8 @@ class standalone_lines_scanner {
   // stripped when standalone.
   enum class standalone_compatible_kind {
     comment, // "{{!"
-    block_or_statement, // "{{#", "{{^", or "{{"/"}
-    partial_apply, // "{{>"
+    block_or_statement, // "{{#" (except "{{#partial"), "{{^", or "{{"/"}
+    partial_apply, // "{{>", "{{#partial"
     ineligible // "{{variable}} for example
   };
   static parse_result<standalone_compatible_kind> parse_standalone_compatible(
@@ -505,7 +505,9 @@ class standalone_lines_scanner {
       case tok::pound:
       case tok::caret:
       case tok::slash:
-        kind = standalone_compatible_kind::block_or_statement;
+        kind = scan.peek().kind == tok::kw_partial
+            ? standalone_compatible_kind::partial_apply
+            : standalone_compatible_kind::block_or_statement;
         break;
       case tok::gt:
         kind = standalone_compatible_kind::partial_apply;
@@ -877,6 +879,7 @@ class parser {
       ast::with_block,
       ast::each_block,
       ast::partial_block,
+      ast::partial_statement,
       ast::let_statement,
       ast::pragma_statement,
       ast::macro>;
@@ -917,6 +920,8 @@ class parser {
       templ = std::move(let_statement).consume_and_advance(&scan);
     } else if (parse_result pragma_statement = parse_pragma_statement(scan)) {
       templ = std::move(pragma_statement).consume_and_advance(&scan);
+    } else if (parse_result partial_statement = parse_partial_statement(scan)) {
+      templ = std::move(partial_statement).consume_and_advance(&scan);
     } else if (parse_result section_block = parse_section_block(scan)) {
       templ = std::move(section_block).consume_and_advance(&scan);
     } else if (parse_result macro = parse_macro(scan)) {
@@ -1641,6 +1646,98 @@ class parser {
             std::move(id),
             std::move(arguments),
             std::move(bodies),
+        },
+        scan};
+  }
+
+  // partial-statement →
+  //   { "{{" ~ "#" ~ "partial" ~ expression ~ partial-argument* ~ "}}" }
+  // partial-argument → { identifier ~ "=" ~ expression }
+  parse_result<ast::partial_statement> parse_partial_statement(
+      parser_scan_window scan) {
+    assert(scan.empty());
+    const auto scan_start = scan.start;
+
+    if (!try_consume_tokens(&scan, {tok::open, tok::pound, tok::kw_partial})) {
+      return no_parse_result();
+    }
+
+    parse_result lookup = parse_expression(scan.make_fresh());
+    if (!lookup.has_value()) {
+      report_fatal_expected(
+          scan, "partial name (expression) in partial-statement");
+    }
+    ast::expression partial = std::move(lookup).consume_and_advance(&scan);
+
+    decltype(ast::partial_statement::named_arguments) named_arguments;
+    using named_argument_entry = decltype(named_arguments)::value_type;
+    const auto parse_argument =
+        [&](parser_scan_window scan) -> parse_result<named_argument_entry> {
+      assert(scan.empty());
+
+      const token* id = try_consume_token(&scan, tok::identifier);
+      if (id == nullptr) {
+        return no_parse_result();
+      }
+
+      if (!try_consume_token(&scan, tok::eq)) {
+        report_fatal_expected(
+            scan, "{} in partial-statement argument", tok::eq);
+      }
+
+      if (parse_result expr = parse_expression(scan.make_fresh())) {
+        return {
+            named_argument_entry{
+                std::string(id->string_value()),
+                ast::partial_statement::named_argument{
+                    make_identifier(*id),
+                    std::move(expr).consume_and_advance(&scan)}},
+            scan};
+      }
+      report_fatal_expected(scan, "expression in partial-statement argument");
+    };
+    while (parse_result arg = parse_argument(scan)) {
+      auto [_, inserted] =
+          named_arguments.emplace(std::move(arg).consume_and_advance(&scan));
+      if (!inserted) {
+        report_error(scan, "duplicate argument name in partial-statement");
+      }
+    }
+
+    if (named_arguments.empty()) {
+      // Arguments could missing because of a failed parse. Let's check the
+      // common user errors.
+      if (scan.peek().kind == tok::eq) {
+        // This case probably means that the user forgot to provide the partial
+        // name. Something like:
+        //
+        //   {{#partial arg1=... arg2=...}}
+        //
+        // Here, `arg1` will be parsed the partial's name. parse_arguments(...)
+        // will see `=...` and fail to parsed.
+        report_fatal_expected(
+            scan, "partial name (expression) in partial-statement");
+      }
+      if (parse_expression(scan)) {
+        // This case probably means that the user forgot to name an argument.
+        // Something like:
+        //
+        //   {{#partial partial_name arg1 arg2}}
+        //
+        report_fatal_expected(scan, "argument name in partial-statement");
+      }
+    }
+
+    if (!try_consume_token(&scan, tok::close)) {
+      report_fatal_expected(scan, "{} to close partial-statement", tok::close);
+    }
+
+    return {
+        ast::partial_statement{
+            scan.with_start(scan_start).range(),
+            std::move(partial),
+            std::move(named_arguments),
+            standalone_partial_offset(scan_start),
         },
         scan};
   }

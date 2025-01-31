@@ -329,7 +329,7 @@ class standalone_lines_scanner {
   /**
    * Returns a result containing the cursors of the tokens that are "involved"
    * in standalone constructs. The cursors can be used by the parser to remove
-   * whitespace or add partial standalone offset information.
+   * whitespace or add partial standalone indentation information.
    */
   static result mark(const std::vector<token>& tokens) {
     assert(!tokens.empty());
@@ -609,7 +609,7 @@ class parser {
     return standalone_markings_.find(pos) != standalone_markings_.end();
   }
 
-  std::optional<std::string> standalone_partial_offset(
+  std::optional<std::string> standalone_partial_indentation(
       parser_scan_window::cursor pos) const {
     assert(pos->kind == tok::open);
     if (auto marking = standalone_markings_.find(pos);
@@ -1775,7 +1775,7 @@ class parser {
             scan.with_start(scan_start).range(),
             std::move(partial),
             std::move(named_arguments),
-            standalone_partial_offset(scan_start),
+            standalone_partial_indentation(scan_start),
         },
         scan};
   }
@@ -1806,7 +1806,7 @@ class parser {
         ast::macro{
             scan.with_start(scan_start).range(),
             std::move(lookup),
-            standalone_partial_offset(scan_start)},
+            standalone_partial_indentation(scan_start)},
         scan};
   }
 

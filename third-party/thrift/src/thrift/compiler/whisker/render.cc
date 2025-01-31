@@ -1137,8 +1137,8 @@ class render_engine {
 
     auto source_frame_guard = source_stack_.make_frame_guard(
         std::move(derived_ctx), partial, partial_statement.loc.begin);
-    auto indent_guard =
-        out_.make_indent_guard(partial_statement.standalone_offset_within_line);
+    auto indent_guard = out_.make_indent_guard(
+        partial_statement.standalone_indentation_within_line);
     visit(partial->bodies);
   }
 
@@ -1173,7 +1173,7 @@ class render_engine {
         nullptr /* no partial definition because macros are at root scope */,
         macro.loc.begin);
     auto indent_guard =
-        out_.make_indent_guard(macro.standalone_offset_within_line);
+        out_.make_indent_guard(macro.standalone_indentation_within_line);
     visit(resolved_macro->body_elements);
   }
 

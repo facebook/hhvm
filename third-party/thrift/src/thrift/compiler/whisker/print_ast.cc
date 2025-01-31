@@ -119,10 +119,10 @@ struct ast_visitor {
   }
   void visit(const ast::macro& macro, tree_printer::scope scope) const {
     scope.println(" macro {} '{}'", location(macro.loc), macro.path_string());
-    if (const auto& offset = macro.standalone_offset_within_line;
-        offset.has_value()) {
+    if (const auto& indentation = macro.standalone_indentation_within_line;
+        indentation.has_value()) {
       scope.open_property().println(
-          " standalone-offset '{}'", tree_printer::escape(*offset));
+          " standalone-indentation '{}'", tree_printer::escape(*indentation));
     }
   }
   void visit(const ast::comment& comment, tree_printer::scope scope) const {
@@ -183,10 +183,11 @@ struct ast_visitor {
         " partial-statement {} '{}'",
         location(partial_statement.loc),
         partial_statement.partial.to_string());
-    if (const auto& offset = partial_statement.standalone_offset_within_line;
-        offset.has_value()) {
+    if (const auto& indentation =
+            partial_statement.standalone_indentation_within_line;
+        indentation.has_value()) {
       scope.open_property().println(
-          " standalone-offset '{}'", tree_printer::escape(*offset));
+          " standalone-indentation '{}'", tree_printer::escape(*indentation));
     }
     for (const auto& [name, arg] : partial_statement.named_arguments) {
       scope.open_property().println(

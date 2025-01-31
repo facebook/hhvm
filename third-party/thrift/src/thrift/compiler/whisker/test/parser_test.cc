@@ -1249,7 +1249,7 @@ TEST_F(ParserTest, partial_statement_basic) {
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
       "|- partial-statement <line:1:1, col:17> 'foo'\n"
-      "| `- standalone-offset ''\n");
+      "| `- standalone-indentation ''\n");
 }
 
 TEST_F(ParserTest, partial_statement_with_args) {
@@ -1259,7 +1259,7 @@ TEST_F(ParserTest, partial_statement_with_args) {
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
       "|- partial-statement <line:1:1, col:26> 'foo'\n"
-      "| `- standalone-offset ''\n"
+      "| `- standalone-indentation ''\n"
       "| `- argument 'bar=1234'\n");
 }
 
@@ -1271,7 +1271,7 @@ TEST_F(ParserTest, partial_statement_expression) {
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
       "|- partial-statement <line:1:1, col:54> '(fetch-partial \"foo\" bar=1234)'\n"
-      "| `- standalone-offset ''\n"
+      "| `- standalone-indentation ''\n"
       "| `- argument 'arg1=true'\n");
 }
 
@@ -1331,7 +1331,7 @@ TEST_F(ParserTest, partial_statement_standalone) {
       "root [path/to/test-1.whisker]\n"
       "|- text <line:1:1, col:4> ' \\t '\n"
       "|- partial-statement <line:1:4, col:30> 'foo'\n"
-      "| `- standalone-offset ' \\t '\n"
+      "| `- standalone-indentation ' \\t '\n"
       "| `- argument 'arg1=true'\n");
 }
 
@@ -1373,7 +1373,7 @@ TEST_F(ParserTest, basic_macro) {
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
       "|- macro <line:1:1, col:24> 'path/to/file'\n"
-      "| `- standalone-offset ''\n");
+      "| `- standalone-indentation ''\n");
 }
 
 TEST_F(ParserTest, macro_single_id) {
@@ -1382,7 +1382,7 @@ TEST_F(ParserTest, macro_single_id) {
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
       "|- macro <line:1:1, col:11> 'foo'\n"
-      "| `- standalone-offset ''\n");
+      "| `- standalone-indentation ''\n");
 }
 
 TEST_F(ParserTest, macro_in_section) {
@@ -1397,17 +1397,17 @@ TEST_F(ParserTest, macro_in_section) {
       "| `- variable-lookup <line:1:4, col:20> 'news.has-update?'\n"
       "| |- text <line:2:1, col:3> '  '\n"
       "| |- macro <line:2:3, col:19> 'print/news'\n"
-      "| | `- standalone-offset '  '\n");
+      "| | `- standalone-indentation '  '\n");
 }
 
-TEST_F(ParserTest, macro_preserves_whitespace_offset) {
+TEST_F(ParserTest, macro_preserves_whitespace_indentation) {
   auto ast = parse_ast(" \t {{> print/news}}\n");
   EXPECT_EQ(
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
       "|- text <line:1:1, col:4> ' \\t '\n"
       "|- macro <line:1:4, col:20> 'print/news'\n"
-      "| `- standalone-offset ' \\t '\n");
+      "| `- standalone-indentation ' \\t '\n");
 }
 
 TEST_F(ParserTest, macro_no_id) {
@@ -1440,7 +1440,7 @@ TEST_F(ParserTest, macro_dotted_path) {
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
       "|- macro <line:1:1, col:20> 'path/to.file'\n"
-      "| `- standalone-offset ''\n");
+      "| `- standalone-indentation ''\n");
 }
 
 TEST_F(ParserTest, macro_empty_path_part) {

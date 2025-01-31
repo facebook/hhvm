@@ -519,7 +519,7 @@ struct partial_statement {
    *
    * The contained string is guaranteed to be whitespace only.
    */
-  std::optional<std::string> standalone_offset_within_line;
+  std::optional<std::string> standalone_indentation_within_line;
 };
 
 /*
@@ -558,7 +558,7 @@ struct macro {
    *
    * The contained string is guaranteed to be whitespace only.
    */
-  std::optional<std::string> standalone_offset_within_line;
+  std::optional<std::string> standalone_indentation_within_line;
 
   std::string path_string() const;
 };

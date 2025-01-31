@@ -2160,7 +2160,7 @@ TEST_F(RenderTest, macros_indentation_nested) {
       "after\n");
 }
 
-TEST_F(RenderTest, macro_preserves_whitespace_offset) {
+TEST_F(RenderTest, macro_preserves_whitespace_indentation) {
   auto result = render(
       " \t {{> macro-1}} \t \n",
       w::map({{"value", w::i64(42)}}),

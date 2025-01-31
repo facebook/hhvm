@@ -226,28 +226,29 @@ null-literal    → { "null" }
 
 identifier → { !keyword ~ (id_prefix ~ id_suffix*) }
 keyword → {
-  "true"    |
-  "false"   |
-  "null"    |
-  "if"      |
-  "unless"  |
-  "else"    |
-  "each"    |
-  "as"      |
-  "partial" |
-  "let"     |
-  "and"     |
-  "or"      |
-  "not"     |
-  "with"    |
-  "this"    |
-  "define"  |
-  "for"     |
-  "do"      |
-  "import"  |
-  "export"  |
-  "from"    |
-  "pragma"  |
+  "true"     |
+  "false"    |
+  "null"     |
+  "if"       |
+  "unless"   |
+  "else"     |
+  "each"     |
+  "as"       |
+  "partial"  |
+  "captures" |
+  "let"      |
+  "and"      |
+  "or"       |
+  "not"      |
+  "with"     |
+  "this"     |
+  "define"   |
+  "for"      |
+  "do"       |
+  "import"   |
+  "export"   |
+  "from"     |
+  "pragma"   |
 }
 id_prefix → { alpha |        | '_' | '$' }
 id_suffix → { alpha | digits | '_' | '$' | '-' | '+' | ':' | '?' | '/' }
@@ -798,6 +799,39 @@ Greetings, {{firstName}} {{lastName}}!
 {{/let partial}}
 
 {{#partial with-firstName-lastName person=dave action=greeting}}
+```
+
+```json title=Context
+{
+  "dave": {
+    "firstName": "Dave",
+    "lastName": "Grohl"
+  }
+}
+```
+
+```text title=Output
+Greetings, Dave Grohl!
+```
+
+</Example>
+
+Partial blocks may have captures. Captures allow partial blocks to refer to objects in scope at *definition*. This is different from named arguments, which refer to objects in scope at *application*. (i.e. the caller).
+
+A common use of captures is to compose partial blocks together.
+
+<Example title="Example with captures">
+
+```handlebars
+{{#let partial greeting |firstName lastName|}}
+Greetings, {{firstName}} {{lastName}}!
+{{/let partial}}
+
+{{#let partial greet-person |person| captures |greeting|}}
+{{#partial greeting firstName=person.firstName lastName=person.lastName}}
+{{/let partial}}
+
+{{#partial greet-person person=dave}}
 ```
 
 ```json title=Context

@@ -60,7 +60,7 @@ static std::unique_ptr<folly::IOBuf> compressBuffer(
   auto [codecType, level] =
       CompressionAlgorithmSelector::toCodecTypeAndLevel(compressionAlgorithm);
 
-  return folly::io::getCodec(codecType, level)->compress(buffer.get());
+  return folly::compression::getCodec(codecType, level)->compress(buffer.get());
 }
 
 static std::unique_ptr<folly::IOBuf> uncompressBuffer(
@@ -69,7 +69,8 @@ static std::unique_ptr<folly::IOBuf> uncompressBuffer(
   auto [codecType, level] =
       CompressionAlgorithmSelector::toCodecTypeAndLevel(compressionAlgorithm);
   try {
-    return folly::io::getCodec(codecType, level)->uncompress(buffer.get());
+    return folly::compression::getCodec(codecType, level)
+        ->uncompress(buffer.get());
   } catch (const std::exception& e) {
     throw TApplicationException(
         TApplicationException::INVALID_TRANSFORM,

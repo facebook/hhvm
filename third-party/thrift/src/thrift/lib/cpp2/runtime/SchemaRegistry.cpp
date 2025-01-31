@@ -64,8 +64,9 @@ std::optional<type::Schema> readSchema(std::string_view data) {
     // use of relative includes.
     return std::nullopt;
   }
-  auto decompressed = folly::io::getCodec(folly::compression::CodecType::ZSTD)
-                          ->uncompress(data);
+  auto decompressed =
+      folly::compression::getCodec(folly::compression::CodecType::ZSTD)
+          ->uncompress(data);
   return CompactSerializer::deserialize<type::Schema>(decompressed);
 }
 } // namespace

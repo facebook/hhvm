@@ -159,7 +159,7 @@ fn parse_script<'o, 't>(
     let sc =
         DirectDeclSmartConstructors::new(opts, &source, mode, elaborate_xhp_namespaces_for_facts);
     let mut parser = Parser::new(&source, env, sc);
-    let _root = parser.parse_script(); // doing it for the side effect, not the return value
+    let decls = parser.parse_script().script_decls(true);
     let errors = parser.errors();
     let mut sc_state = parser.into_sc_state().into_inner();
 
@@ -167,14 +167,10 @@ fn parse_script<'o, 't>(
     // syntactic order, so reverse it.
     sc_state.file_attributes.reverse();
 
-    // Direct decl parser adds decls in source order, but to match OCaml
-    // we reverse them back.
-    sc_state.decls.rev();
-
     ParsedFileO {
         mode: mode_opt,
         file_attributes: sc_state.file_attributes,
-        decls: sc_state.decls,
+        decls,
         disable_xhp_element_mangling: opts.disable_xhp_element_mangling,
         has_first_pass_parse_errors: !errors.is_empty(),
         module_membership: sc_state.module.map(|id| id.1),

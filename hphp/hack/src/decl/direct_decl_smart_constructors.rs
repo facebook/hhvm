@@ -117,7 +117,6 @@ impl<'o, 't> std::ops::Deref for DirectDeclSmartConstructors<'o, 't> {
 #[derive(Clone)]
 pub struct Impl<'o, 't> {
     pub source_text: IndexedSourceText<'t>,
-    pub decls: Decls,
     pub file_attributes: Vec<typing_defs::UserAttribute>,
 
     // const_refs will accumulate all scope-resolution-expressions it
@@ -170,7 +169,6 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                 source_text,
                 filename,
                 file_mode,
-                decls: Default::default(),
                 file_attributes: Default::default(),
                 const_refs: None,
                 namespace_builder: Rc::new(NamespaceBuilder::new(
@@ -946,6 +944,10 @@ pub enum Node {
 
     // Non-ignored, fixed-width tokens (e.g., keywords, operators, braces, etc.).
     Token(FixedWidthToken),
+
+    // A single toplevel symbol declaration and its name. This is currently
+    // coupled to direct_decl_parser::Decls and Direct_decl_parser.decls
+    Decl(Box<(String, Decl)>),
 }
 
 impl smart_constructors::NodeType for Node {
@@ -1003,6 +1005,33 @@ impl smart_constructors::NodeType for Node {
 }
 
 impl Node {
+    /// Collect the Node::Decls from the root Script node, flattening any nested
+    /// namespaces or similar along the way.
+    pub fn script_decls(self, ocaml_order: bool) -> Decls {
+        let mut decls = Decls::default();
+        fn flatten(acc: &mut Decls, node: Node) {
+            match node {
+                Node::Decl(box (name, decl)) => acc.add(name, decl),
+                Node::List(_) => node.into_iter().for_each(|n| flatten(acc, n)),
+                node => {
+                    if !node.is_ignored() {
+                        panic!(
+                            "Top-level Script node has a child that is not a Decl: {:?}",
+                            node
+                        )
+                    }
+                }
+            };
+        }
+        flatten(&mut decls, self);
+        if ocaml_order {
+            // Direct decl parser returns decls in source order, but to match OCaml
+            // we reverse them back.
+            decls.rev();
+        }
+        decls
+    }
+
     fn is_token(&self, kind: TokenKind) -> bool {
         self.token_kind() == Some(kind)
     }
@@ -1131,31 +1160,32 @@ struct Attributes {
 }
 
 impl<'o, 't> Impl<'o, 't> {
-    fn add_class(&mut self, name: String, decl: shallow_decl_defs::ShallowClass) {
+    fn class_decl(&mut self, name: String, decl: shallow_decl_defs::ShallowClass) -> Node {
         self.under_no_auto_dynamic = false;
         self.under_no_auto_likes = false;
         self.inside_no_auto_dynamic_class = false;
-        self.decls.add(name, Decl::Class(decl));
+        self.classish_name_builder = None;
+        Node::Decl(Box::new((name, Decl::Class(decl))))
     }
-    fn add_fun(&mut self, name: String, decl: typing_defs::FunElt) {
+    fn fun_decl(&mut self, name: String, decl: typing_defs::FunElt) -> Node {
         self.under_no_auto_dynamic = false;
         self.under_no_auto_likes = false;
-        self.decls.add(name, Decl::Fun(decl));
+        Node::Decl(Box::new((name, Decl::Fun(decl))))
     }
-    fn add_typedef(&mut self, name: String, decl: typing_defs::TypedefType) {
+    fn typedef_decl(&mut self, name: String, decl: typing_defs::TypedefType) -> Node {
         self.under_no_auto_dynamic = false;
         self.under_no_auto_likes = false;
-        self.decls.add(name, Decl::Typedef(decl));
+        Node::Decl(Box::new((name, Decl::Typedef(decl))))
     }
-    fn add_const(&mut self, name: String, decl: typing_defs::ConstDecl) {
+    fn const_decl(&mut self, name: String, decl: typing_defs::ConstDecl) -> Node {
         self.under_no_auto_dynamic = false;
         self.under_no_auto_likes = false;
-        self.decls.add(name, Decl::Const(decl));
+        Node::Decl(Box::new((name, Decl::Const(decl))))
     }
-    fn add_module(&mut self, name: String, decl: typing_defs::ModuleDefType) {
+    fn module_decl(&mut self, name: String, decl: typing_defs::ModuleDefType) -> Node {
         self.under_no_auto_dynamic = false;
         self.under_no_auto_likes = false;
-        self.decls.add(name, Decl::Module(decl));
+        Node::Decl(Box::new((name, Decl::Module(decl))))
     }
 
     fn user_attribute_to_decl(&self, attr: UserAttributeNode) -> shallow_decl_defs::UserAttribute {
@@ -3498,9 +3528,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         };
 
         let this = Rc::make_mut(&mut self.state);
-        this.add_typedef(name, typedef);
-
-        Node::Ignored(SK::AliasDeclaration)
+        this.typedef_decl(name, typedef)
     }
 
     fn make_context_alias_declaration(
@@ -3580,9 +3608,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         };
 
         let this = Rc::make_mut(&mut self.state);
-        this.add_typedef(name, typedef);
-
-        Node::Ignored(SK::ContextAliasDeclaration)
+        this.typedef_decl(name, typedef)
     }
 
     fn make_case_type_declaration(
@@ -3694,9 +3720,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         };
 
         let this = Rc::make_mut(&mut self.state);
-        this.add_typedef(name, typedef);
-
-        Node::Ignored(SK::CaseTypeDeclaration)
+        this.typedef_decl(name, typedef)
     }
 
     fn make_case_type_variant(
@@ -3961,8 +3985,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                     package: self.package.clone(),
                 };
                 let this = Rc::make_mut(&mut self.state);
-                this.add_fun(name, fun_elt);
-                Node::Ignored(SK::FunctionDeclaration)
+                this.fun_decl(name, fun_elt)
             }
             _ => Node::Ignored(SK::FunctionDeclaration),
         }
@@ -4143,42 +4166,41 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             }
             // Global consts.
             Node::List(consts) => {
-                // This case always returns Node::Ignored,
-                // but has the side effect of calling self.add_const
-
                 // Note: given "const int X=1,Y=2;", the legacy decl-parser
                 // allows both decls, and it gives them both an identical text-span -
                 // from start of "const" to end of semicolon. This is a bug but
                 // the code here preserves it.
                 let pos = self.merge_positions(&const_keyword, &semicolon);
-                for cst in consts.into_iter() {
-                    match cst {
-                        Node::ConstInitializer(box (name, initializer, _refs)) => {
-                            if let Some(Id(id_pos, id)) = self.elaborate_defined_id(&name) {
-                                let ty = self
-                                    .node_to_ty(hint.clone())
-                                    .or_else(|| self.infer_const(name, initializer.clone()))
-                                    .unwrap_or_else(|| self.tany_with_pos(id_pos));
+                Node::List(
+                    consts
+                        .into_iter()
+                        .filter_map(|cst| match cst {
+                            Node::ConstInitializer(box (name, initializer, _refs)) => {
+                                self.elaborate_defined_id(&name).map(|Id(id_pos, id)| {
+                                    let ty = self
+                                        .node_to_ty(hint.clone())
+                                        .or_else(|| self.infer_const(name, initializer.clone()))
+                                        .unwrap_or_else(|| self.tany_with_pos(id_pos));
 
-                                let value = if self.opts.include_assignment_values {
-                                    Some(self.node_to_str(initializer, &semicolon))
-                                } else {
-                                    None
-                                };
+                                    let value = if self.opts.include_assignment_values {
+                                        Some(self.node_to_str(initializer, &semicolon))
+                                    } else {
+                                        None
+                                    };
 
-                                let const_decl = ConstDecl {
-                                    pos: pos.clone(),
-                                    type_: ty,
-                                    value,
-                                };
-                                let this = Rc::make_mut(&mut self.state);
-                                this.add_const(id, const_decl);
+                                    let const_decl = ConstDecl {
+                                        pos: pos.clone(),
+                                        type_: ty,
+                                        value,
+                                    };
+                                    let this = Rc::make_mut(&mut self.state);
+                                    this.const_decl(id, const_decl)
+                                })
                             }
-                        }
-                        _ => {}
-                    }
-                }
-                Node::Ignored(SK::ConstDeclaration)
+                            _ => None,
+                        })
+                        .collect(),
+                )
             }
             _ => Node::Ignored(SK::ConstDeclaration),
         }
@@ -4209,11 +4231,11 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         _name: Self::Output,
         body: Self::Output,
     ) -> Self::Output {
-        if let Node::Ignored(SK::NamespaceBody) = body {
+        if matches!(&body, Node::List(..)) {
             let this = Rc::make_mut(&mut self.state);
             Rc::make_mut(&mut this.namespace_builder).pop_namespace();
         }
-        Node::Ignored(SK::NamespaceDeclaration)
+        body
     }
 
     fn make_namespace_declaration_header(
@@ -4233,10 +4255,10 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
     fn make_namespace_body(
         &mut self,
         _left_brace: Self::Output,
-        _declarations: Self::Output,
+        declarations: Self::Output,
         _right_brace: Self::Output,
     ) -> Self::Output {
-        Node::Ignored(SK::NamespaceBody)
+        declarations
     }
 
     fn make_namespace_empty_body(&mut self, _semicolon: Self::Output) -> Self::Output {
@@ -4661,11 +4683,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             package: self.package.clone(),
         };
         let this = Rc::make_mut(&mut self.state);
-        this.add_class(name, cls);
-
-        this.classish_name_builder = None;
-
-        Node::Ignored(SK::ClassishDeclaration)
+        this.class_decl(name, cls)
     }
 
     fn make_property_declaration(
@@ -5129,11 +5147,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             package: self.package.clone(),
         };
         let this = Rc::make_mut(&mut self.state);
-        this.add_class(key, cls);
-
-        this.classish_name_builder = None;
-
-        Node::Ignored(SK::EnumDeclaration)
+        this.class_decl(key, cls)
     }
 
     fn make_enum_use(
@@ -5344,11 +5358,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             package: self.package.clone(),
         };
         let this = Rc::make_mut(&mut self.state);
-        this.add_class(name_string, cls);
-
-        this.classish_name_builder = None;
-
-        Node::Ignored(SyntaxKind::EnumClassDeclaration)
+        this.class_decl(name_string, cls)
     }
 
     fn begin_enum_class_enumerator(&mut self) {
@@ -6574,9 +6584,10 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             let module_name = self.module_name_string_from_parts(parts, pos.clone());
             let module = shallow_decl_defs::ModuleDefType { mdt_pos: pos };
             let this = Rc::make_mut(&mut self.state);
-            this.add_module(module_name, module);
+            this.module_decl(module_name, module)
+        } else {
+            Node::Ignored(SK::ModuleDeclaration)
         }
-        Node::Ignored(SK::ModuleDeclaration)
     }
 
     fn make_module_membership_declaration(
@@ -6596,5 +6607,12 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             _ => {}
         }
         Node::Ignored(SK::ModuleMembershipDeclaration)
+    }
+
+    /// See `DeclarationParser::parse_script` to see how the inner decls get
+    /// collected into a Node::List. We explicitly return so it doesn't get
+    /// filtered out as a zero node.
+    fn make_script(&mut self, declarations: Self::Output) -> Self::Output {
+        declarations
     }
 }

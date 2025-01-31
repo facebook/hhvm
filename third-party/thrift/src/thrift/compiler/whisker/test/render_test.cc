@@ -1761,6 +1761,8 @@ TEST_F(RenderTest, partials_with_arguments_out_of_order) {
 }
 
 TEST_F(RenderTest, partials_with_missing_arguments) {
+  show_source_backtrace_on_failure(true);
+
   auto result = render(
       "{{#let partial foo |arg1 arg2|}}\n"
       "{{arg1}} {{arg2}}\n"
@@ -1769,15 +1771,19 @@ TEST_F(RenderTest, partials_with_missing_arguments) {
       w::map({}));
   EXPECT_THAT(
       diagnostics(),
-      testing::ElementsAre(diagnostic(
-          diagnostic_level::error,
-          "Partial 'foo' is missing named arguments: arg2",
-          path_to_file,
-          4)));
+      testing::ElementsAre(
+          diagnostic(
+              diagnostic_level::error,
+              "Partial 'foo' is missing named arguments: arg2",
+              path_to_file,
+              4),
+          error_backtrace("#0 path/to/test.whisker <line:4, col:1>\n")));
   EXPECT_FALSE(result.has_value());
 }
 
 TEST_F(RenderTest, partials_with_extra_arguments) {
+  show_source_backtrace_on_failure(true);
+
   auto result = render(
       "{{#let partial foo |arg1|}}\n"
       "{{arg1}}\n"
@@ -1786,24 +1792,30 @@ TEST_F(RenderTest, partials_with_extra_arguments) {
       w::map({}));
   EXPECT_THAT(
       diagnostics(),
-      testing::ElementsAre(diagnostic(
-          diagnostic_level::error,
-          "Partial 'foo' received unexpected named arguments: arg2",
-          path_to_file,
-          4)));
+      testing::ElementsAre(
+          diagnostic(
+              diagnostic_level::error,
+              "Partial 'foo' received unexpected named arguments: arg2",
+              path_to_file,
+              4),
+          error_backtrace("#0 path/to/test.whisker <line:4, col:1>\n")));
   EXPECT_FALSE(result.has_value());
 }
 
 TEST_F(RenderTest, partials_with_wrong_type) {
+  show_source_backtrace_on_failure(true);
+
   auto result = render("{{#partial true}}\n", w::map({}));
   EXPECT_THAT(
       diagnostics(),
-      testing::ElementsAre(diagnostic(
-          diagnostic_level::error,
-          "Expression 'true' does not evaluate to a partial. The encountered value is:\n"
-          "true\n",
-          path_to_file,
-          1)));
+      testing::ElementsAre(
+          diagnostic(
+              diagnostic_level::error,
+              "Expression 'true' does not evaluate to a partial. The encountered value is:\n"
+              "true\n",
+              path_to_file,
+              1),
+          error_backtrace("#0 path/to/test.whisker <line:1, col:12>\n")));
   EXPECT_FALSE(result.has_value());
 }
 
@@ -1916,6 +1928,8 @@ TEST_F(RenderTest, partials_mutually_recursive) {
 }
 
 TEST_F(RenderTest, partial_derived_context) {
+  show_source_backtrace_on_failure(true);
+
   auto result = render(
       "{{#let x = 1}}\n"
       "{{#let partial foo}}\n"
@@ -1927,18 +1941,23 @@ TEST_F(RenderTest, partial_derived_context) {
       globals({{"global", w::i64(42)}}));
   EXPECT_THAT(
       diagnostics(),
-      testing::ElementsAre(diagnostic(
-          diagnostic_level::error,
-          "Name 'x' was not found in the current scope. Tried to search through the following scopes:\n"
-          "#0 <global scope> (size=1)\n"
-          "`-'global'\n"
-          "  |-i64(42)\n",
-          path_to_file,
-          3)));
+      testing::ElementsAre(
+          diagnostic(
+              diagnostic_level::error,
+              "Name 'x' was not found in the current scope. Tried to search through the following scopes:\n"
+              "#0 <global scope> (size=1)\n"
+              "`-'global'\n"
+              "  |-i64(42)\n",
+              path_to_file,
+              3),
+          error_backtrace("#0 foo @ path/to/test.whisker <line:3, col:3>\n"
+                          "#1 path/to/test.whisker <line:5, col:1>\n")));
   EXPECT_FALSE(result.has_value());
 }
 
 TEST_F(RenderTest, partial_derived_context_no_leak) {
+  show_source_backtrace_on_failure(true);
+
   auto result = render(
       "{{#let partial foo}}\n"
       "{{#let x = 1}}\n"
@@ -1951,16 +1970,49 @@ TEST_F(RenderTest, partial_derived_context_no_leak) {
       globals({{"global", w::i64(42)}}));
   EXPECT_THAT(
       diagnostics(),
-      testing::ElementsAre(diagnostic(
-          diagnostic_level::error,
-          "Name 'x' was not found in the current scope. Tried to search through the following scopes:\n"
-          "#0 map (size=0)\n"
-          "\n"
-          "#1 <global scope> (size=1)\n"
-          "`-'global'\n"
-          "  |-i64(42)\n",
-          path_to_file,
-          6)));
+      testing::ElementsAre(
+          diagnostic(
+              diagnostic_level::error,
+              "Name 'x' was not found in the current scope. Tried to search through the following scopes:\n"
+              "#0 map (size=0)\n"
+              "\n"
+              "#1 <global scope> (size=1)\n"
+              "`-'global'\n"
+              "  |-i64(42)\n",
+              path_to_file,
+              6),
+          error_backtrace("#0 path/to/test.whisker <line:6, col:3>\n")));
+  EXPECT_FALSE(result.has_value());
+}
+
+TEST_F(RenderTest, partial_nested_backtrace) {
+  show_source_backtrace_on_failure(true);
+
+  auto result = render(
+      "{{#let partial foo}}\n"
+      "  {{#let partial bar}}\n"
+      "    {{#let partial baz}}\n"
+      "      {{undefined}}\n"
+      "    {{/let partial}}\n"
+      "    {{#partial baz}}\n"
+      "  {{/let partial}}\n"
+      "  {{#partial bar}}\n"
+      "{{/let partial}}\n"
+      "{{#partial foo}}\n",
+      w::map({}));
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(
+          diagnostic(
+              diagnostic_level::error,
+              "Name 'undefined' was not found in the current scope. Tried to search through the following scopes:\n"
+              "#0 <global scope> (size=0)\n",
+              path_to_file,
+              4),
+          error_backtrace("#0 baz @ path/to/test.whisker <line:4, col:9>\n"
+                          "#1 bar @ path/to/test.whisker <line:6, col:5>\n"
+                          "#2 foo @ path/to/test.whisker <line:8, col:3>\n"
+                          "#3 path/to/test.whisker <line:10, col:1>\n")));
   EXPECT_FALSE(result.has_value());
 }
 

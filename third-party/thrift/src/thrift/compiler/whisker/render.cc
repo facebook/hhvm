@@ -23,6 +23,7 @@
 #include <exception>
 #include <functional>
 #include <iterator>
+#include <list>
 #include <ostream>
 #include <set>
 #include <string>
@@ -200,11 +201,21 @@ class source_stack {
    */
   struct frame {
     /**
+     * The frame from which the current frame was jumped to. This is
+     * nullptr for the root frame.
+     */
+    frame* prev;
+    /**
      * The evaluation context of the source frame. When a new frame is pushed:
      *   - macros — retain the context from the previous frame.
      *   - partials — derive a new context from the previous frame.
      */
     eval_context context;
+    /**
+     * The currently active partial application, or nullptr if the frame
+     * originated from the root, or is a macro.
+     */
+    partial_definition::ptr partial;
     /**
      * For all elements except the top of the stack, this is the location of the
      * partial application within that source that led to the current stack.
@@ -215,44 +226,59 @@ class source_stack {
      * saved before the new source is pushed to the stack. After the partial
      * application completes, the saved location is dropped.
      */
-    source_location apply_location;
+    source_location jumped_from;
+    /**
+     * For `{{#pragma ignore-newlines}}`.
+     */
     bool ignore_newlines = false;
 
-    explicit frame(eval_context ctx) : context(std::move(ctx)) {}
+    std::optional<std::string> name() const {
+      return partial == nullptr ? std::nullopt : std::optional{partial->name};
+    }
+
+    explicit frame(
+        frame* prev, eval_context ctx, partial_definition::ptr partial)
+        : prev(prev), context(std::move(ctx)), partial(std::move(partial)) {}
   };
 
   /**
    * Returns the current source stack frame, or nullptr if the stack is empty.
    */
-  frame* top() {
-    if (frames_.empty()) {
-      return nullptr;
-    }
-    return &frames_.back();
+  frame* top() { return frames_.empty() ? nullptr : &frames_.back(); }
+  const frame* top() const {
+    return frames_.empty() ? nullptr : &frames_.back();
   }
 
   /**
    * An RAII guard that pushes and pops sources from the stack of partial
    * applications.
    */
-  auto make_frame_guard(eval_context eval_ctx, source_location apply_location) {
+  auto make_frame_guard(
+      eval_context eval_ctx,
+      partial_definition::ptr partial,
+      source_location jumped_from) {
     class frame_guard {
      public:
       explicit frame_guard(
           source_stack& stack,
           eval_context eval_ctx,
-          source_location apply_location)
+          partial_definition::ptr&& partial,
+          source_location jumped_from)
           : stack_(stack) {
         if (auto* frame = stack_.top()) {
-          frame->apply_location = std::move(apply_location);
+          // Save the jump location since we're jumping to a new frame. This
+          // allows collecting a backtrace.
+          frame->jumped_from = jumped_from;
         }
-        stack.frames_.emplace_back(std::move(eval_ctx));
+        stack.frames_.emplace_back(
+            stack_.top(), std::move(eval_ctx), std::move(partial));
       }
       ~frame_guard() noexcept {
         assert(!stack_.frames_.empty());
         stack_.frames_.pop_back();
         if (auto* source = stack_.top()) {
-          source->apply_location = source_location();
+          // Reset the jump location since we've return to its origin.
+          source->jumped_from = source_location();
         }
       }
       frame_guard(frame_guard&& other) = delete;
@@ -263,10 +289,23 @@ class source_stack {
      private:
       source_stack& stack_;
     };
-    return frame_guard{*this, std::move(eval_ctx), std::move(apply_location)};
+    return frame_guard{
+        *this, std::move(eval_ctx), std::move(partial), jumped_from};
   }
 
-  using backtrace = std::vector<resolved_location>;
+  struct backtrace_frame {
+    /**
+     * The resolved source location where a jump happened, or the origin of
+     * the backtrace for the top-most frame.
+     */
+    resolved_location location;
+    /**
+     * The name of the partial application (if present) from which the jump
+     * happened.
+     */
+    std::optional<std::string> name;
+  };
+  using backtrace = std::vector<backtrace_frame>;
   /**
    * Creates a back trace for debugging that contains the chain of partial
    * applications within the source.
@@ -275,16 +314,22 @@ class source_stack {
    * caller.
    */
   backtrace make_backtrace_at(const source_location& current) const {
-    assert(!frames_.empty());
     assert(current != source_location());
+    const frame* frame = top();
+    assert(frame != nullptr);
 
-    std::vector<resolved_location> result;
-    result.emplace_back(resolved_location(current, diags_.source_mgr()));
-    for (auto frame = std::next(frames_.rbegin()); frame != frames_.rend();
-         ++frame) {
-      assert(frame->apply_location != source_location());
-      result.emplace_back(
-          resolved_location(frame->apply_location, diags_.source_mgr()));
+    std::vector<backtrace_frame> result;
+    result.emplace_back(backtrace_frame{
+        resolved_location(current, diags_.source_mgr()),
+        frame->name(),
+    });
+    frame = frame->prev;
+    for (; frame != nullptr; frame = frame->prev) {
+      assert(frame->jumped_from != source_location());
+      result.emplace_back(backtrace_frame{
+          resolved_location(frame->jumped_from, diags_.source_mgr()),
+          frame->name(),
+      });
     }
     return result;
   }
@@ -292,8 +337,8 @@ class source_stack {
   explicit source_stack(diagnostics_engine& diags) : diags_(diags) {}
 
  private:
-  // Using std::vector as a stack so we can iterate over it
-  std::vector<frame> frames_;
+  // Doubly linked list provides stable iterators / pointers for backtraces.
+  std::list<frame> frames_;
   diagnostics_engine& diags_;
 };
 
@@ -371,7 +416,9 @@ class render_engine {
       auto eval_ctx = eval_context::with_root_scope(
           std::move(root_context_), std::exchange(opts_.globals, {}));
       auto source_frame_guard = source_stack_.make_frame_guard(
-          std::move(eval_ctx), source_location());
+          std::move(eval_ctx),
+          nullptr /* the root node is not a partial */,
+          source_location());
       visit(root.body_elements);
       return true;
     } catch (const render_error& err) {
@@ -385,14 +432,17 @@ class render_engine {
       auto source_trace = [&]() -> std::string {
         std::string result;
         for (std::size_t i = 0; i < backtrace.size(); ++i) {
-          const auto& frame = backtrace[i];
+          const source_stack::backtrace_frame& frame = backtrace[i];
+          const std::string location = frame.name.has_value()
+              ? fmt::format("{} @ {}", *frame.name, frame.location.file_name())
+              : fmt::format("{}", frame.location.file_name());
           fmt::format_to(
               std::back_inserter(result),
               "#{} {} <line:{}, col:{}>\n",
               i,
-              frame.file_name(),
-              frame.line(),
-              frame.column());
+              location,
+              frame.location.line(),
+              frame.location.column());
         }
         return result;
       }();
@@ -1071,7 +1121,7 @@ class render_engine {
     }
 
     auto source_frame_guard = source_stack_.make_frame_guard(
-        std::move(derived_ctx), partial_statement.loc.begin);
+        std::move(derived_ctx), partial, partial_statement.loc.begin);
     auto indent_guard =
         out_.make_indent_guard(partial_statement.standalone_offset_within_line);
     visit(partial->bodies);
@@ -1104,7 +1154,9 @@ class render_engine {
     // Macros are "inlined" into their invocation site. In other words, they
     // execute within the scope where they are invoked.
     auto source_frame_guard = source_stack_.make_frame_guard(
-        current_frame().context, macro.loc.begin);
+        current_frame().context,
+        nullptr /* no partial definition because macros are at root scope */,
+        macro.loc.begin);
     auto indent_guard =
         out_.make_indent_guard(macro.standalone_offset_within_line);
     visit(resolved_macro->body_elements);

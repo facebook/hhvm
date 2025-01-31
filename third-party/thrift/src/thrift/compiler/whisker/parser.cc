@@ -1572,9 +1572,12 @@ class parser {
   // partial-block →
   //   { partial-block-open ~ body* ~ partial-block-close }
   // partial-block-open →
-  //   { "{{#" ~ "let" ~ "partial" ~ identifier ~ partial-block-args? ~ "}}" }
+  //   { "{{#" ~ "let" ~ "partial" ~ identifier ~
+  //      partial-block-args? ~ partial-block-captures? ~ "}}" }
   // partial-block-args →
   //   { "|" ~ identifier+ ~ "|" }
+  // partial-block-captures →
+  //   { "captures" ~ "|" ~ identifier+ ~ "|" }
   // partial-block-close →
   //   { "{{/" ~ "let" ~ "partial" ~ "}}" }
   parse_result<ast::partial_block> parse_partial_block(
@@ -1629,6 +1632,40 @@ class parser {
       }
       expect_on_open(tok::pipe);
     }
+
+    std::set<ast::identifier, ast::identifier::compare_by_name> captures;
+    if (try_consume_token(&scan, tok::kw_captures)) {
+      expect_on_open(tok::pipe);
+      const auto insert_capture = [&](ast::identifier capture) {
+        if (arguments.find(capture) != arguments.end()) {
+          report_fatal_error(
+              scan,
+              "capture '{}' conflicts with an argument in partial-block '{}'",
+              capture.name,
+              id.name);
+        }
+        auto [_, inserted] = captures.insert(std::move(capture));
+        if (!inserted) {
+          report_fatal_error(
+              scan,
+              "duplicate capture '{}' in partial-block '{}'",
+              capture.name,
+              id.name);
+        }
+      };
+
+      const token* first_capture = try_consume_token(&scan, tok::identifier);
+      if (first_capture == nullptr) {
+        report_fatal_expected(
+            scan, "at least one capture in partial-block '{}'", id.name);
+      }
+      insert_capture(make_identifier(*first_capture));
+      while (const token* capture = try_consume_token(&scan, tok::identifier)) {
+        insert_capture(make_identifier(*capture));
+      }
+      expect_on_open(tok::pipe);
+    }
+
     expect_on_open(tok::close);
     scan = scan.make_fresh();
 
@@ -1645,6 +1682,7 @@ class parser {
             scan.with_start(scan_start).range(),
             std::move(id),
             std::move(arguments),
+            std::move(captures),
             std::move(bodies),
         },
         scan};

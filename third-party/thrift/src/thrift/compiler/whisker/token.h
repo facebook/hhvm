@@ -78,6 +78,7 @@ enum class tok : unsigned {
   kw_each,
   kw_as,
   kw_partial,
+  kw_captures,
 
   // Special Forms:
   kw_let,

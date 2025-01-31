@@ -19,7 +19,6 @@
 #include <thrift/compiler/whisker/source_location.h>
 #include <thrift/compiler/whisker/token.h>
 
-#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <stdexcept>
@@ -31,28 +30,29 @@
 // clang-format off
 // "X macro" pattern to de-dupe code:
 //   https://en.wikipedia.org/wiki/X_macro
-#define WHISKER_KEYWORDS() \
-  WHISKER_KEYWORD(true)    \
-  WHISKER_KEYWORD(false)   \
-  WHISKER_KEYWORD(null)    \
-  WHISKER_KEYWORD(if)      \
-  WHISKER_KEYWORD(unless)  \
-  WHISKER_KEYWORD(else)    \
-  WHISKER_KEYWORD(each)    \
-  WHISKER_KEYWORD(as)      \
-  WHISKER_KEYWORD(partial) \
-  WHISKER_KEYWORD(let)     \
-  WHISKER_KEYWORD(and)     \
-  WHISKER_KEYWORD(or)      \
-  WHISKER_KEYWORD(not)     \
-  WHISKER_KEYWORD(pragma)  \
-  WHISKER_KEYWORD(with)    \
-  WHISKER_KEYWORD(this)    \
-  WHISKER_KEYWORD(define)  \
-  WHISKER_KEYWORD(for)     \
-  WHISKER_KEYWORD(do)      \
-  WHISKER_KEYWORD(import)  \
-  WHISKER_KEYWORD(export)  \
+#define WHISKER_KEYWORDS()  \
+  WHISKER_KEYWORD(true)     \
+  WHISKER_KEYWORD(false)    \
+  WHISKER_KEYWORD(null)     \
+  WHISKER_KEYWORD(if)       \
+  WHISKER_KEYWORD(unless)   \
+  WHISKER_KEYWORD(else)     \
+  WHISKER_KEYWORD(each)     \
+  WHISKER_KEYWORD(as)       \
+  WHISKER_KEYWORD(partial)  \
+  WHISKER_KEYWORD(captures) \
+  WHISKER_KEYWORD(let)      \
+  WHISKER_KEYWORD(and)      \
+  WHISKER_KEYWORD(or)       \
+  WHISKER_KEYWORD(not)      \
+  WHISKER_KEYWORD(pragma)   \
+  WHISKER_KEYWORD(with)     \
+  WHISKER_KEYWORD(this)     \
+  WHISKER_KEYWORD(define)   \
+  WHISKER_KEYWORD(for)      \
+  WHISKER_KEYWORD(do)       \
+  WHISKER_KEYWORD(import)   \
+  WHISKER_KEYWORD(export)   \
   WHISKER_KEYWORD(from)
 // clang-format on
 

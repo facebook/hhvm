@@ -171,6 +171,9 @@ struct ast_visitor {
     for (const auto& argument : partial_block.arguments) {
       scope.open_property().println(" argument '{}'", argument.name);
     }
+    for (const auto& capture : partial_block.captures) {
+      scope.open_property().println(" capture '{}'", capture.name);
+    }
     visit(partial_block.body_elements, scope.open_node());
   }
   void visit(

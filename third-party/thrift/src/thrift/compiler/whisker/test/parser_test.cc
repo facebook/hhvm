@@ -998,6 +998,40 @@ TEST_F(ParserTest, partial_block_basic) {
       "| |- newline <line:2:25, line:3:1> '\\n'\n");
 }
 
+TEST_F(ParserTest, partial_block_with_captures) {
+  auto ast = parse_ast(
+      "{{#let partial foo |arg1 arg2| captures |cap1 cap2|}}\n"
+      "This is a partial block!\n"
+      "{{/let partial}}\n");
+  EXPECT_THAT(diagnostics, testing::IsEmpty());
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- partial-block <line:1:1, line:3:17> 'foo'\n"
+      "| `- argument 'arg1'\n"
+      "| `- argument 'arg2'\n"
+      "| `- capture 'cap1'\n"
+      "| `- capture 'cap2'\n"
+      "| |- text <line:2:1, col:25> 'This is a partial block!'\n"
+      "| |- newline <line:2:25, line:3:1> '\\n'\n");
+}
+
+TEST_F(ParserTest, partial_block_only_captures) {
+  auto ast = parse_ast(
+      "{{#let partial foo captures |cap1 cap2|}}\n"
+      "This is a partial block!\n"
+      "{{/let partial}}\n");
+  EXPECT_THAT(diagnostics, testing::IsEmpty());
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- partial-block <line:1:1, line:3:17> 'foo'\n"
+      "| `- capture 'cap1'\n"
+      "| `- capture 'cap2'\n"
+      "| |- text <line:2:1, col:25> 'This is a partial block!'\n"
+      "| |- newline <line:2:25, line:3:1> '\\n'\n");
+}
+
 TEST_F(ParserTest, partial_block_after_comment) {
   auto ast = parse_ast("{{!}}{{#let partial foo |arg|}}{{/let partial}}\n");
   EXPECT_THAT(diagnostics, testing::IsEmpty());
@@ -1064,6 +1098,45 @@ TEST_F(ParserTest, partial_block_duplicate_arguments) {
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
           "duplicate argument 'arg' in partial-block 'foo'",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, partial_block_empty_captures) {
+  auto ast =
+      parse_ast("{{#let partial foo |arg| captures ||}}{{/let partial}}\n");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected at least one capture in partial-block 'foo' but found `|`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, partial_block_duplicate_captures) {
+  auto ast = parse_ast(
+      "{{#let partial foo |arg| captures |cap cap|}}{{/let partial}}\n");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "duplicate capture 'cap' in partial-block 'foo'",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, partial_block_duplicate_argument_with_capture) {
+  auto ast =
+      parse_ast("{{#let partial foo |arg| captures |arg|}}{{/let partial}}\n");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "capture 'arg' conflicts with an argument in partial-block 'foo'",
           path_to_file(1),
           1)));
 }

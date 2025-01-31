@@ -486,6 +486,7 @@ struct partial_block {
   source_range loc;
   identifier name;
   std::set<identifier, identifier::compare_by_name> arguments;
+  std::set<identifier, identifier::compare_by_name> captures;
   bodies body_elements;
 };
 

@@ -13,9 +13,9 @@ pub mod services;
 #[allow(unused_imports)]
 pub(crate) use crate as types;
 
-pub type double_t = ::std::primitive::f64;
+pub type double_t = ::fbthrift::builtin_types::OrderedFloat<f64>;
 
-pub type map_t = ::std::collections::BTreeMap<::std::string::String, ::std::primitive::i64>;
+pub type map_t = ::sorted_vector_map::SortedVectorMap<::std::string::String, ::std::primitive::i64>;
 
 #[derive(Default, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct binary_t(pub ::smallvec::SmallVec<[u8; 16]>);

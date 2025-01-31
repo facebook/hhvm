@@ -7,8 +7,9 @@
 
 include "eden/fs/config/eden_config.thrift"
 include "fb303/thrift/fb303_core.thrift"
-include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/rust.thrift"
+include "thrift/annotation/thrift.thrift"
 
 namespace cpp2 facebook.eden
 namespace java com.facebook.eden.thrift
@@ -486,7 +487,8 @@ union FileAttributeDataOrErrorV2 {
  * in a certain directory.
  */
 union DirListAttributeDataOrError {
-  1: map_PathString_FileAttributeDataOrErrorV2_3516 dirListAttributeData;
+  @rust.Type{name = "sorted_vector_map::SortedVectorMap"}
+  1: map<PathString, FileAttributeDataOrErrorV2> dirListAttributeData;
   2: EdenError error;
 }
 
@@ -2808,12 +2810,3 @@ service EdenService extends fb303_core.BaseService {
     1: EdenError ex,
   );
 }
-
-// The following were automatically generated and may benefit from renaming.
-@thrift.DeprecatedUnvalidatedAnnotations{
-  items = {"rust.type": "sorted_vector_map::SortedVectorMap"},
-}
-typedef map<
-  PathString,
-  FileAttributeDataOrErrorV2
-> map_PathString_FileAttributeDataOrErrorV2_3516

@@ -22,7 +22,7 @@ using apache::thrift::conformance::data::createCompatibilitySuite;
 using apache::thrift::conformance::data::serializeToFile;
 
 int main(int argc, char** argv) {
-  folly::Init(&argc, &argv);
+  folly::Init init(&argc, &argv);
   serializeToFile<apache::thrift::BinaryProtocolWriter>(
       createCompatibilitySuite(), stdout);
 }

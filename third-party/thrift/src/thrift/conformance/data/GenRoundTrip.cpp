@@ -21,7 +21,7 @@ using apache::thrift::conformance::data::createRoundTripSuite;
 using apache::thrift::conformance::data::serializeToFile;
 
 int main(int argc, char** argv) {
-  folly::Init(&argc, &argv);
+  folly::Init init(&argc, &argv);
   serializeToFile<apache::thrift::BinaryProtocolWriter>(
       createRoundTripSuite(), stdout);
 }

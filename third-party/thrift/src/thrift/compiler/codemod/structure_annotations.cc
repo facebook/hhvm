@@ -468,8 +468,9 @@ class structure_annotations {
         fm_.add_include("thrift/annotation/rust.thrift");
       } else if (name == "rust.exhaustive") {
         to_remove.emplace_back(name, data);
-        if (!dynamic_cast<const t_union*>(&node)) {
-          // annotation is no-op on unions
+        if (!dynamic_cast<const t_union*>(&node) &&
+            !dynamic_cast<const t_enum*>(&node)) {
+          // annotation is no-op on unions and enums
           to_add.insert("@rust.Exhaustive");
           fm_.add_include("thrift/annotation/rust.thrift");
         }

@@ -982,6 +982,193 @@ TEST_F(ParserTest, function_call_named_args_for_builtins) {
   }
 }
 
+TEST_F(ParserTest, partial_block_basic) {
+  auto ast = parse_ast(
+      "{{#let partial foo |arg1 arg2|}}\n"
+      "This is a partial block!\n"
+      "{{/let partial}}\n");
+  EXPECT_THAT(diagnostics, testing::IsEmpty());
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- partial-block <line:1:1, line:3:17> 'foo'\n"
+      "| `- argument 'arg1'\n"
+      "| `- argument 'arg2'\n"
+      "| |- text <line:2:1, col:25> 'This is a partial block!'\n"
+      "| |- newline <line:2:25, line:3:1> '\\n'\n");
+}
+
+TEST_F(ParserTest, partial_block_after_comment) {
+  auto ast = parse_ast("{{!}}{{#let partial foo |arg|}}{{/let partial}}\n");
+  EXPECT_THAT(diagnostics, testing::IsEmpty());
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- comment <line:1:1, col:6> ''\n"
+      "|- partial-block <line:1:6, col:48> 'foo'\n"
+      "| `- argument 'arg'\n");
+}
+
+TEST_F(ParserTest, partial_block_consume_whitespace) {
+  // Partial blocks appear in the header of a file, so they should consume
+  // preceding whitespace.
+  auto ast = parse_ast(
+      "\n"
+      "{{!}}\n"
+      "\n"
+      "{{#let partial foo |arg|}}\n"
+      "  inside partial\n"
+      "{{/let partial}}\n"
+      "hello\n");
+  EXPECT_THAT(diagnostics, testing::IsEmpty());
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- newline <line:1:1, line:2:1> '\\n'\n"
+      "|- comment <line:2:1, col:6> ''\n"
+      "|- newline <line:3:1, line:4:1> '\\n'\n"
+      "|- partial-block <line:4:1, line:6:17> 'foo'\n"
+      "| `- argument 'arg'\n"
+      "| |- text <line:5:1, col:17> '  inside partial'\n"
+      "| |- newline <line:5:17, line:6:1> '\\n'\n"
+      "|- text <line:7:1, col:6> 'hello'\n"
+      "|- newline <line:7:6, line:8:1> '\\n'\n");
+}
+
+TEST_F(ParserTest, partial_block_no_arguments) {
+  auto ast = parse_ast("{{#let partial foo}}{{/let partial}}\n");
+  EXPECT_THAT(diagnostics, testing::IsEmpty());
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- partial-block <line:1:1, col:37> 'foo'\n");
+}
+
+TEST_F(ParserTest, partial_block_empty_arguments) {
+  auto ast = parse_ast("{{#let partial foo ||}}{{/let partial}}\n");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected at least one argument in partial-block 'foo' but found `|`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, partial_block_duplicate_arguments) {
+  auto ast = parse_ast("{{#let partial foo |arg arg|}}{{/let partial}}\n");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "duplicate argument 'arg' in partial-block 'foo'",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, partial_block_missing_name) {
+  auto ast = parse_ast("{{#let partial |arg1|}}{{/let partial}}\n");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected identifier in partial-block but found `|`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, partial_block_extra_tokens) {
+  auto ast = parse_ast("{{#let partial foo |arg1| true}}{{/let partial}}\n");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `}}` to open partial-block 'foo' but found `true`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, partial_block_without_close) {
+  auto ast = parse_ast("{{#let partial foo |arg1|}}\n");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `{{` to close partial-block 'foo' but found EOF",
+          path_to_file(1),
+          2)));
+}
+
+TEST_F(ParserTest, partial_block_with_bad_close) {
+  auto ast = parse_ast("{{#let partial foo |arg1|}}{{/let}}\n");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `partial` to close partial-block 'foo' but found `}}`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, partial_block_nested) {
+  auto ast = parse_ast(
+      "{{#let partial foo |arg1 arg2|}}\n"
+      "  {{#let partial bar |arg3 arg4|}}\n"
+      "  {{/let partial}}\n"
+      "{{/let partial}}\n");
+  EXPECT_THAT(diagnostics, testing::IsEmpty());
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- partial-block <line:1:1, line:4:17> 'foo'\n"
+      "| `- argument 'arg1'\n"
+      "| `- argument 'arg2'\n"
+      "| |- partial-block <line:2:3, line:3:19> 'bar'\n"
+      "| | `- argument 'arg3'\n"
+      "| | `- argument 'arg4'\n");
+}
+
+TEST_F(ParserTest, partial_block_inside_body) {
+  auto ast = parse_ast(
+      "{{! header }}"
+      "{{#let partial foo |arg1 arg2|}}\n"
+      "  body inside a partial does not count\n"
+      "{{/let partial}}\n"
+      "{{#let partial foo2 |arg1 arg2|}}{{/let partial}}\n"
+      "{{! body}}\n"
+      "Some body text\n"
+      "{{#let partial bar |arg1 arg2|}}{{/let partial}}\n"
+      "{{#let partial baz |arg1 arg2|}}{{/let partial}}\n");
+  EXPECT_THAT(diagnostics, testing::IsEmpty());
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- comment <line:1:1, col:14> ' header '\n"
+      "|- partial-block <line:1:14, line:3:17> 'foo'\n"
+      "| `- argument 'arg1'\n"
+      "| `- argument 'arg2'\n"
+      "| |- text <line:2:1, col:39> '  body inside a partial does not count'\n"
+      "| |- newline <line:2:39, line:3:1> '\\n'\n"
+      "|- partial-block <line:4:1, col:50> 'foo2'\n"
+      "| `- argument 'arg1'\n"
+      "| `- argument 'arg2'\n"
+      "|- comment <line:5:1, col:11> ' body'\n"
+      "|- text <line:6:1, col:15> 'Some body text'\n"
+      "|- newline <line:6:15, line:7:1> '\\n'\n"
+      "|- partial-block <line:7:1, col:49> 'bar'\n"
+      "| `- argument 'arg1'\n"
+      "| `- argument 'arg2'\n"
+      "|- partial-block <line:8:1, col:49> 'baz'\n"
+      "| `- argument 'arg1'\n"
+      "| `- argument 'arg2'\n");
+}
+
 TEST_F(ParserTest, basic_macro) {
   auto ast = parse_ast("{{> path / to / file }}");
   EXPECT_EQ(

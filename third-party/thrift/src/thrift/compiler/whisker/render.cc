@@ -914,6 +914,11 @@ class render_engine {
         });
   }
 
+  [[noreturn]] void visit(const ast::partial_block& partial_block) {
+    report_fatal_error(
+        partial_block.loc.begin, "Partial blocks are not yet supported");
+  }
+
   void visit(const ast::macro& macro) {
     std::vector<std::string> path;
     path.reserve(macro.path.parts.size());

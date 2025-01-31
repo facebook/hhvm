@@ -21,6 +21,7 @@
 #include <map>
 #include <memory>
 #include <optional>
+#include <set>
 #include <string>
 #include <variant>
 #include <vector>
@@ -35,6 +36,7 @@ struct conditional_block;
 struct with_block;
 struct each_block;
 struct macro;
+struct partial_block;
 struct interpolation;
 struct let_statement;
 struct pragma_statement;
@@ -51,6 +53,7 @@ using body = std::variant<
     conditional_block,
     with_block,
     each_block,
+    partial_block,
     let_statement,
     pragma_statement,
     macro>;
@@ -118,6 +121,17 @@ struct identifier {
   }
   // Remove in C++20 which introduces comparison operator synthesis
   WHISKER_DEFINE_OPERATOR_INEQUALITY(identifier)
+
+  // For std::map and std::set
+  struct compare_by_name {
+    using is_transparent = void;
+    bool operator()(const identifier& lhs, std::string_view rhs) const {
+      return lhs.name < rhs;
+    }
+    bool operator()(const identifier& lhs, const identifier& rhs) const {
+      return operator()(lhs, rhs.name);
+    }
+  };
 };
 
 /**
@@ -458,6 +472,19 @@ struct each_block {
 
   bodies body_elements;
   std::optional<else_block> else_clause;
+};
+
+/**
+ * A Whisker construct for partially applied (reusable) templates.
+ *
+ * To form text output, a partial block must be applied with a set of arguments
+ * via partial application.
+ */
+struct partial_block {
+  source_range loc;
+  identifier name;
+  std::set<identifier, identifier::compare_by_name> arguments;
+  bodies body_elements;
 };
 
 /*

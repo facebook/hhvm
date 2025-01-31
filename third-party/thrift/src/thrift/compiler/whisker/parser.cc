@@ -227,6 +227,14 @@ ast::identifier make_identifier(const token& t) {
 }
 
 /**
+ * Creates a path component AST node from path component token.
+ */
+ast::path_component make_path_component(const token& t) {
+  assert(t.kind == tok::path_component);
+  return ast::path_component{t.range, std::string(t.string_value())};
+}
+
+/**
  * The Mustache spec contains this concept called "standalone lines".
  *   https://github.com/mustache/spec/blob/v1.4.2/specs/sections.yml#L279-L305
  *
@@ -868,6 +876,7 @@ class parser {
       ast::conditional_block,
       ast::with_block,
       ast::each_block,
+      ast::partial_block,
       ast::let_statement,
       ast::pragma_statement,
       ast::macro>;
@@ -902,6 +911,8 @@ class parser {
       templ = std::move(with_block).consume_and_advance(&scan);
     } else if (parse_result each_block = parse_each_block(scan)) {
       templ = std::move(each_block).consume_and_advance(&scan);
+    } else if (parse_result partial_block = parse_partial_block(scan)) {
+      templ = std::move(partial_block).consume_and_advance(&scan);
     } else if (parse_result let_statement = parse_let_statement(scan)) {
       templ = std::move(let_statement).consume_and_advance(&scan);
     } else if (parse_result pragma_statement = parse_pragma_statement(scan)) {
@@ -1270,6 +1281,11 @@ class parser {
       return no_parse_result();
     }
 
+    if (try_consume_token(&scan, tok::kw_partial)) {
+      // This is actually a partial-block
+      return no_parse_result();
+    }
+
     const token* id = try_consume_token(&scan, tok::identifier);
     if (id == nullptr) {
       report_fatal_expected(scan, "identifier in let-statement");
@@ -1548,6 +1564,87 @@ class parser {
         scan};
   }
 
+  // partial-block →
+  //   { partial-block-open ~ body* ~ partial-block-close }
+  // partial-block-open →
+  //   { "{{#" ~ "let" ~ "partial" ~ identifier ~ partial-block-args? ~ "}}" }
+  // partial-block-args →
+  //   { "|" ~ identifier+ ~ "|" }
+  // partial-block-close →
+  //   { "{{/" ~ "let" ~ "partial" ~ "}}" }
+  parse_result<ast::partial_block> parse_partial_block(
+      parser_scan_window scan) {
+    assert(scan.empty());
+    const auto scan_start = scan.start;
+
+    if (!try_consume_tokens(
+            &scan, {tok::open, tok::pound, tok::kw_let, tok::kw_partial})) {
+      return no_parse_result();
+    }
+
+    ast::identifier id = std::invoke([&] {
+      const token* component = try_consume_token(&scan, tok::identifier);
+      if (component == nullptr) {
+        report_fatal_expected(scan, "identifier in partial-block");
+      }
+      return make_identifier(*component);
+    });
+
+    const auto expect_on_open = [&](tok kind) {
+      if (!try_consume_token(&scan, kind)) {
+        report_fatal_expected(
+            scan, "{} to open partial-block '{}'", kind, id.name);
+      }
+    };
+    const auto expect_on_close = [&](tok kind) {
+      if (!try_consume_token(&scan, kind)) {
+        report_fatal_expected(
+            scan, "{} to close partial-block '{}'", kind, id.name);
+      }
+    };
+
+    std::set<ast::identifier, ast::identifier::compare_by_name> arguments;
+    if (try_consume_token(&scan, tok::pipe)) {
+      const token* first_argument = try_consume_token(&scan, tok::identifier);
+      if (first_argument == nullptr) {
+        report_fatal_expected(
+            scan, "at least one argument in partial-block '{}'", id.name);
+      }
+      arguments.insert(make_identifier(*first_argument));
+      while (const token* argument =
+                 try_consume_token(&scan, tok::identifier)) {
+        auto [_, inserted] = arguments.insert(make_identifier(*argument));
+        if (!inserted) {
+          report_fatal_error(
+              scan,
+              "duplicate argument '{}' in partial-block '{}'",
+              argument->string_value(),
+              id.name);
+        }
+      }
+      expect_on_open(tok::pipe);
+    }
+    expect_on_open(tok::close);
+    scan = scan.make_fresh();
+
+    ast::bodies bodies = parse_bodies(scan).consume_and_advance(&scan);
+
+    expect_on_close(tok::open);
+    expect_on_close(tok::slash);
+    expect_on_close(tok::kw_let);
+    expect_on_close(tok::kw_partial);
+    expect_on_close(tok::close);
+
+    return {
+        ast::partial_block{
+            scan.with_start(scan_start).range(),
+            std::move(id),
+            std::move(arguments),
+            std::move(bodies),
+        },
+        scan};
+  }
+
   // macro → { "{{" ~ ">" ~ macro-lookup ~ "}}" }
   parse_result<ast::macro> parse_macro(parser_scan_window scan) {
     assert(scan.empty());
@@ -1589,8 +1686,7 @@ class parser {
       return no_parse_result();
     }
     std::vector<ast::path_component> path;
-    path.emplace_back(ast::path_component{
-        first_component->range, std::string(first_component->string_value())});
+    path.emplace_back(make_path_component(*first_component));
 
     while (try_consume_token(&scan, tok::slash)) {
       const token* component_part =
@@ -1598,8 +1694,7 @@ class parser {
       if (component_part == nullptr) {
         report_fatal_expected(scan, "path-component in macro-lookup");
       }
-      path.emplace_back(ast::path_component{
-          component_part->range, std::string(component_part->string_value())});
+      path.emplace_back(make_path_component(*component_part));
     }
     return {
         ast::macro_lookup{scan.with_start(scan_start).range(), std::move(path)},

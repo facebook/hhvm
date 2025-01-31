@@ -162,6 +162,18 @@ struct ast_visitor {
         pragma_statement.to_string(),
         location(pragma_statement.loc));
   }
+  void visit(const ast::partial_block& partial_block, tree_printer::scope scope)
+      const {
+    scope.println(
+        " partial-block {} '{}'",
+        location(partial_block.loc),
+        partial_block.name.name);
+    for (const auto& argument : partial_block.arguments) {
+      scope.open_property().println(" argument '{}'", argument.name);
+    }
+    visit(partial_block.body_elements, scope.open_node());
+  }
+
   // Prevent implicit conversion to ast::body. Otherwise, we can silently
   // compile an infinitely recursive visit() chain if there is a missing
   // overload for one of the alternatives in the variant.

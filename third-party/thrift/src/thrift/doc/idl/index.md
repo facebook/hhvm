@@ -803,6 +803,7 @@ initializer ::=
 | bool_literal
 | maybe_qualified_id
 | list_initializer
+| struct_initializer
 | map_initializer
 
 integer ::=  ["+" | "-"] int_literal
@@ -837,13 +838,14 @@ const list<i16> LITTLE = [1, 2, 3];
 
 Initializers can have the following inferred types:
 
-| Initializer         | Inferred Type                          |
-| ------------------- | -------------------------------------- |
-| `integer`           | an integer type, a floating-point type |
-| `float`             | a floating-point type                  |
-| `string_literal`    | `string`, `binary`                     |
-| `bool_literal`      | `bool`                                 |
-| `map_initializer`   | a map, struct or union type            |
+| Initializer          | Inferred Type                          |
+| -------------------- | -------------------------------------- |
+| `integer`            | an integer type, a floating-point type |
+| `float`              | a floating-point type                  |
+| `string_literal`     | `string`, `binary`                     |
+| `bool_literal`       | `bool`                                 |
+| `struct_initializer` | a struct or union type                 |
+| `map_initializer`    | a map type                             |
 
 The value of the initializer must be representable by the inferred type. For example:
 
@@ -891,6 +893,39 @@ const map<string, list<i32>> AMap = {
 }
 ```
 
+#### Struct Initializers
+
+```grammar
+struct_initializer  ::= "{" [(field_entry ",")* field_entry [","]] "}"
+field_entry         ::= identifier "=" initializer
+```
+
+Struct initializers are used to instantiate struct literals, e.g. constants or structured annotations.
+
+```thrift
+struct Foo {
+  1: string name;
+  2: i32 value;
+}
+
+const Foo foo = Foo{name = "Carl", value = 3};
+
+@Foo{name = "Frank", value = 2}
+struct Bar {}
+```
+
+:::caution
+Previously map initializers representing structs were automatically upgraded to struct initializers, by interpreting each `key` as a relevant field name.
+This behavior has now been deprecated, yielding a `deprecated-map-to-struct-promotion` linter warning. In this scenario, please convert
+the map literal to a struct literal instead. e.g see example below.
+:::
+```thrift
+const Foo foo = { "name": "Carl", "value": 3 };
+```
+becomes
+```thrift
+const Foo foo = Foo{ name = "Carl", value = 3 };
+```
 
 ## Types
 

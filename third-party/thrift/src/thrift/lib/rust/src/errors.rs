@@ -20,7 +20,7 @@ use thiserror::Error;
 use crate::ttype::TType;
 use crate::ApplicationException;
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq)]
 #[allow(dead_code)]
 pub enum ProtocolError {
     #[error("end of file reached")]

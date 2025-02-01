@@ -52,15 +52,7 @@ std::unique_ptr<t_const_value> val(Enm val) {
 std::unique_ptr<t_const_value> val(std::string_view s) {
   return val(std::string{s});
 }
-std::string uri_or_name(const t_named& node) {
-  if (!node.uri().empty()) {
-    return node.uri();
-  }
-  if (node.program()) {
-    return node.program()->scope_name(node);
-  }
-  return node.name();
-}
+
 } // namespace
 
 t_type_ref schematizer::std_type(std::string_view uri) {
@@ -68,15 +60,24 @@ t_type_ref schematizer::std_type(std::string_view uri) {
       static_cast<const t_type*>(scope_.find_by_uri(uri)));
 }
 
+// Returns the `TypeUri` type & the corresponding Uri value for the given node
+schematizer::resolved_uri schematizer::calculate_uri(const t_named& node) {
+  if (opts_.use_hash) {
+    return {"definitionKey", identify_definition(node)};
+  }
+  if (!node.uri().empty()) {
+    return {"uri", node.uri()};
+  }
+  if (node.program()) {
+    return {"scopedName", node.program()->scope_name(node)};
+  }
+  return {"scopedName", node.name()};
+}
+
 std::unique_ptr<t_const_value> schematizer::type_uri(const t_type& type) {
   auto ret = t_const_value::make_map();
-  if (opts_.use_hash) {
-    ret->add_map(val("definitionKey"), val(identify_definition(type)));
-  } else if (!type.uri().empty()) {
-    ret->add_map(val("uri"), val(type.uri()));
-  } else {
-    ret->add_map(val("scopedName"), val(type.get_scoped_name()));
-  }
+  auto uri = calculate_uri(type);
+  ret->add_map(val(uri.uri_type), val(std::move(uri.value)));
   ret->set_ttype(std_type("facebook.com/thrift/type/TypeUri"));
   return ret;
 }
@@ -132,7 +133,10 @@ void schematizer::add_definition(
       }
 
       annot->set_ttype(std_type("facebook.com/thrift/type/Annotation"));
-      annots->add_map(val(uri_or_name(*item.type())), std::move(annot));
+      auto uri = calculate_uri(*item.type());
+      // We're ignoring the UriType here, as annotations are stored as
+      // map<string, Annotation>.
+      annots->add_map(val(std::move(uri.value)), std::move(annot));
     }
 
     // Double write to deprecated externed path (T161963504).

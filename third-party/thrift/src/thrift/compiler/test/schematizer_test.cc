@@ -25,19 +25,9 @@
 
 #include <folly/portability/GTest.h>
 
-using apache::thrift::compiler::t_const_value;
-using apache::thrift::compiler::t_enum;
-using apache::thrift::compiler::t_enum_value;
-using apache::thrift::compiler::t_field;
-using apache::thrift::compiler::t_list;
-using apache::thrift::compiler::t_map;
-using apache::thrift::compiler::t_primitive_type;
-using apache::thrift::compiler::t_program;
-using apache::thrift::compiler::t_set;
-using apache::thrift::compiler::t_struct;
-using apache::thrift::compiler::t_type_ref;
-using apache::thrift::compiler::t_typedef;
+using namespace apache::thrift::compiler;
 using apache::thrift::compiler::detail::protocol_value_builder;
+using apache::thrift::compiler::detail::schematizer;
 
 template <typename... Args>
 std::unique_ptr<t_const_value> val(Args&&... args) {
@@ -133,12 +123,17 @@ std::unique_ptr<t_struct> make_foo_bar(const t_program* program) {
   return struct_ty;
 }
 
-TEST(SchematizerTest, wrap_with_protocol_with_struct_ty) {
+std::unique_ptr<t_const_value> make_foo_bar_value() {
   auto strct = t_const_value::make_map();
   strct->add_map(val("foo"), val(1));
   strct->add_map(val("bar"), val(2));
   strct->add_map(val("baz"), val(3.14));
   strct->add_map(val("qux"), val(4.2));
+  return strct;
+}
+
+TEST(SchematizerTest, wrap_with_protocol_with_struct_ty) {
+  auto strct = make_foo_bar_value();
 
   // With the type mapping, integers will be represented by their types in
   // FooBar.
@@ -351,4 +346,157 @@ TEST(SchematizerTest, wrap_with_protocol_map) {
       *inner_map_key2, t_const_value::CV_INTEGER, "i16Value", 777);
   expectWrappedValue(
       *inner_map_val2, t_const_value::CV_INTEGER, "i32Value", 888);
+}
+
+constexpr auto UTILITY_CLASSES = {
+    std::pair(
+        "StructuredAnnotation",
+        "facebook.com/thrift/type/StructuredAnnotation"),
+    std::pair("Annotation", "facebook.com/thrift/type/Annotation"),
+    std::pair("ProtocolValue", "facebook.com/thrift/protocol/Value"),
+    std::pair{"TypeUri", "facebook.com/thrift/type/TypeUri"},
+};
+
+template <typename F>
+void with_schematizer(schematizer::options opts, F&& f) {
+  source_manager sm;
+  sm.add_virtual_file("my_prog", "abcd");
+
+  t_scope scope{};
+  auto program = std::make_unique<t_program>("my_prog", "my_prog");
+
+  // Add some well-known types to the scope.
+  auto protocol_value_ty = std::make_unique<t_struct>(
+      program.get(), "ProtocolValue"); // Can be empty
+  protocol_value_ty->set_uri("facebook.com/thrift/protocol/Value");
+  std::vector<std::unique_ptr<t_struct>> utility_types;
+  for (const auto& [name, uri] : UTILITY_CLASSES) {
+    utility_types.push_back(std::make_unique<t_struct>(program.get(), name));
+    utility_types.back()->set_uri(uri);
+    scope.add_def(*utility_types.back().get());
+  }
+
+  schematizer schematizer{scope, sm, std::move(opts)};
+  f(*program.get(), schematizer);
+}
+
+template <typename F, typename G>
+void with_structured_annotation_uris(
+    const t_const_value& struct_schema,
+    const std::string_view struct_name,
+    F&& on_annotation,
+    G&& on_structured_annotation) {
+  const auto [attrs_key, attrs] = struct_schema.get_map().at(0);
+  EXPECT_EQ(attrs_key->get_string(), "attrs");
+  const auto& definition_attrs = attrs->get_map();
+
+  const auto [name_key, name] = definition_attrs.at(0);
+  EXPECT_EQ(name_key->get_string(), "name");
+  EXPECT_EQ(name->get_string(), struct_name);
+
+  const auto [structured_annotations_key, structured_annotation_ids_set] =
+      definition_attrs.at(1);
+  EXPECT_EQ(structured_annotations_key->get_string(), "structuredAnnotations");
+  const auto& structured_annotations =
+      structured_annotation_ids_set->get_list();
+
+  for (size_t i = 0; i < structured_annotations.size(); ++i) {
+    const auto annotation_id = structured_annotations.at(i)->get_integer();
+    on_structured_annotation(i, annotation_id);
+  }
+
+  const auto [annotations_key, annotations_map] = definition_attrs.at(2);
+  EXPECT_EQ(annotations_key->get_string(), "annotations");
+  const auto& annotations = annotations_map->get_map();
+
+  for (size_t i = 0; i < annotations.size(); ++i) {
+    const auto [annotation_name, _] = annotations.at(i);
+    on_annotation(i, annotation_name->get_string());
+  }
+}
+
+template <typename F>
+void with_foo_bar_plus_structured_annotations(t_program& program, F f) {
+  auto foo_bar_with_annotations_ty =
+      std::make_unique<t_struct>(&program, "FooBarWithStructuredAnnotations");
+  auto foo_bar_ty = make_foo_bar(&program);
+  foo_bar_with_annotations_ty->add_structured_annotation(
+      std::make_unique<t_const>(
+          &program,
+          t_type_ref{*foo_bar_ty},
+          "FooBarWithStructuredAnnotations",
+          make_foo_bar_value()));
+
+  f(*foo_bar_with_annotations_ty, *foo_bar_ty);
+}
+
+TEST(SchematizerTest, use_hash_for_structured_annotations) {
+  for (const bool use_hash : {true, false}) {
+    schematizer::options opts;
+    opts.use_hash = use_hash;
+    size_t id = 0;
+    std::vector<std::unique_ptr<t_const_value>> interned_values;
+    opts.intern_value = [&](std::unique_ptr<t_const_value> val, t_program*) {
+      interned_values.push_back(std::move(val));
+      return static_cast<schematizer::value_id>(id++);
+    };
+
+    with_schematizer(opts, [&](t_program& program, schematizer& schematizer) {
+      with_foo_bar_plus_structured_annotations(
+          program,
+          [&](const auto& foo_bar_with_annotations_ty, const auto& foo_bar_ty) {
+            // Generate a schema.thrift representation of
+            // `FooBarWithStructuredAnnotations`
+            const std::unique_ptr<t_const_value> struct_schema =
+                schematizer.gen_schema(foo_bar_with_annotations_ty);
+
+            // Verify that the URIs of the structured annotations are
+            // hashed
+            with_structured_annotation_uris(
+                *struct_schema,
+                "FooBarWithStructuredAnnotations",
+                [&](size_t annotation_idx, const std::string& annotation_name) {
+                  ASSERT_EQ(annotation_idx, 0); // There's only one annotation
+
+                  if (use_hash) {
+                    EXPECT_TRUE(
+                        annotation_name.find("FooBar") == std::string::npos);
+                    EXPECT_EQ(
+                        annotation_name,
+                        schematizer.identify_definition(foo_bar_ty));
+                  } else {
+                    EXPECT_EQ(
+                        annotation_name,
+                        "my_prog.FooBar"); // This should not be hashed
+                  }
+                },
+                [&](size_t annotation_idx, size_t id) {
+                  ASSERT_EQ(
+                      annotation_idx,
+                      0); // There's only one structured annotation
+
+                  const auto& interned_annotation =
+                      interned_values.at(id)->get_map();
+                  const auto [type_key, type_uri] = interned_annotation.at(1);
+                  ASSERT_EQ(type_key->get_string(), "type");
+
+                  // TypeUri should be a union, so check for the appropriate
+                  // field
+                  const auto [type_uri_key, type_uri_value] =
+                      type_uri->get_map().at(0);
+                  if (use_hash) {
+                    EXPECT_EQ(type_uri_key->get_string(), "definitionKey");
+                    EXPECT_EQ(
+                        type_uri_value->get_string(),
+                        schematizer.identify_definition(foo_bar_ty));
+                  } else {
+                    EXPECT_EQ(type_uri_key->get_string(), "scopedName");
+                    EXPECT_EQ(
+                        type_uri_value->get_string(),
+                        "my_prog.FooBar"); // This should not be hashed
+                  }
+                });
+          });
+    });
+  }
 }

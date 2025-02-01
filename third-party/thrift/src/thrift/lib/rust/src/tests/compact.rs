@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
+use std::collections::HashMap;
+use std::collections::HashSet;
 use std::io::Cursor;
 
 use bytes::Buf;
+use bytes::BufMut;
 use bytes::Bytes;
+use bytes::BytesMut;
 
 use super::BOOL_VALUES;
 use super::BYTE_VALUES;
@@ -26,6 +30,10 @@ use super::FLOAT_VALUES;
 use super::INT16_VALUES;
 use super::INT32_VALUES;
 use super::INT64_VALUES;
+use crate::bufext::BufMutExt as _;
+use crate::compact_protocol::CType;
+use crate::deserialize::Deserialize;
+use crate::errors::ProtocolError;
 use crate::thrift_protocol::MessageType;
 use crate::ttype::TType;
 use crate::CompactProtocol;
@@ -598,4 +606,37 @@ fn skip_stop_in_container() {
             _ => panic!("unexpected error {:?}", err),
         },
     }
+}
+
+#[test]
+fn test_overallocation() {
+    let mut malicious = BytesMut::new();
+    malicious.put_u8(0xf0 | CType::I16 as u8);
+    malicious.put_varint_i64(1_000_000_000_000_000);
+    malicious.put_bytes(0, 10);
+    let malicious = malicious.freeze();
+    let mut deserializer = <CompactProtocol>::deserializer(Cursor::new(malicious.clone()));
+    let err = <Vec<i16> as Deserialize<_>>::read(&mut deserializer).unwrap_err();
+    assert_eq!(
+        err.downcast_ref::<ProtocolError>(),
+        Some(&ProtocolError::EOF),
+    );
+
+    let mut deserializer = <CompactProtocol>::deserializer(Cursor::new(malicious));
+    let err = <HashSet<i16> as Deserialize<_>>::read(&mut deserializer).unwrap_err();
+    assert_eq!(
+        err.downcast_ref::<ProtocolError>(),
+        Some(&ProtocolError::EOF),
+    );
+
+    let mut malicious = BytesMut::new();
+    malicious.put_varint_i64(1_000_000_000_000_000);
+    malicious.put_u8(((CType::Binary as u8) << 4) | (CType::I16 as u8));
+    malicious.put_bytes(0, 10);
+    let mut deserializer = <CompactProtocol>::deserializer(Cursor::new(malicious.freeze()));
+    let err = <HashMap<String, i16> as Deserialize<_>>::read(&mut deserializer).unwrap_err();
+    assert_eq!(
+        err.downcast_ref::<ProtocolError>(),
+        Some(&ProtocolError::EOF),
+    );
 }

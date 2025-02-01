@@ -37,6 +37,7 @@ use crate::protocol::ProtocolWriter;
 use crate::serialize::Serialize;
 use crate::thrift_protocol::MessageType;
 use crate::thrift_protocol::ProtocolID;
+use crate::ttype::GetTType;
 use crate::ttype::TType;
 use crate::varint;
 
@@ -839,6 +840,31 @@ impl<B: BufExt> ProtocolReader for CompactProtocolDeserializer<B> {
         ensure_err!(self.buffer.remaining() >= received_len, ProtocolError::EOF);
 
         Ok(V::copy_from_buf(&mut self.buffer, received_len))
+    }
+
+    fn min_size<T: GetTType>() -> usize {
+        match T::TTYPE {
+            TType::Void => 0,
+            TType::Bool => 1,
+            TType::Byte => 1,
+            TType::Double => 8,
+            TType::I16 => 1,
+            TType::I32 => 1,
+            TType::I64 => 1,
+            TType::String => 1,
+            TType::Struct => 1,
+            TType::Map => 1,
+            TType::Set => 1,
+            TType::List => 1,
+            TType::UTF8 => 1,
+            TType::UTF16 => 1,
+            TType::Float => 4,
+            TType::Stop | TType::Stream => unreachable!(),
+        }
+    }
+
+    fn can_advance(&self, bytes: usize) -> bool {
+        self.buffer.can_advance(bytes)
     }
 }
 

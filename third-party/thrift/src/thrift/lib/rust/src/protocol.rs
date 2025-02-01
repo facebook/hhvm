@@ -24,6 +24,7 @@ use crate::framing::FramingEncoded;
 use crate::framing::FramingEncodedFinal;
 use crate::thrift_protocol::MessageType;
 use crate::thrift_protocol::ProtocolID;
+use crate::ttype::GetTType;
 use crate::ttype::TType;
 use crate::Result;
 
@@ -262,6 +263,23 @@ pub trait ProtocolReader {
     fn read_float(&mut self) -> Result<f32>;
     fn read_string(&mut self) -> Result<String>;
     fn read_binary<V: CopyFromBuf>(&mut self) -> Result<V>;
+
+    /// The smallest number of bytes in which a collection element of type `T`
+    /// could be represented.
+    //
+    // TODO: once feature(adt_const_params) is stable, make this generic
+    // over `const TTYPE: TType` instead of T to reduce monomorphization.
+    // https://github.com/rust-lang/rust/issues/95174
+    fn min_size<T: GetTType>() -> usize {
+        0
+    }
+
+    /// Whether there is enough input data available to bother trying to read
+    /// collection elements that would occupy a minimum of `n` bytes.
+    fn can_advance(&self, bytes: usize) -> bool {
+        let _ = bytes;
+        true
+    }
 
     /// Skip over the next data element from the provided input Protocol object
     fn skip(&mut self, field_type: TType) -> Result<()> {

@@ -21,11 +21,14 @@ use std::collections::HashSet;
 use std::hash::Hash;
 use std::sync::Arc;
 
+use anyhow::bail;
 use bytes::Bytes;
 use ordered_float::OrderedFloat;
 
+use crate::errors::ProtocolError;
 use crate::protocol::should_break;
 use crate::protocol::ProtocolReader;
+use crate::ttype::GetTType;
 use crate::Result;
 
 // Read trait. Every type that needs to be deserialized will implement this trait.
@@ -223,13 +226,21 @@ where
 impl<P, T, S> Deserialize<P> for HashSet<T, S>
 where
     P: ProtocolReader,
-    T: Deserialize<P> + Hash + Eq,
+    T: Deserialize<P> + GetTType + Hash + Eq,
     S: std::hash::BuildHasher + Default,
 {
     fn read(p: &mut P) -> Result<Self> {
         let (_elem_ty, len) = p.read_set_begin()?;
-        let mut hset =
-            HashSet::with_capacity_and_hasher(len.unwrap_or_default(), Default::default());
+        let mut hset = {
+            let cap = len.unwrap_or(0);
+            if match cap.checked_mul(P::min_size::<T>()) {
+                None => true,
+                Some(total) => !p.can_advance(total),
+            } {
+                bail!(ProtocolError::EOF);
+            }
+            HashSet::with_capacity_and_hasher(cap, S::default())
+        };
 
         if let Some(0) = len {
             return Ok(hset);
@@ -294,14 +305,22 @@ where
 impl<P, K, V, S> Deserialize<P> for HashMap<K, V, S>
 where
     P: ProtocolReader,
-    K: Deserialize<P> + Hash + Eq,
-    V: Deserialize<P>,
+    K: Deserialize<P> + GetTType + Hash + Eq,
+    V: Deserialize<P> + GetTType,
     S: std::hash::BuildHasher + Default,
 {
     fn read(p: &mut P) -> Result<Self> {
         let (_key_ty, _val_ty, len) = p.read_map_begin()?;
-        let mut hmap =
-            HashMap::with_capacity_and_hasher(len.unwrap_or_default(), Default::default());
+        let mut hmap = {
+            let cap = len.unwrap_or(0);
+            if match cap.checked_mul(P::min_size::<K>() + P::min_size::<V>()) {
+                None => true,
+                Some(total) => !p.can_advance(total),
+            } {
+                bail!(ProtocolError::EOF);
+            }
+            HashMap::with_capacity_and_hasher(cap, S::default())
+        };
 
         if let Some(0) = len {
             return Ok(hmap);
@@ -332,12 +351,21 @@ where
 impl<P, T> Deserialize<P> for Vec<T>
 where
     P: ProtocolReader,
-    T: Deserialize<P> + crate::ttype::GetTType, // GetTType just to exclude Vec<u8>
+    T: Deserialize<P> + GetTType,
 {
     /// Vec<T> is Thrift List type
     fn read(p: &mut P) -> Result<Self> {
         let (_elem_ty, len) = p.read_list_begin()?;
-        let mut list = Vec::with_capacity(len.unwrap_or_default());
+        let mut list = {
+            let cap = len.unwrap_or(0);
+            if match cap.checked_mul(P::min_size::<T>()) {
+                None => true,
+                Some(total) => !p.can_advance(total),
+            } {
+                bail!(ProtocolError::EOF);
+            }
+            Vec::with_capacity(cap)
+        };
 
         if let Some(0) = len {
             return Ok(list);

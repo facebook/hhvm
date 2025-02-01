@@ -37,6 +37,7 @@ use crate::protocol::ProtocolWriter;
 use crate::serialize::Serialize;
 use crate::thrift_protocol::MessageType;
 use crate::thrift_protocol::ProtocolID;
+use crate::ttype::GetTType;
 use crate::ttype::TType;
 
 pub const BINARY_VERSION_MASK: u32 = 0xffff_0000;
@@ -459,6 +460,31 @@ impl<B: BufExt> ProtocolReader for BinaryProtocolDeserializer<B> {
 
         ensure_err!(self.buffer.remaining() >= received_len, ProtocolError::EOF);
         Ok(V::copy_from_buf(&mut self.buffer, received_len))
+    }
+
+    fn min_size<T: GetTType>() -> usize {
+        match T::TTYPE {
+            TType::Void => 0,
+            TType::Bool => 1,
+            TType::Byte => 1,
+            TType::Double => 8,
+            TType::I16 => 2,
+            TType::I32 => 4,
+            TType::I64 => 8,
+            TType::String => 4,
+            TType::Struct => 1,
+            TType::Map => 6,
+            TType::Set => 5,
+            TType::List => 5,
+            TType::UTF8 => 4,
+            TType::UTF16 => 4,
+            TType::Float => 4,
+            TType::Stop | TType::Stream => unreachable!(),
+        }
+    }
+
+    fn can_advance(&self, bytes: usize) -> bool {
+        self.buffer.can_advance(bytes)
     }
 }
 

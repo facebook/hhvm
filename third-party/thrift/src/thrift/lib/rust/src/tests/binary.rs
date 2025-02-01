@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
+use std::collections::HashMap;
+use std::collections::HashSet;
 use std::io::Cursor;
 
 use bytes::Buf;
+use bytes::BufMut;
 use bytes::Bytes;
+use bytes::BytesMut;
 
 use super::BOOL_VALUES;
 use super::BYTE_VALUES;
@@ -26,6 +30,8 @@ use super::FLOAT_VALUES;
 use super::INT16_VALUES;
 use super::INT32_VALUES;
 use super::INT64_VALUES;
+use crate::deserialize::Deserialize;
+use crate::errors::ProtocolError;
 use crate::thrift_protocol::MessageType;
 use crate::ttype::TType;
 use crate::BinaryProtocol;
@@ -507,4 +513,38 @@ fn read_binary_from_chained_buffer() {
         .read_binary()
         .expect("read \" world\" from the buffer");
     assert_eq!(result.as_slice(), b" world");
+}
+
+#[test]
+fn test_overallocation() {
+    let mut malicious = BytesMut::new();
+    malicious.put_u8(TType::I16 as u8);
+    malicious.put_i32(1_000_000_000);
+    malicious.put_bytes(0, 10);
+    let malicious = malicious.freeze();
+    let mut deserializer = <BinaryProtocol>::deserializer(Cursor::new(malicious.clone()));
+    let err = <Vec<i16> as Deserialize<_>>::read(&mut deserializer).unwrap_err();
+    assert_eq!(
+        err.downcast_ref::<ProtocolError>(),
+        Some(&ProtocolError::EOF),
+    );
+
+    let mut deserializer = <BinaryProtocol>::deserializer(Cursor::new(malicious));
+    let err = <HashSet<i16> as Deserialize<_>>::read(&mut deserializer).unwrap_err();
+    assert_eq!(
+        err.downcast_ref::<ProtocolError>(),
+        Some(&ProtocolError::EOF),
+    );
+
+    let mut malicious = BytesMut::new();
+    malicious.put_u8(TType::String as u8);
+    malicious.put_u8(TType::I16 as u8);
+    malicious.put_i32(1_000_000_000);
+    malicious.put_bytes(0, 10);
+    let mut deserializer = <BinaryProtocol>::deserializer(Cursor::new(malicious.freeze()));
+    let err = <HashMap<String, i16> as Deserialize<_>>::read(&mut deserializer).unwrap_err();
+    assert_eq!(
+        err.downcast_ref::<ProtocolError>(),
+        Some(&ProtocolError::EOF),
+    );
 }

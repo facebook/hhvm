@@ -32,6 +32,25 @@ pub trait BufExt: Buf {
         // Default is to just copy.
         self.copy_to_bytes(len)
     }
+
+    /// Whether there are enough remaining bytes to advance this buffer's
+    /// internal cursor by `n`.
+    ///
+    /// Disjoint buffers for which `remaining()` is not O(1) should override
+    /// this method with a more efficient implementation.
+    fn can_advance(&self, n: usize) -> bool {
+        n <= self.remaining()
+    }
+
+    /// Number of more bytes needed in order to be able to advance by `n`.
+    ///
+    /// If `n <= remaining()`, this is 0. Otherwise `n - remaining()`.
+    ///
+    /// Disjoint buffers for which `remaining()` is not O(1) should override
+    /// this method with a more efficient implementation.
+    fn shortfall(&self, n: usize) -> usize {
+        n.saturating_sub(self.remaining())
+    }
 }
 
 impl BufExt for Bytes {}
@@ -50,7 +69,17 @@ impl BufExt for Cursor<Bytes> {
 
 impl<T: AsRef<[u8]> + ?Sized> BufExt for Cursor<&T> {}
 
-impl<T: BufExt, U: BufExt> BufExt for Chain<T, U> {}
+impl<T: BufExt, U: BufExt> BufExt for Chain<T, U> {
+    fn can_advance(&self, n: usize) -> bool {
+        let rest = self.first_ref().shortfall(n);
+        self.last_ref().can_advance(rest)
+    }
+
+    fn shortfall(&self, n: usize) -> usize {
+        let rest = self.first_ref().shortfall(n);
+        self.last_ref().shortfall(rest)
+    }
+}
 
 pub trait BufMutExt: BufMut {
     type Final: Send + 'static;

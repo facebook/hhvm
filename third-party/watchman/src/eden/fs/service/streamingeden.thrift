@@ -7,6 +7,7 @@
 
 include "eden/fs/service/eden.thrift"
 namespace cpp2 facebook.eden
+namespace java.swift com.facebook.eden.thrift.streaming
 namespace py3 eden.fs.service
 
 enum FsEventType {

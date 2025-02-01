@@ -13,6 +13,7 @@ include "thrift/annotation/thrift.thrift"
 
 namespace cpp2 facebook.eden
 namespace java com.facebook.eden.thrift
+namespace java.swift com.facebook.eden.thrift
 namespace py facebook.eden
 namespace py3 eden.fs.service
 namespace hack edenfs.service

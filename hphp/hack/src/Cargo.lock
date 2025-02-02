@@ -2599,6 +2599,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "hhvm_ffi"
+version = "0.0.0"
+dependencies = [
+ "compiler_ffi",
+ "hdf",
+ "hhvm_hhbc_defs_ffi",
+ "hhvm_types_ffi",
+ "package_ffi",
+ "parser_ffi",
+]
+
+[[package]]
 name = "hhvm_hhbc_defs_ffi"
 version = "0.0.0"
 dependencies = [

@@ -199,11 +199,9 @@ struct c_Awaitable : ObjectData, SystemLib::ClassLoader<"HH\\Awaitable"> {
       // type index of concrete waithandle for gc-scanning
       type_scan::Index m_tyindex;
 
-      union {
-        // ExternalThreadEventWaitHandle: STATE_WAITING
-        // SleepWaitHandle: STATE_WAITING
-        uint32_t m_ctxVecIndex;
-      };
+      // ExternalThreadEventWaitHandle: STATE_WAITING
+      // SleepWaitHandle: STATE_WAITING
+      uint32_t m_ctxVecIndex;
     };
   };
 

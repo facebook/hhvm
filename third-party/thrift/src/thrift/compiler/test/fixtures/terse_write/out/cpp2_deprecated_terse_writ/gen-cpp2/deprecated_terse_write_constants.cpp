@@ -14,10 +14,10 @@ namespace facebook::thrift::test::terse_write::deprecated {
 namespace deprecated_terse_write_constants {
 
 
-::std::string_view _fbthrift_schema_fdf9c457eda6d727() {
+::std::string_view _fbthrift_schema_2bc1aa064d438e85() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_fdf9c457eda6d727_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_2bc1aa064d438e85_includes() {
   return {};
 }
 

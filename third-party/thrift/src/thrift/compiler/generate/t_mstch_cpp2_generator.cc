@@ -2893,6 +2893,52 @@ class validate_splits {
   }
 };
 
+void forbid_deprecated_terse_writes_ref(
+    sema_context& ctx,
+    const t_struct& strct,
+    const std::map<std::string, std::string>& options) {
+  for (auto& field : strct.fields()) {
+    const bool isUniqueRef =
+        gen::cpp::find_ref_type(field) == gen::cpp::reference_type::unique;
+    const bool isDeprecatedTerseWrites =
+        field.qualifier() == t_field_qualifier::none &&
+        (options.count("deprecated_terse_writes") ||
+         field.find_structured_annotation_or_null(kCppDeprecatedTerseWriteUri));
+
+    if (field.find_structured_annotation_or_null(
+            kCppAllowLegacyDeprecatedTerseWritesRefUri)) {
+      if (!isUniqueRef) {
+        ctx.report(
+            field,
+            diagnostic_level::error,
+            "@cpp.AllowLegacyDeprecatedTerseWritesRef can not be applied to `{}`"
+            " since it's not cpp.Ref{{Unique}} field.",
+            field.name());
+      }
+      if (!isDeprecatedTerseWrites) {
+        ctx.report(
+            field,
+            diagnostic_level::error,
+            "@cpp.AllowLegacyDeprecatedTerseWritesRef can not be applied to `{}`"
+            " since it's not cpp.DeprecatedTerseWrite field.",
+            field.name());
+      }
+      continue;
+    }
+
+    if (!isUniqueRef || !isDeprecatedTerseWrites) {
+      continue;
+    }
+
+    ctx.report(
+        field,
+        diagnostic_level::error,
+        "@cpp.Ref{{Unique}} can not be applied to `{}`"
+        " since it's cpp.DeprecatedTerseWrite field.",
+        field.name());
+  }
+}
+
 void validate_lazy_fields(sema_context& ctx, const t_field& field) {
   if (cpp2::is_lazy(&field)) {
     auto t = field.get_type()->get_true_type();
@@ -2934,6 +2980,11 @@ void t_mstch_cpp2_generator::fill_validator_visitors(
     ast_validator& validator) const {
   validator.add_structured_definition_visitor(std::bind(
       validate_struct_annotations,
+      std::placeholders::_1,
+      std::placeholders::_2,
+      options()));
+  validator.add_struct_visitor(std::bind(
+      forbid_deprecated_terse_writes_ref,
       std::placeholders::_1,
       std::placeholders::_2,
       options()));

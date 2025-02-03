@@ -115,10 +115,12 @@ struct FieldLevelTerseStruct {
 struct CppRefStructFields {
   @cpp.AllowLegacyNonOptionalRef
   @cpp.DeprecatedTerseWrite
+  @cpp.AllowLegacyDeprecatedTerseWritesRef
   @cpp.Ref{type = cpp.RefType.Unique}
   1: i32 primitive_ref_field;
   @cpp.AllowLegacyNonOptionalRef
   @cpp.DeprecatedTerseWrite
+  @cpp.AllowLegacyDeprecatedTerseWritesRef
   @cpp.Ref{type = cpp.RefType.Unique}
   2: MyStruct struct_ref_field;
 }

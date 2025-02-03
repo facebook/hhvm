@@ -2329,9 +2329,45 @@ TEST(CompilerTest, cpp_deprecated_terse_write) {
 
       @cpp.AllowLegacyNonOptionalRef
       @cpp.DeprecatedTerseWrite
+      @cpp.AllowLegacyDeprecatedTerseWritesRef
       @cpp.Ref{type = cpp.RefType.Unique}
       6: Bar field6;
-        # expected-warning@-4: Field with @cpp.Ref (or similar) annotation should be optional: `field6` (in `Foo`).
+        # expected-warning@-5: Field with @cpp.Ref (or similar) annotation should be optional: `field6` (in `Foo`).
+    }
+  )");
+}
+
+TEST(CompilerTest, cpp_deprecated_terse_write_ref) {
+  check_compile(R"(
+    include "thrift/annotation/cpp.thrift"
+    include "thrift/annotation/thrift.thrift"
+
+    struct Foo {
+      @cpp.AllowLegacyNonOptionalRef
+      @cpp.DeprecatedTerseWrite
+      @cpp.Ref{type = cpp.RefType.Unique}
+      1: string field1;
+        # expected-warning@-4: Field with @cpp.Ref (or similar) annotation should be optional: `field1` (in `Foo`).
+        # expected-error@-5: @cpp.Ref{Unique} can not be applied to `field1` since it's cpp.DeprecatedTerseWrite field.
+
+      @cpp.AllowLegacyNonOptionalRef
+      @cpp.DeprecatedTerseWrite
+      @cpp.AllowLegacyDeprecatedTerseWritesRef
+      @cpp.Ref{type = cpp.RefType.Unique}
+      2: string field2;
+        # expected-warning@-5: Field with @cpp.Ref (or similar) annotation should be optional: `field2` (in `Foo`).
+
+      @cpp.DeprecatedTerseWrite
+      @cpp.AllowLegacyDeprecatedTerseWritesRef
+      3: string field3;
+        # expected-error@-3: @cpp.AllowLegacyDeprecatedTerseWritesRef can not be applied to `field3` since it's not cpp.Ref{Unique} field.
+
+      @cpp.AllowLegacyNonOptionalRef
+      @cpp.AllowLegacyDeprecatedTerseWritesRef
+      @cpp.Ref{type = cpp.RefType.Unique}
+      4: string field4;
+        # expected-warning@-4: Field with @cpp.Ref (or similar) annotation should be optional: `field4` (in `Foo`).
+        # expected-error@-5: @cpp.AllowLegacyDeprecatedTerseWritesRef can not be applied to `field4` since it's not cpp.DeprecatedTerseWrite field.
     }
   )");
 }

@@ -109,6 +109,8 @@ inline constexpr auto kCppGenerateDeprecatedHeaderClientMethodsUri =
     "facebook.com/thrift/annotation/cpp/GenerateDeprecatedHeaderClientMethods";
 inline constexpr auto kCppAllowLegacyNonOptionalRefUri =
     "facebook.com/thrift/annotation/cpp/AllowLegacyNonOptionalRef";
+inline constexpr auto kCppAllowLegacyDeprecatedTerseWritesRefUri =
+    "facebook.com/thrift/annotation/cpp/AllowLegacyDeprecatedTerseWritesRef";
 inline constexpr auto kCppDeprecatedTerseWriteUri =
     "facebook.com/thrift/annotation/cpp/DeprecatedTerseWrite";
 

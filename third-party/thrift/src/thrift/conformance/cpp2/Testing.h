@@ -246,7 +246,7 @@ struct Derived : Base {
 // Statically asserts that T has the required properties.
 template <typename T, CtorType DefaultType>
 constexpr void staticAssertDefaultConstructible() {
-  sizeof(T); // Fails if the type is not defined.
+  static_assert(sizeof(T), "Type is incomplete");
   static_assert(
       std::is_default_constructible_v<T> ==
           test::is_throw_compat_v<DefaultType>,
@@ -264,7 +264,7 @@ constexpr void staticAssertDefaultConstructible() {
 // Statically asserts that T has the required properties.
 template <typename T, CtorType CopyType>
 constexpr void staticAssertCopyConstructible() {
-  sizeof(T); // Fails if the type is not defined.
+  static_assert(sizeof(T), "Type is incomplete");
   static_assert(
       std::is_copy_constructible_v<T> == test::is_throw_compat_v<CopyType>, "");
   static_assert( // is_nothrow_copy_constructible_v
@@ -280,7 +280,7 @@ constexpr void staticAssertCopyConstructible() {
 // Statically asserts that T has the required properties.
 template <typename T, CtorType CopyType>
 constexpr void staticAssertCopyAssignable() {
-  sizeof(T); // Fails if the type is not defined.
+  static_assert(sizeof(T), "Type is incomplete");
   static_assert(
       std::is_copy_assignable_v<T> == test::is_throw_compat_v<CopyType>, "");
   static_assert( // is_nothrow_copy_assignable_v
@@ -296,7 +296,7 @@ constexpr void staticAssertCopyAssignable() {
 // Statically asserts that T has the required properties.
 template <typename T, CtorType MoveType>
 constexpr void staticAssertMoveConstructible() {
-  sizeof(T); // Fails if the type is not defined.
+  static_assert(sizeof(T), "Type is incomplete");
   static_assert(
       std::is_move_constructible_v<T> == test::is_throw_compat_v<MoveType>, "");
   static_assert( // is_nothrow_move_constructible_v
@@ -312,7 +312,7 @@ constexpr void staticAssertMoveConstructible() {
 // Statically asserts that T has the required properties.
 template <typename T, CtorType MoveType>
 constexpr void staticAssertMoveAssignable() {
-  sizeof(T); // Fails if the type is not defined.
+  static_assert(sizeof(T), "Type is incomplete");
   static_assert(
       std::is_move_assignable_v<T> == test::is_throw_compat_v<MoveType>, "");
   static_assert( // is_nothrow_move_assignable_v
@@ -328,7 +328,7 @@ constexpr void staticAssertMoveAssignable() {
 // Statically asserts that T has the required properties.
 template <typename T, CtorType DtorType>
 constexpr void staticAssertDestructible() {
-  sizeof(T); // Fails if the type is not defined.
+  static_assert(sizeof(T), "Type is incomplete");
   static_assert(DtorType != CtorType::Delete, "can't delete destructor.");
   static_assert( // is_nothrow_destructible_v
       std::is_nothrow_destructible_v<T> == test::is_nothrow_compat_v<DtorType>,

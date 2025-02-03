@@ -158,7 +158,7 @@ TEST(AnyRefTest, Const) {
   EXPECT_THROW(any_cast<double>(ref), std::bad_any_cast);
 
   EXPECT_EQ(&any_cast<const int&>(ref), &i);
-  EXPECT_THROW(&any_cast_exact<const int&>(ref), std::bad_any_cast);
+  EXPECT_THROW((void)&any_cast_exact<const int&>(ref), std::bad_any_cast);
 
   EXPECT_EQ(any_cast<const int&&>(ref), i);
   EXPECT_EQ(any_cast_exact<const int&&>(ref), i);

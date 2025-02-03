@@ -104,12 +104,7 @@ func (c *{{service:go_name}}ChannelClient) {{> svc/func_signature}} {
     {{/function:oneway?}}
 }
 
-func (c *{{service:go_name}}Client) {{> svc/func_signature_no_ctx}} {
-    return c.chClient.{{function:go_name}}(context.Background(){{function:comma}}{{!
-      }}{{#function:args}}{{field:go_arg_name}}{{^last?}}, {{/last?}}{{/function:args}})
-}
-
-func (c *{{service:go_name}}Client) {{> svc/func_signature_with_ctx}} {
+func (c *{{service:go_name}}Client) {{> svc/func_signature}} {
     return c.chClient.{{function:go_name}}({{function:ctx_arg_name}}{{function:comma}}{{!
       }}{{#function:args}}{{field:go_arg_name}}{{^last?}}, {{/last?}}{{/function:args}})
 }

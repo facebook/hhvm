@@ -36,10 +36,7 @@ type RaiserChannelClientInterface interface {
 
 type RaiserClientInterface interface {
     thrift.ClientInterface
-    DoBland() (error)
-    DoRaise() (error)
-    Get200() (string, error)
-    Get500() (string, error)
+    Raiser
 }
 
 type RaiserChannelClient struct {
@@ -87,11 +84,7 @@ func (c *RaiserChannelClient) DoBland(ctx context.Context) (error) {
     return nil
 }
 
-func (c *RaiserClient) DoBland() (error) {
-    return c.chClient.DoBland(context.Background())
-}
-
-func (c *RaiserClient) DoBlandContext(ctx context.Context) (error) {
+func (c *RaiserClient) DoBland(ctx context.Context) (error) {
     return c.chClient.DoBland(ctx)
 }
 
@@ -112,11 +105,7 @@ func (c *RaiserChannelClient) DoRaise(ctx context.Context) (error) {
     return nil
 }
 
-func (c *RaiserClient) DoRaise() (error) {
-    return c.chClient.DoRaise(context.Background())
-}
-
-func (c *RaiserClient) DoRaiseContext(ctx context.Context) (error) {
+func (c *RaiserClient) DoRaise(ctx context.Context) (error) {
     return c.chClient.DoRaise(ctx)
 }
 
@@ -131,11 +120,7 @@ func (c *RaiserChannelClient) Get200(ctx context.Context) (string, error) {
     return out.GetSuccess(), nil
 }
 
-func (c *RaiserClient) Get200() (string, error) {
-    return c.chClient.Get200(context.Background())
-}
-
-func (c *RaiserClient) Get200Context(ctx context.Context) (string, error) {
+func (c *RaiserClient) Get200(ctx context.Context) (string, error) {
     return c.chClient.Get200(ctx)
 }
 
@@ -156,11 +141,7 @@ func (c *RaiserChannelClient) Get500(ctx context.Context) (string, error) {
     return out.GetSuccess(), nil
 }
 
-func (c *RaiserClient) Get500() (string, error) {
-    return c.chClient.Get500(context.Background())
-}
-
-func (c *RaiserClient) Get500Context(ctx context.Context) (string, error) {
+func (c *RaiserClient) Get500(ctx context.Context) (string, error) {
     return c.chClient.Get500(ctx)
 }
 

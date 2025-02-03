@@ -34,8 +34,7 @@ type CChannelClientInterface interface {
 
 type CClientInterface interface {
     thrift.ClientInterface
-    F() (error)
-    Thing(a int32, b string, c []int32) (string, error)
+    C
 }
 
 type CChannelClient struct {
@@ -83,11 +82,7 @@ func (c *CChannelClient) F(ctx context.Context) (error) {
     return nil
 }
 
-func (c *CClient) F() (error) {
-    return c.chClient.F(context.Background())
-}
-
-func (c *CClient) FContext(ctx context.Context) (error) {
+func (c *CClient) F(ctx context.Context) (error) {
     return c.chClient.F(ctx)
 }
 
@@ -107,11 +102,7 @@ func (c *CChannelClient) Thing(ctx context.Context, a int32, b string, c []int32
     return out.GetSuccess(), nil
 }
 
-func (c *CClient) Thing(a int32, b string, c []int32) (string, error) {
-    return c.chClient.Thing(context.Background(), a, b, c)
-}
-
-func (c *CClient) ThingContext(ctx context.Context, a int32, b string, c []int32) (string, error) {
+func (c *CClient) Thing(ctx context.Context, a int32, b string, c []int32) (string, error) {
     return c.chClient.Thing(ctx, a, b, c)
 }
 

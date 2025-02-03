@@ -33,7 +33,7 @@ type MyRootChannelClientInterface interface {
 
 type MyRootClientInterface interface {
     thrift.ClientInterface
-    DoRoot() (error)
+    MyRoot
 }
 
 type MyRootChannelClient struct {
@@ -81,11 +81,7 @@ func (c *MyRootChannelClient) DoRoot(ctx context.Context) (error) {
     return nil
 }
 
-func (c *MyRootClient) DoRoot() (error) {
-    return c.chClient.DoRoot(context.Background())
-}
-
-func (c *MyRootClient) DoRootContext(ctx context.Context) (error) {
+func (c *MyRootClient) DoRoot(ctx context.Context) (error) {
     return c.chClient.DoRoot(ctx)
 }
 
@@ -201,10 +197,7 @@ type MyNodeChannelClientInterface interface {
 
 type MyNodeClientInterface interface {
     thrift.ClientInterface
-    // Inherited/extended service
-    MyRootClientInterface
-
-    DoMid() (error)
+    MyNode
 }
 
 type MyNodeChannelClient struct {
@@ -258,11 +251,7 @@ func (c *MyNodeChannelClient) DoMid(ctx context.Context) (error) {
     return nil
 }
 
-func (c *MyNodeClient) DoMid() (error) {
-    return c.chClient.DoMid(context.Background())
-}
-
-func (c *MyNodeClient) DoMidContext(ctx context.Context) (error) {
+func (c *MyNodeClient) DoMid(ctx context.Context) (error) {
     return c.chClient.DoMid(ctx)
 }
 
@@ -351,10 +340,7 @@ type MyLeafChannelClientInterface interface {
 
 type MyLeafClientInterface interface {
     thrift.ClientInterface
-    // Inherited/extended service
-    MyNodeClientInterface
-
-    DoLeaf() (error)
+    MyLeaf
 }
 
 type MyLeafChannelClient struct {
@@ -408,11 +394,7 @@ func (c *MyLeafChannelClient) DoLeaf(ctx context.Context) (error) {
     return nil
 }
 
-func (c *MyLeafClient) DoLeaf() (error) {
-    return c.chClient.DoLeaf(context.Background())
-}
-
-func (c *MyLeafClient) DoLeafContext(ctx context.Context) (error) {
+func (c *MyLeafClient) DoLeaf(ctx context.Context) (error) {
     return c.chClient.DoLeaf(ctx)
 }
 

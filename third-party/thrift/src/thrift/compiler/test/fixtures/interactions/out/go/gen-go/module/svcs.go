@@ -35,7 +35,7 @@ type MyServiceChannelClientInterface interface {
 
 type MyServiceClientInterface interface {
     thrift.ClientInterface
-    Foo() (error)
+    MyService
 }
 
 type MyServiceChannelClient struct {
@@ -83,11 +83,7 @@ func (c *MyServiceChannelClient) Foo(ctx context.Context) (error) {
     return nil
 }
 
-func (c *MyServiceClient) Foo() (error) {
-    return c.chClient.Foo(context.Background())
-}
-
-func (c *MyServiceClient) FooContext(ctx context.Context) (error) {
+func (c *MyServiceClient) Foo(ctx context.Context) (error) {
     return c.chClient.Foo(ctx)
 }
 
@@ -200,7 +196,7 @@ type FactoriesChannelClientInterface interface {
 
 type FactoriesClientInterface interface {
     thrift.ClientInterface
-    Foo() (error)
+    Factories
 }
 
 type FactoriesChannelClient struct {
@@ -248,11 +244,7 @@ func (c *FactoriesChannelClient) Foo(ctx context.Context) (error) {
     return nil
 }
 
-func (c *FactoriesClient) Foo() (error) {
-    return c.chClient.Foo(context.Background())
-}
-
-func (c *FactoriesClient) FooContext(ctx context.Context) (error) {
+func (c *FactoriesClient) Foo(ctx context.Context) (error) {
     return c.chClient.Foo(ctx)
 }
 
@@ -365,7 +357,7 @@ type PerformChannelClientInterface interface {
 
 type PerformClientInterface interface {
     thrift.ClientInterface
-    Foo() (error)
+    Perform
 }
 
 type PerformChannelClient struct {
@@ -413,11 +405,7 @@ func (c *PerformChannelClient) Foo(ctx context.Context) (error) {
     return nil
 }
 
-func (c *PerformClient) Foo() (error) {
-    return c.chClient.Foo(context.Background())
-}
-
-func (c *PerformClient) FooContext(ctx context.Context) (error) {
+func (c *PerformClient) Foo(ctx context.Context) (error) {
     return c.chClient.Foo(ctx)
 }
 
@@ -530,7 +518,7 @@ type InteractWithSharedChannelClientInterface interface {
 
 type InteractWithSharedClientInterface interface {
     thrift.ClientInterface
-    DoSomeSimilarThings() (*shared.DoSomethingResult, error)
+    InteractWithShared
 }
 
 type InteractWithSharedChannelClient struct {
@@ -578,11 +566,7 @@ func (c *InteractWithSharedChannelClient) DoSomeSimilarThings(ctx context.Contex
     return out.GetSuccess(), nil
 }
 
-func (c *InteractWithSharedClient) DoSomeSimilarThings() (*shared.DoSomethingResult, error) {
-    return c.chClient.DoSomeSimilarThings(context.Background())
-}
-
-func (c *InteractWithSharedClient) DoSomeSimilarThingsContext(ctx context.Context) (*shared.DoSomethingResult, error) {
+func (c *InteractWithSharedClient) DoSomeSimilarThings(ctx context.Context) (*shared.DoSomethingResult, error) {
     return c.chClient.DoSomeSimilarThings(ctx)
 }
 
@@ -695,6 +679,7 @@ type BoxServiceChannelClientInterface interface {
 
 type BoxServiceClientInterface interface {
     thrift.ClientInterface
+    BoxService
 }
 
 type BoxServiceChannelClient struct {

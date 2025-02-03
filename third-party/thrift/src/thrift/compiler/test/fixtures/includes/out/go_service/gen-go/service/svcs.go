@@ -38,8 +38,7 @@ type MyServiceChannelClientInterface interface {
 
 type MyServiceClientInterface interface {
     thrift.ClientInterface
-    Query(s *module.MyStruct, i *includes.Included) (error)
-    HasArgDocs(s *module.MyStruct, i *includes.Included) (error)
+    MyService
 }
 
 type MyServiceChannelClient struct {
@@ -89,11 +88,7 @@ func (c *MyServiceChannelClient) Query(ctx context.Context, s *module.MyStruct, 
     return nil
 }
 
-func (c *MyServiceClient) Query(s *module.MyStruct, i *includes.Included) (error) {
-    return c.chClient.Query(context.Background(), s, i)
-}
-
-func (c *MyServiceClient) QueryContext(ctx context.Context, s *module.MyStruct, i *includes.Included) (error) {
+func (c *MyServiceClient) Query(ctx context.Context, s *module.MyStruct, i *includes.Included) (error) {
     return c.chClient.Query(ctx, s, i)
 }
 
@@ -110,11 +105,7 @@ func (c *MyServiceChannelClient) HasArgDocs(ctx context.Context, s *module.MyStr
     return nil
 }
 
-func (c *MyServiceClient) HasArgDocs(s *module.MyStruct, i *includes.Included) (error) {
-    return c.chClient.HasArgDocs(context.Background(), s, i)
-}
-
-func (c *MyServiceClient) HasArgDocsContext(ctx context.Context, s *module.MyStruct, i *includes.Included) (error) {
+func (c *MyServiceClient) HasArgDocs(ctx context.Context, s *module.MyStruct, i *includes.Included) (error) {
     return c.chClient.HasArgDocs(ctx, s, i)
 }
 

@@ -32,6 +32,7 @@ type InteractLocallyChannelClientInterface interface {
 
 type InteractLocallyClientInterface interface {
     thrift.ClientInterface
+    InteractLocally
 }
 
 type InteractLocallyChannelClient struct {

@@ -38,10 +38,7 @@ type ExtendTestServiceChannelClientInterface interface {
 
 type ExtendTestServiceClientInterface interface {
     thrift.ClientInterface
-    // Inherited/extended service
-    test0.HsTestServiceClientInterface
-
-    Check(struct1 *test0.HsFoo) (bool, error)
+    ExtendTestService
 }
 
 type ExtendTestServiceChannelClient struct {
@@ -96,11 +93,7 @@ func (c *ExtendTestServiceChannelClient) Check(ctx context.Context, struct1 *tes
     return out.GetSuccess(), nil
 }
 
-func (c *ExtendTestServiceClient) Check(struct1 *test0.HsFoo) (bool, error) {
-    return c.chClient.Check(context.Background(), struct1)
-}
-
-func (c *ExtendTestServiceClient) CheckContext(ctx context.Context, struct1 *test0.HsFoo) (bool, error) {
+func (c *ExtendTestServiceClient) Check(ctx context.Context, struct1 *test0.HsFoo) (bool, error) {
     return c.chClient.Check(ctx, struct1)
 }
 

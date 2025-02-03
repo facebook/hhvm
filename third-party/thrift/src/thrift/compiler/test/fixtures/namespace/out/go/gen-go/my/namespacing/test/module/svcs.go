@@ -33,7 +33,7 @@ type TestServiceChannelClientInterface interface {
 
 type TestServiceClientInterface interface {
     thrift.ClientInterface
-    Init(int1 int64) (int64, error)
+    TestService
 }
 
 type TestServiceChannelClient struct {
@@ -82,11 +82,7 @@ func (c *TestServiceChannelClient) Init(ctx context.Context, int1 int64) (int64,
     return out.GetSuccess(), nil
 }
 
-func (c *TestServiceClient) Init(int1 int64) (int64, error) {
-    return c.chClient.Init(context.Background(), int1)
-}
-
-func (c *TestServiceClient) InitContext(ctx context.Context, int1 int64) (int64, error) {
+func (c *TestServiceClient) Init(ctx context.Context, int1 int64) (int64, error) {
     return c.chClient.Init(ctx, int1)
 }
 

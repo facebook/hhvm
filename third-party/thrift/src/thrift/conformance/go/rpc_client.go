@@ -17,6 +17,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"fmt"
@@ -71,7 +72,7 @@ func (t *rpcClientConformanceTester) execute() {
 		glog.Fatalf("failed to get client: %v", err)
 	}
 
-	testCase, err := t.client.GetTestCase()
+	testCase, err := t.client.GetTestCase(context.Background())
 	if err != nil {
 		glog.Fatalf("failed to get test case: %v", err)
 	}
@@ -99,6 +100,7 @@ func (t *rpcClientConformanceTester) execute() {
 
 func (t *rpcClientConformanceTester) RequestResponseBasic() error {
 	response, err := t.client.RequestResponseBasic(
+		context.Background(),
 		t.instruction.RequestResponseBasic.Request,
 	)
 	if err != nil {
@@ -109,11 +111,11 @@ func (t *rpcClientConformanceTester) RequestResponseBasic() error {
 		SetResponse(response)
 	clientTestResult := rpc.NewClientTestResult().
 		SetRequestResponseBasic(responseValue)
-	return t.client.SendTestResult(clientTestResult)
+	return t.client.SendTestResult(context.Background(), clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) RequestResponseNoArgVoidResponse() error {
-	err := t.client.RequestResponseNoArgVoidResponse()
+	err := t.client.RequestResponseNoArgVoidResponse(context.Background())
 	if err != nil {
 		return err
 	}
@@ -121,7 +123,7 @@ func (t *rpcClientConformanceTester) RequestResponseNoArgVoidResponse() error {
 	responseValue := rpc.NewRequestResponseNoArgVoidResponseClientTestResult()
 	clientTestResult := rpc.NewClientTestResult().
 		SetRequestResponseNoArgVoidResponse(responseValue)
-	return t.client.SendTestResult(clientTestResult)
+	return t.client.SendTestResult(context.Background(), clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) RequestResponseTimeout() error {
@@ -132,6 +134,7 @@ func (t *rpcClientConformanceTester) RequestResponseTimeout() error {
 
 func (t *rpcClientConformanceTester) RequestResponseDeclaredException() error {
 	err := t.client.RequestResponseDeclaredException(
+		context.Background(),
 		t.instruction.RequestResponseDeclaredException.Request,
 	)
 
@@ -139,11 +142,12 @@ func (t *rpcClientConformanceTester) RequestResponseDeclaredException() error {
 		SetUserException(err.(*rpc.UserException))
 	clientTestResult := rpc.NewClientTestResult().
 		SetRequestResponseDeclaredException(responseValue)
-	return t.client.SendTestResult(clientTestResult)
+	return t.client.SendTestResult(context.Background(), clientTestResult)
 }
 
 func (t *rpcClientConformanceTester) RequestResponseUndeclaredException() error {
 	err := t.client.RequestResponseUndeclaredException(
+		context.Background(),
 		t.instruction.RequestResponseUndeclaredException.Request,
 	)
 
@@ -151,5 +155,5 @@ func (t *rpcClientConformanceTester) RequestResponseUndeclaredException() error 
 		SetExceptionMessage(err.Error())
 	clientTestResult := rpc.NewClientTestResult().
 		SetRequestResponseUndeclaredException(responseValue)
-	return t.client.SendTestResult(clientTestResult)
+	return t.client.SendTestResult(context.Background(), clientTestResult)
 }

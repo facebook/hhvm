@@ -93,7 +93,7 @@ func doClientTest(ctx context.Context, t *testing.T) {
 	}
 	defer client.Close()
 
-	res, err := client.DoTestStringContext(ctx, testCallString)
+	res, err := client.DoTestString(ctx, testCallString)
 	if err != nil {
 		t.Fatalf("failed to query test server: %s", err.Error())
 	}
@@ -104,7 +104,7 @@ func doClientTest(ctx context.Context, t *testing.T) {
 
 	// Try sending a lot of requests
 	for i := 0; i < 1000; i++ {
-		res, err = client.DoTestStringContext(ctx, testCallString)
+		res, err = client.DoTestString(ctx, testCallString)
 		if err != nil {
 			t.Fatalf("failed to query test server: %s", err.Error())
 		}
@@ -119,7 +119,7 @@ func doClientTest(ctx context.Context, t *testing.T) {
 	exp1.Message = testCallString
 	handler.ReturnError = exp1
 
-	err = client.DoTestExceptionContext(ctx, testCallString)
+	err = client.DoTestException(ctx, testCallString)
 	if texp, ok := err.(*thrifttest.Xception); ok && texp != nil {
 		if texp.ErrorCode != 5 || texp.Message != testCallString {
 			t.Fatalf("application exception values incorrect: got=%s", texp.String())
@@ -143,7 +143,7 @@ func doClientTest(ctx context.Context, t *testing.T) {
 
 	// Try sending a lot of large things
 	for i := 0; i < 10; i++ {
-		resp, terr := client.DoTestInsanityContext(ctx, insanity)
+		resp, terr := client.DoTestInsanity(ctx, insanity)
 		if terr != nil {
 			t.Fatalf("failed to query test server: %s", err.Error())
 		}
@@ -164,7 +164,7 @@ func doClientTest(ctx context.Context, t *testing.T) {
 	}
 
 	// Ensure poorly named method exists
-	_ = client.XDoTestPoorNameContext(ctx)
+	_ = client.XDoTestPoorName(ctx)
 }
 
 func TestHeaderHeader(t *testing.T) {

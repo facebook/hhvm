@@ -39,13 +39,7 @@ type MyServiceChannelClientInterface interface {
 
 type MyServiceClientInterface interface {
     thrift.ClientInterface
-    Ping() (error)
-    GetRandomData() (string, error)
-    HasDataById(id int64) (bool, error)
-    GoGetDataById(id int64) (string, error)
-    PutDataById(id int64, data string) (error)
-    LobDataById(id int64, data string) (error)
-    GoDoNothing() (error)
+    MyService
 }
 
 type MyServiceChannelClient struct {
@@ -95,11 +89,7 @@ func (c *MyServiceChannelClient) Ping(ctx context.Context) (error) {
     return nil
 }
 
-func (c *MyServiceClient) Ping() (error) {
-    return c.chClient.Ping(context.Background())
-}
-
-func (c *MyServiceClient) PingContext(ctx context.Context) (error) {
+func (c *MyServiceClient) Ping(ctx context.Context) (error) {
     return c.chClient.Ping(ctx)
 }
 
@@ -114,11 +104,7 @@ func (c *MyServiceChannelClient) GetRandomData(ctx context.Context) (string, err
     return out.GetSuccess(), nil
 }
 
-func (c *MyServiceClient) GetRandomData() (string, error) {
-    return c.chClient.GetRandomData(context.Background())
-}
-
-func (c *MyServiceClient) GetRandomDataContext(ctx context.Context) (string, error) {
+func (c *MyServiceClient) GetRandomData(ctx context.Context) (string, error) {
     return c.chClient.GetRandomData(ctx)
 }
 
@@ -134,11 +120,7 @@ func (c *MyServiceChannelClient) HasDataById(ctx context.Context, id int64) (boo
     return out.GetSuccess(), nil
 }
 
-func (c *MyServiceClient) HasDataById(id int64) (bool, error) {
-    return c.chClient.HasDataById(context.Background(), id)
-}
-
-func (c *MyServiceClient) HasDataByIdContext(ctx context.Context, id int64) (bool, error) {
+func (c *MyServiceClient) HasDataById(ctx context.Context, id int64) (bool, error) {
     return c.chClient.HasDataById(ctx, id)
 }
 
@@ -154,11 +136,7 @@ func (c *MyServiceChannelClient) GoGetDataById(ctx context.Context, id int64) (s
     return out.GetSuccess(), nil
 }
 
-func (c *MyServiceClient) GoGetDataById(id int64) (string, error) {
-    return c.chClient.GoGetDataById(context.Background(), id)
-}
-
-func (c *MyServiceClient) GoGetDataByIdContext(ctx context.Context, id int64) (string, error) {
+func (c *MyServiceClient) GoGetDataById(ctx context.Context, id int64) (string, error) {
     return c.chClient.GoGetDataById(ctx, id)
 }
 
@@ -175,11 +153,7 @@ func (c *MyServiceChannelClient) PutDataById(ctx context.Context, id int64, data
     return nil
 }
 
-func (c *MyServiceClient) PutDataById(id int64, data string) (error) {
-    return c.chClient.PutDataById(context.Background(), id, data)
-}
-
-func (c *MyServiceClient) PutDataByIdContext(ctx context.Context, id int64, data string) (error) {
+func (c *MyServiceClient) PutDataById(ctx context.Context, id int64, data string) (error) {
     return c.chClient.PutDataById(ctx, id, data)
 }
 
@@ -191,11 +165,7 @@ func (c *MyServiceChannelClient) LobDataById(ctx context.Context, id int64, data
     return c.ch.Oneway(ctx, "lobDataById", in)
 }
 
-func (c *MyServiceClient) LobDataById(id int64, data string) (error) {
-    return c.chClient.LobDataById(context.Background(), id, data)
-}
-
-func (c *MyServiceClient) LobDataByIdContext(ctx context.Context, id int64, data string) (error) {
+func (c *MyServiceClient) LobDataById(ctx context.Context, id int64, data string) (error) {
     return c.chClient.LobDataById(ctx, id, data)
 }
 
@@ -210,11 +180,7 @@ func (c *MyServiceChannelClient) GoDoNothing(ctx context.Context) (error) {
     return nil
 }
 
-func (c *MyServiceClient) GoDoNothing() (error) {
-    return c.chClient.GoDoNothing(context.Background())
-}
-
-func (c *MyServiceClient) GoDoNothingContext(ctx context.Context) (error) {
+func (c *MyServiceClient) GoDoNothing(ctx context.Context) (error) {
     return c.chClient.GoDoNothing(ctx)
 }
 
@@ -656,8 +622,7 @@ type MyServicePrioParentChannelClientInterface interface {
 
 type MyServicePrioParentClientInterface interface {
     thrift.ClientInterface
-    Ping() (error)
-    Pong() (error)
+    MyServicePrioParent
 }
 
 type MyServicePrioParentChannelClient struct {
@@ -705,11 +670,7 @@ func (c *MyServicePrioParentChannelClient) Ping(ctx context.Context) (error) {
     return nil
 }
 
-func (c *MyServicePrioParentClient) Ping() (error) {
-    return c.chClient.Ping(context.Background())
-}
-
-func (c *MyServicePrioParentClient) PingContext(ctx context.Context) (error) {
+func (c *MyServicePrioParentClient) Ping(ctx context.Context) (error) {
     return c.chClient.Ping(ctx)
 }
 
@@ -724,11 +685,7 @@ func (c *MyServicePrioParentChannelClient) Pong(ctx context.Context) (error) {
     return nil
 }
 
-func (c *MyServicePrioParentClient) Pong() (error) {
-    return c.chClient.Pong(context.Background())
-}
-
-func (c *MyServicePrioParentClient) PongContext(ctx context.Context) (error) {
+func (c *MyServicePrioParentClient) Pong(ctx context.Context) (error) {
     return c.chClient.Pong(ctx)
 }
 
@@ -896,10 +853,7 @@ type MyServicePrioChildChannelClientInterface interface {
 
 type MyServicePrioChildClientInterface interface {
     thrift.ClientInterface
-    // Inherited/extended service
-    MyServicePrioParentClientInterface
-
-    Pang() (error)
+    MyServicePrioChild
 }
 
 type MyServicePrioChildChannelClient struct {
@@ -953,11 +907,7 @@ func (c *MyServicePrioChildChannelClient) Pang(ctx context.Context) (error) {
     return nil
 }
 
-func (c *MyServicePrioChildClient) Pang() (error) {
-    return c.chClient.Pang(context.Background())
-}
-
-func (c *MyServicePrioChildClient) PangContext(ctx context.Context) (error) {
+func (c *MyServicePrioChildClient) Pang(ctx context.Context) (error) {
     return c.chClient.Pang(ctx)
 }
 
@@ -1043,7 +993,7 @@ type BadServiceChannelClientInterface interface {
 
 type BadServiceClientInterface interface {
     thrift.ClientInterface
-    Bar() (int32, error)
+    BadService
 }
 
 type BadServiceChannelClient struct {
@@ -1091,11 +1041,7 @@ func (c *BadServiceChannelClient) Bar(ctx context.Context) (int32, error) {
     return out.GetSuccess(), nil
 }
 
-func (c *BadServiceClient) Bar() (int32, error) {
-    return c.chClient.Bar(context.Background())
-}
-
-func (c *BadServiceClient) BarContext(ctx context.Context) (int32, error) {
+func (c *BadServiceClient) Bar(ctx context.Context) (int32, error) {
     return c.chClient.Bar(ctx)
 }
 
@@ -1211,9 +1157,7 @@ type FooBarBazServiceChannelClientInterface interface {
 
 type FooBarBazServiceClientInterface interface {
     thrift.ClientInterface
-    FooStructured() (error)
-    BarNonStructured() (error)
-    Baz() (error)
+    FooBarBazService
 }
 
 type FooBarBazServiceChannelClient struct {
@@ -1261,11 +1205,7 @@ func (c *FooBarBazServiceChannelClient) FooStructured(ctx context.Context) (erro
     return nil
 }
 
-func (c *FooBarBazServiceClient) FooStructured() (error) {
-    return c.chClient.FooStructured(context.Background())
-}
-
-func (c *FooBarBazServiceClient) FooStructuredContext(ctx context.Context) (error) {
+func (c *FooBarBazServiceClient) FooStructured(ctx context.Context) (error) {
     return c.chClient.FooStructured(ctx)
 }
 
@@ -1280,11 +1220,7 @@ func (c *FooBarBazServiceChannelClient) BarNonStructured(ctx context.Context) (e
     return nil
 }
 
-func (c *FooBarBazServiceClient) BarNonStructured() (error) {
-    return c.chClient.BarNonStructured(context.Background())
-}
-
-func (c *FooBarBazServiceClient) BarNonStructuredContext(ctx context.Context) (error) {
+func (c *FooBarBazServiceClient) BarNonStructured(ctx context.Context) (error) {
     return c.chClient.BarNonStructured(ctx)
 }
 
@@ -1299,11 +1235,7 @@ func (c *FooBarBazServiceChannelClient) Baz(ctx context.Context) (error) {
     return nil
 }
 
-func (c *FooBarBazServiceClient) Baz() (error) {
-    return c.chClient.Baz(context.Background())
-}
-
-func (c *FooBarBazServiceClient) BazContext(ctx context.Context) (error) {
+func (c *FooBarBazServiceClient) Baz(ctx context.Context) (error) {
     return c.chClient.Baz(ctx)
 }
 

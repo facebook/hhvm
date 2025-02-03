@@ -37,7 +37,7 @@ class B extends Base {
     echo "args: $a, $b name: $context\n";
   }
 
-  <<__Memoize(#ICInaccessibleSpecialCase)>>
+  <<__Memoize(#NotKeyedByICAndLeakIC__DO_NOT_USE)>>
   public function memo_inaccessible_sc($a, $b)[defaults]: mixed {
     $context = ClassContext::getContext()->name();
     echo "args: $a, $b name: $context\n";
@@ -58,7 +58,7 @@ function memo_inaccessible($a, $b)[defaults]: mixed{
   echo "args: $a, $b name: $context\n";
 }
 
-<<__Memoize(#ICInaccessibleSpecialCase)>>
+<<__Memoize(#NotKeyedByICAndLeakIC__DO_NOT_USE)>>
 function memo_inaccessible_sc($a, $b)[defaults]: mixed{
   $context = ClassContext::getContext()->name();
   echo "args: $a, $b name: $context\n";

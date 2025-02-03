@@ -386,7 +386,7 @@ pub mod memoize_option {
 
     pub const MAKE_IC_INACCESSSIBLE: &str = "MakeICInaccessible";
 
-    pub const IC_INACCESSSIBLE_SPECIAL_CASE: &str = "ICInaccessibleSpecialCase";
+    pub const IC_INACCESSSIBLE_SPECIAL_CASE: &str = "NotKeyedByICAndLeakIC__DO_NOT_USE";
 
     pub static _ALL: &[&str] = &[
         KEYED_BY_IC,

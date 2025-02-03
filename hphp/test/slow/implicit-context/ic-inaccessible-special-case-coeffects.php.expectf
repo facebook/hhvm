@@ -1,2 +1,2 @@
 
-Fatal error: This function requires the defaults, leak_safe_shallow, or leak_safe_local context to be memoized using #ICInaccessibleSpecialCase in %s/hphp/test/slow/implicit-context/ic-inaccessible-special-case-coeffects.php on line 4
+Fatal error: This function requires the defaults, leak_safe_shallow, or leak_safe_local context to be memoized using #NotKeyedByICAndLeakIC__DO_NOT_USE in %s/hphp/test/slow/implicit-context/ic-inaccessible-special-case-coeffects.php on line 4

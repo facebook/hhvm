@@ -721,7 +721,7 @@ public:
     NoIC = 0,
     KeyedByIC = 1,
     MakeICInaccessible = 2,
-    ICInaccessibleSpecialCase = 3,
+    NotKeyedByICAndLeakIC = 3,
   };
 
   MemoizeICType memoizeICType() const;

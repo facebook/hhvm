@@ -175,7 +175,7 @@ abstract class ImplicitContext {
 enum class MemoizeOption: string {
   string KeyedByIC = 'KeyedByIC';
   string MakeICInaccessible = 'MakeICInaccessible';
-  string ICInaccessibleSpecialCase = 'ICInaccessibleSpecialCase';
+  string NotKeyedByICAndLeakIC = 'NotKeyedByICAndLeakIC__DO_NOT_USE';
 }
 
 } // namespace HH

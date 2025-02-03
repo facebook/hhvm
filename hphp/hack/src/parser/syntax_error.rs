@@ -1070,7 +1070,7 @@ pub fn policy_sharded_memoized_without_policied(kind: &str) -> Error {
 
 pub fn memoize_make_ic_inaccessible_without_defaults(kind: &str, is_special_case: bool) -> Error {
     let context = if is_special_case {
-        "#ICInaccessibleSpecialCase"
+        "#NotKeyedByICAndLeakIC__DO_NOT_USE"
     } else {
         "#MakeICInaccessible"
     };

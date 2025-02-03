@@ -940,7 +940,7 @@ const StaticString
   s_systemlib_create_opaque_value("__SystemLib\\create_opaque_value"),
   s_KeyedByIC("KeyedByIC"),
   s_MakeICInaccessible("MakeICInaccessible"),
-  s_ICInaccessibleSpecialCase("ICInaccessibleSpecialCase");
+  s_NotKeyedByICAndLeakIC("NotKeyedByICAndLeakIC__DO_NOT_USE");
 
 ALWAYS_INLINE
 static Array get_function_user_attributes(const Func* func) {
@@ -963,7 +963,7 @@ static Array get_function_user_attributes(const Func* func) {
           auto const sd = tv.m_data.pstr;
           if (sd->same(s_KeyedByIC.get()) ||
               sd->same(s_MakeICInaccessible.get()) ||
-              sd->same(s_ICInaccessibleSpecialCase.get())) {
+              sd->same(s_NotKeyedByICAndLeakIC.get())) {
             if (Cfg::Eval::EmitNativeEnumClassLabels) {
               args.append(make_tv<KindOfEnumClassLabel>(sd));
             } else {

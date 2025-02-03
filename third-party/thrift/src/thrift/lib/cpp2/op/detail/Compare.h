@@ -399,45 +399,6 @@ template <class T, class Comp>
       l.begin(), l.end(), r.begin(), r.end(), less);
 }
 
-template <class I1, class I2, class Cmp>
-constexpr auto lexicographicalCompareThreeWay(
-    I1 f1, I1 l1, I2 f2, I2 l2, Cmp comp) -> decltype(comp(*f1, *f2)) {
-  auto exhaust1 = [&] { return f1 == l1; };
-  auto exhaust2 = [&] { return f2 == l2; };
-  for (; !exhaust1() && !exhaust2(); ++f1, ++f2) {
-    if (auto c = comp(*f1, *f2); c != folly::ordering::eq) {
-      return c;
-    }
-  }
-
-  return !exhaust1() ? folly::ordering::gt
-      : !exhaust2()  ? folly::ordering::lt
-                     : folly::ordering::eq;
-}
-
-template <class T, class Comp, class CmpThreeWay>
-[[maybe_unused]] constexpr folly::ordering
-sortAndLexicographicalCompareThreeWay(
-    const T& lhs, const T& rhs, Comp&& comp, CmpThreeWay&& cmp_three_way) {
-  std::vector<decltype(lhs.begin())> l, r;
-  for (auto i = lhs.begin(); i != lhs.end(); ++i) {
-    l.push_back(i);
-  }
-  for (auto i = rhs.begin(); i != rhs.end(); ++i) {
-    r.push_back(i);
-  }
-  auto less = [&](auto lhsIter, auto rhsIter) {
-    return comp(*lhsIter, *rhsIter);
-  };
-  auto compare_three_way = [&](auto lhsIter, auto rhsIter) {
-    return cmp_three_way(*lhsIter, *rhsIter);
-  };
-  std::sort(l.begin(), l.end(), less);
-  std::sort(r.begin(), r.end(), less);
-  return lexicographicalCompareThreeWay(
-      l.begin(), l.end(), r.begin(), r.end(), compare_three_way);
-}
-
 template <class T, class E, template <class...> class LessThanImpl = LessThan>
 struct ListLessThan {
   bool operator()(const T& l, const T& r) const {
@@ -701,48 +662,6 @@ struct EqualTo<type::cpp_type<T, type::map<KTag, VTag>>>
 // TODO(dokwon): Support field_ref types.
 template <typename Tag, typename Context>
 struct IdenticalTo<type::field<Tag, Context>> : IdenticalTo<Tag> {};
-
-template <typename VTag>
-struct CompareThreeWay<type::list<VTag>, type::list<VTag>> {
-  template <typename T = type::native_type<type::list<VTag>>>
-  folly::ordering operator()(const T& l, const T& r) const {
-    return lexicographicalCompareThreeWay(
-        l.begin(), l.end(), r.begin(), r.end(), CompareThreeWay<VTag>{});
-  }
-};
-
-template <typename VTag>
-struct CompareThreeWay<type::set<VTag>, type::set<VTag>> {
-  template <typename T = type::native_type<type::set<VTag>>>
-  folly::ordering operator()(const T& l, const T& r) const {
-    return lexicographicalCompareThreeWay(
-        l.begin(), l.end(), r.begin(), r.end(), CompareThreeWay<VTag>{});
-  }
-};
-
-template <typename KTag, typename VTag>
-struct CompareThreeWay<type::map<KTag, VTag>, type::map<KTag, VTag>> {
-  template <typename T = type::native_type<type::map<KTag, VTag>>>
-  folly::ordering operator()(const T& lhs, const T& rhs) const {
-    auto less = [](const auto& l, const auto& r) {
-      auto ret = CompareThreeWay<KTag>{}(l.first, r.first);
-      if (ret == folly::ordering::eq) {
-        ret = CompareThreeWay<VTag>{}(l.second, r.second);
-      }
-      return ret == folly::ordering::lt;
-    };
-    auto compare_three_way = [](const auto& l, const auto& r) {
-      auto ret = CompareThreeWay<KTag>{}(l.first, r.first);
-      if (ret != folly::ordering::eq) {
-        return ret;
-      }
-      return CompareThreeWay<VTag>{}(l.second, r.second);
-    };
-
-    return sortAndLexicographicalCompareThreeWay(
-        lhs, rhs, less, compare_three_way);
-  }
-};
 
 // Hooks for adapted types.
 template <typename Adapter, typename Tag>

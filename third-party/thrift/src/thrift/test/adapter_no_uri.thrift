@@ -40,8 +40,3 @@ union AdaptedComparisonUnion {
   @cpp.Adapter{name = "::apache::thrift::test::AdaptedComparisonStringAdapter"}
   1: string field1;
 }
-
-struct AdapterThreeWayComparisonStruct {
-  @cpp.Adapter{name = "::apache::thrift::test::Adapter3WayCompareStringAdapter"}
-  1: string field1;
-}

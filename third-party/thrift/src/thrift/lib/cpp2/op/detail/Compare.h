@@ -265,55 +265,6 @@ struct DefaultLessThan {
   CompareWith compareWith;
 };
 
-// A CompareThreeWay implementation that delegates to EqualTo and LessThan.
-template <
-    typename LTag,
-    typename RTag = LTag,
-    template <class...> class LessThanImpl = LessThan,
-    typename L = type::native_type<LTag>,
-    typename R = type::native_type<RTag>>
-struct DefaultCompareThreeWay {
-  static_assert(type::is_concrete_v<LTag>, "");
-  static_assert(type::is_concrete_v<RTag>, "");
-
-  constexpr folly::ordering operator()(const L& lhs, const R& rhs) const {
-    if (EqualTo<LTag, RTag>{}(lhs, rhs)) {
-      return folly::ordering::eq;
-    }
-    if (LessThanImpl<LTag, RTag>{}(lhs, rhs)) {
-      return folly::ordering::lt;
-    }
-    return folly::ordering::gt;
-  }
-};
-
-// The 'compare three way' operator.
-template <typename LTag, typename RTag = LTag, typename = void>
-struct CompareThreeWay : DefaultCompareThreeWay<LTag, RTag> {
-}; // Delegates by default.
-
-template <>
-struct CompareThreeWay<type::void_t> {
-  template <typename L, typename R>
-  constexpr folly::ordering operator()(const L& lhs, const R& rhs) const {
-    return CompareThreeWay<type::infer_tag<L>, type::infer_tag<R>>{}(lhs, rhs);
-  }
-};
-template <typename LTag>
-struct CompareThreeWay<LTag, type::void_t> {
-  template <typename L, typename R>
-  constexpr folly::ordering operator()(const L& lhs, const R& rhs) const {
-    return CompareThreeWay<LTag, type::infer_tag<R>>{}(lhs, rhs);
-  }
-};
-template <typename RTag>
-struct CompareThreeWay<type::void_t, RTag> {
-  template <typename L, typename R>
-  constexpr folly::ordering operator()(const L& lhs, const R& rhs) const {
-    return CompareThreeWay<type::infer_tag<L>, RTag>{}(lhs, rhs);
-  }
-};
-
 // Use bit_cast for floating point identical.
 template <typename F, typename I>
 struct FloatIdenticalTo {
@@ -365,17 +316,6 @@ struct CompareWith<
                                            folly::IOBufCompare {};
 template <typename LUTag, typename RUTag>
 struct CompareWith<
-    type::cpp_type<std::unique_ptr<folly::IOBuf>, LUTag>,
-    type::cpp_type<std::unique_ptr<folly::IOBuf>, RUTag>>
-    : CheckIOBufOp<LUTag, RUTag>, folly::IOBufCompare {};
-
-template <typename LUTag, typename RUTag>
-struct CompareThreeWay<
-    type::cpp_type<folly::IOBuf, LUTag>,
-    type::cpp_type<folly::IOBuf, RUTag>> : CheckIOBufOp<LUTag, RUTag>,
-                                           folly::IOBufCompare {};
-template <typename LUTag, typename RUTag>
-struct CompareThreeWay<
     type::cpp_type<std::unique_ptr<folly::IOBuf>, LUTag>,
     type::cpp_type<std::unique_ptr<folly::IOBuf>, RUTag>>
     : CheckIOBufOp<LUTag, RUTag>, folly::IOBufCompare {};
@@ -699,30 +639,6 @@ struct LessThan<type::adapted<Adapter, Tag>> {
   }
 };
 
-template <typename Adapter, typename Tag>
-struct CompareThreeWay<type::adapted<Adapter, Tag>> {
-  using adapted_tag = type::adapted<Adapter, Tag>;
-  static_assert(type::is_concrete_v<adapted_tag>, "");
-  template <typename T>
-  constexpr folly::ordering operator()(const T& lhs, const T& rhs) const {
-    if constexpr (adapt_detail::is_compare_three_way_adapter_v<Adapter, T>) {
-      return Adapter::compareThreeWay(lhs, rhs);
-    } else if constexpr (
-        folly::is_invocable_v<std::less<>, const T&, const T&> &&
-        folly::is_invocable_v<std::equal_to<>, const T&, const T&>) {
-      if (lhs == rhs) {
-        return folly::ordering::eq;
-      } else if (lhs < rhs) {
-        return folly::ordering::lt;
-      }
-      return folly::ordering::gt;
-    } else {
-      return CompareThreeWay<Tag>{}(
-          Adapter::toThrift(lhs), Adapter::toThrift(rhs));
-    }
-  }
-};
-
 template <template <class...> class LessThanImpl = LessThan>
 struct StructLessThan {
   template <class T>
@@ -752,9 +668,8 @@ struct StructLessThan {
         return;
       }
 
-      auto ret = CompareThreeWay<Tag>{}(*lhsValue, *rhsValue);
-      if (ret != folly::ordering::eq) {
-        result = ret == folly::ordering::lt;
+      if (!EqualTo<Tag>{}(*lhsValue, *rhsValue)) {
+        result = LessThanImpl<Tag>{}(*lhsValue, *rhsValue);
       }
     });
 

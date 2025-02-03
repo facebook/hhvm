@@ -685,18 +685,6 @@ TEST(AdaptTest, LessThanComparisonFallbackTest) {
   EXPECT_FALSE(obj1c > obj2c);
   EXPECT_TRUE(obj1c < obj2c);
 }
-
-TEST(AdaptTest, ThreeWayComparisonFallbackTest) {
-  auto obj1a = AdapterThreeWayComparisonStruct();
-  obj1a.field1_ref() = "1";
-
-  auto obj2a = AdapterThreeWayComparisonStruct();
-  obj2a.field1_ref() = "2";
-  // It should use the Adapter3WayCompareStringAdapter compareThreeWay for
-  // comparison.
-  EXPECT_TRUE(obj1a > obj2a);
-  EXPECT_FALSE(obj1a < obj2a);
-}
 } // namespace no_uri
 
 namespace terse {

@@ -22,7 +22,6 @@
 #include <utility>
 
 #include <folly/Traits.h>
-#include <folly/lang/Ordering.h>
 #include <thrift/lib/cpp/Field.h>
 #include <thrift/lib/cpp2/Thrift.h>
 
@@ -295,57 +294,6 @@ struct adapter_less<
     folly::void_t<LessType<Adapter, AdaptedT>>> {
   constexpr bool operator()(const AdaptedT& lhs, const AdaptedT& rhs) const {
     return Adapter::less(lhs, rhs);
-  }
-};
-
-// CompareThreeWay op based on the thrift types.
-template <typename Adapter, typename AdaptedT>
-struct thrift_compare_three_way {
-  constexpr folly::ordering operator()(
-      const AdaptedT& lhs, const AdaptedT& rhs) const {
-    if (Adapter::toThrift(lhs) == Adapter::toThrift(rhs)) {
-      return folly::ordering::eq;
-    } else if (Adapter::toThrift(lhs) < Adapter::toThrift(rhs)) {
-      return folly::ordering::lt;
-    }
-    return folly::ordering::gt;
-  }
-};
-
-// CompareThreeWay op based on the adapted types, with a fallback on
-// thrift_compare_three_way.
-template <typename Adapter, typename AdaptedT, typename = void>
-struct adapted_compare_three_way : thrift_compare_three_way<Adapter, AdaptedT> {
-};
-template <typename Adapter, typename AdaptedT>
-struct adapted_compare_three_way<
-    Adapter,
-    AdaptedT,
-    folly::void_t<decltype(cr<AdaptedT>() < cr<AdaptedT>())>> {
-  constexpr folly::ordering operator()(
-      const AdaptedT& lhs, const AdaptedT& rhs) const {
-    if (lhs == rhs) {
-      return folly::ordering::eq;
-    } else if (lhs < rhs) {
-      return folly::ordering::lt;
-    }
-    return folly::ordering::gt;
-  }
-};
-
-// CompareThreeWay op based on the adapter, with a fallback on
-// adapted_compare_three_way.
-template <typename Adapter, typename AdaptedT, typename = void>
-struct adapter_compare_three_way
-    : adapted_compare_three_way<Adapter, AdaptedT> {};
-template <typename Adapter, typename AdaptedT>
-struct adapter_compare_three_way<
-    Adapter,
-    AdaptedT,
-    folly::void_t<CompareThreeWayType<Adapter, AdaptedT>>> {
-  constexpr folly::ordering operator()(
-      const AdaptedT& lhs, const AdaptedT& rhs) const {
-    return Adapter::compareThreeWay(lhs, rhs);
   }
 };
 

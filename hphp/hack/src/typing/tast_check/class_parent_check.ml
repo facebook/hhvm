@@ -12,7 +12,13 @@ open Base
 module Env = Tast_env
 module Cls = Folded_class
 
-let check_is_class env ~require_class_check (p, h) =
+let check_is_class env ~require_constraint_check (p, h) =
+  let (is_req_class_check, is_req_this_as_check) =
+    match require_constraint_check with
+    | Some RequireClass -> (true, false)
+    | Some RequireThisAs -> (false, true)
+    | _ -> (false, false)
+  in
   match h with
   | Aast.Happly ((_, name), _) -> begin
     match Env.get_class env name with
@@ -23,10 +29,16 @@ let check_is_class env ~require_class_check (p, h) =
       let kind = Cls.kind cls in
       let name = Cls.name cls in
       if Ast_defs.is_c_class kind then (
-        if Cls.final cls && not require_class_check then
+        if Cls.final cls && not is_req_class_check then
           Errors.add_error
             Nast_check_error.(
-              to_user_error @@ Requires_final_class { pos = p; name })
+              to_user_error
+              @@ Requires_final_class { pos = p; name; is_req_this_as_check })
+        else if Cls.final cls && is_req_this_as_check then
+          Errors.add_error
+            Nast_check_error.(
+              to_user_error
+              @@ Requires_final_class { pos = p; name; is_req_this_as_check })
       ) else
         Errors.add_error
           Nast_check_error.(
@@ -133,13 +145,19 @@ let handler =
       in
       List.iter c.c_uses ~f:(check_is_trait env);
       duplicated_used_traits (Env.tast_env_as_typing_env env) c;
-      List.iter req_extends ~f:(check_is_class ~require_class_check:false env);
+      List.iter
+        req_extends
+        ~f:(check_is_class env ~require_constraint_check:None);
       List.iter
         c.c_implements
         ~f:(check_is_interface (env, Nast_check_error.Vimplement));
       List.iter
         req_implements
         ~f:(check_is_interface (env, Nast_check_error.Vreq_implement));
-      List.iter req_class ~f:(check_is_class ~require_class_check:true env);
-      List.iter req_this_as ~f:(check_is_class ~require_class_check:false env)
+      List.iter
+        req_class
+        ~f:(check_is_class env ~require_constraint_check:(Some RequireClass));
+      List.iter
+        req_this_as
+        ~f:(check_is_class env ~require_constraint_check:(Some RequireThisAs))
   end

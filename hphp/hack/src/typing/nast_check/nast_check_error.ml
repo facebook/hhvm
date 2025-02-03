@@ -85,6 +85,7 @@ type t =
   | Requires_final_class of {
       pos: Pos.t;
       name: string;
+      is_req_this_as_check: bool;
     }
   | Abstract_body of Pos.t
   | Interface_with_member_variable of Pos.t
@@ -617,14 +618,20 @@ let requires_non_class pos name kind =
         kind )
     []
 
-let requires_final_class pos name =
+let requires_final_class pos name is_req_this_as_check =
   User_error.make_err
     Error_code.(to_enum RequiresFinalClass)
     ( pos,
       Format.sprintf
         "%s is a `final` class, so it cannot be extended."
         (Markdown_lite.md_codify @@ Render.strip_ns name) )
-    []
+    (if is_req_this_as_check then
+      [
+        ( Pos_or_decl.of_raw_pos pos,
+          "Try using `require class` instead of `require this as`." );
+      ]
+    else
+      [])
 
 let internal_method_with_invalid_visibility pos vis =
   let vis_str =
@@ -885,7 +892,8 @@ let to_user_error t =
     | Non_interface { pos; name; verb } -> non_interface pos name verb
     | Uses_non_trait { pos; name; kind } -> uses_non_trait pos name kind
     | Requires_non_class { pos; name; kind } -> requires_non_class pos name kind
-    | Requires_final_class { pos; name } -> requires_final_class pos name
+    | Requires_final_class { pos; name; is_req_this_as_check } ->
+      requires_final_class pos name is_req_this_as_check
     | Internal_method_with_invalid_visibility { pos; vis } ->
       internal_method_with_invalid_visibility pos vis
     | Private_and_final pos -> private_and_final pos

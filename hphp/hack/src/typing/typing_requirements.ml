@@ -14,31 +14,34 @@ module Cls = Folded_class
 
 (* Only applied to classes. Checks that all the requirements of the traits
  * and interfaces it uses are satisfied. *)
-let check_fulfillment env class_pos get_impl (trait_pos, req_ty) =
+let check_fulfillment env class_pos tc (is_strict, (trait_pos, req_ty)) =
   match TUtils.try_unwrap_class_type req_ty with
   | None -> env
   | Some (_r, (_p, req_name), _paraml) ->
     let req_pos = Typing_defs.get_pos req_ty in
-    (match get_impl req_name with
-    | None ->
-      (Typing_error_utils.add_typing_error ~env
-      @@ Typing_error.(
-           primary
-           @@ Primary.Unsatisfied_req
-                { pos = class_pos; trait_pos; req_pos; req_name }));
+    if is_strict || not (String.equal req_name (Cls.name tc)) then (
+      match Cls.get_ancestor tc req_name with
+      | None ->
+        (Typing_error_utils.add_typing_error ~env
+        @@ Typing_error.(
+             primary
+             @@ Primary.Unsatisfied_req
+                  { pos = class_pos; trait_pos; req_pos; req_name }));
+        env
+      | Some impl_ty ->
+        let (env, ty_err_opt) =
+          Typing_phase.sub_type_decl env impl_ty req_ty
+          @@ Some
+               (Typing_error.Reasons_callback.unsatisfied_req_callback
+                  ~class_pos
+                  ~trait_pos
+                  ~req_pos
+                  req_name)
+        in
+        Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+        env
+    ) else
       env
-    | Some impl_ty ->
-      let (env, ty_err_opt) =
-        Typing_phase.sub_type_decl env impl_ty req_ty
-        @@ Some
-             (Typing_error.Reasons_callback.unsatisfied_req_callback
-                ~class_pos
-                ~trait_pos
-                ~req_pos
-                req_name)
-      in
-      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-      env)
 
 let check_require_class env class_pos tc (trait_pos, req_ty) =
   match TUtils.try_unwrap_class_type req_ty with
@@ -166,9 +169,11 @@ let check_class env class_pos tc =
   | Ast_defs.Cclass _ ->
     let env =
       List.fold
-        (Cls.all_ancestor_req_this_as_requirements tc @ Cls.all_ancestor_reqs tc)
-        ~f:(fun env req ->
-          check_fulfillment env class_pos (Cls.get_ancestor tc) req)
+        (List.map
+           ~f:(fun r -> (false, r))
+           (Cls.all_ancestor_req_this_as_requirements tc)
+        @ List.map ~f:(fun r -> (true, r)) (Cls.all_ancestor_reqs tc))
+        ~f:(fun env req -> check_fulfillment env class_pos tc req)
         ~init:env
     in
     List.fold

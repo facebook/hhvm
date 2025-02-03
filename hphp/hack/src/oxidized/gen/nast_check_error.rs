@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<05f20e14e15f3b9b42ee0ce7a78ac6e5>>
+// @generated SignedSource<<b5e6425bc9223f7f312c704fe3d801c4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -163,6 +163,7 @@ pub enum NastCheckError {
     RequiresFinalClass {
         pos: pos::Pos,
         name: String,
+        is_req_this_as_check: bool,
     },
     #[rust_to_ocaml(name = "Abstract_body")]
     AbstractBody(pos::Pos),

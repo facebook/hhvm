@@ -2,7 +2,7 @@
 
 <<file:__EnableUnstableFeatures('require_constraint')>>
 
-class C {
+final class C {
     use T;
 
     public function bar(): void {}

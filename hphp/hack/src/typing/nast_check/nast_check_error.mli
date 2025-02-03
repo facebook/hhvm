@@ -84,6 +84,7 @@ type t =
   | Requires_final_class of {
       pos: Pos.t;
       name: string;
+      is_req_this_as_check: bool;
     }
   | Abstract_body of Pos.t
   | Interface_with_member_variable of Pos.t

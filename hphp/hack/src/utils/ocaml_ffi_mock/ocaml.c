@@ -58,3 +58,12 @@ void caml_output_value_to_malloc() {}
 
 void* Caml_state = 0;
 unsigned long caml_allocated_words = 0;
+void* caml_state = 0;
+struct global_heap_state {
+  int MARKED, UNMARKED, GARBAGE;
+};
+struct global_heap_state caml_global_heap_state = {
+  0 ,
+  1,
+  2,
+};

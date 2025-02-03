@@ -110,6 +110,20 @@ template <typename Adapter, typename AdaptedT, typename R = void>
 using if_not_less_adapter =
     std::enable_if_t<!is_less_adapter_v<Adapter, AdaptedT>, R>;
 
+// Used to detect if Adapter has a three-way comparison override.
+template <typename Adapter, typename AdaptedT>
+using CompareThreeWayType = decltype(Adapter::compareThreeWay(
+    std::declval<const AdaptedT&>(), std::declval<const AdaptedT&>()));
+template <typename Adapter, typename AdaptedT>
+constexpr bool is_compare_three_way_adapter_v =
+    folly::is_detected_v<CompareThreeWayType, Adapter, AdaptedT>;
+template <typename Adapter, typename AdaptedT, typename R = void>
+using if_compare_three_way_adapter =
+    std::enable_if_t<is_compare_three_way_adapter_v<Adapter, AdaptedT>, R>;
+template <typename Adapter, typename AdaptedT, typename R = void>
+using if_not_compare_three_way_adapter =
+    std::enable_if_t<!is_compare_three_way_adapter_v<Adapter, AdaptedT>, R>;
+
 // Used to detect if Adapter has a clear function override.
 template <typename Adapter, typename AdaptedT>
 using ClearType = decltype(Adapter::clear(std::declval<AdaptedT&>()));

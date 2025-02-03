@@ -93,7 +93,7 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifySelfSignedCert) {
   auto selfsigned = createCert("self", false, nullptr);
   expectThrowWithAlert(
       [&] { verifier_->verify({getPeerCert(selfsigned)}); },
-      AlertDescription::bad_certificate);
+      AlertDescription::unknown_ca);
 }
 
 TEST_F(DefaultCertificateVerifierTest, TestVerifySelfSignedCertWithOverride) {
@@ -114,7 +114,7 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifyWithIntermediateMissing) {
   auto subleaf = createCert("subleaf", false, &subauth);
   expectThrowWithAlert(
       [&] { verifier_->verify({getPeerCert(subleaf)}); },
-      AlertDescription::bad_certificate);
+      AlertDescription::unknown_ca);
 }
 
 TEST_F(
@@ -124,10 +124,13 @@ TEST_F(
   auto subleaf = createCert("subleaf", false, &subauth);
   verifier_->setCustomVerifyCallback(
       &DefaultCertificateVerifierTest::allowSelfSignedLeafCertCallback);
-  // The override is irrelevant to the error here. So exception is expected.
+  // The override asserts that self signed certs (chain length = 1) are
+  // accepted. But since this certificate is not self signed, this override
+  // should effectively be a no-op and normal certificate verification
+  // should take place.
   expectThrowWithAlert(
       [&] { verifier_->verify({getPeerCert(subleaf)}); },
-      AlertDescription::bad_certificate);
+      AlertDescription::unknown_ca);
 }
 
 TEST_F(DefaultCertificateVerifierTest, TestVerifyWithBadIntermediate) {
@@ -135,7 +138,7 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifyWithBadIntermediate) {
   auto subleaf = createCert("badsubleaf", false, &subauth);
   expectThrowWithAlert(
       [&] { verifier_->verify({getPeerCert(subleaf)}); },
-      AlertDescription::bad_certificate);
+      AlertDescription::unknown_ca);
 }
 
 TEST_F(DefaultCertificateVerifierTest, TestVerifyWithBadRoot) {
@@ -144,7 +147,7 @@ TEST_F(DefaultCertificateVerifierTest, TestVerifyWithBadRoot) {
   auto subleaf = createCert("leaf2", false, &subauth);
   expectThrowWithAlert(
       [&] { verifier_->verify({getPeerCert(subleaf), getPeerCert(subauth)}); },
-      AlertDescription::bad_certificate);
+      AlertDescription::unknown_ca);
 }
 TEST_F(DefaultCertificateVerifierTest, TestVerifyWithExpiredLeafTooOld) {
   auto now = std::chrono::system_clock::now();

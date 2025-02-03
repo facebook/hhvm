@@ -416,6 +416,10 @@ TEST_F(HandshakeTest, CertRequestPermitNoCert) {
 }
 
 TEST_F(HandshakeTest, CertRequestBadCert) {
+  /**
+   * A server requires client authentication, and the client presents a
+   * self signed certificate to the server.
+   */
   serverContext_->setClientAuthMode(ClientAuthMode::Required);
   auto badCert = createCert("foo", false, nullptr);
   std::vector<folly::ssl::X509UniquePtr> certVec;
@@ -425,7 +429,7 @@ TEST_F(HandshakeTest, CertRequestBadCert) {
       std::make_shared<openssl::OpenSSLSelfCertImpl<openssl::KeyType::P256>>(
           std::move(badCert.key), std::move(certVec)));
   clientContext_->setClientCertManager(std::move(certMgr));
-  expectServerError("alert: bad_certificate", "client certificate failure");
+  expectServerError("alert: unknown_ca", "client certificate failure");
   doHandshake();
 }
 

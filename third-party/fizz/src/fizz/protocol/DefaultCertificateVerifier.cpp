@@ -28,6 +28,18 @@ static AlertDescription toTLSAlert(int opensslVerifyErr) {
        * "A certificate has expired or is not currently valid."
        */
       return AlertDescription::certificate_expired;
+    case X509_V_ERR_CERT_CHAIN_TOO_LONG:
+    case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
+    case X509_V_ERR_PATH_LENGTH_EXCEEDED:
+    case X509_V_ERR_INVALID_CA:
+    case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN:
+    case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT:
+    case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY:
+      /**
+       * All of these conditions indicate that building a path to a trusted
+       * anchor failed.
+       */
+      return AlertDescription::unknown_ca;
     default:
       return AlertDescription::bad_certificate;
   }

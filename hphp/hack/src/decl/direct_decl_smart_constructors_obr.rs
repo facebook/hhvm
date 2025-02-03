@@ -477,6 +477,38 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             None => &[],
         }
     }
+
+    fn make_memberof_type(
+        &mut self,
+        base_pos: &'a Pos<'a>,
+        pos: &'a Pos<'a>,
+        enum_class_ty: &'a Ty<'a>,
+        base_ty: &'a Ty<'a>,
+        wrap_like: bool,
+    ) -> &'a Ty<'a> {
+        let base_ty = if wrap_like && self.opts.everything_sdt {
+            self.alloc(Ty(
+                self.alloc(Reason::FromWitnessDecl(
+                    self.alloc(WitnessDecl::Hint(base_pos)),
+                )),
+                Ty_::Tlike(base_ty),
+            ))
+        } else {
+            base_ty
+        };
+
+        let type_ = Ty_::Tapply(self.alloc((
+            (pos, "\\HH\\MemberOf"),
+            bumpalo::vec![in self.arena; enum_class_ty, base_ty].into_bump_slice(),
+        )));
+
+        let ty = self.alloc(Ty(
+            self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos)))),
+            type_,
+        ));
+
+        ty
+    }
 }
 
 pub trait SourceTextAllocator<'s, 'd>: Clone {
@@ -5242,7 +5274,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             None => return Node::Ignored(SK::EnumDeclaration),
         };
         let extends = match self.node_to_ty(self.make_apply(
-            (self.get_pos(name), "\\HH\\BuiltinEnum"),
+            (
+                self.get_pos(name),
+                naming_special_names::classes::HH_BUILTIN_ENUM,
+            ),
             name,
             NO_POS,
         )) {
@@ -5416,17 +5451,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             .node_to_ty(base)
             .unwrap_or_else(|| self.tany_with_pos(name.0));
 
-        let base = if self.opts.everything_sdt {
-            self.alloc(Ty(
-                self.alloc(Reason::FromWitnessDecl(
-                    self.alloc(WitnessDecl::Hint(base_pos)),
-                )),
-                Ty_::Tlike(base),
-            ))
-        } else {
-            base
-        };
-
         let mut is_abstract = false;
         let mut is_final = false;
         for modifier in modifiers.iter() {
@@ -5450,19 +5474,19 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos)))),
                 enum_class_ty_,
             ));
-            let elt_ty_ = Ty_::Tapply(self.alloc((
-                (pos, "\\HH\\MemberOf"),
-                bumpalo::vec![in self.arena; enum_class_ty, base].into_bump_slice(),
-            )));
-            let elt_ty = self.alloc(Ty(
-                self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos)))),
-                elt_ty_,
-            ));
+            let elt_ty = self.make_memberof_type(base_pos, pos, enum_class_ty, base, false);
+
             let builtin_enum_ty_ = if is_abstract {
-                Ty_::Tapply(self.alloc(((pos, "\\HH\\BuiltinAbstractEnumClass"), &[])))
+                Ty_::Tapply(self.alloc((
+                    (
+                        pos,
+                        naming_special_names::classes::HH_BUILTIN_ABSTRACT_ENUM_CLASS,
+                    ),
+                    &[],
+                )))
             } else {
                 Ty_::Tapply(self.alloc((
-                    (pos, "\\HH\\BuiltinEnumClass"),
+                    (pos, naming_special_names::classes::HH_BUILTIN_ENUM_CLASS),
                     std::slice::from_ref(self.alloc(elt_ty)),
                 )))
             };
@@ -5598,16 +5622,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let type_ = self
             .node_to_ty(type_)
             .unwrap_or_else(|| self.tany_with_pos(name.0));
-        let type_ = if self.opts.everything_sdt {
-            self.alloc(Ty(
-                self.alloc(Reason::FromWitnessDecl(
-                    self.alloc(WitnessDecl::Hint(type_pos)),
-                )),
-                Ty_::Tlike(type_),
-            ))
-        } else {
-            type_
-        };
         let class_name = match self.get_current_classish_name() {
             Some((name, _)) => name,
             None => return Node::Ignored(SyntaxKind::EnumClassEnumerator),
@@ -5617,14 +5631,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos)))),
             enum_class_ty_,
         ));
-        let type_ = Ty_::Tapply(self.alloc((
-            (pos, "\\HH\\MemberOf"),
-            bumpalo::vec![in self.arena; enum_class_ty, type_].into_bump_slice(),
-        )));
-        let type_ = self.alloc(Ty(
-            self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos)))),
-            type_,
-        ));
+        let type_ = self.make_memberof_type(type_pos, pos, enum_class_ty, type_, true);
+
         Node::Const(self.alloc(ShallowClassConst {
             abstract_,
             name: name.into(),

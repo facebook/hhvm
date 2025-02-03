@@ -463,6 +463,34 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
             Err(_) => panic!("dangling ref"),
         }
     }
+
+    fn make_memberof_type(
+        &mut self,
+        base_pos: &Pos,
+        pos: &Pos,
+        enum_class_ty: Ty,
+        base_ty: Ty,
+        wrap_like: bool,
+    ) -> Ty {
+        let base_ty = if wrap_like && self.opts.everything_sdt {
+            Ty(
+                Reason::FromWitnessDecl(WitnessDecl::Hint(base_pos.clone())),
+                Box::new(Ty_::Tlike(base_ty)),
+            )
+        } else {
+            base_ty
+        };
+
+        let type_ = Ty_::Tapply(
+            (pos.clone(), "\\HH\\MemberOf".into()),
+            vec![enum_class_ty, base_ty],
+        );
+
+        Ty(
+            Reason::FromWitnessDecl(WitnessDecl::Hint(pos.clone())),
+            Box::new(type_),
+        )
+    }
 }
 
 fn prefix_slash(name: &str) -> String {
@@ -5049,7 +5077,10 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             None => return Node::Ignored(SK::EnumDeclaration),
         };
         let extends = match self.node_to_ty(self.make_apply(
-            (self.get_pos(&name), "\\HH\\BuiltinEnum".into()),
+            (
+                self.get_pos(&name),
+                naming_special_names::classes::HH_BUILTIN_ENUM.into(),
+            ),
             name,
             Pos::NONE,
         )) {
@@ -5217,15 +5248,6 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             .node_to_ty(base)
             .unwrap_or_else(|| self.tany_with_pos(name.0.clone()));
 
-        let base = if self.opts.everything_sdt {
-            Ty(
-                Reason::FromWitnessDecl(WitnessDecl::Hint(base_pos)),
-                Box::new(Ty_::Tlike(base)),
-            )
-        } else {
-            base
-        };
-
         let mut is_abstract = false;
         let mut is_final = false;
         for modifier in modifiers.iter() {
@@ -5249,21 +5271,24 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                 Reason::FromWitnessDecl(WitnessDecl::Hint(pos.clone())),
                 Box::new(enum_class_ty_),
             );
-            let elt_ty_ = Ty_::Tapply(
-                (pos.clone(), "\\HH\\MemberOf".into()),
-                vec![enum_class_ty, base.clone()],
-            );
-            let elt_ty = Ty(
-                Reason::FromWitnessDecl(WitnessDecl::Hint(pos.clone())),
-                Box::new(elt_ty_),
-            );
+            let elt_ty =
+                self.make_memberof_type(&base_pos, &pos, enum_class_ty, base.clone(), false);
             let builtin_enum_ty_ = if is_abstract {
                 Ty_::Tapply(
-                    (pos.clone(), "\\HH\\BuiltinAbstractEnumClass".into()),
+                    (
+                        pos.clone(),
+                        naming_special_names::classes::HH_BUILTIN_ABSTRACT_ENUM_CLASS.into(),
+                    ),
                     vec![],
                 )
             } else {
-                Ty_::Tapply((pos.clone(), "\\HH\\BuiltinEnumClass".into()), vec![elt_ty])
+                Ty_::Tapply(
+                    (
+                        pos.clone(),
+                        naming_special_names::classes::HH_BUILTIN_ENUM_CLASS.into(),
+                    ),
+                    vec![elt_ty],
+                )
             };
             Ty(
                 Reason::FromWitnessDecl(WitnessDecl::Hint(pos)),
@@ -5391,14 +5416,6 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         let type_ = self
             .node_to_ty(type_)
             .unwrap_or_else(|| self.tany_with_pos(pos.clone()));
-        let type_ = if self.opts.everything_sdt {
-            Ty(
-                Reason::FromWitnessDecl(WitnessDecl::Hint(type_pos)),
-                Box::new(Ty_::Tlike(type_)),
-            )
-        } else {
-            type_
-        };
         let class_name = match self.get_current_classish_name() {
             Some((name, _)) => name,
             None => return Node::Ignored(SyntaxKind::EnumClassEnumerator),
@@ -5408,14 +5425,8 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             Reason::FromWitnessDecl(WitnessDecl::Hint(pos.clone())),
             Box::new(enum_class_ty_),
         );
-        let type_ = Ty_::Tapply(
-            (pos.clone(), "\\HH\\MemberOf".into()),
-            vec![enum_class_ty, type_],
-        );
-        let type_ = Ty(
-            Reason::FromWitnessDecl(WitnessDecl::Hint(pos.clone())),
-            Box::new(type_),
-        );
+        let type_ = self.make_memberof_type(&type_pos, &pos, enum_class_ty, type_, true);
+
         Node::Const(Box::new(ShallowClassConst {
             abstract_,
             name: (pos, name),

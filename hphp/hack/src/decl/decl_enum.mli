@@ -26,6 +26,7 @@ type t = {
 val enum_kind :
   Typing_defs.pos_id ->
   is_enum_class:bool ->
+  add_like:bool ->
   Typing_defs.enum_type option ->
   Typing_defs.decl_ty option ->
   get_ancestor:(string -> Typing_defs.decl_phase Typing_defs.ty option) ->

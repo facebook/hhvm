@@ -20,5 +20,5 @@ nameOf
 SORT TEXT: none
 getValues
   INSERT getValues()
-  function()[HH\Contexts\write_props]: ~dict<string, HH\MemberOf<SomeEnumClass, ~mixed>>
+  function()[HH\Contexts\write_props]: ~dict<string, HH\MemberOf<SomeEnumClass, mixed>>
 SORT TEXT: none

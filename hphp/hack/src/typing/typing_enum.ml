@@ -48,6 +48,7 @@ let member_type env member_ce =
            Decl_enum.enum_kind
              (Cls.pos tc, Cls.name tc)
              ~is_enum_class:(Ast_defs.is_c_enum_class (Cls.kind tc))
+             ~add_like:false
              (Cls.enum_type tc)
              Option.(
                Cls.get_typeconst tc Naming_special_names.FB.tInner >>= fun t ->
@@ -244,10 +245,15 @@ let enum_class_check
     (consts : Nast.class_const list)
     (const_types : locl_ty list) =
   let pos = Cls.pos tc in
+  let add_like =
+    Typing_env.get_support_dynamic_type env
+    && TypecheckerOptions.everything_sdt (Typing_env.get_tcopt env)
+  in
   let (enum_info_opt : Decl_enum.t option) =
     Decl_enum.enum_kind
       (pos, Cls.name tc)
       ~is_enum_class:(Ast_defs.is_c_enum_class (Cls.kind tc))
+      ~add_like
       (Cls.enum_type tc)
       Option.(
         Cls.get_typeconst tc Naming_special_names.FB.tInner >>= fun t ->

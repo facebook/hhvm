@@ -79,6 +79,13 @@ class MapTests(unittest.TestCase):
         self.assertNotIsInstance(StrIntMap(str_int_map), Map__Color_Color)
         self.assertNotIsInstance(StrIntMap(str_int_map), Map__string_List__i32)
 
+    def test_map_views(self) -> None:
+        str_int_map = StrIntMap({"foo": 5})
+        self.assertEqual(len(str_int_map), 1)
+        self.assertEqual(len(str_int_map.keys()), 1)
+        self.assertEqual(len(str_int_map.values()), 1)
+        self.assertEqual(len(str_int_map.items()), 1)
+
     def test_getitem(self) -> None:
         x = StrStrMap({"test": "value"})
         self.assertEqual(x["test"], "value")

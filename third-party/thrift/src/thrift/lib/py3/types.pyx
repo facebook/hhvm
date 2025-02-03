@@ -672,19 +672,12 @@ cdef class Map(Container):
         yield from self._py_obj
 
     def keys(Map self):
-        return self.__iter__()
+        return self._py_obj.keys()
 
     def values(Map self):
-        if not self:
-            return
-        yield from self._py_obj.values()
-
+        return self._py_obj.values()
     def items(Map self):
-        if not self:
-            return
-        yield from self._py_obj.items()
-
-
+        return self._py_obj.items()
 CompiledEnum = _fbthrift_python_Enum
 Enum = _fbthrift_python_Enum
 # I wanted to call the base class Enum, but there is a cython bug

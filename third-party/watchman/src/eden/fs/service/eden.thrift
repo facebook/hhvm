@@ -1963,6 +1963,52 @@ struct ChangesSinceV2Params {
   7: optional list<string> excludedSuffixes;
 }
 
+/*
+ * Return value of the startFileAccessMonitor API
+ *
+ * pid - The process ID for the started File Access Monitor(FAM) binary if started
+ *   successfully.
+ *
+ * tmpOutputPath - The path of FAM output file
+ */
+struct StartFileAccessMonitorResult {
+  1: pid_t pid;
+  2: PathString tmpOutputPath;
+}
+
+/*
+ * Return value of the stopFileAccessMonitor API
+ *
+ * tmpOutputPath - The path to the file which file access events are dumped to.
+ *
+ * specifiedOutputPath - If set, it tells the caller if a specified output path was provided.
+ *
+ * shouldUpload - It tells the caller if FAM is started with the request to upload the output file.
+ */
+struct StopFileAccessMonitorResult {
+  1: PathString tmpOutputPath;
+  2: PathString specifiedOutputPath;
+  3: bool shouldUpload;
+}
+
+/**
+ * Argument to startFileAccessMonitor API
+ *
+ * paths - A list of paths monitored by File Access Monitor(FAM).
+ *
+ * specifiedOutputPath - If provided, this is the destination where the file written
+ *   by FAM will be moved to. This is only stored as part of the state of FAM. No
+ *   writes will be made to this path.
+ *
+ * shouldUpload - It indicates if the output file should be uploaded. This is only
+ *   stored as part of the state of FAM.
+ */
+struct StartFileAccessMonitorParams {
+  1: list<PathString> paths;
+  2: optional PathString specifiedOutputPath;
+  3: bool shouldUpload;
+}
+
 service EdenService extends fb303_core.BaseService {
   list<MountInfo> listMounts() throws (1: EdenError ex);
   void mount(1: MountArgument info) throws (1: EdenError ex);
@@ -2810,4 +2856,10 @@ service EdenService extends fb303_core.BaseService {
   ChangesSinceV2Result changesSinceV2(1: ChangesSinceV2Params params) throws (
     1: EdenError ex,
   );
+
+  StartFileAccessMonitorResult startFileAccessMonitor(
+    1: StartFileAccessMonitorParams params,
+  ) throws (1: EdenError ex);
+
+  StopFileAccessMonitorResult stopFileAccessMonitor() throws (1: EdenError ex);
 }

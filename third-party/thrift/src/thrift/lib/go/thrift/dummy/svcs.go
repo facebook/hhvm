@@ -34,14 +34,7 @@ type DummyChannelClientInterface interface {
 
 type DummyClientInterface interface {
     thrift.ClientInterface
-    Echo(value string) (string, error)
-    OnewayRPC(value string) (error)
-}
-
-type DummyContextClientInterface interface {
-    DummyClientInterface
-    EchoContext(ctx context.Context, value string) (string, error)
-    OnewayRPCContext(ctx context.Context, value string) (error)
+    Dummy
 }
 
 type DummyChannelClient struct {
@@ -65,7 +58,6 @@ type DummyClient struct {
 }
 // Compile time interface enforcer
 var _ DummyClientInterface = (*DummyClient)(nil)
-var _ DummyContextClientInterface = (*DummyClient)(nil)
 
 func NewDummyClient(prot thrift.Protocol) *DummyClient {
     return &DummyClient{
@@ -91,11 +83,7 @@ func (c *DummyChannelClient) Echo(ctx context.Context, value string) (string, er
     return out.GetSuccess(), nil
 }
 
-func (c *DummyClient) Echo(value string) (string, error) {
-    return c.chClient.Echo(context.Background(), value)
-}
-
-func (c *DummyClient) EchoContext(ctx context.Context, value string) (string, error) {
+func (c *DummyClient) Echo(ctx context.Context, value string) (string, error) {
     return c.chClient.Echo(ctx, value)
 }
 
@@ -106,11 +94,7 @@ func (c *DummyChannelClient) OnewayRPC(ctx context.Context, value string) (error
     return c.ch.Oneway(ctx, "OnewayRPC", in)
 }
 
-func (c *DummyClient) OnewayRPC(value string) (error) {
-    return c.chClient.OnewayRPC(context.Background(), value)
-}
-
-func (c *DummyClient) OnewayRPCContext(ctx context.Context, value string) (error) {
+func (c *DummyClient) OnewayRPC(ctx context.Context, value string) (error) {
     return c.chClient.OnewayRPC(ctx, value)
 }
 

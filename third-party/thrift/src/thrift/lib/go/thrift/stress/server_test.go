@@ -102,7 +102,7 @@ func runStressTest(t *testing.T, serverTransport thrift.TransportID) {
 		}
 		client := dummy.NewDummyClient(conn)
 		defer client.Close()
-		result, err := client.Echo("hello")
+		result, err := client.Echo(context.Background(), "hello")
 		if err != nil {
 			errRes := fmt.Errorf("failed to make RPC: %v", err)
 			t.Log(errRes.Error())

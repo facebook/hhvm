@@ -24,8 +24,7 @@ folly::Optional<OverloadResult> QueueConcurrencyOverloadChecker::checkOverload(
        !server_.getMethodsBypassMaxRequestsLimit().contains(*params.method)) &&
       static_cast<uint32_t>(server_.getActiveRequests()) >= maxRequests) {
     LoadShedder loadShedder = LoadShedder::MAX_REQUESTS;
-    if (auto* cpuConcurrencyController = server_.getCPUConcurrencyController();
-        cpuConcurrencyController->requestShed(
+    if (server_.getCPUConcurrencyController().requestShed(
             CPUConcurrencyController::Method::MAX_REQUESTS)) {
       loadShedder = LoadShedder::CPU_CONCURRENCY_CONTROLLER;
     } else if (server_.getAdaptiveConcurrencyController().enabled()) {

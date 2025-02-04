@@ -265,10 +265,10 @@ ThriftServer::ThriftServer()
           apache::thrift::detail::makeAdaptiveConcurrencyConfig(),
           thriftConfig_.getMaxRequests().getObserver(),
           detail::getThriftServerConfig(*this)},
-      cpuConcurrencyController_{std::make_shared<CPUConcurrencyController>(
+      cpuConcurrencyController_{
           makeCPUConcurrencyControllerConfigInternal(),
           *this,
-          detail::getThriftServerConfig(*this))},
+          detail::getThriftServerConfig(*this)},
       addresses_(1),
       wShutdownSocketSet_(folly::tryGetShutdownSocketSet()),
       lastRequestTime_(
@@ -1963,7 +1963,7 @@ folly::Optional<OverloadResult> ThriftServer::checkOverload(
         !getMethodsBypassMaxRequestsLimit().contains(method) &&
         static_cast<uint32_t>(getActiveRequests()) >= maxRequests) {
       LoadShedder loadShedder = LoadShedder::MAX_REQUESTS;
-      if (notifyCPUConcurrencyControllerOnRequestLoadShed(
+      if (getCPUConcurrencyController().requestShed(
               CPUConcurrencyController::Method::MAX_REQUESTS)) {
         loadShedder = LoadShedder::CPU_CONCURRENCY_CONTROLLER;
       } else if (getAdaptiveConcurrencyController().enabled()) {
@@ -1981,7 +1981,7 @@ folly::Optional<OverloadResult> ThriftServer::checkOverload(
       !getMethodsBypassMaxRequestsLimit().contains(method) &&
       !qpsTokenBucket_.consume(1.0, maxQps, maxQps)) {
     LoadShedder loadShedder = LoadShedder::MAX_QPS;
-    if (notifyCPUConcurrencyControllerOnRequestLoadShed(
+    if (getCPUConcurrencyController().requestShed(
             CPUConcurrencyController::Method::MAX_QPS)) {
       loadShedder = LoadShedder::CPU_CONCURRENCY_CONTROLLER;
     }
@@ -2549,12 +2549,5 @@ bool ThriftServer::getTaskExpireTimeForRequest(
     queueTimeout = taskTimeout;
   }
   return queueTimeout != taskTimeout;
-}
-
-bool ThriftServer::notifyCPUConcurrencyControllerOnRequestLoadShed(
-    std::optional<CPUConcurrencyController::Method> method) {
-  auto* cpuConcurrencyControllerPtr = getCPUConcurrencyController();
-  return cpuConcurrencyControllerPtr != nullptr &&
-      cpuConcurrencyControllerPtr->requestShed(method);
 }
 } // namespace apache::thrift

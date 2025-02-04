@@ -83,8 +83,8 @@ class ServerConfigs {
   virtual const AdaptiveConcurrencyController&
   getAdaptiveConcurrencyController() const = 0;
 
-  virtual CPUConcurrencyController* getCPUConcurrencyController() = 0;
-  virtual const CPUConcurrencyController* getCPUConcurrencyController()
+  virtual CPUConcurrencyController& getCPUConcurrencyController() = 0;
+  virtual const CPUConcurrencyController& getCPUConcurrencyController()
       const = 0;
 
   // @see ThriftServer::getNumIOWorkerThreads function.

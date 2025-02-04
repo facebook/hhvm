@@ -85,14 +85,14 @@ class ServerConfigsMock : public ServerConfigs {
     return adaptiveConcurrencyController_;
   }
 
-  apache::thrift::CPUConcurrencyController* getCPUConcurrencyController()
+  apache::thrift::CPUConcurrencyController& getCPUConcurrencyController()
       override {
-    return &cpuConcurrencyController_;
+    return cpuConcurrencyController_;
   }
 
-  const apache::thrift::CPUConcurrencyController* getCPUConcurrencyController()
+  const apache::thrift::CPUConcurrencyController& getCPUConcurrencyController()
       const override {
-    return &cpuConcurrencyController_;
+    return cpuConcurrencyController_;
   }
 
   uint32_t getMaxRequests() const override {

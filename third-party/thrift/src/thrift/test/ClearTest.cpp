@@ -198,10 +198,8 @@ TEST(OpClearTest, TerseWriteField) {
   TerseWriteField obj;
   obj.field_1() = 1;
   EXPECT_EQ(obj.field_1(), 1);
-  EXPECT_EQ(obj.field_2(), 2);
   clear_struct(obj);
   EXPECT_EQ(obj.field_1(), 0);
-  EXPECT_EQ(obj.field_2(), 0);
 }
 
 } // namespace

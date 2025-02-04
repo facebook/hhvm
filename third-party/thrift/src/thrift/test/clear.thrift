@@ -89,7 +89,6 @@ struct AdapterClearTestStruct {
 @thrift.TerseWrite
 struct TerseWriteField {
   1: i32 field_1;
-  2: i32 field_2 = 2;
 }
 
 struct OptionalField {

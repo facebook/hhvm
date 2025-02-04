@@ -51,12 +51,12 @@ class MockServerConfigs : public apache::thrift::server::ServerConfigs {
       (),
       (const, override));
   MOCK_METHOD(
-      apache::thrift::CPUConcurrencyController&,
+      apache::thrift::CPUConcurrencyController*,
       getCPUConcurrencyController,
       (),
       (override));
   MOCK_METHOD(
-      const apache::thrift::CPUConcurrencyController&,
+      const apache::thrift::CPUConcurrencyController*,
       getCPUConcurrencyController,
       (),
       (const, override));

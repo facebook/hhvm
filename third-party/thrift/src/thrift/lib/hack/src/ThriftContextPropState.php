@@ -107,10 +107,15 @@ final class ThriftContextPropState {
   }
 
   public static function updateFromVC(?IViewerContextBase $vc): void {
+    $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
     if ($vc is IFBViewerContext) {
       self::updateFBUserIdFromVC($vc);
+      $ods->bumpKey('contextprop.fb_vc');
     } else if ($vc is IIGViewerContext) {
       self::updateIGUserIdFromVC($vc);
+      $ods->bumpKey('contextprop.ig_vc');
+    } else {
+      $ods->bumpKey('contextprop.unknown_vc');
     }
   }
 

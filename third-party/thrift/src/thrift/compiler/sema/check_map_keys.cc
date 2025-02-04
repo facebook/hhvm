@@ -50,8 +50,10 @@ std::string to_string(const t_const_value* val) {
   switch (val->kind()) {
     case t_const_value::CV_BOOL:
       return val->get_bool() ? "true" : "false";
-    case t_const_value::CV_INTEGER:
-      return std::to_string(val->get_integer());
+    case t_const_value::CV_INTEGER: {
+      auto enum_val = val->get_enum_value();
+      return enum_val ? enum_val->name() : std::to_string(val->get_integer());
+    }
     case t_const_value::CV_DOUBLE:
       return fmt::format("{}", val->get_double());
     case t_const_value::CV_STRING:

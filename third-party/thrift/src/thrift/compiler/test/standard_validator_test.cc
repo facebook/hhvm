@@ -138,8 +138,17 @@ TEST(StandardValidatorTest, ConstMapKeyCollision) {
       FooBar.Foo: "Foo",
       FooBar.Bar: "Bar",
       FooBar.Bar: "Bar"
-    # expected-warning@-1: Duplicate key in map literal: `2`
+    # expected-warning@-1: Duplicate key in map literal: `Bar`
     }
+
+    const map<i32, string> ENUM_DUPE_COERCE = {
+    FooBar.Bar: "Bar",
+    FooBar.Foo: "Foo",
+    1: "Bar2",
+    # expected-warning@-1: Duplicate key in map literal: `1`
+    2: "Foo2",
+    # expected-warning@-1: Duplicate key in map literal: `2`
+}
 
     const map<i64, string> USEFUL_DATA = {
       1: "a",

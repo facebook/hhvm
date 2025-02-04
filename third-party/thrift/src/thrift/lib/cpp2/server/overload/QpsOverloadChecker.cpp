@@ -28,7 +28,9 @@ folly::Optional<OverloadResult> QpsOverloadChecker::checkOverload(
   if (!server_.getMethodsBypassMaxRequestsLimit().contains(*params.method) &&
       !qpsTokenBucket_.consume(1.0, maxQps, maxQps)) {
     LoadShedder loadShedder = LoadShedder::MAX_QPS;
-    if (server_.getCPUConcurrencyController().requestShed(
+    if (auto* cpuConcurrencyController = server_.getCPUConcurrencyController();
+        cpuConcurrencyController != nullptr &&
+        cpuConcurrencyController->requestShed(
             CPUConcurrencyController::Method::MAX_QPS)) {
       loadShedder = LoadShedder::CPU_CONCURRENCY_CONTROLLER;
     }

@@ -243,8 +243,13 @@ ThriftRequestCore::LogRequestSampleCallback::buildRequestLoggingContext(
   requestLoggingContext.clientTimeoutMs = thriftRequest.clientTimeout_;
 
   // CPUConcurrencyController mode
-  requestLoggingContext.cpuConcurrencyControllerMode = static_cast<uint8_t>(
-      serverConfigs_.getCPUConcurrencyController().config()->mode);
+  if (serverConfigs_.getCPUConcurrencyController() != nullptr) {
+    requestLoggingContext.cpuConcurrencyControllerMode = static_cast<uint8_t>(
+        serverConfigs_.getCPUConcurrencyController()->config()->mode);
+  } else {
+    requestLoggingContext.cpuConcurrencyControllerMode =
+        static_cast<uint8_t>(CPUConcurrencyController::Mode::DISABLED);
+  }
 
   return requestLoggingContext;
 }

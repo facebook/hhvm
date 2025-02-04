@@ -1651,6 +1651,18 @@ class parser {
           report_fatal_error(
               scan,
               "duplicate capture '{}' in partial-block '{}'",
+              // std::map<...>::insert takes in its argument as an r-value
+              // reference and performs a conditional move.
+              //
+              // From https://en.cppreference.com/w/cpp/container/map/insert:
+              //   If the insertion succeeds, `nh` is moved from, otherwise it
+              //   retains ownership of the element.
+              //
+              // Therefore, if `inserted` is false, `capture` is safe to use.
+              // Unfortunately, clang-tidy fundamentally cannot reason about
+              // conditional moves — this is a limitation of C++.
+              //
+              // @lint-ignore CLANGTIDY bugprone-use-after-move
               capture.name,
               id.name);
         }

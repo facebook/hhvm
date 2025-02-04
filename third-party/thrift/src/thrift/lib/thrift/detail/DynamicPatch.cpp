@@ -877,9 +877,19 @@ DynamicPatch DiffVisitorBase::diffStructured(
   }
 
   if (src.size() <= 1 && dst.size() <= 1) {
-    // If same field is set, use normal Object diff logic.
-    if (src.empty() || dst.empty() ||
-        src.begin()->first != dst.begin()->first) {
+    // If the src and dst looks like an union (no more than one field), we can
+    // not tell whether it's a struct or an union. In most cases we should use
+    // AssignPatch, unless both struct have the same field, in which case we can
+    // use PatchPrior which works for both struct and union and it's smaller
+    // than AssignPatch.
+
+    // If both struct doesn't have the same field, the normal diffing logic uses
+    // EnsureStruct and Remove. Both are not supported by union patch, thus we
+    // need to use AssignPatch.
+    bool shouldUseAssignPatch =
+        src.empty() || dst.empty() || src.begin()->first != dst.begin()->first;
+
+    if (shouldUseAssignPatch) {
       DynamicUnknownPatch patch;
       patch.doNotConvertStringToBinary(badge);
       patch.assign(badge, dst);

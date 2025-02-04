@@ -875,7 +875,7 @@ func (x *Serde) String() string {
 
 func (x *Serde) setDefaults() *Serde {
     return x.
-        SetEnabledNonCompat(false)
+        SetEnabledNonCompat(true)
 }
 
 type Mod struct {

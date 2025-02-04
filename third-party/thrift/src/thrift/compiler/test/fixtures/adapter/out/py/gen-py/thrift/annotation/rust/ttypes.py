@@ -1683,7 +1683,7 @@ Type.__setstate__ = Type__setstate__
 
 all_structs.append(Serde)
 Serde.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
-  (1, TType.BOOL, 'enabled', None, None, 2, ), # 1
+  (1, TType.BOOL, 'enabled', None, True, 2, ), # 1
 )))
 
 Serde.thrift_struct_annotations = {
@@ -1691,13 +1691,13 @@ Serde.thrift_struct_annotations = {
 Serde.thrift_field_annotations = {
 }
 
-def Serde__init__(self, enabled=None,):
+def Serde__init__(self, enabled=Serde.thrift_spec[1][4],):
   self.enabled = enabled
 
 Serde.__init__ = Serde__init__
 
 def Serde__setstate__(self, state):
-  state.setdefault('enabled', None)
+  state.setdefault('enabled', True)
   self.__dict__ = state
 
 Serde.__getstate__ = lambda self: self.__dict__.copy()

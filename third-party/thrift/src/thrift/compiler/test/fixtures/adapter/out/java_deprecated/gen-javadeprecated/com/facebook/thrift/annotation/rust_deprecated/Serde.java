@@ -49,6 +49,8 @@ public class Serde implements TBase, java.io.Serializable, Cloneable, Comparable
   }
 
   public Serde() {
+    this.enabled = true;
+
   }
 
   public Serde(

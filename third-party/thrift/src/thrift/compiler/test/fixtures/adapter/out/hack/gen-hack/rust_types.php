@@ -887,7 +887,7 @@ class Serde implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapi
   public bool $enabled;
 
   public function __construct(?bool $enabled = null)[] {
-    $this->enabled = $enabled ?? false;
+    $this->enabled = $enabled ?? true;
   }
 
   public static function withDefaultValues()[]: this {

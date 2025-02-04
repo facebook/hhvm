@@ -30,11 +30,6 @@ type NestedContainers interface {
     Turtles(ctx context.Context, foo [][]map[int32]map[int32][]int32) (error)
 }
 
-type NestedContainersChannelClientInterface interface {
-    thrift.ClientInterface
-    NestedContainers
-}
-
 type NestedContainersClientInterface interface {
     thrift.ClientInterface
     NestedContainers
@@ -44,7 +39,7 @@ type NestedContainersChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ NestedContainersChannelClientInterface = (*NestedContainersChannelClient)(nil)
+var _ NestedContainersClientInterface = (*NestedContainersChannelClient)(nil)
 
 func NewNestedContainersChannelClient(channel thrift.RequestChannel) *NestedContainersChannelClient {
     return &NestedContainersChannelClient{

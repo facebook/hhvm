@@ -29,11 +29,6 @@ type Raiser interface {
     Get500(ctx context.Context) (string, error)
 }
 
-type RaiserChannelClientInterface interface {
-    thrift.ClientInterface
-    Raiser
-}
-
 type RaiserClientInterface interface {
     thrift.ClientInterface
     Raiser
@@ -43,7 +38,7 @@ type RaiserChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ RaiserChannelClientInterface = (*RaiserChannelClient)(nil)
+var _ RaiserClientInterface = (*RaiserChannelClient)(nil)
 
 func NewRaiserChannelClient(channel thrift.RequestChannel) *RaiserChannelClient {
     return &RaiserChannelClient{

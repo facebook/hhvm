@@ -31,11 +31,6 @@ type ExtendTestService interface {
     Check(ctx context.Context, struct1 *test0.HsFoo) (bool, error)
 }
 
-type ExtendTestServiceChannelClientInterface interface {
-    thrift.ClientInterface
-    ExtendTestService
-}
-
 type ExtendTestServiceClientInterface interface {
     thrift.ClientInterface
     ExtendTestService
@@ -47,7 +42,7 @@ type ExtendTestServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ ExtendTestServiceChannelClientInterface = (*ExtendTestServiceChannelClient)(nil)
+var _ ExtendTestServiceClientInterface = (*ExtendTestServiceChannelClient)(nil)
 
 func NewExtendTestServiceChannelClient(channel thrift.RequestChannel) *ExtendTestServiceChannelClient {
     return &ExtendTestServiceChannelClient{

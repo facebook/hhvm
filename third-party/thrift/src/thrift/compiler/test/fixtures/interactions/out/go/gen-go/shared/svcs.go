@@ -25,11 +25,6 @@ var _ = metadata.GoUnusedProtection__
 type InteractLocally interface {
 }
 
-type InteractLocallyChannelClientInterface interface {
-    thrift.ClientInterface
-    InteractLocally
-}
-
 type InteractLocallyClientInterface interface {
     thrift.ClientInterface
     InteractLocally
@@ -39,7 +34,7 @@ type InteractLocallyChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ InteractLocallyChannelClientInterface = (*InteractLocallyChannelClient)(nil)
+var _ InteractLocallyClientInterface = (*InteractLocallyChannelClient)(nil)
 
 func NewInteractLocallyChannelClient(channel thrift.RequestChannel) *InteractLocallyChannelClient {
     return &InteractLocallyChannelClient{

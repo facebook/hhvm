@@ -29,11 +29,6 @@ type SomeService interface {
     BinaryKeyedMap(ctx context.Context, r []int64) (map[*TBinary]int64, error)
 }
 
-type SomeServiceChannelClientInterface interface {
-    thrift.ClientInterface
-    SomeService
-}
-
 type SomeServiceClientInterface interface {
     thrift.ClientInterface
     SomeService
@@ -43,7 +38,7 @@ type SomeServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ SomeServiceChannelClientInterface = (*SomeServiceChannelClient)(nil)
+var _ SomeServiceClientInterface = (*SomeServiceChannelClient)(nil)
 
 func NewSomeServiceChannelClient(channel thrift.RequestChannel) *SomeServiceChannelClient {
     return &SomeServiceChannelClient{

@@ -27,11 +27,6 @@ type C interface {
     Thing(ctx context.Context, a int32, b string, c []int32) (string, error)
 }
 
-type CChannelClientInterface interface {
-    thrift.ClientInterface
-    C
-}
-
 type CClientInterface interface {
     thrift.ClientInterface
     C
@@ -41,7 +36,7 @@ type CChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ CChannelClientInterface = (*CChannelClient)(nil)
+var _ CClientInterface = (*CChannelClient)(nil)
 
 func NewCChannelClient(channel thrift.RequestChannel) *CChannelClient {
     return &CChannelClient{

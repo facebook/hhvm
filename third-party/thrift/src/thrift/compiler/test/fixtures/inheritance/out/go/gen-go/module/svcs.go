@@ -26,11 +26,6 @@ type MyRoot interface {
     DoRoot(ctx context.Context) (error)
 }
 
-type MyRootChannelClientInterface interface {
-    thrift.ClientInterface
-    MyRoot
-}
-
 type MyRootClientInterface interface {
     thrift.ClientInterface
     MyRoot
@@ -40,7 +35,7 @@ type MyRootChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyRootChannelClientInterface = (*MyRootChannelClient)(nil)
+var _ MyRootClientInterface = (*MyRootChannelClient)(nil)
 
 func NewMyRootChannelClient(channel thrift.RequestChannel) *MyRootChannelClient {
     return &MyRootChannelClient{
@@ -190,11 +185,6 @@ type MyNode interface {
     DoMid(ctx context.Context) (error)
 }
 
-type MyNodeChannelClientInterface interface {
-    thrift.ClientInterface
-    MyNode
-}
-
 type MyNodeClientInterface interface {
     thrift.ClientInterface
     MyNode
@@ -206,7 +196,7 @@ type MyNodeChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyNodeChannelClientInterface = (*MyNodeChannelClient)(nil)
+var _ MyNodeClientInterface = (*MyNodeChannelClient)(nil)
 
 func NewMyNodeChannelClient(channel thrift.RequestChannel) *MyNodeChannelClient {
     return &MyNodeChannelClient{
@@ -333,11 +323,6 @@ type MyLeaf interface {
     DoLeaf(ctx context.Context) (error)
 }
 
-type MyLeafChannelClientInterface interface {
-    thrift.ClientInterface
-    MyLeaf
-}
-
 type MyLeafClientInterface interface {
     thrift.ClientInterface
     MyLeaf
@@ -349,7 +334,7 @@ type MyLeafChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyLeafChannelClientInterface = (*MyLeafChannelClient)(nil)
+var _ MyLeafClientInterface = (*MyLeafChannelClient)(nil)
 
 func NewMyLeafChannelClient(channel thrift.RequestChannel) *MyLeafChannelClient {
     return &MyLeafChannelClient{

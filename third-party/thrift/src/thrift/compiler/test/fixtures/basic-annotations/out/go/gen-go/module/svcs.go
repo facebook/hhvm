@@ -32,11 +32,6 @@ type MyService interface {
     GoDoNothing(ctx context.Context) (error)
 }
 
-type MyServiceChannelClientInterface interface {
-    thrift.ClientInterface
-    MyService
-}
-
 type MyServiceClientInterface interface {
     thrift.ClientInterface
     MyService
@@ -46,7 +41,7 @@ type MyServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyServiceChannelClientInterface = (*MyServiceChannelClient)(nil)
+var _ MyServiceClientInterface = (*MyServiceChannelClient)(nil)
 
 func NewMyServiceChannelClient(channel thrift.RequestChannel) *MyServiceChannelClient {
     return &MyServiceChannelClient{
@@ -615,11 +610,6 @@ type MyServicePrioParent interface {
     Pong(ctx context.Context) (error)
 }
 
-type MyServicePrioParentChannelClientInterface interface {
-    thrift.ClientInterface
-    MyServicePrioParent
-}
-
 type MyServicePrioParentClientInterface interface {
     thrift.ClientInterface
     MyServicePrioParent
@@ -629,7 +619,7 @@ type MyServicePrioParentChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyServicePrioParentChannelClientInterface = (*MyServicePrioParentChannelClient)(nil)
+var _ MyServicePrioParentClientInterface = (*MyServicePrioParentChannelClient)(nil)
 
 func NewMyServicePrioParentChannelClient(channel thrift.RequestChannel) *MyServicePrioParentChannelClient {
     return &MyServicePrioParentChannelClient{
@@ -846,11 +836,6 @@ type MyServicePrioChild interface {
     Pang(ctx context.Context) (error)
 }
 
-type MyServicePrioChildChannelClientInterface interface {
-    thrift.ClientInterface
-    MyServicePrioChild
-}
-
 type MyServicePrioChildClientInterface interface {
     thrift.ClientInterface
     MyServicePrioChild
@@ -862,7 +847,7 @@ type MyServicePrioChildChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyServicePrioChildChannelClientInterface = (*MyServicePrioChildChannelClient)(nil)
+var _ MyServicePrioChildClientInterface = (*MyServicePrioChildChannelClient)(nil)
 
 func NewMyServicePrioChildChannelClient(channel thrift.RequestChannel) *MyServicePrioChildChannelClient {
     return &MyServicePrioChildChannelClient{
@@ -986,11 +971,6 @@ type BadService interface {
     Bar(ctx context.Context) (int32, error)
 }
 
-type BadServiceChannelClientInterface interface {
-    thrift.ClientInterface
-    BadService
-}
-
 type BadServiceClientInterface interface {
     thrift.ClientInterface
     BadService
@@ -1000,7 +980,7 @@ type BadServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ BadServiceChannelClientInterface = (*BadServiceChannelClient)(nil)
+var _ BadServiceClientInterface = (*BadServiceChannelClient)(nil)
 
 func NewBadServiceChannelClient(channel thrift.RequestChannel) *BadServiceChannelClient {
     return &BadServiceChannelClient{
@@ -1150,11 +1130,6 @@ type FooBarBazService interface {
     Baz(ctx context.Context) (error)
 }
 
-type FooBarBazServiceChannelClientInterface interface {
-    thrift.ClientInterface
-    FooBarBazService
-}
-
 type FooBarBazServiceClientInterface interface {
     thrift.ClientInterface
     FooBarBazService
@@ -1164,7 +1139,7 @@ type FooBarBazServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ FooBarBazServiceChannelClientInterface = (*FooBarBazServiceChannelClient)(nil)
+var _ FooBarBazServiceClientInterface = (*FooBarBazServiceChannelClient)(nil)
 
 func NewFooBarBazServiceChannelClient(channel thrift.RequestChannel) *FooBarBazServiceChannelClient {
     return &FooBarBazServiceChannelClient{

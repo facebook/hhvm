@@ -26,11 +26,6 @@ type FooService interface {
     SimpleRPC(ctx context.Context) (error)
 }
 
-type FooServiceChannelClientInterface interface {
-    thrift.ClientInterface
-    FooService
-}
-
 type FooServiceClientInterface interface {
     thrift.ClientInterface
     FooService
@@ -40,7 +35,7 @@ type FooServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ FooServiceChannelClientInterface = (*FooServiceChannelClient)(nil)
+var _ FooServiceClientInterface = (*FooServiceChannelClient)(nil)
 
 func NewFooServiceChannelClient(channel thrift.RequestChannel) *FooServiceChannelClient {
     return &FooServiceChannelClient{
@@ -187,11 +182,6 @@ type FB303Service interface {
     SimpleRPC(ctx context.Context, intParameter int32) (*ReservedKeyword, error)
 }
 
-type FB303ServiceChannelClientInterface interface {
-    thrift.ClientInterface
-    FB303Service
-}
-
 type FB303ServiceClientInterface interface {
     thrift.ClientInterface
     FB303Service
@@ -201,7 +191,7 @@ type FB303ServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ FB303ServiceChannelClientInterface = (*FB303ServiceChannelClient)(nil)
+var _ FB303ServiceClientInterface = (*FB303ServiceChannelClient)(nil)
 
 func NewFB303ServiceChannelClient(channel thrift.RequestChannel) *FB303ServiceChannelClient {
     return &FB303ServiceChannelClient{
@@ -360,11 +350,6 @@ type MyService interface {
     RpcSkippedCodegen(ctx context.Context) (error)
 }
 
-type MyServiceChannelClientInterface interface {
-    thrift.ClientInterface
-    MyService
-}
-
 type MyServiceClientInterface interface {
     thrift.ClientInterface
     MyService
@@ -374,7 +359,7 @@ type MyServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyServiceChannelClientInterface = (*MyServiceChannelClient)(nil)
+var _ MyServiceClientInterface = (*MyServiceChannelClient)(nil)
 
 func NewMyServiceChannelClient(channel thrift.RequestChannel) *MyServiceChannelClient {
     return &MyServiceChannelClient{
@@ -1137,11 +1122,6 @@ type DbMixedStackArguments interface {
     GetDataByKey1(ctx context.Context, key string) ([]byte, error)
 }
 
-type DbMixedStackArgumentsChannelClientInterface interface {
-    thrift.ClientInterface
-    DbMixedStackArguments
-}
-
 type DbMixedStackArgumentsClientInterface interface {
     thrift.ClientInterface
     DbMixedStackArguments
@@ -1151,7 +1131,7 @@ type DbMixedStackArgumentsChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ DbMixedStackArgumentsChannelClientInterface = (*DbMixedStackArgumentsChannelClient)(nil)
+var _ DbMixedStackArgumentsClientInterface = (*DbMixedStackArgumentsChannelClient)(nil)
 
 func NewDbMixedStackArgumentsChannelClient(channel thrift.RequestChannel) *DbMixedStackArgumentsChannelClient {
     return &DbMixedStackArgumentsChannelClient{

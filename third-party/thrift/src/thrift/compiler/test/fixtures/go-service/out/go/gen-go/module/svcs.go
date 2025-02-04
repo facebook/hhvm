@@ -47,11 +47,6 @@ type GetEntity interface {
     GetErr1Collision(ctx context.Context, err int64, err1 int64) (int32, error)
 }
 
-type GetEntityChannelClientInterface interface {
-    thrift.ClientInterface
-    GetEntity
-}
-
 type GetEntityClientInterface interface {
     thrift.ClientInterface
     GetEntity
@@ -61,7 +56,7 @@ type GetEntityChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ GetEntityChannelClientInterface = (*GetEntityChannelClient)(nil)
+var _ GetEntityClientInterface = (*GetEntityChannelClient)(nil)
 
 func NewGetEntityChannelClient(channel thrift.RequestChannel) *GetEntityChannelClient {
     return &GetEntityChannelClient{

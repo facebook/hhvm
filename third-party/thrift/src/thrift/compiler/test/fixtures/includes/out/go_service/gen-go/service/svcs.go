@@ -31,11 +31,6 @@ type MyService interface {
     HasArgDocs(ctx context.Context, s *module.MyStruct, i *includes.Included) (error)
 }
 
-type MyServiceChannelClientInterface interface {
-    thrift.ClientInterface
-    MyService
-}
-
 type MyServiceClientInterface interface {
     thrift.ClientInterface
     MyService
@@ -45,7 +40,7 @@ type MyServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ MyServiceChannelClientInterface = (*MyServiceChannelClient)(nil)
+var _ MyServiceClientInterface = (*MyServiceChannelClient)(nil)
 
 func NewMyServiceChannelClient(channel thrift.RequestChannel) *MyServiceChannelClient {
     return &MyServiceChannelClient{

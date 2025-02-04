@@ -30,11 +30,6 @@
     {{/service:functions}}
 }
 
-type {{service:go_name}}ChannelClientInterface interface {
-    thrift.ClientInterface
-    {{service:go_name}}
-}
-
 type {{service:go_name}}ClientInterface interface {
     thrift.ClientInterface
     {{service:go_name}}

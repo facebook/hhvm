@@ -32,11 +32,6 @@ type Finder interface {
     PreviousPlate(ctx context.Context, plate Plate) (Plate, error)
 }
 
-type FinderChannelClientInterface interface {
-    thrift.ClientInterface
-    Finder
-}
-
 type FinderClientInterface interface {
     thrift.ClientInterface
     Finder
@@ -46,7 +41,7 @@ type FinderChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ FinderChannelClientInterface = (*FinderChannelClient)(nil)
+var _ FinderClientInterface = (*FinderChannelClient)(nil)
 
 func NewFinderChannelClient(channel thrift.RequestChannel) *FinderChannelClient {
     return &FinderChannelClient{

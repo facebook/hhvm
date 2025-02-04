@@ -27,11 +27,6 @@ type Dummy interface {
     OnewayRPC(ctx context.Context, value string) (error)
 }
 
-type DummyChannelClientInterface interface {
-    thrift.ClientInterface
-    Dummy
-}
-
 type DummyClientInterface interface {
     thrift.ClientInterface
     Dummy
@@ -41,7 +36,7 @@ type DummyChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ DummyChannelClientInterface = (*DummyChannelClient)(nil)
+var _ DummyClientInterface = (*DummyChannelClient)(nil)
 
 func NewDummyChannelClient(channel thrift.RequestChannel) *DummyChannelClient {
     return &DummyChannelClient{

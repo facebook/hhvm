@@ -26,11 +26,6 @@ type Service interface {
     Func(ctx context.Context, arg1 StringWithAdapter_7208, arg2 string, arg3 *Foo) (MyI32_4873, error)
 }
 
-type ServiceChannelClientInterface interface {
-    thrift.ClientInterface
-    Service
-}
-
 type ServiceClientInterface interface {
     thrift.ClientInterface
     Service
@@ -40,7 +35,7 @@ type ServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ ServiceChannelClientInterface = (*ServiceChannelClient)(nil)
+var _ ServiceClientInterface = (*ServiceChannelClient)(nil)
 
 func NewServiceChannelClient(channel thrift.RequestChannel) *ServiceChannelClient {
     return &ServiceChannelClient{
@@ -193,11 +188,6 @@ type AdapterService interface {
     AdaptedTypes(ctx context.Context, arg *HeapAllocated) (*HeapAllocated, error)
 }
 
-type AdapterServiceChannelClientInterface interface {
-    thrift.ClientInterface
-    AdapterService
-}
-
 type AdapterServiceClientInterface interface {
     thrift.ClientInterface
     AdapterService
@@ -207,7 +197,7 @@ type AdapterServiceChannelClient struct {
     ch thrift.RequestChannel
 }
 // Compile time interface enforcer
-var _ AdapterServiceChannelClientInterface = (*AdapterServiceChannelClient)(nil)
+var _ AdapterServiceClientInterface = (*AdapterServiceChannelClient)(nil)
 
 func NewAdapterServiceChannelClient(channel thrift.RequestChannel) *AdapterServiceChannelClient {
     return &AdapterServiceChannelClient{

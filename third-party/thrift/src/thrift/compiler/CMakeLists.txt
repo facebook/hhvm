@@ -120,6 +120,7 @@ add_library(
   parse/token.cc
   parse/token.h
   sema/check_initializer.cc
+  sema/check_map_keys.cc
   sema/explicit_include_validator.cc
   sema/scope_validator.cc
   sema/sema.cc

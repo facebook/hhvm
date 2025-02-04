@@ -486,7 +486,11 @@ class structure_annotations {
         to_remove.emplace_back(name, data);
       } else if (name == "rust.serde") {
         to_remove.emplace_back(name, data);
-        to_add.insert(fmt::format("@rust.Serde{{enabled = {}}}", data.value));
+        if (data.value == "false") {
+          to_add.insert("@rust.Serde{enabled = false}");
+        } else {
+          to_add.insert("@rust.Serde");
+        }
         fm_.add_include("thrift/annotation/rust.thrift");
       } else if (name == "rust.mod") {
         to_remove.emplace_back(name, data);

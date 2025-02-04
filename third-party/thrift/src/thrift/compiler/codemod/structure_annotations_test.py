@@ -446,6 +446,8 @@ class StructureAnnotations(unittest.TestCase):
                     1: i32 (rust.type = "u32") f (rust.name = "foo", rust.box, rust.type = "foo");
                 } (rust.arc, rust.copy, rust.exhaustive, rust.ord, rust.serde = "true", rust.mod = "foo", rust.derive = "Foo, Bar")
 
+                struct SerdeOptOut {} (rust.serde = "false")
+
                 service S {} (rust.request_context)
 
                 """
@@ -467,13 +469,16 @@ class StructureAnnotations(unittest.TestCase):
                 @rust.Exhaustive
                 @rust.Mod{name = "foo"}
                 @rust.Ord
-                @rust.Serde{enabled = true}
+                @rust.Serde
                 struct S {
                   @rust.Box
                   @rust.Name{name = "foo"}
                   @rust.Type{name = "u32"}
                   1: i32  f ;
                 }
+
+                @rust.Serde{enabled = false}
+                struct SerdeOptOut {}
 
                 @rust.RequestContext
                 service S {}

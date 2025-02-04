@@ -174,37 +174,6 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 };
 
 template <>
-struct Extractor<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>
-    : public BaseExtractor<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault> {
-  static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault> operator()(PyObject* obj);
-  int typeCheck(PyObject* obj);
-};
-
-template <>
-struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>>
-    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>> {
-  ExtractorResult<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault> operator()(PyObject* obj);
-};
-
-template <>
-struct Constructor<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>
-    : public BaseConstructor<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault> {
-  static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::terse_write::TerseStructWithCustomDefault& val);
-};
-
-template <>
-struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>>
-    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>> {
-  PyObject* operator()(const ::facebook::thrift::test::terse_write::TerseStructWithCustomDefault& val);
-};
-
-template <>
 struct Extractor<::facebook::thrift::test::terse_write::AdaptedFields>
     : public BaseExtractor<::facebook::thrift::test::terse_write::AdaptedFields> {
   static const bool kUsingMarshal = false;
@@ -233,37 +202,6 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
         ::facebook::thrift::test::terse_write::AdaptedFields>> {
   PyObject* operator()(const ::facebook::thrift::test::terse_write::AdaptedFields& val);
-};
-
-template <>
-struct Extractor<::facebook::thrift::test::terse_write::WrappedFields>
-    : public BaseExtractor<::facebook::thrift::test::terse_write::WrappedFields> {
-  static const bool kUsingMarshal = true;
-  ExtractorResult<::facebook::thrift::test::terse_write::WrappedFields> operator()(PyObject* obj);
-  int typeCheck(PyObject* obj);
-};
-
-template <>
-struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::WrappedFields>>
-    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::WrappedFields>> {
-  ExtractorResult<::facebook::thrift::test::terse_write::WrappedFields> operator()(PyObject* obj);
-};
-
-template <>
-struct Constructor<::facebook::thrift::test::terse_write::WrappedFields>
-    : public BaseConstructor<::facebook::thrift::test::terse_write::WrappedFields> {
-  static const bool kUsingMarshal = true;
-  PyObject* operator()(const ::facebook::thrift::test::terse_write::WrappedFields& val);
-};
-
-template <>
-struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::WrappedFields>>
-    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::WrappedFields>> {
-  PyObject* operator()(const ::facebook::thrift::test::terse_write::WrappedFields& val);
 };
 
 template <>

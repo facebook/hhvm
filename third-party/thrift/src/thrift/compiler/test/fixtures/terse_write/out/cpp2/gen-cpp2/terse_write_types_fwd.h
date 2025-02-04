@@ -15,9 +15,7 @@ class MyUnion;
 class MyStructWithCustomDefault;
 class StructLevelTerseStruct;
 class FieldLevelTerseStruct;
-class TerseStructWithCustomDefault;
 class AdaptedFields;
-class WrappedFields;
 class TerseException;
 } // namespace facebook::thrift::test::terse_write
 // END forward_declare

@@ -143,30 +143,6 @@ StructMetadata<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::ge
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("terse_write.TerseStructWithCustomDefault", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
-  }
-  ::apache::thrift::metadata::ThriftStruct& terse_write_TerseStructWithCustomDefault = res.first->second;
-  terse_write_TerseStructWithCustomDefault.name() = "terse_write.TerseStructWithCustomDefault";
-  terse_write_TerseStructWithCustomDefault.is_union() = false;
-  static const auto* const
-  terse_write_TerseStructWithCustomDefault_fields = new std::array<EncodedThriftField, 14>{ {
-    { 1, "bool_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ }},    { 2, "byte_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{ }},    { 3, "short_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{ }},    { 4, "int_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ }},    { 5, "long_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ }},    { 6, "float_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{ }},    { 7, "double_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ }},    { 8, "string_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ }},    { 9, "binary_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ }},    { 10, "enum_field", false, std::make_unique<Enum<::facebook::thrift::test::terse_write::MyEnum>>("terse_write.MyEnum"), std::vector<ThriftConstStruct>{ }},    { 11, "list_field", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ }},    { 12, "set_field", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ }},    { 13, "map_field", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{ }},    { 14, "struct_field", false, std::make_unique<Struct<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>>("terse_write.MyStructWithCustomDefault"), std::vector<ThriftConstStruct>{ }},  }};
-  for (const auto& f : *terse_write_TerseStructWithCustomDefault_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
-    terse_write_TerseStructWithCustomDefault.fields()->push_back(std::move(field));
-  }
-  terse_write_TerseStructWithCustomDefault.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct_ref());
-  return res.first->second;
-}
-const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::AdaptedFields>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("terse_write.AdaptedFields", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
@@ -188,30 +164,6 @@ StructMetadata<::facebook::thrift::test::terse_write::AdaptedFields>::gen(Thrift
     terse_write_AdaptedFields.fields()->push_back(std::move(field));
   }
   terse_write_AdaptedFields.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct_ref());
-  return res.first->second;
-}
-const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::facebook::thrift::test::terse_write::WrappedFields>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("terse_write.WrappedFields", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
-  }
-  ::apache::thrift::metadata::ThriftStruct& terse_write_WrappedFields = res.first->second;
-  terse_write_WrappedFields.name() = "terse_write.WrappedFields";
-  terse_write_WrappedFields.is_union() = false;
-  static const auto* const
-  terse_write_WrappedFields_fields = new std::array<EncodedThriftField, 1>{ {
-    { 1, "field1", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("hack.FieldWrapper", { {"name", cvString("\\MyFieldWrapper") } }).cv_struct_ref(), }},  }};
-  for (const auto& f : *terse_write_WrappedFields_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
-    terse_write_WrappedFields.fields()->push_back(std::move(field));
-  }
-  terse_write_WrappedFields.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {  }).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&

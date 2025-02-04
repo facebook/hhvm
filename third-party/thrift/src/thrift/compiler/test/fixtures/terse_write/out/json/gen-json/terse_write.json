@@ -33,16 +33,16 @@
   },
   "typedefs" : {
     "MyInteger" : {
-      "lineno" : 140,
+      "lineno" : 122,
       "type_enum" : "I32",
       "spec_args" : null,
       "source_range" : {
         "begin" : {
-          "line" : 140,
+          "line" : 122,
           "column" : 1
         },
         "end" : {
-          "line" : 142,
+          "line" : 124,
           "column" : 22
         }
       }
@@ -1036,248 +1036,8 @@
         }
       }
     },
-    "TerseStructWithCustomDefault" : {
-      "lineno" : 122,
-      "is_exception" : false,
-      "is_union" : false,
-      "fields" : {
-        "bool_field" : {
-          "type_enum" : "BOOL",
-          "spec_args" : null,
-          "required" : true,
-          "default_value" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 124,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 124,
-              "column" : 29
-            }
-          }
-        },
-        "byte_field" : {
-          "type_enum" : "BYTE",
-          "spec_args" : null,
-          "required" : true,
-          "default_value" : 1,
-          "source_range" : {
-            "begin" : {
-              "line" : 125,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 125,
-              "column" : 26
-            }
-          }
-        },
-        "short_field" : {
-          "type_enum" : "I16",
-          "spec_args" : null,
-          "required" : true,
-          "default_value" : 2,
-          "source_range" : {
-            "begin" : {
-              "line" : 126,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 126,
-              "column" : 26
-            }
-          }
-        },
-        "int_field" : {
-          "type_enum" : "I32",
-          "spec_args" : null,
-          "required" : true,
-          "default_value" : 3,
-          "source_range" : {
-            "begin" : {
-              "line" : 127,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 127,
-              "column" : 24
-            }
-          }
-        },
-        "long_field" : {
-          "type_enum" : "I64",
-          "spec_args" : null,
-          "required" : true,
-          "default_value" : 4,
-          "source_range" : {
-            "begin" : {
-              "line" : 128,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 128,
-              "column" : 25
-            }
-          }
-        },
-        "float_field" : {
-          "type_enum" : "FLOAT",
-          "spec_args" : null,
-          "required" : true,
-          "default_value" : 5,
-          "source_range" : {
-            "begin" : {
-              "line" : 129,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 129,
-              "column" : 30
-            }
-          }
-        },
-        "double_field" : {
-          "type_enum" : "DOUBLE",
-          "spec_args" : null,
-          "required" : true,
-          "default_value" : 6,
-          "source_range" : {
-            "begin" : {
-              "line" : 130,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 130,
-              "column" : 32
-            }
-          }
-        },
-        "string_field" : {
-          "type_enum" : "STRING",
-          "spec_args" : null,
-          "required" : true,
-          "default_value" : "7",
-          "source_range" : {
-            "begin" : {
-              "line" : 131,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 131,
-              "column" : 32
-            }
-          }
-        },
-        "binary_field" : {
-          "type_enum" : "STRING",
-          "spec_args" : null,
-          "required" : true,
-          "default_value" : "8",
-          "source_range" : {
-            "begin" : {
-              "line" : 132,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 132,
-              "column" : 32
-            }
-          }
-        },
-        "enum_field" : {
-          "type_enum" : "ENUM",
-          "spec_args" : "MyEnum",
-          "required" : true,
-          "default_value" : 1,
-          "source_range" : {
-            "begin" : {
-              "line" : 133,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 133,
-              "column" : 38
-            }
-          }
-        },
-        "list_field" : {
-          "type_enum" : "LIST",
-          "spec_args" : { "type_enum" : "I16", "spec_args" : null} ,
-          "required" : true,
-          "default_value" : [ 1 ],
-          "source_range" : {
-            "begin" : {
-              "line" : 134,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 134,
-              "column" : 34
-            }
-          }
-        },
-        "set_field" : {
-          "type_enum" : "SET",
-          "spec_args" : { "type_enum" : "I16", "spec_args" : null} ,
-          "required" : true,
-          "default_value" : [ 1 ],
-          "source_range" : {
-            "begin" : {
-              "line" : 135,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 135,
-              "column" : 32
-            }
-          }
-        },
-        "map_field" : {
-          "type_enum" : "MAP",
-          "spec_args" : { "key_type" : { "type_enum" : "I16", "spec_args" : null }, "val_type" : { "type_enum" : "I16", "spec_args" : null} } ,
-          "required" : true,
-          "default_value" : { "1" : 1 },
-          "source_range" : {
-            "begin" : {
-              "line" : 136,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 136,
-              "column" : 40
-            }
-          }
-        },
-        "struct_field" : {
-          "type_enum" : "STRUCT",
-          "spec_args" : "MyStructWithCustomDefault",
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 137,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 137,
-              "column" : 46
-            }
-          }
-        }
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 122,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 138,
-          "column" : 2
-        }
-      }
-    },
     "AdaptedFields" : {
-      "lineno" : 144,
+      "lineno" : 126,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -1287,11 +1047,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 146,
+              "line" : 128,
               "column" : 3
             },
             "end" : {
-              "line" : 146,
+              "line" : 128,
               "column" : 23
             }
           }
@@ -1302,11 +1062,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 147,
+              "line" : 129,
               "column" : 3
             },
             "end" : {
-              "line" : 149,
+              "line" : 131,
               "column" : 17
             }
           }
@@ -1317,11 +1077,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 150,
+              "line" : 132,
               "column" : 3
             },
             "end" : {
-              "line" : 151,
+              "line" : 133,
               "column" : 23
             }
           }
@@ -1329,50 +1089,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 144,
+          "line" : 126,
           "column" : 1
         },
         "end" : {
-          "line" : 152,
-          "column" : 2
-        }
-      }
-    },
-    "WrappedFields" : {
-      "lineno" : 154,
-      "is_exception" : false,
-      "is_union" : false,
-      "fields" : {
-        "field1" : {
-          "type_enum" : "I32",
-          "spec_args" : null,
-          "required" : true,
-          "default_value" : 7,
-          "source_range" : {
-            "begin" : {
-              "line" : 156,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 157,
-              "column" : 21
-            }
-          }
-        }
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 154,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 158,
+          "line" : 134,
           "column" : 2
         }
       }
     },
     "TerseException" : {
-      "lineno" : 160,
+      "lineno" : 136,
       "is_exception" : true,
       "is_union" : false,
       "fields" : {
@@ -1382,11 +1109,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 162,
+              "line" : 138,
               "column" : 3
             },
             "end" : {
-              "line" : 163,
+              "line" : 139,
               "column" : 17
             }
           }
@@ -1394,11 +1121,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 160,
+          "line" : 136,
           "column" : 1
         },
         "end" : {
-          "line" : 164,
+          "line" : 140,
           "column" : 2
         }
       }

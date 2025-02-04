@@ -17,5 +17,5 @@ if sys.version_info[0] >= 3:
   long = int
 
 
-from .ttypes import UTF8STRINGS, MyEnum, MyStruct, MyUnion, MyStructWithCustomDefault, StructLevelTerseStruct, FieldLevelTerseStruct, TerseStructWithCustomDefault, AdaptedFields, WrappedFields, TerseException, MyInteger
+from .ttypes import UTF8STRINGS, MyEnum, MyStruct, MyUnion, MyStructWithCustomDefault, StructLevelTerseStruct, FieldLevelTerseStruct, AdaptedFields, TerseException, MyInteger
 

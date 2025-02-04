@@ -192,17 +192,6 @@ var (
 
         }
     }()
-    premadeCodecTypeSpec_terse_write_TerseStructWithCustomDefault = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "terse_write.TerseStructWithCustomDefault",
-            CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "terse_write.TerseStructWithCustomDefault",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewTerseStructWithCustomDefault() },
-},
-
-        }
-    }()
     premadeCodecTypeSpec_terse_write_MyInteger = func() *thrift.TypeSpec {
         return &thrift.TypeSpec{
             FullName: "terse_write.MyInteger",
@@ -220,17 +209,6 @@ var (
     ScopedName: "terse_write.AdaptedFields",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewAdaptedFields() },
-},
-
-        }
-    }()
-    premadeCodecTypeSpec_terse_write_WrappedFields = func() *thrift.TypeSpec {
-        return &thrift.TypeSpec{
-            FullName: "terse_write.WrappedFields",
-            CodecStructSpec: &thrift.CodecStructSpec{
-    ScopedName: "terse_write.WrappedFields",
-    IsUnion:    false,
-    NewFunc:    func() thrift.Struct { return NewWrappedFields() },
 },
 
         }
@@ -920,160 +898,6 @@ var (
     },
 }
     }()
-    premadeStructSpec_TerseStructWithCustomDefault = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
-    Name:                 "TerseStructWithCustomDefault",
-    ScopedName:           "terse_write.TerseStructWithCustomDefault",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.BOOL,
-            Name:                 "bool_field",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_bool,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   2,
-            WireType:             thrift.BYTE,
-            Name:                 "byte_field",
-            ReflectIndex:         1,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_byte,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   3,
-            WireType:             thrift.I16,
-            Name:                 "short_field",
-            ReflectIndex:         2,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_i16,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   4,
-            WireType:             thrift.I32,
-            Name:                 "int_field",
-            ReflectIndex:         3,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_i32,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   5,
-            WireType:             thrift.I64,
-            Name:                 "long_field",
-            ReflectIndex:         4,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_i64,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   6,
-            WireType:             thrift.FLOAT,
-            Name:                 "float_field",
-            ReflectIndex:         5,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_float,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   7,
-            WireType:             thrift.DOUBLE,
-            Name:                 "double_field",
-            ReflectIndex:         6,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_double,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   8,
-            WireType:             thrift.STRING,
-            Name:                 "string_field",
-            ReflectIndex:         7,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_string,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   9,
-            WireType:             thrift.STRING,
-            Name:                 "binary_field",
-            ReflectIndex:         8,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_binary,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   10,
-            WireType:             thrift.I32,
-            Name:                 "enum_field",
-            ReflectIndex:         9,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_terse_write_MyEnum,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   11,
-            WireType:             thrift.LIST,
-            Name:                 "list_field",
-            ReflectIndex:         10,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_list_i16,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   12,
-            WireType:             thrift.SET,
-            Name:                 "set_field",
-            ReflectIndex:         11,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_set_i16,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   13,
-            WireType:             thrift.MAP,
-            Name:                 "map_field",
-            ReflectIndex:         12,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_map_i16_i16,
-            MustBeSetToSerialize: false,
-        },        {
-            ID:                   14,
-            WireType:             thrift.STRUCT,
-            Name:                 "struct_field",
-            ReflectIndex:         13,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_terse_write_MyStructWithCustomDefault,
-            MustBeSetToSerialize: true,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-        2: 1,
-        3: 2,
-        4: 3,
-        5: 4,
-        6: 5,
-        7: 6,
-        8: 7,
-        9: 8,
-        10: 9,
-        11: 10,
-        12: 11,
-        13: 12,
-        14: 13,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "bool_field": 0,
-        "byte_field": 1,
-        "short_field": 2,
-        "int_field": 3,
-        "long_field": 4,
-        "float_field": 5,
-        "double_field": 6,
-        "string_field": 7,
-        "binary_field": 8,
-        "enum_field": 9,
-        "list_field": 10,
-        "set_field": 11,
-        "map_field": 12,
-        "struct_field": 13,
-    },
-}
-    }()
     premadeStructSpec_AdaptedFields = func() *thrift.StructSpec {
         return &thrift.StructSpec{
     Name:                 "AdaptedFields",
@@ -1118,30 +942,6 @@ var (
     },
 }
     }()
-    premadeStructSpec_WrappedFields = func() *thrift.StructSpec {
-        return &thrift.StructSpec{
-    Name:                 "WrappedFields",
-    ScopedName:           "terse_write.WrappedFields",
-    IsUnion:              false,
-    IsException:          false,
-    FieldSpecs:           []thrift.FieldSpec{
-        {
-            ID:                   1,
-            WireType:             thrift.I32,
-            Name:                 "field1",
-            ReflectIndex:         0,
-            IsOptional:           false,
-            ValueTypeSpec:        premadeCodecTypeSpec_i32,
-            MustBeSetToSerialize: false,
-        },    },
-    FieldSpecIDToIndex:   map[int16]int{
-        1: 0,
-    },
-    FieldSpecNameToIndex: map[string]int{
-        "field1": 0,
-    },
-}
-    }()
     premadeStructSpec_TerseException = func() *thrift.StructSpec {
         return &thrift.StructSpec{
     Name:                 "TerseException",
@@ -1176,9 +976,7 @@ var premadeStructSpecs = func() []*thrift.StructSpec {
     fbthriftResults = append(fbthriftResults, premadeStructSpec_MyStructWithCustomDefault)
     fbthriftResults = append(fbthriftResults, premadeStructSpec_StructLevelTerseStruct)
     fbthriftResults = append(fbthriftResults, premadeStructSpec_FieldLevelTerseStruct)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_TerseStructWithCustomDefault)
     fbthriftResults = append(fbthriftResults, premadeStructSpec_AdaptedFields)
-    fbthriftResults = append(fbthriftResults, premadeStructSpec_WrappedFields)
     fbthriftResults = append(fbthriftResults, premadeStructSpec_TerseException)
     return fbthriftResults
 }()
@@ -1200,10 +998,8 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_MyStructWithCustomDefault.FullName] = premadeCodecTypeSpec_terse_write_MyStructWithCustomDefault
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_StructLevelTerseStruct.FullName] = premadeCodecTypeSpec_terse_write_StructLevelTerseStruct
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_FieldLevelTerseStruct.FullName] = premadeCodecTypeSpec_terse_write_FieldLevelTerseStruct
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_TerseStructWithCustomDefault.FullName] = premadeCodecTypeSpec_terse_write_TerseStructWithCustomDefault
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_MyInteger.FullName] = premadeCodecTypeSpec_terse_write_MyInteger
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_AdaptedFields.FullName] = premadeCodecTypeSpec_terse_write_AdaptedFields
-    fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_WrappedFields.FullName] = premadeCodecTypeSpec_terse_write_WrappedFields
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_TerseException.FullName] = premadeCodecTypeSpec_terse_write_TerseException
     return fbthriftTypeSpecsMap
 }()

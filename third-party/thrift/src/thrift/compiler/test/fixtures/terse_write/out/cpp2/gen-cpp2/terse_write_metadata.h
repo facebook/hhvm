@@ -48,17 +48,7 @@ class StructMetadata<::facebook::thrift::test::terse_write::FieldLevelTerseStruc
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-template <>
 class StructMetadata<::facebook::thrift::test::terse_write::AdaptedFields> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-template <>
-class StructMetadata<::facebook::thrift::test::terse_write::WrappedFields> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };

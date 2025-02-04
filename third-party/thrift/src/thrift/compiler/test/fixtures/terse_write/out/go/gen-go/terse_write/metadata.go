@@ -119,12 +119,6 @@ var (
                 SetName("terse_write.FieldLevelTerseStruct"),
         )
     }()
-    premadeThriftType_terse_write_TerseStructWithCustomDefault = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("terse_write.TerseStructWithCustomDefault"),
-        )
-    }()
     premadeThriftType_terse_write_MyInteger = func() *metadata.ThriftType {
         return metadata.NewThriftType().SetTTypedef(
             metadata.NewThriftTypedefType().
@@ -136,12 +130,6 @@ var (
         return metadata.NewThriftType().SetTStruct(
             metadata.NewThriftStructType().
                 SetName("terse_write.AdaptedFields"),
-        )
-    }()
-    premadeThriftType_terse_write_WrappedFields = func() *metadata.ThriftType {
-        return metadata.NewThriftType().SetTStruct(
-            metadata.NewThriftStructType().
-                SetName("terse_write.WrappedFields"),
         )
     }()
     premadeThriftType_terse_write_TerseException = func() *metadata.ThriftType {
@@ -177,10 +165,8 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "terse_write.MyStructWithCustomDefault", premadeThriftType_terse_write_MyStructWithCustomDefault })
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "terse_write.StructLevelTerseStruct", premadeThriftType_terse_write_StructLevelTerseStruct })
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "terse_write.FieldLevelTerseStruct", premadeThriftType_terse_write_FieldLevelTerseStruct })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "terse_write.TerseStructWithCustomDefault", premadeThriftType_terse_write_TerseStructWithCustomDefault })
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "terse_write.MyInteger", premadeThriftType_terse_write_MyInteger })
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "terse_write.AdaptedFields", premadeThriftType_terse_write_AdaptedFields })
-    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "terse_write.WrappedFields", premadeThriftType_terse_write_WrappedFields })
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "terse_write.TerseException", premadeThriftType_terse_write_TerseException })
 
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))

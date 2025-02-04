@@ -18,7 +18,7 @@
         "name": "MyInteger",
         "type": "i32",
         "is_exception": false,
-        "lineno": 140
+        "lineno": 122
       }
   },
   "enumerations" :
@@ -719,137 +719,6 @@
         "is_union" : false,
         "lineno" : 71
       },
-      "TerseStructWithCustomDefault" : {
-        "name" : "TerseStructWithCustomDefault",
-        "structured_annotations": {
-          "thrift.TerseWrite" : {
-            "type" : {
-          "type" : "struct",
-          "name" : "TerseWrite",
-          "path" : "thrift/annotation/thrift.thrift"
-        },
-            "value" : {}
-          }
-        },
-        "fields" : {
-          "bool_field" : {
-            "name" : "bool_field",
-            "default_value" : 1,
-            "key" : 1,
-            "lineno" : 124,
-            "type" : "bool"
-                  },
-          "byte_field" : {
-            "name" : "byte_field",
-            "default_value" : 1,
-            "key" : 2,
-            "lineno" : 125,
-            "type" : "byte"
-                  },
-          "short_field" : {
-            "name" : "short_field",
-            "default_value" : 2,
-            "key" : 3,
-            "lineno" : 126,
-            "type" : "i16"
-                  },
-          "int_field" : {
-            "name" : "int_field",
-            "default_value" : 3,
-            "key" : 4,
-            "lineno" : 127,
-            "type" : "i32"
-                  },
-          "long_field" : {
-            "name" : "long_field",
-            "default_value" : 4,
-            "key" : 5,
-            "lineno" : 128,
-            "type" : "i64"
-                  },
-          "float_field" : {
-            "name" : "float_field",
-            "default_value" : 5,
-            "key" : 6,
-            "lineno" : 129,
-            "type" : "float"
-                  },
-          "double_field" : {
-            "name" : "double_field",
-            "default_value" : 6,
-            "key" : 7,
-            "lineno" : 130,
-            "type" : "double"
-                  },
-          "string_field" : {
-            "name" : "string_field",
-            "default_value" : "7",
-            "key" : 8,
-            "lineno" : 131,
-            "type" : "string"
-                  },
-          "binary_field" : {
-            "name" : "binary_field",
-            "default_value" : "8",
-            "key" : 9,
-            "lineno" : 132,
-            "type" : "binary"
-                  },
-          "enum_field" : {
-            "name" : "enum_field",
-            "default_value" : 1,
-            "key" : 10,
-            "lineno" : 133,
-            "type" : {
-      "type" : "enum",
-      "name" : "MyEnum"
-    }
-                  },
-          "list_field" : {
-            "name" : "list_field",
-            "default_value" : [1],
-            "key" : 11,
-            "lineno" : 134,
-            "type" : {
-      "type" : "list",
-      "inner_type" : "i16"
-    }
-                  },
-          "set_field" : {
-            "name" : "set_field",
-            "default_value" : [1],
-            "key" : 12,
-            "lineno" : 135,
-            "type" : {
-      "type" : "set",
-      "inner_type" : "i16"
-    }
-                  },
-          "map_field" : {
-            "name" : "map_field",
-            "default_value" : {"1" : 1},
-            "key" : 13,
-            "lineno" : 136,
-            "type" : {
-      "type" : "map",
-      "key_type" : "i16",
-      "value_type" : "i16"
-    }
-                  },
-          "struct_field" : {
-            "name" : "struct_field",
-            "key" : 14,
-            "lineno" : 137,
-            "type" : {
-      "type" : "struct",
-      "name" : "MyStructWithCustomDefault"
-    }
-                  }
-        },
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 122
-      },
       "AdaptedFields" : {
         "name" : "AdaptedFields",
         "structured_annotations": {
@@ -866,13 +735,13 @@
           "field1" : {
             "name" : "field1",
             "key" : 1,
-            "lineno" : 146,
+            "lineno" : 128,
             "type" : "i32"
                   },
           "field2" : {
             "name" : "field2",
             "key" : 2,
-            "lineno" : 147,
+            "lineno" : 129,
             "type" : "i32"
             ,
             "structured_annotations": {
@@ -897,7 +766,7 @@
           "field3" : {
             "name" : "field3",
             "key" : 3,
-            "lineno" : 150,
+            "lineno" : 132,
             "type" : "i32"
             ,
             "structured_annotations": {
@@ -914,43 +783,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 144
-      },
-      "WrappedFields" : {
-        "name" : "WrappedFields",
-        "structured_annotations": {
-          "thrift.TerseWrite" : {
-            "type" : {
-          "type" : "struct",
-          "name" : "TerseWrite",
-          "path" : "thrift/annotation/thrift.thrift"
-        },
-            "value" : {}
-          }
-        },
-        "fields" : {
-          "field1" : {
-            "name" : "field1",
-            "default_value" : 7,
-            "key" : 1,
-            "lineno" : 156,
-            "type" : "i32"
-            ,
-            "structured_annotations": {
-              "hack.FieldWrapper" : {
-                "type" : {
-              "type" : "struct",
-              "name" : "FieldWrapper",
-              "path" : "thrift/annotation/hack.thrift"
-            },
-                "value" : {"name": "\\MyFieldWrapper"}
-              }
-            }
-          }
-        },
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 154
+        "lineno" : 126
       },
       "TerseException" : {
         "name" : "TerseException",
@@ -968,7 +801,7 @@
           "msg" : {
             "name" : "msg",
             "key" : 1,
-            "lineno" : 162,
+            "lineno" : 138,
             "type" : "string"
             ,
             "structured_annotations": {
@@ -985,7 +818,7 @@
         },
         "is_exception" : true,
         "is_union" : false,
-        "lineno" : 160
+        "lineno" : 136
       }
   },
   "source_path" : "thrift/compiler/test/fixtures/terse_write/src/terse_write",

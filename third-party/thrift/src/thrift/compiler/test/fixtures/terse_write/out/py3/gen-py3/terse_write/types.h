@@ -185,55 +185,6 @@ inline void reset_field<::facebook::thrift::test::terse_write::FieldLevelTerseSt
 }
 
 template<>
-inline void reset_field<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>(
-    ::facebook::thrift::test::terse_write::TerseStructWithCustomDefault& obj, uint16_t index) {
-  switch (index) {
-    case 0:
-      obj.bool_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>().bool_field_ref());
-      return;
-    case 1:
-      obj.byte_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>().byte_field_ref());
-      return;
-    case 2:
-      obj.short_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>().short_field_ref());
-      return;
-    case 3:
-      obj.int_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>().int_field_ref());
-      return;
-    case 4:
-      obj.long_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>().long_field_ref());
-      return;
-    case 5:
-      obj.float_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>().float_field_ref());
-      return;
-    case 6:
-      obj.double_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>().double_field_ref());
-      return;
-    case 7:
-      obj.string_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>().string_field_ref());
-      return;
-    case 8:
-      obj.binary_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>().binary_field_ref());
-      return;
-    case 9:
-      obj.enum_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>().enum_field_ref());
-      return;
-    case 10:
-      obj.list_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>().list_field_ref());
-      return;
-    case 11:
-      obj.set_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>().set_field_ref());
-      return;
-    case 12:
-      obj.map_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>().map_field_ref());
-      return;
-    case 13:
-      obj.struct_field_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>().struct_field_ref());
-      return;
-  }
-}
-
-template<>
 inline void reset_field<::facebook::thrift::test::terse_write::AdaptedFields>(
     ::facebook::thrift::test::terse_write::AdaptedFields& obj, uint16_t index) {
   switch (index) {
@@ -245,16 +196,6 @@ inline void reset_field<::facebook::thrift::test::terse_write::AdaptedFields>(
       return;
     case 2:
       obj.field3_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::AdaptedFields>().field3_ref());
-      return;
-  }
-}
-
-template<>
-inline void reset_field<::facebook::thrift::test::terse_write::WrappedFields>(
-    ::facebook::thrift::test::terse_write::WrappedFields& obj, uint16_t index) {
-  switch (index) {
-    case 0:
-      obj.field1_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::WrappedFields>().field1_ref());
       return;
   }
 }
@@ -321,27 +262,7 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>::namesmap() {
-  static const folly::Indestructible<NamesMap> map {
-    {
-    }
-  };
-  return *map;
-}
-
-template<>
-inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::terse_write::AdaptedFields>::namesmap() {
-  static const folly::Indestructible<NamesMap> map {
-    {
-    }
-  };
-  return *map;
-}
-
-template<>
-inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::facebook::thrift::test::terse_write::WrappedFields>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

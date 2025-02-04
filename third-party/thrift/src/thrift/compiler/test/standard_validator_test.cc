@@ -121,3 +121,72 @@ TEST(StandardValidatorTest, ValidatePy3EnableCppAdapter) {
     typedef i32 MyInt2
   )");
 }
+
+TEST(StandardValidatorTest, ConstMapKeyCollision) {
+  check_compile(R"(
+    enum FooBar {
+      Foo = 1,
+      Bar = 2,
+    }
+
+    const map<FooBar, string> ENUM_OK = {
+      FooBar.Foo: "Foo",
+      FooBar.Bar: "Bar"
+    }
+
+    const map<FooBar, string> ENUM_DUPE = {
+      FooBar.Foo: "Foo",
+      FooBar.Bar: "Bar",
+      FooBar.Bar: "Bar"
+    # expected-warning@-1: Duplicate key in map literal: `2`
+    }
+
+    const map<i64, string> USEFUL_DATA = {
+      1: "a",
+      2: "b",
+      1: "c",
+    # expected-warning@-1: Duplicate key in map literal: `1`
+    };
+
+    const string GREETING = "hey";
+    const string HELLO = "hello";
+    const string SALUTATION = "hey";
+
+    const map<string, string> ARTIFICIAL_INTELLIGENCE = {
+      GREETING: "a",
+      HELLO: "b",
+      SALUTATION: "c",
+    # expected-warning@-1: Duplicate key in map literal: `hey`
+    };
+
+    const list<map<string, i64>> LIST_NESTING = [
+      {"str": 1},
+      {"foo": 1, "bar": 2, "foo": 3},
+    # expected-warning@-1: Duplicate key in map literal: `foo`
+      {"str": 1},
+    ];
+
+    const list<map<i64, string>> CASCADING = [
+      {1: "str"},
+      // Verify no duplicate error on USEFUL_DATA 
+      USEFUL_DATA,
+      {1: "str"},
+    ];
+
+    struct Building {
+      1: map<i64, string> int_str;
+    }
+
+    const Building B = Building {
+      int_str = {4: "a", 5: "b", 4: "c"},
+    # expected-warning@-1: Duplicate key in map literal: `4`
+    };
+
+    const Building C = Building {
+      // Verify no duplicate error on USEFUL_DATA 
+      int_str = USEFUL_DATA,
+    };
+
+
+  )");
+}

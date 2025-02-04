@@ -46,6 +46,13 @@ bool check_initializer(
 bool is_initializer_default_value(
     const t_type& type, const t_const_value& initializer);
 
+/**
+ * Validates that any mapping value in a const initializer contains no duplicate
+ * keys. Checks both top-level and nested maps, e.g., a map field of struct
+ * const.
+ */
+void check_map_keys(diagnostics_engine& diags, const t_const& const_);
+
 void validate_annotation_scopes(sema_context& ctx, const t_named& node);
 
 } // namespace detail

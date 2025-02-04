@@ -654,6 +654,7 @@ void validate_const_type_and_value(sema_context& ctx, const t_const& node) {
           has_experimental_annotation(ctx, node),
       "Using adapters on const `{}` is only allowed in the experimental mode.",
       node.name());
+  detail::check_map_keys(ctx, node);
 }
 
 std::string_view field_qualifier_to_string(t_field_qualifier qualifier) {

@@ -1122,11 +1122,10 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
     }
     runtimeDisableResourcePoolsDeprecated();
   } else {
-    // Need to set this up now to check.
-    ensureProcessedServiceDescriptionInitialized();
-
     // Check whether there are any wildcard services.
-    auto methodMetadata = getDecoratedProcessorFactory().createMethodMetadata();
+    // Need to set this up now to check.
+    auto methodMetadata =
+        ensureDecoratedProcessorFactoryInitialized().createMethodMetadata();
 
     if (auto* methodMetadataMap =
             std::get_if<AsyncProcessorFactory::MethodMetadataMap>(
@@ -1498,6 +1497,7 @@ void ThriftServer::cleanUp() {
   // Clear the service description so that it's re-created if the server
   // is restarted.
   processedServiceDescription_.reset();
+  decoratedProcessorFactory_.reset();
 }
 
 uint64_t ThriftServer::getNumDroppedConnections() const {
@@ -1679,12 +1679,11 @@ void ThriftServer::stopAcceptingAndJoinOutstandingRequests() {
   internalStatus_.store(ServerStatus::NOT_RUNNING, std::memory_order_release);
 }
 
-void ThriftServer::ensureProcessedServiceDescriptionInitialized() {
+AsyncProcessorFactory&
+ThriftServer::ensureDecoratedProcessorFactoryInitialized() {
   DCHECK(getProcessorFactory().get());
-  if (processedServiceDescription_ == nullptr) {
-    auto modules = processModulesSpecification(
-        std::exchange(unprocessedModulesSpecification_, {}));
-    auto decoratedProcessorFactory = createDecoratedProcessorFactory(
+  if (decoratedProcessorFactory_ == nullptr) {
+    decoratedProcessorFactory_ = createDecoratedProcessorFactory(
         getProcessorFactory(),
         getStatusInterface(),
         getMonitoringInterface(),
@@ -1692,11 +1691,18 @@ void ThriftServer::ensureProcessedServiceDescriptionInitialized() {
         getSecurityInterface(),
         isCheckUnimplementedExtraInterfacesAllowed() &&
             THRIFT_FLAG(server_check_unimplemented_extra_interfaces));
+  }
+  return *decoratedProcessorFactory_;
+}
+
+void ThriftServer::ensureProcessedServiceDescriptionInitialized() {
+  ensureDecoratedProcessorFactoryInitialized();
+  if (processedServiceDescription_ == nullptr) {
+    auto modules = processModulesSpecification(
+        std::exchange(unprocessedModulesSpecification_, {}));
     processedServiceDescription_ =
         ProcessedServiceDescription::createAndActivate(
-            *this,
-            ProcessedServiceDescription{
-                std::move(modules), std::move(decoratedProcessorFactory)});
+            *this, ProcessedServiceDescription{std::move(modules)});
   }
 }
 

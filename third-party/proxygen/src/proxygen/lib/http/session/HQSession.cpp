@@ -40,7 +40,6 @@
 
 namespace {
 static const uint16_t kMaxReadsPerLoop = 16;
-static const std::string kNoProtocolString("");
 static const std::string kQUICProtocolName("QUIC");
 constexpr uint64_t kMaxQuarterStreamId = (1ull << 60) - 1;
 

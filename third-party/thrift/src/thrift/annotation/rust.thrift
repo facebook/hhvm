@@ -275,7 +275,7 @@ struct Type {
 @scope.Enum
 @scope.Union
 struct Serde {
-  1: bool enabled;
+  1: bool enabled = true;
 }
 
 // # `rust.Mod`

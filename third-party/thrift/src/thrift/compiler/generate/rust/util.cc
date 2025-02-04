@@ -392,7 +392,7 @@ std::string get_annotation_property_string(
 }
 
 bool get_annotation_property_bool(
-    const t_const* annotation, const std::string& key) {
+    const t_const* annotation, const std::string& key, bool default_value) {
   if (annotation) {
     for (const auto& item : annotation->value()->get_map()) {
       if (item.first->get_string() == key) {
@@ -400,7 +400,7 @@ bool get_annotation_property_bool(
       }
     }
   }
-  return false;
+  return default_value;
 }
 
 namespace {

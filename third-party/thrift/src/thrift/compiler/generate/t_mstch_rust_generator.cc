@@ -192,7 +192,7 @@ bool rust_serde_enabled(
     const rust_codegen_options& options, const t_named& node) {
   if (const t_const* annot =
           node.find_structured_annotation_or_null(kRustSerdeUri)) {
-    return get_annotation_property_bool(annot, "enabled");
+    return get_annotation_property_bool(annot, "enabled", true);
   }
 
   if (const std::string* ann = node.find_annotation_or_null("rust.serde")) {

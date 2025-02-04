@@ -68,7 +68,9 @@ std::string camelcase(const std::string& name);
 std::string quote(const std::string& data, bool do_backslash);
 
 bool get_annotation_property_bool(
-    const t_const* annotation, const std::string& key);
+    const t_const* annotation,
+    const std::string& key,
+    bool default_value = false);
 std::string get_annotation_property_string(
     const t_const* annotation, const std::string& key);
 

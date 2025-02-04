@@ -444,11 +444,15 @@ class standalone_lines_scanner {
               drain_current_line();
               continue;
             }
-            std::string preceding_whitespace;
-            for (cursor c = current_line.start; c != scan_start; ++c) {
-              assert(c->kind == tok::whitespace);
-              preceding_whitespace += c->string_value();
-            }
+            auto preceding_whitespace = std::invoke([&]() -> std::string {
+              if (current_line.start == scan_start) {
+                return {};
+              }
+              // There should be exactly one whitespace token on the line
+              assert(current_line.start->kind == tok::whitespace);
+              assert(std::next(current_line.start) == scan_start);
+              return std::string(current_line.start->string_value());
+            });
             current_line.markings.emplace_back(
                 scan_start, partial_apply{std::move(preceding_whitespace)});
             // Do not strip the left side

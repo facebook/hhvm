@@ -23,7 +23,6 @@ import pywatchman
 
 from . import TempDir
 
-
 try:
     import pwd
 except ImportError:
@@ -211,12 +210,7 @@ class _Instance:
             )
         if self.debug_watchman:
             print("Watchman instance PID: " + str(self.proc.pid))
-            # pyre-fixme[16]: Module `pywatchman` has no attribute `compat`.
-            if pywatchman.compat.PYTHON3:
-                user_input = input
-            else:
-                # pyre-fixme[10]: Name `raw_input` is used but not defined.
-                user_input = raw_input  # noqa:F821
+            user_input = input
             user_input("Press Enter to continue...")
 
         # wait for it to come up

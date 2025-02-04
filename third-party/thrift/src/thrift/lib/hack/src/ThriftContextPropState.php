@@ -107,32 +107,37 @@ final class ThriftContextPropState {
   }
 
   public static function updateFromVC(?IViewerContextBase $vc): void {
-    $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
     if ($vc is IFBViewerContext) {
       self::updateFBUserIdFromVC($vc);
-      $ods->bumpKey('contextprop.fb_vc');
     } else if ($vc is IIGViewerContext) {
       self::updateIGUserIdFromVC($vc);
-      $ods->bumpKey('contextprop.ig_vc');
     } else {
+      $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
       $ods->bumpKey('contextprop.unknown_vc');
     }
   }
 
   private static function updateFBUserIdFromVC(IFBViewerContext $vc): void {
-    $tcps_fb_user_id = self::get()->getFBUserId();
+    $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
+    $ods->bumpKey('contextprop.fb_vc');
     // don't overwrite if TCPS already has a valid fb user id
+    $tcps_fb_user_id = self::get()->getFBUserId();
     if (self::coerceId($tcps_fb_user_id) is nonnull) {
       return;
     }
 
     $fb_user_id = self::coerceId($vc->getUserID());
     if ($fb_user_id is nonnull) {
+      $ods->bumpKey('contextprop.set_fb_user_id');
       self::get()->setFBUserId($fb_user_id);
+    } else {
+      $ods->bumpKey('contextprop.missing_fb_user_id');
     }
   }
 
   private static function updateIGUserIdFromVC(IIGViewerContext $vc): void {
+    $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
+    $ods->bumpKey('contextprop.ig_vc');
     // don't overwrite if TCPS already has a valid ig user id
     $tcps_ig_user_id = self::get()->getIGUserId();
     if (self::coerceId($tcps_ig_user_id) is nonnull) {
@@ -141,7 +146,10 @@ final class ThriftContextPropState {
 
     $ig_user_id = self::coerceId($vc->getViewerID());
     if ($ig_user_id is nonnull) {
+      $ods->bumpKey('contextprop.set_ig_user_id');
       self::get()->setIGUserId($ig_user_id);
+    } else {
+      $ods->bumpKey('contextprop.missing_ig_user_id');
     }
   }
 

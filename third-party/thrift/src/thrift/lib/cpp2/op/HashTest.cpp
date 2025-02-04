@@ -68,7 +68,9 @@ class DebugHasher {
     combine(other.result_);
   }
 
-  bool operator<(const DebugHasher& other) { return result_ < other.result_; }
+  bool operator<(const DebugHasher& other) const {
+    return result_ < other.result_;
+  }
 
  private:
   void handlePrefix() {

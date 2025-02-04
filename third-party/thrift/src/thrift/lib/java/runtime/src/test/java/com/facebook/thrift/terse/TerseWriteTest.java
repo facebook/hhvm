@@ -24,7 +24,6 @@ import static org.junit.Assert.assertNull;
 import com.facebook.thrift.payload.ThriftSerializable;
 import com.facebook.thrift.protocol.ByteBufTProtocol;
 import com.facebook.thrift.test.terse.AdaptedTerseStruct;
-import com.facebook.thrift.test.terse.EmptyStruct;
 import com.facebook.thrift.test.terse.FieldLevelTerseStruct;
 import com.facebook.thrift.test.terse.InnerTerseStruct;
 import com.facebook.thrift.test.terse.MyEnum;
@@ -32,7 +31,6 @@ import com.facebook.thrift.test.terse.MyStruct;
 import com.facebook.thrift.test.terse.PackageLevelTerseStruct;
 import com.facebook.thrift.test.terse.StructLevelTerseStruct;
 import com.facebook.thrift.test.terse.TerseException;
-import com.facebook.thrift.test.terse.TerseStructWithCustomDefault;
 import com.facebook.thrift.test.terse.TerseStructWithPrimitiveTypeAdapter;
 import com.facebook.thrift.test.terse.TerseStructWithStructTypeAdapter;
 import com.facebook.thrift.util.IntrinsicDefaults;
@@ -77,52 +75,6 @@ public class TerseWriteTest {
     assertEquals(IntrinsicDefaults.defaultMap().size(), st.getMapField().size());
     assertNotNull(st.getStructField());
     assertNotNull(st.getInnerField());
-  }
-
-  @Test
-  public void testTerseStructWithCustomDefault() {
-    TerseStructWithCustomDefault st = new TerseStructWithCustomDefault.Builder().build();
-    assertEquals(true, st.isBoolField());
-    assertEquals(1, st.getByteField());
-    assertEquals(2, st.getShortField());
-    assertEquals(3, st.getIntField());
-    assertEquals(4, st.getLongField());
-    assertEquals(5.0f, st.getFloatField(), 0);
-    assertEquals(6.0d, st.getDoubleField(), 0);
-    assertEquals("7", st.getStringField());
-    assertArrayEquals(new byte[] {56}, st.getBinaryField());
-    assertEquals(MyEnum.ME1, st.getEnumField());
-    assertEquals(1, (short) st.getListField().get(0));
-    assertEquals(1, st.getSetField().iterator().next().intValue());
-    assertEquals(1, st.getMapField().size());
-    assertEquals(1, (short) st.getMapField().get((short) 1));
-    assertEquals("5000", st.getAdaptedIntField());
-    assertEquals((Long) 6000L, (Long) st.getDoubleAdaptedIntField());
-    assertNotNull(st.getStructField());
-  }
-
-  @Test
-  public void testTerseStructWithCustomDefaultDeserialized() {
-    ByteBufTProtocol protocol = serialize(new EmptyStruct.Builder().build());
-    // create from an empty struct
-    TerseStructWithCustomDefault st = TerseStructWithCustomDefault.read0(protocol);
-
-    assertEquals(IntrinsicDefaults.defaultBoolean(), st.isBoolField());
-    assertEquals(IntrinsicDefaults.defaultByte(), st.getByteField());
-    assertEquals(IntrinsicDefaults.defaultShort(), st.getShortField());
-    assertEquals(IntrinsicDefaults.defaultInt(), st.getIntField());
-    assertEquals(IntrinsicDefaults.defaultLong(), st.getLongField());
-    assertEquals(IntrinsicDefaults.defaultFloat(), st.getFloatField(), 0);
-    assertEquals(IntrinsicDefaults.defaultDouble(), st.getDoubleField(), 0);
-    assertEquals(IntrinsicDefaults.defaultString(), st.getStringField());
-    assertArrayEquals(IntrinsicDefaults.defaultByteArray(), st.getBinaryField());
-    assertEquals(MyEnum.ME0, st.getEnumField());
-    assertEquals(IntrinsicDefaults.defaultList(), st.getListField());
-    assertEquals(IntrinsicDefaults.defaultSet(), st.getSetField());
-    assertEquals(IntrinsicDefaults.defaultMap(), st.getMapField());
-    assertEquals("0", st.getAdaptedIntField());
-    assertEquals((Long) IntrinsicDefaults.defaultLong(), (Long) st.getDoubleAdaptedIntField());
-    assertNotNull(st.getStructField());
   }
 
   @Test
@@ -249,11 +201,9 @@ public class TerseWriteTest {
     assertEquals("0", st.getAdaptedLongField());
     assertEquals(IntrinsicDefaults.defaultByteBuf(), st.getB1());
     assertEquals("", st.getAdaptedBinaryListField());
-    assertEquals("5000", st.getAdaptedLongDefault());
     assertEquals(null, st.isOptionalAdaptedBooleanField());
     assertEquals(null, st.getOptionalB1());
     assertEquals((Long) 0L, (Long) st.getDoubleAdaptedIntField());
-    assertEquals((Long) 3000L, (Long) st.getDoubleAdaptedIntDefault());
     assertEquals("0", st.getDoubleTypedefAdaptedIntField());
   }
 }

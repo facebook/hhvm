@@ -320,11 +320,9 @@ public class TerseWriteProtocolTest {
     assertEquals(IntrinsicDefaults.defaultLong(), received.getLongField());
     assertEquals(IntrinsicDefaults.defaultByteArray(), received.getB1());
     assertEquals(IntrinsicDefaults.defaultList(), received.getBinaryListField());
-    assertEquals(5000, received.getLongDefault());
     assertEquals(null, received.isOptionalBooleanField());
     assertEquals(null, received.getOptionalB1());
     assertEquals(IntrinsicDefaults.defaultInt(), received.getIntField2());
-    assertEquals(3000, received.getIntDefault2());
     assertEquals(IntrinsicDefaults.defaultInt(), received.getDoubleTypedefIntField());
   }
 

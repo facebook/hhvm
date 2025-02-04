@@ -25,8 +25,6 @@ from apache.thrift.test.terse_write.terse_write.types import (
     FieldLevelTerseStruct,
     MyEnum,
     MyStruct,
-    MyStructWithCustomDefault,
-    TerseStructWithCustomDefault,
 )
 from testing.thrift_types import easy as python_easy, hard as python_hard
 from testing.types import (
@@ -391,31 +389,6 @@ class SerializerTests(SerializerTestBase):
             encoded = serialize(obj, protocol=proto)
             encoded_empty = serialize(empty, protocol=proto)
             self.assertEqual(encoded, encoded_empty)
-
-    # Since empty serializd binary is deserialized, all terse fields should equal
-    # to the intrinsic default.
-    def test_terse_struct_with_custom_default(self) -> None:
-        empty = EmptyStruct()
-        for proto in Protocol:
-            encoded_empty = serialize(empty, protocol=proto)
-            decoded, length = deserialize_with_length(
-                TerseStructWithCustomDefault, encoded_empty, protocol=proto
-            )
-            self.assertIsInstance(decoded, TerseStructWithCustomDefault)
-            self.assertEqual(decoded.bool_field, False)
-            self.assertEqual(decoded.byte_field, 0)
-            self.assertEqual(decoded.short_field, 0)
-            self.assertEqual(decoded.int_field, 0)
-            self.assertEqual(decoded.long_field, 0)
-            self.assertEqual(decoded.float_field, 0.0)
-            self.assertEqual(decoded.double_field, 0.0)
-            self.assertEqual(decoded.string_field, "")
-            self.assertEqual(decoded.binary_field, b"")
-            self.assertEqual(decoded.enum_field, MyEnum.ME0)
-            self.assertEqual(decoded.list_field, [])
-            self.assertEqual(decoded.set_field, set())
-            self.assertEqual(decoded.map_field, {})
-            self.assertEqual(decoded.struct_field, MyStructWithCustomDefault(field1=0))
 
 
 class SerializerForwardCompat(SerializerTestBase):

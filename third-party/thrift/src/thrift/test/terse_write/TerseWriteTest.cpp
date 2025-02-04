@@ -122,10 +122,7 @@ void expect_intrinsic_default(const T& obj) {
   EXPECT_TRUE(obj.set_field()->empty());
   EXPECT_TRUE(obj.map_field()->empty());
   EXPECT_TRUE(apache::thrift::empty(*obj.struct_field()));
-  if constexpr (!std::is_same<terse_write::TerseStructWithCustomDefault, T>::
-                    value) {
-    EXPECT_TRUE(apache::thrift::empty(*obj.union_field()));
-  }
+  EXPECT_TRUE(apache::thrift::empty(*obj.union_field()));
 }
 
 TYPED_TEST_CASE_P(TerseWriteTests);
@@ -226,28 +223,6 @@ void test_mixed_fields_struct() {
 }
 
 template <typename T, typename Serializer>
-void test_mixed_fields_struct_with_custom_default() {
-  T obj;
-
-  apache::thrift::clear(obj);
-
-  auto objs = Serializer::template serialize<std::string>(obj);
-  T objd;
-  EXPECT_EQ(objd.terse_int_field(), 1);
-  EXPECT_EQ(objd.def_int_field(), 2);
-  EXPECT_EQ(objd.opt_int_field().value_unchecked(), 3);
-
-  Serializer::template deserialize(objs, objd);
-
-  EXPECT_EQ(objd.terse_int_field(), 0);
-  EXPECT_EQ(objd.def_int_field(), 0);
-  // Note, since `opt_int_field` is default constructed and the serialization is
-  // skipped, the deserializer will not set the field. Therefore, it will have
-  // custom default value with isset is false.
-  EXPECT_EQ(objd.opt_int_field().value_unchecked(), 3);
-}
-
-template <typename T, typename Serializer>
 void test_nested_mixed_struct() {
   T obj;
 
@@ -259,37 +234,18 @@ void test_nested_mixed_struct() {
   EXPECT_EQ(objd.mixed_field()->terse_int_field(), 0);
   EXPECT_EQ(objd.mixed_field()->def_int_field(), 0);
   EXPECT_EQ(objd.mixed_field()->opt_int_field().value_unchecked(), 0);
-  EXPECT_EQ(objd.mixed_field_with_custom_default()->terse_int_field(), 1);
-  EXPECT_EQ(objd.mixed_field_with_custom_default()->def_int_field(), 2);
-  EXPECT_EQ(
-      objd.mixed_field_with_custom_default()->opt_int_field().value_unchecked(),
-      3);
 
   Serializer::template deserialize(objs, objd);
 
   EXPECT_EQ(objd.mixed_field()->terse_int_field(), 0);
   EXPECT_EQ(objd.mixed_field()->def_int_field(), 0);
   EXPECT_EQ(objd.mixed_field()->opt_int_field().value_unchecked(), 0);
-  EXPECT_EQ(objd.mixed_field_with_custom_default()->terse_int_field(), 0);
-  EXPECT_EQ(objd.mixed_field_with_custom_default()->def_int_field(), 0);
-  EXPECT_EQ(
-      objd.mixed_field_with_custom_default()->opt_int_field().value_unchecked(),
-      3);
 }
 
 TYPED_TEST_P(TerseWriteSerializerTests, MixedFieldsStruct) {
   test_mixed_fields_struct<terse_write::MixedFieldsStruct, TypeParam>();
   test_mixed_fields_struct<
       tablebased_terse_write::MixedFieldsStruct,
-      TypeParam>();
-}
-
-TYPED_TEST_P(TerseWriteSerializerTests, MixedFieldsStructWithCustomDefault) {
-  test_mixed_fields_struct_with_custom_default<
-      terse_write::MixedFieldsStructWithCustomDefault,
-      TypeParam>();
-  test_mixed_fields_struct_with_custom_default<
-      tablebased_terse_write::MixedFieldsStructWithCustomDefault,
       TypeParam>();
 }
 
@@ -347,43 +303,6 @@ TYPED_TEST_P(TerseWriteSerializerTests, CppRefTerseStruct_Empty) {
   EXPECT_EQ(objs, emptys);
 }
 
-TYPED_TEST_P(TerseWriteSerializerTests, TerseInternBoxWithCustomDefault) {
-  terse_write::TerseInternBoxedStructWithCustomDefault obj;
-  terse_write::EmptyStruct empty;
-
-  const auto& objc = obj;
-
-  EXPECT_FALSE(apache::thrift::empty(obj));
-
-  // reset the field to shared default value.
-  obj.intern_boxed_field_with_custom_default().reset();
-  obj.intern_boxed_field_with_custom_default_adapted().reset();
-
-  EXPECT_EQ(objc.intern_boxed_field_with_custom_default()->field1(), 1);
-  EXPECT_EQ(
-      objc.intern_boxed_field_with_custom_default_adapted()->value.field1(), 1);
-
-  EXPECT_FALSE(apache::thrift::empty(obj));
-
-  // clear the field to shared intrinsic default value.
-  apache::thrift::clear(obj);
-
-  EXPECT_EQ(objc.intern_boxed_field_with_custom_default()->field1(), 0);
-  EXPECT_EQ(
-      objc.intern_boxed_field_with_custom_default_adapted()->value.field1(), 0);
-
-  EXPECT_TRUE(apache::thrift::empty(obj));
-
-  auto objs = TypeParam::template serialize<std::string>(obj);
-  auto emptys = TypeParam::template serialize<std::string>(empty);
-
-  EXPECT_EQ(objs, emptys);
-
-  terse_write::TerseInternBoxedStructWithCustomDefault objd;
-  TypeParam::template deserialize(objs, objd);
-  EXPECT_EQ(objd, obj);
-}
-
 TYPED_TEST_P(TerseWriteSerializerTests, CustomStringFields) {
   tablebased_terse_write::CustomStringFields obj;
   terse_write::EmptyStruct empty;
@@ -398,8 +317,6 @@ TYPED_TEST_P(TerseWriteSerializerTests, CustomStringFields) {
 
   obj.iobuf_field()->clear();
   (*obj.iobuf_ptr_field())->clear();
-  obj.iobuf_field_with_custom_default()->clear();
-  (*obj.iobuf_ptr_field_with_custom_default())->clear();
 
   objs = TypeParam::template serialize<std::string>(obj);
 
@@ -416,8 +333,6 @@ TYPED_TEST_P(TerseWriteSerializerTests, CustomStringFieldsDeserialization) {
 
   EXPECT_TRUE(objd.iobuf_field()->empty());
   EXPECT_FALSE((*objd.iobuf_ptr_field()));
-  EXPECT_TRUE(objd.iobuf_field_with_custom_default()->empty());
-  EXPECT_TRUE((*objd.iobuf_ptr_field_with_custom_default())->empty());
 }
 
 TYPED_TEST_P(TerseWriteSerializerTests, EmptiableStructField) {
@@ -441,71 +356,6 @@ TYPED_TEST_P(TerseWriteSerializerTests, EmptiableStructField) {
   // optional `opt_int_field` field is not explicitly set, and the terse
   // `terse_int_field` field is equal to the intrinsic default.
   EXPECT_EQ(emptys, objs);
-}
-
-TYPED_TEST_P(TerseWriteSerializerTests, TerseStructWithCustomDefault) {
-  terse_write::TerseStructWithCustomDefault obj;
-  terse_write::EmptyStruct empty;
-
-  auto emptys = TypeParam::template serialize<std::string>(empty);
-  auto objs = TypeParam::template serialize<std::string>(obj);
-
-  EXPECT_NE(emptys, objs);
-
-  apache::thrift::clear(obj);
-
-  objs = TypeParam::template serialize<std::string>(obj);
-
-  EXPECT_EQ(emptys, objs);
-}
-
-// A terse field needs to be cleared before deserialization for the consistent
-// behavior when it is missing during deserialization. There are two reasons why
-// a terse field might be missing:
-//   1. Serialization is skipped for a terse field since it is equal to the
-//   intrinsic default.
-//   2. IDL version mismatch.
-// Since we sent empty serialized binary, all terse fields in deserialized
-// object should equal to cleared object.
-TYPED_TEST_P(
-    TerseWriteSerializerTests, TerseStructWithCustomDefaultDeserialization) {
-  terse_write::TerseStructWithCustomDefault obj;
-
-  apache::thrift::clear(obj);
-
-  auto objs = TypeParam::template serialize<std::string>(obj);
-  terse_write::TerseStructWithCustomDefault objd;
-  TypeParam::template deserialize(objs, objd);
-
-  EXPECT_EQ(obj, objd);
-}
-
-// Since empty serializd binary is deserialized, all terse fields should equal
-// to the intrinsic default.
-TYPED_TEST_P(
-    TerseWriteSerializerTests, TerseStructWithCustomDefaultClearTerseFields) {
-  terse_write::EmptyStruct empty;
-
-  auto emptys = TypeParam::template serialize<std::string>(empty);
-
-  terse_write::TerseStructWithCustomDefault objd;
-  TypeParam::template deserialize(emptys, objd);
-
-  expect_intrinsic_default(objd);
-}
-
-TYPED_TEST_P(
-    TerseWriteSerializerTests,
-    TableBasedTerseStructWithCustomDefaultDeserialization) {
-  tablebased_terse_write::TerseStructWithCustomDefault obj;
-
-  apache::thrift::clear(obj);
-
-  auto objs = TypeParam::template serialize<std::string>(obj);
-  tablebased_terse_write::TerseStructWithCustomDefault objd;
-  TypeParam::template deserialize(objs, objd);
-
-  EXPECT_EQ(obj, objd);
 }
 
 template <typename Prot, typename T, typename T1, typename T2, typename T3>
@@ -699,7 +549,6 @@ REGISTER_TYPED_TEST_CASE_P(
     AdaptedStringFields,
     AdaptedListFields,
     MixedFieldsStruct,
-    MixedFieldsStructWithCustomDefault,
     NestedMixedStruct,
     CppRefTerseStruct,
     CppRefTerseStruct_Empty,
@@ -707,12 +556,7 @@ REGISTER_TYPED_TEST_CASE_P(
     CustomStringFieldsDeserialization,
     EmptiableStructField,
     TerseException,
-    TerseInternBoxWithCustomDefault,
-    TerseStructWithCustomDefault,
-    TerseStructWithCustomDefaultDeserialization,
-    TerseStructWithCustomDefaultClearTerseFields,
-    TerseStructs,
-    TableBasedTerseStructWithCustomDefaultDeserialization);
+    TerseStructs);
 
 using Serializers = ::testing::Types<
     BinarySerializer,

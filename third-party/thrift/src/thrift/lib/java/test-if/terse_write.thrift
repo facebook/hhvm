@@ -185,30 +185,6 @@ struct FieldLevelTerseStruct {
 }
 
 @thrift.TerseWrite
-struct TerseStructWithCustomDefault {
-  1: bool bool_field = true;
-  2: byte byte_field = 1;
-  3: i16 short_field = 2;
-  4: i32 int_field = 3;
-  5: i64 long_field = 4;
-  6: float float_field = 5.0;
-  7: double double_field = 6.0;
-  8: string string_field = "7";
-  9: binary binary_field = "8";
-  10: MyEnum enum_field = MyEnum.ME1;
-  11: list<i16> list_field = [1];
-  12: set<i16> set_field = [1];
-  13: map<i16, i16> map_field = {1: 1};
-  14: MyStructWithCustomDefault struct_field;
-  15: adaptedInt adaptedInt_field = 5000;
-  @java.Adapter{
-    adapterClassName = "com.facebook.thrift.adapter.test.StringToLongTypeAdapter",
-    typeClassName = "java.lang.Long",
-  }
-  16: adaptedInt doubleAdaptedInt_field = 6000;
-}
-
-@thrift.TerseWrite
 struct TerseStructSingleField {
   1: i32 int_field;
 }
@@ -255,15 +231,12 @@ struct TestV0 {
   1: bool boolean_field;
   2: byte byte_field;
   3: i16 short_field;
-  4: i32 int_field = 5;
 }
 
 struct TestV1 {
   1: bool boolean_field;
   2: byte byte_field;
   3: i16 short_field;
-  @thrift.TerseWrite
-  4: i32 int_field = 5;
 }
 
 @java.Adapter{
@@ -313,7 +286,6 @@ struct AdaptedTerseStruct {
   5: adaptedLong adaptedLong_field;
   10: SlicedByteBuf b1;
   21: adaptedBinaryList adaptedBinaryList_field;
-  55: adaptedLong adaptedLong_default = 5000;
   101: optional adaptedBoolean optionalAdaptedBoolean_field;
   102: optional SlicedByteBuf optional_b1;
   @java.Adapter{
@@ -321,11 +293,6 @@ struct AdaptedTerseStruct {
     typeClassName = "java.lang.Long",
   }
   204: adaptedInt doubleAdaptedInt_field;
-  @java.Adapter{
-    adapterClassName = "com.facebook.thrift.adapter.test.StringToLongTypeAdapter",
-    typeClassName = "java.lang.Long",
-  }
-  205: adaptedInt doubleAdaptedInt_default = 3000;
   206: doubleTypedefInt doubleTypedefAdaptedInt_field;
 }
 
@@ -337,7 +304,6 @@ struct TerseStruct {
   5: i64 long_field;
   10: binary b1;
   21: list<binary> binaryList_field;
-  55: i64 long_default = 5000;
   101: optional bool optionalBoolean_field;
   102: optional binary optional_b1;
   204: i32 int_field2;

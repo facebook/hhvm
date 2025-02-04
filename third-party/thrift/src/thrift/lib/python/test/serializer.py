@@ -42,14 +42,12 @@ from apache.thrift.test.terse_write.terse_write.thrift_types import (
     FieldLevelTerseStruct,
     MyEnum,
     MyStruct,
-    MyStructWithCustomDefault,
     MyUnion,
     TerseSafePatch,
     TerseStructs,
     TerseStructs1,
     TerseStructs2,
     TerseStructs3,
-    TerseStructWithCustomDefault,
 )
 from folly.iobuf import IOBuf
 
@@ -527,13 +525,7 @@ class SerializerTerseWriteTests(unittest.TestCase):
             # pyre-ignore[16]: has no attribute `test_types`
             self.test_types.FieldLevelTerseStruct
         )
-        self.TerseStructWithCustomDefault: Type[TerseStructWithCustomDefault] = (
-            self.test_types.TerseStructWithCustomDefault
-        )
         self.MyStruct: Type[MyStruct] = self.test_types.MyStruct
-        self.MyStructWithCustomDefault: Type[MyStructWithCustomDefault] = (
-            self.test_types.MyStructWithCustomDefault
-        )
         self.MyUnion: Type[MyUnion] = self.test_types.MyUnion
         self.EmptyStruct: Type[EmptyStruct] = self.test_types.EmptyStruct
         self.MyEnum: Type[MyEnum] = self.test_types.MyEnum
@@ -601,33 +593,6 @@ class SerializerTerseWriteTests(unittest.TestCase):
             encoded = self.serializer.serialize(obj, protocol=proto)
             encoded_empty = self.serializer.serialize(empty, protocol=proto)
             self.assertEqual(encoded, encoded_empty)
-
-    # Since empty serializd binary is deserialized, all terse fields should equal
-    # to their intrinsic default values.
-    def test_terse_struct_with_custom_default(self) -> None:
-        empty = self.EmptyStruct()
-        for proto in Protocol:
-            encoded_empty = self.serializer.serialize(empty, protocol=proto)
-            decoded, length = self.serializer.deserialize_with_length(
-                self.TerseStructWithCustomDefault, encoded_empty, protocol=proto
-            )
-            self.assertIsInstance(decoded, self.TerseStructWithCustomDefault)
-            self.assertEqual(decoded.bool_field, False)
-            self.assertEqual(decoded.byte_field, 0)
-            self.assertEqual(decoded.short_field, 0)
-            self.assertEqual(decoded.int_field, 0)
-            self.assertEqual(decoded.long_field, 0)
-            self.assertEqual(decoded.float_field, 0.0)
-            self.assertEqual(decoded.double_field, 0.0)
-            self.assertEqual(decoded.string_field, "")
-            self.assertEqual(decoded.binary_field, b"")
-            self.assertEqual(decoded.enum_field, self.MyEnum.ME0)
-            self.assertEqual(decoded.list_field, [])
-            self.assertEqual(decoded.set_field, set())
-            self.assertEqual(decoded.map_field, {})
-            self.assertEqual(
-                decoded.struct_field, self.MyStructWithCustomDefault(field1=0)
-            )
 
     def test_terse_structs_optimization(self) -> None:
         # empty

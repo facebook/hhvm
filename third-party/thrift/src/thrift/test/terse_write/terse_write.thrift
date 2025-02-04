@@ -132,46 +132,12 @@ struct MixedFieldsStruct {
   3: optional i32 opt_int_field;
 }
 
-struct MixedFieldsStructWithCustomDefault {
-  @thrift.TerseWrite
-  1: i32 terse_int_field = 1;
-  2: i32 def_int_field = 2;
-  3: optional i32 opt_int_field = 3;
-}
-
 @thrift.TerseWrite
 struct NestedMixedStruct {
   1: MixedFieldsStruct mixed_field;
-  2: MixedFieldsStructWithCustomDefault mixed_field_with_custom_default;
 }
 
 struct EmptyStruct {}
-
-@thrift.TerseWrite
-struct MyStructWithCustomDefault {
-  1: i32 field1 = 1;
-}
-
-@cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
-typedef MyStructWithCustomDefault MyStructWithCustomDefaultAdapted
-
-@thrift.TerseWrite
-struct TerseStructWithCustomDefault {
-  1: bool bool_field = true;
-  2: byte byte_field = 1;
-  3: i16 short_field = 2;
-  4: i32 int_field = 3;
-  5: i64 long_field = 4;
-  6: float float_field = 5.0;
-  7: double double_field = 6.0;
-  8: string string_field = "7";
-  9: binary binary_field = "8";
-  10: MyEnum enum_field = MyEnum.ME1;
-  11: list<i32> list_field = [1];
-  12: set<i32> set_field = [1];
-  13: map<i32, i32> map_field = {1: 1};
-  14: MyStructWithCustomDefault struct_field;
-}
 
 @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
 typedef i32 AdaptedInteger
@@ -279,15 +245,6 @@ struct TerseStructs2 {
 @thrift.TerseWrite
 struct TerseStructs3 {
   3: MyStruct field3;
-}
-
-@thrift.TerseWrite
-struct TerseInternBoxedStructWithCustomDefault {
-  @thrift.InternBox
-  1: MyStructWithCustomDefault intern_boxed_field_with_custom_default;
-  @python.Py3Hidden
-  @thrift.InternBox
-  2: MyStructWithCustomDefaultAdapted intern_boxed_field_with_custom_default_adapted;
 }
 
 @thrift.TerseWrite

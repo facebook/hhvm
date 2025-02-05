@@ -44,6 +44,7 @@ from thrift.test.python_capi.module.thrift_types import (
     Onion as MyUnion,
     PrimitiveStruct,
     SetStruct,
+    SomeBinary,
     StringPair,
 )
 from thrift.test.python_capi.serialized_dep.thrift_types import (
@@ -228,6 +229,23 @@ class PythonCapiRoundtrip(PythonCapiFixture):
     def test_roundtrip_union(self) -> None:
         for u in self.my_union():
             self.assertEqual(u, fixture.roundtrip_MyUnion(u))
+
+    def test_roundtrip_iobuf_union(self) -> None:
+        iobuf: IOBuf = IOBuf(memoryview(b"hello world"))
+        checked = 0
+        for field_name in dir(SomeBinary()):
+            if "iobuf" not in field_name:
+                continue
+
+            def make_union(field_name: str) -> SomeBinary:
+                return SomeBinary(**{field_name: iobuf})
+
+            result = fixture.roundtrip_SomeBinary(make_union(field_name))
+            self.assertIsNot(getattr(result, field_name), iobuf)
+            self.assertEqual(getattr(result, field_name), iobuf)
+            self.assertEqual(make_union(field_name), result)
+            checked += 1
+        self.assertEqual(checked, 3)
 
     def test_roundtrip_enum(self) -> None:
         self.assertEqual(MyEnum.MyValue1, fixture.roundtrip_MyEnum(MyEnum.MyValue1))

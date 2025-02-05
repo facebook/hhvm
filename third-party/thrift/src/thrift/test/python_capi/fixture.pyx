@@ -31,6 +31,7 @@ cdef extern from "thrift/test/python_capi/gen-cpp2/module_types.h" namespace "th
     cppclass SetStruct
     cppclass StringPair
     cppclass VapidStruct
+    cppclass SomeBinary
 
 cdef extern from "thrift/test/python_capi/gen-cpp2/containers_types.h" namespace "thrift::test::python_capi":
     cppclass TemplateLists
@@ -96,6 +97,9 @@ def roundtrip_AdaptedFields(object x):
 
 def roundtrip_SerializedStruct(object x):
     return __shim__roundtrip[SerializedStruct](x)
+
+def roundtrip_SomeBinary(object x):
+    return __shim__roundtrip[SomeBinary](x)
 
 def gen_SerializedStruct(int64_t len_):
     return __shim__gen_SerializedStruct(len_)

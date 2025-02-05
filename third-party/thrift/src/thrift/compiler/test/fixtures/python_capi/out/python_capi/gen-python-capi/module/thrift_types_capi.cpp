@@ -2045,7 +2045,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
           cpp.iobuf_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
     case 2:
-      Extractor<std::unique_ptr<folly::IOBuf>>{}.extractInto(
+      Extractor<folly::IOBuf>{}.extractInto(
           cpp.iobuf_ptr_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
     case 3:
@@ -2107,7 +2107,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       break;
     case 2:
       py_val = StrongRef(
-          Constructor<std::unique_ptr<folly::IOBuf>>{}
+          Constructor<folly::IOBuf>{}
           .constructFrom(val.iobuf_ptr_ref()));
       break;
     case 3:

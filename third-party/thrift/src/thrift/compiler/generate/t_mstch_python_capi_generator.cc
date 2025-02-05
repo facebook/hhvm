@@ -629,12 +629,18 @@ class python_capi_mstch_field : public mstch_field {
         {
             {"field:cpp_name", &python_capi_mstch_field::cpp_name},
             {"field:marshal_type", &python_capi_mstch_field::marshal_type},
+            {"field:iobuf?", &python_capi_mstch_field::iobuf},
         });
   }
 
   mstch::node cpp_name() { return cpp2::get_name(field_); }
 
   mstch::node marshal_type() { return format_marshal_type(*field_); }
+
+  mstch::node iobuf() {
+    const auto* ttype = field_->get_type()->get_true_type();
+    return ttype->is_binary() && is_type_iobuf(ttype);
+  }
 
  private:
   const std::string py_name_;

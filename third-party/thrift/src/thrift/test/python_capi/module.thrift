@@ -208,3 +208,11 @@ union Onion {
   9: map<binary, string> strMap;
   10: id.ProtocolId adapted_int;
 }
+
+union SomeBinary {
+  1: IOBuf iobuf;
+  2: IOBufPtr iobuf_ptr;
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
+  3: IOBuf iobufRef;
+}

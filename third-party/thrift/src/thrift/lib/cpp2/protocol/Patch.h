@@ -100,7 +100,9 @@ inline ExtractedMasksFromPatch operator|(
 /// patches. For map, it uses the address of Value key as the key for the
 /// integer map mask. Note that Mask contains pointer to `protocol::Value` in
 /// patch, so caller needs to make sure Patch has longer lifetime than the mask.
-ExtractedMasksFromPatch extractMaskViewFromPatch(const protocol::Object& patch);
+[[deprecated(
+    "Use protocol::extractMaskFromPatch instead.")]] ExtractedMasksFromPatch
+extractMaskViewFromPatch(const protocol::Object& patch);
 
 // Extracting mask from a temporary patch is dangerous and should be disallowed.
 ExtractedMasksFromPatch extractMaskViewFromPatch(Object&& patch) = delete;
@@ -114,7 +116,7 @@ ExtractedMasksFromPatch extractMaskFromPatch(const protocol::Object& patch);
 // Constructs read and write Thrift Map Mask of a given patch originating from
 // the field, map entry, or type entry specified mask. YOU PROBABLY SHOULDN'T BE
 // CALLING THIS!
-ExtractedMasksFromPatch extractMapMaskFromPatch_DO_NOT_USE(
+[[deprecated]] ExtractedMasksFromPatch extractMapMaskFromPatch_DO_NOT_USE(
     const protocol::Object& patch, const Mask& mask);
 
 template <type::StandardProtocol Protocol>

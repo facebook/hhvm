@@ -56,5 +56,5 @@ TEST(ScopedServerThreadTest, BindFailure) {
   server->setAddress(address);
   EXPECT_THROW(std::make_unique<ScopedServerThread>(server), exception);
   // Make sure there wasn't a leak of the ThriftServer, (cf. t13139338).
-  EXPECT_TRUE(server.unique());
+  EXPECT_EQ(1, server.use_count());
 }

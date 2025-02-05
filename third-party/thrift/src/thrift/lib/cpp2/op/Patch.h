@@ -78,6 +78,16 @@ struct SafePatchValueType {};
 template <typename T>
 using detect_safe_patch_value_type = typename SafePatchValueType<T>::type;
 
+template <typename T, FieldId Id>
+void checkFieldIsNotDeprecatedTerseWritesWithCustomDefault() {
+  static_assert(
+      !apache::thrift::detail::qualifier::
+          is_deprecated_terse_writes_with_custom_default_field<
+              T,
+              op::get_field_id<T, type::field_id_tag<Id>>>::value,
+      "Thrift Patch is not supported with fields with `deprecated_terse_writes` and custom default value.");
+}
+
 } // namespace detail
 
 /// The safe patch represenations for the base thrift types.

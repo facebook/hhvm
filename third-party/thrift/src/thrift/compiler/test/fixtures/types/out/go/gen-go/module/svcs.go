@@ -34,41 +34,27 @@ type SomeServiceClientInterface interface {
     SomeService
 }
 
-type SomeServiceChannelClient struct {
-    ch thrift.RequestChannel
-}
-// Compile time interface enforcer
-var _ SomeServiceClientInterface = (*SomeServiceChannelClient)(nil)
-
-func NewSomeServiceChannelClient(channel thrift.RequestChannel) *SomeServiceChannelClient {
-    return &SomeServiceChannelClient{
-        ch: channel,
-    }
-}
-
-func (c *SomeServiceChannelClient) Close() error {
-    return c.ch.Close()
-}
-
 type SomeServiceClient struct {
-    chClient *SomeServiceChannelClient
+    ch thrift.RequestChannel
 }
 // Compile time interface enforcer
 var _ SomeServiceClientInterface = (*SomeServiceClient)(nil)
 
-func NewSomeServiceClient(prot thrift.Protocol) *SomeServiceClient {
+func NewSomeServiceChannelClient(channel thrift.RequestChannel) *SomeServiceClient {
     return &SomeServiceClient{
-        chClient: NewSomeServiceChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
+        ch: channel,
     }
 }
 
-func (c *SomeServiceClient) Close() error {
-    return c.chClient.Close()
+func NewSomeServiceClient(prot thrift.Protocol) *SomeServiceClient {
+    return NewSomeServiceChannelClient(thrift.NewSerialChannel(prot))
 }
 
-func (c *SomeServiceChannelClient) BounceMap(ctx context.Context, m included.SomeMap) (included.SomeMap, error) {
+func (c *SomeServiceClient) Close() error {
+    return c.ch.Close()
+}
+
+func (c *SomeServiceClient) BounceMap(ctx context.Context, m included.SomeMap) (included.SomeMap, error) {
     in := &reqSomeServiceBounceMap{
         M: m,
     }
@@ -80,11 +66,7 @@ func (c *SomeServiceChannelClient) BounceMap(ctx context.Context, m included.Som
     return out.GetSuccess(), nil
 }
 
-func (c *SomeServiceClient) BounceMap(ctx context.Context, m included.SomeMap) (included.SomeMap, error) {
-    return c.chClient.BounceMap(ctx, m)
-}
-
-func (c *SomeServiceChannelClient) BinaryKeyedMap(ctx context.Context, r []int64) (map[*TBinary]int64, error) {
+func (c *SomeServiceClient) BinaryKeyedMap(ctx context.Context, r []int64) (map[*TBinary]int64, error) {
     in := &reqSomeServiceBinaryKeyedMap{
         R: r,
     }
@@ -94,10 +76,6 @@ func (c *SomeServiceChannelClient) BinaryKeyedMap(ctx context.Context, r []int64
         return nil, err
     }
     return out.GetSuccess(), nil
-}
-
-func (c *SomeServiceClient) BinaryKeyedMap(ctx context.Context, r []int64) (map[*TBinary]int64, error) {
-    return c.chClient.BinaryKeyedMap(ctx, r)
 }
 
 

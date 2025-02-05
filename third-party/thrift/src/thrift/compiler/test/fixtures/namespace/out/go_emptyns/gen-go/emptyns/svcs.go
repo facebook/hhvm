@@ -31,41 +31,27 @@ type TestServiceClientInterface interface {
     TestService
 }
 
-type TestServiceChannelClient struct {
-    ch thrift.RequestChannel
-}
-// Compile time interface enforcer
-var _ TestServiceClientInterface = (*TestServiceChannelClient)(nil)
-
-func NewTestServiceChannelClient(channel thrift.RequestChannel) *TestServiceChannelClient {
-    return &TestServiceChannelClient{
-        ch: channel,
-    }
-}
-
-func (c *TestServiceChannelClient) Close() error {
-    return c.ch.Close()
-}
-
 type TestServiceClient struct {
-    chClient *TestServiceChannelClient
+    ch thrift.RequestChannel
 }
 // Compile time interface enforcer
 var _ TestServiceClientInterface = (*TestServiceClient)(nil)
 
-func NewTestServiceClient(prot thrift.Protocol) *TestServiceClient {
+func NewTestServiceChannelClient(channel thrift.RequestChannel) *TestServiceClient {
     return &TestServiceClient{
-        chClient: NewTestServiceChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
+        ch: channel,
     }
 }
 
-func (c *TestServiceClient) Close() error {
-    return c.chClient.Close()
+func NewTestServiceClient(prot thrift.Protocol) *TestServiceClient {
+    return NewTestServiceChannelClient(thrift.NewSerialChannel(prot))
 }
 
-func (c *TestServiceChannelClient) Init(ctx context.Context, int1 int64) (int64, error) {
+func (c *TestServiceClient) Close() error {
+    return c.ch.Close()
+}
+
+func (c *TestServiceClient) Init(ctx context.Context, int1 int64) (int64, error) {
     in := &reqTestServiceInit{
         Int1: int1,
     }
@@ -75,10 +61,6 @@ func (c *TestServiceChannelClient) Init(ctx context.Context, int1 int64) (int64,
         return 0, err
     }
     return out.GetSuccess(), nil
-}
-
-func (c *TestServiceClient) Init(ctx context.Context, int1 int64) (int64, error) {
-    return c.chClient.Init(ctx, int1)
 }
 
 

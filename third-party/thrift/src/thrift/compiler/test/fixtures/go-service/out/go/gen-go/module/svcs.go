@@ -52,41 +52,27 @@ type GetEntityClientInterface interface {
     GetEntity
 }
 
-type GetEntityChannelClient struct {
-    ch thrift.RequestChannel
-}
-// Compile time interface enforcer
-var _ GetEntityClientInterface = (*GetEntityChannelClient)(nil)
-
-func NewGetEntityChannelClient(channel thrift.RequestChannel) *GetEntityChannelClient {
-    return &GetEntityChannelClient{
-        ch: channel,
-    }
-}
-
-func (c *GetEntityChannelClient) Close() error {
-    return c.ch.Close()
-}
-
 type GetEntityClient struct {
-    chClient *GetEntityChannelClient
+    ch thrift.RequestChannel
 }
 // Compile time interface enforcer
 var _ GetEntityClientInterface = (*GetEntityClient)(nil)
 
-func NewGetEntityClient(prot thrift.Protocol) *GetEntityClient {
+func NewGetEntityChannelClient(channel thrift.RequestChannel) *GetEntityClient {
     return &GetEntityClient{
-        chClient: NewGetEntityChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
+        ch: channel,
     }
 }
 
-func (c *GetEntityClient) Close() error {
-    return c.chClient.Close()
+func NewGetEntityClient(prot thrift.Protocol) *GetEntityClient {
+    return NewGetEntityChannelClient(thrift.NewSerialChannel(prot))
 }
 
-func (c *GetEntityChannelClient) GetEntity(ctx context.Context, r *GetEntityRequest) (*GetEntityResponse, error) {
+func (c *GetEntityClient) Close() error {
+    return c.ch.Close()
+}
+
+func (c *GetEntityClient) GetEntity(ctx context.Context, r *GetEntityRequest) (*GetEntityResponse, error) {
     in := &reqGetEntityGetEntity{
         R: r,
     }
@@ -98,11 +84,7 @@ func (c *GetEntityChannelClient) GetEntity(ctx context.Context, r *GetEntityRequ
     return out.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetEntity(ctx context.Context, r *GetEntityRequest) (*GetEntityResponse, error) {
-    return c.chClient.GetEntity(ctx, r)
-}
-
-func (c *GetEntityChannelClient) GetBool(ctx context.Context) (bool, error) {
+func (c *GetEntityClient) GetBool(ctx context.Context) (bool, error) {
     in := &reqGetEntityGetBool{
     }
     out := newRespGetEntityGetBool()
@@ -113,11 +95,7 @@ func (c *GetEntityChannelClient) GetBool(ctx context.Context) (bool, error) {
     return out.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetBool(ctx context.Context) (bool, error) {
-    return c.chClient.GetBool(ctx)
-}
-
-func (c *GetEntityChannelClient) GetByte(ctx context.Context) (int8, error) {
+func (c *GetEntityClient) GetByte(ctx context.Context) (int8, error) {
     in := &reqGetEntityGetByte{
     }
     out := newRespGetEntityGetByte()
@@ -128,11 +106,7 @@ func (c *GetEntityChannelClient) GetByte(ctx context.Context) (int8, error) {
     return out.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetByte(ctx context.Context) (int8, error) {
-    return c.chClient.GetByte(ctx)
-}
-
-func (c *GetEntityChannelClient) GetI16(ctx context.Context) (int16, error) {
+func (c *GetEntityClient) GetI16(ctx context.Context) (int16, error) {
     in := &reqGetEntityGetI16{
     }
     out := newRespGetEntityGetI16()
@@ -143,11 +117,7 @@ func (c *GetEntityChannelClient) GetI16(ctx context.Context) (int16, error) {
     return out.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetI16(ctx context.Context) (int16, error) {
-    return c.chClient.GetI16(ctx)
-}
-
-func (c *GetEntityChannelClient) GetI32(ctx context.Context) (int32, error) {
+func (c *GetEntityClient) GetI32(ctx context.Context) (int32, error) {
     in := &reqGetEntityGetI32{
     }
     out := newRespGetEntityGetI32()
@@ -158,11 +128,7 @@ func (c *GetEntityChannelClient) GetI32(ctx context.Context) (int32, error) {
     return out.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetI32(ctx context.Context) (int32, error) {
-    return c.chClient.GetI32(ctx)
-}
-
-func (c *GetEntityChannelClient) GetI64(ctx context.Context) (int64, error) {
+func (c *GetEntityClient) GetI64(ctx context.Context) (int64, error) {
     in := &reqGetEntityGetI64{
     }
     out := newRespGetEntityGetI64()
@@ -173,11 +139,7 @@ func (c *GetEntityChannelClient) GetI64(ctx context.Context) (int64, error) {
     return out.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetI64(ctx context.Context) (int64, error) {
-    return c.chClient.GetI64(ctx)
-}
-
-func (c *GetEntityChannelClient) GetDouble(ctx context.Context) (float64, error) {
+func (c *GetEntityClient) GetDouble(ctx context.Context) (float64, error) {
     in := &reqGetEntityGetDouble{
     }
     out := newRespGetEntityGetDouble()
@@ -188,11 +150,7 @@ func (c *GetEntityChannelClient) GetDouble(ctx context.Context) (float64, error)
     return out.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetDouble(ctx context.Context) (float64, error) {
-    return c.chClient.GetDouble(ctx)
-}
-
-func (c *GetEntityChannelClient) GetString(ctx context.Context) (string, error) {
+func (c *GetEntityClient) GetString(ctx context.Context) (string, error) {
     in := &reqGetEntityGetString{
     }
     out := newRespGetEntityGetString()
@@ -203,11 +161,7 @@ func (c *GetEntityChannelClient) GetString(ctx context.Context) (string, error) 
     return out.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetString(ctx context.Context) (string, error) {
-    return c.chClient.GetString(ctx)
-}
-
-func (c *GetEntityChannelClient) GetBinary(ctx context.Context) ([]byte, error) {
+func (c *GetEntityClient) GetBinary(ctx context.Context) ([]byte, error) {
     in := &reqGetEntityGetBinary{
     }
     out := newRespGetEntityGetBinary()
@@ -218,11 +172,7 @@ func (c *GetEntityChannelClient) GetBinary(ctx context.Context) ([]byte, error) 
     return out.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetBinary(ctx context.Context) ([]byte, error) {
-    return c.chClient.GetBinary(ctx)
-}
-
-func (c *GetEntityChannelClient) GetMap(ctx context.Context) (map[string]string, error) {
+func (c *GetEntityClient) GetMap(ctx context.Context) (map[string]string, error) {
     in := &reqGetEntityGetMap{
     }
     out := newRespGetEntityGetMap()
@@ -233,11 +183,7 @@ func (c *GetEntityChannelClient) GetMap(ctx context.Context) (map[string]string,
     return out.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetMap(ctx context.Context) (map[string]string, error) {
-    return c.chClient.GetMap(ctx)
-}
-
-func (c *GetEntityChannelClient) GetSet(ctx context.Context) ([]string, error) {
+func (c *GetEntityClient) GetSet(ctx context.Context) ([]string, error) {
     in := &reqGetEntityGetSet{
     }
     out := newRespGetEntityGetSet()
@@ -248,11 +194,7 @@ func (c *GetEntityChannelClient) GetSet(ctx context.Context) ([]string, error) {
     return out.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetSet(ctx context.Context) ([]string, error) {
-    return c.chClient.GetSet(ctx)
-}
-
-func (c *GetEntityChannelClient) GetList(ctx context.Context) ([]string, error) {
+func (c *GetEntityClient) GetList(ctx context.Context) ([]string, error) {
     in := &reqGetEntityGetList{
     }
     out := newRespGetEntityGetList()
@@ -263,11 +205,7 @@ func (c *GetEntityChannelClient) GetList(ctx context.Context) ([]string, error) 
     return out.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetList(ctx context.Context) ([]string, error) {
-    return c.chClient.GetList(ctx)
-}
-
-func (c *GetEntityChannelClient) GetLegacyStuff(ctx context.Context, numPos int64, numNeg1 int64, numNeg2 int64) (int32, error) {
+func (c *GetEntityClient) GetLegacyStuff(ctx context.Context, numPos int64, numNeg1 int64, numNeg2 int64) (int32, error) {
     in := &reqGetEntityGetLegacyStuff{
         NumPos: numPos,
         NumNeg1: numNeg1,
@@ -281,11 +219,7 @@ func (c *GetEntityChannelClient) GetLegacyStuff(ctx context.Context, numPos int6
     return out.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetLegacyStuff(ctx context.Context, numPos int64, numNeg1 int64, numNeg2 int64) (int32, error) {
-    return c.chClient.GetLegacyStuff(ctx, numPos, numNeg1, numNeg2)
-}
-
-func (c *GetEntityChannelClient) GetCtxCollision(ctx1 context.Context, ctx int64) (int32, error) {
+func (c *GetEntityClient) GetCtxCollision(ctx1 context.Context, ctx int64) (int32, error) {
     in := &reqGetEntityGetCtxCollision{
         Ctx: ctx,
     }
@@ -297,11 +231,7 @@ func (c *GetEntityChannelClient) GetCtxCollision(ctx1 context.Context, ctx int64
     return out.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetCtxCollision(ctx1 context.Context, ctx int64) (int32, error) {
-    return c.chClient.GetCtxCollision(ctx1, ctx)
-}
-
-func (c *GetEntityChannelClient) GetCtx1Collision(ctx2 context.Context, ctx int64, ctx1 int64) (int32, error) {
+func (c *GetEntityClient) GetCtx1Collision(ctx2 context.Context, ctx int64, ctx1 int64) (int32, error) {
     in := &reqGetEntityGetCtx1Collision{
         Ctx: ctx,
         Ctx1: ctx1,
@@ -314,11 +244,7 @@ func (c *GetEntityChannelClient) GetCtx1Collision(ctx2 context.Context, ctx int6
     return out.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetCtx1Collision(ctx2 context.Context, ctx int64, ctx1 int64) (int32, error) {
-    return c.chClient.GetCtx1Collision(ctx2, ctx, ctx1)
-}
-
-func (c *GetEntityChannelClient) GetContextCollision(ctx context.Context, context_ int64) (int32, error) {
+func (c *GetEntityClient) GetContextCollision(ctx context.Context, context_ int64) (int32, error) {
     in := &reqGetEntityGetContextCollision{
         Context: context_,
     }
@@ -330,11 +256,7 @@ func (c *GetEntityChannelClient) GetContextCollision(ctx context.Context, contex
     return out.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetContextCollision(ctx context.Context, context_ int64) (int32, error) {
-    return c.chClient.GetContextCollision(ctx, context_)
-}
-
-func (c *GetEntityChannelClient) GetOutCollision(ctx context.Context, out int64) (int32, error) {
+func (c *GetEntityClient) GetOutCollision(ctx context.Context, out int64) (int32, error) {
     in := &reqGetEntityGetOutCollision{
         Out: out,
     }
@@ -346,11 +268,7 @@ func (c *GetEntityChannelClient) GetOutCollision(ctx context.Context, out int64)
     return out1.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetOutCollision(ctx context.Context, out int64) (int32, error) {
-    return c.chClient.GetOutCollision(ctx, out)
-}
-
-func (c *GetEntityChannelClient) GetOut1Collision(ctx context.Context, out int64, out1 int64) (int32, error) {
+func (c *GetEntityClient) GetOut1Collision(ctx context.Context, out int64, out1 int64) (int32, error) {
     in := &reqGetEntityGetOut1Collision{
         Out: out,
         Out1: out1,
@@ -363,11 +281,7 @@ func (c *GetEntityChannelClient) GetOut1Collision(ctx context.Context, out int64
     return out2.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetOut1Collision(ctx context.Context, out int64, out1 int64) (int32, error) {
-    return c.chClient.GetOut1Collision(ctx, out, out1)
-}
-
-func (c *GetEntityChannelClient) GetInCollision(ctx context.Context, in int64) (int32, error) {
+func (c *GetEntityClient) GetInCollision(ctx context.Context, in int64) (int32, error) {
     in1 := &reqGetEntityGetInCollision{
         In: in,
     }
@@ -379,11 +293,7 @@ func (c *GetEntityChannelClient) GetInCollision(ctx context.Context, in int64) (
     return out.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetInCollision(ctx context.Context, in int64) (int32, error) {
-    return c.chClient.GetInCollision(ctx, in)
-}
-
-func (c *GetEntityChannelClient) GetIn1Collision(ctx context.Context, in int64, in1 int64) (int32, error) {
+func (c *GetEntityClient) GetIn1Collision(ctx context.Context, in int64, in1 int64) (int32, error) {
     in2 := &reqGetEntityGetIn1Collision{
         In: in,
         In1: in1,
@@ -396,11 +306,7 @@ func (c *GetEntityChannelClient) GetIn1Collision(ctx context.Context, in int64, 
     return out.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetIn1Collision(ctx context.Context, in int64, in1 int64) (int32, error) {
-    return c.chClient.GetIn1Collision(ctx, in, in1)
-}
-
-func (c *GetEntityChannelClient) GetErrCollision(ctx context.Context, err int64) (int32, error) {
+func (c *GetEntityClient) GetErrCollision(ctx context.Context, err int64) (int32, error) {
     in := &reqGetEntityGetErrCollision{
         Err: err,
     }
@@ -412,11 +318,7 @@ func (c *GetEntityChannelClient) GetErrCollision(ctx context.Context, err int64)
     return out.GetSuccess(), nil
 }
 
-func (c *GetEntityClient) GetErrCollision(ctx context.Context, err int64) (int32, error) {
-    return c.chClient.GetErrCollision(ctx, err)
-}
-
-func (c *GetEntityChannelClient) GetErr1Collision(ctx context.Context, err int64, err1 int64) (int32, error) {
+func (c *GetEntityClient) GetErr1Collision(ctx context.Context, err int64, err1 int64) (int32, error) {
     in := &reqGetEntityGetErr1Collision{
         Err: err,
         Err1: err1,
@@ -427,10 +329,6 @@ func (c *GetEntityChannelClient) GetErr1Collision(ctx context.Context, err int64
         return 0, err2
     }
     return out.GetSuccess(), nil
-}
-
-func (c *GetEntityClient) GetErr1Collision(ctx context.Context, err int64, err1 int64) (int32, error) {
-    return c.chClient.GetErr1Collision(ctx, err, err1)
 }
 
 

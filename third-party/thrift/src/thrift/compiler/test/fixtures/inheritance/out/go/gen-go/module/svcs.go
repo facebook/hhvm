@@ -31,41 +31,27 @@ type MyRootClientInterface interface {
     MyRoot
 }
 
-type MyRootChannelClient struct {
-    ch thrift.RequestChannel
-}
-// Compile time interface enforcer
-var _ MyRootClientInterface = (*MyRootChannelClient)(nil)
-
-func NewMyRootChannelClient(channel thrift.RequestChannel) *MyRootChannelClient {
-    return &MyRootChannelClient{
-        ch: channel,
-    }
-}
-
-func (c *MyRootChannelClient) Close() error {
-    return c.ch.Close()
-}
-
 type MyRootClient struct {
-    chClient *MyRootChannelClient
+    ch thrift.RequestChannel
 }
 // Compile time interface enforcer
 var _ MyRootClientInterface = (*MyRootClient)(nil)
 
-func NewMyRootClient(prot thrift.Protocol) *MyRootClient {
+func NewMyRootChannelClient(channel thrift.RequestChannel) *MyRootClient {
     return &MyRootClient{
-        chClient: NewMyRootChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
+        ch: channel,
     }
 }
 
-func (c *MyRootClient) Close() error {
-    return c.chClient.Close()
+func NewMyRootClient(prot thrift.Protocol) *MyRootClient {
+    return NewMyRootChannelClient(thrift.NewSerialChannel(prot))
 }
 
-func (c *MyRootChannelClient) DoRoot(ctx context.Context) (error) {
+func (c *MyRootClient) Close() error {
+    return c.ch.Close()
+}
+
+func (c *MyRootClient) DoRoot(ctx context.Context) (error) {
     in := &reqMyRootDoRoot{
     }
     out := newRespMyRootDoRoot()
@@ -74,10 +60,6 @@ func (c *MyRootChannelClient) DoRoot(ctx context.Context) (error) {
         return err
     }
     return nil
-}
-
-func (c *MyRootClient) DoRoot(ctx context.Context) (error) {
-    return c.chClient.DoRoot(ctx)
 }
 
 
@@ -190,47 +172,30 @@ type MyNodeClientInterface interface {
     MyNode
 }
 
-type MyNodeChannelClient struct {
-    // Inherited/extended service
-    *MyRootChannelClient
-    ch thrift.RequestChannel
-}
-// Compile time interface enforcer
-var _ MyNodeClientInterface = (*MyNodeChannelClient)(nil)
-
-func NewMyNodeChannelClient(channel thrift.RequestChannel) *MyNodeChannelClient {
-    return &MyNodeChannelClient{
-        MyRootChannelClient: NewMyRootChannelClient(channel),
-        ch: channel,
-    }
-}
-
-func (c *MyNodeChannelClient) Close() error {
-    return c.ch.Close()
-}
-
 type MyNodeClient struct {
     // Inherited/extended service
     *MyRootClient
-    chClient *MyNodeChannelClient
+    ch thrift.RequestChannel
 }
 // Compile time interface enforcer
 var _ MyNodeClientInterface = (*MyNodeClient)(nil)
 
-func NewMyNodeClient(prot thrift.Protocol) *MyNodeClient {
+func NewMyNodeChannelClient(channel thrift.RequestChannel) *MyNodeClient {
     return &MyNodeClient{
-        MyRootClient: NewMyRootClient(prot),
-        chClient: NewMyNodeChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
+        MyRootClient: NewMyRootChannelClient(channel),
+        ch: channel,
     }
 }
 
-func (c *MyNodeClient) Close() error {
-    return c.chClient.Close()
+func NewMyNodeClient(prot thrift.Protocol) *MyNodeClient {
+    return NewMyNodeChannelClient(thrift.NewSerialChannel(prot))
 }
 
-func (c *MyNodeChannelClient) DoMid(ctx context.Context) (error) {
+func (c *MyNodeClient) Close() error {
+    return c.ch.Close()
+}
+
+func (c *MyNodeClient) DoMid(ctx context.Context) (error) {
     in := &reqMyNodeDoMid{
     }
     out := newRespMyNodeDoMid()
@@ -239,10 +204,6 @@ func (c *MyNodeChannelClient) DoMid(ctx context.Context) (error) {
         return err
     }
     return nil
-}
-
-func (c *MyNodeClient) DoMid(ctx context.Context) (error) {
-    return c.chClient.DoMid(ctx)
 }
 
 
@@ -328,47 +289,30 @@ type MyLeafClientInterface interface {
     MyLeaf
 }
 
-type MyLeafChannelClient struct {
-    // Inherited/extended service
-    *MyNodeChannelClient
-    ch thrift.RequestChannel
-}
-// Compile time interface enforcer
-var _ MyLeafClientInterface = (*MyLeafChannelClient)(nil)
-
-func NewMyLeafChannelClient(channel thrift.RequestChannel) *MyLeafChannelClient {
-    return &MyLeafChannelClient{
-        MyNodeChannelClient: NewMyNodeChannelClient(channel),
-        ch: channel,
-    }
-}
-
-func (c *MyLeafChannelClient) Close() error {
-    return c.ch.Close()
-}
-
 type MyLeafClient struct {
     // Inherited/extended service
     *MyNodeClient
-    chClient *MyLeafChannelClient
+    ch thrift.RequestChannel
 }
 // Compile time interface enforcer
 var _ MyLeafClientInterface = (*MyLeafClient)(nil)
 
-func NewMyLeafClient(prot thrift.Protocol) *MyLeafClient {
+func NewMyLeafChannelClient(channel thrift.RequestChannel) *MyLeafClient {
     return &MyLeafClient{
-        MyNodeClient: NewMyNodeClient(prot),
-        chClient: NewMyLeafChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
+        MyNodeClient: NewMyNodeChannelClient(channel),
+        ch: channel,
     }
 }
 
-func (c *MyLeafClient) Close() error {
-    return c.chClient.Close()
+func NewMyLeafClient(prot thrift.Protocol) *MyLeafClient {
+    return NewMyLeafChannelClient(thrift.NewSerialChannel(prot))
 }
 
-func (c *MyLeafChannelClient) DoLeaf(ctx context.Context) (error) {
+func (c *MyLeafClient) Close() error {
+    return c.ch.Close()
+}
+
+func (c *MyLeafClient) DoLeaf(ctx context.Context) (error) {
     in := &reqMyLeafDoLeaf{
     }
     out := newRespMyLeafDoLeaf()
@@ -377,10 +321,6 @@ func (c *MyLeafChannelClient) DoLeaf(ctx context.Context) (error) {
         return err
     }
     return nil
-}
-
-func (c *MyLeafClient) DoLeaf(ctx context.Context) (error) {
-    return c.chClient.DoLeaf(ctx)
 }
 
 

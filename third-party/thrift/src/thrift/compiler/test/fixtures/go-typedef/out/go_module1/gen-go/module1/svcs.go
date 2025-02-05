@@ -37,41 +37,27 @@ type FinderClientInterface interface {
     Finder
 }
 
-type FinderChannelClient struct {
-    ch thrift.RequestChannel
-}
-// Compile time interface enforcer
-var _ FinderClientInterface = (*FinderChannelClient)(nil)
-
-func NewFinderChannelClient(channel thrift.RequestChannel) *FinderChannelClient {
-    return &FinderChannelClient{
-        ch: channel,
-    }
-}
-
-func (c *FinderChannelClient) Close() error {
-    return c.ch.Close()
-}
-
 type FinderClient struct {
-    chClient *FinderChannelClient
+    ch thrift.RequestChannel
 }
 // Compile time interface enforcer
 var _ FinderClientInterface = (*FinderClient)(nil)
 
-func NewFinderClient(prot thrift.Protocol) *FinderClient {
+func NewFinderChannelClient(channel thrift.RequestChannel) *FinderClient {
     return &FinderClient{
-        chClient: NewFinderChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
+        ch: channel,
     }
 }
 
-func (c *FinderClient) Close() error {
-    return c.chClient.Close()
+func NewFinderClient(prot thrift.Protocol) *FinderClient {
+    return NewFinderChannelClient(thrift.NewSerialChannel(prot))
 }
 
-func (c *FinderChannelClient) ByPlate(ctx context.Context, plate Plate) (*Automobile, error) {
+func (c *FinderClient) Close() error {
+    return c.ch.Close()
+}
+
+func (c *FinderClient) ByPlate(ctx context.Context, plate Plate) (*Automobile, error) {
     in := &reqFinderByPlate{
         Plate: plate,
     }
@@ -83,11 +69,7 @@ func (c *FinderChannelClient) ByPlate(ctx context.Context, plate Plate) (*Automo
     return out.GetSuccess(), nil
 }
 
-func (c *FinderClient) ByPlate(ctx context.Context, plate Plate) (*Automobile, error) {
-    return c.chClient.ByPlate(ctx, plate)
-}
-
-func (c *FinderChannelClient) AliasByPlate(ctx context.Context, plate Plate) (*Car, error) {
+func (c *FinderClient) AliasByPlate(ctx context.Context, plate Plate) (*Car, error) {
     in := &reqFinderAliasByPlate{
         Plate: plate,
     }
@@ -99,11 +81,7 @@ func (c *FinderChannelClient) AliasByPlate(ctx context.Context, plate Plate) (*C
     return out.GetSuccess(), nil
 }
 
-func (c *FinderClient) AliasByPlate(ctx context.Context, plate Plate) (*Car, error) {
-    return c.chClient.AliasByPlate(ctx, plate)
-}
-
-func (c *FinderChannelClient) PreviousPlate(ctx context.Context, plate Plate) (Plate, error) {
+func (c *FinderClient) PreviousPlate(ctx context.Context, plate Plate) (Plate, error) {
     in := &reqFinderPreviousPlate{
         Plate: plate,
     }
@@ -113,10 +91,6 @@ func (c *FinderChannelClient) PreviousPlate(ctx context.Context, plate Plate) (P
         return "", err
     }
     return out.GetSuccess(), nil
-}
-
-func (c *FinderClient) PreviousPlate(ctx context.Context, plate Plate) (Plate, error) {
-    return c.chClient.PreviousPlate(ctx, plate)
 }
 
 

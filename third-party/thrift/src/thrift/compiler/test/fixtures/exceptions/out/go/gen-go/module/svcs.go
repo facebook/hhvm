@@ -34,41 +34,27 @@ type RaiserClientInterface interface {
     Raiser
 }
 
-type RaiserChannelClient struct {
-    ch thrift.RequestChannel
-}
-// Compile time interface enforcer
-var _ RaiserClientInterface = (*RaiserChannelClient)(nil)
-
-func NewRaiserChannelClient(channel thrift.RequestChannel) *RaiserChannelClient {
-    return &RaiserChannelClient{
-        ch: channel,
-    }
-}
-
-func (c *RaiserChannelClient) Close() error {
-    return c.ch.Close()
-}
-
 type RaiserClient struct {
-    chClient *RaiserChannelClient
+    ch thrift.RequestChannel
 }
 // Compile time interface enforcer
 var _ RaiserClientInterface = (*RaiserClient)(nil)
 
-func NewRaiserClient(prot thrift.Protocol) *RaiserClient {
+func NewRaiserChannelClient(channel thrift.RequestChannel) *RaiserClient {
     return &RaiserClient{
-        chClient: NewRaiserChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
+        ch: channel,
     }
 }
 
-func (c *RaiserClient) Close() error {
-    return c.chClient.Close()
+func NewRaiserClient(prot thrift.Protocol) *RaiserClient {
+    return NewRaiserChannelClient(thrift.NewSerialChannel(prot))
 }
 
-func (c *RaiserChannelClient) DoBland(ctx context.Context) (error) {
+func (c *RaiserClient) Close() error {
+    return c.ch.Close()
+}
+
+func (c *RaiserClient) DoBland(ctx context.Context) (error) {
     in := &reqRaiserDoBland{
     }
     out := newRespRaiserDoBland()
@@ -79,11 +65,7 @@ func (c *RaiserChannelClient) DoBland(ctx context.Context) (error) {
     return nil
 }
 
-func (c *RaiserClient) DoBland(ctx context.Context) (error) {
-    return c.chClient.DoBland(ctx)
-}
-
-func (c *RaiserChannelClient) DoRaise(ctx context.Context) (error) {
+func (c *RaiserClient) DoRaise(ctx context.Context) (error) {
     in := &reqRaiserDoRaise{
     }
     out := newRespRaiserDoRaise()
@@ -100,11 +82,7 @@ func (c *RaiserChannelClient) DoRaise(ctx context.Context) (error) {
     return nil
 }
 
-func (c *RaiserClient) DoRaise(ctx context.Context) (error) {
-    return c.chClient.DoRaise(ctx)
-}
-
-func (c *RaiserChannelClient) Get200(ctx context.Context) (string, error) {
+func (c *RaiserClient) Get200(ctx context.Context) (string, error) {
     in := &reqRaiserGet200{
     }
     out := newRespRaiserGet200()
@@ -115,11 +93,7 @@ func (c *RaiserChannelClient) Get200(ctx context.Context) (string, error) {
     return out.GetSuccess(), nil
 }
 
-func (c *RaiserClient) Get200(ctx context.Context) (string, error) {
-    return c.chClient.Get200(ctx)
-}
-
-func (c *RaiserChannelClient) Get500(ctx context.Context) (string, error) {
+func (c *RaiserClient) Get500(ctx context.Context) (string, error) {
     in := &reqRaiserGet500{
     }
     out := newRespRaiserGet500()
@@ -134,10 +108,6 @@ func (c *RaiserChannelClient) Get500(ctx context.Context) (string, error) {
         return "", out.S
     }
     return out.GetSuccess(), nil
-}
-
-func (c *RaiserClient) Get500(ctx context.Context) (string, error) {
-    return c.chClient.Get500(ctx)
 }
 
 

@@ -19,33 +19,6 @@
   This template defined the client type/functions for a thrift service.
 
 }}
-type {{service:go_name}}ChannelClient struct {
-    {{#service:extends?}}
-    {{#service:extends}}
-    // Inherited/extended service
-    *{{service:go_qualified_name}}ChannelClient
-    {{/service:extends}}
-    {{/service:extends?}}
-    ch thrift.RequestChannel
-}
-// Compile time interface enforcer
-var _ {{service:go_name}}ClientInterface = (*{{service:go_name}}ChannelClient)(nil)
-
-func New{{service:go_name}}ChannelClient(channel thrift.RequestChannel) *{{service:go_name}}ChannelClient {
-    return &{{service:go_name}}ChannelClient{
-        {{#service:extends?}}
-        {{#service:extends}}
-        {{service:go_name}}ChannelClient: {{service:go_package_alias_prefix}}New{{service:go_name}}ChannelClient(channel),
-        {{/service:extends}}
-        {{/service:extends?}}
-        ch: channel,
-    }
-}
-
-func (c *{{service:go_name}}ChannelClient) Close() error {
-    return c.ch.Close()
-}
-
 type {{service:go_name}}Client struct {
     {{#service:extends?}}
     {{#service:extends}}
@@ -53,31 +26,33 @@ type {{service:go_name}}Client struct {
     *{{service:go_qualified_name}}Client
     {{/service:extends}}
     {{/service:extends?}}
-    chClient *{{service:go_name}}ChannelClient
+    ch thrift.RequestChannel
 }
 // Compile time interface enforcer
 var _ {{service:go_name}}ClientInterface = (*{{service:go_name}}Client)(nil)
 
-func New{{service:go_name}}Client(prot thrift.Protocol) *{{service:go_name}}Client {
+func New{{service:go_name}}ChannelClient(channel thrift.RequestChannel) *{{service:go_name}}Client {
     return &{{service:go_name}}Client{
         {{#service:extends?}}
         {{#service:extends}}
-        {{service:go_name}}Client: {{service:go_package_alias_prefix}}New{{service:go_name}}Client(prot),
+        {{service:go_name}}Client: {{service:go_package_alias_prefix}}New{{service:go_name}}ChannelClient(channel),
         {{/service:extends}}
         {{/service:extends?}}
-        chClient: New{{service:go_name}}ChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
+        ch: channel,
     }
 }
 
+func New{{service:go_name}}Client(prot thrift.Protocol) *{{service:go_name}}Client {
+    return New{{service:go_name}}ChannelClient(thrift.NewSerialChannel(prot))
+}
+
 func (c *{{service:go_name}}Client) Close() error {
-    return c.chClient.Close()
+    return c.ch.Close()
 }
 {{#service:functions}}
 {{#function:go_supported?}}
 
-func (c *{{service:go_name}}ChannelClient) {{> svc/func_signature}} {
+func (c *{{service:go_name}}Client) {{> svc/func_signature}} {
     {{function:in_var_name}} := &req{{service:go_name}}{{function:go_name}}{
         {{#function:args}}
         {{#field:type}}
@@ -102,11 +77,6 @@ func (c *{{service:go_name}}ChannelClient) {{> svc/func_signature}} {
     }}{{/function:exceptions?}}
     return {{^function:void?}}{{function:out_var_name}}.Get{{function:retval_field_name}}(), {{/function:void?}}nil
     {{/function:oneway?}}
-}
-
-func (c *{{service:go_name}}Client) {{> svc/func_signature}} {
-    return c.chClient.{{function:go_name}}({{function:ctx_arg_name}}{{function:comma}}{{!
-      }}{{#function:args}}{{field:go_arg_name}}{{^last?}}, {{/last?}}{{/function:args}})
 }
 {{/function:go_supported?}}
 {{/service:functions}}

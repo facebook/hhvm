@@ -32,41 +32,27 @@ type DummyClientInterface interface {
     Dummy
 }
 
-type DummyChannelClient struct {
-    ch thrift.RequestChannel
-}
-// Compile time interface enforcer
-var _ DummyClientInterface = (*DummyChannelClient)(nil)
-
-func NewDummyChannelClient(channel thrift.RequestChannel) *DummyChannelClient {
-    return &DummyChannelClient{
-        ch: channel,
-    }
-}
-
-func (c *DummyChannelClient) Close() error {
-    return c.ch.Close()
-}
-
 type DummyClient struct {
-    chClient *DummyChannelClient
+    ch thrift.RequestChannel
 }
 // Compile time interface enforcer
 var _ DummyClientInterface = (*DummyClient)(nil)
 
-func NewDummyClient(prot thrift.Protocol) *DummyClient {
+func NewDummyChannelClient(channel thrift.RequestChannel) *DummyClient {
     return &DummyClient{
-        chClient: NewDummyChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
+        ch: channel,
     }
 }
 
-func (c *DummyClient) Close() error {
-    return c.chClient.Close()
+func NewDummyClient(prot thrift.Protocol) *DummyClient {
+    return NewDummyChannelClient(thrift.NewSerialChannel(prot))
 }
 
-func (c *DummyChannelClient) Echo(ctx context.Context, value string) (string, error) {
+func (c *DummyClient) Close() error {
+    return c.ch.Close()
+}
+
+func (c *DummyClient) Echo(ctx context.Context, value string) (string, error) {
     in := &reqDummyEcho{
         Value: value,
     }
@@ -78,19 +64,11 @@ func (c *DummyChannelClient) Echo(ctx context.Context, value string) (string, er
     return out.GetSuccess(), nil
 }
 
-func (c *DummyClient) Echo(ctx context.Context, value string) (string, error) {
-    return c.chClient.Echo(ctx, value)
-}
-
-func (c *DummyChannelClient) OnewayRPC(ctx context.Context, value string) (error) {
+func (c *DummyClient) OnewayRPC(ctx context.Context, value string) (error) {
     in := &reqDummyOnewayRPC{
         Value: value,
     }
     return c.ch.Oneway(ctx, "OnewayRPC", in)
-}
-
-func (c *DummyClient) OnewayRPC(ctx context.Context, value string) (error) {
-    return c.chClient.OnewayRPC(ctx, value)
 }
 
 

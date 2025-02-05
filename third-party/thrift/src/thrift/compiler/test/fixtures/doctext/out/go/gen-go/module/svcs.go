@@ -32,41 +32,27 @@ type CClientInterface interface {
     C
 }
 
-type CChannelClient struct {
-    ch thrift.RequestChannel
-}
-// Compile time interface enforcer
-var _ CClientInterface = (*CChannelClient)(nil)
-
-func NewCChannelClient(channel thrift.RequestChannel) *CChannelClient {
-    return &CChannelClient{
-        ch: channel,
-    }
-}
-
-func (c *CChannelClient) Close() error {
-    return c.ch.Close()
-}
-
 type CClient struct {
-    chClient *CChannelClient
+    ch thrift.RequestChannel
 }
 // Compile time interface enforcer
 var _ CClientInterface = (*CClient)(nil)
 
-func NewCClient(prot thrift.Protocol) *CClient {
+func NewCChannelClient(channel thrift.RequestChannel) *CClient {
     return &CClient{
-        chClient: NewCChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
+        ch: channel,
     }
 }
 
-func (c *CClient) Close() error {
-    return c.chClient.Close()
+func NewCClient(prot thrift.Protocol) *CClient {
+    return NewCChannelClient(thrift.NewSerialChannel(prot))
 }
 
-func (c *CChannelClient) F(ctx context.Context) (error) {
+func (c *CClient) Close() error {
+    return c.ch.Close()
+}
+
+func (c *CClient) F(ctx context.Context) (error) {
     in := &reqCF{
     }
     out := newRespCF()
@@ -77,11 +63,7 @@ func (c *CChannelClient) F(ctx context.Context) (error) {
     return nil
 }
 
-func (c *CClient) F(ctx context.Context) (error) {
-    return c.chClient.F(ctx)
-}
-
-func (c *CChannelClient) Thing(ctx context.Context, a int32, b string, c []int32) (string, error) {
+func (c *CClient) Thing(ctx context.Context, a int32, b string, c []int32) (string, error) {
     in := &reqCThing{
         A: a,
         B: b,
@@ -95,10 +77,6 @@ func (c *CChannelClient) Thing(ctx context.Context, a int32, b string, c []int32
         return "", out.Bang
     }
     return out.GetSuccess(), nil
-}
-
-func (c *CClient) Thing(ctx context.Context, a int32, b string, c []int32) (string, error) {
-    return c.chClient.Thing(ctx, a, b, c)
 }
 
 

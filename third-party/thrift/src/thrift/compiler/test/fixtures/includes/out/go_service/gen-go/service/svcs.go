@@ -36,41 +36,27 @@ type MyServiceClientInterface interface {
     MyService
 }
 
-type MyServiceChannelClient struct {
-    ch thrift.RequestChannel
-}
-// Compile time interface enforcer
-var _ MyServiceClientInterface = (*MyServiceChannelClient)(nil)
-
-func NewMyServiceChannelClient(channel thrift.RequestChannel) *MyServiceChannelClient {
-    return &MyServiceChannelClient{
-        ch: channel,
-    }
-}
-
-func (c *MyServiceChannelClient) Close() error {
-    return c.ch.Close()
-}
-
 type MyServiceClient struct {
-    chClient *MyServiceChannelClient
+    ch thrift.RequestChannel
 }
 // Compile time interface enforcer
 var _ MyServiceClientInterface = (*MyServiceClient)(nil)
 
-func NewMyServiceClient(prot thrift.Protocol) *MyServiceClient {
+func NewMyServiceChannelClient(channel thrift.RequestChannel) *MyServiceClient {
     return &MyServiceClient{
-        chClient: NewMyServiceChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
+        ch: channel,
     }
 }
 
-func (c *MyServiceClient) Close() error {
-    return c.chClient.Close()
+func NewMyServiceClient(prot thrift.Protocol) *MyServiceClient {
+    return NewMyServiceChannelClient(thrift.NewSerialChannel(prot))
 }
 
-func (c *MyServiceChannelClient) Query(ctx context.Context, s *module.MyStruct, i *includes.Included) (error) {
+func (c *MyServiceClient) Close() error {
+    return c.ch.Close()
+}
+
+func (c *MyServiceClient) Query(ctx context.Context, s *module.MyStruct, i *includes.Included) (error) {
     in := &reqMyServiceQuery{
         S: s,
         I: i,
@@ -83,11 +69,7 @@ func (c *MyServiceChannelClient) Query(ctx context.Context, s *module.MyStruct, 
     return nil
 }
 
-func (c *MyServiceClient) Query(ctx context.Context, s *module.MyStruct, i *includes.Included) (error) {
-    return c.chClient.Query(ctx, s, i)
-}
-
-func (c *MyServiceChannelClient) HasArgDocs(ctx context.Context, s *module.MyStruct, i *includes.Included) (error) {
+func (c *MyServiceClient) HasArgDocs(ctx context.Context, s *module.MyStruct, i *includes.Included) (error) {
     in := &reqMyServiceHasArgDocs{
         S: s,
         I: i,
@@ -98,10 +80,6 @@ func (c *MyServiceChannelClient) HasArgDocs(ctx context.Context, s *module.MyStr
         return err
     }
     return nil
-}
-
-func (c *MyServiceClient) HasArgDocs(ctx context.Context, s *module.MyStruct, i *includes.Included) (error) {
-    return c.chClient.HasArgDocs(ctx, s, i)
 }
 
 

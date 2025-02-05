@@ -31,41 +31,27 @@ type HsTestServiceClientInterface interface {
     HsTestService
 }
 
-type HsTestServiceChannelClient struct {
-    ch thrift.RequestChannel
-}
-// Compile time interface enforcer
-var _ HsTestServiceClientInterface = (*HsTestServiceChannelClient)(nil)
-
-func NewHsTestServiceChannelClient(channel thrift.RequestChannel) *HsTestServiceChannelClient {
-    return &HsTestServiceChannelClient{
-        ch: channel,
-    }
-}
-
-func (c *HsTestServiceChannelClient) Close() error {
-    return c.ch.Close()
-}
-
 type HsTestServiceClient struct {
-    chClient *HsTestServiceChannelClient
+    ch thrift.RequestChannel
 }
 // Compile time interface enforcer
 var _ HsTestServiceClientInterface = (*HsTestServiceClient)(nil)
 
-func NewHsTestServiceClient(prot thrift.Protocol) *HsTestServiceClient {
+func NewHsTestServiceChannelClient(channel thrift.RequestChannel) *HsTestServiceClient {
     return &HsTestServiceClient{
-        chClient: NewHsTestServiceChannelClient(
-            thrift.NewSerialChannel(prot),
-        ),
+        ch: channel,
     }
 }
 
-func (c *HsTestServiceClient) Close() error {
-    return c.chClient.Close()
+func NewHsTestServiceClient(prot thrift.Protocol) *HsTestServiceClient {
+    return NewHsTestServiceChannelClient(thrift.NewSerialChannel(prot))
 }
 
-func (c *HsTestServiceChannelClient) Init(ctx context.Context, int1 int64) (int64, error) {
+func (c *HsTestServiceClient) Close() error {
+    return c.ch.Close()
+}
+
+func (c *HsTestServiceClient) Init(ctx context.Context, int1 int64) (int64, error) {
     in := &reqHsTestServiceInit{
         Int1: int1,
     }
@@ -75,10 +61,6 @@ func (c *HsTestServiceChannelClient) Init(ctx context.Context, int1 int64) (int6
         return 0, err
     }
     return out.GetSuccess(), nil
-}
-
-func (c *HsTestServiceClient) Init(ctx context.Context, int1 int64) (int64, error) {
-    return c.chClient.Init(ctx, int1)
 }
 
 

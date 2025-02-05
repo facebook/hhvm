@@ -76,30 +76,6 @@ final class UpdateUniverseContextHandler implements IContextHandler {
     }
   }
 
-  public static function getTransformedThriftClientName(
-    string $thrift_name,
-    IThriftClient $client,
-  )[zoned_local]: string {
-    try {
-      $thrift_name = Str\split($thrift_name, '\\') |> C\lastx($$);
-      if ($client is IThriftSyncIf) {
-        return Str\strip_suffix($thrift_name, 'Client');
-      } else if ($client is IThriftAsyncIf) {
-        return Str\strip_suffix($thrift_name, 'AsyncClient');
-      } else {
-        return $thrift_name;
-      }
-    } catch (Exception $e) {
-      FBLogger('privacylib', 'thrift_client_naming_transform')
-        ->handle(
-          $e,
-          Causes::the('Thrift client name')->to('not transform')
-            ->document('fail to transform existing Thrift client name'),
-        );
-      return $thrift_name;
-    }
-  }
-
   private static function getCurrentUniverse(
     string $thrift_name,
     string $function_name,

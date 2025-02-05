@@ -227,12 +227,12 @@ let prj_symm_to_json = function
               ] );
         ])
   | Prj_symm_tuple idx ->
-    Hh_json.(JSON_Object [(" Prj_symm_tuple", JSON_Number (string_of_int idx))])
+    Hh_json.(JSON_Object [("Prj_symm_tuple", JSON_Number (string_of_int idx))])
   | Prj_symm_shape (fld_nm, fld_kind_sub, fld_kind_super) ->
     Hh_json.(
       JSON_Object
         [
-          ( " Prj_symm_shape",
+          ( "Prj_symm_shape",
             JSON_Array
               [
                 JSON_String fld_nm;
@@ -1968,8 +1968,16 @@ let rec to_json_help : type a. a t_ -> Hh_json.json list -> Hh_json.json list =
   | Missing_field ->
     Hh_json.(JSON_Object [("Missing_field", JSON_Array [])]) :: acc
   | Invalid -> Hh_json.(JSON_Object [("Invalid", JSON_Array [])]) :: acc
-  | From_witness_locl witness -> witness_locl_to_json witness :: acc
-  | From_witness_decl witness -> witness_decl_to_json witness :: acc
+  | From_witness_locl witness ->
+    Hh_json.(
+      JSON_Object
+        [("From_witness_locl", JSON_Array [witness_locl_to_json witness])])
+    :: acc
+  | From_witness_decl witness ->
+    Hh_json.(
+      JSON_Object
+        [("From_witness_decl", JSON_Array [witness_decl_to_json witness])])
+    :: acc
   | Idx (pos, r) ->
     Hh_json.(JSON_Object [("Idx", JSON_Array [pos_to_json pos; to_json r])])
     :: acc

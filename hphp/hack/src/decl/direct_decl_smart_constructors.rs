@@ -1498,36 +1498,6 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                 Reason::FromWitnessDecl(WitnessDecl::WitnessFromDecl(pos)),
                 Box::new(Ty_::Tprim(aast::Tprim::Tbool)),
             )),
-            Node::Token(t) if t.kind() == TokenKind::Varray => {
-                let pos = self.token_pos(t);
-                let tany = Ty(
-                    Reason::FromWitnessDecl(WitnessDecl::Hint(pos.clone())),
-                    Box::new(TANY_),
-                );
-                let ty_ = Box::new(Ty_::Tapply(
-                    (pos.clone(), naming_special_names::collections::VEC.into()),
-                    vec![tany],
-                ));
-                Some(Ty(Reason::FromWitnessDecl(WitnessDecl::Hint(pos)), ty_))
-            }
-            Node::Token(t) if t.kind() == TokenKind::Darray => {
-                let pos = self.token_pos(t);
-                let tany = Ty(
-                    Reason::FromWitnessDecl(WitnessDecl::Hint(pos.clone())),
-                    Box::new(TANY_),
-                );
-                let ty_ = Ty_::Tapply(
-                    (
-                        self.token_pos(t),
-                        naming_special_names::collections::DICT.into(),
-                    ),
-                    vec![tany.clone(), tany],
-                );
-                Some(Ty(
-                    Reason::FromWitnessDecl(WitnessDecl::Hint(pos)),
-                    Box::new(ty_),
-                ))
-            }
             Node::Token(t) if t.kind() == TokenKind::This => Some(Ty(
                 Reason::FromWitnessDecl(WitnessDecl::Hint(self.token_pos(t))),
                 Box::new(Ty_::Tthis),
@@ -5463,10 +5433,12 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
                     ellipsis,
                 }) => {
                     if let Some(ty) = self.node_to_ty(hint) {
-                        if ellipsis {
-                            variadic_opt = Some(ty);
-                        } else if pre_ellipsis {
+                        if pre_ellipsis {
                             splat_opt = Some(ty)
+                        } else if ellipsis {
+                            if variadic_opt.is_none() {
+                                variadic_opt = Some(ty);
+                            }
                         } else if opt {
                             optional.push(ty);
                         } else {
@@ -5566,7 +5538,13 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         let mut fields = TShapeMap::new();
         for node in fields_in.into_iter() {
             if let Node::ShapeFieldSpecifier(box ShapeFieldNode { name, type_ }) = node {
-                fields.insert(self.make_t_shape_field_name(name), type_);
+                // Implementation of Ord for TShapeField ignores position
+                // https://doc.rust-lang.org/std/collections/index.html#insert-and-complex-keys
+                let key = self.make_t_shape_field_name(name);
+                if fields.contains_key(&key) {
+                    fields.remove(&key);
+                }
+                fields.insert(key, type_);
             }
         }
         let kind = self.make_variadic_type(&open);

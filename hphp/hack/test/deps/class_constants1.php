@@ -15,7 +15,3 @@ type S = shape(
   A::C => int,
   ...
 );
-
-//////////////////////
-
-//// deleted-a.php

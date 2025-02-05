@@ -319,6 +319,7 @@
   typing_subtype_method
   typing_type_wellformedness)
  (libraries
+  typing
   typing_algebra
   typing_common
   typing_modules

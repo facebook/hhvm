@@ -314,16 +314,6 @@ let typedef_def ctx typedef =
     env
   in
 
-  let env =
-    List.fold_left hints ~init:env ~f:(fun env hint ->
-        match hint with
-        | (_pos, Hshape { nsi_allows_unknown_fields = _; nsi_field_map }) ->
-          let get_name sfi = sfi.sfi_name in
-          Typing_shapes.check_shape_keys_validity
-            env
-            (List.map ~f:get_name nsi_field_map)
-        | _ -> env)
-  in
   let (env, user_attributes) =
     Typing.attributes_check_def
       env

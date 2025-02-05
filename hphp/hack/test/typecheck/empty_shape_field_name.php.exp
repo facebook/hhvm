@@ -2,5 +2,7 @@ ERROR: File "empty_shape_field_name.php", line 2, characters 25-26:
 Shape field name must be a nonempty single-quoted string or a class constant (Parsing[1002])
 ERROR: File "empty_shape_field_name.php", line 3, characters 14-15:
 Shape field name must be a nonempty single-quoted string or a class constant (Parsing[1002])
+ERROR: File "empty_shape_field_name.php", line 2, characters 25-26:
+A shape field name cannot be an empty string (Typing[4136])
 ERROR: File "empty_shape_field_name.php", line 3, characters 14-15:
 A shape field name cannot be an empty string (Typing[4136])

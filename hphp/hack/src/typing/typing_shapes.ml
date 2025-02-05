@@ -683,18 +683,13 @@ let check_shape_keys_validity env keys =
   let cmp_keys x y = Pos.compare (shape_field_pos x) (shape_field_pos y) in
   let keys = List.sort ~compare:cmp_keys keys in
   match keys with
-  | [] -> env
+  | [] -> (env, [])
   | witness :: rest_keys ->
     let (env, pos, info) = get_field_info env witness in
-    let (env, ty_errs) =
-      List.fold_left rest_keys ~init:(env, []) ~f:(fun (env, ty_errs) k ->
-          match check_field pos info env k with
-          | (env, Some ty_err) -> (env, ty_err :: ty_errs)
-          | (env, _) -> (env, ty_errs))
-    in
-    let ty_err_opt = Typing_error.multiple_opt ty_errs in
-    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-    env
+    List.fold_left rest_keys ~init:(env, []) ~f:(fun (env, ty_errs) k ->
+        match check_field pos info env k with
+        | (env, Some ty_err) -> (env, ty_err :: ty_errs)
+        | (env, _) -> (env, ty_errs))
 
 let update_param : decl_fun_param -> decl_ty -> decl_fun_param =
  (fun param ty -> { param with fp_type = ty })

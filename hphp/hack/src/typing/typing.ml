@@ -4756,9 +4756,10 @@ end = struct
           ~init:TShapeMap.empty
           tfdm
       in
-      let env =
+      let (env, errors) =
         Typing_shapes.check_shape_keys_validity env (List.map tfdm ~f:fst3)
       in
+      List.iter errors ~f:(Typing_error_utils.add_typing_error ~env);
       (* Fields are fully known, because this shape is constructed
        * using shape keyword and we know exactly what fields are set. *)
       make_result

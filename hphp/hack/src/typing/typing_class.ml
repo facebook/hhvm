@@ -1055,18 +1055,6 @@ let typeconst_def
       (env, ty_err_opt)
   in
   Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
-  (* TODO(T88552052): should this check be happening for defaults
-   * Does this belong here at all? *)
-  let env =
-    match c_tconst_kind with
-    | TCConcrete { c_tc_type = (_, Hshape { nsi_field_map; _ }) }
-    | TCAbstract { c_atc_default = Some (_, Hshape { nsi_field_map; _ }); _ } ->
-      let get_name sfi = sfi.sfi_name in
-      Typing_shapes.check_shape_keys_validity
-        env
-        (List.map ~f:get_name nsi_field_map)
-    | _ -> env
-  in
 
   let (env, user_attributes) =
     Typing.attributes_check_def

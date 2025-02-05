@@ -1,0 +1,4 @@
+Const A::B -> Type A, Type S
+Const A::C -> Type A, Type S
+Type A -> Type S
+Type HH\supportdyn -> Type S

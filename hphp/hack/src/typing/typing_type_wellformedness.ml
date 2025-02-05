@@ -252,22 +252,9 @@ and hint_ ~in_signature env p h_ =
   | Happly ((p, "\\Tuple"), _)
   | Happly ((p, "\\tuple"), _) ->
     [Typing_error.(wellformedness @@ Primary.Wellformedness.Tuple_syntax p)]
-  | Happly ((_, x), hl) as h -> begin
-    match Env.get_class_or_typedef env.tenv x with
-    | Decl_entry.DoesNotExist
-    | Decl_entry.NotYetAvailable ->
-      []
-    | Decl_entry.Found (Env.TypedefResult _) ->
-      let (_ : Typing_env_types.env) =
-        check_happly env.typedef_tparams env.tenv (p, h)
-      in
-      hints env hl
-    | Decl_entry.Found (Env.ClassResult _) ->
-      let (_ : Typing_env_types.env) =
-        check_happly env.typedef_tparams env.tenv (p, h)
-      in
-      hints env hl
-  end
+  | Happly (_, hl) as h ->
+    let _tenv = check_happly env.typedef_tparams env.tenv (p, h) in
+    hints env hl
   | Hrefinement (hr, rl) as h ->
     check_hrefinement env.typedef_tparams env.tenv (p, h) rl;
     let refinement_hints =
@@ -281,8 +268,20 @@ and hint_ ~in_signature env p h_ =
     in
     hints env (hr :: refinement_hints)
   | Hshape { nsi_allows_unknown_fields = _; nsi_field_map } ->
-    let compute_hint_for_shape_field_info { sfi_hint; _ } = hint env sfi_hint in
-    List.concat_map ~f:compute_hint_for_shape_field_info nsi_field_map
+    let (tenv, errors) =
+      let get_name sfi = sfi.sfi_name in
+      Typing_shapes.check_shape_keys_validity
+        env.tenv
+        (List.map ~f:get_name nsi_field_map)
+    in
+    let env = { env with tenv } in
+    let rec_errors =
+      let compute_hint_for_shape_field_info { sfi_hint; _ } =
+        hint env sfi_hint
+      in
+      List.concat_map ~f:compute_hint_for_shape_field_info nsi_field_map
+    in
+    errors @ rec_errors
   | Hfun_context _ ->
     (* TODO(coeffects): check if arg is a function type in the locals? *)
     []

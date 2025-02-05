@@ -24,7 +24,9 @@ type naming_table = Naming_table.t * Relative_path.t SymbolMap.t
 
 let deps_mode = Typing_deps_mode.InMemoryMode None
 
-let popt = ParserOptions.{ default with disable_xhp_element_mangling = false }
+let popt =
+  ParserOptions.
+    { default with disable_xhp_element_mangling = false; everything_sdt = true }
 
 let tcopt =
   GlobalOptions.

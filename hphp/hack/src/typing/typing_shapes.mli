@@ -71,7 +71,9 @@ val to_dict :
   Type_mapper.result
 
 val check_shape_keys_validity :
-  Typing_env_types.env -> Ast_defs.shape_field_name list -> Typing_env_types.env
+  Typing_env_types.env ->
+  Ast_defs.shape_field_name list ->
+  Typing_env_types.env * Typing_error.t list
 
 val transform_special_shapes_fun_ty :
   Typing_defs.tshape_field_name ->

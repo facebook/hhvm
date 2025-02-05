@@ -201,46 +201,6 @@ TEST(DeserializeKnownLengthMapTest, EmplaceHintConstuctCountVec) {
           /* destroyed */ 0}));
 }
 
-TEST(DeserializeKnownLengthMapTest, EmplaceHintConstuctCountVecAlloc) {
-  using Map =
-      folly::pmr::F14FastMap<TrackedKey, std::pmr::vector<TrackedValue>>;
-
-  static_assert(!detail::pm::sorted_unique_constructible_v<Map>);
-  static_assert(detail::pm::map_emplace_hint_is_invocable_v<Map>);
-  static_assert(detail::alloc_should_propagate_map<Map>);
-
-  Map map;
-  detail::pm::deserialize_known_length_map(
-      map,
-      1,
-      deserializeTrackedKey,
-      deserializeVecOfTrackedValues<std::pmr::vector<TrackedValue>>);
-
-  EXPECT_EQ(map.size(), 1);
-  EXPECT_EQ(
-      TrackedKey::counts(),
-      (folly::test::Counts{
-          /* copyConstruct */ 0,
-          /* moveConstruct */ 1,
-          /* copyConvert */ 0,
-          /* moveConvert */ 0,
-          /* copyAssign */ 0,
-          /* moveAssign */ 0,
-          /* defaultConstruct */ 1,
-          /* destroyed */ 1}));
-  EXPECT_EQ(
-      TrackedValue::counts(),
-      (folly::test::Counts{
-          /* copyConstruct */ 0,
-          /* moveConstruct */ 0,
-          /* copyConvert */ 0,
-          /* moveConvert */ 0,
-          /* copyAssign */ 0,
-          /* moveAssign */ 0,
-          /* defaultConstruct */ 1,
-          /* destroyed */ 0}));
-}
-
 TEST(DeserializeKnownLengthMapTest, EmplaceConstuctCount) {
   using Allocator = std::allocator<std::pair<const TrackedKey, TrackedValue>>;
   using Map = MinimalMap<
@@ -326,6 +286,47 @@ TEST(DeserializeKnownLengthMapTest, EmplaceConstuctCountVec) {
           /* destroyed */ 0}));
 }
 
+#if FOLLY_HAS_MEMORY_RESOURCE
+
+TEST(DeserializeKnownLengthMapTest, EmplaceHintConstuctCountVecAlloc) {
+  using Map =
+      folly::pmr::F14FastMap<TrackedKey, std::pmr::vector<TrackedValue>>;
+
+  static_assert(!detail::pm::sorted_unique_constructible_v<Map>);
+  static_assert(detail::pm::map_emplace_hint_is_invocable_v<Map>);
+  static_assert(detail::alloc_should_propagate_map<Map>);
+
+  Map map;
+  detail::pm::deserialize_known_length_map(
+      map,
+      1,
+      deserializeTrackedKey,
+      deserializeVecOfTrackedValues<std::pmr::vector<TrackedValue>>);
+  EXPECT_EQ(map.size(), 1);
+  EXPECT_EQ(
+      TrackedKey::counts(),
+      (folly::test::Counts{
+          /* copyConstruct */ 0,
+          /* moveConstruct */ 1,
+          /* copyConvert */ 0,
+          /* moveConvert */ 0,
+          /* copyAssign */ 0,
+          /* moveAssign */ 0,
+          /* defaultConstruct */ 1,
+          /* destroyed */ 1}));
+  EXPECT_EQ(
+      TrackedValue::counts(),
+      (folly::test::Counts{
+          /* copyConstruct */ 0,
+          /* moveConstruct */ 0,
+          /* copyConvert */ 0,
+          /* moveConvert */ 0,
+          /* copyAssign */ 0,
+          /* moveAssign */ 0,
+          /* defaultConstruct */ 1,
+          /* destroyed */ 0}));
+}
+
 TEST(DeserializeKnownLengthMapTest, EmplaceConstuctCountVecAlloc) {
   using Vec = std::pmr::vector<TrackedValue>;
   using Allocator =
@@ -369,3 +370,5 @@ TEST(DeserializeKnownLengthMapTest, EmplaceConstuctCountVecAlloc) {
           /* defaultConstruct */ 1,
           /* destroyed */ 0}));
 }
+
+#endif

@@ -2574,6 +2574,9 @@ class Flag(Enum):
             return NotImplemented
         return cls(self._fbthrift_value_ ^ other._fbthrift_value_)
 
+    def __int__(self):
+        return self.value
+
     def __invert__(self):
         cls = type(self)
         res = self._fbthrift_value_

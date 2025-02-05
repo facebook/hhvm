@@ -324,7 +324,6 @@ class EnumMetaTests(unittest.TestCase):
 
 
 class FlagTests(unittest.TestCase):
-    @brokenInAutoMigrate()
     def test_flag_enum(self) -> None:
         with self.assertRaises(TypeError):
             # flags are not ints

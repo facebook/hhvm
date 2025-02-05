@@ -432,6 +432,7 @@ class FlagTests(unittest.TestCase):
         self.assertEqual(x.permissions, self.Perm.read | self.Perm.execute)
         self.assertTrue(x.permissions)
         self.assertNotIsInstance(2, self.Perm, "Flags are not ints")
+        self.assertEqual(int(x.permissions), 5)
         self.assertEqual(x.permissions.value, 5)
         x = self.File(name="")
         self.assertFalse(x.permissions)

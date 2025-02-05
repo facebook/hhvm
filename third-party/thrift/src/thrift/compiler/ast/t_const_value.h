@@ -28,7 +28,6 @@
 #include <vector>
 
 #include <fmt/format.h>
-#include <thrift/compiler/ast/t_node.h>
 #include <thrift/compiler/ast/t_type.h>
 
 namespace apache::thrift::compiler {
@@ -235,25 +234,8 @@ class t_const_value {
     return *program_;
   }
 
-  static std::string_view kind_to_string(t_const_value_kind kind) {
-    switch (kind) {
-      case CV_BOOL:
-        return "bool";
-      case CV_INTEGER:
-        return "integer";
-      case CV_DOUBLE:
-        return "double";
-      case CV_STRING:
-        return "string";
-      case CV_MAP:
-        return "map({})";
-      case CV_LIST:
-        return "list([])";
-      case CV_IDENTIFIER:
-        return "identifier";
-    }
-    abort();
-  }
+  // Returns a debug string representation of a const value kind.
+  static std::string_view kind_to_string(t_const_value_kind kind);
 
  private:
   t_const_value_kind kind_ = CV_BOOL;
@@ -325,7 +307,7 @@ class t_const_value {
   const t_enum* enum_ = nullptr;
   const t_enum_value* enum_val_ = nullptr;
 
-  // This flag is set to true if the value is a struct literal, i.e. when field
+  // Set to true if the value is a struct literal, i.e. when field
   // assignment using unquoted field names is used. For example:
   //   const MyStruct s = MyStruct{a = 1, b = 2};
   bool is_struct_literal_ = false;
@@ -338,16 +320,7 @@ class t_const_value {
           kind_to_string(kind_)));
     }
   }
-
- public:
-  // TODO(afuller): Delete everything below here. It is only provided for
-  // backwards compatibility.
-  const t_type* get_ttype() const { return ttype_.get_type(); }
 };
-
-// Returns the ProtocolObject ValueType of a t_const_value
-t_type::value_type from_const_value_type(
-    t_const_value::t_const_value_kind kind);
 
 } // namespace apache::thrift::compiler
 

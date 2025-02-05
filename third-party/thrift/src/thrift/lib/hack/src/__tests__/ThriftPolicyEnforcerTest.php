@@ -291,7 +291,13 @@ final class ThriftPolicyEnforcerTest extends WWWTest {
       PolicyEnforcerContext::builder()
         ->add(
           #ThriftPolicyZones,
-          new ThriftPolicyZoneModuleContext('fake_method', 'fake_service'),
+          new ThriftPolicyZoneModuleContext(
+            ThriftServiceMethodNameAssetXID::unsafeGet(
+              'fake_service',
+              'fake_method',
+            ),
+            'fake_service',
+          ),
         )
         ->build(),
     );
@@ -358,7 +364,13 @@ final class ThriftPolicyEnforcerTest extends WWWTest {
       PolicyEnforcerContext::builder()
         ->add(
           #ThriftPolicyZones,
-          new ThriftPolicyZoneModuleContext('fake_method', 'fake_service'),
+          new ThriftPolicyZoneModuleContext(
+            ThriftServiceMethodNameAssetXID::unsafeGet(
+              'fake_service',
+              'fake_method',
+            ),
+            'fake_service',
+          ),
         )
         ->add(
           #PZ2,

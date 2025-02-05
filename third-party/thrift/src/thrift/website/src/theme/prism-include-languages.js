@@ -18,45 +18,45 @@ export default function prismIncludeLanguages(PrismObject) {
 
   // Syntax highlighting rules for Thrift code:
   Prism.languages.thrift = {
-    'keyword': [
+    keyword: [
       /\b(?:binary|bool|byte|const|cpp_include|double|enum|exception)\b/,
       /\b(?:extends|float|hs_include|i16|i32|i64|include|interaction)\b/,
       /\b(?:list|map|namespace|optional|performs|required|service|set)\b/,
       /\b(?:stream|string|struct|throws|typedef|union|void)\b/,
       // Context-sensitive keywords:
       /\b(?:client|idempotent|oneway|package|permanent|readonly)\b/,
-      /\b(?:safe|server|sink|stateful|transient)\b/
+      /\b(?:safe|server|sink|stateful|transient)\b/,
     ],
-    'boolean': /\b(?:false|true)\b/,
-    'number': /\b0x[\da-f]+\b|(?:\b\d+(?:\.\d*)?|\B\.\d+)(?:e[+-]?\d+)?/i,
-    'string': {
+    boolean: /\b(?:false|true)\b/,
+    number: /\b0x[\da-f]+\b|(?:\b\d+(?:\.\d*)?|\B\.\d+)(?:e[+-]?\d+)?/i,
+    string: {
       pattern: /(?:"[^"]*"|'[^']*')/,
-      greedy: true
+      greedy: true,
     },
-    'operator': /[+-]/,
-    'punctuation': /[,;]/,
-    'comment': [
+    operator: /[+-]/,
+    punctuation: /[,;]/,
+    comment: [
       {
-        'pattern': /\/\/.*/,
-        'greedy': true
+        pattern: /\/\/.*/,
+        greedy: true,
       },
       {
-        'pattern': /\/\*(\*(?!\/)|[^*])*\*\//,
-        'greedy': true
-      }
-    ]
+        pattern: /\/\*(\*(?!\/)|[^*])*\*\//,
+        greedy: true,
+      },
+    ],
   };
 
   // Syntax highlighting rules for grammar (modified BNF):
   Prism.languages.grammar = {
     'defined-symbol': {
-      'pattern': /(^|\n)[a-z][a-z_]*/,
-      'lookbehind': true,
-      'alias': 'keyword'
+      pattern: /(^|\n)[a-z][a-z_]*/,
+      lookbehind: true,
+      alias: 'keyword',
     },
-    'string': /(?:"[^"]*"|'[^']*')/,
-    'operator': /(?:[|*]|\.\.\.|::=)/,
-    'punctuation': /[\[\]()]/
+    string: /(?:"[^"]*"|'[^']*')/,
+    operator: /(?:[|*]|\.\.\.|::=)/,
+    punctuation: /[\[\]()]/,
   };
 
   delete globalThis.Prism;

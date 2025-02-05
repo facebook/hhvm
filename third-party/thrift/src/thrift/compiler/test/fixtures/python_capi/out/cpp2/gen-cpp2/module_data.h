@@ -61,6 +61,21 @@ template <> struct TEnumDataStorage<::test::fixtures::python_capi::Shallot::Type
   }};
 };
 
+template <> struct TEnumDataStorage<::test::fixtures::python_capi::SomeBinary::Type> {
+  using type = ::test::fixtures::python_capi::SomeBinary::Type;
+  static constexpr const std::size_t size = 3;
+  static constexpr std::array<type, size> values = { {
+      type::iobuf,
+      type::iobuf_ptr,
+      type::iobufRef,
+  }};
+  static constexpr std::array<std::string_view, size> names = { {
+      "iobuf"sv,
+      "iobuf_ptr"sv,
+      "iobufRef"sv,
+  }};
+};
+
 template <> struct TStructDataStorage<::test::fixtures::python_capi::MyStruct> {
   static constexpr const std::size_t fields_size = 8;
   static const std::string_view name;
@@ -255,6 +270,22 @@ template <> struct TStructDataStorage<::test::fixtures::python_capi::ComposeStru
 
 template <> struct TStructDataStorage<::test::fixtures::python_capi::Shallot> {
   static constexpr const std::size_t fields_size = 7;
+  static const std::string_view name;
+  static const std::array<std::string_view, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<std::string_view, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
+};
+
+template <> struct TStructDataStorage<::test::fixtures::python_capi::SomeBinary> {
+  static constexpr const std::size_t fields_size = 3;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;

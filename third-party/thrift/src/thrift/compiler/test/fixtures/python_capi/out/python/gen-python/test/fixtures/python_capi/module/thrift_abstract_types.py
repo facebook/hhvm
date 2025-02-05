@@ -512,6 +512,45 @@ class Onion(_abc.ABC):
     def fbthrift_current_field(self) -> FbThriftUnionFieldEnum: ...
 
 _fbthrift_Onion = Onion
+class SomeBinary(_abc.ABC):
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
+    @_abc.abstractmethod
+    def iobuf(self) -> _fbthrift_iobuf.IOBuf: ...
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
+    @_abc.abstractmethod
+    def iobuf_ptr(self) -> _fbthrift_iobuf.IOBuf: ...
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
+    @_abc.abstractmethod
+    def iobufRef(self) -> _fbthrift_iobuf.IOBuf: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.SomeBinary": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "test.fixtures.python_capi.module.thrift_types.SomeBinary": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "test.fixtures.python_capi.module.types.SomeBinary": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.SomeBinary": ...  # type: ignore
+
+    class FbThriftUnionFieldEnum(_enum.Enum):
+        EMPTY = 0
+        iobuf = 1
+        iobuf_ptr = 2
+        iobufRef = 3
+
+    FbThriftUnionFieldEnum.__name__ = "SomeBinary"
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
+    @_abc.abstractmethod
+    def fbthrift_current_value(self) -> _typing.Union[None, _fbthrift_iobuf.IOBuf, _fbthrift_iobuf.IOBuf, _fbthrift_iobuf.IOBuf]: ...
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
+    @_abc.abstractmethod
+    def fbthrift_current_field(self) -> FbThriftUnionFieldEnum: ...
+
+_fbthrift_SomeBinary = SomeBinary
 
 uint64 = int
 ui64 = int

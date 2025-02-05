@@ -331,6 +331,29 @@ StructMetadata<::test::fixtures::python_capi::Shallot>::gen(ThriftMetadata& meta
   module_Onion.structured_annotations()->push_back(*cvStruct("cpp.Name", { {"value", cvString("Shallot") } }).cv_struct_ref());
   return res.first->second;
 }
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::test::fixtures::python_capi::SomeBinary>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.SomeBinary", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_SomeBinary = res.first->second;
+  module_SomeBinary.name() = "module.SomeBinary";
+  module_SomeBinary.is_union() = true;
+  static const auto* const
+  module_SomeBinary_fields = new std::array<EncodedThriftField, 3>{ {
+    { 1, "iobuf", false, std::make_unique<Typedef>("module.IOBuf", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("folly::IOBuf") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},    { 2, "iobuf_ptr", false, std::make_unique<Typedef>("module.IOBufPtr", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("std::unique_ptr<folly::IOBuf>") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},    { 3, "iobufRef", false, std::make_unique<Typedef>("module.IOBuf", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("folly::IOBuf") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Ref", { {"type", cvInteger(0) } }).cv_struct_ref(), *cvStruct("cpp.AllowLegacyNonOptionalRef", {  }).cv_struct_ref(), }},  }};
+  for (const auto& f : *module_SomeBinary_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_SomeBinary.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
 
 } // namespace md
 } // namespace detail

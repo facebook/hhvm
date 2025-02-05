@@ -25,6 +25,7 @@ class SetStruct;
 class MapStruct;
 class ComposeStruct;
 class Shallot;
+class SomeBinary;
 } // namespace test::fixtures::python_capi
 // END forward_declare
 

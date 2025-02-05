@@ -34,6 +34,8 @@ cdef extern from "thrift/compiler/test/fixtures/python_capi/gen-cpp2/module_type
         cComposeStruct()
     cdef cppclass cOnion "::test::fixtures::python_capi::Shallot":
         cOnion()
+    cdef cppclass cSomeBinary "::test::fixtures::python_capi::SomeBinary":
+        cSomeBinary()
 
 cdef extern from "thrift/compiler/test/fixtures/python_capi/gen-cpp2/module_types.h":
     cdef cppclass cMyEnum "::test::fixtures::python_capi::MyEnum":
@@ -78,4 +80,7 @@ cdef object ComposeStruct_from_cpp(const cComposeStruct& c_struct)
 
 cdef cOnion Onion_convert_to_cpp(object inst) except*
 cdef object Onion_from_cpp(const cOnion& c_struct)
+
+cdef cSomeBinary SomeBinary_convert_to_cpp(object inst) except*
+cdef object SomeBinary_from_cpp(const cSomeBinary& c_struct)
 

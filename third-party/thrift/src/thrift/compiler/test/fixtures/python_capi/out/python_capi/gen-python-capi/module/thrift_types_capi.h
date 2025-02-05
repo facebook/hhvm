@@ -422,6 +422,37 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 };
 
 template <>
+struct Extractor<::test::fixtures::python_capi::SomeBinary>
+    : public BaseExtractor<::test::fixtures::python_capi::SomeBinary> {
+  static const bool kUsingMarshal = true;
+  ExtractorResult<::test::fixtures::python_capi::SomeBinary> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::python_capi::SomeBinary>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::python_capi::SomeBinary>> {
+  ExtractorResult<::test::fixtures::python_capi::SomeBinary> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::test::fixtures::python_capi::SomeBinary>
+    : public BaseConstructor<::test::fixtures::python_capi::SomeBinary> {
+  static const bool kUsingMarshal = true;
+  PyObject* operator()(const ::test::fixtures::python_capi::SomeBinary& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::python_capi::SomeBinary>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::python_capi::SomeBinary>> {
+  PyObject* operator()(const ::test::fixtures::python_capi::SomeBinary& val);
+};
+
+template <>
 struct Extractor<::test::fixtures::python_capi::MyEnum>
     : public BaseExtractor<::test::fixtures::python_capi::MyEnum> {
   ExtractorResult<::test::fixtures::python_capi::MyEnum> operator()(PyObject* obj);

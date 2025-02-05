@@ -39,6 +39,24 @@ struct VisitUnion<::test::fixtures::python_capi::Shallot> {
     }
   }
 };
+template <>
+struct VisitUnion<::test::fixtures::python_capi::SomeBinary> {
+
+  template <typename F, typename T>
+  decltype(auto) operator()([[maybe_unused]] F&& f, T&& t) const {
+    using Union = std::remove_reference_t<T>;
+    switch (t.getType()) {
+    case Union::Type::iobuf:
+      return f(0, *static_cast<T&&>(t).iobuf_ref());
+    case Union::Type::iobuf_ptr:
+      return f(1, *static_cast<T&&>(t).iobuf_ptr_ref());
+    case Union::Type::iobufRef:
+      return f(2, *static_cast<T&&>(t).iobufRef_ref());
+    case Union::Type::__EMPTY__:
+      return decltype(f(0, *static_cast<T&&>(t).iobuf_ref()))();
+    }
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

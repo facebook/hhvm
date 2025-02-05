@@ -2013,6 +2013,116 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
+ExtractorResult<::test::fixtures::python_capi::SomeBinary>
+Extractor<::test::fixtures::python_capi::SomeBinary>::operator()(PyObject* obj) {
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a SomeBinary");
+      }
+      return extractorError<::test::fixtures::python_capi::SomeBinary>(
+          "Marshal error: SomeBinary");
+  }
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::test::fixtures::python_capi::SomeBinary>>{}(*fbThriftData);
+}
+
+ExtractorResult<::test::fixtures::python_capi::SomeBinary>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    ::test::fixtures::python_capi::SomeBinary>>::operator()(PyObject* fbThriftData) {
+  ::test::fixtures::python_capi::SomeBinary cpp;
+  std::optional<std::string_view> error;
+  auto type_tag = Extractor<int64_t>{}(PyTuple_GET_ITEM(fbThriftData, 0));
+  if (type_tag.hasError()) {
+    return folly::makeUnexpected(type_tag.error());
+  }
+  switch (*type_tag) {
+    case 0:
+      break; // union is unset
+    case 1:
+      Extractor<folly::IOBuf>{}.extractInto(
+          cpp.iobuf_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+    case 2:
+      Extractor<std::unique_ptr<folly::IOBuf>>{}.extractInto(
+          cpp.iobuf_ptr_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+    case 3:
+      Extractor<folly::IOBuf>{}.extractInto(
+          cpp.iobufRef_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
+      break;
+  }
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+  return cpp;
+}
+
+
+int Extractor<::test::fixtures::python_capi::SomeBinary>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.python_capi.module import error");
+  }
+  int result =
+      can_extract__test__fixtures__python_capi__module__SomeBinary(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: SomeBinary");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::test::fixtures::python_capi::SomeBinary>::operator()(
+    const ::test::fixtures::python_capi::SomeBinary& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::python_capi::SomeBinary>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
+  }
+  return init__test__fixtures__python_capi__module__SomeBinary(*fbthrift_data);
+}
+
+PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::test::fixtures::python_capi::SomeBinary>>::operator()(
+    [[maybe_unused]] const ::test::fixtures::python_capi::SomeBinary& val) {
+  int64_t type_key = static_cast<int64_t>(val.getType());
+  StrongRef py_val;
+  switch (type_key) {
+    case 0:
+      Py_INCREF(Py_None);
+      py_val = StrongRef(Py_None);
+      break;
+    case 1:
+      py_val = StrongRef(
+          Constructor<folly::IOBuf>{}
+          .constructFrom(val.iobuf_ref()));
+      break;
+    case 2:
+      py_val = StrongRef(
+          Constructor<std::unique_ptr<folly::IOBuf>>{}
+          .constructFrom(val.iobuf_ptr_ref()));
+      break;
+    case 3:
+      py_val = StrongRef(
+          Constructor<folly::IOBuf>{}
+          .constructFrom(val.iobufRef_ref()));
+      break;
+  }
+  if (!py_val) {
+    return nullptr;
+  }
+  return unionTupleFromValue(type_key, *py_val);
+}
+
+
 ExtractorResult<::test::fixtures::python_capi::MyEnum>
 Extractor<::test::fixtures::python_capi::MyEnum>::operator()(PyObject* obj) {
   long val = PyLong_AsLong(obj);

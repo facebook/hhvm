@@ -110,6 +110,13 @@ cdef api int can_extract__test__fixtures__python_capi__module__Onion(object __ob
 cdef api object init__test__fixtures__python_capi__module__Onion(object data):
     return __thrift_types.Onion._fbthrift_create(data)
 
+cdef api int can_extract__test__fixtures__python_capi__module__SomeBinary(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.SomeBinary) else 0
+
+
+cdef api object init__test__fixtures__python_capi__module__SomeBinary(object data):
+    return __thrift_types.SomeBinary._fbthrift_create(data)
+
 cdef api int can_extract__test__fixtures__python_capi__module__MyEnum(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyEnum) else 0
 

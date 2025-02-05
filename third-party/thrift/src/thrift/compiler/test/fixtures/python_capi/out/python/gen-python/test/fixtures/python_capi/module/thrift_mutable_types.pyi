@@ -820,6 +820,51 @@ class Onion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_wi
     def _to_py_deprecated(self) -> "module.ttypes.Onion": ...  # type: ignore
 _fbthrift_Onion = Onion
 
+class _fbthrift_compatible_with_SomeBinary:
+    pass
+
+
+class SomeBinary(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_SomeBinary, _fbthrift_python_abstract_types.SomeBinary):
+    @property
+    def iobuf(self) -> _fbthrift_iobuf.IOBuf: ...
+    @iobuf.setter
+    def iobuf(self, value: _fbthrift_iobuf.IOBuf) -> None: ...
+
+    @property
+    def iobuf_ptr(self) -> _fbthrift_iobuf.IOBuf: ...
+    @iobuf_ptr.setter
+    def iobuf_ptr(self, value: _fbthrift_iobuf.IOBuf) -> None: ...
+
+    @property
+    def iobufRef(self) -> _fbthrift_iobuf.IOBuf: ...
+    @iobufRef.setter
+    def iobufRef(self, value: _fbthrift_iobuf.IOBuf) -> None: ...
+
+    def __init__(
+        self, *,
+        iobuf: _typing.Optional[_fbthrift_iobuf.IOBuf]=...,
+        iobuf_ptr: _typing.Optional[_fbthrift_iobuf.IOBuf]=...,
+        iobufRef: _typing.Optional[_fbthrift_iobuf.IOBuf]=...
+    ) -> None: ...
+
+
+
+    class FbThriftUnionFieldEnum(enum.Enum):
+        EMPTY: SomeBinary.FbThriftUnionFieldEnum = ...
+        iobuf: SomeBinary.FbThriftUnionFieldEnum = ...
+        iobuf_ptr: SomeBinary.FbThriftUnionFieldEnum = ...
+        iobufRef: SomeBinary.FbThriftUnionFieldEnum = ...
+
+    fbthrift_current_value: _typing.Final[_typing.Union[None, _fbthrift_iobuf.IOBuf, _fbthrift_iobuf.IOBuf, _fbthrift_iobuf.IOBuf]]
+    # pyre-ignore[15]: `fbthrift_current_field` overrides attribute defined in `_fbthrift_python_abstract_types.SomeBinary` inconsistently. Type `SomeBinary.FbThriftUnionFieldEnum` is not a subtype of the overridden attribute `_fbthrift_python_abstract_types.SomeBinary.FbThriftUnionFieldEnum`
+    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
+    def get_type(self) -> FbThriftUnionFieldEnum: ...
+    def _to_python(self) -> "test.fixtures.python_capi.module.thrift_types.SomeBinary": ...  # type: ignore
+    def _to_mutable_python(self) -> _typing.Self: ...
+    def _to_py3(self) -> "test.fixtures.python_capi.module.types.SomeBinary": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.SomeBinary": ...  # type: ignore
+_fbthrift_SomeBinary = SomeBinary
+
 uint64 = int
 ui64 = int
 signed_byte = int

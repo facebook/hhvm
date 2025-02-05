@@ -106,6 +106,13 @@ struct TccStructTraits<::test::fixtures::python_capi::Shallot> {
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
+template <>
+struct TccStructTraits<::test::fixtures::python_capi::SomeBinary> {
+  static void translateFieldName(
+      std::string_view _fname,
+      int16_t& fid,
+      apache::thrift::protocol::TType& _ftype) noexcept;
+};
 
 } // namespace detail
 } // namespace thrift
@@ -4086,6 +4093,178 @@ extern template void Shallot::readNoXfer<>(apache::thrift::CompactProtocolReader
 extern template uint32_t Shallot::write<>(apache::thrift::CompactProtocolWriter*) const;
 extern template uint32_t Shallot::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 extern template uint32_t Shallot::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+template <class Protocol_>
+void SomeBinary::readNoXfer(Protocol_* iprot) {
+  apache::thrift::detail::ProtocolReaderStructReadState<Protocol_> _readState;
+  _readState.fieldId = 0;
+
+  _readState.readStructBegin(iprot);
+
+  _readState.readFieldBegin(iprot);
+  if (_readState.atStop()) {
+    apache::thrift::clear(*this);
+  } else {
+    if (iprot->kUsesFieldNames()) {
+      _readState.template fillFieldTraitsFromName<apache::thrift::detail::TccStructTraits<SomeBinary>>();
+    }
+    switch (_readState.fieldId) {
+      case 1:
+      {
+        if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
+          this->iobuf_ref().emplace();
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::test::fixtures::python_capi::IOBuf>::readWithContext(*iprot, value_.iobuf, _readState);
+        } else {
+          _readState.skip(iprot);
+        }
+        break;
+      }
+      case 2:
+      {
+        if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
+          this->iobuf_ptr_ref().emplace();
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::test::fixtures::python_capi::IOBufPtr>::readWithContext(*iprot, value_.iobuf_ptr, _readState);
+        } else {
+          _readState.skip(iprot);
+        }
+        break;
+      }
+      case 3:
+      {
+        if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING)) {
+          this->iobufRef_ref().emplace();
+          auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::test::fixtures::python_capi::IOBuf>>();
+          ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::test::fixtures::python_capi::IOBuf>::readWithContext(*iprot, *ptr, _readState);
+          value_.iobufRef = std::move(ptr);
+        } else {
+          _readState.skip(iprot);
+        }
+        break;
+      }
+      default:
+      {
+        _readState.skip(iprot);
+        break;
+      }
+    }
+    _readState.readFieldEnd(iprot);
+    _readState.readFieldBegin(iprot);
+    if (UNLIKELY(!_readState.atStop())) {
+      using apache::thrift::protocol::TProtocolException;
+      TProtocolException::throwUnionMissingStop();
+    }
+  }
+  _readState.readStructEnd(iprot);
+}
+template <class Protocol_>
+uint32_t SomeBinary::serializedSize(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("SomeBinary");
+  switch(this->getType()) {
+    case SomeBinary::Type::iobuf:
+    {
+      xfer += prot_->serializedFieldSize("iobuf", apache::thrift::protocol::T_STRING, 1);
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::test::fixtures::python_capi::IOBuf>::serializedSize<false>(*prot_, value_.iobuf);
+      break;
+    }
+    case SomeBinary::Type::iobuf_ptr:
+    {
+      xfer += prot_->serializedFieldSize("iobuf_ptr", apache::thrift::protocol::T_STRING, 2);
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::test::fixtures::python_capi::IOBufPtr>::serializedSize<false>(*prot_, value_.iobuf_ptr);
+      break;
+    }
+    case SomeBinary::Type::iobufRef:
+    {
+      xfer += prot_->serializedFieldSize("iobufRef", apache::thrift::protocol::T_STRING, 3);
+      if (value_.iobufRef) {
+        xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::test::fixtures::python_capi::IOBuf>::serializedSize<false>(*prot_, *value_.iobufRef);
+      }
+      break;
+    }
+    case SomeBinary::Type::__EMPTY__:;
+  }
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t SomeBinary::serializedSizeZC(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("SomeBinary");
+  switch(this->getType()) {
+    case SomeBinary::Type::iobuf:
+    {
+      xfer += prot_->serializedFieldSize("iobuf", apache::thrift::protocol::T_STRING, 1);
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::test::fixtures::python_capi::IOBuf>::serializedSize<true>(*prot_, value_.iobuf);
+      break;
+    }
+    case SomeBinary::Type::iobuf_ptr:
+    {
+      xfer += prot_->serializedFieldSize("iobuf_ptr", apache::thrift::protocol::T_STRING, 2);
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::test::fixtures::python_capi::IOBufPtr>::serializedSize<true>(*prot_, value_.iobuf_ptr);
+      break;
+    }
+    case SomeBinary::Type::iobufRef:
+    {
+      xfer += prot_->serializedFieldSize("iobufRef", apache::thrift::protocol::T_STRING, 3);
+      if (value_.iobufRef) {
+        xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::test::fixtures::python_capi::IOBuf>::serializedSize<true>(*prot_, *value_.iobufRef);
+      }
+      break;
+    }
+    case SomeBinary::Type::__EMPTY__:;
+  }
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t SomeBinary::write(Protocol_* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->writeStructBegin("SomeBinary");
+  switch(this->getType()) {
+    case SomeBinary::Type::iobuf:
+    {
+      constexpr int16_t kPrevFieldId = 0;
+      xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRING, 1, kPrevFieldId>(*prot_, "iobuf", false);
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::test::fixtures::python_capi::IOBuf>::write(*prot_, value_.iobuf);
+      xfer += prot_->writeFieldEnd();
+      break;
+    }
+    case SomeBinary::Type::iobuf_ptr:
+    {
+      constexpr int16_t kPrevFieldId = 1;
+      xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRING, 2, kPrevFieldId>(*prot_, "iobuf_ptr", false);
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::test::fixtures::python_capi::IOBufPtr>::write(*prot_, value_.iobuf_ptr);
+      xfer += prot_->writeFieldEnd();
+      break;
+    }
+    case SomeBinary::Type::iobufRef:
+    {
+      constexpr int16_t kPrevFieldId = 2;
+      xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRING, 3, kPrevFieldId>(*prot_, "iobufRef", false);
+      if (value_.iobufRef) {
+        xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::test::fixtures::python_capi::IOBuf>::write(*prot_, *value_.iobufRef);
+      }
+      xfer += prot_->writeFieldEnd();
+      break;
+    }
+    case SomeBinary::Type::__EMPTY__:;
+  }
+  xfer += prot_->writeFieldStop();
+  xfer += prot_->writeStructEnd();
+  return xfer;
+}
+
+extern template void SomeBinary::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+extern template uint32_t SomeBinary::write<>(apache::thrift::BinaryProtocolWriter*) const;
+extern template uint32_t SomeBinary::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t SomeBinary::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template void SomeBinary::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+extern template uint32_t SomeBinary::write<>(apache::thrift::CompactProtocolWriter*) const;
+extern template uint32_t SomeBinary::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+extern template uint32_t SomeBinary::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 } // namespace test::fixtures::python_capi

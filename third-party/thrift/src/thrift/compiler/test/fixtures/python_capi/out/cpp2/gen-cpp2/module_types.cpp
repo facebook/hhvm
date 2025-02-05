@@ -2371,6 +2371,157 @@ static_assert(
 
 } // namespace test::fixtures::python_capi
 
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::python_capi::SomeBinary>::translateFieldName(
+    std::string_view _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::python_capi::SomeBinary>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift {
+
+folly::Range<::test::fixtures::python_capi::SomeBinary::Type const*> const TEnumTraits<::test::fixtures::python_capi::SomeBinary::Type>::values = folly::range(TEnumDataStorage<::test::fixtures::python_capi::SomeBinary::Type>::values);
+folly::Range<std::string_view const*> const TEnumTraits<::test::fixtures::python_capi::SomeBinary::Type>::names = folly::range(TEnumDataStorage<::test::fixtures::python_capi::SomeBinary::Type>::names);
+
+bool TEnumTraits<::test::fixtures::python_capi::SomeBinary::Type>::findName(type value, std::string_view* out) noexcept {
+  return ::apache::thrift::detail::st::enum_find_name(value, out);
+}
+
+bool TEnumTraits<::test::fixtures::python_capi::SomeBinary::Type>::findValue(std::string_view name, type* out) noexcept {
+  return ::apache::thrift::detail::st::enum_find_value(name, out);
+}
+}} // apache::thrift
+namespace test::fixtures::python_capi {
+
+const char* SomeBinary::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/python_capi/SomeBinary";
+}
+
+std::string_view SomeBinary::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<SomeBinary>::fields_names[folly::to_underlying(ord) - 1];
+}
+std::string_view SomeBinary::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<SomeBinary>::name;
+}
+
+void SomeBinary::__fbthrift_destruct() {
+  switch(getType()) {
+    case Type::__EMPTY__:
+      break;
+    case Type::iobuf:
+      ::std::destroy_at(::std::addressof(value_.iobuf));
+      break;
+    case Type::iobuf_ptr:
+      ::std::destroy_at(::std::addressof(value_.iobuf_ptr));
+      break;
+    case Type::iobufRef:
+      ::std::destroy_at(::std::addressof(value_.iobufRef));
+      break;
+    default:
+      assert(false);
+      break;
+  }
+}
+
+void SomeBinary::__fbthrift_clear() {
+  __fbthrift_destruct();
+  type_ = folly::to_underlying(Type::__EMPTY__);
+}
+
+  SomeBinary::~SomeBinary() {
+    __fbthrift_destruct();
+  }
+
+bool SomeBinary::__fbthrift_is_empty() const {
+  return getType() == Type::__EMPTY__;
+}
+  SomeBinary::SomeBinary(const SomeBinary& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        return;
+      case Type::iobuf:
+        set_iobuf(rhs.value_.iobuf);
+        break;
+      case Type::iobuf_ptr:
+        set_iobuf_ptr(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::binary>(rhs.value_.iobuf_ptr));
+        break;
+      case Type::iobufRef:
+        set_iobufRef(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::binary>(rhs.value_.iobufRef));
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+    SomeBinary&SomeBinary::operator=(const SomeBinary& rhs) {
+    if (this == &rhs) { return *this; }
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+        __fbthrift_clear();
+        return *this;
+      case Type::iobuf:
+        set_iobuf(rhs.value_.iobuf);
+        break;
+      case Type::iobuf_ptr:
+        set_iobuf_ptr(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::binary>(rhs.value_.iobuf_ptr));
+        break;
+      case Type::iobufRef:
+        set_iobufRef(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::binary>(rhs.value_.iobufRef));
+        break;
+      default:
+        __fbthrift_clear();
+        assert(false);
+    }
+    return *this;
+  }
+
+
+bool SomeBinary::operator==(const SomeBinary& rhs) const {
+  return ::apache::thrift::op::detail::UnionEquality{}(*this, rhs);
+}
+
+bool SomeBinary::operator<([[maybe_unused]] const SomeBinary& rhs) const {
+  return ::apache::thrift::op::detail::UnionLessThan{}(*this, rhs);
+}
+
+void swap(SomeBinary& a, SomeBinary& b) {
+  SomeBinary temp(std::move(a));
+  a = std::move(b);
+  b = std::move(temp);
+}
+
+template void SomeBinary::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t SomeBinary::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t SomeBinary::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t SomeBinary::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void SomeBinary::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t SomeBinary::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t SomeBinary::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t SomeBinary::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+} // namespace test::fixtures::python_capi
+
 namespace test::fixtures::python_capi { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::thrift::test::lib::StringDoubler, 2, ::std::string, ::test::fixtures::python_capi::StringPair>();

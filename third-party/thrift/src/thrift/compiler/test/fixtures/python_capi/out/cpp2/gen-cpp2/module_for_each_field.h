@@ -179,6 +179,16 @@ struct ForEachField<::test::fixtures::python_capi::Shallot> {
     f(6, static_cast<T&&>(t).adapted_int_ref()...);
   }
 };
+
+template <>
+struct ForEachField<::test::fixtures::python_capi::SomeBinary> {
+  template <typename F, typename... T>
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
+    f(0, static_cast<T&&>(t).iobuf_ref()...);
+    f(1, static_cast<T&&>(t).iobuf_ptr_ref()...);
+    f(2, static_cast<T&&>(t).iobufRef_ref()...);
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

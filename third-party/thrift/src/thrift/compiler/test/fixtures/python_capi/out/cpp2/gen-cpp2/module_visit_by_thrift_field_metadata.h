@@ -307,6 +307,23 @@ struct VisitByFieldId<::test::fixtures::python_capi::Shallot> {
     }
   }
 };
+
+template <>
+struct VisitByFieldId<::test::fixtures::python_capi::SomeBinary> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).iobuf_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).iobuf_ptr_ref());
+    case 3:
+      return f(2, static_cast<T&&>(t).iobufRef_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::python_capi::SomeBinary");
+    }
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

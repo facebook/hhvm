@@ -78,6 +78,11 @@ cdef api int can_extract__test__fixtures__python_capi__module__Onion(object) exc
 
 cdef api object init__test__fixtures__python_capi__module__Onion(object data)
 
+cdef api int can_extract__test__fixtures__python_capi__module__SomeBinary(object) except -1
+
+
+cdef api object init__test__fixtures__python_capi__module__SomeBinary(object data)
+
 cdef api int can_extract__test__fixtures__python_capi__module__MyEnum(object) except -1
 
 cdef api object construct__test__fixtures__python_capi__module__MyEnum(int64_t)

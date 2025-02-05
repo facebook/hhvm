@@ -569,5 +569,32 @@ THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test::fixtures:
   3,
 }};
 
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::test::fixtures::python_capi::SomeBinary>::name = "SomeBinary";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::test::fixtures::python_capi::SomeBinary>::fields_names = { {
+  "iobuf"sv,
+  "iobuf_ptr"sv,
+  "iobufRef"sv,
+}};
+THRIFT_DATA_MEMBER const std::array<int16_t, 3> TStructDataStorage<::test::fixtures::python_capi::SomeBinary>::fields_ids = { {
+  1,
+  2,
+  3,
+}};
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 3> TStructDataStorage<::test::fixtures::python_capi::SomeBinary>::fields_types = { {
+  TType::T_STRING,
+  TType::T_STRING,
+  TType::T_STRING,
+}};
+THRIFT_DATA_MEMBER const std::array<std::string_view, 3> TStructDataStorage<::test::fixtures::python_capi::SomeBinary>::storage_names = { {
+  "iobuf"sv,
+  "iobuf_ptr"sv,
+  "iobufRef"sv,
+}};
+THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::test::fixtures::python_capi::SomeBinary>::isset_indexes = { {
+  0,
+  1,
+  -1,
+}};
+
 } // namespace thrift
 } // namespace apache

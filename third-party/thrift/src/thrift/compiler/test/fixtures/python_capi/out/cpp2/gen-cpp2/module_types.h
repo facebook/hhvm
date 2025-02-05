@@ -102,6 +102,9 @@ struct myString;
 struct doubleList;
 struct strMap;
 struct adapted_int;
+struct iobuf;
+struct iobuf_ptr;
+struct iobufRef;
 } // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_inty
@@ -408,6 +411,18 @@ APACHE_THRIFT_DEFINE_ACCESSOR(strMap);
 #define APACHE_THRIFT_ACCESSOR_adapted_int
 APACHE_THRIFT_DEFINE_ACCESSOR(adapted_int);
 #endif
+#ifndef APACHE_THRIFT_ACCESSOR_iobuf
+#define APACHE_THRIFT_ACCESSOR_iobuf
+APACHE_THRIFT_DEFINE_ACCESSOR(iobuf);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_iobuf_ptr
+#define APACHE_THRIFT_ACCESSOR_iobuf_ptr
+APACHE_THRIFT_DEFINE_ACCESSOR(iobuf_ptr);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_iobufRef
+#define APACHE_THRIFT_ACCESSOR_iobufRef
+APACHE_THRIFT_DEFINE_ACCESSOR(iobufRef);
+#endif
 } // namespace detail
 } // namespace thrift
 } // namespace apache
@@ -526,6 +541,7 @@ class SetStruct;
 class MapStruct;
 class ComposeStruct;
 class Shallot;
+class SomeBinary;
 } // namespace test::fixtures::python_capi
 // END forward_declare
 namespace apache::thrift::detail::annotation {
@@ -6919,6 +6935,412 @@ unsigned long Shallot::read(Protocol_* iprot) {
 }
 
 
+/** Glean {"file": "thrift/compiler/test/fixtures/python_capi/src/module.thrift", "name": "SomeBinary", "kind": "union" } */
+class SomeBinary final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
+  static const char* __fbthrift_thrift_uri();
+  static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::iobuf,
+    ::apache::thrift::ident::iobuf_ptr,
+    ::apache::thrift::ident::iobufRef
+  >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::cpp_type<folly::IOBuf, ::apache::thrift::type::binary_t>,
+    ::apache::thrift::type::cpp_type<std::unique_ptr<folly::IOBuf>, ::apache::thrift::type::binary_t>,
+    ::apache::thrift::type::cpp_type<folly::IOBuf, ::apache::thrift::type::binary_t>
+  >;
+
+  static constexpr std::size_t __fbthrift_field_size_v = 3;
+
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_destruct();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = SomeBinary;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    true;
+  static constexpr bool __fbthrift_cpp2_uses_op_encode =
+    false;
+
+
+ public:
+  enum Type : int {
+    __EMPTY__ = 0,
+    iobuf = 1,
+    iobuf_ptr = 2,
+    iobufRef = 3,
+  } ;
+
+  SomeBinary()
+      : type_(folly::to_underlying(Type::__EMPTY__)) {}
+
+  SomeBinary(SomeBinary&& rhs) noexcept
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    if (this == &rhs) { return; }
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
+      case Type::iobuf:
+      {
+        set_iobuf(std::move(rhs.value_.iobuf));
+        break;
+      }
+      case Type::iobuf_ptr:
+      {
+        set_iobuf_ptr(std::move(rhs.value_.iobuf_ptr));
+        break;
+      }
+      case Type::iobufRef:
+      {
+        set_iobufRef(std::move(*rhs.value_.iobufRef));
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    apache::thrift::clear(rhs);
+  }
+
+  SomeBinary(const SomeBinary& rhs);
+
+  SomeBinary& operator=(SomeBinary&& rhs) noexcept {
+    if (this == &rhs) { return *this; }
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        __fbthrift_clear();
+        return *this;
+      }
+      case Type::iobuf:
+      {
+        set_iobuf(std::move(rhs.value_.iobuf));
+        break;
+      }
+      case Type::iobuf_ptr:
+      {
+        set_iobuf_ptr(std::move(rhs.value_.iobuf_ptr));
+        break;
+      }
+      case Type::iobufRef:
+      {
+        set_iobufRef(std::move(*rhs.value_.iobufRef));
+        break;
+      }
+      default:
+      {
+        assert(false);
+        __fbthrift_clear();
+      }
+    }
+    apache::thrift::clear(rhs);
+    return *this;
+  }
+
+  SomeBinary& operator=(const SomeBinary& rhs);
+
+  ~SomeBinary();
+
+  union storage_type {
+    ::test::fixtures::python_capi::IOBuf iobuf;
+    ::test::fixtures::python_capi::IOBufPtr iobuf_ptr;
+    ::std::unique_ptr<::test::fixtures::python_capi::IOBuf> iobufRef;
+
+    storage_type() {}
+    ~storage_type() {}
+  } ;
+
+  bool operator==(const SomeBinary&) const;
+  bool operator<(const SomeBinary&) const;
+
+  /** Glean { "field": "iobuf" } */
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  ::test::fixtures::python_capi::IOBuf& set_iobuf(::test::fixtures::python_capi::IOBuf const &t) {
+    using T0 = ::test::fixtures::python_capi::IOBuf;
+    using T = folly::type_t<T0, A...>;
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::iobuf);
+    ::new (std::addressof(value_.iobuf)) T(t);
+    return value_.iobuf;
+  }
+
+  /** Glean { "field": "iobuf" } */
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  ::test::fixtures::python_capi::IOBuf& set_iobuf(::test::fixtures::python_capi::IOBuf&& t) {
+    using T0 = ::test::fixtures::python_capi::IOBuf;
+    using T = folly::type_t<T0, A...>;
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::iobuf);
+    ::new (std::addressof(value_.iobuf)) T(std::move(t));
+    return value_.iobuf;
+  }
+
+  /** Glean { "field": "iobuf" } */
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<::test::fixtures::python_capi::IOBuf, T...>> ::test::fixtures::python_capi::IOBuf& set_iobuf(T&&... t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::iobuf);
+    ::new (std::addressof(value_.iobuf)) ::test::fixtures::python_capi::IOBuf(std::forward<T>(t)...);
+    return value_.iobuf;
+  }
+
+
+  /** Glean { "field": "iobuf_ptr" } */
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  ::test::fixtures::python_capi::IOBufPtr& set_iobuf_ptr(::test::fixtures::python_capi::IOBufPtr const &t) {
+    using T0 = ::test::fixtures::python_capi::IOBufPtr;
+    using T = folly::type_t<T0, A...>;
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::iobuf_ptr);
+    ::new (std::addressof(value_.iobuf_ptr)) T(t);
+    return value_.iobuf_ptr;
+  }
+
+  /** Glean { "field": "iobuf_ptr" } */
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  ::test::fixtures::python_capi::IOBufPtr& set_iobuf_ptr(::test::fixtures::python_capi::IOBufPtr&& t) {
+    using T0 = ::test::fixtures::python_capi::IOBufPtr;
+    using T = folly::type_t<T0, A...>;
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::iobuf_ptr);
+    ::new (std::addressof(value_.iobuf_ptr)) T(std::move(t));
+    return value_.iobuf_ptr;
+  }
+
+  /** Glean { "field": "iobuf_ptr" } */
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<::test::fixtures::python_capi::IOBufPtr, T...>> ::test::fixtures::python_capi::IOBufPtr& set_iobuf_ptr(T&&... t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::iobuf_ptr);
+    ::new (std::addressof(value_.iobuf_ptr)) ::test::fixtures::python_capi::IOBufPtr(std::forward<T>(t)...);
+    return value_.iobuf_ptr;
+  }
+
+
+  /** Glean { "field": "iobufRef" } */
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  ::std::unique_ptr<::test::fixtures::python_capi::IOBuf>& set_iobufRef(::test::fixtures::python_capi::IOBuf const &t) {
+    using T0 = ::std::unique_ptr<::test::fixtures::python_capi::IOBuf>;
+    using T = folly::type_t<T0, A...>;
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::iobufRef);
+    ::new (std::addressof(value_.iobufRef)) T(new typename T::element_type(t));
+    return value_.iobufRef;
+  }
+
+  /** Glean { "field": "iobufRef" } */
+  template <typename... A, std::enable_if_t<!sizeof...(A), int> = 0>
+  ::std::unique_ptr<::test::fixtures::python_capi::IOBuf>& set_iobufRef(::test::fixtures::python_capi::IOBuf&& t) {
+    using T0 = ::std::unique_ptr<::test::fixtures::python_capi::IOBuf>;
+    using T = folly::type_t<T0, A...>;
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::iobufRef);
+    ::new (std::addressof(value_.iobufRef)) T(new typename T::element_type(std::move(t)));
+    return value_.iobufRef;
+  }
+
+  /** Glean { "field": "iobufRef" } */
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<::test::fixtures::python_capi::IOBuf, T...>> ::std::unique_ptr<::test::fixtures::python_capi::IOBuf>& set_iobufRef(T&&... t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::iobufRef);
+    ::new (std::addressof(value_.iobufRef)) ::std::unique_ptr<::test::fixtures::python_capi::IOBuf>(new ::std::unique_ptr<::test::fixtures::python_capi::IOBuf>::element_type(std::forward<T>(t)...));
+    return value_.iobufRef;
+  }
+
+  /** Glean { "field": "iobufRef" } */
+  ::std::unique_ptr<::test::fixtures::python_capi::IOBuf>& set_iobufRef(::std::unique_ptr<::test::fixtures::python_capi::IOBuf> t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::iobufRef);
+    ::new (std::addressof(value_.iobufRef)) ::std::unique_ptr<::test::fixtures::python_capi::IOBuf>(std::move(t));
+    return value_.iobufRef;
+  }
+
+  ::test::fixtures::python_capi::IOBuf const& get_iobuf() const {
+    if (getType() != Type::iobuf) {
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
+    }
+    return value_.iobuf;
+  }
+
+  ::test::fixtures::python_capi::IOBufPtr const& get_iobuf_ptr() const {
+    if (getType() != Type::iobuf_ptr) {
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
+    }
+    return value_.iobuf_ptr;
+  }
+
+  ::std::unique_ptr<::test::fixtures::python_capi::IOBuf> const& get_iobufRef() const {
+    if (getType() != Type::iobufRef) {
+      ::apache::thrift::detail::throw_on_bad_union_field_access();
+    }
+    return value_.iobufRef;
+  }
+
+  ::test::fixtures::python_capi::IOBuf& mutable_iobuf() {
+    assert(getType() == Type::iobuf);
+    return value_.iobuf;
+  }
+
+  ::test::fixtures::python_capi::IOBufPtr& mutable_iobuf_ptr() {
+    assert(getType() == Type::iobuf_ptr);
+    return value_.iobuf_ptr;
+  }
+
+  ::std::unique_ptr<::test::fixtures::python_capi::IOBuf>& mutable_iobufRef() {
+    assert(getType() == Type::iobufRef);
+    return value_.iobufRef;
+  }
+
+  template <typename..., typename T = ::test::fixtures::python_capi::IOBuf>
+  T move_iobuf() {
+    assert(getType() == Type::iobuf);
+    return std::move(value_.iobuf);
+  }
+
+  template <typename..., typename T = ::test::fixtures::python_capi::IOBufPtr>
+  T move_iobuf_ptr() {
+    assert(getType() == Type::iobuf_ptr);
+    return std::move(value_.iobuf_ptr);
+  }
+
+  template <typename..., typename T = ::std::unique_ptr<::test::fixtures::python_capi::IOBuf>>
+  T move_iobufRef() {
+    assert(getType() == Type::iobufRef);
+    return std::move(value_.iobufRef);
+  }
+
+  /** Glean { "field": "iobuf" } */
+  template <typename..., typename T = ::test::fixtures::python_capi::IOBuf>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> iobuf_ref() const& {
+    return {value_.iobuf, type_, folly::to_underlying(Type::iobuf), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "iobuf" } */
+  template <typename..., typename T = ::test::fixtures::python_capi::IOBuf>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> iobuf_ref() const&& {
+    return {std::move(value_.iobuf), type_, folly::to_underlying(Type::iobuf), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "iobuf" } */
+  template <typename..., typename T = ::test::fixtures::python_capi::IOBuf>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> iobuf_ref() & {
+    return {value_.iobuf, type_, folly::to_underlying(Type::iobuf), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "iobuf" } */
+  template <typename..., typename T = ::test::fixtures::python_capi::IOBuf>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> iobuf_ref() && {
+    return {std::move(value_.iobuf), type_, folly::to_underlying(Type::iobuf), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  /** Glean { "field": "iobuf_ptr" } */
+  template <typename..., typename T = ::test::fixtures::python_capi::IOBufPtr>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> iobuf_ptr_ref() const& {
+    return {value_.iobuf_ptr, type_, folly::to_underlying(Type::iobuf_ptr), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "iobuf_ptr" } */
+  template <typename..., typename T = ::test::fixtures::python_capi::IOBufPtr>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> iobuf_ptr_ref() const&& {
+    return {std::move(value_.iobuf_ptr), type_, folly::to_underlying(Type::iobuf_ptr), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "iobuf_ptr" } */
+  template <typename..., typename T = ::test::fixtures::python_capi::IOBufPtr>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> iobuf_ptr_ref() & {
+    return {value_.iobuf_ptr, type_, folly::to_underlying(Type::iobuf_ptr), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "iobuf_ptr" } */
+  template <typename..., typename T = ::test::fixtures::python_capi::IOBufPtr>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> iobuf_ptr_ref() && {
+    return {std::move(value_.iobuf_ptr), type_, folly::to_underlying(Type::iobuf_ptr), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  /** Glean { "field": "iobufRef" } */
+  template <typename..., typename T = ::std::unique_ptr<::test::fixtures::python_capi::IOBuf>>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> iobufRef_ref() const& {
+    return {value_.iobufRef, type_, folly::to_underlying(Type::iobufRef), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "iobufRef" } */
+  template <typename..., typename T = ::std::unique_ptr<::test::fixtures::python_capi::IOBuf>>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> iobufRef_ref() const&& {
+    return {std::move(value_.iobufRef), type_, folly::to_underlying(Type::iobufRef), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "iobufRef" } */
+  template <typename..., typename T = ::std::unique_ptr<::test::fixtures::python_capi::IOBuf>>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> iobufRef_ref() & {
+    return {value_.iobufRef, type_, folly::to_underlying(Type::iobufRef), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  /** Glean { "field": "iobufRef" } */
+  template <typename..., typename T = ::std::unique_ptr<::test::fixtures::python_capi::IOBuf>>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> iobufRef_ref() && {
+    return {std::move(value_.iobufRef), type_, folly::to_underlying(Type::iobufRef), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  Type getType() const { return static_cast<Type>(type_); }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+ protected:
+  storage_type value_;
+  std::underlying_type_t<Type> type_;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<SomeBinary>;
+  friend void swap(SomeBinary& a, SomeBinary& b);
+};
+
+template <class Protocol_>
+unsigned long SomeBinary::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
 } // namespace test::fixtures::python_capi
 
 namespace apache { namespace thrift {
@@ -6929,6 +7351,25 @@ template <> struct TEnumTraits<::test::fixtures::python_capi::Shallot::Type> {
   using type = ::test::fixtures::python_capi::Shallot::Type;
 
   static constexpr std::size_t const size = 7;
+  static folly::Range<type const*> const values;
+  static folly::Range<std::string_view const*> const names;
+
+  static bool findName(type value, std::string_view* out) noexcept;
+  static bool findValue(std::string_view name, type* out) noexcept;
+
+  static char const* findName(type value) noexcept {
+    std::string_view ret;
+    (void)findName(value, &ret);
+    return ret.data();
+  }
+};
+
+template <> struct TEnumDataStorage<::test::fixtures::python_capi::SomeBinary::Type>;
+
+template <> struct TEnumTraits<::test::fixtures::python_capi::SomeBinary::Type> {
+  using type = ::test::fixtures::python_capi::SomeBinary::Type;
+
+  static constexpr std::size_t const size = 3;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
 

@@ -90,3 +90,9 @@ cdef cOnion Onion_convert_to_cpp(object inst) except *:
 cdef object Onion_from_cpp(const cOnion& c_struct):
     return cpp_to_python[cOnion](c_struct)
 
+cdef cSomeBinary SomeBinary_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cSomeBinary](inst))
+
+cdef object SomeBinary_from_cpp(const cSomeBinary& c_struct):
+    return cpp_to_python[cSomeBinary](c_struct)
+

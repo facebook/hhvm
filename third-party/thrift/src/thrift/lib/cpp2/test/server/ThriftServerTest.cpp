@@ -3872,23 +3872,6 @@ TEST(ThriftServer, SetupThreadManager) {
       [](auto& ts) { ts.setupThreadManager(); });
 }
 
-TEST(ThriftServer, AddModuleAfterSetupThreadManager) {
-  ScopedServerInterfaceThread runner(
-      std::make_shared<apache::thrift::ServiceHandler<TestService>>(),
-      "::1",
-      0,
-      [](auto& ts) {
-        class TestModule : public apache::thrift::ServerModule {
-         public:
-          std::string getName() const override { return "TestModule"; }
-        };
-        ts.setupThreadManager();
-        ts.addModule(std::make_unique<TestModule>());
-      });
-
-  EXPECT_EQ(runner.getThriftServer().hasModule("TestModule"), true);
-}
-
 TEST(ThriftServer, GetSetMaxRequests) {
   for (auto target : std::array<uint32_t, 2>{1000, 0}) {
     {

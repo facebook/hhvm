@@ -1899,7 +1899,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   void callOnStartServing();
   void callOnStopRequested();
 
-  AsyncProcessorFactory& ensureDecoratedProcessorFactoryInitialized();
   void ensureProcessedServiceDescriptionInitialized();
 
   bool serverRanWithDCHECK();
@@ -2071,9 +2070,13 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
 
   struct ProcessedServiceDescription {
     ProcessedModuleSet modules;
+    std::unique_ptr<AsyncProcessorFactory> decoratedProcessorFactory;
 
-    ProcessedServiceDescription(ProcessedModuleSet moduleSet)
-        : modules(std::move(moduleSet)) {}
+    ProcessedServiceDescription(
+        ProcessedModuleSet moduleSet,
+        std::unique_ptr<AsyncProcessorFactory> processorFactory)
+        : modules(std::move(moduleSet)),
+          decoratedProcessorFactory(std::move(processorFactory)) {}
 
     ProcessedServiceDescription(ProcessedServiceDescription&& modules) =
         default;
@@ -2120,7 +2123,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
       return ptr;
     }
   };
-  std::unique_ptr<AsyncProcessorFactory> decoratedProcessorFactory_;
   ProcessedServiceDescription::UniquePtr processedServiceDescription_{nullptr};
 
  public:
@@ -2133,18 +2135,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     }
     unprocessedModulesSpecification_.infos.emplace_back(
         ModulesSpecification::Info{std::move(module), std::move(name)});
-  }
-
-  bool hasModule(const std::string_view name) const noexcept {
-    CHECK(processedServiceDescription_)
-        << "Server must be set up before calling this method";
-    for (const auto& moduleInfo :
-         processedServiceDescription_->modules.modules) {
-      if (moduleInfo.name == name) {
-        return true;
-      }
-    }
-    return false;
   }
 
  private:
@@ -2815,9 +2805,9 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
    *    └────────────────────────┘
    */
   AsyncProcessorFactory& getDecoratedProcessorFactory() const {
-    CHECK(decoratedProcessorFactory_)
+    CHECK(processedServiceDescription_)
         << "Server must be set up before calling this method";
-    return *decoratedProcessorFactory_;
+    return *processedServiceDescription_->decoratedProcessorFactory;
   }
 
   /**

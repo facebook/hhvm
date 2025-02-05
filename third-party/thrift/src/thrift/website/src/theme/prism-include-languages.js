@@ -47,6 +47,79 @@ export default function prismIncludeLanguages(PrismObject) {
     ],
   };
 
+  // Syntax highlighting rules for Whisker templates:
+  {
+    const keywords = [
+      'if',
+      'unless',
+      'else',
+      'each',
+      'as',
+      'partial',
+      'captures',
+      'let',
+      'and',
+      'or',
+      'not',
+      'with',
+      'this',
+      'define',
+      'for',
+      'do',
+      'import',
+      'export',
+      'from',
+      'pragma',
+    ];
+    // The handlebars highlighting could be a helpful reference:
+    //   https://github.com/PrismJS/prism/blob/59e5a3471377057de1f401ba38337aca27b80e03/components/prism-handlebars.js
+    PrismObject.languages.whisker = {
+      keyword: [new RegExp(`\\b(?:${keywords.join('|')})\\b`)],
+      boolean: /\b(?:false|true)\b/,
+      number: /\b0x[\da-f]+\b|(?:\b\d+(?:\.\d*)?|\B\.\d+)(?:e[+-]?\d+)?/i,
+      string: /(["'])(?:\\.|(?!\1)[^\\\r\n])*\1/,
+      null: {
+        pattern: /\bnull\b/,
+        alias: 'keyword',
+      },
+      block: {
+        pattern: /^(\s*(?:~\s*)?)[#\/]\S+?(?=\s*(?:~\s*)?$|\s)/,
+        lookbehind: true,
+        alias: 'keyword',
+      },
+      brackets: {
+        pattern: /\[[^\]]+\]/,
+        inside: {
+          punctuation: /\[|\]/,
+          variable: /[\s\S]+/,
+        },
+      },
+      delimiter: {
+        pattern: /^\{\{|\}\}$/,
+        alias: 'punctuation',
+      },
+      comment: /\{\{![\s\S]*?\}\}/,
+      punctuation: /[!"#%&':()*+,.\/;<=>@\[\\\]^`{|}~]/,
+      variable: /[^!"#%&'()*+,\/;<=>@\[\\\]^`{|}~\s]+/,
+    };
+
+    PrismObject.hooks.add('before-tokenize', function (env) {
+      var whiskerPattern = /\{\{\{[\s\S]+?\}\}\}|\{\{[\s\S]+?\}\}/g;
+      PrismObject.languages['markup-templating'].buildPlaceholders(
+        env,
+        'whisker',
+        whiskerPattern,
+      );
+    });
+
+    PrismObject.hooks.add('after-tokenize', function (env) {
+      PrismObject.languages['markup-templating'].tokenizePlaceholders(
+        env,
+        'whisker',
+      );
+    });
+  }
+
   // Syntax highlighting rules for grammar (modified BNF):
   Prism.languages.grammar = {
     'defined-symbol': {

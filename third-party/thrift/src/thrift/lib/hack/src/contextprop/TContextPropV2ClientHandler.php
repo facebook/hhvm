@@ -8,6 +8,7 @@ type ClientInstrumentationParams = shape(
   ?'fn_name' => string,
   ?'fn_args' => mixed,
   ?'fn_sequence_id' => ?int,
+  ?'service_interface' => string,
 );
 
 final class TContextPropV2ClientHandler extends TClientEventHandler {
@@ -29,7 +30,7 @@ final class TContextPropV2ClientHandler extends TClientEventHandler {
     string $fn_name,
     mixed $args,
     int $sequence_id,
-    ?string $_service_interface = null,
+    string $service_interface,
   ): void {
     try {
       // set params
@@ -45,6 +46,7 @@ final class TContextPropV2ClientHandler extends TClientEventHandler {
       $full_params['fn_name'] = $fn_name;
       $full_params['fn_args'] = $args;
       $full_params['fn_sequence_id'] = $sequence_id;
+      $full_params['service_interface'] = $service_interface;
 
       // call handlers
       foreach ($this->handlers as $handler) {

@@ -79,7 +79,12 @@ final class ProductIdContextHandlerTest extends WWWTest {
 
     $handler = new ProductIdContextHandler();
     $client_handler->addHandler($handler);
-    $client_handler->preSend('sample_method_name', null, 0);
+    $client_handler->preSend(
+      'sample_method_name',
+      null,
+      0,
+      'sample_service_interface',
+    );
 
     // verify that TagManager::getLatestOriginID() was called
     expect($mock)->wasCalledOnce();
@@ -124,7 +129,12 @@ final class ProductIdContextHandlerTest extends WWWTest {
 
     $handler = new ProductIdContextHandler();
     $client_handler->addHandler($handler);
-    $client_handler->preSend('sample_method_name', null, 0);
+    $client_handler->preSend(
+      'sample_method_name',
+      null,
+      0,
+      'sample_service_interface',
+    );
 
     // verify that TagManager::getLatestOriginID() was called
     expect($mock)->wasCalledOnce();
@@ -169,7 +179,12 @@ final class ProductIdContextHandlerTest extends WWWTest {
 
     $handler = new ProductIdContextHandler();
     $client_handler->addHandler($handler);
-    $client_handler->preSend('sample_method_name', null, 0);
+    $client_handler->preSend(
+      'sample_method_name',
+      null,
+      0,
+      'sample_service_interface',
+    );
 
     // verify that TagManager::getLatestOriginID() was called
     expect($mock)->wasCalledOnce();

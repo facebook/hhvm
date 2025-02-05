@@ -103,7 +103,12 @@ final class UpdateUniverseContextHandlerTest
     $client_handler = new TContextPropV2ClientHandler($transport, $params);
 
     $client_handler->addHandler($handler);
-    $client_handler->preSend($thrift_method_name, null, 0);
+    $client_handler->preSend(
+      $thrift_method_name,
+      null,
+      0,
+      'sample_service_interface',
+    );
 
     $write_headers = $transport->getWriteHeaders();
     expect($write_headers)->toContainKey(

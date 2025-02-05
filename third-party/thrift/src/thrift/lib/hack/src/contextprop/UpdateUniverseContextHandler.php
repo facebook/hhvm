@@ -28,20 +28,12 @@ final class UpdateUniverseContextHandler implements IContextHandler {
     ThriftFrameworkMetadata $mutable_tfm,
     ImmutableThriftContextPropState $immutable_ctx,
   ): void {
-    $raw_thrift_class_name = Shapes::idx($params, 'thrift_class');
-    $client = Shapes::idx($params, 'client');
+    $service_interface = Shapes::idx($params, 'service_interface');
     $function_name = Shapes::idx($params, 'fn_name');
-    if (
-      $raw_thrift_class_name is null ||
-      $function_name is null ||
-      $client is null
-    ) {
+    if ($service_interface is null || $function_name is null) {
       return;
     }
-
-    $thrift_name = HH\class_to_classname($raw_thrift_class_name);
-
-    $thrift_name = self::getTransformedThriftClientName($thrift_name, $client);
+    $thrift_name = ThriftServiceHelper::extractServiceName($service_interface);
 
     if (self::isServiceNameOptedOut($thrift_name)) {
       return;

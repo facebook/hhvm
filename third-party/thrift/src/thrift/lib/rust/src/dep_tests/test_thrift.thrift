@@ -17,6 +17,7 @@
 namespace cpp2 facebook
 namespace rust fbthrift_test_if
 
+include "thrift/annotation/rust.thrift"
 include "thrift/annotation/thrift.thrift"
 
 struct Small {
@@ -83,7 +84,10 @@ struct Containers {
   2: list<string> l;
 }
 
-typedef double Double (rust.newtype, rust.type = "OrderedFloat<f64>", rust.ord)
+@rust.NewType
+@rust.Ord
+@rust.Type{name = "OrderedFloat<f64>"}
+typedef double Double
 
 safe stateful server exception TestException {
   1: string message;

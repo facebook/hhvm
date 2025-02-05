@@ -657,4 +657,7 @@ struct HeadersPayloadMetadata {
 }
 
 // The following were automatically generated and may benefit from renaming.
-typedef string (java.swift.binary_string = "1") string_4852
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"java.swift.binary_string": "1"},
+}
+typedef string string_4852

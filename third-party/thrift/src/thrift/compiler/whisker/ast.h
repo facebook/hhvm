@@ -82,7 +82,31 @@ struct root {
  */
 struct text {
   source_range loc;
-  std::string content;
+
+  /**
+   * Whitespace characters except newlines. One or more repetitions of:
+   *   - " "
+   *   - "\t"
+   *   - "\v"
+   */
+  struct whitespace {
+    source_range loc;
+    std::string value;
+  };
+  /**
+   * A sequence of non-whitespace characters.
+   */
+  struct non_whitespace {
+    source_range loc;
+    std::string value;
+  };
+  using content = std::variant<whitespace, non_whitespace>;
+  std::vector<content> parts;
+
+  /**
+   * A concatenation of all composed whitespace and non-whitespace nodes.
+   */
+  std::string joined() const;
 };
 
 /**
@@ -516,10 +540,8 @@ struct partial_statement {
    * If this is a standalone partial, the value is the preceding whitespace
    * necessary before the partial interpolation. Otherwise, this is
    * std::nullopt.
-   *
-   * The contained string is guaranteed to be whitespace only.
    */
-  std::optional<std::string> standalone_indentation_within_line;
+  std::optional<ast::text::whitespace> standalone_indentation_within_line;
 };
 
 /*
@@ -555,10 +577,8 @@ struct macro {
    *
    * If this is a standalone macro, the value is the preceding whitespace
    * necessary before the macro interpolation. Otherwise, this is std::nullopt.
-   *
-   * The contained string is guaranteed to be whitespace only.
    */
-  std::optional<std::string> standalone_indentation_within_line;
+  std::optional<ast::text::whitespace> standalone_indentation_within_line;
 
   std::string path_string() const;
 };

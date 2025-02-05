@@ -53,7 +53,10 @@ class outputter {
 
   void write(const ast::text& text) {
     // ast::text is guaranteed to have no newlines
-    current_line().buffer += text.content;
+    for (const ast::text::content& c : text.parts) {
+      detail::variant_match(
+          c, [&](const auto& s) { current_line().buffer += s.value; });
+    }
   }
 
   void write(const ast::newline& newline) {
@@ -101,7 +104,7 @@ class outputter {
    * buffered output. This is needed for indentation of standalone partial
    * applications.
    */
-  auto make_indent_guard(const std::optional<std::string>& indent) {
+  auto make_indent_guard(const std::optional<ast::text::whitespace>& indent) {
     // This implementation assumes that indent_guard lifetimes are nested.
     //
     // That is, if guard A was created before guard B, then guard B must be
@@ -112,9 +115,9 @@ class outputter {
     // for the stack.
     class indent_guard {
      public:
-      explicit indent_guard(outputter& out, const std::string& indent)
+      explicit indent_guard(outputter& out, const ast::text::whitespace& indent)
           : out_(out) {
-        out_.next_indent_.emplace_back(indent);
+        out_.next_indent_.emplace_back(&indent);
       }
       ~indent_guard() { out_.next_indent_.pop_back(); }
 
@@ -152,8 +155,8 @@ class outputter {
   current_line_info& current_line() {
     if (!current_line_.has_value()) {
       std::string indent;
-      for (const auto& stack : next_indent_) {
-        indent += stack;
+      for (const auto& part : next_indent_) {
+        indent += part->value;
       }
       current_line_ = {{}, std::move(indent)};
     }
@@ -161,7 +164,9 @@ class outputter {
   }
 
   std::ostream& sink_;
-  std::vector<std::string> next_indent_;
+  // The pointers are never null. The AST nodes outlive the renderer so a
+  // non-owning reference is safe here.
+  std::vector<const ast::text::whitespace*> next_indent_;
 };
 
 /**

@@ -55,7 +55,7 @@ struct ast_visitor {
     scope.println(
         " text {} '{}'",
         location(text.loc),
-        tree_printer::escape(text.content));
+        tree_printer::escape(text.joined()));
   }
   void visit(const ast::newline& newline, tree_printer::scope scope) const {
     scope.println(
@@ -122,7 +122,8 @@ struct ast_visitor {
     if (const auto& indentation = macro.standalone_indentation_within_line;
         indentation.has_value()) {
       scope.open_property().println(
-          " standalone-indentation '{}'", tree_printer::escape(*indentation));
+          " standalone-indentation '{}'",
+          tree_printer::escape(indentation->value));
     }
   }
   void visit(const ast::comment& comment, tree_printer::scope scope) const {
@@ -187,7 +188,8 @@ struct ast_visitor {
             partial_statement.standalone_indentation_within_line;
         indentation.has_value()) {
       scope.open_property().println(
-          " standalone-indentation '{}'", tree_printer::escape(*indentation));
+          " standalone-indentation '{}'",
+          tree_printer::escape(indentation->value));
     }
     for (const auto& [name, arg] : partial_statement.named_arguments) {
       scope.open_property().println(

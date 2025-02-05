@@ -218,20 +218,23 @@ bool try_consume_tokens(
   return true;
 }
 
-/**
- * Creates an identifier AST node from identifier token.
- */
-ast::identifier make_identifier(const token& t) {
-  assert(t.kind == tok::identifier);
-  return ast::identifier{t.range, std::string(t.string_value())};
+// Creates AST nodes that are derived from exactly one textual lexer token.
+template <typename T, tok Kind>
+T make_textual_node(const token& t) {
+  assert(t.kind == Kind);
+  return T{t.range, std::string(t.string_value())};
 }
-
-/**
- * Creates a path component AST node from path component token.
- */
+ast::identifier make_identifier(const token& t) {
+  return make_textual_node<ast::identifier, tok::identifier>(t);
+}
 ast::path_component make_path_component(const token& t) {
-  assert(t.kind == tok::path_component);
-  return ast::path_component{t.range, std::string(t.string_value())};
+  return make_textual_node<ast::path_component, tok::path_component>(t);
+}
+ast::text::whitespace make_whitespace_text(const token& t) {
+  return make_textual_node<ast::text::whitespace, tok::whitespace>(t);
+}
+ast::text::non_whitespace make_non_whitespace_text(const token& t) {
+  return make_textual_node<ast::text::non_whitespace, tok::text>(t);
 }
 
 /**
@@ -312,7 +315,7 @@ class standalone_lines_scanner {
      * should be replicated for subsequent lines in multi-line partial
      * applications.
      */
-    std::string preceding_whitespace;
+    ast::text::whitespace preceding_whitespace;
   };
   using standalone_marking =
       std::variant<removed, standalone_block, partial_apply>;
@@ -444,15 +447,16 @@ class standalone_lines_scanner {
               drain_current_line();
               continue;
             }
-            auto preceding_whitespace = std::invoke([&]() -> std::string {
-              if (current_line.start == scan_start) {
-                return {};
-              }
-              // There should be exactly one whitespace token on the line
-              assert(current_line.start->kind == tok::whitespace);
-              assert(std::next(current_line.start) == scan_start);
-              return std::string(current_line.start->string_value());
-            });
+            auto preceding_whitespace =
+                std::invoke([&]() -> ast::text::whitespace {
+                  if (current_line.start == scan_start) {
+                    return {};
+                  }
+                  // There should be exactly one whitespace token on the line
+                  assert(current_line.start->kind == tok::whitespace);
+                  assert(std::next(current_line.start) == scan_start);
+                  return make_whitespace_text(*current_line.start);
+                });
             current_line.markings.emplace_back(
                 scan_start, partial_apply{std::move(preceding_whitespace)});
             // Do not strip the left side
@@ -613,7 +617,7 @@ class parser {
     return standalone_markings_.find(pos) != standalone_markings_.end();
   }
 
-  std::optional<std::string> standalone_partial_indentation(
+  std::optional<ast::text::whitespace> standalone_partial_indentation(
       parser_scan_window::cursor pos) const {
     assert(pos->kind == tok::open);
     if (auto marking = standalone_markings_.find(pos);
@@ -797,19 +801,20 @@ class parser {
   //
   // Returns the ast::text found otherwise with a non-empty string.
   //
-  // text → { (tok::text | whitespace)+ }
+  // text → { (tok::text | tok::whitespace)+ }
   parse_result<std::optional<ast::text>> parse_text(parser_scan_window scan) {
     assert(scan.empty());
-    std::string result;
+    std::vector<ast::text::content> parts;
     while (scan.can_advance()) {
       const token& t = scan.peek();
-      if (t.kind != tok::text && t.kind != tok::whitespace) {
+      if (t.kind == tok::text) {
+        parts.emplace_back(make_non_whitespace_text(t));
+      } else if (t.kind == tok::whitespace) {
+        if (!is_standalone_whitespace(scan.head)) {
+          parts.emplace_back(make_whitespace_text(t));
+        }
+      } else {
         break;
-      }
-      bool is_stripped =
-          t.kind == tok::whitespace && is_standalone_whitespace(scan.head);
-      if (!is_stripped) {
-        result += t.string_value();
       }
       scan.advance();
     }
@@ -817,13 +822,13 @@ class parser {
       // No text was scanned. Not even standalone whitespace.
       return no_parse_result();
     }
-    if (result.empty()) {
+    if (parts.empty()) {
       // Text was scanned but they were all stripped. We still need to advance
       // the scan window.
       return {std::nullopt, scan};
     }
     return parse_result{
-        std::optional{ast::text{scan.range(), std::move(result)}}, scan};
+        std::optional{ast::text{scan.range(), std::move(parts)}}, scan};
   }
 
   // Returns an empty parse result if no newline was found.

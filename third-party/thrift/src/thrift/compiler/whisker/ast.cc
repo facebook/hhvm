@@ -42,6 +42,15 @@ std::string to_joined_string(
 
 } // namespace
 
+std::string text::joined() const {
+  std::string result;
+  for (const auto& part : parts) {
+    result += detail::variant_match(
+        part, [](const auto& s) -> std::string_view { return s.value; });
+  }
+  return result;
+}
+
 std::string variable_lookup::chain_string() const {
   return detail::variant_match(
       chain,

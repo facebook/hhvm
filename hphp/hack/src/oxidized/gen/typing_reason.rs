@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d166261debd93682ed77ea152fba947d>>
+// @generated SignedSource<<fa5b6344fee6fd29456b543a76c37bd9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -735,10 +735,6 @@ pub enum T_ {
     TypeAccess(Box<T_>, Vec<(Box<T_>, lazy::Lazy<String>)>),
     #[rust_to_ocaml(name = "Expr_dep_type")]
     ExprDepType(Box<T_>, pos_or_decl::PosOrDecl, ExprDepTypeReason),
-    #[rust_to_ocaml(name = "Contravariant_generic")]
-    ContravariantGeneric(Box<T_>, String),
-    #[rust_to_ocaml(name = "Invariant_generic")]
-    InvariantGeneric(Box<T_>, String),
     #[rust_to_ocaml(name = "Lambda_param")]
     LambdaParam(pos::Pos, Box<T_>),
     #[rust_to_ocaml(name = "Dynamic_coercion")]

@@ -129,8 +129,6 @@ impl Reason {
             OpaqueTypeFromModule(pos_or_decl, _, _) => Some(pos_or_decl),
             LostInfo(_, t, _)
             | TypeAccess(t, _)
-            | InvariantGeneric(t, _)
-            | ContravariantGeneric(t, _)
             | DynamicCoercion(t)
             | ExprDepType(t, _, _)
             | Typeconst(t, _, _, _)

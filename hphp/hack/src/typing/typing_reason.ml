@@ -1608,8 +1608,6 @@ type _ t_ =
   | Expr_dep_type :
       'phase t_ * (Pos_or_decl.t[@hash.ignore]) * expr_dep_type_reason
       -> 'phase t_
-  | Contravariant_generic : locl_phase t_ * string -> locl_phase t_
-  | Invariant_generic : locl_phase t_ * string -> locl_phase t_
   | Lambda_param : Pos.t * locl_phase t_ -> locl_phase t_
   | Dynamic_coercion : locl_phase t_ -> locl_phase t_
   | Dynamic_partial_enforcement :
@@ -1657,8 +1655,6 @@ let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Def (_, t)
   | Lost_info (_, t, _)
   | Type_access (t, _)
-  | Invariant_generic (t, _)
-  | Contravariant_generic (t, _)
   | Dynamic_coercion t ->
     to_raw_pos t
   | Expr_dep_type (t, _, _) -> to_raw_pos t
@@ -1709,10 +1705,6 @@ let rec map_pos :
   | Expr_dep_type (r, p, n) ->
     Expr_dep_type (map_pos pos pos_or_decl r, pos_or_decl p, n)
   | Lambda_param (p, r) -> Lambda_param (pos p, map_pos pos pos_or_decl r)
-  | Contravariant_generic (r1, n) ->
-    Contravariant_generic (map_pos pos pos_or_decl r1, n)
-  | Invariant_generic (r1, n) ->
-    Contravariant_generic (map_pos pos pos_or_decl r1, n)
   | Arith_ret_float (p, r, s) ->
     Arith_ret_float (pos p, map_pos pos pos_or_decl r, s)
   | Arith_ret_num (p, r, s) ->
@@ -1793,8 +1785,6 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Typeconst _ -> "Rtypeconst"
   | Type_access _ -> "Rtype_access"
   | Expr_dep_type _ -> "Rexpr_dep_type"
-  | Contravariant_generic _ -> "Rcontravariant_generic"
-  | Invariant_generic _ -> "Rinvariant_generic"
   | Dynamic_coercion _ -> "Rdynamic_coercion"
   | Dynamic_partial_enforcement _ -> "Rdynamic_partial_enforcement"
   | Rigid_tvar_escape _ -> "Rrigid_tvar_escape"
@@ -1905,11 +1895,6 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
       Format.pp_print_string fmt s2;
       comma ();
       pp_t_ fmt r
-    | Invariant_generic (r, s)
-    | Contravariant_generic (r, s) ->
-      pp_t_ fmt r;
-      comma ();
-      Format.pp_print_string fmt s
     | Lost_info (s, r, b) ->
       Format.pp_print_string fmt s;
       comma ();
@@ -2071,16 +2056,6 @@ let rec to_json_help : type a. a t_ -> Hh_json.json list -> Hh_json.json list =
   | Lambda_param (pos, r) ->
     Hh_json.(
       JSON_Object [("Lambda_param", JSON_Array [pos_to_json pos; to_json r])])
-    :: acc
-  | Contravariant_generic (r, str) ->
-    Hh_json.(
-      JSON_Object
-        [("Contravariant_generic", JSON_Array [to_json r; JSON_String str])])
-    :: acc
-  | Invariant_generic (r, str) ->
-    Hh_json.(
-      JSON_Object
-        [("Invariant_generic", JSON_Array [to_json r; JSON_String str])])
     :: acc
   | Dynamic_coercion r ->
     Hh_json.(JSON_Object [("Dynamic_coercion", JSON_Array [to_json r])]) :: acc
@@ -2436,22 +2411,6 @@ let rec to_string_help :
   | Expr_dep_type (r, p, e) ->
     to_string_help prefix solutions r
     @ [(p, "  " ^ expr_dep_type_reason_string e)]
-  | Contravariant_generic (r_orig, class_name) ->
-    to_string_help prefix solutions r_orig
-    @ [
-        ( p,
-          "This type argument to "
-          ^ (strip_ns class_name |> Markdown_lite.md_codify)
-          ^ " only allows supertypes (it is contravariant)" );
-      ]
-  | Invariant_generic (r_orig, class_name) ->
-    to_string_help prefix solutions r_orig
-    @ [
-        ( p,
-          "This type argument to "
-          ^ (strip_ns class_name |> Markdown_lite.md_codify)
-          ^ " must match exactly (it is invariant)" );
-      ]
     (* If type originated with an unannotated lambda parameter with type variable type,
      * suggested annotating the lambda parameter. Otherwise defer to original reason. *)
   | Lambda_param
@@ -2640,10 +2599,6 @@ module Constructors = struct
     from_witness_decl @@ Missing_optional_field (p, s)
 
   let unset_field (p, s) = from_witness_locl @@ Unset_field (p, s)
-
-  let contravariant_generic (r, s) = Contravariant_generic (r, s)
-
-  let invariant_generic (r, s) = Invariant_generic (r, s)
 
   let regex p = from_witness_locl @@ Regex p
 
@@ -2905,9 +2860,6 @@ module Visitor = struct
         | Instantiate (r1, x, r2) ->
           Instantiate (this#on_reason r1, x, this#on_reason r2)
         | Expr_dep_type (r, y, z) -> Expr_dep_type (this#on_reason r, y, z)
-        | Contravariant_generic (x, y) ->
-          Contravariant_generic (this#on_reason x, y)
-        | Invariant_generic (r, y) -> Invariant_generic (this#on_reason r, y)
         | Lambda_param (x, r) -> Lambda_param (x, this#on_reason r)
         | Dynamic_coercion r -> Dynamic_coercion (this#on_reason r)
         | Dynamic_partial_enforcement (x, y, r) ->
@@ -3578,10 +3530,6 @@ module Derivation = struct
       Expr_dep_type (push_solutions r ~solutions, s, t)
     | Lost_info (x, t, y) -> Lost_info (x, push_solutions t ~solutions, y)
     | Type_access (t, x) -> Type_access (push_solutions t ~solutions, x)
-    | Invariant_generic (t, x) ->
-      Invariant_generic (push_solutions ~solutions t, x)
-    | Contravariant_generic (t, x) ->
-      Contravariant_generic (push_solutions ~solutions t, x)
     | Dynamic_coercion t -> Dynamic_coercion (push_solutions ~solutions t)
     | _ -> t
 
@@ -3608,8 +3556,6 @@ module Derivation = struct
     | Typeconst _
     | Type_access _
     | Expr_dep_type _
-    | Contravariant_generic _
-    | Invariant_generic _
     | Lambda_param _
     | Dynamic_coercion _
     | Dynamic_partial_enforcement _
@@ -3642,8 +3588,6 @@ module Derivation = struct
     | Typeconst _
     | Type_access _
     | Expr_dep_type _
-    | Contravariant_generic _
-    | Invariant_generic _
     | Lambda_param _
     | Dynamic_coercion _
     | Dynamic_partial_enforcement _
@@ -3757,16 +3701,14 @@ module Derivation = struct
       | ( ( No_reason | From_witness_decl _ | From_witness_locl _
           | Instantiate _ | Flow _ | Def _ | Invalid | Missing_field | Idx _
           | Arith_ret_float _ | Arith_ret_num _ | Lost_info _ | Format _
-          | Typeconst _ | Type_access _ | Expr_dep_type _
-          | Contravariant_generic _ | Invariant_generic _ | Lambda_param _
+          | Typeconst _ | Type_access _ | Expr_dep_type _ | Lambda_param _
           | Dynamic_coercion _ | Dynamic_partial_enforcement _
           | Rigid_tvar_escape _ | Opaque_type_from_module _ | SDT_call _
           | Like_call _ ),
           ( No_reason | From_witness_decl _ | From_witness_locl _
           | Instantiate _ | Flow _ | Def _ | Invalid | Missing_field | Idx _
           | Arith_ret_float _ | Arith_ret_num _ | Lost_info _ | Format _
-          | Typeconst _ | Type_access _ | Expr_dep_type _
-          | Contravariant_generic _ | Invariant_generic _ | Lambda_param _
+          | Typeconst _ | Type_access _ | Expr_dep_type _ | Lambda_param _
           | Dynamic_coercion _ | Dynamic_partial_enforcement _
           | Rigid_tvar_escape _ | Opaque_type_from_module _ | SDT_call _
           | Like_call _ ) ) ->
@@ -4166,10 +4108,6 @@ module Derivation = struct
       | Type_access (r, rs) -> explain_type_access (r, rs) ~st ~cfg ~ctxt
       | Expr_dep_type (r, pos, expr_dep_type_reason) ->
         explain_expr_dep_type (r, pos, expr_dep_type_reason) ~st ~cfg ~ctxt
-      | Contravariant_generic (r, nm) ->
-        explain_contravariant_generic (r, nm) ~st ~cfg ~ctxt
-      | Invariant_generic (r, nm) ->
-        explain_invariant_generic (r, nm) ~st ~cfg ~ctxt
       | Lambda_param (pos, r) -> explain_lambda_param (pos, r) ~st ~cfg ~ctxt
       | Dynamic_coercion r -> explain_dynamic_coercion r ~st ~cfg ~ctxt
       | Dynamic_partial_enforcement (pos, nm, r) ->
@@ -4374,12 +4312,6 @@ module Derivation = struct
       explain_reason r ~st ~cfg ~ctxt
 
     and explain_expr_dep_type (r, _pos, _expr_dep_type_reason) ~st ~cfg ~ctxt =
-      explain_reason r ~st ~cfg ~ctxt
-
-    and explain_contravariant_generic (r, _nm) ~st ~cfg ~ctxt =
-      explain_reason r ~st ~cfg ~ctxt
-
-    and explain_invariant_generic (r, _nm) ~st ~cfg ~ctxt =
       explain_reason r ~st ~cfg ~ctxt
 
     and explain_lambda_param (pos, _r) ~st ~cfg:_ ~ctxt:_ =

@@ -302,10 +302,6 @@ val missing_optional_field : Pos_or_decl.t * string -> 'phase t_
 
 val unset_field : Pos.t * string -> t
 
-val contravariant_generic : t * string -> t
-
-val invariant_generic : t * string -> t
-
 val regex : Pos.t -> t
 
 val implicit_upper_bound : Pos_or_decl.t * string -> 'phase t_

@@ -309,6 +309,7 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
   hqParams.transportSettings.readEcnOnIngress = FLAGS_read_ecn;
 
   hqParams.transportSettings.dscpValue = FLAGS_dscp;
+  hqParams.transportSettings.disableMigration = false;
 } // initializeTransportSettings
 
 void initializeHttpServerSettings(HQToolServerParams& hqParams) {

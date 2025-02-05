@@ -33,6 +33,9 @@ DEFINE_string(path,
               "/",
               "(HQClient) url-path to send the request to, "
               "or a comma separated list of paths to fetch in parallel");
+DEFINE_int32(num_requests,
+             1,
+             "How many requests to issue to the URL(s) specified in <path>");
 DEFINE_string(connect_to_address,
               "",
               "(HQClient) Override IP address to connect to instead of "
@@ -326,6 +329,19 @@ void initializeHttpServerSettings(HQToolServerParams& hqParams) {
 
 void initializeHttpClientSettings(HQToolClientParams& hqParams) {
   folly::split(',', FLAGS_path, hqParams.httpPaths);
+
+  if (FLAGS_num_requests > 1) {
+    std::vector<std::string> multipliedPaths;
+    multipliedPaths.reserve(hqParams.httpPaths.size() * FLAGS_num_requests);
+
+    for (int i = 0; i < FLAGS_num_requests; i++) {
+      std::copy(hqParams.httpPaths.begin(),
+                hqParams.httpPaths.end(),
+                std::back_inserter(multipliedPaths));
+    }
+    hqParams.httpPaths.swap(multipliedPaths);
+  }
+
   hqParams.httpBody = FLAGS_body;
   hqParams.httpMethod = hqParams.httpBody.empty() ? proxygen::HTTPMethod::GET
                                                   : proxygen::HTTPMethod::POST;

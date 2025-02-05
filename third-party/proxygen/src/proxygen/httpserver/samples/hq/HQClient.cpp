@@ -49,14 +49,7 @@ int HQClient::start() {
   // TODO: turn on cert verification
   LOG(INFO) << "HQClient connecting to " << params_.remoteAddress->describe();
   quicClient_->start(this, nullptr);
-
-  if (params_.migrateClient) {
-    quicClient_->onNetworkSwitch(
-        std::make_unique<FollyQuicAsyncUDPSocket>(qEvb_));
-    sendRequests(true, quicClient_->getNumOpenableBidirectionalStreams());
-  }
   evb_.loop();
-
   return failed_ ? -1 : 0;
 }
 
@@ -174,6 +167,10 @@ void HQClient::sendRequests(bool closeSession, uint64_t numOpenableStreams) {
   // will keep scheduling itself until there are no more requests.
   if (params_.sendRequestsSequentially && !httpPaths_.empty()) {
     auto callSendRequestsAfterADelay = [&]() {
+      if (params_.migrateClient) {
+        quicClient_->onNetworkSwitch(
+            std::make_unique<FollyQuicAsyncUDPSocket>(qEvb_));
+      }
       std::chrono::milliseconds gap = requestGaps_.front();
       requestGaps_.pop_front();
       if (gap.count() > 0) {

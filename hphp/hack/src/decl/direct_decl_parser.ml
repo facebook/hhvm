@@ -27,6 +27,10 @@ type parsed_file_with_hashes = {
   pfh_decls: (string * Shallow_decl_defs.decl * Int64.t * string option) list;
 }
 
+external parse_decls_obr :
+  DeclParserOptions.t -> Relative_path.t -> string -> parsed_file
+  = "hh_parse_decls_ffi_obr"
+
 external parse_decls :
   DeclParserOptions.t -> Relative_path.t -> string -> parsed_file
   = "hh_parse_decls_ffi"

@@ -59,7 +59,7 @@ let init ~enable_strict_const_semantics tcopt : Provider_context.t =
 let direct_decl_parse ctx fn text =
   let popt = Provider_context.get_popt ctx in
   let opts = DeclParserOptions.from_parser_options popt in
-  let parsed_file = Direct_decl_parser.parse_decls opts fn text in
+  let parsed_file = Direct_decl_parser.parse_decls_obr opts fn text in
   parsed_file.pf_decls
 
 let print_diff ~expected_name ~actual_name ~expected_contents ~actual_contents =

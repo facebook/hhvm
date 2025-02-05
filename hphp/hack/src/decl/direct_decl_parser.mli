@@ -23,6 +23,11 @@ type parsed_file_with_hashes = {
       (** (name, decl, position-sensitive hash of this decl) *)
 }
 
+(** NOTE: this doesn't respect deregister_php_lib, and has decls in reverse lexical order.
+  * Uses the arena-based direct decl parser. *)
+val parse_decls_obr :
+  DeclParserOptions.t -> Relative_path.t -> string -> parsed_file
+
 (** NOTE: this doesn't respect deregister_php_lib, and has decls in reverse lexical order. *)
 val parse_decls :
   DeclParserOptions.t -> Relative_path.t -> string -> parsed_file

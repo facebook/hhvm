@@ -74,30 +74,55 @@ let init root tcopt ~rust_provider_backend : Provider_context.t =
 
   ctx
 
-let direct_decl_parse ctx fn text =
+let direct_decl_parse ~by_ref ctx fn text =
   let popt = Provider_context.get_popt ctx in
   let opts = DeclParserOptions.from_parser_options popt in
-  let parsed_file = parse_decls opts fn text in
+  let parsed_file =
+    if by_ref then
+      parse_decls_obr opts fn text
+    else
+      parse_decls opts fn text
+  in
   parsed_file.pf_decls
 
-let parse_and_print_decls ctx fn text =
+let parse_and_print_decls ~by_ref ctx fn text =
   let (ctx, _entry) =
     Provider_context.(
       add_or_overwrite_entry_contents ~ctx ~path:fn ~contents:text)
   in
-  let decls = direct_decl_parse ctx fn text in
+  let decls = direct_decl_parse ~by_ref ctx fn text in
   let decls_str = show_decls (List.rev decls) ^ "\n" in
   Printf.eprintf "%s%!" decls_str;
   (* This mode doesn't compare anything. Return false so that we don't print "They matched!". *)
   let matched = false in
   matched
 
+let compare_oxidized ctx fn text =
+  let (ctx, _entry) =
+    Provider_context.(
+      add_or_overwrite_entry_contents ~ctx ~path:fn ~contents:text)
+  in
+  let oxidized_decls = direct_decl_parse ~by_ref:false ctx fn text in
+  let oxidized_by_ref_decls = direct_decl_parse ~by_ref:true ctx fn text in
+  let oxidized = show_decls (List.rev oxidized_decls) in
+  let oxidized_by_ref = show_decls (List.rev oxidized_by_ref_decls) in
+  let decls_matched = String.equal oxidized oxidized_by_ref in
+  let () =
+    if not decls_matched then begin
+      Printf.printf
+        "oxidized direct decl parser does not match oxidized_by_ref DDP:\n%!";
+      Printf.printf "oxidized:\n%s\n%!" oxidized;
+      Printf.printf "oxidized_by_ref:\n%s\n%!" oxidized_by_ref
+    end
+  in
+  decls_matched
+
 let compare_marshal ctx fn text =
   let (ctx, _entry) =
     Provider_context.(
       add_or_overwrite_entry_contents ~ctx ~path:fn ~contents:text)
   in
-  let decls = direct_decl_parse ctx fn text in
+  let decls = direct_decl_parse ~by_ref:true ctx fn text in
   (* Test that Rust produces the same marshaled bytes as OCaml. *)
   let ocaml_marshaled = Marshal.to_string decls [] in
   let rust_marshaled = Ocamlrep_marshal_ffi.to_string decls [] in
@@ -381,7 +406,10 @@ let name_and_then_print_name_results ctx files ~decl_make_env =
   ()
 
 type modes =
-  | DirectDeclParse  (** Runs the direct decl parser on the given file *)
+  | DirectDeclParse of bool
+      (** Runs the direct decl parser on the given file. If true, run the arena-based DDP. *)
+  | VerifyOxidized
+      (** Runs the oxidized and oxidized-by-ref DDPs on a file and compares their output *)
   | VerifyOcamlrepMarshal
       (** Marshals the output of the direct decl parser using Marshal and ocamlrep_marshal and compares their output *)
   | Winners
@@ -443,8 +471,15 @@ let () =
   Arg.parse
     [
       ( "--decl-parse",
-        Arg.Unit (set_mode DirectDeclParse),
+        Arg.Unit (set_mode (DirectDeclParse false)),
         "(mode) Runs the direct decl parser on the given file" );
+      ( "--decl-parse-obr",
+        Arg.Unit (set_mode (DirectDeclParse true)),
+        "(mode) Runs the arena-based direct decl parser on the given file" );
+      ( "--verify-oxidized",
+        Arg.Unit (set_mode VerifyOxidized),
+        "(mode) Runs the oxidized and oxidized-by-ref DDPs on a file and compares their output"
+      );
       ( "--verify-ocamlrep-marshal",
         Arg.Unit (set_mode VerifyOcamlrepMarshal),
         "(mode) Marshals the output of the direct decl parser using Marshal and ocamlrep_marshal and compares their output"
@@ -603,11 +638,16 @@ let () =
   in
   let all_matched =
     match mode with
-    | DirectDeclParse ->
+    | DirectDeclParse by_ref ->
       iterate_files files ~f:(fun filename contents ->
           Provider_utils.respect_but_quarantine_unsaved_changes
             ~ctx
-            ~f:(fun () -> parse_and_print_decls ctx filename contents))
+            ~f:(fun () -> parse_and_print_decls ~by_ref ctx filename contents))
+    | VerifyOxidized ->
+      iterate_files files ~f:(fun filename contents ->
+          Provider_utils.respect_but_quarantine_unsaved_changes
+            ~ctx
+            ~f:(fun () -> compare_oxidized ctx filename contents))
     | VerifyOcamlrepMarshal ->
       iterate_files files ~f:(fun filename contents ->
           Provider_utils.respect_but_quarantine_unsaved_changes

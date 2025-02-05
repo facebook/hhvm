@@ -1182,7 +1182,7 @@ let get_shallow_decls ctx filename file_contents :
     Shallow_decl_defs.shallow_class SMap.t =
   let popt = Provider_context.get_popt ctx in
   let opts = DeclParserOptions.from_parser_options popt in
-  (Direct_decl_parser.parse_decls opts filename file_contents)
+  (Direct_decl_parser.parse_decls_obr opts filename file_contents)
     .Direct_decl_parser.pf_decls
   |> List.fold ~init:SMap.empty ~f:(fun acc (name, decl) ->
          match decl with

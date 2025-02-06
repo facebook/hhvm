@@ -65,7 +65,7 @@ arena_deserializer::impl_deserialize_in_arena!(X<'arena>);
     ToOcamlRep,
 )]
 #[repr(u8)]
-pub enum AllNullary<'a> {
+pub enum AllNullary {
     Cons1,
     Cons2,
 }

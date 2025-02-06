@@ -920,6 +920,13 @@ let type_declaration ~mutual_rec ~safe_ints name td =
     let all_nullary =
       List.for_all ctors ~f:(fun c -> 0 = ctor_arg_len c.pcd_args)
     in
+    let lifetime =
+      if all_nullary then
+        (* prevent generating unused lifetime parameters *)
+        []
+      else
+        lifetime
+    in
     let force_derive_copy =
       if is_by_ref () then
         true

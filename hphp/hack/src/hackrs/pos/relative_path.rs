@@ -16,6 +16,7 @@ pub use relative_path::Prefix;
 pub use relative_path::RelativePathCtx;
 
 use crate::Bytes;
+use crate::ToOxidized;
 use crate::ToOxidizedByRef;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -104,6 +105,17 @@ impl<'a> ToOxidizedByRef<'a> for RelativePath {
             self.prefix,
             Path::new(OsStr::from_bytes(self.suffix.as_bytes())),
         ))
+    }
+}
+
+impl ToOxidized for RelativePath {
+    type Output = relative_path::RelativePath;
+
+    fn to_oxidized(self) -> Self::Output {
+        relative_path::RelativePath::make(
+            self.prefix,
+            PathBuf::from(OsStr::from_bytes(self.suffix.as_bytes())),
+        )
     }
 }
 

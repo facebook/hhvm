@@ -19,6 +19,7 @@ use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::ToOxidized;
 use crate::ToOxidizedByRef;
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
@@ -89,6 +90,14 @@ impl<'a> ToOxidizedByRef<'a> for Symbol {
 
     fn to_oxidized_by_ref(&self, _arena: &'a bumpalo::Bump) -> &'a str {
         self.as_str()
+    }
+}
+
+impl ToOxidized for Symbol {
+    type Output = String;
+
+    fn to_oxidized(self) -> String {
+        self.to_string()
     }
 }
 
@@ -212,6 +221,14 @@ impl<'a> ToOxidizedByRef<'a> for Bytes {
     }
 }
 
+impl ToOxidized for Bytes {
+    type Output = bstr::BString;
+
+    fn to_oxidized(self) -> bstr::BString {
+        self.as_bstr().into()
+    }
+}
+
 impl ToOcamlRep for Bytes {
     fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         alloc.add_copy(self.as_bytes())
@@ -300,6 +317,14 @@ macro_rules! common_impls {
 
             fn to_oxidized_by_ref(&self, _arena: &'a bumpalo::Bump) -> &'a str {
                 self.as_str()
+            }
+        }
+
+        impl ToOxidized for $name {
+            type Output = String;
+
+            fn to_oxidized(self) -> String {
+                self.to_string()
             }
         }
 

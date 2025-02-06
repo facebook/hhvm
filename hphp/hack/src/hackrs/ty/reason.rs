@@ -20,6 +20,7 @@ use pos::BPos;
 use pos::NPos;
 use pos::Pos;
 use pos::Symbol;
+use pos::ToOxidized;
 use pos::ToOxidizedByRef;
 use pos::TypeName;
 use serde::de::DeserializeOwned;
@@ -46,6 +47,7 @@ pub trait Reason:
     + for<'a> From<oxidized::typing_reason::T_>
     + for<'a> From<oxidized_by_ref::typing_reason::T_<'a>>
     + for<'a> ToOxidizedByRef<'a, Output = oxidized_by_ref::typing_reason::T_<'a>>
+    + ToOxidized<Output = oxidized::typing_reason::T_>
     + ToOcamlRep
     + FromOcamlRep
     + 'static
@@ -308,6 +310,14 @@ impl<'a> ToOxidizedByRef<'a> for BReason {
     }
 }
 
+impl ToOxidized for BReason {
+    type Output = oxidized::typing_reason::Reason;
+    // Unused
+    fn to_oxidized(self) -> Self::Output {
+        oxidized::typing_reason::Reason::NoReason
+    }
+}
+
 impl EqModuloPos for BReason {
     fn eq_modulo_pos(&self, rhs: &Self) -> bool {
         self.0.eq_modulo_pos(&rhs.0)
@@ -374,6 +384,14 @@ impl<'a> ToOxidizedByRef<'a> for NReason {
 
     fn to_oxidized_by_ref(&self, _arena: &'a bumpalo::Bump) -> Self::Output {
         oxidized_by_ref::typing_reason::Reason::NoReason
+    }
+}
+
+impl ToOxidized for NReason {
+    type Output = oxidized::typing_reason::Reason;
+
+    fn to_oxidized(self) -> Self::Output {
+        oxidized::typing_reason::Reason::NoReason
     }
 }
 

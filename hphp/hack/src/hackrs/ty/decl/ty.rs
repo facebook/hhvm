@@ -35,6 +35,7 @@ use pos::Bytes;
 use pos::ModuleName;
 use pos::Positioned;
 use pos::Symbol;
+use pos::ToOxidized;
 use pos::TypeConstName;
 use pos::TypeName;
 use serde::de::DeserializeOwned;
@@ -306,6 +307,18 @@ impl<R: Reason> Ty<R> {
             }
             _ => (r, Positioned::new(r.pos().clone(), TypeName::from("")), &[]),
         }
+    }
+}
+
+impl<R: Reason> ToOxidized for Ty<R> {
+    type Output = oxidized::typing_defs::Ty;
+
+    // For oxidized types, need an owned, heap-allocated Ty_
+    fn to_oxidized(self) -> Self::Output {
+        oxidized::typing_defs::Ty(
+            self.0.to_oxidized(),
+            Box::new((*self.1).clone().to_oxidized()),
+        )
     }
 }
 

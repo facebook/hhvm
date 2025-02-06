@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+#![feature(box_patterns)]
 use std::fmt;
 use std::hash::Hash;
 
@@ -18,9 +19,11 @@ use serde::Serialize;
 
 mod relative_path;
 mod symbol;
+mod to_oxidized;
 mod to_oxidized_by_ref;
 pub use oxidized::file_pos_large::FilePosLarge;
 pub use symbol::*;
+pub use to_oxidized::ToOxidized;
 pub use to_oxidized_by_ref::ToOxidizedByRef;
 
 pub use crate::relative_path::*;
@@ -36,6 +39,7 @@ pub trait Pos:
     + for<'a> From<&'a oxidized::pos::Pos>
     + for<'a> From<&'a oxidized_by_ref::pos::Pos<'a>>
     + for<'a> ToOxidizedByRef<'a, Output = &'a oxidized_by_ref::pos::Pos<'a>>
+    + for<'a> ToOxidized<Output = oxidized::pos::Pos>
     + ToOcamlRep
     + FromOcamlRep
     + EqModuloPos
@@ -295,6 +299,34 @@ impl<'a> ToOxidizedByRef<'a> for BPos {
     }
 }
 
+impl ToOxidized for BPos {
+    type Output = oxidized::pos::Pos;
+
+    fn to_oxidized(self) -> Self::Output {
+        let file = self.file().to_oxidized();
+        match self.0 {
+            PosImpl::Small { box span, .. } => {
+                let (start, end) = span;
+                oxidized::pos::Pos::from_raw_span(
+                    file.into(),
+                    PosSpanRaw {
+                        start: start.into(),
+                        end: end.into(),
+                    },
+                )
+            }
+            PosImpl::Large { box span, .. } => {
+                let (start, end) = span;
+                oxidized::pos::Pos::from_raw_span(file.into(), PosSpanRaw { start, end })
+            }
+            PosImpl::Tiny { span, .. } => {
+                let span = span.to_raw_span();
+                oxidized::pos::Pos::from_raw_span(file.into(), span)
+            }
+        }
+    }
+}
+
 impl ToOcamlRep for BPos {
     fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         let file = match &self.0 {
@@ -444,6 +476,14 @@ impl<'a> ToOxidizedByRef<'a> for NPos {
     }
 }
 
+impl ToOxidized for NPos {
+    type Output = oxidized::pos::Pos;
+
+    fn to_oxidized(self) -> Self::Output {
+        oxidized::pos::Pos::NONE
+    }
+}
+
 impl ToOcamlRep for NPos {
     fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         oxidized_by_ref::pos::Pos::none().to_ocamlrep(alloc)
@@ -547,5 +587,13 @@ impl<'a, S: ToOxidizedByRef<'a, Output = &'a str>, P: Pos> ToOxidizedByRef<'a>
             self.pos.to_oxidized_by_ref(arena),
             self.id.to_oxidized_by_ref(arena),
         )
+    }
+}
+
+impl<S: ToOxidized<Output = String>, P: Pos> ToOxidized for Positioned<S, P> {
+    type Output = oxidized::typing_reason::PosId;
+
+    fn to_oxidized(self) -> Self::Output {
+        (self.pos.to_oxidized(), self.id.to_oxidized())
     }
 }

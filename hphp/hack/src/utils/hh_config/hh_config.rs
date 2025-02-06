@@ -320,6 +320,10 @@ impl HhConfig {
                 "enable_class_pointer_hint",
                 default.enable_class_pointer_hint,
             )?,
+            disallow_non_annotated_memoize: hhconfig.get_bool_or(
+                "disallow_non_annotated_memoize",
+                default.disallow_non_annotated_memoize,
+            )?,
         };
         let default = GlobalOptions::default();
         let opts = GlobalOptions {

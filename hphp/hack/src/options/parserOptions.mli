@@ -79,6 +79,8 @@ type t = {
       (** When false, type hint class<T> (Hclass_ptr) becomes decl ty classname<T> (Tnewtype).
           When true, it becomes decl ty class<T> (Tclass_ptr). This option is similar to the
           interpret_soft_types_as_like_types switch. **)
+  disallow_non_annotated_memoize: bool;
+      (** When true, plain <<__Memoize>> will not be allowed. **)
 }
 [@@deriving show, eq]
 

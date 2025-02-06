@@ -70,6 +70,7 @@ mod ffi {
         hhvm_compat_mode: bool,
         include_assignment_values: bool,
         enable_class_pointer_hint: bool,
+        disallow_non_annotated_memoize: bool,
     }
 
     pub struct DeclsAndBlob {
@@ -647,6 +648,7 @@ pub fn parse_decls(
         hhvm_compat_mode: config.hhvm_compat_mode,
         include_assignment_values: config.include_assignment_values,
         enable_class_pointer_hint: config.enable_class_pointer_hint,
+        disallow_non_annotated_memoize: config.disallow_non_annotated_memoize,
         keep_user_attributes: true,
         ..Default::default()
     };

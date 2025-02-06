@@ -377,6 +377,9 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
         enable_class_pointer_hint =
           bool_opt "enable_class_pointer_hint" config
           >?? po_opt.enable_class_pointer_hint;
+        disallow_non_annotated_memoize =
+          bool_opt "disallow_non_annotated_memoize" config
+          >?? po_opt.disallow_non_annotated_memoize;
       }
   in
   GlobalOptions.set

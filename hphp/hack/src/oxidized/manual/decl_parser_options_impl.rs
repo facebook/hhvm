@@ -32,6 +32,7 @@ impl DeclParserOptions {
             package_v2: opts.package_v2,
             package_v2_support_multifile_tests: opts.package_v2_support_multifile_tests,
             enable_class_pointer_hint: opts.enable_class_pointer_hint,
+            disallow_non_annotated_memoize: opts.disallow_non_annotated_memoize,
         }
     }
 }

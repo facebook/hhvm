@@ -1411,6 +1411,10 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   Killswitch for the class<T> type. When false, lowerer and direct decl parser
   erase it to classname<T>.
 
+- bool Hack.Lang.DisallowNonAnnotatedMemoize = false, maxt, repooptionsflag(Parser)|hackc(parser)
+
+  Disallow non annotated <<__Memoize>>. Will throw for such.
+
 - bool Hack.Lang.StressShallowDeclDeps = false, UNKNOWN, repooptionsflag(Parser)|hackc(hhbc)
 - bool Hack.Lang.StressFoldedDeclDeps = false, UNKNOWN, repooptionsflag(Parser)|hackc(hhbc)
 - bool Hack.Lang.OptimizeReifiedParamChecks = false, UNKNOWN, repooptionsflag(Parser)|hackc(hhbc)

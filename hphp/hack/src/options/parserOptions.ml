@@ -45,6 +45,7 @@ type t = {
   package_info: PackageInfo.t;
   package_v2_support_multifile_tests: bool;
   enable_class_pointer_hint: bool;
+  disallow_non_annotated_memoize: bool;
 }
 [@@deriving show, eq]
 
@@ -86,6 +87,7 @@ let default =
     package_info = PackageInfo.empty;
     package_v2_support_multifile_tests = false;
     enable_class_pointer_hint = true;
+    disallow_non_annotated_memoize = false;
   }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)

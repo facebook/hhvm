@@ -4550,6 +4550,10 @@ fn process_attribute_constructor_call<'a>(
     env: &mut Env<'a>,
 ) -> Result<ast::UserAttribute> {
     let name = pos_name(constructor_call_type, env)?;
+    let params = could_map(constructor_call_argument_list, env, |n, e| {
+        is_valid_attribute_arg(n, e, &name.1);
+        p_expr(n, e)
+    })?;
     if name.1.eq_ignore_ascii_case("__reified") || name.1.eq_ignore_ascii_case("__hasreifiedparent")
     {
         raise_parsing_error(node, env, &syntax_error::reified_attribute);
@@ -4575,6 +4579,15 @@ fn process_attribute_constructor_call<'a>(
             }
         }
 
+        // NB: if disallow_non_annotated_memoize is true, <<__Memoize>> without annotation are disallowed
+        if env.parser_options.disallow_non_annotated_memoize && params.is_empty() {
+            raise_parsing_error(
+                node,
+                env,
+                &syntax_error::memoize_without_annotation_disabled(&name.1),
+            );
+        }
+
         if list.len() > 1 {
             let ast::Id(_, first) = pos_name(list[0], env)?;
             raise_parsing_error(
@@ -4584,10 +4597,6 @@ fn process_attribute_constructor_call<'a>(
             );
         }
     }
-    let params = could_map(constructor_call_argument_list, env, |n, e| {
-        is_valid_attribute_arg(n, e, &name.1);
-        p_expr(n, e)
-    })?;
     Ok(ast::UserAttribute { name, params })
 }
 

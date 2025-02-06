@@ -1111,6 +1111,13 @@ pub fn memoize_requires_label(attr: &str) -> Error {
     ))
 }
 
+pub fn memoize_without_annotation_disabled(attr: &str) -> Error {
+    Cow::Owned(format!(
+        "`{}` without a label (e.g. `#KeyedByIC`) is disabled with DisallowNonAnnotatedMemoize.",
+        attr
+    ))
+}
+
 pub fn lambda_effect_polymorphic(kind: &str) -> Error {
     Cow::Owned(format!("{} cannot have a polymorphic context", kind))
 }

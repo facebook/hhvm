@@ -42,7 +42,7 @@ template <typename Baton>
 class ServerStreamConsumerBaton final : public ServerStreamConsumer {
  public:
   void consume() override { baton.post(); }
-  void canceled() override { std::terminate(); }
+  void canceled() override { LOG(WARNING) << "Server stream is cancelled"; }
   Baton baton;
 };
 

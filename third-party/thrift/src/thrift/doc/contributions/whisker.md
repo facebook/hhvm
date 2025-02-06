@@ -86,30 +86,25 @@ The supported set of combinators are:
 
 ## File Structure
 
-A Whisker source file's `body` is a repeated pattern of textual content, variable interpolations, and control flow constructs (condition, iteration).
+A Whisker source file is composed of two sections: a leading `header` followed by the main `body`.
 
-The source file's `body` is wrapped by a leading `header`, and a trailing `footer`. The rest of this document describes the contents of the `body`.
+The `body` is a repeated pattern of textual content, variable interpolations, and control flow constructs (condition, iteration).
+The rest of this document describes its contents.
 
-`header` and `footer` are *unrendered* sections of the source. They may contain:
+The `header` is an *unrendered* section of the source. It may contain:
   * [Comments](#comments)
   * [Pragma statements](#pragma-statements)
   * [Whitespace-only `text` (including `newline`)](#text).
-
-The `header` may also contain:
   * [Import statements](#modules)
 
-The `footer` may also contain:
-  * [Export statements](#modules)
-
-Rendering ignores all whitespaces in the `header` and the `footer`.
+Rendering ignores all whitespaces in the `header`.
 
 <Grammar>
 
 ```
-root → { (whitespace* ~ header)* ~ body* ~ (whitespace* ~ footer)* }
+root → { (whitespace* ~ header)* ~ body* }
 
 header     → { comment | pragma-statement | import-statement }
-footer     → { comment | pragma-statement | export-statement }
 
 body     → { text | template }
 text     → { <see below> }

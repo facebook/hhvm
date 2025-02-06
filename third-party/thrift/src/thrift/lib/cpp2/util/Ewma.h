@@ -51,7 +51,7 @@ class Ewma {
  public:
   explicit Ewma(std::chrono::duration<double> window, double initialValue = 0)
       : tau_(std::chrono::duration_cast<std::chrono::nanoseconds>(
-                 window / M_LN2l)
+                 window / Ewma<Clock>::LN2l_)
                  .count()),
         ewma_(initialValue),
         timestamp_(Clock::now()) {}
@@ -71,6 +71,7 @@ class Ewma {
   double getWindowNs() const { return tau_; }
 
  private:
+  static inline long double LN2l_ = logl(2);
   const double tau_;
   double ewma_;
   std::chrono::time_point<Clock> timestamp_;

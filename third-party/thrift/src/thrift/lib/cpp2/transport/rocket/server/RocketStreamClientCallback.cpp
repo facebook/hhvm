@@ -226,8 +226,9 @@ bool RocketStreamClientCallback::request(uint32_t tokens) {
   }
 
   cancelTimeout();
-  tokens_ += tokens;
+  streamMetricCallback_.recordCreditsAvailable(rpcMethodName_, tokens_);
   streamMetricCallback_.onStreamRequestN(rpcMethodName_, tokens);
+  tokens_ += tokens;
   return serverCallback()->onStreamRequestN(tokens);
 }
 
@@ -292,6 +293,7 @@ void RocketStreamClientCallback::scheduleTimeout() {
     timeoutCallback_ = std::make_unique<TimeoutCallback>(*this);
   }
   connection_.scheduleStreamTimeout(timeoutCallback_.get());
+  streamMetricCallback_.recordCreditsAvailable(rpcMethodName_, tokens_);
 }
 
 void RocketStreamClientCallback::cancelTimeout() {

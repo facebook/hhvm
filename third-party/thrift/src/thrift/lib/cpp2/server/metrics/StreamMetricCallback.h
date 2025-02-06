@@ -31,6 +31,8 @@ class StreamMetricCallback {
   virtual void onStreamCancel(std::string_view /* methodName */) = 0;
   virtual void onStreamRequestN(
       std::string_view /* methodName */, uint32_t /* credits */) = 0;
+  virtual void recordCreditsAvailable(
+      std::string_view /* methodName */, uint32_t /* creditsAvailable */) = 0;
 };
 
 class NoopStreamMetricCallback final : public StreamMetricCallback {
@@ -41,6 +43,7 @@ class NoopStreamMetricCallback final : public StreamMetricCallback {
   void onStreamComplete(std::string_view) override {}
   void onStreamCancel(std::string_view) override {}
   void onStreamRequestN(std::string_view, uint32_t) override {}
+  void recordCreditsAvailable(std::string_view, uint32_t) override {}
 };
 
 } // namespace apache::thrift

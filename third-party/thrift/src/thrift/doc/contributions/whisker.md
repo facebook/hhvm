@@ -84,11 +84,43 @@ The supported set of combinators are:
 * `a | b` — exactly one *a* or one *b* (*a* matches first)
 * `(a <op> b)` — parentheses to disambiguate groups of rules and combinators.
 
-## Text & Template
+## File Structure
 
-A Whisker source file is a repeated pattern of textual content and *template* placeholders.
+A Whisker source file's `body` is a repeated pattern of textual content, variable interpolations, and control flow constructs (condition, iteration).
 
-`text` is a sequence of unicode characters except `newline`s and `{{`, which denotes the opening of a `template` (or `comment`).
+The source file's `body` is wrapped by a leading `header`, and a trailing `footer`. The rest of this document describes the contents of the `body`.
+
+`header` and `footer` are *unrendered* sections of the source. They may contain:
+  * [Comments](#comments)
+  * [Pragma statements](#pragma-statements)
+  * [Whitespace-only `text` (including `newline`)](#text).
+
+The `header` may also contain:
+  * [Import statements](#modules)
+
+The `footer` may also contain:
+  * [Export statements](#modules)
+
+Rendering ignores all whitespaces in the `header` and the `footer`.
+
+<Grammar>
+
+```
+root → { (whitespace* ~ header)* ~ body* ~ (whitespace* ~ footer)* }
+
+header     → { comment | pragma-statement | import-statement }
+footer     → { comment | pragma-statement | export-statement }
+
+body     → { text | template }
+text     → { <see below> }
+template → { <see below> }
+```
+
+</Grammar>
+
+## Text
+
+`text` is a sequence of unicode characters except `newline`s and `{{`, which denote the opening of a `template`, or a `comment`.
 
 `newline` is either `"\r"`, `"\n"`, or `"\r\n"`.
 
@@ -96,25 +128,13 @@ A Whisker source file is a repeated pattern of textual content and *template* pl
 To interpret `{{` as literal text, use the escape sequence `\{{`.
 :::
 
-<Grammar>
-
-```
-root → { body* }
-body → { text | newline | template | comment }
-
-template → { <see below> }
-comment  → { <see below> }
-```
-
-</Grammar>
-
 ## Comments
 
-Comments are ignored during rendering and do not appear in the output. Whisker supports two types of comments:
+Rendering ignores comments, which do not appear in the output. Whisker supports two types of comments:
 
 ```whisker
 {{! This is a comment }}
-{{!-- This is a comment that is allowed to contain "}}" --}}
+{{!-- This is a comment that contains "}}" --}}
 ```
 
 <Grammar>
@@ -130,7 +150,7 @@ escaped-comment → { "{{!--" ~ <raw text until we see "--}}"> ~ "--}}" }
 
 ## Templates
 
-A `template` is the fundamental building block for expressing variability in the output produced by a Whisker template.
+A `template` is the fundamental building block for the variability expressed in the output produced by Whisker. It is of the form `{{ ... }}`.
 
 There are four categories of `template`s:
 * ***Interpolations*** — `{{foo}}` — *interpolate* an *expression* into the rendered output.
@@ -960,6 +980,12 @@ length restrictions).
 
 </Grammar>
 
+### Modules
+
+:::note
+This section is incomplete.
+:::
+
 ## Data Model
 
 The *context* provided during when rendering a template follows Whisker's *data model*. Whisker's type system is heavily influenced by JSON. The root of the type system is `object` — all types are subtypes of `object`.
@@ -1133,7 +1159,7 @@ Notice that both lines are standalone-stripping ineligible and retain their whit
 
 </Example>
 
-Only [`newline` tokens in the grammar](#text--template) denote the end of lines.
+Only [`newline` tokens in the grammar](#text) denote the end of lines.
 In other words, a line break inside a tag does *not* result in a new line for the purpose of standalone line stripping.
 
 <Example title="Example with multi-line tag">

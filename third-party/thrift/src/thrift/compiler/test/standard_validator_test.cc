@@ -228,3 +228,31 @@ TEST(StandardValidatorTest, FieldDefaultKeyCollision) {
     }
   )");
 }
+
+TEST(StandardValidatorTest, SetKeyCollision) {
+  check_compile(R"(
+    const set<i64> SET_DUPE = [
+      2,
+      4,
+      2,
+    # expected-warning@-1: Duplicate key in set literal: `2`
+      4,
+    # expected-warning@-1: Duplicate key in set literal: `4`
+    ];
+
+    const list<i64> LIST_DUPE = [2, 2, 2, 4, 2, 4];
+
+    const set<set<i64>> NESTED_SET = [[2], [4], [2]];
+    # expected-warning@-1: Duplicate key in set literal: `[2]`
+
+    const list<set<i64>> NESTED_IDENTIFIER = [[2], SET_DUPE];
+
+    struct S {
+      1: set<string> ok_init = [];
+      2: set<string> dupe_init_set = ["a", "b", "a"];
+    # expected-warning@-1: Duplicate key in set literal: `a`
+      3: list<string> dupe_init_list = ["a", "b", "a"];
+      4: set<i64> set_from_named_const = SET_DUPE;
+    }
+  )");
+}

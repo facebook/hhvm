@@ -5,3 +5,7 @@ type x =
   | D of int ref
   | E of string
   | F of string * string
+
+type all_nullary =
+  | Cons1
+  | Cons2

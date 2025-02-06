@@ -7,6 +7,7 @@
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
+use ocamlrep::FromOcamlRep;
 use ocamlrep::FromOcamlRepIn;
 use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
@@ -45,3 +46,28 @@ pub enum X<'a> {
 }
 impl<'a> TrivialDrop for X<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(X<'arena>);
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep,
+)]
+#[repr(u8)]
+pub enum AllNullary<'a> {
+    Cons1,
+    Cons2,
+}
+impl<'a> TrivialDrop for AllNullary<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(AllNullary<'arena>);

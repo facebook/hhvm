@@ -15,6 +15,7 @@
  */
 
 #include <folly/Overload.h>
+#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Patch.h>
 #include <thrift/lib/thrift/detail/DynamicPatch.h>
@@ -23,6 +24,9 @@
 #include <thrift/lib/cpp2/patch/detail/PatchBadge.h>
 
 namespace apache::thrift::protocol {
+THRIFT_FLAG_DEFINE_bool(
+    thrift_patch_diff_visitor_ensure_on_potential_terse_write_field, false);
+
 using detail::badge;
 using detail::ValueList;
 using detail::ValueMap;
@@ -841,6 +845,38 @@ DynamicMapPatch DiffVisitorBase::diffMap(
   return patch;
 }
 
+// Check whether value should not be serialized due to deprecated_terse_writes,
+// but serialized in languages other than C++.
+static bool maybeEmptyDeprecatedTerseField(const Value& value) {
+  switch (value.getType()) {
+    case Value::Type::boolValue:
+    case Value::Type::byteValue:
+    case Value::Type::i16Value:
+    case Value::Type::i32Value:
+    case Value::Type::i64Value:
+    case Value::Type::floatValue:
+    case Value::Type::doubleValue:
+      // Numeric fields maybe empty terse field regardless the value, since it
+      // honors custom default
+      return true;
+    case Value::Type::stringValue:
+    case Value::Type::binaryValue:
+    case Value::Type::listValue:
+    case Value::Type::setValue:
+    case Value::Type::mapValue:
+      // string/binary and containers fields don't honor custom default.
+      // It can only be empty if it is intrinsic default
+      return protocol::isIntrinsicDefault(value);
+    case Value::Type::objectValue:
+      // struct/union/exception can never be empty terse field
+      return false;
+    case Value::Type::__EMPTY__:
+      folly::throw_exception<std::runtime_error>("value is empty.");
+    default:
+      notImpl();
+  }
+}
+
 void DiffVisitorBase::diffElement(
     const ValueMap& src,
     const ValueMap& dst,
@@ -888,6 +924,16 @@ DynamicPatch DiffVisitorBase::diffStructured(
     // need to use AssignPatch.
     bool shouldUseAssignPatch =
         src.empty() || dst.empty() || src.begin()->first != dst.begin()->first;
+
+    if (THRIFT_FLAG(
+            thrift_patch_diff_visitor_ensure_on_potential_terse_write_field)) {
+      // If field is src looks like deprecated terse field, we need to use
+      // EnsureStruct, which is not supported by UnionPatch, thus we need to use
+      // AssignPatch.
+      shouldUseAssignPatch = shouldUseAssignPatch ||
+          (src.begin()->second != dst.begin()->second &&
+           maybeEmptyDeprecatedTerseField(src.begin()->second));
+    }
 
     if (shouldUseAssignPatch) {
       DynamicUnknownPatch patch;
@@ -1027,6 +1073,11 @@ void DiffVisitorBase::diffField(
   auto guard = folly::makeGuard([&] { pop(); });
   auto subPatch = diff(badge, src.at(id), dst.at(id));
   if (!subPatch.empty(badge)) {
+    if (THRIFT_FLAG(
+            thrift_patch_diff_visitor_ensure_on_potential_terse_write_field) &&
+        maybeEmptyDeprecatedTerseField(src.at(id))) {
+      patch.ensure(badge, id, emptyValue(src.at(id).getType()));
+    }
     patch.patchIfSet(badge, id).merge(badge, DynamicPatch{std::move(subPatch)});
   }
 }

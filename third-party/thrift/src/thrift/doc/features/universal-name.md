@@ -10,7 +10,7 @@ where `domain_path` is defined in [Package Declaration](/idl/index.md#package-de
 
 A universal name is either [generated automatically](#package) based on the package name or [specified manually](#annotation) using the `@thrift.Uri` annotation.
 
-You should ensure that universal names for your definitions are unique. For generated universal names, follow the recommendations on [naming packages](/idl/index.md#package-declaration). For `@thrift.Uri`, combine a domain name that belongs to you or your organization with a path, possibly consisting of multiple components, that uniquely identifies this definition within the domain/organization.
+You should ensure that universal names for your definitions are unique. For generated universal names, follow the recommendations on [naming packages](/idl/index.md#package-declaration). For `@thrift.Uri`, combine a domain name that belongs to you or your organization with a path, possibly consisting of multiple components, that uniquely identifies this definition within the domain/organization. We recommend the last component of `@thrift.Uri` to match with the identifier.
 
 :::caution
 Universal name conflicts can be difficult to resolve, so choose these names carefully and prefer longer, more specific names to shorter, generic ones.

@@ -81,6 +81,8 @@ type t = {
           interpret_soft_types_as_like_types switch. **)
   disallow_non_annotated_memoize: bool;
       (** When true, plain <<__Memoize>> will not be allowed. **)
+  treat_non_annotated_memoize_as_kbic: bool;
+      (** When true, plain <<__Memoize>> will be treated as <<__Memoize(#KeyedByIC)>>. **)
 }
 [@@deriving show, eq]
 

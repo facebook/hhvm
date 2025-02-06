@@ -324,6 +324,10 @@ impl HhConfig {
                 "disallow_non_annotated_memoize",
                 default.disallow_non_annotated_memoize,
             )?,
+            treat_non_annotated_memoize_as_kbic: hhconfig.get_bool_or(
+                "treat_non_annotated_memoize_as_kbic",
+                default.treat_non_annotated_memoize_as_kbic,
+            )?,
         };
         let default = GlobalOptions::default();
         let opts = GlobalOptions {

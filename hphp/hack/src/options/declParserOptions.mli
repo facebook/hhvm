@@ -23,6 +23,7 @@ type t = {
   package_v2_support_multifile_tests: bool;
   enable_class_pointer_hint: bool;
   disallow_non_annotated_memoize: bool;
+  treat_non_annotated_memoize_as_kbic: bool;
 }
 [@@deriving show]
 

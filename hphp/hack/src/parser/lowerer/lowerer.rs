@@ -4550,7 +4550,7 @@ fn process_attribute_constructor_call<'a>(
     env: &mut Env<'a>,
 ) -> Result<ast::UserAttribute> {
     let name = pos_name(constructor_call_type, env)?;
-    let params = could_map(constructor_call_argument_list, env, |n, e| {
+    let mut params = could_map(constructor_call_argument_list, env, |n, e| {
         is_valid_attribute_arg(n, e, &name.1);
         p_expr(n, e)
     })?;
@@ -4579,8 +4579,19 @@ fn process_attribute_constructor_call<'a>(
             }
         }
 
-        // NB: if disallow_non_annotated_memoize is true, <<__Memoize>> without annotation are disallowed
-        if env.parser_options.disallow_non_annotated_memoize && params.is_empty() {
+        // If TreatNonAnnotatedMemoizeAsKBIC was supplied by config, add that to empty __Memoize
+        if env.parser_options.treat_non_annotated_memoize_as_kbic && params.is_empty() {
+            params.push(ast::Expr::new(
+                (),
+                env.mk_none_pos(),
+                ast::Expr_::EnumClassLabel(Box::new((
+                    None,
+                    sn::memoize_option::KEYED_BY_IC.to_string(),
+                ))),
+            ));
+        } else if env.parser_options.disallow_non_annotated_memoize && params.is_empty() {
+            // if DisallowNonAnnotatedMemoize was supplied by config, plain <<__Memoize>>
+            // are not allowed. This only matters if TreatNonAnnotatedMemoizeAsKBIC was not supplied
             raise_parsing_error(
                 node,
                 env,

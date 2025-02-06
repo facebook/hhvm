@@ -1,0 +1,6 @@
+args: 1, 2 name: A
+args: 1, 2 name: A
+Function memo_inaccessible throws: Implicit context is set to inaccessible
+Method B->memo_inaccessible throws: Implicit context is set to inaccessible
+args: 5, 6 name: A
+args: 5, 6 name: A

@@ -123,6 +123,7 @@ impl NativeEnv {
             keep_user_attributes: true,
             enable_class_pointer_hint: lang_flags.enable_class_pointer_hint,
             disallow_non_annotated_memoize: lang_flags.disallow_non_annotated_memoize,
+            treat_non_annotated_memoize_as_kbic: lang_flags.treat_non_annotated_memoize_as_kbic,
             ..Default::default()
         }
     }

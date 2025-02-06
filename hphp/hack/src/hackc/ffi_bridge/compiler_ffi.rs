@@ -71,6 +71,7 @@ mod ffi {
         include_assignment_values: bool,
         enable_class_pointer_hint: bool,
         disallow_non_annotated_memoize: bool,
+        treat_non_annotated_memoize_as_kbic: bool,
     }
 
     pub struct DeclsAndBlob {
@@ -649,6 +650,7 @@ pub fn parse_decls(
         include_assignment_values: config.include_assignment_values,
         enable_class_pointer_hint: config.enable_class_pointer_hint,
         disallow_non_annotated_memoize: config.disallow_non_annotated_memoize,
+        treat_non_annotated_memoize_as_kbic: config.treat_non_annotated_memoize_as_kbic,
         keep_user_attributes: true,
         ..Default::default()
     };

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e3c252e22a70b5466ec94f08062e5071>>
+// @generated SignedSource<<e546c240a79d6efc49618b9c4d3283b9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -73,6 +73,7 @@ pub struct ParserOptions {
     pub package_v2_support_multifile_tests: bool,
     pub enable_class_pointer_hint: bool,
     pub disallow_non_annotated_memoize: bool,
+    pub treat_non_annotated_memoize_as_kbic: bool,
 }
 
 #[derive(

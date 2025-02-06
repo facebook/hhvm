@@ -47,6 +47,7 @@ impl Default for ParserOptions {
             package_v2_support_multifile_tests: false,
             enable_class_pointer_hint: true,
             disallow_non_annotated_memoize: false,
+            treat_non_annotated_memoize_as_kbic: false,
         }
     }
 }

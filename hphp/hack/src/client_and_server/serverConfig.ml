@@ -380,6 +380,9 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
         disallow_non_annotated_memoize =
           bool_opt "disallow_non_annotated_memoize" config
           >?? po_opt.disallow_non_annotated_memoize;
+        treat_non_annotated_memoize_as_kbic =
+          bool_opt "treat_non_annotated_memoize_as_kbic" config
+          >?? po_opt.treat_non_annotated_memoize_as_kbic;
       }
   in
   GlobalOptions.set

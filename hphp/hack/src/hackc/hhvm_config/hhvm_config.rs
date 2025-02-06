@@ -74,5 +74,11 @@ pub fn parser_options(config: &HhvmConfig) -> Result<ParserOptions> {
         "Hack.Lang.DisallowNonAnnotatedMemoize",
     )?;
 
+    // Treat non annotated <<__Memoize>> as KeyedByIC
+    init(
+        &mut flags.treat_non_annotated_memoize_as_kbic,
+        "Hack.Lang.TreatNonAnnotatedMemoizeAsKBIC",
+    )?;
+
     Ok(flags)
 }

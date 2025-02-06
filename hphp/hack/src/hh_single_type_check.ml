@@ -311,6 +311,7 @@ let parse_options () =
   let get_some_file_deps_full_hierarchy = ref false in
   let enable_class_pointer_hint = ref true in
   let disallow_non_annotated_memoize = ref false in
+  let treat_non_annotated_memoize_as_kbic = ref false in
   let options =
     [
       ( "--config",
@@ -919,6 +920,8 @@ let parse_options () =
           default.package_v2_support_multifile_tests;
         enable_class_pointer_hint = !enable_class_pointer_hint;
         disallow_non_annotated_memoize = !disallow_non_annotated_memoize;
+        treat_non_annotated_memoize_as_kbic =
+          !treat_non_annotated_memoize_as_kbic;
       }
   in
 

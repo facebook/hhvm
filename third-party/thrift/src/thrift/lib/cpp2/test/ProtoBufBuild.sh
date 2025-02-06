@@ -21,6 +21,6 @@ shift 1
 ${PROTOC} --cpp_out="$INSTALL_DIR" "$@"
 
 # Fix up include path
-sed -i \
+sed -i='' \
   's|ProtoBufBenchData.pb.h|thrift/lib/cpp2/test/ProtoBufBenchData.pb.h|g' \
   "$INSTALL_DIR"/ProtoBufBenchData.pb.cc

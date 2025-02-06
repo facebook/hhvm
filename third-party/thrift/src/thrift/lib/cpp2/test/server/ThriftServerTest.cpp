@@ -3674,6 +3674,13 @@ TEST(ThriftServer, SocketQueueTimeout) {
 }
 
 TEST(ThriftServer, PerConnectionSocketOptions) {
+  // On MacOS TCP_KEEPALIVE can be used in the same way TCP_KEEPIDLE is used on
+  // Linux.
+#if defined(__APPLE__) && defined(TCP_KEEPALIVE)
+  constexpr auto kTCPKeepIdle = TCP_KEEPALIVE;
+#else
+  constexpr auto kTCPKeepIdle = TCP_KEEPIDLE;
+#endif
   class TestServiceHandler
       : public apache::thrift::ServiceHandler<TestService> {
     void voidResponse() override {
@@ -3690,7 +3697,7 @@ TEST(ThriftServer, PerConnectionSocketOptions) {
         return value;
       };
       soKeepAlive = readSockOpt(SOL_SOCKET, SO_KEEPALIVE);
-      tcpKeepIdle = readSockOpt(IPPROTO_TCP, TCP_KEEPIDLE);
+      tcpKeepIdle = readSockOpt(IPPROTO_TCP, kTCPKeepIdle);
       tcpKeepIntvl = readSockOpt(IPPROTO_TCP, TCP_KEEPINTVL);
       tcpKeepCnt = readSockOpt(IPPROTO_TCP, TCP_KEEPCNT);
     }
@@ -3706,7 +3713,7 @@ TEST(ThriftServer, PerConnectionSocketOptions) {
   ScopedServerInterfaceThread runner(handler, [](ThriftServer& server) {
     folly::SocketOptionMap socketOptions{
         {{SOL_SOCKET, SO_KEEPALIVE}, 1},
-        {{IPPROTO_TCP, TCP_KEEPIDLE}, 2},
+        {{IPPROTO_TCP, kTCPKeepIdle}, 2},
         {{IPPROTO_TCP, TCP_KEEPINTVL}, 3},
         {{IPPROTO_TCP, TCP_KEEPCNT}, 4},
     };
@@ -3716,7 +3723,7 @@ TEST(ThriftServer, PerConnectionSocketOptions) {
   auto client = runner.newClient<apache::thrift::Client<TestService>>();
   client->sync_voidResponse();
 
-  EXPECT_EQ(handler->soKeepAlive, 1);
+  EXPECT_TRUE(handler->soKeepAlive);
   EXPECT_EQ(handler->tcpKeepIdle, 2);
   EXPECT_EQ(handler->tcpKeepIntvl, 3);
   EXPECT_EQ(handler->tcpKeepCnt, 4);

@@ -301,7 +301,7 @@ TEST(ObjectTest, StructWithMap) {
 
 TEST(ObjectTest, StructWithSet) {
   testset::struct_with<type::set<type::i64_t>> s;
-  std::set<long> setValues = {1, 2, 3};
+  std::set<std::int64_t> setValues = {1, 2, 3};
   s.field_1_ref() = setValues;
   Value value = asValueStruct<type::struct_c>(s);
   ASSERT_EQ(value.getType(), Value::Type::objectValue);
@@ -471,7 +471,7 @@ TEST(ObjectTest, DirectlyAdaptedStruct) {
 TEST(ObjectTest, parseObject) {
   folly::IOBufQueue iobufQueue;
   testset::struct_with<type::set<type::i64_t>> thriftStruct;
-  std::set<long> setValues = {1, 2, 3};
+  std::set<std::int64_t> setValues = {1, 2, 3};
   thriftStruct.field_1_ref() = setValues;
   BinarySerializer::serialize(thriftStruct, &iobufQueue);
   auto serialized = iobufQueue.move();
@@ -485,7 +485,7 @@ TEST(ObjectTest, parseObject) {
 TEST(ObjectTest, serializeObject) {
   folly::IOBufQueue iobufQueue;
   testset::struct_with<type::set<type::i64_t>> thriftStruct;
-  std::set<long> setValues = {1, 2, 3};
+  std::set<std::int64_t> setValues = {1, 2, 3};
   thriftStruct.field_1_ref() = setValues;
   BinarySerializer::serialize(thriftStruct, &iobufQueue);
   auto expected = iobufQueue.move();

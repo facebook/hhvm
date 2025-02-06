@@ -122,7 +122,7 @@ TEST(StandardValidatorTest, ValidatePy3EnableCppAdapter) {
   )");
 }
 
-TEST(StandardValidatorTest, ConstMapKeyCollision) {
+TEST(StandardValidatorTest, ConstKeyCollision) {
   check_compile(R"(
     enum FooBar {
       Foo = 1,
@@ -197,5 +197,34 @@ TEST(StandardValidatorTest, ConstMapKeyCollision) {
     };
 
 
+  )");
+}
+
+TEST(StandardValidatorTest, FieldDefaultKeyCollision) {
+  check_compile(R"(
+    enum FooBar {
+      Foo = 1,
+      Bar = 2,
+    }
+
+    const map<i64, string> INT_DUPE = {
+      2: "Foo",
+      4: "Bar",
+      2: "Bar"
+    # expected-warning@-1: Duplicate key in map literal: `2`
+    }
+
+    struct S {
+      1: map<FooBar, string> ok_init = {};
+      2: map<i64, string> bad_init_no_err = INT_DUPE;
+      3: map<FooBar, string> bad_init_should_err = {
+        FooBar.Foo: "Foo", FooBar.Bar: "Bar", FooBar.Bar: "Bar"
+    # expected-warning@-1: Duplicate key in map literal: `Bar`
+      };
+      4: map<list<i64>, i64> bad_init_list_key = {
+        [1, 1, 2]: 1, [1, 1, 2]: 2
+    # expected-warning@-1: Duplicate key in map literal: `[1, ..., 2]`
+      };
+    }
   )");
 }

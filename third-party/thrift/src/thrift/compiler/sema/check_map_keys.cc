@@ -180,27 +180,28 @@ std::vector<const t_const_value*> find_duplicate_keys(
   return duplicates;
 }
 
-// If owner is null, it's a nested "anonymous" constant value.
-// If owner is non-null and doesn't match enclosing t_const, it's
-// defined elsewhere.
-bool is_named_const_value(const t_const_value* value, const t_const& const_) {
+// If node is a field, only have to check if owner is non-null.
+// If node is a const, also have to check if owner is not the encolsing const.
+bool is_named_const_value(const t_const_value* value, const t_node& node) {
   auto owner = value->get_owner();
-  return owner != nullptr && owner != &const_;
+  if (owner == nullptr) {
+    return false;
+  }
+  // if node is a field, returns true b/c owner is non-null
+  return owner != dynamic_cast<const t_const*>(&node);
 }
 
 void check_key_value(
-    diagnostics_engine& diags,
-    const t_const& const_,
-    const t_const_value* value) {
+    diagnostics_engine& diags, const t_node& node, const t_const_value* value) {
   // recurse on elements
   if (value->kind() == t_const_value::CV_LIST) {
     for (const t_const_value* elem : value->get_list()) {
-      check_key_value(diags, const_, elem);
+      check_key_value(diags, node, elem);
     }
   }
   if (value->kind() == t_const_value::CV_MAP) {
     // Don't recurse or check constant defined elsewhere.
-    if (is_named_const_value(value, const_)) {
+    if (is_named_const_value(value, node)) {
       return;
     }
     auto duplicates = find_duplicate_keys(value);
@@ -209,7 +210,7 @@ void check_key_value(
       // fallback to the source range of the enclosing const.
       const source_range& src_range = duplicate->src_range()
           ? *duplicate->src_range()
-          : (value->src_range() ? *value->src_range() : const_.src_range());
+          : (value->src_range() ? *value->src_range() : node.src_range());
       // TODO(T213710219): Enable this with error severity
       diags.warning(
           src_range.begin,
@@ -217,8 +218,8 @@ void check_key_value(
           to_string(duplicate));
     }
     for (const auto& kv : value->get_map()) {
-      check_key_value(diags, const_, kv.first);
-      check_key_value(diags, const_, kv.second);
+      check_key_value(diags, node, kv.first);
+      check_key_value(diags, node, kv.second);
     }
   }
 }
@@ -228,6 +229,13 @@ namespace detail {
 
 void check_map_keys(diagnostics_engine& diags, const t_const& const_) {
   check_key_value(diags, const_, const_.value());
+}
+
+void check_map_keys(diagnostics_engine& diags, const t_field& field_) {
+  if (field_.default_value() == nullptr) {
+    return;
+  }
+  check_key_value(diags, field_, field_.default_value());
 }
 
 } // namespace detail

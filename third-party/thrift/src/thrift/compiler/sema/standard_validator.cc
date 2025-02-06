@@ -680,6 +680,7 @@ void validate_field_default_value(sema_context& ctx, const t_field& field) {
     // If initializer is not valid to begin with, stop checks and return error.
     return;
   }
+  detail::check_map_keys(ctx, field);
 
   const t_structured& parent_node =
       dynamic_cast<const t_structured&>(*ctx.parent());

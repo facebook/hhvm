@@ -52,6 +52,7 @@ bool is_initializer_default_value(
  * const.
  */
 void check_map_keys(diagnostics_engine& diags, const t_const& const_);
+void check_map_keys(diagnostics_engine& diags, const t_field& field);
 
 void validate_annotation_scopes(sema_context& ctx, const t_named& node);
 

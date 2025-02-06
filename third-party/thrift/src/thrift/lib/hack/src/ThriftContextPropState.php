@@ -107,6 +107,14 @@ final class ThriftContextPropState {
   }
 
   public static function updateFromVC(?IViewerContextBase $vc): void {
+    if ($vc is null) {
+      return;
+    }
+
+    if (!JustKnobs::eval('meta_cp/www:enable_user_id_ctx_prop')) {
+      return;
+    }
+
     if ($vc is IFBViewerContext) {
       self::updateFBUserIdFromVC($vc);
     } else if ($vc is IIGViewerContext) {

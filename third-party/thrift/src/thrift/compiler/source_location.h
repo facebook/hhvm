@@ -16,13 +16,13 @@
 
 #pragma once
 
-#include <stdint.h>
-
 #include <cstdint>
 #include <deque>
+#include <functional>
+#include <map>
 #include <optional>
 #include <string>
-#include <unordered_map>
+#include <string_view>
 #include <variant>
 #include <vector>
 
@@ -115,10 +115,10 @@ class source_manager {
   // sources_ grows.
   std::deque<source_info> sources_;
 
-  std::unordered_map<std::string, source> file_source_map_;
+  std::map<std::string, source, std::less<>> file_source_map_;
 
   // Maps from filepaths present in the AST to filepaths on disk.
-  std::unordered_map<std::string, std::string> found_includes_;
+  std::map<std::string, std::string, std::less<>> found_includes_;
 
   const source_info* get_source(uint_least32_t source_id) const {
     return source_id > 0 && source_id <= sources_.size()
@@ -128,7 +128,7 @@ class source_manager {
 
   friend class resolved_location;
 
-  source add_source(const std::string& file_name, std::vector<char> text);
+  source add_source(std::string_view file_name, std::vector<char> text);
 
  public:
   // Loads a file and returns a source object representing its content.
@@ -136,12 +136,12 @@ class source_manager {
   // add_virtual_file.
   // Returns an empty optional if opening or reading the file fails.
   // Makes use of the result of previous calls to find_include_file.
-  std::optional<source> get_file(const std::string& file_name);
+  std::optional<source> get_file(std::string_view file_name);
 
-  std::string get_file_path(const std::string& file_name) const;
+  std::string get_file_path(std::string_view file_name) const;
 
   // Adds a virtual file with the specified name and content.
-  source add_virtual_file(const std::string& file_name, const std::string& src);
+  source add_virtual_file(std::string_view file_name, std::string_view src);
 
   // Returns the start location of a source containing the specified location.
   // It is a member function in case we add clang-like compression of locations.
@@ -171,12 +171,12 @@ class source_manager {
   // The resolved path is made available to get_file.
   using path_or_error = std::variant<std::string, std::string>;
   path_or_error find_include_file(
-      const std::string& filename,
-      const std::string& program_path,
+      std::string_view filename,
+      std::string_view program_path,
       const std::vector<std::string>& search_paths);
   // Queries for a file previously found by find_include_file.
   std::optional<std::string> found_include_file(
-      const std::string& filename) const;
+      std::string_view filename) const;
 };
 
 } // namespace apache::thrift::compiler

@@ -19,10 +19,10 @@
 
 #include <fmt/core.h>
 
-#include <assert.h>
-#include <errno.h>
-#include <string.h>
 #include <algorithm>
+#include <cassert>
+#include <cerrno>
+#include <cstring>
 #include <filesystem>
 #include <stdexcept>
 #include <string>
@@ -84,24 +84,24 @@ std::vector<uint_least32_t> get_line_offsets(std::string_view sv) {
 } // namespace
 
 source source_manager::add_source(
-    const std::string& file_name, std::vector<char> text) {
+    std::string_view file_name, std::vector<char> text) {
   assert(text.back() == '\0');
   std::string_view sv(text.data(), text.size());
-  sources_.push_back(
-      source_info{file_name, std::move(text), get_line_offsets(sv)});
+  sources_.push_back(source_info{
+      std::string(file_name), std::move(text), get_line_offsets(sv)});
   return {/* .start = */
           source_location(/* source_id= */ sources_.size(), /** offset= */ 0),
           /* .text = */ sv};
 }
 
-std::string source_manager::get_file_path(const std::string& file_name) const {
+std::string source_manager::get_file_path(std::string_view file_name) const {
   if (file_source_map_.find(file_name) != file_source_map_.end()) {
-    return file_name;
+    return std::string(file_name);
   }
   return std::filesystem::absolute(file_name).string();
 }
 
-std::optional<source> source_manager::get_file(const std::string& file_name) {
+std::optional<source> source_manager::get_file(std::string_view file_name) {
   if (auto source = file_source_map_.find(file_name);
       source != file_source_map_.end()) {
     return source->second;
@@ -156,11 +156,11 @@ std::optional<source> source_manager::get_file(const std::string& file_name) {
 }
 
 source source_manager::add_virtual_file(
-    const std::string& file_name, const std::string& src) {
+    std::string_view file_name, std::string_view src) {
   if (file_source_map_.find(file_name) != file_source_map_.end()) {
-    throw std::runtime_error(std::string("file already added: ") + file_name);
+    throw std::runtime_error(fmt::format("file already added: {}", file_name));
   }
-  const char* start = src.c_str();
+  const char* start = src.data();
   auto source =
       add_source(file_name, std::vector<char>(start, start + src.size() + 1));
   file_source_map_.emplace(file_name, source);
@@ -202,21 +202,21 @@ resolved_location::resolved_location(
 }
 
 source_manager::path_or_error source_manager::find_include_file(
-    const std::string& filename,
-    const std::string& parent_path,
+    std::string_view filename,
+    std::string_view parent_path,
     const std::vector<std::string>& search_paths) {
   if (auto itr = found_includes_.find(filename); itr != found_includes_.end()) {
     return source_manager::path_or_error{std::in_place_index<0>, itr->second};
   }
 
   auto found = [&](std::string path) {
-    found_includes_[filename] = path;
+    found_includes_[std::string(filename)] = path;
     return source_manager::path_or_error{
         std::in_place_index<0>, std::move(path)};
   };
 
   if (file_source_map_.find(filename) != file_source_map_.end()) {
-    return found(filename);
+    return found(std::string(filename));
   }
 
   // Absolute path? Just try that.
@@ -236,7 +236,7 @@ source_manager::path_or_error source_manager::find_include_file(
   // new search path with current dir global
   std::vector<std::string> sp = search_paths;
   auto itr = found_includes_.find(parent_path);
-  const std::string& resolved_parent_path =
+  std::string_view resolved_parent_path =
       itr != found_includes_.end() ? itr->second : parent_path;
   auto dir = std::filesystem::path(resolved_parent_path).parent_path().string();
   dir = dir.empty() ? "." : dir;
@@ -271,7 +271,7 @@ source_manager::path_or_error source_manager::find_include_file(
 }
 
 std::optional<std::string> source_manager::found_include_file(
-    const std::string& filename) const {
+    std::string_view filename) const {
   if (auto itr = found_includes_.find(filename); itr != found_includes_.end()) {
     return itr->second;
   }

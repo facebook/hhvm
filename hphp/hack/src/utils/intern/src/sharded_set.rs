@@ -109,10 +109,6 @@ impl<T, S: BuildHasher> ShardedSet<T, S> {
     }
 }
 
-fn hash_one<B: BuildHasher, T: Hash>(build_hasher: &B, x: T) -> u64 {
-    build_hasher.hash_one(&x)
-}
-
 pub struct InsertLock<'a, T, S = RandomState> {
     build_hasher: &'a S,
     hash: u64,
@@ -135,7 +131,7 @@ impl<T: Eq + Hash, S: BuildHasher> ShardedSet<T, S> {
         T: Borrow<Q>,
         Q: ?Sized + Hash,
     {
-        let hash = hash_one(&self.build_hasher, q);
+        let hash = self.build_hasher.hash_one(q);
         (
             hash,
             &self.shards[(hash >> (64 - 7 - SHARD_SHIFT)) as usize & (SHARDS - 1)],
@@ -196,7 +192,7 @@ impl<T: Eq + Hash, S: BuildHasher> ShardedSet<T, S> {
         let (hash, shard) = self.hash_and_shard(&t);
         shard
             .write()
-            .insert_unique(hash, t, |v| hash_one(build_hasher, v));
+            .insert_unique(hash, t, |v| build_hasher.hash_one(v));
     }
 }
 
@@ -206,6 +202,6 @@ impl<T: Sized + Hash, S: BuildHasher> InsertLock<'_, T, S> {
     pub fn insert<Q: Into<T>>(&mut self, q: Q) {
         let build_hasher = self.build_hasher;
         self.shard
-            .insert_unique(self.hash, q.into(), |v| hash_one(build_hasher, v));
+            .insert_unique(self.hash, q.into(), |v| build_hasher.hash_one(v));
     }
 }

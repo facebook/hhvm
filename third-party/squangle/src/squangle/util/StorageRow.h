@@ -13,8 +13,6 @@
 #include <folly/ScopeGuard.h>
 #include <glog/logging.h>
 
-#include "secure_lib/secure_string.h"
-
 namespace facebook::common::mysql_client {
 
 /**
@@ -164,7 +162,7 @@ class StorageRow {
   T readBytes(Offsets& offsets) const {
     DCHECK_LE(offsets.curr + sizeof(T), offsets.end);
     T res;
-    checked_memcpy(&res, sizeof(res), &data_[offsets.curr], sizeof(res));
+    memcpy(&res, &data_[offsets.curr], sizeof(res));
     offsets.curr += sizeof(res);
     return res;
   }

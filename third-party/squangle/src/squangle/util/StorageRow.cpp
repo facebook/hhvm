@@ -117,7 +117,8 @@ void StorageRow::writeBytes(const void* data, size_t size) {
   if (size > 0) {
     auto orig_size = data_.size();
     data_.resize(orig_size + size);
-    checked_memcpy(&data_[orig_size], data_.size() - orig_size, data, size);
+    // @lint-ignore CLANGSECURITY facebook-security-vulnerable-memcpy
+    memcpy(&data_[orig_size], data, size);
   }
 }
 

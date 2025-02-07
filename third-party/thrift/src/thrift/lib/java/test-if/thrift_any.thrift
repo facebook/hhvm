@@ -17,6 +17,7 @@
 include "thrift/annotation/java.thrift"
 include "thrift/lib/thrift/any.thrift"
 include "thrift/annotation/compat.thrift"
+include "thrift/annotation/thrift.thrift"
 
 package "test.dev/thrift/lib/java/test/thrift/any"
 
@@ -69,9 +70,10 @@ enum TestOpenEnum {
   TWO = 2,
 }
 
+@thrift.Uri{value = "a.b/c/d"}
 struct TestShortUriStruct {
   1: i32 inf_field;
-} (thrift.uri = "a.b/c/d")
+}
 
 struct Position {
   1: i32 x;

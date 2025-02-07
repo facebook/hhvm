@@ -172,7 +172,13 @@ transient exception TestExceptionCompat {
 }
 
 // The following were automatically generated and may benefit from renaming.
-typedef string (java.swift.binary_string = "1") string_7069
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"java.swift.binary_string": "1"},
+}
+typedef string string_7069
 
 // The following were automatically generated and may benefit from renaming.
-typedef string (java.swift.binary_string = "1") string_5433
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"java.swift.binary_string": "1"},
+}
+typedef string string_5433

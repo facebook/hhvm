@@ -18,11 +18,14 @@ package "test.dev/thrift/lib/java/test/universalname"
 
 namespace java.swift com.facebook.thrift.test.universalname
 
+include "thrift/annotation/thrift.thrift"
+
+@thrift.Uri{value = "test.dev/thrift/lib/java/my_request"}
 struct TestRequest {
   1: bool aBool;
   3: i64 aLong;
   5: string aString;
-} (thrift.uri = "test.dev/thrift/lib/java/my_request")
+}
 
 struct TestResponse {
   1: list<string> aList;
@@ -35,9 +38,10 @@ union TestUnion {
   3: TestRequest aStruct;
 }
 
+@thrift.Uri{value = "test.dev/thrift/lib/java/my_exp"}
 exception TestException {
   1: string message;
-} (thrift.uri = "test.dev/thrift/lib/java/my_exp")
+}
 
 service UNService {
   TestResponse test(1: TestRequest request) throws (1: TestException ex);

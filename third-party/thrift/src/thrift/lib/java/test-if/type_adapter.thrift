@@ -173,11 +173,14 @@ typedef adaptedBoolean doubleTypedefBoolean
 typedef adaptedInt doubleTypedefInt
 typedef doubleTypedefInt multipleTypedefInt
 
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"java.swift.binary_string": "1"},
+}
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.common.CopiedPooledByteBufTypeAdapter",
   typeClassName = "io.netty.buffer.ByteBuf",
 }
-typedef string (java.swift.binary_string) BinaryString
+typedef string BinaryString
 
 typedef binary data
 @java.Adapter{
@@ -983,4 +986,7 @@ safe permanent client exception AdaptedTestException {
 }
 
 // The following were automatically generated and may benefit from renaming.
-typedef string (java.swift.binary_string = "1") string_5578
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"java.swift.binary_string": "1"},
+}
+typedef string string_5578

@@ -18,12 +18,10 @@ using std::unique_ptr;
 namespace proxygen {
 
 HTTPDirectResponseHandler::HTTPDirectResponseHandler(
-    unsigned statusCode,
-    const std::string& statusMsg,
-    const HTTPErrorPage* errorPage)
+    unsigned statusCode, std::string statusMsg, const HTTPErrorPage* errorPage)
     : txn_(nullptr),
       errorPage_(errorPage),
-      statusMessage_(statusMsg),
+      statusMessage_(std::move(statusMsg)),
       statusCode_(statusCode),
       headersSent_(false),
       eomSent_(false),
@@ -59,10 +57,11 @@ void HTTPDirectResponseHandler::onHeadersComplete(
   }
   if (errorPage_) {
     HTTPErrorPage::Page page = errorPage_->generate(
-        0, statusCode_, statusMessage_, nullptr, empty_string);
+        0, statusCode_, statusMessage_, nullptr, empty_string, err_);
     VLOG(4) << "sending error page with type " << page.contentType;
     response.getHeaders().add(HTTP_HEADER_CONTENT_TYPE, page.contentType);
     responseBody = std::move(page.content);
+    page.headers.copyTo(response.getHeaders());
   }
   response.getHeaders().add(
       HTTP_HEADER_CONTENT_LENGTH,
@@ -93,6 +92,10 @@ void HTTPDirectResponseHandler::onUpgrade(
 }
 
 void HTTPDirectResponseHandler::onError(const HTTPException& error) noexcept {
+  if (error.hasProxygenError()) {
+    err_ = error.getProxygenError();
+  }
+
   if (error.getDirection() == HTTPException::Direction::INGRESS) {
     if (error.getProxygenError() == kErrorTimeout) {
       VLOG(4) << "processing ingress timeout";

@@ -25,6 +25,7 @@
 #include <proxygen/lib/http/observer/HTTPSessionObserverInterface.h>
 #include <proxygen/lib/http/session/HTTPDirectResponseHandler.h>
 #include <proxygen/lib/http/session/HTTPDownstreamSession.h>
+#include <proxygen/lib/http/session/HTTPErrorPage.h>
 #include <proxygen/lib/http/session/HTTPSession.h>
 #include <proxygen/lib/http/session/test/HTTPSessionMocks.h>
 #include <proxygen/lib/http/session/test/HTTPSessionTest.h>
@@ -1530,6 +1531,67 @@ TEST_F(HTTPDownstreamSessionTest, HttpWithAckTimingConnError) {
   expectDetachSession();
   handler1->txn_->decrementPendingByteEvents();
   httpSession_->timeoutExpired();
+}
+
+TEST_F(HTTPDownstreamSessionTest, ServerStatusHeaderOnError) {
+  // On ingress error, controller will call getParseErrorHandler, instantiating
+  // a DirectResponseHandler. The handler then calls generate() on a
+  // HTTPStaticErrorPage, which will set a Server-Status header to the
+  // corresponding ProxygenError.
+  HTTPStaticErrorPage page{folly::IOBuf::fromString("")};
+  HTTPTransaction::Handler* errorHandler =
+      new HTTPDirectResponseHandler(400, "Bad Request", &page);
+  EXPECT_CALL(mockController_, getParseErrorHandler(_, _, _))
+      .WillOnce(Return(errorHandler));
+
+  NiceMock<MockHTTPCodecCallback> callbacks;
+  clientCodec_->setCallback(&callbacks);
+
+  EXPECT_CALL(callbacks, onHeadersComplete(1, _))
+      .WillOnce(Invoke([](HTTPCodec::StreamID,
+                          std::shared_ptr<HTTPMessage> msg) {
+        EXPECT_EQ(msg->getHeaders().getSingleOrEmpty("Server-Status"), "16");
+      }));
+
+  auto req = getGetRequest("/");                 // construct basic get req
+  req.getHeaders().set("Host", " \xfa\r\n\r\n"); // set invalid header value in
+                                                 // host field
+  sendRequest(req);                              // send req with eom
+
+  folly::DelayedDestruction::DestructorGuard dg(httpSession_);
+  flushRequests();
+  eventBase_.loopOnce();
+  eventBase_.loopOnce();
+  parseOutput(*clientCodec_); // client parses resp with server-status set to
+                              // kErrorParseHeader (16)
+  expectDetachSession();
+}
+
+TEST_F(HTTP2DownstreamSessionTest, ServerStatusHeaderOnError) {
+  HTTPStaticErrorPage page{folly::IOBuf::fromString("")};
+  HTTPTransaction::Handler* errorHandler =
+      new HTTPDirectResponseHandler(400, "Bad Request", &page);
+  EXPECT_CALL(mockController_, getParseErrorHandler(_, _, _))
+      .WillOnce(Return(errorHandler));
+
+  NiceMock<MockHTTPCodecCallback> callbacks;
+  clientCodec_->setCallback(&callbacks);
+
+  EXPECT_CALL(callbacks, onHeadersComplete(1, _))
+      .WillOnce(Invoke([](HTTPCodec::StreamID,
+                          std::shared_ptr<HTTPMessage> msg) {
+        EXPECT_EQ(msg->getHeaders().getSingleOrEmpty("Server-Status"), "16");
+      }));
+
+  auto req = getGetRequest("/");
+  req.getHeaders().set("Host", " \xfa\r\n\r\n");
+  sendRequest(req);
+
+  flushRequests();
+  eventBase_.loopOnce();
+  eventBase_.loopOnce();
+  parseOutput(*clientCodec_);
+  gracefulShutdown();
 }
 
 TEST_F(HTTP2DownstreamSessionTest, TestPing) {

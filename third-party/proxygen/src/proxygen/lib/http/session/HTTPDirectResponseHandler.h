@@ -17,7 +17,7 @@ class HTTPErrorPage;
 class HTTPDirectResponseHandler : public HTTPTransaction::Handler {
  public:
   HTTPDirectResponseHandler(unsigned statusCode,
-                            const std::string& statusMsg,
+                            std::string statusMsg,
                             const HTTPErrorPage* errorPage = nullptr);
 
   void forceConnectionClose(bool close) {
@@ -45,6 +45,7 @@ class HTTPDirectResponseHandler : public HTTPTransaction::Handler {
   const HTTPErrorPage* errorPage_;
   std::string statusMessage_;
   unsigned statusCode_;
+  ProxygenError err_{kErrorNone};
   bool headersSent_ : 1;
   bool eomSent_ : 1;
   bool forceConnectionClose_ : 1;

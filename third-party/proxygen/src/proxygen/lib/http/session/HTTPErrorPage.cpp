@@ -24,9 +24,13 @@ HTTPErrorPage::Page HTTPStaticErrorPage::generate(
     unsigned /*httpStatusCode*/,
     const std::string& /*reason*/,
     std::unique_ptr<folly::IOBuf> /*body*/,
-    const std::string& /*detailReason*/) const {
+    const std::string& /*detailReason*/,
+    ProxygenError err) const {
 
-  return HTTPErrorPage::Page(contentType_, content_->clone());
+  HTTPHeaders headers;
+  VLOG(4) << "adding server-status header for proxygen error";
+  headers.set("Server-Status", folly::to<std::string>(static_cast<int>(err)));
+  return {contentType_, content_->clone(), std::move(headers)};
 }
 
 } // namespace proxygen

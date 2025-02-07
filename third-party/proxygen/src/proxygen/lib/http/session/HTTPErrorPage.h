@@ -10,6 +10,8 @@
 
 #include <cstdint>
 #include <memory>
+#include <proxygen/lib/http/HTTPHeaders.h>
+#include <proxygen/lib/http/ProxygenErrorEnum.h>
 #include <string>
 
 namespace folly {
@@ -30,12 +32,19 @@ class HTTPErrorPage {
         : contentType(pageContentType), content(std::move(pageContent)) {
     }
 
-    Page(Page&& other) noexcept
-        : contentType(other.contentType), content(std::move(other.content)) {
+    Page(std::string pageContentType,
+         std::unique_ptr<folly::IOBuf> pageContent,
+         HTTPHeaders pageHeaders)
+        : contentType(std::move(pageContentType)),
+          content(std::move(pageContent)),
+          headers(std::move(pageHeaders)) {
     }
+
+    Page(Page&& other) noexcept = default;
 
     const std::string contentType;
     std::unique_ptr<folly::IOBuf> content;
+    HTTPHeaders headers;
   };
 
   virtual ~HTTPErrorPage() {
@@ -45,7 +54,8 @@ class HTTPErrorPage {
                         unsigned httpStatusCode,
                         const std::string& reason,
                         std::unique_ptr<folly::IOBuf> body,
-                        const std::string& detailReason) const = 0;
+                        const std::string& detailReason,
+                        ProxygenError err) const = 0;
 };
 
 /**
@@ -61,9 +71,10 @@ class HTTPStaticErrorPage : public HTTPErrorPage {
                 unsigned httpStatusCode,
                 const std::string& reason,
                 std::unique_ptr<folly::IOBuf> body,
-                const std::string& detailReason) const override;
+                const std::string& detailReason,
+                ProxygenError err) const override;
 
- private:
+ protected:
   std::unique_ptr<folly::IOBuf> content_;
   std::string contentType_;
 };

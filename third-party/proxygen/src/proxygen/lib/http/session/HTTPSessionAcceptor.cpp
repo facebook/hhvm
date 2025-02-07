@@ -43,11 +43,7 @@ HTTPSessionAcceptor::~HTTPSessionAcceptor() {
 
 const HTTPErrorPage* HTTPSessionAcceptor::getErrorPage(
     const SocketAddress& addr) const {
-  const HTTPErrorPage* errorPage = nullptr;
-  if (errorPage == nullptr) {
-    errorPage = defaultErrorPage_.get();
-  }
-  return errorPage;
+  return defaultErrorPage_.get();
 }
 
 void HTTPSessionAcceptor::onNewConnection(folly::AsyncTransport::UniquePtr sock,

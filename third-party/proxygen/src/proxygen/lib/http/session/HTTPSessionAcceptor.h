@@ -58,7 +58,7 @@ class HTTPSessionAcceptor
    *          else the default error page generator if one has
    *          been set, or else nullptr.
    */
-  virtual const HTTPErrorPage* getErrorPage(
+  [[nodiscard]] virtual const HTTPErrorPage* getErrorPage(
       const folly::SocketAddress& addr) const;
 
   /**

@@ -401,6 +401,14 @@ class THeader final {
 
   folly::Optional<int64_t> getServerLoad() const { return c_.serverLoad_; }
 
+  void setServerSecondaryLoad(folly::Optional<int64_t> load) {
+    c_.serverSecondaryLoad_ = load;
+  }
+
+  folly::Optional<int64_t> getServerSecondaryLoad() const {
+    return c_.serverSecondaryLoad_;
+  }
+
   apache::thrift::concurrency::PRIORITY getCallPriority() const;
 
   std::chrono::milliseconds getTimeoutFromHeader(std::string_view header) const;
@@ -466,6 +474,8 @@ class THeader final {
   static constexpr std::string_view CLIENT_TIMEOUT_HEADER = "client_timeout";
   static constexpr std::string_view QUEUE_TIMEOUT_HEADER = "queue_timeout";
   static constexpr std::string_view QUERY_LOAD_HEADER = "load";
+  static constexpr std::string_view QUERY_SECONDARY_LOAD_HEADER =
+      "secondary_load";
   static constexpr std::string_view kClientId = "client_id";
   static constexpr std::string_view kServiceTraceMeta = "service_trace_meta";
   static constexpr std::string_view kTenantId = "tenant_id";
@@ -563,6 +573,7 @@ class THeader final {
     folly::Optional<uint32_t> crc32c_;
     std::optional<Checksum> checksum_;
     folly::Optional<int64_t> serverLoad_;
+    folly::Optional<int64_t> serverSecondaryLoad_;
 
     std::optional<ProxiedPayloadMetadata> proxiedPayloadMetadata_;
 

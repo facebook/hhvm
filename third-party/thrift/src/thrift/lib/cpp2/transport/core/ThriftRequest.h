@@ -606,6 +606,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
   bool checksumRequested_{false};
   transport::THeader header_;
   folly::Optional<std::string> loadMetric_;
+  folly::Optional<std::string> secondaryLoadMetric_;
   Cpp2RequestContext reqContext_;
   folly::Optional<CompressionConfig> compressionConfig_;
 

@@ -311,6 +311,8 @@ struct RequestRpcMetadata {
   25: optional Checksum checksum;
   // require checksumed response
   26: optional bool checksumResponse;
+  // FB303 metric name to allow SR to fetch secondary load.
+  27: optional string secondaryLoadMetric;
 }
 
 struct ErrorClassification {
@@ -414,6 +416,9 @@ struct ResponseRpcMetadata {
   13: optional IOBufPtr frameworkMetadata;
   // checksum metadata
   14: optional Checksum checksum;
+  // Load returned by server in response to fb303 metric from
+  // request header 'secondary_load'
+  15: optional i64 secondaryLoad;
 }
 
 enum ResponseRpcErrorCategory {

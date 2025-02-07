@@ -254,10 +254,20 @@ void Cpp2Connection::setServerHeaders(
   auto& writeHeaders = request.getHeader()->mutableWriteHeaders();
   setServerHeaders(writeHeaders);
   const auto& readHeaders = request.getHeader()->getHeaders();
+  // set load header
   auto ptr = folly::get_ptr(readHeaders, THeader::QUERY_LOAD_HEADER);
   if (ptr) {
     auto load = getWorker()->getServer()->getLoad(*ptr);
     writeHeaders[THeader::QUERY_LOAD_HEADER] = folly::to<std::string>(load);
+  }
+
+  // set secondary load header
+  auto ptrSl =
+      folly::get_ptr(readHeaders, THeader::QUERY_SECONDARY_LOAD_HEADER);
+  if (ptrSl) {
+    auto load = getWorker()->getServer()->getLoad(*ptrSl);
+    writeHeaders[THeader::QUERY_SECONDARY_LOAD_HEADER] =
+        folly::to<std::string>(load);
   }
 }
 

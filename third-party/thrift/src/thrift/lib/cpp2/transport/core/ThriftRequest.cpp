@@ -56,6 +56,11 @@ ThriftRequestCore::ThriftRequestCore(
           metadata.loadMetric_ref()
               ? folly::make_optional(std::move(*metadata.loadMetric_ref()))
               : folly::none),
+      secondaryLoadMetric_(
+          metadata.secondaryLoadMetric_ref()
+              ? folly::make_optional(
+                    std::move(*metadata.secondaryLoadMetric_ref()))
+              : folly::none),
       reqContext_(
           &connContext,
           &header_,
@@ -365,6 +370,11 @@ ResponseRpcMetadata ThriftRequestCore::makeResponseRpcMetadata(
 
   if (loadMetric_) {
     metadata.load_ref() = serverConfigs_.getLoad(*loadMetric_);
+  }
+
+  if (secondaryLoadMetric_) {
+    metadata.secondaryLoad_ref() =
+        serverConfigs_.getLoad(*secondaryLoadMetric_);
   }
 
   if (!writeHeaders.empty()) {

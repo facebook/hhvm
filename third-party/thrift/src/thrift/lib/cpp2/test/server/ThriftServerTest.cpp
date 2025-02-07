@@ -417,13 +417,19 @@ void doLoadHeaderTest(bool isRocket) {
   };
 
   auto checkLoadHeader = [](const auto& header,
-                            folly::Optional<std::string> loadMetric) {
+                            folly::Optional<std::string> loadMetric,
+                            bool isSecondaryLoad = false) {
     auto& headers = header.getHeaders();
     auto load = [&]() -> folly::Optional<int64_t> {
-      if (auto value = header.getServerLoad()) {
+      auto value = !isSecondaryLoad ? header.getServerLoad()
+                                    : header.getServerSecondaryLoad();
+      if (value) {
         return value;
       }
-      if (auto* loadPtr = folly::get_ptr(headers, THeader::QUERY_LOAD_HEADER)) {
+      if (auto* loadPtr = folly::get_ptr(
+              headers,
+              !isSecondaryLoad ? THeader::QUERY_LOAD_HEADER
+                               : THeader::QUERY_SECONDARY_LOAD_HEADER)) {
         return folly::to<int64_t>(*loadPtr);
       }
       return {};
@@ -482,24 +488,32 @@ void doLoadHeaderTest(bool isRocket) {
     RpcOptions options;
     auto [_, header] = client->header_semifuture_voidResponse(options).get();
     checkLoadHeader(*header, folly::none);
+    checkLoadHeader(*header, folly::none, true /*isSecondaryLoad*/);
   }
 
   {
-    // Empty load header
+    // Empty load and secondary load header
     RpcOptions options;
-    const std::string kLoadMetric;
-    options.setWriteHeader(THeader::QUERY_LOAD_HEADER, kLoadMetric);
+    const std::string kEmptyLoadMetric;
+    options.setWriteHeader(THeader::QUERY_LOAD_HEADER, kEmptyLoadMetric);
+    options.setWriteHeader(
+        THeader::QUERY_SECONDARY_LOAD_HEADER, kEmptyLoadMetric);
     auto [_, header] = client->header_semifuture_voidResponse(options).get();
-    checkLoadHeader(*header, kLoadMetric);
+    checkLoadHeader(*header, kEmptyLoadMetric);
+    checkLoadHeader(*header, kEmptyLoadMetric, true /*isSecondaryLoad*/);
   }
 
   {
-    // Custom load header
+    // Custom load and secondary load header
     RpcOptions options;
     const std::string kLoadMetric{"custom_load_metric_789"};
+    const std::string kSecondaryLoadMetric{"custom_load_metric_99"};
     options.setWriteHeader(THeader::QUERY_LOAD_HEADER, kLoadMetric);
+    options.setWriteHeader(
+        THeader::QUERY_SECONDARY_LOAD_HEADER, kSecondaryLoadMetric);
     auto [_, header] = client->header_semifuture_voidResponse(options).get();
     checkLoadHeader(*header, kLoadMetric);
+    checkLoadHeader(*header, kSecondaryLoadMetric, true /*isSecondaryLoad*/);
   }
 
   {

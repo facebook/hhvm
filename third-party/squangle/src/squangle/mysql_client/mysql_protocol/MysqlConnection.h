@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <fmt/format.h>
 #include <mysql.h>
 
 #include "squangle/base/Base.h"
@@ -298,3 +299,90 @@ class SyncMysqlConnection : public MysqlConnection {
 };
 
 } // namespace facebook::common::mysql_client::mysql_protocol
+
+// Tell fmt::format how to print the enum net_async_status
+template <>
+struct fmt::formatter<enum net_async_status> {
+  template <typename ParseContext>
+  constexpr auto parse(const ParseContext& ctx) const {
+    // No reading of the format needed
+    return ctx.begin();
+  }
+
+  template <typename FormatContext>
+  auto format(enum net_async_status status, FormatContext& ctx) const {
+    std::string_view name = "unknown";
+    switch (status) {
+      case NET_ASYNC_COMPLETE:
+        name = "NET_ASYNC_COMPLETE";
+        break;
+      case NET_ASYNC_NOT_READY:
+        name = "NET_ASYNC_NOT_READY";
+        break;
+      case NET_ASYNC_ERROR:
+        name = "NET_ASYNC_ERROR";
+        break;
+      case NET_ASYNC_COMPLETE_NO_MORE_RESULTS:
+        name = "NET_ASYNC_COMPLETE_NO_MORE_RESULTS";
+        break;
+    }
+    return fmt::format_to(ctx.out(), "{}", name);
+  }
+};
+
+// Tell fmt::format how to print the enum connect_stage
+template <>
+struct fmt::formatter<enum connect_stage> {
+  template <typename ParseContext>
+  constexpr auto parse(const ParseContext& ctx) const {
+    // No reading of the format needed
+    return ctx.begin();
+  }
+
+  template <typename FormatContext>
+  auto format(enum connect_stage stage, FormatContext& ctx) const {
+    std::string_view name = "unknown";
+    switch (stage) {
+      case CONNECT_STAGE_INVALID:
+        name = "CONNECT_STAGE_INVALID";
+        break;
+      case CONNECT_STAGE_NOT_STARTED:
+        name = "CONNECT_STAGE_NOT_STARTED";
+        break;
+      case CONNECT_STAGE_NET_BEGIN_CONNECT:
+        name = "CONNECT_STAGE_NET_BEGIN_CONNECT";
+        break;
+      case CONNECT_STAGE_NET_WAIT_CONNECT:
+        name = "CONNECT_STAGE_NET_WAIT_CONNECT";
+        break;
+      case CONNECT_STAGE_NET_COMPLETE_CONNECT:
+        name = "CONNECT_STAGE_NET_COMPLETE_CONNECT";
+        break;
+      case CONNECT_STAGE_READ_GREETING:
+        name = "CONNECT_STAGE_READ_GREETING";
+        break;
+      case CONNECT_STAGE_PARSE_HANDSHAKE:
+        name = "CONNECT_STAGE_PARSE_HANDSHAKE";
+        break;
+      case CONNECT_STAGE_ESTABLISH_SSL:
+        name = "CONNECT_STAGE_ESTABLISH_SSL";
+        break;
+      case CONNECT_STAGE_AUTHENTICATE:
+        name = "CONNECT_STAGE_AUTHENTICATE";
+        break;
+      case CONNECT_STAGE_PREP_SELECT_DATABASE:
+        name = "CONNECT_STAGE_PREP_SELECT_DATABASE";
+        break;
+      case CONNECT_STAGE_PREP_INIT_COMMANDS:
+        name = "CONNECT_STAGE_PREP_INIT_COMMANDS";
+        break;
+      case CONNECT_STAGE_SEND_ONE_INIT_COMMAND:
+        name = "CONNECT_STAGE_SEND_ONE_INIT_COMMAND";
+        break;
+      case CONNECT_STAGE_COMPLETE:
+        name = "CONNECT_STAGE_COMPLETE";
+        break;
+    }
+    return fmt::format_to(ctx.out(), "{}", name);
+  }
+};

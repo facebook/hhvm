@@ -699,6 +699,8 @@ TEST(CompilerTest, annotation_positions) {
     service S {
       i32 (annot) foo() # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
       void bar(1: i32 (annot) p) # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
+      void qux() throws (1: E (annot) e) # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
+      void baz() throws (1: E e (annot)) # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
     }
     struct Foo {
       1: i32 (annot) f
@@ -706,6 +708,7 @@ TEST(CompilerTest, annotation_positions) {
       @Type{name="foo"}
       2: i32 g
     }
+    exception E {}
   )");
 }
 

@@ -1329,6 +1329,17 @@ struct ValidateAnnotationPositions {
         err(ctx);
       }
     }
+
+    if (auto* exs = node.exceptions()) {
+      for (auto& ex : exs->fields()) {
+        if (owns_annotations(ex.type())) {
+          err(ctx);
+        }
+        if (!ex.annotations().empty()) {
+          err(ctx);
+        }
+      }
+    }
   }
   void operator()(sema_context& ctx, const t_container& type) {
     switch (type.get_type_value()) {

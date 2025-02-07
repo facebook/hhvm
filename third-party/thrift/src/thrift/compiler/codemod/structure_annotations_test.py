@@ -424,14 +424,14 @@ class StructureAnnotations(unittest.TestCase):
                 """\
                 include "thrift/annotation/erlang.thrift"
 
-                @annotation.NameOverride{name = "T"}
-                @annotation.StructRepr{repr = annotation.StructReprType.RECORD}
+                @erlang.NameOverride{name = "T"}
+                @erlang.StructRepr{repr = erlang.StructReprType.RECORD}
                 struct S {
-                    @annotation.Iq{node_type = annotation.IqNodeType.XMLATTRIBUTE}
+                    @erlang.Iq{node_type = erlang.IqNodeType.XMLATTRIBUTE}
                     1: i32 field1 ;
                 }
 
-                @annotation.DefaultValue{value = "QUX"}
+                @erlang.DefaultValue{value = "QUX"}
                 enum E {QUX = 1}
                 """
             ),
@@ -524,7 +524,7 @@ class StructureAnnotations(unittest.TestCase):
 
                 service S {
                     void f(1: i32 a (annot))
-                } 
+                }
 
                 """
             ),

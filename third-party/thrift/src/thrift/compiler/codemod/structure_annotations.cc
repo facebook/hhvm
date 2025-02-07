@@ -423,29 +423,28 @@ class structure_annotations {
       // erlang
       else if (name == "erl.name") {
         to_remove.emplace_back(name, data);
-        to_add.insert(fmt::format(
-            "@annotation.NameOverride{{name = \"{}\"}}", data.value));
+        to_add.insert(
+            fmt::format("@erlang.NameOverride{{name = \"{}\"}}", data.value));
         fm_.add_include("thrift/annotation/erlang.thrift");
       } else if (name == "erl.struct_repr") {
         to_remove.emplace_back(name, data);
         to_add.insert(fmt::format(
-            "@annotation.StructRepr{{repr = {}}}",
-            data.value == "record" ? "annotation.StructReprType.RECORD"
-                                   : "annotation.StructReprType.MAP"));
+            "@erlang.StructRepr{{repr = {}}}",
+            data.value == "record" ? "erlang.StructReprType.RECORD"
+                                   : "erlang.StructReprType.MAP"));
         fm_.add_include("thrift/annotation/erlang.thrift");
       } else if (name == "erl.default_value") {
         to_remove.emplace_back(name, data);
-        to_add.insert(fmt::format(
-            "@annotation.DefaultValue{{value = \"{}\"}}", data.value));
+        to_add.insert(
+            fmt::format("@erlang.DefaultValue{{value = \"{}\"}}", data.value));
         fm_.add_include("thrift/annotation/erlang.thrift");
       } else if (name == "iq.node_type") {
         to_remove.emplace_back(name, data);
         to_add.insert(fmt::format(
-            "@annotation.Iq{{node_type = {}}}",
-            data.value == "xmlcdata" ? "annotation.IqNodeType.XMLCDATA"
-                : data.value == "xmlnode"
-                ? "annotation.IqNodeType.XMLNODE"
-                : "annotation.IqNodeType.XMLATTRIBUTE"));
+            "@erlang.Iq{{node_type = {}}}",
+            data.value == "xmlcdata"      ? "erlang.IqNodeType.XMLCDATA"
+                : data.value == "xmlnode" ? "erlang.IqNodeType.XMLNODE"
+                                          : "erlang.IqNodeType.XMLATTRIBUTE"));
         fm_.add_include("thrift/annotation/erlang.thrift");
       }
 

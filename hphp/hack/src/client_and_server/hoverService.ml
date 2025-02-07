@@ -8,16 +8,15 @@
  *)
 
 type hover_info = {
-  (* For fields and locals, this is the type. For method and function calls, it
-      is the signature, including any inferred types for generics.
-      This is also the only part of the hover info to get displayed as code
-      rather than Markdown. *)
   snippet: string;
-  (* Additional information, such as doc string and declaration file. Displayed
-      as Markdown. *)
+      (** For fields and locals, this is the type. For method and function calls, it
+          is the signature, including any inferred types for generics.
+          This is also the only part of the hover info to get displayed as code
+          rather than Markdown. *)
   addendum: string list;
-  (* Position of this result. *)
-  pos: Pos.t option;
+      (** Additional information, such as doc string and declaration file. Displayed
+          as Markdown. *)
+  pos: Pos.t option;  (** Position of this result. *)
 }
 [@@deriving eq]
 

@@ -1077,8 +1077,7 @@ let lsp_range_to_ide (range : Lsp.range) : Ide_api_types.range =
 let hack_symbol_definition_to_lsp_construct_location
     (symbol : string SymbolDefinition.t) ~(default_path : string) :
     Lsp.Location.t =
-  let open SymbolDefinition in
-  hack_pos_to_lsp_location symbol.span ~default_path
+  hack_pos_to_lsp_location symbol.SymbolDefinition.span ~default_path
 
 let hack_pos_definition_to_lsp_identifier_location
     (sid : Pos.absolute * string) ~(default_path : string) :
@@ -1090,8 +1089,9 @@ let hack_pos_definition_to_lsp_identifier_location
 let hack_symbol_definition_to_lsp_identifier_location
     (symbol : string SymbolDefinition.t) ~(default_path : string) :
     Lsp.DefinitionLocation.t =
-  let open SymbolDefinition in
-  let location = hack_pos_to_lsp_location symbol.pos ~default_path in
+  let location =
+    hack_pos_to_lsp_location symbol.SymbolDefinition.pos ~default_path
+  in
   Lsp.DefinitionLocation.
     {
       location;

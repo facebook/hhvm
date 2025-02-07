@@ -1443,18 +1443,17 @@ module Full = struct
     let ty = locl_ty ~hide_internals in
     let penv = Loclenv env in
     let prefix =
-      SymbolDefinition.(
-        let print_mod m = text (string_of_modifier m) ^^ Space in
-        match (definition_opt, occurrence.SymbolOccurrence.type_) with
-        | (None, _) -> Nothing
-        | (_, XhpLiteralAttr _) -> Nothing
-        | (Some def, _) -> begin
-          match def.modifiers with
-          | [] -> Nothing
-          (* It looks weird if we line break after a single modifier. *)
-          | [m] -> print_mod m
-          | ms -> Concat (List.map ms ~f:print_mod) ^^ SplitWith Cost.Base
-        end)
+      let print_mod m = text (SymbolDefinition.string_of_modifier m) ^^ Space in
+      match (definition_opt, occurrence.SymbolOccurrence.type_) with
+      | (None, _) -> Nothing
+      | (_, XhpLiteralAttr _) -> Nothing
+      | (Some def, _) -> begin
+        match def.SymbolDefinition.modifiers with
+        | [] -> Nothing
+        (* It looks weird if we line break after a single modifier. *)
+        | [m] -> print_mod m
+        | ms -> Concat (List.map ms ~f:print_mod) ^^ SplitWith Cost.Base
+      end
     in
     (* For functions and methods, interpret supportdyn as use of <<__SupportDynamicType>> attribute *)
     let (prefix, x) =

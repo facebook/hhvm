@@ -45,14 +45,13 @@ let get_lambda_parameter_rewrite_patches ctx files =
         (Relative_path.from_root ~suffix:file))
 
 let find_def_filename current_filename definition =
-  SymbolDefinition.(
-    if Relative_path.equal (Pos.filename definition.pos) Relative_path.default
-    then
-      (* When the definition is in an IDE buffer with local changes, the filename
-         in the definition will be empty. *)
-      current_filename
-    else
-      Pos.filename definition.pos)
+  let def_filename = Pos.filename definition.SymbolDefinition.pos in
+  if Relative_path.equal def_filename Relative_path.default then
+    (* When the definition is in an IDE buffer with local changes, the filename
+       in the definition will be empty. *)
+    current_filename
+  else
+    def_filename
 
 (*
   We construct the text for the deprecated wrapper here.
@@ -285,100 +284,97 @@ let get_deprecated_wrapper_patch
             "--refactor has empty filename";
         Option.some_if (not is_dummy) filename)
   in
-  SymbolDefinition.(
-    Full_fidelity_positioned_syntax.(
-      Option.Monad_infix.(
-        filename >>= fun filename ->
-        definition >>= fun definition ->
-        (* We need the number of spaces that the function declaration is offsetted so that we can
-           format our wrapper properly with the correct indent (i.e. we need 0-indexed columns).
+  Full_fidelity_positioned_syntax.(
+    Option.Monad_infix.(
+      filename >>= fun filename ->
+      definition >>= fun definition ->
+      (* We need the number of spaces that the function declaration is offsetted so that we can
+         format our wrapper properly with the correct indent (i.e. we need 0-indexed columns).
 
-           However, even though column offsets are already indexed accordingly when
-           stored in positions, `destruct_range_one_based` adds 1 in order to
-           return an [inclusive, exclusive) span.
+         However, even though column offsets are already indexed accordingly when
+         stored in positions, `destruct_range_one_based` adds 1 in order to
+         return an [inclusive, exclusive) span.
 
-           Thus, we subtract 1.
-        *)
-        let (_, col_start_plus1, _, _) =
-          Pos.destruct_range_one_based definition.span
-        in
-        let col_start = col_start_plus1 - 1 in
-        let (_ctx, entry) =
-          Provider_context.add_entry_if_missing ~ctx ~path:filename
-        in
-        let cst_node =
-          ServerSymbolDefinition.get_definition_cst_node_ctx
-            ~ctx
-            ~entry
-            ~kind:definition.kind
-            ~pos:definition.pos
-        in
+         Thus, we subtract 1.
+      *)
+      let { SymbolDefinition.span; pos; class_name; kind; _ } = definition in
+      let (_, col_start_plus1, _, _) = Pos.destruct_range_one_based span in
+      let col_start = col_start_plus1 - 1 in
+      let (_ctx, entry) =
+        Provider_context.add_entry_if_missing ~ctx ~path:filename
+      in
+      let cst_node =
+        ServerSymbolDefinition.get_definition_cst_node_ctx
+          ~ctx
+          ~entry
+          ~kind
+          ~pos
+      in
 
-        cst_node >>= fun cst_node ->
-        begin
-          match syntax cst_node with
-          | MethodishDeclaration
-              { methodish_function_decl_header = func_decl; _ } ->
-            let call_signature = get_call_signature_for_wrap func_decl in
-            let func_decl_text = text func_decl in
-            let func_ref =
-              if call_signature.is_static then
-                DeprecatedStaticMethodRef
-              else
-                DeprecatedNonStaticMethodRef
-            in
+      cst_node >>= fun cst_node ->
+      begin
+        match syntax cst_node with
+        | MethodishDeclaration { methodish_function_decl_header = func_decl; _ }
+          ->
+          let call_signature = get_call_signature_for_wrap func_decl in
+          let func_decl_text = text func_decl in
+          let func_ref =
+            if call_signature.is_static then
+              DeprecatedStaticMethodRef
+            else
+              DeprecatedNonStaticMethodRef
+          in
 
-            (match definition.class_name with
-            | Some name when classish_is_interface ctx name ->
-              (* We can't add a stub that calls the new name in
-                 interfaces, as methods can't have bodies there. *)
-              None
-            | _ ->
-              Some
-                ( func_decl_text,
-                  call_signature.params_text_list,
-                  call_signature.returns_void,
-                  call_signature.is_async,
-                  func_ref ))
-          | FunctionDeclaration { function_declaration_header = func_decl; _ }
-            ->
-            let call_signature = get_call_signature_for_wrap func_decl in
-            let func_decl_text = text func_decl in
-            let func_ref = DeprecatedFunctionRef in
+          (match class_name with
+          | Some name when classish_is_interface ctx name ->
+            (* We can't add a stub that calls the new name in
+               interfaces, as methods can't have bodies there. *)
+            None
+          | _ ->
             Some
               ( func_decl_text,
                 call_signature.params_text_list,
                 call_signature.returns_void,
                 call_signature.is_async,
-                func_ref )
-          | _ -> None
-        end
-        >>| fun ( func_decl_text,
-                  params_text_list,
-                  returns_void,
-                  is_async,
-                  func_ref ) ->
-        let deprecated_wrapper_stub =
-          construct_deprecated_wrapper_stub
-            ~func_decl_text
-            ~params_text_list
-            ~col_start
-            ~returns_void
-            ~is_async
-            ~func_ref
-            new_name
-        in
-        let filename = find_def_filename filename definition in
-        let deprecated_wrapper_pos =
-          get_pos_before_docblock_from_cst_node filename cst_node
-        in
-        let patch =
-          {
-            pos = Pos.to_absolute deprecated_wrapper_pos;
-            text = deprecated_wrapper_stub;
-          }
-        in
-        Insert patch)))
+                func_ref ))
+        | FunctionDeclaration { function_declaration_header = func_decl; _ } ->
+          let call_signature = get_call_signature_for_wrap func_decl in
+          let func_decl_text = text func_decl in
+          let func_ref = DeprecatedFunctionRef in
+          Some
+            ( func_decl_text,
+              call_signature.params_text_list,
+              call_signature.returns_void,
+              call_signature.is_async,
+              func_ref )
+        | _ -> None
+      end
+      >>| fun ( func_decl_text,
+                params_text_list,
+                returns_void,
+                is_async,
+                func_ref ) ->
+      let deprecated_wrapper_stub =
+        construct_deprecated_wrapper_stub
+          ~func_decl_text
+          ~params_text_list
+          ~col_start
+          ~returns_void
+          ~is_async
+          ~func_ref
+          new_name
+      in
+      let filename = find_def_filename filename definition in
+      let deprecated_wrapper_pos =
+        get_pos_before_docblock_from_cst_node filename cst_node
+      in
+      let patch =
+        {
+          pos = Pos.to_absolute deprecated_wrapper_pos;
+          text = deprecated_wrapper_stub;
+        }
+      in
+      Insert patch))
 
 let method_might_support_dynamic ctx ~class_name ~method_name =
   let open Option.Monad_infix in
@@ -523,9 +519,8 @@ let new_name_for_symbol_definition
     else
       s
   in
-  let open SymbolDefinition in
-  match symbol_definition.kind with
-  | Property ->
+  match symbol_definition.SymbolDefinition.kind with
+  | SymbolDefinition.Property ->
     (* For static properties: they always have a $-sign prefix.
        For non-static properties:
          - On the definition site they have a $-sign prefix.
@@ -541,8 +536,8 @@ let new_name_for_symbol_definition
              end)
     in
     let is_static =
-      List.exists symbol_definition.modifiers ~f:(function
-          | Static -> true
+      List.exists symbol_definition.SymbolDefinition.modifiers ~f:(function
+          | SymbolDefinition.Static -> true
           | _ -> false)
     in
     if is_static then
@@ -551,20 +546,20 @@ let new_name_for_symbol_definition
       ensure_dollar new_name
     else
       strip_dollar new_name
-  | Function
-  | Class
-  | Method
-  | ClassConst
-  | GlobalConst
-  | Enum
-  | Interface
-  | Trait
-  | LocalVar
-  | TypeVar
-  | Typeconst
-  | Param
-  | Typedef
-  | Module ->
+  | SymbolDefinition.Function
+  | SymbolDefinition.Class
+  | SymbolDefinition.Method
+  | SymbolDefinition.ClassConst
+  | SymbolDefinition.GlobalConst
+  | SymbolDefinition.Enum
+  | SymbolDefinition.Interface
+  | SymbolDefinition.Trait
+  | SymbolDefinition.LocalVar
+  | SymbolDefinition.TypeVar
+  | SymbolDefinition.Typeconst
+  | SymbolDefinition.Param
+  | SymbolDefinition.Typedef
+  | SymbolDefinition.Module ->
     new_name
 
 let go_for_single_file

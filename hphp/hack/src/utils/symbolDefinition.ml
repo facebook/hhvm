@@ -46,10 +46,9 @@ type 'a t = {
   class_name: string option;
   id: string option;
   pos: 'a Pos.pos;
-  (* covers the span of just the identifier *)
-  span: 'a Pos.pos;
-  (* covers the span of the entire construct, including children *)
+  span: 'a Pos.pos;  (** covers the span of just the identifier *)
   modifiers: modifier list;
+      (** covers the span of the entire construct, including children *)
   children: 'a t list option;
   params: 'a t list option;
   docblock: string option;

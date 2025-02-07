@@ -41,25 +41,28 @@ type 'a t = {
   kind: kind;
   name: string;
   full_name: string;
+      (** For a class member, a string like `ClassName::memberName`. Otherwise equal to `name`. *)
   class_name: string option;
+      (** The class name if this definition is for a class or a class member, None otherwise. *)
   id: string option;
-  pos: 'a Pos.pos;
-  (* covers the span of just the identifier *)
+      (** A string like <kind>::Type or <kind>::Type::member where `kind` is one
+          of "function", "type_id", "method", etc. *)
+  pos: 'a Pos.pos;  (** covers the span of just the identifier *)
   span: 'a Pos.pos;
-  (* covers the span of the entire construct, including children *)
+      (** covers the span of the entire construct, including children *)
   modifiers: modifier list;
   children: 'a t list option;
+      (** For classes, the list of its members' definitions. *)
   params: 'a t list option;
-      (** Only provided on some code paths,
-      * such as FileOutline.outline (but not FileOutline.outline_entry_no_comments)
-      *)
+      (** For functions and methods, the list of its parameter definitions *)
   docblock: string option;
-      (** misc. unstructured information about the symbol.
-      * For functions, we include function signature with param names added.
-      * Current use case is providing additional context for AI coding assistants.
-      * Only provided on some code paths: File_outline.outline*
-      *)
+      (** Only provided on some code paths,
+          such as FileOutline.outline (but not FileOutline.outline_entry_no_comments) *)
   detail: string option;
+      (** misc. unstructured information about the symbol.
+          For functions, we include function signature with param names added.
+          Current use case is providing additional context for AI coding assistants.
+          Only provided on some code paths: File_outline.outline *)
 }
 [@@deriving ord, show]
 
@@ -70,15 +73,5 @@ val to_relative : string t -> Relative_path.t t
 val string_of_kind : kind -> string
 
 val string_of_modifier : modifier -> string
-
-val function_kind_name : string
-
-val type_id_kind_name : string
-
-val method_kind_name : string
-
-val property_kind_name : string
-
-val class_const_kind_name : string
 
 val get_symbol_id : kind -> string option -> string -> string option

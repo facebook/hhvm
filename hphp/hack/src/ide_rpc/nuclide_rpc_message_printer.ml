@@ -17,13 +17,6 @@ let opt_field ~v_opt ~label ~f =
  * meantime *)
 let deprecated_pos_field = Pos.json (Pos.to_absolute Pos.none)
 
-let deprecated_int_field = Hh_json.int_ 0
-
-let deprecated_bool_field = JSON_Bool false
-
-(* Instead of "assert false" *)
-let should_not_happen = JSON_Object [("this_should", JSON_String "not_happen")]
-
 let infer_type_response_to_json (type_string, type_json) =
   Hh_json.JSON_Object
     ([("type", string_opt type_string); ("pos", deprecated_pos_field)]
@@ -136,10 +129,6 @@ let rec definition_to_json def =
 
 and outline_response_to_json x =
   Hh_json.JSON_Array (List.map x ~f:definition_to_json)
-
-let symbol_by_id_response_to_json = function
-  | Some def -> definition_to_json def
-  | None -> JSON_Null
 
 let highlight_references_response_to_json l =
   JSON_Array

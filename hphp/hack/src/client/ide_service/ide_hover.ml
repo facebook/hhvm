@@ -426,65 +426,64 @@ let fun_defined_in def_opt : string =
   | _ -> ""
 
 let make_hover_info under_dynamic_result ctx info_opt entry occurrence def_opt =
-  SymbolOccurrence.(
-    let defined_in =
-      match def_opt with
-      | Some def ->
-        Printf.sprintf
-          "// Defined in %s\n"
-          (split_class_name def.SymbolDefinition.full_name)
-      | None -> ""
+  let open SymbolOccurrence in
+  let defined_in =
+    match def_opt with
+    | Some def ->
+      Printf.sprintf
+        "// Defined in %s\n"
+        (split_class_name def.SymbolDefinition.full_name)
+    | None -> ""
+  in
+  let print_locl_ty_with_identity ?(do_not_strip_dynamic = false) info =
+    let env = ServerInferType.get_env info in
+    let ty = ServerInferType.get_type info in
+    let ty =
+      if do_not_strip_dynamic then
+        ty
+      else
+        Tast_env.strip_dynamic env ty
     in
-    let print_locl_ty_with_identity ?(do_not_strip_dynamic = false) info =
-      let env = ServerInferType.get_env info in
-      let ty = ServerInferType.get_type info in
-      let ty =
-        if do_not_strip_dynamic then
-          ty
-        else
-          Tast_env.strip_dynamic env ty
-      in
-      Tast_env.print_ty_with_identity env ty occurrence def_opt
-    in
-    let snippet =
-      match (occurrence, info_opt) with
-      | ({ name; _ }, None) -> Utils.strip_hh_lib_ns name
-      | ({ type_ = BestEffortArgument (recv, i); _ }, _) ->
-        let param_name = nth_param ctx recv i in
-        Printf.sprintf "Parameter: %s" (Option.value ~default:"$_" param_name)
-      | ({ type_ = Method _; _ }, Some info)
-      | ({ type_ = ClassConst _; _ }, Some info)
-      | ({ type_ = Property _; _ }, Some info) ->
-        defined_in ^ print_locl_ty_with_identity info
-      | ({ type_ = GConst; _ }, Some info) ->
-        (match make_hover_const_definition entry def_opt with
-        | Some def_txt -> def_txt
-        | None -> print_locl_ty_with_identity info)
-      | ({ type_ = Function; _ }, Some info) ->
-        fun_defined_in def_opt
-        ^ print_locl_ty_with_identity ~do_not_strip_dynamic:true info
-      | (_, Some info) ->
-        print_locl_ty_with_identity ~do_not_strip_dynamic:true info
-        ^ under_dynamic_result
-    in
-    let addendum =
-      let { name; type_; is_declaration = _; pos = _ } = occurrence in
-      match type_ with
-      | Attribute _ ->
-        List.concat
-          [
-            make_hover_attr_docs name;
-            make_hover_doc_block ctx entry occurrence def_opt;
-          ]
-      | Keyword info -> [keyword_info info]
-      | HhFixme -> [hh_fixme_info]
-      | HhIgnore -> [hh_ignore_info]
-      | PureFunctionContext -> [pure_context_info]
-      | BuiltInType bt -> [SymbolOccurrence.built_in_type_hover bt]
-      | _ -> make_hover_doc_block ctx entry occurrence def_opt
-    in
-    HoverService.
-      { snippet; addendum; pos = Some occurrence.SymbolOccurrence.pos })
+    Tast_env.print_ty_with_identity env ty occurrence def_opt
+  in
+  let snippet =
+    match (occurrence, info_opt) with
+    | ({ name; _ }, None) -> Utils.strip_hh_lib_ns name
+    | ({ type_ = BestEffortArgument (recv, i); _ }, _) ->
+      let param_name = nth_param ctx recv i in
+      Printf.sprintf "Parameter: %s" (Option.value ~default:"$_" param_name)
+    | ({ type_ = Method _; _ }, Some info)
+    | ({ type_ = ClassConst _; _ }, Some info)
+    | ({ type_ = Property _; _ }, Some info) ->
+      defined_in ^ print_locl_ty_with_identity info
+    | ({ type_ = GConst; _ }, Some info) ->
+      (match make_hover_const_definition entry def_opt with
+      | Some def_txt -> def_txt
+      | None -> print_locl_ty_with_identity info)
+    | ({ type_ = Function; _ }, Some info) ->
+      fun_defined_in def_opt
+      ^ print_locl_ty_with_identity ~do_not_strip_dynamic:true info
+    | (_, Some info) ->
+      print_locl_ty_with_identity ~do_not_strip_dynamic:true info
+      ^ under_dynamic_result
+  in
+  let addendum =
+    let { name; type_; is_declaration = _; pos = _ } = occurrence in
+    match type_ with
+    | Attribute _ ->
+      List.concat
+        [
+          make_hover_attr_docs name;
+          make_hover_doc_block ctx entry occurrence def_opt;
+        ]
+    | Keyword info -> [keyword_info info]
+    | HhFixme -> [hh_fixme_info]
+    | HhIgnore -> [hh_ignore_info]
+    | PureFunctionContext -> [pure_context_info]
+    | BuiltInType bt -> [SymbolOccurrence.built_in_type_hover bt]
+    | _ -> make_hover_doc_block ctx entry occurrence def_opt
+  in
+  HoverService.{ snippet; addendum; pos = Some occurrence.SymbolOccurrence.pos }
 
 let make_hover_info_with_fallback under_dynamic_result results =
   let class_fallback =

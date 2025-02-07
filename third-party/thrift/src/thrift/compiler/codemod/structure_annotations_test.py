@@ -450,7 +450,7 @@ class StructureAnnotations(unittest.TestCase):
 
                 enum E {
                   UNKNOWN = 0,
-                } (rust.copy, rust.exhaustive, rust.name = "E2")
+                } (rust.copy, rust.exhaustive, rust.ord, rust.name = "E2")
 
                 service S {} (rust.request_context)
 

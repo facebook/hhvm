@@ -479,8 +479,11 @@ class structure_annotations {
         }
       } else if (name == "rust.ord") {
         to_remove.emplace_back(name, data);
-        to_add.insert("@rust.Ord");
-        fm_.add_include("thrift/annotation/rust.thrift");
+        if (!dynamic_cast<const t_enum*>(&node)) {
+          // enums automatically implement Ord
+          to_add.insert("@rust.Ord");
+          fm_.add_include("thrift/annotation/rust.thrift");
+        }
       } else if (name == "rust.newtype") {
         to_remove.emplace_back(name, data);
         to_add.insert("@rust.NewType");

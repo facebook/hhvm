@@ -931,9 +931,14 @@ Hello world!
 
 ```
 partial-block           → { partial-block-open ~ body* ~ partial-block-close }
-partial-block-open      → { "{{#" ~ "let" ~ partial-name-spec ~ partial-block-arguments? ~ "}}" }
+partial-block-open      → { "{{#" ~ "let" ~
+                              partial-name-spec ~
+                              partial-block-arguments? ~
+                              partial-block-captures? ~
+                            "}}" }
 partial-name-spec       → { "export"? ~ "partial" ~ identifier }
 partial-block-arguments → { "|" ~ identifier+ ~ "|" }
+partial-block-captures  → { "as" ~ "|" ~ identifier+ ~ "|" }
 partial-block-close     → { "{{/" ~ "let" ~ "partial" ~ "}}" }
 
 partial-statement → { "{{" ~ "#" ~ "partial" ~ expression ~ partial-argument* ~ "}}" }

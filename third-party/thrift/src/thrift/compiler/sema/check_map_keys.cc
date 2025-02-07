@@ -257,11 +257,11 @@ void check_key_value(
 } // namespace
 namespace detail {
 
-void check_map_keys(diagnostics_engine& diags, const t_const& const_) {
+void check_duplicate_keys(diagnostics_engine& diags, const t_const& const_) {
   check_key_value(diags, const_, const_.value());
 }
 
-void check_map_keys(diagnostics_engine& diags, const t_field& field_) {
+void check_duplicate_keys(diagnostics_engine& diags, const t_field& field_) {
   if (field_.default_value() == nullptr) {
     return;
   }

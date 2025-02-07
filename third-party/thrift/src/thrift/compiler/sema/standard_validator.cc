@@ -648,13 +648,14 @@ void validate_enum_value(sema_context& ctx, const t_enum_value& node) {
 }
 
 void validate_const_type_and_value(sema_context& ctx, const t_const& node) {
-  detail::check_initializer(ctx, node, node.type(), node.value());
+  if (detail::check_initializer(ctx, node, node.type(), node.value())) {
+    detail::check_duplicate_keys(ctx, node);
+  }
   ctx.check(
       !node.find_structured_annotation_or_null(kCppAdapterUri) ||
           has_experimental_annotation(ctx, node),
       "Using adapters on const `{}` is only allowed in the experimental mode.",
       node.name());
-  detail::check_map_keys(ctx, node);
 }
 
 std::string_view field_qualifier_to_string(t_field_qualifier qualifier) {
@@ -680,7 +681,7 @@ void validate_field_default_value(sema_context& ctx, const t_field& field) {
     // If initializer is not valid to begin with, stop checks and return error.
     return;
   }
-  detail::check_map_keys(ctx, field);
+  detail::check_duplicate_keys(ctx, field);
 
   const t_structured& parent_node =
       dynamic_cast<const t_structured&>(*ctx.parent());

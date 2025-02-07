@@ -419,7 +419,7 @@ std::string parse_args(
           validators, *arg, [](char c) { return c == ','; });
       for (const auto& validator : validators) {
         if (validator == "unstructured_annotations_on_field_type") {
-          sparams.forbid_unstructured_annotations_on_field_types = true;
+          // no-op
         } else if (validator == "warn_on_redundant_custom_default_values") {
           sparams.warn_on_redundant_custom_default_values = true;
         } else if (validator == "forbid_non_optional_cpp_ref_fields") {

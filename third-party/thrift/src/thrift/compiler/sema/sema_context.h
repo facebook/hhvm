@@ -89,7 +89,6 @@ class node_metadata_cache {
 };
 
 struct sema_params {
-  bool forbid_unstructured_annotations_on_field_types = true;
   bool skip_lowering_annotations = false;
 
   // If true, will issue a warning if a default value is explicitly specified

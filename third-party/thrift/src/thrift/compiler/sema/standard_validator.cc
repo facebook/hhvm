@@ -1365,8 +1365,7 @@ struct ValidateAnnotationPositions {
     }
   }
   void operator()(sema_context& ctx, const t_field& node) {
-    if (ctx.sema_parameters().forbid_unstructured_annotations_on_field_types &&
-        owns_annotations(node.type()) &&
+    if (owns_annotations(node.type()) &&
         std::any_of(
             node.type()->annotations().begin(),
             node.type()->annotations().end(),

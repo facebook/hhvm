@@ -719,8 +719,7 @@ TEST(CompilerTest, annotation_positions_field) {
       1: i32 (annot) f # expected-error: Annotations are not allowed in this position. Extract the type into a named typedef instead.
       2: i32 g
     }
-  )",
-      {"--extra-validation", "unstructured_annotations_on_field_type"});
+  )");
 }
 
 TEST(CompilerTest, performs_in_interaction) {

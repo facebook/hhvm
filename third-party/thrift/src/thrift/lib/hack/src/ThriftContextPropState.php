@@ -106,6 +106,37 @@ final class ThriftContextPropState {
     }
   }
 
+  // update FB user id from explicit value
+  public static function updateFBUserId(?int $fb_user_id, string $src): bool {
+    // don't overwrite if TCPS already has a valid fb user id
+    $tcps_fb_user_id = self::get()->getFBUserId();
+    if (self::coerceId($tcps_fb_user_id) is nonnull) {
+      return false;
+    }
+    if (
+      !JustKnobs::eval(
+        'meta_cp/www:enable_user_id_ctx_prop',
+        /*hashval=*/null,
+        /*switchval=*/$src,
+      )
+    ) {
+      return false;
+    }
+
+    $fb_user_id = self::coerceId($fb_user_id);
+
+    $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
+    if ($fb_user_id is nonnull) {
+      self::get()->setFBUserId($fb_user_id);
+      $ods->bumpKey('contextprop.set_fb_user_id'.$src);
+      return true;
+    }
+
+    $ods->bumpKey('contextprop.missing_fb_user_id'.$src);
+    return false;
+  }
+
+  // update user id from ViewerContext
   public static function updateUserIdFromVC(
     ?IViewerContextBase $vc,
     string $src,
@@ -143,21 +174,9 @@ final class ThriftContextPropState {
   ): bool {
     $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
     $ods->bumpKey('contextprop.fb_vc'.$src);
-    // don't overwrite if TCPS already has a valid fb user id
-    $tcps_fb_user_id = self::get()->getFBUserId();
-    if (self::coerceId($tcps_fb_user_id) is nonnull) {
-      return false;
-    }
 
     $fb_user_id = self::coerceId($vc->getUserID());
-    if ($fb_user_id is nonnull) {
-      $ods->bumpKey('contextprop.set_fb_user_id'.$src);
-      self::get()->setFBUserId($fb_user_id);
-      return true;
-    }
-
-    $ods->bumpKey('contextprop.missing_fb_user_id'.$src);
-    return false;
+    return self::updateFBUserId($fb_user_id, $src);
   }
 
   private static function updateIGUserIdFromVC(

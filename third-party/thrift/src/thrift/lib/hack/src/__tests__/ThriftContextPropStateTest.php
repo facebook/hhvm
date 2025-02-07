@@ -230,6 +230,53 @@ final class ThriftContextPropStateTest extends WWWTest {
     expect($tcps->getUserIds()?->ig_user_id)->toEqual(456);
   }
 
+  public async function testUpdatedWithExplicitFBUserId(
+  )[defaults]: Awaitable<void> {
+    MockJustKnobs::setBool('meta_cp/www:enable_user_id_ctx_prop', true);
+    $tfm = ThriftFrameworkMetadata::withDefaultValues();
+    $tfm->baggage = ContextProp\Baggage::withDefaultValues();
+    $tfm->baggage->user_ids = ContextProp\UserIds::fromShape(
+      shape('fb_user_id' => null, 'ig_user_id' => 456),
+    );
+
+    $buf = new TMemoryBuffer();
+    $prot = new TCompactProtocolAccelerated($buf);
+    $tfm->write($prot);
+    $s = $buf->getBuffer();
+    $e = Base64::encode($s);
+
+    ThriftContextPropState::initFromString($e);
+    // expect these to be no-op if TFM already has user ids
+    ThriftContextPropState::updateFBUserId(1, "test");
+
+    $tcps = ThriftContextPropState::get();
+    expect($tcps->getUserIds()?->fb_user_id)->toEqual(1);
+    expect($tcps->getUserIds()?->ig_user_id)->toEqual(456);
+  }
+
+  public async function testUpdatedWithExplicitFBUserIdNoOverwrite(
+  )[defaults]: Awaitable<void> {
+    MockJustKnobs::setBool('meta_cp/www:enable_user_id_ctx_prop', true);
+    $tfm = ThriftFrameworkMetadata::withDefaultValues();
+    $tfm->baggage = ContextProp\Baggage::withDefaultValues();
+    $tfm->baggage->user_ids = ContextProp\UserIds::fromShape(
+      shape('fb_user_id' => 123, 'ig_user_id' => null),
+    );
+
+    $buf = new TMemoryBuffer();
+    $prot = new TCompactProtocolAccelerated($buf);
+    $tfm->write($prot);
+    $s = $buf->getBuffer();
+    $e = Base64::encode($s);
+
+    ThriftContextPropState::initFromString($e);
+    // expect these to be no-op if TFM already has user ids
+    ThriftContextPropState::updateFBUserId(456, "test");
+
+    $tcps = ThriftContextPropState::get();
+    expect($tcps->getUserIds()?->fb_user_id)->toEqual(123);
+  }
+
   public function testGen()[defaults]: void {
     ThriftContextPropState::initFromString(null);
     $tcps = ThriftContextPropState::get();

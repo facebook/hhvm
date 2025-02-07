@@ -516,6 +516,10 @@ class StructureAnnotations(unittest.TestCase):
                     1: i32 f;
                 }
 
+                service S {
+                    void f(1: i32 a (annot))
+                } 
+
                 """
             ),
         )
@@ -558,6 +562,11 @@ class StructureAnnotations(unittest.TestCase):
                 struct AlreadyVisited {
                     @DeprecatedUnvalidatedAnnotations{items = {"bar": "baz", "foo": "1"}}
                     1: i32 f;
+                }
+
+                service S {
+                    void f(@thrift.DeprecatedUnvalidatedAnnotations{items = {"annot": "1"}}
+                    1: i32 a )
                 }
                 """
             ),

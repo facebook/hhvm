@@ -15,6 +15,7 @@
  */
 
 include "thrift/conformance/if/any.thrift"
+include "thrift/annotation/thrift.thrift"
 
 package "test.dev/thrift/lib/java/test/any"
 
@@ -36,13 +37,14 @@ struct Circle {
   4: Position position;
 }
 
+@thrift.Uri{value = "test.dev/thrift/lib/java/test/any/Rec"}
 struct Rectangle {
   1: i32 color;
   2: i32 len;
   3: i32 width;
   4: Position position;
   5: any.LazyAny canvas; // can be Image or SolidColor
-} (thrift.uri = "test.dev/thrift/lib/java/test/any/Rec")
+}
 
 struct Image {
   1: binary jpg;

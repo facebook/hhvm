@@ -57,7 +57,6 @@ let summarize_property ~(source_text : string option) class_name var =
   in
   let (pos, name) = var.cv_id in
   let kind = Property in
-  let id = get_symbol_id kind (Some class_name) name in
   let detail =
     Option.map source_text ~f:(fun source_text ->
         let readonly =
@@ -84,7 +83,6 @@ let summarize_property ~(source_text : string option) class_name var =
     kind;
     name;
     class_name = Some class_name;
-    id;
     pos;
     span = var.cv_span;
     modifiers;
@@ -111,7 +109,6 @@ let summarize_class_const ~(source_text : string option) class_name cc =
     | CCAbstract None -> (pos, [Abstract])
   in
   let kind = ClassConst in
-  let id = get_symbol_id kind (Some class_name) name in
   let detail =
     Option.map source_text ~f:(fun source_text ->
         let ty : string =
@@ -125,7 +122,6 @@ let summarize_class_const ~(source_text : string option) class_name cc =
     kind;
     name;
     class_name = Some class_name;
-    id;
     pos;
     span;
     modifiers;
@@ -148,7 +144,6 @@ let modifier_of_param_kind acc = function
 let summarize_class_typeconst ~(source_text : string option) class_name t =
   let (pos, name) = t.c_tconst_name in
   let kind = Typeconst in
-  let id = get_symbol_id kind (Some class_name) name in
   let modifiers =
     match t.c_tconst_kind with
     | TCAbstract _ -> [Abstract]
@@ -162,7 +157,6 @@ let summarize_class_typeconst ~(source_text : string option) class_name t =
     kind;
     name;
     class_name = Some class_name;
-    id;
     pos;
     span = t.c_tconst_span;
     modifiers;
@@ -196,12 +190,10 @@ let summarize_param param =
     | _ -> modifiers
   in
   let kind = Param in
-  let id = get_symbol_id kind None name in
   {
     kind;
     name;
     class_name = None;
-    id;
     pos;
     span = Pos.btw param_start param_end;
     children = None;
@@ -243,7 +235,6 @@ let summarize_method ~(source_text : string option) class_name m =
   let params = Some (List.map m.m_params ~f:summarize_param) in
   let name = snd m.m_name in
   let kind = Method in
-  let id = get_symbol_id kind (Some class_name) name in
   let detail =
     Option.map source_text ~f:(fun source_text ->
         detail_of_fun ~source_text ~fun_pos:m.m_span m.m_name m.m_body)
@@ -252,7 +243,6 @@ let summarize_method ~(source_text : string option) class_name m =
     kind;
     name;
     class_name = Some class_name;
-    id;
     pos = fst m.m_name;
     span = m.m_span;
     modifiers;
@@ -385,12 +375,10 @@ let summarize_class ~(source_text : string option) class_ ~no_children =
     | Ast_defs.(Cclass _) -> Class
   in
   let name = class_name in
-  let id = get_symbol_id kind None name in
   {
     kind;
     name;
     class_name = Some class_name;
-    id;
     pos = class_name_pos;
     span = c_span;
     modifiers;
@@ -404,7 +392,6 @@ let summarize_typedef ~(source_text : string option) (tdef : _ typedef) :
     Relative_path.t SymbolDefinition.t =
   let kind = SymbolDefinition.Typedef in
   let name = Utils.strip_ns (snd tdef.t_name) in
-  let id = get_symbol_id kind None name in
   let pos = fst tdef.t_name in
   let hint_for_end_pos = tdef.t_runtime_type in
   let span = Pos.btw pos (fst hint_for_end_pos) in
@@ -416,7 +403,6 @@ let summarize_typedef ~(source_text : string option) (tdef : _ typedef) :
     kind;
     name;
     class_name = None;
-    id;
     pos;
     span;
     modifiers = [];
@@ -432,7 +418,6 @@ let summarize_fun ~(source_text : string option) fd =
   let params = Some (List.map f.f_params ~f:summarize_param) in
   let kind = SymbolDefinition.Function in
   let name = Utils.strip_ns (snd fd.fd_name) in
-  let id = get_symbol_id kind None name in
   let detail =
     Option.map source_text ~f:(fun source_text ->
         detail_of_fun ~source_text ~fun_pos:f.f_span fd.fd_name f.f_body)
@@ -441,7 +426,6 @@ let summarize_fun ~(source_text : string option) fd =
     kind;
     name;
     class_name = None;
-    id;
     pos = fst fd.fd_name;
     span = f.f_span;
     modifiers;
@@ -458,7 +442,6 @@ let summarize_gconst ~(source_text : string option) (cst : _ gconst) :
   let (_, gconst_end, _) = cst.cst_value in
   let kind = GlobalConst in
   let name = Utils.strip_ns (snd cst.cst_name) in
-  let id = get_symbol_id kind None name in
   let span = Pos.btw gconst_start gconst_end in
   let detail =
     Option.map source_text ~f:(fun source_text ->
@@ -468,7 +451,6 @@ let summarize_gconst ~(source_text : string option) (cst : _ gconst) :
     kind;
     name;
     class_name = None;
-    id;
     pos;
     span;
     modifiers = [];
@@ -480,12 +462,10 @@ let summarize_gconst ~(source_text : string option) (cst : _ gconst) :
 
 let summarize_local name span =
   let kind = LocalVar in
-  let id = get_symbol_id kind None name in
   {
     kind;
     name;
     class_name = None;
-    id;
     pos = span;
     span;
     modifiers = [];
@@ -498,7 +478,6 @@ let summarize_local name span =
 let summarize_module_def md =
   let kind = SymbolDefinition.Module in
   let name = snd md.md_name in
-  let id = get_symbol_id kind None name in
   let span = md.md_span in
   let doc_comment = md.md_doc_comment in
   let docblock =
@@ -510,7 +489,6 @@ let summarize_module_def md =
     kind;
     name;
     class_name = None;
-    id;
     pos = span;
     span;
     modifiers = [];
@@ -626,7 +604,6 @@ let rec print_def ~short_pos indent def =
   let {
     name;
     kind;
-    id;
     pos;
     span;
     modifiers;
@@ -646,7 +623,8 @@ let rec print_def ~short_pos indent def =
   in
   Printf.printf "%s%s\n" indent name;
   Printf.printf "%s  kind: %s\n" indent (string_of_kind kind);
-  Option.iter id ~f:(fun id -> Printf.printf "%s  id: %s\n" indent id);
+  Option.iter (SymbolDefinition.identifier def) ~f:(fun id ->
+      Printf.printf "%s  id: %s\n" indent id);
   Printf.printf "%s  position: %s\n" indent (print_pos pos);
   Printf.printf "%s  span: %s\n" indent (print_span span);
   Printf.printf "%s  modifiers: " indent;

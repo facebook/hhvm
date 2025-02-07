@@ -71,11 +71,11 @@ let tast_holes_response_to_json ~print_file holes =
 let identify_symbol_response_to_json results =
   let get_definition_data = function
     | Some x ->
-      SymbolDefinition.(
-        let pos = Pos.json x.pos in
-        let span = Pos.multiline_json x.span in
-        let id = string_opt x.id in
-        (pos, span, id))
+      let { SymbolDefinition.pos; span; _ } = x in
+      let pos = Pos.json pos in
+      let span = Pos.multiline_json span in
+      let id = SymbolDefinition.identifier x |> string_opt in
+      (pos, span, id)
     | None -> (JSON_Null, JSON_Null, JSON_Null)
   in
   let symbol_to_json (occurrence, definition) =
@@ -118,7 +118,7 @@ let rec definition_to_json def =
       ([
          ("kind", JSON_String (string_of_kind def.kind));
          ("name", JSON_String def.name);
-         ("id", string_opt def.id);
+         ("id", SymbolDefinition.identifier def |> string_opt);
          ("position", Pos.json def.pos);
          ("span", Pos.multiline_json def.span);
          ("modifiers", modifiers);

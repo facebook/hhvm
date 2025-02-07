@@ -43,7 +43,6 @@ type 'a t = {
   kind: kind;
   name: string;
   class_name: string option;
-  id: string option;
   pos: 'a Pos.pos;
   span: 'a Pos.pos;  (** covers the span of just the identifier *)
   modifiers: modifier list;
@@ -84,6 +83,37 @@ let full_name { name; class_name; kind; _ } =
   | ((Method | Property | ClassConst | Typeconst), Some class_name) ->
     Printf.sprintf "%s::%s" class_name name
 
+let identifier def =
+  match def.kind with
+  | TypeVar -> Some def.name
+  | _ ->
+    let kind_string =
+      match def.kind with
+      | Property -> Some "property"
+      | ClassConst
+      | Typeconst ->
+        Some "class_const"
+      | Method -> Some "method"
+      | Class
+      | Interface
+      | Trait
+      | Enum
+      | Typedef ->
+        Some "type_id"
+      | Function -> Some "function"
+      | GlobalConst -> Some "global_const"
+      | Module -> Some "module"
+      | TypeVar
+      | LocalVar
+      | Param ->
+        None
+    in
+    (match kind_string with
+    | None -> None
+    | Some kind_string ->
+      let full_name = full_name def in
+      Some (Printf.sprintf "%s::%s" kind_string full_name))
+
 let string_of_kind = function
   | Function -> "function"
   | Class -> "class"
@@ -111,45 +141,3 @@ let string_of_modifier = function
   | Async -> "async"
   | Inout -> "inout"
   | Internal -> "internal"
-
-let function_kind_name = "function"
-
-let type_id_kind_name = "type_id"
-
-let method_kind_name = "method"
-
-let property_kind_name = "property"
-
-let class_const_kind_name = "class_const"
-
-let global_const_kind_name = "global_const"
-
-let module_kind_name = "module"
-
-let get_symbol_id kind parent_class name =
-  let prefix =
-    match kind with
-    | Function -> Some function_kind_name
-    | Class
-    | Typedef
-    | Enum
-    | Interface
-    | Trait ->
-      Some type_id_kind_name
-    | Method -> Some method_kind_name
-    | Property -> Some property_kind_name
-    | Typeconst
-    | ClassConst ->
-      Some class_const_kind_name
-    | GlobalConst -> Some global_const_kind_name
-    | Module -> Some module_kind_name
-    | LocalVar
-    | TypeVar
-    | Param ->
-      None
-  in
-  match (prefix, parent_class) with
-  | (Some prefix, Some parent_class) ->
-    Some (Printf.sprintf "%s::%s::%s" prefix parent_class name)
-  | (Some prefix, None) -> Some (Printf.sprintf "%s::%s" prefix name)
-  | (None, _) -> None

@@ -42,9 +42,6 @@ type 'a t = {
   name: string;
   class_name: string option;
       (** The class name if this definition is for a class or a class member, None otherwise. *)
-  id: string option;
-      (** A string like <kind>::Type or <kind>::Type::member where `kind` is one
-          of "function", "type_id", "method", etc. *)
   pos: 'a Pos.pos;  (** covers the span of just the identifier *)
   span: 'a Pos.pos;
       (** covers the span of the entire construct, including children *)
@@ -73,6 +70,8 @@ val full_name : 'a t -> string
 
 val string_of_kind : kind -> string
 
-val string_of_modifier : modifier -> string
+(** A string like <kind>::Type or <kind>::Type::member where `kind` is one of "function",
+   "type_id", "method", etc. None for type var, local var and params *)
+val identifier : 'a t -> string option
 
-val get_symbol_id : kind -> string option -> string -> string option
+val string_of_modifier : modifier -> string

@@ -487,6 +487,10 @@ class structure_annotations {
         fm_.add_include("thrift/annotation/rust.thrift");
       } else if (name == "rust.type") {
         to_remove.emplace_back(name, data);
+        if (dynamic_cast<const t_typedef*>(&node)) {
+          to_add.insert(fmt::format("@rust.Type{{name = \"{}\"}}", data.value));
+          fm_.add_include("thrift/annotation/rust.thrift");
+        }
       } else if (name == "rust.serde") {
         to_remove.emplace_back(name, data);
         if (data.value == "false") {

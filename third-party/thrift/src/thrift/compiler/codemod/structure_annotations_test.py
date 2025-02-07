@@ -454,6 +454,8 @@ class StructureAnnotations(unittest.TestCase):
 
                 service S {} (rust.request_context)
 
+                typedef binary Sha256 (rust.newtype, rust.type = "SmallVec<[u8; 32]>")
+
                 """
             ),
         )
@@ -491,6 +493,10 @@ class StructureAnnotations(unittest.TestCase):
 
                 @rust.RequestContext
                 service S {}
+
+                @rust.NewType
+                @rust.Type{name = "SmallVec<[u8; 32]>"}
+                typedef binary Sha256
                 """
             ),
         )

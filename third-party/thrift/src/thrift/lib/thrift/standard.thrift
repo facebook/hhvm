@@ -17,6 +17,7 @@
 include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/java.thrift"
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/rust.thrift"
 
 cpp_include "<folly/io/IOBuf.h>"
 cpp_include "<folly/FBString.h>"
@@ -102,6 +103,7 @@ union TypeUri {
 }
 
 /** Uniquely identifies a Thrift type. */
+@rust.Ord
 union TypeName {
   /** True(1) or False(0) */
   1: Void boolType;
@@ -148,7 +150,7 @@ union TypeName {
   15: Void setType;
   /** `map<K, V>` definition */
   16: Void mapType;
-} (rust.ord)
+}
 
 /** The standard Thrift protocols. */
 enum StandardProtocol {

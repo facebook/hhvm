@@ -66,8 +66,23 @@ let log_remaining_prop env =
  *   Contra<#1,t2>
  * leaving the invariant component alone.
  *)
-let rec freshen_inside_ty env ty =
-  let default () = (env, ty) in
+let rec freshen_inside_ty env ty :
+    (Typing_env_types.env * Typing_defs.locl_ty) option =
+  let freshen_inside_tyl env tyl :
+      (Typing_env_types.env * Typing_defs.locl_ty list) option =
+    let (env, ty_either_l) =
+      List.map_env env tyl ~f:(fun env ty ->
+          match freshen_inside_ty env ty with
+          | Some (env, ty) -> (env, Either.First ty)
+          | None -> (env, Either.Second ty))
+    in
+    if List.for_all ty_either_l ~f:Either.is_second then
+      None
+    else
+      Some (env, List.map ty_either_l ~f:Either.value)
+  in
+  let open Option.Let_syntax in
+  let default () = None in
   let (env, ty) = Env.expand_type env ty in
   let (r, ty_) = deref ty in
   match ty_ with
@@ -87,44 +102,47 @@ let rec freshen_inside_ty env ty =
       let variancel =
         List.replicate ~num:(List.length tyl) Ast_defs.Invariant
       in
-      let (env, tyl) = freshen_tparams env variancel tyl in
-      (env, mk (r, Tnewtype (name, tyl, ty)))
+      let* (env, tyl) = freshen_tparams env variancel tyl in
+      return (env, mk (r, Tnewtype (name, tyl, ty)))
   | Tdependent _ -> default ()
   (* Nullable is covariant *)
   | Toption ty ->
-    let (env, ty) = freshen_inside_ty env ty in
-    (env, mk (r, Toption ty))
+    let* (env, ty) = freshen_inside_ty env ty in
+    return (env, mk (r, Toption ty))
   | Tunion tyl ->
-    let (env, tyl) = List.map_env env tyl ~f:freshen_inside_ty in
-    (env, mk (r, Tunion tyl))
+    let* (env, tyl) = freshen_inside_tyl env tyl in
+    return (env, mk (r, Tunion tyl))
   | Tintersection tyl ->
-    let (env, tyl) = List.map_env env tyl ~f:freshen_inside_ty in
-    Inter.intersect_list env r tyl
+    let* (env, tyl) = freshen_inside_tyl env tyl in
+    return (Inter.intersect_list env r tyl)
   (* Tuples are covariant *)
   | Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } } ->
     let (env, t_required) = List.map_env env t_required ~f:freshen_ty in
     let (env, t_optional) = List.map_env env t_optional ~f:freshen_ty in
     let (env, t_variadic) = freshen_ty env t_variadic in
-    ( env,
-      mk (r, Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } })
-    )
+    Some
+      ( env,
+        mk
+          (r, Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } })
+      )
   | Ttuple { t_required; t_extra = Tsplat t_splat } ->
     let (env, t_required) = List.map_env env t_required ~f:freshen_ty in
     let (env, t_splat) = freshen_ty env t_splat in
-    (env, mk (r, Ttuple { t_required; t_extra = Tsplat t_splat }))
+    Some (env, mk (r, Ttuple { t_required; t_extra = Tsplat t_splat }))
   (* Shape data is covariant *)
   | Tshape { s_origin = _; s_unknown_value = shape_kind; s_fields = fdm } ->
     let (env, fdm) = ShapeFieldMap.map_env freshen_ty env fdm in
     (* TODO(shapes) should freshening impact unknown type? *)
-    ( env,
-      mk
-        ( r,
-          Tshape
-            {
-              s_origin = Missing_origin;
-              s_unknown_value = shape_kind;
-              s_fields = fdm;
-            } ) )
+    Some
+      ( env,
+        mk
+          ( r,
+            Tshape
+              {
+                s_origin = Missing_origin;
+                s_unknown_value = shape_kind;
+                s_fields = fdm;
+              } ) )
   (* Functions are covariant in return type, contravariant in parameter types *)
   | Tfun ft ->
     let (env, ft_ret) = freshen_ty env ft.ft_ret in
@@ -133,11 +151,11 @@ let rec freshen_inside_ty env ty =
           let (env, fp_type) = freshen_ty env p.fp_type in
           (env, { p with fp_type }))
     in
-    (env, mk (r, Tfun { ft with ft_ret; ft_params }))
+    Some (env, mk (r, Tfun { ft with ft_ret; ft_params }))
   | Tnewtype (name, _, ty)
     when String.equal name Naming_special_names.Classes.cSupportDyn ->
-    let (env, ty) = freshen_inside_ty env ty in
-    (env, MakeType.supportdyn r ty)
+    let* (env, ty) = freshen_inside_ty env ty in
+    return (env, MakeType.supportdyn r ty)
   | Tnewtype (name, tyl, ty) ->
     if List.is_empty tyl then
       default ()
@@ -148,8 +166,8 @@ let rec freshen_inside_ty env ty =
         default ()
       | Decl_entry.Found td ->
         let variancel = List.map td.td_tparams ~f:(fun t -> t.tp_variance) in
-        let (env, tyl) = freshen_tparams env variancel tyl in
-        (env, mk (r, Tnewtype (name, tyl, ty)))
+        let* (env, tyl) = freshen_tparams env variancel tyl in
+        return (env, mk (r, Tnewtype (name, tyl, ty)))
     end
   | Tclass ((p, cid), e, tyl) ->
     if List.is_empty tyl then
@@ -163,24 +181,24 @@ let rec freshen_inside_ty env ty =
         let variancel =
           List.map (Cls.tparams cls) ~f:(fun t -> t.tp_variance)
         in
-        let (env, tyl) = freshen_tparams env variancel tyl in
-        (env, mk (r, Tclass ((p, cid), e, tyl)))
+        let* (env, tyl) = freshen_tparams env variancel tyl in
+        return (env, mk (r, Tclass ((p, cid), e, tyl)))
     end
   | Tvec_or_dict (ty1, ty2) ->
     let (env, ty1) = freshen_ty env ty1 in
     let (env, ty2) = freshen_ty env ty2 in
-    (env, mk (r, Tvec_or_dict (ty1, ty2)))
+    Some (env, mk (r, Tvec_or_dict (ty1, ty2)))
   | Tvar _ -> default ()
   | Taccess (ty, ids) ->
     let (env, ty) = freshen_ty env ty in
-    (env, mk (r, Taccess (ty, ids)))
+    Some (env, mk (r, Taccess (ty, ids)))
   | Tunapplied_alias _ -> default ()
   | Tclass_ptr ty ->
     let (env, ty) = freshen_ty env ty in
     (* TODO(T199606542) Matches classname but does it actually make sense
      * to freshen class pointer? This will disappear when we move to direct
      * strings *)
-    (env, mk (r, Tclass_ptr ty))
+    Some (env, mk (r, Tclass_ptr ty))
 
 and freshen_ty env ty =
   if TUtils.is_tyvar_error env ty then
@@ -189,18 +207,24 @@ and freshen_ty env ty =
     Env.fresh_type_invariant env (get_pos ty |> Pos_or_decl.unsafe_to_raw_pos)
 
 and freshen_tparams env variancel tyl =
-  match (variancel, tyl) with
-  | ([], []) -> (env, [])
-  | (variance :: variancel, ty :: tyl) ->
-    let (env, tyl) = freshen_tparams env variancel tyl in
-    let (env, ty) =
-      if Ast_defs.(equal_variance variance Invariant) then
-        (env, ty)
-      else
-        freshen_ty env ty
+  if List.for_all variancel ~f:Ast_defs.(equal_variance Invariant) then
+    None
+  else
+    let rec freshen_tparams_ env variancel tyl =
+      match (variancel, tyl) with
+      | ([], []) -> (env, [])
+      | (variance :: variancel, ty :: tyl) ->
+        let (env, tyl) = freshen_tparams_ env variancel tyl in
+        let (env, ty) =
+          if Ast_defs.(equal_variance variance Invariant) then
+            (env, ty)
+          else
+            freshen_ty env ty
+        in
+        (env, ty :: tyl)
+      | _ -> (env, tyl)
     in
-    (env, ty :: tyl)
-  | _ -> (env, tyl)
+    Some (freshen_tparams_ env variancel tyl)
 
 let bind env var (ty : locl_ty) =
   let old_env = env in
@@ -267,19 +291,21 @@ let bind_to_lower_bound ~freshen env r var lower_bounds =
        *)
       let (env, freshen_ty_err, ty) =
         if freshen then
-          let (env, newty) = freshen_inside_ty env ty in
-          (* In theory, the following subtype would only fail if the lower bound
-           * was already in conflict with another bound. However we don't
-           * add such conflicting bounds to avoid cascading errors, so in theory,
-           * the following subtype calls should not fail, and the error callback
-           * should not matter. *)
-          let on_error =
-            Some
-              (Typing_error.Reasons_callback.unify_error_at
-              @@ Env.get_tyvar_pos env var)
-          in
-          let (env, ty_err_opt) = TUtils.sub_type env ty newty on_error in
-          (env, ty_err_opt, newty)
+          match freshen_inside_ty env ty with
+          | None -> (env, None, ty)
+          | Some (env, newty) ->
+            (* In theory, the following subtype would only fail if the lower bound
+             * was already in conflict with another bound. However we don't
+             * add such conflicting bounds to avoid cascading errors, so in theory,
+             * the following subtype calls should not fail, and the error callback
+             * should not matter. *)
+            let on_error =
+              Some
+                (Typing_error.Reasons_callback.unify_error_at
+                @@ Env.get_tyvar_pos env var)
+            in
+            let (env, ty_err_opt) = TUtils.sub_type env ty newty on_error in
+            (env, ty_err_opt, newty)
         else
           (env, None, ty)
       in
@@ -481,7 +507,11 @@ let try_bind_to_equal_bound ~freshen env r var =
           in
           (match shallow_match with
           | Some (LoclType shallow_match) ->
-            let (env, ty) = freshen_inside_ty env shallow_match in
+            let (env, ty) =
+              Option.value
+                (freshen_inside_ty env shallow_match)
+                ~default:(env, shallow_match)
+            in
             let var_ty = mk (r, Tvar var) in
             (* In theory, the following subtype would only fail if the shallow match
              * we've found was already in conflict with another bound. However we don't

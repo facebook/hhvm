@@ -1137,9 +1137,9 @@ Whisker resolves an import path to a Whisker source file in an implementation-de
 
 ## Data Model
 
-The *context* provided during when rendering a template follows Whisker's *data model*. Whisker's type system is heavily influenced by JSON. The root of the type system is `object` — all types are subtypes of `object`.
+The *context* provided when Whisker renders a template follows Whisker's *data model*. JSON heavily influences Whisker's type system.
 
-`object` is a union of the following types:
+A Whisker `object` is one of the following types:
 * `i64` — 64-bit two's complement signed integer (<code>-2<sup>63</sup> ≤ value < 2<sup>63</sup></code>).
 * `f64` — [IEEE 754 `binary64` floating point number](https://en.wikipedia.org/wiki/Double-precision_floating-point_format#IEEE_754_double-precision_binary_floating-point_format:_binary64).
 * `string` — sequence of Unicode characters.
@@ -1236,13 +1236,13 @@ When resolving an *identifier* like `name`, the process works as follows:
 4. Move to the previous scope in the stack and repeat (2) and (3).
     * If the bottom of the stack is reached without resolution, return an error.
 
-Local bindings can be added to the current scope using [`{{#let}}`](#let-statements), [`{{#import}}](#import-statements), `as` captures in [`{{#each}}`](#each-blocks), and similar constructs.
+Use [`{{#let}}`](#let-statements), [`{{#import}}](#import-statements), `as` captures in [`{{#each}}`](#each-blocks), and similar constructs to add local bindings to the current scope.
 
-Certain scopes lack an **implicit context** `object`, which is represented by `null`. For instance, [`{{#if}}`](#if-blocks) blocks always have a `null` context. [`{{#each}}`](#each-blocks) blocks have a `null` context when captures are present.
+`null` represents scopes that lack an **implicit context** `object`. For instance, [`{{#if}}`](#if-blocks) blocks always have a `null` context. [`{{#each}}`](#each-blocks) blocks have a `null` context in the presence of captures.
 
 ### Derived Evaluation Context
 
-`{{#let partial}}` blocks are rendered within a new evaluation context *derived* from the the call site. This context starts with an empty stack but retains access to the same global scope `map`.
+Whisker renders `{{#let partial}}` blocks within a new evaluation context *derived* from the the call site. This context starts with an empty stack but retains access to the same global scope.
 
 ## Standalone Tags
 

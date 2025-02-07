@@ -12,6 +12,7 @@
 #include <vector>
 
 #include <folly/SocketAddress.h>
+#include <folly/container/F14Map.h>
 
 #include <proxygen/lib/utils/Time.h>
 
@@ -59,7 +60,28 @@ const std::string serverDownInfoStr(ServerDownInfo info);
 class ServerHealthCheckerCallback {
  public:
   // Additional info received from a successful healthcheck (e.g. HTTP headers)
-  using ExtraInfo = std::vector<std::pair<std::string, std::string>>;
+  // This is a vector of pairs for legacy reasons.
+  // All new usecases should be defined as struct members.
+  struct ExtraInfo : public std::vector<std::pair<std::string, std::string>> {
+    ExtraInfo() = default;
+    ExtraInfo(const ExtraInfo&) = default;
+    ExtraInfo(ExtraInfo&&) = default;
+    explicit ExtraInfo(std::vector<std::pair<std::string, std::string>> v)
+        : std::vector<std::pair<std::string, std::string>>(std::move(v)) {
+    }
+    ExtraInfo& operator=(
+        const std::vector<std::pair<std::string, std::string>>& v) {
+      std::vector<std::pair<std::string, std::string>>::operator=(v);
+      return *this;
+    }
+    ExtraInfo& operator=(const ExtraInfo& other) = default;
+
+    // Converts all fields within the vector of pairs to a map.
+    [[nodiscard]] folly::F14FastMap<std::string, std::string> toMap() const;
+
+    // Custom fields for WWW healthchecks
+    folly::F14FastMap<std::string, std::string> thriftWWWCustomFields;
+  };
 
   virtual void processHealthCheckFailure(
       const TimePoint& startTime,

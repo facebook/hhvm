@@ -43,4 +43,14 @@ const std::string serverDownInfoStr(ServerDownInfo info) {
   }
 }
 
+// Convert extraInfo to a map, overrides duplicate headers
+folly::F14FastMap<std::string, std::string>
+ServerHealthCheckerCallback::ExtraInfo::toMap() const {
+  folly::F14FastMap<std::string, std::string> mapOut;
+  for (const auto& it : *this) {
+    mapOut.insert(it);
+  }
+  return mapOut;
+}
+
 } // namespace proxygen

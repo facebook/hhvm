@@ -2,13 +2,14 @@ open Hh_prelude
 open ServerDepsUtil
 
 let build_json_def def =
-  let open SymbolDefinition in
   let open Hh_json in
   Hh_json.JSON_Object
     [
-      ("kind", string_ (SymbolDefinition.string_of_kind def.kind));
-      ("name", string_ def.full_name);
-      ("position", Pos.to_absolute def.pos |> Pos.multiline_json);
+      ( "kind",
+        string_ (SymbolDefinition.string_of_kind def.SymbolDefinition.kind) );
+      ("name", string_ (SymbolDefinition.full_name def));
+      ( "position",
+        Pos.to_absolute def.SymbolDefinition.pos |> Pos.multiline_json );
     ]
 
 let rec build_json_entry

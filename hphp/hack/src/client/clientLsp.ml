@@ -1095,7 +1095,7 @@ let hack_symbol_definition_to_lsp_identifier_location
   Lsp.DefinitionLocation.
     {
       location;
-      title = Some (Utils.strip_ns symbol.SymbolDefinition.full_name);
+      title = Some (Utils.strip_ns @@ SymbolDefinition.full_name symbol);
     }
 
 (** See documentation for `args` field `notebook_mode` *)

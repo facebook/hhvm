@@ -413,8 +413,8 @@ let split_class_name (full_name : string) : string =
 
 let fun_defined_in def_opt : string =
   match def_opt with
-  | Some { SymbolDefinition.full_name; _ } ->
-    let abs_name = "\\" ^ full_name in
+  | Some def ->
+    let abs_name = "\\" ^ SymbolDefinition.full_name def in
     if SN.PseudoFunctions.is_pseudo_function abs_name then
       ""
     else (
@@ -432,7 +432,7 @@ let make_hover_info under_dynamic_result ctx info_opt entry occurrence def_opt =
     | Some def ->
       Printf.sprintf
         "// Defined in %s\n"
-        (split_class_name def.SymbolDefinition.full_name)
+        (split_class_name @@ SymbolDefinition.full_name def)
     | None -> ""
   in
   let print_locl_ty_with_identity ?(do_not_strip_dynamic = false) info =

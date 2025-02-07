@@ -6,6 +6,8 @@
  *
  *)
 
+(** Given a file and a position, return a list of symbols at that position,
+    plus information about the definition of that symbol if found. *)
 val go_quarantined :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->

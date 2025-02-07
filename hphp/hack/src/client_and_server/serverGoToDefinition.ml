@@ -54,7 +54,7 @@ let go_quarantined
               | Some cls ->
                 if
                   String.is_prefix
-                    def.SymbolDefinition.full_name
+                    (SymbolDefinition.full_name def)
                     ~prefix:(Utils.strip_ns cls)
                 then
                   (occ, def) :: acc

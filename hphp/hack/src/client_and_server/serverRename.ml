@@ -577,7 +577,7 @@ let go_for_single_file
       ~ctx
       ~action
       ~filename
-      ~name:symbol_definition.SymbolDefinition.full_name
+      ~name:(SymbolDefinition.full_name symbol_definition)
       ~naming_table
   |> fun refs ->
     let changes =

@@ -42,7 +42,6 @@ type modifier =
 type 'a t = {
   kind: kind;
   name: string;
-  full_name: string;
   class_name: string option;
   id: string option;
   pos: 'a Pos.pos;
@@ -74,6 +73,16 @@ let rec to_relative x =
     children = Option.map x.children ~f:(fun x -> List.map x ~f:to_relative);
     params = Option.map x.params ~f:(fun x -> List.map x ~f:to_relative);
   }
+
+let full_name { name; class_name; kind; _ } =
+  match (kind, class_name) with
+  | (_, None)
+  | ( ( Class | Interface | Trait | Enum | Typedef | Param | Function
+      | GlobalConst | LocalVar | Module | TypeVar ),
+      _ ) ->
+    name
+  | ((Method | Property | ClassConst | Typeconst), Some class_name) ->
+    Printf.sprintf "%s::%s" class_name name
 
 let string_of_kind = function
   | Function -> "function"

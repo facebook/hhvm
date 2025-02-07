@@ -402,4 +402,4 @@ let go_from_file_ctx
     (string * ServerCommandTypes.Find_refs.action) option =
   go_from_file_ctx_with_symbol_definition ~ctx ~entry pos
   |> Option.map ~f:(fun (def, action) ->
-         (def.SymbolDefinition.full_name, action))
+         (SymbolDefinition.full_name def, action))

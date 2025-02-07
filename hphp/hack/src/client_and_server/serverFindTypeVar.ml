@@ -42,7 +42,6 @@ let sym_def_of_tparam (tp : ('a, 'b) Aast.tparam) :
     {
       kind = SymbolDefinition.TypeVar;
       name;
-      full_name = name;
       class_name = None;
       id = Some name;
       pos;

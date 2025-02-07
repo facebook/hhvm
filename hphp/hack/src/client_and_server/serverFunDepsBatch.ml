@@ -109,7 +109,7 @@ let result_to_string result (fn, line, char) =
                       let module SD = SymbolDefinition in
                       let props =
                         [
-                          ("name", JSON_String def.SD.full_name);
+                          ("name", JSON_String (SD.full_name def));
                           ("kind", JSON_String (SD.string_of_kind def.SD.kind));
                           ("position", Pos.json (Pos.to_absolute def.SD.pos));
                         ]

@@ -40,8 +40,6 @@ type modifier =
 type 'a t = {
   kind: kind;
   name: string;
-  full_name: string;
-      (** For a class member, a string like `ClassName::memberName`. Otherwise equal to `name`. *)
   class_name: string option;
       (** The class name if this definition is for a class or a class member, None otherwise. *)
   id: string option;
@@ -69,6 +67,9 @@ type 'a t = {
 val to_absolute : Relative_path.t t -> string t
 
 val to_relative : string t -> Relative_path.t t
+
+(** For a class member definition, a string like `ClassName::memberName`. Otherwise just the `name`. *)
+val full_name : 'a t -> string
 
 val string_of_kind : kind -> string
 

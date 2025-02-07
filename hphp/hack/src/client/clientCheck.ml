@@ -506,7 +506,7 @@ let main_internal
     let definition_to_json (d : string SymbolDefinition.t) : Hh_json.json =
       Hh_json.JSON_Object
         [
-          ("full_name", d.SymbolDefinition.full_name |> Hh_json.string_);
+          ("full_name", SymbolDefinition.full_name d |> Hh_json.string_);
           ("pos", d.SymbolDefinition.pos |> Pos.json);
           ( "kind",
             d.SymbolDefinition.kind

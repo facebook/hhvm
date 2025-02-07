@@ -43,11 +43,6 @@ let modifiers_to_list ~is_final ~visibility ~is_abstract ~is_static =
   in
   List.rev modifiers
 
-let get_full_name class_name name =
-  match class_name with
-  | None -> name
-  | Some class_name -> class_name ^ "::" ^ name
-
 let pos_of_hint = function
   | Some (p, _) when not Pos.(equal none p) -> Some p
   | _ -> None
@@ -63,7 +58,6 @@ let summarize_property ~(source_text : string option) class_name var =
   let (pos, name) = var.cv_id in
   let kind = Property in
   let id = get_symbol_id kind (Some class_name) name in
-  let full_name = get_full_name (Some class_name) name in
   let detail =
     Option.map source_text ~f:(fun source_text ->
         let readonly =
@@ -89,7 +83,6 @@ let summarize_property ~(source_text : string option) class_name var =
   {
     kind;
     name;
-    full_name;
     class_name = Some class_name;
     id;
     pos;
@@ -119,7 +112,6 @@ let summarize_class_const ~(source_text : string option) class_name cc =
   in
   let kind = ClassConst in
   let id = get_symbol_id kind (Some class_name) name in
-  let full_name = get_full_name (Some class_name) name in
   let detail =
     Option.map source_text ~f:(fun source_text ->
         let ty : string =
@@ -132,7 +124,6 @@ let summarize_class_const ~(source_text : string option) class_name cc =
   {
     kind;
     name;
-    full_name;
     class_name = Some class_name;
     id;
     pos;
@@ -163,7 +154,6 @@ let summarize_class_typeconst ~(source_text : string option) class_name t =
     | TCAbstract _ -> [Abstract]
     | _ -> []
   in
-  let full_name = get_full_name (Some class_name) name in
   let detail =
     Option.map source_text ~f:(fun source_text ->
         Pos.get_text_from_pos ~content:source_text t.c_tconst_span)
@@ -171,7 +161,6 @@ let summarize_class_typeconst ~(source_text : string option) class_name t =
   {
     kind;
     name;
-    full_name;
     class_name = Some class_name;
     id;
     pos;
@@ -208,11 +197,9 @@ let summarize_param param =
   in
   let kind = Param in
   let id = get_symbol_id kind None name in
-  let full_name = get_full_name None name in
   {
     kind;
     name;
-    full_name;
     class_name = None;
     id;
     pos;
@@ -257,7 +244,6 @@ let summarize_method ~(source_text : string option) class_name m =
   let name = snd m.m_name in
   let kind = Method in
   let id = get_symbol_id kind (Some class_name) name in
-  let full_name = get_full_name (Some class_name) name in
   let detail =
     Option.map source_text ~f:(fun source_text ->
         detail_of_fun ~source_text ~fun_pos:m.m_span m.m_name m.m_body)
@@ -265,7 +251,6 @@ let summarize_method ~(source_text : string option) class_name m =
   {
     kind;
     name;
-    full_name;
     class_name = Some class_name;
     id;
     pos = fst m.m_name;
@@ -401,11 +386,9 @@ let summarize_class ~(source_text : string option) class_ ~no_children =
   in
   let name = class_name in
   let id = get_symbol_id kind None name in
-  let full_name = get_full_name None name in
   {
     kind;
     name;
-    full_name;
     class_name = Some class_name;
     id;
     pos = class_name_pos;
@@ -422,7 +405,6 @@ let summarize_typedef ~(source_text : string option) (tdef : _ typedef) :
   let kind = SymbolDefinition.Typedef in
   let name = Utils.strip_ns (snd tdef.t_name) in
   let id = get_symbol_id kind None name in
-  let full_name = get_full_name None name in
   let pos = fst tdef.t_name in
   let hint_for_end_pos = tdef.t_runtime_type in
   let span = Pos.btw pos (fst hint_for_end_pos) in
@@ -433,7 +415,6 @@ let summarize_typedef ~(source_text : string option) (tdef : _ typedef) :
   {
     kind;
     name;
-    full_name;
     class_name = None;
     id;
     pos;
@@ -452,7 +433,6 @@ let summarize_fun ~(source_text : string option) fd =
   let kind = SymbolDefinition.Function in
   let name = Utils.strip_ns (snd fd.fd_name) in
   let id = get_symbol_id kind None name in
-  let full_name = get_full_name None name in
   let detail =
     Option.map source_text ~f:(fun source_text ->
         detail_of_fun ~source_text ~fun_pos:f.f_span fd.fd_name f.f_body)
@@ -460,7 +440,6 @@ let summarize_fun ~(source_text : string option) fd =
   {
     kind;
     name;
-    full_name;
     class_name = None;
     id;
     pos = fst fd.fd_name;
@@ -480,7 +459,6 @@ let summarize_gconst ~(source_text : string option) (cst : _ gconst) :
   let kind = GlobalConst in
   let name = Utils.strip_ns (snd cst.cst_name) in
   let id = get_symbol_id kind None name in
-  let full_name = get_full_name None name in
   let span = Pos.btw gconst_start gconst_end in
   let detail =
     Option.map source_text ~f:(fun source_text ->
@@ -489,7 +467,6 @@ let summarize_gconst ~(source_text : string option) (cst : _ gconst) :
   {
     kind;
     name;
-    full_name;
     class_name = None;
     id;
     pos;
@@ -504,11 +481,9 @@ let summarize_gconst ~(source_text : string option) (cst : _ gconst) :
 let summarize_local name span =
   let kind = LocalVar in
   let id = get_symbol_id kind None name in
-  let full_name = get_full_name None name in
   {
     kind;
     name;
-    full_name;
     class_name = None;
     id;
     pos = span;
@@ -523,7 +498,6 @@ let summarize_local name span =
 let summarize_module_def md =
   let kind = SymbolDefinition.Module in
   let name = snd md.md_name in
-  let full_name = get_full_name None name in
   let id = get_symbol_id kind None name in
   let span = md.md_span in
   let doc_comment = md.md_doc_comment in
@@ -535,7 +509,6 @@ let summarize_module_def md =
   {
     kind;
     name;
-    full_name;
     class_name = None;
     id;
     pos = span;
@@ -660,7 +633,6 @@ let rec print_def ~short_pos indent def =
     children;
     params;
     docblock;
-    full_name = _;
     class_name = _;
     detail;
   } =

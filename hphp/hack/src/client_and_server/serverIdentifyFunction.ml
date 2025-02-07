@@ -39,6 +39,8 @@ let rec take_best_suggestions l =
       first :: take_best_suggestions rest
   | [] -> []
 
+(** Given a file and a position, return a list of symbols at that position,
+    plus information about the definition of that symbol if found. *)
 let go_quarantined
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) pos =
   let (symbols : _ SymbolOccurrence.t list) =

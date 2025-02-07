@@ -165,8 +165,8 @@ final class ThriftContextPropStateTest extends WWWTest {
     $e = Base64::encode($s);
 
     ThriftContextPropState::initFromString($e);
-    ThriftContextPropState::updateFromVC($fb_vc);
-    ThriftContextPropState::updateFromVC($ig_vc);
+    ThriftContextPropState::updateUserIdFromVC($fb_vc, "test");
+    ThriftContextPropState::updateUserIdFromVC($ig_vc, "test");
 
     $tcps = ThriftContextPropState::get();
     // expect user ids were set from fetched values
@@ -193,7 +193,7 @@ final class ThriftContextPropStateTest extends WWWTest {
     $e = Base64::encode($s);
 
     ThriftContextPropState::initFromString($e);
-    ThriftContextPropState::updateFromVC($fb_vc);
+    ThriftContextPropState::updateUserIdFromVC($fb_vc, "test");
 
     $tcps = ThriftContextPropState::get();
     // expect fb user id to be populated
@@ -222,8 +222,8 @@ final class ThriftContextPropStateTest extends WWWTest {
 
     ThriftContextPropState::initFromString($e);
     // expect these to be no-op if TFM already has user ids
-    ThriftContextPropState::updateFromVC($fb_vc);
-    ThriftContextPropState::updateFromVC($ig_vc);
+    ThriftContextPropState::updateUserIdFromVC($fb_vc, "test");
+    ThriftContextPropState::updateUserIdFromVC($ig_vc, "test");
 
     $tcps = ThriftContextPropState::get();
     expect($tcps->getUserIds()?->fb_user_id)->toEqual(123);

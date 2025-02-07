@@ -257,32 +257,35 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
     struct AnyPatchExtractionVisitor {
       void assign(const type::AnyStruct& any) {
         if (type::identicalType(any.type().value(), type_)) {
-          patch = type::AnyData{any}.get<VTag>();
+          patch_ = type::AnyData{any}.get<VTag>();
         }
       }
-      void clear() { patch.clear(); }
+      void clear() { patch_.clear(); }
       void patchIfTypeIs(
           const type::Type& type, const protocol::DynamicPatch& dpatch) {
         if (!type::identicalType(type, type_)) {
           return;
         }
         auto patchObj = dpatch.toObject();
-        patch.merge(protocol::fromObjectStruct<VPatchTag>(patchObj));
+        patch_.merge(protocol::fromObjectStruct<VPatchTag>(patchObj));
       }
       void ensureAny(const type::AnyStruct& any) {
         // TODO(dokwon): Consider short circuiting `patchIfTypeIsPrior` if
         // `ensureAny` ensures to different type.
         if (!type::identicalType(any.type().value(), type_)) {
-          op::clear<VPatchTag>(patch);
+          op::clear<VPatchTag>(patch_);
         }
       }
 
-      VPatch patch;
+      explicit AnyPatchExtractionVisitor(VPatch& patch) : patch_(patch) {}
+
+      VPatch& patch_;
       const type::Type& type_ = type::Type::get<VTag>();
     };
-    AnyPatchExtractionVisitor visitor;
+    VPatch patch;
+    AnyPatchExtractionVisitor visitor(patch);
     customVisit(visitor);
-    return std::move(visitor.patch);
+    return patch;
   }
 
   /// Extracts dynamic patch for the given patch type.

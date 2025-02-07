@@ -1506,7 +1506,12 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[],
+      'struct' => dict[
+        '\facebook\thrift\annotation\rust\Ord' => \facebook\thrift\annotation\rust\Ord::fromShape(
+          shape(
+          )
+        ),
+      ],
       'fields' => dict[
       ],
     );

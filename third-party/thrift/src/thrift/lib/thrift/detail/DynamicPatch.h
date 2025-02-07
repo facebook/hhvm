@@ -72,6 +72,13 @@ constexpr static bool has_merge_with_badge_v =
     folly::is_detected_v<detect_merge_with_badge, T>;
 
 template <typename T>
+using detect_clear_with_badge =
+    decltype(std::declval<T>().clear(std::declval<Badge>()));
+template <typename T>
+constexpr static bool has_clear_with_badge_v =
+    folly::is_detected_v<detect_clear_with_badge, T>;
+
+template <typename T>
 using detect_custom_visit_with_badge = decltype(std::declval<T>().customVisit(
     std::declval<Badge>(), std::declval<T>));
 template <typename T>

@@ -285,6 +285,14 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
     return std::move(visitor.patch);
   }
 
+  /// Extracts dynamic patch for the given patch type.
+  protocol::DynamicPatch extractDynamicPatchAsIf(const type::Type& type) const {
+    protocol::DynamicPatch patch;
+    DynamicPatchExtractionVisitor visitor(patch, type);
+    customVisit(visitor);
+    return patch;
+  }
+
   static auto fromSafePatch(const AnySafePatch& patch) {
     return fromSafePatchImpl<AnyPatch>(patch);
   }
@@ -338,6 +346,22 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   // Needed for merge.
   void patchIfTypeIs(
       const type::Type& type, const protocol::DynamicPatch& patch);
+
+  // A visitor to extract DynamicPatch for the given patch type.
+  struct DynamicPatchExtractionVisitor {
+    void assign(const type::AnyStruct& any);
+    void clear();
+    void patchIfTypeIs(
+        const type::Type& type, const protocol::DynamicPatch& dpatch);
+    void ensureAny(const type::AnyStruct& any);
+
+    DynamicPatchExtractionVisitor(
+        protocol::DynamicPatch& patch, const type::Type& type)
+        : patch_(patch), type_(type) {}
+
+    protocol::DynamicPatch& patch_;
+    const type::Type& type_;
+  };
 };
 
 template <class T>

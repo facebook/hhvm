@@ -188,6 +188,44 @@ void AnyPatch<Patch>::patchIfTypeIs(
   }
 }
 
+template <class Patch>
+void AnyPatch<Patch>::DynamicPatchExtractionVisitor::assign(
+    const type::AnyStruct& any) {
+  if (type::identicalType(any.type().value(), type_)) {
+    // TODO(dokwon): Optimize creating DynamicPatch::assign from Thrift Any.
+    protocol::Object patch;
+    patch[static_cast<FieldId>(PatchOp::Assign)] =
+        protocol::detail::parseValueFromAny(any);
+    patch_.fromObject(badge, patch);
+  }
+}
+template <class Patch>
+void AnyPatch<Patch>::DynamicPatchExtractionVisitor::clear() {
+  patch_.visitPatch(badge, [&](auto& patch) {
+    if constexpr (protocol::detail::has_clear_with_badge_v<
+                      folly::remove_cvref_t<decltype(patch)>>) {
+      patch.clear(badge);
+    } else {
+      patch.clear();
+    }
+  });
+}
+template <class Patch>
+void AnyPatch<Patch>::DynamicPatchExtractionVisitor::patchIfTypeIs(
+    const type::Type& type, const protocol::DynamicPatch& dpatch) {
+  if (!type::identicalType(type, type_)) {
+    return;
+  }
+  patch_.merge(badge, dpatch);
+}
+template <class Patch>
+void AnyPatch<Patch>::DynamicPatchExtractionVisitor::ensureAny(
+    const type::AnyStruct& any) {
+  if (!type::identicalType(any.type().value(), type_)) {
+    patch_ = {};
+  }
+}
+
 template class AnyPatch<AnyPatchStruct>;
 
 } // namespace apache::thrift::op::detail

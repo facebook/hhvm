@@ -20,6 +20,7 @@ include "thrift/annotation/thrift.thrift"
 include "thrift/lib/thrift/standard.thrift"
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/hack.thrift"
+include "thrift/annotation/rust.thrift"
 cpp_include "thrift/lib/thrift/detail/protocol.h"
 cpp_include "folly/container/F14Map.h"
 cpp_include "folly/container/F14Set.h"
@@ -36,6 +37,9 @@ namespace go thrift.lib.thrift.protocol_detail
 namespace py thrift.lib.thrift.protocol_detail
 
 // A dynamic struct/union/exception
+@rust.Ord
+@thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.virtual": "1"}}
+@thrift.Uri{value = "facebook.com/thrift/protocol/Object"}
 @cpp.Adapter{
   name = "::apache::thrift::protocol::detail::ObjectAdapter",
   adaptedType = "::apache::thrift::protocol::detail::ObjectWrapper<::apache::thrift::protocol::detail::detail::Object>",
@@ -51,13 +55,22 @@ struct Object {
   @cpp.Type{template = "::folly::F14NodeMap"}
   @cpp.AllowLegacyNonOptionalRef
   2: map<i16, Value> members;
-} (cpp.virtual, thrift.uri = "facebook.com/thrift/protocol/Object", rust.ord)
+}
 
 // We need this to use float/double as set/map key in rust
-typedef float Float (rust.newtype, rust.type = "OrderedFloat<f32>", rust.ord)
-typedef double Double (rust.newtype, rust.type = "OrderedFloat<f64>", rust.ord)
+@rust.NewType
+@rust.Ord
+@rust.Type{name = "OrderedFloat<f32>"}
+typedef float Float
+@rust.NewType
+@rust.Ord
+@rust.Type{name = "OrderedFloat<f64>"}
+typedef double Double
 
 // A dynamic value.
+@rust.Ord
+@thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.virtual": "1"}}
+@thrift.Uri{value = "facebook.com/thrift/protocol/Value"}
 @cpp.Adapter{
   name = "::apache::thrift::protocol::detail::ValueAdapter",
   adaptedType = "::apache::thrift::protocol::detail::ValueWrapper<::apache::thrift::protocol::detail::detail::Value>",
@@ -100,4 +113,4 @@ union Value {
   @hack.SkipCodegen{reason = "Map keys can only be integer/string/binary/enum"}
   @cpp.AllowLegacyNonOptionalRef
   16: map<Value, Value> mapValue;
-} (cpp.virtual, thrift.uri = "facebook.com/thrift/protocol/Value", rust.ord)
+}

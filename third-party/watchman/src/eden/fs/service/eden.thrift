@@ -2009,6 +2009,13 @@ struct StartFileAccessMonitorParams {
   3: bool shouldUpload;
 }
 
+struct SendNotificationResponse {}
+
+struct SendNotificationRequest {
+  1: string title;
+  2: string description;
+}
+
 service EdenService extends fb303_core.BaseService {
   list<MountInfo> listMounts() throws (1: EdenError ex);
   void mount(1: MountArgument info) throws (1: EdenError ex);
@@ -2862,4 +2869,18 @@ service EdenService extends fb303_core.BaseService {
   ) throws (1: EdenError ex);
 
   StopFileAccessMonitorResult stopFileAccessMonitor() throws (1: EdenError ex);
+
+  /**
+  * Ask the server to send a notification to the user via the Notifier.
+  *
+  * Note that only Windows has a Notifier implementation. This is a no-op on other platforms.
+  */
+  /**
+  * Ask the server to send a notification to the user via the Notifier.
+  *
+  * Note that only Windows has a Notifier implementation. This is a no-op on other platforms.
+  */
+  SendNotificationResponse sendNotification(
+    1: SendNotificationRequest request,
+  ) throws (1: EdenError ex);
 }

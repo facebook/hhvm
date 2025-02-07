@@ -95,7 +95,7 @@ The `header` is an *unrendered* section of the source. It may contain:
   * [Comments](#comments)
   * [Pragma statements](#pragma-statements)
   * [Whitespace-only `text` (including `newline`)](#text).
-  * [Import statements](#modules)
+  * [Import statements](#import-statements)
 
 Rendering ignores all whitespaces in the `header`.
 
@@ -598,10 +598,20 @@ The `{{#let}}` statement will evaluate repeatedly since every iteration of the `
 
 </Example>
 
+`{{#let}}` statements may be [exported](#exports) by adding `export` to their definitions.
+
+<Example title={<>Example with <code>export</code></>}>
+
+```whisker
+{{#let export answer = 42}}
+```
+
+</Example>
+
 <Grammar>
 
 ```
-let-statement → { "{{" ~ "#" ~ "let" ~ identifier ~ "=" ~ expression ~ "}}" }
+let-statement → { "{{" ~ "#" ~ "let" ~ "export"? ~ identifier ~ "=" ~ expression ~ "}}" }
 ```
 
 </Grammar>
@@ -905,11 +915,24 @@ Some historic presidents are:
 
 </Example>
 
+Partial blocks may be [exported](#exports) by adding `export` to their definitions.
+
+<Example title={<>Example with <code>export</code></>}>
+
+```whisker
+{{#let export partial foo}}
+Hello world!
+{{/let partial}}
+```
+
+</Example>
+
 <Grammar>
 
 ```
 partial-block           → { partial-block-open ~ body* ~ partial-block-close }
-partial-block-open      → { "{{#" ~ "let" ~ "partial" ~ identifier ~ partial-block-arguments? ~ "}}" }
+partial-block-open      → { "{{#" ~ "let" ~ partial-name-spec ~ partial-block-arguments? ~ "}}" }
+partial-name-spec       → { "export"? ~ "partial" ~ identifier }
 partial-block-arguments → { "|" ~ identifier+ ~ "|" }
 partial-block-close     → { "{{/" ~ "let" ~ "partial" ~ "}}" }
 
@@ -977,8 +1000,139 @@ length restrictions).
 
 ### Modules
 
+Whisker templates may be partitioned into multiple source files to improve code re-use. `{{#import}}` statements and `export`-ed constructs allow files to share objects.
+
+<Example>
+
+```whisker title=lib.whisker
+{{#let export partial copyright}}
+// This code belongs to me!
+{{/let partial}}
+```
+
+```whisker title=example.whisker
+{{#import "lib.whisker" as lib}}
+{{#partial lib.copyright}}
+```
+
+```text title=Output
+// This code belongs to me!
+```
+
+</Example>
+
+Every Whisker source file falls into one of two categories: **root** or **module**.
+
+Root files are the entry points for rendering. They cannot have [exports](#exports).
+
+Module files are all non-root files. They cannot have renderable `body` elements at the outer-most scope (e.g. `text`).
+[Partial blocks](#partial-blocks--statements) containing `body` elements are allowed in modules.
+Due to these constraints, a module file is useful only as the target of an `{{#import}}` statement.
+
 :::note
-This section is incomplete.
+Whisker classifies [macros](#macros) as root files.
+:::
+
+#### Exports
+
+The following constructs may be exported from a module:
+* [Partial blocks](#partial-blocks--statements)
+* [Let statements](#let-statements)
+
+The [`map`](#data-model) formed by a module's exports is called its *export map*.
+
+<Example>
+
+```whisker
+{{#let export partial foo}}
+Hello
+{{/let partial}}
+
+{{#let export answer = 42}}
+```
+
+```javascript title=export map
+{
+  "foo": native_handle(<partial foo>),
+  "answer": 42,
+}
+```
+
+</Example>
+
+Every export must be unique.
+
+<Example title="Example with duplicate export">
+
+It is an error to export `answer` twice.
+
+```whisker
+{{#let export answer = 42}}
+{{#let export answer = 24}}
+```
+
+</Example>
+
+Exports must be at the outer-most scope of the a module.
+
+<Example title="Example with conditional export">
+
+It is an error to export `good-mood?` in a nested scope, such as a conditional block.
+
+```whisker
+{{#if sunny?}}
+  {{#let export good-mood? = true}}
+{{else}}
+  {{#let export good-mood? = false}}
+{{/if sunny?}}
+```
+
+</Example>
+
+#### Import Statements
+
+Import statements appear in the `header` of any source file. A source file may have multiple imports.
+The target of an import must be a module (non-root) file.
+
+<Example>
+
+The `identifier` in an import statement [binds a name](#scopes) to the target module's *export map*.
+
+```whisker title=a.whisker
+{{#let export partial copyright}}
+// This code belongs to me!
+{{/let partial}}
+```
+
+```whisker title=b.whisker
+{{#let export answer = 42}}
+```
+
+```whisker title=example.whisker
+{{#import "a.whisker" as module_a}}
+{{#import "b.whisker" as module_b}}
+{{#partial module_a.copyright}}
+{{module_b.answer}}
+```
+
+```text title=Output
+// This code belongs to me!
+42
+```
+
+</Example>
+
+<Grammar>
+
+```
+import-statement → { "{{" ~ "#" ~ "import" ~ import-path ~ "as" ~ identifier ~ "}}" }
+import-path      → { string-literal }
+```
+
+</Grammar>
+
+:::note
+Whisker resolves an import path to a Whisker source file in an implementation-defined manner.
 :::
 
 ## Data Model
@@ -1082,7 +1236,7 @@ When resolving an *identifier* like `name`, the process works as follows:
 4. Move to the previous scope in the stack and repeat (2) and (3).
     * If the bottom of the stack is reached without resolution, return an error.
 
-Local bindings can be added to the current scope using [`{{#let}}`](#let-statements), `as` captures in [`{{#each}}`](#each-blocks), and similar constructs.
+Local bindings can be added to the current scope using [`{{#let}}`](#let-statements), [`{{#import}}](#import-statements), `as` captures in [`{{#each}}`](#each-blocks), and similar constructs.
 
 Certain scopes lack an **implicit context** `object`, which is represented by `null`. For instance, [`{{#if}}`](#if-blocks) blocks always have a `null` context. [`{{#each}}`](#each-blocks) blocks have a `null` context when captures are present.
 

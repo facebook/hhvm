@@ -18,6 +18,7 @@ include "thrift/annotation/thrift.thrift"
 include "thrift/lib/thrift/id.thrift"
 include "thrift/lib/thrift/standard.thrift"
 include "thrift/annotation/python.thrift"
+include "thrift/annotation/rust.thrift"
 
 /**
  * The **underlying representations** for well-known Thrift types.
@@ -42,6 +43,7 @@ namespace go thrift.lib.thrift.type_rep
 namespace py thrift.lib.thrift.type_rep
 
 /** A union representation of a protocol. */
+@thrift.Uri{value = "facebook.com/thrift/type/Protocol"}
 union ProtocolUnion {
   /** A standard protocol, known by all Thrift implementations. */
   1: standard.StandardProtocol standard;
@@ -50,12 +52,14 @@ union ProtocolUnion {
   /** An externally stored protocol. */
   @python.Py3Hidden
   3: id.ProtocolId id;
-} (thrift.uri = "facebook.com/thrift/type/Protocol")
+}
 
 /** A concrete Thrift type. */
+@rust.Ord
+@thrift.Uri{value = "facebook.com/thrift/type/Type"}
 struct TypeStruct {
   /** The type name. */
   1: standard.TypeName name;
   /** The type params, if appropriate. */
   2: list<TypeStruct> params;
-} (thrift.uri = "facebook.com/thrift/type/Type", rust.ord)
+}

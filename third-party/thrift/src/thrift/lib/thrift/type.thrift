@@ -82,16 +82,18 @@ enum BaseTypeEnum {
   Map = 16,
 }
 
+@thrift.Uri{value = ""}
 @cpp.Adapter{
   name = "::apache::thrift::InlineAdapter<::apache::thrift::type::Protocol>",
 }
-typedef type_rep.ProtocolUnion Protocol (thrift.uri = "")
+typedef type_rep.ProtocolUnion Protocol
 
+@thrift.Uri{value = ""}
 @cpp.Adapter{
   name = "::apache::thrift::InlineAdapter<::apache::thrift::type::Type>",
 }
 @hack.Adapter{name = "\\ThriftTypeStructAdapter"}
-typedef type_rep.TypeStruct Type (thrift.uri = "")
+typedef type_rep.TypeStruct Type
 
 /** A list of Types, accessible by `TypeId`. */
 @thrift.Experimental // TODO(afuller): Adapt! and use Type directly when supported.

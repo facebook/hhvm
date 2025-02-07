@@ -448,6 +448,10 @@ class StructureAnnotations(unittest.TestCase):
 
                 struct SerdeOptOut {} (rust.serde = "false")
 
+                enum E {
+                  UNKNOWN = 0,
+                } (rust.copy, rust.exhaustive, rust.name = "E2")
+
                 service S {} (rust.request_context)
 
                 """
@@ -479,6 +483,11 @@ class StructureAnnotations(unittest.TestCase):
 
                 @rust.Serde{enabled = false}
                 struct SerdeOptOut {}
+
+                @rust.Name{name = "E2"}
+                enum E {
+                  UNKNOWN = 0,
+                }
 
                 @rust.RequestContext
                 service S {}

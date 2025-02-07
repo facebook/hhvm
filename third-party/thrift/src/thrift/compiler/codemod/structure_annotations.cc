@@ -456,8 +456,11 @@ class structure_annotations {
         fm_.add_include("thrift/annotation/rust.thrift");
       } else if (name == "rust.copy") {
         to_remove.emplace_back(name, data);
-        to_add.insert("@rust.Copy");
-        fm_.add_include("thrift/annotation/rust.thrift");
+        if (!dynamic_cast<const t_enum*>(&node)) {
+          // enums automatically implement Copy
+          to_add.insert("@rust.Copy");
+          fm_.add_include("thrift/annotation/rust.thrift");
+        }
       } else if (name == "rust.arc") {
         to_remove.emplace_back(name, data);
         to_add.insert("@rust.Arc");

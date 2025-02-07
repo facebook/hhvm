@@ -19,10 +19,12 @@ namespace java.swift com.facebook.thrift.javaswift.test
 namespace android com.facebook.thrift.android.test
 
 include "thrift/annotation/java.thrift"
+include "thrift/annotation/thrift.thrift"
 
-typedef map<i32, i64> (
-  java.swift.type = "it.unimi.dsi.fastutil.ints.Int2LongArrayMap",
-) FMap
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"java.swift.type": "it.unimi.dsi.fastutil.ints.Int2LongArrayMap"},
+}
+typedef map<i32, i64> FMap
 
 struct MySimpleStruct {
   1: i64 id = 99;
@@ -31,7 +33,8 @@ struct MySimpleStruct {
 
 struct MySensitiveStruct {
   1: i64 id;
-  2: string password (java.sensitive);
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"java.sensitive": "1"}}
+  2: string password;
 }
 
 @java.Mutable
@@ -245,6 +248,9 @@ struct StructWithMaps {
   5: map<string, i32> stringints;
 }
 
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"android.generate_builder": "true"},
+}
 struct EveryLayout {
   1: bool aBool;
   2: i32 aInt;
@@ -262,7 +268,7 @@ struct EveryLayout {
   15: map<i32, list<i32>> aMapOfLists;
   16: list<set<map<bool, string>>> listOfSetsOfMap;
   17: binary blob;
-} (android.generate_builder = "true")
+}
 
 struct Nesting {
   1: EveryLayout every;
@@ -280,10 +286,19 @@ struct StringAndList {
 }
 
 // The following were automatically generated and may benefit from renaming.
-typedef binary (java.swift.type = "java.nio.ByteBuffer") binary_9731
-typedef map<i32, FMap> (
-  java.swift.type = "it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap<it.unimi.dsi.fastutil.ints.Int2LongArrayMap>",
-) map_i32_FMap_3815
-typedef map<i64, string> (
-  java.swift.type = "it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String>",
-) map_i64_string_6611
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"java.swift.type": "java.nio.ByteBuffer"},
+}
+typedef binary binary_9731
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "java.swift.type": "it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap<it.unimi.dsi.fastutil.ints.Int2LongArrayMap>",
+  },
+}
+typedef map<i32, FMap> map_i32_FMap_3815
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {
+    "java.swift.type": "it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String>",
+  },
+}
+typedef map<i64, string> map_i64_string_6611

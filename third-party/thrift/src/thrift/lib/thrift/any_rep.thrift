@@ -17,6 +17,8 @@
 include "thrift/lib/thrift/type.thrift"
 include "thrift/lib/thrift/standard.thrift"
 include "thrift/annotation/python.thrift"
+include "thrift/annotation/rust.thrift"
+include "thrift/annotation/thrift.thrift"
 
 /**
  * The **underlying representations** for Thrift: Any.
@@ -39,6 +41,8 @@ namespace go thrift.lib.thrift.any_rep
 namespace py thrift.lib.thrift.any_rep
 
 /** A struct that can hold any thrift supported value, encoded in any format. */
+@rust.Ord
+@thrift.Uri{value = "facebook.com/thrift/type/Any"}
 struct AnyStruct {
   /**
    * The type stored in `data`.
@@ -58,7 +62,7 @@ struct AnyStruct {
 
   /** The encoded data. */
   3: standard.ByteBuffer data;
-} (thrift.uri = "facebook.com/thrift/type/Any", rust.ord)
+}
 
 /**
  * Like Any, except all fields are mutable and can be empty.
@@ -73,6 +77,7 @@ struct AnyStruct {
  * bytes contained in the data field.
  *
  */
+@thrift.Uri{value = "facebook.com/thrift/type/SemiAny"}
 struct SemiAnyStruct {
   /**
    * The type stored in `data`, if known. If unset, it indicates the type is not
@@ -90,4 +95,4 @@ struct SemiAnyStruct {
 
   /** The encoded data. */
   3: standard.ByteBuffer data;
-} (thrift.uri = "facebook.com/thrift/type/SemiAny")
+}

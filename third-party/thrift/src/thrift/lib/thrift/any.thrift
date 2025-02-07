@@ -15,6 +15,7 @@
  */
 
 include "thrift/lib/thrift/any_rep.thrift"
+include "thrift/annotation/thrift.thrift"
 
 /** The **standard** representations for Thrift: Any. */
 package "facebook.com/thrift/type"
@@ -32,17 +33,19 @@ namespace py thrift.lib.thrift.any
  * Always contains enough information to deserialize the stored value,  if the
  * type/protocol are recognized.
  */
-typedef any_rep.AnyStruct Any (
-  thrift.uri = "",
-  thrift.patch.uri = "facebook.com/thrift/op/AnyPatch",
-)
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"thrift.patch.uri": "facebook.com/thrift/op/AnyPatch"},
+}
+@thrift.Uri{value = ""}
+typedef any_rep.AnyStruct Any
 
 /** A type that can hold any subset of 'any' value.
  *
  * Unlike `Any`, `SemiAny` may not hold enough information to deserialized the
  * stored value.
  */
-typedef any_rep.SemiAnyStruct SemiAny (thrift.uri = "")
+@thrift.Uri{value = ""}
+typedef any_rep.SemiAnyStruct SemiAny
 
 /** A list of SemiAny values, accessible by ValueId. */
 typedef list<Any> AnyValueList

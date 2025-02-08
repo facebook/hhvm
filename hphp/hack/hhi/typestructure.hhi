@@ -45,6 +45,8 @@ namespace HH {
     OF_NULL = 0;
     OF_NOTHING = 0;
     OF_DYNAMIC = 0;
+    OF_CLASS_PTR = 0;
+    OF_CLASS_OR_CLASSNAME = 0;
     OF_UNRESOLVED = 0;
     OF_XHP = 0;
   }

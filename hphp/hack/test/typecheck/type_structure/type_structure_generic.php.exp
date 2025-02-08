@@ -1,8 +1,8 @@
 ERROR: File "type_structure_generic.php", line 11, characters 14-24:
 This shape doesn't have a field `classname` (Typing[4108])
-  File "typestructure.hhi", line 55, characters 31-697:
+  File "typestructure.hhi", line 57, characters 31-697:
   The shape is defined here
 ERROR: File "type_structure_generic.php", line 15, characters 14-24:
 This shape doesn't have a field `classname` (Typing[4108])
-  File "typestructure.hhi", line 55, characters 31-697:
+  File "typestructure.hhi", line 57, characters 31-697:
   The shape is defined here

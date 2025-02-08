@@ -44,45 +44,45 @@ File "bad_type_structure_shape.php", line 36, characters 3-22:
   TypeStructureKind
 ERROR: File "bad_type_structure_shape.php", line 10, characters 15-25:
 This shape doesn't have a field `classname` (Typing[4108])
-  File "typestructure.hhi", line 55, characters 31-697:
+  File "typestructure.hhi", line 57, characters 31-697:
   The shape is defined here
 ERROR: File "bad_type_structure_shape.php", line 11, characters 15-24:
 This shape doesn't have a field `nullable` (Typing[4108])
-  File "typestructure.hhi", line 55, characters 31-697:
+  File "typestructure.hhi", line 57, characters 31-697:
   The shape is defined here
 ERROR: File "bad_type_structure_shape.php", line 12, characters 15-26:
 This shape doesn't have a field `elem_types` (Typing[4108])
-  File "typestructure.hhi", line 55, characters 31-697:
+  File "typestructure.hhi", line 57, characters 31-697:
   The shape is defined here
 ERROR: File "bad_type_structure_shape.php", line 13, characters 15-27:
 This shape doesn't have a field `param_types` (Typing[4108])
-  File "typestructure.hhi", line 55, characters 31-697:
+  File "typestructure.hhi", line 57, characters 31-697:
   The shape is defined here
 ERROR: File "bad_type_structure_shape.php", line 14, characters 15-27:
 This shape doesn't have a field `return_type` (Typing[4108])
-  File "typestructure.hhi", line 55, characters 31-697:
+  File "typestructure.hhi", line 57, characters 31-697:
   The shape is defined here
 ERROR: File "bad_type_structure_shape.php", line 15, characters 15-29:
 This shape doesn't have a field `generic_types` (Typing[4108])
-  File "typestructure.hhi", line 55, characters 31-697:
+  File "typestructure.hhi", line 57, characters 31-697:
   The shape is defined here
 ERROR: File "bad_type_structure_shape.php", line 28, characters 15-25:
 This shape doesn't have a field `classname` (Typing[4108])
-  File "typestructure.hhi", line 55, characters 31-697:
+  File "typestructure.hhi", line 57, characters 31-697:
   The shape is defined here
 ERROR: File "bad_type_structure_shape.php", line 29, characters 15-24:
 This shape doesn't have a field `nullable` (Typing[4108])
-  File "typestructure.hhi", line 55, characters 31-697:
+  File "typestructure.hhi", line 57, characters 31-697:
   The shape is defined here
 ERROR: File "bad_type_structure_shape.php", line 30, characters 15-26:
 This shape doesn't have a field `elem_types` (Typing[4108])
-  File "typestructure.hhi", line 55, characters 31-697:
+  File "typestructure.hhi", line 57, characters 31-697:
   The shape is defined here
 ERROR: File "bad_type_structure_shape.php", line 31, characters 15-27:
 This shape doesn't have a field `param_types` (Typing[4108])
-  File "typestructure.hhi", line 55, characters 31-697:
+  File "typestructure.hhi", line 57, characters 31-697:
   The shape is defined here
 ERROR: File "bad_type_structure_shape.php", line 32, characters 15-27:
 This shape doesn't have a field `return_type` (Typing[4108])
-  File "typestructure.hhi", line 55, characters 31-697:
+  File "typestructure.hhi", line 57, characters 31-697:
   The shape is defined here

@@ -522,6 +522,7 @@ THRIFT_REGISTER_GENERATOR(
     "    source_ranges:     Enables population of the identifier source range map.\n"
     "    no_backcompat:     Disables double writes (breaking changes possible!).\n"
     "    use_hash:          Uses definitionKey in typeUri and instead of extern ids.\n"
+    "                       (Required for use with the SyntaxGraph API)\n"
     "    root_program_only: Only schematize the root program.\n"
     "");
 

@@ -22,7 +22,10 @@ namespace py3 thrift.conformance
 namespace java.swift org.apache.thrift.conformance
 namespace go thrift.conformance.type
 
+include "thrift/annotation/thrift.thrift"
+
 // Language-independent type information.
+@thrift.Uri{value = "facebook.com/thrift/ThriftTypeInfo"}
 struct ThriftTypeInfo {
   // The URI of the type. For example: "facebook.com/thrift/ThriftTypeInfo"
   //
@@ -46,4 +49,4 @@ struct ThriftTypeInfo {
   // 0 indicates a type hash should never be used.
   // Unset indicates that the implementation should decide.
   3: optional byte typeHashBytes;
-} (thrift.uri = "facebook.com/thrift/ThriftTypeInfo")
+}

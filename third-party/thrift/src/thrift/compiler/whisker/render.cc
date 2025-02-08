@@ -426,6 +426,7 @@ class render_engine {
           std::move(eval_ctx),
           nullptr /* the root node is not a partial */,
           source_location());
+      visit(root.header_elements);
       visit(root.body_elements);
       return true;
     } catch (const render_error& err) {
@@ -501,19 +502,26 @@ class render_engine {
     abort_rendering(loc);
   }
 
+  void visit(const ast::headers& headers) {
+    for (const auto& header : headers) {
+      visit(header);
+    }
+  }
   void visit(const ast::bodies& bodies) {
     for (const auto& body : bodies) {
       visit(body);
     }
   }
-  // Prevent implicit conversion to ast::body. Otherwise, we can silently
-  // compile an infinitely recursive visit() chain if there is a missing
-  // overload for one of the alternatives in the variant.
+  // Prevent implicit conversion to ast::header or ast::body. Otherwise, we can
+  // silently compile an infinitely recursive visit() chain if there is a
+  // missing overload for one of the alternatives in the variant.
   template <
-      typename T = ast::body,
-      typename = std::enable_if_t<std::is_same_v<T, ast::body>>>
-  void visit(const T& body) {
-    detail::variant_match(body, [&](const auto& node) { visit(node); });
+      typename T,
+      std::enable_if_t<
+          std::is_same_v<T, ast::header> || std::is_same_v<T, ast::body>>* =
+          nullptr>
+  void visit(const T& elements) {
+    detail::variant_match(elements, [&](const auto& node) { visit(node); });
   }
 
   void visit(const ast::text& text) { out_.write(text); }
@@ -1179,6 +1187,7 @@ class render_engine {
         macro.loc.begin);
     auto indent_guard =
         out_.make_indent_guard(macro.standalone_indentation_within_line);
+    visit(resolved_macro->header_elements);
     visit(resolved_macro->body_elements);
   }
 

@@ -61,6 +61,13 @@ using body = std::variant<
     macro>;
 using bodies = std::vector<body>;
 
+/**
+ * Elements that can appear at the top of a Whisker source file.
+ * Whisker does not render these kinds of elements.
+ */
+using header = std::variant<comment, pragma_statement>;
+using headers = std::vector<header>;
+
 // Defines operator!= in terms of operator==
 // Remove in C++20 which introduces comparison operator synthesis
 #define WHISKER_DEFINE_OPERATOR_INEQUALITY(type)             \
@@ -73,6 +80,7 @@ using bodies = std::vector<body>;
  */
 struct root {
   source_location loc;
+  headers header_elements;
   bodies body_elements;
 };
 

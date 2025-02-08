@@ -1005,14 +1005,13 @@ TEST_F(ParserTest, partial_block_after_comment) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- comment <line:1:1, col:6> ''\n"
+      "|- header\n"
+      "| |- comment <line:1:1, col:6> ''\n"
       "|- partial-block <line:1:6, col:48> 'foo'\n"
       "| `- argument 'arg'\n");
 }
 
-TEST_F(ParserTest, partial_block_consume_whitespace) {
-  // Partial blocks appear in the header of a file, so they should consume
-  // preceding whitespace.
+TEST_F(ParserTest, partial_block_do_not_consume_whitespace) {
   auto ast = parse_ast(
       "\n"
       "{{!}}\n"
@@ -1024,8 +1023,8 @@ TEST_F(ParserTest, partial_block_consume_whitespace) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- newline <line:1:1, line:2:1> '\\n'\n"
-      "|- comment <line:2:1, col:6> ''\n"
+      "|- header\n"
+      "| |- comment <line:2:1, col:6> ''\n"
       "|- newline <line:3:1, line:4:1> '\\n'\n"
       "|- partial-block <line:4:1, line:6:17> 'foo'\n"
       "| `- argument 'arg'\n"
@@ -1176,7 +1175,8 @@ TEST_F(ParserTest, partial_block_inside_body) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- comment <line:1:1, col:14> ' header '\n"
+      "|- header\n"
+      "| |- comment <line:1:1, col:14> ' header '\n"
       "|- partial-block <line:1:14, line:3:17> 'foo'\n"
       "| `- argument 'arg1'\n"
       "| `- argument 'arg2'\n"
@@ -1510,7 +1510,8 @@ TEST_F(ParserTest, pragma_ignore_newlines) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- pragma-statement 'ignore-newlines' <line:1:1, col:28>\n");
+      "|- header\n"
+      "| |- pragma-statement 'ignore-newlines' <line:1:1, col:28>\n");
 }
 
 TEST_F(ParserTest, pragma_unrecognized) {
@@ -1594,7 +1595,8 @@ TEST_F(ParserTest, comment_empty) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- comment <line:1:1, col:6> ''\n");
+      "|- header\n"
+      "| |- comment <line:1:1, col:6> ''\n");
 }
 
 TEST_F(ParserTest, comment_escaped) {
@@ -1614,7 +1616,31 @@ TEST_F(ParserTest, comment_escaped_empty) {
   EXPECT_EQ(
       to_string(ast),
       "root [path/to/test-1.whisker]\n"
-      "|- comment <line:1:1, col:10> ''\n");
+      "|- header\n"
+      "| |- comment <line:1:1, col:10> ''\n");
+}
+
+TEST_F(ParserTest, header_consumes_whitespace) {
+  auto ast = parse_ast(
+      "\n"
+      "{{!}}\n"
+      " \t\n"
+      "{{#pragma ignore-newlines}}\t\n"
+      "\n"
+      "hello\n"
+      "{{#pragma ignore-newlines}}\n");
+  // Consumes newlines within a header.
+  // Does not consume newlines after the last header element.
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- header\n"
+      "| |- comment <line:2:1, col:6> ''\n"
+      "| |- pragma-statement 'ignore-newlines' <line:4:1, col:28>\n"
+      "|- newline <line:5:1, line:6:1> '\\n'\n"
+      "|- text <line:6:1, col:6> 'hello'\n"
+      "|- newline <line:6:6, line:7:1> '\\n'\n"
+      "|- pragma-statement 'ignore-newlines' <line:7:1, col:28>\n");
 }
 
 TEST_F(ParserTest, strip_standalone_lines) {

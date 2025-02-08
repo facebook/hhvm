@@ -24,7 +24,9 @@
   This might be fine in C++, but Rust crates have isolated dependencies, so
   this doesn't work for us. Disable generating annotations on patch structs
   for now.
-}}{{^struct:generated?}}
+}}
+
+{{^struct:generated?}}
 impl ::fbthrift::metadata::ThriftAnnotations for {{struct:rust_name}} {
     fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
         {{! We can't use a match statement as `TypeId::of` must be const, which is blocked by

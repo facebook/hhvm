@@ -628,11 +628,17 @@ class parser {
     return std::nullopt;
   }
 
-  // root → { body* }
+  // root → { header* ~ body* }
   std::optional<ast::root> parse_root(parser_scan_window scan) {
     constexpr std::string_view expected_types = "text, template, or comment";
     try {
       auto original_scan = scan;
+
+      ast::headers headers;
+      while (parse_result header = parse_header(scan)) {
+        headers.emplace_back(std::move(header).consume_and_advance(&scan));
+      }
+
       ast::bodies bodies;
       while (scan.can_advance()) {
         if (parse_result maybe_body = parse_body(scan)) {
@@ -655,7 +661,10 @@ class parser {
         // is not valid.
         return std::nullopt;
       }
-      return ast::root{original_scan.start_location(), std::move(bodies)};
+      return ast::root{
+          original_scan.start_location(),
+          std::move(headers),
+          std::move(bodies)};
     } catch (const parse_error&) {
       // the error should already have been reported via the diagnostics
       // engine
@@ -737,6 +746,39 @@ class parser {
             std::move(cond),
             std::move(bodies)},
         scan};
+  }
+
+  // Parses header elements that can only appear at the top of the source.
+  //
+  // header → { comment | pragma-statement }
+  parse_result<ast::header> parse_header(parser_scan_window scan) {
+    assert(scan.empty());
+
+    while (scan.can_advance()) {
+      // Because header elements are more "directives" for the Whisker language,
+      // we ignore whitespace that exist between header elements.
+      // However, the header is not "greedy". When we encounter the first
+      // non-header element, we return all consumed whitespace back to the body.
+      if (parse_result newline = parse_newline(scan)) {
+        std::ignore = std::move(newline).consume_and_advance(&scan);
+        continue;
+      }
+      if (try_consume_token(&scan, tok::whitespace)) {
+        scan = scan.make_fresh();
+        continue;
+      }
+      if (parse_result maybe_comment = parse_comment(scan)) {
+        auto comment = std::move(maybe_comment).consume_and_advance(&scan);
+        return {std::move(comment), scan};
+      }
+      if (parse_result maybe_pragma = parse_pragma_statement(scan)) {
+        auto pragma = std::move(maybe_pragma).consume_and_advance(&scan);
+        return {pragma, scan};
+      }
+      // Next token is not valid for a header element
+      break;
+    }
+    return no_parse_result();
   }
 
   // Returns an empty parse result if no body was found.

@@ -197,16 +197,13 @@ struct ast_visitor {
     }
   }
 
-  // Prevent implicit conversion to ast::body. Otherwise, we can silently
-  // compile an infinitely recursive visit() chain if there is a missing
-  // overload for one of the alternatives in the variant.
-  template <
-      class T = ast::body,
-      typename = std::enable_if_t<std::is_same_v<T, ast::body>>>
-  void visit(const T& body, tree_printer::scope scope) const {
-    // This node is transparent so it does not directly appear in the tree
-    detail::variant_match(
-        body, [&](const auto& node) { visit(node, std::move(scope)); });
+  void visit(
+      const ast::headers& header_elements, tree_printer::scope scope) const {
+    scope.println(" header");
+    auto header_scope = scope.open_node();
+    for (const auto& header : header_elements) {
+      visit(header, header_scope);
+    }
   }
   void visit(
       const ast::bodies& body_elements, tree_printer::scope scope) const {
@@ -215,10 +212,27 @@ struct ast_visitor {
       visit(body, scope);
     }
   }
+  // Prevent implicit conversion to ast::header or ast::body. Otherwise, we can
+  // silently compile an infinitely recursive visit() chain if there is a
+  // missing overload for one of the alternatives in the variant.
+  template <
+      class T,
+      std::enable_if_t<
+          std::is_same_v<T, ast::header> || std::is_same_v<T, ast::body>>* =
+          nullptr>
+  void visit(const T& elements, tree_printer::scope scope) const {
+    // This node is transparent so it does not directly appear in the tree
+    detail::variant_match(
+        elements, [&](const auto& node) { visit(node, std::move(scope)); });
+  }
+
   void visit(const ast::root& root, tree_printer::scope scope) const {
     scope.println(
         "root [{}]", resolved_location(root.loc, src_manager).file_name());
     auto root_scope = scope.open_node();
+    if (!root.header_elements.empty()) {
+      visit(root.header_elements, root_scope);
+    }
     visit(root.body_elements, root_scope);
   }
 

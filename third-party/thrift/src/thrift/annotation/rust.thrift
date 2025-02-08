@@ -337,6 +337,7 @@ struct Adapter {
 
 @scope.Enum
 @scope.Struct
+@scope.Union
 struct Derive {
   // List of additional derives to apply to the generated struct.
   //

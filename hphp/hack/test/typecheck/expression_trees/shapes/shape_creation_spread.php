@@ -4,7 +4,7 @@
 
 function g(): void {
   ExampleDsl`{
-    $f = (shape('x' => ExampleInt, ...) $shape) ==> 3;
+    $f = (ExampleShape<shape('x' => ExampleInt, ...)> $shape) ==> 3;
     $f(shape('x' => 2, 'y' => 'hi'));
   }`;
 }

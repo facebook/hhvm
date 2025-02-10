@@ -4,7 +4,7 @@ ERROR: File "nested_expression_tree_lambda.php", line 6, characters 28-40:
 Invalid argument (Typing[4110])
   File "expr_tree.php", line 60, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 205, characters 5-20:
+  File "expr_tree.php", line 208, characters 5-20:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "expr_tree.php", line 72, characters 8-53:
   But got `ExprTree<ExampleDsl, string, ExampleInt>`

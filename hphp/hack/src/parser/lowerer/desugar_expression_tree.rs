@@ -1618,7 +1618,12 @@ impl RewriteState {
                         ));
                     }
                 }
-                let virtual_expr = Expr((), pos.clone(), Shape(virtual_shape_fields));
+                let virtual_expr = static_meth_call(
+                    visitor_name,
+                    et::SHAPE_TYPE,
+                    vec![Expr((), pos.clone(), Shape(virtual_shape_fields))],
+                    &pos,
+                );
                 let desugar_expr = v_meth_call(
                     et::VISIT_SHAPE,
                     vec![pos_expr, vec_literal(desugar_shape_fields)],

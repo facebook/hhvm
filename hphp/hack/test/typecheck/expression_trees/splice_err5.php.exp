@@ -1,6 +1,6 @@
 ERROR: File "splice_err5.php", line 9, characters 23-27:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 343, characters 26-35:
+  File "expr_tree.php", line 346, characters 26-35:
   Expected `ExampleInt`
   File "expr_tree.php", line 88, characters 40-52:
   But got `ExampleString`

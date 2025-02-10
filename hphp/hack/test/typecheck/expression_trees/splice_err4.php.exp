@@ -1,6 +1,6 @@
 ERROR: File "splice_err4.php", line 13, characters 23-27:
 This value cannot be inserted (spliced) into a `ExampleDsl` expression tree (Typing[4110])
-  File "expr_tree.php", line 320, characters 5-27:
+  File "expr_tree.php", line 323, characters 5-27:
   Expected `ExampleDslExpression<T>` because you are splicing into a `ExampleDsl` expression or block
   File "splice_err4.php", line 6, characters 3-62:
   But got `(int | ExprTree<ExampleDsl, string, ExampleInt>)` because of this statement
@@ -8,7 +8,7 @@ This value cannot be inserted (spliced) into a `ExampleDsl` expression tree (Typ
   Hack values need to be converted (lifted) to compatible types before splicing. For more information see: https://docs.hhvm.com/hack/expression-trees/splicing
 ERROR: File "splice_err4.php", line 13, characters 25-26:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 320, characters 5-27:
+  File "expr_tree.php", line 323, characters 5-27:
   Expected `Spliceable<ExampleDsl, string, _>`
   File "splice_err4.php", line 9, characters 10-10:
   But got `int`

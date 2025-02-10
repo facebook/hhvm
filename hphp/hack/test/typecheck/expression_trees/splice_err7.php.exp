@@ -2,7 +2,7 @@ ERROR: File "splice_err7.php", line 5, characters 23-27:
 Splicing can only occur inside expression tree literals (between backticks) (Parsing[1002])
 ERROR: File "splice_err7.php", line 5, characters 14-28:
 This value cannot be inserted (spliced) into a `ExampleDsl` expression tree (Typing[4110])
-  File "expr_tree.php", line 320, characters 5-27:
+  File "expr_tree.php", line 323, characters 5-27:
   Expected `ExampleDslExpression<T>` because you are splicing into a `ExampleDsl` expression or block
   File "splice_err7.php", line 5, characters 16-27:
   But got `(function(Spliceable<_, mixed, _> $x): _)`
@@ -10,7 +10,7 @@ This value cannot be inserted (spliced) into a `ExampleDsl` expression tree (Typ
   Hack values need to be converted (lifted) to compatible types before splicing. For more information see: https://docs.hhvm.com/hack/expression-trees/splicing
 ERROR: File "splice_err7.php", line 5, characters 16-27:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 320, characters 5-27:
+  File "expr_tree.php", line 323, characters 5-27:
   Expected `Spliceable<ExampleDsl, string, _>`
   File "splice_err7.php", line 5, characters 16-27:
   But got `(function(Spliceable<_, mixed, _> $x): _)`

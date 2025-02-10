@@ -1153,6 +1153,7 @@ pub mod expression_trees {
     pub const VOID_TYPE: &str = "voidType";
     pub const SYMBOL_TYPE: &str = "symbolType";
     pub const LAMBDA_TYPE: &str = "lambdaType";
+    pub const SHAPE_TYPE: &str = "shapeType";
 
     pub const VISIT_INT: &str = "visitInt";
     pub const VISIT_FLOAT: &str = "visitFloat";

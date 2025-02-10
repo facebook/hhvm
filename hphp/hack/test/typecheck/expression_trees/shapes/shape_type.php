@@ -3,7 +3,7 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 function g(): ExampleDslExpression<ExampleFunction<(function(
-    shape('x' => ExampleInt)
+    ExampleShape<shape('x' => ExampleInt)>
   ): ExampleInt)>> {
-  return ExampleDsl`(shape('x' => ExampleInt) $shape) ==> 3`;
+  return ExampleDsl`(ExampleShape<shape('x' => ExampleInt)> $shape) ==> 3`;
 }

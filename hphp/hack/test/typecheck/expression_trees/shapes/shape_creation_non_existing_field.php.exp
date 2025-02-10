@@ -1,6 +1,6 @@
 ERROR: File "shape_creation_non_existing_field.php", line 8, characters 8-35:
 Invalid argument (Typing[4057])
-  File "shape_creation_non_existing_field.php", line 7, characters 11-34:
+  File "shape_creation_non_existing_field.php", line 7, characters 24-47:
   The field `z` is missing
   File "shape_creation_non_existing_field.php", line 8, characters 24-26:
   The field `z` is defined

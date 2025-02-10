@@ -104,6 +104,9 @@ class ExampleDsl {
   public static function lambdaType<T>(T $_): ExampleFunction<T> {
     throw new Exception();
   }
+  public static function shapeType<T>(T $_): ExampleShape<T> {
+    throw new Exception();
+  }
 
   // Desugared nodes. Calls to these are emitted by hackc, following the structure
   // of the expression in the expression tree. Here, they compute a string
@@ -380,6 +383,10 @@ final class ExampleContext {}
 interface ExampleVoid {}
 
 interface ExampleFunction<T> {
+  public function __unwrap(): T;
+}
+
+interface ExampleShape<T> {
   public function __unwrap(): T;
 }
 

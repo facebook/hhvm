@@ -2,16 +2,16 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-type MyExampleShape = shape('y' => ExampleString);
+type MyExampleShape = ExampleShape<shape('y' => ExampleString)>;
 
 function g(): void {
   ExampleDsl`{
-    $f = (shape('x' => ExampleInt) $shape) ==> 3;
+    $f = (ExampleShape<shape('x' => ExampleInt)> $shape) ==> 3;
     $f(shape('x' => 2));
   }`;
 
   ExampleDsl`{
-    $f = (shape('x' => ExampleInt) $shape) ==> 3;
+    $f = (ExampleShape<shape('x' => ExampleInt)> $shape) ==> 3;
     $x = shape('x' => 2);
     $f($x);
   }`;

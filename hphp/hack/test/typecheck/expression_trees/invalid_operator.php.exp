@@ -28,7 +28,7 @@ ERROR: File "invalid_operator.php", line 16, characters 19-26:
 Invalid argument (Typing[4110])
   File "expr_tree.php", line 60, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 134, characters 5-20:
+  File "expr_tree.php", line 137, characters 5-20:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "invalid_operator.php", line 9, characters 7-9:
   But got `int`

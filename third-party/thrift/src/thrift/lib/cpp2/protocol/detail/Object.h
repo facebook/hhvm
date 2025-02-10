@@ -126,7 +126,7 @@ template <typename V>
 struct ValueHelper<type::list<V>> {
   template <typename C>
   static void set(Value& result, C&& value) {
-    auto& result_list = result.ensure_list();
+    auto& result_list = result.emplace_list();
     for (auto& elem : value) {
       ValueHelper<V>::set(result_list.emplace_back(), forward_elem<C>(elem));
     }
@@ -137,7 +137,7 @@ template <typename V>
 struct ValueHelper<type::set<V>> {
   template <typename C>
   static void set(Value& result, C&& value) {
-    auto& result_set = result.ensure_set();
+    auto& result_set = result.emplace_set();
     for (auto& elem : value) {
       Value elem_val;
       ValueHelper<V>::set(elem_val, forward_elem<C>(elem));
@@ -150,7 +150,7 @@ template <typename K, typename V>
 struct ValueHelper<type::map<K, V>> {
   template <typename C>
   static void set(Value& result, C&& value) {
-    auto& result_map = result.ensure_map();
+    auto& result_map = result.emplace_map();
     for (auto& entry : value) {
       Value key;
       ValueHelper<K>::set(key, entry.first);
@@ -191,7 +191,7 @@ class ObjectWriter : public BaseObjectAdapter {
   }
 
   uint32_t writeStructBegin(const char* /*name*/) {
-    beginValue().ensure_object();
+    beginValue().emplace_object();
     return 0;
   }
   uint32_t writeStructEnd() { return endValue(Value::Type::objectValue); }
@@ -223,7 +223,7 @@ class ObjectWriter : public BaseObjectAdapter {
     // insert elements from buffer into mapValue
     std::vector<Value> mapKeyAndValues = getBufferFromStack();
     assert(mapKeyAndValues.size() % 2 == 0);
-    auto& mapVal = cur().ensure_map();
+    auto& mapVal = cur().emplace_map();
     mapVal.reserve(mapKeyAndValues.size() / 2);
     for (size_t i = 0; i < mapKeyAndValues.size(); i += 2) {
       mapVal.emplace(
@@ -249,7 +249,7 @@ class ObjectWriter : public BaseObjectAdapter {
   uint32_t writeSetEnd() {
     // insert elements from buffer into setValue
     std::vector<Value> setValues = getBufferFromStack();
-    auto& setVal = cur().ensure_set();
+    auto& setVal = cur().emplace_set();
     setVal.reserve(setValues.size());
     for (size_t i = 0; i < setValues.size(); i++) {
       setVal.emplace(std::move(setValues[i]));
@@ -351,7 +351,7 @@ class ObjectWriter : public BaseObjectAdapter {
   // Allocated temporary buffer in cur() and pushes buffer references on stack
   void allocBufferPushOnStack(size_t n) {
     // using listVal as temporary buffer
-    std::vector<Value>& listVal = beginValue().ensure_list();
+    std::vector<Value>& listVal = beginValue().emplace_list();
     listVal.resize(n);
     for (auto itr = listVal.rbegin(); itr != listVal.rend(); ++itr) {
       cur_.push(&*itr);
@@ -482,7 +482,7 @@ void parseValueInplace(
     }
     case protocol::T_STRING: {
       if (string_to_binary) {
-        auto& binaryValue = result.ensure_binary();
+        auto& binaryValue = result.emplace_binary();
         prot.readBinary(binaryValue);
         break;
       }
@@ -491,14 +491,14 @@ void parseValueInplace(
       break;
     }
     case protocol::T_STRUCT: {
-      parseObjectInplace(prot, result.ensure_object(), string_to_binary);
+      parseObjectInplace(prot, result.emplace_object(), string_to_binary);
       break;
     }
     case protocol::T_MAP: {
       TType keyType;
       TType valType;
       uint32_t size;
-      auto& mapValue = result.ensure_map();
+      auto& mapValue = result.emplace_map();
       prot.readMapBegin(keyType, valType, size);
       if (!canReadNElements(prot, size, {keyType, valType})) {
         TProtocolException::throwTruncatedData();
@@ -517,7 +517,7 @@ void parseValueInplace(
     case protocol::T_SET: {
       TType elemType;
       uint32_t size;
-      auto& setValue = result.ensure_set();
+      auto& setValue = result.emplace_set();
       prot.readSetBegin(elemType, size);
       if (!canReadNElements(prot, size, {elemType})) {
         TProtocolException::throwTruncatedData();
@@ -533,7 +533,7 @@ void parseValueInplace(
       TType elemType;
       uint32_t size;
       prot.readListBegin(elemType, size);
-      auto& listValue = result.ensure_list();
+      auto& listValue = result.emplace_list();
       if (!canReadNElements(prot, size, {elemType})) {
         TProtocolException::throwTruncatedData();
       }

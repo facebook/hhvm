@@ -79,3 +79,17 @@ TEST(Base64Test, base64DecodeBasic) {
   EXPECT_EQ(
       folly::fbstring("abcdef"), base64Decode("YWJjZGVm")->moveToFbString());
 }
+
+TEST(Base64Test, base64EncodeDecodeShort) {
+  EXPECT_EQ(std::string("YQ=="), base64Encode(folly::StringPiece("a")));
+  EXPECT_EQ(folly::fbstring("a"), base64Decode("YQ==")->moveToFbString());
+}
+
+TEST(Base64Test, base64EncodeDecodeEmpty) {
+  EXPECT_EQ(std::string(""), base64Encode(folly::StringPiece("")));
+  EXPECT_EQ(folly::fbstring(""), base64Decode("==")->moveToFbString());
+}
+
+TEST(Base64Test, base64EncodeDecodeInvalid) {
+  EXPECT_EQ(folly::fbstring(""), base64Decode("Y==")->moveToFbString());
+}

@@ -98,7 +98,10 @@ std::unique_ptr<folly::IOBuf> base64Decode(folly::StringPiece base64) {
     base64.pop_back();
   }
   auto binary = folly::IOBuf::create(base64.size() * 3 / 4);
-  for (size_t idx = 0; idx < base64.size(); idx += 4) {
+  // Valid base64-encoded strings have unpadded length equal to 4k+{0,2,3} for
+  // some k. Break out of the loop if 0 or 1 bytes remain to avoid buffer
+  // overrun on invalid input.
+  for (size_t idx = 0; idx + 1 < base64.size(); idx += 4) {
     auto in = base64.begin() + idx;
     auto out = binary->writableTail();
     auto inLen = std::min(static_cast<int>(base64.end() - in), 4);

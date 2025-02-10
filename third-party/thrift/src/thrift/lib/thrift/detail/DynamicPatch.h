@@ -301,7 +301,7 @@ class DynamicSetPatch : public DynamicPatchBase {
 
   void erase(detail::Badge, Value v) {
     if (auto assign = get_ptr(op::PatchOp::Assign)) {
-      assign->ensure_set().erase(std::move(v));
+      assign->ensure_set().erase(v);
       return;
     }
     if (auto add = get_ptr(op::PatchOp::Add)) {
@@ -311,13 +311,13 @@ class DynamicSetPatch : public DynamicPatchBase {
   }
 
   void addMulti(detail::Badge badge, const detail::ValueSet& add) {
-    for (auto&& i : add) {
+    for (const auto& i : add) {
       insert(badge, i);
     }
   }
 
   void removeMulti(detail::Badge badge, const detail::ValueSet& remove) {
-    for (auto&& i : remove) {
+    for (const auto& i : remove) {
       erase(badge, i);
     }
   }
@@ -377,12 +377,12 @@ class DynamicMapPatch {
 
   void tryPutMulti(detail::Badge, detail::ValueMap v);
   void removeMulti(detail::Badge badge, const detail::ValueSet& v) {
-    for (auto&& k : v) {
+    for (const auto& k : v) {
       erase(badge, k);
     }
   }
   void putMulti(detail::Badge badge, const detail::ValueMap& m) {
-    for (auto&& [k, v] : m) {
+    for (const auto& [k, v] : m) {
       insert_or_assign(badge, k, v);
     }
   }

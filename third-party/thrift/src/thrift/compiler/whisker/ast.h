@@ -41,6 +41,7 @@ struct partial_statement;
 struct interpolation;
 struct let_statement;
 struct pragma_statement;
+struct import_statement;
 
 /**
  * The top-level types of constructs allowed in a Whisker source file.
@@ -65,7 +66,7 @@ using bodies = std::vector<body>;
  * Elements that can appear at the top of a Whisker source file.
  * Whisker does not render these kinds of elements.
  */
-using header = std::variant<comment, pragma_statement>;
+using header = std::variant<comment, pragma_statement, import_statement>;
 using headers = std::vector<header>;
 
 // Defines operator!= in terms of operator==
@@ -423,6 +424,18 @@ struct pragma_statement {
   pragmas pragma;
 
   std::string_view to_string() const;
+};
+
+/**
+ * A Whisker constructor for importing objects exported from other templates.
+ *
+ * {{#import "<path>" as <name>}}
+ */
+struct import_statement {
+  source_range loc;
+
+  expression::string_literal path;
+  identifier name;
 };
 
 /**

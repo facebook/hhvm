@@ -196,6 +196,13 @@ struct ast_visitor {
           " argument '{}={}'", name, arg.value.to_string());
     }
   }
+  void visit(
+      const ast::import_statement& import_statement,
+      tree_printer::scope scope) const {
+    scope.println(" import-statement {}", location(import_statement.loc));
+    scope.open_property().println(" path '{}'", import_statement.path.text);
+    scope.open_property().println(" name '{}'", import_statement.name.name);
+  }
 
   void visit(
       const ast::headers& header_elements, tree_printer::scope scope) const {

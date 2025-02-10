@@ -750,7 +750,7 @@ class parser {
 
   // Parses header elements that can only appear at the top of the source.
   //
-  // header → { comment | pragma-statement }
+  // header → { comment | pragma-statement | import-statement }
   parse_result<ast::header> parse_header(parser_scan_window scan) {
     assert(scan.empty());
 
@@ -774,6 +774,10 @@ class parser {
       if (parse_result maybe_pragma = parse_pragma_statement(scan)) {
         auto pragma = std::move(maybe_pragma).consume_and_advance(&scan);
         return {pragma, scan};
+      }
+      if (parse_result maybe_import = parse_import_statement(scan)) {
+        auto import = std::move(maybe_import).consume_and_advance(&scan);
+        return {std::move(import), scan};
       }
       // Next token is not valid for a header element
       break;
@@ -800,6 +804,10 @@ class parser {
         body = std::move(maybe_text).consume_and_advance(&scan);
       } else if (parse_result maybe_newline = parse_newline(scan)) {
         body = std::move(maybe_newline).consume_and_advance(&scan);
+      } else if (peek_import_statement(scan)) {
+        report_fatal_error(
+            scan,
+            "import statements must appear in the header of a source file");
       } else if (peek_else_clause(scan)) {
         // The "{{#else [if]}}" clause marks the end of the current block (and
         // the beginning of the next one).
@@ -1398,6 +1406,55 @@ class parser {
 
     return {
         ast::pragma_statement{scan.with_start(scan_start).range(), pragma},
+        scan};
+  }
+
+  // { "{{" ~ "#" ~ "import" }
+  parse_result<std::monostate> peek_import_statement(parser_scan_window scan) {
+    if (try_consume_tokens(&scan, {tok::open, tok::pound, tok::kw_import})) {
+      return {{}, scan};
+    }
+    return no_parse_result();
+  }
+
+  // import-statement →
+  //   { "{{" ~ "#" ~ "import" ~ import-path ~ "as" ~ identifier ~ "}}" }
+  // import-path → { string-literal }
+  parse_result<ast::import_statement> parse_import_statement(
+      parser_scan_window scan) {
+    assert(scan.empty());
+    const auto scan_start = scan.start;
+
+    if (auto open = peek_import_statement(scan)) {
+      std::ignore = std::move(open).consume_and_advance(&scan);
+    } else {
+      return no_parse_result();
+    }
+
+    const token* import_path = try_consume_token(&scan, tok::string_literal);
+    if (import_path == nullptr) {
+      report_fatal_expected(scan, "import-path in import-statement");
+    }
+
+    if (!try_consume_token(&scan, tok::kw_as)) {
+      report_fatal_expected(scan, "{} in import-statement", tok::kw_as);
+    }
+
+    const token* id = try_consume_token(&scan, tok::identifier);
+    if (id == nullptr) {
+      report_fatal_expected(scan, "identifier in import-statement");
+    }
+
+    if (!try_consume_token(&scan, tok::close)) {
+      report_fatal_expected(scan, "{} to close import-statement", tok::close);
+    }
+
+    return {
+        ast::import_statement{
+            scan.with_start(scan_start).range(),
+            ast::expression::string_literal{
+                std::string(import_path->string_value())},
+            make_identifier(*id)},
         scan};
   }
 

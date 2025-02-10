@@ -534,6 +534,11 @@ class render_engine {
     // comments are not rendered in the output
   }
 
+  [[noreturn]] void visit(const ast::import_statement& import_statement) {
+    report_fatal_error(
+        import_statement.loc.begin, "Import statements are not supported yet.");
+  }
+
   // Performs a lookup of a variable in the current scope or reports diagnostics
   // on failure. Failing to lookup a variable is a fatal error.
   object::ptr lookup_variable(const ast::variable_lookup& variable_lookup) {

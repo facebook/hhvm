@@ -1643,6 +1643,133 @@ TEST_F(ParserTest, header_consumes_whitespace) {
       "|- pragma-statement 'ignore-newlines' <line:7:1, col:28>\n");
 }
 
+TEST_F(ParserTest, import_statement_basic) {
+  auto ast = parse_ast("{{#import \"path/to/file\" as foo}}");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- header\n"
+      "| |- import-statement <line:1:1, col:34>\n"
+      "| | `- path 'path/to/file'\n"
+      "| | `- name 'foo'\n");
+}
+
+TEST_F(ParserTest, import_statement_with_header_elements) {
+  auto ast = parse_ast(
+      "{{! comment }}\n"
+      "\n"
+      "{{#pragma ignore-newlines}}\n"
+      "\n"
+      "{{#import \"path/to/file\" as foo}}\n");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- header\n"
+      "| |- comment <line:1:1, col:15> ' comment '\n"
+      "| |- pragma-statement 'ignore-newlines' <line:3:1, col:28>\n"
+      "| |- import-statement <line:5:1, col:34>\n"
+      "| | `- path 'path/to/file'\n"
+      "| | `- name 'foo'\n");
+}
+
+TEST_F(ParserTest, import_statement_multiple) {
+  auto ast = parse_ast(
+      "\n"
+      "{{#pragma ignore-newlines}}\n"
+      "\n"
+      "\t{{#import \"path/to/file\" as foo}}\n"
+      "{{! comment }}\n"
+      "  {{#import \"path/to/other\" as bar}}\n"
+      "\n"
+      "Some text");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- header\n"
+      "| |- pragma-statement 'ignore-newlines' <line:2:1, col:28>\n"
+      "| |- import-statement <line:4:2, col:35>\n"
+      "| | `- path 'path/to/file'\n"
+      "| | `- name 'foo'\n"
+      "| |- comment <line:5:1, col:15> ' comment '\n"
+      "| |- import-statement <line:6:3, col:37>\n"
+      "| | `- path 'path/to/other'\n"
+      "| | `- name 'bar'\n"
+      "|- newline <line:7:1, line:8:1> '\\n'\n"
+      "|- text <line:8:1, col:10> 'Some text'\n");
+}
+
+TEST_F(ParserTest, import_statement_not_allowed_in_body) {
+  parse_ast_should_fail(
+      "{{! comment in header }}\n"
+      "Hello\n"
+      "{{#import \"path/to/file\" as foo}}\n");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "import statements must appear in the header of a source file",
+          path_to_file(1),
+          3)));
+}
+
+TEST_F(ParserTest, import_statement_not_allowed_in_nested_body) {
+  parse_ast_should_fail(
+      "{{#if true}}\n"
+      "  {{#import \"path/to/file\" as foo}}\n"
+      "{{/if true}}\n");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "import statements must appear in the header of a source file",
+          path_to_file(1),
+          2)));
+}
+
+TEST_F(ParserTest, import_statement_missing_as_and_name) {
+  parse_ast_should_fail("{{#import \"path/to/file\"}}");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `as` in import-statement but found `}}`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, import_statement_missing_name) {
+  parse_ast_should_fail("{{#import \"path/to/file\" as}}");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected identifier in import-statement but found `}}`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, import_statement_name_is_expression) {
+  parse_ast_should_fail(R"({{#import "path/to/file" as "foo"}})");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected identifier in import-statement but found string literal",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, import_statement_name_is_not_string_literal) {
+  parse_ast_should_fail("{{#import path/to/file as foo}}");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected import-path in import-statement but found identifier",
+          path_to_file(1),
+          1)));
+}
+
 TEST_F(ParserTest, strip_standalone_lines) {
   auto ast = parse_ast(
       "| This Is\n"

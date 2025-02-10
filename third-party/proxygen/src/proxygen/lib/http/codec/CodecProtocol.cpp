@@ -69,6 +69,10 @@ extern bool isValidCodecProtocolStr(folly::StringPiece protocolStr) {
          protocolStr == http_binary;
 }
 
+extern bool isHTTP1_1CodecProtocol(CodecProtocol protocol) {
+  return protocol == CodecProtocol::HTTP_1_1;
+}
+
 extern bool isHTTP2CodecProtocol(CodecProtocol protocol) {
   return protocol == CodecProtocol::HTTP_2;
 }

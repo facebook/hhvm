@@ -41,6 +41,11 @@ extern bool isValidCodecProtocolStr(folly::StringPiece protocolStr);
 extern CodecProtocol getCodecProtocolFromStr(folly::StringPiece protocolStr);
 
 /**
+ * Check if the given protocol is HTTP 1.1
+ */
+extern bool isHTTP1_1CodecProtocol(CodecProtocol protocol);
+
+/**
  * Check if the given protocol is HTTP2.
  */
 extern bool isHTTP2CodecProtocol(CodecProtocol protocol);

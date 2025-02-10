@@ -1308,6 +1308,10 @@ class Derive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShap
           shape(
           )
         ),
+        '\facebook\thrift\annotation\Union' => \facebook\thrift\annotation\Union::fromShape(
+          shape(
+          )
+        ),
       ],
       'fields' => dict[
       ],

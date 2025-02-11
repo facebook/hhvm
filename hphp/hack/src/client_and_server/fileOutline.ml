@@ -86,7 +86,6 @@ let summarize_property ~(source_text : string option) class_name var =
     pos;
     span = var.cv_span;
     modifiers;
-    children = None;
     params = None;
     docblock = None;
     detail;
@@ -125,7 +124,6 @@ let summarize_class_const ~(source_text : string option) class_name cc =
     pos;
     span;
     modifiers;
-    children = None;
     params = None;
     docblock = None;
     detail;
@@ -160,7 +158,6 @@ let summarize_class_typeconst ~(source_text : string option) class_name t =
     pos;
     span = t.c_tconst_span;
     modifiers;
-    children = None;
     params = None;
     docblock = None;
     detail;
@@ -196,7 +193,6 @@ let summarize_param param =
     class_name = None;
     pos;
     span = Pos.btw param_start param_end;
-    children = None;
     modifiers;
     params = None;
     docblock = None;
@@ -246,7 +242,6 @@ let summarize_method ~(source_text : string option) class_name m =
     pos = fst m.m_name;
     span = m.m_span;
     modifiers;
-    children = None;
     params;
     docblock = None;
     detail;
@@ -284,9 +279,9 @@ let summarize_class ~(source_text : string option) class_ ~no_children =
     else
       modifiers
   in
-  let children =
+  let members =
     if no_children then
-      None
+      []
     else
       let implicit_props =
         List.fold (class_implicit_fields class_) ~f:SSet.add ~init:SSet.empty
@@ -363,9 +358,9 @@ let summarize_class ~(source_text : string option) class_ ~no_children =
         let cmp x y = Int.compare (Pos.line x.pos) (Pos.line y.pos) in
         List.sort ~compare:cmp summaries
       in
-      Some (sort_by_line acc)
+      sort_by_line acc
   in
-  let kind =
+  let classish_kind =
     match class_.c_kind with
     | Ast_defs.Cinterface -> Interface
     | Ast_defs.Ctrait -> Trait
@@ -376,13 +371,12 @@ let summarize_class ~(source_text : string option) class_ ~no_children =
   in
   let name = class_name in
   {
-    kind;
+    kind = Classish { classish_kind; members };
     name;
     class_name = Some class_name;
     pos = class_name_pos;
     span = c_span;
     modifiers;
-    children;
     params = None;
     docblock = None;
     detail = None;
@@ -406,7 +400,6 @@ let summarize_typedef ~(source_text : string option) (tdef : _ typedef) :
     pos;
     span;
     modifiers = [];
-    children = None;
     params = None;
     docblock = None;
     detail;
@@ -429,7 +422,6 @@ let summarize_fun ~(source_text : string option) fd =
     pos = fst fd.fd_name;
     span = f.f_span;
     modifiers;
-    children = None;
     params;
     docblock = None;
     detail;
@@ -454,7 +446,6 @@ let summarize_gconst ~(source_text : string option) (cst : _ gconst) :
     pos;
     span;
     modifiers = [];
-    children = None;
     params = None;
     docblock = None;
     detail;
@@ -469,7 +460,6 @@ let summarize_local name span =
     pos = span;
     span;
     modifiers = [];
-    children = None;
     params = None;
     docblock = None;
     detail = None;
@@ -492,7 +482,6 @@ let summarize_module_def md =
     pos = span;
     span;
     modifiers = [];
-    children = None;
     params = None;
     docblock;
     detail = None;
@@ -519,14 +508,11 @@ let outline_ast ast ~(source_text : string option) =
 
 let should_add_docblock = function
   | Function
-  | Class
+  | Classish _
   | Method
   | Property
   | ClassConst
   | GlobalConst
-  | Enum
-  | Interface
-  | Trait
   | Typeconst
   | Typedef
   | Module ->
@@ -550,15 +536,24 @@ let add_docblocks defs comments =
   let finder = Docblock_finder.make_docblock_finder comments in
   let rec map_def f (acc : int) (def : string SymbolDefinition.t) =
     let (acc, def) = f acc def in
-    let (acc, children) =
-      Option.value_map
-        def.children
-        ~f:(fun defs ->
-          let (acc, defs) = map_def_list f acc defs in
-          (acc, Some defs))
-        ~default:(acc, None)
+    let (acc, kind) =
+      match def.kind with
+      | Classish { classish_kind; members } ->
+        let (acc, members) = map_def_list f acc members in
+        (acc, Classish { classish_kind; members })
+      | Function -> (acc, Function)
+      | Method -> (acc, Method)
+      | Property -> (acc, Property)
+      | ClassConst -> (acc, ClassConst)
+      | GlobalConst -> (acc, GlobalConst)
+      | LocalVar -> (acc, LocalVar)
+      | TypeVar -> (acc, TypeVar)
+      | Typeconst -> (acc, Typeconst)
+      | Param -> (acc, Param)
+      | Typedef -> (acc, Typedef)
+      | Module -> (acc, Module)
     in
-    (acc, { def with children })
+    (acc, { def with kind })
   and map_def_list f (acc : int) (defs : string SymbolDefinition.t list) =
     let (acc, defs) =
       List.fold_left
@@ -607,7 +602,6 @@ let rec print_def ~short_pos indent def =
     pos;
     span;
     modifiers;
-    children;
     params;
     docblock;
     class_name = _;
@@ -638,7 +632,9 @@ let rec print_def ~short_pos indent def =
       Printf.printf "%s  docblock:\n" indent;
       Printf.printf "%s\n" x);
   Printf.printf "\n";
-  Option.iter children ~f:(fun x -> print ~short_pos (indent ^ "  ") x)
+  match kind with
+  | Classish { members; _ } -> print ~short_pos (indent ^ "  ") members
+  | _ -> ()
 
 and print ~short_pos indent defs =
   List.iter defs ~f:(print_def ~short_pos indent)

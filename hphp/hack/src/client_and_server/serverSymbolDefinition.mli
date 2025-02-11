@@ -16,7 +16,7 @@ val go :
 val get_definition_cst_node_ctx :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
-  kind:SymbolDefinition.kind ->
+  kind:'a SymbolDefinition.kind ->
   pos:'a Pos.pos ->
   Full_fidelity_positioned_syntax.t option
 

@@ -46,7 +46,6 @@ let sym_def_of_tparam (tp : ('a, 'b) Aast.tparam) :
       pos;
       span = pos;
       modifiers = [];
-      children = None;
       params = None;
       docblock;
       detail = None;

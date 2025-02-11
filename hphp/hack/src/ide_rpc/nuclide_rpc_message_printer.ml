@@ -103,7 +103,10 @@ let rec definition_to_json def =
     in
     let children =
       opt_field
-        ~v_opt:def.children
+        ~v_opt:
+          (match def.kind with
+          | Classish { members; _ } -> Some members
+          | _ -> None)
         ~label:"children"
         ~f:outline_response_to_json
     in

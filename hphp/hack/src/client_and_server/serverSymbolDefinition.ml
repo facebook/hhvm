@@ -213,7 +213,8 @@ let get_definition_cst_node_from_pos ctx entry kind pos =
     List.find parents ~f:(fun syntax ->
         match (kind, Syntax.kind syntax) with
         | (SymbolDefinition.Function, SyntaxKind.FunctionDeclaration)
-        | (SymbolDefinition.Class, SyntaxKind.ClassishDeclaration)
+        | ( SymbolDefinition.(Classish { classish_kind = Class; _ }),
+            SyntaxKind.ClassishDeclaration )
         | (SymbolDefinition.Method, SyntaxKind.MethodishDeclaration)
         | (SymbolDefinition.Property, SyntaxKind.PropertyDeclaration)
         | (SymbolDefinition.Property, SyntaxKind.XHPClassAttribute)
@@ -221,10 +222,14 @@ let get_definition_cst_node_from_pos ctx entry kind pos =
         | (SymbolDefinition.GlobalConst, SyntaxKind.ConstDeclaration)
         | (SymbolDefinition.ClassConst, SyntaxKind.EnumClassEnumerator)
         | (SymbolDefinition.ClassConst, SyntaxKind.Enumerator)
-        | (SymbolDefinition.Enum, SyntaxKind.EnumDeclaration)
-        | (SymbolDefinition.Enum, SyntaxKind.EnumClassDeclaration)
-        | (SymbolDefinition.Interface, SyntaxKind.ClassishDeclaration)
-        | (SymbolDefinition.Trait, SyntaxKind.ClassishDeclaration)
+        | ( SymbolDefinition.(Classish { classish_kind = Enum; _ }),
+            SyntaxKind.EnumDeclaration )
+        | ( SymbolDefinition.(Classish { classish_kind = Enum; _ }),
+            SyntaxKind.EnumClassDeclaration )
+        | ( SymbolDefinition.(Classish { classish_kind = Interface; _ }),
+            SyntaxKind.ClassishDeclaration )
+        | ( SymbolDefinition.(Classish { classish_kind = Trait; _ }),
+            SyntaxKind.ClassishDeclaration )
         | (SymbolDefinition.LocalVar, SyntaxKind.VariableExpression)
         | (SymbolDefinition.Typeconst, SyntaxKind.TypeConstDeclaration)
         | (SymbolDefinition.Param, SyntaxKind.ParameterDeclaration)
@@ -237,6 +242,6 @@ let get_definition_cst_node_from_pos ctx entry kind pos =
 let get_definition_cst_node_ctx
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
-    ~(kind : SymbolDefinition.kind)
+    ~(kind : 'a SymbolDefinition.kind)
     ~(pos : 'a Pos.pos) : Full_fidelity_positioned_syntax.t option =
   get_definition_cst_node_from_pos ctx entry kind pos

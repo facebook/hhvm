@@ -67,11 +67,7 @@ let classish_docs_url ctx classish_name : string option =
 let docs_url ctx def : string option =
   let open SymbolDefinition in
   match def.kind with
-  | Class
-  | Enum
-  | Interface
-  | Trait ->
-    classish_docs_url ctx def.name
+  | Classish _ -> classish_docs_url ctx def.name
   | Typedef -> typedef_docs_url ctx def.name
   | Function
   | Method
@@ -425,7 +421,13 @@ let fun_defined_in def_opt : string =
     )
   | _ -> ""
 
-let make_hover_info under_dynamic_result ctx info_opt entry occurrence def_opt =
+let make_hover_info
+    under_dynamic_result
+    ctx
+    (info_opt : ServerInferType.t option)
+    entry
+    occurrence
+    def_opt =
   let open SymbolOccurrence in
   let defined_in =
     match def_opt with

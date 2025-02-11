@@ -2614,14 +2614,17 @@ let rec hack_symbol_tree_to_lsp
   let open SymbolDefinition in
   let hack_to_lsp_kind = function
     | SymbolDefinition.Function -> SymbolInformation.Function
-    | SymbolDefinition.Class -> SymbolInformation.Class
+    | SymbolDefinition.(Classish { classish_kind = Class; _ }) ->
+      SymbolInformation.Class
     | SymbolDefinition.Method -> SymbolInformation.Method
     | SymbolDefinition.Property -> SymbolInformation.Property
     | SymbolDefinition.ClassConst -> SymbolInformation.Constant
     | SymbolDefinition.GlobalConst -> SymbolInformation.Constant
-    | SymbolDefinition.Enum -> SymbolInformation.Enum
-    | SymbolDefinition.Interface -> SymbolInformation.Interface
-    | SymbolDefinition.Trait -> SymbolInformation.Interface
+    | SymbolDefinition.(Classish { classish_kind = Enum; _ }) ->
+      SymbolInformation.Enum
+    | SymbolDefinition.(Classish { classish_kind = Interface; _ })
+    | SymbolDefinition.(Classish { classish_kind = Trait; _ }) ->
+      SymbolInformation.Interface
     (* LSP doesn't have traits, so we approximate with interface *)
     | SymbolDefinition.LocalVar -> SymbolInformation.Variable
     | SymbolDefinition.TypeVar -> SymbolInformation.TypeParameter
@@ -2649,7 +2652,11 @@ let rec hack_symbol_tree_to_lsp
   (* Flattens the recursive list of symbols *)
   | [] -> List.rev accu
   | def :: defs ->
-    let children = Option.value def.children ~default:[] in
+    let children =
+      match def.kind with
+      | Classish { members; _ } -> members
+      | _ -> []
+    in
     let accu = hack_symbol_to_lsp def container_name :: accu in
     let accu =
       hack_symbol_tree_to_lsp

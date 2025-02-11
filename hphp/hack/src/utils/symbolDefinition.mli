@@ -7,23 +7,11 @@
  *
  *)
 
-type kind =
-  | Function
+type classish_kind =
   | Class
-  | Method
-  | Property
-  | ClassConst
-  | GlobalConst
-  | Enum
   | Interface
   | Trait
-  | LocalVar
-  | TypeVar
-  | Typeconst
-  | Param
-  | Typedef
-  | Module
-[@@deriving ord, show]
+  | Enum
 
 type modifier =
   | Final
@@ -37,8 +25,26 @@ type modifier =
   | Internal
 [@@deriving ord, show]
 
-type 'a t = {
-  kind: kind;
+type 'a kind =
+  | Function
+  | Classish of {
+      classish_kind: classish_kind;
+      members: 'a t list;
+    }
+  | Method
+  | Property
+  | ClassConst
+  | GlobalConst
+  | LocalVar
+  | TypeVar
+  | Typeconst
+  | Param
+  | Typedef
+  | Module
+[@@deriving ord, show]
+
+and 'a t = {
+  kind: 'a kind;
   name: string;
   class_name: string option;
       (** The class name if this definition is for a class or a class member, None otherwise. *)
@@ -46,8 +52,6 @@ type 'a t = {
   span: 'a Pos.pos;
       (** covers the span of the entire construct, including children *)
   modifiers: modifier list;
-  children: 'a t list option;
-      (** For classes, the list of its members' definitions. *)
   params: 'a t list option;
       (** For functions and methods, the list of its parameter definitions *)
   docblock: string option;
@@ -68,10 +72,10 @@ val to_relative : string t -> Relative_path.t t
 (** For a class member definition, a string like `ClassName::memberName`. Otherwise just the `name`. *)
 val full_name : 'a t -> string
 
-val string_of_kind : kind -> string
-
 (** A string like <kind>::Type or <kind>::Type::member where `kind` is one of "function",
    "type_id", "method", etc. None for type var, local var and params *)
 val identifier : 'a t -> string option
+
+val string_of_kind : 'a kind -> string
 
 val string_of_modifier : modifier -> string

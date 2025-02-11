@@ -547,13 +547,10 @@ let new_name_for_symbol_definition
     else
       strip_dollar new_name
   | SymbolDefinition.Function
-  | SymbolDefinition.Class
+  | SymbolDefinition.Classish _
   | SymbolDefinition.Method
   | SymbolDefinition.ClassConst
   | SymbolDefinition.GlobalConst
-  | SymbolDefinition.Enum
-  | SymbolDefinition.Interface
-  | SymbolDefinition.Trait
   | SymbolDefinition.LocalVar
   | SymbolDefinition.TypeVar
   | SymbolDefinition.Typeconst

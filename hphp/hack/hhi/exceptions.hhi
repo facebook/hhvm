@@ -88,7 +88,7 @@ namespace {
     public function __construct(
       protected string $message = '',
       int $code = 0,
-      protected ?Exception $previous = null,
+      private ?Exception $previous = null,
     )[];
 
     /**

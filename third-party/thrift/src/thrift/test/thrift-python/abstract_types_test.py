@@ -250,12 +250,15 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             ),
         ]
     )
-    def test_exception(
+    def test_validate_that_exception_to_raise_derives_from_exception_to_catch(
         self,
         test_name: str,
         exception_to_raise: typing.Type[TestExceptionAllThriftPrimitiveTypesAbstract],
         exception_to_catch: typing.Type[Error],
     ) -> None:
+        """
+        This test checks that the raised exception (exception_to_raise) derives from the exception to catch (exception_to_catch).
+        """
         try:
             raise exception_to_raise
         except exception_to_catch as ex:
@@ -263,6 +266,8 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
                 len(ex.args),
                 16,
             )
+        except Exception as ex:
+            self.fail(f"{type(ex)} does not derive from {exception_to_catch}")
 
     @parameterized.expand(
         [

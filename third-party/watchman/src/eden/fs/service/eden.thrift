@@ -252,6 +252,11 @@ struct MountArgument {
   3: bool readOnly;
 }
 
+struct UnmountArgument {
+  1: MountId mountId;
+  2: bool useForce = true;
+}
+
 union SHA1Result {
   1: BinaryHash sha1;
   2: EdenError error;
@@ -2020,6 +2025,7 @@ service EdenService extends fb303_core.BaseService {
   list<MountInfo> listMounts() throws (1: EdenError ex);
   void mount(1: MountArgument info) throws (1: EdenError ex);
   void unmount(1: PathString mountPoint) throws (1: EdenError ex);
+  void unmountV2(1: UnmountArgument unmountArgument) throws (1: EdenError ex);
 
   /**
    * Potentially check out the specified snapshot, reporting conflicts (and

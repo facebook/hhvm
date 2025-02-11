@@ -7,6 +7,8 @@
  */
 
 #include <fizz/backend/liboqs/OQSKeyExchange.h>
+
+#if FIZZ_HAVE_OQS
 #include <folly/portability/GTest.h>
 
 using namespace fizz;
@@ -99,3 +101,4 @@ TEST(OQSKeyExchangeTest, FailedCloneTest) {
   EXPECT_THROW(serverKex.clone(), std::runtime_error);
 }
 } // namespace fizz::test
+#endif

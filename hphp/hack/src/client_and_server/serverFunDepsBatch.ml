@@ -18,9 +18,7 @@ open Hh_prelude
  *)
 
 module T = Aast
-module S = ServerRxApiShared
 module SN = Naming_special_names
-open SymbolOccurrence
 
 module Results = Stdlib.Set.Make (struct
   type t = Relative_path.t SymbolOccurrence.t
@@ -31,8 +29,8 @@ end)
 let process_method_cid n cid =
   Results.singleton
     {
-      name = cid ^ "::" ^ snd n;
-      type_ = Method (ClassName cid, snd n);
+      SymbolOccurrence.name = cid ^ "::" ^ snd n;
+      type_ = SymbolOccurrence.Method (SymbolOccurrence.ClassName cid, snd n);
       is_declaration = None;
       pos = fst n;
     }
@@ -44,11 +42,21 @@ let process_method env ty n =
 
 let process_function id =
   Results.singleton
-    { name = snd id; type_ = Function; is_declaration = None; pos = fst id }
+    {
+      SymbolOccurrence.name = snd id;
+      type_ = SymbolOccurrence.Function;
+      is_declaration = None;
+      pos = fst id;
+    }
 
 let process_local id =
   Results.singleton
-    { name = snd id; type_ = LocalVar; is_declaration = None; pos = fst id }
+    {
+      SymbolOccurrence.name = snd id;
+      type_ = SymbolOccurrence.LocalVar;
+      is_declaration = None;
+      pos = fst id;
+    }
 
 let collect_in_decl =
   object (self)
@@ -97,7 +105,7 @@ let result_to_string result (fn, line, char) =
     let obj =
       JSON_Object
         [
-          ("position", S.pos_to_json fn line char);
+          ("position", ServerRxApiShared.pos_to_json fn line char);
           (match result with
           | Ok (Some refs) ->
             ( "deps",
@@ -136,31 +144,30 @@ let remove_duplicates_except_none ~compare l =
   in
   List.rev (loop l [])
 
-let handlers =
+let handlers :
+    ( Results.t,
+      Relative_path.t SymbolDefinition.t option list,
+      Nast.program )
+    ServerRxApiShared.handlers =
   let compare =
     Option.compare (SymbolDefinition.compare Relative_path.compare)
   in
   {
-    S.result_to_string;
-    S.walker =
+    ServerRxApiShared.result_to_string;
+    walker =
       {
-        S.plus = collect_in_decl#plus;
-        S.on_method = collect_in_decl#on_method_;
-        S.on_fun_def = collect_in_decl#on_fun_def;
+        ServerRxApiShared.plus = collect_in_decl#plus;
+        on_method = collect_in_decl#on_method_;
+        on_fun_def = collect_in_decl#on_fun_def;
       };
-    S.get_state =
-      begin
-        (fun ctx fn -> Ast_provider.get_ast ~full:true ctx fn)
-      end;
-    S.map_result =
-      begin
-        fun ctx ast refs ->
-          let ast = Some ast in
-          Results.elements refs
-          |> List.map ~f:(ServerSymbolDefinition.go ctx ast)
-          |> List.sort ~compare
-          |> remove_duplicates_except_none ~compare
-      end;
+    get_state = (fun ctx fn -> Ast_provider.get_ast ~full:true ctx fn);
+    map_result =
+      (fun ctx ast refs ->
+        let ast = Some ast in
+        Results.elements refs
+        |> List.map ~f:(ServerSymbolDefinition.go ctx ast)
+        |> List.sort ~compare
+        |> remove_duplicates_except_none ~compare);
   }
 
 (* Entry Point *)

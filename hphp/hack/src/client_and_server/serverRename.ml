@@ -297,7 +297,7 @@ let get_deprecated_wrapper_patch
 
          Thus, we subtract 1.
       *)
-      let { SymbolDefinition.span; pos; class_name; kind; _ } = definition in
+      let { SymbolDefinition.span; pos; kind; _ } = definition in
       let (_, col_start_plus1, _, _) = Pos.destruct_range_one_based span in
       let col_start = col_start_plus1 - 1 in
       let (_ctx, entry) =
@@ -325,8 +325,9 @@ let get_deprecated_wrapper_patch
               DeprecatedNonStaticMethodRef
           in
 
-          (match class_name with
-          | Some name when classish_is_interface ctx name ->
+          (match kind with
+          | SymbolDefinition.Member { class_name; _ }
+            when classish_is_interface ctx class_name ->
             (* We can't add a stub that calls the new name in
                interfaces, as methods can't have bodies there. *)
             None
@@ -520,7 +521,7 @@ let new_name_for_symbol_definition
       s
   in
   match symbol_definition.SymbolDefinition.kind with
-  | SymbolDefinition.Property ->
+  | SymbolDefinition.(Member { member_kind = Property; _ }) ->
     (* For static properties: they always have a $-sign prefix.
        For non-static properties:
          - On the definition site they have a $-sign prefix.
@@ -548,12 +549,10 @@ let new_name_for_symbol_definition
       strip_dollar new_name
   | SymbolDefinition.Function
   | SymbolDefinition.Classish _
-  | SymbolDefinition.Method
-  | SymbolDefinition.ClassConst
+  | SymbolDefinition.Member _
   | SymbolDefinition.GlobalConst
   | SymbolDefinition.LocalVar
   | SymbolDefinition.TypeVar
-  | SymbolDefinition.Typeconst
   | SymbolDefinition.Param
   | SymbolDefinition.Typedef
   | SymbolDefinition.Module ->

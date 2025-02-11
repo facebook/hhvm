@@ -22,7 +22,8 @@ let pos_to_json fn line char =
         ("character", int_ char);
       ])
 
-let recheck_typing ctx (pos_list : pos list) =
+let compute_tasts ctx (pos_list : pos list) :
+    (Relative_path.t * Tast.program Tast_with_dynamic.t) list =
   let files_to_check =
     pos_list
     |> List.map ~f:(fun (path, _, _) -> path)
@@ -84,10 +85,11 @@ let prepare_pos_infos pos_list =
   |> List.map ~f:(fun (path, line, char) ->
          (Relative_path.create_detect_prefix path, line, char))
 
-let helper h ctx acc pos_list =
+let helper (h : (_, 'result, 'state) handlers) ctx (acc : string list) pos_list
+    =
   let tasts =
     List.fold
-      (recheck_typing ctx pos_list)
+      (compute_tasts ctx pos_list)
       ~init:Relative_path.Map.empty
       ~f:(fun map (key, data) -> Relative_path.Map.add map ~key ~data)
   in

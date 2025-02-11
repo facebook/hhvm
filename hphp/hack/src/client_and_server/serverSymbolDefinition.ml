@@ -215,13 +215,19 @@ let get_definition_cst_node_from_pos ctx entry kind pos =
         | (SymbolDefinition.Function, SyntaxKind.FunctionDeclaration)
         | ( SymbolDefinition.(Classish { classish_kind = Class; _ }),
             SyntaxKind.ClassishDeclaration )
-        | (SymbolDefinition.Method, SyntaxKind.MethodishDeclaration)
-        | (SymbolDefinition.Property, SyntaxKind.PropertyDeclaration)
-        | (SymbolDefinition.Property, SyntaxKind.XHPClassAttribute)
-        | (SymbolDefinition.ClassConst, SyntaxKind.ConstDeclaration)
+        | ( SymbolDefinition.(Member { member_kind = Method; _ }),
+            SyntaxKind.MethodishDeclaration )
+        | ( SymbolDefinition.(Member { member_kind = Property; _ }),
+            SyntaxKind.PropertyDeclaration )
+        | ( SymbolDefinition.(Member { member_kind = Property; _ }),
+            SyntaxKind.XHPClassAttribute )
+        | ( SymbolDefinition.(Member { member_kind = ClassConst; _ }),
+            SyntaxKind.ConstDeclaration )
         | (SymbolDefinition.GlobalConst, SyntaxKind.ConstDeclaration)
-        | (SymbolDefinition.ClassConst, SyntaxKind.EnumClassEnumerator)
-        | (SymbolDefinition.ClassConst, SyntaxKind.Enumerator)
+        | ( SymbolDefinition.(Member { member_kind = ClassConst; _ }),
+            SyntaxKind.EnumClassEnumerator )
+        | ( SymbolDefinition.(Member { member_kind = ClassConst; _ }),
+            SyntaxKind.Enumerator )
         | ( SymbolDefinition.(Classish { classish_kind = Enum; _ }),
             SyntaxKind.EnumDeclaration )
         | ( SymbolDefinition.(Classish { classish_kind = Enum; _ }),
@@ -231,7 +237,8 @@ let get_definition_cst_node_from_pos ctx entry kind pos =
         | ( SymbolDefinition.(Classish { classish_kind = Trait; _ }),
             SyntaxKind.ClassishDeclaration )
         | (SymbolDefinition.LocalVar, SyntaxKind.VariableExpression)
-        | (SymbolDefinition.Typeconst, SyntaxKind.TypeConstDeclaration)
+        | ( SymbolDefinition.(Member { member_kind = TypeConst; _ }),
+            SyntaxKind.TypeConstDeclaration )
         | (SymbolDefinition.Param, SyntaxKind.ParameterDeclaration)
         | (SymbolDefinition.Typedef, SyntaxKind.AliasDeclaration) ->
           true

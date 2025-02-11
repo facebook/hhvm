@@ -2616,9 +2616,14 @@ let rec hack_symbol_tree_to_lsp
     | SymbolDefinition.Function -> SymbolInformation.Function
     | SymbolDefinition.(Classish { classish_kind = Class; _ }) ->
       SymbolInformation.Class
-    | SymbolDefinition.Method -> SymbolInformation.Method
-    | SymbolDefinition.Property -> SymbolInformation.Property
-    | SymbolDefinition.ClassConst -> SymbolInformation.Constant
+    | SymbolDefinition.Member { member_kind; _ } ->
+      (match member_kind with
+      | SymbolDefinition.Method -> SymbolInformation.Method
+      | SymbolDefinition.Property -> SymbolInformation.Property
+      | SymbolDefinition.ClassConst -> SymbolInformation.Constant
+      | SymbolDefinition.TypeConst ->
+        SymbolInformation.Class
+        (* e.g. "const type Ta = string;" -- absent from LSP *))
     | SymbolDefinition.GlobalConst -> SymbolInformation.Constant
     | SymbolDefinition.(Classish { classish_kind = Enum; _ }) ->
       SymbolInformation.Enum
@@ -2628,8 +2633,6 @@ let rec hack_symbol_tree_to_lsp
     (* LSP doesn't have traits, so we approximate with interface *)
     | SymbolDefinition.LocalVar -> SymbolInformation.Variable
     | SymbolDefinition.TypeVar -> SymbolInformation.TypeParameter
-    | SymbolDefinition.Typeconst -> SymbolInformation.Class
-    (* e.g. "const type Ta = string;" -- absent from LSP *)
     | SymbolDefinition.Typedef -> SymbolInformation.Class
     (* e.g. top level type alias -- absent from LSP *)
     | SymbolDefinition.Param -> SymbolInformation.Variable

@@ -213,7 +213,7 @@ let tests =
     );
     (* handle chained calls *)
     ( (fst f5, 22, 10),
-      {|{"position":{"file":"/f5.php","line":22,"character":10},"deps":[{"name":"D::getc","kind":"method","position":{"filename":"/f5.php","line":27,"char_start":26,"char_end":29}},{"name":"C::m","kind":"method","position":{"filename":"/f5.php","line":17,"char_start":19,"char_end":19}}]}|}
+      {|{"position":{"file":"/f5.php","line":22,"character":10},"deps":[{"name":"C::m","kind":"method","position":{"filename":"/f5.php","line":17,"char_start":19,"char_end":19}},{"name":"D::getc","kind":"method","position":{"filename":"/f5.php","line":27,"char_start":26,"char_end":29}}]}|}
     );
     (* should look into lambdas *)
     ( (fst f6, 2, 10),

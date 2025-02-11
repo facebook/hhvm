@@ -70,14 +70,11 @@ let docs_url ctx def : string option =
   | Classish _ -> classish_docs_url ctx def.name
   | Typedef -> typedef_docs_url ctx def.name
   | Function
-  | Method
-  | Property
-  | ClassConst
+  | Member _
   | GlobalConst
   | LocalVar
   | TypeVar
   | Param
-  | Typeconst
   | Module ->
     None
 

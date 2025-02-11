@@ -25,19 +25,25 @@ type modifier =
   | Internal
 [@@deriving ord, show]
 
+type member_kind =
+  | Method
+  | Property
+  | ClassConst
+  | TypeConst
+
 type 'a kind =
   | Function
   | Classish of {
       classish_kind: classish_kind;
       members: 'a t list;
     }
-  | Method
-  | Property
-  | ClassConst
+  | Member of {
+      member_kind: member_kind;
+      class_name: string;
+    }
   | GlobalConst
   | LocalVar
   | TypeVar
-  | Typeconst
   | Param
   | Typedef
   | Module
@@ -46,8 +52,6 @@ type 'a kind =
 and 'a t = {
   kind: 'a kind;
   name: string;
-  class_name: string option;
-      (** The class name if this definition is for a class or a class member, None otherwise. *)
   pos: 'a Pos.pos;  (** covers the span of just the identifier *)
   span: 'a Pos.pos;
       (** covers the span of the entire construct, including children *)

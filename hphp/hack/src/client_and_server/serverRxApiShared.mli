@@ -8,6 +8,8 @@
 
 type pos = Relative_path.t * int * int
 
+type spos = string * int * int
+
 val pos_to_json : Relative_path.t -> int -> int -> Hh_json.json
 
 type 'a walker = {
@@ -25,7 +27,7 @@ type ('a, 'r, 's) handlers = {
 
 val go :
   MultiWorker.worker list option ->
-  (string * int * int) list ->
+  spos list ->
   ServerEnv.env ->
   ('a, 'b, 'c) handlers ->
   string list

@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include <common/logging/logging.h>
 #include <folly/container/F14Map.h>
 #include <folly/container/F14Set.h>
 #include <folly/synchronization/Baton.h>
@@ -739,9 +738,8 @@ class ConnectionPool
     // Check server_status for in_transaction bit
     if (mysql_conn->inTransaction()) {
       // To avoid complication, we are just going to close the connection
-      LOG_EVERY_N_ATOMIC(INFO, 1000)
-          << "Closing connection during a transaction."
-          << " Transaction will rollback.";
+      LOG_EVERY_N(INFO, 1000) << "Closing connection during a transaction."
+                              << " Transaction will rollback.";
       return;
     }
 

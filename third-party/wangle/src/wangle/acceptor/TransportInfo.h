@@ -41,11 +41,19 @@ class AsyncSocket;
 namespace wangle {
 
 /**
- * A struct that can store additional information specific to the protocol being
- * used.
+ * A struct that can store additional information specific to the Transport
+ * Protocol being used (e.g., tcp, quic, etc.).
  */
 struct ProtocolInfo {
   virtual ~ProtocolInfo() = default;
+};
+
+/**
+ * A struct that can store additional information specific to the security
+ * protocol being used (TLS, other encryption, etc.).
+ */
+struct SecurityProtocolInfo {
+  virtual ~SecurityProtocolInfo() = default;
 };
 
 struct TransportInfo {
@@ -234,7 +242,6 @@ struct TransportInfo {
    * it is a server side address. Otherwise, it is a client side address.
    */
   std::shared_ptr<folly::SocketAddress> remoteAddr;
-
   /**
    * the address of the local side. If the TransportInfo is associated with the
    * downstream transport in a proxy server, this is an VIP address.
@@ -285,6 +292,11 @@ struct TransportInfo {
    * resumed session, or neither (non-SSL).
    */
   SSLResumeEnum sslResume{SSLResumeEnum::NA};
+
+  /*
+   * Additional security protocol information, not guaranteed to be present
+   */
+  std::shared_ptr<SecurityProtocolInfo> securityProtocolInfo{nullptr};
 
   /*
    * time used to get a usable connection.

@@ -111,11 +111,11 @@ Given the rules above, the following changes to Thrift structs will maintain com
 * Changing an **optional** field to **unqualified**
 * Changing an **optional** field to **terse**
 * Changing an **unqualified** field to **required**
-* Changing an **unqualified** field to **optional**
-* Changing an **unqualified** field to **terse**
+* Changing an **unqualified** field to **optional** (see [caution](#caution_unqualified_to_optional) below)
+* Changing an **unqualified** field to **terse** (see [caution](#caution_unqualified_to_terse) below)
 * Changing an **terse** field to **unqualified**
 * Changing an **terse** field to **optional**
-* Changing an **optional** field to **terse**
+* Changing an **optional** field to **terse** (see [caution](#caution_optional_to_terse) below)
 * Deleting an **optional** field
 * Deleting an **unqualified** field
 * Adding a new **optional** field
@@ -125,19 +125,19 @@ Given the rules above, the following changes to Thrift structs will maintain com
 
 :::caution
 
-The **unqualified** to **optional** migration, while compatible from the protocol standpoint, is potentially unsafe because it changes access semantics. For example, in C++ reading an unset optional fields may throw. Also if any C++ code uses legacy field writes (`s.field = ..`) to set a newly optional field, field values will be silently dropped during serialization after making the field optional. Ensure all clients are migrated to setters (`s.field_ref() = ..`) first.
+<a id="caution_unqualified_to_optional"></a>The **unqualified** to **optional** migration, while compatible from the protocol standpoint, is potentially unsafe because it changes access semantics. For example, in C++ reading an unset optional field may throw. Also if any C++ code uses legacy field writes (`s.field = ..`) to set a newly optional field, field values will be silently dropped during serialization after making the field optional. Migrate all clients to setters (`s.field_ref() = ..`) first.
 
 :::
 
 :::caution
 
-The **unqualified** to **terse** migration, while compatible from the protocol standpoint, is potentially dangerous if the field has a [custom default value](./#pre-defined-value). A **terse** field can not distinguish whether a field was absent due to IDL version mismatch or skipped serialization as it was equal to the intrinsic default value. Therefore, if a field is missing in the serialized binary, a **terse** field is cleared to the intrinsic default value; meanwhile, an **unqualified** field holds the custom default value.
+<a id="caution_unqualified_to_terse"></a>The **unqualified** to **terse** migration, while compatible from the protocol standpoint, is potentially dangerous if the field has a [custom default value](./#pre-defined-value). A **terse** field can not distinguish whether a field was absent due to IDL version mismatch or skipped serialization as it was equal to the intrinsic default value. Therefore, if a field is missing in the serialized binary, a **terse** field is cleared to the intrinsic default value; meanwhile, an **unqualified** field holds the custom default value.
 
 :::
 
 :::caution
 
-The **optional** to **terse** migration, while compatible from the protocol standpoint, is potentially dangerous as a terse field does not distinguish the difference between unset and the [intrinsic default](./#intrinsic-default-values). For example, an **optional** field can explicitly set to the intrinsic default value (`s.intField() = 0`); meanwhile, the same operation is equal to clearing the field in a **terse** field.
+<a id="caution_optional_to_terse"></a>The **optional** to **terse** migration, while compatible from the protocol standpoint, is potentially dangerous as a terse field does not distinguish the difference between unset and the [intrinsic default](./#intrinsic-default-values). For example, an **optional** field can explicitly set to the intrinsic default value (`s.intField() = 0`); meanwhile, the same operation is equal to clearing the field in a **terse** field.
 
 :::
 

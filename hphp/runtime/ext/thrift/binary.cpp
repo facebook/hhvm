@@ -50,6 +50,7 @@ namespace HPHP::thrift {
 /////////////////////////////////////////////////////////////////////////////
 
 const StaticString
+  s_getBuffer("getBuffer"),
   s_getTransport("getTransport"),
   s_flush("flush"),
   s_onewayFlush("onewayFlush"),

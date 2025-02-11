@@ -115,6 +115,18 @@ Object HHVM_FUNCTION(
     int64_t options);
 
 ///////////////////////////////////////////////////////////////////////////////
+// Helper functions for compact serialization and deserialization
+
+Object compact_deserialize_from_string(
+    const String& serialized, 
+    const String& thrift_typename, 
+    int64_t options = 0);
+
+String compact_serialize_to_string(const Object& transportobj,
+                   const Object& thrift_struct,
+                   int64_t version = 2);
+
+///////////////////////////////////////////////////////////////////////////////
 
 struct InteractionId : SystemLib::ClassLoader<"InteractionId"> {
   static Object newInstance() {

@@ -1458,6 +1458,45 @@ struct CompactReader {
 
 };
 
+///////////////////////////////////////////////////////////////////////////////
+
+Object compact_deserialize_from_string(
+                     const String& serialized,
+                     const String& thrift_typename, int64_t options) {
+  // Suppress class-to-string conversion warnings that occur during
+  // serialization and deserialization.
+  SuppressClassConversionNotice suppressor;
+
+  VMRegAnchor _;
+  auto iobuf = folly::IOBuf::wrapBufferAsValue(
+    serialized.data(),
+    serialized.size());
+  CompactReader<folly::io::Cursor> reader(
+    folly::io::Cursor(&iobuf),
+    options);
+  return reader.readStruct(thrift_typename);
+}
+
+String compact_serialize_to_string(const Object& protocol,
+                   const Object& thrift_struct,
+                   int64_t version) {
+  CoeffectsAutoGuard _;
+  // Suppress class-to-string conversion warnings that occur during
+  // serialization and deserialization.
+  SuppressClassConversionNotice suppressor;
+
+  VMRegAnchor _2;
+
+  PHPOutputTransport transport(protocol);
+
+  CompactWriter writer(&transport);
+  writer.setWriteVersion(version);
+  writer.write(thrift_struct);
+  transport.flush();
+  return transport.getPHPBuffer();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 int64_t HHVM_FUNCTION(thrift_protocol_set_compact_version,
                       int64_t version) {
   int result = s_compact_request_data->version;
@@ -1571,18 +1610,7 @@ Object HHVM_FUNCTION(thrift_protocol_read_compact_struct_from_string,
                      const String& serialized,
                      const String& obj_typename,
                      int64_t options) {
-  // Suppress class-to-string conversion warnings that occur during
-  // serialization and deserialization.
-  SuppressClassConversionNotice suppressor;
-
-  VMRegAnchor _;
-  auto iobuf = folly::IOBuf::wrapBufferAsValue(
-    serialized.data(),
-    serialized.size());
-  CompactReader<folly::io::Cursor> reader(
-    folly::io::Cursor(&iobuf),
-    options);
-  return reader.readStruct(obj_typename);
+  return compact_deserialize_from_string(serialized, obj_typename, options);
 }
 
 }

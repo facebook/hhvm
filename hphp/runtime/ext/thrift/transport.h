@@ -54,6 +54,7 @@ enum TType {
 };
 
 extern const StaticString
+  s_getBuffer,
   s_getTransport,
   s_flush,
   s_onewayFlush,
@@ -147,6 +148,13 @@ public:
   void onewayFlush() {
     writeBufferToTransport();
     directOnewayFlush();
+  }
+
+  String getPHPBuffer() {
+    if (buffer_used != 0) {
+      raise_warning("runtime/ext_thrift: Output buffer has %lu unflushed bytes", buffer_used);
+    }
+    return m_transport->o_invoke_few_args(s_getBuffer, RuntimeCoeffects::fixme(), 0).toString();
   }
 
 private:

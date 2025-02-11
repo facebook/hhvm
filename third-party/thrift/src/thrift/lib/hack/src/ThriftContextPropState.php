@@ -128,11 +128,11 @@ final class ThriftContextPropState {
     $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
     if ($fb_user_id is nonnull) {
       self::get()->setFBUserId($fb_user_id);
-      $ods->bumpKey('contextprop.set_fb_user_id'.$src);
+      $ods->bumpKey('contextprop.set_fb_user_id.'.$src);
       return true;
     }
 
-    $ods->bumpKey('contextprop.missing_fb_user_id'.$src);
+    $ods->bumpKey('contextprop.missing_fb_user_id.'.$src);
     return false;
   }
 
@@ -173,7 +173,7 @@ final class ThriftContextPropState {
     string $src,
   ): bool {
     $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
-    $ods->bumpKey('contextprop.fb_vc'.$src);
+    $ods->bumpKey('contextprop.fb_vc.'.$src);
 
     $fb_user_id = self::coerceId($vc->getUserID());
     return self::updateFBUserId($fb_user_id, $src);
@@ -184,7 +184,7 @@ final class ThriftContextPropState {
     string $src,
   ): bool {
     $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
-    $ods->bumpKey('contextprop.ig_vc'.$src);
+    $ods->bumpKey('contextprop.ig_vc.'.$src);
     // don't overwrite if TCPS already has a valid ig user id
     $tcps_ig_user_id = self::get()->getIGUserId();
     if (self::coerceId($tcps_ig_user_id) is nonnull) {
@@ -193,12 +193,12 @@ final class ThriftContextPropState {
 
     $ig_user_id = self::coerceId($vc->getViewerID());
     if ($ig_user_id is nonnull) {
-      $ods->bumpKey('contextprop.set_ig_user_id'.$src);
+      $ods->bumpKey('contextprop.set_ig_user_id.'.$src);
       self::get()->setIGUserId($ig_user_id);
       return true;
     }
 
-    $ods->bumpKey('contextprop.missing_ig_user_id'.$src);
+    $ods->bumpKey('contextprop.missing_ig_user_id.'.$src);
     return false;
   }
 

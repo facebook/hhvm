@@ -15,7 +15,6 @@
 from collections import defaultdict
 from collections.abc import Iterable, Mapping, Sequence, Set as pySet, Sized
 import warnings
-from types import MappingProxyType
 
 from folly.iobuf cimport cIOBuf, IOBuf, from_unique_ptr
 from libcpp.utility cimport move as cmove
@@ -32,9 +31,7 @@ from cython.operator cimport dereference as deref
 import copy
 import cython
 import enum
-import functools
 import itertools
-import threading
 import typing
 
 from folly cimport cFollyIsDebug
@@ -1702,9 +1699,15 @@ class StructMeta(type):
                 List[Tuple[int (index in fields), str (field name), type_info]]
                 for all primitive (and non-adapted) fields.
         """
+        for base in bases:
+            if getattr(base, '_fbthrift_allow_inheritance_DO_NOT_USE', False):
+                continue
+            raise TypeError(
+                f"Inheritance from generated thrift struct {cls_name} is deprecated. Please use composition."
+            )
         # Set[Tuple (field spec)]. See `StructInfo` class docstring for the
         # contents of the field spec tuples.
-        fields = dct.pop('_fbthrift_SPEC')
+        fields = dct.pop('_fbthrift_SPEC', ())
 
         num_fields = len(fields)
         dct["_fbthrift_struct_info"] = StructInfo(cls_name, fields)
@@ -1727,7 +1730,8 @@ class StructMeta(type):
 
         dct["_fbthrift_primitive_types"] = primitive_types
         dct["__slots__"] = slots
-        klass = super().__new__(cls, cls_name, (Struct,), dct)
+        all_bases = bases if bases else (Struct,) 
+        klass = super().__new__(cls, cls_name, all_bases, dct)
 
         for field_index, field_name in non_primitive_types:
             type.__setattr__(

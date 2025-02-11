@@ -16,6 +16,7 @@
 
 import copy
 import math
+import types
 import unittest
 
 from testing.dependency.types import IncludedStruct
@@ -33,6 +34,7 @@ from testing.types import (
     Nested3,
     NonCopyable,
     numerical,
+    OptionalFile,
     Optionals,
     PrivateCppRefField,
     Reserved,
@@ -494,3 +496,36 @@ class NumericalConversionsTests(unittest.TestCase):
         self.assertFalse(issubclass(int, Nested1))
         self.assertFalse(issubclass(Struct, Nested1))
         self.assertFalse(issubclass(Nested1, Nested2))
+
+    def test_subclass_not_allow_inheritance(self) -> None:
+        # TODO(sunniewang): remove this predicate when @cython.final
+        # landed in thrift-py3
+        if not is_auto_migrated():
+            return
+        thrift_python_err = r"Inheritance from generated thrift struct .+ is deprecated. Please use composition."
+        cython_err = r"type '.*' is not an acceptable base type"
+        err_regex = thrift_python_err if is_auto_migrated() else cython_err
+        with self.assertRaisesRegex(TypeError, err_regex):
+            types.new_class("TestSubclass", bases=(File,))
+
+    def test_subclass_allow_inheritance(self) -> None:
+        c = TestSubclass()
+        self.assertIsInstance(c, OptionalFile)
+        self.assertIsInstance(c, Struct)
+        self.assertIsInstance(OptionalFile(), Struct)
+
+    def test_subclass_allow_inheritance_ancestor(self) -> None:
+        c = TestSubSubclass()
+        self.assertIsInstance(c, TestSubclass)
+        self.assertIsInstance(c, OptionalFile)
+        self.assertIsInstance(c, Struct)
+
+
+class TestSubclass(OptionalFile):
+    def __init__(self) -> None:
+        pass
+
+
+class TestSubSubclass(TestSubclass):
+    def __init__(self) -> None:
+        pass

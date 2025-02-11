@@ -175,6 +175,7 @@ struct File {
   3: Kind type = Kind.REGULAR;
 }
 
+@python.MigrationBlockingAllowInheritance
 struct OptionalFile {
   1: optional string name;
   3: optional i32 type;

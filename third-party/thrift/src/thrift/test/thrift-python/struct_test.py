@@ -267,11 +267,16 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
         )
 
     def test_subclass(self) -> None:
-        types.new_class(
-            "TestImmutableSubclass",
-            bases=(TestStructImmutable,),
-            exec_body=lambda ns: ns.update(_fbthrift_SPEC=()),
+        err = (
+            r"Inheritance from generated thrift struct \w+ is deprecated."
+            r" Please use composition."
         )
+        with self.assertRaisesRegex(TypeError, err):
+            types.new_class(
+                "TestImmutableSubclass",
+                bases=(TestStructImmutable,),
+                exec_body=lambda ns: ns.update(_fbthrift_SPEC=()),
+            )
 
     def test_base_classes(self) -> None:
         self.assertIsInstance(TestStructImmutable(), ImmutableStruct)

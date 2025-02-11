@@ -881,6 +881,8 @@ class python_mstch_struct : public mstch_struct {
              &python_mstch_struct::has_invariant_field},
             {"struct:legacy_api?", &python_mstch_struct::legacy_api},
             {"struct:fields_size", &python_mstch_struct::fields_size},
+            {"struct:allow_inheritance?",
+             &python_mstch_struct::allow_inheritance},
         });
   }
 
@@ -920,6 +922,13 @@ class python_mstch_struct : public mstch_struct {
   }
 
   mstch::node fields_size() { return struct_->fields().size(); }
+
+  // While inheritance is discouraged, there is limited support for py3
+  // auto-migraters
+  mstch::node allow_inheritance() {
+    return struct_->find_structured_annotation_or_null(
+               kPythonMigrationBlockingAllowInheritanceUri) != nullptr;
+  }
 
  private:
   const t_const* adapter_annotation_;

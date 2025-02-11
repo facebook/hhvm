@@ -57,6 +57,11 @@ class {{> structs/unadapted_name}}{{!
         }}{{^struct:exception?}}{{> types/struct_metaclass}}{{/struct:exception?}}{{!
         }}{{/struct:union?}}{{!
         }}):
+    {{#program:py3_auto_migrate?}}
+    {{#struct:allow_inheritance?}}
+    _fbthrift_allow_inheritance_DO_NOT_USE = True
+    {{/struct:allow_inheritance?}}
+    {{/program:py3_auto_migrate?}}
     _fbthrift_SPEC = (
         {{#struct:fields_ordered_by_id}}
         _fbthrift_python_types.FieldInfo(

@@ -97,7 +97,7 @@ The `header` is an *unrendered* section of the source. It may contain:
   * [Whitespace-only `text` (including `newline`)](#text).
   * [Import statements](#import-statements)
 
-Rendering ignores all whitespaces in the `header`.
+Whisker ignores whitespaces in the `header` and does not render them.
 
 <Grammar>
 

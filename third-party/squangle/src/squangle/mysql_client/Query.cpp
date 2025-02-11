@@ -566,7 +566,7 @@ folly::fbstring Query::renderInternal(
       appendValue(&ret, idx, c, param, escapeFunc);
     } else if (c == 'm') {
       if (!(param.isString() || param.isInt() || param.isDouble() ||
-            param.isBool() || param.isNull())) {
+            param.isBool() || param.isNull() || param.isQuery())) {
         parseError(querySp, idx, "%m expects int/float/string/bool");
       }
       appendValue(&ret, idx, c, param, escapeFunc);

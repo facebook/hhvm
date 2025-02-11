@@ -33,6 +33,18 @@ struct ServerLoadInfo {
   }
 };
 
+// In-code definition of WWWThriftServerInfo
+// Only store relevant fields
+struct ThriftWWWCustomHealthCheckerFields {
+  int64_t jitMaturity{0};
+  int64_t jitWeightFactor{0};
+  int64_t loadHint{0};
+  int64_t semrBucket{-1};
+  int64_t jumpstartBucket{-1};
+  int64_t serverUpTime{0};
+  bool prepareToStop{false};
+};
+
 enum ServerDownInfo {
   NONE = 0,
 
@@ -80,7 +92,7 @@ class ServerHealthCheckerCallback {
     [[nodiscard]] folly::F14FastMap<std::string, std::string> toMap() const;
 
     // Custom fields for WWW healthchecks
-    folly::F14FastMap<std::string, std::string> thriftWWWCustomFields;
+    std::optional<ThriftWWWCustomHealthCheckerFields> thriftWWWCustomFields;
   };
 
   virtual void processHealthCheckFailure(

@@ -1438,7 +1438,7 @@ module Full = struct
     (fuel, str)
 
   let to_string_with_identity
-      ~fuel ~hide_internals env x occurrence definition_opt =
+      ~fuel ~hide_internals env (x : locl_ty) occurrence definition_opt =
     let open SymbolOccurrence in
     let ty = locl_ty ~hide_internals in
     let penv = Loclenv env in

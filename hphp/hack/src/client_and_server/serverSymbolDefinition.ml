@@ -108,7 +108,7 @@ let summarize_class_typedef ctx x =
     Ast_provider.find_typedef_in_file ctx fn x ~full:false >>= fun tdef ->
     Some (FileOutline.summarize_typedef tdef)
 
-let go ctx ast result =
+let go ctx ast (result : _ SymbolOccurrence.t) : _ SymbolDefinition.t option =
   let module SO = SymbolOccurrence in
   match result.SO.type_ with
   | SO.Attribute (Some { SO.class_name; method_name; is_static }) ->
@@ -128,8 +128,8 @@ let go ctx ast result =
   | SO.Attribute None -> summarize_class_typedef ctx result.SO.name
   | SO.Method (SO.ClassName c_name, method_name) ->
     (* Classes on typing heap have all the methods from inheritance hierarchy
-       * folded together, so we will correctly identify them even if method_name
-       * is not defined directly in class c_name *)
+     * folded together, so we will correctly identify them even if method_name
+     * is not defined directly in class c_name *)
     Decl_provider.get_class ctx c_name |> Decl_entry.to_option >>= fun class_ ->
     if String.equal method_name Naming_special_names.Members.__construct then
       match fst (Cls.construct class_) with

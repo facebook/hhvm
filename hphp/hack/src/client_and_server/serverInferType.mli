@@ -6,10 +6,10 @@
  *
  *)
 
-(* Information gathered from the TAST. Includes at least
- * the type and an environment with which to resolve solved
- * type variables. For function calls, the type arguments
- * are also recorded. *)
+(** Information gathered from the TAST. Includes at least
+    the type and an environment with which to resolve solved
+    type variables. For function calls, the type arguments
+    are also recorded. *)
 type t
 
 val get_type : t -> Tast.ty

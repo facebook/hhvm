@@ -426,9 +426,8 @@ let make_hover_info
     ctx
     (info_opt : ServerInferType.t option)
     entry
-    occurrence
+    (occurrence : _ SymbolOccurrence.t)
     def_opt =
-  let open SymbolOccurrence in
   let defined_in =
     match def_opt with
     | Some def ->
@@ -448,21 +447,24 @@ let make_hover_info
     in
     Tast_env.print_ty_with_identity env ty occurrence def_opt
   in
+  let { SymbolOccurrence.name; type_; is_declaration = _; pos = _ } =
+    occurrence
+  in
   let snippet =
-    match (occurrence, info_opt) with
-    | ({ name; _ }, None) -> Utils.strip_hh_lib_ns name
-    | ({ type_ = BestEffortArgument (recv, i); _ }, _) ->
+    match (type_, info_opt) with
+    | (_, None) -> Utils.strip_hh_lib_ns name
+    | (SymbolOccurrence.BestEffortArgument (recv, i), _) ->
       let param_name = nth_param ctx recv i in
       Printf.sprintf "Parameter: %s" (Option.value ~default:"$_" param_name)
-    | ({ type_ = Method _; _ }, Some info)
-    | ({ type_ = ClassConst _; _ }, Some info)
-    | ({ type_ = Property _; _ }, Some info) ->
+    | (SymbolOccurrence.Method _, Some info)
+    | (SymbolOccurrence.ClassConst _, Some info)
+    | (SymbolOccurrence.Property _, Some info) ->
       defined_in ^ print_locl_ty_with_identity info
-    | ({ type_ = GConst; _ }, Some info) ->
+    | (SymbolOccurrence.GConst, Some info) ->
       (match make_hover_const_definition entry def_opt with
       | Some def_txt -> def_txt
       | None -> print_locl_ty_with_identity info)
-    | ({ type_ = Function; _ }, Some info) ->
+    | (SymbolOccurrence.Function, Some info) ->
       fun_defined_in def_opt
       ^ print_locl_ty_with_identity ~do_not_strip_dynamic:true info
     | (_, Some info) ->
@@ -470,19 +472,19 @@ let make_hover_info
       ^ under_dynamic_result
   in
   let addendum =
-    let { name; type_; is_declaration = _; pos = _ } = occurrence in
     match type_ with
-    | Attribute _ ->
+    | SymbolOccurrence.Attribute _ ->
       List.concat
         [
           make_hover_attr_docs name;
           make_hover_doc_block ctx entry occurrence def_opt;
         ]
-    | Keyword info -> [keyword_info info]
-    | HhFixme -> [hh_fixme_info]
-    | HhIgnore -> [hh_ignore_info]
-    | PureFunctionContext -> [pure_context_info]
-    | BuiltInType bt -> [SymbolOccurrence.built_in_type_hover bt]
+    | SymbolOccurrence.Keyword info -> [keyword_info info]
+    | SymbolOccurrence.HhFixme -> [hh_fixme_info]
+    | SymbolOccurrence.HhIgnore -> [hh_ignore_info]
+    | SymbolOccurrence.PureFunctionContext -> [pure_context_info]
+    | SymbolOccurrence.BuiltInType bt ->
+      [SymbolOccurrence.built_in_type_hover bt]
     | _ -> make_hover_doc_block ctx entry occurrence def_opt
   in
   HoverService.{ snippet; addendum; pos = Some occurrence.SymbolOccurrence.pos }
@@ -537,17 +539,19 @@ let go_quarantined
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     (pos : File_content.Position.t) : HoverService.result =
-  let identities = ServerIdentifyFunction.go_quarantined ~ctx ~entry pos in
+  let identities : (_ SymbolOccurrence.t * _ SymbolDefinition.t option) list =
+    ServerIdentifyFunction.go_quarantined ~ctx ~entry pos
+  in
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
-  let info_opt =
+  let info_opt : ServerInferType.t option =
     ServerInferType.human_friendly_type_at_pos ~under_dynamic:false ctx tast pos
   in
-  let info_dynamic_opt =
+  let info_dynamic_opt : ServerInferType.t option =
     ServerInferType.human_friendly_type_at_pos ~under_dynamic:true ctx tast pos
   in
-  let under_dynamic_result =
+  let under_dynamic_result : string =
     match info_dynamic_opt with
     | Some info_dynamic ->
       let ty_dynamic = ServerInferType.get_type info_dynamic in
@@ -567,103 +571,100 @@ let go_quarantined
             (Tast_env.print_ty env ty_dynamic))
     | None -> ""
   in
-  let result =
-    match (identities, info_opt) with
-    | ([], Some info) ->
-      let ty = ServerInferType.get_type info in
-      let env = ServerInferType.get_env info in
-      (* There are no identities (named entities) at the cursor, but we
-         know the type of the expression. Just show the type.
+  match (identities, info_opt) with
+  | ([], Some info) ->
+    let ty = ServerInferType.get_type info in
+    let env = ServerInferType.get_env info in
+    (* There are no identities (named entities) at the cursor, but we
+       know the type of the expression. Just show the type.
 
-         This can occur if the user hovers over a literal such as `123`. *)
-      let addendum =
-        match Typing_defs.get_node ty with
-        | Typing_defs.Tgeneric (name, _)
-          when String.equal name SN.Typehints.this ->
-          let upper_bounds =
-            Tast_env.get_upper_bounds env SN.Typehints.this []
-            |> Typing_set.to_list
-            |> List.map ~f:(Tast_env.print_ty env)
-            |> String.concat ~sep:", "
-          in
-          ["this has the following upper bounds: " ^ upper_bounds]
-        | _ -> []
-      in
-      [
-        {
-          snippet = Tast_env.print_ty env ty ^ under_dynamic_result;
-          addendum;
-          pos = None;
-        };
-      ]
-    | ( [
-          ( {
-              SymbolOccurrence.type_ =
-                SymbolOccurrence.BestEffortArgument (recv, i);
-              _;
-            },
-            _ );
-        ],
-        _ ) ->
-      (* There are no identities (named entities) at the cursor, but we
-         know the type of the expression and the name of the parameter
-         from the definition site.
+       This can occur if the user hovers over a literal such as `123`. *)
+    let addendum =
+      match Typing_defs.get_node ty with
+      | Typing_defs.Tgeneric (name, _) when String.equal name SN.Typehints.this
+        ->
+        let upper_bounds =
+          Tast_env.get_upper_bounds env SN.Typehints.this []
+          |> Typing_set.to_list
+          |> List.map ~f:(Tast_env.print_ty env)
+          |> String.concat ~sep:", "
+        in
+        ["this has the following upper bounds: " ^ upper_bounds]
+      | _ -> []
+    in
+    [
+      {
+        snippet = Tast_env.print_ty env ty ^ under_dynamic_result;
+        addendum;
+        pos = None;
+      };
+    ]
+  | ( [
+        ( {
+            SymbolOccurrence.type_ =
+              SymbolOccurrence.BestEffortArgument (recv, i);
+            _;
+          },
+          _ );
+      ],
+      _ ) ->
+    (* There are no identities (named entities) at the cursor, but we
+       know the type of the expression and the name of the parameter
+       from the definition site.
 
-         This can occur if the user hovers over a literal in a call,
-         e.g. `foo(123)`. *)
-      let ty_result =
-        match info_opt with
-        | Some info ->
-          let ty = ServerInferType.get_type info in
-          [
-            {
-              snippet =
-                Tast_env.print_ty (ServerInferType.get_env info) ty
-                ^ under_dynamic_result;
-              addendum = [];
-              pos = None;
-            };
-          ]
-        | None -> []
-      in
-      let param_result =
-        match nth_param ctx recv i with
-        | Some param_name ->
-          [
-            {
-              snippet = Printf.sprintf "Parameter: %s" param_name;
-              addendum = [];
-              pos = None;
-            };
-          ]
-        | None -> []
-      in
-      ty_result @ param_result
-    | (identities, _) ->
-      (* We have a list of named things at the cursor. Show the
-         docblock and type of each thing. *)
-      identities
-      |> List.map ~f:(fun (occurrence, def_opt) ->
-             (* If we're hovering over a type hint, we're not interested
-                in the type of the enclosing expression. *)
-             let info_opt =
-               match occurrence.SymbolOccurrence.type_ with
-               | SymbolOccurrence.TypeVar -> None
-               | SymbolOccurrence.BuiltInType _ -> None
-               | _ -> info_opt
-             in
-             let path =
-               def_opt
-               |> Option.map ~f:(fun def -> def.SymbolDefinition.pos)
-               |> Option.map ~f:Pos.filename
-               |> Option.value ~default:entry.Provider_context.path
-             in
-             let (ctx, entry) =
-               Provider_context.add_entry_if_missing ~ctx ~path
-             in
-             (ctx, info_opt, entry, occurrence, def_opt))
-      |> make_hover_info_with_fallback under_dynamic_result
-      |> filter_class_and_constructor
-      |> List.remove_consecutive_duplicates ~equal:equal_hover_info
-  in
-  result
+       This can occur if the user hovers over a literal in a call,
+       e.g. `foo(123)`. *)
+    let ty_result =
+      match info_opt with
+      | Some info ->
+        let ty = ServerInferType.get_type info in
+        [
+          {
+            snippet =
+              Tast_env.print_ty (ServerInferType.get_env info) ty
+              ^ under_dynamic_result;
+            addendum = [];
+            pos = None;
+          };
+        ]
+      | None -> []
+    in
+    let param_result =
+      match nth_param ctx recv i with
+      | Some param_name ->
+        [
+          {
+            snippet = Printf.sprintf "Parameter: %s" param_name;
+            addendum = [];
+            pos = None;
+          };
+        ]
+      | None -> []
+    in
+    ty_result @ param_result
+  | (identities, _) ->
+    (* We have a list of named things at the cursor. Show the
+       docblock and type of each thing. *)
+    identities
+    |> List.map ~f:(fun (occurrence, def_opt) ->
+           (* If we're hovering over a type hint, we're not interested
+              in the type of the enclosing expression. *)
+           let info_opt =
+             match occurrence.SymbolOccurrence.type_ with
+             | SymbolOccurrence.TypeVar -> None
+             | SymbolOccurrence.BuiltInType _ -> None
+             | _ -> info_opt
+           in
+           let path =
+             def_opt
+             |> Option.map ~f:(fun def -> def.SymbolDefinition.pos)
+             |> Option.map ~f:Pos.filename
+             |> Option.value ~default:entry.Provider_context.path
+           in
+           let (ctx, entry) =
+             Provider_context.add_entry_if_missing ~ctx ~path
+           in
+           (ctx, info_opt, entry, occurrence, def_opt))
+    |> make_hover_info_with_fallback under_dynamic_result
+    |> filter_class_and_constructor
+    |> List.remove_consecutive_duplicates ~equal:equal_hover_info

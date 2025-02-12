@@ -1377,7 +1377,9 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
                         let s = util::escaped_string(s.as_bytes().as_bstr());
                         hack::expr_builtin(Builtin::String, [s])
                     }
-                    Immediate::EnumClassLabel(..) => textual_todo! { textual::Expr::null() },
+                    Immediate::EnumClassLabel(..) => {
+                        textual::Expr::Const(textual::Const::EnumClassLabel)
+                    }
                     Immediate::Vec(_) | Immediate::Dict(_) | Immediate::Keyset(_) => {
                         textual_todo! { textual::Expr::null() }
                     }

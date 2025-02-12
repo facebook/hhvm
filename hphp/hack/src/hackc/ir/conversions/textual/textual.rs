@@ -774,6 +774,7 @@ impl fmt::Display for FmtTy<'_> {
 
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub(crate) enum Const {
+    EnumClassLabel,
     False,
     Float(FloatBits),
     Int(i64),
@@ -1378,6 +1379,9 @@ trait ExprWriter {
 
     fn write_const(&mut self, value: &Const) -> Result {
         match value {
+            Const::EnumClassLabel => {
+                write!(self.internal_get_writer(), "$builtins.hack_enum_label()")?;
+            }
             Const::False => self.internal_get_writer().write_all(b"false")?,
             Const::Float(d) => {
                 let fun = match d.to_f64() {

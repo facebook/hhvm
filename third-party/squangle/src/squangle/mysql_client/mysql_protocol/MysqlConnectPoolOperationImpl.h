@@ -130,7 +130,7 @@ class MysqlConnectPoolOperationImpl : public MysqlConnectOperationImpl,
 
   // Called when the connection is matched by the pool client
   void connectionCallback(
-      std::unique_ptr<MysqlPooledHolder<Client>> pooled_conn) {
+      std::unique_ptr<MysqlPooledHolder<Client>> pooled_conn) override {
     // TODO: validate we are in the correct thread (for async)
 
     if (!pooled_conn) {

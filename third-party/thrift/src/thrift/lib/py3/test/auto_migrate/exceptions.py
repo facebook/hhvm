@@ -15,9 +15,11 @@
 
 # pyre-strict
 
+import types
 import unittest
 
 from testing.types import Color, HardError, SimpleError, UnfriendlyError, UnusedError
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import is_auto_migrated
 
 from thrift.lib.py3.test.exception_helper import (
     simulate_HardError,
@@ -181,3 +183,46 @@ class ExceptionTests(unittest.TestCase):
         self.assertFalse(issubclass(int, HardError))
         self.assertFalse(issubclass(int, GeneratedError))
         self.assertFalse(issubclass(HardError, Struct))
+
+    def test_subclass_not_allow_inheritance(self) -> None:
+        # TODO(T210960250): remove this predicate when @cython.final
+        # landed in thrift-py3
+        if not is_auto_migrated():
+            return
+        thrift_python_err = (
+            r"Inheritance from generated thrift exception .+ is deprecated"
+        )
+        cython_err = r"type '.+' is not an acceptable base type"
+        err_regex = thrift_python_err if is_auto_migrated() else cython_err
+        with self.assertRaisesRegex(TypeError, err_regex):
+            types.new_class("TestSubclass", bases=(HardError,))
+
+    def test_subclass_allow_inheritance(self) -> None:
+        c = SubclassError()
+        self.assertIsInstance(c, UnusedError)
+        self.assertIsInstance(c, GeneratedError)
+        self.assertIsInstance(UnusedError(), GeneratedError)
+
+        for catch in (SubclassError, UnusedError, GeneratedError):
+            with self.assertRaises(catch):
+                raise SubclassError()
+
+    def test_subclass_allow_inheritance_ancestor(self) -> None:
+        c = SubSubclassError()
+        self.assertIsInstance(c, SubclassError)
+        self.assertIsInstance(c, UnusedError)
+        self.assertIsInstance(c, GeneratedError)
+
+        for catch in (SubSubclassError, SubclassError, UnusedError, GeneratedError):
+            with self.assertRaises(catch):
+                raise SubSubclassError()
+
+
+class SubclassError(UnusedError):
+    def __init__(self) -> None:
+        pass
+
+
+class SubSubclassError(SubclassError):
+    def __init__(self) -> None:
+        pass

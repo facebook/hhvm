@@ -261,15 +261,21 @@ cdef make_fget_error(i):
 
 class GeneratedErrorMeta(type):
     def __new__(cls, name, bases, dct):
-        fields = dct.pop('_fbthrift_SPEC')
+        for base in bases:
+            if getattr(base, '_fbthrift_allow_inheritance_DO_NOT_USE', False):
+                continue
+            raise TypeError(
+                f"Inheritance from generated thrift exception {name} is deprecated."
+            )
+        fields = dct.pop('_fbthrift_SPEC', ())
         num_fields = len(fields)
         dct["_fbthrift_struct_info"] = StructInfo(name, fields)
         for i, f in enumerate(fields):
             dct[f.py_name] = make_fget_error(i)
-        bases = (GeneratedError, )
+        all_bases = bases if bases else (GeneratedError,) 
         if "_fbthrift_abstract_base_class" in dct:
-            bases += (dct.pop("_fbthrift_abstract_base_class"),)
-        return super().__new__(cls, name, bases, dct)
+            all_bases += (dct.pop("_fbthrift_abstract_base_class"),)
+        return super().__new__(cls, name, all_bases, dct)
 
     def _fbthrift_fill_spec(cls):
         (<StructInfo>cls._fbthrift_struct_info)._fill_struct_info()

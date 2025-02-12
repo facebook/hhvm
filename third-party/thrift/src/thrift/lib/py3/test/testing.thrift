@@ -98,6 +98,7 @@ typedef set<i32> AdaptedSet
 @python.Py3EnableCppAdapter
 typedef map<i32, i32> AdaptedMap
 
+@python.MigrationBlockingAllowInheritance
 exception UnusedError {
   @thrift.ExceptionMessage
   1: string message;

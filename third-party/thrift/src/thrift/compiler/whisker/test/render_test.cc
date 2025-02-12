@@ -2203,9 +2203,9 @@ TEST_F(RenderTest, macro_nested_undefined_variable_trace) {
               "#1 <global scope> (size=0)\n",
               "macro-3", // file name
               1),
-          error_backtrace("#0 macro-3 <line:1, col:3>\n"
-                          "#1 macro-2 <line:1, col:5>\n"
-                          "#2 macro-1 <line:2, col:3>\n"
+          error_backtrace("#0 <macro> @ macro-3 <line:1, col:3>\n"
+                          "#1 <macro> @ macro-2 <line:1, col:5>\n"
+                          "#2 <macro> @ macro-1 <line:2, col:3>\n"
                           "#3 path/to/test.whisker <line:2, col:1>\n")));
 }
 

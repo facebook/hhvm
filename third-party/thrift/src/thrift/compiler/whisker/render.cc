@@ -194,11 +194,18 @@ class partial_definition final {
 };
 
 /**
- * A class that keeps track of the stack of partial applications, including the
- * locations in the source file where partials have been applied.
+ * A class that keeps track of the stack of imported modules and partial
+ * applications. Each item in the stack is one of:
+ *   - root source (where rendering began)
+ *   - target of an import statement
+ *   - partial application
+ *   - macro
  *
- * This is necessary for partial applications, and aids with pragmas and
- * debugging.
+ * Each previous item in the stack stores the source location from which a jump
+ * occured to the current item. This allows backtraces to be generated at any
+ * point during rendering.
+ *
+ * This is also aids with pragmas and debugging.
  */
 class source_stack {
  public:
@@ -218,11 +225,18 @@ class source_stack {
      *   - partials — derive a new context from the previous frame.
      */
     eval_context context;
+
+    struct for_root {};
+    struct for_import {};
+    struct for_macro {};
+    using for_partial = partial_definition::ptr;
+    using reason = std::variant<for_root, for_import, for_macro, for_partial>;
     /**
-     * The currently active partial application, or nullptr if the frame
-     * originated from the root, or is a macro.
+     * The reason why this frame came into existence from the previous one. This
+     * is used to annotate backtraces with useful information.
      */
-    partial_definition::ptr partial;
+    reason cause;
+
     /**
      * For all elements except the top of the stack, this is the location of the
      * partial application within that source that led to the current stack.
@@ -234,18 +248,14 @@ class source_stack {
      * application completes, the saved location is dropped.
      */
     source_location jumped_from;
+
     /**
      * For `{{#pragma ignore-newlines}}`.
      */
     bool ignore_newlines = false;
 
-    std::optional<std::string> name() const {
-      return partial == nullptr ? std::nullopt : std::optional{partial->name};
-    }
-
-    explicit frame(
-        frame* prev, eval_context ctx, partial_definition::ptr partial)
-        : prev(prev), context(std::move(ctx)), partial(std::move(partial)) {}
+    explicit frame(frame* prev, eval_context ctx, reason cause)
+        : prev(prev), context(std::move(ctx)), cause(std::move(cause)) {}
   };
 
   /**
@@ -262,14 +272,14 @@ class source_stack {
    */
   auto make_frame_guard(
       eval_context eval_ctx,
-      partial_definition::ptr partial,
+      frame::reason reason,
       source_location jumped_from) {
     class frame_guard {
      public:
       explicit frame_guard(
           source_stack& stack,
           eval_context eval_ctx,
-          partial_definition::ptr&& partial,
+          frame::reason&& reason,
           source_location jumped_from)
           : stack_(stack) {
         if (auto* frame = stack_.top()) {
@@ -278,7 +288,7 @@ class source_stack {
           frame->jumped_from = jumped_from;
         }
         stack.frames_.emplace_back(
-            stack_.top(), std::move(eval_ctx), std::move(partial));
+            stack_.top(), std::move(eval_ctx), std::move(reason));
       }
       ~frame_guard() noexcept {
         assert(!stack_.frames_.empty());
@@ -297,7 +307,7 @@ class source_stack {
       source_stack& stack_;
     };
     return frame_guard{
-        *this, std::move(eval_ctx), std::move(partial), jumped_from};
+        *this, std::move(eval_ctx), std::move(reason), jumped_from};
   }
 
   struct backtrace_frame {
@@ -307,10 +317,9 @@ class source_stack {
      */
     resolved_location location;
     /**
-     * The name of the partial application (if present) from which the jump
-     * happened.
+     * The reason for the frame's existence (e.g. partial application).
      */
-    std::optional<std::string> name;
+    frame::reason cause;
   };
   using backtrace = std::vector<backtrace_frame>;
   /**
@@ -328,14 +337,14 @@ class source_stack {
     std::vector<backtrace_frame> result;
     result.emplace_back(backtrace_frame{
         resolved_location(current, diags_.source_mgr()),
-        frame->name(),
+        frame->cause,
     });
     frame = frame->prev;
     for (; frame != nullptr; frame = frame->prev) {
       assert(frame->jumped_from != source_location());
       result.emplace_back(backtrace_frame{
           resolved_location(frame->jumped_from, diags_.source_mgr()),
-          frame->name(),
+          frame->cause,
       });
     }
     return result;
@@ -423,9 +432,7 @@ class render_engine {
       auto eval_ctx = eval_context::with_root_scope(
           std::move(root_context_), std::exchange(opts_.globals, {}));
       auto source_frame_guard = source_stack_.make_frame_guard(
-          std::move(eval_ctx),
-          nullptr /* the root node is not a partial */,
-          source_location());
+          std::move(eval_ctx), frame::for_root{}, source_location());
       visit(root.header_elements);
       visit(root.body_elements);
       return true;
@@ -441,9 +448,17 @@ class render_engine {
         std::string result;
         for (std::size_t i = 0; i < backtrace.size(); ++i) {
           const source_stack::backtrace_frame& frame = backtrace[i];
-          const std::string location = frame.name.has_value()
-              ? fmt::format("{} @ {}", *frame.name, frame.location.file_name())
-              : fmt::format("{}", frame.location.file_name());
+          const auto name = detail::variant_match(
+              frame.cause,
+              [](frame::for_root) -> std::string_view { return ""; },
+              [](frame::for_import) -> std::string_view { return "<module>"; },
+              [](frame::for_macro) -> std::string_view { return "<macro>"; },
+              [](const frame::for_partial& partial) -> std::string_view {
+                return partial->name;
+              });
+          const auto location = name.empty()
+              ? fmt::format("{}", frame.location.file_name())
+              : fmt::format("{} @ {}", name, frame.location.file_name());
           fmt::format_to(
               std::back_inserter(result),
               "#{} {} <line:{}, col:{}>\n",
@@ -1187,9 +1202,7 @@ class render_engine {
     // Macros are "inlined" into their invocation site. In other words, they
     // execute within the scope where they are invoked.
     auto source_frame_guard = source_stack_.make_frame_guard(
-        current_frame().context,
-        nullptr /* no partial definition because macros are at root scope */,
-        macro.loc.begin);
+        current_frame().context, frame::for_macro{}, macro.loc.begin);
     auto indent_guard =
         out_.make_indent_guard(macro.standalone_indentation_within_line);
     visit(resolved_macro->header_elements);

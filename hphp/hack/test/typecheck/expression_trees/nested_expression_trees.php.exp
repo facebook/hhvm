@@ -1,2 +1,1 @@
-ERROR: File "nested_expression_trees.php", line 6, characters 16-28:
-Cannot use unstable feature: `expression_tree_nest` (Parsing[1002])
+No errors

@@ -5819,9 +5819,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             self.errors
                 .push(make_error_from_node(prefix, errors::expression_tree_name))
         }
-        if self.context.expression_tree_depth > 0 && !self.context.active_expression_tree {
-            self.check_can_use_feature(node, &FeatureName::ExpressionTreeNest)
-        }
 
         *prev_context = Some(self.env.context.clone());
         self.context.active_expression_tree = true;

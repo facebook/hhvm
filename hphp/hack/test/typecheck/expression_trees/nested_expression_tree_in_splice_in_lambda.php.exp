@@ -1,2 +1,1 @@
-ERROR: File "nested_expression_tree_in_splice_in_lambda.php", line 7, characters 13-25:
-Cannot use unstable feature: `expression_tree_nest` (Parsing[1002])
+No errors

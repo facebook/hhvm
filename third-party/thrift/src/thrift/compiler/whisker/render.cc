@@ -358,6 +358,64 @@ class source_stack {
   diagnostics_engine& diags_;
 };
 
+/**
+ * A fatal error that aborts rendering but contains no messaging. Diagnostics
+ * should be attached to the diagnostics_engine.
+ *
+ * This is only used within the render_engine implementation to abruptly
+ * terminate rendering.
+ */
+struct render_error : std::exception {
+  explicit render_error(source_stack::backtrace backtrace)
+      : backtrace_(std::move(backtrace)) {
+    assert(!backtrace_.empty());
+  }
+  const source_stack::backtrace& backtrace() const { return backtrace_; }
+
+ private:
+  source_stack::backtrace backtrace_;
+};
+
+/**
+ * A class that provides common diagnostic helpers around source_stack that is
+ * shared by different rendering components.
+ */
+class diagnoser {
+ public:
+  explicit diagnoser(diagnostics_engine& diags, source_stack& source_stack)
+      : diags_(diags), source_stack_(source_stack) {}
+
+  diagnostics_engine& engine() noexcept { return diags_; }
+
+  // Reports a diagnostic but avoids generating the diagnostic message unless
+  // the diagnostic is actually reported. This can avoid expensive computation
+  // which is then thrown away without being used.
+  template <typename ReportFunc>
+  void maybe_report(
+      source_range loc, diagnostic_level level, ReportFunc&& report) {
+    if (!diags_.params().should_report(level)) {
+      return;
+    }
+    diags_.report(
+        loc.begin, level, "{}", std::invoke(std::forward<ReportFunc>(report)));
+  }
+
+  [[noreturn]] void abort_rendering(const source_location& loc) {
+    throw render_error(source_stack_.make_backtrace_at(loc));
+  }
+
+  template <typename... T>
+  [[noreturn]] void report_fatal_error(
+      source_location loc, fmt::format_string<T...> msg, T&&... args) {
+    diags_.error(loc, msg, std::forward<T>(args)...);
+    abort_rendering(loc);
+  }
+
+ private:
+  diagnostics_engine& diags_;
+  source_stack& source_stack_;
+};
+
 // The following coercion functions follow the rules described in
 // render_options::strict_boolean_conditional.
 
@@ -395,24 +453,6 @@ bool coerce_to_boolean(const map&) {
   return true;
 }
 
-/**
- * A fatal error that aborts rendering but contains no messaging. Diagnostics
- * should be attached to the diagnostics_engine.
- *
- * This is only used within the render_engine implementation to abruptly
- * terminate rendering.
- */
-struct render_error : std::exception {
-  explicit render_error(source_stack::backtrace backtrace)
-      : backtrace_(std::move(backtrace)) {
-    assert(!backtrace_.empty());
-  }
-  const source_stack::backtrace& backtrace() const { return backtrace_; }
-
- private:
-  source_stack::backtrace backtrace_;
-};
-
 class render_engine {
  public:
   explicit render_engine(
@@ -422,8 +462,8 @@ class render_engine {
       render_options opts)
       : out_(out),
         root_context_(std::move(root_context)),
-        diags_(diags),
-        source_stack_(diags_),
+        source_stack_(diags),
+        diags_(diags, source_stack_),
         opts_(std::move(opts)) {}
 
   bool visit(const ast::root& root) {
@@ -437,7 +477,7 @@ class render_engine {
       visit(root.body_elements);
       return true;
     } catch (const render_error& err) {
-      if (!diags_.params().should_report(
+      if (!diags_.engine().params().should_report(
               opts_.show_source_backtrace_on_failure)) {
         return false;
       }
@@ -470,7 +510,7 @@ class render_engine {
         return result;
       }();
 
-      diags_.error(
+      diags_.engine().error(
           source_location(),
           "The source backtrace is:\n{}",
           std::move(source_trace));
@@ -492,30 +532,6 @@ class render_engine {
     return *source_stack_.top();
   }
   eval_context& eval_ctx() { return current_frame().context; }
-
-  // Reports a diagnostic but avoids generating the diagnostic message unless
-  // the diagnostic is actually reported. This can avoid expensive computation
-  // which is then thrown away without being used.
-  template <typename ReportFunc>
-  void maybe_report(
-      source_range loc, diagnostic_level level, ReportFunc&& report) {
-    if (!diags_.params().should_report(level)) {
-      return;
-    }
-    diags_.report(
-        loc.begin, level, "{}", std::invoke(std::forward<ReportFunc>(report)));
-  }
-
-  [[noreturn]] void abort_rendering(const source_location& loc) {
-    throw render_error(source_stack_.make_backtrace_at(loc));
-  }
-
-  template <typename... T>
-  [[noreturn]] void report_fatal_error(
-      source_location loc, fmt::format_string<T...> msg, T&&... args) {
-    diags_.error(loc, msg, std::forward<T>(args)...);
-    abort_rendering(loc);
-  }
 
   void visit(const ast::headers& headers) {
     for (const auto& header : headers) {
@@ -550,7 +566,7 @@ class render_engine {
   }
 
   [[noreturn]] void visit(const ast::import_statement& import_statement) {
-    report_fatal_error(
+    diags_.report_fatal_error(
         import_statement.loc.begin, "Import statements are not supported yet.");
   }
 
@@ -596,7 +612,7 @@ class render_engine {
             return result;
           }();
 
-          maybe_report(variable_lookup.loc, undefined_diag_level, [&] {
+          diags_.maybe_report(variable_lookup.loc, undefined_diag_level, [&] {
             return fmt::format(
                 "Name '{}' was not found in the current scope. {}",
                 err.property_name(),
@@ -604,7 +620,7 @@ class render_engine {
           });
           if (undefined_diag_level == diagnostic_level::error) {
             // Fail rendering in strict mode
-            abort_rendering(variable_lookup.loc.begin);
+            diags_.abort_rendering(variable_lookup.loc.begin);
           }
           return manage_as_static(whisker::make::null);
         },
@@ -618,7 +634,7 @@ class render_engine {
                 // Move to the start of the identifier that failed to resolve
                 return chain[err.success_path().size()].loc;
               });
-          maybe_report(std::move(src_range), undefined_diag_level, [&] {
+          diags_.maybe_report(src_range, undefined_diag_level, [&] {
             object_print_options print_opts;
             print_opts.max_depth = 1;
             return fmt::format(
@@ -629,7 +645,7 @@ class render_engine {
           });
           if (undefined_diag_level == diagnostic_level::error) {
             // Fail rendering in strict mode
-            abort_rendering(variable_lookup.loc.begin);
+            diags_.abort_rendering(variable_lookup.loc.begin);
           }
           return manage_as_static(whisker::make::null);
         });
@@ -694,7 +710,7 @@ class render_engine {
                 const ast::variable_lookup& name = user_defined.name;
                 object::ptr lookup_result = lookup_variable(name);
                 if (!lookup_result->is_native_function()) {
-                  report_fatal_error(
+                  diags_.report_fatal_error(
                       name.loc.begin,
                       "Object '{}' is not a function. The encountered value is:\n{}",
                       name.chain_string(),
@@ -718,13 +734,13 @@ class render_engine {
 
                 native_function::context ctx{
                     expr.loc,
-                    diags_,
+                    diags_.engine(),
                     std::move(positional_args),
                     std::move(named_args)};
                 try {
                   return f->invoke(std::move(ctx));
                 } catch (const native_function::fatal_error& err) {
-                  report_fatal_error(
+                  diags_.report_fatal_error(
                       name.loc.begin,
                       "Function '{}' threw an error:\n{}",
                       name.chain_string(),
@@ -745,7 +761,7 @@ class render_engine {
           // The binding was successful
         },
         [&](const eval_name_already_bound_error& err) {
-          report_fatal_error(
+          diags_.report_fatal_error(
               loc,
               "Name '{}' is already bound in the current scope.",
               err.name());
@@ -773,7 +789,7 @@ class render_engine {
     object::ptr result = evaluate(interpolation.content);
 
     const auto report_unprintable_message_only = [&](diagnostic_level level) {
-      maybe_report(interpolation.loc, level, [&] {
+      diags_.maybe_report(interpolation.loc, level, [&] {
         return fmt::format(
             "Object named '{}' is not printable. The encountered value is:\n{}",
             interpolation.to_string(),
@@ -786,7 +802,7 @@ class render_engine {
       report_unprintable_message_only(level);
       if (level == diagnostic_level::error) {
         // Fail rendering in strict mode
-        abort_rendering(interpolation.loc.begin);
+        diags_.abort_rendering(interpolation.loc.begin);
       }
     };
 
@@ -809,7 +825,7 @@ class render_engine {
         [&](auto&&) -> std::string {
           // Other types are never printable
           report_unprintable_message_only(diagnostic_level::error);
-          abort_rendering(interpolation.loc.begin);
+          diags_.abort_rendering(interpolation.loc.begin);
         });
     out_.write(std::move(output));
   }
@@ -821,7 +837,7 @@ class render_engine {
   void maybe_report_boolean_coercion(
       const ast::expression& expr, const object& value) {
     auto diag_level = opts_.strict_boolean_conditional;
-    maybe_report(expr.loc, diag_level, [&] {
+    diags_.maybe_report(expr.loc, diag_level, [&] {
       return fmt::format(
           "Condition '{}' is not a boolean. The encountered value is:\n{}",
           expr.to_string(),
@@ -829,7 +845,7 @@ class render_engine {
     });
     if (diag_level == diagnostic_level::error) {
       // Fail rendering in strict mode
-      abort_rendering(expr.loc.begin);
+      diags_.abort_rendering(expr.loc.begin);
     }
   }
   bool evaluate_as_bool(const ast::expression& expr) {
@@ -972,7 +988,7 @@ class render_engine {
         [&](const native_object::ptr& o) {
           // map-like native objects can be de-structured.
           if (o->as_map_like() == nullptr) {
-            report_fatal_error(
+            diags_.report_fatal_error(
                 expr.loc.begin,
                 "Expression '{}' is a native_object which is not map-like. The encountered value is:\n{}",
                 expr.to_string(),
@@ -980,7 +996,7 @@ class render_engine {
           }
         },
         [&](auto&&) {
-          report_fatal_error(
+          diags_.report_fatal_error(
               expr.loc.begin,
               "Expression '{}' does not evaluate to a map. The encountered value is:\n{}",
               expr.to_string(),
@@ -1042,7 +1058,7 @@ class render_engine {
           // array-like native objects are iterable.
           native_object::array_like::ptr array_like = o->as_array_like();
           if (array_like == nullptr) {
-            report_fatal_error(
+            diags_.report_fatal_error(
                 expr.loc.begin,
                 "Expression '{}' is a native_object which is not array-like. The encountered value is:\n{}",
                 expr.to_string(),
@@ -1058,7 +1074,7 @@ class render_engine {
           }
         },
         [&](auto&&) {
-          report_fatal_error(
+          diags_.report_fatal_error(
               expr.loc.begin,
               "Expression '{}' does not evaluate to an array. The encountered value is:\n{}",
               expr.to_string(),
@@ -1073,7 +1089,7 @@ class render_engine {
     for (const ast::identifier& id : partial_block.arguments) {
       auto [_, inserted] = arguments.insert(id.name);
       if (!inserted) {
-        report_fatal_error(
+        diags_.report_fatal_error(
             id.loc.begin,
             "Duplicate capture name in partial block definition '{}'",
             name);
@@ -1113,7 +1129,7 @@ class render_engine {
           return handle->ptr();
         }
       }
-      report_fatal_error(
+      diags_.report_fatal_error(
           partial_statement.partial.loc.begin,
           "Expression '{}' does not evaluate to a partial. The encountered value is:\n{}",
           partial_statement.partial.to_string(),
@@ -1132,14 +1148,14 @@ class render_engine {
       return std::pair{std::move(not_provided), std::move(leftovers)};
     });
     if (!missing.empty()) {
-      report_fatal_error(
+      diags_.report_fatal_error(
           partial_statement.loc.begin,
           "Partial '{}' is missing named arguments: {}",
           partial->name,
           fmt::join(missing, ", "));
     }
     if (!extras.empty()) {
-      report_fatal_error(
+      diags_.report_fatal_error(
           partial_statement.loc.begin,
           "Partial '{}' received unexpected named arguments: {}",
           partial->name,
@@ -1184,7 +1200,7 @@ class render_engine {
 
     source_resolver* resolver = opts_.source_resolver.get();
     if (resolver == nullptr) {
-      report_fatal_error(
+      diags_.report_fatal_error(
           macro.loc.begin,
           "No source resolver was provided. Cannot resolve macro with path '{}'",
           macro.path_string());
@@ -1192,9 +1208,9 @@ class render_engine {
 
     // Kept alive by the source_resolver implementation
     const ast::root* resolved_macro =
-        resolver->resolve_macro(path, macro.loc.begin, diags_);
+        resolver->resolve_macro(path, macro.loc.begin, diags_.engine());
     if (resolved_macro == nullptr) {
-      report_fatal_error(
+      diags_.report_fatal_error(
           macro.loc.begin,
           "Macro with path '{}' was not found or failed to parse",
           macro.path_string());
@@ -1212,8 +1228,8 @@ class render_engine {
 
   outputter out_;
   object::ptr root_context_;
-  diagnostics_engine& diags_;
   source_stack source_stack_;
+  diagnoser diags_;
   render_options opts_;
 };
 

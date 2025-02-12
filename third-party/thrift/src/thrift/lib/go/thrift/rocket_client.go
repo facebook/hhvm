@@ -54,8 +54,6 @@ type rocketClient struct {
 }
 
 var _ types.Protocol = (*rocketClient)(nil)
-var _ types.RequestHeaders = (*rocketClient)(nil)
-var _ types.ResponseHeaderGetter = (*rocketClient)(nil)
 
 // NewRocketClient creates a new Rocket client given an RSocketClient.
 func NewRocketClient(client RSocketClient, protoID types.ProtocolID, ioTimeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {

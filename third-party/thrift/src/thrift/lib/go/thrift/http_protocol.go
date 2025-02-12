@@ -31,8 +31,6 @@ type httpProtocol struct {
 }
 
 var _ types.Protocol = (*httpProtocol)(nil)
-var _ types.RequestHeaders = (*httpProtocol)(nil)
-var _ types.ResponseHeaderGetter = (*httpProtocol)(nil)
 
 // NewHTTPProtocol creates a Protocol from a format that serializes directly to an HTTPClient.
 func NewHTTPProtocol(url string) (types.Protocol, error) {

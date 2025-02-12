@@ -36,8 +36,6 @@ type upgradeToRocketClient struct {
 }
 
 var _ types.Protocol = (*upgradeToRocketClient)(nil)
-var _ types.RequestHeaders = (*upgradeToRocketClient)(nil)
-var _ types.ResponseHeaderGetter = (*upgradeToRocketClient)(nil)
 
 // newUpgradeToRocketClient creates a protocol that upgrades from Header to Rocket client from a socket.
 func newUpgradeToRocketClient(conn net.Conn, protoID types.ProtocolID, ioTimeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {

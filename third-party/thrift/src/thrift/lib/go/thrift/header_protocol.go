@@ -32,8 +32,6 @@ type headerProtocol struct {
 }
 
 var _ types.Protocol = (*headerProtocol)(nil)
-var _ types.RequestHeaders = (*headerProtocol)(nil)
-var _ types.ResponseHeaderGetter = (*headerProtocol)(nil)
 
 // NewHeaderProtocol creates a new header protocol.
 func NewHeaderProtocol(conn net.Conn) (types.Protocol, error) {

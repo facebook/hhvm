@@ -45,7 +45,7 @@ func (cc *ClientConn) Close() error {
 func (cc *ClientConn) SendMsg(ctx context.Context, method string, req types.IRequest, msgType types.MessageType) error {
 	cc.seqID++
 
-	if err := setRequestHeaders(ctx, cc.proto); err != nil {
+	if err := types.SetRequestHeaders(ctx, cc.proto); err != nil {
 		return fmt.Errorf("Failed to set request headers: %w", err)
 	}
 

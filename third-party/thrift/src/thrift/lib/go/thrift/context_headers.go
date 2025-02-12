@@ -18,7 +18,6 @@ package thrift
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -67,31 +66,6 @@ func GetHeaders(ctx context.Context) map[string]string {
 	v, ok := ctx.Value(types.HeadersKey).(map[string]string)
 	if ok {
 		return v
-	}
-	return nil
-}
-
-// setRequestHeaders sets the Headers in the protocol to send with the request.
-// These headers will be written via the Write method, inside the Call method for each generated request.
-// These Headers will be cleared with Flush, as they are not persistent.
-func setRequestHeaders(ctx context.Context, protocol types.Protocol) error {
-	if ctx == nil {
-		return nil
-	}
-	headers := ctx.Value(types.HeadersKey)
-	if headers == nil {
-		return nil
-	}
-	headersMap, ok := headers.(map[string]string)
-	if !ok {
-		return types.NewTransportException(types.INVALID_HEADERS_TYPE, "Headers key in context value is not map[string]string")
-	}
-	p, ok := protocol.(types.RequestHeaders)
-	if !ok {
-		return types.NewTransportException(types.NOT_IMPLEMENTED, fmt.Sprintf("requestHeaders not implemented for transport type %T", protocol))
-	}
-	for k, v := range headersMap {
-		p.SetRequestHeader(k, v)
 	}
 	return nil
 }

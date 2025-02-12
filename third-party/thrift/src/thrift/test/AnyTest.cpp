@@ -106,6 +106,7 @@ TYPED_TEST(AnyTestFixture, ToAny) {
     // Rely on infer_tag if TypeParam is not string_t or binary_t
     any = AnyData::toAny(value);
     any.get(v1);
+    EXPECT_EQ(v1, any.get<decltype(value)>());
   } else {
     any = toAnyData<TypeParam>();
     any.get<TypeParam>(v1);

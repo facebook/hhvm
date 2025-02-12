@@ -79,10 +79,12 @@ class AnyData : public detail::Wrap<AnyStruct> {
     return type() == Type::get<Tag>();
   }
 
-  template <typename Tag>
-  type::native_type<Tag> get() const {
-    type::native_type<Tag> v;
-    get<Tag>(v);
+  template <typename TagOrT>
+  auto get() const {
+    using actual_tag = std::
+        conditional_t<is_thrift_type_tag_v<TagOrT>, TagOrT, infer_tag<TagOrT>>;
+    type::native_type<actual_tag> v;
+    get<actual_tag>(v);
     return v;
   }
 

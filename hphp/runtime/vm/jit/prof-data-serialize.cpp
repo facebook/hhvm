@@ -292,6 +292,16 @@ void read_units_preload(ProfDataDeserializer& ser, const std::string& root) {
   read_container(ser, [&] { read_unit_preload(ser, root); });
 }
 
+void wait_for_units_preload() {
+  if (s_preload_dispatcher) {
+    BootStats::Block timer("DES_wait_for_units_preload",
+                           Cfg::Server::Mode);
+    s_preload_dispatcher->waitEmpty(true);
+    delete s_preload_dispatcher;
+    s_preload_dispatcher = nullptr;
+  }
+}
+
 void write_type(ProfDataSerializer& ser, Type t) {
   t.serialize(ser);
 }
@@ -2189,21 +2199,13 @@ std::string deserializeProfData(const std::string& filename,
                                 bool rds) {
   s_deserializedFile = filename;
   try {
-    if (!rds) ProfData::setTriedDeserialization();
-
     ProfDataDeserializer ser{filename};
 
     if (read_raw<decltype(kMagic)>(ser) != kMagic) {
       throw std::runtime_error("Not a profile-data dump");
     }
     auto signature = read_raw<decltype(RepoFile::globalData().Signature)>(ser);
-    if (signature != RepoFile::globalData().Signature) {
-      auto const msg =
-        folly::sformat("Mismatched repo signature (expected signature '{}', got '{}')",
-                       RepoFile::globalData().Signature, signature);
-
-      throw std::runtime_error(msg);
-    }
+    auto const preload_only = signature != RepoFile::globalData().Signature;
     auto size = read_raw<size_t>(ser);
     std::string schema;
     schema.resize(size);
@@ -2241,12 +2243,38 @@ std::string deserializeProfData(const std::string& filename,
     // If we're loading RDS ordering, we can stop here.
     auto const ordering = read_rds_ordering(ser);
     if (rds) {
-      rds::setPreAssignments(ordering);
+      if (!preload_only) {
+        rds::setPreAssignments(ordering);
+      }
       return "";
     }
 
     read_units_preload(ser, "");
+    SCOPE_EXIT {
+      // Ensure the preloading work is finished properly before we proceed, even
+      // upon early returns and exceptions.
+      wait_for_units_preload();
+      // During deserialization we didn't merge the loaded units because we
+      // wanted to pick and choose the hot Funcs and Classes. But we need to
+      // merge them before we start serving traffic to ensure we don't have
+      // inconsistentcies (eg a persistent memoized Func wrapper might have been
+      // merged, while its implementation was not; since the implementation has
+      // an internal name, there won't be an autoload entry for it, so unless
+      // something else causes the unit to be loaded the implementation might
+      // never get pulled in (resulting in fatals when the wrapper tries to call
+      // it).
+      merge_loaded_units(numWorkers);
+    };
     ExtensionRegistry::deserialize(ser);
+
+    if (preload_only) {
+      return folly::sformat("Mismatched repo signature "
+                            "(expected '{}', got '{}'), preloading only",
+                            RepoFile::globalData().Signature, signature);
+    }
+
+    if (!rds) ProfData::setTriedDeserialization();
+
     PropertyProfile::deserialize(ser);
     InstanceBits::deserialize(ser);
 
@@ -2305,25 +2333,7 @@ std::string deserializeProfData(const std::string& filename,
       deserializeCachedInliningCost(ser);
     }
 
-    if (s_preload_dispatcher) {
-      BootStats::Block timer("DES_wait_for_units_preload",
-                             Cfg::Server::Mode);
-      s_preload_dispatcher->waitEmpty(true);
-      delete s_preload_dispatcher;
-      s_preload_dispatcher = nullptr;
-    }
     always_assert(ser.done());
-
-    // During deserialization we didn't merge the loaded units because
-    // we wanted to pick and choose the hot Funcs and Classes. But we
-    // need to merge them before we start serving traffic to ensure we
-    // don't have inconsistentcies (eg a persistent memoized Func
-    // wrapper might have been merged, while its implementation was
-    // not; since the implementation has an internal name, there won't
-    // be an autoload entry for it, so unless something else causes
-    // the unit to be loaded the implementation might never get pulled
-    // in (resulting in fatals when the wrapper tries to call it).
-    merge_loaded_units(numWorkers);
 
     if (isJitSerializing() && serializeOptProfEnabled()) {
       s_lastMappers = ser.getMappers();

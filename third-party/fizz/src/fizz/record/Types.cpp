@@ -67,6 +67,8 @@ std::string toString(ExtensionType extType) {
       return "signature_algorithms";
     case ExtensionType::application_layer_protocol_negotiation:
       return "application_layer_protocol_negotiation";
+    case ExtensionType::padding:
+      return "padding";
     case ExtensionType::token_binding:
       return "token_binding";
     case ExtensionType::quic_transport_parameters_draft:

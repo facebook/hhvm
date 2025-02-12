@@ -1,8 +1,3 @@
-# @generated SignedSource<<9637ef5067835d0574a6b268d63b71f1>>
-#
-# This file is generated file from `fizz/facebook/boilerplate.sh`.
-# All manual changes will be lost.
-
 # This file contains sources that were extracted from the source of truth in
 # BUCK.
 #
@@ -53,6 +48,8 @@ set(
         experimental/ktls/FizzKTLSCallback.cpp
         experimental/ktls/KTLS.cpp
         experimental/protocol/BatchSignatureTypes.cpp
+        extensions/clientpadding/PaddingClientExtension.cpp
+        extensions/clientpadding/Types.cpp
         extensions/delegatedcred/DelegatedCredentialCertManager.cpp
         extensions/delegatedcred/DelegatedCredentialClientCertManager.cpp
         extensions/delegatedcred/DelegatedCredentialClientExtension.cpp

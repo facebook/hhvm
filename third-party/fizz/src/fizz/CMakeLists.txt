@@ -133,6 +133,7 @@ set(FIZZ_HEADER_DIRS
   experimental/crypto/exchange
   experimental/ktls
   experimental/util
+  extensions/clientpadding
   extensions/delegatedcred
   extensions/exportedauth
   extensions/tokenbinding
@@ -358,6 +359,7 @@ if(BUILD_TESTS)
   add_gtest(crypto/test/KeyDerivationTest.cpp KeyDerivationTest)
   add_gtest(crypto/test/RandomGeneratorTest.cpp RandomGeneratorTest)
   add_gtest(crypto/test/UtilsTest.cpp UtilsTest)
+  add_gtest(extensions/clientpadding/test/PaddingClientExtensionTest.cpp PaddingClientExtensionTest)
   add_gtest(extensions/delegatedcred/test/DelegatedCredTypesTest.cpp DelegatedCredTypesTest)
   add_gtest(extensions/delegatedcred/test/DelegatedCredentialFactoryTest.cpp DelegatedCredentialFactoryTest)
   add_gtest(extensions/delegatedcred/test/DelegatedCredentialCertManagerTest.cpp DelegatedCredentialCertManagerTest)

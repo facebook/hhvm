@@ -7,7 +7,9 @@
  */
 
 #include <fizz/client/AsyncFizzClient.h>
+#include <fizz/client/MultiClientExtensions.h>
 #include <fizz/crypto/hpke/Utils.h>
+#include <fizz/extensions/clientpadding/PaddingClientExtension.h>
 #include <fizz/extensions/delegatedcred/DelegatedCredentialClientExtension.h>
 #include <fizz/extensions/delegatedcred/DelegatedCredentialFactory.h>
 #include <fizz/protocol/DefaultFactory.h>
@@ -73,6 +75,7 @@ void printUsage() {
     << " -curves c1:...           (colon-separated list of supported ECDSA curves. Default: secp256r1, x25519)\n"
     << " -certcompression a1:...  (enables certificate compression support for given algorithms. Default: None)\n"
     << " -early                   (enables sending early data during resumption. Default: false)\n"
+    << " -padding N               (ClientHello padding in bytes. Clamps to minimum 4 bytes if more than 0. Default: 0)\n"
     << " -quiet                   (hide informational logging. Default: false)\n"
     << " -v verbosity             (set verbose log level for VLOG macros. Default: 0)\n"
     << " -vmodule m1=N,...        (set per-module verbose log level for VLOG macros. Default: none)\n"
@@ -550,6 +553,7 @@ int fizzClientCommand(const std::vector<std::string>& args) {
   int32_t uringCapacity = 128;
   int32_t uringMaxSubmit = 64;
   int32_t uringMaxGet = -1;
+  uint16_t padding = 0;
 
   // clang-format off
   FizzArgHandlerMap handlers = {
@@ -593,6 +597,7 @@ int fizzClientCommand(const std::vector<std::string>& args) {
           throw;
         }
     }}},
+    {"-padding", {true, [&padding](const std::string& arg) { padding = folly::to<uint16_t>(arg);}}},
     {"-early", {false, [&early](const std::string&) { early = true; }}},
     {"-quiet", {false, [](const std::string&) {
         FLAGS_minloglevel = google::GLOG_ERROR;
@@ -778,13 +783,22 @@ int fizzClientCommand(const std::vector<std::string>& args) {
     clientContext->setClientCertManager(std::move(certMgr));
   }
 
-  std::shared_ptr<ClientExtensions> extensions;
+  std::vector<std::shared_ptr<ClientExtensions>> extensionsList;
   if (delegatedCredentials) {
     clientContext->setFactory(
         std::make_shared<extensions::DelegatedCredentialFactory>());
-    extensions =
+    extensionsList.push_back(
         std::make_shared<extensions::DelegatedCredentialClientExtension>(
-            clientContext->getSupportedSigSchemes());
+            clientContext->getSupportedSigSchemes()));
+  }
+  if (padding > 0) {
+    extensionsList.push_back(
+        std::make_shared<extensions::PaddingClientExtension>(padding));
+  }
+  std::shared_ptr<ClientExtensions> extensions;
+  if (!extensionsList.empty()) {
+    extensions =
+        std::make_shared<MultiClientExtensions>(std::move(extensionsList));
   }
 
   folly::Optional<ech::ECHConfigList> echConfigList = folly::none;

@@ -91,6 +91,7 @@ enum class ExtensionType : uint16_t {
   supported_groups = 10,
   signature_algorithms = 13,
   application_layer_protocol_negotiation = 16,
+  padding = 21,
   token_binding = 24,
   compress_certificate = 27,
   delegated_credential = 34,

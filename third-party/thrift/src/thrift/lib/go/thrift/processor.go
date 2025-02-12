@@ -83,6 +83,21 @@ func setRequestHeadersForResult(protocol types.Protocol, result types.WritableSt
 	}
 }
 
+// sendException is a utility function to send the exception for the specified
+// method.
+func sendException(prot types.Encoder, name string, seqID int32, err types.ApplicationException) error {
+	if e2 := prot.WriteMessageBegin(name, types.EXCEPTION, seqID); e2 != nil {
+		return e2
+	} else if e2 := err.Write(prot); e2 != nil {
+		return e2
+	} else if e2 := prot.WriteMessageEnd(); e2 != nil {
+		return e2
+	} else if e2 := prot.Flush(); e2 != nil {
+		return e2
+	}
+	return nil
+}
+
 // process is a utility function to take a processor and a protocol, and fully process a message.
 // It is broken up into 3 steps:
 // 1. Read the message from the protocol.

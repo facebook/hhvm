@@ -29,7 +29,12 @@ using AddIntValueFunction =
  */
 class ConnectionContextBase {
  public:
-  virtual ~ConnectionContextBase() {}
+  ConnectionContextBase() = default;
+  ConnectionContextBase(const ConnectionContextBase&) = default;
+  ConnectionContextBase(ConnectionContextBase&&) = default;
+  ConnectionContextBase& operator=(const ConnectionContextBase&) = default;
+  ConnectionContextBase& operator=(ConnectionContextBase&&) = default;
+  virtual ~ConnectionContextBase() = default;
   virtual void collectNormalValues(const AddNormalValueFunction& add) const;
   virtual void collectIntValues(const AddIntValueFunction& add) const;
   virtual std::unique_ptr<ConnectionContextBase> copy() const {

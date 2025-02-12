@@ -38,6 +38,10 @@ namespace wangle {
 
 struct SSLContextConfig {
   SSLContextConfig() = default;
+  SSLContextConfig(const SSLContextConfig&) = default;
+  SSLContextConfig(SSLContextConfig&&) = default;
+  SSLContextConfig& operator=(const SSLContextConfig&) = default;
+  SSLContextConfig& operator=(SSLContextConfig&&) = default;
   virtual ~SSLContextConfig() = default;
 
   struct CertificateInfo {

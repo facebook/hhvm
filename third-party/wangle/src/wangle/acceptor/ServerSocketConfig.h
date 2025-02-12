@@ -44,6 +44,11 @@ namespace wangle {
  */
 class CustomConfig {
  public:
+  CustomConfig() = default;
+  CustomConfig(const CustomConfig&) = default;
+  CustomConfig(CustomConfig&&) = default;
+  CustomConfig& operator=(const CustomConfig&) = default;
+  CustomConfig& operator=(CustomConfig&&) = default;
   virtual ~CustomConfig() = default;
 };
 

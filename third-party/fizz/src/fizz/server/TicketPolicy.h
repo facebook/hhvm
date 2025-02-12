@@ -18,6 +18,10 @@ class TicketPolicy {
  public:
   TicketPolicy() : clock_(std::make_shared<SystemClock>()) {}
 
+  TicketPolicy(const TicketPolicy&) = default;
+  TicketPolicy(TicketPolicy&&) = default;
+  TicketPolicy& operator=(const TicketPolicy&) = default;
+  TicketPolicy& operator=(TicketPolicy&&) = default;
   ~TicketPolicy() = default;
 
   /**

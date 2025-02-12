@@ -38,8 +38,32 @@ if(thriftpy3)
   file(TOUCH "${_cybld}/thrift/python/__init__.pxd")
   file(TOUCH "${_cybld}/thrift/py3/__init__.pxd")
 
+  ###
+  # First, run Thrift compiler on metadata.thrift. thrift-python runtime depends on
+  # apache.thrift.metadata package, which is created and installed later in setup.py.
+  ###
+  add_custom_target(
+    generate_apache_thrift_metadata_python
+    COMMAND
+      thrift1 -I ${CMAKE_SOURCE_DIR} --out . --gen mstch_python
+      ${CMAKE_CURRENT_SOURCE_DIR}/thrift/metadata.thrift
+    WORKING_DIRECTORY ${_cybld}
+    BYPRODUCTS
+      ${_cybld}/apache/thrift/metadata/thrift_abstract_types.py
+      ${_cybld}/apache/thrift/metadata/thrift_clients.py
+      ${_cybld}/apache/thrift/metadata/thrift_enums.py
+      ${_cybld}/apache/thrift/metadata/thrift_metadata.py
+      ${_cybld}/apache/thrift/metadata/thrift_mutable_clients.py
+      ${_cybld}/apache/thrift/metadata/thrift_mutable_services.py
+      ${_cybld}/apache/thrift/metadata/thrift_mutable_types.py
+      ${_cybld}/apache/thrift/metadata/thrift_mutable_types.pyi
+      ${_cybld}/apache/thrift/metadata/thrift_services.py
+      ${_cybld}/apache/thrift/metadata/thrift_types.py
+      ${_cybld}/apache/thrift/metadata/thrift_types.pyi
+  )
+
   ####
-  # First, prepare for building cython extensions by creating the necessary symlinks in the cybld directory
+  # Next, prepare for building cython extensions by creating the necessary symlinks in the cybld directory
   ####
   add_custom_target(create_binding_symlink_python_types ALL)
   foreach(
@@ -300,6 +324,7 @@ if(thriftpy3)
   add_custom_target(
     thrift_python_and_py3_bindings ALL
     DEPENDS
+      generate_apache_thrift_metadata_python
       create_binding_symlink_python
       create_binding_symlink_py3
       thriftcpp2

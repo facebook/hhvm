@@ -254,6 +254,7 @@ else:
             "thrift.python",
             "thrift.python.client",
             "thrift.py3",
+            "apache.thrift.metadata",
         ],
         package_data={"": ["*.pxd", "*.h"]},
         setup_requires=["cython"],

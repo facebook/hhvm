@@ -408,6 +408,7 @@ struct interpolation {
 struct let_statement {
   source_range loc;
 
+  bool exported;
   identifier id;
   expression value;
 };

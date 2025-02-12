@@ -152,6 +152,9 @@ struct ast_visitor {
   void visit(const ast::let_statement& let_statement, tree_printer::scope scope)
       const {
     scope.println(" let-statement {}", location(let_statement.loc));
+    if (let_statement.exported) {
+      scope.open_property().println(" exported");
+    }
     visit(let_statement.id, scope.open_property());
     visit(let_statement.value, scope.open_property());
   }

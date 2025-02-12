@@ -1434,6 +1434,17 @@ TEST_F(ParserTest, let_statement) {
       "| `- expression <line:1:14, col:30> '(not true_value)'\n");
 }
 
+TEST_F(ParserTest, let_statement_export) {
+  auto ast = parse_ast("{{#let export foo = (hello world)}}");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- let-statement <line:1:1, col:36>\n"
+      "| `- exported\n"
+      "| `- identifier 'foo'\n"
+      "| `- expression <line:1:21, col:34> '(hello world)'\n");
+}
+
 TEST_F(ParserTest, let_statement_with_implicit_context) {
   auto ast = parse_ast("{{#let foo = (a.b.c this)}}");
   EXPECT_EQ(

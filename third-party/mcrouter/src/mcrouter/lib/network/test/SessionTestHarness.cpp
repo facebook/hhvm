@@ -9,7 +9,6 @@
 
 #include <folly/SocketAddress.h>
 
-#include "mcrouter/lib/network/AsyncMcServerWorker.h"
 #include "mcrouter/lib/network/AsyncMcServerWorkerOptions.h"
 #include "mcrouter/lib/network/McServerSession.h"
 #include "mcrouter/lib/network/gen/MemcacheServer.h"

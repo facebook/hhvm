@@ -7,8 +7,6 @@
 
 #include "SecurityOptions.h"
 
-#include <exception>
-
 #include <folly/lang/Assume.h>
 
 namespace facebook {

@@ -11,7 +11,6 @@
 
 #include <memory>
 
-#include <folly/SingletonThreadLocal.h>
 #include <folly/container/EvictingCacheMap.h>
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/EventBase.h>

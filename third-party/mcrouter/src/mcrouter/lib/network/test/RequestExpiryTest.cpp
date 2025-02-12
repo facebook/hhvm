@@ -5,8 +5,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <sys/uio.h>
-
 #include <chrono>
 #include <cstring>
 #include <string>
@@ -15,7 +13,6 @@
 #include <gtest/gtest.h>
 
 #include "mcrouter/McReqUtil.h"
-#include "mcrouter/lib/network/CaretProtocol.h"
 #include "mcrouter/lib/network/gen/MemcacheMessages.h"
 #include "mcrouter/lib/network/test/gen/CarbonTestMessages.h"
 

@@ -10,10 +10,8 @@
 #include <signal.h>
 #include <sys/eventfd.h>
 #include <sys/resource.h>
-#include <sys/time.h>
 
 #include <chrono>
-#include <condition_variable>
 #include <cstdio>
 #include <future>
 #include <memory>

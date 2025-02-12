@@ -19,7 +19,6 @@
 #include <folly/portability/OpenSSL.h>
 
 #include <folly/io/async/AsyncSSLSocket.h>
-#include <folly/io/async/AsyncSocket.h>
 
 namespace facebook {
 namespace memcache {

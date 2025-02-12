@@ -16,7 +16,6 @@
 
 #include <folly/Conv.h>
 #include <folly/fibers/EventBaseLoopController.h>
-#include <folly/fibers/FiberManager.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/synchronization/LifoSem.h>
 #include <wangle/ssl/TLSTicketKeySeeds.h>

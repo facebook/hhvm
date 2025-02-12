@@ -13,7 +13,6 @@
 #include <folly/FileUtil.h>
 #include <folly/ScopeGuard.h>
 #include <folly/fibers/EventBaseLoopController.h>
-#include <folly/fibers/FiberManager.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/portability/GFlags.h>
 

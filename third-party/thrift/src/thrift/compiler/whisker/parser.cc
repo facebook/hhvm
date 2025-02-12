@@ -1693,8 +1693,11 @@ class parser {
     assert(scan.empty());
     const auto scan_start = scan.start;
 
-    if (!try_consume_tokens(
-            &scan, {tok::open, tok::pound, tok::kw_let, tok::kw_partial})) {
+    if (!try_consume_tokens(&scan, {tok::open, tok::pound, tok::kw_let})) {
+      return no_parse_result();
+    }
+    const bool exported = try_consume_token(&scan, tok::kw_export) != nullptr;
+    if (!try_consume_token(&scan, tok::kw_partial)) {
       return no_parse_result();
     }
 
@@ -1804,6 +1807,7 @@ class parser {
     return {
         ast::partial_block{
             scan.with_start(scan_start).range(),
+            exported,
             std::move(id),
             std::move(arguments),
             std::move(captures),

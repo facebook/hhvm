@@ -968,6 +968,22 @@ TEST_F(ParserTest, partial_block_basic) {
       "| |- newline <line:2:25, line:3:1> '\\n'\n");
 }
 
+TEST_F(ParserTest, partial_block_export) {
+  auto ast = parse_ast(
+      "{{#let export partial foo |arg1 arg2|}}\n"
+      "This is a partial block!\n"
+      "{{/let partial}}\n");
+  EXPECT_EQ(
+      to_string(ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- partial-block <line:1:1, line:3:17> 'foo'\n"
+      "| `- exported\n"
+      "| `- argument 'arg1'\n"
+      "| `- argument 'arg2'\n"
+      "| |- text <line:2:1, col:25> 'This is a partial block!'\n"
+      "| |- newline <line:2:25, line:3:1> '\\n'\n");
+}
+
 TEST_F(ParserTest, partial_block_with_captures) {
   auto ast = parse_ast(
       "{{#let partial foo |arg1 arg2| captures |cap1 cap2|}}\n"

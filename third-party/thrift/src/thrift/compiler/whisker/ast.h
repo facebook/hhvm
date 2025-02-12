@@ -529,6 +529,8 @@ struct each_block {
  */
 struct partial_block {
   source_range loc;
+
+  bool exported;
   identifier name;
   std::set<identifier, identifier::compare_by_name> arguments;
   std::set<identifier, identifier::compare_by_name> captures;

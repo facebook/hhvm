@@ -169,6 +169,9 @@ struct ast_visitor {
         " partial-block {} '{}'",
         location(partial_block.loc),
         partial_block.name.name);
+    if (partial_block.exported) {
+      scope.open_property().println(" exported");
+    }
     for (const auto& argument : partial_block.arguments) {
       scope.open_property().println(" argument '{}'", argument.name);
     }

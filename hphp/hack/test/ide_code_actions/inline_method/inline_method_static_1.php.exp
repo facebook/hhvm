@@ -1,6 +1,8 @@
 Code actions available:
 ------------------------------------------
 Inline method (CodeActionKind: refactor) SELECTED
+Fix Hack error inline - Typing error (CodeActionKind: )
+Fix Hack error inline - Private members cannot be accessed with static:: since a child class may also have an identically named private member (CodeActionKind: )
 
 JSON for selected code action:
 ------------------------------------------

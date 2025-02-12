@@ -4730,7 +4730,7 @@ function call_method(ClassWithFooBar $mc): void {
                                         }
                                     ]
                                 },
-                            },
+                            }
                         },
                     },
                     {
@@ -4858,8 +4858,36 @@ function call_method(ClassWithFooBar $mc): void {
                                         }
                                     ]
                                 },
-                            },
+                            }
                         },
+                    },
+                    {
+                        "title": "Fix Hack error inline - No instance method `foobaz` in `ClassWithFooBar`",
+                        "kind": "",
+                        "diagnostics": [],
+                        "edit": {"changes": {}},
+                        "command": {
+                            "title": "Fix Hack error inline - No instance method `foobaz` in `ClassWithFooBar`",
+                            "command": "code-compose.show-inline-chat",
+                            "arguments": [
+                                {
+                                    "entrypoint": "FixLintErrorCodeAction",
+                                    "predefinedPrompt": {
+                                        "command": "Fix Hack error inline",
+                                        "displayPrompt": "Fix inline - No instance method `foobaz` in `ClassWithFooBar`",
+                                        "userPrompt": "\nGiven the following snippet of Hack code that is part of the file:\n 7 | function call_method(ClassWithFooBar $mc): void {\n 8 |   $mc->foobar();\n 9 | }\n\n<DIAGNOSTIC>\nerror: Typing[4053] No instance method foobaz in ClassWithFooBar\n\nFile code_action_missing_method.php, line 8, character 8 - line 8, character 13:\n\n 5 | }\n 6 | \n 7 | function call_method(ClassWithFooBar $mc): void {\n 8 |   $mc->»foobar«();\n 9 | }\n\nDid you mean foobar instead?\n\nFile code_action_missing_method.php, line 4, character 19 - line 4, character 24:\n\n 1 | <?hh\n 2 | \n 3 | class ClassWithFooBar {\n 4 |   public function »foobar«(): void {}\n 5 | }\n 6 | \n 7 | function call_method(ClassWithFooBar $mc): void {\n\nThis is why I think it is an object of type ClassWithFooBar\n\nFile code_action_missing_method.php, line 7, character 22 - line 7, character 36:\n\n 5 | }\n 6 | \n 7 | function call_method(»ClassWithFooBar« $mc): void {\n 8 |   $mc->foobar();\n 9 | }\n\nDeclaration of ClassWithFooBar is here\n\nFile code_action_missing_method.php, line 3, character 7 - line 3, character 21:\n\n 1 | <?hh\n 2 | \n 3 | class »ClassWithFooBar« {\n 4 |   public function foobar(): void {}\n 5 | }\n 6 | \n 7 | function call_method(ClassWithFooBar $mc): void {\n\n\n</DIAGNOSTIC>\nEdit <selection_to_edit> in a way that would fix that lint.\nIf there are multiple ways to fix this issue, please return in the code section the most strightforward one that is part of <selection_to_edit>,\nany further suggestions can be added in the explanation section.\n",
+                                        "description": "Fix Hack error inline",
+                                        "model": "iCodeLlama 3.1 405B",
+                                    },
+                                    "overrideSelection": {
+                                        "start": {"line": 6, "character": 0},
+                                        "end": {"line": 8, "character": 1},
+                                    },
+                                    "webviewStartLine": 6,
+                                }
+                            ],
+                        },
+                        "data": {"isAI": True},
                     },
                 ],
                 powered_by="serverless_ide",

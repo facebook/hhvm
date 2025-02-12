@@ -1,6 +1,7 @@
 Code actions available:
 ------------------------------------------
 Inline method (CodeActionKind: refactor) SELECTED
+Fix Hack error inline - Typing error (CodeActionKind: )
 
 JSON for selected code action:
 ------------------------------------------

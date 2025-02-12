@@ -1,1 +1,5 @@
-No commands or actions found
+Code actions available:
+------------------------------------------
+Fix Hack error inline - Property declarations require a visibility modifier such as `public`, `private` or `protected`. (CodeActionKind: )
+
+No code action titles match prefix: Extract into variable

@@ -1,6 +1,9 @@
 Code actions available:
 ------------------------------------------
 await expression (CodeActionKind: quickfix) SELECTED
+Fix Hack error inline - Casting Awaitable<int> to int: casting a non-primitive type to a primitive rarely yields a useful value. Did you mean to extract a value from this object before casting it, or to do a null-check? (CodeActionKind: )
+Fix Hack error inline - This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (CodeActionKind: )
+Fix Hack error inline - Invalid return type (CodeActionKind: )
 
 JSON for selected code action:
 ------------------------------------------

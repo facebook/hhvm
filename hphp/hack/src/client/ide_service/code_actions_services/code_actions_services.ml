@@ -117,12 +117,45 @@ let edit_to_code_action
       isAI = None;
     }
 
+let command_to_code_action Code_action_types.{ title; command_args } =
+  match command_args with
+  | Code_action_types.Show_inline_chat command_args ->
+    let command =
+      Lsp.Command.
+        {
+          title;
+          command = "code-compose.show-inline-chat";
+          arguments =
+            [
+              Code_action_types.Show_inline_chat_command_args.to_json
+                command_args;
+            ];
+        }
+    in
+    (* We include an empty map of edits so the client does not send us a follow-up
+       codeAction/resolve request to as for edits
+       https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_codeAction
+    *)
+    let edit = Lsp.(WorkspaceEdit.{ changes = DocumentUri.Map.empty }) in
+    let action =
+      Lsp.CodeAction.
+        {
+          title;
+          kind = Lsp.CodeActionKind.empty;
+          diagnostics = [];
+          action = BothEditThenCommand (edit, command);
+          isAI = Some true;
+        }
+    in
+    Lsp.CodeAction.Action action
+
 let to_action code_action =
   match code_action with
   | Code_action_types.Refactor_action edit ->
     edit_to_code_action edit ~kind:Lsp.CodeActionKind.refactor
   | Code_action_types.Quickfix_action edit ->
     edit_to_code_action edit ~kind:Lsp.CodeActionKind.quickfix
+  | Code_action_types.Command_action command -> command_to_code_action command
 
 let find
     ~(ctx : Provider_context.t)
@@ -146,17 +179,24 @@ let find
         ( SSet.add edit.Code_action_types.title acc,
           Code_action_types.Quickfix_action edit ))
   in
-  (* Accumulate refactors then reverse the entire list so that quickfixes come first *)
+  (* Accumulate refactors *)
+  let refactors_and_quickfixes =
+    List.fold_left
+      (Code_actions_refactors.find ~entry pos ctx)
+      ~init:quickfixes
+      ~f:(fun acc Code_action_types.(Refactor edit) ->
+        (* Ensure no duplicates with quickfixes generated from Quickfixes_to_refactors_config. *)
+        if SSet.mem edit.Code_action_types.title quickfix_titles then
+          acc
+        else
+          Code_action_types.Refactor_action edit :: acc)
+  in
+  (* Accumulate commands then reverse the entire list so that quickfixes come first, then refactors, the commands *)
   List.rev
   @@ List.fold_left
-       (Code_actions_refactors.find ~entry pos ctx)
-       ~init:quickfixes
-       ~f:(fun acc Code_action_types.(Refactor edit) ->
-         (* Ensure no duplicates with quickfixes generated from Quickfixes_to_refactors_config. *)
-         if SSet.mem edit.Code_action_types.title quickfix_titles then
-           acc
-         else
-           Code_action_types.Refactor_action edit :: acc)
+       (Code_actions_commands.find ~entry pos ctx ~error_filter)
+       ~init:refactors_and_quickfixes
+       ~f:(fun acc command -> Code_action_types.Command_action command :: acc)
 
 let map_edit_and_or_command ~f :
     Lsp.CodeAction.resolved_marker Lsp.CodeAction.edit_and_or_command ->
@@ -211,7 +251,8 @@ let code_action_title t =
   let open Code_action_types in
   match t with
   | Refactor_action { title; _ }
-  | Quickfix_action { title; _ } ->
+  | Quickfix_action { title; _ }
+  | Command_action { title; _ } ->
     title
 
 let resolve

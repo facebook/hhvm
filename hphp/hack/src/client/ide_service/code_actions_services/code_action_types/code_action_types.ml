@@ -25,9 +25,84 @@ type refactor = Refactor of edit_data [@@ocaml.unboxed]
 
 type quickfix = Quickfix of edit_data [@@ocaml.unboxed]
 
+module Show_inline_chat_command_args = struct
+  type predefined_prompt = {
+    command: string;
+    display_prompt: string;
+    user_prompt: string;
+    description: string option;
+    rules: string option;
+    task: string option;
+    prompt_template: string option;
+    model: string option;
+    add_diagnostics: bool option;
+  }
+
+  let field_opt name t_to_json t_opt =
+    Option.map t_opt ~f:(fun t -> (name, t_to_json t))
+
+  let predefined_prompt_to_json
+      {
+        command;
+        display_prompt;
+        user_prompt;
+        description;
+        rules;
+        task;
+        prompt_template;
+        model;
+        add_diagnostics;
+      } =
+    Hh_json.(
+      JSON_Object
+        (("command", string_ command)
+        :: ("displayPrompt", string_ display_prompt)
+        :: ("userPrompt", string_ user_prompt)
+        :: List.filter_opt
+             [
+               field_opt "description" string_ description;
+               field_opt "rules" string_ rules;
+               field_opt "task" string_ task;
+               field_opt "promptTemplate" string_ prompt_template;
+               field_opt "model" string_ model;
+               field_opt "addDiagnostics" bool_ add_diagnostics;
+             ]))
+
+  type t = {
+    entrypoint: string;
+    predefined_prompt: predefined_prompt;
+    override_selection: Pos.absolute;
+    webview_start_line: int;
+  }
+
+  let to_json
+      { entrypoint; predefined_prompt; override_selection; webview_start_line }
+      =
+    Hh_json.(
+      JSON_Object
+        [
+          ("entrypoint", string_ entrypoint);
+          ("predefinedPrompt", predefined_prompt_to_json predefined_prompt);
+          ( "overrideSelection",
+            Lsp_fmt.print_range
+            @@ Lsp_helpers.hack_pos_to_lsp_range
+                 ~equal:String.equal
+                 override_selection );
+          ("webviewStartLine", int_ webview_start_line);
+        ])
+end
+
+type command_args = Show_inline_chat of Show_inline_chat_command_args.t
+
+type command = {
+  title: string;
+  command_args: command_args;
+}
+
 type t =
   | Refactor_action of edit_data
   | Quickfix_action of edit_data
+  | Command_action of command
 
 type find_refactor =
   entry:Provider_context.entry -> Pos.t -> Provider_context.t -> refactor list

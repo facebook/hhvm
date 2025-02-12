@@ -1,0 +1,22 @@
+(rule
+ (alias ide_code_actions_show_inline_chat)
+ (deps
+  %{exe:../../../src/hh_single_type_check.exe}
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/ide_code_actions/show_inline_chat/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/ide_code_actions/show_inline_chat/*.php)
+  (glob_files %{project_root}/hack/test/ide_code_actions/show_inline_chat/*.exp))
+ (action
+  (run
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/ide_code_actions/show_inline_chat
+   --program
+   %{exe:../../../src/hh_single_type_check.exe}
+   --flags
+   --ide-code-actions "Fix Hack error inline")))
+
+(alias
+ (name runtest)
+ (deps
+  (alias ide_code_actions_show_inline_chat)))

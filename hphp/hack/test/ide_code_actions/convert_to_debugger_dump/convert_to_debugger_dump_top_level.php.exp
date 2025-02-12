@@ -1,6 +1,10 @@
 Code actions available:
 ------------------------------------------
 convert to 'debugger_dump' (CodeActionKind: quickfix) SELECTED
+Fix Hack error inline - An expression cannot start with `=` (CodeActionKind: )
+Fix Hack error inline - Unbound global constant (Typing) (CodeActionKind: )
+Fix Hack error inline - Unbound name: `=` (a global constant) (CodeActionKind: )
+Fix Hack error inline - Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (CodeActionKind: )
 
 JSON for selected code action:
 ------------------------------------------

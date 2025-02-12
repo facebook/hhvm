@@ -111,3 +111,7 @@ val to_json :
   filename_to_string:('a -> string) ->
   ('a Pos.pos, 'a Pos.pos) t ->
   Hh_json.json
+
+val claim_message : ('a, _) t -> 'a Message.t
+
+val function_pos : ('a, _) t -> 'a option

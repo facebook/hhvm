@@ -2,5 +2,6 @@ Code actions available:
 ------------------------------------------
 Extract into variable (CodeActionKind: refactor)
 Extract into method (CodeActionKind: refactor)
+Fix Hack error inline - Too few arguments (required 1 but got 0) (CodeActionKind: )
 
 No code action titles match prefix: Inline method

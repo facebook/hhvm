@@ -1,6 +1,7 @@
 Code actions available:
 ------------------------------------------
 Extract into variable (CodeActionKind: refactor) SELECTED
+Fix Hack error inline - Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (CodeActionKind: )
 
 JSON for selected code action:
 ------------------------------------------

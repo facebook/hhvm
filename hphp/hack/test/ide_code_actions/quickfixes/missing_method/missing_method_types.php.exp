@@ -1,6 +1,11 @@
 Code actions available:
 ------------------------------------------
 Add stubs for missing interface methods (CodeActionKind: quickfix) SELECTED
+Fix Hack error inline - This interface is not properly implemented (CodeActionKind: ) SELECTED
+
+Multiple code action titles match prefix: ''
+
+Code action title: Add stubs for missing interface methods
 
 JSON for selected code action:
 ------------------------------------------
@@ -33,6 +38,51 @@ class Foo implements IFoo {
   public function otherMethod(): void {}
 
   public function bar(int $x, shape("y" => vec<int>) $s, shape(...) $_, IFoo $other, dynamic $d, mixed $m, (float, num) $tuple, T $t, Vector<null> $v, ?arraykey $ak, nothing $_, mixed $_, int ...$args): void {}
+
+}
+
+
+Code action title: Fix Hack error inline - This interface is not properly implemented
+
+JSON for selected code action:
+------------------------------------------
+{
+  "command":{
+    "arguments":[
+      {
+        "entrypoint":"FixLintErrorCodeAction",
+        "overrideSelection":{"end":{"character":25,"line":6},"start":{"character":21,"line":6}},
+        "predefinedPrompt":{
+          "command":"Fix Hack error inline",
+          "description":"Fix Hack error inline",
+          "displayPrompt":"Fix inline - This interface is not properly implemented",
+          "model":"iCodeLlama 3.1 405B",
+          "userPrompt":"\nGiven the following snippet of Hack code that is part of the file:\n 7 | class Foo implements IFoo {\n\n<DIAGNOSTIC>\nerror: Typing[4054] This interface is not properly implemented\n\nFile missing_method_types.php, line 7, character 22 - line 7, character 25:\n\n 3 | interface IFoo {\n 4 |   public function bar<T>(int $x, shape('y' => vec<int>) $s, shape(...) $_, IFoo $other, dynamic $d, mixed $m, (float, num) $tuple, T $t, Vector<null> $v, ?arraykey $ak, nothing $_, ?nonnull $_, int ...$args): void;\n 5 | }\n 6 | \n 7 | class Foo implements »IFoo« {\n 8 |                    // ^ at-caret\n 9 |   public function otherMethod(): void {}\n\nMethod bar does not have an implementation\n\nFile missing_method_types.php, line 4, character 19 - line 4, character 21:\n\n 3 | interface IFoo {\n 4 |   public function »bar«<T>(int $x, shape('y' => vec<int>) $s, shape(...) $_, IFoo $other, dynamic $d, mixed $m, (float, num) $tuple, T $t, Vector<null> $v, ?arraykey $ak, nothing $_, ?nonnull $_, int ...$args): void;\n 5 | }\n 6 | \n 7 | class Foo implements IFoo {\n 8 |                    // ^ at-caret\n 9 |   public function otherMethod(): void {}\n\n\n</DIAGNOSTIC>\nEdit <selection_to_edit> in a way that would fix that lint.\nIf there are multiple ways to fix this issue, please return in the code section the most strightforward one that is part of <selection_to_edit>,\nany further suggestions can be added in the explanation section.\n"
+        },
+        "webviewStartLine":6
+      }
+    ],
+    "command":"code-compose.show-inline-chat",
+    "title":"Fix Hack error inline - This interface is not properly implemented"
+  },
+  "data":{"isAI":true},
+  "diagnostics":[],
+  "edit":{"changes":{}},
+  "kind":"",
+  "title":"Fix Hack error inline - This interface is not properly implemented"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+interface IFoo {
+  public function bar<T>(int $x, shape('y' => vec<int>) $s, shape(...) $_, IFoo $other, dynamic $d, mixed $m, (float, num) $tuple, T $t, Vector<null> $v, ?arraykey $ak, nothing $_, ?nonnull $_, int ...$args): void;
+}
+
+class Foo implements IFoo {
+                   // ^ at-caret
+  public function otherMethod(): void {}
 
 }
 

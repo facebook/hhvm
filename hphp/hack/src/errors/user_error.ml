@@ -334,3 +334,7 @@ let to_json ~(human_formatter : (_ -> string) option) ~filename_to_string error
          ]
   in
   Hh_json.JSON_Object obj
+
+let claim_message { claim; _ } = claim
+
+let function_pos { function_pos; _ } = function_pos

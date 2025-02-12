@@ -36,9 +36,7 @@ HHVM_DEFINE_EXTENSION("gd"
     libgd/gd_topal.cpp
     libgd/gd_transform.cpp
     libgd/gd_wbmp.cpp
-    libgd/gd_webp.cpp
     libgd/wbmp.cpp
-    libgd/webpimg.cpp
     libgd/xbm.cpp
   HEADERS
     ext_gd.h
@@ -53,13 +51,13 @@ HHVM_DEFINE_EXTENSION("gd"
     libgd/gdfontt.h
     libgd/jisx0208.h
     libgd/wbmp.h
-    libgd/webpimg.h
   SYSTEMLIB
     ext_exif.php
     ext_gd.php
   DEPENDS
     libFreetype OPTIONAL
     libJpeg OPTIONAL
+    libHeif
     libIConv
     libPng OPTIONAL
     libVpx OPTIONAL

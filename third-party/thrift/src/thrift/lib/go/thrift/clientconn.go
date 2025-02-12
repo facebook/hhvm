@@ -42,7 +42,7 @@ func (cc *ClientConn) Close() error {
 }
 
 // SendMsg sends a request to a given thrift endpoint
-func (cc *ClientConn) SendMsg(ctx context.Context, method string, req types.IRequest, msgType types.MessageType) error {
+func (cc *ClientConn) SendMsg(ctx context.Context, method string, req types.WritableStruct, msgType types.MessageType) error {
 	cc.seqID++
 
 	if err := types.SetRequestHeaders(ctx, cc.proto); err != nil {
@@ -65,7 +65,7 @@ func (cc *ClientConn) SendMsg(ctx context.Context, method string, req types.IReq
 }
 
 // RecvMsg receives the response from a call to a thrift endpoint
-func (cc *ClientConn) RecvMsg(ctx context.Context, method string, res types.IResponse) error {
+func (cc *ClientConn) RecvMsg(ctx context.Context, method string, res types.ReadableStruct) error {
 	recvMethod, mTypeID, seqID, err := cc.proto.ReadMessageBegin()
 
 	if err != nil {

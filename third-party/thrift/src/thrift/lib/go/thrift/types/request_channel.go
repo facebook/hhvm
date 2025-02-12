@@ -28,6 +28,6 @@ import "context"
 type RequestChannel interface {
 	ClientInterface
 
-	Call(ctx context.Context, method string, request IRequest, response IResponse) error
-	Oneway(ctx context.Context, method string, request IRequest) error
+	Call(ctx context.Context, method string, request WritableStruct, response ReadableStruct) error
+	Oneway(ctx context.Context, method string, request WritableStruct) error
 }

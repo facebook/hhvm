@@ -16,9 +16,20 @@
 
 package types
 
-// WritableStruct is an interface used to encapsulate a message that can be written to a protocol
+// WritableStruct is an interface used to encapsulate a message that can be written to an Encoder
 type WritableStruct interface {
-	Write(p Encoder) error
+	Write(Encoder) error
+}
+
+// ReadableStruct is an interface used to encapsulate a message that can be read from a Decoder
+type ReadableStruct interface {
+	Read(Decoder) error
+}
+
+// Struct is the interface used to encapsulate a message that can be read and written to/from Encoder/Decoder
+type Struct interface {
+	WritableStruct
+	ReadableStruct
 }
 
 // WritableException is an interface used to encapsulate an exception that can be written to a protocol
@@ -31,10 +42,4 @@ type WritableException interface {
 type WritableResult interface {
 	WritableStruct
 	Exception() WritableException
-}
-
-// Struct is the interface used to encapsulate a message that can be read and written to a protocol
-type Struct interface {
-	Write(p Encoder) error
-	Read(p Decoder) error
 }

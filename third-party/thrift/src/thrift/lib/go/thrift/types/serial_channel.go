@@ -38,7 +38,7 @@ func NewSerialChannel(protocol Protocol) *SerialChannel {
 	}
 }
 
-func (c *SerialChannel) sendMsg(ctx context.Context, method string, request IRequest, msgType MessageType) (int32, error) {
+func (c *SerialChannel) sendMsg(ctx context.Context, method string, request WritableStruct, msgType MessageType) (int32, error) {
 	c.seqID++
 	seqID := c.seqID
 
@@ -61,7 +61,7 @@ func (c *SerialChannel) sendMsg(ctx context.Context, method string, request IReq
 	return seqID, c.protocol.Flush()
 }
 
-func (c *SerialChannel) recvMsg(method string, seqID int32, response IResponse) error {
+func (c *SerialChannel) recvMsg(method string, seqID int32, response ReadableStruct) error {
 	// TODO: Implement per-call cancellation for a SerialChannel
 	recvMethod, mTypeID, msgSeqID, err := c.protocol.ReadMessageBegin()
 
@@ -111,7 +111,7 @@ func (c *SerialChannel) Close() error {
 
 // Call will call the given method with the given thrift struct, and read the response
 // into the given response struct. It only allows one outstanding request at once, but is thread-safe.
-func (c *SerialChannel) Call(ctx context.Context, method string, request IRequest, response IResponse) error {
+func (c *SerialChannel) Call(ctx context.Context, method string, request WritableStruct, response ReadableStruct) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -130,7 +130,7 @@ func (c *SerialChannel) Call(ctx context.Context, method string, request IReques
 
 // Oneway will call the given method with the given thrift struct. It returns immediately when the request is sent.
 // It only allows one outstanding request at once, but is thread-safe.
-func (c *SerialChannel) Oneway(ctx context.Context, method string, request IRequest) error {
+func (c *SerialChannel) Oneway(ctx context.Context, method string, request WritableStruct) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 

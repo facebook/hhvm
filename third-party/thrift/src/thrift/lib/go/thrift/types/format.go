@@ -119,16 +119,6 @@ type Encoder interface {
 	Flush() (err error)
 }
 
-// IRequest represents a request to be sent to a thrift endpoint
-type IRequest interface {
-	Write(p Encoder) error
-}
-
-// IResponse represents a response received from a thrift call
-type IResponse interface {
-	Read(p Decoder) error
-}
-
 // The maximum recursive depth the skip() function will traverse
 const DEFAULT_RECURSION_DEPTH = 64
 

@@ -40,15 +40,13 @@ type Exception = types.Exception
 
 type WritableStruct = types.WritableStruct
 
+type ReadableStruct = types.ReadableStruct
+
 type Encoder = types.Encoder
 
 type ApplicationException = types.ApplicationException
 
 type Type = types.Type
-
-type IRequest = types.IRequest
-
-type IResponse = types.IResponse
 
 type FormatID = types.ProtocolID
 

@@ -25,6 +25,7 @@
 #include <thrift/compiler/whisker/parser.h>
 #include <thrift/compiler/whisker/render.h>
 
+#include <cassert>
 #include <functional>
 #include <optional>
 #include <sstream>
@@ -110,27 +111,34 @@ class RenderTest : public testing::Test {
   };
   std::optional<source_state> last_render_;
 
-  class in_memory_template_resolver : public template_resolver {
+  class in_memory_source_resolver : public source_resolver {
    public:
-    explicit in_memory_template_resolver(source_manager& src_manager)
+    explicit in_memory_source_resolver(source_manager& src_manager)
         : src_manager_(src_manager) {}
 
    private:
-    std::optional<ast::root> resolve(
+    const ast::root* resolve_macro(
         const std::vector<std::string>& macro_path,
         source_location,
         diagnostics_engine& diags) override {
-      // This implementation is dumb and parses the file every time. But that's
-      // ok in a test.
-      std::string virtual_path = fmt::format("{}", fmt::join(macro_path, "/"));
-      auto source = src_manager_.get_file(virtual_path);
-      if (!source.has_value()) {
-        return std::nullopt;
+      std::string path = fmt::format("{}", fmt::join(macro_path, "/"));
+      if (auto cached = cached_asts_.find(path); cached != cached_asts_.end()) {
+        return &cached->second.value();
       }
-      return parse(*source, diags);
+
+      auto source = src_manager_.get_file(path);
+      if (!source.has_value()) {
+        return nullptr;
+      }
+      auto ast = whisker::parse(*source, diags);
+      auto [result, inserted] =
+          cached_asts_.insert({std::move(path), std::move(ast)});
+      assert(inserted);
+      return &result->second.value();
     }
 
     source_manager& src_manager_;
+    std::unordered_map<std::string, std::optional<ast::root>> cached_asts_;
   };
 
   // Render options are "sticky" for each test case, across multiple render(...)
@@ -226,12 +234,12 @@ class RenderTest : public testing::Test {
 
     render_options options;
     if (!macros.value.empty()) {
-      auto macro_resolver =
-          std::make_unique<in_memory_template_resolver>(current.src_manager);
+      auto source_resolver =
+          std::make_unique<in_memory_source_resolver>(current.src_manager);
       for (const auto& [name, content] : macros.value) {
         current.src_manager.add_virtual_file(name, content);
       }
-      options.macro_resolver = std::move(macro_resolver);
+      options.source_resolver = std::move(source_resolver);
     }
     options.globals = std::move(globals.value);
     render_test_options_.apply_to(options);

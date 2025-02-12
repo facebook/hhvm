@@ -192,54 +192,54 @@ void chomp_last_char(std::string* data, char c) {
 }
 
 /**
- * This implementation of whisker's template resolver builds on top of the
+ * This implementation of whisker's source resolver builds on top of the
  * template_map that already used by mstch. This allows template names to
  * remain the same (albeit exact file names are not recoverable).
  *
  * When a new partial is requested, we lazily parse the corresponding entry
  * in the template_map and cache the parsed AST.
  */
-class whisker_template_parser : public whisker::template_resolver {
+class whisker_source_parser : public whisker::source_resolver {
  public:
-  explicit whisker_template_parser(
+  explicit whisker_source_parser(
       const t_whisker_generator::templates_map& templates_by_path,
       std::string template_prefix)
       : templates_by_path_(templates_by_path),
         template_prefix_(std::move(template_prefix)) {}
 
-  std::optional<whisker::ast::root> resolve(
-      const std::vector<std::string>& partial_path,
+  const whisker::ast::root* resolve_macro(
+      const std::vector<std::string>& macro_path,
       source_location include_from,
       diagnostics_engine& diags) override {
-    auto path = normalize_path(partial_path, include_from);
+    auto path = normalize_path(macro_path, include_from);
 
     if (auto cached = cached_asts_.find(path); cached != cached_asts_.end()) {
-      return cached->second;
+      return &cached->second.value();
     }
 
     auto source_code = templates_by_path_.find(path);
     if (source_code == templates_by_path_.end()) {
-      return std::nullopt;
+      return nullptr;
     }
     auto src = src_manager_.add_virtual_file(path, source_code->second);
     auto ast = whisker::parse(src, diags);
     auto [result, inserted] =
         cached_asts_.insert({std::move(path), std::move(ast)});
     assert(inserted);
-    return result->second;
+    return &result->second.value();
   }
 
   whisker::source_manager& source_manager() { return src_manager_; }
 
  private:
   std::string normalize_path(
-      const std::vector<std::string>& partial_path,
+      const std::vector<std::string>& macro_path,
       source_location include_from) const {
     // The template_prefix will be added to the partial path, e.g.,
     // "field/member" --> "cpp2/field/member"
     std::string template_prefix;
 
-    auto start = partial_path.begin();
+    auto start = macro_path.begin();
     if (include_from == source_location()) {
       // If include_from is empty, we use the stored template_prefix
       template_prefix = template_prefix_;
@@ -258,7 +258,7 @@ class whisker_template_parser : public whisker::template_resolver {
     // Whisker always breaks down the path into components. However, the
     // template_map stores them as one concatenated string.
     return fmt::format(
-        "{}/{}", template_prefix, fmt::join(start, partial_path.end(), "/"));
+        "{}/{}", template_prefix, fmt::join(start, macro_path.end(), "/"));
   }
 
   const std::map<std::string, std::string, std::less<>>& templates_by_path_;
@@ -299,9 +299,9 @@ t_whisker_base_generator::render_state() {
   if (!cached_render_state_) {
     whisker::render_options options;
 
-    auto template_parser = std::make_shared<whisker_template_parser>(
+    auto source_resolver = std::make_shared<whisker_source_parser>(
         templates_by_path(), template_prefix());
-    options.macro_resolver = template_parser;
+    options.source_resolver = source_resolver;
 
     strictness_options strict = strictness();
     const auto level_for = [](bool strict) {
@@ -316,10 +316,10 @@ t_whisker_base_generator::render_state() {
 
     cached_render_state_ = cached_render_state{
         whisker::diagnostics_engine(
-            template_parser->source_manager(),
+            source_resolver->source_manager(),
             [](const diagnostic& d) { fmt::print(stderr, "{}\n", d); },
             diagnostic_params::only_errors()),
-        template_parser,
+        source_resolver,
         std::move(options),
     };
   }
@@ -335,9 +335,9 @@ std::string t_whisker_base_generator::render(
       partial_path, template_file, [](char c) { return c == '/'; });
 
   cached_render_state& state = render_state();
-  std::optional<whisker::ast::root> ast = state.template_resolver->resolve(
+  const whisker::ast::root* ast = state.source_resolver->resolve_macro(
       partial_path, {}, state.diagnostic_engine);
-  if (!ast.has_value()) {
+  if (ast == nullptr) {
     throw std::runtime_error{fmt::format(
         "Failed to find or correctly parse template '{}'", template_file)};
   }

@@ -148,7 +148,7 @@ class t_whisker_base_generator : public t_generator {
  private:
   struct cached_render_state {
     whisker::diagnostics_engine diagnostic_engine;
-    std::shared_ptr<whisker::template_resolver> template_resolver;
+    std::shared_ptr<whisker::source_resolver> source_resolver;
     whisker::render_options render_options;
   };
   std::optional<cached_render_state> cached_render_state_;

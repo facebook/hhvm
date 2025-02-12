@@ -1182,20 +1182,21 @@ class render_engine {
       path.push_back(component.value);
     }
 
-    auto* macro_resolver = opts_.macro_resolver.get();
-    if (macro_resolver == nullptr) {
+    source_resolver* resolver = opts_.source_resolver.get();
+    if (resolver == nullptr) {
       report_fatal_error(
           macro.loc.begin,
-          "No macro resolver was provided. Cannot resolve macro with path '{}'",
+          "No source resolver was provided. Cannot resolve macro with path '{}'",
           macro.path_string());
     }
 
-    auto resolved_macro =
-        macro_resolver->resolve(path, macro.loc.begin, diags_);
-    if (!resolved_macro.has_value()) {
+    // Kept alive by the source_resolver implementation
+    const ast::root* resolved_macro =
+        resolver->resolve_macro(path, macro.loc.begin, diags_);
+    if (resolved_macro == nullptr) {
       report_fatal_error(
           macro.loc.begin,
-          "Macro with path '{}' was not found",
+          "Macro with path '{}' was not found or failed to parse",
           macro.path_string());
     }
 

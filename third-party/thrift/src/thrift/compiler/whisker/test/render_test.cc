@@ -2075,7 +2075,7 @@ TEST_F(RenderTest, macros_missing) {
       diagnostics(),
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "Macro with path 'some/other/path' was not found",
+          "Macro with path 'some/other/path' was not found or failed to parse",
           path_to_file,
           1)));
   EXPECT_FALSE(result.has_value());
@@ -2087,7 +2087,7 @@ TEST_F(RenderTest, macros_no_resolver) {
       diagnostics(),
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "No macro resolver was provided. Cannot resolve macro with path 'some/file/path'",
+          "No source resolver was provided. Cannot resolve macro with path 'some/file/path'",
           path_to_file,
           1)));
   EXPECT_FALSE(result.has_value());

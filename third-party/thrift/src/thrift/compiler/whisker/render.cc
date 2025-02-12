@@ -1219,6 +1219,14 @@ class render_engine {
 
 } // namespace
 
+const ast::root* source_resolver::resolve_macro(
+    const std::vector<std::string>& path,
+    source_location include_from,
+    diagnostics_engine& diags) {
+  return resolve_import(
+      fmt::format("{}", fmt::join(path, "/")), include_from, diags);
+}
+
 bool render(
     std::ostream& out,
     const ast::root& root,

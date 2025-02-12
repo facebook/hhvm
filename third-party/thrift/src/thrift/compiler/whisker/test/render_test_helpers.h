@@ -117,11 +117,10 @@ class RenderTest : public testing::Test {
         : src_manager_(src_manager) {}
 
    private:
-    const ast::root* resolve_macro(
-        const std::vector<std::string>& macro_path,
+    const ast::root* resolve_import(
+        std::string_view path,
         source_location,
         diagnostics_engine& diags) override {
-      std::string path = fmt::format("{}", fmt::join(macro_path, "/"));
       if (auto cached = cached_asts_.find(path); cached != cached_asts_.end()) {
         return &cached->second.value();
       }
@@ -132,13 +131,13 @@ class RenderTest : public testing::Test {
       }
       auto ast = whisker::parse(*source, diags);
       auto [result, inserted] =
-          cached_asts_.insert({std::move(path), std::move(ast)});
+          cached_asts_.insert({std::string(path), std::move(ast)});
       assert(inserted);
       return &result->second.value();
     }
 
     source_manager& src_manager_;
-    std::unordered_map<std::string, std::optional<ast::root>> cached_asts_;
+    std::map<std::string, std::optional<ast::root>, std::less<>> cached_asts_;
   };
 
   // Render options are "sticky" for each test case, across multiple render(...)

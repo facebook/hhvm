@@ -40,8 +40,8 @@ class source_resolver {
   virtual ~source_resolver() noexcept = default;
 
   /**
-   * Given a lookup path (corresponding to ast::macro_lookup), this function
-   * tries to resolve it to a parsed AST node.
+   * Resolves a Whisker source that is the target of an import statement:
+   *   {{#import "path/to/file" as foo}}
    *
    * The returned object must be kept alive by the implementation for the
    * duration of rendering.
@@ -54,10 +54,25 @@ class source_resolver {
    * nullptr. Errors or warnings should be attached to the provided
    * diagnostics_engine.
    */
+  virtual const ast::root* resolve_import(
+      std::string_view path,
+      source_location include_from,
+      diagnostics_engine&) = 0;
+
+  /**
+   * Given a lookup path (corresponding to ast::macro_lookup), this function
+   * tries to resolve it to a parsed AST node.
+   *
+   * The returned object must satisfy the same requirements as
+   * resolve_import(...).
+   *
+   * The default implementation delegates to resolve_import(...) with the
+   * provided path joined using "/" as a delimiter.
+   */
   virtual const ast::root* resolve_macro(
       const std::vector<std::string>& path,
       source_location include_from,
-      diagnostics_engine&) = 0;
+      diagnostics_engine&);
 };
 
 struct render_options {

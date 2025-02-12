@@ -207,11 +207,14 @@ class whisker_source_parser : public whisker::source_resolver {
       : templates_by_path_(templates_by_path),
         template_prefix_(std::move(template_prefix)) {}
 
-  const whisker::ast::root* resolve_macro(
-      const std::vector<std::string>& macro_path,
+  const whisker::ast::root* resolve_import(
+      std::string_view combined_path,
       source_location include_from,
       diagnostics_engine& diags) override {
-    auto path = normalize_path(macro_path, include_from);
+    std::vector<std::string> path_parts;
+    boost::algorithm::split(
+        path_parts, combined_path, [](char c) { return c == '/'; });
+    std::string path = normalize_path(path_parts, include_from);
 
     if (auto cached = cached_asts_.find(path); cached != cached_asts_.end()) {
       return &cached->second.value();
@@ -330,13 +333,9 @@ t_whisker_base_generator::render_state() {
 
 std::string t_whisker_base_generator::render(
     std::string_view template_file, const whisker::object& context) {
-  std::vector<std::string> partial_path;
-  boost::algorithm::split(
-      partial_path, template_file, [](char c) { return c == '/'; });
-
   cached_render_state& state = render_state();
-  const whisker::ast::root* ast = state.source_resolver->resolve_macro(
-      partial_path, {}, state.diagnostic_engine);
+  const whisker::ast::root* ast = state.source_resolver->resolve_import(
+      template_file, {}, state.diagnostic_engine);
   if (ast == nullptr) {
     throw std::runtime_error{fmt::format(
         "Failed to find or correctly parse template '{}'", template_file)};

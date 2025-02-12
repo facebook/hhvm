@@ -18,11 +18,13 @@
 
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>
 #include <thrift/lib/cpp/transport/THeader.h>
-#include <thrift/lib/cpp2/async/HTTPClientChannel.h>
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/python/client/ssl.h>
+#ifndef THRIFT_NO_HTTP_CLIENT_CHANNEL
+#include <thrift/lib/cpp2/async/HTTPClientChannel.h>
+#endif
 
 namespace thrift::python::client {
 
@@ -46,11 +48,15 @@ DefaultChannelFactory::createThriftChannelTCP(
       chan->setProtocolId(proto);
       return chan;
     } else if (client_t == THRIFT_HTTP2_CLIENT_TYPE) {
+#ifndef THRIFT_NO_HTTP_CLIENT_CHANNEL
       auto chan = HTTPClientChannel::newHTTP2Channel(std::move(socket));
       chan->setHTTPHost(host);
       chan->setHTTPUrl(endpoint);
       chan->setProtocolId(proto);
       return chan;
+#else
+        LOG(FATAL) << "HTTP2ClientChannel not supported in this build";
+#endif
     } else {
       return createHeaderChannel(
           std::move(socket), client_t, proto, host, endpoint);

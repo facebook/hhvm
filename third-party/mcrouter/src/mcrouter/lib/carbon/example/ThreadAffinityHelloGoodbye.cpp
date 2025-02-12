@@ -16,7 +16,6 @@
 
 #include "mcrouter/lib/carbon/example/gen/HelloGoodbye.h"
 #include "mcrouter/lib/carbon/example/gen/HelloGoodbyeRouterInfo.h"
-#include "mcrouter/lib/mc/msg.h"
 #include "mcrouter/lib/network/AsyncMcClient.h"
 #include "mcrouter/lib/network/AsyncMcServer.h"
 #include "mcrouter/lib/network/AsyncMcServerWorker.h"

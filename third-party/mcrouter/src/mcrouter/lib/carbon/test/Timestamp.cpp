@@ -6,7 +6,6 @@
  */
 
 #include "mcrouter/lib/carbon/test/Timestamp.h"
-#include <limits>
 
 namespace carbon {
 namespace test {

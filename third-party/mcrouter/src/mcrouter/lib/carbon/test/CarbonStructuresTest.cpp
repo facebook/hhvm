@@ -11,7 +11,6 @@
 #include <string>
 
 #include <gtest/gtest.h>
-#include <string.h>
 
 #include "mcrouter/lib/IOBufUtil.h"
 #include "mcrouter/lib/carbon/CarbonProtocolWriter.h"

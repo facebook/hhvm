@@ -14,11 +14,9 @@
 #include <folly/init/Init.h>
 #include <folly/io/async/EventBase.h>
 
-#include "mcrouter/lib/mc/msg.h"
 #include "mcrouter/lib/network/AsyncMcClient.h"
 #include "mcrouter/lib/network/AsyncMcServer.h"
 #include "mcrouter/lib/network/AsyncMcServerWorker.h"
-#include "mcrouter/lib/network/McServerRequestContext.h"
 
 #include "mcrouter/CarbonRouterClient.h"
 #include "mcrouter/CarbonRouterFactory.h"

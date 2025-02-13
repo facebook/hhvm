@@ -60,8 +60,6 @@ type TransportException = types.TransportException
 
 type ResponseHeaderGetter = types.ResponseHeaderGetter
 
-type RequestHeaders = types.RequestHeaders
-
 type FormatException = types.ProtocolException
 
 var ZERO types.Numeric = types.ZERO

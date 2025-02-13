@@ -26,7 +26,7 @@ type Protocol interface {
 	ResponseHeaderGetter
 
 	// Deprecated
-	RequestHeaders
+	requestHeaders
 }
 
 // ResponseHeaderGetter is a temporary measure to allow protocols to expose headers received with the response.
@@ -34,7 +34,6 @@ type ResponseHeaderGetter interface {
 	GetResponseHeaders() map[string]string
 }
 
-// Deprecated: RequestHeaders will eventually be private.
-type RequestHeaders interface {
+type requestHeaders interface {
 	SetRequestHeader(key, value string)
 }

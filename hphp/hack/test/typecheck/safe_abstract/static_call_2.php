@@ -9,3 +9,4 @@ abstract class AbstractClass {
     static::concreteMethod(); // ok
   }
 }
+//

@@ -1,2 +1,1 @@
-WARN: File "static_call_5.php", line 6, characters 5-17:
-Unsafe call: `abs::A` might not exist because the receiver might be abstract. (Warn[12014])
+No errors

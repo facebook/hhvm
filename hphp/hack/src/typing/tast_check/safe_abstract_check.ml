@@ -23,14 +23,25 @@ module Class_use : sig
         This information is distinct from what `Folded_class.abstract class_` provides *)
   }
 
-  val get : Tast_env.env -> (Typing_defs.locl_ty, 'a) Tast.class_id_ -> t option
+  val get :
+    Tast_env.env ->
+    (Typing_defs.locl_ty, 'a) Tast.class_id_ ->
+    current_method:Tast.method_ option ->
+    t option
 end = struct
   type t = {
     class_: Folded_class.t;
     abstractness: abstractness;
   }
 
-  let get env class_id : t option =
+  let static_keyword_refers_to_concrete_class current_method =
+    match current_method with
+    | None -> false
+    | Some method_ -> not method_.Aast_defs.m_static
+  (* TODO:  also return `true` when the current method has the <<__NeedsConcrete>> attribute *)
+
+  let get env class_id ~(current_method : _ Aast_defs.method_ option) : t option
+      =
     let open Option.Let_syntax in
     let get_class class_name =
       Tast_env.get_class env class_name |> Decl_entry.to_option
@@ -45,7 +56,13 @@ end = struct
     | Aast.CIstatic ->
       let* class_name = Tast_env.get_self_id env in
       let+ class_ = get_class class_name in
-      { class_; abstractness = Maybe_abstract }
+      let abstractness =
+        if static_keyword_refers_to_concrete_class current_method then
+          Concrete
+        else
+          Maybe_abstract
+      in
+      { class_; abstractness }
     | Aast.CIparent ->
       let* class_name = Tast_env.get_parent_id env in
       let+ class_ = get_class class_name in
@@ -133,8 +150,14 @@ let check_for_new_abstract Class_use.{ class_; abstractness } env new_pos =
         { kind = New_abstract; class_ = Folded_class.name class_ }
 
 let handler =
+  let current_method = ref None in
+
   object
     inherit Tast_visitor.handler_base
+
+    method! at_fun_def _env _fun_def = current_method := None
+
+    method! at_method_ _env m = current_method := Some m
 
     method! at_expr env expr =
       match expr with
@@ -146,7 +169,9 @@ let handler =
           ) ->
         let open Option.Let_syntax in
         Option.value ~default:()
-        @@ let* class_use = Class_use.get env class_id in
+        @@ let* class_use =
+             Class_use.get env class_id ~current_method:!current_method
+           in
            let+ folded_method =
              Folded_class.get_smethod class_use.Class_use.class_ method_
            in
@@ -155,7 +180,8 @@ let handler =
           ( _,
             new_pos,
             New ((_, _, class_id), _targs, _exprs, _expr, _constructor) ) ->
-        Option.iter (Class_use.get env class_id) ~f:(fun class_use ->
-            check_for_new_abstract class_use env new_pos)
+        Option.iter
+          (Class_use.get env class_id ~current_method:!current_method)
+          ~f:(fun class_use -> check_for_new_abstract class_use env new_pos)
       | _ -> ()
   end

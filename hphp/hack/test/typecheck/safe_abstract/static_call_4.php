@@ -8,3 +8,4 @@ abstract class A {
   public static abstract function abs(): void;
 
 }
+//

@@ -494,6 +494,49 @@ void readIntoVector(Protocol* prot, std::vector<bool>& vec) {
   }
 }
 
+// Define the operation types
+struct writeOp {};
+struct serializedSizeOp {};
+struct serializedSizeZCOp {};
+
+template <class Operation, class Protocol, class V>
+uint32_t forEachElement(Protocol* prot, const V* vec) {
+  typedef typename V::value_type ElemType;
+  uint32_t xfer = 0;
+  for (const auto& e : *vec) {
+    if constexpr (std::is_same_v<Operation, writeOp>) {
+      xfer += Cpp2Ops<ElemType>::write(prot, &e);
+    } else if constexpr (std::is_same_v<Operation, serializedSizeOp>) {
+      xfer += Cpp2Ops<ElemType>::serializedSize(prot, &e);
+    } else {
+      static_assert(
+          std::is_same_v<Operation, serializedSizeZCOp>, "Invalid operation!");
+      xfer += Cpp2Ops<ElemType>::serializedSizeZC(prot, &e);
+    }
+  }
+  return xfer;
+}
+
+template <class Operation, class Protocol>
+uint32_t forEachElement(Protocol* prot, const std::vector<bool>* vec) {
+  uint32_t xfer = 0;
+  // libc++ uses __bit_const_reference<vector>, a proxy type, as const_reference
+  // for std::vector<bool>. Treating it like other types can lead to compilation
+  // errors on macOS, hence the std::vector<bool> overload for compatibility.
+  for (bool e : *vec) {
+    if constexpr (std::is_same_v<Operation, writeOp>) {
+      xfer += Cpp2Ops<bool>::write(prot, &e);
+    } else if constexpr (std::is_same_v<Operation, serializedSizeOp>) {
+      xfer += Cpp2Ops<bool>::serializedSize(prot, &e);
+    } else {
+      static_assert(
+          std::is_same_v<Operation, serializedSizeZCOp>, "Invalid operation!");
+      xfer += Cpp2Ops<bool>::serializedSizeZC(prot, &e);
+    }
+  }
+  return xfer;
+}
+
 } // namespace detail
 
 template <class L>
@@ -525,9 +568,7 @@ class Cpp2Ops<
     uint32_t xfer = 0;
     xfer += prot->writeListBegin(
         Cpp2Ops<ElemType>::thriftType(), folly::to_narrow(value->size()));
-    for (const auto& e : *value) {
-      xfer += Cpp2Ops<ElemType>::write(prot, &e);
-    }
+    xfer += detail::forEachElement<detail::writeOp>(prot, value);
     xfer += prot->writeListEnd();
     return xfer;
   }
@@ -547,9 +588,7 @@ class Cpp2Ops<
     uint32_t xfer = 0;
     xfer += prot->serializedSizeListBegin(
         Cpp2Ops<ElemType>::thriftType(), value->size());
-    for (const auto& e : *value) {
-      xfer += Cpp2Ops<ElemType>::serializedSize(prot, &e);
-    }
+    xfer += detail::forEachElement<detail::serializedSizeOp>(prot, value);
     xfer += prot->serializedSizeListEnd();
     return xfer;
   }
@@ -559,9 +598,7 @@ class Cpp2Ops<
     uint32_t xfer = 0;
     xfer += prot->serializedSizeListBegin(
         Cpp2Ops<ElemType>::thriftType(), folly::to_narrow(value->size()));
-    for (const auto& e : *value) {
-      xfer += Cpp2Ops<ElemType>::serializedSizeZC(prot, &e);
-    }
+    xfer += detail::forEachElement<detail::serializedSizeZCOp>(prot, value);
     xfer += prot->serializedSizeListEnd();
     return xfer;
   }

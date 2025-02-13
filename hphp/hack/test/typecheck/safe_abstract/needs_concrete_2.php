@@ -14,4 +14,3 @@ abstract class B extends A {
     static::nc(); // error
   }
 }
-//

@@ -17,4 +17,3 @@ abstract class B extends A {
   }
   public static function abs(): void {}
 }
-//

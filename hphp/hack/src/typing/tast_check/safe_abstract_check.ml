@@ -34,11 +34,17 @@ end = struct
     abstractness: abstractness;
   }
 
+  let has_needs_concrete_attribute Aast_defs.{ m_user_attributes; _ } =
+    List.exists
+      m_user_attributes
+      ~f:(fun Aast_defs.{ ua_name = (_, name); _ } ->
+        String.equal name Naming_special_names.UserAttributes.uaNeedsConcrete)
+
   let static_keyword_refers_to_concrete_class current_method =
     match current_method with
     | None -> false
-    | Some method_ -> not method_.Aast_defs.m_static
-  (* TODO:  also return `true` when the current method has the <<__NeedsConcrete>> attribute *)
+    | Some method_ ->
+      (not method_.Aast_defs.m_static) || has_needs_concrete_attribute method_
 
   let get env class_id ~(current_method : _ Aast_defs.method_ option) : t option
       =
@@ -126,6 +132,26 @@ let check_for_call_abstract
       Typing_warning.Safe_abstract.
         { kind = Call_abstract { method_ }; class_ = Folded_class.name class_ }
 
+let check_for_call_needs_concrete
+    Class_use.{ class_; abstractness } env call_pos method_ folded_method : unit
+    =
+  let callee_method_needs_concrete =
+    Typing_defs.get_ce_readonly_prop_or_needs_concrete folded_method
+  in
+  match abstractness with
+  | Abstract
+  | Maybe_abstract ->
+    if callee_method_needs_concrete then
+      warn
+        env
+        call_pos
+        Typing_warning.Safe_abstract.
+          {
+            kind = Call_needs_concrete { method_ };
+            class_ = Folded_class.name class_;
+          }
+  | Concrete -> ()
+
 let check_for_new_abstract Class_use.{ class_; abstractness } env new_pos =
   let is_final_class = Folded_class.final class_ in
   let receiver_may_be_abstract =
@@ -175,7 +201,13 @@ let handler =
            let+ folded_method =
              Folded_class.get_smethod class_use.Class_use.class_ method_
            in
-           check_for_call_abstract class_use env call_pos method_ folded_method
+           check_for_call_abstract class_use env call_pos method_ folded_method;
+           check_for_call_needs_concrete
+             class_use
+             env
+             call_pos
+             method_
+             folded_method
       | Aast.
           ( _,
             new_pos,

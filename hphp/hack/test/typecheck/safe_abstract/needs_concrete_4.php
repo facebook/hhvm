@@ -14,4 +14,3 @@ abstract class B extends A {
     $cls::nc2(); // error
   }
 }
-//

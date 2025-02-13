@@ -19,6 +19,7 @@ type quickfix = {
 module Safe_abstract = struct
   type kind =
     | Call_abstract of { method_: string }
+    | Call_needs_concrete of { method_: string }
     | New_abstract
 
   type t = {

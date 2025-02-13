@@ -83,6 +83,11 @@ struct
         "Unsafe call: `%s::%s` might not exist because the receiver might be abstract."
         method_
         (Utils.strip_ns class_)
+    | { kind = Call_needs_concrete { method_ }; class_ } ->
+      Printf.sprintf
+        "Unsafe call: %s::%s has `<<__NeedsConcrete>>`, but the receiver might be abstract."
+        method_
+        (Utils.strip_ns class_)
     | { kind = New_abstract; class_ } ->
       Printf.sprintf
         "Unsafe use of `new`: `%s` might be abstract"
@@ -92,8 +97,14 @@ struct
     match kind with
     | Call_abstract _ -> Codes.SafeAbstractCall
     | New_abstract -> Codes.SafeAbstractNew
+    | Call_needs_concrete _ -> Codes.SafeAbstractCallNeedsConcrete
 
-  let codes : Codes.t list = [Codes.SafeAbstractCall; Codes.SafeAbstractNew]
+  let codes : Codes.t list =
+    [
+      Codes.SafeAbstractCall;
+      Codes.SafeAbstractNew;
+      Codes.SafeAbstractCallNeedsConcrete;
+    ]
 
   let reasons _ : Pos_or_decl.t Message.t list = []
 

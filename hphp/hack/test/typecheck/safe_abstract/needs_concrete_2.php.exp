@@ -1,2 +1,2 @@
-WARN: File "needs_concrete_2.php", line 5, characters 5-17:
-Unsafe call: `abs::A` might not exist because the receiver might be abstract. (Warn[12014])
+WARN: File "needs_concrete_2.php", line 14, characters 5-16:
+Unsafe call: nc::B has `<<__NeedsConcrete>>`, but the receiver might be abstract. (Warn[12016])

@@ -175,7 +175,7 @@ class parser {
     consume_token();
     switch (kind) {
       case tok::kw_include:
-        actions_.on_include(range, str, str_range);
+        actions_.on_include(range, str, std::nullopt, str_range);
         break;
       case tok::kw_cpp_include:
         actions_.on_cpp_include(range, str);

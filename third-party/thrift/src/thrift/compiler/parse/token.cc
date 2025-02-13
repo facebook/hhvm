@@ -114,7 +114,8 @@ constexpr token_kind_info info[] = {
     THRIFT_KEYWORD(struct),
     THRIFT_KEYWORD(throws),
     THRIFT_KEYWORD(typedef),
-    THRIFT_KEYWORD(union)};
+    THRIFT_KEYWORD(union),
+    THRIFT_KEYWORD(as)};
 
 constexpr int num_token_kinds = sizeof(info) / sizeof(*info);
 

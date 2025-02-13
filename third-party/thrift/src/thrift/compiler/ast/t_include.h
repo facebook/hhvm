@@ -28,12 +28,19 @@ class t_program;
  */
 class t_include : public t_node {
  public:
-  t_include(t_program* program, std::string raw_path)
-      : program_(program), raw_path_(std::move(raw_path)) {}
+  t_include(
+      t_program* program,
+      std::string raw_path,
+      std::optional<std::string> alias)
+      : program_(program),
+        raw_path_(std::move(raw_path)),
+        alias_(std::move(alias)) {}
 
   t_program* get_program() const { return program_; }
 
-  fmt::string_view raw_path() const { return raw_path_; }
+  std::string_view raw_path() const { return raw_path_; }
+
+  std::optional<std::string_view> alias() const { return alias_; }
 
   void set_str_range(source_range rng) { range_ = rng; }
   source_range str_range() const { return range_; }
@@ -41,6 +48,7 @@ class t_include : public t_node {
  private:
   t_program* program_;
   std::string raw_path_;
+  std::optional<std::string> alias_;
   source_range range_;
 };
 

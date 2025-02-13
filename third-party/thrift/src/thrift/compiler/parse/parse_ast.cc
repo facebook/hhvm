@@ -199,7 +199,10 @@ class parsing_terminator : public std::runtime_error {
 }
 
 using include_handler = std::function<t_program*(
-    source_range range, const std::string& include_name, const t_program& p)>;
+    source_range range,
+    const std::string& include_name,
+    const std::optional<std::string_view>& alias,
+    const t_program& p)>;
 
 // A semantic analyzer and AST builder for a single Thrift program.
 class ast_builder : public parser_actions {
@@ -505,14 +508,20 @@ class ast_builder : public parser_actions {
   void on_include(
       source_range range,
       std::string_view str,
+      const std::optional<std::string_view>& alias,
       source_range str_range) override {
     std::string include_name = fmt::to_string(str);
-    auto included_program = on_include_(range, include_name, program_);
+    std::optional<std::string> alias_str_opt = alias.has_value()
+        ? std::make_optional(std::string{alias.value()})
+        : std::nullopt;
+    auto included_program =
+        on_include_(range, include_name, alias_str_opt, program_);
     auto last_slash = include_name.find_last_of("/\\");
     if (last_slash != std::string::npos) {
       included_program->set_include_prefix(include_name.substr(0, last_slash));
     }
-    auto include = std::make_unique<t_include>(included_program, include_name);
+    auto include = std::make_unique<t_include>(
+        included_program, std::move(include_name), std::move(alias_str_opt));
     include->set_src_range(range);
     include->set_str_range(str_range);
     program_.add_include(std::move(include));
@@ -1014,73 +1023,105 @@ std::unique_ptr<t_program_bundle> parse_ast(
 
   auto circular_deps = std::set<std::string>{path};
 
-  include_handler on_include = [&](source_range range,
-                                   const std::string& include_path,
-                                   const t_program& parent) {
-    auto path_or_error = sm.find_include_file(
-        include_path, parent.path(), params.incl_searchpath);
-    if (path_or_error.index() == 1) {
-      diags.report(
-          range.begin,
-          params.allow_missing_includes ? diagnostic_level::warning
-                                        : diagnostic_level::error,
-          "{}",
-          std::get<1>(path_or_error));
-      if (!params.allow_missing_includes) {
-        end_parsing();
-      }
-    }
+  include_handler on_include =
+      [&](source_range range,
+          const std::string& include_path,
+          const std::optional<std::string_view>& include_alias,
+          const t_program& parent) {
+        auto path_or_error = sm.find_include_file(
+            include_path, parent.path(), params.incl_searchpath);
+        if (path_or_error.index() == 1) {
+          diags.report(
+              range.begin,
+              params.allow_missing_includes ? diagnostic_level::warning
+                                            : diagnostic_level::error,
+              "{}",
+              std::get<1>(path_or_error));
+          if (!params.allow_missing_includes) {
+            end_parsing();
+          }
+        }
 
-    // Skip already parsed files.
-    t_program* program = nullptr;
-    const std::string* resolved_path = &include_path;
-    const std::string* full_path = resolved_path;
-    if (path_or_error.index() == 0) {
-      full_path = &std::get<0>(path_or_error);
-      program = programs->find_program_by_full_path(*full_path);
-      if (program) {
-        // We've already seen this program but know it by another path.
-        resolved_path = &program->path();
-      }
-    }
-    if (program) {
-      if (program == programs->get_root_program()) {
-        // If we're including the root program we must have a dependency cycle.
-        assert(circular_deps.count(*full_path));
-      } else {
+        // Resolve the include path to a full path.
+        t_program* program = nullptr;
+        const std::string* resolved_path = &include_path;
+        const std::string* full_path = resolved_path;
+        if (path_or_error.index() == 0) {
+          full_path = &std::get<0>(path_or_error);
+          program = programs->find_program_by_full_path(*full_path);
+          if (program) {
+            // We've already seen this program but know it by another path.
+            resolved_path = &program->path();
+          }
+        }
+
+        // Fail on duplicate include aliases
+        if (include_alias.has_value()) {
+          const auto& knownIncludes = parent.includes();
+          for (const t_include* inc : knownIncludes) {
+            if (!inc->alias()) {
+              continue;
+            }
+
+            if (inc->alias() == include_alias.value()) {
+              diags.error(
+                  range.begin,
+                  "'{}' is already an alias for '{}'",
+                  *include_alias,
+                  inc->get_program()->full_path());
+            }
+
+            if (*full_path == inc->get_program()->full_path()) {
+              diags.error(
+                  range.begin,
+                  "Include '{}' has multiple aliases: '{}' vs '{}'",
+                  *full_path,
+                  inc->alias().value(),
+                  *include_alias);
+            }
+          }
+        }
+
+        // Skip already parsed files.
+        if (program) {
+          if (program == programs->get_root_program()) {
+            // If we're including the root program we must have a dependency
+            // cycle.
+            assert(circular_deps.count(*full_path));
+          } else {
+            return program;
+          }
+        }
+
+        // Fail on circular dependencies.
+        if (!circular_deps.insert(*full_path).second) {
+          diags.error(
+              range.begin,
+              "Circular dependency found: file `{}` is already parsed.",
+              *resolved_path);
+          end_parsing();
+        }
+
+        // Create a new program for a Thrift file in an include statement and
+        // set its include_prefix by parsing the directory which it is
+        // included from.
+        auto included_program =
+            std::make_unique<t_program>(*resolved_path, *full_path, &parent);
+        program = included_program.get();
+        programs->add_program(std::move(included_program));
+
+        try {
+          ast_builder(diags, *program, params, on_include)
+              .parse_file(sm, range.begin);
+        } catch (...) {
+          if (!params.allow_missing_includes) {
+            throw;
+          }
+        }
+
+        circular_deps.erase(*full_path);
         return program;
-      }
-    }
-
-    // Fail on circular dependencies.
-    if (!circular_deps.insert(*full_path).second) {
-      diags.error(
-          range.begin,
-          "Circular dependency found: file `{}` is already parsed.",
-          *resolved_path);
-      end_parsing();
-    }
-
-    // Create a new program for a Thrift file in an include statement and
-    // set its include_prefix by parsing the directory which it is
-    // included from.
-    auto included_program =
-        std::make_unique<t_program>(*resolved_path, *full_path, &parent);
-    program = included_program.get();
-    programs->add_program(std::move(included_program));
-
-    try {
-      ast_builder(diags, *program, params, on_include)
-          .parse_file(sm, range.begin);
-    } catch (...) {
-      if (!params.allow_missing_includes) {
-        throw;
-      }
-    }
-
-    circular_deps.erase(*full_path);
-    return program;
-  };
+      };
 
   t_program& root_program = *programs->root_program();
   try {

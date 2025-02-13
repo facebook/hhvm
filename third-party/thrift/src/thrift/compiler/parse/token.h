@@ -107,6 +107,7 @@ enum class tok {
   kw_throws,
   kw_typedef,
   kw_union,
+  kw_as,
 };
 
 namespace detail {

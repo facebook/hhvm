@@ -1,6 +1,6 @@
 Code actions available:
 ------------------------------------------
-Extract shape type to alias (CodeActionKind: refactor) SELECTED
+Extract shape type to alias (CodeActionKind: "refactor") SELECTED
 
 JSON for selected code action:
 ------------------------------------------

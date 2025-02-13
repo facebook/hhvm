@@ -1,7 +1,7 @@
 Code actions available:
 ------------------------------------------
-Inline variable $sh (CodeActionKind: refactor)
-Extract shape type (CodeActionKind: refactor) SELECTED
+Inline variable $sh (CodeActionKind: "refactor")
+Extract shape type (CodeActionKind: "refactor") SELECTED
 
 JSON for selected code action:
 ------------------------------------------

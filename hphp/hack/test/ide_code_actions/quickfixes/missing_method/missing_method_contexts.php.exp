@@ -1,6 +1,6 @@
 Code actions available:
 ------------------------------------------
-Add override for FooParent::explicitCapabilityMethods (CodeActionKind: refactor) SELECTED
+Add override for FooParent::explicitCapabilityMethods (CodeActionKind: "refactor") SELECTED
 
 JSON for selected code action:
 ------------------------------------------

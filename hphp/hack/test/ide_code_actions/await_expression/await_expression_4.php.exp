@@ -1,9 +1,9 @@
 Code actions available:
 ------------------------------------------
-await expression (CodeActionKind: refactor) SELECTED
-Extract into variable (CodeActionKind: refactor)
-Fix Hack error inline - `await` can only operate on an `Awaitable` (CodeActionKind: )
-Fix Hack error inline - Typing error (CodeActionKind: )
+await expression (CodeActionKind: "refactor") SELECTED
+Extract into variable (CodeActionKind: "refactor")
+Fix Hack error inline - `await` can only operate on an `Awaitable` (CodeActionKind: "")
+Fix Hack error inline - Typing error (CodeActionKind: "")
 
 JSON for selected code action:
 ------------------------------------------

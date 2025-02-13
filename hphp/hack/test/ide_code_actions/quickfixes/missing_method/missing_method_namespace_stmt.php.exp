@@ -1,7 +1,7 @@
 Code actions available:
 ------------------------------------------
-Add stubs for missing interface methods (CodeActionKind: quickfix) SELECTED
-Fix Hack error inline - This interface is not properly implemented (CodeActionKind: )
+Add stubs for missing interface methods (CodeActionKind: "quickfix") SELECTED
+Fix Hack error inline - This interface is not properly implemented (CodeActionKind: "")
 
 JSON for selected code action:
 ------------------------------------------

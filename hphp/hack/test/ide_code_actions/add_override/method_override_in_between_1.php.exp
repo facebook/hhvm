@@ -1,6 +1,6 @@
 Code actions available:
 ------------------------------------------
-Add override for TheParent::foo (CodeActionKind: refactor) SELECTED
+Add override for TheParent::foo (CodeActionKind: "refactor") SELECTED
 
 JSON for selected code action:
 ------------------------------------------

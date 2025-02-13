@@ -1,6 +1,6 @@
 Code actions available:
 ------------------------------------------
-Inline variable $x (CodeActionKind: refactor) SELECTED
+Inline variable $x (CodeActionKind: "refactor") SELECTED
 
 JSON for selected code action:
 ------------------------------------------

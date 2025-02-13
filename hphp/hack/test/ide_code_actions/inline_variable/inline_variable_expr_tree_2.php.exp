@@ -1,9 +1,9 @@
 Code actions available:
 ------------------------------------------
-Splice in $x (CodeActionKind: quickfix)
-Inline variable $x (CodeActionKind: refactor) SELECTED
-Fix Hack error inline - This type is not permitted as an expression tree visitor. It is not included in `allowed_expression_tree_visitors` in `.hhconfig`, and this file does not contain `<<file:__EnableUnstableFeatures('expression_trees')>>`. (CodeActionKind: )
-Fix Hack error inline - Variable `$x` is undefined in this `ExampleDsl` expression tree. (CodeActionKind: )
+Splice in $x (CodeActionKind: "quickfix")
+Inline variable $x (CodeActionKind: "refactor") SELECTED
+Fix Hack error inline - This type is not permitted as an expression tree visitor. It is not included in `allowed_expression_tree_visitors` in `.hhconfig`, and this file does not contain `<<file:__EnableUnstableFeatures('expression_trees')>>`. (CodeActionKind: "")
+Fix Hack error inline - Variable `$x` is undefined in this `ExampleDsl` expression tree. (CodeActionKind: "")
 
 JSON for selected code action:
 ------------------------------------------

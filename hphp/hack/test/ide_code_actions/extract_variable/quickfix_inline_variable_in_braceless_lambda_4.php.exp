@@ -1,7 +1,7 @@
 Code actions available:
 ------------------------------------------
-Extract into variable (CodeActionKind: quickfix) SELECTED
-Fix Hack error inline - `await` cannot be used as an expression in this location because it's conditionally executed. (CodeActionKind: )
+Extract into variable (CodeActionKind: "quickfix") SELECTED
+Fix Hack error inline - `await` cannot be used as an expression in this location because it's conditionally executed. (CodeActionKind: "")
 
 JSON for selected code action:
 ------------------------------------------

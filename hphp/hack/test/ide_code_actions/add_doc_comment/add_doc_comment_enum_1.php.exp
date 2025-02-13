@@ -1,6 +1,6 @@
 Code actions available:
 ------------------------------------------
-Add doc comment (CodeActionKind: refactor) SELECTED
+Add doc comment (CodeActionKind: "refactor") SELECTED
 
 JSON for selected code action:
 ------------------------------------------

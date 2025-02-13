@@ -1,7 +1,7 @@
 Code actions available:
 ------------------------------------------
-await expression (CodeActionKind: refactor) SELECTED
-Extract into variable (CodeActionKind: refactor)
+await expression (CodeActionKind: "refactor") SELECTED
+Extract into variable (CodeActionKind: "refactor")
 
 JSON for selected code action:
 ------------------------------------------

@@ -1,7 +1,7 @@
 Code actions available:
 ------------------------------------------
-Extract into variable (CodeActionKind: refactor) SELECTED
-Fix Hack error inline - Typing error (CodeActionKind: )
+Extract into variable (CodeActionKind: "refactor") SELECTED
+Fix Hack error inline - Typing error (CodeActionKind: "")
 
 JSON for selected code action:
 ------------------------------------------

@@ -1,6 +1,6 @@
 Code actions available:
 ------------------------------------------
-Extract interface (CodeActionKind: refactor) SELECTED
+Extract interface (CodeActionKind: "refactor") SELECTED
 
 JSON for selected code action:
 ------------------------------------------

@@ -1,6 +1,6 @@
 Code actions available:
 ------------------------------------------
-Flip around comma (CodeActionKind: refactor) SELECTED
+Flip around comma (CodeActionKind: "refactor") SELECTED
 
 JSON for selected code action:
 ------------------------------------------

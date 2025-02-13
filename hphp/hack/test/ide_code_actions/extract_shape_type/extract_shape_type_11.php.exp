@@ -1,5 +1,5 @@
 Code actions available:
 ------------------------------------------
-Extract into method (CodeActionKind: refactor)
+Extract into method (CodeActionKind: "refactor")
 
 No code action titles match prefix: Extract shape type

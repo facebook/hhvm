@@ -1,7 +1,7 @@
 Code actions available:
 ------------------------------------------
-Inline variable $x (CodeActionKind: refactor) SELECTED
-Fix Hack error inline - This type is not permitted as an expression tree visitor. It is not included in `allowed_expression_tree_visitors` in `.hhconfig`, and this file does not contain `<<file:__EnableUnstableFeatures('expression_trees')>>`. (CodeActionKind: )
+Inline variable $x (CodeActionKind: "refactor") SELECTED
+Fix Hack error inline - This type is not permitted as an expression tree visitor. It is not included in `allowed_expression_tree_visitors` in `.hhconfig`, and this file does not contain `<<file:__EnableUnstableFeatures('expression_trees')>>`. (CodeActionKind: "")
 
 JSON for selected code action:
 ------------------------------------------

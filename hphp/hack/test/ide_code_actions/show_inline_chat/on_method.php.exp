@@ -1,6 +1,6 @@
 Code actions available:
 ------------------------------------------
-Fix Hack error inline - Invalid argument (CodeActionKind: ) SELECTED
+Fix Hack error inline - Invalid argument (CodeActionKind: "") SELECTED
 
 JSON for selected code action:
 ------------------------------------------

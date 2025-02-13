@@ -1,8 +1,8 @@
 Code actions available:
 ------------------------------------------
-Add stubs for missing inherited methods (CodeActionKind: quickfix) SELECTED
-Fix Hack error inline - This class must be declared `abstract`, or provide an implementation for the abstract method `baz` (CodeActionKind: )
-Fix Hack error inline - This class must be declared `abstract`, or provide an implementation for the abstract method `bar` (CodeActionKind: )
+Add stubs for missing inherited methods (CodeActionKind: "quickfix") SELECTED
+Fix Hack error inline - This class must be declared `abstract`, or provide an implementation for the abstract method `baz` (CodeActionKind: "")
+Fix Hack error inline - This class must be declared `abstract`, or provide an implementation for the abstract method `bar` (CodeActionKind: "")
 
 JSON for selected code action:
 ------------------------------------------

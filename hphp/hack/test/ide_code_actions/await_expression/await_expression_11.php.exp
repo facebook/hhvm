@@ -1,9 +1,9 @@
 Code actions available:
 ------------------------------------------
-Change to `void` (CodeActionKind: quickfix)
-await expression (CodeActionKind: refactor) SELECTED
-Extract into variable (CodeActionKind: refactor)
-Fix Hack error inline - Invalid return type (CodeActionKind: )
+Change to `void` (CodeActionKind: "quickfix")
+await expression (CodeActionKind: "refactor") SELECTED
+Extract into variable (CodeActionKind: "refactor")
+Fix Hack error inline - Invalid return type (CodeActionKind: "")
 
 JSON for selected code action:
 ------------------------------------------

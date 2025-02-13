@@ -103,7 +103,7 @@ let run_exn ctx ~error_filter entry range ~title_prefix ~use_snippet_edits =
       |> List.map ~f:(function
              | CodeAction.Action CodeAction.{ title; kind; _ } ->
                let kind_str =
-                 Printf.sprintf "CodeActionKind: %s"
+                 Printf.sprintf {|CodeActionKind: "%s"|}
                  @@ Lsp.CodeActionKind.string_of_kind kind
                in
                let is_selected = String.is_prefix ~prefix:title_prefix title in

@@ -1,6 +1,6 @@
 Code actions available:
 ------------------------------------------
-Extract into method (CodeActionKind: refactor) SELECTED
+Extract into method (CodeActionKind: "refactor") SELECTED
 
 JSON for selected code action:
 ------------------------------------------
@@ -48,3 +48,4 @@ class Klass {
     return $x + $y;
   }
 }
+

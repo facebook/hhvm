@@ -1,7 +1,7 @@
 Code actions available:
 ------------------------------------------
-Extract shape type (CodeActionKind: refactor)
-Add local type hint for $x (CodeActionKind: refactor) SELECTED
+Extract shape type (CodeActionKind: "refactor")
+Add local type hint for $x (CodeActionKind: "refactor") SELECTED
 
 JSON for selected code action:
 ------------------------------------------

@@ -1,6 +1,6 @@
 Code actions available:
 ------------------------------------------
-Add local type hint for $the_variable (CodeActionKind: refactor) SELECTED
+Add local type hint for $the_variable (CodeActionKind: "refactor") SELECTED
 
 JSON for selected code action:
 ------------------------------------------

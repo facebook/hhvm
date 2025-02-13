@@ -1,6 +1,6 @@
 Code actions available:
 ------------------------------------------
-Extract into variable (CodeActionKind: refactor) SELECTED
+Extract into variable (CodeActionKind: "refactor") SELECTED
 
 JSON for selected code action:
 ------------------------------------------

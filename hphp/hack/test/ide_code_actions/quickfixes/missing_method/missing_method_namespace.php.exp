@@ -1,11 +1,7 @@
 Code actions available:
 ------------------------------------------
 Add stubs for missing interface methods (CodeActionKind: quickfix) SELECTED
-Fix Hack error inline - This interface is not properly implemented (CodeActionKind: ) SELECTED
-
-Multiple code action titles match prefix: ''
-
-Code action title: Add stubs for missing interface methods
+Fix Hack error inline - This interface is not properly implemented (CodeActionKind: )
 
 JSON for selected code action:
 ------------------------------------------
@@ -42,35 +38,3 @@ class Foo implements IFoo {
 
 }
 
-
-Code action title: Fix Hack error inline - This interface is not properly implemented
-
-JSON for selected code action:
-------------------------------------------
-{
-  "command":{
-    "arguments":[
-      {
-        "entrypoint":"FixLintErrorCodeAction",
-        "overrideSelection":{"end":{"character":25,"line":8},"start":{"character":21,"line":8}},
-        "predefinedPrompt":{
-          "command":"Fix Hack error inline",
-          "description":"Fix Hack error inline",
-          "displayPrompt":"Fix inline - This interface is not properly implemented",
-          "model":"iCodeLlama 3.1 405B",
-          "userPrompt":"\nGiven the following snippet of Hack code that is part of the file:\n 9 | class Foo implements IFoo {}\n\n<DIAGNOSTIC>\nerror: Typing[4054] This interface is not properly implemented\n\nFile missing_method_namespace.php, line 9, character 22 - line 9, character 25:\n\n 5 | interface IFoo {\n 6 |   public function bar(): void;\n 7 | }\n 8 | \n 9 | class Foo implements »IFoo« {}\n10 |   //                  ^ at-caret\n11 | \n12 | }\n\nMethod bar does not have an implementation\n\nFile missing_method_namespace.php, line 6, character 19 - line 6, character 21:\n\n 5 | interface IFoo {\n 6 |   public function »bar«(): void;\n 7 | }\n 8 | \n 9 | class Foo implements IFoo {}\n10 |   //                  ^ at-caret\n11 | \n12 | }\n\n\n</DIAGNOSTIC>\nEdit <selection_to_edit> in a way that would fix that lint.\nIf there are multiple ways to fix this issue, please return in the code section the most strightforward one that is part of <selection_to_edit>,\nany further suggestions can be added in the explanation section.\n"
-        },
-        "webviewStartLine":8
-      }
-    ],
-    "command":"code-compose.show-inline-chat",
-    "title":"Fix Hack error inline - This interface is not properly implemented"
-  },
-  "data":{"isAI":true},
-  "diagnostics":[],
-  "edit":{"changes":{}},
-  "kind":"",
-  "title":"Fix Hack error inline - This interface is not properly implemented"
-}
-
-The code action edit was a no-op

@@ -439,8 +439,10 @@ let class_const_fold
 
 (* Every class, interface, and trait implicitly defines a ::class to
  * allow accessing its fully qualified name as a string *)
-let class_class_decl (ctx : Provider_context.t) (class_id : Typing_defs.pos_id)
-    : Typing_defs.class_const =
+let class_class_decl
+    (is_abstract : bool)
+    (ctx : Provider_context.t)
+    (class_id : Typing_defs.pos_id) : Typing_defs.class_const =
   let (pos, name) = class_id in
   let reason = Reason.class_class (pos, name) in
   let tco = Provider_context.get_tcopt ctx in
@@ -448,7 +450,14 @@ let class_class_decl (ctx : Provider_context.t) (class_id : Typing_defs.pos_id)
     if TypecheckerOptions.(class_class_type tco) then
       mk (reason, Tclass_ptr (mk (reason, Tthis)))
     else
-      mk (reason, Tapply ((pos, SN.Classes.cClassname), [mk (reason, Tthis)]))
+      let name =
+        let safe_abstract = TypecheckerOptions.safe_abstract tco in
+        if is_abstract || not safe_abstract then
+          SN.Classes.cClassname
+        else
+          SN.Classes.cConcreteclassname
+      in
+      mk (reason, Tapply ((pos, name), [mk (reason, Tthis)]))
   in
   {
     cc_abstract = CCConcrete;
@@ -849,7 +858,10 @@ and class_decl
     List.fold_left ~f:(class_const_fold c) ~init:consts c.sc_consts
   in
   let consts =
-    SMap.add SN.Members.mClass (class_class_decl ctx c.sc_name) consts
+    SMap.add
+      SN.Members.mClass
+      (class_class_decl is_abstract ctx c.sc_name)
+      consts
   in
   let typeconsts = inherited.Decl_inherit.ih_typeconsts in
   let (typeconsts, consts) =

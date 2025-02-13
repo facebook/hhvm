@@ -76,6 +76,7 @@ pub mod classes {
     pub static cUNSAFESingletonMemoizeParam: Lazy<TypeName> =
         lazy!(sn::classes::UNSAFE_SINGLETON_MEMOIZE_PARAM);
     pub static cClassname: Lazy<TypeName> = lazy!(sn::classes::CLASS_NAME);
+    pub static cConcreteclassname: Lazy<TypeName> = lazy!(sn::classes::CONCRETE_CLASS_NAME);
     pub static cTypename: Lazy<TypeName> = lazy!(sn::classes::TYPE_NAME);
     pub static cIDisposable: Lazy<TypeName> = lazy!(sn::classes::IDISPOSABLE);
     pub static cIAsyncDisposable: Lazy<TypeName> = lazy!(sn::classes::IASYNC_DISPOSABLE);

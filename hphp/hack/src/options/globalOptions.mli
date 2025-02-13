@@ -277,6 +277,8 @@ type t = {
   recursive_case_types: bool;  (** Enable recursive case types *)
   class_sub_classname: bool;  (** Whether class<T> <: classname<T> *)
   class_class_type: bool;  (** When true, C::class : class<C> *)
+  safe_abstract: bool;
+      (** Enable Safe Abstract features https://fburl.com/hack-safe-abstract *)
 }
 [@@deriving eq, show]
 
@@ -386,6 +388,7 @@ val set :
   ?recursive_case_types:bool ->
   ?class_sub_classname:bool ->
   ?class_class_type:bool ->
+  ?safe_abstract:bool ->
   t ->
   t
 

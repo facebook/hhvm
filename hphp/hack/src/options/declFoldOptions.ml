@@ -11,6 +11,7 @@ type t = {
   everything_sdt: bool;
   enable_strict_const_semantics: int;
   class_class_type: bool;
+  safe_abstract: bool;
 }
 [@@deriving show]
 
@@ -21,4 +22,5 @@ let from_global_options (gopt : GlobalOptions.t) =
     everything_sdt = gopt.po.ParserOptions.everything_sdt;
     enable_strict_const_semantics = gopt.tco_enable_strict_const_semantics;
     class_class_type = gopt.class_class_type;
+    safe_abstract = gopt.safe_abstract;
   }

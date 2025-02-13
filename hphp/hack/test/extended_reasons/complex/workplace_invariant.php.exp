@@ -51,8 +51,8 @@ File classname.hhi, line 19, character 42 - line 19, character 52:
  18 |   <<__NoAutoDynamic>>
  19 |   newtype classname<+T> as typename<T> = »typename<T>«;
  20 | 
- 21 |   /**
- 22 |    * Creates a runtime KindOfClass (class pointer) from input $cn. Migration function
+ 21 |   <<__NoAutoDynamic>>
+ 22 |   newtype concreteclassname<+T> as classname<T> = classname<T>;
 
 and flows into this class constant access expression
 
@@ -270,8 +270,8 @@ File classname.hhi, line 19, character 42 - line 19, character 52:
  18 |   <<__NoAutoDynamic>>
  19 |   newtype classname<+T> as typename<T> = »typename<T>«;
  20 | 
- 21 |   /**
- 22 |    * Creates a runtime KindOfClass (class pointer) from input $cn. Migration function
+ 21 |   <<__NoAutoDynamic>>
+ 22 |   newtype concreteclassname<+T> as classname<T> = classname<T>;
 
 and flows into this class constant access expression
 
@@ -466,8 +466,8 @@ File classname.hhi, line 19, character 42 - line 19, character 52:
  18 |   <<__NoAutoDynamic>>
  19 |   newtype classname<+T> as typename<T> = »typename<T>«;
  20 | 
- 21 |   /**
- 22 |    * Creates a runtime KindOfClass (class pointer) from input $cn. Migration function
+ 21 |   <<__NoAutoDynamic>>
+ 22 |   newtype concreteclassname<+T> as classname<T> = classname<T>;
 
 and flows into this class constant access expression
 

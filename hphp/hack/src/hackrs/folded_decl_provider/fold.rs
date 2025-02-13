@@ -149,12 +149,21 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         let pos = self.child.name.pos();
         let name = self.child.name.id();
         let reason = R::class_class(pos.clone(), name);
+        let is_abstract = match self.child.kind {
+            ClassishKind::Cenum | ClassishKind::Ctrait | ClassishKind::Cinterface => true,
+            ClassishKind::Cclass(c) | ClassishKind::CenumClass(c) => c.is_abstract(),
+        };
+        let id = if is_abstract || !self.opts.safe_abstract {
+            &sn::classes::cClassname
+        } else {
+            &sn::classes::cConcreteclassname
+        };
         let classname_ty = if self.opts.class_class_type {
             Ty::class_ptr(reason.clone(), Ty::this(reason))
         } else {
             Ty::apply(
                 reason.clone(),
-                Positioned::new(pos.clone(), *sn::classes::cClassname),
+                Positioned::new(pos.clone(), **id),
                 [Ty::this(reason)].into(),
             )
         };

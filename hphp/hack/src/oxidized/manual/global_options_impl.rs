@@ -144,6 +144,7 @@ impl Default for GlobalOptions {
             recursive_case_types: false,
             class_sub_classname: true,
             class_class_type: false,
+            safe_abstract: false,
         }
     }
 }

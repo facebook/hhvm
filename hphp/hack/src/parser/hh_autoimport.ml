@@ -21,6 +21,7 @@ let types =
     "Awaitable";
     "AwaitAllWaitHandle";
     "classname";
+    "concreteclassname";
     "Collection";
     "ConcurrentWaitHandle";
     "ConditionWaitHandle";

@@ -193,6 +193,7 @@ type t = {
   recursive_case_types: bool;
   class_sub_classname: bool;
   class_class_type: bool;
+  safe_abstract: bool;
 }
 [@@deriving eq, show]
 
@@ -303,6 +304,7 @@ let default =
     recursive_case_types = false;
     class_sub_classname = true;
     class_class_type = false;
+    safe_abstract = false;
   }
 
 let set
@@ -411,6 +413,7 @@ let set
     ?recursive_case_types
     ?class_sub_classname
     ?class_class_type
+    ?safe_abstract
     options =
   let setting setting option =
     match setting with
@@ -700,6 +703,7 @@ let set
     class_sub_classname =
       setting class_sub_classname options.class_sub_classname;
     class_class_type = setting class_class_type options.class_class_type;
+    safe_abstract = setting safe_abstract options.safe_abstract;
   }
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path

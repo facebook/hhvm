@@ -13,6 +13,7 @@ impl DeclFoldOptions {
             everything_sdt: opts.po.everything_sdt,
             enable_strict_const_semantics: opts.tco_enable_strict_const_semantics,
             class_class_type: opts.class_class_type,
+            safe_abstract: opts.safe_abstract,
         }
     }
 }

@@ -18,6 +18,9 @@ namespace HH {
   <<__NoAutoDynamic>>
   newtype classname<+T> as typename<T> = typename<T>;
 
+  <<__NoAutoDynamic>>
+  newtype concreteclassname<+T> as classname<T> = classname<T>;
+
   /**
    * Creates a runtime KindOfClass (class pointer) from input $cn. Migration function
    * to eliminate implicit coercions from strings e.g. `$cn::func()`

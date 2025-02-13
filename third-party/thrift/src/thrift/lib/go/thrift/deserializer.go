@@ -28,44 +28,44 @@ import (
 const defaultMemoryBufferSize = 1024 // 1KB
 
 type Deserializer struct {
-	Transport *MemoryBuffer
-	Protocol  types.Decoder
+	transport *MemoryBuffer
+	decoder   types.Decoder
 }
 
-// NewBinaryDeserializer creates a new deserializer using the binary protocol
+// NewBinaryDeserializer creates a new deserializer using the binary format
 func NewBinaryDeserializer() *Deserializer {
 	transport := NewMemoryBufferLen(defaultMemoryBufferSize)
-	protocol := NewBinaryFormat(transport)
-	return &Deserializer{Transport: transport, Protocol: protocol}
+	decoder := NewBinaryFormat(transport)
+	return &Deserializer{transport: transport, decoder: decoder}
 }
 
-// NewCompactDeserializer creates a new deserializer using the compact protocol
+// NewCompactDeserializer creates a new deserializer using the compact format
 func NewCompactDeserializer() *Deserializer {
 	transport := NewMemoryBufferLen(defaultMemoryBufferSize)
-	protocol := NewCompactFormat(transport)
-	return &Deserializer{Transport: transport, Protocol: protocol}
+	decoder := NewCompactFormat(transport)
+	return &Deserializer{transport: transport, decoder: decoder}
 }
 
-// NewCompactJSONDeserializer creates a new deserializer using the JSON protocol
+// NewCompactJSONDeserializer creates a new deserializer using the JSON format
 func NewCompactJSONDeserializer() *Deserializer {
 	transport := NewMemoryBufferLen(defaultMemoryBufferSize)
-	protocol := NewCompactJSONFormat(transport)
-	return &Deserializer{Transport: transport, Protocol: protocol}
+	decoder := NewCompactJSONFormat(transport)
+	return &Deserializer{transport: transport, decoder: decoder}
 }
 
-// NewSimpleJSONDeserializer creates a new deserializer using the simple JSON protocol
+// NewSimpleJSONDeserializer creates a new deserializer using the simple JSON format
 func NewSimpleJSONDeserializer() *Deserializer {
 	transport := NewMemoryBufferLen(defaultMemoryBufferSize)
-	protocol := NewSimpleJSONFormat(transport)
-	return &Deserializer{Transport: transport, Protocol: protocol}
+	decoder := NewSimpleJSONFormat(transport)
+	return &Deserializer{transport: transport, decoder: decoder}
 }
 
-// DecodeCompact deserializes a compact protocol message
+// DecodeCompact deserializes a compact format message
 func DecodeCompact(data []byte, msg types.Struct) error {
 	return NewCompactDeserializer().Read(msg, data)
 }
 
-// DecodeBinary deserializes a binary protocol message
+// DecodeBinary deserializes a binary format message
 func DecodeBinary(data []byte, msg types.Struct) error {
 	return NewBinaryDeserializer().Read(msg, data)
 }
@@ -78,12 +78,12 @@ func (t *Deserializer) ReadString(msg types.Struct, s string) error {
 // Read deserializes a Thrift struct from a byte slice
 func (t *Deserializer) Read(msg types.Struct, b []byte) error {
 	// Reset the internal buffer (while keeping the underlying storage)
-	t.Transport.Reset()
+	t.transport.Reset()
 
-	if _, err := t.Transport.Write(b); err != nil {
+	if _, err := t.transport.Write(b); err != nil {
 		return err
 	}
-	if err := msg.Read(t.Protocol); err != nil {
+	if err := msg.Read(t.decoder); err != nil {
 		return err
 	}
 	return nil

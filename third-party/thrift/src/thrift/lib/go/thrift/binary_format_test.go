@@ -35,9 +35,9 @@ func TestWriteBinaryEmptyBinaryFormat(t *testing.T) {
 	m := NewMyTestStruct()
 	m.Bin = nil
 	s := NewBinarySerializer()
-	transport := s.Transport
+	transport := s.transport
 	transport.Buffer = bytes.NewBuffer([]byte(nil))
-	if err := m.Write(s.Protocol); err != nil {
+	if err := m.Write(s.encoder); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -48,10 +48,10 @@ func TestSkipUnknownTypeBinaryFormat(t *testing.T) {
 	// skip over a map with invalid key/value type and ~550M entries
 	data := make([]byte, 1100000000)
 	copy(data[:], []byte("\n\x10\rO\t6\x03\n\n\n\x10\r\n\tsl ce\x00"))
-	transport := d.Transport
+	transport := d.transport
 	transport.Buffer = bytes.NewBuffer(data)
 	start := time.Now()
-	err := m.Read(d.Protocol)
+	err := m.Read(d.decoder)
 	if err == nil {
 		t.Fatalf("Parsed invalid message correctly")
 	} else if !strings.Contains(err.Error(), "unknown type") {

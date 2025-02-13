@@ -80,7 +80,7 @@ func TestConsequentDeserialization(t *testing.T) {
 
 	// The internal memory buffer should not have grown at all,
 	// since we were deserializing small structs.
-	if des.Transport.Cap() != defaultMemoryBufferSize {
-		t.Fatalf("deserializer memory buffer grew: %d", des.Transport.Cap())
+	if des.transport.Cap() != defaultMemoryBufferSize {
+		t.Fatalf("deserializer memory buffer grew: %d", des.transport.Cap())
 	}
 }

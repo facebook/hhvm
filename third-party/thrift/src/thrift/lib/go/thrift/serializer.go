@@ -22,36 +22,36 @@ import (
 
 // A Serializer is used to turn a Struct in to a byte stream
 type Serializer struct {
-	Transport *MemoryBuffer
-	Protocol  types.Encoder
+	transport *MemoryBuffer
+	encoder   types.Encoder
 }
 
 // NewBinarySerializer create a new serializer using the binary format
 func NewBinarySerializer() *Serializer {
 	transport := NewMemoryBufferLen(defaultMemoryBufferSize)
-	protocol := NewBinaryFormat(transport)
-	return &Serializer{Transport: transport, Protocol: protocol}
+	encoder := NewBinaryFormat(transport)
+	return &Serializer{transport: transport, encoder: encoder}
 }
 
 // NewCompactSerializer creates a new serializer using the compact format
 func NewCompactSerializer() *Serializer {
 	transport := NewMemoryBufferLen(defaultMemoryBufferSize)
-	protocol := NewCompactFormat(transport)
-	return &Serializer{Transport: transport, Protocol: protocol}
+	encoder := NewCompactFormat(transport)
+	return &Serializer{transport: transport, encoder: encoder}
 }
 
 // NewCompactJSONSerializer creates a new serializer using the compact JSON format
 func NewCompactJSONSerializer() *Serializer {
 	transport := NewMemoryBufferLen(defaultMemoryBufferSize)
-	protocol := NewCompactJSONFormat(transport)
-	return &Serializer{Transport: transport, Protocol: protocol}
+	encoder := NewCompactJSONFormat(transport)
+	return &Serializer{transport: transport, encoder: encoder}
 }
 
 // NewSimpleJSONSerializer creates a new serializer using the SimpleJSON format
 func NewSimpleJSONSerializer() *Serializer {
 	transport := NewMemoryBufferLen(defaultMemoryBufferSize)
-	protocol := NewSimpleJSONFormat(transport)
-	return &Serializer{Transport: transport, Protocol: protocol}
+	encoder := NewSimpleJSONFormat(transport)
+	return &Serializer{transport: transport, encoder: encoder}
 }
 
 // EncodeCompact serializes msg using the compact format
@@ -75,13 +75,13 @@ func (s *Serializer) WriteString(msg types.Struct) (string, error) {
 
 // Write writes msg to the serializer and returns it as a byte array
 func (s *Serializer) Write(msg types.Struct) ([]byte, error) {
-	s.Transport.Reset()
+	s.transport.Reset()
 
-	if err := msg.Write(s.Protocol); err != nil {
+	if err := msg.Write(s.encoder); err != nil {
 		return nil, err
 	}
 
-	if err := s.Protocol.Flush(); err != nil {
+	if err := s.encoder.Flush(); err != nil {
 		return nil, err
 	}
 
@@ -90,8 +90,8 @@ func (s *Serializer) Write(msg types.Struct) ([]byte, error) {
 	// The contents of the internal Transport buffer will be overwritten
 	// on the next call to Write()/WriteString(). We don't want that to
 	// affect the caller's buffer. Hence, the copy.
-	serBytes := make([]byte, s.Transport.Len())
-	copy(serBytes, s.Transport.Bytes())
+	serBytes := make([]byte, s.transport.Len())
+	copy(serBytes, s.transport.Bytes())
 
 	return serBytes, nil
 }

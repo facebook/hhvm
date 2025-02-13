@@ -39,14 +39,14 @@ namespace {
 
 std::string_view appendTypeUri(const type::TypeUri& uri) {
   switch (uri.getType()) {
-    case apache::thrift::type::TypeUri::uri:
+    case apache::thrift::type::TypeUri::Type::uri:
       return *uri.uri_ref();
-    case apache::thrift::type::TypeUri::typeHashPrefixSha2_256:
+    case apache::thrift::type::TypeUri::Type::typeHashPrefixSha2_256:
       return uri.typeHashPrefixSha2_256_ref()->c_str();
-    case apache::thrift::type::TypeUri::scopedName:
-    case apache::thrift::type::TypeUri::__EMPTY__:
+    case apache::thrift::type::TypeUri::Type::scopedName:
+    case apache::thrift::type::TypeUri::Type::__EMPTY__:
       return "(unspecified)";
-    case apache::thrift::type::TypeUri::definitionKey:
+    case apache::thrift::type::TypeUri::Type::definitionKey:
       folly::terminate_with<std::runtime_error>(
           "TypeUri::definitionKey should not be specified for Thrift Any.");
   }
@@ -67,46 +67,46 @@ void appendTypeParams(
 
 std::string getTypeName(const type::TypeStruct& type) {
   switch (type.name()->getType()) {
-    case type::TypeName::boolType:
+    case type::TypeName::Type::boolType:
       return "bool";
-    case type::TypeName::byteType:
+    case type::TypeName::Type::byteType:
       return "byte";
-    case type::TypeName::i16Type:
+    case type::TypeName::Type::i16Type:
       return "i16";
-    case type::TypeName::i32Type:
+    case type::TypeName::Type::i32Type:
       return "i32";
-    case type::TypeName::i64Type:
+    case type::TypeName::Type::i64Type:
       return "i64";
-    case type::TypeName::floatType:
+    case type::TypeName::Type::floatType:
       return "float";
-    case type::TypeName::doubleType:
+    case type::TypeName::Type::doubleType:
       return "double";
-    case type::TypeName::stringType:
+    case type::TypeName::Type::stringType:
       return "string";
-    case type::TypeName::binaryType:
+    case type::TypeName::Type::binaryType:
       return "binary";
-    case type::TypeName::enumType:
+    case type::TypeName::Type::enumType:
       return fmt::format(
           "enum<{}>", appendTypeUri(*type.name()->enumType_ref()));
-    case type::TypeName::typedefType:
+    case type::TypeName::Type::typedefType:
       return fmt::format(
           "typedef<{}>", appendTypeUri(*type.name()->typedefType_ref()));
-    case type::TypeName::structType:
+    case type::TypeName::Type::structType:
       return fmt::format(
           "struct<{}>", appendTypeUri(*type.name()->structType_ref()));
-    case type::TypeName::unionType:
+    case type::TypeName::Type::unionType:
       return fmt::format(
           "union<{}>", appendTypeUri(*type.name()->unionType_ref()));
-    case type::TypeName::exceptionType:
+    case type::TypeName::Type::exceptionType:
       return fmt::format(
           "exception<{}>", appendTypeUri(*type.name()->exceptionType_ref()));
-    case type::TypeName::listType:
+    case type::TypeName::Type::listType:
       return "list";
-    case type::TypeName::setType:
+    case type::TypeName::Type::setType:
       return "set";
-    case type::TypeName::mapType:
+    case type::TypeName::Type::mapType:
       return "map";
-    case type::TypeName::__EMPTY__:
+    case type::TypeName::Type::__EMPTY__:
       return "void";
   }
 }

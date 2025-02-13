@@ -120,49 +120,49 @@ bool identicalTypeStruct(const TypeStruct& lhs, const TypeStruct& rhs) {
   }
 
   switch (lhs.name()->getType()) {
-    case TypeName::__EMPTY__:
+    case TypeName::Type::__EMPTY__:
       return false;
     // primitives
-    case TypeName::boolType:
-    case TypeName::byteType:
-    case TypeName::i16Type:
-    case TypeName::i32Type:
-    case TypeName::i64Type:
-    case TypeName::floatType:
-    case TypeName::doubleType:
-    case TypeName::stringType:
-    case TypeName::binaryType:
+    case TypeName::Type::boolType:
+    case TypeName::Type::byteType:
+    case TypeName::Type::i16Type:
+    case TypeName::Type::i32Type:
+    case TypeName::Type::i64Type:
+    case TypeName::Type::floatType:
+    case TypeName::Type::doubleType:
+    case TypeName::Type::stringType:
+    case TypeName::Type::binaryType:
       return true;
     // definitions
-    case TypeName::enumType:
+    case TypeName::Type::enumType:
       return identicalTypeUri(
           lhs.name()->enumType_ref().value(),
           rhs.name()->enumType_ref().value());
-    case TypeName::typedefType:
+    case TypeName::Type::typedefType:
       return identicalTypeUri(
           lhs.name()->typedefType_ref().value(),
           rhs.name()->typedefType_ref().value());
-    case TypeName::structType:
+    case TypeName::Type::structType:
       return identicalTypeUri(
           lhs.name()->structType_ref().value(),
           rhs.name()->structType_ref().value());
-    case TypeName::unionType:
+    case TypeName::Type::unionType:
       return identicalTypeUri(
           lhs.name()->unionType_ref().value(),
           rhs.name()->unionType_ref().value());
-    case TypeName::exceptionType:
+    case TypeName::Type::exceptionType:
       return identicalTypeUri(
           lhs.name()->exceptionType_ref().value(),
           rhs.name()->exceptionType_ref().value());
     // containers
-    case TypeName::listType:
-    case TypeName::setType:
+    case TypeName::Type::listType:
+    case TypeName::Type::setType:
       if (lhs.params()->size() != 1 || rhs.params()->size() != 1) {
         folly::throw_exception<std::runtime_error>("Invalid params");
       }
       return identicalTypeStruct(
           lhs.params().value()[0], rhs.params().value()[0]);
-    case TypeName::mapType:
+    case TypeName::Type::mapType:
       if (lhs.params()->size() != 2 || rhs.params()->size() != 2) {
         folly::throw_exception<std::runtime_error>("Invalid params");
       }
@@ -214,43 +214,43 @@ std::string debugUri(const TypeUri& type) {
 
 std::string debugStringImpl(const TypeStruct& type) {
   switch (type.name()->getType()) {
-    case TypeName::boolType:
+    case TypeName::Type::boolType:
       return "bool";
-    case TypeName::byteType:
+    case TypeName::Type::byteType:
       return "byte";
-    case TypeName::i16Type:
+    case TypeName::Type::i16Type:
       return "i16";
-    case TypeName::i32Type:
+    case TypeName::Type::i32Type:
       return "i32";
-    case TypeName::i64Type:
+    case TypeName::Type::i64Type:
       return "i64";
-    case TypeName::floatType:
+    case TypeName::Type::floatType:
       return "float";
-    case TypeName::doubleType:
+    case TypeName::Type::doubleType:
       return "double";
-    case TypeName::stringType:
+    case TypeName::Type::stringType:
       return "string";
-    case TypeName::binaryType:
+    case TypeName::Type::binaryType:
       return "binary";
-    case TypeName::enumType:
+    case TypeName::Type::enumType:
       return fmt::format("enum<{}>", debugUri(*type.name()->enumType_ref()));
-    case TypeName::typedefType:
+    case TypeName::Type::typedefType:
       // Need schema to resolve :(
       return fmt::format(
           "typedef<{}>", debugUri(*type.name()->typedefType_ref()));
-    case TypeName::structType:
+    case TypeName::Type::structType:
       return fmt::format(
           "struct<{}>", debugUri(*type.name()->structType_ref()));
-    case TypeName::unionType:
+    case TypeName::Type::unionType:
       return fmt::format("union<{}>", debugUri(*type.name()->unionType_ref()));
-    case TypeName::exceptionType:
+    case TypeName::Type::exceptionType:
       return fmt::format(
           "exception<{}>", debugUri(*type.name()->exceptionType_ref()));
-    case TypeName::listType:
+    case TypeName::Type::listType:
       return fmt::format("list<{}>", debugStringImpl(type.params()->at(0)));
-    case TypeName::setType:
+    case TypeName::Type::setType:
       return fmt::format("set<{}>", debugStringImpl(type.params()->at(0)));
-    case TypeName::mapType:
+    case TypeName::Type::mapType:
       return fmt::format(
           "map<{}, {}>",
           debugStringImpl(type.params()->at(0)),

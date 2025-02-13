@@ -453,72 +453,25 @@ bool coerce_to_boolean(const map&) {
   return true;
 }
 
-class render_engine {
+/**
+ * A class that manages the "machine state" of a Whisker render.
+ *
+ * The VM manages:
+ *   - The program stack, which includes...
+ *       - local name bindings
+ *       - partial application context switching
+ *       - diagnostics (collecting backtraces)
+ *   - Resolution of name lookups
+ *   - Evaluation of expressions
+ */
+class virtual_machine {
  public:
-  explicit render_engine(
-      std::ostream& out,
-      object::ptr root_context,
-      diagnostics_engine& diags,
-      render_options opts)
-      : out_(out),
-        root_context_(std::move(root_context)),
-        source_stack_(diags),
-        diags_(diags, source_stack_),
-        opts_(std::move(opts)) {}
+  explicit virtual_machine(render_options& opts, diagnostics_engine& diags)
+      : opts_(opts), source_stack_(diags), diags_(diags, source_stack_) {}
 
-  bool visit(const ast::root& root) {
-    try {
-      auto flush_guard = out_.make_flush_guard();
-      auto eval_ctx = eval_context::with_root_scope(
-          std::move(root_context_), std::exchange(opts_.globals, {}));
-      auto source_frame_guard = source_stack_.make_frame_guard(
-          std::move(eval_ctx), frame::for_root{}, source_location());
-      visit(root.header_elements);
-      visit(root.body_elements);
-      return true;
-    } catch (const render_error& err) {
-      if (!diags_.engine().params().should_report(
-              opts_.show_source_backtrace_on_failure)) {
-        return false;
-      }
-      const source_stack::backtrace& backtrace = err.backtrace();
-      assert(!backtrace.empty());
+  source_stack& stack() { return source_stack_; }
+  diagnoser& diags() { return diags_; }
 
-      auto source_trace = [&]() -> std::string {
-        std::string result;
-        for (std::size_t i = 0; i < backtrace.size(); ++i) {
-          const source_stack::backtrace_frame& frame = backtrace[i];
-          const auto name = detail::variant_match(
-              frame.cause,
-              [](frame::for_root) -> std::string_view { return ""; },
-              [](frame::for_import) -> std::string_view { return "<module>"; },
-              [](frame::for_macro) -> std::string_view { return "<macro>"; },
-              [](const frame::for_partial& partial) -> std::string_view {
-                return partial->name;
-              });
-          const auto location = name.empty()
-              ? fmt::format("{}", frame.location.file_name())
-              : fmt::format("{} @ {}", name, frame.location.file_name());
-          fmt::format_to(
-              std::back_inserter(result),
-              "#{} {} <line:{}, col:{}>\n",
-              i,
-              location,
-              frame.location.line(),
-              frame.location.column());
-        }
-        return result;
-      }();
-
-      diags_.engine().error(
-          source_location(),
-          "The source backtrace is:\n{}",
-          std::move(source_trace));
-      return false;
-    }
-  }
-
- private:
   using frame = source_stack::frame;
   /**
    * Returns the current frame of the source stack. The frame holds necessary
@@ -530,44 +483,6 @@ class render_engine {
   frame& current_frame() {
     assert(source_stack_.top() != nullptr);
     return *source_stack_.top();
-  }
-  eval_context& eval_ctx() { return current_frame().context; }
-
-  void visit(const ast::headers& headers) {
-    for (const auto& header : headers) {
-      visit(header);
-    }
-  }
-  void visit(const ast::bodies& bodies) {
-    for (const auto& body : bodies) {
-      visit(body);
-    }
-  }
-  // Prevent implicit conversion to ast::header or ast::body. Otherwise, we can
-  // silently compile an infinitely recursive visit() chain if there is a
-  // missing overload for one of the alternatives in the variant.
-  template <
-      typename T,
-      std::enable_if_t<
-          std::is_same_v<T, ast::header> || std::is_same_v<T, ast::body>>* =
-          nullptr>
-  void visit(const T& elements) {
-    detail::variant_match(elements, [&](const auto& node) { visit(node); });
-  }
-
-  void visit(const ast::text& text) { out_.write(text); }
-  void visit(const ast::newline& newline) {
-    if (!source_stack_.top()->ignore_newlines) {
-      out_.write(newline);
-    }
-  }
-  void visit(const ast::comment&) {
-    // comments are not rendered in the output
-  }
-
-  [[noreturn]] void visit(const ast::import_statement& import_statement) {
-    diags_.report_fatal_error(
-        import_statement.loc.begin, "Import statements are not supported yet.");
   }
 
   // Performs a lookup of a variable in the current scope or reports diagnostics
@@ -592,7 +507,7 @@ class render_engine {
     auto undefined_diag_level = opts_.strict_undefined_variables;
 
     return whisker::visit(
-        eval_ctx().lookup_object(path),
+        current_frame().context.lookup_object(path),
         [](const object::ptr& value) -> object::ptr { return value; },
         [&](const eval_scope_lookup_error& err) -> object::ptr {
           auto scope_trace = [&]() -> std::string {
@@ -648,6 +563,34 @@ class render_engine {
             diags_.abort_rendering(variable_lookup.loc.begin);
           }
           return manage_as_static(whisker::make::null);
+        });
+  }
+
+  /**
+   * Reports a diagnostic and fails rendering depending on the type of the
+   * provided value and render_options::strict_boolean_conditional.
+   */
+  void maybe_report_boolean_coercion(
+      const ast::expression& expr, const object& value) {
+    auto diag_level = opts_.strict_boolean_conditional;
+    diags_.maybe_report(expr.loc, diag_level, [&] {
+      return fmt::format(
+          "Condition '{}' is not a boolean. The encountered value is:\n{}",
+          expr.to_string(),
+          to_string(value));
+    });
+    if (diag_level == diagnostic_level::error) {
+      // Fail rendering in strict mode
+      diags_.abort_rendering(expr.loc.begin);
+    }
+  }
+  bool evaluate_as_bool(const ast::expression& expr) {
+    object::ptr result = evaluate(expr);
+    return result->visit(
+        [&](boolean value) { return value; },
+        [&](const auto& value) {
+          maybe_report_boolean_coercion(expr, *result);
+          return coerce_to_boolean(value);
         });
   }
 
@@ -750,7 +693,11 @@ class render_engine {
         });
   }
 
-  void bind_local(
+  /**
+   * Creates a name binding in the local scope of the provided context with the
+   * provided value.
+   */
+  void bind_local_in(
       eval_context& ctx,
       source_location loc,
       std::string name,
@@ -767,29 +714,142 @@ class render_engine {
               err.name());
         });
   }
+  void bind_local(source_location loc, std::string name, object::ptr value) {
+    bind_local_in(
+        current_frame().context, loc, std::move(name), std::move(value));
+  }
+
+ private:
+  render_options& opts_;
+  source_stack source_stack_;
+  diagnoser diags_;
+};
+
+/**
+ * A class that walks Whisker ASTs to drive the Whisker VM. During the walk, the
+ * render engine interpolates the contemporary state of the VM to write to an
+ * output buffer.
+ */
+class render_engine {
+ public:
+  explicit render_engine(
+      std::ostream& out, diagnostics_engine& diags, render_options opts)
+      : out_(out), opts_(std::move(opts)), vm_(opts_, diags) {}
+
+  bool visit(const ast::root& root, object::ptr root_context) && {
+    try {
+      auto flush_guard = out_.make_flush_guard();
+      auto eval_ctx = eval_context::with_root_scope(
+          std::move(root_context), std::exchange(opts_.globals, {}));
+      auto source_frame_guard = vm_.stack().make_frame_guard(
+          std::move(eval_ctx), frame::for_root{}, source_location());
+      visit(root.header_elements);
+      visit(root.body_elements);
+      return true;
+    } catch (const render_error& err) {
+      if (!vm_.diags().engine().params().should_report(
+              opts_.show_source_backtrace_on_failure)) {
+        return false;
+      }
+      const source_stack::backtrace& backtrace = err.backtrace();
+      assert(!backtrace.empty());
+
+      auto source_trace = [&]() -> std::string {
+        std::string result;
+        for (std::size_t i = 0; i < backtrace.size(); ++i) {
+          const source_stack::backtrace_frame& frame = backtrace[i];
+          const auto name = detail::variant_match(
+              frame.cause,
+              [](frame::for_root) -> std::string_view { return ""; },
+              [](frame::for_import) -> std::string_view { return "<module>"; },
+              [](frame::for_macro) -> std::string_view { return "<macro>"; },
+              [](const frame::for_partial& partial) -> std::string_view {
+                return partial->name;
+              });
+          const auto location = name.empty()
+              ? fmt::format("{}", frame.location.file_name())
+              : fmt::format("{} @ {}", name, frame.location.file_name());
+          fmt::format_to(
+              std::back_inserter(result),
+              "#{} {} <line:{}, col:{}>\n",
+              i,
+              location,
+              frame.location.line(),
+              frame.location.column());
+        }
+        return result;
+      }();
+
+      vm_.diags().engine().error(
+          source_location(),
+          "The source backtrace is:\n{}",
+          std::move(source_trace));
+      return false;
+    }
+  }
+
+ private:
+  using frame = source_stack::frame;
+  eval_context& eval_ctx() { return vm_.current_frame().context; }
+
+  void visit(const ast::headers& headers) {
+    for (const auto& header : headers) {
+      visit(header);
+    }
+  }
+  void visit(const ast::bodies& bodies) {
+    for (const auto& body : bodies) {
+      visit(body);
+    }
+  }
+  // Prevent implicit conversion to ast::header or ast::body. Otherwise, we can
+  // silently compile an infinitely recursive visit() chain if there is a
+  // missing overload for one of the alternatives in the variant.
+  template <
+      typename T,
+      std::enable_if_t<
+          std::is_same_v<T, ast::header> || std::is_same_v<T, ast::body>>* =
+          nullptr>
+  void visit(const T& elements) {
+    detail::variant_match(elements, [&](const auto& node) { visit(node); });
+  }
+
+  void visit(const ast::text& text) { out_.write(text); }
+  void visit(const ast::newline& newline) {
+    if (!vm_.stack().top()->ignore_newlines) {
+      out_.write(newline);
+    }
+  }
+  void visit(const ast::comment&) {
+    // comments are not rendered in the output
+  }
+
+  [[noreturn]] void visit(const ast::import_statement& import_statement) {
+    vm_.diags().report_fatal_error(
+        import_statement.loc.begin, "Import statements are not supported yet.");
+  }
 
   void visit(const ast::let_statement& let_statement) {
-    bind_local(
-        eval_ctx(),
+    vm_.bind_local(
         let_statement.loc.begin,
         let_statement.id.name,
-        evaluate(let_statement.value));
+        vm_.evaluate(let_statement.value));
   }
 
   void visit(const ast::pragma_statement& pragma_statement) {
     using pragma = ast::pragma_statement::pragmas;
     switch (pragma_statement.pragma) {
       case pragma::ignore_newlines:
-        source_stack_.top()->ignore_newlines = true;
+        vm_.stack().top()->ignore_newlines = true;
         break;
     }
   }
 
   void visit(const ast::interpolation& interpolation) {
-    object::ptr result = evaluate(interpolation.content);
+    object::ptr result = vm_.evaluate(interpolation.content);
 
     const auto report_unprintable_message_only = [&](diagnostic_level level) {
-      diags_.maybe_report(interpolation.loc, level, [&] {
+      vm_.diags().maybe_report(interpolation.loc, level, [&] {
         return fmt::format(
             "Object named '{}' is not printable. The encountered value is:\n{}",
             interpolation.to_string(),
@@ -802,7 +862,7 @@ class render_engine {
       report_unprintable_message_only(level);
       if (level == diagnostic_level::error) {
         // Fail rendering in strict mode
-        diags_.abort_rendering(interpolation.loc.begin);
+        vm_.diags().abort_rendering(interpolation.loc.begin);
       }
     };
 
@@ -825,44 +885,16 @@ class render_engine {
         [&](auto&&) -> std::string {
           // Other types are never printable
           report_unprintable_message_only(diagnostic_level::error);
-          diags_.abort_rendering(interpolation.loc.begin);
+          vm_.diags().abort_rendering(interpolation.loc.begin);
         });
     out_.write(std::move(output));
   }
 
-  /**
-   * Reports a diagnostic and fails rendering depending on the type of the
-   * provided value and render_options::strict_boolean_conditional.
-   */
-  void maybe_report_boolean_coercion(
-      const ast::expression& expr, const object& value) {
-    auto diag_level = opts_.strict_boolean_conditional;
-    diags_.maybe_report(expr.loc, diag_level, [&] {
-      return fmt::format(
-          "Condition '{}' is not a boolean. The encountered value is:\n{}",
-          expr.to_string(),
-          to_string(value));
-    });
-    if (diag_level == diagnostic_level::error) {
-      // Fail rendering in strict mode
-      diags_.abort_rendering(expr.loc.begin);
-    }
-  }
-  bool evaluate_as_bool(const ast::expression& expr) {
-    object::ptr result = evaluate(expr);
-    return result->visit(
-        [&](boolean value) { return value; },
-        [&](const auto& value) {
-          maybe_report_boolean_coercion(expr, *result);
-          return coerce_to_boolean(value);
-        });
-  }
-
   void visit(const ast::section_block& section) {
-    object::ptr section_variable = lookup_variable(section.variable);
+    object::ptr section_variable = vm_.lookup_variable(section.variable);
 
     const auto maybe_report_coercion = [&] {
-      maybe_report_boolean_coercion(
+      vm_.maybe_report_boolean_coercion(
           ast::expression{section.variable.loc, section.variable},
           *section_variable);
     };
@@ -960,7 +992,7 @@ class render_engine {
     // Returns whether the else clause should be evaluated.
     auto visit_else_if = [&](const ast::conditional_block& b) {
       for (const auto& clause : b.else_if_clauses) {
-        if (evaluate_as_bool(clause.condition)) {
+        if (vm_.evaluate_as_bool(clause.condition)) {
           do_visit(clause.body_elements);
           return true;
         }
@@ -968,7 +1000,7 @@ class render_engine {
       return false;
     };
 
-    const bool condition = evaluate_as_bool(conditional_block.condition);
+    const bool condition = vm_.evaluate_as_bool(conditional_block.condition);
     if (condition) {
       do_visit(conditional_block.body_elements);
     } else if (visit_else_if(conditional_block)) {
@@ -980,7 +1012,7 @@ class render_engine {
 
   void visit(const ast::with_block& with_block) {
     const ast::expression& expr = with_block.value;
-    object::ptr result = evaluate(expr);
+    object::ptr result = vm_.evaluate(expr);
     result->visit(
         [&](const map&) {
           // maps can be de-structured.
@@ -988,7 +1020,7 @@ class render_engine {
         [&](const native_object::ptr& o) {
           // map-like native objects can be de-structured.
           if (o->as_map_like() == nullptr) {
-            diags_.report_fatal_error(
+            vm_.diags().report_fatal_error(
                 expr.loc.begin,
                 "Expression '{}' is a native_object which is not map-like. The encountered value is:\n{}",
                 expr.to_string(),
@@ -996,7 +1028,7 @@ class render_engine {
           }
         },
         [&](auto&&) {
-          diags_.report_fatal_error(
+          vm_.diags().report_fatal_error(
               expr.loc.begin,
               "Expression '{}' does not evaluate to a map. The encountered value is:\n{}",
               expr.to_string(),
@@ -1009,19 +1041,17 @@ class render_engine {
 
   void visit(const ast::each_block& each_block) {
     const ast::expression& expr = each_block.iterable;
-    object::ptr result = evaluate(expr);
+    object::ptr result = vm_.evaluate(expr);
 
     const auto do_visit = [this, &each_block](i64 index, object::ptr scope) {
       if (const auto& captured = each_block.captured) {
         eval_ctx().push_scope(manage_as_static(whisker::make::null));
-        bind_local(
-            eval_ctx(),
+        vm_.bind_local(
             captured->element.loc.begin,
             captured->element.name,
             std::move(scope));
         if (captured->index.has_value()) {
-          bind_local(
-              eval_ctx(),
+          vm_.bind_local(
               captured->index->loc.begin,
               captured->index->name,
               manage_owned<object>(whisker::make::i64(index)));
@@ -1058,7 +1088,7 @@ class render_engine {
           // array-like native objects are iterable.
           native_object::array_like::ptr array_like = o->as_array_like();
           if (array_like == nullptr) {
-            diags_.report_fatal_error(
+            vm_.diags().report_fatal_error(
                 expr.loc.begin,
                 "Expression '{}' is a native_object which is not array-like. The encountered value is:\n{}",
                 expr.to_string(),
@@ -1074,7 +1104,7 @@ class render_engine {
           }
         },
         [&](auto&&) {
-          diags_.report_fatal_error(
+          vm_.diags().report_fatal_error(
               expr.loc.begin,
               "Expression '{}' does not evaluate to an array. The encountered value is:\n{}",
               expr.to_string(),
@@ -1089,7 +1119,7 @@ class render_engine {
     for (const ast::identifier& id : partial_block.arguments) {
       auto [_, inserted] = arguments.insert(id.name);
       if (!inserted) {
-        diags_.report_fatal_error(
+        vm_.diags().report_fatal_error(
             id.loc.begin,
             "Duplicate capture name in partial block definition '{}'",
             name);
@@ -1099,7 +1129,7 @@ class render_engine {
     std::map<ast::identifier, object::ptr, ast::identifier::compare_by_name>
         captures;
     for (const ast::identifier& capture : partial_block.captures) {
-      object::ptr captured_object = lookup_variable(
+      object::ptr captured_object = vm_.lookup_variable(
           ast::variable_lookup{capture.loc, std::vector{capture}});
       captures.emplace(std::pair{capture, std::move(captured_object)});
     }
@@ -1112,15 +1142,14 @@ class render_engine {
             std::move(captures),
             std::cref(partial_block.body_elements),
         });
-    bind_local(
-        eval_ctx(),
+    vm_.bind_local(
         partial_block.name.loc.begin,
         std::move(name),
         manage_owned<object>(native_handle<>(std::move(definition))));
   }
 
   void visit(const ast::partial_statement& partial_statement) {
-    object::ptr lookup = evaluate(partial_statement.partial);
+    object::ptr lookup = vm_.evaluate(partial_statement.partial);
 
     partial_definition::ptr partial = std::invoke([&] {
       if (lookup->is_native_handle()) {
@@ -1129,7 +1158,7 @@ class render_engine {
           return handle->ptr();
         }
       }
-      diags_.report_fatal_error(
+      vm_.diags().report_fatal_error(
           partial_statement.partial.loc.begin,
           "Expression '{}' does not evaluate to a partial. The encountered value is:\n{}",
           partial_statement.partial.to_string(),
@@ -1148,14 +1177,14 @@ class render_engine {
       return std::pair{std::move(not_provided), std::move(leftovers)};
     });
     if (!missing.empty()) {
-      diags_.report_fatal_error(
+      vm_.diags().report_fatal_error(
           partial_statement.loc.begin,
           "Partial '{}' is missing named arguments: {}",
           partial->name,
           fmt::join(missing, ", "));
     }
     if (!extras.empty()) {
-      diags_.report_fatal_error(
+      vm_.diags().report_fatal_error(
           partial_statement.loc.begin,
           "Partial '{}' received unexpected named arguments: {}",
           partial->name,
@@ -1165,7 +1194,7 @@ class render_engine {
     // Partials get a new evaluation context derived from the current one.
     auto derived_ctx = eval_ctx().make_derived();
     // Make the partial itself available in the derived context
-    bind_local(
+    vm_.bind_local_in(
         derived_ctx,
         partial_statement.partial.loc.begin,
         partial->name,
@@ -1177,14 +1206,15 @@ class render_engine {
       assert(arg != named_arguments.end());
       const ast::identifier& id = arg->second.name;
       const ast::expression& expr = arg->second.value;
-      bind_local(derived_ctx, id.loc.begin, argument, evaluate(expr));
+      vm_.bind_local_in(
+          derived_ctx, id.loc.begin, argument, vm_.evaluate(expr));
     }
 
     for (const auto& [capture, value] : partial->captures) {
-      bind_local(derived_ctx, capture.loc.begin, capture.name, value);
+      vm_.bind_local_in(derived_ctx, capture.loc.begin, capture.name, value);
     }
 
-    auto source_frame_guard = source_stack_.make_frame_guard(
+    auto source_frame_guard = vm_.stack().make_frame_guard(
         std::move(derived_ctx), partial, partial_statement.loc.begin);
     auto indent_guard = out_.make_indent_guard(
         partial_statement.standalone_indentation_within_line);
@@ -1200,7 +1230,7 @@ class render_engine {
 
     source_resolver* resolver = opts_.source_resolver.get();
     if (resolver == nullptr) {
-      diags_.report_fatal_error(
+      vm_.diags().report_fatal_error(
           macro.loc.begin,
           "No source resolver was provided. Cannot resolve macro with path '{}'",
           macro.path_string());
@@ -1208,9 +1238,9 @@ class render_engine {
 
     // Kept alive by the source_resolver implementation
     const ast::root* resolved_macro =
-        resolver->resolve_macro(path, macro.loc.begin, diags_.engine());
+        resolver->resolve_macro(path, macro.loc.begin, vm_.diags().engine());
     if (resolved_macro == nullptr) {
-      diags_.report_fatal_error(
+      vm_.diags().report_fatal_error(
           macro.loc.begin,
           "Macro with path '{}' was not found or failed to parse",
           macro.path_string());
@@ -1218,8 +1248,8 @@ class render_engine {
 
     // Macros are "inlined" into their invocation site. In other words, they
     // execute within the scope where they are invoked.
-    auto source_frame_guard = source_stack_.make_frame_guard(
-        current_frame().context, frame::for_macro{}, macro.loc.begin);
+    auto source_frame_guard = vm_.stack().make_frame_guard(
+        eval_ctx(), frame::for_macro{}, macro.loc.begin);
     auto indent_guard =
         out_.make_indent_guard(macro.standalone_indentation_within_line);
     visit(resolved_macro->header_elements);
@@ -1227,10 +1257,8 @@ class render_engine {
   }
 
   outputter out_;
-  object::ptr root_context_;
-  source_stack source_stack_;
-  diagnoser diags_;
   render_options opts_;
+  virtual_machine vm_;
 };
 
 } // namespace
@@ -1249,9 +1277,8 @@ bool render(
     const object& root_context,
     diagnostics_engine& diags,
     render_options opts) {
-  render_engine engine{
-      out, manage_as_static(root_context), diags, std::move(opts)};
-  return engine.visit(root);
+  render_engine engine{out, diags, std::move(opts)};
+  return std::move(engine).visit(root, manage_as_static(root_context));
 }
 
 } // namespace whisker

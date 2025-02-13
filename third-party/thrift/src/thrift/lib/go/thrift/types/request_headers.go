@@ -18,7 +18,6 @@ package types
 
 import (
 	"context"
-	"fmt"
 )
 
 // The headersKeyType type is unexported to prevent collisions with context keys.
@@ -42,12 +41,8 @@ func SetRequestHeaders(ctx context.Context, protocol Protocol) error {
 	if !ok {
 		return NewTransportException(INVALID_HEADERS_TYPE, "Headers key in context value is not map[string]string")
 	}
-	p, ok := protocol.(RequestHeaders)
-	if !ok {
-		return NewTransportException(NOT_IMPLEMENTED, fmt.Sprintf("requestHeaders not implemented for transport type %T", protocol))
-	}
 	for k, v := range headersMap {
-		p.SetRequestHeader(k, v)
+		protocol.SetRequestHeader(k, v)
 	}
 	return nil
 }

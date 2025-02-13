@@ -27,7 +27,7 @@ import (
 // These headers are not persistent and will only be sent with the current request.
 func AddHeader(ctx context.Context, key string, value string) (context.Context, error) {
 	headersMap := make(map[string]string)
-	if headers := ctx.Value(types.HeadersKey); headers != nil {
+	if headers := ctx.Value(types.RequestHeadersKey); headers != nil {
 		var ok bool
 		headersMap, ok = headers.(map[string]string)
 		if !ok {
@@ -35,35 +35,35 @@ func AddHeader(ctx context.Context, key string, value string) (context.Context, 
 		}
 	}
 	headersMap[key] = value
-	ctx = context.WithValue(ctx, types.HeadersKey, headersMap)
+	ctx = context.WithValue(ctx, types.RequestHeadersKey, headersMap)
 	return ctx, nil
 }
 
 // WithHeaders attaches thrift headers to a ctx.
 func WithHeaders(ctx context.Context, headers map[string]string) context.Context {
-	storedHeaders := ctx.Value(types.HeadersKey)
+	storedHeaders := ctx.Value(types.RequestHeadersKey)
 	if storedHeaders == nil {
-		return context.WithValue(ctx, types.HeadersKey, headers)
+		return context.WithValue(ctx, types.RequestHeadersKey, headers)
 	}
 	headersMap, ok := storedHeaders.(map[string]string)
 	if !ok {
-		return context.WithValue(ctx, types.HeadersKey, headers)
+		return context.WithValue(ctx, types.RequestHeadersKey, headers)
 	}
 	for k, v := range headers {
 		headersMap[k] = v
 	}
-	return context.WithValue(ctx, types.HeadersKey, headersMap)
+	return context.WithValue(ctx, types.RequestHeadersKey, headersMap)
 }
 
 // SetHeaders replaces all the current headers.
 func SetHeaders(ctx context.Context, headers map[string]string) context.Context {
-	return context.WithValue(ctx, types.HeadersKey, headers)
+	return context.WithValue(ctx, types.RequestHeadersKey, headers)
 }
 
 // GetHeaders gets thrift headers from ctx.
 func GetHeaders(ctx context.Context) map[string]string {
 	// check for headersKey
-	v, ok := ctx.Value(types.HeadersKey).(map[string]string)
+	v, ok := ctx.Value(types.RequestHeadersKey).(map[string]string)
 	if ok {
 		return v
 	}

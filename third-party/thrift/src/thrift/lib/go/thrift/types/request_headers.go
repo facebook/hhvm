@@ -23,8 +23,8 @@ import (
 // The headersKeyType type is unexported to prevent collisions with context keys.
 type headersKeyType int
 
-// HeadersKey is a context key.
-const HeadersKey headersKeyType = 0
+// RequestHeadersKey is a context key.
+const RequestHeadersKey headersKeyType = 0
 
 // SetRequestHeaders sets the Headers in the protocol to send with the request.
 // These headers will be written via the Write method, inside the Call method for each generated request.
@@ -33,7 +33,7 @@ func SetRequestHeaders(ctx context.Context, protocol Protocol) error {
 	if ctx == nil {
 		return nil
 	}
-	headers := ctx.Value(HeadersKey)
+	headers := ctx.Value(RequestHeadersKey)
 	if headers == nil {
 		return nil
 	}

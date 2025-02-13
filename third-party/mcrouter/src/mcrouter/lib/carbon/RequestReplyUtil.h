@@ -392,12 +392,6 @@ class RequestIdMap {
   std::array<T, kSize> container_;
 };
 
-template <class RequestList, class T>
-constexpr size_t RequestIdMap<RequestList, T>::kMinId;
-
-template <class RequestList, class T>
-constexpr size_t RequestIdMap<RequestList, T>::kMaxId;
-
 namespace detail {
 
 /**

@@ -85,21 +85,16 @@ func (cc *ClientConn) RecvMsg(ctx context.Context, method string, res types.Read
 		if err := res.Read(cc.proto); err != nil {
 			return fmt.Errorf("Failed to read message body: %w", err)
 		}
-
 		return cc.proto.ReadMessageEnd()
 	case types.EXCEPTION:
-		err := types.NewApplicationException(types.UNKNOWN_APPLICATION_EXCEPTION, "Unknown exception")
-
-		recvdErr, readErr := err.Read(cc.proto)
-
-		if readErr != nil {
-			return readErr
+		appException := types.NewApplicationException(types.UNKNOWN_APPLICATION_EXCEPTION, "Unknown exception")
+		if err := appException.Read(cc.proto); err != nil {
+			return err
 		}
-
-		if msgEndErr := cc.proto.ReadMessageEnd(); msgEndErr != nil {
-			return msgEndErr
+		if err := cc.proto.ReadMessageEnd(); err != nil {
+			return err
 		}
-		return recvdErr
+		return appException
 	default:
 		return types.NewApplicationException(types.INVALID_MESSAGE_TYPE_EXCEPTION, fmt.Sprintf("%s failed: invalid message type", method))
 	}

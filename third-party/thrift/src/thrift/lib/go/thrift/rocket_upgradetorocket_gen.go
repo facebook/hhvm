@@ -65,15 +65,14 @@ func upgradeToRocket(_ context.Context, protocol Protocol) error {
 
 		return protocol.ReadMessageEnd()
 	case EXCEPTION:
-		err := NewApplicationException(UNKNOWN_APPLICATION_EXCEPTION, "Unknown exception")
-		recvdErr, readErr := err.Read(protocol)
-		if readErr != nil {
-			return readErr
+		appException := NewApplicationException(UNKNOWN_APPLICATION_EXCEPTION, "Unknown exception")
+		if err := appException.Read(protocol); err != nil {
+			return err
 		}
-		if msgEndErr := protocol.ReadMessageEnd(); msgEndErr != nil {
-			return msgEndErr
+		if err := protocol.ReadMessageEnd(); err != nil {
+			return err
 		}
-		return recvdErr
+		return appException
 	default:
 		return NewApplicationException(INVALID_MESSAGE_TYPE_EXCEPTION, fmt.Sprintf("%s failed: invalid message type", method))
 	}

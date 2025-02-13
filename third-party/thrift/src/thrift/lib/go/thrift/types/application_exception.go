@@ -30,9 +30,8 @@ const (
 // ApplicationException is an application level Thrift exception
 type ApplicationException interface {
 	Exception
+	Struct
 	TypeID() int32
-	Read(prot Decoder) (ApplicationException, error)
-	Write(prot Encoder) error
 }
 
 type applicationException struct {
@@ -67,10 +66,10 @@ func (e *applicationException) Unwrap() error {
 }
 
 // Read reads an ApplicationException from the protocol
-func (e *applicationException) Read(prot Decoder) (ApplicationException, error) {
+func (e *applicationException) Read(prot Decoder) error {
 	_, err := prot.ReadStructBegin()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	message := ""
@@ -79,7 +78,7 @@ func (e *applicationException) Read(prot Decoder) (ApplicationException, error) 
 	for {
 		_, ttype, id, err := prot.ReadFieldBegin()
 		if err != nil {
-			return nil, err
+			return err
 		}
 		if ttype == STOP {
 			break
@@ -88,33 +87,40 @@ func (e *applicationException) Read(prot Decoder) (ApplicationException, error) 
 		case 1:
 			if ttype == STRING {
 				if message, err = prot.ReadString(); err != nil {
-					return nil, err
+					return err
 				}
 			} else {
 				if err = SkipDefaultDepth(prot, ttype); err != nil {
-					return nil, err
+					return err
 				}
 			}
 		case 2:
 			if ttype == I32 {
 				if exceptionType, err = prot.ReadI32(); err != nil {
-					return nil, err
+					return err
 				}
 			} else {
 				if err = SkipDefaultDepth(prot, ttype); err != nil {
-					return nil, err
+					return err
 				}
 			}
 		default:
 			if err = SkipDefaultDepth(prot, ttype); err != nil {
-				return nil, err
+				return err
 			}
 		}
 		if err = prot.ReadFieldEnd(); err != nil {
-			return nil, err
+			return err
 		}
 	}
-	return NewApplicationException(exceptionType, message), prot.ReadStructEnd()
+
+	if err := prot.ReadStructEnd(); err != nil {
+		return err
+	}
+
+	e.message = message
+	e.exceptionType = exceptionType
+	return nil
 }
 
 // Write writes an exception to the protocol

@@ -16,6 +16,17 @@ type quickfix = {
   replacement_pos: Pos.t;
 }
 
+module Safe_abstract = struct
+  type kind =
+    | Call_abstract of { method_: string }
+    | New_abstract
+
+  type t = {
+    kind: kind;
+    class_: string;
+  }
+end
+
 module Is_as_always = struct
   type kind =
     | Is_is_always_true
@@ -120,6 +131,7 @@ end
 
 type (_, _) kind =
   | Sketchy_equality : (Sketchy_equality.t, warn) kind
+  | Safe_abstract : (Safe_abstract.t, warn) kind
   | Is_as_always : (Is_as_always.t, migrated) kind
   | Sketchy_null_check : (Sketchy_null_check.t, migrated) kind
   | Non_disjoint_check : (Non_disjoint_check.t, migrated) kind

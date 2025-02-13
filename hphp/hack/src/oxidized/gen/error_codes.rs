@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2710c48268f6a5eb1d65f3467baf643b>>
+// @generated SignedSource<<c0f5a411ca6eb390c68edd88a7a9864e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -636,6 +636,8 @@ pub enum Warning {
     AsAlwaysSucceeds = 12011,
     AsAlwaysFails = 12012,
     ClassPointerToString = 12013,
+    SafeAbstractCall = 12014,
+    SafeAbstractNew = 12015,
 }
 impl TrivialDrop for Warning {}
 arena_deserializer::impl_deserialize_in_arena!(Warning);

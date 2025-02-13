@@ -121,6 +121,10 @@ let visitor ctx =
           else
             None);
           Some Class_pointer_check.handler;
+          (if TypecheckerOptions.safe_abstract tcopt then
+            Some Safe_abstract_check.handler
+          else
+            None);
         ]
   in
   let handlers =

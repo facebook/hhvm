@@ -796,6 +796,8 @@ module Warning = struct
     | AsAlwaysSucceeds [@value 12011]
     | AsAlwaysFails [@value 12012]
     | ClassPointerToString [@value 12013]
+    | SafeAbstractCall [@value 12014]
+    | SafeAbstractNew [@value 12015]
   [@@deriving enum, ord, show { with_path = false }]
 end
 

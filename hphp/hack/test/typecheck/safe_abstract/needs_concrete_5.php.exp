@@ -1,0 +1,6 @@
+WARN: File "needs_concrete_5.php", line 6, characters 5-17:
+Unsafe call: `abs::A` might not exist because the receiver might be abstract. (Warn[12014])
+ERROR: File "needs_concrete_5.php", line 4, characters 5-19:
+Unrecognized user attribute: `__NeedsConcrete` starts with __ but is not a standard attribute (Naming[2049])
+ERROR: File "needs_concrete_5.php", line 12, characters 5-19:
+Unrecognized user attribute: `__NeedsConcrete` starts with __ but is not a standard attribute (Naming[2049])

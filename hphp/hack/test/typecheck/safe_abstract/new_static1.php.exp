@@ -1,0 +1,2 @@
+WARN: File "new_static1.php", line 11, characters 5-16:
+Unsafe use of `new`: `AbstractClass2` might be abstract (Warn[12015])

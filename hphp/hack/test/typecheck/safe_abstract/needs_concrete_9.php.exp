@@ -1,0 +1,2 @@
+ERROR: File "needs_concrete_9.php", line 4, characters 5-19:
+Unrecognized user attribute: `__NeedsConcrete` starts with __ but is not a standard attribute (Naming[2049])

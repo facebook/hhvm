@@ -1,0 +1,4 @@
+ERROR: File "static_call_3.php", line 8, characters 11-24:
+Cannot call `self::abstractMethod()`; it is abstract. Did you mean `static::abstractMethod()`? (Typing[4073])
+  File "static_call_3.php", line 5, characters 35-48:
+  Declaration is here

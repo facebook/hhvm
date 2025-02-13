@@ -587,7 +587,9 @@ struct RequestSetupMetadata {
   9: optional ClientMetadata clientMetadata;
   // RSocket KeepAliveFrame Timeout
   12: optional i32 keepAliveTimeoutMs;
-} // next-id: 13
+  // Encode Thrift Metadata using Binary
+  13: optional bool encodeMetadataUsingBinary;
+} // next-id: 14
 
 struct SetupResponse {
   // The Rocket protocol version that server picked. SHOULD be set. MUST be a

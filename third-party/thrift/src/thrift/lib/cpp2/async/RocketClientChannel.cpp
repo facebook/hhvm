@@ -738,8 +738,13 @@ rocket::SetupFrame RocketClientChannel::makeSetupFrame(
 
   uint32_t serialized_size;
   folly::IOBufQueue paramQueue;
+
   bool encodeMetadataUsingBinary =
       THRIFT_FLAG(rocket_client_binary_rpc_metadata_encoding);
+
+  if (meta.encodeMetadataUsingBinary().has_value()) {
+    encodeMetadataUsingBinary = meta.encodeMetadataUsingBinary().value();
+  }
 
   // TODO: migrate this to
   if (encodeMetadataUsingBinary) {

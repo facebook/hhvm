@@ -170,6 +170,9 @@ class RpcOptions {
   RpcOptions& setChecksum(Checksum checksum);
   Checksum getChecksum() const;
 
+  RpcOptions& setForceSyncOnFiber(bool forceSyncOnFiber);
+  bool getForceSyncOnFiber() const;
+
  private:
   using timeout_ms_t = uint32_t;
   timeout_ms_t timeout_{0};
@@ -209,6 +212,8 @@ class RpcOptions {
   folly::SocketFds::ToSend fdsToSend_;
 
   Checksum checksum_{Checksum::NONE};
+
+  bool forceSyncOnFiber_{false};
 };
 
 } // namespace apache::thrift

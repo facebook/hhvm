@@ -995,7 +995,7 @@ void RocketClientChannel::sendSingleRequestNoResponse(
       rpcOptions.copySocketFdsToSend(),
       encodeMetadataUsingBinary(),
       getTransportWrapper());
-  const bool isSync = cb->isSync();
+  const bool isSync = cb->isSync() || rpcOptions.getForceSyncOnFiber();
   SingleRequestNoResponseCallback callback(std::move(cb));
 
   if (isSync && folly::fibers::onFiber()) {
@@ -1024,7 +1024,7 @@ void RocketClientChannel::sendSingleRequestSingleResponse(
   const auto requestWireSize = requestPayload.dataSize();
   const auto requestMetadataAndPayloadSize =
       requestPayload.metadataAndDataSize();
-  const bool isSync = cb->isSync();
+  const bool isSync = cb->isSync() || rpcOptions.getForceSyncOnFiber();
   SingleRequestSingleResponseCallback callback(
       std::move(cb),
       static_cast<uint16_t>(*metadata.protocol_ref()),

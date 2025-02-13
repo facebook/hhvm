@@ -286,4 +286,13 @@ RpcOptions::Checksum RpcOptions::getChecksum() const {
   return checksum_;
 }
 
+RpcOptions& RpcOptions::setForceSyncOnFiber(bool forceSyncOnFiber) {
+  forceSyncOnFiber_ = forceSyncOnFiber;
+  return *this;
+}
+
+bool RpcOptions::getForceSyncOnFiber() const {
+  return forceSyncOnFiber_;
+}
+
 } // namespace apache::thrift

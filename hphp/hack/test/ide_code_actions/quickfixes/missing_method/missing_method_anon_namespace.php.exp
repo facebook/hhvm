@@ -73,18 +73,4 @@ JSON for selected code action:
   "title":"Fix Hack error inline - This interface is not properly implemented"
 }
 
-Applied edit for code action:
-------------------------------------------
-<?hh
-
-namespace {
-
-interface IFoo {
-  public function bar(): void;
-}
-
-class Foo implements IFoo {}
-                  // ^ at-caret
-
-}
-
+The code action edit was a no-op

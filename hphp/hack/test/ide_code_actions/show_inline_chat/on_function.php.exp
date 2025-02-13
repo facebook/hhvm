@@ -36,24 +36,7 @@ JSON for selected code action:
   "title":"Fix Hack error inline - Invalid return type"
 }
 
-Applied edit for code action:
-------------------------------------------
-<?hh
-
-interface I {}
-class A {}
-class C extends A {}
-
-function inter_is(A $a, C $c): C {
- if($a is I) {
-   $z = $a;
- } else {
-   $z = $c;
- }
- return $z;
- //      ^ at-caret
-}
-
+The code action edit was a no-op
 
 Code action title: Fix Hack error inline - Invalid return type
 
@@ -85,24 +68,7 @@ JSON for selected code action:
   "title":"Fix Hack error inline - Invalid return type"
 }
 
-Applied edit for code action:
-------------------------------------------
-<?hh
-
-interface I {}
-class A {}
-class C extends A {}
-
-function inter_is(A $a, C $c): C {
- if($a is I) {
-   $z = $a;
- } else {
-   $z = $c;
- }
- return $z;
- //      ^ at-caret
-}
-
+The code action edit was a no-op
 
 Code action title: Fix Hack error inline - Invalid return type
 
@@ -134,21 +100,4 @@ JSON for selected code action:
   "title":"Fix Hack error inline - Invalid return type"
 }
 
-Applied edit for code action:
-------------------------------------------
-<?hh
-
-interface I {}
-class A {}
-class C extends A {}
-
-function inter_is(A $a, C $c): C {
- if($a is I) {
-   $z = $a;
- } else {
-   $z = $c;
- }
- return $z;
- //      ^ at-caret
-}
-
+The code action edit was a no-op

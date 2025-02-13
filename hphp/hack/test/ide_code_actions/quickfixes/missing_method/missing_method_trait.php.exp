@@ -77,20 +77,7 @@ JSON for selected code action:
   "title":"Fix Hack error inline - This class must be declared `abstract`, or provide an implementation for the abstract method `baz`"
 }
 
-Applied edit for code action:
-------------------------------------------
-<?hh
-
-trait FooTrait {
-  abstract public function bar(): void;
-  abstract public function baz(): void;
-}
-
-class Foo {
-//      ^ at-caret
-  use FooTrait;
-}
-
+The code action edit was a no-op
 
 Code action title: Fix Hack error inline - This class must be declared `abstract`, or provide an implementation for the abstract method `bar`
 
@@ -122,17 +109,4 @@ JSON for selected code action:
   "title":"Fix Hack error inline - This class must be declared `abstract`, or provide an implementation for the abstract method `bar`"
 }
 
-Applied edit for code action:
-------------------------------------------
-<?hh
-
-trait FooTrait {
-  abstract public function bar(): void;
-  abstract public function baz(): void;
-}
-
-class Foo {
-//      ^ at-caret
-  use FooTrait;
-}
-
+The code action edit was a no-op

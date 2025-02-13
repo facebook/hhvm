@@ -20,7 +20,7 @@ oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 parser_core_types = { version = "0.0.0", path = "../../../../parser/cargo/core_types" }
 proc-macro2 = { version = "1.0.70", features = ["span-locations"] }
 quote = "1.0.29"
-regex = "1.9.2"
+regex = "1.11.1"
 relative_path = { version = "0.0.0", path = "../../../rust/relative_path" }
 serde = { version = "1.0.185", features = ["derive", "rc"] }
 syn = { version = "1.0.109", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }

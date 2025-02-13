@@ -20,6 +20,6 @@ hash = { version = "0.0.0", path = "../../../../utils/hash" }
 log = { version = "0.4.22", features = ["kv_unstable"] }
 newtype = { version = "0.0.0", path = "../../../../utils/newtype" }
 rayon = "1.9.0"
-smallvec = { version = "1.6.1", features = ["serde", "specialization", "union"] }
+smallvec = { version = "1.13.2", features = ["serde", "specialization", "union"] }
 vint64 = "1.0.1"
 zstd = { version = "0.13", features = ["experimental", "zstdmt"] }

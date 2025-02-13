@@ -11,4 +11,4 @@ license = "MIT"
 path = "../files_to_ignore.rs"
 
 [dependencies]
-regex = "1.9.2"
+regex = "1.11.1"

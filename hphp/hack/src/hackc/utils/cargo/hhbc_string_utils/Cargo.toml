@@ -13,11 +13,11 @@ path = "../../string_utils.rs"
 [dependencies]
 bstr = { version = "1.10.0", features = ["serde", "std", "unicode"] }
 escaper = { version = "0.0.0", path = "../../../../utils/escaper" }
-lazy_static = "1.4"
+lazy_static = "1.5"
 libc = "0.2.139"
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
 ocaml_helper = { version = "0.0.0", path = "../../../../utils/ocaml_helper" }
-regex = "1.9.2"
+regex = "1.11.1"
 
 [dev-dependencies]
 pretty_assertions = { version = "1.2", features = ["alloc"], default-features = false }

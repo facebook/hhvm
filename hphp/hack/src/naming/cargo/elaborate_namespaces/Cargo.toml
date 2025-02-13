@@ -13,7 +13,7 @@ path = "../../elaborate_namespaces_visitor.rs"
 [dependencies]
 core_utils_rust = { version = "0.0.0", path = "../../../utils/core" }
 hash = { version = "0.0.0", path = "../../../utils/hash" }
-lazy_static = "1.4"
+lazy_static = "1.5"
 namespaces_rust = { version = "0.0.0", path = "../../../parser/cargo/namespaces" }
 naming_special_names_rust = { version = "0.0.0", path = "../.." }
 oxidized = { version = "0.0.0", path = "../../../oxidized" }

@@ -31,14 +31,14 @@ ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", b
 package = { version = "0.0.0", path = "../package/cargo" }
 parser_core_types = { version = "0.0.0", path = "../parser/cargo/core_types" }
 rc_pos = { version = "0.0.0", path = "../utils/rust/pos" }
-regex = "1.9.2"
+regex = "1.11.1"
 relative_path = { version = "0.0.0", path = "../utils/rust/relative_path" }
 rust_to_ocaml_attr = { version = "0.0.0", path = "../rust_to_ocaml/rust_to_ocaml_attr" }
 serde = { version = "1.0.185", features = ["derive", "rc"] }
 serde_json = { version = "1.0.132", features = ["float_roundtrip", "unbounded_depth"] }
 strum = { version = "0.26.2", features = ["derive"] }
 thiserror = "2"
-toml = "0.8.4"
+toml = "0.8.19"
 
 [dev-dependencies]
 pretty_assertions = { version = "1.2", features = ["alloc"], default-features = false }

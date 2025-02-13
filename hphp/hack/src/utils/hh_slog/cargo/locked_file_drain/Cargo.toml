@@ -17,4 +17,4 @@ slog-json = "2.3"
 
 [dev-dependencies]
 serde_json = { version = "1.0.132", features = ["float_roundtrip", "unbounded_depth"] }
-tempfile = "3.8"
+tempfile = "3.15"

@@ -18,13 +18,13 @@ hash = { version = "0.0.0", path = "../../utils/hash" }
 hhbc_string_utils = { version = "0.0.0", path = "../../hackc/utils/cargo/hhbc_string_utils" }
 html_entities = { version = "0.0.0", path = "../../utils/html_entities" }
 itertools = "0.14.0"
-lazy_static = "1.4"
+lazy_static = "1.5"
 lint_rust = { version = "0.0.0", path = "../../utils/lint" }
 naming_special_names_rust = { version = "0.0.0", path = "../../naming" }
 ocaml_helper = { version = "0.0.0", path = "../../utils/ocaml_helper" }
 oxidized = { version = "0.0.0", path = "../../oxidized" }
 parser_core_types = { version = "0.0.0", path = "../cargo/core_types" }
-regex = "1.9.2"
+regex = "1.11.1"
 relative_path = { version = "0.0.0", path = "../../utils/rust/relative_path" }
 rescan_trivia = { version = "0.0.0", path = "../api/cargo/rescan_trivia" }
 stack_limit = { version = "0.0.0", path = "../../utils/stack_limit" }

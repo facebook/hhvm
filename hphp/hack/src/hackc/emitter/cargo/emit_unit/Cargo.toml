@@ -34,17 +34,17 @@ indexmap = { version = "2.2.6", features = ["arbitrary", "rayon", "serde"] }
 instruction_sequence = { version = "0.0.0", path = "../instruction_sequence" }
 itertools = "0.14.0"
 label_rewriter = { version = "0.0.0", path = "../label_rewriter" }
-lazy_static = "1.4"
+lazy_static = "1.5"
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
 options = { version = "0.0.0", path = "../../../compile/cargo/options" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 oxidized_by_ref = { version = "0.0.0", path = "../../../../oxidized_by_ref" }
 print_expr = { version = "0.0.0", path = "../../../print_expr" }
 priority-queue = "1.2.2"
-regex = "1.9.2"
+regex = "1.11.1"
 scope = { version = "0.0.0", path = "../scope" }
 serde_json = { version = "1.0.132", features = ["float_roundtrip", "unbounded_depth"] }
-smallvec = { version = "1.6.1", features = ["serde", "specialization", "union"] }
+smallvec = { version = "1.13.2", features = ["serde", "specialization", "union"] }
 stack_depth = { version = "0.0.0", path = "../../../utils/cargo/stack_depth" }
 stack_limit = { version = "0.0.0", path = "../../../../utils/stack_limit" }
 statement_state = { version = "0.0.0", path = "../statement_state" }

@@ -11,4 +11,4 @@ license = "MIT"
 path = "../../hh_autoimport.rs"
 
 [dependencies]
-lazy_static = "1.4"
+lazy_static = "1.5"

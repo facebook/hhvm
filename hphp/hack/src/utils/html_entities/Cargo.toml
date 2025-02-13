@@ -11,9 +11,9 @@ license = "MIT"
 path = "html_entities.rs"
 
 [dependencies]
-lazy_static = "1.4"
+lazy_static = "1.5"
 ocaml_helper = { version = "0.0.0", path = "../ocaml_helper" }
-regex = "1.9.2"
+regex = "1.11.1"
 
 [dev-dependencies]
 pretty_assertions = { version = "1.2", features = ["alloc"], default-features = false }

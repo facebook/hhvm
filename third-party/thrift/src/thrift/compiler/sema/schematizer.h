@@ -127,6 +127,13 @@ class schematizer {
       intern_func& intern_value);
 
   std::string_view program_checksum(const t_program& program);
+
+  struct resolved_uri {
+    std::string_view uri_type;
+    std::string value;
+  };
+
+  resolved_uri calculate_uri(const t_named& node, bool use_hash);
 };
 
 // Tag for obtaining a compact-encoded schema for the root program via a

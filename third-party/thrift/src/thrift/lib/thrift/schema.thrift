@@ -157,16 +157,23 @@ struct DefinitionAttrs {
   2: string uri;
 
   /**
-   * DEPRECATED! Prefer `annotations`.
+   * DEPRECATED! Prefer `annotationsByKey`.
    * The structured annotations associated with this definition.
    */
   3: AnnotationIds structuredAnnotations;
 
   /**
+   * DEPRECATED! Prefer `annotationsByKey`
    * The structured annotations associated with this definition indexed by
-   * their universal names.
+   * their universal names (i.e. Uri or scoped name)
    */
   8: map<string, Annotation> annotations;
+
+  /**
+   * The structured annotations associated with this definitions indexed by
+   * the annotation's definitionKey (~hash).
+   */
+  9: map<DefinitionKey, Annotation> annotationsByKey;
 
   /**
    * The unstructured annotations (deprecated) associated with this definition.

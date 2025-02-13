@@ -125,11 +125,18 @@ trait ThriftUnionSerializationTrait implements IThriftStruct {
     $xfer += $protocol->readStructEnd();
     if ($num_field_count > 1) {
       HH\Coeffects\fb\backdoor_from_pure__DO_NOT_USE(
-        ()[defaults] ==> signal_log_in_psp(
-          SignalDynamicLoggerDataset::SHARED_DATASET_AVOID,
-          SignalDynamicLoggerProject::THRIFT_UNION_READ,
-          $object_class_name." has ".$num_field_count." fields set",
-        ),
+        ()[defaults] ==> {
+          signal_log_in_psp(
+            SignalDynamicLoggerDataset::SHARED_DATASET_AVOID,
+            SignalDynamicLoggerProject::THRIFT_UNION_READ,
+            $object_class_name." has ".$num_field_count." fields set",
+          );
+          CategorizedOBC::typedGet(ODSCategoryID::ODS_THRIFT)
+            ->bumpEntityKeySampled(
+              "thrift_union",
+              "thrift_union.multiple_fields.read".$object_class_name,
+            );
+        },
         'Operational logging of class and field counts',
       );
     }
@@ -231,11 +238,21 @@ trait ThriftUnionSerializationTrait implements IThriftStruct {
         ($incorrect_field_set ? "- has values set without setter. " : "").
         ($extended_thrift_union ? "- extends a thrift union class. " : "");
       HH\Coeffects\fb\backdoor_from_pure__DO_NOT_USE(
-        ()[defaults] ==> signal_log_in_psp(
-          SignalDynamicLoggerDataset::SHARED_DATASET_AVOID,
-          SignalDynamicLoggerProject::THRIFT_UNION_WRITE,
-          $key,
-        ),
+        ()[defaults] ==> {
+          signal_log_in_psp(
+            SignalDynamicLoggerDataset::SHARED_DATASET_AVOID,
+            SignalDynamicLoggerProject::THRIFT_UNION_WRITE,
+            $key,
+          );
+
+          if ($num_field_count > 1) {
+            CategorizedOBC::typedGet(ODSCategoryID::ODS_THRIFT)
+              ->bumpEntityKeySampled(
+                "thrift_union",
+                "thrift_union..multiple_fields.write".$object_class_name,
+              );
+          }
+        },
         'Operational logging of class and field counts',
       );
     }

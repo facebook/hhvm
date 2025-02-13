@@ -723,6 +723,23 @@ let check_abstract_overrides_concrete
                    `property);
              })
 
+let check_needs_concrete_override env parent_class_elt class_elt on_error =
+  if
+    (not (get_ce_readonly_prop_or_needs_concrete parent_class_elt))
+    && get_ce_readonly_prop_or_needs_concrete class_elt
+  then
+    (* It would be unsound for a class that needs concrete (`<<__NeedsConcrete>>`) to override one that does not, because
+     * then `<<__NeedsConcrete>>` methods have stricter requirements (`static` must point to a concrete class). *)
+    Typing_error_utils.add_typing_error
+      ~env
+      Typing_error.(
+        apply_reasons ~on_error
+        @@ Secondary.Needs_concrete_override
+             {
+               pos = Lazy.force class_elt.ce_pos;
+               parent_pos = Lazy.force parent_class_elt.ce_pos;
+             })
+
 let detect_multiple_concrete_defs
     (class_elt, class_) (parent_class_elt, parent_class) =
   (* We want to check if there are conflicting trait declarations of a class member.
@@ -1015,6 +1032,7 @@ let check_override
     parent_class_elt
     class_elt
     on_error;
+  check_needs_concrete_override env parent_class_elt class_elt on_error;
 
   let (lazy pos) = class_elt.ce_pos in
   let (lazy parent_pos) = parent_class_elt.ce_pos in

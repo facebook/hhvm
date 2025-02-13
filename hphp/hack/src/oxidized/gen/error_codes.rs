@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<44069dfaf18b16eb3bb99bfa000d9f5a>>
+// @generated SignedSource<<e55393123a98a4ee390186d6e756757f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -600,6 +600,7 @@ pub enum Typing {
     OptionalParameterNotSupported = 4484,
     InvalidRecursiveType = 4485,
     StaticCallOnTraitRequireThisAs = 4486,
+    NeedsConcreteOverride = 4487,
 }
 impl TrivialDrop for Typing {}
 arena_deserializer::impl_deserialize_in_arena!(Typing);

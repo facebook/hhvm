@@ -7362,6 +7362,21 @@ end = struct
       lazy Explanation.empty,
       User_error_flags.empty )
 
+  let needs_concrete_override pos parent_pos =
+    let reasons =
+      lazy
+        [
+          ( pos,
+            "Cannot declare this method as __NeedsConcrete, since it overrides a non-__NeedsConcrete method"
+          );
+          (parent_pos, "Previously defined here");
+        ]
+    in
+    ( Error_code.NeedsConcreteOverride,
+      reasons,
+      lazy Explanation.empty,
+      User_error_flags.empty )
+
   let eval t ~env ~current_span =
     let open Typing_error.Secondary in
     match t with
@@ -7581,6 +7596,8 @@ end = struct
       Eval_result.single (violated_refinement_constraint cstr)
     | Unknown_label { enum_name; decl_pos; most_similar } ->
       Eval_result.single (label_unknown enum_name decl_pos most_similar)
+    | Needs_concrete_override { pos; parent_pos } ->
+      Eval_result.single (needs_concrete_override pos parent_pos)
 end
 
 and Eval_callback : sig

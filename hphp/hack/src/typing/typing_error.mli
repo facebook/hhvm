@@ -1656,6 +1656,10 @@ and Secondary : sig
         decl_pos: Pos_or_decl.t;
         most_similar: (string * Pos_or_decl.t) option;
       }
+    | Needs_concrete_override of {
+        pos: Pos_or_decl.t;
+        parent_pos: Pos_or_decl.t;
+      }
   [@@deriving show]
 end
 

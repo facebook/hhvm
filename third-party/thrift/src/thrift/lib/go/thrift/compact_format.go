@@ -78,7 +78,7 @@ type compactFormat struct {
 var _ types.Format = (*compactFormat)(nil)
 
 // NewCompactFormat creates a CompactFormat
-func NewCompactFormat(trans io.ReadWriteCloser) types.Format {
+func NewCompactFormat(trans io.ReadWriter) types.Format {
 	p := &compactFormat{}
 	p.compactDecoder.version = COMPACT_VERSION_BE
 	p.compactDecoder.reader = trans

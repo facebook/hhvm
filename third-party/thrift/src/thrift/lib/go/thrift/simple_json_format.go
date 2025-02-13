@@ -92,7 +92,7 @@ var errEmptyJSONContextStack = types.NewProtocolExceptionWithType(types.INVALID_
 // suitable for parsing by scripting languages.  It should not be
 // confused with the full-featured JSONProtocol.
 type simpleJSONFormat struct {
-	buffer io.ReadWriteCloser
+	buffer io.ReadWriter
 
 	parseContextStack jsonContextStack
 	dumpContext       jsonContextStack
@@ -104,12 +104,13 @@ type simpleJSONFormat struct {
 var _ types.Format = (*simpleJSONFormat)(nil)
 
 // NewSimpleJSONFormat creates a new simpleJSONFormat
-func NewSimpleJSONFormat(buffer io.ReadWriteCloser) types.Format {
+func NewSimpleJSONFormat(buffer io.ReadWriter) types.Format {
 	return newSimpleJSONFormat(buffer)
 }
 
-func newSimpleJSONFormat(buffer io.ReadWriteCloser) *simpleJSONFormat {
-	v := &simpleJSONFormat{buffer: buffer,
+func newSimpleJSONFormat(buffer io.ReadWriter) *simpleJSONFormat {
+	v := &simpleJSONFormat{
+		buffer: buffer,
 		writer: bufio.NewWriter(buffer),
 		reader: bufio.NewReader(buffer),
 	}
@@ -529,10 +530,6 @@ func (p *simpleJSONFormat) Flush() (err error) {
 
 func (p *simpleJSONFormat) Skip(fieldType types.Type) (err error) {
 	return types.SkipDefaultDepth(p, fieldType)
-}
-
-func (p *simpleJSONFormat) Close() error {
-	return p.buffer.Close()
 }
 
 func (p *simpleJSONFormat) OutputPreValue() error {

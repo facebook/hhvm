@@ -32,22 +32,20 @@ const BinaryVersion1 uint32 = 0x80010000
 type binaryFormat struct {
 	binaryEncoder
 	binaryDecoder
-	io.Closer
 }
 
 var _ types.Format = (*binaryFormat)(nil)
 
 // NewBinaryFormat creates a new Format handler using a buffer
-func NewBinaryFormat(t io.ReadWriteCloser) types.Format {
+func NewBinaryFormat(t io.ReadWriter) types.Format {
 	return NewBinaryFormatOptions(t, false, true)
 }
 
 // NewBinaryFormatOptions creates a new Format handler using a buffer
-func NewBinaryFormatOptions(t io.ReadWriteCloser, strictRead, strictWrite bool) types.Format {
+func NewBinaryFormatOptions(t io.ReadWriter, strictRead, strictWrite bool) types.Format {
 	p := &binaryFormat{}
 	p.binaryDecoder = binaryDecoder{reader: t, strictRead: strictRead}
 	p.binaryEncoder = binaryEncoder{writer: t, strictWrite: strictWrite}
-	p.Closer = t
 	return p
 }
 

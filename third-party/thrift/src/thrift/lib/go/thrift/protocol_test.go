@@ -823,7 +823,7 @@ func ReadWriteStruct(t testing.TB, p types.Format, buffer io.ReadWriter) {
 	ReadStruct(t, p, buffer)
 }
 
-func UnmatchedBeginEndProtocolTest(t *testing.T, formatFactory func(io.ReadWriteCloser) types.Format) {
+func UnmatchedBeginEndProtocolTest(t *testing.T, formatFactory func(io.ReadWriter) types.Format) {
 	// NOTE: not all protocol implementations do strict state check to
 	// return an error on unmatched Begin/End calls.
 	// This test is only meant to make sure that those unmatched Begin/End

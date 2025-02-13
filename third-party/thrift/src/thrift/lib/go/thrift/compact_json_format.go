@@ -54,7 +54,7 @@ type compactJSONFormat struct {
 var _ types.Format = (*compactJSONFormat)(nil)
 
 // NewCompactJSONFormat creates a new compact JSON Format.
-func NewCompactJSONFormat(buffer io.ReadWriteCloser) types.Format {
+func NewCompactJSONFormat(buffer io.ReadWriter) types.Format {
 	v := &compactJSONFormat{simpleJSONFormat: newSimpleJSONFormat(buffer)}
 	v.resetContextStack()
 	return v
@@ -460,10 +460,6 @@ func (p *compactJSONFormat) Flush() (err error) {
 
 func (p *compactJSONFormat) Skip(fieldType types.Type) (err error) {
 	return types.SkipDefaultDepth(p, fieldType)
-}
-
-func (p *compactJSONFormat) Close() error {
-	return p.buffer.Close()
 }
 
 func (p *compactJSONFormat) OutputElemListBegin(elemType types.Type, size int) error {

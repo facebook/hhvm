@@ -193,14 +193,15 @@ class RenderTest : public testing::Test {
     render_test_options_.libraries_to_load.push_back(std::move(library_loader));
   }
 
-  struct macros_by_path {
+  struct sources_by_path {
     /**
-     * Mapping of macro path (delimited by '/') to the source code.
+     * Mapping of source (macro or module) paths (delimited by '/') to its
+     * source code.
      */
     std::unordered_map<std::string, std::string> value;
   };
 
-  static macros_by_path macros(
+  static sources_by_path sources(
       std::initializer_list<std::pair<const std::string, std::string>>
           entries) {
     return {std::unordered_map<std::string, std::string>{std::move(entries)}};
@@ -221,7 +222,7 @@ class RenderTest : public testing::Test {
   std::optional<std::string> render(
       const std::string& source,
       const object& root_context,
-      const macros_by_path& macros = {},
+      const sources_by_path& sources = {},
       globals_by_name globals = {}) {
     auto& current = last_render_.emplace();
 
@@ -232,10 +233,10 @@ class RenderTest : public testing::Test {
     }
 
     render_options options;
-    if (!macros.value.empty()) {
+    if (!sources.value.empty()) {
       auto source_resolver =
           std::make_unique<in_memory_source_resolver>(current.src_manager);
-      for (const auto& [name, content] : macros.value) {
+      for (const auto& [name, content] : sources.value) {
         current.src_manager.add_virtual_file(name, content);
       }
       options.source_resolver = std::move(source_resolver);

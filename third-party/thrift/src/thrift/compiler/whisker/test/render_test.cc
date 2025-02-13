@@ -1873,7 +1873,7 @@ TEST_F(RenderTest, partials_recursive) {
       "{{/let partial}}\n"
       "{{#partial collatz n=6}}\n",
       w::map({}),
-      macros({}),
+      sources({}),
       globals({
           {"even?", w::native_function(is_even)},
           {"mul", w::native_function(mul)},
@@ -1944,7 +1944,7 @@ TEST_F(RenderTest, partial_derived_context) {
       "{{/let partial}}\n"
       "{{#partial foo}}\n",
       w::map({}),
-      macros({}),
+      sources({}),
       globals({{"global", w::i64(42)}}));
   EXPECT_THAT(
       diagnostics(),
@@ -1973,7 +1973,7 @@ TEST_F(RenderTest, partial_derived_context_no_leak) {
       "{{#partial foo}}\n"
       "{{x}}\n",
       w::map({}),
-      macros({}),
+      sources({}),
       globals({{"global", w::i64(42)}}));
   EXPECT_THAT(
       diagnostics(),
@@ -2057,7 +2057,7 @@ TEST_F(RenderTest, macros) {
                 {w::map({{"value", w::i64(2)}}),
                  w::map({{"value", w::string("foo")}}),
                  w::map({{"value", w::string("bar")}})})}}),
-      macros({{"some/file/path", "{{value}} (from macro)\n"}}));
+      sources({{"some/file/path", "{{value}} (from macro)\n"}}));
   EXPECT_EQ(
       *result,
       "1 (from macro)\n"
@@ -2070,7 +2070,7 @@ TEST_F(RenderTest, macros_missing) {
   auto result = render(
       "{{> some/other/path}}",
       w::map({}),
-      macros({{"some/file/path", "{{value}} (from macro)"}}));
+      sources({{"some/file/path", "{{value}} (from macro)"}}));
   EXPECT_THAT(
       diagnostics(),
       testing::ElementsAre(diagnostic(
@@ -2106,7 +2106,7 @@ TEST_F(RenderTest, macros_indentation) {
                 {w::map({{"value", w::i64(2)}}),
                  w::map({{"value", w::string("foo")}}),
                  w::map({{"value", w::string("bar")}})})}}),
-      macros(
+      sources(
           {{"some/file/path",
             "{{value}} (from macro)\n"
             "A second line\n"}}));
@@ -2139,7 +2139,7 @@ TEST_F(RenderTest, macros_indentation_nested) {
                 w::map({{"value", w::i64(2)}}),
                 w::map({{"value", w::string("foo")}}),
             })}}),
-      macros(
+      sources(
           {{"macro-1",
             "{{value}} (from macro-1)\n"
             "  nested: {{> macro-2}}\n"},
@@ -2164,7 +2164,7 @@ TEST_F(RenderTest, macro_preserves_whitespace_indentation) {
   auto result = render(
       " \t {{> macro-1}} \t \n",
       w::map({{"value", w::i64(42)}}),
-      macros(
+      sources(
           {{"macro-1",
             "\t 1\n"
             " \t {{>macro-2}} \n"},
@@ -2185,7 +2185,7 @@ TEST_F(RenderTest, macro_nested_undefined_variable_trace) {
       "\n"
       "{{> macro-1}}\n",
       w::map({}),
-      macros(
+      sources(
           {{"macro-1",
             "\n"
             "\t {{>macro-2}}\n"},
@@ -2319,7 +2319,7 @@ TEST_F(
       w::map(
           {{"value", w::i64(5)},
            {"boolean", w::map({{"condition", w::true_}})}}),
-      macros({{"ineligible", "{{value}} (from macro)\n"}}));
+      sources({{"ineligible", "{{value}} (from macro)\n"}}));
   EXPECT_EQ(
       *result,
       "| This Is\n"
@@ -2336,7 +2336,7 @@ TEST_F(RenderTest, globals) {
       "{{.}} — {{global-2}}\n"
       "{{/array}}\n",
       w::map({{"array", w::array({w::i64(1), w::i64(2)})}}),
-      macros({}),
+      sources({}),
       globals(
           {{"global", w::string("hello")}, {"global-2", w::string("hello!")}}));
   EXPECT_EQ(
@@ -2350,7 +2350,7 @@ TEST_F(RenderTest, globals_shadowing) {
   auto result = render(
       "{{global}}\n",
       w::map({{"global", w::string("good")}}),
-      macros({}),
+      sources({}),
       globals({{"global", w::string("bad")}}));
   EXPECT_EQ(*result, "good\n");
 }
@@ -2378,7 +2378,7 @@ TEST_F(RenderTest, pragma_ignore_newlines) {
       " one\n"
       " line\n",
       w::map({}),
-      macros({{"macro", "\nnot\n!\n"}}));
+      sources({{"macro", "\nnot\n!\n"}}));
   EXPECT_THAT(diagnostics(), testing::IsEmpty());
   EXPECT_EQ(*result, "This is\nnot\n!\n all one line");
 }

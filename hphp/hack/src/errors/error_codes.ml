@@ -798,6 +798,7 @@ module Warning = struct
     | ClassPointerToString [@value 12013]
     | SafeAbstractCall [@value 12014]
     | SafeAbstractNew [@value 12015]
+    | SafeAbstractCallNeedsConcrete [@value 12016]
   [@@deriving enum, ord, show { with_path = false }]
 end
 

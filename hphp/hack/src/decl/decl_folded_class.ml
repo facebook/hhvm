@@ -373,7 +373,7 @@ let build_constructor
           ~synthesized:false
           ~superfluous_override:false
           ~dynamicallycallable:false
-          ~readonly_prop:false
+          ~readonly_prop_or_needs_concrete:false
           ~support_dynamic_type:false
           ~needs_init:false
           ~no_auto_likes:(sm_no_auto_likes method_)
@@ -512,7 +512,7 @@ let prop_decl_eager
           ~lateinit:(sp_lateinit sp)
           ~abstract:(sp_abstract sp)
           ~dynamicallycallable:false
-          ~readonly_prop:(sp_readonly sp)
+          ~readonly_prop_or_needs_concrete:(sp_readonly sp)
           ~support_dynamic_type:false
           ~needs_init:(sp_needs_init sp)
           ~safe_global_variable:false
@@ -551,7 +551,7 @@ let static_prop_decl_eager
           ~abstract:(sp_abstract sp)
           ~synthesized:false
           ~dynamicallycallable:false
-          ~readonly_prop:(sp_readonly sp)
+          ~readonly_prop_or_needs_concrete:(sp_readonly sp)
           ~support_dynamic_type:false
           ~needs_init:false
           ~no_auto_likes:false
@@ -733,7 +733,7 @@ let method_decl_eager
           ~const:false
           ~lateinit:false
           ~dynamicallycallable:(sm_dynamicallycallable m)
-          ~readonly_prop:false
+          ~readonly_prop_or_needs_concrete:(sm_needs_concrete m)
           ~support_dynamic_type
           ~needs_init:false
           ~no_auto_likes

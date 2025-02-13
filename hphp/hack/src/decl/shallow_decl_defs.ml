@@ -121,6 +121,7 @@ module MethodFlags = struct
     php_std_lib: bool;
     support_dynamic_type: bool;
     no_auto_likes: bool;
+    needs_concrete: bool;
   }
   [@@deriving show]
 
@@ -133,6 +134,7 @@ module MethodFlags = struct
   let php_std_lib_bit            = 1 lsl 4
   let support_dynamic_type_bit   = 1 lsl 5
   let no_auto_likes_bit          = 1 lsl 6
+  let needs_concrete_bit = 1 lsl 7
 
   let get_abstract               = is_set abstract_bit
   let get_final                  = is_set final_bit
@@ -141,6 +143,7 @@ module MethodFlags = struct
   let get_php_std_lib            = is_set php_std_lib_bit
   let get_support_dynamic_type   = is_set support_dynamic_type_bit
   let get_no_auto_likes          = is_set no_auto_likes_bit
+  let get_needs_concrete = is_set needs_concrete_bit
 
   let set_abstract               = set_bit abstract_bit
   let set_final                  = set_bit final_bit
@@ -149,6 +152,7 @@ module MethodFlags = struct
   let set_php_std_lib            = set_bit php_std_lib_bit
   let set_support_dynamic_type   = set_bit support_dynamic_type_bit
   let set_no_auto_likes          = set_bit no_auto_likes_bit
+  let set_needs_concrete          = set_bit needs_concrete_bit
 
   let to_record t : record =
   {
@@ -159,6 +163,7 @@ module MethodFlags = struct
     php_std_lib = get_php_std_lib t;
     support_dynamic_type     = get_support_dynamic_type t;
     no_auto_likes = get_no_auto_likes t;
+    needs_concrete = get_needs_concrete t;
   }
 
   let make
@@ -169,6 +174,7 @@ module MethodFlags = struct
       ~php_std_lib
       ~support_dynamic_type
       ~no_auto_likes
+      ~needs_concrete
       =
     empty
     |> set_abstract abstract
@@ -178,6 +184,7 @@ module MethodFlags = struct
     |> set_php_std_lib php_std_lib
     |> set_support_dynamic_type support_dynamic_type
     |> set_no_auto_likes no_auto_likes
+    |> set_needs_concrete needs_concrete
 
   let pp fmt t =
     pp_record fmt (to_record t)
@@ -311,6 +318,8 @@ let sm_support_dynamic_type sm =
   MethodFlags.get_support_dynamic_type sm.sm_flags
 
 let sm_no_auto_likes sm = MethodFlags.get_no_auto_likes sm.sm_flags
+
+let sm_needs_concrete sm = MethodFlags.get_needs_concrete sm.sm_flags
 
 type fun_decl = fun_elt [@@deriving show]
 

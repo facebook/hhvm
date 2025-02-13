@@ -1737,7 +1737,7 @@ let default_constructor_ce class_ =
         ~lsb:false
         ~synthesized:true
         ~dynamicallycallable:false
-        ~readonly_prop:false
+        ~readonly_prop_or_needs_concrete:false
         ~support_dynamic_type:false
         ~needs_init:false
         ~safe_global_variable:false

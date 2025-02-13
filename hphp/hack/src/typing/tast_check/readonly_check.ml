@@ -175,14 +175,20 @@ let rec ty_expr env ((_, _, expr_) : Tast.expr) : rty =
       (* In the mut case, we need to check if the property is marked readonly *)
       let prop_elts = get_prop_elts env e1 e2 in
       let readonly_prop =
-        List.find ~f:Typing_defs.get_ce_readonly_prop prop_elts
+        List.find
+          ~f:Typing_defs.get_ce_readonly_prop_or_needs_concrete
+          prop_elts
       in
       Option.value_map readonly_prop ~default:Mut ~f:(fun _ -> Readonly))
   | Class_get (class_id, expr, Is_prop) ->
     (* If any of the static props could be readonly, treat the expression as readonly *)
     let class_elts = get_static_prop_elts env class_id expr in
     (* Note that the empty list case (when the prop doesn't exist) returns Mut *)
-    if List.exists class_elts ~f:Typing_defs.get_ce_readonly_prop then
+    if
+      List.exists
+        class_elts
+        ~f:Typing_defs.get_ce_readonly_prop_or_needs_concrete
+    then
       Readonly
     else
       Mut
@@ -293,7 +299,9 @@ let check_readonly_property env obj get obj_ro =
   let prop_elts = get_prop_elts env obj get in
   (* If there's any property in the list of possible properties that could be readonly,
       it must be explicitly cast to readonly *)
-  let readonly_prop = List.find ~f:get_ce_readonly_prop prop_elts in
+  let readonly_prop =
+    List.find ~f:get_ce_readonly_prop_or_needs_concrete prop_elts
+  in
   match (readonly_prop, obj_ro) with
   | (Some elt, Mut) ->
     Typing_error_utils.add_typing_error
@@ -312,9 +320,12 @@ let check_static_readonly_property pos env (class_ : Tast.class_id) get obj_ro =
   let prop_elts = get_static_prop_elts env class_ get in
   (* If there's any property in the list of possible properties that could be readonly,
       it must be explicitly cast to readonly *)
-  let readonly_prop = List.find ~f:Typing_defs.get_ce_readonly_prop prop_elts in
+  let readonly_prop =
+    List.find ~f:Typing_defs.get_ce_readonly_prop_or_needs_concrete prop_elts
+  in
   match (readonly_prop, obj_ro) with
-  | (Some elt, Mut) when Typing_defs.get_ce_readonly_prop elt ->
+  | (Some elt, Mut) when Typing_defs.get_ce_readonly_prop_or_needs_concrete elt
+    ->
     Typing_error_utils.add_typing_error
       ~env:(Tast_env.tast_env_as_typing_env env)
       Typing_error.(
@@ -349,10 +360,13 @@ let rec assign env lval rval =
   (* Check that we're assigning a readonly value to a readonly property *)
   let check_ro_prop_assignment prop_elts =
     let mutable_prop =
-      List.find ~f:(fun r -> not (Typing_defs.get_ce_readonly_prop r)) prop_elts
+      List.find
+        ~f:(fun r -> not (Typing_defs.get_ce_readonly_prop_or_needs_concrete r))
+        prop_elts
     in
     match mutable_prop with
-    | Some elt when not (Typing_defs.get_ce_readonly_prop elt) ->
+    | Some elt when not (Typing_defs.get_ce_readonly_prop_or_needs_concrete elt)
+      ->
       Typing_error_utils.add_typing_error
         ~env:(Tast_env.tast_env_as_typing_env env)
         Typing_error.(

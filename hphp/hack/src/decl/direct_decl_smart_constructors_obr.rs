@@ -1221,6 +1221,7 @@ struct Attributes<'a> {
     cross_package: Option<&'a str>,
     sort_text: Option<&'a str>,
     dynamically_referenced: bool,
+    needs_concrete: bool,
 }
 
 impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> Impl<'a, 'o, 't, S> {
@@ -1747,6 +1748,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             cross_package: None,
             sort_text: None,
             dynamically_referenced: false,
+            needs_concrete: false,
         };
 
         let nodes = match node {
@@ -1835,6 +1837,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                             .string_literal_param
                             .map(|(_, x)| self.str_from_utf8_for_bytes_in_arena(x));
                     }
+                    "__NeedsConcrete" => attributes.needs_concrete = true,
+
                     _ => {}
                 }
             }
@@ -5203,6 +5207,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             !is_constructor && attributes.support_dynamic_type,
         );
         flags.set(MethodFlags::NO_AUTO_LIKES, attributes.no_auto_likes);
+        flags.set(MethodFlags::NEEDS_CONCRETE, attributes.needs_concrete);
 
         // Parse the user attributes
         // in facts-mode all attributes are saved, otherwise only __NoAutoDynamic/__NoAutoLikes is

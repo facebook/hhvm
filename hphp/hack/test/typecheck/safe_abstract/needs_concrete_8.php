@@ -8,3 +8,4 @@ abstract class A {
 function foo(concreteclassname<A> $cls): void {
   $cls::nc(); // ok
 }
+//

@@ -62,7 +62,11 @@ bitflags! {
         const XA_HAS_DEFAULT           = 1 << 9;
         const XA_TAG_REQUIRED          = 1 << 10;
         const XA_TAG_LATEINIT          = 1 << 11;
-        const READONLY_PROP            = 1 << 12;
+        /*
+        * for properties: indicates readonly-ness
+        * for methods: indicates presence of <<__NeedsConcrete>> attribute
+        */
+        const READONLY_PROP_OR_NEEDS_CONCRETE            = 1 << 12;
         const NEEDS_INIT               = 1 << 13;
         const SAFE_GLOBAL_VARIABLE     = 1 << 14;
         const NO_AUTO_LIKES            = 1 << 15;
@@ -82,7 +86,11 @@ pub struct ClassEltFlagsArgs {
     pub is_const: bool,
     pub is_lateinit: bool,
     pub is_dynamicallycallable: bool,
-    pub is_readonly_prop: bool,
+    /**
+     * for properties: indicates readonly-ness
+     * for methods: indicates presence of <<__NeedsConcrete>> attribute:
+     */
+    pub is_readonly_prop_or_needs_concrete: bool,
     pub supports_dynamic_type: bool,
     pub needs_init: bool,
     pub safe_global_variable: bool,
@@ -128,7 +136,7 @@ impl ClassEltFlags {
             is_const,
             is_lateinit,
             is_dynamicallycallable,
-            is_readonly_prop,
+            is_readonly_prop_or_needs_concrete,
             supports_dynamic_type,
             needs_init,
             safe_global_variable,
@@ -144,7 +152,10 @@ impl ClassEltFlags {
         flags.set(Self::LATEINIT, is_lateinit);
         flags.set(Self::DYNAMICALLYCALLABLE, is_dynamicallycallable);
         flags.set_xhp_attr(xhp_attr);
-        flags.set(Self::READONLY_PROP, is_readonly_prop);
+        flags.set(
+            Self::READONLY_PROP_OR_NEEDS_CONCRETE,
+            is_readonly_prop_or_needs_concrete,
+        );
         flags.set(Self::SUPPORT_DYNAMIC_TYPE, supports_dynamic_type);
         flags.set(Self::NEEDS_INIT, needs_init);
         flags.set(Self::SAFE_GLOBAL_VARIABLE, safe_global_variable);

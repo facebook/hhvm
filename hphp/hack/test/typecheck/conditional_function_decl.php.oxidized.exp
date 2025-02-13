@@ -33,7 +33,7 @@ oxidized:
           { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
             override = false; dynamicallycallable = false;
             php_std_lib = false; support_dynamic_type = false;
-            no_auto_likes = false };
+            no_auto_likes = false; needs_concrete = false };
           sm_attributes = []; sm_sort_text = None }
          ];
        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
@@ -114,7 +114,7 @@ oxidized_by_ref:
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
              override = false; dynamicallycallable = false;
              php_std_lib = false; support_dynamic_type = false;
-             no_auto_likes = false };
+             no_auto_likes = false; needs_concrete = false };
            sm_attributes = []; sm_sort_text = None }
           ];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;

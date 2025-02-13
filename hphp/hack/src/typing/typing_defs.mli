@@ -375,7 +375,7 @@ val get_ce_const : class_elt -> bool
 
 val get_ce_lateinit : class_elt -> bool
 
-val get_ce_readonly_prop : class_elt -> bool
+val get_ce_readonly_prop_or_needs_concrete : class_elt -> bool
 
 val get_ce_dynamicallycallable : class_elt -> bool
 
@@ -397,7 +397,7 @@ val make_ce_flags :
   const:bool ->
   lateinit:bool ->
   dynamicallycallable:bool ->
-  readonly_prop:bool ->
+  readonly_prop_or_needs_concrete:bool ->
   support_dynamic_type:bool ->
   needs_init:bool ->
   safe_global_variable:bool ->

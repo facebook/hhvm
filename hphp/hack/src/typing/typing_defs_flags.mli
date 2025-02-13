@@ -152,7 +152,7 @@ module ClassElt : sig
     const:bool ->
     lateinit:bool ->
     dynamicallycallable:bool ->
-    readonly_prop:bool ->
+    readonly_prop_or_needs_concrete:bool ->
     support_dynamic_type:bool ->
     needs_init:bool ->
     safe_global_variable:bool ->
@@ -178,7 +178,7 @@ module ClassElt : sig
 
   val supports_dynamic_type : t -> bool
 
-  val is_readonly_prop : t -> bool
+  val is_readonly_prop_or_needs_concrete : t -> bool
 
   val needs_init : t -> bool
 

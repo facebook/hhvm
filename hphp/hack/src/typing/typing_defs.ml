@@ -648,7 +648,8 @@ let get_ce_const ce = ClassElt.is_const ce.ce_flags
 
 let get_ce_lateinit ce = ClassElt.has_lateinit ce.ce_flags
 
-let get_ce_readonly_prop ce = ClassElt.is_readonly_prop ce.ce_flags
+let get_ce_readonly_prop_or_needs_concrete ce =
+  ClassElt.is_readonly_prop_or_needs_concrete ce.ce_flags
 
 let get_ce_dynamicallycallable ce = ClassElt.is_dynamicallycallable ce.ce_flags
 

@@ -224,6 +224,8 @@ pub mod user_attributes {
 
     pub const AUTOCOMPLETE_SORT_TEXT: &str = "__AutocompleteSortText";
 
+    pub const NEEDS_CONCRETE: &str = "__NeedsConcrete";
+
     pub const CONSISTENT_CONSTRUCT: &str = "__ConsistentConstruct";
 
     pub const CONST: &str = "__Const";

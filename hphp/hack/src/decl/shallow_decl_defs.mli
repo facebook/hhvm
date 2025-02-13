@@ -60,6 +60,7 @@ module MethodFlags : sig
   val get_php_std_lib            : t -> bool
   val get_support_dynamic_type : t -> bool
   val get_no_auto_likes          : t -> bool
+  val get_needs_concrete : t -> bool
 
   val set_abstract               : bool -> t -> t
   val set_final                  : bool -> t -> t
@@ -68,6 +69,7 @@ module MethodFlags : sig
   val set_php_std_lib            : bool -> t -> t
   val set_support_dynamic_type : bool -> t -> t
   val set_no_auto_likes          : bool -> t -> t
+  val set_needs_concrete         : bool -> t -> t
 
   val make :
     abstract:bool ->
@@ -77,6 +79,7 @@ module MethodFlags : sig
     php_std_lib:bool ->
     support_dynamic_type:bool ->
     no_auto_likes:bool ->
+    needs_concrete:bool ->
     t
 end
 [@@ocamlformat "disable"]
@@ -192,6 +195,8 @@ val sm_php_std_lib : shallow_method -> bool
 val sm_support_dynamic_type : shallow_method -> bool
 
 val sm_no_auto_likes : shallow_method -> bool
+
+val sm_needs_concrete : shallow_method -> bool
 
 type fun_decl = fun_elt [@@deriving show]
 

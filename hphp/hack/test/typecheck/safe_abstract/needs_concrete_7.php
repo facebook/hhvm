@@ -24,3 +24,4 @@ function example(classname<A> $klass): void {
 function main(): void {
   example(B::class);
 }
+//

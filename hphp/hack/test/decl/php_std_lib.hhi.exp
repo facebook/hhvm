@@ -76,7 +76,7 @@
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
              override = false; dynamicallycallable = false;
              php_std_lib = true; support_dynamic_type = false;
-             no_auto_likes = false };
+             no_auto_likes = false; needs_concrete = false };
            sm_attributes = []; sm_sort_text = None }
           ];
         sc_methods =
@@ -100,7 +100,7 @@
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
              override = false; dynamicallycallable = false;
              php_std_lib = true; support_dynamic_type = false;
-             no_auto_likes = false };
+             no_auto_likes = false; needs_concrete = false };
            sm_attributes = []; sm_sort_text = None }
           ];
         sc_user_attributes =

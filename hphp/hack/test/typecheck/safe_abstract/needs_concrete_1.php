@@ -14,3 +14,4 @@ function main(): void {
   // through a class that may be abstract
   Abs::nc(); // error
 }
+//

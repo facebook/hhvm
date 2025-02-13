@@ -19,6 +19,7 @@ bitflags! {
         const PHP_STD_LIB         = 1 << 4;
         const SUPPORT_DYNAMIC_TYPE = 1 << 5;
         const NO_AUTO_LIKES       = 1 << 6;
+        const NEEDS_CONCRETE = 1 << 7;
     }
 }
 
@@ -43,6 +44,9 @@ impl MethodFlags {
     }
     pub fn is_no_auto_likes(&self) -> bool {
         self.contains(Self::NO_AUTO_LIKES)
+    }
+    pub fn is_needs_concrete(&self) -> bool {
+        self.contains(Self::NEEDS_CONCRETE)
     }
 }
 

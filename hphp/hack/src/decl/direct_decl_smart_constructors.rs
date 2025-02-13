@@ -1185,6 +1185,7 @@ struct Attributes {
     cross_package: Option<String>,
     sort_text: Option<String>,
     dynamically_referenced: bool,
+    needs_concrete: bool,
 }
 
 impl<'o, 't> Impl<'o, 't> {
@@ -1616,6 +1617,7 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
             cross_package: None,
             sort_text: None,
             dynamically_referenced: false,
+            needs_concrete: false,
         };
 
         let nodes = match node {
@@ -1707,6 +1709,9 @@ impl<'o, 't> DirectDeclSmartConstructors<'o, 't> {
                             .string_literal_param
                             .as_ref()
                             .map(|(_, x)| Self::str_from_utf8(x).into_owned());
+                    }
+                    "__NeedsConcrete" => {
+                        attributes.needs_concrete = true;
                     }
                     _ => {}
                 }
@@ -4972,6 +4977,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             !is_constructor && attributes.support_dynamic_type,
         );
         flags.set(MethodFlags::NO_AUTO_LIKES, attributes.no_auto_likes);
+        flags.set(MethodFlags::NEEDS_CONCRETE, attributes.needs_concrete);
 
         // Parse the user attributes
         // in facts-mode all attributes are saved, otherwise only __NoAutoDynamic/__NoAutoLikes is

@@ -249,7 +249,11 @@ module ClassElt = struct
       | XaHasDefault
       | XaTagRequired
       | XaTagLateinit
-      | ReadonlyProp
+      | ReadonlyPropOrNeedsConcrete
+          (** 
+       * for properties: indicates readonly-ness
+       * for methods: indicates presence of <<__NeedsConcrete>> attribute
+      *)
       | NeedsInit
       | SafeGlobalVariable
       | NoAutoLikes
@@ -370,7 +374,8 @@ module ClassElt = struct
 
   let supports_dynamic_type = is_set Field.SupportDynamicType
 
-  let is_readonly_prop = is_set Field.ReadonlyProp
+  let is_readonly_prop_or_needs_concrete =
+    is_set Field.ReadonlyPropOrNeedsConcrete
 
   let needs_init = is_set Field.NeedsInit
 
@@ -411,7 +416,7 @@ module ClassElt = struct
       ~const
       ~lateinit
       ~dynamicallycallable
-      ~readonly_prop
+      ~readonly_prop_or_needs_concrete
       ~support_dynamic_type
       ~needs_init
       ~safe_global_variable
@@ -426,7 +431,12 @@ module ClassElt = struct
     let flags = set Field.Lateinit lateinit flags in
     let flags = set Field.Dynamicallycallable dynamicallycallable flags in
     let flags = set_xhp_attr xhp_attr flags in
-    let flags = set Field.ReadonlyProp readonly_prop flags in
+    let flags =
+      set
+        Field.ReadonlyPropOrNeedsConcrete
+        readonly_prop_or_needs_concrete
+        flags
+    in
     let flags = set Field.SupportDynamicType support_dynamic_type flags in
     let flags = set Field.NeedsInit needs_init flags in
     let flags = set Field.SafeGlobalVariable safe_global_variable flags in

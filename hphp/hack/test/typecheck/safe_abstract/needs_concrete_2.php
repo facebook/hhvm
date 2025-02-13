@@ -1,5 +1,4 @@
 <?hh
-
 abstract class A {
   <<__NeedsConcrete>>
   public static function nc(): void {
@@ -15,3 +14,4 @@ abstract class B extends A {
     static::nc(); // error
   }
 }
+//

@@ -19,6 +19,7 @@ bitflags! {
         const PHP_STD_LIB         = 1 << 4;
         const SUPPORT_DYNAMIC_TYPE = 1 << 5;
         const NO_AUTO_LIKES       = 1 << 6;
+        const NEEDS_CONCRETE       = 1 << 7;
     }
 }
 
@@ -37,6 +38,9 @@ impl MethodFlags {
     }
     pub fn supports_dynamic_type(&self) -> bool {
         self.contains(Self::SUPPORT_DYNAMIC_TYPE)
+    }
+    pub fn needs_concrete(&self) -> bool {
+        self.contains(Self::NEEDS_CONCRETE)
     }
 }
 

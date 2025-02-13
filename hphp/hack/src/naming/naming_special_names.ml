@@ -263,6 +263,8 @@ end
 module UserAttributes = struct
   let uaOverride = "__Override"
 
+  let uaNeedsConcrete = "__NeedsConcrete"
+
   let uaConsistentConstruct = "__ConsistentConstruct"
 
   let uaConst = "__Const"
@@ -831,6 +833,15 @@ module UserAttributes = struct
               autocomplete = true;
               doc =
                 "Overrides the PACKAGES.toml declaration, grouping the file into the specified package.";
+            } );
+          ( uaNeedsConcrete,
+            {
+              contexts = [mthd];
+              autocomplete =
+                false
+                (* TODO(T213971384): set to `true` when safe abstract features are ready for WWW devs to use *);
+              doc =
+                "Indicates that the method can only be called on concrete classes. Inside the method, `static` refers to a concrete class.";
             } );
         ])
 

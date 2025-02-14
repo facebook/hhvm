@@ -363,8 +363,8 @@ func (x *Automobile) SetFirstPlateNonCompat(value Plate) *Automobile {
     return x
 }
 
-func (x *Automobile) SetFirstPlate(value Plate) *Automobile {
-    x.FirstPlate = &value
+func (x *Automobile) SetFirstPlate(value *Plate) *Automobile {
+    x.FirstPlate = value
     return x
 }
 

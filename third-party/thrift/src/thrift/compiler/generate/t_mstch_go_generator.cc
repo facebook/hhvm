@@ -300,10 +300,6 @@ class mstch_go_field : public mstch_field {
             {"field:pointer?", &mstch_go_field::is_pointer},
             {"field:non_struct_pointer?",
              &mstch_go_field::is_non_struct_pointer},
-            {"field:compat_setter_pointer?",
-             &mstch_go_field::is_compat_setter_pointer},
-            {"field:compat_setter_value_op",
-             &mstch_go_field::compat_setter_value_op},
             {"field:nilable?", &mstch_go_field::is_nilable},
             {"field:must_be_set_to_serialize?",
              &mstch_go_field::must_be_set_to_serialize},
@@ -368,22 +364,6 @@ class mstch_go_field : public mstch_field {
     auto real_type = field_->type()->get_true_type();
     return is_pointer_() && !go::is_type_go_struct(real_type);
   }
-  mstch::node is_compat_setter_pointer() { return is_compat_setter_pointer_(); }
-  mstch::node compat_setter_value_op() {
-    if (is_pointer_()) {
-      if (is_compat_setter_pointer_()) {
-        return std::string("");
-      } else {
-        return std::string("&");
-      }
-    } else { // !is_pointer_()
-      if (is_compat_setter_pointer_()) {
-        return std::string("*");
-      } else {
-        return std::string("");
-      }
-    }
-  }
   mstch::node key_str() {
     // Legacy schemas may have negative tags - replace minus with an underscore.
     if (field_->get_key() < 0) {
@@ -426,20 +406,6 @@ class mstch_go_field : public mstch_field {
     return go::is_type_go_struct(real_type) ||
         ((is_inside_union_() || is_optional_()) &&
          !go::is_type_go_nilable(real_type));
-  }
-
-  bool is_compat_setter_pointer_() {
-    // Whether this field's value should be a pointer in compat-setter.
-    // This is needed for a seamless migration from the legacy generator.
-    //
-    // Legacy generator treats optional fields with default values differently
-    // compared to the new generator (pointer vs non-pointer).
-    // This method helps with backwards compatibility.
-    bool has_default_value = (field_->default_value() != nullptr);
-    if (is_optional_() && has_default_value) {
-      return false;
-    }
-    return is_pointer_();
   }
 
   bool is_inside_union_() {

@@ -440,8 +440,8 @@ func (x *Vehicle) SetHasACNonCompat(value bool) *Vehicle {
     return x
 }
 
-func (x *Vehicle) SetHasAC(value bool) *Vehicle {
-    x.HasAC = &value
+func (x *Vehicle) SetHasAC(value *bool) *Vehicle {
+    x.HasAC = value
     return x
 }
 

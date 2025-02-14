@@ -626,8 +626,8 @@ func (x *StructWithCustomDefaultValues) SetOptionalIntegerNonCompat(value int32)
     return x
 }
 
-func (x *StructWithCustomDefaultValues) SetOptionalInteger(value int32) *StructWithCustomDefaultValues {
-    x.OptionalInteger = &value
+func (x *StructWithCustomDefaultValues) SetOptionalInteger(value *int32) *StructWithCustomDefaultValues {
+    x.OptionalInteger = value
     return x
 }
 
@@ -656,8 +656,8 @@ func (x *StructWithCustomDefaultValues) SetOptionalStructNonCompat(value *Trivia
     return x
 }
 
-func (x *StructWithCustomDefaultValues) SetOptionalStruct(value TrivialStruct) *StructWithCustomDefaultValues {
-    x.OptionalStruct = &value
+func (x *StructWithCustomDefaultValues) SetOptionalStruct(value *TrivialStruct) *StructWithCustomDefaultValues {
+    x.OptionalStruct = value
     return x
 }
 

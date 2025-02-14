@@ -205,8 +205,8 @@ func (x *TestStruct) SetOptionalIntFieldNonCompat(value int32) *TestStruct {
     return x
 }
 
-func (x *TestStruct) SetOptionalIntField(value int32) *TestStruct {
-    x.OptionalIntField = &value
+func (x *TestStruct) SetOptionalIntField(value *int32) *TestStruct {
+    x.OptionalIntField = value
     return x
 }
 
@@ -215,8 +215,8 @@ func (x *TestStruct) SetOptionalBoolFieldNonCompat(value bool) *TestStruct {
     return x
 }
 
-func (x *TestStruct) SetOptionalBoolField(value bool) *TestStruct {
-    x.OptionalBoolField = &value
+func (x *TestStruct) SetOptionalBoolField(value *bool) *TestStruct {
+    x.OptionalBoolField = value
     return x
 }
 
@@ -235,8 +235,8 @@ func (x *TestStruct) SetOptionalStructFieldNonCompat(value *EmptyStruct) *TestSt
     return x
 }
 
-func (x *TestStruct) SetOptionalStructField(value EmptyStruct) *TestStruct {
-    x.OptionalStructField = &value
+func (x *TestStruct) SetOptionalStructField(value *EmptyStruct) *TestStruct {
+    x.OptionalStructField = value
     return x
 }
 

@@ -9,7 +9,6 @@
 #include <proxygen/lib/utils/ZlibStreamCompressor.h>
 
 #include <folly/io/Cursor.h>
-#include <folly/lang/Bits.h>
 
 using folly::IOBuf;
 

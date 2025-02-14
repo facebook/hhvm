@@ -8,14 +8,10 @@
 
 #include <proxygen/httpserver/samples/hq/HQCommandLine.h>
 
-#include <folly/io/async/AsyncSocketException.h>
-#include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/EventBaseManager.h>
-#include <folly/net/NetworkSocket.h>
 #include <folly/portability/GFlags.h>
 #include <proxygen/httpclient/samples/curl/CurlClient.h>
 #include <proxygen/lib/http/SynchronizedLruQuicPskCache.h>
-#include <proxygen/lib/http/session/HTTPTransaction.h>
 #include <proxygen/lib/transport/PersistentQuicPskCache.h>
 #include <quic/QuicConstants.h>
 

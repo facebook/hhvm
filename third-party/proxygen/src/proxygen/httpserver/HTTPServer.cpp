@@ -10,7 +10,6 @@
 
 #include <folly/executors/thread_factory/NamedThreadFactory.h>
 #include <folly/io/async/EventBaseManager.h>
-#include <folly/system/ThreadName.h>
 #include <proxygen/httpserver/HTTPServerAcceptor.h>
 #include <proxygen/httpserver/SignalHandler.h>
 #include <proxygen/httpserver/filters/CompressionFilter.h>

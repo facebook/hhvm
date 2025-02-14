@@ -9,7 +9,6 @@
 #include <folly/Format.h>
 #include <folly/io/IOBuf.h>
 #include <folly/portability/GTest.h>
-#include <glog/logging.h>
 #include <proxygen/lib/utils/Logging.h>
 
 using namespace folly;

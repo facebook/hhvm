@@ -8,7 +8,6 @@
 
 #include <proxygen/httpserver/samples/websocket/WebSocketHandler.h>
 
-#include <folly/executors/GlobalExecutor.h>
 #include <folly/io/async/EventBaseManager.h>
 
 using namespace proxygen;

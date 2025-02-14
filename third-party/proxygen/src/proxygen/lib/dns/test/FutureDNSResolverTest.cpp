@@ -12,7 +12,6 @@
 #include <utility>
 #include <vector>
 
-#include <folly/Memory.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/EventBaseManager.h>
 #include <folly/portability/GTest.h>

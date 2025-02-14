@@ -11,7 +11,6 @@
 #include <folly/FileUtil.h>
 #include <folly/executors/GlobalExecutor.h>
 #include <folly/io/async/EventBaseManager.h>
-#include <proxygen/httpserver/RequestHandler.h>
 #include <proxygen/httpserver/ResponseBuilder.h>
 #include <proxygen/lib/utils/SafePathUtils.h>
 

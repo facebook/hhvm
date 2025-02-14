@@ -8,7 +8,6 @@
 
 #include <proxygen/lib/pools/generators/ServerListGenerator.h>
 
-#include <folly/Conv.h>
 #include <folly/io/async/EventBase.h>
 
 using folly::EventBase;

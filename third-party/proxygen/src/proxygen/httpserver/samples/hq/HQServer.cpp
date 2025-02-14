@@ -17,8 +17,6 @@
 #include <proxygen/httpserver/samples/hq/H1QDownstreamSession.h>
 #include <proxygen/httpserver/samples/hq/HQLoggerHelper.h>
 #include <proxygen/lib/http/session/HQDownstreamSession.h>
-#include <proxygen/lib/http/session/HTTPDownstreamSession.h>
-#include <quic/api/QuicStreamAsyncTransport.h>
 #include <quic/server/QuicSharedUDPSocketFactory.h>
 
 using fizz::server::FizzServerContext;

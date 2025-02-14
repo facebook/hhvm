@@ -10,7 +10,6 @@
 #include <folly/Memory.h>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
-#include <map>
 #include <proxygen/lib/utils/FilterChain.h>
 #include <stdlib.h>
 

@@ -8,8 +8,6 @@
 
 #include <proxygen/lib/transport/PersistentFizzPskCache.h>
 
-#include <fizz/record/Types.h>
-
 namespace folly {
 
 template <>

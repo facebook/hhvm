@@ -21,9 +21,7 @@
 #include <folly/FileUtil.h>
 #include <folly/Random.h>
 #include <folly/String.h>
-#include <folly/init/Init.h>
 #include <folly/io/async/AsyncSSLSocket.h>
-#include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/portability/GFlags.h>
 #include <folly/ssl/SSLSession.h>
@@ -34,7 +32,6 @@
 
 #include <csignal>
 #include <iostream>
-#include <openssl/engine.h>
 #include <random>
 
 using folly::SocketAddress;

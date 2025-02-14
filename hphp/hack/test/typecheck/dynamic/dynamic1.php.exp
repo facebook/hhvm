@@ -35,7 +35,7 @@ File "dynamic1.php", line 45, characters 3-13:
 File "dynamic1.php", line 47, characters 3-13:
   dynamic
 File "dynamic1.php", line 49, characters 3-13:
-  (dynamic & string)
+  (string & dynamic)
 File "dynamic1.php", line 51, characters 3-13:
   dynamic
 File "dynamic1.php", line 54, characters 3-13:

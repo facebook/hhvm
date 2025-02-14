@@ -7259,6 +7259,18 @@ end = struct
         in
         (env, tyl @ tyl_span)
       in
+      let union env reason tyl =
+        (* This avoids a degenerate case where tyl is just one type which is an
+           enormous intersection.
+           Union.union_list does some computation on intersections that can be
+           prohibitively expensive for large intersections.
+           However, we don't want to apply to optimization in the general case
+           because some parts of the typechecker unfortunately depend on the
+           normalization. *)
+        match tyl with
+        | [ty] -> (env, ty)
+        | tyl -> Union.union_list env reason tyl
+      in
       let (env, ty_true_ty_false_assumptions) =
         List.map_env env partitions ~f:(fun env partition ->
             let Typing_refinement.
@@ -7313,7 +7325,7 @@ end = struct
                 let (env, ty_trues) = ty_trues env in
                 (env, ty_trues @ acc))
           in
-          let (env, ty_true) = Union.union_list env reason ty_trues in
+          let (env, ty_true) = union env reason ty_trues in
           let (env, ty_true) =
             Inter.intersect
               env
@@ -7332,7 +7344,7 @@ end = struct
                 let (env, ty_falses) = ty_falses env in
                 (env, ty_falses @ acc))
           in
-          let (env, ty_false) = Union.union_list env reason ty_falses in
+          let (env, ty_false) = union env reason ty_falses in
           refine_local ty_false env )
 
   (** [tparamet] = false means the expression is negated. *)

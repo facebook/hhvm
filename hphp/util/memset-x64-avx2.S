@@ -101,7 +101,7 @@ ETCH_LABEL(more_than_63bytes):
 	addq	%rax, %rcx
 	subq	%rax, %rdx
 	je		ETCH_LABEL(EXIT_MEMSET)
-	
+
 ETCH_ALIGN8
 ETCH_ALIGN4
 ETCH_LABEL(128byte_loop_data_guzzler):

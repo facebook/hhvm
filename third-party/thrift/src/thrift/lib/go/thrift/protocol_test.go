@@ -51,8 +51,8 @@ var (
 	int16Values    = []int16{459, 0, 1, -1, -128, 127, 32767, -32768}
 	int32Values    = []int32{459, 0, 1, -1, -128, 127, 32767, 2147483647, -2147483535}
 	int64Values    = []int64{459, 0, 1, -1, -128, 127, 32767, 2147483647, -2147483535, 34359738481, -35184372088719, -9223372036854775808, 9223372036854775807}
-	doubleValues   = []float64{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, types.INFINITY.Float64(), types.NEGATIVE_INFINITY.Float64(), types.NAN.Float64()}
-	floatValues    = []float32{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, types.INFINITY.Float32(), types.NEGATIVE_INFINITY.Float32(), types.NAN.Float32()}
+	doubleValues   = []float64{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float64(), NEGATIVE_INFINITY.Float64(), NAN.Float64()}
+	floatValues    = []float32{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float32(), NEGATIVE_INFINITY.Float32(), NAN.Float32()}
 	stringValues   = []string{"", "a", "st[uf]f", "st,u:ff with spaces", "stuff\twith\nescape\\characters'...\"lots{of}fun</xml>"}
 	structTestData = structData{
 		name: "test struct",
@@ -555,7 +555,7 @@ func ReadWriteI64(t testing.TB, p types.Format, trans io.ReadWriter) {
 }
 
 func WriteDouble(t testing.TB, p types.Format, trans io.Writer) {
-	doubleValues = []float64{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, types.INFINITY.Float64(), types.NEGATIVE_INFINITY.Float64(), types.NAN.Float64()}
+	doubleValues = []float64{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float64(), NEGATIVE_INFINITY.Float64(), NAN.Float64()}
 	thetype := types.DOUBLE
 	thelen := len(doubleValues)
 	p.WriteListBegin(thetype, thelen)
@@ -568,7 +568,7 @@ func WriteDouble(t testing.TB, p types.Format, trans io.Writer) {
 }
 
 func ReadDouble(t testing.TB, p types.Format, trans io.Reader) {
-	doubleValues = []float64{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, types.INFINITY.Float64(), types.NEGATIVE_INFINITY.Float64(), types.NAN.Float64()}
+	doubleValues = []float64{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float64(), NEGATIVE_INFINITY.Float64(), NAN.Float64()}
 	thetype := types.DOUBLE
 	thelen := len(doubleValues)
 	thetype2, thelen2, err := p.ReadListBegin()
@@ -606,7 +606,7 @@ func ReadWriteDouble(t testing.TB, p types.Format, trans io.ReadWriter) {
 }
 
 func WriteFloat(t testing.TB, p types.Format, trans io.Writer) {
-	floatValues = []float32{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, types.INFINITY.Float32(), types.NEGATIVE_INFINITY.Float32(), types.NAN.Float32()}
+	floatValues = []float32{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float32(), NEGATIVE_INFINITY.Float32(), NAN.Float32()}
 
 	thetype := types.FLOAT
 	thelen := len(floatValues)
@@ -620,7 +620,7 @@ func WriteFloat(t testing.TB, p types.Format, trans io.Writer) {
 }
 
 func ReadFloat(t testing.TB, p types.Format, trans io.Reader) {
-	floatValues = []float32{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, types.INFINITY.Float32(), types.NEGATIVE_INFINITY.Float32(), types.NAN.Float32()}
+	floatValues = []float32{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float32(), NEGATIVE_INFINITY.Float32(), NAN.Float32()}
 
 	thetype := types.FLOAT
 	thelen := len(floatValues)

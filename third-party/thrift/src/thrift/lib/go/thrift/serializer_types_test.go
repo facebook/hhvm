@@ -51,10 +51,6 @@ import (
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
-// (needed to ensure safety because of naive import list construction.)
-var _ = types.ZERO
-var _ = fmt.Printf
-
 var GoUnusedProtection__ int
 
 type MyTestEnum int64

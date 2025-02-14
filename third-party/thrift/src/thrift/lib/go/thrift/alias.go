@@ -60,8 +60,6 @@ type TransportException = types.TransportException
 
 type FormatException = types.ProtocolException
 
-var ZERO types.Numeric = types.ZERO
-
 var REPLY types.MessageType = types.REPLY
 var CALL types.MessageType = types.CALL
 var EXCEPTION types.MessageType = types.EXCEPTION

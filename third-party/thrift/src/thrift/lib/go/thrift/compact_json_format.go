@@ -208,7 +208,7 @@ func (p *compactJSONFormat) WriteBinary(v []byte) error {
 	if e := p.OutputPreValue(); e != nil {
 		return e
 	}
-	if _, e := p.write(types.JSON_QUOTE_BYTES); e != nil {
+	if _, e := p.write(JSON_QUOTE_BYTES); e != nil {
 		return types.NewProtocolException(e)
 	}
 	if len(v) > 0 {
@@ -221,7 +221,7 @@ func (p *compactJSONFormat) WriteBinary(v []byte) error {
 			return types.NewProtocolException(e)
 		}
 	}
-	if _, e := p.write(types.JSON_QUOTE_BYTES); e != nil {
+	if _, e := p.write(JSON_QUOTE_BYTES); e != nil {
 		return types.NewProtocolException(e)
 	}
 	return p.OutputPostValue()
@@ -272,7 +272,7 @@ func (p *compactJSONFormat) ReadStructEnd() error {
 
 func (p *compactJSONFormat) ReadFieldBegin() (string, types.Type, int16, error) {
 	b, _ := p.reader.Peek(1)
-	if len(b) < 1 || b[0] == types.JSON_RBRACE[0] || b[0] == types.JSON_RBRACKET[0] {
+	if len(b) < 1 || b[0] == JSON_RBRACE[0] || b[0] == JSON_RBRACKET[0] {
 		return "", types.STOP, -1, nil
 	}
 	fieldID, err := p.ReadI16()
@@ -395,20 +395,20 @@ func (p *compactJSONFormat) ReadString() (string, error) {
 		return v, err
 	}
 	f, _ := p.reader.Peek(1)
-	if len(f) > 0 && f[0] == types.JSON_QUOTE {
+	if len(f) > 0 && f[0] == JSON_QUOTE {
 		p.reader.ReadByte()
 		value, err := p.ParseStringBody()
 		v = value
 		if err != nil {
 			return v, err
 		}
-	} else if len(f) > 0 && f[0] == types.JSON_NULL[0] {
-		b := make([]byte, len(types.JSON_NULL))
+	} else if len(f) > 0 && f[0] == JSON_NULL[0] {
+		b := make([]byte, len(JSON_NULL))
 		_, err := p.reader.Read(b)
 		if err != nil {
 			return v, types.NewProtocolException(err)
 		}
-		if string(b) != string(types.JSON_NULL) {
+		if string(b) != string(JSON_NULL) {
 			e := fmt.Errorf("Expected a JSON string, found unquoted data started with %s", string(b))
 			return v, types.NewProtocolExceptionWithType(types.INVALID_DATA, e)
 		}
@@ -425,20 +425,20 @@ func (p *compactJSONFormat) ReadBinary() ([]byte, error) {
 		return nil, err
 	}
 	f, _ := p.reader.Peek(1)
-	if len(f) > 0 && f[0] == types.JSON_QUOTE {
+	if len(f) > 0 && f[0] == JSON_QUOTE {
 		p.reader.ReadByte()
 		value, err := p.ParseBase64EncodedBody()
 		v = value
 		if err != nil {
 			return v, err
 		}
-	} else if len(f) > 0 && f[0] == types.JSON_NULL[0] {
-		b := make([]byte, len(types.JSON_NULL))
+	} else if len(f) > 0 && f[0] == JSON_NULL[0] {
+		b := make([]byte, len(JSON_NULL))
 		_, err := p.reader.Read(b)
 		if err != nil {
 			return v, types.NewProtocolException(err)
 		}
-		if string(b) != string(types.JSON_NULL) {
+		if string(b) != string(JSON_NULL) {
 			e := fmt.Errorf("Expected a JSON string, found unquoted data started with %s", string(b))
 			return v, types.NewProtocolExceptionWithType(types.INVALID_DATA, e)
 		}

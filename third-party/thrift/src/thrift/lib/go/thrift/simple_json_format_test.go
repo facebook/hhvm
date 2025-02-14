@@ -58,9 +58,9 @@ func TestReadSimpleJSONProtocolBool(t *testing.T) {
 		trans := NewMemoryBuffer()
 		p := NewSimpleJSONFormat(trans)
 		if value {
-			trans.Write(types.JSON_TRUE)
+			trans.Write(JSON_TRUE)
 		} else {
-			trans.Write(types.JSON_FALSE)
+			trans.Write(JSON_FALSE)
 		}
 
 		s := trans.String()
@@ -320,16 +320,16 @@ func TestWriteSimpleJSONProtocolDouble(t *testing.T) {
 		}
 		s := trans.String()
 		if math.IsInf(value, 1) {
-			if s != jsonQuote(types.JSON_INFINITY) {
-				t.Fatalf("Bad value for %s %v, wrote: %v, expected: %v", thetype, value, s, jsonQuote(types.JSON_INFINITY))
+			if s != jsonQuote(JSON_INFINITY) {
+				t.Fatalf("Bad value for %s %v, wrote: %v, expected: %v", thetype, value, s, jsonQuote(JSON_INFINITY))
 			}
 		} else if math.IsInf(value, -1) {
-			if s != jsonQuote(types.JSON_NEGATIVE_INFINITY) {
-				t.Fatalf("Bad value for %s %v, wrote: %v, expected: %v", thetype, value, s, jsonQuote(types.JSON_NEGATIVE_INFINITY))
+			if s != jsonQuote(JSON_NEGATIVE_INFINITY) {
+				t.Fatalf("Bad value for %s %v, wrote: %v, expected: %v", thetype, value, s, jsonQuote(JSON_NEGATIVE_INFINITY))
 			}
 		} else if math.IsNaN(value) {
-			if s != jsonQuote(types.JSON_NAN) {
-				t.Fatalf("Bad value for %s %v, wrote: %v, expected: %v", thetype, value, s, jsonQuote(types.JSON_NAN))
+			if s != jsonQuote(JSON_NAN) {
+				t.Fatalf("Bad value for %s %v, wrote: %v, expected: %v", thetype, value, s, jsonQuote(JSON_NAN))
 			}
 		} else {
 			if s != fmt.Sprint(value) {
@@ -350,7 +350,7 @@ func TestReadSimpleJSONProtocolDouble(t *testing.T) {
 	for _, value := range doubleValues {
 		trans := NewMemoryBuffer()
 		p := NewSimpleJSONFormat(trans)
-		n := types.NewNumericFromDouble(value)
+		n := NewNumericFromDouble(value)
 		trans.WriteString(n.String())
 
 		s := trans.String()
@@ -396,16 +396,16 @@ func TestWriteSimpleJSONProtocolFloat(t *testing.T) {
 		}
 		s := trans.String()
 		if math.IsInf(float64(value), 1) {
-			if s != jsonQuote(types.JSON_INFINITY) {
-				t.Fatalf("Bad value for %s %v, wrote: %v, expected: %v", thetype, value, s, jsonQuote(types.JSON_INFINITY))
+			if s != jsonQuote(JSON_INFINITY) {
+				t.Fatalf("Bad value for %s %v, wrote: %v, expected: %v", thetype, value, s, jsonQuote(JSON_INFINITY))
 			}
 		} else if math.IsInf(float64(value), -1) {
-			if s != jsonQuote(types.JSON_NEGATIVE_INFINITY) {
-				t.Fatalf("Bad value for %s %v, wrote: %v, expected: %v", thetype, value, s, jsonQuote(types.JSON_NEGATIVE_INFINITY))
+			if s != jsonQuote(JSON_NEGATIVE_INFINITY) {
+				t.Fatalf("Bad value for %s %v, wrote: %v, expected: %v", thetype, value, s, jsonQuote(JSON_NEGATIVE_INFINITY))
 			}
 		} else if math.IsNaN(float64(value)) {
-			if s != jsonQuote(types.JSON_NAN) {
-				t.Fatalf("Bad value for %s %v, wrote: %v, expected: %v", thetype, value, s, jsonQuote(types.JSON_NAN))
+			if s != jsonQuote(JSON_NAN) {
+				t.Fatalf("Bad value for %s %v, wrote: %v, expected: %v", thetype, value, s, jsonQuote(JSON_NAN))
 			}
 		} else {
 			if s != fmt.Sprint(value) {
@@ -426,7 +426,7 @@ func TestReadSimpleJSONProtocolFloat(t *testing.T) {
 	for _, value := range floatValues {
 		trans := NewMemoryBuffer()
 		p := NewSimpleJSONFormat(trans)
-		n := types.NewNumericFromFloat(value)
+		n := NewNumericFromFloat(value)
 		trans.WriteString(n.String())
 
 		s := trans.String()
@@ -634,16 +634,16 @@ func TestWriteSimpleJSONProtocolList(t *testing.T) {
 	for k, value := range doubleValues {
 		s := l[k+2]
 		if math.IsInf(value, 1) {
-			if s.(string) != types.JSON_INFINITY {
-				t.Fatalf("Bad value for %s at index %v %v, wrote: %q, expected: %q, originally wrote: %q", thetype, k, value, s, jsonQuote(types.JSON_INFINITY), str)
+			if s.(string) != JSON_INFINITY {
+				t.Fatalf("Bad value for %s at index %v %v, wrote: %q, expected: %q, originally wrote: %q", thetype, k, value, s, jsonQuote(JSON_INFINITY), str)
 			}
 		} else if math.IsInf(value, 0) {
-			if s.(string) != types.JSON_NEGATIVE_INFINITY {
-				t.Fatalf("Bad value for %s at index %v %v, wrote: %q, expected: %q, originally wrote: %q", thetype, k, value, s, jsonQuote(types.JSON_NEGATIVE_INFINITY), str)
+			if s.(string) != JSON_NEGATIVE_INFINITY {
+				t.Fatalf("Bad value for %s at index %v %v, wrote: %q, expected: %q, originally wrote: %q", thetype, k, value, s, jsonQuote(JSON_NEGATIVE_INFINITY), str)
 			}
 		} else if math.IsNaN(value) {
-			if s.(string) != types.JSON_NAN {
-				t.Fatalf("Bad value for %s at index %v  %v, wrote: %q, expected: %q, originally wrote: %q", thetype, k, value, s, jsonQuote(types.JSON_NAN), str)
+			if s.(string) != JSON_NAN {
+				t.Fatalf("Bad value for %s at index %v  %v, wrote: %q, expected: %q, originally wrote: %q", thetype, k, value, s, jsonQuote(JSON_NAN), str)
 			}
 		} else {
 			if s.(float64) != value {
@@ -688,16 +688,16 @@ func TestWriteSimpleJSONProtocolSet(t *testing.T) {
 	for k, value := range doubleValues {
 		s := l[k+2]
 		if math.IsInf(value, 1) {
-			if s.(string) != types.JSON_INFINITY {
-				t.Fatalf("Bad value for %s at index %v %v, wrote: %q, expected: %q, originally wrote: %q", thetype, k, value, s, jsonQuote(types.JSON_INFINITY), str)
+			if s.(string) != JSON_INFINITY {
+				t.Fatalf("Bad value for %s at index %v %v, wrote: %q, expected: %q, originally wrote: %q", thetype, k, value, s, jsonQuote(JSON_INFINITY), str)
 			}
 		} else if math.IsInf(value, 0) {
-			if s.(string) != types.JSON_NEGATIVE_INFINITY {
-				t.Fatalf("Bad value for %s at index %v %v, wrote: %q, expected: %q, originally wrote: %q", thetype, k, value, s, jsonQuote(types.JSON_NEGATIVE_INFINITY), str)
+			if s.(string) != JSON_NEGATIVE_INFINITY {
+				t.Fatalf("Bad value for %s at index %v %v, wrote: %q, expected: %q, originally wrote: %q", thetype, k, value, s, jsonQuote(JSON_NEGATIVE_INFINITY), str)
 			}
 		} else if math.IsNaN(value) {
-			if s.(string) != types.JSON_NAN {
-				t.Fatalf("Bad value for %s at index %v  %v, wrote: %q, expected: %q, originally wrote: %q", thetype, k, value, s, jsonQuote(types.JSON_NAN), str)
+			if s.(string) != JSON_NAN {
+				t.Fatalf("Bad value for %s at index %v  %v, wrote: %q, expected: %q, originally wrote: %q", thetype, k, value, s, jsonQuote(JSON_NAN), str)
 			}
 		} else {
 			if s.(float64) != value {
@@ -758,16 +758,16 @@ func TestWriteSimpleJSONProtocolMap(t *testing.T) {
 		}
 		s := strv
 		if math.IsInf(value, 1) {
-			if s != jsonQuote(types.JSON_INFINITY) {
-				t.Fatalf("Bad value for %s at index %v %v, wrote: %v, expected: %v", thetype, k, value, s, jsonQuote(types.JSON_INFINITY))
+			if s != jsonQuote(JSON_INFINITY) {
+				t.Fatalf("Bad value for %s at index %v %v, wrote: %v, expected: %v", thetype, k, value, s, jsonQuote(JSON_INFINITY))
 			}
 		} else if math.IsInf(value, 0) {
-			if s != jsonQuote(types.JSON_NEGATIVE_INFINITY) {
-				t.Fatalf("Bad value for %s at index %v %v, wrote: %v, expected: %v", thetype, k, value, s, jsonQuote(types.JSON_NEGATIVE_INFINITY))
+			if s != jsonQuote(JSON_NEGATIVE_INFINITY) {
+				t.Fatalf("Bad value for %s at index %v %v, wrote: %v, expected: %v", thetype, k, value, s, jsonQuote(JSON_NEGATIVE_INFINITY))
 			}
 		} else if math.IsNaN(value) {
-			if s != jsonQuote(types.JSON_NAN) {
-				t.Fatalf("Bad value for %s at index %v  %v, wrote: %v, expected: %v", thetype, k, value, s, jsonQuote(types.JSON_NAN))
+			if s != jsonQuote(JSON_NAN) {
+				t.Fatalf("Bad value for %s at index %v  %v, wrote: %v, expected: %v", thetype, k, value, s, jsonQuote(JSON_NAN))
 			}
 		} else {
 			expected := strconv.FormatFloat(value, 'g', 10, 64)

@@ -58,8 +58,6 @@ type WritableResult = types.WritableResult
 
 type TransportException = types.TransportException
 
-type ResponseHeaderGetter = types.ResponseHeaderGetter
-
 type FormatException = types.ProtocolException
 
 var ZERO types.Numeric = types.ZERO

@@ -23,14 +23,12 @@ type Protocol interface {
 	// used by SerialChannel and generated thrift Clients
 	Close() error
 
-	ResponseHeaderGetter
-
 	// Deprecated
 	requestHeaders
+	responseHeaderGetter
 }
 
-// ResponseHeaderGetter is a temporary measure to allow protocols to expose headers received with the response.
-type ResponseHeaderGetter interface {
+type responseHeaderGetter interface {
 	GetResponseHeaders() map[string]string
 }
 

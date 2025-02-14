@@ -304,7 +304,7 @@ t_whisker_base_generator::render_state() {
 
     auto source_resolver = std::make_shared<whisker_source_parser>(
         templates_by_path(), template_prefix());
-    options.source_resolver = source_resolver;
+    options.src_resolver = source_resolver;
 
     strictness_options strict = strictness();
     const auto level_for = [](bool strict) {

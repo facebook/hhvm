@@ -1228,7 +1228,7 @@ class render_engine {
       path.push_back(component.value);
     }
 
-    source_resolver* resolver = opts_.source_resolver.get();
+    source_resolver* resolver = opts_.src_resolver.get();
     if (resolver == nullptr) {
       vm_.diags().report_fatal_error(
           macro.loc.begin,

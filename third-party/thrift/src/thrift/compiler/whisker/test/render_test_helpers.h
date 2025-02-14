@@ -239,7 +239,7 @@ class RenderTest : public testing::Test {
       for (const auto& [name, content] : sources.value) {
         current.src_manager.add_virtual_file(name, content);
       }
-      options.source_resolver = std::move(source_resolver);
+      options.src_resolver = std::move(source_resolver);
     }
     options.globals = std::move(globals.value);
     render_test_options_.apply_to(options);

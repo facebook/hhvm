@@ -175,7 +175,7 @@ struct render_options {
    *
    * If this is not set, then all macro applications will fail.
    */
-  std::shared_ptr<source_resolver> source_resolver = nullptr;
+  std::shared_ptr<source_resolver> src_resolver = nullptr;
 
   /**
    * A map of identifiers to objects that will be injected as global bindings,

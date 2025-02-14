@@ -5,7 +5,7 @@ Invalid argument (Typing[4110])
   File "tconst_bad_union.php", line 20, characters 31-37:
     resulting from expanding the type constant `C1::T`
   File "tconst_bad_union.php", line 28, characters 13-14:
-  But got `A2`
+  But got `A2` from this `is` expression test
 ERROR: File "tconst_bad_union.php", line 35, characters 17-18:
 Invalid argument (Typing[4110])
   File "tconst_bad_union.php", line 23, characters 18-19:
@@ -13,4 +13,4 @@ Invalid argument (Typing[4110])
   File "tconst_bad_union.php", line 24, characters 31-37:
     resulting from expanding the type constant `C2::T`
   File "tconst_bad_union.php", line 30, characters 20-21:
-  But got `A1`
+  But got `A1` from this `is` expression test

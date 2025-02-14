@@ -1,0 +1,7 @@
+File "neg_class.php", line 12, characters 3-13:
+  T as Base
+File "neg_class.php", line 18, characters 3-13:
+  ?(((nonnull & not Base) | (Base & not C)) | C | I)
+File "neg_class.php", line 24, characters 3-13:
+  T
+No errors

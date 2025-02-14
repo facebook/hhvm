@@ -1,25 +1,25 @@
 WARN: File "typing_fail_instance_of.php", line 29, characters 7-13:
 This `is` check is always `false`. The expression on the left has type `A` which shares no values with `B`. (Warn[12010])
 WARN: File "typing_fail_instance_of.php", line 39, characters 14-15:
-This is a sketchy null check on an expression of type (not A & not B).
+This is a sketchy null check on an expression of type ?(not A & nonnull & not B).
 It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
 If you want to test for them, please consider doing so explicitly.
 If you only meant to test for `null`, use `$x is nonnull` instead (Warn[12003])
 ERROR: File "typing_fail_instance_of.php", line 40, characters 10-11:
 Typing error (Typing[4429])
-  File "typing_fail_instance_of.php", line 39, characters 14-15:
+  File "typing_fail_instance_of.php", line 34, characters 16-20:
   Expected `?num`
   File "typing_fail_instance_of.php", line 34, characters 16-20:
-  But got `(not A & not B)`
+  But got `(not B & not A)`
 ERROR: File "typing_fail_instance_of.php", line 40, characters 10-11:
 Typing error (Typing[4429])
   File "typing_fail_instance_of.php", line 40, characters 10-15:
   Expected `num` because this is used in an arithmetic operation
-  File "typing_fail_instance_of.php", line 35, characters 7-13:
+  File "typing_fail_instance_of.php", line 35, characters 13-13:
   But got `not A` from this `is` expression test
 ERROR: File "typing_fail_instance_of.php", line 40, characters 10-11:
 Typing error (Typing[4429])
   File "typing_fail_instance_of.php", line 40, characters 10-15:
   Expected `num` because this is used in an arithmetic operation
-  File "typing_fail_instance_of.php", line 37, characters 14-20:
+  File "typing_fail_instance_of.php", line 37, characters 20-20:
   But got `not B` from this `is` expression test

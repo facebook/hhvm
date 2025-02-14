@@ -69,6 +69,20 @@ module TyPredicate = struct
           Result.Ok (IsShapeOf { sp_fields = TShapeMap.of_list elts })
       end else
         Result.Error "open_shape"
+    | Tclass (_, Exact, _) -> Result.Error "exact class"
+    | Tclass ((_, name), Nonexact _, args) ->
+      if List.is_empty args then
+        match Env.get_class env name with
+        | Decl_entry.Found class_info ->
+          if List.is_empty (Folded_class.tparams class_info) then
+            Result.Ok (IsTag (ClassTag name))
+          else
+            Result.Error "malformed class with generics"
+        | Decl_entry.DoesNotExist
+        | Decl_entry.NotYetAvailable ->
+          Result.Error "missing class"
+      else
+        Result.Error "class with generics"
     | Tprim Aast.Tvoid -> Result.Error "void"
     | Tprim Aast.Tnoreturn -> Result.Error "noreturn"
     | Tnonnull -> Result.Error "nonnull"
@@ -85,7 +99,6 @@ module TyPredicate = struct
     | Tnewtype (s, _, _) -> Result.Error ("newtype-" ^ s)
     | Tunapplied_alias _ -> Result.Error "unapplied_alias"
     | Tdependent _ -> Result.Error "dependent"
-    | Tclass _ -> Result.Error "class"
     | Tneg _ -> Result.Error "neg"
     | Tlabel _ -> Result.Error "label"
     | Ttuple _ -> Result.Error "tuple"
@@ -372,7 +385,7 @@ and split_ty_by_tag
     (tag : type_tag)
     (predicate : type_predicate) : env * TyPartition.t =
   let (env, predicate_datatype) =
-    DataType.of_tag ~safe_for_are_disjoint:false env tag
+    DataType.of_tag ~safe_for_are_disjoint:true env tag
   in
   let predicate_complement_datatype = DataType.complement predicate_datatype in
   if DataType.are_disjoint env ty_datatype predicate_datatype then
@@ -457,8 +470,7 @@ and split_ty
     | Tlabel _ ->
       partition_f DataType.(of_ty ~safe_for_are_disjoint:false env Label)
     | Tclass ((_, name), _, _) ->
-      partition_f
-        DataType.(of_ty ~safe_for_are_disjoint:false env @@ Class name)
+      partition_f DataType.(of_ty ~safe_for_are_disjoint:true env @@ Class name)
     | Tneg (_, predicate) ->
       let (env, dty) =
         match predicate with

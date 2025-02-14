@@ -7,4 +7,4 @@ Invalid argument (Typing[4110])
   File "fake_members13.php", line 18, characters 22-27:
   Expected `string`
   File "fake_members13.php", line 13, characters 16-16:
-  But got `D`
+  But got `D` from this `is` expression test

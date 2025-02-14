@@ -1,5 +1,5 @@
 WARN: File "t76864299.php", line 9, characters 8-14:
-This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `(T & J)` which is a subtype of `J`. (Warn[12011])
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `(J & T)` which is a subtype of `J`. (Warn[12011])
 ERROR: File "t76864299.php", line 10, characters 10-11:
 Invalid return type (Typing[4110])
   File "t76864299.php", line 6, characters 30-30:

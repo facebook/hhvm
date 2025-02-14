@@ -614,7 +614,7 @@ let bounded_generic_fun_cases =
     ( ("bounded_generic_fun.php", 9, 5),
       [
         {
-          snippet = "(T & C)\nwhere T as Base";
+          snippet = "(C & T)\nwhere T as Base";
           addendum = [];
           pos = pos_at (9, 5) (9, 6);
         };

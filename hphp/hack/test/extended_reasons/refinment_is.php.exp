@@ -108,10 +108,10 @@ The subtype is a union type so next I checked the subtype constraint is satisfie
 
 The subtype comes from this is expression
 
-File refinment_is.php, line 8, character 6 - line 8, character 12:
+File refinment_is.php, line 8, character 12 - line 8, character 12:
 
  7 | function inter_is(A $a, C $c): C {
- 8 |   if(»$a is I«) {
+ 8 |   if($a is »I«) {
  9 |     $z = $a;
 10 |   } else {
 11 |     $z = $c;
@@ -258,12 +258,12 @@ File refinment_is.php, line 7, character 32 - line 7, character 32:
  9 |     $z = $a;
 10 |   } else {
 
-But got (A & I) from this is expression test
+But got (I & A) from this is expression test
 
-File refinment_is.php, line 8, character 6 - line 8, character 12:
+File refinment_is.php, line 8, character 12 - line 8, character 12:
 
  7 | function inter_is(A $a, C $c): C {
- 8 |   if(»$a is I«) {
+ 8 |   if($a is »I«) {
  9 |     $z = $a;
 10 |   } else {
 11 |     $z = $c;
@@ -346,10 +346,10 @@ The subtype is a union type so next I checked the subtype constraint is satisfie
 
 The subtype comes from this is expression
 
-File refinment_is.php, line 8, character 6 - line 8, character 12:
+File refinment_is.php, line 8, character 12 - line 8, character 12:
 
  7 | function inter_is(A $a, C $c): C {
- 8 |   if(»$a is I«) {
+ 8 |   if($a is »I«) {
  9 |     $z = $a;
 10 |   } else {
 11 |     $z = $c;
@@ -422,7 +422,7 @@ File refinment_is.php, line 7, character 32 - line 7, character 32:
  9 |     $z = $a;
 10 |   } else {
 
-But got I
+But got I from this is expression test
 
 File refinment_is.php, line 8, character 12 - line 8, character 12:
 
@@ -510,10 +510,10 @@ The subtype is a union type so next I checked the subtype constraint is satisfie
 
 The subtype comes from this is expression
 
-File refinment_is.php, line 8, character 6 - line 8, character 12:
+File refinment_is.php, line 8, character 12 - line 8, character 12:
 
  7 | function inter_is(A $a, C $c): C {
- 8 |   if(»$a is I«) {
+ 8 |   if($a is »I«) {
  9 |     $z = $a;
 10 |   } else {
 11 |     $z = $c;
@@ -569,7 +569,7 @@ File refinment_is.php, line 7, character 32 - line 7, character 32:
 
 The subtype is an intersection type so next I checked that the subtype constraint is satisfied for at least one of its element.
 
-The subtype comes from this hint
+The subtype comes from this is expression
 
 File refinment_is.php, line 8, character 12 - line 8, character 12:
 
@@ -581,16 +581,6 @@ File refinment_is.php, line 8, character 12 - line 8, character 12:
 12 |   }
 13 |   return $z;
 14 | }
-
-which is defined here
-
-File refinment_is.php, line 3, character 11 - line 3, character 11:
-
- 1 | <?hh
- 2 | 
- 3 | interface »I« {}
- 4 | class A {}
- 5 | class C extends A {}
 
 The supertype is the same as before.
 

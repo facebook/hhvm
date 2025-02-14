@@ -1,2 +1,6 @@
 WARN: File "inter_instanceof.php", line 21, characters 6-12:
 This `is` check is always `false`. The expression on the left has type `(int | string)` which shares no values with `A`. (Warn[12010])
+ERROR: File "inter_instanceof.php", line 22, characters 5-6:
+Was expecting an object but type is unknown (Typing[4297])
+  File "inter_instanceof.php", line 21, characters 6-12:
+  It is unknown because a type could not be determined here

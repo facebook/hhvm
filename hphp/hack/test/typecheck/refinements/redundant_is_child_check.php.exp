@@ -1,2 +1,2 @@
 WARN: File "redundant_is_child_check.php", line 22, characters 31-53:
-This `is` check is always `false`. The expression on the left has type `(IMyGenericTaker<T> & not FooTaker)` which shares no values with `FooTakerChild`. (Warn[12010])
+This `is` check is always `false`. The expression on the left has type `(not FooTaker & IMyGenericTaker<T>)` which shares no values with `FooTakerChild`. (Warn[12010])

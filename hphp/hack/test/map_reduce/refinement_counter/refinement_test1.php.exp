@@ -5,13 +5,6 @@ Errors:
 {
   "refinement_counter": {
     "legacy_refinements": {
-      "class": {
-        "count": 2,
-        "positions": [
-          "File \"refinement_test1.php\", line 14, characters 16-16:",
-          "File \"refinement_test1.php\", line 22, characters 13-13:"
-        ]
-      },
       "intersection": {
         "count": 1,
         "positions": [
@@ -37,7 +30,7 @@ Errors:
         ]
       }
     },
-    "new_refinements": 2,
+    "new_refinements": 4,
     "total_refinements": 8
   }
 }

@@ -7148,13 +7148,16 @@ end = struct
       let (env, partition) =
         Typing_refinement.partition_ty env ty_sub predicate
       in
-      let intersect tyl = MakeType.intersection reason_super tyl in
+      let intersect env tyl =
+        Typing_intersection.intersect_list env reason_super tyl
+      in
       let simplify_subtype ~f tyl ty_super env =
+        let (env, ty_sub) = f env tyl in
         Subtype.(
           simplify
             ~subtype_env
             ~this_ty
-            ~lhs:{ sub_supportdyn; ty_sub = f tyl }
+            ~lhs:{ sub_supportdyn; ty_sub }
             ~rhs:{ super_supportdyn = false; super_like; ty_super }
             env)
       in
@@ -7166,23 +7169,24 @@ end = struct
       let simplify_split
           ~init
           ~refine
+          ~refine_span
           (subset : Typing_refinement.dnf_ty)
           (span : Typing_refinement.dnf_ty)
           ty_sup =
         let init =
           List.fold_left subset ~init ~f:(fun res tyl ->
-              res &&& simplify_subtype ~f:intersect tyl ty_sup)
+              res &&& simplify_subtype ~f:refine tyl ty_sup)
         in
         List.fold_left span ~init ~f:(fun res tyl ->
-            res &&& simplify_subtype ~f:refine tyl ty_sup)
+            res &&& simplify_subtype ~f:refine_span tyl ty_sup)
       in
 
-      let refine_true tyl =
-        intersect (Typing_refinement.TyPredicate.to_ty predicate :: tyl)
+      let refine_true_span env tyl =
+        intersect env (Typing_refinement.TyPredicate.to_ty predicate :: tyl)
       in
-      let refine_false tyl =
+      let refine_false_span env tyl =
         let neg = MakeType.neg reason_super predicate in
-        intersect (neg :: tyl)
+        intersect env (neg :: tyl)
       in
       let left = partition.Typing_refinement.left in
       let span = partition.Typing_refinement.span in
@@ -7214,14 +7218,16 @@ end = struct
       in
       let (env, props) =
         simplify_split
-          ~refine:refine_true
+          ~refine:refine_true_span
+          ~refine_span:refine_true_span
           ~init:(env, TL.valid)
           left
           span
           ty_true
       in
       simplify_split
-        ~refine:refine_false
+        ~refine:intersect
+        ~refine_span:refine_false_span
         ~init:(env, props)
         right
         span_for_false

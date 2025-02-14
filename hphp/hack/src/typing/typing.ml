@@ -7314,6 +7314,13 @@ end = struct
                 (env, ty_trues @ acc))
           in
           let (env, ty_true) = Union.union_list env reason ty_trues in
+          let (env, ty_true) =
+            Inter.intersect
+              env
+              ~r:reason
+              ty_true
+              (Typing_refinement.TyPredicate.to_ty predicate)
+          in
           refine_local ty_true env),
         fun env ->
           let (env, ty_falses) =

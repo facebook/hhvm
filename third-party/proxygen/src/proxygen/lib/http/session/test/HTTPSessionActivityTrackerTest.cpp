@@ -10,7 +10,6 @@
 #include <folly/portability/GTest.h>
 
 #include <proxygen/lib/http/session/HTTPSessionActivityTracker.h>
-#include <proxygen/lib/http/session/test/ByteEventTrackerMocks.h>
 #include <proxygen/lib/http/session/test/HTTPTransactionMocks.h>
 #include <proxygen/lib/http/session/test/MockByteEventTracker.h>
 

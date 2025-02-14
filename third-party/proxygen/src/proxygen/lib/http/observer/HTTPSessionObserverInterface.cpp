@@ -8,7 +8,6 @@
 
 #include <cstdint>
 #include <proxygen/lib/http/observer/HTTPSessionObserverInterface.h>
-#include <sys/types.h>
 
 namespace proxygen {
 

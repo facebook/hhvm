@@ -9,7 +9,6 @@
 #include <boost/optional/optional_io.hpp>
 #include <fizz/record/Extensions.h>
 #include <fizz/record/Types.h>
-#include <folly/io/Cursor.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/TimeoutManager.h>
 #include <folly/io/async/test/MockAsyncTransport.h>
@@ -27,7 +26,6 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <wangle/acceptor/ConnectionManager.h>
 
 using folly::test::MockAsyncTransport;
 

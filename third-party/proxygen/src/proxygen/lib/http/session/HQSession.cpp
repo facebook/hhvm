@@ -12,21 +12,17 @@
 #include <proxygen/lib/http/codec/HQControlCodec.h>
 #include <proxygen/lib/http/codec/HQStreamCodec.h>
 #include <proxygen/lib/http/codec/HQUtils.h>
-#include <proxygen/lib/http/codec/HTTP1xCodec.h>
 #include <proxygen/lib/http/codec/HTTPCodec.h>
 #include <proxygen/lib/http/codec/HTTPCodecFilter.h>
 #include <proxygen/lib/http/codec/QPACKDecoderCodec.h>
 #include <proxygen/lib/http/codec/QPACKEncoderCodec.h>
 #include <proxygen/lib/http/session/HTTPSession.h>
-#include <proxygen/lib/http/session/HTTPSessionController.h>
 #include <proxygen/lib/http/session/HTTPSessionStats.h>
 #include <proxygen/lib/http/session/HTTPTransaction.h>
 
 #include <folly/CppAttributes.h>
-#include <folly/Format.h>
 #include <folly/ScopeGuard.h>
 #include <folly/io/IOBufQueue.h>
-#include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/DelayedDestructionBase.h>
 #include <folly/io/async/EventBase.h>

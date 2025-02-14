@@ -8,7 +8,6 @@
 
 #include <proxygen/lib/http/session/ByteEventTracker.h>
 
-#include <folly/io/async/DelayedDestruction.h>
 #include <string>
 
 namespace proxygen {

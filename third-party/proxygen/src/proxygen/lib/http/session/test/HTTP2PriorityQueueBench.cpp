@@ -10,8 +10,6 @@
 #include <folly/Range.h>
 #include <proxygen/lib/http/session/HTTP2PriorityQueue.h>
 
-#include <algorithm>
-
 using namespace proxygen;
 
 namespace {

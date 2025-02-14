@@ -8,8 +8,6 @@
 
 #include <proxygen/lib/http/session/CodecErrorResponseHandler.h>
 
-#include <folly/Conv.h>
-
 using folly::IOBuf;
 using std::unique_ptr;
 

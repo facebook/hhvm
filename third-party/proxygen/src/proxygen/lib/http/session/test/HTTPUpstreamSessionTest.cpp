@@ -8,7 +8,6 @@
 
 #include <proxygen/lib/http/session/HTTPUpstreamSession.h>
 
-#include <folly/io/Cursor.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/TimeoutManager.h>
 #include <folly/io/async/test/MockAsyncTransport.h>

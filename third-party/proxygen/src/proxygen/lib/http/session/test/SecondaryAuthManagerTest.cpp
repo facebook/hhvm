@@ -12,7 +12,6 @@
 #include <fizz/protocol/test/Mocks.h>
 #include <fizz/record/Extensions.h>
 #include <fizz/record/Types.h>
-#include <folly/Conv.h>
 #include <folly/String.h>
 
 #include <folly/portability/GMock.h>

@@ -20,9 +20,7 @@
 #include <proxygen/lib/http/session/test/HTTPTransactionMocks.h>
 #include <proxygen/lib/http/session/test/MockQuicSocketDriver.h>
 #include <proxygen/lib/http/session/test/MockSessionObserver.h>
-#include <proxygen/lib/http/session/test/TestUtils.h>
 #include <quic/api/test/MockQuicSocket.h>
-#include <quic/dsr/Types.h>
 #include <wangle/acceptor/ConnectionManager.h>
 
 #include <folly/futures/Future.h>

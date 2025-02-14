@@ -10,7 +10,6 @@
 #include <folly/io/Cursor.h>
 #include <proxygen/lib/http/session/test/HQSessionMocks.h>
 #include <proxygen/lib/http/session/test/HQSessionTestCommon.h>
-#include <quic/api/test/MockQuicSocket.h>
 
 using namespace proxygen;
 using namespace quic;

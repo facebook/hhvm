@@ -442,39 +442,14 @@ macro(hphp_link target)
     target_link_libraries(${target} ${VISIBILITY} dbghelp.lib dnsapi.lib)
   endif()
 
-# Check whether atomic operations require -latomic or not
-# See https://github.com/facebook/hhvm/issues/5217
-  include(CheckCXXSourceCompiles)
-  set(OLD_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
-  set(CMAKE_REQUIRED_FLAGS "-std=c++1y")
-  CHECK_CXX_SOURCE_COMPILES("
-#include <atomic>
-#include <iostream>
-#include <stdint.h>
-int main() {
-    struct Test { int64_t val1; int64_t val2; };
-    std::atomic<Test> s;
-    // Do this to stop modern compilers from optimizing away the libatomic
-    // calls in release builds, making this test always pass in release builds,
-    // and incorrectly think that HHVM doesn't need linking against libatomic.
-    bool (std::atomic<Test>::* volatile x)(void) const =
-      &std::atomic<Test>::is_lock_free;
-    std::cout << (s.*x)() << std::endl;
-}
-  " NOT_REQUIRE_ATOMIC_LINKER_FLAG)
-
-  if(NOT "${NOT_REQUIRE_ATOMIC_LINKER_FLAG}")
-      message(STATUS "-latomic is required to link hhvm")
-      find_library(ATOMIC_LIBRARY NAMES atomic libatomic.so.1)
-      if (ATOMIC_LIBRARY STREQUAL "ATOMIC_LIBRARY-NOTFOUND")
-        # -latomic should be available for gcc even when libatomic.so.1 is not
-        # in the library search path
-        target_link_libraries(${target} ${VISIBILITY} atomic)
-      else()
-        target_link_libraries(${target} ${VISIBILITY} ${ATOMIC_LIBRARY})
-      endif()
+  find_library(ATOMIC_LIBRARY NAMES atomic libatomic.so.1)
+  if (ATOMIC_LIBRARY STREQUAL "ATOMIC_LIBRARY-NOTFOUND")
+    # -latomic should be available for gcc even when libatomic.so.1 is not
+    # in the library search path
+    target_link_libraries(${target} ${VISIBILITY} atomic)
+  else()
+    target_link_libraries(${target} ${VISIBILITY} ${ATOMIC_LIBRARY})
   endif()
-  set(CMAKE_REQUIRED_FLAGS ${OLD_CMAKE_REQUIRED_FLAGS})
 
   if (ENABLE_XED)
     if (LibXed_FOUND)

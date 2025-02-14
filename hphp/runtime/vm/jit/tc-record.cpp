@@ -298,6 +298,8 @@ void reportJitMaturity() {
              code().cold().used() >= Cfg::CodeCache::AColdMaxUsage ||
              code().frozen().used() >= Cfg::CodeCache::AFrozenMaxUsage) {
     maturity = g_maxJitMaturity;
+  } else if (Cfg::Jit::PGOOnly && mcgen::retranslateAllComplete()) {
+    maturity = 100;
   } else if (codeSize >= fullSize) {
     maturity = 99;
   } else {

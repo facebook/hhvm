@@ -15,7 +15,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = thrift.ZERO
+var _ = thrift.VOID
 
 type GetEntityRequest struct {
     Id string `thrift:"id,1" json:"id" db:"id"`

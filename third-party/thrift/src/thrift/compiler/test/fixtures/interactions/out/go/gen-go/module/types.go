@@ -17,7 +17,7 @@ var _ = shared.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = thrift.ZERO
+var _ = thrift.VOID
 
 type CustomException struct {
     Message string `thrift:"message,1" json:"message" db:"message"`

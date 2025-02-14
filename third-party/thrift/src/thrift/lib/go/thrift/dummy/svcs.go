@@ -19,7 +19,7 @@ import (
 var _ = context.Background
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = thrift.ZERO
+var _ = thrift.VOID
 var _ = metadata.GoUnusedProtection__
 
 type Dummy interface {
@@ -221,5 +221,3 @@ func (p *procFuncDummyOnewayRPC) RunContext(ctx context.Context, reqStruct thrif
 
     return nil, nil
 }
-
-

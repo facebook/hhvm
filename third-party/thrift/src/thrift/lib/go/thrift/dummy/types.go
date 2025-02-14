@@ -15,7 +15,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = thrift.ZERO
+var _ = thrift.VOID
 
 type DummyStruct1 struct {
     Field1 int8 `thrift:"field1,1" json:"field1" db:"field1"`

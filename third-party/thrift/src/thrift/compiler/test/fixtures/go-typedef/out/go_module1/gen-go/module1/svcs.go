@@ -23,7 +23,7 @@ var _ = module2.GoUnusedProtection__
 var _ = context.Background
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = thrift.ZERO
+var _ = thrift.VOID
 var _ = metadata.GoUnusedProtection__
 
 type Finder interface {

@@ -17,7 +17,7 @@ var _ = transitive.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = thrift.ZERO
+var _ = thrift.VOID
 
 
 type IncludedInt64 = int64

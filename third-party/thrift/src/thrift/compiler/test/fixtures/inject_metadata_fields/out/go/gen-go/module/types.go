@@ -17,7 +17,7 @@ var _ = foo.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = fmt.Printf
 var _ = reflect.Ptr
-var _ = thrift.ZERO
+var _ = thrift.VOID
 
 type Fields struct {
     InjectedField string `thrift:"injected_field,100" json:"injected_field" db:"injected_field"`

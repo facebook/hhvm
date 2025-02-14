@@ -39,7 +39,7 @@ import (
 
 {{> common/unused_imports_protection}}
 // (needed to ensure safety because of naive import list construction)
-var _ = thrift.ZERO
+var _ = thrift.VOID
 var _ = maps.Copy[map[int]int, map[int]int]
 {{#program:import_metadata_package?}}
 var _ = metadata.GoUnusedProtection__

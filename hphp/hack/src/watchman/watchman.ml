@@ -11,8 +11,7 @@ open Hh_prelude
 open Utils
 
 (** Module for us to interface with Watchman, a file watching service.
-    https://facebook.github.io/watchman/
-  *)
+    https://facebook.github.io/watchman/ *)
 
 (** Stuff shared between Actual and Mocked implementations. *)
 module Testing_common = struct
@@ -30,20 +29,23 @@ module Testing_common = struct
     }
 end
 
-module Helpers = struct
-  include Watchman_sig.Types
-  module J = Hh_json_helpers.AdhocJsonHelpers
+module J = Hh_json_helpers.AdhocJsonHelpers
+module T = Watchman_sig.Types
 
+module Helpers : sig
+  val timeout_to_secs : T.timeout -> float option
+
+  val max_array_elt_in_json_logging : int
+
+  (** Verifies that a watchman response is valid JSON and free from common errors *)
+  val sanitize_watchman_response : debug_logging:bool -> T.clock -> Hh_json.json
+end = struct
   let timeout_to_secs = function
-    | No_timeout -> None
-    | Default_timeout -> Some 1200.
-    | Explicit_timeout timeout -> Some timeout
+    | T.No_timeout -> None
+    | T.Default_timeout -> Some 1200.
+    | T.Explicit_timeout timeout -> Some timeout
 
-  (* Throw this exception when we know there is something to read from
-   * the watchman channel, but reading took too long. *)
-  exception Read_payload_too_long
-
-  (* Looks for common errors in watchman responses *)
+  (** Look for common errors in watchman responses *)
   let assert_no_error obj =
     (try
        let warning = J.get_string_val "warning" obj in
@@ -54,14 +56,14 @@ module Helpers = struct
     (try
        let error = J.get_string_val "error" obj in
        EventLogger.watchman_error error;
-       raise @@ Watchman_error error
+       raise @@ T.Watchman_error error
      with
     | J.Not_found -> ());
     try
       let canceled = J.get_bool_val "canceled" obj in
       if canceled then (
         EventLogger.watchman_error "Subscription canceled by watchman";
-        raise @@ Subscription_canceled_by_watchman
+        raise @@ T.Subscription_canceled_by_watchman
       ) else
         ()
     with
@@ -69,7 +71,7 @@ module Helpers = struct
 
   let max_array_elt_in_json_logging = 5
 
-  (* Verifies that a watchman response is valid JSON and free from common errors *)
+  (** Verifies that a watchman response is valid JSON and free from common errors *)
   let sanitize_watchman_response ~debug_logging output =
     if debug_logging then Hh_logger.info "Watchman response: %s" output;
     let response =
@@ -114,6 +116,8 @@ module Watchman_conn : sig
   val open_connection :
     timeout:Watchman_sig.Types.timeout -> sockname:string option -> conn
 
+  (** Sends a request to watchman and returns the response. If we don't have a connection,
+      a new connection will be created before the request and destroyed after the response *)
   val request :
     debug_logging:bool ->
     ?conn:conn ->
@@ -139,11 +143,13 @@ module Watchman_conn : sig
     val get_test_conn : unit -> conn
   end
 end = struct
-  include Helpers
-
   type conn = Buffered_line_reader.t * Out_channel.t
 
-  (* Send a request to the watchman process *)
+  (** Throw this exception when we know there is something to read from
+      the watchman channel, but reading took too long. *)
+  exception Read_payload_too_long
+
+  (** Send a request to the watchman process *)
   let send_request ~debug_logging oc json =
     let json_str = Hh_json.(json_to_string json) in
     if debug_logging then
@@ -153,7 +159,7 @@ end = struct
       let json =
         Hh_json.json_truncate
           json
-          ~max_array_elt_count:max_array_elt_in_json_logging
+          ~max_array_elt_count:Helpers.max_array_elt_in_json_logging
           ~has_changed
       in
       Hh_logger.info
@@ -176,7 +182,9 @@ end = struct
       true
     else
       (* Negative means "no timeout" to select *)
-      let timeout = Option.value (timeout_to_secs timeout) ~default:~-.1. in
+      let timeout =
+        Option.value (Helpers.timeout_to_secs timeout) ~default:~-.1.
+      in
       match
         Sys_utils.select_non_intr
           [Buffered_line_reader.get_fd reader]
@@ -190,9 +198,9 @@ end = struct
   let read_with_timeout timeout reader =
     let start_t = Unix.time () in
     if not (has_input timeout reader) then
-      raise Timeout
+      raise T.Timeout
     else
-      match timeout_to_secs timeout with
+      match Helpers.timeout_to_secs timeout with
       | None -> Buffered_line_reader.get_next_line reader
       | Some timeout ->
         let remaining = start_t +. timeout -. Unix.time () in
@@ -205,7 +213,7 @@ end = struct
             let () = EventLogger.watchman_timeout () in
             raise Read_payload_too_long)
 
-  (* Asks watchman for the path to the socket file *)
+  (** Asks watchman for the path to the socket file *)
   let get_sockname timeout =
     let (ic, pid) =
       Timeout.open_process_in
@@ -254,12 +262,12 @@ end = struct
     Unix.close @@ Buffered_line_reader.get_fd @@ fst conn;
     result
 
-  (* Sends a request to watchman and returns the response. If we don't have a connection,
-   * a new connection will be created before the request and destroyed after the response *)
+  (** Sends a request to watchman and returns the response. If we don't have a connection,
+      a new connection will be created before the request and destroyed after the response *)
   let rec request
       ~debug_logging
       ?conn
-      ?(timeout = Default_timeout)
+      ?(timeout = T.Default_timeout)
       ~(sockname : string option)
       json =
     match conn with
@@ -268,7 +276,7 @@ end = struct
           request ~debug_logging ~conn ~timeout ~sockname json)
     | Some (reader, oc) ->
       send_request ~debug_logging oc json;
-      sanitize_watchman_response
+      Helpers.sanitize_watchman_response
         ~debug_logging
         (read_with_timeout timeout reader)
 
@@ -276,13 +284,13 @@ end = struct
       ~debug_logging ~conn:(_, oc) json =
     send_request ~debug_logging oc json
 
-  let blocking_read ~debug_logging ?(timeout = Explicit_timeout 0.) conn =
+  let blocking_read ~debug_logging ?(timeout = T.Explicit_timeout 0.) conn =
     let ready = has_input timeout @@ fst conn in
     if not ready then
       match timeout with
-      | No_timeout -> None
-      | Explicit_timeout timeout when Float.equal timeout 0. -> None
-      | _ -> raise Timeout
+      | T.No_timeout -> None
+      | T.Explicit_timeout timeout when Float.equal timeout 0. -> None
+      | _ -> raise T.Timeout
     else
       (* Use the timeout mechanism to limit maximum time to read payload (cap
        * data size) so we don't freeze if watchman sends an inordinate amount of
@@ -301,7 +309,7 @@ end = struct
                 raise Read_payload_too_long
             end
       in
-      Some (sanitize_watchman_response ~debug_logging output)
+      Some (Helpers.sanitize_watchman_response ~debug_logging output)
 
   let get_reader (reader, _) = reader
 
@@ -311,17 +319,17 @@ end = struct
   end
 end
 
+(** The production implementation of this Watchman module,
+    as opposed to the mock implementation Watchman_mock *)
 module Watchman_actual : Watchman_sig.S = struct
   type conn = Watchman_conn.conn
 
-  (**
-   * Ocaml module signatures are static. This means since mocking
-   * functionality is exposed in the mli, it must be implemented for
-   * both actual builds as well as testing/mocked builds.
-   *
-   * For actual builds, we just raise exceptions for the
-   * setters.
-   *)
+  (** Ocaml module signatures are static. This means since mocking
+  functionality is exposed in the mli, it must be implemented for
+  both actual builds as well as testing/mocked builds.
+
+  For actual builds, we just raise exceptions for the
+  setters. *)
   module Mocking = struct
     exception Cannot_set_when_mocks_disabled
 
@@ -335,30 +343,26 @@ module Watchman_actual : Watchman_sig.S = struct
   (** This number is totally arbitrary. Just need some cap. *)
   let max_reinit_attempts = 8
 
-  (**
-   * Triggers watchman to flush buffered updates on this subscription.
-   * See watchman/docs/cmd/flush-subscriptions.html
-   *)
+  (** Triggers watchman to flush buffered updates on this subscription.
+      See watchman/docs/cmd/flush-subscriptions.html *)
   let flush_subscriptions_cmd = "cmd-flush-subscriptions"
 
   include Watchman_sig.Types
 
   type dead_env = {
-    (* Will reuse original settings to reinitializing watchman subscription. *)
     prior_settings: init_settings;
+        (** Will reuse original settings to reinitializing watchman subscription. *)
     reinit_attempts: int;
     dead_since: float;
     prior_clockspec: string;
   }
 
   type env = {
-    (* See https://facebook.github.io/watchman/docs/clockspec.html
-     *
-     * This is also used to reliably detect a crashed watchman. Watchman has a
-     * facility to detect watchman process crashes between two "since" queries
-     *
-     * See also assert_no_fresh_instance *)
     mutable clockspec: string;
+        (** See https://facebook.github.io/watchman/docs/clockspec.html
+            This is also used to reliably detect a crashed watchman. Watchman has a
+            facility to detect watchman process crashes between two "since" queries.
+            See also assert_no_fresh_instance *)
     conn: Watchman_conn.conn;
     settings: init_settings;
     subscription: string;
@@ -403,30 +407,30 @@ module Watchman_actual : Watchman_sig.S = struct
     | Subscribe
     | Query
 
-  (** Conjunction of extra_expressions and expression_terms. *)
+  (** Conjunction of extra_expressions and env.settings.expression_terms. *)
   let request_json
       ?(extra_kv = []) ?(extra_expressions = []) watchman_command env =
     Hh_json.(
-      let command =
-        match watchman_command with
-        | Subscribe -> "subscribe"
-        | Query -> "query"
-      in
       let header =
+        let command =
+          match watchman_command with
+          | Subscribe -> "subscribe"
+          | Query -> "query"
+        in
         [JSON_String command; JSON_String env.watch_root]
         @
         match watchman_command with
         | Subscribe -> [JSON_String env.subscription]
         | _ -> []
       in
-      let expressions = extra_expressions @ env.settings.expression_terms in
-      let expressions =
-        match env.watched_path_expression_terms with
-        | Some terms -> terms :: expressions
-        | None -> expressions
-      in
-      assert (not (List.is_empty expressions));
       let directives =
+        let expressions = extra_expressions @ env.settings.expression_terms in
+        let expressions =
+          match env.watched_path_expression_terms with
+          | Some terms -> terms :: expressions
+          | None -> expressions
+        in
+        assert (not (List.is_empty expressions));
         [
           JSON_Object
             (extra_kv
@@ -439,9 +443,6 @@ module Watchman_actual : Watchman_sig.S = struct
       in
       let request = JSON_Array (header @ directives) in
       request)
-
-  let all_query env =
-    request_json ~extra_expressions:[Hh_json.JSON_String "exists"] Query env
 
   let get_changes_since_mergebase_query env =
     let extra_kv =
@@ -494,7 +495,7 @@ module Watchman_actual : Watchman_sig.S = struct
 
   let watch_project root = J.strlist ["watch-project"; root]
 
-  (* See https://facebook.github.io/watchman/docs/cmd/version.html *)
+  (** See https://facebook.github.io/watchman/docs/cmd/version.html *)
   let capability_check ?(optional = []) required =
     Hh_json.(
       JSON_Array
@@ -904,9 +905,9 @@ module Watchman_actual : Watchman_sig.S = struct
         ~on_dead
         ~on_alive:(on_alive source f)
 
-  (** This is a large >50MB payload, which could longer than 2 minutes for
-   * Watchman to generate and push down the channel. *)
-  let get_all_files env =
+  (** This is a large >50MB payload, which could take longer than 2 minutes for
+       Watchman to generate and push down the channel. *)
+  let get_all_files env : string list =
     try
       with_crash_record_exn "get_all_files" @@ fun () ->
       let response =
@@ -914,7 +915,10 @@ module Watchman_actual : Watchman_sig.S = struct
           ~debug_logging:env.settings.debug_logging
           ~timeout:Default_timeout
           ~sockname:env.settings.sockname
-          (all_query env)
+          (request_json
+             ~extra_expressions:[Hh_json.JSON_String "exists"]
+             Query
+             env)
       in
       env.clockspec <- J.get_string_val "clock" response;
       extract_file_names env response
@@ -972,7 +976,9 @@ module Watchman_actual : Watchman_sig.S = struct
            ~value:(SSet.elements past_states)
   end
 
-  let make_state_change_response state name data =
+  let make_state_change_response
+      (state : [< `Enter | `Leave ]) (name : string) (data : Hh_json.json) :
+      pushed_changes =
     let metadata = J.try_get_val "metadata" data in
     match state with
     | `Enter ->
@@ -1058,7 +1064,8 @@ module Watchman_actual : Watchman_sig.S = struct
     | Watchman_alive { clockspec; _ } -> clockspec
     | Watchman_dead { prior_clockspec; _ } -> prior_clockspec
 
-  let get_changes ?deadline instance =
+  let get_changes ?deadline (instance : watchman_instance) :
+      watchman_instance * changes =
     call_on_instance instance "get_changes" @@ fun env ->
     let timeout =
       Option.map deadline ~f:(fun deadline ->
@@ -1318,6 +1325,7 @@ module Watchman_mock = struct
     | Watchman_alive env -> on_alive env
 end
 
+(** Helpers to invoke the `watchman` executable directly. *)
 module Process (Exec : Watchman_sig.Exec) = struct
   type error =
     | Process_failure of Exec.error

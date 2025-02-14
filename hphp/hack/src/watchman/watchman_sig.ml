@@ -29,12 +29,11 @@ module Types = struct
     | Explicit_timeout of float
 
   type init_settings = {
-    (* None for query mode, otherwise specify subscriptions mode. *)
     subscribe_mode: subscribe_mode option;
-    (* Seconds used for init timeout - will be reused for reinitialization. None -> no timeout *)
+        (** None for query mode, otherwise specify subscriptions mode. *)
     init_timeout: timeout;
-    (* See watchman expression terms. *)
-    expression_terms: Hh_json.json list;
+        (** Seconds used for init timeout - will be reused for reinitialization.*)
+    expression_terms: Hh_json.json list;  (** See watchman expression terms. *)
     debug_logging: bool;
     roots: Path.t list;
     sockname: string option;
@@ -81,11 +80,11 @@ module Types = struct
 end
 
 (** The abstract types, and the types that are defined in terms of
- * abstract types must be split out. The reason is left as an exercise
- * to the reader (i.e. try it yourself out a few ways and you'll discover the
- * limitations - whether your strategy is splitting up the definitions
- * into 3 modules "base types, abstract types, dependent types", or
- * if you change this to a functor). *)
+    abstract types must be split out. The reason is left as an exercise
+    to the reader (i.e. try it yourself out a few ways and you'll discover the
+    limitations - whether your strategy is splitting up the definitions
+    into 3 modules "base types, abstract types, dependent types", or
+    if you change this to a functor). *)
 module Abstract_types = struct
   type env
 

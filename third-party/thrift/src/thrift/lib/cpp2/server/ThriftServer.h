@@ -20,7 +20,6 @@
 #include <atomic>
 #include <chrono>
 #include <cstdlib>
-#include <map>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -902,6 +901,11 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
 
   void disableInfoLogging() { infoLoggingEnabled_ = false; }
 
+  void setCPUConcurrencyController(
+      std::shared_ptr<CPUConcurrencyController> controller) {
+    cpuConcurrencyController_ = std::move(controller);
+  }
+
  private:
   friend ThriftServerConfig& detail::getThriftServerConfig(ThriftServer&);
 
@@ -1015,7 +1019,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
       mockCPUConcurrencyControllerConfig_{std::nullopt};
   folly::observer::Observer<CPUConcurrencyController::Config>
   makeCPUConcurrencyControllerConfigInternal();
-  CPUConcurrencyController cpuConcurrencyController_;
+  std::shared_ptr<CPUConcurrencyController> cpuConcurrencyController_;
 
   //! The server's listening addresses
   std::vector<folly::SocketAddress> addresses_;
@@ -1077,13 +1081,16 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     return adaptiveConcurrencyController_;
   }
 
-  CPUConcurrencyController& getCPUConcurrencyController() final {
-    return cpuConcurrencyController_;
+  CPUConcurrencyController* getCPUConcurrencyController() final {
+    return cpuConcurrencyController_.get();
   }
 
-  const CPUConcurrencyController& getCPUConcurrencyController() const final {
-    return cpuConcurrencyController_;
+  const CPUConcurrencyController* getCPUConcurrencyController() const final {
+    return cpuConcurrencyController_.get();
   }
+
+  bool notifyCPUConcurrencyControllerOnRequestLoadShed(
+      std::optional<CPUConcurrencyController::Method> method);
 
   void setMockCPUConcurrencyControllerConfig(
       CPUConcurrencyController::Config config) {

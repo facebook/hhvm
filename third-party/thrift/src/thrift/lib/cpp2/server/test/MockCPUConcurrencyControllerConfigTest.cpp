@@ -48,7 +48,9 @@ TEST(MockCpuConcurrencyControllerConfigTest, testOverride) {
       CPUConcurrencyController::Config{.concurrencyLowerBound = 1111});
   folly::observer_detail::ObserverManager::waitForAllUpdates();
 
-  auto config = server.getCPUConcurrencyController().config();
+  auto* cpuConcurrencyController = server.getCPUConcurrencyController();
+  ASSERT_NE(cpuConcurrencyController, nullptr);
+  auto config = cpuConcurrencyController->config();
   ASSERT_EQ(config->concurrencyLowerBound, 1111);
   ASSERT_TRUE(kMakeCPUConcurrencyControllerConfigCalled);
 }
@@ -57,7 +59,9 @@ TEST(MockCpuConcurrencyControllerConfigTest, testBase) {
   kMakeCPUConcurrencyControllerConfigCalled = false;
 
   ThriftServer server;
-  auto config = server.getCPUConcurrencyController().config();
+  auto* cpuConcurrencyController = server.getCPUConcurrencyController();
+  ASSERT_NE(cpuConcurrencyController, nullptr);
+  auto config = cpuConcurrencyController->config();
   ASSERT_EQ(config->concurrencyLowerBound, 2222);
   ASSERT_TRUE(kMakeCPUConcurrencyControllerConfigCalled);
 }

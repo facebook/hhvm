@@ -36,7 +36,7 @@ class RequestStateMachine {
   RequestStateMachine(
       bool includeInRecentRequests,
       AdaptiveConcurrencyController& controller,
-      CPUConcurrencyController& cpuController);
+      CPUConcurrencyController* cpuController);
 
   ~RequestStateMachine();
 
@@ -97,7 +97,7 @@ class RequestStateMachine {
   std::atomic<std::chrono::steady_clock::time_point> dequeued_{
       std::chrono::steady_clock::time_point::min()};
   AdaptiveConcurrencyController& adaptiveConcurrencyController_;
-  CPUConcurrencyController& cpuController_;
+  CPUConcurrencyController* cpuController_;
 };
 
 } // namespace apache::thrift

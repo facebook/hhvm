@@ -459,6 +459,26 @@ struct is_deprecated_terse_writes_with_custom_default_field : std::false_type {
 };
 } // namespace qualifier
 
+template <class T, class F>
+constexpr std::bool_constant<std::is_invocable_v<F&&, T&>> callable(F&&) {
+  return {};
+}
+
+// __FBTHRIFT_IS_VALID(VARIABLE, EXPRESSION)
+//
+// Uses SFINAE to check whether expression is valid. The caller must specifies
+// one variable so that the expression depends on its type.
+//
+// e.g.,
+//
+//   if constexpr (__FBTHRIFT_IS_VALID(list, list.reserve(n))) {
+//     list.reserve(n);
+//   }
+#define __FBTHRIFT_IS_VALID(VARIABLE, ...)                            \
+  (::apache::thrift::detail::callable<decltype(VARIABLE)>(            \
+       [&](auto&& VARIABLE) -> std::void_t<decltype(__VA_ARGS__)> {}) \
+       .value)
+
 } // namespace detail
 
 } // namespace apache::thrift

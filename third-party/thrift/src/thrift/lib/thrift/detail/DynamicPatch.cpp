@@ -231,8 +231,7 @@ std::string fromPatchUri(std::string s) {
 bool DynamicPatch::empty(detail::Badge badge) const {
   return std::visit(
       [&](auto&& v) {
-        if constexpr (detail::has_empty_with_badge_v<
-                          folly::remove_cvref_t<decltype(v)>>) {
+        if constexpr (__FBTHRIFT_IS_VALID(v, v.empty(badge))) {
           return v.empty(badge);
         } else {
           return v.empty();
@@ -1236,7 +1235,8 @@ DynamicPatch::merge(detail::Badge, Other&& other) {
         using L = folly::remove_cvref_t<decltype(l)>;
         using R = folly::remove_cvref_t<decltype(r)>;
         if constexpr (std::is_same_v<L, R>) {
-          if constexpr (detail::has_merge_with_badge_v<L>) {
+          if constexpr (__FBTHRIFT_IS_VALID(
+                            l, l.merge(badge, folly::forward_like<Other>(r)))) {
             l.merge(badge, folly::forward_like<Other>(r));
           } else {
             l.merge(folly::forward_like<Other>(r));

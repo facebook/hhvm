@@ -202,8 +202,7 @@ void AnyPatch<Patch>::DynamicPatchExtractionVisitor::assign(
 template <class Patch>
 void AnyPatch<Patch>::DynamicPatchExtractionVisitor::clear() {
   patch_.visitPatch(badge, [&](auto& patch) {
-    if constexpr (protocol::detail::has_clear_with_badge_v<
-                      folly::remove_cvref_t<decltype(patch)>>) {
+    if constexpr (__FBTHRIFT_IS_VALID(patch, patch.clear(badge))) {
       patch.clear(badge);
     } else {
       patch.clear();

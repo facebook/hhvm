@@ -50,41 +50,6 @@ using ValueMap = folly::F14FastMap<Value, Value>;
 struct PatchBadgeFactory;
 using Badge = folly::badge<PatchBadgeFactory>;
 
-template <typename T>
-using detect_from_object = decltype(std::declval<T>().fromObject(
-    std::declval<Badge>(), std::declval<Object>()));
-template <typename T>
-constexpr static bool has_from_object_v =
-    folly::is_detected_v<detect_from_object, T>;
-
-template <typename T>
-using detect_empty_with_badge =
-    decltype(std::declval<T>().empty(std::declval<Badge>()));
-template <typename T>
-constexpr static bool has_empty_with_badge_v =
-    folly::is_detected_v<detect_empty_with_badge, T>;
-
-template <typename T>
-using detect_merge_with_badge =
-    decltype(std::declval<T>().merge(std::declval<Badge>(), std::declval<T>()));
-template <typename T>
-constexpr static bool has_merge_with_badge_v =
-    folly::is_detected_v<detect_merge_with_badge, T>;
-
-template <typename T>
-using detect_clear_with_badge =
-    decltype(std::declval<T>().clear(std::declval<Badge>()));
-template <typename T>
-constexpr static bool has_clear_with_badge_v =
-    folly::is_detected_v<detect_clear_with_badge, T>;
-
-template <typename T>
-using detect_custom_visit_with_badge = decltype(std::declval<T>().customVisit(
-    std::declval<Badge>(), std::declval<T>));
-template <typename T>
-constexpr static bool has_custom_visit_with_badge_v =
-    folly::is_detected_v<detect_custom_visit_with_badge, T>;
-
 template <typename T, typename U>
 using if_same_type_after_remove_cvref = std::enable_if_t<
     std::is_same_v<folly::remove_cvref_t<T>, folly::remove_cvref_t<U>>>;
@@ -92,7 +57,8 @@ using if_same_type_after_remove_cvref = std::enable_if_t<
 template <class PatchType>
 PatchType createPatchFromObject(Badge badge, Object obj) {
   PatchType patch;
-  if constexpr (has_from_object_v<PatchType>) {
+  if constexpr (__FBTHRIFT_IS_VALID(
+                    patch, patch.fromObject(badge, std::move(obj)))) {
     patch.fromObject(badge, std::move(obj));
   } else {
     // TODO: schema validation
@@ -658,7 +624,10 @@ class DynamicPatch {
   static void customVisitImpl(Self&& self, detail::Badge badge, Visitor&& v) {
     std::forward<Self>(self).visitPatch(badge, [&](auto&& patch) {
       using PatchType = folly::remove_cvref_t<decltype(patch)>;
-      if constexpr (detail::has_custom_visit_with_badge_v<PatchType>) {
+      if constexpr (__FBTHRIFT_IS_VALID(
+                        patch,
+                        std::forward<PatchType>(patch).customVisit(
+                            badge, std::forward<Visitor>(v)))) {
         std::forward<PatchType>(patch).customVisit(
             badge, std::forward<Visitor>(v));
       } else {

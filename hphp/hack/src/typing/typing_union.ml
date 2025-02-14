@@ -133,6 +133,22 @@ This allows the result of any unioning function from this module to be flattened
 with options being "pushed out" of the union (e.g. we return ?(A|B) instead of (A | ?B)
 or (A | null | B), and similarly with like types). *)
 let make_union env r tyl reason_nullable_opt reason_dyn_opt =
+  let rec is_dynamic_or_intersection_with_dynamic ty =
+    Typing_defs.is_dynamic ty
+    ||
+    match get_node ty with
+    | Tintersection tyl ->
+      List.exists tyl ~f:is_dynamic_or_intersection_with_dynamic
+    | _ -> false
+  in
+  (* dynamic | (T & dynamic) = dynamic *)
+  let tyl =
+    match reason_dyn_opt with
+    | Some _ ->
+      List.filter tyl ~f:(fun ty ->
+          not @@ is_dynamic_or_intersection_with_dynamic ty)
+    | None -> tyl
+  in
   let ty =
     match tyl with
     | [ty] -> ty

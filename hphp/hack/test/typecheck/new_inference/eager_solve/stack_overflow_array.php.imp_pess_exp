@@ -1,7 +1,7 @@
 File "stack_overflow_array.php", line 25, characters 3-13:
   ~dict<int, ~(bool | dict<string, ~dict<int, ~((nonnull & ~~dict<_, _>) | dict<(string | _ | _ | _), (_ | _ | _ | (nonnull & ~(_ | _)) | dict<nothing, nothing>)>)>>)>
 ERROR: File "stack_overflow_array.php", line 15, characters 3-13:
-This is not an object of type `KeyedContainer`, this is a bool or a dynamic value or a nonnull value and a dynamic value or an object of type dict<nothing, nothing> (Typing[4324])
+This is not an object of type `KeyedContainer`, this is a bool or a dynamic value or an object of type dict<nothing, nothing> (Typing[4324])
   File "stack_overflow_array.php", line 6, characters 4-17:
   Definition is here
 ERROR: File "stack_overflow_array.php", line 15, characters 3-24:

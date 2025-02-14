@@ -2,5 +2,5 @@ WARN: File "noreturn_case.php", line 7, characters 9-20:
 This `is` check is always `false`. The expression on the left has type `int` which shares no values with `string`. (Warn[12010])
 ERROR: File "noreturn_case.php", line 9, characters 14-14:
 Switching on `nothing` but using constant from `int` (Typing[4023])
-  File "noreturn_case.php", line 7, characters 9-20:
+  File "noreturn_case.php", line 7, characters 15-20:
   expecting `nothing` based on this

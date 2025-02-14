@@ -9,6 +9,7 @@
 open Hh_prelude
 open Typing_defs
 open Typing_env_types
+module Cls = Folded_class
 module Env = Typing_env
 module DataType = Typing_case_types.AtomicDataTypes
 
@@ -128,11 +129,91 @@ module TyPredicate = struct
       Typing_make_type.shape reason (Typing_make_type.nothing reason) map
 end
 
-module TyPartition = Partition.Make (struct
-  type t = locl_ty
+module TyPartition = struct
+  module Partition = Partition.Make (struct
+    type t = locl_ty
 
-  let compare = Typing_defs.compare_locl_ty ~normalize_lists:true
-end)
+    let compare = Typing_defs.compare_locl_ty ~normalize_lists:true
+  end)
+
+  type assumptions = Typing_logic.subtype_prop
+
+  type t = Partition.t * assumptions
+
+  type base_ty =
+    | ClassTy of pos_id * exact * locl_ty list
+    | OtherTy
+
+  let valid = Typing_logic.valid
+
+  let invalid = Typing_logic.invalid ~fail:None
+
+  (* Assuming a value `v` is a sub type of [base_ty] and satisifies [predicate], subtyping
+     relations must hold *)
+  let assume env base_ty predicate : assumptions =
+    let sub ty =
+      let pred_ty = TyPredicate.to_ty predicate in
+      Typing_logic.IsSubtype (None, LoclType pred_ty, LoclType ty)
+    in
+    Option.value ~default:valid
+    @@
+    match (base_ty, snd predicate) with
+    (* Given a value `v` of type `C<T>` and a predicate `is D`, search for a class
+       `K<TC>` and `K<TD>` respectively, it must hold that `K<TC> = K<TD>`
+    *)
+    | (ClassTy (((_, name) as posid), exact, tyargs), IsTag (ClassTag id)) ->
+      let open Option.Let_syntax in
+      (* let* cls1 = Decl_entry.to_option (Env.get_class env id1) in *)
+      let* class_info = Decl_entry.to_option (Env.get_class env id) in
+      if
+        String.equal name (Cls.name class_info)
+        || Cls.has_ancestor class_info name
+        || Cls.requires_ancestor class_info name
+      then
+        return @@ sub (mk (Reason.none, Tclass (posid, exact, tyargs)))
+      else
+        None
+    | ((ClassTy _ | OtherTy), _) -> None
+
+  let assume env ty predicate =
+    match get_node ty with
+    | Tclass (a, b, c) -> assume env (ClassTy (a, b, c)) predicate
+    | _ -> assume env OtherTy predicate
+
+  let mk_left ~env ~predicate ty =
+    (Partition.mk_left ty, assume env ty predicate)
+
+  let mk_span ~env ~predicate ty =
+    (Partition.mk_span ty, assume env ty predicate)
+
+  let mk_right ~env:_ ~predicate:_ ty = (Partition.mk_right ty, invalid)
+
+  let mk_bottom = (Partition.mk_bottom, invalid)
+
+  let join (partition1, assumption1) (partition2, assumption2) =
+    ( Partition.join partition1 partition2,
+      Typing_logic.disj ~fail:None assumption1 assumption2 )
+
+  let meet (partition1, assumption1) (partition2, assumption2) =
+    ( Partition.meet partition1 partition2,
+      Typing_logic.conj assumption1 assumption2 )
+
+  let product ~f sub_splits_and_assumptions =
+    let (sub_splits, sub_assumptions) = List.unzip sub_splits_and_assumptions in
+    let assumptions =
+      List.fold ~init:valid ~f:Typing_logic.conj sub_assumptions
+    in
+    (Partition.product f sub_splits, assumptions)
+
+  let simplify (partition, assumptions) ty =
+    (Partition.simplify partition ty, assumptions)
+
+  let left = Partition.left
+
+  let span = Partition.span
+
+  let right = Partition.right
+end
 
 type dnf_ty = locl_ty list list
 
@@ -141,6 +222,7 @@ type ty_partition = {
   left: dnf_ty;
   span: dnf_ty;
   right: dnf_ty;
+  assumptions: Typing_logic.subtype_prop;
 }
 
 let rec split_ty_by_tuple
@@ -148,7 +230,8 @@ let rec split_ty_by_tuple
     ~(ty_datatype : DataType.t)
     (env : env)
     (ty : locl_ty)
-    (sub_predicates : type_predicate list) : env * TyPartition.t =
+    (sub_predicates : type_predicate list)
+    (predicate : type_predicate) : env * TyPartition.t =
   match deref ty with
   (* TODO: optional and variadic fields T201398626 T201398652 *)
   | ( ty_reason,
@@ -159,7 +242,7 @@ let rec split_ty_by_tuple
     begin
       match predicate_ty_pairs with
       | List.Or_unequal_lengths.Unequal_lengths ->
-        (env, TyPartition.mk_right ty (* mismatch arity *))
+        (env, TyPartition.mk_right ~env ~predicate ty (* mismatch arity *))
       | List.Or_unequal_lengths.Ok predicate_ty_pairs ->
         (* split each tuple element ty by its respective predicate *)
         let (env, sub_splits) =
@@ -169,7 +252,9 @@ let rec split_ty_by_tuple
             ~f:(fun env (predicate, ty) ->
               split_ty ~expansions env ty ~predicate)
         in
-        (env, TyPartition.product (Typing_make_type.tuple ty_reason) sub_splits)
+        ( env,
+          TyPartition.product ~f:(Typing_make_type.tuple ty_reason) sub_splits
+        )
     end
   | _ ->
     (* Tuples are vecs at runtime, thus if the type's data type is disjoint from a vec
@@ -179,16 +264,17 @@ let rec split_ty_by_tuple
     *)
     let (env, predicate_datatype) = DataType.(of_ty env Tuple) in
     if DataType.are_disjoint env ty_datatype predicate_datatype then
-      (env, TyPartition.mk_right ty)
+      (env, TyPartition.mk_right ~env ~predicate ty)
     else
-      (env, TyPartition.mk_span ty)
+      (env, TyPartition.mk_span ~env ~predicate ty)
 
 and split_ty_by_shape
     ~(expansions : SSet.t)
     ~(ty_datatype : DataType.t)
     (env : env)
     (ty : locl_ty)
-    { sp_fields = field_predicate_map } : env * TyPartition.t =
+    { sp_fields = field_predicate_map }
+    (predicate : type_predicate) : env * TyPartition.t =
   match deref ty with
   | ( ty_reason,
       Tshape { s_origin = _; s_unknown_value; s_fields = field_ty_map } ) ->
@@ -207,7 +293,7 @@ and split_ty_by_shape
       || has_class_const_field field_predicate_map
     then
       (* class const field names are unsound, so fall back to span *)
-      (env, TyPartition.mk_span ty)
+      (env, TyPartition.mk_span ~env ~predicate ty)
     else if
       (* Ignore (span) open shape, optional fields for now (T196048813) *)
 
@@ -218,7 +304,7 @@ and split_ty_by_shape
            (fun _field { sft_optional; sft_ty = _ } -> sft_optional)
            field_ty_map
     then
-      (env, TyPartition.mk_span ty)
+      (env, TyPartition.mk_span ~env ~predicate ty)
     else
       let field_ty_pairs =
         List.sort
@@ -238,7 +324,7 @@ and split_ty_by_shape
              (List.map field_predicate_pairs ~f:fst)
       then
         (* mismatched fields *)
-        (env, TyPartition.mk_right ty)
+        (env, TyPartition.mk_right ~env ~predicate ty)
       else
         (* Calculate the splits for each field *)
         let (env, field_split_pairs) =
@@ -262,7 +348,7 @@ and split_ty_by_shape
           @@ List.zip_exn fields
           @@ List.map tys ~f:(fun ty -> { sft_optional = false; sft_ty = ty })
         in
-        (env, TyPartition.product mk_shape splits)
+        (env, TyPartition.product ~f:mk_shape splits)
   | _ ->
     (* Shapes are dicts at runtime, thus if the type's data type is disjoint from a dict
        we can conclude the type must be in the right partition. Otherwise we do not
@@ -271,22 +357,25 @@ and split_ty_by_shape
     *)
     let (env, predicate_datatype) = DataType.(of_ty env Shape) in
     if DataType.are_disjoint env ty_datatype predicate_datatype then
-      (env, TyPartition.mk_right ty)
+      (env, TyPartition.mk_right ~env ~predicate ty)
     else
-      (env, TyPartition.mk_span ty)
+      (env, TyPartition.mk_span ~env ~predicate ty)
 
 and split_ty_by_tag
-    ~(ty_datatype : DataType.t) (env : env) (ty : locl_ty) (tag : type_tag) :
-    env * TyPartition.t =
+    ~(ty_datatype : DataType.t)
+    (env : env)
+    (ty : locl_ty)
+    (tag : type_tag)
+    (predicate : type_predicate) : env * TyPartition.t =
   let (env, predicate_datatype) = DataType.of_tag env tag in
   let predicate_complement_datatype = DataType.complement predicate_datatype in
   if DataType.are_disjoint env ty_datatype predicate_datatype then
-    (env, TyPartition.mk_right ty)
+    (env, TyPartition.mk_right ~env ~predicate ty)
   else if DataType.are_disjoint env ty_datatype predicate_complement_datatype
   then
-    (env, TyPartition.mk_left ty)
+    (env, TyPartition.mk_left ~env ~predicate ty)
   else
-    (env, TyPartition.mk_span ty)
+    (env, TyPartition.mk_span ~env ~predicate ty)
 
 and split_ty
     ~(expansions : SSet.t)
@@ -298,10 +387,22 @@ and split_ty
       env * TyPartition.t =
     match snd predicate with
     | IsTupleOf { tp_required = sub_predicates } ->
-      split_ty_by_tuple ~expansions ~ty_datatype env ety sub_predicates
+      split_ty_by_tuple
+        ~expansions
+        ~ty_datatype
+        env
+        ety
+        sub_predicates
+        predicate
     | IsShapeOf shape_predicate ->
-      split_ty_by_shape ~expansions ~ty_datatype env ety shape_predicate
-    | IsTag tag -> split_ty_by_tag ~ty_datatype env ety tag
+      split_ty_by_shape
+        ~expansions
+        ~ty_datatype
+        env
+        ety
+        shape_predicate
+        predicate
+    | IsTag tag -> split_ty_by_tag ~ty_datatype env ety tag predicate
   in
   let split_union ~expansions env (tys : locl_ty list) =
     let (env, partitions) =
@@ -319,7 +420,7 @@ and split_ty
     let partition = List.fold ~init ~f:TyPartition.meet partitions in
     (env, partition)
   in
-  let (env, partition) =
+  let (env, partition) : env * TyPartition.t =
     match get_node ety with
     (* Types we cannot split, that we know will end up being a part of both
        partitions. *)
@@ -328,10 +429,10 @@ and split_ty
     | Tdynamic
     | Taccess _
     | Tunapplied_alias _ ->
-      (env, TyPartition.mk_span ty)
+      (env, TyPartition.mk_span ~env ~predicate ty)
     | Tclass_ptr _ ->
       (* TODO: need a bespoke DataType to model KindOfClass *)
-      (env, TyPartition.mk_span ty)
+      (env, TyPartition.mk_span ~env ~predicate ty)
     (* Types we cannot split *)
     | Tprim
         Aast.(
@@ -395,20 +496,20 @@ and split_ty
     (* Below are types of the form T <: U. We treat these as T & U *)
     | Tdependent (_, super_ty) ->
       let (env, partition) = split_ty ~expansions ~predicate env super_ty in
-      (env, TyPartition.(meet (mk_span ty) partition))
+      (env, TyPartition.(meet (mk_span ~env ~predicate ty) partition))
     | Tgeneric (name, _)
     | Tnewtype (name, _, _)
       when SSet.mem name expansions ->
-      (env, TyPartition.mk_span ty)
+      (env, TyPartition.mk_span ~env ~predicate ty)
     | Tgeneric (name, tyl) ->
       let expansions = SSet.add name expansions in
       let upper_bounds =
         Env.get_upper_bounds env name tyl |> Typing_set.elements
       in
-      let init = TyPartition.mk_span ty in
+      let init = TyPartition.mk_span ~env ~predicate ty in
       split_intersection env ~init ~expansions upper_bounds
     | Tnewtype (name, tyl, as_ty) ->
-      let init = TyPartition.mk_span ty in
+      let init = TyPartition.mk_span ~env ~predicate ty in
       let expansions = SSet.add name expansions in
       begin
         match Env.get_typedef env name with
@@ -452,7 +553,9 @@ and split_ty
   (env, partition)
 
 let partition_ty (env : env) (ty : locl_ty) (predicate : type_predicate) =
-  let (env, partition) = split_ty ~expansions:SSet.empty ~predicate env ty in
+  let (env, (partition, assumptions)) =
+    split_ty ~expansions:SSet.empty ~predicate env ty
+  in
   let left = TyPartition.left partition in
   let span = TyPartition.span partition in
   let right = TyPartition.right partition in
@@ -466,6 +569,11 @@ let partition_ty (env : env) (ty : locl_ty) (predicate : type_predicate) =
           (Log_type ("ty", ty) :: from_list "left" left)
           @ from_list "span" span
           @ from_list "right" right
+          @ [
+              Log_head
+                ( "assumptions = " ^ Typing_print.subtype_prop env assumptions,
+                  [] );
+            ]
         in
         log_types
           (Reason.to_pos @@ fst predicate)
@@ -474,4 +582,4 @@ let partition_ty (env : env) (ty : locl_ty) (predicate : type_predicate) =
             Log_head
               ("partition " ^ show_type_predicate_ @@ snd predicate, structures);
           ]));
-  (env, { predicate; left; span; right })
+  (env, { predicate; left; span; right; assumptions })

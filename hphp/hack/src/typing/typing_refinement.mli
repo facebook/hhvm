@@ -20,12 +20,16 @@ type dnf_ty = Typing_defs.locl_ty list list
 
   [span] describes a type whose set of values contain values that
     both pass and fail the predicate
+
+  [assumptions] a subtype prop that should be considered true when the predicate
+    is satisfied
 *)
 type ty_partition = {
   predicate: Typing_defs.type_predicate;
   left: dnf_ty;
   span: dnf_ty;
   right: dnf_ty;
+  assumptions: Typing_logic.subtype_prop;
 }
 
 (**

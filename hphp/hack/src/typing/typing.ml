@@ -7167,35 +7167,12 @@ end = struct
     env
 
   and type_switch env ~p ~ivar ~errs ~reason ~predicate =
+    let ty = fst3 ivar in
     let open Option.Let_syntax in
     let (env, locl_opt) =
       make_a_local_of ~include_this:true env (Tast.to_nast_expr ivar)
     in
     let* locl = locl_opt in
-    let env = Env.open_tyvars env p in
-    let (env, ty_true) = Env.fresh_type env p in
-    let (env, ty_false) = Env.fresh_type env p in
-    let type_switch_constraint =
-      ConstraintType
-        (mk_constraint_type
-           (reason, Ttype_switch { predicate; ty_true; ty_false }))
-    in
-    let env = Env.set_tyvar_variance_i env type_switch_constraint in
-    let ty = fst3 ivar in
-    let (env, ty_err) =
-      Type.sub_type_i
-        ~is_coeffect:false
-        p
-        Reason.URnone
-        env
-        (LoclType ty)
-        type_switch_constraint
-        Typing_error.Callback.unify_error
-    in
-    let errs = Option.merge errs ty_err ~f:Typing_error.both in
-    let (env, ty_err) = Typing_solver.close_tyvars_and_solve env in
-    let errs = Option.merge errs ty_err ~f:Typing_error.both in
-    Option.iter ~f:(Typing_error_utils.add_typing_error ~env) errs;
     let refine_local ty env =
       let (_, local_id) = locl in
       let bound_ty =
@@ -7203,7 +7180,153 @@ end = struct
       in
       (set_local ~is_defined:true ~bound_ty env locl ty, { pkgs = SSet.empty })
     in
-    return (env, refine_local ty_true, refine_local ty_false)
+    let type_switch_constraint env =
+      let env = Env.open_tyvars env p in
+      let (env, ty_true) = Env.fresh_type env p in
+      let (env, ty_false) = Env.fresh_type env p in
+      let type_switch_constraint =
+        ConstraintType
+          (mk_constraint_type
+             (reason, Ttype_switch { predicate; ty_true; ty_false }))
+      in
+      let env = Env.set_tyvar_variance_i env type_switch_constraint in
+      let (env, ty_err) =
+        Type.sub_type_i
+          ~is_coeffect:false
+          p
+          Reason.URnone
+          env
+          (LoclType ty)
+          type_switch_constraint
+          Typing_error.Callback.unify_error
+      in
+      let errs = Option.merge errs ty_err ~f:Typing_error.both in
+      let (env, ty_err) = Typing_solver.close_tyvars_and_solve env in
+      let errs = Option.merge errs ty_err ~f:Typing_error.both in
+      Option.iter ~f:(Typing_error_utils.add_typing_error ~env) errs;
+      (env, refine_local ty_true, refine_local ty_false)
+    in
+    let rec get_partitions env ty :
+        env * Typing_refinement.ty_partition list option =
+      let (env, ty) = Env.expand_type env ty in
+      match get_node ty with
+      | Tvar _ -> (env, None)
+      | Tunion tyl ->
+        let (env, partitions) = List.map_env env tyl ~f:get_partitions in
+        (env, Option.map (Option.all partitions) ~f:List.concat)
+      | _ ->
+        let (env, partition) =
+          Typing_refinement.partition_ty env ty predicate
+        in
+        (env, Some [partition])
+    in
+    return
+    @@
+    match get_partitions env ty with
+    | (_env, None) -> type_switch_constraint env
+    | (env, Some partitions) ->
+      let rec update_env_with_assumptions env assumptions =
+        match assumptions with
+        | Typing_logic.Disj (_err, props) ->
+          (* If we have reached a disjunction then we cannot assume the assumption holds
+             since it is not required. Return environment unchanged *)
+          (match
+             List.filter props ~f:(fun prop ->
+                 not @@ Typing_logic.is_unsat prop)
+           with
+          (* make sure it's not a trivial disjunction *)
+          | [prop] -> update_env_with_assumptions env prop
+          | _ -> env)
+        | Typing_logic.Conj props ->
+          List.fold props ~init:env ~f:update_env_with_assumptions
+        | Typing_logic.IsSubtype (None, LoclType ty_sub, LoclType ty_super) ->
+          SubType.add_constraint env Ast_defs.Constraint_as ty_sub ty_super
+          @@ Some (Typing_error.Reasons_callback.unify_error_at p)
+        | Typing_logic.IsSubtype _ ->
+          (* Assume nothing if coercion is required or if requirement comes from a constraint type *)
+          env
+      in
+      (* return (env, locl_ty list) where we intend to union the list later;
+         we don't do it here b/c we'll have more types to union with later *)
+      let union_inter_list ~refine env tyll tyll_span =
+        let (env, tyl) =
+          List.map_env env tyll ~f:(fun env tyl ->
+              Inter.intersect_list env reason tyl)
+        in
+        let (env, tyl_span) =
+          List.map_env env tyll_span ~f:(fun env tyl ->
+              Inter.intersect_list env reason (refine :: tyl))
+        in
+        (env, tyl @ tyl_span)
+      in
+      let (env, ty_true_ty_false_assumptions) =
+        List.map_env env partitions ~f:(fun env partition ->
+            let Typing_refinement.
+                  { left; span; right; assumptions; predicate = _ } =
+              partition
+            in
+            (* See Type_switch.simplify_ for why we update span and right for the false side  *)
+            let (span_for_false, dyn) =
+              List.fold_left
+                ~init:([], None)
+                ~f:(fun (tyll, dyn_opt) tyl ->
+                  match tyl with
+                  | [ty] when Typing_defs.is_dynamic ty -> (tyll, Some ty)
+                  | _ -> (tyl :: tyll, dyn_opt))
+                span
+            in
+            let right =
+              match dyn with
+              | Some dyn -> [dyn] :: right
+              | _ -> right
+            in
+            let ty_trues env =
+              union_inter_list
+                env
+                left
+                span
+                ~refine:(Typing_refinement.TyPredicate.to_ty predicate)
+            in
+            let ty_falses env =
+              union_inter_list
+                env
+                right
+                span_for_false
+                ~refine:(MakeType.neg reason predicate)
+            in
+            (env, (ty_trues, ty_falses, assumptions)))
+      in
+      ( env,
+        (fun env ->
+          let assumptions =
+            Typing_logic.Disj
+              ( None,
+                List.map ty_true_ty_false_assumptions ~f:(fun (_, _, a) -> a) )
+          in
+          let env = update_env_with_assumptions env assumptions in
+          let (env, ty_trues) =
+            List.fold_left_env
+              env
+              ty_true_ty_false_assumptions
+              ~init:[]
+              ~f:(fun env acc (ty_trues, _, _) ->
+                let (env, ty_trues) = ty_trues env in
+                (env, ty_trues @ acc))
+          in
+          let (env, ty_true) = Union.union_list env reason ty_trues in
+          refine_local ty_true env),
+        fun env ->
+          let (env, ty_falses) =
+            List.fold_left_env
+              env
+              ty_true_ty_false_assumptions
+              ~init:[]
+              ~f:(fun env acc (_, ty_falses, _) ->
+                let (env, ty_falses) = ty_falses env in
+                (env, ty_falses @ acc))
+          in
+          let (env, ty_false) = Union.union_list env reason ty_falses in
+          refine_local ty_false env )
 
   (** [tparamet] = false means the expression is negated. *)
   and condition env tparamet te =

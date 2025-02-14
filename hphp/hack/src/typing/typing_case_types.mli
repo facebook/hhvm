@@ -20,8 +20,13 @@ type runtime_data_type
 (**
   Maps a type hint to its associated runtime data type. This is intended to
   be used to only as part of checking if a case type is well-formed.
+
+  When safe_for_are_disjoint is true, do not specially handle interfaces' sealed
+  attribute or required ancestors.
+  Temporary flag to avoid an issue with `are_disjoint` T215053987
 *)
-val data_type_from_hint : env -> Aast.hint -> env * runtime_data_type
+val data_type_from_hint :
+  safe_for_are_disjoint:bool -> env -> Aast.hint -> env * runtime_data_type
 
 (**
   Checks if two different runtime data types can possibly overlap. Two
@@ -53,9 +58,18 @@ val check_overlapping :
    Note that this function only considers the data type associated to each type and not
    the type itself. So even though `vec<int>` and `Container<string>` do not intersect at
    the type level, they do intersect when considering only the runtime data types.
+
+  When safe_for_are_disjoint is true, do not specially handle interfaces' sealed
+  attribute or required ancestors.
+  Temporary flag to avoid an issue with `are_disjoint` T215053987
  *)
 val filter_variants_using_datatype :
-  env -> Typing_reason.t -> locl_ty list -> locl_ty -> env * locl_ty
+  safe_for_are_disjoint:bool ->
+  env ->
+  Typing_reason.t ->
+  locl_ty list ->
+  locl_ty ->
+  env * locl_ty
 
 (**
   Return whether or not any of the case type variants have a where clause
@@ -89,9 +103,16 @@ module AtomicDataTypes : sig
     | Label
     | Class of string
 
-  val of_ty : env -> atomic_ty -> env * t
+  (** When safe_for_are_disjoint is true, do not specially handle interfaces'
+      sealed attribute or required ancestors.
+      Temporary flag to avoid an issue with `are_disjoint` T215053987 *)
+  val of_ty : safe_for_are_disjoint:bool -> env -> atomic_ty -> env * t
 
-  val of_tag : env -> Typing_defs_core.type_tag -> env * t
+  (** When safe_for_are_disjoint is true, do not specially handle interfaces'
+      sealed attribute or required ancestors.
+      Temporary flag to avoid an issue with `are_disjoint` T215053987 *)
+  val of_tag :
+    safe_for_are_disjoint:bool -> env -> Typing_defs_core.type_tag -> env * t
 
   (** Computes the complement for the set of values contained in [t] *)
   val complement : t -> t

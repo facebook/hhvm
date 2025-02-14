@@ -97,7 +97,10 @@ let check_overlapping env (t_pos, t_name) hints =
     | [] -> acc
   in
   let (env, data_types) =
-    hints |> List.fold_map ~init:env ~f:Typing_case_types.data_type_from_hint
+    hints
+    |> List.fold_map
+         ~init:env
+         ~f:(Typing_case_types.data_type_from_hint ~safe_for_are_disjoint:false)
   in
   let err = data_types |> pairwise_check [] |> Typing_error.multiple_opt in
   (env, err)

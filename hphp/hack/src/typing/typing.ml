@@ -2127,6 +2127,7 @@ let safely_refine_class_type
         | Some variants ->
           let (env, ty) =
             Typing_case_types.filter_variants_using_datatype
+              ~safe_for_are_disjoint:false
               env
               (get_reason ty)
               variants

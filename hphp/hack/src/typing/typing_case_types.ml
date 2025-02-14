@@ -327,9 +327,10 @@ module DataType : sig
     This represents such a set. *)
   type t = Set.t
 
-  val fromHint : env -> Aast.hint -> env * (decl_ty * t)
+  val fromHint :
+    safe_for_are_disjoint:bool -> env -> Aast.hint -> env * (decl_ty * t)
 
-  val fromTy : env -> locl_ty -> env * t
+  val fromTy : safe_for_are_disjoint:bool -> env -> locl_ty -> env * t
 
   val fun_to_datatypes : trail:DataTypeReason.trail -> t
 
@@ -346,7 +347,12 @@ module DataType : sig
   val mixed : reason:DataTypeReason.subreason * DataTypeReason.trail -> Set.t
 
   module Class : sig
-    val to_datatypes : trail:DataTypeReason.trail -> env -> string -> env * t
+    val to_datatypes :
+      safe_for_are_disjoint:bool ->
+      trail:DataTypeReason.trail ->
+      env ->
+      string ->
+      env * t
   end
 end = struct
   module Set = struct
@@ -429,7 +435,12 @@ end = struct
     Set.singleton ~reason:DataTypeReason.(make NoSubreason trail) Tag.LabelData
 
   module Class : sig
-    val to_datatypes : trail:DataTypeReason.trail -> env -> string -> env * t
+    val to_datatypes :
+      safe_for_are_disjoint:bool ->
+      trail:DataTypeReason.trail ->
+      env ->
+      string ->
+      env * t
   end = struct
     (* Set of interfaces that contain non-object members *)
     let special_interfaces =
@@ -513,7 +524,10 @@ end = struct
       String.Table.create ()
 
     let rec to_datatypes
-        ~(trail : DataTypeReason.trail) (env : env) (cls : string) : t =
+        ~(safe_for_are_disjoint : bool)
+        ~(trail : DataTypeReason.trail)
+        (env : env)
+        (cls : string) : t =
       let open Tag in
       let cycle_handler f = cycle_handler ~env ~f in
       let reason = DataTypeReason.(make NoSubreason trail) in
@@ -546,49 +560,63 @@ end = struct
                      Set.singleton ~reason
                      @@ InstanceOf { name; kind = Interface }
                  in
-                 match Cls.sealed_whitelist cls with
-                 | None ->
-                   let reqs = Cls.all_ancestor_reqs cls in
-                   if List.is_empty reqs then
-                     default ~reason
-                   else
-                     List.fold
-                       ~init:(default ~reason)
-                       ~f:(fun acc (_, required_ty) ->
-                         match
-                           Typing_utils.try_unwrap_class_type required_ty
-                         with
-                         | None -> acc
-                         | Some (r, (_p, req_cls), _paraml) ->
-                           let trail =
-                             DataTypeReason.requirement
-                               ~trail
-                               (Reason.localize r)
-                               name
-                           in
-                           cycle_handler ~trail ~default @@ fun env trail ->
-                           Set.inter acc @@ to_datatypes ~trail env req_cls)
-                       reqs
-                 | Some whitelist ->
-                   let trail =
-                     DataTypeReason.sealed_interface
-                       ~trail
-                       (Reason.witness_from_decl (Cls.pos cls))
-                       name
-                   in
-                   SSet.fold
-                     (fun whitelist_cls acc ->
-                       cycle_handler ~trail ~default @@ fun env trail ->
-                       Set.union acc @@ to_datatypes ~trail env whitelist_cls)
-                     whitelist
-                     Set.empty
-                   |> Set.inter (default ~reason)
+                 if safe_for_are_disjoint then
+                   default ~reason
+                 else
+                   match Cls.sealed_whitelist cls with
+                   | None ->
+                     let reqs = Cls.all_ancestor_reqs cls in
+                     if List.is_empty reqs then
+                       default ~reason
+                     else
+                       List.fold
+                         ~init:(default ~reason)
+                         ~f:(fun acc (_, required_ty) ->
+                           match
+                             Typing_utils.try_unwrap_class_type required_ty
+                           with
+                           | None -> acc
+                           | Some (r, (_p, req_cls), _paraml) ->
+                             let trail =
+                               DataTypeReason.requirement
+                                 ~trail
+                                 (Reason.localize r)
+                                 name
+                             in
+                             cycle_handler ~trail ~default @@ fun env trail ->
+                             Set.inter acc
+                             @@ to_datatypes
+                                  ~safe_for_are_disjoint
+                                  ~trail
+                                  env
+                                  req_cls)
+                         reqs
+                   | Some whitelist ->
+                     let trail =
+                       DataTypeReason.sealed_interface
+                         ~trail
+                         (Reason.witness_from_decl (Cls.pos cls))
+                         name
+                     in
+                     SSet.fold
+                       (fun whitelist_cls acc ->
+                         cycle_handler ~trail ~default @@ fun env trail ->
+                         Set.union acc
+                         @@ to_datatypes
+                              ~safe_for_are_disjoint
+                              ~trail
+                              env
+                              whitelist_cls)
+                       whitelist
+                       Set.empty
+                     |> Set.inter (default ~reason)
                end
                | Cenum
                | Cenum_class _ ->
                  Set.singleton ~reason ObjectData)
 
-    let to_datatypes ~trail (env : env) (cls : string) : env * t =
+    let to_datatypes ~safe_for_are_disjoint ~trail (env : env) (cls : string) :
+        env * t =
       if SSet.mem cls special_interfaces then
         let (env, tags) =
           match Hashtbl.find special_interface_cache cls with
@@ -605,13 +633,15 @@ end = struct
             ~reason:DataTypeReason.(make (SpecialInterface cls) trail)
             tags
         in
-        let set2 = to_datatypes ~trail env cls in
+        let set2 = to_datatypes ~safe_for_are_disjoint ~trail env cls in
         (env, Set.union set1 set2)
       else
-        (env, to_datatypes ~trail env cls)
+        (env, to_datatypes ~safe_for_are_disjoint ~trail env cls)
   end
 
-  let fromPredicate ~trail (env : env) (predicate : type_predicate) : env * t =
+  let fromPredicate
+      ~safe_for_are_disjoint ~trail (env : env) (predicate : type_predicate) :
+      env * t =
     let open Tag in
     let reason = DataTypeReason.(make NoSubreason trail) in
     let from_tag tag =
@@ -624,20 +654,21 @@ end = struct
       | NumTag -> (env, Set.of_list ~reason [IntData; FloatData])
       | ResourceTag -> (env, Set.singleton ~reason ResourceData)
       | NullTag -> (env, Set.singleton ~reason NullData)
-      | ClassTag id -> Class.to_datatypes ~trail env id
+      | ClassTag id -> Class.to_datatypes ~safe_for_are_disjoint ~trail env id
     in
     match snd predicate with
     | IsTag tag -> from_tag tag
     | IsTupleOf _ -> (env, Set.singleton ~reason VecData)
     | IsShapeOf _ -> (env, Set.singleton ~reason DictData)
 
-  let rec fromTy ~trail (env : env) (ty : locl_ty) : env * t =
+  let rec fromTy ~safe_for_are_disjoint ~trail (env : env) (ty : locl_ty) :
+      env * t =
     let (env, ty) = Env.expand_type env ty in
     let reason = DataTypeReason.(make NoSubreason trail) in
     let cycle_handler ty =
       cycle_handler
         ~default:(fun ~reason -> (env, mixed ~reason))
-        ~f:(fun env trail -> fromTy ~trail env ty)
+        ~f:(fun env trail -> fromTy ~safe_for_are_disjoint ~trail env ty)
     in
     match get_node ty with
     | Tprim prim -> (env, prim_to_datatypes ~trail prim)
@@ -645,7 +676,7 @@ end = struct
     | Tdynamic -> (env, mixed ~reason)
     | Tany _ -> (env, mixed ~reason)
     | Toption ty ->
-      let (env, data_types) = fromTy ~trail env ty in
+      let (env, data_types) = fromTy ~safe_for_are_disjoint ~trail env ty in
       let data_types =
         Set.union
           data_types
@@ -683,12 +714,15 @@ end = struct
       (env, res)
     | Tunion tyl ->
       List.fold tyl ~init:(env, Set.empty) ~f:(fun (env, acc) ty ->
-          let (env, dty) = fromTy ~trail env ty in
+          let (env, dty) = fromTy ~safe_for_are_disjoint ~trail env ty in
           let dty = Set.union acc dty in
           (env, dty))
     | Tintersection tyl ->
       let (env, sets) =
-        List.fold_map ~init:env ~f:(fun env ty -> fromTy ~trail env ty) tyl
+        List.fold_map
+          ~init:env
+          ~f:(fun env ty -> fromTy ~safe_for_are_disjoint ~trail env ty)
+          tyl
       in
       let result_opt = List.reduce ~f:Set.inter sets in
       let res =
@@ -710,10 +744,10 @@ end = struct
         DataTypeReason.type_constant ~trail (get_reason ty) root_ty (snd id)
       in
       cycle_handler ~env ~trail ty
-    | Tdependent (_, ty) -> fromTy ~trail env ty
+    | Tdependent (_, ty) -> fromTy ~safe_for_are_disjoint ~trail env ty
     | Tnewtype (name, _, as_ty)
       when String.equal name Naming_special_names.Classes.cSupportDyn ->
-      fromTy ~trail env as_ty
+      fromTy ~safe_for_are_disjoint ~trail env as_ty
     | Tnewtype (name, _, _)
       when String.equal name Naming_special_names.Classes.cEnumClassLabel ->
       (env, label_to_datatypes ~trail)
@@ -779,9 +813,12 @@ end = struct
     end
     | Tunapplied_alias _ ->
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()
-    | Tclass ((_, cls), _, _) -> Class.to_datatypes ~trail env cls
+    | Tclass ((_, cls), _, _) ->
+      Class.to_datatypes ~safe_for_are_disjoint ~trail env cls
     | Tneg predicate ->
-      let (env, right) = fromPredicate ~trail env predicate in
+      let (env, right) =
+        fromPredicate ~safe_for_are_disjoint ~trail env predicate
+      in
       (env, Set.diff (mixed ~reason) right)
     | Tclass_ptr _ ->
       (* TODO(T199606542) This likely needs a new DataType to represent
@@ -789,18 +826,18 @@ end = struct
        * while the types are still on logging enforcement *)
       (env, mixed ~reason)
 
-  let fromHint env hint =
+  let fromHint ~safe_for_are_disjoint env hint =
     let decl_ty = Decl_hint.hint env.decl_env hint in
     let ((env, _), ty) =
       Typing_utils.localize_no_subst env ~ignore_errors:true decl_ty
     in
     let trail = DataTypeReason.make_trail in
-    let (env, dt) = fromTy ~trail env ty in
+    let (env, dt) = fromTy ~safe_for_are_disjoint ~trail env ty in
     (env, (decl_ty, dt))
 
-  let fromTy env ty : env * t =
+  let fromTy ~safe_for_are_disjoint env ty : env * t =
     let trail = DataTypeReason.make_trail in
-    fromTy ~trail env ty
+    fromTy ~safe_for_are_disjoint ~trail env ty
 end
 
 type runtime_data_type = decl_ty * DataType.t
@@ -881,9 +918,14 @@ let check_overlapping
   Note that this function only considers the data type associated to each type and not
   the type itself. So even though `vec<int>` and `Container<string>` do not intersect at
   the type level, they do intersect when considering only the runtime data types. *)
-let filter_variants_using_datatype env reason variants intersecting_ty =
-  let (env, tags) = DataType.fromTy env intersecting_ty in
-  let (env, vtags) = List.fold_map variants ~init:env ~f:DataType.fromTy in
+let filter_variants_using_datatype
+    ~safe_for_are_disjoint env reason variants intersecting_ty =
+  let (env, tags) =
+    DataType.fromTy ~safe_for_are_disjoint env intersecting_ty
+  in
+  let (env, vtags) =
+    List.fold_map variants ~init:env ~f:(DataType.fromTy ~safe_for_are_disjoint)
+  in
   let tyl =
     List.filter_map
       ~f:(fun (variant, variant_tags) ->
@@ -971,16 +1013,19 @@ module AtomicDataTypes = struct
 
   let label = DataType.label_to_datatypes ~trail
 
-  let of_ty env : atomic_ty -> env * DataType.t = function
+  let of_ty ~safe_for_are_disjoint env : atomic_ty -> env * DataType.t =
+    function
     | Primitive prim -> (env, DataType.prim_to_datatypes ~trail prim)
     | Function -> (env, function_)
     | Nonnull -> (env, nonnull)
     | Tuple -> (env, tuple)
     | Shape -> (env, shape)
     | Label -> (env, label)
-    | Class name -> DataType.Class.to_datatypes ~trail env name
+    | Class name ->
+      DataType.Class.to_datatypes ~safe_for_are_disjoint ~trail env name
 
-  let of_tag env tag : env * DataType.t =
+  let of_tag ~safe_for_are_disjoint env tag : env * DataType.t =
+    let of_ty = of_ty ~safe_for_are_disjoint in
     match tag with
     | BoolTag -> of_ty env (Primitive Aast.Tbool)
     | IntTag -> of_ty env (Primitive Aast.Tint)

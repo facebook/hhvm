@@ -262,7 +262,9 @@ let rec split_ty_by_tuple
        precisely know the relationship with the [IsTupleOf] predicate so default to
        spanning
     *)
-    let (env, predicate_datatype) = DataType.(of_ty env Tuple) in
+    let (env, predicate_datatype) =
+      DataType.(of_ty ~safe_for_are_disjoint:false env Tuple)
+    in
     if DataType.are_disjoint env ty_datatype predicate_datatype then
       (env, TyPartition.mk_right ~env ~predicate ty)
     else
@@ -355,7 +357,9 @@ and split_ty_by_shape
        precisely know the relationship with the [IsShapeOf] prediacte so default to
        spanning
     *)
-    let (env, predicate_datatype) = DataType.(of_ty env Shape) in
+    let (env, predicate_datatype) =
+      DataType.(of_ty ~safe_for_are_disjoint:false env Shape)
+    in
     if DataType.are_disjoint env ty_datatype predicate_datatype then
       (env, TyPartition.mk_right ~env ~predicate ty)
     else
@@ -367,7 +371,9 @@ and split_ty_by_tag
     (ty : locl_ty)
     (tag : type_tag)
     (predicate : type_predicate) : env * TyPartition.t =
-  let (env, predicate_datatype) = DataType.of_tag env tag in
+  let (env, predicate_datatype) =
+    DataType.of_tag ~safe_for_are_disjoint:false env tag
+  in
   let predicate_complement_datatype = DataType.complement predicate_datatype in
   if DataType.are_disjoint env ty_datatype predicate_datatype then
     (env, TyPartition.mk_right ~env ~predicate ty)
@@ -438,19 +444,27 @@ and split_ty
         Aast.(
           (Tint | Tnull | Tvoid | Tbool | Tfloat | Tstring | Tresource) as prim)
       ->
-      partition_f DataType.(of_ty env @@ Primitive prim)
-    | Tfun _ -> partition_f DataType.(of_ty env Function)
-    | Tnonnull -> partition_f DataType.(of_ty env Nonnull)
-    | Ttuple _ -> partition_f DataType.(of_ty env Tuple)
-    | Tshape _ -> partition_f DataType.(of_ty env Shape)
-    | Tlabel _ -> partition_f DataType.(of_ty env Label)
-    | Tclass ((_, name), _, _) -> partition_f DataType.(of_ty env @@ Class name)
+      partition_f
+        DataType.(of_ty ~safe_for_are_disjoint:false env @@ Primitive prim)
+    | Tfun _ ->
+      partition_f DataType.(of_ty ~safe_for_are_disjoint:false env Function)
+    | Tnonnull ->
+      partition_f DataType.(of_ty ~safe_for_are_disjoint:false env Nonnull)
+    | Ttuple _ ->
+      partition_f DataType.(of_ty ~safe_for_are_disjoint:false env Tuple)
+    | Tshape _ ->
+      partition_f DataType.(of_ty ~safe_for_are_disjoint:false env Shape)
+    | Tlabel _ ->
+      partition_f DataType.(of_ty ~safe_for_are_disjoint:false env Label)
+    | Tclass ((_, name), _, _) ->
+      partition_f
+        DataType.(of_ty ~safe_for_are_disjoint:false env @@ Class name)
     | Tneg (_, predicate) ->
       let (env, dty) =
         match predicate with
-        | IsTag tag -> DataType.of_tag env tag
-        | IsTupleOf _ -> DataType.(of_ty env Tuple)
-        | IsShapeOf _ -> DataType.(of_ty env Shape)
+        | IsTag tag -> DataType.of_tag ~safe_for_are_disjoint:false env tag
+        | IsTupleOf _ -> DataType.(of_ty ~safe_for_are_disjoint:false env Tuple)
+        | IsShapeOf _ -> DataType.(of_ty ~safe_for_are_disjoint:false env Shape)
       in
       let dty = DataType.complement dty in
       partition_f (env, dty)

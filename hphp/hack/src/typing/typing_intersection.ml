@@ -479,6 +479,7 @@ and try_simplifying_case_type
       | Some variants ->
         let (env, filtered_ty) =
           Typing_case_types.filter_variants_using_datatype
+            ~safe_for_are_disjoint:false
             env
             r
             variants

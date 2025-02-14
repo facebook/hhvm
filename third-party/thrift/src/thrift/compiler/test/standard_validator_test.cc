@@ -145,16 +145,16 @@ TEST(StandardValidatorTest, ConstKeyCollision) {
     FooBar.Bar: "Bar",
     FooBar.Foo: "Foo",
     1: "Bar2",
-    # expected-warning@-1: Duplicate key in map literal: `1`
+    # expected-error@-1: Duplicate key in map literal: `1`
     2: "Foo2",
-    # expected-warning@-1: Duplicate key in map literal: `2`
+    # expected-error@-1: Duplicate key in map literal: `2`
 }
 
     const map<i64, string> USEFUL_DATA = {
       1: "a",
       2: "b",
       1: "c",
-    # expected-warning@-1: Duplicate key in map literal: `1`
+    # expected-error@-1: Duplicate key in map literal: `1`
     };
 
     const string GREETING = "hey";
@@ -165,13 +165,13 @@ TEST(StandardValidatorTest, ConstKeyCollision) {
       GREETING: "a",
       HELLO: "b",
       SALUTATION: "c",
-    # expected-warning@-1: Duplicate key in map literal: `hey`
+    # expected-error@-1: Duplicate key in map literal: `hey`
     };
 
     const list<map<string, i64>> LIST_NESTING = [
       {"str": 1},
       {"foo": 1, "bar": 2, "foo": 3},
-    # expected-warning@-1: Duplicate key in map literal: `foo`
+    # expected-error@-1: Duplicate key in map literal: `foo`
       {"str": 1},
     ];
 
@@ -188,7 +188,7 @@ TEST(StandardValidatorTest, ConstKeyCollision) {
 
     const Building B = Building {
       int_str = {4: "a", 5: "b", 4: "c"},
-    # expected-warning@-1: Duplicate key in map literal: `4`
+    # expected-error@-1: Duplicate key in map literal: `4`
     };
 
     const Building C = Building {
@@ -211,7 +211,7 @@ TEST(StandardValidatorTest, FieldDefaultKeyCollision) {
       2: "Foo",
       4: "Bar",
       2: "Bar"
-    # expected-warning@-1: Duplicate key in map literal: `2`
+    # expected-error@-1: Duplicate key in map literal: `2`
     }
 
     struct S {
@@ -223,7 +223,7 @@ TEST(StandardValidatorTest, FieldDefaultKeyCollision) {
       };
       4: map<list<i64>, i64> bad_init_list_key = {
         [1, 1, 2]: 1, [1, 1, 2]: 2
-    # expected-warning@-1: Duplicate key in map literal: `[1, ..., 2]`
+    # expected-error-1: Duplicate key in map literal: `[1, ..., 2]`
       };
     }
   )");

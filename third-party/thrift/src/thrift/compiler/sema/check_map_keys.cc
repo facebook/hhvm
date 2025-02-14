@@ -27,8 +27,12 @@
 namespace apache::thrift::compiler {
 namespace {
 
-diagnostic_level kMismatchLevel = diagnostic_level::warning;
-diagnostic_level kDuplicateLevel = diagnostic_level::warning;
+// When a mapping (struct or map) has duplicate keys, and they have conflicting
+// values, then we report a compiler error.
+static const diagnostic_level kMismatchLevel = diagnostic_level::error;
+// When a mapping has duplicate keys, and they have the same values, or if a set
+// has duplicate keys, then we report a compiler warning.
+static const diagnostic_level kDuplicateLevel = diagnostic_level::warning;
 
 using const_value_kv = std::pair<t_const_value*, t_const_value*>;
 

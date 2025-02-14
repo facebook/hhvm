@@ -15,7 +15,6 @@
 #include <proxygen/lib/http/codec/HTTPChecks.h>
 #include <proxygen/lib/http/codec/test/MockHTTPCodec.h>
 #include <proxygen/lib/http/codec/test/TestUtils.h>
-#include <random>
 
 using namespace proxygen;
 using namespace std;

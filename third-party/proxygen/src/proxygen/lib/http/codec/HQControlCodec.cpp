@@ -9,7 +9,6 @@
 #include <proxygen/lib/http/codec/HQControlCodec.h>
 
 #include <proxygen/lib/http/HTTP3ErrorCode.h>
-#include <proxygen/lib/http/codec/CodecUtil.h>
 #include <proxygen/lib/http/codec/HQUtils.h>
 
 #include <folly/Random.h>

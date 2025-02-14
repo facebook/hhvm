@@ -10,7 +10,6 @@
 
 #include <folly/String.h>
 #include <folly/ThreadLocal.h>
-#include <proxygen/lib/http/HeaderConstants.h>
 #include <proxygen/lib/http/RFC2616.h>
 
 namespace proxygen {

@@ -12,7 +12,6 @@
 #include <proxygen/lib/http/codec/CodecProtocol.h>
 #include <proxygen/lib/http/codec/HTTP1xCodec.h>
 #include <proxygen/lib/http/codec/HTTP2Codec.h>
-#include <proxygen/lib/http/codec/HTTP2Constants.h>
 
 namespace {
 folly::StringPiece trimTrailingNulls(folly::StringPiece sp) {

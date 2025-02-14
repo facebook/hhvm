@@ -10,7 +10,6 @@
 #include <folly/portability/GFlags.h>
 
 #include <proxygen/lib/http/codec/compress/HPACKEncoder.h>
-#include <proxygen/lib/http/codec/compress/HPACKHeader.h>
 #include <proxygen/lib/http/codec/compress/experimental/simulator/CompressionSimulator.h>
 
 DEFINE_string(input, "", "File containing requests");

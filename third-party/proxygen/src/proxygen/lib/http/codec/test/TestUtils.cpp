@@ -11,7 +11,6 @@
 #include <proxygen/lib/http/codec/HTTP2Codec.h>
 #include <proxygen/lib/http/codec/HTTP2Constants.h>
 
-#include <boost/optional/optional_io.hpp>
 #include <folly/Random.h>
 #include <folly/io/Cursor.h>
 

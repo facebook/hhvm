@@ -10,10 +10,8 @@
 
 #include <folly/Random.h>
 #include <folly/portability/GTest.h>
-#include <proxygen/lib/http/HTTPHeaderSize.h>
 #include <proxygen/lib/http/HTTPMessage.h>
 #include <proxygen/lib/http/codec/test/TestUtils.h>
-#include <random>
 
 #include <proxygen/lib/http/codec/HTTP2Framer.h>
 

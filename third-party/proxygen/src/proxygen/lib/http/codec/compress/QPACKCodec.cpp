@@ -9,7 +9,6 @@
 #include <proxygen/lib/http/codec/compress/QPACKCodec.h>
 
 #include <algorithm>
-#include <folly/String.h>
 #include <folly/ThreadLocal.h>
 #include <folly/io/Cursor.h>
 #include <iosfwd>

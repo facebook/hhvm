@@ -8,7 +8,6 @@
 
 #include <proxygen/lib/http/codec/HTTPParallelCodec.h>
 
-#include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <glog/logging.h>
 #include <proxygen/lib/http/HTTPMessage.h>

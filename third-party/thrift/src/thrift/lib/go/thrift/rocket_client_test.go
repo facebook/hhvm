@@ -148,7 +148,7 @@ func TestFDRelease(t *testing.T) {
 		// NOTE!!!!!!
 		// Close() call is missing intentionally!!!!
 		// We are testing that the FD is released when the client is GCed.
-		client := dummy.NewDummyClient(proto)
+		client := dummy.NewDummyChannelClient(NewSerialChannel(proto))
 		_, err = client.Echo(context.Background(), "hello")
 		if err != nil {
 			t.Fatalf("failed to make RPC: %v", err)

@@ -100,7 +100,7 @@ func runStressTest(t *testing.T, serverTransport thrift.TransportID) {
 			t.Log(errRes.Error())
 			return errRes
 		}
-		client := dummy.NewDummyClient(conn)
+		client := dummy.NewDummyChannelClient(thrift.NewSerialChannel(conn))
 		defer client.Close()
 		result, err := client.Echo(context.Background(), "hello")
 		if err != nil {

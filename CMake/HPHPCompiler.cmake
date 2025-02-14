@@ -93,19 +93,8 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
   endif()
 
   if (IS_X64)
-    # For unclear reasons, our detection for what crc32 intrinsics you have
-    # will cause Apple clang to ICE. Specifying a baseline here works around
-    # the issue. (SSE4.2 has been available on processors for quite some time now.)
-    if(ENABLE_SSE4_2 OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
-      list(APPEND GENERAL_CXX_OPTIONS
-        # SSE4.2 has been available on processors for quite some time now. This
-        # allows enabling CRC hash function code
-        "msse4.2"
-      )
-      # Also pass the right option to ASM files to avoid inconsistencies
-      # in CRC hash function handling
-      set(CMAKE_ASM_FLAGS  "${CMAKE_ASM_FLAGS} -msse4.2")
-    endif()
+    list(APPEND GENERAL_CXX_OPTIONS "march=x86-64-v3")
+    set(CMAKE_ASM_FLAGS  "${CMAKE_ASM_FLAGS} -march=x86-64-v3")
   endif()
 
   if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang") # using Clang
@@ -285,13 +274,6 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -${opt}")
   endforeach()
 
-  # The ASM part of this makes it more effort than it's worth
-  # to add these to the general flags system.
-  if(ENABLE_AVX2)
-    set(CMAKE_C_FLAGS    "${CMAKE_C_FLAGS} -mavx2 -march=core-avx2")
-    set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -mavx2 -march=core-avx2")
-    set(CMAKE_ASM_FLAGS  "${CMAKE_ASM_FLAGS} -mavx2 -march=core-avx2")
-  endif()
   # using Intel C++
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
   set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -no-ipo -fp-model precise -wd584 -wd1418 -wd1918 -wd383 -wd869 -wd981 -wd424 -wd1419 -wd444 -wd271 -wd2259 -wd1572 -wd1599 -wd82 -wd177 -wd593 -w")
@@ -347,11 +329,6 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
   # Enable multi-processor compilation if requested.
   if (MSVC_ENABLE_PARALLEL_BUILD)
     list(APPEND MSVC_GENERAL_OPTIONS "MP")
-  endif()
-
-  # Enable AVX2 codegen if available and requested.
-  if (ENABLE_AVX2)
-    list(APPEND MSVC_GENERAL_OPTIONS "arch:AVX2")
   endif()
 
   # Validate, and then add the favored architecture.

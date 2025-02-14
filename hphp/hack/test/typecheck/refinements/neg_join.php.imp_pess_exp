@@ -1,7 +1,7 @@
 File "neg_join.php", line 17, characters 9-19:
   null
 File "neg_join.php", line 22, characters 5-15:
-  (not string & nonnull & not bool & not num)
+  (not string & not bool & nonnull & not num)
 File "neg_join.php", line 25, characters 3-13:
   ?nonnull
 No errors

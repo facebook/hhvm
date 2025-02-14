@@ -571,6 +571,9 @@ and intersect_lists env rec_tracker r tyl1 tyl2 =
   make_intersection env r tyl
 
 and intersect_ty_tyl env rec_tracker r ty tyl =
+  (* try negs last because we expect them to be more likely to fail try_intersect *)
+  let (negs, others) = List.partition_tf tyl ~f:is_neg in
+  let tyl = others @ negs in
   let rec intersect_ty_tyl env ty tyl missed_inter_tyl =
     match tyl with
     | [] -> (env, (ty, missed_inter_tyl))

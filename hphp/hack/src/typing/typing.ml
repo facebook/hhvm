@@ -7220,6 +7220,16 @@ end = struct
         in
         (env, Some [partition])
     in
+    let (env, like_type_dynamic, ty) =
+      let (env, ty) = Env.expand_type env ty in
+      match get_node ty with
+      | Tunion tyl ->
+        (match Typing_dynamic_utils.try_strip_dynamic_from_union env tyl with
+        | Some (dynamic, tyl) ->
+          (env, Some dynamic, MakeType.union (get_reason ty) tyl)
+        | None -> (env, None, ty))
+      | _ -> (env, None, ty)
+    in
     return
     @@
     match get_partitions env ty with
@@ -7311,9 +7321,18 @@ end = struct
       ( env,
         (fun env ->
           let assumptions =
-            Typing_logic.Disj
-              ( None,
-                List.map ty_true_ty_false_assumptions ~f:(fun (_, _, a) -> a) )
+            let props =
+              List.map ty_true_ty_false_assumptions ~f:(fun (_, _, a) -> a)
+            in
+            match props with
+            (* Avoid creating a unary Disj -- this avoids the is_unsat prop
+               filtering that we do in update_env_with_assumptions.
+               This is a sneaky way of handling cases such as where we have a
+               like type whose non-dynamic part is disjoint and we get
+               `prop &&& FALSE` and we'd like to not filter it out and apply
+               `prop` to mimic current (unsound) behavior (T214130596) *)
+            | [prop] -> prop
+            | props -> Typing_logic.Disj (None, props)
           in
           let env = update_env_with_assumptions env assumptions in
           let (env, ty_trues) =
@@ -7324,6 +7343,11 @@ end = struct
               ~f:(fun env acc (ty_trues, _, _) ->
                 let (env, ty_trues) = ty_trues env in
                 (env, ty_trues @ acc))
+          in
+          let ty_trues =
+            match like_type_dynamic with
+            | Some dyn -> dyn :: ty_trues
+            | None -> ty_trues
           in
           let (env, ty_true) = union env reason ty_trues in
           let (env, ty_true) =
@@ -7343,6 +7367,11 @@ end = struct
               ~f:(fun env acc (_, ty_falses, _) ->
                 let (env, ty_falses) = ty_falses env in
                 (env, ty_falses @ acc))
+          in
+          let ty_falses =
+            match like_type_dynamic with
+            | Some dyn -> dyn :: ty_falses
+            | None -> ty_falses
           in
           let (env, ty_false) = union env reason ty_falses in
           refine_local ty_false env )

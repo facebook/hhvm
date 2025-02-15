@@ -955,10 +955,11 @@ void ThriftServer::setupThreadManager() {
       }
     } else {
       auto explanation = fmt::format(
-          "thrift flag: {}, enable gflag: {}, disable gflag: {}",
+          "thrift flag: {}, enable gflag: {}, disable gflag: {}, runtime actions: {}",
           THRIFT_FLAG(experimental_use_resource_pools),
           FLAGS_thrift_experimental_use_resource_pools,
-          FLAGS_thrift_disable_resource_pools);
+          FLAGS_thrift_disable_resource_pools,
+          runtimeServerActions_.explain());
       XLOG_IF(INFO, infoLoggingEnabled_)
           << "Using resource pools on address/port " << getAddressAsString()
           << ": " << explanation;

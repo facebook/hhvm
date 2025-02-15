@@ -864,13 +864,13 @@ class ResourcePoolsFlagsTest : public testing::Test,
     // enumerates the various cases and the complete text of the explanation.
     if (thriftFlag && !gFlag) {
       expectedExplanation_ =
-          "thrift flag: true, enable gflag: false, disable gflag: false";
+          "thrift flag: true, enable gflag: false, disable gflag: false, runtime actions: ";
     } else if (!thriftFlag && gFlag) {
       expectedExplanation_ =
-          "thrift flag: false, enable gflag: true, disable gflag: false";
+          "thrift flag: false, enable gflag: true, disable gflag: false, runtime actions: thriftFlagNotSet, ";
     } else if (thriftFlag && gFlag) {
       expectedExplanation_ =
-          "thrift flag: true, enable gflag: true, disable gflag: false";
+          "thrift flag: true, enable gflag: true, disable gflag: false, runtime actions: ";
     } else {
       expectedExplanation_ =
           "runtime: thriftFlagNotSet, , thrift flag: false, enable gflag: false, disable gflag: false";

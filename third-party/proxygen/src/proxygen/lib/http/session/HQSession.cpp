@@ -3936,12 +3936,14 @@ HQSession::HQStreamTransport::resumeWebTransportIngress(
 
 folly::Expected<folly::Unit, WebTransport::ErrorCode>
 HQSession::HQStreamTransport::stopReadingWebTransportIngress(
-    HTTPCodec::StreamID id, uint32_t errorCode) {
+    HTTPCodec::StreamID id, folly::Optional<uint32_t> errorCode) {
   if (session_.sock_) {
-    auto res = session_.sock_->setReadCallback(
-        id,
-        nullptr,
-        quic::ApplicationErrorCode(WebTransport::toHTTPErrorCode(errorCode)));
+    quic::Optional<quic::ApplicationErrorCode> quicErrorCode;
+    if (errorCode) {
+      quicErrorCode =
+          quic::ApplicationErrorCode(WebTransport::toHTTPErrorCode(*errorCode));
+    }
+    auto res = session_.sock_->setReadCallback(id, nullptr, quicErrorCode);
     if (res.hasError()) {
       return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
     }

@@ -739,8 +739,9 @@ class HTTPTransaction
     }
 
     folly::Expected<folly::Unit, WebTransport::ErrorCode>
-    stopReadingWebTransportIngress(HTTPCodec::StreamID /*id*/,
-                                   uint32_t /*errorCode*/) override {
+    stopReadingWebTransportIngress(
+        HTTPCodec::StreamID /*id*/,
+        folly::Optional<uint32_t> /*errorCode*/) override {
       LOG(FATAL) << __func__ << " not supported";
       folly::assume_unreachable();
     }

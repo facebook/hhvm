@@ -130,8 +130,8 @@ WebTransportImpl::resetWebTransportEgress(HTTPCodec::StreamID id,
 }
 
 folly::Expected<folly::Unit, WebTransport::ErrorCode>
-WebTransportImpl::stopReadingWebTransportIngress(HTTPCodec::StreamID id,
-                                                 uint32_t errorCode) {
+WebTransportImpl::stopReadingWebTransportIngress(
+    HTTPCodec::StreamID id, folly::Optional<uint32_t> errorCode) {
   auto res = tp_.stopReadingWebTransportIngress(id, errorCode);
   wtIngressStreams_.erase(id);
   sp_.refreshTimeout();
@@ -229,7 +229,8 @@ WebTransportImpl::StreamReadHandle::readStreamData() {
     auto bufLen = buf_.chainLength();
     WebTransport::StreamData streamData({buf_.move(), eof_});
     if (eof_) {
-      impl_.wtIngressStreams_.erase(getID());
+      // unregister the read callback, but don't send STOP_SENDING
+      impl_.stopReadingWebTransportIngress(id_, folly::none);
     } else if (bufLen >= kMaxWTIngressBuf) {
       VLOG(4) << __func__ << " resuming reads";
       impl_.tp_.resumeWebTransportIngress(getID());
@@ -269,7 +270,8 @@ WebTransport::FCState WebTransportImpl::StreamReadHandle::dataAvailable(
     readPromise_->setValue(WebTransport::StreamData({std::move(data), eof}));
     readPromise_.reset();
     if (eof) {
-      impl_.wtIngressStreams_.erase(getID());
+      // unregister the read callback, but don't send STOP_SENDING
+      impl_.stopReadingWebTransportIngress(getID(), folly::none);
       return WebTransport::FCState::UNBLOCKED;
     }
   } else {

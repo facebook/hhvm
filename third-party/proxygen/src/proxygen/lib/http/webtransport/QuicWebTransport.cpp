@@ -168,11 +168,14 @@ QuicWebTransport::resumeWebTransportIngress(HTTPCodec::StreamID id) {
 }
 
 folly::Expected<folly::Unit, WebTransport::ErrorCode>
-QuicWebTransport::stopReadingWebTransportIngress(HTTPCodec::StreamID id,
-                                                 uint32_t errorCode) {
+QuicWebTransport::stopReadingWebTransportIngress(
+    HTTPCodec::StreamID id, folly::Optional<uint32_t> errorCode) {
   XCHECK(quicSocket_);
-  auto res = quicSocket_->setReadCallback(
-      id, nullptr, quic::ApplicationErrorCode(errorCode));
+  quic::Optional<quic::ApplicationErrorCode> quicErrorCode;
+  if (errorCode) {
+    quicErrorCode = quic::ApplicationErrorCode(*errorCode);
+  }
+  auto res = quicSocket_->setReadCallback(id, nullptr, quicErrorCode);
   if (res.hasError()) {
     return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
   }

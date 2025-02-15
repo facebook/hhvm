@@ -16,6 +16,9 @@ using WTFCState = proxygen::WebTransport::FCState;
 namespace {
 constexpr uint32_t WT_APP_ERROR_1 = 19;
 constexpr uint32_t WT_APP_ERROR_2 = 77;
+folly::Optional<uint32_t> makeOpt(uint32_t n) {
+  return n;
+}
 } // namespace
 
 namespace proxygen::test {
@@ -124,7 +127,8 @@ TEST_F(HTTPTransactionWebTransportTest, CreateStreams) {
       .WillOnce(Return(folly::unit));
   EXPECT_EQ(res->writeHandle->getID(), 0);
   res->writeHandle->resetStream(WT_APP_ERROR_1);
-  EXPECT_CALL(transport_, stopReadingWebTransportIngress(0, WT_APP_ERROR_2))
+  EXPECT_CALL(transport_,
+              stopReadingWebTransportIngress(0, makeOpt(WT_APP_ERROR_2)))
       .WillOnce(Return(folly::unit));
   res->readHandle->stopSending(WT_APP_ERROR_2);
 
@@ -198,6 +202,10 @@ TEST_F(HTTPTransactionWebTransportTest, ReadStream) {
             });
   EXPECT_FALSE(fut.isReady());
 
+  // it gets stopReadingWebTransportIngress when the EOF is read out
+  EXPECT_CALL(transport_,
+              stopReadingWebTransportIngress(0, folly::Optional<uint32_t>()));
+
   implHandle->dataAvailable(nullptr, true);
   eventBase_.loopOnce();
   EXPECT_TRUE(fut.isReady());
@@ -264,8 +272,9 @@ TEST_F(HTTPTransactionWebTransportTest, ReadStreamCancel) {
   auto fut = readHandle->readStreamData();
 
   // Cancel the future, the transport will get a STOP_SENDING
-  EXPECT_CALL(transport_,
-              stopReadingWebTransportIngress(0, WebTransport::kInternalError))
+  EXPECT_CALL(
+      transport_,
+      stopReadingWebTransportIngress(0, makeOpt(WebTransport::kInternalError)))
       .WillOnce(Return(folly::unit));
   fut.cancel();
   EXPECT_TRUE(fut.isReady());
@@ -391,6 +400,10 @@ TEST_F(HTTPTransactionWebTransportTest, BidiStreamEdgeCases) {
   // deliver EOF before read
   bidiHandle.readHandle->dataAvailable(nullptr, true);
 
+  // it gets stopReadingWebTransportIngress when the EOF is read out
+  EXPECT_CALL(transport_,
+              stopReadingWebTransportIngress(0, folly::Optional<uint32_t>()));
+
   auto fut = streamHandle.readHandle->readStreamData()
                  .via(&eventBase_)
                  .thenTry([](auto streamData) {
@@ -448,8 +461,9 @@ TEST_F(HTTPTransactionWebTransportTest, StreamDetachWithOpenStreams) {
       });
   HTTPException ex(HTTPException::Direction::INGRESS_AND_EGRESS, "aborted");
   handler_.expectError();
-  EXPECT_CALL(transport_,
-              stopReadingWebTransportIngress(0, WebTransport::kInternalError));
+  EXPECT_CALL(
+      transport_,
+      stopReadingWebTransportIngress(0, makeOpt(WebTransport::kInternalError)));
   txn_->onError(ex);
   EXPECT_TRUE(readCancelled);
   EXPECT_TRUE(writeCancelled);
@@ -458,14 +472,16 @@ TEST_F(HTTPTransactionWebTransportTest, StreamDetachWithOpenStreams) {
 TEST_F(HTTPTransactionWebTransportTest, NoHandler) {
   TearDown();
   setup(/*withHandler=*/false);
-  EXPECT_CALL(transport_,
-              stopReadingWebTransportIngress(0, WebTransport::kInternalError))
+  EXPECT_CALL(
+      transport_,
+      stopReadingWebTransportIngress(0, makeOpt(WebTransport::kInternalError)))
       .RetiresOnSaturation();
   EXPECT_CALL(transport_,
               resetWebTransportEgress(0, WebTransport::kInternalError));
   txn_->onWebTransportBidiStream(0);
-  EXPECT_CALL(transport_,
-              stopReadingWebTransportIngress(1, WebTransport::kInternalError));
+  EXPECT_CALL(
+      transport_,
+      stopReadingWebTransportIngress(1, makeOpt(WebTransport::kInternalError)));
   txn_->onWebTransportUniStream(1);
 }
 
@@ -493,7 +509,8 @@ TEST_F(HTTPTransactionWebTransportTest, StreamIDAPIs) {
   EXPECT_TRUE(fut.isReady());
 
   // stopSending by ID
-  EXPECT_CALL(transport_, stopReadingWebTransportIngress(0, WT_APP_ERROR_1))
+  EXPECT_CALL(transport_,
+              stopReadingWebTransportIngress(0, makeOpt(WT_APP_ERROR_1)))
       .WillOnce(Return(folly::unit));
   wt_->stopSending(id, WT_APP_ERROR_1);
 
@@ -542,7 +559,7 @@ TEST_F(HTTPTransactionWebTransportTest, RefreshTimeout) {
       [this] {
         EXPECT_CALL(transport_,
                     stopReadingWebTransportIngress(
-                        0, std::numeric_limits<uint32_t>::max()))
+                        0, makeOpt(std::numeric_limits<uint32_t>::max())))
             .WillOnce(Return(folly::unit));
         handler_.expectEOM();
         txn_->onIngressEOM();
@@ -560,7 +577,8 @@ TEST_F(HTTPTransactionWebTransportTest, StopSendingThenAbort) {
 
   txn_->onWebTransportUniStream(0);
   EXPECT_NE(readHandle, nullptr);
-  EXPECT_CALL(transport_, stopReadingWebTransportIngress(0, WT_APP_ERROR_2))
+  EXPECT_CALL(transport_,
+              stopReadingWebTransportIngress(0, makeOpt(WT_APP_ERROR_2)))
       .WillOnce(Return(folly::unit));
   readHandle->stopSending(WT_APP_ERROR_2);
   // there's no way to abort this stream anymore.  stopSending removes the

@@ -111,8 +111,9 @@ class QuicWebTransport
       resumeWebTransportIngress(HTTPCodec::StreamID /*id*/) override;
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode>
-      stopReadingWebTransportIngress(HTTPCodec::StreamID /*id*/,
-                                     uint32_t /*errorCode*/) override;
+      stopReadingWebTransportIngress(
+          HTTPCodec::StreamID /*id*/,
+          folly::Optional<uint32_t> /*errorCode*/) override;
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode> sendDatagram(
       std::unique_ptr<folly::IOBuf> /*datagram*/) override;

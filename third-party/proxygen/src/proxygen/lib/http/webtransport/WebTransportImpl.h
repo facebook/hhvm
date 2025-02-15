@@ -62,8 +62,9 @@ class WebTransportImpl : public WebTransport {
         resumeWebTransportIngress(HTTPCodec::StreamID /*id*/) = 0;
 
     virtual folly::Expected<folly::Unit, WebTransport::ErrorCode>
-        stopReadingWebTransportIngress(HTTPCodec::StreamID /*id*/,
-                                       uint32_t /*errorCode*/) = 0;
+        stopReadingWebTransportIngress(
+            HTTPCodec::StreamID /*id*/,
+            folly::Optional<uint32_t> /*errorCode*/) = 0;
     virtual folly::Expected<folly::Unit, WebTransport::ErrorCode> sendDatagram(
         std::unique_ptr<folly::IOBuf> /*datagram*/) = 0;
 
@@ -273,7 +274,8 @@ class WebTransportImpl : public WebTransport {
       HTTPCodec::StreamID id, uint32_t errorCode);
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode>
-  stopReadingWebTransportIngress(HTTPCodec::StreamID id, uint32_t errorCode);
+  stopReadingWebTransportIngress(HTTPCodec::StreamID id,
+                                 folly::Optional<uint32_t> errorCode);
 
   folly::Expected<WebTransport::BidiStreamHandle, WebTransport::ErrorCode>
   newWebTransportBidiStream();

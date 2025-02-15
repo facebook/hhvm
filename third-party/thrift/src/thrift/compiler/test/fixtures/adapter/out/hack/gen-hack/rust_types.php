@@ -202,6 +202,10 @@ class Copy implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
           shape(
           )
         ),
+        '\facebook\thrift\annotation\Union' => \facebook\thrift\annotation\Union::fromShape(
+          shape(
+          )
+        ),
       ],
       'fields' => dict[
       ],

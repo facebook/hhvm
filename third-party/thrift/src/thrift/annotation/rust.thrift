@@ -41,6 +41,7 @@ struct Name {
 }
 
 @scope.Struct
+@scope.Union
 struct Copy {
 // # `rust.Copy`
 //

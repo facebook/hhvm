@@ -92,7 +92,7 @@ class t_node {
   // t_node is abstract.
   t_node() = default;
 
-  static const std::string kEmptyString;
+  static const std::string& emptyString();
 
   template <typename D>
   static std::string annotation_or(const std::string* val, D&& def) {
@@ -104,12 +104,12 @@ class t_node {
 
   static const std::string& annotation_or(
       const std::string* val, const std::string* def) {
-    return val ? *val : (def ? *def : kEmptyString);
+    return val ? *val : (def ? *def : emptyString());
   }
 
   static const std::string& annotation_or(
       const std::string* val, std::string* def) {
-    return val ? *val : (def ? *def : kEmptyString);
+    return val ? *val : (def ? *def : emptyString());
   }
 
  private:

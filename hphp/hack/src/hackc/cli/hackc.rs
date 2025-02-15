@@ -261,7 +261,7 @@ fn hackc_main(mut opts: Opts) -> Result<()> {
     // on AAST nodes are inherently recursive.
     rayon::ThreadPoolBuilder::new()
         .num_threads(opts.num_threads)
-        .stack_size(opts.stack_size.get_bytes().try_into()?)
+        .stack_size(opts.stack_size.as_u128().try_into()?)
         .build_global()
         .unwrap();
 

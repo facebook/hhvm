@@ -17,7 +17,7 @@ anyhow = "1.0.95"
 assemble = { version = "0.0.0", path = "cargo/assemble" }
 bc_to_ir = { version = "0.0.0", path = "ir/conversions/bc_to_ir" }
 bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
-byte-unit = "4.0.14"
+byte-unit = { version = "5.1.6", features = ["default", "u128"] }
 bytecode_printer = { version = "0.0.0", path = "bytecode_printer" }
 clap = { version = "4.5.20", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 cmp = { version = "0.0.0", path = "utils/cmp" }

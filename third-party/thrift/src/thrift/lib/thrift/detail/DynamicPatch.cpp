@@ -15,7 +15,6 @@
  */
 
 #include <folly/Overload.h>
-#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Patch.h>
 #include <thrift/lib/thrift/detail/DynamicPatch.h>
@@ -24,8 +23,6 @@
 #include <thrift/lib/cpp2/patch/detail/PatchBadge.h>
 
 namespace apache::thrift::protocol {
-THRIFT_FLAG_DEFINE_bool(
-    thrift_patch_diff_visitor_ensure_on_potential_terse_write_field, false);
 
 using detail::badge;
 using detail::ValueList;
@@ -924,15 +921,12 @@ DynamicPatch DiffVisitorBase::diffStructured(
     bool shouldUseAssignPatch =
         src.empty() || dst.empty() || src.begin()->first != dst.begin()->first;
 
-    if (THRIFT_FLAG(
-            thrift_patch_diff_visitor_ensure_on_potential_terse_write_field)) {
-      // If field is src looks like deprecated terse field, we need to use
-      // EnsureStruct, which is not supported by UnionPatch, thus we need to use
-      // AssignPatch.
-      shouldUseAssignPatch = shouldUseAssignPatch ||
-          (src.begin()->second != dst.begin()->second &&
-           maybeEmptyDeprecatedTerseField(src.begin()->second));
-    }
+    // If field is src looks like deprecated terse field, we need to use
+    // EnsureStruct, which is not supported by UnionPatch, thus we need to use
+    // AssignPatch.
+    shouldUseAssignPatch = shouldUseAssignPatch ||
+        (src.begin()->second != dst.begin()->second &&
+         maybeEmptyDeprecatedTerseField(src.begin()->second));
 
     if (shouldUseAssignPatch) {
       DynamicUnknownPatch patch;
@@ -1072,9 +1066,7 @@ void DiffVisitorBase::diffField(
   auto guard = folly::makeGuard([&] { pop(); });
   auto subPatch = diff(badge, src.at(id), dst.at(id));
   if (!subPatch.empty(badge)) {
-    if (THRIFT_FLAG(
-            thrift_patch_diff_visitor_ensure_on_potential_terse_write_field) &&
-        maybeEmptyDeprecatedTerseField(src.at(id))) {
+    if (maybeEmptyDeprecatedTerseField(src.at(id))) {
       patch.ensure(badge, id, emptyValue(src.at(id).getType()));
     }
     patch.patchIfSet(badge, id).merge(badge, DynamicPatch{std::move(subPatch)});

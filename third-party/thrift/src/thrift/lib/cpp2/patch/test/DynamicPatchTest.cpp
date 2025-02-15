@@ -15,7 +15,6 @@
  */
 
 #include <gtest/gtest.h>
-#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/patch/DynamicPatch.h>
 #include <thrift/lib/cpp2/patch/detail/PatchBadge.h>
 #include <thrift/lib/cpp2/patch/test/gen-cpp2/gen_patch_DynamicPatchTest_types.h>
@@ -25,8 +24,6 @@
 
 namespace apache::thrift::protocol {
 using detail::badge;
-THRIFT_FLAG_DECLARE_bool(
-    thrift_patch_diff_visitor_ensure_on_potential_terse_write_field);
 
 class DemoDiffVisitor : public DiffVisitorBase {
  public:
@@ -1011,8 +1008,6 @@ TEST(DynamicPatchTest, MergeMovedStructPatch) {
 }
 
 TEST(DemoDiffVisitor, TerseWriteFieldMismatch1) {
-  THRIFT_FLAG_SET_MOCK(
-      thrift_patch_diff_visitor_ensure_on_potential_terse_write_field, true);
   using test::Foo;
   Foo src, dst;
   dst.bar() = "123";
@@ -1038,8 +1033,6 @@ TEST(DemoDiffVisitor, TerseWriteFieldMismatch1) {
 }
 
 TEST(DemoDiffVisitor, TerseWriteFieldMismatch2) {
-  THRIFT_FLAG_SET_MOCK(
-      thrift_patch_diff_visitor_ensure_on_potential_terse_write_field, true);
   using test::Foo;
   Foo src, dst;
   dst.bar() = "123";

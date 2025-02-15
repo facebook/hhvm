@@ -4,6 +4,7 @@ Checks: '
 modernize-concat-nested-namespaces,
 modernize-type-traits,
 modernize-use-override,
+modernize-use-using,
 modernize-raw-string-literal,
 '
 ...

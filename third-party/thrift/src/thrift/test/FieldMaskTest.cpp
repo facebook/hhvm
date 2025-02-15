@@ -226,6 +226,12 @@ TEST(FieldMaskTest, IsAllMapMask) {
     EXPECT_FALSE((MaskRef{m, false}).isAllMapMask());
     EXPECT_FALSE((MaskRef{m, true}).isAllMapMask());
   }
+  {
+    Mask m;
+    m.includes_type_ref().emplace()[type::infer_tag<Foo>{}] = allMask();
+    EXPECT_THROW((MaskRef{m, true}).isAllMapMask(), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, false}).isAllMapMask(), std::runtime_error);
+  }
 }
 
 TEST(FieldMaskTest, IsNoneMapMask) {
@@ -265,6 +271,104 @@ TEST(FieldMaskTest, IsNoneMapMask) {
         .emplace();
     EXPECT_FALSE((MaskRef{m, false}).isNoneMapMask());
     EXPECT_FALSE((MaskRef{m, true}).isNoneMapMask());
+  }
+  {
+    Mask m;
+    m.includes_type_ref().emplace()[type::infer_tag<Foo>{}] = allMask();
+    EXPECT_THROW((MaskRef{m, true}).isNoneMapMask(), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, false}).isNoneMapMask(), std::runtime_error);
+  }
+}
+
+TEST(FieldMaskTest, IsAllTypeMask) {
+  auto allTypeMask = [] {
+    Mask m;
+    m.excludes_type_ref().emplace();
+    return m;
+  };
+
+  auto noneTypeMask = [] {
+    Mask m;
+    m.includes_type_ref().emplace();
+    return m;
+  };
+
+  EXPECT_TRUE((MaskRef{allTypeMask(), false}).isAllTypeMask());
+  EXPECT_TRUE((MaskRef{noneTypeMask(), true}).isAllTypeMask());
+  EXPECT_FALSE((MaskRef{noneTypeMask(), false}).isAllTypeMask());
+  EXPECT_FALSE((MaskRef{allTypeMask(), true}).isAllTypeMask());
+  {
+    Mask m;
+    m.excludes_ref().emplace()[5] = noneMask();
+    EXPECT_THROW((MaskRef{m, false}).isAllTypeMask(), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, true}).isAllTypeMask(), std::runtime_error);
+  }
+  {
+    Mask m;
+    m.includes_map_ref().emplace()[3].includes_map_ref().emplace();
+    EXPECT_THROW((MaskRef{m, false}).isAllTypeMask(), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, true}).isAllTypeMask(), std::runtime_error);
+  }
+  {
+    Mask m;
+    m.includes_string_map_ref()
+        .emplace()["3"]
+        .includes_string_map_ref()
+        .emplace();
+    EXPECT_THROW((MaskRef{m, false}).isAllTypeMask(), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, true}).isAllTypeMask(), std::runtime_error);
+  }
+  {
+    Mask m;
+    m.includes_type_ref().emplace()[type::infer_tag<Foo>{}] = allMask();
+    EXPECT_FALSE((MaskRef{m, false}).isAllTypeMask());
+    EXPECT_FALSE((MaskRef{m, true}).isAllTypeMask());
+  }
+}
+
+TEST(FieldMaskTest, IsNoneTypeMask) {
+  auto allTypeMask = [] {
+    Mask m;
+    m.excludes_type_ref().emplace();
+    return m;
+  };
+
+  auto noneTypeMask = [] {
+    Mask m;
+    m.includes_type_ref().emplace();
+    return m;
+  };
+
+  EXPECT_TRUE((MaskRef{noneTypeMask(), false}).isNoneTypeMask());
+  EXPECT_TRUE((MaskRef{allTypeMask(), true}).isNoneTypeMask());
+  EXPECT_FALSE((MaskRef{allTypeMask(), false}).isNoneTypeMask());
+  EXPECT_FALSE((MaskRef{noneTypeMask(), true}).isNoneTypeMask());
+  {
+    Mask m;
+    m.excludes_ref().emplace()[5] = noneMask();
+    EXPECT_THROW((MaskRef{m, false}).isNoneTypeMask(), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, true}).isNoneTypeMask(), std::runtime_error);
+  }
+  {
+    Mask m;
+    m.includes_map_ref().emplace()[3].includes_map_ref().emplace();
+    EXPECT_THROW((MaskRef{m, false}).isNoneTypeMask(), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, true}).isNoneTypeMask(), std::runtime_error);
+  }
+  {
+    Mask m;
+    m.includes_string_map_ref()
+        .emplace()["3"]
+        .includes_string_map_ref()
+        .emplace();
+    EXPECT_THROW((MaskRef{m, false}).isNoneTypeMask(), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, true}).isNoneTypeMask(), std::runtime_error);
+  }
+  {
+    Mask m;
+    m.includes_type_ref().emplace()[type::infer_tag<Foo>{}] = allMask();
+    EXPECT_FALSE((MaskRef{m, false}).isNoneTypeMask());
+    EXPECT_FALSE((MaskRef{m, true}).isNoneTypeMask());
   }
 }
 

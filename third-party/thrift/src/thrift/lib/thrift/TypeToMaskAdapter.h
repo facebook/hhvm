@@ -88,6 +88,8 @@ class ValidatingTypeMap {
 
   size_t size() const { return map_.size(); }
 
+  bool empty() const { return map_.empty(); }
+
   bool operator==(const ValidatingTypeMap& rhs) const {
     return this->map_ == rhs.map_;
   }

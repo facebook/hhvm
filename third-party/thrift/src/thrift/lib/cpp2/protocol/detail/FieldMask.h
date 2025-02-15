@@ -79,6 +79,22 @@ inline bool isNoneMapMask(const Mask& mask) {
        mask.includes_string_map_ref()->empty());
 }
 
+// Checks whether it is ALL type mask.
+inline bool isAllTypeMask(const Mask& mask) {
+  if (!mask.excludes_type_ref() && !mask.includes_type_ref()) {
+    folly::throw_exception<std::runtime_error>("This is not a type mask.");
+  }
+  return mask.excludes_type_ref() && mask.excludes_type_ref()->empty();
+}
+
+// Checks whether it is NONE type mask.
+inline bool isNoneTypeMask(const Mask& mask) {
+  if (!mask.excludes_type_ref() && !mask.includes_type_ref()) {
+    folly::throw_exception<std::runtime_error>("This is not a type mask.");
+  }
+  return mask.includes_type_ref() && mask.includes_type_ref()->empty();
+}
+
 // If mask is a field mask, return it, otherwise return nullptr
 [[nodiscard]] const FieldIdToMask* FOLLY_NULLABLE
 getFieldMask(const Mask& mask);

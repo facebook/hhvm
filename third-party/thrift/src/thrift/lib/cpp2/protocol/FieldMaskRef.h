@@ -65,11 +65,17 @@ class MaskRef {
   // Returns whether the ref includes no fields.
   bool isNoneMask() const;
 
-  // Returns whether the ref includes all fields.
+  // Returns whether the ref includes all map keys.
   bool isAllMapMask() const;
 
-  // Returns whether the ref includes no fields.
+  // Returns whether the ref includes no map keys.
   bool isNoneMapMask() const;
+
+  // Returns whether the ref includes all type entries.
+  bool isAllTypeMask() const;
+
+  // Returns whether the ref includes no type entries.
+  bool isNoneTypeMask() const;
 
   // Returns whether the ref is logically exclusive in context.
   bool isExclusive() const;

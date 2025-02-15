@@ -244,6 +244,20 @@ bool MaskRef::isNoneMapMask() const {
        ::apache::thrift::protocol::detail::isNoneMapMask(mask));
 }
 
+bool MaskRef::isAllTypeMask() const {
+  return (is_exclusion &&
+          ::apache::thrift::protocol::detail::isNoneTypeMask(mask)) ||
+      (!is_exclusion &&
+       ::apache::thrift::protocol::detail::isAllTypeMask(mask));
+}
+
+bool MaskRef::isNoneTypeMask() const {
+  return (is_exclusion &&
+          ::apache::thrift::protocol::detail::isAllTypeMask(mask)) ||
+      (!is_exclusion &&
+       ::apache::thrift::protocol::detail::isNoneTypeMask(mask));
+}
+
 bool MaskRef::isExclusive() const {
   return (mask.includes_ref() && is_exclusion) ||
       (mask.excludes_ref() && !is_exclusion) ||

@@ -526,11 +526,7 @@ std::string cpp_name_resolver::gen_type_tag(const t_type& type) {
       ? gen_type_tag(*static_cast<const t_typedef&>(type).get_type())
       : gen_thrift_type_tag(type);
 
-  // We currently lowers the `cpp.indirection` annotation on a typedef to the
-  // type. Ignore the consumption of `cpp.indirection` on a typedef. Ideally,
-  // when we no longer need the lowering of `cpp.indirection`, we should only
-  // consume `cpp.indirection` on a typedef.
-  if (!type.is_typedef() && type.find_annotation_or_null("cpp.indirection")) {
+  if (type.find_annotation_or_null("cpp.indirection")) {
     return fmt::format(
         "::apache::thrift::type::indirected<{}, {}>",
         get_native_type(type),

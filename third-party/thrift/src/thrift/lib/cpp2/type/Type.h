@@ -96,7 +96,7 @@ class Type : public detail::Wrap<TypeStruct> {
     return kInst;
   }
   BaseType baseType() const noexcept {
-    return BaseType{data_.name()->getType()};
+    return static_cast<BaseType>(folly::to_underlying(data_.name()->getType()));
   }
 
   Type& operator=(const Type&) = default;

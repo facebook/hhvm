@@ -1,0 +1,18 @@
+[package]
+name = "hhvm_ffi"
+version = "0.0.0"
+edition = "2021"
+repository = "https://github.com/facebook/hhvm"
+license = "MIT"
+
+[lib]
+path = "lib.rs"
+crate-type = ["staticlib"]
+
+[dependencies]
+hdf = { path = "../utils/hdf" }
+compiler_ffi = { path = "../hackc/ffi_bridge" }
+package_ffi = { path = "../package/ffi_bridge" }
+parser_ffi = { path = "../parser/ffi_bridge" }
+hhvm_hhbc_defs_ffi = { path = "../hackc/hhvm_cxx/hhvm_hhbc_defs" }
+hhvm_types_ffi = { path = "../hackc/hhvm_cxx/hhvm_types" }

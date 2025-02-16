@@ -32,13 +32,18 @@ clean:
 define build_hack
 $(eval ext := $(if $(filter $(2),-debug),".bc",""))
 build-hack$(2):
-	dune build \
-		src/hh_server.$(1) \
-		src/hh_client.$(1) \
-		src/hh_single_type_check.$(1) \
-		src/hackfmt.$(1) \
-		src/hh_parse.$(1) \
-		src/generate_full_fidelity.$(1)
+	rm -rf "$(DUNE_BUILD_DIR)/default/target/release"
+	dune build src/hh_server.$(1)
+	rm -rf "$(DUNE_BUILD_DIR)/default/target/release"
+	dune build src/hh_client.$(1)
+	rm -rf "$(DUNE_BUILD_DIR)/default/target/release"
+	dune build src/hh_single_type_check.$(1)
+	rm -rf "$(DUNE_BUILD_DIR)/default/target/release"
+	dune build src/hackfmt.$(1)
+	rm -rf "$(DUNE_BUILD_DIR)/default/target/release"
+	dune build src/hh_parse.$(1)
+	rm -rf "$(DUNE_BUILD_DIR)/default/target/release"
+	dune build src/generate_full_fidelity.$(1)
 
 copy-hack$(2)-files: build-hack$(2)
 	mkdir -p "$(HACK_BIN_DIR)"

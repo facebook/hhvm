@@ -685,12 +685,16 @@ struct CompareThreeWay<type::adapted<Adapter, Tag>> {
   static_assert(type::is_concrete_v<adapted_tag>, "");
   template <typename T>
   constexpr folly::ordering operator()(const T& lhs, const T& rhs) const {
-    if (EqualTo<adapted_tag>{}(lhs, rhs)) {
-      return folly::ordering::eq;
-    } else if (LessThan<adapted_tag>{}(lhs, rhs)) {
-      return folly::ordering::lt;
+    if constexpr (adapt_detail::is_compare_three_way_adapter_v<Adapter, T>) {
+      return Adapter::compareThreeWay(lhs, rhs);
+    } else {
+      if (EqualTo<adapted_tag>{}(lhs, rhs)) {
+        return folly::ordering::eq;
+      } else if (LessThan<adapted_tag>{}(lhs, rhs)) {
+        return folly::ordering::lt;
+      }
+      return folly::ordering::gt;
     }
-    return folly::ordering::gt;
   }
 };
 

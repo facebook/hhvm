@@ -157,7 +157,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
       v.patchIfTypeIs(type::Type{}, protocol::DynamicPatch{});
       v.ensureAny(type::AnyStruct{});
     }
-    if (!Base::template customVisitAssignAndClear(v)) {
+    if (!Base::customVisitAssignAndClear(v)) {
       // patchIfTypeIsPrior
       for (const auto& [type, patch] : data_.patchIfTypeIsPrior().value()) {
         v.patchIfTypeIs(type, patch);

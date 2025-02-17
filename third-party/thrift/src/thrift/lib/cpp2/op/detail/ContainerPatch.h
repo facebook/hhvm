@@ -124,7 +124,7 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
       v.appendMulti(T{});
     }
 
-    if (Base::template customVisitAssignAndClear(v)) {
+    if (Base::customVisitAssignAndClear(v)) {
       return;
     }
 
@@ -241,7 +241,7 @@ class SetPatch : public BaseContainerPatch<Patch, SetPatch<Patch>> {
       v.addMulti(T{});
     }
 
-    if (Base::template customVisitAssignAndClear(v)) {
+    if (Base::customVisitAssignAndClear(v)) {
       return;
     }
 
@@ -397,7 +397,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
       v.removeMulti(std::unordered_set<typename T::key_type>{});
     }
 
-    if (Base::template customVisitAssignAndClear(v)) {
+    if (Base::customVisitAssignAndClear(v)) {
       return;
     }
 

@@ -453,7 +453,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
       });
     }
 
-    if (Base::template customVisitAssignAndClear(std::forward<Visitor>(v))) {
+    if (Base::customVisitAssignAndClear(std::forward<Visitor>(v))) {
       return;
     }
 

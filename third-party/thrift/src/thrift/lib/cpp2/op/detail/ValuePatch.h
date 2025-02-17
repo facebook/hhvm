@@ -73,7 +73,7 @@ class BoolPatch : public BaseClearPatch<Patch, BoolPatch<Patch>> {
       v.clear();
       v.invert();
     }
-    if (!Base::template customVisitAssignAndClear(v) && *data_.invert()) {
+    if (!Base::customVisitAssignAndClear(v) && *data_.invert()) {
       std::forward<Visitor>(v).invert();
     }
   }
@@ -154,7 +154,7 @@ class NumberPatch : public BaseClearPatch<Patch, NumberPatch<Patch>> {
       v.clear();
       v.add(T{});
     }
-    if (!Base::template customVisitAssignAndClear(v)) {
+    if (!Base::customVisitAssignAndClear(v)) {
       v.add(*data_.add());
     }
   }

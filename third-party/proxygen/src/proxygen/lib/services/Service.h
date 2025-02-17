@@ -155,6 +155,15 @@ class Service {
   }
 
   /**
+   * Services can return arbitrary objects whose lifetime needs to be extended
+   * until after workers threads have joined.
+   */
+  virtual std::vector<std::shared_ptr<void>>
+  keepAliveUntilWorkersDone() noexcept {
+    return {};
+  }
+
+  /**
    * Add a new ServiceWorker (subclasses should create one ServiceWorker
    * per worker thread)
    */

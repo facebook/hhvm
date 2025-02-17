@@ -265,6 +265,34 @@ struct DefaultLessThan {
   CompareWith compareWith;
 };
 
+// A CompareThreeWay implementation that delegates to EqualTo and LessThan.
+template <
+    typename Tag,
+    template <class...> class LessThanImpl = LessThan,
+    typename T = type::native_type<Tag>,
+    typename = void>
+struct DefaultCompareThreeWay {
+  static_assert(type::is_concrete_v<Tag>, "");
+
+  constexpr folly::ordering operator()(const T& lhs, const T& rhs) const {
+    if (EqualTo<Tag>{}(lhs, rhs)) {
+      return folly::ordering::eq;
+    }
+    if (LessThanImpl<Tag>{}(lhs, rhs)) {
+      return folly::ordering::lt;
+    }
+    return folly::ordering::gt;
+  }
+};
+
+// The 'compare three way' operator.
+template <
+    typename Tag,
+    template <class...> class LessThanImpl = LessThan,
+    typename = void>
+struct CompareThreeWay : DefaultCompareThreeWay<Tag, LessThanImpl> {
+}; // Delegates by default.
+
 // Use bit_cast for floating point identical.
 template <typename F, typename I>
 struct FloatIdenticalTo {
@@ -319,6 +347,18 @@ struct CompareWith<
     type::cpp_type<std::unique_ptr<folly::IOBuf>, LUTag>,
     type::cpp_type<std::unique_ptr<folly::IOBuf>, RUTag>>
     : CheckIOBufOp<LUTag, RUTag>, folly::IOBufCompare {};
+
+template <typename UTag>
+struct CompareWith<type::cpp_type<folly::IOBuf, UTag>>
+    : CheckIOBufOp<UTag, UTag>, folly::IOBufCompare {};
+
+template <typename UTag>
+struct CompareThreeWay<type::cpp_type<folly::IOBuf, UTag>>
+    : CheckIOBufOp<UTag, UTag>, folly::IOBufCompare {};
+
+template <typename UTag>
+struct CompareThreeWay<type::cpp_type<std::unique_ptr<folly::IOBuf>, UTag>>
+    : CheckIOBufOp<UTag, UTag>, folly::IOBufCompare {};
 
 template <class T, class Comp>
 [[maybe_unused]] bool sortAndLexicographicalCompare(
@@ -639,6 +679,21 @@ struct LessThan<type::adapted<Adapter, Tag>> {
   }
 };
 
+template <typename Adapter, typename Tag>
+struct CompareThreeWay<type::adapted<Adapter, Tag>> {
+  using adapted_tag = type::adapted<Adapter, Tag>;
+  static_assert(type::is_concrete_v<adapted_tag>, "");
+  template <typename T>
+  constexpr folly::ordering operator()(const T& lhs, const T& rhs) const {
+    if (EqualTo<adapted_tag>{}(lhs, rhs)) {
+      return folly::ordering::eq;
+    } else if (LessThan<adapted_tag>{}(lhs, rhs)) {
+      return folly::ordering::lt;
+    }
+    return folly::ordering::gt;
+  }
+};
+
 template <template <class...> class LessThanImpl = LessThan>
 struct StructLessThan {
   template <class T>
@@ -668,8 +723,9 @@ struct StructLessThan {
         return;
       }
 
-      if (!EqualTo<Tag>{}(*lhsValue, *rhsValue)) {
-        result = LessThanImpl<Tag>{}(*lhsValue, *rhsValue);
+      auto ret = CompareThreeWay<Tag, LessThanImpl>{}(*lhsValue, *rhsValue);
+      if (ret != folly::ordering::eq) {
+        result = ret == folly::ordering::lt;
       }
     });
 

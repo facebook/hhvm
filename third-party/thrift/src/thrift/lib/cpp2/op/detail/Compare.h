@@ -698,46 +698,55 @@ struct CompareThreeWay<type::adapted<Adapter, Tag>> {
   }
 };
 
+template <typename T, template <class...> class LessThanImpl = LessThan>
+folly::ordering compareStructFields(const T& lhs, const T& rhs) {
+  folly::Optional<folly::ordering> result;
+  for_each_ordinal<T>([&](auto ord) {
+    if (result.has_value()) {
+      return;
+    }
+
+    using Ord = decltype(ord);
+    using Tag = get_type_tag<T, Ord>;
+    const auto* lhsValue = getValueOrNull(get<Ord>(lhs));
+    const auto* rhsValue = getValueOrNull(get<Ord>(rhs));
+
+    if (lhsValue == nullptr && rhsValue == nullptr) {
+      return;
+    }
+
+    if (lhsValue == nullptr) {
+      result = folly::ordering::lt;
+      return;
+    }
+
+    if (rhsValue == nullptr) {
+      result = folly::ordering::gt;
+      return;
+    }
+
+    auto ret = CompareThreeWay<Tag, LessThanImpl>{}(*lhsValue, *rhsValue);
+    if (ret != folly::ordering::eq) {
+      result = ret;
+    }
+  });
+
+  return result.value_or(folly::ordering::eq);
+}
+
+template <typename T>
+struct CompareThreeWay<type::struct_t<T>> {
+  folly::ordering operator()(const T& lhs, const T& rhs) const {
+    return compareStructFields<T>(lhs, rhs);
+  }
+};
+
 template <template <class...> class LessThanImpl = LessThan>
 struct StructLessThan {
   template <class T>
   bool operator()(const T& lhs, const T& rhs) const {
-    folly::Optional<bool> result;
-    for_each_ordinal<T>([&](auto ord) {
-      if (result.has_value()) {
-        return;
-      }
-
-      using Ord = decltype(ord);
-      using Tag = get_type_tag<T, Ord>;
-      const auto* lhsValue = getValueOrNull(get<Ord>(lhs));
-      const auto* rhsValue = getValueOrNull(get<Ord>(rhs));
-
-      if (lhsValue == nullptr && rhsValue == nullptr) {
-        return;
-      }
-
-      if (lhsValue == nullptr) {
-        result = true;
-        return;
-      }
-
-      if (rhsValue == nullptr) {
-        result = false;
-        return;
-      }
-
-      auto ret = CompareThreeWay<Tag, LessThanImpl>{}(*lhsValue, *rhsValue);
-      if (ret != folly::ordering::eq) {
-        result = ret == folly::ordering::lt;
-      }
-    });
-
-    if (result.has_value()) {
-      return *result;
-    }
-
-    return false;
+    return compareStructFields<T, LessThanImpl>(lhs, rhs) ==
+        folly::ordering::lt;
   }
 };
 

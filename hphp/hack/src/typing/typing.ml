@@ -2519,7 +2519,7 @@ end = struct
         ~result:(fun (env, _expr, ty) -> Some (Typing_print.debug env ty))
   end
 
-  (* Compute an expected type for a labmda that is being called with the
+  (* Compute an expected type for a lambda that is being called with the
      given args. Where the type of the argument isn't obvious (without actual
      type checking, just use a fresh tyvar *)
   let lambda_expected p env fun_ args =

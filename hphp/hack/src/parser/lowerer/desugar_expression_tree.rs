@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use bstr::BString;
 use naming_special_names_rust::classes;
 use naming_special_names_rust::expression_trees as et;
@@ -18,6 +20,7 @@ use oxidized::ast::ClassId_;
 use oxidized::ast::Expr;
 use oxidized::ast::Expr_;
 use oxidized::ast::Hint_;
+use oxidized::ast::LocalId;
 use oxidized::ast::Sid;
 use oxidized::ast::Stmt;
 use oxidized::ast::Stmt_;
@@ -2058,4 +2061,214 @@ fn mk_visit_string(pos: &Pos, str: Expr_) -> Expr {
         vec![exprpos(pos), Expr((), pos.clone(), str)],
         pos,
     )
+}
+
+// Live variable calculation, only applying to what is allowed in expression trees
+// Tests are in desugar_expression_tree_tests.rs
+#[derive(PartialEq, Debug)]
+pub struct LiveVars {
+    // The variables that might be used in a block, not following an assignment
+    // to that variable in the block
+    pub used: HashSet<LocalId>,
+    // The variables that are definitely assigned in a block
+    pub assigned: HashSet<LocalId>,
+}
+
+impl LiveVars {
+    // Compute the live variables at the entry to a list of statements,
+    // assuming nothing is live after
+    pub fn new_from_statement(stmts: &[Stmt]) -> Self {
+        let mut lvs = LiveVars {
+            used: HashSet::default(),
+            assigned: HashSet::default(),
+        };
+        lvs.update_for_stmts(stmts);
+        lvs
+    }
+
+    // Compute the live variables right before the given expression,
+    // assuming that nothing is live after
+    pub fn new_from_expression(expr: &Expr) -> Self {
+        let mut lvs = LiveVars {
+            used: HashSet::default(),
+            assigned: HashSet::default(),
+        };
+        lvs.visit_expr(&mut (), expr).unwrap();
+        lvs
+    }
+
+    // Update self with the live variable information for the stmts preceding
+    // it in control-flow order
+    fn update_for_stmts(&mut self, stmts: &[Stmt]) {
+        for Stmt(_pos, stmt) in stmts.iter().rev() {
+            match stmt {
+                Stmt_::Expr(box e) | Stmt_::Return(box Some(e)) => {
+                    self.visit_expr(&mut (), e).unwrap();
+                }
+                Stmt_::If(box (cond, ast::Block(then), ast::Block(els))) => {
+                    let then_lvs = Self::new_from_statement(then);
+                    let els_lvs = Self::new_from_statement(els);
+                    let combined_lvs = then_lvs.merge(els_lvs);
+                    self.update_for_more_live_vars(combined_lvs);
+                    self.visit_expr(&mut (), cond).unwrap();
+                }
+                Stmt_::While(box (test, body)) => {
+                    // We don't need to iterate to a fixed point, because we are
+                    // only looking at the used variables on entry to the loop,
+                    // rather than trying to use them at program points inside
+                    // the loop. Any live variable at the start of the loop
+                    // either comes from after the loop and it's not definitely
+                    // assigned in the body, or it's used in the body, in which
+                    // case it's used in the first iteration.
+
+                    let mut body_lvs = Self::new_from_statement(body);
+                    // The assigned vars don't matter because we might not enter the body
+                    body_lvs.assigned = HashSet::default();
+                    self.update_for_more_live_vars(body_lvs);
+                    // We relay on there being no assignments in the expr
+                    self.visit_expr(&mut (), test).unwrap();
+                }
+                Stmt_::For(box (init, test, inc, body)) => {
+                    let mut body_lvs = LiveVars {
+                        used: HashSet::default(),
+                        assigned: HashSet::default(),
+                    };
+                    for e in inc.iter().rev() {
+                        body_lvs.visit_expr(&mut (), e).unwrap();
+                    }
+                    body_lvs.update_for_stmts(body);
+                    body_lvs.assigned = HashSet::default();
+                    self.update_for_more_live_vars(body_lvs);
+                    for e in test.iter().rev() {
+                        self.visit_expr(&mut (), e).unwrap();
+                    }
+                    for e in init.iter().rev() {
+                        self.visit_expr(&mut (), e).unwrap();
+                    }
+                }
+                aast::Stmt_::Noop
+                | aast::Stmt_::Fallthrough
+                | aast::Stmt_::Break
+                | aast::Stmt_::Continue
+                | aast::Stmt_::Throw(_)
+                | aast::Stmt_::Return(_)
+                | aast::Stmt_::YieldBreak
+                | aast::Stmt_::Awaitall(_)
+                | aast::Stmt_::Concurrent(_)
+                | aast::Stmt_::Do(_)
+                | aast::Stmt_::Using(_)
+                | aast::Stmt_::Switch(_)
+                | aast::Stmt_::Match(_)
+                | aast::Stmt_::Foreach(_)
+                | aast::Stmt_::Try(_)
+                | aast::Stmt_::DeclareLocal(_)
+                | aast::Stmt_::Block(_)
+                | aast::Stmt_::Markup(_) => {}
+            }
+        }
+    }
+
+    // Update self with the live variable info in update, assuming that self
+    // follows update in the control flow
+    fn update_for_more_live_vars(&mut self, update: Self) {
+        for v in update.assigned {
+            self.used.remove(&v);
+            self.assigned.insert(v);
+        }
+        for v in update.used {
+            self.used.insert(v);
+        }
+    }
+
+    // Compute new live variable information where self and lvs come from two
+    // branches of a control-flow split
+    fn merge(self, lvs: Self) -> Self {
+        let assigned = self
+            .assigned
+            .into_iter()
+            .filter(|v| lvs.assigned.contains(v))
+            .collect();
+        let mut used = self.used;
+        for v in lvs.used {
+            used.insert(v);
+        }
+        LiveVars { assigned, used }
+    }
+
+    // Add an addignment of Lid to the live variable information. It is removed
+    // from used, since the subsequent use will now see the assignment.
+    fn add_assign(&mut self, lid: &ast::Lid) {
+        let loc = lid.as_local_id();
+        self.used.remove(loc);
+        self.assigned.insert(loc.clone());
+    }
+
+    fn add_use(&mut self, lid: &ast::Lid) {
+        self.used.insert(lid.as_local_id().clone());
+    }
+
+    // Update the live variable info in self to reflect the assignment to an
+    // lvalue
+    fn visit_lvalue(&mut self, env: &mut (), Expr(_, _, e): &Expr) {
+        match e {
+            Expr_::List(lv) => lv.iter().for_each(|e| self.visit_lvalue(env, e)),
+            Expr_::Lvar(box lid) => self.add_assign(lid),
+            _ => {
+                self.visit_expr_(env, e).unwrap();
+            }
+        }
+    }
+}
+
+// Visit an expression, updating the live variable information assumed to follow
+// the expression in control-flow order
+impl<'ast> Visitor<'ast> for LiveVars {
+    type Params = AstParams<(), ()>;
+
+    fn object(&mut self) -> &mut dyn Visitor<'ast, Params = Self::Params> {
+        self
+    }
+
+    // We won't visit lids in lvalues because assignments get treated specially
+    // in visit_expr_ (and the other lvalue position (foreach) isn't allowed in
+    // ETs)
+    fn visit_lid(&mut self, _env: &mut (), lid: &ast::Lid) -> Result<(), ()> {
+        self.add_use(lid);
+        Ok(())
+    }
+
+    fn visit_expr_(&mut self, env: &mut (), e: &Expr_) -> Result<(), ()> {
+        match e {
+            Expr_::Assign(box (lhs, bop, rhs)) => {
+                if bop.is_none() {
+                    self.visit_lvalue(env, lhs);
+                    rhs.recurse(env, self.object())
+                } else {
+                    lhs.recurse(env, self.object())?;
+                    rhs.recurse(env, self.object())?;
+                    self.visit_lvalue(env, lhs);
+                    Ok(())
+                }
+            }
+            Expr_::ExpressionTree(_) | Expr_::ETSplice(_) => Ok(()),
+            Expr_::Lfun(box (f, _idl)) => {
+                // functions create a new scope
+                let ast::Block(stmts) = &f.body.fb_ast;
+                let mut lv = LiveVars::new_from_statement(stmts);
+                for p in &f.params {
+                    lv.used.remove(&local_id::make_unscoped(&p.name));
+                }
+                for p in &f.params {
+                    if let ast::FunParamInfo::ParamOptional(Some(e)) = &p.info {
+                        lv.visit_expr(&mut (), e).unwrap();
+                    }
+                }
+                for v in lv.used {
+                    self.used.insert(v);
+                }
+                Ok(())
+            }
+            _ => e.recurse(env, self.object()),
+        }
+    }
 }

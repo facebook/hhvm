@@ -9,6 +9,7 @@ package module
 import (
     "context"
     "fmt"
+    "io"
     "reflect"
 
     shared "shared"
@@ -20,6 +21,7 @@ var _ = shared.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background
 var _ = fmt.Printf
+var _ = io.EOF
 var _ = reflect.Ptr
 var _ = thrift.VOID
 var _ = metadata.GoUnusedProtection__
@@ -29,7 +31,7 @@ type MyService interface {
 }
 
 type MyServiceClientInterface interface {
-    thrift.ClientInterface
+    io.Closer
     MyService
 }
 
@@ -167,7 +169,7 @@ type Factories interface {
 }
 
 type FactoriesClientInterface interface {
-    thrift.ClientInterface
+    io.Closer
     Factories
 }
 
@@ -305,7 +307,7 @@ type Perform interface {
 }
 
 type PerformClientInterface interface {
-    thrift.ClientInterface
+    io.Closer
     Perform
 }
 
@@ -443,7 +445,7 @@ type InteractWithShared interface {
 }
 
 type InteractWithSharedClientInterface interface {
-    thrift.ClientInterface
+    io.Closer
     InteractWithShared
 }
 
@@ -581,7 +583,7 @@ type BoxService interface {
 }
 
 type BoxServiceClientInterface interface {
-    thrift.ClientInterface
+    io.Closer
     BoxService
 }
 

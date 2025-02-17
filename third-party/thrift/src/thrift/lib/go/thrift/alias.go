@@ -28,8 +28,6 @@ type RequestChannel = types.RequestChannel
 
 type Protocol = types.Protocol
 
-type ClientInterface = types.ClientInterface
-
 type ProcessorFunction = types.ProcessorFunction
 
 type Decoder = types.Decoder

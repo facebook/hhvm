@@ -9,6 +9,7 @@ package dummy
 import (
     "context"
     "fmt"
+    "io"
     "reflect"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
@@ -28,7 +29,7 @@ type Dummy interface {
 }
 
 type DummyClientInterface interface {
-    thrift.ClientInterface
+    io.Closer
     Dummy
 }
 

@@ -9,6 +9,7 @@ package module1
 import (
     "context"
     "fmt"
+    "io"
     "reflect"
 
     module0 "module0"
@@ -22,6 +23,7 @@ var _ = module2.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background
 var _ = fmt.Printf
+var _ = io.EOF
 var _ = reflect.Ptr
 var _ = thrift.VOID
 var _ = metadata.GoUnusedProtection__
@@ -33,7 +35,7 @@ type Finder interface {
 }
 
 type FinderClientInterface interface {
-    thrift.ClientInterface
+    io.Closer
     Finder
 }
 

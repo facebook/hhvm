@@ -9,6 +9,7 @@ package module
 import (
     "context"
     "fmt"
+    "io"
     "reflect"
 
     included "included"
@@ -20,6 +21,7 @@ var _ = included.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background
 var _ = fmt.Printf
+var _ = io.EOF
 var _ = reflect.Ptr
 var _ = thrift.VOID
 var _ = metadata.GoUnusedProtection__
@@ -30,7 +32,7 @@ type SomeService interface {
 }
 
 type SomeServiceClientInterface interface {
-    thrift.ClientInterface
+    io.Closer
     SomeService
 }
 

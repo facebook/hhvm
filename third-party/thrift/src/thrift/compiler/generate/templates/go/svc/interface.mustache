@@ -31,7 +31,7 @@
 }
 
 type {{service:go_name}}ClientInterface interface {
-    thrift.ClientInterface
+    io.Closer
     {{service:go_name}}
 }
 {{! new line }}

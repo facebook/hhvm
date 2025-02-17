@@ -21,6 +21,7 @@
 import (
     "context"
     "fmt"
+    "io"
     "reflect"
 
     {{#program:thrift_imports}}
@@ -38,6 +39,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background
 var _ = fmt.Printf
+var _ = io.EOF
 var _ = reflect.Ptr
 var _ = thrift.VOID
 {{#program:gen_metadata?}}

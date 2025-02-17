@@ -9,6 +9,7 @@ package module
 import (
     "context"
     "fmt"
+    "io"
     "reflect"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
@@ -18,6 +19,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background
 var _ = fmt.Printf
+var _ = io.EOF
 var _ = reflect.Ptr
 var _ = thrift.VOID
 var _ = metadata.GoUnusedProtection__
@@ -30,7 +32,7 @@ type Raiser interface {
 }
 
 type RaiserClientInterface interface {
-    thrift.ClientInterface
+    io.Closer
     Raiser
 }
 

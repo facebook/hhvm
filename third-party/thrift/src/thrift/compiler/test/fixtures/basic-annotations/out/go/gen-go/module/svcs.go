@@ -9,6 +9,7 @@ package module
 import (
     "context"
     "fmt"
+    "io"
     "reflect"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
@@ -18,6 +19,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background
 var _ = fmt.Printf
+var _ = io.EOF
 var _ = reflect.Ptr
 var _ = thrift.VOID
 var _ = metadata.GoUnusedProtection__
@@ -33,7 +35,7 @@ type MyService interface {
 }
 
 type MyServiceClientInterface interface {
-    thrift.ClientInterface
+    io.Closer
     MyService
 }
 
@@ -569,7 +571,7 @@ type MyServicePrioParent interface {
 }
 
 type MyServicePrioParentClientInterface interface {
-    thrift.ClientInterface
+    io.Closer
     MyServicePrioParent
 }
 
@@ -773,7 +775,7 @@ type MyServicePrioChild interface {
 }
 
 type MyServicePrioChildClientInterface interface {
-    thrift.ClientInterface
+    io.Closer
     MyServicePrioChild
 }
 
@@ -887,7 +889,7 @@ type BadService interface {
 }
 
 type BadServiceClientInterface interface {
-    thrift.ClientInterface
+    io.Closer
     BadService
 }
 
@@ -1028,7 +1030,7 @@ type FooBarBazService interface {
 }
 
 type FooBarBazServiceClientInterface interface {
-    thrift.ClientInterface
+    io.Closer
     FooBarBazService
 }
 

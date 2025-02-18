@@ -134,7 +134,10 @@ trait ThriftUnionSerializationTrait implements IThriftStruct {
           CategorizedOBC::typedGet(ODSCategoryID::ODS_THRIFT)
             ->bumpEntityKeySampled(
               "thrift_union",
-              "thrift_union.multiple_fields.read".$object_class_name,
+              "thrift_union.multiple_fields.read.".$object_class_name,
+              1,
+              OdsAggregationType::ODS_AGGREGATION_TYPE_SUM,
+              10,
             );
         },
         'Operational logging of class and field counts',
@@ -249,7 +252,10 @@ trait ThriftUnionSerializationTrait implements IThriftStruct {
             CategorizedOBC::typedGet(ODSCategoryID::ODS_THRIFT)
               ->bumpEntityKeySampled(
                 "thrift_union",
-                "thrift_union..multiple_fields.write".$object_class_name,
+                "thrift_union.multiple_fields.write.".$object_class_name,
+                1,
+                OdsAggregationType::ODS_AGGREGATION_TYPE_SUM,
+                10,
               );
           }
         },

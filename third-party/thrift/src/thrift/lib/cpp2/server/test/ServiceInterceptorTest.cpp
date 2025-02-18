@@ -24,20 +24,26 @@
 #include <folly/coro/GtestHelpers.h>
 #include <thrift/lib/cpp2/async/HTTPClientChannel.h>
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
+#include <thrift/lib/cpp2/async/MultiplexAsyncProcessor.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/cpp2/server/ServerModule.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptor.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/server/test/gen-cpp2/ServiceInterceptor_clients.h>
 #include <thrift/lib/cpp2/server/test/gen-cpp2/ServiceInterceptor_handlers.h>
+#include <thrift/lib/cpp2/test/gen-cpp2/MultiplexAsyncProcessor2_clients.h>
+#include <thrift/lib/cpp2/test/gen-cpp2/MultiplexAsyncProcessor2_handlers.h>
+#include <thrift/lib/cpp2/test/gen-cpp2/MultiplexAsyncProcessor_clients.h>
+#include <thrift/lib/cpp2/test/gen-cpp2/MultiplexAsyncProcessor_handlers.h>
 #include <thrift/lib/cpp2/transport/http2/common/HTTP2RoutingHandler.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
 using namespace apache::thrift;
+using namespace apache::thrift::test;
+using namespace apache::thrift::test2;
 using namespace ::testing;
 
 namespace {
-
 using TransportType = Cpp2ConnContext::TransportType;
 
 std::unique_ptr<HTTP2RoutingHandler> createHTTP2RoutingHandler(
@@ -64,6 +70,12 @@ class ServiceInterceptorTestP : public ::testing::TestWithParam<TransportType> {
       thriftServer.addRoutingHandler(createHTTP2RoutingHandler(thriftServer));
     }
     return runner;
+  }
+
+  std::shared_ptr<AsyncProcessorFactory> multiplex(
+      std::vector<std::shared_ptr<AsyncProcessorFactory>> services) {
+    return std::make_shared<MultiplexAsyncProcessorFactory>(
+        std::move(services));
   }
 
   ScopedServerInterfaceThread::MakeChannelFunc channelFor(
@@ -1143,31 +1155,32 @@ struct ServiceNameInfo {
                info.methodName);
   }
 };
+
+struct ServiceInterceptorCheckingServiceAndMethodNames
+    : public NamedServiceInterceptor<folly::Unit> {
+ public:
+  using ConnectionState = folly::Unit;
+  using RequestState = folly::Unit;
+
+  ServiceInterceptorCheckingServiceAndMethodNames()
+      : NamedServiceInterceptor("SomeName") {}
+
+  folly::coro::Task<std::optional<RequestState>> onRequest(
+      ConnectionState*, RequestInfo requestInfo) override {
+    names.emplace_back(
+        requestInfo.serviceName ? std::string(requestInfo.serviceName) : "",
+        requestInfo.definingServiceName
+            ? std::string(requestInfo.definingServiceName)
+            : "",
+        requestInfo.methodName ? std::string(requestInfo.methodName) : "");
+    co_return std::nullopt;
+  }
+
+  std::vector<ServiceNameInfo> names;
+};
 } // namespace
 
-CO_TEST_P(ServiceInterceptorTestP, ServiceAndMethodNames) {
-  struct ServiceInterceptorCheckingServiceAndMethodNames
-      : public NamedServiceInterceptor<folly::Unit> {
-   public:
-    using ConnectionState = folly::Unit;
-    using RequestState = folly::Unit;
-
-    ServiceInterceptorCheckingServiceAndMethodNames()
-        : NamedServiceInterceptor("SomeName") {}
-
-    folly::coro::Task<std::optional<RequestState>> onRequest(
-        ConnectionState*, RequestInfo requestInfo) override {
-      names.emplace_back(
-          requestInfo.serviceName ? std::string(requestInfo.serviceName) : "",
-          requestInfo.definingServiceName
-              ? std::string(requestInfo.definingServiceName)
-              : "",
-          requestInfo.methodName ? std::string(requestInfo.methodName) : "");
-      co_return std::nullopt;
-    }
-
-    std::vector<ServiceNameInfo> names;
-  };
+CO_TEST_P(ServiceInterceptorTestP, ServiceAndMethodNamesBasic) {
   auto interceptor =
       std::make_shared<ServiceInterceptorCheckingServiceAndMethodNames>();
   auto runner =
@@ -1200,6 +1213,117 @@ CO_TEST_P(ServiceInterceptorTestP, ServiceAndMethodNames) {
   }
 
   EXPECT_THAT(interceptor->names, ElementsAreArray(expectedNames));
+}
+/* Service Authorization Platform depends on ServiceInterceptor multiplex
+ * conflict resolution. Breakage in these tests could result in ACL failures.*/
+CO_TEST_P(
+    ServiceInterceptorTestP, ServiceAndMethodNamesMultiplexBasicConflicts) {
+  class SecondHandler : public apache::thrift::ServiceHandler<Second> {
+    int three() override { return 3; }
+    int four() override { return 4; }
+  };
+
+  class ThirdHandler : public apache::thrift::ServiceHandler<Third> {
+    int five() override { return 5; }
+    int six() override { return 6; }
+  };
+
+  class ConflictsHandler : public apache::thrift::ServiceHandler<Conflicts> {
+    int four() override { return 444; }
+    int five() override { return 555; }
+  };
+  std::vector<std::shared_ptr<AsyncProcessorFactory>> services = {
+      /* order matters when resolving conflicts */
+      std::make_shared<SecondHandler>(),
+      std::make_shared<ConflictsHandler>(),
+      std::make_shared<ThirdHandler>(),
+  };
+  auto interceptor =
+      std::make_shared<ServiceInterceptorCheckingServiceAndMethodNames>();
+  auto runner = makeServer(multiplex(services), [&](ThriftServer& server) {
+    server.addModule(std::make_unique<TestModule>(interceptor));
+  });
+
+  auto client2 = makeClient<apache::thrift::Client<Second>>(*runner);
+  auto client3 = makeClient<apache::thrift::Client<Third>>(*runner);
+
+  EXPECT_EQ(co_await client2->co_three(), 3);
+  // Second takes precedence
+  EXPECT_EQ(co_await client2->co_four(), 4);
+  // Conflicts takes precedence
+  EXPECT_EQ(co_await client3->co_five(), 555);
+  EXPECT_EQ(co_await client3->co_six(), 6);
+
+  std::vector<ServiceNameInfo> expectedNames = {
+      {"Second", "Second", "three"},
+      {"Second", "Second", "four"},
+      {"Conflicts", "Conflicts", "five"},
+      {"Third", "Third", "six"},
+  };
+
+  EXPECT_THAT(interceptor->names, ElementsAreArray(expectedNames));
+}
+
+CO_TEST_P(
+    ServiceInterceptorTestP,
+    ServiceAndMethodNamesMultiplexInteractionConflicts) {
+  if (transportType() == TransportType::ROCKET) {
+    class Interaction1Handler
+        : public apache::thrift::ServiceHandler<Interaction1> {
+     public:
+      std::unique_ptr<Thing1If> createThing1() override {
+        class Thing1 : public Thing1If {
+         public:
+          void foo() override {}
+        };
+        return std::make_unique<Thing1>();
+      }
+    };
+
+    class ConflictsInteraction1Handler
+        : public apache::thrift::ServiceHandler<
+              apache::thrift::test2::ConflictsInteraction1> {
+     public:
+      std::unique_ptr<Thing1If> createThing1() override {
+        class Thing1 : public Thing1If {
+         public:
+          void foo() override { ADD_FAILURE() << "Should never be called"; }
+          void bar() override { ADD_FAILURE() << "Should never be called"; }
+        };
+        return std::make_unique<Thing1>();
+      }
+    };
+
+    std::vector<std::shared_ptr<AsyncProcessorFactory>> services = {
+        /* order matters when resolving conflicts */
+        std::make_shared<Interaction1Handler>(),
+        std::make_shared<ConflictsInteraction1Handler>(),
+    };
+    auto interceptor =
+        std::make_shared<ServiceInterceptorCheckingServiceAndMethodNames>();
+    auto runner = makeServer(multiplex(services), [&](ThriftServer& server) {
+      server.addModule(std::make_unique<TestModule>(interceptor));
+    });
+
+    auto client1 = makeClient<apache::thrift::Client<Interaction1>>(*runner);
+    auto client2 =
+        makeClient<apache::thrift::Client<ConflictsInteraction1>>(*runner);
+
+    auto thing = client1->createThing1();
+    EXPECT_NO_THROW(co_await thing.co_foo());
+
+    auto thing2 = client2->createThing1();
+
+    // Thing1.bar from ConflictsInteraction1 should not be in MethodMetadataMap
+    // because Interaction1 already added Thing1.foo.
+    EXPECT_THROW(co_await thing2.co_bar(), TApplicationException);
+
+    std::vector<ServiceNameInfo> expectedNames = {
+        {"Interaction1", "Interaction1", "Thing1.foo"},
+    };
+
+    EXPECT_THAT(interceptor->names, ElementsAreArray(expectedNames));
+  }
 }
 
 CO_TEST_P(

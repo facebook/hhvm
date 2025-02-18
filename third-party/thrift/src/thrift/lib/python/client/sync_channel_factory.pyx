@@ -52,7 +52,7 @@ cdef RequestChannel create_channel(
 
     if host is not None and port is not None:
         if path is not None:
-            raise ValueError("Can not set path and host/port at same time")
+            raise ValueError("Cannot set path and host/port at same time")
 
         if isinstance(host, str):
             try:

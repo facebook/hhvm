@@ -182,7 +182,19 @@ def get_client(
     assert loop.is_running(), "Eventloop is not running"
     # TODO (ffrancet) headers
     if issubclass(clientKlass, PythonClient):
-        return get_client_python(clientKlass, host=host, port=port, path=path, timeout=timeout, client_type=client_type, protocol=protocol, ssl_context=ssl_context, ssl_timeout=ssl_timeout)
+        # get_client_python uses None for port unset
+        maybe_port = None if port == -1 else port
+        return get_client_python(
+            clientKlass,
+            host=host,
+            port=maybe_port,
+            path=path,
+            timeout=timeout,
+            client_type=client_type,
+            protocol=protocol,
+            ssl_context=ssl_context,
+            ssl_timeout=ssl_timeout
+        )
     assert issubclass(clientKlass, Client), "Must be a py3 thrift client"
 
     cdef uint32_t _timeout_ms = int(timeout * 1000)

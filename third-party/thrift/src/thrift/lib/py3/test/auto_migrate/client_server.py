@@ -34,10 +34,8 @@ from testing.services import (
     ClientMetadataTestingServiceInterface,
     TestingServiceInterface,
 )
-from testing.thrift_types import easy as Python_easy
 from testing.types import Color, easy, HardError
 
-from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.client import ClientType, get_client
 from thrift.py3.common import Priority, Protocol, RpcOptions
 from thrift.py3.exceptions import ApplicationError
@@ -289,7 +287,6 @@ class ClientServerTests(unittest.TestCase):
 
         loop.run_until_complete(inner_test())
 
-    @brokenInAutoMigrate()
     def test_unix_socket(self) -> None:
         loop = asyncio.get_event_loop()
 

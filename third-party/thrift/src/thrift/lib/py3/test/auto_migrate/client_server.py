@@ -493,11 +493,7 @@ class ClientServerTests(unittest.TestCase):
 
 
 class Utf8Test(unittest.IsolatedAsyncioTestCase):
-    @brokenInAutoMigrate()
     async def test_non_utf8_exception_message(self) -> None:
-        # something about non-utf8 exceptions seems extra broken, I need to skip the test entirely
-        if Python_easy is easy:
-            self.assertTrue(False)
         async with TestServer(handler=CppHandler()) as sa:
             ip, port = sa.ip, sa.port
             assert ip and port

@@ -344,13 +344,14 @@ cdef class GeneratedError(Error):
         self._fbthrift_populate_field_values()
         return size
 
-    cdef void _fbthrift_populate_field_values(self):
+    cdef int _fbthrift_populate_field_values(self) except -1:
         cdef StructInfo info = self._fbthrift_struct_info
         args = []
         for index, type_info in enumerate(info.type_infos):
             data = self._fbthrift_data[index + 1]
             args.append(None if data is None else type_info.to_python_value(data))
         self.args = args
+        return 0
 
     def __repr__(self):
         fields = ", ".join(f"{name}={repr(value)}" for name, value in self)

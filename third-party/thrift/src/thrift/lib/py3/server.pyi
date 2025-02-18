@@ -78,8 +78,6 @@ class ServiceInterface(AsyncProcessorFactory):
 
 hT = TypeVar("hT", bound=AsyncProcessorFactory)
 
-def getServiceName(svc: hT) -> str: ...
-
 class ThriftServer:
     def __init__(
         self,

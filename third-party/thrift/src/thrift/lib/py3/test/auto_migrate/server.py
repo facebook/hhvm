@@ -23,7 +23,7 @@ from typing import Sequence
 from testing.services import TestingServiceInterface
 from testing.types import Color, easy
 from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
-from thrift.py3.server import getServiceName, SocketAddress, ThriftServer
+from thrift.py3.server import SocketAddress, ThriftServer
 from thrift.py3.test.is_overload.helper import OverloadTestHelper
 
 
@@ -96,11 +96,6 @@ class ServicesTests(unittest.TestCase):
                 self.assertTrue(h.initalized)
 
         loop.run_until_complete(inner())
-
-    @brokenInAutoMigrate()
-    def test_get_service_name(self) -> None:
-        h = Handler()
-        self.assertEqual(getServiceName(h), "TestingService")
 
     @brokenInAutoMigrate()
     def test_get_address(self) -> None:

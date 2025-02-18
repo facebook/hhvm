@@ -1730,7 +1730,7 @@ class StructMeta(type):
 
         dct["_fbthrift_primitive_types"] = primitive_types
         dct["__slots__"] = slots
-        all_bases = bases if bases else (Struct,) 
+        all_bases = bases if bases else (Struct,)
         klass = super().__new__(cls, cls_name, all_bases, dct)
 
         for field_index, field_name in non_primitive_types:
@@ -1830,6 +1830,12 @@ class UnionMeta(type):
                 A property for every field in the Thrift union, with its corresponding
                 `py_name`.
         """
+        if bases:
+            raise TypeError(
+                f"Inheritance from generated thrift union {bases[0].__name__} is deprecated."
+                " Please use composition."
+            )
+
         field_infos = union_class_namespace.pop('_fbthrift_SPEC')
         num_fields = len(field_infos)
         union_class_namespace["_fbthrift_struct_info"] = UnionInfo(

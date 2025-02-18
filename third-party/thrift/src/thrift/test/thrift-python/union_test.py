@@ -624,6 +624,19 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
             case _:
                 self.fail("Expected match, got none.")
 
+    def test_subclass(self) -> None:
+        bases = (TestUnionImmutable,)
+        err = (
+            f"Inheritance from generated thrift union {bases[0].__name__} is deprecated."
+            " Please use composition."
+        )
+        with self.assertRaisesRegex(TypeError, err):
+            types.new_class(
+                "TestImmutableSubclass",
+                bases=bases,
+                exec_body=lambda ns: ns.update(_fbthrift_SPEC=()),
+            )
+
 
 class ThriftPython_MutableUnion_Test(unittest.TestCase):
     def setUp(self) -> None:

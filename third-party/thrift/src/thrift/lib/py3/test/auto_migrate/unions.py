@@ -20,7 +20,15 @@ import types
 import unittest
 
 from folly.iobuf import IOBuf
-from testing.types import Color, ComplexUnion, easy, Integers, IOBufUnion, ReservedUnion
+from testing.types import (
+    Color,
+    ComplexUnion,
+    easy,
+    Integers,
+    IOBufUnion,
+    ReservedUnion,
+    ValueOrError,
+)
 from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
     brokenInAutoMigrate,
     is_auto_migrated,
@@ -204,9 +212,13 @@ class UnionTests(unittest.TestCase):
         self.assertFalse(issubclass(Struct, ComplexUnion))
         self.assertFalse(issubclass(ComplexUnion, ReservedUnion))
 
-    def test_subclass(self) -> None:
-        if not is_auto_migrated():
-            with self.assertRaisesRegex(
-                TypeError, r"type '.+' is not an acceptable base type"
-            ):
-                types.new_class("TestSubclass", bases=(Integers,))
+    def test_subclass_not_allow_inheritance(self) -> None:
+        thrift_python_err = r"Inheritance from generated thrift union .+ is deprecated. Please use composition."
+        cython_err = r"type '.+' is not an acceptable base type"
+        err_regex = thrift_python_err if is_auto_migrated() else cython_err
+
+        with self.assertRaisesRegex(TypeError, err_regex):
+            types.new_class(
+                "TestSubclass",
+                bases=(ValueOrError,),
+            )

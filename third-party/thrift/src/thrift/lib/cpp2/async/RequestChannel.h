@@ -17,8 +17,6 @@
 #ifndef THRIFT_ASYNC_REQUESTCHANNEL_H_
 #define THRIFT_ASYNC_REQUESTCHANNEL_H_ 1
 
-#include <chrono>
-#include <functional>
 #include <memory>
 
 #include <glog/logging.h>
@@ -93,7 +91,8 @@ using ChannelSendFunc = void (RequestChannel::*)(
     MethodMetadata&&,
     SerializedRequest&&,
     std::shared_ptr<transport::THeader>,
-    typename RequestClientCallbackType<Kind>::Ptr);
+    typename RequestClientCallbackType<Kind>::Ptr,
+    std::unique_ptr<folly::IOBuf>);
 } // namespace detail
 
 /**
@@ -119,7 +118,8 @@ class RequestChannel : virtual public folly::DelayedDestruction {
       MethodMetadata&&,
       SerializedRequest&&,
       std::shared_ptr<apache::thrift::transport::THeader>&&,
-      typename apache::thrift::detail::RequestClientCallbackType<Kind>::Ptr);
+      typename apache::thrift::detail::RequestClientCallbackType<Kind>::Ptr,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata);
 
   /**
    * ReplyCallback will be invoked when the reply to this request is
@@ -134,7 +134,8 @@ class RequestChannel : virtual public folly::DelayedDestruction {
       MethodMetadata&&,
       SerializedRequest&&,
       std::shared_ptr<apache::thrift::transport::THeader>,
-      RequestClientCallback::Ptr);
+      RequestClientCallback::Ptr,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata);
 
   /* Similar to sendRequest, although replyReceived will never be called
    *
@@ -145,7 +146,8 @@ class RequestChannel : virtual public folly::DelayedDestruction {
       MethodMetadata&&,
       SerializedRequest&&,
       std::shared_ptr<apache::thrift::transport::THeader>,
-      RequestClientCallback::Ptr);
+      RequestClientCallback::Ptr,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata);
 
   /**
    * ReplyCallback will be invoked when the reply to this request is
@@ -160,14 +162,16 @@ class RequestChannel : virtual public folly::DelayedDestruction {
       MethodMetadata&&,
       SerializedRequest&&,
       std::shared_ptr<transport::THeader> header,
-      StreamClientCallback* clientCallback);
+      StreamClientCallback* clientCallback,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata);
 
   virtual void sendRequestSink(
       const RpcOptions& rpcOptions,
       MethodMetadata&&,
       SerializedRequest&&,
       std::shared_ptr<transport::THeader> header,
-      SinkClientCallback* clientCallback);
+      SinkClientCallback* clientCallback,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata);
 
   // Some channels can make use of rvalue RpcOptions as an optimization.
   virtual void sendRequestResponse(
@@ -175,25 +179,29 @@ class RequestChannel : virtual public folly::DelayedDestruction {
       MethodMetadata&&,
       SerializedRequest&&,
       std::shared_ptr<apache::thrift::transport::THeader>,
-      RequestClientCallback::Ptr);
+      RequestClientCallback::Ptr,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata);
   virtual void sendRequestNoResponse(
       RpcOptions&&,
       MethodMetadata&&,
       SerializedRequest&&,
       std::shared_ptr<apache::thrift::transport::THeader>,
-      RequestClientCallback::Ptr);
+      RequestClientCallback::Ptr,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata);
   virtual void sendRequestStream(
       RpcOptions&&,
       MethodMetadata&&,
       SerializedRequest&&,
       std::shared_ptr<transport::THeader>,
-      StreamClientCallback*);
+      StreamClientCallback*,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata);
   virtual void sendRequestSink(
       RpcOptions&&,
       MethodMetadata&&,
       SerializedRequest&&,
       std::shared_ptr<transport::THeader>,
-      SinkClientCallback*);
+      SinkClientCallback*,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata);
 
   virtual void setCloseCallback(CloseCallback*) = 0;
 
@@ -376,7 +384,8 @@ void RequestChannel::sendRequestAsync(
     SerializedRequest&& request,
     std::shared_ptr<apache::thrift::transport::THeader>&& header,
     typename apache::thrift::detail::RequestClientCallbackType<Kind>::Ptr
-        callback) {
+        callback,
+    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
   auto* eb = getEventBase();
   if (!eb || eb->isInEventBaseThread()) {
     auto send = apache::thrift::detail::getChannelSendFunc<Kind, RpcOptions>();
@@ -385,23 +394,27 @@ void RequestChannel::sendRequestAsync(
         std::move(methodMetadata),
         std::move(request),
         std::move(header),
-        std::move(callback));
+        std::move(callback),
+        std::move(frameworkMetadata));
   } else {
-    eb->runInEventBaseThread([this,
-                              rpcOptions = std::forward<RpcOptions>(rpcOptions),
-                              methodMetadata = std::move(methodMetadata),
-                              request = std::move(request),
-                              header = std::move(header),
-                              callback = std::move(callback)]() mutable {
-      auto send =
-          apache::thrift::detail::getChannelSendFunc<Kind, RpcOptions>();
-      (this->*send)(
-          std::forward<RpcOptions>(rpcOptions),
-          std::move(methodMetadata),
-          std::move(request),
-          std::move(header),
-          std::move(callback));
-    });
+    eb->runInEventBaseThread(
+        [this,
+         rpcOptions = std::forward<RpcOptions>(rpcOptions),
+         methodMetadata = std::move(methodMetadata),
+         request = std::move(request),
+         header = std::move(header),
+         callback = std::move(callback),
+         frameworkMetadata = std::move(frameworkMetadata)]() mutable {
+          auto send =
+              apache::thrift::detail::getChannelSendFunc<Kind, RpcOptions>();
+          (this->*send)(
+              std::forward<RpcOptions>(rpcOptions),
+              std::move(methodMetadata),
+              std::move(request),
+              std::move(header),
+              std::move(callback),
+              std::move(frameworkMetadata));
+        });
   }
 }
 
@@ -413,13 +426,15 @@ void clientSendT(
         callback,
     std::shared_ptr<apache::thrift::transport::THeader>&& header,
     RequestChannel* channel,
-    apache::thrift::MethodMetadata&& methodMetadata) {
+    apache::thrift::MethodMetadata&& methodMetadata,
+    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
   channel->sendRequestAsync<Kind>(
       std::forward<RpcOptions>(rpcOptions),
       std::move(methodMetadata),
       std::move(serializedRequest),
       std::move(header),
-      std::move(callback));
+      std::move(callback),
+      std::move(frameworkMetadata));
 }
 
 } // namespace apache::thrift

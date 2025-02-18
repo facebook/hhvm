@@ -827,7 +827,8 @@ void RocketClientChannel::sendRequestResponse(
     apache::thrift::MethodMetadata&& methodMetadata,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    RequestClientCallback::Ptr cb) {
+    RequestClientCallback::Ptr cb,
+    std::unique_ptr<folly::IOBuf> /* unused */) {
   sendThriftRequest(
       rpcOptions,
       RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
@@ -842,7 +843,8 @@ void RocketClientChannel::sendRequestNoResponse(
     apache::thrift::MethodMetadata&& methodMetadata,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    RequestClientCallback::Ptr cb) {
+    RequestClientCallback::Ptr cb,
+    std::unique_ptr<folly::IOBuf> /* unused */) {
   sendThriftRequest(
       rpcOptions,
       RpcKind::SINGLE_REQUEST_NO_RESPONSE,
@@ -857,7 +859,8 @@ void RocketClientChannel::sendRequestStream(
     apache::thrift::MethodMetadata&& methodMetadata,
     SerializedRequest&& request,
     std::shared_ptr<THeader> header,
-    StreamClientCallback* clientCallback) {
+    StreamClientCallback* clientCallback,
+    std::unique_ptr<folly::IOBuf> /* unused */) {
   DestructorGuard dg(this);
   if (!canHandleRequest(clientCallback)) {
     return;
@@ -899,7 +902,8 @@ void RocketClientChannel::sendRequestSink(
     apache::thrift::MethodMetadata&& methodMetadata,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    SinkClientCallback* clientCallback) {
+    SinkClientCallback* clientCallback,
+    std::unique_ptr<folly::IOBuf> /* unused */) {
   DestructorGuard dg(this);
   if (!canHandleRequest(clientCallback)) {
     return;

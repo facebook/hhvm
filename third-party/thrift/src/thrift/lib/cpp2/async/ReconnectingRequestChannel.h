@@ -85,28 +85,32 @@ class ReconnectingRequestChannel : public RequestChannel,
       MethodMetadata&& methodMetadata,
       SerializedRequest&& request,
       std::shared_ptr<transport::THeader> header,
-      RequestClientCallback::Ptr cob) override;
+      RequestClientCallback::Ptr cob,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
 
   void sendRequestNoResponse(
       const RpcOptions&,
       MethodMetadata&& methodMetadata,
       SerializedRequest&& request,
       std::shared_ptr<transport::THeader>,
-      RequestClientCallback::Ptr) override;
+      RequestClientCallback::Ptr,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
 
   void sendRequestStream(
       const RpcOptions&,
       MethodMetadata&& methodMetadata,
       SerializedRequest&& request,
       std::shared_ptr<transport::THeader>,
-      StreamClientCallback*) override;
+      StreamClientCallback*,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
 
   void sendRequestSink(
       const apache::thrift::RpcOptions& rpcOptions,
       MethodMetadata&& methodMetadata,
       SerializedRequest&& request,
       std::shared_ptr<apache::thrift::transport::THeader> header,
-      apache::thrift::SinkClientCallback* cb) override;
+      apache::thrift::SinkClientCallback* cb,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
 
   void setCloseCallback(CloseCallback*) override {
     LOG(FATAL) << "Not supported";

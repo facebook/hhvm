@@ -149,7 +149,8 @@ void HTTPClientChannel::sendRequestNoResponse(
     MethodMetadata&& methodMetadata,
     SerializedRequest&& serializedRequest,
     std::shared_ptr<THeader> header,
-    RequestClientCallback::Ptr cb) {
+    RequestClientCallback::Ptr cb,
+    std::unique_ptr<folly::IOBuf> /*unused - framework metadata unsupported*/) {
   auto buf = LegacySerializedRequest(
                  header->getProtocolId(),
                  methodMetadata.name_view(),
@@ -165,7 +166,8 @@ void HTTPClientChannel::sendRequestResponse(
     MethodMetadata&& methodMetadata,
     SerializedRequest&& serializedRequest,
     std::shared_ptr<THeader> header,
-    RequestClientCallback::Ptr cb) {
+    RequestClientCallback::Ptr cb,
+    std::unique_ptr<folly::IOBuf> /*unused - framework metadata unsupported*/) {
   auto buf = LegacySerializedRequest(
                  header->getProtocolId(),
                  methodMetadata.name_view(),

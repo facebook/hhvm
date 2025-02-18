@@ -187,7 +187,8 @@ void GuardedRequestChannel<RequestGuardType, ChannelGuardType>::
         MethodMetadata&& methodMetadata,
         SerializedRequest&& serializedRequest,
         std::shared_ptr<transport::THeader> header,
-        RequestClientCallback::Ptr cb) {
+        RequestClientCallback::Ptr cb,
+        std::unique_ptr<folly::IOBuf> frameworkMetadata) {
   auto wrappedCb = RequestClientCallback::Ptr(
       new GuardedRequestClientCallback<RequestGuardType>(std::move(cb)));
 
@@ -196,7 +197,8 @@ void GuardedRequestChannel<RequestGuardType, ChannelGuardType>::
       std::move(methodMetadata),
       std::move(serializedRequest),
       std::move(header),
-      std::move(wrappedCb));
+      std::move(wrappedCb),
+      std::move(frameworkMetadata));
 }
 
 template <class RequestGuardType, class ChannelGuardType>
@@ -206,7 +208,8 @@ void GuardedRequestChannel<RequestGuardType, ChannelGuardType>::
         MethodMetadata&& methodMetadata,
         SerializedRequest&& serializedRequest,
         std::shared_ptr<transport::THeader> header,
-        StreamClientCallback* cob) {
+        StreamClientCallback* cob,
+        std::unique_ptr<folly::IOBuf> frameworkMetadata) {
   auto wrappedCb = new GuardedStreamCallback<RequestGuardType>(std::move(cob));
 
   impl_->sendRequestStream(
@@ -214,7 +217,8 @@ void GuardedRequestChannel<RequestGuardType, ChannelGuardType>::
       std::move(methodMetadata),
       std::move(serializedRequest),
       std::move(header),
-      wrappedCb);
+      wrappedCb,
+      std::move(frameworkMetadata));
 }
 
 template <class RequestGuardType, class ChannelGuardType>
@@ -224,7 +228,8 @@ void GuardedRequestChannel<RequestGuardType, ChannelGuardType>::
         MethodMetadata&& methodMetadata,
         SerializedRequest&& serializedRequest,
         std::shared_ptr<transport::THeader> header,
-        RequestClientCallback::Ptr cb) {
+        RequestClientCallback::Ptr cb,
+        std::unique_ptr<folly::IOBuf> frameworkMetadata) {
   auto wrappedCb = RequestClientCallback::Ptr(
       new GuardedRequestClientCallback<RequestGuardType>(std::move(cb)));
 
@@ -233,7 +238,8 @@ void GuardedRequestChannel<RequestGuardType, ChannelGuardType>::
       std::move(methodMetadata),
       std::move(serializedRequest),
       std::move(header),
-      std::move(wrappedCb));
+      std::move(wrappedCb),
+      std::move(frameworkMetadata));
 }
 
 } // namespace apache::thrift

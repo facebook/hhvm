@@ -46,7 +46,8 @@ void HibernatingRequestChannel::sendRequestResponse(
     MethodMetadata&& methodMetadata,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    apache::thrift::RequestClientCallback::Ptr cob) {
+    apache::thrift::RequestClientCallback::Ptr cob,
+    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
   auto implPtr = impl();
   auto& implRef = *implPtr;
   cob = apache::thrift::RequestClientCallback::Ptr(
@@ -56,7 +57,8 @@ void HibernatingRequestChannel::sendRequestResponse(
       std::move(methodMetadata),
       std::move(request),
       std::move(header),
-      std::move(cob));
+      std::move(cob),
+      std::move(frameworkMetadata));
 
   timeout_->scheduleTimeout(waitTime_.count());
 }

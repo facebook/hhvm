@@ -41,28 +41,32 @@ class ThreadBoundAdaptorChannel : public apache::thrift::RequestChannel {
       MethodMetadata&&,
       apache::thrift::SerializedRequest&&,
       std::shared_ptr<apache::thrift::transport::THeader> header,
-      apache::thrift::RequestClientCallback::Ptr cob) override;
+      apache::thrift::RequestClientCallback::Ptr cob,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
 
   void sendRequestNoResponse(
       const apache::thrift::RpcOptions& options,
       MethodMetadata&&,
       apache::thrift::SerializedRequest&&,
       std::shared_ptr<apache::thrift::transport::THeader> header,
-      apache::thrift::RequestClientCallback::Ptr cob) override;
+      apache::thrift::RequestClientCallback::Ptr cob,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
 
   void sendRequestStream(
       const apache::thrift::RpcOptions& options,
       MethodMetadata&&,
       apache::thrift::SerializedRequest&&,
       std::shared_ptr<apache::thrift::transport::THeader> header,
-      apache::thrift::StreamClientCallback* cob) override;
+      apache::thrift::StreamClientCallback* cob,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
 
   void sendRequestSink(
       const apache::thrift::RpcOptions& options,
       MethodMetadata&&,
       apache::thrift::SerializedRequest&&,
       std::shared_ptr<apache::thrift::transport::THeader> header,
-      apache::thrift::SinkClientCallback* cob) override;
+      apache::thrift::SinkClientCallback* cob,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
 
   void setCloseCallback(apache::thrift::CloseCallback*) override;
 

@@ -73,28 +73,32 @@ class RocketClientChannel final : public ClientChannel,
       apache::thrift::MethodMetadata&& methodMetadata,
       SerializedRequest&& request,
       std::shared_ptr<transport::THeader> header,
-      RequestClientCallback::Ptr cb) override;
+      RequestClientCallback::Ptr cb,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
 
   void sendRequestNoResponse(
       const RpcOptions& rpcOptions,
       apache::thrift::MethodMetadata&& methodMetadata,
       SerializedRequest&& request,
       std::shared_ptr<transport::THeader> header,
-      RequestClientCallback::Ptr cb) override;
+      RequestClientCallback::Ptr cb,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
 
   void sendRequestStream(
       const RpcOptions& rpcOptions,
       apache::thrift::MethodMetadata&& methodMetadata,
       SerializedRequest&& request,
       std::shared_ptr<transport::THeader> header,
-      StreamClientCallback* clientCallback) override;
+      StreamClientCallback* clientCallback,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
 
   void sendRequestSink(
       const RpcOptions& rpcOptions,
       apache::thrift::MethodMetadata&& methodMetadata,
       SerializedRequest&& request,
       std::shared_ptr<transport::THeader> header,
-      SinkClientCallback* clientCallback) override;
+      SinkClientCallback* clientCallback,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
 
   folly::EventBase* getEventBase() const override { return evb_; }
 

@@ -207,6 +207,7 @@ cdef class SimpleException(thrift.py3.exceptions.GeneratedError):
         return thrift.util.converter.to_py_struct(py_deprecated_types.SimpleException, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class OptionalRefStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -328,6 +329,7 @@ cdef class OptionalRefStruct(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.OptionalRefStruct, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class SimpleStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -514,6 +516,7 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.SimpleStruct, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class HiddenTypeFieldsStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -619,6 +622,7 @@ cdef class HiddenTypeFieldsStruct(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.HiddenTypeFieldsStruct, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class ComplexStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -808,6 +812,7 @@ cdef class ComplexStruct(thrift.py3.types.Struct):
 
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class BinaryUnion(thrift.py3.types.Union):
     __module__ = _fbthrift__module_name__
     Type = __BinaryUnionType
@@ -952,6 +957,7 @@ cdef class BinaryUnion(thrift.py3.types.Union):
         return thrift.util.converter.to_py_struct(py_deprecated_types.BinaryUnion, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class BinaryUnionStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -1064,6 +1070,7 @@ cdef class BinaryUnionStruct(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.BinaryUnionStruct, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class CustomFields(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -1253,6 +1260,7 @@ cdef class CustomFields(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.CustomFields, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class CustomTypedefFields(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -1442,6 +1450,7 @@ cdef class CustomTypedefFields(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.CustomTypedefFields, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class AdaptedTypedefFields(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 

@@ -83,6 +83,7 @@ cdef object get_types_reflection():
     )
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Internship(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -238,6 +239,7 @@ cdef class Internship(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.Internship, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Range(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -361,6 +363,7 @@ cdef class Range(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.Range, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class struct1(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -484,6 +487,7 @@ cdef class struct1(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.struct1, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class struct2(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -627,6 +631,7 @@ cdef class struct2(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.struct2, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class struct3(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -760,6 +765,7 @@ cdef class struct3(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.struct3, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class struct4(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -897,6 +903,7 @@ cdef class struct4(thrift.py3.types.Struct):
 
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class union1(thrift.py3.types.Union):
     __module__ = _fbthrift__module_name__
     Type = __union1Type
@@ -1082,6 +1089,7 @@ cdef class union1(thrift.py3.types.Union):
 
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class union2(thrift.py3.types.Union):
     __module__ = _fbthrift__module_name__
     Type = __union2Type

@@ -16,6 +16,7 @@
 # pyre-strict
 
 import enum
+import types
 import unittest
 
 from folly.iobuf import IOBuf
@@ -202,3 +203,10 @@ class UnionTests(unittest.TestCase):
         self.assertFalse(issubclass(Union, ComplexUnion))
         self.assertFalse(issubclass(Struct, ComplexUnion))
         self.assertFalse(issubclass(ComplexUnion, ReservedUnion))
+
+    def test_subclass(self) -> None:
+        if not is_auto_migrated():
+            with self.assertRaisesRegex(
+                TypeError, r"type '.+' is not an acceptable base type"
+            ):
+                types.new_class("TestSubclass", bases=(Integers,))

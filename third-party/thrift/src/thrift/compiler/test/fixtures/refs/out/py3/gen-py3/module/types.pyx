@@ -76,6 +76,7 @@ cdef object get_types_reflection():
 
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class MyUnion(thrift.py3.types.Union):
     __module__ = _fbthrift__module_name__
     Type = __MyUnionType
@@ -255,6 +256,7 @@ cdef class MyUnion(thrift.py3.types.Union):
 
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class NonTriviallyDestructibleUnion(thrift.py3.types.Union):
     __module__ = _fbthrift__module_name__
     Type = __NonTriviallyDestructibleUnionType
@@ -410,6 +412,7 @@ cdef class NonTriviallyDestructibleUnion(thrift.py3.types.Union):
         return thrift.util.converter.to_py_struct(py_deprecated_types.NonTriviallyDestructibleUnion, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class MyField(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -616,6 +619,7 @@ cdef class MyField(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyField, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class MyStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -756,6 +760,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyStruct, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class StructWithUnion(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -895,6 +900,7 @@ cdef class StructWithUnion(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithUnion, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class RecursiveStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -1014,6 +1020,7 @@ cdef class RecursiveStruct(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.RecursiveStruct, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class StructWithContainers(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -1187,6 +1194,7 @@ cdef class StructWithContainers(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithContainers, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class StructWithSharedConst(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -1327,6 +1335,7 @@ cdef class StructWithSharedConst(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithSharedConst, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Empty(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -1427,6 +1436,7 @@ cdef class Empty(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.Empty, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class StructWithRef(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -1567,6 +1577,7 @@ cdef class StructWithRef(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithRef, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class StructWithBox(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -1708,6 +1719,7 @@ cdef class StructWithBox(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithBox, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class StructWithInternBox(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -1835,6 +1847,7 @@ cdef class StructWithInternBox(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithInternBox, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class StructWithTerseInternBox(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -1960,6 +1973,7 @@ cdef class StructWithTerseInternBox(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithTerseInternBox, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class AdaptedStructWithInternBox(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -2087,6 +2101,7 @@ cdef class AdaptedStructWithInternBox(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.AdaptedStructWithInternBox, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -2212,6 +2227,7 @@ cdef class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.AdaptedStructWithTerseInternBox, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class StructWithRefTypeUnique(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -2352,6 +2368,7 @@ cdef class StructWithRefTypeUnique(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithRefTypeUnique, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class StructWithRefTypeShared(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -2492,6 +2509,7 @@ cdef class StructWithRefTypeShared(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithRefTypeShared, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class StructWithRefTypeSharedConst(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -2632,6 +2650,7 @@ cdef class StructWithRefTypeSharedConst(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithRefTypeSharedConst, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class StructWithRefAndAnnotCppNoexceptMoveCtor(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -2750,6 +2769,7 @@ cdef class StructWithRefAndAnnotCppNoexceptMoveCtor(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithRefAndAnnotCppNoexceptMoveCtor, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class StructWithString(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 

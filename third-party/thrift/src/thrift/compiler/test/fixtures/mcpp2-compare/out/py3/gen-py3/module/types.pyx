@@ -130,6 +130,7 @@ cdef object get_types_reflection():
     )
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Empty(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -230,6 +231,7 @@ cdef class Empty(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.Empty, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class ASimpleStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -347,6 +349,7 @@ cdef class ASimpleStruct(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.ASimpleStruct, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class ASimpleStructNoexcept(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -462,6 +465,7 @@ cdef class ASimpleStructNoexcept(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.ASimpleStructNoexcept, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class MyStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -671,6 +675,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class SimpleUnion(thrift.py3.types.Union):
     __module__ = _fbthrift__module_name__
     Type = __SimpleUnionType
@@ -842,6 +847,7 @@ cdef class SimpleUnion(thrift.py3.types.Union):
 
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class ComplexUnion(thrift.py3.types.Union):
     __module__ = _fbthrift__module_name__
     Type = __ComplexUnionType
@@ -1918,6 +1924,7 @@ cdef class AnotherException(thrift.py3.exceptions.GeneratedError):
         return thrift.util.converter.to_py_struct(py_deprecated_types.AnotherException, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class containerStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -2460,6 +2467,7 @@ cdef class containerStruct(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.containerStruct, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class MyIncludedStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -2606,6 +2614,7 @@ cdef class MyIncludedStruct(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyIncludedStruct, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class AnnotatedStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -3120,6 +3129,7 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.AnnotatedStruct, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class ComplexContainerStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -3247,6 +3257,7 @@ cdef class ComplexContainerStruct(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.ComplexContainerStruct, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class FloatStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -3372,6 +3383,7 @@ cdef class FloatStruct(thrift.py3.types.Struct):
 
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class FloatUnion(thrift.py3.types.Union):
     __module__ = _fbthrift__module_name__
     Type = __FloatUnionType
@@ -3561,6 +3573,7 @@ cdef class FloatUnion(thrift.py3.types.Union):
         return thrift.util.converter.to_py_struct(py_deprecated_types.FloatUnion, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class AllRequiredNoExceptMoveCtrStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 

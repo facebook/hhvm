@@ -869,6 +869,7 @@ class py3_mstch_struct : public mstch_struct {
             {"struct:has_hidden_fields?", &py3_mstch_struct::has_hidden_fields},
             {"struct:has_defaulted_field?",
              &py3_mstch_struct::has_defaulted_field},
+            {"struct:allow_inheritance?", &py3_mstch_struct::allow_inheritance},
         });
     py3_fields_ = struct_->fields().copy();
     py3_fields_.erase(
@@ -886,6 +887,11 @@ class py3_mstch_struct : public mstch_struct {
   }
 
   mstch::node getSize() { return py3_fields_.size(); }
+
+  mstch::node allow_inheritance() {
+    return struct_->find_structured_annotation_or_null(
+               kPythonMigrationBlockingAllowInheritanceUri) != nullptr;
+  }
 
   mstch::node isStructOrderable() {
     return cpp2::is_orderable(*struct_) &&

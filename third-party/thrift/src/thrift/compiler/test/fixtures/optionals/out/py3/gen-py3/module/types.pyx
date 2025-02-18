@@ -69,6 +69,7 @@ cdef object get_types_reflection():
     )
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Color(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -208,6 +209,7 @@ cdef class Color(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.Color, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Vehicle(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -363,6 +365,7 @@ cdef class Vehicle(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.Vehicle, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Person(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 

@@ -74,6 +74,7 @@ cdef object get_types_reflection():
     )
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class MyStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -259,6 +260,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyStruct, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Containers(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -396,6 +398,7 @@ cdef class Containers(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.Containers, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class MyDataItem(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -498,6 +501,7 @@ cdef class MyDataItem(thrift.py3.types.Struct):
 
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class MyUnion(thrift.py3.types.Union):
     __module__ = _fbthrift__module_name__
     Type = __MyUnionType
@@ -964,6 +968,7 @@ cdef class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyExceptionWithMessage, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class ReservedKeyword(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -1081,6 +1086,7 @@ cdef class ReservedKeyword(thrift.py3.types.Struct):
 
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class UnionToBeRenamed(thrift.py3.types.Union):
     __module__ = _fbthrift__module_name__
     Type = __UnionToBeRenamedType

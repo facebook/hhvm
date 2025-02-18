@@ -64,6 +64,7 @@ cdef object get_types_reflection():
     )
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Empty(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -166,6 +167,7 @@ cdef class Empty(thrift.py3.types.Struct):
 
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Nada(thrift.py3.types.Union):
     __module__ = _fbthrift__module_name__
     Type = __NadaType

@@ -498,10 +498,6 @@ class NumericalConversionsTests(unittest.TestCase):
         self.assertFalse(issubclass(Nested1, Nested2))
 
     def test_subclass_not_allow_inheritance(self) -> None:
-        # TODO(T210960250): remove this predicate when @cython.final
-        # landed in thrift-py3
-        if not is_auto_migrated():
-            return
         thrift_python_err = r"Inheritance from generated thrift struct .+ is deprecated. Please use composition."
         cython_err = r"type '.+' is not an acceptable base type"
         err_regex = thrift_python_err if is_auto_migrated() else cython_err

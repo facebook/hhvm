@@ -171,6 +171,7 @@ cdef class CustomException(thrift.py3.exceptions.GeneratedError):
         return thrift.util.converter.to_py_struct(py_deprecated_types.CustomException, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class ShouldBeBoxed(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 

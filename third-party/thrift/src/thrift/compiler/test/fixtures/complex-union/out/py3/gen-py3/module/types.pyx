@@ -76,6 +76,7 @@ cdef object get_types_reflection():
 
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class ComplexUnion(thrift.py3.types.Union):
     __module__ = _fbthrift__module_name__
     Type = __ComplexUnionType
@@ -323,6 +324,7 @@ cdef class ComplexUnion(thrift.py3.types.Union):
 
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class ListUnion(thrift.py3.types.Union):
     __module__ = _fbthrift__module_name__
     Type = __ListUnionType
@@ -484,6 +486,7 @@ cdef class ListUnion(thrift.py3.types.Union):
 
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class DataUnion(thrift.py3.types.Union):
     __module__ = _fbthrift__module_name__
     Type = __DataUnionType
@@ -643,6 +646,7 @@ cdef class DataUnion(thrift.py3.types.Union):
         return thrift.util.converter.to_py_struct(py_deprecated_types.DataUnion, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Val(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -778,6 +782,7 @@ cdef class Val(thrift.py3.types.Struct):
 
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class ValUnion(thrift.py3.types.Union):
     __module__ = _fbthrift__module_name__
     Type = __ValUnionType
@@ -939,6 +944,7 @@ cdef class ValUnion(thrift.py3.types.Union):
 
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class VirtualComplexUnion(thrift.py3.types.Union):
     __module__ = _fbthrift__module_name__
     Type = __VirtualComplexUnionType
@@ -1098,6 +1104,7 @@ cdef class VirtualComplexUnion(thrift.py3.types.Union):
         return thrift.util.converter.to_py_struct(py_deprecated_types.VirtualComplexUnion, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class NonCopyableStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -1202,6 +1209,7 @@ cdef class NonCopyableStruct(thrift.py3.types.Struct):
 
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class NonCopyableUnion(thrift.py3.types.Union):
     __module__ = _fbthrift__module_name__
     Type = __NonCopyableUnionType

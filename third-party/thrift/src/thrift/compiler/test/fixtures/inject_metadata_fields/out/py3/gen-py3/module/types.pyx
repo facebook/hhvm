@@ -63,6 +63,7 @@ cdef object get_types_reflection():
     )
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Fields(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -178,6 +179,7 @@ cdef class Fields(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.Fields, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class FieldsInjectedToEmptyStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -293,6 +295,7 @@ cdef class FieldsInjectedToEmptyStruct(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.FieldsInjectedToEmptyStruct, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class FieldsInjectedToStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -416,6 +419,7 @@ cdef class FieldsInjectedToStruct(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.FieldsInjectedToStruct, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class FieldsInjectedWithIncludedStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 

@@ -64,6 +64,7 @@ cdef object get_types_reflection():
     )
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class AStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 
@@ -179,6 +180,7 @@ cdef class AStruct(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.AStruct, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class AStructB(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
 

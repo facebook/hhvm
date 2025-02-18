@@ -453,7 +453,7 @@ void DynamicStructurePatch<IsUnion>::ensureUnion(FieldId id, Value v) {
     return;
   }
 
-  if (const bool removed = clear_ || !ensure_.empty()) {
+  if (clear_ || !ensure_.empty()) {
     Object obj;
     obj[id] = std::move(v);
     assign(badge, std::move(obj));

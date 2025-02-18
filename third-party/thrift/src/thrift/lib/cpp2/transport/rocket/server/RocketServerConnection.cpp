@@ -100,7 +100,7 @@ RocketServerConnection::RocketServerConnection(
     if (cfg.socketOptions != nullptr) {
       auto sockfd = rawSocket_->getNetworkSocket();
       for (auto& [option, value] : *cfg.socketOptions) {
-        if (auto err = option.apply(sockfd, value)) {
+        if (option.apply(sockfd, value)) {
           folly::SocketAddress address;
           rawSocket_->getAddress(&address);
           FB_LOG_EVERY_MS(WARNING, 60 * 1000) << fmt::format(

@@ -209,7 +209,7 @@ void TilePtr::release(InteractionReleaseEvent event) {
 }
 
 TileStreamGuard::TileStreamGuard(TilePtr&& ptr) : tile_(std::move(ptr)) {
-  if (auto tile = tile_.get()) {
+  if (tile_.get()) {
     tile_->decRef(*tile_.eb_, InteractionReleaseEvent::STREAM_TRANSFER);
   }
 }

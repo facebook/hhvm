@@ -77,15 +77,11 @@ void ResourcePool::stop() {
     if (auto threadPoolExecutor =
             dynamic_cast<folly::ThreadPoolExecutor*>(executor_.get())) {
       threadPoolExecutor->join();
-    } else if (
-        auto virtualExecutor =
-            dynamic_cast<folly::VirtualExecutor*>(executor_.get())) {
+    } else if (dynamic_cast<folly::VirtualExecutor*>(executor_.get())) {
       // since we're dealing with an executor wrapper it's sufficient to just
       // release the pointer
       executor_.reset();
-    } else if (
-        auto meteredExecutor =
-            dynamic_cast<folly::MeteredExecutor*>(executor_.get())) {
+    } else if (dynamic_cast<folly::MeteredExecutor*>(executor_.get())) {
       // since we're dealing with an executor wrapper it's sufficient to just
       // release the pointer
       executor_.reset();

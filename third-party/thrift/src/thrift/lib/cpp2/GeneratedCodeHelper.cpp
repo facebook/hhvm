@@ -326,8 +326,7 @@ TApplicationException toTApplicationException(
   auto& ex = *ew.get_exception();
   auto msg = folly::exceptionStr(ex).toStdString();
 
-  if (auto* ae =
-          dynamic_cast<const AppBaseError*>(&ex)) { // customized app errors
+  if (dynamic_cast<const AppBaseError*>(&ex)) { // customized app errors
     return TApplicationException(
         TApplicationException::TApplicationExceptionType::UNKNOWN, ex.what());
   } else {

@@ -252,7 +252,7 @@ cdef class ComplexUnion(thrift.py3.types.Union):
 
     cdef _initialize_py(ComplexUnion self):
         self.py_type = None
-        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        self.type_int = int(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType())
         self.py_value = None
 
     def __copy__(ComplexUnion self):
@@ -414,7 +414,7 @@ cdef class ListUnion(thrift.py3.types.Union):
 
     cdef _initialize_py(ListUnion self):
         self.py_type = None
-        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        self.type_int = int(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType())
         self.py_value = None
 
     def __copy__(ListUnion self):
@@ -576,7 +576,7 @@ cdef class DataUnion(thrift.py3.types.Union):
 
     cdef _initialize_py(DataUnion self):
         self.py_type = None
-        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        self.type_int = int(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType())
         self.py_value = None
 
     def __copy__(DataUnion self):
@@ -872,7 +872,7 @@ cdef class ValUnion(thrift.py3.types.Union):
 
     cdef _initialize_py(ValUnion self):
         self.py_type = None
-        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        self.type_int = int(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType())
         self.py_value = None
 
     def __copy__(ValUnion self):
@@ -1034,7 +1034,7 @@ cdef class VirtualComplexUnion(thrift.py3.types.Union):
 
     cdef _initialize_py(VirtualComplexUnion self):
         self.py_type = None
-        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        self.type_int = int(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType())
         self.py_value = None
 
     def __copy__(VirtualComplexUnion self):
@@ -1281,7 +1281,7 @@ cdef class NonCopyableUnion(thrift.py3.types.Union):
 
     cdef _initialize_py(NonCopyableUnion self):
         self.py_type = None
-        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        self.type_int = int(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType())
         self.py_value = None
 
     def __copy__(NonCopyableUnion self):

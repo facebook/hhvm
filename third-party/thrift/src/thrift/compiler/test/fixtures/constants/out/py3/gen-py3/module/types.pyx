@@ -1017,7 +1017,7 @@ cdef class union1(thrift.py3.types.Union):
 
     cdef _initialize_py(union1 self):
         self.py_type = None
-        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        self.type_int = int(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType())
         self.py_value = None
 
     def __copy__(union1 self):
@@ -1239,7 +1239,7 @@ cdef class union2(thrift.py3.types.Union):
 
     cdef _initialize_py(union2 self):
         self.py_type = None
-        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        self.type_int = int(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType())
         self.py_value = None
 
     def __copy__(union2 self):

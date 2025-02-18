@@ -775,7 +775,7 @@ cdef class SimpleUnion(thrift.py3.types.Union):
 
     cdef _initialize_py(SimpleUnion self):
         self.py_type = None
-        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        self.type_int = int(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType())
         self.py_value = None
 
     def __copy__(SimpleUnion self):
@@ -1467,7 +1467,7 @@ cdef class ComplexUnion(thrift.py3.types.Union):
 
     cdef _initialize_py(ComplexUnion self):
         self.py_type = None
-        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        self.type_int = int(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType())
         self.py_value = None
 
     def __copy__(ComplexUnion self):
@@ -3503,7 +3503,7 @@ cdef class FloatUnion(thrift.py3.types.Union):
 
     cdef _initialize_py(FloatUnion self):
         self.py_type = None
-        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        self.type_int = int(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType())
         self.py_value = None
 
     def __copy__(FloatUnion self):

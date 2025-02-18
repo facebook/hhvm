@@ -402,7 +402,7 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
     {{! initialize python cache}}
     cdef _initialize_py({{struct:name}} self):
         self.py_type = None
-        self.type_int = deref(self.{{> types/cpp_obj}}).getType()
+        self.type_int = int(deref(self.{{> types/cpp_obj}}).getType())
         self.py_value = None
 
 {{/struct:union?}}

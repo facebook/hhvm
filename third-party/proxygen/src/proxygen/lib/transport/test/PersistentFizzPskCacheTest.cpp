@@ -292,4 +292,23 @@ TEST_F(PersistentFizzPskCacheTest, TestGetPskUses) {
   cache_->getPsk("facebook.com");
   EXPECT_EQ(folly::none, cache_->getPskUses("facebook.com"));
 }
+
+TEST_F(PersistentFizzPskCacheTest, TestPeekPsk) {
+  cache_->setMaxPskUses(5);
+
+  EXPECT_EQ(folly::none, cache_->getPskUses("facebook.com"));
+  cache_->putPsk("facebook.com", psk1_);
+  EXPECT_EQ(0u, cache_->getPskUses("facebook.com"));
+
+  cache_->getPsk("facebook.com");
+  EXPECT_EQ(1u, cache_->getPskUses("facebook.com"));
+
+  for (size_t i = 0; i < 10; i++) {
+    expectMatch(*cache_->peekPsk("facebook.com"), psk1_);
+    EXPECT_EQ(1u, cache_->getPskUses("facebook.com"));
+  }
+
+  cache_->getPsk("facebook.com");
+  EXPECT_EQ(2u, cache_->getPskUses("facebook.com"));
+}
 }} // namespace proxygen::test

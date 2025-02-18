@@ -44,6 +44,26 @@ class PersistentFizzPskCache : public fizz::client::PskCache {
     return folly::none;
   }
 
+  /**
+   * Returns a PSK, without increasing its usage count. Keep in mind that it
+   * would still update the internal LRU cache
+   */
+  folly::Optional<fizz::client::CachedPsk> peekPsk(
+      const std::string& identity) {
+    auto serialized = cache_.get(identity);
+    if (serialized) {
+      try {
+        return fizz::client::deserializePsk(
+            fizz::openssl::certificateSerializer(),
+            folly::ByteRange(serialized->serialized));
+      } catch (const std::exception& ex) {
+        LOG(ERROR) << "Error deserializing PSK: " << ex.what();
+        cache_.remove(identity);
+      }
+    }
+    return folly::none;
+  }
+
   folly::Optional<fizz::client::CachedPsk> getPsk(
       const std::string& identity) override {
     auto serialized = cache_.get(identity);

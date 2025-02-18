@@ -840,9 +840,6 @@ void mysqlExtension::moduleRegisterNative() {
 mysqlExtension s_mysql_extension;
 
 bool mysqlExtension::ReadOnly = false;
-#ifdef HHVM_FACEBOOK
-bool mysqlExtension::Localize = false;
-#endif
 int mysqlExtension::ConnectTimeout = 1000;
 int mysqlExtension::ReadTimeout = 60000;
 int mysqlExtension::WaitTimeout = -1;
@@ -854,9 +851,6 @@ bool mysqlExtension::TypedResults = true;
 
 void mysqlExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   Config::Bind(ReadOnly, ini, config, "MySQL.ReadOnly", false);
-#ifdef HHVM_FACEBOOK
-  Config::Bind(Localize, ini, config, "MySQL.Localize", false);
-#endif
   Config::Bind(ConnectTimeout, ini, config, "MySQL.ConnectTimeout", 1000);
   Config::Bind(ReadTimeout, ini, config, "MySQL.ReadTimeout", 60000);
   Config::Bind(WaitTimeout, ini, config, "MySQL.WaitTimeout", -1);

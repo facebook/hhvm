@@ -34,9 +34,7 @@ struct mysqlExtension final : Extension {
   mysqlExtension() : Extension("mysql", "1.0", "mysql_gateway") {}
 
   static bool ReadOnly;
-#ifdef HHVM_FACEBOOK
-  static bool Localize;
-#endif
+
   static int ConnectTimeout;
   static int ReadTimeout;
   static int WaitTimeout;

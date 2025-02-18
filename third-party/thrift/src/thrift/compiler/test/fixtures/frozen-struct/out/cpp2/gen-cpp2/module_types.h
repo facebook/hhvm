@@ -568,92 +568,92 @@ class ModuleA final  {
   }
 
   /** Glean { "field": "i32Field" } */
-  [[deprecated("Use `FOO.i32Field().value();` instead of `FOO.get_i32Field();`")]]
+  [[deprecated("Use `FOO.i32Field().value()` instead of `FOO.get_i32Field()`")]]
   ::std::int32_t get_i32Field() const;
 
   /** Glean { "field": "i32Field" } */
-  [[deprecated("Use `FOO.i32Field() = BAR;` instead of `FOO.set_i32Field(BAR);`")]]
+  [[deprecated("Use `FOO.i32Field() = BAR` instead of `FOO.set_i32Field(BAR)`")]]
   ::std::int32_t& set_i32Field(::std::int32_t i32Field_);
 
   /** Glean { "field": "strField" } */
-  [[deprecated("Use `FOO.strField().value();` instead of `FOO.get_strField();`")]]
+  [[deprecated("Use `FOO.strField().value()` instead of `FOO.get_strField()`")]]
   const ::std::string& get_strField() const& {
     return __fbthrift_field_strField;
   }
 
   /** Glean { "field": "strField" } */
-  [[deprecated("Use `FOO.strField().value();` instead of `FOO.get_strField();`")]]
+  [[deprecated("Use `FOO.strField().value()` instead of `FOO.get_strField()`")]]
   ::std::string get_strField() && {
     return static_cast<::std::string&&>(__fbthrift_field_strField);
   }
 
   /** Glean { "field": "strField" } */
   template <typename T_ModuleA_strField_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.strField() = BAR;` instead of `FOO.set_strField(BAR);`")]]
+  [[deprecated("Use `FOO.strField() = BAR` instead of `FOO.set_strField(BAR)`")]]
   ::std::string& set_strField(T_ModuleA_strField_struct_setter&& strField_) {
     strField_ref() = std::forward<T_ModuleA_strField_struct_setter>(strField_);
     return __fbthrift_field_strField;
   }
 
   /** Glean { "field": "listField" } */
-  [[deprecated("Use `FOO.listField().value();` instead of `FOO.get_listField();`")]]
+  [[deprecated("Use `FOO.listField().value()` instead of `FOO.get_listField()`")]]
   const ::std::vector<::std::int16_t>& get_listField() const&;
 
   /** Glean { "field": "listField" } */
-  [[deprecated("Use `FOO.listField().value();` instead of `FOO.get_listField();`")]]
+  [[deprecated("Use `FOO.listField().value()` instead of `FOO.get_listField()`")]]
   ::std::vector<::std::int16_t> get_listField() &&;
 
   /** Glean { "field": "listField" } */
   template <typename T_ModuleA_listField_struct_setter = ::std::vector<::std::int16_t>>
-  [[deprecated("Use `FOO.listField() = BAR;` instead of `FOO.set_listField(BAR);`")]]
+  [[deprecated("Use `FOO.listField() = BAR` instead of `FOO.set_listField(BAR)`")]]
   ::std::vector<::std::int16_t>& set_listField(T_ModuleA_listField_struct_setter&& listField_) {
     listField_ref() = std::forward<T_ModuleA_listField_struct_setter>(listField_);
     return __fbthrift_field_listField;
   }
 
   /** Glean { "field": "mapField" } */
-  [[deprecated("Use `FOO.mapField().value();` instead of `FOO.get_mapField();`")]]
+  [[deprecated("Use `FOO.mapField().value()` instead of `FOO.get_mapField()`")]]
   const ::std::map<::std::string, ::std::int32_t>& get_mapField() const&;
 
   /** Glean { "field": "mapField" } */
-  [[deprecated("Use `FOO.mapField().value();` instead of `FOO.get_mapField();`")]]
+  [[deprecated("Use `FOO.mapField().value()` instead of `FOO.get_mapField()`")]]
   ::std::map<::std::string, ::std::int32_t> get_mapField() &&;
 
   /** Glean { "field": "mapField" } */
   template <typename T_ModuleA_mapField_struct_setter = ::std::map<::std::string, ::std::int32_t>>
-  [[deprecated("Use `FOO.mapField() = BAR;` instead of `FOO.set_mapField(BAR);`")]]
+  [[deprecated("Use `FOO.mapField() = BAR` instead of `FOO.set_mapField(BAR)`")]]
   ::std::map<::std::string, ::std::int32_t>& set_mapField(T_ModuleA_mapField_struct_setter&& mapField_) {
     mapField_ref() = std::forward<T_ModuleA_mapField_struct_setter>(mapField_);
     return __fbthrift_field_mapField;
   }
 
   /** Glean { "field": "inclAField" } */
-  [[deprecated("Use `FOO.inclAField().value();` instead of `FOO.get_inclAField();`")]]
+  [[deprecated("Use `FOO.inclAField().value()` instead of `FOO.get_inclAField()`")]]
   const ::some::ns::IncludedA& get_inclAField() const&;
 
   /** Glean { "field": "inclAField" } */
-  [[deprecated("Use `FOO.inclAField().value();` instead of `FOO.get_inclAField();`")]]
+  [[deprecated("Use `FOO.inclAField().value()` instead of `FOO.get_inclAField()`")]]
   ::some::ns::IncludedA get_inclAField() &&;
 
   /** Glean { "field": "inclAField" } */
   template <typename T_ModuleA_inclAField_struct_setter = ::some::ns::IncludedA>
-  [[deprecated("Use `FOO.inclAField() = BAR;` instead of `FOO.set_inclAField(BAR);`")]]
+  [[deprecated("Use `FOO.inclAField() = BAR` instead of `FOO.set_inclAField(BAR)`")]]
   ::some::ns::IncludedA& set_inclAField(T_ModuleA_inclAField_struct_setter&& inclAField_) {
     inclAField_ref() = std::forward<T_ModuleA_inclAField_struct_setter>(inclAField_);
     return __fbthrift_field_inclAField;
   }
 
   /** Glean { "field": "inclBField" } */
-  [[deprecated("Use `FOO.inclBField().value();` instead of `FOO.get_inclBField();`")]]
+  [[deprecated("Use `FOO.inclBField().value()` instead of `FOO.get_inclBField()`")]]
   const ::some::ns::IncludedB& get_inclBField() const&;
 
   /** Glean { "field": "inclBField" } */
-  [[deprecated("Use `FOO.inclBField().value();` instead of `FOO.get_inclBField();`")]]
+  [[deprecated("Use `FOO.inclBField().value()` instead of `FOO.get_inclBField()`")]]
   ::some::ns::IncludedB get_inclBField() &&;
 
   /** Glean { "field": "inclBField" } */
   template <typename T_ModuleA_inclBField_struct_setter = ::some::ns::IncludedB>
-  [[deprecated("Use `FOO.inclBField() = BAR;` instead of `FOO.set_inclBField(BAR);`")]]
+  [[deprecated("Use `FOO.inclBField() = BAR` instead of `FOO.set_inclBField(BAR)`")]]
   ::some::ns::IncludedB& set_inclBField(T_ModuleA_inclBField_struct_setter&& inclBField_) {
     inclBField_ref() = std::forward<T_ModuleA_inclBField_struct_setter>(inclBField_);
     return __fbthrift_field_inclBField;
@@ -867,19 +867,19 @@ class ModuleB final  {
   }
 
   /** Glean { "field": "i32Field" } */
-  [[deprecated("Use `FOO.i32Field().value();` instead of `FOO.get_i32Field();`")]]
+  [[deprecated("Use `FOO.i32Field().value()` instead of `FOO.get_i32Field()`")]]
   ::std::int32_t get_i32Field() const;
 
   /** Glean { "field": "i32Field" } */
-  [[deprecated("Use `FOO.i32Field() = BAR;` instead of `FOO.set_i32Field(BAR);`")]]
+  [[deprecated("Use `FOO.i32Field() = BAR` instead of `FOO.set_i32Field(BAR)`")]]
   ::std::int32_t& set_i32Field(::std::int32_t i32Field_);
 
   /** Glean { "field": "inclEnumB" } */
-  [[deprecated("Use `FOO.inclEnumB().value();` instead of `FOO.get_inclEnumB();`")]]
+  [[deprecated("Use `FOO.inclEnumB().value()` instead of `FOO.get_inclEnumB()`")]]
   ::some::ns::EnumB get_inclEnumB() const;
 
   /** Glean { "field": "inclEnumB" } */
-  [[deprecated("Use `FOO.inclEnumB() = BAR;` instead of `FOO.set_inclEnumB(BAR);`")]]
+  [[deprecated("Use `FOO.inclEnumB() = BAR` instead of `FOO.set_inclEnumB(BAR)`")]]
   ::some::ns::EnumB& set_inclEnumB(::some::ns::EnumB inclEnumB_);
 
   template <class Protocol_>
@@ -1038,11 +1038,11 @@ class DirectlyAdapted final  {
   }
 
   /** Glean { "field": "field" } */
-  [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
+  [[deprecated("Use `FOO.field().value()` instead of `FOO.get_field()`")]]
   ::std::int32_t get_field() const;
 
   /** Glean { "field": "field" } */
-  [[deprecated("Use `FOO.field() = BAR;` instead of `FOO.set_field(BAR);`")]]
+  [[deprecated("Use `FOO.field() = BAR` instead of `FOO.set_field(BAR)`")]]
   ::std::int32_t& set_field(::std::int32_t field_);
 
   template <class Protocol_>

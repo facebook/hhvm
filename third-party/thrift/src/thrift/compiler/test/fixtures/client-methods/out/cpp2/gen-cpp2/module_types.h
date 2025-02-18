@@ -184,20 +184,20 @@ class EchoRequest final  {
   }
 
   /** Glean { "field": "text" } */
-  [[deprecated("Use `FOO.text().value();` instead of `FOO.get_text();`")]]
+  [[deprecated("Use `FOO.text().value()` instead of `FOO.get_text()`")]]
   const ::std::string& get_text() const& {
     return __fbthrift_field_text;
   }
 
   /** Glean { "field": "text" } */
-  [[deprecated("Use `FOO.text().value();` instead of `FOO.get_text();`")]]
+  [[deprecated("Use `FOO.text().value()` instead of `FOO.get_text()`")]]
   ::std::string get_text() && {
     return static_cast<::std::string&&>(__fbthrift_field_text);
   }
 
   /** Glean { "field": "text" } */
   template <typename T_EchoRequest_text_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.text() = BAR;` instead of `FOO.set_text(BAR);`")]]
+  [[deprecated("Use `FOO.text() = BAR` instead of `FOO.set_text(BAR)`")]]
   ::std::string& set_text(T_EchoRequest_text_struct_setter&& text_) {
     text_ref() = std::forward<T_EchoRequest_text_struct_setter>(text_);
     return __fbthrift_field_text;
@@ -359,20 +359,20 @@ class EchoResponse final  {
   }
 
   /** Glean { "field": "text" } */
-  [[deprecated("Use `FOO.text().value();` instead of `FOO.get_text();`")]]
+  [[deprecated("Use `FOO.text().value()` instead of `FOO.get_text()`")]]
   const ::std::string& get_text() const& {
     return __fbthrift_field_text;
   }
 
   /** Glean { "field": "text" } */
-  [[deprecated("Use `FOO.text().value();` instead of `FOO.get_text();`")]]
+  [[deprecated("Use `FOO.text().value()` instead of `FOO.get_text()`")]]
   ::std::string get_text() && {
     return static_cast<::std::string&&>(__fbthrift_field_text);
   }
 
   /** Glean { "field": "text" } */
   template <typename T_EchoResponse_text_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.text() = BAR;` instead of `FOO.set_text(BAR);`")]]
+  [[deprecated("Use `FOO.text() = BAR` instead of `FOO.set_text(BAR)`")]]
   ::std::string& set_text(T_EchoResponse_text_struct_setter&& text_) {
     text_ref() = std::forward<T_EchoResponse_text_struct_setter>(text_);
     return __fbthrift_field_text;

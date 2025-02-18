@@ -221,20 +221,20 @@ class Fields final  {
   }
 
   /** Glean { "field": "injected_field" } */
-  [[deprecated("Use `FOO.injected_field().value();` instead of `FOO.get_injected_field();`")]]
+  [[deprecated("Use `FOO.injected_field().value()` instead of `FOO.get_injected_field()`")]]
   const ::std::string& get_injected_field() const& {
     return __fbthrift_field_injected_field;
   }
 
   /** Glean { "field": "injected_field" } */
-  [[deprecated("Use `FOO.injected_field().value();` instead of `FOO.get_injected_field();`")]]
+  [[deprecated("Use `FOO.injected_field().value()` instead of `FOO.get_injected_field()`")]]
   ::std::string get_injected_field() && {
     return static_cast<::std::string&&>(__fbthrift_field_injected_field);
   }
 
   /** Glean { "field": "injected_field" } */
   template <typename T_Fields_injected_field_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.injected_field() = BAR;` instead of `FOO.set_injected_field(BAR);`")]]
+  [[deprecated("Use `FOO.injected_field() = BAR` instead of `FOO.set_injected_field(BAR)`")]]
   ::std::string& set_injected_field(T_Fields_injected_field_struct_setter&& injected_field_) {
     injected_field_ref() = std::forward<T_Fields_injected_field_struct_setter>(injected_field_);
     return __fbthrift_field_injected_field;
@@ -396,20 +396,20 @@ class FieldsInjectedToEmptyStruct final  {
   }
 
   /** Glean { "field": "injected_field" } */
-  [[deprecated("Use `FOO.injected_field().value();` instead of `FOO.get_injected_field();`")]]
+  [[deprecated("Use `FOO.injected_field().value()` instead of `FOO.get_injected_field()`")]]
   const ::std::string& get_injected_field() const& {
     return __fbthrift_field_injected_field;
   }
 
   /** Glean { "field": "injected_field" } */
-  [[deprecated("Use `FOO.injected_field().value();` instead of `FOO.get_injected_field();`")]]
+  [[deprecated("Use `FOO.injected_field().value()` instead of `FOO.get_injected_field()`")]]
   ::std::string get_injected_field() && {
     return static_cast<::std::string&&>(__fbthrift_field_injected_field);
   }
 
   /** Glean { "field": "injected_field" } */
   template <typename T_FieldsInjectedToEmptyStruct_injected_field_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.injected_field() = BAR;` instead of `FOO.set_injected_field(BAR);`")]]
+  [[deprecated("Use `FOO.injected_field() = BAR` instead of `FOO.set_injected_field(BAR)`")]]
   ::std::string& set_injected_field(T_FieldsInjectedToEmptyStruct_injected_field_struct_setter&& injected_field_) {
     injected_field_ref() = std::forward<T_FieldsInjectedToEmptyStruct_injected_field_struct_setter>(injected_field_);
     return __fbthrift_field_injected_field;
@@ -623,40 +623,40 @@ class FieldsInjectedToStruct final  {
   }
 
   /** Glean { "field": "string_field" } */
-  [[deprecated("Use `FOO.string_field().value();` instead of `FOO.get_string_field();`")]]
+  [[deprecated("Use `FOO.string_field().value()` instead of `FOO.get_string_field()`")]]
   const ::std::string& get_string_field() const& {
     return __fbthrift_field_string_field;
   }
 
   /** Glean { "field": "string_field" } */
-  [[deprecated("Use `FOO.string_field().value();` instead of `FOO.get_string_field();`")]]
+  [[deprecated("Use `FOO.string_field().value()` instead of `FOO.get_string_field()`")]]
   ::std::string get_string_field() && {
     return static_cast<::std::string&&>(__fbthrift_field_string_field);
   }
 
   /** Glean { "field": "string_field" } */
   template <typename T_FieldsInjectedToStruct_string_field_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.string_field() = BAR;` instead of `FOO.set_string_field(BAR);`")]]
+  [[deprecated("Use `FOO.string_field() = BAR` instead of `FOO.set_string_field(BAR)`")]]
   ::std::string& set_string_field(T_FieldsInjectedToStruct_string_field_struct_setter&& string_field_) {
     string_field_ref() = std::forward<T_FieldsInjectedToStruct_string_field_struct_setter>(string_field_);
     return __fbthrift_field_string_field;
   }
 
   /** Glean { "field": "injected_field" } */
-  [[deprecated("Use `FOO.injected_field().value();` instead of `FOO.get_injected_field();`")]]
+  [[deprecated("Use `FOO.injected_field().value()` instead of `FOO.get_injected_field()`")]]
   const ::std::string& get_injected_field() const& {
     return __fbthrift_field_injected_field;
   }
 
   /** Glean { "field": "injected_field" } */
-  [[deprecated("Use `FOO.injected_field().value();` instead of `FOO.get_injected_field();`")]]
+  [[deprecated("Use `FOO.injected_field().value()` instead of `FOO.get_injected_field()`")]]
   ::std::string get_injected_field() && {
     return static_cast<::std::string&&>(__fbthrift_field_injected_field);
   }
 
   /** Glean { "field": "injected_field" } */
   template <typename T_FieldsInjectedToStruct_injected_field_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.injected_field() = BAR;` instead of `FOO.set_injected_field(BAR);`")]]
+  [[deprecated("Use `FOO.injected_field() = BAR` instead of `FOO.set_injected_field(BAR)`")]]
   ::std::string& set_injected_field(T_FieldsInjectedToStruct_injected_field_struct_setter&& injected_field_) {
     injected_field_ref() = std::forward<T_FieldsInjectedToStruct_injected_field_struct_setter>(injected_field_);
     return __fbthrift_field_injected_field;
@@ -974,40 +974,40 @@ class FieldsInjectedWithIncludedStruct final  {
   }
 
   /** Glean { "field": "string_field" } */
-  [[deprecated("Use `FOO.string_field().value();` instead of `FOO.get_string_field();`")]]
+  [[deprecated("Use `FOO.string_field().value()` instead of `FOO.get_string_field()`")]]
   const ::std::string& get_string_field() const& {
     return __fbthrift_field_string_field;
   }
 
   /** Glean { "field": "string_field" } */
-  [[deprecated("Use `FOO.string_field().value();` instead of `FOO.get_string_field();`")]]
+  [[deprecated("Use `FOO.string_field().value()` instead of `FOO.get_string_field()`")]]
   ::std::string get_string_field() && {
     return static_cast<::std::string&&>(__fbthrift_field_string_field);
   }
 
   /** Glean { "field": "string_field" } */
   template <typename T_FieldsInjectedWithIncludedStruct_string_field_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.string_field() = BAR;` instead of `FOO.set_string_field(BAR);`")]]
+  [[deprecated("Use `FOO.string_field() = BAR` instead of `FOO.set_string_field(BAR)`")]]
   ::std::string& set_string_field(T_FieldsInjectedWithIncludedStruct_string_field_struct_setter&& string_field_) {
     string_field_ref() = std::forward<T_FieldsInjectedWithIncludedStruct_string_field_struct_setter>(string_field_);
     return __fbthrift_field_string_field;
   }
 
   /** Glean { "field": "injected_field" } */
-  [[deprecated("Use `FOO.injected_field().value();` instead of `FOO.get_injected_field();`")]]
+  [[deprecated("Use `FOO.injected_field().value()` instead of `FOO.get_injected_field()`")]]
   const ::std::string& get_injected_field() const& {
     return __fbthrift_field_injected_field;
   }
 
   /** Glean { "field": "injected_field" } */
-  [[deprecated("Use `FOO.injected_field().value();` instead of `FOO.get_injected_field();`")]]
+  [[deprecated("Use `FOO.injected_field().value()` instead of `FOO.get_injected_field()`")]]
   ::std::string get_injected_field() && {
     return static_cast<::std::string&&>(__fbthrift_field_injected_field);
   }
 
   /** Glean { "field": "injected_field" } */
   template <typename T_FieldsInjectedWithIncludedStruct_injected_field_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.injected_field() = BAR;` instead of `FOO.set_injected_field(BAR);`")]]
+  [[deprecated("Use `FOO.injected_field() = BAR` instead of `FOO.set_injected_field(BAR)`")]]
   ::std::string& set_injected_field(T_FieldsInjectedWithIncludedStruct_injected_field_struct_setter&& injected_field_) {
     injected_field_ref() = std::forward<T_FieldsInjectedWithIncludedStruct_injected_field_struct_setter>(injected_field_);
     return __fbthrift_field_injected_field;

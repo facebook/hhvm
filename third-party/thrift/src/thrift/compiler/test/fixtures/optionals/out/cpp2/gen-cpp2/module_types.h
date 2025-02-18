@@ -484,35 +484,35 @@ class Color final  {
   }
 
   /** Glean { "field": "red" } */
-  [[deprecated("Use `FOO.red().value();` instead of `FOO.get_red();`")]]
+  [[deprecated("Use `FOO.red().value()` instead of `FOO.get_red()`")]]
   double get_red() const;
 
   /** Glean { "field": "red" } */
-  [[deprecated("Use `FOO.red() = BAR;` instead of `FOO.set_red(BAR);`")]]
+  [[deprecated("Use `FOO.red() = BAR` instead of `FOO.set_red(BAR)`")]]
   double& set_red(double red_);
 
   /** Glean { "field": "green" } */
-  [[deprecated("Use `FOO.green().value();` instead of `FOO.get_green();`")]]
+  [[deprecated("Use `FOO.green().value()` instead of `FOO.get_green()`")]]
   double get_green() const;
 
   /** Glean { "field": "green" } */
-  [[deprecated("Use `FOO.green() = BAR;` instead of `FOO.set_green(BAR);`")]]
+  [[deprecated("Use `FOO.green() = BAR` instead of `FOO.set_green(BAR)`")]]
   double& set_green(double green_);
 
   /** Glean { "field": "blue" } */
-  [[deprecated("Use `FOO.blue().value();` instead of `FOO.get_blue();`")]]
+  [[deprecated("Use `FOO.blue().value()` instead of `FOO.get_blue()`")]]
   double get_blue() const;
 
   /** Glean { "field": "blue" } */
-  [[deprecated("Use `FOO.blue() = BAR;` instead of `FOO.set_blue(BAR);`")]]
+  [[deprecated("Use `FOO.blue() = BAR` instead of `FOO.set_blue(BAR)`")]]
   double& set_blue(double blue_);
 
   /** Glean { "field": "alpha" } */
-  [[deprecated("Use `FOO.alpha().value();` instead of `FOO.get_alpha();`")]]
+  [[deprecated("Use `FOO.alpha().value()` instead of `FOO.get_alpha()`")]]
   double get_alpha() const;
 
   /** Glean { "field": "alpha" } */
-  [[deprecated("Use `FOO.alpha() = BAR;` instead of `FOO.set_alpha(BAR);`")]]
+  [[deprecated("Use `FOO.alpha() = BAR` instead of `FOO.set_alpha(BAR)`")]]
   double& set_alpha(double alpha_);
 
   template <class Protocol_>
@@ -879,87 +879,87 @@ class Vehicle final  {
   }
 
   /** Glean { "field": "color" } */
-  [[deprecated("Use `FOO.color().value();` instead of `FOO.get_color();`")]]
+  [[deprecated("Use `FOO.color().value()` instead of `FOO.get_color()`")]]
   const ::cpp2::Color& get_color() const&;
 
   /** Glean { "field": "color" } */
-  [[deprecated("Use `FOO.color().value();` instead of `FOO.get_color();`")]]
+  [[deprecated("Use `FOO.color().value()` instead of `FOO.get_color()`")]]
   ::cpp2::Color get_color() &&;
 
   /** Glean { "field": "color" } */
   template <typename T_Vehicle_color_struct_setter = ::cpp2::Color>
-  [[deprecated("Use `FOO.color() = BAR;` instead of `FOO.set_color(BAR);`")]]
+  [[deprecated("Use `FOO.color() = BAR` instead of `FOO.set_color(BAR)`")]]
   ::cpp2::Color& set_color(T_Vehicle_color_struct_setter&& color_) {
     color_ref() = std::forward<T_Vehicle_color_struct_setter>(color_);
     return __fbthrift_field_color;
   }
 
   /** Glean { "field": "licensePlate" } */
-  [[deprecated("Use `FOO.licensePlate().value();` instead of `FOO.get_licensePlate();`")]]
+  [[deprecated("Use `FOO.licensePlate().value()` instead of `FOO.get_licensePlate()`")]]
   const ::std::string* get_licensePlate() const&;
 
   /** Glean { "field": "licensePlate" } */
-  [[deprecated("Use `FOO.licensePlate().value();` instead of `FOO.get_licensePlate();`")]]
+  [[deprecated("Use `FOO.licensePlate().value()` instead of `FOO.get_licensePlate()`")]]
   ::std::string* get_licensePlate() &;
 
   ::std::string* get_licensePlate() && = delete;
 
   /** Glean { "field": "licensePlate" } */
   template <typename T_Vehicle_licensePlate_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.licensePlate() = BAR;` instead of `FOO.set_licensePlate(BAR);`")]]
+  [[deprecated("Use `FOO.licensePlate() = BAR` instead of `FOO.set_licensePlate(BAR)`")]]
   ::std::string& set_licensePlate(T_Vehicle_licensePlate_struct_setter&& licensePlate_) {
     licensePlate_ref() = std::forward<T_Vehicle_licensePlate_struct_setter>(licensePlate_);
     return __fbthrift_field_licensePlate;
   }
 
   /** Glean { "field": "description" } */
-  [[deprecated("Use `FOO.description().value();` instead of `FOO.get_description();`")]]
+  [[deprecated("Use `FOO.description().value()` instead of `FOO.get_description()`")]]
   const ::std::string* get_description() const&;
 
   /** Glean { "field": "description" } */
-  [[deprecated("Use `FOO.description().value();` instead of `FOO.get_description();`")]]
+  [[deprecated("Use `FOO.description().value()` instead of `FOO.get_description()`")]]
   ::std::string* get_description() &;
 
   ::std::string* get_description() && = delete;
 
   /** Glean { "field": "description" } */
   template <typename T_Vehicle_description_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.description() = BAR;` instead of `FOO.set_description(BAR);`")]]
+  [[deprecated("Use `FOO.description() = BAR` instead of `FOO.set_description(BAR)`")]]
   ::std::string& set_description(T_Vehicle_description_struct_setter&& description_) {
     description_ref() = std::forward<T_Vehicle_description_struct_setter>(description_);
     return __fbthrift_field_description;
   }
 
   /** Glean { "field": "name" } */
-  [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
+  [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
   const ::std::string* get_name() const&;
 
   /** Glean { "field": "name" } */
-  [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
+  [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
   ::std::string* get_name() &;
 
   ::std::string* get_name() && = delete;
 
   /** Glean { "field": "name" } */
   template <typename T_Vehicle_name_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.name() = BAR;` instead of `FOO.set_name(BAR);`")]]
+  [[deprecated("Use `FOO.name() = BAR` instead of `FOO.set_name(BAR)`")]]
   ::std::string& set_name(T_Vehicle_name_struct_setter&& name_) {
     name_ref() = std::forward<T_Vehicle_name_struct_setter>(name_);
     return __fbthrift_field_name;
   }
 
   /** Glean { "field": "hasAC" } */
-  [[deprecated("Use `FOO.hasAC().value();` instead of `FOO.get_hasAC();`")]]
+  [[deprecated("Use `FOO.hasAC().value()` instead of `FOO.get_hasAC()`")]]
   const bool* get_hasAC() const&;
 
   /** Glean { "field": "hasAC" } */
-  [[deprecated("Use `FOO.hasAC().value();` instead of `FOO.get_hasAC();`")]]
+  [[deprecated("Use `FOO.hasAC().value()` instead of `FOO.get_hasAC()`")]]
   bool* get_hasAC() &;
 
   bool* get_hasAC() && = delete;
 
   /** Glean { "field": "hasAC" } */
-  [[deprecated("Use `FOO.hasAC() = BAR;` instead of `FOO.set_hasAC(BAR);`")]]
+  [[deprecated("Use `FOO.hasAC() = BAR` instead of `FOO.set_hasAC(BAR)`")]]
   bool& set_hasAC(bool hasAC_);
 
   template <class Protocol_>
@@ -1586,160 +1586,160 @@ class Person final  {
   }
 
   /** Glean { "field": "id" } */
-  [[deprecated("Use `FOO.id().value();` instead of `FOO.get_id();`")]]
+  [[deprecated("Use `FOO.id().value()` instead of `FOO.get_id()`")]]
   ::cpp2::PersonID get_id() const;
 
   /** Glean { "field": "id" } */
-  [[deprecated("Use `FOO.id() = BAR;` instead of `FOO.set_id(BAR);`")]]
+  [[deprecated("Use `FOO.id() = BAR` instead of `FOO.set_id(BAR)`")]]
   ::cpp2::PersonID& set_id(::cpp2::PersonID id_);
 
   /** Glean { "field": "name" } */
-  [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
+  [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
   const ::std::string& get_name() const& {
     return __fbthrift_field_name;
   }
 
   /** Glean { "field": "name" } */
-  [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
+  [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
   ::std::string get_name() && {
     return static_cast<::std::string&&>(__fbthrift_field_name);
   }
 
   /** Glean { "field": "name" } */
   template <typename T_Person_name_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.name() = BAR;` instead of `FOO.set_name(BAR);`")]]
+  [[deprecated("Use `FOO.name() = BAR` instead of `FOO.set_name(BAR)`")]]
   ::std::string& set_name(T_Person_name_struct_setter&& name_) {
     name_ref() = std::forward<T_Person_name_struct_setter>(name_);
     return __fbthrift_field_name;
   }
 
   /** Glean { "field": "age" } */
-  [[deprecated("Use `FOO.age().value();` instead of `FOO.get_age();`")]]
+  [[deprecated("Use `FOO.age().value()` instead of `FOO.get_age()`")]]
   const ::std::int16_t* get_age() const&;
 
   /** Glean { "field": "age" } */
-  [[deprecated("Use `FOO.age().value();` instead of `FOO.get_age();`")]]
+  [[deprecated("Use `FOO.age().value()` instead of `FOO.get_age()`")]]
   ::std::int16_t* get_age() &;
 
   ::std::int16_t* get_age() && = delete;
 
   /** Glean { "field": "age" } */
-  [[deprecated("Use `FOO.age() = BAR;` instead of `FOO.set_age(BAR);`")]]
+  [[deprecated("Use `FOO.age() = BAR` instead of `FOO.set_age(BAR)`")]]
   ::std::int16_t& set_age(::std::int16_t age_);
 
   /** Glean { "field": "address" } */
-  [[deprecated("Use `FOO.address().value();` instead of `FOO.get_address();`")]]
+  [[deprecated("Use `FOO.address().value()` instead of `FOO.get_address()`")]]
   const ::std::string* get_address() const&;
 
   /** Glean { "field": "address" } */
-  [[deprecated("Use `FOO.address().value();` instead of `FOO.get_address();`")]]
+  [[deprecated("Use `FOO.address().value()` instead of `FOO.get_address()`")]]
   ::std::string* get_address() &;
 
   ::std::string* get_address() && = delete;
 
   /** Glean { "field": "address" } */
   template <typename T_Person_address_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.address() = BAR;` instead of `FOO.set_address(BAR);`")]]
+  [[deprecated("Use `FOO.address() = BAR` instead of `FOO.set_address(BAR)`")]]
   ::std::string& set_address(T_Person_address_struct_setter&& address_) {
     address_ref() = std::forward<T_Person_address_struct_setter>(address_);
     return __fbthrift_field_address;
   }
 
   /** Glean { "field": "favoriteColor" } */
-  [[deprecated("Use `FOO.favoriteColor().value();` instead of `FOO.get_favoriteColor();`")]]
+  [[deprecated("Use `FOO.favoriteColor().value()` instead of `FOO.get_favoriteColor()`")]]
   const ::cpp2::Color* get_favoriteColor() const&;
 
   /** Glean { "field": "favoriteColor" } */
-  [[deprecated("Use `FOO.favoriteColor().value();` instead of `FOO.get_favoriteColor();`")]]
+  [[deprecated("Use `FOO.favoriteColor().value()` instead of `FOO.get_favoriteColor()`")]]
   ::cpp2::Color* get_favoriteColor() &;
 
   ::cpp2::Color* get_favoriteColor() && = delete;
 
   /** Glean { "field": "favoriteColor" } */
   template <typename T_Person_favoriteColor_struct_setter = ::cpp2::Color>
-  [[deprecated("Use `FOO.favoriteColor() = BAR;` instead of `FOO.set_favoriteColor(BAR);`")]]
+  [[deprecated("Use `FOO.favoriteColor() = BAR` instead of `FOO.set_favoriteColor(BAR)`")]]
   ::cpp2::Color& set_favoriteColor(T_Person_favoriteColor_struct_setter&& favoriteColor_) {
     favoriteColor_ref() = std::forward<T_Person_favoriteColor_struct_setter>(favoriteColor_);
     return __fbthrift_field_favoriteColor;
   }
 
   /** Glean { "field": "friends" } */
-  [[deprecated("Use `FOO.friends().value();` instead of `FOO.get_friends();`")]]
+  [[deprecated("Use `FOO.friends().value()` instead of `FOO.get_friends()`")]]
   const ::std::set<::cpp2::PersonID>* get_friends() const&;
 
   /** Glean { "field": "friends" } */
-  [[deprecated("Use `FOO.friends().value();` instead of `FOO.get_friends();`")]]
+  [[deprecated("Use `FOO.friends().value()` instead of `FOO.get_friends()`")]]
   ::std::set<::cpp2::PersonID>* get_friends() &;
 
   ::std::set<::cpp2::PersonID>* get_friends() && = delete;
 
   /** Glean { "field": "friends" } */
   template <typename T_Person_friends_struct_setter = ::std::set<::cpp2::PersonID>>
-  [[deprecated("Use `FOO.friends() = BAR;` instead of `FOO.set_friends(BAR);`")]]
+  [[deprecated("Use `FOO.friends() = BAR` instead of `FOO.set_friends(BAR)`")]]
   ::std::set<::cpp2::PersonID>& set_friends(T_Person_friends_struct_setter&& friends_) {
     friends_ref() = std::forward<T_Person_friends_struct_setter>(friends_);
     return __fbthrift_field_friends;
   }
 
   /** Glean { "field": "bestFriend" } */
-  [[deprecated("Use `FOO.bestFriend().value();` instead of `FOO.get_bestFriend();`")]]
+  [[deprecated("Use `FOO.bestFriend().value()` instead of `FOO.get_bestFriend()`")]]
   const ::cpp2::PersonID* get_bestFriend() const&;
 
   /** Glean { "field": "bestFriend" } */
-  [[deprecated("Use `FOO.bestFriend().value();` instead of `FOO.get_bestFriend();`")]]
+  [[deprecated("Use `FOO.bestFriend().value()` instead of `FOO.get_bestFriend()`")]]
   ::cpp2::PersonID* get_bestFriend() &;
 
   ::cpp2::PersonID* get_bestFriend() && = delete;
 
   /** Glean { "field": "bestFriend" } */
-  [[deprecated("Use `FOO.bestFriend() = BAR;` instead of `FOO.set_bestFriend(BAR);`")]]
+  [[deprecated("Use `FOO.bestFriend() = BAR` instead of `FOO.set_bestFriend(BAR)`")]]
   ::cpp2::PersonID& set_bestFriend(::cpp2::PersonID bestFriend_);
 
   /** Glean { "field": "petNames" } */
-  [[deprecated("Use `FOO.petNames().value();` instead of `FOO.get_petNames();`")]]
+  [[deprecated("Use `FOO.petNames().value()` instead of `FOO.get_petNames()`")]]
   const ::std::map<::cpp2::Animal, ::std::string>* get_petNames() const&;
 
   /** Glean { "field": "petNames" } */
-  [[deprecated("Use `FOO.petNames().value();` instead of `FOO.get_petNames();`")]]
+  [[deprecated("Use `FOO.petNames().value()` instead of `FOO.get_petNames()`")]]
   ::std::map<::cpp2::Animal, ::std::string>* get_petNames() &;
 
   ::std::map<::cpp2::Animal, ::std::string>* get_petNames() && = delete;
 
   /** Glean { "field": "petNames" } */
   template <typename T_Person_petNames_struct_setter = ::std::map<::cpp2::Animal, ::std::string>>
-  [[deprecated("Use `FOO.petNames() = BAR;` instead of `FOO.set_petNames(BAR);`")]]
+  [[deprecated("Use `FOO.petNames() = BAR` instead of `FOO.set_petNames(BAR)`")]]
   ::std::map<::cpp2::Animal, ::std::string>& set_petNames(T_Person_petNames_struct_setter&& petNames_) {
     petNames_ref() = std::forward<T_Person_petNames_struct_setter>(petNames_);
     return __fbthrift_field_petNames;
   }
 
   /** Glean { "field": "afraidOfAnimal" } */
-  [[deprecated("Use `FOO.afraidOfAnimal().value();` instead of `FOO.get_afraidOfAnimal();`")]]
+  [[deprecated("Use `FOO.afraidOfAnimal().value()` instead of `FOO.get_afraidOfAnimal()`")]]
   const ::cpp2::Animal* get_afraidOfAnimal() const&;
 
   /** Glean { "field": "afraidOfAnimal" } */
-  [[deprecated("Use `FOO.afraidOfAnimal().value();` instead of `FOO.get_afraidOfAnimal();`")]]
+  [[deprecated("Use `FOO.afraidOfAnimal().value()` instead of `FOO.get_afraidOfAnimal()`")]]
   ::cpp2::Animal* get_afraidOfAnimal() &;
 
   ::cpp2::Animal* get_afraidOfAnimal() && = delete;
 
   /** Glean { "field": "afraidOfAnimal" } */
-  [[deprecated("Use `FOO.afraidOfAnimal() = BAR;` instead of `FOO.set_afraidOfAnimal(BAR);`")]]
+  [[deprecated("Use `FOO.afraidOfAnimal() = BAR` instead of `FOO.set_afraidOfAnimal(BAR)`")]]
   ::cpp2::Animal& set_afraidOfAnimal(::cpp2::Animal afraidOfAnimal_);
 
   /** Glean { "field": "vehicles" } */
-  [[deprecated("Use `FOO.vehicles().value();` instead of `FOO.get_vehicles();`")]]
+  [[deprecated("Use `FOO.vehicles().value()` instead of `FOO.get_vehicles()`")]]
   const ::std::vector<::cpp2::Vehicle>* get_vehicles() const&;
 
   /** Glean { "field": "vehicles" } */
-  [[deprecated("Use `FOO.vehicles().value();` instead of `FOO.get_vehicles();`")]]
+  [[deprecated("Use `FOO.vehicles().value()` instead of `FOO.get_vehicles()`")]]
   ::std::vector<::cpp2::Vehicle>* get_vehicles() &;
 
   ::std::vector<::cpp2::Vehicle>* get_vehicles() && = delete;
 
   /** Glean { "field": "vehicles" } */
   template <typename T_Person_vehicles_struct_setter = ::std::vector<::cpp2::Vehicle>>
-  [[deprecated("Use `FOO.vehicles() = BAR;` instead of `FOO.set_vehicles(BAR);`")]]
+  [[deprecated("Use `FOO.vehicles() = BAR` instead of `FOO.set_vehicles(BAR)`")]]
   ::std::vector<::cpp2::Vehicle>& set_vehicles(T_Person_vehicles_struct_setter&& vehicles_) {
     vehicles_ref() = std::forward<T_Person_vehicles_struct_setter>(vehicles_);
     return __fbthrift_field_vehicles;

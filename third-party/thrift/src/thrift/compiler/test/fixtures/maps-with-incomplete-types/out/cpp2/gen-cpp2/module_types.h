@@ -183,17 +183,17 @@ class B final  {
   }
 
   /** Glean { "field": "field" } */
-  [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
+  [[deprecated("Use `FOO.field().value()` instead of `FOO.get_field()`")]]
   const ::std::int32_t* get_field() const&;
 
   /** Glean { "field": "field" } */
-  [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
+  [[deprecated("Use `FOO.field().value()` instead of `FOO.get_field()`")]]
   ::std::int32_t* get_field() &;
 
   ::std::int32_t* get_field() && = delete;
 
   /** Glean { "field": "field" } */
-  [[deprecated("Use `FOO.field() = BAR;` instead of `FOO.set_field(BAR);`")]]
+  [[deprecated("Use `FOO.field() = BAR` instead of `FOO.set_field(BAR)`")]]
   ::std::int32_t& set_field(::std::int32_t field_);
 
   template <class Protocol_>
@@ -352,18 +352,18 @@ class A final  {
   }
 
   /** Glean { "field": "some_map" } */
-  [[deprecated("Use `FOO.some_map().value();` instead of `FOO.get_some_map();`")]]
+  [[deprecated("Use `FOO.some_map().value()` instead of `FOO.get_some_map()`")]]
   const std::unordered_map<::std::int32_t, ::apache::thrift::test::B>* get_some_map() const&;
 
   /** Glean { "field": "some_map" } */
-  [[deprecated("Use `FOO.some_map().value();` instead of `FOO.get_some_map();`")]]
+  [[deprecated("Use `FOO.some_map().value()` instead of `FOO.get_some_map()`")]]
   std::unordered_map<::std::int32_t, ::apache::thrift::test::B>* get_some_map() &;
 
   std::unordered_map<::std::int32_t, ::apache::thrift::test::B>* get_some_map() && = delete;
 
   /** Glean { "field": "some_map" } */
   template <typename T_A_some_map_struct_setter = std::unordered_map<::std::int32_t, ::apache::thrift::test::B>>
-  [[deprecated("Use `FOO.some_map() = BAR;` instead of `FOO.set_some_map(BAR);`")]]
+  [[deprecated("Use `FOO.some_map() = BAR` instead of `FOO.set_some_map(BAR)`")]]
   std::unordered_map<::std::int32_t, ::apache::thrift::test::B>& set_some_map(T_A_some_map_struct_setter&& some_map_) {
     some_map_ref() = std::forward<T_A_some_map_struct_setter>(some_map_);
     return __fbthrift_field_some_map;

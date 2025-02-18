@@ -292,43 +292,43 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "MyIncludedField" } */
-  [[deprecated("Use `FOO.MyIncludedField().value();` instead of `FOO.get_MyIncludedField();`")]]
+  [[deprecated("Use `FOO.MyIncludedField().value()` instead of `FOO.get_MyIncludedField()`")]]
   const ::cpp2::Included& get_MyIncludedField() const&;
 
   /** Glean { "field": "MyIncludedField" } */
-  [[deprecated("Use `FOO.MyIncludedField().value();` instead of `FOO.get_MyIncludedField();`")]]
+  [[deprecated("Use `FOO.MyIncludedField().value()` instead of `FOO.get_MyIncludedField()`")]]
   ::cpp2::Included get_MyIncludedField() &&;
 
   /** Glean { "field": "MyIncludedField" } */
   template <typename T_MyStruct_MyIncludedField_struct_setter = ::cpp2::Included>
-  [[deprecated("Use `FOO.MyIncludedField() = BAR;` instead of `FOO.set_MyIncludedField(BAR);`")]]
+  [[deprecated("Use `FOO.MyIncludedField() = BAR` instead of `FOO.set_MyIncludedField(BAR)`")]]
   ::cpp2::Included& set_MyIncludedField(T_MyStruct_MyIncludedField_struct_setter&& MyIncludedField_) {
     MyIncludedField_ref() = std::forward<T_MyStruct_MyIncludedField_struct_setter>(MyIncludedField_);
     return __fbthrift_field_MyIncludedField;
   }
 
   /** Glean { "field": "MyOtherIncludedField" } */
-  [[deprecated("Use `FOO.MyOtherIncludedField().value();` instead of `FOO.get_MyOtherIncludedField();`")]]
+  [[deprecated("Use `FOO.MyOtherIncludedField().value()` instead of `FOO.get_MyOtherIncludedField()`")]]
   const ::cpp2::Included& get_MyOtherIncludedField() const&;
 
   /** Glean { "field": "MyOtherIncludedField" } */
-  [[deprecated("Use `FOO.MyOtherIncludedField().value();` instead of `FOO.get_MyOtherIncludedField();`")]]
+  [[deprecated("Use `FOO.MyOtherIncludedField().value()` instead of `FOO.get_MyOtherIncludedField()`")]]
   ::cpp2::Included get_MyOtherIncludedField() &&;
 
   /** Glean { "field": "MyOtherIncludedField" } */
   template <typename T_MyStruct_MyOtherIncludedField_struct_setter = ::cpp2::Included>
-  [[deprecated("Use `FOO.MyOtherIncludedField() = BAR;` instead of `FOO.set_MyOtherIncludedField(BAR);`")]]
+  [[deprecated("Use `FOO.MyOtherIncludedField() = BAR` instead of `FOO.set_MyOtherIncludedField(BAR)`")]]
   ::cpp2::Included& set_MyOtherIncludedField(T_MyStruct_MyOtherIncludedField_struct_setter&& MyOtherIncludedField_) {
     MyOtherIncludedField_ref() = std::forward<T_MyStruct_MyOtherIncludedField_struct_setter>(MyOtherIncludedField_);
     return __fbthrift_field_MyOtherIncludedField;
   }
 
   /** Glean { "field": "MyIncludedInt" } */
-  [[deprecated("Use `FOO.MyIncludedInt().value();` instead of `FOO.get_MyIncludedInt();`")]]
+  [[deprecated("Use `FOO.MyIncludedInt().value()` instead of `FOO.get_MyIncludedInt()`")]]
   ::cpp2::IncludedInt64 get_MyIncludedInt() const;
 
   /** Glean { "field": "MyIncludedInt" } */
-  [[deprecated("Use `FOO.MyIncludedInt() = BAR;` instead of `FOO.set_MyIncludedInt(BAR);`")]]
+  [[deprecated("Use `FOO.MyIncludedInt() = BAR` instead of `FOO.set_MyIncludedInt(BAR)`")]]
   ::cpp2::IncludedInt64& set_MyIncludedInt(::cpp2::IncludedInt64 MyIncludedInt_);
 
   template <class Protocol_>

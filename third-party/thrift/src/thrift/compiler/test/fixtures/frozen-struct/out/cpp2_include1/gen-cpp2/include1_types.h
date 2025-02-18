@@ -235,28 +235,28 @@ class IncludedA final  {
   }
 
   /** Glean { "field": "i32Field" } */
-  [[deprecated("Use `FOO.i32Field().value();` instead of `FOO.get_i32Field();`")]]
+  [[deprecated("Use `FOO.i32Field().value()` instead of `FOO.get_i32Field()`")]]
   ::std::int32_t get_i32Field() const;
 
   /** Glean { "field": "i32Field" } */
-  [[deprecated("Use `FOO.i32Field() = BAR;` instead of `FOO.set_i32Field(BAR);`")]]
+  [[deprecated("Use `FOO.i32Field() = BAR` instead of `FOO.set_i32Field(BAR)`")]]
   ::std::int32_t& set_i32Field(::std::int32_t i32Field_);
 
   /** Glean { "field": "strField" } */
-  [[deprecated("Use `FOO.strField().value();` instead of `FOO.get_strField();`")]]
+  [[deprecated("Use `FOO.strField().value()` instead of `FOO.get_strField()`")]]
   const ::std::string& get_strField() const& {
     return __fbthrift_field_strField;
   }
 
   /** Glean { "field": "strField" } */
-  [[deprecated("Use `FOO.strField().value();` instead of `FOO.get_strField();`")]]
+  [[deprecated("Use `FOO.strField().value()` instead of `FOO.get_strField()`")]]
   ::std::string get_strField() && {
     return static_cast<::std::string&&>(__fbthrift_field_strField);
   }
 
   /** Glean { "field": "strField" } */
   template <typename T_IncludedA_strField_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.strField() = BAR;` instead of `FOO.set_strField(BAR);`")]]
+  [[deprecated("Use `FOO.strField() = BAR` instead of `FOO.set_strField(BAR)`")]]
   ::std::string& set_strField(T_IncludedA_strField_struct_setter&& strField_) {
     strField_ref() = std::forward<T_IncludedA_strField_struct_setter>(strField_);
     return __fbthrift_field_strField;

@@ -425,66 +425,66 @@ class SerializedStruct final  {
   }
 
   /** Glean { "field": "s" } */
-  [[deprecated("Use `FOO.s().value();` instead of `FOO.get_s();`")]]
+  [[deprecated("Use `FOO.s().value()` instead of `FOO.get_s()`")]]
   const ::std::string& get_s() const& {
     return __fbthrift_field_s;
   }
 
   /** Glean { "field": "s" } */
-  [[deprecated("Use `FOO.s().value();` instead of `FOO.get_s();`")]]
+  [[deprecated("Use `FOO.s().value()` instead of `FOO.get_s()`")]]
   ::std::string get_s() && {
     return static_cast<::std::string&&>(__fbthrift_field_s);
   }
 
   /** Glean { "field": "s" } */
   template <typename T_SerializedStruct_s_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.s() = BAR;` instead of `FOO.set_s(BAR);`")]]
+  [[deprecated("Use `FOO.s() = BAR` instead of `FOO.set_s(BAR)`")]]
   ::std::string& set_s(T_SerializedStruct_s_struct_setter&& s_) {
     s_ref() = std::forward<T_SerializedStruct_s_struct_setter>(s_);
     return __fbthrift_field_s;
   }
 
   /** Glean { "field": "i" } */
-  [[deprecated("Use `FOO.i().value();` instead of `FOO.get_i();`")]]
+  [[deprecated("Use `FOO.i().value()` instead of `FOO.get_i()`")]]
   ::std::int32_t get_i() const;
 
   /** Glean { "field": "i" } */
-  [[deprecated("Use `FOO.i() = BAR;` instead of `FOO.set_i(BAR);`")]]
+  [[deprecated("Use `FOO.i() = BAR` instead of `FOO.set_i(BAR)`")]]
   ::std::int32_t& set_i(::std::int32_t i_);
 
   /** Glean { "field": "os" } */
-  [[deprecated("Use `FOO.os().value();` instead of `FOO.get_os();`")]]
+  [[deprecated("Use `FOO.os().value()` instead of `FOO.get_os()`")]]
   const ::std::string* get_os() const&;
 
   /** Glean { "field": "os" } */
-  [[deprecated("Use `FOO.os().value();` instead of `FOO.get_os();`")]]
+  [[deprecated("Use `FOO.os().value()` instead of `FOO.get_os()`")]]
   ::std::string* get_os() &;
 
   ::std::string* get_os() && = delete;
 
   /** Glean { "field": "os" } */
   template <typename T_SerializedStruct_os_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.os() = BAR;` instead of `FOO.set_os(BAR);`")]]
+  [[deprecated("Use `FOO.os() = BAR` instead of `FOO.set_os(BAR)`")]]
   ::std::string& set_os(T_SerializedStruct_os_struct_setter&& os_) {
     os_ref() = std::forward<T_SerializedStruct_os_struct_setter>(os_);
     return __fbthrift_field_os;
   }
 
   /** Glean { "field": "rs" } */
-  [[deprecated("Use `FOO.rs().value();` instead of `FOO.get_rs();`")]]
+  [[deprecated("Use `FOO.rs().value()` instead of `FOO.get_rs()`")]]
   const ::std::string& get_rs() const& {
     return __fbthrift_field_rs;
   }
 
   /** Glean { "field": "rs" } */
-  [[deprecated("Use `FOO.rs().value();` instead of `FOO.get_rs();`")]]
+  [[deprecated("Use `FOO.rs().value()` instead of `FOO.get_rs()`")]]
   ::std::string get_rs() && {
     return static_cast<::std::string&&>(__fbthrift_field_rs);
   }
 
   /** Glean { "field": "rs" } */
   template <typename T_SerializedStruct_rs_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.rs() = BAR;` instead of `FOO.set_rs(BAR);`")]]
+  [[deprecated("Use `FOO.rs() = BAR` instead of `FOO.set_rs(BAR)`")]]
   ::std::string& set_rs(T_SerializedStruct_rs_struct_setter&& rs_) {
     rs_ref() = std::forward<T_SerializedStruct_rs_struct_setter>(rs_);
     return __fbthrift_field_rs;
@@ -1051,58 +1051,58 @@ class FOLLY_EXPORT SerializedError : public virtual apache::thrift::TException {
   }
 
   /** Glean { "field": "msg" } */
-  [[deprecated("Use `FOO.msg().value();` instead of `FOO.get_msg();`")]]
+  [[deprecated("Use `FOO.msg().value()` instead of `FOO.get_msg()`")]]
   const ::std::string& get_msg() const& {
     return __fbthrift_field_msg;
   }
 
   /** Glean { "field": "msg" } */
-  [[deprecated("Use `FOO.msg().value();` instead of `FOO.get_msg();`")]]
+  [[deprecated("Use `FOO.msg().value()` instead of `FOO.get_msg()`")]]
   ::std::string get_msg() && {
     return static_cast<::std::string&&>(__fbthrift_field_msg);
   }
 
   /** Glean { "field": "msg" } */
   template <typename T_SerializedError_msg_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.msg() = BAR;` instead of `FOO.set_msg(BAR);`")]]
+  [[deprecated("Use `FOO.msg() = BAR` instead of `FOO.set_msg(BAR)`")]]
   ::std::string& set_msg(T_SerializedError_msg_struct_setter&& msg_) {
     msg_ref() = std::forward<T_SerializedError_msg_struct_setter>(msg_);
     return __fbthrift_field_msg;
   }
 
   /** Glean { "field": "os" } */
-  [[deprecated("Use `FOO.os().value();` instead of `FOO.get_os();`")]]
+  [[deprecated("Use `FOO.os().value()` instead of `FOO.get_os()`")]]
   const ::std::string* get_os() const&;
 
   /** Glean { "field": "os" } */
-  [[deprecated("Use `FOO.os().value();` instead of `FOO.get_os();`")]]
+  [[deprecated("Use `FOO.os().value()` instead of `FOO.get_os()`")]]
   ::std::string* get_os() &;
 
   ::std::string* get_os() && = delete;
 
   /** Glean { "field": "os" } */
   template <typename T_SerializedError_os_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.os() = BAR;` instead of `FOO.set_os(BAR);`")]]
+  [[deprecated("Use `FOO.os() = BAR` instead of `FOO.set_os(BAR)`")]]
   ::std::string& set_os(T_SerializedError_os_struct_setter&& os_) {
     os_ref() = std::forward<T_SerializedError_os_struct_setter>(os_);
     return __fbthrift_field_os;
   }
 
   /** Glean { "field": "rs" } */
-  [[deprecated("Use `FOO.rs().value();` instead of `FOO.get_rs();`")]]
+  [[deprecated("Use `FOO.rs().value()` instead of `FOO.get_rs()`")]]
   const ::std::string& get_rs() const& {
     return __fbthrift_field_rs;
   }
 
   /** Glean { "field": "rs" } */
-  [[deprecated("Use `FOO.rs().value();` instead of `FOO.get_rs();`")]]
+  [[deprecated("Use `FOO.rs().value()` instead of `FOO.get_rs()`")]]
   ::std::string get_rs() && {
     return static_cast<::std::string&&>(__fbthrift_field_rs);
   }
 
   /** Glean { "field": "rs" } */
   template <typename T_SerializedError_rs_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.rs() = BAR;` instead of `FOO.set_rs(BAR);`")]]
+  [[deprecated("Use `FOO.rs() = BAR` instead of `FOO.set_rs(BAR)`")]]
   ::std::string& set_rs(T_SerializedError_rs_struct_setter&& rs_) {
     rs_ref() = std::forward<T_SerializedError_rs_struct_setter>(rs_);
     return __fbthrift_field_rs;
@@ -1425,66 +1425,66 @@ class MarshalStruct final  {
   }
 
   /** Glean { "field": "s" } */
-  [[deprecated("Use `FOO.s().value();` instead of `FOO.get_s();`")]]
+  [[deprecated("Use `FOO.s().value()` instead of `FOO.get_s()`")]]
   const ::std::string& get_s() const& {
     return __fbthrift_field_s;
   }
 
   /** Glean { "field": "s" } */
-  [[deprecated("Use `FOO.s().value();` instead of `FOO.get_s();`")]]
+  [[deprecated("Use `FOO.s().value()` instead of `FOO.get_s()`")]]
   ::std::string get_s() && {
     return static_cast<::std::string&&>(__fbthrift_field_s);
   }
 
   /** Glean { "field": "s" } */
   template <typename T_MarshalStruct_s_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.s() = BAR;` instead of `FOO.set_s(BAR);`")]]
+  [[deprecated("Use `FOO.s() = BAR` instead of `FOO.set_s(BAR)`")]]
   ::std::string& set_s(T_MarshalStruct_s_struct_setter&& s_) {
     s_ref() = std::forward<T_MarshalStruct_s_struct_setter>(s_);
     return __fbthrift_field_s;
   }
 
   /** Glean { "field": "i" } */
-  [[deprecated("Use `FOO.i().value();` instead of `FOO.get_i();`")]]
+  [[deprecated("Use `FOO.i().value()` instead of `FOO.get_i()`")]]
   ::std::int32_t get_i() const;
 
   /** Glean { "field": "i" } */
-  [[deprecated("Use `FOO.i() = BAR;` instead of `FOO.set_i(BAR);`")]]
+  [[deprecated("Use `FOO.i() = BAR` instead of `FOO.set_i(BAR)`")]]
   ::std::int32_t& set_i(::std::int32_t i_);
 
   /** Glean { "field": "os" } */
-  [[deprecated("Use `FOO.os().value();` instead of `FOO.get_os();`")]]
+  [[deprecated("Use `FOO.os().value()` instead of `FOO.get_os()`")]]
   const ::std::string* get_os() const&;
 
   /** Glean { "field": "os" } */
-  [[deprecated("Use `FOO.os().value();` instead of `FOO.get_os();`")]]
+  [[deprecated("Use `FOO.os().value()` instead of `FOO.get_os()`")]]
   ::std::string* get_os() &;
 
   ::std::string* get_os() && = delete;
 
   /** Glean { "field": "os" } */
   template <typename T_MarshalStruct_os_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.os() = BAR;` instead of `FOO.set_os(BAR);`")]]
+  [[deprecated("Use `FOO.os() = BAR` instead of `FOO.set_os(BAR)`")]]
   ::std::string& set_os(T_MarshalStruct_os_struct_setter&& os_) {
     os_ref() = std::forward<T_MarshalStruct_os_struct_setter>(os_);
     return __fbthrift_field_os;
   }
 
   /** Glean { "field": "rs" } */
-  [[deprecated("Use `FOO.rs().value();` instead of `FOO.get_rs();`")]]
+  [[deprecated("Use `FOO.rs().value()` instead of `FOO.get_rs()`")]]
   const ::std::string& get_rs() const& {
     return __fbthrift_field_rs;
   }
 
   /** Glean { "field": "rs" } */
-  [[deprecated("Use `FOO.rs().value();` instead of `FOO.get_rs();`")]]
+  [[deprecated("Use `FOO.rs().value()` instead of `FOO.get_rs()`")]]
   ::std::string get_rs() && {
     return static_cast<::std::string&&>(__fbthrift_field_rs);
   }
 
   /** Glean { "field": "rs" } */
   template <typename T_MarshalStruct_rs_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.rs() = BAR;` instead of `FOO.set_rs(BAR);`")]]
+  [[deprecated("Use `FOO.rs() = BAR` instead of `FOO.set_rs(BAR)`")]]
   ::std::string& set_rs(T_MarshalStruct_rs_struct_setter&& rs_) {
     rs_ref() = std::forward<T_MarshalStruct_rs_struct_setter>(rs_);
     return __fbthrift_field_rs;
@@ -2051,58 +2051,58 @@ class FOLLY_EXPORT MarshalError : public virtual apache::thrift::TException {
   }
 
   /** Glean { "field": "msg" } */
-  [[deprecated("Use `FOO.msg().value();` instead of `FOO.get_msg();`")]]
+  [[deprecated("Use `FOO.msg().value()` instead of `FOO.get_msg()`")]]
   const ::std::string& get_msg() const& {
     return __fbthrift_field_msg;
   }
 
   /** Glean { "field": "msg" } */
-  [[deprecated("Use `FOO.msg().value();` instead of `FOO.get_msg();`")]]
+  [[deprecated("Use `FOO.msg().value()` instead of `FOO.get_msg()`")]]
   ::std::string get_msg() && {
     return static_cast<::std::string&&>(__fbthrift_field_msg);
   }
 
   /** Glean { "field": "msg" } */
   template <typename T_MarshalError_msg_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.msg() = BAR;` instead of `FOO.set_msg(BAR);`")]]
+  [[deprecated("Use `FOO.msg() = BAR` instead of `FOO.set_msg(BAR)`")]]
   ::std::string& set_msg(T_MarshalError_msg_struct_setter&& msg_) {
     msg_ref() = std::forward<T_MarshalError_msg_struct_setter>(msg_);
     return __fbthrift_field_msg;
   }
 
   /** Glean { "field": "os" } */
-  [[deprecated("Use `FOO.os().value();` instead of `FOO.get_os();`")]]
+  [[deprecated("Use `FOO.os().value()` instead of `FOO.get_os()`")]]
   const ::std::string* get_os() const&;
 
   /** Glean { "field": "os" } */
-  [[deprecated("Use `FOO.os().value();` instead of `FOO.get_os();`")]]
+  [[deprecated("Use `FOO.os().value()` instead of `FOO.get_os()`")]]
   ::std::string* get_os() &;
 
   ::std::string* get_os() && = delete;
 
   /** Glean { "field": "os" } */
   template <typename T_MarshalError_os_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.os() = BAR;` instead of `FOO.set_os(BAR);`")]]
+  [[deprecated("Use `FOO.os() = BAR` instead of `FOO.set_os(BAR)`")]]
   ::std::string& set_os(T_MarshalError_os_struct_setter&& os_) {
     os_ref() = std::forward<T_MarshalError_os_struct_setter>(os_);
     return __fbthrift_field_os;
   }
 
   /** Glean { "field": "rs" } */
-  [[deprecated("Use `FOO.rs().value();` instead of `FOO.get_rs();`")]]
+  [[deprecated("Use `FOO.rs().value()` instead of `FOO.get_rs()`")]]
   const ::std::string& get_rs() const& {
     return __fbthrift_field_rs;
   }
 
   /** Glean { "field": "rs" } */
-  [[deprecated("Use `FOO.rs().value();` instead of `FOO.get_rs();`")]]
+  [[deprecated("Use `FOO.rs().value()` instead of `FOO.get_rs()`")]]
   ::std::string get_rs() && {
     return static_cast<::std::string&&>(__fbthrift_field_rs);
   }
 
   /** Glean { "field": "rs" } */
   template <typename T_MarshalError_rs_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.rs() = BAR;` instead of `FOO.set_rs(BAR);`")]]
+  [[deprecated("Use `FOO.rs() = BAR` instead of `FOO.set_rs(BAR)`")]]
   ::std::string& set_rs(T_MarshalError_rs_struct_setter&& rs_) {
     rs_ref() = std::forward<T_MarshalError_rs_struct_setter>(rs_);
     return __fbthrift_field_rs;

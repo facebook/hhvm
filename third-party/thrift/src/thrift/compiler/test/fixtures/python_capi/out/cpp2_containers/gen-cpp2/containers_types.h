@@ -529,82 +529,82 @@ class TemplateLists final  {
   }
 
   /** Glean { "field": "std_string" } */
-  [[deprecated("Use `FOO.std_string().value();` instead of `FOO.get_std_string();`")]]
+  [[deprecated("Use `FOO.std_string().value()` instead of `FOO.get_std_string()`")]]
   const std::vector<::std::string>* get_std_string() const&;
 
   /** Glean { "field": "std_string" } */
-  [[deprecated("Use `FOO.std_string().value();` instead of `FOO.get_std_string();`")]]
+  [[deprecated("Use `FOO.std_string().value()` instead of `FOO.get_std_string()`")]]
   std::vector<::std::string>* get_std_string() &;
 
   std::vector<::std::string>* get_std_string() && = delete;
 
   /** Glean { "field": "std_string" } */
   template <typename T_TemplateLists_std_string_struct_setter = std::vector<::std::string>>
-  [[deprecated("Use `FOO.std_string() = BAR;` instead of `FOO.set_std_string(BAR);`")]]
+  [[deprecated("Use `FOO.std_string() = BAR` instead of `FOO.set_std_string(BAR)`")]]
   std::vector<::std::string>& set_std_string(T_TemplateLists_std_string_struct_setter&& std_string_) {
     std_string_ref() = std::forward<T_TemplateLists_std_string_struct_setter>(std_string_);
     return __fbthrift_field_std_string;
   }
 
   /** Glean { "field": "deque_string" } */
-  [[deprecated("Use `FOO.deque_string().value();` instead of `FOO.get_deque_string();`")]]
+  [[deprecated("Use `FOO.deque_string().value()` instead of `FOO.get_deque_string()`")]]
   const std::deque<::std::string>& get_deque_string() const&;
 
   /** Glean { "field": "deque_string" } */
-  [[deprecated("Use `FOO.deque_string().value();` instead of `FOO.get_deque_string();`")]]
+  [[deprecated("Use `FOO.deque_string().value()` instead of `FOO.get_deque_string()`")]]
   std::deque<::std::string> get_deque_string() &&;
 
   /** Glean { "field": "deque_string" } */
   template <typename T_TemplateLists_deque_string_struct_setter = std::deque<::std::string>>
-  [[deprecated("Use `FOO.deque_string() = BAR;` instead of `FOO.set_deque_string(BAR);`")]]
+  [[deprecated("Use `FOO.deque_string() = BAR` instead of `FOO.set_deque_string(BAR)`")]]
   std::deque<::std::string>& set_deque_string(T_TemplateLists_deque_string_struct_setter&& deque_string_) {
     deque_string_ref() = std::forward<T_TemplateLists_deque_string_struct_setter>(deque_string_);
     return __fbthrift_field_deque_string;
   }
 
   /** Glean { "field": "small_vector_iobuf" } */
-  [[deprecated("Use `FOO.small_vector_iobuf().value();` instead of `FOO.get_small_vector_iobuf();`")]]
+  [[deprecated("Use `FOO.small_vector_iobuf().value()` instead of `FOO.get_small_vector_iobuf()`")]]
   const ::test::fixtures::python_capi::small_vector_iobuf& get_small_vector_iobuf() const&;
 
   /** Glean { "field": "small_vector_iobuf" } */
-  [[deprecated("Use `FOO.small_vector_iobuf().value();` instead of `FOO.get_small_vector_iobuf();`")]]
+  [[deprecated("Use `FOO.small_vector_iobuf().value()` instead of `FOO.get_small_vector_iobuf()`")]]
   ::test::fixtures::python_capi::small_vector_iobuf get_small_vector_iobuf() &&;
 
   /** Glean { "field": "small_vector_iobuf" } */
   template <typename T_TemplateLists_small_vector_iobuf_struct_setter = ::test::fixtures::python_capi::small_vector_iobuf>
-  [[deprecated("Use `FOO.small_vector_iobuf() = BAR;` instead of `FOO.set_small_vector_iobuf(BAR);`")]]
+  [[deprecated("Use `FOO.small_vector_iobuf() = BAR` instead of `FOO.set_small_vector_iobuf(BAR)`")]]
   ::test::fixtures::python_capi::small_vector_iobuf& set_small_vector_iobuf(T_TemplateLists_small_vector_iobuf_struct_setter&& small_vector_iobuf_) {
     small_vector_iobuf_ref() = std::forward<T_TemplateLists_small_vector_iobuf_struct_setter>(small_vector_iobuf_);
     return __fbthrift_field_small_vector_iobuf;
   }
 
   /** Glean { "field": "nested_small_vector" } */
-  [[deprecated("Use `FOO.nested_small_vector().value();` instead of `FOO.get_nested_small_vector();`")]]
+  [[deprecated("Use `FOO.nested_small_vector().value()` instead of `FOO.get_nested_small_vector()`")]]
   const folly::small_vector<::test::fixtures::python_capi::fbvector_string>& get_nested_small_vector() const&;
 
   /** Glean { "field": "nested_small_vector" } */
-  [[deprecated("Use `FOO.nested_small_vector().value();` instead of `FOO.get_nested_small_vector();`")]]
+  [[deprecated("Use `FOO.nested_small_vector().value()` instead of `FOO.get_nested_small_vector()`")]]
   folly::small_vector<::test::fixtures::python_capi::fbvector_string> get_nested_small_vector() &&;
 
   /** Glean { "field": "nested_small_vector" } */
   template <typename T_TemplateLists_nested_small_vector_struct_setter = folly::small_vector<::test::fixtures::python_capi::fbvector_string>>
-  [[deprecated("Use `FOO.nested_small_vector() = BAR;` instead of `FOO.set_nested_small_vector(BAR);`")]]
+  [[deprecated("Use `FOO.nested_small_vector() = BAR` instead of `FOO.set_nested_small_vector(BAR)`")]]
   folly::small_vector<::test::fixtures::python_capi::fbvector_string>& set_nested_small_vector(T_TemplateLists_nested_small_vector_struct_setter&& nested_small_vector_) {
     nested_small_vector_ref() = std::forward<T_TemplateLists_nested_small_vector_struct_setter>(nested_small_vector_);
     return __fbthrift_field_nested_small_vector;
   }
 
   /** Glean { "field": "small_vector_tensor" } */
-  [[deprecated("Use `FOO.small_vector_tensor().value();` instead of `FOO.get_small_vector_tensor();`")]]
+  [[deprecated("Use `FOO.small_vector_tensor().value()` instead of `FOO.get_small_vector_tensor()`")]]
   const folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>& get_small_vector_tensor() const&;
 
   /** Glean { "field": "small_vector_tensor" } */
-  [[deprecated("Use `FOO.small_vector_tensor().value();` instead of `FOO.get_small_vector_tensor();`")]]
+  [[deprecated("Use `FOO.small_vector_tensor().value()` instead of `FOO.get_small_vector_tensor()`")]]
   folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string> get_small_vector_tensor() &&;
 
   /** Glean { "field": "small_vector_tensor" } */
   template <typename T_TemplateLists_small_vector_tensor_struct_setter = folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>>
-  [[deprecated("Use `FOO.small_vector_tensor() = BAR;` instead of `FOO.set_small_vector_tensor(BAR);`")]]
+  [[deprecated("Use `FOO.small_vector_tensor() = BAR` instead of `FOO.set_small_vector_tensor(BAR)`")]]
   folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>& set_small_vector_tensor(T_TemplateLists_small_vector_tensor_struct_setter&& small_vector_tensor_) {
     small_vector_tensor_ref() = std::forward<T_TemplateLists_small_vector_tensor_struct_setter>(small_vector_tensor_);
     return __fbthrift_field_small_vector_tensor;
@@ -1079,112 +1079,112 @@ class TemplateSets final  {
   }
 
   /** Glean { "field": "std_set" } */
-  [[deprecated("Use `FOO.std_set().value();` instead of `FOO.get_std_set();`")]]
+  [[deprecated("Use `FOO.std_set().value()` instead of `FOO.get_std_set()`")]]
   const std::set<::std::string>& get_std_set() const&;
 
   /** Glean { "field": "std_set" } */
-  [[deprecated("Use `FOO.std_set().value();` instead of `FOO.get_std_set();`")]]
+  [[deprecated("Use `FOO.std_set().value()` instead of `FOO.get_std_set()`")]]
   std::set<::std::string> get_std_set() &&;
 
   /** Glean { "field": "std_set" } */
   template <typename T_TemplateSets_std_set_struct_setter = std::set<::std::string>>
-  [[deprecated("Use `FOO.std_set() = BAR;` instead of `FOO.set_std_set(BAR);`")]]
+  [[deprecated("Use `FOO.std_set() = BAR` instead of `FOO.set_std_set(BAR)`")]]
   std::set<::std::string>& set_std_set(T_TemplateSets_std_set_struct_setter&& std_set_) {
     std_set_ref() = std::forward<T_TemplateSets_std_set_struct_setter>(std_set_);
     return __fbthrift_field_std_set;
   }
 
   /** Glean { "field": "std_unordered" } */
-  [[deprecated("Use `FOO.std_unordered().value();` instead of `FOO.get_std_unordered();`")]]
+  [[deprecated("Use `FOO.std_unordered().value()` instead of `FOO.get_std_unordered()`")]]
   const std::unordered_set<::std::string>& get_std_unordered() const&;
 
   /** Glean { "field": "std_unordered" } */
-  [[deprecated("Use `FOO.std_unordered().value();` instead of `FOO.get_std_unordered();`")]]
+  [[deprecated("Use `FOO.std_unordered().value()` instead of `FOO.get_std_unordered()`")]]
   std::unordered_set<::std::string> get_std_unordered() &&;
 
   /** Glean { "field": "std_unordered" } */
   template <typename T_TemplateSets_std_unordered_struct_setter = std::unordered_set<::std::string>>
-  [[deprecated("Use `FOO.std_unordered() = BAR;` instead of `FOO.set_std_unordered(BAR);`")]]
+  [[deprecated("Use `FOO.std_unordered() = BAR` instead of `FOO.set_std_unordered(BAR)`")]]
   std::unordered_set<::std::string>& set_std_unordered(T_TemplateSets_std_unordered_struct_setter&& std_unordered_) {
     std_unordered_ref() = std::forward<T_TemplateSets_std_unordered_struct_setter>(std_unordered_);
     return __fbthrift_field_std_unordered;
   }
 
   /** Glean { "field": "folly_fast" } */
-  [[deprecated("Use `FOO.folly_fast().value();` instead of `FOO.get_folly_fast();`")]]
+  [[deprecated("Use `FOO.folly_fast().value()` instead of `FOO.get_folly_fast()`")]]
   const folly::F14FastSet<::std::string>& get_folly_fast() const&;
 
   /** Glean { "field": "folly_fast" } */
-  [[deprecated("Use `FOO.folly_fast().value();` instead of `FOO.get_folly_fast();`")]]
+  [[deprecated("Use `FOO.folly_fast().value()` instead of `FOO.get_folly_fast()`")]]
   folly::F14FastSet<::std::string> get_folly_fast() &&;
 
   /** Glean { "field": "folly_fast" } */
   template <typename T_TemplateSets_folly_fast_struct_setter = folly::F14FastSet<::std::string>>
-  [[deprecated("Use `FOO.folly_fast() = BAR;` instead of `FOO.set_folly_fast(BAR);`")]]
+  [[deprecated("Use `FOO.folly_fast() = BAR` instead of `FOO.set_folly_fast(BAR)`")]]
   folly::F14FastSet<::std::string>& set_folly_fast(T_TemplateSets_folly_fast_struct_setter&& folly_fast_) {
     folly_fast_ref() = std::forward<T_TemplateSets_folly_fast_struct_setter>(folly_fast_);
     return __fbthrift_field_folly_fast;
   }
 
   /** Glean { "field": "folly_node" } */
-  [[deprecated("Use `FOO.folly_node().value();` instead of `FOO.get_folly_node();`")]]
+  [[deprecated("Use `FOO.folly_node().value()` instead of `FOO.get_folly_node()`")]]
   const folly::F14NodeSet<::std::string>& get_folly_node() const&;
 
   /** Glean { "field": "folly_node" } */
-  [[deprecated("Use `FOO.folly_node().value();` instead of `FOO.get_folly_node();`")]]
+  [[deprecated("Use `FOO.folly_node().value()` instead of `FOO.get_folly_node()`")]]
   folly::F14NodeSet<::std::string> get_folly_node() &&;
 
   /** Glean { "field": "folly_node" } */
   template <typename T_TemplateSets_folly_node_struct_setter = folly::F14NodeSet<::std::string>>
-  [[deprecated("Use `FOO.folly_node() = BAR;` instead of `FOO.set_folly_node(BAR);`")]]
+  [[deprecated("Use `FOO.folly_node() = BAR` instead of `FOO.set_folly_node(BAR)`")]]
   folly::F14NodeSet<::std::string>& set_folly_node(T_TemplateSets_folly_node_struct_setter&& folly_node_) {
     folly_node_ref() = std::forward<T_TemplateSets_folly_node_struct_setter>(folly_node_);
     return __fbthrift_field_folly_node;
   }
 
   /** Glean { "field": "folly_value" } */
-  [[deprecated("Use `FOO.folly_value().value();` instead of `FOO.get_folly_value();`")]]
+  [[deprecated("Use `FOO.folly_value().value()` instead of `FOO.get_folly_value()`")]]
   const folly::F14ValueSet<::std::string>& get_folly_value() const&;
 
   /** Glean { "field": "folly_value" } */
-  [[deprecated("Use `FOO.folly_value().value();` instead of `FOO.get_folly_value();`")]]
+  [[deprecated("Use `FOO.folly_value().value()` instead of `FOO.get_folly_value()`")]]
   folly::F14ValueSet<::std::string> get_folly_value() &&;
 
   /** Glean { "field": "folly_value" } */
   template <typename T_TemplateSets_folly_value_struct_setter = folly::F14ValueSet<::std::string>>
-  [[deprecated("Use `FOO.folly_value() = BAR;` instead of `FOO.set_folly_value(BAR);`")]]
+  [[deprecated("Use `FOO.folly_value() = BAR` instead of `FOO.set_folly_value(BAR)`")]]
   folly::F14ValueSet<::std::string>& set_folly_value(T_TemplateSets_folly_value_struct_setter&& folly_value_) {
     folly_value_ref() = std::forward<T_TemplateSets_folly_value_struct_setter>(folly_value_);
     return __fbthrift_field_folly_value;
   }
 
   /** Glean { "field": "folly_vector" } */
-  [[deprecated("Use `FOO.folly_vector().value();` instead of `FOO.get_folly_vector();`")]]
+  [[deprecated("Use `FOO.folly_vector().value()` instead of `FOO.get_folly_vector()`")]]
   const folly::F14VectorSet<::std::string>& get_folly_vector() const&;
 
   /** Glean { "field": "folly_vector" } */
-  [[deprecated("Use `FOO.folly_vector().value();` instead of `FOO.get_folly_vector();`")]]
+  [[deprecated("Use `FOO.folly_vector().value()` instead of `FOO.get_folly_vector()`")]]
   folly::F14VectorSet<::std::string> get_folly_vector() &&;
 
   /** Glean { "field": "folly_vector" } */
   template <typename T_TemplateSets_folly_vector_struct_setter = folly::F14VectorSet<::std::string>>
-  [[deprecated("Use `FOO.folly_vector() = BAR;` instead of `FOO.set_folly_vector(BAR);`")]]
+  [[deprecated("Use `FOO.folly_vector() = BAR` instead of `FOO.set_folly_vector(BAR)`")]]
   folly::F14VectorSet<::std::string>& set_folly_vector(T_TemplateSets_folly_vector_struct_setter&& folly_vector_) {
     folly_vector_ref() = std::forward<T_TemplateSets_folly_vector_struct_setter>(folly_vector_);
     return __fbthrift_field_folly_vector;
   }
 
   /** Glean { "field": "folly_sorted_vector" } */
-  [[deprecated("Use `FOO.folly_sorted_vector().value();` instead of `FOO.get_folly_sorted_vector();`")]]
+  [[deprecated("Use `FOO.folly_sorted_vector().value()` instead of `FOO.get_folly_sorted_vector()`")]]
   const folly::sorted_vector_set<::std::string>& get_folly_sorted_vector() const&;
 
   /** Glean { "field": "folly_sorted_vector" } */
-  [[deprecated("Use `FOO.folly_sorted_vector().value();` instead of `FOO.get_folly_sorted_vector();`")]]
+  [[deprecated("Use `FOO.folly_sorted_vector().value()` instead of `FOO.get_folly_sorted_vector()`")]]
   folly::sorted_vector_set<::std::string> get_folly_sorted_vector() &&;
 
   /** Glean { "field": "folly_sorted_vector" } */
   template <typename T_TemplateSets_folly_sorted_vector_struct_setter = folly::sorted_vector_set<::std::string>>
-  [[deprecated("Use `FOO.folly_sorted_vector() = BAR;` instead of `FOO.set_folly_sorted_vector(BAR);`")]]
+  [[deprecated("Use `FOO.folly_sorted_vector() = BAR` instead of `FOO.set_folly_sorted_vector(BAR)`")]]
   folly::sorted_vector_set<::std::string>& set_folly_sorted_vector(T_TemplateSets_folly_sorted_vector_struct_setter&& folly_sorted_vector_) {
     folly_sorted_vector_ref() = std::forward<T_TemplateSets_folly_sorted_vector_struct_setter>(folly_sorted_vector_);
     return __fbthrift_field_folly_sorted_vector;
@@ -1659,112 +1659,112 @@ class TemplateMaps final  {
   }
 
   /** Glean { "field": "std_map" } */
-  [[deprecated("Use `FOO.std_map().value();` instead of `FOO.get_std_map();`")]]
+  [[deprecated("Use `FOO.std_map().value()` instead of `FOO.get_std_map()`")]]
   const std::map<::std::string, ::std::string>& get_std_map() const&;
 
   /** Glean { "field": "std_map" } */
-  [[deprecated("Use `FOO.std_map().value();` instead of `FOO.get_std_map();`")]]
+  [[deprecated("Use `FOO.std_map().value()` instead of `FOO.get_std_map()`")]]
   std::map<::std::string, ::std::string> get_std_map() &&;
 
   /** Glean { "field": "std_map" } */
   template <typename T_TemplateMaps_std_map_struct_setter = std::map<::std::string, ::std::string>>
-  [[deprecated("Use `FOO.std_map() = BAR;` instead of `FOO.set_std_map(BAR);`")]]
+  [[deprecated("Use `FOO.std_map() = BAR` instead of `FOO.set_std_map(BAR)`")]]
   std::map<::std::string, ::std::string>& set_std_map(T_TemplateMaps_std_map_struct_setter&& std_map_) {
     std_map_ref() = std::forward<T_TemplateMaps_std_map_struct_setter>(std_map_);
     return __fbthrift_field_std_map;
   }
 
   /** Glean { "field": "std_unordered" } */
-  [[deprecated("Use `FOO.std_unordered().value();` instead of `FOO.get_std_unordered();`")]]
+  [[deprecated("Use `FOO.std_unordered().value()` instead of `FOO.get_std_unordered()`")]]
   const std::unordered_map<::std::string, ::std::string>& get_std_unordered() const&;
 
   /** Glean { "field": "std_unordered" } */
-  [[deprecated("Use `FOO.std_unordered().value();` instead of `FOO.get_std_unordered();`")]]
+  [[deprecated("Use `FOO.std_unordered().value()` instead of `FOO.get_std_unordered()`")]]
   std::unordered_map<::std::string, ::std::string> get_std_unordered() &&;
 
   /** Glean { "field": "std_unordered" } */
   template <typename T_TemplateMaps_std_unordered_struct_setter = std::unordered_map<::std::string, ::std::string>>
-  [[deprecated("Use `FOO.std_unordered() = BAR;` instead of `FOO.set_std_unordered(BAR);`")]]
+  [[deprecated("Use `FOO.std_unordered() = BAR` instead of `FOO.set_std_unordered(BAR)`")]]
   std::unordered_map<::std::string, ::std::string>& set_std_unordered(T_TemplateMaps_std_unordered_struct_setter&& std_unordered_) {
     std_unordered_ref() = std::forward<T_TemplateMaps_std_unordered_struct_setter>(std_unordered_);
     return __fbthrift_field_std_unordered;
   }
 
   /** Glean { "field": "folly_fast" } */
-  [[deprecated("Use `FOO.folly_fast().value();` instead of `FOO.get_folly_fast();`")]]
+  [[deprecated("Use `FOO.folly_fast().value()` instead of `FOO.get_folly_fast()`")]]
   const folly::F14FastMap<::std::string, ::std::string>& get_folly_fast() const&;
 
   /** Glean { "field": "folly_fast" } */
-  [[deprecated("Use `FOO.folly_fast().value();` instead of `FOO.get_folly_fast();`")]]
+  [[deprecated("Use `FOO.folly_fast().value()` instead of `FOO.get_folly_fast()`")]]
   folly::F14FastMap<::std::string, ::std::string> get_folly_fast() &&;
 
   /** Glean { "field": "folly_fast" } */
   template <typename T_TemplateMaps_folly_fast_struct_setter = folly::F14FastMap<::std::string, ::std::string>>
-  [[deprecated("Use `FOO.folly_fast() = BAR;` instead of `FOO.set_folly_fast(BAR);`")]]
+  [[deprecated("Use `FOO.folly_fast() = BAR` instead of `FOO.set_folly_fast(BAR)`")]]
   folly::F14FastMap<::std::string, ::std::string>& set_folly_fast(T_TemplateMaps_folly_fast_struct_setter&& folly_fast_) {
     folly_fast_ref() = std::forward<T_TemplateMaps_folly_fast_struct_setter>(folly_fast_);
     return __fbthrift_field_folly_fast;
   }
 
   /** Glean { "field": "folly_node" } */
-  [[deprecated("Use `FOO.folly_node().value();` instead of `FOO.get_folly_node();`")]]
+  [[deprecated("Use `FOO.folly_node().value()` instead of `FOO.get_folly_node()`")]]
   const folly::F14NodeMap<::std::string, ::std::string>& get_folly_node() const&;
 
   /** Glean { "field": "folly_node" } */
-  [[deprecated("Use `FOO.folly_node().value();` instead of `FOO.get_folly_node();`")]]
+  [[deprecated("Use `FOO.folly_node().value()` instead of `FOO.get_folly_node()`")]]
   folly::F14NodeMap<::std::string, ::std::string> get_folly_node() &&;
 
   /** Glean { "field": "folly_node" } */
   template <typename T_TemplateMaps_folly_node_struct_setter = folly::F14NodeMap<::std::string, ::std::string>>
-  [[deprecated("Use `FOO.folly_node() = BAR;` instead of `FOO.set_folly_node(BAR);`")]]
+  [[deprecated("Use `FOO.folly_node() = BAR` instead of `FOO.set_folly_node(BAR)`")]]
   folly::F14NodeMap<::std::string, ::std::string>& set_folly_node(T_TemplateMaps_folly_node_struct_setter&& folly_node_) {
     folly_node_ref() = std::forward<T_TemplateMaps_folly_node_struct_setter>(folly_node_);
     return __fbthrift_field_folly_node;
   }
 
   /** Glean { "field": "folly_value" } */
-  [[deprecated("Use `FOO.folly_value().value();` instead of `FOO.get_folly_value();`")]]
+  [[deprecated("Use `FOO.folly_value().value()` instead of `FOO.get_folly_value()`")]]
   const folly::F14ValueMap<::std::string, ::std::string>& get_folly_value() const&;
 
   /** Glean { "field": "folly_value" } */
-  [[deprecated("Use `FOO.folly_value().value();` instead of `FOO.get_folly_value();`")]]
+  [[deprecated("Use `FOO.folly_value().value()` instead of `FOO.get_folly_value()`")]]
   folly::F14ValueMap<::std::string, ::std::string> get_folly_value() &&;
 
   /** Glean { "field": "folly_value" } */
   template <typename T_TemplateMaps_folly_value_struct_setter = folly::F14ValueMap<::std::string, ::std::string>>
-  [[deprecated("Use `FOO.folly_value() = BAR;` instead of `FOO.set_folly_value(BAR);`")]]
+  [[deprecated("Use `FOO.folly_value() = BAR` instead of `FOO.set_folly_value(BAR)`")]]
   folly::F14ValueMap<::std::string, ::std::string>& set_folly_value(T_TemplateMaps_folly_value_struct_setter&& folly_value_) {
     folly_value_ref() = std::forward<T_TemplateMaps_folly_value_struct_setter>(folly_value_);
     return __fbthrift_field_folly_value;
   }
 
   /** Glean { "field": "folly_vector" } */
-  [[deprecated("Use `FOO.folly_vector().value();` instead of `FOO.get_folly_vector();`")]]
+  [[deprecated("Use `FOO.folly_vector().value()` instead of `FOO.get_folly_vector()`")]]
   const folly::F14VectorMap<::std::string, ::std::string>& get_folly_vector() const&;
 
   /** Glean { "field": "folly_vector" } */
-  [[deprecated("Use `FOO.folly_vector().value();` instead of `FOO.get_folly_vector();`")]]
+  [[deprecated("Use `FOO.folly_vector().value()` instead of `FOO.get_folly_vector()`")]]
   folly::F14VectorMap<::std::string, ::std::string> get_folly_vector() &&;
 
   /** Glean { "field": "folly_vector" } */
   template <typename T_TemplateMaps_folly_vector_struct_setter = folly::F14VectorMap<::std::string, ::std::string>>
-  [[deprecated("Use `FOO.folly_vector() = BAR;` instead of `FOO.set_folly_vector(BAR);`")]]
+  [[deprecated("Use `FOO.folly_vector() = BAR` instead of `FOO.set_folly_vector(BAR)`")]]
   folly::F14VectorMap<::std::string, ::std::string>& set_folly_vector(T_TemplateMaps_folly_vector_struct_setter&& folly_vector_) {
     folly_vector_ref() = std::forward<T_TemplateMaps_folly_vector_struct_setter>(folly_vector_);
     return __fbthrift_field_folly_vector;
   }
 
   /** Glean { "field": "folly_sorted_vector" } */
-  [[deprecated("Use `FOO.folly_sorted_vector().value();` instead of `FOO.get_folly_sorted_vector();`")]]
+  [[deprecated("Use `FOO.folly_sorted_vector().value()` instead of `FOO.get_folly_sorted_vector()`")]]
   const folly::sorted_vector_map<::std::string, ::std::string>& get_folly_sorted_vector() const&;
 
   /** Glean { "field": "folly_sorted_vector" } */
-  [[deprecated("Use `FOO.folly_sorted_vector().value();` instead of `FOO.get_folly_sorted_vector();`")]]
+  [[deprecated("Use `FOO.folly_sorted_vector().value()` instead of `FOO.get_folly_sorted_vector()`")]]
   folly::sorted_vector_map<::std::string, ::std::string> get_folly_sorted_vector() &&;
 
   /** Glean { "field": "folly_sorted_vector" } */
   template <typename T_TemplateMaps_folly_sorted_vector_struct_setter = folly::sorted_vector_map<::std::string, ::std::string>>
-  [[deprecated("Use `FOO.folly_sorted_vector() = BAR;` instead of `FOO.set_folly_sorted_vector(BAR);`")]]
+  [[deprecated("Use `FOO.folly_sorted_vector() = BAR` instead of `FOO.set_folly_sorted_vector(BAR)`")]]
   folly::sorted_vector_map<::std::string, ::std::string>& set_folly_sorted_vector(T_TemplateMaps_folly_sorted_vector_struct_setter&& folly_sorted_vector_) {
     folly_sorted_vector_ref() = std::forward<T_TemplateMaps_folly_sorted_vector_struct_setter>(folly_sorted_vector_);
     return __fbthrift_field_folly_sorted_vector;
@@ -1979,40 +1979,40 @@ class TWrapped final  {
   }
 
   /** Glean { "field": "fieldA" } */
-  [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
+  [[deprecated("Use `FOO.fieldA().value()` instead of `FOO.get_fieldA()`")]]
   const ::std::string& get_fieldA() const& {
     return __fbthrift_field_fieldA;
   }
 
   /** Glean { "field": "fieldA" } */
-  [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
+  [[deprecated("Use `FOO.fieldA().value()` instead of `FOO.get_fieldA()`")]]
   ::std::string get_fieldA() && {
     return static_cast<::std::string&&>(__fbthrift_field_fieldA);
   }
 
   /** Glean { "field": "fieldA" } */
   template <typename T_TWrapped_fieldA_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.fieldA() = BAR;` instead of `FOO.set_fieldA(BAR);`")]]
+  [[deprecated("Use `FOO.fieldA() = BAR` instead of `FOO.set_fieldA(BAR)`")]]
   ::std::string& set_fieldA(T_TWrapped_fieldA_struct_setter&& fieldA_) {
     fieldA_ref() = std::forward<T_TWrapped_fieldA_struct_setter>(fieldA_);
     return __fbthrift_field_fieldA;
   }
 
   /** Glean { "field": "fieldB" } */
-  [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
+  [[deprecated("Use `FOO.fieldB().value()` instead of `FOO.get_fieldB()`")]]
   const ::std::string& get_fieldB() const& {
     return __fbthrift_field_fieldB;
   }
 
   /** Glean { "field": "fieldB" } */
-  [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
+  [[deprecated("Use `FOO.fieldB().value()` instead of `FOO.get_fieldB()`")]]
   ::std::string get_fieldB() && {
     return static_cast<::std::string&&>(__fbthrift_field_fieldB);
   }
 
   /** Glean { "field": "fieldB" } */
   template <typename T_TWrapped_fieldB_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.fieldB() = BAR;` instead of `FOO.set_fieldB(BAR);`")]]
+  [[deprecated("Use `FOO.fieldB() = BAR` instead of `FOO.set_fieldB(BAR)`")]]
   ::std::string& set_fieldB(T_TWrapped_fieldB_struct_setter&& fieldB_) {
     fieldB_ref() = std::forward<T_TWrapped_fieldB_struct_setter>(fieldB_);
     return __fbthrift_field_fieldB;
@@ -2175,16 +2175,16 @@ class IndirectionA final  {
   }
 
   /** Glean { "field": "lst" } */
-  [[deprecated("Use `FOO.lst().value();` instead of `FOO.get_lst();`")]]
+  [[deprecated("Use `FOO.lst().value()` instead of `FOO.get_lst()`")]]
   const ::test::fixtures::python_capi::ListOfWrapped& get_lst() const&;
 
   /** Glean { "field": "lst" } */
-  [[deprecated("Use `FOO.lst().value();` instead of `FOO.get_lst();`")]]
+  [[deprecated("Use `FOO.lst().value()` instead of `FOO.get_lst()`")]]
   ::test::fixtures::python_capi::ListOfWrapped get_lst() &&;
 
   /** Glean { "field": "lst" } */
   template <typename T_IndirectionA_lst_struct_setter = ::test::fixtures::python_capi::ListOfWrapped>
-  [[deprecated("Use `FOO.lst() = BAR;` instead of `FOO.set_lst(BAR);`")]]
+  [[deprecated("Use `FOO.lst() = BAR` instead of `FOO.set_lst(BAR)`")]]
   ::test::fixtures::python_capi::ListOfWrapped& set_lst(T_IndirectionA_lst_struct_setter&& lst_) {
     lst_ref() = std::forward<T_IndirectionA_lst_struct_setter>(lst_);
     return __fbthrift_field_lst;
@@ -2347,16 +2347,16 @@ class IndirectionB final  {
   }
 
   /** Glean { "field": "lst" } */
-  [[deprecated("Use `FOO.lst().value();` instead of `FOO.get_lst();`")]]
+  [[deprecated("Use `FOO.lst().value()` instead of `FOO.get_lst()`")]]
   const ::test::fixtures::python_capi::VecOfWrapped& get_lst() const&;
 
   /** Glean { "field": "lst" } */
-  [[deprecated("Use `FOO.lst().value();` instead of `FOO.get_lst();`")]]
+  [[deprecated("Use `FOO.lst().value()` instead of `FOO.get_lst()`")]]
   ::test::fixtures::python_capi::VecOfWrapped get_lst() &&;
 
   /** Glean { "field": "lst" } */
   template <typename T_IndirectionB_lst_struct_setter = ::test::fixtures::python_capi::VecOfWrapped>
-  [[deprecated("Use `FOO.lst() = BAR;` instead of `FOO.set_lst(BAR);`")]]
+  [[deprecated("Use `FOO.lst() = BAR` instead of `FOO.set_lst(BAR)`")]]
   ::test::fixtures::python_capi::VecOfWrapped& set_lst(T_IndirectionB_lst_struct_setter&& lst_) {
     lst_ref() = std::forward<T_IndirectionB_lst_struct_setter>(lst_);
     return __fbthrift_field_lst;
@@ -2519,16 +2519,16 @@ class IndirectionC final  {
   }
 
   /** Glean { "field": "lst" } */
-  [[deprecated("Use `FOO.lst().value();` instead of `FOO.get_lst();`")]]
+  [[deprecated("Use `FOO.lst().value()` instead of `FOO.get_lst()`")]]
   const ::test::fixtures::python_capi::ListOfWrappedAlias& get_lst() const&;
 
   /** Glean { "field": "lst" } */
-  [[deprecated("Use `FOO.lst().value();` instead of `FOO.get_lst();`")]]
+  [[deprecated("Use `FOO.lst().value()` instead of `FOO.get_lst()`")]]
   ::test::fixtures::python_capi::ListOfWrappedAlias get_lst() &&;
 
   /** Glean { "field": "lst" } */
   template <typename T_IndirectionC_lst_struct_setter = ::test::fixtures::python_capi::ListOfWrappedAlias>
-  [[deprecated("Use `FOO.lst() = BAR;` instead of `FOO.set_lst(BAR);`")]]
+  [[deprecated("Use `FOO.lst() = BAR` instead of `FOO.set_lst(BAR)`")]]
   ::test::fixtures::python_capi::ListOfWrappedAlias& set_lst(T_IndirectionC_lst_struct_setter&& lst_) {
     lst_ref() = std::forward<T_IndirectionC_lst_struct_setter>(lst_);
     return __fbthrift_field_lst;

@@ -213,20 +213,20 @@ class Mixin1 final  {
   }
 
   /** Glean { "field": "field1" } */
-  [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
+  [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
   const ::std::string& get_field1() const& {
     return __fbthrift_field_field1;
   }
 
   /** Glean { "field": "field1" } */
-  [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
+  [[deprecated("Use `FOO.field1().value()` instead of `FOO.get_field1()`")]]
   ::std::string get_field1() && {
     return static_cast<::std::string&&>(__fbthrift_field_field1);
   }
 
   /** Glean { "field": "field1" } */
   template <typename T_Mixin1_field1_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.field1() = BAR;` instead of `FOO.set_field1(BAR);`")]]
+  [[deprecated("Use `FOO.field1() = BAR` instead of `FOO.set_field1(BAR)`")]]
   ::std::string& set_field1(T_Mixin1_field1_struct_setter&& field1_) {
     field1_ref() = std::forward<T_Mixin1_field1_struct_setter>(field1_);
     return __fbthrift_field_field1;
@@ -448,34 +448,34 @@ class Mixin2 final  {
   FOLLY_ERASE auto field1() const&&     { return std::move(*this).field1_ref(); }
 
   /** Glean { "field": "m1" } */
-  [[deprecated("Use `FOO.m1().value();` instead of `FOO.get_m1();`")]]
+  [[deprecated("Use `FOO.m1().value()` instead of `FOO.get_m1()`")]]
   const ::cpp2::Mixin1& get_m1() const&;
 
   /** Glean { "field": "m1" } */
-  [[deprecated("Use `FOO.m1().value();` instead of `FOO.get_m1();`")]]
+  [[deprecated("Use `FOO.m1().value()` instead of `FOO.get_m1()`")]]
   ::cpp2::Mixin1 get_m1() &&;
 
   /** Glean { "field": "m1" } */
   template <typename T_Mixin2_m1_struct_setter = ::cpp2::Mixin1>
-  [[deprecated("Use `FOO.m1() = BAR;` instead of `FOO.set_m1(BAR);`")]]
+  [[deprecated("Use `FOO.m1() = BAR` instead of `FOO.set_m1(BAR)`")]]
   ::cpp2::Mixin1& set_m1(T_Mixin2_m1_struct_setter&& m1_) {
     m1_ref() = std::forward<T_Mixin2_m1_struct_setter>(m1_);
     return __fbthrift_field_m1;
   }
 
   /** Glean { "field": "field2" } */
-  [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
+  [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
   const ::std::string* get_field2() const&;
 
   /** Glean { "field": "field2" } */
-  [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
+  [[deprecated("Use `FOO.field2().value()` instead of `FOO.get_field2()`")]]
   ::std::string* get_field2() &;
 
   ::std::string* get_field2() && = delete;
 
   /** Glean { "field": "field2" } */
   template <typename T_Mixin2_field2_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.field2() = BAR;` instead of `FOO.set_field2(BAR);`")]]
+  [[deprecated("Use `FOO.field2() = BAR` instead of `FOO.set_field2(BAR)`")]]
   ::std::string& set_field2(T_Mixin2_field2_struct_setter&& field2_) {
     field2_ref() = std::forward<T_Mixin2_field2_struct_setter>(field2_);
     return __fbthrift_field_field2;
@@ -637,20 +637,20 @@ class Mixin3Base final  {
   }
 
   /** Glean { "field": "field3" } */
-  [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
+  [[deprecated("Use `FOO.field3().value()` instead of `FOO.get_field3()`")]]
   const ::std::string& get_field3() const& {
     return __fbthrift_field_field3;
   }
 
   /** Glean { "field": "field3" } */
-  [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
+  [[deprecated("Use `FOO.field3().value()` instead of `FOO.get_field3()`")]]
   ::std::string get_field3() && {
     return static_cast<::std::string&&>(__fbthrift_field_field3);
   }
 
   /** Glean { "field": "field3" } */
   template <typename T_Mixin3Base_field3_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.field3() = BAR;` instead of `FOO.set_field3(BAR);`")]]
+  [[deprecated("Use `FOO.field3() = BAR` instead of `FOO.set_field3(BAR)`")]]
   ::std::string& set_field3(T_Mixin3Base_field3_struct_setter&& field3_) {
     field3_ref() = std::forward<T_Mixin3Base_field3_struct_setter>(field3_);
     return __fbthrift_field_field3;
@@ -948,52 +948,52 @@ class Foo final  {
   FOLLY_ERASE auto field3() const&&     { return std::move(*this).field3_ref(); }
 
   /** Glean { "field": "field4" } */
-  [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
+  [[deprecated("Use `FOO.field4().value()` instead of `FOO.get_field4()`")]]
   const ::std::string& get_field4() const& {
     return __fbthrift_field_field4;
   }
 
   /** Glean { "field": "field4" } */
-  [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
+  [[deprecated("Use `FOO.field4().value()` instead of `FOO.get_field4()`")]]
   ::std::string get_field4() && {
     return static_cast<::std::string&&>(__fbthrift_field_field4);
   }
 
   /** Glean { "field": "field4" } */
   template <typename T_Foo_field4_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.field4() = BAR;` instead of `FOO.set_field4(BAR);`")]]
+  [[deprecated("Use `FOO.field4() = BAR` instead of `FOO.set_field4(BAR)`")]]
   ::std::string& set_field4(T_Foo_field4_struct_setter&& field4_) {
     field4_ref() = std::forward<T_Foo_field4_struct_setter>(field4_);
     return __fbthrift_field_field4;
   }
 
   /** Glean { "field": "m2" } */
-  [[deprecated("Use `FOO.m2().value();` instead of `FOO.get_m2();`")]]
+  [[deprecated("Use `FOO.m2().value()` instead of `FOO.get_m2()`")]]
   const ::cpp2::Mixin2& get_m2() const&;
 
   /** Glean { "field": "m2" } */
-  [[deprecated("Use `FOO.m2().value();` instead of `FOO.get_m2();`")]]
+  [[deprecated("Use `FOO.m2().value()` instead of `FOO.get_m2()`")]]
   ::cpp2::Mixin2 get_m2() &&;
 
   /** Glean { "field": "m2" } */
   template <typename T_Foo_m2_struct_setter = ::cpp2::Mixin2>
-  [[deprecated("Use `FOO.m2() = BAR;` instead of `FOO.set_m2(BAR);`")]]
+  [[deprecated("Use `FOO.m2() = BAR` instead of `FOO.set_m2(BAR)`")]]
   ::cpp2::Mixin2& set_m2(T_Foo_m2_struct_setter&& m2_) {
     m2_ref() = std::forward<T_Foo_m2_struct_setter>(m2_);
     return __fbthrift_field_m2;
   }
 
   /** Glean { "field": "m3" } */
-  [[deprecated("Use `FOO.m3().value();` instead of `FOO.get_m3();`")]]
+  [[deprecated("Use `FOO.m3().value()` instead of `FOO.get_m3()`")]]
   const ::cpp2::Mixin3& get_m3() const&;
 
   /** Glean { "field": "m3" } */
-  [[deprecated("Use `FOO.m3().value();` instead of `FOO.get_m3();`")]]
+  [[deprecated("Use `FOO.m3().value()` instead of `FOO.get_m3()`")]]
   ::cpp2::Mixin3 get_m3() &&;
 
   /** Glean { "field": "m3" } */
   template <typename T_Foo_m3_struct_setter = ::cpp2::Mixin3>
-  [[deprecated("Use `FOO.m3() = BAR;` instead of `FOO.set_m3(BAR);`")]]
+  [[deprecated("Use `FOO.m3() = BAR` instead of `FOO.set_m3(BAR)`")]]
   ::cpp2::Mixin3& set_m3(T_Foo_m3_struct_setter&& m3_) {
     m3_ref() = std::forward<T_Foo_m3_struct_setter>(m3_);
     return __fbthrift_field_m3;

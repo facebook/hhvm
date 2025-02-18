@@ -657,74 +657,74 @@ class Internship final  {
   }
 
   /** Glean { "field": "weeks" } */
-  [[deprecated("Use `FOO.weeks().value();` instead of `FOO.get_weeks();`")]]
+  [[deprecated("Use `FOO.weeks().value()` instead of `FOO.get_weeks()`")]]
   ::std::int32_t get_weeks() const;
 
   /** Glean { "field": "weeks" } */
-  [[deprecated("Use `FOO.weeks() = BAR;` instead of `FOO.set_weeks(BAR);`")]]
+  [[deprecated("Use `FOO.weeks() = BAR` instead of `FOO.set_weeks(BAR)`")]]
   ::std::int32_t& set_weeks(::std::int32_t weeks_);
 
   /** Glean { "field": "title" } */
-  [[deprecated("Use `FOO.title().value();` instead of `FOO.get_title();`")]]
+  [[deprecated("Use `FOO.title().value()` instead of `FOO.get_title()`")]]
   const ::std::string& get_title() const& {
     return __fbthrift_field_title;
   }
 
   /** Glean { "field": "title" } */
-  [[deprecated("Use `FOO.title().value();` instead of `FOO.get_title();`")]]
+  [[deprecated("Use `FOO.title().value()` instead of `FOO.get_title()`")]]
   ::std::string get_title() && {
     return static_cast<::std::string&&>(__fbthrift_field_title);
   }
 
   /** Glean { "field": "title" } */
   template <typename T_Internship_title_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.title() = BAR;` instead of `FOO.set_title(BAR);`")]]
+  [[deprecated("Use `FOO.title() = BAR` instead of `FOO.set_title(BAR)`")]]
   ::std::string& set_title(T_Internship_title_struct_setter&& title_) {
     title_ref() = std::forward<T_Internship_title_struct_setter>(title_);
     return __fbthrift_field_title;
   }
 
   /** Glean { "field": "employer" } */
-  [[deprecated("Use `FOO.employer().value();` instead of `FOO.get_employer();`")]]
+  [[deprecated("Use `FOO.employer().value()` instead of `FOO.get_employer()`")]]
   const ::cpp2::Company* get_employer() const&;
 
   /** Glean { "field": "employer" } */
-  [[deprecated("Use `FOO.employer().value();` instead of `FOO.get_employer();`")]]
+  [[deprecated("Use `FOO.employer().value()` instead of `FOO.get_employer()`")]]
   ::cpp2::Company* get_employer() &;
 
   ::cpp2::Company* get_employer() && = delete;
 
   /** Glean { "field": "employer" } */
-  [[deprecated("Use `FOO.employer() = BAR;` instead of `FOO.set_employer(BAR);`")]]
+  [[deprecated("Use `FOO.employer() = BAR` instead of `FOO.set_employer(BAR)`")]]
   ::cpp2::Company& set_employer(::cpp2::Company employer_);
 
   /** Glean { "field": "compensation" } */
-  [[deprecated("Use `FOO.compensation().value();` instead of `FOO.get_compensation();`")]]
+  [[deprecated("Use `FOO.compensation().value()` instead of `FOO.get_compensation()`")]]
   const double* get_compensation() const&;
 
   /** Glean { "field": "compensation" } */
-  [[deprecated("Use `FOO.compensation().value();` instead of `FOO.get_compensation();`")]]
+  [[deprecated("Use `FOO.compensation().value()` instead of `FOO.get_compensation()`")]]
   double* get_compensation() &;
 
   double* get_compensation() && = delete;
 
   /** Glean { "field": "compensation" } */
-  [[deprecated("Use `FOO.compensation() = BAR;` instead of `FOO.set_compensation(BAR);`")]]
+  [[deprecated("Use `FOO.compensation() = BAR` instead of `FOO.set_compensation(BAR)`")]]
   double& set_compensation(double compensation_);
 
   /** Glean { "field": "school" } */
-  [[deprecated("Use `FOO.school().value();` instead of `FOO.get_school();`")]]
+  [[deprecated("Use `FOO.school().value()` instead of `FOO.get_school()`")]]
   const ::std::string* get_school() const&;
 
   /** Glean { "field": "school" } */
-  [[deprecated("Use `FOO.school().value();` instead of `FOO.get_school();`")]]
+  [[deprecated("Use `FOO.school().value()` instead of `FOO.get_school()`")]]
   ::std::string* get_school() &;
 
   ::std::string* get_school() && = delete;
 
   /** Glean { "field": "school" } */
   template <typename T_Internship_school_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.school() = BAR;` instead of `FOO.set_school(BAR);`")]]
+  [[deprecated("Use `FOO.school() = BAR` instead of `FOO.set_school(BAR)`")]]
   ::std::string& set_school(T_Internship_school_struct_setter&& school_) {
     school_ref() = std::forward<T_Internship_school_struct_setter>(school_);
     return __fbthrift_field_school;
@@ -936,19 +936,19 @@ class Range final  {
   }
 
   /** Glean { "field": "min" } */
-  [[deprecated("Use `FOO.min().value();` instead of `FOO.get_min();`")]]
+  [[deprecated("Use `FOO.min().value()` instead of `FOO.get_min()`")]]
   ::std::int32_t get_min() const;
 
   /** Glean { "field": "min" } */
-  [[deprecated("Use `FOO.min() = BAR;` instead of `FOO.set_min(BAR);`")]]
+  [[deprecated("Use `FOO.min() = BAR` instead of `FOO.set_min(BAR)`")]]
   ::std::int32_t& set_min(::std::int32_t min_);
 
   /** Glean { "field": "max" } */
-  [[deprecated("Use `FOO.max().value();` instead of `FOO.get_max();`")]]
+  [[deprecated("Use `FOO.max().value()` instead of `FOO.get_max()`")]]
   ::std::int32_t get_max() const;
 
   /** Glean { "field": "max" } */
-  [[deprecated("Use `FOO.max() = BAR;` instead of `FOO.set_max(BAR);`")]]
+  [[deprecated("Use `FOO.max() = BAR` instead of `FOO.set_max(BAR)`")]]
   ::std::int32_t& set_max(::std::int32_t max_);
 
   template <class Protocol_>
@@ -1159,28 +1159,28 @@ class struct1 final  {
   }
 
   /** Glean { "field": "a" } */
-  [[deprecated("Use `FOO.a().value();` instead of `FOO.get_a();`")]]
+  [[deprecated("Use `FOO.a().value()` instead of `FOO.get_a()`")]]
   ::std::int32_t get_a() const;
 
   /** Glean { "field": "a" } */
-  [[deprecated("Use `FOO.a() = BAR;` instead of `FOO.set_a(BAR);`")]]
+  [[deprecated("Use `FOO.a() = BAR` instead of `FOO.set_a(BAR)`")]]
   ::std::int32_t& set_a(::std::int32_t a_);
 
   /** Glean { "field": "b" } */
-  [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
+  [[deprecated("Use `FOO.b().value()` instead of `FOO.get_b()`")]]
   const ::std::string& get_b() const& {
     return __fbthrift_field_b;
   }
 
   /** Glean { "field": "b" } */
-  [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
+  [[deprecated("Use `FOO.b().value()` instead of `FOO.get_b()`")]]
   ::std::string get_b() && {
     return static_cast<::std::string&&>(__fbthrift_field_b);
   }
 
   /** Glean { "field": "b" } */
   template <typename T_struct1_b_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.b() = BAR;` instead of `FOO.set_b(BAR);`")]]
+  [[deprecated("Use `FOO.b() = BAR` instead of `FOO.set_b(BAR)`")]]
   ::std::string& set_b(T_struct1_b_struct_setter&& b_) {
     b_ref() = std::forward<T_struct1_b_struct_setter>(b_);
     return __fbthrift_field_b;
@@ -1498,60 +1498,60 @@ class struct2 final  {
   }
 
   /** Glean { "field": "a" } */
-  [[deprecated("Use `FOO.a().value();` instead of `FOO.get_a();`")]]
+  [[deprecated("Use `FOO.a().value()` instead of `FOO.get_a()`")]]
   ::std::int32_t get_a() const;
 
   /** Glean { "field": "a" } */
-  [[deprecated("Use `FOO.a() = BAR;` instead of `FOO.set_a(BAR);`")]]
+  [[deprecated("Use `FOO.a() = BAR` instead of `FOO.set_a(BAR)`")]]
   ::std::int32_t& set_a(::std::int32_t a_);
 
   /** Glean { "field": "b" } */
-  [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
+  [[deprecated("Use `FOO.b().value()` instead of `FOO.get_b()`")]]
   const ::std::string& get_b() const& {
     return __fbthrift_field_b;
   }
 
   /** Glean { "field": "b" } */
-  [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
+  [[deprecated("Use `FOO.b().value()` instead of `FOO.get_b()`")]]
   ::std::string get_b() && {
     return static_cast<::std::string&&>(__fbthrift_field_b);
   }
 
   /** Glean { "field": "b" } */
   template <typename T_struct2_b_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.b() = BAR;` instead of `FOO.set_b(BAR);`")]]
+  [[deprecated("Use `FOO.b() = BAR` instead of `FOO.set_b(BAR)`")]]
   ::std::string& set_b(T_struct2_b_struct_setter&& b_) {
     b_ref() = std::forward<T_struct2_b_struct_setter>(b_);
     return __fbthrift_field_b;
   }
 
   /** Glean { "field": "c" } */
-  [[deprecated("Use `FOO.c().value();` instead of `FOO.get_c();`")]]
+  [[deprecated("Use `FOO.c().value()` instead of `FOO.get_c()`")]]
   const ::cpp2::struct1& get_c() const&;
 
   /** Glean { "field": "c" } */
-  [[deprecated("Use `FOO.c().value();` instead of `FOO.get_c();`")]]
+  [[deprecated("Use `FOO.c().value()` instead of `FOO.get_c()`")]]
   ::cpp2::struct1 get_c() &&;
 
   /** Glean { "field": "c" } */
   template <typename T_struct2_c_struct_setter = ::cpp2::struct1>
-  [[deprecated("Use `FOO.c() = BAR;` instead of `FOO.set_c(BAR);`")]]
+  [[deprecated("Use `FOO.c() = BAR` instead of `FOO.set_c(BAR)`")]]
   ::cpp2::struct1& set_c(T_struct2_c_struct_setter&& c_) {
     c_ref() = std::forward<T_struct2_c_struct_setter>(c_);
     return __fbthrift_field_c;
   }
 
   /** Glean { "field": "d" } */
-  [[deprecated("Use `FOO.d().value();` instead of `FOO.get_d();`")]]
+  [[deprecated("Use `FOO.d().value()` instead of `FOO.get_d()`")]]
   const ::std::vector<::std::int32_t>& get_d() const&;
 
   /** Glean { "field": "d" } */
-  [[deprecated("Use `FOO.d().value();` instead of `FOO.get_d();`")]]
+  [[deprecated("Use `FOO.d().value()` instead of `FOO.get_d()`")]]
   ::std::vector<::std::int32_t> get_d() &&;
 
   /** Glean { "field": "d" } */
   template <typename T_struct2_d_struct_setter = ::std::vector<::std::int32_t>>
-  [[deprecated("Use `FOO.d() = BAR;` instead of `FOO.set_d(BAR);`")]]
+  [[deprecated("Use `FOO.d() = BAR` instead of `FOO.set_d(BAR)`")]]
   ::std::vector<::std::int32_t>& set_d(T_struct2_d_struct_setter&& d_) {
     d_ref() = std::forward<T_struct2_d_struct_setter>(d_);
     return __fbthrift_field_d;
@@ -1817,44 +1817,44 @@ class struct3 final  {
   }
 
   /** Glean { "field": "a" } */
-  [[deprecated("Use `FOO.a().value();` instead of `FOO.get_a();`")]]
+  [[deprecated("Use `FOO.a().value()` instead of `FOO.get_a()`")]]
   const ::std::string& get_a() const& {
     return __fbthrift_field_a;
   }
 
   /** Glean { "field": "a" } */
-  [[deprecated("Use `FOO.a().value();` instead of `FOO.get_a();`")]]
+  [[deprecated("Use `FOO.a().value()` instead of `FOO.get_a()`")]]
   ::std::string get_a() && {
     return static_cast<::std::string&&>(__fbthrift_field_a);
   }
 
   /** Glean { "field": "a" } */
   template <typename T_struct3_a_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.a() = BAR;` instead of `FOO.set_a(BAR);`")]]
+  [[deprecated("Use `FOO.a() = BAR` instead of `FOO.set_a(BAR)`")]]
   ::std::string& set_a(T_struct3_a_struct_setter&& a_) {
     a_ref() = std::forward<T_struct3_a_struct_setter>(a_);
     return __fbthrift_field_a;
   }
 
   /** Glean { "field": "b" } */
-  [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
+  [[deprecated("Use `FOO.b().value()` instead of `FOO.get_b()`")]]
   ::std::int32_t get_b() const;
 
   /** Glean { "field": "b" } */
-  [[deprecated("Use `FOO.b() = BAR;` instead of `FOO.set_b(BAR);`")]]
+  [[deprecated("Use `FOO.b() = BAR` instead of `FOO.set_b(BAR)`")]]
   ::std::int32_t& set_b(::std::int32_t b_);
 
   /** Glean { "field": "c" } */
-  [[deprecated("Use `FOO.c().value();` instead of `FOO.get_c();`")]]
+  [[deprecated("Use `FOO.c().value()` instead of `FOO.get_c()`")]]
   const ::cpp2::struct2& get_c() const&;
 
   /** Glean { "field": "c" } */
-  [[deprecated("Use `FOO.c().value();` instead of `FOO.get_c();`")]]
+  [[deprecated("Use `FOO.c().value()` instead of `FOO.get_c()`")]]
   ::cpp2::struct2 get_c() &&;
 
   /** Glean { "field": "c" } */
   template <typename T_struct3_c_struct_setter = ::cpp2::struct2>
-  [[deprecated("Use `FOO.c() = BAR;` instead of `FOO.set_c(BAR);`")]]
+  [[deprecated("Use `FOO.c() = BAR` instead of `FOO.set_c(BAR)`")]]
   ::cpp2::struct2& set_c(T_struct3_c_struct_setter&& c_) {
     c_ref() = std::forward<T_struct3_c_struct_setter>(c_);
     return __fbthrift_field_c;
@@ -2120,39 +2120,39 @@ class struct4 final  {
   }
 
   /** Glean { "field": "a" } */
-  [[deprecated("Use `FOO.a().value();` instead of `FOO.get_a();`")]]
+  [[deprecated("Use `FOO.a().value()` instead of `FOO.get_a()`")]]
   ::std::int32_t get_a() const;
 
   /** Glean { "field": "a" } */
-  [[deprecated("Use `FOO.a() = BAR;` instead of `FOO.set_a(BAR);`")]]
+  [[deprecated("Use `FOO.a() = BAR` instead of `FOO.set_a(BAR)`")]]
   ::std::int32_t& set_a(::std::int32_t a_);
 
   /** Glean { "field": "b" } */
-  [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
+  [[deprecated("Use `FOO.b().value()` instead of `FOO.get_b()`")]]
   const double* get_b() const&;
 
   /** Glean { "field": "b" } */
-  [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
+  [[deprecated("Use `FOO.b().value()` instead of `FOO.get_b()`")]]
   double* get_b() &;
 
   double* get_b() && = delete;
 
   /** Glean { "field": "b" } */
-  [[deprecated("Use `FOO.b() = BAR;` instead of `FOO.set_b(BAR);`")]]
+  [[deprecated("Use `FOO.b() = BAR` instead of `FOO.set_b(BAR)`")]]
   double& set_b(double b_);
 
   /** Glean { "field": "c" } */
-  [[deprecated("Use `FOO.c().value();` instead of `FOO.get_c();`")]]
+  [[deprecated("Use `FOO.c().value()` instead of `FOO.get_c()`")]]
   const ::std::int8_t* get_c() const&;
 
   /** Glean { "field": "c" } */
-  [[deprecated("Use `FOO.c().value();` instead of `FOO.get_c();`")]]
+  [[deprecated("Use `FOO.c().value()` instead of `FOO.get_c()`")]]
   ::std::int8_t* get_c() &;
 
   ::std::int8_t* get_c() && = delete;
 
   /** Glean { "field": "c" } */
-  [[deprecated("Use `FOO.c() = BAR;` instead of `FOO.set_c(BAR);`")]]
+  [[deprecated("Use `FOO.c() = BAR` instead of `FOO.set_c(BAR)`")]]
   ::std::int8_t& set_c(::std::int8_t c_);
 
   template <class Protocol_>

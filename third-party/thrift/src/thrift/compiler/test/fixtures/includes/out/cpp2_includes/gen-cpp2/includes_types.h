@@ -240,24 +240,24 @@ class Included final  {
   }
 
   /** Glean { "field": "MyIntField" } */
-  [[deprecated("Use `FOO.MyIntField().value();` instead of `FOO.get_MyIntField();`")]]
+  [[deprecated("Use `FOO.MyIntField().value()` instead of `FOO.get_MyIntField()`")]]
   ::std::int64_t get_MyIntField() const;
 
   /** Glean { "field": "MyIntField" } */
-  [[deprecated("Use `FOO.MyIntField() = BAR;` instead of `FOO.set_MyIntField(BAR);`")]]
+  [[deprecated("Use `FOO.MyIntField() = BAR` instead of `FOO.set_MyIntField(BAR)`")]]
   ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_);
 
   /** Glean { "field": "MyTransitiveField" } */
-  [[deprecated("Use `FOO.MyTransitiveField().value();` instead of `FOO.get_MyTransitiveField();`")]]
+  [[deprecated("Use `FOO.MyTransitiveField().value()` instead of `FOO.get_MyTransitiveField()`")]]
   const ::cpp2::Foo& get_MyTransitiveField() const&;
 
   /** Glean { "field": "MyTransitiveField" } */
-  [[deprecated("Use `FOO.MyTransitiveField().value();` instead of `FOO.get_MyTransitiveField();`")]]
+  [[deprecated("Use `FOO.MyTransitiveField().value()` instead of `FOO.get_MyTransitiveField()`")]]
   ::cpp2::Foo get_MyTransitiveField() &&;
 
   /** Glean { "field": "MyTransitiveField" } */
   template <typename T_Included_MyTransitiveField_struct_setter = ::cpp2::Foo>
-  [[deprecated("Use `FOO.MyTransitiveField() = BAR;` instead of `FOO.set_MyTransitiveField(BAR);`")]]
+  [[deprecated("Use `FOO.MyTransitiveField() = BAR` instead of `FOO.set_MyTransitiveField(BAR)`")]]
   ::cpp2::Foo& set_MyTransitiveField(T_Included_MyTransitiveField_struct_setter&& MyTransitiveField_) {
     MyTransitiveField_ref() = std::forward<T_Included_MyTransitiveField_struct_setter>(MyTransitiveField_);
     return __fbthrift_field_MyTransitiveField;

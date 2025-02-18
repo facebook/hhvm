@@ -178,11 +178,11 @@ class Foo final  {
   }
 
   /** Glean { "field": "MyInt" } */
-  [[deprecated("Use `FOO.MyInt().value();` instead of `FOO.get_MyInt();`")]]
+  [[deprecated("Use `FOO.MyInt().value()` instead of `FOO.get_MyInt()`")]]
   ::std::int64_t get_MyInt() const;
 
   /** Glean { "field": "MyInt" } */
-  [[deprecated("Use `FOO.MyInt() = BAR;` instead of `FOO.set_MyInt(BAR);`")]]
+  [[deprecated("Use `FOO.MyInt() = BAR` instead of `FOO.set_MyInt(BAR)`")]]
   ::std::int64_t& set_MyInt(::std::int64_t MyInt_);
 
   template <class Protocol_>

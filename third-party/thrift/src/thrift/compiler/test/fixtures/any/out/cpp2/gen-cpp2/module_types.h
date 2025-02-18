@@ -194,20 +194,20 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "myString" } */
-  [[deprecated("Use `FOO.myString().value();` instead of `FOO.get_myString();`")]]
+  [[deprecated("Use `FOO.myString().value()` instead of `FOO.get_myString()`")]]
   const ::std::string& get_myString() const& {
     return __fbthrift_field_myString;
   }
 
   /** Glean { "field": "myString" } */
-  [[deprecated("Use `FOO.myString().value();` instead of `FOO.get_myString();`")]]
+  [[deprecated("Use `FOO.myString().value()` instead of `FOO.get_myString()`")]]
   ::std::string get_myString() && {
     return static_cast<::std::string&&>(__fbthrift_field_myString);
   }
 
   /** Glean { "field": "myString" } */
   template <typename T_MyStruct_myString_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.myString() = BAR;` instead of `FOO.set_myString(BAR);`")]]
+  [[deprecated("Use `FOO.myString() = BAR` instead of `FOO.set_myString(BAR)`")]]
   ::std::string& set_myString(T_MyStruct_myString_struct_setter&& myString_) {
     myString_ref() = std::forward<T_MyStruct_myString_struct_setter>(myString_);
     return __fbthrift_field_myString;
@@ -606,20 +606,20 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
   }
 
   /** Glean { "field": "myString" } */
-  [[deprecated("Use `FOO.myString().value();` instead of `FOO.get_myString();`")]]
+  [[deprecated("Use `FOO.myString().value()` instead of `FOO.get_myString()`")]]
   const ::std::string& get_myString() const& {
     return __fbthrift_field_myString;
   }
 
   /** Glean { "field": "myString" } */
-  [[deprecated("Use `FOO.myString().value();` instead of `FOO.get_myString();`")]]
+  [[deprecated("Use `FOO.myString().value()` instead of `FOO.get_myString()`")]]
   ::std::string get_myString() && {
     return static_cast<::std::string&&>(__fbthrift_field_myString);
   }
 
   /** Glean { "field": "myString" } */
   template <typename T_MyException_myString_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.myString() = BAR;` instead of `FOO.set_myString(BAR);`")]]
+  [[deprecated("Use `FOO.myString() = BAR` instead of `FOO.set_myString(BAR)`")]]
   ::std::string& set_myString(T_MyException_myString_struct_setter&& myString_) {
     myString_ref() = std::forward<T_MyException_myString_struct_setter>(myString_);
     return __fbthrift_field_myString;

@@ -191,20 +191,20 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
   }
 
   /** Glean { "field": "message" } */
-  [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
+  [[deprecated("Use `FOO.message().value()` instead of `FOO.get_message()`")]]
   const ::std::string& get_message() const& {
     return __fbthrift_field_message;
   }
 
   /** Glean { "field": "message" } */
-  [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
+  [[deprecated("Use `FOO.message().value()` instead of `FOO.get_message()`")]]
   ::std::string get_message() && {
     return static_cast<::std::string&&>(__fbthrift_field_message);
   }
 
   /** Glean { "field": "message" } */
   template <typename T_CustomException_message_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.message() = BAR;` instead of `FOO.set_message(BAR);`")]]
+  [[deprecated("Use `FOO.message() = BAR` instead of `FOO.set_message(BAR)`")]]
   ::std::string& set_message(T_CustomException_message_struct_setter&& message_) {
     message_ref() = std::forward<T_CustomException_message_struct_setter>(message_);
     return __fbthrift_field_message;
@@ -370,20 +370,20 @@ class ShouldBeBoxed final  {
   }
 
   /** Glean { "field": "sessionId" } */
-  [[deprecated("Use `FOO.sessionId().value();` instead of `FOO.get_sessionId();`")]]
+  [[deprecated("Use `FOO.sessionId().value()` instead of `FOO.get_sessionId()`")]]
   const ::std::string& get_sessionId() const& {
     return __fbthrift_field_sessionId;
   }
 
   /** Glean { "field": "sessionId" } */
-  [[deprecated("Use `FOO.sessionId().value();` instead of `FOO.get_sessionId();`")]]
+  [[deprecated("Use `FOO.sessionId().value()` instead of `FOO.get_sessionId()`")]]
   ::std::string get_sessionId() && {
     return static_cast<::std::string&&>(__fbthrift_field_sessionId);
   }
 
   /** Glean { "field": "sessionId" } */
   template <typename T_ShouldBeBoxed_sessionId_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.sessionId() = BAR;` instead of `FOO.set_sessionId(BAR);`")]]
+  [[deprecated("Use `FOO.sessionId() = BAR` instead of `FOO.set_sessionId(BAR)`")]]
   ::std::string& set_sessionId(T_ShouldBeBoxed_sessionId_struct_setter&& sessionId_) {
     sessionId_ref() = std::forward<T_ShouldBeBoxed_sessionId_struct_setter>(sessionId_);
     return __fbthrift_field_sessionId;

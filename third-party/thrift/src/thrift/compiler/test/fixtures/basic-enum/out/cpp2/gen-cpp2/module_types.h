@@ -426,19 +426,19 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "myEnum" } */
-  [[deprecated("Use `FOO.myEnum().value();` instead of `FOO.get_myEnum();`")]]
+  [[deprecated("Use `FOO.myEnum().value()` instead of `FOO.get_myEnum()`")]]
   ::test::fixtures::enumstrict::MyEnum get_myEnum() const;
 
   /** Glean { "field": "myEnum" } */
-  [[deprecated("Use `FOO.myEnum() = BAR;` instead of `FOO.set_myEnum(BAR);`")]]
+  [[deprecated("Use `FOO.myEnum() = BAR` instead of `FOO.set_myEnum(BAR)`")]]
   ::test::fixtures::enumstrict::MyEnum& set_myEnum(::test::fixtures::enumstrict::MyEnum myEnum_);
 
   /** Glean { "field": "myBigEnum" } */
-  [[deprecated("Use `FOO.myBigEnum().value();` instead of `FOO.get_myBigEnum();`")]]
+  [[deprecated("Use `FOO.myBigEnum().value()` instead of `FOO.get_myBigEnum()`")]]
   ::test::fixtures::enumstrict::MyBigEnum get_myBigEnum() const;
 
   /** Glean { "field": "myBigEnum" } */
-  [[deprecated("Use `FOO.myBigEnum() = BAR;` instead of `FOO.set_myBigEnum(BAR);`")]]
+  [[deprecated("Use `FOO.myBigEnum() = BAR` instead of `FOO.set_myBigEnum(BAR)`")]]
   ::test::fixtures::enumstrict::MyBigEnum& set_myBigEnum(::test::fixtures::enumstrict::MyBigEnum myBigEnum_);
 
   template <class Protocol_>

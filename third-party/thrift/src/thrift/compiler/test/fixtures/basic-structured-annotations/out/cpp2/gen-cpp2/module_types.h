@@ -479,28 +479,28 @@ class structured_annotation_inline final  {
   }
 
   /** Glean { "field": "count" } */
-  [[deprecated("Use `FOO.count().value();` instead of `FOO.get_count();`")]]
+  [[deprecated("Use `FOO.count().value()` instead of `FOO.get_count()`")]]
   ::std::int64_t get_count() const;
 
   /** Glean { "field": "count" } */
-  [[deprecated("Use `FOO.count() = BAR;` instead of `FOO.set_count(BAR);`")]]
+  [[deprecated("Use `FOO.count() = BAR` instead of `FOO.set_count(BAR)`")]]
   ::std::int64_t& set_count(::std::int64_t count_);
 
   /** Glean { "field": "name" } */
-  [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
+  [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
   const ::std::string& get_name() const& {
     return __fbthrift_field_name;
   }
 
   /** Glean { "field": "name" } */
-  [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
+  [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
   ::std::string get_name() && {
     return static_cast<::std::string&&>(__fbthrift_field_name);
   }
 
   /** Glean { "field": "name" } */
   template <typename T_structured_annotation_inline_name_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.name() = BAR;` instead of `FOO.set_name(BAR);`")]]
+  [[deprecated("Use `FOO.name() = BAR` instead of `FOO.set_name(BAR)`")]]
   ::std::string& set_name(T_structured_annotation_inline_name_struct_setter&& name_) {
     name_ref() = std::forward<T_structured_annotation_inline_name_struct_setter>(name_);
     return __fbthrift_field_name;
@@ -663,20 +663,20 @@ class structured_annotation_with_default final  {
   }
 
   /** Glean { "field": "name" } */
-  [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
+  [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
   const ::std::string& get_name() const& {
     return __fbthrift_field_name;
   }
 
   /** Glean { "field": "name" } */
-  [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
+  [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
   ::std::string get_name() && {
     return static_cast<::std::string&&>(__fbthrift_field_name);
   }
 
   /** Glean { "field": "name" } */
   template <typename T_structured_annotation_with_default_name_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.name() = BAR;` instead of `FOO.set_name(BAR);`")]]
+  [[deprecated("Use `FOO.name() = BAR` instead of `FOO.set_name(BAR)`")]]
   ::std::string& set_name(T_structured_annotation_with_default_name_struct_setter&& name_) {
     name_ref() = std::forward<T_structured_annotation_with_default_name_struct_setter>(name_);
     return __fbthrift_field_name;
@@ -838,11 +838,11 @@ class structured_annotation_forward final  {
   }
 
   /** Glean { "field": "count" } */
-  [[deprecated("Use `FOO.count().value();` instead of `FOO.get_count();`")]]
+  [[deprecated("Use `FOO.count().value()` instead of `FOO.get_count()`")]]
   ::std::int64_t get_count() const;
 
   /** Glean { "field": "count" } */
-  [[deprecated("Use `FOO.count() = BAR;` instead of `FOO.set_count(BAR);`")]]
+  [[deprecated("Use `FOO.count() = BAR` instead of `FOO.set_count(BAR)`")]]
   ::std::int64_t& set_count(::std::int64_t count_);
 
   template <class Protocol_>
@@ -1104,36 +1104,36 @@ class structured_annotation_recursive final  {
   }
 
   /** Glean { "field": "name" } */
-  [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
+  [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
   const ::std::string& get_name() const& {
     return __fbthrift_field_name;
   }
 
   /** Glean { "field": "name" } */
-  [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
+  [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
   ::std::string get_name() && {
     return static_cast<::std::string&&>(__fbthrift_field_name);
   }
 
   /** Glean { "field": "name" } */
   template <typename T_structured_annotation_recursive_name_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.name() = BAR;` instead of `FOO.set_name(BAR);`")]]
+  [[deprecated("Use `FOO.name() = BAR` instead of `FOO.set_name(BAR)`")]]
   ::std::string& set_name(T_structured_annotation_recursive_name_struct_setter&& name_) {
     name_ref() = std::forward<T_structured_annotation_recursive_name_struct_setter>(name_);
     return __fbthrift_field_name;
   }
 
   /** Glean { "field": "forward" } */
-  [[deprecated("Use `FOO.forward().value();` instead of `FOO.get_forward();`")]]
+  [[deprecated("Use `FOO.forward().value()` instead of `FOO.get_forward()`")]]
   const ::test::fixtures::basic-structured-annotations::structured_annotation_forward& get_forward() const&;
 
   /** Glean { "field": "forward" } */
-  [[deprecated("Use `FOO.forward().value();` instead of `FOO.get_forward();`")]]
+  [[deprecated("Use `FOO.forward().value()` instead of `FOO.get_forward()`")]]
   ::test::fixtures::basic-structured-annotations::structured_annotation_forward get_forward() &&;
 
   /** Glean { "field": "forward" } */
   template <typename T_structured_annotation_recursive_forward_struct_setter = ::test::fixtures::basic-structured-annotations::structured_annotation_forward>
-  [[deprecated("Use `FOO.forward() = BAR;` instead of `FOO.set_forward(BAR);`")]]
+  [[deprecated("Use `FOO.forward() = BAR` instead of `FOO.set_forward(BAR)`")]]
   ::test::fixtures::basic-structured-annotations::structured_annotation_forward& set_forward(T_structured_annotation_recursive_forward_struct_setter&& forward_) {
     forward_ref() = std::forward<T_structured_annotation_recursive_forward_struct_setter>(forward_);
     return __fbthrift_field_forward;
@@ -1348,36 +1348,36 @@ class structured_annotation_nested final  {
   }
 
   /** Glean { "field": "name" } */
-  [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
+  [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
   const ::std::string& get_name() const& {
     return __fbthrift_field_name;
   }
 
   /** Glean { "field": "name" } */
-  [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
+  [[deprecated("Use `FOO.name().value()` instead of `FOO.get_name()`")]]
   ::std::string get_name() && {
     return static_cast<::std::string&&>(__fbthrift_field_name);
   }
 
   /** Glean { "field": "name" } */
   template <typename T_structured_annotation_nested_name_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.name() = BAR;` instead of `FOO.set_name(BAR);`")]]
+  [[deprecated("Use `FOO.name() = BAR` instead of `FOO.set_name(BAR)`")]]
   ::std::string& set_name(T_structured_annotation_nested_name_struct_setter&& name_) {
     name_ref() = std::forward<T_structured_annotation_nested_name_struct_setter>(name_);
     return __fbthrift_field_name;
   }
 
   /** Glean { "field": "nest" } */
-  [[deprecated("Use `FOO.nest().value();` instead of `FOO.get_nest();`")]]
+  [[deprecated("Use `FOO.nest().value()` instead of `FOO.get_nest()`")]]
   const ::test::fixtures::basic-structured-annotations::structured_annotation_with_default& get_nest() const&;
 
   /** Glean { "field": "nest" } */
-  [[deprecated("Use `FOO.nest().value();` instead of `FOO.get_nest();`")]]
+  [[deprecated("Use `FOO.nest().value()` instead of `FOO.get_nest()`")]]
   ::test::fixtures::basic-structured-annotations::structured_annotation_with_default get_nest() &&;
 
   /** Glean { "field": "nest" } */
   template <typename T_structured_annotation_nested_nest_struct_setter = ::test::fixtures::basic-structured-annotations::structured_annotation_with_default>
-  [[deprecated("Use `FOO.nest() = BAR;` instead of `FOO.set_nest(BAR);`")]]
+  [[deprecated("Use `FOO.nest() = BAR` instead of `FOO.set_nest(BAR)`")]]
   ::test::fixtures::basic-structured-annotations::structured_annotation_with_default& set_nest(T_structured_annotation_nested_nest_struct_setter&& nest_) {
     nest_ref() = std::forward<T_structured_annotation_nested_nest_struct_setter>(nest_);
     return __fbthrift_field_nest;
@@ -1696,59 +1696,59 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "annotated_field" } */
-  [[deprecated("Use `FOO.annotated_field().value();` instead of `FOO.get_annotated_field();`")]]
+  [[deprecated("Use `FOO.annotated_field().value()` instead of `FOO.get_annotated_field()`")]]
   ::std::int64_t get_annotated_field() const;
 
   /** Glean { "field": "annotated_field" } */
-  [[deprecated("Use `FOO.annotated_field() = BAR;` instead of `FOO.set_annotated_field(BAR);`")]]
+  [[deprecated("Use `FOO.annotated_field() = BAR` instead of `FOO.set_annotated_field(BAR)`")]]
   ::std::int64_t& set_annotated_field(::std::int64_t annotated_field_);
 
   /** Glean { "field": "annotated_type" } */
-  [[deprecated("Use `FOO.annotated_type().value();` instead of `FOO.get_annotated_type();`")]]
+  [[deprecated("Use `FOO.annotated_type().value()` instead of `FOO.get_annotated_type()`")]]
   const ::test::fixtures::basic-structured-annotations::annotated_inline_string& get_annotated_type() const& {
     return __fbthrift_field_annotated_type;
   }
 
   /** Glean { "field": "annotated_type" } */
-  [[deprecated("Use `FOO.annotated_type().value();` instead of `FOO.get_annotated_type();`")]]
+  [[deprecated("Use `FOO.annotated_type().value()` instead of `FOO.get_annotated_type()`")]]
   ::test::fixtures::basic-structured-annotations::annotated_inline_string get_annotated_type() && {
     return static_cast<::test::fixtures::basic-structured-annotations::annotated_inline_string&&>(__fbthrift_field_annotated_type);
   }
 
   /** Glean { "field": "annotated_type" } */
   template <typename T_MyStruct_annotated_type_struct_setter = ::test::fixtures::basic-structured-annotations::annotated_inline_string>
-  [[deprecated("Use `FOO.annotated_type() = BAR;` instead of `FOO.set_annotated_type(BAR);`")]]
+  [[deprecated("Use `FOO.annotated_type() = BAR` instead of `FOO.set_annotated_type(BAR)`")]]
   ::test::fixtures::basic-structured-annotations::annotated_inline_string& set_annotated_type(T_MyStruct_annotated_type_struct_setter&& annotated_type_) {
     annotated_type_ref() = std::forward<T_MyStruct_annotated_type_struct_setter>(annotated_type_);
     return __fbthrift_field_annotated_type;
   }
 
   /** Glean { "field": "annotated_recursive" } */
-  [[deprecated("Use `FOO.annotated_recursive().value();` instead of `FOO.get_annotated_recursive();`")]]
+  [[deprecated("Use `FOO.annotated_recursive().value()` instead of `FOO.get_annotated_recursive()`")]]
   const ::std::string& get_annotated_recursive() const& {
     return __fbthrift_field_annotated_recursive;
   }
 
   /** Glean { "field": "annotated_recursive" } */
-  [[deprecated("Use `FOO.annotated_recursive().value();` instead of `FOO.get_annotated_recursive();`")]]
+  [[deprecated("Use `FOO.annotated_recursive().value()` instead of `FOO.get_annotated_recursive()`")]]
   ::std::string get_annotated_recursive() && {
     return static_cast<::std::string&&>(__fbthrift_field_annotated_recursive);
   }
 
   /** Glean { "field": "annotated_recursive" } */
   template <typename T_MyStruct_annotated_recursive_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.annotated_recursive() = BAR;` instead of `FOO.set_annotated_recursive(BAR);`")]]
+  [[deprecated("Use `FOO.annotated_recursive() = BAR` instead of `FOO.set_annotated_recursive(BAR)`")]]
   ::std::string& set_annotated_recursive(T_MyStruct_annotated_recursive_struct_setter&& annotated_recursive_) {
     annotated_recursive_ref() = std::forward<T_MyStruct_annotated_recursive_struct_setter>(annotated_recursive_);
     return __fbthrift_field_annotated_recursive;
   }
 
   /** Glean { "field": "annotated_nested" } */
-  [[deprecated("Use `FOO.annotated_nested().value();` instead of `FOO.get_annotated_nested();`")]]
+  [[deprecated("Use `FOO.annotated_nested().value()` instead of `FOO.get_annotated_nested()`")]]
   ::std::int64_t get_annotated_nested() const;
 
   /** Glean { "field": "annotated_nested" } */
-  [[deprecated("Use `FOO.annotated_nested() = BAR;` instead of `FOO.set_annotated_nested(BAR);`")]]
+  [[deprecated("Use `FOO.annotated_nested() = BAR` instead of `FOO.set_annotated_nested(BAR)`")]]
   ::std::int64_t& set_annotated_nested(::std::int64_t annotated_nested_);
 
   template <class Protocol_>
@@ -1914,20 +1914,20 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
   }
 
   /** Glean { "field": "context" } */
-  [[deprecated("Use `FOO.context().value();` instead of `FOO.get_context();`")]]
+  [[deprecated("Use `FOO.context().value()` instead of `FOO.get_context()`")]]
   const ::std::string& get_context() const& {
     return __fbthrift_field_context;
   }
 
   /** Glean { "field": "context" } */
-  [[deprecated("Use `FOO.context().value();` instead of `FOO.get_context();`")]]
+  [[deprecated("Use `FOO.context().value()` instead of `FOO.get_context()`")]]
   ::std::string get_context() && {
     return static_cast<::std::string&&>(__fbthrift_field_context);
   }
 
   /** Glean { "field": "context" } */
   template <typename T_MyException_context_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.context() = BAR;` instead of `FOO.set_context(BAR);`")]]
+  [[deprecated("Use `FOO.context() = BAR` instead of `FOO.set_context(BAR)`")]]
   ::std::string& set_context(T_MyException_context_struct_setter&& context_) {
     context_ref() = std::forward<T_MyException_context_struct_setter>(context_);
     return __fbthrift_field_context;

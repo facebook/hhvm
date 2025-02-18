@@ -679,112 +679,112 @@ class TestStruct final  {
   }
 
   /** Glean { "field": "unqualified_int_field" } */
-  [[deprecated("Use `FOO.unqualified_int_field().value();` instead of `FOO.get_unqualified_int_field();`")]]
+  [[deprecated("Use `FOO.unqualified_int_field().value()` instead of `FOO.get_unqualified_int_field()`")]]
   ::std::int32_t get_unqualified_int_field() const;
 
   /** Glean { "field": "unqualified_int_field" } */
-  [[deprecated("Use `FOO.unqualified_int_field() = BAR;` instead of `FOO.set_unqualified_int_field(BAR);`")]]
+  [[deprecated("Use `FOO.unqualified_int_field() = BAR` instead of `FOO.set_unqualified_int_field(BAR)`")]]
   ::std::int32_t& set_unqualified_int_field(::std::int32_t unqualified_int_field_);
 
   /** Glean { "field": "unqualified_bool_field" } */
-  [[deprecated("Use `FOO.unqualified_bool_field().value();` instead of `FOO.get_unqualified_bool_field();`")]]
+  [[deprecated("Use `FOO.unqualified_bool_field().value()` instead of `FOO.get_unqualified_bool_field()`")]]
   bool get_unqualified_bool_field() const;
 
   /** Glean { "field": "unqualified_bool_field" } */
-  [[deprecated("Use `FOO.unqualified_bool_field() = BAR;` instead of `FOO.set_unqualified_bool_field(BAR);`")]]
+  [[deprecated("Use `FOO.unqualified_bool_field() = BAR` instead of `FOO.set_unqualified_bool_field(BAR)`")]]
   bool& set_unqualified_bool_field(bool unqualified_bool_field_);
 
   /** Glean { "field": "unqualified_list_field" } */
-  [[deprecated("Use `FOO.unqualified_list_field().value();` instead of `FOO.get_unqualified_list_field();`")]]
+  [[deprecated("Use `FOO.unqualified_list_field().value()` instead of `FOO.get_unqualified_list_field()`")]]
   const ::std::vector<::std::int32_t>& get_unqualified_list_field() const&;
 
   /** Glean { "field": "unqualified_list_field" } */
-  [[deprecated("Use `FOO.unqualified_list_field().value();` instead of `FOO.get_unqualified_list_field();`")]]
+  [[deprecated("Use `FOO.unqualified_list_field().value()` instead of `FOO.get_unqualified_list_field()`")]]
   ::std::vector<::std::int32_t> get_unqualified_list_field() &&;
 
   /** Glean { "field": "unqualified_list_field" } */
   template <typename T_TestStruct_unqualified_list_field_struct_setter = ::std::vector<::std::int32_t>>
-  [[deprecated("Use `FOO.unqualified_list_field() = BAR;` instead of `FOO.set_unqualified_list_field(BAR);`")]]
+  [[deprecated("Use `FOO.unqualified_list_field() = BAR` instead of `FOO.set_unqualified_list_field(BAR)`")]]
   ::std::vector<::std::int32_t>& set_unqualified_list_field(T_TestStruct_unqualified_list_field_struct_setter&& unqualified_list_field_) {
     unqualified_list_field_ref() = std::forward<T_TestStruct_unqualified_list_field_struct_setter>(unqualified_list_field_);
     return __fbthrift_field_unqualified_list_field;
   }
 
   /** Glean { "field": "unqualified_struct_field" } */
-  [[deprecated("Use `FOO.unqualified_struct_field().value();` instead of `FOO.get_unqualified_struct_field();`")]]
+  [[deprecated("Use `FOO.unqualified_struct_field().value()` instead of `FOO.get_unqualified_struct_field()`")]]
   const ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct& get_unqualified_struct_field() const&;
 
   /** Glean { "field": "unqualified_struct_field" } */
-  [[deprecated("Use `FOO.unqualified_struct_field().value();` instead of `FOO.get_unqualified_struct_field();`")]]
+  [[deprecated("Use `FOO.unqualified_struct_field().value()` instead of `FOO.get_unqualified_struct_field()`")]]
   ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct get_unqualified_struct_field() &&;
 
   /** Glean { "field": "unqualified_struct_field" } */
   template <typename T_TestStruct_unqualified_struct_field_struct_setter = ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>
-  [[deprecated("Use `FOO.unqualified_struct_field() = BAR;` instead of `FOO.set_unqualified_struct_field(BAR);`")]]
+  [[deprecated("Use `FOO.unqualified_struct_field() = BAR` instead of `FOO.set_unqualified_struct_field(BAR)`")]]
   ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct& set_unqualified_struct_field(T_TestStruct_unqualified_struct_field_struct_setter&& unqualified_struct_field_) {
     unqualified_struct_field_ref() = std::forward<T_TestStruct_unqualified_struct_field_struct_setter>(unqualified_struct_field_);
     return __fbthrift_field_unqualified_struct_field;
   }
 
   /** Glean { "field": "optional_int_field" } */
-  [[deprecated("Use `FOO.optional_int_field().value();` instead of `FOO.get_optional_int_field();`")]]
+  [[deprecated("Use `FOO.optional_int_field().value()` instead of `FOO.get_optional_int_field()`")]]
   const ::std::int32_t* get_optional_int_field() const&;
 
   /** Glean { "field": "optional_int_field" } */
-  [[deprecated("Use `FOO.optional_int_field().value();` instead of `FOO.get_optional_int_field();`")]]
+  [[deprecated("Use `FOO.optional_int_field().value()` instead of `FOO.get_optional_int_field()`")]]
   ::std::int32_t* get_optional_int_field() &;
 
   ::std::int32_t* get_optional_int_field() && = delete;
 
   /** Glean { "field": "optional_int_field" } */
-  [[deprecated("Use `FOO.optional_int_field() = BAR;` instead of `FOO.set_optional_int_field(BAR);`")]]
+  [[deprecated("Use `FOO.optional_int_field() = BAR` instead of `FOO.set_optional_int_field(BAR)`")]]
   ::std::int32_t& set_optional_int_field(::std::int32_t optional_int_field_);
 
   /** Glean { "field": "optional_bool_field" } */
-  [[deprecated("Use `FOO.optional_bool_field().value();` instead of `FOO.get_optional_bool_field();`")]]
+  [[deprecated("Use `FOO.optional_bool_field().value()` instead of `FOO.get_optional_bool_field()`")]]
   const bool* get_optional_bool_field() const&;
 
   /** Glean { "field": "optional_bool_field" } */
-  [[deprecated("Use `FOO.optional_bool_field().value();` instead of `FOO.get_optional_bool_field();`")]]
+  [[deprecated("Use `FOO.optional_bool_field().value()` instead of `FOO.get_optional_bool_field()`")]]
   bool* get_optional_bool_field() &;
 
   bool* get_optional_bool_field() && = delete;
 
   /** Glean { "field": "optional_bool_field" } */
-  [[deprecated("Use `FOO.optional_bool_field() = BAR;` instead of `FOO.set_optional_bool_field(BAR);`")]]
+  [[deprecated("Use `FOO.optional_bool_field() = BAR` instead of `FOO.set_optional_bool_field(BAR)`")]]
   bool& set_optional_bool_field(bool optional_bool_field_);
 
   /** Glean { "field": "optional_list_field" } */
-  [[deprecated("Use `FOO.optional_list_field().value();` instead of `FOO.get_optional_list_field();`")]]
+  [[deprecated("Use `FOO.optional_list_field().value()` instead of `FOO.get_optional_list_field()`")]]
   const ::std::vector<::std::int32_t>* get_optional_list_field() const&;
 
   /** Glean { "field": "optional_list_field" } */
-  [[deprecated("Use `FOO.optional_list_field().value();` instead of `FOO.get_optional_list_field();`")]]
+  [[deprecated("Use `FOO.optional_list_field().value()` instead of `FOO.get_optional_list_field()`")]]
   ::std::vector<::std::int32_t>* get_optional_list_field() &;
 
   ::std::vector<::std::int32_t>* get_optional_list_field() && = delete;
 
   /** Glean { "field": "optional_list_field" } */
   template <typename T_TestStruct_optional_list_field_struct_setter = ::std::vector<::std::int32_t>>
-  [[deprecated("Use `FOO.optional_list_field() = BAR;` instead of `FOO.set_optional_list_field(BAR);`")]]
+  [[deprecated("Use `FOO.optional_list_field() = BAR` instead of `FOO.set_optional_list_field(BAR)`")]]
   ::std::vector<::std::int32_t>& set_optional_list_field(T_TestStruct_optional_list_field_struct_setter&& optional_list_field_) {
     optional_list_field_ref() = std::forward<T_TestStruct_optional_list_field_struct_setter>(optional_list_field_);
     return __fbthrift_field_optional_list_field;
   }
 
   /** Glean { "field": "optional_struct_field" } */
-  [[deprecated("Use `FOO.optional_struct_field().value();` instead of `FOO.get_optional_struct_field();`")]]
+  [[deprecated("Use `FOO.optional_struct_field().value()` instead of `FOO.get_optional_struct_field()`")]]
   const ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct* get_optional_struct_field() const&;
 
   /** Glean { "field": "optional_struct_field" } */
-  [[deprecated("Use `FOO.optional_struct_field().value();` instead of `FOO.get_optional_struct_field();`")]]
+  [[deprecated("Use `FOO.optional_struct_field().value()` instead of `FOO.get_optional_struct_field()`")]]
   ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct* get_optional_struct_field() &;
 
   ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct* get_optional_struct_field() && = delete;
 
   /** Glean { "field": "optional_struct_field" } */
   template <typename T_TestStruct_optional_struct_field_struct_setter = ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct>
-  [[deprecated("Use `FOO.optional_struct_field() = BAR;` instead of `FOO.set_optional_struct_field(BAR);`")]]
+  [[deprecated("Use `FOO.optional_struct_field() = BAR` instead of `FOO.set_optional_struct_field(BAR)`")]]
   ::facebook::thrift::compiler::test::fixtures::default_values_rectification::EmptyStruct& set_optional_struct_field(T_TestStruct_optional_struct_field_struct_setter&& optional_struct_field_) {
     optional_struct_field_ref() = std::forward<T_TestStruct_optional_struct_field_struct_setter>(optional_struct_field_);
     return __fbthrift_field_optional_struct_field;

@@ -352,33 +352,33 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "def_field" } */
-  [[deprecated("Use `FOO.def_field().value();` instead of `FOO.get_def_field();`")]]
+  [[deprecated("Use `FOO.def_field().value()` instead of `FOO.get_def_field()`")]]
   ::std::int32_t get_def_field() const;
 
   /** Glean { "field": "def_field" } */
-  [[deprecated("Use `FOO.def_field() = BAR;` instead of `FOO.set_def_field(BAR);`")]]
+  [[deprecated("Use `FOO.def_field() = BAR` instead of `FOO.set_def_field(BAR)`")]]
   ::std::int32_t& set_def_field(::std::int32_t def_field_);
 
   /** Glean { "field": "opt_field" } */
-  [[deprecated("Use `FOO.opt_field().value();` instead of `FOO.get_opt_field();`")]]
+  [[deprecated("Use `FOO.opt_field().value()` instead of `FOO.get_opt_field()`")]]
   const ::std::int32_t* get_opt_field() const&;
 
   /** Glean { "field": "opt_field" } */
-  [[deprecated("Use `FOO.opt_field().value();` instead of `FOO.get_opt_field();`")]]
+  [[deprecated("Use `FOO.opt_field().value()` instead of `FOO.get_opt_field()`")]]
   ::std::int32_t* get_opt_field() &;
 
   ::std::int32_t* get_opt_field() && = delete;
 
   /** Glean { "field": "opt_field" } */
-  [[deprecated("Use `FOO.opt_field() = BAR;` instead of `FOO.set_opt_field(BAR);`")]]
+  [[deprecated("Use `FOO.opt_field() = BAR` instead of `FOO.set_opt_field(BAR)`")]]
   ::std::int32_t& set_opt_field(::std::int32_t opt_field_);
 
   /** Glean { "field": "req_field" } */
-  [[deprecated("Use `FOO.req_field().value();` instead of `FOO.get_req_field();`")]]
+  [[deprecated("Use `FOO.req_field().value()` instead of `FOO.get_req_field()`")]]
   ::std::int32_t get_req_field() const;
 
   /** Glean { "field": "req_field" } */
-  [[deprecated("Use `FOO.req_field() = BAR;` instead of `FOO.set_req_field(BAR);`")]]
+  [[deprecated("Use `FOO.req_field() = BAR` instead of `FOO.set_req_field(BAR)`")]]
   ::std::int32_t& set_req_field(::std::int32_t req_field_);
 
   template <class Protocol_>

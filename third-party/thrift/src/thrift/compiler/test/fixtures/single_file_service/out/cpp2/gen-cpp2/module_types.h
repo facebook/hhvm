@@ -178,17 +178,17 @@ class Foo final  {
   }
 
   /** Glean { "field": "value" } */
-  [[deprecated("Use `FOO.value().value();` instead of `FOO.get_value();`")]]
+  [[deprecated("Use `FOO.value().value()` instead of `FOO.get_value()`")]]
   const ::std::int32_t* get_value() const&;
 
   /** Glean { "field": "value" } */
-  [[deprecated("Use `FOO.value().value();` instead of `FOO.get_value();`")]]
+  [[deprecated("Use `FOO.value().value()` instead of `FOO.get_value()`")]]
   ::std::int32_t* get_value() &;
 
   ::std::int32_t* get_value() && = delete;
 
   /** Glean { "field": "value" } */
-  [[deprecated("Use `FOO.value() = BAR;` instead of `FOO.set_value(BAR);`")]]
+  [[deprecated("Use `FOO.value() = BAR` instead of `FOO.set_value(BAR)`")]]
   ::std::int32_t& set_value(::std::int32_t value_);
 
   template <class Protocol_>

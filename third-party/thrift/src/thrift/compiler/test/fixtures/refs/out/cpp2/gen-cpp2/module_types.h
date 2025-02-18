@@ -2037,16 +2037,16 @@ class StructWithUnion final  {
   }
 
   /** Glean { "field": "f" } */
-  [[deprecated("Use `FOO.f().value();` instead of `FOO.get_f();`")]]
+  [[deprecated("Use `FOO.f().value()` instead of `FOO.get_f()`")]]
   const ::cpp2::MyField& get_f() const&;
 
   /** Glean { "field": "f" } */
-  [[deprecated("Use `FOO.f().value();` instead of `FOO.get_f();`")]]
+  [[deprecated("Use `FOO.f().value()` instead of `FOO.get_f()`")]]
   ::cpp2::MyField get_f() &&;
 
   /** Glean { "field": "f" } */
   template <typename T_StructWithUnion_f_struct_setter = ::cpp2::MyField>
-  [[deprecated("Use `FOO.f() = BAR;` instead of `FOO.set_f(BAR);`")]]
+  [[deprecated("Use `FOO.f() = BAR` instead of `FOO.set_f(BAR)`")]]
   ::cpp2::MyField& set_f(T_StructWithUnion_f_struct_setter&& f_) {
     f_ref() = std::forward<T_StructWithUnion_f_struct_setter>(f_);
     return __fbthrift_field_f;
@@ -2208,18 +2208,18 @@ class RecursiveStruct final  {
   }
 
   /** Glean { "field": "mes" } */
-  [[deprecated("Use `FOO.mes().value();` instead of `FOO.get_mes();`")]]
+  [[deprecated("Use `FOO.mes().value()` instead of `FOO.get_mes()`")]]
   const ::std::vector<::cpp2::RecursiveStruct>* get_mes() const&;
 
   /** Glean { "field": "mes" } */
-  [[deprecated("Use `FOO.mes().value();` instead of `FOO.get_mes();`")]]
+  [[deprecated("Use `FOO.mes().value()` instead of `FOO.get_mes()`")]]
   ::std::vector<::cpp2::RecursiveStruct>* get_mes() &;
 
   ::std::vector<::cpp2::RecursiveStruct>* get_mes() && = delete;
 
   /** Glean { "field": "mes" } */
   template <typename T_RecursiveStruct_mes_struct_setter = ::std::vector<::cpp2::RecursiveStruct>>
-  [[deprecated("Use `FOO.mes() = BAR;` instead of `FOO.set_mes(BAR);`")]]
+  [[deprecated("Use `FOO.mes() = BAR` instead of `FOO.set_mes(BAR)`")]]
   ::std::vector<::cpp2::RecursiveStruct>& set_mes(T_RecursiveStruct_mes_struct_setter&& mes_) {
     mes_ref() = std::forward<T_RecursiveStruct_mes_struct_setter>(mes_);
     return __fbthrift_field_mes;

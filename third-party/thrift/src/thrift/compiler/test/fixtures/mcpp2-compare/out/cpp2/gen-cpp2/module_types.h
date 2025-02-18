@@ -1435,11 +1435,11 @@ class ASimpleStruct final  {
   }
 
   /** Glean { "field": "boolField" } */
-  [[deprecated("Use `FOO.boolField().value();` instead of `FOO.get_boolField();`")]]
+  [[deprecated("Use `FOO.boolField().value()` instead of `FOO.get_boolField()`")]]
   ::std::int64_t get_boolField() const;
 
   /** Glean { "field": "boolField" } */
-  [[deprecated("Use `FOO.boolField() = BAR;` instead of `FOO.set_boolField(BAR);`")]]
+  [[deprecated("Use `FOO.boolField() = BAR` instead of `FOO.set_boolField(BAR)`")]]
   ::std::int64_t& set_boolField(::std::int64_t boolField_);
 
   template <class Protocol_>
@@ -1597,11 +1597,11 @@ class ASimpleStructNoexcept final  {
   }
 
   /** Glean { "field": "boolField" } */
-  [[deprecated("Use `FOO.boolField().value();` instead of `FOO.get_boolField();`")]]
+  [[deprecated("Use `FOO.boolField().value()` instead of `FOO.get_boolField()`")]]
   ::std::int64_t get_boolField() const;
 
   /** Glean { "field": "boolField" } */
-  [[deprecated("Use `FOO.boolField() = BAR;` instead of `FOO.set_boolField(BAR);`")]]
+  [[deprecated("Use `FOO.boolField() = BAR` instead of `FOO.set_boolField(BAR)`")]]
   ::std::int64_t& set_boolField(::std::int64_t boolField_);
 
   template <class Protocol_>
@@ -2279,146 +2279,146 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "MyBoolField" } */
-  [[deprecated("Use `FOO.MyBoolField().value();` instead of `FOO.get_MyBoolField();`")]]
+  [[deprecated("Use `FOO.MyBoolField().value()` instead of `FOO.get_MyBoolField()`")]]
   bool get_MyBoolField() const;
 
   /** Glean { "field": "MyBoolField" } */
-  [[deprecated("Use `FOO.MyBoolField() = BAR;` instead of `FOO.set_MyBoolField(BAR);`")]]
+  [[deprecated("Use `FOO.MyBoolField() = BAR` instead of `FOO.set_MyBoolField(BAR)`")]]
   bool& set_MyBoolField(bool MyBoolField_);
 
   /** Glean { "field": "MyIntField" } */
-  [[deprecated("Use `FOO.MyIntField().value();` instead of `FOO.get_MyIntField();`")]]
+  [[deprecated("Use `FOO.MyIntField().value()` instead of `FOO.get_MyIntField()`")]]
   ::std::int64_t get_MyIntField() const;
 
   /** Glean { "field": "MyIntField" } */
-  [[deprecated("Use `FOO.MyIntField() = BAR;` instead of `FOO.set_MyIntField(BAR);`")]]
+  [[deprecated("Use `FOO.MyIntField() = BAR` instead of `FOO.set_MyIntField(BAR)`")]]
   ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_);
 
   /** Glean { "field": "MyStringField" } */
-  [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
+  [[deprecated("Use `FOO.MyStringField().value()` instead of `FOO.get_MyStringField()`")]]
   const ::std::string& get_MyStringField() const& {
     return __fbthrift_field_MyStringField;
   }
 
   /** Glean { "field": "MyStringField" } */
-  [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
+  [[deprecated("Use `FOO.MyStringField().value()` instead of `FOO.get_MyStringField()`")]]
   ::std::string get_MyStringField() && {
     return static_cast<::std::string&&>(__fbthrift_field_MyStringField);
   }
 
   /** Glean { "field": "MyStringField" } */
   template <typename T_MyStruct_MyStringField_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.MyStringField() = BAR;` instead of `FOO.set_MyStringField(BAR);`")]]
+  [[deprecated("Use `FOO.MyStringField() = BAR` instead of `FOO.set_MyStringField(BAR)`")]]
   ::std::string& set_MyStringField(T_MyStruct_MyStringField_struct_setter&& MyStringField_) {
     MyStringField_ref() = std::forward<T_MyStruct_MyStringField_struct_setter>(MyStringField_);
     return __fbthrift_field_MyStringField;
   }
 
   /** Glean { "field": "MyStringField2" } */
-  [[deprecated("Use `FOO.MyStringField2().value();` instead of `FOO.get_MyStringField2();`")]]
+  [[deprecated("Use `FOO.MyStringField2().value()` instead of `FOO.get_MyStringField2()`")]]
   const ::std::string& get_MyStringField2() const& {
     return __fbthrift_field_MyStringField2;
   }
 
   /** Glean { "field": "MyStringField2" } */
-  [[deprecated("Use `FOO.MyStringField2().value();` instead of `FOO.get_MyStringField2();`")]]
+  [[deprecated("Use `FOO.MyStringField2().value()` instead of `FOO.get_MyStringField2()`")]]
   ::std::string get_MyStringField2() && {
     return static_cast<::std::string&&>(__fbthrift_field_MyStringField2);
   }
 
   /** Glean { "field": "MyStringField2" } */
   template <typename T_MyStruct_MyStringField2_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.MyStringField2() = BAR;` instead of `FOO.set_MyStringField2(BAR);`")]]
+  [[deprecated("Use `FOO.MyStringField2() = BAR` instead of `FOO.set_MyStringField2(BAR)`")]]
   ::std::string& set_MyStringField2(T_MyStruct_MyStringField2_struct_setter&& MyStringField2_) {
     MyStringField2_ref() = std::forward<T_MyStruct_MyStringField2_struct_setter>(MyStringField2_);
     return __fbthrift_field_MyStringField2;
   }
 
   /** Glean { "field": "MyBinaryField" } */
-  [[deprecated("Use `FOO.MyBinaryField().value();` instead of `FOO.get_MyBinaryField();`")]]
+  [[deprecated("Use `FOO.MyBinaryField().value()` instead of `FOO.get_MyBinaryField()`")]]
   const ::std::string& get_MyBinaryField() const& {
     return __fbthrift_field_MyBinaryField;
   }
 
   /** Glean { "field": "MyBinaryField" } */
-  [[deprecated("Use `FOO.MyBinaryField().value();` instead of `FOO.get_MyBinaryField();`")]]
+  [[deprecated("Use `FOO.MyBinaryField().value()` instead of `FOO.get_MyBinaryField()`")]]
   ::std::string get_MyBinaryField() && {
     return static_cast<::std::string&&>(__fbthrift_field_MyBinaryField);
   }
 
   /** Glean { "field": "MyBinaryField" } */
   template <typename T_MyStruct_MyBinaryField_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.MyBinaryField() = BAR;` instead of `FOO.set_MyBinaryField(BAR);`")]]
+  [[deprecated("Use `FOO.MyBinaryField() = BAR` instead of `FOO.set_MyBinaryField(BAR)`")]]
   ::std::string& set_MyBinaryField(T_MyStruct_MyBinaryField_struct_setter&& MyBinaryField_) {
     MyBinaryField_ref() = std::forward<T_MyStruct_MyBinaryField_struct_setter>(MyBinaryField_);
     return __fbthrift_field_MyBinaryField;
   }
 
   /** Glean { "field": "MyBinaryField2" } */
-  [[deprecated("Use `FOO.MyBinaryField2().value();` instead of `FOO.get_MyBinaryField2();`")]]
+  [[deprecated("Use `FOO.MyBinaryField2().value()` instead of `FOO.get_MyBinaryField2()`")]]
   const ::std::string* get_MyBinaryField2() const&;
 
   /** Glean { "field": "MyBinaryField2" } */
-  [[deprecated("Use `FOO.MyBinaryField2().value();` instead of `FOO.get_MyBinaryField2();`")]]
+  [[deprecated("Use `FOO.MyBinaryField2().value()` instead of `FOO.get_MyBinaryField2()`")]]
   ::std::string* get_MyBinaryField2() &;
 
   ::std::string* get_MyBinaryField2() && = delete;
 
   /** Glean { "field": "MyBinaryField2" } */
   template <typename T_MyStruct_MyBinaryField2_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.MyBinaryField2() = BAR;` instead of `FOO.set_MyBinaryField2(BAR);`")]]
+  [[deprecated("Use `FOO.MyBinaryField2() = BAR` instead of `FOO.set_MyBinaryField2(BAR)`")]]
   ::std::string& set_MyBinaryField2(T_MyStruct_MyBinaryField2_struct_setter&& MyBinaryField2_) {
     MyBinaryField2_ref() = std::forward<T_MyStruct_MyBinaryField2_struct_setter>(MyBinaryField2_);
     return __fbthrift_field_MyBinaryField2;
   }
 
   /** Glean { "field": "MyBinaryField3" } */
-  [[deprecated("Use `FOO.MyBinaryField3().value();` instead of `FOO.get_MyBinaryField3();`")]]
+  [[deprecated("Use `FOO.MyBinaryField3().value()` instead of `FOO.get_MyBinaryField3()`")]]
   const ::std::string& get_MyBinaryField3() const& {
     return __fbthrift_field_MyBinaryField3;
   }
 
   /** Glean { "field": "MyBinaryField3" } */
-  [[deprecated("Use `FOO.MyBinaryField3().value();` instead of `FOO.get_MyBinaryField3();`")]]
+  [[deprecated("Use `FOO.MyBinaryField3().value()` instead of `FOO.get_MyBinaryField3()`")]]
   ::std::string get_MyBinaryField3() && {
     return static_cast<::std::string&&>(__fbthrift_field_MyBinaryField3);
   }
 
   /** Glean { "field": "MyBinaryField3" } */
   template <typename T_MyStruct_MyBinaryField3_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.MyBinaryField3() = BAR;` instead of `FOO.set_MyBinaryField3(BAR);`")]]
+  [[deprecated("Use `FOO.MyBinaryField3() = BAR` instead of `FOO.set_MyBinaryField3(BAR)`")]]
   ::std::string& set_MyBinaryField3(T_MyStruct_MyBinaryField3_struct_setter&& MyBinaryField3_) {
     MyBinaryField3_ref() = std::forward<T_MyStruct_MyBinaryField3_struct_setter>(MyBinaryField3_);
     return __fbthrift_field_MyBinaryField3;
   }
 
   /** Glean { "field": "MyBinaryListField4" } */
-  [[deprecated("Use `FOO.MyBinaryListField4().value();` instead of `FOO.get_MyBinaryListField4();`")]]
+  [[deprecated("Use `FOO.MyBinaryListField4().value()` instead of `FOO.get_MyBinaryListField4()`")]]
   const ::std::vector<::std::string>& get_MyBinaryListField4() const&;
 
   /** Glean { "field": "MyBinaryListField4" } */
-  [[deprecated("Use `FOO.MyBinaryListField4().value();` instead of `FOO.get_MyBinaryListField4();`")]]
+  [[deprecated("Use `FOO.MyBinaryListField4().value()` instead of `FOO.get_MyBinaryListField4()`")]]
   ::std::vector<::std::string> get_MyBinaryListField4() &&;
 
   /** Glean { "field": "MyBinaryListField4" } */
   template <typename T_MyStruct_MyBinaryListField4_struct_setter = ::std::vector<::std::string>>
-  [[deprecated("Use `FOO.MyBinaryListField4() = BAR;` instead of `FOO.set_MyBinaryListField4(BAR);`")]]
+  [[deprecated("Use `FOO.MyBinaryListField4() = BAR` instead of `FOO.set_MyBinaryListField4(BAR)`")]]
   ::std::vector<::std::string>& set_MyBinaryListField4(T_MyStruct_MyBinaryListField4_struct_setter&& MyBinaryListField4_) {
     MyBinaryListField4_ref() = std::forward<T_MyStruct_MyBinaryListField4_struct_setter>(MyBinaryListField4_);
     return __fbthrift_field_MyBinaryListField4;
   }
 
   /** Glean { "field": "MyMapEnumAndInt" } */
-  [[deprecated("Use `FOO.MyMapEnumAndInt().value();` instead of `FOO.get_MyMapEnumAndInt();`")]]
+  [[deprecated("Use `FOO.MyMapEnumAndInt().value()` instead of `FOO.get_MyMapEnumAndInt()`")]]
   const ::std::map<::some::valid::ns::MyEnumA, ::std::string>& get_MyMapEnumAndInt() const&;
 
   /** Glean { "field": "MyMapEnumAndInt" } */
-  [[deprecated("Use `FOO.MyMapEnumAndInt().value();` instead of `FOO.get_MyMapEnumAndInt();`")]]
+  [[deprecated("Use `FOO.MyMapEnumAndInt().value()` instead of `FOO.get_MyMapEnumAndInt()`")]]
   ::std::map<::some::valid::ns::MyEnumA, ::std::string> get_MyMapEnumAndInt() &&;
 
   /** Glean { "field": "MyMapEnumAndInt" } */
   template <typename T_MyStruct_MyMapEnumAndInt_struct_setter = ::std::map<::some::valid::ns::MyEnumA, ::std::string>>
-  [[deprecated("Use `FOO.MyMapEnumAndInt() = BAR;` instead of `FOO.set_MyMapEnumAndInt(BAR);`")]]
+  [[deprecated("Use `FOO.MyMapEnumAndInt() = BAR` instead of `FOO.set_MyMapEnumAndInt(BAR)`")]]
   ::std::map<::some::valid::ns::MyEnumA, ::std::string>& set_MyMapEnumAndInt(T_MyStruct_MyMapEnumAndInt_struct_setter&& MyMapEnumAndInt_) {
     MyMapEnumAndInt_ref() = std::forward<T_MyStruct_MyMapEnumAndInt_struct_setter>(MyMapEnumAndInt_);
     return __fbthrift_field_MyMapEnumAndInt;
@@ -3711,224 +3711,224 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
   }
 
   /** Glean { "field": "code" } */
-  [[deprecated("Use `FOO.code().value();` instead of `FOO.get_code();`")]]
+  [[deprecated("Use `FOO.code().value()` instead of `FOO.get_code()`")]]
   ::std::int32_t get_code() const;
 
   /** Glean { "field": "code" } */
-  [[deprecated("Use `FOO.code() = BAR;` instead of `FOO.set_code(BAR);`")]]
+  [[deprecated("Use `FOO.code() = BAR` instead of `FOO.set_code(BAR)`")]]
   ::std::int32_t& set_code(::std::int32_t code_);
 
   /** Glean { "field": "req_code" } */
-  [[deprecated("Use `FOO.req_code().value();` instead of `FOO.get_req_code();`")]]
+  [[deprecated("Use `FOO.req_code().value()` instead of `FOO.get_req_code()`")]]
   ::std::int32_t get_req_code() const;
 
   /** Glean { "field": "req_code" } */
-  [[deprecated("Use `FOO.req_code() = BAR;` instead of `FOO.set_req_code(BAR);`")]]
+  [[deprecated("Use `FOO.req_code() = BAR` instead of `FOO.set_req_code(BAR)`")]]
   ::std::int32_t& set_req_code(::std::int32_t req_code_);
 
   /** Glean { "field": "message2" } */
-  [[deprecated("Use `FOO.message2().value();` instead of `FOO.get_message2();`")]]
+  [[deprecated("Use `FOO.message2().value()` instead of `FOO.get_message2()`")]]
   const ::std::string& get_message2() const& {
     return __fbthrift_field_message2;
   }
 
   /** Glean { "field": "message2" } */
-  [[deprecated("Use `FOO.message2().value();` instead of `FOO.get_message2();`")]]
+  [[deprecated("Use `FOO.message2().value()` instead of `FOO.get_message2()`")]]
   ::std::string get_message2() && {
     return static_cast<::std::string&&>(__fbthrift_field_message2);
   }
 
   /** Glean { "field": "message2" } */
   template <typename T_AnException_message2_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.message2() = BAR;` instead of `FOO.set_message2(BAR);`")]]
+  [[deprecated("Use `FOO.message2() = BAR` instead of `FOO.set_message2(BAR)`")]]
   ::std::string& set_message2(T_AnException_message2_struct_setter&& message2_) {
     message2_ref() = std::forward<T_AnException_message2_struct_setter>(message2_);
     return __fbthrift_field_message2;
   }
 
   /** Glean { "field": "req_message" } */
-  [[deprecated("Use `FOO.req_message().value();` instead of `FOO.get_req_message();`")]]
+  [[deprecated("Use `FOO.req_message().value()` instead of `FOO.get_req_message()`")]]
   const ::std::string& get_req_message() const& {
     return __fbthrift_field_req_message;
   }
 
   /** Glean { "field": "req_message" } */
-  [[deprecated("Use `FOO.req_message().value();` instead of `FOO.get_req_message();`")]]
+  [[deprecated("Use `FOO.req_message().value()` instead of `FOO.get_req_message()`")]]
   ::std::string get_req_message() && {
     return static_cast<::std::string&&>(__fbthrift_field_req_message);
   }
 
   /** Glean { "field": "req_message" } */
   template <typename T_AnException_req_message_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.req_message() = BAR;` instead of `FOO.set_req_message(BAR);`")]]
+  [[deprecated("Use `FOO.req_message() = BAR` instead of `FOO.set_req_message(BAR)`")]]
   ::std::string& set_req_message(T_AnException_req_message_struct_setter&& req_message_) {
     req_message_ref() = std::forward<T_AnException_req_message_struct_setter>(req_message_);
     return __fbthrift_field_req_message;
   }
 
   /** Glean { "field": "exception_list" } */
-  [[deprecated("Use `FOO.exception_list().value();` instead of `FOO.get_exception_list();`")]]
+  [[deprecated("Use `FOO.exception_list().value()` instead of `FOO.get_exception_list()`")]]
   const ::std::vector<::std::int32_t>& get_exception_list() const&;
 
   /** Glean { "field": "exception_list" } */
-  [[deprecated("Use `FOO.exception_list().value();` instead of `FOO.get_exception_list();`")]]
+  [[deprecated("Use `FOO.exception_list().value()` instead of `FOO.get_exception_list()`")]]
   ::std::vector<::std::int32_t> get_exception_list() &&;
 
   /** Glean { "field": "exception_list" } */
   template <typename T_AnException_exception_list_struct_setter = ::std::vector<::std::int32_t>>
-  [[deprecated("Use `FOO.exception_list() = BAR;` instead of `FOO.set_exception_list(BAR);`")]]
+  [[deprecated("Use `FOO.exception_list() = BAR` instead of `FOO.set_exception_list(BAR)`")]]
   ::std::vector<::std::int32_t>& set_exception_list(T_AnException_exception_list_struct_setter&& exception_list_) {
     exception_list_ref() = std::forward<T_AnException_exception_list_struct_setter>(exception_list_);
     return __fbthrift_field_exception_list;
   }
 
   /** Glean { "field": "exception_set" } */
-  [[deprecated("Use `FOO.exception_set().value();` instead of `FOO.get_exception_set();`")]]
+  [[deprecated("Use `FOO.exception_set().value()` instead of `FOO.get_exception_set()`")]]
   const ::std::set<::std::int64_t>& get_exception_set() const&;
 
   /** Glean { "field": "exception_set" } */
-  [[deprecated("Use `FOO.exception_set().value();` instead of `FOO.get_exception_set();`")]]
+  [[deprecated("Use `FOO.exception_set().value()` instead of `FOO.get_exception_set()`")]]
   ::std::set<::std::int64_t> get_exception_set() &&;
 
   /** Glean { "field": "exception_set" } */
   template <typename T_AnException_exception_set_struct_setter = ::std::set<::std::int64_t>>
-  [[deprecated("Use `FOO.exception_set() = BAR;` instead of `FOO.set_exception_set(BAR);`")]]
+  [[deprecated("Use `FOO.exception_set() = BAR` instead of `FOO.set_exception_set(BAR)`")]]
   ::std::set<::std::int64_t>& set_exception_set(T_AnException_exception_set_struct_setter&& exception_set_) {
     exception_set_ref() = std::forward<T_AnException_exception_set_struct_setter>(exception_set_);
     return __fbthrift_field_exception_set;
   }
 
   /** Glean { "field": "exception_map" } */
-  [[deprecated("Use `FOO.exception_map().value();` instead of `FOO.get_exception_map();`")]]
+  [[deprecated("Use `FOO.exception_map().value()` instead of `FOO.get_exception_map()`")]]
   const ::std::map<::std::string, ::std::int32_t>& get_exception_map() const&;
 
   /** Glean { "field": "exception_map" } */
-  [[deprecated("Use `FOO.exception_map().value();` instead of `FOO.get_exception_map();`")]]
+  [[deprecated("Use `FOO.exception_map().value()` instead of `FOO.get_exception_map()`")]]
   ::std::map<::std::string, ::std::int32_t> get_exception_map() &&;
 
   /** Glean { "field": "exception_map" } */
   template <typename T_AnException_exception_map_struct_setter = ::std::map<::std::string, ::std::int32_t>>
-  [[deprecated("Use `FOO.exception_map() = BAR;` instead of `FOO.set_exception_map(BAR);`")]]
+  [[deprecated("Use `FOO.exception_map() = BAR` instead of `FOO.set_exception_map(BAR)`")]]
   ::std::map<::std::string, ::std::int32_t>& set_exception_map(T_AnException_exception_map_struct_setter&& exception_map_) {
     exception_map_ref() = std::forward<T_AnException_exception_map_struct_setter>(exception_map_);
     return __fbthrift_field_exception_map;
   }
 
   /** Glean { "field": "req_exception_map" } */
-  [[deprecated("Use `FOO.req_exception_map().value();` instead of `FOO.get_req_exception_map();`")]]
+  [[deprecated("Use `FOO.req_exception_map().value()` instead of `FOO.get_req_exception_map()`")]]
   const ::std::map<::std::string, ::std::int32_t>& get_req_exception_map() const&;
 
   /** Glean { "field": "req_exception_map" } */
-  [[deprecated("Use `FOO.req_exception_map().value();` instead of `FOO.get_req_exception_map();`")]]
+  [[deprecated("Use `FOO.req_exception_map().value()` instead of `FOO.get_req_exception_map()`")]]
   ::std::map<::std::string, ::std::int32_t> get_req_exception_map() &&;
 
   /** Glean { "field": "req_exception_map" } */
   template <typename T_AnException_req_exception_map_struct_setter = ::std::map<::std::string, ::std::int32_t>>
-  [[deprecated("Use `FOO.req_exception_map() = BAR;` instead of `FOO.set_req_exception_map(BAR);`")]]
+  [[deprecated("Use `FOO.req_exception_map() = BAR` instead of `FOO.set_req_exception_map(BAR)`")]]
   ::std::map<::std::string, ::std::int32_t>& set_req_exception_map(T_AnException_req_exception_map_struct_setter&& req_exception_map_) {
     req_exception_map_ref() = std::forward<T_AnException_req_exception_map_struct_setter>(req_exception_map_);
     return __fbthrift_field_req_exception_map;
   }
 
   /** Glean { "field": "enum_field" } */
-  [[deprecated("Use `FOO.enum_field().value();` instead of `FOO.get_enum_field();`")]]
+  [[deprecated("Use `FOO.enum_field().value()` instead of `FOO.get_enum_field()`")]]
   ::some::valid::ns::MyEnumA get_enum_field() const;
 
   /** Glean { "field": "enum_field" } */
-  [[deprecated("Use `FOO.enum_field() = BAR;` instead of `FOO.set_enum_field(BAR);`")]]
+  [[deprecated("Use `FOO.enum_field() = BAR` instead of `FOO.set_enum_field(BAR)`")]]
   ::some::valid::ns::MyEnumA& set_enum_field(::some::valid::ns::MyEnumA enum_field_);
 
   /** Glean { "field": "enum_container" } */
-  [[deprecated("Use `FOO.enum_container().value();` instead of `FOO.get_enum_container();`")]]
+  [[deprecated("Use `FOO.enum_container().value()` instead of `FOO.get_enum_container()`")]]
   const ::std::vector<::some::valid::ns::MyEnumA>& get_enum_container() const&;
 
   /** Glean { "field": "enum_container" } */
-  [[deprecated("Use `FOO.enum_container().value();` instead of `FOO.get_enum_container();`")]]
+  [[deprecated("Use `FOO.enum_container().value()` instead of `FOO.get_enum_container()`")]]
   ::std::vector<::some::valid::ns::MyEnumA> get_enum_container() &&;
 
   /** Glean { "field": "enum_container" } */
   template <typename T_AnException_enum_container_struct_setter = ::std::vector<::some::valid::ns::MyEnumA>>
-  [[deprecated("Use `FOO.enum_container() = BAR;` instead of `FOO.set_enum_container(BAR);`")]]
+  [[deprecated("Use `FOO.enum_container() = BAR` instead of `FOO.set_enum_container(BAR)`")]]
   ::std::vector<::some::valid::ns::MyEnumA>& set_enum_container(T_AnException_enum_container_struct_setter&& enum_container_) {
     enum_container_ref() = std::forward<T_AnException_enum_container_struct_setter>(enum_container_);
     return __fbthrift_field_enum_container;
   }
 
   /** Glean { "field": "a_struct" } */
-  [[deprecated("Use `FOO.a_struct().value();` instead of `FOO.get_a_struct();`")]]
+  [[deprecated("Use `FOO.a_struct().value()` instead of `FOO.get_a_struct()`")]]
   const ::some::valid::ns::MyStruct& get_a_struct() const&;
 
   /** Glean { "field": "a_struct" } */
-  [[deprecated("Use `FOO.a_struct().value();` instead of `FOO.get_a_struct();`")]]
+  [[deprecated("Use `FOO.a_struct().value()` instead of `FOO.get_a_struct()`")]]
   ::some::valid::ns::MyStruct get_a_struct() &&;
 
   /** Glean { "field": "a_struct" } */
   template <typename T_AnException_a_struct_struct_setter = ::some::valid::ns::MyStruct>
-  [[deprecated("Use `FOO.a_struct() = BAR;` instead of `FOO.set_a_struct(BAR);`")]]
+  [[deprecated("Use `FOO.a_struct() = BAR` instead of `FOO.set_a_struct(BAR)`")]]
   ::some::valid::ns::MyStruct& set_a_struct(T_AnException_a_struct_struct_setter&& a_struct_) {
     a_struct_ref() = std::forward<T_AnException_a_struct_struct_setter>(a_struct_);
     return __fbthrift_field_a_struct;
   }
 
   /** Glean { "field": "a_set_struct" } */
-  [[deprecated("Use `FOO.a_set_struct().value();` instead of `FOO.get_a_set_struct();`")]]
+  [[deprecated("Use `FOO.a_set_struct().value()` instead of `FOO.get_a_set_struct()`")]]
   const ::std::set<::some::valid::ns::MyStruct>& get_a_set_struct() const&;
 
   /** Glean { "field": "a_set_struct" } */
-  [[deprecated("Use `FOO.a_set_struct().value();` instead of `FOO.get_a_set_struct();`")]]
+  [[deprecated("Use `FOO.a_set_struct().value()` instead of `FOO.get_a_set_struct()`")]]
   ::std::set<::some::valid::ns::MyStruct> get_a_set_struct() &&;
 
   /** Glean { "field": "a_set_struct" } */
   template <typename T_AnException_a_set_struct_struct_setter = ::std::set<::some::valid::ns::MyStruct>>
-  [[deprecated("Use `FOO.a_set_struct() = BAR;` instead of `FOO.set_a_set_struct(BAR);`")]]
+  [[deprecated("Use `FOO.a_set_struct() = BAR` instead of `FOO.set_a_set_struct(BAR)`")]]
   ::std::set<::some::valid::ns::MyStruct>& set_a_set_struct(T_AnException_a_set_struct_struct_setter&& a_set_struct_) {
     a_set_struct_ref() = std::forward<T_AnException_a_set_struct_struct_setter>(a_set_struct_);
     return __fbthrift_field_a_set_struct;
   }
 
   /** Glean { "field": "a_union_list" } */
-  [[deprecated("Use `FOO.a_union_list().value();` instead of `FOO.get_a_union_list();`")]]
+  [[deprecated("Use `FOO.a_union_list().value()` instead of `FOO.get_a_union_list()`")]]
   const ::std::vector<::some::valid::ns::SimpleUnion>& get_a_union_list() const&;
 
   /** Glean { "field": "a_union_list" } */
-  [[deprecated("Use `FOO.a_union_list().value();` instead of `FOO.get_a_union_list();`")]]
+  [[deprecated("Use `FOO.a_union_list().value()` instead of `FOO.get_a_union_list()`")]]
   ::std::vector<::some::valid::ns::SimpleUnion> get_a_union_list() &&;
 
   /** Glean { "field": "a_union_list" } */
   template <typename T_AnException_a_union_list_struct_setter = ::std::vector<::some::valid::ns::SimpleUnion>>
-  [[deprecated("Use `FOO.a_union_list() = BAR;` instead of `FOO.set_a_union_list(BAR);`")]]
+  [[deprecated("Use `FOO.a_union_list() = BAR` instead of `FOO.set_a_union_list(BAR)`")]]
   ::std::vector<::some::valid::ns::SimpleUnion>& set_a_union_list(T_AnException_a_union_list_struct_setter&& a_union_list_) {
     a_union_list_ref() = std::forward<T_AnException_a_union_list_struct_setter>(a_union_list_);
     return __fbthrift_field_a_union_list;
   }
 
   /** Glean { "field": "union_typedef" } */
-  [[deprecated("Use `FOO.union_typedef().value();` instead of `FOO.get_union_typedef();`")]]
+  [[deprecated("Use `FOO.union_typedef().value()` instead of `FOO.get_union_typedef()`")]]
   const ::some::valid::ns::unionTypeDef& get_union_typedef() const&;
 
   /** Glean { "field": "union_typedef" } */
-  [[deprecated("Use `FOO.union_typedef().value();` instead of `FOO.get_union_typedef();`")]]
+  [[deprecated("Use `FOO.union_typedef().value()` instead of `FOO.get_union_typedef()`")]]
   ::some::valid::ns::unionTypeDef get_union_typedef() &&;
 
   /** Glean { "field": "union_typedef" } */
   template <typename T_AnException_union_typedef_struct_setter = ::some::valid::ns::unionTypeDef>
-  [[deprecated("Use `FOO.union_typedef() = BAR;` instead of `FOO.set_union_typedef(BAR);`")]]
+  [[deprecated("Use `FOO.union_typedef() = BAR` instead of `FOO.set_union_typedef(BAR)`")]]
   ::some::valid::ns::unionTypeDef& set_union_typedef(T_AnException_union_typedef_struct_setter&& union_typedef_) {
     union_typedef_ref() = std::forward<T_AnException_union_typedef_struct_setter>(union_typedef_);
     return __fbthrift_field_union_typedef;
   }
 
   /** Glean { "field": "a_union_typedef_list" } */
-  [[deprecated("Use `FOO.a_union_typedef_list().value();` instead of `FOO.get_a_union_typedef_list();`")]]
+  [[deprecated("Use `FOO.a_union_typedef_list().value()` instead of `FOO.get_a_union_typedef_list()`")]]
   const ::std::vector<::some::valid::ns::unionTypeDef>& get_a_union_typedef_list() const&;
 
   /** Glean { "field": "a_union_typedef_list" } */
-  [[deprecated("Use `FOO.a_union_typedef_list().value();` instead of `FOO.get_a_union_typedef_list();`")]]
+  [[deprecated("Use `FOO.a_union_typedef_list().value()` instead of `FOO.get_a_union_typedef_list()`")]]
   ::std::vector<::some::valid::ns::unionTypeDef> get_a_union_typedef_list() &&;
 
   /** Glean { "field": "a_union_typedef_list" } */
   template <typename T_AnException_a_union_typedef_list_struct_setter = ::std::vector<::some::valid::ns::unionTypeDef>>
-  [[deprecated("Use `FOO.a_union_typedef_list() = BAR;` instead of `FOO.set_a_union_typedef_list(BAR);`")]]
+  [[deprecated("Use `FOO.a_union_typedef_list() = BAR` instead of `FOO.set_a_union_typedef_list(BAR)`")]]
   ::std::vector<::some::valid::ns::unionTypeDef>& set_a_union_typedef_list(T_AnException_a_union_typedef_list_struct_setter&& a_union_typedef_list_) {
     a_union_typedef_list_ref() = std::forward<T_AnException_a_union_typedef_list_struct_setter>(a_union_typedef_list_);
     return __fbthrift_field_a_union_typedef_list;
@@ -6569,36 +6569,36 @@ class FOLLY_EXPORT AnotherException : public virtual apache::thrift::TException 
   }
 
   /** Glean { "field": "code" } */
-  [[deprecated("Use `FOO.code().value();` instead of `FOO.get_code();`")]]
+  [[deprecated("Use `FOO.code().value()` instead of `FOO.get_code()`")]]
   ::std::int32_t get_code() const;
 
   /** Glean { "field": "code" } */
-  [[deprecated("Use `FOO.code() = BAR;` instead of `FOO.set_code(BAR);`")]]
+  [[deprecated("Use `FOO.code() = BAR` instead of `FOO.set_code(BAR)`")]]
   ::std::int32_t& set_code(::std::int32_t code_);
 
   /** Glean { "field": "req_code" } */
-  [[deprecated("Use `FOO.req_code().value();` instead of `FOO.get_req_code();`")]]
+  [[deprecated("Use `FOO.req_code().value()` instead of `FOO.get_req_code()`")]]
   ::std::int32_t get_req_code() const;
 
   /** Glean { "field": "req_code" } */
-  [[deprecated("Use `FOO.req_code() = BAR;` instead of `FOO.set_req_code(BAR);`")]]
+  [[deprecated("Use `FOO.req_code() = BAR` instead of `FOO.set_req_code(BAR)`")]]
   ::std::int32_t& set_req_code(::std::int32_t req_code_);
 
   /** Glean { "field": "message" } */
-  [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
+  [[deprecated("Use `FOO.message().value()` instead of `FOO.get_message()`")]]
   const ::std::string& get_message() const& {
     return __fbthrift_field_message;
   }
 
   /** Glean { "field": "message" } */
-  [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
+  [[deprecated("Use `FOO.message().value()` instead of `FOO.get_message()`")]]
   ::std::string get_message() && {
     return static_cast<::std::string&&>(__fbthrift_field_message);
   }
 
   /** Glean { "field": "message" } */
   template <typename T_AnotherException_message_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.message() = BAR;` instead of `FOO.set_message(BAR);`")]]
+  [[deprecated("Use `FOO.message() = BAR` instead of `FOO.set_message(BAR)`")]]
   ::std::string& set_message(T_AnotherException_message_struct_setter&& message_) {
     message_ref() = std::forward<T_AnotherException_message_struct_setter>(message_);
     return __fbthrift_field_message;
@@ -7997,678 +7997,678 @@ class containerStruct final  {
   }
 
   /** Glean { "field": "fieldA" } */
-  [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
+  [[deprecated("Use `FOO.fieldA().value()` instead of `FOO.get_fieldA()`")]]
   bool get_fieldA() const;
 
   /** Glean { "field": "fieldA" } */
-  [[deprecated("Use `FOO.fieldA() = BAR;` instead of `FOO.set_fieldA(BAR);`")]]
+  [[deprecated("Use `FOO.fieldA() = BAR` instead of `FOO.set_fieldA(BAR)`")]]
   bool& set_fieldA(bool fieldA_);
 
   /** Glean { "field": "req_fieldA" } */
-  [[deprecated("Use `FOO.req_fieldA().value();` instead of `FOO.get_req_fieldA();`")]]
+  [[deprecated("Use `FOO.req_fieldA().value()` instead of `FOO.get_req_fieldA()`")]]
   bool get_req_fieldA() const;
 
   /** Glean { "field": "req_fieldA" } */
-  [[deprecated("Use `FOO.req_fieldA() = BAR;` instead of `FOO.set_req_fieldA(BAR);`")]]
+  [[deprecated("Use `FOO.req_fieldA() = BAR` instead of `FOO.set_req_fieldA(BAR)`")]]
   bool& set_req_fieldA(bool req_fieldA_);
 
   /** Glean { "field": "opt_fieldA" } */
-  [[deprecated("Use `FOO.opt_fieldA().value();` instead of `FOO.get_opt_fieldA();`")]]
+  [[deprecated("Use `FOO.opt_fieldA().value()` instead of `FOO.get_opt_fieldA()`")]]
   const bool* get_opt_fieldA() const&;
 
   /** Glean { "field": "opt_fieldA" } */
-  [[deprecated("Use `FOO.opt_fieldA().value();` instead of `FOO.get_opt_fieldA();`")]]
+  [[deprecated("Use `FOO.opt_fieldA().value()` instead of `FOO.get_opt_fieldA()`")]]
   bool* get_opt_fieldA() &;
 
   bool* get_opt_fieldA() && = delete;
 
   /** Glean { "field": "opt_fieldA" } */
-  [[deprecated("Use `FOO.opt_fieldA() = BAR;` instead of `FOO.set_opt_fieldA(BAR);`")]]
+  [[deprecated("Use `FOO.opt_fieldA() = BAR` instead of `FOO.set_opt_fieldA(BAR)`")]]
   bool& set_opt_fieldA(bool opt_fieldA_);
 
   /** Glean { "field": "fieldB" } */
-  [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
+  [[deprecated("Use `FOO.fieldB().value()` instead of `FOO.get_fieldB()`")]]
   const ::std::map<::std::string, bool>& get_fieldB() const&;
 
   /** Glean { "field": "fieldB" } */
-  [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
+  [[deprecated("Use `FOO.fieldB().value()` instead of `FOO.get_fieldB()`")]]
   ::std::map<::std::string, bool> get_fieldB() &&;
 
   /** Glean { "field": "fieldB" } */
   template <typename T_containerStruct_fieldB_struct_setter = ::std::map<::std::string, bool>>
-  [[deprecated("Use `FOO.fieldB() = BAR;` instead of `FOO.set_fieldB(BAR);`")]]
+  [[deprecated("Use `FOO.fieldB() = BAR` instead of `FOO.set_fieldB(BAR)`")]]
   ::std::map<::std::string, bool>& set_fieldB(T_containerStruct_fieldB_struct_setter&& fieldB_) {
     fieldB_ref() = std::forward<T_containerStruct_fieldB_struct_setter>(fieldB_);
     return fieldB;
   }
 
   /** Glean { "field": "req_fieldB" } */
-  [[deprecated("Use `FOO.req_fieldB().value();` instead of `FOO.get_req_fieldB();`")]]
+  [[deprecated("Use `FOO.req_fieldB().value()` instead of `FOO.get_req_fieldB()`")]]
   const ::std::map<::std::string, bool>& get_req_fieldB() const&;
 
   /** Glean { "field": "req_fieldB" } */
-  [[deprecated("Use `FOO.req_fieldB().value();` instead of `FOO.get_req_fieldB();`")]]
+  [[deprecated("Use `FOO.req_fieldB().value()` instead of `FOO.get_req_fieldB()`")]]
   ::std::map<::std::string, bool> get_req_fieldB() &&;
 
   /** Glean { "field": "req_fieldB" } */
   template <typename T_containerStruct_req_fieldB_struct_setter = ::std::map<::std::string, bool>>
-  [[deprecated("Use `FOO.req_fieldB() = BAR;` instead of `FOO.set_req_fieldB(BAR);`")]]
+  [[deprecated("Use `FOO.req_fieldB() = BAR` instead of `FOO.set_req_fieldB(BAR)`")]]
   ::std::map<::std::string, bool>& set_req_fieldB(T_containerStruct_req_fieldB_struct_setter&& req_fieldB_) {
     req_fieldB_ref() = std::forward<T_containerStruct_req_fieldB_struct_setter>(req_fieldB_);
     return req_fieldB;
   }
 
   /** Glean { "field": "opt_fieldB" } */
-  [[deprecated("Use `FOO.opt_fieldB().value();` instead of `FOO.get_opt_fieldB();`")]]
+  [[deprecated("Use `FOO.opt_fieldB().value()` instead of `FOO.get_opt_fieldB()`")]]
   const ::std::map<::std::string, bool>* get_opt_fieldB() const&;
 
   /** Glean { "field": "opt_fieldB" } */
-  [[deprecated("Use `FOO.opt_fieldB().value();` instead of `FOO.get_opt_fieldB();`")]]
+  [[deprecated("Use `FOO.opt_fieldB().value()` instead of `FOO.get_opt_fieldB()`")]]
   ::std::map<::std::string, bool>* get_opt_fieldB() &;
 
   ::std::map<::std::string, bool>* get_opt_fieldB() && = delete;
 
   /** Glean { "field": "opt_fieldB" } */
   template <typename T_containerStruct_opt_fieldB_struct_setter = ::std::map<::std::string, bool>>
-  [[deprecated("Use `FOO.opt_fieldB() = BAR;` instead of `FOO.set_opt_fieldB(BAR);`")]]
+  [[deprecated("Use `FOO.opt_fieldB() = BAR` instead of `FOO.set_opt_fieldB(BAR)`")]]
   ::std::map<::std::string, bool>& set_opt_fieldB(T_containerStruct_opt_fieldB_struct_setter&& opt_fieldB_) {
     opt_fieldB_ref() = std::forward<T_containerStruct_opt_fieldB_struct_setter>(opt_fieldB_);
     return opt_fieldB;
   }
 
   /** Glean { "field": "fieldC" } */
-  [[deprecated("Use `FOO.fieldC().value();` instead of `FOO.get_fieldC();`")]]
+  [[deprecated("Use `FOO.fieldC().value()` instead of `FOO.get_fieldC()`")]]
   const ::std::set<::std::int32_t>& get_fieldC() const&;
 
   /** Glean { "field": "fieldC" } */
-  [[deprecated("Use `FOO.fieldC().value();` instead of `FOO.get_fieldC();`")]]
+  [[deprecated("Use `FOO.fieldC().value()` instead of `FOO.get_fieldC()`")]]
   ::std::set<::std::int32_t> get_fieldC() &&;
 
   /** Glean { "field": "fieldC" } */
   template <typename T_containerStruct_fieldC_struct_setter = ::std::set<::std::int32_t>>
-  [[deprecated("Use `FOO.fieldC() = BAR;` instead of `FOO.set_fieldC(BAR);`")]]
+  [[deprecated("Use `FOO.fieldC() = BAR` instead of `FOO.set_fieldC(BAR)`")]]
   ::std::set<::std::int32_t>& set_fieldC(T_containerStruct_fieldC_struct_setter&& fieldC_) {
     fieldC_ref() = std::forward<T_containerStruct_fieldC_struct_setter>(fieldC_);
     return fieldC;
   }
 
   /** Glean { "field": "req_fieldC" } */
-  [[deprecated("Use `FOO.req_fieldC().value();` instead of `FOO.get_req_fieldC();`")]]
+  [[deprecated("Use `FOO.req_fieldC().value()` instead of `FOO.get_req_fieldC()`")]]
   const ::std::set<::std::int32_t>& get_req_fieldC() const&;
 
   /** Glean { "field": "req_fieldC" } */
-  [[deprecated("Use `FOO.req_fieldC().value();` instead of `FOO.get_req_fieldC();`")]]
+  [[deprecated("Use `FOO.req_fieldC().value()` instead of `FOO.get_req_fieldC()`")]]
   ::std::set<::std::int32_t> get_req_fieldC() &&;
 
   /** Glean { "field": "req_fieldC" } */
   template <typename T_containerStruct_req_fieldC_struct_setter = ::std::set<::std::int32_t>>
-  [[deprecated("Use `FOO.req_fieldC() = BAR;` instead of `FOO.set_req_fieldC(BAR);`")]]
+  [[deprecated("Use `FOO.req_fieldC() = BAR` instead of `FOO.set_req_fieldC(BAR)`")]]
   ::std::set<::std::int32_t>& set_req_fieldC(T_containerStruct_req_fieldC_struct_setter&& req_fieldC_) {
     req_fieldC_ref() = std::forward<T_containerStruct_req_fieldC_struct_setter>(req_fieldC_);
     return req_fieldC;
   }
 
   /** Glean { "field": "opt_fieldC" } */
-  [[deprecated("Use `FOO.opt_fieldC().value();` instead of `FOO.get_opt_fieldC();`")]]
+  [[deprecated("Use `FOO.opt_fieldC().value()` instead of `FOO.get_opt_fieldC()`")]]
   const ::std::set<::std::int32_t>* get_opt_fieldC() const&;
 
   /** Glean { "field": "opt_fieldC" } */
-  [[deprecated("Use `FOO.opt_fieldC().value();` instead of `FOO.get_opt_fieldC();`")]]
+  [[deprecated("Use `FOO.opt_fieldC().value()` instead of `FOO.get_opt_fieldC()`")]]
   ::std::set<::std::int32_t>* get_opt_fieldC() &;
 
   ::std::set<::std::int32_t>* get_opt_fieldC() && = delete;
 
   /** Glean { "field": "opt_fieldC" } */
   template <typename T_containerStruct_opt_fieldC_struct_setter = ::std::set<::std::int32_t>>
-  [[deprecated("Use `FOO.opt_fieldC() = BAR;` instead of `FOO.set_opt_fieldC(BAR);`")]]
+  [[deprecated("Use `FOO.opt_fieldC() = BAR` instead of `FOO.set_opt_fieldC(BAR)`")]]
   ::std::set<::std::int32_t>& set_opt_fieldC(T_containerStruct_opt_fieldC_struct_setter&& opt_fieldC_) {
     opt_fieldC_ref() = std::forward<T_containerStruct_opt_fieldC_struct_setter>(opt_fieldC_);
     return opt_fieldC;
   }
 
   /** Glean { "field": "fieldD" } */
-  [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
+  [[deprecated("Use `FOO.fieldD().value()` instead of `FOO.get_fieldD()`")]]
   const ::std::string& get_fieldD() const& {
     return fieldD;
   }
 
   /** Glean { "field": "fieldD" } */
-  [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
+  [[deprecated("Use `FOO.fieldD().value()` instead of `FOO.get_fieldD()`")]]
   ::std::string get_fieldD() && {
     return static_cast<::std::string&&>(fieldD);
   }
 
   /** Glean { "field": "fieldD" } */
   template <typename T_containerStruct_fieldD_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.fieldD() = BAR;` instead of `FOO.set_fieldD(BAR);`")]]
+  [[deprecated("Use `FOO.fieldD() = BAR` instead of `FOO.set_fieldD(BAR)`")]]
   ::std::string& set_fieldD(T_containerStruct_fieldD_struct_setter&& fieldD_) {
     fieldD_ref() = std::forward<T_containerStruct_fieldD_struct_setter>(fieldD_);
     return fieldD;
   }
 
   /** Glean { "field": "fieldE" } */
-  [[deprecated("Use `FOO.fieldE().value();` instead of `FOO.get_fieldE();`")]]
+  [[deprecated("Use `FOO.fieldE().value()` instead of `FOO.get_fieldE()`")]]
   const ::std::string& get_fieldE() const& {
     return fieldE;
   }
 
   /** Glean { "field": "fieldE" } */
-  [[deprecated("Use `FOO.fieldE().value();` instead of `FOO.get_fieldE();`")]]
+  [[deprecated("Use `FOO.fieldE().value()` instead of `FOO.get_fieldE()`")]]
   ::std::string get_fieldE() && {
     return static_cast<::std::string&&>(fieldE);
   }
 
   /** Glean { "field": "fieldE" } */
   template <typename T_containerStruct_fieldE_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.fieldE() = BAR;` instead of `FOO.set_fieldE(BAR);`")]]
+  [[deprecated("Use `FOO.fieldE() = BAR` instead of `FOO.set_fieldE(BAR)`")]]
   ::std::string& set_fieldE(T_containerStruct_fieldE_struct_setter&& fieldE_) {
     fieldE_ref() = std::forward<T_containerStruct_fieldE_struct_setter>(fieldE_);
     return fieldE;
   }
 
   /** Glean { "field": "req_fieldE" } */
-  [[deprecated("Use `FOO.req_fieldE().value();` instead of `FOO.get_req_fieldE();`")]]
+  [[deprecated("Use `FOO.req_fieldE().value()` instead of `FOO.get_req_fieldE()`")]]
   const ::std::string& get_req_fieldE() const& {
     return req_fieldE;
   }
 
   /** Glean { "field": "req_fieldE" } */
-  [[deprecated("Use `FOO.req_fieldE().value();` instead of `FOO.get_req_fieldE();`")]]
+  [[deprecated("Use `FOO.req_fieldE().value()` instead of `FOO.get_req_fieldE()`")]]
   ::std::string get_req_fieldE() && {
     return static_cast<::std::string&&>(req_fieldE);
   }
 
   /** Glean { "field": "req_fieldE" } */
   template <typename T_containerStruct_req_fieldE_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.req_fieldE() = BAR;` instead of `FOO.set_req_fieldE(BAR);`")]]
+  [[deprecated("Use `FOO.req_fieldE() = BAR` instead of `FOO.set_req_fieldE(BAR)`")]]
   ::std::string& set_req_fieldE(T_containerStruct_req_fieldE_struct_setter&& req_fieldE_) {
     req_fieldE_ref() = std::forward<T_containerStruct_req_fieldE_struct_setter>(req_fieldE_);
     return req_fieldE;
   }
 
   /** Glean { "field": "opt_fieldE" } */
-  [[deprecated("Use `FOO.opt_fieldE().value();` instead of `FOO.get_opt_fieldE();`")]]
+  [[deprecated("Use `FOO.opt_fieldE().value()` instead of `FOO.get_opt_fieldE()`")]]
   const ::std::string* get_opt_fieldE() const&;
 
   /** Glean { "field": "opt_fieldE" } */
-  [[deprecated("Use `FOO.opt_fieldE().value();` instead of `FOO.get_opt_fieldE();`")]]
+  [[deprecated("Use `FOO.opt_fieldE().value()` instead of `FOO.get_opt_fieldE()`")]]
   ::std::string* get_opt_fieldE() &;
 
   ::std::string* get_opt_fieldE() && = delete;
 
   /** Glean { "field": "opt_fieldE" } */
   template <typename T_containerStruct_opt_fieldE_struct_setter = ::std::string>
-  [[deprecated("Use `FOO.opt_fieldE() = BAR;` instead of `FOO.set_opt_fieldE(BAR);`")]]
+  [[deprecated("Use `FOO.opt_fieldE() = BAR` instead of `FOO.set_opt_fieldE(BAR)`")]]
   ::std::string& set_opt_fieldE(T_containerStruct_opt_fieldE_struct_setter&& opt_fieldE_) {
     opt_fieldE_ref() = std::forward<T_containerStruct_opt_fieldE_struct_setter>(opt_fieldE_);
     return opt_fieldE;
   }
 
   /** Glean { "field": "fieldF" } */
-  [[deprecated("Use `FOO.fieldF().value();` instead of `FOO.get_fieldF();`")]]
+  [[deprecated("Use `FOO.fieldF().value()` instead of `FOO.get_fieldF()`")]]
   const ::std::vector<::std::vector<::std::int32_t>>& get_fieldF() const&;
 
   /** Glean { "field": "fieldF" } */
-  [[deprecated("Use `FOO.fieldF().value();` instead of `FOO.get_fieldF();`")]]
+  [[deprecated("Use `FOO.fieldF().value()` instead of `FOO.get_fieldF()`")]]
   ::std::vector<::std::vector<::std::int32_t>> get_fieldF() &&;
 
   /** Glean { "field": "fieldF" } */
   template <typename T_containerStruct_fieldF_struct_setter = ::std::vector<::std::vector<::std::int32_t>>>
-  [[deprecated("Use `FOO.fieldF() = BAR;` instead of `FOO.set_fieldF(BAR);`")]]
+  [[deprecated("Use `FOO.fieldF() = BAR` instead of `FOO.set_fieldF(BAR)`")]]
   ::std::vector<::std::vector<::std::int32_t>>& set_fieldF(T_containerStruct_fieldF_struct_setter&& fieldF_) {
     fieldF_ref() = std::forward<T_containerStruct_fieldF_struct_setter>(fieldF_);
     return fieldF;
   }
 
   /** Glean { "field": "fieldG" } */
-  [[deprecated("Use `FOO.fieldG().value();` instead of `FOO.get_fieldG();`")]]
+  [[deprecated("Use `FOO.fieldG().value()` instead of `FOO.get_fieldG()`")]]
   const ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>& get_fieldG() const&;
 
   /** Glean { "field": "fieldG" } */
-  [[deprecated("Use `FOO.fieldG().value();` instead of `FOO.get_fieldG();`")]]
+  [[deprecated("Use `FOO.fieldG().value()` instead of `FOO.get_fieldG()`")]]
   ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>> get_fieldG() &&;
 
   /** Glean { "field": "fieldG" } */
   template <typename T_containerStruct_fieldG_struct_setter = ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>>
-  [[deprecated("Use `FOO.fieldG() = BAR;` instead of `FOO.set_fieldG(BAR);`")]]
+  [[deprecated("Use `FOO.fieldG() = BAR` instead of `FOO.set_fieldG(BAR)`")]]
   ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>& set_fieldG(T_containerStruct_fieldG_struct_setter&& fieldG_) {
     fieldG_ref() = std::forward<T_containerStruct_fieldG_struct_setter>(fieldG_);
     return fieldG;
   }
 
   /** Glean { "field": "fieldH" } */
-  [[deprecated("Use `FOO.fieldH().value();` instead of `FOO.get_fieldH();`")]]
+  [[deprecated("Use `FOO.fieldH().value()` instead of `FOO.get_fieldH()`")]]
   const ::std::vector<::std::set<::std::int32_t>>& get_fieldH() const&;
 
   /** Glean { "field": "fieldH" } */
-  [[deprecated("Use `FOO.fieldH().value();` instead of `FOO.get_fieldH();`")]]
+  [[deprecated("Use `FOO.fieldH().value()` instead of `FOO.get_fieldH()`")]]
   ::std::vector<::std::set<::std::int32_t>> get_fieldH() &&;
 
   /** Glean { "field": "fieldH" } */
   template <typename T_containerStruct_fieldH_struct_setter = ::std::vector<::std::set<::std::int32_t>>>
-  [[deprecated("Use `FOO.fieldH() = BAR;` instead of `FOO.set_fieldH(BAR);`")]]
+  [[deprecated("Use `FOO.fieldH() = BAR` instead of `FOO.set_fieldH(BAR)`")]]
   ::std::vector<::std::set<::std::int32_t>>& set_fieldH(T_containerStruct_fieldH_struct_setter&& fieldH_) {
     fieldH_ref() = std::forward<T_containerStruct_fieldH_struct_setter>(fieldH_);
     return fieldH;
   }
 
   /** Glean { "field": "fieldI" } */
-  [[deprecated("Use `FOO.fieldI().value();` instead of `FOO.get_fieldI();`")]]
+  [[deprecated("Use `FOO.fieldI().value()` instead of `FOO.get_fieldI()`")]]
   bool get_fieldI() const;
 
   /** Glean { "field": "fieldI" } */
-  [[deprecated("Use `FOO.fieldI() = BAR;` instead of `FOO.set_fieldI(BAR);`")]]
+  [[deprecated("Use `FOO.fieldI() = BAR` instead of `FOO.set_fieldI(BAR)`")]]
   bool& set_fieldI(bool fieldI_);
 
   /** Glean { "field": "fieldJ" } */
-  [[deprecated("Use `FOO.fieldJ().value();` instead of `FOO.get_fieldJ();`")]]
+  [[deprecated("Use `FOO.fieldJ().value()` instead of `FOO.get_fieldJ()`")]]
   const ::std::map<::std::string, ::std::vector<::std::int32_t>>& get_fieldJ() const&;
 
   /** Glean { "field": "fieldJ" } */
-  [[deprecated("Use `FOO.fieldJ().value();` instead of `FOO.get_fieldJ();`")]]
+  [[deprecated("Use `FOO.fieldJ().value()` instead of `FOO.get_fieldJ()`")]]
   ::std::map<::std::string, ::std::vector<::std::int32_t>> get_fieldJ() &&;
 
   /** Glean { "field": "fieldJ" } */
   template <typename T_containerStruct_fieldJ_struct_setter = ::std::map<::std::string, ::std::vector<::std::int32_t>>>
-  [[deprecated("Use `FOO.fieldJ() = BAR;` instead of `FOO.set_fieldJ(BAR);`")]]
+  [[deprecated("Use `FOO.fieldJ() = BAR` instead of `FOO.set_fieldJ(BAR)`")]]
   ::std::map<::std::string, ::std::vector<::std::int32_t>>& set_fieldJ(T_containerStruct_fieldJ_struct_setter&& fieldJ_) {
     fieldJ_ref() = std::forward<T_containerStruct_fieldJ_struct_setter>(fieldJ_);
     return fieldJ;
   }
 
   /** Glean { "field": "fieldK" } */
-  [[deprecated("Use `FOO.fieldK().value();` instead of `FOO.get_fieldK();`")]]
+  [[deprecated("Use `FOO.fieldK().value()` instead of `FOO.get_fieldK()`")]]
   const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& get_fieldK() const&;
 
   /** Glean { "field": "fieldK" } */
-  [[deprecated("Use `FOO.fieldK().value();` instead of `FOO.get_fieldK();`")]]
+  [[deprecated("Use `FOO.fieldK().value()` instead of `FOO.get_fieldK()`")]]
   ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>> get_fieldK() &&;
 
   /** Glean { "field": "fieldK" } */
   template <typename T_containerStruct_fieldK_struct_setter = ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>>
-  [[deprecated("Use `FOO.fieldK() = BAR;` instead of `FOO.set_fieldK(BAR);`")]]
+  [[deprecated("Use `FOO.fieldK() = BAR` instead of `FOO.set_fieldK(BAR)`")]]
   ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& set_fieldK(T_containerStruct_fieldK_struct_setter&& fieldK_) {
     fieldK_ref() = std::forward<T_containerStruct_fieldK_struct_setter>(fieldK_);
     return fieldK;
   }
 
   /** Glean { "field": "fieldL" } */
-  [[deprecated("Use `FOO.fieldL().value();` instead of `FOO.get_fieldL();`")]]
+  [[deprecated("Use `FOO.fieldL().value()` instead of `FOO.get_fieldL()`")]]
   const ::std::set<::std::set<::std::set<bool>>>& get_fieldL() const&;
 
   /** Glean { "field": "fieldL" } */
-  [[deprecated("Use `FOO.fieldL().value();` instead of `FOO.get_fieldL();`")]]
+  [[deprecated("Use `FOO.fieldL().value()` instead of `FOO.get_fieldL()`")]]
   ::std::set<::std::set<::std::set<bool>>> get_fieldL() &&;
 
   /** Glean { "field": "fieldL" } */
   template <typename T_containerStruct_fieldL_struct_setter = ::std::set<::std::set<::std::set<bool>>>>
-  [[deprecated("Use `FOO.fieldL() = BAR;` instead of `FOO.set_fieldL(BAR);`")]]
+  [[deprecated("Use `FOO.fieldL() = BAR` instead of `FOO.set_fieldL(BAR)`")]]
   ::std::set<::std::set<::std::set<bool>>>& set_fieldL(T_containerStruct_fieldL_struct_setter&& fieldL_) {
     fieldL_ref() = std::forward<T_containerStruct_fieldL_struct_setter>(fieldL_);
     return fieldL;
   }
 
   /** Glean { "field": "fieldM" } */
-  [[deprecated("Use `FOO.fieldM().value();` instead of `FOO.get_fieldM();`")]]
+  [[deprecated("Use `FOO.fieldM().value()` instead of `FOO.get_fieldM()`")]]
   const ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& get_fieldM() const&;
 
   /** Glean { "field": "fieldM" } */
-  [[deprecated("Use `FOO.fieldM().value();` instead of `FOO.get_fieldM();`")]]
+  [[deprecated("Use `FOO.fieldM().value()` instead of `FOO.get_fieldM()`")]]
   ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>> get_fieldM() &&;
 
   /** Glean { "field": "fieldM" } */
   template <typename T_containerStruct_fieldM_struct_setter = ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>>
-  [[deprecated("Use `FOO.fieldM() = BAR;` instead of `FOO.set_fieldM(BAR);`")]]
+  [[deprecated("Use `FOO.fieldM() = BAR` instead of `FOO.set_fieldM(BAR)`")]]
   ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& set_fieldM(T_containerStruct_fieldM_struct_setter&& fieldM_) {
     fieldM_ref() = std::forward<T_containerStruct_fieldM_struct_setter>(fieldM_);
     return fieldM;
   }
 
   /** Glean { "field": "fieldN" } */
-  [[deprecated("Use `FOO.fieldN().value();` instead of `FOO.get_fieldN();`")]]
+  [[deprecated("Use `FOO.fieldN().value()` instead of `FOO.get_fieldN()`")]]
   ::some::valid::ns::simpleTypeDef get_fieldN() const;
 
   /** Glean { "field": "fieldN" } */
-  [[deprecated("Use `FOO.fieldN() = BAR;` instead of `FOO.set_fieldN(BAR);`")]]
+  [[deprecated("Use `FOO.fieldN() = BAR` instead of `FOO.set_fieldN(BAR)`")]]
   ::some::valid::ns::simpleTypeDef& set_fieldN(::some::valid::ns::simpleTypeDef fieldN_);
 
   /** Glean { "field": "fieldO" } */
-  [[deprecated("Use `FOO.fieldO().value();` instead of `FOO.get_fieldO();`")]]
+  [[deprecated("Use `FOO.fieldO().value()` instead of `FOO.get_fieldO()`")]]
   const ::some::valid::ns::complexStructTypeDef& get_fieldO() const&;
 
   /** Glean { "field": "fieldO" } */
-  [[deprecated("Use `FOO.fieldO().value();` instead of `FOO.get_fieldO();`")]]
+  [[deprecated("Use `FOO.fieldO().value()` instead of `FOO.get_fieldO()`")]]
   ::some::valid::ns::complexStructTypeDef get_fieldO() &&;
 
   /** Glean { "field": "fieldO" } */
   template <typename T_containerStruct_fieldO_struct_setter = ::some::valid::ns::complexStructTypeDef>
-  [[deprecated("Use `FOO.fieldO() = BAR;` instead of `FOO.set_fieldO(BAR);`")]]
+  [[deprecated("Use `FOO.fieldO() = BAR` instead of `FOO.set_fieldO(BAR)`")]]
   ::some::valid::ns::complexStructTypeDef& set_fieldO(T_containerStruct_fieldO_struct_setter&& fieldO_) {
     fieldO_ref() = std::forward<T_containerStruct_fieldO_struct_setter>(fieldO_);
     return fieldO;
   }
 
   /** Glean { "field": "fieldP" } */
-  [[deprecated("Use `FOO.fieldP().value();` instead of `FOO.get_fieldP();`")]]
+  [[deprecated("Use `FOO.fieldP().value()` instead of `FOO.get_fieldP()`")]]
   const ::std::vector<::some::valid::ns::mostComplexTypeDef>& get_fieldP() const&;
 
   /** Glean { "field": "fieldP" } */
-  [[deprecated("Use `FOO.fieldP().value();` instead of `FOO.get_fieldP();`")]]
+  [[deprecated("Use `FOO.fieldP().value()` instead of `FOO.get_fieldP()`")]]
   ::std::vector<::some::valid::ns::mostComplexTypeDef> get_fieldP() &&;
 
   /** Glean { "field": "fieldP" } */
   template <typename T_containerStruct_fieldP_struct_setter = ::std::vector<::some::valid::ns::mostComplexTypeDef>>
-  [[deprecated("Use `FOO.fieldP() = BAR;` instead of `FOO.set_fieldP(BAR);`")]]
+  [[deprecated("Use `FOO.fieldP() = BAR` instead of `FOO.set_fieldP(BAR)`")]]
   ::std::vector<::some::valid::ns::mostComplexTypeDef>& set_fieldP(T_containerStruct_fieldP_struct_setter&& fieldP_) {
     fieldP_ref() = std::forward<T_containerStruct_fieldP_struct_setter>(fieldP_);
     return fieldP;
   }
 
   /** Glean { "field": "fieldQ" } */
-  [[deprecated("Use `FOO.fieldQ().value();` instead of `FOO.get_fieldQ();`")]]
+  [[deprecated("Use `FOO.fieldQ().value()` instead of `FOO.get_fieldQ()`")]]
   ::some::valid::ns::MyEnumA get_fieldQ() const;
 
   /** Glean { "field": "fieldQ" } */
-  [[deprecated("Use `FOO.fieldQ() = BAR;` instead of `FOO.set_fieldQ(BAR);`")]]
+  [[deprecated("Use `FOO.fieldQ() = BAR` instead of `FOO.set_fieldQ(BAR)`")]]
   ::some::valid::ns::MyEnumA& set_fieldQ(::some::valid::ns::MyEnumA fieldQ_);
 
   /** Glean { "field": "fieldR" } */
-  [[deprecated("Use `FOO.fieldR().value();` instead of `FOO.get_fieldR();`")]]
+  [[deprecated("Use `FOO.fieldR().value()` instead of `FOO.get_fieldR()`")]]
   ::some::valid::ns::MyEnumA get_fieldR() const;
 
   /** Glean { "field": "fieldR" } */
-  [[deprecated("Use `FOO.fieldR() = BAR;` instead of `FOO.set_fieldR(BAR);`")]]
+  [[deprecated("Use `FOO.fieldR() = BAR` instead of `FOO.set_fieldR(BAR)`")]]
   ::some::valid::ns::MyEnumA& set_fieldR(::some::valid::ns::MyEnumA fieldR_);
 
   /** Glean { "field": "req_fieldR" } */
-  [[deprecated("Use `FOO.req_fieldR().value();` instead of `FOO.get_req_fieldR();`")]]
+  [[deprecated("Use `FOO.req_fieldR().value()` instead of `FOO.get_req_fieldR()`")]]
   ::some::valid::ns::MyEnumA get_req_fieldR() const;
 
   /** Glean { "field": "req_fieldR" } */
-  [[deprecated("Use `FOO.req_fieldR() = BAR;` instead of `FOO.set_req_fieldR(BAR);`")]]
+  [[deprecated("Use `FOO.req_fieldR() = BAR` instead of `FOO.set_req_fieldR(BAR)`")]]
   ::some::valid::ns::MyEnumA& set_req_fieldR(::some::valid::ns::MyEnumA req_fieldR_);
 
   /** Glean { "field": "opt_fieldR" } */
-  [[deprecated("Use `FOO.opt_fieldR().value();` instead of `FOO.get_opt_fieldR();`")]]
+  [[deprecated("Use `FOO.opt_fieldR().value()` instead of `FOO.get_opt_fieldR()`")]]
   const ::some::valid::ns::MyEnumA* get_opt_fieldR() const&;
 
   /** Glean { "field": "opt_fieldR" } */
-  [[deprecated("Use `FOO.opt_fieldR().value();` instead of `FOO.get_opt_fieldR();`")]]
+  [[deprecated("Use `FOO.opt_fieldR().value()` instead of `FOO.get_opt_fieldR()`")]]
   ::some::valid::ns::MyEnumA* get_opt_fieldR() &;
 
   ::some::valid::ns::MyEnumA* get_opt_fieldR() && = delete;
 
   /** Glean { "field": "opt_fieldR" } */
-  [[deprecated("Use `FOO.opt_fieldR() = BAR;` instead of `FOO.set_opt_fieldR(BAR);`")]]
+  [[deprecated("Use `FOO.opt_fieldR() = BAR` instead of `FOO.set_opt_fieldR(BAR)`")]]
   ::some::valid::ns::MyEnumA& set_opt_fieldR(::some::valid::ns::MyEnumA opt_fieldR_);
 
   /** Glean { "field": "fieldS" } */
-  [[deprecated("Use `FOO.fieldS().value();` instead of `FOO.get_fieldS();`")]]
+  [[deprecated("Use `FOO.fieldS().value()` instead of `FOO.get_fieldS()`")]]
   ::some::valid::ns::MyEnumA get_fieldS() const;
 
   /** Glean { "field": "fieldS" } */
-  [[deprecated("Use `FOO.fieldS() = BAR;` instead of `FOO.set_fieldS(BAR);`")]]
+  [[deprecated("Use `FOO.fieldS() = BAR` instead of `FOO.set_fieldS(BAR)`")]]
   ::some::valid::ns::MyEnumA& set_fieldS(::some::valid::ns::MyEnumA fieldS_);
 
   /** Glean { "field": "fieldT" } */
-  [[deprecated("Use `FOO.fieldT().value();` instead of `FOO.get_fieldT();`")]]
+  [[deprecated("Use `FOO.fieldT().value()` instead of `FOO.get_fieldT()`")]]
   const ::std::vector<::some::valid::ns::MyEnumA>& get_fieldT() const&;
 
   /** Glean { "field": "fieldT" } */
-  [[deprecated("Use `FOO.fieldT().value();` instead of `FOO.get_fieldT();`")]]
+  [[deprecated("Use `FOO.fieldT().value()` instead of `FOO.get_fieldT()`")]]
   ::std::vector<::some::valid::ns::MyEnumA> get_fieldT() &&;
 
   /** Glean { "field": "fieldT" } */
   template <typename T_containerStruct_fieldT_struct_setter = ::std::vector<::some::valid::ns::MyEnumA>>
-  [[deprecated("Use `FOO.fieldT() = BAR;` instead of `FOO.set_fieldT(BAR);`")]]
+  [[deprecated("Use `FOO.fieldT() = BAR` instead of `FOO.set_fieldT(BAR)`")]]
   ::std::vector<::some::valid::ns::MyEnumA>& set_fieldT(T_containerStruct_fieldT_struct_setter&& fieldT_) {
     fieldT_ref() = std::forward<T_containerStruct_fieldT_struct_setter>(fieldT_);
     return fieldT;
   }
 
   /** Glean { "field": "fieldU" } */
-  [[deprecated("Use `FOO.fieldU().value();` instead of `FOO.get_fieldU();`")]]
+  [[deprecated("Use `FOO.fieldU().value()` instead of `FOO.get_fieldU()`")]]
   const ::std::vector<::some::valid::ns::MyEnumA>& get_fieldU() const&;
 
   /** Glean { "field": "fieldU" } */
-  [[deprecated("Use `FOO.fieldU().value();` instead of `FOO.get_fieldU();`")]]
+  [[deprecated("Use `FOO.fieldU().value()` instead of `FOO.get_fieldU()`")]]
   ::std::vector<::some::valid::ns::MyEnumA> get_fieldU() &&;
 
   /** Glean { "field": "fieldU" } */
   template <typename T_containerStruct_fieldU_struct_setter = ::std::vector<::some::valid::ns::MyEnumA>>
-  [[deprecated("Use `FOO.fieldU() = BAR;` instead of `FOO.set_fieldU(BAR);`")]]
+  [[deprecated("Use `FOO.fieldU() = BAR` instead of `FOO.set_fieldU(BAR)`")]]
   ::std::vector<::some::valid::ns::MyEnumA>& set_fieldU(T_containerStruct_fieldU_struct_setter&& fieldU_) {
     fieldU_ref() = std::forward<T_containerStruct_fieldU_struct_setter>(fieldU_);
     return fieldU;
   }
 
   /** Glean { "field": "fieldV" } */
-  [[deprecated("Use `FOO.fieldV().value();` instead of `FOO.get_fieldV();`")]]
+  [[deprecated("Use `FOO.fieldV().value()` instead of `FOO.get_fieldV()`")]]
   const ::some::valid::ns::MyStruct& get_fieldV() const&;
 
   /** Glean { "field": "fieldV" } */
-  [[deprecated("Use `FOO.fieldV().value();` instead of `FOO.get_fieldV();`")]]
+  [[deprecated("Use `FOO.fieldV().value()` instead of `FOO.get_fieldV()`")]]
   ::some::valid::ns::MyStruct get_fieldV() &&;
 
   /** Glean { "field": "fieldV" } */
   template <typename T_containerStruct_fieldV_struct_setter = ::some::valid::ns::MyStruct>
-  [[deprecated("Use `FOO.fieldV() = BAR;` instead of `FOO.set_fieldV(BAR);`")]]
+  [[deprecated("Use `FOO.fieldV() = BAR` instead of `FOO.set_fieldV(BAR)`")]]
   ::some::valid::ns::MyStruct& set_fieldV(T_containerStruct_fieldV_struct_setter&& fieldV_) {
     fieldV_ref() = std::forward<T_containerStruct_fieldV_struct_setter>(fieldV_);
     return fieldV;
   }
 
   /** Glean { "field": "req_fieldV" } */
-  [[deprecated("Use `FOO.req_fieldV().value();` instead of `FOO.get_req_fieldV();`")]]
+  [[deprecated("Use `FOO.req_fieldV().value()` instead of `FOO.get_req_fieldV()`")]]
   const ::some::valid::ns::MyStruct& get_req_fieldV() const&;
 
   /** Glean { "field": "req_fieldV" } */
-  [[deprecated("Use `FOO.req_fieldV().value();` instead of `FOO.get_req_fieldV();`")]]
+  [[deprecated("Use `FOO.req_fieldV().value()` instead of `FOO.get_req_fieldV()`")]]
   ::some::valid::ns::MyStruct get_req_fieldV() &&;
 
   /** Glean { "field": "req_fieldV" } */
   template <typename T_containerStruct_req_fieldV_struct_setter = ::some::valid::ns::MyStruct>
-  [[deprecated("Use `FOO.req_fieldV() = BAR;` instead of `FOO.set_req_fieldV(BAR);`")]]
+  [[deprecated("Use `FOO.req_fieldV() = BAR` instead of `FOO.set_req_fieldV(BAR)`")]]
   ::some::valid::ns::MyStruct& set_req_fieldV(T_containerStruct_req_fieldV_struct_setter&& req_fieldV_) {
     req_fieldV_ref() = std::forward<T_containerStruct_req_fieldV_struct_setter>(req_fieldV_);
     return req_fieldV;
   }
 
   /** Glean { "field": "opt_fieldV" } */
-  [[deprecated("Use `FOO.opt_fieldV().value();` instead of `FOO.get_opt_fieldV();`")]]
+  [[deprecated("Use `FOO.opt_fieldV().value()` instead of `FOO.get_opt_fieldV()`")]]
   const ::some::valid::ns::MyStruct* get_opt_fieldV() const&;
 
   /** Glean { "field": "opt_fieldV" } */
-  [[deprecated("Use `FOO.opt_fieldV().value();` instead of `FOO.get_opt_fieldV();`")]]
+  [[deprecated("Use `FOO.opt_fieldV().value()` instead of `FOO.get_opt_fieldV()`")]]
   ::some::valid::ns::MyStruct* get_opt_fieldV() &;
 
   ::some::valid::ns::MyStruct* get_opt_fieldV() && = delete;
 
   /** Glean { "field": "opt_fieldV" } */
   template <typename T_containerStruct_opt_fieldV_struct_setter = ::some::valid::ns::MyStruct>
-  [[deprecated("Use `FOO.opt_fieldV() = BAR;` instead of `FOO.set_opt_fieldV(BAR);`")]]
+  [[deprecated("Use `FOO.opt_fieldV() = BAR` instead of `FOO.set_opt_fieldV(BAR)`")]]
   ::some::valid::ns::MyStruct& set_opt_fieldV(T_containerStruct_opt_fieldV_struct_setter&& opt_fieldV_) {
     opt_fieldV_ref() = std::forward<T_containerStruct_opt_fieldV_struct_setter>(opt_fieldV_);
     return opt_fieldV;
   }
 
   /** Glean { "field": "fieldW" } */
-  [[deprecated("Use `FOO.fieldW().value();` instead of `FOO.get_fieldW();`")]]
+  [[deprecated("Use `FOO.fieldW().value()` instead of `FOO.get_fieldW()`")]]
   const ::std::set<::some::valid::ns::MyStruct>& get_fieldW() const&;
 
   /** Glean { "field": "fieldW" } */
-  [[deprecated("Use `FOO.fieldW().value();` instead of `FOO.get_fieldW();`")]]
+  [[deprecated("Use `FOO.fieldW().value()` instead of `FOO.get_fieldW()`")]]
   ::std::set<::some::valid::ns::MyStruct> get_fieldW() &&;
 
   /** Glean { "field": "fieldW" } */
   template <typename T_containerStruct_fieldW_struct_setter = ::std::set<::some::valid::ns::MyStruct>>
-  [[deprecated("Use `FOO.fieldW() = BAR;` instead of `FOO.set_fieldW(BAR);`")]]
+  [[deprecated("Use `FOO.fieldW() = BAR` instead of `FOO.set_fieldW(BAR)`")]]
   ::std::set<::some::valid::ns::MyStruct>& set_fieldW(T_containerStruct_fieldW_struct_setter&& fieldW_) {
     fieldW_ref() = std::forward<T_containerStruct_fieldW_struct_setter>(fieldW_);
     return fieldW;
   }
 
   /** Glean { "field": "fieldX" } */
-  [[deprecated("Use `FOO.fieldX().value();` instead of `FOO.get_fieldX();`")]]
+  [[deprecated("Use `FOO.fieldX().value()` instead of `FOO.get_fieldX()`")]]
   const ::some::valid::ns::ComplexUnion& get_fieldX() const&;
 
   /** Glean { "field": "fieldX" } */
-  [[deprecated("Use `FOO.fieldX().value();` instead of `FOO.get_fieldX();`")]]
+  [[deprecated("Use `FOO.fieldX().value()` instead of `FOO.get_fieldX()`")]]
   ::some::valid::ns::ComplexUnion get_fieldX() &&;
 
   /** Glean { "field": "fieldX" } */
   template <typename T_containerStruct_fieldX_struct_setter = ::some::valid::ns::ComplexUnion>
-  [[deprecated("Use `FOO.fieldX() = BAR;` instead of `FOO.set_fieldX(BAR);`")]]
+  [[deprecated("Use `FOO.fieldX() = BAR` instead of `FOO.set_fieldX(BAR)`")]]
   ::some::valid::ns::ComplexUnion& set_fieldX(T_containerStruct_fieldX_struct_setter&& fieldX_) {
     fieldX_ref() = std::forward<T_containerStruct_fieldX_struct_setter>(fieldX_);
     return fieldX;
   }
 
   /** Glean { "field": "req_fieldX" } */
-  [[deprecated("Use `FOO.req_fieldX().value();` instead of `FOO.get_req_fieldX();`")]]
+  [[deprecated("Use `FOO.req_fieldX().value()` instead of `FOO.get_req_fieldX()`")]]
   const ::some::valid::ns::ComplexUnion& get_req_fieldX() const&;
 
   /** Glean { "field": "req_fieldX" } */
-  [[deprecated("Use `FOO.req_fieldX().value();` instead of `FOO.get_req_fieldX();`")]]
+  [[deprecated("Use `FOO.req_fieldX().value()` instead of `FOO.get_req_fieldX()`")]]
   ::some::valid::ns::ComplexUnion get_req_fieldX() &&;
 
   /** Glean { "field": "req_fieldX" } */
   template <typename T_containerStruct_req_fieldX_struct_setter = ::some::valid::ns::ComplexUnion>
-  [[deprecated("Use `FOO.req_fieldX() = BAR;` instead of `FOO.set_req_fieldX(BAR);`")]]
+  [[deprecated("Use `FOO.req_fieldX() = BAR` instead of `FOO.set_req_fieldX(BAR)`")]]
   ::some::valid::ns::ComplexUnion& set_req_fieldX(T_containerStruct_req_fieldX_struct_setter&& req_fieldX_) {
     req_fieldX_ref() = std::forward<T_containerStruct_req_fieldX_struct_setter>(req_fieldX_);
     return req_fieldX;
   }
 
   /** Glean { "field": "opt_fieldX" } */
-  [[deprecated("Use `FOO.opt_fieldX().value();` instead of `FOO.get_opt_fieldX();`")]]
+  [[deprecated("Use `FOO.opt_fieldX().value()` instead of `FOO.get_opt_fieldX()`")]]
   const ::some::valid::ns::ComplexUnion* get_opt_fieldX() const&;
 
   /** Glean { "field": "opt_fieldX" } */
-  [[deprecated("Use `FOO.opt_fieldX().value();` instead of `FOO.get_opt_fieldX();`")]]
+  [[deprecated("Use `FOO.opt_fieldX().value()` instead of `FOO.get_opt_fieldX()`")]]
   ::some::valid::ns::ComplexUnion* get_opt_fieldX() &;
 
   ::some::valid::ns::ComplexUnion* get_opt_fieldX() && = delete;
 
   /** Glean { "field": "opt_fieldX" } */
   template <typename T_containerStruct_opt_fieldX_struct_setter = ::some::valid::ns::ComplexUnion>
-  [[deprecated("Use `FOO.opt_fieldX() = BAR;` instead of `FOO.set_opt_fieldX(BAR);`")]]
+  [[deprecated("Use `FOO.opt_fieldX() = BAR` instead of `FOO.set_opt_fieldX(BAR)`")]]
   ::some::valid::ns::ComplexUnion& set_opt_fieldX(T_containerStruct_opt_fieldX_struct_setter&& opt_fieldX_) {
     opt_fieldX_ref() = std::forward<T_containerStruct_opt_fieldX_struct_setter>(opt_fieldX_);
     return opt_fieldX;
   }
 
   /** Glean { "field": "fieldY" } */
-  [[deprecated("Use `FOO.fieldY().value();` instead of `FOO.get_fieldY();`")]]
+  [[deprecated("Use `FOO.fieldY().value()` instead of `FOO.get_fieldY()`")]]
   const ::std::vector<::some::valid::ns::ComplexUnion>& get_fieldY() const&;
 
   /** Glean { "field": "fieldY" } */
-  [[deprecated("Use `FOO.fieldY().value();` instead of `FOO.get_fieldY();`")]]
+  [[deprecated("Use `FOO.fieldY().value()` instead of `FOO.get_fieldY()`")]]
   ::std::vector<::some::valid::ns::ComplexUnion> get_fieldY() &&;
 
   /** Glean { "field": "fieldY" } */
   template <typename T_containerStruct_fieldY_struct_setter = ::std::vector<::some::valid::ns::ComplexUnion>>
-  [[deprecated("Use `FOO.fieldY() = BAR;` instead of `FOO.set_fieldY(BAR);`")]]
+  [[deprecated("Use `FOO.fieldY() = BAR` instead of `FOO.set_fieldY(BAR)`")]]
   ::std::vector<::some::valid::ns::ComplexUnion>& set_fieldY(T_containerStruct_fieldY_struct_setter&& fieldY_) {
     fieldY_ref() = std::forward<T_containerStruct_fieldY_struct_setter>(fieldY_);
     return fieldY;
   }
 
   /** Glean { "field": "fieldZ" } */
-  [[deprecated("Use `FOO.fieldZ().value();` instead of `FOO.get_fieldZ();`")]]
+  [[deprecated("Use `FOO.fieldZ().value()` instead of `FOO.get_fieldZ()`")]]
   const ::some::valid::ns::unionTypeDef& get_fieldZ() const&;
 
   /** Glean { "field": "fieldZ" } */
-  [[deprecated("Use `FOO.fieldZ().value();` instead of `FOO.get_fieldZ();`")]]
+  [[deprecated("Use `FOO.fieldZ().value()` instead of `FOO.get_fieldZ()`")]]
   ::some::valid::ns::unionTypeDef get_fieldZ() &&;
 
   /** Glean { "field": "fieldZ" } */
   template <typename T_containerStruct_fieldZ_struct_setter = ::some::valid::ns::unionTypeDef>
-  [[deprecated("Use `FOO.fieldZ() = BAR;` instead of `FOO.set_fieldZ(BAR);`")]]
+  [[deprecated("Use `FOO.fieldZ() = BAR` instead of `FOO.set_fieldZ(BAR)`")]]
   ::some::valid::ns::unionTypeDef& set_fieldZ(T_containerStruct_fieldZ_struct_setter&& fieldZ_) {
     fieldZ_ref() = std::forward<T_containerStruct_fieldZ_struct_setter>(fieldZ_);
     return fieldZ;
   }
 
   /** Glean { "field": "fieldAA" } */
-  [[deprecated("Use `FOO.fieldAA().value();` instead of `FOO.get_fieldAA();`")]]
+  [[deprecated("Use `FOO.fieldAA().value()` instead of `FOO.get_fieldAA()`")]]
   const ::std::vector<::some::valid::ns::unionTypeDef>& get_fieldAA() const&;
 
   /** Glean { "field": "fieldAA" } */
-  [[deprecated("Use `FOO.fieldAA().value();` instead of `FOO.get_fieldAA();`")]]
+  [[deprecated("Use `FOO.fieldAA().value()` instead of `FOO.get_fieldAA()`")]]
   ::std::vector<::some::valid::ns::unionTypeDef> get_fieldAA() &&;
 
   /** Glean { "field": "fieldAA" } */
   template <typename T_containerStruct_fieldAA_struct_setter = ::std::vector<::some::valid::ns::unionTypeDef>>
-  [[deprecated("Use `FOO.fieldAA() = BAR;` instead of `FOO.set_fieldAA(BAR);`")]]
+  [[deprecated("Use `FOO.fieldAA() = BAR` instead of `FOO.set_fieldAA(BAR)`")]]
   ::std::vector<::some::valid::ns::unionTypeDef>& set_fieldAA(T_containerStruct_fieldAA_struct_setter&& fieldAA_) {
     fieldAA_ref() = std::forward<T_containerStruct_fieldAA_struct_setter>(fieldAA_);
     return fieldAA;
   }
 
   /** Glean { "field": "fieldAB" } */
-  [[deprecated("Use `FOO.fieldAB().value();` instead of `FOO.get_fieldAB();`")]]
+  [[deprecated("Use `FOO.fieldAB().value()` instead of `FOO.get_fieldAB()`")]]
   const ::std::map<::some::valid::ns::IndirectionB, ::some::valid::ns::IndirectionC>& get_fieldAB() const&;
 
   /** Glean { "field": "fieldAB" } */
-  [[deprecated("Use `FOO.fieldAB().value();` instead of `FOO.get_fieldAB();`")]]
+  [[deprecated("Use `FOO.fieldAB().value()` instead of `FOO.get_fieldAB()`")]]
   ::std::map<::some::valid::ns::IndirectionB, ::some::valid::ns::IndirectionC> get_fieldAB() &&;
 
   /** Glean { "field": "fieldAB" } */
   template <typename T_containerStruct_fieldAB_struct_setter = ::std::map<::some::valid::ns::IndirectionB, ::some::valid::ns::IndirectionC>>
-  [[deprecated("Use `FOO.fieldAB() = BAR;` instead of `FOO.set_fieldAB(BAR);`")]]
+  [[deprecated("Use `FOO.fieldAB() = BAR` instead of `FOO.set_fieldAB(BAR)`")]]
   ::std::map<::some::valid::ns::IndirectionB, ::some::valid::ns::IndirectionC>& set_fieldAB(T_containerStruct_fieldAB_struct_setter&& fieldAB_) {
     fieldAB_ref() = std::forward<T_containerStruct_fieldAB_struct_setter>(fieldAB_);
     return fieldAB;
   }
 
   /** Glean { "field": "fieldAC" } */
-  [[deprecated("Use `FOO.fieldAC().value();` instead of `FOO.get_fieldAC();`")]]
+  [[deprecated("Use `FOO.fieldAC().value()` instead of `FOO.get_fieldAC()`")]]
   ::some::valid::ns::MyEnumB get_fieldAC() const;
 
   /** Glean { "field": "fieldAC" } */
-  [[deprecated("Use `FOO.fieldAC() = BAR;` instead of `FOO.set_fieldAC(BAR);`")]]
+  [[deprecated("Use `FOO.fieldAC() = BAR` instead of `FOO.set_fieldAC(BAR)`")]]
   ::some::valid::ns::MyEnumB& set_fieldAC(::some::valid::ns::MyEnumB fieldAC_);
 
   /** Glean { "field": "fieldAD" } */
-  [[deprecated("Use `FOO.fieldAD().value();` instead of `FOO.get_fieldAD();`")]]
+  [[deprecated("Use `FOO.fieldAD().value()` instead of `FOO.get_fieldAD()`")]]
   ::a::different::ns::AnEnum get_fieldAD() const;
 
   /** Glean { "field": "fieldAD" } */
-  [[deprecated("Use `FOO.fieldAD() = BAR;` instead of `FOO.set_fieldAD(BAR);`")]]
+  [[deprecated("Use `FOO.fieldAD() = BAR` instead of `FOO.set_fieldAD(BAR)`")]]
   ::a::different::ns::AnEnum& set_fieldAD(::a::different::ns::AnEnum fieldAD_);
 
   /** Glean { "field": "fieldAE" } */
-  [[deprecated("Use `FOO.fieldAE().value();` instead of `FOO.get_fieldAE();`")]]
+  [[deprecated("Use `FOO.fieldAE().value()` instead of `FOO.get_fieldAE()`")]]
   const ::std::map<::std::string, ::std::int32_t>& get_fieldAE() const&;
 
   /** Glean { "field": "fieldAE" } */
-  [[deprecated("Use `FOO.fieldAE().value();` instead of `FOO.get_fieldAE();`")]]
+  [[deprecated("Use `FOO.fieldAE().value()` instead of `FOO.get_fieldAE()`")]]
   ::std::map<::std::string, ::std::int32_t> get_fieldAE() &&;
 
   /** Glean { "field": "fieldAE" } */
   template <typename T_containerStruct_fieldAE_struct_setter = ::std::map<::std::string, ::std::int32_t>>
-  [[deprecated("Use `FOO.fieldAE() = BAR;` instead of `FOO.set_fieldAE(BAR);`")]]
+  [[deprecated("Use `FOO.fieldAE() = BAR` instead of `FOO.set_fieldAE(BAR)`")]]
   ::std::map<::std::string, ::std::int32_t>& set_fieldAE(T_containerStruct_fieldAE_struct_setter&& fieldAE_) {
     fieldAE_ref() = std::forward<T_containerStruct_fieldAE_struct_setter>(fieldAE_);
     return fieldAE;
   }
 
   /** Glean { "field": "fieldSD" } */
-  [[deprecated("Use `FOO.fieldSD().value();` instead of `FOO.get_fieldSD();`")]]
+  [[deprecated("Use `FOO.fieldSD().value()` instead of `FOO.get_fieldSD()`")]]
   const ::some::valid::ns::IndirectionD& get_fieldSD() const& {
     return fieldSD;
   }
 
   /** Glean { "field": "fieldSD" } */
-  [[deprecated("Use `FOO.fieldSD().value();` instead of `FOO.get_fieldSD();`")]]
+  [[deprecated("Use `FOO.fieldSD().value()` instead of `FOO.get_fieldSD()`")]]
   ::some::valid::ns::IndirectionD get_fieldSD() && {
     return static_cast<::some::valid::ns::IndirectionD&&>(fieldSD);
   }
 
   /** Glean { "field": "fieldSD" } */
   template <typename T_containerStruct_fieldSD_struct_setter = ::some::valid::ns::IndirectionD>
-  [[deprecated("Use `FOO.fieldSD() = BAR;` instead of `FOO.set_fieldSD(BAR);`")]]
+  [[deprecated("Use `FOO.fieldSD() = BAR` instead of `FOO.set_fieldSD(BAR)`")]]
   ::some::valid::ns::IndirectionD& set_fieldSD(T_containerStruct_fieldSD_struct_setter&& fieldSD_) {
     fieldSD_ref() = std::forward<T_containerStruct_fieldSD_struct_setter>(fieldSD_);
     return fieldSD;
@@ -8986,40 +8986,40 @@ class MyIncludedStruct final  {
   }
 
   /** Glean { "field": "MyIncludedInt" } */
-  [[deprecated("Use `FOO.MyIncludedInt().value();` instead of `FOO.get_MyIncludedInt();`")]]
+  [[deprecated("Use `FOO.MyIncludedInt().value()` instead of `FOO.get_MyIncludedInt()`")]]
   ::a::different::ns::IncludedInt64 get_MyIncludedInt() const;
 
   /** Glean { "field": "MyIncludedInt" } */
-  [[deprecated("Use `FOO.MyIncludedInt() = BAR;` instead of `FOO.set_MyIncludedInt(BAR);`")]]
+  [[deprecated("Use `FOO.MyIncludedInt() = BAR` instead of `FOO.set_MyIncludedInt(BAR)`")]]
   ::a::different::ns::IncludedInt64& set_MyIncludedInt(::a::different::ns::IncludedInt64 MyIncludedInt_);
 
   /** Glean { "field": "MyIncludedStruct" } */
-  [[deprecated("Use `FOO.MyIncludedStruct().value();` instead of `FOO.get_MyIncludedStruct();`")]]
+  [[deprecated("Use `FOO.MyIncludedStruct().value()` instead of `FOO.get_MyIncludedStruct()`")]]
   const ::some::valid::ns::AStruct& get_MyIncludedStruct() const&;
 
   /** Glean { "field": "MyIncludedStruct" } */
-  [[deprecated("Use `FOO.MyIncludedStruct().value();` instead of `FOO.get_MyIncludedStruct();`")]]
+  [[deprecated("Use `FOO.MyIncludedStruct().value()` instead of `FOO.get_MyIncludedStruct()`")]]
   ::some::valid::ns::AStruct get_MyIncludedStruct() &&;
 
   /** Glean { "field": "MyIncludedStruct" } */
   template <typename T_MyIncludedStruct_MyIncludedStruct_struct_setter = ::some::valid::ns::AStruct>
-  [[deprecated("Use `FOO.MyIncludedStruct() = BAR;` instead of `FOO.set_MyIncludedStruct(BAR);`")]]
+  [[deprecated("Use `FOO.MyIncludedStruct() = BAR` instead of `FOO.set_MyIncludedStruct(BAR)`")]]
   ::some::valid::ns::AStruct& set_MyIncludedStruct(T_MyIncludedStruct_MyIncludedStruct_struct_setter&& MyIncludedStruct_) {
     MyIncludedStruct_ref() = std::forward<T_MyIncludedStruct_MyIncludedStruct_struct_setter>(MyIncludedStruct_);
     return __fbthrift_field_MyIncludedStruct;
   }
 
   /** Glean { "field": "ARequiredField" } */
-  [[deprecated("Use `FOO.ARequiredField().value();` instead of `FOO.get_ARequiredField();`")]]
+  [[deprecated("Use `FOO.ARequiredField().value()` instead of `FOO.get_ARequiredField()`")]]
   const ::some::valid::ns::AStruct& get_ARequiredField() const&;
 
   /** Glean { "field": "ARequiredField" } */
-  [[deprecated("Use `FOO.ARequiredField().value();` instead of `FOO.get_ARequiredField();`")]]
+  [[deprecated("Use `FOO.ARequiredField().value()` instead of `FOO.get_ARequiredField()`")]]
   ::some::valid::ns::AStruct get_ARequiredField() &&;
 
   /** Glean { "field": "ARequiredField" } */
   template <typename T_MyIncludedStruct_ARequiredField_struct_setter = ::some::valid::ns::AStruct>
-  [[deprecated("Use `FOO.ARequiredField() = BAR;` instead of `FOO.set_ARequiredField(BAR);`")]]
+  [[deprecated("Use `FOO.ARequiredField() = BAR` instead of `FOO.set_ARequiredField(BAR)`")]]
   ::some::valid::ns::AStruct& set_ARequiredField(T_MyIncludedStruct_ARequiredField_struct_setter&& ARequiredField_) {
     ARequiredField_ref() = std::forward<T_MyIncludedStruct_ARequiredField_struct_setter>(ARequiredField_);
     return __fbthrift_field_ARequiredField;
@@ -10228,352 +10228,352 @@ class AnnotatedStruct  {
   }
 
   /** Glean { "field": "no_annotation" } */
-  [[deprecated("Use `FOO.no_annotation().value();` instead of `FOO.get_no_annotation();`")]]
+  [[deprecated("Use `FOO.no_annotation().value()` instead of `FOO.get_no_annotation()`")]]
   const ::some::valid::ns::containerStruct& get_no_annotation() const&;
 
   /** Glean { "field": "no_annotation" } */
-  [[deprecated("Use `FOO.no_annotation().value();` instead of `FOO.get_no_annotation();`")]]
+  [[deprecated("Use `FOO.no_annotation().value()` instead of `FOO.get_no_annotation()`")]]
   ::some::valid::ns::containerStruct get_no_annotation() &&;
 
   /** Glean { "field": "no_annotation" } */
   template <typename T_AnnotatedStruct_no_annotation_struct_setter = ::some::valid::ns::containerStruct>
-  [[deprecated("Use `FOO.no_annotation() = BAR;` instead of `FOO.set_no_annotation(BAR);`")]]
+  [[deprecated("Use `FOO.no_annotation() = BAR` instead of `FOO.set_no_annotation(BAR)`")]]
   ::some::valid::ns::containerStruct& set_no_annotation(T_AnnotatedStruct_no_annotation_struct_setter&& no_annotation_) {
     no_annotation_ref() = std::forward<T_AnnotatedStruct_no_annotation_struct_setter>(no_annotation_);
     return no_annotation;
   }
 
   /** Glean { "field": "base_type" } */
-  [[deprecated("Use `FOO.base_type().value();` instead of `FOO.get_base_type();`")]]
+  [[deprecated("Use `FOO.base_type().value()` instead of `FOO.get_base_type()`")]]
   ::some::valid::ns::CppFakeI32 get_base_type() const;
 
   /** Glean { "field": "base_type" } */
-  [[deprecated("Use `FOO.base_type() = BAR;` instead of `FOO.set_base_type(BAR);`")]]
+  [[deprecated("Use `FOO.base_type() = BAR` instead of `FOO.set_base_type(BAR)`")]]
   ::some::valid::ns::CppFakeI32& set_base_type(::some::valid::ns::CppFakeI32 base_type_);
 
   /** Glean { "field": "list_type" } */
-  [[deprecated("Use `FOO.list_type().value();` instead of `FOO.get_list_type();`")]]
+  [[deprecated("Use `FOO.list_type().value()` instead of `FOO.get_list_type()`")]]
   const ::some::valid::ns::FollySmallVectorI64& get_list_type() const&;
 
   /** Glean { "field": "list_type" } */
-  [[deprecated("Use `FOO.list_type().value();` instead of `FOO.get_list_type();`")]]
+  [[deprecated("Use `FOO.list_type().value()` instead of `FOO.get_list_type()`")]]
   ::some::valid::ns::FollySmallVectorI64 get_list_type() &&;
 
   /** Glean { "field": "list_type" } */
   template <typename T_AnnotatedStruct_list_type_struct_setter = ::some::valid::ns::FollySmallVectorI64>
-  [[deprecated("Use `FOO.list_type() = BAR;` instead of `FOO.set_list_type(BAR);`")]]
+  [[deprecated("Use `FOO.list_type() = BAR` instead of `FOO.set_list_type(BAR)`")]]
   ::some::valid::ns::FollySmallVectorI64& set_list_type(T_AnnotatedStruct_list_type_struct_setter&& list_type_) {
     list_type_ref() = std::forward<T_AnnotatedStruct_list_type_struct_setter>(list_type_);
     return list_type;
   }
 
   /** Glean { "field": "set_type" } */
-  [[deprecated("Use `FOO.set_type().value();` instead of `FOO.get_set_type();`")]]
+  [[deprecated("Use `FOO.set_type().value()` instead of `FOO.get_set_type()`")]]
   const ::some::valid::ns::SortedVectorSetString& get_set_type() const&;
 
   /** Glean { "field": "set_type" } */
-  [[deprecated("Use `FOO.set_type().value();` instead of `FOO.get_set_type();`")]]
+  [[deprecated("Use `FOO.set_type().value()` instead of `FOO.get_set_type()`")]]
   ::some::valid::ns::SortedVectorSetString get_set_type() &&;
 
   /** Glean { "field": "set_type" } */
   template <typename T_AnnotatedStruct_set_type_struct_setter = ::some::valid::ns::SortedVectorSetString>
-  [[deprecated("Use `FOO.set_type() = BAR;` instead of `FOO.set_set_type(BAR);`")]]
+  [[deprecated("Use `FOO.set_type() = BAR` instead of `FOO.set_set_type(BAR)`")]]
   ::some::valid::ns::SortedVectorSetString& set_set_type(T_AnnotatedStruct_set_type_struct_setter&& set_type_) {
     set_type_ref() = std::forward<T_AnnotatedStruct_set_type_struct_setter>(set_type_);
     return set_type;
   }
 
   /** Glean { "field": "map_type" } */
-  [[deprecated("Use `FOO.map_type().value();` instead of `FOO.get_map_type();`")]]
+  [[deprecated("Use `FOO.map_type().value()` instead of `FOO.get_map_type()`")]]
   const ::some::valid::ns::FakeMap& get_map_type() const&;
 
   /** Glean { "field": "map_type" } */
-  [[deprecated("Use `FOO.map_type().value();` instead of `FOO.get_map_type();`")]]
+  [[deprecated("Use `FOO.map_type().value()` instead of `FOO.get_map_type()`")]]
   ::some::valid::ns::FakeMap get_map_type() &&;
 
   /** Glean { "field": "map_type" } */
   template <typename T_AnnotatedStruct_map_type_struct_setter = ::some::valid::ns::FakeMap>
-  [[deprecated("Use `FOO.map_type() = BAR;` instead of `FOO.set_map_type(BAR);`")]]
+  [[deprecated("Use `FOO.map_type() = BAR` instead of `FOO.set_map_type(BAR)`")]]
   ::some::valid::ns::FakeMap& set_map_type(T_AnnotatedStruct_map_type_struct_setter&& map_type_) {
     map_type_ref() = std::forward<T_AnnotatedStruct_map_type_struct_setter>(map_type_);
     return map_type;
   }
 
   /** Glean { "field": "map_struct_type" } */
-  [[deprecated("Use `FOO.map_struct_type().value();` instead of `FOO.get_map_struct_type();`")]]
+  [[deprecated("Use `FOO.map_struct_type().value()` instead of `FOO.get_map_struct_type()`")]]
   const ::some::valid::ns::UnorderedMapStruct& get_map_struct_type() const&;
 
   /** Glean { "field": "map_struct_type" } */
-  [[deprecated("Use `FOO.map_struct_type().value();` instead of `FOO.get_map_struct_type();`")]]
+  [[deprecated("Use `FOO.map_struct_type().value()` instead of `FOO.get_map_struct_type()`")]]
   ::some::valid::ns::UnorderedMapStruct get_map_struct_type() &&;
 
   /** Glean { "field": "map_struct_type" } */
   template <typename T_AnnotatedStruct_map_struct_type_struct_setter = ::some::valid::ns::UnorderedMapStruct>
-  [[deprecated("Use `FOO.map_struct_type() = BAR;` instead of `FOO.set_map_struct_type(BAR);`")]]
+  [[deprecated("Use `FOO.map_struct_type() = BAR` instead of `FOO.set_map_struct_type(BAR)`")]]
   ::some::valid::ns::UnorderedMapStruct& set_map_struct_type(T_AnnotatedStruct_map_struct_type_struct_setter&& map_struct_type_) {
     map_struct_type_ref() = std::forward<T_AnnotatedStruct_map_struct_type_struct_setter>(map_struct_type_);
     return map_struct_type;
   }
 
   /** Glean { "field": "iobuf_type" } */
-  [[deprecated("Use `FOO.iobuf_type().value();` instead of `FOO.get_iobuf_type();`")]]
+  [[deprecated("Use `FOO.iobuf_type().value()` instead of `FOO.get_iobuf_type()`")]]
   const ::some::valid::ns::IOBuf& get_iobuf_type() const& {
     return iobuf_type;
   }
 
   /** Glean { "field": "iobuf_type" } */
-  [[deprecated("Use `FOO.iobuf_type().value();` instead of `FOO.get_iobuf_type();`")]]
+  [[deprecated("Use `FOO.iobuf_type().value()` instead of `FOO.get_iobuf_type()`")]]
   ::some::valid::ns::IOBuf get_iobuf_type() && {
     return static_cast<::some::valid::ns::IOBuf&&>(iobuf_type);
   }
 
   /** Glean { "field": "iobuf_type" } */
   template <typename T_AnnotatedStruct_iobuf_type_struct_setter = ::some::valid::ns::IOBuf>
-  [[deprecated("Use `FOO.iobuf_type() = BAR;` instead of `FOO.set_iobuf_type(BAR);`")]]
+  [[deprecated("Use `FOO.iobuf_type() = BAR` instead of `FOO.set_iobuf_type(BAR)`")]]
   ::some::valid::ns::IOBuf& set_iobuf_type(T_AnnotatedStruct_iobuf_type_struct_setter&& iobuf_type_) {
     iobuf_type_ref() = std::forward<T_AnnotatedStruct_iobuf_type_struct_setter>(iobuf_type_);
     return iobuf_type;
   }
 
   /** Glean { "field": "iobuf_ptr" } */
-  [[deprecated("Use `FOO.iobuf_ptr().value();` instead of `FOO.get_iobuf_ptr();`")]]
+  [[deprecated("Use `FOO.iobuf_ptr().value()` instead of `FOO.get_iobuf_ptr()`")]]
   const ::some::valid::ns::IOBufPtr& get_iobuf_ptr() const& {
     return iobuf_ptr;
   }
 
   /** Glean { "field": "iobuf_ptr" } */
-  [[deprecated("Use `FOO.iobuf_ptr().value();` instead of `FOO.get_iobuf_ptr();`")]]
+  [[deprecated("Use `FOO.iobuf_ptr().value()` instead of `FOO.get_iobuf_ptr()`")]]
   ::some::valid::ns::IOBufPtr get_iobuf_ptr() && {
     return static_cast<::some::valid::ns::IOBufPtr&&>(iobuf_ptr);
   }
 
   /** Glean { "field": "iobuf_ptr" } */
   template <typename T_AnnotatedStruct_iobuf_ptr_struct_setter = ::some::valid::ns::IOBufPtr>
-  [[deprecated("Use `FOO.iobuf_ptr() = BAR;` instead of `FOO.set_iobuf_ptr(BAR);`")]]
+  [[deprecated("Use `FOO.iobuf_ptr() = BAR` instead of `FOO.set_iobuf_ptr(BAR)`")]]
   ::some::valid::ns::IOBufPtr& set_iobuf_ptr(T_AnnotatedStruct_iobuf_ptr_struct_setter&& iobuf_ptr_) {
     iobuf_ptr_ref() = std::forward<T_AnnotatedStruct_iobuf_ptr_struct_setter>(iobuf_ptr_);
     return iobuf_ptr;
   }
 
   /** Glean { "field": "list_i32_template" } */
-  [[deprecated("Use `FOO.list_i32_template().value();` instead of `FOO.get_list_i32_template();`")]]
+  [[deprecated("Use `FOO.list_i32_template().value()` instead of `FOO.get_list_i32_template()`")]]
   const std::list<::std::int32_t>& get_list_i32_template() const&;
 
   /** Glean { "field": "list_i32_template" } */
-  [[deprecated("Use `FOO.list_i32_template().value();` instead of `FOO.get_list_i32_template();`")]]
+  [[deprecated("Use `FOO.list_i32_template().value()` instead of `FOO.get_list_i32_template()`")]]
   std::list<::std::int32_t> get_list_i32_template() &&;
 
   /** Glean { "field": "list_i32_template" } */
   template <typename T_AnnotatedStruct_list_i32_template_struct_setter = std::list<::std::int32_t>>
-  [[deprecated("Use `FOO.list_i32_template() = BAR;` instead of `FOO.set_list_i32_template(BAR);`")]]
+  [[deprecated("Use `FOO.list_i32_template() = BAR` instead of `FOO.set_list_i32_template(BAR)`")]]
   std::list<::std::int32_t>& set_list_i32_template(T_AnnotatedStruct_list_i32_template_struct_setter&& list_i32_template_) {
     list_i32_template_ref() = std::forward<T_AnnotatedStruct_list_i32_template_struct_setter>(list_i32_template_);
     return list_i32_template;
   }
 
   /** Glean { "field": "list_string_template" } */
-  [[deprecated("Use `FOO.list_string_template().value();` instead of `FOO.get_list_string_template();`")]]
+  [[deprecated("Use `FOO.list_string_template().value()` instead of `FOO.get_list_string_template()`")]]
   const std::deque<::std::string>& get_list_string_template() const&;
 
   /** Glean { "field": "list_string_template" } */
-  [[deprecated("Use `FOO.list_string_template().value();` instead of `FOO.get_list_string_template();`")]]
+  [[deprecated("Use `FOO.list_string_template().value()` instead of `FOO.get_list_string_template()`")]]
   std::deque<::std::string> get_list_string_template() &&;
 
   /** Glean { "field": "list_string_template" } */
   template <typename T_AnnotatedStruct_list_string_template_struct_setter = std::deque<::std::string>>
-  [[deprecated("Use `FOO.list_string_template() = BAR;` instead of `FOO.set_list_string_template(BAR);`")]]
+  [[deprecated("Use `FOO.list_string_template() = BAR` instead of `FOO.set_list_string_template(BAR)`")]]
   std::deque<::std::string>& set_list_string_template(T_AnnotatedStruct_list_string_template_struct_setter&& list_string_template_) {
     list_string_template_ref() = std::forward<T_AnnotatedStruct_list_string_template_struct_setter>(list_string_template_);
     return list_string_template;
   }
 
   /** Glean { "field": "set_template" } */
-  [[deprecated("Use `FOO.set_template().value();` instead of `FOO.get_set_template();`")]]
+  [[deprecated("Use `FOO.set_template().value()` instead of `FOO.get_set_template()`")]]
   const folly::sorted_vector_set<::std::string>& get_set_template() const&;
 
   /** Glean { "field": "set_template" } */
-  [[deprecated("Use `FOO.set_template().value();` instead of `FOO.get_set_template();`")]]
+  [[deprecated("Use `FOO.set_template().value()` instead of `FOO.get_set_template()`")]]
   folly::sorted_vector_set<::std::string> get_set_template() &&;
 
   /** Glean { "field": "set_template" } */
   template <typename T_AnnotatedStruct_set_template_struct_setter = folly::sorted_vector_set<::std::string>>
-  [[deprecated("Use `FOO.set_template() = BAR;` instead of `FOO.set_set_template(BAR);`")]]
+  [[deprecated("Use `FOO.set_template() = BAR` instead of `FOO.set_set_template(BAR)`")]]
   folly::sorted_vector_set<::std::string>& set_set_template(T_AnnotatedStruct_set_template_struct_setter&& set_template_) {
     set_template_ref() = std::forward<T_AnnotatedStruct_set_template_struct_setter>(set_template_);
     return set_template;
   }
 
   /** Glean { "field": "map_template" } */
-  [[deprecated("Use `FOO.map_template().value();` instead of `FOO.get_map_template();`")]]
+  [[deprecated("Use `FOO.map_template().value()` instead of `FOO.get_map_template()`")]]
   const folly::sorted_vector_map<::std::int64_t, ::std::string>& get_map_template() const&;
 
   /** Glean { "field": "map_template" } */
-  [[deprecated("Use `FOO.map_template().value();` instead of `FOO.get_map_template();`")]]
+  [[deprecated("Use `FOO.map_template().value()` instead of `FOO.get_map_template()`")]]
   folly::sorted_vector_map<::std::int64_t, ::std::string> get_map_template() &&;
 
   /** Glean { "field": "map_template" } */
   template <typename T_AnnotatedStruct_map_template_struct_setter = folly::sorted_vector_map<::std::int64_t, ::std::string>>
-  [[deprecated("Use `FOO.map_template() = BAR;` instead of `FOO.set_map_template(BAR);`")]]
+  [[deprecated("Use `FOO.map_template() = BAR` instead of `FOO.set_map_template(BAR)`")]]
   folly::sorted_vector_map<::std::int64_t, ::std::string>& set_map_template(T_AnnotatedStruct_map_template_struct_setter&& map_template_) {
     map_template_ref() = std::forward<T_AnnotatedStruct_map_template_struct_setter>(map_template_);
     return map_template;
   }
 
   /** Glean { "field": "typedef_list_template" } */
-  [[deprecated("Use `FOO.typedef_list_template().value();` instead of `FOO.get_typedef_list_template();`")]]
+  [[deprecated("Use `FOO.typedef_list_template().value()` instead of `FOO.get_typedef_list_template()`")]]
   const ::some::valid::ns::std_list& get_typedef_list_template() const&;
 
   /** Glean { "field": "typedef_list_template" } */
-  [[deprecated("Use `FOO.typedef_list_template().value();` instead of `FOO.get_typedef_list_template();`")]]
+  [[deprecated("Use `FOO.typedef_list_template().value()` instead of `FOO.get_typedef_list_template()`")]]
   ::some::valid::ns::std_list get_typedef_list_template() &&;
 
   /** Glean { "field": "typedef_list_template" } */
   template <typename T_AnnotatedStruct_typedef_list_template_struct_setter = ::some::valid::ns::std_list>
-  [[deprecated("Use `FOO.typedef_list_template() = BAR;` instead of `FOO.set_typedef_list_template(BAR);`")]]
+  [[deprecated("Use `FOO.typedef_list_template() = BAR` instead of `FOO.set_typedef_list_template(BAR)`")]]
   ::some::valid::ns::std_list& set_typedef_list_template(T_AnnotatedStruct_typedef_list_template_struct_setter&& typedef_list_template_) {
     typedef_list_template_ref() = std::forward<T_AnnotatedStruct_typedef_list_template_struct_setter>(typedef_list_template_);
     return typedef_list_template;
   }
 
   /** Glean { "field": "typedef_deque_template" } */
-  [[deprecated("Use `FOO.typedef_deque_template().value();` instead of `FOO.get_typedef_deque_template();`")]]
+  [[deprecated("Use `FOO.typedef_deque_template().value()` instead of `FOO.get_typedef_deque_template()`")]]
   const ::some::valid::ns::std_deque& get_typedef_deque_template() const&;
 
   /** Glean { "field": "typedef_deque_template" } */
-  [[deprecated("Use `FOO.typedef_deque_template().value();` instead of `FOO.get_typedef_deque_template();`")]]
+  [[deprecated("Use `FOO.typedef_deque_template().value()` instead of `FOO.get_typedef_deque_template()`")]]
   ::some::valid::ns::std_deque get_typedef_deque_template() &&;
 
   /** Glean { "field": "typedef_deque_template" } */
   template <typename T_AnnotatedStruct_typedef_deque_template_struct_setter = ::some::valid::ns::std_deque>
-  [[deprecated("Use `FOO.typedef_deque_template() = BAR;` instead of `FOO.set_typedef_deque_template(BAR);`")]]
+  [[deprecated("Use `FOO.typedef_deque_template() = BAR` instead of `FOO.set_typedef_deque_template(BAR)`")]]
   ::some::valid::ns::std_deque& set_typedef_deque_template(T_AnnotatedStruct_typedef_deque_template_struct_setter&& typedef_deque_template_) {
     typedef_deque_template_ref() = std::forward<T_AnnotatedStruct_typedef_deque_template_struct_setter>(typedef_deque_template_);
     return typedef_deque_template;
   }
 
   /** Glean { "field": "typedef_set_template" } */
-  [[deprecated("Use `FOO.typedef_set_template().value();` instead of `FOO.get_typedef_set_template();`")]]
+  [[deprecated("Use `FOO.typedef_set_template().value()` instead of `FOO.get_typedef_set_template()`")]]
   const ::some::valid::ns::folly_set& get_typedef_set_template() const&;
 
   /** Glean { "field": "typedef_set_template" } */
-  [[deprecated("Use `FOO.typedef_set_template().value();` instead of `FOO.get_typedef_set_template();`")]]
+  [[deprecated("Use `FOO.typedef_set_template().value()` instead of `FOO.get_typedef_set_template()`")]]
   ::some::valid::ns::folly_set get_typedef_set_template() &&;
 
   /** Glean { "field": "typedef_set_template" } */
   template <typename T_AnnotatedStruct_typedef_set_template_struct_setter = ::some::valid::ns::folly_set>
-  [[deprecated("Use `FOO.typedef_set_template() = BAR;` instead of `FOO.set_typedef_set_template(BAR);`")]]
+  [[deprecated("Use `FOO.typedef_set_template() = BAR` instead of `FOO.set_typedef_set_template(BAR)`")]]
   ::some::valid::ns::folly_set& set_typedef_set_template(T_AnnotatedStruct_typedef_set_template_struct_setter&& typedef_set_template_) {
     typedef_set_template_ref() = std::forward<T_AnnotatedStruct_typedef_set_template_struct_setter>(typedef_set_template_);
     return typedef_set_template;
   }
 
   /** Glean { "field": "typedef_map_template" } */
-  [[deprecated("Use `FOO.typedef_map_template().value();` instead of `FOO.get_typedef_map_template();`")]]
+  [[deprecated("Use `FOO.typedef_map_template().value()` instead of `FOO.get_typedef_map_template()`")]]
   const ::some::valid::ns::folly_map& get_typedef_map_template() const&;
 
   /** Glean { "field": "typedef_map_template" } */
-  [[deprecated("Use `FOO.typedef_map_template().value();` instead of `FOO.get_typedef_map_template();`")]]
+  [[deprecated("Use `FOO.typedef_map_template().value()` instead of `FOO.get_typedef_map_template()`")]]
   ::some::valid::ns::folly_map get_typedef_map_template() &&;
 
   /** Glean { "field": "typedef_map_template" } */
   template <typename T_AnnotatedStruct_typedef_map_template_struct_setter = ::some::valid::ns::folly_map>
-  [[deprecated("Use `FOO.typedef_map_template() = BAR;` instead of `FOO.set_typedef_map_template(BAR);`")]]
+  [[deprecated("Use `FOO.typedef_map_template() = BAR` instead of `FOO.set_typedef_map_template(BAR)`")]]
   ::some::valid::ns::folly_map& set_typedef_map_template(T_AnnotatedStruct_typedef_map_template_struct_setter&& typedef_map_template_) {
     typedef_map_template_ref() = std::forward<T_AnnotatedStruct_typedef_map_template_struct_setter>(typedef_map_template_);
     return typedef_map_template;
   }
 
   /** Glean { "field": "indirection_a" } */
-  [[deprecated("Use `FOO.indirection_a().value();` instead of `FOO.get_indirection_a();`")]]
+  [[deprecated("Use `FOO.indirection_a().value()` instead of `FOO.get_indirection_a()`")]]
   ::some::valid::ns::IndirectionA get_indirection_a() const;
 
   /** Glean { "field": "indirection_a" } */
-  [[deprecated("Use `FOO.indirection_a() = BAR;` instead of `FOO.set_indirection_a(BAR);`")]]
+  [[deprecated("Use `FOO.indirection_a() = BAR` instead of `FOO.set_indirection_a(BAR)`")]]
   ::some::valid::ns::IndirectionA& set_indirection_a(::some::valid::ns::IndirectionA indirection_a_);
 
   /** Glean { "field": "indirection_b" } */
-  [[deprecated("Use `FOO.indirection_b().value();` instead of `FOO.get_indirection_b();`")]]
+  [[deprecated("Use `FOO.indirection_b().value()` instead of `FOO.get_indirection_b()`")]]
   const ::std::vector<::some::valid::ns::IndirectionB>& get_indirection_b() const&;
 
   /** Glean { "field": "indirection_b" } */
-  [[deprecated("Use `FOO.indirection_b().value();` instead of `FOO.get_indirection_b();`")]]
+  [[deprecated("Use `FOO.indirection_b().value()` instead of `FOO.get_indirection_b()`")]]
   ::std::vector<::some::valid::ns::IndirectionB> get_indirection_b() &&;
 
   /** Glean { "field": "indirection_b" } */
   template <typename T_AnnotatedStruct_indirection_b_struct_setter = ::std::vector<::some::valid::ns::IndirectionB>>
-  [[deprecated("Use `FOO.indirection_b() = BAR;` instead of `FOO.set_indirection_b(BAR);`")]]
+  [[deprecated("Use `FOO.indirection_b() = BAR` instead of `FOO.set_indirection_b(BAR)`")]]
   ::std::vector<::some::valid::ns::IndirectionB>& set_indirection_b(T_AnnotatedStruct_indirection_b_struct_setter&& indirection_b_) {
     indirection_b_ref() = std::forward<T_AnnotatedStruct_indirection_b_struct_setter>(indirection_b_);
     return indirection_b;
   }
 
   /** Glean { "field": "indirection_c" } */
-  [[deprecated("Use `FOO.indirection_c().value();` instead of `FOO.get_indirection_c();`")]]
+  [[deprecated("Use `FOO.indirection_c().value()` instead of `FOO.get_indirection_c()`")]]
   const ::std::set<::some::valid::ns::IndirectionC>& get_indirection_c() const&;
 
   /** Glean { "field": "indirection_c" } */
-  [[deprecated("Use `FOO.indirection_c().value();` instead of `FOO.get_indirection_c();`")]]
+  [[deprecated("Use `FOO.indirection_c().value()` instead of `FOO.get_indirection_c()`")]]
   ::std::set<::some::valid::ns::IndirectionC> get_indirection_c() &&;
 
   /** Glean { "field": "indirection_c" } */
   template <typename T_AnnotatedStruct_indirection_c_struct_setter = ::std::set<::some::valid::ns::IndirectionC>>
-  [[deprecated("Use `FOO.indirection_c() = BAR;` instead of `FOO.set_indirection_c(BAR);`")]]
+  [[deprecated("Use `FOO.indirection_c() = BAR` instead of `FOO.set_indirection_c(BAR)`")]]
   ::std::set<::some::valid::ns::IndirectionC>& set_indirection_c(T_AnnotatedStruct_indirection_c_struct_setter&& indirection_c_) {
     indirection_c_ref() = std::forward<T_AnnotatedStruct_indirection_c_struct_setter>(indirection_c_);
     return indirection_c;
   }
 
   /** Glean { "field": "iobuf_type_val" } */
-  [[deprecated("Use `FOO.iobuf_type_val().value();` instead of `FOO.get_iobuf_type_val();`")]]
+  [[deprecated("Use `FOO.iobuf_type_val().value()` instead of `FOO.get_iobuf_type_val()`")]]
   const ::some::valid::ns::IOBuf& get_iobuf_type_val() const& {
     return iobuf_type_val;
   }
 
   /** Glean { "field": "iobuf_type_val" } */
-  [[deprecated("Use `FOO.iobuf_type_val().value();` instead of `FOO.get_iobuf_type_val();`")]]
+  [[deprecated("Use `FOO.iobuf_type_val().value()` instead of `FOO.get_iobuf_type_val()`")]]
   ::some::valid::ns::IOBuf get_iobuf_type_val() && {
     return static_cast<::some::valid::ns::IOBuf&&>(iobuf_type_val);
   }
 
   /** Glean { "field": "iobuf_type_val" } */
   template <typename T_AnnotatedStruct_iobuf_type_val_struct_setter = ::some::valid::ns::IOBuf>
-  [[deprecated("Use `FOO.iobuf_type_val() = BAR;` instead of `FOO.set_iobuf_type_val(BAR);`")]]
+  [[deprecated("Use `FOO.iobuf_type_val() = BAR` instead of `FOO.set_iobuf_type_val(BAR)`")]]
   ::some::valid::ns::IOBuf& set_iobuf_type_val(T_AnnotatedStruct_iobuf_type_val_struct_setter&& iobuf_type_val_) {
     iobuf_type_val_ref() = std::forward<T_AnnotatedStruct_iobuf_type_val_struct_setter>(iobuf_type_val_);
     return iobuf_type_val;
   }
 
   /** Glean { "field": "iobuf_ptr_val" } */
-  [[deprecated("Use `FOO.iobuf_ptr_val().value();` instead of `FOO.get_iobuf_ptr_val();`")]]
+  [[deprecated("Use `FOO.iobuf_ptr_val().value()` instead of `FOO.get_iobuf_ptr_val()`")]]
   const ::some::valid::ns::IOBufPtr& get_iobuf_ptr_val() const& {
     return iobuf_ptr_val;
   }
 
   /** Glean { "field": "iobuf_ptr_val" } */
-  [[deprecated("Use `FOO.iobuf_ptr_val().value();` instead of `FOO.get_iobuf_ptr_val();`")]]
+  [[deprecated("Use `FOO.iobuf_ptr_val().value()` instead of `FOO.get_iobuf_ptr_val()`")]]
   ::some::valid::ns::IOBufPtr get_iobuf_ptr_val() && {
     return static_cast<::some::valid::ns::IOBufPtr&&>(iobuf_ptr_val);
   }
 
   /** Glean { "field": "iobuf_ptr_val" } */
   template <typename T_AnnotatedStruct_iobuf_ptr_val_struct_setter = ::some::valid::ns::IOBufPtr>
-  [[deprecated("Use `FOO.iobuf_ptr_val() = BAR;` instead of `FOO.set_iobuf_ptr_val(BAR);`")]]
+  [[deprecated("Use `FOO.iobuf_ptr_val() = BAR` instead of `FOO.set_iobuf_ptr_val(BAR)`")]]
   ::some::valid::ns::IOBufPtr& set_iobuf_ptr_val(T_AnnotatedStruct_iobuf_ptr_val_struct_setter&& iobuf_ptr_val_) {
     iobuf_ptr_val_ref() = std::forward<T_AnnotatedStruct_iobuf_ptr_val_struct_setter>(iobuf_ptr_val_);
     return iobuf_ptr_val;
   }
 
   /** Glean { "field": "struct_struct" } */
-  [[deprecated("Use `FOO.struct_struct().value();` instead of `FOO.get_struct_struct();`")]]
+  [[deprecated("Use `FOO.struct_struct().value()` instead of `FOO.get_struct_struct()`")]]
   const ::some::valid::ns::containerStruct& get_struct_struct() const&;
 
   /** Glean { "field": "struct_struct" } */
-  [[deprecated("Use `FOO.struct_struct().value();` instead of `FOO.get_struct_struct();`")]]
+  [[deprecated("Use `FOO.struct_struct().value()` instead of `FOO.get_struct_struct()`")]]
   ::some::valid::ns::containerStruct get_struct_struct() &&;
 
   /** Glean { "field": "struct_struct" } */
   template <typename T_AnnotatedStruct_struct_struct_struct_setter = ::some::valid::ns::containerStruct>
-  [[deprecated("Use `FOO.struct_struct() = BAR;` instead of `FOO.set_struct_struct(BAR);`")]]
+  [[deprecated("Use `FOO.struct_struct() = BAR` instead of `FOO.set_struct_struct(BAR)`")]]
   ::some::valid::ns::containerStruct& set_struct_struct(T_AnnotatedStruct_struct_struct_struct_setter&& struct_struct_) {
     struct_struct_ref() = std::forward<T_AnnotatedStruct_struct_struct_struct_setter>(struct_struct_);
     return struct_struct;
@@ -10788,32 +10788,32 @@ class ComplexContainerStruct final  {
   }
 
   /** Glean { "field": "map_of_iobufs" } */
-  [[deprecated("Use `FOO.map_of_iobufs().value();` instead of `FOO.get_map_of_iobufs();`")]]
+  [[deprecated("Use `FOO.map_of_iobufs().value()` instead of `FOO.get_map_of_iobufs()`")]]
   const ::std::map<::std::string, ::some::valid::ns::IOBuf>& get_map_of_iobufs() const&;
 
   /** Glean { "field": "map_of_iobufs" } */
-  [[deprecated("Use `FOO.map_of_iobufs().value();` instead of `FOO.get_map_of_iobufs();`")]]
+  [[deprecated("Use `FOO.map_of_iobufs().value()` instead of `FOO.get_map_of_iobufs()`")]]
   ::std::map<::std::string, ::some::valid::ns::IOBuf> get_map_of_iobufs() &&;
 
   /** Glean { "field": "map_of_iobufs" } */
   template <typename T_ComplexContainerStruct_map_of_iobufs_struct_setter = ::std::map<::std::string, ::some::valid::ns::IOBuf>>
-  [[deprecated("Use `FOO.map_of_iobufs() = BAR;` instead of `FOO.set_map_of_iobufs(BAR);`")]]
+  [[deprecated("Use `FOO.map_of_iobufs() = BAR` instead of `FOO.set_map_of_iobufs(BAR)`")]]
   ::std::map<::std::string, ::some::valid::ns::IOBuf>& set_map_of_iobufs(T_ComplexContainerStruct_map_of_iobufs_struct_setter&& map_of_iobufs_) {
     map_of_iobufs_ref() = std::forward<T_ComplexContainerStruct_map_of_iobufs_struct_setter>(map_of_iobufs_);
     return __fbthrift_field_map_of_iobufs;
   }
 
   /** Glean { "field": "map_of_iobuf_ptrs" } */
-  [[deprecated("Use `FOO.map_of_iobuf_ptrs().value();` instead of `FOO.get_map_of_iobuf_ptrs();`")]]
+  [[deprecated("Use `FOO.map_of_iobuf_ptrs().value()` instead of `FOO.get_map_of_iobuf_ptrs()`")]]
   const ::std::map<::std::string, ::some::valid::ns::IOBufPtr>& get_map_of_iobuf_ptrs() const&;
 
   /** Glean { "field": "map_of_iobuf_ptrs" } */
-  [[deprecated("Use `FOO.map_of_iobuf_ptrs().value();` instead of `FOO.get_map_of_iobuf_ptrs();`")]]
+  [[deprecated("Use `FOO.map_of_iobuf_ptrs().value()` instead of `FOO.get_map_of_iobuf_ptrs()`")]]
   ::std::map<::std::string, ::some::valid::ns::IOBufPtr> get_map_of_iobuf_ptrs() &&;
 
   /** Glean { "field": "map_of_iobuf_ptrs" } */
   template <typename T_ComplexContainerStruct_map_of_iobuf_ptrs_struct_setter = ::std::map<::std::string, ::some::valid::ns::IOBufPtr>>
-  [[deprecated("Use `FOO.map_of_iobuf_ptrs() = BAR;` instead of `FOO.set_map_of_iobuf_ptrs(BAR);`")]]
+  [[deprecated("Use `FOO.map_of_iobuf_ptrs() = BAR` instead of `FOO.set_map_of_iobuf_ptrs(BAR)`")]]
   ::std::map<::std::string, ::some::valid::ns::IOBufPtr>& set_map_of_iobuf_ptrs(T_ComplexContainerStruct_map_of_iobuf_ptrs_struct_setter&& map_of_iobuf_ptrs_) {
     map_of_iobuf_ptrs_ref() = std::forward<T_ComplexContainerStruct_map_of_iobuf_ptrs_struct_setter>(map_of_iobuf_ptrs_);
     return __fbthrift_field_map_of_iobuf_ptrs;
@@ -11027,19 +11027,19 @@ class FloatStruct final  {
   }
 
   /** Glean { "field": "floatField" } */
-  [[deprecated("Use `FOO.floatField().value();` instead of `FOO.get_floatField();`")]]
+  [[deprecated("Use `FOO.floatField().value()` instead of `FOO.get_floatField()`")]]
   float get_floatField() const;
 
   /** Glean { "field": "floatField" } */
-  [[deprecated("Use `FOO.floatField() = BAR;` instead of `FOO.set_floatField(BAR);`")]]
+  [[deprecated("Use `FOO.floatField() = BAR` instead of `FOO.set_floatField(BAR)`")]]
   float& set_floatField(float floatField_);
 
   /** Glean { "field": "doubleField" } */
-  [[deprecated("Use `FOO.doubleField().value();` instead of `FOO.get_doubleField();`")]]
+  [[deprecated("Use `FOO.doubleField().value()` instead of `FOO.get_doubleField()`")]]
   double get_doubleField() const;
 
   /** Glean { "field": "doubleField" } */
-  [[deprecated("Use `FOO.doubleField() = BAR;` instead of `FOO.set_doubleField(BAR);`")]]
+  [[deprecated("Use `FOO.doubleField() = BAR` instead of `FOO.set_doubleField(BAR)`")]]
   double& set_doubleField(double doubleField_);
 
   template <class Protocol_>
@@ -11466,11 +11466,11 @@ class AllRequiredNoExceptMoveCtrStruct final  {
   }
 
   /** Glean { "field": "intField" } */
-  [[deprecated("Use `FOO.intField().value();` instead of `FOO.get_intField();`")]]
+  [[deprecated("Use `FOO.intField().value()` instead of `FOO.get_intField()`")]]
   ::std::int64_t get_intField() const;
 
   /** Glean { "field": "intField" } */
-  [[deprecated("Use `FOO.intField() = BAR;` instead of `FOO.set_intField(BAR);`")]]
+  [[deprecated("Use `FOO.intField() = BAR` instead of `FOO.set_intField(BAR)`")]]
   ::std::int64_t& set_intField(::std::int64_t intField_);
 
   template <class Protocol_>

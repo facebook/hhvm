@@ -351,47 +351,47 @@ class BasicTypes final  {
   }
 
   /** Glean { "field": "first" } */
-  [[deprecated("Use `FOO.first().value();` instead of `FOO.get_first();`")]]
+  [[deprecated("Use `FOO.first().value()` instead of `FOO.get_first()`")]]
   ::std::int32_t get_first() const;
 
   /** Glean { "field": "first" } */
-  [[deprecated("Use `FOO.first() = BAR;` instead of `FOO.set_first(BAR);`")]]
+  [[deprecated("Use `FOO.first() = BAR` instead of `FOO.set_first(BAR)`")]]
   ::std::int32_t& set_first(::std::int32_t first_);
 
   /** Glean { "field": "second" } */
-  [[deprecated("Use `FOO.second().value();` instead of `FOO.get_second();`")]]
+  [[deprecated("Use `FOO.second().value()` instead of `FOO.get_second()`")]]
   const ::std::int32_t* get_second() const&;
 
   /** Glean { "field": "second" } */
-  [[deprecated("Use `FOO.second().value();` instead of `FOO.get_second();`")]]
+  [[deprecated("Use `FOO.second().value()` instead of `FOO.get_second()`")]]
   ::std::int32_t* get_second() &;
 
   ::std::int32_t* get_second() && = delete;
 
   /** Glean { "field": "second" } */
-  [[deprecated("Use `FOO.second() = BAR;` instead of `FOO.set_second(BAR);`")]]
+  [[deprecated("Use `FOO.second() = BAR` instead of `FOO.set_second(BAR)`")]]
   ::std::int32_t& set_second(::std::int32_t second_);
 
   /** Glean { "field": "third" } */
-  [[deprecated("Use `FOO.third().value();` instead of `FOO.get_third();`")]]
+  [[deprecated("Use `FOO.third().value()` instead of `FOO.get_third()`")]]
   const ::std::int64_t* get_third() const&;
 
   /** Glean { "field": "third" } */
-  [[deprecated("Use `FOO.third().value();` instead of `FOO.get_third();`")]]
+  [[deprecated("Use `FOO.third().value()` instead of `FOO.get_third()`")]]
   ::std::int64_t* get_third() &;
 
   ::std::int64_t* get_third() && = delete;
 
   /** Glean { "field": "third" } */
-  [[deprecated("Use `FOO.third() = BAR;` instead of `FOO.set_third(BAR);`")]]
+  [[deprecated("Use `FOO.third() = BAR` instead of `FOO.set_third(BAR)`")]]
   ::std::int64_t& set_third(::std::int64_t third_);
 
   /** Glean { "field": "isTrue" } */
-  [[deprecated("Use `FOO.isTrue().value();` instead of `FOO.get_isTrue();`")]]
+  [[deprecated("Use `FOO.isTrue().value()` instead of `FOO.get_isTrue()`")]]
   bool get_isTrue() const;
 
   /** Glean { "field": "isTrue" } */
-  [[deprecated("Use `FOO.isTrue() = BAR;` instead of `FOO.set_isTrue(BAR);`")]]
+  [[deprecated("Use `FOO.isTrue() = BAR` instead of `FOO.set_isTrue(BAR)`")]]
   bool& set_isTrue(bool isTrue_);
 
   template <class Protocol_>

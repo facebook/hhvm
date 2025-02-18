@@ -245,32 +245,32 @@ class Struct final  {
   }
 
   /** Glean { "field": "first" } */
-  [[deprecated("Use `FOO.first().value();` instead of `FOO.get_first();`")]]
+  [[deprecated("Use `FOO.first().value()` instead of `FOO.get_first()`")]]
   const ::module0::Struct& get_first() const&;
 
   /** Glean { "field": "first" } */
-  [[deprecated("Use `FOO.first().value();` instead of `FOO.get_first();`")]]
+  [[deprecated("Use `FOO.first().value()` instead of `FOO.get_first()`")]]
   ::module0::Struct get_first() &&;
 
   /** Glean { "field": "first" } */
   template <typename T_Struct_first_struct_setter = ::module0::Struct>
-  [[deprecated("Use `FOO.first() = BAR;` instead of `FOO.set_first(BAR);`")]]
+  [[deprecated("Use `FOO.first() = BAR` instead of `FOO.set_first(BAR)`")]]
   ::module0::Struct& set_first(T_Struct_first_struct_setter&& first_) {
     first_ref() = std::forward<T_Struct_first_struct_setter>(first_);
     return __fbthrift_field_first;
   }
 
   /** Glean { "field": "second" } */
-  [[deprecated("Use `FOO.second().value();` instead of `FOO.get_second();`")]]
+  [[deprecated("Use `FOO.second().value()` instead of `FOO.get_second()`")]]
   const ::module1::Struct& get_second() const&;
 
   /** Glean { "field": "second" } */
-  [[deprecated("Use `FOO.second().value();` instead of `FOO.get_second();`")]]
+  [[deprecated("Use `FOO.second().value()` instead of `FOO.get_second()`")]]
   ::module1::Struct get_second() &&;
 
   /** Glean { "field": "second" } */
   template <typename T_Struct_second_struct_setter = ::module1::Struct>
-  [[deprecated("Use `FOO.second() = BAR;` instead of `FOO.set_second(BAR);`")]]
+  [[deprecated("Use `FOO.second() = BAR` instead of `FOO.set_second(BAR)`")]]
   ::module1::Struct& set_second(T_Struct_second_struct_setter&& second_) {
     second_ref() = std::forward<T_Struct_second_struct_setter>(second_);
     return __fbthrift_field_second;
@@ -482,27 +482,27 @@ class BigStruct final  {
   }
 
   /** Glean { "field": "s" } */
-  [[deprecated("Use `FOO.s().value();` instead of `FOO.get_s();`")]]
+  [[deprecated("Use `FOO.s().value()` instead of `FOO.get_s()`")]]
   const ::module2::Struct& get_s() const&;
 
   /** Glean { "field": "s" } */
-  [[deprecated("Use `FOO.s().value();` instead of `FOO.get_s();`")]]
+  [[deprecated("Use `FOO.s().value()` instead of `FOO.get_s()`")]]
   ::module2::Struct get_s() &&;
 
   /** Glean { "field": "s" } */
   template <typename T_BigStruct_s_struct_setter = ::module2::Struct>
-  [[deprecated("Use `FOO.s() = BAR;` instead of `FOO.set_s(BAR);`")]]
+  [[deprecated("Use `FOO.s() = BAR` instead of `FOO.set_s(BAR)`")]]
   ::module2::Struct& set_s(T_BigStruct_s_struct_setter&& s_) {
     s_ref() = std::forward<T_BigStruct_s_struct_setter>(s_);
     return __fbthrift_field_s;
   }
 
   /** Glean { "field": "id" } */
-  [[deprecated("Use `FOO.id().value();` instead of `FOO.get_id();`")]]
+  [[deprecated("Use `FOO.id().value()` instead of `FOO.get_id()`")]]
   ::std::int32_t get_id() const;
 
   /** Glean { "field": "id" } */
-  [[deprecated("Use `FOO.id() = BAR;` instead of `FOO.set_id(BAR);`")]]
+  [[deprecated("Use `FOO.id() = BAR` instead of `FOO.set_id(BAR)`")]]
   ::std::int32_t& set_id(::std::int32_t id_);
 
   template <class Protocol_>

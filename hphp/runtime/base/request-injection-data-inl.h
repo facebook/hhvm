@@ -54,6 +54,7 @@ inline bool RequestInjectionData::getJitFolding() const {
 
 inline void RequestInjectionData::setJitFolding(bool flag) {
   m_jitFolding = flag;
+  updateJit();
 }
 
 inline bool RequestInjectionData::getSuppressClassConversionNotices() const {

@@ -856,7 +856,7 @@ void enterVMAtFunc(ActRec* enterFnAr, uint32_t numArgsInclUnpack) {
   prepareFuncEntry(enterFnAr, numArgsInclUnpack);
   assertx(vmfp()->func()->contains(vmpc()));
 
-  if (RID().getJit() && !RID().getJitFolding()) {
+  if (RID().getJit()) {
     jit::enterTC(jit::svcreq::getFuncEntry(enterFnAr->func()));
   } else {
     if (!funcEntry()) return;

@@ -563,6 +563,8 @@ JitResumeAddr handleResume(ResumeFlags flags) {
   FTRACE(2, "handleResume: sk: {}\n", showShort(sk));
 
   auto const findOrTranslate = [&] (ResumeFlags flags) -> JitResumeAddr {
+    if (!RID().getJit()) return JitResumeAddr::none();
+
     if (!flags.m_noTranslate) {
       auto const trans = getTranslation(sk);
       if (auto const addr = trans.addr()) {
@@ -579,11 +581,9 @@ JitResumeAddr handleResume(ResumeFlags flags) {
 
     if (auto const sr = tc::findSrcRec(sk)) {
       if (auto const tca = sr->getTopTranslation()) {
-        if (LIKELY(RID().getJit())) {
-          SKTRACE(2, sk, "handleResume: found %p\n", tca);
-          if (sk.funcEntry()) return JitResumeAddr::transFuncEntry(tca);
-          return JitResumeAddr::trans(tca);
-        }
+        SKTRACE(2, sk, "handleResume: found %p\n", tca);
+        if (sk.funcEntry()) return JitResumeAddr::transFuncEntry(tca);
+        return JitResumeAddr::trans(tca);
       }
     }
     return JitResumeAddr::none();

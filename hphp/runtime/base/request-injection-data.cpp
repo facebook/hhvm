@@ -594,7 +594,8 @@ void RequestInjectionData::updateJit() {
     !(Cfg::Jit::DisabledByHphpd && m_debuggerAttached) &&
     !m_coverage &&
     (rl_typeProfileLocals.isNull() || !isForcedToInterpret()) &&
-    !m_vsdebugDisablesJit;
+    !m_vsdebugDisablesJit &&
+    !m_jitFolding;
 }
 
 void RequestInjectionData::clearFlag(SurpriseFlag flag) {

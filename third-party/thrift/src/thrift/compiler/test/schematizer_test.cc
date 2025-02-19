@@ -362,7 +362,7 @@ void with_schematizer(schematizer::options opts, F&& f) {
   source_manager sm;
   sm.add_virtual_file("my_prog", "abcd");
 
-  t_scope scope{};
+  t_global_scope scope{};
   auto program = std::make_unique<t_program>("my_prog", "my_prog");
 
   // Add some well-known types to the scope.

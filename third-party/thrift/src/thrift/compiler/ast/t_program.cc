@@ -29,7 +29,7 @@ namespace apache::thrift::compiler {
 void t_program::add_definition(std::unique_ptr<t_named> definition) {
   assert(definition != nullptr);
 
-  scope_->add_definition(scope_name(*definition), definition.get());
+  global_scope_->add_definition(scope_name(*definition), definition.get());
 
   if (!definition->explicit_uri()) {
     // Resolve Thrift URI.
@@ -44,7 +44,7 @@ void t_program::add_definition(std::unique_ptr<t_named> definition) {
     }
   }
 
-  scope_->add_def(*definition);
+  global_scope_->add_def(*definition);
 
   // Index the node.
   auto* ptr = definition.get();

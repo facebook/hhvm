@@ -26,11 +26,11 @@
 
 #include <thrift/compiler/ast/t_const_value.h>
 #include <thrift/compiler/ast/t_field.h>
+#include <thrift/compiler/ast/t_global_scope.h>
 #include <thrift/compiler/ast/t_named.h>
 #include <thrift/compiler/ast/t_node.h>
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
-#include <thrift/compiler/ast/t_scope.h>
 #include <thrift/compiler/ast/t_union.h>
 #include <thrift/compiler/diagnostic.h>
 #include <thrift/compiler/parse/lexer.h>
@@ -209,7 +209,7 @@ class ast_builder : public parser_actions {
  private:
   diagnostics_engine& diags_;
   t_program& program_; // The program being built.
-  t_scope* scope_; // The program scope.
+  t_global_scope* global_scope_; // The global scope.
   std::unordered_map<std::string, t_named*> definitions_;
   const parsing_params& params_;
   include_handler on_include_;
@@ -220,9 +220,9 @@ class ast_builder : public parser_actions {
   // ENUM_NAME.ENUM_VALUE.
   void validate_not_ambiguous_enum(
       source_location loc, const std::string& name) {
-    if (scope_->is_ambiguous_enum_value(name)) {
+    if (global_scope_->is_ambiguous_enum_value(name)) {
       std::string possible_enums =
-          scope_->get_fully_qualified_enum_value_names(name).c_str();
+          global_scope_->get_fully_qualified_enum_value_names(name).c_str();
       diags_.warning(
           loc,
           "The ambiguous enum `{}` is defined in more than one place. "
@@ -414,7 +414,7 @@ class ast_builder : public parser_actions {
       std::string name,
       std::unique_ptr<deprecated_annotations> annotations,
       const source_range& range) {
-    t_type_ref result = scope_->ref_type(program_, name, range);
+    t_type_ref result = global_scope_->ref_type(program_, name, range);
 
     if (auto* node = result.get_unresolved_type()) { // A newly created ph.
       set_annotations(node, std::move(annotations));
@@ -481,7 +481,7 @@ class ast_builder : public parser_actions {
       include_handler on_include)
       : diags_(diags),
         program_(program),
-        scope_(program.scope()),
+        global_scope_(program.global_scope()),
         params_(params),
         on_include_(on_include) {}
 
@@ -579,11 +579,12 @@ class ast_builder : public parser_actions {
     auto find_base_service = [&]() -> const t_service* {
       if (base.str.size() != 0) {
         auto base_name = base.str;
-        if (const t_service* result = scope_->find<t_service>(base_name)) {
+        if (const t_service* result =
+                global_scope_->find<t_service>(base_name)) {
           return result;
         }
-        if (const t_service* result =
-                scope_->find<t_service>(program_.scope_name(base_name))) {
+        if (const t_service* result = global_scope_->find<t_service>(
+                program_.scope_name(base_name))) {
           return result;
         }
         diags_.error(
@@ -631,7 +632,8 @@ class ast_builder : public parser_actions {
         qualified_name = program_.scope_name(return_name);
         return_name = qualified_name;
       }
-      if (auto interaction_ptr = scope_->find<t_interaction>(return_name)) {
+      if (auto interaction_ptr =
+              global_scope_->find<t_interaction>(return_name)) {
         interaction = t_type_ref::from_ptr(interaction_ptr, ret.name.range());
       } else if (ret.type) {
         diags_.error(
@@ -846,8 +848,9 @@ class ast_builder : public parser_actions {
     // Register enum value names in scope.
     for (const auto& value : enum_node->consts()) {
       // TODO: Remove the ability to access unscoped enum values.
-      scope_->add_enum_value(program_.scope_name(value), &value);
-      scope_->add_enum_value(program_.scope_name(*enum_node, value), &value);
+      global_scope_->add_enum_value(program_.scope_name(value), &value);
+      global_scope_->add_enum_value(
+          program_.scope_name(*enum_node, value), &value);
     }
 
     add_definition(std::move(enum_node));
@@ -888,11 +891,11 @@ class ast_builder : public parser_actions {
     auto find_const =
         [this](source_location loc, const std::string& name) -> const t_const* {
       validate_not_ambiguous_enum(loc, name);
-      if (const t_const* constant = scope_->find<t_const>(name)) {
+      if (const t_const* constant = global_scope_->find<t_const>(name)) {
         return constant;
       }
       if (const t_const* constant =
-              scope_->find<t_const>(program_.scope_name(name))) {
+              global_scope_->find<t_const>(program_.scope_name(name))) {
         validate_not_ambiguous_enum(loc, program_.scope_name(name));
         return constant;
       }

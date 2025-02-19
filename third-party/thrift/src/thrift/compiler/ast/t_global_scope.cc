@@ -21,7 +21,7 @@
 #include <thrift/compiler/ast/t_const.h>
 #include <thrift/compiler/ast/t_enum_value.h>
 #include <thrift/compiler/ast/t_program.h>
-#include <thrift/compiler/ast/t_scope.h>
+#include <thrift/compiler/ast/t_global_scope.h>
 
 namespace apache::thrift::compiler {
 namespace {
@@ -53,7 +53,7 @@ std::vector<std::string> split_string_by_periods(const std::string& str) {
 
 } // namespace
 
-t_type_ref t_scope::ref_type(
+t_type_ref t_global_scope::ref_type(
     t_program& program, const std::string& name, const source_range& range) {
   std::string scoped_name = name.find_first_of('.') != std::string::npos
       ? name
@@ -78,7 +78,7 @@ t_type_ref t_scope::ref_type(
   return add_placeholder_typedef(std::move(ph));
 }
 
-const t_named* t_scope::add_def(const t_named& node) {
+const t_named* t_global_scope::add_def(const t_named& node) {
   if (!node.uri().empty()) {
     auto result = definitions_by_uri_.emplace(node.uri(), &node);
     if (!result.second) {
@@ -88,7 +88,7 @@ const t_named* t_scope::add_def(const t_named& node) {
   return nullptr;
 }
 
-void t_scope::add_enum_value(std::string name, const t_const* constant) {
+void t_global_scope::add_enum_value(std::string name, const t_const* constant) {
   assert(constant->value()->is_enum());
   const std::string& enum_value_name =
       constant->value()->get_enum_value()->get_name();
@@ -104,7 +104,7 @@ void t_scope::add_enum_value(std::string name, const t_const* constant) {
   definitions_.insert(std::make_pair(std::move(name), constant));
 }
 
-std::string t_scope::get_fully_qualified_enum_value_names(
+std::string t_global_scope::get_fully_qualified_enum_value_names(
     const std::string& name) const {
   // Get just the enum value name from name, which is
   // PROGRAM_NAME.ENUM_VALUE_NAME.

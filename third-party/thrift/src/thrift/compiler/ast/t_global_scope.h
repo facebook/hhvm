@@ -31,12 +31,14 @@
 namespace apache::thrift::compiler {
 
 /**
- * This represents a scope used for looking up types, services and other
- * definitions. Typically, a scope is associated with a t_program. Scopes are
- * not used to determine code generation, but rather to resolve identifiers at
+ * This represents a global-level scope, i.e. a scope shared between all programs parsed by a single compiler
+ * invocation. The global scope is used for looking up types, services and other
+ * definitions that cannot be resolved directly via the relevant program they're used in, e.g. lookups via Uri.
+ * While every program has access to the global scope, only the root t_program creates an instance of it.
+ * Note: Scopes are not used to determine code generation, but rather to resolve identifiers at
  * parse time.
  */
-class t_scope {
+class t_global_scope {
  public:
   void add_definition(std::string name, const t_named* named) {
     definitions_[std::move(name)] = named;

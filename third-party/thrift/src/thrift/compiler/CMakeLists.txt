@@ -75,7 +75,7 @@ add_library(
   ast/t_package.cc
   ast/t_paramlist.cc
   ast/t_program.cc
-  ast/t_scope.cc
+  ast/t_global_scope.cc
   ast/t_set.cc
   ast/t_structured.cc
   ast/t_type.cc

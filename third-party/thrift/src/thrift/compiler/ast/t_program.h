@@ -37,7 +37,7 @@
 #include <thrift/compiler/ast/t_named.h>
 #include <thrift/compiler/ast/t_package.h>
 #include <thrift/compiler/ast/t_primitive_type.h>
-#include <thrift/compiler/ast/t_scope.h>
+#include <thrift/compiler/ast/t_global_scope.h>
 #include <thrift/compiler/ast/t_service.h>
 #include <thrift/compiler/ast/t_set.h>
 #include <thrift/compiler/ast/t_sink.h>
@@ -68,7 +68,7 @@ class t_program : public t_named {
       : t_program(
             std::move(path),
             std::move(full_path),
-            parent ? parent->scope_ : std::make_shared<t_scope>()) {}
+            parent ? parent->global_scope_ : std::make_shared<t_global_scope>()) {}
 
   void set_package(t_package package) { package_ = std::move(package); }
   const t_package& package() const { return package_; }
@@ -206,7 +206,7 @@ class t_program : public t_named {
     return included_programs;
   }
 
-  t_scope* scope() const { return scope_.get(); }
+  t_global_scope* global_scope() const { return global_scope_.get(); }
 
   // Only used in py_frontend.tcc
   const std::map<std::string, std::string>& namespaces() const {
@@ -309,13 +309,13 @@ class t_program : public t_named {
   std::string include_prefix_;
   std::map<std::string, std::string> namespaces_;
   std::unordered_map<std::string, std::vector<std::string>> language_includes_;
-  std::shared_ptr<t_scope> scope_;
+  std::shared_ptr<t_global_scope> global_scope_;
 
   t_program(
-      std::string path, std::string full_path, std::shared_ptr<t_scope> scope)
+      std::string path, std::string full_path, std::shared_ptr<t_global_scope> global_scope)
       : path_(std::move(path)),
         full_path_(std::move(full_path)),
-        scope_(std::move(scope)) {
+        global_scope_(std::move(global_scope)) {
     set_name(compute_name_from_file_path(path_));
   }
 

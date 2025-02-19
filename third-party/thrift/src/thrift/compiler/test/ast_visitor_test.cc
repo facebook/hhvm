@@ -202,7 +202,7 @@ class AstVisitorTest : public base_program_test {
  protected:
   testing::StrictMock<MockAstVisitor> mock_;
   testing::StrictMock<MockAstVisitor> overload_mock_;
-  t_scope scope_;
+  t_global_scope scope_;
 
  private:
   V visitor_;

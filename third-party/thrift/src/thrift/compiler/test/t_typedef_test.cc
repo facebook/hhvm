@@ -64,7 +64,7 @@ TEST(TypedefTest, bad_true_type) {
 
 TEST(TypedefTest, inherited_annotations) {
   t_program program("test", "test");
-  t_scope scope;
+  t_global_scope scope;
   t_typedef t1(&program, &t_primitive_type::t_i32(), "t1", &scope);
   t_typedef t2(&program, &t1, "t2", &scope);
   t_typedef t3(&program, &t2, "t3", &scope);

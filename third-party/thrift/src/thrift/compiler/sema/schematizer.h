@@ -29,7 +29,7 @@ namespace apache::thrift::compiler {
 
 class t_enum;
 class t_program;
-class t_scope;
+class t_global_scope;
 class t_service;
 class t_structured;
 class t_typedef;
@@ -66,8 +66,9 @@ class schematizer {
           include_source_ranges(true) {}
   };
 
-  explicit schematizer(const t_scope& scope, source_manager& sm, options opts)
-      : scope_(scope), sm_(sm), opts_(std::move(opts)) {}
+  explicit schematizer(
+      const t_global_scope& global_scope, source_manager& sm, options opts)
+      : global_scope_(global_scope), sm_(sm), opts_(std::move(opts)) {}
 
   // Creates a constant of type schema.Struct describing the argument.
   // https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/schema.thrift
@@ -92,7 +93,7 @@ class schematizer {
   static std::string name_schema(source_manager& sm, const t_program& node);
 
  private:
-  const t_scope& scope_;
+  const t_global_scope& global_scope_;
   source_manager& sm_;
   options opts_;
   std::unordered_map<const t_program*, std::string> program_checksums_;

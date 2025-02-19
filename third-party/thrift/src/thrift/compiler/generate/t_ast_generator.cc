@@ -232,13 +232,15 @@ type::Schema t_ast_generator::gen_schema(
     }
   };
 
-  if (!root_program.scope()->find_by_uri("facebook.com/thrift/type/TypeUri")) {
+  if (!root_program.global_scope()->find_by_uri(
+          "facebook.com/thrift/type/TypeUri")) {
     throw std::runtime_error(
         "thrift/lib/thrift/schema.thrift must be present in one of the include paths.");
   }
 
   schema_opts.intern_value = intern_value;
-  schematizer schema_source(*root_program.scope(), source_mgr, schema_opts);
+  schematizer schema_source(
+      *root_program.global_scope(), source_mgr, schema_opts);
   const_ast_visitor visitor;
   bool is_root_program = true;
   visitor.add_program_visitor([&](const t_program& program) {

@@ -215,7 +215,7 @@ bool has_runtime_annotation(const t_named& named) {
 }
 
 bool has_schema(source_manager& sm, const t_program& program) {
-  return program.scope()->find(
+  return program.global_scope()->find(
       program.scope_name(schematizer::name_schema(sm, program)));
 }
 
@@ -910,7 +910,7 @@ class cpp_mstch_service : public mstch_service {
   }
 
   mstch::node definition_key() {
-    schematizer s(*service_->program()->scope(), sm_, {});
+    schematizer s(*service_->program()->global_scope(), sm_, {});
     return escape_binary_string(s.identify_definition(*service_));
   }
   mstch::node definition_key_length() {

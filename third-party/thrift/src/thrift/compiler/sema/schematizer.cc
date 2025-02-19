@@ -28,9 +28,9 @@
 #include <thrift/compiler/ast/t_const.h>
 #include <thrift/compiler/ast/t_enum.h>
 #include <thrift/compiler/ast/t_exception.h>
+#include <thrift/compiler/ast/t_global_scope.h>
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
-#include <thrift/compiler/ast/t_scope.h>
 #include <thrift/compiler/ast/t_service.h>
 #include <thrift/compiler/ast/t_structured.h>
 #include <thrift/compiler/ast/t_typedef.h>
@@ -77,7 +77,7 @@ t_type::value_type from_const_value_type(
 
 t_type_ref schematizer::std_type(std::string_view uri) {
   return t_type_ref::from_req_ptr(
-      static_cast<const t_type*>(scope_.find_by_uri(uri)));
+      static_cast<const t_type*>(global_scope_.find_by_uri(uri)));
 }
 
 // Returns the `TypeUri` type & the corresponding Uri value for the given node
@@ -415,9 +415,9 @@ void schematize_recursively(
 
 const t_enum* find_enum(const t_program* program, const std::string& enum_uri) {
   // May be null in unit tests.
-  return program
-      ? dynamic_cast<const t_enum*>(program->scope()->find_by_uri(enum_uri))
-      : nullptr;
+  return program ? dynamic_cast<const t_enum*>(
+                       program->global_scope()->find_by_uri(enum_uri))
+                 : nullptr;
 }
 
 void add_qualifier(const t_enum* t_enum, t_const_value& schema, int enum_val) {
@@ -1013,7 +1013,7 @@ int64_t schematizer::identify_program(const t_program& node) {
 
 std::string schematizer::name_schema(
     source_manager& sm, const t_program& node) {
-  schematizer s(*node.scope(), sm, {});
+  schematizer s(*node.global_scope(), sm, {});
   return fmt::format(
       "_fbthrift_schema_{:x}", static_cast<uint64_t>(s.identify_program(node)));
 }

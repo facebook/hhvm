@@ -139,7 +139,7 @@ let exec_command_with_config
 
   let (config, local_config) =
     ServerConfig.load
-      ~silent:true
+      ~silent:(not @@ ClientArgs.dump_config command)
       ~from
       ~ai_options:None
       ~cli_config_overrides:

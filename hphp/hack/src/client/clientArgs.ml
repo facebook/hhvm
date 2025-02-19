@@ -174,6 +174,8 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
   let desc = ref (ClientCommand.command_name cmd) in
   (* custom behaviors *)
   let current_option = ref None in
+  let dump_config = ref false in
+
   let set_from x () = from := x in
   let single_files = ref [] in
   let set_mode ?(validate = true) x =
@@ -293,6 +295,7 @@ let parse_check_args cmd ~from_default : ClientEnv.client_check_env =
           end,
         " (mode) for each entry in input list get list of what depends on it [file:line:character list]"
       );
+      ("--dump-config", Arg.Set dump_config, " Output configuration");
       ( "--dump-full-fidelity-parse",
         Arg.String (fun x -> set_mode (MODE_FULL_FIDELITY_PARSE x)),
         "" );
@@ -864,6 +867,7 @@ rewrite to the function names to something like `foo_1` and `foo_2`.
     desc = !desc;
     is_interactive;
     warning_switches = List.rev !warning_switches;
+    dump_config = !dump_config;
   }
 
 let parse_start_env command ~from_default =
@@ -1267,5 +1271,9 @@ let from = function
   | CDownloadSavedState { ClientDownloadSavedState.from; _ }
   | CRage { ClientRage.from; _ } ->
     from
+
+let dump_config = function
+  | CCheck { ClientEnv.dump_config; _ } -> dump_config
+  | _ -> false
 
 let is_interactive cmd = from cmd |> is_interactive

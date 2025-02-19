@@ -15,3 +15,5 @@ val from : ClientCommand.heavy_command -> string
 val is_interactive : ClientCommand.heavy_command -> bool
 
 val config : ClientCommand.heavy_command -> (string * string) list option
+
+val dump_config : ClientCommand.heavy_command -> bool

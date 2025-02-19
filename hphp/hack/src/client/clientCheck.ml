@@ -128,6 +128,7 @@ let connect
     desc = _;
     is_interactive = _;
     warning_switches = _;
+    dump_config = _;
   } =
     args
   in

@@ -51,6 +51,7 @@ let main (env : ClientEnv.client_check_env) (config : ServerLocalConfig.t) :
     desc = _;
     is_interactive = _;
     warning_switches = _;
+    dump_config = _;
   } =
     env
   in

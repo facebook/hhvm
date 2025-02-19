@@ -565,6 +565,7 @@ let env =
       preexisting_warnings = false;
       is_interactive = false;
       warning_switches = [];
+      dump_config = false;
     }
 
 let make_error_filter env =

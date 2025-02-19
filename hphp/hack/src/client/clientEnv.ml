@@ -110,6 +110,7 @@ type client_check_env = {
       (** Determined based on the --from option. Affects UI behaviour in a
       number of places, e.g., error formatting and spinners. *)
   warning_switches: Filter_errors.switch list;
+  dump_config: bool;
 }
 
 let string_to_rename_mode = function

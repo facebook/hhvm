@@ -1537,6 +1537,7 @@ cdef class ComplexUnion(thrift.py3.types.Union):
         return thrift.util.converter.to_py_struct(py_deprecated_types.ComplexUnion, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class AnException(thrift.py3.exceptions.GeneratedError):
     __module__ = _fbthrift__module_name__
 
@@ -1802,6 +1803,7 @@ cdef class AnException(thrift.py3.exceptions.GeneratedError):
         return thrift.util.converter.to_py_struct(py_deprecated_types.AnException, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class AnotherException(thrift.py3.exceptions.GeneratedError):
     __module__ = _fbthrift__module_name__
 

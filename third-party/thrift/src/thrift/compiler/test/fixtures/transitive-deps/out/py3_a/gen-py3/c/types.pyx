@@ -177,6 +177,7 @@ cdef class C(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.C, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class E(thrift.py3.exceptions.GeneratedError):
     __module__ = _fbthrift__module_name__
 

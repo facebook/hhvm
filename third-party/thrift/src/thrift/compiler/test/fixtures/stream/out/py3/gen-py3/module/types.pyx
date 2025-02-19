@@ -63,6 +63,7 @@ cdef object get_types_reflection():
     )
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class FooStreamEx(thrift.py3.exceptions.GeneratedError):
     __module__ = _fbthrift__module_name__
 
@@ -161,6 +162,7 @@ cdef class FooStreamEx(thrift.py3.exceptions.GeneratedError):
         return thrift.util.converter.to_py_struct(py_deprecated_types.FooStreamEx, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class FooEx(thrift.py3.exceptions.GeneratedError):
     __module__ = _fbthrift__module_name__
 
@@ -259,6 +261,7 @@ cdef class FooEx(thrift.py3.exceptions.GeneratedError):
         return thrift.util.converter.to_py_struct(py_deprecated_types.FooEx, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class FooEx2(thrift.py3.exceptions.GeneratedError):
     __module__ = _fbthrift__module_name__
 

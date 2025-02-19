@@ -127,9 +127,9 @@ cdef object get_types_reflection():
 {{#program:filtered_structs}}
 {{^struct:union?}}
 @__cython.auto_pickle(False)
-{{^struct:exception?}}{{^struct:allow_inheritance?}}
+{{^struct:allow_inheritance?}}
 @__cython.final
-{{/struct:allow_inheritance?}}{{/struct:exception?}}
+{{/struct:allow_inheritance?}}
 cdef class {{struct:name}}({{> types/python_struct_class}}):
     __module__ = _fbthrift__module_name__
 

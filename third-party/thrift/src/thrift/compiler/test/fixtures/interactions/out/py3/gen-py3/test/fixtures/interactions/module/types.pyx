@@ -65,6 +65,7 @@ cdef object get_types_reflection():
     )
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class CustomException(thrift.py3.exceptions.GeneratedError):
     __module__ = _fbthrift__module_name__
 

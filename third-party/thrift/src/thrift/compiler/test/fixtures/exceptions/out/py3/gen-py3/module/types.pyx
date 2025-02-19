@@ -61,6 +61,7 @@ cdef object get_types_reflection():
     )
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Fiery(thrift.py3.exceptions.GeneratedError):
     __module__ = _fbthrift__module_name__
 
@@ -170,6 +171,7 @@ cdef class Fiery(thrift.py3.exceptions.GeneratedError):
         return thrift.util.converter.to_py_struct(py_deprecated_types.Fiery, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Serious(thrift.py3.exceptions.GeneratedError):
     __module__ = _fbthrift__module_name__
 
@@ -281,6 +283,7 @@ cdef class Serious(thrift.py3.exceptions.GeneratedError):
         return thrift.util.converter.to_py_struct(py_deprecated_types.Serious, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class ComplexFieldNames(thrift.py3.exceptions.GeneratedError):
     __module__ = _fbthrift__module_name__
 
@@ -398,6 +401,7 @@ cdef class ComplexFieldNames(thrift.py3.exceptions.GeneratedError):
         return thrift.util.converter.to_py_struct(py_deprecated_types.ComplexFieldNames, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class CustomFieldNames(thrift.py3.exceptions.GeneratedError):
     __module__ = _fbthrift__module_name__
 
@@ -515,6 +519,7 @@ cdef class CustomFieldNames(thrift.py3.exceptions.GeneratedError):
         return thrift.util.converter.to_py_struct(py_deprecated_types.CustomFieldNames, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class ExceptionWithPrimitiveField(thrift.py3.exceptions.GeneratedError):
     __module__ = _fbthrift__module_name__
 
@@ -632,6 +637,7 @@ cdef class ExceptionWithPrimitiveField(thrift.py3.exceptions.GeneratedError):
         return thrift.util.converter.to_py_struct(py_deprecated_types.ExceptionWithPrimitiveField, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class ExceptionWithStructuredAnnotation(thrift.py3.exceptions.GeneratedError):
     __module__ = _fbthrift__module_name__
 
@@ -749,6 +755,7 @@ cdef class ExceptionWithStructuredAnnotation(thrift.py3.exceptions.GeneratedErro
         return thrift.util.converter.to_py_struct(py_deprecated_types.ExceptionWithStructuredAnnotation, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class Banal(thrift.py3.exceptions.GeneratedError):
     __module__ = _fbthrift__module_name__
 

@@ -525,6 +525,7 @@ cdef class CompatibleWithKeywordSink(thrift.py3.types.Struct):
         return thrift.util.converter.to_py_struct(py_deprecated_types.CompatibleWithKeywordSink, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class InitialException(thrift.py3.exceptions.GeneratedError):
     __module__ = _fbthrift__module_name__
 
@@ -631,6 +632,7 @@ cdef class InitialException(thrift.py3.exceptions.GeneratedError):
         return thrift.util.converter.to_py_struct(py_deprecated_types.InitialException, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class SinkException1(thrift.py3.exceptions.GeneratedError):
     __module__ = _fbthrift__module_name__
 
@@ -737,6 +739,7 @@ cdef class SinkException1(thrift.py3.exceptions.GeneratedError):
         return thrift.util.converter.to_py_struct(py_deprecated_types.SinkException1, self)
 
 @__cython.auto_pickle(False)
+@__cython.final
 cdef class SinkException2(thrift.py3.exceptions.GeneratedError):
     __module__ = _fbthrift__module_name__
 

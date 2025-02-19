@@ -41,7 +41,7 @@ struct OriginalStruct {
   20032: string f20032; // "def"
   // 20033: string f20033; // "ghi"
   20034: list<i32> f20034; // [0]
-// 20035: list<i32> f20035; // [1]
+  // 20035: list<i32> f20035; // [1]
 }
 
 struct UpdatedStruct {

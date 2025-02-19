@@ -1495,8 +1495,8 @@ struct MountAccesses {
 struct GetAccessCountsResult {
   1: map<pid_t, binary> cmdsByPid;
   2: map<PathString, MountAccesses> accessesByMount;
-// TODO: Count the number of thrift requests
-// 3: map<pid_t, AccessCount> thriftAccesses
+  // TODO: Count the number of thrift requests
+  // 3: map<pid_t, AccessCount> thriftAccesses
 }
 
 enum TracePointEvent {

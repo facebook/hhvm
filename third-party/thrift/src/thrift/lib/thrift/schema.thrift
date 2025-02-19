@@ -213,7 +213,7 @@ struct DocBlock {
  */
 struct InterfaceRef {
   1: standard.TypeUri uri;
-// TODO: symbol span
+  // TODO: symbol span
 }
 
 /**

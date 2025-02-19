@@ -98,25 +98,25 @@ void setToIntrinsicDefault(void* value, const FieldInfo& info) {
       break;
     }
     case protocol::TType::T_I64:
-      reinterpret_cast<void (*)(void*, std::int64_t)>(typeInfo.set)(value, 0);
+      reinterpret_cast<void* (*)(void*, std::int64_t)>(typeInfo.set)(value, 0);
       break;
     case protocol::TType::T_I32:
-      reinterpret_cast<void (*)(void*, std::int32_t)>(typeInfo.set)(value, 0);
+      reinterpret_cast<void* (*)(void*, std::int32_t)>(typeInfo.set)(value, 0);
       break;
     case protocol::TType::T_I16:
-      reinterpret_cast<void (*)(void*, std::int16_t)>(typeInfo.set)(value, 0);
+      reinterpret_cast<void* (*)(void*, std::int16_t)>(typeInfo.set)(value, 0);
       break;
     case protocol::TType::T_BYTE:
-      reinterpret_cast<void (*)(void*, std::int8_t)>(typeInfo.set)(value, 0);
+      reinterpret_cast<void* (*)(void*, std::int8_t)>(typeInfo.set)(value, 0);
       break;
     case protocol::TType::T_BOOL:
-      reinterpret_cast<void (*)(void*, bool)>(typeInfo.set)(value, false);
+      reinterpret_cast<void* (*)(void*, bool)>(typeInfo.set)(value, false);
       break;
     case protocol::TType::T_DOUBLE:
-      reinterpret_cast<void (*)(void*, double)>(typeInfo.set)(value, 0.0);
+      reinterpret_cast<void* (*)(void*, double)>(typeInfo.set)(value, 0.0);
       break;
     case protocol::TType::T_FLOAT:
-      reinterpret_cast<void (*)(void*, float)>(typeInfo.set)(value, 0.0);
+      reinterpret_cast<void* (*)(void*, float)>(typeInfo.set)(value, 0.0);
       break;
     case protocol::TType::T_STRING: {
       switch (*static_cast<const StringFieldType*>(typeInfoExt)) {
@@ -125,7 +125,7 @@ void setToIntrinsicDefault(void* value, const FieldInfo& info) {
           break;
         case StringFieldType::StringView:
         case StringFieldType::BinaryStringView:
-          reinterpret_cast<void (*)(void*, const std::string&)>(typeInfo.set)(
+          reinterpret_cast<void* (*)(void*, const std::string&)>(typeInfo.set)(
               value, "");
           break;
         case StringFieldType::Binary:

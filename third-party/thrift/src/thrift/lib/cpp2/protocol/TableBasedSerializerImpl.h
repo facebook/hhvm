@@ -71,7 +71,7 @@ inline OptionalThriftValue getValue(
                              : folly::none;
 }
 
-FOLLY_ERASE void* invokeSet(VoidFuncPtr set, void* outValuePtr) {
+FOLLY_ERASE void* invokeSet(VoidPtrFuncPtr set, void* outValuePtr) {
   return reinterpret_cast<void* (*)(void*)>(set)(outValuePtr);
 }
 
@@ -187,48 +187,49 @@ void readThriftValue(
     case protocol::TType::T_I64: {
       std::int64_t temp;
       iprot->readI64(temp);
-      reinterpret_cast<void (*)(void*, std::int64_t)>(typeInfo.set)(
+      reinterpret_cast<void* (*)(void*, std::int64_t)>(typeInfo.set)(
           outValuePtr, temp);
       break;
     }
     case protocol::TType::T_I32: {
       std::int32_t temp;
       iprot->readI32(temp);
-      reinterpret_cast<void (*)(void*, std::int32_t)>(typeInfo.set)(
+      reinterpret_cast<void* (*)(void*, std::int32_t)>(typeInfo.set)(
           outValuePtr, temp);
       break;
     }
     case protocol::TType::T_I16: {
       std::int16_t temp;
       iprot->readI16(temp);
-      reinterpret_cast<void (*)(void*, std::int16_t)>(typeInfo.set)(
+      reinterpret_cast<void* (*)(void*, std::int16_t)>(typeInfo.set)(
           outValuePtr, temp);
       break;
     }
     case protocol::TType::T_BYTE: {
       std::int8_t temp;
       iprot->readByte(temp);
-      reinterpret_cast<void (*)(void*, std::int8_t)>(typeInfo.set)(
+      reinterpret_cast<void* (*)(void*, std::int8_t)>(typeInfo.set)(
           outValuePtr, temp);
       break;
     }
     case protocol::TType::T_BOOL: {
       bool temp;
       iprot->readBool(temp);
-      reinterpret_cast<void (*)(void*, bool)>(typeInfo.set)(outValuePtr, temp);
+      reinterpret_cast<void* (*)(void*, bool)>(typeInfo.set)(outValuePtr, temp);
       break;
     }
     case protocol::TType::T_DOUBLE: {
       double temp;
       iprot->readDouble(temp);
-      reinterpret_cast<void (*)(void*, double)>(typeInfo.set)(
+      reinterpret_cast<void* (*)(void*, double)>(typeInfo.set)(
           outValuePtr, temp);
       break;
     }
     case protocol::TType::T_FLOAT: {
       float temp;
       iprot->readFloat(temp);
-      reinterpret_cast<void (*)(void*, float)>(typeInfo.set)(outValuePtr, temp);
+      reinterpret_cast<void* (*)(void*, float)>(typeInfo.set)(
+          outValuePtr, temp);
       break;
     }
     case protocol::TType::T_STRING: {
@@ -239,7 +240,7 @@ void readThriftValue(
         case StringFieldType::StringView: {
           std::string temp;
           iprot->readString(temp);
-          reinterpret_cast<void (*)(void*, const std::string&)>(typeInfo.set)(
+          reinterpret_cast<void* (*)(void*, const std::string&)>(typeInfo.set)(
               outValuePtr, temp);
           break;
         }
@@ -249,7 +250,7 @@ void readThriftValue(
         case StringFieldType::BinaryStringView: {
           std::string temp;
           iprot->readBinary(temp);
-          reinterpret_cast<void (*)(void*, const std::string&)>(typeInfo.set)(
+          reinterpret_cast<void* (*)(void*, const std::string&)>(typeInfo.set)(
               outValuePtr, temp);
           break;
         }
@@ -260,7 +261,7 @@ void readThriftValue(
           } else {
             folly::IOBuf temp;
             iprot->readBinary(temp);
-            reinterpret_cast<void (*)(void*, const folly::IOBuf&)>(
+            reinterpret_cast<void* (*)(void*, const folly::IOBuf&)>(
                 typeInfo.set)(outValuePtr, temp);
           }
           break;

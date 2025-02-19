@@ -33,7 +33,7 @@ using OptionalThriftValue = folly::Optional<ThriftValue>;
 /**
  * See `TypeInfo.set`
  */
-using VoidFuncPtr = void (*)(void* /* outValuePtr */);
+using VoidPtrFuncPtr = void* (*)(...);
 
 struct TypeInfo {
   protocol::TType type;
@@ -78,16 +78,17 @@ struct TypeInfo {
    *   `TType::T_DOUBLE` -> `double`
    *   `TType::T_FLOAT` -> `float`
    *   `TType::T_STRING` -> `const std::string&` or `const folly::IOBuf&`
+   *   For the TTypes above, `set` always returns `nullptr`.
    *
    *   `TType::T_STRUCT` -> `const TypeInfo&`. Returns `void*`
    *
-   *    For the following TTypes, the `set` function expects a `void*` argument,
-   *    and returns a `void*`:
+   *   For the following TTypes, the `set` function expects a `void*` argument,
+   *   and returns a `void*`:
    *     `TType::T_MAP`
    *     `TType::T_SET`
    *     `TType::T_LIST`
    */
-  VoidFuncPtr set;
+  VoidPtrFuncPtr set;
 
   // A pointer to additional type information, e.g. `MapFieldExt` for a map.
   const void* typeExt;

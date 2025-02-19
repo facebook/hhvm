@@ -350,7 +350,7 @@ class ListTypeInfo {
         typeinfo_{
             protocol::TType::T_LIST,
             getStruct,
-            reinterpret_cast<detail::VoidFuncPtr>(setContainer),
+            reinterpret_cast<detail::VoidPtrFuncPtr>(setContainer),
             &ext_,
         } {}
   inline const detail::TypeInfo* get() const { return &typeinfo_; }
@@ -402,7 +402,7 @@ class MutableListTypeInfo {
         typeinfo_{
             protocol::TType::T_LIST,
             getStruct,
-            reinterpret_cast<detail::VoidFuncPtr>(setList),
+            reinterpret_cast<detail::VoidPtrFuncPtr>(setList),
             &ext_,
         } {}
 
@@ -451,7 +451,7 @@ class SetTypeInfoTemplate {
         typeinfo_{
             protocol::TType::T_SET,
             getStruct,
-            reinterpret_cast<detail::VoidFuncPtr>(T::clear),
+            reinterpret_cast<detail::VoidPtrFuncPtr>(T::clear),
             &ext_,
         } {}
   const detail::TypeInfo* get() const { return &typeinfo_; }
@@ -615,7 +615,7 @@ class MapTypeInfo {
         typeinfo_{
             protocol::TType::T_MAP,
             getStruct,
-            reinterpret_cast<detail::VoidFuncPtr>(setContainer),
+            reinterpret_cast<detail::VoidPtrFuncPtr>(setContainer),
             &ext_,
         } {}
   const detail::TypeInfo* get() const { return &typeinfo_; }
@@ -708,7 +708,7 @@ class MutableMapTypeInfo {
         tableBasedSerializerTypeinfo_{
             protocol::TType::T_MAP,
             getStruct,
-            reinterpret_cast<detail::VoidFuncPtr>(setMutableMap),
+            reinterpret_cast<detail::VoidPtrFuncPtr>(setMutableMap),
             &tableBasedSerializerMapFieldExt_,
         } {}
   const detail::TypeInfo* get() const { return &tableBasedSerializerTypeinfo_; }

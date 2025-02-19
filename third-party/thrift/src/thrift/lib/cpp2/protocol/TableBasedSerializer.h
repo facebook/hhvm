@@ -118,13 +118,15 @@ struct FieldInfo final {
   const TypeInfo* typeInfo;
 };
 
+using VoidVoidPtrFuncPtr = void (*)(void* /* object */);
+
 struct UnionExt final {
   /**
    * Clears the given union data object.
    *
    * Should be called prior to setting any field.
    */
-  VoidFuncPtr clear;
+  VoidVoidPtrFuncPtr clear;
 
   /**
    * Offset (in bytes) from the start of the corresponding union data object to
@@ -173,7 +175,7 @@ struct UnionExt final {
    * `placementNewUnionValue()` template methods, to default-create new values
    * directly in the given (allocated) memory (via placement-new).
    */
-  VoidFuncPtr initMember[];
+  VoidVoidPtrFuncPtr initMember[];
 
   FOLLY_POP_WARNING
 };
@@ -184,11 +186,11 @@ struct UnionExt final {
  */
 template <std::int16_t NumFields>
 struct UnionExtN final {
-  VoidFuncPtr clear;
+  void (*clear)(void* /* object */);
   ptrdiff_t unionTypeOffset;
   int (*getActiveId)(const void*);
   void (*setActiveId)(void*, int);
-  VoidFuncPtr initMember[NumFields];
+  VoidVoidPtrFuncPtr initMember[NumFields];
 };
 
 /**
@@ -461,24 +463,28 @@ std::enable_if_t<is_unique_ptr_v<PtrType>, void*> set(void* object) {
 }
 
 template <typename ObjectType, typename PrimitiveType>
-enable_if_not_smart_ptr_t<ObjectType> set(void* object, PrimitiveType val) {
+enable_if_not_smart_ptr_t<ObjectType, void*> set(
+    void* object, PrimitiveType val) {
   *static_cast<ObjectType*>(object) = static_cast<ObjectType>(val);
+  return nullptr;
 }
 
 template <typename PtrType, typename PrimitiveType>
-std::enable_if_t<is_unique_ptr_v<PtrType>> set(
+std::enable_if_t<is_unique_ptr_v<PtrType>, void*> set(
     void* object, PrimitiveType val) {
   using Element = typename PtrType::element_type;
   *static_cast<PtrType*>(object) =
       std::make_unique<Element>(static_cast<Element>(val));
+  return nullptr;
 }
 
 template <typename PtrType, typename PrimitiveType>
-std::enable_if_t<is_shared_ptr_v<PtrType>> set(
+std::enable_if_t<is_shared_ptr_v<PtrType>, void*> set(
     void* object, PrimitiveType val) {
   using Element = typename PtrType::element_type;
   *static_cast<PtrType*>(object) =
       std::make_shared<Element>(static_cast<Element>(val));
+  return nullptr;
 }
 
 template <typename ValueType>
@@ -744,7 +750,7 @@ template <typename ElemTypeClass, typename T>
 const TypeInfo TypeToInfo<type_class::set<ElemTypeClass>, T>::typeInfo = {
     /* .type */ protocol::TType::T_SET,
     /* .get */ getDerefFuncPtr<T>(),
-    /* .set */ reinterpret_cast<VoidFuncPtr>(set<T>),
+    /* .set */ reinterpret_cast<VoidPtrFuncPtr>(set<T>),
     /* .typeExt */
     &TypeToInfo<type_class::set<ElemTypeClass>, T>::ext,
 };
@@ -770,7 +776,7 @@ template <typename ElemTypeClass, typename T>
 const TypeInfo TypeToInfo<type_class::list<ElemTypeClass>, T>::typeInfo = {
     /* .type */ protocol::TType::T_LIST,
     /* .get */ getDerefFuncPtr<T>(),
-    /* .set */ reinterpret_cast<VoidFuncPtr>(set<T>),
+    /* .set */ reinterpret_cast<VoidPtrFuncPtr>(set<T>),
     /* .typeExt */ &ext,
 };
 
@@ -799,7 +805,7 @@ const TypeInfo
     TypeToInfo<type_class::map<KeyTypeClass, ValTypeClass>, T>::typeInfo = {
         /* .type */ protocol::TType::T_MAP,
         /* .get */ getDerefFuncPtr<T>(),
-        /* .set */ reinterpret_cast<VoidFuncPtr>(set<T>),
+        /* .set */ reinterpret_cast<VoidPtrFuncPtr>(set<T>),
         /* .typeExt */ &ext,
 };
 
@@ -818,7 +824,7 @@ const TypeInfo
       enable_if_smart_ptr_t<T>>::typeInfo = {                             \
       TypeToInfo<type_class::TypeClass, struct_type>::typeInfo.type,      \
       get<T>,                                                             \
-      reinterpret_cast<VoidFuncPtr>(set<T>),                              \
+      reinterpret_cast<VoidPtrFuncPtr>(set<T>),                           \
       TypeToInfo<type_class::TypeClass, struct_type>::typeInfo.typeExt,   \
   }
 
@@ -843,7 +849,7 @@ THRIFT_DEFINE_STRUCT_PTR_TYPE_INFO(variant);
           typeInfo = {                                                        \
               TypeToInfo<type_class::TypeClass, numeric_type>::typeInfo.type, \
               get<underlying_type, T>,                                        \
-              reinterpret_cast<VoidFuncPtr>(set<T, underlying_type>),         \
+              reinterpret_cast<VoidPtrFuncPtr>(set<T, underlying_type>),      \
               nullptr,                                                        \
   }
 

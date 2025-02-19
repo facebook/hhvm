@@ -26,6 +26,9 @@ type headersKeyType int
 // RequestHeadersKey is a context key.
 const RequestHeadersKey headersKeyType = 0
 
+// ResponseHeadersKey is a context key.
+const ResponseHeadersKey headersKeyType = 1
+
 // SetRequestHeaders sets the Headers in the protocol to send with the request.
 // These headers will be written via the Write method, inside the Call method for each generated request.
 // These Headers will be cleared with Flush, as they are not persistent.
@@ -45,4 +48,22 @@ func SetRequestHeaders(ctx context.Context, protocol Protocol) error {
 		protocol.SetRequestHeader(k, v)
 	}
 	return nil
+}
+
+func setResponseHeaders(ctx context.Context, responseHeaders map[string]string) {
+	if ctx == nil {
+		return
+	}
+	responseHeadersMapIf := ctx.Value(ResponseHeadersKey)
+	if responseHeadersMapIf == nil {
+		return
+	}
+	responseHeadersMap, ok := responseHeadersMapIf.(map[string]string)
+	if !ok {
+		return
+	}
+
+	for k, v := range responseHeaders {
+		responseHeadersMap[k] = v
+	}
 }

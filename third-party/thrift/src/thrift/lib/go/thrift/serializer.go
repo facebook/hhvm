@@ -55,17 +55,17 @@ func NewSimpleJSONSerializer() *Serializer {
 }
 
 // EncodeCompact serializes msg using the compact format
-func EncodeCompact(msg types.Struct) ([]byte, error) {
+func EncodeCompact(msg types.WritableStruct) ([]byte, error) {
 	return NewCompactSerializer().Write(msg)
 }
 
 // EncodeBinary serializes msg using the binary format
-func EncodeBinary(msg types.Struct) ([]byte, error) {
+func EncodeBinary(msg types.WritableStruct) ([]byte, error) {
 	return NewBinarySerializer().Write(msg)
 }
 
 // WriteString writes msg to the serializer and returns it as a string
-func (s *Serializer) WriteString(msg types.Struct) (string, error) {
+func (s *Serializer) WriteString(msg types.WritableStruct) (string, error) {
 	serBytes, err := s.Write(msg)
 	if err != nil {
 		return "", err
@@ -74,7 +74,7 @@ func (s *Serializer) WriteString(msg types.Struct) (string, error) {
 }
 
 // Write writes msg to the serializer and returns it as a byte array
-func (s *Serializer) Write(msg types.Struct) ([]byte, error) {
+func (s *Serializer) Write(msg types.WritableStruct) ([]byte, error) {
 	s.transport.Reset()
 
 	if err := msg.Write(s.encoder); err != nil {

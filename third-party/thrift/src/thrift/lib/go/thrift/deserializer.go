@@ -61,22 +61,22 @@ func NewSimpleJSONDeserializer() *Deserializer {
 }
 
 // DecodeCompact deserializes a compact format message
-func DecodeCompact(data []byte, msg types.Struct) error {
+func DecodeCompact(data []byte, msg types.ReadableStruct) error {
 	return NewCompactDeserializer().Read(msg, data)
 }
 
 // DecodeBinary deserializes a binary format message
-func DecodeBinary(data []byte, msg types.Struct) error {
+func DecodeBinary(data []byte, msg types.ReadableStruct) error {
 	return NewBinaryDeserializer().Read(msg, data)
 }
 
 // ReadString deserializes a Thrift struct from a string
-func (t *Deserializer) ReadString(msg types.Struct, s string) error {
+func (t *Deserializer) ReadString(msg types.ReadableStruct, s string) error {
 	return t.Read(msg, []byte(s))
 }
 
 // Read deserializes a Thrift struct from a byte slice
-func (t *Deserializer) Read(msg types.Struct, b []byte) error {
+func (t *Deserializer) Read(msg types.ReadableStruct, b []byte) error {
 	// Reset the internal buffer (while keeping the underlying storage)
 	t.transport.Reset()
 

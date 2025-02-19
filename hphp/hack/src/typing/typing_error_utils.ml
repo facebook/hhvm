@@ -5520,6 +5520,25 @@ end = struct
       [],
       User_error_flags.empty )
 
+  let string_to_class_pointer pos cls_name =
+    let cls_name = Utils.strip_ns cls_name in
+    let classname_ty = Printf.sprintf "classname<%s>" cls_name in
+    let classname_ty_md = Markdown_lite.md_codify classname_ty in
+    let class_ptr_ty = Printf.sprintf "class<%s>" cls_name in
+    let class_ptr_ty_md = Markdown_lite.md_codify class_ptr_ty in
+    ( Error_code.ClassPointerToString,
+      lazy
+        ( pos,
+          "It is no longer allowed to use a "
+          ^ classname_ty_md
+          ^ " in this position. Please use a "
+          ^ class_ptr_ty_md
+          ^ " instead." ),
+      lazy [],
+      lazy Explanation.empty,
+      [],
+      User_error_flags.empty )
+
   let to_error t ~env : error =
     let open Typing_error.Primary in
     match t with
@@ -6105,6 +6124,8 @@ end = struct
     | Class_const_to_string { pos; cls_name } ->
       class_const_to_string pos cls_name
     | Class_pointer_to_string { pos; ty } -> class_pointer_to_string pos ty
+    | String_to_class_pointer { pos; cls_name } ->
+      string_to_class_pointer pos cls_name
     | Optional_parameter_not_supported pos ->
       optional_parameter_not_supported pos
     | Optional_parameter_not_abstract pos -> optional_parameter_not_abstract pos

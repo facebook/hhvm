@@ -1,1 +1,1 @@
---config 'class_pointer_levels={"param": 2, "return": 2, "prop": 2, "concat": 2, "const": 2, "enum": 2, "arraykey": 3}'
+--config 'class_pointer_levels={"param": 2, "return": 2, "prop": 2, "concat": 2, "const": 2, "enum": 2, "arraykey": 3, "classname_class": 2}'

@@ -777,6 +777,7 @@ module Typing = struct
     | InvalidRecursiveType [@value 4485]
     | StaticCallOnTraitRequireThisAs [@value 4486]
     | NeedsConcreteOverride [@value 4487]
+    | StringToClassPointer [@value 4488]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

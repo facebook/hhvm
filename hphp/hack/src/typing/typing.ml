@@ -10049,7 +10049,20 @@ end = struct
         | (_, Tnewtype (classname, [the_cls], as_ty))
           when String.equal classname SN.Classes.cClassname ->
           let wrap ty = mk (Reason.none, Tnewtype (classname, [ty], as_ty)) in
-          resolve_class_pointer env wrap the_cls
+          let ((env, ty_err), (ty, err_res)) =
+            resolve_class_pointer env wrap the_cls
+          in
+          let cls_name =
+            Typing_print.full_strip_ns ~hide_internals:true env ty
+          in
+          Typing_class_pointers.error_at_classname_type
+            env
+            (TypecheckerOptions.class_pointer_level
+               (Env.get_tcopt env)
+               "classname_class")
+            p
+            cls_name;
+          ((env, ty_err), (ty, err_res))
         | (_, Tclass_ptr the_cls) ->
           let wrap ty = mk (Reason.none, Tclass_ptr ty) in
           resolve_class_pointer env wrap the_cls

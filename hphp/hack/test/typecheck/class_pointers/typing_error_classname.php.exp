@@ -1,0 +1,8 @@
+ERROR: File "typing_error_classname.php", line 12, characters 5-6:
+It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
+ERROR: File "typing_error_classname.php", line 13, characters 5-6:
+It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
+ERROR: File "typing_error_classname.php", line 14, characters 5-6:
+It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])
+ERROR: File "typing_error_classname.php", line 15, characters 9-10:
+It is no longer allowed to use a `classname<A>` in this position. Please use a `class<A>` instead. (Typing[4482])

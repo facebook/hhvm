@@ -1335,6 +1335,10 @@ module Primary : sig
         pos: Pos.t;
         ty: string;
       }
+    | String_to_class_pointer of {
+        pos: Pos.t;
+        cls_name: string;
+      }
     | Optional_parameter_not_supported of Pos.t
     | Optional_parameter_not_abstract of Pos.t
   [@@deriving show]

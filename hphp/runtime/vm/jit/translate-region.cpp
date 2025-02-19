@@ -423,12 +423,14 @@ RegionDescPtr getInlinableCalleeRegion(const irgen::IRGS& irgs,
   }
 
   auto calleeRegion = selectCalleeRegion(irgs, entry, ctxType, psk.srcKey);
-  if (!calleeRegion || calleeRegion->instrSize() > irgs.budgetBCInstrs) {
+  if (!calleeRegion) {
     return nullptr;
   }
-
   calleeCost = costOfInlining(psk.srcKey, entry.func(), *calleeRegion,
                               annotationsPtr);
+  if (calleeCost > Cfg::HHIR::AlwaysInlineVasmCostLimit && calleeRegion->instrSize() > irgs.budgetBCInstrs) {
+    return nullptr;
+  }
   return calleeRegion;
 }
 
@@ -894,7 +896,7 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
 
   // We shouldn't be inlining profiling translations.
   assertx(irgs.context.kind != TransKind::Profile);
-  assertx(calleeRegion->instrSize() <= irgs.budgetBCInstrs);
+  assertx(calleeRegion->instrSize() <= irgs.budgetBCInstrs || calleeCost <= Cfg::HHIR::AlwaysInlineVasmCostLimit);
   assert_flog(calleeRegion->start().func() == entry.func() &&
               calleeRegion->start().funcEntry() && entry.funcEntry() &&
               calleeRegion->start().numEntryArgs() >= entry.numEntryArgs(),

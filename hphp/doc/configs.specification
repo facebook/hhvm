@@ -1550,9 +1550,9 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - uint32_t HHIR.InliningCostFactorCold = 32, UNKNOWN
 - uint32_t HHIR.InliningCostFactorFrozen = 10, UNKNOWN
 - uint32_t HHIR.InliningVasmCostLimit = 80000, UNKNOWN
-- uint32_t HHIR.InliningMinVasmCostLimit = 6500, UNKNOWN
-- uint32_t HHIR.InliningMaxVasmCostLimit = 30000, UNKNOWN
-- uint32_t HHIR.AlwaysInlineVasmCostLimit = 4800, UNKNOWN
+- uint32_t HHIR.InliningMinVasmCostLimit = 5000, UNKNOWN
+- uint32_t HHIR.InliningMaxVasmCostLimit = 25000, UNKNOWN
+- uint32_t HHIR.AlwaysInlineVasmCostLimit = 5000, UNKNOWN
 - uint32_t HHIR.InliningMaxDepth = 5, UNKNOWN
 - double HHIR.InliningVasmCallerExp = .5, UNKNOWN
 - double HHIR.InliningVasmCalleeExp = .5, UNKNOWN
@@ -1735,8 +1735,8 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   Minimum probability of an arc to include it in HotCFG. [0,1]
 
 - uint32_t Jit.PGORelaxPercent = 100, UNKNOWN
-- uint32_t Jit.PGOCalledFuncCheckNumSpeculations = 2, UNKNOWN
-- double Jit.PGOCalledFuncCheckThreshold = 25, UNKNOWN
+- uint32_t Jit.PGOCalledFuncCheckNumSpeculations = 6, UNKNOWN
+- double Jit.PGOCalledFuncCheckThreshold = 10, UNKNOWN
 - double Jit.PGOCalledFuncExitThreshold = 99.9, UNKNOWN
 - bool Jit.PGODumpCallGraph = false, UNKNOWN
 - bool Jit.PGOOptCodeCallGraph = true, UNKNOWN

@@ -2744,7 +2744,67 @@ TEST_F(ClientProtocolTest, TestConnectPskKeAlwaysShares) {
   encodedHello->trimStart(4);
   auto decodedHello = decode<ClientHello>(std::move(encodedHello));
   auto keyShare = getExtension<ClientKeyShare>(decodedHello.extensions);
-  EXPECT_TRUE(!keyShare->client_shares.empty());
+  EXPECT_EQ(
+      keyShare->client_shares.size(), context_->getDefaultShares().size());
+  EXPECT_TRUE(!state_.keyExchangers()->empty());
+}
+
+TEST_F(ClientProtocolTest, TestConnectPskDheKeAlwaysShares) {
+  Connect connect;
+  context_->setSendKeyShare(SendKeyShare::Always);
+  context_->setDefaultShares({NamedGroup::secp256r1, NamedGroup::x25519});
+  connect.context = context_;
+  auto psk = getCachedPsk();
+  psk.group = NamedGroup::x25519;
+  connect.cachedPsk = psk;
+  fizz::Param param = std::move(connect);
+  auto actions = detail::processEvent(state_, param);
+  expectActions<MutateState, WriteToSocket>(actions);
+  processStateMutations(actions);
+  EXPECT_EQ(state_.state(), StateEnum::ExpectingServerHello);
+
+  auto& encodedHello = *state_.encodedClientHello();
+
+  // Get rid of handshake header (type + version)
+  encodedHello->trimStart(4);
+  auto decodedHello = decode<ClientHello>(std::move(encodedHello));
+  auto keyShare = getExtension<ClientKeyShare>(decodedHello.extensions);
+  const auto& clientShares = keyShare->client_shares;
+  EXPECT_EQ(clientShares.size(), 1);
+  EXPECT_EQ(clientShares[0].group, NamedGroup::x25519);
+  EXPECT_TRUE(!state_.keyExchangers()->empty());
+}
+
+TEST_F(ClientProtocolTest, TestConnectPskDheKeAlwaysDefaultShares) {
+  Connect connect;
+  context_->setSendKeyShare(SendKeyShare::AlwaysDefaultShares);
+  std::vector<NamedGroup> defaultShares = {
+      NamedGroup::secp256r1, NamedGroup::x25519};
+  context_->setDefaultShares(defaultShares);
+  connect.context = context_;
+  auto psk = getCachedPsk();
+  psk.group = NamedGroup::x25519;
+  connect.cachedPsk = psk;
+  fizz::Param param = std::move(connect);
+  auto actions = detail::processEvent(state_, param);
+  expectActions<MutateState, WriteToSocket>(actions);
+  processStateMutations(actions);
+  EXPECT_EQ(state_.state(), StateEnum::ExpectingServerHello);
+
+  auto& encodedHello = *state_.encodedClientHello();
+
+  // Get rid of handshake header (type + version)
+  encodedHello->trimStart(4);
+  auto decodedHello = decode<ClientHello>(std::move(encodedHello));
+  auto keyShare = getExtension<ClientKeyShare>(decodedHello.extensions);
+  const auto& clientShares = keyShare->client_shares;
+  EXPECT_EQ(clientShares.size(), 2);
+  std::vector<NamedGroup> clientSharesNamedGroups;
+  for (const auto& clientShare : clientShares) {
+    clientSharesNamedGroups.push_back(clientShare.group);
+  }
+  std::sort(clientSharesNamedGroups.begin(), clientSharesNamedGroups.end());
+  EXPECT_EQ(clientSharesNamedGroups, defaultShares);
   EXPECT_TRUE(!state_.keyExchangers()->empty());
 }
 

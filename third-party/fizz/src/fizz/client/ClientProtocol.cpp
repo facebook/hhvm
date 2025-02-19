@@ -830,7 +830,8 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
   // If we have a saved PSK, use the group to choose which groups to
   // send by default
   std::vector<NamedGroup> selectedShares;
-  if (psk && psk->group &&
+  if (context->getSendKeyShare() != SendKeyShare::AlwaysDefaultShares && psk &&
+      psk->group &&
       std::find(
           context->getSupportedGroups().begin(),
           context->getSupportedGroups().end(),

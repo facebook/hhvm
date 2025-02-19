@@ -20,9 +20,17 @@
 namespace fizz {
 namespace client {
 
+/**
+ * Controls keyshare sending behaviour in the presence of a saved PSK.
+ * Always: If saved PSK has a group, always send that group and only that group.
+ * WhenNecessary: Omit sending keyshare iff saved PSK has no group i.e. psk_ke
+ * AlwaysDefaultShares: Send all default shares regardless of saved PSK and its
+ * group
+ */
 enum class SendKeyShare {
   Always,
   WhenNecessary,
+  AlwaysDefaultShares,
 };
 
 class FizzClientContext {

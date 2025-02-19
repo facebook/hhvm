@@ -512,7 +512,11 @@ class StructureAnnotations(unittest.TestCase):
                     1: i32 field1 (foo, quote = '"', both_quotes = "'\\"'");
                 }(foo, bar = "baz")
 
-                typedef i32 (foo, hs.type = "hs") T (bar = "baz", hs.category = "value")
+                typedef i32 (
+                    foo,
+                    thriftx.v8.i32 = "Number",
+                    hs.type = "hs",
+                ) T (bar = "baz", hs.category = "value")
 
                 enum E {QUX = 1} (foo, bar = "baz")
 
@@ -559,7 +563,10 @@ class StructureAnnotations(unittest.TestCase):
                 }
 
                 @thrift.DeprecatedUnvalidatedAnnotations{items = {"bar": "baz", "foo": "1"}}
-                typedef i32 ( hs.type = "hs") T ( hs.category = "value")
+                typedef i32 (
+                    thriftx.v8.i32 = "Number",
+                    hs.type = "hs",
+                ) T ( hs.category = "value")
 
                 @thrift.DeprecatedUnvalidatedAnnotations{items = {"bar": "baz", "foo": "1"}}
                 enum E {QUX = 1}

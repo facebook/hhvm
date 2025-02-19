@@ -102,6 +102,11 @@ class structure_annotations {
         else if (name.find("hs.") == 0) {
         }
 
+        // THRIFTX doesn't work with structured annotations, but deprecation is
+        // planned for Q1 2025.
+        else if (name.find("thriftx.") == 0) {
+        }
+
         // catch-all (if typedef)
         else if (annotations_for_catch_all) {
           to_remove.emplace_back(name, data);
@@ -525,6 +530,11 @@ class structure_annotations {
 
       // haskell annotations are ignored by the main compiler
       else if (name.find("hs.") == 0) {
+      }
+
+      // THRIFTX doesn't work with structured annotations, but deprecation is
+      // planned for Q1 2025.
+      else if (name.find("thriftx.") == 0) {
       }
 
       // catch-all

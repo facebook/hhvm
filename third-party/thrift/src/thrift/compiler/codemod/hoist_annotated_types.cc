@@ -281,9 +281,7 @@ class hoist_annotated_types {
     auto name = name_typedef(type);
     if (typedefs_.count(name)) {
       assert(typedefs_[name].type == render_type(type));
-    } else if (
-        auto existing =
-            prog_.global_scope()->find<t_type>(prog_.scope_name(name))) {
+    } else if (auto existing = prog_.find<t_type>(prog_.scope_name(name))) {
       if (existing->get_true_type()->get_full_name() !=
           type->get_true_type()->get_full_name()) {
         throw std::runtime_error(fmt::format(

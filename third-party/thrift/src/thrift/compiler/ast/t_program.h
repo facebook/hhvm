@@ -276,6 +276,13 @@ class t_program : public t_named {
     return scope_name(node.name());
   }
 
+  // Returns the definition with the given name or nullptr if there is no such
+  // definition.
+  template <typename Node = t_named>
+  const Node* find(std::string_view name) const {
+    return global_scope_->find<Node>(name);
+  }
+
  private:
   t_package package_;
 

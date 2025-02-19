@@ -215,7 +215,7 @@ bool has_runtime_annotation(const t_named& named) {
 }
 
 bool has_schema(source_manager& sm, const t_program& program) {
-  return program.global_scope()->find(
+  return program.find(
       program.scope_name(schematizer::name_schema(sm, program)));
 }
 

@@ -203,7 +203,7 @@ void match_type_with_const_value(
       }
       if (value->kind() == t_const_value::CV_IDENTIFIER) {
         const std::string& id = value->get_identifier();
-        const t_const* constant = program.global_scope()->find<t_const>(id);
+        const t_const* constant = program.find<t_const>(id);
         if (!constant) {
           ctx.error(
               value->ref_range().begin,
@@ -245,10 +245,9 @@ void match_type_with_const_value(
         } else if (value->kind() == t_const_value::CV_IDENTIFIER) {
           // Resolve enum values defined after use.
           const std::string& id = value->get_identifier();
-          const t_const* constant = program.global_scope()->find<t_const>(id);
+          const t_const* constant = program.find<t_const>(id);
           if (!constant) {
-            constant = program.global_scope()->find<t_const>(
-                value->program().scope_name(id));
+            constant = program.find<t_const>(value->program().scope_name(id));
           }
           if (!constant) {
             // Try to resolve enum values from typedefs.
@@ -257,8 +256,8 @@ void match_type_with_const_value(
             if (std::count(enum_name.begin(), enum_name.end(), '.') == 0) {
               enum_name = value->program().scope_name(enum_name);
             }
-            if (auto* def = dynamic_cast<const t_type*>(
-                    program.global_scope()->find(enum_name))) {
+            if (auto* def =
+                    dynamic_cast<const t_type*>(program.find(enum_name))) {
               if (auto* enum_def =
                       dynamic_cast<const t_enum*>(def->get_true_type())) {
                 constant =
@@ -378,7 +377,7 @@ void mutate_inject_metadata_fields(
     type_string = annotation->program()->name() + "." + type_string;
   }
 
-  const auto* ttype = node.program()->global_scope()->find<t_type>(type_string);
+  const auto* ttype = node.program()->find<t_type>(type_string);
   if (!ttype) {
     ctx.error(
         "Can not find expected type `{}` specified in "

@@ -101,5 +101,6 @@ struct UseCAPI {
 @scope.Typedef
 struct Py3EnableCppAdapter {}
 
-@scope.Structured
+@scope.Struct
+@scope.Exception
 struct MigrationBlockingAllowInheritance {}

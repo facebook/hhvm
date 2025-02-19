@@ -674,7 +674,11 @@ class MigrationBlockingAllowInheritance implements \IThriftSyncStruct, \IThriftS
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::fromShape(
+        '\facebook\thrift\annotation\Struct' => \facebook\thrift\annotation\Struct::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\Exception' => \facebook\thrift\annotation\Exception::fromShape(
           shape(
           )
         ),

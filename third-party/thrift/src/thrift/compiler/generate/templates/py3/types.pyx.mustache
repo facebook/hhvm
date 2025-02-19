@@ -232,9 +232,7 @@ cdef class {{struct:name}}({{> types/python_struct_class}}):
 
 
 @__cython.auto_pickle(False)
-{{^struct:allow_inheritance?}}
 @__cython.final
-{{/struct:allow_inheritance?}}
 cdef class {{struct:name}}(thrift.py3.types.Union):
     __module__ = _fbthrift__module_name__
     Type = __{{struct:name}}Type

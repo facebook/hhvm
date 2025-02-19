@@ -574,6 +574,10 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - uint32_t Eval.InitialFuncTableSize = Eval.InitialFuncTableSize, UNKNOWN, globaldata(noload)|staticdefault(3000)
 
+- uint32_t Eval.StaticStringsSampleRate = 0, UNKNOWN
+
+  Enables StructuredLog for static strings
+
 - bool Eval.HackArrCompatSerializeNotices = false, UNKNOWN, globaldata(onlyhhbbc)|compileroption(HackArrCompatSerializeNotices)|unitcacheflag
 
 - bool Eval.LogKnownMethodsAsDynamicCalls = true, UNKNOWN, globaldata(onlyhhbbc)|compileroption(LogKnownMethodsAsDynamicCalls)|unitcacheflag

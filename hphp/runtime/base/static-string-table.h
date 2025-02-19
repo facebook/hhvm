@@ -163,6 +163,8 @@ void create_string_data_map();
  */
 void refineStaticStringTableSize();
 
+void log_static_strings();
+
 //////////////////////////////////////////////////////////////////////
 
 }

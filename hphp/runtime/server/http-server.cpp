@@ -461,6 +461,8 @@ void HttpServer::runOrExitProcess() {
   waitForServers();
   // Log APC samples after all requests finish.
   apc_sample_by_size();
+  // Log static string samples after all requests finish.
+  log_static_strings();
   playShutdownRequest(Cfg::Server::CleanupRequest);
 }
 

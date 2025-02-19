@@ -3603,7 +3603,7 @@ void* takeCtx(NoCtx) {
 }
 
 template<bool dynamic, typename Ctx>
-JitResumeAddr fcallImpl(bool retToJit, PC origpc, PC& pc, const FCallArgs& fca,
+JitResumeAddr fcallImpl(PC origpc, PC& pc, const FCallArgs& fca,
                         const Func* func, Ctx&& ctx,
                         bool logAsDynamicCall = true, bool isCtor = false) {
   if (fca.enforceInOut()) checkInOutMismatch(func, fca.numArgs, fca.inoutArgs);
@@ -3646,22 +3646,16 @@ JitResumeAddr fcallImpl(bool retToJit, PC origpc, PC& pc, const FCallArgs& fca,
   doFCall(prologueFlags, func, numArgsInclUnpack,
           takeCtx(std::forward<Ctx>(ctx)), jit::tc::ustubs().retHelper);
 
-  if (retToJit) {
-    // Let JIT handle FuncEntry if possible.
-    pc = vmpc();
-    return
-      JitResumeAddr::helper(jit::tc::ustubs().resumeHelperFuncEntryFromInterp);
-  }
-
-  funcEntry();
+  // Let JIT handle FuncEntry.
   pc = vmpc();
-  return JitResumeAddr::none();
+  return
+    JitResumeAddr::helper(jit::tc::ustubs().resumeHelperFuncEntryFromInterp);
 }
 
 const StaticString s___invoke("__invoke");
 
 // This covers both closures and functors.
-OPTBLD_INLINE JitResumeAddr fcallFuncObj(bool retToJit, PC origpc, PC& pc,
+OPTBLD_INLINE JitResumeAddr fcallFuncObj(PC origpc, PC& pc,
                                          const FCallArgs& fca) {
   assertx(tvIsObject(vmStack().topC()));
   auto obj = Object::attach(vmStack().topC()->m_data.pobj);
@@ -3676,9 +3670,9 @@ OPTBLD_INLINE JitResumeAddr fcallFuncObj(bool retToJit, PC origpc, PC& pc,
 
   if (func->isStaticInPrologue()) {
     obj.reset();
-    return fcallImpl<false>(retToJit, origpc, pc, fca, func, cls);
+    return fcallImpl<false>(origpc, pc, fca, func, cls);
   } else {
-    return fcallImpl<false>(retToJit, origpc, pc, fca, func, std::move(obj));
+    return fcallImpl<false>(origpc, pc, fca, func, std::move(obj));
   }
 }
 
@@ -3693,7 +3687,7 @@ OPTBLD_INLINE JitResumeAddr fcallFuncObj(bool retToJit, PC origpc, PC& pc,
  *   array(Class*, Func*),
  *   array(ObjectData*, Func*),
  */
-OPTBLD_INLINE JitResumeAddr fcallFuncArr(bool retToJit, PC origpc, PC& pc,
+OPTBLD_INLINE JitResumeAddr fcallFuncArr(PC origpc, PC& pc,
                                          const FCallArgs& fca) {
   assertx(tvIsArrayLike(vmStack().topC()));
   auto arr = Array::attach(vmStack().topC()->m_data.parr);
@@ -3717,11 +3711,11 @@ OPTBLD_INLINE JitResumeAddr fcallFuncArr(bool retToJit, PC origpc, PC& pc,
   arr.reset();
 
   if (thisRC) {
-    return fcallImpl<true>(retToJit, origpc, pc, fca, func, std::move(thisRC));
+    return fcallImpl<true>(origpc, pc, fca, func, std::move(thisRC));
   } else if (cls) {
-    return fcallImpl<true>(retToJit, origpc, pc, fca, func, cls);
+    return fcallImpl<true>(origpc, pc, fca, func, cls);
   } else {
-    return fcallImpl<true>(retToJit, origpc, pc, fca, func, NoCtx{});
+    return fcallImpl<true>(origpc, pc, fca, func, NoCtx{});
   }
 }
 
@@ -3730,7 +3724,7 @@ OPTBLD_INLINE JitResumeAddr fcallFuncArr(bool retToJit, PC origpc, PC& pc,
  *   'func_name'
  *   'class::method'
  */
-OPTBLD_INLINE JitResumeAddr fcallFuncStr(bool retToJit, PC origpc, PC& pc,
+OPTBLD_INLINE JitResumeAddr fcallFuncStr(PC origpc, PC& pc,
                                          const FCallArgs& fca) {
   assertx(tvIsString(vmStack().topC()));
   auto str = String::attach(vmStack().topC()->m_data.pstr);
@@ -3754,15 +3748,15 @@ OPTBLD_INLINE JitResumeAddr fcallFuncStr(bool retToJit, PC origpc, PC& pc,
   str.reset();
 
   if (thisRC) {
-    return fcallImpl<true>(retToJit, origpc, pc, fca, func, std::move(thisRC));
+    return fcallImpl<true>(origpc, pc, fca, func, std::move(thisRC));
   } else if (cls) {
-    return fcallImpl<true>(retToJit, origpc, pc, fca, func, cls);
+    return fcallImpl<true>(origpc, pc, fca, func, cls);
   } else {
-    return fcallImpl<true>(retToJit, origpc, pc, fca, func, NoCtx{});
+    return fcallImpl<true>(origpc, pc, fca, func, NoCtx{});
   }
 }
 
-OPTBLD_INLINE JitResumeAddr fcallFuncFunc(bool retToJit, PC origpc, PC& pc,
+OPTBLD_INLINE JitResumeAddr fcallFuncFunc(PC origpc, PC& pc,
                                           const FCallArgs& fca) {
   assertx(tvIsFunc(vmStack().topC()));
   auto func = vmStack().topC()->m_data.pfunc;
@@ -3772,11 +3766,11 @@ OPTBLD_INLINE JitResumeAddr fcallFuncFunc(bool retToJit, PC origpc, PC& pc,
     raise_error(Strings::CALL_ILLFORMED_FUNC);
   }
 
-  return fcallImpl<false>(retToJit, origpc, pc, fca, func, NoCtx{});
+  return fcallImpl<false>(origpc, pc, fca, func, NoCtx{});
 }
 
-OPTBLD_INLINE JitResumeAddr fcallFuncRFunc(bool retToJit, PC origpc, PC& pc,
-                                           FCallArgs& fca) {
+OPTBLD_INLINE JitResumeAddr fcallFuncRFunc(PC origpc, PC& pc,
+                                           const FCallArgs& fca) {
   assertx(tvIsRFunc(vmStack().topC()));
   auto const rfunc = vmStack().topC()->m_data.prfunc;
   auto const func = rfunc->m_func;
@@ -3785,10 +3779,10 @@ OPTBLD_INLINE JitResumeAddr fcallFuncRFunc(bool retToJit, PC origpc, PC& pc,
   decRefRFunc(rfunc);
 
   return
-    fcallImpl<false>(retToJit, origpc, pc, fca.withGenerics(), func, NoCtx{});
+    fcallImpl<false>(origpc, pc, fca.withGenerics(), func, NoCtx{});
 }
 
-OPTBLD_INLINE JitResumeAddr fcallFuncClsMeth(bool retToJit, PC origpc, PC& pc,
+OPTBLD_INLINE JitResumeAddr fcallFuncClsMeth(PC origpc, PC& pc,
                                              const FCallArgs& fca) {
   assertx(tvIsClsMeth(vmStack().topC()));
   auto const clsMeth = vmStack().topC()->m_data.pclsmeth;
@@ -3798,10 +3792,10 @@ OPTBLD_INLINE JitResumeAddr fcallFuncClsMeth(bool retToJit, PC origpc, PC& pc,
   auto const cls = clsMeth->getCls();
   assertx(func && cls);
 
-  return fcallImpl<false>(retToJit, origpc, pc, fca, func, cls);
+  return fcallImpl<false>(origpc, pc, fca, func, cls);
 }
 
-OPTBLD_INLINE JitResumeAddr fcallFuncRClsMeth(bool retToJit, PC origpc, PC& pc,
+OPTBLD_INLINE JitResumeAddr fcallFuncRClsMeth(PC origpc, PC& pc,
                                               const FCallArgs& fca) {
   assertx(tvIsRClsMeth(vmStack().topC()));
   auto const rclsMeth = vmStack().topC()->m_data.prclsmeth;
@@ -3811,7 +3805,7 @@ OPTBLD_INLINE JitResumeAddr fcallFuncRClsMeth(bool retToJit, PC origpc, PC& pc,
   vmStack().pushArrayLike(rclsMeth->m_arr);
   decRefRClsMeth(rclsMeth);
 
-  return fcallImpl<false>(retToJit, origpc, pc, fca.withGenerics(), func, cls);
+  return fcallImpl<false>(origpc, pc, fca.withGenerics(), func, cls);
 }
 
 Func* resolveFuncImpl(Id id) {
@@ -3868,22 +3862,21 @@ OPTBLD_INLINE void iopResolveRFunc(Id id) {
   }
 }
 
-OPTBLD_INLINE JitResumeAddr iopFCallFunc(bool retToJit, PC origpc, PC& pc,
-                                         FCallArgs fca) {
+OPTBLD_INLINE JitResumeAddr iopFCallFunc(PC origpc, PC& pc, FCallArgs fca) {
   auto const type = vmStack().topC()->m_type;
-  if (isObjectType(type)) return fcallFuncObj(retToJit, origpc, pc, fca);
-  if (isArrayLikeType(type)) return fcallFuncArr(retToJit, origpc, pc, fca);
-  if (isStringType(type)) return fcallFuncStr(retToJit, origpc, pc, fca);
-  if (isFuncType(type)) return fcallFuncFunc(retToJit, origpc, pc, fca);
-  if (isRFuncType(type)) return fcallFuncRFunc(retToJit, origpc, pc, fca);
-  if (isClsMethType(type)) return fcallFuncClsMeth(retToJit, origpc, pc, fca);
-  if (isRClsMethType(type)) return fcallFuncRClsMeth(retToJit, origpc, pc, fca);
+  if (isObjectType(type)) return fcallFuncObj(origpc, pc, fca);
+  if (isArrayLikeType(type)) return fcallFuncArr(origpc, pc, fca);
+  if (isStringType(type)) return fcallFuncStr(origpc, pc, fca);
+  if (isFuncType(type)) return fcallFuncFunc(origpc, pc, fca);
+  if (isRFuncType(type)) return fcallFuncRFunc(origpc, pc, fca);
+  if (isClsMethType(type)) return fcallFuncClsMeth(origpc, pc, fca);
+  if (isRClsMethType(type)) return fcallFuncRClsMeth(origpc, pc, fca);
 
   raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
 }
 
-OPTBLD_INLINE JitResumeAddr iopFCallFuncD(bool retToJit, PC origpc, PC& pc,
-                                          FCallArgs fca, Id id) {
+OPTBLD_INLINE JitResumeAddr iopFCallFuncD(PC origpc, PC& pc, FCallArgs fca,
+                                          Id id) {
   auto const nep = vmfp()->unit()->lookupNamedFuncPairId(id);
   auto const func = [&]() {
     auto const f = Func::resolve(nep.second, nep.first, vmfp()->func());
@@ -3893,7 +3886,7 @@ OPTBLD_INLINE JitResumeAddr iopFCallFuncD(bool retToJit, PC origpc, PC& pc,
     return f->unwrap();
   }();
 
-  return fcallImpl<false>(retToJit, origpc, pc, fca, func, NoCtx{});
+  return fcallImpl<false>(origpc, pc, fca, func, NoCtx{});
 }
 
 namespace {
@@ -3902,8 +3895,8 @@ const StaticString
   s_DynamicContextOverrideUnsafe("__SystemLib\\DynamicContextOverrideUnsafe");
 
 template<bool dynamic>
-JitResumeAddr fcallObjMethodImpl(bool retToJit, PC origpc, PC& pc,
-                                 const FCallArgs& fca, StringData* methName) {
+JitResumeAddr fcallObjMethodImpl(PC origpc, PC& pc, const FCallArgs& fca,
+                                 StringData* methName) {
   const Func* func;
   LookupResult res;
   assertx(tvIsObject(vmStack().indC(fca.numInputs() + (kNumActRecCells - 1))));
@@ -3939,7 +3932,7 @@ JitResumeAddr fcallObjMethodImpl(bool retToJit, PC origpc, PC& pc,
   // of these checks fail, make sure it gets decref'd only via ctx.
   tvWriteNull(*vmStack().indC(fca.numInputs() + (kNumActRecCells - 1)));
   return
-    fcallImpl<dynamic>(retToJit, origpc, pc, fca, func, Object::attach(obj));
+    fcallImpl<dynamic>(origpc, pc, fca, func, Object::attach(obj));
 }
 
 static void raise_resolve_non_object(const char* methodName,
@@ -4010,8 +4003,8 @@ fcallObjMethodHandleInput(const FCallArgs& fca, ObjMethodOp op,
 } // namespace
 
 OPTBLD_INLINE JitResumeAddr
-iopFCallObjMethod(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
-                  const StringData*, ObjMethodOp op) {
+iopFCallObjMethod(PC origpc, PC& pc, FCallArgs fca, const StringData*,
+                  ObjMethodOp op) {
   TypedValue* c1 = vmStack().topC(); // Method name.
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::METHOD_NAME_MUST_BE_STRING);
@@ -4024,18 +4017,18 @@ iopFCallObjMethod(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
 
   // We handle decReffing method name in fcallObjMethodImpl
   vmStack().discard();
-  return fcallObjMethodImpl<true>(retToJit, origpc, pc, fca, methName);
+  return fcallObjMethodImpl<true>(origpc, pc, fca, methName);
 }
 
 OPTBLD_INLINE JitResumeAddr
-iopFCallObjMethodD(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
+iopFCallObjMethodD(PC origpc, PC& pc, FCallArgs fca,
                    const StringData*, ObjMethodOp op,
                    const StringData* methName) {
   if (fcallObjMethodHandleInput(fca, op, methName, false)) {
     return JitResumeAddr::none();
   }
   auto const methNameC = const_cast<StringData*>(methName);
-  return fcallObjMethodImpl<false>(retToJit, origpc, pc, fca, methNameC);
+  return fcallObjMethodImpl<false>(origpc, pc, fca, methNameC);
 }
 
 Class* specialClsRefToCls(SpecialClsRef ref) {
@@ -4165,7 +4158,7 @@ OPTBLD_INLINE void iopResolveRClsMethodS(SpecialClsRef ref,
 namespace {
 
 template<bool dynamic>
-JitResumeAddr fcallClsMethodImpl(bool retToJit, PC origpc, PC& pc,
+JitResumeAddr fcallClsMethodImpl(PC origpc, PC& pc,
                                  const FCallArgs& fca, Class* cls,
                                  StringData* methName, bool forwarding,
                                  bool logAsDynamicCall = true) {
@@ -4204,7 +4197,7 @@ JitResumeAddr fcallClsMethodImpl(bool retToJit, PC origpc, PC& pc,
 
   if (obj) {
     return fcallImpl<dynamic>(
-      retToJit, origpc, pc, fca, func, Object(obj), logAsDynamicCall);
+      origpc, pc, fca, func, Object(obj), logAsDynamicCall);
   } else {
     if (forwarding && ctx) {
       /* Propagate the current late bound class if there is one, */
@@ -4215,16 +4208,15 @@ JitResumeAddr fcallClsMethodImpl(bool retToJit, PC origpc, PC& pc,
         cls = vmfp()->getClass();
       }
     }
-    return fcallImpl<dynamic>(
-      retToJit, origpc, pc, fca, func, cls, logAsDynamicCall);
+    return fcallImpl<dynamic>(origpc, pc, fca, func, cls, logAsDynamicCall);
   }
 }
 
 } // namespace
 
 OPTBLD_INLINE JitResumeAddr
-iopFCallClsMethod(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
-                  const StringData*, IsLogAsDynamicCallOp op) {
+iopFCallClsMethod(PC origpc, PC& pc, FCallArgs fca, const StringData*,
+                  IsLogAsDynamicCallOp op) {
   auto const c1 = vmStack().topC();
   if (!isClassType(c1->m_type)) {
     raise_error("Attempting to use non-class in FCallClsMethod");
@@ -4243,13 +4235,13 @@ iopFCallClsMethod(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
   auto const logAsDynamicCall = op == IsLogAsDynamicCallOp::LogAsDynamicCall ||
     Cfg::Eval::LogKnownMethodsAsDynamicCalls;
   return fcallClsMethodImpl<true>(
-    retToJit, origpc, pc, fca, cls, methName, false, logAsDynamicCall);
+    origpc, pc, fca, cls, methName, false, logAsDynamicCall);
 }
 
 OPTBLD_INLINE JitResumeAddr
-iopFCallClsMethodM(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
-                  const StringData*, IsLogAsDynamicCallOp op,
-                  const StringData* methName) {
+iopFCallClsMethodM(PC origpc, PC& pc, FCallArgs fca,
+                   const StringData*, IsLogAsDynamicCallOp op,
+                   const StringData* methName) {
   auto const cell = vmStack().topC();
   auto isString = isStringType(cell->m_type);
   auto const cls = lookupClsRef(cell);
@@ -4260,15 +4252,15 @@ iopFCallClsMethodM(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
     Cfg::Eval::LogKnownMethodsAsDynamicCalls;
   if (isString) {
     return fcallClsMethodImpl<true>(
-      retToJit, origpc, pc, fca, cls, methNameC, false, logAsDynamicCall);
+      origpc, pc, fca, cls, methNameC, false, logAsDynamicCall);
   } else {
     return fcallClsMethodImpl<false>(
-      retToJit, origpc, pc, fca, cls, methNameC, false, logAsDynamicCall);
+      origpc, pc, fca, cls, methNameC, false, logAsDynamicCall);
   }
 }
 
 OPTBLD_INLINE JitResumeAddr
-iopFCallClsMethodD(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
+iopFCallClsMethodD(PC origpc, PC& pc, FCallArgs fca,
                    Id classId, const StringData* methName) {
   const NamedTypePair &nep =
     vmfp()->func()->unit()->lookupNamedTypePairId(classId);
@@ -4278,12 +4270,12 @@ iopFCallClsMethodD(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
   }
   auto const methNameC = const_cast<StringData*>(methName);
   return fcallClsMethodImpl<false>(
-    retToJit, origpc, pc, fca, cls, methNameC, false);
+    origpc, pc, fca, cls, methNameC, false);
 }
 
 OPTBLD_INLINE JitResumeAddr
-iopFCallClsMethodS(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
-                   const StringData*, SpecialClsRef ref) {
+iopFCallClsMethodS(PC origpc, PC& pc, FCallArgs fca, const StringData*,
+                   SpecialClsRef ref) {
   auto const c1 = vmStack().topC(); // Method name.
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
@@ -4295,20 +4287,18 @@ iopFCallClsMethodS(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
   vmStack().ndiscard(1);
   auto const fwd = ref == SpecialClsRef::SelfCls ||
                    ref == SpecialClsRef::ParentCls;
-  return fcallClsMethodImpl<true>(
-    retToJit, origpc, pc, fca, cls, methName, fwd);
+  return fcallClsMethodImpl<true>(origpc, pc, fca, cls, methName, fwd);
 }
 
 OPTBLD_INLINE JitResumeAddr
-iopFCallClsMethodSD(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
+iopFCallClsMethodSD(PC origpc, PC& pc, FCallArgs fca,
                     const StringData*, SpecialClsRef ref,
                     const StringData* methName) {
   auto const cls = specialClsRefToCls(ref);
   auto const methNameC = const_cast<StringData*>(methName);
   auto const fwd = ref == SpecialClsRef::SelfCls ||
                    ref == SpecialClsRef::ParentCls;
-  return fcallClsMethodImpl<false>(
-    retToJit, origpc, pc, fca, cls, methNameC, fwd);
+  return fcallClsMethodImpl<false>(origpc, pc, fca, cls, methNameC, fwd);
 }
 
 namespace {
@@ -4358,8 +4348,8 @@ OPTBLD_INLINE void iopNewObjS(SpecialClsRef ref) {
   vmStack().pushObjectNoRc(this_);
 }
 
-OPTBLD_INLINE JitResumeAddr iopFCallCtor(bool retToJit, PC origpc, PC& pc,
-                                         FCallArgs fca, const StringData*) {
+OPTBLD_INLINE JitResumeAddr iopFCallCtor(PC origpc, PC& pc, FCallArgs fca,
+                                         const StringData*) {
   assertx(fca.numRets == 1);
   assertx(fca.asyncEagerOffset == kInvalidOffset);
   assertx(tvIsObject(vmStack().indC(fca.numInputs() + (kNumActRecCells - 1))));
@@ -4377,7 +4367,7 @@ OPTBLD_INLINE JitResumeAddr iopFCallCtor(bool retToJit, PC origpc, PC& pc,
   // of these checks fail, make sure it gets decref'd only via ctx.
   tvWriteNull(*vmStack().indC(fca.numInputs() + (kNumActRecCells - 1)));
   return fcallImpl<false>(
-    retToJit, origpc, pc, fca, func, Object::attach(obj), true, true);
+    origpc, pc, fca, func, Object::attach(obj), true, true);
 }
 
 OPTBLD_INLINE void iopLockObj() {
@@ -5377,43 +5367,34 @@ namespace {
  * returns JitResumeAddr, or JitResumeAddr::none() if returns void.
  * Some opcodes need the original PC by value, and some do not. We have wrappers
  * for both flavors. Some opcodes (FCall*) may want to return to the JIT in the
- * middle of an instruction, so we pass the breakOnCtlFlow flag. When this flag
- * is true in control flow instructions such as FCall*, we are guaranteed to
- * use the returned JitResumeAddr to return to the JIT and so it is safe to
- * return in the middle of an instruction.
+ * middle of an instruction. If their implementation returns JitResumeAddr,
+ * we are guaranteed to use the returned JitResumeAddr to return to the JIT and
+ * so it is safe to return in the middle of an instruction.
  */
 template<typename... Params, typename... Args>
 OPTBLD_INLINE JitResumeAddr
-iopWrapReturn(void(fn)(Params...), bool, PC, Args&&... args) {
+iopWrapReturn(void(fn)(Params...), PC, Args&&... args) {
   fn(std::forward<Args>(args)...);
   return JitResumeAddr::none();
 }
 
 template<typename... Params, typename... Args>
 OPTBLD_INLINE JitResumeAddr
-iopWrapReturn(JitResumeAddr(fn)(Params...), bool, PC, Args&&... args) {
+iopWrapReturn(JitResumeAddr(fn)(Params...), PC, Args&&... args) {
   return fn(std::forward<Args>(args)...);
 }
 
 template<typename... Params, typename... Args>
 OPTBLD_INLINE JitResumeAddr
-iopWrapReturn(void(fn)(PC, Params...), bool, PC origpc, Args&&... args) {
+iopWrapReturn(void(fn)(PC, Params...), PC origpc, Args&&... args) {
   fn(origpc, std::forward<Args>(args)...);
   return JitResumeAddr::none();
 }
 
 template<typename... Params, typename... Args>
 OPTBLD_INLINE JitResumeAddr
-iopWrapReturn(JitResumeAddr(fn)(PC, Params...),
-              bool, PC origpc, Args&&... args) {
+iopWrapReturn(JitResumeAddr(fn)(PC, Params...), PC origpc, Args&&... args) {
   return fn(origpc, std::forward<Args>(args)...);
-}
-
-template<typename... Params, typename... Args>
-OPTBLD_INLINE JitResumeAddr
-iopWrapReturn(JitResumeAddr(fn)(bool, PC, Params...),
-              bool breakOnCtlFlow, PC origpc, Args&&... args) {
-  return fn(breakOnCtlFlow, origpc, std::forward<Args>(args)...);
 }
 
 /*
@@ -5483,13 +5464,12 @@ struct litstr_id {
 #define PASS_SIX(...) , imm1, imm2, imm3, imm4, imm5, imm6
 
 #define O(name, imm, in, out, flags)                                 \
-  template<bool breakOnCtlFlow>                                      \
   OPTBLD_INLINE JitResumeAddr iopWrap##name(PC& pc) {                \
     UNUSED auto constexpr op = Op::name;                             \
     UNUSED auto const origpc = pc - encoded_op_size(op);             \
     DECODE_##imm                                                     \
     return iopWrapReturn(                                            \
-      iop##name, breakOnCtlFlow, origpc FLAG_##flags PASS_##imm);    \
+      iop##name, origpc FLAG_##flags PASS_##imm);                    \
   }
 OPCODES
 
@@ -5568,7 +5548,7 @@ JitResumeAddr interpOne##opcode(ActRec* fp, TypedValue* sp, Offset pcOff) {    \
           Trace::trace("op"#opcode" offset: %d\n", offset));                   \
   assertx(peek_op(pc) == Op::opcode);                                          \
   pc += encoded_op_size(Op::opcode);                                           \
-  auto const retAddr = iopWrap##opcode<true>(pc);                              \
+  auto const retAddr = iopWrap##opcode(pc);                                    \
   vmpc() = pc;                                                                 \
   COND_STACKTRACE("op"#opcode" post: ");                                       \
   condStackTraceSep(Op##opcode);                                               \
@@ -5618,9 +5598,8 @@ JitResumeAddr unpackJitResumeAddr(uint64_t packedAddr) {
   return {handler, arg};
 }
 
-template <bool breakOnCtlFlow>
 JitResumeAddr dispatchThreaded(bool coverage) {
-  auto modes = breakOnCtlFlow ? ExecMode::BB : ExecMode::Normal;
+  auto modes = ExecMode::Normal;
   if (coverage) {
     modes = modes | ExecMode::Coverage;
   }
@@ -5640,7 +5619,6 @@ ModeType updateCoverageModeThreaded(ModeType modes) {
     (modes & ~(ModeType)ExecMode::Coverage);
 }
 
-template <bool breakOnCtlFlow>
 JitResumeAddr dispatchImpl() {
   auto const checkCoverage = [&] {
     return !RI().m_coverage.m_should_use_per_file_coverage
@@ -5651,7 +5629,7 @@ JitResumeAddr dispatchImpl() {
 
 #ifdef CTI_SUPPORTED
   if (cti_enabled()) {
-    return dispatchThreaded<breakOnCtlFlow>(collectCoverage);
+    return dispatchThreaded(collectCoverage);
   }
 #endif
 
@@ -5688,7 +5666,7 @@ JitResumeAddr dispatchImpl() {
 #define DISPATCH_ACTUAL() goto *optab[size_t(op)]
 
 #define DISPATCH() do {                                                 \
-    if (breakOnCtlFlow && isCtlFlow) {                                  \
+    if (isCtlFlow) {                                                    \
       ONTRACE(1,                                                        \
               Trace::trace("dispatch: Halt dispatch(%p)\n",             \
                            vmfp()));                                    \
@@ -5716,10 +5694,10 @@ JitResumeAddr dispatchImpl() {
   }
 #define OPCODE_MAIN_BODY(name, imm, push, pop, flags)         \
   {                                                           \
-    if (breakOnCtlFlow && Stats::enableInstrCount()) {        \
+    if (Stats::enableInstrCount()) {                          \
       Stats::inc(Stats::Instr_InterpBB##name);                \
     }                                                         \
-    retAddr = iopWrap##name<breakOnCtlFlow>(pc);              \
+    retAddr = iopWrap##name(pc);                              \
     vmpc() = pc;                                              \
     if (isFCallFunc(Op::name) ||                              \
         Op::name == Op::NativeImpl) {                         \
@@ -5727,9 +5705,7 @@ JitResumeAddr dispatchImpl() {
       optab = !collectCoverage ? optabDirect : optabCover;    \
       DEBUGGER_ATTACHED_ONLY(optab = optabDbg);               \
     }                                                         \
-    if (breakOnCtlFlow) {                                     \
-      isCtlFlow = instrIsControlFlow(Op::name);               \
-    }                                                         \
+    isCtlFlow = instrIsControlFlow(Op::name);                 \
     if (instrCanHalt(Op::name) && UNLIKELY(!pc)) {            \
       vmfp() = nullptr;                                       \
       vmpc() = nullptr;                                       \
@@ -5739,7 +5715,7 @@ JitResumeAddr dispatchImpl() {
        * the TC. We only actually return callToExit to our caller if that
        * caller is dispatchBB(). */                             \
       assertx(isCallToExit((uint64_t)retAddr.arg));             \
-      return breakOnCtlFlow ? retAddr : JitResumeAddr::none();  \
+      return retAddr;                                           \
     }                                                           \
     assertx(isCtlFlow || !retAddr);                             \
     DISPATCH();                                                 \
@@ -5778,7 +5754,7 @@ JitResumeAddr dispatchBB() {
   if (Trace::moduleEnabled(Trace::ringbuffer)) {
     Trace::ringbufferEntry(Trace::RBTypeDispatchBB, sk().toAtomicInt(), 0);
   }
-  auto const retAddr = dispatchImpl<true>();
+  auto const retAddr = dispatchImpl();
   // When dispatchBB returns with debugger interrupt set, the next check in JIT
   // for debugger interrupt must bring the execution back to interpreter.
   if (UNLIKELY(Cfg::Debugger::EnableVSDebugger &&
@@ -5832,15 +5808,15 @@ NEVER_INLINE void execModeHelper(PC pc, ExecMode modes) {
   if (modes & ExecMode::Coverage) recordCodeCoverage(pc);
 }
 
-template<Op opcode, bool repo_auth, bool breakOnCtlFlow, class Iop>
+template<Op opcode, bool repo_auth, class Iop>
 PcPair run(TCA* returnaddr, ExecMode modes, PC nextpc, PC pc, Iop iop) {
   assert(vmpc() == pc);
   assert(peek_op(pc) == opcode);
   FTRACE(1, "dispatch: {}: {}\n", pcOff(),
          instrToString(pc, vmfp()->func()));
   if constexpr (!repo_auth) {
-    static_assert((int)ExecMode::Normal == 0 && (int)ExecMode::BB == 1);
-    if (UNLIKELY(modes > ExecMode::BB)) {
+    static_assert((int)ExecMode::Normal == 0);
+    if (UNLIKELY(modes > ExecMode::Normal)) {
       execModeHelper(pc, modes);
     }
   }
@@ -5855,15 +5831,10 @@ PcPair run(TCA* returnaddr, ExecMode modes, PC nextpc, PC pc, Iop iop) {
   }
   if constexpr (isBranch(opcode) || isUnconditionalJmp(opcode)) {
     // Regular branches have no ability to indirect-jump out of bytecode,
-    // so smash the return address to &g_exitCti
-    // if we need to exit because of dispatchBB() mode.
-    // TODO: t6019406 use surprise checks to eliminate BB mode
-    if constexpr (breakOnCtlFlow) {
-      *returnaddr = g_exitCti;
-      return {nullptr, reinterpret_cast<PC>(packJitResumeAddr(retAddr))};
-    } else {
-      return {nullptr, pc};
-    }
+    // so smash the return address to &g_exitCti if we need to exit.
+    // TODO: t6019406 use surprise checks to extend BB mode
+    *returnaddr = g_exitCti;
+    return {nullptr, reinterpret_cast<PC>(packJitResumeAddr(retAddr))};
   }
   // call & indirect branch: caller will jump to address returned in rax
   if (instrCanHalt(opcode) && !pc) {
@@ -5872,16 +5843,11 @@ PcPair run(TCA* returnaddr, ExecMode modes, PC nextpc, PC pc, Iop iop) {
     // We returned from the top VM frame in this nesting level. This means
     // m_savedRip in our ActRec must have been callToExit, which should've
     // been returned by jitReturnPost(), whether or not we were called from
-    // the TC. We only actually return callToExit to our caller if that
-    // caller is dispatchBB().
+    // the TC.
     assert(isCallToExit((uint64_t)retAddr.arg));
-    if constexpr (breakOnCtlFlow) {
-      return {g_exitCti, reinterpret_cast<PC>(packJitResumeAddr(retAddr))};
-    } else {
-      return {g_exitCti, nullptr};
-    }
+    return {g_exitCti, reinterpret_cast<PC>(packJitResumeAddr(retAddr))};
   }
-  if constexpr (breakOnCtlFlow && instrIsControlFlow(opcode)) {
+  if constexpr (instrIsControlFlow(opcode)) {
     return {g_exitCti, reinterpret_cast<PC>(packJitResumeAddr(retAddr))};
   }
   if constexpr (isReturnish(opcode)) {
@@ -5927,19 +5893,11 @@ namespace cti {
 #define O(opcode, imm, push, pop, flags)\
 PcPair opcode(PC nextpc, TCA*, PC pc) {\
   DECLARE_FIXED(modes, returnaddr);\
-  if (modes & ExecMode::BB) {\
-    return run<Op::opcode,true,true>(returnaddr, modes, nextpc, pc,\
-      [&](PC& pc) {\
-        return iopWrap##opcode<true>(pc);\
-      }\
-    );\
-  } else {\
-    return run<Op::opcode,true,false>(returnaddr, modes, nextpc, pc,\
-      [&](PC& pc) {\
-        return iopWrap##opcode<false>(pc);\
-      }\
-    );\
-  };\
+  return run<Op::opcode,true>(returnaddr, modes, nextpc, pc,\
+    [&](PC& pc) {\
+      return iopWrap##opcode(pc);\
+    }\
+  );\
 }
 OPCODES
 #undef O
@@ -5948,19 +5906,11 @@ OPCODES
 #define O(opcode, imm, push, pop, flags)\
 PcPair d##opcode(PC nextpc, TCA*, PC pc) {\
   DECLARE_FIXED(modes, returnaddr);\
-  if (modes & ExecMode::BB) {\
-    return run<Op::opcode,false,true>(returnaddr, modes, nextpc, pc,\
-      [&](PC& pc) {\
-        return iopWrap##opcode<true>(pc);\
-      }\
-    );\
-  } else {\
-    return run<Op::opcode,false,false>(returnaddr, modes, nextpc, pc,\
-      [&](PC& pc) {\
-        return iopWrap##opcode<false>(pc);\
-      }\
-    );\
-  };\
+  return run<Op::opcode,false>(returnaddr, modes, nextpc, pc,\
+    [&](PC& pc) {\
+      return iopWrap##opcode(pc);\
+    }\
+  );\
 }
 OPCODES
 #undef O

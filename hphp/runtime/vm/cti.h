@@ -36,7 +36,7 @@ namespace HPHP {
 struct Func;
 struct ExecutionContext;
 
-enum class ExecMode : uint32_t { Normal=0, BB=1, Debugger=2, Coverage=4 };
+enum class ExecMode : uint32_t { Normal=0, Debugger=1, Coverage=2 };
 
 // ip is always a native code address, pc can either be a virtual pc
 // or a packed JitResumeAddr. Passed and stored by value.

@@ -30,6 +30,7 @@
 #include <thrift/lib/cpp/transport/TSocket.h>
 #include <thrift/lib/cpp/transport/TZlibTransport.h>
 
+#include <folly/portability/GFlags.h>
 #include <folly/portability/GTest.h>
 
 using namespace std;
@@ -329,7 +330,7 @@ void set_alarm() {
   struct sigaction action;
   memset(&action, 0, sizeof(action));
   action.sa_handler = alarm_handler;
-  action.sa_flags = SA_ONESHOT;
+  action.sa_flags = SA_RESETHAND;
   sigemptyset(&action.sa_mask);
   sigaction(SIGALRM, &action, nullptr);
 

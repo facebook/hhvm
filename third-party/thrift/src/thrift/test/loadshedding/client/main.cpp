@@ -48,8 +48,8 @@ int main(int argc, char* argv[]) {
       last = now;
 
       uint64_t count = client.getResponseCount();
-      double rate =
-          static_cast<double>(client.getSuccess()) / std::max(1UL, count);
+      double rate = static_cast<double>(client.getSuccess()) /
+          std::max<uint64_t>(1UL, count);
 
       LOG(INFO) << "RPS: " << (client.getResponseCount() / elapsed.count())
                 << ", success rate: " << (round(100 * rate) / 100)

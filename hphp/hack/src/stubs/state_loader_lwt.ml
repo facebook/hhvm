@@ -12,7 +12,7 @@ let get_project_metadata
     ~repo:_
     ~ignore_hh_version:_
     ~opts:_ =
-  failwith "Not implemented"
+  Lwt.return (Error ("Not implemented", Telemetry.create ()))
 
 let load
     ~ssopt:_
@@ -20,7 +20,7 @@ let load
     ~watchman_opts:_
     ~ignore_hh_version:_
     =
-  failwith "Not implemented"
+  Lwt.return (Error "Not implemented")
 
 let load_internal
     ~ssopt:_
@@ -50,5 +50,5 @@ module FromDisk = struct
     files_changed: Saved_state_loader.changed_files;
   }
 
-  let load ~project_metadata:_ ~threshold:_ ~root:_ = failwith "Not implemented"
+  let load ~project_metadata:_ ~threshold:_ ~root:_ = Error "Not implemented"
 end

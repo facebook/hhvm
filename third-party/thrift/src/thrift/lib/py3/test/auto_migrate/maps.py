@@ -40,6 +40,10 @@ from thrift.python.types import Map as PythonMap
 
 
 class MapTests(unittest.TestCase):
+    def test_default_ctor(self) -> None:
+        self.assertEqual(StrIntMap(), {})
+        self.assertEqual(Map__string_i64(), {})
+
     def test_recursive_const_map(self) -> None:
         self.assertEqual(LocationMap[1][1], 1)
 

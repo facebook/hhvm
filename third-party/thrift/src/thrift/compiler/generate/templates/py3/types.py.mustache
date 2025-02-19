@@ -93,6 +93,8 @@ class {{type:flat_name}}__Meta(type):
 
 class {{type:flat_name}}(_fbthrift_python_types.{{> types/container_base}}, metaclass={{type:flat_name}}__Meta):
     def __init__(self, *args, **kwargs):
+        if not args and not kwargs:
+            args = {{#type:map?}}({},){{/type:map?}}{{^type:map?}}((),){{/type:map?}}
         super().__init__(
             *{{type:flat_name}}._fbthrift_type_info(),
             *args,

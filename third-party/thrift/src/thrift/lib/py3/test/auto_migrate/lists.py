@@ -97,6 +97,10 @@ class ListTests(unittest.TestCase):
         with self.assertRaises(AttributeError):
             I32List().__dict__
 
+    def test_default_ctor(self) -> None:
+        self.assertEqual(I32List(), [])
+        self.assertEqual(List__i32(), [])
+
     @brokenInAutoMigrate()
     def test_list_add(self) -> None:
         other_list = [99, 88, 77, 66, 55]

@@ -953,6 +953,21 @@ let per_file_error_count ?(drop_fixmed = true) (errors : per_file_errors) : int
   in
   List.length errors
 
+let per_file_warning_count ?(drop_fixmed = true) (errors : per_file_errors) :
+    int =
+  let errors =
+    if drop_fixmed then
+      drop_fixmed_errors errors
+    else
+      errors
+  in
+  List.fold errors ~init:0 ~f:(fun acc (error : error) ->
+      acc
+      +
+      match error.User_error.severity with
+      | User_error.Warning -> 1
+      | User_error.Err -> 0)
+
 let get_file_errors ?(drop_fixmed = true) (t : t) (file : Relative_path.t) :
     per_file_errors =
   match Relative_path.Map.find_opt t file with
@@ -1001,6 +1016,11 @@ let error_count : t -> int =
   Relative_path.Map.fold errors ~init:0 ~f:(fun _path errors count ->
       count + per_file_error_count ~drop_fixmed:true errors)
 
+let warning_count : t -> int =
+ fun errors ->
+  Relative_path.Map.fold errors ~init:0 ~f:(fun _path errors count ->
+      count + per_file_warning_count ~drop_fixmed:true errors)
+
 exception Done of ISet.t
 
 (** This ignores warnings. *)
@@ -1033,6 +1053,7 @@ let as_telemetry_summary : t -> Telemetry.t =
  fun errors ->
   Telemetry.create ()
   |> Telemetry.int_ ~key:"count" ~value:(error_count errors)
+  |> Telemetry.int_ ~key:"warning_count" ~value:(warning_count errors)
   |> Telemetry.int_list
        ~key:"first_5_distinct_error_codes"
        ~value:

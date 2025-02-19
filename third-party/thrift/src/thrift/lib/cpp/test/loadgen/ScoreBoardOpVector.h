@@ -40,11 +40,11 @@ namespace loadgen {
 template <typename OpDataT>
 class ScoreBoardOpVector {
  private:
-  typedef std::vector<OpDataT> DataVector;
+  using DataVector = std::vector<OpDataT>;
 
  public:
-  typedef typename DataVector::iterator Iterator;
-  typedef typename DataVector::const_iterator ConstIterator;
+  using Iterator = typename DataVector::iterator;
+  using ConstIterator = typename DataVector::const_iterator;
 
   explicit ScoreBoardOpVector(uint32_t numOpsHint) { resize(numOpsHint); }
 

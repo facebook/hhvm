@@ -56,7 +56,7 @@ class LatencyMonitor : public TerminalMonitor {
     bool dynamicWidth;
   };
 
-  typedef std::vector<FieldInfo> FieldInfoVector;
+  using FieldInfoVector = std::vector<FieldInfo>;
 
   explicit LatencyMonitor(const std::shared_ptr<LoadConfig>& config);
 
@@ -78,7 +78,7 @@ class LatencyMonitor : public TerminalMonitor {
   uint64_t getCurrentQps() override;
 
  private:
-  typedef std::vector<std::shared_ptr<LatencyScoreBoard>> ScoreBoardVector;
+  using ScoreBoardVector = std::vector<std::shared_ptr<LatencyScoreBoard>>;
 
   void printOpHeader(FieldInfoVector* fields);
   void printOpInfo(

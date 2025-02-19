@@ -33,7 +33,7 @@ namespace apache::thrift {
 using folly::IOBuf;
 using folly::IOBufQueue;
 
-typedef folly::io::RWPrivateCursor RWCursor;
+using RWCursor = folly::io::RWPrivateCursor;
 using folly::io::Cursor;
 using folly::io::QueueAppender;
 

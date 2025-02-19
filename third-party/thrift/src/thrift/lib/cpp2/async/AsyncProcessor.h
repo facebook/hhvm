@@ -1914,11 +1914,11 @@ namespace detail {
 // unique_ptr<S>, in which case it typedefs type to S.
 template <class S>
 struct inner_type {
-  typedef S type;
+  using type = S;
 };
 template <class S>
 struct inner_type<std::unique_ptr<S>> {
-  typedef S type;
+  using type = S;
 };
 
 template <typename T>

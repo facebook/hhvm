@@ -44,10 +44,10 @@ namespace loadgen {
 class RNG {
  public:
   // Use boost::mt19937 as the underlying RNG
-  typedef boost::mt19937 BoostRNG;
+  using BoostRNG = boost::mt19937;
 
   // result_type and has_fixed_range are required for the boost interfaces
-  typedef BoostRNG::result_type result_type;
+  using result_type = BoostRNG::result_type;
   static const bool has_fixed_range = false;
 
   RNG(BoostRNG* rng) : rng_(rng) {}

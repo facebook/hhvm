@@ -218,12 +218,12 @@ struct Serializer {
   }
 };
 
-typedef Serializer<CompactProtocolReader, CompactProtocolWriter>
-    CompactSerializer;
-typedef Serializer<BinaryProtocolReader, BinaryProtocolWriter> BinarySerializer;
-typedef Serializer<JSONProtocolReader, JSONProtocolWriter> JSONSerializer;
-typedef Serializer<SimpleJSONProtocolReader, SimpleJSONProtocolWriter>
-    SimpleJSONSerializer;
+using CompactSerializer =
+    Serializer<CompactProtocolReader, CompactProtocolWriter>;
+using BinarySerializer = Serializer<BinaryProtocolReader, BinaryProtocolWriter>;
+using JSONSerializer = Serializer<JSONProtocolReader, JSONProtocolWriter>;
+using SimpleJSONSerializer =
+    Serializer<SimpleJSONProtocolReader, SimpleJSONProtocolWriter>;
 
 // Serialization code specific to handling errors
 template <typename ProtIn, typename ProtOut, bool includeEnvelope = true>

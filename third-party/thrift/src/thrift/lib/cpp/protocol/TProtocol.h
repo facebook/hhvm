@@ -542,8 +542,8 @@ class TProtocolFactory {
  * TProtocolPair.first = Input Protocol
  * TProtocolPair.second = Output Protocol
  */
-typedef std::pair<std::shared_ptr<TProtocol>, std::shared_ptr<TProtocol>>
-    TProtocolPair;
+using TProtocolPair =
+    std::pair<std::shared_ptr<TProtocol>, std::shared_ptr<TProtocol>>;
 
 class TDuplexProtocolFactory {
  public:

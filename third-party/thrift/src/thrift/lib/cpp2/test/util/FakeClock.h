@@ -22,10 +22,10 @@ namespace apache::thrift {
 
 class FakeClock {
  public:
-  typedef uint64_t rep;
-  typedef std::ratio<1l, 1000000000l> period;
-  typedef std::chrono::duration<rep, period> duration;
-  typedef std::chrono::time_point<FakeClock> time_point;
+  using rep = uint64_t;
+  using period = std::ratio<1L, 1000000000L>;
+  using duration = std::chrono::duration<rep, period>;
+  using time_point = std::chrono::time_point<FakeClock>;
 
   static void advance(const duration& d) noexcept { now_us_ += d; }
 

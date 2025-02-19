@@ -272,35 +272,35 @@ int readBenchArenaMemory(size_t iters) {
   BENCHMARK_MACRO_RELATIVE(Compact, write, bench) \
   BENCHMARK_DRAW_LINE();
 
-typedef protobuf::Empty pEmpty;
+using pEmpty = protobuf::Empty;
 BENCHMARK_MACRO(Empty)
-typedef protobuf::SmallInt pSmallInt;
+using pSmallInt = protobuf::SmallInt;
 BENCHMARK_MACRO(SmallInt)
-typedef protobuf::BigInt pBigInt;
+using pBigInt = protobuf::BigInt;
 BENCHMARK_MACRO(BigInt)
-typedef protobuf::MixedInt pMixedInt;
+using pMixedInt = protobuf::MixedInt;
 BENCHMARK_MACRO(MixedInt)
-typedef protobuf::SmallString pSmallString;
+using pSmallString = protobuf::SmallString;
 BENCHMARK_MACRO(SmallString)
-typedef protobuf::BigString pBigString;
+using pBigString = protobuf::BigString;
 BENCHMARK_MACRO(BigString)
-typedef protobuf::Mixed pMixed;
+using pMixed = protobuf::Mixed;
 BENCHMARK_MACRO(Mixed)
-typedef protobuf::LargeMixed pLargeMixed;
+using pLargeMixed = protobuf::LargeMixed;
 BENCHMARK_MACRO(LargeMixed)
-typedef protobuf::SmallListInt pSmallListInt;
+using pSmallListInt = protobuf::SmallListInt;
 BENCHMARK_MACRO(SmallListInt)
-typedef protobuf::BigListInt pBigListInt;
+using pBigListInt = protobuf::BigListInt;
 BENCHMARK_MACRO(BigListInt)
-typedef protobuf::BigListMixed pBigListMixed;
+using pBigListMixed = protobuf::BigListMixed;
 BENCHMARK_MACRO(BigListMixed)
-typedef protobuf::LargeListMixed pLargeListMixed;
+using pLargeListMixed = protobuf::LargeListMixed;
 BENCHMARK_MACRO(LargeListMixed)
-typedef protobuf::LargeMapInt pLargeMapInt;
+using pLargeMapInt = protobuf::LargeMapInt;
 BENCHMARK_MACRO(LargeMapInt)
-typedef protobuf::NestedMap pNestedMap;
+using pNestedMap = protobuf::NestedMap;
 BENCHMARK_MACRO(NestedMap)
-typedef protobuf::ComplexStruct pComplexStruct;
+using pComplexStruct = protobuf::ComplexStruct;
 BENCHMARK_MACRO(ComplexStruct)
 
 // some special map types for Thrift

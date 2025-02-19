@@ -115,9 +115,8 @@ class GaussianMixtureModel {
   //   1. the boost normal distribution sampling relies on
   //   apache::thrift::loadgen::RNG
   //   2. the underlying RNG is ThreadLocal
-  typedef std::vector<
-      boost::variate_generator<RNG, boost::normal_distribution<double>>>
-      TGaussianGenerators;
+  using TGaussianGenerators = std::vector<
+      boost::variate_generator<RNG, boost::normal_distribution<double>>>;
   folly::ThreadLocal<TGaussianGenerators> threadLocalGaussianGenerators;
 };
 

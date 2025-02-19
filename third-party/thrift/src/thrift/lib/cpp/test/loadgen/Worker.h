@@ -47,8 +47,8 @@ namespace loadgen {
 template <typename ClientT, typename ConfigT = LoadConfig>
 class Worker : public WorkerIf {
  public:
-  typedef ClientT ClientType;
-  typedef ConfigT ConfigType;
+  using ClientType = ClientT;
+  using ConfigType = ConfigT;
 
   enum ErrorAction {
     EA_CONTINUE,

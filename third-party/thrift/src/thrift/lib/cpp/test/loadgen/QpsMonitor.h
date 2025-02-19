@@ -50,7 +50,7 @@ class QpsMonitor : public TerminalMonitor {
   void printAllTimeQps(bool enabled) { printAllTime_ = enabled; }
 
  private:
-  typedef std::vector<std::shared_ptr<QpsScoreBoard>> ScoreBoardVector;
+  using ScoreBoardVector = std::vector<std::shared_ptr<QpsScoreBoard>>;
 
   void computeAggregate(QpsScoreBoard* scoreboard);
 

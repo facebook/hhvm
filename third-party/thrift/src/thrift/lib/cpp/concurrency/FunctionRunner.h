@@ -56,11 +56,11 @@ namespace concurrency {
 class FunctionRunner : public virtual Runnable {
  public:
   // This is the type of callback 'pthread_create()' expects.
-  typedef void* (*PthreadFuncPtr)(void* arg);
+  using PthreadFuncPtr = void* (*)(void*);
   // This a fully-generic void(void) callback for custom bindings.
-  typedef folly::Function<void()> VoidFunc;
+  using VoidFunc = folly::Function<void()>;
 
-  typedef folly::Function<bool()> BoolFunc;
+  using BoolFunc = folly::Function<bool()>;
 
   /**
    * Syntactic sugar to make it easier to create new FunctionRunner

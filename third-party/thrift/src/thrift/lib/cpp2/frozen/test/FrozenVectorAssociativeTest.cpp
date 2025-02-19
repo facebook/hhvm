@@ -186,5 +186,5 @@ TYPED_TEST_P(FrozenStructsWithVectors, Freezable) {
 }
 
 REGISTER_TYPED_TEST_CASE_P(FrozenStructsWithVectors, Freezable, Serializable);
-typedef ::testing::Types<VectorTest> MyTypes;
+using MyTypes = ::testing::Types<VectorTest>;
 INSTANTIATE_TYPED_TEST_CASE_P(CppVerions, FrozenStructsWithVectors, MyTypes);

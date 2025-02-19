@@ -136,8 +136,8 @@ enum class EffectiveTicketSeedStrategy {
   FILE
 };
 
-typedef wangle::Pipeline<folly::IOBufQueue&, std::unique_ptr<folly::IOBuf>>
-    Pipeline;
+using Pipeline =
+    wangle::Pipeline<folly::IOBufQueue&, std::unique_ptr<folly::IOBuf>>;
 
 class ThriftTlsConfig : public wangle::CustomConfig {
  public:
@@ -198,16 +198,14 @@ class ThriftServerStopController final {
 using IsOverloadedFunc = folly::Function<bool(
     const transport::THeader::StringToStringMap&, const std::string&) const>;
 
-typedef std::function<void(
+using getHandlerFunc = std::function<void(
     folly::EventBase*,
     wangle::ConnectionManager*,
     std::shared_ptr<folly::AsyncTransport>,
-    std::unique_ptr<folly::IOBuf>)>
-    getHandlerFunc;
+    std::unique_ptr<folly::IOBuf>)>;
 
-typedef std::function<void(
-    const apache::thrift::transport::THeader*, const folly::SocketAddress*)>
-    GetHeaderHandlerFunc;
+using GetHeaderHandlerFunc = std::function<void(
+    const apache::thrift::transport::THeader*, const folly::SocketAddress*)>;
 
 template <typename T>
 class ThriftServerAsyncProcessorFactory : public AsyncProcessorFactory {

@@ -137,7 +137,7 @@ class Cpp2Channel
   std::shared_ptr<wangle::OutputBufferingHandler> outputBufferingHandler_;
   std::shared_ptr<FramingHandler> framingHandler_;
 
-  typedef wangle::StaticPipeline<
+  using Pipeline = wangle::StaticPipeline<
       folly::IOBufQueue&,
       std::pair<
           std::unique_ptr<folly::IOBuf>,
@@ -145,8 +145,7 @@ class Cpp2Channel
       TAsyncTransportHandler,
       wangle::OutputBufferingHandler,
       FramingHandler,
-      Cpp2Channel>
-      Pipeline;
+      Cpp2Channel>;
   std::shared_ptr<Pipeline> pipeline_;
   TAsyncTransportHandler* transportHandler_;
 };

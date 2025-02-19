@@ -126,9 +126,9 @@ template <int16_t Fid, typename TC, typename T, typename Tag = void>
 struct FieldData {
   static const constexpr int16_t fid = Fid;
   static const constexpr protocol::TType ttype = protocol_type_v<TC, T>;
-  typedef TC type_class;
-  typedef T type;
-  typedef std::remove_pointer_t<T> value_type;
+  using type_class = TC;
+  using type = T;
+  using value_type = std::remove_pointer_t<T>;
   using Ops = Cpp2Ops<value_type>;
   T value;
   static_assert(std::is_pointer_v<T> != std::is_base_of_v<TException, T>, "");
@@ -203,9 +203,9 @@ class ThriftPresult
       public apache::thrift::detail::IsSetHelper<hasIsSet, sizeof...(Field)> {
   // The fields tuple and IsSetHelper are base classes (rather than members)
   // to employ the empty base class optimization when they are empty
-  typedef std::tuple<Field...> Fields;
-  typedef apache::thrift::detail::IsSetHelper<hasIsSet, sizeof...(Field)>
-      CurIsSetHelper;
+  using Fields = std::tuple<Field...>;
+  using CurIsSetHelper =
+      apache::thrift::detail::IsSetHelper<hasIsSet, sizeof...(Field)>;
 
  public:
   using size = std::tuple_size<Fields>;
@@ -329,7 +329,7 @@ struct ThriftPResultSink {
 template <bool hasIsSet, class... Args>
 class Cpp2Ops<ThriftPresult<hasIsSet, Args...>> {
  public:
-  typedef ThriftPresult<hasIsSet, Args...> Presult;
+  using Presult = ThriftPresult<hasIsSet, Args...>;
   static constexpr protocol::TType thriftType() { return protocol::T_STRUCT; }
   template <class Protocol>
   static uint32_t write(Protocol* prot, const Presult* value) {

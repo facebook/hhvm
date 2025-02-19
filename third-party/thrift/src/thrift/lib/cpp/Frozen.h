@@ -82,12 +82,12 @@ struct Frozen;
 template <class T, class = void>
 struct Freezer {
   // The type which a frozen value thaws back into, usually just T.
-  typedef T ThawedType;
+  using ThawedType = T;
 
   // The type which a mutable value is frozen into. Here, it is simply T. For
   // complex data types, this class will be specialized and a different type
   // will be provided, usually Frozen<T>.
-  typedef Frozen<T> FrozenType;
+  using FrozenType = Frozen<T>;
 
   // Compute the amount of out-of-struct space needed to represent the given
   // object. Specializations of this class will recurse down to children,
@@ -110,12 +110,12 @@ struct Freezer {
 template <class T>
 struct TrivialFreezer {
   // The type which a frozen value thaws back into, usually just T.
-  typedef T ThawedType;
+  using ThawedType = T;
 
   // The type which a mutable value is frozen into. Here, it is simply T. For
   // complex data types, this class will be specialized and a different type
   // will be provided, usually Frozen<T>.
-  typedef T FrozenType;
+  using FrozenType = T;
 
   // Compute the amount of out-of-struct space needed to represent the given
   // object. Specializations of this class will recurse down to children,
@@ -283,12 +283,12 @@ ThawedType thaw(const Frozen<ThawedType>& frozen) {
  */
 template <class A, class B>
 struct Freezer<std::pair<A, B>> {
-  typedef typename Freezer<A>::ThawedType ThawedFirst;
-  typedef typename Freezer<B>::ThawedType ThawedSecond;
-  typedef std::pair<ThawedFirst, ThawedSecond> ThawedType;
-  typedef typename Freezer<A>::FrozenType FrozenFirst;
-  typedef typename Freezer<B>::FrozenType FrozenSecond;
-  typedef std::pair<FrozenFirst, FrozenSecond> FrozenType;
+  using ThawedFirst = typename Freezer<A>::ThawedType;
+  using ThawedSecond = typename Freezer<B>::ThawedType;
+  using ThawedType = std::pair<ThawedFirst, ThawedSecond>;
+  using FrozenFirst = typename Freezer<A>::FrozenType;
+  using FrozenSecond = typename Freezer<B>::FrozenType;
+  using FrozenType = std::pair<FrozenFirst, FrozenSecond>;
 
   static constexpr size_t extraSizeImpl(const ThawedType& src) {
     return Freezer<A>::extraSizeImpl(src.first) +
@@ -332,9 +332,9 @@ template <
     class ThawedItem,
     class FrozenItem = typename Freezer<ThawedItem>::FrozenType>
 struct FrozenRange {
-  typedef const FrozenItem value_type;
-  typedef FrozenIterator<FrozenItem> iterator;
-  typedef FrozenIterator<FrozenItem> const_iterator;
+  using value_type = const FrozenItem;
+  using iterator = FrozenIterator<FrozenItem>;
+  using const_iterator = FrozenIterator<FrozenItem>;
 
   FrozenRange() : begin_(nullptr), end_(nullptr) {}
 
@@ -478,8 +478,8 @@ template <
     class Container,
     class FrozenItem = typename Freezer<ThawedItem>::FrozenType>
 struct RangeFreezer {
-  typedef Container ThawedType;
-  typedef FrozenRange<ThawedItem> FrozenType;
+  using ThawedType = Container;
+  using FrozenType = FrozenRange<ThawedItem>;
 
   static size_t extraSizeImpl(const ThawedType& src) {
     size_t size = 0;
@@ -528,11 +528,11 @@ struct RangeFreezer {
  */
 template <class K, class V>
 struct FrozenMap : FrozenRange<std::pair<const K, V>> {
-  typedef typename Freezer<K>::FrozenType key_type;
-  typedef typename Freezer<V>::FrozenType mapped_type;
-  typedef std::pair<key_type, mapped_type> value_type;
-  typedef FrozenIterator<value_type> iterator;
-  typedef FrozenIterator<value_type> const_iterator;
+  using key_type = typename Freezer<K>::FrozenType;
+  using mapped_type = typename Freezer<V>::FrozenType;
+  using value_type = std::pair<key_type, mapped_type>;
+  using iterator = FrozenIterator<value_type>;
+  using const_iterator = FrozenIterator<value_type>;
 
   template <class Key>
   const mapped_type& at(const Key& key) const {
@@ -593,8 +593,8 @@ struct FrozenMap : FrozenRange<std::pair<const K, V>> {
  */
 template <class K, class V, class MapType>
 struct MapFreezer : public RangeFreezer<std::pair<const K, V>, MapType> {
-  typedef MapType ThawedType;
-  typedef FrozenMap<K, V> FrozenType;
+  using ThawedType = MapType;
+  using FrozenType = FrozenMap<K, V>;
 
   static void thawImpl(const FrozenType& src, ThawedType& dst) {
     dst.clear();
@@ -658,14 +658,14 @@ struct Freezer<apache::thrift::detail::BlockIndex, void>
 template <class K, class V>
 struct FrozenHashMap : public FrozenRange<std::pair<const K, V>> {
  private:
-  typedef FrozenRange<std::pair<const K, V>> Base;
+  using Base = FrozenRange<std::pair<const K, V>>;
 
  public:
-  typedef typename Freezer<K>::FrozenType key_type;
-  typedef typename Freezer<V>::FrozenType mapped_type;
-  typedef std::pair<key_type, mapped_type> value_type;
-  typedef FrozenIterator<value_type> iterator;
-  typedef FrozenIterator<value_type> const_iterator;
+  using key_type = typename Freezer<K>::FrozenType;
+  using mapped_type = typename Freezer<V>::FrozenType;
+  using value_type = std::pair<key_type, mapped_type>;
+  using iterator = FrozenIterator<value_type>;
+  using const_iterator = FrozenIterator<value_type>;
 
   template <class Key>
   const_iterator find(const Key& key) const {
@@ -748,10 +748,10 @@ struct FrozenHashMap : public FrozenRange<std::pair<const K, V>> {
  */
 template <class K, class V, class HashMapType>
 struct HashMapFreezer {
-  typedef HashMapType ThawedType;
-  typedef FrozenHashMap<K, V> FrozenType;
-  typedef typename ThawedType::value_type ThawedItem;
-  typedef typename Freezer<ThawedItem>::FrozenType FrozenItem;
+  using ThawedType = HashMapType;
+  using FrozenType = FrozenHashMap<K, V>;
+  using ThawedItem = typename ThawedType::value_type;
+  using FrozenItem = typename Freezer<ThawedItem>::FrozenType;
 
   static size_t chunkCount(size_t size) {
     auto bits = apache::thrift::detail::BlockIndex::kSize;
@@ -851,9 +851,9 @@ template <
     class ThawedItem,
     class FrozenItem = typename Freezer<ThawedItem>::FrozenType>
 struct FrozenSet : public FrozenRange<ThawedItem, FrozenItem> {
-  typedef const FrozenItem value_type;
-  typedef value_type* iterator;
-  typedef value_type* const_iterator;
+  using value_type = const FrozenItem;
+  using iterator = value_type*;
+  using const_iterator = value_type*;
 
   template <class Key>
   const_iterator find(const Key& key) const {
@@ -891,8 +891,8 @@ struct FrozenSet : public FrozenRange<ThawedItem, FrozenItem> {
  */
 template <class ThawedItem, class SetType>
 struct SetFreezer : public RangeFreezer<ThawedItem, SetType> {
-  typedef SetType ThawedType;
-  typedef FrozenSet<ThawedItem> FrozenType;
+  using ThawedType = SetType;
+  using FrozenType = FrozenSet<ThawedItem>;
 
   static void thawImpl(const FrozenType& src, ThawedType& dst) {
     dst.clear();

@@ -114,9 +114,9 @@ class TimerManager {
   friend class Dispatcher;
   std::shared_ptr<Dispatcher> dispatcher_;
   std::shared_ptr<Thread> dispatcherThread_;
-  typedef std::multimap<int64_t, std::shared_ptr<TimerManager::Task>>::iterator
-      task_iterator;
-  typedef std::pair<task_iterator, task_iterator> task_range;
+  using task_iterator =
+      std::multimap<int64_t, std::shared_ptr<TimerManager::Task>>::iterator;
+  using task_range = std::pair<task_iterator, task_iterator>;
 };
 
 } // namespace concurrency

@@ -77,8 +77,8 @@ class ThreadManager : public virtual folly::Executor {
   static const size_t DEFAULT_MAX_QUEUE_SIZE = 1 << 16; // should be power of 2
 
   class Task;
-  typedef std::function<void(std::shared_ptr<Runnable>)> ExpireCallback;
-  typedef std::function<void()> InitCallback;
+  using ExpireCallback = std::function<void(std::shared_ptr<Runnable>)>;
+  using InitCallback = std::function<void()>;
 
   ~ThreadManager() override {}
 

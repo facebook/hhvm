@@ -60,8 +60,8 @@ class ClientChannel : public RequestChannel, public HeaderChannel {
         : type(SaturationType::REQUEST), usedCapacity(usedCap), capacity(cap) {}
   };
 
-  typedef std::unique_ptr<ClientChannel, folly::DelayedDestruction::Destructor>
-      Ptr;
+  using Ptr =
+      std::unique_ptr<ClientChannel, folly::DelayedDestruction::Destructor>;
 
   virtual folly::AsyncTransport* getTransport() = 0;
 

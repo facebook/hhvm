@@ -74,7 +74,7 @@ enum PRIORITY {
  */
 class Thread {
  public:
-  typedef uint64_t id_t;
+  using id_t = uint64_t;
 
   virtual ~Thread() {}
 

@@ -22,7 +22,7 @@
 namespace apache {
 namespace thrift {
 
-typedef uint8_t byte;
+using byte = uint8_t;
 
 // Relative Ptr - The key to relocatable object graphs
 // TODO: expose 'OffsetType' as a type parameter in freeze()

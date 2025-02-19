@@ -1345,7 +1345,7 @@ namespace {
 
 class PriorityQueueThreadManager : public ThreadManager::Impl {
  public:
-  typedef apache::thrift::concurrency::PRIORITY PRIORITY;
+  using PRIORITY = apache::thrift::concurrency::PRIORITY;
   explicit PriorityQueueThreadManager(size_t numThreads)
       : ThreadManager::Impl(N_PRIORITIES), numThreads_(numThreads) {
     for (int i = 0; i < N_PRIORITIES; i++) {

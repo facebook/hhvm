@@ -54,7 +54,7 @@ class Controller {
 
  private:
   class WorkerRunner;
-  typedef std::vector<std::shared_ptr<WorkerIf>> WorkerVector;
+  using WorkerVector = std::vector<std::shared_ptr<WorkerIf>>;
 
   void createWorkerThreads(uint32_t numThreads);
   void startWorkers(uint32_t numThreads);

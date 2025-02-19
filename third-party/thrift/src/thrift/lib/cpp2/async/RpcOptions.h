@@ -68,7 +68,7 @@ class RpcOptions {
     XXH3_64 = 2,
   };
 
-  typedef apache::thrift::concurrency::PRIORITY PRIORITY;
+  using PRIORITY = apache::thrift::concurrency::PRIORITY;
 
   /**
    * NOTE: This only sets the receive timeout, and not the send timeout on

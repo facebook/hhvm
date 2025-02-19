@@ -956,7 +956,7 @@ class TMemoryBuffer : public TVirtualTransport<TMemoryBuffer, TBufferBase> {
   // The container is a vector (rather than a list) for performance
   // reasons despite the O(N) penalty in unobserve.  The vec keeps the
   // overhead lower in the common case, which is a single observer.
-  typedef std::vector<TMemoryBuffer*> TMemoryBufferContainer;
+  using TMemoryBufferContainer = std::vector<TMemoryBuffer*>;
   TMemoryBufferContainer observers_;
   // Don't forget to update constructors, initCommon, and swap if
   // you add new members.

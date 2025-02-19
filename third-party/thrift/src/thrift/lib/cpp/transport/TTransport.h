@@ -277,8 +277,8 @@ class TTransportFactory {
  * TTransportPair.first = Input Transport
  * TTransportPair.second = Output Transport
  */
-typedef std::pair<std::shared_ptr<TTransport>, std::shared_ptr<TTransport>>
-    TTransportPair;
+using TTransportPair =
+    std::pair<std::shared_ptr<TTransport>, std::shared_ptr<TTransport>>;
 
 class TDuplexTransportFactory {
  public:

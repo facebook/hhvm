@@ -24,7 +24,7 @@ namespace thrift {
 namespace transport {
 
 class THttpClient : public THttpTransport {
-  typedef std::map<std::string, std::string> StringToStringMap;
+  using StringToStringMap = std::map<std::string, std::string>;
 
  public:
   /*

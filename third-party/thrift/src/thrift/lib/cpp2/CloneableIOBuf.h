@@ -31,7 +31,7 @@ namespace detail {
 template <typename T, typename Deleter = std::default_delete<T>>
 class CloneableUniquePtr : public std::unique_ptr<T, Deleter> {
  public:
-  typedef std::unique_ptr<T, Deleter> Base;
+  using Base = std::unique_ptr<T, Deleter>;
   CloneableUniquePtr() : std::unique_ptr<T, Deleter>() {}
   explicit CloneableUniquePtr(std::nullptr_t)
       : std::unique_ptr<T, Deleter>(nullptr) {}
@@ -82,7 +82,7 @@ void swap(
 
 } // namespace detail
 
-typedef apache::thrift::detail::CloneableUniquePtr<folly::IOBuf> CloneableIOBuf;
+using CloneableIOBuf = apache::thrift::detail::CloneableUniquePtr<folly::IOBuf>;
 
 } // namespace apache::thrift
 

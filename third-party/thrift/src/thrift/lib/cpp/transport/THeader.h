@@ -191,7 +191,7 @@ class THeader final {
   // Info headers
   // NB: we're using F14NodeMap here because it's a very≥ general map, which
   // sometimes requires reference stability guarantees.
-  typedef folly::F14NodeMap<std::string, std::string> StringToStringMap;
+  using StringToStringMap = folly::F14NodeMap<std::string, std::string>;
 
   /**
    * We know we got a packet in header format here, try to parse the header

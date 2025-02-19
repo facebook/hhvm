@@ -28,8 +28,8 @@ class TestInterface
 
   void echoRequest(
       std::string& _return, std::unique_ptr<std::string> req) override;
-  typedef apache::thrift::HandlerCallback<std::unique_ptr<std::string>>
-      StringCob;
+  using StringCob =
+      apache::thrift::HandlerCallback<std::unique_ptr<std::string>>;
   void async_tm_serializationTest(
       StringCob::Ptr callback, bool inEventBase) override;
 

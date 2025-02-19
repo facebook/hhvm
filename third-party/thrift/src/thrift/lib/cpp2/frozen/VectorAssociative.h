@@ -29,7 +29,7 @@ namespace apache::thrift::frozen {
  */
 template <class V>
 class VectorAsSet : public std::vector<V> {
-  typedef std::vector<V> Base;
+  using Base = std::vector<V>;
 
  public:
   using Base::Base;
@@ -79,8 +79,8 @@ class VectorAsMap : public VectorAsSet<std::pair<K, V>> {
  public:
   using VectorAsSet<std::pair<K, V>>::VectorAsSet;
 
-  typedef K key_type;
-  typedef V mapped_type;
+  using key_type = K;
+  using mapped_type = V;
   V& operator[](K key) {
     this->emplace_back(
         std::piecewise_construct,

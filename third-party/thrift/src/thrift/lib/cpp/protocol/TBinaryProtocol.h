@@ -213,7 +213,7 @@ class TBinaryProtocolT : public TVirtualProtocol<TBinaryProtocolT<Transport_>> {
   bool strict_write_;
 };
 
-typedef TBinaryProtocolT<transport::TTransport> TBinaryProtocol;
+using TBinaryProtocol = TBinaryProtocolT<transport::TTransport>;
 
 class TBinaryProtocolFactoryBase : public TProtocolFactory {};
 
@@ -281,7 +281,7 @@ class TBinaryProtocolFactoryT : public TBinaryProtocolFactoryBase {
   bool strict_write_;
 };
 
-typedef TBinaryProtocolFactoryT<transport::TTransport> TBinaryProtocolFactory;
+using TBinaryProtocolFactory = TBinaryProtocolFactoryT<transport::TTransport>;
 
 } // namespace protocol
 } // namespace thrift

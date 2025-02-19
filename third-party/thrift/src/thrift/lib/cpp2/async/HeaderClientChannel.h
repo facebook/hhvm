@@ -108,11 +108,10 @@ class HeaderClientChannel : public ClientChannel,
   struct WithRocketUpgrade {};
   struct WithoutRocketUpgrade {};
 
-  typedef std::unique_ptr<ClientChannel, folly::DelayedDestruction::Destructor>
-      Ptr;
-  typedef std::
-      unique_ptr<HeaderClientChannel, folly::DelayedDestruction::Destructor>
-          LegacyPtr;
+  using Ptr =
+      std::unique_ptr<ClientChannel, folly::DelayedDestruction::Destructor>;
+  using LegacyPtr = std::
+      unique_ptr<HeaderClientChannel, folly::DelayedDestruction::Destructor>;
 
   static Ptr newChannel(
       folly::AsyncTransport::UniquePtr transport, Options options = Options());

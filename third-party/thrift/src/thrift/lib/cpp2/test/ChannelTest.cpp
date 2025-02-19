@@ -1176,8 +1176,8 @@ class DestroyAsyncTransport : public folly::AsyncTransport {
 
 class DestroyRecvCallback : public MessageChannel::RecvCallback {
  public:
-  typedef std::unique_ptr<Cpp2Channel, folly::DelayedDestruction::Destructor>
-      ChannelPointer;
+  using ChannelPointer =
+      std::unique_ptr<Cpp2Channel, folly::DelayedDestruction::Destructor>;
   explicit DestroyRecvCallback(ChannelPointer&& channel)
       : channel_(std::move(channel)), invocations_(0) {
     channel_->setReceiveCallback(this);

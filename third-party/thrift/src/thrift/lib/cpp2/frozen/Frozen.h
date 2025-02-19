@@ -82,7 +82,7 @@ namespace apache::thrift::frozen {
  *
  * -Tom Jackson
  */
-typedef uint8_t byte;
+using byte = uint8_t;
 
 class LoadRoot;
 

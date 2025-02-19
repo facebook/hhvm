@@ -24,6 +24,7 @@ struct QuicProtocolInfo : public wangle::ProtocolInfo {
   folly::Optional<quic::ConnectionId> serverConnectionId;
   folly::Optional<quic::TransportSettings> transportSettings;
   folly::Optional<std::string> fingerprint;
+  folly::Optional<quic::QuicVersion> quicVersion;
 
   uint32_t ptoCount{0};
   uint32_t totalPTOCount{0};
@@ -38,6 +39,8 @@ inline void initQuicProtocolInfo(QuicProtocolInfo& quicInfo,
       sock.getClientChosenDestConnectionId();
   quicInfo.clientConnectionId = sock.getClientConnectionId();
   quicInfo.serverConnectionId = sock.getServerConnectionId();
+  quicInfo.quicVersion =
+      sock.getState() ? sock.getState()->version : folly::none;
 }
 
 inline void updateQuicProtocolInfo(QuicProtocolInfo& quicInfo,

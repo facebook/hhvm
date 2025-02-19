@@ -846,8 +846,6 @@ static void prepareFuncEntry(ActRec *ar, uint32_t numArgsInclUnpack) {
   vmJitReturnAddr() = nullptr;
 }
 
-static void dispatch();
-
 void enterVMAtFunc(ActRec* enterFnAr, uint32_t numArgsInclUnpack) {
   assertx(enterFnAr);
   assertx(!isResumed(enterFnAr));
@@ -855,13 +853,7 @@ void enterVMAtFunc(ActRec* enterFnAr, uint32_t numArgsInclUnpack) {
 
   prepareFuncEntry(enterFnAr, numArgsInclUnpack);
   assertx(vmfp()->func()->contains(vmpc()));
-
-  if (RID().getJit()) {
-    jit::enterTC(jit::svcreq::getFuncEntry(enterFnAr->func()));
-  } else {
-    if (!funcEntry()) return;
-    dispatch();
-  }
+  jit::enterTC(jit::svcreq::getFuncEntry(enterFnAr->func()));
 }
 
 void enterVMAtCurPC() {
@@ -869,12 +861,10 @@ void enterVMAtCurPC() {
   assertx(vmpc());
   assertx(vmfp()->func()->contains(vmpc()));
   Stats::inc(Stats::VMEnter);
-  if (RID().getJit()) {
-    jit::enterTC(JitResumeAddr::helper(
-      jit::tc::ustubs().resumeHelperFromInterp));
-  } else {
-    dispatch();
-  }
+  auto const resumeHelper = RID().getJit()
+    ? jit::tc::ustubs().resumeHelperFromInterp
+    : jit::tc::ustubs().resumeHelperNoTranslateFromInterp;
+  jit::enterTC(JitResumeAddr::helper(resumeHelper));
 }
 
 static inline StringData* lookup_name(tv_rval key) {
@@ -5773,15 +5763,6 @@ JitResumeAddr dispatchImpl() {
 #undef OPCODE_MAIN_BODY
 
   not_reached();
-}
-
-static void dispatch() {
-  WorkloadStats guard(WorkloadStats::InInterp);
-
-  tracing::BlockNoTrace _{"dispatch"};
-
-  DEBUG_ONLY auto const retAddr = dispatchImpl<false>();
-  assertx(!retAddr);
 }
 
 JitResumeAddr dispatchBB() {

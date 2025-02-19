@@ -193,6 +193,11 @@ TranslationResult getTranslation(SrcKey sk) {
 }
 
 JitResumeAddr getFuncEntry(const Func* func) {
+  if (!RID().getJit()) {
+    return JitResumeAddr::helper(
+      tc::ustubs().resumeHelperNoTranslateFuncEntryFromInterp);
+  }
+
   if (auto const addr = func->getFuncEntry()) {
     return JitResumeAddr::transFuncEntry(addr);
   }

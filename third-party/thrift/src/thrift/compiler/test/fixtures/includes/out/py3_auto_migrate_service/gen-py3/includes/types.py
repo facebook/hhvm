@@ -4,4 +4,10 @@
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #  @generated
 #
-from includes.thrift_types import *
+from includes.thrift_types import (
+    Included,
+    ExampleIncluded,
+    IncludedConstant,
+    IncludedInt64,
+    TransitiveFoo,
+)

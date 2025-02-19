@@ -34,7 +34,19 @@ want to include.
 }}
 {{> common/auto_generated_py}}
 {{#program:auto_migrate?}}
-from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types import *
+{{#program:has_types?}}
+from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types import (
+    {{#program:structs}}
+    {{struct:name}},
+    {{/program:structs}}{{#program:enums}}
+    {{enum:name}},
+    {{/program:enums}}{{#program:constants}}{{#constant:type}}
+    {{constant:name}},
+    {{/constant:type}}{{/program:constants}}{{#program:typedefs}}
+    {{typedef:name}},
+    {{/program:typedefs}}
+)
+{{/program:has_types?}}
 {{#program:hasContainerTypes}}
 import importlib
 import thrift.python.types as _fbthrift_python_types

@@ -59,7 +59,7 @@ void apache::thrift::Client<::cpp2::PubSubStreamingService>::fbthrift_send_retur
                 "returnstream",
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "PubSubStreamingService");
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
 template <typename RpcOptions>
@@ -70,7 +70,7 @@ void apache::thrift::Client<::cpp2::PubSubStreamingService>::fbthrift_send_strea
                 "streamthrows",
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "PubSubStreamingService");
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
 template <typename RpcOptions>
@@ -81,7 +81,7 @@ void apache::thrift::Client<::cpp2::PubSubStreamingService>::fbthrift_send_servi
                 "servicethrows",
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "PubSubStreamingService");
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
 template <typename RpcOptions>
@@ -92,7 +92,7 @@ void apache::thrift::Client<::cpp2::PubSubStreamingService>::fbthrift_send_servi
                 "servicethrows2",
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "PubSubStreamingService");
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
 template <typename RpcOptions>
@@ -103,7 +103,7 @@ void apache::thrift::Client<::cpp2::PubSubStreamingService>::fbthrift_send_botht
                 "boththrows",
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "PubSubStreamingService");
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
 template <typename RpcOptions>
@@ -114,7 +114,7 @@ void apache::thrift::Client<::cpp2::PubSubStreamingService>::fbthrift_send_respo
                 "responseandstreamstreamthrows",
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "PubSubStreamingService");
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
 template <typename RpcOptions>
@@ -125,7 +125,7 @@ void apache::thrift::Client<::cpp2::PubSubStreamingService>::fbthrift_send_respo
                 "responseandstreamservicethrows",
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "PubSubStreamingService");
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
 template <typename RpcOptions>
@@ -136,7 +136,7 @@ void apache::thrift::Client<::cpp2::PubSubStreamingService>::fbthrift_send_respo
                 "responseandstreamboththrows",
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "PubSubStreamingService");
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
 

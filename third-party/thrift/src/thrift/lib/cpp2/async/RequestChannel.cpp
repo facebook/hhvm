@@ -31,15 +31,13 @@ void RequestChannel::sendRequestResponse(
     MethodMetadata&& metadata,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    RequestClientCallback::Ptr clientCallback,
-    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
+    RequestClientCallback::Ptr clientCallback) {
   sendRequestResponse(
       folly::copy(rpcOptions),
       std::move(metadata),
       std::move(request),
       std::move(header),
-      std::move(clientCallback),
-      std::move(frameworkMetadata));
+      std::move(clientCallback));
 }
 
 void RequestChannel::sendRequestNoResponse(
@@ -47,15 +45,13 @@ void RequestChannel::sendRequestNoResponse(
     MethodMetadata&& metadata,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    RequestClientCallback::Ptr clientCallback,
-    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
+    RequestClientCallback::Ptr clientCallback) {
   sendRequestNoResponse(
       folly::copy(rpcOptions),
       std::move(metadata),
       std::move(request),
       std::move(header),
-      std::move(clientCallback),
-      std::move(frameworkMetadata));
+      std::move(clientCallback));
 }
 
 void RequestChannel::sendRequestStream(
@@ -63,15 +59,13 @@ void RequestChannel::sendRequestStream(
     MethodMetadata&& metadata,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    StreamClientCallback* clientCallback,
-    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
+    StreamClientCallback* clientCallback) {
   sendRequestStream(
       folly::copy(rpcOptions),
       std::move(metadata),
       std::move(request),
       std::move(header),
-      clientCallback,
-      std::move(frameworkMetadata));
+      clientCallback);
 }
 
 void RequestChannel::sendRequestSink(
@@ -79,15 +73,13 @@ void RequestChannel::sendRequestSink(
     MethodMetadata&& metadata,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    SinkClientCallback* clientCallback,
-    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
+    SinkClientCallback* clientCallback) {
   sendRequestSink(
       folly::copy(rpcOptions),
       std::move(metadata),
       std::move(request),
       std::move(header),
-      clientCallback,
-      std::move(frameworkMetadata));
+      clientCallback);
 }
 
 void RequestChannel::sendRequestResponse(
@@ -95,15 +87,13 @@ void RequestChannel::sendRequestResponse(
     MethodMetadata&& metadata,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    RequestClientCallback::Ptr clientCallback,
-    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
+    RequestClientCallback::Ptr clientCallback) {
   sendRequestResponse(
       rpcOptions,
       std::move(metadata),
       std::move(request),
       std::move(header),
-      std::move(clientCallback),
-      std::move(frameworkMetadata));
+      std::move(clientCallback));
 }
 
 void RequestChannel::sendRequestNoResponse(
@@ -111,15 +101,13 @@ void RequestChannel::sendRequestNoResponse(
     MethodMetadata&& metadata,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    RequestClientCallback::Ptr clientCallback,
-    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
+    RequestClientCallback::Ptr clientCallback) {
   sendRequestNoResponse(
       rpcOptions,
       std::move(metadata),
       std::move(request),
       std::move(header),
-      std::move(clientCallback),
-      std::move(frameworkMetadata));
+      std::move(clientCallback));
 }
 
 void RequestChannel::sendRequestStream(
@@ -127,15 +115,13 @@ void RequestChannel::sendRequestStream(
     MethodMetadata&& metadata,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    StreamClientCallback* clientCallback,
-    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
+    StreamClientCallback* clientCallback) {
   sendRequestStream(
       rpcOptions,
       std::move(metadata),
       std::move(request),
       std::move(header),
-      clientCallback,
-      std::move(frameworkMetadata));
+      clientCallback);
 }
 
 void RequestChannel::sendRequestSink(
@@ -143,15 +129,13 @@ void RequestChannel::sendRequestSink(
     MethodMetadata&& metadata,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    SinkClientCallback* clientCallback,
-    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
+    SinkClientCallback* clientCallback) {
   sendRequestSink(
       rpcOptions,
       std::move(metadata),
       std::move(request),
       std::move(header),
-      clientCallback,
-      std::move(frameworkMetadata));
+      clientCallback);
 }
 
 void RequestChannel::terminateInteraction(InteractionId) {

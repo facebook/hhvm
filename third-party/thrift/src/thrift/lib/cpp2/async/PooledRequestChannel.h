@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <atomic>
+
 #include <folly/Function.h>
 #include <folly/executors/IOExecutor.h>
 #include <folly/io/async/EventBaseLocal.h>
@@ -112,32 +114,28 @@ class PooledRequestChannel : public RequestChannel {
       MethodMetadata&& methodMetadata,
       SerializedRequest&&,
       std::shared_ptr<transport::THeader> header,
-      RequestClientCallback::Ptr cob,
-      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
+      RequestClientCallback::Ptr cob) override;
 
   void sendRequestNoResponse(
       RpcOptions&& options,
       MethodMetadata&& methodMetadata,
       SerializedRequest&&,
       std::shared_ptr<transport::THeader> header,
-      RequestClientCallback::Ptr cob,
-      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
+      RequestClientCallback::Ptr cob) override;
 
   void sendRequestStream(
       RpcOptions&& options,
       MethodMetadata&& methodMetadata,
       SerializedRequest&&,
       std::shared_ptr<transport::THeader> header,
-      StreamClientCallback* cob,
-      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
+      StreamClientCallback* cob) override;
 
   void sendRequestSink(
       RpcOptions&& options,
       MethodMetadata&& methodMetadata,
       SerializedRequest&&,
       std::shared_ptr<transport::THeader> header,
-      SinkClientCallback* cob,
-      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
+      SinkClientCallback* cob) override;
 
   using RequestChannel::sendRequestNoResponse;
   using RequestChannel::sendRequestResponse;

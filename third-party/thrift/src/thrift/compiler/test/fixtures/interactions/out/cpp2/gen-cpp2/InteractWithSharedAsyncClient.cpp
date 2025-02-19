@@ -21,7 +21,7 @@ void apache::thrift::Client<::cpp2::InteractWithShared>::fbthrift_send_do_some_s
                 "do_some_similar_things",
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "InteractWithShared");
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
 
@@ -254,7 +254,7 @@ void apache::thrift::Client<::cpp2::InteractWithShared>::MyInteraction::fbthrift
                 "InteractWithShared",
                 ::apache::thrift::InteractionMethodPosition::Member,
                 "MyInteraction");
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::move(rpcOpts), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::move(rpcOpts), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
 template <typename RpcOptions>
@@ -269,7 +269,7 @@ void apache::thrift::Client<::cpp2::InteractWithShared>::MyInteraction::fbthrift
                 "InteractWithShared",
                 ::apache::thrift::InteractionMethodPosition::Member,
                 "MyInteraction");
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE>(std::move(request), std::move(rpcOpts), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_NO_RESPONSE>(std::move(request), std::move(rpcOpts), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
 template <typename RpcOptions>
@@ -284,7 +284,7 @@ void apache::thrift::Client<::cpp2::InteractWithShared>::MyInteraction::fbthrift
                 "InteractWithShared",
                 ::apache::thrift::InteractionMethodPosition::Member,
                 "MyInteraction");
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE>(std::move(request), std::move(rpcOpts), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE>(std::move(request), std::move(rpcOpts), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
 template <typename RpcOptions>
@@ -299,7 +299,7 @@ void apache::thrift::Client<::cpp2::InteractWithShared>::MyInteraction::fbthrift
                 "InteractWithShared",
                 ::apache::thrift::InteractionMethodPosition::Member,
                 "MyInteraction");
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINK>(std::move(request), std::move(rpcOpts), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINK>(std::move(request), std::move(rpcOpts), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
 
@@ -899,7 +899,7 @@ void apache::thrift::Client<::cpp2::InteractWithShared>::SharedInteraction::fbth
                 "InteractWithShared",
                 ::apache::thrift::InteractionMethodPosition::Member,
                 "SharedInteraction");
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::move(rpcOpts), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::move(rpcOpts), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
 template <typename RpcOptions>
@@ -914,7 +914,7 @@ void apache::thrift::Client<::cpp2::InteractWithShared>::SharedInteraction::fbth
                 "InteractWithShared",
                 ::apache::thrift::InteractionMethodPosition::Member,
                 "SharedInteraction");
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::move(rpcOpts), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::move(rpcOpts), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
 template <typename RpcOptions>
@@ -929,7 +929,7 @@ void apache::thrift::Client<::cpp2::InteractWithShared>::SharedInteraction::fbth
                 "InteractWithShared",
                 ::apache::thrift::InteractionMethodPosition::Member,
                 "SharedInteraction");
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::move(rpcOpts), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::move(rpcOpts), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
 

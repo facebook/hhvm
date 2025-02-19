@@ -141,8 +141,7 @@ void PooledRequestChannel::sendRequestResponse(
     apache::thrift::MethodMetadata&& methodMetadata,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    RequestClientCallback::Ptr cob,
-    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
+    RequestClientCallback::Ptr cob) {
   if (!cob->isInlineSafe()) {
     cob = RequestClientCallback::Ptr(new ExecutorRequestCallback(
         std::move(cob), getKeepAliveToken(callbackExecutor_)));
@@ -155,17 +154,14 @@ void PooledRequestChannel::sendRequestResponse(
        request = std::move(request),
        header = std::move(header),
        guard = std::move(guard),
-       cob = std::move(cob),
-       frameworkMetadata =
-           std::move(frameworkMetadata)](Impl& channel) mutable {
+       cob = std::move(cob)](Impl& channel) mutable {
         maybeCreateInteraction(options, channel);
         channel.sendRequestResponse(
             std::move(options),
             std::move(methodMetadata),
             std::move(request),
             std::move(header),
-            std::move(cob),
-            std::move(frameworkMetadata));
+            std::move(cob));
       },
       std::move(evb));
 }
@@ -175,8 +171,7 @@ void PooledRequestChannel::sendRequestNoResponse(
     apache::thrift::MethodMetadata&& methodMetadata,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    RequestClientCallback::Ptr cob,
-    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
+    RequestClientCallback::Ptr cob) {
   if (!cob->isInlineSafe()) {
     cob = RequestClientCallback::Ptr(new ExecutorRequestCallback(
         std::move(cob), getKeepAliveToken(callbackExecutor_)));
@@ -189,17 +184,14 @@ void PooledRequestChannel::sendRequestNoResponse(
        request = std::move(request),
        header = std::move(header),
        guard = std::move(guard),
-       cob = std::move(cob),
-       frameworkMetadata =
-           std::move(frameworkMetadata)](Impl& channel) mutable {
+       cob = std::move(cob)](Impl& channel) mutable {
         maybeCreateInteraction(options, channel);
         channel.sendRequestNoResponse(
             std::move(options),
             std::move(methodMetadata),
             std::move(request),
             std::move(header),
-            std::move(cob),
-            std::move(frameworkMetadata));
+            std::move(cob));
       },
       std::move(evb));
 }
@@ -209,8 +201,7 @@ void PooledRequestChannel::sendRequestStream(
     apache::thrift::MethodMetadata&& methodMetadata,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    StreamClientCallback* cob,
-    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
+    StreamClientCallback* cob) {
   auto evb = getEvb(options);
   auto guard = getInteractionGuard(options);
   sendRequestImpl(
@@ -219,17 +210,14 @@ void PooledRequestChannel::sendRequestStream(
        request = std::move(request),
        header = std::move(header),
        guard = std::move(guard),
-       cob,
-       frameworkMetadata =
-           std::move(frameworkMetadata)](Impl& channel) mutable {
+       cob](Impl& channel) mutable {
         maybeCreateInteraction(options, channel);
         channel.sendRequestStream(
             std::move(options),
             std::move(methodMetadata),
             std::move(request),
             std::move(header),
-            cob,
-            std::move(frameworkMetadata));
+            cob);
       },
       std::move(evb));
 }
@@ -239,8 +227,7 @@ void PooledRequestChannel::sendRequestSink(
     apache::thrift::MethodMetadata&& methodMetadata,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    SinkClientCallback* cob,
-    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
+    SinkClientCallback* cob) {
   auto evb = getEvb(options);
   auto guard = getInteractionGuard(options);
   sendRequestImpl(
@@ -249,17 +236,14 @@ void PooledRequestChannel::sendRequestSink(
        request = std::move(request),
        header = std::move(header),
        guard = std::move(guard),
-       cob,
-       frameworkMetadata =
-           std::move(frameworkMetadata)](Impl& channel) mutable {
+       cob](Impl& channel) mutable {
         maybeCreateInteraction(options, channel);
         channel.sendRequestSink(
             std::move(options),
             std::move(methodMetadata),
             std::move(request),
             std::move(header),
-            cob,
-            std::move(frameworkMetadata));
+            cob);
       },
       std::move(evb));
 }

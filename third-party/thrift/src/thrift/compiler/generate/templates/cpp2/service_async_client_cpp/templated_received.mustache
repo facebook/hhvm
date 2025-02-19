@@ -34,7 +34,7 @@ void {{> service_common/client_class_name}}::fbthrift_send_{{function:cpp_name}}
   apache::thrift::clientSendT<{{> types/function_kind}}>(std::move(request), {{!
     }}{{#function:in_or_creates_interaction?}}std::move(rpcOpts){{/function:in_or_creates_interaction?}}{{!
     }}{{^function:in_or_creates_interaction?}}std::forward<RpcOptions>(rpcOptions){{/function:in_or_creates_interaction?}}{{!
-    }}, std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
+    }}, std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
 }
 
 {{/function:starts_interaction?}}{{/function:return_type}}{{/service:functions}}

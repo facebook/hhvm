@@ -193,8 +193,7 @@ void HeaderClientChannel::sendRequestNoResponse(
     MethodMetadata&& methodMetadata,
     SerializedRequest&& serializedRequest,
     std::shared_ptr<THeader> header,
-    RequestClientCallback::Ptr cb,
-    std::unique_ptr<folly::IOBuf> /*unsupported - header has no RpcMetadata*/) {
+    RequestClientCallback::Ptr cb) {
   preprocessHeader(header.get());
 
   auto buf = LegacySerializedRequest(
@@ -282,8 +281,7 @@ void HeaderClientChannel::sendRequestResponse(
     MethodMetadata&& methodMetadata,
     SerializedRequest&& serializedRequest,
     std::shared_ptr<THeader> header,
-    RequestClientCallback::Ptr cb,
-    std::unique_ptr<folly::IOBuf> /*unsupported - header has no RpcMetadata*/) {
+    RequestClientCallback::Ptr cb) {
   preprocessHeader(header.get());
 
   auto buf = LegacySerializedRequest(
@@ -511,8 +509,7 @@ void HeaderClientChannel::RocketUpgradeChannel::sendRequestResponse(
     apache::thrift::MethodMetadata&& methodMetadata,
     SerializedRequest&& serializedRequest,
     std::shared_ptr<apache::thrift::transport::THeader> header,
-    RequestClientCallback::Ptr cb,
-    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
+    RequestClientCallback::Ptr cb) {
   preprocessHeader(header.get());
 
   initUpgradeIfNeeded(rpcOptions);
@@ -523,7 +520,6 @@ void HeaderClientChannel::RocketUpgradeChannel::sendRequestResponse(
         std::move(serializedRequest),
         std::move(header),
         std::move(cb),
-        std::move(frameworkMetadata),
         false /* oneWay */);
     return;
   }
@@ -535,8 +531,7 @@ void HeaderClientChannel::RocketUpgradeChannel::sendRequestResponse(
       std::move(methodMetadata),
       std::move(serializedRequest),
       std::move(header),
-      std::move(cb),
-      std::move(frameworkMetadata));
+      std::move(cb));
 }
 
 void HeaderClientChannel::RocketUpgradeChannel::sendRequestNoResponse(
@@ -544,8 +539,7 @@ void HeaderClientChannel::RocketUpgradeChannel::sendRequestNoResponse(
     apache::thrift::MethodMetadata&& methodMetadata,
     SerializedRequest&& serializedRequest,
     std::shared_ptr<apache::thrift::transport::THeader> header,
-    RequestClientCallback::Ptr cb,
-    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
+    RequestClientCallback::Ptr cb) {
   preprocessHeader(header.get());
 
   initUpgradeIfNeeded(rpcOptions);
@@ -556,7 +550,6 @@ void HeaderClientChannel::RocketUpgradeChannel::sendRequestNoResponse(
         std::move(serializedRequest),
         std::move(header),
         std::move(cb),
-        std::move(frameworkMetadata),
         true /* oneWay */);
     return;
   }
@@ -568,8 +561,7 @@ void HeaderClientChannel::RocketUpgradeChannel::sendRequestNoResponse(
       std::move(methodMetadata),
       std::move(serializedRequest),
       std::move(header),
-      std::move(cb),
-      std::move(frameworkMetadata));
+      std::move(cb));
 }
 
 void HeaderClientChannel::RocketUpgradeChannel::setCloseCallback(
@@ -728,16 +720,14 @@ void HeaderClientChannel::RocketUpgradeChannel::BufferedRequest::send(
         std::move(methodMetadata_),
         std::move(serializedRequest_),
         std::move(header_),
-        std::move(callback_),
-        std::move(frameworkMetadata_));
+        std::move(callback_));
   } else {
     channel.sendRequestResponse(
         rpcOptions_,
         std::move(methodMetadata_),
         std::move(serializedRequest_),
         std::move(header_),
-        std::move(callback_),
-        std::move(frameworkMetadata_));
+        std::move(callback_));
   }
 }
 

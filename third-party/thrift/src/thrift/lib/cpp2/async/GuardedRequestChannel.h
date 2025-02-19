@@ -15,6 +15,7 @@
  */
 
 #pragma once
+#include <atomic>
 
 #include <thrift/lib/cpp2/async/RequestChannel.h>
 
@@ -51,24 +52,21 @@ class GuardedRequestChannel : public RequestChannel {
       MethodMetadata&& methodMetadata,
       SerializedRequest&& serializedRequest,
       std::shared_ptr<transport::THeader> header,
-      RequestClientCallback::Ptr cb,
-      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
+      RequestClientCallback::Ptr cb) override;
 
   void sendRequestStream(
       RpcOptions&& options,
       MethodMetadata&& methodMetadata,
       SerializedRequest&& serializedRequest,
       std::shared_ptr<transport::THeader> header,
-      StreamClientCallback* cob,
-      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
+      StreamClientCallback* cob) override;
 
   void sendRequestNoResponse(
       RpcOptions&& options,
       MethodMetadata&& methodMetadata,
       SerializedRequest&& request,
       std::shared_ptr<transport::THeader> header,
-      RequestClientCallback::Ptr cob,
-      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
+      RequestClientCallback::Ptr cob) override;
 
  private:
   GuardedRequestChannel(ImplPtr impl) : impl_{std::move(impl)} {}

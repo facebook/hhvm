@@ -499,15 +499,13 @@ class HeaderChannelTest
         "test",
         makeTestSerializedRequest(len_),
         std::unique_ptr<THeader>(new THeader),
-        RequestClientCallback::Ptr(new Callback(this, true)),
-        /* frameworkMetadata */ nullptr);
+        RequestClientCallback::Ptr(new Callback(this, true)));
     channel0_->sendRequestResponse(
         options,
         "test",
         makeTestSerializedRequest(len_),
         std::unique_ptr<THeader>(new THeader),
-        RequestClientCallback::Ptr(new Callback(this, false)),
-        /* frameworkMetadata */ nullptr);
+        RequestClientCallback::Ptr(new Callback(this, false)));
     channel0_->setCloseCallback(nullptr);
   }
 
@@ -579,8 +577,7 @@ class HeaderChannelClosedTest
         "test",
         makeTestSerializedRequest(42),
         std::make_unique<THeader>(),
-        RequestClientCallback::Ptr(new Callback(this)),
-        /* frameworkMetadata */ nullptr);
+        RequestClientCallback::Ptr(new Callback(this)));
   }
 
   void postLoop() override {
@@ -646,15 +643,13 @@ class InOrderTest
         "test",
         makeTestSerializedRequest(len_),
         std::unique_ptr<THeader>(new THeader),
-        RequestClientCallback::Ptr(new Callback(this)),
-        /* frameworkMetadata */ nullptr);
+        RequestClientCallback::Ptr(new Callback(this)));
     channel0_->sendRequestResponse(
         options,
         "test",
         makeTestSerializedRequest(len_ + 1),
         std::unique_ptr<THeader>(new THeader),
-        RequestClientCallback::Ptr(new Callback(this)),
-        /* frameworkMetadata */ nullptr);
+        RequestClientCallback::Ptr(new Callback(this)));
   }
 
   void postLoop() override {
@@ -730,15 +725,13 @@ class BadSeqIdTest
         "test",
         makeTestSerializedRequest(len_),
         std::unique_ptr<THeader>(new THeader),
-        RequestClientCallback::Ptr(new Callback(this, true)),
-        /* frameworkMetadata */ nullptr);
+        RequestClientCallback::Ptr(new Callback(this, true)));
     channel0_->sendRequestResponse(
         options,
         "test",
         makeTestSerializedRequest(len_),
         std::unique_ptr<THeader>(new THeader),
-        RequestClientCallback::Ptr(new Callback(this, false)),
-        /* frameworkMetadata */ nullptr);
+        RequestClientCallback::Ptr(new Callback(this, false)));
   }
 
   void postLoop() override {
@@ -785,15 +778,13 @@ class TimeoutTest
         "test",
         makeTestSerializedRequest(len_),
         std::unique_ptr<THeader>(new THeader),
-        RequestClientCallback::Ptr(new TestRequestCallback()),
-        /* frameworkMetadata */ nullptr);
+        RequestClientCallback::Ptr(new TestRequestCallback()));
     channel0_->sendRequestResponse(
         options,
         "test",
         makeTestSerializedRequest(len_),
         std::unique_ptr<THeader>(new THeader),
-        RequestClientCallback::Ptr(new TestRequestCallback()),
-        /* frameworkMetadata */ nullptr);
+        RequestClientCallback::Ptr(new TestRequestCallback()));
   }
 
   void postLoop() override {
@@ -862,8 +853,7 @@ class OptionsTimeoutTest
         "test",
         makeTestSerializedRequest(len_),
         std::unique_ptr<THeader>(new THeader),
-        RequestClientCallback::Ptr(new TestRequestCallback()),
-        /* frameworkMetadata */ nullptr);
+        RequestClientCallback::Ptr(new TestRequestCallback()));
     // Verify the timeout worked within 10ms
     channel0_->getEventBase()->tryRunAfterDelay(
         [&]() { EXPECT_EQ(replyError_, 1); }, 35);
@@ -876,8 +866,7 @@ class OptionsTimeoutTest
               "test",
               makeTestSerializedRequest(len_),
               std::unique_ptr<THeader>(new THeader),
-              RequestClientCallback::Ptr(new TestRequestCallback()),
-              /* frameworkMetadata */ nullptr);
+              RequestClientCallback::Ptr(new TestRequestCallback()));
         },
         20);
   }
@@ -1080,15 +1069,13 @@ class ClientCloseOnErrorTest
         "test",
         makeTestSerializedRequest(10),
         std::make_unique<THeader>(),
-        RequestClientCallback::Ptr(new Callback(this)),
-        /* frameworkMetadata */ nullptr);
+        RequestClientCallback::Ptr(new Callback(this)));
     channel0_->sendRequestResponse(
         options,
         "test",
         makeTestSerializedRequest(reqSize_),
         std::make_unique<THeader>(),
-        RequestClientCallback::Ptr(new Callback(this)),
-        /* frameworkMetadata */ nullptr);
+        RequestClientCallback::Ptr(new Callback(this)));
   }
 
   void postLoop() override {

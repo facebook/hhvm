@@ -106,9 +106,7 @@ class RetryingRequestChannel::RequestCallback
         methodName_,
         SerializedRequest(request_.buffer->clone()),
         header_,
-        RequestClientCallback::Ptr(this),
-        // TODO(ezou) This needs some handling due to ownership - need follow up
-        nullptr);
+        RequestClientCallback::Ptr(this));
   }
 
  private:
@@ -180,8 +178,7 @@ class RetryingRequestChannel::StreamCallback
         methodName_,
         SerializedRequest(request_.buffer->clone()),
         header_,
-        this,
-        nullptr);
+        this);
   }
 
   StreamClientCallback& clientCallback_;
@@ -252,9 +249,7 @@ class RetryingRequestChannel::SinkCallback
         methodName_,
         SerializedRequest(request_.buffer->clone()),
         header_,
-        this,
-        // TODO(ezou) This needs some handling due to ownership - need follow up
-        nullptr);
+        this);
   }
 
   SinkClientCallback& clientCallback_;
@@ -265,8 +260,7 @@ void RetryingRequestChannel::sendRequestStream(
     MethodMetadata&& methodMetadata,
     apache::thrift::SerializedRequest&& request,
     std::shared_ptr<apache::thrift::transport::THeader> header,
-    apache::thrift::StreamClientCallback* clientCallback,
-    std::unique_ptr<folly::IOBuf> /*unused*/) {
+    apache::thrift::StreamClientCallback* clientCallback) {
   apache::thrift::StreamClientCallback* streamCallback = new StreamCallback(
       folly::getKeepAliveToken(evb_),
       impl_,
@@ -282,9 +276,7 @@ void RetryingRequestChannel::sendRequestStream(
       std::move(methodMetadata),
       std::move(request),
       std::move(header),
-      streamCallback,
-      // TODO(ezou) This needs some handling due to ownership - need follow up
-      nullptr);
+      streamCallback);
 }
 
 void RetryingRequestChannel::sendRequestSink(
@@ -292,8 +284,7 @@ void RetryingRequestChannel::sendRequestSink(
     apache::thrift::MethodMetadata&& methodMetadata,
     apache::thrift::SerializedRequest&& request,
     std::shared_ptr<apache::thrift::transport::THeader> header,
-    apache::thrift::SinkClientCallback* clientCallback,
-    std::unique_ptr<folly::IOBuf> /*unused*/) {
+    apache::thrift::SinkClientCallback* clientCallback) {
   apache::thrift::SinkClientCallback* sinkCallback = new SinkCallback(
       folly::getKeepAliveToken(evb_),
       impl_,
@@ -309,8 +300,7 @@ void RetryingRequestChannel::sendRequestSink(
       std::move(methodMetadata),
       std::move(request),
       std::move(header),
-      sinkCallback,
-      nullptr);
+      sinkCallback);
 }
 
 void RetryingRequestChannel::sendRequestResponse(
@@ -318,8 +308,7 @@ void RetryingRequestChannel::sendRequestResponse(
     MethodMetadata&& methodMetadata,
     SerializedRequest&& request,
     std::shared_ptr<apache::thrift::transport::THeader> header,
-    RequestClientCallback::Ptr cob,
-    std::unique_ptr<folly::IOBuf> /*unused*/) {
+    RequestClientCallback::Ptr cob) {
   cob = RequestClientCallback::Ptr(new RequestCallback(
       folly::getKeepAliveToken(evb_),
       impl_,
@@ -335,7 +324,6 @@ void RetryingRequestChannel::sendRequestResponse(
       std::move(methodMetadata),
       std::move(request),
       std::move(header),
-      std::move(cob),
-      nullptr);
+      std::move(cob));
 }
 } // namespace apache::thrift

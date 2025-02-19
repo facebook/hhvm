@@ -91,24 +91,21 @@ class ThriftClient : public ClientChannel {
       MethodMetadata&&,
       SerializedRequest&&,
       std::shared_ptr<apache::thrift::transport::THeader> header,
-      RequestClientCallback::Ptr cb,
-      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
+      RequestClientCallback::Ptr cb) override;
 
   void sendRequestNoResponse(
       const RpcOptions& rpcOptions,
       MethodMetadata&&,
       SerializedRequest&&,
       std::shared_ptr<apache::thrift::transport::THeader> header,
-      RequestClientCallback::Ptr cb,
-      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
+      RequestClientCallback::Ptr cb) override;
 
   void sendRequestStream(
       const RpcOptions&,
       MethodMetadata&&,
       SerializedRequest&&,
       std::shared_ptr<transport::THeader>,
-      StreamClientCallback* clientCallback,
-      std::unique_ptr<folly::IOBuf>) override {
+      StreamClientCallback* clientCallback) override {
     clientCallback->onFirstResponseError(
         folly::make_exception_wrapper<transport::TTransportException>(
             "This channel doesn't support stream RPC"));
@@ -119,8 +116,7 @@ class ThriftClient : public ClientChannel {
       MethodMetadata&&,
       SerializedRequest&&,
       std::shared_ptr<transport::THeader>,
-      SinkClientCallback* clientCallback,
-      std::unique_ptr<folly::IOBuf>) override {
+      SinkClientCallback* clientCallback) override {
     clientCallback->onFirstResponseError(
         folly::make_exception_wrapper<transport::TTransportException>(
             "This channel doesn't support sink RPC"));

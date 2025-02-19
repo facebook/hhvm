@@ -66,8 +66,7 @@ void ThriftClient::sendRequestResponse(
     MethodMetadata&& methodMetadata,
     SerializedRequest&& serializedRequest,
     std::shared_ptr<THeader> header,
-    RequestClientCallback::Ptr cb,
-    std::unique_ptr<folly::IOBuf> /* unused */) {
+    RequestClientCallback::Ptr cb) {
   auto buf = LegacySerializedRequest(
                  header->getProtocolId(),
                  methodMetadata.name_view(),
@@ -87,8 +86,7 @@ void ThriftClient::sendRequestNoResponse(
     MethodMetadata&& methodMetadata,
     SerializedRequest&& serializedRequest,
     std::shared_ptr<THeader> header,
-    RequestClientCallback::Ptr cb,
-    std::unique_ptr<folly::IOBuf> /* unused */) {
+    RequestClientCallback::Ptr cb) {
   auto buf = LegacySerializedRequest(
                  header->getProtocolId(),
                  methodMetadata.name_view(),

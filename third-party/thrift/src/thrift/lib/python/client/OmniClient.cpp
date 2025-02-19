@@ -99,8 +99,8 @@ folly::Try<folly::IOBuf> decode_stream_exception(folly::exception_wrapper ew) {
         auto& payload = err.encoded;
         DCHECK_EQ(payload.metadata.payloadMetadata().has_value(), true);
         DCHECK_EQ(
-            payload.metadata.payloadMetadata()->getType(),
-            PayloadMetadata::Type::exceptionMetadata);
+            folly::to_underlying(payload.metadata.payloadMetadata()->getType()),
+            folly::to_underlying(PayloadMetadata::Type::exceptionMetadata));
         auto& exceptionMetadataBase =
             payload.metadata.payloadMetadata()->get_exceptionMetadata();
         if (auto exceptionMetadataRef = exceptionMetadataBase.metadata()) {

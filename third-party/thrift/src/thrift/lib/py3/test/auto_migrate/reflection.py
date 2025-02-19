@@ -15,28 +15,46 @@
 
 # pyre-strict
 
+import typing
 import unittest
 
 from testing.types import (
     Color,
     easy,
+    EasyList,
+    EasySet,
     I32List,
     Integers,
     List__i32,
+    List__string,
     Messy,
     Runtime,
     Set__Color,
+    Set__List__i32,
+    SetI32,
+    SetI32Lists,
+    SetSetI32Lists,
     SimpleError,
+    StrEasyMap,
     StrI32ListMap,
+    StringList,
+    StrIntMap,
+    StrList2D,
     StrStrIntListMapMap,
 )
-from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import is_auto_migrated
 from thrift.py3.reflection import (
     inspect,
     inspectable,
+    MapSpec,
     NumberType,
     Qualifier,
     StructType,
+)
+from thrift.python.types import (
+    List as python_List,
+    Map as python_Map,
+    Set as python_Set,
 )
 
 
@@ -119,17 +137,77 @@ class ReflectionTests(unittest.TestCase):
         self.assertEqual(r.value, Color)
         self.assertEqual(r.kind, NumberType.NOT_A_NUMBER)
 
-    # Fails because thrift python list values are not inspectible
-    @brokenInAutoMigrate()
     def test_map_key_value(self) -> None:
         x = StrStrIntListMapMap({"a": StrI32ListMap({"b": I32List([7, 8, 9])})})
         self.assertTrue(inspectable(x))
-        self.assertTrue(inspectable(StrStrIntListMapMap))
         r = inspect(x)
         self.assertEqual(r.key, str)
-        self.assertEqual(r.value, StrI32ListMap)
+        expected_val_klass = python_Map if is_auto_migrated() else StrI32ListMap
+        self.assertEqual(r.value, expected_val_klass)
         self.assertEqual(r.key_kind, NumberType.NOT_A_NUMBER)
         self.assertEqual(r.value_kind, NumberType.NOT_A_NUMBER)
+
+        map_klass = python_Map if is_auto_migrated() else StrStrIntListMapMap
+        self.assertTrue(inspectable(map_klass))
+        r_klass = inspect(typing.cast(StrStrIntListMapMap, map_klass))
+        self.assertIsInstance(r_klass, MapSpec)
+        if not is_auto_migrated():
+            self.assertEqual(r_klass, r)
+
+    def test_list_typedefs(self) -> None:
+        cases = [
+            (I32List, int, NumberType.I32),
+            (StrList2D, List__string, NumberType.NOT_A_NUMBER),
+            (StringList, str, NumberType.NOT_A_NUMBER),
+            (EasyList, easy, NumberType.NOT_A_NUMBER),
+        ]
+        for case in cases:
+            kls, elem_type, num_type = case
+            inst = kls()
+            kls = inst.__class__ if is_auto_migrated() else kls
+            self.assertTrue(inspectable(inst), kls.__name__)
+            r = inspect(inst)
+            self.assertIsInstance(elem_type(), r.value, kls.__name__)
+            self.assertEqual(r.kind, num_type, kls.__name__)
+
+    def test_set_typedefs(self) -> None:
+        cases = [
+            (EasySet, easy, NumberType.NOT_A_NUMBER),
+            (SetI32, int, NumberType.I32),
+            (SetI32Lists, List__i32, NumberType.NOT_A_NUMBER),
+            (SetSetI32Lists, Set__List__i32, NumberType.NOT_A_NUMBER),
+        ]
+        for case in cases:
+            kls, elem_type, num_type = case
+            inst = kls()
+            kls = inst.__class__ if is_auto_migrated() else kls
+            self.assertTrue(inspectable(inst), kls.__name__)
+            r = inspect(inst)
+            self.assertIsInstance(elem_type(), r.value, kls.__name__)
+            self.assertEqual(r.kind, num_type, kls.__name__)
+
+    def test_map_typedefs(self) -> None:
+        cases = [
+            (StrIntMap, str, NumberType.NOT_A_NUMBER, int, NumberType.I64),
+            (StrEasyMap, str, NumberType.NOT_A_NUMBER, easy, NumberType.NOT_A_NUMBER),
+            (
+                StrI32ListMap,
+                str,
+                NumberType.NOT_A_NUMBER,
+                I32List,
+                NumberType.NOT_A_NUMBER,
+            ),
+        ]
+        for case in cases:
+            kls, key_type, key_num, val_type, val_num = case
+            inst = kls()
+            kls = inst.__class__ if is_auto_migrated() else kls
+            self.assertTrue(inspectable(inst), kls.__name__)
+            r = inspect(inst)
+            self.assertIsInstance(val_type(), r.value, kls.__name__)
+            self.assertIsInstance(key_type(), r.key, kls.__name__)
+            self.assertEqual(r.value_kind, val_num, kls.__name__)
+            self.assertEqual(r.key_kind, key_num, kls.__name__)
 
     def test_other(self) -> None:
         x = None

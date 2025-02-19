@@ -13,10 +13,38 @@
 # limitations under the License.
 
 cimport cython
+from cpython cimport bool as pbool, int as pint, float as pfloat
 
 import threading
 from functools import wraps
 from types import MappingProxyType
+from thrift.python.types cimport (
+    Container as python_Container,
+    EnumTypeInfo,
+    StructTypeInfo,
+    TypeInfoBase,
+    Map as python_Map,
+)
+from thrift.python.types import (
+    List as python_List,
+    ListTypeInfo,
+    MapTypeInfo,
+    Set as python_Set,
+    SetTypeInfo,
+    UnionInfo,
+    typeinfo_bool,
+    typeinfo_byte,
+    typeinfo_i16,
+    typeinfo_i32,
+    typeinfo_i64,
+    typeinfo_double,
+    typeinfo_float,
+    typeinfo_string,
+    typeinfo_binary,
+    typeinfo_iobuf,
+)
+from folly.iobuf import IOBuf
+import importlib
 
 
 cdef threadsafe_cached(fn):
@@ -43,17 +71,56 @@ def _inspect_impl(cls):
 
 
 def inspect(cls):
-    if not isinstance(cls, type):
-        cls = type(cls)
-    if not hasattr(cls, '__get_reflection__'):
-        raise TypeError('No reflection information found')
-    return _inspect_impl(cls)
-
+    klass = cls if isinstance(cls, type) else type(cls)
+    if hasattr(klass, '__get_reflection__'):
+        return _inspect_impl(klass)
+    if isinstance(cls, python_Container):
+        return _fbthrift_python_container_inst(cls)
+    if issubclass(klass, python_Container):
+        return _fbthrift_python_container_cls(klass)
+    raise TypeError(
+        f"No reflection information found: '{klass.__module__}.{klass.__name__}'"
+    )
 
 def inspectable(cls):
     if not isinstance(cls, type):
         cls = type(cls)
-    return hasattr(cls, '__get_reflection__')
+    return (
+        hasattr(cls, '__get_reflection__') or 
+        issubclass(cls, python_Container)
+    )
+
+### Note in thrift-python the class doesn't have any info about the
+### the element types, so this is the best we can do.
+cdef _fbthrift_python_container_cls(type klass):
+    cdef num_type = NumberType.NOT_A_NUMBER
+    if issubclass(klass, python_List):
+        return ListSpec._fbthrift_create(None, num_type)
+    if issubclass(klass, python_Set):
+        return SetSpec._fbthrift_create(None, num_type)
+    if issubclass(klass, python_Map):
+        return MapSpec._fbthrift_create(None, num_type, None, num_type)
+
+cdef _fbthrift_python_container_inst(python_Container inst):
+    if isinstance(inst, python_List):
+        kls, num_type = spec_from_TypeInfo(inst._fbthrift_val_info)
+        return ListSpec._fbthrift_create(kls, num_type)
+    if isinstance(inst, python_Set):
+        kls, num_type = spec_from_TypeInfo(inst._fbthrift_val_info)
+        return SetSpec._fbthrift_create(kls, num_type)
+    if isinstance(inst, python_Map):
+        val_kls, val_num_type = spec_from_TypeInfo(inst._fbthrift_val_info)
+        key_kls, key_num_type = spec_from_TypeInfo(
+            (<python_Map>inst)._fbthrift_key_info
+        )
+        return MapSpec._fbthrift_create(
+            key_kls,
+            key_num_type,
+            val_kls,
+            val_num_type,
+        )
+
+
 
 
 @cython.auto_pickle(False)
@@ -296,3 +363,41 @@ cdef class ArgumentSpec:
         if not isinstance(other, ArgumentSpec):
             return False
         return tuple(self) == tuple(other)
+
+### This is all for thrift-py3-auto-migrate.
+### If we can remove reflection from thrift-py3 usage, we can delete this.
+
+
+cdef spec_from_TypeInfo(info):
+    if isinstance(info, (EnumTypeInfo, StructTypeInfo)):
+        kls = info.__reduce__()[1][0]
+        return (kls, NumberType.NOT_A_NUMBER)
+    if info is typeinfo_bool:
+        return (pbool, NumberType.NOT_A_NUMBER)
+    if info is typeinfo_byte:
+        return (int, NumberType.BYTE)
+    if info is typeinfo_i16:
+        return (int, NumberType.I16)
+    if info is typeinfo_i32:
+        return (int, NumberType.I32)
+    if info is typeinfo_i64:
+        return (int, NumberType.I64)
+    if info is typeinfo_double:
+        return (int, NumberType.DOUBLE)
+    if info is typeinfo_float:
+        return (int, NumberType.FLOAT)
+    if info is typeinfo_string:
+        return (str, NumberType.NOT_A_NUMBER)
+    if info is typeinfo_binary:
+        return (bytes, NumberType.NOT_A_NUMBER)
+    if info is typeinfo_iobuf:
+        return (IOBuf, NumberType.NOT_A_NUMBER)
+    # note these aren't going to work for recursive calls
+    # because the python Container classes themselves don't
+    # have the element type info
+    if isinstance(info, ListTypeInfo):
+        return (python_List, NumberType.NOT_A_NUMBER)
+    if isinstance(info, SetTypeInfo):
+        return (python_Set, NumberType.NOT_A_NUMBER)
+    if isinstance(info, MapTypeInfo):
+        return (python_Map, NumberType.NOT_A_NUMBER)

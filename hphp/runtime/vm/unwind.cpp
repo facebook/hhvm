@@ -418,7 +418,17 @@ UnwinderResult unwindVM(Either<ObjectData*, Exception*> exception,
 
     // We found no more handlers in this frame.
     auto const jit = fpToUnwind != nullptr && fpToUnwind == fp->m_sfp;
+    auto const retToInterp = isReturnHelper(fp->m_savedRip);
     phpException = tearDownFrame(fp, stack, pc, phpException, jit, teardown);
+
+    if (retToInterp) {
+      // If this is a call from an interpreted FCallCtor, we might need to lock
+      // the object. Interpreted calls are by definition not inlined, so the PC
+      // must be correct.
+      // Jitted FCallCtor calls lock objects in their catch traces.
+      assertx(fp && pc);
+      lockObjectWhileUnwinding(pc, stack);
+    }
 
     if (exception.left() != nullptr && RI().m_pendingException != nullptr) {
       // EventHook::FunctionUnwind might have generated a pending C++ exception.
@@ -449,7 +459,6 @@ UnwinderResult unwindVM(Either<ObjectData*, Exception*> exception,
     }
 
     if (!fp || (fpToUnwind && fp == fpToUnwind)) break;
-    lockObjectWhileUnwinding(pc, stack);
   }
 
   if (fp || fpToUnwind) {

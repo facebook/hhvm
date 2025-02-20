@@ -96,7 +96,7 @@ func RequestHeadersFromContext(ctx context.Context) map[string]string {
 	if ctx == nil {
 		return nil
 	}
-	requestHeaders := ctx.Value(RequestHeadersKey)
+	requestHeaders := ctx.Value(types.RequestHeadersKey)
 	if requestHeaders == nil {
 		return nil
 	}

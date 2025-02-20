@@ -21,17 +21,6 @@
 namespace apache::thrift {
 
 namespace {
-template <typename Executor>
-void scheduleWithExecutor(Executor& executor, folly::Func&& task) {
-  if (executor.getNumPriorities() > 1) {
-    // By default we have 2 prios, external requests should go to
-    // lower priority queue to yield to the internal ones
-    executor.addWithPriority(std::move(task), folly::Executor::LO_PRI);
-  } else {
-    executor.add(std::move(task));
-  }
-}
-
 std::string describeRequestExecutionMode(
     ParallelConcurrencyController::RequestExecutionMode requestExecutionMode) {
   switch (requestExecutionMode) {
@@ -136,34 +125,43 @@ bool ParallelConcurrencyControllerBase::trySchedule(bool onEnqueued) {
   }
 }
 
-void ParallelConcurrencyController::scheduleWithSerialExecutor() {
-  auto keepAlive = folly::SmallSerialExecutor::create(
-      folly::Executor::getKeepAliveToken(executor_));
-  auto& executor = *keepAlive.get();
-  scheduleWithExecutor(executor, [this, ka = std::move(keepAlive)]() mutable {
-    auto req = pile_.dequeue();
-    if (req) {
-      apache::thrift::detail::ServerRequestHelper::setExecutor(
-          req.value(), std::move(ka));
-    }
-    executeRequest(std::move(req));
-  });
+namespace {
+template <typename Executor, typename Function>
+FOLLY_ALWAYS_INLINE void scheduleOnExecutorInner(
+    Executor& executor, Function&& function) {
+  if (executor.getNumPriorities() > 1) {
+    // By default we have 2 prios, external requests should go to
+    // lower priority queue to yield to the internal ones
+    executor.addWithPriority(
+        std::forward<Function>(function), folly::Executor::LO_PRI);
+  } else {
+    executor.add(std::forward<Function>(function));
+  }
 }
-
-void ParallelConcurrencyController::scheduleWithoutSerialExecutor() {
-  scheduleWithExecutor(
-      executor_, [this]() { executeRequest(pile_.dequeue()); });
-}
+} // namespace
 
 void ParallelConcurrencyController::scheduleOnExecutor() {
   switch (requestExecutionMode_) {
-    case RequestExecutionMode::Serial:
-      scheduleWithSerialExecutor();
-      break;
-    case RequestExecutionMode::Parallel:
-      scheduleWithoutSerialExecutor();
-      break;
+    case RequestExecutionMode::Parallel: {
+      return scheduleOnExecutorInner(
+          executor_, [this]() { executeRequest(pile_.dequeue()); });
+    }
+    case RequestExecutionMode::Serial: {
+      auto keepAlive = folly::SmallSerialExecutor::create(
+          folly::Executor::getKeepAliveToken(executor_));
+      auto& executor = *keepAlive.get();
+      return scheduleOnExecutorInner(
+          executor, [this, ka = std::move(keepAlive)]() mutable {
+            auto req = pile_.dequeue();
+            if (req) {
+              apache::thrift::detail::ServerRequestHelper::setExecutor(
+                  req.value(), std::move(ka));
+            }
+            executeRequest(std::move(req));
+          });
+    }
   }
+  folly::assume_unreachable();
 }
 
 void ParallelConcurrencyControllerBase::executeRequest(

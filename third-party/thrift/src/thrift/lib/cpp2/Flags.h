@@ -75,6 +75,38 @@ getFlagObserver<std::string>(std::string_view name) {
 }
 
 template <typename T>
+struct TypeName;
+
+template <>
+struct TypeName<bool> {
+  static constexpr std::string_view name = "bool";
+};
+
+template <>
+struct TypeName<int64_t> {
+  static constexpr std::string_view name = "int64";
+};
+
+template <>
+struct TypeName<std::string> {
+  static constexpr std::string_view name = "string";
+};
+
+template <typename F>
+struct NamedCreator {
+  NamedCreator(std::string name, F&& creatorP)
+      : name_(std::move(name)), creator_(std::forward<F>(creatorP)) {}
+
+  auto operator()() { return creator_(); }
+
+  const std::string& getName() const { return name_; }
+
+ private:
+  std::string name_;
+  F creator_;
+};
+
+template <typename T>
 class FlagWrapper;
 
 template <typename T>
@@ -132,7 +164,8 @@ class FlagWrapper {
 
   ReadOptimizedObserver<T>& ensureInit() {
     return observer_.try_emplace_with([this] {
-      return folly::observer::makeValueObserver(
+      return folly::observer::makeValueObserver(NamedCreator(
+          fmt::format("THRIFT_FLAG_{}_{}", TypeName<T>::name, name_),
           [overrideObserver = getFlagObserver<T>(name_),
            mockObserver = mockObservable_.getObserver(),
            defaultValue = defaultValue_] {
@@ -145,7 +178,7 @@ class FlagWrapper {
               return **overrideSnapshot;
             }
             return defaultValue;
-          });
+          }));
     });
   }
 

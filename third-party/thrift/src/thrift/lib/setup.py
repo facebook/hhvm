@@ -82,7 +82,6 @@ else:
     common_options = {
         "language": "c++",
         "libraries": libs,
-        "extra_compile_args": ["-std=gnu++17", "-fcoroutines"],
     }
 
     exts = [

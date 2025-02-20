@@ -322,9 +322,9 @@ struct SkippingU64Impl {
   const static bool skip = true;
   const static int kMaxVarintSize = 10;
   using UIntType = uint64_t;
-  template <typename CursorT>
-  static void doReadVarintMediumSlow(uint64_t&, const uint8_t) {
+  static size_t doReadVarintMediumSlow(uint64_t&, const uint8_t*) {
     ADD_FAILURE();
+    return 0;
   }
 };
 

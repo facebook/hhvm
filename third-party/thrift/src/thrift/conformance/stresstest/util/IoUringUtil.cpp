@@ -25,10 +25,24 @@ DEFINE_int32(io_max_submit, 0, "");
 DEFINE_int32(io_registers, 2048, "");
 DEFINE_int32(io_prov_buffs_size, 2048, "");
 DEFINE_int32(io_prov_buffs, 2000, "");
+DEFINE_bool(io_zcrx, false, "");
+DEFINE_int32(io_zcrx_num_pages, 16384, "");
+DEFINE_int32(io_zcrx_refill_entries, 16384, "");
+DEFINE_string(io_zcrx_ifname, "eth0", "");
+DEFINE_int32(io_zcrx_queue_id, 0, "");
 
 namespace apache {
 namespace thrift {
 namespace stress {
+#if FOLLY_HAVE_WEAK_SYMBOLS
+FOLLY_ATTR_WEAK int resolve_napi_callback(
+    int /*ifindex*/, uint32_t /*queueId*/);
+#else
+static int resolve_napi_callback(int /*ifindex*/, uint32_t /*queueId*/) {
+  return -1;
+}
+#endif
+
 folly::IoUringBackend::Options getIoUringOptions() {
   folly::IoUringBackend::Options options;
   options.setRegisterRingFd(FLAGS_use_iouring_event_eventfd);
@@ -65,6 +79,16 @@ folly::IoUringBackend::Options getIoUringOptions() {
       LOG(ERROR) << "not setting DeferTaskRun as not supported on this kernel";
     }
   }
+
+  if (FLAGS_io_zcrx) {
+    options.setZeroCopyRx(true)
+        .setZeroCopyRxInterface(FLAGS_io_zcrx_ifname)
+        .setZeroCopyRxQueue(FLAGS_io_zcrx_queue_id)
+        .setZeroCopyRxNumPages(FLAGS_io_zcrx_num_pages)
+        .setZeroCopyRxRefillEntries(FLAGS_io_zcrx_refill_entries)
+        .setResolveNapiCallback(resolve_napi_callback);
+  }
+
   return options;
 }
 } // namespace stress

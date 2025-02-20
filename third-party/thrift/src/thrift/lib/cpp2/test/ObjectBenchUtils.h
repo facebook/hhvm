@@ -44,8 +44,11 @@ std::size_t read_all(const ::apache::thrift::protocol::detail::Value& val);
 // ----- Access a sparse subset of data within a thrift hierarchy ---- //
 
 enum class SparseAccess {
-  Half, // Reads every other property
-  First, // Only reads the first property at every level
+  // Reads every other property
+  Half,
+  // Reads a random property at every level.
+  // Note: Always reads the first field for a struct
+  SingleRandom,
 };
 
 std::size_t read_some(

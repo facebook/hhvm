@@ -111,7 +111,9 @@ template <typename ProtocolWriter, typename ProtocolReader, typename T>
 void bench_read_first_protocol() {
   withParsed<T, ProtocolWriter>(
       [](auto& buf) { return protocol::parseObject<ProtocolReader>(buf); },
-      [](const auto& obj) { return read_some(SparseAccess::First, obj); });
+      [](const auto& obj) {
+        return read_some(SparseAccess::SingleRandom, obj);
+      });
 }
 
 #define BENCH_OP(PROT_NAME, OP, WRITER, READER, T) \

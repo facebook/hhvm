@@ -16,6 +16,7 @@
 
 #include <cstdint>
 
+#include <folly/Benchmark.h>
 #include <folly/BenchmarkUtil.h>
 
 #include <thrift/lib/cpp2/test/ObjectBenchUtils.h>
@@ -160,7 +161,11 @@ READ_SOME_IS_ALL(folly::IOBuf)
 #undef READ_SOME_IS_ALL
 
 template <typename T>
-std::size_t read_some_map_iter(SparseAccess access, const T& iterable);
+std::size_t read_some_map_container(
+    SparseAccess access, const T& container, const std::size_t slot = 5);
+template <typename T>
+std::size_t read_some_set_container(
+    SparseAccess access, const T& container, const std::size_t slot = 5);
 template <typename T>
 std::size_t read_some_iter(SparseAccess access, const T& iterable);
 
@@ -168,7 +173,7 @@ template <typename T>
 std::size_t read_some_iter(SparseAccess access, const T& iterable) {
   std::size_t res = 0;
   switch (access) {
-    case SparseAccess::First: {
+    case SparseAccess::SingleRandom: {
       const auto it = iterable.begin();
       if (it != iterable.end()) {
         res += read_some(access, *it);
@@ -190,13 +195,136 @@ std::size_t read_some_iter(SparseAccess access, const T& iterable) {
   return res;
 }
 
+template <typename Key>
+auto get_key(const folly::F14FastSet<Key>& m, const std::size_t slot) {
+  folly::BenchmarkSuspender suspender;
+  auto it = m.begin();
+  for (std::size_t i = 0; i < slot; ++i) {
+    ++it;
+  }
+  auto key = *it;
+  suspender.dismiss();
+  return key;
+}
+
+template <typename Key, typename Value>
+auto get_key(const folly::F14FastMap<Key, Value>& m, const std::size_t slot) {
+  folly::BenchmarkSuspender suspender;
+  auto it = m.begin();
+  for (std::size_t i = 0; i < slot; ++i) {
+    ++it;
+  }
+  auto key = it->first;
+  suspender.dismiss();
+  return key;
+}
+
+auto get_key(const protocol::detail::ObjectWrapper<>& obj, const std::size_t) {
+  folly::BenchmarkSuspender suspender;
+  assert(!obj.empty());
+  auto it = obj.begin();
+  auto key = it->first;
+  suspender.dismiss();
+  return key;
+}
+
+template <typename Key, typename F>
+void with_half_keys(const folly::F14FastSet<Key>& m, F&& f) {
+  folly::BenchmarkSuspender suspender;
+  std::vector<Key> keys;
+  const auto key_count = std::max<std::size_t>(m.size() / 2, 1);
+  keys.reserve(key_count);
+  auto it = m.begin();
+  for (std::size_t i = 0; i < key_count; ++i) {
+    keys.push_back(*it);
+    ++it;
+    if (it == m.end()) {
+      break;
+    }
+    ++it;
+  }
+  suspender.dismissing([&]() { f(keys); });
+}
+
+template <typename Key, typename Value, typename F>
+void with_half_keys(const folly::F14FastMap<Key, Value>& m, F&& f) {
+  folly::BenchmarkSuspender suspender;
+  std::vector<Key> keys;
+  const auto key_count = std::max<std::size_t>(m.size() / 2, 1);
+  keys.reserve(key_count);
+  auto it = m.begin();
+  for (std::size_t i = 0; i < key_count; ++i) {
+    keys.push_back(it->first);
+    ++it;
+    if (it == m.end()) {
+      break;
+    }
+    ++it;
+  }
+  suspender.dismissing([&]() { f(keys); });
+}
+
+template <typename F>
+void with_half_keys(const protocol::detail::ObjectWrapper<>& obj, F&& f) {
+  folly::BenchmarkSuspender suspender;
+  std::vector<std::int16_t> keys;
+  const auto key_count = std::max<std::size_t>(obj.size() / 2, 1);
+  keys.reserve(key_count);
+  auto it = obj.begin();
+  for (std::size_t i = 0; i < key_count; ++i) {
+    keys.push_back(it->first);
+    ++it;
+    if (it == obj.end()) {
+      break;
+    }
+    ++it;
+  }
+  suspender.dismissing([&]() { f(keys); });
+}
+
 template <typename T>
-std::size_t read_some_map_iter(SparseAccess access, const T& iterable) {
+std::size_t read_some_set_container(
+    SparseAccess access, const T& container, const std::size_t slot) {
   std::size_t res = 0;
+  if (container.empty()) {
+    return res;
+  }
+
   switch (access) {
-    case SparseAccess::First: {
-      const auto it = iterable.begin();
-      if (it != iterable.end()) {
+    case SparseAccess::SingleRandom: {
+      const auto key = get_key(container, slot);
+      const auto it = container.find(key);
+      res += read_some(access, *it);
+      break;
+    }
+    case SparseAccess::Half: {
+      with_half_keys(container, [&](const auto& keys) {
+        for (const auto& key : keys) {
+          const auto it = container.find(key);
+          res += read_some(access, *it);
+        }
+      });
+    }
+  }
+  return res;
+}
+
+template <typename T>
+std::size_t read_some_map_container(
+    SparseAccess access, const T& container, const std::size_t slot) {
+  std::size_t res = 0;
+  if (container.empty()) {
+    return res;
+  }
+  switch (access) {
+    case SparseAccess::SingleRandom: {
+      const auto a_key = get_key(container, slot);
+      if constexpr (std::is_same_v<T, protocol::detail::ObjectWrapper<>>) {
+        const auto& val = container.at(::apache::thrift::type::FieldId{a_key});
+        res += read_some(access, a_key);
+        res += read_some(access, val);
+      } else {
+        const auto it = container.find(a_key);
         const auto& [key, value] = *it;
         res += read_some(access, key);
         res += read_some(access, value);
@@ -204,17 +332,21 @@ std::size_t read_some_map_iter(SparseAccess access, const T& iterable) {
       break;
     }
     case SparseAccess::Half: {
-      bool skip = false;
-      for (auto it = iterable.begin(); it != iterable.end(); ++it) {
-        if (skip) {
-          skip = false;
-        } else {
-          const auto& [key, value] = *it;
-          res += read_some(access, key);
-          res += read_some(access, value);
-          skip = true;
+      with_half_keys(container, [&](const auto& keys) {
+        for (const auto& key : keys) {
+          if constexpr (std::is_same_v<T, protocol::detail::ObjectWrapper<>>) {
+            const auto& val =
+                container.at(::apache::thrift::type::FieldId{key});
+            res += read_some(access, key);
+            res += read_some(access, val);
+          } else {
+            const auto it = container.find(key);
+            const auto& [k, v] = *it;
+            res += read_some(access, k);
+            res += read_some(access, v);
+          }
         }
-      }
+      });
     }
   }
   return res;
@@ -222,7 +354,7 @@ std::size_t read_some_map_iter(SparseAccess access, const T& iterable) {
 
 template <typename T>
 std::size_t read_some(SparseAccess access, const folly::F14FastSet<T>& set) {
-  return read_some_iter(access, set);
+  return read_some_set_container(access, set);
 }
 
 std::size_t read_some(
@@ -234,16 +366,16 @@ std::size_t read_some(
     SparseAccess access,
     const folly::F14FastMap<protocol::detail::Value, protocol::detail::Value>&
         m) {
-  return read_some_map_iter(access, m);
+  return read_some_map_container(access, m);
 }
 
 std::size_t read_some(
     SparseAccess access, const folly::F14FastSet<protocol::Value>& set) {
-  return read_some_iter(access, set);
+  return read_some_set_container(access, set);
 }
 
 std::size_t read_some(SparseAccess access, const protocol::Object& obj) {
-  return read_some_map_iter(access, obj);
+  return read_some_map_container(access, obj, 1 /*slot*/);
 }
 
 std::size_t read_some(SparseAccess access, const protocol::detail::Value& val) {

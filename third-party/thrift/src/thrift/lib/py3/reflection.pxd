@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from types import MappingProxyType
 
 from cpython.ref cimport PyObject, Py_INCREF, Py_XDECREF
 from libcpp.vector cimport vector as cvector
@@ -73,25 +72,3 @@ cdef class MapSpec:
     cdef readonly object key_kind
     cdef readonly object value
     cdef readonly object value_kind
-
-
-cdef class InterfaceSpec:
-    cdef readonly str name
-    cdef list _methods
-    cdef readonly object annotations
-
-
-cdef class MethodSpec:
-    cdef readonly str name
-    cdef readonly tuple arguments
-    cdef readonly object result_kind
-    cdef readonly object result
-    cdef readonly tuple exceptions
-    cdef readonly object annotations
-
-
-cdef class ArgumentSpec:
-    cdef readonly str name
-    cdef readonly object kind
-    cdef readonly object type
-    cdef readonly object annotations

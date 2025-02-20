@@ -18,11 +18,8 @@ from collections.abc import Mapping, Sequence, Set
 from enum import Enum
 from typing import Any, NamedTuple, Optional, overload, Tuple, Type, TypeVar, Union
 
-from thrift.py3.client import Client
 from thrift.py3.exceptions import Error
 from thrift.py3.types import Struct
-
-TClient = TypeVar("TClient", bound=Client)
 
 @overload
 def inspect(cls: Union[Struct, Type[Struct], Error, Type[Error]]) -> StructSpec: ...

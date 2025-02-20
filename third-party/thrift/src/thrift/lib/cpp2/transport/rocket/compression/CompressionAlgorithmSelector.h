@@ -28,7 +28,7 @@ class CompressionAlgorithmSelector {
   static CodecConfig toCodecConfig(
       const CompressionAlgorithm& CompressionAlgorithm);
 
-  static std::pair<folly::io::CodecType, int> toCodecTypeAndLevel(
+  static std::pair<folly::compression::CodecType, int> toCodecTypeAndLevel(
       const CompressionAlgorithm& compressionAlgorithm);
 
   static CompressionAlgorithm fromTTransform(const TTransform& tTransform);

@@ -157,33 +157,33 @@ CompressionAlgorithm fromLz4Config(const Lz4CompressionCodecConfig& lz4Config) {
   throwUnknownTEnumTApplicationException(compressionAlgorithm);
 }
 
-/* static */ std::pair<folly::io::CodecType, int>
+/* static */ std::pair<folly::compression::CodecType, int>
 CompressionAlgorithmSelector::toCodecTypeAndLevel(
     const CompressionAlgorithm& compressionAlgorithm) {
   // clang-format off
   switch (compressionAlgorithm) {
     case CompressionAlgorithm::ZLIB:
       return {
-          folly::io::CodecType::ZLIB,
+          folly::compression::CodecType::ZLIB,
           folly::compression::COMPRESSION_LEVEL_DEFAULT};
     case CompressionAlgorithm::ZSTD:
       return {
-          folly::io::CodecType::ZSTD,
+          folly::compression::CodecType::ZSTD,
           folly::compression::COMPRESSION_LEVEL_DEFAULT};
     case CompressionAlgorithm::LZ4:
       return {
-          folly::io::CodecType::LZ4_VARINT_SIZE,
+          folly::compression::CodecType::LZ4_VARINT_SIZE,
           folly::compression::COMPRESSION_LEVEL_DEFAULT};
 
     case CompressionAlgorithm::CUSTOM:
       // TODO: use custom compression implementation
       return {
-          folly::io::CodecType::NO_COMPRESSION,
+          folly::compression::CodecType::NO_COMPRESSION,
           folly::compression::COMPRESSION_LEVEL_DEFAULT};
 
     case CompressionAlgorithm::ZLIB_LESS:
       return {
-          folly::io::CodecType::ZLIB,
+          folly::compression::CodecType::ZLIB,
           folly::compression::COMPRESSION_LEVEL_FASTEST};
     case CompressionAlgorithm::ZSTD_LESS:
       // ZSTD is special in that it also uses negative (faster) levels. Due to
@@ -193,29 +193,29 @@ CompressionAlgorithmSelector::toCodecTypeAndLevel(
       // the underlying base codec) was determined to to be sane by an internal
       // customer.
       return {
-          folly::io::CodecType::ZSTD_FAST,
+          folly::compression::CodecType::ZSTD_FAST,
           7};
     case CompressionAlgorithm::LZ4_LESS:
       return {
-          folly::io::CodecType::LZ4_VARINT_SIZE,
+          folly::compression::CodecType::LZ4_VARINT_SIZE,
           folly::compression::COMPRESSION_LEVEL_FASTEST};
 
     case CompressionAlgorithm::ZLIB_MORE:
       return {
-          folly::io::CodecType::ZLIB,
+          folly::compression::CodecType::ZLIB,
           folly::compression::COMPRESSION_LEVEL_BEST};
     case CompressionAlgorithm::ZSTD_MORE:
       return {
-          folly::io::CodecType::ZSTD,
+          folly::compression::CodecType::ZSTD,
           folly::compression::COMPRESSION_LEVEL_BEST};
     case CompressionAlgorithm::LZ4_MORE:
       return {
-          folly::io::CodecType::LZ4_VARINT_SIZE,
+          folly::compression::CodecType::LZ4_VARINT_SIZE,
           folly::compression::COMPRESSION_LEVEL_BEST};
 
     case CompressionAlgorithm::NONE:
       return {
-          folly::io::CodecType::NO_COMPRESSION,
+          folly::compression::CodecType::NO_COMPRESSION,
           folly::compression::COMPRESSION_LEVEL_DEFAULT};
   };
   // clang-format on

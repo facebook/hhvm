@@ -37,7 +37,7 @@ class CompressionManager {
 
   CompressionAlgorithm fromCodecConfig(const CodecConfig& codecConfig);
 
-  std::pair<folly::io::CodecType, int> toCodecTypeAndLevel(
+  std::pair<folly::compression::CodecType, int> toCodecTypeAndLevel(
       const CompressionAlgorithm& compressionAlgorithm);
 
   void setCompressionCodec(

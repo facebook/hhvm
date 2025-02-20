@@ -537,7 +537,7 @@ std::string gen_schema(
       t_ast_generator::gen_schema(schema_opts, source_mgr, root_program);
   auto serialized = serialize<CompactProtocolWriter>(schema);
   auto compressed = folly::compression::getCodec(
-                        folly::io::CodecType::ZSTD,
+                        folly::compression::CodecType::ZSTD,
                         folly::compression::COMPRESSION_LEVEL_BEST)
                         ->compress(serialized);
   return compressed;

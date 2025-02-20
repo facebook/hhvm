@@ -83,7 +83,8 @@ CompressionAlgorithm CompressionManager::fromCodecConfig(
   return CompressionAlgorithmSelector::fromCodecConfig(codecConfig);
 }
 
-std::pair<folly::io::CodecType, int> CompressionManager::toCodecTypeAndLevel(
+std::pair<folly::compression::CodecType, int>
+CompressionManager::toCodecTypeAndLevel(
     const CompressionAlgorithm& compressionAlgorithm) {
   return CompressionAlgorithmSelector::toCodecTypeAndLevel(
       compressionAlgorithm);

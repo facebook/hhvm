@@ -81,6 +81,7 @@ add_library(
   ast/t_type.cc
   ast/t_typedef.cc
   ast/t_union.cc
+  ast/scope_identifier.cc
 )
 target_link_libraries(
   compiler_ast

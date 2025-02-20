@@ -24,13 +24,13 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 /**
- * Allows inheritance from a struct or exception in thrift-py3.
- * Inheritance from union is DEPRECATED!
- * Do not add new usage of this. Prefer composition over inheritance.
+ * In thrift-py3 only, disables `int` base for non-`Flag` enums.
+ * DEPRECATED! Do not add new usage.
+ * In thrift-python, all non-`Flag` enums have `int` base class.
  */
 @SuppressWarnings({ "unused", "serial" })
-public class MigrationBlockingAllowInheritance implements TBase, java.io.Serializable, Cloneable, Comparable<MigrationBlockingAllowInheritance> {
-  private static final TStruct STRUCT_DESC = new TStruct("MigrationBlockingAllowInheritance");
+public class NoIntBaseClassDeprecated implements TBase, java.io.Serializable, Cloneable, Comparable<NoIntBaseClassDeprecated> {
+  private static final TStruct STRUCT_DESC = new TStruct("NoIntBaseClassDeprecated");
 
   public static final Map<Integer, FieldMetaData> metaDataMap;
 
@@ -40,10 +40,10 @@ public class MigrationBlockingAllowInheritance implements TBase, java.io.Seriali
   }
 
   static {
-    FieldMetaData.addStructMetaDataMap(MigrationBlockingAllowInheritance.class, metaDataMap);
+    FieldMetaData.addStructMetaDataMap(NoIntBaseClassDeprecated.class, metaDataMap);
   }
 
-  public MigrationBlockingAllowInheritance() {
+  public NoIntBaseClassDeprecated() {
   }
 
   public static class Builder {
@@ -51,8 +51,8 @@ public class MigrationBlockingAllowInheritance implements TBase, java.io.Seriali
     public Builder() {
     }
 
-    public MigrationBlockingAllowInheritance build() {
-      MigrationBlockingAllowInheritance result = new MigrationBlockingAllowInheritance();
+    public NoIntBaseClassDeprecated build() {
+      NoIntBaseClassDeprecated result = new NoIntBaseClassDeprecated();
       return result;
     }
   }
@@ -64,11 +64,11 @@ public class MigrationBlockingAllowInheritance implements TBase, java.io.Seriali
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public MigrationBlockingAllowInheritance(MigrationBlockingAllowInheritance other) {
+  public NoIntBaseClassDeprecated(NoIntBaseClassDeprecated other) {
   }
 
-  public MigrationBlockingAllowInheritance deepCopy() {
-    return new MigrationBlockingAllowInheritance(this);
+  public NoIntBaseClassDeprecated deepCopy() {
+    return new NoIntBaseClassDeprecated(this);
   }
 
   public void setFieldValue(int fieldID, Object __value) {
@@ -91,9 +91,9 @@ public class MigrationBlockingAllowInheritance implements TBase, java.io.Seriali
       return false;
     if (this == _that)
       return true;
-    if (!(_that instanceof MigrationBlockingAllowInheritance))
+    if (!(_that instanceof NoIntBaseClassDeprecated))
       return false;
-    MigrationBlockingAllowInheritance that = (MigrationBlockingAllowInheritance)_that;
+    NoIntBaseClassDeprecated that = (NoIntBaseClassDeprecated)_that;
 
     return true;
   }
@@ -104,7 +104,7 @@ public class MigrationBlockingAllowInheritance implements TBase, java.io.Seriali
   }
 
   @Override
-  public int compareTo(MigrationBlockingAllowInheritance other) {
+  public int compareTo(NoIntBaseClassDeprecated other) {
     if (other == null) {
       // See java.lang.Comparable docs
       throw new NullPointerException();
@@ -160,7 +160,7 @@ public class MigrationBlockingAllowInheritance implements TBase, java.io.Seriali
     String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
     String newLine = prettyPrint ? "\n" : "";
     String space = prettyPrint ? " " : "";
-    StringBuilder sb = new StringBuilder("MigrationBlockingAllowInheritance");
+    StringBuilder sb = new StringBuilder("NoIntBaseClassDeprecated");
     sb.append(space);
     sb.append("(");
     sb.append(newLine);

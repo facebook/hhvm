@@ -23,6 +23,11 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * Allows inheritance from a struct or exception in thrift-py3.
+ * Inheritance from union is DEPRECATED!
+ * Do not add new usage of this. Prefer composition over inheritance.
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class MigrationBlockingAllowInheritance implements TBase, java.io.Serializable, Cloneable, Comparable<MigrationBlockingAllowInheritance> {
   private static final TStruct STRUCT_DESC = new TStruct("MigrationBlockingAllowInheritance");

@@ -206,7 +206,7 @@
       }
     },
     "MigrationBlockingAllowInheritance" : {
-      "lineno" : 104,
+      "lineno" : 107,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -214,12 +214,30 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 104,
+          "line" : 107,
           "column" : 1
         },
         "end" : {
-          "line" : 106,
+          "line" : 109,
           "column" : 44
+        }
+      }
+    },
+    "NoIntBaseClassDeprecated" : {
+      "lineno" : 114,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 114,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 115,
+          "column" : 35
         }
       }
     }

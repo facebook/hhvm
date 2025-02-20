@@ -799,6 +799,10 @@ class Py3EnableCppAdapter implements \IThriftSyncStruct, \IThriftStructMetadata,
 }
 
 /**
+ * Allows inheritance from a struct or exception in thrift-py3.
+ * Inheritance from union is DEPRECATED!
+ * Do not add new usage of this. Prefer composition over inheritance.
+ *
  * Original thrift struct:-
  * MigrationBlockingAllowInheritance
  */
@@ -851,6 +855,92 @@ class MigrationBlockingAllowInheritance implements \IThriftSyncStruct, \IThriftS
           )
         ),
         '\facebook\thrift\annotation\Exception' => \facebook\thrift\annotation\Exception::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+  }
+
+}
+
+/**
+ * In thrift-py3 only, disables `int` base for non-`Flag` enums.
+ * DEPRECATED! Do not add new usage.
+ * In thrift-python, all non-`Flag` enums have `int` base class.
+ *
+ * Original thrift struct:-
+ * NoIntBaseClassDeprecated
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/python/NoIntBaseClassDeprecated'))>>
+class NoIntBaseClassDeprecated implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const type TShape = shape(
+  );
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'NoIntBaseClassDeprecated';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "python.NoIntBaseClassDeprecated",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Enum' => \facebook\thrift\annotation\Enum::fromShape(
           shape(
           )
         ),

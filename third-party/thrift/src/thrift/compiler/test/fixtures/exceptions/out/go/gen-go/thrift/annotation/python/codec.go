@@ -121,6 +121,17 @@ var (
 
         }
     }()
+    premadeCodecTypeSpec_python_NoIntBaseClassDeprecated = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "python.NoIntBaseClassDeprecated",
+            CodecStructSpec: &thrift.CodecStructSpec{
+    ScopedName: "python.NoIntBaseClassDeprecated",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewNoIntBaseClassDeprecated() },
+},
+
+        }
+    }()
 )
 
 // Premade struct specs
@@ -287,6 +298,20 @@ var (
     },
 }
     }()
+    premadeStructSpec_NoIntBaseClassDeprecated = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
+    Name:                 "NoIntBaseClassDeprecated",
+    ScopedName:           "python.NoIntBaseClassDeprecated",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
+    },
+    FieldSpecIDToIndex:   map[int16]int{
+    },
+    FieldSpecNameToIndex: map[string]int{
+    },
+}
+    }()
 )
 
 // Premade slice of all struct specs
@@ -300,6 +325,7 @@ var premadeStructSpecs = func() []*thrift.StructSpec {
     fbthriftResults = append(fbthriftResults, premadeStructSpec_UseCAPI)
     fbthriftResults = append(fbthriftResults, premadeStructSpec_Py3EnableCppAdapter)
     fbthriftResults = append(fbthriftResults, premadeStructSpec_MigrationBlockingAllowInheritance)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_NoIntBaseClassDeprecated)
     return fbthriftResults
 }()
 
@@ -315,6 +341,7 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_UseCAPI.FullName] = premadeCodecTypeSpec_python_UseCAPI
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_Py3EnableCppAdapter.FullName] = premadeCodecTypeSpec_python_Py3EnableCppAdapter
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_MigrationBlockingAllowInheritance.FullName] = premadeCodecTypeSpec_python_MigrationBlockingAllowInheritance
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_NoIntBaseClassDeprecated.FullName] = premadeCodecTypeSpec_python_NoIntBaseClassDeprecated
     return fbthriftTypeSpecsMap
 }()
 

@@ -24,26 +24,26 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 /**
- * Allows inheritance from a struct or exception in thrift-py3.
- * Inheritance from union is DEPRECATED!
- * Do not add new usage of this. Prefer composition over inheritance.
+ * In thrift-py3 only, disables `int` base for non-`Flag` enums.
+ * DEPRECATED! Do not add new usage.
+ * In thrift-python, all non-`Flag` enums have `int` base class.
  */
 @SuppressWarnings({ "unused", "serial" })
-public class MigrationBlockingAllowInheritance implements TBase, java.io.Serializable, Cloneable {
-  private static final TStruct STRUCT_DESC = new TStruct("MigrationBlockingAllowInheritance");
+public class NoIntBaseClassDeprecated implements TBase, java.io.Serializable, Cloneable {
+  private static final TStruct STRUCT_DESC = new TStruct("NoIntBaseClassDeprecated");
 
 
-  public MigrationBlockingAllowInheritance() {
+  public NoIntBaseClassDeprecated() {
   }
 
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public MigrationBlockingAllowInheritance(MigrationBlockingAllowInheritance other) {
+  public NoIntBaseClassDeprecated(NoIntBaseClassDeprecated other) {
   }
 
-  public MigrationBlockingAllowInheritance deepCopy() {
-    return new MigrationBlockingAllowInheritance(this);
+  public NoIntBaseClassDeprecated deepCopy() {
+    return new NoIntBaseClassDeprecated(this);
   }
 
   @Override
@@ -52,9 +52,9 @@ public class MigrationBlockingAllowInheritance implements TBase, java.io.Seriali
       return false;
     if (this == _that)
       return true;
-    if (!(_that instanceof MigrationBlockingAllowInheritance))
+    if (!(_that instanceof NoIntBaseClassDeprecated))
       return false;
-    MigrationBlockingAllowInheritance that = (MigrationBlockingAllowInheritance)_that;
+    NoIntBaseClassDeprecated that = (NoIntBaseClassDeprecated)_that;
 
     return true;
   }
@@ -69,7 +69,7 @@ public class MigrationBlockingAllowInheritance implements TBase, java.io.Seriali
     throw new TException("unimplemented in android immutable structure");
   }
 
-  public static MigrationBlockingAllowInheritance deserialize(TProtocol iprot) throws TException {
+  public static NoIntBaseClassDeprecated deserialize(TProtocol iprot) throws TException {
     TField __field;
     iprot.readStructBegin();
     while (true)
@@ -88,8 +88,8 @@ public class MigrationBlockingAllowInheritance implements TBase, java.io.Seriali
     }
     iprot.readStructEnd();
 
-    MigrationBlockingAllowInheritance _that;
-    _that = new MigrationBlockingAllowInheritance(
+    NoIntBaseClassDeprecated _that;
+    _that = new NoIntBaseClassDeprecated(
     );
     _that.validate();
     return _that;

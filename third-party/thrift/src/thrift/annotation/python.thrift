@@ -101,6 +101,15 @@ struct UseCAPI {
 @scope.Typedef
 struct Py3EnableCppAdapter {}
 
+/// Allows inheritance from a struct or exception in thrift-py3.
+/// Inheritance from union is DEPRECATED!
+/// Do not add new usage of this. Prefer composition over inheritance.
 @scope.Struct
 @scope.Exception
 struct MigrationBlockingAllowInheritance {}
+
+/// In thrift-py3 only, disables `int` base for non-`Flag` enums.
+/// DEPRECATED! Do not add new usage.
+/// In thrift-python, all non-`Flag` enums have `int` base class.
+@scope.Enum
+struct NoIntBaseClassDeprecated {}

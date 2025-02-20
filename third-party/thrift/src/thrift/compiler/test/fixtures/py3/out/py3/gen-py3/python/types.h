@@ -90,6 +90,13 @@ inline void reset_field<::facebook::thrift::annotation::python::MigrationBlockin
 }
 
 template<>
+inline void reset_field<::facebook::thrift::annotation::python::NoIntBaseClassDeprecated>(
+    ::facebook::thrift::annotation::python::NoIntBaseClassDeprecated& obj, uint16_t index) {
+  switch (index) {
+  }
+}
+
+template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::python::Py3Hidden>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
@@ -162,6 +169,16 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::python::MigrationBlockingAllowInheritance>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::facebook::thrift::annotation::python::NoIntBaseClassDeprecated>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

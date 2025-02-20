@@ -77,6 +77,12 @@ var (
                 SetName("python.MigrationBlockingAllowInheritance"),
         )
     }()
+    premadeThriftType_python_NoIntBaseClassDeprecated = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("python.NoIntBaseClassDeprecated"),
+        )
+    }()
 )
 
 // Helper type to allow us to store Thrift types in a slice at compile time,
@@ -99,6 +105,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "python.UseCAPI", premadeThriftType_python_UseCAPI })
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "python.Py3EnableCppAdapter", premadeThriftType_python_Py3EnableCppAdapter })
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "python.MigrationBlockingAllowInheritance", premadeThriftType_python_MigrationBlockingAllowInheritance })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "python.NoIntBaseClassDeprecated", premadeThriftType_python_NoIntBaseClassDeprecated })
 
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
     for _, value := range thriftTypesWithFullName {

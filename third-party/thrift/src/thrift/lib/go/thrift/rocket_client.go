@@ -115,12 +115,12 @@ func (p *rocketClient) Flush() (err error) {
 	}
 	headers := unionMaps(p.reqHeaders, p.persistentHeaders)
 	if p.writeType == types.ONEWAY {
-		return p.client.FireAndForget(p.messageName, p.protoID, p.writeType, headers, dataBytes)
+		return p.client.FireAndForget(p.messageName, p.protoID, headers, dataBytes)
 	}
 	if p.writeType != types.CALL {
 		return nil
 	}
-	p.respHeaders, p.resultData, p.resultErr = p.client.RequestResponse(ctx, p.messageName, p.protoID, p.writeType, headers, dataBytes)
+	p.respHeaders, p.resultData, p.resultErr = p.client.RequestResponse(ctx, p.messageName, p.protoID, headers, dataBytes)
 	clear(p.reqHeaders)
 	return nil
 }

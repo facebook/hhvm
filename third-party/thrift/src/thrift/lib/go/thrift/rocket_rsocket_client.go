@@ -30,8 +30,8 @@ import (
 // RSocketClient is a client that uses a rsocket library.
 type RSocketClient interface {
 	SendSetup(ctx context.Context) error
-	FireAndForget(messageName string, protoID types.ProtocolID, typeID types.MessageType, headers map[string]string, dataBytes []byte) error
-	RequestResponse(ctx context.Context, messageName string, protoID types.ProtocolID, typeID types.MessageType, headers map[string]string, dataBytes []byte) (map[string]string, []byte, error)
+	FireAndForget(messageName string, protoID types.ProtocolID, headers map[string]string, dataBytes []byte) error
+	RequestResponse(ctx context.Context, messageName string, protoID types.ProtocolID, headers map[string]string, dataBytes []byte) (map[string]string, []byte, error)
 	Close() error
 }
 
@@ -114,9 +114,9 @@ func (r *rsocketClient) resetDeadline() {
 	r.conn.SetDeadline(time.Time{})
 }
 
-func (r *rsocketClient) RequestResponse(ctx context.Context, messageName string, protoID types.ProtocolID, typeID types.MessageType, headers map[string]string, dataBytes []byte) (map[string]string, []byte, error) {
+func (r *rsocketClient) RequestResponse(ctx context.Context, messageName string, protoID types.ProtocolID, headers map[string]string, dataBytes []byte) (map[string]string, []byte, error) {
 	r.resetDeadline()
-	request, err := encodeRequestPayload(messageName, protoID, typeID, headers, r.useZstd, dataBytes)
+	request, err := encodeRequestPayload(messageName, protoID, types.CALL, headers, r.useZstd, dataBytes)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -132,9 +132,9 @@ func (r *rsocketClient) RequestResponse(ctx context.Context, messageName string,
 	return nil, nil, err
 }
 
-func (r *rsocketClient) FireAndForget(messageName string, protoID types.ProtocolID, typeID types.MessageType, headers map[string]string, dataBytes []byte) error {
+func (r *rsocketClient) FireAndForget(messageName string, protoID types.ProtocolID, headers map[string]string, dataBytes []byte) error {
 	r.resetDeadline()
-	request, err := encodeRequestPayload(messageName, protoID, typeID, headers, r.useZstd, dataBytes)
+	request, err := encodeRequestPayload(messageName, protoID, types.ONEWAY, headers, r.useZstd, dataBytes)
 	if err != nil {
 		return err
 	}

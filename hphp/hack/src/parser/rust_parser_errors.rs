@@ -2122,6 +2122,8 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     &x.type_parameter_list,
                 );
 
+                self.check_type_parameters_attributes(&x.type_parameter_list);
+
                 if let Some(clashing_name) = self.class_constructor_param_promotion_clash(node) {
                     let class_name = self.active_classish_name().unwrap_or("");
                     let error_msg = errors::error2025(class_name, clashing_name);
@@ -2280,6 +2282,17 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 }
             }
             _ => {}
+        }
+    }
+
+    fn check_type_parameters_attributes(&mut self, x: S<'a>) {
+        if let TypeParameters(x) = &x.children {
+            syntax_to_list_no_separators(&x.parameters).for_each(|x| {
+                if let TypeParameter(x) = &x.children {
+                    let tparam_attributes = &x.attribute_spec;
+                    self.check_attr_enabled(tparam_attributes);
+                }
+            })
         }
     }
 
@@ -5538,9 +5551,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             RequireClauseConstraint(_) => {
                 self.check_can_use_feature(node, &FeatureName::RequireConstraint)
             }
-            ClassishDeclaration(_) => {
+            ClassishDeclaration(children) => {
                 self.classish_errors(node);
                 self.class_reified_param_errors(node);
+                self.check_type_parameters_attributes(&children.type_parameters);
             }
 
             EnumClassDeclaration(_) => {

@@ -17,6 +17,13 @@ using namespace proxygen::test;
 using namespace testing;
 using quic::MockQuicSocketDriver;
 
+class MockDeliveryCallback : public WebTransport::DeliveryCallback {
+ public:
+  MOCK_METHOD(void, onDelivery, (uint64_t, uint32_t), (noexcept));
+
+  MOCK_METHOD(void, onDeliveryCancelled, (uint64_t, uint32_t), (noexcept));
+};
+
 namespace {
 const uint32_t WT_ERROR_1 = 19;
 const uint32_t WT_ERROR_2 = 77;
@@ -146,6 +153,25 @@ TEST_F(QuicWebTransportTest, SetPriority) {
       setStreamPriority(handle.value()->getID(), quic::Priority(1, false, 1)));
   handle.value()->setPriority(1, 1, false);
   handle.value()->writeStreamData(nullptr, true, nullptr);
+  eventBase_.loop();
+}
+
+TEST_F(QuicWebTransportTest, WriteWithDeliveryCallback) {
+  auto handle = webTransport()->createUniStream();
+  EXPECT_TRUE(handle.hasValue());
+  auto mockCallback = std::make_unique<StrictMock<MockDeliveryCallback>>();
+
+  folly::StringPiece data = "test data";
+
+  uint64_t expectedStreamId = handle.value()->getID();
+  uint32_t expectedOffset = data.size();
+  EXPECT_CALL(*mockCallback, onDelivery(expectedStreamId, expectedOffset))
+      .Times(1);
+
+  handle.value()->writeStreamData(
+      folly::IOBuf::copyBuffer(data), true, mockCallback.get());
+  // The MockQuicSocketDriver automatically simulates the delivery of data
+  // written to the QUIC socket.
   eventBase_.loop();
 }
 

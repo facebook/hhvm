@@ -1098,7 +1098,8 @@ void TransportCompatibilityTest::TestBadPayload() {
             apache::thrift::SerializedRequest(
                 std::move(envelopeAndRequest->second)),
             std::move(header),
-            ErrorCallback::create());
+            ErrorCallback::create(),
+            nullptr);
       } else {
         ErrorCallback::create().release()->onResponseError(
             folly::make_exception_wrapper<

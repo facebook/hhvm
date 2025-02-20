@@ -23,7 +23,7 @@ void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::fbt
                 "bounce_map",
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "apache.org/thrift/fixtures/types/SomeService");
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
 }
 
 template <typename RpcOptions>
@@ -34,7 +34,7 @@ void apache::thrift::Client<::apache::thrift::fixtures::types::SomeService>::fbt
                 "binary_keyed_map",
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "apache.org/thrift/fixtures/types/SomeService");
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
 }
 
 

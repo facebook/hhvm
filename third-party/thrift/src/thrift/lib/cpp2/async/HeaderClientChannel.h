@@ -163,21 +163,24 @@ class HeaderClientChannel : public ClientChannel,
       MethodMetadata&&,
       SerializedRequest&&,
       std::shared_ptr<apache::thrift::transport::THeader>,
-      RequestClientCallback::Ptr) override;
+      RequestClientCallback::Ptr,
+      std::unique_ptr<folly::IOBuf>) override;
 
   void sendRequestNoResponse(
       const RpcOptions&,
       MethodMetadata&&,
       SerializedRequest&&,
       std::shared_ptr<apache::thrift::transport::THeader>,
-      RequestClientCallback::Ptr) override;
+      RequestClientCallback::Ptr,
+      std::unique_ptr<folly::IOBuf>) override;
 
   void sendRequestStream(
       const RpcOptions&,
       MethodMetadata&&,
       SerializedRequest&&,
       std::shared_ptr<transport::THeader>,
-      StreamClientCallback* clientCallback) override {
+      StreamClientCallback* clientCallback,
+      std::unique_ptr<folly::IOBuf>) override {
     clientCallback->onFirstResponseError(
         folly::make_exception_wrapper<transport::TTransportException>(
             "This channel doesn't support stream RPC"));
@@ -188,7 +191,8 @@ class HeaderClientChannel : public ClientChannel,
       MethodMetadata&&,
       SerializedRequest&&,
       std::shared_ptr<transport::THeader>,
-      SinkClientCallback* clientCallback) override {
+      SinkClientCallback* clientCallback,
+      std::unique_ptr<folly::IOBuf>) override {
     clientCallback->onFirstResponseError(
         folly::make_exception_wrapper<transport::TTransportException>(
             "This channel doesn't support sink RPC"));
@@ -312,21 +316,24 @@ class HeaderClientChannel : public ClientChannel,
         apache::thrift::MethodMetadata&& methodMetadata,
         SerializedRequest&&,
         std::shared_ptr<apache::thrift::transport::THeader>,
-        RequestClientCallback::Ptr) override;
+        RequestClientCallback::Ptr,
+        std::unique_ptr<folly::IOBuf>) override;
 
     void sendRequestNoResponse(
         const RpcOptions&,
         apache::thrift::MethodMetadata&& methodMetadata,
         SerializedRequest&&,
         std::shared_ptr<apache::thrift::transport::THeader>,
-        RequestClientCallback::Ptr) override;
+        RequestClientCallback::Ptr,
+        std::unique_ptr<folly::IOBuf>) override;
 
     void sendRequestStream(
         const RpcOptions&,
         MethodMetadata&&,
         SerializedRequest&&,
         std::shared_ptr<transport::THeader>,
-        StreamClientCallback* clientCallback) override {
+        StreamClientCallback* clientCallback,
+        std::unique_ptr<folly::IOBuf>) override {
       clientCallback->onFirstResponseError(
           folly::make_exception_wrapper<transport::TTransportException>(
               "This channel doesn't support stream RPC"));
@@ -337,7 +344,8 @@ class HeaderClientChannel : public ClientChannel,
         MethodMetadata&&,
         SerializedRequest&&,
         std::shared_ptr<transport::THeader>,
-        SinkClientCallback* clientCallback) override {
+        SinkClientCallback* clientCallback,
+        std::unique_ptr<folly::IOBuf>) override {
       clientCallback->onFirstResponseError(
           folly::make_exception_wrapper<transport::TTransportException>(
               "This channel doesn't support sink RPC"));
@@ -395,12 +403,14 @@ class HeaderClientChannel : public ClientChannel,
           SerializedRequest&& serializedRequest,
           std::shared_ptr<apache::thrift::transport::THeader> header,
           RequestClientCallback::Ptr cb,
+          std::unique_ptr<folly::IOBuf> frameworkMetadata,
           bool oneWay)
           : rpcOptions_(rpcOptions),
             methodMetadata_(std::move(methodMetadata)),
             serializedRequest_(std::move(serializedRequest)),
             header_(std::move(header)),
             callback_(std::move(cb)),
+            frameworkMetadata_(std::move(frameworkMetadata)),
             oneWay_(oneWay) {}
 
       void send(ClientChannel& channel) &&;
@@ -412,6 +422,7 @@ class HeaderClientChannel : public ClientChannel,
       SerializedRequest serializedRequest_;
       std::shared_ptr<apache::thrift::transport::THeader> header_;
       RequestClientCallback::Ptr callback_;
+      std::unique_ptr<folly::IOBuf> frameworkMetadata_;
       const bool oneWay_;
     };
 

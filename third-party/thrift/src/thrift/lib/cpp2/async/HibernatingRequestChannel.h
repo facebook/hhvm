@@ -53,14 +53,16 @@ class HibernatingRequestChannel : public RequestChannel {
       MethodMetadata&&,
       SerializedRequest&&,
       std::shared_ptr<transport::THeader> header,
-      RequestClientCallback::Ptr cob) override;
+      RequestClientCallback::Ptr cob,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
 
   void sendRequestNoResponse(
       const RpcOptions&,
       MethodMetadata&&,
       SerializedRequest&&,
       std::shared_ptr<transport::THeader>,
-      RequestClientCallback::Ptr) override {
+      RequestClientCallback::Ptr,
+      std::unique_ptr<folly::IOBuf>) override {
     LOG(FATAL) << "Not supported";
   }
 
@@ -69,7 +71,8 @@ class HibernatingRequestChannel : public RequestChannel {
       MethodMetadata&&,
       SerializedRequest&&,
       std::shared_ptr<transport::THeader>,
-      StreamClientCallback* clientCallback) override {
+      StreamClientCallback* clientCallback,
+      std::unique_ptr<folly::IOBuf>) override {
     clientCallback->onFirstResponseError(
         folly::make_exception_wrapper<transport::TTransportException>(
             "This channel doesn't support stream RPC"));
@@ -80,7 +83,8 @@ class HibernatingRequestChannel : public RequestChannel {
       MethodMetadata&&,
       SerializedRequest&&,
       std::shared_ptr<transport::THeader>,
-      SinkClientCallback* clientCallback) override {
+      SinkClientCallback* clientCallback,
+      std::unique_ptr<folly::IOBuf>) override {
     clientCallback->onFirstResponseError(
         folly::make_exception_wrapper<transport::TTransportException>(
             "This channel doesn't support sink RPC"));

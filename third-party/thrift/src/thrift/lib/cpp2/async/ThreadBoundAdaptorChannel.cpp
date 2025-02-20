@@ -221,7 +221,8 @@ void ThreadBoundAdaptorChannel::sendRequestResponse(
     MethodMetadata&& methodMetadata,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    RequestClientCallback::Ptr cob) {
+    RequestClientCallback::Ptr cob,
+    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
   cob = RequestClientCallback::Ptr(new EvbRequestCallback(
       std::move(cob), folly::Executor::getKeepAliveToken(evb_)));
 
@@ -230,7 +231,8 @@ void ThreadBoundAdaptorChannel::sendRequestResponse(
       std::move(methodMetadata),
       std::move(request),
       std::move(header),
-      std::move(cob));
+      std::move(cob),
+      std::move(frameworkMetadata));
 }
 
 void ThreadBoundAdaptorChannel::sendRequestNoResponse(
@@ -238,7 +240,8 @@ void ThreadBoundAdaptorChannel::sendRequestNoResponse(
     MethodMetadata&& methodMetadata,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    RequestClientCallback::Ptr cob) {
+    RequestClientCallback::Ptr cob,
+    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
   cob = RequestClientCallback::Ptr(new EvbRequestCallback(
       std::move(cob), folly::Executor::getKeepAliveToken(evb_)));
 
@@ -247,7 +250,8 @@ void ThreadBoundAdaptorChannel::sendRequestNoResponse(
       std::move(methodMetadata),
       std::move(request),
       std::move(header),
-      std::move(cob));
+      std::move(cob),
+      std::move(frameworkMetadata));
 }
 
 void ThreadBoundAdaptorChannel::sendRequestStream(
@@ -255,7 +259,8 @@ void ThreadBoundAdaptorChannel::sendRequestStream(
     MethodMetadata&& methodMetadata,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    StreamClientCallback* cob) {
+    StreamClientCallback* cob,
+    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
   cob = new EvbStreamCallback(std::move(cob), evb_);
 
   threadSafeChannel_->sendRequestStream(
@@ -263,7 +268,8 @@ void ThreadBoundAdaptorChannel::sendRequestStream(
       std::move(methodMetadata),
       std::move(request),
       std::move(header),
-      std::move(cob));
+      std::move(cob),
+      std::move(frameworkMetadata));
 }
 
 void ThreadBoundAdaptorChannel::sendRequestSink(
@@ -271,7 +277,8 @@ void ThreadBoundAdaptorChannel::sendRequestSink(
     MethodMetadata&& /* methodName */,
     SerializedRequest&& /* request */,
     std::shared_ptr<transport::THeader> /* header */,
-    SinkClientCallback* /* cob */) {
+    SinkClientCallback* /* cob */,
+    std::unique_ptr<folly::IOBuf> /* frameworkMetadata */) {
   // Currently not implemented.
   LOG(FATAL) << "Not implemented";
 }

@@ -135,33 +135,38 @@ void ReconnectingRequestChannel::sendRequestResponse(
     MethodMetadata&& methodMetadata,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    RequestClientCallback::Ptr cob) {
+    RequestClientCallback::Ptr cob,
+    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
   if (!isChannelGood()) {
     if (useRequestQueue_) {
       if (requestQueue_.size() >= requestQueueLimit) {
         cob.release()->onResponseError(pendingRequestOverflowError());
         return;
       }
-      requestQueue_.push_back([this,
-                               options = options,
-                               methodMetadata = std::move(methodMetadata),
-                               request = std::move(request),
-                               header = std::move(header),
-                               cob = std::move(cob)](bool failRequest) mutable {
-        if (failRequest) {
-          cob.release()->onResponseError(
-              requestQueueNonEmptyAtDestructionError());
-          return;
-        }
-        cob = RequestClientCallback::Ptr(
-            new ChannelKeepAlive(impl_, std::move(cob)));
-        return impl_->sendRequestResponse(
-            std::move(options),
-            std::move(methodMetadata),
-            std::move(request),
-            std::move(header),
-            std::move(cob));
-      });
+      requestQueue_.push_back(
+          [this,
+           options = options,
+           methodMetadata = std::move(methodMetadata),
+           request = std::move(request),
+           header = std::move(header),
+           cob = std::move(cob),
+           frameworkMetadata =
+               std::move(frameworkMetadata)](bool failRequest) mutable {
+            if (failRequest) {
+              cob.release()->onResponseError(
+                  requestQueueNonEmptyAtDestructionError());
+              return;
+            }
+            cob = RequestClientCallback::Ptr(
+                new ChannelKeepAlive(impl_, std::move(cob)));
+            return impl_->sendRequestResponse(
+                std::move(options),
+                std::move(methodMetadata),
+                std::move(request),
+                std::move(header),
+                std::move(cob),
+                std::move(frameworkMetadata));
+          });
       reconnectRequestChannelWithCallback();
       // Callback will invoke this request after successful reconnecting.
       return;
@@ -176,7 +181,8 @@ void ReconnectingRequestChannel::sendRequestResponse(
       std::move(methodMetadata),
       std::move(request),
       std::move(header),
-      std::move(cob));
+      std::move(cob),
+      std::move(frameworkMetadata));
 }
 
 void ReconnectingRequestChannel::sendRequestNoResponse(
@@ -184,33 +190,38 @@ void ReconnectingRequestChannel::sendRequestNoResponse(
     MethodMetadata&& methodMetadata,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    RequestClientCallback::Ptr cob) {
+    RequestClientCallback::Ptr cob,
+    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
   if (!isChannelGood()) {
     if (useRequestQueue_) {
       if (requestQueue_.size() >= requestQueueLimit) {
         cob.release()->onResponseError(pendingRequestOverflowError());
         return;
       }
-      requestQueue_.push_back([this,
-                               options = options,
-                               methodMetadata = std::move(methodMetadata),
-                               request = std::move(request),
-                               header = std::move(header),
-                               cob = std::move(cob)](bool failRequest) mutable {
-        if (failRequest) {
-          cob.release()->onResponseError(
-              requestQueueNonEmptyAtDestructionError());
-          return;
-        }
-        cob = RequestClientCallback::Ptr(
-            new ChannelKeepAlive(impl_, std::move(cob)));
-        return impl_->sendRequestNoResponse(
-            std::move(options),
-            std::move(methodMetadata),
-            std::move(request),
-            std::move(header),
-            std::move(cob));
-      });
+      requestQueue_.push_back(
+          [this,
+           options = options,
+           methodMetadata = std::move(methodMetadata),
+           request = std::move(request),
+           header = std::move(header),
+           cob = std::move(cob),
+           frameworkMetadata =
+               std::move(frameworkMetadata)](bool failRequest) mutable {
+            if (failRequest) {
+              cob.release()->onResponseError(
+                  requestQueueNonEmptyAtDestructionError());
+              return;
+            }
+            cob = RequestClientCallback::Ptr(
+                new ChannelKeepAlive(impl_, std::move(cob)));
+            return impl_->sendRequestNoResponse(
+                std::move(options),
+                std::move(methodMetadata),
+                std::move(request),
+                std::move(header),
+                std::move(cob),
+                std::move(frameworkMetadata));
+          });
       reconnectRequestChannelWithCallback();
       // Callback will invoke this request after successful reconnecting.
       return;
@@ -224,7 +235,8 @@ void ReconnectingRequestChannel::sendRequestNoResponse(
       std::move(methodMetadata),
       std::move(request),
       std::move(header),
-      std::move(cob));
+      std::move(cob),
+      std::move(frameworkMetadata));
 }
 
 void ReconnectingRequestChannel::sendRequestStream(
@@ -232,7 +244,8 @@ void ReconnectingRequestChannel::sendRequestStream(
     MethodMetadata&& methodMetadata,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    StreamClientCallback* cob) {
+    StreamClientCallback* cob,
+    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
   if (!isChannelGood()) {
     if (useRequestQueue_) {
       if (requestQueue_.size() >= requestQueueLimit) {
@@ -244,7 +257,10 @@ void ReconnectingRequestChannel::sendRequestStream(
                                methodMetadata = std::move(methodMetadata),
                                request = std::move(request),
                                header = std::move(header),
-                               cob = std::move(cob)](bool failRequest) mutable {
+                               cob = std::move(cob),
+                               frameworkMetadata =
+                                   std::move(frameworkMetadata)](
+                                  bool failRequest) mutable {
         if (failRequest) {
           cob->onFirstResponseError(requestQueueNonEmptyAtDestructionError());
           return;
@@ -255,7 +271,8 @@ void ReconnectingRequestChannel::sendRequestStream(
             std::move(methodMetadata),
             std::move(request),
             std::move(header),
-            cob);
+            cob,
+            std::move(frameworkMetadata));
       });
       reconnectRequestChannelWithCallback();
       // Callback will invoke this request after successful reconnecting.
@@ -270,7 +287,8 @@ void ReconnectingRequestChannel::sendRequestStream(
       std::move(methodMetadata),
       std::move(request),
       std::move(header),
-      cob);
+      cob,
+      std::move(frameworkMetadata));
 }
 
 void ReconnectingRequestChannel::sendRequestSink(
@@ -278,7 +296,8 @@ void ReconnectingRequestChannel::sendRequestSink(
     MethodMetadata&& methodMetadata,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    SinkClientCallback* cob) {
+    SinkClientCallback* cob,
+    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
   if (!isChannelGood()) {
     if (useRequestQueue_) {
       if (requestQueue_.size() >= requestQueueLimit) {
@@ -290,7 +309,10 @@ void ReconnectingRequestChannel::sendRequestSink(
                                methodMetadata = std::move(methodMetadata),
                                request = std::move(request),
                                header = std::move(header),
-                               cob = std::move(cob)](bool failRequest) mutable {
+                               cob = std::move(cob),
+                               frameworkMetadata =
+                                   std::move(frameworkMetadata)](
+                                  bool failRequest) mutable {
         if (failRequest) {
           cob->onFirstResponseError(requestQueueNonEmptyAtDestructionError());
           return;
@@ -301,7 +323,8 @@ void ReconnectingRequestChannel::sendRequestSink(
             std::move(methodMetadata),
             std::move(request),
             std::move(header),
-            cob);
+            cob,
+            std::move(frameworkMetadata));
       });
       reconnectRequestChannelWithCallback();
       // sendQueuedRequests() will take care of sending this request.
@@ -317,7 +340,8 @@ void ReconnectingRequestChannel::sendRequestSink(
       std::move(methodMetadata),
       std::move(request),
       std::move(header),
-      cob);
+      cob,
+      std::move(frameworkMetadata));
 }
 
 void ReconnectingRequestChannel::connectSuccess() noexcept {

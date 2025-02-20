@@ -28,7 +28,7 @@ void apache::thrift::Client<::cpp2::C>::fbthrift_send_f(apache::thrift::Serializ
                 "f",
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "C");
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
 }
 
 template <typename RpcOptions>
@@ -39,7 +39,7 @@ void apache::thrift::Client<::cpp2::C>::fbthrift_send_numbers(apache::thrift::Se
                 "numbers",
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "C");
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
 }
 
 template <typename RpcOptions>
@@ -50,7 +50,7 @@ void apache::thrift::Client<::cpp2::C>::fbthrift_send_thing(apache::thrift::Seri
                 "thing",
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "C");
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
 }
 
 

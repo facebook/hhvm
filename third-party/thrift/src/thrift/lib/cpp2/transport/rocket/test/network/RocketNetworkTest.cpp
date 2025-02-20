@@ -1080,7 +1080,8 @@ TEST_F(RocketNetworkTest, RequestStreamNewApiBasic) {
       "dummy",
       apache::thrift::SerializedRequest(std::move(payload)),
       std::make_shared<THeader>(),
-      &clientCallback);
+      &clientCallback,
+      /* frameworkMetadata */ nullptr);
 
   evb.loop();
 
@@ -1108,7 +1109,8 @@ TEST_F(RocketNetworkTest, RequestStreamNewApiError) {
       "dummy",
       apache::thrift::SerializedRequest(std::move(payload)),
       std::make_shared<THeader>(),
-      &clientCallback);
+      &clientCallback,
+      /* frameworkMetadata */ nullptr);
 
   evb.loop();
 
@@ -1139,7 +1141,8 @@ TEST_F(RocketNetworkTest, RequestStreamNewApiHeadersPush) {
         "dummy",
         apache::thrift::SerializedRequest(std::move(payload)),
         std::make_shared<THeader>(),
-        &clientCallback);
+        &clientCallback,
+        /* frameworkMetadata */ nullptr);
 
     evb.loop();
 
@@ -1162,7 +1165,8 @@ TEST_F(RocketNetworkTest, RequestStreamNewApiHeadersPush) {
         "dummy",
         apache::thrift::SerializedRequest(std::move(payload)),
         std::make_shared<THeader>(),
-        &clientCallback);
+        &clientCallback,
+        /* frameworkMetadata */ nullptr);
 
     evb.loop();
 

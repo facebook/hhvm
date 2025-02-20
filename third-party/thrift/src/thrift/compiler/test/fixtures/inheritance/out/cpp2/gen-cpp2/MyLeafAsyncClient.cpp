@@ -21,7 +21,7 @@ void apache::thrift::Client<::cpp2::MyLeaf>::fbthrift_send_do_leaf(apache::thrif
                 "do_leaf",
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "MyLeaf");
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata));
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
 }
 
 

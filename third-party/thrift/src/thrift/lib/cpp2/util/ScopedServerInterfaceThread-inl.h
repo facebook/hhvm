@@ -118,7 +118,8 @@ class FaultInjectionChannel : public RequestChannel {
       MethodMetadata&& methodMetadata,
       SerializedRequest&& req,
       std::shared_ptr<transport::THeader> header,
-      RequestClientCallback::Ptr clientCallback) override {
+      RequestClientCallback::Ptr clientCallback,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override {
     if (auto ex = injectFault_ ? injectFault_(methodMetadata.name_view())
                                : folly::exception_wrapper()) {
       clientCallback.release()->onResponseError(std::move(ex));
@@ -129,14 +130,16 @@ class FaultInjectionChannel : public RequestChannel {
         std::move(methodMetadata),
         std::move(req),
         std::move(header),
-        std::move(clientCallback));
+        std::move(clientCallback),
+        std::move(frameworkMetadata));
   }
   void sendRequestNoResponse(
       const RpcOptions& rpcOptions,
       MethodMetadata&& methodMetadata,
       SerializedRequest&& req,
       std::shared_ptr<transport::THeader> header,
-      RequestClientCallback::Ptr clientCallback) override {
+      RequestClientCallback::Ptr clientCallback,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override {
     if (auto ex = injectFault_ ? injectFault_(methodMetadata.name_view())
                                : folly::exception_wrapper()) {
       clientCallback.release()->onResponseError(std::move(ex));
@@ -147,14 +150,16 @@ class FaultInjectionChannel : public RequestChannel {
         std::move(methodMetadata),
         std::move(req),
         std::move(header),
-        std::move(clientCallback));
+        std::move(clientCallback),
+        std::move(frameworkMetadata));
   }
   void sendRequestStream(
       const RpcOptions& rpcOptions,
       MethodMetadata&& methodMetadata,
       SerializedRequest&& req,
       std::shared_ptr<transport::THeader> header,
-      StreamClientCallback* clientCallback) override {
+      StreamClientCallback* clientCallback,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override {
     if (auto ex = injectFault_ ? injectFault_(methodMetadata.name_view())
                                : folly::exception_wrapper()) {
       clientCallback->onFirstResponseError(std::move(ex));
@@ -171,14 +176,16 @@ class FaultInjectionChannel : public RequestChannel {
         std::move(methodMetadata),
         std::move(req),
         std::move(header),
-        clientCallback);
+        clientCallback,
+        std::move(frameworkMetadata));
   }
   void sendRequestSink(
       const RpcOptions& rpcOptions,
       MethodMetadata&& methodMetadata,
       SerializedRequest&& req,
       std::shared_ptr<transport::THeader> header,
-      SinkClientCallback* clientCallback) override {
+      SinkClientCallback* clientCallback,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override {
     if (auto ex = injectFault_ ? injectFault_(methodMetadata.name_view())
                                : folly::exception_wrapper()) {
       clientCallback->onFirstResponseError(std::move(ex));
@@ -189,7 +196,8 @@ class FaultInjectionChannel : public RequestChannel {
         std::move(methodMetadata),
         std::move(req),
         std::move(header),
-        clientCallback);
+        clientCallback,
+        std::move(frameworkMetadata));
   }
 
   void setCloseCallback(CloseCallback* cb) override {

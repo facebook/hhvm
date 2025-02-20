@@ -191,7 +191,8 @@ TEST(H2ClientConnectionTest, H2GoAway) {
       MethodMetadata("foo"),
       SerializedRequest(folly::IOBuf::create(0)),
       std::move(header),
-      std::move(cb));
+      std::move(cb),
+      /* frameworkMetadata */ nullptr);
 
   // Loop until server receives a message and sends us GOAWAY.
   evb.loopForever();

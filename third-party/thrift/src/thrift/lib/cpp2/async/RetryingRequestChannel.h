@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include <future>
-
 #include <thrift/lib/cpp2/async/RequestChannel.h>
 
 namespace apache::thrift {
@@ -46,28 +44,32 @@ class RetryingRequestChannel : public apache::thrift::RequestChannel {
       MethodMetadata&& methodMetadata,
       apache::thrift::SerializedRequest&& request,
       std::shared_ptr<apache::thrift::transport::THeader> header,
-      apache::thrift::StreamClientCallback* clientCallback) override;
+      apache::thrift::StreamClientCallback* clientCallback,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
 
   void sendRequestResponse(
       const apache::thrift::RpcOptions& options,
       MethodMetadata&& methodMetadata,
       SerializedRequest&& request,
       std::shared_ptr<apache::thrift::transport::THeader> header,
-      RequestClientCallback::Ptr cob) override;
+      RequestClientCallback::Ptr cob,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
 
   void sendRequestSink(
       const apache::thrift::RpcOptions& rpcOptions,
       apache::thrift::MethodMetadata&& methodMetadata,
       SerializedRequest&& request,
       std::shared_ptr<apache::thrift::transport::THeader> header,
-      apache::thrift::SinkClientCallback* cb) override;
+      apache::thrift::SinkClientCallback* cb,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata) override;
 
   void sendRequestNoResponse(
       const apache::thrift::RpcOptions&,
       MethodMetadata&&,
       SerializedRequest&&,
       std::shared_ptr<apache::thrift::transport::THeader>,
-      RequestClientCallback::Ptr) override {
+      RequestClientCallback::Ptr,
+      std::unique_ptr<folly::IOBuf>) override {
     LOG(FATAL) << "Not supported";
   }
 

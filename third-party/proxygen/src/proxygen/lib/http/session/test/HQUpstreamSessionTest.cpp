@@ -2245,19 +2245,31 @@ class HQUpstreamSessionTestWebTransport : public HQUpstreamSessionTest {
   WebTransport* wt_{nullptr};
 };
 
+class MockDeliveryCallback : public WebTransport::DeliveryCallback {
+ public:
+  MOCK_METHOD(void, onDelivery, (uint64_t, uint32_t), (noexcept));
+
+  MOCK_METHOD(void, onDeliveryCancelled, (uint64_t, uint32_t), (noexcept));
+};
+
 TEST_P(HQUpstreamSessionTestWebTransport, BidirectionalStream) {
   InSequence enforceOrder;
   // Create a bidi WT stream
   auto stream = wt_->createBidiStream().value();
   auto id = stream.readHandle->getID();
   // small write
-  stream.writeHandle->writeStreamData(makeBuf(10), false, nullptr);
+  auto mockCallback1 = std::make_unique<StrictMock<MockDeliveryCallback>>();
+  EXPECT_CALL(*mockCallback1, onDelivery(id, 10)).Times(1);
+  stream.writeHandle->writeStreamData(makeBuf(10), false, mockCallback1.get());
   eventBase_.loopOnce();
 
   // shrink the fcw to force it to block
   socketDriver_->setStreamFlowControlWindow(id, 100);
   bool writeComplete = false;
-  stream.writeHandle->writeStreamData(makeBuf(65536), false, nullptr);
+  auto mockCallback2 = std::make_unique<StrictMock<MockDeliveryCallback>>();
+  EXPECT_CALL(*mockCallback2, onDelivery(id, 65536 + 10)).Times(1);
+  stream.writeHandle->writeStreamData(
+      makeBuf(65536), false, mockCallback2.get());
   stream.writeHandle->awaitWritable().value().via(&eventBase_).then([&](auto) {
     VLOG(4) << "big write complete";
     // after it completes, write FIN

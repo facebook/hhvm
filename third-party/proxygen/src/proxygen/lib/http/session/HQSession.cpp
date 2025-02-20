@@ -7,6 +7,7 @@
  */
 
 #include <proxygen/lib/http/session/HQSession.h>
+#include <proxygen/lib/http/webtransport/QuicWtDeliveryCallbackWrapper.h>
 
 #include <proxygen/lib/http/HTTPPriorityFunctions.h>
 #include <proxygen/lib/http/codec/HQControlCodec.h>
@@ -91,7 +92,8 @@ quic::Priority toQuicPriority(const proxygen::HTTPPriority& pri) {
   return quic::Priority(pri.urgency, pri.incremental, pri.orderId);
 }
 
-bool writeWTStreamPrefaceToSock(
+// Returns the number of bytes written. 0 if error.
+uint32_t writeWTStreamPrefaceToSock(
     quic::QuicSocket& sock,
     quic::StreamId wtStreamId,
     quic::StreamId wtSessionId,
@@ -101,14 +103,14 @@ bool writeWTStreamPrefaceToSock(
       proxygen::hq::writeWTStreamPreface(writeBuf, streamType, wtSessionId);
   if (!res) {
     LOG(ERROR) << "Failed to write WT stream preface";
-    return false;
+    return 0;
   }
   auto writeRes = sock.writeChain(wtStreamId, writeBuf.move(), false);
   if (writeRes.hasError()) {
     LOG(ERROR) << "Failed to write stream preface to socket";
-    return false;
+    return 0;
   }
-  return true;
+  return res.value();
 }
 } // namespace
 
@@ -3828,15 +3830,18 @@ HQSession::HQStreamTransport::newWebTransportBidiStream() {
     return folly::makeUnexpected(
         WebTransport::ErrorCode::STREAM_CREATION_ERROR);
   }
-  if (!writeWTStreamPrefaceToSock(*session_.sock_,
-                                  *id,
-                                  getEgressStreamId(),
-                                  hq::WebTransportStreamType::BIDI)) {
+  auto numPrefaceBytesWritten =
+      writeWTStreamPrefaceToSock(*session_.sock_,
+                                 *id,
+                                 getEgressStreamId(),
+                                 hq::WebTransportStreamType::BIDI);
+  if (numPrefaceBytesWritten == 0) {
     LOG(ERROR) << "Failed to write bidirectional stream preface";
     // TODO: resetStream/stopSending?
     return folly::makeUnexpected(
         WebTransport::ErrorCode::STREAM_CREATION_ERROR);
   }
+  streamIdToPrefaceSize_[*id] = numPrefaceBytesWritten;
   return *id;
 }
 
@@ -3849,14 +3854,17 @@ HQSession::HQStreamTransport::newWebTransportUniStream() {
     return folly::makeUnexpected(
         WebTransport::ErrorCode::STREAM_CREATION_ERROR);
   }
-  if (!writeWTStreamPrefaceToSock(*session_.sock_,
-                                  *id,
-                                  getEgressStreamId(),
-                                  hq::WebTransportStreamType::UNI)) {
+  auto numPrefaceBytesWritten =
+      writeWTStreamPrefaceToSock(*session_.sock_,
+                                 *id,
+                                 getEgressStreamId(),
+                                 hq::WebTransportStreamType::UNI);
+  if (numPrefaceBytesWritten == 0) {
     LOG(ERROR) << "Failed to write unidirectional stream preface";
     return folly::makeUnexpected(
         WebTransport::ErrorCode::STREAM_CREATION_ERROR);
   }
+  streamIdToPrefaceSize_[*id] = numPrefaceBytesWritten;
   return *id;
 }
 
@@ -3865,8 +3873,17 @@ HQSession::HQStreamTransport::sendWebTransportStreamData(
     HTTPCodec::StreamID id,
     std::unique_ptr<folly::IOBuf> data,
     bool eof,
-    WebTransport::DeliveryCallback* /* deliveryCallback */) {
-  auto res = session_.sock_->writeChain(id, std::move(data), eof);
+    WebTransportImpl::DeliveryCallback* deliveryCallback) {
+  std::unique_ptr<QuicWtDeliveryCallbackWrapper> deliveryCallbackWrapper =
+      nullptr;
+  if (deliveryCallback) {
+    uint32_t prefaceSize =
+        streamIdToPrefaceSize_.contains(id) ? streamIdToPrefaceSize_[id] : 0;
+    deliveryCallbackWrapper = std::make_unique<QuicWtDeliveryCallbackWrapper>(
+        deliveryCallback, prefaceSize);
+  }
+  auto res = session_.sock_->writeChain(
+      id, std::move(data), eof, deliveryCallbackWrapper.release());
   if (res.hasError()) {
     LOG(ERROR) << "Failed to write WT stream data";
     return folly::makeUnexpected(WebTransport::ErrorCode::SEND_ERROR);
@@ -3895,6 +3912,7 @@ HQSession::HQStreamTransport::notifyPendingWriteOnStream(
 folly::Expected<folly::Unit, WebTransport::ErrorCode>
 HQSession::HQStreamTransport::resetWebTransportEgress(HTTPCodec::StreamID id,
                                                       uint32_t errorCode) {
+  streamIdToPrefaceSize_.erase(id);
   if (session_.sock_) {
     auto res = session_.sock_->resetStream(
         id,

@@ -1742,6 +1742,8 @@ static int execute_program_impl(int argc, char** argv) {
     return 0;
   }
   if (vm.count("modules")) {
+    rds::local::init();
+    SCOPE_EXIT { rds::local::fini(); };
     tl_heap.getCheck();
     Array exts = ExtensionRegistry::getLoaded();
     cout << "[PHP Modules]" << "\n";

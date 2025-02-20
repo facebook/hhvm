@@ -25,16 +25,23 @@
 
 namespace wangle {
 
+template <class R>
+using THandlerAdapter =
+    wangle::HandlerAdapter<R&, std::unique_ptr<folly::IOBuf>>;
+
 // This handler may only be used in a single Pipeline
-class AsyncSocketHandler : public wangle::BytesToBytesHandler,
-                           public folly::AsyncTransport::ReadCallback {
+template <typename R>
+class TAsyncSocketHandler : public THandlerAdapter<R>,
+                            public folly::AsyncTransport::ReadCallback {
+  using Context = typename THandlerAdapter<R>::Context;
+
  public:
-  explicit AsyncSocketHandler(std::shared_ptr<folly::AsyncTransport> socket)
+  explicit TAsyncSocketHandler(std::shared_ptr<folly::AsyncTransport> socket)
       : socket_(std::move(socket)) {}
 
-  AsyncSocketHandler(AsyncSocketHandler&&) = default;
+  TAsyncSocketHandler(TAsyncSocketHandler&&) = default;
 
-  ~AsyncSocketHandler() override {
+  ~TAsyncSocketHandler() override {
     detachReadCallback();
 
     if (socket_) {
@@ -54,7 +61,7 @@ class AsyncSocketHandler : public wangle::BytesToBytesHandler,
     if (socket_ && socket_->getReadCallback() == this) {
       socket_->setReadCB(nullptr);
     }
-    auto ctx = getContext();
+    auto ctx = this->getContext();
     if (ctx && !firedInactive_) {
       firedInactive_ = true;
       ctx->fireTransportInactive();
@@ -137,7 +144,7 @@ class AsyncSocketHandler : public wangle::BytesToBytesHandler,
   }
 
   void getReadBuffer(void** bufReturn, size_t* lenReturn) override {
-    const auto readBufferSettings = getContext()->getReadBufferSettings();
+    const auto readBufferSettings = this->getContext()->getReadBufferSettings();
     const auto ret = bufQueue_.preallocate(
         readBufferSettings.first, readBufferSettings.second);
     *bufReturn = ret.first;
@@ -147,21 +154,21 @@ class AsyncSocketHandler : public wangle::BytesToBytesHandler,
   void readDataAvailable(size_t len) noexcept override {
     refreshTimeout();
     bufQueue_.postallocate(len);
-    getContext()->fireRead(bufQueue_);
+    this->getContext()->fireRead(bufQueue_);
   }
 
   void readEOF() noexcept override {
-    getContext()->fireReadEOF();
+    this->getContext()->fireReadEOF();
   }
 
   void readErr(const folly::AsyncSocketException& ex) noexcept override {
-    getContext()->fireReadException(
+    this->getContext()->fireReadException(
         folly::make_exception_wrapper<folly::AsyncSocketException>(ex));
   }
 
  private:
   void refreshTimeout() {
-    auto manager = getContext()->getPipeline()->getPipelineManager();
+    auto manager = this->getContext()->getPipeline()->getPipelineManager();
     if (manager) {
       manager->refreshTimeout();
     }
@@ -197,14 +204,16 @@ class AsyncSocketHandler : public wangle::BytesToBytesHandler,
     }
 
    private:
-    friend class AsyncSocketHandler;
+    friend class TAsyncSocketHandler;
     folly::Promise<folly::Unit> promise_;
   };
 
-  folly::IOBufQueue bufQueue_{folly::IOBufQueue::cacheChainLength()};
+  R bufQueue_{folly::IOBufQueue::cacheChainLength()};
   std::shared_ptr<folly::AsyncTransport> socket_{nullptr};
   bool firedInactive_{false};
   bool pipelineDeleted_{false};
 };
+
+using AsyncSocketHandler = TAsyncSocketHandler<folly::IOBufQueue>;
 
 } // namespace wangle

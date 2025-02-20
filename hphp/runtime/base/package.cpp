@@ -161,6 +161,7 @@ std::string PackageInfo::mangleForCacheKey() const {
   for (auto& [name, package] : packages()) {
     folly::dynamic entry = folly::dynamic::object();
     entry["uses"] = mangleVecForCacheKey(package.m_uses);
+    entry["include_paths"] = mangleVecForCacheKey(package.m_include_paths);
     entry["includes"] = mangleVecForCacheKey(package.m_includes);
     entry["soft_includes"] = mangleVecForCacheKey(package.m_soft_includes);
     result[name] = entry;

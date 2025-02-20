@@ -33,7 +33,8 @@ class WebTransportImpl : public WebTransport {
     virtual folly::Expected<FCState, WebTransport::ErrorCode>
     sendWebTransportStreamData(HTTPCodec::StreamID /*id*/,
                                std::unique_ptr<folly::IOBuf> /*data*/,
-                               bool /*eof*/) = 0;
+                               bool /*eof*/,
+                               DeliveryCallback* /* deliveryCallback */) = 0;
 
     virtual folly::Expected<folly::Unit, WebTransport::ErrorCode>
     notifyPendingWriteOnStream(HTTPCodec::StreamID,
@@ -123,12 +124,15 @@ class WebTransportImpl : public WebTransport {
     return it->second.stopSending(error);
   }
   folly::Expected<FCState, ErrorCode> writeStreamData(
-      uint64_t id, std::unique_ptr<folly::IOBuf> data, bool fin) override {
+      uint64_t id,
+      std::unique_ptr<folly::IOBuf> data,
+      bool fin,
+      DeliveryCallback* deliveryCallback) override {
     auto it = wtEgressStreams_.find(id);
     if (it == wtEgressStreams_.end()) {
       return folly::makeUnexpected(WebTransport::ErrorCode::INVALID_STREAM_ID);
     }
-    return it->second.writeStreamData(std::move(data), fin);
+    return it->second.writeStreamData(std::move(data), fin, deliveryCallback);
   }
   folly::Expected<folly::Unit, WebTransport::ErrorCode> resetStream(
       uint64_t id, uint32_t error) override {
@@ -190,7 +194,9 @@ class WebTransportImpl : public WebTransport {
     }
 
     folly::Expected<FCState, WebTransport::ErrorCode> writeStreamData(
-        std::unique_ptr<folly::IOBuf> data, bool fin) override;
+        std::unique_ptr<folly::IOBuf> data,
+        bool fin,
+        DeliveryCallback* deliveryCallback) override;
 
     folly::Expected<folly::Unit, WebTransport::ErrorCode> resetStream(
         uint32_t errorCode) override {
@@ -268,7 +274,8 @@ class WebTransportImpl : public WebTransport {
   folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>
   sendWebTransportStreamData(HTTPCodec::StreamID id,
                              std::unique_ptr<folly::IOBuf> data,
-                             bool eof);
+                             bool eof,
+                             DeliveryCallback* deliveryCallback);
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode> resetWebTransportEgress(
       HTTPCodec::StreamID id, uint32_t errorCode);

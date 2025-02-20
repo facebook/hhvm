@@ -70,7 +70,7 @@ TEST_F(QuicWebTransportTest, PeerBidiStream) {
   EXPECT_CALL(*handler_, onNewBidiStream(_))
       .WillOnce([this](WebTransport::BidiStreamHandle bidiHandle) {
         bidiHandle.writeHandle->writeStreamData(
-            folly::IOBuf::copyBuffer("hello"), true);
+            folly::IOBuf::copyBuffer("hello"), true, nullptr);
         bidiHandle.readHandle->awaitNextRead(
             &eventBase_,
             [](WebTransport::StreamReadHandle*,
@@ -121,7 +121,7 @@ TEST_F(QuicWebTransportTest, OnStopSending) {
   auto id = handle.value()->getID();
   socketDriver_.addStopSending(id, WT_ERROR_1);
   eventBase_.loopOnce();
-  auto res = handle.value()->writeStreamData(nullptr, true);
+  auto res = handle.value()->writeStreamData(nullptr, true, nullptr);
   EXPECT_TRUE(res.hasError());
   EXPECT_EQ(res.error(), WebTransport::ErrorCode::STOP_SENDING);
   EXPECT_EQ(*handle.value()->stopSendingErrorCode(), WT_ERROR_1);
@@ -145,7 +145,7 @@ TEST_F(QuicWebTransportTest, SetPriority) {
       *socketDriver_.getSocket(),
       setStreamPriority(handle.value()->getID(), quic::Priority(1, false, 1)));
   handle.value()->setPriority(1, 1, false);
-  handle.value()->writeStreamData(nullptr, true);
+  handle.value()->writeStreamData(nullptr, true, nullptr);
   eventBase_.loop();
 }
 

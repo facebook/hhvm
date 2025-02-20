@@ -82,8 +82,10 @@ void DeviousBaton::start() {
       wt_->closeSession(uint32_t(BatonSessionError::DA_YAMN));
     }
     auto id = handle.value()->getID();
-    wt_->writeStreamData(
-        id, makeBatonMessage(kStreamPadLen, baton), /*fin=*/true);
+    wt_->writeStreamData(id,
+                         makeBatonMessage(kStreamPadLen, baton),
+                         /*fin=*/true,
+                         /*deliveryCallback=*/nullptr);
   }
 }
 
@@ -226,8 +228,10 @@ DeviousBaton::onBatonMessage(uint64_t inStreamId,
       break;
     }
   }
-  wt_->writeStreamData(
-      outStreamId, makeBatonMessage(kStreamPadLen, baton + 1), /*fin=*/true);
+  wt_->writeStreamData(outStreamId,
+                       makeBatonMessage(kStreamPadLen, baton + 1),
+                       /*fin=*/true,
+                       /*deliveryCallback=*/nullptr);
   if (baton + 1 == 0) {
     return WhoFinished::SELF;
   }

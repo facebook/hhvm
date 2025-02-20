@@ -93,9 +93,11 @@ QuicWebTransport::newWebTransportUniStream() {
 }
 
 folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>
-QuicWebTransport::sendWebTransportStreamData(HTTPCodec::StreamID id,
-                                             std::unique_ptr<folly::IOBuf> data,
-                                             bool eof) {
+QuicWebTransport::sendWebTransportStreamData(
+    HTTPCodec::StreamID id,
+    std::unique_ptr<folly::IOBuf> data,
+    bool eof,
+    WebTransport::DeliveryCallback* /* deliveryCallback */) {
   XCHECK(quicSocket_);
   auto res = quicSocket_->writeChain(id, std::move(data), eof);
   if (!res) {

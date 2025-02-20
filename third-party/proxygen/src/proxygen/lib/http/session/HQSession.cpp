@@ -3862,7 +3862,10 @@ HQSession::HQStreamTransport::newWebTransportUniStream() {
 
 folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>
 HQSession::HQStreamTransport::sendWebTransportStreamData(
-    HTTPCodec::StreamID id, std::unique_ptr<folly::IOBuf> data, bool eof) {
+    HTTPCodec::StreamID id,
+    std::unique_ptr<folly::IOBuf> data,
+    bool eof,
+    WebTransport::DeliveryCallback* /* deliveryCallback */) {
   auto res = session_.sock_->writeChain(id, std::move(data), eof);
   if (res.hasError()) {
     LOG(ERROR) << "Failed to write WT stream data";

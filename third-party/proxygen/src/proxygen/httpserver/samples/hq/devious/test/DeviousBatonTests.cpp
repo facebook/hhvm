@@ -24,20 +24,23 @@ struct Message {
 folly::SemiFuture<Message> expectSendMessage(MockWebTransport& wt) {
   auto [promise, future] = folly::makePromiseContract<Message>();
 
-  EXPECT_CALL(wt, writeStreamData(_, _, _))
-      .WillOnce(
-          [&wt, promise = folly::MoveWrapper(std::move(promise))](
-              uint64_t id, std::unique_ptr<folly::IOBuf> data, bool eof) mutable
-          -> folly::Expected<proxygen::WebTransport::FCState,
-                             proxygen::WebTransport::ErrorCode> {
-            Message m;
-            m.id = id;
-            m.message = std::move(data);
-            promise->setValue(std::move(m));
-            EXPECT_TRUE(eof);
-            wt.cleanupStream(id);
-            return proxygen::WebTransport::FCState::UNBLOCKED;
-          })
+  EXPECT_CALL(wt, writeStreamData(_, _, _, _))
+      .WillOnce([&wt, promise = folly::MoveWrapper(std::move(promise))](
+                    uint64_t id,
+                    std::unique_ptr<folly::IOBuf> data,
+                    bool eof,
+                    proxygen::WebTransport::DeliveryCallback*
+                    /* deliveryCallback */) mutable
+                -> folly::Expected<proxygen::WebTransport::FCState,
+                                   proxygen::WebTransport::ErrorCode> {
+        Message m;
+        m.id = id;
+        m.message = std::move(data);
+        promise->setValue(std::move(m));
+        EXPECT_TRUE(eof);
+        wt.cleanupStream(id);
+        return proxygen::WebTransport::FCState::UNBLOCKED;
+      })
       .RetiresOnSaturation();
 
   return std::move(future);

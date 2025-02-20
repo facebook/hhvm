@@ -109,10 +109,13 @@ WebTransportImpl::StreamReadHandle* WebTransportImpl::onWebTransportUniStream(
 
 folly::Expected<WebTransportImpl::WebTransport::FCState,
                 WebTransport::ErrorCode>
-WebTransportImpl::sendWebTransportStreamData(HTTPCodec::StreamID id,
-                                             std::unique_ptr<folly::IOBuf> data,
-                                             bool eof) {
-  auto res = tp_.sendWebTransportStreamData(id, std::move(data), eof);
+WebTransportImpl::sendWebTransportStreamData(
+    HTTPCodec::StreamID id,
+    std::unique_ptr<folly::IOBuf> data,
+    bool eof,
+    DeliveryCallback* deliveryCallback) {
+  auto res = tp_.sendWebTransportStreamData(
+      id, std::move(data), eof, deliveryCallback);
   if (eof || res.hasError()) {
     wtEgressStreams_.erase(id);
   }
@@ -140,12 +143,15 @@ WebTransportImpl::stopReadingWebTransportIngress(
 
 folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>
 WebTransportImpl::StreamWriteHandle::writeStreamData(
-    std::unique_ptr<folly::IOBuf> data, bool fin) {
+    std::unique_ptr<folly::IOBuf> data,
+    bool fin,
+    DeliveryCallback* deliveryCallback) {
   if (stopSendingErrorCode_) {
     return folly::makeUnexpected(WebTransport::ErrorCode::STOP_SENDING);
   }
   impl_.sp_.refreshTimeout();
-  auto fcState = impl_.sendWebTransportStreamData(id_, std::move(data), fin);
+  auto fcState = impl_.sendWebTransportStreamData(
+      id_, std::move(data), fin, deliveryCallback);
   if (fcState.hasError()) {
     return folly::makeUnexpected(fcState.error());
   }

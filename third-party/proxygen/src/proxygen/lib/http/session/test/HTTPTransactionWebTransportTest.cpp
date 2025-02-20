@@ -135,9 +135,10 @@ TEST_F(HTTPTransactionWebTransportTest, CreateStreams) {
   EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
   auto res2 = wt_->createUniStream();
   EXPECT_TRUE(res2.hasValue());
-  EXPECT_CALL(transport_, sendWebTransportStreamData(1, testing::_, true))
+  EXPECT_CALL(transport_,
+              sendWebTransportStreamData(1, testing::_, true, nullptr))
       .WillOnce(Return(WTFCState::UNBLOCKED));
-  res2.value()->writeStreamData(nullptr, true);
+  res2.value()->writeStreamData(nullptr, true, nullptr);
   // Try creating streams but fail at transport
   EXPECT_CALL(transport_, newWebTransportBidiStream())
       .WillOnce(Return(folly::makeUnexpected(
@@ -286,10 +287,11 @@ TEST_F(HTTPTransactionWebTransportTest, WriteFails) {
   EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
   auto res = wt_->createUniStream();
   EXPECT_TRUE(res.hasValue());
-  EXPECT_CALL(transport_, sendWebTransportStreamData(1, testing::_, false))
+  EXPECT_CALL(transport_,
+              sendWebTransportStreamData(1, testing::_, false, nullptr))
       .WillOnce(
           Return(folly::makeUnexpected(WebTransport::ErrorCode::SEND_ERROR)));
-  EXPECT_EQ(res.value()->writeStreamData(makeBuf(10), false).error(),
+  EXPECT_EQ(res.value()->writeStreamData(makeBuf(10), false, nullptr).error(),
             WebTransport::ErrorCode::SEND_ERROR);
 }
 
@@ -301,9 +303,10 @@ TEST_F(HTTPTransactionWebTransportTest, WriteStreamPauseStopSending) {
   // Block write, then resume
   bool ready = false;
   quic::StreamWriteCallback* wcb{nullptr};
-  EXPECT_CALL(transport_, sendWebTransportStreamData(1, testing::_, false))
+  EXPECT_CALL(transport_,
+              sendWebTransportStreamData(1, testing::_, false, nullptr))
       .WillOnce(Return(WTFCState::BLOCKED));
-  auto res = writeHandle.value()->writeStreamData(makeBuf(10), false);
+  auto res = writeHandle.value()->writeStreamData(makeBuf(10), false, nullptr);
   EXPECT_TRUE(res.hasValue());
   EXPECT_CALL(transport_, notifyPendingWriteOnStream(1, testing::_))
       .WillOnce(DoAll(SaveArg<1>(&wcb), Return(folly::unit)));
@@ -322,9 +325,10 @@ TEST_F(HTTPTransactionWebTransportTest, WriteStreamPauseStopSending) {
 
   // Block write/stop sending
   ready = false;
-  EXPECT_CALL(transport_, sendWebTransportStreamData(1, testing::_, false))
+  EXPECT_CALL(transport_,
+              sendWebTransportStreamData(1, testing::_, false, nullptr))
       .WillOnce(Return(WTFCState::BLOCKED));
-  auto res2 = writeHandle.value()->writeStreamData(makeBuf(10), false);
+  auto res2 = writeHandle.value()->writeStreamData(makeBuf(10), false, nullptr);
   EXPECT_TRUE(res2.hasValue());
   EXPECT_CALL(transport_, notifyPendingWriteOnStream(1, testing::_))
       .WillOnce(DoAll(SaveArg<1>(&wcb), Return(folly::unit)));
@@ -421,7 +425,8 @@ TEST_F(HTTPTransactionWebTransportTest, BidiStreamEdgeCases) {
         EXPECT_EQ(*streamHandle.writeHandle->stopSendingErrorCode(),
                   WT_APP_ERROR_2);
         // attempt to write, will error, but don't reset the stream
-        auto res = streamHandle.writeHandle->writeStreamData(makeBuf(10), true);
+        auto res = streamHandle.writeHandle->writeStreamData(
+            makeBuf(10), true, nullptr);
         EXPECT_TRUE(res.hasError());
         EXPECT_EQ(res.error(), WebTransport::ErrorCode::STOP_SENDING);
       });
@@ -515,9 +520,10 @@ TEST_F(HTTPTransactionWebTransportTest, StreamIDAPIs) {
   wt_->stopSending(id, WT_APP_ERROR_1);
 
   // write by ID
-  EXPECT_CALL(transport_, sendWebTransportStreamData(id, testing::_, false))
+  EXPECT_CALL(transport_,
+              sendWebTransportStreamData(id, testing::_, false, nullptr))
       .WillOnce(Return(WTFCState::UNBLOCKED));
-  auto res2 = wt_->writeStreamData(id, makeBuf(10), false);
+  auto res2 = wt_->writeStreamData(id, makeBuf(10), false, nullptr);
   EXPECT_TRUE(res2.hasValue());
 
   // resetStream by ID
@@ -534,7 +540,7 @@ TEST_F(HTTPTransactionWebTransportTest, InvalidStreamIDAPIs) {
             WebTransport::ErrorCode::INVALID_STREAM_ID);
   EXPECT_EQ(wt_->readStreamData(id).error(),
             WebTransport::ErrorCode::INVALID_STREAM_ID);
-  EXPECT_EQ(wt_->writeStreamData(id, makeBuf(10), false).error(),
+  EXPECT_EQ(wt_->writeStreamData(id, makeBuf(10), false, nullptr).error(),
             WebTransport::ErrorCode::INVALID_STREAM_ID);
 }
 

@@ -2251,17 +2251,17 @@ TEST_P(HQUpstreamSessionTestWebTransport, BidirectionalStream) {
   auto stream = wt_->createBidiStream().value();
   auto id = stream.readHandle->getID();
   // small write
-  stream.writeHandle->writeStreamData(makeBuf(10), false);
+  stream.writeHandle->writeStreamData(makeBuf(10), false, nullptr);
   eventBase_.loopOnce();
 
   // shrink the fcw to force it to block
   socketDriver_->setStreamFlowControlWindow(id, 100);
   bool writeComplete = false;
-  stream.writeHandle->writeStreamData(makeBuf(65536), false);
+  stream.writeHandle->writeStreamData(makeBuf(65536), false, nullptr);
   stream.writeHandle->awaitWritable().value().via(&eventBase_).then([&](auto) {
     VLOG(4) << "big write complete";
     // after it completes, write FIN
-    stream.writeHandle->writeStreamData(nullptr, true);
+    stream.writeHandle->writeStreamData(nullptr, true, nullptr);
 #if 0
         stream.writeHandle
             .value()

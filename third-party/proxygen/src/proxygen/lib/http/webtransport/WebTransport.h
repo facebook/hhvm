@@ -152,6 +152,16 @@ class WebTransport {
         uint32_t error) = 0;
   };
 
+  class DeliveryCallback {
+   public:
+    virtual ~DeliveryCallback() = default;
+
+    virtual void onDelivery(uint64_t streamId, uint32_t offset) noexcept = 0;
+
+    virtual void onDeliveryCancelled(uint64_t streamId,
+                                     uint32_t offset) noexcept = 0;
+  };
+
   enum class FCState { BLOCKED, UNBLOCKED };
   // Handle for write streams
   class StreamWriteHandle : public StreamHandleBase {
@@ -170,7 +180,9 @@ class WebTransport {
     // fail with a WebTransport::Exception with the stopSendingErrorCode.
     // After the cancellation callback, the StreamWriteHandle is invalid.
     virtual folly::Expected<FCState, ErrorCode> writeStreamData(
-        std::unique_ptr<folly::IOBuf> data, bool fin) = 0;
+        std::unique_ptr<folly::IOBuf> data,
+        bool fin,
+        DeliveryCallback* deliveryCallback) = 0;
 
     // Reset the stream with the given error
     virtual folly::Expected<folly::Unit, ErrorCode> resetStream(
@@ -224,7 +236,10 @@ class WebTransport {
                           WebTransport::ErrorCode>
   readStreamData(uint64_t id) = 0;
   virtual folly::Expected<FCState, ErrorCode> writeStreamData(
-      uint64_t id, std::unique_ptr<folly::IOBuf> data, bool fin) = 0;
+      uint64_t id,
+      std::unique_ptr<folly::IOBuf> data,
+      bool fin,
+      DeliveryCallback* deliveryCallback) = 0;
   virtual folly::Expected<folly::Unit, ErrorCode> resetStream(
       uint64_t streamId, uint32_t error) = 0;
   virtual folly::Expected<folly::Unit, ErrorCode> setPriority(

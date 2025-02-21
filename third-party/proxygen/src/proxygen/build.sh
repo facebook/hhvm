@@ -20,11 +20,18 @@ COLOR_OFF="\033[0m"
 function detect_platform() {
   unameOut="$(uname -s)"
   case "${unameOut}" in
-      Linux*)     PLATFORM=Linux; DISTRO="$(lsb_release -is)";;
+      Linux*)
+        PLATFORM=Linux
+        if [ -x "$(command -v lsb_release)" ]; then
+          DISTRO="$(lsb_release -is)"
+        else
+          DISTRO="CentOS"
+        fi
+        ;;
       Darwin*)    PLATFORM=Mac;;
       *)          PLATFORM="UNKNOWN:${unameOut}"
   esac
-  echo -e "${COLOR_GREEN}Detected platform: $PLATFORM ${COLOR_OFF}"
+  echo -e "${COLOR_GREEN}Detected platform: $PLATFORM  Distribution $DISTRO ${COLOR_OFF}"
 }
 
 function install_dependencies_linux_default() {
@@ -83,6 +90,38 @@ function install_dependencies_linux_fedora() {
     gperf
 }
 
+function install_dependencies_linux_centos() {
+  sudo dnf install -y \
+    $deps_universal \
+    m4 \
+    g++ \
+    flex \
+    bison \
+    fast_float-devel \
+    gflags-devel \
+    glog-devel \
+    krb5-libs \
+    double-conversion-devel \
+    libzstd-devel \
+    libsodium-devel \
+    binutils-devel \
+    zlib-devel \
+    make \
+    lz4-devel \
+    wget \
+    unzip \
+    snappy-devel \
+    jemalloc-devel \
+    boost-devel\
+    cyrus-sasl-devel \
+    numactl-libs \
+    openssl-devel \
+    libcap-devel \
+    libevent-devel \
+    libtool \
+    gperf
+}
+
 function install_dependencies_linux {
   deps_universal="\
     git \
@@ -98,6 +137,7 @@ function install_dependencies_linux {
 
   case "$DISTRO" in
       Fedora*)    install_dependencies_linux_fedora;;
+      CentOS*)    install_dependencies_linux_centos;;
       *)          install_dependencies_linux_default;;
   esac
 }
@@ -405,7 +445,10 @@ INSTALL_DEPENDENCIES=true
 FETCH_DEPENDENCIES=true
 PREFIX=""
 COMPILER_FLAGS=""
-USAGE="./build.sh [-j num_jobs] [-m|--no-jemalloc] [--no-install-dependencies] [-p|--prefix] [-x|--compiler-flags] [--no-fetch-dependencies]"
+PROXY_SERVER_HOST=""
+PROXY_SERVER_PORT="8080"
+
+USAGE="./build.sh [-j num_jobs] [-m|--no-jemalloc] [--no-install-dependencies] [-p|--prefix] [-x|--compiler-flags] [--no-fetch-dependencies] [--proxy_server_host] [--proxy_server_port]"
 while [ "$1" != "" ]; do
   case $1 in
     -j | --jobs ) shift
@@ -433,6 +476,14 @@ while [ "$1" != "" ]; do
     -x | --compiler-flags )
                   shift
                   COMPILER_FLAGS=$1
+      ;;
+    --proxy_server_host )
+                  shift
+                  PROXY_SERVER_HOST=$1
+      ;;
+    --proxy_server_port )
+                  shift
+                  PROXY_SERVER_PORT=$1
       ;;
     * )           echo $USAGE
                   exit 1
@@ -464,6 +515,10 @@ mkdir -p "$DEPS_DIR"
 # Must execute from the directory containing this script
 cd "$(dirname "$0")"
 
+if [ -n "$PROXY_SERVER_HOST" ]; then
+    export https_proxy=http://$PROXY_SERVER_HOST:$PROXY_SERVER_PORT
+    export http_proxy=http://$PROXY_SERVER_HOST:$PROXY_SERVER_PORT
+fi
 setup_fmt
 setup_googletest
 setup_zstd

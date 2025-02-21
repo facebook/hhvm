@@ -17,6 +17,7 @@
 #include <folly/Overload.h>
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Patch.h>
+#include <thrift/lib/cpp2/protocol/detail/Object.h>
 #include <thrift/lib/thrift/detail/DynamicPatch.h>
 #include <thrift/lib/thrift/gen-cpp2/any_patch_types.h>
 
@@ -1519,4 +1520,24 @@ void DynamicPatch::fromAny(detail::Badge, const type::AnyStruct& any) {
   auto v = protocol::detail::parseValueFromAny(any);
   fromObject(badge, std::move(v.as_object()));
 }
+
+template <typename Protocol>
+std::uint32_t DynamicPatch::encode(Protocol& prot) const {
+  // TODO(dokwon): Provide direct encode from DynamicPatch.
+  return protocol::detail::serializeObject(prot, toObject());
+}
+
+template <typename Protocol>
+void DynamicPatch::decode(Protocol& prot) {
+  // TODO(dokwon): Provide direct decode to DynamicPatch.
+  fromObject(badge, protocol::parseObject(prot));
+}
+
+template std::uint32_t DynamicPatch::encode(
+    apache::thrift::BinaryProtocolWriter&) const;
+template std::uint32_t DynamicPatch::encode(
+    apache::thrift::CompactProtocolWriter&) const;
+template void DynamicPatch::decode(apache::thrift::BinaryProtocolReader&);
+template void DynamicPatch::decode(apache::thrift::CompactProtocolReader&);
+
 } // namespace apache::thrift::protocol

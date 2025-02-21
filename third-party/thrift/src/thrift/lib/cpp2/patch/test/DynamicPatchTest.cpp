@@ -19,6 +19,7 @@
 #include <thrift/lib/cpp2/patch/detail/PatchBadge.h>
 #include <thrift/lib/cpp2/patch/test/gen-cpp2/gen_patch_DynamicPatchTest_types.h>
 #include <thrift/lib/cpp2/patch/test/gen-cpp2/gen_patch_OldTerseWrite_types.h>
+#include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/thrift/gen-cpp2/any_patch_types.h>
 
@@ -90,6 +91,19 @@ TYPED_TEST(DynamicPatchesTest, Clear) {
   EXPECT_EQ(obj.at(static_cast<FieldId>(op::PatchOp::Clear)).as_bool(), true);
 }
 
+DynamicPatch roundTrip(const DynamicPatch& patch) {
+  folly::IOBufQueue queue;
+  apache::thrift::CompactProtocolWriter writer;
+  writer.setOutput(&queue);
+  patch.encode(writer);
+  auto buf = queue.move();
+  apache::thrift::CompactProtocolReader reader;
+  reader.setInput(buf.get());
+  DynamicPatch ret;
+  ret.decode(reader);
+  return ret;
+}
+
 template <class Tag, class PatchType, class T = type::native_type<Tag>>
 void testOneWay(T src, T dst) {
   Value v1 = asValueStruct<Tag>(src);
@@ -100,6 +114,9 @@ void testOneWay(T src, T dst) {
   EXPECT_TRUE(patch.holds_alternative<PatchType>(badge));
   auto other =
       detail::createPatchFromObject<PatchType>(badge, patch.toObject());
+  EXPECT_EQ(other.toObject(), patch.toObject());
+  EXPECT_EQ(patch.empty(), src == dst);
+  auto other2 = roundTrip(patch);
   EXPECT_EQ(other.toObject(), patch.toObject());
   EXPECT_EQ(patch.empty(), src == dst);
 }

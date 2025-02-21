@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/type-profile.h"
 
 #include "hphp/util/alloc.h"
+#include "hphp/util/build-info.h"
 #include "hphp/util/configs/codecache.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/job-queue.h"
@@ -378,6 +379,46 @@ bool mayEnqueueAsyncTranslateRequest(const SrcKey& sk) {
   }
   return false;
 }
+
+void logImpl(StructuredLogEntry& ent, const Func* f) {
+  ent.setStr("repo_schema", repoSchemaId());
+  ent.setStr("file", f->unit()->filepath()->slice());
+  ent.setStr("function_name", f->fullName()->slice());
+  ent.setInt("did_jumpstart", didDeserializeSBProfData());
+  if (auto const cls = f->cls()) ent.setStr("class_name", cls->name()->slice());
+}
+
+void log(const Func* f, int nPassed) {
+  if (!Cfg::Eval::DumpJitProfileStats) return;
+
+  StructuredLogEntry ent;
+  logImpl(ent, f);
+  ent.setStr("kind", "prologue");
+  ent.setInt("num_passed", nPassed);
+  StructuredLog::log("hhvm_async_jit", ent);
+}
+
+void log(const RegionContext& ctx) {
+  if (!Cfg::Eval::DumpJitProfileStats) return;
+
+  StructuredLogEntry ent;
+  logImpl(ent, ctx.sk.func());
+  ent.setStr("kind", "region");
+  ent.setInt("line", ctx.sk.lineNumber());
+  ent.setInt("has_this", ctx.sk.hasThis());
+  ent.setStr("resume_mode", resumeModeShortName(ctx.sk.resumeMode()));
+  ent.setInt("func_entry", ctx.sk.funcEntry());
+  ent.setInt("offset", ctx.sk.offset());
+  ent.setInt("hash", ctx.sk.stableHash());
+  if (ctx.sk.funcEntry()) {
+    ent.setInt("entry_offset", ctx.sk.entryOffset());
+    ent.setInt("entry_num_args", ctx.sk.numEntryArgs());
+  }
+  ent.setInt("num_live", ctx.liveTypes.size());
+  ent.setInt("stack_offset", ctx.spOffset.offset);
+  StructuredLog::log("hhvm_async_jit", ent);
+}
+
 }
 
 void enqueueAsyncTranslateRequest(const RegionContext& ctx,
@@ -392,6 +433,7 @@ void enqueueAsyncTranslateRequest(const RegionContext& ctx,
       AsyncRegionTranslationContext {ctx, currNumTranslations}
     );
     FTRACE(2, "Enqueued sk {} for jitting\n", show(ctx.sk));
+    log(ctx);
   }
 }
 
@@ -414,6 +456,7 @@ void enqueueAsyncPrologueRequestImpl(Func* func, int nPassed) {
 
 void enqueueAsyncPrologueRequest(Func* func, int nPassed) {
   enqueueAsyncPrologueRequestImpl<false>(func, nPassed);
+  log(func, nPassed);
 }
 
 void enqueueAsyncPrologueRequestForJumpstart(Func* func, int nPassed) {

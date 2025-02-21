@@ -1049,6 +1049,55 @@ void merge_loaded_units(int numWorkers) {
   }
 }
 
+void log(const ProfDataSBDeser* pd,
+         const std::string& root,
+         const char* error = nullptr,
+         Optional<SrcKey> sk = std::nullopt) {
+  if (!Cfg::Eval::DumpJitProfileStats) return;
+
+  StructuredLogEntry ent;
+  ent.force_init = true;
+  ent.setStr("root", root);
+  ent.setStr("file", pd->m_unit->filepath()->slice());
+  ent.setStr("repo_schema", repoSchemaId());
+  ent.setStr("function_name", pd->m_funcName->slice());
+
+  if (auto cls = pd->m_clsName) {
+    ent.setStr("class_name", cls->slice());
+  }
+
+  if (sk) {
+    ent.setInt("line", sk->lineNumber());
+    ent.setInt("has_this", sk->hasThis());
+    ent.setStr("resume_mode", resumeModeShortName(sk->resumeMode()));
+    ent.setInt("func_entry", sk->funcEntry());
+    ent.setInt("offset", sk->offset());
+    ent.setInt("hash", sk->stableHash());
+    if (sk->funcEntry()) {
+      ent.setInt("entry_offset", sk->entryOffset());
+      ent.setInt("entry_num_args", sk->numEntryArgs());
+    }
+  }
+
+  if (error) ent.setStr("error", error);
+
+  switch (pd->m_kind) {
+  case ProfDataSBKind::Prologue:
+    ent.setStr("kind", "prologue");
+    ent.setInt("num_args",
+               static_cast<const ProfDataSBPrologueDeser*>(pd)->m_nPassed);
+    break;
+  case ProfDataSBKind::Region:
+    ent.setStr("kind", "region");
+    auto rd = static_cast<const ProfDataSBRegionDeser*>(pd);
+    ent.setInt("num_live", rd->m_liveProfTypes.size());
+    ent.setInt("stack_offset", rd->m_spOffset.offset);
+    break;
+  }
+
+  StructuredLog::log("hhvm_sb_jumpstart", ent);
+}
+
 void merge_and_enqueue_for_jit(const std::string& root, int numWorkers) {
   BootStats::Block timer("DES_merge_and_enqueue_for_jit",
                          Cfg::Server::Mode);
@@ -1089,8 +1138,8 @@ void merge_and_enqueue_for_jit(const std::string& root, int numWorkers) {
             if (begin >= end) break;
             auto pdCount = end - begin;
             for (auto i = size_t{0}; i < pdCount; ++i) {
+              auto const pd = pds[begin + i].get();
               try {
-                auto const pd = pds[begin + i].get();
                 auto unit = pd->m_unit;
                 always_assert(unit);
                 unit->merge();
@@ -1102,6 +1151,7 @@ void merge_and_enqueue_for_jit(const std::string& root, int numWorkers) {
                         Trace::ftraceRelease("Failed to load class {}\n",
                                              pd->m_clsName->data());
                       }
+                      log(pd, root, "class not found");
                       return nullptr;
                     }
                     auto const meth = cls->lookupMethod(pd->m_funcName);
@@ -1111,6 +1161,7 @@ void merge_and_enqueue_for_jit(const std::string& root, int numWorkers) {
                                              pd->m_clsName->data(),
                                              pd->m_funcName->data());
                       }
+                      log(pd, root, "method not found");
                       return nullptr;
                     }
                     always_assert(meth->cls() == cls);
@@ -1122,6 +1173,7 @@ void merge_and_enqueue_for_jit(const std::string& root, int numWorkers) {
                         Trace::ftraceRelease("Failed to load func {}\n",
                                              pd->m_funcName->data());
                       }
+                      log(pd, root, "function not found");
                     }
                     return f;
                   }
@@ -1139,6 +1191,7 @@ void merge_and_enqueue_for_jit(const std::string& root, int numWorkers) {
                   // already an ongoing prologue traslation request for the same
                   // function, no need to retry it.
                   mcgen::enqueueAsyncPrologueRequestForJumpstart(func, nPassed);
+                  log(pd, root, nullptr);
                 } else {
                   auto pdr = static_cast<ProfDataSBRegionDeser*>(pd);
                   auto const funcId = func->getFuncId();
@@ -1152,12 +1205,14 @@ void merge_and_enqueue_for_jit(const std::string& root, int numWorkers) {
                     ctx.liveTypes.emplace_back(pt.location, t);
                   }
                   mcgen::enqueueAsyncTranslateRequestForJumpstart(ctx);
+                  log(pd, root, nullptr, sk);
                 }
               } catch (const Exception& e) {
                 if (Trace::moduleEnabledRelease(Trace::prof_sb, 1)) {
                   Trace::ftraceRelease("Merging and jitting failed {}\n",
                     e.what());
                 }
+                log(pd, root, e.what());
                 // silently ignore this profile data
               }
             }
@@ -2416,6 +2471,8 @@ std::string deserializeSBProfData(const std::string& root,
     return folly::sformat("Deser failed {}: {}\n", profFileName, err.what());
   }
 }
+
+bool didDeserializeSBProfData() { return s_sbDeserDone.test(); }
 
 //////////////////////////////////////////////////////////////////////
 } }

@@ -280,5 +280,7 @@ bool serializeOptProfEnabled();
 // Get the name of the file deserialized if any.
 Optional<std::string> getFilenameDeserialized();
 
+bool didDeserializeSBProfData();
+
 //////////////////////////////////////////////////////////////////////
 } }

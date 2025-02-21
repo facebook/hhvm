@@ -405,7 +405,7 @@ void speculateTargetFunction(IRGS& env, SSATmp* callee,
   const Func* profiledFunc = choices[attempts].func;
   double probability = choices[attempts].probability / remainingProb;
   // Don't emit the check if the probability of it succeeding is below the
-  // threshold.  
+  // threshold.
   if (probability * 100 < Cfg::Jit::PGOCalledFuncCheckThreshold) {
     return indirectCall();
   }
@@ -457,7 +457,7 @@ void callProfiledFunc(IRGS& env, SSATmp* callee,
     );
   }
 
-  speculateTargetFunction(env, callee, callKnown, callUnknown, data.choose(), 
+  speculateTargetFunction(env, callee, callKnown, callUnknown, data.choose(),
                           0, Cfg::Jit::PGOCalledFuncCheckNumSpeculations);
 }
 
@@ -2123,6 +2123,8 @@ void fcallClsMethodCommon(IRGS& env,
 
     auto const ctx = forward ? ldCtxCls(env) : clsVal;
     decRef(env, methVal);
+    // For dynamic methods such as $c::$foo(), numExtraInputs describes the
+    // number of stack values representing the callee that need to be discarded.
     discard(env, numExtraInputs);
     if (noCallProfiling) {
       prepareAndCallUnknown(env, func, fca, ctx,

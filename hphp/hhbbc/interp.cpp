@@ -2411,12 +2411,28 @@ void in(ISS& env, const bc::ClassGetC& op) {
 }
 
 void in(ISS& env, const bc::ClassGetTS& op) {
-  // TODO(T31677864): implement real optimizations
   auto const ts = popC(env);
   if (!ts.couldBe(BDict)) {
     push(env, TBottom);
     push(env, TBottom);
     return;
+  }
+
+  auto const a = tv(ts);
+  if (a && isValidTSType(*a, false)) {
+    // HackC emits CombineAndResolveTypeStruct before this so assume resolved
+    auto const ts_arr = a->m_data.parr;
+    if (auto const name = type_structure_name(ts_arr)) {
+      if (auto const rcls = env.index.resolve_class(name)) {
+        push(env, clsExact(*rcls, true));
+        if (auto const rg = get_ts_generic_types_opt(ts_arr)) {
+          push(env, vec_val(rg));
+        } else {
+          push(env, TInitNull);
+        }
+        return;
+      }
+    }
   }
 
   push(env, TCls);
@@ -3902,6 +3918,11 @@ void fcallKnownImpl(
     return;
   }
 
+  // For dynamic methods such as $c::$foo(), $o->$foo(), and similar,
+  // numExtraInputs describes the number of stack values representing the callee
+  // that need to be discarded e.g. when folding by emitting PopC or just for
+  // type analysis.
+  // See also: extraInput bools, extraStk in the interpreter
   for (auto i = uint32_t{0}; i < numExtraInputs; ++i) popC(env);
   if (fca.hasGenerics()) popC(env);
   if (fca.hasUnpack()) popC(env);

@@ -36,6 +36,7 @@ ProfDataSBSer::ProfDataSBSer(const Func* func, ProfDataSBKind k)
     auto const unit = cls->preClass()->unit();
     m_unitPath = unit->origFilepath();
     m_clsName = cls->preClass()->name();
+    if (func->isClosureBody() && func->cls()) m_context = func->cls()->name();
   } else {
     auto const unit = func->unit();
     m_unitPath = unit->origFilepath();
@@ -69,20 +70,22 @@ ProfDataSBPrologueSer::ProfDataSBPrologueSer(const Func* func, int nPassed)
 {}
 
 ProfDataSBDeser::ProfDataSBDeser(Unit* unit, const StringData* funcName,
-                                 const StringData* clsName, ProfDataSBKind k)
+                                 const StringData* clsName,
+                                 const StringData* context, ProfDataSBKind k)
   : m_kind(k)
   , m_unit(unit)
   , m_funcName(funcName)
   , m_clsName(clsName)
+  , m_context(context)
 {}
 
 ProfDataSBRegionDeser::
 ProfDataSBRegionDeser(Unit* unit,
                       const StringData* funcName, const StringData* clsName,
-                      uint32_t offsetAndMode,
+                      const StringData* context, uint32_t offsetAndMode,
                       const std::vector<SBProfTypedLocation>& liveProfTypes,
                       SBInvOffset spOffset)
-  : ProfDataSBDeser(unit, funcName, clsName, ProfDataSBKind::Region)
+  : ProfDataSBDeser(unit, funcName, clsName, context, ProfDataSBKind::Region)
   , m_offsetAndMode(offsetAndMode)
   , m_liveProfTypes(liveProfTypes)
   , m_spOffset(spOffset)
@@ -91,8 +94,8 @@ ProfDataSBRegionDeser(Unit* unit,
 ProfDataSBPrologueDeser::
 ProfDataSBPrologueDeser(Unit* unit,
                         const StringData* funcName, const StringData* clsName,
-                        int nPassed)
-  : ProfDataSBDeser(unit, funcName, clsName, ProfDataSBKind::Prologue)
+                        const StringData* context, int nPassed)
+  : ProfDataSBDeser(unit, funcName, clsName, context, ProfDataSBKind::Prologue)
   , m_nPassed(nPassed)
 {}
 

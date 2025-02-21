@@ -1098,6 +1098,54 @@ void log(const ProfDataSBDeser* pd,
   StructuredLog::log("hhvm_sb_jumpstart", ent);
 }
 
+Func* findFunc(ProfDataSBDeser* pd, const std::string& root) {
+  if (!pd->m_clsName) {
+    if (auto const f = Func::lookup(pd->m_funcName)) return f;
+    pd->m_unit->merge();
+    if (auto const f = Func::lookup(pd->m_funcName)) return f;
+
+    if (Trace::moduleEnabledRelease(Trace::prof_sb, 1)) {
+      Trace::ftraceRelease("Failed to load func {}\n",
+                           pd->m_funcName->data());
+    }
+    log(pd, root, "function not found");
+    return nullptr;
+  }
+
+  auto const cls = [&] () -> Class* {
+    auto pcls = pd->m_unit->lookupPreClass(pd->m_clsName);
+    if (!pcls) return nullptr;
+
+    if (pcls->parent() == c_Closure::classof()->name()) {
+      auto const ctx = pd->m_context ? Class::load(pd->m_context) : nullptr;
+      auto const ccls = Class::defClosure(pcls, true);
+      return ccls->rescope(ctx);
+    }
+    if (auto const c = Class::lookup(pd->m_clsName)) return c;
+    pd->m_unit->merge();
+    return Class::lookup(pd->m_clsName);
+  }();
+
+  if (!cls) {
+    if (Trace::moduleEnabledRelease(Trace::prof_sb, 1)) {
+      Trace::ftraceRelease("Failed to load class {}\n",
+                           pd->m_clsName->data());
+    }
+    log(pd, root, "class not found");
+    return nullptr;
+  }
+
+  if (auto const m = cls->lookupMethod(pd->m_funcName)) return m;
+
+  if (Trace::moduleEnabledRelease(Trace::prof_sb, 1)) {
+    Trace::ftraceRelease("Failed to load meth {}::{}\n",
+                         pd->m_clsName->data(),
+                         pd->m_funcName->data());
+  }
+  log(pd, root, "method not found");
+  return nullptr;
+}
+
 void merge_and_enqueue_for_jit(const std::string& root, int numWorkers) {
   BootStats::Block timer("DES_merge_and_enqueue_for_jit",
                          Cfg::Server::Mode);
@@ -1140,44 +1188,7 @@ void merge_and_enqueue_for_jit(const std::string& root, int numWorkers) {
             for (auto i = size_t{0}; i < pdCount; ++i) {
               auto const pd = pds[begin + i].get();
               try {
-                auto unit = pd->m_unit;
-                always_assert(unit);
-                unit->merge();
-                auto const func = [&]() -> Func* {
-                  if (pd->m_clsName) {
-                    auto const cls = Class::lookup(pd->m_clsName);
-                    if (!cls) {
-                      if (Trace::moduleEnabledRelease(Trace::prof_sb, 1)) {
-                        Trace::ftraceRelease("Failed to load class {}\n",
-                                             pd->m_clsName->data());
-                      }
-                      log(pd, root, "class not found");
-                      return nullptr;
-                    }
-                    auto const meth = cls->lookupMethod(pd->m_funcName);
-                    if (!meth) {
-                      if (Trace::moduleEnabledRelease(Trace::prof_sb, 1)) {
-                        Trace::ftraceRelease("Failed to load meth {}::{}\n",
-                                             pd->m_clsName->data(),
-                                             pd->m_funcName->data());
-                      }
-                      log(pd, root, "method not found");
-                      return nullptr;
-                    }
-                    always_assert(meth->cls() == cls);
-                    return meth;
-                  } else {
-                    auto const f = Func::lookup(pd->m_funcName);
-                    if (!f) {
-                      if (Trace::moduleEnabledRelease(Trace::prof_sb, 1)) {
-                        Trace::ftraceRelease("Failed to load func {}\n",
-                                             pd->m_funcName->data());
-                      }
-                      log(pd, root, "function not found");
-                    }
-                    return f;
-                  }
-                }();
+                auto const func = findFunc(pd, root);
                 if (!func) continue;
                 if (Cfg::Debugger::EnableVSDebugger &&
                     Cfg::Eval::EmitDebuggerIntrCheck) {
@@ -1257,7 +1268,11 @@ void write_sb_prof_data(ProfDataSerializer& ser,
   }
   write_raw(ser, pd->m_bcUnitSha1);
   write_raw_string(ser, pd->m_funcName);
-  if (pd->m_clsName) {
+  if (pd->m_context) {
+    write_raw(ser, 2);
+    write_raw_string(ser, pd->m_clsName);
+    write_raw_string(ser, pd->m_context);
+  } else if (pd->m_clsName) {
     write_raw(ser, 1);
     write_raw_string(ser, pd->m_clsName);
   } else {
@@ -1301,12 +1316,14 @@ void read_sb_prof_data(ProfDataDeserializer& des,
   auto const funcName = read_raw_string(des);
   auto const hasClsName = read_raw<int>(des);
   auto const clsName = hasClsName ? read_raw_string(des) : nullptr;
+  auto const ctx = hasClsName > 1 ? read_raw_string(des) : nullptr;
 
   if (kind == ProfDataSBKind::Prologue) {
     auto nPassed = read_raw<int>(des);
     if (shouldDeser) {
       auto pd =
-        std::make_unique<ProfDataSBPrologueDeser>(unit, funcName, clsName, nPassed);
+        std::make_unique<ProfDataSBPrologueDeser>(unit, funcName, clsName,
+                                                  ctx, nPassed);
       pds.push_back(std::move(pd));
     }
   } else {
@@ -1319,7 +1336,7 @@ void read_sb_prof_data(ProfDataDeserializer& des,
     auto spOffset = read_raw<SBInvOffset>(des);
     if (shouldDeser) {
       auto pd = std::make_unique<ProfDataSBRegionDeser>(
-        unit, funcName, clsName, offsetAndMode, typedLocations,spOffset
+        unit, funcName, clsName, ctx, offsetAndMode, typedLocations,spOffset
       );
       pds.push_back(std::move(pd));
     }

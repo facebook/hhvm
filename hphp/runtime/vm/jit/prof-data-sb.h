@@ -64,6 +64,7 @@ struct ProfDataSBSer {
   SHA1 m_bcUnitSha1 {0};
   const StringData* m_funcName;
   const StringData* m_clsName {nullptr};
+  const StringData* m_context {nullptr};
 };
 
 struct ProfDataSBRegionSer : ProfDataSBSer {
@@ -80,18 +81,20 @@ struct ProfDataSBPrologueSer : ProfDataSBSer {
 
 struct ProfDataSBDeser {
   ProfDataSBDeser(Unit* unit, const StringData* funcName,
-                  const StringData* clsName, ProfDataSBKind);
+                  const StringData* clsName, const StringData* context,
+                  ProfDataSBKind);
   virtual ~ProfDataSBDeser() = default;
   ProfDataSBKind m_kind;
   Unit* m_unit;
   const StringData* m_funcName;
   const StringData* m_clsName {nullptr};
+  const StringData* m_context {nullptr};
 };
 
 struct ProfDataSBRegionDeser : ProfDataSBDeser {
   ProfDataSBRegionDeser(Unit* unit,
                         const StringData* funcName, const StringData* clsName,
-                        uint32_t offsetAndMode,
+                        const StringData* context, uint32_t offsetAndMode,
                         const std::vector<SBProfTypedLocation>& liveProfTypes,
                         SBInvOffset sbOffset);
   uint32_t m_offsetAndMode;
@@ -101,7 +104,8 @@ struct ProfDataSBRegionDeser : ProfDataSBDeser {
 
 struct ProfDataSBPrologueDeser : ProfDataSBDeser {
   ProfDataSBPrologueDeser(Unit* unit, const StringData* funcName,
-                          const StringData* clsName, int nPassed);
+                          const StringData* clsName, const StringData* context,
+                          int nPassed);
   int m_nPassed;
 };
 

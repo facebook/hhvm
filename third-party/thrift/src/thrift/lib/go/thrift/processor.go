@@ -132,7 +132,7 @@ func process(ctx context.Context, processor Processor, prot Protocol) (ext types
 	}
 
 	// Step 1c: Use Protocol interface to retrieve headers.
-	ctx = WithHeaders(ctx, prot.GetResponseHeaders())
+	ctx = WithHeaders(ctx, prot.getResponseHeaders())
 
 	// Step 2: Processing the message without using the Protocol.
 	var result types.WritableStruct

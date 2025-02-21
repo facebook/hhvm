@@ -76,7 +76,7 @@ func (p *httpProtocol) Close() error {
 	return p.transport.Close()
 }
 
-func (p *httpProtocol) GetResponseHeaders() map[string]string {
+func (p *httpProtocol) getResponseHeaders() map[string]string {
 	return nil
 }
 
@@ -93,4 +93,8 @@ func (p *httpProtocol) WriteMessageBegin(name string, typeID types.MessageType, 
 
 func (p *httpProtocol) DO_NOT_USE_WrapChannel() RequestChannel {
 	return NewSerialChannel(p)
+}
+
+func (p *httpProtocol) DO_NOT_USE_GetResponseHeaders() map[string]string {
+	return p.getResponseHeaders()
 }

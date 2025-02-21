@@ -102,16 +102,16 @@ func (p *upgradeToRocketClient) SetRequestHeader(key, value string) {
 	p.Protocol.setRequestHeader(key, value)
 }
 
-func (p *upgradeToRocketClient) GetResponseHeaders() map[string]string {
+func (p *upgradeToRocketClient) getResponseHeaders() map[string]string {
 	if p.Protocol == nil {
-		headers := p.headerProtocol.GetResponseHeaders()
-		rocketHeaders := p.rocketProtocol.GetResponseHeaders()
+		headers := p.headerProtocol.getResponseHeaders()
+		rocketHeaders := p.rocketProtocol.getResponseHeaders()
 		for k, v := range rocketHeaders {
 			headers[k] = v
 		}
 		return headers
 	}
-	return p.Protocol.GetResponseHeaders()
+	return p.Protocol.getResponseHeaders()
 }
 
 func (p *upgradeToRocketClient) Close() error {
@@ -125,4 +125,8 @@ func (p *upgradeToRocketClient) Close() error {
 
 func (p *upgradeToRocketClient) DO_NOT_USE_WrapChannel() RequestChannel {
 	return NewSerialChannel(p)
+}
+
+func (p *upgradeToRocketClient) DO_NOT_USE_GetResponseHeaders() map[string]string {
+	return p.getResponseHeaders()
 }

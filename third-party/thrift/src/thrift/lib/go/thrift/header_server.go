@@ -300,7 +300,7 @@ func (s *server) reader(ctx context.Context, socket net.Conn, writeCh chan func(
 		// maintain the header seqid we received, as well as the msg seq id.
 		msg.name, msg.typ, msg.seqID, err = prot.ReadMessageBegin()
 		// add headers to the ctx. This allows thrift functions to inspect headers, at the cost of a gomap per request
-		msg.headers = prot.GetResponseHeaders()
+		msg.headers = prot.getResponseHeaders()
 		msg.headerSeqID = prot.GetSeqID()
 		if remainingMsStr, ok := msg.headers[ClientTimeoutKey]; ok {
 			if remainingMs, err := strconv.Atoi(remainingMsStr); err == nil && remainingMs > 0 {

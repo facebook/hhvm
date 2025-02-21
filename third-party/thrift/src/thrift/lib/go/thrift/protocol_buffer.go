@@ -88,7 +88,7 @@ func (b *protocolBuffer) Close() error {
 	return nil
 }
 
-func (b *protocolBuffer) GetResponseHeaders() map[string]string {
+func (b *protocolBuffer) getResponseHeaders() map[string]string {
 	return b.respHeaders
 }
 
@@ -102,4 +102,8 @@ func (b *protocolBuffer) getRequestHeaders() map[string]string {
 
 func (b *protocolBuffer) DO_NOT_USE_WrapChannel() RequestChannel {
 	return NewSerialChannel(b)
+}
+
+func (b *protocolBuffer) DO_NOT_USE_GetResponseHeaders() map[string]string {
+	return b.getResponseHeaders()
 }

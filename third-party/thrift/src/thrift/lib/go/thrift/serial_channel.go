@@ -84,7 +84,7 @@ func (c *SerialChannel) recvMsg(ctx context.Context, method string, seqID int32,
 		if err := c.protocol.ReadMessageEnd(); err != nil {
 			return err
 		}
-		responseHeaders := c.protocol.GetResponseHeaders()
+		responseHeaders := c.protocol.getResponseHeaders()
 		setResponseHeaders(ctx, responseHeaders)
 		return nil
 	case EXCEPTION:
@@ -95,7 +95,7 @@ func (c *SerialChannel) recvMsg(ctx context.Context, method string, seqID int32,
 		if err := c.protocol.ReadMessageEnd(); err != nil {
 			return err
 		}
-		responseHeaders := c.protocol.GetResponseHeaders()
+		responseHeaders := c.protocol.getResponseHeaders()
 		setResponseHeaders(ctx, responseHeaders)
 		return appException
 	default:

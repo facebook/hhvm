@@ -158,7 +158,7 @@ func (p *rocketClient) setRequestHeader(key, value string) {
 	p.reqHeaders[key] = value
 }
 
-func (p *rocketClient) GetResponseHeaders() map[string]string {
+func (p *rocketClient) getResponseHeaders() map[string]string {
 	return p.respHeaders
 }
 
@@ -170,4 +170,8 @@ func (p *rocketClient) Close() error {
 
 func (p *rocketClient) DO_NOT_USE_WrapChannel() RequestChannel {
 	return NewSerialChannel(p)
+}
+
+func (p *rocketClient) DO_NOT_USE_GetResponseHeaders() map[string]string {
+	return p.getResponseHeaders()
 }

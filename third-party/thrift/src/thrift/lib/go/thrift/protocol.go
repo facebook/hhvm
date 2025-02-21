@@ -30,7 +30,9 @@ type Protocol interface {
 	// Deprecated
 	setRequestHeader(key, value string)
 	// Deprecated
-	GetResponseHeaders() map[string]string
+	getResponseHeaders() map[string]string
+	// Deprecated
+	DO_NOT_USE_GetResponseHeaders() map[string]string
 
 	types.DO_NOT_USE_ChannelWrapper
 }

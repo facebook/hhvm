@@ -136,7 +136,7 @@ func (p *headerProtocol) setRequestHeader(key, value string) {
 	p.trans.SetRequestHeader(key, value)
 }
 
-func (p *headerProtocol) GetResponseHeaders() map[string]string {
+func (p *headerProtocol) getResponseHeaders() map[string]string {
 	return p.trans.GetResponseHeaders()
 }
 
@@ -160,6 +160,10 @@ func (p *headerProtocol) AddTransform(trans TransformID) error {
 
 func (p *headerProtocol) DO_NOT_USE_WrapChannel() RequestChannel {
 	return NewSerialChannel(p)
+}
+
+func (p *headerProtocol) DO_NOT_USE_GetResponseHeaders() map[string]string {
+	return p.getResponseHeaders()
 }
 
 // Deprecated: HeaderProtocolSeqID is a deprecated type, temporarily introduced to ease transition to new API.

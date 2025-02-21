@@ -48,8 +48,12 @@ func NewRaiserChannelClient(channel thrift.RequestChannel) *RaiserClient {
     }
 }
 
-func NewRaiserClient(prot thrift.Protocol) *RaiserClient {
-    return NewRaiserChannelClient(thrift.NewSerialChannel(prot))
+func NewRaiserClient(prot thrift.DO_NOT_USE_ChannelWrapper) *RaiserClient {
+    var channel thrift.RequestChannel
+    if prot != nil {
+        channel = prot.DO_NOT_USE_WrapChannel()
+    }
+    return NewRaiserChannelClient(channel)
 }
 
 func (c *RaiserClient) Close() error {

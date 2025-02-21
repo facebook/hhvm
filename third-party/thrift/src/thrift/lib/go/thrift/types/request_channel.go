@@ -34,3 +34,8 @@ type RequestChannel interface {
 	Call(ctx context.Context, method string, request WritableStruct, response ReadableStruct) error
 	Oneway(ctx context.Context, method string, request WritableStruct) error
 }
+
+// DO NOT USE: temporary migration workaround.
+type DO_NOT_USE_ChannelWrapper interface {
+	DO_NOT_USE_WrapChannel() RequestChannel
+}

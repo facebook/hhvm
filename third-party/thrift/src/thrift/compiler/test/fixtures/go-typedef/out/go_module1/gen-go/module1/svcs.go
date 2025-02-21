@@ -51,8 +51,12 @@ func NewFinderChannelClient(channel thrift.RequestChannel) *FinderClient {
     }
 }
 
-func NewFinderClient(prot thrift.Protocol) *FinderClient {
-    return NewFinderChannelClient(thrift.NewSerialChannel(prot))
+func NewFinderClient(prot thrift.DO_NOT_USE_ChannelWrapper) *FinderClient {
+    var channel thrift.RequestChannel
+    if prot != nil {
+        channel = prot.DO_NOT_USE_WrapChannel()
+    }
+    return NewFinderChannelClient(channel)
 }
 
 func (c *FinderClient) Close() error {

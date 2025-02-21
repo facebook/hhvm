@@ -51,8 +51,12 @@ func NewMyServiceChannelClient(channel thrift.RequestChannel) *MyServiceClient {
     }
 }
 
-func NewMyServiceClient(prot thrift.Protocol) *MyServiceClient {
-    return NewMyServiceChannelClient(thrift.NewSerialChannel(prot))
+func NewMyServiceClient(prot thrift.DO_NOT_USE_ChannelWrapper) *MyServiceClient {
+    var channel thrift.RequestChannel
+    if prot != nil {
+        channel = prot.DO_NOT_USE_WrapChannel()
+    }
+    return NewMyServiceChannelClient(channel)
 }
 
 func (c *MyServiceClient) Close() error {
@@ -587,8 +591,12 @@ func NewMyServicePrioParentChannelClient(channel thrift.RequestChannel) *MyServi
     }
 }
 
-func NewMyServicePrioParentClient(prot thrift.Protocol) *MyServicePrioParentClient {
-    return NewMyServicePrioParentChannelClient(thrift.NewSerialChannel(prot))
+func NewMyServicePrioParentClient(prot thrift.DO_NOT_USE_ChannelWrapper) *MyServicePrioParentClient {
+    var channel thrift.RequestChannel
+    if prot != nil {
+        channel = prot.DO_NOT_USE_WrapChannel()
+    }
+    return NewMyServicePrioParentChannelClient(channel)
 }
 
 func (c *MyServicePrioParentClient) Close() error {
@@ -794,8 +802,12 @@ func NewMyServicePrioChildChannelClient(channel thrift.RequestChannel) *MyServic
     }
 }
 
-func NewMyServicePrioChildClient(prot thrift.Protocol) *MyServicePrioChildClient {
-    return NewMyServicePrioChildChannelClient(thrift.NewSerialChannel(prot))
+func NewMyServicePrioChildClient(prot thrift.DO_NOT_USE_ChannelWrapper) *MyServicePrioChildClient {
+    var channel thrift.RequestChannel
+    if prot != nil {
+        channel = prot.DO_NOT_USE_WrapChannel()
+    }
+    return NewMyServicePrioChildChannelClient(channel)
 }
 
 func (c *MyServicePrioChildClient) Close() error {
@@ -905,8 +917,12 @@ func NewBadServiceChannelClient(channel thrift.RequestChannel) *BadServiceClient
     }
 }
 
-func NewBadServiceClient(prot thrift.Protocol) *BadServiceClient {
-    return NewBadServiceChannelClient(thrift.NewSerialChannel(prot))
+func NewBadServiceClient(prot thrift.DO_NOT_USE_ChannelWrapper) *BadServiceClient {
+    var channel thrift.RequestChannel
+    if prot != nil {
+        channel = prot.DO_NOT_USE_WrapChannel()
+    }
+    return NewBadServiceChannelClient(channel)
 }
 
 func (c *BadServiceClient) Close() error {
@@ -1046,8 +1062,12 @@ func NewFooBarBazServiceChannelClient(channel thrift.RequestChannel) *FooBarBazS
     }
 }
 
-func NewFooBarBazServiceClient(prot thrift.Protocol) *FooBarBazServiceClient {
-    return NewFooBarBazServiceChannelClient(thrift.NewSerialChannel(prot))
+func NewFooBarBazServiceClient(prot thrift.DO_NOT_USE_ChannelWrapper) *FooBarBazServiceClient {
+    var channel thrift.RequestChannel
+    if prot != nil {
+        channel = prot.DO_NOT_USE_WrapChannel()
+    }
+    return NewFooBarBazServiceChannelClient(channel)
 }
 
 func (c *FooBarBazServiceClient) Close() error {

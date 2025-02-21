@@ -45,8 +45,12 @@ func NewHsTestServiceChannelClient(channel thrift.RequestChannel) *HsTestService
     }
 }
 
-func NewHsTestServiceClient(prot thrift.Protocol) *HsTestServiceClient {
-    return NewHsTestServiceChannelClient(thrift.NewSerialChannel(prot))
+func NewHsTestServiceClient(prot thrift.DO_NOT_USE_ChannelWrapper) *HsTestServiceClient {
+    var channel thrift.RequestChannel
+    if prot != nil {
+        channel = prot.DO_NOT_USE_WrapChannel()
+    }
+    return NewHsTestServiceChannelClient(channel)
 }
 
 func (c *HsTestServiceClient) Close() error {

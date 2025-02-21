@@ -45,8 +45,12 @@ func NewFooServiceChannelClient(channel thrift.RequestChannel) *FooServiceClient
     }
 }
 
-func NewFooServiceClient(prot thrift.Protocol) *FooServiceClient {
-    return NewFooServiceChannelClient(thrift.NewSerialChannel(prot))
+func NewFooServiceClient(prot thrift.DO_NOT_USE_ChannelWrapper) *FooServiceClient {
+    var channel thrift.RequestChannel
+    if prot != nil {
+        channel = prot.DO_NOT_USE_WrapChannel()
+    }
+    return NewFooServiceChannelClient(channel)
 }
 
 func (c *FooServiceClient) Close() error {
@@ -183,8 +187,12 @@ func NewFB303ServiceChannelClient(channel thrift.RequestChannel) *FB303ServiceCl
     }
 }
 
-func NewFB303ServiceClient(prot thrift.Protocol) *FB303ServiceClient {
-    return NewFB303ServiceChannelClient(thrift.NewSerialChannel(prot))
+func NewFB303ServiceClient(prot thrift.DO_NOT_USE_ChannelWrapper) *FB303ServiceClient {
+    var channel thrift.RequestChannel
+    if prot != nil {
+        channel = prot.DO_NOT_USE_WrapChannel()
+    }
+    return NewFB303ServiceChannelClient(channel)
 }
 
 func (c *FB303ServiceClient) Close() error {
@@ -333,8 +341,12 @@ func NewMyServiceChannelClient(channel thrift.RequestChannel) *MyServiceClient {
     }
 }
 
-func NewMyServiceClient(prot thrift.Protocol) *MyServiceClient {
-    return NewMyServiceChannelClient(thrift.NewSerialChannel(prot))
+func NewMyServiceClient(prot thrift.DO_NOT_USE_ChannelWrapper) *MyServiceClient {
+    var channel thrift.RequestChannel
+    if prot != nil {
+        channel = prot.DO_NOT_USE_WrapChannel()
+    }
+    return NewMyServiceChannelClient(channel)
 }
 
 func (c *MyServiceClient) Close() error {
@@ -1051,8 +1063,12 @@ func NewDbMixedStackArgumentsChannelClient(channel thrift.RequestChannel) *DbMix
     }
 }
 
-func NewDbMixedStackArgumentsClient(prot thrift.Protocol) *DbMixedStackArgumentsClient {
-    return NewDbMixedStackArgumentsChannelClient(thrift.NewSerialChannel(prot))
+func NewDbMixedStackArgumentsClient(prot thrift.DO_NOT_USE_ChannelWrapper) *DbMixedStackArgumentsClient {
+    var channel thrift.RequestChannel
+    if prot != nil {
+        channel = prot.DO_NOT_USE_WrapChannel()
+    }
+    return NewDbMixedStackArgumentsChannelClient(channel)
 }
 
 func (c *DbMixedStackArgumentsClient) Close() error {

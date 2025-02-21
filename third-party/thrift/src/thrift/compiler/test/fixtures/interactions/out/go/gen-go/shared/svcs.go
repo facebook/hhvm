@@ -44,8 +44,12 @@ func NewInteractLocallyChannelClient(channel thrift.RequestChannel) *InteractLoc
     }
 }
 
-func NewInteractLocallyClient(prot thrift.Protocol) *InteractLocallyClient {
-    return NewInteractLocallyChannelClient(thrift.NewSerialChannel(prot))
+func NewInteractLocallyClient(prot thrift.DO_NOT_USE_ChannelWrapper) *InteractLocallyClient {
+    var channel thrift.RequestChannel
+    if prot != nil {
+        channel = prot.DO_NOT_USE_WrapChannel()
+    }
+    return NewInteractLocallyChannelClient(channel)
 }
 
 func (c *InteractLocallyClient) Close() error {

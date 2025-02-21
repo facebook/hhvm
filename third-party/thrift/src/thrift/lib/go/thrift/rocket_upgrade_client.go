@@ -122,3 +122,7 @@ func (p *upgradeToRocketClient) Close() error {
 	}
 	return p.Protocol.Close()
 }
+
+func (p *upgradeToRocketClient) DO_NOT_USE_WrapChannel() RequestChannel {
+	return NewSerialChannel(p)
+}

@@ -90,3 +90,7 @@ func (p *httpProtocol) WriteMessageBegin(name string, typeID types.MessageType, 
 	}
 	return p.Format.WriteMessageBegin(name, typeID, seqid)
 }
+
+func (p *httpProtocol) DO_NOT_USE_WrapChannel() RequestChannel {
+	return NewSerialChannel(p)
+}

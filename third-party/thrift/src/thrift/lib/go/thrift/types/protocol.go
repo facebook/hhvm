@@ -26,6 +26,7 @@ type Protocol interface {
 	// Deprecated
 	requestHeaders
 	responseHeaderGetter
+	DO_NOT_USE_ChannelWrapper
 }
 
 type responseHeaderGetter interface {

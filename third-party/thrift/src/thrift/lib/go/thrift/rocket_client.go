@@ -167,3 +167,7 @@ func (p *rocketClient) Close() error {
 	runtime.SetFinalizer(p, nil)
 	return p.client.Close()
 }
+
+func (p *rocketClient) DO_NOT_USE_WrapChannel() RequestChannel {
+	return NewSerialChannel(p)
+}

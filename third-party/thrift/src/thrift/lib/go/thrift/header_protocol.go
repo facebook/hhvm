@@ -158,6 +158,10 @@ func (p *headerProtocol) AddTransform(trans TransformID) error {
 	return p.trans.AddTransform(trans)
 }
 
+func (p *headerProtocol) DO_NOT_USE_WrapChannel() RequestChannel {
+	return NewSerialChannel(p)
+}
+
 // Deprecated: HeaderProtocolSeqID is a deprecated type, temporarily introduced to ease transition to new API.
 type HeaderProtocolSeqID interface {
 	GetSeqID() uint32

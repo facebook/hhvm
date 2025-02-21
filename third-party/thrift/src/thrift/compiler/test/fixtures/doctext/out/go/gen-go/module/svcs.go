@@ -46,8 +46,12 @@ func NewCChannelClient(channel thrift.RequestChannel) *CClient {
     }
 }
 
-func NewCClient(prot thrift.Protocol) *CClient {
-    return NewCChannelClient(thrift.NewSerialChannel(prot))
+func NewCClient(prot thrift.DO_NOT_USE_ChannelWrapper) *CClient {
+    var channel thrift.RequestChannel
+    if prot != nil {
+        channel = prot.DO_NOT_USE_WrapChannel()
+    }
+    return NewCChannelClient(channel)
 }
 
 func (c *CClient) Close() error {

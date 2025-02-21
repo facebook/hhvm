@@ -2373,3 +2373,14 @@ TEST(CompilerTest, cpp_deprecated_terse_write_ref) {
     }
   )");
 }
+
+TEST(CompilerTest, base_service_defined_after_use) {
+  check_compile(R"(
+    typedef Base BaseAlias
+
+    service Derived extends Base {}  # expected-error: Service "Base" has not been defined.
+    service DerivedWithAlias extends BaseAlias {}  # expected-error: Service "BaseAlias" has not been defined.
+
+    service Base {}
+  )");
+}

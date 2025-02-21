@@ -2430,46 +2430,60 @@ std::string deserializeSBProfData(const std::string& root,
   if (s_sbDeserDone.test_and_set()) {
     return "Deser failed: already attempted deserialization\n";
   }
-  auto const numWorkers = Cfg::Jit::WorkerThreadsForSerdes ?
-    Cfg::Jit::WorkerThreadsForSerdes : Process::GetCPUCount();
-  auto const profFileName = !filename.empty() ?
-    filename : RuntimeOption::EvalSBSerdesFile;
+  std::string errMsg;
+  VMWorker([&] () {
+    hphp_session_init(Treadmill::SessionKind::PreloadRepo);
+    SCOPE_EXIT {
+      hphp_context_exit();
+      hphp_session_exit();
+    };
+
+    auto const numWorkers = Cfg::Jit::WorkerThreadsForSerdes ?
+      Cfg::Jit::WorkerThreadsForSerdes : Process::GetCPUCount();
+    auto const profFileName = !filename.empty() ?
+      filename : RuntimeOption::EvalSBSerdesFile;
 
 #if USE_JEMALLOC_EXTENT_HOOKS
-  // TODO: add additional param like WorkerArenas
-  setup_extra_arenas(numWorkers);
+    // TODO: add additional param like WorkerArenas
+    setup_extra_arenas(numWorkers);
 #endif
 
-  try {
-    ProfDataDeserializer des{profFileName};
-    if (read_raw<decltype(kMagic)>(des) != kMagic) {
-      throw std::runtime_error("Not a profile-data dump");
+    try {
+      ProfDataDeserializer des{profFileName};
+      if (read_raw<decltype(kMagic)>(des) != kMagic) {
+        throw std::runtime_error("Not a profile-data dump");
+      }
+      // TODO: repo-schema
+      read_units_preload(des, root);
+      auto& sbProfData = getSBDeserProfData();
+      {
+        BootStats::Block timer("DES_read_sb_prof_data",
+                               Cfg::Server::Mode);
+        read_container(des, [&] {read_sb_prof_data(des, sbProfData, root);});
+      }
+
+      always_assert(des.done());
+
+      if (s_preload_dispatcher) {
+        BootStats::Block timer("DES_wait_for_units_preload",
+                               Cfg::Server::Mode);
+        s_preload_dispatcher->waitEmpty(true);
+        delete s_preload_dispatcher;
+        s_preload_dispatcher = nullptr;
+      }
+
+      merge_and_enqueue_for_jit(root, numWorkers);
+
+      errMsg = "Deserialization of profile data successful\n";
+    } catch (Exception& ex) {
+      errMsg = folly::sformat("Deser failed {}: {}\n", profFileName,
+                              ex.what());
+    } catch (std::exception& ex) {
+      errMsg = folly::sformat("Deser failed {}: {}\n", profFileName,
+                              ex.what());
     }
-    // TODO: repo-schema
-    read_units_preload(des, root);
-    auto& sbProfData = getSBDeserProfData();
-    {
-      BootStats::Block timer("DES_read_sb_prof_data",
-                             Cfg::Server::Mode);
-      read_container(des, [&] {read_sb_prof_data(des, sbProfData, root);});
-    }
-
-    always_assert(des.done());
-
-    if (s_preload_dispatcher) {
-      BootStats::Block timer("DES_wait_for_units_preload",
-                             Cfg::Server::Mode);
-      s_preload_dispatcher->waitEmpty(true);
-      delete s_preload_dispatcher;
-      s_preload_dispatcher = nullptr;
-    }
-
-    merge_and_enqueue_for_jit(root, numWorkers);
-
-    return "Deserialization of profile data successful\n";
-  } catch (std::runtime_error& err) {
-    return folly::sformat("Deser failed {}: {}\n", profFileName, err.what());
-  }
+  }).run();
+  return errMsg;
 }
 
 bool didDeserializeSBProfData() { return s_sbDeserDone.test(); }

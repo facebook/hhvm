@@ -439,4 +439,23 @@ final class ThriftContextPropStateTest extends WWWTest {
       ->toBeFalse();
   }
 
+  public function testBaggageRootProductId(): void {
+    $tcps_with_empty_baggage = ThriftContextPropState::get();
+    $tcps_with_empty_baggage->clear();
+    expect($tcps_with_empty_baggage->getBaggage())->toBeNull();
+    expect(readonly $tcps_with_empty_baggage->getRootProductId())->toBeNull();
+
+    $tcps = ThriftContextPropState::get();
+    expect(readonly $tcps->getRootProductId())->toBeNull();
+
+    $root_product_id = $tcps->setRootProductId(789);
+    expect(readonly $tcps->getRootProductId())->toEqual(789);
+    expect($root_product_id)->toEqual(789);
+
+    // Test overrding existing value should not be allowed
+    $root_product_id = $tcps->setRootProductId(100);
+    expect(readonly $tcps->getRootProductId())->toEqual(789);
+    expect($root_product_id)->toEqual(789);
+  }
+
 }

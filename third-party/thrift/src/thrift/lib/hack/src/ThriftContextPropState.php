@@ -520,6 +520,30 @@ final class ThriftContextPropState {
     $this->setBaggageFlags1($flags1);
   }
 
+  // Getters for the root_product_id
+  public function getRootProductId()[leak_safe]: ?int {
+    return $this->storage->baggage?->root_product_id;
+  }
+
+  // Immutable setter for the root_product_id
+  public function setRootProductId(int $root_product_id): ?int {
+    $current_root_product_id = $this->getRootProductId();
+
+    // By design, If the root product id is already set, do not overwrite it
+    if ($current_root_product_id is null) {
+      $this->storage->baggage =
+        $this->storage->baggage ?? ContextProp\Baggage::withDefaultValues();
+
+      $baggage = $this->storage->baggage as nonnull;
+      $baggage->root_product_id = $root_product_id;
+      $current_root_product_id = $root_product_id;
+
+      $this->dirty();
+    }
+
+    return $current_root_product_id;
+  }
+
   public function getTFMCopy(): ThriftFrameworkMetadata {
     $tfm_copy = ThriftFrameworkMetadata::withDefaultValues();
     $tfm_copy->request_id = $this->storage->request_id;

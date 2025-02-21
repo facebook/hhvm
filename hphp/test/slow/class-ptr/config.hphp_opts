@@ -1,0 +1,4 @@
+-vRuntime.Eval.RaiseClassConversionNoticeSampleRate=1
+-vRuntime.Eval.ClassStringHintNoticesSampleRate=1
+-vRuntime.Eval.RaiseStrToClsConversionNoticeSampleRate=1
+-vRuntime.Hack.Lang.AllowUnstableFeatures=true

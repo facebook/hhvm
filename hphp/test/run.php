@@ -1125,6 +1125,10 @@ function hphp_cmd(Options $options, string $test): string {
     }
   }
 
+  $config_hphp_opts = read_opts_file(
+    find_file_for_dir(dirname($test), 'config.hphp_opts')
+  );
+
   return implode(" ", vec[
     hphpc_path($options),
     '--hphp',
@@ -1149,6 +1153,7 @@ function hphp_cmd(Options $options, string $test): string {
     '--file-cache="'.Status::getTestWorkingDir($test).'/file.cache"',
     "\"$test\"",
     "-vExternWorker.WorkingDir=".Status::getTestWorkingDir($test),
+    $config_hphp_opts,
     $extra_args,
     $compiler_args,
     read_opts_file(find_test_ext($test, 'hphp_opts')),

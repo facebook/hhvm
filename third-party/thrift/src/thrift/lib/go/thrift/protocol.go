@@ -28,15 +28,9 @@ type Protocol interface {
 	Close() error
 
 	// Deprecated
-	requestHeaders
-	responseHeaderGetter
-	types.DO_NOT_USE_ChannelWrapper
-}
-
-type responseHeaderGetter interface {
-	GetResponseHeaders() map[string]string
-}
-
-type requestHeaders interface {
 	SetRequestHeader(key, value string)
+	// Deprecated
+	GetResponseHeaders() map[string]string
+
+	types.DO_NOT_USE_ChannelWrapper
 }

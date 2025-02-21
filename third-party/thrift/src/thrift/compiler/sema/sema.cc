@@ -652,6 +652,21 @@ void deduplicate_thrift_includes(
   includes.erase(it, includes.end());
 }
 
+// scope.thrift can't use structured annotations for circular dependency reasons
+// so inject annotations here.
+void add_magic_annotations(sema_context&, mutator_context&, t_struct& node) {
+  if (node.uri() == "facebook.com/thrift/annotation/Function") {
+    node.set_annotation("hack.name", "TFunction");
+    node.set_annotation("js.name", "TFunction");
+  } else if (node.uri() == "facebook.com/thrift/annotation/Const") {
+    node.set_annotation("hack.name", "TConst");
+  } else if (node.uri() == "facebook.com/thrift/annotation/Enum") {
+    node.set_annotation("py3.hidden", "1");
+  } else if (node.uri() == "facebook.com/thrift/annotation/Interface") {
+    node.set_annotation("hack.name", "TInterface");
+  }
+}
+
 std::vector<ast_mutator> standard_mutators() {
   std::vector<ast_mutator> mutators;
 
@@ -670,6 +685,7 @@ std::vector<ast_mutator> standard_mutators() {
   main.add_field_visitor(&match_field_type_with_default_value);
   main.add_named_visitor(&match_annotation_types_with_const_values);
   main.add_program_visitor(&deduplicate_thrift_includes);
+  main.add_struct_visitor(&add_magic_annotations);
   mutators.push_back(std::move(main));
 
   return mutators;

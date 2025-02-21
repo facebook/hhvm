@@ -99,17 +99,20 @@ struct Service {}
 struct Interaction {}
 
 /** The `function` definition scope. */
-struct Function {} (hack.name = "TFunction", js.name = "TFunction")
+struct Function {}
+/* added by compiler: (hack.name = "TFunction", js.name = "TFunction") */
 
 /** The Enum value definition scope. */
 struct EnumValue {}
 
 /** The `const` definition scope. */
-struct Const {} (hack.name = "TConst")
+struct Const {}
+/* added by compiler: (hack.name = "TConst") */
 
 // Due to cython bug, we can not use `Enum` as class name directly
 // https://github.com/cython/cython/issues/2474
-struct Enum {} (py3.hidden)
+struct Enum {}
+/* added by compiler: (py3.hidden) */
 
 /** A scope that includes all 'structured' definitions. */
 @Struct
@@ -122,7 +125,8 @@ struct Structured {}
 @Service
 @Interaction
 @Transitive
-struct Interface {} (hack.name = "TInterface")
+struct Interface {}
+/* added by compiler: (hack.name = "TInterface") */
 
 /** A scope that includes all program-scoped definition. */
 @Structured

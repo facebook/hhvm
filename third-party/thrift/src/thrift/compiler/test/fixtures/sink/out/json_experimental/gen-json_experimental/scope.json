@@ -92,20 +92,20 @@
         "docstring" : "The Enum value definition scope.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 105
+        "lineno" : 106
       },
       "Const" : {
         "name" : "Const",
         "docstring" : "The `const` definition scope.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 108
+        "lineno" : 109
       },
       "Enum" : {
         "name" : "Enum",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 112
+        "lineno" : 114
       },
       "Structured" : {
         "name" : "Structured",
@@ -142,7 +142,7 @@
         "docstring" : "A scope that includes all 'structured' definitions.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 115
+        "lineno" : 118
       },
       "Interface" : {
         "name" : "Interface",
@@ -172,7 +172,7 @@
         "docstring" : "A scope that includes all 'interface' definitions.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 122
+        "lineno" : 125
       },
       "RootDefinition" : {
         "name" : "RootDefinition",
@@ -223,7 +223,7 @@
         "docstring" : "A scope that includes all program-scoped definition.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 128
+        "lineno" : 132
       },
       "Definition" : {
         "name" : "Definition",
@@ -267,7 +267,7 @@
         "docstring" : "A scope that includes all definitions.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 137
+        "lineno" : 141
       },
       "DisableSchemaConst" : {
         "name" : "DisableSchemaConst",
@@ -283,7 +283,7 @@
         "docstring" : "Not a scope, just here for dependency cycle reasons.\nDisables schema const injection for the program.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 148
+        "lineno" : 152
       }
   },
   "source_path" : "thrift/annotation/scope",

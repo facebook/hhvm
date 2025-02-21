@@ -45,10 +45,6 @@ func NewDummyChannelClient(channel thrift.RequestChannel) *DummyClient {
     }
 }
 
-func NewDummyClient(prot thrift.Protocol) *DummyClient {
-    return NewDummyChannelClient(thrift.NewSerialChannel(prot))
-}
-
 func (c *DummyClient) Close() error {
     return c.ch.Close()
 }

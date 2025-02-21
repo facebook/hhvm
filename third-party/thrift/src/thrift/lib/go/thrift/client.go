@@ -150,7 +150,7 @@ func newOptions(opts ...ClientOption) *clientOptions {
 // NewClient will return a connected thrift protocol object.
 // Effectively, this is an open thrift connection to a server.
 // A thrift client can use this connection to communicate with a server.
-func NewClient(opts ...ClientOption) (types.Protocol, error) {
+func NewClient(opts ...ClientOption) (Protocol, error) {
 	options := newOptions(opts...)
 
 	// Important: TLS config must be modified *before* the dialerFn below is called.
@@ -175,7 +175,7 @@ func NewClient(opts ...ClientOption) (types.Protocol, error) {
 		}
 	}
 
-	var protocol types.Protocol
+	var protocol Protocol
 	var protocolErr error
 	switch options.transport {
 	case TransportIDHeader:

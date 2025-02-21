@@ -30,10 +30,10 @@ type httpProtocol struct {
 	persistentHeaders map[string]string
 }
 
-var _ types.Protocol = (*httpProtocol)(nil)
+var _ Protocol = (*httpProtocol)(nil)
 
 // NewHTTPProtocol creates a Protocol from a format that serializes directly to an HTTPClient.
-func NewHTTPProtocol(url string) (types.Protocol, error) {
+func NewHTTPProtocol(url string) (Protocol, error) {
 	httpClient, err := newHTTPPostClient(url)
 	if err != nil {
 		return nil, err

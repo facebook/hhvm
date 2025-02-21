@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-package types
+package thrift
+
+import (
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+)
 
 // Protocol defines the interface that must be implemented by all protocols
 type Protocol interface {
@@ -26,7 +30,7 @@ type Protocol interface {
 	// Deprecated
 	requestHeaders
 	responseHeaderGetter
-	DO_NOT_USE_ChannelWrapper
+	types.DO_NOT_USE_ChannelWrapper
 }
 
 type responseHeaderGetter interface {

@@ -62,19 +62,19 @@ func getProcessorFunction(processor Processor, messageType types.MessageType, na
 	return nil, types.NewApplicationException(types.UNKNOWN_METHOD, fmt.Sprintf("no such function: %q", name))
 }
 
-func skipMessage(protocol types.Protocol) error {
+func skipMessage(protocol Protocol) error {
 	if err := protocol.Skip(types.STRUCT); err != nil {
 		return err
 	}
 	return protocol.ReadMessageEnd()
 }
 
-func setRequestHeadersForError(protocol types.Protocol, err types.ApplicationException) {
+func setRequestHeadersForError(protocol Protocol, err types.ApplicationException) {
 	protocol.SetRequestHeader("uex", errorType(err))
 	protocol.SetRequestHeader("uexw", err.Error())
 }
 
-func setRequestHeadersForResult(protocol types.Protocol, result types.WritableStruct) {
+func setRequestHeadersForResult(protocol Protocol, result types.WritableStruct) {
 	if rr, ok := result.(types.WritableResult); ok && rr.Exception() != nil {
 		// If we got a structured exception back, write metadata about it into headers
 		terr := rr.Exception()
@@ -103,7 +103,7 @@ func sendException(prot types.Encoder, name string, seqID int32, err types.Appli
 // 1. Read the message from the protocol.
 // 2. Process the message.
 // 3. Write the message to the protocol.
-func process(ctx context.Context, processor Processor, prot types.Protocol) (ext types.Exception) {
+func process(ctx context.Context, processor Processor, prot Protocol) (ext types.Exception) {
 	// Step 1: Decode message only using Decoder interface and GetResponseHeaders method on the protocol.
 
 	// Step 1a: find the processor function for the message.

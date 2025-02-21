@@ -43,7 +43,7 @@ type fakeRequest struct {
 }
 
 type fakeProto struct {
-	types.Protocol
+	Protocol
 	method            string
 	typeID            types.MessageType
 	seqID             int32
@@ -99,7 +99,7 @@ func (f *fakeResponse) Read(proto types.Decoder) error {
 
 func TestSendMsgError(t *testing.T) {
 	testCases := []struct {
-		proto    types.Protocol
+		proto    Protocol
 		request  types.WritableStruct
 		expected error
 	}{
@@ -142,7 +142,7 @@ func TestSendMsgError(t *testing.T) {
 
 func TestRecvMsgError(t *testing.T) {
 	testCases := []struct {
-		proto    types.Protocol
+		proto    Protocol
 		response types.ReadableStruct
 		expected error
 	}{

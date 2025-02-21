@@ -31,14 +31,14 @@ type headerProtocol struct {
 	protoID types.ProtocolID
 }
 
-var _ types.Protocol = (*headerProtocol)(nil)
+var _ Protocol = (*headerProtocol)(nil)
 
 // NewHeaderProtocol creates a new header protocol.
-func NewHeaderProtocol(conn net.Conn) (types.Protocol, error) {
+func NewHeaderProtocol(conn net.Conn) (Protocol, error) {
 	return newHeaderProtocol(conn, types.ProtocolIDCompact, 0, nil)
 }
 
-func newHeaderProtocol(conn net.Conn, protoID types.ProtocolID, ioTimeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {
+func newHeaderProtocol(conn net.Conn, protoID types.ProtocolID, ioTimeout time.Duration, persistentHeaders map[string]string) (Protocol, error) {
 	p := &headerProtocol{protoID: protoID}
 	p.trans = newHeaderTransport(conn, protoID)
 	p.trans.conn.readTimeout = ioTimeout

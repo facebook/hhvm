@@ -26,7 +26,6 @@ import (
 	"runtime/debug"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/stats"
-	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/rsocket/rsocket-go/core/transport"
 )
 
@@ -178,7 +177,7 @@ func (r *rocketServerTransport) processRocketRequests(ctx context.Context, conn 
 	r.acceptor(ctx, transport.NewTransport(transport.NewTCPConn(conn)), func(*transport.Transport) {})
 }
 
-func (r *rocketServerTransport) processHeaderRequest(ctx context.Context, protocol types.Protocol, processor Processor) error {
+func (r *rocketServerTransport) processHeaderRequest(ctx context.Context, protocol Protocol, processor Processor) error {
 	exc := process(ctx, processor, protocol)
 	if isEOF(exc) {
 		return exc
@@ -190,7 +189,7 @@ func (r *rocketServerTransport) processHeaderRequest(ctx context.Context, protoc
 	return nil
 }
 
-func (r *rocketServerTransport) processHeaderRequests(ctx context.Context, protocol types.Protocol, processor Processor) error {
+func (r *rocketServerTransport) processHeaderRequests(ctx context.Context, protocol Protocol, processor Processor) error {
 	defer func() {
 		if err := recover(); err != nil {
 			r.log("panic in processor: %v: %s", err, debug.Stack())

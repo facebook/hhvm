@@ -29,16 +29,16 @@ type upgradeToRocketClient struct {
 	// Current protocol - either 'nil', 'headerProtocol' or 'rocketProtocol',
 	// depending on the current state of "upgrade". It will be 'nil' initially
 	// to indicate that "upgrade" has not yet been attempted or started.
-	types.Protocol
+	Protocol
 
-	rocketProtocol types.Protocol
-	headerProtocol types.Protocol
+	rocketProtocol Protocol
+	headerProtocol Protocol
 }
 
-var _ types.Protocol = (*upgradeToRocketClient)(nil)
+var _ Protocol = (*upgradeToRocketClient)(nil)
 
 // newUpgradeToRocketClient creates a protocol that upgrades from Header to Rocket client from a socket.
-func newUpgradeToRocketClient(conn net.Conn, protoID types.ProtocolID, ioTimeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {
+func newUpgradeToRocketClient(conn net.Conn, protoID types.ProtocolID, ioTimeout time.Duration, persistentHeaders map[string]string) (Protocol, error) {
 	rocket, err := newRocketClient(conn, protoID, ioTimeout, persistentHeaders)
 	if err != nil {
 		return nil, err

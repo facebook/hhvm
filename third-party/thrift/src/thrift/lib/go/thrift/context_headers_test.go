@@ -38,7 +38,7 @@ func TestHeaderProtocolSomeHeaders(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := types.SetRequestHeaders(ctx, protocol); err != nil {
+	if err := SetRequestHeaders(ctx, protocol); err != nil {
 		t.Fatal(err)
 	}
 	got := protocol.(*headerProtocol).trans.writeInfoHeaders
@@ -51,7 +51,7 @@ func TestHeaderProtocolSetNilHeaders(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := types.SetRequestHeaders(nil, protocol); err != nil {
+	if err := SetRequestHeaders(nil, protocol); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -70,7 +70,7 @@ func TestRocketProtocolSomeHeaders(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := types.SetRequestHeaders(ctx, protocol); err != nil {
+	if err := SetRequestHeaders(ctx, protocol); err != nil {
 		t.Fatal(err)
 	}
 	got := protocol.(*rocketClient).reqHeaders
@@ -83,7 +83,7 @@ func TestRocketProtocolSetNilHeaders(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := types.SetRequestHeaders(nil, protocol); err != nil {
+	if err := SetRequestHeaders(nil, protocol); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -94,7 +94,7 @@ func TestUpgradeToRocketProtocolSetNilHeaders(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := types.SetRequestHeaders(nil, protocol); err != nil {
+	if err := SetRequestHeaders(nil, protocol); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -39,7 +39,7 @@ type protocolBuffer struct {
 	respHeaders map[string]string
 }
 
-var _ types.Protocol = (*protocolBuffer)(nil)
+var _ Protocol = (*protocolBuffer)(nil)
 
 func newProtocolBuffer(respHeaders map[string]string, protoID types.ProtocolID, data []byte) (*protocolBuffer, error) {
 	p := &protocolBuffer{

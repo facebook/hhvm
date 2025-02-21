@@ -27,7 +27,7 @@ import (
 // These headers are not persistent and will only be sent with the current request.
 func AddHeader(ctx context.Context, key string, value string) (context.Context, error) {
 	headersMap := make(map[string]string)
-	if headers := ctx.Value(types.RequestHeadersKey); headers != nil {
+	if headers := ctx.Value(RequestHeadersKey); headers != nil {
 		var ok bool
 		headersMap, ok = headers.(map[string]string)
 		if !ok {
@@ -35,35 +35,35 @@ func AddHeader(ctx context.Context, key string, value string) (context.Context, 
 		}
 	}
 	headersMap[key] = value
-	ctx = context.WithValue(ctx, types.RequestHeadersKey, headersMap)
+	ctx = context.WithValue(ctx, RequestHeadersKey, headersMap)
 	return ctx, nil
 }
 
 // WithHeaders attaches thrift headers to a ctx.
 func WithHeaders(ctx context.Context, headers map[string]string) context.Context {
-	storedHeaders := ctx.Value(types.RequestHeadersKey)
+	storedHeaders := ctx.Value(RequestHeadersKey)
 	if storedHeaders == nil {
-		return context.WithValue(ctx, types.RequestHeadersKey, headers)
+		return context.WithValue(ctx, RequestHeadersKey, headers)
 	}
 	headersMap, ok := storedHeaders.(map[string]string)
 	if !ok {
-		return context.WithValue(ctx, types.RequestHeadersKey, headers)
+		return context.WithValue(ctx, RequestHeadersKey, headers)
 	}
 	for k, v := range headers {
 		headersMap[k] = v
 	}
-	return context.WithValue(ctx, types.RequestHeadersKey, headersMap)
+	return context.WithValue(ctx, RequestHeadersKey, headersMap)
 }
 
 // SetHeaders replaces all the current headers.
 func SetHeaders(ctx context.Context, headers map[string]string) context.Context {
-	return context.WithValue(ctx, types.RequestHeadersKey, headers)
+	return context.WithValue(ctx, RequestHeadersKey, headers)
 }
 
 // GetHeaders gets thrift headers from ctx.
 func GetHeaders(ctx context.Context) map[string]string {
 	// check for headersKey
-	v, ok := ctx.Value(types.RequestHeadersKey).(map[string]string)
+	v, ok := ctx.Value(RequestHeadersKey).(map[string]string)
 	if ok {
 		return v
 	}
@@ -72,7 +72,7 @@ func GetHeaders(ctx context.Context) map[string]string {
 
 // NewResponseHeadersContext returns a new context with the response headers value.
 func NewResponseHeadersContext(ctx context.Context) context.Context {
-	return context.WithValue(ctx, types.ResponseHeadersKey, make(map[string]string))
+	return context.WithValue(ctx, ResponseHeadersKey, make(map[string]string))
 }
 
 // ResponseHeadersFromContext returns the response headers from the context.
@@ -80,7 +80,7 @@ func ResponseHeadersFromContext(ctx context.Context) map[string]string {
 	if ctx == nil {
 		return nil
 	}
-	responseHeaders := ctx.Value(types.ResponseHeadersKey)
+	responseHeaders := ctx.Value(ResponseHeadersKey)
 	if responseHeaders == nil {
 		return nil
 	}
@@ -96,7 +96,7 @@ func RequestHeadersFromContext(ctx context.Context) map[string]string {
 	if ctx == nil {
 		return nil
 	}
-	requestHeaders := ctx.Value(types.RequestHeadersKey)
+	requestHeaders := ctx.Value(RequestHeadersKey)
 	if requestHeaders == nil {
 		return nil
 	}

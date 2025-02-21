@@ -22,11 +22,7 @@ import (
 
 // These are temporary aliases to the types package. They will be removed or kept, but that is to be determined in future diffs as we refactor.
 
-type SerialChannel = types.SerialChannel
-
 type RequestChannel = types.RequestChannel
-
-type Protocol = types.Protocol
 
 type ProcessorFunction = types.ProcessorFunction
 
@@ -100,12 +96,11 @@ var UTF16 Type = types.UTF16
 var STREAM Type = types.STREAM
 var FLOAT Type = types.FLOAT
 
+var INVALID_HEADERS_TYPE = types.INVALID_HEADERS_TYPE
+var BAD_SEQUENCE_ID int32 = types.BAD_SEQUENCE_ID
+
 func PrependError(prepend string, err error) error {
 	return types.PrependError(prepend, err)
-}
-
-func NewSerialChannel(protocol types.Protocol) *types.SerialChannel {
-	return types.NewSerialChannel(protocol)
 }
 
 func Float32Ptr(v float32) *float32 { return &v }

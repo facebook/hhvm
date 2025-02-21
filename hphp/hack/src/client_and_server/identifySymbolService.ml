@@ -290,6 +290,16 @@ let process_class class_ =
          ~kind:`Method
   | None -> acc
 
+let possibly_remove_unknown_classes classes =
+  let is_class_name = function
+    | ClassName _ -> true
+    | UnknownClass -> false
+  in
+  if List.exists classes ~f:is_class_name then
+    List.filter classes ~f:is_class_name
+  else
+    classes
+
 let typed_member_id env receiver_ty mid ~kind =
   Tast_env.get_receiver_ids env receiver_ty
   |> List.map ~f:(function
@@ -298,6 +308,7 @@ let typed_member_id env receiver_ty mid ~kind =
          | Tast_env.RIerr
          | Tast_env.RIany ->
            UnknownClass)
+  |> possibly_remove_unknown_classes
   |> List.map ~f:(fun rid -> process_member rid mid ~kind)
   |> List.fold ~init:Result_set.empty ~f:Result_set.union
 

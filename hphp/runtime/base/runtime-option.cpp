@@ -985,7 +985,7 @@ static std::vector<std::string> getTierOverwrites(
   };
 
   std::vector<std::string> messages;
-  auto enableShards = true;
+  auto enableShards = !config["DisableShards"].configGetBool();
 
   auto const matchesTier = [&] (Hdf hdf) {
     // Check the patterns one by one so they all get evaluated; otherwise, when

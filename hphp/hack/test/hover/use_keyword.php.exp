@@ -1,4 +1,5 @@
 use
+---
 Include all the items (methods, properties etc) from a trait in this class/trait.
 
 If this class/trait already has an item of the same name, the trait item is not copied.

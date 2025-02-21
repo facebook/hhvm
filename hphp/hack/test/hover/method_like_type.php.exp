@@ -1,2 +1,3 @@
-// Defined in C
+Defined in `C`
+---
 public function f(): void

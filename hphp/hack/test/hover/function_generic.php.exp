@@ -1,3 +1,4 @@
 function identity<T>(T $x, mixed $_): ~T
+---
 Instantiation:
   T = ~int;

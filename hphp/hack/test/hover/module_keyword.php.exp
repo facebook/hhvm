@@ -1,4 +1,5 @@
 module
+---
 `module Foo;` marks all the definitions in the current file as associated with the `Foo` module, and enables them to use `internal`.
 
 You must also define this module with `new module Foo {}` inside or outside this file.

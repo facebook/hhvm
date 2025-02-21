@@ -1,3 +1,5 @@
-// Defined in Foo
+Defined in `Foo`
+---
 const int BAR
+---
 A doc comment.

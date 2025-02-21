@@ -2787,6 +2787,7 @@ class TestLsp(LspTestBase):
                 result={
                     "contents": [
                         {"language": "hack", "value": "string"},
+                        "---",
                         {"language": "hack", "value": "Parameter: $s"},
                     ]
                 },
@@ -2803,6 +2804,7 @@ class TestLsp(LspTestBase):
                 result={
                     "contents": [
                         {"language": "hack", "value": "int"},
+                        "---",
                         {"language": "hack", "value": "Parameter: $i"},
                     ]
                 },
@@ -3097,9 +3099,11 @@ class TestLsp(LspTestBase):
                 },
                 result={
                     "contents": [
+                        "Defined in `HoverWithErrorsClass`",
+                        "---",
                         {
                             "language": "hack",
-                            "value": "// Defined in HoverWithErrorsClass\npublic static function staticMethod(string $z): void",
+                            "value": "public static function staticMethod(string $z): void",
                         },
                         "---",
                         'During testing, we\'ll remove the "public" tag from this '
@@ -3139,9 +3143,11 @@ class TestLsp(LspTestBase):
                 },
                 result={
                     "contents": [
+                        "Defined in `HoverWithErrorsClass`",
+                        "---",
                         {
                             "language": "hack",
-                            "value": "// Defined in HoverWithErrorsClass\npublic static function staticMethod(string $z): void",
+                            "value": "public static function staticMethod(string $z): void",
                         },
                         "---",
                         'During testing, we\'ll remove the "public" tag from this '
@@ -5114,9 +5120,11 @@ function call_method(ClassWithFooBar $mc): void {
                 },
                 result={
                     "contents": [
+                        "Defined in `BaseClassIncremental`",
+                        "---",
                         {
                             "language": "hack",
-                            "value": "// Defined in BaseClassIncremental\npublic function foo(): int",
+                            "value": "public function foo(): int",
                         },
                     ],
                     "range": {
@@ -5146,9 +5154,11 @@ class BaseClassIncremental {
                 },
                 result={
                     "contents": [
+                        "Defined in `BaseClassIncremental`",
+                        "---",
                         {
                             "language": "hack",
-                            "value": "// Defined in BaseClassIncremental\npublic function foo(): string",
+                            "value": "public function foo(): string",
                         },
                     ],
                     "range": {
@@ -5430,6 +5440,7 @@ function unsaved_bar(): string { return "hello"; }
                 result={
                     "contents": [
                         {"language": "hack", "value": "string"},
+                        "---",
                         {"language": "hack", "value": "Parameter: $s"},
                     ]
                 },

@@ -1,2 +1,3 @@
-// Defined in CGeneric<T>
+Defined in `CGeneric<T>`
+---
 final function __construct(): void

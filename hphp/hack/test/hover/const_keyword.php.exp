@@ -1,4 +1,5 @@
 const
+---
 A class constant.
 
 Class constants have public visibility, so you can access `MyClass::MY_CONST` anywhere.

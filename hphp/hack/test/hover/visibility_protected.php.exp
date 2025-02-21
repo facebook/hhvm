@@ -1,4 +1,5 @@
 protected
+---
 A `protected` method or property can only be accessed from methods defined on the current class, or methods on subclasses.
 
 If the current class `use`s a trait, the trait methods can also access `protected` methods and properties.

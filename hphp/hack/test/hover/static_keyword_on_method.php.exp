@@ -1,2 +1,3 @@
 static
+---
 A static method can be called without an instance, e.g. `MyClass::my_method()`.

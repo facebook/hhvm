@@ -1,4 +1,5 @@
 abstract
+---
 An `abstract` class can only contain `static` methods and `abstract` instance methods.
 
 `abstract` classes cannot be instantiated directly. You can only use `new` on child classes that aren't `abstract`.

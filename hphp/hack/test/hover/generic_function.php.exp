@@ -1,3 +1,4 @@
 function g<T>(T $x): void
+---
 Instantiation:
   T = int;

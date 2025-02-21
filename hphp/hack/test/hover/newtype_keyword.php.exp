@@ -1,4 +1,5 @@
 newtype
+---
 A `newtype` is a type alias that is opaque.
 
 Inside the current file, code can see the underlying type. In all other files, code cannot see the underlying type. This enables you to hide implementation details.

@@ -1,4 +1,5 @@
 Awaitable<int>
+---
 An `async` block is syntactic sugar for an `async` lambda that is immediately called.
 
 ```

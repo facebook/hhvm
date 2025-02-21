@@ -1,2 +1,3 @@
 static
+---
 A static property is shared between all instances of a class. It can be accessed with `MyClass::$myProperty`.

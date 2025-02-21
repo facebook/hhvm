@@ -1,4 +1,5 @@
 trait
+---
 A `trait` provides methods and properties that can be `use`d in classes.
 
 Traits are often used to provide default implementations for methods declared in an `interface`.

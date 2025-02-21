@@ -1,9 +1,10 @@
 Parameter: $_
--------------
+---
 function UNSAFE_CAST<Tin, Tout>(
   Tin $t,
   optional ?HH\FormatString<nothing> $msg
 )[]: ~Tout
+---
 `UNSAFE_CAST` allows you to lie to the type checker. **This is almost
 always a bad idea**. You might get an exception, or you might get an
 unexpected value. Even scarier, you might cause an exception in a

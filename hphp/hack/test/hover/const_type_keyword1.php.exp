@@ -1,4 +1,5 @@
 const
+---
 A `const type` declares a type constant inside a class. You can refer to type constants in signatures with `this::TMyConstType`.
 
 Type constants are also a form of generics.

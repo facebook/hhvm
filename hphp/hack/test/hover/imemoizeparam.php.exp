@@ -1,4 +1,5 @@
 IMemoizeParam
+---
 Classes that implement `IMemoizeParam` may be used as parameters on
 `<<__Memoize>>` functions.
 

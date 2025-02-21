@@ -1,2 +1,3 @@
 int BAR = 1
+---
 A doc comment.

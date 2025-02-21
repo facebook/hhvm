@@ -73,7 +73,7 @@ let identify_tests =
       go_hover
         [
           {
-            HoverService.snippet = "Contexts\\a";
+            HoverService.snippet = [Lsp.MarkedCode ("hack", "Contexts\\a")];
             addendum = [];
             pos = pos_at (11, 18) (11, 18);
           };

@@ -1,4 +1,5 @@
 nothing
+---
 The `nothing` type has no values, it's the empty type.
 
 A function returning `nothing` either loops forever or throws an exception. A `vec<nothing>` is always empty.

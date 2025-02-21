@@ -1,4 +1,5 @@
 async
+---
 An `async` function can use `await` to get results from other `async` functions. You may still return plain values, e.g. `return 1;` is permitted in an `Awaitable<int>` function.
 
 This does not give you threads. Only one function is running at any point in time. Instead, the runtime may switch to another function at an `await` expression, and come back to this function later.

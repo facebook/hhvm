@@ -1,4 +1,5 @@
 HH_IGNORE
+---
 `HH_IGNORE[N]` silences type checker warning N on the next line. It does
 not change runtime behavior.
 

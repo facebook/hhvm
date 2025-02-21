@@ -1,2 +1,3 @@
-// Defined in Foo
+Defined in `Foo`
+---
 public mixed $x

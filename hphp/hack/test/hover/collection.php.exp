@@ -1,4 +1,5 @@
 Vector
+---
 **Prefer `vec` over `Vector`**. If you need reference semantics,
 you can wrap the `vec` in a `Ref`.
 

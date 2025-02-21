@@ -1,2 +1,3 @@
 readonly
+---
 This function/method may return a `readonly` value.

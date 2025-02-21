@@ -1,4 +1,5 @@
 children
+---
 `children` declares which XHP types may be used as children when creating instances of this class.
 
 For example, `children (:p)+` means that users may write `<my-class><p>hello</p><p>world</p></my_class>`.

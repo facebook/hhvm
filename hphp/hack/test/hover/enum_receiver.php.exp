@@ -1,2 +1,3 @@
 enum MyEnum
+---
 Doc comment here.

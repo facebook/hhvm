@@ -1,10 +1,12 @@
-// Defined in namespace C
+Defined in namespace `C`
+---
 function any<T>(
   Traversable<T> $traversable,
   optional ?(function(
     T
   )[T/[ctx $predicate]]: ~bool) $predicate
 )[T/[ctx $predicate]ctx $predicate]: bool
+---
 Instantiation:
   T = int;
 ---

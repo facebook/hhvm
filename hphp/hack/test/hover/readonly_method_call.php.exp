@@ -1,3 +1,5 @@
-// Defined in Foo
+Defined in `Foo`
+---
 public function foo(): void
+---
 This is a method.

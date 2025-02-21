@@ -2205,23 +2205,7 @@ let do_rageFB (state : state) : RageFB.result Lwt.t =
   Lwt.return [{ RageFB.title = None; data }]
 
 let do_hover_common (infos : HoverService.hover_info list) : Hover.result =
-  let contents =
-    infos
-    |> List.map ~f:(fun hoverInfo ->
-           (* Hack server uses None to indicate absence of a result. *)
-           (* We're also catching the non-result "" just in case...               *)
-           match hoverInfo with
-           | { HoverService.snippet = ""; _ } -> []
-           | { HoverService.snippet; addendum; _ } ->
-             let addendum =
-               if List.is_empty addendum then
-                 addendum
-               else
-                 MarkedString "---" :: addendum
-             in
-             MarkedCode ("hack", snippet) :: addendum)
-    |> List.concat
-  in
+  let contents = HoverService.as_marked_string_list infos in
   (* We pull the position from the SymbolOccurrence.t record, so I would be
      surprised if there were any different ones in here. Just take the first
      non-None one. *)

@@ -1,4 +1,5 @@
 enum
+---
 An `enum` is a fixed set of string or integer values.
 
 You can use `switch` with an `enum` and the type checker will ensure you handle every possible value.

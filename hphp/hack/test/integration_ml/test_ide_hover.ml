@@ -78,7 +78,12 @@ let class_members_cases =
       [
         {
           snippet =
-            "// Defined in ClassMembers\npublic async function genDoStuff(): Awaitable<void>";
+            [
+              Lsp.MarkedString "Defined in `ClassMembers`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode
+                ("hack", "public async function genDoStuff(): Awaitable<void>");
+            ];
           addendum = [];
           pos = pos_at (18, 18) (18, 27);
         };
@@ -86,7 +91,12 @@ let class_members_cases =
     ( ("class_members.php", 20, 12),
       [
         {
-          snippet = "// Defined in ClassMembers\npublic string $public";
+          snippet =
+            [
+              Lsp.MarkedString "Defined in `ClassMembers`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode ("hack", "public string $public");
+            ];
           addendum = [];
           pos = pos_at (20, 12) (20, 17);
         };
@@ -94,7 +104,12 @@ let class_members_cases =
     ( ("class_members.php", 22, 12),
       [
         {
-          snippet = "// Defined in ClassMembers\nprotected string $protected";
+          snippet =
+            [
+              Lsp.MarkedString "Defined in `ClassMembers`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode ("hack", "protected string $protected");
+            ];
           addendum = [];
           pos = pos_at (22, 12) (22, 20);
         };
@@ -102,7 +117,12 @@ let class_members_cases =
     ( ("class_members.php", 24, 12),
       [
         {
-          snippet = "// Defined in ClassMembers\nprivate string $private";
+          snippet =
+            [
+              Lsp.MarkedString "Defined in `ClassMembers`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode ("hack", "private string $private");
+            ];
           addendum = [];
           pos = pos_at (24, 12) (24, 18);
         };
@@ -110,7 +130,12 @@ let class_members_cases =
     ( ("class_members.php", 26, 19),
       [
         {
-          snippet = "// Defined in ClassMembers\npublic static string $staticVar";
+          snippet =
+            [
+              Lsp.MarkedString "Defined in `ClassMembers`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode ("hack", "public static string $staticVar");
+            ];
           addendum = [];
           pos = pos_at (26, 19) (26, 28);
         };
@@ -119,7 +144,12 @@ let class_members_cases =
       [
         {
           snippet =
-            "// Defined in ClassMembers\npublic abstract function abstractMethod(): string";
+            [
+              Lsp.MarkedString "Defined in `ClassMembers`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode
+                ("hack", "public abstract function abstractMethod(): string");
+            ];
           addendum = [];
           pos = pos_at (28, 12) (28, 25);
         };
@@ -128,7 +158,12 @@ let class_members_cases =
       [
         {
           snippet =
-            "// Defined in ClassMembers\npublic final function finalMethod(string $arg): void";
+            [
+              Lsp.MarkedString "Defined in `ClassMembers`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode
+                ("hack", "public final function finalMethod(string $arg): void");
+            ];
           addendum = [];
           pos = pos_at (30, 12) (30, 22);
         };
@@ -136,7 +171,7 @@ let class_members_cases =
     ( ("class_members.php", 32, 11),
       [
         {
-          snippet = "abstract class ClassMembers";
+          snippet = [Lsp.MarkedCode ("hack", "abstract class ClassMembers")];
           addendum = [];
           pos = pos_at (32, 11) (32, 22);
         };
@@ -145,7 +180,14 @@ let class_members_cases =
       [
         {
           snippet =
-            "// Defined in ClassMembers\nprotected final static async\nfunction genLotsOfModifiers(): Awaitable<void>";
+            [
+              Lsp.MarkedString "Defined in `ClassMembers`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode
+                ( "hack",
+                  "protected final static async\nfunction genLotsOfModifiers(): Awaitable<void>"
+                );
+            ];
           addendum = [];
           pos = pos_at (32, 25) (32, 42);
         };
@@ -154,13 +196,18 @@ let class_members_cases =
       [
         {
           snippet =
-            "// Defined in ClassMembers\n"
-            ^ "public function calculateDistance(\n"
-            ^ "  float $originalPositionX,\n"
-            ^ "  float $finalPositionX,\n"
-            ^ "  float $originalPositionY,\n"
-            ^ "  float $finalPositionY\n"
-            ^ "): float";
+            [
+              Lsp.MarkedString "Defined in `ClassMembers`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode
+                ( "hack",
+                  "public function calculateDistance(\n"
+                  ^ "  float $originalPositionX,\n"
+                  ^ "  float $finalPositionX,\n"
+                  ^ "  float $originalPositionY,\n"
+                  ^ "  float $finalPositionY\n"
+                  ^ "): float" );
+            ];
           addendum = [Lsp.MarkedString "Another method doc block"];
           pos = pos_at (34, 12) (34, 28);
         };
@@ -185,7 +232,7 @@ let classname_call_cases =
     ( ("classname_call.php", 9, 4),
       [
         {
-          snippet = "class ClassnameCall";
+          snippet = [Lsp.MarkedCode ("hack", "class ClassnameCall")];
           addendum = [];
           pos = pos_at (9, 3) (9, 15);
         };
@@ -194,7 +241,11 @@ let classname_call_cases =
       [
         {
           snippet =
-            "// Defined in ClassnameCall\npublic static function foo(): int";
+            [
+              Lsp.MarkedString "Defined in `ClassnameCall`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode ("hack", "public static function foo(): int");
+            ];
           addendum = [];
           pos = pos_at (9, 18) (9, 20);
         };
@@ -223,12 +274,16 @@ let chained_calls_cases =
     ( ("chained_calls.php", 13, 8),
       [
         {
-          snippet = "// Defined in ChainedCalls\npublic function foo(): this";
-          addendum =
+          snippet =
             [
+              Lsp.MarkedString "Defined in `ChainedCalls`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode ("hack", "public function foo(): this");
+              Lsp.MarkedString "---";
               Lsp.MarkedString "Instantiation:";
               Lsp.MarkedCode ("hack", "  this = ChainedCalls;");
             ];
+          addendum = [];
           pos = pos_at (13, 7) (13, 9);
         };
       ] );
@@ -247,16 +302,30 @@ function test_multiple_type(C1 $c1, C2 $c2, bool $cond): arraykey {
 let multiple_potential_types_cases =
   [
     ( ("multiple_potential_types.php", 6, 11),
-      [{ snippet = "(C1 | C2)"; addendum = []; pos = None }] );
+      [
+        {
+          snippet = [Lsp.MarkedCode ("hack", "(C1 | C2)")];
+          addendum = [];
+          pos = None;
+        };
+      ] );
     ( ("multiple_potential_types.php", 6, 16),
       [
         {
-          snippet = "((function(): string) | (function(): int))";
+          snippet =
+            [
+              Lsp.MarkedCode
+                ("hack", "((function(): string) | (function(): int))");
+            ];
           addendum = [];
           pos = None;
         };
         {
-          snippet = "((function(): string) | (function(): int))";
+          snippet =
+            [
+              Lsp.MarkedCode
+                ("hack", "((function(): string) | (function(): int))");
+            ];
           addendum = [];
           pos = None;
         };
@@ -280,7 +349,7 @@ let classname_variable_cases =
     ( ("classname_variable.php", 8, 4),
       [
         {
-          snippet = "classname<ClassnameVariable>";
+          snippet = [Lsp.MarkedCode ("hack", "classname<ClassnameVariable>")];
           addendum = [];
           pos = pos_at (8, 3) (8, 6);
         };
@@ -289,7 +358,11 @@ let classname_variable_cases =
       [
         {
           snippet =
-            "// Defined in ClassnameVariable\npublic static function foo(): void";
+            [
+              Lsp.MarkedString "Defined in `ClassnameVariable`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode ("hack", "public static function foo(): void");
+            ];
           addendum = [];
           pos = pos_at (8, 9) (8, 11);
         };
@@ -411,7 +484,7 @@ let docblock_cases =
     ( ("docblock.php", 7, 3),
       [
         {
-          snippet = "class DocBlock";
+          snippet = [Lsp.MarkedCode ("hack", "class DocBlock")];
           addendum =
             [
               Lsp.MarkedString
@@ -424,7 +497,11 @@ let docblock_cases =
       [
         {
           snippet =
-            "// Defined in DocBlock\npublic static function doStuff(): void";
+            [
+              Lsp.MarkedString "Defined in `DocBlock`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode ("hack", "public static function doStuff(): void");
+            ];
           addendum = [Lsp.MarkedString "Method doc block with double star."];
           pos = pos_at (7, 13) (7, 19);
         };
@@ -432,7 +509,7 @@ let docblock_cases =
     ( ("docblock.php", 9, 3),
       [
         {
-          snippet = "function queryDocBlocks(): void";
+          snippet = [Lsp.MarkedCode ("hack", "function queryDocBlocks(): void")];
           addendum = [Lsp.MarkedString "Multiline\nfunction\ndoc block."];
           pos = pos_at (9, 3) (9, 16);
         };
@@ -441,7 +518,12 @@ let docblock_cases =
       [
         {
           snippet =
-            "// Defined in DocBlock\npublic static function preserveIndentation(): void";
+            [
+              Lsp.MarkedString "Defined in `DocBlock`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode
+                ("hack", "public static function preserveIndentation(): void");
+            ];
           addendum =
             [
               Lsp.MarkedString
@@ -457,7 +539,12 @@ we want to preserve.";
       [
         {
           snippet =
-            "// Defined in DocBlock\npublic static function leadingStarsAndMDList(): void";
+            [
+              Lsp.MarkedString "Defined in `DocBlock`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode
+                ("hack", "public static function leadingStarsAndMDList(): void");
+            ];
           addendum =
             [
               Lsp.MarkedString
@@ -474,7 +561,12 @@ the other stars.";
       [
         {
           snippet =
-            "// Defined in DocBlock\npublic static function manyLineBreaks(): void";
+            [
+              Lsp.MarkedString "Defined in `DocBlock`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode
+                ("hack", "public static function manyLineBreaks(): void");
+            ];
           addendum =
             [
               Lsp.MarkedString
@@ -487,7 +579,11 @@ the other stars.";
       [
         {
           snippet =
-            "// Defined in DocBlockOnClassButNotConstructor\npublic function __construct(): void";
+            [
+              Lsp.MarkedString "Defined in `DocBlockOnClassButNotConstructor`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode ("hack", "public function __construct(): void");
+            ];
           addendum =
             [
               Lsp.MarkedString
@@ -500,7 +596,12 @@ the other stars.";
       [
         {
           snippet =
-            "// Defined in DocBlockOnClassButNotConstructor\npublic static function nonConstructorMethod(): void";
+            [
+              Lsp.MarkedString "Defined in `DocBlockOnClassButNotConstructor`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode
+                ("hack", "public static function nonConstructorMethod(): void");
+            ];
           addendum =
             [
               Lsp.MarkedString
@@ -512,7 +613,7 @@ the other stars.";
     ( ("docblock.php", 23, 28),
       [
         {
-          snippet = "DocBlockBase";
+          snippet = [Lsp.MarkedCode ("hack", "DocBlockBase")];
           addendum = [Lsp.MarkedString "DocBlockBase: class doc block."];
           pos = pos_at (23, 28) (23, 39);
         };
@@ -521,7 +622,11 @@ the other stars.";
       [
         {
           snippet =
-            "// Defined in DocBlockBase\npublic function __construct(): void";
+            [
+              Lsp.MarkedString "Defined in `DocBlockBase`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode ("hack", "public function __construct(): void");
+            ];
           addendum = [Lsp.MarkedString "DocBlockBase: constructor doc block."];
           pos = pos_at (25, 12) (25, 23);
         };
@@ -530,7 +635,11 @@ the other stars.";
       [
         {
           snippet =
-            "// Defined in DocBlockBase\npublic function __construct(): void";
+            [
+              Lsp.MarkedString "Defined in `DocBlockBase`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode ("hack", "public function __construct(): void");
+            ];
           addendum = [Lsp.MarkedString "DocBlockBase: constructor doc block."];
           pos = pos_at (27, 14) (27, 28);
         };
@@ -538,7 +647,10 @@ the other stars.";
     ( ("docblock.php", 89, 44),
       [
         {
-          snippet = "function line_comment_with_break(): void";
+          snippet =
+            [
+              Lsp.MarkedCode ("hack", "function line_comment_with_break(): void");
+            ];
           addendum =
             [
               Lsp.MarkedString
@@ -550,7 +662,8 @@ the other stars.";
     ( ("docblock.php", 94, 38),
       [
         {
-          snippet = "function two_comment_types(): void";
+          snippet =
+            [Lsp.MarkedCode ("hack", "function two_comment_types(): void")];
           addendum =
             [Lsp.MarkedString "Only this should be part of the docblock."];
           pos = pos_at (94, 38) (94, 54);
@@ -559,7 +672,8 @@ the other stars.";
     ( ("docblock.php", 101, 41),
       [
         {
-          snippet = "function too_many_blank_lines(): void";
+          snippet =
+            [Lsp.MarkedCode ("hack", "function too_many_blank_lines(): void")];
           addendum = [];
           pos = pos_at (101, 41) (101, 60);
         };
@@ -567,7 +681,7 @@ the other stars.";
     ( ("docblock.php", 106, 27),
       [
         {
-          snippet = "function needs_fixing(): _";
+          snippet = [Lsp.MarkedCode ("hack", "function needs_fixing(): _")];
           addendum = [Lsp.MarkedString "A function with an HH_FIXME."];
           pos = pos_at (106, 27) (106, 38);
         };
@@ -588,16 +702,21 @@ let special_cases_cases =
       [
         {
           snippet =
-            "function idx<Tk as arraykey, Tv>(
+            [
+              Lsp.MarkedCode
+                ( "hack",
+                  "function idx<Tk as arraykey, Tv>(
   ?KeyedContainer<Tk, Tv> $collection,
   ?Tk $index,
   optional HH\\FIXME\\MISSING_PARAM_TYPE $default
-)[]: Tv";
-          addendum =
-            [
+)[]: Tv"
+                );
+              Lsp.MarkedString "---";
               Lsp.MarkedString "Instantiation:";
               Lsp.MarkedCode ("hack", "  Tk = int;\n  Tv = ?int;");
-              Lsp.MarkedString "---";
+            ];
+          addendum =
+            [
               Lsp.MarkedString
                 "Index into the given KeyedContainer using the provided key.\n\nIf the key doesn't exist, the key is `null`, or the collection is `null`,\nreturn the provided default value instead, or `null` if no default value was\nprovided. If the key is `null`, the default value will be returned even if\n`null` is a valid key in the container.";
             ];
@@ -626,20 +745,37 @@ function bounded_generic_fun<T as Base>(T $x): void {
 let bounded_generic_fun_cases =
   [
     ( ("bounded_generic_fun.php", 5, 3),
-      [{ snippet = "T as Base"; addendum = []; pos = pos_at (5, 3) (5, 4) }] );
+      [
+        {
+          snippet = [Lsp.MarkedCode ("hack", "T as Base")];
+          addendum = [];
+          pos = pos_at (5, 3) (5, 4);
+        };
+      ] );
     ( ("bounded_generic_fun.php", 7, 7),
-      [{ snippet = "T as Base"; addendum = []; pos = pos_at (7, 7) (7, 8) }] );
+      [
+        {
+          snippet = [Lsp.MarkedCode ("hack", "T as Base")];
+          addendum = [];
+          pos = pos_at (7, 7) (7, 8);
+        };
+      ] );
     ( ("bounded_generic_fun.php", 9, 5),
       [
         {
-          snippet = "(C & T)\nwhere T as Base";
+          snippet = [Lsp.MarkedCode ("hack", "(C & T)\nwhere T as Base")];
           addendum = [];
           pos = pos_at (9, 5) (9, 6);
         };
       ] );
     ( ("bounded_generic_fun.php", 12, 3),
-      [{ snippet = "T as Base"; addendum = []; pos = pos_at (12, 3) (12, 4) }]
-    );
+      [
+        {
+          snippet = [Lsp.MarkedCode ("hack", "T as Base")];
+          addendum = [];
+          pos = pos_at (12, 3) (12, 4);
+        };
+      ] );
   ]
 
 let doc_block_fallback =
@@ -746,7 +882,11 @@ let doc_block_fallback_cases =
       [
         {
           snippet =
-            "// Defined in DBFBClass1\npublic function doTheThing(): void";
+            [
+              Lsp.MarkedString "Defined in `DBFBClass1`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode ("hack", "public function doTheThing(): void");
+            ];
           addendum =
             [
               Lsp.MarkedString
@@ -759,7 +899,11 @@ let doc_block_fallback_cases =
       [
         {
           snippet =
-            "// Defined in DBFBClass1\npublic function docBlockInClass(): void";
+            [
+              Lsp.MarkedString "Defined in `DBFBClass1`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode ("hack", "public function docBlockInClass(): void");
+            ];
           addendum = [Lsp.MarkedString "DBFBClass1."];
           pos = pos_at (5, 7) (5, 21);
         };
@@ -767,7 +911,12 @@ let doc_block_fallback_cases =
     ( ("doc_block_fallback.php", 7, 7),
       [
         {
-          snippet = "// Defined in DBFBClass1\npublic function identical(): void";
+          snippet =
+            [
+              Lsp.MarkedString "Defined in `DBFBClass1`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode ("hack", "public function identical(): void");
+            ];
           addendum = [Lsp.MarkedString "Identical."];
           pos = pos_at (7, 7) (7, 15);
         };
@@ -776,7 +925,12 @@ let doc_block_fallback_cases =
       [
         {
           snippet =
-            "// Defined in DBFBClass1\npublic function slightlyDifferent(): void";
+            [
+              Lsp.MarkedString "Defined in `DBFBClass1`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode
+                ("hack", "public function slightlyDifferent(): void");
+            ];
           addendum =
             [
               Lsp.MarkedString
@@ -789,7 +943,11 @@ let doc_block_fallback_cases =
       [
         {
           snippet =
-            "// Defined in DBFBClass1\npublic function noDocBlock(): void";
+            [
+              Lsp.MarkedString "Defined in `DBFBClass1`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode ("hack", "public function noDocBlock(): void");
+            ];
           addendum = [];
           pos = pos_at (11, 7) (11, 16);
         };
@@ -800,7 +958,11 @@ let doc_block_fallback_cases =
       [
         {
           snippet =
-            "// Defined in DBFBClass3\npublic function docBlockInClass2(): void";
+            [
+              Lsp.MarkedString "Defined in `DBFBClass3`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode ("hack", "public function docBlockInClass2(): void");
+            ];
           addendum = [Lsp.MarkedString "DBFBClass1."];
           pos = pos_at (13, 7) (13, 22);
         };
@@ -809,7 +971,11 @@ let doc_block_fallback_cases =
       [
         {
           snippet =
-            "// Defined in DBFBTrait\npublic function traitFunction(): void";
+            [
+              Lsp.MarkedString "Defined in `DBFBTrait`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode ("hack", "public function traitFunction(): void");
+            ];
           addendum = [Lsp.MarkedString "DBFBTrait."];
           pos = pos_at (15, 7) (15, 19);
         };
@@ -818,7 +984,11 @@ let doc_block_fallback_cases =
       [
         {
           snippet =
-            "// Defined in DBFBClass3\npublic function traitFunction2(): void";
+            [
+              Lsp.MarkedString "Defined in `DBFBClass3`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode ("hack", "public function traitFunction2(): void");
+            ];
           addendum = [Lsp.MarkedString "DBFBClass1."];
           pos = pos_at (17, 7) (17, 20);
         };
@@ -854,47 +1024,74 @@ let class_id_positions_cases =
   [
     ( ("class_id_positions.php", 3, 18),
       [
-        { snippet = "class CIPos2"; addendum = []; pos = pos_at (3, 18) (3, 23) };
+        {
+          snippet = [Lsp.MarkedCode ("hack", "class CIPos2")];
+          addendum = [];
+          pos = pos_at (3, 18) (3, 23);
+        };
       ] );
     ( ("class_id_positions.php", 3, 26),
       [
         {
-          snippet = "// Defined in CIPos2\nconst int MyConstInt";
+          snippet =
+            [
+              Lsp.MarkedString "Defined in `CIPos2`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode ("hack", "const int MyConstInt");
+            ];
           addendum = [];
           pos = pos_at (3, 26) (3, 35);
         };
         {
-          snippet = "Parameter: $x";
+          snippet = [Lsp.MarkedCode ("hack", "Parameter: $x")];
           addendum = [];
           pos = pos_at (3, 18) (3, 35);
         };
       ] );
     ( ("class_id_positions.php", 5, 18),
       [
-        { snippet = "class CIPos2"; addendum = []; pos = pos_at (5, 18) (5, 23) };
+        {
+          snippet = [Lsp.MarkedCode ("hack", "class CIPos2")];
+          addendum = [];
+          pos = pos_at (5, 18) (5, 23);
+        };
       ] );
     ( ("class_id_positions.php", 5, 26),
       [
         {
-          snippet = "// Defined in CIPos2\npublic static int $myStaticInt";
+          snippet =
+            [
+              Lsp.MarkedString "Defined in `CIPos2`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode ("hack", "public static int $myStaticInt");
+            ];
           addendum = [];
           pos = pos_at (5, 26) (5, 37);
         };
         {
-          snippet = "Parameter: $x";
+          snippet = [Lsp.MarkedCode ("hack", "Parameter: $x")];
           addendum = [];
           pos = pos_at (5, 18) (5, 37);
         };
       ] );
     ( ("class_id_positions.php", 7, 18),
       [
-        { snippet = "class CIPos2"; addendum = []; pos = pos_at (7, 18) (7, 23) };
+        {
+          snippet = [Lsp.MarkedCode ("hack", "class CIPos2")];
+          addendum = [];
+          pos = pos_at (7, 18) (7, 23);
+        };
       ] );
     ( ("class_id_positions.php", 7, 26),
       [
         {
           snippet =
-            "// Defined in CIPos2\npublic static function returnConstInt(): int";
+            [
+              Lsp.MarkedString "Defined in `CIPos2`";
+              Lsp.MarkedString "---";
+              Lsp.MarkedCode
+                ("hack", "public static function returnConstInt(): int");
+            ];
           addendum = [];
           pos = pos_at (7, 26) (7, 39);
         };

@@ -1,4 +1,5 @@
 attribute
+---
 `attribute` declares which attributes are permitted on the current XHP class.
 
 Attributes are optional unless marked with `@required`.

@@ -1,4 +1,5 @@
 enum class
+---
 An `enum class` is a fixed set of values that can be used as typed constants.
 
 Enum classes enable you to write generic getter and setter methods.

@@ -1,4 +1,5 @@
 final class ImmMap
+---
 **Prefer `dict` over `ImmMap`**.
 
 `ImmMap` is an immutable `Map`. HHVM provides a native implementation for

@@ -1,4 +1,5 @@
 final class Map
+---
 **Prefer `dict` over `Map`**. If you need reference semantics,
 you can wrap the `dict` in an `Ref`.
 

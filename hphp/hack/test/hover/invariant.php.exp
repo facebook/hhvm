@@ -3,6 +3,7 @@ function invariant(
   HH\FormatString<PlainSprintf> $f,
   mixed $f_args...
 )[]: void
+---
 Call `invariant_violation` if the condition is false.
 
 ```

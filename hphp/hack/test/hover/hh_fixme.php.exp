@@ -1,4 +1,5 @@
 HH_FIXME
+---
 `HH_FIXME[N]` disables type checker error N on the next line. It does
 not change runtime behavior.
 

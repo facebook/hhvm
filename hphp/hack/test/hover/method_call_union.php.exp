@@ -1,5 +1,7 @@
-// Defined in FooParent
+Defined in `FooParent`
+---
 public function bar(): string
--------------
-// Defined in Other
+---
+Defined in `Other`
+---
 public function bar(): int

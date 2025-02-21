@@ -1,5 +1,7 @@
-// Defined in C
+Defined in `C`
+---
 public function foo(): int
+---
 
 This is a docblock 2
 

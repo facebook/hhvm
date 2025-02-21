@@ -1,2 +1,3 @@
 internal
+---
 An `internal` symbol can only be accessed from files that belong to the current `module`.

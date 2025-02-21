@@ -1,4 +1,5 @@
 __Memoize
+---
 Cache the return values from this function/method. Calls with the same arguments will return the cached value.
 
 Caching is per-request and shared between subclasses (see also `__MemoizeLSB`).

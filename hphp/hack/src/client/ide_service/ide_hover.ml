@@ -406,19 +406,17 @@ let split_class_name (full_name : string) : string =
   | Some (class_name, _member) -> class_name
   | None -> full_name
 
-let fun_defined_in def_opt : string =
-  match def_opt with
-  | Some def ->
-    let abs_name = "\\" ^ SymbolDefinition.full_name def in
-    if SN.PseudoFunctions.is_pseudo_function abs_name then
-      ""
-    else (
-      match String.rsplit2 (Utils.strip_hh_lib_ns abs_name) ~on:'\\' with
-      | Some (namespace, _) when not (String.equal namespace "") ->
-        Printf.sprintf "// Defined in namespace %s\n" namespace
-      | _ -> ""
-    )
-  | _ -> ""
+let make_fun_defined_in_section def_opt : string option =
+  let open Option.Let_syntax in
+  let* def = def_opt in
+  let abs_name = "\\" ^ SymbolDefinition.full_name def in
+  if SN.PseudoFunctions.is_pseudo_function abs_name then
+    None
+  else
+    match String.rsplit2 (Utils.strip_hh_lib_ns abs_name) ~on:'\\' with
+    | Some (namespace, _) when not (String.equal namespace "") ->
+      Some (Printf.sprintf "Defined in namespace `%s`" namespace)
+    | _ -> None
 
 (** Return the decl type of a class member or function represented by a SymbolDefinition.t.
     If passed a class member, also return the type parameters of that class *)
@@ -482,6 +480,8 @@ let get_decl_ty
     | _ -> None)
   | _ -> None
 
+let make_hack_marked_code s = Lsp.MarkedCode ("hack", s)
+
 (** Make the 'instantiation' section of the hover card, something like:
 
 ---
@@ -500,45 +500,42 @@ let make_instantiation_section
     let Derive_type_instantiation.Instantiation.{ this; subst } = subst in
     let header = Lsp.MarkedString "Instantiation:" in
     let section =
-      Lsp.MarkedCode
-        ( "hack",
-          let print_tparam (tparam, ty) =
-            Printf.sprintf "  %s = %s;" tparam (Tast_env.print_ty env ty)
-          in
-          let printed_this =
-            Option.map this ~f:(fun ty -> print_tparam ("this", ty))
-          in
-          let printed_tparams =
-            SMap.elements subst |> List.rev_map ~f:print_tparam
-          in
-          let printed_tparams =
-            match printed_this with
-            | None -> printed_tparams
-            | Some printed_this -> printed_this :: printed_tparams
-          in
-          String.concat ~sep:"\n" printed_tparams )
+      let print_tparam (tparam, ty) =
+        Printf.sprintf "  %s = %s;" tparam (Tast_env.print_ty env ty)
+      in
+      let printed_this =
+        Option.map this ~f:(fun ty -> print_tparam ("this", ty))
+      in
+      let printed_tparams =
+        SMap.elements subst |> List.rev_map ~f:print_tparam
+      in
+      let printed_tparams =
+        match printed_this with
+        | None -> printed_tparams
+        | Some printed_this -> printed_this :: printed_tparams
+      in
+      String.concat ~sep:"\n" printed_tparams |> make_hack_marked_code
     in
     Some [header; section]
 
 (** Make the "Defined in" section of the hover card, which indicates where a member
     is defined *)
 let make_defined_in_section def_opt (tparams : Typing_defs.decl_tparam list) =
-  match def_opt with
-  | Some def ->
-    let tparams =
-      match tparams with
-      | [] -> ""
-      | _ ->
-        "<"
-        ^ (String.concat ~sep:", "
-          @@ List.map tparams ~f:(fun param -> snd param.Typing_defs.tp_name))
-        ^ ">"
-    in
-    Printf.sprintf
-      "// Defined in %s%s\n"
-      (split_class_name @@ SymbolDefinition.full_name def)
-      tparams
-  | None -> ""
+  let open Option.Let_syntax in
+  let+ def = def_opt in
+  let tparams =
+    match tparams with
+    | [] -> ""
+    | _ ->
+      "<"
+      ^ (String.concat ~sep:", "
+        @@ List.map tparams ~f:(fun param -> snd param.Typing_defs.tp_name))
+      ^ ">"
+  in
+  Printf.sprintf
+    "Defined in `%s%s`"
+    (split_class_name @@ SymbolDefinition.full_name def)
+    tparams
 
 (** Return the hover card section for the uninstantiated signature and the
     hover card section showing the instantiation.
@@ -595,12 +592,13 @@ let make_hover_info
   let improved_hover =
     (Provider_context.get_tcopt ctx).GlobalOptions.improved_hover
   in
-  let (snippet, instantiation_section) =
+  let (defined_in, snippet, instantiation_section) =
     match (type_, info_opt) with
-    | (_, None) -> (Utils.strip_hh_lib_ns name, None)
+    | (_, None) -> (None, Utils.strip_hh_lib_ns name, None)
     | (SymbolOccurrence.BestEffortArgument (recv, i), _) ->
       let param_name = nth_param ctx recv i in
-      ( Printf.sprintf "Parameter: %s" (Option.value ~default:"$_" param_name),
+      ( None,
+        Printf.sprintf "Parameter: %s" (Option.value ~default:"$_" param_name),
         None )
     | (SymbolOccurrence.Method _, Some info)
     | (SymbolOccurrence.ClassConst _, Some info)
@@ -612,10 +610,12 @@ let make_hover_info
             class_tparams )
         | _ -> ((print_locl_ty_with_identity info, None), [])
       in
-      ( make_defined_in_section def_opt class_tparams ^ snippet,
+      ( make_defined_in_section def_opt class_tparams,
+        snippet,
         instantiation_section )
     | (SymbolOccurrence.GConst, Some info) ->
-      ( (match make_hover_const_definition entry def_opt with
+      ( None,
+        (match make_hover_const_definition entry def_opt with
         | Some def_txt -> def_txt
         | None -> print_locl_ty_with_identity info),
         None )
@@ -627,13 +627,14 @@ let make_hover_info
         | _ ->
           (print_locl_ty_with_identity ~do_not_strip_dynamic:true info, None)
       in
-      (fun_defined_in def_opt ^ snippet, instantiation_section)
+      (make_fun_defined_in_section def_opt, snippet, instantiation_section)
     | ( SymbolOccurrence.(
           ( Class _ | Module | Typeconst _ | Attribute _ | EnumClassLabel _
           | Keyword _ | BuiltInType _ | LocalVar | TypeVar | XhpLiteralAttr _
           | HhFixme | HhIgnore | PureFunctionContext )),
         Some info ) ->
-      ( print_locl_ty_with_identity ~do_not_strip_dynamic:true info
+      ( None,
+        print_locl_ty_with_identity ~do_not_strip_dynamic:true info
         ^ under_dynamic_result,
         None )
   in
@@ -654,13 +655,19 @@ let make_hover_info
     | _ -> make_hover_doc_block ctx entry occurrence def_opt
   in
   let addendum = List.map addendum ~f:(fun s -> Lsp.MarkedString s) in
-  let addendum =
+  let main_section =
     match instantiation_section with
-    | None -> addendum
-    | Some instantiation_section ->
-      (match addendum with
-      | [] -> instantiation_section
-      | _ :: _ -> instantiation_section @ (Lsp.MarkedString "---" :: addendum))
+    | None -> []
+    | Some instantiation_section -> instantiation_section :: []
+  in
+  let main_section = [make_hack_marked_code snippet] :: main_section in
+  let main_section =
+    match defined_in with
+    | None -> main_section
+    | Some defined_in -> [Lsp.MarkedString defined_in] :: main_section
+  in
+  let snippet =
+    List.intersperse main_section ~sep:[Lsp.MarkedString "---"] |> List.concat
   in
   HoverService.{ snippet; addendum; pos = Some occurrence.SymbolOccurrence.pos }
 
@@ -771,7 +778,11 @@ let go_quarantined
     in
     [
       {
-        snippet = Tast_env.print_ty env ty ^ under_dynamic_result;
+        snippet =
+          [
+            make_hack_marked_code
+              (Tast_env.print_ty env ty ^ under_dynamic_result);
+          ];
         addendum;
         pos = None;
       };
@@ -798,8 +809,11 @@ let go_quarantined
         [
           {
             snippet =
-              Tast_env.print_ty (ServerInferType.get_env info) ty
-              ^ under_dynamic_result;
+              [
+                make_hack_marked_code
+                  (Tast_env.print_ty (ServerInferType.get_env info) ty
+                  ^ under_dynamic_result);
+              ];
             addendum = [];
             pos = None;
           };
@@ -811,7 +825,10 @@ let go_quarantined
       | Some param_name ->
         [
           {
-            snippet = Printf.sprintf "Parameter: %s" param_name;
+            snippet =
+              [
+                make_hack_marked_code (Printf.sprintf "Parameter: %s" param_name);
+              ];
             addendum = [];
             pos = None;
           };

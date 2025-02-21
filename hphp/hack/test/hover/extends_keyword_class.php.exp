@@ -1,4 +1,5 @@
 extends
+---
 Extending a class allows your class to inherit methods from another class.
 
 Inheritance allows your class to:

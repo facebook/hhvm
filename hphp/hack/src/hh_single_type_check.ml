@@ -1786,23 +1786,14 @@ let do_hover ~ctx ~filename oc (pos_given : File_content.Position.t option) =
   in
   let results = Ide_hover.go_quarantined ~ctx ~entry pos in
   let formatted_results =
-    List.map
-      ~f:(fun r ->
-        let open HoverService in
-        String.concat
-          ~sep:"\n"
-          (r.snippet
-          :: List.map
-               ~f:(function
-                 | Lsp.MarkedCode (_, s) -> s
-                 | Lsp.MarkedString s -> s)
-               r.addendum))
-      results
+    HoverService.as_marked_string_list results
+    |> List.map ~f:(fun (r : Lsp.markedString) ->
+           match r with
+           | Lsp.MarkedCode (_, s) -> s
+           | Lsp.MarkedString s -> s)
+    |> String.concat ~sep:"\n"
   in
-  Printf.fprintf
-    oc
-    "%s\n"
-    (String.concat ~sep:"\n-------------\n" formatted_results)
+  Printf.fprintf oc "%s\n" formatted_results
 
 let handle_mode
     mode

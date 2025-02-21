@@ -1,4 +1,5 @@
 dynamic
+---
 Any value at all. Unlike `mixed`, the type checker allows any operation on a `dynamic` value, even if e.g. a method doesn't actually exist.
 
 All operations on a `dynamic` value return another `dynamic` value. Prefer more specific types so the type checker can help you.

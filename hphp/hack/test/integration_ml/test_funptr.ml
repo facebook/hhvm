@@ -66,6 +66,8 @@ let pos_at (line1, column1) (line2, column2) =
        ~pos_start:(line1, 0, column1 - 1)
        ~pos_end:(line2, 0, column2))
 
+let make_hack_marked_code s = [Lsp.MarkedCode ("hack", s)]
+
 let identify_tests =
   [
     ( (17, 9),
@@ -83,7 +85,11 @@ let identify_tests =
         [
           {
             HoverService.snippet =
-              "HH\\FunctionRef<(readonly function(string $s): string)>";
+              [
+                Lsp.MarkedCode
+                  ( "hack",
+                    "HH\\FunctionRef<(readonly function(string $s): string)>" );
+              ];
             addendum = [Lsp.MarkedString "foo_docblock"];
             pos = pos_at (17, 8) (17, 10);
           };
@@ -102,7 +108,7 @@ let identify_tests =
       go_hover
         [
           {
-            HoverService.snippet = "class Cardoor";
+            HoverService.snippet = [Lsp.MarkedCode ("hack", "class Cardoor")];
             addendum = [Lsp.MarkedString "Cardoor_docblock"];
             pos = pos_at (20, 8) (20, 14);
           };
@@ -122,7 +128,12 @@ let identify_tests =
         [
           {
             HoverService.snippet =
-              "// Defined in Cardoor\npublic static function bar<T>(string $x): string";
+              [
+                Lsp.MarkedString "Defined in `Cardoor`";
+                Lsp.MarkedString "---";
+                Lsp.MarkedCode
+                  ("hack", "public static function bar<T>(string $x): string");
+              ];
             addendum = [Lsp.MarkedString "bar_docblock"];
             pos = pos_at (20, 17) (20, 19);
           };

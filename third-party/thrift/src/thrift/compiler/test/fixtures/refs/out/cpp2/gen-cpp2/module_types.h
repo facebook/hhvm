@@ -667,6 +667,7 @@ class MyUnion final  {
     return value_.aString;
   }
 
+  /** Glean { "field": "anInteger" } */
   ::std::unique_ptr<::std::int32_t> const& get_anInteger() const {
     if (getType() != Type::anInteger) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -674,6 +675,7 @@ class MyUnion final  {
     return value_.anInteger;
   }
 
+  /** Glean { "field": "aString" } */
   ::std::unique_ptr<::std::string> const& get_aString() const {
     if (getType() != Type::aString) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -922,6 +924,7 @@ class NonTriviallyDestructibleUnion final  {
     return value_.int_field;
   }
 
+  /** Glean { "field": "int_field" } */
   ::std::shared_ptr<::std::int32_t> const& get_int_field() const {
     if (getType() != Type::int_field) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();

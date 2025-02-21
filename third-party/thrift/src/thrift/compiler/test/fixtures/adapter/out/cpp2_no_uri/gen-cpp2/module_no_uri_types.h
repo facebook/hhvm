@@ -210,6 +210,7 @@ class RefUnion final  {
     return value_.field1;
   }
 
+  /** Glean { "field": "field1" } */
   ::std::shared_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::string, RefUnion>> const& get_field1() const {
     if (getType() != Type::field1) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();

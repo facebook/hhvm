@@ -1638,6 +1638,7 @@ class MyUnion final  {
     return value_.floatSet;
   }
 
+  /** Glean { "field": "myEnum" } */
   ::test::fixtures::basic::MyEnumAlias const& get_myEnum() const {
     if (getType() != Type::myEnum) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1645,6 +1646,7 @@ class MyUnion final  {
     return value_.myEnum;
   }
 
+  /** Glean { "field": "myStruct" } */
   ::test::fixtures::basic::MyStruct const& get_myStruct() const {
     if (getType() != Type::myStruct) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1652,6 +1654,7 @@ class MyUnion final  {
     return value_.myStruct;
   }
 
+  /** Glean { "field": "myDataItem" } */
   ::test::fixtures::basic::MyDataItem const& get_myDataItem() const {
     if (getType() != Type::myDataItem) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1659,6 +1662,7 @@ class MyUnion final  {
     return value_.myDataItem;
   }
 
+  /** Glean { "field": "floatSet" } */
   ::std::set<float> const& get_floatSet() const {
     if (getType() != Type::floatSet) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -2894,6 +2898,7 @@ class UnionToBeRenamed final  {
   }
 
 
+  /** Glean { "field": "reserved_field" } */
   ::std::int32_t const& get_reserved_field() const {
     if (getType() != Type::reserved_field) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();

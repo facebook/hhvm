@@ -463,6 +463,7 @@ class U final  {
   }
 
 
+  /** Glean { "field": "i" } */
   ::std::int32_t const& get_i() const {
     if (getType() != Type::i) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -470,6 +471,7 @@ class U final  {
     return value_.i;
   }
 
+  /** Glean { "field": "s" } */
   ::std::string const& get_s() const {
     if (getType() != Type::s) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();

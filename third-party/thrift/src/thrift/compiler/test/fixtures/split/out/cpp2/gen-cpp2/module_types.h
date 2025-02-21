@@ -1013,6 +1013,7 @@ class MyUnion final  {
     return value_.myDataItem;
   }
 
+  /** Glean { "field": "myEnum" } */
   ::cpp2::MyEnum const& get_myEnum() const {
     if (getType() != Type::myEnum) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1020,6 +1021,7 @@ class MyUnion final  {
     return value_.myEnum;
   }
 
+  /** Glean { "field": "myStruct" } */
   ::cpp2::MyStruct const& get_myStruct() const {
     if (getType() != Type::myStruct) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1027,6 +1029,7 @@ class MyUnion final  {
     return value_.myStruct;
   }
 
+  /** Glean { "field": "myDataItem" } */
   ::cpp2::MyDataItem const& get_myDataItem() const {
     if (getType() != Type::myDataItem) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();

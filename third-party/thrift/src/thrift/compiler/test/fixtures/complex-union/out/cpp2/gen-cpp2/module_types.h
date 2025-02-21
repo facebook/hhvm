@@ -511,6 +511,7 @@ class ComplexUnion final  {
     return value_.stringRef;
   }
 
+  /** Glean { "field": "intValue" } */
   ::std::int64_t const& get_intValue() const {
     if (getType() != Type::intValue) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -518,6 +519,7 @@ class ComplexUnion final  {
     return value_.intValue;
   }
 
+  /** Glean { "field": "stringValue" } */
   ::std::string const& get_stringValue() const {
     if (getType() != Type::stringValue) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -525,6 +527,7 @@ class ComplexUnion final  {
     return value_.stringValue;
   }
 
+  /** Glean { "field": "intListValue" } */
   ::std::vector<::std::int64_t> const& get_intListValue() const {
     if (getType() != Type::intListValue) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -532,6 +535,7 @@ class ComplexUnion final  {
     return value_.intListValue;
   }
 
+  /** Glean { "field": "stringListValue" } */
   ::std::vector<::std::string> const& get_stringListValue() const {
     if (getType() != Type::stringListValue) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -539,6 +543,7 @@ class ComplexUnion final  {
     return value_.stringListValue;
   }
 
+  /** Glean { "field": "typedefValue" } */
   ::cpp2::containerTypedef const& get_typedefValue() const {
     if (getType() != Type::typedefValue) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -546,6 +551,7 @@ class ComplexUnion final  {
     return value_.typedefValue;
   }
 
+  /** Glean { "field": "stringRef" } */
   ::std::unique_ptr<::std::string> const& get_stringRef() const {
     if (getType() != Type::stringRef) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -985,6 +991,7 @@ class ListUnion final  {
     return value_.stringListValue;
   }
 
+  /** Glean { "field": "intListValue" } */
   ::std::vector<::std::int64_t> const& get_intListValue() const {
     if (getType() != Type::intListValue) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -992,6 +999,7 @@ class ListUnion final  {
     return value_.intListValue;
   }
 
+  /** Glean { "field": "stringListValue" } */
   ::std::vector<::std::string> const& get_stringListValue() const {
     if (getType() != Type::stringListValue) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1297,6 +1305,7 @@ class DataUnion final  {
   }
 
 
+  /** Glean { "field": "binaryData" } */
   ::std::string const& get_binaryData() const {
     if (getType() != Type::binaryData) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1304,6 +1313,7 @@ class DataUnion final  {
     return value_.binaryData;
   }
 
+  /** Glean { "field": "stringData" } */
   ::std::string const& get_stringData() const {
     if (getType() != Type::stringData) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1910,6 +1920,7 @@ class ValUnion final  {
     return value_.v2;
   }
 
+  /** Glean { "field": "v1" } */
   ::cpp2::Val const& get_v1() const {
     if (getType() != Type::v1) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1917,6 +1928,7 @@ class ValUnion final  {
     return value_.v1;
   }
 
+  /** Glean { "field": "v2" } */
   ::cpp2::Val const& get_v2() const {
     if (getType() != Type::v2) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -2222,6 +2234,7 @@ class VirtualComplexUnion  {
   }
 
 
+  /** Glean { "field": "thingOne" } */
   ::std::string const& get_thingOne() const {
     if (getType() != Type::thingOne) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -2229,6 +2242,7 @@ class VirtualComplexUnion  {
     return value_.thingOne;
   }
 
+  /** Glean { "field": "thingTwo" } */
   ::std::string const& get_thingTwo() const {
     if (getType() != Type::thingTwo) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -2632,6 +2646,7 @@ class NonCopyableUnion final  {
     return value_.s;
   }
 
+  /** Glean { "field": "s" } */
   ::cpp2::NonCopyableStruct const& get_s() const {
     if (getType() != Type::s) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();

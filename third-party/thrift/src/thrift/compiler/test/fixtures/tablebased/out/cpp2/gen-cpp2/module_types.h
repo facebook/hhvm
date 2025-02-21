@@ -1461,6 +1461,7 @@ class ExampleUnion final  {
     return value_.fieldB;
   }
 
+  /** Glean { "field": "fieldA" } */
   ::test::fixtures::tablebased::ContainerStruct const& get_fieldA() const {
     if (getType() != Type::fieldA) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1468,6 +1469,7 @@ class ExampleUnion final  {
     return value_.fieldA;
   }
 
+  /** Glean { "field": "fieldB" } */
   ::test::fixtures::tablebased::TrivialTypesStruct const& get_fieldB() const {
     if (getType() != Type::fieldB) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();

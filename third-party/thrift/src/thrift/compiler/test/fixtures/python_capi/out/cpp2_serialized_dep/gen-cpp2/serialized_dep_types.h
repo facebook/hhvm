@@ -697,6 +697,7 @@ class SerializedUnion final  {
   }
 
 
+  /** Glean { "field": "s" } */
   ::std::string const& get_s() const {
     if (getType() != Type::s) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -704,6 +705,7 @@ class SerializedUnion final  {
     return value_.s;
   }
 
+  /** Glean { "field": "i" } */
   ::std::int32_t const& get_i() const {
     if (getType() != Type::i) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1697,6 +1699,7 @@ class MarshalUnion final  {
   }
 
 
+  /** Glean { "field": "s" } */
   ::std::string const& get_s() const {
     if (getType() != Type::s) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1704,6 +1707,7 @@ class MarshalUnion final  {
     return value_.s;
   }
 
+  /** Glean { "field": "i" } */
   ::std::int32_t const& get_i() const {
     if (getType() != Type::i) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();

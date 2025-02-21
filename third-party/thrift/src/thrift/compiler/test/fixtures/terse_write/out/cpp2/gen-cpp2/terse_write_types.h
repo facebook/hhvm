@@ -1108,6 +1108,7 @@ class MyUnion final  {
     return value_.struct_field;
   }
 
+  /** Glean { "field": "bool_field" } */
   bool const& get_bool_field() const {
     if (getType() != Type::bool_field) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1115,6 +1116,7 @@ class MyUnion final  {
     return value_.bool_field;
   }
 
+  /** Glean { "field": "byte_field" } */
   ::std::int8_t const& get_byte_field() const {
     if (getType() != Type::byte_field) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1122,6 +1124,7 @@ class MyUnion final  {
     return value_.byte_field;
   }
 
+  /** Glean { "field": "short_field" } */
   ::std::int16_t const& get_short_field() const {
     if (getType() != Type::short_field) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1129,6 +1132,7 @@ class MyUnion final  {
     return value_.short_field;
   }
 
+  /** Glean { "field": "int_field" } */
   ::std::int32_t const& get_int_field() const {
     if (getType() != Type::int_field) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1136,6 +1140,7 @@ class MyUnion final  {
     return value_.int_field;
   }
 
+  /** Glean { "field": "long_field" } */
   ::std::int64_t const& get_long_field() const {
     if (getType() != Type::long_field) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1143,6 +1148,7 @@ class MyUnion final  {
     return value_.long_field;
   }
 
+  /** Glean { "field": "float_field" } */
   float const& get_float_field() const {
     if (getType() != Type::float_field) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1150,6 +1156,7 @@ class MyUnion final  {
     return value_.float_field;
   }
 
+  /** Glean { "field": "double_field" } */
   double const& get_double_field() const {
     if (getType() != Type::double_field) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1157,6 +1164,7 @@ class MyUnion final  {
     return value_.double_field;
   }
 
+  /** Glean { "field": "string_field" } */
   ::std::string const& get_string_field() const {
     if (getType() != Type::string_field) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1164,6 +1172,7 @@ class MyUnion final  {
     return value_.string_field;
   }
 
+  /** Glean { "field": "binary_field" } */
   ::std::string const& get_binary_field() const {
     if (getType() != Type::binary_field) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1171,6 +1180,7 @@ class MyUnion final  {
     return value_.binary_field;
   }
 
+  /** Glean { "field": "enum_field" } */
   ::facebook::thrift::test::terse_write::MyEnum const& get_enum_field() const {
     if (getType() != Type::enum_field) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1178,6 +1188,7 @@ class MyUnion final  {
     return value_.enum_field;
   }
 
+  /** Glean { "field": "list_field" } */
   ::std::vector<::std::int16_t> const& get_list_field() const {
     if (getType() != Type::list_field) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1185,6 +1196,7 @@ class MyUnion final  {
     return value_.list_field;
   }
 
+  /** Glean { "field": "set_field" } */
   ::std::set<::std::int16_t> const& get_set_field() const {
     if (getType() != Type::set_field) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1192,6 +1204,7 @@ class MyUnion final  {
     return value_.set_field;
   }
 
+  /** Glean { "field": "map_field" } */
   ::std::map<::std::int16_t, ::std::int16_t> const& get_map_field() const {
     if (getType() != Type::map_field) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1199,6 +1212,7 @@ class MyUnion final  {
     return value_.map_field;
   }
 
+  /** Glean { "field": "struct_field" } */
   ::facebook::thrift::test::terse_write::MyStruct const& get_struct_field() const {
     if (getType() != Type::struct_field) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();

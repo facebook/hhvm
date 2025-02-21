@@ -1938,6 +1938,7 @@ class Baz final  {
   }
 
 
+  /** Glean { "field": "intField" } */
   ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::facebook::thrift::test::i32_5137, Baz> const& get_intField() const {
     if (getType() != Type::intField) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1945,6 +1946,7 @@ class Baz final  {
     return value_.intField;
   }
 
+  /** Glean { "field": "setField" } */
   ::facebook::thrift::test::SetWithAdapter const& get_setField() const {
     if (getType() != Type::setField) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1952,6 +1954,7 @@ class Baz final  {
     return value_.setField;
   }
 
+  /** Glean { "field": "mapField" } */
   ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, Baz> const& get_mapField() const {
     if (getType() != Type::mapField) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1959,6 +1962,7 @@ class Baz final  {
     return value_.mapField;
   }
 
+  /** Glean { "field": "binaryField" } */
   ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::facebook::thrift::test::binary_5673, Baz> const& get_binaryField() const {
     if (getType() != Type::binaryField) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1966,6 +1970,7 @@ class Baz final  {
     return value_.binaryField;
   }
 
+  /** Glean { "field": "longField" } */
   ::facebook::thrift::test::MyI64 const& get_longField() const {
     if (getType() != Type::longField) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -7075,6 +7080,7 @@ class ThriftAdaptTestUnion final  {
   }
 
 
+  /** Glean { "field": "delay" } */
   ::facebook::thrift::test::DurationMs const& get_delay() const {
     if (getType() != Type::delay) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -7082,6 +7088,7 @@ class ThriftAdaptTestUnion final  {
     return value_.delay;
   }
 
+  /** Glean { "field": "custom" } */
   ::facebook::thrift::test::CustomProtocolType const& get_custom() const {
     if (getType() != Type::custom) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();

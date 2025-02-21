@@ -2144,6 +2144,7 @@ class MyUnion final  {
   }
 
 
+  /** Glean { "field": "first" } */
   ::test::fixtures::basic-structured-annotations::annotated_inline_string const& get_first() const {
     if (getType() != Type::first) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -2151,6 +2152,7 @@ class MyUnion final  {
     return value_.first;
   }
 
+  /** Glean { "field": "second" } */
   ::test::fixtures::basic-structured-annotations::annotated_inline_i64 const& get_second() const {
     if (getType() != Type::second) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();

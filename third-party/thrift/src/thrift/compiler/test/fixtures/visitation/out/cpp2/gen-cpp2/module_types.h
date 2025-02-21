@@ -1310,6 +1310,7 @@ class union1 final  {
   }
 
 
+  /** Glean { "field": "ui" } */
   ::std::int32_t const& get_ui() const {
     if (getType() != Type::ui) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1317,6 +1318,7 @@ class union1 final  {
     return value_.ui;
   }
 
+  /** Glean { "field": "ud" } */
   double const& get_ud() const {
     if (getType() != Type::ud) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1324,6 +1326,7 @@ class union1 final  {
     return value_.ud;
   }
 
+  /** Glean { "field": "us" } */
   ::std::string const& get_us() const {
     if (getType() != Type::us) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1331,6 +1334,7 @@ class union1 final  {
     return value_.us;
   }
 
+  /** Glean { "field": "ue" } */
   ::test_cpp2::cpp_reflection::enum1 const& get_ue() const {
     if (getType() != Type::ue) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1737,6 +1741,7 @@ class union2 final  {
   }
 
 
+  /** Glean { "field": "ui_2" } */
   ::std::int32_t const& get_ui_2() const {
     if (getType() != Type::ui_2) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1744,6 +1749,7 @@ class union2 final  {
     return value_.ui_2;
   }
 
+  /** Glean { "field": "ud_2" } */
   double const& get_ud_2() const {
     if (getType() != Type::ud_2) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1751,6 +1757,7 @@ class union2 final  {
     return value_.ud_2;
   }
 
+  /** Glean { "field": "us_2" } */
   ::std::string const& get_us_2() const {
     if (getType() != Type::us_2) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -1758,6 +1765,7 @@ class union2 final  {
     return value_.us_2;
   }
 
+  /** Glean { "field": "ue_2" } */
   ::test_cpp2::cpp_reflection::enum1 const& get_ue_2() const {
     if (getType() != Type::ue_2) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -2164,6 +2172,7 @@ class union3 final  {
   }
 
 
+  /** Glean { "field": "ui_3" } */
   ::std::int32_t const& get_ui_3() const {
     if (getType() != Type::ui_3) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -2171,6 +2180,7 @@ class union3 final  {
     return value_.ui_3;
   }
 
+  /** Glean { "field": "ud_3" } */
   double const& get_ud_3() const {
     if (getType() != Type::ud_3) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -2178,6 +2188,7 @@ class union3 final  {
     return value_.ud_3;
   }
 
+  /** Glean { "field": "us_3" } */
   ::std::string const& get_us_3() const {
     if (getType() != Type::us_3) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -2185,6 +2196,7 @@ class union3 final  {
     return value_.us_3;
   }
 
+  /** Glean { "field": "ue_3" } */
   ::test_cpp2::cpp_reflection::enum1 const& get_ue_3() const {
     if (getType() != Type::ue_3) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -2870,6 +2882,7 @@ class unionA final  {
     return value_.a;
   }
 
+  /** Glean { "field": "i" } */
   ::std::int32_t const& get_i() const {
     if (getType() != Type::i) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -2877,6 +2890,7 @@ class unionA final  {
     return value_.i;
   }
 
+  /** Glean { "field": "d" } */
   double const& get_d() const {
     if (getType() != Type::d) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -2884,6 +2898,7 @@ class unionA final  {
     return value_.d;
   }
 
+  /** Glean { "field": "s" } */
   ::std::string const& get_s() const {
     if (getType() != Type::s) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -2891,6 +2906,7 @@ class unionA final  {
     return value_.s;
   }
 
+  /** Glean { "field": "e" } */
   ::test_cpp2::cpp_reflection::enum1 const& get_e() const {
     if (getType() != Type::e) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -2898,6 +2914,7 @@ class unionA final  {
     return value_.e;
   }
 
+  /** Glean { "field": "a" } */
   ::test_cpp2::cpp_reflection::structA const& get_a() const {
     if (getType() != Type::a) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10332,6 +10349,7 @@ class union_with_special_names final  {
   }
 
 
+  /** Glean { "field": "get" } */
   ::std::int32_t const& get_get() const {
     if (getType() != Type::get) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10339,6 +10357,7 @@ class union_with_special_names final  {
     return value_.get;
   }
 
+  /** Glean { "field": "getter" } */
   ::std::int32_t const& get_getter() const {
     if (getType() != Type::getter) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10346,6 +10365,7 @@ class union_with_special_names final  {
     return value_.getter;
   }
 
+  /** Glean { "field": "lists" } */
   ::std::int32_t const& get_lists() const {
     if (getType() != Type::lists) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10353,6 +10373,7 @@ class union_with_special_names final  {
     return value_.lists;
   }
 
+  /** Glean { "field": "maps" } */
   ::std::int32_t const& get_maps() const {
     if (getType() != Type::maps) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10360,6 +10381,7 @@ class union_with_special_names final  {
     return value_.maps;
   }
 
+  /** Glean { "field": "name" } */
   ::std::int32_t const& get_name() const {
     if (getType() != Type::name) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10367,6 +10389,7 @@ class union_with_special_names final  {
     return value_.name;
   }
 
+  /** Glean { "field": "name_to_value" } */
   ::std::int32_t const& get_name_to_value() const {
     if (getType() != Type::name_to_value) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10374,6 +10397,7 @@ class union_with_special_names final  {
     return value_.name_to_value;
   }
 
+  /** Glean { "field": "names" } */
   ::std::int32_t const& get_names() const {
     if (getType() != Type::names) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10381,6 +10405,7 @@ class union_with_special_names final  {
     return value_.names;
   }
 
+  /** Glean { "field": "prefix_tree" } */
   ::std::int32_t const& get_prefix_tree() const {
     if (getType() != Type::prefix_tree) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10388,6 +10413,7 @@ class union_with_special_names final  {
     return value_.prefix_tree;
   }
 
+  /** Glean { "field": "sets" } */
   ::std::int32_t const& get_sets() const {
     if (getType() != Type::sets) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10395,6 +10421,7 @@ class union_with_special_names final  {
     return value_.sets;
   }
 
+  /** Glean { "field": "setter" } */
   ::std::int32_t const& get_setter() const {
     if (getType() != Type::setter) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10402,6 +10429,7 @@ class union_with_special_names final  {
     return value_.setter;
   }
 
+  /** Glean { "field": "str" } */
   ::std::int32_t const& get_str() const {
     if (getType() != Type::str) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10409,6 +10437,7 @@ class union_with_special_names final  {
     return value_.str;
   }
 
+  /** Glean { "field": "strings" } */
   ::std::int32_t const& get_strings() const {
     if (getType() != Type::strings) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10416,6 +10445,7 @@ class union_with_special_names final  {
     return value_.strings;
   }
 
+  /** Glean { "field": "type" } */
   ::std::int32_t const& get_type() const {
     if (getType() != Type::type) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10423,6 +10453,7 @@ class union_with_special_names final  {
     return value_.type;
   }
 
+  /** Glean { "field": "value" } */
   ::std::int32_t const& get_value() const {
     if (getType() != Type::value) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10430,6 +10461,7 @@ class union_with_special_names final  {
     return value_.value;
   }
 
+  /** Glean { "field": "value_to_name" } */
   ::std::int32_t const& get_value_to_name() const {
     if (getType() != Type::value_to_name) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10437,6 +10469,7 @@ class union_with_special_names final  {
     return value_.value_to_name;
   }
 
+  /** Glean { "field": "values" } */
   ::std::int32_t const& get_values() const {
     if (getType() != Type::values) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10444,6 +10477,7 @@ class union_with_special_names final  {
     return value_.values;
   }
 
+  /** Glean { "field": "id" } */
   ::std::int32_t const& get_id() const {
     if (getType() != Type::id) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10451,6 +10485,7 @@ class union_with_special_names final  {
     return value_.id;
   }
 
+  /** Glean { "field": "ids" } */
   ::std::int32_t const& get_ids() const {
     if (getType() != Type::ids) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10458,6 +10493,7 @@ class union_with_special_names final  {
     return value_.ids;
   }
 
+  /** Glean { "field": "descriptor" } */
   ::std::int32_t const& get_descriptor() const {
     if (getType() != Type::descriptor) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10465,6 +10501,7 @@ class union_with_special_names final  {
     return value_.descriptor;
   }
 
+  /** Glean { "field": "descriptors" } */
   ::std::int32_t const& get_descriptors() const {
     if (getType() != Type::descriptors) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10472,6 +10509,7 @@ class union_with_special_names final  {
     return value_.descriptors;
   }
 
+  /** Glean { "field": "key" } */
   ::std::int32_t const& get_key() const {
     if (getType() != Type::key) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10479,6 +10517,7 @@ class union_with_special_names final  {
     return value_.key;
   }
 
+  /** Glean { "field": "keys" } */
   ::std::int32_t const& get_keys() const {
     if (getType() != Type::keys) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10486,6 +10525,7 @@ class union_with_special_names final  {
     return value_.keys;
   }
 
+  /** Glean { "field": "annotation" } */
   ::std::int32_t const& get_annotation() const {
     if (getType() != Type::annotation) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10493,6 +10533,7 @@ class union_with_special_names final  {
     return value_.annotation;
   }
 
+  /** Glean { "field": "annotations" } */
   ::std::int32_t const& get_annotations() const {
     if (getType() != Type::annotations) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10500,6 +10541,7 @@ class union_with_special_names final  {
     return value_.annotations;
   }
 
+  /** Glean { "field": "member" } */
   ::std::int32_t const& get_member() const {
     if (getType() != Type::member) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10507,6 +10549,7 @@ class union_with_special_names final  {
     return value_.member;
   }
 
+  /** Glean { "field": "members" } */
   ::std::int32_t const& get_members() const {
     if (getType() != Type::members) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10514,6 +10557,7 @@ class union_with_special_names final  {
     return value_.members;
   }
 
+  /** Glean { "field": "field" } */
   ::std::int32_t const& get_field() const {
     if (getType() != Type::field) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -10521,6 +10565,7 @@ class union_with_special_names final  {
     return value_.field;
   }
 
+  /** Glean { "field": "fields" } */
   ::std::int32_t const& get_fields() const {
     if (getType() != Type::fields) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();

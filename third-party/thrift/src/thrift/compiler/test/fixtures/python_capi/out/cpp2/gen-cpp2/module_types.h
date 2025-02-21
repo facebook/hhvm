@@ -6618,6 +6618,7 @@ class Shallot final  {
   }
 
 
+  /** Glean { "field": "myEnum" } */
   ::test::fixtures::python_capi::MyEnum const& get_myEnum() const {
     if (getType() != Type::myEnum) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -6625,6 +6626,7 @@ class Shallot final  {
     return value_.myEnum;
   }
 
+  /** Glean { "field": "myStruct" } */
   ::test::fixtures::python_capi::PrimitiveStruct const& get_myStruct() const {
     if (getType() != Type::myStruct) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -6632,6 +6634,7 @@ class Shallot final  {
     return value_.myStruct;
   }
 
+  /** Glean { "field": "intSet" } */
   ::std::set<::std::int64_t> const& get_intSet() const {
     if (getType() != Type::intSet) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -6639,6 +6642,7 @@ class Shallot final  {
     return *value_.intSet;
   }
 
+  /** Glean { "field": "myString" } */
   ::std::string const& get_myString() const {
     if (getType() != Type::myString) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -6646,6 +6650,7 @@ class Shallot final  {
     return value_.myString;
   }
 
+  /** Glean { "field": "doubleList" } */
   ::std::shared_ptr<const ::std::vector<double>> const& get_doubleList() const {
     if (getType() != Type::doubleList) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -6653,6 +6658,7 @@ class Shallot final  {
     return value_.doubleList;
   }
 
+  /** Glean { "field": "strMap" } */
   ::std::unique_ptr<::std::map<::std::string, ::std::string>> const& get_strMap() const {
     if (getType() != Type::strMap) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -6660,6 +6666,7 @@ class Shallot final  {
     return value_.strMap;
   }
 
+  /** Glean { "field": "adapted_int" } */
   ::apache::thrift::type::ProtocolId const& get_adapted_int() const {
     if (getType() != Type::adapted_int) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -7188,6 +7195,7 @@ class SomeBinary final  {
     return value_.iobufRef;
   }
 
+  /** Glean { "field": "iobuf" } */
   ::test::fixtures::python_capi::IOBuf const& get_iobuf() const {
     if (getType() != Type::iobuf) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -7195,6 +7203,7 @@ class SomeBinary final  {
     return value_.iobuf;
   }
 
+  /** Glean { "field": "iobuf_ptr" } */
   ::test::fixtures::python_capi::IOBufPtr const& get_iobuf_ptr() const {
     if (getType() != Type::iobuf_ptr) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();
@@ -7202,6 +7211,7 @@ class SomeBinary final  {
     return value_.iobuf_ptr;
   }
 
+  /** Glean { "field": "iobufRef" } */
   ::std::unique_ptr<::test::fixtures::python_capi::IOBuf> const& get_iobufRef() const {
     if (getType() != Type::iobufRef) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();

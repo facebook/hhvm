@@ -397,6 +397,7 @@ class MyUnion final  {
   }
 
 
+  /** Glean { "field": "myString" } */
   ::std::string const& get_myString() const {
     if (getType() != Type::myString) {
       ::apache::thrift::detail::throw_on_bad_union_field_access();

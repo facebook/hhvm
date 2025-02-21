@@ -2213,7 +2213,6 @@ let do_hover_common (infos : HoverService.hover_info list) : Hover.result =
            match hoverInfo with
            | { HoverService.snippet = ""; _ } -> []
            | { HoverService.snippet; addendum; _ } ->
-             let addendum = List.map ~f:(fun s -> MarkedString s) addendum in
              let addendum =
                if List.is_empty addendum then
                  addendum

@@ -265,6 +265,7 @@ module Full = struct
       (match get_node t with
       | Tnonnull -> true
       | _ -> false)
+    | Tmixed -> true
     | _ -> false
 
   let rec fun_type
@@ -881,7 +882,7 @@ module Full = struct
       ~fuel
 
   (* For a given type parameter, construct a list of its constraints *)
-  let get_constraints_on_tparam penv tparam =
+  let get_constraints_on_tparam (penv : Typing_env_types.env) tparam =
     let kind_opt = Typing_env_types.get_pos_and_kind_of_generic penv tparam in
     match kind_opt with
     | None -> []
@@ -1437,10 +1438,46 @@ module Full = struct
     let str = Libhackfmt.format_doc_unbroken format_env doc |> String.strip in
     (fuel, str)
 
+  (** For functions and methods, interpret supportdyn as use of <<__SupportDynamicType>> attribute *)
+  let add_supportdyn_prefix (type ph) env (x : ph ty) occurrence prefix :
+      _ * ph ty =
+    let add_prefix prefix =
+      text "<<__SupportDynamicType>>" ^^ Newline ^^ prefix
+    in
+    match (occurrence, get_node x) with
+    | ( SymbolOccurrence.{ type_ = Function | Method _; _ },
+        Tnewtype (name, [tyarg], _) )
+      when String.equal name SN.Classes.cSupportDyn ->
+      if show_supportdyn env then
+        (add_prefix prefix, tyarg)
+      else
+        (prefix, tyarg)
+    | ( SymbolOccurrence.{ type_ = Function | Method _; _ },
+        Tapply ((_, name), [tyarg]) )
+      when String.equal name SN.Classes.cSupportDyn ->
+      if show_supportdyn env then
+        (add_prefix prefix, tyarg)
+      else
+        (prefix, tyarg)
+    | (_, _) -> (prefix, x)
+
   let to_string_with_identity
-      ~fuel ~hide_internals env (x : locl_ty) occurrence definition_opt =
+      (type ph)
+      ~fuel
+      env
+      (x : ph ty)
+      (ty :
+        fuel:Fuel.t ->
+        (string -> t) ->
+        Tvid.Set.t ->
+        penv ->
+        ph ty ->
+        Fuel.t * t)
+      ~default_capability
+      ~constraints
+      occurrence
+      definition_opt =
     let open SymbolOccurrence in
-    let ty = locl_ty ~hide_internals in
     let penv = Loclenv env in
     let prefix =
       let print_mod m = text (SymbolDefinition.string_of_modifier m) ^^ Space in
@@ -1455,17 +1492,7 @@ module Full = struct
         | ms -> Concat (List.map ms ~f:print_mod) ^^ SplitWith Cost.Base
       end
     in
-    (* For functions and methods, interpret supportdyn as use of <<__SupportDynamicType>> attribute *)
-    let (prefix, x) =
-      match (occurrence, get_node x) with
-      | ({ type_ = Function | Method _; _ }, Tnewtype (name, [tyarg], _))
-        when String.equal name SN.Classes.cSupportDyn ->
-        if show_supportdyn env then
-          (text "<<__SupportDynamicType>>" ^^ Newline ^^ prefix, tyarg)
-        else
-          (prefix, tyarg)
-      | (_, _) -> (prefix, x)
-    in
+    let (prefix, x) = add_supportdyn_prefix env x occurrence prefix in
     let (fuel, body_doc) =
       match (occurrence, get_node x) with
       | ({ type_ = Class class_type_id; name; _ }, _) ->
@@ -1501,7 +1528,7 @@ module Full = struct
             penv
             ~verbose:false
             ft
-            (fun_locl_implicit_params ~hide_internals)
+            (fun_implicit_params ty default_capability)
         in
         let fun_doc =
           Concat [text "function"; Space; text_strip_all_ns name; fun_ty_doc]
@@ -1539,15 +1566,51 @@ module Full = struct
         (fuel, doc)
       | _ -> ty ~fuel text_strip_ns Tvid.Set.empty penv x
     in
-    let (fuel, constraints) =
-      constraints_for_type ~fuel ~hide_internals text_strip_ns env x
-    in
     let str =
       Concat [prefix; body_doc; constraints]
       |> Libhackfmt.format_doc format_env
       |> String.strip
     in
     (fuel, str)
+
+  let to_string_locl_with_identity
+      ~fuel ~hide_internals env (x : locl_ty) occurrence definition_opt =
+    let ty = locl_ty ~hide_internals in
+    let (fuel, constraints) =
+      constraints_for_type ~fuel ~hide_internals text_strip_ns env x
+    in
+    to_string_with_identity
+      ~fuel
+      env
+      x
+      ty
+      ~default_capability:(Typing_make_type.default_capability Pos_or_decl.none)
+      ~constraints
+      occurrence
+      definition_opt
+
+  let to_string_decl_with_identity
+      ~fuel ~verbose_fun env (x : decl_ty) occurrence definition_opt =
+    to_string_with_identity
+      ~fuel
+      env
+      x
+      (decl_ty ~verbose_fun)
+      ~default_capability:
+        (Typing_make_type.default_capability_decl Pos_or_decl.none)
+      ~constraints:Nothing
+      occurrence
+      definition_opt
+
+  let to_string_with_identity
+      ~fuel ~hide_internals env (x : locl_ty) occurrence definition_opt =
+    to_string_locl_with_identity
+      ~fuel
+      ~hide_internals
+      env
+      x
+      occurrence
+      definition_opt
 end
 
 (*****************************************************************************)
@@ -2568,6 +2631,16 @@ let full_with_identity ~hide_internals env x occurrence definition_opt =
     env.genv.tcopt
     (Full.to_string_with_identity
        ~hide_internals
+       env
+       x
+       occurrence
+       definition_opt)
+
+let full_decl_with_identity env ~verbose_fun x occurrence definition_opt =
+  supply_fuel
+    env.genv.tcopt
+    (Full.to_string_decl_with_identity
+       ~verbose_fun
        env
        x
        occurrence

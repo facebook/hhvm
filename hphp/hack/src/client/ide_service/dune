@@ -74,6 +74,7 @@
  (modules ide_hover)
  (libraries
   decl_provider
+  derive_type_instantiation
   naming_special_names
   pos
   provider_context

@@ -1,3 +1,6 @@
-// Defined in Thingy
-public function __construct(int $item): void
+// Defined in Thingy<T>
+public function __construct(T $item): void
+Instantiation:
+  T = int;
+---
 Make a Thingy

@@ -161,7 +161,7 @@ let class_members_cases =
             ^ "  float $originalPositionY,\n"
             ^ "  float $finalPositionY\n"
             ^ "): float";
-          addendum = ["Another method doc block"];
+          addendum = [Lsp.MarkedString "Another method doc block"];
           pos = pos_at (34, 12) (34, 28);
         };
       ] );
@@ -223,9 +223,12 @@ let chained_calls_cases =
     ( ("chained_calls.php", 13, 8),
       [
         {
-          snippet =
-            "// Defined in ChainedCalls\npublic function foo(): ChainedCalls";
-          addendum = [];
+          snippet = "// Defined in ChainedCalls\npublic function foo(): this";
+          addendum =
+            [
+              Lsp.MarkedString "Instantiation:";
+              Lsp.MarkedCode ("hack", "  this = ChainedCalls;");
+            ];
           pos = pos_at (13, 7) (13, 9);
         };
       ] );
@@ -410,7 +413,10 @@ let docblock_cases =
         {
           snippet = "class DocBlock";
           addendum =
-            ["Class doc block.\nThis\ndoc\nblock\nhas\nmultiple\nlines."];
+            [
+              Lsp.MarkedString
+                "Class doc block.\nThis\ndoc\nblock\nhas\nmultiple\nlines.";
+            ];
           pos = pos_at (7, 3) (7, 10);
         };
       ] );
@@ -419,7 +425,7 @@ let docblock_cases =
         {
           snippet =
             "// Defined in DocBlock\npublic static function doStuff(): void";
-          addendum = ["Method doc block with double star."];
+          addendum = [Lsp.MarkedString "Method doc block with double star."];
           pos = pos_at (7, 13) (7, 19);
         };
       ] );
@@ -427,7 +433,7 @@ let docblock_cases =
       [
         {
           snippet = "function queryDocBlocks(): void";
-          addendum = ["Multiline\nfunction\ndoc block."];
+          addendum = [Lsp.MarkedString "Multiline\nfunction\ndoc block."];
           pos = pos_at (9, 3) (9, 16);
         };
       ] );
@@ -438,7 +444,8 @@ let docblock_cases =
             "// Defined in DocBlock\npublic static function preserveIndentation(): void";
           addendum =
             [
-              "Multiline doc block with
+              Lsp.MarkedString
+                "Multiline doc block with
 a certain amount of
     indentation
 we want to preserve.";
@@ -453,7 +460,8 @@ we want to preserve.";
             "// Defined in DocBlock\npublic static function leadingStarsAndMDList(): void";
           addendum =
             [
-              "Multiline doc block with
+              Lsp.MarkedString
+                "Multiline doc block with
 leading stars, as well as
   * a Markdown list!
 and we'd really like to preserve the Markdown list while getting rid of
@@ -469,7 +477,8 @@ the other stars.";
             "// Defined in DocBlock\npublic static function manyLineBreaks(): void";
           addendum =
             [
-              "This method has many line breaks, which\n\nsomeone might use if they wanted\n\nto have separate paragraphs\n\nin Markdown.";
+              Lsp.MarkedString
+                "This method has many line breaks, which\n\nsomeone might use if they wanted\n\nto have separate paragraphs\n\nin Markdown.";
             ];
           pos = pos_at (15, 13) (15, 26);
         };
@@ -481,7 +490,8 @@ the other stars.";
             "// Defined in DocBlockOnClassButNotConstructor\npublic function __construct(): void";
           addendum =
             [
-              "Class doc block for a class whose constructor doesn't have a doc block.";
+              Lsp.MarkedString
+                "Class doc block for a class whose constructor doesn't have a doc block.";
             ];
           pos = pos_at (17, 12) (17, 43);
         };
@@ -493,7 +503,8 @@ the other stars.";
             "// Defined in DocBlockOnClassButNotConstructor\npublic static function nonConstructorMethod(): void";
           addendum =
             [
-              "Docblock for non-constructor method in DocBlockOnClassButNotConstructor";
+              Lsp.MarkedString
+                "Docblock for non-constructor method in DocBlockOnClassButNotConstructor";
             ];
           pos = pos_at (19, 37) (19, 56);
         };
@@ -502,7 +513,7 @@ the other stars.";
       [
         {
           snippet = "DocBlockBase";
-          addendum = ["DocBlockBase: class doc block."];
+          addendum = [Lsp.MarkedString "DocBlockBase: class doc block."];
           pos = pos_at (23, 28) (23, 39);
         };
       ] );
@@ -511,7 +522,7 @@ the other stars.";
         {
           snippet =
             "// Defined in DocBlockBase\npublic function __construct(): void";
-          addendum = ["DocBlockBase: constructor doc block."];
+          addendum = [Lsp.MarkedString "DocBlockBase: constructor doc block."];
           pos = pos_at (25, 12) (25, 23);
         };
       ] );
@@ -520,7 +531,7 @@ the other stars.";
         {
           snippet =
             "// Defined in DocBlockBase\npublic function __construct(): void";
-          addendum = ["DocBlockBase: constructor doc block."];
+          addendum = [Lsp.MarkedString "DocBlockBase: constructor doc block."];
           pos = pos_at (27, 14) (27, 28);
         };
       ] );
@@ -530,7 +541,8 @@ the other stars.";
           snippet = "function line_comment_with_break(): void";
           addendum =
             [
-              "We don't want the line comment above to be part of this docblock.\nWe do want both these lines though.";
+              Lsp.MarkedString
+                "We don't want the line comment above to be part of this docblock.\nWe do want both these lines though.";
             ];
           pos = pos_at (89, 44) (89, 66);
         };
@@ -539,7 +551,8 @@ the other stars.";
       [
         {
           snippet = "function two_comment_types(): void";
-          addendum = ["Only this should be part of the docblock."];
+          addendum =
+            [Lsp.MarkedString "Only this should be part of the docblock."];
           pos = pos_at (94, 38) (94, 54);
         };
       ] );
@@ -555,7 +568,7 @@ the other stars.";
       [
         {
           snippet = "function needs_fixing(): _";
-          addendum = ["A function with an HH_FIXME."];
+          addendum = [Lsp.MarkedString "A function with an HH_FIXME."];
           pos = pos_at (106, 27) (106, 38);
         };
       ] );
@@ -575,13 +588,18 @@ let special_cases_cases =
       [
         {
           snippet =
-            "function idx(
-  ?KeyedContainer<int, int> $collection,
-  ?int $index
-)[]: ?int";
+            "function idx<Tk as arraykey, Tv>(
+  ?KeyedContainer<Tk, Tv> $collection,
+  ?Tk $index,
+  optional HH\\FIXME\\MISSING_PARAM_TYPE $default
+)[]: Tv";
           addendum =
             [
-              "Index into the given KeyedContainer using the provided key.\n\nIf the key doesn't exist, the key is `null`, or the collection is `null`,\nreturn the provided default value instead, or `null` if no default value was\nprovided. If the key is `null`, the default value will be returned even if\n`null` is a valid key in the container.";
+              Lsp.MarkedString "Instantiation:";
+              Lsp.MarkedCode ("hack", "  Tk = int;\n  Tv = ?int;");
+              Lsp.MarkedString "---";
+              Lsp.MarkedString
+                "Index into the given KeyedContainer using the provided key.\n\nIf the key doesn't exist, the key is `null`, or the collection is `null`,\nreturn the provided default value instead, or `null` if no default value was\nprovided. If the key is `null`, the default value will be returned even if\n`null` is a valid key in the container.";
             ];
           pos = pos_at (3, 3) (3, 5);
         };
@@ -731,7 +749,8 @@ let doc_block_fallback_cases =
             "// Defined in DBFBClass1\npublic function doTheThing(): void";
           addendum =
             [
-              "DBFBInterface2.\n(from DBFBInterface2)\n\n---\n\nDBFBInterface1.\n(from DBFBInterface1)";
+              Lsp.MarkedString
+                "DBFBInterface2.\n(from DBFBInterface2)\n\n---\n\nDBFBInterface1.\n(from DBFBInterface1)";
             ];
           pos = pos_at (3, 7) (3, 16);
         };
@@ -741,7 +760,7 @@ let doc_block_fallback_cases =
         {
           snippet =
             "// Defined in DBFBClass1\npublic function docBlockInClass(): void";
-          addendum = ["DBFBClass1."];
+          addendum = [Lsp.MarkedString "DBFBClass1."];
           pos = pos_at (5, 7) (5, 21);
         };
       ] );
@@ -749,7 +768,7 @@ let doc_block_fallback_cases =
       [
         {
           snippet = "// Defined in DBFBClass1\npublic function identical(): void";
-          addendum = ["Identical."];
+          addendum = [Lsp.MarkedString "Identical."];
           pos = pos_at (7, 7) (7, 15);
         };
       ] );
@@ -760,7 +779,8 @@ let doc_block_fallback_cases =
             "// Defined in DBFBClass1\npublic function slightlyDifferent(): void";
           addendum =
             [
-              "Slightly more different.\n(from DBFBInterface3)\n\n---\n\nSlightly different.\n(from DBFBInterface1, DBFBInterface2)";
+              Lsp.MarkedString
+                "Slightly more different.\n(from DBFBInterface3)\n\n---\n\nSlightly different.\n(from DBFBInterface1, DBFBInterface2)";
             ];
           pos = pos_at (9, 7) (9, 23);
         };
@@ -781,7 +801,7 @@ let doc_block_fallback_cases =
         {
           snippet =
             "// Defined in DBFBClass3\npublic function docBlockInClass2(): void";
-          addendum = ["DBFBClass1."];
+          addendum = [Lsp.MarkedString "DBFBClass1."];
           pos = pos_at (13, 7) (13, 22);
         };
       ] );
@@ -790,7 +810,7 @@ let doc_block_fallback_cases =
         {
           snippet =
             "// Defined in DBFBTrait\npublic function traitFunction(): void";
-          addendum = ["DBFBTrait."];
+          addendum = [Lsp.MarkedString "DBFBTrait."];
           pos = pos_at (15, 7) (15, 19);
         };
       ] );
@@ -799,7 +819,7 @@ let doc_block_fallback_cases =
         {
           snippet =
             "// Defined in DBFBClass3\npublic function traitFunction2(): void";
-          addendum = ["DBFBClass1."];
+          addendum = [Lsp.MarkedString "DBFBClass1."];
           pos = pos_at (17, 7) (17, 20);
         };
       ] );
@@ -954,7 +974,7 @@ let test () =
       ~silent:false
       ~from:""
       ~ai_options:None
-      ~cli_config_overrides:[]
+      ~cli_config_overrides:[("improved_hover", "true")]
   in
   let env =
     Test.setup_server

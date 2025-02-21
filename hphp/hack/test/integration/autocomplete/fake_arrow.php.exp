@@ -1,22 +1,22 @@
 C\pop_back
   INSERT C\pop_back(
   INSERT )
-  (function<T as mixed as Container<Tv>, Tv as mixed>(inout ~T $container)[HH\Contexts\write_props]: ~?Tv)
+  (function<T as Container<Tv>, Tv>(inout ~T $container)[HH\Contexts\write_props]: ~?Tv)
 SORT TEXT: none
 C\pop_backx
   INSERT C\pop_backx(
   INSERT )
-  (function<T as mixed as Container<Tv>, Tv as mixed>(inout ~T $container)[HH\Contexts\write_props]: ~Tv)
+  (function<T as Container<Tv>, Tv>(inout ~T $container)[HH\Contexts\write_props]: ~Tv)
 SORT TEXT: none
 C\pop_front
   INSERT C\pop_front(
   INSERT )
-  (function<T as mixed as Container<Tv>, Tv as mixed>(inout ~T $container)[HH\Contexts\write_props]: ~?Tv)
+  (function<T as Container<Tv>, Tv>(inout ~T $container)[HH\Contexts\write_props]: ~?Tv)
 SORT TEXT: none
 C\pop_frontx
   INSERT C\pop_frontx(
   INSERT )
-  (function<T as mixed as Container<Tv>, Tv as mixed>(inout ~T $container)[HH\Contexts\write_props]: ~Tv)
+  (function<T as Container<Tv>, Tv>(inout ~T $container)[HH\Contexts\write_props]: ~Tv)
 SORT TEXT: none
 Str\capitalize
   INSERT Str\capitalize(

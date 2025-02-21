@@ -103,6 +103,7 @@ end
 type markedString =
   | MarkedString of string
   | MarkedCode of string * string  (** lang, value *)
+[@@deriving eq, show]
 
 (* Represents a reference to a command. Provides a title which will be used to
  * represent a command in the UI. Commands are identitifed using a string

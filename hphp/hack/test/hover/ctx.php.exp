@@ -1,8 +1,13 @@
 // Defined in namespace C
-function any(
-  Traversable<int> $traversable,
-  optional ?(function(int): ~bool) $predicate
-): bool
+function any<T>(
+  Traversable<T> $traversable,
+  optional ?(function(
+    T
+  )[T/[ctx $predicate]]: ~bool) $predicate
+)[T/[ctx $predicate]ctx $predicate]: bool
+Instantiation:
+  T = int;
+---
 Returns true if the given predicate returns true for any element of the
 given Traversable. If no predicate is provided, it defaults to casting the
 element to bool. If the Traversable is empty, it returns false.

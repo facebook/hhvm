@@ -71,6 +71,7 @@ end
 type markedString =
   | MarkedString of string
   | MarkedCode of string * string
+[@@deriving eq, show]
 
 module Command = struct
   type t = {

@@ -1,0 +1,4 @@
+// Defined in CGeneric<T>
+public ~?Vector<T> $v
+Instantiation:
+  T = int;

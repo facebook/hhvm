@@ -96,7 +96,7 @@ let num r = prim_type r Nast.Tnum
 
 let arraykey r = prim_type r Nast.Tarraykey
 
-let void r = prim_type r Nast.Tvoid
+let void (type ph) r : ph ty = prim_type r Nast.Tvoid
 
 let null r = prim_type r Nast.Tnull
 
@@ -274,3 +274,27 @@ let default_capability_decl p : decl_ty =
       ]
 
 let default_capability_unsafe p : locl_ty = mixed (Reason.hint p)
+
+(** Construct the default type for `__construct` *)
+let default_construct (type ph) r : ph ty =
+  mk
+    ( r,
+      Tfun
+        {
+          ft_tparams = [];
+          ft_where_constraints = [];
+          ft_params = [];
+          ft_implicit_params = { capability = CapDefaults (Reason.to_pos r) };
+          ft_flags =
+            Typing_defs_flags.Fun.make
+              Ast_defs.FSync
+              ~return_disposable:false
+              ~returns_readonly:false
+              ~readonly_this:false
+              ~support_dynamic_type:false
+              ~is_memoized:false
+              ~variadic:false;
+          ft_ret = void r;
+          ft_cross_package = None;
+          ft_instantiated = true;
+        } )

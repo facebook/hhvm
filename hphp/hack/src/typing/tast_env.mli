@@ -38,6 +38,13 @@ val print_ty_with_identity :
   'b SymbolDefinition.t option ->
   string
 
+val print_decl_ty_with_identity :
+  env ->
+  Typing_defs.decl_ty ->
+  'b SymbolOccurrence.t ->
+  'b SymbolDefinition.t option ->
+  string
+
 (** Return a JSON representation of the given type. *)
 val ty_to_json :
   env -> ?show_like_ty:bool -> Typing_defs.locl_ty -> Hh_json.json
@@ -366,3 +373,9 @@ val is_hhi : env -> bool
 val get_check_status : env -> Tast.check_status
 
 val get_current_decl_and_file : env -> Pos_or_decl.ctx
+
+val derive_instantiation :
+  env ->
+  Typing_defs.decl_ty ->
+  Typing_defs.locl_ty ->
+  env * Derive_type_instantiation.Instantiation.t

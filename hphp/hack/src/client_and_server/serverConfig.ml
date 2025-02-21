@@ -654,6 +654,7 @@ let load
         ~warnings_default_all:local_config.warnings_default_all
         ~hh_distc_exponential_backoff_num_retries:
           local_config.hh_distc_exponential_backoff_num_retries
+        ~improved_hover:local_config.improved_hover
         GlobalOptions.default
     in
     load_config config local_config_opts

@@ -1,2 +1,8 @@
 // Defined in CL
-public function app(#Mul $l, (int, int) $arg): ~int
+public function app<Ta, Tr>(
+  HH\EnumClass\Label<Funcs, Func<Ta, Tr>> $l,
+  Ta $arg
+): ~Tr
+Instantiation:
+  Ta = (int, int);
+  Tr = ~int;

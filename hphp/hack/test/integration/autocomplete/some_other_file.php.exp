@@ -12,11 +12,11 @@ FIRST_NAME
 SORT TEXT: none
 valueOf
   INSERT valueOf(${1:#label})
-  function<TEnum as mixed super this, TType as mixed>(HH\EnumClass\Label<TEnum, TType> $label)[HH\Contexts\write_props]: ~HH\MemberOf<TEnum, TType>
+  function<TEnum super this, TType>(HH\EnumClass\Label<TEnum, TType> $label)[HH\Contexts\write_props]: ~HH\MemberOf<TEnum, TType>
 SORT TEXT: none
 nameOf
   INSERT nameOf(${1:#label})
-  function<TType as mixed>(HH\EnumClass\Label<this, TType> $label)[]: string
+  function<TType>(HH\EnumClass\Label<this, TType> $label)[]: string
 SORT TEXT: none
 getValues
   INSERT getValues()

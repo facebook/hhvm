@@ -569,6 +569,7 @@ impl HhConfig {
                 .get_bool_or("class_sub_classname", default.class_sub_classname)?,
             class_class_type: hhconfig.get_bool_or("class_class_type", default.class_class_type)?,
             safe_abstract: hhconfig.get_bool_or("safe_abstract", default.safe_abstract)?,
+            improved_hover: hhconfig.get_bool_or("improved_hover", default.improved_hover)?,
         };
         let mut c = Self {
             local_config,

@@ -1,0 +1,4 @@
+// Defined in CGeneric<T>
+public function m<Tm>(T $x, Tm $y): void
+Instantiation:
+  Tm = float;

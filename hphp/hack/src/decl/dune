@@ -254,7 +254,12 @@
 (library
  (name decl_instantiate)
  (modules decl_instantiate)
- (libraries decl_defs decl_subst shallow_decl_defs typing_defs)
+ (libraries
+  decl_defs
+  decl_subst
+  shallow_decl_defs
+  typing_defs
+  typing_ast)
  (preprocess
   (pps ppx_deriving.std)))
 

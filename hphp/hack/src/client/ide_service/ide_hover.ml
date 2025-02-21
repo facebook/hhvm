@@ -399,6 +399,8 @@ person_get($a_person, #email); // string
     "`module Foo;` marks all the definitions in the current file as associated with the `Foo` module, and enables them to use `internal`."
     ^ "\n\nYou must also define this module with `new module Foo {}` inside or outside this file."
 
+(** For strings like "preffix::suffix", return "prefix", otherwise
+  return the full string. *)
 let split_class_name (full_name : string) : string =
   match String.lsplit2 full_name ~on:':' with
   | Some (class_name, _member) -> class_name
@@ -418,21 +420,164 @@ let fun_defined_in def_opt : string =
     )
   | _ -> ""
 
+(** Return the decl type of a class member or function represented by a SymbolDefinition.t.
+    If passed a class member, also return the type parameters of that class *)
+let get_decl_ty
+    ctx
+    (def_opt : _ SymbolDefinition.t option)
+    (occurrence : SymbolOccurrence.kind) :
+    Typing_defs.decl_tparam list option * Typing_defs.decl_ty option =
+  Option.value ~default:(None, None)
+  @@
+  let open Option.Let_syntax in
+  let* def = def_opt in
+  let { SymbolDefinition.name; kind; modifiers; _ } = def in
+  match kind with
+  | SymbolDefinition.Member { class_name; member_kind } ->
+    let* cls =
+      Decl_provider.get_class ctx (Utils.add_ns class_name)
+      |> Decl_entry.to_option
+    in
+    let is_static = SymbolDefinition.is_static modifiers in
+    let member_ty =
+      match member_kind with
+      | SymbolDefinition.Method ->
+        let+ member = Folded_class.get_any_method ~is_static cls name in
+        member.Typing_defs.ce_type |> Lazy.force
+      | SymbolDefinition.Property ->
+        let+ property =
+          if is_static then
+            Folded_class.get_sprop cls name
+          else
+            Folded_class.get_prop cls name
+        in
+        property.Typing_defs.ce_type |> Lazy.force
+      | SymbolDefinition.ClassConst ->
+        let+ class_const = Folded_class.get_const cls name in
+        class_const.Typing_defs.cc_type
+      | SymbolDefinition.TypeConst -> None
+    in
+    Some (Some (Folded_class.tparams cls), member_ty)
+  | SymbolDefinition.Function ->
+    let* (func : Typing_defs.fun_elt) =
+      Decl_provider.get_fun ctx (Utils.add_ns name) |> Decl_entry.to_option
+    in
+    Some (None, Some func.Typing_defs.fe_type)
+  | SymbolDefinition.Classish _ ->
+    (match occurrence with
+    | SymbolOccurrence.Method (_, construct_name)
+      when String.equal construct_name Naming_special_names.Members.__construct
+      ->
+      (* If the constructor is not explicitly defined, then the SymbolDefinition.t
+         will be a Classish instead of Method *)
+      let* cls =
+        Decl_provider.get_class ctx (Utils.add_ns name) |> Decl_entry.to_option
+      in
+      let ty =
+        match Folded_class.construct cls |> fst with
+        | Some ce -> ce.Typing_defs.ce_type |> Lazy.force
+        | None -> Typing_make_type.default_construct Typing_reason.none
+      in
+      Some (Some (Folded_class.tparams cls), Some ty)
+    | _ -> None)
+  | _ -> None
+
+(** Make the 'instantiation' section of the hover card, something like:
+
+---
+Instantiation:
+```
+  T = int;
+  Ta = string;
+```
+*)
+let make_instantiation_section
+    env (subst : Derive_type_instantiation.Instantiation.t) :
+    Lsp.markedString list option =
+  if Derive_type_instantiation.Instantiation.is_empty subst then
+    None
+  else
+    let Derive_type_instantiation.Instantiation.{ this; subst } = subst in
+    let header = Lsp.MarkedString "Instantiation:" in
+    let section =
+      Lsp.MarkedCode
+        ( "hack",
+          let print_tparam (tparam, ty) =
+            Printf.sprintf "  %s = %s;" tparam (Tast_env.print_ty env ty)
+          in
+          let printed_this =
+            Option.map this ~f:(fun ty -> print_tparam ("this", ty))
+          in
+          let printed_tparams =
+            SMap.elements subst |> List.rev_map ~f:print_tparam
+          in
+          let printed_tparams =
+            match printed_this with
+            | None -> printed_tparams
+            | Some printed_this -> printed_this :: printed_tparams
+          in
+          String.concat ~sep:"\n" printed_tparams )
+    in
+    Some [header; section]
+
+(** Make the "Defined in" section of the hover card, which indicates where a member
+    is defined *)
+let make_defined_in_section def_opt (tparams : Typing_defs.decl_tparam list) =
+  match def_opt with
+  | Some def ->
+    let tparams =
+      match tparams with
+      | [] -> ""
+      | _ ->
+        "<"
+        ^ (String.concat ~sep:", "
+          @@ List.map tparams ~f:(fun param -> snd param.Typing_defs.tp_name))
+        ^ ">"
+    in
+    Printf.sprintf
+      "// Defined in %s%s\n"
+      (split_class_name @@ SymbolDefinition.full_name def)
+      tparams
+  | None -> ""
+
+(** Return the hover card section for the uninstantiated signature and the
+    hover card section showing the instantiation.
+    So when hovering on a method call for example, shows something like
+
+---
+```
+public function m<T, Tr>(T $x): Tr;
+```
+---
+Instantiation:
+```
+  T = int;
+  Tr = string;
+```
+*)
+let show_type_with_instantiation
+    (occurrence : _ SymbolOccurrence.t)
+    (def_opt : _ SymbolDefinition.t option)
+    decl_ty
+    (type_info : ServerInferType.t) : string * Lsp.markedString list option =
+  let env = ServerInferType.get_env type_info in
+  let locl_ty = ServerInferType.get_type type_info in
+  let snippet =
+    Tast_env.print_decl_ty_with_identity env decl_ty occurrence def_opt
+  in
+  let (env, instantiation) =
+    Tast_env.derive_instantiation env decl_ty locl_ty
+  in
+  let instantiation_section = make_instantiation_section env instantiation in
+  (snippet, instantiation_section)
+
 let make_hover_info
     under_dynamic_result
     ctx
     (info_opt : ServerInferType.t option)
     entry
     (occurrence : _ SymbolOccurrence.t)
-    def_opt =
-  let defined_in =
-    match def_opt with
-    | Some def ->
-      Printf.sprintf
-        "// Defined in %s\n"
-        (split_class_name @@ SymbolDefinition.full_name def)
-    | None -> ""
-  in
+    def_opt : hover_info =
   let print_locl_ty_with_identity ?(do_not_strip_dynamic = false) info =
     let env = ServerInferType.get_env info in
     let ty = ServerInferType.get_type info in
@@ -447,26 +592,50 @@ let make_hover_info
   let { SymbolOccurrence.name; type_; is_declaration = _; pos = _ } =
     occurrence
   in
-  let snippet =
+  let improved_hover =
+    (Provider_context.get_tcopt ctx).GlobalOptions.improved_hover
+  in
+  let (snippet, instantiation_section) =
     match (type_, info_opt) with
-    | (_, None) -> Utils.strip_hh_lib_ns name
+    | (_, None) -> (Utils.strip_hh_lib_ns name, None)
     | (SymbolOccurrence.BestEffortArgument (recv, i), _) ->
       let param_name = nth_param ctx recv i in
-      Printf.sprintf "Parameter: %s" (Option.value ~default:"$_" param_name)
+      ( Printf.sprintf "Parameter: %s" (Option.value ~default:"$_" param_name),
+        None )
     | (SymbolOccurrence.Method _, Some info)
     | (SymbolOccurrence.ClassConst _, Some info)
     | (SymbolOccurrence.Property _, Some info) ->
-      defined_in ^ print_locl_ty_with_identity info
+      let ((snippet, instantiation_section), class_tparams) =
+        match (improved_hover, get_decl_ty ctx def_opt type_) with
+        | (true, (Some class_tparams, Some decl_ty)) ->
+          ( show_type_with_instantiation occurrence def_opt decl_ty info,
+            class_tparams )
+        | _ -> ((print_locl_ty_with_identity info, None), [])
+      in
+      ( make_defined_in_section def_opt class_tparams ^ snippet,
+        instantiation_section )
     | (SymbolOccurrence.GConst, Some info) ->
-      (match make_hover_const_definition entry def_opt with
-      | Some def_txt -> def_txt
-      | None -> print_locl_ty_with_identity info)
+      ( (match make_hover_const_definition entry def_opt with
+        | Some def_txt -> def_txt
+        | None -> print_locl_ty_with_identity info),
+        None )
     | (SymbolOccurrence.Function, Some info) ->
-      fun_defined_in def_opt
-      ^ print_locl_ty_with_identity ~do_not_strip_dynamic:true info
-    | (_, Some info) ->
-      print_locl_ty_with_identity ~do_not_strip_dynamic:true info
-      ^ under_dynamic_result
+      let (snippet, instantiation_section) =
+        match (improved_hover, get_decl_ty ctx def_opt type_) with
+        | (true, (_, Some decl_ty)) ->
+          show_type_with_instantiation occurrence def_opt decl_ty info
+        | _ ->
+          (print_locl_ty_with_identity ~do_not_strip_dynamic:true info, None)
+      in
+      (fun_defined_in def_opt ^ snippet, instantiation_section)
+    | ( SymbolOccurrence.(
+          ( Class _ | Module | Typeconst _ | Attribute _ | EnumClassLabel _
+          | Keyword _ | BuiltInType _ | LocalVar | TypeVar | XhpLiteralAttr _
+          | HhFixme | HhIgnore | PureFunctionContext )),
+        Some info ) ->
+      ( print_locl_ty_with_identity ~do_not_strip_dynamic:true info
+        ^ under_dynamic_result,
+        None )
   in
   let addendum =
     match type_ with
@@ -484,6 +653,15 @@ let make_hover_info
       [SymbolOccurrence.built_in_type_hover bt]
     | _ -> make_hover_doc_block ctx entry occurrence def_opt
   in
+  let addendum = List.map addendum ~f:(fun s -> Lsp.MarkedString s) in
+  let addendum =
+    match instantiation_section with
+    | None -> addendum
+    | Some instantiation_section ->
+      (match addendum with
+      | [] -> instantiation_section
+      | _ :: _ -> instantiation_section @ (Lsp.MarkedString "---" :: addendum))
+  in
   HoverService.{ snippet; addendum; pos = Some occurrence.SymbolOccurrence.pos }
 
 let make_hover_info_with_fallback under_dynamic_result results =
@@ -492,8 +670,7 @@ let make_hover_info_with_fallback under_dynamic_result results =
       (List.filter results ~f:(fun (_, _, _, occurrence, _) ->
            SymbolOccurrence.is_class occurrence))
   in
-  List.map
-    ~f:(fun (ctx, env_and_ty, entry, occurrence, def_opt) ->
+  List.map results ~f:(fun (ctx, env_and_ty, entry, occurrence, def_opt) ->
       if
         SymbolOccurrence.is_constructor occurrence
         && List.is_empty (make_hover_doc_block ctx entry occurrence def_opt)
@@ -512,12 +689,13 @@ let make_hover_info_with_fallback under_dynamic_result results =
         | Some (ctx, _, entry, class_occurrence, def_opt) ->
           let fallback_doc_block =
             make_hover_doc_block ctx entry class_occurrence def_opt
+            |> List.map ~f:(fun s -> Lsp.MarkedString s)
           in
           ( occurrence,
             HoverService.
               {
                 snippet = hover_info.snippet;
-                addendum = List.concat [fallback_doc_block; hover_info.addendum];
+                addendum = fallback_doc_block @ hover_info.addendum;
                 pos = hover_info.pos;
               } )
         | None -> (occurrence, hover_info)
@@ -530,7 +708,6 @@ let make_hover_info_with_fallback under_dynamic_result results =
             entry
             occurrence
             def_opt ))
-    results
 
 let go_quarantined
     ~(ctx : Provider_context.t)
@@ -586,7 +763,10 @@ let go_quarantined
           |> List.map ~f:(Tast_env.print_ty env)
           |> String.concat ~sep:", "
         in
-        ["this has the following upper bounds: " ^ upper_bounds]
+        [
+          Lsp.MarkedString
+            ("this has the following upper bounds: " ^ upper_bounds);
+        ]
       | _ -> []
     in
     [

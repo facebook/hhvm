@@ -1,11 +1,11 @@
 ERROR: File "override_with_generic_5.php", line 38, characters 19-31:
 The method `numInCovar_Eq` is not compatible with the overridden method (Typing[4341])
   File "override_with_generic_5.php", line 38, characters 19-31:
-  Method `numInCovar_Eq` has type `(function<TTi as mixed>(Contra<TTi> $_): void where T as I with { type Ti = TTi })` in `B`
+  Method `numInCovar_Eq` has type `(function<TTi>(Contra<TTi> $_): void where T as I with { type Ti = TTi })` in `B`
   File "override_with_generic_5.php", line 12, characters 19-31:
   But it has type `(function(Contra<num> $t): void)` in parent `A`
   File "override_with_generic_5.php", line 38, characters 19-31:
-  Type `(function<TTi as mixed>(Contra<TTi> $_): void where T as I with { type Ti = TTi })` is not a subtype of `(function(Contra<num> $t): void)`
+  Type `(function<TTi>(Contra<TTi> $_): void where T as I with { type Ti = TTi })` is not a subtype of `(function(Contra<num> $t): void)`
   File "override_with_generic_5.php", line 40, characters 10-33:
   Expected a class with `{type Ti = _}`
   File "override_with_generic_5.php", line 40, characters 5-5:
@@ -13,11 +13,11 @@ The method `numInCovar_Eq` is not compatible with the overridden method (Typing[
 ERROR: File "override_with_generic_5.php", line 62, characters 19-36:
 The method `numInContravar_Sub` is not compatible with the overridden method (Typing[4341])
   File "override_with_generic_5.php", line 62, characters 19-36:
-  Method `numInContravar_Sub` has type `(function<TTi as mixed>(TTi $_): void where T as I with { type Ti super TTi })` in `B`
+  Method `numInContravar_Sub` has type `(function<TTi>(TTi $_): void where T as I with { type Ti super TTi })` in `B`
   File "override_with_generic_5.php", line 17, characters 19-36:
   But it has type `(function(num $t): void)` in parent `A`
   File "override_with_generic_5.php", line 62, characters 19-36:
-  Type `(function<TTi as mixed>(TTi $_): void where T as I with { type Ti super TTi })` is not a subtype of `(function(num $t): void)`
+  Type `(function<TTi>(TTi $_): void where T as I with { type Ti super TTi })` is not a subtype of `(function(num $t): void)`
   File "override_with_generic_5.php", line 7, characters 23-24:
   Expected `nothing` because the type constant Ti lacks a constraint
   File "override_with_generic_5.php", line 17, characters 38-40:
@@ -25,11 +25,11 @@ The method `numInContravar_Sub` is not compatible with the overridden method (Ty
 ERROR: File "override_with_generic_5.php", line 69, characters 19-35:
 The method `numInContravar_Eq` is not compatible with the overridden method (Typing[4341])
   File "override_with_generic_5.php", line 69, characters 19-35:
-  Method `numInContravar_Eq` has type `(function<TTi as mixed>(TTi $_): void where T as I with { type Ti = TTi })` in `B`
+  Method `numInContravar_Eq` has type `(function<TTi>(TTi $_): void where T as I with { type Ti = TTi })` in `B`
   File "override_with_generic_5.php", line 18, characters 19-35:
   But it has type `(function(num $t): void)` in parent `A`
   File "override_with_generic_5.php", line 69, characters 19-35:
-  Type `(function<TTi as mixed>(TTi $_): void where T as I with { type Ti = TTi })` is not a subtype of `(function(num $t): void)`
+  Type `(function<TTi>(TTi $_): void where T as I with { type Ti = TTi })` is not a subtype of `(function(num $t): void)`
   File "override_with_generic_5.php", line 71, characters 10-33:
   Expected a class with `{type Ti = _}`
   File "override_with_generic_5.php", line 71, characters 5-5:
@@ -37,11 +37,11 @@ The method `numInContravar_Eq` is not compatible with the overridden method (Typ
 ERROR: File "override_with_generic_5.php", line 76, characters 19-34:
 The method `numInInvar_Super` is not compatible with the overridden method (Typing[4341])
   File "override_with_generic_5.php", line 76, characters 19-34:
-  Method `numInInvar_Super` has type `(function<TTi as mixed>(In<TTi> $_): void where T as I with { type Ti super TTi })` in `B`
+  Method `numInInvar_Super` has type `(function<TTi>(In<TTi> $_): void where T as I with { type Ti super TTi })` in `B`
   File "override_with_generic_5.php", line 20, characters 19-34:
   But it has type `(function(In<num> $_): void)` in parent `A`
   File "override_with_generic_5.php", line 76, characters 19-34:
-  Type `(function<TTi as mixed>(In<TTi> $_): void where T as I with { type Ti super TTi })` is not a subtype of `(function(In<num> $_): void)`
+  Type `(function<TTi>(In<TTi> $_): void where T as I with { type Ti super TTi })` is not a subtype of `(function(In<num> $_): void)`
   File "override_with_generic_5.php", line 7, characters 23-24:
   Expected `nothing` because the type constant Ti lacks a constraint
   File "override_with_generic_5.php", line 20, characters 39-41:
@@ -51,11 +51,11 @@ The method `numInInvar_Super` is not compatible with the overridden method (Typi
 ERROR: File "override_with_generic_5.php", line 91, characters 19-31:
 The method `numInInvar_Eq` is not compatible with the overridden method (Typing[4341])
   File "override_with_generic_5.php", line 91, characters 19-31:
-  Method `numInInvar_Eq` has type `(function<TTi as mixed>(In<TTi> $_): void where T as I with { type Ti = TTi })` in `B`
+  Method `numInInvar_Eq` has type `(function<TTi>(In<TTi> $_): void where T as I with { type Ti = TTi })` in `B`
   File "override_with_generic_5.php", line 22, characters 19-31:
   But it has type `(function(In<num> $t): void)` in parent `A`
   File "override_with_generic_5.php", line 91, characters 19-31:
-  Type `(function<TTi as mixed>(In<TTi> $_): void where T as I with { type Ti = TTi })` is not a subtype of `(function(In<num> $t): void)`
+  Type `(function<TTi>(In<TTi> $_): void where T as I with { type Ti = TTi })` is not a subtype of `(function(In<num> $t): void)`
   File "override_with_generic_5.php", line 93, characters 10-33:
   Expected a class with `{type Ti = _}`
   File "override_with_generic_5.php", line 93, characters 5-5:

@@ -26,9 +26,10 @@ let rec take_best_suggestions l =
        "foo($bar)" it's not useful to look outside the local variable "$bar". *)
     let stop =
       match first.SymbolOccurrence.type_ with
-      | SymbolOccurrence.LocalVar -> true
-      | SymbolOccurrence.Method _ -> true
-      | SymbolOccurrence.Class _ -> true
+      | SymbolOccurrence.LocalVar
+      | SymbolOccurrence.Method _
+      | SymbolOccurrence.Class _ ->
+        true
       | _ -> false
     in
     if stop then

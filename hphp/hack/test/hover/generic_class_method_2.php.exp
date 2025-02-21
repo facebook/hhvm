@@ -1,0 +1,5 @@
+// Defined in CGeneric<T>
+public function m<Tm>(T $x, Tm $y): void
+Instantiation:
+  T = int;
+  Tm = string;

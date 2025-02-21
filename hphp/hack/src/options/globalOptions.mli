@@ -279,6 +279,7 @@ type t = {
   class_class_type: bool;  (** When true, C::class : class<C> *)
   safe_abstract: bool;
       (** Enable Safe Abstract features https://fburl.com/hack-safe-abstract *)
+  improved_hover: bool;
 }
 [@@deriving eq, show]
 
@@ -389,6 +390,7 @@ val set :
   ?class_sub_classname:bool ->
   ?class_class_type:bool ->
   ?safe_abstract:bool ->
+  ?improved_hover:bool ->
   t ->
   t
 

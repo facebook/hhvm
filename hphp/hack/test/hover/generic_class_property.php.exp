@@ -1,0 +1,2 @@
+// Defined in CGeneric<T>
+public ~?Vector<T> $v

@@ -1,5 +1,5 @@
 function invariant(
-  mixed $condition,
+  HH\FIXME\MISSING_PARAM_TYPE $condition,
   HH\FormatString<PlainSprintf> $f,
   mixed $f_args...
 )[]: void

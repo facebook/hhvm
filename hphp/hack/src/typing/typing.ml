@@ -6077,29 +6077,7 @@ end = struct
         argument_list_exprs (expr ~expected:None ~ctxt:Context.default) env el
       in
       let should_forget_fakes = true in
-      (* Construct a default __construct type *)
-      let ft =
-        {
-          ft_tparams = [];
-          ft_where_constraints = [];
-          ft_params = [];
-          ft_implicit_params =
-            { capability = CapDefaults (Pos_or_decl.of_raw_pos p) };
-          ft_flags =
-            Typing_defs_flags.Fun.make
-              Ast_defs.FSync
-              ~return_disposable:false
-              ~returns_readonly:false
-              ~readonly_this:false
-              ~support_dynamic_type:false
-              ~is_memoized:false
-              ~variadic:false;
-          ft_ret = MakeType.void r;
-          ft_cross_package = None;
-          ft_instantiated = true;
-        }
-      in
-      let ty = mk (r, Tfun ft) in
+      let ty = MakeType.default_construct r in
       (env, tel, None, ty, should_forget_fakes)
     | Some
         { ce_visibility = vis; ce_type = (lazy m); ce_deprecated; ce_flags; _ }

@@ -83,3 +83,6 @@ val identifier : 'a t -> string option
 val string_of_kind : 'a kind -> string
 
 val string_of_modifier : modifier -> string
+
+(** Whether the list of modifiers contain the 'static' modifier *)
+val is_static : modifier list -> bool

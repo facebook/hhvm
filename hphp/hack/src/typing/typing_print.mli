@@ -53,6 +53,15 @@ val full_with_identity :
   'b SymbolDefinition.t option ->
   string
 
+(** Pretty print a type and all of its associated declaration information. *)
+val full_decl_with_identity :
+  env ->
+  verbose_fun:bool ->
+  Typing_defs.decl_ty ->
+  'b SymbolOccurrence.t ->
+  'b SymbolDefinition.t option ->
+  string
+
 (** Print a locl_type to a string, stripping namespaces, including exact annotations and type variable numbering *)
 val debug : env -> Typing_defs.locl_ty -> string
 

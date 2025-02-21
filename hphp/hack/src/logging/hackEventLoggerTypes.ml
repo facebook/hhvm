@@ -124,4 +124,5 @@ type rollout_flags = {
       (** POC: @mckenzie - if true, autocomplete results will be sorted using sort text attribute *)
   warnings_default_all: bool;
       (** POC: @catg - whether the client shows warnings by default. *)
+  improved_hover: bool;  (** POC: @catg *)
 }

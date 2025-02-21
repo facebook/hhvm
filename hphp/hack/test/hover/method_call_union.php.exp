@@ -1,5 +1,5 @@
 // Defined in FooParent
-public function bar(): (int | string)
+public function bar(): string
 -------------
 // Defined in Other
-public function bar(): (int | string)
+public function bar(): int

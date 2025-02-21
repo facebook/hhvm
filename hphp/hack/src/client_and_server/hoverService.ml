@@ -13,7 +13,7 @@ type hover_info = {
           is the signature, including any inferred types for generics.
           This is also the only part of the hover info to get displayed as code
           rather than Markdown. *)
-  addendum: string list;
+  addendum: Lsp.markedString list;
       (** Additional information, such as doc string and declaration file. Displayed
           as Markdown. *)
   pos: Pos.t option;  (** Position of this result. *)
@@ -26,7 +26,7 @@ let string_of_result { snippet; addendum; pos } =
   Printf.sprintf
     "{ snippet = %S; addendum = [%s]; pos = %s }"
     snippet
-    (String.concat "; " (List.map (fun s -> Printf.sprintf "%S" s) addendum))
+    (String.concat "; " (List.map Lsp.show_markedString addendum))
     (match pos with
     | None -> "None"
     | Some p -> Printf.sprintf "Some %S" (Pos.multiline_string_no_file p))

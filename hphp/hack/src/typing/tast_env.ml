@@ -50,6 +50,14 @@ let print_ty_with_identity env ty sym_occurrence sym_definition =
     sym_occurrence
     sym_definition
 
+let print_decl_ty_with_identity env ty sym_occurrence sym_definition =
+  Typing_print.full_decl_with_identity
+    ~verbose_fun:false
+    env
+    ty
+    sym_occurrence
+    sym_definition
+
 let ty_to_json env ?show_like_ty ty = Typing_print.to_json env ?show_like_ty ty
 
 let json_to_locl_ty = Typing_print.json_to_locl_ty
@@ -446,3 +454,6 @@ let is_hhi = Typing_env.is_hhi
 let get_check_status env : check_status = env.Typing_env_types.checked
 
 let get_current_decl_and_file = Typing_env.get_current_decl_and_file
+
+let derive_instantiation env =
+  Derive_type_instantiation.derive_instantiation env

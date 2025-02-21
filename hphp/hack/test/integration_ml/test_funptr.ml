@@ -84,7 +84,7 @@ let identify_tests =
           {
             HoverService.snippet =
               "HH\\FunctionRef<(readonly function(string $s): string)>";
-            addendum = ["foo_docblock"];
+            addendum = [Lsp.MarkedString "foo_docblock"];
             pos = pos_at (17, 8) (17, 10);
           };
         ] );
@@ -103,7 +103,7 @@ let identify_tests =
         [
           {
             HoverService.snippet = "class Cardoor";
-            addendum = ["Cardoor_docblock"];
+            addendum = [Lsp.MarkedString "Cardoor_docblock"];
             pos = pos_at (20, 8) (20, 14);
           };
         ] );
@@ -123,7 +123,7 @@ let identify_tests =
           {
             HoverService.snippet =
               "// Defined in Cardoor\npublic static function bar<T>(string $x): string";
-            addendum = ["bar_docblock"];
+            addendum = [Lsp.MarkedString "bar_docblock"];
             pos = pos_at (20, 17) (20, 19);
           };
         ] );

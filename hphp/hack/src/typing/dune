@@ -164,7 +164,9 @@
   tast_visitor
   typing_env_from_def
   typing_equality_check)
- (libraries typing)
+ (libraries
+  derive_type_instantiation
+  typing)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -582,3 +584,11 @@
  (libraries errors)
  (preprocess
   (pps ppx_deriving.std)))
+
+(library
+ (name derive_type_instantiation)
+ (wrapped false)
+ (modules
+  derive_type_instantiation)
+ (libraries
+  typing_env))

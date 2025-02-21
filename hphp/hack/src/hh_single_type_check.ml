@@ -973,6 +973,7 @@ let parse_options () =
       ~tco_allow_all_files_for_module_declarations:
         !allow_all_files_for_module_declarations
       ~tco_loop_iteration_upper_bound:!loop_iteration_upper_bound
+      ~improved_hover:true
       GlobalOptions.default
   in
   let tcopt = ServerConfig.load_config config tcopt in
@@ -1788,7 +1789,14 @@ let do_hover ~ctx ~filename oc (pos_given : File_content.Position.t option) =
     List.map
       ~f:(fun r ->
         let open HoverService in
-        String.concat ~sep:"\n" (r.snippet :: r.addendum))
+        String.concat
+          ~sep:"\n"
+          (r.snippet
+          :: List.map
+               ~f:(function
+                 | Lsp.MarkedCode (_, s) -> s
+                 | Lsp.MarkedString s -> s)
+               r.addendum))
       results
   in
   Printf.fprintf

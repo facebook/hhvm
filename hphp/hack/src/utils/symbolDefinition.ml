@@ -26,7 +26,7 @@ type modifier =
   | Async
   | Inout
   | Internal
-[@@deriving ord, show]
+[@@deriving ord, eq, show]
 
 type member_kind =
   | Method
@@ -191,3 +191,5 @@ let string_of_modifier = function
   | Async -> "async"
   | Inout -> "inout"
   | Internal -> "internal"
+
+let is_static l = List.mem l Static ~equal:equal_modifier

@@ -1,0 +1,4 @@
+// Defined in C
+public function f(): void
+-------------
+function f(): void

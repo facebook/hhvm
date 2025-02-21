@@ -29,14 +29,6 @@ function thrift_protocol_read_binary_struct(\HH\object $transportobj,
 function thrift_protocol_set_compact_version(int $version)[leak_safe]: int;
 
 <<__Native>>
-function thrift_protocol_write_compact(\HH\object $transportobj,
-                                       string $method_name,
-                                       int $msgtype,
-                                       \HH\object $request_struct,
-                                       int $seqid,
-                                       bool $oneway = false): void;
-
-<<__Native>>
 function thrift_protocol_write_compact2(\HH\object $transportobj,
                                         string $method_name,
                                         int $msgtype,

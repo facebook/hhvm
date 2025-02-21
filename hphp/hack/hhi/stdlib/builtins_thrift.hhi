@@ -36,15 +36,6 @@ function thrift_protocol_set_compact_version(
   int $version,
 )[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function thrift_protocol_write_compact(
-  HH\FIXME\MISSING_PARAM_TYPE $transportobj,
-  string $method_name,
-  int $msgtype,
-  HH\FIXME\MISSING_PARAM_TYPE $request_struct,
-  int $seqid,
-  bool $oneway = false,
-): HH\FIXME\MISSING_RETURN_TYPE;
-<<__PHPStdLib>>
 function thrift_protocol_write_compact2(
   HH\FIXME\MISSING_PARAM_TYPE $transportobj,
   string $method_name,

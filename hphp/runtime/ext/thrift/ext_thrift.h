@@ -72,15 +72,6 @@ Variant HHVM_FUNCTION(
 int64_t HHVM_FUNCTION(thrift_protocol_set_compact_version, int64_t version);
 
 void HHVM_FUNCTION(
-    thrift_protocol_write_compact,
-    const Object& transportobj,
-    const String& method_name,
-    int64_t msgtype,
-    const Object& request_struct,
-    int64_t seqid,
-    bool oneway = false);
-
-void HHVM_FUNCTION(
     thrift_protocol_write_compact2,
     const Object& transportobj,
     const String& method_name,

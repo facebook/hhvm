@@ -1504,32 +1504,6 @@ int64_t HHVM_FUNCTION(thrift_protocol_set_compact_version,
   return result;
 }
 
-void HHVM_FUNCTION(thrift_protocol_write_compact,
-                   const Object& transportobj,
-                   const String& method_name,
-                   int64_t msgtype,
-                   const Object& request_struct,
-                   int64_t seqid,
-                   bool oneway) {
-  CoeffectsAutoGuard _;
-  // Suppress class-to-string conversion warnings that occur during
-  // serialization and deserialization.
-  SuppressClassConversionNotice suppressor;
-
-  PHPOutputTransport transport(transportobj);
-
-  CompactWriter writer(&transport);
-  writer.setWriteVersion(s_compact_request_data->version);
-  writer.writeHeader(method_name, (uint8_t)msgtype, (uint32_t)seqid);
-  writer.write(request_struct);
-
-  if (oneway) {
-    transport.onewayFlush();
-  } else {
-    transport.flush();
-  }
-}
-
 void HHVM_FUNCTION(thrift_protocol_write_compact2,
                    const Object& transportobj,
                    const String& method_name,

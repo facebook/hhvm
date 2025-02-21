@@ -163,7 +163,7 @@ func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 		if err := process(ctx, s.proc, protocol); err != nil {
 			return nil, err
 		}
-		protocol.SetRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", loadFn(s.stats)))
+		protocol.setRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", loadFn(s.stats)))
 		return encodeResponsePayload(protocol.name, protocol.messageType, protocol.getRequestHeaders(), request.Zstd(), protocol.Bytes())
 	}
 	if s.pipeliningEnabled {

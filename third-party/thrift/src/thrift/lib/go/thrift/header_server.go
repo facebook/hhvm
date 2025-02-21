@@ -220,10 +220,10 @@ func (s *server) writeMessage(
 		if k == LoadHeaderKey {
 			continue // do not set a load header sent from the client.
 		}
-		prot.SetRequestHeader(k, v)
+		prot.setRequestHeader(k, v)
 	}
 	// *always* write our load header
-	prot.SetRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", loadFn(s.stats)))
+	prot.setRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", loadFn(s.stats)))
 
 	messageType := REPLY
 	if _, isExc := response.(ApplicationException); isExc {

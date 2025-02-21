@@ -131,8 +131,8 @@ func (p *headerProtocol) GetSeqID() uint32 {
 
 // Control underlying header transport
 
-// Deprecated: SetRequestHeader is deprecated and will eventually be private.
-func (p *headerProtocol) SetRequestHeader(key, value string) {
+// Deprecated: setRequestHeader is deprecated and will eventually be private.
+func (p *headerProtocol) setRequestHeader(key, value string) {
 	p.trans.SetRequestHeader(key, value)
 }
 

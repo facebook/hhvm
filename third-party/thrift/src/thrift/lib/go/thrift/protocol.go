@@ -28,7 +28,7 @@ type Protocol interface {
 	Close() error
 
 	// Deprecated
-	SetRequestHeader(key, value string)
+	setRequestHeader(key, value string)
 	// Deprecated
 	GetResponseHeaders() map[string]string
 

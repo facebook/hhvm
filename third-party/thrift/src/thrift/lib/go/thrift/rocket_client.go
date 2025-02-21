@@ -154,7 +154,7 @@ func (p *rocketClient) Skip(fieldType types.Type) (err error) {
 	return types.SkipDefaultDepth(p, fieldType)
 }
 
-func (p *rocketClient) SetRequestHeader(key, value string) {
+func (p *rocketClient) setRequestHeader(key, value string) {
 	p.reqHeaders[key] = value
 }
 

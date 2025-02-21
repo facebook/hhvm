@@ -70,16 +70,16 @@ func skipMessage(protocol Protocol) error {
 }
 
 func setRequestHeadersForError(protocol Protocol, err types.ApplicationException) {
-	protocol.SetRequestHeader("uex", errorType(err))
-	protocol.SetRequestHeader("uexw", err.Error())
+	protocol.setRequestHeader("uex", errorType(err))
+	protocol.setRequestHeader("uexw", err.Error())
 }
 
 func setRequestHeadersForResult(protocol Protocol, result types.WritableStruct) {
 	if rr, ok := result.(types.WritableResult); ok && rr.Exception() != nil {
 		// If we got a structured exception back, write metadata about it into headers
 		terr := rr.Exception()
-		protocol.SetRequestHeader("uex", errorType(terr))
-		protocol.SetRequestHeader("uexw", terr.Error())
+		protocol.setRequestHeader("uex", errorType(terr))
+		protocol.setRequestHeader("uexw", terr.Error())
 	}
 }
 

@@ -92,7 +92,7 @@ func (b *protocolBuffer) GetResponseHeaders() map[string]string {
 	return b.respHeaders
 }
 
-func (b *protocolBuffer) SetRequestHeader(key, value string) {
+func (b *protocolBuffer) setRequestHeader(key, value string) {
 	b.reqHeaders[key] = value
 }
 

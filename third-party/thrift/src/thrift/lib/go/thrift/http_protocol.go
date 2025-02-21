@@ -43,7 +43,7 @@ func NewHTTPProtocol(url string) (Protocol, error) {
 		persistentHeaders: make(map[string]string),
 		protoID:           types.ProtocolIDCompact,
 	}
-	p.SetRequestHeader("User-Agent", "Go/THttpClient")
+	p.setRequestHeader("User-Agent", "Go/THttpClient")
 	if err := p.resetProtocol(); err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func (p *httpProtocol) GetResponseHeaders() map[string]string {
 	return nil
 }
 
-func (p *httpProtocol) SetRequestHeader(key, value string) {
+func (p *httpProtocol) setRequestHeader(key, value string) {
 	p.transport.SetHeader(key, value)
 }
 

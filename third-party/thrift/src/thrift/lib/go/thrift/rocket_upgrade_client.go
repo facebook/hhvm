@@ -95,11 +95,11 @@ func (p *upgradeToRocketClient) upgradeToRocket() error {
 
 func (p *upgradeToRocketClient) SetRequestHeader(key, value string) {
 	if p.Protocol == nil {
-		p.rocketProtocol.SetRequestHeader(key, value)
-		p.headerProtocol.SetRequestHeader(key, value)
+		p.rocketProtocol.setRequestHeader(key, value)
+		p.headerProtocol.setRequestHeader(key, value)
 		return
 	}
-	p.Protocol.SetRequestHeader(key, value)
+	p.Protocol.setRequestHeader(key, value)
 }
 
 func (p *upgradeToRocketClient) GetResponseHeaders() map[string]string {

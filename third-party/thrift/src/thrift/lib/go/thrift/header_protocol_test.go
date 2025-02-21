@@ -37,7 +37,7 @@ func TestHeaderProtocolHeaders(t *testing.T) {
 		t.Fatalf("failed to create header protocol: %s", err)
 	}
 
-	proto1.SetRequestHeader("preferred_cheese", "cheddar")
+	proto1.setRequestHeader("preferred_cheese", "cheddar")
 	if v, _ := proto1.(*headerProtocol).trans.writeInfoHeaders["preferred_cheese"]; v != "cheddar" {
 		t.Fatalf("failed to set header")
 	}

@@ -1523,8 +1523,14 @@ void DynamicPatch::fromAny(detail::Badge, const type::AnyStruct& any) {
 
 template <typename Protocol>
 std::uint32_t DynamicPatch::encode(Protocol& prot) const {
-  // TODO(dokwon): Provide direct encode from DynamicPatch.
-  return protocol::detail::serializeObject(prot, toObject());
+  return visitPatch(badge, [&](const auto& patch) {
+    if constexpr (__FBTHRIFT_IS_VALID(patch, patch.encode(prot))) {
+      return patch.encode(prot);
+    } else {
+      // TODO(dokwon): Provide direct encode from DynamicPatch.
+      return protocol::detail::serializeObject(prot, toObject());
+    }
+  });
 }
 
 template <typename Protocol>

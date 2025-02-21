@@ -16,13 +16,13 @@
 
 #pragma once
 
-#include <stdexcept>
 #include <type_traits>
 
 #include <folly/Portability.h>
 #include <folly/Traits.h>
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Compare.h>
+#include <thrift/lib/cpp2/op/Encode.h>
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/op/detail/Compare.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
@@ -76,6 +76,10 @@ class Wrap {
 
   void reset() { op::clear<underlying_tag>(data_); }
   bool empty() const { return op::isEmpty<underlying_tag>(data_); }
+  template <typename Protocol>
+  std::uint32_t encode(Protocol& prot) const {
+    return op::encode<underlying_tag>(prot, data_);
+  }
 
  protected:
   T data_;

@@ -32,6 +32,7 @@ use fbthrift_test_if::SubStruct;
 use fbthrift_test_if::Un;
 use fbthrift_test_if::UnOne;
 use proptest::prelude::*;
+use rstest::*;
 
 use crate::proptest::gen_main_struct;
 
@@ -580,6 +581,14 @@ fn test_unknown_union() -> Result<()> {
     assert_eq!(u, deserialize(old_output).unwrap());
 
     Ok(())
+}
+
+#[rstest]
+#[case(r#"{ "one": "1 }"#)]
+#[case(r#"{ "one": "1 ,", ":null}"#)]
+fn test_invalid_json(#[case] json: &str) {
+    let res: Result<UnOne> = deserialize(json);
+    assert!(res.is_err(), "Expected error, got {:?}", res);
 }
 
 proptest! {

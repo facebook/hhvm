@@ -480,8 +480,7 @@ impl<B: Buf> SimpleJsonProtocolDeserializer<B> {
         }
     }
     #[inline]
-    fn read_json_number(&mut self) -> Result<serde_json::Number> {
-        self.strip_whitespace();
+    fn read_json_number_string(&mut self) -> Result<Vec<u8>> {
         let mut ret = Vec::new();
 
         let as_string = match self.peek() {
@@ -494,8 +493,14 @@ impl<B: Buf> SimpleJsonProtocolDeserializer<B> {
 
         while let Some(b) = self.peek() {
             match b {
-                b' ' | b'\t' | b'\n' | b'\r' | b'}' | b']' | b',' | b':' | b'"' => {
-                    if as_string && b == b'"' {
+                b' ' | b'\t' | b'\n' | b'\r' | b'}' | b']' | b',' | b':' => {
+                    if as_string {
+                        bail!("Missing closing quote \" for number")
+                    }
+                    break;
+                }
+                b'"' => {
+                    if as_string {
                         self.advance(1);
                     }
                     break;
@@ -506,6 +511,13 @@ impl<B: Buf> SimpleJsonProtocolDeserializer<B> {
                 }
             }
         }
+
+        Ok(ret)
+    }
+    #[inline]
+    fn read_json_number(&mut self) -> Result<serde_json::Number> {
+        self.strip_whitespace();
+        let ret = self.read_json_number_string()?;
 
         let v: std::result::Result<serde_json::Value, _> = serde_json::from_slice(&ret);
         match v {

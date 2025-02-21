@@ -806,30 +806,37 @@ let on_cancelled (next : unit -> 'a Bucket.bucket) (todo : Todo.t) :
   add_next []
 
 let rec drain_events
-    warnings_saved_state (done_count, total_count, handle, check_info) :
-    (Warnings_saved_state.t option * (int * int), _) result =
+    warnings_saved_state_acc
+    errors_acc
+    (done_count, total_count, handle, check_info) :
+    (Warnings_saved_state.t option * Errors.t * (int * int), _) result =
   match Hh_distc_ffi.recv handle with
   | Ok (Some (Hh_distc_types.Errors errors)) ->
     let (warnings_saved_state, errors) =
       filter_out_warnings
-        warnings_saved_state
+        warnings_saved_state_acc
         errors
         ~discard_warnings:check_info.discard_warnings
     in
     if check_info.log_errors then Server_progress.ErrorsWrite.report errors;
+    let errors_acc = Errors.merge errors_acc errors in
     drain_events
       warnings_saved_state
+      errors_acc
       (done_count, total_count, handle, check_info)
   | Ok (Some (Hh_distc_types.TypingStart total_count)) ->
     drain_events
-      warnings_saved_state
+      warnings_saved_state_acc
+      errors_acc
       (done_count, total_count, handle, check_info)
   | Ok (Some (Hh_distc_types.TypingProgress n)) ->
     let done_count = done_count + n in
     drain_events
-      warnings_saved_state
+      warnings_saved_state_acc
+      errors_acc
       (done_count, total_count, handle, check_info)
-  | Ok None -> Ok (warnings_saved_state, (done_count, total_count))
+  | Ok None ->
+    Ok (warnings_saved_state_acc, errors_acc, (done_count, total_count))
   | Error error -> Error error
 
 type 'env distc_outcome =
@@ -863,7 +870,8 @@ let rec event_loop
     ~(handle : Hh_distc_ffi.handle)
     ~(check_info : check_info)
     ~(hhdg_path : string)
-    ~warnings_saved_state : _ distc_outcome =
+    ~warnings_saved_state
+    ~errors_acc : _ distc_outcome =
   let handler_fds = List.map handlers ~f:fst in
   (* hh_distc sends a byte each time new events are ready. *)
   let ready_fds =
@@ -876,11 +884,12 @@ let rec event_loop
     | None ->
       Server_progress.write "hh_distc done";
       (match Hh_distc_ffi.join handle with
-      | Ok (errors, map_reduce_data) ->
+      | Ok (_errors, map_reduce_data) ->
+        (* TODO catg: check that errors is consistent with errors_acc *)
         (* TODO: Clear in memory deps. Doesn't effect correctness but can cause larger fanouts *)
         Typing_deps.replace (Typing_deps_mode.InMemoryMode (Some hhdg_path));
         Success
-          ( errors,
+          ( errors_acc,
             Map_reduce.of_ffi map_reduce_data,
             Typing_deps.dep_edges_make (),
             warnings_saved_state,
@@ -890,9 +899,10 @@ let rec event_loop
       (match
          drain_events
            warnings_saved_state
+           errors_acc
            (done_count, total_count, handle, check_info)
        with
-      | Ok (warnings_saved_state, (done_count, total_count)) ->
+      | Ok (warnings_saved_state, errors_acc, (done_count, total_count)) ->
         Server_progress.write_percentage
           ~operation:"hh_distc checking"
           ~done_count
@@ -909,6 +919,7 @@ let rec event_loop
           ~check_info
           ~hhdg_path
           ~warnings_saved_state
+          ~errors_acc
       | Error error -> DistCError error)
   else
     let (env, decision, handlers) =
@@ -950,6 +961,7 @@ let rec event_loop
         ~check_info
         ~hhdg_path
         ~warnings_saved_state
+        ~errors_acc
 
 (**
   This is the main process function that triggers a full init via hh_distc.
@@ -1001,6 +1013,7 @@ let process_with_hh_distc
     ~check_info
     ~hhdg_path
     ~warnings_saved_state
+    ~errors_acc:Errors.empty
 
 (**
   `next` and `merge` both run in the master process and update mutable

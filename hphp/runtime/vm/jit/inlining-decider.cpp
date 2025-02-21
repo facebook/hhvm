@@ -107,14 +107,21 @@ const StaticString
   s_HH_Coeffects_Backdoor_Async("HH\\Coeffects\\backdoor_async"),
   s_HH_Coeffects_FB_Backdoor_to_globals_leak_safe__DO_NOT_USE(
     "HH\\Coeffects\\fb\\backdoor_to_globals_leak_safe__DO_NOT_USE"
+  ),
+  s_HH_Coeffects_FB_Backdoor_to_globals_leak_safe_async__DO_NOT_USE(
+    "HH\\Coeffects\\fb\\backdoor_to_globals_leak_safe_async__DO_NOT_USE"
   );
 
 #define COEFFECTS_BACKDOOR_WRAPPERS \
   X(pure)                           \
+  X(pure_async)                     \
   X(write_props)                    \
+  X(write_props_async)              \
   X(read_globals)                   \
+  X(read_globals_async)             \
   X(zoned)                          \
-  X(leak_safe)
+  X(leak_safe)                      \
+  X(leak_safe_async)
 
 #define X(x)                                             \
   const StaticString                                     \
@@ -439,7 +446,9 @@ bool isCoeffectsBackdoor(SrcKey callerSk, const Func* callee) {
 #undef X
 
   if (callee_name ==
-        s_HH_Coeffects_FB_Backdoor_to_globals_leak_safe__DO_NOT_USE.get()) {
+        s_HH_Coeffects_FB_Backdoor_to_globals_leak_safe__DO_NOT_USE.get() ||
+      callee_name ==
+        s_HH_Coeffects_FB_Backdoor_to_globals_leak_safe_async__DO_NOT_USE.get()) {
     return true;
   }
 

@@ -97,7 +97,8 @@ pub fn emit_function<'a, 'd>(e: &mut Emitter<'d>, fd: &'a ast::FunDef) -> Result
         coeffects = coeffects.with_backdoor()
     }
     if e.systemlib()
-        && (fd.name.1 == "\\HH\\Coeffects\\fb\\backdoor_to_globals_leak_safe__DO_NOT_USE")
+        && (fd.name.1 == "\\HH\\Coeffects\\fb\\backdoor_to_globals_leak_safe__DO_NOT_USE"
+            || fd.name.1 == "\\HH\\Coeffects\\fb\\backdoor_to_globals_leak_safe_async__DO_NOT_USE")
     {
         coeffects = coeffects.with_backdoor_globals_leak_safe()
     }

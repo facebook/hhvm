@@ -93,7 +93,7 @@ func (p *upgradeToRocketClient) upgradeToRocket() error {
 	return upgradeToRocket(context.Background(), p.headerProtocol)
 }
 
-func (p *upgradeToRocketClient) SetRequestHeader(key, value string) {
+func (p *upgradeToRocketClient) setRequestHeader(key, value string) {
 	if p.Protocol == nil {
 		p.rocketProtocol.setRequestHeader(key, value)
 		p.headerProtocol.setRequestHeader(key, value)

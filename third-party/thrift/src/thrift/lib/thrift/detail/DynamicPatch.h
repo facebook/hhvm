@@ -143,6 +143,8 @@ class DynamicPatchBase {
   detail::DynamicPatchOptions options_;
 };
 
+// For Patches that there are multiple possible types.
+// See DynamicUnknownPatch::Category for all possible scenarios.
 class DynamicUnknownPatch : public DynamicPatchBase {
  public:
   void assign(detail::Badge, Object v);
@@ -173,15 +175,17 @@ class DynamicUnknownPatch : public DynamicPatchBase {
  private:
   // The unknown patch can be classified into the following categories
   enum class Category {
-    // The patch has no operation.
+    // The patch has no operation. It can be any kinds of patch.
     EmptyPatch,
 
-    // The patch only has clear operation.
+    // The patch only has clear operation. It can be any kinds of patch.
     ClearPatch,
 
     // The patch has assign or patchPrior/patchAfter, but we don't know whether
-    // it is a struct patch or an union patch
-    StructuredPatch,
+    // it is a struct patch or an union patch.
+    // If the patch only has assign, it can be an any patch, which is also under
+    // this category.
+    StructuredOrAnyPatch,
 
     // Patch only has the `remove` operation, we don't know whether it is a set
     // or a map patch.

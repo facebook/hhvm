@@ -1341,7 +1341,7 @@ auto DynamicUnknownPatch::validateAndGetCategory() const -> Category {
 
   if (auto assign = get_ptr(op::PatchOp::Assign)) {
     throwExceptionIf(!assign->is_object());
-    return Category::StructuredPatch;
+    return Category::StructuredOrAnyPatch;
   }
 
   if (onlyHasOps({op::PatchOp::Clear})) {
@@ -1357,7 +1357,7 @@ auto DynamicUnknownPatch::validateAndGetCategory() const -> Category {
           {op::PatchOp::Clear,
            op::PatchOp::PatchPrior,
            op::PatchOp::PatchAfter})) {
-    return Category::StructuredPatch;
+    return Category::StructuredOrAnyPatch;
   }
 
   throwExceptionIf(true);
@@ -1384,7 +1384,7 @@ void DynamicUnknownPatch::assign(detail::Badge, Object v) {
   if (!isOneOfCategory(
           {Category::EmptyPatch,
            Category::ClearPatch,
-           Category::StructuredPatch})) {
+           Category::StructuredOrAnyPatch})) {
     throwIncompatibleCategory("assign");
   }
 
@@ -1396,7 +1396,7 @@ void DynamicUnknownPatch::patchIfSet(
   if (!isOneOfCategory(
           {Category::EmptyPatch,
            Category::ClearPatch,
-           Category::StructuredPatch})) {
+           Category::StructuredOrAnyPatch})) {
     throwIncompatibleCategory("patchIfSet");
   }
   if (auto assign = get_ptr(op::PatchOp::Assign)) {

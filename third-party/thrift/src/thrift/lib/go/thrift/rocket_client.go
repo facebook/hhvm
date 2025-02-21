@@ -34,26 +34,26 @@ type rocketClient struct {
 	// rsocket client state
 	client RSocketClient
 
-	resultData []byte
-	resultErr  error
-
 	ioTimeout time.Duration
 
 	protoID types.ProtocolID
 
+	persistentHeaders map[string]string
+
+	// NOTE: all variables below are used per-request.
 	messageName string
 	writeType   types.MessageType
 	seqID       int32
-
-	reqHeaders        map[string]string
-	respHeaders       map[string]string
-	persistentHeaders map[string]string
-
-	rbuf *MemoryBuffer
-	wbuf *MemoryBuffer
+	resultData  []byte
+	resultErr   error
+	reqHeaders  map[string]string
+	respHeaders map[string]string
+	rbuf        *MemoryBuffer
+	wbuf        *MemoryBuffer
 }
 
 var _ Protocol = (*rocketClient)(nil)
+var _ RequestChannel = (*rocketClient)(nil)
 
 // NewRocketClient creates a new Rocket client given an RSocketClient.
 func NewRocketClient(client RSocketClient, protoID types.ProtocolID, ioTimeout time.Duration, persistentHeaders map[string]string) (Protocol, error) {
@@ -123,6 +123,80 @@ func (p *rocketClient) Flush() (err error) {
 	p.respHeaders, p.resultData, p.resultErr = p.client.RequestResponse(ctx, p.messageName, p.protoID, headers, dataBytes)
 	clear(p.reqHeaders)
 	return nil
+}
+
+func (p *rocketClient) Oneway(ctx context.Context, messageName string, request WritableStruct) error {
+	dataBytes, err := encodeRequest(p.protoID, request)
+	if err != nil {
+		return err
+	}
+
+	if p.ioTimeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, p.ioTimeout)
+		defer cancel()
+	}
+
+	err = p.client.SendSetup(ctx)
+	if err != nil {
+		return err
+	}
+	reqHeaders := RequestHeadersFromContext(ctx)
+	headers := unionMaps(reqHeaders, p.persistentHeaders)
+	return p.client.FireAndForget(messageName, p.protoID, headers, dataBytes)
+}
+
+func (p *rocketClient) Call(ctx context.Context, messageName string, request WritableStruct, response ReadableStruct) error {
+	dataBytes, err := encodeRequest(p.protoID, request)
+	if err != nil {
+		return err
+	}
+
+	if p.ioTimeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, p.ioTimeout)
+		defer cancel()
+	}
+
+	err = p.client.SendSetup(ctx)
+	if err != nil {
+		return err
+	}
+	reqHeaders := RequestHeadersFromContext(ctx)
+	headers := unionMaps(reqHeaders, p.persistentHeaders)
+	respHeaders, resultData, resultErr := p.client.RequestResponse(ctx, messageName, p.protoID, headers, dataBytes)
+	if resultErr != nil {
+		return resultErr
+	}
+
+	setResponseHeaders(ctx, respHeaders)
+	err = decodeResponse(p.protoID, resultData, response)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func encodeRequest(protoID types.ProtocolID, request WritableStruct) ([]byte, error) {
+	switch protoID {
+	case types.ProtocolIDBinary:
+		return EncodeBinary(request)
+	case types.ProtocolIDCompact:
+		return EncodeCompact(request)
+	default:
+		return nil, types.NewProtocolException(fmt.Errorf("Unknown protocol id: %d", protoID))
+	}
+}
+
+func decodeResponse(protoID types.ProtocolID, data []byte, response ReadableStruct) error {
+	switch protoID {
+	case types.ProtocolIDBinary:
+		return DecodeBinary(data, response)
+	case types.ProtocolIDCompact:
+		return DecodeCompact(data, response)
+	default:
+		return types.NewProtocolException(fmt.Errorf("Unknown protocol id: %d", protoID))
+	}
 }
 
 func unionMaps(dst, src map[string]string) map[string]string {

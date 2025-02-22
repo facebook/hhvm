@@ -398,14 +398,11 @@ std::string munge_ident(const std::string& ident, bool exported, bool compat) {
          next_underscore_pos > word_len);
 
     if (is_initialism) {
-      // Compat: legacy generator does not change whole-string
-      // initialisms to uppercase.
       // Compat: legacy generator does not change initialisms
       // at the beginning of the string to uppercase.
       // Compat: legacy generator does not change initialisms
       // to uppercase if it hits a substring bug.
-      if (!(compat && word_len == ident.size()) && !(compat && is_first_word) &&
-          !(compat && is_legacy_substr_bug)) {
+      if (!(compat && is_first_word) && !(compat && is_legacy_substr_bug)) {
         boost::algorithm::to_upper(word);
       }
     }

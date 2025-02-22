@@ -209,7 +209,8 @@ TEST_F(InitialThrowTest, InitialThrow) {
               "range",
               SerializedRequest(folly::IOBuf::copyBuffer(req)),
               std::make_shared<transport::THeader>(),
-              &callback);
+              &callback,
+              nullptr /* frameworkMetadata */);
           co_await responseReceived;
           if (onFirstResponseBool) {
             co_await onStreamCompleteCalled;

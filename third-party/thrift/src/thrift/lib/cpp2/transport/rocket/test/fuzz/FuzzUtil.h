@@ -194,7 +194,8 @@ void testClientOneInput(const uint8_t* Data, size_t Size) {
       "",
       std::move(request),
       std::move(tHeader),
-      apache::thrift::RequestClientCallback::Ptr(&callback));
+      apache::thrift::RequestClientCallback::Ptr(&callback),
+      nullptr /* frameworkMetadata */);
   evb.drive();
   int fd = sp.extractFD1();
   write(fd, Data, Size);

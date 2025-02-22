@@ -226,7 +226,8 @@ TEST_F(SinkServiceTest, SinkInitialThrowsOnFinalResponseCalled) {
               "initialThrow",
               SerializedRequest(folly::IOBuf::copyBuffer(req)),
               std::make_shared<transport::THeader>(),
-              &callback);
+              &callback,
+              nullptr /* frameworkMetadata */);
           co_await responseReceived;
           if (onFirstResponseBool) {
             co_await onFinalResponseCalled;

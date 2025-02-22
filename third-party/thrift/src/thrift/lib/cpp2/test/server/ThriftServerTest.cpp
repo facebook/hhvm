@@ -2000,7 +2000,7 @@ TEST_P(HeaderOrRocket, ResponseWriteTimeout) {
   // set maxResponseWriteTime to 1 second
   auto& config =
       apache::thrift::detail::getThriftServerConfig(ssit.getThriftServer());
-  config.setMaxResponseWriteTime(folly::observer::makeStaticObserver(
+  config.setMaxResponseWriteTime_Deprecated(folly::observer::makeStaticObserver(
       std::make_optional(std::chrono::milliseconds{1000})));
 
   std::unique_ptr<SlowReadCallback> readCallback;

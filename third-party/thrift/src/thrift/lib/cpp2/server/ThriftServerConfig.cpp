@@ -497,7 +497,7 @@ void ThriftServerConfig::setWriteBatchingByteSize(
   writeBatchingByteSize_.set(batchingByteSize, source);
 }
 
-void ThriftServerConfig::setMaxResponseWriteTime(
+void ThriftServerConfig::setMaxResponseWriteTime_Deprecated(
     folly::observer::Observer<std::optional<std::chrono::milliseconds>>
         maxResponseWriteTime,
     AttributeSource source) {

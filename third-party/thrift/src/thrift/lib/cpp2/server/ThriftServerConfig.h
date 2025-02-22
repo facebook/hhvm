@@ -582,9 +582,9 @@ class ThriftServerConfig {
       AttributeSource source = AttributeSource::OVERRIDE);
 
   /**
-   * Set max response write time.
+   * Deprecated: Use RSocket KeepAliveTimeout instead. See ServiceRouter Wiki.
    */
-  void setMaxResponseWriteTime(
+  void setMaxResponseWriteTime_Deprecated(
       folly::observer::Observer<std::optional<std::chrono::milliseconds>>
           maxResponseWriteTime,
       AttributeSource source = AttributeSource::OVERRIDE);

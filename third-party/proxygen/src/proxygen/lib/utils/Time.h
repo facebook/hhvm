@@ -8,13 +8,10 @@
 
 #pragma once
 
-#include <algorithm>
 #include <chrono>
-#include <cinttypes>
+#include <folly/portability/Time.h>
 #include <memory>
 #include <string>
-
-#include <folly/portability/Time.h>
 
 namespace proxygen {
 

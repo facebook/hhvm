@@ -92,7 +92,7 @@ TEST(SchemaTest, linked) {
 TEST(SchemaTest, static_schema) {
   auto static_schema = SchemaRegistry::mergeSchemas(
       facebook::thrift::test::schema::schema_constants::
-          _fbthrift_schema_fba4d3dcfb7c979a_includes());
+          _fbthrift_schema_542ebcbee39d65d1_includes());
   const type::Program* static_program = nullptr;
   for (const auto& program : *static_schema.programs()) {
     if (program.path() == "thrift/test/schema.thrift") {
@@ -115,7 +115,7 @@ TEST(SchemaTest, static_schema) {
 
 TEST(SchemaTest, merged_schema_add_after_access) {
   auto data = facebook::thrift::test::schema::schema_constants::
-      _fbthrift_schema_fba4d3dcfb7c979a();
+      _fbthrift_schema_542ebcbee39d65d1();
 
   BaseSchemaRegistry base;
   SchemaRegistry registry(base);

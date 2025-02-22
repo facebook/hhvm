@@ -25,7 +25,8 @@ namespace apache::thrift::detail::mc {
 ::std::string_view readSchemaInclude(
     ::folly::Range<const ::std::string_view*> (*access)(),
     ::std::size_t index) {
-  return access()[index];
+  auto range = access();
+  return index < range.size() ? range[index] : "";
 }
 
 } // namespace apache::thrift::detail::mc

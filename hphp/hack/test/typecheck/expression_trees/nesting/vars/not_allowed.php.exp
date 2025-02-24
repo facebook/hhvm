@@ -1,0 +1,4 @@
+ERROR: File "not_allowed.php", line 5, characters 27-28:
+Cannot use unstable feature: `expression_tree_nested_bindings` Free variables: $x (Parsing[1002])
+ERROR: File "not_allowed.php", line 5, characters 27-28:
+Variable `$x` is undefined, or not always defined. (Naming[2050])

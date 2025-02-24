@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2facd3cbe46b61fbc2db60418f88e85d>>
+// @generated SignedSource<<ca37ab13e19dd7bfde3b0161975a0806>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -645,6 +645,9 @@ pub struct ExpressionTree<Ex, En> {
     ///
     ///     Foo::makeTree($v ==> $v->visitBinOp(...))
     pub runtime_expr: Expr<Ex, En>,
+    /// For nested expression trees, what variables they use that should
+    /// be defined in the the enclosing environment.
+    pub free_vars: Option<Vec<LocalId>>,
 }
 
 #[derive(

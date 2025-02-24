@@ -90,7 +90,7 @@ let visitor =
         (* ReadonlyExprs can be immediately surrounding a void thing,
            but the thing inside the expression should be checked for void *)
         this#disallow_non_returning (fun () -> super#on_expr env r)
-      | ExpressionTree { et_class; et_runtime_expr } ->
+      | ExpressionTree { et_class; et_runtime_expr; et_free_vars = _ } ->
         this#on_id env et_class;
 
         (* Allow calls to void functions at the top level:

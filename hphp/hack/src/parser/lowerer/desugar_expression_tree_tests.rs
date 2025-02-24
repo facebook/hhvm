@@ -11,6 +11,7 @@
 mod tests {
     use std::collections::HashSet;
 
+    use hack_macros::hack_expr;
     use hack_macros::hack_stmts;
     use lowerer::desugar_expression_tree::LiveVars;
 
@@ -97,5 +98,55 @@ mod tests {
         ));
         let res = live_vars_from_vecs(vec!["$e", "$y", "$z"], vec!["$x"]);
         assert_eq!(lvs, res);
+    }
+
+    #[test]
+    fn et() {
+        let lvs = hack_expr!("ET`$x`")
+            .2
+            .as_expression_tree()
+            .unwrap()
+            .free_vars
+            .clone();
+        let res = None;
+        assert_eq!(lvs, res);
+    }
+
+    #[test]
+    fn nest_et() {
+        let mut e = Empty {};
+        let mut splices = vec![];
+        let _ = e.visit_expr(&mut splices, &hack_expr!("ET`${ET`{$y = 1; $x + $y;}`}`"));
+        let fvs = splices[0]
+            .spliced_expr
+            .2
+            .as_expression_tree()
+            .unwrap()
+            .free_vars
+            .clone();
+        let res = Some(vec![(0, "$x".to_string())]);
+        assert_eq!(fvs, res);
+    }
+
+    use oxidized::aast::EtSplice;
+    use oxidized::aast_visitor::*;
+
+    struct Empty {}
+
+    impl<'ast> Visitor<'ast> for Empty {
+        type Params = AstParams<Vec<EtSplice<(), ()>>, ()>;
+
+        fn object(&mut self) -> &mut dyn Visitor<'ast, Params = Self::Params> {
+            self
+        }
+
+        fn visit_et_splice(
+            &mut self,
+            env: &mut Vec<EtSplice<(), ()>>,
+            splice: &EtSplice<(), ()>,
+        ) -> Result<(), ()> {
+            env.push(splice.clone());
+            Ok(())
+        }
     }
 }

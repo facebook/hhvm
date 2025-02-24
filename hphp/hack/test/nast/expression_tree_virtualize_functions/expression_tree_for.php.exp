@@ -482,8 +482,8 @@
                                  f_fun_kind = FSync; f_user_attributes = []; 
                                  f_external = false; f_doc_comment = None },
                                [((), ([6:7-10], $0fp0))])));
-                           targs = []; args = []; unpacked_arg = None }))
-                     }))))
+                           targs = []; args = []; unpacked_arg = None }));
+                     et_free_vars = None }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-14], "__SupportDynamicType"); ua_params = [] }]; 

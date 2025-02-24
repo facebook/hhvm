@@ -63,7 +63,8 @@ class virtual iter =
       let env = Env.set_allow_wildcards env in
       super#on_As env e
 
-    method! on_expression_tree env Aast.{ et_class; et_runtime_expr } =
+    method! on_expression_tree
+        env Aast.{ et_class; et_runtime_expr; et_free_vars = _ } =
       self#on_id env et_class;
       let env = Env.inside_expr_tree env et_class in
       self#on_expr env et_runtime_expr
@@ -135,7 +136,8 @@ class virtual ['state] iter_with_state =
       let env = Env.set_allow_wildcards env in
       super#on_As (env, state) e
 
-    method! on_expression_tree (env, state) Aast.{ et_class; et_runtime_expr } =
+    method! on_expression_tree
+        (env, state) Aast.{ et_class; et_runtime_expr; et_free_vars = _ } =
       self#on_id (env, state) et_class;
       let env = Env.inside_expr_tree env et_class in
       self#on_expr (env, state) et_runtime_expr
@@ -202,7 +204,8 @@ class virtual ['a] reduce =
       let env = Env.set_allow_wildcards env in
       super#on_As env e
 
-    method! on_expression_tree env Aast.{ et_class = cls; et_runtime_expr } =
+    method! on_expression_tree
+        env Aast.{ et_class = cls; et_runtime_expr; et_free_vars = _ } =
       let et_class = self#on_id env cls in
       let env = Env.inside_expr_tree env cls in
       let et_runtime_expr = self#on_expr env et_runtime_expr in
@@ -272,13 +275,14 @@ class virtual map =
       let env = Env.set_allow_wildcards env in
       super#on_As env e
 
-    method! on_expression_tree env Aast.{ et_class; et_runtime_expr } =
+    method! on_expression_tree
+        env Aast.{ et_class; et_runtime_expr; et_free_vars } =
       let et_class = self#on_id env et_class in
       let et_runtime_expr =
         let env = Env.inside_expr_tree env et_class in
         self#on_expr env et_runtime_expr
       in
-      Aast.{ et_class; et_runtime_expr }
+      Aast.{ et_class; et_runtime_expr; et_free_vars }
 
     method! on_ET_Splice env e =
       let env = Env.outside_expr_tree env in
@@ -343,13 +347,14 @@ class virtual endo =
       let env = Env.set_allow_wildcards env in
       super#on_As env e
 
-    method! on_expression_tree env Aast.{ et_class; et_runtime_expr } =
+    method! on_expression_tree
+        env Aast.{ et_class; et_runtime_expr; et_free_vars } =
       let et_class = self#on_id env et_class in
       let et_runtime_expr =
         let env = Env.inside_expr_tree env et_class in
         self#on_expr env et_runtime_expr
       in
-      Aast.{ et_class; et_runtime_expr }
+      Aast.{ et_class; et_runtime_expr; et_free_vars }
 
     method! on_ET_Splice env e =
       let env = Env.outside_expr_tree env in

@@ -408,8 +408,16 @@ impl ser::Serializer for AstWriter {
         Ok(AstValue::Tokens(s))
     }
 
-    fn serialize_bytes(self, _: &[u8]) -> Result {
-        todo!()
+    fn serialize_bytes(self, value: &[u8]) -> Result {
+        let mut s = TokenStream::new();
+        let span = Span::call_site();
+        let mut s2 = TokenStream::new();
+        s2.append(TokenTree::Literal(Literal::byte_string(value)));
+        s.push_ident(span, "From");
+        s.push_colon2();
+        s.push_ident(span, "from");
+        s.push_paren_group(s2);
+        Ok(AstValue::Tokens(s))
     }
 
     fn serialize_none(self) -> Result {

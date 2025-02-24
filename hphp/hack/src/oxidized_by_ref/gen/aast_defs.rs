@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bb97aa8ba626827e7c22f56f78e10b10>>
+// @generated SignedSource<<5de3ced8e2a8aeeaf8f50b77a5b88e7f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -829,6 +829,10 @@ pub struct ExpressionTree<'a, Ex, En> {
     ///     Foo::makeTree($v ==> $v->visitBinOp(...))
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub runtime_expr: &'a Expr<'a, Ex, En>,
+    /// For nested expression trees, what variables they use that should
+    /// be defined in the the enclosing environment.
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub free_vars: Option<&'a [&'a LocalId<'a>]>,
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for ExpressionTree<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(ExpressionTree<'arena, Ex, En>);

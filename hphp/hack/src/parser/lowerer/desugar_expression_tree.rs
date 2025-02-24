@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 
 use bstr::BString;
+use itertools::Itertools;
 use naming_special_names_rust::classes;
 use naming_special_names_rust::expression_trees as et;
 use naming_special_names_rust::pseudo_functions;
@@ -26,8 +27,10 @@ use oxidized::ast::Stmt;
 use oxidized::ast::Stmt_;
 use oxidized::ast_defs;
 use oxidized::ast_defs::*;
+use oxidized::experimental_features::FeatureName;
 use oxidized::local_id;
 use oxidized::pos::Pos;
+use parser_core_types::syntax_error;
 
 use crate::lowerer::Env;
 
@@ -92,8 +95,18 @@ pub fn desugar(
     Id(visitor_pos, visitor_name): &aast::ClassName,
     e: Expr,
     env: &Env<'_>,
+    is_nested: bool,
 ) -> DesugarResult {
     let et_literal_pos = e.1.clone();
+
+    let free_vars = if is_nested {
+        // Only compute the free variables for nested expression trees.
+        // Top level ones will just desugar to a virtual expression with
+        // free variables and get an error from that
+        LiveVars::new_from_expression(&e).used
+    } else {
+        HashSet::default()
+    };
 
     let mut state = RewriteState {
         splices: vec![],
@@ -259,7 +272,20 @@ pub fn desugar(
     let mut function_pointers = vec![];
     function_pointers.extend(function_pointer_assignments);
     function_pointers.extend(static_method_assignments);
-
+    if is_nested
+        && !free_vars.is_empty()
+        && !FeatureName::ExpressionTreeNestedBindings
+            .can_use(env.parser_options, &env.active_experimental_features)
+    {
+        state.errors.push((
+            et_literal_pos.clone(),
+            format!(
+                "{} Free variables: {}",
+                syntax_error::cannot_use_feature(FeatureName::ExpressionTreeNestedBindings.into()),
+                free_vars.iter().map(|x| x.1.clone()).join(", ")
+            ),
+        ))
+    }
     let make_tree = static_meth_call(
         visitor_name,
         et::MAKE_TREE,
@@ -293,6 +319,11 @@ pub fn desugar(
         Expr_::mk_expression_tree(ast::ExpressionTree {
             class: Id(visitor_pos.clone(), visitor_name.clone()),
             runtime_expr,
+            free_vars: if is_nested {
+                Some(free_vars.into_iter().collect())
+            } else {
+                None
+            },
         }),
     );
     DesugarResult {
@@ -2198,13 +2229,17 @@ impl LiveVars {
     // Add an addignment of Lid to the live variable information. It is removed
     // from used, since the subsequent use will now see the assignment.
     fn add_assign(&mut self, lid: &ast::Lid) {
-        let loc = lid.as_local_id();
-        self.used.remove(loc);
-        self.assigned.insert(loc.clone());
+        if lid.as_local_id().1 != "$this" {
+            let loc = lid.as_local_id();
+            self.used.remove(loc);
+            self.assigned.insert(loc.clone());
+        }
     }
 
     fn add_use(&mut self, lid: &ast::Lid) {
-        self.used.insert(lid.as_local_id().clone());
+        if lid.as_local_id().1 != "$this" {
+            self.used.insert(lid.as_local_id().clone());
+        }
     }
 
     // Update the live variable info in self to reflect the assignment to an

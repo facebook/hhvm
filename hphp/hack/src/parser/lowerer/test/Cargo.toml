@@ -13,3 +13,4 @@ path = "../desugar_expression_tree_tests.rs"
 [dev-dependencies]
 hack_macros = { version = "0.0.0", path = "../../../utils/hack_macros/cargo/hack_macros" }
 lowerer = { version = "0.0.0", path = ".." }
+oxidized = { version = "0.0.0", path = "../../../oxidized" }

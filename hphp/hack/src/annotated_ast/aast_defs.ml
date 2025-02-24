@@ -350,6 +350,9 @@ and ('ex, 'en) expression_tree = {
       (** The expression that's executed at runtime.
        *
        *     Foo::makeTree($v ==> $v->visitBinOp(...)) *)
+  et_free_vars: local_id list option;
+      (** For nested expression trees, what variables they use that should
+       * be defined in the the enclosing environment. *)
 }
 
 and ('ex, 'en) as_ = {

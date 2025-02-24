@@ -10533,7 +10533,7 @@ and Expression_tree : sig
     env -> pos -> (unit, unit) expression_tree -> env * Tast.expr * locl_ty
 end = struct
   let expression_tree env p et =
-    let { et_class; et_runtime_expr } = et in
+    let { et_class; et_runtime_expr; et_free_vars } = et in
 
     let (env, t_runtime_expr, ty_runtime_expr) =
       Env.with_inside_expr_tree env et_class (fun env ->
@@ -10547,7 +10547,8 @@ end = struct
     make_result
       env
       p
-      (Aast.ExpressionTree { et_class; et_runtime_expr = t_runtime_expr })
+      (Aast.ExpressionTree
+         { et_class; et_runtime_expr = t_runtime_expr; et_free_vars })
       ty_runtime_expr
 end
 

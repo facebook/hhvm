@@ -2348,6 +2348,7 @@ fn p_prefixed_code_expr<'a>(
 ) -> Result<Expr_> {
     let mut clear_et_class_at_end = false;
     let missing = c.prefix.is_missing();
+    let is_nested = env.expression_tree_class.is_some();
     let nested_id = match (pos_name(&c.prefix, env), &env.expression_tree_class) {
         (Ok(nested_id), Some(enclosing_id)) => {
             if !missing {
@@ -2415,7 +2416,7 @@ fn p_prefixed_code_expr<'a>(
         });
         ast::Expr::new((), pos, expr)
     };
-    let desugar_result = desugar(&nested_id, src_expr, env);
+    let desugar_result = desugar(&nested_id, src_expr, env, is_nested);
     for (pos, msg) in desugar_result.errors {
         raise_parsing_error_pos(&pos, env, &msg);
     }

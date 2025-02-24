@@ -437,8 +437,7 @@ class WithAnnotations {
  protected:
   folly::span<const Annotation> annotations() const;
 
-  explicit WithAnnotations(std::vector<Annotation>&& annotations)
-      : annotations_(std::move(annotations)) {}
+  explicit WithAnnotations(std::vector<Annotation>&& annotations);
 
  private:
   std::vector<Annotation> annotations_;
@@ -980,14 +979,7 @@ class FunctionNode final : folly::MoveOnly,
       Response&& response,
       std::string_view name,
       std::vector<Param>&& params,
-      std::vector<TypeRef>&& exceptions)
-      : detail::WithResolver(resolver),
-        detail::WithName(name),
-        detail::WithAnnotations(std::move(annotations)),
-        parent_(parent),
-        response_(std::move(response)),
-        params_(std::move(params)),
-        exceptions_(std::move(exceptions)) {}
+      std::vector<TypeRef>&& exceptions);
 
   friend class detail::Resolver;
 };
@@ -1197,12 +1189,7 @@ class DefinitionNode final : folly::MoveOnly,
       apache::thrift::type::ProgramId programId,
       std::vector<Annotation>&& annotations,
       std::string_view name,
-      Alternative&& definition)
-      : detail::WithResolver(resolver),
-        detail::WithName(name),
-        detail::WithAnnotations(std::move(annotations)),
-        programId_(programId),
-        definition_(std::move(definition)) {}
+      Alternative&& definition);
 
   friend class detail::Resolver;
 };

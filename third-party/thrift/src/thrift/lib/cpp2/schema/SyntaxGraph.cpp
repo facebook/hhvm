@@ -438,6 +438,22 @@ TypeRef FunctionParam::type() const {
   return resolver().typeOf(*type_);
 }
 
+FunctionNode::FunctionNode(
+    const detail::Resolver& resolver,
+    const apache::thrift::type::DefinitionKey& parent,
+    std::vector<Annotation>&& annotations,
+    Response&& response,
+    std::string_view name,
+    std::vector<Param>&& params,
+    std::vector<TypeRef>&& exceptions)
+    : detail::WithResolver(resolver),
+      detail::WithName(name),
+      detail::WithAnnotations(std::move(annotations)),
+      parent_(parent),
+      response_(std::move(response)),
+      params_(std::move(params)),
+      exceptions_(std::move(exceptions)) {}
+
 const RpcInterfaceNode& FunctionNode::parent() const {
   return detail::lazyResolve(resolver(), parent_).asRpcInterface();
 }
@@ -451,6 +467,18 @@ const ServiceNode* FOLLY_NULLABLE ServiceNode::baseService() const {
       ? &detail::lazyResolve(resolver(), *baseServiceKey_).asService()
       : nullptr;
 }
+
+DefinitionNode::DefinitionNode(
+    const detail::Resolver& resolver,
+    apache::thrift::type::ProgramId programId,
+    std::vector<Annotation>&& annotations,
+    std::string_view name,
+    Alternative&& definition)
+    : detail::WithResolver(resolver),
+      detail::WithName(name),
+      detail::WithAnnotations(std::move(annotations)),
+      programId_(programId),
+      definition_(std::move(definition)) {}
 
 const ProgramNode& DefinitionNode::program() const {
   return resolver().programOf(programId_);
@@ -600,6 +628,9 @@ ProgramNode::IncludesList SyntaxGraph::programs() const {
 }
 
 namespace detail {
+
+WithAnnotations::WithAnnotations(std::vector<Annotation>&& annotations)
+    : annotations_(std::move(annotations)) {}
 
 folly::span<const Annotation> WithAnnotations::annotations() const {
   return annotations_;

@@ -350,7 +350,7 @@ and ('ex, 'en) expression_tree = {
       (** The expression that's executed at runtime.
        *
        *     Foo::makeTree($v ==> $v->visitBinOp(...)) *)
-  et_free_vars: local_id list option;
+  et_free_vars: lid list option;
       (** For nested expression trees, what variables they use that should
        * be defined in the the enclosing environment. *)
 }
@@ -369,10 +369,11 @@ and ('ex, 'en) et_splice = {
   contains_await: bool;
       (** Does the spliced_expr contain an await expression *)
   macro_variables: lid list option;
-      (** Should the splice be interpreted as a "macro". That is, if spliced_expr has type
+      (** Some if the splice be interpreted as a "macro". That is, if spliced_expr has type
           Spliceable<t1, t2, t3>, in an enviroment with the macro variables bound to types
           Spliceable<t1, t2, u1>,..,Spliceable<t1, t2, un> then the splice should have
-          type Spliceable<t1, t2, (function (u1, .., un): t3)> *)
+          type Spliceable<t1, t2, (function (u1, .., un): t3)>.
+          None is the splice is not a macro. *)
   spliced_expr: ('ex, 'en) expr;
 }
 

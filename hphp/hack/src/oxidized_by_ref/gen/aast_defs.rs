@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5de3ced8e2a8aeeaf8f50b77a5b88e7f>>
+// @generated SignedSource<<9d45af9036e955832dd27ae23d689114>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -832,7 +832,7 @@ pub struct ExpressionTree<'a, Ex, En> {
     /// For nested expression trees, what variables they use that should
     /// be defined in the the enclosing environment.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub free_vars: Option<&'a [&'a LocalId<'a>]>,
+    pub free_vars: Option<&'a [&'a Lid<'a>]>,
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for ExpressionTree<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(ExpressionTree<'arena, Ex, En>);
@@ -892,10 +892,11 @@ pub struct EtSplice<'a, Ex, En> {
     pub extract_client_type: bool,
     /// Does the spliced_expr contain an await expression
     pub contains_await: bool,
-    /// Should the splice be interpreted as a "macro". That is, if spliced_expr has type
+    /// Some if the splice be interpreted as a "macro". That is, if spliced_expr has type
     /// Spliceable<t1, t2, t3>, in an enviroment with the macro variables bound to types
     /// Spliceable<t1, t2, u1>,..,Spliceable<t1, t2, un> then the splice should have
-    /// type Spliceable<t1, t2, (function (u1, .., un): t3)>
+    /// type Spliceable<t1, t2, (function (u1, .., un): t3)>.
+    /// None is the splice is not a macro.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub macro_variables: Option<&'a [&'a Lid<'a>]>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

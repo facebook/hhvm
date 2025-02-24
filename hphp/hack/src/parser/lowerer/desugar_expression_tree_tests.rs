@@ -9,16 +9,26 @@
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
+    use std::collections::HashMap;
 
     use hack_macros::hack_expr;
     use hack_macros::hack_stmts;
     use lowerer::desugar_expression_tree::LiveVars;
 
-    pub fn live_vars_from_vecs(used: Vec<&str>, assigned: Vec<&str>) -> LiveVars {
+    fn strings_to_map(v: Vec<&str>) -> HashMap<aast::LocalId, Pos> {
+        HashMap::from_iter(v.iter().map(|s| ((0, s.to_string()), Pos::NONE)))
+    }
+
+    fn strings_to_lids(v: Vec<&str>) -> Vec<aast::Lid> {
+        v.iter()
+            .map(|s| aast::Lid(Pos::NONE, (0, s.to_string())))
+            .collect()
+    }
+
+    fn live_vars_from_vecs(used: Vec<&str>, assigned: Vec<&str>) -> LiveVars {
         LiveVars {
-            used: HashSet::from_iter(used.into_iter().map(|s| (0, s.to_string()))),
-            assigned: HashSet::from_iter(assigned.into_iter().map(|s| (0, s.to_string()))),
+            used: strings_to_map(used),
+            assigned: strings_to_map(assigned),
         }
     }
 
@@ -114,9 +124,7 @@ mod tests {
 
     #[test]
     fn nest_et() {
-        let mut e = Empty {};
-        let mut splices = vec![];
-        let _ = e.visit_expr(&mut splices, &hack_expr!("ET`${ET`{$y = 1; $x + $y;}`}`"));
+        let splices = get_splices(&hack_expr!("ET`${ET`{$y = 1; $x + $y;}`}`"));
         let fvs = splices[0]
             .spliced_expr
             .2
@@ -124,17 +132,69 @@ mod tests {
             .unwrap()
             .free_vars
             .clone();
-        let res = Some(vec![(0, "$x".to_string())]);
+        let res = Some(strings_to_lids(vec!["$x"]));
         assert_eq!(fvs, res);
+        assert_eq!(splices[0].macro_variables, res);
     }
 
-    use oxidized::aast::EtSplice;
+    #[test]
+    fn nest_et_no_vars() {
+        let splices = get_splices(&hack_expr!("ET`${ET`{$y = 1; $y;}`}`"));
+        let fvs = splices[0]
+            .spliced_expr
+            .2
+            .as_expression_tree()
+            .unwrap()
+            .free_vars
+            .clone();
+        let res = Some(vec![]);
+        assert_eq!(fvs, res);
+        assert_eq!(splices[0].macro_variables, None);
+    }
+
+    #[test]
+    fn nest_multiple_et() {
+        let splices = get_splices(&hack_expr!("ET`${ET`$y` + ET`$z`}`"));
+        let res = Some(strings_to_lids(vec!["$y", "$z"]));
+        assert_eq!(splices[0].macro_variables, res);
+    }
+
+    #[test]
+    fn double_nested_et() {
+        let expr = hack_expr!("ET`${ET`${ET`$x`}`}`");
+        let splices = get_splices(&expr);
+        let nested_splices = get_splices(&splices[0].spliced_expr);
+        let fvs = splices[0]
+            .spliced_expr
+            .2
+            .as_expression_tree()
+            .unwrap()
+            .free_vars
+            .clone();
+        let res = Some(strings_to_lids(vec!["$x"]));
+        assert_eq!(nested_splices[0].macro_variables, res);
+        assert_eq!(fvs, res);
+        //assert_eq!(splices[0].macro_variables, res);
+    }
+
+    use oxidized::aast;
     use oxidized::aast_visitor::*;
+    use oxidized::pos::Pos;
 
-    struct Empty {}
+    // Helper to find all of the splices in an expression
+    fn get_splices(expr: &aast::Expr<(), ()>) -> Vec<aast::EtSplice<(), ()>> {
+        let mut fs = FindSplices::default();
+        let _ = fs.visit_expr(&mut (), expr);
+        fs.splices
+    }
 
-    impl<'ast> Visitor<'ast> for Empty {
-        type Params = AstParams<Vec<EtSplice<(), ()>>, ()>;
+    #[derive(Default)]
+    struct FindSplices {
+        splices: Vec<aast::EtSplice<(), ()>>,
+    }
+
+    impl<'ast> Visitor<'ast> for FindSplices {
+        type Params = AstParams<(), ()>;
 
         fn object(&mut self) -> &mut dyn Visitor<'ast, Params = Self::Params> {
             self
@@ -142,10 +202,10 @@ mod tests {
 
         fn visit_et_splice(
             &mut self,
-            env: &mut Vec<EtSplice<(), ()>>,
-            splice: &EtSplice<(), ()>,
+            _: &mut (),
+            splice: &aast::EtSplice<(), ()>,
         ) -> Result<(), ()> {
-            env.push(splice.clone());
+            self.splices.push(splice.clone());
             Ok(())
         }
     }

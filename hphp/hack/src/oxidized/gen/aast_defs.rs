@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ca37ab13e19dd7bfde3b0161975a0806>>
+// @generated SignedSource<<55509d66235bcc3b20c63de82d0faff7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -647,7 +647,7 @@ pub struct ExpressionTree<Ex, En> {
     pub runtime_expr: Expr<Ex, En>,
     /// For nested expression trees, what variables they use that should
     /// be defined in the the enclosing environment.
-    pub free_vars: Option<Vec<LocalId>>,
+    pub free_vars: Option<Vec<Lid>>,
 }
 
 #[derive(
@@ -695,10 +695,11 @@ pub struct EtSplice<Ex, En> {
     pub extract_client_type: bool,
     /// Does the spliced_expr contain an await expression
     pub contains_await: bool,
-    /// Should the splice be interpreted as a "macro". That is, if spliced_expr has type
+    /// Some if the splice be interpreted as a "macro". That is, if spliced_expr has type
     /// Spliceable<t1, t2, t3>, in an enviroment with the macro variables bound to types
     /// Spliceable<t1, t2, u1>,..,Spliceable<t1, t2, un> then the splice should have
-    /// type Spliceable<t1, t2, (function (u1, .., un): t3)>
+    /// type Spliceable<t1, t2, (function (u1, .., un): t3)>.
+    /// None is the splice is not a macro.
     pub macro_variables: Option<Vec<Lid>>,
     pub spliced_expr: Expr<Ex, En>,
 }

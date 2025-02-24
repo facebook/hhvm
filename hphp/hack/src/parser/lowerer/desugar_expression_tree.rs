@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::HashMap;
 
 use bstr::BString;
 use itertools::Itertools;
@@ -18,6 +18,7 @@ use oxidized::ast;
 use oxidized::ast::Afield;
 use oxidized::ast::ClassId;
 use oxidized::ast::ClassId_;
+use oxidized::ast::EtSplice;
 use oxidized::ast::Expr;
 use oxidized::ast::Expr_;
 use oxidized::ast::Hint_;
@@ -105,7 +106,7 @@ pub fn desugar(
         // free variables and get an error from that
         LiveVars::new_from_expression(&e).used
     } else {
-        HashSet::default()
+        HashMap::default()
     };
 
     let mut state = RewriteState {
@@ -282,7 +283,7 @@ pub fn desugar(
             format!(
                 "{} Free variables: {}",
                 syntax_error::cannot_use_feature(FeatureName::ExpressionTreeNestedBindings.into()),
-                free_vars.iter().map(|x| x.1.clone()).join(", ")
+                free_vars.keys().map(|x| x.1.clone()).join(", ")
             ),
         ))
     }
@@ -320,7 +321,12 @@ pub fn desugar(
             class: Id(visitor_pos.clone(), visitor_name.clone()),
             runtime_expr,
             free_vars: if is_nested {
-                Some(free_vars.into_iter().collect())
+                Some(
+                    free_vars
+                        .into_iter()
+                        .map(|(id, pos)| aast::Lid(pos, id))
+                        .collect(),
+                )
             } else {
                 None
             },
@@ -2100,9 +2106,9 @@ fn mk_visit_string(pos: &Pos, str: Expr_) -> Expr {
 pub struct LiveVars {
     // The variables that might be used in a block, not following an assignment
     // to that variable in the block
-    pub used: HashSet<LocalId>,
+    pub used: HashMap<LocalId, Pos>,
     // The variables that are definitely assigned in a block
-    pub assigned: HashSet<LocalId>,
+    pub assigned: HashMap<LocalId, Pos>,
 }
 
 impl LiveVars {
@@ -2110,8 +2116,8 @@ impl LiveVars {
     // assuming nothing is live after
     pub fn new_from_statement(stmts: &[Stmt]) -> Self {
         let mut lvs = LiveVars {
-            used: HashSet::default(),
-            assigned: HashSet::default(),
+            used: HashMap::default(),
+            assigned: HashMap::default(),
         };
         lvs.update_for_stmts(stmts);
         lvs
@@ -2121,8 +2127,8 @@ impl LiveVars {
     // assuming that nothing is live after
     pub fn new_from_expression(expr: &Expr) -> Self {
         let mut lvs = LiveVars {
-            used: HashSet::default(),
-            assigned: HashSet::default(),
+            used: HashMap::default(),
+            assigned: HashMap::default(),
         };
         lvs.visit_expr(&mut (), expr).unwrap();
         lvs
@@ -2154,21 +2160,21 @@ impl LiveVars {
 
                     let mut body_lvs = Self::new_from_statement(body);
                     // The assigned vars don't matter because we might not enter the body
-                    body_lvs.assigned = HashSet::default();
+                    body_lvs.assigned = HashMap::default();
                     self.update_for_more_live_vars(body_lvs);
                     // We relay on there being no assignments in the expr
                     self.visit_expr(&mut (), test).unwrap();
                 }
                 Stmt_::For(box (init, test, inc, body)) => {
                     let mut body_lvs = LiveVars {
-                        used: HashSet::default(),
-                        assigned: HashSet::default(),
+                        used: HashMap::default(),
+                        assigned: HashMap::default(),
                     };
                     for e in inc.iter().rev() {
                         body_lvs.visit_expr(&mut (), e).unwrap();
                     }
                     body_lvs.update_for_stmts(body);
-                    body_lvs.assigned = HashSet::default();
+                    body_lvs.assigned = HashMap::default();
                     self.update_for_more_live_vars(body_lvs);
                     for e in test.iter().rev() {
                         self.visit_expr(&mut (), e).unwrap();
@@ -2202,12 +2208,12 @@ impl LiveVars {
     // Update self with the live variable info in update, assuming that self
     // follows update in the control flow
     fn update_for_more_live_vars(&mut self, update: Self) {
-        for v in update.assigned {
+        for (v, pos) in update.assigned {
             self.used.remove(&v);
-            self.assigned.insert(v);
+            self.assigned.insert(v, pos);
         }
-        for v in update.used {
-            self.used.insert(v);
+        for (v, pos) in update.used {
+            self.used.insert(v, pos);
         }
     }
 
@@ -2217,11 +2223,11 @@ impl LiveVars {
         let assigned = self
             .assigned
             .into_iter()
-            .filter(|v| lvs.assigned.contains(v))
+            .filter(|(v, _)| lvs.assigned.contains_key(v))
             .collect();
         let mut used = self.used;
-        for v in lvs.used {
-            used.insert(v);
+        for (v, pos) in lvs.used {
+            used.insert(v, pos);
         }
         LiveVars { assigned, used }
     }
@@ -2232,13 +2238,13 @@ impl LiveVars {
         if lid.as_local_id().1 != "$this" {
             let loc = lid.as_local_id();
             self.used.remove(loc);
-            self.assigned.insert(loc.clone());
+            self.assigned.insert(loc.clone(), lid.0.clone());
         }
     }
 
     fn add_use(&mut self, lid: &ast::Lid) {
         if lid.as_local_id().1 != "$this" {
-            self.used.insert(lid.as_local_id().clone());
+            self.used.insert(lid.as_local_id().clone(), lid.0.clone());
         }
     }
 
@@ -2272,6 +2278,15 @@ impl<'ast> Visitor<'ast> for LiveVars {
         Ok(())
     }
 
+    fn visit_et_splice(&mut self, _env: &mut (), e: &ast::EtSplice) -> Result<(), ()> {
+        if let Some(vars) = &e.macro_variables {
+            for v in vars {
+                self.add_use(v);
+            }
+        }
+        Ok(())
+    }
+
     fn visit_expr_(&mut self, env: &mut (), e: &Expr_) -> Result<(), ()> {
         match e {
             Expr_::Assign(box (lhs, bop, rhs)) => {
@@ -2285,7 +2300,17 @@ impl<'ast> Visitor<'ast> for LiveVars {
                     Ok(())
                 }
             }
-            Expr_::ExpressionTree(_) | Expr_::ETSplice(_) => Ok(()),
+            Expr_::ExpressionTree(_) => Ok(()),
+            Expr_::ETSplice(box EtSplice {
+                macro_variables, ..
+            }) => {
+                if let Some(vars) = macro_variables {
+                    for v in vars {
+                        self.add_use(v);
+                    }
+                }
+                Ok(())
+            }
             Expr_::Lfun(box (f, _idl)) => {
                 // functions create a new scope
                 let ast::Block(stmts) = &f.body.fb_ast;
@@ -2298,8 +2323,8 @@ impl<'ast> Visitor<'ast> for LiveVars {
                         lv.visit_expr(&mut (), e).unwrap();
                     }
                 }
-                for v in lv.used {
-                    self.used.insert(v);
+                for (v, pos) in lv.used {
+                    self.used.insert(v, pos);
                 }
                 Ok(())
             }

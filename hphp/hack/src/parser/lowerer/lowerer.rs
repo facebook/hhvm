@@ -2438,6 +2438,13 @@ fn p_et_splice_expr<'a>(expr: S<'a>, env: &mut Env<'a>, location: ExprLocation) 
     let inner_pos = p_pos(expr, env);
     let inner_expr_ = p_expr_recurse(location, expr, env, None)?;
     let spliced_expr = ast::Expr::new((), inner_pos, inner_expr_);
+    let mut macro_vars = ETVars::default();
+    let _ = macro_vars.visit_expr(&mut (), &spliced_expr);
+    let macro_variables = if macro_vars.vars.is_empty() {
+        None
+    } else {
+        Some(macro_vars.vars)
+    };
     let contains_await = env.found_await;
     env.found_await |= old_found_await;
     // Since splices can't directly nest, we don't need to restore the old value,
@@ -2447,8 +2454,36 @@ fn p_et_splice_expr<'a>(expr: S<'a>, env: &mut Env<'a>, location: ExprLocation) 
         spliced_expr,
         contains_await,
         extract_client_type: true,
-        macro_variables: None,
+        macro_variables,
     })))
+}
+
+// visitor to collect all of the free variables from sub-expressions
+// that are expression trees
+#[derive(Default)]
+struct ETVars {
+    vars: Vec<aast::Lid>,
+}
+
+impl<'ast> Visitor<'ast> for ETVars {
+    type Params = AstParams<(), ()>;
+
+    fn object(&mut self) -> &mut dyn Visitor<'ast, Params = Self::Params> {
+        self
+    }
+
+    fn visit_expression_tree(
+        &mut self,
+        _env: &mut (),
+        et: &'ast aast::ExpressionTree<(), ()>,
+    ) -> Result<(), ()> {
+        if let Some(free_vars) = &et.free_vars {
+            for v in free_vars.iter() {
+                self.vars.push(v.clone());
+            }
+        }
+        Ok(())
+    }
 }
 
 fn p_conditional_expr<'a>(

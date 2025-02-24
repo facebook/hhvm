@@ -101,9 +101,12 @@ void logSetupConnectionEventsOnce(
         const auto& protocol = context.getSecurityProtocol();
         if (protocol == "TLS" || protocol == "Fizz" || protocol == "stopTLS" ||
             protocol == "Fizz/KTLS") {
-          if (!transport->getPeerCertificate()) {
+          // Check if we had cached the cert on the conn context as well, we may
+          // have dropped the cert from the transport
+          if (!transport->getPeerCertificate() &&
+              !context.getPeerCertificate()) {
             logTlsNoPeerCertEvent(context);
-          } else {
+          } else if (transport->getPeerCertificate() != nullptr) {
             maybeLogTlsPeerCertEvent(context, transport->getPeerCertificate());
           }
         } else {

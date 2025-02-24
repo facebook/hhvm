@@ -46,6 +46,19 @@
 #include <immintrin.h>
 #endif
 
+#if defined(__BMI2__)
+#define THRIFT_UTIL_VARINTUTILS_BRANCH_FREE_ENCODER 1
+#elif defined(__ARM_FEATURE_SVE2_BITPERM) && __has_include(<arm_neon_sve_bridge.h>)
+#define THRIFT_UTIL_VARINTUTILS_BRANCH_FREE_ENCODER 1
+#else
+#define THRIFT_UTIL_VARINTUTILS_BRANCH_FREE_ENCODER 0
+#endif
+
+#if THRIFT_UTIL_VARINTUTILS_BRANCH_FREE_ENCODER && FOLLY_AARCH64
+#include <arm_neon_sve_bridge.h> // @manual
+#include <arm_sve.h>
+#endif
+
 namespace apache {
 namespace thrift {
 
@@ -361,10 +374,22 @@ uint8_t writeVarintUnrolled(Cursor& c, T value) {
   return detail::writeVarintSlow(c, value);
 }
 
-#ifdef __BMI2__
+#if THRIFT_UTIL_VARINTUTILS_BRANCH_FREE_ENCODER
+
+inline uint64_t compressBits(uint64_t value, uint64_t mask) {
+#if defined(__BMI2__)
+  return _pdep_u64(value, mask);
+#elif defined(__ARM_FEATURE_SVE2_BITPERM)
+  // See https://godbolt.org/z/nhc443acd
+  const auto vec = svbdep_u64(svdup_n_u64(value), svdup_n_u64(mask));
+  return vgetq_lane_u64(svget_neonq_u64(vec), 0);
+#else
+  static_assert(0, "no pdep-equivalent instruction is available");
+#endif // __BMI2__, __ARM_FEATURE_SVE2_BITPERM
+}
 
 template <class Cursor, class T>
-uint8_t writeVarintBMI2(Cursor& c, T valueS) {
+uint8_t writeVarintBranchFree(Cursor& c, T valueS) {
   auto value = folly::to_unsigned(valueS);
   if (FOLLY_LIKELY((value & ~0x7f) == 0)) {
     c.template write<uint8_t>(static_cast<uint8_t>(value));
@@ -395,7 +420,7 @@ uint8_t writeVarintBMI2(Cursor& c, T valueS) {
 
   auto clzll = __builtin_clzll(static_cast<uint64_t>(value));
   // Only the first 56 bits of @value will be deposited in @v.
-  uint64_t v = _pdep_u64(value, ~kMask) | (kMask >> kShift[clzll]);
+  uint64_t v = compressBits(value, ~kMask) | (kMask >> kShift[clzll]);
   uint8_t size = kSize[clzll];
 
   if /* constexpr */ (sizeof(T) < sizeof(uint64_t)) {
@@ -417,17 +442,17 @@ uint8_t writeVarintBMI2(Cursor& c, T valueS) {
 
 template <class Cursor, class T>
 uint8_t writeVarint(Cursor& c, T value) {
-  return writeVarintBMI2(c, value);
+  return writeVarintBranchFree(c, value);
 }
 
-#else // __BMI2__
+#else // THRIFT_UTIL_VARINTUTILS_BRANCH_FREE_ENCODER
 
 template <class Cursor, class T>
 uint8_t writeVarint(Cursor& c, T value) {
   return writeVarintUnrolled(c, value);
 }
 
-#endif // __BMI2__
+#endif // THRIFT_UTIL_VARINTUTILS_BRANCH_FREE_ENCODER
 
 inline int32_t zigzagToI32(uint32_t n) {
   return detail::zigzagToSignedInt(n);

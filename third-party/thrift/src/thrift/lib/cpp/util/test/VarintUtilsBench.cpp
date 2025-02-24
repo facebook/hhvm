@@ -67,8 +67,8 @@ extern "C" FOLLY_KEEP uint8_t check_thrift_write_varint_u64_cursor_unrolled(
 }
 
 FOLLY_CREATE_QUAL_INVOKER_SUITE(write_unrolled, writeVarintUnrolled);
-#ifdef __BMI2__
-FOLLY_CREATE_QUAL_INVOKER_SUITE(write_bmi2, writeVarintBMI2);
+#if THRIFT_UTIL_VARINTUTILS_BRANCH_FREE_ENCODER
+FOLLY_CREATE_QUAL_INVOKER_SUITE(write_branch_free, writeVarintBranchFree);
 #endif
 
 template <typename Case, typename Fn>
@@ -92,13 +92,14 @@ void bench_write(size_t iters, Fn fn, Case) {
 #define BM_WRITE_LOOP(kind) \
   BENCHMARK_NAMED_PARAM(bench_write, kind##_unrolled, write_unrolled, kind())
 
-#ifdef __BMI2__
-#define BM_REL_WRITE_BMI2(kind) \
-  BENCHMARK_RELATIVE_NAMED_PARAM(bench_write, kind##_bmi2, write_bmi2, kind())
+#if THRIFT_UTIL_VARINTUTILS_BRANCH_FREE_ENCODER
+#define BM_REL_WRITE_BRANCH_FREE(kind) \
+  BENCHMARK_RELATIVE_NAMED_PARAM(      \
+      bench_write, kind##_branch_free, write_branch_free, kind())
 
 #define BM_WRITE(kind) \
   BM_WRITE_LOOP(kind)  \
-  BM_REL_WRITE_BMI2(kind)
+  BM_REL_WRITE_BRANCH_FREE(kind)
 #else
 #define BM_WRITE(kind) BM_WRITE_LOOP(kind)
 #endif
@@ -141,8 +142,8 @@ void bench_read(size_t iters, Case) {
     auto ints = Case::gen();
     c.ensure(ints.size() * 10);
     for (auto v : ints) {
-#ifdef __BMI2__
-      writeVarintBMI2(c, v);
+#if THRIFT_UTIL_VARINTUTILS_BRANCH_FREE_ENCODER
+      writeVarintBranchFree(c, v);
 #else
       writeVarintUnrolled(c, v);
 #endif

@@ -22,8 +22,8 @@
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp/util/test/VarintUtilsTestUtil.h>
 
-#ifndef __BMI2__
-#define writeVarintBMI2 writeVarintUnrolled
+#if !THRIFT_UTIL_VARINTUTILS_BRANCH_FREE_ENCODER
+#define writeVarintBranchFree writeVarintUnrolled
 #endif
 
 using namespace apache::thrift::util;
@@ -33,45 +33,45 @@ class VarintUtilsTest : public testing::Test {};
 
 TEST_F(VarintUtilsTest, example) {
   folly::IOBufQueue queueUnrolled;
-  folly::IOBufQueue queueBMI2;
+  folly::IOBufQueue queueBranchFree;
   folly::io::QueueAppender appenderUnrolled(&queueUnrolled, 1000);
-  folly::io::QueueAppender appenderBMI2(&queueBMI2, 1000);
+  folly::io::QueueAppender appenderBranchFree(&queueBranchFree, 1000);
 
   auto test = [&](int bit) {
     std::string u;
     std::string b;
     queueUnrolled.appendToString(u);
-    queueBMI2.appendToString(b);
+    queueBranchFree.appendToString(b);
     CHECK_EQ(u.size(), b.size()) << "bit: " << bit;
     CHECK_EQ(u, b) << "bit: " << bit;
   };
 
   int64_t v = 1;
   writeVarintUnrolled(appenderUnrolled, 0);
-  writeVarintBMI2(appenderBMI2, 0);
+  writeVarintBranchFree(appenderBranchFree, 0);
   for (int bit = 0; bit < 64; bit++, v <<= int(bit < 64)) {
     if (bit < 8) {
       writeVarintUnrolled(appenderUnrolled, int8_t(v));
-      writeVarintBMI2(appenderBMI2, int8_t(v));
+      writeVarintBranchFree(appenderBranchFree, int8_t(v));
       test(bit);
     }
     if (bit < 16) {
       writeVarintUnrolled(appenderUnrolled, int16_t(v));
-      writeVarintBMI2(appenderBMI2, int16_t(v));
+      writeVarintBranchFree(appenderBranchFree, int16_t(v));
       test(bit);
     }
     if (bit < 32) {
       writeVarintUnrolled(appenderUnrolled, int32_t(v));
-      writeVarintBMI2(appenderBMI2, int32_t(v));
+      writeVarintBranchFree(appenderBranchFree, int32_t(v));
       test(bit);
     }
     writeVarintUnrolled(appenderUnrolled, v);
-    writeVarintBMI2(appenderBMI2, v);
+    writeVarintBranchFree(appenderBranchFree, v);
     test(bit);
   }
   int32_t oversize = 1000000;
   writeVarintUnrolled(appenderUnrolled, oversize);
-  writeVarintBMI2(appenderBMI2, oversize);
+  writeVarintBranchFree(appenderBranchFree, oversize);
 
   {
     folly::io::Cursor rcursor(queueUnrolled.front());
@@ -93,7 +93,7 @@ TEST_F(VarintUtilsTest, example) {
   }
 
   {
-    folly::io::Cursor rcursor(queueBMI2.front());
+    folly::io::Cursor rcursor(queueBranchFree.front());
     EXPECT_EQ(0, readVarint<int8_t>(rcursor));
     v = 1;
     for (int bit = 0; bit < 64; bit++, v <<= int(bit < 64)) {
@@ -135,7 +135,7 @@ TYPED_TEST_P(VarintUtilsMegaTest, example) {
     constexpr size_t kDesiredGrowth = 1 << 14;
     folly::io::QueueAppender c(&q, kDesiredGrowth);
     for (auto v : ints) {
-      writeVarintBMI2(c, v);
+      writeVarintBranchFree(c, v);
     }
     q.appendToString(strBmi2);
   }

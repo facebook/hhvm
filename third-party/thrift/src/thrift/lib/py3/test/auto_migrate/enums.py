@@ -148,8 +148,15 @@ class EnumTests(unittest.TestCase):
         self.assertBadEnum(cast(BadEnum, lst[1]), Color, 8)
 
     def test_bad_enum_in_map_items(self) -> None:
-        json = b'{"color_map": {"1": 2, "0": 5, "6": 1, "7": 8}}'
+        json = b'{"color_map": {"0": 5, "1": 2, "6": 1, "7": 8}}'
         x = deserialize(ColorGroups, json, Protocol.JSON)
+        self.assertEqual(
+            str(x.color_map),
+            "i{<Color.red: 0>: <Color.#INVALID#: 5>,"
+            " <Color.blue: 1>: <Color.green: 2>,"
+            " <Color.#INVALID#: 6>: <Color.blue: 1>,"
+            " <Color.#INVALID#: 7>: <Color.#INVALID#: 8>}",
+        )
         for k, v in x.color_map.items():
             if k == Color.blue:
                 self.assertEqual(v, Color.green)

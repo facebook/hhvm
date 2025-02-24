@@ -25,6 +25,7 @@ from folly.cast cimport down_cast_ptr
 from folly.iobuf import IOBuf
 from types import MappingProxyType
 
+from folly cimport cFollyIsDebug
 from thrift.python.exceptions cimport GeneratedError as _fbthrift_python_GeneratedError
 from thrift.py3.serializer import deserialize, serialize
 from thrift.python.types cimport (
@@ -630,7 +631,15 @@ cdef class Map(Container):
             return 'i{}'
         # print in sorted order for backward compatibility
         if self._child_cls._FBTHRIFT_USE_SORTED_REPR:
-            key_val = sorted(self.items(), key=lambda x: x[0])
+            try:
+                key_val = sorted(self.items(), key=lambda x: x[0])
+            except TypeError as e:  # e.g., BadEnum
+                if cFollyIsDebug:
+                    warnings.warn(
+                        f"thrift.py3.types.Map: Failed to sort map keys: {e}",
+                        RuntimeWarning,
+                    )
+                key_val = self.items()
         else:
             key_val = self.items()
         return f'i{{{", ".join(map(lambda i: f"{repr(i[0])}: {repr(i[1])}", key_val))}}}'

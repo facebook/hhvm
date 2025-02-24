@@ -60,6 +60,7 @@ class PersistentQuicPskCacheTest : public Test {
     quicPsk1_.transportParams.ackReceiveTimestampsEnabled = true;
     quicPsk1_.transportParams.maxReceiveTimestampsPerAck = 30;
     quicPsk1_.transportParams.receiveTimestampsExponent = 0;
+    quicPsk1_.transportParams.extendedAckFeatures = 3;
     quicPsk1_.appParams = "QPACK param";
 
     auto& fizzPsk2 = quicPsk2_.cachedPsk;
@@ -88,9 +89,10 @@ class PersistentQuicPskCacheTest : public Test {
     quicPsk2_.transportParams.initialMaxStreamsBidi = 2345;
     quicPsk2_.transportParams.initialMaxStreamsUni = 1233;
     quicPsk2_.transportParams.knobFrameSupport = false;
-    quicPsk1_.transportParams.ackReceiveTimestampsEnabled = false;
-    quicPsk1_.transportParams.maxReceiveTimestampsPerAck = 10;
-    quicPsk1_.transportParams.receiveTimestampsExponent = 0;
+    quicPsk2_.transportParams.ackReceiveTimestampsEnabled = false;
+    quicPsk2_.transportParams.maxReceiveTimestampsPerAck = 10;
+    quicPsk2_.transportParams.receiveTimestampsExponent = 0;
+    quicPsk2_.transportParams.extendedAckFeatures = 0;
   }
 
   void TearDown() override {
@@ -154,6 +156,7 @@ static void expectMatch(const QuicCachedPsk& a, const QuicCachedPsk& b) {
             paramsB.maxReceiveTimestampsPerAck);
   EXPECT_EQ(paramsA.receiveTimestampsExponent,
             paramsB.receiveTimestampsExponent);
+  EXPECT_EQ(paramsA.extendedAckFeatures, paramsB.extendedAckFeatures);
 
   EXPECT_EQ(a.appParams, b.appParams);
 }

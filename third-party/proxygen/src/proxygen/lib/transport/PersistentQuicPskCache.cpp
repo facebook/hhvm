@@ -76,6 +76,8 @@ folly::Optional<quic::QuicCachedPsk> PersistentQuicPskCache::getPsk(
                        cursor);
     fizz::detail::read(quicCachedPsk.transportParams.receiveTimestampsExponent,
                        cursor);
+    fizz::detail::read(quicCachedPsk.transportParams.extendedAckFeatures,
+                       cursor);
 
     std::unique_ptr<folly::IOBuf> appParams;
     fizz::detail::readBuf<uint16_t>(appParams, cursor);
@@ -125,6 +127,8 @@ void PersistentQuicPskCache::putPsk(const std::string& identity,
   fizz::detail::write(quicCachedPsk.transportParams.maxReceiveTimestampsPerAck,
                       appender);
   fizz::detail::write(quicCachedPsk.transportParams.receiveTimestampsExponent,
+                      appender);
+  fizz::detail::write(quicCachedPsk.transportParams.extendedAckFeatures,
                       appender);
 
   fizz::detail::writeBuf<uint16_t>(

@@ -20,9 +20,9 @@ Invalid case type declaration. More than one variant of `StringData` could conta
   This is the type `mixed`, which includes **strings**
   File "case_type_overlapping_variants_primitives.php", line 8, characters 5-20:
   It overlaps with `classname<mixed>`, which also includes **strings**
-  File "classname.hhi", line 19, characters 28-38:
+  File "classname.hhi", line 21, characters 28-38:
     via the constraint on the newtype `classname`
-  File "classname.hhi", line 12, characters 27-32:
+  File "classname.hhi", line 14, characters 27-32:
     via the constraint on the newtype `typename`
 ERROR: File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
 Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
@@ -58,9 +58,9 @@ Invalid case type declaration. More than one variant of `StringData` could conta
   This is the type `nonnull`, which includes **strings**
   File "case_type_overlapping_variants_primitives.php", line 8, characters 5-20:
   It overlaps with `classname<mixed>`, which also includes **strings**
-  File "classname.hhi", line 19, characters 28-38:
+  File "classname.hhi", line 21, characters 28-38:
     via the constraint on the newtype `classname`
-  File "classname.hhi", line 12, characters 27-32:
+  File "classname.hhi", line 14, characters 27-32:
     via the constraint on the newtype `typename`
 ERROR: File "case_type_overlapping_variants_primitives.php", line 4, characters 11-20:
 Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
@@ -86,9 +86,9 @@ ERROR: File "case_type_overlapping_variants_primitives.php", line 4, characters 
 Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 8, characters 5-20:
   This is the type `classname<mixed>`, which includes **strings**
-  File "classname.hhi", line 19, characters 28-38:
+  File "classname.hhi", line 21, characters 28-38:
     via the constraint on the newtype `classname`
-  File "classname.hhi", line 12, characters 27-32:
+  File "classname.hhi", line 14, characters 27-32:
     via the constraint on the newtype `typename`
   File "case_type_overlapping_variants_primitives.php", line 9, characters 5-12:
   It overlaps with `arraykey`, which also includes **strings** because arraykeys are ints or strings
@@ -96,9 +96,9 @@ ERROR: File "case_type_overlapping_variants_primitives.php", line 4, characters 
 Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 8, characters 5-20:
   This is the type `classname<mixed>`, which includes **strings**
-  File "classname.hhi", line 19, characters 28-38:
+  File "classname.hhi", line 21, characters 28-38:
     via the constraint on the newtype `classname`
-  File "classname.hhi", line 12, characters 27-32:
+  File "classname.hhi", line 14, characters 27-32:
     via the constraint on the newtype `typename`
   File "case_type_overlapping_variants_primitives.php", line 10, characters 5-10:
   It overlaps with `string`, which also includes **strings**
@@ -106,9 +106,9 @@ ERROR: File "case_type_overlapping_variants_primitives.php", line 4, characters 
 Invalid case type declaration. More than one variant of `StringData` could contain values with the same runtime tag (Typing[4475])
   File "case_type_overlapping_variants_primitives.php", line 8, characters 5-20:
   This is the type `classname<mixed>`, which includes **strings**
-  File "classname.hhi", line 19, characters 28-38:
+  File "classname.hhi", line 21, characters 28-38:
     via the constraint on the newtype `classname`
-  File "classname.hhi", line 12, characters 27-32:
+  File "classname.hhi", line 14, characters 27-32:
     via the constraint on the newtype `typename`
   File "case_type_overlapping_variants_primitives.php", line 11, characters 5-6:
   It overlaps with `?T`, which also includes **strings**

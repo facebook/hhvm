@@ -8,5 +8,5 @@ Invalid return type (Typing[4110])
   But got `D`; implicitly defined constant `::class` is a reference to class `D`
   File "typename_array_literal_bad.php", line 9, characters 45-45:
     where the class `D` was referenced here
-  File "classname.hhi", line 19, characters 37-37:
+  File "classname.hhi", line 21, characters 37-37:
     via this generic `T`

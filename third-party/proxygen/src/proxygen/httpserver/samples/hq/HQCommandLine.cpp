@@ -121,14 +121,20 @@ DEFINE_uint32(
     max_ack_receive_timestamps_to_send,
     quic::kMaxReceivedPktsTimestampsStored,
     "Controls how many packet receieve timestamps the peer should send");
-DEFINE_uint32(
-    extended_ack_features,
-    0,
-    "Replace the ACK frame with ACK_EXTENDED with the following features."
-    "The bitwise values can be ORed together."
-    "bit 1 - ECN support"
-    "bit 2 - Receive timestamps support"
-    "Example: 3 means both ECN and receive timestamps are supported");
+DEFINE_uint32(advertise_extended_ack_features,
+              0,
+              "Advertise ACK_EXTENDED frame support to the peer. The following"
+              "bitwise values can be ORed together:"
+              "bit 1 - ECN support"
+              "bit 2 - Receive timestamps support"
+              "Example: 3 means both ECN and receive timestamps are supported");
+DEFINE_uint32(enable_extended_ack_features,
+              0,
+              "Replace the ACK frame with ACK_EXTENDED when supported by the "
+              "peer. The following bitwise values can be ORed together:"
+              "bit 1 - ECN support"
+              "bit 2 - Receive timestamps support"
+              "Example: 3 means both ECN and receive timestamps are supported");
 DEFINE_bool(initiate_key_updates,
             false,
             "Whether to initiate periodic key updates");
@@ -316,7 +322,9 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
   hqParams.transportSettings.disableMigration = false;
 
   hqParams.transportSettings.advertisedExtendedAckFeatures =
-      FLAGS_extended_ack_features;
+      FLAGS_advertise_extended_ack_features;
+  hqParams.transportSettings.enableExtendedAckFeatures =
+      FLAGS_enable_extended_ack_features;
 } // initializeTransportSettings
 
 void initializeHttpServerSettings(HQToolServerParams& hqParams) {

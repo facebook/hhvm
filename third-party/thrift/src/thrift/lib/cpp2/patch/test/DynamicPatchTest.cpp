@@ -795,7 +795,7 @@ TEST(DynamicPatch, FromStructOrUnionPatch) {
     MyUnion u;
     u.i_ref() = 5;
     auto value = asValueStruct<type::union_t<MyUnion>>(u);
-    patch.apply(badge, value);
+    patch.apply(value);
     EXPECT_EQ(value.as_object()[FieldId{2}].as_i32(), 25);
   }
   {
@@ -911,7 +911,7 @@ TEST(DynamicPatchTest, AnyPatch) {
   auto patch =
       AnyDiffVisitor{}.diff(srcValue.as_object(), dstValue.as_object());
 
-  patch.apply(badge, srcValue);
+  patch.apply(srcValue);
   EXPECT_EQ(srcValue, dstValue);
 }
 

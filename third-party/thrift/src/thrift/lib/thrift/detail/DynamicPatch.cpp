@@ -389,7 +389,7 @@ void DynamicMapPatch::apply(detail::Badge, detail::ValueMap& v) const {
     void patchByKey(detail::Badge, Value key, const DynamicPatch& p) {
       detail::convertStringToBinary(key);
       if (auto ptr = folly::get_ptr(value, key)) {
-        p.apply(badge, *ptr);
+        p.apply(*ptr);
       }
     }
     void removeMulti(detail::Badge, const detail::ValueSet& v) {
@@ -587,7 +587,7 @@ void DynamicStructurePatch<IsUnion>::apply(detail::Badge, Object& obj) const {
     void clear(detail::Badge) { obj.members()->clear(); }
     void patchIfSet(detail::Badge, FieldId id, const DynamicPatch& p) {
       if (obj.contains(id)) {
-        p.apply(badge, obj[id]);
+        p.apply(obj[id]);
       }
     }
     void remove(detail::Badge, FieldId id) { obj.erase(id); }
@@ -1402,7 +1402,7 @@ void DynamicUnknownPatch::patchIfSet(
   }
   if (auto assign = get_ptr(op::PatchOp::Assign)) {
     if (assign->as_object().contains(id)) {
-      p.apply(badge, assign->as_object().at(id));
+      p.apply(assign->as_object().at(id));
     }
     return;
   }
@@ -1436,7 +1436,7 @@ void DynamicUnknownPatch::apply(detail::Badge, Value& v) const {
     }
     void patchIfSet(detail::Badge, FieldId id, const DynamicPatch& p) {
       if (auto field = value.as_object().if_contains(id)) {
-        p.apply(badge, *field);
+        p.apply(*field);
       }
     }
     Value& value;
@@ -1444,7 +1444,7 @@ void DynamicUnknownPatch::apply(detail::Badge, Value& v) const {
 
   return customVisit(badge, Visitor{v});
 }
-void DynamicPatch::apply(detail::Badge, Value& value) const {
+void DynamicPatch::apply(Value& value) const {
   auto applier = folly::overload(
       [&](const op::BoolPatch& patch) { patch.apply(value.as_bool()); },
       [&](const op::BytePatch& patch) { patch.apply(value.as_byte()); },

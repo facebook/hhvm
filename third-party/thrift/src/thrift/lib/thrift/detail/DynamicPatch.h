@@ -546,7 +546,9 @@ class DynamicPatch {
   [[nodiscard]] bool empty(detail::Badge) const;
   [[nodiscard]] bool empty() const;
 
-  void apply(detail::Badge, Value&) const;
+  /// Applies the patch to the given value. Throws if the patch is not
+  /// applicable to the value.
+  void apply(Value&) const;
 
   void fromObject(detail::Badge, Object);
   void fromAny(detail::Badge, const type::AnyStruct& any);

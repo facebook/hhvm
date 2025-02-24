@@ -120,7 +120,7 @@ void AnyPatch<Patch>::apply(type::AnyStruct& val) const {
       for (const auto& [type, patch] : *prior) {
         if (type::identicalType(type, val.type().value())) {
           dynVal = protocol::detail::parseValueFromAny(val);
-          patch.apply(badge, *dynVal);
+          patch.apply(*dynVal);
           break;
         }
       }
@@ -131,7 +131,7 @@ void AnyPatch<Patch>::apply(type::AnyStruct& val) const {
           if (!dynVal) {
             dynVal = protocol::detail::parseValueFromAny(val);
           }
-          patch.apply(badge, *dynVal);
+          patch.apply(*dynVal);
           break;
         }
       }

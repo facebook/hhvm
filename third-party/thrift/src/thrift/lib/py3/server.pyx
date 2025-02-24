@@ -14,27 +14,22 @@
 
 from cpython.version cimport PY_VERSION_HEX
 from libcpp.memory cimport unique_ptr, shared_ptr, make_shared
-from libc.string cimport const_uchar
+from libcpp.optional cimport optional
 from cython.operator cimport dereference as deref, preincrement as inc
 from libc.stdint cimport uint64_t
-from folly.iobuf cimport from_unique_ptr as create_IOBuf
 from cpython.ref cimport PyObject
 from folly.executor cimport get_executor
 from folly.range cimport StringPiece
 from libcpp.utility cimport move as cmove
-from thrift.py3.std_libcpp cimport sv_to_str
-from typing import Mapping
 
 import asyncio
 import collections
-import functools
-import inspect
 import ipaddress
 from pathlib import Path
 import os
 
 from enum import Enum
-from thrift.python.common import Priority, Headers
+from thrift.python.common import Priority, Headers # noqa
 from thrift.python.server_impl.event_handler cimport (
     SSLPolicy__DISABLED,
     SSLPolicy__PERMITTED,
@@ -43,50 +38,22 @@ from thrift.python.server_impl.event_handler cimport (
     makeFromPath,
     object_partial,
 )
+from thrift.python.server_impl.request_context import ( # noqa
+    ClientMetadata,
+    ConnectionContext,
+    ReadHeaders,
+    RequestContext,
+    SocketAddress,
+    WriteHeaders, 
+)
+from thrift.python.server_impl.request_context cimport handleAddressCallback
 
-SocketAddress = collections.namedtuple('SocketAddress', 'ip port path')
 
 from contextvars import ContextVar
 # don't include in the module dict, so only cython can set it
 THRIFT_REQUEST_CONTEXT = ContextVar('ThriftRequestContext')
 get_context = THRIFT_REQUEST_CONTEXT.get
 
-
-cdef inline _get_SocketAddress(const cfollySocketAddress* sadr):
-    if sadr.isFamilyInet():
-        ip = ipaddress.ip_address(sadr.getAddressStr().decode('utf-8'))
-        return SocketAddress(ip=ip, port=sadr.getPort(), path=None)
-    return SocketAddress(ip=None, port=None, path=Path(
-            os.fsdecode(sadr.getPath())
-        )
-    )
-
-
-cdef inline string _get_agent_from_metadata(optional[ClientMetadataRef] metadata_ref):
-    cdef string cagent
-    if not metadata_ref.has_value():
-      return cagent
-    if not metadata_ref.value().getAgent().has_value():
-        return cagent
-    cagent = metadata_ref.value().getAgent().value().data()
-    return cagent
-
-
-cdef inline string _get_hostname_from_metadata(optional[ClientMetadataRef] metadata_ref):
-    cdef string chostname
-    if not metadata_ref.has_value():
-      return chostname
-    if not metadata_ref.value().getHostname().has_value():
-      return chostname
-    chostname = metadata_ref.value().getHostname().value().data()
-    return chostname
-
-
-cdef inline F14NodeMap[string, string] _get_fields_from_metadata(optional[ClientMetadataRef] metadata_ref):
-    cdef F14NodeMap[string, string] empty_fields
-    if not metadata_ref.has_value():
-      return empty_fields
-    return metadata_ref.value().getFields()
 
 
 class SSLPolicy(Enum):
@@ -147,8 +114,6 @@ cdef class StatusServerInterface:
     pass
 
 
-cdef void handleAddressCallback(PyObject* future, cfollySocketAddress address) noexcept:
-    (<object>future).set_result(_get_SocketAddress(&address))
 
 
 cdef class ThriftServer:
@@ -355,170 +320,3 @@ cdef class ThriftServer:
 
     def set_use_client_timeout(self, cbool use_client_timeout):
         self.server.get().setUseClientTimeout(use_client_timeout)
-
-
-
-cdef class ClientMetadata:
-    @staticmethod
-    cdef ClientMetadata _fbthrift_create(optional[ClientMetadataRef] metadata_ref):
-        inst = <ClientMetadata>ClientMetadata.__new__(ClientMetadata)
-        inst._cagent = _get_agent_from_metadata(metadata_ref)
-        inst._chostname = _get_hostname_from_metadata(metadata_ref)
-        inst._cfields = _get_fields_from_metadata(metadata_ref)
-        return inst
-
-    @property
-    def agent(ClientMetadata self) -> str:
-        return self._cagent.decode('utf-8')
-
-    @property
-    def hostname(ClientMetadata self) -> str:
-        return self._chostname.decode('utf-8')
-
-    def getMetadataField(self, str key not None) -> str:
-        if key is None:
-          return ""
-        cdef string ckey = key.encode('utf-8')
-        it = self._cfields.find(ckey)
-        if it == self._cfields.end():
-          return ""
-        return (<bytes>deref(it).second).decode('utf-8')
-
-
-cdef class ConnectionContext:
-    @staticmethod
-    cdef ConnectionContext _fbthrift_create(Cpp2ConnContext* ctx):
-        cdef const cfollySocketAddress* peer_address
-        cdef const cfollySocketAddress* local_address
-        inst = <ConnectionContext>ConnectionContext.__new__(ConnectionContext)
-        if ctx:
-            inst._ctx = ctx
-            peer_address = ctx.getPeerAddress()
-            if not peer_address.empty():
-                inst._peer_address = _get_SocketAddress(peer_address)
-            local_address = ctx.getLocalAddress()
-            if not local_address.empty():
-                inst._local_address = _get_SocketAddress(local_address)
-            inst._client_metadata = ClientMetadata._fbthrift_create(ctx.getClientMetadataRef())
-        return inst
-
-    @property
-    def peer_address(ConnectionContext self):
-        return self._peer_address
-
-    @property
-    def peer_common_name(ConnectionContext self):
-        return self._ctx.getPeerCommonName().decode('utf-8')
-
-    @property
-    def security_protocol(ConnectionContext self):
-        return self._ctx.getSecurityProtocol().decode('utf-8')
-
-    @property
-    def peer_certificate(ConnectionContext self):
-        cdef const_uchar* data
-        cdef X509UniquePtr cert
-        cdef uint64_t length
-        cdef const AsyncTransport* transport
-        cdef const AsyncTransportCertificate* osslCert
-        transport = self._ctx.getTransport()
-        if not transport:
-            return None
-        osslCert = transport.getPeerCertificate()
-        if not osslCert:
-            return None
-        cert = tryExtractX509(osslCert);
-        if cert.get():
-            iobuf = create_IOBuf(derEncode(deref(cert.get())))
-            if iobuf.is_chained:
-                return b''.join(iobuf)
-            return bytes(iobuf)
-        return None
-
-    @property
-    def peer_certificate_identity(ConnectionContext self):
-        cdef const AsyncTransport* transport
-        cdef const AsyncTransportCertificate* osslCert
-        transport = self._ctx.getTransport()
-        if not transport:
-            return None
-        osslCert = transport.getPeerCertificate()
-        if not osslCert:
-            return None
-        return deref(osslCert).getIdentity().decode('utf-8')
-
-    @property
-    def local_address(ConnectionContext self):
-        return self._local_address
-
-    @property
-    def client_metadata(ConnectionContext self):
-      return self._client_metadata
-
-
-cdef class ReadHeaders(Headers):
-    @staticmethod
-    cdef _fbthrift_create(RequestContext ctx):
-        inst = <ReadHeaders>ReadHeaders.__new__(ReadHeaders)
-        inst._parent = ctx
-        return inst
-
-    cdef const F14NodeMap[string, string]* _getMap(self):
-        return &self._parent._ctx.getHeader().getHeaders()
-
-
-cdef class WriteHeaders(Headers):
-    @staticmethod
-    cdef _fbthrift_create(RequestContext ctx):
-        inst = <WriteHeaders>WriteHeaders.__new__(WriteHeaders)
-        inst._parent = ctx
-        return inst
-
-    cdef const F14NodeMap[string, string]* _getMap(self):
-        return &self._parent._ctx.getHeader().getWriteHeaders()
-
-
-cdef class RequestContext:
-    @staticmethod
-    cdef RequestContext _fbthrift_create(Cpp2RequestContext* ctx):
-        inst = <RequestContext>RequestContext.__new__(RequestContext)
-        inst._ctx = ctx
-        inst._c_ctx = ConnectionContext._fbthrift_create(ctx.getConnectionContext())
-        inst._requestId = getRequestId()
-        return inst
-
-    @property
-    def connection_context(self):
-        return self._c_ctx
-
-    @property
-    def read_headers(self):
-        if not self._readheaders:
-            self._readheaders = ReadHeaders._fbthrift_create(self)
-        return self._readheaders
-
-    @property
-    def write_headers(self):
-        # So we don't create a cycle
-        if not self._writeheaders:
-            self._writeheaders = WriteHeaders._fbthrift_create(self)
-        return self._writeheaders
-
-    @property
-    def priority(self):
-        return Priority(<int>self._ctx.getCallPriority())
-
-    def set_header(self, str key not None, str value not None):
-        self._ctx.getHeader().setHeader(key.encode('utf-8'), value.encode('utf-8'))
-
-    @property
-    def method_name(ConnectionContext self):
-        return self._ctx.getMethodName().decode('utf-8')
-
-    @property
-    def request_id(self):
-        return self._requestId.decode('utf-8')
-
-    @property
-    def request_timeout(self):
-        return float(self._ctx.getRequestTimeout().count() / 1000)

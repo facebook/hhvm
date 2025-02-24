@@ -24,10 +24,12 @@ from cpython.ref cimport PyObject
 from cython.operator cimport dereference
 from libcpp.map cimport map as cmap
 from libcpp.memory cimport make_unique, make_shared, static_pointer_cast
+from libcpp.optional cimport optional
 from libcpp.pair cimport pair
 from libcpp.unordered_set cimport unordered_set
 from libcpp.utility cimport move as cmove
 from libcpp.vector cimport vector as cvector
+
 from folly.executor cimport get_executor
 from folly.iobuf cimport IOBuf, from_unique_ptr
 from thrift.python.exceptions cimport (
@@ -35,8 +37,16 @@ from thrift.python.exceptions cimport (
     cTApplicationException,
     cTApplicationExceptionType__UNKNOWN,
 )
-from thrift.py3.server cimport Cpp2RequestContext, RequestContext, THRIFT_REQUEST_CONTEXT
-from libcpp.optional cimport optional
+from thrift.py3.server cimport THRIFT_REQUEST_CONTEXT
+from thrift.python.server_impl.request_context cimport (
+    Cpp2RequestContext,
+    handleAddressCallback,
+    RequestContext,
+)
+from thrift.python.server_impl.request_context import (
+    RequestContext,
+    SocketAddress,
+)
 from thrift.py3.stream cimport cServerStream, cResponseAndServerStream, createResponseAndServerStream, createAsyncIteratorFromPyIterator, ServerStream
 from thrift.python.types cimport ServiceInterface as cServiceInterface
 from thrift.python.protocol cimport Protocol

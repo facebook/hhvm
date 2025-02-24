@@ -26,6 +26,11 @@ struct check_compile_options {
   // Specifies whether to add Thrift annotation and lib directories to the
   // includes search path.
   bool add_standard_includes = true;
+
+  // Specifies whether to use global resolution (~ via t_global_scope) when
+  // resolving identifiers or only rely on the local resolution (~ via
+  // program_scope).
+  bool use_global_resolution = true;
 };
 
 void check_compile(

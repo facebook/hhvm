@@ -53,23 +53,6 @@
 
 namespace apache::thrift::compiler {
 namespace {
-/**
- * Flags to control code generation
- */
-struct gen_params {
-  bool gen_recurse = false;
-  std::string genfile;
-  std::vector<std::string> targets;
-  std::string out_path;
-  bool add_gen_dir = true;
-
-  // If true, code generation will be skipped (regardless of other parameters).
-  // This is useful, for example, to parse and validate source Thrift IDL
-  // without a particular target language in mind.
-  bool skip_gen = false;
-
-  bool inject_schema_const = false;
-};
 
 constexpr bool bundle_annotations() {
 #ifdef THRIFT_OSS
@@ -303,172 +286,6 @@ bool validate_params(const gen_params& gparams) {
   }
 
   return true;
-}
-
-// Returns the input file name if successful, otherwise returns an empty
-// string.
-std::string parse_args(
-    const std::vector<std::string>& arguments,
-    parsing_params& pparams,
-    gen_params& gparams,
-    diagnostic_params& dparams,
-    sema_params& sparams) {
-  // Check for necessary arguments, you gotta have at least a filename and
-  // an output language flag.
-  if (arguments.size() < 3 && gparams.targets.empty()) {
-    printUsageError();
-    return {};
-  }
-
-  size_t arg_i = 1; // Skip the binary name.
-
-  // Convenient closure to call consume_next_arg() without repeating local
-  // variables.
-  auto consume_arg = [&](const char* arg_name) -> const std::string* {
-    return consume_next_arg(arg_name, arguments, arg_i);
-  };
-
-  // Hacky parameter handling... I didn't feel like using a library sorry!
-
-  // Guard so --nowarn and --legacy-strict are order agnostic.
-  bool nowarn = false;
-
-  for (; arg_i < arguments.size() - 1;
-       ++arg_i) { // Last argument is the src file.
-    // Parse flag.
-    const std::string flag = parse_flag(arguments[arg_i]);
-    if (flag.empty()) {
-      return {};
-    }
-
-    // Interpret flag.
-    if (flag == "debug") {
-      dparams.debug = true;
-    } else if (flag == "nowarn") {
-      dparams.warn_level = 0;
-      nowarn = true;
-    } else if (flag == "legacy-strict") {
-      pparams.strict = 255;
-      if (!nowarn) { // Don't override nowarn.
-        dparams.warn_level = 2;
-      }
-    } else if (flag == "v" || flag == "verbose") {
-      dparams.info = true;
-    } else if (flag == "r" || flag == "recurse") {
-      gparams.gen_recurse = true;
-    } else if (flag == "allow-neg-keys") {
-      // no-op
-    } else if (flag == "allow-neg-enum-vals") {
-      // no-op
-    } else if (flag == "allow-64bit-consts") {
-      pparams.allow_64bit_consts = true;
-    } else if (flag == "record-genfiles") {
-      const std::string* arg = consume_arg("genfile file specification");
-      if (arg == nullptr) {
-        return {};
-      }
-      gparams.genfile = *arg;
-    } else if (flag == "gen") {
-      const std::string* arg = consume_arg("generator specification");
-      if (arg == nullptr) {
-        return {};
-      }
-      gparams.targets.push_back(*arg);
-    } else if (flag == "skip-gen") {
-      gparams.skip_gen = true;
-    } else if (flag == "I") {
-      const std::string* arg = consume_arg("include directory");
-      if (arg == nullptr) {
-        return {};
-      }
-      // An argument of "-I\ asdf" is invalid and has unknown results
-      pparams.incl_searchpath.push_back(*arg);
-    } else if (flag == "o" || flag == "out") {
-      const std::string* arg = consume_arg("output directory");
-      if (arg == nullptr) {
-        return {};
-      }
-
-      if (!gparams.out_path.empty()) {
-        fprintf(stderr, "!!! Cannot specify both -o and --out.\n\n");
-        printUsageError();
-        return {};
-      }
-
-      std::string out_path = *arg;
-
-      // Strip out trailing \ on a Windows path
-      if (detail::platform_is_windows()) {
-        int last = out_path.length() - 1;
-        if (out_path[last] == '\\') {
-          out_path.erase(last);
-        }
-      }
-
-      gparams.out_path = std::move(out_path);
-      gparams.add_gen_dir = (flag == "o");
-    } else if (flag == "inject-schema-const") {
-      gparams.inject_schema_const = true;
-    } else if (flag == "extra-validation") {
-      const std::string* arg = consume_arg("extra validation");
-      if (arg == nullptr) {
-        return {};
-      }
-      std::vector<std::string> validators;
-      boost::algorithm::split(
-          validators, *arg, [](char c) { return c == ','; });
-      for (const auto& validator : validators) {
-        if (validator == "unstructured_annotations_on_field_type") {
-          // no-op
-        } else if (validator == "warn_on_redundant_custom_default_values") {
-          sparams.warn_on_redundant_custom_default_values = true;
-        } else if (validator == "forbid_non_optional_cpp_ref_fields") {
-          // no-op
-        } else if (validator == "implicit_field_ids") {
-          // no-op
-        } else {
-          fprintf(
-              stderr, "!!! Unrecognized validator: %s\n\n", validator.c_str());
-          printUsageError();
-          return {};
-        }
-      }
-    } else {
-      fprintf(
-          stderr, "!!! Unrecognized option: %s\n\n", arguments[arg_i].c_str());
-      printUsageError();
-      return {};
-    }
-  }
-
-  if (const char* env_p = std::getenv("THRIFT_INCLUDE_PATH")) {
-    std::vector<std::string> components;
-    boost::algorithm::split(components, env_p, isPathSeparator);
-    pparams.incl_searchpath.insert(
-        pparams.incl_searchpath.end(), components.begin(), components.end());
-  }
-
-  if (!validate_params(gparams)) {
-    return {};
-  }
-
-  // Return the input file name.
-  assert(arg_i == arguments.size() - 1);
-  if (detail::platform_is_windows()) {
-    // The path here is used in schema.thrift
-    //
-    // * In Linux, buck uses relative path.
-    // * In Windows, buck uses absolute path.
-    //
-    // To make the generated schema.thrift consistent with Unix, we need to
-    // convert it to relative path when possible.
-    //
-    // Not that the path might not exist since when thrift compiler is used as
-    // library, user's code can use `source_manager::add_virtual_file(...)`
-    // method to create a virtual file.
-    return std::filesystem::proximate(arguments[arg_i]).generic_string();
-  }
-  return arguments[arg_i];
 }
 
 enum class parse_control : bool { stop, more };
@@ -833,6 +650,172 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
 
 } // namespace
 
+// Returns the input file name if successful, otherwise returns an empty
+// string.
+std::string parse_args(
+    const std::vector<std::string>& arguments,
+    parsing_params& pparams,
+    gen_params& gparams,
+    diagnostic_params& dparams,
+    sema_params& sparams) {
+  // Check for necessary arguments, you gotta have at least a filename and
+  // an output language flag.
+  if (arguments.size() < 3 && gparams.targets.empty()) {
+    printUsageError();
+    return {};
+  }
+
+  size_t arg_i = 1; // Skip the binary name.
+
+  // Convenient closure to call consume_next_arg() without repeating local
+  // variables.
+  auto consume_arg = [&](const char* arg_name) -> const std::string* {
+    return consume_next_arg(arg_name, arguments, arg_i);
+  };
+
+  // Hacky parameter handling... I didn't feel like using a library sorry!
+
+  // Guard so --nowarn and --legacy-strict are order agnostic.
+  bool nowarn = false;
+
+  for (; arg_i < arguments.size() - 1;
+       ++arg_i) { // Last argument is the src file.
+    // Parse flag.
+    const std::string flag = parse_flag(arguments[arg_i]);
+    if (flag.empty()) {
+      return {};
+    }
+
+    // Interpret flag.
+    if (flag == "debug") {
+      dparams.debug = true;
+    } else if (flag == "nowarn") {
+      dparams.warn_level = 0;
+      nowarn = true;
+    } else if (flag == "legacy-strict") {
+      pparams.strict = 255;
+      if (!nowarn) { // Don't override nowarn.
+        dparams.warn_level = 2;
+      }
+    } else if (flag == "v" || flag == "verbose") {
+      dparams.info = true;
+    } else if (flag == "r" || flag == "recurse") {
+      gparams.gen_recurse = true;
+    } else if (flag == "allow-neg-keys") {
+      // no-op
+    } else if (flag == "allow-neg-enum-vals") {
+      // no-op
+    } else if (flag == "allow-64bit-consts") {
+      pparams.allow_64bit_consts = true;
+    } else if (flag == "record-genfiles") {
+      const std::string* arg = consume_arg("genfile file specification");
+      if (arg == nullptr) {
+        return {};
+      }
+      gparams.genfile = *arg;
+    } else if (flag == "gen") {
+      const std::string* arg = consume_arg("generator specification");
+      if (arg == nullptr) {
+        return {};
+      }
+      gparams.targets.push_back(*arg);
+    } else if (flag == "skip-gen") {
+      gparams.skip_gen = true;
+    } else if (flag == "I") {
+      const std::string* arg = consume_arg("include directory");
+      if (arg == nullptr) {
+        return {};
+      }
+      // An argument of "-I\ asdf" is invalid and has unknown results
+      pparams.incl_searchpath.push_back(*arg);
+    } else if (flag == "o" || flag == "out") {
+      const std::string* arg = consume_arg("output directory");
+      if (arg == nullptr) {
+        return {};
+      }
+
+      if (!gparams.out_path.empty()) {
+        fprintf(stderr, "!!! Cannot specify both -o and --out.\n\n");
+        printUsageError();
+        return {};
+      }
+
+      std::string out_path = *arg;
+
+      // Strip out trailing \ on a Windows path
+      if (detail::platform_is_windows()) {
+        int last = out_path.length() - 1;
+        if (out_path[last] == '\\') {
+          out_path.erase(last);
+        }
+      }
+
+      gparams.out_path = std::move(out_path);
+      gparams.add_gen_dir = (flag == "o");
+    } else if (flag == "inject-schema-const") {
+      gparams.inject_schema_const = true;
+    } else if (flag == "extra-validation") {
+      const std::string* arg = consume_arg("extra validation");
+      if (arg == nullptr) {
+        return {};
+      }
+      std::vector<std::string> validators;
+      boost::algorithm::split(
+          validators, *arg, [](char c) { return c == ','; });
+      for (const auto& validator : validators) {
+        if (validator == "unstructured_annotations_on_field_type") {
+          // no-op
+        } else if (validator == "warn_on_redundant_custom_default_values") {
+          sparams.warn_on_redundant_custom_default_values = true;
+        } else if (validator == "forbid_non_optional_cpp_ref_fields") {
+          // no-op
+        } else if (validator == "implicit_field_ids") {
+          // no-op
+        } else {
+          fprintf(
+              stderr, "!!! Unrecognized validator: %s\n\n", validator.c_str());
+          printUsageError();
+          return {};
+        }
+      }
+    } else {
+      fprintf(
+          stderr, "!!! Unrecognized option: %s\n\n", arguments[arg_i].c_str());
+      printUsageError();
+      return {};
+    }
+  }
+
+  if (const char* env_p = std::getenv("THRIFT_INCLUDE_PATH")) {
+    std::vector<std::string> components;
+    boost::algorithm::split(components, env_p, isPathSeparator);
+    pparams.incl_searchpath.insert(
+        pparams.incl_searchpath.end(), components.begin(), components.end());
+  }
+
+  if (!validate_params(gparams)) {
+    return {};
+  }
+
+  // Return the input file name.
+  assert(arg_i == arguments.size() - 1);
+  if (detail::platform_is_windows()) {
+    // The path here is used in schema.thrift
+    //
+    // * In Linux, buck uses relative path.
+    // * In Windows, buck uses absolute path.
+    //
+    // To make the generated schema.thrift consistent with Unix, we need to
+    // convert it to relative path when possible.
+    //
+    // Not that the path might not exist since when thrift compiler is used as
+    // library, user's code can use `source_manager::add_virtual_file(...)`
+    // method to create a virtual file.
+    return std::filesystem::proximate(arguments[arg_i]).generic_string();
+  }
+  return arguments[arg_i];
+}
+
 std::optional<std::string> detail::parse_command_line_args(
     const std::vector<std::string>& args,
     parsing_params& parsing_params,
@@ -871,24 +854,14 @@ std::unique_ptr<t_program_bundle> parse_and_dump_diagnostics(
   return programs;
 }
 
-compile_result compile(
-    const std::vector<std::string>& arguments, source_manager& source_mgr) {
+compile_result compile_with_options(
+    parsing_params pparams,
+    gen_params gparams,
+    diagnostic_params dparams,
+    sema_params sparams,
+    const std::string& input_filename,
+    source_manager& source_mgr) {
   compile_result result;
-
-  // If --help is explicitly passed, print (non-error) usage and return
-  // successfully.
-  if (maybeHandleHelpInvocation(arguments)) {
-    result.retcode = compile_retcode::success;
-    return result;
-  }
-
-  // Parse arguments.
-  parsing_params pparams;
-  gen_params gparams;
-  diagnostic_params dparams;
-  sema_params sparams;
-  std::string input_filename =
-      parse_args(arguments, pparams, gparams, dparams, sparams);
   if (input_filename.empty()) {
     return result;
   }
@@ -909,6 +882,29 @@ compile_result compile(
   result.retcode =
       generate_code_for_program_bundle(*program_bundle, gparams, ctx);
   return result;
+}
+
+compile_result compile(
+    const std::vector<std::string>& arguments, source_manager& source_mgr) {
+  compile_result result;
+
+  // If --help is explicitly passed, print (non-error) usage and return
+  // successfully.
+  if (maybeHandleHelpInvocation(arguments)) {
+    result.retcode = compile_retcode::success;
+    return result;
+  }
+
+  // Parse arguments.
+  parsing_params pparams;
+  gen_params gparams;
+  diagnostic_params dparams;
+  sema_params sparams;
+  std::string input_filename =
+      parse_args(arguments, pparams, gparams, dparams, sparams);
+
+  return compile_with_options(
+      pparams, gparams, dparams, sparams, input_filename, source_mgr);
 }
 
 } // namespace apache::thrift::compiler

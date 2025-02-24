@@ -20,8 +20,6 @@
 #include <algorithm>
 #include <filesystem>
 #include <random>
-#include <regex>
-#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -32,6 +30,7 @@
 
 #include <thrift/compiler/compiler.h>
 #include <thrift/compiler/diagnostic.h>
+#include <thrift/compiler/sema/sema_context.h>
 #include <thrift/compiler/source_location.h>
 
 namespace apache::thrift::compiler {
@@ -204,20 +203,28 @@ void check_compile(
       ? compile_retcode::failure
       : compile_retcode::success;
 
-  args.insert(args.begin(), "thrift_binary"); // Ignored argument
-  args.emplace_back("--gen"); // generator arg
-  args.emplace_back("mstch_cpp2"); // target language
-  args.emplace_back("-o"); // output directory
-  args.emplace_back(tmp_dir.string() + "/");
+  gen_params gparams;
+  gparams.targets.emplace_back("mstch_cpp2");
+  gparams.out_path = tmp_dir.string() + "/";
+
+  parsing_params pparams;
   if (options.add_standard_includes) {
     if (auto* includes = std::getenv("IMPLICIT_INCLUDES")) {
-      args.emplace_back("-I"); // include directory
-      args.emplace_back(includes);
+      pparams.incl_searchpath.emplace_back(includes);
     }
   }
-  args.emplace_back(file_name); // input file name
 
-  compile_result result = compile(args, smgr);
+  diagnostic_params dparams;
+  sema_params sparams;
+
+  args.emplace(args.begin(), ""); // Dummy binary name
+  args.emplace_back(""); // Dummy file name
+
+  parse_args(args, pparams, gparams, dparams, sparams);
+
+  compile_result result =
+      compile_with_options(pparams, gparams, dparams, sparams, file_name, smgr);
+
   EXPECT_EQ(expected_ret_code, result.retcode);
   std::vector<diagnostic> result_diagnostics = result.detail.diagnostics();
   std::sort(result_diagnostics.begin(), result_diagnostics.end());

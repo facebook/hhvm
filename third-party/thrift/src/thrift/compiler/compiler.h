@@ -49,6 +49,33 @@ struct compile_result {
 };
 
 /**
+ * Flags to control code generation
+ */
+struct gen_params {
+  bool gen_recurse = false;
+  std::string genfile;
+  std::vector<std::string> targets;
+  std::string out_path;
+  bool add_gen_dir = true;
+
+  // If true, code generation will be skipped (regardless of other parameters).
+  // This is useful, for example, to parse and validate source Thrift IDL
+  // without a particular target language in mind.
+  bool skip_gen = false;
+
+  bool inject_schema_const = false;
+};
+
+// Returns the input file name if successful, otherwise returns an empty
+// string.
+std::string parse_args(
+    const std::vector<std::string>& arguments,
+    parsing_params& pparams,
+    gen_params& gparams,
+    diagnostic_params& dparams,
+    sema_params& sparams);
+
+/**
  * Parse with the given parameters, and dump all the diagnostic messages
  * returned.
  *
@@ -71,6 +98,18 @@ parse_and_mutate_program(
     const std::string& filename,
     parsing_params params,
     diagnostic_params dparams = {});
+
+/**
+ * Compile with the given set of parameters.
+ * The parameters can be parsed from the command line arguments using `compile`.
+ */
+compile_result compile_with_options(
+    parsing_params pparams,
+    gen_params gparams,
+    diagnostic_params dparams,
+    sema_params sparams,
+    const std::string& input_filename,
+    source_manager& source_mgr);
 
 /**
  * Runs the Thrift compiler with the specified (command-line) arguments.

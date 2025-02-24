@@ -1,2 +1,2 @@
 File "unsurfaced_exception.bad.php", line 9, characters 33-34:
-Generic exceptions cannot be thrown away -- prefer to log exceptions and explain how the program recovers. See https://fburl.com/hack-error-reporting for guidance and caveats. (Lint[5811])
+Generic exceptions cannot be thrown away -- prefer to log exceptions and explain how the program recovers. See https://fburl.com/hacklint5811 for guidance and caveats. (Lint[5811])

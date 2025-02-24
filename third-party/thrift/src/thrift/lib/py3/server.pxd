@@ -12,41 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from cpython.ref cimport PyObject
 from libc.stdint cimport uint16_t, int32_t, uint32_t, int64_t
-from libcpp.string cimport string
 from libcpp cimport bool as cbool
 from libcpp.memory cimport shared_ptr, unique_ptr
-from folly.iobuf cimport cIOBuf
-from folly.range cimport StringPiece
-from folly cimport cFollyExecutor
-from cpython.ref cimport PyObject
-from thrift.python.common cimport cPriority, Priority_to_cpp, Headers, cThriftMetadata
-from thrift.py3.std_libcpp cimport milliseconds, seconds, string_view
 from libcpp.optional cimport optional
+from libcpp.string cimport string
 from libcpp.utility cimport pair
 
+from folly.iobuf cimport cIOBuf
+from folly cimport cFollyExecutor
+from thrift.py3.std_libcpp cimport milliseconds, seconds, string_view
+from thrift.python.common cimport cPriority, Priority_to_cpp, Headers, cThriftMetadata
+from thrift.python.server_impl.event_handler cimport (
+    Py3ServerEventHandler,
+    cBaseThriftServerMetadata,
+    cIsOverloadedFunc,
+    cSSLPolicy,
+    cfollySocketAddress,
+    cTransportRoutingHandler,
+)
 
-cdef extern from "thrift/lib/py3/server.h" namespace "::thrift::py3":
-    cdef cppclass cfollySocketAddress "folly::SocketAddress":
-        uint16_t getPort()
-        bint isFamilyInet()
-        bint empty()
-        string getAddressStr()
-        string getPath()
 
-    cfollySocketAddress makeFromPath "folly::SocketAddress::makeFromPath"(StringPiece path)
-
-    cdef cppclass AddressHandler:  # This isn't true but its easier for cython
-        pass
-
-    AddressHandler object_partial(void(*)(PyObject*, cfollySocketAddress), PyObject*)
-
-    cdef cppclass Py3ServerEventHandler:
-        Py3ServerEventHandler(cFollyExecutor*, AddressHandler) nogil
-
-    cdef cppclass cIsOverloadedFunc "apache::thrift::IsOverloadedFunc":
-        pass
-    string getRequestId() except +
 
 cdef extern from "thrift/lib/cpp2/async/AsyncProcessor.h" \
         namespace "apache::thrift":
@@ -66,10 +53,6 @@ cdef extern from "thrift/lib/cpp2/async/AsyncProcessor.h" \
 
     cdef cGeneratedAsyncProcessorBase* dynamic_cast_gen "dynamic_cast<apache::thrift::GeneratedAsyncProcessorBase*>"(...)
 
-cdef extern from "thrift/lib/cpp2/server/TransportRoutingHandler.h" \
-        namespace "apache::thrift":
-    cdef cppclass cTransportRoutingHandler "apache::thrift::TransportRoutingHandler":
-        pass
 
 cdef extern from "thrift/lib/cpp2/server/StatusServerInterface.h" \
         namespace "apache::thrift":
@@ -83,17 +66,6 @@ cdef extern from "thrift/lib/cpp2/util/EmptyAsyncProcessor.h":
 
 cdef extern from "thrift/lib/cpp2/server/ThriftServer.h" \
         namespace "apache::thrift":
-
-    cdef cppclass cSSLPolicy "apache::thrift::SSLPolicy":
-        bint operator==(cSSLPolicy&)
-
-    cSSLPolicy SSLPolicy__DISABLED "apache::thrift::SSLPolicy::DISABLED"
-    cSSLPolicy SSLPolicy__PERMITTED "apache::thrift::SSLPolicy::PERMITTED"
-    cSSLPolicy SSLPolicy__REQUIRED "apache::thrift::SSLPolicy::REQUIRED"
-
-    cdef cppclass cBaseThriftServerMetadata "apache::thrift::BaseThriftServer::Metadata":
-        string wrapper
-        string languageFramework
 
     cdef cppclass cThriftServer "apache::thrift::ThriftServer":
         ThriftServer() nogil except +

@@ -35,6 +35,14 @@ import os
 
 from enum import Enum
 from thrift.python.common import Priority, Headers
+from thrift.python.server_impl.event_handler cimport (
+    SSLPolicy__DISABLED,
+    SSLPolicy__PERMITTED,
+    SSLPolicy__REQUIRED,
+    getRequestId,
+    makeFromPath,
+    object_partial,
+)
 
 SocketAddress = collections.namedtuple('SocketAddress', 'ip port path')
 

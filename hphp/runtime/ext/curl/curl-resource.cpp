@@ -629,7 +629,6 @@ bool CurlResource::isStringOption(long option) {
     case CURLOPT_EGDSOCKET:
     case CURLOPT_INTERFACE:
     case CURLOPT_PROXY:
-    case CURLOPT_PROXYUSERPWD:
     case CURLOPT_REFERER:
     case CURLOPT_SSLCERTTYPE:
     case CURLOPT_SSLENGINE:
@@ -639,7 +638,6 @@ bool CurlResource::isStringOption(long option) {
     case CURLOPT_SSLKEYTYPE:
     case CURLOPT_SSL_CIPHER_LIST:
     case CURLOPT_USERAGENT:
-    case CURLOPT_USERPWD:
 #if LIBCURL_VERSION_NUM >= 0x070e01 /* Available since 7.14.1 */
     case CURLOPT_COOKIELIST:
 #endif
@@ -773,7 +771,9 @@ bool CurlResource::isNullableStringOption(long option) {
   switch (option) {
     case CURLOPT_CUSTOMREQUEST:
     case CURLOPT_FTPPORT:
+    case CURLOPT_PROXYUSERPWD:
     case CURLOPT_RANGE:
+    case CURLOPT_USERPWD:
 #if LIBCURL_VERSION_NUM >= 0x070d00 /* Available since 7.13.0 */
     case CURLOPT_FTP_ACCOUNT:
 #endif

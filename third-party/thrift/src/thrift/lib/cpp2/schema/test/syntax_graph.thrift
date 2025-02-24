@@ -51,6 +51,13 @@ union TestUnion {
   2: TestEnum e;
 }
 
+@thrift.Uri{value = ""}
+@scope.Definition
+struct TestStructuredAnnotationWithoutUri {
+  1: i64 field1;
+}
+
+@TestStructuredAnnotationWithoutUri{field1 = 3}
 exception TestException {
   1: binary blob;
 }

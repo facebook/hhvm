@@ -69,7 +69,7 @@ TEST_F(ServiceSchemaTest, Programs) {
   EXPECT_EQ(programs.size(), 3);
 
   auto mainProgram = findProgramByName(syntaxGraph, "syntax_graph");
-  EXPECT_EQ(mainProgram->definitions().size(), 11);
+  EXPECT_EQ(mainProgram->definitions().size(), 12);
   EXPECT_EQ(&mainProgram->syntaxGraph(), &syntaxGraph);
   {
     ProgramNode::IncludesList includes = mainProgram->includes();
@@ -378,6 +378,24 @@ TEST_F(ServiceSchemaTest, StructuredAnnotation) {
   EXPECT_EQ(
       &annotations[0].type().asStruct(),
       &program->definitions().at("TestStructuredAnnotation")->asStruct());
+  EXPECT_EQ(annotations[0].fields().size(), 1);
+  EXPECT_EQ(annotations[0].fields().at("field1").as_i64(), 3);
+}
+
+TEST_F(ServiceSchemaTest, StructuredAnnotationWithoutUri) {
+  auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
+  auto program = findProgramByName(syntaxGraph, "syntax_graph");
+
+  folly::not_null<const DefinitionNode*> testException =
+      program->definitions().at("TestException");
+
+  const auto& annotations = testException->annotations();
+  EXPECT_EQ(annotations.size(), 1);
+  EXPECT_EQ(
+      &annotations[0].type().asStruct(),
+      &program->definitions()
+           .at("TestStructuredAnnotationWithoutUri")
+           ->asStruct());
   EXPECT_EQ(annotations[0].fields().size(), 1);
   EXPECT_EQ(annotations[0].fields().at("field1").as_i64(), 3);
 }

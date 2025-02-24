@@ -39,20 +39,6 @@ namespace detail {
 
 namespace {
 
-// Due to circular dependency concerns in the Thrift compiler, the standard
-// annotation library does not bundle its runtime schema information.
-// For now, we pretend that they do not exist.
-bool isIgnoredUri(std::string_view uri) {
-  static const auto kIgnoredUriPrefixes =
-      folly::make_array<std::string_view>("facebook.com/thrift/annotation/");
-  for (std::string_view prefix : kIgnoredUriPrefixes) {
-    if (uri.substr(0, prefix.length()) == prefix) {
-      return true;
-    }
-  }
-  return false;
-}
-
 /**
  * Transparent hashing for DefinitionKey and DefinitionKeyRef. This enables
  * heterogenous access in F14Map / F14Set.
@@ -104,16 +90,9 @@ class Resolver final {
   friend const DefinitionNode& lazyResolve(
       const Resolver&, const type::DefinitionKey&);
 
+  // Lifetime managed by SyntaxGraph
+  folly::not_null<const type::Schema*> rawSchema_;
   folly::not_null<SyntaxGraph*> syntaxGraph_;
-
-  // In schema.thrift, certain references use URIs instead of DefinitionKeys.
-  // They could probably be changed to DefinitionKeys in practice but
-  // standard.TypeUri is a union of both URI and DefinitionKey.
-  //
-  // We use this map to normalize all indexing to DefinitionKeys.
-  using DefinitionKeysByUri =
-      folly::F14FastMap<std::string_view, DefinitionKeyRef>;
-  DefinitionKeysByUri definitionKeysByUri_;
 
   // Every top-level definition has exactly one associated graph node. These are
   // stored and kept alive in this map.
@@ -144,7 +123,6 @@ class Resolver final {
       DefinitionKeyHash,
       DefinitionKeyEqual>;
 
-  static DefinitionKeysByUri createDefinitionKeysByUri(const type::Schema&);
   ProgramsById createProgramsById(const type::Schema&, const DefinitionsByKey&);
   ValuesById createValuesById(const type::Schema& schema);
 
@@ -176,12 +154,12 @@ class Resolver final {
       const type::DefinitionKey&, const type::Function&);
 
   std::vector<Annotation> createAnnotations(
-      const std::map<std::string, type::Annotation>& annotations);
+      const std::map<type::DefinitionKey, type::Annotation>& annotations);
 
  public:
   explicit Resolver(const type::Schema& schema, SyntaxGraph& syntaxGraph)
-      : syntaxGraph_(&syntaxGraph),
-        definitionKeysByUri_(createDefinitionKeysByUri(schema)),
+      : rawSchema_(&schema),
+        syntaxGraph_(&syntaxGraph),
         definitionsByKey_(createDefinitionsByKey(
             schema, createProgramIdsByDefinitionKey(schema))),
         programsById_(createProgramsById(schema, definitionsByKey_)),
@@ -708,13 +686,9 @@ const type::DefinitionKey& Resolver::definitionKeyOf(
     const type::TypeUri& typeUri) const {
   using T = type::TypeUri::Type;
   switch (typeUri.getType()) {
-    case T::uri:
-      return folly::get_or_throw<InvalidSyntaxGraphError>(
-          definitionKeysByUri_,
-          *typeUri.uri_ref(),
-          "Unknown DefinitionKey for URI: ");
     case T::definitionKey:
       return *typeUri.definitionKey_ref();
+    case T::uri:
     case T::typeHashPrefixSha2_256:
     case T::scopedName:
     case T::__EMPTY__:
@@ -796,40 +770,6 @@ TypeRef Resolver::typeOf(const type::TypeStruct& type) const {
 const protocol::Value& Resolver::valueOf(const type::ValueId& id) const {
   return folly::get_or_throw<InvalidSyntaxGraphError>(
       valuesById_, id, "Unknown ValueId: ");
-}
-
-/* static */ Resolver::DefinitionKeysByUri Resolver::createDefinitionKeysByUri(
-    const type::Schema& schema) {
-  DefinitionKeysByUri result;
-  const auto emplaceUri = [&result](
-                              std::string_view uri,
-                              const type::DefinitionKey& definitionKey) {
-    if (uri.empty()) {
-      // Empty URI string indicates that the type has no URI. This design
-      // choice was made with the assumption that eventually all user-defined
-      // types will have URIs.
-      return;
-    }
-    if (isIgnoredUri(uri)) {
-      return;
-    }
-    result.emplace(uri, definitionKey);
-  };
-
-  for (const auto& entry : *schema.definitionsMap()) {
-    const type::DefinitionKey& definitionKey = entry.first;
-    const type::Definition& definition = entry.second;
-    visitDefinition(
-        definition,
-        [](const type::Typedef&) {
-          // Typedefs should not have URIs
-        },
-        [](const type::Const&) {
-          // Consts should not have URIs
-        },
-        [&](auto&& def) { emplaceUri(*def.uri(), definitionKey); });
-  }
-  return result;
 }
 
 Resolver::ProgramsById Resolver::createProgramsById(
@@ -935,7 +875,7 @@ DefinitionNode Resolver::createDefinition(
           programIdsByDefinitionKey,
           definitionKey,
           "Unknown ProgramId for DefinitionKey: "),
-      createAnnotations(*attrs.annotations()),
+      createAnnotations(*attrs.annotationsByKey()),
       *attrs.name(),
       std::move(alternative));
 }
@@ -1086,7 +1026,7 @@ FunctionNode Resolver::createFunction(
   return FunctionNode(
       *this,
       interfaceDefinitionKey,
-      createAnnotations(*function.annotations()),
+      createAnnotations(*function.annotationsByKey()),
       FunctionNode::Response(
           std::move(initialResponse),
           std::move(interaction),
@@ -1097,18 +1037,30 @@ FunctionNode Resolver::createFunction(
 }
 
 std::vector<Annotation> Resolver::createAnnotations(
-    const std::map<std::string, type::Annotation>& annotations) {
+    const std::map<type::DefinitionKey, type::Annotation>& annotations) {
   std::vector<Annotation> result;
-  for (const auto& [uri, annotation] : annotations) {
-    if (isIgnoredUri(uri)) {
+  for (const auto& [definitionKey, annotation] : annotations) {
+    // We need to access the raw struct because the DefinitionNode for the
+    // annotation might not exist yet.
+    const type::Definition* definition =
+        folly::get_ptr(*rawSchema_->definitionsMap(), definitionKey);
+    if (definition == nullptr) {
+      // Due to circular dependency concerns in the Thrift compiler, the
+      // standard annotation library does not bundle its runtime schema
+      // information. For now, we pretend that they do not exist.
       continue;
     }
-    auto type = type::Type::create<type::struct_c>(uri);
     Annotation::Fields fields;
     for (const auto& [fieldName, value] : *annotation.fields()) {
       fields.emplace(fieldName, value);
     }
-    result.emplace_back(Annotation(typeOf(type), std::move(fields)));
+
+    FOLLY_SAFE_CHECK(
+        definition->getType() == type::Definition::Type::structDef,
+        "Annotations should always be structs (not unions, nor exceptions)");
+    auto type =
+        TypeRef(detail::Lazy<StructNode>::Unresolved(*this, definitionKey));
+    result.emplace_back(Annotation(std::move(type), std::move(fields)));
   }
   return result;
 }

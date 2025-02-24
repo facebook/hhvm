@@ -255,7 +255,7 @@ DynamicPatch& DynamicMapPatch::patchByKeyImpl(Value k, SubPatch&& p) {
       ? patchAfter_
       : patchPrior_;
   if (auto subPatch = get_ptr(patch, k)) {
-    subPatch->merge(badge, std::forward<SubPatch>(p));
+    subPatch->merge(std::forward<SubPatch>(p));
     return *subPatch;
   } else {
     return patch.emplace(std::move(k), std::forward<SubPatch>(p)).first->second;
@@ -462,7 +462,7 @@ void DynamicStructurePatch<IsUnion>::ensureUnion(FieldId id, Value v) {
   }
 
   DynamicPatch tmp = std::move(patchPrior_[id]);
-  tmp.merge(badge, patchAfter_[id]);
+  tmp.merge(patchAfter_[id]);
 
   // After ensuring field `id`, all other fields will be cleared, thus we don't
   // need to worry about them.
@@ -491,7 +491,7 @@ void DynamicStructurePatch<IsUnion>::ensureStruct(FieldId id, Value v) {
   }
 
   if (patchAfter_.contains(id)) {
-    patchPrior_[id].merge(badge, patchAfter_[id]);
+    patchPrior_[id].merge(patchAfter_[id]);
     patchAfter_.erase(id);
   }
 
@@ -986,7 +986,7 @@ DynamicUnionPatch DiffVisitorBase::diffUnion(
   auto guard = folly::makeGuard([&] { pop(); });
   auto subPatch = diff(badge, src.at(id), dst.at(id));
   if (!subPatch.empty(badge)) {
-    patch.patchIfSet(badge, id).merge(badge, DynamicPatch{std::move(subPatch)});
+    patch.patchIfSet(badge, id).merge(DynamicPatch{std::move(subPatch)});
   }
 
   return patch;
@@ -1059,7 +1059,7 @@ void DiffVisitorBase::diffField(
     auto empty = emptyValue(field.getType());
     auto subPatch = diff(badge, empty, field);
     patch.ensure(badge, id, std::move(empty));
-    patch.patchIfSet(badge, id).merge(badge, DynamicPatch{std::move(subPatch)});
+    patch.patchIfSet(badge, id).merge(DynamicPatch{std::move(subPatch)});
     return;
   }
 
@@ -1070,7 +1070,7 @@ void DiffVisitorBase::diffField(
     if (maybeEmptyDeprecatedTerseField(src.at(id))) {
       patch.ensure(badge, id, emptyValue(src.at(id).getType()));
     }
-    patch.patchIfSet(badge, id).merge(badge, DynamicPatch{std::move(subPatch)});
+    patch.patchIfSet(badge, id).merge(DynamicPatch{std::move(subPatch)});
   }
 }
 
@@ -1177,7 +1177,7 @@ void DynamicSetPatch::apply(detail::Badge, detail::ValueSet& v) const {
 
 template <class Other>
 detail::if_same_type_after_remove_cvref<Other, DynamicPatch>
-DynamicPatch::merge(detail::Badge, Other&& other) {
+DynamicPatch::merge(Other&& other) {
   // If only one of the patch is Unknown patch, convert the Unknown patch type
   // to the known patch type.
   if (std::holds_alternative<DynamicUnknownPatch>(*patch_) &&
@@ -1197,7 +1197,7 @@ DynamicPatch::merge(detail::Badge, Other&& other) {
           auto tmp = DynamicPatch{detail::createPatchFromObject<
               folly::remove_cvref_t<decltype(patch)>>(
               badge, std::forward<Other>(other).toObject())};
-          return merge(badge, std::move(tmp));
+          return merge(std::move(tmp));
         },
         *patch_);
   }
@@ -1205,13 +1205,13 @@ DynamicPatch::merge(detail::Badge, Other&& other) {
       std::holds_alternative<op::BinaryPatch>(*other.patch_)) {
     *patch_ = detail::createPatchFromObject<op::BinaryPatch>(
         badge, std::move(*this).toObject());
-    return merge(badge, std::forward<Other>(other));
+    return merge(std::forward<Other>(other));
   }
   if (std::holds_alternative<op::BinaryPatch>(*patch_) &&
       std::holds_alternative<op::StringPatch>(*other.patch_)) {
     *patch_ = detail::createPatchFromObject<op::StringPatch>(
         badge, std::move(*this).toObject());
-    return merge(badge, std::forward<Other>(other));
+    return merge(std::forward<Other>(other));
   }
 
   if (other.empty(badge)) {
@@ -1245,10 +1245,10 @@ DynamicPatch::merge(detail::Badge, Other&& other) {
       *other.patch_);
 }
 
-template void DynamicPatch::merge(detail::Badge, DynamicPatch&);
-template void DynamicPatch::merge(detail::Badge, DynamicPatch&&);
-template void DynamicPatch::merge(detail::Badge, const DynamicPatch&);
-template void DynamicPatch::merge(detail::Badge, const DynamicPatch&&);
+template void DynamicPatch::merge(DynamicPatch&);
+template void DynamicPatch::merge(DynamicPatch&&);
+template void DynamicPatch::merge(const DynamicPatch&);
+template void DynamicPatch::merge(const DynamicPatch&&);
 
 void DynamicPatch::fromObject(detail::Badge, Object obj) {
   if (auto p = get_ptr(obj, op::PatchOp::EnsureStruct)) {
@@ -1413,8 +1413,8 @@ void DynamicUnknownPatch::patchIfSet(
       badge, get(op::PatchOp::PatchPrior).ensure_object()[id].ensure_object());
   after.fromObject(
       badge, get(op::PatchOp::PatchAfter).ensure_object()[id].ensure_object());
-  prior.merge(badge, after);
-  prior.merge(badge, p);
+  prior.merge(after);
+  prior.merge(p);
   get(op::PatchOp::PatchAfter).ensure_object().erase(id);
   get(op::PatchOp::PatchPrior).ensure_object()[id].as_object() =
       prior.toObject();

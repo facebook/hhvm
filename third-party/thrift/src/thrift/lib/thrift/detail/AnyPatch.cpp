@@ -171,9 +171,9 @@ void AnyPatch<Patch>::patchIfTypeIsImpl(
   DynamicPatch patch;
   patch.fromAny(badge, any);
   if (after) {
-    data_.patchIfTypeIsAfter()[type].merge(badge, patch);
+    data_.patchIfTypeIsAfter()[type].merge(patch);
   } else {
-    data_.patchIfTypeIsPrior()[type].merge(badge, patch);
+    data_.patchIfTypeIsPrior()[type].merge(patch);
   }
 }
 
@@ -182,9 +182,9 @@ void AnyPatch<Patch>::patchIfTypeIs(
     const type::Type& type, const protocol::DynamicPatch& patch) {
   tryPatchable(type);
   if (ensures(type)) {
-    data_.patchIfTypeIsAfter()[type].merge(badge, patch);
+    data_.patchIfTypeIsAfter()[type].merge(patch);
   } else {
-    data_.patchIfTypeIsPrior()[type].merge(badge, patch);
+    data_.patchIfTypeIsPrior()[type].merge(patch);
   }
 }
 
@@ -215,7 +215,7 @@ void AnyPatch<Patch>::DynamicPatchExtractionVisitor::patchIfTypeIs(
   if (!type::identicalType(type, type_)) {
     return;
   }
-  patch_.merge(badge, dpatch);
+  patch_.merge(dpatch);
 }
 template <class Patch>
 void AnyPatch<Patch>::DynamicPatchExtractionVisitor::ensureAny(

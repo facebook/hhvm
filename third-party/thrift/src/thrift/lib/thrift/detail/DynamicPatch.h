@@ -480,7 +480,7 @@ class DynamicStructurePatch {
   // Needed for merge(...). We can consider making this a public API.
   template <class SubPatch>
   void patchIfSet(detail::Badge badge, FieldId id, SubPatch&& patch) {
-    patchIfSet(badge, id).merge(badge, std::forward<SubPatch>(patch));
+    patchIfSet(badge, id).merge(std::forward<SubPatch>(patch));
   }
 
  public:
@@ -568,9 +568,11 @@ class DynamicPatch {
     return std::get_if<PatchType>(patch_.get());
   }
 
+  /// Merges another patch into this patch. After the merge
+  /// (`patch.merge(next)`), `patch.apply(value)` is equivalent to
+  /// `next.apply(patch.apply(value))`.
   template <class Other>
-  detail::if_same_type_after_remove_cvref<Other, DynamicPatch> merge(
-      detail::Badge, Other&&);
+  detail::if_same_type_after_remove_cvref<Other, DynamicPatch> merge(Other&&);
 
   template <class Tag>
   auto& getStoredPatchByTag(detail::Badge badge) {
@@ -620,7 +622,7 @@ class DynamicPatch {
     }
 
     // Use merge to change patch's type.
-    merge(badge, DynamicPatch{Patch{}});
+    merge(DynamicPatch{Patch{}});
     return *get_if<Patch>(badge);
   }
 

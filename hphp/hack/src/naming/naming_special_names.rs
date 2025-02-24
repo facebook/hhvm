@@ -334,6 +334,8 @@ pub mod user_attributes {
 
     pub const REQUIRE_PACKAGE: &str = "__RequirePackage";
 
+    pub const NO_DISJOINT_UNION: &str = "__NoDisjointUnion";
+
     pub fn is_memoized(name: &str) -> bool {
         name == MEMOIZE || name == MEMOIZE_LSB
     }
@@ -379,6 +381,10 @@ pub mod user_attributes {
 
     pub fn is_require_package(name: &str) -> bool {
         name == REQUIRE_PACKAGE
+    }
+
+    pub fn is_no_disjoint_union(name: &str) -> bool {
+        name == NO_DISJOINT_UNION
     }
 }
 

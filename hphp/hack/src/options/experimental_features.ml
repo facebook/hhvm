@@ -67,6 +67,7 @@ type feature_name =
   | LikeTypeHints
   | ShapeDestructure
   | ExpressionTreeShapeCreation
+  | NoDisjointUnion
 [@@deriving eq, ord, show]
 
 let feature_name_map =
@@ -110,6 +111,7 @@ let feature_name_map =
       ("like_type_hints", LikeTypeHints);
       ("shape_destructure", ShapeDestructure);
       ("expression_tree_shape_creation", ExpressionTreeShapeCreation);
+      ("no_disjoint_union", NoDisjointUnion);
     ]
 
 let feature_name_from_string s = SMap.find_opt s feature_name_map

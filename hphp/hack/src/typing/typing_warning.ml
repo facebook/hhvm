@@ -130,6 +130,10 @@ module Class_pointer_to_string = struct
   }
 end
 
+module No_disjoint_union_check = struct
+  type t = string Lazy.t
+end
+
 type (_, _) kind =
   | Sketchy_equality : (Sketchy_equality.t, warn) kind
   | Safe_abstract : (Safe_abstract.t, warn) kind
@@ -141,5 +145,6 @@ type (_, _) kind =
   | Equality_check : (Equality_check.t, migrated) kind
   | Duplicate_properties : (Duplicate_properties.t, migrated) kind
   | Class_pointer_to_string : (Class_pointer_to_string.t, warn) kind
+  | No_disjoint_union_check : (No_disjoint_union_check.t, warn) kind
 
 type ('x, 'a) t = Pos.t * ('x, 'a) kind * 'x

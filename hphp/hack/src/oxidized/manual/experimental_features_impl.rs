@@ -52,6 +52,7 @@ impl FeatureName {
             LikeTypeHints => Unstable,
             ShapeDestructure => Unstable,
             ExpressionTreeShapeCreation => Preview,
+            NoDisjointUnion => OngoingRelease,
         }
     }
 

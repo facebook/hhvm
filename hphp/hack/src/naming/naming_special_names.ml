@@ -299,6 +299,8 @@ module UserAttributes = struct
 
   let uaExplicit = "__Explicit"
 
+  let uaNoDisjointUnion = "__NoDisjointUnion"
+
   let uaNonDisjoint = "__NonDisjoint"
 
   let uaOverlapping = "__Overlapping"
@@ -679,6 +681,14 @@ module UserAttributes = struct
               doc =
                 "Associates this class with a native data type (usually a C++ class)."
                 ^ " When instantiating this class, the corresponding native object will also be allocated.";
+            } );
+          ( uaNoDisjointUnion,
+            {
+              contexts = [typeparam];
+              autocomplete = true;
+              doc =
+                "Requires this type parameter to NOT have a union type where the types in the union are disjoint from each other, e.g., `(int | string)`."
+                ^ " This prevents Hack from inferring completely unrelated types.";
             } );
           ( uaNonDisjoint,
             {

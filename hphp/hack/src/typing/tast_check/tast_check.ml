@@ -125,6 +125,7 @@ let visitor ctx =
             Some Safe_abstract_check.handler
           else
             None);
+          Some No_disjoint_union_check.handler;
         ]
   in
   let handlers =

@@ -801,6 +801,7 @@ module Warning = struct
     | SafeAbstractCall [@value 12014]
     | SafeAbstractNew [@value 12015]
     | SafeAbstractCallNeedsConcrete [@value 12016]
+    | NoDisjointUnion [@value 12017]
   [@@deriving enum, ord, show { with_path = false }]
 end
 

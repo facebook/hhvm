@@ -2043,6 +2043,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         self.check_require_package_args_are_string_literals(node);
                         self.check_package_version_for_feature(node, &FeatureName::RequirePackage);
                     }
+                    if sn::user_attributes::is_no_disjoint_union(n) {
+                        self.check_can_use_feature(node, &FeatureName::NoDisjointUnion);
+                    }
                 }
                 None => {}
             }

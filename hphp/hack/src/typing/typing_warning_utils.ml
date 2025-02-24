@@ -474,6 +474,28 @@ module Class_pointer_to_string = struct
   let quickfixes _ = []
 end
 
+module No_disjoint_union_check = struct
+  type t = Typing_warning.No_disjoint_union_check.t
+
+  let code = Codes.NoDisjointUnion
+
+  let codes = [code]
+
+  let code _ = code
+
+  let claim ty =
+    "This call has a type argument that is inferred to be a union of disjoint types,"
+    ^ " but the API is marked to indicate that this is an error."
+    ^ " This is typically the case because two entities that are not related to each other are compared to each other."
+    ^ " For example, comparing a value of `int` type to a value of `string` type will always result in `false` and is likely a coding mistake."
+    ^ " The inferred type in this case is: "
+    ^ Lazy.force ty
+
+  let reasons _ = []
+
+  let quickfixes _ = []
+end
+
 let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
     (module Warning with type t = x) =
   match kind with
@@ -487,6 +509,7 @@ let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
   | Typing_warning.Equality_check -> (module Equality_check)
   | Typing_warning.Duplicate_properties -> (module Duplicated_properties)
   | Typing_warning.Class_pointer_to_string -> (module Class_pointer_to_string)
+  | Typing_warning.No_disjoint_union_check -> (module No_disjoint_union_check)
 
 let module_of_migrated
     (type x) (kind : (x, Typing_warning.migrated) Typing_warning.kind) :

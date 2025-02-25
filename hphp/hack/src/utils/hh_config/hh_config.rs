@@ -543,9 +543,9 @@ impl HhConfig {
             warnings_default_all: hhconfig
                 .get_bool_or("warnings_default_all", default.warnings_default_all)?,
             tco_strict_switch: hhconfig.get_bool_or("strict_switch", default.tco_strict_switch)?,
-            tco_package_v2_bypass_package_check_for_class_const: hhconfig.get_bool_or(
-                "package_v2_bypass_package_check_for_class_const",
-                default.tco_package_v2_bypass_package_check_for_class_const,
+            tco_package_v2_bypass_package_check_for_classptr_migration: hhconfig.get_bool_or(
+                "package_v2_bypass_package_check_for_classptr_migration",
+                default.tco_package_v2_bypass_package_check_for_classptr_migration,
             )?,
             tco_package_v2_exclude_patterns: hhconfig
                 .get_str("package_v2_exclude_patterns")

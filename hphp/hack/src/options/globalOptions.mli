@@ -261,7 +261,7 @@ type t = {
   tco_allowed_files_for_ignore_readonly: string list;
   tco_package_v2_exclude_patterns: string list;
       (** Patterns for files excluded from the package boundary check. *)
-  tco_package_v2_bypass_package_check_for_class_const: bool;
+  tco_package_v2_bypass_package_check_for_classptr_migration: bool;
       (** Option for package v2 to bypass package boundary violation errors on ::class during
           the ::class to nameof migration to unblock V0 of intern-prod separation *)
   re_no_cache: bool;
@@ -381,7 +381,7 @@ val set :
   ?tco_strict_switch:bool ->
   ?tco_allowed_files_for_ignore_readonly:string list ->
   ?tco_package_v2_exclude_patterns:string list ->
-  ?tco_package_v2_bypass_package_check_for_class_const:bool ->
+  ?tco_package_v2_bypass_package_check_for_classptr_migration:bool ->
   ?re_no_cache:bool ->
   ?hh_distc_should_disable_trace_store:bool ->
   ?hh_distc_exponential_backoff_num_retries:int ->

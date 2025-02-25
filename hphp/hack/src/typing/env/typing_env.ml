@@ -697,8 +697,8 @@ let is_package_loaded env package = SSet.mem package env.loaded_packages
 
 let package_v2 env = TypecheckerOptions.package_v2 @@ get_tcopt env
 
-let package_v2_bypass_package_check_for_class_const env =
-  TypecheckerOptions.package_v2_bypass_package_check_for_class_const
+let package_v2_bypass_package_check_for_classptr_migration env =
+  TypecheckerOptions.package_v2_bypass_package_check_for_classptr_migration
   @@ get_tcopt env
 
 let load_packages env packages =

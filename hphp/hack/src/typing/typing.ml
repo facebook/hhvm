@@ -9950,7 +9950,8 @@ end = struct
                  || is_attribute
                  || is_catch
                  || is_function_pointer
-                 || Env.package_v2_bypass_package_check_for_class_const env
+                 || Env.package_v2_bypass_package_check_for_classptr_migration
+                      env
                     && is_const)
             in
             List.iter

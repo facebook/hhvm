@@ -84,6 +84,11 @@ struct Containers {
   2: list<string> l;
 }
 
+struct FloatingPoint {
+  1: float f32;
+  2: double f64;
+}
+
 @rust.NewType
 @rust.Ord
 @rust.Type{name = "OrderedFloat<f64>"}

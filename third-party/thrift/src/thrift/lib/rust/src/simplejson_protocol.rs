@@ -15,6 +15,8 @@
  */
 
 use std::io::Cursor;
+use std::num::ParseFloatError;
+use std::str::FromStr;
 
 use anyhow::anyhow;
 use anyhow::bail;
@@ -380,6 +382,75 @@ enum CommaState {
     End,
 }
 
+struct JsonNumberString {
+    string: Vec<u8>,
+    quoted: bool,
+}
+
+trait From32Infinity {
+    fn from_f32_inf() -> Self;
+}
+
+impl From32Infinity for f32 {
+    fn from_f32_inf() -> Self {
+        f32::INFINITY
+    }
+}
+
+impl From32Infinity for f64 {
+    fn from_f32_inf() -> Self {
+        3.4028237e38f64
+    }
+}
+
+trait From32NegInfinity {
+    fn from_f32_neg_inf() -> Self;
+}
+
+impl From32NegInfinity for f32 {
+    fn from_f32_neg_inf() -> Self {
+        f32::NEG_INFINITY
+    }
+}
+
+impl From32NegInfinity for f64 {
+    fn from_f32_neg_inf() -> Self {
+        -3.4028237e38f64
+    }
+}
+
+trait FromF64Infinity {
+    fn from_f64_inf() -> Self;
+}
+
+impl FromF64Infinity for f32 {
+    fn from_f64_inf() -> Self {
+        f32::NAN
+    }
+}
+
+impl FromF64Infinity for f64 {
+    fn from_f64_inf() -> Self {
+        f64::INFINITY
+    }
+}
+
+trait FromF64NegInfinity {
+    fn from_f64_neg_inf() -> Self;
+}
+
+impl FromF64NegInfinity for f32 {
+    fn from_f64_neg_inf() -> Self {
+        f32::NAN
+    }
+}
+
+impl FromF64NegInfinity for f64 {
+    fn from_f64_neg_inf() -> Self {
+        f64::NEG_INFINITY
+    }
+}
+
 impl<B: Buf> SimpleJsonProtocolDeserializer<B> {
     #[inline]
     pub fn new(buffer: B) -> Self {
@@ -480,10 +551,10 @@ impl<B: Buf> SimpleJsonProtocolDeserializer<B> {
         }
     }
     #[inline]
-    fn read_json_number_string(&mut self) -> Result<Vec<u8>> {
-        let mut ret = Vec::new();
+    fn read_json_number_string(&mut self) -> Result<JsonNumberString> {
+        let mut string = Vec::new();
 
-        let as_string = match self.peek() {
+        let quoted = match self.peek() {
             Some(b'"') => {
                 self.advance(1);
                 true
@@ -494,36 +565,118 @@ impl<B: Buf> SimpleJsonProtocolDeserializer<B> {
         while let Some(b) = self.peek() {
             match b {
                 b' ' | b'\t' | b'\n' | b'\r' | b'}' | b']' | b',' | b':' => {
-                    if as_string {
+                    if quoted {
                         bail!("Missing closing quote \" for number")
                     }
                     break;
                 }
                 b'"' => {
-                    if as_string {
+                    if quoted {
                         self.advance(1);
                     }
                     break;
                 }
                 _ => {
-                    ret.push(b);
+                    string.push(b);
                     self.advance(1);
                 }
             }
         }
 
-        Ok(ret)
+        Ok(JsonNumberString { string, quoted })
     }
+    /// Used for deserializing into a `serde_json::Value`.
     #[inline]
     fn read_json_number(&mut self) -> Result<serde_json::Number> {
         self.strip_whitespace();
-        let ret = self.read_json_number_string()?;
+        let JsonNumberString { string, .. } = self.read_json_number_string()?;
 
-        let v: std::result::Result<serde_json::Value, _> = serde_json::from_slice(&ret);
+        serde_json::from_slice(&string).map_err(Into::into)
+    }
+    #[inline]
+    fn read_json_integer_number(&mut self) -> Result<serde_json::Number> {
+        self.strip_whitespace();
+        let JsonNumberString { string, .. } = self.read_json_number_string()?;
+
+        let v: std::result::Result<serde_json::Value, _> = serde_json::from_slice(&string);
         match v {
             Ok(serde_json::Value::Number(n)) => Ok(n),
             _ => bail!("Invalid number"),
         }
+    }
+    #[inline]
+    fn read_floating_point_number<F>(&mut self) -> Result<F>
+    where
+        F: num_traits::Float
+            + FromStr<Err = ParseFloatError>
+            + From32Infinity
+            + From32NegInfinity
+            + FromF64Infinity
+            + FromF64NegInfinity,
+    {
+        self.strip_whitespace();
+        let JsonNumberString { string, quoted } = self.read_json_number_string()?;
+
+        let result = match &string[..] {
+            b"NaN" => {
+                if !quoted {
+                    bail!("NaN must be quoted")
+                }
+                F::nan()
+            }
+            b"-NaN" => {
+                if !quoted {
+                    bail!("-NaN must be quoted")
+                }
+                -F::nan()
+            }
+            b"Infinity" => {
+                if !quoted {
+                    bail!("Infinity must be quoted")
+                }
+                F::infinity()
+            }
+            b"-Infinity" => {
+                if !quoted {
+                    bail!("-Infinity must be quoted")
+                }
+                F::neg_infinity()
+            }
+            b"1.797693134862316e308" => F::from_f64_inf(),
+            b"-1.797693134862316e308" => F::from_f64_neg_inf(),
+            b"3.4028237e38" => F::from_f32_inf(),
+            b"-3.4028237e38" => F::from_f32_neg_inf(),
+            other => {
+                let s = std::str::from_utf8(other)
+                    .context("Invalid UTF-8 for floating point number")?;
+                // Curiously, this parses the below incorrectly-serialized nan/infinities as infinite nans,
+                // instead of erroring out like other float parsers.
+                // We currently rely on this behavior (but its unit-tested!).
+                let x = s.parse::<F>().context("Invalid floating point number")?;
+
+                // This if-condition is added here for backward compatibility with the original Rust simplejson_protocol::serialize
+                // and can be removed in the future along with excessive match arms and corresponding tests. For reference, it used
+                // to be that the original Rust serializer produced a string representation of a floating point number by
+                // serde_json::Formatter::write_f64 or serde_json::Formatter::write_32, both of each boil down to ryu::Buffer::format_finite.
+                //
+                // Examples of this include but are not limited to:
+                // - "2.696539702293474e308" for f64::NAN
+                // - "-2.696539702293474e308" for -f64::NAN
+                // - "1.797693134862316e308" for f64::INFINITY
+                // - "-1.797693134862316e308" for f64::NEG_INFINITY
+                // - "5.1042355e38" for f32::NAN
+                // - "-5.1042355e38" for -f32::NAN
+                // - "3.4028237e38" for f32::INFINITY
+                // - "-3.4028237e38" for f32::NEG_INFINITY
+                //
+                // Given that we've checked for string representations of positive and negative infinity above, combined with the fact that
+                // the standard parser successfully parses every grammar correct string representation of NaN values into ±Infinity or ±NaN as
+                // "closest representable floating-point number", we can safely turn infinities into NaNs and all other values into themselves.
+                if x.is_infinite() { F::nan() } else { x }
+            }
+        };
+
+        Ok(result)
     }
     #[inline]
     fn read_json_value(&mut self, max_depth: i32) -> Result<serde_json::Value> {
@@ -675,7 +828,7 @@ impl<B: Buf> SimpleJsonProtocolDeserializer<B> {
             Some(b'"') => Ok(ValueKind::String),
             Some(b'n') => Ok(ValueKind::Null),
             Some(b't') | Some(b'f') => Ok(ValueKind::Bool),
-            Some(b'-') => Ok(ValueKind::Number),
+            Some(b'-') | Some(b'I') | Some(b'N') => Ok(ValueKind::Number),
             Some(b) if (b as char).is_ascii_digit() => Ok(ValueKind::Number),
             ch => bail!(
                 "Expected [, {{, or \", or number after {:?}",
@@ -869,19 +1022,17 @@ impl<B: Buf> ProtocolReader for SimpleJsonProtocolDeserializer<B> {
     }
     #[inline]
     fn read_i64(&mut self) -> Result<i64> {
-        self.read_json_number()?
+        self.read_json_integer_number()?
             .as_i64()
             .ok_or_else(|| anyhow!("Invalid number"))
     }
     #[inline]
     fn read_double(&mut self) -> Result<f64> {
-        self.read_json_number()?
-            .as_f64()
-            .ok_or_else(|| anyhow!("Invalid number"))
+        self.read_floating_point_number()
     }
     #[inline]
     fn read_float(&mut self) -> Result<f32> {
-        Ok(self.read_double()? as f32)
+        self.read_floating_point_number()
     }
     #[inline]
     fn read_string(&mut self) -> Result<String> {

@@ -16,8 +16,10 @@
 
 use std::collections::BTreeMap;
 use std::io::Cursor;
+use std::sync::LazyLock;
 
 use anyhow::Result;
+use approx::assert_relative_eq;
 use fbthrift::simplejson_protocol::deserialize;
 use fbthrift::simplejson_protocol::serialize;
 use fbthrift::simplejson_protocol::SimpleJsonProtocolDeserializer;
@@ -25,6 +27,7 @@ use fbthrift::Deserialize;
 use fbthrift_test_if::Basic;
 use fbthrift_test_if::Containers;
 use fbthrift_test_if::En;
+use fbthrift_test_if::FloatingPoint;
 use fbthrift_test_if::MainStruct;
 use fbthrift_test_if::MainStructNoBinary;
 use fbthrift_test_if::Small;
@@ -32,6 +35,7 @@ use fbthrift_test_if::SubStruct;
 use fbthrift_test_if::Un;
 use fbthrift_test_if::UnOne;
 use proptest::prelude::*;
+use regex::Regex;
 use rstest::*;
 
 use crate::proptest::gen_main_struct;
@@ -313,7 +317,7 @@ fn test_deprecated_null_stuff_deser() -> Result<()> {
         ..Default::default()
     };
 
-    let inputs = &["{}", r#"{"optDef": null}"#];
+    let inputs = &["{}", r#"{ "optDef": null}"#];
     for input in inputs {
         // Make sure everything is skipped properly
         let res = deserialize(*input);
@@ -588,6 +592,199 @@ fn test_unknown_union() -> Result<()> {
 #[case(r#"{ "one": "1 ,", ":null}"#)]
 fn test_invalid_json(#[case] json: &str) {
     let res: Result<UnOne> = deserialize(json);
+    assert!(res.is_err(), "Expected error, got {:?}", res);
+}
+
+#[rstest]
+#[case::zero(0.0, r#"{"f32":0.0,"f64":0.0}"#)]
+#[case::negative_zero(-0.0, r#"{"f32":-0.0,"f64":0.0}"#)]
+#[case::one(1.0, r#"{"f32":1.0,"f64":0.0}"#)]
+#[case::min_positive(f32::MIN_POSITIVE, r#"{"f32":1.1754944e-38,"f64":0.0}"#)]
+#[case::negative_one(-1.0, r#"{"f32":-1.0,"f64":0.0}"#)]
+#[case::min(f32::MIN, r#"{"f32":-3.4028235e38,"f64":0.0}"#)]
+#[case::max(f32::MAX, r#"{"f32":3.4028235e38,"f64":0.0}"#)]
+fn test_f32_round_trip(#[case] value: f32, #[case] expected_json: &str) -> Result<()> {
+    let fp = FloatingPoint {
+        f32: value,
+        ..Default::default()
+    };
+
+    let s = String::from_utf8(serialize(&fp).to_vec()).unwrap();
+    assert_eq!(s, expected_json);
+    let d: FloatingPoint = deserialize(s).unwrap();
+
+    assert_relative_eq!(d.f32, fp.f32);
+
+    Ok(())
+}
+
+static EXPECTED_JSON_FOR_TEMPORARILY_IGNORED_F32_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"\{"f32":([+-]?[0-9]*[.]?[0-9]+([eE][0-9]+)?),"f64":0\.0\}"#).unwrap()
+});
+
+#[rstest]
+#[case::infinity(f32::INFINITY)]
+#[case::negative_infinity(f32::NEG_INFINITY)]
+fn test_f32_round_trip_ignore_intermediate_representation_temporarily(
+    #[case] value: f32,
+) -> Result<()> {
+    let fp = FloatingPoint {
+        f32: value,
+        ..Default::default()
+    };
+
+    let s = String::from_utf8(serialize(&fp).to_vec()).unwrap();
+    assert!(EXPECTED_JSON_FOR_TEMPORARILY_IGNORED_F32_REGEX.is_match(s.as_str()));
+    let d: FloatingPoint = deserialize(s).unwrap();
+
+    assert_relative_eq!(d.f32, fp.f32);
+
+    Ok(())
+}
+
+#[rstest]
+#[case::nan(f32::NAN)]
+#[case::negative_nan(-f32::NAN)]
+fn test_f32_round_trip_nan(#[case] value: f32) -> Result<()> {
+    let fp = FloatingPoint {
+        f32: value,
+        ..Default::default()
+    };
+
+    let s = String::from_utf8(serialize(&fp).to_vec()).unwrap();
+    let d: FloatingPoint = deserialize(s).unwrap();
+
+    assert!(d.f32.is_nan(), "value: {}", d.f32);
+
+    Ok(())
+}
+
+#[rstest]
+#[case::nan(r#"{ "f32": "NaN" }"#, f32::NAN)]
+#[case::negative_nan(r#"{ "f32": "-NaN" }"#, -f32::NAN)]
+#[case::infinity(r#"{ "f32": "Infinity" }"#, f32::INFINITY)]
+#[case::negative_infinity(r#"{ "f32": "-Infinity" }"#, f32::NEG_INFINITY)]
+#[case::ryu_nan(r#"{ "f32": "5.1042355e38" }"#, f32::NAN)]
+#[case::ryu_negative_nan(r#"{ "f32": "-5.1042355e38" }"#, -f32::NAN)]
+#[case::ryu_infinity(r#"{ "f32": "3.4028237e38" }"#, f32::INFINITY)]
+#[case::ryu_negative_infinity(r#"{ "f32": "-3.4028237e38" }"#, f32::NEG_INFINITY)]
+#[case::f64_infinity(r#"{ "f32": "1.797693134862316e308" }"#, f32::NAN)]
+#[case::f64_negative_infinity(r#"{ "f32": "-1.797693134862316e308" }"#, f32::NAN)]
+fn test_f32_deserialize(#[case] json: &str, #[case] expected_value: f32) -> Result<()> {
+    let d: FloatingPoint = deserialize(json).unwrap();
+    if expected_value.is_nan() {
+        assert!(d.f32.is_nan(), "value: {}", d.f32);
+    } else {
+        assert_relative_eq!(d.f32, expected_value);
+    }
+
+    Ok(())
+}
+
+#[rstest]
+#[case::zero(0.0, r#"{"f32":0.0,"f64":0.0}"#)]
+#[case::negative_zero(-0.0, r#"{"f32":0.0,"f64":-0.0}"#)]
+#[case::one(1.0, r#"{"f32":0.0,"f64":1.0}"#)]
+#[case::negative_one(-1.0, r#"{"f32":0.0,"f64":-1.0}"#)]
+#[case::min_positive(f64::MIN_POSITIVE, r#"{"f32":0.0,"f64":2.2250738585072014e-308}"#)]
+#[case::f32_nan(5.1042355e38, r#"{"f32":0.0,"f64":5.1042355e38}"#)]
+#[case::f32_negative_nan(-5.1042355e38, r#"{"f32":0.0,"f64":-5.1042355e38}"#)]
+#[case::f32_infinity(3.4028237e38, r#"{"f32":0.0,"f64":3.4028237e38}"#)]
+#[case::f32_negative_infinity(-3.4028237e38, r#"{"f32":0.0,"f64":-3.4028237e38}"#)]
+#[case::min(f64::MIN, r#"{"f32":0.0,"f64":-1.7976931348623157e308}"#)]
+#[case::max(f64::MAX, r#"{"f32":0.0,"f64":1.7976931348623157e308}"#)]
+fn test_f64_round_trip(#[case] value: f64, #[case] expected_json: &str) -> Result<()> {
+    let fp = FloatingPoint {
+        f64: value,
+        ..Default::default()
+    };
+
+    let s = String::from_utf8(serialize(&fp).to_vec()).unwrap();
+    assert_eq!(s, expected_json);
+    let d: FloatingPoint = deserialize(s).unwrap();
+
+    assert_relative_eq!(d.f64, fp.f64);
+
+    Ok(())
+}
+
+static EXPECTED_JSON_FOR_TEMPORARILY_IGNORED_F64_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"\{"f32":0\.0,"f64":([+-]?[0-9]*[.]?[0-9]+([eE][0-9]+)?)}"#).unwrap()
+});
+
+#[rstest]
+#[case::infinity(f64::INFINITY)]
+#[case::negative_infinity(f64::NEG_INFINITY)]
+fn test_f64_round_trip_ignore_intermediate_representation_temporarily(
+    #[case] value: f64,
+) -> Result<()> {
+    let fp = FloatingPoint {
+        f64: value,
+        ..Default::default()
+    };
+
+    let s = String::from_utf8(serialize(&fp).to_vec()).unwrap();
+    assert!(
+        EXPECTED_JSON_FOR_TEMPORARILY_IGNORED_F64_REGEX.is_match(s.as_str()),
+        "serialized: {}",
+        s
+    );
+    let d: FloatingPoint = deserialize(s).unwrap();
+
+    assert_relative_eq!(d.f64, fp.f64);
+
+    Ok(())
+}
+
+#[rstest]
+#[case::nan(f64::NAN)]
+#[case::negative_nan(-f64::NAN)]
+fn test_f64_round_trip_nan(#[case] value: f64) -> Result<()> {
+    let fp = FloatingPoint {
+        f64: value,
+        ..Default::default()
+    };
+
+    let s = String::from_utf8(serialize(&fp).to_vec()).unwrap();
+    let d: FloatingPoint = deserialize(s).unwrap();
+
+    assert!(d.f64.is_nan(), "value: {}", d.f64);
+
+    Ok(())
+}
+
+#[rstest]
+#[case::nan(r#"{ "f64": "NaN" }"#, f64::NAN)]
+#[case::negative_nan(r#"{ "f64": "-NaN" }"#, -f64::NAN)]
+#[case::infinity(r#"{ "f64": "Infinity" }"#, f64::INFINITY)]
+#[case::negative_infinity(r#"{ "f64": "-Infinity" }"#, f64::NEG_INFINITY)]
+#[case::ryu_nan(r#"{ "f64": "2.696539702293474e308" }"#, f64::NAN)]
+#[case::ryu_negative_nan(r#"{ "f64": "-2.696539702293474e308" }"#, -f64::NAN)]
+#[case::ryu_infinity(r#"{ "f64": "1.797693134862316e308" }"#, f64::INFINITY)]
+#[case::ryu_negative_infinity(r#"{ "f64": "-1.797693134862316e308" }"#, f64::NEG_INFINITY)]
+fn test_f64_deserialize(#[case] json: &str, #[case] expected_value: f64) -> Result<()> {
+    let d: FloatingPoint = deserialize(json).unwrap();
+
+    if expected_value.is_nan() {
+        assert!(d.f64.is_nan(), "value: {}", d.f64);
+    } else {
+        assert_relative_eq!(d.f64, expected_value);
+    }
+
+    Ok(())
+}
+
+#[rstest]
+#[case::unqoted_nan_f32(r#"{"f32":NaN}"#)]
+#[case::unqoted_nan_f64(r#"{"f64":NaN}"#)]
+#[case::unqoted_negative_nan_f32(r#"{"f32":-NaN}"#)]
+#[case::unqoted_negative_nan_f64(r#"{"f64":-NaN}"#)]
+#[case::unqoted_infinity_f32(r#"{"f32":Infinity}"#)]
+#[case::unqoted_infinity_f64(r#"{"f64":Infinity}"#)]
+#[case::unqoted_negative_infinity_f32(r#"{"f32":-Infinity}"#)]
+#[case::unqoted_negative_infinity_f64(r#"{"f64":-Infinity}"#)]
+fn test_invalid_floating_point(#[case] json: &str) {
+    let res: Result<FloatingPoint> = deserialize(json);
     assert!(res.is_err(), "Expected error, got {:?}", res);
 }
 

@@ -1,0 +1,6 @@
+Exit_status.Uncaught_exception exit_code=221 [Failure("Internal error: converting to hack notebook produced ipynb that can no longer be converted back to syntactically valid hack.\nExcerpt:\\n<?hh\n// the_header\n//@bento-notebook:{\"notebook_number\":\"N12345\",\"kernelspec\":{\"name\":\"bento_kernel_hack\",\"display_name\":\"hack\",\"language\":\"hack\",\"metadata\":{\"kernel_name\":\"bento_kernel_hack\",\"nightly\\nErrors: { Full_fidelity_syntax_error.child = None; start_offset = 732;\n  end_offset = 733; error_type = Full_fidelity_syntax_error.ParseError;\n  message = \"A right brace `}` is expected here.\"; quickfixes = [] }\"")]
+src/notebook_convert/notebook_convert.ml @ 81
+src/client/clientCheck.ml @ 452
+Re-raised at Lwt_utils.run_main.(fun) in file "fbcode/hphp/hack/src/utils/lwt_utils.ml", lines 23-31, characters 7-36
+src/utils/core/exception.ml @ 36
+Called from ClientCheck.main in file "fbcode/hphp/hack/src/client/clientCheck.ml", lines 1021-1022, characters 6-71

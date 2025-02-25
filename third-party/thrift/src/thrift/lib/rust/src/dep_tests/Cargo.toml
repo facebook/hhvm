@@ -14,7 +14,7 @@ path = "lib.rs"
 
 [dev-dependencies]
 anyhow = "1.0.95"
-approx = "0.3.2"
+approx = "0.5.1"
 fbthrift = { version = "0.0.1+unstable", path = "../.." }
 fbthrift_test_if = { version = "0.0.1+unstable", path = "cargo_thrift" }
 fbthrift_test_if_clients = { version = "0.0.1+unstable", path = "cargo_thrift/clients" }

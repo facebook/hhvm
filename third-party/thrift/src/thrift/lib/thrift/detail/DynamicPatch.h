@@ -61,8 +61,12 @@ PatchType createPatchFromObject(Badge badge, Object obj) {
                     patch, patch.fromObject(badge, std::move(obj)))) {
     patch.fromObject(badge, std::move(obj));
   } else {
-    // TODO: schema validation
-    patch = fromObjectStruct<type::infer_tag<PatchType>>(std::move(obj));
+    if (!ProtocolValueToThriftValue<type::infer_tag<PatchType>>{}(obj, patch)) {
+      throw std::runtime_error(fmt::format(
+          "Object does not match patch ({}) schema. Object = {}",
+          folly::pretty_name<PatchType>(),
+          debugStringViaEncode(obj)));
+    }
   }
   return patch;
 }

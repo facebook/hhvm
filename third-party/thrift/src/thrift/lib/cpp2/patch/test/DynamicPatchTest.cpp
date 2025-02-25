@@ -1072,4 +1072,39 @@ TEST(DemoDiffVisitor, TerseWriteFieldMismatch2) {
   EXPECT_EQ(srcVal, dstVal);
 }
 
+template <class P1, class P2>
+void testUnmergeablePatches(P1 p1, P2 p2) {
+  {
+    DynamicPatch src(p1), dst(p2);
+    EXPECT_THROW(src.merge(dst), std::runtime_error);
+  }
+  {
+    DynamicPatch src(p2), dst(p1);
+    EXPECT_THROW(src.merge(dst), std::runtime_error);
+  }
+}
+
+TEST(DynamicPatch, MergingIncompatiblePatch) {
+  {
+    op::I32Patch p1;
+    p1 = 10;
+    op::I64Patch p2;
+    p2 += 20;
+    testUnmergeablePatches(p1, p2);
+  }
+  {
+    test::FooPatch patch;
+    patch.patchIfSet<ident::bar>() = "123";
+
+    op::AnyPatch p1;
+    p1.patchIfTypeIs(patch);
+
+    DynamicUnknownPatch p2;
+    p2.fromObject(badge, patch.toObject());
+
+    // p1 is AnyPatch, p2 is StructPatch. They are not mergeable.
+    testUnmergeablePatches(p1, p2);
+  }
+}
+
 } // namespace apache::thrift::protocol

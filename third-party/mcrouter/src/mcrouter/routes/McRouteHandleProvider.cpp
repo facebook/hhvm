@@ -329,8 +329,11 @@ typename McRouteHandleProvider<
 McRouteHandleProvider<MemcacheRouterInfo>::buildRouteMapForWrapper() {
   RouteHandleFactoryMapForWrapper map{
       {"AxonLogRoute",
-       [](RouteHandlePtr rh, ProxyBase& proxy, const folly::dynamic& json) {
-         return makeAxonLogRoute(std::move(rh), proxy, json);
+       [](RouteHandlePtr rh,
+          ProxyBase& proxy,
+          const folly::dynamic& json,
+          RouteHandleFactory<RouteHandleIf>& factory) {
+         return makeAxonLogRoute(std::move(rh), proxy, json, factory);
        }}};
   return map;
 }

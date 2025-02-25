@@ -113,7 +113,8 @@ struct CarbonThriftTestRouterInfo {
       std::function<RouteHandlePtr(
           RouteHandlePtr,
           facebook::memcache::mcrouter::ProxyBase&,
-          const folly::dynamic&)>,
+          const folly::dynamic&,
+          facebook::memcache::RouteHandleFactory<RouteHandleIf>&)>,
       folly::Hash>;
 
   static RouteHandleFactoryMap buildRouteMap();

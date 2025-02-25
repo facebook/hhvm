@@ -40,7 +40,8 @@ FOLLY_ATTR_WEAK MemcacheRouterInfo::RouteHandlePtr makeSRRoute(
 FOLLY_ATTR_WEAK MemcacheRouterInfo::RouteHandlePtr makeAxonLogRoute(
     MemcacheRouterInfo::RouteHandlePtr rh,
     ProxyBase& proxy,
-    const folly::dynamic& json);
+    const folly::dynamic& json,
+    RouteHandleFactory<MemcacheRouterInfo::RouteHandleIf>& factory);
 
 template <class RouteHandleIf>
 class ExtraRouteHandleProviderIf;
@@ -107,8 +108,11 @@ class McRouteHandleProvider
       folly::StringPiece,
       RouteHandleFactoryFuncWithProxy,
       folly::Hash>;
-  using RouteHandleFactoryFuncForWrapper = std::function<
-      RouteHandlePtr(RouteHandlePtr, ProxyBase&, const folly::dynamic&)>;
+  using RouteHandleFactoryFuncForWrapper = std::function<RouteHandlePtr(
+      RouteHandlePtr,
+      ProxyBase&,
+      const folly::dynamic&,
+      RouteHandleFactory<RouteHandleIf>&)>;
   using RouteHandleFactoryMapForWrapper = std::unordered_map<
       folly::StringPiece,
       RouteHandleFactoryFuncForWrapper,
@@ -212,7 +216,8 @@ class McRouteHandleProvider
   RouteHandlePtr wrapAxonLogRoute(
       RouteHandlePtr route,
       ProxyBase& proxy,
-      const folly::dynamic& json);
+      const folly::dynamic& json,
+      RouteHandleFactory<RouteHandleIf>& factory);
 
   template <class Transport>
   std::pair<RouteHandlePtr, std::shared_ptr<const AccessPoint>>

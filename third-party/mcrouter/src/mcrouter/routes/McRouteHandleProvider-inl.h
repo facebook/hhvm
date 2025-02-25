@@ -133,7 +133,8 @@ std::shared_ptr<typename RouterInfo::RouteHandleIf>
 McRouteHandleProvider<RouterInfo>::wrapAxonLogRoute(
     RouteHandlePtr route,
     ProxyBase& proxy,
-    const folly::dynamic& json) {
+    const folly::dynamic& json,
+    RouteHandleFactory<RouteHandleIf>& factory) {
   bool needAxonlog = false;
   if (auto* jNeedAxonlog = json.get_ptr("axonlog")) {
     needAxonlog = parseBool(*jNeedAxonlog, "axonlog");
@@ -143,7 +144,7 @@ McRouteHandleProvider<RouterInfo>::wrapAxonLogRoute(
     checkLogic(
         it != routeMapForWrapper_.end(),
         "AxonLogRoute is not implemented for this router");
-    return it->second(std::move(route), proxy, json);
+    return it->second(std::move(route), proxy, json, factory);
   }
   return route;
 }
@@ -557,7 +558,7 @@ McRouteHandleProvider<RouterInfo>::createSRRoute(
     route = createAsynclogRoute(std::move(route), asynclogName.toString());
   }
 
-  route = wrapAxonLogRoute(std::move(route), proxy_, json);
+  route = wrapAxonLogRoute(std::move(route), proxy_, json, factory);
 
   if (json.count("shadows")) {
     route = std::move(makeShadowRoutes(
@@ -731,7 +732,7 @@ McRouteHandleProvider<RouterInfo>::makePoolRoute(
     }
     if (json.isObject()) {
       // Wrap AxonLogRoute if configured
-      route = wrapAxonLogRoute(std::move(route), proxy_, json);
+      route = wrapAxonLogRoute(std::move(route), proxy_, json, factory);
       route = bucketize(std::move(route), json);
 
       if (auto jPoolId = json.get_ptr("pool_id")) {
@@ -844,9 +845,12 @@ McRouteHandleProvider<RouterInfo>::buildCheckedRouteMapForWrapper() {
     checkedRouteMapForWrapper.emplace(
         it.first,
         [factoryFunc = std::move(it.second), rhName = it.first](
-            RouteHandlePtr rh, ProxyBase& proxy, const folly::dynamic& json) {
+            RouteHandlePtr rh,
+            ProxyBase& proxy,
+            const folly::dynamic& json,
+            RouteHandleFactory<RouteHandleIf>& factory) {
           try {
-            auto ret = factoryFunc(std::move(rh), proxy, json);
+            auto ret = factoryFunc(std::move(rh), proxy, json, factory);
             checkLogic(ret != nullptr, "make{} returned nullptr", rhName);
             return ret;
           } catch (const std::exception& e) {

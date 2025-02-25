@@ -603,7 +603,7 @@ class ast_builder : public parser_actions {
     auto return_name = ret.name.str;
     t_type_ref interaction;
     t_type_ref return_type = ret.type;
-    if (size_t size = return_name.size()) {
+    if (return_name.size()) {
       // Handle an interaction or return type name.
       if (auto interaction_ptr = program_.find<t_interaction>(return_name)) {
         interaction = t_type_ref::from_ptr(interaction_ptr, ret.name.range());

@@ -147,7 +147,7 @@ func (c *MyServiceClient) GoDoNothing(ctx context.Context) (error) {
 type MyServiceProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            MyService
+    handler              MyService
 }
 
 func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
@@ -629,7 +629,7 @@ func (c *MyServicePrioParentClient) Pong(ctx context.Context) (error) {
 type MyServicePrioParentProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            MyServicePrioParent
+    handler              MyServicePrioParent
 }
 
 func NewMyServicePrioParentProcessor(handler MyServicePrioParent) *MyServicePrioParentProcessor {
@@ -944,7 +944,7 @@ func (c *BadServiceClient) Bar(ctx context.Context) (int32, error) {
 type BadServiceProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            BadService
+    handler              BadService
 }
 
 func NewBadServiceProcessor(handler BadService) *BadServiceProcessor {
@@ -1111,7 +1111,7 @@ func (c *FooBarBazServiceClient) Baz(ctx context.Context) (error) {
 type FooBarBazServiceProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            FooBarBazService
+    handler              FooBarBazService
 }
 
 func NewFooBarBazServiceProcessor(handler FooBarBazService) *FooBarBazServiceProcessor {

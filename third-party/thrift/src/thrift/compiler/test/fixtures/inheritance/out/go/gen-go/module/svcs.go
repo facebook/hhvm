@@ -72,7 +72,7 @@ func (c *MyRootClient) DoRoot(ctx context.Context) (error) {
 type MyRootProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            MyRoot
+    handler              MyRoot
 }
 
 func NewMyRootProcessor(handler MyRoot) *MyRootProcessor {

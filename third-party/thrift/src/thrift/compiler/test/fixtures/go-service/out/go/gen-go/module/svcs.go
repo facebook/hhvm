@@ -341,7 +341,7 @@ func (c *GetEntityClient) GetErr1Collision(ctx context.Context, err int64, err1 
 type GetEntityProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            GetEntity
+    handler              GetEntity
 }
 
 func NewGetEntityProcessor(handler GetEntity) *GetEntityProcessor {

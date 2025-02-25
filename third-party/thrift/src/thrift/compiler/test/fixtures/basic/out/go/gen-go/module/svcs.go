@@ -72,7 +72,7 @@ func (c *FooServiceClient) SimpleRPC(ctx context.Context) (error) {
 type FooServiceProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            FooService
+    handler              FooService
 }
 
 func NewFooServiceProcessor(handler FooService) *FooServiceProcessor {
@@ -215,7 +215,7 @@ func (c *FB303ServiceClient) SimpleRPC(ctx context.Context, intParameter int32) 
 type FB303ServiceProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            FB303Service
+    handler              FB303Service
 }
 
 func NewFB303ServiceProcessor(handler FB303Service) *FB303ServiceProcessor {
@@ -470,7 +470,7 @@ func (c *MyServiceClient) RpcSkippedCodegen(ctx context.Context) (error) {
 type MyServiceProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            MyService
+    handler              MyService
 }
 
 func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
@@ -1103,7 +1103,7 @@ func (c *DbMixedStackArgumentsClient) GetDataByKey1(ctx context.Context, key str
 type DbMixedStackArgumentsProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            DbMixedStackArguments
+    handler              DbMixedStackArguments
 }
 
 func NewDbMixedStackArgumentsProcessor(handler DbMixedStackArguments) *DbMixedStackArgumentsProcessor {

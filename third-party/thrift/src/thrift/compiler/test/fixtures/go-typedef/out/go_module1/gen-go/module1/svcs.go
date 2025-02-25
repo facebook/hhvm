@@ -103,7 +103,7 @@ func (c *FinderClient) PreviousPlate(ctx context.Context, plate Plate) (Plate, e
 type FinderProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            Finder
+    handler              Finder
 }
 
 func NewFinderProcessor(handler Finder) *FinderProcessor {

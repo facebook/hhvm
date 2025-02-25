@@ -120,7 +120,7 @@ func (c *RaiserClient) Get500(ctx context.Context) (string, error) {
 type RaiserProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            Raiser
+    handler              Raiser
 }
 
 func NewRaiserProcessor(handler Raiser) *RaiserProcessor {

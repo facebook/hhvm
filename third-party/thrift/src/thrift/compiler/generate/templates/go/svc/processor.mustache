@@ -30,7 +30,7 @@ type {{service:go_name}}Processor struct {
     {{^service:extends?}}
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            {{service:go_name}}
+    handler              {{service:go_name}}
     {{/service:extends?}}
 }
 

@@ -89,7 +89,7 @@ func (c *CClient) Thing(ctx context.Context, a int32, b string, c []int32) (stri
 type CProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            C
+    handler              C
 }
 
 func NewCProcessor(handler C) *CProcessor {

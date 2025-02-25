@@ -125,7 +125,7 @@ func (c *NestedContainersClient) Turtles(ctx context.Context, foo [][]map[int32]
 type NestedContainersProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            NestedContainers
+    handler              NestedContainers
 }
 
 func NewNestedContainersProcessor(handler NestedContainers) *NestedContainersProcessor {

@@ -75,7 +75,7 @@ func (c *ServiceClient) Func(ctx context.Context, arg1 StringWithAdapter_7208, a
 type ServiceProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            Service
+    handler              Service
 }
 
 func NewServiceProcessor(handler Service) *ServiceProcessor {
@@ -232,7 +232,7 @@ func (c *AdapterServiceClient) AdaptedTypes(ctx context.Context, arg *HeapAlloca
 type AdapterServiceProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            AdapterService
+    handler              AdapterService
 }
 
 func NewAdapterServiceProcessor(handler AdapterService) *AdapterServiceProcessor {

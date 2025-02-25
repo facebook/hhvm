@@ -92,7 +92,7 @@ func (c *MyServiceClient) HasArgDocs(ctx context.Context, s *module.MyStruct, i 
 type MyServiceProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            MyService
+    handler              MyService
 }
 
 func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {

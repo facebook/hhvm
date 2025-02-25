@@ -74,7 +74,7 @@ func (c *MyServiceClient) Foo(ctx context.Context) (error) {
 type MyServiceProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            MyService
+    handler              MyService
 }
 
 func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
@@ -216,7 +216,7 @@ func (c *FactoriesClient) Foo(ctx context.Context) (error) {
 type FactoriesProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            Factories
+    handler              Factories
 }
 
 func NewFactoriesProcessor(handler Factories) *FactoriesProcessor {
@@ -358,7 +358,7 @@ func (c *PerformClient) Foo(ctx context.Context) (error) {
 type PerformProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            Perform
+    handler              Perform
 }
 
 func NewPerformProcessor(handler Perform) *PerformProcessor {
@@ -500,7 +500,7 @@ func (c *InteractWithSharedClient) DoSomeSimilarThings(ctx context.Context) (*sh
 type InteractWithSharedProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            InteractWithShared
+    handler              InteractWithShared
 }
 
 func NewInteractWithSharedProcessor(handler InteractWithShared) *InteractWithSharedProcessor {
@@ -631,7 +631,7 @@ func (c *BoxServiceClient) Close() error {
 type BoxServiceProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            BoxService
+    handler              BoxService
 }
 
 func NewBoxServiceProcessor(handler BoxService) *BoxServiceProcessor {

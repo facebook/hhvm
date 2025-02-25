@@ -73,7 +73,7 @@ func (c *HsTestServiceClient) Init(ctx context.Context, int1 int64) (int64, erro
 type HsTestServiceProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            HsTestService
+    handler              HsTestService
 }
 
 func NewHsTestServiceProcessor(handler HsTestService) *HsTestServiceProcessor {

@@ -88,7 +88,7 @@ func (c *SomeServiceClient) BinaryKeyedMap(ctx context.Context, r []int64) (map[
 type SomeServiceProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            SomeService
+    handler              SomeService
 }
 
 func NewSomeServiceProcessor(handler SomeService) *SomeServiceProcessor {

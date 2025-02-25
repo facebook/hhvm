@@ -2021,6 +2021,44 @@ struct SendNotificationRequest {
   2: string description;
 }
 
+enum RedirectionType {
+  BIND = 0,
+  SYMLINK = 1,
+  UNKNOWN = 2,
+}
+
+enum RedirectionState {
+  // Matches the expectations of our configuration as far as we can tell
+  MATCHES_CONFIGURATION = 0,
+  // Something is mounted that we don't have a configuration for
+  UNKNOWN_MOUNT = 1,
+  // We expected the redirect to be mounted, but it isn't
+  NOT_MOUNTED = 2,
+  // We expected the redirect be a symlink, but it is not present
+  SYMLINK_MISSING = 3,
+  // The symlink is present, but it points to the wrong place
+  SYMLINK_INCORRECT = 4,
+}
+
+struct Redirection {
+  1: PathString repoPath;
+  2: RedirectionType redirType;
+  3: PathString source;
+  4: RedirectionState state;
+  /**
+    * TODO: when is this not set (state == UNKNOWN)
+    */
+  5: optional PathString target;
+}
+
+struct ListRedirectionsRequest {
+  1: MountId mount;
+}
+
+struct ListRedirectionsResponse {
+  1: list<Redirection> redirections;
+}
+
 service EdenService extends fb303_core.BaseService {
   list<MountInfo> listMounts() throws (1: EdenError ex);
   void mount(1: MountArgument info) throws (1: EdenError ex);
@@ -2881,12 +2919,11 @@ service EdenService extends fb303_core.BaseService {
   *
   * Note that only Windows has a Notifier implementation. This is a no-op on other platforms.
   */
-  /**
-  * Ask the server to send a notification to the user via the Notifier.
-  *
-  * Note that only Windows has a Notifier implementation. This is a no-op on other platforms.
-  */
   SendNotificationResponse sendNotification(
     1: SendNotificationRequest request,
+  ) throws (1: EdenError ex);
+
+  ListRedirectionsResponse listRedirections(
+    1: ListRedirectionsRequest request,
   ) throws (1: EdenError ex);
 }

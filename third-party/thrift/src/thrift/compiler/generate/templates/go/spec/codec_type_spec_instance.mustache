@@ -51,7 +51,7 @@
 {{#type:struct}}
 &thrift.CodecStructSpec{
     ScopedName: "{{struct:scoped_name}}",
-    IsUnion:    {{#struct:union?}}true{{/struct:union?}}{{^struct:union?}}false{{/struct:union?}},
+    IsUnion:    {{struct:union?}},
     NewFunc:    func() thrift.Struct { return {{struct:go_qualified_new_func}}() },
 },
 {{/type:struct}}

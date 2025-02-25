@@ -22,5 +22,5 @@
 {{program:metadata_qualifier}}NewThriftField().
     SetId({{field:key}}).
     SetName("{{field:name}}").
-    SetIsOptional({{#field:optional?}}true{{/field:optional?}}{{^field:optional?}}false{{/field:optional?}}).
+    SetIsOptional({{field:optional?}}).
     SetType({{#field:type}}{{type:metadata_thrift_type_getter}}{{/field:type}})

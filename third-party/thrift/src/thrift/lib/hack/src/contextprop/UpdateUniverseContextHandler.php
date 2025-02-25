@@ -70,7 +70,7 @@ final class UpdateUniverseContextHandler implements IContextHandler {
       FBLogger('privacylib', 'thrift_propagation_exception')
         ->handle(
           $e,
-          Causes::the('Universe')->to('not update')
+          causes_the('Universe')->to('not update')
             ->document('fail to update thrift context prop universe'),
         );
     }
@@ -129,7 +129,7 @@ final class UpdateUniverseContextHandler implements IContextHandler {
       FBLogger('privacylib', 'thrift_propagation_exception')
         ->handle(
           $e,
-          Causes::the('Universe')->to('not update')
+          causes_the('Universe')->to('not update')
             ->document('fail to update thrift context prop universe'),
         );
       return null;

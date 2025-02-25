@@ -37,7 +37,7 @@ final class ThriftContextPropHandlers {
       FBLogger('am_request_priority', 'failed_to_register_handler')
         ->handle(
           $e,
-          Causes::the('AM Request priority handler')->to('be not set'),
+          causes_the('AM Request priority handler')->to('be not set'),
         );
 
     }

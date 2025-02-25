@@ -854,7 +854,7 @@ detail::OptionalThriftValue getIOBuf(
              : detail::OptionalThriftValue{};
 }
 
-void setIOBuf(void* objectPtr, const folly::IOBuf& value) {
+void* setIOBuf(void* objectPtr, const folly::IOBuf& value) {
   ensureImportOrThrow();
   PyObject* buf = create_IOBuf(value.clone());
   UniquePyObjectPtr iobufObj{buf};
@@ -862,6 +862,7 @@ void setIOBuf(void* objectPtr, const folly::IOBuf& value) {
     THRIFT_PY3_CHECK_ERROR();
   }
   setPyObject(objectPtr, std::move(iobufObj));
+  return nullptr;
 }
 
 // This helper method for `MutableMapTypeInfo::write()` sorts the map keys and
@@ -1077,8 +1078,9 @@ class PrimitiveTypeInfoHelper final {
    *        converted to the corresponding Python type and pointed to by the
    *        given `PyObject*`.
    */
-  static void set(void* objectPtr, TCppType value) {
+  static void* set(void* objectPtr, TCppType value) {
     setPyObject(objectPtr, primitiveCppToPython(value));
+    return nullptr;
   }
 };
 

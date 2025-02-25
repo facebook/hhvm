@@ -525,7 +525,7 @@ MCROUTER_OPTION_STRING(
 MCROUTER_OPTION(
     facebook::memcache::mcrouter::RoutingPrefix,
     default_route,
-    "/././",
+    facebook::memcache::mcrouter::RoutingPrefix("/././"),
     "route-prefix",
     'R',
     "default routing prefix (ex. /oregon/prn1c16/)",

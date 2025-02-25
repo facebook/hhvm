@@ -22,15 +22,16 @@ namespace mcrouter {
  */
 class RoutingPrefix {
  public:
+  RoutingPrefix() = default;
   /**
    * Constructor from string
    *
    * @throws  std::invalid_argument if prefix is not of form
    *          "[/]region/cluster[/]"
    */
-  /* implicit */ RoutingPrefix(std::string prefix);
-  /* implicit */ RoutingPrefix(const char* prefix);
-  /* implicit */ RoutingPrefix(folly::StringPiece prefix);
+  explicit RoutingPrefix(std::string prefix);
+  explicit RoutingPrefix(const char* prefix);
+  explicit RoutingPrefix(folly::StringPiece prefix);
 
   // Move and copy constructors
   RoutingPrefix(const RoutingPrefix& other) noexcept;
@@ -65,6 +66,11 @@ class RoutingPrefix {
   void initFromPrefix();
   void initFromPrefixUnsafe();
 };
+
+template <class String>
+void toAppend(const RoutingPrefix& prefix, String* out) {
+  out->append(prefix.str());
+}
 } // namespace mcrouter
 } // namespace memcache
 } // namespace facebook

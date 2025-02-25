@@ -138,10 +138,10 @@ class {{> structs/unadapted_name}}{{!
 {{#program:generate_mutable_types}}
 
     def _to_python(self):
-        import thrift.python.converter
+        from thrift.python import converter
         import importlib
         immutable_types = importlib.import_module("{{program:module_path}}.thrift_types")
-        return thrift.python.converter.to_python_struct(immutable_types.{{> structs/unadapted_name}}, self)
+        return converter.to_python_struct(immutable_types.{{> structs/unadapted_name}}, self)
 
     def _to_mutable_python(self):
         return self
@@ -151,18 +151,18 @@ class {{> structs/unadapted_name}}{{!
         return self
 
     def _to_mutable_python(self):
-        import thrift.python.mutable_converter
+        from thrift.python import mutable_converter
         import importlib
         mutable_types = importlib.import_module("{{program:module_path}}.thrift_mutable_types")
-        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.{{> structs/unadapted_name}}, self)
+        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.{{> structs/unadapted_name}}, self)
 {{/program:generate_immutable_types}}
 
     def _to_py3(self):
     {{^program:py3_auto_migrate?}}
         import importlib
         py3_types = importlib.import_module("{{program:module_path}}.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.{{> structs/unadapted_name}}, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.{{> structs/unadapted_name}}, self)
     {{/program:py3_auto_migrate?}}
     {{#program:py3_auto_migrate?}}
         return self
@@ -170,13 +170,13 @@ class {{> structs/unadapted_name}}{{!
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("{{program:py_deprecated_module_path}}.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.{{> structs/unadapted_name}}, self)
+            return converter.to_py_struct(py_deprecated_types.{{> structs/unadapted_name}}, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("{{program:py_asyncio_module_path}}.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.{{> structs/unadapted_name}}, self)
+            return converter.to_py_struct(py_asyncio_types.{{> structs/unadapted_name}}, self)
     {{/struct:legacy_api?}}
 {{#program:enable_abstract_types?}}{{!
 TODO(T208096866)

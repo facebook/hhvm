@@ -57,10 +57,10 @@ class Fiery(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorM
 
 
     def _to_python(self):
-        import thrift.python.converter
+        from thrift.python import converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return thrift.python.converter.to_python_struct(immutable_types.Fiery, self)
+        return converter.to_python_struct(immutable_types.Fiery, self)
 
     def _to_mutable_python(self):
         return self
@@ -68,18 +68,18 @@ class Fiery(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorM
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.Fiery, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.Fiery, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.Fiery, self)
+            return converter.to_py_struct(py_deprecated_types.Fiery, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.Fiery, self)
+            return converter.to_py_struct(py_asyncio_types.Fiery, self)
 _fbthrift_Fiery = Fiery
 
 class Serious(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
@@ -121,10 +121,10 @@ class Serious(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErro
 
 
     def _to_python(self):
-        import thrift.python.converter
+        from thrift.python import converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return thrift.python.converter.to_python_struct(immutable_types.Serious, self)
+        return converter.to_python_struct(immutable_types.Serious, self)
 
     def _to_mutable_python(self):
         return self
@@ -132,18 +132,18 @@ class Serious(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErro
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.Serious, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.Serious, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.Serious, self)
+            return converter.to_py_struct(py_deprecated_types.Serious, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.Serious, self)
+            return converter.to_py_struct(py_asyncio_types.Serious, self)
 _fbthrift_Serious = Serious
 
 class ComplexFieldNames(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
@@ -196,10 +196,10 @@ class ComplexFieldNames(metaclass=_fbthrift_python_mutable_exceptions.MutableGen
 
 
     def _to_python(self):
-        import thrift.python.converter
+        from thrift.python import converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return thrift.python.converter.to_python_struct(immutable_types.ComplexFieldNames, self)
+        return converter.to_python_struct(immutable_types.ComplexFieldNames, self)
 
     def _to_mutable_python(self):
         return self
@@ -207,18 +207,18 @@ class ComplexFieldNames(metaclass=_fbthrift_python_mutable_exceptions.MutableGen
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.ComplexFieldNames, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.ComplexFieldNames, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.ComplexFieldNames, self)
+            return converter.to_py_struct(py_deprecated_types.ComplexFieldNames, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.ComplexFieldNames, self)
+            return converter.to_py_struct(py_asyncio_types.ComplexFieldNames, self)
 _fbthrift_ComplexFieldNames = ComplexFieldNames
 
 class CustomFieldNames(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
@@ -271,10 +271,10 @@ class CustomFieldNames(metaclass=_fbthrift_python_mutable_exceptions.MutableGene
 
 
     def _to_python(self):
-        import thrift.python.converter
+        from thrift.python import converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return thrift.python.converter.to_python_struct(immutable_types.CustomFieldNames, self)
+        return converter.to_python_struct(immutable_types.CustomFieldNames, self)
 
     def _to_mutable_python(self):
         return self
@@ -282,18 +282,18 @@ class CustomFieldNames(metaclass=_fbthrift_python_mutable_exceptions.MutableGene
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.CustomFieldNames, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.CustomFieldNames, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.CustomFieldNames, self)
+            return converter.to_py_struct(py_deprecated_types.CustomFieldNames, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.CustomFieldNames, self)
+            return converter.to_py_struct(py_asyncio_types.CustomFieldNames, self)
 _fbthrift_CustomFieldNames = CustomFieldNames
 
 class ExceptionWithPrimitiveField(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
@@ -346,10 +346,10 @@ class ExceptionWithPrimitiveField(metaclass=_fbthrift_python_mutable_exceptions.
 
 
     def _to_python(self):
-        import thrift.python.converter
+        from thrift.python import converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return thrift.python.converter.to_python_struct(immutable_types.ExceptionWithPrimitiveField, self)
+        return converter.to_python_struct(immutable_types.ExceptionWithPrimitiveField, self)
 
     def _to_mutable_python(self):
         return self
@@ -357,18 +357,18 @@ class ExceptionWithPrimitiveField(metaclass=_fbthrift_python_mutable_exceptions.
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.ExceptionWithPrimitiveField, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.ExceptionWithPrimitiveField, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.ExceptionWithPrimitiveField, self)
+            return converter.to_py_struct(py_deprecated_types.ExceptionWithPrimitiveField, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.ExceptionWithPrimitiveField, self)
+            return converter.to_py_struct(py_asyncio_types.ExceptionWithPrimitiveField, self)
 _fbthrift_ExceptionWithPrimitiveField = ExceptionWithPrimitiveField
 
 class ExceptionWithStructuredAnnotation(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
@@ -421,10 +421,10 @@ class ExceptionWithStructuredAnnotation(metaclass=_fbthrift_python_mutable_excep
 
 
     def _to_python(self):
-        import thrift.python.converter
+        from thrift.python import converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return thrift.python.converter.to_python_struct(immutable_types.ExceptionWithStructuredAnnotation, self)
+        return converter.to_python_struct(immutable_types.ExceptionWithStructuredAnnotation, self)
 
     def _to_mutable_python(self):
         return self
@@ -432,18 +432,18 @@ class ExceptionWithStructuredAnnotation(metaclass=_fbthrift_python_mutable_excep
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.ExceptionWithStructuredAnnotation, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.ExceptionWithStructuredAnnotation, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.ExceptionWithStructuredAnnotation, self)
+            return converter.to_py_struct(py_deprecated_types.ExceptionWithStructuredAnnotation, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.ExceptionWithStructuredAnnotation, self)
+            return converter.to_py_struct(py_asyncio_types.ExceptionWithStructuredAnnotation, self)
 _fbthrift_ExceptionWithStructuredAnnotation = ExceptionWithStructuredAnnotation
 
 class Banal(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
@@ -467,10 +467,10 @@ class Banal(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorM
 
 
     def _to_python(self):
-        import thrift.python.converter
+        from thrift.python import converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return thrift.python.converter.to_python_struct(immutable_types.Banal, self)
+        return converter.to_python_struct(immutable_types.Banal, self)
 
     def _to_mutable_python(self):
         return self
@@ -478,18 +478,18 @@ class Banal(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorM
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.Banal, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.Banal, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.Banal, self)
+            return converter.to_py_struct(py_deprecated_types.Banal, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.Banal, self)
+            return converter.to_py_struct(py_asyncio_types.Banal, self)
 _fbthrift_Banal = Banal
 
 

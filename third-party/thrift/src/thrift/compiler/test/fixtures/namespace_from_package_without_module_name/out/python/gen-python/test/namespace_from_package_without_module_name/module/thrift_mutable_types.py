@@ -47,10 +47,10 @@ class Foo(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 
 
     def _to_python(self):
-        import thrift.python.converter
+        from thrift.python import converter
         import importlib
         immutable_types = importlib.import_module("test.namespace_from_package_without_module_name.module.thrift_types")
-        return thrift.python.converter.to_python_struct(immutable_types.Foo, self)
+        return converter.to_python_struct(immutable_types.Foo, self)
 
     def _to_mutable_python(self):
         return self
@@ -58,18 +58,18 @@ class Foo(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("test.namespace_from_package_without_module_name.module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.Foo, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.Foo, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("namespace_from_package_without_module_name.module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.Foo, self)
+            return converter.to_py_struct(py_deprecated_types.Foo, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("test.namespace_from_package_without_module_name.module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.Foo, self)
+            return converter.to_py_struct(py_asyncio_types.Foo, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Foo, Foo)
 _fbthrift_Foo = Foo

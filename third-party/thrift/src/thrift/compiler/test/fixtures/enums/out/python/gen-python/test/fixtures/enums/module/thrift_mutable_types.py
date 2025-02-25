@@ -104,10 +104,10 @@ class SomeStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 
 
     def _to_python(self):
-        import thrift.python.converter
+        from thrift.python import converter
         import importlib
         immutable_types = importlib.import_module("test.fixtures.enums.module.thrift_types")
-        return thrift.python.converter.to_python_struct(immutable_types.SomeStruct, self)
+        return converter.to_python_struct(immutable_types.SomeStruct, self)
 
     def _to_mutable_python(self):
         return self
@@ -115,18 +115,18 @@ class SomeStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("test.fixtures.enums.module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.SomeStruct, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.SomeStruct, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.SomeStruct, self)
+            return converter.to_py_struct(py_deprecated_types.SomeStruct, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.SomeStruct, self)
+            return converter.to_py_struct(py_asyncio_types.SomeStruct, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.SomeStruct, SomeStruct)
 _fbthrift_SomeStruct = SomeStruct
@@ -193,10 +193,10 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 
 
     def _to_python(self):
-        import thrift.python.converter
+        from thrift.python import converter
         import importlib
         immutable_types = importlib.import_module("test.fixtures.enums.module.thrift_types")
-        return thrift.python.converter.to_python_struct(immutable_types.MyStruct, self)
+        return converter.to_python_struct(immutable_types.MyStruct, self)
 
     def _to_mutable_python(self):
         return self
@@ -204,18 +204,18 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("test.fixtures.enums.module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.MyStruct, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.MyStruct, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.MyStruct, self)
+            return converter.to_py_struct(py_deprecated_types.MyStruct, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.MyStruct, self)
+            return converter.to_py_struct(py_asyncio_types.MyStruct, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyStruct, MyStruct)
 _fbthrift_MyStruct = MyStruct

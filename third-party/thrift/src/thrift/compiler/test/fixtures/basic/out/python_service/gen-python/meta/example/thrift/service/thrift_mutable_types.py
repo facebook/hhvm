@@ -47,10 +47,10 @@ class EchoRequest(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 
 
     def _to_python(self):
-        import thrift.python.converter
+        from thrift.python import converter
         import importlib
         immutable_types = importlib.import_module("meta.example.thrift.service.thrift_types")
-        return thrift.python.converter.to_python_struct(immutable_types.EchoRequest, self)
+        return converter.to_python_struct(immutable_types.EchoRequest, self)
 
     def _to_mutable_python(self):
         return self
@@ -58,18 +58,18 @@ class EchoRequest(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("meta.example.thrift.service.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.EchoRequest, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.EchoRequest, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("service.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.EchoRequest, self)
+            return converter.to_py_struct(py_deprecated_types.EchoRequest, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("service.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.EchoRequest, self)
+            return converter.to_py_struct(py_asyncio_types.EchoRequest, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.EchoRequest, EchoRequest)
 _fbthrift_EchoRequest = EchoRequest
@@ -103,10 +103,10 @@ class EchoResponse(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 
 
     def _to_python(self):
-        import thrift.python.converter
+        from thrift.python import converter
         import importlib
         immutable_types = importlib.import_module("meta.example.thrift.service.thrift_types")
-        return thrift.python.converter.to_python_struct(immutable_types.EchoResponse, self)
+        return converter.to_python_struct(immutable_types.EchoResponse, self)
 
     def _to_mutable_python(self):
         return self
@@ -114,18 +114,18 @@ class EchoResponse(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("meta.example.thrift.service.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.EchoResponse, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.EchoResponse, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("service.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.EchoResponse, self)
+            return converter.to_py_struct(py_deprecated_types.EchoResponse, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("service.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.EchoResponse, self)
+            return converter.to_py_struct(py_asyncio_types.EchoResponse, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.EchoResponse, EchoResponse)
 _fbthrift_EchoResponse = EchoResponse
@@ -162,10 +162,10 @@ class WhisperException(metaclass=_fbthrift_python_mutable_exceptions.MutableGene
 
 
     def _to_python(self):
-        import thrift.python.converter
+        from thrift.python import converter
         import importlib
         immutable_types = importlib.import_module("meta.example.thrift.service.thrift_types")
-        return thrift.python.converter.to_python_struct(immutable_types.WhisperException, self)
+        return converter.to_python_struct(immutable_types.WhisperException, self)
 
     def _to_mutable_python(self):
         return self
@@ -173,18 +173,18 @@ class WhisperException(metaclass=_fbthrift_python_mutable_exceptions.MutableGene
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("meta.example.thrift.service.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.WhisperException, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.WhisperException, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("service.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.WhisperException, self)
+            return converter.to_py_struct(py_deprecated_types.WhisperException, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("service.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.WhisperException, self)
+            return converter.to_py_struct(py_asyncio_types.WhisperException, self)
 _fbthrift_WhisperException = WhisperException
 
 

@@ -51,26 +51,26 @@ class StructForInvariantTypes(metaclass=_fbthrift_python_types.StructMeta):
         return self
 
     def _to_mutable_python(self):
-        import thrift.python.mutable_converter
+        from thrift.python import mutable_converter
         import importlib
         mutable_types = importlib.import_module("invariant.thrift_mutable_types")
-        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.StructForInvariantTypes, self)
+        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.StructForInvariantTypes, self)
 
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("invariant.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.StructForInvariantTypes, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.StructForInvariantTypes, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("invariant.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.StructForInvariantTypes, self)
+            return converter.to_py_struct(py_deprecated_types.StructForInvariantTypes, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("invariant.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.StructForInvariantTypes, self)
+            return converter.to_py_struct(py_asyncio_types.StructForInvariantTypes, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.StructForInvariantTypes, StructForInvariantTypes)
 _fbthrift_StructForInvariantTypes = StructForInvariantTypes
@@ -121,26 +121,26 @@ class UnionForInvariantTypes(metaclass=_fbthrift_python_types.StructMeta):
         return self
 
     def _to_mutable_python(self):
-        import thrift.python.mutable_converter
+        from thrift.python import mutable_converter
         import importlib
         mutable_types = importlib.import_module("invariant.thrift_mutable_types")
-        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.UnionForInvariantTypes, self)
+        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.UnionForInvariantTypes, self)
 
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("invariant.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.UnionForInvariantTypes, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.UnionForInvariantTypes, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("invariant.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.UnionForInvariantTypes, self)
+            return converter.to_py_struct(py_deprecated_types.UnionForInvariantTypes, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("invariant.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.UnionForInvariantTypes, self)
+            return converter.to_py_struct(py_asyncio_types.UnionForInvariantTypes, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.UnionForInvariantTypes, UnionForInvariantTypes)
 _fbthrift_UnionForInvariantTypes = UnionForInvariantTypes
@@ -194,26 +194,26 @@ class InvariantTypes(metaclass=_fbthrift_python_types.UnionMeta):
         return self
 
     def _to_mutable_python(self):
-        import thrift.python.mutable_converter
+        from thrift.python import mutable_converter
         import importlib
         mutable_types = importlib.import_module("invariant.thrift_mutable_types")
-        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.InvariantTypes, self)
+        return mutable_converter.to_mutable_python_struct_or_union(mutable_types.InvariantTypes, self)
 
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("invariant.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.InvariantTypes, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.InvariantTypes, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("invariant.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.InvariantTypes, self)
+            return converter.to_py_struct(py_deprecated_types.InvariantTypes, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("invariant.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.InvariantTypes, self)
+            return converter.to_py_struct(py_asyncio_types.InvariantTypes, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.InvariantTypes, InvariantTypes)
 _fbthrift_InvariantTypes = InvariantTypes

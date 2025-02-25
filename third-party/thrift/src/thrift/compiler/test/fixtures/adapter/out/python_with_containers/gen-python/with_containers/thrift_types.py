@@ -63,26 +63,26 @@ class _fbthrift_unadapted_AnnotationWithContainers(metaclass=_fbthrift_python_ty
         return self
 
     def _to_mutable_python(self):
-        import thrift.python.mutable_converter
+        from thrift.python import mutable_converter
         import importlib
         mutable_types = importlib.import_module("with_containers.thrift_mutable_types")
-        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types._fbthrift_unadapted_AnnotationWithContainers, self)
+        return mutable_converter.to_mutable_python_struct_or_union(mutable_types._fbthrift_unadapted_AnnotationWithContainers, self)
 
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("with_containers.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types._fbthrift_unadapted_AnnotationWithContainers, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types._fbthrift_unadapted_AnnotationWithContainers, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("with_containers.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types._fbthrift_unadapted_AnnotationWithContainers, self)
+            return converter.to_py_struct(py_deprecated_types._fbthrift_unadapted_AnnotationWithContainers, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("with_containers.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types._fbthrift_unadapted_AnnotationWithContainers, self)
+            return converter.to_py_struct(py_asyncio_types._fbthrift_unadapted_AnnotationWithContainers, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types._fbthrift_unadapted_AnnotationWithContainers, _fbthrift_unadapted_AnnotationWithContainers)
 
@@ -125,26 +125,26 @@ class _fbthrift_unadapted_MyStruct(metaclass=_fbthrift_python_types.StructMeta):
         return self
 
     def _to_mutable_python(self):
-        import thrift.python.mutable_converter
+        from thrift.python import mutable_converter
         import importlib
         mutable_types = importlib.import_module("with_containers.thrift_mutable_types")
-        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types._fbthrift_unadapted_MyStruct, self)
+        return mutable_converter.to_mutable_python_struct_or_union(mutable_types._fbthrift_unadapted_MyStruct, self)
 
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("with_containers.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types._fbthrift_unadapted_MyStruct, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types._fbthrift_unadapted_MyStruct, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("with_containers.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types._fbthrift_unadapted_MyStruct, self)
+            return converter.to_py_struct(py_deprecated_types._fbthrift_unadapted_MyStruct, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("with_containers.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types._fbthrift_unadapted_MyStruct, self)
+            return converter.to_py_struct(py_asyncio_types._fbthrift_unadapted_MyStruct, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types._fbthrift_unadapted_MyStruct, _fbthrift_unadapted_MyStruct)
 

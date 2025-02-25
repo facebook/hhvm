@@ -50,10 +50,10 @@ class Fields(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 
 
     def _to_python(self):
-        import thrift.python.converter
+        from thrift.python import converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return thrift.python.converter.to_python_struct(immutable_types.Fields, self)
+        return converter.to_python_struct(immutable_types.Fields, self)
 
     def _to_mutable_python(self):
         return self
@@ -61,18 +61,18 @@ class Fields(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.Fields, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.Fields, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.Fields, self)
+            return converter.to_py_struct(py_deprecated_types.Fields, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.Fields, self)
+            return converter.to_py_struct(py_asyncio_types.Fields, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Fields, Fields)
 _fbthrift_Fields = Fields
@@ -106,10 +106,10 @@ class FieldsInjectedToEmptyStruct(metaclass=_fbthrift_python_mutable_types.Mutab
 
 
     def _to_python(self):
-        import thrift.python.converter
+        from thrift.python import converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return thrift.python.converter.to_python_struct(immutable_types.FieldsInjectedToEmptyStruct, self)
+        return converter.to_python_struct(immutable_types.FieldsInjectedToEmptyStruct, self)
 
     def _to_mutable_python(self):
         return self
@@ -117,18 +117,18 @@ class FieldsInjectedToEmptyStruct(metaclass=_fbthrift_python_mutable_types.Mutab
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.FieldsInjectedToEmptyStruct, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.FieldsInjectedToEmptyStruct, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.FieldsInjectedToEmptyStruct, self)
+            return converter.to_py_struct(py_deprecated_types.FieldsInjectedToEmptyStruct, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.FieldsInjectedToEmptyStruct, self)
+            return converter.to_py_struct(py_asyncio_types.FieldsInjectedToEmptyStruct, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.FieldsInjectedToEmptyStruct, FieldsInjectedToEmptyStruct)
 _fbthrift_FieldsInjectedToEmptyStruct = FieldsInjectedToEmptyStruct
@@ -173,10 +173,10 @@ class FieldsInjectedToStruct(metaclass=_fbthrift_python_mutable_types.MutableStr
 
 
     def _to_python(self):
-        import thrift.python.converter
+        from thrift.python import converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return thrift.python.converter.to_python_struct(immutable_types.FieldsInjectedToStruct, self)
+        return converter.to_python_struct(immutable_types.FieldsInjectedToStruct, self)
 
     def _to_mutable_python(self):
         return self
@@ -184,18 +184,18 @@ class FieldsInjectedToStruct(metaclass=_fbthrift_python_mutable_types.MutableStr
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.FieldsInjectedToStruct, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.FieldsInjectedToStruct, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.FieldsInjectedToStruct, self)
+            return converter.to_py_struct(py_deprecated_types.FieldsInjectedToStruct, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.FieldsInjectedToStruct, self)
+            return converter.to_py_struct(py_asyncio_types.FieldsInjectedToStruct, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.FieldsInjectedToStruct, FieldsInjectedToStruct)
 _fbthrift_FieldsInjectedToStruct = FieldsInjectedToStruct
@@ -262,10 +262,10 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_mutable_types.
 
 
     def _to_python(self):
-        import thrift.python.converter
+        from thrift.python import converter
         import importlib
         immutable_types = importlib.import_module("module.thrift_types")
-        return thrift.python.converter.to_python_struct(immutable_types.FieldsInjectedWithIncludedStruct, self)
+        return converter.to_python_struct(immutable_types.FieldsInjectedWithIncludedStruct, self)
 
     def _to_mutable_python(self):
         return self
@@ -273,18 +273,18 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_mutable_types.
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.FieldsInjectedWithIncludedStruct, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.FieldsInjectedWithIncludedStruct, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.FieldsInjectedWithIncludedStruct, self)
+            return converter.to_py_struct(py_deprecated_types.FieldsInjectedWithIncludedStruct, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.FieldsInjectedWithIncludedStruct, self)
+            return converter.to_py_struct(py_asyncio_types.FieldsInjectedWithIncludedStruct, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.FieldsInjectedWithIncludedStruct, FieldsInjectedWithIncludedStruct)
 _fbthrift_FieldsInjectedWithIncludedStruct = FieldsInjectedWithIncludedStruct

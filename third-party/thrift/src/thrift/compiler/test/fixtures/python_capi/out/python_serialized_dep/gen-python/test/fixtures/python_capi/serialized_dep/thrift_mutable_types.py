@@ -80,10 +80,10 @@ class SerializedStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMet
 
 
     def _to_python(self):
-        import thrift.python.converter
+        from thrift.python import converter
         import importlib
         immutable_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.thrift_types")
-        return thrift.python.converter.to_python_struct(immutable_types.SerializedStruct, self)
+        return converter.to_python_struct(immutable_types.SerializedStruct, self)
 
     def _to_mutable_python(self):
         return self
@@ -91,18 +91,18 @@ class SerializedStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMet
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.SerializedStruct, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.SerializedStruct, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("serialized_dep.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.SerializedStruct, self)
+            return converter.to_py_struct(py_deprecated_types.SerializedStruct, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("serialized_dep.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.SerializedStruct, self)
+            return converter.to_py_struct(py_asyncio_types.SerializedStruct, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.SerializedStruct, SerializedStruct)
 _fbthrift_SerializedStruct = SerializedStruct
@@ -150,10 +150,10 @@ class SerializedUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta)
 
 
     def _to_python(self):
-        import thrift.python.converter
+        from thrift.python import converter
         import importlib
         immutable_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.thrift_types")
-        return thrift.python.converter.to_python_struct(immutable_types.SerializedUnion, self)
+        return converter.to_python_struct(immutable_types.SerializedUnion, self)
 
     def _to_mutable_python(self):
         return self
@@ -161,18 +161,18 @@ class SerializedUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta)
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.SerializedUnion, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.SerializedUnion, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("serialized_dep.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.SerializedUnion, self)
+            return converter.to_py_struct(py_deprecated_types.SerializedUnion, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("serialized_dep.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.SerializedUnion, self)
+            return converter.to_py_struct(py_asyncio_types.SerializedUnion, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.SerializedUnion, SerializedUnion)
 _fbthrift_SerializedUnion = SerializedUnion
@@ -231,10 +231,10 @@ class SerializedError(metaclass=_fbthrift_python_mutable_exceptions.MutableGener
 
 
     def _to_python(self):
-        import thrift.python.converter
+        from thrift.python import converter
         import importlib
         immutable_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.thrift_types")
-        return thrift.python.converter.to_python_struct(immutable_types.SerializedError, self)
+        return converter.to_python_struct(immutable_types.SerializedError, self)
 
     def _to_mutable_python(self):
         return self
@@ -242,18 +242,18 @@ class SerializedError(metaclass=_fbthrift_python_mutable_exceptions.MutableGener
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.SerializedError, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.SerializedError, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("serialized_dep.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.SerializedError, self)
+            return converter.to_py_struct(py_deprecated_types.SerializedError, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("serialized_dep.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.SerializedError, self)
+            return converter.to_py_struct(py_asyncio_types.SerializedError, self)
 _fbthrift_SerializedError = SerializedError
 
 class MarshalStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -318,10 +318,10 @@ class MarshalStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
 
 
     def _to_python(self):
-        import thrift.python.converter
+        from thrift.python import converter
         import importlib
         immutable_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.thrift_types")
-        return thrift.python.converter.to_python_struct(immutable_types.MarshalStruct, self)
+        return converter.to_python_struct(immutable_types.MarshalStruct, self)
 
     def _to_mutable_python(self):
         return self
@@ -329,18 +329,18 @@ class MarshalStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.MarshalStruct, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.MarshalStruct, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("serialized_dep.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.MarshalStruct, self)
+            return converter.to_py_struct(py_deprecated_types.MarshalStruct, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("serialized_dep.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.MarshalStruct, self)
+            return converter.to_py_struct(py_asyncio_types.MarshalStruct, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.MarshalStruct, MarshalStruct)
 _fbthrift_MarshalStruct = MarshalStruct
@@ -388,10 +388,10 @@ class MarshalUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
 
 
     def _to_python(self):
-        import thrift.python.converter
+        from thrift.python import converter
         import importlib
         immutable_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.thrift_types")
-        return thrift.python.converter.to_python_struct(immutable_types.MarshalUnion, self)
+        return converter.to_python_struct(immutable_types.MarshalUnion, self)
 
     def _to_mutable_python(self):
         return self
@@ -399,18 +399,18 @@ class MarshalUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.MarshalUnion, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.MarshalUnion, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("serialized_dep.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.MarshalUnion, self)
+            return converter.to_py_struct(py_deprecated_types.MarshalUnion, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("serialized_dep.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.MarshalUnion, self)
+            return converter.to_py_struct(py_asyncio_types.MarshalUnion, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.MarshalUnion, MarshalUnion)
 _fbthrift_MarshalUnion = MarshalUnion
@@ -469,10 +469,10 @@ class MarshalError(metaclass=_fbthrift_python_mutable_exceptions.MutableGenerate
 
 
     def _to_python(self):
-        import thrift.python.converter
+        from thrift.python import converter
         import importlib
         immutable_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.thrift_types")
-        return thrift.python.converter.to_python_struct(immutable_types.MarshalError, self)
+        return converter.to_python_struct(immutable_types.MarshalError, self)
 
     def _to_mutable_python(self):
         return self
@@ -480,18 +480,18 @@ class MarshalError(metaclass=_fbthrift_python_mutable_exceptions.MutableGenerate
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.MarshalError, self)
+        from thrift.py3 import converter
+        return converter.to_py3_struct(py3_types.MarshalError, self)
 
     def _to_py_deprecated(self):
         import importlib
-        import thrift.util.converter
+        from thrift.util import converter
         try:
             py_deprecated_types = importlib.import_module("serialized_dep.ttypes")
-            return thrift.util.converter.to_py_struct(py_deprecated_types.MarshalError, self)
+            return converter.to_py_struct(py_deprecated_types.MarshalError, self)
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("serialized_dep.ttypes")
-            return thrift.util.converter.to_py_struct(py_asyncio_types.MarshalError, self)
+            return converter.to_py_struct(py_asyncio_types.MarshalError, self)
 _fbthrift_MarshalError = MarshalError
 
 

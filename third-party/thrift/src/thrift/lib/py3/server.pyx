@@ -47,15 +47,12 @@ from thrift.python.server_impl.request_context import ( # noqa
     RequestContext,
     SocketAddress,
     WriteHeaders, 
+    get_context,
 )
 from thrift.python.server_impl.request_context cimport handleAddressCallback
 
 AsyncProcessorFactory = AsyncProcessorFactory_
 
-from contextvars import ContextVar
-# don't include in the module dict, so only cython can set it
-THRIFT_REQUEST_CONTEXT = ContextVar('ThriftRequestContext')
-get_context = THRIFT_REQUEST_CONTEXT.get
 
 
 

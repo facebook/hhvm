@@ -138,6 +138,3 @@ cdef class ThriftServer:
 
 cdef class StatusServerInterface:
     cdef shared_ptr[cStatusServerInterface] _cpp_obj
-
-
-cdef object THRIFT_REQUEST_CONTEXT

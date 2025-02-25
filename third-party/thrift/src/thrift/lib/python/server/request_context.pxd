@@ -136,3 +136,5 @@ cdef class WriteHeaders(Headers):
     cdef RequestContext _parent
     @staticmethod
     cdef _fbthrift_create(RequestContext ctx)
+
+cdef object THRIFT_REQUEST_CONTEXT

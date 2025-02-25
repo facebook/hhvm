@@ -38,11 +38,11 @@ from thrift.python.exceptions cimport (
     cTApplicationException,
     cTApplicationExceptionType__UNKNOWN,
 )
-from thrift.py3.server cimport THRIFT_REQUEST_CONTEXT
 from thrift.python.server_impl.request_context cimport (
     Cpp2RequestContext,
     handleAddressCallback,
     RequestContext,
+    THRIFT_REQUEST_CONTEXT,
 )
 from thrift.python.server_impl.request_context import (
     RequestContext,

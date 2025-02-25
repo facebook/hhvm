@@ -20,6 +20,7 @@ from thrift.python.server_impl.event_handler cimport getRequestId
 from thrift.python.common cimport Priority_to_cpp, Headers
 
 import collections
+from contextvars import ContextVar
 import ipaddress
 import os
 from pathlib import Path
@@ -27,6 +28,10 @@ from pathlib import Path
 from thrift.python.common import Priority
 
 SocketAddress = collections.namedtuple('SocketAddress', 'ip port path')
+
+# don't include in the module dict, so only cython can set it
+THRIFT_REQUEST_CONTEXT = ContextVar('ThriftRequestContext')
+get_context = THRIFT_REQUEST_CONTEXT.get
 
 cdef class RequestContext:
     @staticmethod

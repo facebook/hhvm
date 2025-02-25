@@ -32,7 +32,7 @@ let ipynb_of_json (ipynb_json : Hh_json.json) : (t, string) Result.t =
     let source_lines_json = Hh_json.get_array_exn source_json in
     let source_lines = List.map source_lines_json ~f:Hh_json.get_string_exn in
     let type_json = find_exn obj "cell_type" in
-    let contents = String.concat ~sep:"" source_lines in
+    let contents = String.concat ~sep:"\n" source_lines in
     let cell_bento_metadata =
       List.Assoc.find obj "metadata" ~equal:String.equal
     in

@@ -289,8 +289,9 @@ struct FieldInfo {
 };
 }
 
+template<typename Transport>
 struct CompactWriter {
-    explicit CompactWriter(PHPOutputTransport *transport) :
+    explicit CompactWriter(Transport& transport) :
       transport(transport),
       version(VERSION),
       state(STATE_CLEAR),
@@ -318,7 +319,7 @@ struct CompactWriter {
     }
 
   private:
-    PHPOutputTransport* transport;
+    Transport& transport;
 
     uint8_t version;
     CState state;
@@ -510,14 +511,14 @@ struct CompactWriter {
               bits = htolell(bits);
             }
 
-            transport->write((char*)&bits, 8);
+            transport.push((uint8_t *)&bits, 8);
           }
           break;
 
         case T_FLOAT: {
             float d = (float)value.toDouble();
             uint32_t bits = htonl(folly::bit_cast<uint32_t>(d));
-            transport->write((char*)&bits, 4);
+            transport.push((uint8_t *)&bits, 4);
           }
           break;
 
@@ -531,7 +532,7 @@ struct CompactWriter {
             auto s = value.toString();
             auto slice = s.slice();
             writeVarint(slice.size());
-            transport->write(slice.data(), slice.size());
+            transport.push((uint8_t *) slice.data(), slice.size());
             break;
           }
 
@@ -641,7 +642,7 @@ struct CompactWriter {
     }
 
     void writeUByte(uint8_t n) {
-      transport->writeI8(n);
+      transport.push(&n, 1);
     }
 
     void writeI(int64_t n) {
@@ -689,13 +690,13 @@ struct CompactWriter {
         }
       }
 
-      transport->write((char*)buf, wsize);
+      transport.push(buf, wsize);
     }
 
     void writeString(const String& s) {
       auto slice = s.slice();
       writeVarint(slice.size());
-      transport->write(slice.data(), slice.size());
+      transport.write(slice.data(), slice.size());
     }
 
     uint64_t i64ToZigzag(int64_t n) {
@@ -1477,8 +1478,7 @@ Object compact_deserialize_from_string(
   return reader.readStruct(thrift_typename);
 }
 
-String compact_serialize_to_string(const Object& protocol,
-                   const Object& thrift_struct,
+String compact_serialize_to_string(const Object& thrift_struct,
                    int64_t version) {
   CoeffectsAutoGuard _;
   // Suppress class-to-string conversion warnings that occur during
@@ -1487,13 +1487,13 @@ String compact_serialize_to_string(const Object& protocol,
 
   VMRegAnchor _2;
 
-  PHPOutputTransport transport(protocol);
+  folly::IOBuf iobuf{folly::IOBuf::CREATE, 1024};
+  folly::io::Appender appender(&iobuf, 1024);
 
-  CompactWriter writer(&transport);
+  CompactWriter<folly::io::Appender> writer(appender);
   writer.setWriteVersion(version);
   writer.write(thrift_struct);
-  transport.flush();
-  return transport.getPHPBuffer();
+  return iobuf.toString();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1519,7 +1519,7 @@ void HHVM_FUNCTION(thrift_protocol_write_compact2,
 
   PHPOutputTransport transport(transportobj);
 
-  CompactWriter writer(&transport);
+  CompactWriter<PHPOutputTransport> writer(transport);
   writer.setWriteVersion(version);
   writer.writeHeader(method_name, (uint8_t)msgtype, (uint32_t)seqid);
   writer.write(request_struct);
@@ -1543,10 +1543,16 @@ void HHVM_FUNCTION(thrift_protocol_write_compact_struct,
 
   PHPOutputTransport transport(transportobj);
 
-  CompactWriter writer(&transport);
+  CompactWriter<PHPOutputTransport> writer(transport);
   writer.setWriteVersion(version);
   writer.write(request_struct);
   transport.flush();
+}
+
+String HHVM_FUNCTION(thrift_protocol_write_compact_struct_to_string,
+                     const Object& request_struct,
+                     int64_t version) {
+  return compact_serialize_to_string(request_struct, version);
 }
 
 Variant HHVM_FUNCTION(thrift_protocol_read_compact,

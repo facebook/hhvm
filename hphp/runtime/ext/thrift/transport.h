@@ -103,6 +103,10 @@ public:
     }
   }
 
+  void push(const uint8_t* data, size_t len) {
+    write((const char*)data, len);
+  }
+
   void writeI64(int64_t i) {
     i = htonll(i);
     write((const char*)&i, 8);

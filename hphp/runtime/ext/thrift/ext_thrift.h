@@ -87,6 +87,11 @@ void HHVM_FUNCTION(
     const Object& request_struct,
     int64_t version = 2);
 
+String HHVM_FUNCTION(
+    thrift_protocol_write_compact_struct_to_string,
+    const Object& request_struct,
+    int64_t version);
+
 Variant HHVM_FUNCTION(
     thrift_protocol_read_compact,
     const Object& transportobj,

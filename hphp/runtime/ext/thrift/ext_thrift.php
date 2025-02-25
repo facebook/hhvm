@@ -43,6 +43,10 @@ function thrift_protocol_write_compact_struct(\HH\object $transportobj,
                                         int $version = 2): void;
 
 <<__Native>>
+function thrift_protocol_write_compact_struct_to_string(\HH\object $transportobj,
+                                                          int $version = 2): string;
+
+<<__Native>>
 function thrift_protocol_read_compact(\HH\object $transportobj,
                                       string $obj_typename,
                                       int $options = 0): mixed;

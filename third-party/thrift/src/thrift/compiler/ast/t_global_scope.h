@@ -19,13 +19,15 @@
 #include <map>
 #include <string>
 #include <unordered_map>
-#include <unordered_set>
 #include <utility>
 
 #include <thrift/compiler/ast/node_list.h>
+#include <thrift/compiler/ast/program_scope.h>
+#include <thrift/compiler/ast/scope_identifier.h>
 #include <thrift/compiler/ast/t_interaction.h>
 #include <thrift/compiler/ast/t_type.h>
 #include <thrift/compiler/ast/t_typedef.h>
+#include <thrift/compiler/detail/overload.h>
 #include <thrift/compiler/source_location.h>
 
 namespace apache::thrift::compiler {
@@ -40,26 +42,46 @@ namespace apache::thrift::compiler {
  */
 class t_global_scope {
  public:
-  void add_definition(std::string name, const t_named* named) {
-    definitions_[std::move(name)] = named;
-  }
+  using ProgramScopes = std::
+      unordered_map<std::string_view, std::vector<const scope::program_scope*>>;
 
-  void add_enum_value(std::string name, const t_const* value);
+  struct global_id {
+    std::string_view scope;
+    std::string_view name;
+    std::string_view value_name; // Only for enum values
 
-  // Returns the definition with the given name or nullptr if there is no such
-  // definition.
-  template <typename Node = t_named>
-  const Node* find(std::string_view name) const {
-    auto it = definitions_.find(name);
-    if (it == definitions_.end()) {
-      return nullptr;
+    bool operator==(const global_id& other) const {
+      return scope == other.scope && name == other.name &&
+          value_name == other.value_name;
     }
-    return dynamic_cast<const Node*>(it->second);
-  }
+  };
+
+  struct global_id_hasher {
+    size_t operator()(const global_id& id) const {
+      return std::hash<std::string_view>{}(id.scope) ^
+          std::hash<std::string_view>{}(id.name) ^
+          std::hash<std::string_view>{}(id.value_name);
+    }
+  };
 
   // Returns an existing def, if one is already registered with the same uri, or
   // nullptr.
-  const t_named* add_def(const t_named& node);
+  const t_named* add_def_by_uri(const t_named& node);
+
+  // [TEMPORARY] Adds a definition to the global scope. This is used to retain
+  // the "old" behavior of globally resolving identifiers.
+  void add_definition(
+      const t_named& node,
+      std::string_view name,
+      std::string_view value_name = "");
+
+  // Adds a scope via program/name alias to the global scope
+  void add_program(const t_program& program);
+
+  // Returns the global priority of the given program.
+  // The priority is the order in which the program was added to the global
+  // scope.
+  size_t global_priority(const t_program& program) const;
 
   // Returns the definition with the given Thrift URI, or nullptr if there is
   // no such definition.
@@ -67,14 +89,6 @@ class t_global_scope {
     auto it = definitions_by_uri_.find(uri);
     return it != definitions_by_uri_.end() ? it->second : nullptr;
   }
-
-  bool is_ambiguous_enum_value(const std::string& enum_value_name) const {
-    return redefined_enum_values_.find(enum_value_name) !=
-        redefined_enum_values_.end();
-  }
-
-  std::string get_fully_qualified_enum_value_names(
-      const std::string& name) const;
 
   // Get a (poetically unresolved) reference to given type, declared in the
   // given program.
@@ -88,6 +102,19 @@ class t_global_scope {
     return placeholder_typedefs_;
   }
 
+  const ProgramScopes& program_scopes() const;
+
+  template <typename Node = t_named>
+  const Node* find(scope::identifier id) const {
+    const auto [scope, name, value_name] = id.split();
+    const global_id gid{scope, name, value_name};
+    auto it = all_definitions_.find(gid);
+    if (it == all_definitions_.end()) {
+      return nullptr;
+    }
+    return dynamic_cast<const Node*>(it->second);
+  }
+
  private:
   t_type_ref add_placeholder_typedef(
       std::unique_ptr<t_placeholder_typedef> ptd) {
@@ -99,18 +126,22 @@ class t_global_scope {
 
   node_list<t_placeholder_typedef> placeholder_typedefs_;
 
-  // A map from names to definitions.
-  std::map<std::string, const t_named*, std::less<>> definitions_;
+  // A mapping from scope names/alias to a collection of definitions.
+  ProgramScopes program_scopes_;
+
+  // [TEMPORARY Global ordering of programs in the order they are added.
+  // This is used to allow scope resolution to happen in the same order as
+  // the all_definitions_ below.
+  std::unordered_map<const t_program*, size_t> program_order_;
+
+  // [TEMPORARY] A global list of definitions in order of their instantiation.
+  // This is used to retain the "old" behavior of globally resolving identifiers
+  // in the order they were defined.
+  std::unordered_map<global_id, const t_named*, global_id_hasher>
+      all_definitions_;
 
   // A map from URIs to definitions.
   std::map<std::string, const t_named*, std::less<>> definitions_by_uri_;
-
-  // Set of enum value names that are redefined and are ambiguous
-  // if referred to without the enum name.
-  std::unordered_set<std::string> redefined_enum_values_;
-
-  // Map of enum value names to their definition full names.
-  std::unordered_map<std::string, std::unordered_set<std::string>> enum_values_;
 };
 
 } // namespace apache::thrift::compiler

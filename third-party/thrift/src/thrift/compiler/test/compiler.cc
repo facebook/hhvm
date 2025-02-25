@@ -213,6 +213,7 @@ void check_compile(
       pparams.incl_searchpath.emplace_back(includes);
     }
   }
+  pparams.use_global_resolution = options.use_global_resolution;
 
   diagnostic_params dparams;
   sema_params sparams;

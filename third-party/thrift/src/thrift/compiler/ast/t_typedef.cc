@@ -58,15 +58,14 @@ std::unique_ptr<t_typedef> t_typedef::make_unnamed(
 
 bool t_placeholder_typedef::resolve() {
   if (type_.empty()) {
-    type_ = t_type_ref::from_ptr(
-        program()->find<t_type>(name()), src_range());
+    type_ = t_type_ref::from_ptr(program()->find<t_type>(name()), src_range());
     if (!type_.empty()) {
       // Update the type to mirror the underlying one.
       // TODO(afuller): Update codegen to always skip over placeholders via
       // type_ref instead.
       name_ = type_->name();
       // TODO(afuller): Make program_ const or remove it completely.
-      program_ = const_cast<t_program*>(type_->get_program());
+      program_ = type_->get_program();
     }
   }
   return !type_.empty();

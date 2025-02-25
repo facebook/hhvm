@@ -215,8 +215,7 @@ bool has_runtime_annotation(const t_named& named) {
 }
 
 bool has_schema(source_manager& sm, const t_program& program) {
-  return program.find(
-      program.scope_name(schematizer::name_schema(sm, program)));
+  return program.find(schematizer::name_schema(sm, program));
 }
 
 std::string escape_binary_string(std::string_view str) {

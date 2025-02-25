@@ -90,7 +90,7 @@ schematizer::resolved_uri schematizer::calculate_uri(
     return {"uri", node.uri()};
   }
   if (node.program()) {
-    return {"scopedName", node.program()->scope_name(node)};
+    return {"scopedName", node.program()->scoped_name(node)};
   }
   return {"scopedName", node.name()};
 }

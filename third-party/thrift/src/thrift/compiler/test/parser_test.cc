@@ -36,7 +36,7 @@ TEST(ParserTest, type_resolution) {
   // Types must be resolved in parse_ast.
   auto programs = parse_ast(source_mgr, diags, "test.thrift", {});
   EXPECT_TRUE(diags.has_errors());
-  EXPECT_EQ(diag->message(), "Type `test.MissingType` not defined.");
+  EXPECT_EQ(diag->message(), "Type `MissingType` not defined.");
 
   // Programs must be non-null even in case of an error.
   EXPECT_TRUE(programs != nullptr);

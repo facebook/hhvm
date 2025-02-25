@@ -373,7 +373,7 @@ void with_schematizer(schematizer::options opts, F&& f) {
   for (const auto& [name, uri] : UTILITY_CLASSES) {
     utility_types.push_back(std::make_unique<t_struct>(program.get(), name));
     utility_types.back()->set_uri(uri);
-    scope.add_def(*utility_types.back().get());
+    scope.add_def_by_uri(*utility_types.back().get());
   }
 
   schematizer schematizer{scope, sm, std::move(opts)};

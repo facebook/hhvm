@@ -14,52 +14,17 @@
  * limitations under the License.
  */
 
-#include <iterator>
-#include <sstream>
-#include <vector>
-
+#include <thrift/compiler/ast/scope_identifier.h>
 #include <thrift/compiler/ast/t_const.h>
-#include <thrift/compiler/ast/t_enum_value.h>
-#include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_global_scope.h>
+#include <thrift/compiler/ast/t_program.h>
 
 namespace apache::thrift::compiler {
-namespace {
-
-std::string join_strings_by_commas(
-    const std::unordered_set<std::string>& strs) {
-  std::ostringstream stream;
-  std::copy(
-      strs.begin(),
-      strs.end(),
-      std::ostream_iterator<std::string>(stream, ", "));
-  std::string joined_str = stream.str();
-  // Remove the last comma.
-  return joined_str.empty() ? joined_str
-                            : joined_str.substr(0, joined_str.size() - 2);
-}
-
-std::vector<std::string> split_string_by_periods(const std::string& str) {
-  std::istringstream iss(str);
-  std::vector<std::string> tokens;
-  std::string token;
-  while (std::getline(iss, token, '.')) {
-    if (!token.empty()) {
-      tokens.push_back(token);
-    }
-  }
-  return tokens;
-}
-
-} // namespace
 
 t_type_ref t_global_scope::ref_type(
     t_program& program, const std::string& name, const source_range& range) {
-  std::string scoped_name = name.find_first_of('.') != std::string::npos
-      ? name
-      : program.scope_name(name);
   // Try to resolve the type.
-  if (const t_type* type = find<t_type>(scoped_name)) {
+  if (const t_type* type = program.find<t_type>(name)) {
     return {*type, range}; // We found the type!
   }
 
@@ -73,12 +38,12 @@ t_type_ref t_global_scope::ref_type(
   // However, this actually breaks dynamic casts.
   // TODO(afuller): Merge t_placeholder_typedef into t_type_ref and remove const
   // cast.
-  auto ph = std::make_unique<t_placeholder_typedef>(&program, scoped_name);
+  auto ph = std::make_unique<t_placeholder_typedef>(&program, name);
   ph->set_src_range(range);
   return add_placeholder_typedef(std::move(ph));
 }
 
-const t_named* t_global_scope::add_def(const t_named& node) {
+const t_named* t_global_scope::add_def_by_uri(const t_named& node) {
   if (!node.uri().empty()) {
     auto result = definitions_by_uri_.emplace(node.uri(), &node);
     if (!result.second) {
@@ -88,31 +53,36 @@ const t_named* t_global_scope::add_def(const t_named& node) {
   return nullptr;
 }
 
-void t_global_scope::add_enum_value(std::string name, const t_const* constant) {
-  assert(constant->value()->is_enum());
-  const std::string& enum_value_name =
-      constant->value()->get_enum_value()->get_name();
-  if (enum_value_name != "UNKNOWN" &&
-      definitions_.find(name) != definitions_.end()) {
-    redefined_enum_values_.insert(name);
-  }
-  if (std::count(name.begin(), name.end(), '.') == 2) {
-    // The name has two periods and three components, take the last two.
-    auto name_with_enum = name.substr(name.find('.') + 1);
-    enum_values_[enum_value_name].insert(name_with_enum);
-  }
-  definitions_.insert(std::make_pair(std::move(name), constant));
+void t_global_scope::add_program(const t_program& program) {
+  const auto [it, _] = program_scopes_.try_emplace(
+      program.name(), std::vector<const scope::program_scope*>{});
+  it->second.push_back(&program.program_scope());
+  program_order_.emplace(&program, program_order_.size());
 }
 
-std::string t_global_scope::get_fully_qualified_enum_value_names(
-    const std::string& name) const {
-  // Get just the enum value name from name, which is
-  // PROGRAM_NAME.ENUM_VALUE_NAME.
-  auto name_split = split_string_by_periods(name);
-  if (name_split.empty()) {
-    return "";
+const t_global_scope::ProgramScopes& t_global_scope::program_scopes() const {
+  return program_scopes_;
+}
+
+void t_global_scope::add_definition(
+    const t_named& node, std::string_view name, std::string_view value_name) {
+  if (value_name != "") {
+    // [TEMPORARY] Add global definition for <scope>.<value_name>
+    // NOTE: Enum values can't override existing definitions
+    all_definitions_.try_emplace(
+        global_id{node.program()->name(), value_name, ""}, &node);
   }
-  return join_strings_by_commas(enum_values_.at(name_split.back()));
+
+  all_definitions_[global_id{node.program()->name(), name, value_name}] = &node;
+}
+
+size_t t_global_scope::global_priority(const t_program& program) const {
+  const auto it = program_order_.find(&program);
+  if (it == program_order_.end()) {
+    // Only the root program should be missing.
+    return std::numeric_limits<size_t>::max();
+  }
+  return it->second;
 }
 
 } // namespace apache::thrift::compiler

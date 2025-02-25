@@ -60,6 +60,12 @@ struct parsing_params {
   bool use_legacy_type_ref_resolution = false;
 
   /**
+   * Whether to use the global resolution (~ via t_global_scope) for identifiers
+   * or rely only on the local resolution (~ via program_scope).
+   */
+  bool use_global_resolution = true;
+
+  /**
    * Search path for includes.
    */
   std::vector<std::string> incl_searchpath;

@@ -27,9 +27,11 @@
 #include <fmt/core.h>
 
 #include <thrift/compiler/ast/node_list.h>
+#include <thrift/compiler/ast/program_scope.h>
 #include <thrift/compiler/ast/t_const.h>
 #include <thrift/compiler/ast/t_enum.h>
 #include <thrift/compiler/ast/t_exception.h>
+#include <thrift/compiler/ast/t_global_scope.h>
 #include <thrift/compiler/ast/t_include.h>
 #include <thrift/compiler/ast/t_interaction.h>
 #include <thrift/compiler/ast/t_list.h>
@@ -37,7 +39,6 @@
 #include <thrift/compiler/ast/t_named.h>
 #include <thrift/compiler/ast/t_package.h>
 #include <thrift/compiler/ast/t_primitive_type.h>
-#include <thrift/compiler/ast/t_global_scope.h>
 #include <thrift/compiler/ast/t_service.h>
 #include <thrift/compiler/ast/t_set.h>
 #include <thrift/compiler/ast/t_sink.h>
@@ -52,10 +53,29 @@ namespace apache::thrift::compiler {
  * Top level class representing an entire thrift program.
  */
 class t_program : public t_named {
- public:
+ private:
+  // A combination of a program scope & the order in which it was added
+  // to the global scope.
+  struct scope_by_priority {
+    const scope::program_scope* scope;
+    size_t priority;
+
+    bool operator==(const scope_by_priority& other) const {
+      return priority == other.priority;
+    }
+
+    bool operator<(const scope_by_priority& other) const {
+      // Reverse order, so later definitions have higher priority.
+      return priority > other.priority;
+    }
+  };
+
+  using scopes_by_priority = std::vector<scope_by_priority>;
+
   // The value used when an offset is not specified/unknown.
   static constexpr auto noffset = static_cast<size_t>(-1);
 
+ public:
   /**
    * Constructor for t_program
    *
@@ -68,8 +88,10 @@ class t_program : public t_named {
       : t_program(
             std::move(path),
             std::move(full_path),
-            parent ? parent->global_scope_ : std::make_shared<t_global_scope>()) {}
+            parent ? parent->global_scope_
+                   : std::make_shared<t_global_scope>()) {}
 
+  void set_use_global_resolution(bool val) { use_global_resolution_ = val; }
   void set_package(t_package package) { package_ = std::move(package); }
   const t_package& package() const { return package_; }
 
@@ -77,6 +99,7 @@ class t_program : public t_named {
   node_list_view<t_named> definitions() { return definitions_; }
   node_list_view<const t_named> definitions() const { return definitions_; }
   void add_definition(std::unique_ptr<t_named> definition);
+  void add_enum_definition(scope::enum_id id, const t_const& constant);
 
   // A convience function that:
   //  - optionally sets the uri (overriding any set value or
@@ -246,6 +269,16 @@ class t_program : public t_named {
       const std::string& language, namespace_config config) const;
 
   void add_include(std::unique_ptr<t_include> include) {
+    std::string_view scope_name = include->alias().value_or(include->get_program()->name());
+
+    const size_t global_priority =
+        global_scope_->global_priority(*include->get_program());
+    auto& defs = available_scopes_[scope_name];
+    // TODO @sadroeck - Sort on insert for performance
+    defs.push_back(scope_by_priority{
+        &include->get_program()->program_scope(), global_priority});
+    std::sort(defs.begin(), defs.end());
+
     includes_.push_back(include.get());
     nodes_.push_back(std::move(include));
   }
@@ -266,21 +299,31 @@ class t_program : public t_named {
   std::string compute_name_from_file_path(std::string path);
 
   // Helpers for constrcuting program scoped names.
-  std::string scope_name(std::string_view defname) const {
-    return fmt::format("{}.{}", name(), defname);
-  }
-  std::string scope_name(const t_named& owner, const t_named& node) const {
-    return name() + "." + owner.name() + "." + node.name();
-  }
-  std::string scope_name(const t_named& node) const {
-    return scope_name(node.name());
+  std::string scoped_name(const t_named& node) const {
+    return fmt::format("{}.{}", name(), node.name());
   }
 
-  // Returns the definition with the given name or nullptr if there is no such
+  const scope::program_scope& program_scope() const { return program_scope_; }
+
+  // Returns the definition of the identifier or nullptr if there is no such
   // definition.
   template <typename Node = t_named>
-  const Node* find(std::string_view name) const {
-    return global_scope_->find<Node>(name);
+  const Node* find(scope::identifier id) const {
+    const auto* local_node = find_by_id(id);
+    if (!use_global_resolution_) {
+      return dynamic_cast<const Node*>(local_node);
+    }
+
+    const auto* global_node = find_global_by_id(id);
+
+    if (local_node != global_node) {
+      // [TEMPORARY] If there's a mismatch, for the time being
+      // we'll return the "old" global resolution.
+      return dynamic_cast<const Node*>(global_node);
+    }
+
+    // Local and global resolution are the same.
+    return dynamic_cast<const Node*>(local_node);
   }
 
  private:
@@ -317,14 +360,31 @@ class t_program : public t_named {
   std::map<std::string, std::string> namespaces_;
   std::unordered_map<std::string, std::vector<std::string>> language_includes_;
   std::shared_ptr<t_global_scope> global_scope_;
+  scope::program_scope program_scope_;
+
+  // A map from scope name to the scope object. This is used to resolve
+  // references to definitions in other scopes.
+  //
+  // TEMPORARY: A scope name can refer to multiple scopes, ordered by the order
+  // in which they were added to the global scope.
+  std::unordered_map<std::string_view, scopes_by_priority> available_scopes_;
+  bool use_global_resolution_;
 
   t_program(
-      std::string path, std::string full_path, std::shared_ptr<t_global_scope> global_scope)
+      std::string path,
+      std::string full_path,
+      std::shared_ptr<t_global_scope> global_scope)
       : path_(std::move(path)),
         full_path_(std::move(full_path)),
-        global_scope_(std::move(global_scope)) {
+        global_scope_(std::move(global_scope)),
+        program_scope_{},
+        available_scopes_{},
+        use_global_resolution_{true} {
     set_name(compute_name_from_file_path(path_));
   }
+
+  const t_named* find_by_id(scope::identifier id) const;
+  const t_named* find_global_by_id(scope::identifier id) const;
 
   // TODO (satishvk): There was a TODO from afuller here to remove other
   // deprecated functions like add_service, etc. Did inherit_annotation_or_null

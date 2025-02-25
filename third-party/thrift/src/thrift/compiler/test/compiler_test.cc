@@ -61,7 +61,7 @@ TEST(CompilerTest, missing_type_definition) {
   check_compile(R"(
     struct S {
       1: i32 i;
-      2: MyStruct ms; # expected-error: Type `test.MyStruct` not defined.
+      2: MyStruct ms; # expected-error: Type `MyStruct` not defined.
     }
   )");
 }
@@ -638,7 +638,7 @@ TEST(CompilerTest, undefined_type) {
 
 TEST(CompilerTest, undefined_const) {
   check_compile(R"(
-    const Type c = 42; # expected-error: Type `test.Type` not defined.
+    const Type c = 42; # expected-error: Type `Type` not defined.
   )");
 }
 
@@ -650,7 +650,7 @@ TEST(CompilerTest, undefined_const_external) {
 
 TEST(CompilerTest, undefined_annotation) {
   check_compile(R"(
-    @BadAnnotation # expected-error: Type `test.BadAnnotation` not defined.
+    @BadAnnotation # expected-error: Type `BadAnnotation` not defined.
     struct S {}
   )");
 }
@@ -1627,11 +1627,11 @@ TEST(CompilerTest, inject_metadata_fields_annotation) {
     struct Injected2 {}
 
     @internal.InjectMetadataFields{type="UnionFields"}
-      # expected-error@-1: `bar.UnionFields` is not a struct type. `@internal.InjectMetadataFields` can be only used with a struct type.
+      # expected-error@-1: `UnionFields` is not a struct type. `@internal.InjectMetadataFields` can be only used with a struct type.
     struct Injected3 {}
 
     @internal.InjectMetadataFields{type="MyI64"}
-      # expected-error@-1: `bar.MyI64` is not a struct type. `@internal.InjectMetadataFields` can be only used with a struct type.
+      # expected-error@-1: `MyI64` is not a struct type. `@internal.InjectMetadataFields` can be only used with a struct type.
     struct Injected4 {}
 
     @internal.InjectMetadataFields{type="Fields"}
@@ -1873,7 +1873,7 @@ TEST(CompilerTest, required_key_specified_in_structured_annotation) {
 TEST(CompilerTest, nonexist_type_in_variable) {
   check_compile(R"(
     const map<i8, string> foo = {1: "str"}
-      # expected-error@-1: Type `test.i8` not defined.
+      # expected-error@-1: Type `i8` not defined.
   )");
 }
 
@@ -2010,7 +2010,7 @@ TEST(CompilerTest, py3_invalid_field_names) {
       {"--gen", "mstch_py3"});
 }
 
-TEST(CompilerTest, warn_on_non_explicit_includes) {
+TEST(CompilerTest, error_on_non_explicit_includes) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["path/to/upstream.thrift"] = R"(
     struct TransitiveStruct {}
@@ -2383,4 +2383,155 @@ TEST(CompilerTest, base_service_defined_after_use) {
 
     service Base {}
   )");
+}
+
+TEST(CompilerTest, resolve_enum_typedefs_after_use) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["remote.thrift"] = R"(
+    typedef Remote LazyRemoteAlias;
+
+    enum Remote {
+      FOO = 1,
+    }
+
+    typedef Remote RemoteAlias;
+  )";
+  name_contents_map["main.thrift"] = R"(
+    include "remote.thrift"
+
+    typedef Local LazyLocalAlias;
+
+    struct S {
+      1: remote.Remote field_v1 = remote.Remote.FOO;
+      2: remote.Remote field_v2 = remote.RemoteAlias.FOO;
+      3: remote.Remote field_v3 = remote.FOO;
+      4: remote.Remote field_v4 = LocalAliasForRemote.FOO;
+      5: Local field_v5 = Local.BAR;
+      6: Local field_v6 = LocalAlias.BAR;
+      7: Local field_v8 = BAR;
+    }
+
+    const remote.Remote var_v1 = remote.Remote.FOO;
+    const remote.Remote var_v2 = remote.RemoteAlias.FOO;
+    const remote.Remote var_v3 = remote.FOO;
+    const remote.Remote var_v4 = remote.LazyRemoteAlias.FOO;
+    const remote.Remote var_v5 = LocalAliasForRemote.FOO;
+
+    const Local LAZY_BAR_ALIAS = Local.BAR;
+    const Local LAZY_BAR_ALIAS2 = main.BAR;
+
+    const Local var_v6 = Local.BAR;
+    const Local var_v7 = LocalAlias.BAR;
+    const Local var_v8 = BAR;
+    const Local var_v9 = LazyLocalAlias.BAR;
+    const Local var_v10 = main.LazyLocalAlias.BAR;
+    const Local var_v11 = LAZY_BAR_ALIAS;
+    const Local var_v12 = main.LAZY_BAR_ALIAS;
+    const Local var_v13 = LAZY_BAR_ALIAS2;
+    const Local var_v14 = main.LAZY_BAR_ALIAS2;
+
+    enum Local {
+      BAR = 2,
+    }
+
+    typedef remote.Remote LocalAliasForRemote;
+    typedef Local LocalAlias;
+  )";
+  check_compile(name_contents_map, "main.thrift");
+}
+
+// [TEMPORARY] This verifies that unscoped identifiers in injected metadata
+// annotations are resolved to the program they're defined in.
+TEST(CompilerTest, scope_resolution_for_unscoped_injected_metadata) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["module.thrift"] = R"(
+    include "thrift/annotation/internal.thrift"
+
+    struct Foo {
+      1: map<i16, i32> metadata;
+    }
+
+    @internal.InjectMetadataFields{type = "Foo"}
+    struct MyInjected {}
+
+    @internal.InjectMetadataFields{type = "module.Foo"}
+    struct MyInjected2 {}
+
+  )";
+  name_contents_map["main.thrift"] = R"(
+    include "module.thrift"
+
+    @module.MyInjected
+    struct S1 {
+    }
+
+    @module.MyInjected2
+    struct S2 {
+    }
+  )";
+  check_compile(name_contents_map, "main.thrift");
+}
+
+TEST(CompilerTest, local_vs_global_resolution_sanity) {
+  for (const bool use_global_resolution : {true, false}) {
+    std::map<std::string, std::string> name_content_map;
+
+    name_content_map["c/foo.thrift"] = R"(
+      struct Something {
+        1: i32 val;
+      }
+
+      struct Bar {
+        1: Something field;
+      }
+    )";
+
+    name_content_map["a/foo.thrift"] = R"(
+      include "c/foo.thrift"
+      struct Bar {
+        1: string field;
+      }
+    )";
+
+    name_content_map["b/foo.thrift"] = R"(
+      include "a/foo.thrift"
+
+      struct Bar {
+        1: i32 field;
+      }
+    )";
+
+    name_content_map["local/foo.thrift"] = R"(
+      include "a/foo.thrift"
+      include "b/foo.thrift"
+      include "c/foo.thrift"
+
+      struct Inner {
+        1: string val;
+      }
+
+      struct Bar {
+        1: Inner field;
+      }
+
+      // This should always resolve to the local Bar
+      const Bar bar = Bar{field = Inner{val = "hello"}};
+    )";
+
+    name_content_map["get_b/foo.thrift"] = R"(
+      include "a/foo.thrift"
+      include "b/foo.thrift"
+      include "c/foo.thrift"
+
+      // This should resolve to b's Bar, as it was parsed last
+      // in the hierarchy
+      const foo.Bar bar = foo.Bar{field = 12};
+    )";
+
+    auto options = check_compile_options();
+    options.use_global_resolution = use_global_resolution;
+
+    check_compile(name_content_map, "local/foo.thrift", {}, options);
+    check_compile(name_content_map, "get_b/foo.thrift", {}, options);
+  }
 }

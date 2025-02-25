@@ -393,7 +393,7 @@ type::Schema t_ast_generator::gen_schema(
               ident.uri()->uri_ref() = uri;
             } else {
               ident.uri()->scopedName_ref() =
-                  enum_owner->program()->scope_name(*enum_owner);
+                  enum_owner->program()->scoped_name(*enum_owner);
             }
             ident.enumValue() = val->get_owner()->get_name();
             ast.identifierSourceRanges()->push_back(std::move(ident));
@@ -402,7 +402,7 @@ type::Schema t_ast_generator::gen_schema(
               ident.uri()->uri_ref() = uri;
             } else {
               ident.uri()->scopedName_ref() =
-                  owner->program()->scope_name(*owner);
+                  owner->program()->scoped_name(*owner);
             }
             ast.identifierSourceRanges()->push_back(std::move(ident));
           } else {

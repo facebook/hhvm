@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<56c8a030592caf9d593468b8a04f15df>>
+// @generated SignedSource<<a845a79d488ee09dbd39fb66df326f4f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -106,7 +106,6 @@ pub enum FeatureName {
     ClassType,
     FunctionReferences,
     FunctionTypeOptionalParams,
-    ExpressionTreeNest,
     SealedMethods,
     AwaitInSplice,
     OpenTuples,

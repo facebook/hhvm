@@ -1,40 +1,40 @@
-ERROR: File "simple.php", line 11, characters 37-51:
+ERROR: File "simple.php", line 10, characters 37-51:
 Nested expression trees must use the same DSL name as the enclosing expression tree, got ExampleDsl2 inside of ExampleDsl (Parsing[1002])
-ERROR: File "simple.php", line 12, characters 38-50:
+ERROR: File "simple.php", line 11, characters 38-50:
 Nested expression trees must use the same DSL name as the enclosing expression tree, got ExampleDsl inside of ExampleDsl2 (Parsing[1002])
-ERROR: File "simple.php", line 8, characters 20-36:
+ERROR: File "simple.php", line 7, characters 20-36:
 Invalid argument (Typing[4110])
-  File "simple.php", line 8, characters 8-18:
+  File "simple.php", line 7, characters 8-18:
   Expected `ExampleDsl2`
   File "expr_tree.php", line 71, characters 15-24:
   But got `ExampleDsl`
-ERROR: File "simple.php", line 8, characters 34-34:
+ERROR: File "simple.php", line 7, characters 34-34:
 Invalid argument (Typing[4110])
-  File "simple.php", line 8, characters 22-32:
+  File "simple.php", line 7, characters 22-32:
   Expected `ExampleDsl2`
   File "expr_tree.php", line 71, characters 15-24:
   But got `ExampleDsl`
-ERROR: File "simple.php", line 9, characters 44-44:
+ERROR: File "simple.php", line 8, characters 44-44:
 Invalid argument (Typing[4110])
-  File "simple.php", line 9, characters 32-42:
+  File "simple.php", line 8, characters 32-42:
   Expected `ExampleDsl2`
   File "expr_tree.php", line 71, characters 15-24:
   But got `ExampleDsl`
-ERROR: File "simple.php", line 10, characters 29-29:
+ERROR: File "simple.php", line 9, characters 29-29:
 Invalid argument (Typing[4110])
-  File "simple.php", line 10, characters 17-27:
+  File "simple.php", line 9, characters 17-27:
   Expected `ExampleDsl2`
   File "expr_tree.php", line 71, characters 15-24:
   But got `ExampleDsl`
-ERROR: File "simple.php", line 11, characters 49-50:
+ERROR: File "simple.php", line 10, characters 49-50:
 Invalid argument (Typing[4110])
-  File "simple.php", line 11, characters 37-47:
+  File "simple.php", line 10, characters 37-47:
   Expected `ExampleDsl2`
   File "expr_tree.php", line 71, characters 15-24:
   But got `ExampleDsl`
-ERROR: File "simple.php", line 12, characters 20-56:
+ERROR: File "simple.php", line 11, characters 20-56:
 Invalid argument (Typing[4110])
-  File "simple.php", line 12, characters 8-18:
+  File "simple.php", line 11, characters 8-18:
   Expected `ExampleDsl2`
   File "expr_tree.php", line 71, characters 15-24:
   But got `ExampleDsl`

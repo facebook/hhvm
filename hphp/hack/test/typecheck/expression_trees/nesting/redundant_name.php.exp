@@ -1,16 +1,16 @@
-ERROR: File "redundant_name.php", line 8, characters 22-34:
+ERROR: File "redundant_name.php", line 7, characters 22-34:
 Nested expression trees must use the same DSL name as the enclosing expression tree, got ExampleDsl inside of ExampleDsl2 (Parsing[1002])
-ERROR: File "redundant_name.php", line 9, characters 21-34:
+ERROR: File "redundant_name.php", line 8, characters 21-34:
 Nested expression trees must use the same DSL name as the enclosing expression tree, got ExampleDsl2 inside of ExampleDsl (Parsing[1002])
-ERROR: File "redundant_name.php", line 8, characters 20-35:
+ERROR: File "redundant_name.php", line 7, characters 20-35:
 Invalid argument (Typing[4110])
-  File "redundant_name.php", line 8, characters 8-18:
+  File "redundant_name.php", line 7, characters 8-18:
   Expected `ExampleDsl2`
   File "expr_tree.php", line 71, characters 15-24:
   But got `ExampleDsl`
-ERROR: File "redundant_name.php", line 9, characters 33-33:
+ERROR: File "redundant_name.php", line 8, characters 33-33:
 Invalid argument (Typing[4110])
-  File "redundant_name.php", line 9, characters 21-31:
+  File "redundant_name.php", line 8, characters 21-31:
   Expected `ExampleDsl2`
   File "expr_tree.php", line 71, characters 15-24:
   But got `ExampleDsl`

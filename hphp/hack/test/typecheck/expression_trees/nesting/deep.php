@@ -1,6 +1,5 @@
 <?hh
 <<file: __EnableUnstableFeatures('expression_trees')>>
-<<file: __EnableUnstableFeatures('expression_tree_nest')>>
 
 <<__EntryPoint>>
 function f(): void {

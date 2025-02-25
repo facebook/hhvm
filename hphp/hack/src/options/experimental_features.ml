@@ -58,7 +58,6 @@ type feature_name =
   | ClassType
   | FunctionReferences
   | FunctionTypeOptionalParams
-  | ExpressionTreeNest
   | SealedMethods
   | AwaitInSplice
   | OpenTuples
@@ -102,7 +101,6 @@ let feature_name_map =
       ("class_type", ClassType);
       ("function_references", FunctionReferences);
       ("function_type_optional_params", FunctionTypeOptionalParams);
-      ("expression_tree_nest", ExpressionTreeNest);
       ("sealed_methods", SealedMethods);
       ("await_in_splice", AwaitInSplice);
       ("open_tuples", OpenTuples);

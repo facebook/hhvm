@@ -52,7 +52,6 @@ type feature_name =
   | ClassType
   | FunctionReferences
   | FunctionTypeOptionalParams
-  | ExpressionTreeNest
   | SealedMethods
   | AwaitInSplice
   | OpenTuples

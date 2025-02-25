@@ -23,6 +23,7 @@
 #include <set>
 
 #include <fmt/format.h>
+#include <fmt/ranges.h>
 
 #include <thrift/compiler/ast/t_const_value.h>
 #include <thrift/compiler/ast/t_field.h>

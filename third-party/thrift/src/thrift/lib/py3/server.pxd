@@ -29,25 +29,10 @@ from thrift.python.server_impl.event_handler cimport (
     cTransportRoutingHandler,
 )
 
-
-
-cdef extern from "thrift/lib/cpp2/async/AsyncProcessor.h" \
-        namespace "apache::thrift":
-    cdef cppclass cAsyncProcessor "apache::thrift::AsyncProcessor":
-        pass
-
-    cdef cppclass cGeneratedAsyncProcessorBase "apache::thrift::GeneratedAsyncProcessorBase"(cAsyncProcessor):
-        const char* getServiceName()
-
-    cdef cppclass cAsyncProcessorFactory \
-            "apache::thrift::AsyncProcessorFactory":
-        unique_ptr[cAsyncProcessor] getProcessor()
-
-    cdef cppclass cServerInterface \
-            "apache::thrift::ServerInterface"(cAsyncProcessorFactory):
-        pass
-
-    cdef cGeneratedAsyncProcessorBase* dynamic_cast_gen "dynamic_cast<apache::thrift::GeneratedAsyncProcessorBase*>"(...)
+from thrift.python.server_impl.async_processor cimport (
+    cAsyncProcessorFactory,
+    AsyncProcessorFactory as Py3AsyncProcessorFactory,
+)
 
 
 cdef extern from "thrift/lib/cpp2/server/StatusServerInterface.h" \
@@ -55,10 +40,6 @@ cdef extern from "thrift/lib/cpp2/server/StatusServerInterface.h" \
     cdef cppclass cStatusServerInterface "apache::thrift::StatusServerInterface"(cAsyncProcessorFactory):
         pass
 
-cdef extern from "thrift/lib/cpp2/util/EmptyAsyncProcessor.h":
-    # This is a little wonky, but makes using it much easier from cython.
-    # without having to use a static_pointer_cast to make cython happy.
-    ctypedef cAsyncProcessorFactory EmptyAsyncProcessorFactory "apache::thrift::EmptyAsyncProcessorFactory"
 
 cdef extern from "thrift/lib/cpp2/server/ThriftServer.h" \
         namespace "apache::thrift":
@@ -140,18 +121,14 @@ cdef extern from "folly/io/async/AsyncTransport.h" namespace "folly":
         const AsyncTransportCertificate* getPeerCertificate()
 
 
-cdef class AsyncProcessorFactory:
-    cdef shared_ptr[cAsyncProcessorFactory] _cpp_obj
-    cdef cbool requireResourcePools(AsyncProcessorFactory self)
 
-
-cdef class ServiceInterface(AsyncProcessorFactory):
+cdef class ServiceInterface(Py3AsyncProcessorFactory):
     pass
 
 
 cdef class ThriftServer:
     cdef shared_ptr[cThriftServer] server
-    cdef AsyncProcessorFactory factory
+    cdef Py3AsyncProcessorFactory factory
     cdef object loop
     cdef object address_future
     cdef void set_is_overloaded(self, cIsOverloadedFunc is_overloaded)

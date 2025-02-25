@@ -30,6 +30,7 @@ from libcpp.unordered_set cimport unordered_set
 from libcpp.utility cimport move as cmove
 from libcpp.vector cimport vector as cvector
 
+from folly cimport cFollyPromise, cFollyUnit, c_unit
 from folly.executor cimport get_executor
 from folly.iobuf cimport IOBuf, from_unique_ptr
 from thrift.python.exceptions cimport (
@@ -47,14 +48,15 @@ from thrift.python.server_impl.request_context import (
     RequestContext,
     SocketAddress,
 )
-from thrift.py3.stream cimport cServerStream, cResponseAndServerStream, createResponseAndServerStream, createAsyncIteratorFromPyIterator, ServerStream
+from thrift.py3.stream cimport (
+    cServerStream,
+    cResponseAndServerStream,
+    createResponseAndServerStream,
+    createAsyncIteratorFromPyIterator,
+    ServerStream
+)
 from thrift.python.types cimport ServiceInterface as cServiceInterface
 from thrift.python.protocol cimport Protocol
-from folly cimport (
-  cFollyPromise,
-  cFollyUnit,
-  c_unit,
-)
 
 cdef class Promise_Optional_IOBuf(Promise_Py):
     cdef cFollyPromise[optional[unique_ptr[cIOBuf]]]* cPromise

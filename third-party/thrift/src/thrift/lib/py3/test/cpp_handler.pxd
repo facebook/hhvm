@@ -14,7 +14,8 @@
 
 from libcpp.memory cimport shared_ptr, unique_ptr
 
-from thrift.py3.server cimport cServerInterface, cAsyncProcessorFactory, cTransportRoutingHandler
+from thrift.python.server_impl.async_processor cimport cAsyncProcessorFactory, cServerInterface
+from thrift.python.server_impl.event_handler cimport cTransportRoutingHandler
 
 cdef extern from "thrift/lib/py3/test/cpp_handler.h" namespace "::thrift::py3::test":
     cdef cppclass cTestingServiceInterfaceService "::thrift::py3::test::TestingService"(cServerInterface):

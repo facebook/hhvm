@@ -24,7 +24,7 @@ Pxd file to expose the interface defined in ServicesWrapper.h to the pyx files.
 
 from cpython.ref cimport PyObject
 from libcpp.memory cimport shared_ptr
-from thrift.py3.server cimport cAsyncProcessorFactory
+from thrift.python.server_impl.async_processor cimport cAsyncProcessorFactory
 from folly cimport cFollyExecutor
 
 

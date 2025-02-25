@@ -7,7 +7,7 @@
 
 from cpython.ref cimport PyObject
 from libcpp.memory cimport shared_ptr
-from thrift.py3.server cimport cAsyncProcessorFactory
+from thrift.python.server_impl.async_processor cimport cAsyncProcessorFactory
 from folly cimport cFollyExecutor
 
 

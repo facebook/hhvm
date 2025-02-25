@@ -13,15 +13,16 @@
 # limitations under the License.
 
 from cpython.ref cimport PyObject
-from thrift.py3.server cimport AsyncProcessorFactory
-from libcpp.map cimport map as cmap
-from libcpp.string cimport string
-from libcpp.pair cimport pair
-from thrift.python.server cimport RpcKind
-from libcpp.vector cimport vector as cvector
-from libcpp.memory cimport shared_ptr
 from libcpp cimport bool as cbool
+from libcpp.map cimport map as cmap
+from libcpp.memory cimport shared_ptr
+from libcpp.pair cimport pair
+from libcpp.vector cimport vector as cvector
+from libcpp.string cimport string
+
 from folly.executor cimport cAsyncioExecutor
+from thrift.python.server cimport RpcKind
+from thrift.python.server_impl.async_processor cimport AsyncProcessorFactory
 
 ctypedef PyObject* PyObjPtr
 

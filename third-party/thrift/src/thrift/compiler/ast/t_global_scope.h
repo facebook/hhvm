@@ -81,7 +81,7 @@ class t_global_scope {
   // Returns the global priority of the given program.
   // The priority is the order in which the program was added to the global
   // scope.
-  size_t global_priority(const t_program& program) const;
+  scope::program_scope::ScopePriority global_priority(const t_program& program) const;
 
   // Returns the definition with the given Thrift URI, or nullptr if there is
   // no such definition.

@@ -51,6 +51,10 @@ class program_scope {
 
  public:
   using Definitions = std::unordered_map<id, const t_named*, id_hasher>;
+  using ScopePriority = std::uint64_t;
+
+  constexpr static ScopePriority ROOT_PROGRAM_PRIORITY = std::numeric_limits<ScopePriority>::max() - 1;
+  constexpr static ScopePriority ALIAS_PRIORITY = std::numeric_limits<ScopePriority>::max();
 
   // Find a definition by either:
   // * one-part identifier, e.g. `Foo`

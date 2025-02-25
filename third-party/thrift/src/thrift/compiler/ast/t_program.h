@@ -58,7 +58,11 @@ class t_program : public t_named {
   // to the global scope.
   struct scope_by_priority {
     const scope::program_scope* scope;
-    size_t priority;
+    // The priority is the order in which the program was added to the global scope.
+    // An alias include has the highest priority, followed by the root program, followed by regular includes.
+    scope::program_scope::ScopePriority priority;
+
+    bool is_alias() const { return priority == scope::program_scope::ALIAS_PRIORITY; }
 
     bool operator==(const scope_by_priority& other) const {
       return priority == other.priority;
@@ -271,14 +275,13 @@ class t_program : public t_named {
   void add_include(std::unique_ptr<t_include> include) {
     std::string_view scope_name = include->alias().value_or(include->get_program()->name());
 
-    const size_t global_priority =
+    const auto global_priority = include->alias().has_value() ? scope::program_scope::ALIAS_PRIORITY :
         global_scope_->global_priority(*include->get_program());
     auto& defs = available_scopes_[scope_name];
     // TODO @sadroeck - Sort on insert for performance
     defs.push_back(scope_by_priority{
         &include->get_program()->program_scope(), global_priority});
     std::sort(defs.begin(), defs.end());
-
     includes_.push_back(include.get());
     nodes_.push_back(std::move(include));
   }
@@ -309,8 +312,8 @@ class t_program : public t_named {
   // definition.
   template <typename Node = t_named>
   const Node* find(scope::identifier id) const {
-    const auto* local_node = find_by_id(id);
-    if (!use_global_resolution_) {
+    const auto [local_node, resolved_via_alias] = find_by_id(id);
+    if (!use_global_resolution_ || resolved_via_alias) {
       return dynamic_cast<const Node*>(local_node);
     }
 
@@ -383,7 +386,15 @@ class t_program : public t_named {
     set_name(compute_name_from_file_path(path_));
   }
 
-  const t_named* find_by_id(scope::identifier id) const;
+  // [TEMPORARY] This is an annotation to identify when a node was resolved via
+  // an include alias. Include alias resolution has absolute priority over global resolution.
+  // In all other scenarios, (currently) the global resolution is preferred.
+  struct resolved_node {
+    const t_named* node;
+    bool via_include_alias;
+  };
+
+  resolved_node find_by_id(scope::identifier id) const;
   const t_named* find_global_by_id(scope::identifier id) const;
 
   // TODO (satishvk): There was a TODO from afuller here to remove other

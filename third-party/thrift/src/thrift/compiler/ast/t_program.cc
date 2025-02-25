@@ -148,49 +148,54 @@ std::string t_program::compute_name_from_file_path(std::string path) {
   return path;
 }
 
-const t_named* t_program::find_by_id(scope::identifier id) const {
+t_program::resolved_node t_program::find_by_id(scope::identifier id) const {
   return id.visit(
       [&](scope::unscoped_id&& id) {
         // Unscoped identifiers, e.g. `Bar` can only be local to the current
         // program.
-        return program_scope_.find_by_name(id.name);
+        return resolved_node{program_scope_.find_by_name(id.name), false};
       },
-      [&](scope::scoped_id&& id) -> const t_named* {
+      [&](scope::scoped_id&& id) {
         // Note: We can't distinguish between a scoped identifier e.g.
         // `foo.Bar` & an unscoped enum identifier `e.g. `Foo.Bar`
 
         // Check if the full identifier is available in the current program.
         // e.g. for enum values `Foo.Bar`
         if (const auto* local_node = program_scope_.find_by_name(id.scope, id.name)) {
-          return local_node;
+          return resolved_node{local_node, false};
         }
 
         // Otherwise check for an include with the provided scope name, and if
         // so, use that to resolve the identifier.
         if (const auto scope_it = available_scopes_.find(id.scope);
             scope_it != available_scopes_.end()) {
-          for(const auto& [scope, _priority] : scope_it->second) {
-            if (auto* res = scope->find_by_name(id.name)) {
-              return res;
+          for (const scope_by_priority& scope_prio : scope_it->second) {
+            if (auto* res =  scope_prio.scope->find_by_name(id.name)) {
+              return resolved_node{res, scope_prio.is_alias()};
+            }
+
+            // If this scope was an alias, don't fall back to checking other scopes
+            if (scope_prio.is_alias()) {
+              return resolved_node{nullptr, false};
             }
           }
         }
 
-        return nullptr;
+        return resolved_node{nullptr, false};
       },
-      [&](scope::enum_id&& id) -> const t_named* {
+      [&](scope::enum_id&& id) {
         // Enum IDs always have a program scope, so if we can't find an
         // available program, fail the resolution.
         if (const auto scope_it = available_scopes_.find(id.scope);
             scope_it != available_scopes_.end()) {
-          for(const auto& [scope, _priority] : scope_it->second) {
-            if (auto* res = scope->find_by_name(id.enum_name, id.value_name)) {
-              return res;
+          for (const scope_by_priority& scope_prio : scope_it->second) {
+            if (auto* res = scope_prio.scope->find_by_name(id.enum_name, id.value_name)) {
+              return resolved_node{res, scope_prio.is_alias()};
             }
           }
         }
 
-        return nullptr;
+        return resolved_node{nullptr, false};
       });
 }
 

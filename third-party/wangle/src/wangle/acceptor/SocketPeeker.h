@@ -16,9 +16,9 @@
 
 #pragma once
 
+#include <folly/io/async/AsyncIoUringSocketFactory.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/AsyncTransport.h>
-#include <array>
 
 namespace wangle {
 
@@ -40,7 +40,12 @@ class TransportPeeker : public folly::AsyncTransport::ReadCallback,
       size_t numBytes)
       : transport_(transport),
         transportCallback_(callback),
-        peekBytes_(numBytes) {}
+        peekBytes_(numBytes) {
+    if (folly::AsyncIoUringSocketFactory::supportsZcRx(
+            transport.getEventBase())) {
+      setReadMode(folly::AsyncReader::ReadCallback::ReadMode::ReadZC);
+    }
+  }
 
   ~TransportPeeker() override {
     if (transport_.getReadCallback() == this) {

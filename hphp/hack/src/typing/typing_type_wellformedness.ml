@@ -369,7 +369,9 @@ let consts env cs = List.concat_map ~f:(const env) cs
 
 let typeconsts env tcs =
   let f tconst =
-    let ignore_package_errors = true in
+    let ignore_package_errors =
+      Env.package_v2_bypass_package_check_for_classptr_migration env.tenv
+    in
     match tconst.c_tconst_kind with
     | TCAbstract { c_atc_as_constraint; c_atc_super_constraint; c_atc_default }
       ->

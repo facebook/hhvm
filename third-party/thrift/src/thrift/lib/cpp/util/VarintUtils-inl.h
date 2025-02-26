@@ -48,7 +48,8 @@
 
 #if defined(__BMI2__)
 #define THRIFT_UTIL_VARINTUTILS_BRANCH_FREE_ENCODER 1
-#elif defined(__ARM_FEATURE_SVE2_BITPERM) && __has_include(<arm_neon_sve_bridge.h>)
+#elif defined(__ARM_FEATURE_SVE) && defined(__ARM_FEATURE_SVE2_BITPERM) && \
+    __has_include(<arm_neon_sve_bridge.h>)
 #define THRIFT_UTIL_VARINTUTILS_BRANCH_FREE_ENCODER 1
 #else
 #define THRIFT_UTIL_VARINTUTILS_BRANCH_FREE_ENCODER 0
@@ -377,9 +378,9 @@ uint8_t writeVarintUnrolled(Cursor& c, T value) {
 #if THRIFT_UTIL_VARINTUTILS_BRANCH_FREE_ENCODER
 
 inline uint64_t compressBits(uint64_t value, uint64_t mask) {
-#if defined(__BMI2__)
+#if FOLLY_X64
   return _pdep_u64(value, mask);
-#elif defined(__ARM_FEATURE_SVE2_BITPERM)
+#elif FOLLY_AARCH64
   // See https://godbolt.org/z/nhc443acd
   const auto vec = svbdep_u64(svdup_n_u64(value), svdup_n_u64(mask));
   return vgetq_lane_u64(svget_neonq_u64(vec), 0);

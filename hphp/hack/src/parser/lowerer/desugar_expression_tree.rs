@@ -175,41 +175,37 @@ pub fn desugar(
                 ),
             )],
         ));
-        let mut spliced_vars: Vec<_> = (0..splice_count)
-            .map(|i| {
-                ast::CaptureLid(
-                    (),
-                    ast::Lid(visitor_pos.clone(), (0, temp_splice_lvar_string(i))),
-                )
-            })
-            .collect();
-        let function_pointer_vars: Vec<_> = (0..function_count)
-            .map(|i| {
-                ast::CaptureLid(
-                    (),
-                    ast::Lid(
-                        visitor_pos.clone(),
-                        (0, temp_function_pointer_lvar_string(i)),
-                    ),
-                )
-            })
-            .collect();
-        let static_method_vars: Vec<_> = (0..static_method_count)
-            .map(|i| {
-                ast::CaptureLid(
-                    (),
-                    ast::Lid(visitor_pos.clone(), (0, temp_static_method_lvar_string(i))),
-                )
-            })
-            .collect();
-        spliced_vars.extend(function_pointer_vars);
-        spliced_vars.extend(static_method_vars);
+        let mut use_ = vec![];
+        let spliced_vars = (0..splice_count).map(|i| {
+            ast::CaptureLid(
+                (),
+                ast::Lid(visitor_pos.clone(), (0, temp_splice_lvar_string(i))),
+            )
+        });
+        use_.extend(spliced_vars);
+        let function_pointer_vars = (0..function_count).map(|i| {
+            ast::CaptureLid(
+                (),
+                ast::Lid(
+                    visitor_pos.clone(),
+                    (0, temp_function_pointer_lvar_string(i)),
+                ),
+            )
+        });
+        use_.extend(function_pointer_vars);
+        let static_method_vars = (0..static_method_count).map(|i| {
+            ast::CaptureLid(
+                (),
+                ast::Lid(visitor_pos.clone(), (0, temp_static_method_lvar_string(i))),
+            )
+        });
+        use_.extend(static_method_vars);
         Expr::new(
             (),
             et_literal_pos.clone(),
             Expr_::mk_efun(aast::Efun {
                 fun: typing_fun_,
-                use_: spliced_vars,
+                use_,
                 closure_class_name: None,
             }),
         )

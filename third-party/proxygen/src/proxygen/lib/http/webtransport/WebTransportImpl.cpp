@@ -113,7 +113,7 @@ WebTransportImpl::sendWebTransportStreamData(
     HTTPCodec::StreamID id,
     std::unique_ptr<folly::IOBuf> data,
     bool eof,
-    DeliveryCallback* deliveryCallback) {
+    ByteEventCallback* deliveryCallback) {
   auto res = tp_.sendWebTransportStreamData(
       id, std::move(data), eof, deliveryCallback);
   if (eof || res.hasError()) {
@@ -145,7 +145,7 @@ folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>
 WebTransportImpl::StreamWriteHandle::writeStreamData(
     std::unique_ptr<folly::IOBuf> data,
     bool fin,
-    DeliveryCallback* deliveryCallback) {
+    ByteEventCallback* deliveryCallback) {
   if (stopSendingErrorCode_) {
     return folly::makeUnexpected(WebTransport::ErrorCode::STOP_SENDING);
   }

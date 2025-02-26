@@ -687,7 +687,7 @@ class HTTPTransaction
         HTTPCodec::StreamID /*id*/,
         std::unique_ptr<folly::IOBuf> /*data*/,
         bool /*eof*/,
-        WebTransport::DeliveryCallback* /* deliveryCallback */) override {
+        WebTransport::ByteEventCallback* /* deliveryCallback */) override {
       LOG(FATAL) << __func__ << " not supported";
       folly::assume_unreachable();
     }

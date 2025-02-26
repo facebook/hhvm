@@ -7,7 +7,6 @@
  */
 
 #include <proxygen/lib/http/webtransport/QuicWebTransport.h>
-#include <proxygen/lib/http/webtransport/QuicWtDeliveryCallbackWrapper.h>
 
 using FCState = proxygen::WebTransport::FCState;
 
@@ -98,16 +97,10 @@ QuicWebTransport::sendWebTransportStreamData(
     HTTPCodec::StreamID id,
     std::unique_ptr<folly::IOBuf> data,
     bool eof,
-    DeliveryCallback* deliveryCallback) {
+    ByteEventCallback* deliveryCallback) {
   XCHECK(quicSocket_);
-  std::unique_ptr<QuicWtDeliveryCallbackWrapper> deliveryCallbackWrapper =
-      nullptr;
-  if (deliveryCallback) {
-    deliveryCallbackWrapper =
-        std::make_unique<QuicWtDeliveryCallbackWrapper>(deliveryCallback, 0);
-  }
-  auto res = quicSocket_->writeChain(
-      id, std::move(data), eof, deliveryCallbackWrapper.release());
+  auto res =
+      quicSocket_->writeChain(id, std::move(data), eof, deliveryCallback);
   if (!res) {
     return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);
   }

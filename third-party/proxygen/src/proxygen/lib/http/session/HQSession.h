@@ -1835,7 +1835,7 @@ class HQSession
         HTTPCodec::StreamID /*id*/,
         std::unique_ptr<folly::IOBuf> /*data*/,
         bool /*eof*/,
-        WebTransportImpl::DeliveryCallback* /* deliveryCallback */) override;
+        WebTransport::ByteEventCallback* /* deliveryCallback */) override;
 
     folly::Expected<folly::Unit, WebTransport::ErrorCode>
     notifyPendingWriteOnStream(HTTPCodec::StreamID,

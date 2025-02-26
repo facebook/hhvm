@@ -17,11 +17,14 @@ using namespace proxygen::test;
 using namespace testing;
 using quic::MockQuicSocketDriver;
 
-class MockDeliveryCallback : public WebTransport::DeliveryCallback {
+class MockDeliveryCallback : public WebTransport::ByteEventCallback {
  public:
-  MOCK_METHOD(void, onDelivery, (uint64_t, uint32_t), (noexcept));
+  MOCK_METHOD(void, onByteEvent, (quic::StreamId, uint64_t), (noexcept));
 
-  MOCK_METHOD(void, onDeliveryCancelled, (uint64_t, uint32_t), (noexcept));
+  MOCK_METHOD(void,
+              onByteEventCanceled,
+              (quic::StreamId, uint64_t),
+              (noexcept));
 };
 
 namespace {
@@ -165,7 +168,7 @@ TEST_F(QuicWebTransportTest, WriteWithDeliveryCallback) {
 
   uint64_t expectedStreamId = handle.value()->getID();
   uint32_t expectedOffset = data.size();
-  EXPECT_CALL(*mockCallback, onDelivery(expectedStreamId, expectedOffset))
+  EXPECT_CALL(*mockCallback, onByteEvent(expectedStreamId, expectedOffset))
       .Times(1);
 
   handle.value()->writeStreamData(

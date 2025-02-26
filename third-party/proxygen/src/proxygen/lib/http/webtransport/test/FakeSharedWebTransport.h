@@ -65,7 +65,7 @@ class FakeStreamHandle
   WriteStreamDataRet writeStreamData(
       std::unique_ptr<folly::IOBuf> data,
       bool fin,
-      WebTransport::DeliveryCallback* deliveryCallback) override {
+      WebTransport::ByteEventCallback* deliveryCallback) override {
     buf_.append(std::move(data));
     fin_ = fin;
     if (promise_) {
@@ -186,7 +186,7 @@ class FakeSharedWebTransport : public WebTransport {
       uint64_t id,
       std::unique_ptr<folly::IOBuf> data,
       bool fin,
-      WebTransport::DeliveryCallback* deliveryCallback) override {
+      WebTransport::ByteEventCallback* deliveryCallback) override {
     auto h = writeHandles.find(id);
     if (h == writeHandles.end()) {
       return folly::makeUnexpected(WebTransport::ErrorCode::GENERIC_ERROR);

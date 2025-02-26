@@ -14,6 +14,7 @@
 #include <folly/futures/Future.h>
 #include <folly/io/IOBuf.h>
 #include <proxygen/lib/http/HTTPMessage.h>
+#include <quic/api/QuicCallbacks.h>
 
 namespace proxygen {
 
@@ -152,14 +153,39 @@ class WebTransport {
         uint32_t error) = 0;
   };
 
-  class DeliveryCallback {
+  class ByteEventCallback : public quic::ByteEventCallback {
    public:
-    virtual ~DeliveryCallback() = default;
+    ByteEventCallback() = default;
 
-    virtual void onDelivery(uint64_t streamId, uint32_t offset) noexcept = 0;
+    ~ByteEventCallback() override = default;
 
-    virtual void onDeliveryCancelled(uint64_t streamId,
-                                     uint32_t offset) noexcept = 0;
+    virtual void onByteEvent(quic::StreamId id, uint64_t offset) noexcept = 0;
+
+    virtual void onByteEventCanceled(quic::StreamId id,
+                                     uint64_t offset) noexcept = 0;
+
+    // setWritePrefaceSize is called by the WebTransport layer, and doesn't need
+    // to be called by the user.
+    // The reason this is present is that some WebTransport implementations
+    // write a preface to the stream once it is created. We want to pass the
+    // correct value of offset to the onByteEvent and onByteEventCanceled
+    // callbacks.
+    void setWritePrefaceSize(uint32_t writePrefaceSize) {
+      writePrefaceSize_ = writePrefaceSize;
+    }
+
+   private:
+    void onByteEvent(quic::ByteEvent byteEvent) final {
+      onByteEvent(byteEvent.id, byteEvent.offset - writePrefaceSize_);
+    }
+
+    void onByteEventCanceled(quic::ByteEventCancellation cancellation) final {
+      onByteEventCanceled(cancellation.id,
+                          cancellation.offset - writePrefaceSize_);
+    }
+
+   private:
+    uint32_t writePrefaceSize_{0};
   };
 
   enum class FCState { BLOCKED, UNBLOCKED };
@@ -182,7 +208,7 @@ class WebTransport {
     virtual folly::Expected<FCState, ErrorCode> writeStreamData(
         std::unique_ptr<folly::IOBuf> data,
         bool fin,
-        DeliveryCallback* deliveryCallback) = 0;
+        ByteEventCallback* byteEventCallback) = 0;
 
     // Reset the stream with the given error
     virtual folly::Expected<folly::Unit, ErrorCode> resetStream(
@@ -239,7 +265,7 @@ class WebTransport {
       uint64_t id,
       std::unique_ptr<folly::IOBuf> data,
       bool fin,
-      DeliveryCallback* deliveryCallback) = 0;
+      ByteEventCallback* deliveryCallback) = 0;
   virtual folly::Expected<folly::Unit, ErrorCode> resetStream(
       uint64_t streamId, uint32_t error) = 0;
   virtual folly::Expected<folly::Unit, ErrorCode> setPriority(

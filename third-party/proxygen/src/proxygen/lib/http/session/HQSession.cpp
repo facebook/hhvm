@@ -7,7 +7,6 @@
  */
 
 #include <proxygen/lib/http/session/HQSession.h>
-#include <proxygen/lib/http/webtransport/QuicWtDeliveryCallbackWrapper.h>
 
 #include <proxygen/lib/http/HTTPPriorityFunctions.h>
 #include <proxygen/lib/http/codec/HQControlCodec.h>
@@ -3872,17 +3871,14 @@ HQSession::HQStreamTransport::sendWebTransportStreamData(
     HTTPCodec::StreamID id,
     std::unique_ptr<folly::IOBuf> data,
     bool eof,
-    WebTransportImpl::DeliveryCallback* deliveryCallback) {
-  std::unique_ptr<QuicWtDeliveryCallbackWrapper> deliveryCallbackWrapper =
-      nullptr;
+    WebTransport::ByteEventCallback* deliveryCallback) {
   if (deliveryCallback) {
     uint32_t prefaceSize =
         streamIdToPrefaceSize_.contains(id) ? streamIdToPrefaceSize_[id] : 0;
-    deliveryCallbackWrapper = std::make_unique<QuicWtDeliveryCallbackWrapper>(
-        deliveryCallback, prefaceSize);
+    deliveryCallback->setWritePrefaceSize(prefaceSize);
   }
-  auto res = session_.sock_->writeChain(
-      id, std::move(data), eof, deliveryCallbackWrapper.release());
+  auto res =
+      session_.sock_->writeChain(id, std::move(data), eof, deliveryCallback);
   if (res.hasError()) {
     LOG(ERROR) << "Failed to write WT stream data";
     return folly::makeUnexpected(WebTransport::ErrorCode::SEND_ERROR);

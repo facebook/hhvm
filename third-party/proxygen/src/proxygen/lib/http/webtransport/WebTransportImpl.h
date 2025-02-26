@@ -10,7 +10,6 @@
 
 #include <proxygen/lib/http/codec/HTTPCodec.h>
 #include <proxygen/lib/http/webtransport/WebTransport.h>
-#include <quic/api/QuicCallbacks.h>
 
 namespace proxygen {
 
@@ -34,7 +33,7 @@ class WebTransportImpl : public WebTransport {
     sendWebTransportStreamData(HTTPCodec::StreamID /*id*/,
                                std::unique_ptr<folly::IOBuf> /*data*/,
                                bool /*eof*/,
-                               DeliveryCallback* /* deliveryCallback */) = 0;
+                               ByteEventCallback* /* byteEventCallback */) = 0;
 
     virtual folly::Expected<folly::Unit, WebTransport::ErrorCode>
     notifyPendingWriteOnStream(HTTPCodec::StreamID,
@@ -127,7 +126,7 @@ class WebTransportImpl : public WebTransport {
       uint64_t id,
       std::unique_ptr<folly::IOBuf> data,
       bool fin,
-      DeliveryCallback* deliveryCallback) override {
+      ByteEventCallback* deliveryCallback) override {
     auto it = wtEgressStreams_.find(id);
     if (it == wtEgressStreams_.end()) {
       return folly::makeUnexpected(WebTransport::ErrorCode::INVALID_STREAM_ID);
@@ -196,7 +195,7 @@ class WebTransportImpl : public WebTransport {
     folly::Expected<FCState, WebTransport::ErrorCode> writeStreamData(
         std::unique_ptr<folly::IOBuf> data,
         bool fin,
-        DeliveryCallback* deliveryCallback) override;
+        ByteEventCallback* deliveryCallback) override;
 
     folly::Expected<folly::Unit, WebTransport::ErrorCode> resetStream(
         uint32_t errorCode) override {
@@ -275,7 +274,7 @@ class WebTransportImpl : public WebTransport {
   sendWebTransportStreamData(HTTPCodec::StreamID id,
                              std::unique_ptr<folly::IOBuf> data,
                              bool eof,
-                             DeliveryCallback* deliveryCallback);
+                             ByteEventCallback* deliveryCallback);
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode> resetWebTransportEgress(
       HTTPCodec::StreamID id, uint32_t errorCode);

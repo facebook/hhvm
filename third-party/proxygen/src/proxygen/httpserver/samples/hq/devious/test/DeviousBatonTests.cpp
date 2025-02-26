@@ -29,7 +29,7 @@ folly::SemiFuture<Message> expectSendMessage(MockWebTransport& wt) {
                     uint64_t id,
                     std::unique_ptr<folly::IOBuf> data,
                     bool eof,
-                    proxygen::WebTransport::DeliveryCallback*
+                    proxygen::WebTransport::ByteEventCallback*
                     /* deliveryCallback */) mutable
                 -> folly::Expected<proxygen::WebTransport::FCState,
                                    proxygen::WebTransport::ErrorCode> {

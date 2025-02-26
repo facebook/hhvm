@@ -2245,11 +2245,14 @@ class HQUpstreamSessionTestWebTransport : public HQUpstreamSessionTest {
   WebTransport* wt_{nullptr};
 };
 
-class MockDeliveryCallback : public WebTransport::DeliveryCallback {
+class MockDeliveryCallback : public WebTransport::ByteEventCallback {
  public:
-  MOCK_METHOD(void, onDelivery, (uint64_t, uint32_t), (noexcept));
+  MOCK_METHOD(void, onByteEvent, (quic::StreamId, uint64_t), (noexcept));
 
-  MOCK_METHOD(void, onDeliveryCancelled, (uint64_t, uint32_t), (noexcept));
+  MOCK_METHOD(void,
+              onByteEventCanceled,
+              (quic::StreamId, uint64_t),
+              (noexcept));
 };
 
 TEST_P(HQUpstreamSessionTestWebTransport, BidirectionalStream) {
@@ -2259,7 +2262,7 @@ TEST_P(HQUpstreamSessionTestWebTransport, BidirectionalStream) {
   auto id = stream.readHandle->getID();
   // small write
   auto mockCallback1 = std::make_unique<StrictMock<MockDeliveryCallback>>();
-  EXPECT_CALL(*mockCallback1, onDelivery(id, 10)).Times(1);
+  EXPECT_CALL(*mockCallback1, onByteEvent(id, 10)).Times(1);
   stream.writeHandle->writeStreamData(makeBuf(10), false, mockCallback1.get());
   eventBase_.loopOnce();
 
@@ -2267,7 +2270,7 @@ TEST_P(HQUpstreamSessionTestWebTransport, BidirectionalStream) {
   socketDriver_->setStreamFlowControlWindow(id, 100);
   bool writeComplete = false;
   auto mockCallback2 = std::make_unique<StrictMock<MockDeliveryCallback>>();
-  EXPECT_CALL(*mockCallback2, onDelivery(id, 65536 + 10)).Times(1);
+  EXPECT_CALL(*mockCallback2, onByteEvent(id, 65536 + 10)).Times(1);
   stream.writeHandle->writeStreamData(
       makeBuf(65536), false, mockCallback2.get());
   stream.writeHandle->awaitWritable().value().via(&eventBase_).then([&](auto) {

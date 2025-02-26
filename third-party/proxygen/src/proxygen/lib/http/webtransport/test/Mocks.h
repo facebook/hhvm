@@ -42,7 +42,7 @@ class MockStreamWriteHandle : public WebTransport::StreamWriteHandle {
               writeStreamData,
               (std::unique_ptr<folly::IOBuf>,
                bool,
-               WebTransport::DeliveryCallback*));
+               WebTransport::ByteEventCallback*));
   MOCK_METHOD((folly::Expected<folly::SemiFuture<folly::Unit>,
                                WebTransport::ErrorCode>),
               awaitWritable,
@@ -92,7 +92,7 @@ class MockWebTransport : public WebTransport {
               (uint64_t,
                std::unique_ptr<folly::IOBuf>,
                bool,
-               WebTransport::DeliveryCallback*));
+               WebTransport::ByteEventCallback*));
   MOCK_METHOD(GenericApiRet, resetStream, (uint64_t, uint32_t));
   MOCK_METHOD(GenericApiRet, setPriority, (uint64_t, uint8_t, uint64_t, bool));
   MOCK_METHOD(GenericApiRet, stopSending, (uint64_t, uint32_t));

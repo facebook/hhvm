@@ -71,7 +71,7 @@ class QuicWebTransport
       HTTPCodec::StreamID /*id*/,
       std::unique_ptr<folly::IOBuf> /*data*/,
       bool /*eof*/,
-      WebTransport::DeliveryCallback* /* deliveryCallback */) override;
+      ByteEventCallback* /* deliveryCallback */) override;
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode>
   notifyPendingWriteOnStream(HTTPCodec::StreamID,

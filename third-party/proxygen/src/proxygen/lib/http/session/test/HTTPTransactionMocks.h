@@ -238,7 +238,7 @@ class MockHTTPTransactionTransport : public HTTPTransaction::Transport {
               (HTTPCodec::StreamID,
                std::unique_ptr<folly::IOBuf>,
                bool,
-               WebTransport::DeliveryCallback*));
+               WebTransport::ByteEventCallback*));
   MOCK_METHOD((folly::Expected<folly::Unit, WebTransport::ErrorCode>),
               resetWebTransportEgress,
               (HTTPCodec::StreamID, uint32_t));

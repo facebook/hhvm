@@ -36,7 +36,7 @@ using TransparentTrackedKeyEqual = folly::test::TransparentTrackedEqual<0>;
 
 class DeserializeKnownLengthMapTest : public testing::Test {
  public:
-  DeserializeKnownLengthMapTest() { folly::test::resetTracking(); }
+  void SetUp() override { folly::test::resetTracking(); }
 };
 
 enum TrackedValues {
@@ -93,7 +93,7 @@ bool operator<(const TrackedKey& a, const TrackedKey& b) {
 
 } // namespace folly::test
 
-TEST(DeserializeKnownLengthMapTest, SortedUniqueConstuctCount) {
+TEST_F(DeserializeKnownLengthMapTest, SortedUniqueConstuctCount) {
   using Map = folly::sorted_vector_map<TrackedKey, TrackedValue>;
 
   static_assert(detail::pm::sorted_unique_constructible_v<Map>);
@@ -128,7 +128,7 @@ TEST(DeserializeKnownLengthMapTest, SortedUniqueConstuctCount) {
           /* destroyed */ 0}));
 }
 
-TEST(DeserializeKnownLengthMapTest, EmplaceHintConstuctCount) {
+TEST_F(DeserializeKnownLengthMapTest, EmplaceHintConstuctCount) {
   using Map = folly::F14FastMap<TrackedKey, TrackedValue>;
 
   static_assert(!detail::pm::sorted_unique_constructible_v<Map>);
@@ -164,7 +164,7 @@ TEST(DeserializeKnownLengthMapTest, EmplaceHintConstuctCount) {
           /* destroyed */ 1}));
 }
 
-TEST(DeserializeKnownLengthMapTest, EmplaceHintConstuctCountVec) {
+TEST_F(DeserializeKnownLengthMapTest, EmplaceHintConstuctCountVec) {
   using Vec = std::vector<TrackedValue>;
   using Map = folly::F14FastMap<TrackedKey, Vec>;
 
@@ -201,7 +201,7 @@ TEST(DeserializeKnownLengthMapTest, EmplaceHintConstuctCountVec) {
           /* destroyed */ 0}));
 }
 
-TEST(DeserializeKnownLengthMapTest, EmplaceConstuctCount) {
+TEST_F(DeserializeKnownLengthMapTest, EmplaceConstuctCount) {
   using Allocator = std::allocator<std::pair<const TrackedKey, TrackedValue>>;
   using Map = MinimalMap<
       TrackedKey,
@@ -243,7 +243,7 @@ TEST(DeserializeKnownLengthMapTest, EmplaceConstuctCount) {
           /* destroyed */ 0}));
 }
 
-TEST(DeserializeKnownLengthMapTest, EmplaceConstuctCountVec) {
+TEST_F(DeserializeKnownLengthMapTest, EmplaceConstuctCountVec) {
   using Vec = std::vector<TrackedValue>;
   using Allocator = std::allocator<std::pair<const TrackedKey, Vec>>;
   using Map = MinimalMap<
@@ -288,7 +288,7 @@ TEST(DeserializeKnownLengthMapTest, EmplaceConstuctCountVec) {
 
 #if FOLLY_HAS_MEMORY_RESOURCE
 
-TEST(DeserializeKnownLengthMapTest, EmplaceHintConstuctCountVecAlloc) {
+TEST_F(DeserializeKnownLengthMapTest, EmplaceHintConstuctCountVecAlloc) {
   using Map =
       folly::pmr::F14FastMap<TrackedKey, std::pmr::vector<TrackedValue>>;
 
@@ -327,7 +327,7 @@ TEST(DeserializeKnownLengthMapTest, EmplaceHintConstuctCountVecAlloc) {
           /* destroyed */ 0}));
 }
 
-TEST(DeserializeKnownLengthMapTest, EmplaceConstuctCountVecAlloc) {
+TEST_F(DeserializeKnownLengthMapTest, EmplaceConstuctCountVecAlloc) {
   using Vec = std::pmr::vector<TrackedValue>;
   using Allocator =
       std::pmr::polymorphic_allocator<std::pair<const TrackedKey, Vec>>;

@@ -30,7 +30,6 @@ let check pos env user_attributesl targs =
         if List.exists user_attributes ~f:is_no_union then begin
           let ty = Tast_env.strip_dynamic env ty in
           let (_, ty) = Tast_env.strip_supportdyn env ty in
-          Hh_logger.log "%s" (Typing_defs.show_locl_ty ty);
           match Typing_defs.get_node ty with
           | Typing_defs.Tunion ([] | [_]) -> ()
           | Typing_defs.Tunion tyl -> begin

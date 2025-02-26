@@ -35,6 +35,7 @@ from typing import (
 )
 
 from thrift.py3.common import Headers, Priority
+from thrift.python.types import ServiceInterface as PythonServiceInterface
 
 # pyre-ignore[33]: the callable can be any function
 mT = TypeVar("mT", bound=Callable[..., Any])
@@ -76,12 +77,13 @@ class AsyncProcessorFactory:
 class ServiceInterface(AsyncProcessorFactory):
     pass
 
-hT = TypeVar("hT", bound=AsyncProcessorFactory)
+Py3Interface = TypeVar("Py3Interface", bound=AsyncProcessorFactory)
+PythonInterface = TypeVar("PythonInterface", bound=PythonServiceInterface)
 
 class ThriftServer:
     def __init__(
         self,
-        handler: Optional[hT],
+        handler: Optional[Union[Py3Interface, PythonInterface]],
         port: int = 0,
         ip: Optional[Union[IPAddress, str]] = None,
         path: Optional[Path] = None,

@@ -42,4 +42,13 @@ void cancelPythonIterator(PyObject* iter) {
 
 } // namespace thrift::py3
 
+#else
+
+namespace thrift::py3 {
+
+void cancelPythonIterator(PyObject*) {
+  throw std::runtime_error(
+      "cancelPythonIterator not supported when coroutines are not available");
+}
+} // namespace thrift::py3
 #endif

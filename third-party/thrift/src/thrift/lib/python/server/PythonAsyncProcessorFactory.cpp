@@ -17,15 +17,16 @@
 #include <memory>
 #include <thrift/lib/python/server/PythonAsyncProcessor.h>
 #include <thrift/lib/python/server/PythonAsyncProcessorFactory.h>
-#include <thrift/lib/python/server/server_api.h> // @manual
+#include <thrift/lib/python/server/python_async_processor_api.h> // @manual
 
 namespace thrift::python {
 
 namespace {
 
 void do_import() {
-  if (0 != import_thrift__python__server()) {
-    throw std::runtime_error("import_thrift__python__server failed");
+  if (0 != import_thrift__python__server_impl__python_async_processor()) {
+    throw std::runtime_error(
+        "import thrift.python.server_impl.python_async_processor failed");
   }
 }
 

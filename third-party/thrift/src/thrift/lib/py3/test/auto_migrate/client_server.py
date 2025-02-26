@@ -39,18 +39,9 @@ from testing.types import Color, easy, HardError
 from thrift.py3.client import ClientType, get_client
 from thrift.py3.common import Priority, Protocol, RpcOptions
 from thrift.py3.exceptions import ApplicationError
-from thrift.py3.server import (
-    AsyncProcessorFactory,
-    get_context,
-    ServiceInterface,
-    SocketAddress,
-    ThriftServer,
-)
+from thrift.py3.server import get_context, ServiceInterface, SocketAddress, ThriftServer
 from thrift.py3.test.cpp_handler import CppHandler
-from thrift.python.server import (
-    ServiceInterface as PythonServiceInterface,
-    ThriftServer as PythonThriftServer,
-)
+from thrift.python.server import ServiceInterface as PythonServiceInterface
 
 
 class Handler(TestingServiceInterface):
@@ -127,12 +118,7 @@ class TestServer:
         handler: ServiceInterface | PythonServiceInterface = Handler(),  # noqa: B008
     ) -> None:
         self.serve_task: Optional[asyncio.Task] = None
-        if isinstance(handler, AsyncProcessorFactory):
-            self.server = ThriftServer(handler, ip=ip, path=path)
-        elif isinstance(handler, PythonServiceInterface):
-            self.server = PythonThriftServer(handler, ip=ip, path=path)
-        else:
-            raise RuntimeError(f"Unexpected handler: {handler}")
+        self.server = ThriftServer(handler, ip=ip, path=path)
 
     async def __aenter__(self) -> SocketAddress:
         self.serve_task = asyncio.get_event_loop().create_task(self.server.serve())

@@ -20,7 +20,6 @@ from libcpp.pair cimport pair
 from libcpp.vector cimport vector as cvector
 from folly.iobuf cimport cIOBuf
 from thrift.python.types cimport ServiceInterface as cServiceInterface
-from thrift.py3.server cimport ThriftServer as ThriftServer_py3
 from thrift.python.server_impl.async_processor cimport (
     cAsyncProcessorFactory,
     AsyncProcessorFactory,
@@ -79,6 +78,3 @@ cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
 
 cdef class PythonUserException(Exception):
     cdef unique_ptr[cPythonUserException] _cpp_obj
-
-cdef class ThriftServer(ThriftServer_py3):
-    cdef readonly cServiceInterface handler

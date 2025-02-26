@@ -22,7 +22,10 @@ from types import TracebackType
 from typing import Any, Awaitable, Callable, Mapping, Optional, Type, TypeVar, Union
 
 from folly.iobuf import IOBuf
-from thrift.py3.server import ThriftServer as ThriftServer_py3
+from thrift.py3.server import ThriftServer as _ThriftServer
+
+# they are now merged into one
+ThriftServer = _ThriftServer
 
 # This looks really dumb but otherwise this name doesn't get re-exported
 from thrift.python.types import ServiceInterface as ServiceInterface
@@ -41,13 +44,3 @@ class RpcKind(Enum):
 
 class PythonUserException(Exception):
     def __init__(self, type_: str, reason: str, buf: IOBuf) -> None: ...
-
-class ThriftServer(ThriftServer_py3):
-    def __init__(
-        self,
-        handler: ServiceInterface,
-        port: int = 0,
-        ip: Optional[IPAddress | str] = None,
-        path: Optional[Path] = None,
-        socket_fd: Optional[int] = None,
-    ) -> None: ...

@@ -28,7 +28,7 @@ from thrift.python.server_impl.event_handler cimport (
     cfollySocketAddress,
     cTransportRoutingHandler,
 )
-
+from thrift.python.types cimport ServiceInterface as PythonServiceInterface
 from thrift.python.server_impl.async_processor cimport (
     cAsyncProcessorFactory,
     AsyncProcessorFactory as Py3AsyncProcessorFactory,
@@ -133,7 +133,8 @@ cdef class ThriftServer:
     cdef object address_future
     cdef void set_is_overloaded(self, cIsOverloadedFunc is_overloaded)
     cdef void add_routing_handler(self, unique_ptr[cTransportRoutingHandler] handler)
-
+    # handler only set when initialized with thrift-python ServiceInterface
+    cdef PythonServiceInterface handler
 
 
 cdef class StatusServerInterface:

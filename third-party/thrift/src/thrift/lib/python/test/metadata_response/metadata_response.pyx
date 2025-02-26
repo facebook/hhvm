@@ -28,7 +28,8 @@ from folly.executor cimport get_executor
 from folly.futures cimport bridgeSemiFutureWith
 from libcpp.memory cimport unique_ptr
 from libcpp.utility cimport move as cmove
-from thrift.python.server cimport ThriftServer
+from thrift.py3.server cimport ThriftServer
+from thrift.python.server_impl.async_processor cimport AsyncProcessorFactory
 
 cdef void serialized_metadata_callback(cFollyTry[unique_ptr[cIOBuf]]&& result, PyObject* userdata) noexcept:
     pyfuture = <object> userdata

@@ -21,8 +21,8 @@ from libcpp.vector cimport vector as cvector
 from libcpp.string cimport string
 
 from folly.executor cimport cAsyncioExecutor
-from thrift.python.server cimport RpcKind
 from thrift.python.server_impl.async_processor cimport AsyncProcessorFactory
+from thrift.python.server_impl.python_async_processor cimport RpcKind
 
 ctypedef PyObject* PyObjPtr
 

@@ -30,6 +30,7 @@ import os
 
 from enum import Enum
 from thrift.python.common import Priority, Headers # noqa
+from thrift.python.types cimport ServiceInterface as PythonServiceInterface
 from thrift.python.server_impl.event_handler cimport (
     SSLPolicy__DISABLED,
     SSLPolicy__PERMITTED,
@@ -40,6 +41,7 @@ from thrift.python.server_impl.event_handler cimport (
 )
 from thrift.python.server_impl.async_processor import AsyncProcessorFactory as AsyncProcessorFactory_
 from thrift.python.server_impl.async_processor cimport EmptyAsyncProcessorFactory
+from thrift.python.server_impl.python_async_processor cimport PythonAsyncProcessorFactory
 from thrift.python.server_impl.request_context import ( # noqa
     ClientMetadata,
     ConnectionContext,
@@ -70,26 +72,39 @@ cdef class StatusServerInterface:
     pass
 
 
-
-
+# TODO: move this to thrift/lib/python/server.pyx when no longer referenced by
+# thrift/lib/py3/__init__.py
 cdef class ThriftServer:
     def __cinit__(self):
         self.server = make_shared[cThriftServer]()
 
-    def __init__(self, Py3AsyncProcessorFactory handler, int port=0, ip=None, path=None, socket_fd=None):
+    def __init__(self, handler, int port=0, ip=None, path=None, socket_fd=None):
+        # thrift-python path
+        if isinstance(handler, PythonServiceInterface):
+            self.handler = handler
+            self.factory = PythonAsyncProcessorFactory.create(handler)
+        # thrift-py3 path
+        elif isinstance(handler, Py3AsyncProcessorFactory):
+            self.handler = None
+            self.factory = handler
+        elif handler is None:
+            self.handler = None
+            self.factory = None
+        else:
+            raise TypeError("handler must be a ServiceInterface or AsyncProcessorFactory")
+
         self.loop = asyncio.get_event_loop()
-        self.factory = handler
-        if handler is not None:
+        if self.factory is not None:
             self.server.get().setThreadManagerFromExecutor(get_executor(), b'python_executor')
-            if handler._cpp_obj:
-                self.server.get().setInterface(handler._cpp_obj)
+            if self.factory._cpp_obj:
+                self.server.get().setInterface(self.factory._cpp_obj)
                 # Per the Thrift Resource Pools documentation, to enable resource pools,
                 # use `requireResourcePools()` on the server before it starts.
                 # Provide the opportunity for the handler implementation to
                 # determine whether to enable resource pools.
                 # For example, python servers have a Thrift Flag that gates the use of
                 # resource pools.
-                if handler.requireResourcePools():
+                if self.factory.requireResourcePools():
                     self.server.get().requireResourcePools()
             else:
                 raise RuntimeError(
@@ -276,3 +291,13 @@ cdef class ThriftServer:
 
     def set_use_client_timeout(self, cbool use_client_timeout):
         self.server.get().setUseClientTimeout(use_client_timeout)
+
+    @property
+    def handler(self):
+        if self.handler is not None:
+            return self.handler
+
+        raise AttributeError(
+            "ThriftServer handler attribute only available if initialized"
+            " with thrift-python ServiceInterface"
+        )

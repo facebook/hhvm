@@ -13,3 +13,4 @@ import (
 var _ = thrift.VOID
 
 var GoUnusedProtection__ int
+

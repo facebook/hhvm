@@ -19,6 +19,7 @@ import (
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background
 var _ = fmt.Printf
+var _ = io.EOF
 var _ = reflect.Ptr
 var _ = thrift.VOID
 var _ = metadata.GoUnusedProtection__
@@ -43,6 +44,14 @@ func NewDummyChannelClient(channel thrift.RequestChannel) *DummyClient {
     return &DummyClient{
         ch: channel,
     }
+}
+
+func NewDummyClient(prot thrift.DO_NOT_USE_ChannelWrapper) *DummyClient {
+    var channel thrift.RequestChannel
+    if prot != nil {
+        channel = prot.DO_NOT_USE_WrapChannel()
+    }
+    return NewDummyChannelClient(channel)
 }
 
 func (c *DummyClient) Close() error {
@@ -218,3 +227,5 @@ func (p *procFuncDummyOnewayRPC) RunContext(ctx context.Context, reqStruct thrif
 
     return nil, nil
 }
+
+

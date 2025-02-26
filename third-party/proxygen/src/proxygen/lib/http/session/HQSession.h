@@ -1882,11 +1882,6 @@ class HQSession
             HTTPCodec::StreamID /*id*/,
             folly::Optional<uint32_t> /*errorCode*/) override;
 
-   private:
-    // We keep track of this so that we know how many bytes we need to subtract
-    // off when we fire delivery callbacks.
-    folly::F14FastMap<HTTPCodec::StreamID, uint32_t> streamIdToPrefaceSize_;
-
   }; // HQStreamTransport
 
 #ifdef _MSC_VER

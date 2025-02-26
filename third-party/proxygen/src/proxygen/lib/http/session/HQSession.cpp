@@ -91,6 +91,30 @@ quic::Priority toQuicPriority(const proxygen::HTTPPriority& pri) {
   return quic::Priority(pri.urgency, pri.incremental, pri.orderId);
 }
 
+// Get the size of the WebTransport stream preface without actually encoding it
+folly::Expected<size_t, quic::TransportErrorCode> getWebTransportPrefaceSize(
+    proxygen::HTTPCodec::StreamID streamId, quic::StreamId wtSessionId) {
+  // The preface contains two QuicIntegers: One which represents whether the
+  // stream is unidirectional or bidirectional, and the other of which
+  // represents the session id. We just sum up the sizes of the two if they
+  // were to be encoded as QuicIntegers.
+  uint64_t encodedStreamType =
+      quic::isUnidirectionalStream(streamId)
+          ? folly::to_underlying(
+                proxygen::hq::UnidirectionalStreamType::WEBTRANSPORT)
+          : folly::to_underlying(
+                proxygen::hq::BidirectionalStreamType::WEBTRANSPORT);
+  auto maybeStreamTypeEncodedSize = quic::getQuicIntegerSize(encodedStreamType);
+  if (maybeStreamTypeEncodedSize.hasError()) {
+    return folly::makeUnexpected(maybeStreamTypeEncodedSize.error());
+  }
+  auto maybeSessionIdEncodedSize = quic::getQuicIntegerSize(wtSessionId);
+  if (maybeSessionIdEncodedSize.hasError()) {
+    return folly::makeUnexpected(maybeSessionIdEncodedSize.error());
+  }
+  return *maybeStreamTypeEncodedSize + *maybeSessionIdEncodedSize;
+}
+
 // Returns the number of bytes written. 0 if error.
 uint32_t writeWTStreamPrefaceToSock(
     quic::QuicSocket& sock,
@@ -3839,7 +3863,6 @@ HQSession::HQStreamTransport::newWebTransportBidiStream() {
     return folly::makeUnexpected(
         WebTransport::ErrorCode::STREAM_CREATION_ERROR);
   }
-  streamIdToPrefaceSize_[*id] = numPrefaceBytesWritten;
   return *id;
 }
 
@@ -3862,7 +3885,6 @@ HQSession::HQStreamTransport::newWebTransportUniStream() {
     return folly::makeUnexpected(
         WebTransport::ErrorCode::STREAM_CREATION_ERROR);
   }
-  streamIdToPrefaceSize_[*id] = numPrefaceBytesWritten;
   return *id;
 }
 
@@ -3873,9 +3895,10 @@ HQSession::HQStreamTransport::sendWebTransportStreamData(
     bool eof,
     WebTransport::ByteEventCallback* deliveryCallback) {
   if (deliveryCallback) {
-    uint32_t prefaceSize =
-        streamIdToPrefaceSize_.contains(id) ? streamIdToPrefaceSize_[id] : 0;
-    deliveryCallback->setWritePrefaceSize(prefaceSize);
+    auto maybePrefaceSize = getWebTransportPrefaceSize(id, getEgressStreamId());
+    if (maybePrefaceSize) {
+      deliveryCallback->setWritePrefaceSize(*maybePrefaceSize);
+    }
   }
   auto res =
       session_.sock_->writeChain(id, std::move(data), eof, deliveryCallback);
@@ -3907,7 +3930,6 @@ HQSession::HQStreamTransport::notifyPendingWriteOnStream(
 folly::Expected<folly::Unit, WebTransport::ErrorCode>
 HQSession::HQStreamTransport::resetWebTransportEgress(HTTPCodec::StreamID id,
                                                       uint32_t errorCode) {
-  streamIdToPrefaceSize_.erase(id);
   if (session_.sock_) {
     auto res = session_.sock_->resetStream(
         id,

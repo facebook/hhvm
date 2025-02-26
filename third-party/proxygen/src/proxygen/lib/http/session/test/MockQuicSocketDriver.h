@@ -97,8 +97,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
     folly::Optional<quic::ApplicationErrorCode> error;
     QuicSocket::ReadCallback* readCB{nullptr};
     QuicSocket::PeekCallback* peekCB{nullptr};
-    using ByteEventList =
-        std::list<std::pair<uint64_t, QuicSocket::ByteEventCallback*>>;
+    using ByteEventList = std::list<std::pair<uint64_t, ByteEventCallback*>>;
     ByteEventList txCallbacks;
     ByteEventList deliveryCallbacks;
     uint64_t flowControlWindow{65536};
@@ -503,12 +502,11 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
 
     EXPECT_CALL(*sock_,
                 writeChain(testing::_, testing::_, testing::_, testing::_))
-        .WillRepeatedly(
-            testing::Invoke([this](StreamId id,
-                                   MockQuicSocket::SharedBuf data,
-                                   bool eof,
-                                   QuicSocket::ByteEventCallback* cb)
-                                -> quic::MockQuicSocket::WriteResult {
+        .WillRepeatedly(testing::Invoke(
+            [this](StreamId id,
+                   MockQuicSocket::SharedBuf data,
+                   bool eof,
+                   ByteEventCallback* cb) -> quic::MockQuicSocket::WriteResult {
               ERROR_IF(id == kConnectionStreamId,
                        "writeChain(kConnectionStreamId) not handled",
                        return folly::makeUnexpected(
@@ -561,7 +559,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
                 // The API doesn't allow for registering a last-byte tx cb here
                 auto finOffset =
                     stream.nextWriteOffset + stream.unsentBuf.chainLength();
-                auto type = quic::QuicSocket::ByteEvent::Type::ACK;
+                auto type = quic::ByteEvent::Type::ACK;
                 VLOG(4) << "onByteEventRegistered id=" << id
                         << " offset=" << finOffset
                         << " type=" << uint64_t(type);
@@ -580,12 +578,11 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
 
     EXPECT_CALL(*sock_,
                 writeBufMeta(testing::_, testing::_, testing::_, testing::_))
-        .WillRepeatedly(
-            testing::Invoke([this](StreamId id,
-                                   const BufferMeta& data,
-                                   bool eof,
-                                   QuicSocket::ByteEventCallback* cb)
-                                -> quic::MockQuicSocket::WriteResult {
+        .WillRepeatedly(testing::Invoke(
+            [this](StreamId id,
+                   const BufferMeta& data,
+                   bool eof,
+                   ByteEventCallback* cb) -> quic::MockQuicSocket::WriteResult {
               ERROR_IF(id == kConnectionStreamId,
                        "writeChain(kConnectionStreamId) not handled",
                        return folly::makeUnexpected(
@@ -646,7 +643,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
                 auto finOffset = stream.nextWriteOffset +
                                  stream.pendingBufMetaLength +
                                  stream.unsentBufMeta.length;
-                auto type = quic::QuicSocket::ByteEvent::Type::ACK;
+                auto type = quic::ByteEvent::Type::ACK;
                 VLOG(4) << "onByteEventRegistered id=" << id
                         << " offset=" << finOffset
                         << " type=" << uint64_t(type);
@@ -803,30 +800,26 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
     EXPECT_CALL(*sock_,
                 registerDeliveryCallback(testing::_, testing::_, testing::_))
         .WillRepeatedly(testing::Invoke(
-            [this](quic::StreamId id,
-                   uint64_t offset,
-                   MockQuicSocket::ByteEventCallback* cb)
+            [this](quic::StreamId id, uint64_t offset, ByteEventCallback* cb)
                 -> folly::Expected<folly::Unit, LocalErrorCode> {
               return sock_->registerByteEventCallback(
-                  quic::QuicSocket::ByteEvent::Type::ACK, id, offset, cb);
+                  quic::ByteEvent::Type::ACK, id, offset, cb);
             }));
     EXPECT_CALL(*sock_, registerTxCallback(testing::_, testing::_, testing::_))
         .WillRepeatedly(testing::Invoke(
-            [this](quic::StreamId id,
-                   uint64_t offset,
-                   MockQuicSocket::ByteEventCallback* cb)
+            [this](quic::StreamId id, uint64_t offset, ByteEventCallback* cb)
                 -> folly::Expected<folly::Unit, LocalErrorCode> {
               return sock_->registerByteEventCallback(
-                  quic::QuicSocket::ByteEvent::Type::TX, id, offset, cb);
+                  quic::ByteEvent::Type::TX, id, offset, cb);
             }));
     EXPECT_CALL(*sock_,
                 registerByteEventCallback(
                     testing::_, testing::_, testing::_, testing::_))
         .WillRepeatedly(testing::Invoke(
-            [this](MockQuicSocket::ByteEvent::Type type,
+            [this](ByteEvent::Type type,
                    quic::StreamId id,
                    uint64_t offset,
-                   MockQuicSocket::ByteEventCallback* cb)
+                   ByteEventCallback* cb)
                 -> folly::Expected<folly::Unit, LocalErrorCode> {
               auto& connState = streams_[kConnectionStreamId];
               ERROR_IF(connState.writeState == CLOSED,
@@ -859,7 +852,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
                 return folly::unit;
               }
 
-              if (type == quic::QuicSocket::ByteEvent::Type::ACK) {
+              if (type == quic::ByteEvent::Type::ACK) {
                 it->second.deliveryCallbacks.emplace_back(offset, cb);
               } else {
                 it->second.txCallbacks.emplace_back(offset, cb);
@@ -1057,16 +1050,12 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
   void cancelDeliveryCallbacks(quic::StreamId id, StreamState& stream) {
     while (!stream.txCallbacks.empty()) {
       stream.txCallbacks.front().second->onByteEventCanceled(
-          {id,
-           stream.txCallbacks.front().first,
-           QuicSocket::ByteEvent::Type::TX});
+          {id, stream.txCallbacks.front().first, ByteEvent::Type::TX});
       stream.txCallbacks.pop_front();
     }
     while (!stream.deliveryCallbacks.empty()) {
       stream.deliveryCallbacks.front().second->onByteEventCanceled(
-          {id,
-           stream.deliveryCallbacks.front().first,
-           QuicSocket::ByteEvent::Type::ACK});
+          {id, stream.deliveryCallbacks.front().first, ByteEvent::Type::ACK});
       stream.deliveryCallbacks.pop_front();
     }
   }
@@ -1167,8 +1156,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
     }
 
     // Deliver tx callbacks
-    fireCallbacks(
-        id, stream, stream.txCallbacks, QuicSocket::ByteEvent::Type::TX);
+    fireCallbacks(id, stream, stream.txCallbacks, ByteEvent::Type::TX);
 
     // delay delivery callbacks 50ms
     eventBase_->runAfterDelay(
@@ -1176,10 +1164,8 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
           if (*deleted) {
             return;
           }
-          fireCallbacks(id,
-                        stream,
-                        stream.deliveryCallbacks,
-                        QuicSocket::ByteEvent::Type::ACK);
+          fireCallbacks(
+              id, stream, stream.deliveryCallbacks, ByteEvent::Type::ACK);
         },
         50);
   }
@@ -1187,7 +1173,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
   void fireCallbacks(uint64_t id,
                      StreamState& stream,
                      StreamState::ByteEventList& callbacks,
-                     QuicSocket::ByteEvent::Type type) {
+                     ByteEvent::Type type) {
     while (!callbacks.empty()) {
       auto cb = callbacks.front();
       if (!stream.fireByteEventAt(cb.first)) {

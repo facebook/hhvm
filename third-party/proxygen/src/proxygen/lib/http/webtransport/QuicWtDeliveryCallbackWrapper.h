@@ -14,8 +14,7 @@
 
 namespace proxygen {
 
-class QuicWtDeliveryCallbackWrapper
-    : public quic::QuicSocketLite::ByteEventCallback {
+class QuicWtDeliveryCallbackWrapper : public quic::ByteEventCallback {
  public:
   explicit QuicWtDeliveryCallbackWrapper(
       WebTransport::DeliveryCallback* deliveryCallback,
@@ -24,16 +23,15 @@ class QuicWtDeliveryCallbackWrapper
         offsetToSubtract_(offsetToSubtract) {
   }
 
-  void onByteEvent(quic::QuicSocketLite::ByteEvent byteEvent) override {
-    XCHECK_EQ(byteEvent.type, quic::QuicSocketLite::ByteEvent::Type::ACK);
+  void onByteEvent(quic::ByteEvent byteEvent) override {
+    XCHECK_EQ(byteEvent.type, quic::ByteEvent::Type::ACK);
     deliveryCallback_->onDelivery(byteEvent.id,
                                   byteEvent.offset - offsetToSubtract_);
     delete this;
   }
 
-  void onByteEventCanceled(
-      quic::QuicSocketLite::ByteEventCancellation cancellation) override {
-    XCHECK_EQ(cancellation.type, quic::QuicSocketLite::ByteEvent::Type::ACK);
+  void onByteEventCanceled(quic::ByteEventCancellation cancellation) override {
+    XCHECK_EQ(cancellation.type, quic::ByteEvent::Type::ACK);
     deliveryCallback_->onDeliveryCancelled(
         cancellation.id, cancellation.offset - offsetToSubtract_);
     delete this;

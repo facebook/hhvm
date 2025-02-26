@@ -3357,7 +3357,7 @@ void HQSession::HQStreamTransportBase::trackEgressBodyOffset(
 }
 
 void HQSession::HQStreamTransportBase::armStreamByteEventCb(
-    uint64_t streamOffset, quic::QuicSocket::ByteEvent::Type type) {
+    uint64_t streamOffset, quic::ByteEvent::Type type) {
   auto res = session_.sock_->registerByteEventCallback(
       type, getEgressStreamId(), streamOffset, this);
   if (res.hasError()) {
@@ -3384,7 +3384,7 @@ void HQSession::HQStreamTransportBase::armEgressHeadersAckCb(
     uint64_t streamOffset) {
   VLOG(4) << __func__ << ": registering headers delivery callback for offset="
           << streamOffset << "; sess=" << session_ << "; txn=" << txn_;
-  armStreamByteEventCb(streamOffset, quic::QuicSocket::ByteEvent::Type::ACK);
+  armStreamByteEventCb(streamOffset, quic::ByteEvent::Type::ACK);
   egressHeadersAckOffset_ = streamOffset;
 }
 
@@ -3396,7 +3396,7 @@ void HQSession::HQStreamTransportBase::armEgressBodyCallbacks(
           << streamOffset << "; flags=" << uint32_t(eventFlags)
           << "; sess=" << session_ << "; txn=" << txn_;
   if (eventFlags & proxygen::ByteEvent::EventFlags::TX) {
-    armStreamByteEventCb(streamOffset, quic::QuicSocket::ByteEvent::Type::TX);
+    armStreamByteEventCb(streamOffset, quic::ByteEvent::Type::TX);
     auto res = egressBodyByteEventOffsets_.try_emplace(
         streamOffset, BodyByteOffset(bodyOffset, 1));
     if (!res.second) {
@@ -3404,7 +3404,7 @@ void HQSession::HQStreamTransportBase::armEgressBodyCallbacks(
     }
   }
   if (eventFlags & proxygen::ByteEvent::EventFlags::ACK) {
-    armStreamByteEventCb(streamOffset, quic::QuicSocket::ByteEvent::Type::ACK);
+    armStreamByteEventCb(streamOffset, quic::ByteEvent::Type::ACK);
     auto res = egressBodyByteEventOffsets_.try_emplace(
         streamOffset, BodyByteOffset(bodyOffset, 1));
     if (!res.second) {
@@ -3431,7 +3431,7 @@ void HQSession::HQStreamTransportBase::handleHeadersAcked(
 }
 
 void HQSession::HQStreamTransportBase::handleBodyEvent(
-    uint64_t streamOffset, quic::QuicSocket::ByteEvent::Type type) {
+    uint64_t streamOffset, quic::ByteEvent::Type type) {
   auto g = folly::makeGuard(setActiveCodec(__func__));
 
   auto bodyOffset = resetEgressBodyEventOffset(streamOffset);
@@ -3444,15 +3444,15 @@ void HQSession::HQStreamTransportBase::handleBodyEvent(
           << " for egress body, bodyOffset=" << *bodyOffset
           << "; sess=" << session_ << "; txn=" << txn_;
 
-  if (type == quic::QuicSocket::ByteEvent::Type::ACK) {
+  if (type == quic::ByteEvent::Type::ACK) {
     txn_.onEgressBodyBytesAcked(*bodyOffset);
-  } else if (type == quic::QuicSocket::ByteEvent::Type::TX) {
+  } else if (type == quic::ByteEvent::Type::TX) {
     txn_.onEgressBodyBytesTx(*bodyOffset);
   }
 }
 
 void HQSession::HQStreamTransportBase::handleBodyEventCancelled(
-    uint64_t streamOffset, quic::QuicSocket::ByteEvent::Type) {
+    uint64_t streamOffset, quic::ByteEvent::Type) {
   auto g = folly::makeGuard(setActiveCodec(__func__));
 
   auto bodyOffset = resetEgressBodyEventOffset(streamOffset);
@@ -3467,8 +3467,7 @@ void HQSession::HQStreamTransportBase::handleBodyEventCancelled(
   txn_.onEgressBodyDeliveryCanceled(*bodyOffset);
 }
 
-void HQSession::HQStreamTransportBase::onByteEvent(
-    quic::QuicSocket::ByteEvent byteEvent) {
+void HQSession::HQStreamTransportBase::onByteEvent(quic::ByteEvent byteEvent) {
   VLOG(4) << __func__ << ": got byte event type=" << uint32_t(byteEvent.type)
           << " for offset=" << byteEvent.offset << "; sess=" << session_
           << "; txn=" << txn_;
@@ -3480,7 +3479,7 @@ void HQSession::HQStreamTransportBase::onByteEvent(
   // For a given type (ACK|TX), onByteEvent calls will be called from QuicSocket
   // with monotonically increasing offsets.
   if (egressHeadersAckOffset_) {
-    if (byteEvent.type == quic::QuicSocket::ByteEvent::Type::ACK) {
+    if (byteEvent.type == quic::ByteEvent::Type::ACK) {
       handleHeadersAcked(byteEvent.offset);
       return;
     }
@@ -3491,7 +3490,7 @@ void HQSession::HQStreamTransportBase::onByteEvent(
 }
 
 void HQSession::HQStreamTransportBase::onByteEventCanceled(
-    quic::QuicSocket::ByteEventCancellation cancellation) {
+    quic::ByteEventCancellation cancellation) {
   VLOG(3) << __func__ << ": data cancelled on stream=" << cancellation.id
           << ", type=" << uint32_t(cancellation.type)
           << ", offset=" << cancellation.offset << "; sess=" << session_
@@ -3503,7 +3502,7 @@ void HQSession::HQStreamTransportBase::onByteEventCanceled(
   // Are byte events of a given type always cancelled in offset order?
 
   if (egressHeadersAckOffset_) {
-    if (cancellation.type == quic::QuicSocket::ByteEvent::Type::ACK) {
+    if (cancellation.type == quic::ByteEvent::Type::ACK) {
       resetEgressHeadersAckOffset();
       return;
     }

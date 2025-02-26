@@ -1093,7 +1093,7 @@ class HQSession
       : public HQStreamBase
       , public HTTPTransaction::Transport
       , public HTTP2PriorityQueueBase
-      , public quic::QuicSocket::ByteEventCallback {
+      , public quic::ByteEventCallback {
    protected:
     HQStreamTransportBase(
         HQSession& session,
@@ -1134,9 +1134,8 @@ class HQSession
         const folly::Range<quic::QuicSocket::PeekIterator>& peekData);
 
     // QuicSocket::DeliveryCallback
-    void onByteEvent(quic::QuicSocket::ByteEvent byteEvent) override;
-    void onByteEventCanceled(
-        quic::QuicSocket::ByteEventCancellation cancellation) override;
+    void onByteEvent(quic::ByteEvent byteEvent) override;
+    void onByteEventCanceled(quic::ByteEventCancellation cancellation) override;
 
     // HTTPCodec::Callback methods
     void onMessageBegin(HTTPCodec::StreamID streamID,
@@ -1702,7 +1701,7 @@ class HQSession
     HTTPTransaction::BufferMeta bufMeta_;
 
     void armStreamByteEventCb(uint64_t streamOffset,
-                              quic::QuicSocket::ByteEvent::Type type);
+                              quic::ByteEvent::Type type);
     void armEgressHeadersAckCb(uint64_t streamOffset);
     void armEgressBodyCallbacks(uint64_t bodyOffset,
                                 uint64_t streamOffset,
@@ -1740,10 +1739,9 @@ class HQSession
         HTTPHeaderSize* size) noexcept;
     void coalesceEOM(size_t encodedBodySize);
     void handleHeadersAcked(uint64_t streamOffset);
-    void handleBodyEvent(uint64_t streamOffset,
-                         quic::QuicSocket::ByteEvent::Type type);
+    void handleBodyEvent(uint64_t streamOffset, quic::ByteEvent::Type type);
     void handleBodyEventCancelled(uint64_t streamOffset,
-                                  quic::QuicSocket::ByteEvent::Type type);
+                                  quic::ByteEvent::Type type);
     uint64_t bodyBytesEgressed_{0};
     folly::Optional<uint64_t> egressHeadersAckOffset_;
     struct BodyByteOffset {

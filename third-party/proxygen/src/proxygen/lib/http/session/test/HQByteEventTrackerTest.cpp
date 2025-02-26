@@ -20,8 +20,8 @@
 using namespace testing;
 using namespace proxygen;
 
-using QuicByteEvent = quic::QuicSocket::ByteEvent;
-using QuicByteEventType = quic::QuicSocket::ByteEvent::Type;
+using QuicByteEvent = quic::ByteEvent;
+using QuicByteEventType = quic::ByteEvent::Type;
 
 class HQByteEventTrackerTest : public Test {
  public:
@@ -36,12 +36,12 @@ class HQByteEventTrackerTest : public Test {
   /**
    * Setup an EXPECT_CALL for QuicSocket::registerTxCallback.
    */
-  std::unique_ptr<quic::QuicSocket::ByteEventCallback*>
-  expectRegisterTxCallback(const uint64_t offset,
-                           folly::Expected<folly::Unit, quic::LocalErrorCode>
-                               returnVal = folly::Unit()) const {
+  std::unique_ptr<quic::ByteEventCallback*> expectRegisterTxCallback(
+      const uint64_t offset,
+      folly::Expected<folly::Unit, quic::LocalErrorCode> returnVal =
+          folly::Unit()) const {
     auto capturedCallbackPtr =
-        std::make_unique<quic::QuicSocket::ByteEventCallback*>(nullptr);
+        std::make_unique<quic::ByteEventCallback*>(nullptr);
     EXPECT_CALL(*socket_, registerTxCallback(streamId_, offset, _))
         .WillOnce(
             DoAll(SaveArg<2>(&*capturedCallbackPtr.get()), Return(returnVal)));
@@ -54,13 +54,12 @@ class HQByteEventTrackerTest : public Test {
    * Returns a unique_ptr<ptr*> where the inner pointer will be populated to
    * point to the callback handler passed to registerDeliveryCallback.
    */
-  std::unique_ptr<quic::QuicSocket::ByteEventCallback*>
-  expectRegisterDeliveryCallback(
+  std::unique_ptr<quic::ByteEventCallback*> expectRegisterDeliveryCallback(
       const uint64_t offset,
       folly::Expected<folly::Unit, quic::LocalErrorCode> returnVal =
           folly::Unit()) const {
     auto capturedCallbackPtr =
-        std::make_unique<quic::QuicSocket::ByteEventCallback*>(nullptr);
+        std::make_unique<quic::ByteEventCallback*>(nullptr);
     EXPECT_CALL(*socket_, registerDeliveryCallback(streamId_, offset, _))
         .WillOnce(
             DoAll(SaveArg<2>(&*capturedCallbackPtr.get()), Return(returnVal)));

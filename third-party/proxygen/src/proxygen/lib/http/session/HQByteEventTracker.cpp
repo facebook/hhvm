@@ -11,18 +11,18 @@
 namespace {
 class HQTransportByteEvent
     : public proxygen::TransactionByteEvent
-    , public quic::QuicSocket::ByteEventCallback {
+    , public quic::ByteEventCallback {
 
  public:
   using TransactionByteEvent::TransactionByteEvent;
 
-  void onByteEvent(quic::QuicSocket::ByteEvent byteEvent) override {
+  void onByteEvent(quic::ByteEvent byteEvent) override {
     if (txn_) {
       switch (byteEvent.type) {
-        case quic::QuicSocket::ByteEvent::Type::TX:
+        case quic::ByteEvent::Type::TX:
           txn_->onEgressTrackedByteEventTX(*this);
           break;
-        case quic::QuicSocket::ByteEvent::Type::ACK:
+        case quic::ByteEvent::Type::ACK:
           txn_->onEgressTrackedByteEventAck(*this);
           break;
       }
@@ -31,7 +31,7 @@ class HQTransportByteEvent
   }
 
   void onByteEventCanceled(
-      quic::QuicSocket::ByteEventCancellation /* cancellation */) override {
+      quic::ByteEventCancellation /* cancellation */) override {
     delete this;
   }
 };

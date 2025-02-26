@@ -3291,18 +3291,16 @@ TEST_P(HQDownstreamSessionTestDeliveryAck,
 
   // This is a copy of the one in MockQuicSocketDriver, only hijacks data stream
   // and forces an error.
-  EXPECT_CALL(*sock,
-              registerByteEventCallback(quic::QuicSocket::ByteEvent::Type::ACK,
-                                        testing::_,
-                                        testing::_,
-                                        testing::_))
-      .WillRepeatedly(
-          testing::Invoke([streamId, &socketDriver = socketDriver_](
-                              quic::QuicSocket::ByteEvent::Type,
-                              quic::StreamId id,
-                              uint64_t offset,
-                              MockQuicSocket::ByteEventCallback* cb)
-                              -> folly::Expected<folly::Unit, LocalErrorCode> {
+  EXPECT_CALL(
+      *sock,
+      registerByteEventCallback(
+          quic::ByteEvent::Type::ACK, testing::_, testing::_, testing::_))
+      .WillRepeatedly(testing::Invoke(
+          [streamId, &socketDriver = socketDriver_](quic::ByteEvent::Type,
+                                                    quic::StreamId id,
+                                                    uint64_t offset,
+                                                    quic::ByteEventCallback* cb)
+              -> folly::Expected<folly::Unit, LocalErrorCode> {
             if (id == streamId) {
               return folly::makeUnexpected(LocalErrorCode::INVALID_OPERATION);
             }
@@ -3345,7 +3343,8 @@ TEST_P(HQDownstreamSessionTestDeliveryAck, TestBodyDeliveryAck) {
     handler->sendHeaders(200, length);
     handler->sendBody(length);
     EXPECT_TRUE(handler->txn_->trackEgressBodyOffset(
-        handler->txn_->bodyBytesSent() - 1, ByteEvent::EventFlags::ACK));
+        handler->txn_->bodyBytesSent() - 1,
+        proxygen::ByteEvent::EventFlags::ACK));
     handler->sendEOM();
   });
 
@@ -3370,7 +3369,7 @@ TEST_P(HQDownstreamSessionTestDeliveryAck, TestBodyTxCallback) {
     handler->txn_->setTransportCallback(&transportCallback_);
     handler->sendHeaders(200, length);
     EXPECT_TRUE(handler->txn_->trackEgressBodyOffset(
-        offset, ByteEvent::EventFlags::TX));
+        offset, proxygen::ByteEvent::EventFlags::TX));
     handler->sendBody(length);
     handler->sendEOM();
   });
@@ -3398,9 +3397,11 @@ TEST_P(HQDownstreamSessionTestDeliveryAck, TestBodyDeliveryAckMultiple) {
     handler->sendHeaders(200, length);
     // Test registering callbacks before sendBody
     EXPECT_TRUE(handler->txn_->trackEgressBodyOffset(
-        offset1, ByteEvent::EventFlags::TX | ByteEvent::EventFlags::ACK));
+        offset1,
+        proxygen::ByteEvent::EventFlags::TX |
+            proxygen::ByteEvent::EventFlags::ACK));
     EXPECT_TRUE(handler->txn_->trackEgressBodyOffset(
-        offset2, ByteEvent::EventFlags::ACK));
+        offset2, proxygen::ByteEvent::EventFlags::ACK));
     handler->sendBody(42);
     handler->sendBody(17);
     handler->sendEOM();
@@ -3429,7 +3430,7 @@ TEST_P(HQDownstreamSessionTestDeliveryAck, TestBodyDeliveryErr) {
     handler->txn_->setTransportCallback(&transportCallback_);
     handler->sendHeaders(200, length);
     EXPECT_TRUE(handler->txn_->trackEgressBodyOffset(
-        offset, ByteEvent::EventFlags::ACK));
+        offset, proxygen::ByteEvent::EventFlags::ACK));
   });
   flushRequestsAndLoop();
   EXPECT_TRUE(transportCallback_.lastEgressHeadersByteDelivered_);
@@ -3444,18 +3445,17 @@ TEST_P(HQDownstreamSessionTestDeliveryAck, TestBodyDeliveryErr) {
 
   // This is a copy of the one in MockQuicSocketDriver, only hijacks data stream
   // and forces an error.
-  EXPECT_CALL(*sock,
-              registerByteEventCallback(quic::QuicSocket::ByteEvent::Type::ACK,
-                                        testing::_,
-                                        testing::_,
-                                        testing::_))
+  EXPECT_CALL(
+      *sock,
+      registerByteEventCallback(
+          quic::ByteEvent::Type::ACK, testing::_, testing::_, testing::_))
       .WillRepeatedly(testing::Invoke(
           [streamId,
            &streamOffsetAfterHeaders = streamOffsetAfterHeaders,
-           &socketDriver = socketDriver_](quic::QuicSocket::ByteEvent::Type,
+           &socketDriver = socketDriver_](quic::ByteEvent::Type,
                                           quic::StreamId id,
                                           uint64_t offset,
-                                          MockQuicSocket::ByteEventCallback* cb)
+                                          quic::ByteEventCallback* cb)
               -> folly::Expected<folly::Unit, LocalErrorCode> {
             if (id == streamId && offset > streamOffsetAfterHeaders) {
               for (auto& it : socketDriver->streams_) {
@@ -3505,7 +3505,9 @@ TEST_P(HQDownstreamSessionTestDeliveryAck, TestBodyDeliveryCancel) {
     handler->txn_->setTransportCallback(&transportCallback_);
     handler->sendHeaders(200, length);
     EXPECT_TRUE(handler->txn_->trackEgressBodyOffset(
-        offset, ByteEvent::EventFlags::TX | ByteEvent::EventFlags::ACK));
+        offset,
+        proxygen::ByteEvent::EventFlags::TX |
+            proxygen::ByteEvent::EventFlags::ACK));
     handler->sendBody(length);
     // handler->sendEOM();
   });

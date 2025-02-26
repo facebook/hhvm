@@ -103,8 +103,10 @@ struct TWrapped {
   2: binary fieldB;
 }
 
-@cpp.Type{name = "::thrift::test::python_capi::CppWrapperT"}
-typedef TWrapped (cpp.indirection) CppWrapper
+@cpp.Adapter{
+  name = "::apache::thrift::IndirectionAdapter<::thrift::test::python_capi::CppWrapperT>",
+}
+typedef TWrapped CppWrapper
 
 typedef list<CppWrapper> ListOfWrapped
 

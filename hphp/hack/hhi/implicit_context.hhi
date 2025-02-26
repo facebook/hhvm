@@ -70,6 +70,14 @@ namespace HH {
      * callee will result in an exception.
      */
     string MakeICInaccessible = 'MakeICInaccessible';
+    /**
+     * Do not incorporate the Implicit Context state into the memoization cache
+     * key.
+     * Attempting to fetch the Implicit Context is allowed.
+     * Do not use this unless you know what you're doing.
+     */
+    string NotKeyedByICAndLeakIC__DO_NOT_USE = 'NotKeyedByICAndLeakIC__DO_NOT_USE';
+
   }
 
   /**

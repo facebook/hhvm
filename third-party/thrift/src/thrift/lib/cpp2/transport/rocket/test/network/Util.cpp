@@ -24,7 +24,6 @@
 
 #include <folly/ExceptionWrapper.h>
 #include <folly/Range.h>
-#include <folly/io/IOBuf.h>
 
 #include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>

@@ -19,8 +19,6 @@
 #include <glog/logging.h>
 
 #include <folly/ExceptionWrapper.h>
-#include <folly/io/async/Request.h>
-#include <folly/synchronization/Baton.h>
 #include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 #include <thrift/lib/cpp2/transport/core/RpcMetadataPlugins.h>

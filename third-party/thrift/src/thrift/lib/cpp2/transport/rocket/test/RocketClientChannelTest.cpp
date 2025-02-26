@@ -29,7 +29,6 @@
 #include <folly/fibers/FiberManagerMap.h>
 #include <folly/futures/Future.h>
 #include <folly/io/Cursor.h>
-#include <folly/io/IOBufQueue.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBase.h>
 
@@ -39,7 +38,6 @@
 #include <thrift/lib/cpp2/async/ServerStream.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestService.h>
 #include <thrift/lib/cpp2/transport/core/RpcMetadataPlugins.h>
-#include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
 #include <thrift/lib/cpp2/transport/rocket/test/util/TestUtil.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 

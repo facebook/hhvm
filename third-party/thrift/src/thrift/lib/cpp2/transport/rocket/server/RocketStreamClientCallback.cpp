@@ -28,7 +28,6 @@
 #include <folly/io/IOBufQueue.h>
 #include <folly/io/async/EventBase.h>
 
-#include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
@@ -37,7 +36,6 @@
 #include <thrift/lib/cpp2/transport/rocket/framing/ErrorCode.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Flags.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
-#include <thrift/lib/cpp2/transport/rocket/server/RocketServerFrameContext.h>
 
 namespace apache::thrift::rocket {
 

@@ -17,7 +17,6 @@
 #include <thrift/lib/cpp2/transport/rocket/framing/Util.h>
 
 #include <cstdint>
-#include <exception>
 #include <string>
 
 #include <folly/Conv.h>

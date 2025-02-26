@@ -28,7 +28,6 @@
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
 #include <thrift/lib/cpp2/server/LoggingEventHelper.h>
 #include <thrift/lib/cpp2/transport/http2/server/ThriftRequestHandler.h>
-#include <wangle/acceptor/ManagedConnection.h>
 
 DEFINE_uint32(stream_timeout_ms, 1000, "Stream timeout in milliseconds");
 

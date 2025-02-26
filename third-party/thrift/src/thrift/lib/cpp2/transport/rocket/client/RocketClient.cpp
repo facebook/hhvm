@@ -24,7 +24,6 @@
 
 #include <fmt/core.h>
 #include <folly/Conv.h>
-#include <folly/CppAttributes.h>
 #include <folly/ExceptionWrapper.h>
 #include <folly/GLog.h>
 #include <folly/Likely.h>

@@ -25,13 +25,10 @@
 #include <proxygen/lib/http/session/HTTPTransaction.h>
 #include <proxygen/lib/utils/WheelTimerInstance.h>
 #include <thrift/lib/cpp/transport/TTransportException.h>
-#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/transport/core/ThriftClient.h>
 #include <thrift/lib/cpp2/transport/http2/client/ThriftTransactionHandler.h>
 #include <thrift/lib/cpp2/transport/http2/common/SingleRpcChannel.h>
 #include <wangle/acceptor/TransportInfo.h>
-
-#include <algorithm>
 
 namespace apache::thrift {
 

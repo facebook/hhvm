@@ -17,7 +17,6 @@
 #include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
 
 #include <chrono>
-#include <map>
 #include <string>
 #include <utility>
 

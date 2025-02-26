@@ -20,9 +20,7 @@
 
 #include <fmt/core.h>
 #include <folly/Likely.h>
-#include <folly/Range.h>
 #include <folly/io/IOBuf.h>
-#include <folly/io/IOBufQueue.h>
 #include <folly/lang/Assume.h>
 
 #include <thrift/lib/cpp/transport/TTransportException.h>

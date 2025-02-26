@@ -477,9 +477,7 @@ reply McGatsReply with 1: MemcacheReplyCommon {
 
 service {
   additional_requests: [];
-  additional_route_handles: [
-      McRefillRoute @ "mcrouter/routes/McRefillRoute.h"
-  ];
+  additional_route_handles: [];
   on_reply_logger: facebook::memcache::mcrouter::AdditionalProxyRequestLogger;
   enable_shutdown: false;
   stats: {

@@ -34,7 +34,6 @@
 #include "mcrouter/routes/FailoverRoute.h"
 #include "mcrouter/routes/HashRouteFactory.h"
 #include "mcrouter/routes/McBucketRoute.h"
-#include "mcrouter/routes/McRefillRoute.h"
 #include "mcrouter/routes/PoolRouteUtils.h"
 #include "mcrouter/routes/RateLimitRoute.h"
 #include "mcrouter/routes/RateLimiter.h"
@@ -575,12 +574,21 @@ McRouteHandleProvider<RouterInfo>::createSRRoute(
       checkLogic(
           jRefillFromTier != nullptr,
           "SRroute: 'refill_from_tier' property is missing");
-      folly::dynamic refillJson = json;
+      folly::dynamic refillJson = folly::dynamic::object;
       refillJson["service_name"] = *jRefillFromTier;
       refillJson["type"] = "SRRoute";
-
-      route = makeMcRefillRouteUsePrimaryAndRefill<RouterInfo>(
-          route, factoryFunc(factory, refillJson, proxy_));
+      refillJson["asynclog"] = false;
+      if (auto jsplits = json.get_ptr("shard_splits")) {
+        refillJson["shard_splits"] = *jsplits;
+      }
+      if (auto jsalt = json.get_ptr("salt")) {
+        refillJson["salt"] = *jsalt;
+      }
+      auto it = routeMapForWrapper_.find("McRefillRouteWrapper");
+      checkLogic(
+          it != routeMapForWrapper_.end(),
+          "McRefillRoute is not implemented for this router");
+      route = it->second(route, proxy_, refillJson, factory);
     }
   }
 

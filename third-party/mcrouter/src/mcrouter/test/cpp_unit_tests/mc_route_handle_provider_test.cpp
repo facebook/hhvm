@@ -88,18 +88,11 @@ const char* const kBucketizedPoolRoute =
    "bucketization_keyspace": "tst"
 })";
 
-const char* const kRefillOnMissSRRoute =
+const char* const kSimpleSRRoute =
     R"({
    "type": "SRRoute",
    "service_name": "twmemcache.shadow.bucketization-test",
-   "server_timeout": 200,
-   "asynclog_name": "test.asynclog",
-   "axonlog": false,
-   "bucketize": true,
-   "total_buckets": 1000,
-   "bucketization_keyspace": "tst",
-   "refill_on_miss": true,
-   "refill_from_tier": "twmemcache.shadow.mcrouter-rc"
+   "asynclog": false,
 })";
 
 struct TestSetup {
@@ -170,6 +163,15 @@ TEST(McRouteHandleProvider, pool_route) {
   EXPECT_EQ("asynclog:mock", asynclogRoutes["mock"]->routeName());
 }
 
+TEST(McRouteHandleProvider, sr_route) {
+  TestSetup setup;
+  auto rh = setup.getRoute(kSimpleSRRoute);
+  EXPECT_TRUE(rh != nullptr);
+  EXPECT_EQ(
+      "srroute|service=twmemcache.shadow.bucketization-test|timeout=1000|keep_routing_prefix=false|salt=|asynclog_name=|set_routing_key=true|client_id=|write_checksum=false|all_checksum=false|jump_threads=false",
+      rh->routeName());
+}
+
 TEST(McRouteHandleProvider, pool_route_with_invalid_fanout) {
   try {
     TestSetup setup;
@@ -206,13 +208,4 @@ TEST(McRouteHandleProvider, bucketized_pool_route_and_mcreplay_asynclogRoutes) {
   EXPECT_EQ(
       "bucketize|total_buckets=1000|bucketization_keyspace=tst|prefix_map_enabled=false",
       asynclogRoutes["test.asynclog"]->routeName());
-}
-
-TEST(McRouteHandleProvider, bucketized_sr_route_with_refill_on_miss) {
-  TestSetup setup;
-  auto rh = setup.getRoute(kRefillOnMissSRRoute);
-  EXPECT_TRUE(rh != nullptr);
-  EXPECT_EQ(
-      "bucketize|total_buckets=1000|bucketization_keyspace=tst|prefix_map_enabled=false",
-      rh->routeName());
 }

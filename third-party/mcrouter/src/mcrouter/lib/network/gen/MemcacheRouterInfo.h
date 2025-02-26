@@ -139,7 +139,7 @@ struct MemcacheRouterInfo {
   static constexpr const char* name = "Memcache";
   static constexpr const bool bucketization = true;
   static constexpr const bool useRequestAclChecker = true;
-  static constexpr const bool hasMcRefillRoute = true;
+  static constexpr const bool hasMcRefillRoute = false;
 
   template <class Route>
   using RouteHandle = MemcacheRouteHandle<Route>;

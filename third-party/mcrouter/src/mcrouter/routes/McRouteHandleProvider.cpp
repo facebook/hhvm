@@ -34,7 +34,6 @@
 #include "mcrouter/routes/LoadBalancerRoute.h"
 #include "mcrouter/routes/LoggingRoute.h"
 #include "mcrouter/routes/McExtraRouteHandleProvider.h"
-#include "mcrouter/routes/McRefillRoute.h"
 #include "mcrouter/routes/MigrateRouteFactory.h"
 #include "mcrouter/routes/MissFailoverRoute.h"
 #include "mcrouter/routes/ModifyExptimeRoute.h"
@@ -283,10 +282,6 @@ McRouteHandleProvider<MemcacheRouterInfo>::buildRouteMap() {
       {"LatestRoute", &makeLatestRoute<MemcacheRouterInfo>},
       {"LoadBalancerRoute", &makeLoadBalancerRoute<MemcacheRouterInfo>},
       {"LoggingRoute", &makeLoggingRoute<MemcacheRouterInfo>},
-      {"McRefillRoute",
-       [](McRouteHandleFactory& factory, const folly::dynamic& json) {
-         return makeMcRefillRoute<MemcacheRouterInfo>(factory, json);
-       }},
       {"MigrateRoute", &makeMigrateRoute<MemcacheRouterInfo>},
       {"MissFailoverRoute", &makeMissFailoverRoute<MemcacheRouterInfo>},
       {"ModifyKeyRoute", &makeModifyKeyRoute<MemcacheRouterInfo>},

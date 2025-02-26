@@ -47,8 +47,6 @@
 
 #include <mcrouter/routes/McExtraRouteHandleProvider.h>
 
-#include "mcrouter/routes/McRefillRoute.h"
-
 using namespace facebook::memcache;
 using namespace facebook::memcache::mcrouter;
 
@@ -191,7 +189,6 @@ MemcacheRouterInfo::buildRouteMap() {
       {"OperationSelectorRoute",
        &makeOperationSelectorRoute<MemcacheRouterInfo>},
       {"RandomRoute", &makeRandomRoute<MemcacheRouterInfo>},
-      {"McRefillRoute", &makeMcRefillRoute<MemcacheRouterInfo>},
   };
   return map;
 }

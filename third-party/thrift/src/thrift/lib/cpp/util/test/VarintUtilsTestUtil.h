@@ -125,3 +125,24 @@ using s8_any = u8_any::signed_case;
 using s16_any = u16_any::signed_case;
 using s32_any = u32_any::signed_case;
 using s64_any = u64_any::signed_case;
+
+// Generate test values using an exponential distribution with given median
+template <uint64_t Median>
+struct varint_case_exponential {
+  using integer_type = uint64_t;
+
+  static std::vector<uint64_t> gen() {
+    std::default_random_engine rng(1729); // Make PRNG deterministic.
+    constexpr double kLn2 = 0.69314718056;
+    constexpr double lambda =
+        kLn2 / Median; // median of Exp(lambda) is ln(2) / lambda
+    std::exponential_distribution<double> dist(lambda);
+    std::vector<uint64_t> v(N);
+    std::generate(v.begin(), v.end(), [&] { return uint64_t(dist(rng)); });
+    return v;
+  }
+};
+
+using exponential_1b = varint_case_exponential<lim(1)>;
+using exponential_2b = varint_case_exponential<lim(2)>;
+using exponential_3b = varint_case_exponential<lim(3)>;

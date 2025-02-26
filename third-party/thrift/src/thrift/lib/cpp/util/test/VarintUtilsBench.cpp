@@ -133,6 +133,10 @@ BM_WRITE(u64_8b)
 BM_WRITE(u64_9b)
 BM_WRITE(u64_10b)
 
+BM_WRITE(exponential_1b)
+BM_WRITE(exponential_2b)
+BM_WRITE(exponential_3b)
+
 template <typename Case>
 void bench_read(size_t iters, Case) {
   folly::IOBufQueue iobufQueue(folly::IOBufQueue::cacheChainLength());

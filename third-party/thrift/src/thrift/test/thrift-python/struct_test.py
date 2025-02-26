@@ -20,6 +20,7 @@ import types
 import typing
 import unittest
 from datetime import datetime
+from sys import platform
 
 import thrift.python.mutable_serializer as mutable_serializer
 
@@ -305,14 +306,17 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
 
         # Attributes of immutable types cannot be deleted.
         #
-        # Note the interesting (and somewhat inconsistent) current behavior:
+        # Note the interesting (and somewhat inconsistent) current behavior on Linux:
         # Calling `del` prior to accessing an attribute raises an AttributeError
         # (at the cinder level), but doing so after accessing it is a silent
         # no-op.
         with self.assertRaisesRegex(AttributeError, "unqualified_string"):
             del w.unqualified_string
         self.assertEqual(w.unqualified_string, "hello, world!")
-        del w.unqualified_string  # silent no-op
+
+        if platform == "linux":
+            del w.unqualified_string  # silent no-op
+
         self.assertEqual(w.unqualified_string, "hello, world!")
 
         # However, a new instance of the object can be created with a specific

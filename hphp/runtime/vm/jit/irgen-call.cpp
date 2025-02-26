@@ -434,7 +434,7 @@ void speculateTargetFunction(IRGS& env, SSATmp* callee,
  * is the given profiled function and if so, emit a code to invoke it directly.
  */
 template<class TKnown, class TUnknown>
-void callProfiledFunc(IRGS& env, SSATmp* callee,
+void callProfiledFunc(IRGS& env, SSATmp* callee, SSATmp* objOrClass,
                       TKnown callKnown, TUnknown callUnknown) {
   if (!Cfg::Repo::Authoritative) return callUnknown(false);
 
@@ -457,7 +457,22 @@ void callProfiledFunc(IRGS& env, SSATmp* callee,
     );
   }
 
-  speculateTargetFunction(env, callee, callKnown, callUnknown, data.choose(),
+  auto choices = [&]() {
+    jit::vector<CallTargetProfile::Choice> result;
+    auto const funcName = curFunc(env)->name();
+    const Class* targetClass = objOrClass ? objOrClass->type().clsSpec().cls() : nullptr;
+    for (auto const& choice: data.choose()) {
+      auto const choiceClass = choice.func->implCls();
+      bool includeChoice = !targetClass || !choiceClass || choiceClass->classof(targetClass) ||
+                           targetClass->lookupMethod(funcName) == choice.func;
+      if (includeChoice) {
+        result.push_back(choice);
+      }
+    }
+    return result;
+  }();
+
+  speculateTargetFunction(env, callee, callKnown, callUnknown, choices, 
                           0, Cfg::Jit::PGOCalledFuncCheckNumSpeculations);
 }
 
@@ -726,7 +741,7 @@ void prepareAndCallProfiled(IRGS& env, SSATmp* callee, const FCallArgs& fca,
                           dynamicCall, suppressDynCallCheck,
                           unlikely);
   };
-  callProfiledFunc(env, callee, handleKnown, handleUnknown);
+  callProfiledFunc(env, callee, objOrClass, handleKnown, handleUnknown);
 }
 
 //////////////////////////////////////////////////////////////////////

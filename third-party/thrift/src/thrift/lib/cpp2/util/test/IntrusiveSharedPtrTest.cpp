@@ -556,17 +556,14 @@ TEST(IntrusiveSharedPtrTest, Leak) {
   EXPECT_EQ(p2.get(), ptr);
 }
 
-namespace {
-template <class T>
-auto hash(T&& value) {
-  return std::hash<std::remove_cvref_t<T>>{}(std::forward<T>(value));
-}
-} // namespace
-
 TEST(IntrusiveSharedPtrTest, Hash) {
   LifetimeTracker::Ptr p1 = LifetimeTracker::Ptr::make();
-  EXPECT_EQ(hash(p1), hash(p1.get()));
+  EXPECT_EQ(
+      std::hash<LifetimeTracker::Ptr>()(p1),
+      std::hash<LifetimeTracker*>()(p1.get()));
 
   p1.reset();
-  EXPECT_EQ(hash(p1), hash(nullptr));
+  EXPECT_EQ(
+      std::hash<LifetimeTracker::Ptr>()(p1),
+      std::hash<LifetimeTracker*>()(nullptr));
 }

@@ -661,14 +661,19 @@ end = struct
     | IsTupleOf _ -> (env, Set.singleton ~reason VecData)
     | IsShapeOf _ -> (env, Set.singleton ~reason DictData)
 
-  let rec fromTy ~safe_for_are_disjoint ~trail (env : env) (ty : locl_ty) :
-      env * t =
+  type context = {
+    safe_for_are_disjoint: bool;
+    trail: DataTypeReason.trail;
+  }
+
+  let rec fromTy (ctx : context) (env : env) (ty : locl_ty) : env * t =
     let (env, ty) = Env.expand_type env ty in
+    let trail = ctx.trail in
     let reason = DataTypeReason.(make NoSubreason trail) in
     let cycle_handler ty =
       cycle_handler
         ~default:(fun ~reason -> (env, mixed ~reason))
-        ~f:(fun env trail -> fromTy ~safe_for_are_disjoint ~trail env ty)
+        ~f:(fun env trail -> fromTy { ctx with trail } env ty)
     in
     match get_node ty with
     | Tprim prim -> (env, prim_to_datatypes ~trail prim)
@@ -676,7 +681,7 @@ end = struct
     | Tdynamic -> (env, mixed ~reason)
     | Tany _ -> (env, mixed ~reason)
     | Toption ty ->
-      let (env, data_types) = fromTy ~safe_for_are_disjoint ~trail env ty in
+      let (env, data_types) = fromTy ctx env ty in
       let data_types =
         Set.union
           data_types
@@ -714,15 +719,12 @@ end = struct
       (env, res)
     | Tunion tyl ->
       List.fold tyl ~init:(env, Set.empty) ~f:(fun (env, acc) ty ->
-          let (env, dty) = fromTy ~safe_for_are_disjoint ~trail env ty in
+          let (env, dty) = fromTy ctx env ty in
           let dty = Set.union acc dty in
           (env, dty))
     | Tintersection tyl ->
       let (env, sets) =
-        List.fold_map
-          ~init:env
-          ~f:(fun env ty -> fromTy ~safe_for_are_disjoint ~trail env ty)
-          tyl
+        List.fold_map ~init:env ~f:(fun env ty -> fromTy ctx env ty) tyl
       in
       let result_opt = List.reduce ~f:Set.inter sets in
       let res =
@@ -744,10 +746,10 @@ end = struct
         DataTypeReason.type_constant ~trail (get_reason ty) root_ty (snd id)
       in
       cycle_handler ~env ~trail ty
-    | Tdependent (_, ty) -> fromTy ~safe_for_are_disjoint ~trail env ty
+    | Tdependent (_, ty) -> fromTy ctx env ty
     | Tnewtype (name, _, as_ty)
       when String.equal name Naming_special_names.Classes.cSupportDyn ->
-      fromTy ~safe_for_are_disjoint ~trail env as_ty
+      fromTy ctx env as_ty
     | Tnewtype (name, _, _)
       when String.equal name Naming_special_names.Classes.cEnumClassLabel ->
       (env, label_to_datatypes ~trail)
@@ -814,10 +816,18 @@ end = struct
     | Tunapplied_alias _ ->
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()
     | Tclass ((_, cls), _, _) ->
-      Class.to_datatypes ~safe_for_are_disjoint ~trail env cls
+      Class.to_datatypes
+        ~safe_for_are_disjoint:ctx.safe_for_are_disjoint
+        ~trail
+        env
+        cls
     | Tneg predicate ->
       let (env, right) =
-        fromPredicate ~safe_for_are_disjoint ~trail env predicate
+        fromPredicate
+          ~safe_for_are_disjoint:ctx.safe_for_are_disjoint
+          ~trail
+          env
+          predicate
       in
       (env, Set.diff (mixed ~reason) right)
     | Tclass_ptr _ ->
@@ -832,12 +842,12 @@ end = struct
       Typing_utils.localize_no_subst env ~ignore_errors:true decl_ty
     in
     let trail = DataTypeReason.make_trail in
-    let (env, dt) = fromTy ~safe_for_are_disjoint ~trail env ty in
+    let (env, dt) = fromTy { safe_for_are_disjoint; trail } env ty in
     (env, (decl_ty, dt))
 
   let fromTy ~safe_for_are_disjoint env ty : env * t =
     let trail = DataTypeReason.make_trail in
-    fromTy ~safe_for_are_disjoint ~trail env ty
+    fromTy { safe_for_are_disjoint; trail } env ty
 end
 
 type runtime_data_type = decl_ty * DataType.t

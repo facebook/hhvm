@@ -1,0 +1,48 @@
+ERROR: File "reified.php", line 11, characters 7-14:
+Invalid reified hint (Typing[4305])
+  File "reified.php", line 7, characters 19-26:
+  This is a class pointer type, it cannot be used as a reified type argument
+  File "reified.php", line 16, characters 18-18:
+  `T` is reified
+ERROR: File "reified.php", line 12, characters 7-15:
+Invalid reified hint (Typing[4305])
+  File "reified.php", line 8, characters 20-31:
+  This is a classname, it cannot be used as a reified type argument
+  File "reified.php", line 16, characters 18-18:
+  `T` is reified
+ERROR: File "reified.php", line 19, characters 5-12:
+Invalid reified hint (Typing[4305])
+  File "reified.php", line 19, characters 5-12:
+  This is a class pointer type, it cannot be used as a reified type argument
+  File "reified.php", line 16, characters 18-18:
+  `T` is reified
+ERROR: File "reified.php", line 20, characters 5-16:
+Invalid reified hint (Typing[4305])
+  File "reified.php", line 20, characters 5-16:
+  This is a classname, it cannot be used as a reified type argument
+  File "reified.php", line 16, characters 18-18:
+  `T` is reified
+ERROR: File "reified.php", line 22, characters 5-9:
+Invalid reified hint (Typing[4305])
+  File "reified.php", line 7, characters 19-26:
+  This is a class pointer type, it cannot be used as a reified type argument
+  File "reified.php", line 16, characters 18-18:
+  `T` is reified
+ERROR: File "reified.php", line 23, characters 5-10:
+Invalid reified hint (Typing[4305])
+  File "reified.php", line 8, characters 20-31:
+  This is a classname, it cannot be used as a reified type argument
+  File "reified.php", line 16, characters 18-18:
+  `T` is reified
+ERROR: File "reified.php", line 25, characters 5-6:
+Invalid reified hint (Typing[4305])
+  File "reified.php", line 3, characters 11-18:
+  This is a class pointer type, it cannot be used as a reified type argument
+  File "reified.php", line 16, characters 18-18:
+  `T` is reified
+ERROR: File "reified.php", line 26, characters 5-7:
+Invalid reified hint (Typing[4305])
+  File "reified.php", line 4, characters 12-23:
+  This is a classname, it cannot be used as a reified type argument
+  File "reified.php", line 16, characters 18-18:
+  `T` is reified

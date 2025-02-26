@@ -27,6 +27,10 @@ let validator =
       else
         super#on_tapply acc r (p, h) tyl
 
+    method! on_tclass_ptr acc r _ty =
+      (* TODO(T199611023) allow when we enforce inner type *)
+      this#invalid acc r "a class pointer type"
+
     method! on_twildcard acc r =
       if acc.Type_validator.env.Typing_env_types.allow_wildcards then
         acc

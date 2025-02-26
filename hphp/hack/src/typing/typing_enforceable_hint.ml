@@ -181,6 +181,10 @@ let validator =
       let acc = List.fold_left tyl ~init:acc ~f:this#on_type in
       this#check_for_wildcards acc tyl "shape"
 
+    method! on_tclass_ptr acc r _ty =
+      (* TODO(T199611023) allow when we enforce inner type *)
+      this#invalid acc r "a class pointer type"
+
     method check_generic acc r name =
       (* No need to look at type arguments of generic var, as higher-kinded type params
          cannot be enforcable *)

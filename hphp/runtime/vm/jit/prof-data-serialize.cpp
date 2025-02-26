@@ -1246,7 +1246,14 @@ void merge_and_enqueue_for_jit(const std::string& root, int numWorkers) {
 std::string relativePath(const std::string& root, const StringData* absPath) {
   auto const fullPath = absPath->toCppString();
   auto const p = std::mismatch(root.begin(), root.end(), fullPath.begin());
-  if (p.first == root.end()) return std::string{p.second, fullPath.end()};
+  if (p.first == root.end()) {
+    // if root ends with a slash, return the range from p.second to end.
+    // else, start one after p.second to avoid relpaths with prefixed slashes.
+    auto const startPos = (root.find_last_of('/') == root.length() - 1)
+      ? p.second
+      : p.second + 1;
+    return std::string{startPos, fullPath.end()};
+  }
   return "";
 }
 

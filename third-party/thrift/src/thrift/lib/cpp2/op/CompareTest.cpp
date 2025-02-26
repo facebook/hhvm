@@ -187,7 +187,8 @@ TEST(CompareTest, InternSet_Dbl) {
   static_assert(detail::comparable_v<Tag>, "");
 
   EXPECT_FALSE(identical<Tag>({0.0}, {-0.0}));
-  EXPECT_TRUE(equal<Tag>({0.0}, {-0.0}));
+  // Comparing whether these two sets are equal is undefined behavior because
+  // operator== for double is not a refinement of IdenticalTo.
   EXPECT_TRUE(less<Tag>({0}, {1}));
   EXPECT_FALSE(less<Tag>({0, 1}, {1, 0}));
 

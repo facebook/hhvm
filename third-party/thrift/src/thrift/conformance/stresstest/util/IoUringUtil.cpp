@@ -30,7 +30,7 @@ DEFINE_int32(io_zcrx_num_pages, 16384, "");
 DEFINE_int32(io_zcrx_refill_entries, 16384, "");
 DEFINE_string(io_zcrx_ifname, "eth0", "");
 DEFINE_int32(io_zcrx_queue_id, 0, "");
-
+#if FOLLY_HAS_LIBURING
 namespace apache {
 namespace thrift {
 namespace stress {
@@ -94,3 +94,4 @@ folly::IoUringBackend::Options getIoUringOptions() {
 } // namespace stress
 } // namespace thrift
 } // namespace apache
+#endif

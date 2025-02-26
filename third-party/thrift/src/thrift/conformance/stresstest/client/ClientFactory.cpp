@@ -48,14 +48,14 @@ folly::AsyncTransport::UniquePtr createTLSSocket(
     folly::EventBase* evb, const ClientConnectionConfig& cfg);
 folly::AsyncTransport::UniquePtr createFizzSocket(
     folly::EventBase* evb, const ClientConnectionConfig& cfg);
-
+#if FOLLY_HAS_LIBURING
 folly::AsyncTransport::UniquePtr createIOUring(
     folly::EventBase* evb, const ClientConnectionConfig& cfg);
 folly::AsyncTransport::UniquePtr createIOUringTLS(
     folly::EventBase* evb, const ClientConnectionConfig& cfg);
 folly::AsyncTransport::UniquePtr createIOUringFizz(
     folly::EventBase* evb, const ClientConnectionConfig& cfg);
-
+#endif
 class ConnectCallback : public folly::AsyncSocket::ConnectCallback,
                         public folly::DelayedDestruction {
  public:
@@ -128,7 +128,7 @@ folly::AsyncTransport::UniquePtr createSocketWithEPoll(
       return createFizzSocket(evb, cfg);
   }
 }
-
+#if FOLLY_HAS_LIBURING
 folly::AsyncTransport::UniquePtr createSocketWithIOUring(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
   switch (cfg.security) {
@@ -140,7 +140,7 @@ folly::AsyncTransport::UniquePtr createSocketWithIOUring(
       return createIOUringFizz(evb, cfg);
   }
 }
-
+#endif
 folly::AsyncTransport::UniquePtr createQuicSocket(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
   static quic::TransportSettings ts{
@@ -183,7 +183,11 @@ folly::AsyncTransport::UniquePtr createSocket(
   if (cfg.useQuic) {
     return createQuicSocket(evb, cfg);
   } else if (cfg.ioUring) {
+#if FOLLY_HAS_LIBURING
     return createSocketWithIOUring(evb, cfg);
+#else
+    LOG(FATAL) << "IoUring not supported";
+#endif
   } else {
     return createSocketWithEPoll(evb, cfg);
   }
@@ -211,7 +215,7 @@ folly::AsyncTransport::UniquePtr createFizzSocket(
       cfg.serverHost, new ConnectCallback(), getFizzVerifier(cfg), {}, {});
   return fizzClient;
 }
-
+#if FOLLY_HAS_LIBURING
 folly::AsyncTransport::UniquePtr createIOUring(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
   auto ring = new folly::AsyncIoUringSocket(evb);
@@ -235,7 +239,7 @@ folly::AsyncTransport::UniquePtr createIOUringFizz(
   ring->connect(new ConnectCallback(), cfg.serverHost);
   return folly::AsyncTransport::UniquePtr(ring);
 }
-
+#endif
 } // namespace
 
 /* static */ std::unique_ptr<StressTestAsyncClient>

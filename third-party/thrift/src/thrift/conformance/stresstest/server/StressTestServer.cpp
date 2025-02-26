@@ -122,6 +122,7 @@ std::shared_ptr<StressTestHandler> createStressTestHandler() {
 }
 
 std::unique_ptr<folly::EventBaseBackendBase> getEventBaseBackendFunc() {
+#if FOLLY_HAS_LIBURING
   try {
     // TODO numa node affinitization
     // static int sqSharedCore = 0;
@@ -132,6 +133,9 @@ std::unique_ptr<folly::EventBaseBackendBase> getEventBaseBackendFunc() {
     LOG(FATAL) << "Failed to create io_uring backend: "
                << folly::exceptionStr(ex);
   }
+#else
+  LOG(FATAL) << "io_uring not supported";
+#endif
 }
 
 std::shared_ptr<folly::IOThreadPoolExecutor> getIOThreadPool(

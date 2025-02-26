@@ -55,7 +55,11 @@ class WarmupDoneTimeout : public folly::HHWheelTimer::Callback {
 };
 
 std::unique_ptr<folly::EventBaseBackendBase> getIOUringBackend() {
+#if FOLLY_HAS_LIBURING
   return std::make_unique<folly::IoUringBackend>(getIoUringOptions());
+#else
+  LOG(FATAL) << "IoUring not supported";
+#endif
 }
 
 std::unique_ptr<folly::EventBaseBackendBase> getDefaultBackend() {

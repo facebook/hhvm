@@ -46,6 +46,8 @@ class codegen_data {
   bool gen_default_get = true;
   // whether to use reflect codec
   bool use_reflect_codec = false;
+  // whether to optimize struct layout
+  bool optimize_struct_layout = false;
 
   // Records field names for every struct in the program.
   // This is needed to resolve some edge case name collisions.
@@ -159,5 +161,8 @@ std::vector<t_struct*> get_service_req_resp_structs(const t_service* service);
 
 const std::string* get_go_name_annotation(const t_named* node);
 const std::string* get_go_tag_annotation(const t_named* node);
+
+int get_field_size(const t_field* field, bool is_inside_union);
+void optimize_fields_layout(std::vector<t_field*>& fields, bool is_union);
 
 } // namespace apache::thrift::compiler::go

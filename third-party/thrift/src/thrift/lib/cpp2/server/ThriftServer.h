@@ -1851,9 +1851,13 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   // evb->worker eventbase local
   folly::EventBaseLocal<Cpp2Worker*> evbToWorker_;
 
-  // setMaxRequestsCallbackHandle should be cancelled, unsyncing maxRequests
-  // from resource pools, when setConcurrencyLimit is explicitly called.
+  // When setConcurrencyLimit is explicitly called, setMaxRequestsCallbackHandle
+  // should be cancelled. Cancelling only needs to happen once.
   folly::once_flag cancelSetMaxRequestsCallbackHandleFlag_;
+
+  // If the service might rely on the synced maxRequests, then we need to log.
+  // Logging only needs to happen once.
+  folly::once_flag serviceMightRelyOnSyncedMaxRequestsFlag_;
 
   struct IdleServerAction : public folly::HHWheelTimer::Callback {
     IdleServerAction(

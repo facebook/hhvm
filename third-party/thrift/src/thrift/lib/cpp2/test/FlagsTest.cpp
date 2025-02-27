@@ -63,6 +63,18 @@ class TestFlagsBackend : public apache::thrift::detail::FlagsBackend {
     return getFlagObservable<std::string>(stringObservables_, name);
   }
 
+  void reset() {
+    for (auto& [_, observable] : boolObservables_) {
+      observable->setValue(std::nullopt);
+    }
+    for (auto& [_, observable] : int64Observables_) {
+      observable->setValue(std::nullopt);
+    }
+    for (auto& [_, observable] : stringObservables_) {
+      observable->setValue(std::nullopt);
+    }
+  }
+
  private:
   template <typename T>
   using ObservablesMap = std::unordered_map<
@@ -87,8 +99,27 @@ class TestFlagsBackend : public apache::thrift::detail::FlagsBackend {
 };
 
 namespace {
-TestFlagsBackend* testBackendPtr;
+TestFlagsBackend* testBackendPtr = nullptr;
 bool useDummyBackend{false};
+
+struct Flags : testing::Test {
+  void TearDown() override {
+    if (useDummyBackend) {
+      return;
+    }
+
+    testBackendPtr->reset();
+
+    THRIFT_FLAG_UNMOCK(test_flag_bool);
+    THRIFT_FLAG_UNMOCK(test_flag_int);
+    THRIFT_FLAG_UNMOCK(test_flag_string);
+    THRIFT_FLAG_UNMOCK(test_flag_bool_external);
+    THRIFT_FLAG_UNMOCK(test_flag_int_external);
+    THRIFT_FLAG_UNMOCK(test_flag_string_external);
+
+    folly::observer_detail::ObserverManager::waitForAllUpdates();
+  }
+};
 } // namespace
 
 namespace apache::thrift::detail {
@@ -105,7 +136,7 @@ THRIFT_PLUGGABLE_FUNC_SET(
 
 } // namespace apache::thrift::detail
 
-TEST(Flags, Get) {
+TEST_F(Flags, Get) {
   EXPECT_EQ(true, THRIFT_FLAG(test_flag_bool));
   EXPECT_EQ(42, THRIFT_FLAG(test_flag_int));
   EXPECT_EQ("foo", THRIFT_FLAG(test_flag_string));
@@ -133,7 +164,7 @@ TEST(Flags, Get) {
   EXPECT_EQ("bar", THRIFT_FLAG(test_flag_string_external));
 }
 
-TEST(Flags, Observe) {
+TEST_F(Flags, Observe) {
   auto test_flag_bool_observer = THRIFT_FLAG_OBSERVE(test_flag_bool);
   auto test_flag_int_observer = THRIFT_FLAG_OBSERVE(test_flag_int);
   auto test_flag_string_observer = THRIFT_FLAG_OBSERVE(test_flag_string);
@@ -170,7 +201,11 @@ TEST(Flags, Observe) {
   EXPECT_EQ("bar", **test_flag_string_external_observer);
 }
 
-TEST(Flags, NoBackend) {
+TEST_F(Flags, NoBackend) {
+  if (testBackendPtr) {
+    GTEST_SKIP() << "Requires isolated test run";
+  }
+
   useDummyBackend = true;
 
   EXPECT_EQ(true, THRIFT_FLAG(test_flag_bool));
@@ -181,7 +216,7 @@ TEST(Flags, NoBackend) {
   EXPECT_EQ("foo", THRIFT_FLAG(test_flag_string_external));
 }
 
-TEST(Flags, MockGet) {
+TEST_F(Flags, MockGet) {
   EXPECT_EQ(true, THRIFT_FLAG(test_flag_bool));
   EXPECT_EQ(42, THRIFT_FLAG(test_flag_int));
   EXPECT_EQ("foo", THRIFT_FLAG(test_flag_string));
@@ -222,7 +257,7 @@ TEST(Flags, MockGet) {
   EXPECT_EQ("baz", THRIFT_FLAG(test_flag_string_external));
 }
 
-TEST(Flags, MockObserve) {
+TEST_F(Flags, MockObserve) {
   EXPECT_EQ(true, THRIFT_FLAG(test_flag_bool));
   EXPECT_EQ(42, THRIFT_FLAG(test_flag_int));
   EXPECT_EQ("foo", THRIFT_FLAG(test_flag_string));
@@ -273,7 +308,7 @@ TEST(Flags, MockObserve) {
   EXPECT_EQ("baz", **test_flag_string_external_observer);
 }
 
-TEST(Flags, MockValuePreferred) {
+TEST_F(Flags, MockValuePreferred) {
   EXPECT_EQ(true, THRIFT_FLAG(test_flag_bool));
   EXPECT_EQ(42, THRIFT_FLAG(test_flag_int));
   EXPECT_EQ("foo", THRIFT_FLAG(test_flag_string));
@@ -324,7 +359,7 @@ void assertFlagValue(
   EXPECT_TRUE(flagFound);
 }
 
-TEST(Flags, getAllThriftFlags) {
+TEST_F(Flags, getAllThriftFlags) {
   // Arrange
   THRIFT_FLAG_SET_MOCK(test_flag_bool, false);
   THRIFT_FLAG_SET_MOCK(test_flag_int, 88);

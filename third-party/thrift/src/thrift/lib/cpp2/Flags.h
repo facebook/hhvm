@@ -226,6 +226,8 @@ class FlagWrapper {
 #define THRIFT_FLAG_SET_MOCK(_name, _val) \
   THRIFT_FLAG_WRAPPER__##_name().setMockValue(_val)
 
+#define THRIFT_FLAG_UNMOCK(_name) THRIFT_FLAG_WRAPPER__##_name().unmock()
+
 struct ThriftFlagInfo {
   std::string name;
   std::string currentValue;

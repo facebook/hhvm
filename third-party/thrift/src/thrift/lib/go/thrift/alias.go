@@ -117,7 +117,6 @@ func Uint32Ptr(v uint32) *uint32    { return &v }
 func Uint64Ptr(v uint64) *uint64    { return &v }
 func BoolPtr(v bool) *bool          { return &v }
 func BytePtr(v byte) *byte          { return &v }
-func ByteSlicePtr(v []byte) *[]byte { return &v }
 
 func NewTransportException(t int, msg string) types.TransportException {
 	return types.NewTransportException(t, msg)

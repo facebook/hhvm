@@ -18,7 +18,6 @@
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/FieldRefHash.h>
 
-#include <algorithm>
 #include <type_traits>
 
 namespace apache::thrift {

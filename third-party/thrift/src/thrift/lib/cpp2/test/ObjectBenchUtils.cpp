@@ -17,7 +17,6 @@
 #include <cstdint>
 
 #include <folly/Benchmark.h>
-#include <folly/BenchmarkUtil.h>
 
 #include <thrift/lib/cpp2/test/ObjectBenchUtils.h>
 

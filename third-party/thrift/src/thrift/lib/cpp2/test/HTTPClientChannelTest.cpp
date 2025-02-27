@@ -26,10 +26,7 @@
 #include <thrift/lib/cpp2/test/gen-cpp2/TestService.h>
 #include <thrift/lib/cpp2/transport/http2/common/HTTP2RoutingHandler.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
-#include <wangle/bootstrap/ServerBootstrap.h>
 #include <wangle/channel/AsyncSocketHandler.h>
-#include <wangle/channel/Handler.h>
-#include <wangle/channel/Pipeline.h>
 
 #include <boost/lexical_cast.hpp>
 

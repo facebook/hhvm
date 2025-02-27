@@ -16,7 +16,6 @@
 
 #include <exception>
 
-#include <folly/CPortability.h>
 #include <folly/MapUtil.h>
 #include <folly/portability/GTest.h>
 

@@ -19,7 +19,6 @@
 #include <glog/logging.h>
 #include <google/protobuf/arena.h> // @manual
 #include <folly/Benchmark.h>
-#include <folly/Optional.h>
 #include <folly/portability/GFlags.h>
 
 using namespace std;

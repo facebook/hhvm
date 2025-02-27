@@ -32,7 +32,6 @@
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
 #include <thrift/lib/cpp2/server/MonitoringServerInterface.h>
-#include <thrift/lib/cpp2/server/ServerFlags.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/transport/http2/common/HTTP2RoutingHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketRoutingHandler.h>
@@ -47,7 +46,6 @@
 #include <thrift/lib/cpp2/test/gen-cpp2/DummySecurity.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/DummyStatus.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/Parent.h>
-#include <thrift/lib/cpp2/test/gen-cpp2/SchemaService.h>
 
 namespace apache::thrift::test {
 

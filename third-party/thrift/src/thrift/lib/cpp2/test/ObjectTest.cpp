@@ -22,14 +22,12 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 #include <thrift/conformance/cpp2/AnyRegistry.h>
-#include <thrift/conformance/cpp2/AnyStructSerializer.h>
 #include <thrift/conformance/cpp2/Protocol.h>
 #include <thrift/conformance/cpp2/Testing.h>
 #include <thrift/conformance/cpp2/internal/AnyStructSerializer.h>
 #include <thrift/conformance/data/ValueGenerator.h>
 #include <thrift/conformance/if/gen-cpp2/conformance_types_custom_protocol.h>
 #include <thrift/conformance/if/gen-cpp2/protocol_types.h>
-#include <thrift/conformance/if/gen-cpp2/protocol_types_custom_protocol.h>
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/BadFieldAccess.h>
 #include <thrift/lib/cpp2/op/Encode.h>
@@ -45,7 +43,6 @@
 #include <thrift/lib/thrift/gen-cpp2/standard_types.h>
 #include <thrift/test/gen-cpp2/adapter_types.h>
 #include <thrift/test/testset/Testset.h>
-#include <thrift/test/testset/gen-cpp2/testset_types_custom_protocol.h>
 
 // TODO: Remove this. Specify namespace explicitly instead.
 using namespace ::apache::thrift::conformance;

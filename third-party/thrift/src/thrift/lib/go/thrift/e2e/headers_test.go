@@ -26,9 +26,9 @@ import (
 	"thrift/lib/go/thrift/e2e/service"
 )
 
-// TestServicePersistentHeaders ensures that persistent headers can be retrieved
+// TestServiceHeaders ensures that persistent headers can be retrieved
 // from the context passed to the server handler.
-func TestServicePersistentHeaders(t *testing.T) {
+func TestServiceHeaders(t *testing.T) {
 	t.Run("Header", func(t *testing.T) {
 		runHeaderTest(t, thrift.TransportIDHeader)
 	})
@@ -42,8 +42,10 @@ func TestServicePersistentHeaders(t *testing.T) {
 
 func runHeaderTest(t *testing.T, serverTransport thrift.TransportID) {
 	const (
-		headerKey   = "X-My-Test-Header"
-		headerValue = "Success!"
+		persistentHeaderKey   = "persistentHeader"
+		persistentHeaderValue = "persistentHeaderValue"
+		rpcHeaderKey          = "rpcHeader"
+		rpcHeaderValue        = "rpcHeaderValue"
 	)
 
 	var clientTransportOption thrift.ClientOption
@@ -67,18 +69,22 @@ func runHeaderTest(t *testing.T, serverTransport thrift.TransportID) {
 			return net.DialTimeout("unix", addr.String(), 5*time.Second)
 		}),
 		thrift.WithIoTimeout(5*time.Second),
-		thrift.WithPersistentHeader(headerKey, headerValue),
+		thrift.WithPersistentHeader(persistentHeaderKey, persistentHeaderValue),
 	)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}
 	client := service.NewE2EChannelClient(thrift.NewSerialChannel(conn))
 	defer client.Close()
-	echoedHeaders, err := client.EchoHeaders(context.Background())
+	ctx := thrift.WithHeaders(context.Background(), map[string]string{rpcHeaderKey: rpcHeaderValue})
+	echoedHeaders, err := client.EchoHeaders(ctx)
 	if err != nil {
 		t.Fatalf("failed to make RPC: %v", err)
 	}
-	if echoedHeaders[headerKey] != headerValue {
+	if echoedHeaders[persistentHeaderKey] != persistentHeaderValue {
+		t.Fatalf("unexpected or missing persistent header value: '%v'", echoedHeaders)
+	}
+	if echoedHeaders[rpcHeaderKey] != rpcHeaderValue {
 		t.Fatalf("unexpected or missing header value: '%v'", echoedHeaders)
 	}
 }

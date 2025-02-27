@@ -34,51 +34,51 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           build-args: "UBUNTU_VERSION=%UBUNTU_LTS_VERSION%.04"
           file: watchman/build/package/ubuntu-env/Dockerfile
           push: true
-          tags: ${{ format('ghcr.io/{0}/watchman-build-env-ubuntu-%UBUNTU_LTS_VERSION%:latest', github.repository) }}
+          tags: ${{ format('ghcr.io/{0}/watchman-build-env:ubuntu-%UBUNTU_LTS_VERSION%-latest', github.repository) }}
 
   docker-fedora-%FEDORA_STABLE_VERSION%:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           build-args: "FEDORA_VERSION=%FEDORA_STABLE_VERSION%"
           file: watchman/build/package/fedora-env/Dockerfile
           push: true
-          tags: ${{ format('ghcr.io/{0}/watchman-build-env-fedora-%FEDORA_STABLE_VERSION%:latest', github.repository) }}
+          tags: ${{ format('ghcr.io/{0}/watchman-build-env:fedora-%FEDORA_STABLE_VERSION%-latest', github.repository) }}
 
   clone-build-package-ubuntu-%UBUNTU_LTS_VERSION%:
     needs:
@@ -86,7 +86,7 @@ jobs:
       - docker-ubuntu-%UBUNTU_LTS_VERSION%
     runs-on: ubuntu-latest
     container:
-      image: ${{ format('ghcr.io/{0}/watchman-build-env-ubuntu-%UBUNTU_LTS_VERSION%:latest', github.repository) }}
+      image: ${{ format('ghcr.io/{0}/watchman-build-env:ubuntu-%UBUNTU_LTS_VERSION%-latest', github.repository) }}
     steps:
       # This allows rustup toolchains to survive between container construction and use.
       # https://github.com/actions/runner/issues/863
@@ -94,7 +94,7 @@ jobs:
         run: echo HOME=/root >> $GITHUB_ENV
 
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install system dependencies
         run: ./install-system-packages.sh
@@ -126,7 +126,7 @@ jobs:
       - docker-fedora-%FEDORA_STABLE_VERSION%
     runs-on: ubuntu-latest
     container:
-      image: ${{ format('ghcr.io/{0}/watchman-build-env-fedora-%FEDORA_STABLE_VERSION%:latest', github.repository) }}
+      image: ${{ format('ghcr.io/{0}/watchman-build-env:fedora-%FEDORA_STABLE_VERSION%-latest', github.repository) }}
     steps:
       # This allows rustup toolchains to survive between container construction and use.
       # https://github.com/actions/runner/issues/863
@@ -134,7 +134,7 @@ jobs:
         run: echo HOME=/root >> $GITHUB_ENV
 
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install system dependencies
         run: ./install-system-packages.sh
@@ -164,9 +164,9 @@ jobs:
   linux-build:
     continue-on-error: true
     needs: prepare
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Build watchman
       run: python3 build/fbcode_builder/getdeps.py build --src-dir=. watchman  --project-install-prefix watchman:/usr/local
     - name: Copy artifacts
@@ -192,7 +192,7 @@ jobs:
     # Xcode 12.4 on the macOS-10.15 image.
     runs-on: macOS-10.15
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Build watchman
       run: SDKROOT=$(xcrun --show-sdk-path --sdk macosx11.1) python3 build/fbcode_builder/getdeps.py --allow-system-packages build --src-dir=. watchman  --project-install-prefix watchman:/usr/local
     - name: Copy artifacts
@@ -216,7 +216,7 @@ jobs:
     needs: prepare
     runs-on: windows-2019
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Export boost environment
       run: "echo BOOST_ROOT=%BOOST_ROOT_1_69_0% >> %GITHUB_ENV%"
       shell: cmd

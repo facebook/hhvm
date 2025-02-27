@@ -29,10 +29,7 @@ from testing.types import (
     ReservedUnion,
     ValueOrError,
 )
-from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
-    brokenInAutoMigrate,
-    is_auto_migrated,
-)
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import is_auto_migrated
 from thrift.py3.common import Protocol
 from thrift.py3.serializer import deserialize
 from thrift.py3.types import Struct, Union
@@ -145,7 +142,6 @@ class UnionTests(unittest.TestCase):
         union = Integers.fromValue(large)
         self.assertEqual(union.type, Integers.Type.large)
 
-    @brokenInAutoMigrate()
     def test_complexunion_fromValue(self) -> None:
         tiny = 2**7 - 1
         large = 2**63 - 1
@@ -160,7 +156,13 @@ class UnionTests(unittest.TestCase):
         self.assertEqual(union.type, ComplexUnion.Type.float_val)
         union = ComplexUnion.fromValue(adouble)
         self.assertEqual(union.value, adouble)
-        self.assertEqual(union.type, ComplexUnion.Type.double_val)
+        # thrift-python has no mechanism to distinguish between float and double
+        adouble_arm = (
+            ComplexUnion.Type.float_val
+            if is_auto_migrated()
+            else ComplexUnion.Type.double_val
+        )
+        self.assertEqual(union.type, adouble_arm)
         union = ComplexUnion.fromValue(Color.red)
         self.assertEqual(union.type, ComplexUnion.Type.color)
         union = ComplexUnion.fromValue(easy())

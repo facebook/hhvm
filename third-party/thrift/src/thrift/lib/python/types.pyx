@@ -1564,6 +1564,9 @@ cdef class Union(StructOrUnion):
             return union_instance
         cdef UnionInfo union_info = cls._fbthrift_struct_info
         for type_value, typeinfo in union_info.type_infos.items():
+            # stricter type checking for consistency with py3
+            if _strict_type_info_mismatch(value, typeinfo):
+                continue
             try:
                 value = union_instance._fbthrift_to_internal_data(type_value, value)
             except (TypeError, OverflowError):
@@ -1622,6 +1625,18 @@ cdef class Union(StructOrUnion):
 
 cdef inline int _fbthrift_get_Union_type_int(Union u):
     return u._fbthrift_data[0]
+
+# stricter type checking for Union.fromValue for easily confused types
+#   - typeinfo_int accidentally accepts bool because bool subclasses int
+#   - typeinfo_float accepts int since int in range can be converted to double
+# returns True if value is convertible to type_info but is not strict match
+# returns False if no mismatch; there may be mismatch detectable by TypeError
+cdef inline pbool _strict_type_info_mismatch(value, type_info):
+    if isinstance(type_info, IntegerTypeInfo):
+        return isinstance(value, (float, bool))
+    if type_info is typeinfo_float or type_info is typeinfo_double:
+        return not isinstance(value, float)
+    return False
 
 cdef _make_fget_struct(i):
     """

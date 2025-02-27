@@ -250,18 +250,18 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         self.assertEqual(union_int_bool_1.int_field, 1)
         _assert_serialization_round_trip(self, immutable_serializer, union_int_bool_1)
 
-        # BAD: fromValue(bool) populates an int field if it comes before bool.
+        # FIXED: fromValue(bool) used to populate int field ordered before bool field.
         union_int_bool_2 = TestUnionAmbiguousFromValueIntBoolImmutable.fromValue(True)
         self.assertIs(
             union_int_bool_2.fbthrift_current_field,
-            TestUnionAmbiguousFromValueIntBoolImmutable.FbThriftUnionFieldEnum.int_field,
+            TestUnionAmbiguousFromValueIntBoolImmutable.FbThriftUnionFieldEnum.bool_field,
         )
         self.assertIs(
             union_int_bool_2.type,
-            TestUnionAmbiguousFromValueIntBoolImmutable.Type.int_field,
+            TestUnionAmbiguousFromValueIntBoolImmutable.Type.bool_field,
         )
         self.assertEqual(union_int_bool_2.value, 1)
-        self.assertEqual(union_int_bool_2.int_field, 1)
+        self.assertEqual(union_int_bool_2.bool_field, True)
         _assert_serialization_round_trip(self, immutable_serializer, union_int_bool_2)
 
     def test_from_value_ambiguous_bool_int(self) -> None:
@@ -296,18 +296,18 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         _assert_serialization_round_trip(self, immutable_serializer, union_bool_int_2)
 
     def test_from_value_ambiguous_float_int(self) -> None:
-        # BAD: fromValue(int) populated a float field if it comes before int.
+        # FIXED: fromValue(int) used to populate a float field ordered before int field
         union_float_int_1 = TestUnionAmbiguousFromValueFloatIntImmutable.fromValue(1)
         self.assertIs(
             union_float_int_1.fbthrift_current_field,
-            TestUnionAmbiguousFromValueFloatIntImmutable.FbThriftUnionFieldEnum.float_field,
+            TestUnionAmbiguousFromValueFloatIntImmutable.FbThriftUnionFieldEnum.int_field,
         )
         self.assertIs(
             union_float_int_1.type,
-            TestUnionAmbiguousFromValueFloatIntImmutable.Type.float_field,
+            TestUnionAmbiguousFromValueFloatIntImmutable.Type.int_field,
         )
         self.assertEqual(union_float_int_1.value, 1.0)
-        self.assertEqual(union_float_int_1.float_field, 1)
+        self.assertEqual(union_float_int_1.int_field, 1)
         _assert_serialization_round_trip(self, immutable_serializer, union_float_int_1)
 
         union_float_int_2 = TestUnionAmbiguousFromValueFloatIntImmutable.fromValue(1.0)

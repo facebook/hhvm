@@ -18,17 +18,11 @@ package e2e
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"net"
-	"os"
 	"testing"
 	"time"
 
-	"golang.org/x/sync/errgroup"
-
 	"thrift/lib/go/thrift"
-	"thrift/lib/go/thrift/e2e/handler"
 	"thrift/lib/go/thrift/e2e/service"
 )
 
@@ -52,13 +46,6 @@ func runHeaderTest(t *testing.T, serverTransport thrift.TransportID) {
 		headerValue = "Success!"
 	)
 
-	listener, err := net.Listen("unix", fmt.Sprintf("/tmp/thrift_go_stress_server_test_%d_%d.sock", os.Getpid(), serverTransport))
-	if err != nil {
-		t.Fatalf("could not create listener: %s", err)
-	}
-	addr := listener.Addr()
-	t.Logf("Server listening on %v", addr)
-
 	var clientTransportOption thrift.ClientOption
 	switch serverTransport {
 	case thrift.TransportIDHeader:
@@ -71,14 +58,8 @@ func runHeaderTest(t *testing.T, serverTransport thrift.TransportID) {
 		panic("unsupported transport!")
 	}
 
-	processor := service.NewE2EProcessor(&handler.E2EHandler{})
-	server := thrift.NewServer(processor, listener, serverTransport, thrift.WithNumWorkers(10))
-
-	serverCtx, serverCancel := context.WithCancel(context.Background())
-	var serverEG errgroup.Group
-	serverEG.Go(func() error {
-		return server.ServeContext(serverCtx)
-	})
+	addr, stopServer := startE2EServer(t, serverTransport, thrift.WithNumWorkers(10))
+	defer stopServer()
 
 	conn, err := thrift.NewClient(
 		clientTransportOption,
@@ -99,12 +80,5 @@ func runHeaderTest(t *testing.T, serverTransport thrift.TransportID) {
 	}
 	if echoedHeaders[headerKey] != headerValue {
 		t.Fatalf("unexpected or missing header value: '%v'", echoedHeaders)
-	}
-
-	// Shut down server.
-	serverCancel()
-	err = serverEG.Wait()
-	if err != nil && !errors.Is(err, context.Canceled) {
-		t.Fatalf("unexpected error in ServeContext: %v", err)
 	}
 }

@@ -60,14 +60,9 @@
 namespace apache::thrift::compiler {
 
 /**
- * Base class for all template-based code generators using Whisker as the
- * templating engine.
- *
- * This class serves as the basis for both:
- *   - t_mstch_generator, the legacy mstch-based generator
- *   - t_whisker_generator, the pure Whisker-based generator
+ * A template-based code generator that uses Whisker as the templating engine.
  */
-class t_whisker_base_generator : public t_generator {
+class t_whisker_generator : public t_generator {
  public:
   using t_generator::t_generator;
 
@@ -82,7 +77,7 @@ class t_whisker_base_generator : public t_generator {
    * The global context used for whisker rendering. This function can be used,
    * for example, to add globally available helper functions.
    */
-  virtual whisker::map globals() const { return {}; }
+  virtual whisker::map globals() const;
 
   // See whisker::render_options
   struct strictness_options {
@@ -145,21 +140,6 @@ class t_whisker_base_generator : public t_generator {
       std::string_view template_file,
       const whisker::object& context);
 
- private:
-  struct cached_render_state {
-    whisker::diagnostics_engine diagnostic_engine;
-    std::shared_ptr<whisker::source_resolver> source_resolver;
-    whisker::render_options render_options;
-  };
-  std::optional<cached_render_state> cached_render_state_;
-  cached_render_state& render_state();
-};
-
-class t_whisker_generator : public t_whisker_base_generator {
- public:
-  using t_whisker_base_generator::t_whisker_base_generator;
-
- protected:
   // Whisker-based code generators are designed to work directly against the
   // Thrift AST node types (t_<node_type> classes). This is different from the
   // mstch-based code generators which have an additional conversion layer from
@@ -286,8 +266,14 @@ class t_whisker_generator : public t_whisker_base_generator {
       h_program>;
   using h_node = make_handle<t_node, h_named>;
 
- public:
-  whisker::map globals() const override;
+ private:
+  struct cached_render_state {
+    whisker::diagnostics_engine diagnostic_engine;
+    std::shared_ptr<whisker::source_resolver> source_resolver;
+    whisker::render_options render_options;
+  };
+  std::optional<cached_render_state> cached_render_state_;
+  cached_render_state& render_state();
 };
 
 } // namespace apache::thrift::compiler

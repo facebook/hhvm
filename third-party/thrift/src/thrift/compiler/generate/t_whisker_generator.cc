@@ -273,8 +273,8 @@ class whisker_source_parser : public whisker::source_resolver {
 
 } // namespace
 
-/* static */ const t_whisker_base_generator::templates_map&
-t_whisker_base_generator::templates_by_path() {
+/* static */ const t_whisker_generator::templates_map&
+t_whisker_generator::templates_by_path() {
   static const auto cached_result = [] {
     templates_map result;
     for (std::size_t i = 0; i < templates_size; ++i) {
@@ -297,8 +297,7 @@ t_whisker_base_generator::templates_by_path() {
   return cached_result;
 }
 
-t_whisker_base_generator::cached_render_state&
-t_whisker_base_generator::render_state() {
+t_whisker_generator::cached_render_state& t_whisker_generator::render_state() {
   if (!cached_render_state_) {
     whisker::render_options options;
 
@@ -331,7 +330,7 @@ t_whisker_base_generator::render_state() {
   return *cached_render_state_;
 }
 
-std::string t_whisker_base_generator::render(
+std::string t_whisker_generator::render(
     std::string_view template_file, const whisker::object& context) {
   cached_render_state& state = render_state();
   const whisker::ast::root* ast = state.source_resolver->resolve_import(
@@ -350,7 +349,7 @@ std::string t_whisker_base_generator::render(
   return out.str();
 }
 
-void t_whisker_base_generator::write_to_file(
+void t_whisker_generator::write_to_file(
     const std::filesystem::path& output_file, std::string_view data) {
   auto abs_path = detail::make_abs_path(fs_path(get_out_dir()), output_file);
   std::filesystem::create_directories(abs_path.parent_path());
@@ -370,7 +369,7 @@ void t_whisker_base_generator::write_to_file(
   record_genfile(abs_path.string());
 }
 
-void t_whisker_base_generator::render_to_file(
+void t_whisker_generator::render_to_file(
     const std::filesystem::path& output_file,
     std::string_view template_file,
     const whisker::object& context) {

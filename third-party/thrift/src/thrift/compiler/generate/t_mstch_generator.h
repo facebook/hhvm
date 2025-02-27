@@ -31,9 +31,9 @@
 
 namespace apache::thrift::compiler {
 
-class t_mstch_generator : public t_whisker_base_generator {
+class t_mstch_generator : public t_whisker_generator {
  public:
-  using t_whisker_base_generator::t_whisker_base_generator;
+  using t_whisker_generator::t_whisker_generator;
 
   void process_options(
       const std::map<std::string, std::string>& options) override {
@@ -70,7 +70,7 @@ class t_mstch_generator : public t_whisker_base_generator {
    */
   const std::string& get_template(const std::string& template_name);
 
-  using t_whisker_base_generator::render;
+  using t_whisker_generator::render;
   /**
    * Render the mstch template with name `template_name` in the given context.
    */
@@ -219,7 +219,7 @@ class t_mstch_generator : public t_whisker_base_generator {
    */
   std::map<std::string, std::string> options_;
 
-  whisker::map globals() const final;
+  whisker::map globals() const final override;
   strictness_options strictness() const final;
 
   /**

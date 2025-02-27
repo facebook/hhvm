@@ -168,6 +168,35 @@ final class ThriftContextPropState {
     }
   }
 
+  public static function updateIGUserId(?int $ig_user_id, string $src): bool {
+    // don't overwrite if TCPS already has a valid ig user id
+    $tcps_ig_user_id = self::get()->getIGUserId();
+    if (self::coerceId($tcps_ig_user_id) is nonnull) {
+      return false;
+    }
+    if (
+      !JustKnobs::eval(
+        'meta_cp/www:enable_user_id_ctx_prop',
+        /*hashval=*/null,
+        /*switchval=*/$src,
+      )
+    ) {
+      return false;
+    }
+
+    $ig_user_id = self::coerceId($ig_user_id);
+
+    $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
+    if ($ig_user_id is nonnull) {
+      self::get()->setIGUserId($ig_user_id);
+      $ods->bumpKey('contextprop.set_ig_user_id.'.$src);
+      return true;
+    }
+
+    $ods->bumpKey('contextprop.missing_ig_user_id.'.$src);
+    return false;
+  }
+
   private static function updateFBUserIdFromVC(
     IFBViewerContext $vc,
     string $src,

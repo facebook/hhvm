@@ -277,6 +277,51 @@ final class ThriftContextPropStateTest extends WWWTest {
     expect($tcps->getUserIds()?->fb_user_id)->toEqual(123);
   }
 
+  public async function testUpdatedWithExplicitIGUserId(
+  )[defaults]: Awaitable<void> {
+    MockJustKnobs::setBool('meta_cp/www:enable_user_id_ctx_prop', true);
+    $tfm = ThriftFrameworkMetadata::withDefaultValues();
+    $tfm->baggage = ContextProp\Baggage::withDefaultValues();
+    $tfm->baggage->user_ids = ContextProp\UserIds::fromShape(
+      shape('fb_user_id' => 456, 'ig_user_id' => null),
+    );
+
+    $buf = new TMemoryBuffer();
+    $prot = new TCompactProtocolAccelerated($buf);
+    $tfm->write($prot);
+    $s = $buf->getBuffer();
+    $e = Base64::encode($s);
+
+    ThriftContextPropState::initFromString($e);
+    ThriftContextPropState::updateIGUserId(1, "test");
+
+    $tcps = ThriftContextPropState::get();
+    expect($tcps->getUserIds()?->fb_user_id)->toEqual(456);
+    expect($tcps->getUserIds()?->ig_user_id)->toEqual(1);
+  }
+
+  public async function testUpdatedWithExplicitIGUserIdNoOverwrite(
+  )[defaults]: Awaitable<void> {
+    MockJustKnobs::setBool('meta_cp/www:enable_user_id_ctx_prop', true);
+    $tfm = ThriftFrameworkMetadata::withDefaultValues();
+    $tfm->baggage = ContextProp\Baggage::withDefaultValues();
+    $tfm->baggage->user_ids = ContextProp\UserIds::fromShape(
+      shape('fb_user_id' => null, 'ig_user_id' => 123),
+    );
+
+    $buf = new TMemoryBuffer();
+    $prot = new TCompactProtocolAccelerated($buf);
+    $tfm->write($prot);
+    $s = $buf->getBuffer();
+    $e = Base64::encode($s);
+
+    ThriftContextPropState::initFromString($e);
+    ThriftContextPropState::updateIGUserId(456, "test");
+
+    $tcps = ThriftContextPropState::get();
+    expect($tcps->getUserIds()?->ig_user_id)->toEqual(123);
+  }
+
   public function testGen()[defaults]: void {
     ThriftContextPropState::initFromString(null);
     $tcps = ThriftContextPropState::get();

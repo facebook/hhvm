@@ -97,23 +97,16 @@ testing::AssertionResult runPatchTest(
 
   const Any& expectedAny = *patchTestCase.result();
 
-  auto parseAny = [](const Any& a) {
-    switch (auto protocol = a.protocol().value_or(StandardProtocol::Compact)) {
-      case StandardProtocol::Compact:
-        return protocol::parseObject<apache::thrift::CompactProtocolReader>(
-            *a.data());
-      case StandardProtocol::Binary:
-        return protocol::parseObject<apache::thrift::BinaryProtocolReader>(
-            *a.data());
-      default:
-        throw std::invalid_argument(
-            "Unsupported protocol: " + util::enumNameSafe(protocol));
-    }
-  };
+  auto actual = AnyRegistry::generated().load<protocol::Value>(*res.result());
+  auto expected = AnyRegistry::generated().load<protocol::Value>(expectedAny);
 
-  protocol::Object actual = parseAny(*res.result());
-  protocol::Object expected = parseAny(expectedAny);
-  if (!op::identical<protocol::Object::Tag>(actual, expected)) {
+  // This is needed right now to handle string/binary ambiguation and to treat
+  // all string/binary as binary.
+  auto rexpected = protocol::parseValue<CompactProtocolReader>(
+      *protocol::serializeValue<CompactProtocolWriter>(expected),
+      static_cast<type::BaseType>(expected.getType()));
+
+  if (actual != rexpected) {
     // TODO: Report out the delta
     return testing::AssertionFailure();
   }

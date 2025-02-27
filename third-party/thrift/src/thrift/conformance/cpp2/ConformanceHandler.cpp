@@ -20,9 +20,13 @@
 #include <thrift/conformance/cpp2/AnyRegistry.h>
 #include <thrift/conformance/cpp2/ConformanceHandler.h>
 #include <thrift/conformance/cpp2/Protocol.h>
+#include <thrift/lib/cpp2/patch/DynamicPatch.h>
+#include <thrift/lib/cpp2/patch/detail/PatchBadge.h>
 #include <thrift/lib/cpp2/protocol/Patch.h>
 
 namespace apache::thrift::conformance {
+
+using apache::thrift::protocol::detail::badge;
 
 void ConformanceHandler::roundTrip(
     RoundTripResponse& res, std::unique_ptr<RoundTripRequest> req) {
@@ -40,12 +44,21 @@ void ConformanceHandler::patch(
     PatchOpResponse& res, std::unique_ptr<PatchOpRequest> req) {
   // Load the value.
   auto value = AnyRegistry::generated().load<protocol::Value>(*req->value());
-  auto patch = AnyRegistry::generated().load<protocol::Value>(*req->patch());
+  auto patchValue =
+      AnyRegistry::generated().load<protocol::Value>(*req->patch());
 
-  protocol::applyPatch(patch.as_object(), value);
+  // This is needed right now to handle string/binary ambiguation and to treat
+  // all string/binary as binary.
+  auto rvalue = protocol::parseValue<CompactProtocolReader>(
+      *protocol::serializeValue<CompactProtocolWriter>(value),
+      static_cast<type::BaseType>(value.getType()));
+
+  protocol::DynamicPatch patch;
+  patch.fromObject(badge, patchValue.as_object());
+  patch.apply(rvalue);
 
   res.result() = AnyRegistry::generated().store(
-      std::move(value), getProtocol(*req->value()));
+      std::move(rvalue), getProtocol(*req->value()));
 }
 
 } // namespace apache::thrift::conformance

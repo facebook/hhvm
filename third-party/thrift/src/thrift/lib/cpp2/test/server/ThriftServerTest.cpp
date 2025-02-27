@@ -3933,6 +3933,15 @@ TEST(ThriftServer, AddModuleAfterSetupThreadManager) {
 }
 
 TEST(ThriftServer, GetSetMaxRequests) {
+  auto getExecutionLimitRequests = [](const ThriftServer& server) {
+    return server.resourcePoolSet()
+        .resourcePool(ResourcePoolHandle::defaultAsync())
+        .concurrencyController()
+        .value()
+        .get()
+        .getExecutionLimitRequests();
+  };
+
   for (auto target : std::array<uint32_t, 2>{1000, 0}) {
     {
       // Test set before setupThreadManager
@@ -3947,16 +3956,18 @@ TEST(ThriftServer, GetSetMaxRequests) {
       server.setupThreadManager();
       EXPECT_EQ(server.getMaxRequests(), target);
       if (server.useResourcePools()) {
-        auto concurrencyLimit =
+        auto maxRequests =
             target == 0 ? std::numeric_limits<decltype(target)>::max() : target;
-        EXPECT_EQ(
-            concurrencyLimit,
-            server.resourcePoolSet()
-                .resourcePool(ResourcePoolHandle::defaultAsync())
-                .concurrencyController()
-                .value()
-                .get()
-                .getExecutionLimitRequests());
+        EXPECT_EQ(maxRequests, getExecutionLimitRequests(server));
+
+        // Also test that setting concurrencyLimit unsyncs the resource pool
+        // from maxRequets.
+        auto concurrencyLimit = target + 1;
+        server.setConcurrencyLimit(concurrencyLimit);
+        EXPECT_EQ(concurrencyLimit, getExecutionLimitRequests(server));
+
+        server.setMaxRequests(target);
+        EXPECT_NE(maxRequests, getExecutionLimitRequests(server));
       }
     }
     {
@@ -3971,16 +3982,18 @@ TEST(ThriftServer, GetSetMaxRequests) {
       server.setMaxRequests(target);
       EXPECT_EQ(server.getMaxRequests(), target);
       if (server.useResourcePools()) {
-        auto concurrencyLimit =
+        auto maxRequests =
             target == 0 ? std::numeric_limits<decltype(target)>::max() : target;
-        EXPECT_EQ(
-            concurrencyLimit,
-            server.resourcePoolSet()
-                .resourcePool(ResourcePoolHandle::defaultAsync())
-                .concurrencyController()
-                .value()
-                .get()
-                .getExecutionLimitRequests());
+        EXPECT_EQ(maxRequests, getExecutionLimitRequests(server));
+
+        // Also test that setting concurrencyLimit unsyncs the resource pool
+        // from maxRequets.
+        auto concurrencyLimit = target + 1;
+        server.setConcurrencyLimit(concurrencyLimit);
+        EXPECT_EQ(concurrencyLimit, getExecutionLimitRequests(server));
+
+        server.setMaxRequests(target);
+        EXPECT_NE(maxRequests, getExecutionLimitRequests(server));
       }
     }
   }

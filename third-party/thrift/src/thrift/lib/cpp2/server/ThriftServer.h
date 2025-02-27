@@ -1136,6 +1136,9 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
    * @param concurrencyLimit new setting for concurrency limit.
    */
   void setConcurrencyLimit(uint32_t concurrencyLimit) override {
+    folly::call_once(cancelSetMaxRequestsCallbackHandleFlag_, [this]() {
+      setMaxRequestsCallbackHandle.cancel();
+    });
     thriftConfig_.setConcurrencyLimit(
         folly::observer::makeStaticObserver(std::optional{concurrencyLimit}),
         AttributeSource::OVERRIDE);
@@ -1848,6 +1851,10 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   // evb->worker eventbase local
   folly::EventBaseLocal<Cpp2Worker*> evbToWorker_;
 
+  // setMaxRequestsCallbackHandle should be cancelled, unsyncing maxRequests
+  // from resource pools, when setConcurrencyLimit is explicitly called.
+  folly::once_flag cancelSetMaxRequestsCallbackHandleFlag_;
+
   struct IdleServerAction : public folly::HHWheelTimer::Callback {
     IdleServerAction(
         ThriftServer& server,
@@ -1961,6 +1968,7 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
 
  protected:
   folly::observer::CallbackHandle getSSLCallbackHandle();
+  folly::observer::CallbackHandle setConcurrencyLimitCallbackHandle{};
   folly::observer::CallbackHandle setMaxRequestsCallbackHandle{};
   folly::observer::CallbackHandle setMaxQpsCallbackHandle{};
 

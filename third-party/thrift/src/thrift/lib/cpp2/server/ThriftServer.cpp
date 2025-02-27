@@ -979,38 +979,63 @@ void ThriftServer::setupThreadManager() {
   // Now do setup that we want to do whether we created these resources or the
   // client did.
   if (!resourcePoolSet().empty()) {
-    // Keep concurrency controller in sync with max requests for now.
+    setConcurrencyLimitCallbackHandle =
+        detail::getThriftServerConfig(*this)
+            .getConcurrencyLimit()
+            .getObserver()
+            .addCallback(
+                [this](const folly::observer::Snapshot<uint32_t>& snapshot) {
+                  auto concurrencyLimit = *snapshot;
+                  if (auto cc =
+                          resourcePoolSet()
+                              .resourcePool(ResourcePoolHandle::defaultAsync())
+                              .concurrencyController()) {
+                    cc.value().get().setExecutionLimitRequests(
+                        concurrencyLimit != 0
+                            ? concurrencyLimit
+                            : std::numeric_limits<
+                                  decltype(concurrencyLimit)>::max());
+                  }
+                });
+    // ThriftServer's maxRequests was historically synced to
+    // ConcurrencyController's executionLimitRequests. This syncing behavior
+    // will be removed, but for now we sync by default.
     setMaxRequestsCallbackHandle =
         detail::getThriftServerConfig(*this)
             .getMaxRequests()
             .getObserver()
-            .addCallback([this](folly::observer::Snapshot<uint32_t> snapshot) {
-              auto maxRequests = *snapshot;
-              if (auto cc =
-                      resourcePoolSet()
-                          .resourcePool(ResourcePoolHandle::defaultAsync())
-                          .concurrencyController()) {
-                cc.value().get().setExecutionLimitRequests(
-                    maxRequests != 0
-                        ? maxRequests
-                        : std::numeric_limits<decltype(maxRequests)>::max());
-              }
-            });
+            .addCallback(
+                [this](const folly::observer::Snapshot<uint32_t>& snapshot) {
+                  auto maxRequests = *snapshot;
+                  if (auto cc =
+                          resourcePoolSet()
+                              .resourcePool(ResourcePoolHandle::defaultAsync())
+                              .concurrencyController()) {
+                    (cc.value().get())
+                        .setExecutionLimitRequests(
+                            maxRequests != 0
+                                ? maxRequests
+                                : std::numeric_limits<
+                                      decltype(maxRequests)>::max());
+                  }
+                });
     setMaxQpsCallbackHandle =
         detail::getThriftServerConfig(*this)
             .getMaxQps()
             .getObserver()
-            .addCallback([this](folly::observer::Snapshot<uint32_t> snapshot) {
-              auto maxQps = *snapshot;
-              if (auto cc =
-                      resourcePoolSet()
-                          .resourcePool(ResourcePoolHandle::defaultAsync())
-                          .concurrencyController()) {
-                cc.value().get().setQpsLimit(
-                    maxQps != 0 ? maxQps
-                                : std::numeric_limits<decltype(maxQps)>::max());
-              }
-            });
+            .addCallback(
+                [this](const folly::observer::Snapshot<uint32_t>& snapshot) {
+                  auto maxQps = *snapshot;
+                  if (auto cc =
+                          resourcePoolSet()
+                              .resourcePool(ResourcePoolHandle::defaultAsync())
+                              .concurrencyController()) {
+                    cc.value().get().setQpsLimit(
+                        maxQps != 0
+                            ? maxQps
+                            : std::numeric_limits<decltype(maxQps)>::max());
+                  }
+                });
     // Create an adapter so calls to getThreadManager_deprecated will work
     // when we are using resource pools
     if (!threadManager_ &&

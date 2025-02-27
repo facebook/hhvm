@@ -101,35 +101,38 @@ class LeafServiceHandler(EchoServiceHandler, LeafServiceInterface):
         return list(reversed(input))
 
 
+async def _start_server_async(
+    path: str,
+    server_ready_event: synchronize.Event,
+    test_done_event: synchronize.Event,
+) -> None:
+    server = ThriftServer(LeafServiceHandler(), path=path)
+    task = asyncio.create_task(server.serve())
+    await server.get_address()
+    server_ready_event.set()
+    while not test_done_event.is_set():
+        await asyncio.sleep(0)
+    server.stop()
+    await task
+
+
+def _start_server(
+    path: str,
+    server_ready_event: synchronize.Event,
+    test_done_event: synchronize.Event,
+) -> None:
+    asyncio.run(_start_server_async(path, server_ready_event, test_done_event))
+
+
 @contextlib.contextmanager
 def server_in_another_process() -> typing.Generator[str, None, None]:
-    async def start_server_async(
-        path: str,
-        server_ready_event: synchronize.Event,
-        test_done_event: synchronize.Event,
-    ) -> None:
-        server = ThriftServer(LeafServiceHandler(), path=path)
-        task = asyncio.create_task(server.serve())
-        await server.get_address()
-        server_ready_event.set()
-        while not test_done_event.is_set():
-            await asyncio.sleep(0)
-        server.stop()
-        await task
-
-    def start_server(
-        path: str,
-        server_ready_event: synchronize.Event,
-        test_done_event: synchronize.Event,
-    ) -> None:
-        asyncio.run(start_server_async(path, server_ready_event, test_done_event))
-
     with tempfile.NamedTemporaryFile() as socket:
         socket.close()
         server_ready_event = Event()
         test_done_event = Event()
         process = Process(
-            target=start_server, args=(socket.name, server_ready_event, test_done_event)
+            target=_start_server,
+            args=(socket.name, server_ready_event, test_done_event),
         )
         process.start()
         server_ready_event.wait()

@@ -50,7 +50,7 @@ impl FeatureName {
             ExpressionTreeNestedBindings => Unstable,
             LikeTypeHints => Unstable,
             ShapeDestructure => Unstable,
-            ExpressionTreeShapeCreation => Preview,
+            ExpressionTreeShapeCreation => OngoingRelease,
             NoDisjointUnion => OngoingRelease,
         }
     }

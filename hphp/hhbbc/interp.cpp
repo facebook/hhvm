@@ -2504,16 +2504,23 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
   // memo key is a parameter, then we can possibly using the type constraint to
   // infer a more efficient memo key mode.
   using MK = MemoKeyConstraint;
-  Optional<Type> resolvedClsTy;
+  bool isMemoizeParam = false;
   auto const mkc = [&] {
     if (op.nloc1.id >= env.ctx.func->params.size()) return MK::None;
-    auto const& tc = env.ctx.func->params[op.nloc1.id].typeConstraints.main();
-    if (tc.isSubObject()) {
+    auto const& tcs = env.ctx.func->params[op.nloc1.id].typeConstraints;
+    auto isTCMemoizeParam = [&](auto const& tc) -> bool {
+      if (!tc.isSubObject()) return false;
+      if (tc.isSoft()) return false;
       auto const rcls = env.index.resolve_class(tc.clsName());
       assertx(rcls.has_value());
-      resolvedClsTy = subObj(*rcls);
-    }
-    return memoKeyConstraintFromTC(tc);
+      return subObj(*rcls).subtypeOf(tyIMemoizeParam);
+    };
+    isMemoizeParam = std::any_of(
+      tcs.range().begin(),
+      tcs.range().end(),
+      isTCMemoizeParam
+    );
+    return tcs.getMemoKeyConstraint();
   }();
 
   // Use the type-constraint to reduce this operation to a more efficient memo
@@ -2605,8 +2612,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
       // a string (which is what the generic mode does). If not, it will use the
       // generic mode, which can handle collections or classes which don't
       // implement getInstanceKey.
-      if (resolvedClsTy &&
-          resolvedClsTy->subtypeOf(tyIMemoizeParam) &&
+      if (isMemoizeParam &&
           inTy.subtypeOf(tyIMemoizeParam)) {
         return reduce(
           env,
@@ -2627,8 +2633,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
       // when invoking getInstanceKey and then select from the result of that,
       // or the integer 0. This might seem wasteful, but the JIT does a good job
       // inlining away the call in the null case.
-      if (resolvedClsTy &&
-          resolvedClsTy->subtypeOf(tyIMemoizeParam) &&
+      if (isMemoizeParam &&
           inTy.subtypeOf(opt(tyIMemoizeParam))) {
         return reduce(
           env,
@@ -2647,7 +2652,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
         );
       }
       break;
-    case MK::None:
+    default:
       break;
   }
 
@@ -5146,7 +5151,10 @@ bool couldBeMocked(const Type& t) {
   return true;
 }
 
-bool couldHaveReifiedType(const ISS& env, const TypeConstraint& tc) {
+bool couldHaveReifiedType(
+    const ISS& env,
+    const TypeIntersectionConstraint& tcs
+) {
   if (env.ctx.func->isClosureBody) {
     for (auto i = env.ctx.func->params.size();
          i < env.ctx.func->locals.size();
@@ -5157,11 +5165,17 @@ bool couldHaveReifiedType(const ISS& env, const TypeConstraint& tc) {
     }
     return false;
   }
-  if (tc.isAnyObject()) return true;
-  if (!tc.isSubObject()) return false;
-  auto const cls = env.index.resolve_class(tc.clsName());
-  assertx(cls.has_value());
-  return cls->couldHaveReifiedGenerics();
+  auto couldHaveReifiedGenerics = [&](const TypeConstraint& tc) {
+    if (!tc.isSubObject()) return false;
+    auto const cls = env.index.resolve_class(tc.clsName());
+    assertx(cls.has_value());
+    return cls->couldHaveReifiedGenerics();
+  };
+  return std::any_of(
+    tcs.range().begin(),
+    tcs.range().end(),
+    couldHaveReifiedGenerics
+  );
 }
 
 }
@@ -5189,11 +5203,11 @@ void in(ISS& env, const bc::VerifyParamTypeTS& op) {
     popC(env);
     return;
   }
-  auto const constraint = env.ctx.func->params[op.loc1].typeConstraints.main();
+  auto const& constraints = env.ctx.func->params[op.loc1].typeConstraints;
   // TODO(T31677864): We are being extremely pessimistic here, relax it
   if (!env.ctx.func->isReified &&
       (!env.ctx.cls || !env.ctx.cls->hasReifiedGenerics) &&
-      !couldHaveReifiedType(env, constraint)) {
+      !couldHaveReifiedType(env, constraints)) {
     return reduce(env, bc::PopC {});
   }
 
@@ -5341,12 +5355,12 @@ void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
     popC(env);
     return;
   }
-  auto const& retTypeConstraint = env.ctx.func->retTypeConstraints.main();
+  auto const& retTypeConstraints = env.ctx.func->retTypeConstraints;
 
   // TODO(T31677864): We are being extremely pessimistic here, relax it
   if (!env.ctx.func->isReified &&
       (!env.ctx.cls || !env.ctx.cls->hasReifiedGenerics) &&
-      !couldHaveReifiedType(env, retTypeConstraint)) {
+      !couldHaveReifiedType(env, retTypeConstraints)) {
     return reduce(env, bc::PopC {}, bc::VerifyRetTypeC {});
   }
   if (auto const inputTS = tv(a)) {
@@ -5714,15 +5728,16 @@ void in(ISS& env, const bc::InitProp& op) {
     };
 
     auto const [refined, effectFree] = [&] () -> std::pair<Type, bool> {
-      auto [refined, effectFree] = refine(prop.typeConstraints.main());
-      for (auto const& tc : prop.typeConstraints.ubs()) {
-        if (!effectFree) break;
+      auto refined1 = TCell;
+      auto effectFree1 = true;
+      for (auto const& tc : prop.typeConstraints.range()) {
+        if (!effectFree1) break;
         auto [refined2, effectFree2] = refine(tc);
-        refined &= refined2;
-        if (refined.is(BBottom)) effectFree = false;
-        effectFree &= effectFree2;
+        refined1 &= refined2;
+        if (refined1.is(BBottom)) effectFree1 = false;
+        effectFree1 &= effectFree2;
       }
-      return { std::move(refined), effectFree };
+      return {std::move(refined1), effectFree1};
     }();
 
     auto const val = [effectFree = effectFree] (const Type& t) {

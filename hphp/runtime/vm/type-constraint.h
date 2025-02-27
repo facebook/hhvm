@@ -43,6 +43,44 @@ struct StringData;
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
+/*
+ * Its possible to use type constraints on function parameters to devise better
+ * memoization key generation schemes. For example, if we know a
+ * type-constraint limits the parameter to only ever being an integer or string,
+ * then the memoization key scheme can just be the identity. This is because
+ * integers and strings won't collide with each other, and we know it won't ever
+ * be anything else. Without such a constraint, the string would need escaping.
+ *
+ * This enum defines the possible memo key constraints that can be generated
+ * for a list of given type constraints.
+ */
+enum class MemoKeyConstraint : uint8_t {
+  None            = 0b00000000,
+  Null            = 0b00000001,
+  Int             = 0b00000010,
+  Bool            = 0b00000100,
+  Str             = 0b00001000,
+  Dbl             = 0b00010000,
+  Object          = 0b00100000,
+  // Unions of the above, defined for convenience
+  BoolOrNull      = 0b00000101,
+  IntOrNull       = 0b00000011,
+  StrOrNull       = 0b00001001,
+  DblOrNull       = 0b00010001,
+  ObjectOrNull    = 0b00100001,
+  IntOrStr        = 0b00001010,
+  IntOrStrOrNull  = 0b00001011,
+  NonNull         = 0b11111110,
+  Any             = 0b11111111
+};
+
+constexpr MemoKeyConstraint operator&(MemoKeyConstraint a, MemoKeyConstraint b) {
+  return MemoKeyConstraint(static_cast<uint8_t>(a) & static_cast<uint8_t>(b));
+}
+
+constexpr MemoKeyConstraint operator|(MemoKeyConstraint a, MemoKeyConstraint b) {
+  return MemoKeyConstraint(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
+}
 
 /*
  * TypeConstraint represents the metadata required to check a PHP
@@ -533,6 +571,15 @@ struct TypeConstraint {
    */
   MaybeDataType asSystemlibType() const;
 
+  /**
+   * This function returns the suitable "memo-key constraint" if it
+   * corresponds to one. Note: HHBBC, the interpreter, and the JIT all need to
+   * agree exactly on the scheme for each constraint. It is the caller's
+   * responsibility to actually verify that type-hints are being enforced.
+   * If they are not, then none of this information can be used.
+   */
+  MemoKeyConstraint getMemoKeyConstraint() const;
+
 private:
   void initSingle();
   void initUnion();
@@ -977,6 +1024,8 @@ struct TypeIntersectionConstraint {
     );
   }
 
+  MemoKeyConstraint getMemoKeyConstraint() const;
+
   private:
   folly::Range<TypeConstraint*> mutableRange() {
     if (isSimple()) {
@@ -1006,36 +1055,8 @@ static_assert(std::endian::native == std::endian::little,
     "LSB of TypeConstraint::m_flags and CompactTaggedPtr align only on little-endian ");
 
 //////////////////////////////////////////////////////////////////////
-
-/*
- * Its possible to use type constraints on function parameters to devise better
- * memoization key generation schemes. For example, if we know the
- * type-constraint limits the parameter to only ever being an integer or string,
- * then the memoization key scheme can just be the identity. This is because
- * integers and strings won't collide with each other, and we know it won't ever
- * be anything else. Without such a constraint, the string would need escaping.
- *
- * This function takes a type-constraint and returns the suitable "memo-key
- * constraint" if it corresponds to one. Note: HHBBC, the interpreter, and the
- * JIT all need to agree exactly on the scheme for each constraint. It is the
- * caller's responsibility to actually verify that type-hints are being
- * enforced. If they are not, then none of this information can be used.
- */
-enum class MemoKeyConstraint {
-  Int,
-  IntOrNull,
-  Bool,
-  BoolOrNull,
-  Str,
-  StrOrNull,
-  IntOrStr,
-  Dbl,
-  DblOrNull,
-  Object,
-  ObjectOrNull,
-  None
-};
-MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint&);
+MemoKeyConstraint memoKeyConstraintFromTypeConstraints(
+  const TypeIntersectionConstraint&);
 
 std::string describe_actual_type(tv_rval val);
 

@@ -962,6 +962,14 @@ HPHP::Optional<TypedValue> TypeIntersectionConstraint::defaultValue() const {
   return std::nullopt;
 }
 
+MemoKeyConstraint TypeIntersectionConstraint::getMemoKeyConstraint() const {
+  auto result = MemoKeyConstraint::Any;
+  for (auto const& tc : range()) {
+    result = result & tc.getMemoKeyConstraint();
+  }
+  return result;
+}
+
 namespace {
 
 /*
@@ -2023,36 +2031,34 @@ void TypeConstraint::unresolve() {
   m_u.single.class_.m_clsName.reset();
 }
 
-//////////////////////////////////////////////////////////////////////
-
-MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
+MemoKeyConstraint TypeConstraint::getMemoKeyConstraint() const {
   using MK = MemoKeyConstraint;
 
   // Soft constraints aren't useful because they're not enforced.
-  if (!tc.hasConstraint() || tc.isTypeVar() ||
-      tc.isTypeConstant() || tc.isSoft() || tc.isUnion()) {
-    return MK::None;
+  if (!hasConstraint() || isTypeVar() ||
+      isTypeConstant() || isSoft() || isUnion()) {
+    return MK::Any;
   }
 
   // Only a subset of possible type-constraints are useful to use. Namely,
   // single types which might be nullable, and int/string combination.
-  switch (tc.metaType()) {
+  switch (metaType()) {
     case AnnotMetaType::Precise: {
-      auto const dt = tc.underlyingDataType();
-      if (!dt) return MK::None;
+      auto const dt = underlyingDataType();
+      if (!dt) return MK::Any;
       switch (*dt) {
         case KindOfBoolean:
-          return tc.isNullable() ? MK::BoolOrNull : MK::Bool;
+          return isNullable() ? MK::BoolOrNull : MK::Bool;
         case KindOfInt64:
-          return tc.isNullable() ? MK::IntOrNull : MK::Int;
+          return isNullable() ? MK::IntOrNull : MK::Int;
         case KindOfPersistentString:
         case KindOfString:
         case KindOfLazyClass:
-          return tc.isNullable() ? MK::StrOrNull : MK::Str;
+          return isNullable() ? MK::StrOrNull : MK::Str;
         case KindOfObject:
-          return tc.isNullable() ? MK::ObjectOrNull : MK::Object;
+          return isNullable() ? MK::ObjectOrNull : MK::Object;
         case KindOfDouble:
-          return tc.isNullable() ? MK::DblOrNull : MK::Dbl;
+          return isNullable() ? MK::DblOrNull : MK::Dbl;
         case KindOfPersistentVec:
         case KindOfVec:
         case KindOfPersistentDict:
@@ -2062,7 +2068,7 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
         case KindOfClsMeth:
         case KindOfResource:
         case KindOfEnumClassLabel:
-        case KindOfNull:         return MK::None;
+        case KindOfNull:         return MK::Null;
         case KindOfUninit:
         case KindOfRFunc:
         case KindOfFunc:
@@ -2073,26 +2079,27 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
       not_reached();
     }
     case AnnotMetaType::ArrayKey:
-      return tc.isNullable() ? MK::None : MK::IntOrStr;
+      return isNullable() ? MK::IntOrStrOrNull : MK::IntOrStr;
     case AnnotMetaType::Classname:
-      return tc.isNullable() ? MK::StrOrNull : MK::Str;
+      return isNullable() ? MK::StrOrNull : MK::Str;
     case AnnotMetaType::Class:
-      return tc.isNullable() ? MK::StrOrNull : MK::Str;
+      return isNullable() ? MK::StrOrNull : MK::Str;
     case AnnotMetaType::ClassOrClassname:
-      return tc.isNullable() ? MK::StrOrNull : MK::Str;
+      return isNullable() ? MK::StrOrNull : MK::Str;
     case AnnotMetaType::SubObject:
-      return tc.isNullable() ? MK::ObjectOrNull : MK::Object;
+      return isNullable() ? MK::ObjectOrNull : MK::Object;
+    case AnnotMetaType::Nonnull:
+      return isNullable() ? MK::Any : MK::NonNull;
     case AnnotMetaType::Mixed:
     case AnnotMetaType::Nothing:
     case AnnotMetaType::NoReturn:
-    case AnnotMetaType::Nonnull:
     case AnnotMetaType::This:
     case AnnotMetaType::Callable:
     case AnnotMetaType::Number:
     case AnnotMetaType::VecOrDict:
     case AnnotMetaType::ArrayLike:
     case AnnotMetaType::Unresolved:
-      return MK::None;
+      return MK::Any;
   }
   not_reached();
 }

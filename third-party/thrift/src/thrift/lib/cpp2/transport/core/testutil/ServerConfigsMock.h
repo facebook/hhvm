@@ -105,6 +105,16 @@ class ServerConfigsMock : public ServerConfigs {
         AttributeSource::OVERRIDE);
   }
 
+  uint32_t getConcurrencyLimit() const override {
+    return thriftServerConfig_.getConcurrencyLimit().get();
+  }
+
+  void setConcurrencyLimit(uint32_t concurrencyLimit) override {
+    thriftServerConfig_.setConcurrencyLimit(
+        folly::observer::makeStaticObserver(std::optional{concurrencyLimit}),
+        AttributeSource::OVERRIDE);
+  }
+
   uint32_t getMaxQps() const override {
     return thriftServerConfig_.getMaxQps().get();
   }

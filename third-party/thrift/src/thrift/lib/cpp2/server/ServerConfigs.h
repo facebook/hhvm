@@ -160,6 +160,9 @@ class ServerConfigs {
   virtual uint32_t getMaxQps() const = 0;
   virtual void setMaxQps(uint32_t maxQps) = 0;
 
+  virtual uint32_t getConcurrencyLimit() const = 0;
+  virtual void setConcurrencyLimit(uint32_t concurrencyLimit) = 0;
+
   enum class RequestHandlingCapability { NONE, INTERNAL_METHODS_ONLY, ALL };
   /**
    * Determines which requests the server can handle in its current state.

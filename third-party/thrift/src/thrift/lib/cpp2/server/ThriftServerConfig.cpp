@@ -155,6 +155,11 @@ const ServerAttributeDynamic<uint32_t>& ThriftServerConfig::getMaxQps() const {
   return maxQps_;
 }
 
+const ServerAttributeDynamic<uint32_t>&
+ThriftServerConfig::getConcurrencyLimit() const {
+  return concurrencyLimit_;
+}
+
 const ServerAttributeDynamic<bool>& ThriftServerConfig::getUseClientTimeout()
     const {
   return useClientTimeout_;
@@ -427,6 +432,12 @@ void ThriftServerConfig::setMaxQps(
     folly::observer::Observer<std::optional<uint32_t>> maxQps,
     AttributeSource source) {
   maxQps_.set(maxQps, source);
+}
+
+void ThriftServerConfig::setConcurrencyLimit(
+    folly::observer::Observer<std::optional<uint32_t>> concurrencyLimit,
+    AttributeSource source) {
+  concurrencyLimit_.set(std::move(concurrencyLimit), source);
 }
 
 void ThriftServerConfig::setUseClientTimeout(

@@ -1119,6 +1119,29 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   }
 
   /**
+   * Get the maximum number of requests that this server's resource pool may
+   * execute concurrently. When the maximum is reached, resource pools will
+   * queue requests until they can be processed without exceeding the maximum.
+   *
+   * @return current setting
+   */
+  uint32_t getConcurrencyLimit() const override {
+    return thriftConfig_.getConcurrencyLimit().get();
+  }
+
+  /**
+   * Set the maximum number of requests that this server's resource pool may
+   * execute concurrently.
+   *
+   * @param concurrencyLimit new setting for concurrency limit.
+   */
+  void setConcurrencyLimit(uint32_t concurrencyLimit) override {
+    thriftConfig_.setConcurrencyLimit(
+        folly::observer::makeStaticObserver(std::optional{concurrencyLimit}),
+        AttributeSource::OVERRIDE);
+  }
+
+  /**
    * Get the number of CPU (pool) threads
    *
    * @return number of CPU (pool) threads

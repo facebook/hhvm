@@ -161,6 +161,10 @@ class ThriftServerConfig {
    */
   const ServerAttributeDynamic<uint32_t>& getMaxQps() const;
 
+  // Get the maximum requests that can be actively processed in parallel when
+  // using ParallelConcurrencyController.
+  const ServerAttributeDynamic<uint32_t>& getConcurrencyLimit() const;
+
   const ServerAttributeDynamic<bool>& getUseClientTimeout() const;
 
   const std::optional<bool> getBaselineUseClientTimeout() const;
@@ -437,6 +441,12 @@ class ThriftServerConfig {
    */
   void setMaxQps(
       folly::observer::Observer<std::optional<uint32_t>> maxQps,
+      AttributeSource source = AttributeSource::OVERRIDE);
+
+  // Sets the maximum requests that can be actively processed in parallel when
+  // using ParallelConcurrencyController.
+  void setConcurrencyLimit(
+      folly::observer::Observer<std::optional<uint32_t>> concurrencyLimit,
       AttributeSource source = AttributeSource::OVERRIDE);
 
   void setUseClientTimeout(
@@ -755,6 +765,10 @@ class ThriftServerConfig {
 
   // Max qps enforced with tokenbucket -- 0 is disabled.
   ServerAttributeDynamic<uint32_t> maxQps_{0};
+
+  // Max requests that can be actively processed in parallel on when using
+  // ParallelConcurrencyController -- 0 is disabled.
+  ServerAttributeDynamic<uint32_t> concurrencyLimit_{0};
 
   /**
    * The maximum memory usage (in bytes) by each request debug payload.

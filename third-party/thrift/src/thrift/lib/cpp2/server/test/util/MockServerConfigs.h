@@ -81,6 +81,8 @@ class MockServerConfigs : public apache::thrift::server::ServerConfigs {
   MOCK_METHOD(uint32_t, getListenerTos, (), (const, override));
   MOCK_METHOD(uint32_t, getMaxRequests, (), (const, override));
   MOCK_METHOD(void, setMaxRequests, (uint32_t), (override));
+  MOCK_METHOD(uint32_t, getConcurrencyLimit, (), (const, override));
+  MOCK_METHOD(void, setConcurrencyLimit, (uint32_t), (override));
   MOCK_METHOD(uint32_t, getMaxQps, (), (const, override));
   MOCK_METHOD(void, setMaxQps, (uint32_t), (override));
   MOCK_METHOD(

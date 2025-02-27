@@ -1035,7 +1035,6 @@ let check_override
   check_needs_concrete_override env parent_class_elt class_elt on_error;
 
   let (lazy pos) = class_elt.ce_pos in
-  let (lazy parent_pos) = parent_class_elt.ce_pos in
 
   let (lazy fty_child) = class_elt.ce_type in
   let (lazy fty_parent) = parent_class_elt.ce_type in
@@ -1071,21 +1070,6 @@ let check_override
     on_error;
 
   match (deref fty_parent, deref fty_child) with
-  | ((_, Tany _), (_, Tany _)) -> env
-  | ((_, Tany _), _) ->
-    Typing_error_utils.add_typing_error
-      ~env
-      Typing_error.(
-        apply_reasons ~on_error
-        @@ Secondary.Decl_override_missing_hint parent_pos);
-
-    env
-  | (_, (_, Tany _)) ->
-    Typing_error_utils.add_typing_error
-      ~env
-      Typing_error.(
-        apply_reasons ~on_error @@ Secondary.Decl_override_missing_hint pos);
-    env
   | ((r_parent, Tfun ft_parent), (r_child, Tfun ft_child)) ->
     (match member_kind with
     | MemberKind.Constructor { is_consistent = false } ->

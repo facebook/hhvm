@@ -1699,7 +1699,6 @@ and Secondary : sig
         pos: Pos_or_decl.t;
         decl_pos: Pos_or_decl.t;
       }
-    | Decl_override_missing_hint of Pos_or_decl.t
     | Bad_lateinit_override of {
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
@@ -2003,7 +2002,6 @@ end = struct
         pos: Pos_or_decl.t;
         decl_pos: Pos_or_decl.t;
       }
-    | Decl_override_missing_hint of Pos_or_decl.t
     | Bad_lateinit_override of {
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;

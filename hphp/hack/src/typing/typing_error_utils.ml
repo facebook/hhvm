@@ -6947,20 +6947,6 @@ end = struct
       lazy Explanation.empty,
       User_error_flags.empty )
 
-  let decl_override_missing_hint pos =
-    let reasons =
-      lazy
-        [
-          ( pos,
-            "When redeclaring class members, both declarations must have a typehint"
-          );
-        ]
-    in
-    ( Error_code.DeclOverrideMissingHint,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
-
   let bad_lateinit_override pos parent_pos parent_is_lateinit =
     let reasons =
       lazy
@@ -7513,8 +7499,6 @@ end = struct
       Eval_result.single (cyclic_enum_constraint pos)
     | Inoutness_mismatch { pos; decl_pos } ->
       Eval_result.single (inoutness_mismatch pos decl_pos)
-    | Decl_override_missing_hint pos ->
-      Eval_result.single (decl_override_missing_hint pos)
     | Bad_lateinit_override { pos; parent_pos; parent_is_lateinit } ->
       Eval_result.single
         (bad_lateinit_override pos parent_pos parent_is_lateinit)

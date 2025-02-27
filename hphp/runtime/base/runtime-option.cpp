@@ -764,6 +764,7 @@ bool RuntimeOption::HHProfRequest = false;
 int RuntimeOption::ThriftFBServerThriftServerIOWorkerThreads = 1;
 int RuntimeOption::ThriftFBServerThriftServerCPUWorkerThreads = 1;
 std::set<std::string> RuntimeOption::ThriftFBServerHighPriorityEndPoints;
+bool RuntimeOption::ThriftFBServerUseThriftResourcePool = false;
 
 bool RuntimeOption::EnableFb303Server = false;
 int RuntimeOption::Fb303ServerPort = 0;
@@ -1583,6 +1584,7 @@ void RuntimeOption::Load(
     Config::Bind(ThriftFBServerThriftServerCPUWorkerThreads, ini, config, "ThriftFBServer.ThriftServerCPUWorkerThreads",
                  1);
     Config::Bind(ThriftFBServerHighPriorityEndPoints, ini, config, "ThriftFBServer.HighPriorityEndPoints");
+    Config::Bind(ThriftFBServerUseThriftResourcePool, ini, config, "ThriftFBServer.UseThriftResourcePool", false);
 
     // Fb303Server
     Config::Bind(EnableFb303Server, ini, config, "Fb303Server.Enable",

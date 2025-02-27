@@ -396,6 +396,7 @@ public:
   static int ThriftFBServerThriftServerIOWorkerThreads;
   static int ThriftFBServerThriftServerCPUWorkerThreads;
   static std::set<std::string> ThriftFBServerHighPriorityEndPoints;
+  static bool ThriftFBServerUseThriftResourcePool;
 
   // fb303 server
   static bool EnableFb303Server;

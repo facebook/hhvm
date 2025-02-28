@@ -2067,7 +2067,7 @@ MemoKeyConstraint TypeConstraint::getMemoKeyConstraint() const {
         case KindOfKeyset:
         case KindOfClsMeth:
         case KindOfResource:
-        case KindOfEnumClassLabel:
+        case KindOfEnumClassLabel: return MK::Any;
         case KindOfNull:         return MK::Null;
         case KindOfUninit:
         case KindOfRFunc:

@@ -1,8 +1,12 @@
 
+Notice: Class passed to classname type-hint in %s/class-ptr/attributes.php on line 28
+
 Notice: Implicit Class to string conversion for string key conversion in %s/class-ptr/attributes.php on line 28
 string(5) "C_str"
 object(TakesStr) (0) {
 }
+
+Notice: Class passed to classname type-hint in %s/class-ptr/attributes.php on line 30
 
 Notice: Implicit Class to string conversion for string key conversion in %s/class-ptr/attributes.php on line 30
 
@@ -11,10 +15,16 @@ string(5) "C_cls"
 object(TakesStr) (0) {
 }
 
+Notice: Class passed to classname type-hint in %s/class-ptr/attributes.php on line 33
+
 Notice: Implicit Class to string conversion for string key conversion in %s/class-ptr/attributes.php on line 33
+
+Notice: Class passed to classname type-hint in %s/class-ptr/attributes.php on line 33
 lazyclass(D_cls)
 object(TakesCls) (0) {
 }
+
+Notice: Class passed to classname type-hint in %s/class-ptr/attributes.php on line 35
 
 Notice: Implicit Class to string conversion for string key conversion in %s/class-ptr/attributes.php on line 35
 string(5) "D_str"

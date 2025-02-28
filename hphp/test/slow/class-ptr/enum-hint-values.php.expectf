@@ -4,6 +4,8 @@ dict(2) {
   ["B"]=>
   int(2)
 }
+
+Notice: Class passed to classname type-hint in %s/class-ptr/enum-hint-values.php on line 30
 dict(2) {
   ["A"]=>
   int(1)
@@ -16,6 +18,8 @@ dict(2) {
   ["T"]=>
   string(1) "t"
 }
+
+Notice: Class passed to classname type-hint in %s/class-ptr/enum-hint-values.php on line 36
 dict(2) {
   ["S"]=>
   string(1) "s"

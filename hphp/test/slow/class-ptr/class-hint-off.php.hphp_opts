@@ -1,3 +1,2 @@
 -vRuntime.Hack.Lang.AllowUnstableFeatures=true
 -vRuntime.Hack.Lang.EnableClassPointerHint=false
--vRuntime.Eval.ClassnameNoticesSampleRate=1

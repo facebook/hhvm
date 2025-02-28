@@ -1,2 +1,1 @@
--vRuntime.Eval.ClassnameNoticesSampleRate=1
 --inputs=__DIR__/classname-type-hint.inc

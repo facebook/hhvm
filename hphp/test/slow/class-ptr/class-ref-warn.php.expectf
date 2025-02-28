@@ -1,5 +1,9 @@
+
+Notice: Class passed to classname type-hint in %s/class-ref-warn.php on line 32
 class(C0)
 string(2) "C0"
+
+Notice: Class passed to classname type-hint in %s/class-ref-warn.php on line 34
 object(C0) (1) {
   ["a"]=>
   int(1)

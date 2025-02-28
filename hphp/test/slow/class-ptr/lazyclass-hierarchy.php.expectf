@@ -1,12 +1,20 @@
 
+Notice: Class passed to classname type-hint in %s/lazyclass-hierarchy.php on line 12
+
 Notice: Implicit Class to string conversion for argument 2 passed to is_a() in %s/lazyclass-hierarchy.php on line 7
 bool(false)
+
+Notice: Class passed to classname type-hint in %s/lazyclass-hierarchy.php on line 13
 
 Notice: Implicit Class to string conversion for argument 2 passed to is_a() in %s/lazyclass-hierarchy.php on line 7
 bool(true)
 
+Notice: Class passed to classname type-hint in %s/lazyclass-hierarchy.php on line 15
+
 Notice: Implicit Class to string conversion for argument 2 passed to is_a() in %s/lazyclass-hierarchy.php on line 7
 bool(false)
+
+Notice: Class passed to classname type-hint in %s/lazyclass-hierarchy.php on line 16
 
 Notice: Implicit Class to string conversion for argument 2 passed to is_a() in %s/lazyclass-hierarchy.php on line 7
 bool(false)

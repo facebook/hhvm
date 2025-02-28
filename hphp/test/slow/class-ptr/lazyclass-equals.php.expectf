@@ -6,6 +6,8 @@ bool(true)
 
 Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/lazyclass-equals.php on line 27
 bool(true)
+
+Notice: Class passed to classname type-hint in %s/test/slow/class-ptr/lazyclass-equals.php on line 28
 class(Foo)
 bool(true)
 
@@ -23,6 +25,8 @@ bool(true)
 
 Notice: Implicit Class to string conversion for comparison in %s/test/slow/class-ptr/lazyclass-equals.php on line 34
 bool(true)
+
+Notice: Class passed to classname type-hint in %s/test/slow/class-ptr/lazyclass-equals.php on line 43
 class(Foo)
 bool(true)
 

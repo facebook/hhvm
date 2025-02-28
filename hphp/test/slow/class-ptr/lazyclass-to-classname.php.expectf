@@ -1,8 +1,24 @@
+
+Notice: Class passed to classname type-hint in %s/class-ptr/classname-type-hint.inc on line 34
 class(A)
+
+Notice: Class passed to classname type-hint in %s/class-ptr/classname-type-hint.inc on line 13
 class(A)
+
+Notice: Class passed to classname type-hint in %s/class-ptr/classname-type-hint.inc on line 18
+
+Notice: Class passed to classname type-hint in %s/class-ptr/classname-type-hint.inc on line 36
 class(B)
+
+Notice: Class passed to classname type-hint in %s/class-ptr/classname-type-hint.inc on line 39
 class(A)
+
+Notice: Class passed to classname type-hint in %s/class-ptr/classname-type-hint.inc on line 24
 class(A)
+
+Notice: Class passed to classname type-hint in %s/class-ptr/classname-type-hint.inc on line 29
+
+Notice: Class passed to classname type-hint in %s/class-ptr/classname-type-hint.inc on line 41
 class(B)
 string(1) "A"
 string(1) "A"

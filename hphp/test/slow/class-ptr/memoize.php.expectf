@@ -1,0 +1,68 @@
+===== classname<C> =====
+** Called a
+string(1) "C"
+string(1) "C"
+
+Notice: Class passed to classname type-hint in %s/class-ptr/memoize.php on line 41
+string(1) "C"
+
+Notice: Class passed to classname type-hint in %s/class-ptr/memoize.php on line 42
+string(1) "C"
+
+Notice: Class passed to classname type-hint in %s/class-ptr/memoize.php on line 44
+
+Notice: Class passed to classname type-hint in %s/class-ptr/memoize.php on line 14
+** Called b
+lazyclass(C)
+lazyclass(C)
+
+Notice: Class passed to classname type-hint in %s/class-ptr/memoize.php on line 46
+lazyclass(C)
+
+Notice: Class passed to classname type-hint in %s/class-ptr/memoize.php on line 47
+lazyclass(C)
+
+Notice: Class passed to classname type-hint in %s/class-ptr/memoize.php on line 49
+
+Notice: Class passed to classname type-hint in %s/class-ptr/memoize.php on line 16
+** Called c
+class(C)
+class(C)
+
+Notice: Class passed to classname type-hint in %s/class-ptr/memoize.php on line 51
+class(C)
+
+Notice: Class passed to classname type-hint in %s/class-ptr/memoize.php on line 52
+class(C)
+===== class<C> =====
+** Called x
+string(1) "C"
+string(1) "C"
+string(1) "C"
+string(1) "C"
+** Called y
+lazyclass(C)
+lazyclass(C)
+lazyclass(C)
+lazyclass(C)
+** Called z
+class(C)
+class(C)
+class(C)
+class(C)
+===== class_or_classname<C> =====
+** Called x
+string(1) "C"
+string(1) "C"
+string(1) "C"
+string(1) "C"
+** Called y
+lazyclass(C)
+lazyclass(C)
+lazyclass(C)
+lazyclass(C)
+** Called z
+class(C)
+class(C)
+class(C)
+class(C)

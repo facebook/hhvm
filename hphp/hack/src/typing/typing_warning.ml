@@ -25,6 +25,7 @@ module Safe_abstract = struct
   type t = {
     kind: kind;
     class_: string;
+    reason: Typing_reason.t option;
   }
 end
 

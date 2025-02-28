@@ -78,17 +78,17 @@ struct
 
   let claim : t -> string = function
     (* TODO(T213971384): better error messages and quickfixes *)
-    | { kind = Call_abstract { method_ }; class_ } ->
+    | { kind = Call_abstract { method_ }; class_; reason = _ } ->
       Printf.sprintf
         "Unsafe call: `%s::%s` might not exist because the receiver might be abstract."
         (Utils.strip_ns class_)
         method_
-    | { kind = Call_needs_concrete { method_ }; class_ } ->
+    | { kind = Call_needs_concrete { method_ }; class_; reason = _ } ->
       Printf.sprintf
         "Unsafe call: %s::%s has `<<__NeedsConcrete>>`, but the receiver might be abstract."
         (Utils.strip_ns class_)
         method_
-    | { kind = New_abstract; class_ } ->
+    | { kind = New_abstract; class_; reason = _ } ->
       Printf.sprintf
         "Unsafe use of `new`: `%s` might be abstract"
         (Utils.strip_ns class_)
@@ -106,7 +106,14 @@ struct
       Codes.SafeAbstractCallNeedsConcrete;
     ]
 
-  let reasons _ : Pos_or_decl.t Message.t list = []
+  let reasons { class_; reason; _ } : Pos_or_decl.t Message.t list =
+    match reason with
+    | Some reason ->
+      [
+        ( Typing_reason.to_pos reason,
+          Printf.sprintf "%s is from " (Utils.strip_ns class_) );
+      ]
+    | None -> []
 
   let quickfixes _ : Pos.t Quickfix.t list = []
 end

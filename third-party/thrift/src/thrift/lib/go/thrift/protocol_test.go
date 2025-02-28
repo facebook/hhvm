@@ -141,7 +141,7 @@ func tcpStreamSetupForTest(t *testing.T) (io.Reader, io.Writer) {
 		for {
 			conn, err := l.Accept()
 			if err != nil {
-				errCh <- fmt.Errorf("could not accept tcp: %s", err.Error())
+				errCh <- fmt.Errorf("could not accept tcp: %w", err)
 			}
 			rCh <- conn
 		}

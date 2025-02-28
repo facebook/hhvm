@@ -87,13 +87,12 @@ func ProtocolTest1(test *testing.T, serial *Serializer, deserial *Deserializer) 
 
 	s, err := serial.WriteString(&m)
 	if err != nil {
-		return false, fmt.Errorf("Unable to Serialize struct\n\t %s", err)
+		return false, fmt.Errorf("Unable to Serialize struct\n\t %w", err)
 	}
 
 	var m1 = MyTestStruct{}
 	if err = deserial.ReadString(&m1, s); err != nil {
-		return false, fmt.Errorf("Unable to Deserialize struct\n\t %s", err)
-
+		return false, fmt.Errorf("Unable to Deserialize struct\n\t %w", err)
 	}
 
 	return compareStructs(m, m1)
@@ -117,14 +116,13 @@ func ProtocolTest2(test *testing.T, serial *Serializer, deserial *Deserializer) 
 
 	s, err := serial.WriteString(&m)
 	if err != nil {
-		return false, fmt.Errorf("Unable to Serialize struct\n\t %s", err)
+		return false, fmt.Errorf("Unable to Serialize struct\n\t %w", err)
 
 	}
 
 	var m1 = MyTestStruct{}
 	if err = deserial.ReadString(&m1, s); err != nil {
-		return false, fmt.Errorf("Unable to Deserialize struct\n\t %s", err)
-
+		return false, fmt.Errorf("Unable to Deserialize struct\n\t %w", err)
 	}
 
 	return compareStructs(m, m1)

@@ -96,7 +96,7 @@ func runStressTest(t *testing.T, serverTransport thrift.TransportID) {
 			thrift.WithIoTimeout(60*time.Second),
 		)
 		if err != nil {
-			errRes := fmt.Errorf("failed to create client: %v", err)
+			errRes := fmt.Errorf("failed to create client: %w", err)
 			t.Log(errRes.Error())
 			return errRes
 		}
@@ -104,7 +104,7 @@ func runStressTest(t *testing.T, serverTransport thrift.TransportID) {
 		defer client.Close()
 		result, err := client.Echo(context.Background(), "hello")
 		if err != nil {
-			errRes := fmt.Errorf("failed to make RPC: %v", err)
+			errRes := fmt.Errorf("failed to make RPC: %w", err)
 			t.Log(errRes.Error())
 			return errRes
 		}

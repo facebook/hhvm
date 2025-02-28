@@ -239,13 +239,13 @@ func (r *limitedByteReader) ReadByte() (byte, error) {
 func readVarString(buf byteReader) (string, error) {
 	strlen, err := binary.ReadUvarint(buf)
 	if err != nil {
-		return "", fmt.Errorf("tHeader: error reading len of kv string: %s", err.Error())
+		return "", fmt.Errorf("tHeader: error reading len of kv string: %w", err)
 	}
 
 	strbuf := make([]byte, strlen)
 	_, err = io.ReadFull(buf, strbuf)
 	if err != nil {
-		return "", fmt.Errorf("tHeader: error reading kv string: %s", err.Error())
+		return "", fmt.Errorf("tHeader: error reading kv string: %w", err)
 	}
 	return string(strbuf), nil
 }
@@ -255,17 +255,17 @@ func readInfoHeaderSet(buf byteReader) (map[string]string, error) {
 	headers := map[string]string{}
 	numkvs, err := binary.ReadUvarint(buf)
 	if err != nil {
-		return nil, fmt.Errorf("tHeader: error reading number of keyvalues: %s", err.Error())
+		return nil, fmt.Errorf("tHeader: error reading number of keyvalues: %w", err)
 	}
 
 	for i := uint64(0); i < numkvs; i++ {
 		key, err := readVarString(buf)
 		if err != nil {
-			return nil, fmt.Errorf("tHeader: error reading keyvalue key: %s", err.Error())
+			return nil, fmt.Errorf("tHeader: error reading keyvalue key: %w", err)
 		}
 		val, err := readVarString(buf)
 		if err != nil {
-			return nil, fmt.Errorf("tHeader: error reading keyvalue val: %s", err.Error())
+			return nil, fmt.Errorf("tHeader: error reading keyvalue val: %w", err)
 		}
 		headers[key] = val
 	}
@@ -280,7 +280,7 @@ func readTransforms(buf byteReader) ([]TransformID, error) {
 	numtransforms, err := binary.ReadUvarint(buf)
 	if err != nil {
 		return nil, types.NewTransportExceptionFromError(
-			fmt.Errorf("tHeader: error reading number of transforms: %s", err.Error()),
+			fmt.Errorf("tHeader: error reading number of transforms: %w", err),
 		)
 	}
 
@@ -289,7 +289,7 @@ func readTransforms(buf byteReader) ([]TransformID, error) {
 		transformID, err := binary.ReadUvarint(buf)
 		if err != nil {
 			return nil, types.NewTransportExceptionFromError(
-				fmt.Errorf("tHeader: error reading transforms: %s", err.Error()),
+				fmt.Errorf("tHeader: error reading transforms: %w", err),
 			)
 		}
 		tid := TransformID(transformID)
@@ -327,7 +327,7 @@ func readInfoHeaders(buf byteReader) (map[string]string, map[string]string, erro
 
 		if err != nil {
 			return nil, nil, types.NewTransportExceptionFromError(
-				fmt.Errorf("tHeader: error reading infoID: %s", err.Error()),
+				fmt.Errorf("tHeader: error reading infoID: %w", err),
 			)
 		}
 
@@ -365,7 +365,7 @@ func (hdr *tHeader) readVarHeader(buf byteReader) error {
 	protoID, err := binary.ReadUvarint(buf)
 	if err != nil {
 		return types.NewTransportExceptionFromError(
-			fmt.Errorf("tHeader: error reading protocol ID: %s", err.Error()),
+			fmt.Errorf("tHeader: error reading protocol ID: %w", err),
 		)
 	}
 	hdr.protoID = types.ProtocolID(protoID)

@@ -81,13 +81,13 @@ struct
     | { kind = Call_abstract { method_ }; class_ } ->
       Printf.sprintf
         "Unsafe call: `%s::%s` might not exist because the receiver might be abstract."
-        method_
         (Utils.strip_ns class_)
+        method_
     | { kind = Call_needs_concrete { method_ }; class_ } ->
       Printf.sprintf
         "Unsafe call: %s::%s has `<<__NeedsConcrete>>`, but the receiver might be abstract."
-        method_
         (Utils.strip_ns class_)
+        method_
     | { kind = New_abstract; class_ } ->
       Printf.sprintf
         "Unsafe use of `new`: `%s` might be abstract"

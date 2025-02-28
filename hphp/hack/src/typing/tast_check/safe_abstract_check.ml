@@ -309,7 +309,14 @@ let handler =
               { func = (_, _, Class_const ((_, _, class_id), (_, method_))); _ }
           ) ->
         let make_warnings class_use =
-          match Folded_class.get_smethod class_use.Class_use.class_ method_ with
+          let folded_method_opt =
+            Tast_env.get_static_member
+              (* is_method *) true
+              env
+              class_use.Class_use.class_
+              method_
+          in
+          match folded_method_opt with
           | Some folded_method ->
             Option.to_list
               (check_for_call_abstract class_use method_ folded_method)

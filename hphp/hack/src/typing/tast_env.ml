@@ -446,6 +446,8 @@ let get_const env cls name = Typing_env.get_const env cls name
 
 let consts env cls = Typing_env.consts env cls
 
+let get_static_member = Typing_env.get_static_member
+
 let fill_in_pos_filename_if_in_current_decl =
   Typing_env.fill_in_pos_filename_if_in_current_decl
 

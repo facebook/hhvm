@@ -360,6 +360,14 @@ val get_const :
 val consts :
   env -> Decl_provider.class_decl -> (string * Typing_defs.class_const) list
 
+(** Get static member declaration of a class from the appropriate backend and add dependency. *)
+val get_static_member :
+  bool ->
+  env ->
+  Decl_provider.class_decl ->
+  string ->
+  Typing_defs.class_elt option
+
 (** Check that the position is in the current decl and if it is, resolve
     it with the current file. *)
 val fill_in_pos_filename_if_in_current_decl :

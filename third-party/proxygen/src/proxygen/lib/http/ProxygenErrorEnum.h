@@ -47,7 +47,7 @@ namespace proxygen {
     x(StreamUnacknowledged),                    \
     x(WriteTimeout),                            \
     x(AddressPrivate),                          \
-    x(AddressFamilyNotSupported),               \
+    x(HeaderContentValidation),                 \
     x(DNSResolutionErr),                        \
     x(DNSNoResults),                            \
     x(MalformedInput),                          \

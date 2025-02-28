@@ -1212,6 +1212,7 @@ let ide_diagnostics_to_lsp_diagnostics
         message;
         relatedInformation;
         relatedLocations = relatedInformation (* legacy FB extension *);
+        data = None;
       }
     in
     let additional_diagnostics =

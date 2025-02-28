@@ -672,6 +672,7 @@ module PublishDiagnostics : sig
     message: string;  (** the diagnostic's message *)
     relatedInformation: diagnosticRelatedInformation list;
     relatedLocations: relatedLocation list;  (** legacy FB extension *)
+    data: Hh_json.json option;
   }
   [@@deriving eq]
 

@@ -490,6 +490,7 @@ let print_diagnostic (diagnostic : PublishDiagnostics.diagnostic) : json =
           Some
             (JSON_Array (List.map diagnostic.relatedLocations ~f:print_related))
         );
+        ("data", diagnostic.data);
       ])
 
 let print_diagnostic_list (ds : PublishDiagnostics.diagnostic list) : json =
@@ -553,6 +554,7 @@ let parse_diagnostic (j : json option) : PublishDiagnostics.diagnostic =
         |> List.map ~f:parse_info;
       relatedLocations =
         Jget.array_d j "relatedLocations" ~default:[] |> List.map ~f:parse_info;
+      data = Jget.val_opt j "data";
     })
 
 let parse_kind json : CodeActionKind.t option =

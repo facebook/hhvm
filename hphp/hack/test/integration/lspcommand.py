@@ -219,6 +219,15 @@ class LspCommandProcessor:
             transcript = self._scribe(transcript, sent=None, received=message)
         return transcript
 
+    def _remove_diagnostic_data(self, params: Json) -> Json:
+        if "diagnostics" in params:
+            diagnostics = params["diagnostics"]
+            if isinstance(diagnostics, list):
+                for diagnostic in diagnostics:
+                    if "data" in diagnostic:
+                        del diagnostic["data"]
+        return params
+
     def _wait_for_message_from_server(
         self,
         transcript: Transcript,
@@ -232,7 +241,7 @@ class LspCommandProcessor:
                 transcript_id not in processed_transcript_ids
                 and entry.received is not None
                 and entry.received.get("method") == method
-                and entry.received.get("params") == params
+                and self._remove_diagnostic_data(entry.received.get("params")) == params
             )
 
         while not any(

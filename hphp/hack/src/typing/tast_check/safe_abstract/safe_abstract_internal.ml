@@ -5,10 +5,14 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-(* Implement the checks from the Safe Abstract proposal,
-   * which makes the combination of "abstract" and "static" safer
-   * (https://fburl.com/hack-safe-abstract) *)
 open Hh_prelude
+
+type class_use_kind =
+  | Static_method_call
+  | New
+
+type class_use_info =
+  class_use_kind * Pos.t * Typing_warning.Safe_abstract.t list
 
 type abstractness =
   | Concrete
@@ -166,12 +170,6 @@ end = struct
       fold_ty ty
 end
 
-let warn env pos (abstract_static_warning : Typing_warning.Safe_abstract.t) :
-    unit =
-  Typing_warning_utils.add
-    (Tast_env.tast_env_as_typing_env env)
-    (pos, Typing_warning.Safe_abstract, abstract_static_warning)
-
 let check_for_call_abstract
     Class_use.{ class_; abstractness; reason } method_ folded_method :
     Typing_warning.Safe_abstract.t option =
@@ -290,66 +288,61 @@ let intersect_warnings (warnings : Typing_warning.Safe_abstract.t list list) :
   | Some l -> l
   | None -> List.hd warnings |> Option.value ~default:[]
 
-let handler =
-  let current_method = ref None in
-
-  object
-    inherit Tast_visitor.handler_base
-
-    method! at_fun_def _env _fun_def = current_method := None
-
-    method! at_method_ _env m = current_method := Some m
-
-    method! at_expr env expr =
-      match expr with
-      | Aast.
-          ( _,
-            call_pos,
-            Call
-              { func = (_, _, Class_const ((_, _, class_id), (_, method_))); _ }
-          ) ->
-        let make_warnings class_use =
-          let folded_method_opt =
-            Tast_env.get_static_member
-              (* is_method *) true
-              env
-              class_use.Class_use.class_
-              method_
-          in
-          match folded_method_opt with
-          | Some folded_method ->
-            Option.to_list
-              (check_for_call_abstract class_use method_ folded_method)
-            @ Option.to_list
-                (check_for_call_needs_concrete class_use method_ folded_method)
-          | None -> []
-        in
-        let warnings =
-          Class_use.fold
-            env
-            class_id
-            ~current_method:!current_method
-            ~f:make_warnings
-            ~intersect:intersect_warnings
-            ~union:union_warnings
-        in
-        Option.iter warnings ~f:(List.iter ~f:(warn env call_pos))
-      | Aast.
-          ( _,
-            new_pos,
-            New ((_, _, class_id), _targs, _exprs, _expr, _constructor) ) ->
-        let make_warnings class_use =
-          Option.to_list (check_for_new_abstract class_use)
-        in
-        let warnings =
-          Class_use.fold
-            env
-            class_id
-            ~current_method:!current_method
-            ~f:make_warnings
-            ~intersect:intersect_warnings
-            ~union:union_warnings
-        in
-        Option.iter warnings ~f:(List.iter ~f:(warn env new_pos))
-      | _ -> ()
-  end
+let calc_warnings env expr ~(current_method : Tast.method_ option) :
+    class_use_info option =
+  match expr with
+  | Aast.
+      ( _,
+        call_pos,
+        Call { func = (_, _, Class_const ((_, _, class_id), (_, method_))); _ }
+      ) ->
+    let make_warnings class_use =
+      let folded_method_opt =
+        Tast_env.get_static_member
+          (* is_method *) true
+          env
+          class_use.Class_use.class_
+          method_
+      in
+      match folded_method_opt with
+      | Some folded_method ->
+        Option.to_list (check_for_call_abstract class_use method_ folded_method)
+        @ Option.to_list
+            (check_for_call_needs_concrete class_use method_ folded_method)
+      | None -> []
+    in
+    let warnings =
+      match
+        Class_use.fold
+          env
+          class_id
+          ~current_method
+          ~f:make_warnings
+          ~intersect:intersect_warnings
+          ~union:union_warnings
+      with
+      | Some warnings -> warnings
+      | None -> []
+    in
+    Some (Static_method_call, call_pos, warnings)
+  | Aast.
+      (_, new_pos, New ((_, _, class_id), _targs, _exprs, _expr, _constructor))
+    ->
+    let make_warnings class_use =
+      Option.to_list (check_for_new_abstract class_use)
+    in
+    let warnings =
+      match
+        Class_use.fold
+          env
+          class_id
+          ~current_method
+          ~f:make_warnings
+          ~intersect:intersect_warnings
+          ~union:union_warnings
+      with
+      | Some warnings -> warnings
+      | None -> []
+    in
+    Some (New, new_pos, warnings)
+  | _ -> None

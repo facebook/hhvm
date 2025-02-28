@@ -15,9 +15,10 @@
 
 # pyre-unsafe
 
+import math
 import unittest
 from sys import float_info, getrefcount
-from typing import Callable
+from typing import Callable, cast
 
 from folly.iobuf import IOBuf
 from thrift.python.marshal import marshal_fixture as fixture
@@ -100,16 +101,38 @@ class TestMarshalPrimitives(MarshalFixture):
 
     def test_float32(self) -> None:
         max_float32 = (2 - 2**-23) * 2.0**127
-        for x in (-max_float32, -1.0, 0.0, max_float32):
-            self.assertEqual(x, fixture.roundtrip_float(x))
+        for x in (
+            -max_float32,
+            -1.0,
+            0.0,
+            max_float32,
+            float("inf"),
+            float("-inf"),
+            float("nan"),
+        ):
+            if math.isnan(x):  # Special handling for NaN since NaN != NaN
+                self.assertTrue(math.isnan(cast(float, fixture.roundtrip_float(x))))
+            else:
+                self.assertEqual(x, fixture.roundtrip_float(x))
         self.assert_type_error(fixture.roundtrip_float, None, "oops")
         self.assert_overflow(
             fixture.roundtrip_float, max_float32 * 2.0, -max_float32 * 2.0
         )
 
     def test_float64(self) -> None:
-        for x in (-float_info.max, -1.0, 0.0, float_info.max):
-            self.assertEqual(x, fixture.roundtrip_double(x))
+        for x in (
+            -float_info.max,
+            -1.0,
+            0.0,
+            float_info.max,
+            float("inf"),
+            float("-inf"),
+            float("nan"),
+        ):
+            if math.isnan(x):  # Special handling for NaN since NaN != NaN
+                self.assertTrue(math.isnan(cast(float, fixture.roundtrip_float(x))))
+            else:
+                self.assertEqual(x, fixture.roundtrip_double(x))
         self.assert_type_error(fixture.roundtrip_double, None, "oops")
 
     def test_bool(self) -> None:

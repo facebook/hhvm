@@ -32,6 +32,9 @@ constexpr std::enable_if_t<std::is_floating_point_v<T>, bool> numericOverflow(
   if constexpr (std::is_same_v<T, double>) {
     return false;
   } else {
+    if (std::isnan(x) || std::isinf(x)) {
+      return false;
+    }
     return x < -std::numeric_limits<T>::max() ||
         x > std::numeric_limits<T>::max();
   }

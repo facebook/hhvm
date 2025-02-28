@@ -1,9 +1,10 @@
+(include_subdirs unqualified)
+
 (library
  (name tast_check)
  (wrapped false)
  (libraries
   ast
-  tany_logger
   core_kernel
   nast
   remove_dead_unsafe_casts

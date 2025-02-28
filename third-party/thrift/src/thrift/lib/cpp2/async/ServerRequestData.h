@@ -36,6 +36,8 @@ struct ServerRequestData {
 
   void setRequestExecutionBegin(TimePoint now = Clock::now());
   void setRequestExecutionEnd(TimePoint now = Clock::now());
+  void recordQueueBeginTime(TimePoint now = Clock::now());
+  void setBucket(size_t priority, size_t bucketNumber);
 
   Duration queuedDuration() const;
   Duration requestExecutionDuration() const;

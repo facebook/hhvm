@@ -26,6 +26,14 @@ void ServerRequestData::setRequestExecutionEnd(TimePoint now) {
   requestExecutionEnd = now;
 }
 
+void ServerRequestData::recordQueueBeginTime(TimePoint now) {
+  queueBegin = now;
+}
+
+void ServerRequestData::setBucket(size_t priority, size_t bucketNumber) {
+  bucket = {priority, bucketNumber};
+}
+
 ServerRequestData::Duration ServerRequestData::queuedDuration() const {
   return requestExecutionBegin - queueBegin;
 }

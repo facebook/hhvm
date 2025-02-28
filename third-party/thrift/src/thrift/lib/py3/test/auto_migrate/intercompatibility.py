@@ -16,9 +16,11 @@
 
 
 import unittest
+from pickle import dumps, loads
 
 import testing.thrift_types as python_types
 import testing.types as py3_types
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import is_auto_migrated
 
 
 class PythonCompatibilityTest(unittest.TestCase):
@@ -60,3 +62,47 @@ class PythonCompatibilityTest(unittest.TestCase):
         python_easy = python_types.easy(name="foo")
         py3_complex_union = py3_types.ComplexUnion(easy_struct=python_easy)
         self.assertEqual("foo", py3_complex_union.easy_struct.name)
+
+
+class PicklingCompatibilityTest(unittest.TestCase):
+    def make_hard(self) -> python_types.hard:
+        return python_types.hard(
+            val=42,
+            val_list=[1, 1, 2, 3, 5, 8, 13],
+            name="foo",
+            an_int=python_types.Integers(small=300),
+        )
+
+    def assert_hard(self, h: python_types.hard | py3_types.hard) -> None:
+        self.assertEqual(42, h.val)
+        self.assertEqual([1, 1, 2, 3, 5, 8, 13], h.val_list)
+        self.assertEqual("foo", h.name)
+        self.assertEqual(300, h.an_int.small)
+
+    def test_python_to_py3_unpickle(self) -> None:
+        python_pickled = dumps(self.make_hard())
+        py3_pickled = dumps(self.make_hard()._to_py3())
+        self.assertEqual(self.pickled_python(), python_pickled)
+        if not is_auto_migrated():
+            self.assertEqual(self.pickled_py3(), py3_pickled)
+
+        python_hard = loads(self.pickled_python())
+        self.assertTrue(
+            python_hard.__class__.__module__.endswith(".thrift_types"),
+            type(python_hard),
+        )
+        py3_hard = loads(self.pickled_py3())
+        expected_ending = ".thrift_types" if is_auto_migrated() else ".types"
+        self.assertTrue(
+            py3_hard.__class__.__module__.endswith(expected_ending), type(py3_hard)
+        )
+        self.assertEqual(py3_hard, python_hard._to_py3())
+        self.assertEqual(python_hard, py3_hard._to_python())
+        self.assert_hard(py3_hard)
+        self.assert_hard(python_hard)
+
+    def pickled_python(self) -> bytes:
+        return b"\x80\x04\x95w\x00\x00\x00\x00\x00\x00\x00\x8c\x13thrift.python.types\x94\x8c\x10_unpickle_struct\x94\x93\x94\x8c\x14testing.thrift_types\x94\x8c\x04hard\x94\x93\x94C$\x15T\x19u\x02\x02\x04\x06\n\x10\x1a\x18\x03foo\x1c$\xd8\x04\x00\x18\x0csome default\x00\x94\x86\x94R\x94."
+
+    def pickled_py3(self) -> bytes:
+        return b"\x80\x04\x95m\x00\x00\x00\x00\x00\x00\x00\x8c\x15thrift.py3.serializer\x94\x8c\x0bdeserialize\x94\x93\x94\x8c\rtesting.types\x94\x8c\x04hard\x94\x93\x94C$\x15T\x19u\x02\x02\x04\x06\n\x10\x1a\x18\x03foo\x1c$\xd8\x04\x00\x18\x0csome default\x00\x94\x86\x94R\x94."

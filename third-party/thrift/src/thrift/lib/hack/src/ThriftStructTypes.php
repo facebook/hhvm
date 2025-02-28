@@ -17,7 +17,7 @@
  */
 
 type ThriftStructGenericSpecRecursiveImpl<
-  T as ThriftStructGenericSpecRecursiveImpl<T>,
+  T /* as ThriftStructGenericSpecRecursiveImpl<T> */,
 > = shape(
   'type' => TType,
   ?'var' => string,
@@ -50,7 +50,7 @@ type ThriftStructGenericSpecImpl = ThriftStructGenericSpecRecursiveImpl<
 >;
 
 type ThriftStructElemSpecRecursiveImpl<
-  T as ThriftStructElemSpecRecursiveImpl<T>,
+  T /* as ThriftStructElemSpecRecursiveImpl<T> */,
 > = shape(
   'type' => TType,
   ?'etype' => TType,

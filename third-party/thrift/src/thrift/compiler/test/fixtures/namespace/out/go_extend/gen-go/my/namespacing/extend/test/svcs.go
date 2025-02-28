@@ -104,7 +104,7 @@ type procFuncExtendTestServiceCheck struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncExtendTestServiceCheck)(nil)
 
-func (p *procFuncExtendTestServiceCheck) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncExtendTestServiceCheck) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqExtendTestServiceCheck()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -113,7 +113,7 @@ func (p *procFuncExtendTestServiceCheck) Read(iprot thrift.Decoder) (thrift.Stru
     return args, nil
 }
 
-func (p *procFuncExtendTestServiceCheck) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncExtendTestServiceCheck) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {

@@ -141,7 +141,7 @@ type procFuncCF struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncCF)(nil)
 
-func (p *procFuncCF) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncCF) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqCF()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -150,7 +150,7 @@ func (p *procFuncCF) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception
     return args, nil
 }
 
-func (p *procFuncCF) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncCF) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -191,7 +191,7 @@ type procFuncCThing struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncCThing)(nil)
 
-func (p *procFuncCThing) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncCThing) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqCThing()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -200,7 +200,7 @@ func (p *procFuncCThing) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Excep
     return args, nil
 }
 
-func (p *procFuncCThing) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncCThing) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch v := result.(type) {

@@ -144,7 +144,7 @@ type procFuncMyServiceQuery struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyServiceQuery)(nil)
 
-func (p *procFuncMyServiceQuery) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncMyServiceQuery) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyServiceQuery()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -153,7 +153,7 @@ func (p *procFuncMyServiceQuery) Read(iprot thrift.Decoder) (thrift.Struct, thri
     return args, nil
 }
 
-func (p *procFuncMyServiceQuery) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncMyServiceQuery) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -195,7 +195,7 @@ type procFuncMyServiceHasArgDocs struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyServiceHasArgDocs)(nil)
 
-func (p *procFuncMyServiceHasArgDocs) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncMyServiceHasArgDocs) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyServiceHasArgDocs()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -204,7 +204,7 @@ func (p *procFuncMyServiceHasArgDocs) Read(iprot thrift.Decoder) (thrift.Struct,
     return args, nil
 }
 
-func (p *procFuncMyServiceHasArgDocs) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncMyServiceHasArgDocs) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {

@@ -122,7 +122,7 @@ type procFuncMyRootDoRoot struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyRootDoRoot)(nil)
 
-func (p *procFuncMyRootDoRoot) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncMyRootDoRoot) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyRootDoRoot()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -131,7 +131,7 @@ func (p *procFuncMyRootDoRoot) Read(iprot thrift.Decoder) (thrift.Struct, thrift
     return args, nil
 }
 
-func (p *procFuncMyRootDoRoot) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncMyRootDoRoot) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -243,7 +243,7 @@ type procFuncMyNodeDoMid struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyNodeDoMid)(nil)
 
-func (p *procFuncMyNodeDoMid) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncMyNodeDoMid) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyNodeDoMid()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -252,7 +252,7 @@ func (p *procFuncMyNodeDoMid) Read(iprot thrift.Decoder) (thrift.Struct, thrift.
     return args, nil
 }
 
-func (p *procFuncMyNodeDoMid) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncMyNodeDoMid) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -364,7 +364,7 @@ type procFuncMyLeafDoLeaf struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyLeafDoLeaf)(nil)
 
-func (p *procFuncMyLeafDoLeaf) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncMyLeafDoLeaf) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyLeafDoLeaf()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -373,7 +373,7 @@ func (p *procFuncMyLeafDoLeaf) Read(iprot thrift.Decoder) (thrift.Struct, thrift
     return args, nil
 }
 
-func (p *procFuncMyLeafDoLeaf) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncMyLeafDoLeaf) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {

@@ -157,7 +157,7 @@ type procFuncFinderByPlate struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncFinderByPlate)(nil)
 
-func (p *procFuncFinderByPlate) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncFinderByPlate) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqFinderByPlate()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -166,7 +166,7 @@ func (p *procFuncFinderByPlate) Read(iprot thrift.Decoder) (thrift.Struct, thrif
     return args, nil
 }
 
-func (p *procFuncFinderByPlate) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncFinderByPlate) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -209,7 +209,7 @@ type procFuncFinderAliasByPlate struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncFinderAliasByPlate)(nil)
 
-func (p *procFuncFinderAliasByPlate) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncFinderAliasByPlate) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqFinderAliasByPlate()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -218,7 +218,7 @@ func (p *procFuncFinderAliasByPlate) Read(iprot thrift.Decoder) (thrift.Struct, 
     return args, nil
 }
 
-func (p *procFuncFinderAliasByPlate) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncFinderAliasByPlate) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -261,7 +261,7 @@ type procFuncFinderPreviousPlate struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncFinderPreviousPlate)(nil)
 
-func (p *procFuncFinderPreviousPlate) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncFinderPreviousPlate) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqFinderPreviousPlate()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -270,7 +270,7 @@ func (p *procFuncFinderPreviousPlate) Read(iprot thrift.Decoder) (thrift.Struct,
     return args, nil
 }
 
-func (p *procFuncFinderPreviousPlate) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncFinderPreviousPlate) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {

@@ -133,7 +133,7 @@ type procFuncDummyEcho struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncDummyEcho)(nil)
 
-func (p *procFuncDummyEcho) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncDummyEcho) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqDummyEcho()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -142,7 +142,7 @@ func (p *procFuncDummyEcho) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Ex
     return args, nil
 }
 
-func (p *procFuncDummyEcho) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncDummyEcho) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -185,7 +185,7 @@ type procFuncDummyOnewayRPC struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncDummyOnewayRPC)(nil)
 
-func (p *procFuncDummyOnewayRPC) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncDummyOnewayRPC) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqDummyOnewayRPC()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -194,7 +194,7 @@ func (p *procFuncDummyOnewayRPC) Read(iprot thrift.Decoder) (thrift.Struct, thri
     return args, nil
 }
 
-func (p *procFuncDummyOnewayRPC) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncDummyOnewayRPC) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -227,5 +227,3 @@ func (p *procFuncDummyOnewayRPC) RunContext(ctx context.Context, reqStruct thrif
 
     return nil, nil
 }
-
-

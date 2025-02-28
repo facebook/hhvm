@@ -140,7 +140,7 @@ type procFuncSomeServiceBounceMap struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncSomeServiceBounceMap)(nil)
 
-func (p *procFuncSomeServiceBounceMap) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncSomeServiceBounceMap) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqSomeServiceBounceMap()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -149,7 +149,7 @@ func (p *procFuncSomeServiceBounceMap) Read(iprot thrift.Decoder) (thrift.Struct
     return args, nil
 }
 
-func (p *procFuncSomeServiceBounceMap) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncSomeServiceBounceMap) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -192,7 +192,7 @@ type procFuncSomeServiceBinaryKeyedMap struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncSomeServiceBinaryKeyedMap)(nil)
 
-func (p *procFuncSomeServiceBinaryKeyedMap) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncSomeServiceBinaryKeyedMap) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqSomeServiceBinaryKeyedMap()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -201,7 +201,7 @@ func (p *procFuncSomeServiceBinaryKeyedMap) Read(iprot thrift.Decoder) (thrift.S
     return args, nil
 }
 
-func (p *procFuncSomeServiceBinaryKeyedMap) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncSomeServiceBinaryKeyedMap) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {

@@ -125,7 +125,7 @@ type procFuncServiceFunc struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncServiceFunc)(nil)
 
-func (p *procFuncServiceFunc) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncServiceFunc) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqServiceFunc()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -134,7 +134,7 @@ func (p *procFuncServiceFunc) Read(iprot thrift.Decoder) (thrift.Struct, thrift.
     return args, nil
 }
 
-func (p *procFuncServiceFunc) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncServiceFunc) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -284,7 +284,7 @@ type procFuncAdapterServiceCount struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncAdapterServiceCount)(nil)
 
-func (p *procFuncAdapterServiceCount) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncAdapterServiceCount) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqAdapterServiceCount()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -293,7 +293,7 @@ func (p *procFuncAdapterServiceCount) Read(iprot thrift.Decoder) (thrift.Struct,
     return args, nil
 }
 
-func (p *procFuncAdapterServiceCount) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncAdapterServiceCount) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -335,7 +335,7 @@ type procFuncAdapterServiceAdaptedTypes struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncAdapterServiceAdaptedTypes)(nil)
 
-func (p *procFuncAdapterServiceAdaptedTypes) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncAdapterServiceAdaptedTypes) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqAdapterServiceAdaptedTypes()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -344,7 +344,7 @@ func (p *procFuncAdapterServiceAdaptedTypes) Read(iprot thrift.Decoder) (thrift.
     return args, nil
 }
 
-func (p *procFuncAdapterServiceAdaptedTypes) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncAdapterServiceAdaptedTypes) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {

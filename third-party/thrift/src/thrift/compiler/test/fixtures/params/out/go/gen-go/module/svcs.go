@@ -183,7 +183,7 @@ type procFuncNestedContainersMapList struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncNestedContainersMapList)(nil)
 
-func (p *procFuncNestedContainersMapList) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncNestedContainersMapList) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqNestedContainersMapList()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -192,7 +192,7 @@ func (p *procFuncNestedContainersMapList) Read(iprot thrift.Decoder) (thrift.Str
     return args, nil
 }
 
-func (p *procFuncNestedContainersMapList) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncNestedContainersMapList) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -234,7 +234,7 @@ type procFuncNestedContainersMapSet struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncNestedContainersMapSet)(nil)
 
-func (p *procFuncNestedContainersMapSet) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncNestedContainersMapSet) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqNestedContainersMapSet()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -243,7 +243,7 @@ func (p *procFuncNestedContainersMapSet) Read(iprot thrift.Decoder) (thrift.Stru
     return args, nil
 }
 
-func (p *procFuncNestedContainersMapSet) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncNestedContainersMapSet) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -285,7 +285,7 @@ type procFuncNestedContainersListMap struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncNestedContainersListMap)(nil)
 
-func (p *procFuncNestedContainersListMap) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncNestedContainersListMap) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqNestedContainersListMap()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -294,7 +294,7 @@ func (p *procFuncNestedContainersListMap) Read(iprot thrift.Decoder) (thrift.Str
     return args, nil
 }
 
-func (p *procFuncNestedContainersListMap) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncNestedContainersListMap) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -336,7 +336,7 @@ type procFuncNestedContainersListSet struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncNestedContainersListSet)(nil)
 
-func (p *procFuncNestedContainersListSet) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncNestedContainersListSet) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqNestedContainersListSet()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -345,7 +345,7 @@ func (p *procFuncNestedContainersListSet) Read(iprot thrift.Decoder) (thrift.Str
     return args, nil
 }
 
-func (p *procFuncNestedContainersListSet) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncNestedContainersListSet) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -387,7 +387,7 @@ type procFuncNestedContainersTurtles struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncNestedContainersTurtles)(nil)
 
-func (p *procFuncNestedContainersTurtles) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncNestedContainersTurtles) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqNestedContainersTurtles()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -396,7 +396,7 @@ func (p *procFuncNestedContainersTurtles) Read(iprot thrift.Decoder) (thrift.Str
     return args, nil
 }
 
-func (p *procFuncNestedContainersTurtles) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncNestedContainersTurtles) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {

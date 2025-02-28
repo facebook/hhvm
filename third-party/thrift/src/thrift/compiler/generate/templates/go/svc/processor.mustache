@@ -103,7 +103,7 @@ type {{> svc/proc_func_name}} struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*{{> svc/proc_func_name}})(nil)
 
-func (p *{{> svc/proc_func_name}}) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *{{> svc/proc_func_name}}) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReq{{service:go_name}}{{function:go_name}}()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -112,7 +112,7 @@ func (p *{{> svc/proc_func_name}}) Read(iprot thrift.Decoder) (thrift.Struct, th
     return args, nil
 }
 
-func (p *{{> svc/proc_func_name}}) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *{{> svc/proc_func_name}}) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch {{#function:exceptions?}}v := {{/function:exceptions?}}result.(type) {

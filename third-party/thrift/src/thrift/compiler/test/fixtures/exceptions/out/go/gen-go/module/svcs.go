@@ -176,7 +176,7 @@ type procFuncRaiserDoBland struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncRaiserDoBland)(nil)
 
-func (p *procFuncRaiserDoBland) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncRaiserDoBland) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqRaiserDoBland()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -185,7 +185,7 @@ func (p *procFuncRaiserDoBland) Read(iprot thrift.Decoder) (thrift.Struct, thrif
     return args, nil
 }
 
-func (p *procFuncRaiserDoBland) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncRaiserDoBland) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -226,7 +226,7 @@ type procFuncRaiserDoRaise struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncRaiserDoRaise)(nil)
 
-func (p *procFuncRaiserDoRaise) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncRaiserDoRaise) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqRaiserDoRaise()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -235,7 +235,7 @@ func (p *procFuncRaiserDoRaise) Read(iprot thrift.Decoder) (thrift.Struct, thrif
     return args, nil
 }
 
-func (p *procFuncRaiserDoRaise) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncRaiserDoRaise) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch v := result.(type) {
@@ -300,7 +300,7 @@ type procFuncRaiserGet200 struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncRaiserGet200)(nil)
 
-func (p *procFuncRaiserGet200) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncRaiserGet200) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqRaiserGet200()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -309,7 +309,7 @@ func (p *procFuncRaiserGet200) Read(iprot thrift.Decoder) (thrift.Struct, thrift
     return args, nil
 }
 
-func (p *procFuncRaiserGet200) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncRaiserGet200) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -351,7 +351,7 @@ type procFuncRaiserGet500 struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncRaiserGet500)(nil)
 
-func (p *procFuncRaiserGet500) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncRaiserGet500) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqRaiserGet500()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -360,7 +360,7 @@ func (p *procFuncRaiserGet500) Read(iprot thrift.Decoder) (thrift.Struct, thrift
     return args, nil
 }
 
-func (p *procFuncRaiserGet500) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncRaiserGet500) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch v := result.(type) {

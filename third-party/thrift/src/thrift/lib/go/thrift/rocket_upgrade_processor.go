@@ -52,7 +52,7 @@ type rocketUpgradeProcessorFunction struct {
 	upgraded *bool
 }
 
-func (r *rocketUpgradeProcessorFunction) Read(prot types.Decoder) (types.Struct, types.Exception) {
+func (r *rocketUpgradeProcessorFunction) Read(prot types.Decoder) (types.Struct, error) {
 	args := &reqServiceUpgradeToRocket{}
 	if err := args.Read(prot); err != nil {
 		return nil, err
@@ -64,7 +64,7 @@ func (r *rocketUpgradeProcessorFunction) RunContext(_ context.Context, _ types.S
 	return &respServiceUpgradeToRocket{}, nil
 }
 
-func (r *rocketUpgradeProcessorFunction) Write(seqID int32, result types.WritableStruct, prot types.Encoder) (err types.Exception) {
+func (r *rocketUpgradeProcessorFunction) Write(seqID int32, result types.WritableStruct, prot types.Encoder) (err error) {
 	var err2 error
 	messageType := types.REPLY
 	switch result.(type) {

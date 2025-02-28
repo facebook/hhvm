@@ -123,7 +123,7 @@ type procFuncHsTestServiceInit struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncHsTestServiceInit)(nil)
 
-func (p *procFuncHsTestServiceInit) Read(iprot thrift.Decoder) (thrift.Struct, thrift.Exception) {
+func (p *procFuncHsTestServiceInit) Read(iprot thrift.Decoder) (thrift.Struct, error) {
     args := newReqHsTestServiceInit()
     if err := args.Read(iprot); err != nil {
         return nil, err
@@ -132,7 +132,7 @@ func (p *procFuncHsTestServiceInit) Read(iprot thrift.Decoder) (thrift.Struct, t
     return args, nil
 }
 
-func (p *procFuncHsTestServiceInit) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err thrift.Exception) {
+func (p *procFuncHsTestServiceInit) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {

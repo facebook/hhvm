@@ -22,7 +22,7 @@ import (
 
 // ProtocolException is the thrift protocol exception
 type ProtocolException interface {
-	Exception
+	error
 	TypeID() int
 }
 

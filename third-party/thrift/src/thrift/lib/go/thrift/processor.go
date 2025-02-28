@@ -103,7 +103,7 @@ func sendException(prot types.Encoder, name string, seqID int32, err types.Appli
 // 1. Read the message from the protocol.
 // 2. Process the message.
 // 3. Write the message to the protocol.
-func process(ctx context.Context, processor Processor, prot Protocol) (ext types.Exception) {
+func process(ctx context.Context, processor Processor, prot Protocol) error {
 	// Step 1: Decode message only using Decoder interface and GetResponseHeaders method on the protocol.
 
 	// Step 1a: find the processor function for the message.

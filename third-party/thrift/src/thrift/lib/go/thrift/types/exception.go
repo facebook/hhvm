@@ -20,11 +20,6 @@ import (
 	"errors"
 )
 
-// Exception is a generic thrift exception
-type Exception interface {
-	error
-}
-
 // PrependError prepends additional information to an error without losing the thrift exception interface
 func PrependError(prepend string, err error) error {
 	if t, ok := err.(TransportException); ok {

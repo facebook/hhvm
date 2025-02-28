@@ -820,5 +820,5 @@ func compactToThriftType(t compactType) (types.Type, error) {
 	case COMPACT_STRUCT:
 		return types.STRUCT, nil
 	}
-	return types.STOP, types.Exception(fmt.Errorf("don't know what type: %#x", t&0x0f))
+	return types.STOP, fmt.Errorf("don't know what type: %#x", t&0x0f)
 }

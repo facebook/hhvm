@@ -27,7 +27,7 @@ type timeoutable interface {
 
 // TransportException is the interface for transport exceptions
 type TransportException interface {
-	Exception
+	error
 	TypeID() int
 	Err() error
 }

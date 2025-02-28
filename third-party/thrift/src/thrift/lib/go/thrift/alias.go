@@ -30,8 +30,6 @@ type Decoder = types.Decoder
 
 type Struct = types.Struct
 
-type Exception = types.Exception
-
 type WritableStruct = types.WritableStruct
 
 type ReadableStruct = types.ReadableStruct

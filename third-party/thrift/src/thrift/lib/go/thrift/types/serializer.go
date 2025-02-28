@@ -35,7 +35,7 @@ type Struct interface {
 // WritableException is an interface used to encapsulate an exception that can be written to a protocol
 type WritableException interface {
 	WritableStruct
-	Exception
+	error
 }
 
 // WritableResult is an interface used to encapsulate a result struct that can be written to a protocol

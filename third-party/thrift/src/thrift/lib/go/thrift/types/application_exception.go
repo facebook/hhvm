@@ -29,7 +29,7 @@ const (
 
 // ApplicationException is an application level Thrift exception
 type ApplicationException interface {
-	Exception
+	error
 	Struct
 	TypeID() int32
 }

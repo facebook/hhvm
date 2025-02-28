@@ -3363,11 +3363,7 @@ OPTBLD_INLINE void iopSetS(ReadonlyOp op) {
   }
   if (Cfg::Eval::CheckPropTypeHints > 0) {
     auto const& sprop = cls->staticProperties()[slot];
-    for (auto const& tc : sprop.typeConstraints.range()) {
-      if (tc.isCheckable()) {
-        tc.verifyStaticProperty(tv1, cls, sprop.cls, name);
-      }
-    }
+    sprop.typeConstraints.verifyStaticProperty(tv1, cls, sprop.cls, name);
   }
   always_assert(cls->sPropLink(slot).isLocal());
   tvSet(*tv1, *val);
@@ -3430,7 +3426,7 @@ OPTBLD_INLINE void iopSetOpS(SetOpOp op) {
     tvDup(*val, temp);
     SCOPE_FAIL { tvDecRefGen(&temp); };
     setopBody(&temp, op, fr);
-    sprop.typeConstraints.main().verifyStaticProperty(
+    sprop.typeConstraints.verifyStaticProperty(
       &temp, cls, sprop.cls, name
     );
     always_assert(cls->sPropLink(slot).isLocal());
@@ -3493,7 +3489,7 @@ OPTBLD_INLINE void iopIncDecS(IncDecOp op) {
     SCOPE_FAIL { tvDecRefGen(&temp); };
     auto result = IncDecBody(op, &temp);
     SCOPE_FAIL { tvDecRefGen(&result); };
-    checkable_sprop->typeConstraints.main().verifyStaticProperty(
+    checkable_sprop->typeConstraints.verifyStaticProperty(
       &temp,
       ss.cls,
       checkable_sprop->cls,
@@ -5190,10 +5186,9 @@ OPTBLD_INLINE void iopInitProp(const StringData* propName, InitPropOp propOp) {
         auto ret = cls->getSPropData(slot);
         if (Cfg::Eval::CheckPropTypeHints > 0) {
           auto const& sprop = cls->staticProperties()[slot];
-          auto const& tc = sprop.typeConstraints.main();
-          if (tc.isCheckable()) {
-            tc.verifyStaticProperty(fr, cls, sprop.cls, sprop.name);
-          }
+          sprop.typeConstraints.verifyStaticProperty(
+            fr, cls, sprop.cls, sprop.name
+          );
         }
         return ret;
       }
@@ -5207,8 +5202,7 @@ OPTBLD_INLINE void iopInitProp(const StringData* propName, InitPropOp propOp) {
         auto ret = (*propVec)[index].val;
         if (Cfg::Eval::CheckPropTypeHints > 0) {
           auto const& prop = cls->declProperties()[slot];
-          auto const& tc = prop.typeConstraints.main();
-          if (tc.isCheckable()) tc.verifyProperty(fr, cls, prop.cls, prop.name);
+          prop.typeConstraints.verifyProperty(fr, cls, prop.cls, prop.name);
         }
         return ret;
       }

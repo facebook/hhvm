@@ -246,10 +246,10 @@ bool checkConstraints(const TCtx& ctx,
 bool checkFuncConstraints(const FuncEmitter* hhbc,
                           const Func* src,
                           FactsStore* fs) {
-  bool status = checkConstraint(
+  bool status = checkConstraints(
     RetTC{src},
-    hhbc->retTypeConstraints.main(),
-    src->returnTypeConstraints().main(),
+    hhbc->retTypeConstraints,
+    src->returnTypeConstraints(),
     fs
   );
   if (src->numParams() != hhbc->params.size()) {

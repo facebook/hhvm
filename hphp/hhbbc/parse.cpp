@@ -923,7 +923,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   auto& propMap = pce.propMap();
   for (size_t idx = 0; idx < propMap.size(); ++idx) {
     auto& prop = propMap[idx];
-    assertx(prop.typeConstraints().main().validForProp());
+    assertx(prop.typeConstraints().validForProp());
     ret->properties.push_back(
       php::Prop {
         prop.name(),

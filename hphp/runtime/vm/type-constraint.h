@@ -1024,6 +1024,30 @@ struct TypeIntersectionConstraint {
     );
   }
 
+  void verifyStaticProperty(
+    tv_lval val,
+    const Class* thisCls,
+    const Class* declCls,
+    const StringData* propName) const {
+    for (auto const& tc : range()) {
+      if (tc.isCheckable()) {
+        tc.verifyStaticProperty(val, thisCls, declCls, propName);
+      }
+    }
+  }
+
+  void verifyProperty(
+    tv_lval val,
+    const Class* thisCls,
+    const Class* declCls,
+    const StringData* propName) const {
+    for (auto const& tc : range()) {
+      if (tc.isCheckable()) {
+        tc.verifyProperty(val, thisCls, declCls, propName);
+      }
+    }
+  }
+
   MemoKeyConstraint getMemoKeyConstraint() const;
 
   private:

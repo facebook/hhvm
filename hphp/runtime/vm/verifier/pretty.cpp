@@ -69,18 +69,12 @@ void pretty_print(const FuncEmitter* fe, std::ostream& out) {
     out << std::endl;
   }
 
-  auto mainConstr = fe->retTypeConstraints.main();
-  if (mainConstr.hasConstraint() ||
-      (fe->retUserType && !fe->retUserType->empty())) {
-    out << " Ret: ";
-    if (mainConstr.hasConstraint()) {
-      out << " " << mainConstr.displayName();
-    }
-    if (fe->retUserType && !fe->retUserType->empty()) {
-      out << " (" << fe->retUserType->data() << ")";
-    }
-    out << std::endl;
+  auto tcs = fe->retTypeConstraints;
+  out << " Ret: " << tcs.show();
+  if (fe->retUserType && !fe->retUserType->empty()) {
+    out << " (" << fe->retUserType->data() << ")";
   }
+  out << std::endl;
 
   if (fe->repoReturnType.tag() != RepoAuthType::Tag::Cell) {
     out << "repoReturnType: " << show(fe->repoReturnType) << '\n';

@@ -792,15 +792,6 @@ void print_cls(Output& out, const PreClass* cls) {
       name = name.substr(0, p);
     }
   }
-  UBMap cls_ubs;
-  for (auto const& prop : cls->allProperties()) {
-    if (prop.typeConstraints().ubs().empty()) continue;
-    auto const key = prop.typeConstraints().main().typeName();
-    auto& v = cls_ubs[key];
-    if (v.isTop()) {
-      v = prop.typeConstraints();
-    }
-  }
 
   out.fmt(".class {} {}{}",
     opt_attrs(AttrContext::Class, cls->attrs(), &cls->userAttributes()),

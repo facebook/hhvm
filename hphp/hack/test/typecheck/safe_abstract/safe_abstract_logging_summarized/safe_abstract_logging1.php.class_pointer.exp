@@ -1,0 +1,5 @@
+safe_abstract_logger:{"filename":"safe_abstract_logging1.php","safe_news":1,"unsafe_news":0,"safe_calls":0,"unsafe_calls":0}
+safe_abstract_logger:{"filename":"safe_abstract_logging1.php","safe_news":0,"unsafe_news":0,"safe_calls":2,"unsafe_calls":0}
+safe_abstract_logger:{"filename":"safe_abstract_logging1.php","safe_news":0,"unsafe_news":0,"safe_calls":1,"unsafe_calls":0}
+safe_abstract_logger:{"filename":"safe_abstract_logging1.php","safe_news":0,"unsafe_news":0,"safe_calls":2,"unsafe_calls":0}
+No errors

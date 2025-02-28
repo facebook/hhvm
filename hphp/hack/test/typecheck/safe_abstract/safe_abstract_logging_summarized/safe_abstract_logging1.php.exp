@@ -1,0 +1,12 @@
+safe_abstract_logger:{"filename":"safe_abstract_logging1.php","safe_news":0,"unsafe_news":1,"safe_calls":0,"unsafe_calls":0}
+safe_abstract_logger:{"filename":"safe_abstract_logging1.php","safe_news":0,"unsafe_news":0,"safe_calls":2,"unsafe_calls":0}
+safe_abstract_logger:{"filename":"safe_abstract_logging1.php","safe_news":0,"unsafe_news":0,"safe_calls":0,"unsafe_calls":1}
+safe_abstract_logger:{"filename":"safe_abstract_logging1.php","safe_news":0,"unsafe_news":0,"safe_calls":2,"unsafe_calls":0}
+WARN: File "safe_abstract_logging1.php", line 20, characters 3-14:
+Unsafe use of `new`: `I1` might be abstract (Warn[12015])
+  File "safe_abstract_logging1.php", line 4, characters 11-12:
+  I1 is from 
+WARN: File "safe_abstract_logging1.php", line 37, characters 3-17:
+Unsafe call: `I1::smeth` might not exist because the receiver might be abstract. (Warn[12014])
+  File "safe_abstract_logging1.php", line 4, characters 11-12:
+  I1 is from 

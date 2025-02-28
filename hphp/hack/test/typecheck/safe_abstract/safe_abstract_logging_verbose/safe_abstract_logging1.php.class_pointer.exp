@@ -1,0 +1,7 @@
+safe_abstract_logger:{"pos":"(Relative_path.Dummy, \"safe_abstract_logging1.php\") 19:2","use_kind":"new","is_safe":true}
+safe_abstract_logger:{"pos":"(Relative_path.Dummy, \"safe_abstract_logging1.php\") 24:2","use_kind":"call","is_safe":true}
+safe_abstract_logger:{"pos":"(Relative_path.Dummy, \"safe_abstract_logging1.php\") 25:2","use_kind":"call","is_safe":true}
+safe_abstract_logger:{"pos":"(Relative_path.Dummy, \"safe_abstract_logging1.php\") 34:2","use_kind":"call","is_safe":true}
+safe_abstract_logger:{"pos":"(Relative_path.Dummy, \"safe_abstract_logging1.php\") 39:2","use_kind":"call","is_safe":true}
+safe_abstract_logger:{"pos":"(Relative_path.Dummy, \"safe_abstract_logging1.php\") 40:2","use_kind":"call","is_safe":true}
+No errors

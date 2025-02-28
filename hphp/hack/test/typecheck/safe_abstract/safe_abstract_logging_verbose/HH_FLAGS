@@ -1,0 +1,2 @@
+--config safe_abstract=true
+--config log_levels='{"safe_abstract": 2}'

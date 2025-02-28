@@ -16,7 +16,7 @@
 
 #include <string>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>

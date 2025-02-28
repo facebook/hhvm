@@ -21,8 +21,8 @@
 
 #include <thrift/compiler/test/test_utils.h>
 
-#include <folly/portability/GMock.h>
-#include <folly/portability/GTest.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using apache::thrift::compiler::test::check_compile;
 

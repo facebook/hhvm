@@ -23,9 +23,9 @@
 #include <string>
 #include <vector>
 
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <folly/Utility.h>
-#include <folly/portability/GMock.h>
-#include <folly/portability/GTest.h>
 
 #include <thrift/compiler/ast/t_exception.h>
 #include <thrift/compiler/ast/t_field.h>

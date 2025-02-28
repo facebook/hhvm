@@ -23,7 +23,7 @@
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/sema/schematizer.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 using namespace apache::thrift::compiler;
 using apache::thrift::compiler::detail::protocol_value_builder;

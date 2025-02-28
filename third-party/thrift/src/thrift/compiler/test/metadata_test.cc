@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_metadata.h> // @manual=//thrift/lib/thrift:metadata-cpp2-services
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 

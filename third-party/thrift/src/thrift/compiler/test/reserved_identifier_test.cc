@@ -16,7 +16,7 @@
 
 #include <thrift/compiler/sema/reserved_identifier.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 using apache::thrift::compiler::is_reserved_identifier;
 

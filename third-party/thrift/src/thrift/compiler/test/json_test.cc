@@ -18,7 +18,7 @@
 #include <thrift/compiler/test/parser_test_helpers.h>
 
 #include <sstream>
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 using namespace apache::thrift::compiler;
 

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <folly/portability/GMock.h>
-#include <folly/portability/GTest.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <folly/testing/TestUtil.h>
 #include <thrift/compiler/source_location.h>
 

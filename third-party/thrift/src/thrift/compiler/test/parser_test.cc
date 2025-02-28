@@ -18,7 +18,7 @@
 
 #include <optional>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 using namespace apache::thrift::compiler;
 

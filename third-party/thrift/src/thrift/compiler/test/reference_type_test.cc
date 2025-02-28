@@ -17,7 +17,7 @@
 #include <thrift/compiler/generate/cpp/reference_type.h>
 #include <thrift/compiler/test/gen_testing.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/t_primitive_type.h>
 

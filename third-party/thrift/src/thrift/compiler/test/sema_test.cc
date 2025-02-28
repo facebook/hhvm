@@ -17,7 +17,7 @@
 #include <memory>
 #include <thrift/compiler/sema/sema.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/diagnostic.h>

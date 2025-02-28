@@ -19,7 +19,7 @@
 #include <utility>
 #include <vector>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <thrift/compiler/detail/system.h>
 

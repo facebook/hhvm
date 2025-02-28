@@ -17,7 +17,7 @@
 #include <thrift/compiler/sema/sema_context.h>
 
 #include <memory>
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 namespace apache::thrift::compiler {
 namespace {

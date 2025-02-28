@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 #include <thrift/compiler/parse/token.h>
 
 #include <fmt/core.h>

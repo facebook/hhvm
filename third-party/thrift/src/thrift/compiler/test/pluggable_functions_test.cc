@@ -16,7 +16,7 @@
 
 #include <thrift/compiler/detail/pluggable_functions.h>
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 using apache::thrift::compiler::detail::pluggable_functions;
 

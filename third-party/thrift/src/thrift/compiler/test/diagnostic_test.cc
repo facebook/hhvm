@@ -16,8 +16,8 @@
 
 #include <thrift/compiler/diagnostic.h>
 
-#include <folly/portability/GMock.h>
-#include <folly/portability/GTest.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using namespace apache::thrift::compiler;
 

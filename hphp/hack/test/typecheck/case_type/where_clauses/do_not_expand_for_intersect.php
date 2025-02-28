@@ -1,16 +1,19 @@
 <?hh
 
-final class MyInt {}
-final class MyString {}
-final class MyBool {}
+abstract class BaseClassA {}
+abstract class BaseClassB {}
 
-case type LiftableTo<+T> =
-  | int where T super MyInt
-  | string where T super MyString
-  | bool where T super MyBool;
+interface IFoo {}
 
-function test<T>(LiftableTo<T> $x): LiftableTo<T> {
-  if ($x is int) {
+interface IForWhereClause {}
+
+case type MyCaseType<+T> =
+  | BaseClassA where T super IForWhereClause
+  | BaseClassB
+  | null;
+
+function test<T>(MyCaseType<T> $x): MyCaseType<T> {
+  if ($x is IFoo) {
   }
   return $x;
 }

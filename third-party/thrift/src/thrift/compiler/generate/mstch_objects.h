@@ -20,7 +20,6 @@
 #include <memory>
 #include <set>
 #include <string>
-#include <type_traits>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -228,7 +227,8 @@ class mstch_factories {
 
 // Mstch object construction context.
 struct mstch_context : mstch_factories {
-  std::map<std::string, std::string> options;
+  using compiler_options_map = std::map<std::string, std::string, std::less<>>;
+  compiler_options_map options;
 
   std::unordered_map<std::string, std::shared_ptr<mstch_base>> enum_cache;
   std::unordered_map<std::string, std::shared_ptr<mstch_base>> struct_cache;

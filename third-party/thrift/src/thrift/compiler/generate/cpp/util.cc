@@ -470,7 +470,7 @@ bool is_eligible_for_constexpr::operator()(const t_type* type) {
 }
 
 bool is_stack_arguments(
-    std::map<std::string, std::string> const& options,
+    std::map<std::string, std::string, std::less<>> const& options,
     t_function const& function) {
   if (function.has_annotation("cpp.stack_arguments")) {
     return function.get_annotation("cpp.stack_arguments") != "0";

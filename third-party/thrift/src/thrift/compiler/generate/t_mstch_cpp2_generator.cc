@@ -186,7 +186,7 @@ std::string render_fatal_string(const std::string& normal_string) {
 }
 
 std::string get_out_dir_base(
-    const std::map<std::string, std::string>& options) {
+    const t_mstch_generator::compiler_options_map& options) {
   return options.find("py3cpp") != options.end() ? "gen-py3cpp" : "gen-cpp2";
 }
 
@@ -256,7 +256,7 @@ int checked_stoi(const std::string& s, std::string msg) {
   return ret;
 }
 
-int get_split_count(const std::map<std::string, std::string>& options) {
+int get_split_count(const t_mstch_generator::compiler_options_map& options) {
   auto iter = options.find("types_cpp_splits");
   if (iter == options.end()) {
     return 0;
@@ -288,7 +288,7 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     cpp_context_ = std::make_shared<cpp2_generator_context>(
         cpp2_generator_context::create());
     client_name_to_split_count_ = get_client_name_to_split_count();
-    out_dir_base_ = get_out_dir_base(options);
+    out_dir_base_ = get_out_dir_base(this->options());
   }
 
   void generate_program() override;
@@ -297,7 +297,7 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
   static std::string get_cpp2_unprefixed_namespace(const t_program* program);
   static mstch::array cpp_includes(const t_program* program);
   static mstch::node include_prefix(
-      const t_program* program, std::map<std::string, std::string>& options);
+      const t_program* program, compiler_options_map& options);
 
  private:
   void set_mstch_factories();
@@ -2751,7 +2751,7 @@ mstch::array t_mstch_cpp2_generator::cpp_includes(const t_program* program) {
 }
 
 mstch::node t_mstch_cpp2_generator::include_prefix(
-    const t_program* program, std::map<std::string, std::string>& options) {
+    const t_program* program, compiler_options_map& options) {
   auto prefix = program->include_prefix();
   auto include_prefix = options["include_prefix"];
   auto out_dir_base = get_out_dir_base(options);
@@ -2808,7 +2808,7 @@ t_mstch_cpp2_generator::get_client_name_to_split_count() const {
 void validate_struct_annotations(
     sema_context& ctx,
     const t_structured& s,
-    const std::map<std::string, std::string>& options) {
+    const t_mstch_generator::compiler_options_map& options) {
   if (cpp2::packed_isset(s)) {
     if (options.count("tablebased") != 0) {
       ctx.report(
@@ -2895,7 +2895,7 @@ class validate_splits {
 void forbid_deprecated_terse_writes_ref(
     sema_context& ctx,
     const t_struct& strct,
-    const std::map<std::string, std::string>& options) {
+    const t_mstch_generator::compiler_options_map& options) {
   for (auto& field : strct.fields()) {
     const bool isUniqueRef =
         gen::cpp::find_ref_type(field) == gen::cpp::reference_type::unique;
@@ -2966,7 +2966,7 @@ void validate_lazy_fields(sema_context& ctx, const t_field& field) {
 void validate_deprecated_terse_writes(
     sema_context& ctx,
     const t_field& field,
-    const std::map<std::string, std::string>& options) {
+    const t_mstch_generator::compiler_options_map& options) {
   if (options.count("deprecated_terse_writes") != 0 &&
       field.find_structured_annotation_or_null(kCppDeprecatedTerseWriteUri) !=
           nullptr) {

@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <initializer_list>
 #include <map>
 #include <stack>
 #include <string>
@@ -189,7 +188,7 @@ inline bool is_unique_ref(const t_field* f) {
 }
 
 bool is_stack_arguments(
-    const std::map<std::string, std::string>& options,
+    const std::map<std::string, std::string, std::less<>>& options,
     const t_function& function);
 
 bool is_mixin(const t_field& field);

@@ -43,6 +43,10 @@ class HQServer {
   // NOTE: can block until the server has started
   const folly::SocketAddress getAddress() const;
 
+  std::vector<folly::EventBase*> getWorkerEvbs() const noexcept {
+    return server_->getWorkerEvbs();
+  }
+
   // Stops both the QUIC transport AND the HTTP server handling loop
   void stop();
 

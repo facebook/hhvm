@@ -176,7 +176,7 @@ t_program::resolved_node t_program::find_by_id(scope::identifier id) const {
 
             // If this scope was an alias, don't fall back to checking other scopes
             if (scope_prio.is_alias()) {
-              return resolved_node{nullptr, false};
+              break;
             }
           }
         }

@@ -2385,6 +2385,35 @@ TEST(CompilerTest, base_service_defined_after_use) {
   )");
 }
 
+TEST(CompilerTest, invalid_include_alias) {
+  std::map<std::string, std::string> name_contents_map;
+
+  name_contents_map["foo.thrift"] = "";
+  name_contents_map["bar.thrift"] = "";
+  name_contents_map["baz.thrift"] = "";
+  name_contents_map["main.thrift"] = R"(
+    include "baz.thrift" as const; # expected-error: Invalid include alias 'const'
+    include "foo.thrift" as ; # expected-error: Include alias cannot be empty
+    include "bar.thrift" as 123; # expected-error: Invalid include alias 'int literal'
+  )";
+
+  check_compile(name_contents_map, "main.thrift");
+}
+
+TEST(CompilerTest, duplicate_include_alias) {
+  std::map<std::string, std::string> name_contents_map;
+
+  name_contents_map["a/b/c/foo.thrift"] = "";
+  name_contents_map["d/e/bar.thrift"] = "";
+  name_contents_map["main.thrift"] = R"(
+    include "a/b/c/foo.thrift" as foo;
+    include "d/e/bar.thrift" as foo; # expected-error: 'foo' is already an alias for 'a/b/c/foo.thrift'
+    include "a/b/c/foo.thrift" as foo2; # expected-error: Include 'a/b/c/foo.thrift' has multiple aliases: 'foo' vs 'foo2'
+  )";
+
+  check_compile(name_contents_map, "main.thrift");
+}
+
 TEST(CompilerTest, resolve_enum_typedefs_after_use) {
   std::map<std::string, std::string> name_contents_map;
   name_contents_map["remote.thrift"] = R"(
@@ -2436,6 +2465,25 @@ TEST(CompilerTest, resolve_enum_typedefs_after_use) {
 
     typedef remote.Remote LocalAliasForRemote;
     typedef Local LocalAlias;
+  )";
+  check_compile(name_contents_map, "main.thrift");
+}
+
+TEST(CompilerTest, include_alias) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["foo.thrift"] = R"(
+    struct FooBar {
+      1: string name;
+    }
+  )";
+  name_contents_map["bar.thrift"] = R"(
+    struct FooBar {
+      1: i32 id;
+    }
+  )";
+  name_contents_map["main.thrift"] = R"(
+    include "foo.thrift" as foo_alias
+    include "bar.thrift" as bar_alias
   )";
   check_compile(name_contents_map, "main.thrift");
 }
@@ -2534,4 +2582,84 @@ TEST(CompilerTest, local_vs_global_resolution_sanity) {
     check_compile(name_content_map, "local/foo.thrift", {}, options);
     check_compile(name_content_map, "get_b/foo.thrift", {}, options);
   }
+}
+
+TEST(CompilerTest, include_alias_resolution_priority) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["foo.thrift"] = R"(
+    struct Bar {
+      1: string name;
+    }
+  )";
+  name_contents_map["other/Foo.thrift"] = R"(
+    struct Bar {
+      1: i32 code;
+    }
+  )";
+  name_contents_map["bar.thrift"] = R"(
+    include "other/Foo.thrift"
+  )";
+
+  name_contents_map["main.thrift"] = R"(
+    include "foo.thrift" as Foo
+    // This transitively includes other/Foo.thrift & should overwrite Foo.Bar
+    // Which clashes with the alias above
+    include "bar.thrift"
+
+    const Foo.Bar MY_BAR = Foo.Bar{name = "hello"};
+  )";
+  check_compile(name_contents_map, "main.thrift");
+}
+
+TEST(CompilerTest, include_alias_resolution_does_not_fallback) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["foo.thrift"] = R"(
+    struct Annot {
+      1: i32 val;
+    }
+
+    const i32 MY_VAL = 11;
+  )";
+  name_contents_map["a/Foo.thrift"] = R"(
+    const string MY_VAL = "hello";
+  )";
+
+  name_contents_map["bar.thrift"] = R"(
+    include "a/Foo.thrift"
+  )";
+
+  name_contents_map["main.thrift"] = R"(
+    include "foo.thrift" as Foo
+    include "bar.thrift"
+
+    @Foo.Annot{ val = Foo.MY_VAL }
+    struct S {
+    }
+  )";
+  check_compile(name_contents_map, "main.thrift");
+}
+
+TEST(CompilerTest, scope_resolution_duplicate_include_as_alias) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["v1/foo.thrift"] = R"(
+    struct Bar {
+      1: string name;
+    }
+  )";
+
+  name_contents_map["foo.thrift"] = R"(
+    include "v1/foo.thrift"
+    include "v1/foo.thrift" as FooV2 # expected-warning: Duplicate include of `v1/foo.thrift`
+
+    struct Bar {
+      1: i32 id;
+    }
+
+    // The `foo.Bar` identifier is overriden by the local definition, despite an explicit include
+    const foo.Bar MY_REMOTE_CONST_V1 = foo.Bar{name = "foo"}; # expected-error: no field named `name` in `Bar`
+    const FooV2.Bar MY_REMOTE_CONST_V2 = FooV2.Bar{name = "foo"};
+    const Bar MY_LOCAL_CONST = Bar{id = 1};
+  )";
+
+  check_compile(name_contents_map, "foo.thrift");
 }

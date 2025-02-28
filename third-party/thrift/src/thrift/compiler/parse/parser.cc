@@ -174,15 +174,19 @@ class parser {
     auto str_range = token_.range;
     consume_token();
     switch (kind) {
-      case tok::kw_include:
-        actions_.on_include(range, str, std::nullopt, str_range);
+      case tok::kw_include:{
+        auto alias = try_parse_include_alias();
+        actions_.on_include(range, str, alias, str_range);
         break;
-      case tok::kw_cpp_include:
+      }
+      case tok::kw_cpp_include: {
         actions_.on_cpp_include(range, str);
         break;
-      case tok::kw_hs_include:
+      }
+      case tok::kw_hs_include: {
         actions_.on_hs_include(range, str);
         break;
+      }
       default:
         assert(false);
     }
@@ -1070,6 +1074,7 @@ class parser {
       case tok::kw_permanent:
       case tok::kw_server:
       case tok::kw_client:
+      case tok::kw_as:
         return identifier{to_string(consume_token().kind), range};
       default:
         return {};
@@ -1086,6 +1091,26 @@ class parser {
   // comma_or_semicolon: ","  | ";"
   bool try_parse_comma_or_semicolon() {
     return try_consume_token(',') || try_consume_token(';');
+  }
+
+  std::optional<std::string_view> try_parse_include_alias() {
+    if (!try_consume_token(tok::kw_as)) {
+      return std::nullopt;
+    }
+
+    auto alias = try_parse_identifier();
+    if (!alias.has_value()) {
+      if (token_.kind == ';') {
+        report_error("Include alias cannot be empty");
+      } else {
+        const auto invalid_alias = consume_token();
+        report_error(
+            "Invalid include alias '{}'", to_string(invalid_alias.kind.value));
+      }
+      return std::nullopt;
+    }
+
+    return alias.value().str;
   }
 
  public:

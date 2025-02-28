@@ -169,6 +169,7 @@ const std::unordered_map<std::string_view, tok> keywords = {
     {"const", tok::kw_const},
     {"required", tok::kw_required},
     {"optional", tok::kw_optional},
+    {"as", tok::kw_as},
 };
 
 } // namespace

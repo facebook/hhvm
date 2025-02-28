@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <string>
 #include <typeinfo>
 #include <utility>
 
@@ -33,7 +32,6 @@ class VTable {
       : typeInfo_(typeInfo) {}
   virtual void destroy(std::byte*) const noexcept = 0;
   virtual void move(std::byte* dst, std::byte* src) const noexcept = 0;
-  virtual void move_assign(std::byte* dst, std::byte* src) const noexcept = 0;
 
   const std::type_info& type() const noexcept { return typeInfo_; }
 
@@ -51,10 +49,6 @@ class VTableImpl final : public VTable {
   void destroy(std::byte* storage) const noexcept final { value(storage).~T(); }
   void move(std::byte* origin, std::byte* destination) const noexcept final {
     new (destination) T(std::move(value(origin)));
-  }
-  void move_assign(
-      std::byte* origin, std::byte* destination) const noexcept final {
-    value(destination) = std::move(value(origin));
   }
 
  private:
@@ -192,9 +186,10 @@ class TypeErasedValue final {
   }
 
   TypeErasedValue& operator=(TypeErasedValue&& other) noexcept {
+    reset();
     vtable_ = other.vtable_;
     if (has_value()) {
-      vtable_->move_assign(other.storage_, storage_);
+      vtable_->move(other.storage_, storage_);
       other.reset();
     }
     return *this;

@@ -254,7 +254,7 @@ TEST_F(TypeErasedValueTest, moveTest) {
       LifetimeOperationsTracker::Ops::DESTRUCT,
       LifetimeOperationsTracker::Ops::DESTRUCT,
       LifetimeOperationsTracker::Ops::CONSTRUCT,
-      LifetimeOperationsTracker::Ops::MOVE_ASSIGN,
+      LifetimeOperationsTracker::Ops::MOVE,
       LifetimeOperationsTracker::Ops::DESTRUCT,
       LifetimeOperationsTracker::Ops::DESTRUCT,
   };
@@ -363,6 +363,17 @@ TEST_F(TypeErasedValueTest, swapTest) {
   std::swap(storageOne, storageTwo);
   ASSERT_EQ(storageOne.value<CounterStorage>().getCount(), 1);
   ASSERT_EQ(storageTwo.value<CounterStorage>().getCount(), 2);
+}
+
+TEST_F(TypeErasedValueTest, moveAssignNonTrivial) {
+  using StringStorage =
+      TypeErasedValue<sizeof(std::string), alignof(std::string)>;
+  StringStorage storage1;
+  storage1.emplace<std::string>("hello");
+
+  StringStorage storage2;
+  storage2 = std::move(storage1);
+  ASSERT_EQ(storage2.value<std::string>(), "hello");
 }
 
 } // namespace apache::thrift::util::test

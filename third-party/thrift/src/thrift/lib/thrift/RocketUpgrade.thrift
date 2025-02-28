@@ -16,6 +16,7 @@
 
 namespace cpp2 apache.thrift
 namespace py3 thrift.lib.thrift
+namespace go 'github.com/facebook/fbthrift/thrift/lib/thrift/rocket_upgrade'
 
 /**
  * This interface should be used by the clients that want to attempt upgrading

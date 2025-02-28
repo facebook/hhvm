@@ -17,7 +17,6 @@
 package thrift
 
 import (
-	"context"
 	"fmt"
 )
 
@@ -26,57 +25,6 @@ import (
 // to avoid the conflicting imports between go build and buck.
 // This also avoids the circular dependency issue.
 // This file is probably not the place you want to edit!
-
-// upgradeToRocket sends an upgradeToRocket service call to the server and returns any errors.
-// the protocol parameter has to be a HeaderProtocol.
-func upgradeToRocket(_ context.Context, protocol Protocol) error {
-	method := "upgradeToRocket"
-
-	// send upgradeToRocket service call
-	request := &reqServiceUpgradeToRocket{}
-	seqID := int32(1)
-	if err := protocol.WriteMessageBegin(method, CALL, seqID); err != nil {
-		return err
-	}
-	if err := request.Write(protocol); err != nil {
-		return err
-	}
-	if err := protocol.WriteMessageEnd(); err != nil {
-		return err
-	}
-	if err := protocol.Flush(); err != nil {
-		return err
-	}
-
-	// receive upgradeToRocket service response, which is void
-	response := &respServiceUpgradeToRocket{}
-	recvMethod, mTypeID, _, err := protocol.ReadMessageBegin()
-	if err != nil {
-		return err
-	}
-	if method != recvMethod {
-		return NewApplicationException(WRONG_METHOD_NAME, fmt.Sprintf("%s failed: wrong method name", method))
-	}
-	switch mTypeID {
-	case REPLY:
-		if err := response.Read(protocol); err != nil {
-			return err
-		}
-
-		return protocol.ReadMessageEnd()
-	case EXCEPTION:
-		appException := NewApplicationException(UNKNOWN_APPLICATION_EXCEPTION, "Unknown exception")
-		if err := appException.Read(protocol); err != nil {
-			return err
-		}
-		if err := protocol.ReadMessageEnd(); err != nil {
-			return err
-		}
-		return appException
-	default:
-		return NewApplicationException(INVALID_MESSAGE_TYPE_EXCEPTION, fmt.Sprintf("%s failed: invalid message type", method))
-	}
-}
 
 type reqServiceUpgradeToRocket struct{}
 

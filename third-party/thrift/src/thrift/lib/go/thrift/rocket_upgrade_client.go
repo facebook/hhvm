@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/facebook/fbthrift/thrift/lib/thrift/rocket_upgrade"
 )
 
 type upgradeToRocketClient struct {
@@ -80,17 +81,15 @@ func newUpgradeToRocketClient(conn net.Conn, protoID types.ProtocolID, ioTimeout
 // If this fails, we send the original message using the HeaderProtocol and continue using the HeaderProtocol.
 func (p *upgradeToRocketClient) WriteMessageBegin(name string, typeID types.MessageType, seqid int32) error {
 	if p.Protocol == nil {
-		if err := p.upgradeToRocket(); err != nil {
+		ruClient := rocket_upgrade.NewRocketUpgradeClient(p.headerProtocol)
+		err := ruClient.UpgradeToRocket(context.Background())
+		if err != nil {
 			p.Protocol = p.headerProtocol
 		} else {
 			p.Protocol = p.rocketProtocol
 		}
 	}
 	return p.Protocol.WriteMessageBegin(name, typeID, seqid)
-}
-
-func (p *upgradeToRocketClient) upgradeToRocket() error {
-	return upgradeToRocket(context.Background(), p.headerProtocol)
 }
 
 func (p *upgradeToRocketClient) setRequestHeader(key, value string) {

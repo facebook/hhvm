@@ -51,13 +51,15 @@ id_start    ::=  "a"..."z" | "A"..."Z" | "_"
 id_continue ::=  id_start | digit
 ```
 
-A qualified identifier is a sequence of two or more identifiers separated by periods. It can be used to refer to a definition in another Thrift file in which case the first component is the name of that file without extension and the second component is the name of the definition. For example, `search_types.Query` denotes the definition named `Query` in `search_types.thrift`.
+A qualified identifier is a sequence of two or three identifiers separated by periods. It can be used to refer to a definition in another Thrift file in which case the first component is the scope where the definition can be found. The scope is either the filename of the thrift file without without extension (or its alias, if specified) and the second component is the name of the definition. For example, `search_types.Query` denotes the definition named `Query` in `search_types.thrift` or an include alias `... as search_types`.
 
 `maybe_qualified_id` denotes a qualified or unqualified identifier.
 
 ```grammar
-maybe_qualified_id ::=  identifier ["." identifier]*
+maybe_qualified_id ::=  identifier ["." identifier] {0,2}
 ```
+
+See [Resolving identifiers](./identifier-resolution.md) for more details on how identifiers are resolved in the IDL.
 
 #### Reserved Identifiers
 
@@ -229,7 +231,8 @@ service PeopleSearch {
 
 ```grammar
 include_directive ::=
-  ("include" | "cpp_include" | "hs_include") string_literal [";"]
+  ("include" | "cpp_include" | "hs_include") string_literal [include_alias] [";"]
+include_alias ::= "as" string_literal
 ```
 
 Include directives allow the use of constants, types, and services from other Thrift files by prefixing the name (without extension) of the included Thrift file followed by a period. `cpp_include` instructs the compiler to emit an include in generated C++ code and `hs_include` does the same for Haskell.
@@ -252,6 +255,25 @@ struct PeopleSearchResponse {
 If there is a circular dependency between files, a compile-time error is reported. So `a.thrift` cannot include itself, and cannot include `b.thrift` if `b.thrift` includes `a.thrift`. Including multiple files with a common ancestor is okay - so `a.thrift` can include `b.thrift` and `c.thrift` when both `b.thrift` and `c.thrift` include `d.thrift`.
 
 Including a file only provides access to symbols defined directly in that file; if `a.thrift` only includes `b.thrift` and `b.thrift` includes `d.thrift` then `a.thrift` can use symbols starting with `b.` but not `d.`. Referencing the latter without the corresponding include directive is an error in some target languages and is deprecated behavior in Thrift.
+
+### Include aliases
+
+An include directive allow specifying an optional include alias. The alias allows accessing the definitions provided by the included program under the new name, e.g.
+
+```thrift
+include "common/if/search_types.thrift"
+include "common/other/search_types.thrift" as other_search_types
+
+struct Combined {
+  1: search_types.Query query;
+  2: other_search_types.Metadata metadata;
+}
+```
+
+This is useful when e.g. preventing definition clashes when using multiple programs with the same filename.
+The alias name can be any string literal, but is not allowed to:
+* Match any other included program name in the current program
+* Match any other alias in the current program
 
 ### Package Declaration
 
@@ -861,9 +883,9 @@ For legacy reasons some implementations support additional kinds of inference no
 `maybe_qualified_id` represents a name referring to a constant and can be one of:
 
 * An identifier that denotes a constant defined in the same Thrift file.
-* A qualified name of the form `<filename>.<const>` where `<filename>` and `<const>` are identifiers, and `<const>` denotes a constant defined in the Thrift file denoted by `<filename>`.
+* A qualified name of the form `<scope>.<const>` where `<scope>` and `<const>` are identifiers, and `<const>` denotes a constant defined in the Thrift file with filename `<scope>.thrift` or as an include alias with name `<scope>`, e.g. `include "foo.thrift" as <scope>`.
 * A qualified name of the form `<enum>.<enumerator>` where `<enum>` and `<enumerator>` are identifiers denoting an enum and an enumerator defined in it respectively.
-* A qualified name of the form `<filename>.<enum>.<enumerator>` where `<filename>`, `<enum>`, and `<enumerator>` are identifiers. `<enum>` denotes an enum defined in the Thrift file denoted by `<filename>` and `<enumerator>` is the enumerator defined in this enum.
+* A qualified name of the form `<scope>.<enum>.<enumerator>` where `<scope>`, `<enum>`, and `<enumerator>` are identifiers. `<enum>` denotes an enum defined in the Thrift scope denoted by `<scope>` and `<enumerator>` is the enumerator defined in this enum.
 
 ```thrift
 const i32 SEARCH_AGGREGATOR_PORT = PORT;

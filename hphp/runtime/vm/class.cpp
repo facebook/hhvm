@@ -1113,63 +1113,54 @@ void Class::checkPropTypeRedefinition(Slot slot) const {
 
   auto const& oldProp = m_parent->m_declProperties[slot];
 
-  auto const& oldTC = oldProp.typeConstraints.main();
-  auto const& newTC = prop.typeConstraints.main();
+  auto const& oldTCs = oldProp.typeConstraints;
+  auto const& newTCs = prop.typeConstraints;
 
-  if (!oldTC.equivalentForProp(newTC)) {
-    auto const oldTCName =
-      oldTC.hasConstraint() ? oldTC.displayName() : "mixed";
-    auto const newTCName =
-      newTC.hasConstraint() ? newTC.displayName() : "mixed";
-
-    auto const msg = folly::sformat(
-      "Type-hint of '{}::{}' must be {}{} (as in class {}), not {}",
-      prop.cls->name(),
-      prop.name,
-      oldTC.isUpperBound()? "upper-bounded by " : "",
-      oldTCName,
-      oldProp.cls->name(),
-      newTCName
-    );
-    raise_property_typehint_error(
-      msg,
-      oldTC.isSoft() && newTC.isSoft(),
-      oldTC.isUpperBound() || newTC.isUpperBound()
-    );
+  for (auto const& oldTC : oldTCs.range()) {
+    if (oldTC.isMixed()) {
+      continue;
+    }
+    if (std::none_of(
+          newTCs.range().begin(),
+          newTCs.range().end(),
+          [&](const TypeConstraint& tc) {
+            return oldTC.equivalentForProp(tc);
+          }
+        )
+    ) {
+      auto const oldTCName =
+        oldTC.hasConstraint() ? oldTC.displayName() : "mixed";
+      auto const msg = folly::sformat(
+        "{}::{} must have a type of {} as defined{} in {}",
+        prop.cls->name(),
+        prop.name,
+        oldTCName,
+        oldTC.isUpperBound()? " by the upper-bound" : "",
+        oldProp.cls->name()
+      );
+      raise_property_typehint_error(
+        msg,
+        oldTC.isSoft(),
+        oldTC.isUpperBound()
+      );
+    }
   }
 
-  if (!prop.typeConstraints.ubs().empty()
-      || !oldProp.typeConstraints.ubs().empty()) {
-    std::vector<TypeConstraint> newTCs = {newTC};
-    for (auto const& ub : prop.typeConstraints.ubs()) newTCs.push_back(ub);
-    std::vector<TypeConstraint> oldTCs = {oldTC};
-    for (auto const& ub : oldProp.typeConstraints.ubs()) oldTCs.push_back(ub);
-
-    for (auto const& ub : newTCs) {
-      if (std::none_of(oldTCs.begin(), oldTCs.end(),
-            [&](const TypeConstraint& tc) {
-              return tc.equivalentForProp(ub);
-            })) {
-        auto const ubName = ub.hasConstraint() ? ub.displayName() : "mixed";
-        auto const msg = folly::sformat(
-          "Upper-bound {} of {}::{} has no equivalent upper-bound in {}",
-          ubName, prop.cls->name(), prop.name, oldProp.cls->name()
-        );
-        raise_property_typehint_error(msg, ub.isSoft(), true);
-      }
-    }
-    for (auto const& ub : oldTCs) {
-      if (std::none_of(newTCs.begin(), newTCs.end(),
-            [&](const TypeConstraint& tc) {
-              return tc.equivalentForProp(ub);
-            })) {
-        auto const ubName = ub.hasConstraint() ? ub.displayName() : "mixed";
-        auto const msg = folly::sformat(
-          "Upper-bound {} of {}::{} has no equivalent upper-bound in {}",
-          ubName, oldProp.cls->name(), oldProp.name, prop.cls->name()
-        );
-        raise_property_typehint_error(msg, ub.isSoft(), true);
-      }
+  for (auto const& newTC : newTCs.range()) {
+    if (std::none_of(oldTCs.range().begin(), oldTCs.range().end(),
+          [&](const TypeConstraint& oldTC) {
+            return oldTC.equivalentForProp(newTC);
+          })) {
+      auto const tcName = newTC.hasConstraint() ? newTC.displayName() : "mixed";
+      auto const msg = folly::sformat(
+        "{}::{} includes a {} of {} but has no equivalent definition in {}",
+        prop.cls->name(),
+        prop.name,
+        newTC.isUpperBound() ? "type upper-bound" : "type",
+        tcName,
+        oldProp.cls->name()
+      );
+      raise_property_typehint_error(msg, newTC.isSoft(), true);
     }
   }
 }
@@ -3179,12 +3170,11 @@ void Class::setProperties() {
           prop.attrs = Attr(prop.attrs ^ (AttrProtected|AttrPublic));
         }
 
-        auto const& tc = preProp->typeConstraints().main();
+        auto const& tcs = preProp->typeConstraints();
         if (Cfg::Eval::CheckPropTypeHints > 0 &&
-            !(preProp->attrs() & AttrNoBadRedeclare) &&
-            (tc.maybeInequivalentForProp(prop.typeConstraints.main()) ||
-             !preProp->typeConstraints().ubs().empty() ||
-             !prop.typeConstraints.ubs().empty())) {
+          !(preProp->attrs() & AttrNoBadRedeclare) &&
+          tcs.maybeInequivalentForProp(prop.typeConstraints)
+        ) {
           // If this property isn't obviously not redeclaring a property in
           // the parent, we need to check that when we initialize the class.
           prop.attrs = Attr(prop.attrs & ~AttrNoBadRedeclare);

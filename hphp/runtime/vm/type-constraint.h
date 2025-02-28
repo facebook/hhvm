@@ -894,15 +894,6 @@ struct TypeIntersectionConstraint {
     return TypeIntersectionConstraint::mainPtr(m_u.m_constraints);
   }
 
-  std::vector<TypeConstraint> ubs() const {
-    if (isTop() || isSimple()) {
-      // Keep the current semantics where the main type constraint and the
-      // upperbounds are treated separately.
-      return std::vector<TypeConstraint>();
-    }
-    return TypeIntersectionConstraint::ubs(m_u.m_constraints);
-  }
-
   bool isTop() const {
     return !isSimple() && m_u.m_constraints.empty();
   }
@@ -1047,6 +1038,8 @@ struct TypeIntersectionConstraint {
       }
     }
   }
+
+  bool maybeInequivalentForProp(const TypeIntersectionConstraint& other) const;
 
   MemoKeyConstraint getMemoKeyConstraint() const;
 

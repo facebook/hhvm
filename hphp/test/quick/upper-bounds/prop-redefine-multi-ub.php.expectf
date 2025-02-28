@@ -1,4 +1,4 @@
 object(Sub1) (0) {
 }
 
-Catchable fatal error: Upper-bound string of Sub2::x has no equivalent upper-bound in Sup in %s/prop-redefine-multi-ub.php on line 19
+Catchable fatal error: Sub2::x must have a type of Barable as defined by the upper-bound in Sup in %s/prop-redefine-multi-ub.php on line 19

@@ -1143,7 +1143,7 @@ TypeConstraint::maybeInequivalentForProp(const TypeConstraint& other) const {
 
   if (isUnion() || other.isUnion()) {
     // unions in property position must match nominally.
-    return !typeName()->tsame(other.typeName());
+   return !typeName()->tsame(other.typeName());
   }
 
   if (isSubObject() && other.isSubObject()) {
@@ -1152,6 +1152,31 @@ TypeConstraint::maybeInequivalentForProp(const TypeConstraint& other) const {
   if (isSubObject() || other.isSubObject()) return true;
 
   return type() != other.type();
+}
+
+bool
+TypeIntersectionConstraint::maybeInequivalentForProp(
+  const TypeIntersectionConstraint& other
+) const {
+  auto check = [](
+    const TypeIntersectionConstraint& one,
+    const TypeIntersectionConstraint& other
+  ) {
+    return std::any_of(
+      one.range().begin(),
+      one.range().end(),
+      [&](auto const& tc) {
+        return std::all_of(
+          other.range().begin(),
+          other.range().end(),
+          [&](auto const& otc) {
+            return tc.maybeInequivalentForProp(otc);
+          }
+        );
+      }
+    );
+  };
+  return check(*this, other) || check(other, *this);
 }
 
 bool TypeConstraint::equivalentForProp(const TypeConstraint& other) const {

@@ -204,4 +204,4 @@ Property 'C::v' declared as type ?HH\varray, HH\dict assigned
 {}
 Property 'C::v' declared as type ?HH\varray, clsmeth assigned
 Property 'C::d' declared as type ?HH\darray, clsmeth assigned
-Type-hint of 'D::d' must be ?HH\darray (as in class C), not ?HH\varray
+D::d must have a type of ?HH\darray as defined in C

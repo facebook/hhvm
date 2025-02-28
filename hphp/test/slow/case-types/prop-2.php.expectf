@@ -1,1 +1,1 @@
-Catchable fatal error: Type-hint of 'B::a' must be C1 (as in class A), not C2 in %s/prop-2.php on line %d
+Catchable fatal error: B::a must have a type of C1 as defined in A in %s/prop-2.php on line 18

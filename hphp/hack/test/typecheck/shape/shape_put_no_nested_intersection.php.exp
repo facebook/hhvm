@@ -1,0 +1,6 @@
+ERROR: File "shape_put_no_nested_intersection.php", line 4, characters 10-55:
+Invalid return type (Typing[4057])
+  File "shape_put_no_nested_intersection.php", line 4, characters 35-54:
+  The field `y` is missing
+  File "shape_put_no_nested_intersection.php", line 3, characters 78-80:
+  The field `y` is defined

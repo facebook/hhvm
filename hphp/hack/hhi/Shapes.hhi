@@ -85,6 +85,31 @@ namespace HH {
       arraykey $index,
     )[]: Tv;
 
+    /**
+     * Clones a shape, and adds a new field to it.
+     * The return type is the refined version of the input shape, with the new field added.
+     * Example:
+     * ```
+     * $s = shape('x' => 1);
+     * $s = Shapes::put($s, 'y', 2);
+     * // $s is now shape('x' => 1, 'y' => 2)
+     * ```
+     *
+     * Note that the original input shape is not modified by the operation.
+     * Example:
+     * ```
+     * $s1 = shape('x' => 1);
+     * $s2 = Shapes::put($s1, 'y', 2);
+     * // $s1 is still shape('x' => 1)
+     * // $s2 is now shape('x' => 1, 'y' => 2)
+     * ```
+     */
+    <<__NoAutoDynamic, __SupportDynamicType>>
+    public static function put(
+      shape(...) $shape,
+      arraykey $index,
+      mixed $value,
+    )[]: shape(...);
   }
 
 } // namespace HH

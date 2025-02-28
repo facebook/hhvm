@@ -20,6 +20,15 @@ namespace HH {
       return $shape[$index];
     }
 
+    public static function put(
+      darray $shape,
+      arraykey $index,
+      mixed $value,
+    )[] {
+      $shape[$index] = $value;
+      return $shape;
+    }
+
     public static function keyExists(
       readonly darray $shape,
       arraykey $index,

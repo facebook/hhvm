@@ -1235,6 +1235,8 @@ module Shapes = struct
   let toArray = "toArray"
 
   let toDict = "toDict"
+
+  let put = "put"
 end
 
 module Hips = struct

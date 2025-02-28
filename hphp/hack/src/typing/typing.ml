@@ -5806,6 +5806,53 @@ end = struct
           | _ -> None
         in
         dispatch_class_const env class_id method_id ?transform_fty
+        (* Special function `Shapes::put` *)
+      | put when String.equal put SN.Shapes.put ->
+        overload_function
+          p
+          env
+          class_id
+          method_id
+          el
+          unpacked_element
+          (fun env _ res el _tel ->
+            match el with
+            | [
+             Aast_defs.Anormal shape;
+             Aast_defs.Anormal field;
+             Aast_defs.Anormal value;
+            ] ->
+              let (_, shapepos, _) = shape in
+              (* infer the input shape type *)
+              let (env, _tes, tshape) =
+                expr ~expected:None ~ctxt:Context.default env shape
+              in
+              (* compute field type *)
+              let (env, _tef, tfield) =
+                expr ~expected:None ~ctxt:Context.default env field
+              in
+              (* compute value type *)
+              let (env, _tev, tvalue) =
+                expr ~expected:None ~ctxt:Context.default env value
+              in
+              (* compute assignment type *)
+              let ( env,
+                    ( res,
+                      _arr_ty_mismatch_opt,
+                      _key_ty_mismatch_opt,
+                      _val_ty_mismatch_opt ) ) =
+                Typing_array_access.assign_array_get
+                  ~array_pos:p
+                  ~expr_pos:shapepos
+                  Reason.URassign
+                  env
+                  tshape
+                  field
+                  tfield
+                  tvalue
+              in
+              (env, res)
+            | _ -> (env, res))
       (* Special function `Shapes::removeKey` *)
       | remove_key when String.equal remove_key SN.Shapes.removeKey ->
         overload_function

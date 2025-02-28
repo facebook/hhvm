@@ -118,7 +118,7 @@ let mixed_for_refinement env r ty =
 
 (** Refine a shape with the knowledge that field_name
   exists. We do this by intersecting with
-  shape(field_name => mixed, ...) *)
+ shape(field_name => mixed, ...) *)
 let refine_key_exists field_name pos env shape =
   let ((env, e1), shape) =
     Typing_solver.expand_type_and_narrow

@@ -1,0 +1,10 @@
+ERROR: File "shape_put_wrong_arg_count.php", line 4, characters 10-22:
+Invalid return type (Typing[4138])
+  File "Shapes.hhi", line 112, characters 10-19:
+  This shape type allows unknown fields, and so it may contain fields other than those explicitly declared in its declaration.
+  File "shape_put_wrong_arg_count.php", line 3, characters 32-38:
+  It is incompatible with a shape that does not allow unknown fields.
+ERROR: File "shape_put_wrong_arg_count.php", line 4, characters 10-22:
+Too few arguments (required 3 but got 0) (Typing[4104])
+  File "Shapes.hhi", line 108, characters 28-30:
+  Definition is here

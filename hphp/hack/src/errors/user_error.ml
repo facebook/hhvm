@@ -43,6 +43,9 @@ type ('prim_pos, 'pos) t = {
 }
 [@@deriving eq, hash, ord, show]
 
+external hash_error_for_saved_state : (Pos.t, Pos_or_decl.t) t -> int
+  = "hash_error_for_saved_state"
+
 let make
     severity
     code

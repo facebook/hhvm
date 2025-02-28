@@ -80,6 +80,7 @@ type completion_request = { is_manually_invoked: bool }
 of locations where a "hint" should be displayed for that error. *)
 type diagnostic = {
   diagnostic_error: Errors.finalized_error;
+  diagnostic_hash: int;
   diagnostic_related_hints: Pos.absolute list;
       (** Note that these will be displayed in the IDE, so this field
           only gets set when diagnostics are computed by clientIdeDaemon, and
@@ -93,8 +94,9 @@ type diagnostic = {
 }
 [@@deriving show]
 
-let diagnostic_of_finalized_error_without_related_hints diagnostic_error =
-  { diagnostic_error; diagnostic_related_hints = [] }
+let diagnostic_of_finalized_error_without_related_hints
+    (diagnostic_error, diagnostic_hash) =
+  { diagnostic_error; diagnostic_related_hints = []; diagnostic_hash }
 
 (* GADT for request/response types. See [ServerCommandTypes] for a discussion on
    using GADTs in this way. *)

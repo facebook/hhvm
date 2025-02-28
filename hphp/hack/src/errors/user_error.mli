@@ -33,6 +33,8 @@ type ('prim_pos, 'pos) t = {
 }
 [@@deriving eq, hash, ord, show]
 
+val hash_error_for_saved_state : (Pos.t, Pos_or_decl.t) t -> int
+
 val make :
   severity ->
   int ->

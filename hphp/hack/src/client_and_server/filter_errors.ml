@@ -193,6 +193,12 @@ let filter filter (error_list : Errors.finalized_error list) =
         filter
         (User_error.get_code error, User_error.get_pos error |> Pos.filename))
 
+let filter_with_hash filter (error_list : (Errors.finalized_error * int) list) =
+  List.filter error_list ~f:(fun (error, _hash) ->
+      Filter.pass
+        filter
+        (User_error.get_code error, User_error.get_pos error |> Pos.filename))
+
 let filter_rel filter (errors : Errors.t) =
   Errors.filter errors ~f:(fun path error ->
       Filter.pass filter (User_error.get_code error, Relative_path.suffix path))

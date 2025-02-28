@@ -209,7 +209,7 @@ let completion_reason_short_description = function
 
 type errors_file_item =
   | Errors of {
-      errors: Errors.finalized_error list Relative_path.Map.t;
+      errors: (Errors.finalized_error * int) list Relative_path.Map.t;
           (** we convert to finalized_error (i.e. turn paths absolute) before writing in the file,
             because consumers don't know hhi paths. As for the [Relative_path.Map.t], it
             is guaranteed to only have root-relative paths. (we don't have a type to indicate
@@ -501,7 +501,11 @@ module ErrorsWrite = struct
                      ~path;
                  is_root)
           |> Relative_path.Map.map ~f:(fun errors ->
-                 errors |> Errors.sort |> List.map ~f:User_error.to_absolute)
+                 errors
+                 |> Errors.sort
+                 |> List.map ~f:(fun err ->
+                        ( User_error.to_absolute err,
+                          User_error.hash_error_for_saved_state err )))
         in
         ErrorsFile.write_message
           fd

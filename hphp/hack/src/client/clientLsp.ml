@@ -1153,7 +1153,9 @@ let ide_diagnostics_to_lsp_diagnostics
   let ide_diagnostic_to_lsp_diagnostics
       (diagnostic : ClientIdeMessage.diagnostic) :
       Lsp.PublishDiagnostics.diagnostic list =
-    let diagnostic_error = diagnostic.ClientIdeMessage.diagnostic_error in
+    let ClientIdeMessage.{ diagnostic_error; diagnostic_hash; _ } =
+      diagnostic
+    in
     let {
       User_error.severity;
       code;
@@ -1185,6 +1187,9 @@ let ide_diagnostics_to_lsp_diagnostics
           message ) =
       first_message
     in
+    let data =
+      Some Hh_json.(JSON_Object [("line_agnostic_hash", int_ diagnostic_hash)])
+    in
     let relatedInformation =
       additional_messages
       |> List.map ~f:(fun (location, message) ->
@@ -1212,7 +1217,7 @@ let ide_diagnostics_to_lsp_diagnostics
         message;
         relatedInformation;
         relatedLocations = relatedInformation (* legacy FB extension *);
-        data = None;
+        data;
       }
     in
     let additional_diagnostics =
@@ -3591,7 +3596,9 @@ let handle_errors_file_item
               when Float.(existing_timestamp > start_time) ->
               acc
             | _ ->
-              let file_errors = Filter_errors.filter error_filter file_errors in
+              let file_errors =
+                Filter_errors.filter_with_hash error_filter file_errors
+              in
               (* We do not precompute additional diagnostic information (like
                  where to display additional LSP visual hints) for errors
                  received from the server. They will in general only be received

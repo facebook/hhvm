@@ -151,7 +151,7 @@ let underlines_to_patches
 let diagnostic_to_underlines
     source_text (diagnostic : ClientIdeMessage.diagnostic) :
     underline list IMap.t list =
-  let ClientIdeMessage.{ diagnostic_error; diagnostic_related_hints } =
+  let ClientIdeMessage.{ diagnostic_error; diagnostic_related_hints; _ } =
     diagnostic
   in
   let hint_uls =
@@ -180,8 +180,12 @@ let diagnostics_to_underlines
         m)
 
 let run_exn ctx entry errors =
-  let errors = Errors.sort_and_finalize errors in
-  let diagnostics = Ide_diagnostics.convert ~ctx ~entry errors in
+  let errors = Errors.get_sorted_error_list errors in
+  let error_hashes =
+    List.map errors ~f:(fun err ->
+        (User_error.to_absolute err, User_error.hash_error_for_saved_state err))
+  in
+  let diagnostics = Ide_diagnostics.convert ~ctx ~entry error_hashes in
   let path = entry.Provider_context.path in
   let source_text = entry.Provider_context.source_text |> Option.value_exn in
   let underlines = diagnostics_to_underlines source_text diagnostics in

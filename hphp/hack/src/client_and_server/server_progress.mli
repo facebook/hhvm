@@ -196,7 +196,7 @@ val completion_reason_short_description : completion_reason -> string
 (** Each item that a consumer reads from the errors-file is one of these. *)
 type errors_file_item =
   | Errors of {
-      errors: Errors.finalized_error list Relative_path.Map.t;
+      errors: (Errors.finalized_error * int) list Relative_path.Map.t;
       timestamp: float;
     }
   | Telemetry of Telemetry.t

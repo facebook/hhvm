@@ -734,10 +734,16 @@ let handle_request
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
-    let errors = get_errors_for_path istate path |> Errors.sort_and_finalize in
+    let errors =
+      Errors.get_sorted_error_list (get_errors_for_path istate path)
+    in
+    let error_hashes =
+      List.map errors ~f:(fun err ->
+          (User_error.to_absolute err, User_error.hash_error_for_saved_state err))
+    in
     let diagnostics =
       List.map
-        errors
+        error_hashes
         ~f:ClientIdeMessage.diagnostic_of_finalized_error_without_related_hints
     in
     ( Initialized
@@ -764,8 +770,12 @@ let handle_request
       get_user_facing_errors ~ctx ~error_filter:istate.error_filter ~entry
     in
     published_errors_ref := Some errors;
-    let errors = Errors.sort_and_finalize errors in
-    let diagnostics = Ide_diagnostics.convert ~ctx ~entry errors in
+    let errors = Errors.get_sorted_error_list errors in
+    let error_hashes =
+      List.map errors ~f:(fun err ->
+          (User_error.to_absolute err, User_error.hash_error_for_saved_state err))
+    in
+    let diagnostics = Ide_diagnostics.convert ~ctx ~entry error_hashes in
     (Initialized istate, Ok diagnostics)
   (* Document Symbol *)
   | (During_init dstate, Document_symbol document) ->

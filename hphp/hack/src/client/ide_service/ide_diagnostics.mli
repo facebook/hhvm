@@ -10,5 +10,5 @@
 val convert :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
-  Errors.finalized_error list ->
+  (Errors.finalized_error * int) list ->
   ClientIdeMessage.diagnostic list

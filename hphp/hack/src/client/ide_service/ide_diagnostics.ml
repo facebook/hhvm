@@ -8,7 +8,7 @@
 
 open Hh_prelude
 
-let convert_error ~classish_positions error =
+let convert_error ~classish_positions (error, diagnostic_hash) =
   let quickfixes = User_error.quickfixes error in
   let hint_styles = List.bind ~f:Quickfix.get_hint_styles quickfixes in
   let related_hints =
@@ -21,7 +21,11 @@ let convert_error ~classish_positions error =
           | HintStyleHint p -> Classish_positions.find p classish_positions)
   in
   ClientIdeMessage.
-    { diagnostic_error = error; diagnostic_related_hints = related_hints }
+    {
+      diagnostic_error = error;
+      diagnostic_related_hints = related_hints;
+      diagnostic_hash;
+    }
 
 (** Convert a list of [Errors.finalized_error] to [ClientIdeMessage.diagnostic] *)
 let convert ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) errors

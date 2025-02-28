@@ -31,4 +31,9 @@ end
 val filter :
   Filter.t -> Errors.finalized_error list -> Errors.finalized_error list
 
+val filter_with_hash :
+  Filter.t ->
+  (Errors.finalized_error * int) list ->
+  (Errors.finalized_error * int) list
+
 val filter_rel : Filter.t -> Errors.t -> Errors.t

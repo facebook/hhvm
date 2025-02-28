@@ -1,0 +1,4 @@
+WARN: File "union_intersection_6.php", line 24, characters 3-15:
+Unsafe call: `foo::Abs1` might not exist because the receiver might be abstract. (Warn[12014])
+WARN: File "union_intersection_6.php", line 24, characters 3-15:
+Unsafe call: `foo::Abs2` might not exist because the receiver might be abstract. (Warn[12014])

@@ -20,14 +20,25 @@ module Class_use : sig
     class_: Folded_class.t;
     abstractness: abstractness;
         (** Refers to what we know about the class at the *use* site.
-        This information is distinct from what `Folded_class.abstract class_` provides *)
+               This information is distinct from what `Folded_class.abstract class_` provides *)
   }
 
-  val get :
+  (**
+  Useful for generating warnings on a use of a class.
+  In simple cases, this is equivalent to returning just a `t`,
+  however, we need to traverse intersections and unions.
+   *)
+  val fold :
+    'acc.
     Tast_env.env ->
-    (Typing_defs.locl_ty, 'a) Tast.class_id_ ->
+    ( Typing_reason.locl_phase Typing_defs_core.ty,
+      Tast.saved_env )
+    Aast_defs.class_id_ ->
     current_method:Tast.method_ option ->
-    t option
+    f:(t -> 'acc) ->
+    intersect:('acc list -> 'acc) ->
+    union:('acc list -> 'acc) ->
+    'acc option
 end = struct
   type t = {
     class_: Folded_class.t;
@@ -46,8 +57,14 @@ end = struct
     | Some method_ ->
       (not method_.Aast_defs.m_static) || has_needs_concrete_attribute method_
 
-  let get env class_id ~(current_method : _ Aast_defs.method_ option) : t option
-      =
+  let fold
+      (type acc)
+      env
+      class_id
+      ~(current_method : Tast.method_ option)
+      ~(f : t -> acc)
+      ~(intersect : acc list -> acc)
+      ~(union : acc list -> acc) : acc option =
     let open Option.Let_syntax in
     let get_class class_name =
       Tast_env.get_class env class_name |> Decl_entry.to_option
@@ -68,39 +85,63 @@ end = struct
         else
           Maybe_abstract
       in
-      { class_; abstractness }
+      f { class_; abstractness }
     | Aast.CIparent ->
       let* class_name = Tast_env.get_parent_id env in
       let+ class_ = get_class class_name in
-      { class_; abstractness = abstractness_of_folded_class class_ }
+      f { class_; abstractness = abstractness_of_folded_class class_ }
     | Aast.CIself ->
       let* class_name = Tast_env.get_self_id env in
       let+ class_ = get_class class_name in
-      { class_; abstractness = abstractness_of_folded_class class_ }
+      f { class_; abstractness = abstractness_of_folded_class class_ }
     | Aast.CI (_, class_name) ->
       let+ class_ = get_class class_name in
-      { class_; abstractness = abstractness_of_folded_class class_ }
+      f { class_; abstractness = abstractness_of_folded_class class_ }
     | Aast.CIexpr (ty, _, _) ->
-      (* extract from classname<T> or concrete_classname<T> *)
-      let from_targ ty_arg abstractness : t option =
+      (*
+      At a high level, the `CIExpr` case is similar to that for `CI` above.
+      The contortion is to handle unions and intersections.
+
+      Examples: `string & (dynamic | classname<C & D>)` and `classname<C> | concreteclassname<D>`
+      *)
+      let aggregate items partial_fn aggregation_fn =
+        let accs = List.filter_map items ~f:partial_fn in
+        if List.is_empty accs then
+          None
+        else
+          Some (aggregation_fn accs)
+      in
+      (* extract class information from the T in classname<T> or concrete_classname<T>
+       * `None` indicates no class information found *)
+      let rec fold_targ abstractness ty_arg : acc option =
         match snd @@ Typing_defs_core.deref ty_arg with
-        | Typing_defs.Tclass ((_, class_name), _exact, _targs) ->
-          let+ class_ = get_class class_name in
-          { class_; abstractness }
+        | Typing_defs.Tclass ((_, class_name), _exact, _targs) -> begin
+          match get_class class_name with
+          | Some class_ -> Some (f { class_; abstractness })
+          | None -> None
+        end
+        | Typing_defs.Tintersection tys ->
+          aggregate tys (fold_targ abstractness) intersect
+        | Typing_defs.Tunion tys -> aggregate tys (fold_targ abstractness) union
         | _ -> None
       in
-      begin
+      (* extract class information from classname<T> or concrete_classname<T>
+       * `None` indicates no class information found *)
+      let rec fold_ty ty : acc option =
         match snd @@ Typing_defs_core.deref ty with
         | Typing_defs.Tnewtype (new_type, [hd_targ], _)
           when String.equal new_type Naming_special_names.Classes.cClassname ->
-          from_targ hd_targ Maybe_abstract
+          fold_targ Maybe_abstract hd_targ
         | Typing_defs.Tnewtype (new_type, hd_targ :: [], _)
           when String.equal
                  new_type
                  Naming_special_names.Classes.cConcreteclassname ->
-          from_targ hd_targ Concrete
+          fold_targ Concrete hd_targ
+        | Typing_defs.Tintersection tys -> aggregate tys fold_ty intersect
+        | Typing_defs.Tunion tys -> aggregate tys fold_ty union
         | _ -> None
-      end
+      in
+      fold_ty ty
 end
 
 let warn env pos (abstract_static_warning : Typing_warning.Safe_abstract.t) :
@@ -110,7 +151,8 @@ let warn env pos (abstract_static_warning : Typing_warning.Safe_abstract.t) :
     (pos, Typing_warning.Safe_abstract, abstract_static_warning)
 
 let check_for_call_abstract
-    Class_use.{ class_; abstractness } env pos method_ folded_method : unit =
+    Class_use.{ class_; abstractness } method_ folded_method :
+    Typing_warning.Safe_abstract.t option =
   let method_may_be_abstract =
     match abstractness with
     | Abstract
@@ -126,15 +168,15 @@ let check_for_call_abstract
       false
   in
   if method_may_be_abstract && not call_warning_would_be_redundant then
-    warn
-      env
-      pos
+    Some
       Typing_warning.Safe_abstract.
         { kind = Call_abstract { method_ }; class_ = Folded_class.name class_ }
+  else
+    None
 
 let check_for_call_needs_concrete
-    Class_use.{ class_; abstractness } env call_pos method_ folded_method : unit
-    =
+    Class_use.{ class_; abstractness } method_ folded_method :
+    Typing_warning.Safe_abstract.t option =
   let callee_method_needs_concrete =
     Typing_defs.get_ce_readonly_prop_or_needs_concrete folded_method
   in
@@ -142,17 +184,18 @@ let check_for_call_needs_concrete
   | Abstract
   | Maybe_abstract ->
     if callee_method_needs_concrete then
-      warn
-        env
-        call_pos
+      Some
         Typing_warning.Safe_abstract.
           {
             kind = Call_needs_concrete { method_ };
             class_ = Folded_class.name class_;
           }
-  | Concrete -> ()
+    else
+      None
+  | Concrete -> None
 
-let check_for_new_abstract Class_use.{ class_; abstractness } env new_pos =
+let check_for_new_abstract Class_use.{ class_; abstractness } :
+    Typing_warning.Safe_abstract.t option =
   let is_final_class = Folded_class.final class_ in
   let receiver_may_be_abstract =
     match abstractness with
@@ -169,11 +212,56 @@ let check_for_new_abstract Class_use.{ class_; abstractness } env new_pos =
       false
   in
   if receiver_may_be_abstract && not warning_would_be_redundant then
-    warn
-      env
-      new_pos
+    Some
       Typing_warning.Safe_abstract.
         { kind = New_abstract; class_ = Folded_class.name class_ }
+  else
+    None
+
+(**
+A use of a union of classnames is ill-typed iff *any* branch is ill-typed. Save all the warnings.
+For example,
+
+```
+<<__ConsistentConstruct>>
+abstract class Abs1 {}
+<<__ConsistentConstruct>>
+abstract class Abs2 { }
+<<__ConsistentConstruct>>
+final class C1 { }
+
+ $class : (classname<Abs1> | classname<Abs2> | concreteclassname<C1>)
+// warning: Unsafe use of new: Abs1 might be abstract
+// warning: Unsafe use of new: Abs2 might be abstract
+new $class();
+ ```
+
+ **)
+let union_warnings = List.concat
+
+(**
+A use of an intersection of classnames is ill-typed iff *all* branches are ill-typed.
+
+For simplicity (of implementation and user experience) report just the first warning.
+(we'd do something fancier if this situation were common, but I doubt it's common)
+
+```
+ <<__ConsistentConstruct>>
+ interface A {}
+ <<__ConsistentConstruct>>
+ interface B { }
+
+ // $class: (classname<A> & classname<B>)
+ // warning: unsafe to instantiate A because it might be abstract
+ new $class();
+ ```
+
+ **)
+let intersect_warnings (warnings : Typing_warning.Safe_abstract.t list list) :
+    Typing_warning.Safe_abstract.t list =
+  match List.find warnings ~f:List.is_empty with
+  | Some l -> l
+  | None -> List.hd warnings |> Option.value ~default:[]
 
 let handler =
   let current_method = ref None in
@@ -193,27 +281,41 @@ let handler =
             Call
               { func = (_, _, Class_const ((_, _, class_id), (_, method_))); _ }
           ) ->
-        let open Option.Let_syntax in
-        Option.value ~default:()
-        @@ let* class_use =
-             Class_use.get env class_id ~current_method:!current_method
-           in
-           let+ folded_method =
-             Folded_class.get_smethod class_use.Class_use.class_ method_
-           in
-           check_for_call_abstract class_use env call_pos method_ folded_method;
-           check_for_call_needs_concrete
-             class_use
-             env
-             call_pos
-             method_
-             folded_method
+        let make_warnings class_use =
+          match Folded_class.get_smethod class_use.Class_use.class_ method_ with
+          | Some folded_method ->
+            Option.to_list
+              (check_for_call_abstract class_use method_ folded_method)
+            @ Option.to_list
+                (check_for_call_needs_concrete class_use method_ folded_method)
+          | None -> []
+        in
+        let warnings =
+          Class_use.fold
+            env
+            class_id
+            ~current_method:!current_method
+            ~f:make_warnings
+            ~intersect:intersect_warnings
+            ~union:union_warnings
+        in
+        Option.iter warnings ~f:(List.iter ~f:(warn env call_pos))
       | Aast.
           ( _,
             new_pos,
             New ((_, _, class_id), _targs, _exprs, _expr, _constructor) ) ->
-        Option.iter
-          (Class_use.get env class_id ~current_method:!current_method)
-          ~f:(fun class_use -> check_for_new_abstract class_use env new_pos)
+        let make_warnings class_use =
+          Option.to_list (check_for_new_abstract class_use)
+        in
+        let warnings =
+          Class_use.fold
+            env
+            class_id
+            ~current_method:!current_method
+            ~f:make_warnings
+            ~intersect:intersect_warnings
+            ~union:union_warnings
+        in
+        Option.iter warnings ~f:(List.iter ~f:(warn env new_pos))
       | _ -> ()
   end

@@ -18,7 +18,7 @@
 import math
 import unittest
 from sys import float_info, getrefcount
-from typing import Callable, cast
+from typing import Callable
 
 from folly.iobuf import IOBuf
 from thrift.python.marshal import marshal_fixture as fixture
@@ -111,7 +111,7 @@ class TestMarshalPrimitives(MarshalFixture):
             float("nan"),
         ):
             if math.isnan(x):  # Special handling for NaN since NaN != NaN
-                self.assertTrue(math.isnan(cast(float, fixture.roundtrip_float(x))))
+                self.assertTrue(math.isnan(fixture.roundtrip_float(x)))
             else:
                 self.assertEqual(x, fixture.roundtrip_float(x))
         self.assert_type_error(fixture.roundtrip_float, None, "oops")
@@ -130,7 +130,7 @@ class TestMarshalPrimitives(MarshalFixture):
             float("nan"),
         ):
             if math.isnan(x):  # Special handling for NaN since NaN != NaN
-                self.assertTrue(math.isnan(cast(float, fixture.roundtrip_float(x))))
+                self.assertTrue(math.isnan(fixture.roundtrip_float(x)))
             else:
                 self.assertEqual(x, fixture.roundtrip_double(x))
         self.assert_type_error(fixture.roundtrip_double, None, "oops")
@@ -356,7 +356,6 @@ class TestMarshalMap(MarshalFixture):
         # and speed, thereby reversing the ordering
         self.assertEqual(
             make_dict(),
-            # pyre-fixme[6]: For 1st argument expected `Reversible[Variable[_T]]`
             tuple(reversed(fixture.roundtrip_bytes_key_map(make_dict()))),
         )
         self.assertEqual((), fixture.roundtrip_bytes_key_map(()))
@@ -415,7 +414,6 @@ class TestMarshalMap(MarshalFixture):
         # and speed, thereby reversing the ordering
         self.assertEqual(
             make_dict(),
-            # pyre-fixme[6]: For 1st argument expected `Reversible[Variable[_T]]`
             tuple(reversed(fixture.roundtrip_unicode_val_map(make_dict()))),
         )
         self.assertEqual((), fixture.roundtrip_unicode_val_map(()))

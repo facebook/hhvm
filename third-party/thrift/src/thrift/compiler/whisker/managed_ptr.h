@@ -44,6 +44,8 @@ using managed_ptr = std::shared_ptr<const T>;
  */
 template <typename T>
 managed_ptr<T> manage_as_static(const T& o) {
+  // Alias an empty shared_ptr to create a non-owning shared_ptr that doesn't
+  // allocate a control block (unlike using a noop deleter).
   return managed_ptr<T>(managed_ptr<void>(), std::addressof(o));
 }
 

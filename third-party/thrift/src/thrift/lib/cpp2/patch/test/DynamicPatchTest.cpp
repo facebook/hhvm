@@ -95,12 +95,12 @@ DynamicPatch roundTrip(const DynamicPatch& patch) {
   folly::IOBufQueue queue;
   apache::thrift::CompactProtocolWriter writer;
   writer.setOutput(&queue);
-  patch.encode(writer);
+  patch.encode(badge, writer);
   auto buf = queue.move();
   apache::thrift::CompactProtocolReader reader;
   reader.setInput(buf.get());
   DynamicPatch ret;
-  ret.decode(reader);
+  ret.decode(badge, reader);
   return ret;
 }
 

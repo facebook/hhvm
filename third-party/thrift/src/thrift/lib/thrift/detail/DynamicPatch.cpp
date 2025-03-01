@@ -1522,7 +1522,7 @@ void DynamicPatch::fromAny(detail::Badge, const type::AnyStruct& any) {
 }
 
 template <typename Protocol>
-std::uint32_t DynamicPatch::encode(Protocol& prot) const {
+std::uint32_t DynamicPatch::encode(detail::Badge, Protocol& prot) const {
   return visitPatch(badge, [&](const auto& patch) {
     if constexpr (__FBTHRIFT_IS_VALID(patch, patch.encode(prot))) {
       return patch.encode(prot);
@@ -1534,16 +1534,18 @@ std::uint32_t DynamicPatch::encode(Protocol& prot) const {
 }
 
 template <typename Protocol>
-void DynamicPatch::decode(Protocol& prot) {
+void DynamicPatch::decode(detail::Badge, Protocol& prot) {
   // TODO(dokwon): Provide direct decode to DynamicPatch.
   fromObject(badge, protocol::parseObject(prot));
 }
 
 template std::uint32_t DynamicPatch::encode(
-    apache::thrift::BinaryProtocolWriter&) const;
+    detail::Badge, apache::thrift::BinaryProtocolWriter&) const;
 template std::uint32_t DynamicPatch::encode(
-    apache::thrift::CompactProtocolWriter&) const;
-template void DynamicPatch::decode(apache::thrift::BinaryProtocolReader&);
-template void DynamicPatch::decode(apache::thrift::CompactProtocolReader&);
+    detail::Badge, apache::thrift::CompactProtocolWriter&) const;
+template void DynamicPatch::decode(
+    detail::Badge, apache::thrift::BinaryProtocolReader&);
+template void DynamicPatch::decode(
+    detail::Badge, apache::thrift::CompactProtocolReader&);
 
 } // namespace apache::thrift::protocol

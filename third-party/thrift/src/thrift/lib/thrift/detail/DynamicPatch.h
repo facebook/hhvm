@@ -558,9 +558,9 @@ class DynamicPatch {
   void fromAny(detail::Badge, const type::AnyStruct& any);
 
   template <typename Protocol>
-  std::uint32_t encode(Protocol& prot) const;
+  std::uint32_t encode(detail::Badge, Protocol& prot) const;
   template <typename Protocol>
-  void decode(Protocol& prot);
+  void decode(detail::Badge, Protocol& prot);
 
   template <class T>
   bool holds_alternative(detail::Badge) const {

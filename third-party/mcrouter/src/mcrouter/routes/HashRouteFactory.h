@@ -15,7 +15,6 @@
 #include "mcrouter/lib/RendezvousHashFunc.h"
 #include "mcrouter/lib/SelectionRouteFactory.h"
 #include "mcrouter/lib/WeightedCh3HashFunc.h"
-#include "mcrouter/lib/WeightedCh4HashFunc.h"
 #include "mcrouter/lib/WeightedRendezvousHashFunc.h"
 #include "mcrouter/lib/config/RouteHandleFactory.h"
 #include "mcrouter/lib/routes/NullRoute.h"
@@ -165,10 +164,6 @@ std::shared_ptr<typename RouterInfo::RouteHandleIf> createHashRoute(
         std::move(func),
         bucketize,
         clientFanout);
-  } else if (funcType == WeightedCh4HashFunc::type()) {
-    WeightedCh4HashFunc func{json, n};
-    return createHashRoute<RouterInfo, WeightedCh4HashFunc>(
-        std::move(rh), std::move(salt), std::move(func));
   } else if (funcType == ConstShardHashFunc::type()) {
     return createHashRoute<RouterInfo, ConstShardHashFunc>(
         std::move(rh), std::move(salt), ConstShardHashFunc(n));

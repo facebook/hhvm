@@ -19,6 +19,6 @@ enum class HashFunctionType : uint8_t {
   CRC32 = 3,
   Rendezvous = 4,
   WeightedCh3 = 5,
-  WeightedCh4 = 6,
+  // unused = 6,
   WeightedRendezvous = 7,
 };

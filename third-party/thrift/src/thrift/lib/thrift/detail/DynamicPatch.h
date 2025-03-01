@@ -560,7 +560,11 @@ class DynamicPatch {
   template <typename Protocol>
   std::uint32_t encode(detail::Badge, Protocol& prot) const;
   template <typename Protocol>
+  std::unique_ptr<folly::IOBuf> encode(detail::Badge) const;
+  template <typename Protocol>
   void decode(detail::Badge, Protocol& prot);
+  template <typename Protocol>
+  void decode(detail::Badge, const folly::IOBuf& buf);
 
   template <class T>
   bool holds_alternative(detail::Badge) const {

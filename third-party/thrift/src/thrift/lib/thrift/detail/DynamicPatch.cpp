@@ -1539,13 +1539,37 @@ void DynamicPatch::decode(detail::Badge, Protocol& prot) {
   fromObject(badge, protocol::parseObject(prot));
 }
 
+template <typename Protocol>
+std::unique_ptr<folly::IOBuf> DynamicPatch::encode(detail::Badge) const {
+  folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
+  Protocol prot;
+  prot.setOutput(&queue);
+  encode(badge, prot);
+  return queue.move();
+}
+
+template <typename Protocol>
+void DynamicPatch::decode(detail::Badge, const folly::IOBuf& buf) {
+  Protocol prot;
+  prot.setInput(&buf);
+  decode(badge, prot);
+}
+
 template std::uint32_t DynamicPatch::encode(
     detail::Badge, apache::thrift::BinaryProtocolWriter&) const;
 template std::uint32_t DynamicPatch::encode(
     detail::Badge, apache::thrift::CompactProtocolWriter&) const;
+template std::unique_ptr<folly::IOBuf> DynamicPatch::encode<
+    apache::thrift::BinaryProtocolWriter>(detail::Badge) const;
+template std::unique_ptr<folly::IOBuf> DynamicPatch::encode<
+    apache::thrift::CompactProtocolWriter>(detail::Badge) const;
 template void DynamicPatch::decode(
     detail::Badge, apache::thrift::BinaryProtocolReader&);
 template void DynamicPatch::decode(
     detail::Badge, apache::thrift::CompactProtocolReader&);
+template void DynamicPatch::decode<apache::thrift::BinaryProtocolReader>(
+    detail::Badge, const folly::IOBuf&);
+template void DynamicPatch::decode<apache::thrift::CompactProtocolReader>(
+    detail::Badge, const folly::IOBuf&);
 
 } // namespace apache::thrift::protocol

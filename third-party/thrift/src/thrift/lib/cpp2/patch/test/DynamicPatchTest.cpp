@@ -92,15 +92,9 @@ TYPED_TEST(DynamicPatchesTest, Clear) {
 }
 
 DynamicPatch roundTrip(const DynamicPatch& patch) {
-  folly::IOBufQueue queue;
-  apache::thrift::CompactProtocolWriter writer;
-  writer.setOutput(&queue);
-  patch.encode(badge, writer);
-  auto buf = queue.move();
-  apache::thrift::CompactProtocolReader reader;
-  reader.setInput(buf.get());
   DynamicPatch ret;
-  ret.decode(badge, reader);
+  ret.decode<apache::thrift::CompactProtocolReader>(
+      badge, *patch.encode<apache::thrift::CompactProtocolWriter>(badge));
   return ret;
 }
 

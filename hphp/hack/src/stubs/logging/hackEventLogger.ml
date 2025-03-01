@@ -27,6 +27,8 @@ let set_changed_mergebase _ = ()
 
 let set_hhconfig_version _ = ()
 
+let set_mergebase_globalrev _ = ()
+
 let set_rollout_group _ = ()
 
 let set_rollout_flags _ = ()
@@ -105,7 +107,7 @@ let type_check_dirty ~start_t:_ ~dirty_count:_ ~recheck_count:_ = ()
 
 let lock_stolen _ = ()
 
-let client_init ~init_id:_ ~from:_ ~custom_columns:_ _ = ()
+let client_init ~init_id:_ ~from:_ ~is_interactive:_ ~custom_columns:_ _ = ()
 
 let serverless_ide_init ~init_id:_ = ()
 
@@ -570,4 +572,8 @@ module Fanouts = struct
 
   let log ~changes_cardinal:_ ~fanout_cardinal:_ ~max_class_fanout_cardinal:_ =
     ()
+end
+
+module TypingErrors = struct
+    let log_errors ~type_check_end_id:_ ~data:_ = ()
 end

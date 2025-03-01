@@ -1070,11 +1070,11 @@ template <class P1, class P2>
 void testUnmergeablePatches(P1 p1, P2 p2) {
   {
     DynamicPatch src(p1), dst(p2);
-    EXPECT_THROW(src.merge(dst), std::runtime_error);
+    EXPECT_THROW(dst.merge(src), std::runtime_error);
   }
   {
     DynamicPatch src(p2), dst(p1);
-    EXPECT_THROW(src.merge(dst), std::runtime_error);
+    EXPECT_THROW(dst.merge(src), std::runtime_error);
   }
 }
 

@@ -375,6 +375,8 @@ class BinaryPatch : public BaseStringPatch<Patch, BinaryPatch<Patch>> {
   void assign(std::string s) {
     assign(*folly::IOBuf::fromString(std::move(s)));
   }
+  void assign(std::unique_ptr<folly::IOBuf>&& s) { assign(std::move(*s)); }
+  void assign(const std::unique_ptr<folly::IOBuf>& s) { assign(*s); }
 
   template <typename T>
   BinaryPatch& operator=(T&& other) {
@@ -425,6 +427,13 @@ class BinaryPatch : public BaseStringPatch<Patch, BinaryPatch<Patch>> {
     auto buf = folly::IOBuf::fromString(std::move(val));
     apply(*buf);
     val = buf->toString();
+  }
+
+  void apply(std::unique_ptr<folly::IOBuf>& val) const {
+    if (!val) {
+      val = std::make_unique<folly::IOBuf>();
+    }
+    apply(*val);
   }
 
  private:

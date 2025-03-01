@@ -367,6 +367,12 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
       }
     }
   }
+  template <typename Id>
+  std::enable_if_t<type::is_optional_or_union_field_v<T, Id>> ensure(
+      const std::unique_ptr<folly::IOBuf>& defaultVal) {
+    ensure(std::make_unique<folly::IOBuf>(*defaultVal));
+  }
+
   /// Ensures the given field is initalized, and return the associated patch
   /// object.
   template <class Id>

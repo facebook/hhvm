@@ -35,6 +35,13 @@ struct McrouterOptionError {
   std::string errorMsg;
 };
 
+struct McrouterOptionMismatch {
+  std::string optionName;
+  std::optional<std::string> lunaValue;
+  std::string mcrouterValue;
+  std::string errorMsg;
+};
+
 struct McrouterOptionData {
   enum class Type {
     integer,
@@ -73,6 +80,9 @@ class McrouterOptionsBase {
 
   std::vector<McrouterOptionError> updateFromDict(
       const std::unordered_map<std::string, std::string>& new_opts);
+
+  virtual std::vector<McrouterOptionMismatch> compare(
+      const std::unordered_map<std::string, std::string>& new_opts) const;
 
   virtual ~McrouterOptionsBase() {}
 

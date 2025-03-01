@@ -175,7 +175,6 @@ string optionTypeToString(McrouterOptionData::Type type) {
       return "unknown";
   }
 }
-
 } // anonymous namespace
 
 unordered_map<string, string> McrouterOptionsBase::toDict() const {
@@ -233,6 +232,59 @@ vector<McrouterOptionError> McrouterOptionsBase::updateFromDict(
           kv.second);
     }
   }
+
+  return errors;
+}
+
+vector<McrouterOptionMismatch> McrouterOptionsBase::compare(
+    const std::unordered_map<std::string, std::string>& new_opts) const {
+  vector<McrouterOptionMismatch> errors;
+  forEach([&errors, &new_opts](
+              const string& name,
+              McrouterOptionData::Type type,
+              const boost::any& value) {
+    auto it = new_opts.find(name);
+    if (it == new_opts.end()) {
+      McrouterOptionMismatch e;
+      e.optionName = name;
+      e.errorMsg =
+          "Not found in luna_opts, with type " + optionTypeToString(type);
+      errors.push_back(std::move(e));
+    } else {
+      auto subValue = options::substituteTemplates(it->second);
+      auto currValue = toString(value);
+
+      // config_params is a string of comma separated key-value pairs
+      // e.g. "key1:value1,key2:value2", and are stored as
+      // McrouterOptionData::Type::string_map. we need to compare them
+      // separately
+      bool isSame = false;
+      if (type == McrouterOptionData::Type::string_map) {
+        boost::any newValue;
+        auto oldValuePtr =
+            boost::any_cast<unordered_map<string, string>*>(&value);
+        if (oldValuePtr != nullptr &&
+            tryFromString<unordered_map<string, string>>(subValue, newValue)) {
+          isSame = *boost::any_cast<unordered_map<string, string>*>(
+                       &newValue) == *oldValuePtr;
+        } else {
+          isSame = false;
+        }
+      } else {
+        isSame = currValue == subValue;
+      }
+
+      if (!isSame) {
+        McrouterOptionMismatch e;
+        e.optionName = name;
+        e.lunaValue = it->second;
+        e.errorMsg = "luna value " + it->second +
+            " and current mcrouter_options value " + toString(value) +
+            " are different";
+        errors.push_back(std::move(e));
+      }
+    }
+  });
 
   return errors;
 }

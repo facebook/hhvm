@@ -171,6 +171,7 @@ final class ThriftContextPropState {
   public static function updateIGUserId(?int $ig_user_id, string $src): bool {
     // don't overwrite if TCPS already has a valid ig user id
     $tcps_ig_user_id = self::get()->getIGUserId();
+
     if (self::coerceId($tcps_ig_user_id) is nonnull) {
       return false;
     }
@@ -183,7 +184,6 @@ final class ThriftContextPropState {
     ) {
       return false;
     }
-
     $ig_user_id = self::coerceId($ig_user_id);
 
     $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
@@ -214,21 +214,9 @@ final class ThriftContextPropState {
   ): bool {
     $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
     $ods->bumpKey('contextprop.ig_vc.'.$src);
-    // don't overwrite if TCPS already has a valid ig user id
-    $tcps_ig_user_id = self::get()->getIGUserId();
-    if (self::coerceId($tcps_ig_user_id) is nonnull) {
-      return false;
-    }
 
     $ig_user_id = self::coerceId($vc->getViewerID());
-    if ($ig_user_id is nonnull) {
-      $ods->bumpKey('contextprop.set_ig_user_id.'.$src);
-      self::get()->setIGUserId($ig_user_id);
-      return true;
-    }
-
-    $ods->bumpKey('contextprop.missing_ig_user_id.'.$src);
-    return false;
+    return self::updateIGUserId($ig_user_id, $src);
   }
 
   // returns id if it is valid (non-null, positive)

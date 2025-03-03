@@ -80,8 +80,7 @@ func (p *binaryEncoder) WriteMessageBegin(name string, typeID types.MessageType,
 		if e != nil {
 			return e
 		}
-		e = p.WriteI32(seqID)
-		return e
+		return p.WriteI32(seqID)
 	} else {
 		e := p.WriteString(name)
 		if e != nil {
@@ -91,8 +90,7 @@ func (p *binaryEncoder) WriteMessageBegin(name string, typeID types.MessageType,
 		if e != nil {
 			return e
 		}
-		e = p.WriteI32(seqID)
-		return e
+		return p.WriteI32(seqID)
 	}
 }
 
@@ -113,8 +111,7 @@ func (p *binaryEncoder) WriteFieldBegin(name string, typeID types.Type, id int16
 	if e != nil {
 		return e
 	}
-	e = p.WriteI16(id)
-	return e
+	return p.WriteI16(id)
 }
 
 func (p *binaryEncoder) WriteFieldEnd() error {
@@ -134,8 +131,7 @@ func (p *binaryEncoder) WriteMapBegin(keyType types.Type, valueType types.Type, 
 	if e != nil {
 		return e
 	}
-	e = p.WriteI32(int32(size))
-	return e
+	return p.WriteI32(int32(size))
 }
 
 func (p *binaryEncoder) WriteMapEnd() error {
@@ -147,8 +143,7 @@ func (p *binaryEncoder) WriteListBegin(elemType types.Type, size int) error {
 	if e != nil {
 		return e
 	}
-	e = p.WriteI32(int32(size))
-	return e
+	return p.WriteI32(int32(size))
 }
 
 func (p *binaryEncoder) WriteListEnd() error {
@@ -160,8 +155,7 @@ func (p *binaryEncoder) WriteSetBegin(elemType types.Type, size int) error {
 	if e != nil {
 		return e
 	}
-	e = p.WriteI32(int32(size))
-	return e
+	return p.WriteI32(int32(size))
 }
 
 func (p *binaryEncoder) WriteSetEnd() error {

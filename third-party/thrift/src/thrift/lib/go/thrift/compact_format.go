@@ -155,9 +155,7 @@ func (p *compactEncoder) WriteMessageBegin(name string, typeID types.MessageType
 	if err != nil {
 		return types.NewProtocolException(err)
 	}
-	e := p.WriteString(name)
-	return e
-
+	return p.WriteString(name)
 }
 
 func (p *compactEncoder) WriteMessageEnd() error { return nil }

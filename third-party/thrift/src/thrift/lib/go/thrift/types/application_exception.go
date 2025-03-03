@@ -156,6 +156,5 @@ func (e *applicationException) Write(prot Encoder) (err error) {
 	if err != nil {
 		return
 	}
-	err = prot.WriteStructEnd()
-	return
+	return prot.WriteStructEnd()
 }

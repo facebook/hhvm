@@ -128,7 +128,7 @@ func (t *headerTransport) GetResponseHeaders() map[string]string {
 func (t *headerTransport) AddTransform(trans TransformID) error {
 	if sup, ok := supportedTransforms[trans]; !ok || !sup {
 		return types.NewTransportException(
-			types.NOT_IMPLEMENTED, fmt.Sprintf("unimplemented transform ID: %s (%#x)", trans.String(), int64(trans)),
+			types.NOT_SUPPORTED, fmt.Sprintf("unsupported transform ID: %s (%#x)", trans.String(), int64(trans)),
 		)
 	}
 	for _, t := range t.writeTransforms {
@@ -291,7 +291,7 @@ func applyTransforms(buf *bytes.Buffer, transforms []TransformID) (*bytes.Buffer
 			tmpbuf.Reset()
 		default:
 			return nil, types.NewTransportException(
-				types.NOT_IMPLEMENTED, fmt.Sprintf("unimplemented transform ID: %s (%#x)", trans.String(), int64(trans)),
+				types.NOT_SUPPORTED, fmt.Sprintf("unsupported transform ID: %s (%#x)", trans.String(), int64(trans)),
 			)
 		}
 	}

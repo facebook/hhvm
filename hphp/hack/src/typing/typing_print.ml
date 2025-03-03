@@ -954,12 +954,15 @@ module Full = struct
     | Tnonnull -> (fuel, text "nonnull")
     | Tvec_or_dict (x, y) -> list ~fuel "vec_or_dict<" k [x; y] ">"
     | Toption ty -> begin
+      let (_, ty) = Typing_inference_env.expand_type env.inference_env ty in
       match deref ty with
       | (_, Tnonnull) -> (fuel, text "mixed")
       | (r, Tunion tyl) when List.exists ~f:is_dynamic tyl ->
         (* Unions with null become Toption, which leads to the awkward ?~...
          * The Tunion case can better handle this *)
         k ~fuel (mk (r, Tunion (mk (r, Tprim Nast.Tnull) :: tyl)))
+      (* Drop the extra option *)
+      | (_, Toption _) -> locl_ty ~fuel ~hide_internals to_doc st penv ty
       | _ ->
         let (fuel, d) = k ~fuel ty in
         (fuel, Concat [text "?"; d])

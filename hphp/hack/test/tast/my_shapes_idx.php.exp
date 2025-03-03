@@ -1,0 +1,140 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([4:10-16], "\\my_idx");
+      fd_fun =
+      { f_span = [4:1-6:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((~?Tv), (Some ([4:43-46], (Hoption ([4:44-46], (Habstr ("Tv", [])))))));
+        f_params =
+        [{ param_annotation = (shape(?'a' => Tv));
+           param_type_hint =
+           ((shape(?'a' => Tv)),
+            (Some ([4:21-38],
+                   (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = true; sfi_hint = ([4:35-37], (Habstr ("Tv", []))); sfi_name = (SFlit_str ([4:28-31], "a")) }] }))));
+           param_pos = [4:39-41]; param_name = "$_"; param_info = Param_required; 
+           param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([5:3-15], (Return (Some ((null), [5:10-14], Null))))] }; 
+        f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([4:10-16], "__SupportDynamicType"); ua_params = [] }]; 
+        f_external = false; f_doc_comment = None };
+      fd_internal = false; fd_module = None;
+      fd_tparams =
+      [{ tp_variance = Invariant; tp_name = ([4:17-19], "Tv"); tp_parameters = []; 
+         tp_constraints = [(Constraint_as, ([4:17-19], (Happly (([4:17-19], "\\HH\\supportdyn"), [([4:17-19], Hmixed)]))))]; 
+         tp_reified = Erased; tp_user_attributes = [] }
+        ];
+      fd_where_constraints = []; fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([8:10-16], "\\testit");
+       fd_fun =
+       { f_span = [8:1-10:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((void), (Some ([8:41-45], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = (shape(?'a' => ?int));
+            param_type_hint =
+            ((shape(?'a' => ?int)),
+             (Some ([8:17-36],
+                    (Hshape
+                       { nsi_allows_unknown_fields = false;
+                         nsi_field_map = [{ sfi_optional = true; sfi_hint = ([8:31-35], (Hoption ([8:32-35], (Hprim Tint)))); sfi_name = (SFlit_str ([8:24-27], "a")) }] }))));
+            param_pos = [8:37-39]; param_name = "$s"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([9:3-19],
+             (Expr
+                ((~?int), [9:3-18],
+                 (Assign (((~?int), [9:3-5], (Lvar ([9:3-5], $x))), None,
+                    ((~?int), [9:8-18],
+                     (Call
+                        { func = (((function<Tv>(shape(?'a' => ?int) $_): ~?int)), [9:8-14], (Id ([9:8-14], "\\my_idx"))); 
+                          targs = [((?int), ([9:8-14], Hwildcard))]; 
+                          args = [(Anormal ((shape(?'a' => ?int)), [9:15-17], (Lvar ([9:15-17], $s))))]; 
+                          unpacked_arg = None }))
+                    )))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([8:10-16], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([4:10-16], "\\my_idx");
+       fd_fun =
+       { f_span = [4:1-6:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((dynamic), (Some ([4:43-46], (Hoption ([4:44-46], (Habstr ("Tv", [])))))));
+         f_params =
+         [{ param_annotation = (dynamic);
+            param_type_hint =
+            ((dynamic),
+             (Some ([4:21-38],
+                    (Hshape { nsi_allows_unknown_fields = false; nsi_field_map = [{ sfi_optional = true; sfi_hint = ([4:35-37], (Habstr ("Tv", []))); sfi_name = (SFlit_str ([4:28-31], "a")) }] }))));
+            param_pos = [4:39-41]; param_name = "$_"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([5:3-15], (Return (Some ((null), [5:10-14], Null))))] }; 
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([4:10-16], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None;
+       fd_tparams =
+       [{ tp_variance = Invariant; tp_name = ([4:17-19], "Tv"); tp_parameters = []; 
+          tp_constraints = [(Constraint_as, ([4:17-19], (Happly (([4:17-19], "\\HH\\supportdyn"), [([4:17-19], Hmixed)]))))]; 
+          tp_reified = Erased; tp_user_attributes = [] }
+         ];
+       fd_where_constraints = []; fd_package = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_mode = Namespace_env.ForTypecheck; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([8:10-16], "\\testit");
+       fd_fun =
+       { f_span = [8:1-10:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((dynamic), (Some ([8:41-45], (Hprim Tvoid))));
+         f_params =
+         [{ param_annotation = (dynamic);
+            param_type_hint =
+            ((dynamic),
+             (Some ([8:17-36],
+                    (Hshape
+                       { nsi_allows_unknown_fields = false;
+                         nsi_field_map = [{ sfi_optional = true; sfi_hint = ([8:31-35], (Hoption ([8:32-35], (Hprim Tint)))); sfi_name = (SFlit_str ([8:24-27], "a")) }] }))));
+            param_pos = [8:37-39]; param_name = "$s"; param_info = Param_required; 
+            param_readonly = None; param_splat = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([9:3-19],
+             (Expr
+                ((~null), [9:3-18],
+                 (Assign (((~null), [9:3-5], (Lvar ([9:3-5], $x))), None,
+                    ((~?nothing), [9:8-18],
+                     (Call
+                        { func = (((function<Tv>(shape(?'a' => nothing) $_): ~?nothing)), [9:8-14], (Id ([9:8-14], "\\my_idx"))); 
+                          targs = [((nothing), ([9:8-14], Hwildcard))]; 
+                          args = [(Anormal ((dynamic), [9:15-17], (Lvar ([9:15-17], $s))))]; 
+                          unpacked_arg = None }))
+                    )))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([8:10-16], "__SupportDynamicType"); ua_params = [] }]; 
+         f_external = false; f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
+       fd_package = None })

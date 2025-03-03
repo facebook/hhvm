@@ -1566,6 +1566,7 @@ void t_mstch_py3_generator::generate_file(
 void t_mstch_py3_generator::generate_types() {
   std::vector<std::string> autoMigrateFilesWithTypeContext{
       "types.py",
+      "types_auto_FBTHRIFT_ONLY_DO_NOT_USE.py",
   };
 
   std::vector<std::string> autoMigrateFilesNoTypeContext{

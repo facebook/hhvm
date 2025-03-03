@@ -267,6 +267,9 @@ class ListTests(unittest.TestCase):
         self.assertEqual(list(y), x)
 
     # thrift-python doesn't believe in flat-name containers
-    @brokenInAutoMigrate()
     def test_list_module(self) -> None:
-        self.assertEqual(I32List.__module__, "testing.types")
+        # typedefs are ListTypeFactory in auto-migrate
+        if not is_auto_migrated():
+            self.assertEqual(I32List.__module__, "testing.types")
+        # flat name containers are always .types
+        self.assertEqual(List__i32.__module__, "testing.types")

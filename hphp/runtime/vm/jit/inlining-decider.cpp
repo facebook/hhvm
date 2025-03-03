@@ -291,7 +291,7 @@ struct InlineRegionKey {
   TinyVector<Type, 4> argTypes;
 };
 
-using InlineCostCache = jit::fast_map<
+using InlineCostCache = folly::ConcurrentHashMap<
   InlineRegionKey,
   unsigned,
   InlineRegionKey::Hash,
@@ -326,16 +326,14 @@ Vcost computeTranslationCostSlow(SrcKey at,
   return irlower::computeIRUnitCost(*unit);
 }
 
-folly::ImplicitSynchronized<InlineCostCache> s_inlCostCache;
+InlineCostCache s_inlCostCache;
 
 int computeTranslationCost(SrcKey at,
                            const RegionDesc& region,
                            AnnotationData* annotationData) {
   InlineRegionKey irk{region};
-  SYNCHRONIZED_CONST(s_inlCostCache) {
-    auto f = s_inlCostCache.find(irk);
-    if (f != s_inlCostCache.end()) return f->second;
-  }
+  auto f = s_inlCostCache.find(irk);
+  if (f != s_inlCostCache.end()) return f->second;
 
   auto const info = computeTranslationCostSlow(at, region, annotationData);
   auto cost = info.cost;
@@ -359,9 +357,8 @@ int computeTranslationCost(SrcKey at,
     // Set cost very high to prevent inlining of incomplete regions.
     cost = std::numeric_limits<int>::max();
   }
-
-  if (cacheResult && !as_const(s_inlCostCache)->count(irk)) {
-    s_inlCostCache->emplace(irk, cost);
+  if (cacheResult) {
+    s_inlCostCache.emplace(irk, cost);
   }
   FTRACE(3, "computeTranslationCost(at {}) = {}\n", showShort(at), cost);
   return cost;
@@ -467,7 +464,7 @@ bool shouldInline(const irgen::IRGS& irgs,
                   SrcKey callerSk,
                   const Func* callee,
                   const RegionDesc& region,
-                  uint32_t maxTotalCost) {
+                  int& cost) {
   auto sk = region.empty() ? SrcKey() : region.start();
   assertx(callee);
   assertx(sk.func() == callee);
@@ -593,7 +590,7 @@ bool shouldInline(const irgen::IRGS& irgs,
   // We measure the cost of inlining each callstack and stop when it exceeds a
   // certain threshold.  (Note that we do not measure the total cost of all the
   // inlined calls for a given caller---just the cost of each nested stack.)
-  const int cost = costOfInlining(callerSk, callee, region, annotationsPtr);
+  cost = costOfInlining(callerSk, callee, region, annotationsPtr);
   if (cost <= Cfg::HHIR::AlwaysInlineVasmCostLimit) {
     return accept(folly::sformat("cost={} within always-inline limit", cost));
   }
@@ -603,7 +600,7 @@ bool shouldInline(const irgen::IRGS& irgs,
       "exhausted bytecode budget: budgetBCInstrs={}, regionSize={}",
       irgs.budgetBCInstrs, region.instrSize()));
   }
-
+  auto maxTotalCost = adjustedMaxVasmCost(irgs, region, inlineDepth(irgs));
   int maxCost = maxTotalCost;
   if (Cfg::HHIR::InliningUseStackedCost) {
     maxCost -= irgs.inlineState.cost;
@@ -823,18 +820,10 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
     entry = SrcKey{callee, param + 1, SrcKey::FuncEntryTag {}};
   }
 
-  const auto depth = inlineDepth(irgs);
   if (profData()) {
     auto region = selectCalleeCFG(callerSk, entry, ctxType, inputTypes,
                                   Cfg::Jit::MaxRegionInstrs, annotationsPtr);
-    if (region) {
-      if (shouldInline(irgs, callerSk, callee, *region,
-                       adjustedMaxVasmCost(irgs, *region, depth))) {
-        return region;
-      }
-      return nullptr;
-    }
-
+    if (region) return region;
     // Special case: even if we don't have prof data for this func, if
     // it takes no arguments and returns a constant, it might be a
     // trivial function (IE, "return 123;"). Attempt to inline it
@@ -847,16 +836,8 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
     if (!retType.hasConstVal()) return nullptr;
   }
 
-  auto region = selectCalleeTracelet(entry, ctxType, inputTypes,
-                                     Cfg::Jit::MaxRegionInstrs);
-
-  if (region &&
-      shouldInline(irgs, callerSk, callee, *region,
-                   adjustedMaxVasmCost(irgs, *region, depth))) {
-    return region;
-  }
-
-  return nullptr;
+  return selectCalleeTracelet(entry, ctxType, inputTypes,
+                              Cfg::Jit::MaxRegionInstrs);
 }
 
 void setBaseInliningProfCount(uint64_t value) {
@@ -867,43 +848,40 @@ void setBaseInliningProfCount(uint64_t value) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void clearCachedInliningCost() {
-  s_inlCostCache->clear();
+  s_inlCostCache.clear();
 }
 
 void serializeCachedInliningCost(ProfDataSerializer& ser) {
   tl_heap.getCheck()->init();
   zend_get_bigint_data();
-
-  SYNCHRONIZED_CONST(s_inlCostCache) {
-    write_raw(ser, safe_cast<uint32_t>(s_inlCostCache.size()));
-    for (auto const& p : s_inlCostCache) {
-      write_srckey(ser, p.first.entryKey);
-      p.first.ctxType.serialize(ser);
-      write_raw(ser, safe_cast<uint32_t>(p.first.argTypes.size()));
-      for (auto const& arg : p.first.argTypes) arg.serialize(ser);
-      write_raw(ser, safe_cast<uint32_t>(p.second));
-    }
+  auto size = s_inlCostCache.size();
+  write_raw(ser, safe_cast<uint32_t>(size));
+  for (auto const& p : s_inlCostCache) {
+    write_srckey(ser, p.first.entryKey);
+    p.first.ctxType.serialize(ser);
+    write_raw(ser, safe_cast<uint32_t>(p.first.argTypes.size()));
+    for (auto const& arg : p.first.argTypes) arg.serialize(ser);
+    write_raw(ser, safe_cast<uint32_t>(p.second));
+    if (--size == 0) break;
   }
 }
 
 void deserializeCachedInliningCost(ProfDataDeserializer& ser) {
-  SYNCHRONIZED(s_inlCostCache) {
-    auto const numEntries = read_raw<uint32_t>(ser);
-    for (uint32_t i = 0; i < numEntries; ++i) {
-      auto srcKey = read_srckey(ser);
-      auto ctxType = Type::deserialize(ser);
-      auto const numArgs = read_raw<uint32_t>(ser);
-      TinyVector<Type, 4> args;
-      for (int64_t j = 0; j < numArgs; j++) {
-        args.emplace_back(Type::deserialize(ser));
-      }
-      auto const cost = read_raw<uint32_t>(ser);
-
-      s_inlCostCache.emplace(
-        InlineRegionKey{std::move(srcKey), std::move(ctxType), std::move(args)},
-        cost
-      );
+  auto const numEntries = read_raw<uint32_t>(ser);
+  for (uint32_t i = 0; i < numEntries; ++i) {
+    auto srcKey = read_srckey(ser);
+    auto ctxType = Type::deserialize(ser);
+    auto const numArgs = read_raw<uint32_t>(ser);
+    TinyVector<Type, 4> args;
+    for (int64_t j = 0; j < numArgs; j++) {
+      args.emplace_back(Type::deserialize(ser));
     }
+    auto const cost = read_raw<uint32_t>(ser);
+
+    s_inlCostCache.emplace(
+      InlineRegionKey{srcKey, ctxType, std::move(args)},
+      cost
+    );
   }
 }
 

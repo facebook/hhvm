@@ -426,9 +426,8 @@ RegionDescPtr getInlinableCalleeRegion(const irgen::IRGS& irgs,
   if (!calleeRegion) {
     return nullptr;
   }
-  calleeCost = costOfInlining(psk.srcKey, entry.func(), *calleeRegion,
-                              annotationsPtr);
-  if (calleeCost > Cfg::HHIR::AlwaysInlineVasmCostLimit && calleeRegion->instrSize() > irgs.budgetBCInstrs) {
+
+  if (!shouldInline(irgs, psk.srcKey, entry.func(), *calleeRegion, calleeCost)) {                  
     return nullptr;
   }
   return calleeRegion;

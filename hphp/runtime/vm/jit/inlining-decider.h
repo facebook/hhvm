@@ -86,7 +86,7 @@ bool canInlineAt(SrcKey callSK,
  * selector /ought/ to do so.
  */
 bool shouldInline(const irgen::IRGS& irgs, SrcKey callerSk, const Func* callee,
-                  const RegionDesc& region, uint32_t maxTotalCost);
+                  const RegionDesc& region, int& cost);
 
 /*
  * Return the cost of inlining the given callee.

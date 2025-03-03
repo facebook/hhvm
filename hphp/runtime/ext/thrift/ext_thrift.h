@@ -118,7 +118,7 @@ Object compact_deserialize_from_string(
     const String& thrift_typename, 
     int64_t options = 0);
 
-String compact_serialize_to_string(const Object& transportobj,
+String compact_serialize_to_string(
                    const Object& thrift_struct,
                    int64_t version = 2);
 

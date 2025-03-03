@@ -1,7 +1,7 @@
-safe_abstract_logger:{"filename":"safe_abstract_logging1.php","safe_news":0,"unsafe_news":1,"safe_calls":0,"unsafe_calls":0}
-safe_abstract_logger:{"filename":"safe_abstract_logging1.php","safe_news":0,"unsafe_news":0,"safe_calls":2,"unsafe_calls":0}
-safe_abstract_logger:{"filename":"safe_abstract_logging1.php","safe_news":0,"unsafe_news":0,"safe_calls":0,"unsafe_calls":1}
-safe_abstract_logger:{"filename":"safe_abstract_logging1.php","safe_news":0,"unsafe_news":0,"safe_calls":2,"unsafe_calls":0}
+safe_abstract_logger:{"filename":"safe_abstract_logging1.php","safe_news":0,"unsafe_news":1,"safe_calls":0,"unsafe_calls":0,"safe_const_accesses":0,"unsafe_const_accesses":0}
+safe_abstract_logger:{"filename":"safe_abstract_logging1.php","safe_news":0,"unsafe_news":0,"safe_calls":2,"unsafe_calls":0,"safe_const_accesses":0,"unsafe_const_accesses":0}
+safe_abstract_logger:{"filename":"safe_abstract_logging1.php","safe_news":0,"unsafe_news":0,"safe_calls":0,"unsafe_calls":1,"safe_const_accesses":0,"unsafe_const_accesses":0}
+safe_abstract_logger:{"filename":"safe_abstract_logging1.php","safe_news":0,"unsafe_news":0,"safe_calls":2,"unsafe_calls":0,"safe_const_accesses":0,"unsafe_const_accesses":0}
 WARN: File "safe_abstract_logging1.php", line 20, characters 3-14:
 Unsafe use of `new`: `I1` might be abstract (Warn[12015])
   File "safe_abstract_logging1.php", line 4, characters 11-12:

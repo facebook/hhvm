@@ -10,6 +10,7 @@ open Hh_prelude
 type class_use_kind =
   | Static_method_call
   | New
+  | Const_access
 
 type class_use_info =
   class_use_kind * Pos.t * Typing_warning.Safe_abstract.t list
@@ -198,6 +199,41 @@ let check_for_call_abstract
   else
     None
 
+(** Check for $class::the_const where the_const might be abstract.
+ * This is very similar to check_for_call_abstract above
+ *)
+let check_for_abstract_const_access
+    Class_use.{ class_; abstractness = class_abstractness; reason }
+    const_name
+    (const : Typing_defs.class_const) : Typing_warning.Safe_abstract.t option =
+  let const_may_be_abstract =
+    match class_abstractness with
+    | Abstract
+    | Maybe_abstract -> begin
+      match const.Typing_defs.cc_abstract with
+      | Typing_defs.CCAbstract _has_default -> true
+      | Typing_defs.CCConcrete -> false
+    end
+    | Concrete -> false
+  in
+  let warning_would_be_redundant =
+    match class_abstractness with
+    | Abstract -> true
+    | Maybe_abstract
+    | Concrete ->
+      false
+  in
+  if const_may_be_abstract && not warning_would_be_redundant then
+    Some
+      Typing_warning.Safe_abstract.
+        {
+          kind = Const_access_abstract { const = const_name };
+          class_ = Folded_class.name class_;
+          reason;
+        }
+  else
+    None
+
 let check_for_call_needs_concrete
     Class_use.{ class_; abstractness; reason } method_ folded_method :
     Typing_warning.Safe_abstract.t option =
@@ -325,6 +361,31 @@ let calc_warnings env expr ~(current_method : Tast.method_ option) :
       | None -> []
     in
     Some (Static_method_call, call_pos, warnings)
+  | Aast.(_, const_pos, Class_const ((_, _, class_id), (_, const_name))) ->
+    let make_warnings class_use =
+      let const_opt =
+        Tast_env.get_const env class_use.Class_use.class_ const_name
+      in
+      match const_opt with
+      | Some const ->
+        Option.to_list
+          (check_for_abstract_const_access class_use const_name const)
+      | None -> []
+    in
+    let warnings =
+      match
+        Class_use.fold
+          env
+          class_id
+          ~current_method
+          ~f:make_warnings
+          ~intersect:intersect_warnings
+          ~union:union_warnings
+      with
+      | Some warnings -> warnings
+      | None -> []
+    in
+    Some (Const_access, const_pos, warnings)
   | Aast.
       (_, new_pos, New ((_, _, class_id), _targs, _exprs, _expr, _constructor))
     ->

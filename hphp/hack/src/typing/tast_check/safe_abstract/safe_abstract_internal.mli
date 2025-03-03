@@ -12,6 +12,7 @@
 type class_use_kind =
   | Static_method_call
   | New
+  | Const_access
 
 type class_use_info =
   class_use_kind * Pos.t * Typing_warning.Safe_abstract.t list

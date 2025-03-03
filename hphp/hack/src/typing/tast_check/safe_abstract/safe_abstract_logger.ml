@@ -11,20 +11,24 @@ let log_prefix = "safe_abstract_logger:"
 
 let infos_to_summarized_log_line
     (infos : Safe_abstract_internal.class_use_info list) : string option =
-  let (news, calls) : bool list * bool list =
-    List.partition_map infos ~f:(fun (kind, _pos, warnings) ->
+  let (news, calls, const_accesses) : bool list * bool list * bool list =
+    List.partition3_map infos ~f:(fun (kind, _pos, warnings) ->
         let is_safe = List.is_empty warnings in
         match kind with
-        | Safe_abstract_internal.New -> First is_safe
-        | Safe_abstract_internal.Static_method_call -> Second is_safe)
+        | Safe_abstract_internal.New -> `Fst is_safe
+        | Safe_abstract_internal.Static_method_call -> `Snd is_safe
+        | Safe_abstract_internal.Const_access -> `Trd is_safe)
   in
   let sum f items = items |> List.filter ~f |> List.length in
   let safe_news = sum Fn.id news in
   let unsafe_news = sum not news in
   let safe_calls = sum Fn.id calls in
   let unsafe_calls = sum not calls in
+  let safe_const_accesses = sum Fn.id const_accesses in
+  let unsafe_const_accesses = sum not const_accesses in
   let is_worth_reporting =
-    safe_news + unsafe_news + safe_calls + unsafe_calls > 0
+    safe_news + unsafe_news + safe_calls + unsafe_calls + unsafe_const_accesses
+    > 0
   in
   if is_worth_reporting then
     let filename =
@@ -41,6 +45,8 @@ let infos_to_summarized_log_line
           ("unsafe_news", `Int unsafe_news);
           ("safe_calls", `Int safe_calls);
           ("unsafe_calls", `Int unsafe_calls);
+          ("safe_const_accesses", `Int safe_const_accesses);
+          ("unsafe_const_accesses", `Int unsafe_const_accesses);
         ]
     in
     Some (log_prefix ^ Yojson.Safe.to_string json)
@@ -54,6 +60,7 @@ let infos_to_verbose_log_lines
         match kind with
         | Safe_abstract_internal.New -> "new"
         | Safe_abstract_internal.Static_method_call -> "call"
+        | Safe_abstract_internal.Const_access -> "const_access"
       in
       let pos_str =
         let (line, column) = Pos.line_column pos in

@@ -4,6 +4,7 @@ safe_abstract_logger:{"pos":"(Relative_path.Dummy, \"safe_abstract_logging1.php\
 safe_abstract_logger:{"pos":"(Relative_path.Dummy, \"safe_abstract_logging1.php\") 34:2","use_kind":"call","is_safe":false}
 safe_abstract_logger:{"pos":"(Relative_path.Dummy, \"safe_abstract_logging1.php\") 39:2","use_kind":"call","is_safe":true}
 safe_abstract_logger:{"pos":"(Relative_path.Dummy, \"safe_abstract_logging1.php\") 40:2","use_kind":"call","is_safe":true}
+safe_abstract_logger:{"pos":"(Relative_path.Dummy, \"safe_abstract_logging1.php\") 44:2","use_kind":"const_access","is_safe":true}
 WARN: File "safe_abstract_logging1.php", line 19, characters 3-14:
 Unsafe use of `new`: `I1` might be abstract (Warn[12015])
   File "safe_abstract_logging1.php", line 4, characters 11-12:

@@ -88,6 +88,11 @@ struct
         "Unsafe call: %s::%s has `<<__NeedsConcrete>>`, but the receiver might be abstract."
         (Utils.strip_ns class_)
         method_
+    | { kind = Const_access_abstract { const }; class_; reason = _ } ->
+      Printf.sprintf
+        "Unsafe class constant access: %s::%s might not exist because the receiver might be abstract."
+        (Utils.strip_ns class_)
+        const
     | { kind = New_abstract; class_; reason = _ } ->
       Printf.sprintf
         "Unsafe use of `new`: `%s` might be abstract"
@@ -97,6 +102,7 @@ struct
     match kind with
     | Call_abstract _ -> Codes.SafeAbstractCall
     | New_abstract -> Codes.SafeAbstractNew
+    | Const_access_abstract _ -> Codes.SafeAbstractConstAccess
     | Call_needs_concrete _ -> Codes.SafeAbstractCallNeedsConcrete
 
   let codes : Codes.t list =

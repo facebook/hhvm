@@ -195,6 +195,7 @@ type t = {
   class_class_type: bool;
   safe_abstract: bool;
   improved_hover: bool;
+  tco_new_exhaustivity_check: bool;
 }
 [@@deriving eq, show]
 
@@ -307,6 +308,7 @@ let default =
     class_class_type = false;
     safe_abstract = false;
     improved_hover = false;
+    tco_new_exhaustivity_check = false;
   }
 
 let set
@@ -417,6 +419,7 @@ let set
     ?class_class_type
     ?safe_abstract
     ?improved_hover
+    ?tco_new_exhaustivity_check
     options =
   let setting setting option =
     match setting with
@@ -708,6 +711,8 @@ let set
     class_class_type = setting class_class_type options.class_class_type;
     safe_abstract = setting safe_abstract options.safe_abstract;
     improved_hover = setting improved_hover options.improved_hover;
+    tco_new_exhaustivity_check =
+      setting tco_new_exhaustivity_check options.tco_new_exhaustivity_check;
   }
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path

@@ -280,6 +280,9 @@ type t = {
   safe_abstract: bool;
       (** Enable Safe Abstract features https://fburl.com/hack-safe-abstract *)
   improved_hover: bool;
+  tco_new_exhaustivity_check: bool;
+      (** Enables strict exhaustivity checks on switch statements and disables
+          the legacy ones *)
 }
 [@@deriving eq, show]
 
@@ -391,6 +394,7 @@ val set :
   ?class_class_type:bool ->
   ?safe_abstract:bool ->
   ?improved_hover:bool ->
+  ?tco_new_exhaustivity_check:bool ->
   t ->
   t
 

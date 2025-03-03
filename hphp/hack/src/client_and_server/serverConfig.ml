@@ -512,6 +512,7 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
     ?class_sub_classname:(bool_opt "class_sub_classname" config)
     ?class_class_type:(bool_opt "class_class_type" config)
     ?safe_abstract:(bool_opt "safe_abstract" config)
+    ?tco_new_exhaustivity_check:(bool_opt "new_exhaustivity_check" config)
     options
 
 (** Load local config from the following sources:

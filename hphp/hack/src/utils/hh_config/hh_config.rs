@@ -570,6 +570,8 @@ impl HhConfig {
             class_class_type: hhconfig.get_bool_or("class_class_type", default.class_class_type)?,
             safe_abstract: hhconfig.get_bool_or("safe_abstract", default.safe_abstract)?,
             improved_hover: hhconfig.get_bool_or("improved_hover", default.improved_hover)?,
+            tco_new_exhaustivity_check: hhconfig
+                .get_bool_or("new_exhaustivity_check", default.tco_new_exhaustivity_check)?,
         };
         let mut c = Self {
             local_config,

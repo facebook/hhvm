@@ -43,6 +43,9 @@ func isEOF(err error) bool {
 	if err == nil {
 		return false
 	}
+	if errors.Is(err, io.EOF) {
+		return true
+	}
 	var exp types.TransportException
 	if errors.As(err, &exp) && exp.TypeID() == types.END_OF_FILE {
 		// connection terminated because client closed connection

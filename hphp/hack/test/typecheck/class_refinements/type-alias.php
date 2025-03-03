@@ -11,4 +11,4 @@ type TBadNested = shape(
   'in_tparam' => vec<Box with { type T = bool }>, // ERROR
 );
 
-type TGood<T as Box with { type T = int }> = Covar<T>; // OK
+type TGood<T> = Covar<T>; // OK

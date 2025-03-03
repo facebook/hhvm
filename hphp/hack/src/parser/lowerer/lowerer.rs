@@ -5990,9 +5990,22 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             let tparams = p_tparam_l(false, &c.generic_parameter, env)?;
             let kinds = p_kinds(&c.modifiers, env);
             let is_module_newtype = !c.module_kw_opt.is_missing();
+            let vis = match token_kind(&c.keyword) {
+                Some(TK::Type) => ast::TypedefVisibility::Transparent,
+                Some(TK::Newtype) if is_module_newtype => ast::TypedefVisibility::OpaqueModule,
+                Some(TK::Newtype) => ast::TypedefVisibility::Opaque,
+                _ => missing_syntax("kind", &c.keyword, env)?,
+            };
             for tparam in tparams.iter() {
                 if tparam.reified != ast::ReifyKind::Erased {
                     raise_parsing_error(node, env, &syntax_error::invalid_reified)
+                }
+                if vis == ast::TypedefVisibility::Transparent && !tparam.constraints.is_empty() {
+                    raise_parsing_error(
+                        node,
+                        env,
+                        &syntax_error::bound_on_transparent_type_alias_generic,
+                    )
                 }
             }
             let user_attributes = itertools::concat(
@@ -6017,12 +6030,6 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             };
             let as_constraint = require_one("as", as_constraints);
             let super_constraint = require_one("super", super_constraints);
-            let vis = match token_kind(&c.keyword) {
-                Some(TK::Type) => ast::TypedefVisibility::Transparent,
-                Some(TK::Newtype) if is_module_newtype => ast::TypedefVisibility::OpaqueModule,
-                Some(TK::Newtype) => ast::TypedefVisibility::Opaque,
-                _ => missing_syntax("kind", &c.keyword, env)?,
-            };
             let hint = p_hint(&c.type_, env)?;
             let runtime_type = hint.clone();
             Ok(vec![ast::Def::mk_typedef(ast::Typedef {

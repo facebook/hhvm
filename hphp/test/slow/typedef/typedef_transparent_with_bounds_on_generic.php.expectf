@@ -1,0 +1,2 @@
+
+Fatal error: A type alias declaration cannot both use `type` and have a constraint on its type parameters. Did you mean `newtype`? in %s/typedef_transparent_with_bounds_on_generic.php on line 4

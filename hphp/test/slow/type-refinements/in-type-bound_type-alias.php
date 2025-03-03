@@ -6,4 +6,4 @@ interface Box {
 
 class Covar<+T> {}
 
-type AliasGood<T as Box with { type T = int }> = Covar<Box>;
+newtype AliasGood<T as Box with { type T = int }> = Covar<Box>;

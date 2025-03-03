@@ -2,26 +2,24 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function setDefault<Tk as arraykey, Tv>(
-    Map<Tk, Tv> $map,
-    Tk $key,
-    Tv $default,
-  ): Map<Tk, Tv> {
+  Map<Tk, Tv> $map,
+  Tk $key,
+  Tv $default,
+): Map<Tk, Tv> {
   return Map {};
 }
 
-type GraphNodeShape<Tkey as arraykey> = shape(
+type GraphNodeShape<Tkey> = shape(
   'id' => Tkey,
   ...
 );
 
 final class Graph<Tkey as arraykey, Tnode as GraphNodeShape<Tkey>> {
 
-  private function __construct(
-    private Map<Tkey, (Tnode, Set<Tkey>)> $nodeMap,
-  ) {
+  private function __construct(private Map<Tkey, (Tnode, Set<Tkey>)> $nodeMap) {
   }
 
-   public static function fromEdges(Iterable<(Tnode, Tnode)> $edges): this {
+  public static function fromEdges(Iterable<(Tnode, Tnode)> $edges): this {
     $node_map = Map {};
     foreach ($edges as $edge) {
       list($s, $t) = $edge;

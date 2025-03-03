@@ -1,22 +1,22 @@
-ERROR: File "primary_error_pos_bug.php", line 9, characters 17-20:
+ERROR: File "primary_error_pos_bug.php", line 9, characters 16-19:
 Invalid type hint (Typing[4090])
-  File "primary_error_pos_bug.php", line 9, characters 20-20:
+  File "primary_error_pos_bug.php", line 9, characters 19-19:
   No type constant `T` in `A`
   File "primary_error_pos_bug.php", line 3, characters 7-7:
   Declaration of `A` is here
-ERROR: File "primary_error_pos_bug.php", line 11, characters 17-22:
+ERROR: File "primary_error_pos_bug.php", line 11, characters 16-21:
 Wrong number of type arguments (expected 0, got 1) (Typing[4101])
   File "primary_error_pos_bug.php", line 3, characters 7-7:
   Definition is here
-ERROR: File "primary_error_pos_bug.php", line 16, characters 29-29:
+ERROR: File "primary_error_pos_bug.php", line 16, characters 28-28:
 No type constant `T` in `A` (Typing[4090])
   File "primary_error_pos_bug.php", line 3, characters 7-7:
   Declaration of `A` is here
-ERROR: File "primary_error_pos_bug.php", line 18, characters 26-31:
+ERROR: File "primary_error_pos_bug.php", line 18, characters 25-30:
 Wrong number of type arguments (expected 0, got 1) (Typing[4101])
   File "primary_error_pos_bug.php", line 3, characters 7-7:
   Definition is here
-ERROR: File "primary_error_pos_bug.php", line 24, characters 29-32:
+ERROR: File "primary_error_pos_bug.php", line 24, characters 28-31:
 Some type arguments violate their constraints (Typing[4323])
   File "primary_error_pos_bug.php", line 5, characters 9-9:
   `T` is a constrained type parameter
@@ -26,7 +26,7 @@ Some type arguments violate their constraints (Typing[4323])
   Expected `num`
   File "primary_error_pos_bug.php", line 24, characters 22-22:
   But got `mixed`
-ERROR: File "primary_error_pos_bug.php", line 24, characters 29-32:
+ERROR: File "primary_error_pos_bug.php", line 24, characters 28-31:
 Some type arguments violate their constraints (Typing[4323])
   File "primary_error_pos_bug.php", line 5, characters 9-9:
   `T` is a constrained type parameter
@@ -34,7 +34,7 @@ Some type arguments violate their constraints (Typing[4323])
   This type constraint is violated
   File "primary_error_pos_bug.php", line 5, characters 14-16:
   Expected `num`
-  File "primary_error_pos_bug.php", line 24, characters 31-31:
+  File "primary_error_pos_bug.php", line 24, characters 30-30:
   But got `T`
 ERROR: File "primary_error_pos_bug.php", line 32, characters 18-31:
 Some type arguments violate their constraints (Typing[4323])
@@ -58,7 +58,7 @@ Some type arguments violate their constraints (Typing[4323])
   Expected `num`
   File "primary_error_pos_bug.php", line 32, characters 44-49:
   But got `string`
-  File "primary_error_pos_bug.php", line 29, characters 27-27:
+  File "primary_error_pos_bug.php", line 29, characters 20-20:
     via this generic `T`
 ERROR: File "primary_error_pos_bug.php", line 38, characters 7-8:
 Some type arguments violate their constraints (Typing[4323])
@@ -74,11 +74,11 @@ ERROR: File "primary_error_pos_bug.php", line 39, characters 7-8:
 A `where` type constraint is violated here (Typing[4323])
   File "primary_error_pos_bug.php", line 22, characters 19-20:
   This is the method with `where` type constraints
-  File "primary_error_pos_bug.php", line 22, characters 45-47:
+  File "primary_error_pos_bug.php", line 22, characters 44-46:
   Expected `num`
   File "primary_error_pos_bug.php", line 39, characters 10-15:
   But got `string`
-  File "primary_error_pos_bug.php", line 22, characters 40-40:
+  File "primary_error_pos_bug.php", line 22, characters 39-39:
     via this generic `T`
 ERROR: File "primary_error_pos_bug.php", line 40, characters 7-7:
 Some type arguments violate their constraints (Typing[4323])

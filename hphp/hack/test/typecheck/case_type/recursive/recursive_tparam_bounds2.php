@@ -1,6 +1,6 @@
 <?hh
 
-type A<T as A<T>> = T;
+type A<T> = T;
 
 function f<T as A<T>, T2 as A<T2> super A<T2>>(A<T> $x): void {
   hh_expect<T>($x);

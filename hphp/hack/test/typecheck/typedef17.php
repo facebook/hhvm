@@ -9,7 +9,7 @@
  *
  */
 
-type A<T as string> = vec<T>;
+type A<T> = vec<T>;
 
 function f0<T as string>(A<T> $foo): T {
   return $foo[0];

@@ -22,7 +22,11 @@
 #include <sys/ucred.h> // @manual
 #endif
 #ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h> // @manual
+#include <folly/portability/Sockets.h> // @manual
+#endif
+
+#ifdef _WIN32
+#include "eden/common/utils/WinUtil.h"
 #endif
 
 using namespace watchman;
@@ -286,6 +290,9 @@ class UnixStream : public watchman_stream {
   }
 
   pid_t getPeerProcessID() const override {
+#ifdef _WIN32
+    return facebook::eden::getPeerProcessID(fd.system_handle());
+#endif
     if (!credvalid) {
       return 0;
     }

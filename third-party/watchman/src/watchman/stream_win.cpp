@@ -15,6 +15,8 @@ using namespace watchman;
 
 #ifdef _WIN32
 
+#include "eden/common/utils/WinUtil.h"
+
 // Things are more complicated here than on unix.
 // We maintain an overlapped context for reads and
 // another for writes.  Actual write data is queued
@@ -106,7 +108,7 @@ class win_handle : public watchman_stream {
   }
 
   pid_t getPeerProcessID() const override {
-    return 0;
+    return facebook::eden::getPeerProcessID(h.system_handle());
   }
 };
 

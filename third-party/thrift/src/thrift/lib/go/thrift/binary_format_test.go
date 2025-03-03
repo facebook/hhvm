@@ -17,7 +17,6 @@
 package thrift
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"strings"
@@ -34,24 +33,20 @@ func TestReadWriteBinaryFormat(t *testing.T) {
 func TestWriteBinaryEmptyBinaryFormat(t *testing.T) {
 	m := NewMyTestStruct()
 	m.Bin = nil
-	s := NewBinarySerializer()
-	transport := s.transport
-	transport.Buffer = bytes.NewBuffer([]byte(nil))
-	if err := m.Write(s.encoder); err != nil {
+	format := NewBinaryFormat(NewMemoryBufferWithData([]byte(nil)))
+	if err := m.Write(format); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestSkipUnknownTypeBinaryFormat(t *testing.T) {
 	var m MyTestStruct
-	d := NewBinaryDeserializer()
 	// skip over a map with invalid key/value type and ~550M entries
 	data := make([]byte, 1100000000)
 	copy(data[:], []byte("\n\x10\rO\t6\x03\n\n\n\x10\r\n\tsl ce\x00"))
-	transport := d.transport
-	transport.Buffer = bytes.NewBuffer(data)
+	format := NewBinaryFormat(NewMemoryBufferWithData(data))
 	start := time.Now()
-	err := m.Read(d.decoder)
+	err := m.Read(format)
 	if err == nil {
 		t.Fatalf("Parsed invalid message correctly")
 	} else if !strings.Contains(err.Error(), "unknown type") {
@@ -65,10 +60,10 @@ func TestSkipUnknownTypeBinaryFormat(t *testing.T) {
 
 func TestInitialAllocationMapBinaryFormat(t *testing.T) {
 	var m MyTestStruct
-	d := NewBinaryDeserializer()
 	// attempts to allocate a map with 1.8B elements for a 20 byte message
 	data := []byte("\n\x10\rO\t6\x03\n\n\n\x10\r\n\tslice\x00")
-	err := d.Read(&m, data)
+	format := NewBinaryFormat(NewMemoryBufferWithData(data))
+	err := m.Read(format)
 	if err == nil {
 		t.Fatalf("Parsed invalid message correctly")
 	} else if !strings.Contains(err.Error(), "Invalid data length") {
@@ -78,10 +73,10 @@ func TestInitialAllocationMapBinaryFormat(t *testing.T) {
 
 func TestInitialAllocationListBinaryFormat(t *testing.T) {
 	var m MyTestStruct
-	d := NewBinaryDeserializer()
 	// attempts to allocate a list with 1.8B elements for a 20 byte message
 	data := []byte("\n\x10\rO\t6\x03\n\n\n\x10\x0f\n\tslice\x00")
-	err := d.Read(&m, data)
+	format := NewBinaryFormat(NewMemoryBufferWithData(data))
+	err := m.Read(format)
 	if err == nil {
 		t.Fatalf("Parsed invalid message correctly")
 	} else if !strings.Contains(err.Error(), "Invalid data length") {
@@ -91,10 +86,10 @@ func TestInitialAllocationListBinaryFormat(t *testing.T) {
 
 func TestInitialAllocationSetBinaryFormat(t *testing.T) {
 	var m MyTestStruct
-	d := NewBinaryDeserializer()
 	// attempts to allocate a set with 1.8B elements for a 20 byte message
 	data := []byte("\n\x12\rO\t6\x03\n\n\n\x10\x0e\n\tslice\x00")
-	err := d.Read(&m, data)
+	format := NewBinaryFormat(NewMemoryBufferWithData(data))
+	err := m.Read(format)
 	if err == nil {
 		t.Fatalf("Parsed invalid message correctly")
 	} else if !strings.Contains(err.Error(), "Invalid data length") {

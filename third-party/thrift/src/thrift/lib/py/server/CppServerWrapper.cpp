@@ -49,10 +49,16 @@ using wangle::SSLCacheOptions;
 using wangle::SSLContextConfig;
 using namespace boost::python;
 
+static bool isPyFinalizing() noexcept {
 // If less than 3.7 offer no additional protection
 #if PY_VERSION_HEX <= 0x03070000
-#define _Py_IsFinalizing() false
+  return false;
+#elif PY_VERSION_HEX < 0x030D0000
+  return _Py_IsFinalizing();
+#else
+  return Py_IsFinalizing();
 #endif
+}
 
 THRIFT_FLAG_DEFINE_bool(allow_resource_pools_in_cpp_server_wrapper, false);
 
@@ -125,7 +131,7 @@ class CppServerEventHandler : public TServerEventHandler {
 
  private:
   void callPythonHandler(TConnectionContext* ctx, const char* method) {
-    if (!_Py_IsFinalizing()) {
+    if (!isPyFinalizing()) {
       PyGILState_STATE state = PyGILState_Ensure();
       SCOPE_EXIT {
         PyGILState_Release(state);

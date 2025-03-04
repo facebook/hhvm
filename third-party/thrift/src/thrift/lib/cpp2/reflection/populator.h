@@ -498,10 +498,9 @@ struct populator_methods<
  * @author: Dylan Knutson <dymk@fb.com>
  */
 
-template <typename Type, typename Rng>
+template <typename Type, typename Rng, typename Tag = detail::infer_tag<Type>>
 void populate(Type& out, const populator_opts& opts, Rng& rng) {
-  return populator_methods<detail::infer_tag<Type>, Type>::populate(
-      rng, opts, out);
+  return populator_methods<Tag, Type>::populate(rng, opts, out);
 }
 
 } // namespace apache::thrift::populator

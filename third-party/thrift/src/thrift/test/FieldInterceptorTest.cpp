@@ -23,7 +23,9 @@
 namespace apache::thrift::test {
 
 template <class T>
-struct InterceptedFieldsTest : ::testing::Test {};
+struct InterceptedFieldsTest : ::testing::Test {
+  void SetUp() override { TestFieldInterceptor::count = 0; }
+};
 
 TYPED_TEST_CASE_P(InterceptedFieldsTest);
 

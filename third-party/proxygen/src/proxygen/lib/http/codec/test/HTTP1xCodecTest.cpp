@@ -873,7 +873,6 @@ TEST(HTTP1xCodecTest, TestChunkResponseSerialization) {
   downCodec.generateBody(
       blob, downStream, body->clone(), HTTPCodec::NoPadding, false);
   downCodec.generateTrailers(blob, downStream, trailers);
-  downCodec.generateEOM(blob, downStream);
 
   std::string tmp;
   blob.appendToString(tmp);

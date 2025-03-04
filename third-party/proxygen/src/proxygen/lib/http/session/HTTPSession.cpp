@@ -1846,13 +1846,8 @@ size_t HTTPSession::sendEOM(HTTPTransaction* txn,
   size_t encodedSize = 0;
   if (trailers) {
     encodedSize = codec_->generateTrailers(writeBuf_, txn->getID(), *trailers);
-  }
-
-  // Don't send EOM for HTTP2, when trailers sent.
-  // sendTrailers already flagged end of stream.
-  bool http2Trailers = trailers && isHTTP2CodecProtocol(codec_->getProtocol());
-  if (!http2Trailers) {
-    encodedSize += codec_->generateEOM(writeBuf_, txn->getID());
+  } else {
+    encodedSize = codec_->generateEOM(writeBuf_, txn->getID());
   }
 
   commonEom(txn, encodedSize, false);

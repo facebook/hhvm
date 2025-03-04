@@ -789,6 +789,7 @@ size_t HTTP1xCodec::generateTrailers(IOBufQueue& writeBuf,
       appendString(writeBuf, len, value);
       appendLiteral(writeBuf, len, CRLF);
     });
+    len += generateEOM(writeBuf, txn);
   }
   return len;
 }
@@ -804,10 +805,7 @@ size_t HTTP1xCodec::generateEOM(IOBufQueue& writeBuf, StreamID txn) {
       // appending a 0\r\n only if it's not a HEAD and downstream request
       if (!lastChunkWritten_) {
         lastChunkWritten_ = true;
-        if (!(headRequest_ &&
-              transportDirection_ == TransportDirection::DOWNSTREAM)) {
-          appendLiteral(writeBuf, len, "0\r\n");
-        }
+        appendLiteral(writeBuf, len, "0\r\n");
       }
       appendLiteral(writeBuf, len, CRLF);
     }

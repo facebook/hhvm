@@ -325,6 +325,24 @@ class ExampleDsl {
     return "\${".($splice_val->visit($this))."}";
   }
 
+  public function macroSplice<T>(
+    ?ExprPos $_,
+    string $_key,
+    (function (): ExampleDslExpression<T>) $splice_val,
+    vec<string> $macro_vars,
+  ): ExampleDsl::TAst {
+    return "\${/* ".concat_arg_list($macro_vars)." */".($splice_val()->visit($this))."}";
+  }
+
+ public function asyncMacroSplice<T>(
+    ?ExprPos $_,
+    string $_key,
+    (function (): Awaitable<ExampleDslExpression<T>>) $splice_val,
+    vec<string> $macro_vars,
+  ): ExampleDsl::TAst {
+    return "\${/* async ".concat_arg_list($macro_vars)." */ <async function>}";
+  }
+
   public function visitShape(
     ?ExprPos $_,
     vec<(ExampleDsl::TAst, ExampleDsl::TAst)> $operand

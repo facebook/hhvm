@@ -1194,6 +1194,8 @@ pub mod expression_trees {
     pub const MAKE_KEYED_COLLECTION_TYPE: &str = "__makeType";
 
     pub const SPLICE: &str = "splice";
+    pub const MACRO_SPLICE: &str = "macroSplice";
+    pub const ASYNC_MACRO_SPLICE: &str = "asyncMacroSplice";
 
     pub const DOLLARDOLLAR_TMP_VAR: &str = "$0dollardollar";
 }

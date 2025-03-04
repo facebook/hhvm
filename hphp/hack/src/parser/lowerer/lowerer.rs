@@ -2450,12 +2450,12 @@ fn p_et_splice_expr<'a>(expr: S<'a>, env: &mut Env<'a>, location: ExprLocation) 
     // Since splices can't directly nest, we don't need to restore the old value,
     // it must be true
     env.in_expr_tree = true;
-    Ok(Expr_::ETSplice(Box::new(aast::EtSplice {
+    Ok(Expr_::mk_etsplice(aast::EtSplice {
         spliced_expr,
         contains_await,
         extract_client_type: true,
         macro_variables,
-    })))
+    }))
 }
 
 // visitor to collect all of the free variables from sub-expressions

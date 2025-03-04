@@ -125,13 +125,8 @@ mod tests {
     #[test]
     fn nest_et() {
         let splices = get_splices(&hack_expr!("ET`${ET`{$y = 1; $x + $y;}`}`"));
-        let fvs = splices[0]
-            .spliced_expr
-            .2
-            .as_expression_tree()
-            .unwrap()
-            .free_vars
-            .clone();
+        let nested_et = get_ets(&splices[0].spliced_expr);
+        let fvs = nested_et[0].free_vars.clone();
         let res = Some(strings_to_lids(vec!["$x"]));
         assert_eq!(fvs, res);
         assert_eq!(splices[0].macro_variables, res);
@@ -140,13 +135,8 @@ mod tests {
     #[test]
     fn nest_et_no_vars() {
         let splices = get_splices(&hack_expr!("ET`${ET`{$y = 1; $y;}`}`"));
-        let fvs = splices[0]
-            .spliced_expr
-            .2
-            .as_expression_tree()
-            .unwrap()
-            .free_vars
-            .clone();
+        let nested_et = get_ets(&splices[0].spliced_expr);
+        let fvs = nested_et[0].free_vars.clone();
         let res = Some(vec![]);
         assert_eq!(fvs, res);
         assert_eq!(splices[0].macro_variables, None);
@@ -164,17 +154,12 @@ mod tests {
         let expr = hack_expr!("ET`${ET`${ET`$x`}`}`");
         let splices = get_splices(&expr);
         let nested_splices = get_splices(&splices[0].spliced_expr);
-        let fvs = splices[0]
-            .spliced_expr
-            .2
-            .as_expression_tree()
-            .unwrap()
-            .free_vars
-            .clone();
+        let nested_et = get_ets(&splices[0].spliced_expr);
+        let fvs = nested_et[0].free_vars.clone();
         let res = Some(strings_to_lids(vec!["$x"]));
         assert_eq!(nested_splices[0].macro_variables, res);
         assert_eq!(fvs, res);
-        //assert_eq!(splices[0].macro_variables, res);
+        assert_eq!(splices[0].macro_variables, res);
     }
 
     use oxidized::aast;
@@ -206,6 +191,35 @@ mod tests {
             splice: &aast::EtSplice<(), ()>,
         ) -> Result<(), ()> {
             self.splices.push(splice.clone());
+            Ok(())
+        }
+    }
+
+    // Helper to find all of the splices in an expression
+    fn get_ets(expr: &aast::Expr<(), ()>) -> Vec<aast::ExpressionTree<(), ()>> {
+        let mut x = FindETs::default();
+        let _ = x.visit_expr(&mut (), expr);
+        x.ets
+    }
+
+    #[derive(Default)]
+    struct FindETs {
+        ets: Vec<aast::ExpressionTree<(), ()>>,
+    }
+
+    impl<'ast> Visitor<'ast> for FindETs {
+        type Params = AstParams<(), ()>;
+
+        fn object(&mut self) -> &mut dyn Visitor<'ast, Params = Self::Params> {
+            self
+        }
+
+        fn visit_expression_tree(
+            &mut self,
+            _: &mut (),
+            et: &aast::ExpressionTree<(), ()>,
+        ) -> Result<(), ()> {
+            self.ets.push(et.clone());
             Ok(())
         }
     }

@@ -134,7 +134,10 @@ final class ThriftContextPropState {
   public static function updateFBUserId(?int $fb_user_id, string $src): bool {
     // don't overwrite if TCPS already has a valid fb user id
     $tcps_fb_user_id = self::get()->getFBUserId();
+    $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
+
     if (self::coerceId($tcps_fb_user_id) is nonnull) {
+      $ods->bumpKey('contextprop.fb_user_id_exists.'.$src);
       return false;
     }
     if (
@@ -149,7 +152,6 @@ final class ThriftContextPropState {
 
     $fb_user_id = self::coerceId($fb_user_id);
 
-    $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
     if ($fb_user_id is nonnull) {
       self::get()->setFBUserId($fb_user_id);
       $ods->bumpKey('contextprop.set_fb_user_id.'.$src);
@@ -195,8 +197,10 @@ final class ThriftContextPropState {
   public static function updateIGUserId(?int $ig_user_id, string $src): bool {
     // don't overwrite if TCPS already has a valid ig user id
     $tcps_ig_user_id = self::get()->getIGUserId();
+    $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
 
     if (self::coerceId($tcps_ig_user_id) is nonnull) {
+      $ods->bumpKey('contextprop.ig_user_id_exists.'.$src);
       return false;
     }
     if (
@@ -210,7 +214,6 @@ final class ThriftContextPropState {
     }
     $ig_user_id = self::coerceId($ig_user_id);
 
-    $ods = CategorizedOBC::typedGet(ODSCategoryID::ODS_CONTEXTPROP);
     if ($ig_user_id is nonnull) {
       self::get()->setIGUserId($ig_user_id);
       $ods->bumpKey('contextprop.set_ig_user_id.'.$src);

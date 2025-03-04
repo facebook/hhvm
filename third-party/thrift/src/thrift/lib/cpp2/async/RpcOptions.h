@@ -160,6 +160,9 @@ class RpcOptions {
   RpcOptions& setFdsToSend(folly::SocketFds::ToSend);
   folly::SocketFds copySocketFdsToSend() const;
 
+  RpcOptions& setMetricsToCollect(std::shared_ptr<void> metricsToClient);
+  const std::shared_ptr<void>& getMetricsToCollect() const;
+
   /**
    * In the routing layer, this key can be used to create or select specific
    * connections to a server.
@@ -214,6 +217,9 @@ class RpcOptions {
   Checksum checksum_{Checksum::NONE};
 
   bool forceSyncOnFiber_{false};
+
+  // Metrics to be sent back to the client
+  std::shared_ptr<void> metricsToCollect_;
 };
 
 } // namespace apache::thrift

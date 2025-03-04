@@ -332,9 +332,33 @@ abstract class ThriftClientBase implements IThriftClient {
     RpcOptions $rpc_options,
     shape(?'read_options' => int) $options = shape(),
   ): Awaitable<TRet> {
+    list($result, $_read_headers) =
+      await $this->genAwaitResponseWithReadHeaders(
+        $result,
+        $name,
+        $is_return_void,
+        $expectedsequenceid,
+        $rpc_options,
+        $options,
+      );
+    return $result;
+  }
+
+  protected async function genAwaitResponseWithReadHeaders<
+    TResulttype as IResultThriftStruct with { type TResult = TRet },
+    TRet,
+  >(
+    classname<TResulttype> $result,
+    string $name,
+    bool $is_return_void,
+    int $expectedsequenceid,
+    RpcOptions $rpc_options,
+    shape(?'read_options' => int) $options = shape(),
+  ): Awaitable<(TRet, ?dict<string, string>)> {
     $channel = $this->channel_;
     $out_transport = $this->output_->getTransport();
     $in_transport = $this->input_->getTransport();
+    $read_headers = null;
     if (
       $channel !== null &&
       $out_transport is \TMemoryBuffer &&
@@ -342,7 +366,7 @@ abstract class ThriftClientBase implements IThriftClient {
     ) {
       $msg = $out_transport->getBuffer();
       $out_transport->resetBuffer();
-      list($result_msg, $_read_headers) =
+      list($result_msg, $read_headers) =
         await $channel->genSendRequestResponse($rpc_options, $msg);
       $in_transport->resetBuffer();
       $in_transport->write($result_msg);
@@ -357,7 +381,7 @@ abstract class ThriftClientBase implements IThriftClient {
       $options,
     );
     await $this->asyncHandler_->genAfter<TRet>($name, $response);
-    return $response;
+    return tuple($response, $read_headers);
   }
 
   protected async function genAwaitNoResponse(

@@ -597,12 +597,6 @@ val prj_arraykey_sub :
 val prj_arraykey_super :
   super:locl_phase t_ -> super_prj:locl_phase t_ -> locl_phase t_
 
-(** Record the rewrite of a subtype constraint between a class<T> type in the
-    subtype position and a string-ish type in the supertype position to
-    classname<T> <: Tsuper *)
-val prj_rewrite_classname :
-  sub:locl_phase t_ -> sub_prj:locl_phase t_ -> locl_phase t_
-
 val missing_field : t
 
 val pessimised_this : Pos_or_decl.t -> 'phase t_

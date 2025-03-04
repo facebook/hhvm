@@ -41,4 +41,4 @@ Invalid return type (Typing[4110])
   File "union_intersection_1.php", line 12, characters 55-75:
   Expected `concreteclassname<C1>`
   File "union_intersection_1.php", line 9, characters 13-14:
-  But got `string`; implicitly defined constant `::class` is a reference to class `C1`
+  But got `class<C1>`; implicitly defined constant `::class` is a reference to class `C1`

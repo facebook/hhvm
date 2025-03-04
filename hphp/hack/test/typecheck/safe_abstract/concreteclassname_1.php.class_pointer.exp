@@ -3,10 +3,10 @@ Invalid argument (Typing[4110])
   File "concreteclassname_1.php", line 12, characters 26-45:
   Expected `concreteclassname<A>`
   File "concreteclassname_1.php", line 6, characters 7-7:
-  But got `string`; implicitly defined constant `::class` is a reference to class `C`
+  But got `class<C>`; implicitly defined constant `::class` is a reference to class `C`
 ERROR: File "concreteclassname_1.php", line 23, characters 19-21:
 Invalid argument (Typing[4110])
   File "concreteclassname_1.php", line 12, characters 26-45:
   Expected `concreteclassname<A>`
   File "concreteclassname_1.php", line 3, characters 16-16:
-  But got `string`; implicitly defined constant `::class` is a reference to class `A`
+  But got `class<A>`; implicitly defined constant `::class` is a reference to class `A`

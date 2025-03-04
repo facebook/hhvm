@@ -3206,42 +3206,6 @@ end = struct
         { rhs with super_supportdyn = false; ty_super = ty_inner_super }
       in
       simplify ~subtype_env ~this_ty ~lhs ~rhs env
-    (* -- Rewrite: class<T> <: C = XHPChild or Stringish
-          ---> classname<T> <: C *)
-    | ( (r_sub, Tclass_ptr ty_sub),
-        (_r_super, Tclass ((_, class_nm_super), exact_super, _)) )
-      when subtype_env.Subtype_env.class_sub_classname
-           && is_nonexact exact_super
-           && (String.equal class_nm_super SN.Classes.cXHPChild
-              || String.equal class_nm_super SN.Classes.cStringish) ->
-      let ty_classname = MakeType.classname r_sub [ty_sub] in
-      let t =
-        Typing_env.update_reason env ty_classname ~f:(fun r_sub_prj ->
-            Typing_reason.prj_rewrite_classname ~sub:r_sub ~sub_prj:r_sub_prj)
-      in
-      simplify
-        ~subtype_env
-        ~this_ty
-        ~lhs:{ sub_supportdyn; ty_sub = t }
-        ~rhs:{ super_like; super_supportdyn; ty_super }
-        env
-    (* -- Rewrite: class<T> <: N ---> classname<T> <: N
-          instead of e.g. considering class<T> as an element in a case type *)
-    | ((r_sub, Tclass_ptr ty_sub), (_r_super, Tnewtype _))
-    (* -- Rewrite: class<T> <: prim ---> classname<T> <: prim *)
-    | ((r_sub, Tclass_ptr ty_sub), (_r_super, Tprim _))
-      when subtype_env.Subtype_env.class_sub_classname ->
-      let ty_classname = MakeType.classname r_sub [ty_sub] in
-      let t =
-        Typing_env.update_reason env ty_classname ~f:(fun r_sub_prj ->
-            Typing_reason.prj_rewrite_classname ~sub:r_sub ~sub_prj:r_sub_prj)
-      in
-      simplify
-        ~subtype_env
-        ~this_ty
-        ~lhs:{ sub_supportdyn; ty_sub = t }
-        ~rhs:{ super_like; super_supportdyn; ty_super }
-        env
     (* -- C-Var-R ----------------------------------------------------------- *)
     | ((_, Tunion _), (_, Tvar _)) ->
       default_subtype
@@ -4269,10 +4233,11 @@ end = struct
                 ~this_ty:None
                 ~lhs:{ sub_supportdyn; ty_sub = unknown_fields_type }
                 ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+        (* class<T> <D: dynamic by exposure to string *)
+        | (_, Tclass_ptr _) when subtype_env.Subtype_env.class_sub_classname ->
+          valid env
+        (* class<T> <D: dynamic if T <D: dynamic (class is SDT) *)
         | (_, Tclass_ptr ty) ->
-          (* TODO(T199606542) May need to change this for migration, but
-           * conceptually a class pointer for class C should only <D: dynamic
-           * if C is <<__SDT>> *)
           simplify
             ~subtype_env
             ~this_ty:None
@@ -4492,6 +4457,10 @@ end = struct
         env
     (* -- C-Prim-R ---------------------------------------------------------- *)
     | ((_, Tprim (Nast.Tint | Nast.Tfloat)), (_, Tprim Nast.Tnum)) -> valid env
+    (* class<T> <: string because of typename's bound *)
+    | ((_, Tclass_ptr _), (_, Tprim (Nast.Tstring | Nast.Tarraykey)))
+      when subtype_env.Subtype_env.class_sub_classname ->
+      valid env
     | ((_, Tprim (Nast.Tint | Nast.Tstring)), (_, Tprim Nast.Tarraykey)) ->
       valid env
     | ((_, Tprim prim_sub), (_, Tprim prim_sup))
@@ -4985,6 +4954,18 @@ end = struct
           ~lhs:{ sub_supportdyn; ty_sub = ty_from }
           ~rhs:{ reason_super = r_sub; name; ty }
           env)
+    (* When flag enabled, class<T> <: classname<T>, which is bounded by
+     * typename<T> *)
+    | ((_r_sub, Tclass_ptr ty_sub), (_r_super, Tnewtype (name, [ty_super], _)))
+      when subtype_env.Subtype_env.class_sub_classname
+           && (String.equal name SN.Classes.cClassname
+              || String.equal name SN.Classes.cTypename) ->
+      simplify
+        ~subtype_env
+        ~this_ty
+        ~lhs:{ sub_supportdyn; ty_sub }
+        ~rhs:{ super_like; super_supportdyn; ty_super }
+        env
     | (_, (r_super, Tnewtype (name_super, lty_supers, _bound_super))) -> begin
       match deref ty_sub with
       | (_, Tclass ((_, name_sub), _, _))
@@ -5415,6 +5396,13 @@ end = struct
       | (_, Tprim Nast.Tstring)
         when String.equal class_nm_super SN.Classes.cStringish
              && is_nonexact exact_super ->
+        valid env
+      (* same as prior two cases by typename's string bound *)
+      | (_, Tclass_ptr _)
+        when subtype_env.Subtype_env.class_sub_classname
+             && is_nonexact exact_super
+             && (String.equal class_nm_super SN.Classes.cXHPChild
+                || String.equal class_nm_super SN.Classes.cStringish) ->
         valid env
       (* Match what's done in unify for non-strict code *)
       | (r_sub, Tclass (class_id_sub, exact_sub, tyl_sub)) ->

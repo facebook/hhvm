@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<327a9543170008c9f6d5e2f5fca34c23>>
+// @generated SignedSource<<de8f9738dc9564e20890359aa073a66e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1671,7 +1671,6 @@ impl<'a> Node<'a> for PrjAsymm {
             PrjAsymm::PrjAsymmNullable => {}
             PrjAsymm::PrjAsymmArraykey => {}
             PrjAsymm::PrjAsymmNum => {}
-            PrjAsymm::PrjRewriteClassname => {}
         }
     }
 }

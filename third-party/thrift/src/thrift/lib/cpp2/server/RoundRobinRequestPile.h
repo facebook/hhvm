@@ -47,7 +47,7 @@ class RoundRobinRequestPile : public RequestPileBase {
     std::string name;
 
     // numBucket = numBuckets_[priority]
-    std::vector<unsigned int> numBucketsPerPriority;
+    std::vector<uint32_t> numBucketsPerPriority;
 
     // 0 means no limit
     // this is a per bucket limit
@@ -62,6 +62,12 @@ class RoundRobinRequestPile : public RequestPileBase {
         numBucketsPerPriority.emplace_back(kDefaultNumBuckets);
       }
     }
+
+    Options(
+        std::vector<uint32_t> shape,
+        PileSelectionFunction pileSelectionFunction)
+        : numBucketsPerPriority(std::move(shape)),
+          pileSelectionFunction(std::move(pileSelectionFunction)) {}
 
     void setName(std::string rName) { name = std::move(rName); }
 

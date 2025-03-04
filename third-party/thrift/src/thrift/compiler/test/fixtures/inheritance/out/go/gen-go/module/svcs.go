@@ -122,16 +122,16 @@ type procFuncMyRootDoRoot struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyRootDoRoot)(nil)
 
-func (p *procFuncMyRootDoRoot) Read(iprot thrift.Decoder) (thrift.Struct, error) {
+func (p *procFuncMyRootDoRoot) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyRootDoRoot()
-    if err := args.Read(iprot); err != nil {
+    if err := args.Read(decoder); err != nil {
         return nil, err
     }
-    iprot.ReadMessageEnd()
+    decoder.ReadMessageEnd()
     return args, nil
 }
 
-func (p *procFuncMyRootDoRoot) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
+func (p *procFuncMyRootDoRoot) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -139,16 +139,16 @@ func (p *procFuncMyRootDoRoot) Write(seqId int32, result thrift.WritableStruct, 
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("do_root", messageType, seqId); err2 != nil {
+    if err2 = encoder.WriteMessageBegin("do_root", messageType, seqId); err2 != nil {
         err = err2
     }
-    if err2 = result.Write(oprot); err == nil && err2 != nil {
+    if err2 = result.Write(encoder); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+    if err2 = encoder.WriteMessageEnd(); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.Flush(); err == nil && err2 != nil {
+    if err2 = encoder.Flush(); err == nil && err2 != nil {
         err = err2
     }
     return err
@@ -243,16 +243,16 @@ type procFuncMyNodeDoMid struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyNodeDoMid)(nil)
 
-func (p *procFuncMyNodeDoMid) Read(iprot thrift.Decoder) (thrift.Struct, error) {
+func (p *procFuncMyNodeDoMid) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyNodeDoMid()
-    if err := args.Read(iprot); err != nil {
+    if err := args.Read(decoder); err != nil {
         return nil, err
     }
-    iprot.ReadMessageEnd()
+    decoder.ReadMessageEnd()
     return args, nil
 }
 
-func (p *procFuncMyNodeDoMid) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
+func (p *procFuncMyNodeDoMid) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -260,16 +260,16 @@ func (p *procFuncMyNodeDoMid) Write(seqId int32, result thrift.WritableStruct, o
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("do_mid", messageType, seqId); err2 != nil {
+    if err2 = encoder.WriteMessageBegin("do_mid", messageType, seqId); err2 != nil {
         err = err2
     }
-    if err2 = result.Write(oprot); err == nil && err2 != nil {
+    if err2 = result.Write(encoder); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+    if err2 = encoder.WriteMessageEnd(); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.Flush(); err == nil && err2 != nil {
+    if err2 = encoder.Flush(); err == nil && err2 != nil {
         err = err2
     }
     return err
@@ -364,16 +364,16 @@ type procFuncMyLeafDoLeaf struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyLeafDoLeaf)(nil)
 
-func (p *procFuncMyLeafDoLeaf) Read(iprot thrift.Decoder) (thrift.Struct, error) {
+func (p *procFuncMyLeafDoLeaf) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyLeafDoLeaf()
-    if err := args.Read(iprot); err != nil {
+    if err := args.Read(decoder); err != nil {
         return nil, err
     }
-    iprot.ReadMessageEnd()
+    decoder.ReadMessageEnd()
     return args, nil
 }
 
-func (p *procFuncMyLeafDoLeaf) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
+func (p *procFuncMyLeafDoLeaf) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -381,16 +381,16 @@ func (p *procFuncMyLeafDoLeaf) Write(seqId int32, result thrift.WritableStruct, 
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("do_leaf", messageType, seqId); err2 != nil {
+    if err2 = encoder.WriteMessageBegin("do_leaf", messageType, seqId); err2 != nil {
         err = err2
     }
-    if err2 = result.Write(oprot); err == nil && err2 != nil {
+    if err2 = result.Write(encoder); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+    if err2 = encoder.WriteMessageEnd(); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.Flush(); err == nil && err2 != nil {
+    if err2 = encoder.Flush(); err == nil && err2 != nil {
         err = err2
     }
     return err

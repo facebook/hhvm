@@ -144,16 +144,16 @@ type procFuncMyServiceQuery struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyServiceQuery)(nil)
 
-func (p *procFuncMyServiceQuery) Read(iprot thrift.Decoder) (thrift.Struct, error) {
+func (p *procFuncMyServiceQuery) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyServiceQuery()
-    if err := args.Read(iprot); err != nil {
+    if err := args.Read(decoder); err != nil {
         return nil, err
     }
-    iprot.ReadMessageEnd()
+    decoder.ReadMessageEnd()
     return args, nil
 }
 
-func (p *procFuncMyServiceQuery) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
+func (p *procFuncMyServiceQuery) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -161,16 +161,16 @@ func (p *procFuncMyServiceQuery) Write(seqId int32, result thrift.WritableStruct
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("query", messageType, seqId); err2 != nil {
+    if err2 = encoder.WriteMessageBegin("query", messageType, seqId); err2 != nil {
         err = err2
     }
-    if err2 = result.Write(oprot); err == nil && err2 != nil {
+    if err2 = result.Write(encoder); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+    if err2 = encoder.WriteMessageEnd(); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.Flush(); err == nil && err2 != nil {
+    if err2 = encoder.Flush(); err == nil && err2 != nil {
         err = err2
     }
     return err
@@ -195,16 +195,16 @@ type procFuncMyServiceHasArgDocs struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyServiceHasArgDocs)(nil)
 
-func (p *procFuncMyServiceHasArgDocs) Read(iprot thrift.Decoder) (thrift.Struct, error) {
+func (p *procFuncMyServiceHasArgDocs) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyServiceHasArgDocs()
-    if err := args.Read(iprot); err != nil {
+    if err := args.Read(decoder); err != nil {
         return nil, err
     }
-    iprot.ReadMessageEnd()
+    decoder.ReadMessageEnd()
     return args, nil
 }
 
-func (p *procFuncMyServiceHasArgDocs) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
+func (p *procFuncMyServiceHasArgDocs) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -212,16 +212,16 @@ func (p *procFuncMyServiceHasArgDocs) Write(seqId int32, result thrift.WritableS
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("has_arg_docs", messageType, seqId); err2 != nil {
+    if err2 = encoder.WriteMessageBegin("has_arg_docs", messageType, seqId); err2 != nil {
         err = err2
     }
-    if err2 = result.Write(oprot); err == nil && err2 != nil {
+    if err2 = result.Write(encoder); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+    if err2 = encoder.WriteMessageEnd(); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.Flush(); err == nil && err2 != nil {
+    if err2 = encoder.Flush(); err == nil && err2 != nil {
         err = err2
     }
     return err

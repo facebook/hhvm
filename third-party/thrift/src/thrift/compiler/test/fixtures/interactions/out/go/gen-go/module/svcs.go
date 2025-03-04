@@ -124,16 +124,16 @@ type procFuncMyServiceFoo struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncMyServiceFoo)(nil)
 
-func (p *procFuncMyServiceFoo) Read(iprot thrift.Decoder) (thrift.Struct, error) {
+func (p *procFuncMyServiceFoo) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqMyServiceFoo()
-    if err := args.Read(iprot); err != nil {
+    if err := args.Read(decoder); err != nil {
         return nil, err
     }
-    iprot.ReadMessageEnd()
+    decoder.ReadMessageEnd()
     return args, nil
 }
 
-func (p *procFuncMyServiceFoo) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
+func (p *procFuncMyServiceFoo) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -141,16 +141,16 @@ func (p *procFuncMyServiceFoo) Write(seqId int32, result thrift.WritableStruct, 
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("foo", messageType, seqId); err2 != nil {
+    if err2 = encoder.WriteMessageBegin("foo", messageType, seqId); err2 != nil {
         err = err2
     }
-    if err2 = result.Write(oprot); err == nil && err2 != nil {
+    if err2 = result.Write(encoder); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+    if err2 = encoder.WriteMessageEnd(); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.Flush(); err == nil && err2 != nil {
+    if err2 = encoder.Flush(); err == nil && err2 != nil {
         err = err2
     }
     return err
@@ -266,16 +266,16 @@ type procFuncFactoriesFoo struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncFactoriesFoo)(nil)
 
-func (p *procFuncFactoriesFoo) Read(iprot thrift.Decoder) (thrift.Struct, error) {
+func (p *procFuncFactoriesFoo) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqFactoriesFoo()
-    if err := args.Read(iprot); err != nil {
+    if err := args.Read(decoder); err != nil {
         return nil, err
     }
-    iprot.ReadMessageEnd()
+    decoder.ReadMessageEnd()
     return args, nil
 }
 
-func (p *procFuncFactoriesFoo) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
+func (p *procFuncFactoriesFoo) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -283,16 +283,16 @@ func (p *procFuncFactoriesFoo) Write(seqId int32, result thrift.WritableStruct, 
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("foo", messageType, seqId); err2 != nil {
+    if err2 = encoder.WriteMessageBegin("foo", messageType, seqId); err2 != nil {
         err = err2
     }
-    if err2 = result.Write(oprot); err == nil && err2 != nil {
+    if err2 = result.Write(encoder); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+    if err2 = encoder.WriteMessageEnd(); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.Flush(); err == nil && err2 != nil {
+    if err2 = encoder.Flush(); err == nil && err2 != nil {
         err = err2
     }
     return err
@@ -408,16 +408,16 @@ type procFuncPerformFoo struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncPerformFoo)(nil)
 
-func (p *procFuncPerformFoo) Read(iprot thrift.Decoder) (thrift.Struct, error) {
+func (p *procFuncPerformFoo) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqPerformFoo()
-    if err := args.Read(iprot); err != nil {
+    if err := args.Read(decoder); err != nil {
         return nil, err
     }
-    iprot.ReadMessageEnd()
+    decoder.ReadMessageEnd()
     return args, nil
 }
 
-func (p *procFuncPerformFoo) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
+func (p *procFuncPerformFoo) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -425,16 +425,16 @@ func (p *procFuncPerformFoo) Write(seqId int32, result thrift.WritableStruct, op
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("foo", messageType, seqId); err2 != nil {
+    if err2 = encoder.WriteMessageBegin("foo", messageType, seqId); err2 != nil {
         err = err2
     }
-    if err2 = result.Write(oprot); err == nil && err2 != nil {
+    if err2 = result.Write(encoder); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+    if err2 = encoder.WriteMessageEnd(); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.Flush(); err == nil && err2 != nil {
+    if err2 = encoder.Flush(); err == nil && err2 != nil {
         err = err2
     }
     return err
@@ -550,16 +550,16 @@ type procFuncInteractWithSharedDoSomeSimilarThings struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncInteractWithSharedDoSomeSimilarThings)(nil)
 
-func (p *procFuncInteractWithSharedDoSomeSimilarThings) Read(iprot thrift.Decoder) (thrift.Struct, error) {
+func (p *procFuncInteractWithSharedDoSomeSimilarThings) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqInteractWithSharedDoSomeSimilarThings()
-    if err := args.Read(iprot); err != nil {
+    if err := args.Read(decoder); err != nil {
         return nil, err
     }
-    iprot.ReadMessageEnd()
+    decoder.ReadMessageEnd()
     return args, nil
 }
 
-func (p *procFuncInteractWithSharedDoSomeSimilarThings) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
+func (p *procFuncInteractWithSharedDoSomeSimilarThings) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -567,16 +567,16 @@ func (p *procFuncInteractWithSharedDoSomeSimilarThings) Write(seqId int32, resul
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("do_some_similar_things", messageType, seqId); err2 != nil {
+    if err2 = encoder.WriteMessageBegin("do_some_similar_things", messageType, seqId); err2 != nil {
         err = err2
     }
-    if err2 = result.Write(oprot); err == nil && err2 != nil {
+    if err2 = result.Write(encoder); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+    if err2 = encoder.WriteMessageEnd(); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.Flush(); err == nil && err2 != nil {
+    if err2 = encoder.Flush(); err == nil && err2 != nil {
         err = err2
     }
     return err

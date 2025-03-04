@@ -81,7 +81,7 @@ func (c *DummyClient) OnewayRPC(ctx context.Context, value string) (error) {
 type DummyProcessor struct {
     processorFunctionMap map[string]thrift.ProcessorFunction
     functionServiceMap   map[string]string
-    handler            Dummy
+    handler              Dummy
 }
 
 func NewDummyProcessor(handler Dummy) *DummyProcessor {
@@ -133,16 +133,16 @@ type procFuncDummyEcho struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncDummyEcho)(nil)
 
-func (p *procFuncDummyEcho) Read(iprot thrift.Decoder) (thrift.Struct, error) {
+func (p *procFuncDummyEcho) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqDummyEcho()
-    if err := args.Read(iprot); err != nil {
+    if err := args.Read(decoder); err != nil {
         return nil, err
     }
-    iprot.ReadMessageEnd()
+    decoder.ReadMessageEnd()
     return args, nil
 }
 
-func (p *procFuncDummyEcho) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
+func (p *procFuncDummyEcho) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -150,16 +150,16 @@ func (p *procFuncDummyEcho) Write(seqId int32, result thrift.WritableStruct, opr
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("Echo", messageType, seqId); err2 != nil {
+    if err2 = encoder.WriteMessageBegin("Echo", messageType, seqId); err2 != nil {
         err = err2
     }
-    if err2 = result.Write(oprot); err == nil && err2 != nil {
+    if err2 = result.Write(encoder); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+    if err2 = encoder.WriteMessageEnd(); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.Flush(); err == nil && err2 != nil {
+    if err2 = encoder.Flush(); err == nil && err2 != nil {
         err = err2
     }
     return err
@@ -185,16 +185,16 @@ type procFuncDummyOnewayRPC struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncDummyOnewayRPC)(nil)
 
-func (p *procFuncDummyOnewayRPC) Read(iprot thrift.Decoder) (thrift.Struct, error) {
+func (p *procFuncDummyOnewayRPC) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqDummyOnewayRPC()
-    if err := args.Read(iprot); err != nil {
+    if err := args.Read(decoder); err != nil {
         return nil, err
     }
-    iprot.ReadMessageEnd()
+    decoder.ReadMessageEnd()
     return args, nil
 }
 
-func (p *procFuncDummyOnewayRPC) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
+func (p *procFuncDummyOnewayRPC) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -202,16 +202,16 @@ func (p *procFuncDummyOnewayRPC) Write(seqId int32, result thrift.WritableStruct
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("OnewayRPC", messageType, seqId); err2 != nil {
+    if err2 = encoder.WriteMessageBegin("OnewayRPC", messageType, seqId); err2 != nil {
         err = err2
     }
-    if err2 = result.Write(oprot); err == nil && err2 != nil {
+    if err2 = result.Write(encoder); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+    if err2 = encoder.WriteMessageEnd(); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.Flush(); err == nil && err2 != nil {
+    if err2 = encoder.Flush(); err == nil && err2 != nil {
         err = err2
     }
     return err
@@ -227,3 +227,5 @@ func (p *procFuncDummyOnewayRPC) RunContext(ctx context.Context, reqStruct thrif
 
     return nil, nil
 }
+
+

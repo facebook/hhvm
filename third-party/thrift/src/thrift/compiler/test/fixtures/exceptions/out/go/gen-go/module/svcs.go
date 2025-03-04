@@ -176,16 +176,16 @@ type procFuncRaiserDoBland struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncRaiserDoBland)(nil)
 
-func (p *procFuncRaiserDoBland) Read(iprot thrift.Decoder) (thrift.Struct, error) {
+func (p *procFuncRaiserDoBland) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqRaiserDoBland()
-    if err := args.Read(iprot); err != nil {
+    if err := args.Read(decoder); err != nil {
         return nil, err
     }
-    iprot.ReadMessageEnd()
+    decoder.ReadMessageEnd()
     return args, nil
 }
 
-func (p *procFuncRaiserDoBland) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
+func (p *procFuncRaiserDoBland) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -193,16 +193,16 @@ func (p *procFuncRaiserDoBland) Write(seqId int32, result thrift.WritableStruct,
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("doBland", messageType, seqId); err2 != nil {
+    if err2 = encoder.WriteMessageBegin("doBland", messageType, seqId); err2 != nil {
         err = err2
     }
-    if err2 = result.Write(oprot); err == nil && err2 != nil {
+    if err2 = result.Write(encoder); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+    if err2 = encoder.WriteMessageEnd(); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.Flush(); err == nil && err2 != nil {
+    if err2 = encoder.Flush(); err == nil && err2 != nil {
         err = err2
     }
     return err
@@ -226,16 +226,16 @@ type procFuncRaiserDoRaise struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncRaiserDoRaise)(nil)
 
-func (p *procFuncRaiserDoRaise) Read(iprot thrift.Decoder) (thrift.Struct, error) {
+func (p *procFuncRaiserDoRaise) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqRaiserDoRaise()
-    if err := args.Read(iprot); err != nil {
+    if err := args.Read(decoder); err != nil {
         return nil, err
     }
-    iprot.ReadMessageEnd()
+    decoder.ReadMessageEnd()
     return args, nil
 }
 
-func (p *procFuncRaiserDoRaise) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
+func (p *procFuncRaiserDoRaise) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch v := result.(type) {
@@ -255,16 +255,16 @@ func (p *procFuncRaiserDoRaise) Write(seqId int32, result thrift.WritableStruct,
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("doRaise", messageType, seqId); err2 != nil {
+    if err2 = encoder.WriteMessageBegin("doRaise", messageType, seqId); err2 != nil {
         err = err2
     }
-    if err2 = result.Write(oprot); err == nil && err2 != nil {
+    if err2 = result.Write(encoder); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+    if err2 = encoder.WriteMessageEnd(); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.Flush(); err == nil && err2 != nil {
+    if err2 = encoder.Flush(); err == nil && err2 != nil {
         err = err2
     }
     return err
@@ -300,16 +300,16 @@ type procFuncRaiserGet200 struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncRaiserGet200)(nil)
 
-func (p *procFuncRaiserGet200) Read(iprot thrift.Decoder) (thrift.Struct, error) {
+func (p *procFuncRaiserGet200) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqRaiserGet200()
-    if err := args.Read(iprot); err != nil {
+    if err := args.Read(decoder); err != nil {
         return nil, err
     }
-    iprot.ReadMessageEnd()
+    decoder.ReadMessageEnd()
     return args, nil
 }
 
-func (p *procFuncRaiserGet200) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
+func (p *procFuncRaiserGet200) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch result.(type) {
@@ -317,16 +317,16 @@ func (p *procFuncRaiserGet200) Write(seqId int32, result thrift.WritableStruct, 
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("get200", messageType, seqId); err2 != nil {
+    if err2 = encoder.WriteMessageBegin("get200", messageType, seqId); err2 != nil {
         err = err2
     }
-    if err2 = result.Write(oprot); err == nil && err2 != nil {
+    if err2 = result.Write(encoder); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+    if err2 = encoder.WriteMessageEnd(); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.Flush(); err == nil && err2 != nil {
+    if err2 = encoder.Flush(); err == nil && err2 != nil {
         err = err2
     }
     return err
@@ -351,16 +351,16 @@ type procFuncRaiserGet500 struct {
 // Compile time interface enforcer
 var _ thrift.ProcessorFunction = (*procFuncRaiserGet500)(nil)
 
-func (p *procFuncRaiserGet500) Read(iprot thrift.Decoder) (thrift.Struct, error) {
+func (p *procFuncRaiserGet500) Read(decoder thrift.Decoder) (thrift.Struct, error) {
     args := newReqRaiserGet500()
-    if err := args.Read(iprot); err != nil {
+    if err := args.Read(decoder); err != nil {
         return nil, err
     }
-    iprot.ReadMessageEnd()
+    decoder.ReadMessageEnd()
     return args, nil
 }
 
-func (p *procFuncRaiserGet500) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Encoder) (err error) {
+func (p *procFuncRaiserGet500) Write(seqId int32, result thrift.WritableStruct, encoder thrift.Encoder) (err error) {
     var err2 error
     messageType := thrift.REPLY
     switch v := result.(type) {
@@ -380,16 +380,16 @@ func (p *procFuncRaiserGet500) Write(seqId int32, result thrift.WritableStruct, 
         messageType = thrift.EXCEPTION
     }
 
-    if err2 = oprot.WriteMessageBegin("get500", messageType, seqId); err2 != nil {
+    if err2 = encoder.WriteMessageBegin("get500", messageType, seqId); err2 != nil {
         err = err2
     }
-    if err2 = result.Write(oprot); err == nil && err2 != nil {
+    if err2 = result.Write(encoder); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+    if err2 = encoder.WriteMessageEnd(); err == nil && err2 != nil {
         err = err2
     }
-    if err2 = oprot.Flush(); err == nil && err2 != nil {
+    if err2 = encoder.Flush(); err == nil && err2 != nil {
         err = err2
     }
     return err

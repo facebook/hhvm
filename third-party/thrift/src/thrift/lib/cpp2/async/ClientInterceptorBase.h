@@ -16,13 +16,13 @@
 
 #pragma once
 
-#include <functional>
 #include <stdexcept>
 #include <vector>
 
 #include <folly/ExceptionWrapper.h>
 
 #include <thrift/lib/cpp2/async/ClientInterceptorStorage.h>
+#include <thrift/lib/cpp2/async/InterceptorFrameworkMetadata.h>
 
 namespace apache::thrift {
 
@@ -50,6 +50,7 @@ class ClientInterceptorBase {
      * in the format `{interaction_name}.{method_name}`.
      */
     const char* methodName = nullptr;
+    InterceptorFrameworkMetadataStorage* frameworkMetadata = nullptr;
   };
   virtual void internal_onRequest(RequestInfo) = 0;
 

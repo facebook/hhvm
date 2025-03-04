@@ -35,6 +35,8 @@ namespace detail {
 class ContextStackInternals {
  public:
   static void*& contextAt(ContextStack&, size_t index);
+  static std::unique_ptr<folly::IOBuf> getInterceptorFrameworkMetadata(
+      ContextStack&);
 };
 } // namespace detail
 
@@ -123,6 +125,7 @@ class ContextStack {
   // "{method_name}", without the service name prefix
   const char* const methodNameUnprefixed_;
   void** serviceContexts_;
+  InterceptorFrameworkMetadataStorage clientInterceptorFrameworkMetadata_;
   // While the server-side has a Cpp2RequestContext, the client-side "fakes" it
   // with an embedded version. We can't make it nullptr because this is the API
   // used to read/write headers. The root cause of this limitation is that the
@@ -162,6 +165,8 @@ class ContextStack {
 
   detail::ClientInterceptorOnRequestStorage*
   getStorageForClientInterceptorOnRequestByIndex(std::size_t index);
+
+  std::unique_ptr<folly::IOBuf> getInterceptorFrameworkMetadata();
 };
 
 } // namespace apache::thrift

@@ -64,7 +64,9 @@ ContextStack::ContextStack(
       methodNamePrefixed_(method),
       methodNameUnprefixed_(
           stripServiceNamePrefix(methodNamePrefixed_, serviceName_)),
-      serviceContexts_(serviceContexts) {
+      serviceContexts_(serviceContexts),
+      clientInterceptorFrameworkMetadata_{
+          detail::initializeInterceptorFrameworkMetadataStorage()} {
   if (!handlers_ || handlers_->empty()) {
     return;
   }
@@ -381,7 +383,8 @@ folly::Try<void> ContextStack::processClientInterceptorsOnRequest(
         arguments,
         headers,
         serviceName_,
-        methodNameUnprefixed_};
+        methodNameUnprefixed_,
+        &clientInterceptorFrameworkMetadata_};
     try {
       clientInterceptor->internal_onRequest(std::move(requestInfo));
     } catch (...) {
@@ -443,10 +446,21 @@ ContextStack::getStorageForClientInterceptorOnRequestByIndex(
   return &clientInterceptorsStorage_[index];
 }
 
+std::unique_ptr<folly::IOBuf> ContextStack::getInterceptorFrameworkMetadata() {
+  return detail::serializeFrameworkMetadata(
+      std::move(clientInterceptorFrameworkMetadata_));
+}
+
 namespace detail {
 /* static */ void*& ContextStackInternals::contextAt(
     ContextStack& contextStack, size_t index) {
   return contextStack.contextAt(index);
+}
+
+/* static */ std::unique_ptr<folly::IOBuf>
+ContextStackInternals::getInterceptorFrameworkMetadata(
+    ContextStack& contextStack) {
+  return contextStack.getInterceptorFrameworkMetadata();
 }
 } // namespace detail
 

@@ -125,15 +125,15 @@ type simpleJSONFormat struct {
 var _ types.Format = (*simpleJSONFormat)(nil)
 
 // NewSimpleJSONFormat creates a new simpleJSONFormat
-func NewSimpleJSONFormat(buffer io.ReadWriter) types.Format {
-	return newSimpleJSONFormat(buffer)
+func NewSimpleJSONFormat(readWriter io.ReadWriter) types.Format {
+	return newSimpleJSONFormat(readWriter)
 }
 
-func newSimpleJSONFormat(buffer io.ReadWriter) *simpleJSONFormat {
+func newSimpleJSONFormat(readWriter io.ReadWriter) *simpleJSONFormat {
 	v := &simpleJSONFormat{
-		buffer: buffer,
-		writer: bufio.NewWriter(buffer),
-		reader: bufio.NewReader(buffer),
+		buffer: readWriter,
+		writer: bufio.NewWriter(readWriter),
+		reader: bufio.NewReader(readWriter),
 	}
 	v.resetContextStack()
 	return v

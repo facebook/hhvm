@@ -78,12 +78,12 @@ type compactFormat struct {
 var _ types.Format = (*compactFormat)(nil)
 
 // NewCompactFormat creates a CompactFormat
-func NewCompactFormat(trans io.ReadWriter) types.Format {
+func NewCompactFormat(readWriter io.ReadWriter) types.Format {
 	p := &compactFormat{}
 	p.compactDecoder.version = COMPACT_VERSION_BE
-	p.compactDecoder.reader = trans
+	p.compactDecoder.reader = readWriter
 	p.compactEncoder.version = COMPACT_VERSION_BE
-	p.compactEncoder.writer = trans
+	p.compactEncoder.writer = readWriter
 	return p
 }
 

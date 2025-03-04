@@ -23,8 +23,8 @@ import (
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
-func remainingBytes(r io.Reader) uint64 {
-	readSizeProvider, ok := r.(types.ReadSizeProvider)
+func remainingBytes(reader io.Reader) uint64 {
+	readSizeProvider, ok := reader.(types.ReadSizeProvider)
 	if !ok {
 		return types.UnknownRemaining
 	}
@@ -54,12 +54,12 @@ func isEOF(err error) bool {
 	return false
 }
 
-func readByte(r io.Reader) (c byte, err error) {
-	if byteReader, ok := r.(io.ByteReader); ok {
+func readByte(reader io.Reader) (c byte, err error) {
+	if byteReader, ok := reader.(io.ByteReader); ok {
 		return byteReader.ReadByte()
 	}
 	v := [1]byte{0}
-	n, err := r.Read(v[0:1])
+	n, err := reader.Read(v[0:1])
 	if n > 0 && (err == nil || err == io.EOF) {
 		return v[0], nil
 	}
@@ -72,11 +72,11 @@ func readByte(r io.Reader) (c byte, err error) {
 	return v[0], nil
 }
 
-func writeByte(w io.Writer, c byte) error {
-	if byteWriter, ok := w.(io.ByteWriter); ok {
+func writeByte(writer io.Writer, c byte) error {
+	if byteWriter, ok := writer.(io.ByteWriter); ok {
 		return byteWriter.WriteByte(c)
 	}
 	v := [1]byte{c}
-	_, err := w.Write(v[0:1])
+	_, err := writer.Write(v[0:1])
 	return err
 }

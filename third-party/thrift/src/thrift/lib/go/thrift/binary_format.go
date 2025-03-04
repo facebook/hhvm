@@ -37,15 +37,15 @@ type binaryFormat struct {
 var _ types.Format = (*binaryFormat)(nil)
 
 // NewBinaryFormat creates a new Format handler using a buffer
-func NewBinaryFormat(t io.ReadWriter) types.Format {
-	return NewBinaryFormatOptions(t, false /* strict read */, true /* strict write */)
+func NewBinaryFormat(readWriter io.ReadWriter) types.Format {
+	return NewBinaryFormatOptions(readWriter, false /* strict read */, true /* strict write */)
 }
 
 // NewBinaryFormatOptions creates a new Format handler using a buffer
-func NewBinaryFormatOptions(t io.ReadWriter, strictRead, strictWrite bool) types.Format {
+func NewBinaryFormatOptions(readWriter io.ReadWriter, strictRead, strictWrite bool) types.Format {
 	return &binaryFormat{
-		binaryDecoder: binaryDecoder{reader: t, strictRead: strictRead},
-		binaryEncoder: binaryEncoder{writer: t, strictWrite: strictWrite},
+		binaryDecoder: binaryDecoder{reader: readWriter, strictRead: strictRead},
+		binaryEncoder: binaryEncoder{writer: readWriter, strictWrite: strictWrite},
 	}
 }
 

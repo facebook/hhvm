@@ -37,93 +37,93 @@ func init() {
 		"value": "Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1667.0 Safari/537.36"}
 }
 
-func TransportTest(t *testing.T, writeTrans io.Writer, readTrans io.Reader) {
+func TransportTest(t *testing.T, writer io.Writer, reader io.Reader) {
 	buf := make([]byte, TRANSPORT_BINARY_DATA_SIZE)
 
 	// Special case for header transport -- need to reset protocol on read
 	var headerTrans *headerTransport
-	if hdr, ok := readTrans.(*headerTransport); ok {
+	if hdr, ok := reader.(*headerTransport); ok {
 		headerTrans = hdr
 	}
 
-	_, err := writeTrans.Write(transport_bdata)
+	_, err := writer.Write(transport_bdata)
 	if err != nil {
-		t.Fatalf("Transport %T cannot write binary data of length %d: %s", writeTrans, len(transport_bdata), err)
+		t.Fatalf("Transport %T cannot write binary data of length %d: %s", writer, len(transport_bdata), err)
 	}
-	err = flush(writeTrans)
+	err = flush(writer)
 	if err != nil {
-		t.Fatalf("Transport %T cannot flush write of binary data: %s", writeTrans, err)
+		t.Fatalf("Transport %T cannot flush write of binary data: %s", writer, err)
 	}
 
 	if headerTrans != nil {
 		err = headerTrans.ResetProtocol()
 		if err != nil {
-			t.Errorf("Header Transport %T cannot read binary data frame", readTrans)
+			t.Errorf("Header Transport %T cannot read binary data frame", reader)
 		}
 	}
-	n, err := io.ReadFull(readTrans, buf)
+	n, err := io.ReadFull(reader, buf)
 	if err != nil {
-		t.Errorf("Transport %T cannot read binary data of length %d: %s", readTrans, TRANSPORT_BINARY_DATA_SIZE, err)
+		t.Errorf("Transport %T cannot read binary data of length %d: %s", reader, TRANSPORT_BINARY_DATA_SIZE, err)
 	}
 	if n != TRANSPORT_BINARY_DATA_SIZE {
-		t.Errorf("Transport %T read only %d instead of %d bytes of binary data", readTrans, n, TRANSPORT_BINARY_DATA_SIZE)
+		t.Errorf("Transport %T read only %d instead of %d bytes of binary data", reader, n, TRANSPORT_BINARY_DATA_SIZE)
 	}
 	for k, v := range buf {
 		if v != transport_bdata[k] {
-			t.Fatalf("Transport %T read %d instead of %d for index %d of binary data 2", readTrans, v, transport_bdata[k], k)
+			t.Fatalf("Transport %T read %d instead of %d for index %d of binary data 2", reader, v, transport_bdata[k], k)
 		}
 	}
-	_, err = writeTrans.Write(transport_bdata)
+	_, err = writer.Write(transport_bdata)
 	if err != nil {
-		t.Fatalf("Transport %T cannot write binary data 2 of length %d: %s", writeTrans, len(transport_bdata), err)
+		t.Fatalf("Transport %T cannot write binary data 2 of length %d: %s", writer, len(transport_bdata), err)
 	}
-	err = flush(writeTrans)
+	err = flush(writer)
 	if err != nil {
-		t.Fatalf("Transport %T cannot flush write binary data 2: %s", writeTrans, err)
+		t.Fatalf("Transport %T cannot flush write binary data 2: %s", writer, err)
 	}
 
 	if headerTrans != nil {
 		err = headerTrans.ResetProtocol()
 		if err != nil {
-			t.Errorf("Header Transport %T cannot read binary data frame 2", readTrans)
+			t.Errorf("Header Transport %T cannot read binary data frame 2", reader)
 		}
 	}
 	buf = make([]byte, TRANSPORT_BINARY_DATA_SIZE)
 	read := 1
 	for n = 0; n < TRANSPORT_BINARY_DATA_SIZE && read != 0; {
-		read, err = readTrans.Read(buf[n:])
+		read, err = reader.Read(buf[n:])
 		if err != nil {
-			t.Errorf("Transport %T cannot read binary data 2 of total length %d from offset %d: %s", readTrans, TRANSPORT_BINARY_DATA_SIZE, n, err)
+			t.Errorf("Transport %T cannot read binary data 2 of total length %d from offset %d: %s", reader, TRANSPORT_BINARY_DATA_SIZE, n, err)
 		}
 		n += read
 	}
 	if n != TRANSPORT_BINARY_DATA_SIZE {
-		t.Errorf("Transport %T read only %d instead of %d bytes of binary data 2", readTrans, n, TRANSPORT_BINARY_DATA_SIZE)
+		t.Errorf("Transport %T read only %d instead of %d bytes of binary data 2", reader, n, TRANSPORT_BINARY_DATA_SIZE)
 	}
 	for k, v := range buf {
 		if v != transport_bdata[k] {
-			t.Fatalf("Transport %T read %d instead of %d for index %d of binary data 2", readTrans, v, transport_bdata[k], k)
+			t.Fatalf("Transport %T read %d instead of %d for index %d of binary data 2", reader, v, transport_bdata[k], k)
 		}
 	}
 }
 
-func transportHTTPClientTest(t *testing.T, writeTrans io.Writer, readTrans io.Reader) {
+func transportHTTPClientTest(t *testing.T, writer io.Writer, reader io.Reader) {
 	buf := make([]byte, TRANSPORT_BINARY_DATA_SIZE)
 
 	// Need to assert type of Transport to HTTPClient to expose the Setter
-	httpWPostTrans := writeTrans.(*httpClient)
+	httpWPostTrans := writer.(*httpClient)
 	httpWPostTrans.SetHeader(transport_header["key"], transport_header["value"])
 
-	_, err := writeTrans.Write(transport_bdata)
+	_, err := writer.Write(transport_bdata)
 	if err != nil {
-		t.Fatalf("Transport %T cannot write binary data of length %d: %s", writeTrans, len(transport_bdata), err)
+		t.Fatalf("Transport %T cannot write binary data of length %d: %s", writer, len(transport_bdata), err)
 	}
-	err = flush(writeTrans)
+	err = flush(writer)
 	if err != nil {
-		t.Fatalf("Transport %T cannot flush write of binary data: %s", writeTrans, err)
+		t.Fatalf("Transport %T cannot flush write of binary data: %s", writer, err)
 	}
 	// Need to assert type of Transport to HTTPClient to expose the Getter
-	httpRPostTrans := readTrans.(*httpClient)
+	httpRPostTrans := reader.(*httpClient)
 	readHeader := httpRPostTrans.GetHeader(transport_header["key"])
 	if err != nil {
 		t.Errorf("Transport %T cannot read HTTP Header Value", httpRPostTrans)
@@ -132,16 +132,16 @@ func transportHTTPClientTest(t *testing.T, writeTrans io.Writer, readTrans io.Re
 	if transport_header["value"] != readHeader {
 		t.Errorf("Expected HTTP Header Value %s, got %s", transport_header["value"], readHeader)
 	}
-	n, err := io.ReadFull(readTrans, buf)
+	n, err := io.ReadFull(reader, buf)
 	if err != nil {
-		t.Errorf("Transport %T cannot read binary data of length %d: %s", readTrans, TRANSPORT_BINARY_DATA_SIZE, err)
+		t.Errorf("Transport %T cannot read binary data of length %d: %s", reader, TRANSPORT_BINARY_DATA_SIZE, err)
 	}
 	if n != TRANSPORT_BINARY_DATA_SIZE {
-		t.Errorf("Transport %T read only %d instead of %d bytes of binary data", readTrans, n, TRANSPORT_BINARY_DATA_SIZE)
+		t.Errorf("Transport %T read only %d instead of %d bytes of binary data", reader, n, TRANSPORT_BINARY_DATA_SIZE)
 	}
 	for k, v := range buf {
 		if v != transport_bdata[k] {
-			t.Fatalf("Transport %T read %d instead of %d for index %d of binary data 2", readTrans, v, transport_bdata[k], k)
+			t.Fatalf("Transport %T read %d instead of %d for index %d of binary data 2", reader, v, transport_bdata[k], k)
 		}
 	}
 }

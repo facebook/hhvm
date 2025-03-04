@@ -228,7 +228,8 @@ let js_string env =
         | 't' -> '\t'
         | 'u' ->
           let code = char_code env in
-          Char.chr code
+          (try Char.chr code with
+          | Invalid_argument _ -> syntax_error env "expected unicode")
         | x -> x
       in
       env.pos <- env.pos + 1;

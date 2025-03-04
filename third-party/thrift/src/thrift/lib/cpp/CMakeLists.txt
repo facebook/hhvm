@@ -101,6 +101,7 @@ add_library(
   server/TServerObserver.cpp
   ../cpp2/detail/EventHandlerRuntime.cpp
   ../cpp2/async/ClientInterceptorBase.cpp
+  ../cpp2/async/InterceptorFrameworkMetadata.cpp
 )
 if (
   CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR

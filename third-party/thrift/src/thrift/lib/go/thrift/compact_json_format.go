@@ -496,40 +496,6 @@ func (p *compactJSONFormat) ParseElemListBegin() (elemType types.Type, size int,
 	return elemType, size, err2
 }
 
-func (p *compactJSONFormat) readElemListBegin() (elemType types.Type, size int, e error) {
-	if isNull, e := p.ParseListBegin(); isNull || e != nil {
-		return types.VOID, 0, e
-	}
-	sElemType, err := p.ReadString()
-	if err != nil {
-		return types.VOID, size, err
-	}
-	elemType, err = p.StringToTypeId(sElemType)
-	if err != nil {
-		return elemType, size, err
-	}
-	nSize, err2 := p.ReadI64()
-	size = int(nSize)
-	return elemType, size, err2
-}
-
-func (p *compactJSONFormat) writeElemListBegin(elemType types.Type, size int) error {
-	if e := p.OutputListBegin(); e != nil {
-		return e
-	}
-	s, e1 := p.TypeIdToString(elemType)
-	if e1 != nil {
-		return e1
-	}
-	if e := p.OutputString(s); e != nil {
-		return e
-	}
-	if e := p.OutputI64(int64(size)); e != nil {
-		return e
-	}
-	return nil
-}
-
 func (p *compactJSONFormat) TypeIdToString(fieldType types.Type) (string, error) {
 	switch fieldType {
 	case types.BOOL:

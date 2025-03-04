@@ -1,0 +1,2 @@
+Warning: gmp_pow(): Exponent cannot be larger than or equal to 2^32 in %s/large-exponent.php on line %d
+bool(false)

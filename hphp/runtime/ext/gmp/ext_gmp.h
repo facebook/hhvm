@@ -85,6 +85,8 @@ const char* const cs_GMP_INVALID_STARTING_INDEX_IS_NEGATIVE =
   "%s(): Starting index must be greater than or equal to zero";
 const char* const cs_GMP_ERROR_EVEN_ROOT_NEGATIVE_NUMBER =
   "%s(): Can't take even root of negative number";
+const char* const cs_GMP_INVALID_EXPONENT_TOO_LARGE =
+  "%s(): Exponent cannot be larger than or equal to 2^32";
 
 ///////////////////////////////////////////////////////////////////////////////
 // classes

@@ -920,6 +920,12 @@ static Variant HHVM_FUNCTION(gmp_pow,
     return false;
   }
 
+  // Check if the exponent is too large
+  if (exp > UINT32_MAX) {
+    raise_warning(cs_GMP_INVALID_EXPONENT_TOO_LARGE, "gmp_pow");
+    return false;
+  }
+
   if (!variantToGMPData("gmp_pow", gmpData, data)) {
     return false;
   }

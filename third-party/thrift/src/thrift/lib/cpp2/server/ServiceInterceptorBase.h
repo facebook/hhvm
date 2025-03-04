@@ -75,6 +75,13 @@ class ServiceInterceptorBase {
      * in the format `{interaction_name}.{method_name}`.
      */
     const char* methodName = nullptr;
+    /**
+     * This is a pointer to the deserialized frameworkMetadata buffer sent as
+     * part of the request. InterceptorFrameworkMetadataStorage may be empty
+     * even if the pointer here is not null - it should always be checked with
+     * has_value()
+     */
+    const InterceptorFrameworkMetadataStorage* frameworkMetadata = nullptr;
   };
   virtual folly::coro::Task<void> internal_onRequest(
       ConnectionInfo, RequestInfo) = 0;

@@ -46,6 +46,11 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
     serializeFrameworkMetadata,
     InterceptorFrameworkMetadataStorage&& storage);
 
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    InterceptorFrameworkMetadataStorage,
+    deserializeFrameworkMetadata,
+    const folly::IOBuf& buf);
+
 } // namespace detail
 
 } // namespace apache::thrift

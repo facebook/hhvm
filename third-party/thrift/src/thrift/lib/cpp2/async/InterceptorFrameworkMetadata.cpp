@@ -33,4 +33,11 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
   return nullptr;
 }
 
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    InterceptorFrameworkMetadataStorage,
+    deserializeFrameworkMetadata,
+    const folly::IOBuf& /* unused */) {
+  return InterceptorFrameworkMetadataStorage{};
+}
+
 } // namespace apache::thrift::detail

@@ -17,9 +17,8 @@
 #pragma once
 
 #include <cstddef>
-#include <optional>
-#include <tuple>
 
+#include <thrift/lib/cpp2/async/InterceptorFrameworkMetadata.h>
 #include <thrift/lib/cpp2/util/AllocationColocator.h>
 #include <thrift/lib/cpp2/util/TypeErasedTupleRef.h>
 #include <thrift/lib/cpp2/util/TypeErasedValue.h>
@@ -33,6 +32,7 @@ struct ServiceInterceptorRequestStorageContext {
   std::size_t count = 0;
   util::AllocationColocator<>::ArrayPtr<ServiceInterceptorOnRequestStorage>
       onRequest = nullptr;
+  InterceptorFrameworkMetadataStorage frameworkMetadata = {};
 };
 
 using ServiceInterceptorOnConnectionStorage =

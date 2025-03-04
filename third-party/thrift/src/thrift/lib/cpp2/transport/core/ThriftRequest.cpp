@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <thrift/lib/cpp2/async/InterceptorFrameworkMetadata.h>
 #include <thrift/lib/cpp2/server/CPUConcurrencyController.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/transport/core/ThriftRequest.h>
@@ -90,11 +91,17 @@ ThriftRequestCore::ThriftRequestCore(
     header_.setCallPriority(static_cast<concurrency::PRIORITY>(*priority));
   }
   auto otherMetadata = metadata.otherMetadata_ref();
+
   // When processing ThriftFrameworkMetadata, the header takes priority.
   if (!otherMetadata ||
       !detail::handleFrameworkMetadataHeader(*otherMetadata)) {
     if (auto frameworkMetadata = metadata.frameworkMetadata_ref()) {
       DCHECK(*frameworkMetadata && !(**frameworkMetadata).empty());
+      // This path handles setting InterceptorFrameworkMetata for
+      // ServiceInterceptors
+      detail::Cpp2RequestContextUnsafeAPI(reqContext_)
+          .initializeInterceptorFrameworkMetadata(**frameworkMetadata);
+      // Handling path using pluggable function
       detail::handleFrameworkMetadata(std::move(*frameworkMetadata));
     }
   }

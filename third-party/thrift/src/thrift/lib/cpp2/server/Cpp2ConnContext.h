@@ -575,6 +575,7 @@ class Cpp2ConnContextInternalAPI {
  private:
   Cpp2ConnContext& connContext_;
 };
+class Cpp2RequestContextUnsafeAPI;
 } // namespace detail
 
 // Request-specific context
@@ -801,10 +802,20 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
     return &serviceInterceptorsStorage_.onRequest[index];
   }
 
+  const InterceptorFrameworkMetadataStorage* getInterceptorFrameworkMetadata() {
+    return &serviceInterceptorsStorage_.frameworkMetadata;
+  }
+
  protected:
   apache::thrift::server::TServerObserver::CallTimestamps timestamps_;
 
  private:
+  void initializeInterceptorFrameworkMetadata(
+      const folly::IOBuf& interceptorFrameworkMetadata) {
+    serviceInterceptorsStorage_.frameworkMetadata =
+        detail::deserializeFrameworkMetadata(interceptorFrameworkMetadata);
+  }
+
   Cpp2ConnContext* ctx_;
   folly::erased_unique_ptr requestData_{nullptr, nullptr};
   std::chrono::milliseconds requestTimeout_{0};
@@ -822,7 +833,29 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
       serviceInterceptorsStorage_;
   detail::RequestInternalFieldsT internalFields_;
   size_t wiredRequestBytes_{0};
+
+  friend class detail::Cpp2RequestContextUnsafeAPI;
 };
+
+namespace detail {
+class Cpp2RequestContextUnsafeAPI {
+ public:
+  explicit Cpp2RequestContextUnsafeAPI(Cpp2RequestContext& requestContext)
+      : requestContext_(requestContext) {}
+
+  void initializeInterceptorFrameworkMetadata(
+      const folly::IOBuf& interceptorFrameworkMetadata) {
+    if (!THRIFT_FLAG(enable_interceptor_framework_metadata)) {
+      return;
+    }
+    requestContext_.initializeInterceptorFrameworkMetadata(
+        interceptorFrameworkMetadata);
+  }
+
+ private:
+  Cpp2RequestContext& requestContext_;
+};
+} // namespace detail
 
 } // namespace apache::thrift
 

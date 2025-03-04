@@ -1167,7 +1167,8 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
         arguments,
         serviceName_,
         definingServiceName_,
-        methodName_};
+        methodName_,
+        reqCtx_->getInterceptorFrameworkMetadata()};
     try {
       co_await serviceInterceptorsInfo[i].interceptor->internal_onRequest(
           std::move(connectionInfo), std::move(requestInfo));

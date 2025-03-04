@@ -312,7 +312,7 @@ func (s *server) reader(ctx context.Context, socket net.Conn, writeCh chan func(
 		s.stats.ReadingCount.Incr()
 		startReadMessage := time.Now()
 		if err != nil {
-			if err, ok := err.(TransportException); ok && err.TypeID() == END_OF_FILE {
+			if isEOF(err) {
 				s.stats.ClientClosed.RecordEvent()
 				s.stats.ReadingCount.Decr()
 				return

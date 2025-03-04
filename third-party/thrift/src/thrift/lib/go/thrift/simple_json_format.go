@@ -356,23 +356,23 @@ func (p *simpleJSONFormat) ReadFieldEnd() error {
 	return nil
 }
 
-func (p *simpleJSONFormat) ReadMapBegin() (keyType types.Type, valueType types.Type, size int, e error) {
-	if isNull, e := p.ParseListBegin(); isNull || e != nil {
-		return types.VOID, types.VOID, 0, e
+func (p *simpleJSONFormat) ReadMapBegin() (keyType types.Type, valueType types.Type, size int, err error) {
+	if isNull, err := p.ParseListBegin(); isNull || err != nil {
+		return types.VOID, types.VOID, 0, err
 	}
 
 	// read keyType
-	bKeyType, e := p.ReadByte()
+	bKeyType, err := p.ReadByte()
 	keyType = types.Type(bKeyType)
-	if e != nil {
-		return keyType, valueType, size, e
+	if err != nil {
+		return keyType, valueType, size, err
 	}
 
 	// read valueType
-	bValueType, e := p.ReadByte()
+	bValueType, err := p.ReadByte()
 	valueType = types.Type(bValueType)
-	if e != nil {
-		return keyType, valueType, size, e
+	if err != nil {
+		return keyType, valueType, size, err
 	}
 
 	// read size
@@ -385,7 +385,7 @@ func (p *simpleJSONFormat) ReadMapEnd() error {
 	return p.ParseListEnd()
 }
 
-func (p *simpleJSONFormat) ReadListBegin() (elemType types.Type, size int, e error) {
+func (p *simpleJSONFormat) ReadListBegin() (elemType types.Type, size int, err error) {
 	return p.ParseElemListBegin()
 }
 
@@ -393,7 +393,7 @@ func (p *simpleJSONFormat) ReadListEnd() error {
 	return p.ParseListEnd()
 }
 
-func (p *simpleJSONFormat) ReadSetBegin() (elemType types.Type, size int, e error) {
+func (p *simpleJSONFormat) ReadSetBegin() (elemType types.Type, size int, err error) {
 	return p.ParseElemListBegin()
 }
 
@@ -1089,9 +1089,9 @@ func (p *simpleJSONFormat) ParseListBegin() (isNull bool, err error) {
 	return isNull, types.NewProtocolExceptionWithType(types.INVALID_DATA, err)
 }
 
-func (p *simpleJSONFormat) ParseElemListBegin() (elemType types.Type, size int, e error) {
-	if isNull, e := p.ParseListBegin(); isNull || e != nil {
-		return types.VOID, 0, e
+func (p *simpleJSONFormat) ParseElemListBegin() (elemType types.Type, size int, err error) {
+	if isNull, err := p.ParseListBegin(); isNull || err != nil {
+		return types.VOID, 0, err
 	}
 	bElemType, err := p.ReadByte()
 	elemType = types.Type(bElemType)

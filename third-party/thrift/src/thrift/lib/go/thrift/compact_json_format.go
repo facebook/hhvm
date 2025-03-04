@@ -294,40 +294,40 @@ func (p *compactJSONFormat) ReadFieldEnd() error {
 	return p.ParseObjectEnd()
 }
 
-func (p *compactJSONFormat) ReadMapBegin() (keyType types.Type, valueType types.Type, size int, e error) {
-	if isNull, e := p.ParseListBegin(); isNull || e != nil {
-		return types.VOID, types.VOID, 0, e
+func (p *compactJSONFormat) ReadMapBegin() (keyType types.Type, valueType types.Type, size int, err error) {
+	if isNull, err := p.ParseListBegin(); isNull || err != nil {
+		return types.VOID, types.VOID, 0, err
 	}
 
 	// read keyType
-	sKeyType, e := p.ReadString()
-	if e != nil {
-		return keyType, valueType, size, e
+	sKeyType, err := p.ReadString()
+	if err != nil {
+		return keyType, valueType, size, err
 	}
-	keyType, e = p.StringToTypeId(sKeyType)
-	if e != nil {
-		return keyType, valueType, size, e
+	keyType, err = p.StringToTypeId(sKeyType)
+	if err != nil {
+		return keyType, valueType, size, err
 	}
 
 	// read valueType
-	sValueType, e := p.ReadString()
-	if e != nil {
-		return keyType, valueType, size, e
+	sValueType, err := p.ReadString()
+	if err != nil {
+		return keyType, valueType, size, err
 	}
-	valueType, e = p.StringToTypeId(sValueType)
-	if e != nil {
-		return keyType, valueType, size, e
+	valueType, err = p.StringToTypeId(sValueType)
+	if err != nil {
+		return keyType, valueType, size, err
 	}
 
 	// read size
-	iSize, e := p.ReadI64()
-	if e != nil {
-		return keyType, valueType, size, e
+	iSize, err := p.ReadI64()
+	if err != nil {
+		return keyType, valueType, size, err
 	}
 	size = int(iSize)
 
-	_, e = p.ParseObjectStart()
-	return keyType, valueType, size, e
+	_, err = p.ParseObjectStart()
+	return keyType, valueType, size, err
 }
 
 func (p *compactJSONFormat) ReadMapEnd() error {
@@ -338,7 +338,7 @@ func (p *compactJSONFormat) ReadMapEnd() error {
 	return p.ParseListEnd()
 }
 
-func (p *compactJSONFormat) ReadListBegin() (elemType types.Type, size int, e error) {
+func (p *compactJSONFormat) ReadListBegin() (elemType types.Type, size int, err error) {
 	return p.ParseElemListBegin()
 }
 
@@ -346,7 +346,7 @@ func (p *compactJSONFormat) ReadListEnd() error {
 	return p.ParseListEnd()
 }
 
-func (p *compactJSONFormat) ReadSetBegin() (elemType types.Type, size int, e error) {
+func (p *compactJSONFormat) ReadSetBegin() (elemType types.Type, size int, err error) {
 	return p.ParseElemListBegin()
 }
 
@@ -479,9 +479,9 @@ func (p *compactJSONFormat) OutputElemListBegin(elemType types.Type, size int) e
 	return nil
 }
 
-func (p *compactJSONFormat) ParseElemListBegin() (elemType types.Type, size int, e error) {
-	if isNull, e := p.ParseListBegin(); isNull || e != nil {
-		return types.VOID, 0, e
+func (p *compactJSONFormat) ParseElemListBegin() (elemType types.Type, size int, err error) {
+	if isNull, err := p.ParseListBegin(); isNull || err != nil {
+		return types.VOID, 0, err
 	}
 	sElemType, err := p.ReadString()
 	if err != nil {

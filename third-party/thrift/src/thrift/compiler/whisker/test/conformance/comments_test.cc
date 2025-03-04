@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <folly/portability/GTest.h>
+#include <gtest/gtest.h>
 
 #include <thrift/compiler/whisker/object.h>
 #include <thrift/compiler/whisker/test/render_test_helpers.h>

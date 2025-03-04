@@ -17,7 +17,9 @@
 #include <folly/Overload.h>
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Patch.h>
+#include <thrift/lib/cpp2/protocol/Patch.h>
 #include <thrift/lib/cpp2/protocol/detail/Object.h>
+#include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/thrift/detail/DynamicPatch.h>
 #include <thrift/lib/thrift/gen-cpp2/any_patch_types.h>
 
@@ -1571,5 +1573,153 @@ template void DynamicPatch::decode<apache::thrift::BinaryProtocolReader>(
     detail::Badge, const folly::IOBuf&);
 template void DynamicPatch::decode<apache::thrift::CompactProtocolReader>(
     detail::Badge, const folly::IOBuf&);
+
+template <typename Protocol>
+std::uint32_t DynamicPatch::DynamicSafePatch::encode(Protocol& prot) const {
+  uint32_t s = 0;
+  s += prot.writeStructBegin("");
+  s += prot.writeFieldBegin("version", TType::T_I32, 1);
+  s += op::encode<type::i32_t>(prot, version_);
+  s += prot.writeFieldEnd();
+  s += prot.writeFieldBegin("data", TType::T_STRING, 2);
+  s += op::encode<type::binary_t>(prot, data_);
+  s += prot.writeFieldEnd();
+  s += prot.writeFieldStop();
+  s += prot.writeStructEnd();
+  return s;
+}
+
+template <typename Protocol>
+void DynamicPatch::DynamicSafePatch::decode(Protocol& prot) {
+  std::int32_t version;
+  std::unique_ptr<folly::IOBuf> data;
+
+  std::string name;
+  int16_t fid;
+  TType ftype;
+  prot.readStructBegin(name);
+  while (true) {
+    prot.readFieldBegin(name, ftype, fid);
+    if (ftype == protocol::T_STOP) {
+      break;
+    }
+    if (fid == 1 && ftype == TType::T_I32) {
+      op::decode<type::i32_t>(prot, version);
+    } else if (fid == 2 && ftype == TType::T_STRING) {
+      op::decode<type::binary_t>(prot, data);
+    } else {
+      prot.skip(ftype);
+    }
+    prot.readFieldEnd();
+  }
+  prot.readStructEnd();
+  *this = DynamicSafePatch{version, std::move(data)};
+}
+
+template std::uint32_t DynamicPatch::DynamicSafePatch::encode(
+    apache::thrift::BinaryProtocolWriter&) const;
+template std::uint32_t DynamicPatch::DynamicSafePatch::encode(
+    apache::thrift::CompactProtocolWriter&) const;
+template void DynamicPatch::DynamicSafePatch::decode(
+    apache::thrift::BinaryProtocolReader&);
+template void DynamicPatch::DynamicSafePatch::decode(
+    apache::thrift::CompactProtocolReader&);
+
+namespace {
+class MinSafePatchVersionVisitor {
+ public:
+  // Shared
+  template <typename T>
+  void assign(const T&) {}
+  template <typename T>
+  void assign(detail::Badge, const T&) {}
+  void clear() {}
+  void clear(detail::Badge) {}
+  void recurse(const DynamicPatch& patch) {
+    // recurse visitPatch
+    patch.visitPatch(
+        badge,
+        folly::overload(
+            [&](const DynamicMapPatch& p) {
+              MinSafePatchVersionVisitor visitor;
+              p.customVisit(badge, visitor);
+              version = std::max(version, visitor.version);
+            },
+            [&](const DynamicStructPatch& p) {
+              MinSafePatchVersionVisitor visitor;
+              p.customVisit(badge, visitor);
+              version = std::max(version, visitor.version);
+            },
+            [&](const DynamicUnionPatch& p) {
+              MinSafePatchVersionVisitor visitor;
+              p.customVisit(badge, visitor);
+              version = std::max(version, visitor.version);
+            },
+            [&](const op::AnyPatch& p) {
+              // recurse AnyPatch in case it only uses `assign` or `clear`
+              // operations that are V1.
+              MinSafePatchVersionVisitor visitor;
+              p.customVisit(visitor);
+              version = std::max(version, visitor.version);
+            },
+            [&](const auto&) {
+              // Short circuit all other patch types.
+            }));
+  }
+
+  // Map
+  void putMulti(detail::Badge, const detail::ValueMap&) {}
+  void tryPutMulti(detail::Badge, const detail::ValueMap&) {}
+  void removeMulti(detail::Badge, const detail::ValueSet&) {}
+  void patchByKey(detail::Badge, Value, const DynamicPatch& p) { recurse(p); }
+
+  // Structured
+  void ensure(detail::Badge, FieldId, const Value&) {}
+  void remove(detail::Badge, FieldId) {}
+  void patchIfSet(detail::Badge, FieldId, const DynamicPatch& fieldPatch) {
+    recurse(fieldPatch);
+  }
+
+  // Thrift Any
+  template <typename... T>
+  void patchIfTypeIs(T&&...) {
+    version = std::max(version, 2);
+  }
+  void ensureAny(const type::AnyStruct&) { version = std::max(version, 2); }
+
+  std::int32_t version = 1;
+};
+} // namespace
+
+void DynamicPatch::fromSafePatch(const type::AnyStruct& any) {
+  DynamicSafePatch safePatch;
+  // TODO: Add SafePatch check based on Uri
+  if (any.protocol() == type::StandardProtocol::Binary) {
+    safePatch.decode<apache::thrift::BinaryProtocolReader>(*any.data());
+  } else if (any.protocol() == type::StandardProtocol::Compact) {
+    safePatch.decode<apache::thrift::CompactProtocolReader>(*any.data());
+  } else {
+    folly::throw_exception<std::runtime_error>(
+        "Unsupported protocol when parsing SafePatch.");
+  }
+  if (safePatch.version() > op::detail::kThriftDynamicPatchVersion) {
+    throw std::runtime_error(
+        fmt::format("Unsupported patch version: {}", safePatch.version()));
+  }
+  decode<apache::thrift::CompactProtocolReader>(badge, *safePatch.data());
+}
+type::AnyStruct DynamicPatch::toSafePatch(type::Type type) const {
+  // TODO: Add SafePatch check based on Uri
+  MinSafePatchVersionVisitor visitor;
+  visitor.recurse(*this);
+  DynamicSafePatch safePatch{
+      visitor.version, encode<CompactProtocolWriter>(badge)};
+
+  type::AnyStruct anyStruct;
+  anyStruct.type() = std::move(type);
+  anyStruct.protocol() = type::StandardProtocol::Compact;
+  anyStruct.data() = *safePatch.encode<CompactProtocolWriter>();
+  return anyStruct;
+}
 
 } // namespace apache::thrift::protocol

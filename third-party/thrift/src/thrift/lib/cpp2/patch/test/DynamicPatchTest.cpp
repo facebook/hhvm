@@ -1101,4 +1101,70 @@ TEST(DynamicPatch, MergingIncompatiblePatch) {
   }
 }
 
+TEST(DynamicPatch, DynamicSafePatch) {
+  MyUnion obj;
+  obj.s_ref().emplace("123");
+
+  MyUnionPatch patch;
+  patch.patchIfSet<ident::s>() = "hello world";
+  MyUnionSafePatch safePatch = patch.toSafePatch();
+
+  // store SafePatch in Thrift Any
+  type::AnyStruct safePatchAny = type::AnyData::toAny(safePatch).toThrift();
+
+  // round trip
+  DynamicPatch dynPatch;
+  dynPatch.fromSafePatch(safePatchAny);
+  type::AnyStruct rSafePatchAny =
+      dynPatch.toSafePatch(type::Type::get<type::struct_t<MyUnionSafePatch>>());
+
+  // apply patch
+  MyUnionSafePatch rSafePatch = type::AnyData{std::move(rSafePatchAny)}
+                                    .get<type::struct_t<MyUnionSafePatch>>();
+  EXPECT_EQ(rSafePatch.version(), 1);
+  MyUnionPatch rpatch = MyUnionPatch::fromSafePatch(rSafePatch);
+  rpatch.apply(obj);
+
+  EXPECT_EQ(obj.s_ref().value(), "hello world");
+}
+
+TEST(DynamicPatch, DynamicSafePatchInvalid) {
+  MyUnionSafePatch safePatch;
+  safePatch.version() = 42;
+
+  // store SafePatch in Thrift Any
+  type::AnyStruct safePatchAny = type::AnyData::toAny(safePatch).toThrift();
+
+  DynamicPatch dynPatch;
+  EXPECT_THROW(dynPatch.fromSafePatch(safePatchAny), std::runtime_error);
+}
+
+TEST(DynamicPatch, DynamicSafePatchV2) {
+  {
+    op::AnyPatch anyPatch;
+    anyPatch.ensureAny(type::AnyData::toAny(MyUnion{}).toThrift());
+
+    DynamicPatch dynPatch{std::move(anyPatch)};
+    type::AnyStruct safePatchAny = dynPatch.toSafePatch(
+        type::Type::get<type::struct_t<MyUnionSafePatch>>());
+
+    MyUnionSafePatch safePatch = type::AnyData{std::move(safePatchAny)}
+                                     .get<type::struct_t<MyUnionSafePatch>>();
+    EXPECT_EQ(safePatch.version(), 2);
+  }
+  {
+    op::AnyPatch anyPatch;
+    // clear is V1 operation
+    anyPatch.clear();
+
+    DynamicPatch dynPatch{std::move(anyPatch)};
+    type::AnyStruct safePatchAny = dynPatch.toSafePatch(
+        type::Type::get<type::struct_t<MyUnionSafePatch>>());
+
+    MyUnionSafePatch safePatch = type::AnyData{std::move(safePatchAny)}
+                                     .get<type::struct_t<MyUnionSafePatch>>();
+    EXPECT_EQ(safePatch.version(), 1);
+  }
+}
+
 } // namespace apache::thrift::protocol

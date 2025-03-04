@@ -557,6 +557,12 @@ class DynamicPatch {
   void fromObject(detail::Badge, Object);
   void fromAny(detail::Badge, const type::AnyStruct& any);
 
+  /// Converts SafePatch stored in Thrift Any to DynamicPatch.
+  void fromSafePatch(const type::AnyStruct& any);
+  /// Stores DynamicPatch as SafePatch in Thrift Any with the provided type
+  /// using CompactProtocol.
+  type::AnyStruct toSafePatch(type::Type type) const;
+
   template <typename Protocol>
   std::uint32_t encode(detail::Badge, Protocol& prot) const;
   template <typename Protocol>
@@ -656,6 +662,45 @@ class DynamicPatch {
       }
     });
   }
+
+  // A SafePatch storage for DynamicPatch.
+  class DynamicSafePatch {
+   public:
+    DynamicSafePatch() = default;
+    DynamicSafePatch(std::int32_t version, std::unique_ptr<folly::IOBuf> data)
+        : version_(version), data_(std::move(data)) {}
+    DynamicSafePatch(const DynamicSafePatch&) = delete;
+    DynamicSafePatch& operator=(const DynamicSafePatch&) = delete;
+    DynamicSafePatch(DynamicSafePatch&&) = default;
+    DynamicSafePatch& operator=(DynamicSafePatch&&) = default;
+    ~DynamicSafePatch() = default;
+
+    template <typename Protocol>
+    std::uint32_t encode(Protocol& prot) const;
+    template <typename Protocol>
+    void decode(Protocol& prot);
+    template <typename Protocol>
+    std::unique_ptr<folly::IOBuf> encode() const {
+      folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
+      Protocol prot;
+      prot.setOutput(&queue);
+      encode(prot);
+      return queue.move();
+    }
+    template <typename Protocol>
+    void decode(const folly::IOBuf& buf) {
+      Protocol prot;
+      prot.setInput(&buf);
+      return decode(prot);
+    }
+
+    std::int32_t version() const { return version_; }
+    const std::unique_ptr<folly::IOBuf>& data() const { return data_; }
+
+   private:
+    std::int32_t version_;
+    std::unique_ptr<folly::IOBuf> data_;
+  };
 
  public:
   FOLLY_FOR_EACH_THIS_OVERLOAD_IN_CLASS_BODY_DELEGATE(

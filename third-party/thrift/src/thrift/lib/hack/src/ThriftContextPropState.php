@@ -90,6 +90,30 @@ final class ThriftContextPropState {
           $rid_set = true;
         }
 
+        /**
+         * TEMPORARY CHECK BELOW
+         *
+         * We should not currently be ingesting any experiment ids, but we
+         * see evidence of them, so we need to add code to check if we're
+         * ingesting the ids here.
+         * ~15B occurrences per hour, 15B / 60 = 250M per minute
+         * 250M / 50M = 5 samples per minute
+         */
+        if ($tfm->experiment_ids is nonnull) {
+          $ids = $tfm->experiment_ids;
+          $sample_rate = JustKnobs::getInt(
+            'lumos/experimentation:ingested_exp_id_sample_rate',
+          );
+          if (coinflip($sample_rate)) {
+            FBLogger('lumos_experimentation', 'unexpected experiment ids')
+              ->setBlameOwner('lumos')
+              ->warn(
+                'Ingested TFM should not contain experiment IDs: [%s]',
+                JSON::encode($ids),
+              );
+          }
+        }
+
         self::get()->storage = $tfm;
         self::get()->dirty();
       }

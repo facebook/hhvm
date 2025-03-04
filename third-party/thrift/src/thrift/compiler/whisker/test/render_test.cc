@@ -2209,6 +2209,329 @@ TEST_F(RenderTest, macro_nested_undefined_variable_trace) {
                           "#3 path/to/test.whisker <line:2, col:1>\n")));
 }
 
+TEST_F(RenderTest, imports) {
+  auto result = render(
+      "{{#import \"some/file/path\" as lib}}\n"
+      "The answer is {{lib.answer}}\n",
+      w::map({}),
+      sources({{"some/file/path", "{{#let export answer = 42}}\n"}}));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(*result, "The answer is 42\n");
+}
+
+TEST_F(RenderTest, imports_partial) {
+  auto result = render(
+      "{{#import \"some/file/path\" as lib}}\n"
+      "The answer is {{#partial lib.echo thing=42}}\n",
+      w::map({}),
+      sources(
+          {{"some/file/path",
+            "{{#let export partial echo |thing|}}\n"
+            "{{#pragma ignore-newlines}}\n"
+            "{{thing}}\n"
+            "{{/let partial}}\n"}}));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(*result, "The answer is 42\n");
+}
+
+TEST_F(RenderTest, imports_missing) {
+  auto result = render(
+      "{{#import \"some/other/path\" as lib}}\"}}\n"
+      "The answer is {{lib.answer}}\n",
+      w::map({}),
+      sources({{"some/file/path", "{{#let export answer = 42}}\n"}}));
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Module with path 'some/other/path' was not found or failed to parse",
+          path_to_file,
+          1)));
+  EXPECT_FALSE(result.has_value());
+}
+
+TEST_F(RenderTest, imports_no_resolver) {
+  auto result = render("{{#import \"some/file/path\" as lib}}\n", w::map({}));
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "No source resolver was provided. Cannot resolve import with path 'some/file/path'",
+          path_to_file,
+          1)));
+  EXPECT_FALSE(result.has_value());
+}
+
+TEST_F(RenderTest, imports_undefined) {
+  auto result = render(
+      "{{#import \"some/file/path\" as lib}}\n"
+      "The answer is {{lib.oops}}\n",
+      w::map({}),
+      sources({{"some/file/path", "{{#let export answer = 42}}\n"}}));
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Object 'lib' has no property named 'oops'. The object with the missing property is:\n"
+          "map (size=1)\n"
+          "`-'answer'\n"
+          "  |-i64(42)\n",
+          path_to_file,
+          2)));
+  EXPECT_FALSE(result.has_value());
+}
+
+TEST_F(RenderTest, imports_multiple) {
+  auto result = render(
+      "{{#import \"module1\" as mod1}}\n"
+      "{{#import \"module2\" as mod2}}\n"
+      "Module 1 answer: {{mod1.answer}}\n"
+      "Module 2 answer: {{mod2.answer}}\n",
+      w::map({}),
+      sources({
+          {"module1", "{{#let export answer = 42}}\n"},
+          {"module2", "{{#let export answer = 84}}\n"},
+      }));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(
+      *result,
+      "Module 1 answer: 42\n"
+      "Module 2 answer: 84\n");
+}
+
+TEST_F(RenderTest, imports_same_module_multiple) {
+  auto result = render(
+      "{{#import \"module1\" as mod1}}\n"
+      "{{#import \"module1\" as mod2}}\n"
+      "Module 1 answer: {{mod1.answer}}\n"
+      "Module 2 answer: {{mod2.answer}}\n",
+      w::map({}),
+      sources({
+          {"module1", "{{#let export answer = 42}}\n"},
+      }));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(
+      *result,
+      "Module 1 answer: 42\n"
+      "Module 2 answer: 42\n");
+}
+
+TEST_F(RenderTest, imports_empty_export) {
+  auto result = render(
+      "{{#import \"empty/module\" as lib}}\n"
+      "This should render without errors even if the module is empty.\n",
+      w::map({}),
+      sources({{"empty/module", " {{!-- empty module --}} \n"}}));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(
+      *result,
+      "This should render without errors even if the module is empty.\n");
+}
+
+TEST_F(RenderTest, imports_with_multiple_exports) {
+  // Test for importing a module with multiple export statements
+  auto result = render(
+      "{{#import \"module\" as mod}}\n"
+      "Answer 1: {{mod.answer1}}\n"
+      "Answer 2: {{mod.answer2}}\n",
+      w::map({}),
+      sources({
+          {"module",
+           "{{#let export answer1 = 42}}\n"
+           " {{!-- there are two answers here! --}}\n"
+           "{{#let export answer2 = 84}}\n"},
+      }));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(
+      *result,
+      "Answer 1: 42\n"
+      "Answer 2: 84\n");
+}
+
+TEST_F(RenderTest, imports_with_transitive_exports) {
+  auto result = render(
+      "{{#import \"module1\" as lib}}\n"
+      "The answer is {{lib.answer}}\n",
+      w::map({}),
+      sources({
+          {"module1",
+           "{{#import \"module2\" as lib}}\n"
+           "{{#let export answer = lib.answer}}\n"},
+          {"module2", "{{#let export answer = 42}}\n"},
+      }));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(*result, "The answer is 42\n");
+}
+
+TEST_F(RenderTest, imports_access_globals) {
+  auto result = render(
+      "{{#import \"module\" as lib}}\n"
+      "The answer is {{lib.answer}}\n",
+      w::map({{"global_answer", w::i64(84)}}),
+      sources({
+          {"module", "{{#let export answer = global_answer}}\n"},
+      }),
+      globals({{"global_answer", w::i64(42)}}));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(*result, "The answer is 42\n");
+}
+
+TEST_F(RenderTest, imports_multiple_with_conflict) {
+  auto result = render(
+      "{{#import \"module1\" as conflict}}\n"
+      "{{#import \"module2\" as conflict}}\n",
+      w::map({}),
+      sources({
+          {"module1", "{{#let export answer = 42}}\n"},
+          {"module2", "{{#let export answer = 84}}\n"},
+      }));
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Name 'conflict' is already bound in the current scope.",
+          path_to_file,
+          2)));
+  EXPECT_FALSE(result.has_value());
+}
+
+TEST_F(RenderTest, imports_no_implicit_transitive_exports) {
+  auto result = render(
+      "{{#import \"module1\" as lib}}\n"
+      "The answer is {{lib.lib.answer}}\n",
+      w::map({}),
+      sources({
+          {"module1", "{{#import \"module2\" as lib}}\n"},
+          {"module2", "{{#let export answer = 84}}\n"},
+      }));
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Object 'lib' has no property named 'lib'. The object with the missing property is:\n"
+          "map (size=0)\n",
+          path_to_file,
+          2)));
+  EXPECT_FALSE(result.has_value());
+}
+
+TEST_F(RenderTest, imports_no_text_in_module) {
+  auto result = render(
+      "{{#import \"some/file/path\" as lib}}\n",
+      w::map({}),
+      sources({{"some/file/path", "This is not a module"}}));
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Modules cannot have non-whitespace text at the top-level",
+          "some/file/path",
+          1)));
+  EXPECT_FALSE(result.has_value());
+}
+
+TEST_F(RenderTest, imports_no_conditional_export) {
+  auto result = render(
+      "{{#import \"some/file/path\" as lib}}\n"
+      "The answer is {{lib.answer}}\n",
+      w::map({}),
+      sources(
+          {{"some/file/path",
+            "{{#if true}}\n"
+            "{{#let export answer = 42}}\n"
+            "{{/if true}}\n"}}));
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Modules cannot have conditional blocks at the top-level",
+          "some/file/path",
+          1)));
+  EXPECT_FALSE(result.has_value());
+}
+
+TEST_F(RenderTest, exports_in_root) {
+  auto result = render("{{#let export answer = 42}}\n", w::map({}));
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Exports are not allowed in root source files or partial blocks",
+          path_to_file,
+          1)));
+  EXPECT_FALSE(result.has_value());
+}
+
+TEST_F(RenderTest, exports_in_root_nested) {
+  auto result = render(
+      "{{#if true}}\n"
+      "{{#let export answer = 42}}\n"
+      "{{/if true}}\n"
+      "This should work!\n",
+      w::map({}));
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Exports are not allowed in root source files or partial blocks",
+          path_to_file,
+          2)));
+  EXPECT_FALSE(result.has_value());
+}
+
+TEST_F(RenderTest, exports_in_root_nested_not_executed) {
+  auto result = render(
+      "{{#if false}}\n"
+      "{{#let export answer = 42}}\n"
+      "{{/if false}}\n"
+      "This should work!\n",
+      w::map({}));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(*result, "This should work!\n");
+}
+
+TEST_F(RenderTest, exports_in_partial) {
+  auto result = render(
+      "{{#import \"some/file/path\" as lib}}\n"
+      "The answer is {{#partial lib.echo thing=42}}\n",
+      w::map({}),
+      sources(
+          {{"some/file/path",
+            "{{#let export partial echo |thing|}}\n"
+            "{{#let export oops = 42}}\n"
+            "{{thing}}\n"
+            "{{/let partial}}\n"}}));
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Exports are not allowed in root source files or partial blocks",
+          "some/file/path",
+          2)));
+  EXPECT_FALSE(result.has_value());
+}
+
+TEST_F(RenderTest, exports_partial_in_partial) {
+  auto result = render(
+      "{{#import \"some/file/path\" as lib}}\n"
+      "The answer is {{#partial lib.echo thing=42}}\n",
+      w::map({}),
+      sources(
+          {{"some/file/path",
+            "{{#let export partial echo |thing|}}\n"
+            "{{#let export partial oops}}{{/let partial}}\n"
+            "{{thing}}\n"
+            "{{/let partial}}\n"}}));
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Exports are not allowed in root source files or partial blocks",
+          "some/file/path",
+          2)));
+  EXPECT_FALSE(result.has_value());
+}
+
 TEST_F(RenderTest, strip_standalone_lines) {
   auto result = render(
       "| This Is\n"

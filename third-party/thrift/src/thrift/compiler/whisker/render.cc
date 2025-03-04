@@ -27,6 +27,7 @@
 #include <ostream>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <fmt/core.h>
@@ -719,10 +720,231 @@ class virtual_machine {
         current_frame().context, loc, std::move(name), std::move(value));
   }
 
+  /**
+   * Creates an opaque native_handle representing a partial-block definition.
+   */
+  native_handle<> create_partial_definition(
+      const ast::partial_block& partial_block) {
+    const std::string& name = partial_block.name.name;
+
+    std::set<std::string> arguments;
+    for (const ast::identifier& id : partial_block.arguments) {
+      auto [_, inserted] = arguments.insert(id.name);
+      if (!inserted) {
+        diags_.report_fatal_error(
+            id.loc.begin,
+            "Duplicate capture name in partial block definition '{}'",
+            name);
+      }
+    }
+
+    std::map<ast::identifier, object::ptr, ast::identifier::compare_by_name>
+        captures;
+    for (const ast::identifier& capture : partial_block.captures) {
+      object::ptr captured_object = lookup_variable(
+          ast::variable_lookup{capture.loc, std::vector{capture}});
+      captures.emplace(std::pair{capture, std::move(captured_object)});
+    }
+
+    partial_definition::ptr definition =
+        manage_owned<partial_definition>(partial_definition{
+            partial_block.loc,
+            name,
+            std::move(arguments),
+            std::move(captures),
+            std::cref(partial_block.body_elements),
+        });
+    return native_handle<>(std::move(definition));
+  }
+
  private:
   render_options& opts_;
   source_stack source_stack_;
   diagnoser diags_;
+};
+
+/**
+ * A class that manages import and export statements. Its primarily
+ * responsibility is to extract the export map from a given Whisker module.
+ *
+ * Whisker modules do not produce output so importing has no side-effect. As an
+ * optimization, this class caches export maps for repeatedly imported modules.
+ */
+class module_importer {
+ public:
+  explicit module_importer(render_options& opts, virtual_machine& vm)
+      : opts_(opts), vm_(vm) {}
+
+  /**
+   * Given an import statement, resolves its export map.
+   *
+   * The resulting export map is cached for future imports of the same module.
+   */
+  object::ptr resolve_exports_of(
+      const ast::import_statement& import_statement) {
+    source_resolver* resolver = opts_.src_resolver.get();
+    if (resolver == nullptr) {
+      vm_.diags().report_fatal_error(
+          import_statement.loc.begin,
+          "No source resolver was provided. Cannot resolve import with path '{}'",
+          import_statement.path.text);
+    }
+
+    const ast::root* module = resolver->resolve_import(
+        import_statement.path.text,
+        import_statement.loc.begin,
+        vm_.diags().engine());
+    if (module == nullptr) {
+      vm_.diags().report_fatal_error(
+          import_statement.loc.begin,
+          "Module with path '{}' was not found or failed to parse",
+          import_statement.path.text);
+    }
+
+    if (auto cached = cached_export_maps_.find(module);
+        cached != cached_export_maps_.end()) {
+      return manage_as_static(cached->second);
+    }
+
+    eval_context eval_ctx = vm_.stack().top()->context.make_derived();
+    auto frame_guard = vm_.stack().make_frame_guard(
+        std::move(eval_ctx),
+        source_stack::frame::for_import{},
+        import_statement.loc.begin);
+
+    map exports;
+    for (const ast::header& header : module->header_elements) {
+      detail::variant_match(
+          header, [&](const auto& node) { visit(exports, node); });
+    }
+    for (const ast::body& body : module->body_elements) {
+      detail::variant_match(
+          body, [&](const auto& node) { visit(exports, node); });
+    }
+    auto [cached, inserted] = cached_export_maps_.emplace(
+        module, whisker::make::map(std::move(exports)));
+    assert(inserted);
+    return manage_as_static(cached->second);
+  }
+
+ private:
+  eval_context& eval_ctx() { return vm_.stack().top()->context; }
+
+  void do_export(
+      map& exports, std::string name, object value, source_location loc) {
+    auto [_, inserted] = exports.emplace(name, std::move(value));
+    if (!inserted) {
+      vm_.diags().report_fatal_error(
+          loc, "Export named '{}' already exists in this module", name);
+    }
+  }
+
+  void visit(map&, const ast::import_statement& import_statement) {
+    auto export_map = resolve_exports_of(import_statement);
+    vm_.bind_local(
+        import_statement.loc.begin,
+        import_statement.name.name,
+        std::move(export_map));
+  }
+
+  void visit(map& exports, const ast::partial_block& partial_block) {
+    native_handle<> definition = vm_.create_partial_definition(partial_block);
+    vm_.bind_local(
+        partial_block.name.loc.begin,
+        partial_block.name.name,
+        manage_owned<object>(native_handle<>(definition)));
+
+    if (partial_block.exported) {
+      do_export(
+          exports,
+          partial_block.name.name,
+          object(std::move(definition)),
+          partial_block.loc.begin);
+    }
+  }
+
+  void visit(map& exports, const ast::let_statement& let_statement) {
+    object::ptr value = vm_.evaluate(let_statement.value);
+    vm_.bind_local(let_statement.loc.begin, let_statement.id.name, value);
+
+    if (let_statement.exported) {
+      do_export(
+          exports,
+          let_statement.id.name,
+          whisker::make::proxy(value),
+          let_statement.loc.begin);
+    }
+  }
+
+  void visit(map&, const ast::text& text) {
+    for (const ast::text::content& part : text.parts) {
+      detail::variant_match(
+          part,
+          [&](const ast::text::whitespace&) {
+            // whitespace can be safely ignored
+          },
+          [&](const ast::text::non_whitespace& t) {
+            vm_.diags().report_fatal_error(
+                t.loc.begin,
+                "Modules cannot have non-whitespace text at the top-level");
+          });
+    }
+  }
+
+  void visit(map&, const ast::newline&) {
+    // newline can be safely ignored
+  }
+  void visit(map&, const ast::comment&) {
+    // comments can be safely ignored
+  }
+  void visit(map&, const ast::pragma_statement&) {
+    // The only supported pragma (ignore-newlines) is safe to ignore.
+  }
+
+  [[noreturn]] void visit(map&, const ast::interpolation& variable) {
+    vm_.diags().report_fatal_error(
+        variable.loc.begin,
+        "Modules cannot have interpolations at the top-level");
+  }
+  [[noreturn]] void visit(map&, const ast::section_block& section_block) {
+    vm_.diags().report_fatal_error(
+        section_block.loc.begin,
+        "Modules cannot have section blocks at the top-level");
+  }
+  [[noreturn]] void visit(
+      map&, const ast::conditional_block& conditional_block) {
+    vm_.diags().report_fatal_error(
+        conditional_block.loc.begin,
+        "Modules cannot have conditional blocks at the top-level");
+  }
+  [[noreturn]] void visit(map&, const ast::with_block& with_block) {
+    vm_.diags().report_fatal_error(
+        with_block.loc.begin,
+        "Modules cannot have with blocks at the top-level");
+  }
+  [[noreturn]] void visit(map&, const ast::each_block& each_block) {
+    vm_.diags().report_fatal_error(
+        each_block.loc.begin,
+        "Modules cannot have each blocks at the top-level");
+  }
+  [[noreturn]] void visit(
+      map&, const ast::partial_statement& partial_statement) {
+    vm_.diags().report_fatal_error(
+        partial_statement.loc.begin,
+        "Modules cannot have partial statements at the top-level");
+  }
+  [[noreturn]] void visit(map&, const ast::macro& macro) {
+    vm_.diags().report_fatal_error(
+        macro.loc.begin, "Modules cannot have macros at the top-level");
+  }
+
+  // Owned and kept alive by the render_engine.
+  render_options& opts_;
+  virtual_machine& vm_;
+
+  // The Whisker module's AST object identity (pointer value) is used to cache
+  // repeated imports. This is a guarantee afforded by the source_resolver.
+  std::unordered_map<const ast::root*, object> cached_export_maps_;
 };
 
 /**
@@ -734,7 +956,10 @@ class render_engine {
  public:
   explicit render_engine(
       std::ostream& out, diagnostics_engine& diags, render_options opts)
-      : out_(out), opts_(std::move(opts)), vm_(opts_, diags) {}
+      : out_(out),
+        opts_(std::move(opts)),
+        vm_(opts_, diags),
+        importer_(opts_, vm_) {}
 
   bool visit(const ast::root& root, object::ptr root_context) && {
     try {
@@ -824,12 +1049,20 @@ class render_engine {
     // comments are not rendered in the output
   }
 
-  [[noreturn]] void visit(const ast::import_statement& import_statement) {
-    vm_.diags().report_fatal_error(
-        import_statement.loc.begin, "Import statements are not supported yet.");
+  void visit(const ast::import_statement& import_statement) {
+    object::ptr export_map = importer_.resolve_exports_of(import_statement);
+    vm_.bind_local(
+        import_statement.loc.begin,
+        import_statement.name.name,
+        std::move(export_map));
   }
 
   void visit(const ast::let_statement& let_statement) {
+    if (let_statement.exported) {
+      vm_.diags().report_fatal_error(
+          let_statement.loc.begin,
+          "Exports are not allowed in root source files or partial blocks");
+    }
     vm_.bind_local(
         let_statement.loc.begin,
         let_statement.id.name,
@@ -1113,39 +1346,17 @@ class render_engine {
   }
 
   void visit(const ast::partial_block& partial_block) {
-    std::string name = partial_block.name.name;
-
-    std::set<std::string> arguments;
-    for (const ast::identifier& id : partial_block.arguments) {
-      auto [_, inserted] = arguments.insert(id.name);
-      if (!inserted) {
-        vm_.diags().report_fatal_error(
-            id.loc.begin,
-            "Duplicate capture name in partial block definition '{}'",
-            name);
-      }
+    if (partial_block.exported) {
+      vm_.diags().report_fatal_error(
+          partial_block.loc.begin,
+          "Exports are not allowed in root source files or partial blocks");
     }
 
-    std::map<ast::identifier, object::ptr, ast::identifier::compare_by_name>
-        captures;
-    for (const ast::identifier& capture : partial_block.captures) {
-      object::ptr captured_object = vm_.lookup_variable(
-          ast::variable_lookup{capture.loc, std::vector{capture}});
-      captures.emplace(std::pair{capture, std::move(captured_object)});
-    }
-
-    partial_definition::ptr definition =
-        manage_owned<partial_definition>(partial_definition{
-            partial_block.loc,
-            name,
-            std::move(arguments),
-            std::move(captures),
-            std::cref(partial_block.body_elements),
-        });
+    native_handle<> definition = vm_.create_partial_definition(partial_block);
     vm_.bind_local(
         partial_block.name.loc.begin,
-        std::move(name),
-        manage_owned<object>(native_handle<>(std::move(definition))));
+        partial_block.name.name,
+        manage_owned<object>(std::move(definition)));
   }
 
   void visit(const ast::partial_statement& partial_statement) {
@@ -1259,6 +1470,7 @@ class render_engine {
   outputter out_;
   render_options opts_;
   virtual_machine vm_;
+  module_importer importer_;
 };
 
 } // namespace

@@ -2916,6 +2916,26 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     std::shared_ptr<SecurityServerInterface> security;
   };
 
+ private:
+  bool allowDebugInterface_{true};
+  bool allowMonitoringInterface_{true};
+  bool allowProfilingInterface_{true};
+
+  void allowDebugInterface(bool value) { allowDebugInterface_ = value; }
+
+  bool allowDebugInterface() const { return allowDebugInterface_; }
+
+  void allowMonitoringInterface(bool value) {
+    allowMonitoringInterface_ = value;
+  }
+
+  bool allowMonitoringInterface() const { return allowMonitoringInterface_; }
+
+  void allowProfilingInterface(bool value) { allowProfilingInterface_ = value; }
+
+  bool allowProfilingInterface() const { return allowProfilingInterface_; }
+
+ public:
   // ThriftServer by defaults uses a global ShutdownSocketSet, so all socket's
   // FDs are registered there. But in some tests you might want to simulate 2
   // ThriftServer running in different processes, so their ShutdownSocketSet are

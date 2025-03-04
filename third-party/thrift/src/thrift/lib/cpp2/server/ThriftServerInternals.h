@@ -34,6 +34,26 @@ class ThriftServerInternals {
     return *server_.streamMetricCallback_;
   }
 
+  void allowDebugInterface(bool value) { server_.allowDebugInterface(value); }
+
+  bool allowDebugInterface() const { return server_.allowDebugInterface(); }
+
+  void allowMonitoringInterface(bool value) {
+    server_.allowMonitoringInterface(value);
+  }
+
+  bool allowMonitoringInterface() const {
+    return server_.allowMonitoringInterface();
+  }
+
+  void allowProfilingInterface(bool value) {
+    server_.allowProfilingInterface(value);
+  }
+
+  bool allowProfilingInterface() const {
+    return server_.allowProfilingInterface();
+  }
+
  private:
   ThriftServer& server_;
 };

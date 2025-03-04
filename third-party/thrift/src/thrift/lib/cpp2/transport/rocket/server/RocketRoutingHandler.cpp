@@ -72,9 +72,16 @@ RocketRoutingHandler::RocketRoutingHandler(ThriftServer& server)
       setupFrameHandlers_.push_back(std::move(handler));
     }
   };
-  addSetupFramehandler(detail::createRocketDebugSetupFrameHandler);
-  addSetupFramehandler(detail::createRocketMonitoringSetupFrameHandler);
-  addSetupFramehandler(detail::createRocketProfilingSetupFrameHandler);
+
+  if (detail::ThriftServerInternals(server).allowDebugInterface()) {
+    addSetupFramehandler(detail::createRocketDebugSetupFrameHandler);
+  }
+  if (detail::ThriftServerInternals(server).allowMonitoringInterface()) {
+    addSetupFramehandler(detail::createRocketMonitoringSetupFrameHandler);
+  }
+  if (detail::ThriftServerInternals(server).allowProfilingInterface()) {
+    addSetupFramehandler(detail::createRocketProfilingSetupFrameHandler);
+  }
 
   auto addSetupFrameInterceptor = [&](auto&& handlerFactory) {
     if (auto handler = handlerFactory(server)) {

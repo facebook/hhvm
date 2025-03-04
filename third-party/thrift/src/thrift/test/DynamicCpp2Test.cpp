@@ -148,8 +148,7 @@ TEST_P(RoundtripTestFixture, RoundtripContainer) {
 
 TEST_P(RoundtripTestFixture, SerializeOverHandler) {
   ScopedServerInterfaceThread runner(std::make_shared<TestServiceHandler>());
-  auto eb = EventBaseManager::get()->getEventBase();
-  auto client = runner.newClient<DynamicTestServiceAsyncClient>(eb);
+  auto client = runner.newClient<DynamicTestServiceAsyncClient>();
 
   const SerializableDynamic expected = GetParam();
   SerializableDynamic actual;

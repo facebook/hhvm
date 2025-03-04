@@ -23,17 +23,6 @@
 using apache::thrift::compiler::test::check_compile;
 using apache::thrift::compiler::test::check_compile_options;
 
-namespace {
-
-// Change the current directory to a subdirectory to avoid relative annotations
-// being found via relative includes. The exact directory doesn't matter so
-// pick "thrift" since we know it exists.
-void disable_relative_includes() {
-  std::filesystem::current_path("thrift");
-}
-
-} // namespace
-
 // Note: To see a reference on the expected lint message format: see the regex
 // in thrift/compiler/test/compiler.cc
 TEST(CompilerTest, diagnostic_in_last_line) {
@@ -2220,7 +2209,11 @@ TEST(CompilerTest, duplicate_include) {
 TEST(CompilerTest, not_bundled_annotation) {
   auto options = check_compile_options();
   options.add_standard_includes = false;
-  disable_relative_includes();
+
+  // Change the current directory to a temp directory to avoid annotations
+  // being found via relative includes.
+  std::filesystem::current_path(std::filesystem::temp_directory_path());
+
   check_compile(
       R"(
       include "thrift/annotation/baz.thrift"

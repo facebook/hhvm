@@ -1649,34 +1649,18 @@ class MinSafePatchVersionVisitor {
     patch.visitPatch(
         badge,
         folly::overload(
-            [&](const DynamicMapPatch& p) {
-              MinSafePatchVersionVisitor visitor;
-              p.customVisit(badge, visitor);
-              version = std::max(version, visitor.version);
-            },
-            [&](const DynamicStructPatch& p) {
-              MinSafePatchVersionVisitor visitor;
-              p.customVisit(badge, visitor);
-              version = std::max(version, visitor.version);
-            },
-            [&](const DynamicUnionPatch& p) {
-              MinSafePatchVersionVisitor visitor;
-              p.customVisit(badge, visitor);
-              version = std::max(version, visitor.version);
-            },
+            [&](const DynamicMapPatch& p) { p.customVisit(badge, *this); },
+            [&](const DynamicStructPatch& p) { p.customVisit(badge, *this); },
+            [&](const DynamicUnionPatch& p) { p.customVisit(badge, *this); },
             [&](const op::AnyPatch& p) {
               // recurse AnyPatch in case it only uses `assign` or `clear`
               // operations that are V1.
-              MinSafePatchVersionVisitor visitor;
-              p.customVisit(visitor);
-              version = std::max(version, visitor.version);
+              p.customVisit(*this);
             },
             [&](const DynamicUnknownPatch& p) {
               // recurse DynamicUnknownPatch for `patchPrior/patchAfter` in
               // `StructuredOrAnyPatch`.
-              MinSafePatchVersionVisitor visitor;
-              p.customVisit(badge, visitor);
-              version = std::max(version, visitor.version);
+              p.customVisit(badge, *this);
             },
             [&](const auto&) {
               // Short circuit all other patch types.

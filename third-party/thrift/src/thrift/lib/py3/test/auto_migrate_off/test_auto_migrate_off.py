@@ -21,7 +21,14 @@ import testing.thrift_types
 
 import testing.types
 
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import is_auto_migrated
+
 
 class AutoMigrateOffTests(unittest.TestCase):
-    def test_auto_migrate_on(self) -> None:
-        self.assertFalse(testing.types.Nested1 == testing.thrift_types.Nested1)
+    def test_auto_migrate_off(self) -> None:
+        self.assertIsNot(testing.types.Nested1, testing.thrift_types.Nested1)
+
+    def test_auto_migrate_util(self) -> None:
+        self.assertFalse(is_auto_migrated())
+        # pyre-ignore[16]: Undefined attribute testing a non-public API
+        self.assertFalse(testing.thrift_types.Nested1._fbthrift_auto_migrate_enabled())

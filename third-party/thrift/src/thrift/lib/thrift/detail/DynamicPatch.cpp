@@ -1671,6 +1671,13 @@ class MinSafePatchVersionVisitor {
               p.customVisit(visitor);
               version = std::max(version, visitor.version);
             },
+            [&](const DynamicUnknownPatch& p) {
+              // recurse DynamicUnknownPatch for `patchPrior/patchAfter` in
+              // `StructuredOrAnyPatch`.
+              MinSafePatchVersionVisitor visitor;
+              p.customVisit(badge, visitor);
+              version = std::max(version, visitor.version);
+            },
             [&](const auto&) {
               // Short circuit all other patch types.
             }));

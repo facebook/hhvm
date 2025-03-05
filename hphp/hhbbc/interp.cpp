@@ -5395,15 +5395,30 @@ void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
 }
 
 void in(ISS& env, const bc::VerifyRetNonNullC&) {
-  auto const& constraint = env.ctx.func->retTypeConstraints.main();
-  if (constraint.isSoft()) return;
-
   auto stackT = topC(env);
   if (!stackT.couldBe(BInitNull)) return reduce(env);
+
+  auto const& constraints = env.ctx.func->retTypeConstraints;
   if (stackT.subtypeOf(BInitNull)) {
-    popC(env);
-    push(env, TBottom);
-    return unreachable(env);
+    if (std::any_of(
+        constraints.range().begin(),
+        constraints.range().end(),
+        [&](const TypeConstraint& tc) {
+          return !tc.isSoft() && !tc.isNullable();
+        })) {
+      popC(env);
+      push(env, TBottom);
+      return unreachable(env);
+    }
+    return;
+  }
+
+  if (std::all_of(
+      constraints.range().begin(),
+      constraints.range().end(),
+      [](auto const& tc) { return tc.isNullable() || tc.isSoft();}
+    )) {
+    return;
   }
   popC(env);
   push(env, unopt(std::move(stackT)));

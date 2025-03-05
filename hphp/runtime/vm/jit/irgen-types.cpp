@@ -1673,9 +1673,6 @@ void emitVerifyRetTypeTS(IRGS& env) {
 }
 
 void emitVerifyRetNonNullC(IRGS& env) {
-  auto const func = curFunc(env);
-  auto const& tc = func->returnTypeConstraints().main();
-  always_assert(!tc.isNullable());
   verifyRetTypeImpl(env, TypeConstraint::ReturnId, 0, true);
 }
 

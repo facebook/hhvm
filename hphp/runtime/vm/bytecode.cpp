@@ -4706,10 +4706,13 @@ OPTBLD_INLINE void iopVerifyRetTypeTS() {
 }
 
 OPTBLD_INLINE void iopVerifyRetNonNullC() {
-  const auto func = vmfp()->func();
-  const auto tc = func->returnTypeConstraints().main();
-  auto const ctx = tc.isThis() ? frameStaticClass(vmfp()) : nullptr;
-  tc.verifyReturnNonNull(vmStack().topC(), ctx, func);
+  auto const func = vmfp()->func();
+  auto const& constraints = func->returnTypeConstraints();
+  for (auto const& tc : constraints.range()) {
+    if (tc.isNullable()) continue;
+    auto const ctx = tc.isThis() ? frameStaticClass(vmfp()) : nullptr;
+    tc.verifyReturnNonNull(vmStack().topC(), ctx, func);
+  }
 }
 
 OPTBLD_INLINE JitResumeAddr iopNativeImpl(PC& pc) {

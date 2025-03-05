@@ -1727,8 +1727,6 @@ void TypeConstraint::verifyStaticProperty(tv_lval val,
 void TypeConstraint::verifyReturnNonNull(TypedValue* tv,
                                          const Class* ctx,
                                          const Func* func) const {
-  const auto DEBUG_ONLY tcs = func->returnTypeConstraints();
-  assertx(!tcs.isNullable());
   if (UNLIKELY(tvIsNull(tv))) {
     verifyReturnFail(tv, ctx, func);
   } else if (debug) {

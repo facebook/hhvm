@@ -16,11 +16,11 @@
 
 namespace py3 pickle_thrift
 
-struct easy {
+struct easy_pickle {
   3: string name;
   1: i32 val;
 }
 
-struct Nested {
-  1: easy c;
+struct nested_pickle {
+  1: easy_pickle c;
 }

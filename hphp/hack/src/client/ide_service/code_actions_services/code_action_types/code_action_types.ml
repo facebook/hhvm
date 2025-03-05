@@ -73,11 +73,17 @@ module Show_inline_chat_command_args = struct
     predefined_prompt: predefined_prompt;
     override_selection: Pos.absolute;
     webview_start_line: int;
+    extras: Hh_json.json;
   }
 
   let to_json
-      { entrypoint; predefined_prompt; override_selection; webview_start_line }
-      =
+      {
+        entrypoint;
+        predefined_prompt;
+        override_selection;
+        webview_start_line;
+        extras;
+      } =
     Hh_json.(
       JSON_Object
         [
@@ -89,6 +95,7 @@ module Show_inline_chat_command_args = struct
                  ~equal:String.equal
                  override_selection );
           ("webviewStartLine", int_ webview_start_line);
+          ("extras", extras);
         ])
 end
 

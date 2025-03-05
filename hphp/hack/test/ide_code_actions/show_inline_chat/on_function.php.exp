@@ -15,6 +15,7 @@ JSON for selected code action:
     "arguments":[
       {
         "entrypoint":"FixLintErrorCodeAction",
+        "extras":{"lineAgnosticHash":1092186985680728002},
         "overrideSelection":{"end":{"character":1,"line":14},"start":{"character":0,"line":6}},
         "predefinedPrompt":{
           "command":"Fix Hack error inline",
@@ -47,6 +48,7 @@ JSON for selected code action:
     "arguments":[
       {
         "entrypoint":"FixLintErrorCodeAction",
+        "extras":{"lineAgnosticHash":1092186985680728002},
         "overrideSelection":{"end":{"character":1,"line":14},"start":{"character":0,"line":6}},
         "predefinedPrompt":{
           "command":"Fix Hack error inline",
@@ -79,6 +81,7 @@ JSON for selected code action:
     "arguments":[
       {
         "entrypoint":"FixLintErrorCodeAction",
+        "extras":{"lineAgnosticHash":1092186985680728002},
         "overrideSelection":{"end":{"character":1,"line":14},"start":{"character":0,"line":6}},
         "predefinedPrompt":{
           "command":"Fix Hack error inline",

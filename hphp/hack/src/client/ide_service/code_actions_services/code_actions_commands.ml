@@ -47,7 +47,7 @@ let create_user_prompt selection user_error =
   in
   Buffer.contents buf
 
-let error_to_show_inline_chat_command user_error =
+let error_to_show_inline_chat_command user_error line_agnostic_hash =
   let claim = User_error.claim_message user_error in
   let override_selection =
     let default = fst claim in
@@ -81,6 +81,9 @@ let error_to_show_inline_chat_command user_error =
         add_diagnostics = None;
       }
   in
+  let extras =
+    Hh_json.(JSON_Object [("lineAgnosticHash", int_ line_agnostic_hash)])
+  in
   let command_args =
     Code_action_types.(
       Show_inline_chat
@@ -90,6 +93,7 @@ let error_to_show_inline_chat_command user_error =
             predefined_prompt;
             override_selection;
             webview_start_line;
+            extras;
           })
   in
   let title = Format.sprintf {|Fix Hack error inline - %s|} (snd claim) in
@@ -97,14 +101,16 @@ let error_to_show_inline_chat_command user_error =
 
 let errors_to_commands errors selection =
   List.filter_map
+    (Errors.get_error_list ~drop_fixmed:false errors)
     ~f:(fun user_error ->
       if Pos.contains (User_error.get_pos user_error) selection then
+        let line_agnostic_hash =
+          User_error.hash_error_for_saved_state user_error
+        and finalized_error = User_error.to_absolute user_error in
         Some
-          (error_to_show_inline_chat_command
-          @@ User_error.to_absolute user_error)
+          (error_to_show_inline_chat_command finalized_error line_agnostic_hash)
       else
         None)
-    (Errors.get_error_list ~drop_fixmed:false errors)
 
 let find ~entry pos ctx ~error_filter : Code_action_types.command list =
   let { Tast_provider.Compute_tast_and_errors.errors; _ } =

@@ -4890,6 +4890,9 @@ function call_method(ClassWithFooBar $mc): void {
                                         "end": {"line": 8, "character": 1},
                                     },
                                     "webviewStartLine": 6,
+                                    "extras": {
+                                        "lineAgnosticHash": -1328940512569485162
+                                    },
                                 }
                             ],
                         },

@@ -23,6 +23,13 @@ package "apache.org/thrift/protocol"
 union MyUnion {
   1: string s;
   2: i32 i;
+  3: MyStruct strct;
+  4: map<i32, MyStruct> m;
+}
+
+@patch.GeneratePatchNew
+struct MyStruct {
+  1: any.Any any;
 }
 
 @patch.GeneratePatchNew

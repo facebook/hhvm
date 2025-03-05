@@ -1165,6 +1165,59 @@ TEST(DynamicPatch, DynamicSafePatchV2) {
                                      .get<type::struct_t<MyUnionSafePatch>>();
     EXPECT_EQ(safePatch.version(), 1);
   }
+  {
+    MyStructPatch patch;
+    patch.patchIfSet<ident::any>().ensureAny(
+        type::AnyData::toAny(MyUnion{}).toThrift());
+    MyStructSafePatch safePatch = patch.toSafePatch();
+    type::AnyStruct safePatchAny = type::AnyData::toAny(safePatch).toThrift();
+
+    // Round trip
+    DynamicPatch dynPatch;
+    dynPatch.fromSafePatch(safePatchAny);
+    type::AnyStruct rSafePatchAny = dynPatch.toSafePatch(
+        type::Type::get<type::struct_t<MyStructSafePatch>>());
+    MyStructSafePatch rSafePatch =
+        type::AnyData{std::move(rSafePatchAny)}
+            .get<type::struct_t<MyStructSafePatch>>();
+    EXPECT_EQ(rSafePatch.version(), 2);
+  }
+  {
+    MyStructPatch patch;
+    patch.patchIfSet<ident::any>().ensureAny(
+        type::AnyData::toAny(MyUnion{}).toThrift());
+    MyStructSafePatch safePatch = patch.toSafePatch();
+    type::AnyStruct safePatchAny = type::AnyData::toAny(safePatch).toThrift();
+
+    // Round trip
+    DynamicPatch dynPatch;
+    dynPatch.fromSafePatch(safePatchAny);
+    type::AnyStruct rSafePatchAny = dynPatch.toSafePatch(
+        type::Type::get<type::struct_t<MyStructSafePatch>>());
+    MyStructSafePatch rSafePatch =
+        type::AnyData{std::move(rSafePatchAny)}
+            .get<type::struct_t<MyStructSafePatch>>();
+    EXPECT_EQ(rSafePatch.version(), 2);
+  }
+  {
+    MyUnionPatch patch;
+    patch.patchIfSet<ident::m>()
+        .patchByKey(42)
+        .patchIfSet<ident::any>()
+        .ensureAny(type::AnyData::toAny(MyUnion{}).toThrift());
+    MyUnionSafePatch safePatch = patch.toSafePatch();
+    type::AnyStruct safePatchAny = type::AnyData::toAny(safePatch).toThrift();
+
+    // Round trip
+    DynamicPatch dynPatch;
+    dynPatch.fromSafePatch(safePatchAny);
+    type::AnyStruct rSafePatchAny = dynPatch.toSafePatch(
+        type::Type::get<type::struct_t<MyUnionSafePatch>>());
+    MyUnionSafePatch rSafePatch = type::AnyData{std::move(rSafePatchAny)}
+                                      .get<type::struct_t<MyUnionSafePatch>>();
+    // TODO(dokwon): Enable this after recursing DynamicUnknownPatch
+    // EXPECT_EQ(rSafePatch.version(), 2);
+  }
 }
 
 } // namespace apache::thrift::protocol

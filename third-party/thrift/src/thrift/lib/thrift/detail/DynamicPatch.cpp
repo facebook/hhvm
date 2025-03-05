@@ -1671,7 +1671,9 @@ class MinSafePatchVersionVisitor {
   void putMulti(detail::Badge, const detail::ValueMap&) {}
   void tryPutMulti(detail::Badge, const detail::ValueMap&) {}
   void removeMulti(detail::Badge, const detail::ValueSet&) {}
-  void patchByKey(detail::Badge, Value, const DynamicPatch& p) { recurse(p); }
+  void patchByKey(detail::Badge, const Value&, const DynamicPatch& p) {
+    recurse(p);
+  }
 
   // Structured
   void ensure(detail::Badge, FieldId, const Value&) {}

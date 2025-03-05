@@ -174,7 +174,11 @@ class OperationBase {
   }
 
   OperationState state() const {
-    return state_;
+    return state_.load(std::memory_order_relaxed);
+  }
+
+  bool isCancelling() const {
+    return state() == OperationState::Cancelling;
   }
 
   void setObserverCallback(ObserverCallback obs_cb);
@@ -217,7 +221,7 @@ class OperationBase {
   void setConnectionContext(
       std::shared_ptr<db::ConnectionContextBase> context) {
     CHECK_THROW(
-        state_ == OperationState::Unstarted, db::OperationStateException);
+        state() == OperationState::Unstarted, db::OperationStateException);
     connection_context_ = std::move(context);
   }
 
@@ -454,7 +458,7 @@ class OperationBase {
   friend class SyncConnection;
 
   // Data members; subclasses freely interact with these.
-  OperationState state_{OperationState::Unstarted};
+  std::atomic<OperationState> state_{OperationState::Unstarted};
   OperationResult result_{OperationResult::Unknown};
 
   // Connection or query attributes (depending on the Operation type)

@@ -87,6 +87,21 @@ const InternalConnection& FetchOperationImpl::getInternalConnection() const {
   return conn().getInternalConnection();
 }
 
+void FetchOperationImpl::cancel() {
+  // Free any allocated results before the connection is closed
+  // We need to do this in the mysql_thread for async versions as the
+  // mysql_thread _might_ be using that memory
+  auto cancelFn = [&]() {
+    current_row_stream_ = folly::none;
+    OperationBase::cancel();
+  };
+  if (client_.isInCorrectThread(true)) {
+    cancelFn();
+  } else {
+    client_.runInThread(std::move(cancelFn), true /*wait*/);
+  }
+}
+
 uint64_t FetchOperationImpl::currentLastInsertId() const {
   CHECK_THROW(isStreamAccessAllowed(), db::OperationStateException);
   return current_last_insert_id_;

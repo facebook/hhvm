@@ -24,8 +24,18 @@ bool MysqlFetchOperationImpl::isStreamAccessAllowed() const {
   return isPaused() || isInEventBaseThread();
 }
 
-bool MysqlFetchOperationImpl::isPaused() const {
+bool MysqlFetchOperationImpl::isPausedImpl() const {
   return active_fetch_action_ == FetchAction::WaitForConsumer;
+}
+
+bool MysqlFetchOperationImpl::isPaused() const {
+  if (client_.isInCorrectThread(true)) {
+    return isPausedImpl();
+  }
+
+  bool isPaused = false;
+  client_.runInThread([&]() { isPaused = isPausedImpl(); }, true);
+  return isPaused;
 }
 
 void MysqlFetchOperationImpl::specializedRun() {
@@ -277,7 +287,7 @@ void MysqlFetchOperationImpl::pauseForConsumer() {
 }
 
 void MysqlFetchOperationImpl::resumeImpl() {
-  CHECK_THROW(isPaused(), db::OperationStateException);
+  CHECK_THROW(isPausedImpl(), db::OperationStateException);
 
   // We should only allow pauses during fetch or between queries.
   // If we come back as RowsFetched and the stream has completed the query,

@@ -778,6 +778,7 @@ module Typing = struct
     | StaticCallOnTraitRequireThisAs [@value 4486]
     | NeedsConcreteOverride [@value 4487]
     | StringToClassPointer [@value 4488]
+    | SwitchNeedsDefault [@value 4489]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 
@@ -803,6 +804,7 @@ module Warning = struct
     | SafeAbstractCallNeedsConcrete [@value 12016]
     | NoDisjointUnion [@value 12017]
     | SafeAbstractConstAccess [@value 12018]
+    | SwitchRedundancy [@value 12019]
   [@@deriving enum, ord, show { with_path = false }]
 end
 

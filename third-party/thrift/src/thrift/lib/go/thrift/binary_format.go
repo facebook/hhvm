@@ -223,7 +223,7 @@ func (p *binaryEncoder) WriteBinary(value []byte) error {
 	return types.NewProtocolException(err)
 }
 
-func (p *binaryEncoder) Flush() (err error) {
+func (p *binaryEncoder) Flush() error {
 	return flush(p.writer)
 }
 
@@ -281,8 +281,8 @@ func (p *binaryDecoder) ReadMessageEnd() error {
 	return nil
 }
 
-func (p *binaryDecoder) ReadStructBegin() (name string, err error) {
-	return
+func (p *binaryDecoder) ReadStructBegin() (string, error) {
+	return "", nil
 }
 
 func (p *binaryDecoder) ReadStructEnd() error {
@@ -414,49 +414,48 @@ func (p *binaryDecoder) ReadByte() (byte, error) {
 	return readByte(p.reader)
 }
 
-func (p *binaryDecoder) ReadI16() (value int16, err error) {
+func (p *binaryDecoder) ReadI16() (int16, error) {
 	buf := p.buffer[0:2]
-	err = p.readAll(buf)
-	value = int16(binary.BigEndian.Uint16(buf))
+	err := p.readAll(buf)
+	value := int16(binary.BigEndian.Uint16(buf))
 	return value, err
 }
 
-func (p *binaryDecoder) ReadI32() (value int32, err error) {
+func (p *binaryDecoder) ReadI32() (int32, error) {
 	buf := p.buffer[0:4]
-	err = p.readAll(buf)
-	value = int32(binary.BigEndian.Uint32(buf))
+	err := p.readAll(buf)
+	value := int32(binary.BigEndian.Uint32(buf))
 	return value, err
 }
 
-func (p *binaryDecoder) ReadI64() (value int64, err error) {
+func (p *binaryDecoder) ReadI64() (int64, error) {
 	buf := p.buffer[0:8]
-	err = p.readAll(buf)
-	value = int64(binary.BigEndian.Uint64(buf))
+	err := p.readAll(buf)
+	value := int64(binary.BigEndian.Uint64(buf))
 	return value, err
 }
 
-func (p *binaryDecoder) ReadDouble() (value float64, err error) {
+func (p *binaryDecoder) ReadDouble() (float64, error) {
 	buf := p.buffer[0:8]
-	err = p.readAll(buf)
-	value = math.Float64frombits(binary.BigEndian.Uint64(buf))
+	err := p.readAll(buf)
+	value := math.Float64frombits(binary.BigEndian.Uint64(buf))
 	return value, err
 }
 
-func (p *binaryDecoder) ReadFloat() (value float32, err error) {
+func (p *binaryDecoder) ReadFloat() (float32, error) {
 	buf := p.buffer[0:4]
-	err = p.readAll(buf)
-	value = math.Float32frombits(binary.BigEndian.Uint32(buf))
+	err := p.readAll(buf)
+	value := math.Float32frombits(binary.BigEndian.Uint32(buf))
 	return value, err
 }
 
-func (p *binaryDecoder) ReadString() (value string, err error) {
-	size, e := p.ReadI32()
-	if e != nil {
-		return "", e
+func (p *binaryDecoder) ReadString() (string, error) {
+	size, err := p.ReadI32()
+	if err != nil {
+		return "", err
 	}
 	if size < 0 {
-		err = invalidDataLength
-		return
+		return "", invalidDataLength
 	}
 
 	return p.readStringBody(size)
@@ -481,7 +480,7 @@ func (p *binaryDecoder) ReadBinary() ([]byte, error) {
 	return buf, types.NewProtocolException(err)
 }
 
-func (p *binaryDecoder) Skip(fieldType types.Type) (err error) {
+func (p *binaryDecoder) Skip(fieldType types.Type) error {
 	return types.SkipDefaultDepth(p, fieldType)
 }
 
@@ -490,7 +489,7 @@ func (p *binaryDecoder) readAll(buf []byte) error {
 	return types.NewProtocolException(err)
 }
 
-func (p *binaryDecoder) readStringBody(size int32) (value string, err error) {
+func (p *binaryDecoder) readStringBody(size int32) (string, error) {
 	if size < 0 {
 		return "", nil
 	}
@@ -504,6 +503,6 @@ func (p *binaryDecoder) readStringBody(size int32) (value string, err error) {
 	} else {
 		buf = make([]byte, size)
 	}
-	_, e := io.ReadFull(p.reader, buf)
-	return string(buf), types.NewProtocolException(e)
+	_, err := io.ReadFull(p.reader, buf)
+	return string(buf), types.NewProtocolException(err)
 }

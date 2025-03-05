@@ -54,7 +54,7 @@ func isEOF(err error) bool {
 	return false
 }
 
-func readByte(reader io.Reader) (c byte, err error) {
+func readByte(reader io.Reader) (byte, error) {
 	if byteReader, ok := reader.(io.ByteReader); ok {
 		return byteReader.ReadByte()
 	}

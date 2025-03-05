@@ -123,42 +123,42 @@ type Encoder interface {
 const DEFAULT_RECURSION_DEPTH = 64
 
 // SkipDefaultDepth skips over the next data element from the provided Protocol object.
-func SkipDefaultDepth(prot Decoder, typeID Type) (err error) {
+func SkipDefaultDepth(prot Decoder, typeID Type) error {
 	return Skip(prot, typeID, DEFAULT_RECURSION_DEPTH)
 }
 
 // Skip skips over the next data element from the provided Protocol object.
-func Skip(self Decoder, fieldType Type, maxDepth int) (err error) {
+func Skip(self Decoder, fieldType Type, maxDepth int) error {
 	if maxDepth <= 0 {
 		return NewProtocolExceptionWithType(DEPTH_LIMIT, errors.New("Depth limit exceeded"))
 	}
 	switch fieldType {
 	case BOOL:
-		_, err = self.ReadBool()
-		return
+		_, err := self.ReadBool()
+		return err
 	case BYTE:
-		_, err = self.ReadByte()
-		return
+		_, err := self.ReadByte()
+		return err
 	case I16:
-		_, err = self.ReadI16()
-		return
+		_, err := self.ReadI16()
+		return err
 	case I32:
-		_, err = self.ReadI32()
-		return
+		_, err := self.ReadI32()
+		return err
 	case I64:
-		_, err = self.ReadI64()
-		return
+		_, err := self.ReadI64()
+		return err
 	case DOUBLE:
-		_, err = self.ReadDouble()
-		return
+		_, err := self.ReadDouble()
+		return err
 	case FLOAT:
-		_, err = self.ReadFloat()
-		return
+		_, err := self.ReadFloat()
+		return err
 	case STRING:
-		_, err = self.ReadString()
-		return
+		_, err := self.ReadString()
+		return err
 	case STRUCT:
-		if _, err = self.ReadStructBegin(); err != nil {
+		if _, err := self.ReadStructBegin(); err != nil {
 			return err
 		}
 		for {

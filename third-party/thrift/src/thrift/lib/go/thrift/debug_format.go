@@ -145,113 +145,113 @@ func (tdp *debugFormat) ReadMessageBegin() (name string, typeId types.MessageTyp
 	log.Printf("%sReadMessageBegin() (name=%#v, typeId=%#v, seqid=%#v, err=%#v)", tdp.LogPrefix, name, typeId, seqid, err)
 	return
 }
-func (tdp *debugFormat) ReadMessageEnd() (err error) {
-	err = tdp.Delegate.ReadMessageEnd()
+func (tdp *debugFormat) ReadMessageEnd() error {
+	err := tdp.Delegate.ReadMessageEnd()
 	log.Printf("%sReadMessageEnd() err=%#v", tdp.LogPrefix, err)
-	return
+	return err
 }
-func (tdp *debugFormat) ReadStructBegin() (name string, err error) {
-	name, err = tdp.Delegate.ReadStructBegin()
+func (tdp *debugFormat) ReadStructBegin() (string, error) {
+	name, err := tdp.Delegate.ReadStructBegin()
 	log.Printf("%sReadStructBegin() (name%#v, err=%#v)", tdp.LogPrefix, name, err)
-	return
+	return name, err
 }
-func (tdp *debugFormat) ReadStructEnd() (err error) {
-	err = tdp.Delegate.ReadStructEnd()
+func (tdp *debugFormat) ReadStructEnd() error {
+	err := tdp.Delegate.ReadStructEnd()
 	log.Printf("%sReadStructEnd() err=%#v", tdp.LogPrefix, err)
-	return
+	return err
 }
 func (tdp *debugFormat) ReadFieldBegin() (name string, typeId types.Type, id int16, err error) {
 	name, typeId, id, err = tdp.Delegate.ReadFieldBegin()
 	log.Printf("%sReadFieldBegin() (name=%#v, typeId=%#v, id=%#v, err=%#v)", tdp.LogPrefix, name, typeId, id, err)
 	return
 }
-func (tdp *debugFormat) ReadFieldEnd() (err error) {
-	err = tdp.Delegate.ReadFieldEnd()
+func (tdp *debugFormat) ReadFieldEnd() error {
+	err := tdp.Delegate.ReadFieldEnd()
 	log.Printf("%sReadFieldEnd() err=%#v", tdp.LogPrefix, err)
-	return
+	return err
 }
 func (tdp *debugFormat) ReadMapBegin() (keyType types.Type, valueType types.Type, size int, err error) {
 	keyType, valueType, size, err = tdp.Delegate.ReadMapBegin()
 	log.Printf("%sReadMapBegin() (keyType=%#v, valueType=%#v, size=%#v, err=%#v)", tdp.LogPrefix, keyType, valueType, size, err)
 	return
 }
-func (tdp *debugFormat) ReadMapEnd() (err error) {
-	err = tdp.Delegate.ReadMapEnd()
+func (tdp *debugFormat) ReadMapEnd() error {
+	err := tdp.Delegate.ReadMapEnd()
 	log.Printf("%sReadMapEnd() err=%#v", tdp.LogPrefix, err)
-	return
+	return err
 }
 func (tdp *debugFormat) ReadListBegin() (elemType types.Type, size int, err error) {
 	elemType, size, err = tdp.Delegate.ReadListBegin()
 	log.Printf("%sReadListBegin() (elemType=%#v, size=%#v, err=%#v)", tdp.LogPrefix, elemType, size, err)
 	return
 }
-func (tdp *debugFormat) ReadListEnd() (err error) {
-	err = tdp.Delegate.ReadListEnd()
+func (tdp *debugFormat) ReadListEnd() error {
+	err := tdp.Delegate.ReadListEnd()
 	log.Printf("%sReadListEnd() err=%#v", tdp.LogPrefix, err)
-	return
+	return err
 }
 func (tdp *debugFormat) ReadSetBegin() (elemType types.Type, size int, err error) {
 	elemType, size, err = tdp.Delegate.ReadSetBegin()
 	log.Printf("%sReadSetBegin() (elemType=%#v, size=%#v, err=%#v)", tdp.LogPrefix, elemType, size, err)
 	return
 }
-func (tdp *debugFormat) ReadSetEnd() (err error) {
-	err = tdp.Delegate.ReadSetEnd()
+func (tdp *debugFormat) ReadSetEnd() error {
+	err := tdp.Delegate.ReadSetEnd()
 	log.Printf("%sReadSetEnd() err=%#v", tdp.LogPrefix, err)
-	return
+	return err
 }
-func (tdp *debugFormat) ReadBool() (value bool, err error) {
-	value, err = tdp.Delegate.ReadBool()
+func (tdp *debugFormat) ReadBool() (bool, error) {
+	value, err := tdp.Delegate.ReadBool()
 	log.Printf("%sReadBool() (value=%#v, err=%#v)", tdp.LogPrefix, value, err)
-	return
+	return value, err
 }
-func (tdp *debugFormat) ReadByte() (value byte, err error) {
-	value, err = tdp.Delegate.ReadByte()
+func (tdp *debugFormat) ReadByte() (byte, error) {
+	value, err := tdp.Delegate.ReadByte()
 	log.Printf("%sReadByte() (value=%#v, err=%#v)", tdp.LogPrefix, value, err)
-	return
+	return value, err
 }
-func (tdp *debugFormat) ReadI16() (value int16, err error) {
-	value, err = tdp.Delegate.ReadI16()
+func (tdp *debugFormat) ReadI16() (int16, error) {
+	value, err := tdp.Delegate.ReadI16()
 	log.Printf("%sReadI16() (value=%#v, err=%#v)", tdp.LogPrefix, value, err)
-	return
+	return value, err
 }
-func (tdp *debugFormat) ReadI32() (value int32, err error) {
-	value, err = tdp.Delegate.ReadI32()
+func (tdp *debugFormat) ReadI32() (int32, error) {
+	value, err := tdp.Delegate.ReadI32()
 	log.Printf("%sReadI32() (value=%#v, err=%#v)", tdp.LogPrefix, value, err)
-	return
+	return value, err
 }
-func (tdp *debugFormat) ReadI64() (value int64, err error) {
-	value, err = tdp.Delegate.ReadI64()
+func (tdp *debugFormat) ReadI64() (int64, error) {
+	value, err := tdp.Delegate.ReadI64()
 	log.Printf("%sReadI64() (value=%#v, err=%#v)", tdp.LogPrefix, value, err)
-	return
+	return value, err
 }
-func (tdp *debugFormat) ReadDouble() (value float64, err error) {
-	value, err = tdp.Delegate.ReadDouble()
+func (tdp *debugFormat) ReadDouble() (float64, error) {
+	value, err := tdp.Delegate.ReadDouble()
 	log.Printf("%sReadDouble() (value=%#v, err=%#v)", tdp.LogPrefix, value, err)
-	return
+	return value, err
 }
-func (tdp *debugFormat) ReadFloat() (value float32, err error) {
-	value, err = tdp.Delegate.ReadFloat()
+func (tdp *debugFormat) ReadFloat() (float32, error) {
+	value, err := tdp.Delegate.ReadFloat()
 	log.Printf("%sReadFloat() (value=%#v, err=%#v)", tdp.LogPrefix, value, err)
-	return
+	return value, err
 }
-func (tdp *debugFormat) ReadString() (value string, err error) {
-	value, err = tdp.Delegate.ReadString()
+func (tdp *debugFormat) ReadString() (string, error) {
+	value, err := tdp.Delegate.ReadString()
 	log.Printf("%sReadString() (value=%#v, err=%#v)", tdp.LogPrefix, value, err)
-	return
+	return value, err
 }
-func (tdp *debugFormat) ReadBinary() (value []byte, err error) {
-	value, err = tdp.Delegate.ReadBinary()
+func (tdp *debugFormat) ReadBinary() ([]byte, error) {
+	value, err := tdp.Delegate.ReadBinary()
 	log.Printf("%sReadBinary() (value=%#v, err=%#v)", tdp.LogPrefix, value, err)
-	return
+	return value, err
 }
-func (tdp *debugFormat) Skip(fieldType types.Type) (err error) {
-	err = tdp.Delegate.Skip(fieldType)
+func (tdp *debugFormat) Skip(fieldType types.Type) error {
+	err := tdp.Delegate.Skip(fieldType)
 	log.Printf("%sSkip(fieldType=%#v) (err=%#v)", tdp.LogPrefix, fieldType, err)
-	return
+	return err
 }
-func (tdp *debugFormat) Flush() (err error) {
-	err = tdp.Delegate.Flush()
+func (tdp *debugFormat) Flush() error {
+	err := tdp.Delegate.Flush()
 	log.Printf("%sFlush() (err=%#v)", tdp.LogPrefix, err)
-	return
+	return err
 }

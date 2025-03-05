@@ -100,7 +100,7 @@ func (p *rocketClient) WriteMessageEnd() error {
 	return nil
 }
 
-func (p *rocketClient) Flush() (err error) {
+func (p *rocketClient) Flush() error {
 	dataBytes := p.wbuf.Bytes()
 
 	ctx := context.Background()
@@ -224,7 +224,7 @@ func (p *rocketClient) ReadMessageEnd() error {
 	return nil
 }
 
-func (p *rocketClient) Skip(fieldType types.Type) (err error) {
+func (p *rocketClient) Skip(fieldType types.Type) error {
 	return types.SkipDefaultDepth(p, fieldType)
 }
 

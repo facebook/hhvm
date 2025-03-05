@@ -114,7 +114,7 @@ func (r *rocketServerTransport) acceptLoop(ctx context.Context) error {
 	}
 }
 
-func (r *rocketServerTransport) Close() (err error) {
+func (r *rocketServerTransport) Close() error {
 	return r.listener.Close()
 }
 

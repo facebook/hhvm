@@ -317,8 +317,8 @@ func (p *simpleJSONFormat) ReadMessageEnd() error {
 	return p.ParseListEnd()
 }
 
-func (p *simpleJSONFormat) ReadStructBegin() (name string, err error) {
-	_, err = p.ParseObjectStart()
+func (p *simpleJSONFormat) ReadStructBegin() (string, error) {
+	_, err := p.ParseObjectStart()
 	return "", err
 }
 
@@ -545,11 +545,11 @@ func (p *simpleJSONFormat) ReadBinary() ([]byte, error) {
 	return v, p.ParsePostValue()
 }
 
-func (p *simpleJSONFormat) Flush() (err error) {
+func (p *simpleJSONFormat) Flush() error {
 	return types.NewProtocolException(p.writer.Flush())
 }
 
-func (p *simpleJSONFormat) Skip(fieldType types.Type) (err error) {
+func (p *simpleJSONFormat) Skip(fieldType types.Type) error {
 	return types.SkipDefaultDepth(p, fieldType)
 }
 

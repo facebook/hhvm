@@ -103,7 +103,7 @@ func (p *httpClient) Read(buf []byte) (int, error) {
 	return n, types.NewTransportExceptionFromError(err)
 }
 
-func (p *httpClient) ReadByte() (c byte, err error) {
+func (p *httpClient) ReadByte() (byte, error) {
 	return readByte(&p.responseBuffer)
 }
 
@@ -116,7 +116,7 @@ func (p *httpClient) WriteByte(c byte) error {
 	return p.requestBuffer.WriteByte(c)
 }
 
-func (p *httpClient) WriteString(s string) (n int, err error) {
+func (p *httpClient) WriteString(s string) (int, error) {
 	return p.requestBuffer.WriteString(s)
 }
 

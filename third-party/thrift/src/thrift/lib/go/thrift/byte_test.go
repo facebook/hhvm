@@ -55,7 +55,7 @@ type mockReader struct {
 	err error
 }
 
-func (r *mockReader) Read(p []byte) (n int, err error) {
+func (r *mockReader) Read(p []byte) (int, error) {
 	if r.n > 0 {
 		p[0] = r.v
 	}

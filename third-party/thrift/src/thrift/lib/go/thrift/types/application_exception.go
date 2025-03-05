@@ -124,37 +124,40 @@ func (e *applicationException) Read(prot Decoder) error {
 }
 
 // Write writes an exception to the protocol
-func (e *applicationException) Write(prot Encoder) (err error) {
-	err = prot.WriteStructBegin("TApplicationException")
+func (e *applicationException) Write(prot Encoder) error {
+	err := prot.WriteStructBegin("TApplicationException")
+	if err != nil {
+		return err
+	}
 	if len(e.Error()) > 0 {
 		err = prot.WriteFieldBegin("message", STRING, 1)
 		if err != nil {
-			return
+			return err
 		}
 		err = prot.WriteString(e.Error())
 		if err != nil {
-			return
+			return err
 		}
 		err = prot.WriteFieldEnd()
 		if err != nil {
-			return
+			return err
 		}
 	}
 	err = prot.WriteFieldBegin("type", I32, 2)
 	if err != nil {
-		return
+		return err
 	}
 	err = prot.WriteI32(e.exceptionType)
 	if err != nil {
-		return
+		return err
 	}
 	err = prot.WriteFieldEnd()
 	if err != nil {
-		return
+		return err
 	}
 	err = prot.WriteFieldStop()
 	if err != nil {
-		return
+		return err
 	}
 	return prot.WriteStructEnd()
 }

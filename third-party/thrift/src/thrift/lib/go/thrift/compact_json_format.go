@@ -261,8 +261,8 @@ func (p *compactJSONFormat) ReadMessageEnd() error {
 	return err
 }
 
-func (p *compactJSONFormat) ReadStructBegin() (name string, err error) {
-	_, err = p.ParseObjectStart()
+func (p *compactJSONFormat) ReadStructBegin() (string, error) {
+	_, err := p.ParseObjectStart()
 	return "", err
 }
 
@@ -450,15 +450,15 @@ func (p *compactJSONFormat) ReadBinary() ([]byte, error) {
 	return v, p.ParsePostValue()
 }
 
-func (p *compactJSONFormat) Flush() (err error) {
-	err = p.writer.Flush()
+func (p *compactJSONFormat) Flush() error {
+	err := p.writer.Flush()
 	if err == nil {
 		return flush(p.buffer)
 	}
 	return types.NewProtocolException(err)
 }
 
-func (p *compactJSONFormat) Skip(fieldType types.Type) (err error) {
+func (p *compactJSONFormat) Skip(fieldType types.Type) error {
 	return types.SkipDefaultDepth(p, fieldType)
 }
 

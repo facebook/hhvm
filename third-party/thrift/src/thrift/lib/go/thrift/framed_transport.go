@@ -103,7 +103,7 @@ func (p *FramedTransport) WriteByte(c byte) error {
 	return p.buf.WriteByte(c)
 }
 
-func (p *FramedTransport) WriteString(s string) (n int, err error) {
+func (p *FramedTransport) WriteString(s string) (int, error) {
 	return p.buf.WriteString(s)
 }
 

@@ -107,11 +107,11 @@ func (p *headerProtocol) ReadMessageBegin() (name string, typeId types.MessageTy
 	return p.Format.ReadMessageBegin()
 }
 
-func (p *headerProtocol) Flush() (err error) {
+func (p *headerProtocol) Flush() error {
 	return types.NewProtocolException(p.trans.Flush())
 }
 
-func (p *headerProtocol) Skip(fieldType types.Type) (err error) {
+func (p *headerProtocol) Skip(fieldType types.Type) error {
 	return types.SkipDefaultDepth(p, fieldType)
 }
 

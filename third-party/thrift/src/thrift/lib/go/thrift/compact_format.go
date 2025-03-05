@@ -392,10 +392,10 @@ func (p *compactDecoder) ReadMessageEnd() error { return nil }
 
 // Read a struct begin. There's nothing on the wire for this, but it is our
 // opportunity to push a new struct begin marker onto the field stack.
-func (p *compactDecoder) ReadStructBegin() (name string, err error) {
+func (p *compactDecoder) ReadStructBegin() (string, error) {
 	p.lastFieldRead = append(p.lastFieldRead, p.lastFieldIDRead)
 	p.lastFieldIDRead = 0
-	return
+	return "", nil
 }
 
 // Doesn't actually consume any wire data, just removes the last field for
@@ -535,7 +535,7 @@ func (p *compactDecoder) ReadSetEnd() error { return nil }
 // Read a boolean off the wire. If this is a boolean field, the value should
 // already have been read during readFieldBegin, so we'll just consume the
 // pre-stored value. Otherwise, read a byte.
-func (p *compactDecoder) ReadBool() (value bool, err error) {
+func (p *compactDecoder) ReadBool() (bool, error) {
 	if p.boolValueIsNotNull {
 		p.boolValueIsNotNull = false
 		return p.boolValue, nil
@@ -550,37 +550,37 @@ func (p *compactDecoder) ReadByte() (byte, error) {
 }
 
 // Read an i16 from the wire as a zigzag varint.
-func (p *compactDecoder) ReadI16() (value int16, err error) {
+func (p *compactDecoder) ReadI16() (int16, error) {
 	v, err := p.ReadI32()
 	return int16(v), err
 }
 
 // Read an i32 from the wire as a zigzag varint.
-func (p *compactDecoder) ReadI32() (value int32, err error) {
-	v, e := p.readVarint32()
-	if e != nil {
-		return 0, types.NewProtocolException(e)
+func (p *compactDecoder) ReadI32() (int32, error) {
+	v, err := p.readVarint32()
+	if err != nil {
+		return 0, types.NewProtocolException(err)
 	}
-	value = p.zigzagToInt32(v)
+	value := p.zigzagToInt32(v)
 	return value, nil
 }
 
 // Read an i64 from the wire as a zigzag varint.
-func (p *compactDecoder) ReadI64() (value int64, err error) {
-	v, e := p.readVarint64()
-	if e != nil {
-		return 0, types.NewProtocolException(e)
+func (p *compactDecoder) ReadI64() (int64, error) {
+	v, err := p.readVarint64()
+	if err != nil {
+		return 0, types.NewProtocolException(err)
 	}
-	value = p.zigzagToInt64(v)
+	value := p.zigzagToInt64(v)
 	return value, nil
 }
 
 // No magic here - just read a double off the wire.
-func (p *compactDecoder) ReadDouble() (value float64, err error) {
+func (p *compactDecoder) ReadDouble() (float64, error) {
 	longBits := p.rBuffer[0:8]
-	_, e := io.ReadFull(p.reader, longBits)
-	if e != nil {
-		return 0.0, types.NewProtocolException(e)
+	_, err := io.ReadFull(p.reader, longBits)
+	if err != nil {
+		return 0.0, types.NewProtocolException(err)
 	}
 	if p.version == COMPACT_VERSION {
 		return math.Float64frombits(binary.LittleEndian.Uint64(longBits)), nil
@@ -589,20 +589,20 @@ func (p *compactDecoder) ReadDouble() (value float64, err error) {
 }
 
 // No magic here - just read a float off the wire.
-func (p *compactDecoder) ReadFloat() (value float32, err error) {
+func (p *compactDecoder) ReadFloat() (float32, error) {
 	bits := p.rBuffer[0:4]
-	_, e := io.ReadFull(p.reader, bits)
-	if e != nil {
-		return 0.0, types.NewProtocolException(e)
+	_, err := io.ReadFull(p.reader, bits)
+	if err != nil {
+		return 0.0, types.NewProtocolException(err)
 	}
 	return math.Float32frombits(binary.BigEndian.Uint32(bits)), nil
 }
 
 // Reads a []byte (via readBinary), and then UTF-8 decodes it.
-func (p *compactDecoder) ReadString() (value string, err error) {
-	length, e := p.readVarint32()
-	if e != nil {
-		return "", types.NewProtocolException(e)
+func (p *compactDecoder) ReadString() (string, error) {
+	length, err := p.readVarint32()
+	if err != nil {
+		return "", types.NewProtocolException(err)
 	}
 	if length < 0 {
 		return "", invalidDataLength
@@ -621,15 +621,15 @@ func (p *compactDecoder) ReadString() (value string, err error) {
 	} else {
 		buf = make([]byte, length)
 	}
-	_, e = io.ReadFull(p.reader, buf)
-	return string(buf), types.NewProtocolException(e)
+	_, err = io.ReadFull(p.reader, buf)
+	return string(buf), types.NewProtocolException(err)
 }
 
 // Read a []byte from the wire.
-func (p *compactDecoder) ReadBinary() (value []byte, err error) {
-	length, e := p.readVarint32()
-	if e != nil {
-		return nil, types.NewProtocolException(e)
+func (p *compactDecoder) ReadBinary() ([]byte, error) {
+	length, err := p.readVarint32()
+	if err != nil {
+		return nil, types.NewProtocolException(err)
 	}
 	if length == 0 {
 		return []byte{}, nil
@@ -643,15 +643,15 @@ func (p *compactDecoder) ReadBinary() (value []byte, err error) {
 	}
 
 	buf := make([]byte, length)
-	_, e = io.ReadFull(p.reader, buf)
-	return buf, types.NewProtocolException(e)
+	_, err = io.ReadFull(p.reader, buf)
+	return buf, types.NewProtocolException(err)
 }
 
-func (p *compactEncoder) Flush() (err error) {
+func (p *compactEncoder) Flush() error {
 	return flush(p.writer)
 }
 
-func (p *compactDecoder) Skip(fieldType types.Type) (err error) {
+func (p *compactDecoder) Skip(fieldType types.Type) error {
 	return types.SkipDefaultDepth(p, fieldType)
 }
 

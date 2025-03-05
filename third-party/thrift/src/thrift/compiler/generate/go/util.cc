@@ -494,8 +494,7 @@ std::string snakecase(const std::string& name) {
 }
 
 bool is_func_go_supported(const t_function* func) {
-  return !func->sink_or_stream() && !func->return_type()->is_service() &&
-      !func->interaction();
+  return !func->sink_or_stream() && !func->interaction();
 }
 
 bool is_go_reserved_word(const std::string& value) {

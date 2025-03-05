@@ -272,6 +272,10 @@ class t_py_generator : public t_concat_generator {
       const t_structured* tstruct, const t_field* tfield);
   std::string render_field_default_value(const t_field* tfield);
   std::string type_name(const t_type* ttype);
+  std::string service_name(const t_service* service) {
+    return get_real_py_module(service->program()) + "." +
+        rename_reserved_keywords(service->get_name());
+  }
   std::string function_signature(
       const t_function* tfunction, std::string prefix = "");
   std::string function_signature_if(
@@ -2315,7 +2319,7 @@ void t_py_generator::generate_service_interface(
   string extends = "";
   string extends_if = "";
   if (tservice->get_extends() != nullptr) {
-    extends = type_name(tservice->get_extends());
+    extends = service_name(tservice->get_extends());
     extends_if = "(" + extends + "." + iface_prefix + "Iface)";
   }
 
@@ -2381,7 +2385,7 @@ void t_py_generator::generate_service_client(const t_service* tservice) {
   string extends = "";
   string extends_client = "";
   if (tservice->get_extends() != nullptr) {
-    extends = type_name(tservice->get_extends());
+    extends = service_name(tservice->get_extends());
     extends_client = extends + ".Client, ";
   }
 
@@ -2927,7 +2931,7 @@ void t_py_generator::generate_service_server(
   string extends = "";
   string extends_processor = "";
   if (tservice->get_extends() != nullptr) {
-    extends = type_name(tservice->get_extends());
+    extends = service_name(tservice->get_extends());
     extends_processor = extends + "." + class_prefix + "Processor, ";
   }
 
@@ -3781,10 +3785,6 @@ string t_py_generator::argument_list(const t_paramlist& tparamlist) {
 
 string t_py_generator::type_name(const t_type* ttype) {
   const t_program* program = ttype->program();
-  if (ttype->is_service()) {
-    return get_real_py_module(program) + "." +
-        rename_reserved_keywords(ttype->get_name());
-  }
   if (program != nullptr && program != program_ &&
       !program_->includes().empty()) {
     return get_real_py_module(program) + ".ttypes." +

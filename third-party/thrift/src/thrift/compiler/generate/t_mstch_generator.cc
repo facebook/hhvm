@@ -119,7 +119,6 @@ mstch::map t_mstch_generator::dump(const t_type& orig_type) {
       {"struct?", type.is_struct() || type.is_exception()},
       {"union?", type.is_union()},
       {"enum?", type.is_enum()},
-      {"service?", type.is_service()},
       {"base?", type.is_primitive_type()},
       {"container?", type.is_container()},
       {"list?", type.is_list()},
@@ -133,8 +132,6 @@ mstch::map t_mstch_generator::dump(const t_type& orig_type) {
     result.emplace("struct", dump(dynamic_cast<const t_struct&>(type), true));
   } else if (type.is_enum()) {
     result.emplace("enum", dump(dynamic_cast<const t_enum&>(type)));
-  } else if (type.is_service()) {
-    result.emplace("service", dump(dynamic_cast<const t_service&>(type)));
   } else if (type.is_list()) {
     result.emplace(
         "list_elem_type",

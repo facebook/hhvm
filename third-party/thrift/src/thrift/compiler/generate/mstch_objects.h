@@ -828,7 +828,6 @@ class mstch_type : public mstch_base {
             {"type:struct?", &mstch_type::is_struct},
             {"type:union?", &mstch_type::is_union},
             {"type:enum?", &mstch_type::is_enum},
-            {"type:service?", &mstch_type::is_service},
             {"type:base?", &mstch_type::is_base},
             {"type:container?", &mstch_type::is_container},
             {"type:list?", &mstch_type::is_list},
@@ -843,7 +842,6 @@ class mstch_type : public mstch_base {
             {"type:value_type", &mstch_type::get_value_type},
             {"type:typedef_type", &mstch_type::get_typedef_type},
             {"type:typedef", &mstch_type::get_typedef},
-            {"type:interaction?", &mstch_type::is_interaction},
         });
   }
   mstch::node name() { return type_->get_name(); }
@@ -872,7 +870,6 @@ class mstch_type : public mstch_base {
   }
   mstch::node is_union() { return resolved_type_->is_union(); }
   mstch::node is_enum() { return resolved_type_->is_enum(); }
-  mstch::node is_service() { return resolved_type_->is_service(); }
   mstch::node is_base() { return resolved_type_->is_primitive_type(); }
   mstch::node is_container() { return resolved_type_->is_container(); }
   mstch::node is_list() { return resolved_type_->is_list(); }
@@ -888,7 +885,6 @@ class mstch_type : public mstch_base {
   mstch::node get_value_type();
   mstch::node get_typedef_type();
   mstch::node get_typedef();
-  mstch::node is_interaction() { return type_->is_service(); }
 
  protected:
   const t_type* type_;

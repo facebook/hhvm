@@ -175,7 +175,6 @@ class t_type : public t_named {
   virtual bool is_list() const { return false; }
   virtual bool is_set() const { return false; }
   virtual bool is_map() const { return false; }
-  virtual bool is_service() const { return false; }
   virtual bool is_binary() const { return false; }
   virtual bool is_paramlist() const { return false; }
 

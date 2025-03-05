@@ -1127,7 +1127,7 @@ class cpp_mstch_type : public mstch_type {
     return resolved_type_->is_container() || resolved_type_->is_enum();
   }
   mstch::node resolves_to_complex_return() {
-    return is_complex_return(resolved_type_) && !resolved_type_->is_service();
+    return is_complex_return(resolved_type_);
   }
   mstch::node resolves_to_fixed_size() {
     return resolved_type_->is_bool() || resolved_type_->is_byte() ||

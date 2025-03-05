@@ -60,13 +60,20 @@ class t_json_generator : public t_concat_generator {
   void generate_service(const t_service* tservice) override;
   void generate_xception(const t_structured* txception) override;
 
-  void print_type(const t_type* ttype);
+  template <typename T>
+  void print_spec(const T* type_or_service);
   void print_name(const string& name);
   void print_const_value(const t_const_value* tvalue);
   void print_const_key(t_const_value* tvalue);
   void print_lineno(const t_node& node);
-  string type_to_string(const t_type* type);
-  string type_to_spec_args(const t_type* ttype);
+
+  string to_string(const t_type* type);
+  string to_string(const t_service* service);
+
+  string to_spec_args(const t_type* type);
+  string to_spec_args(const t_service* service);
+  string to_spec_args_named(const t_named* named);
+
   string type_name(const t_type* ttype);
 
   bool should_resolve_to_true_type(const t_type* ttype);
@@ -221,9 +228,9 @@ void t_json_generator::generate_program() {
 }
 
 /**
- * Converts the parse type to a string
+ * Converts the type to a string.
  */
-string t_json_generator::type_to_string(const t_type* type) {
+string t_json_generator::to_string(const t_type* type) {
   if (should_resolve_to_true_type(type)) {
     type = type->get_true_type();
   }
@@ -262,14 +269,15 @@ string t_json_generator::type_to_string(const t_type* type) {
     return "SET";
   } else if (type->is_list()) {
     return "LIST";
-  } else if (type->is_service()) {
-    return "SERVICE";
   } else if (type->is_typedef()) {
     return "TYPEDEF";
   }
 
-  throw std::runtime_error(
-      "INVALID TYPE IN type_to_string: " + type->get_name());
+  throw std::runtime_error("INVALID TYPE IN to_string: " + type->get_name());
+}
+
+string t_json_generator::to_string(const t_service*) {
+  return "SERVICE";
 }
 
 /**
@@ -281,44 +289,47 @@ string t_json_generator::type_to_string(const t_type* type) {
  *              | tuple_spec  // (for lists and sets)
  *              | { "key_type" : tuple_spec, "val_type" : tuple_spec}  // (maps)
  */
-string t_json_generator::type_to_spec_args(const t_type* ttype) {
-  if (should_resolve_to_true_type(ttype)) {
-    ttype = ttype->get_true_type();
+string t_json_generator::to_spec_args(const t_type* type) {
+  if (should_resolve_to_true_type(type)) {
+    type = type->get_true_type();
   }
 
-  if (ttype->is_primitive_type()) {
+  if (type->is_primitive_type()) {
     return "null";
   } else if (
-      ttype->is_struct() || ttype->is_exception() || ttype->is_service() ||
-      ttype->is_enum() || ttype->is_typedef()) {
-    string module = "";
-    if (ttype->program() != program_) {
-      module = ttype->program()->name() + ".";
-    }
-    return "\"" + module + ttype->get_name() + "\"";
-  } else if (ttype->is_map()) {
+      type->is_struct() || type->is_exception() || type->is_enum() ||
+      type->is_typedef()) {
+    return to_spec_args_named(type);
+  } else if (type->is_map()) {
     return R"({ "key_type" : { "type_enum" : ")" +
-        type_to_string(((t_map*)ttype)->get_key_type()) +
-        R"(", "spec_args" : )" +
-        type_to_spec_args(((t_map*)ttype)->get_key_type()) +
+        to_string(((t_map*)type)->get_key_type()) + R"(", "spec_args" : )" +
+        to_spec_args(((t_map*)type)->get_key_type()) +
         R"( }, "val_type" : { "type_enum" : ")" +
-        type_to_string(((t_map*)ttype)->get_val_type()) +
-        R"(", "spec_args" : )" +
-        type_to_spec_args(((t_map*)ttype)->get_val_type()) + "} } ";
-  } else if (ttype->is_set()) {
+        to_string(((t_map*)type)->get_val_type()) + R"(", "spec_args" : )" +
+        to_spec_args(((t_map*)type)->get_val_type()) + "} } ";
+  } else if (type->is_set()) {
+    return R"({ "type_enum" : ")" + to_string(((t_set*)type)->get_elem_type()) +
+        R"(", "spec_args" : )" + to_spec_args(((t_set*)type)->get_elem_type()) +
+        "} ";
+  } else if (type->is_list()) {
     return R"({ "type_enum" : ")" +
-        type_to_string(((t_set*)ttype)->get_elem_type()) +
-        R"(", "spec_args" : )" +
-        type_to_spec_args(((t_set*)ttype)->get_elem_type()) + "} ";
-  } else if (ttype->is_list()) {
-    return R"({ "type_enum" : ")" +
-        type_to_string(((t_list*)ttype)->get_elem_type()) +
-        R"(", "spec_args" : )" +
-        type_to_spec_args(((t_list*)ttype)->get_elem_type()) + "} ";
+        to_string(((t_list*)type)->get_elem_type()) + R"(", "spec_args" : )" +
+        to_spec_args(((t_list*)type)->get_elem_type()) + "} ";
   }
 
-  throw std::runtime_error(
-      "INVALID TYPE IN type_to_spec_args: " + ttype->get_name());
+  throw std::runtime_error("INVALID TYPE IN to_spec_args: " + type->get_name());
+}
+
+string t_json_generator::to_spec_args(const t_service* service) {
+  return to_spec_args_named(service);
+}
+
+string t_json_generator::to_spec_args_named(const t_named* named) {
+  std::string module;
+  if (named->program() != program_) {
+    module = named->program()->name() + ".";
+  }
+  return "\"" + module + named->get_name() + "\"";
 }
 
 /**
@@ -336,12 +347,13 @@ string t_json_generator::type_name(const t_type* ttype) {
 }
 
 /**
- * Prints out the provided type spec
+ * Prints out the provided type or service spec.
  */
-void t_json_generator::print_type(const t_type* ttype) {
-  indent(f_out_) << R"("type_enum" : ")" << type_to_string(ttype) << "\","
-                 << endl;
-  indent(f_out_) << "\"spec_args\" : " << type_to_spec_args(ttype);
+template <typename T>
+void t_json_generator::print_spec(const T* type_or_service) {
+  indent(f_out_) << R"("type_enum" : ")" << to_string(type_or_service)
+                 << "\",\n";
+  indent(f_out_) << "\"spec_args\" : " << to_spec_args(type_or_service);
 }
 
 void t_json_generator::print_name(const string& name) {
@@ -533,7 +545,7 @@ void t_json_generator::generate_typedef(const t_typedef* ttypedef) {
   indent(f_out_) << "\"" << ttypedef->get_name() << "\" : {" << endl;
   indent_up();
   print_lineno(*ttypedef);
-  print_type(ttypedef->get_type());
+  print_spec(ttypedef->get_type());
   print_node_annotations(
       *ttypedef,
       /*add_heading_comma=*/true,
@@ -604,7 +616,7 @@ void t_json_generator::generate_const(const t_const* tconst) {
   indent(f_out_) << "\"value\" : ";
   print_const_value(tconst->value());
   f_out_ << "," << endl;
-  print_type(tconst->type());
+  print_spec(tconst->type());
   print_node_annotations(
       *tconst,
       /*add_heading_comma=*/true,
@@ -643,7 +655,7 @@ void t_json_generator::generate_struct(const t_structured* tstruct) {
     }
     indent(f_out_) << "\"" << (*mem_iter)->get_name() << "\" : {" << endl;
     indent_up();
-    print_type((*mem_iter)->get_type());
+    print_spec((*mem_iter)->get_type());
     f_out_ << "," << endl
            << indent() << "\"required\" : "
            << ((*mem_iter)->get_req() != t_field::e_req::optional ? "true"
@@ -693,7 +705,7 @@ void t_json_generator::generate_service(const t_service* tservice) {
   if (tservice->get_extends()) {
     indent(f_out_) << "\"extends\" : {" << endl;
     indent_up();
-    print_type(tservice->get_extends());
+    print_spec(tservice->get_extends());
     f_out_ << endl;
     indent_down();
     indent(f_out_) << "}";
@@ -722,9 +734,11 @@ void t_json_generator::generate_service(const t_service* tservice) {
     indent(f_out_) << "\"return_type\" : {" << endl;
     indent_up();
     const t_function* fun = *fn_iter;
-    const auto& ret = fun->is_interaction_constructor() ? fun->interaction()
-                                                        : fun->return_type();
-    print_type(ret.get_type());
+    if (fun->is_interaction_constructor()) {
+      print_spec(static_cast<const t_service*>(fun->interaction().get_type()));
+    } else {
+      print_spec(fun->return_type().get_type());
+    }
     f_out_ << endl;
     indent_down();
     indent(f_out_) << "}," << endl;
@@ -742,7 +756,7 @@ void t_json_generator::generate_service(const t_service* tservice) {
         indent(f_out_) << "{" << endl;
         indent_up();
         print_name((*arg_iter)->get_name());
-        print_type((*arg_iter)->get_type());
+        print_spec((*arg_iter)->get_type());
         if ((*arg_iter)->get_value() != nullptr) {
           f_out_ << "," << endl << indent() << "\"value\" : ";
           print_const_value((*arg_iter)->get_value());
@@ -771,7 +785,7 @@ void t_json_generator::generate_service(const t_service* tservice) {
         if (ex_iter != exceptions.begin()) {
           f_out_ << "," << endl;
         }
-        indent(f_out_) << type_to_spec_args((*ex_iter).get_type());
+        indent(f_out_) << to_spec_args((*ex_iter).get_type());
       }
       f_out_ << endl;
       indent_down();

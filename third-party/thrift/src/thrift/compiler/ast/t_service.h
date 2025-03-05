@@ -16,9 +16,7 @@
 
 #pragma once
 
-#include <memory>
 #include <string>
-#include <vector>
 
 #include <thrift/compiler/ast/t_interface.h>
 
@@ -31,7 +29,7 @@ class t_program;
  */
 class t_service : public t_interface {
  public:
-  explicit t_service(
+  t_service(
       t_program* program, std::string name, const t_service* extends = nullptr)
       : t_interface(program, std::move(name)), extends_(extends) {}
 
@@ -51,7 +49,6 @@ class t_service : public t_interface {
   const t_service* get_extends() const { return extends_; }
   void set_extends(const t_service* extends) { extends_ = extends; }
   type get_type_value() const override { return type::t_service; }
-  bool is_service() const override { return true; }
 };
 
 } // namespace apache::thrift::compiler

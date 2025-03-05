@@ -50,12 +50,17 @@ class ThriftPicklingTest(unittest.TestCase):
         if is_auto_migrated():
             py3_types.nested_pickle(c=loaded)
         else:
-            # TODO: support nesting of a python struct in a py3 struct
-            pass
+            # TODO(T216883007): support nesting of a python struct in a py3 struct
+            with self.assertRaises(TypeError):
+                py3_types.nested_pickle(c=loaded)
 
     def test_pickled_py3_struct_load_and_nest_in_python(self) -> None:
         loaded = loads(self.py3_pickled_data)
         python_types.nested_pickle(c=loaded)
+        if is_auto_migrated():
+            self.assertIsInstance(loaded, python_types.easy_pickle)
+        else:
+            self.assertNotIsInstance(loaded, python_types.easy_pickle)
 
     def test_pickled_python_struct_load_and_nest_in_python(self) -> None:
         loaded = loads(self.python_pickled_data)

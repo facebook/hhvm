@@ -48,8 +48,6 @@
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
-THRIFT_FLAG_DEFINE_int64(rocket_server_version_timeout_ms, 500);
-THRIFT_FLAG_DEFINE_bool(rocket_client_enable_keep_alive, true);
 THRIFT_FLAG_DEFINE_bool(rocket_client_binary_rpc_metadata_encoding, false);
 
 namespace apache::thrift {
@@ -110,7 +108,7 @@ RocketClient::RocketClient(
     socket_2->setCloseOnFailedWrite(false);
   }
 
-  if (THRIFT_FLAG(rocket_client_enable_keep_alive) && keepAliveTimeoutMs > 0) {
+  if (keepAliveTimeoutMs > 0) {
     keepAliveWatcher_ = std::unique_ptr<
         KeepAliveWatcher,
         folly::DelayedDestruction::Destructor>(new KeepAliveWatcher(
@@ -1530,8 +1528,7 @@ void RocketClient::onServerVersionRequired() {
   // include a timeout to close the connection if server does not respond
   serverVersionTimeout_.reset(new ServerVersionTimeout(*this));
   evb_->timer().scheduleTimeout(
-      serverVersionTimeout_.get(),
-      std::chrono::milliseconds(THRIFT_FLAG(rocket_server_version_timeout_ms)));
+      serverVersionTimeout_.get(), std::chrono::milliseconds(500));
 }
 
 void RocketClient::setServerVersion(int32_t serverVersion) {

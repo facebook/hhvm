@@ -110,8 +110,6 @@ THRIFT_FLAG_DEFINE_bool(server_fizz_enable_receiving_dc, false);
 THRIFT_FLAG_DEFINE_bool(server_fizz_enable_presenting_dc, false);
 THRIFT_FLAG_DEFINE_bool(enable_rotation_for_in_memory_ticket_seeds, false);
 THRIFT_FLAG_DEFINE_bool(watch_default_ticket_path, true);
-THRIFT_FLAG_DEFINE_bool(
-    init_decorated_processor_factory_only_resource_pools, false);
 
 namespace apache::thrift::detail {
 THRIFT_PLUGGABLE_FUNC_REGISTER(
@@ -1150,19 +1148,11 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
     }
     runtimeDisableResourcePoolsDeprecated();
   } else {
-    AsyncProcessorFactory::CreateMethodMetadataResult methodMetadata;
-    if (THRIFT_FLAG(init_decorated_processor_factory_only_resource_pools)) {
-      // Check whether there are any wildcard services.
-      // Need to set this up now to check.
-      methodMetadata =
-          ensureDecoratedProcessorFactoryInitialized().createMethodMetadata();
-    } else {
-      // Need to set this up now to check.
-      ensureProcessedServiceDescriptionInitialized();
+    // Need to set this up now to check.
+    ensureProcessedServiceDescriptionInitialized();
 
-      // Check whether there are any wildcard services.
-      methodMetadata = getDecoratedProcessorFactory().createMethodMetadata();
-    }
+    // Check whether there are any wildcard services.
+    auto methodMetadata = getDecoratedProcessorFactory().createMethodMetadata();
 
     if (auto* methodMetadataMap =
             std::get_if<AsyncProcessorFactory::MethodMetadataMap>(
@@ -1534,9 +1524,6 @@ void ThriftServer::cleanUp() {
   // Clear the service description so that it's re-created if the server
   // is restarted.
   processedServiceDescription_.reset();
-  if (THRIFT_FLAG(init_decorated_processor_factory_only_resource_pools)) {
-    decoratedProcessorFactory_.reset();
-  }
 }
 
 uint64_t ThriftServer::getNumDroppedConnections() const {
@@ -1718,22 +1705,12 @@ void ThriftServer::stopAcceptingAndJoinOutstandingRequests() {
   internalStatus_.store(ServerStatus::NOT_RUNNING, std::memory_order_release);
 }
 
-AsyncProcessorFactory& ThriftServer::getDecoratedProcessorFactory() const {
-  if (THRIFT_FLAG(init_decorated_processor_factory_only_resource_pools)) {
-    CHECK(decoratedProcessorFactory_)
-        << "Server must be set up before calling this method";
-    return *decoratedProcessorFactory_;
-  }
-  CHECK(processedServiceDescription_)
-      << "Server must be set up before calling this method";
-  return *processedServiceDescription_->decoratedProcessorFactory;
-}
-
-AsyncProcessorFactory&
-ThriftServer::ensureDecoratedProcessorFactoryInitialized() {
+void ThriftServer::ensureProcessedServiceDescriptionInitialized() {
   DCHECK(getProcessorFactory().get());
-  if (decoratedProcessorFactory_ == nullptr) {
-    decoratedProcessorFactory_ = createDecoratedProcessorFactory(
+  if (processedServiceDescription_ == nullptr) {
+    auto modules = processModulesSpecification(
+        std::exchange(unprocessedModulesSpecification_, {}));
+    auto decoratedProcessorFactory = createDecoratedProcessorFactory(
         getProcessorFactory(),
         getStatusInterface(),
         getMonitoringInterface(),
@@ -1741,39 +1718,11 @@ ThriftServer::ensureDecoratedProcessorFactoryInitialized() {
         getSecurityInterface(),
         isCheckUnimplementedExtraInterfacesAllowed() &&
             THRIFT_FLAG(server_check_unimplemented_extra_interfaces));
-  }
-  return *decoratedProcessorFactory_;
-}
-
-void ThriftServer::ensureProcessedServiceDescriptionInitialized() {
-  if (THRIFT_FLAG(init_decorated_processor_factory_only_resource_pools)) {
-    ensureDecoratedProcessorFactoryInitialized();
-    if (processedServiceDescription_ == nullptr) {
-      auto modules = processModulesSpecification(
-          std::exchange(unprocessedModulesSpecification_, {}));
-      processedServiceDescription_ =
-          ProcessedServiceDescription::createAndActivate(
-              *this, ProcessedServiceDescription{std::move(modules)});
-    }
-  } else {
-    DCHECK(getProcessorFactory().get());
-    if (processedServiceDescription_ == nullptr) {
-      auto modules = processModulesSpecification(
-          std::exchange(unprocessedModulesSpecification_, {}));
-      auto decoratedProcessorFactory = createDecoratedProcessorFactory(
-          getProcessorFactory(),
-          getStatusInterface(),
-          getMonitoringInterface(),
-          getControlInterface(),
-          getSecurityInterface(),
-          isCheckUnimplementedExtraInterfacesAllowed() &&
-              THRIFT_FLAG(server_check_unimplemented_extra_interfaces));
-      processedServiceDescription_ =
-          ProcessedServiceDescription::createAndActivate(
-              *this,
-              ProcessedServiceDescription{
-                  std::move(modules), std::move(decoratedProcessorFactory)});
-    }
+    processedServiceDescription_ =
+        ProcessedServiceDescription::createAndActivate(
+            *this,
+            ProcessedServiceDescription{
+                std::move(modules), std::move(decoratedProcessorFactory)});
   }
 }
 

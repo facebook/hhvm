@@ -43,7 +43,7 @@ struct FsEvent {
    *
    * Positive is success, and, depending on the operation, may contain a nonzero result.
    *
-   * If a FUSE request returns an inode which the kernel will reference, this field contains that inode numebr, so it can be correlated with future FUSE requests to that inode.
+   * If a FUSE request returns an inode which the kernel will reference, this field contains that inode number, so it can be correlated with future FUSE requests to that inode.
    * field is set. This field can be used to link the lookup/create/mknod
    * request to future FUSE requests on that inode.
    *

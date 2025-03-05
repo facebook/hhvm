@@ -117,3 +117,5 @@ val to_json :
 val claim_message : ('a, _) t -> 'a Message.t
 
 val function_pos : ('a, _) t -> 'a option
+
+val custom_errors : (_, _) t -> string list

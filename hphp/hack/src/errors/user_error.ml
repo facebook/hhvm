@@ -341,3 +341,5 @@ let to_json ~(human_formatter : (_ -> string) option) ~filename_to_string error
 let claim_message { claim; _ } = claim
 
 let function_pos { function_pos; _ } = function_pos
+
+let custom_errors { custom_msgs; _ } = custom_msgs

@@ -6,6 +6,7 @@
  */
 
 include "eden/fs/service/eden.thrift"
+include "thrift/annotation/thrift.thrift"
 namespace cpp2 facebook.eden
 namespace java.swift com.facebook.eden.thrift.streaming
 namespace py3 eden.fs.service
@@ -113,9 +114,10 @@ service StreamingEdenService extends eden.EdenService {
   /**
    * subscribeStreamTemporary is deprecated. Please use streamJournalChanged.
    */
+  @thrift.DeprecatedUnvalidatedAnnotations{items = {"deprecated": "1"}}
   stream<eden.JournalPosition> subscribeStreamTemporary(
     1: eden.PathString mountPoint,
-  ) (deprecated);
+  );
 
   /**
    *

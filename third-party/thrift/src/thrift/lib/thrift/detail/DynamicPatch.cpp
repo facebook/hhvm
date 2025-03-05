@@ -1373,7 +1373,8 @@ void DynamicUnknownPatch::throwIncompatibleCategory(
       method,
       debugStringViaEncode(patch_)));
 }
-void DynamicUnknownPatch::remove(detail::Badge, Value v) {
+void DynamicUnknownPatch::removeMulti(
+    detail::Badge, const detail::ValueSet& v) {
   if (!isOneOfCategory(
           {Category::EmptyPatch,
            Category::ClearPatch,
@@ -1381,7 +1382,10 @@ void DynamicUnknownPatch::remove(detail::Badge, Value v) {
     throwIncompatibleCategory("remove");
   }
 
-  get(op::PatchOp::Remove).ensure_set().insert(std::move(v));
+  auto& s = get(op::PatchOp::Remove).ensure_set();
+  for (const auto& k : v) {
+    s.insert(k);
+  }
 }
 void DynamicUnknownPatch::assign(detail::Badge, Object v) {
   if (!isOneOfCategory(
@@ -1428,12 +1432,17 @@ void DynamicUnknownPatch::apply(detail::Badge, Value& v) const {
       value.as_object() = std::move(obj);
     }
     void clear(detail::Badge) { value = emptyValue(value.getType()); }
-    void remove(detail::Badge, detail::Value v) {
-      detail::convertStringToBinary(v);
+    void removeMulti(detail::Badge, const detail::ValueSet& v) {
       if (auto p = value.if_set()) {
-        p->erase(v);
+        for (auto k : v) {
+          detail::convertStringToBinary(k);
+          p->erase(k);
+        }
       } else {
-        value.as_map().erase(v);
+        for (auto k : v) {
+          detail::convertStringToBinary(k);
+          value.as_map().erase(k);
+        }
       }
     }
     void patchIfSet(detail::Badge, FieldId id, const DynamicPatch& p) {

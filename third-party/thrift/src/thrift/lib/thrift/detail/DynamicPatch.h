@@ -152,7 +152,7 @@ class DynamicPatchBase {
 class DynamicUnknownPatch : public DynamicPatchBase {
  public:
   void assign(detail::Badge, Object v);
-  void remove(detail::Badge badge, Value v);
+  void removeMulti(detail::Badge badge, const detail::ValueSet& v);
   void patchIfSet(detail::Badge, FieldId, const DynamicPatch&);
 
   void fromObject(detail::Badge badge, Object obj) {
@@ -760,9 +760,7 @@ void DynamicUnknownPatch::customVisitImpl(
   }
 
   if (auto remove = self.get_ptr(op::PatchOp::Remove)) {
-    for (auto& i : remove->as_set()) {
-      std::forward<Visitor>(v).remove(badge, i);
-    }
+    std::forward<Visitor>(v).removeMulti(badge, remove->as_set());
   }
 }
 

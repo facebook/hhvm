@@ -17,9 +17,12 @@
 
 import unittest
 
+import convertible.thrift_types as python_convertible
+
 import thrift.py3.test.cpp_converter_helper as converter
 
 from convertible.types import Color, Nested, Simple, Union
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import is_auto_migrated
 
 
 class CppConverterEcho(unittest.TestCase):
@@ -71,19 +74,28 @@ class CppConverterEcho(unittest.TestCase):
         )
 
     def test_echo_simple(self) -> None:
-        self.assertEqual(self.make_simple(), converter.echo_simple(self.make_simple()))
+        echo = converter.echo_simple(self.make_simple())
+        self.assertEqual(self.make_simple(), echo)
+        expected_type = python_convertible.Simple if is_auto_migrated() else Simple
+        self.assertIsInstance(echo, expected_type)
 
     def test_echo_nested(self) -> None:
-        self.assertEqual(self.make_nested(), converter.echo_nested(self.make_nested()))
+        echo = converter.echo_nested(self.make_nested())
+        self.assertEqual(self.make_nested(), echo)
+        expected_type = python_convertible.Nested if is_auto_migrated() else Nested
+        self.assertIsInstance(echo, expected_type)
 
     def test_echo_union(self) -> None:
-        for ufac in [
+        for u_factory in [
             lambda: Union(intField=42),
             lambda: Union(strField="hello"),
             lambda: Union(simple_=self.make_simple()),
             lambda: Union(intList=[1, 1, 2, 3, 5, 8]),
         ]:
-            self.assertEqual(ufac(), converter.echo_union(ufac()))
+            echo = converter.echo_union(u_factory())
+            self.assertEqual(u_factory(), echo, str(u_factory()))
+            expected_type = python_convertible.Union if is_auto_migrated() else Union
+            self.assertIsInstance(echo, expected_type)
 
     def test_constructor_error(self) -> None:
         bad_unicode = b"\xc3\x28"

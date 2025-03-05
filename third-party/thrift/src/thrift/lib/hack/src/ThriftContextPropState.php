@@ -565,8 +565,15 @@ final class ThriftContextPropState {
   }
 
   // Getters for the root_product_id
-  public function getRootProductId()[leak_safe]: ?int {
-    return $this->storage->baggage?->root_product_id;
+  public readonly function getRootProductId()[leak_safe]: ?int {
+    if ($this->storage->baggage is null) {
+      return null;
+    }
+    $root_product_id = $this->storage->baggage?->root_product_id;
+    if ($root_product_id is null) {
+      return null;
+    }
+    return ($root_product_id as int);
   }
 
   // Immutable setter for the root_product_id

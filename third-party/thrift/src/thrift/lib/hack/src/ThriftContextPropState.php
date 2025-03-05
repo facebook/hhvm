@@ -446,6 +446,10 @@ final class ThriftContextPropState {
       MCPProductID::UNKNOWN;
   }
 
+  public function clearExperimentIds()[write_props]: void {
+    $this->storage->experiment_ids = null;
+  }
+
   public function getExperimentIds()[]: vec<int> {
     $ret = $this->storage->experiment_ids;
     if ($ret !== null) {
@@ -454,16 +458,40 @@ final class ThriftContextPropState {
     return vec[];
   }
 
-  public function addExperimentId(int $eid)[write_props]: void {
+  public function addExperimentId(int $eid)[zoned_shallow]: void {
+    if (!static::isExperimentIdModificationAllowed()) {
+      return;
+    }
     $v = $this->getExperimentIds();
     $v[] = $eid;
     $this->storage->experiment_ids = $v;
     $this->dirty();
   }
 
-  public function setExperimentIds(vec<int> $eids)[write_props]: void {
+  public function setExperimentIds(vec<int> $eids)[zoned_shallow]: void {
+    if (!static::isExperimentIdModificationAllowed()) {
+      return;
+    }
     $this->storage->experiment_ids = $eids;
     $this->dirty();
+  }
+
+  private static function isExperimentIdModificationAllowed(
+  )[zoned_shallow]: bool {
+    if (
+      !JustKnobs::eval('lumos/experimentation:enable_www_experiment_id_api')
+    ) {
+      $sampling_rate = JustKnobs::getInt(
+        'lumos/experimentation:www_experiment_id_api_violation_sampling_rate',
+      );
+      if (coinflip($sampling_rate)) {
+        FBLogger('lumos_experimentation', 'disallowed experiment id call')
+          ->setBlameOwner('lumos')
+          ->warn('Experiment ID modifications are disallowed!');
+      }
+      return false;
+    }
+    return true;
   }
 
   /**

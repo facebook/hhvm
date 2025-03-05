@@ -26,6 +26,7 @@ import (
 	"runtime/debug"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/stats"
+	"github.com/facebook/fbthrift/thrift/lib/thrift/rocket_upgrade"
 	"github.com/rsocket/rsocket-go/core/transport"
 )
 
@@ -144,20 +145,25 @@ func (r *rocketServerTransport) processRequests(ctx context.Context, conn net.Co
 	case TransportIDRocket:
 		r.processRocketRequests(ctx, conn)
 	case TransportIDUpgradeToRocket:
-		processor := newRocketUpgradeProcessor(r.processor)
+		ruHandler := newRocketUpgradeHandler()
+		ruProcessor := rocket_upgrade.NewRocketUpgradeProcessor(ruHandler)
+		ruCompProcessor := NewCompositeProcessor()
+		ruCompProcessor.Include(r.processor)
+		ruCompProcessor.Include(ruProcessor)
+
 		headerProtocol, err := NewHeaderProtocol(conn)
 		if err != nil {
 			r.log("thrift: error constructing header protocol from %s: %s\n", conn.RemoteAddr(), err)
 			return
 		}
-		if err := r.processHeaderRequest(ctx, headerProtocol, processor); err != nil {
+		if err := r.processHeaderRequest(ctx, headerProtocol, ruCompProcessor); err != nil {
 			r.log("thrift: error processing first header request from %s: %s\n", conn.RemoteAddr(), err)
 			return
 		}
-		if processor.upgraded {
+		if ruHandler.upgradeInvoked {
 			r.processRocketRequests(ctx, conn)
 		} else {
-			if err := r.processHeaderRequests(ctx, headerProtocol, processor); err != nil {
+			if err := r.processHeaderRequests(ctx, headerProtocol, ruCompProcessor); err != nil {
 				r.log("thrift: error processing additional header request from %s: %s\n", conn.RemoteAddr(), err)
 			}
 		}

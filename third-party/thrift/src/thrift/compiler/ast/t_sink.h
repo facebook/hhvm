@@ -71,19 +71,6 @@ class t_sink : public t_node {
  public:
   // TODO(afuller): Delete everything below here. It is only provided for
   // backwards compatibility.
-
-  explicit t_sink(
-      const t_type* elem_type,
-      std::unique_ptr<t_throws> sink_exceptions,
-      const t_type* final_response_type,
-      std::unique_ptr<t_throws> final_response_exceptions)
-      : t_sink(
-            t_type_ref::from_req_ptr(elem_type),
-            t_type_ref::from_req_ptr(final_response_type)) {
-    set_sink_exceptions(std::move(sink_exceptions));
-    set_final_response_exceptions(std::move(final_response_exceptions));
-  }
-
   const t_type* get_elem_type() const { return elem_type().get_type(); }
   const t_type* get_final_response_type() const {
     return final_response_type().get_type();

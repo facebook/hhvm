@@ -362,18 +362,18 @@ void DynamicMapPatch::erase(detail::Badge, Value k) {
 }
 void DynamicMapPatch::tryPutMulti(detail::Badge, detail::ValueMap map) {
   ensurePatchable();
-  for (const auto& [k, v] : map) {
+  map.eraseInto(map.begin(), map.end(), [&](auto&& k, auto&& v) {
     if (put_.contains(k)) {
       // We already `put` the value, ignore `add`
-      continue;
+      return;
     } else if (remove_.erase(k)) {
       // We removed the `value`, we need to add it back as `put`
       patchAfter_.erase(k);
-      put_[k] = v;
+      put_.insert_or_assign(std::move(k), std::move(v));
     } else {
-      add_.try_emplace(k, v);
+      add_.try_emplace(std::move(k), std::move(v));
     }
-  }
+  });
 }
 
 void DynamicMapPatch::ensurePatchable() {

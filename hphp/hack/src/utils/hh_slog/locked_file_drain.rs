@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use fs2::FileExt;
 use slog::Drain;
 
 /// Locks the file when logging. Prevents multi-process writes from mangling if
@@ -48,7 +47,7 @@ impl Drain for LockedFileDrain {
         };
 
         // Acquiring exclusive lock
-        while let Err(err) = file.lock_exclusive() {
+        while let Err(err) = fs2::FileExt::lock_exclusive(&file) {
             match err.kind() {
                 // This shouldn't happen often, but if it's just an
                 // interruption, retry.
@@ -69,7 +68,7 @@ impl Drain for LockedFileDrain {
         }
 
         // Releasing lock
-        while let Err(err) = file.unlock() {
+        while let Err(err) = fs2::FileExt::unlock(&file) {
             match err.kind() {
                 std::io::ErrorKind::Interrupted => continue,
                 _ => {

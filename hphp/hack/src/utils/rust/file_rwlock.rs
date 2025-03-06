@@ -155,9 +155,7 @@ impl<T: serde::Serialize + for<'de> serde::Deserialize<'de>> FileRwLock<T> {
             tempfile::NamedTempFile::new_in(parent).path_context(&self.path, "open(O_TMPFILE)")?;
         #[cfg(not(target_os = "linux"))]
         let file = nfile.as_file_mut();
-        use fs2::FileExt;
-        file.lock_exclusive()
-            .path_context(&self.path, "flock(LOCK_EX)")?;
+        fs2::FileExt::lock_exclusive(&file).path_context(&self.path, "flock(LOCK_EX)")?;
 
         // Initialize the file. The file will initially be in "state" provided as a parameter,
         // either present or poisoned, with different behaviors should we crash.
@@ -270,13 +268,10 @@ impl<T: serde::Serialize + for<'de> serde::Deserialize<'de>> FileRwLock<T> {
         };
 
         // Our sequence point will be the moment we acquire the lock.
-        use fs2::FileExt;
         if write {
-            file.lock_exclusive()
-                .path_context(&self.path, "flock(LOCK_EX)")?;
+            fs2::FileExt::lock_exclusive(&file).path_context(&self.path, "flock(LOCK_EX)")?;
         } else {
-            file.lock_shared()
-                .path_context(&self.path, "flock(LOCKS_SH)")?;
+            fs2::FileExt::lock_shared(&file).path_context(&self.path, "flock(LOCKS_SH)")?;
         }
 
         // Now we have the lock, we can examine what we have in hand...
@@ -348,9 +343,7 @@ impl<T: serde::Serialize + for<'de> serde::Deserialize<'de>> FileRwLock<T> {
             Err(e) => Err(e).path_context(&self.path, "open(WR)"),
             Ok(file) => {
                 // Our sequence point will be the moment we acquire the lock.
-                use fs2::FileExt;
-                file.lock_exclusive()
-                    .path_context(&self.path, "flock(LOCK_EX)")?;
+                fs2::FileExt::lock_exclusive(&file).path_context(&self.path, "flock(LOCK_EX)")?;
 
                 // A stopped lockfile is represented by an empty file -- either
                 // empty from the create(true).open() statement above at the start

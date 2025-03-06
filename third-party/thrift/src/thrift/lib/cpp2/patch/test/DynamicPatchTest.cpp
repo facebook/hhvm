@@ -489,6 +489,21 @@ TEST(DynamicPatch, List) {
   EXPECT_TRUE(l.empty());
 }
 
+TEST(DynamicPatch, InvalidListPatch) {
+  {
+    DynamicListPatch p;
+    p.push_back(badge, asValueStruct<type::i32_t>(1));
+    EXPECT_THROW(
+        p.push_back(badge, asValueStruct<type::i64_t>(2)), std::runtime_error);
+  }
+  {
+    DynamicListPatch p;
+    p.assign(badge, asValueStruct<type::list<type::i32_t>>({1}).as_list());
+    EXPECT_THROW(
+        p.push_back(badge, asValueStruct<type::i64_t>(2)), std::runtime_error);
+  }
+}
+
 TEST(DynamicPatch, Set) {
   DynamicSetPatch p;
   p.insert(badge, asValueStruct<type::i32_t>(1));

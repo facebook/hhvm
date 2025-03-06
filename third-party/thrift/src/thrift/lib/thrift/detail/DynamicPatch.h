@@ -88,6 +88,10 @@ struct DynamicPatchOptions {
 // Ideally we should also support primitive types (e.g., i32 --> I32Patch).
 // External users should use toPatchUri/fromPatchUri instead for now.
 type::Type toPatchType(type::Type input);
+
+void checkSameType(
+    const apache::thrift::protocol::Value& v1,
+    const apache::thrift::protocol::Value& v2);
 } // namespace detail
 
 class DynamicPatch;
@@ -214,10 +218,17 @@ class DynamicListPatch : public DynamicPatchBase {
 
   void push_back(detail::Badge, Value v) {
     if (auto assign = get_ptr(op::PatchOp::Assign)) {
+      if (!assign->as_list().empty()) {
+        detail::checkSameType(assign->as_list().back(), v);
+      }
       assign->as_list().push_back(std::move(v));
       return;
     }
-    get(op::PatchOp::Put).ensure_list().push_back(std::move(v));
+    auto& l = get(op::PatchOp::Put).ensure_list();
+    if (!l.empty()) {
+      detail::checkSameType(l.back(), v);
+    }
+    l.push_back(std::move(v));
   }
 
  private:

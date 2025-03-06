@@ -210,6 +210,18 @@ type::Type toPatchType(type::Type input) {
       "Unsupported type: {}",
       apache::thrift::util::enumNameSafe(input.toThrift().name()->getType())));
 }
+
+void checkSameType(
+    const apache::thrift::protocol::Value& v1,
+    const apache::thrift::protocol::Value& v2) {
+  if (v1.getType() != v2.getType()) {
+    throw std::runtime_error(fmt::format(
+        "Value type does not match: ({}) v.s. ({})",
+        apache::thrift::util::enumNameSafe(v1.getType()),
+        apache::thrift::util::enumNameSafe(v2.getType())));
+  }
+}
+
 } // namespace detail
 
 std::string toPatchUri(std::string s) {

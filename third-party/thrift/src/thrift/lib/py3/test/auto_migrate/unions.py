@@ -26,6 +26,7 @@ from testing.types import (
     easy,
     Integers,
     IOBufUnion,
+    Misordered,
     ReservedUnion,
     ValueOrError,
 )
@@ -173,6 +174,25 @@ class UnionTests(unittest.TestCase):
         self.assertEqual(union.type, ComplexUnion.Type.raw)
         union = ComplexUnion.fromValue(True)
         self.assertEqual(union.type, ComplexUnion.Type.truthy)
+
+    def test_misordered_fromValue(self) -> None:
+        u = Misordered.fromValue(31)
+        # BAD: thrift-python uses key order, thrift-py3 uses declaration order
+        # this is a risk for auto-migration
+        if is_auto_migrated():
+            self.assertEqual(u.type, Misordered.Type.val64)
+            self.assertEqual(u.val64, 31)
+        else:
+            self.assertEqual(u.type, Misordered.Type.val32)
+            self.assertEqual(u.val32, 31)
+
+        u = Misordered.fromValue("31")
+        if is_auto_migrated():
+            self.assertEqual(u.type, Misordered.Type.s2)
+            self.assertEqual(u.s2, "31")
+        else:
+            self.assertEqual(u.type, Misordered.Type.s1)
+            self.assertEqual(u.s1, "31")
 
     def test_iobuf_union(self) -> None:
         abuf = IOBuf(b"3.141592025756836")

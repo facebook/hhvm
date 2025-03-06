@@ -510,6 +510,13 @@ struct ListNode {
   2: optional ListNode next;
 }
 
+union Misordered {
+  4: i32 val32;
+  3: string s1;
+  2: i64 val64;
+  1: string s2;
+}
+
 @cpp.Type{name = "folly::IOBuf"}
 typedef binary IOBuf
 

@@ -414,7 +414,6 @@ bool runServerDual(
       freeAllRouters();
       return false;
     }
-    thriftServer->disableActiveRequestsTracking();
     thriftServer->setSocketMaxReadsPerEvent(1);
     // Set observer for connection stats
     thriftServer->setObserver(

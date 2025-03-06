@@ -14,14 +14,14 @@ typedef apache::thrift::ThriftPresult<false> MyServicePrioChild_pang_pargs;
 typedef apache::thrift::ThriftPresult<true> MyServicePrioChild_pang_presult;
 } // namespace cpp2
 template <typename RpcOptions>
-void apache::thrift::Client<::cpp2::MyServicePrioChild>::fbthrift_send_pang(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
+void apache::thrift::Client<::cpp2::MyServicePrioChild>::fbthrift_send_pang(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata) {
 
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "pang",
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "MyServicePrioChild");
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::forward<RpcOptions>(rpcOptions), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), std::move(interceptorFrameworkMetadata));
 }
 
 
@@ -57,10 +57,14 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::MyServicePrioCh
 
 void apache::thrift::Client<::cpp2::MyServicePrioChild>::fbthrift_serialize_and_send_pang(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_pang(rpcOptions, *header, contextStack);
+  std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
+  if (contextStack != nullptr) {
+    interceptorFrameworkMetadata = detail::ContextStackInternals::getInterceptorFrameworkMetadata(*contextStack);
+  }
   if (stealRpcOptions) {
-    fbthrift_send_pang(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+    fbthrift_send_pang(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback), std::move(interceptorFrameworkMetadata));
   } else {
-    fbthrift_send_pang(std::move(request), rpcOptions, std::move(header), std::move(callback));
+    fbthrift_send_pang(std::move(request), rpcOptions, std::move(header), std::move(callback), std::move(interceptorFrameworkMetadata));
   }
 }
 
@@ -135,15 +139,17 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::MyServicePrioChild
   auto header = std::move(ctxAndHeader.second);
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
+  std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     auto argsAsRefs = std::tie();
     if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get());
         exTry.hasException()) {
       return folly::makeSemiFuture<folly::Unit>(std::move(exTry).exception());
     }
+    interceptorFrameworkMetadata = detail::ContextStackInternals::getInterceptorFrameworkMetadata(*contextStack);
   }
   apache::thrift::SerializedRequest request = fbthrift_serialize_pang(rpcOptions, *header, contextStack);
-  fbthrift_send_pang(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
+  fbthrift_send_pang(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback), std::move(interceptorFrameworkMetadata));
   return std::move(semifuture).deferValue(CallbackHelper::processClientInterceptorsAndExtractResult);
 }
 

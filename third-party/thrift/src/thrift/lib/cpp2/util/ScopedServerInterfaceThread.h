@@ -48,6 +48,8 @@ class ScopedServerInterfaceThread {
   using StreamFaultInjectionFunc =
       folly::Function<folly::Function<folly::exception_wrapper()>(
           folly::StringPiece methodName)>;
+  using InterceptorList =
+      std::shared_ptr<std::vector<std::shared_ptr<ClientInterceptorBase>>>;
 
   ScopedServerInterfaceThread(
       std::shared_ptr<AsyncProcessorFactory> apf,
@@ -105,6 +107,17 @@ class ScopedServerInterfaceThread {
   std::unique_ptr<AsyncClientT> newStickyClient(
       folly::Executor* callbackExecutor = nullptr,
       MakeChannelFunc channelFunc = RocketClientChannel::newChannel) const;
+
+  /**
+   * Like newClient but allows the user to provide client side interceptors
+   */
+  template <class AsyncClientT>
+  std::unique_ptr<AsyncClientT> newClientWithInterceptors(
+      folly::Executor* callbackExecutor = nullptr,
+      MakeChannelFunc channelFunc = RocketClientChannel::newChannel,
+      protocol::PROTOCOL_TYPES prot =
+          protocol::PROTOCOL_TYPES::T_COMPACT_PROTOCOL,
+      InterceptorList interceptors = nullptr) const;
 
   static std::shared_ptr<RequestChannel> makeTestClientChannel(
       std::shared_ptr<AsyncProcessorFactory> apf,

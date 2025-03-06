@@ -14,7 +14,7 @@ typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apac
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::structure, ::cpp2::ShouldBeBoxed*>> BoxService_getABoxSession_presult;
 } // namespace cpp2
 template <typename RpcOptions>
-void apache::thrift::Client<::cpp2::BoxService>::fbthrift_send_getABoxSession(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, const apache::thrift::InteractionHandle& handle) {
+void apache::thrift::Client<::cpp2::BoxService>::fbthrift_send_getABoxSession(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata, const apache::thrift::InteractionHandle& handle) {
   apache::thrift::RpcOptions rpcOpts(std::forward<RpcOptions>(rpcOptions));
   setInteraction(handle, rpcOpts);
 
@@ -25,7 +25,7 @@ void apache::thrift::Client<::cpp2::BoxService>::fbthrift_send_getABoxSession(ap
                 "BoxService",
                 ::apache::thrift::InteractionMethodPosition::Factory,
                 "BoxedInteraction");
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::move(rpcOpts), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::move(rpcOpts), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), std::move(interceptorFrameworkMetadata));
 }
 
 
@@ -58,10 +58,14 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::BoxService>::fb
 
 void apache::thrift::Client<::cpp2::BoxService>::fbthrift_serialize_and_send_getABoxSession(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const apache::thrift::InteractionHandle& handle, const ::cpp2::ShouldBeBoxed& p_req, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_getABoxSession(rpcOptions, *header, contextStack, p_req);
+  std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
+  if (contextStack != nullptr) {
+    interceptorFrameworkMetadata = detail::ContextStackInternals::getInterceptorFrameworkMetadata(*contextStack);
+  }
   if (stealRpcOptions) {
-    fbthrift_send_getABoxSession(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback), handle);
+    fbthrift_send_getABoxSession(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback), std::move(interceptorFrameworkMetadata), handle);
   } else {
-    fbthrift_send_getABoxSession(std::move(request), rpcOptions, std::move(header), std::move(callback), handle);
+    fbthrift_send_getABoxSession(std::move(request), rpcOptions, std::move(header), std::move(callback), std::move(interceptorFrameworkMetadata), handle);
   }
 }
 
@@ -141,15 +145,17 @@ folly::SemiFuture<std::pair<apache::thrift::Client<::cpp2::BoxService>::BoxedInt
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
   BoxedInteraction interactionHandle(channel_, "BoxedInteraction", interceptors_);
+  std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     auto argsAsRefs = std::tie(p_req);
     if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get());
         exTry.hasException()) {
       return folly::makeSemiFuture<std::pair<apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction, ::cpp2::ShouldBeBoxed>>(std::move(exTry).exception());
     }
+    interceptorFrameworkMetadata = detail::ContextStackInternals::getInterceptorFrameworkMetadata(*contextStack);
   }
   apache::thrift::SerializedRequest request = fbthrift_serialize_getABoxSession(rpcOptions, *header, contextStack, p_req);
-  fbthrift_send_getABoxSession(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback), interactionHandle);
+  fbthrift_send_getABoxSession(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback), std::move(interceptorFrameworkMetadata), interactionHandle);
   return std::move(semifuture)
       .deferValue(
           [interactionHandle = std::move(interactionHandle)](CallbackHelper::PromiseResult&& result) mutable {
@@ -230,7 +236,7 @@ typedef apache::thrift::ThriftPresult<false> BoxService_BoxedInteraction_getABox
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::structure, ::cpp2::ShouldBeBoxed*>> BoxService_BoxedInteraction_getABox_presult;
 } // namespace cpp2
 template <typename RpcOptions>
-void apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction::fbthrift_send_getABox(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback) {
+void apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction::fbthrift_send_getABox(apache::thrift::SerializedRequest&& request, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::RequestClientCallback::Ptr callback, std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata) {
   apache::thrift::RpcOptions rpcOpts(std::forward<RpcOptions>(rpcOptions));
   setInteraction(rpcOpts);
 
@@ -241,7 +247,7 @@ void apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction::fbthrift_send
                 "BoxService",
                 ::apache::thrift::InteractionMethodPosition::Member,
                 "BoxedInteraction");
-  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::move(rpcOpts), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), nullptr);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(std::move(request), std::move(rpcOpts), std::move(callback), std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), std::move(interceptorFrameworkMetadata));
 }
 
 
@@ -272,10 +278,14 @@ apache::thrift::SerializedRequest apache::thrift::Client<::cpp2::BoxService>::Bo
 
 void apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction::fbthrift_serialize_and_send_getABox(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_getABox(rpcOptions, *header, contextStack);
+  std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
+  if (contextStack != nullptr) {
+    interceptorFrameworkMetadata = detail::ContextStackInternals::getInterceptorFrameworkMetadata(*contextStack);
+  }
   if (stealRpcOptions) {
-    fbthrift_send_getABox(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback));
+    fbthrift_send_getABox(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback), std::move(interceptorFrameworkMetadata));
   } else {
-    fbthrift_send_getABox(std::move(request), rpcOptions, std::move(header), std::move(callback));
+    fbthrift_send_getABox(std::move(request), rpcOptions, std::move(header), std::move(callback), std::move(interceptorFrameworkMetadata));
   }
 }
 
@@ -349,15 +359,17 @@ folly::SemiFuture<::cpp2::ShouldBeBoxed> apache::thrift::Client<::cpp2::BoxServi
   auto header = std::move(ctxAndHeader.second);
   auto* contextStack = wrappedCallbackAndContextStack.second;
   auto wrappedCallback = std::move(wrappedCallbackAndContextStack.first);
+  std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     auto argsAsRefs = std::tie();
     if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get());
         exTry.hasException()) {
       return folly::makeSemiFuture<::cpp2::ShouldBeBoxed>(std::move(exTry).exception());
     }
+    interceptorFrameworkMetadata = detail::ContextStackInternals::getInterceptorFrameworkMetadata(*contextStack);
   }
   apache::thrift::SerializedRequest request = fbthrift_serialize_getABox(rpcOptions, *header, contextStack);
-  fbthrift_send_getABox(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback));
+  fbthrift_send_getABox(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback), std::move(interceptorFrameworkMetadata));
   return std::move(semifuture).deferValue(CallbackHelper::processClientInterceptorsAndExtractResult);
 }
 

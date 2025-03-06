@@ -29,6 +29,15 @@ struct RequestArgsStruct {
   2: string bar;
 }
 
+/**
+ * This struct is used to test passing of frameworkMetadata between client and
+ * server interceptors. The single string field is used to verify
+ * ClientInterceptor's ability to mutate the metadata
+ */
+struct FrameworkMetadata {
+  1: string value;
+}
+
 service ClientInterceptorTest {
   void noop();
 

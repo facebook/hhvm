@@ -41,7 +41,8 @@ RequestRpcMetadata makeRequestRpcMetadata(
     std::variant<InteractionCreate, int64_t, std::monostate> interactionHandle,
     bool serverZstdSupported,
     ssize_t payloadSize,
-    transport::THeader& header) {
+    transport::THeader& header,
+    std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata) {
   RequestRpcMetadata metadata;
   metadata.protocol() = static_cast<ProtocolId>(header.getProtocolId());
   metadata.kind() = kind;
@@ -128,7 +129,9 @@ RequestRpcMetadata makeRequestRpcMetadata(
     metadata.otherMetadata() = std::move(writeHeaders);
   }
 
-  if (rpcOptions.getContextPropMask()) {
+  if (interceptorFrameworkMetadata != nullptr) {
+    metadata.frameworkMetadata() = std::move(interceptorFrameworkMetadata);
+  } else if (rpcOptions.getContextPropMask()) {
     folly::dynamic logMessages = folly::dynamic::object();
     auto frameworkMetadata = makeFrameworkMetadata(rpcOptions, logMessages);
     if (frameworkMetadata) {

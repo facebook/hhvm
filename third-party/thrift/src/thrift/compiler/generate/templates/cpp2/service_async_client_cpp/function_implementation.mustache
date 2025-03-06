@@ -61,10 +61,14 @@ apache::thrift::SerializedRequest {{> service_common/client_class_name}}::fbthri
 
 void {{> service_common/client_class_name}}::fbthrift_serialize_and_send_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, {{> types/callback_type}} callback{{#function:creates_interaction?}}, const apache::thrift::InteractionHandle& handle{{/function:creates_interaction?}}{{function:comma}}{{> service_common/function_param_list_client}}, bool stealRpcOptions) {
   apache::thrift::SerializedRequest request = fbthrift_serialize_{{function:cpp_name}}(rpcOptions, *header, contextStack{{function:comma}}{{> service_common/param_list}});
+  std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
+  if (contextStack != nullptr) {
+    interceptorFrameworkMetadata = detail::ContextStackInternals::getInterceptorFrameworkMetadata(*contextStack);
+  }
   if (stealRpcOptions) {
-    fbthrift_send_{{function:cpp_name}}(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}});
+    fbthrift_send_{{function:cpp_name}}(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback), std::move(interceptorFrameworkMetadata){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}});
   } else {
-    fbthrift_send_{{function:cpp_name}}(std::move(request), rpcOptions, std::move(header), std::move(callback){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}});
+    fbthrift_send_{{function:cpp_name}}(std::move(request), rpcOptions, std::move(header), std::move(callback), std::move(interceptorFrameworkMetadata){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}});
   }
 }
 

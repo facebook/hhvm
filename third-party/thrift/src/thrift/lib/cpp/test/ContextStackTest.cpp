@@ -160,6 +160,8 @@ TEST(ContextStack, ClientHeaders) {
 }
 
 TEST(ContextStack, FrameworkMetadataInitialized) {
+  using namespace apache::thrift::detail;
+  THRIFT_FLAG_SET_MOCK(enable_interceptor_framework_metadata, true);
   auto handler1 = std::make_shared<TrackingTProcessorEventHandler>();
   auto handler2 = std::make_shared<TrackingTProcessorEventHandler>();
   auto handlers =

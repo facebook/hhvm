@@ -41,15 +41,17 @@ folly::SemiFuture<{{> types/return_type_client_lift_unit}}> {{> service_common/c
 {{#function:creates_interaction?}}
   {{function:created_interaction}} interactionHandle(channel_, "{{function:created_interaction}}", interceptors_);
 {{/function:creates_interaction?}}
+  std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     auto argsAsRefs = std::tie({{> service_common/param_list}});
     if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get());
         exTry.hasException()) {
       return folly::makeSemiFuture<{{> types/return_type_client_lift_unit}}>(std::move(exTry).exception());
     }
+    interceptorFrameworkMetadata = detail::ContextStackInternals::getInterceptorFrameworkMetadata(*contextStack);
   }
   apache::thrift::SerializedRequest request = fbthrift_serialize_{{function:cpp_name}}(rpcOptions, *header, contextStack{{function:comma}}{{> service_common/param_list}});
-  fbthrift_send_{{function:cpp_name}}(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback){{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}});
+  fbthrift_send_{{function:cpp_name}}(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback), std::move(interceptorFrameworkMetadata){{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}});
 {{#if (not function:creates_interaction?)}}
   return std::move(semifuture).deferValue(CallbackHelper::processClientInterceptorsAndExtractResult);
 {{#else}}

@@ -460,6 +460,9 @@ namespace detail {
 /* static */ std::unique_ptr<folly::IOBuf>
 ContextStackInternals::getInterceptorFrameworkMetadata(
     ContextStack& contextStack) {
+  if (!THRIFT_FLAG(enable_interceptor_framework_metadata)) {
+    return nullptr;
+  }
   return contextStack.getInterceptorFrameworkMetadata();
 }
 } // namespace detail

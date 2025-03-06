@@ -252,6 +252,18 @@ ScopedServerInterfaceThread::newClientWithFaultInjection(
 }
 
 template <class AsyncClientT>
+std::unique_ptr<AsyncClientT>
+ScopedServerInterfaceThread::newClientWithInterceptors(
+    folly::Executor* callbackExecutor,
+    ScopedServerInterfaceThread::MakeChannelFunc makeChannel,
+    protocol::PROTOCOL_TYPES prot,
+    InterceptorList interceptors) const {
+  return std::make_unique<AsyncClientT>(
+      newChannel(callbackExecutor, std::move(makeChannel), prot),
+      std::move(interceptors));
+}
+
+template <class AsyncClientT>
 std::unique_ptr<AsyncClientT> makeTestClient(
     std::shared_ptr<AsyncProcessorFactory> apf,
     ScopedServerInterfaceThread::FaultInjectionFunc injectFault,

@@ -169,7 +169,8 @@ class RocketClientChannel final : public ClientChannel,
       apache::thrift::ManagedStringView&& methodName,
       SerializedRequest&& request,
       std::shared_ptr<apache::thrift::transport::THeader> header,
-      RequestClientCallback::Ptr cb);
+      RequestClientCallback::Ptr cb,
+      std::unique_ptr<folly::IOBuf> frameworkMetadata);
 
   void sendSingleRequestNoResponse(
       const RpcOptions& rpcOptions,

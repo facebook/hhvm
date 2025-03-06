@@ -828,14 +828,15 @@ void RocketClientChannel::sendRequestResponse(
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
     RequestClientCallback::Ptr cb,
-    std::unique_ptr<folly::IOBuf> /* unused */) {
+    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
   sendThriftRequest(
       rpcOptions,
       RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
       std::move(methodMetadata).name_managed(),
       std::move(request),
       std::move(header),
-      std::move(cb));
+      std::move(cb),
+      std::move(frameworkMetadata));
 }
 
 void RocketClientChannel::sendRequestNoResponse(
@@ -844,14 +845,15 @@ void RocketClientChannel::sendRequestNoResponse(
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
     RequestClientCallback::Ptr cb,
-    std::unique_ptr<folly::IOBuf> /* unused */) {
+    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
   sendThriftRequest(
       rpcOptions,
       RpcKind::SINGLE_REQUEST_NO_RESPONSE,
       std::move(methodMetadata).name_managed(),
       std::move(request),
       std::move(header),
-      std::move(cb));
+      std::move(cb),
+      std::move(frameworkMetadata));
 }
 
 void RocketClientChannel::sendRequestStream(
@@ -860,7 +862,7 @@ void RocketClientChannel::sendRequestStream(
     SerializedRequest&& request,
     std::shared_ptr<THeader> header,
     StreamClientCallback* clientCallback,
-    std::unique_ptr<folly::IOBuf> /* unused */) {
+    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
   DestructorGuard dg(this);
   if (!canHandleRequest(clientCallback)) {
     return;
@@ -877,7 +879,8 @@ void RocketClientChannel::sendRequestStream(
       getInteractionHandle(rpcOptions),
       getServerZstdSupported(),
       buf->computeChainDataLength(),
-      *header);
+      *header,
+      std::move(frameworkMetadata));
 
   auto payload = rocket::PayloadSerializer::getInstance()->packWithFds(
       &metadata,
@@ -903,7 +906,7 @@ void RocketClientChannel::sendRequestSink(
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
     SinkClientCallback* clientCallback,
-    std::unique_ptr<folly::IOBuf> /* unused */) {
+    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
   DestructorGuard dg(this);
   if (!canHandleRequest(clientCallback)) {
     return;
@@ -920,7 +923,8 @@ void RocketClientChannel::sendRequestSink(
       getInteractionHandle(rpcOptions),
       getServerZstdSupported(),
       buf->computeChainDataLength(),
-      *header);
+      *header,
+      std::move(frameworkMetadata));
 
   auto payload = rocket::PayloadSerializer::getInstance()->packWithFds(
       &metadata,
@@ -945,7 +949,8 @@ void RocketClientChannel::sendThriftRequest(
     apache::thrift::ManagedStringView&& methodName,
     SerializedRequest&& request,
     std::shared_ptr<transport::THeader> header,
-    RequestClientCallback::Ptr clientCallback) {
+    RequestClientCallback::Ptr clientCallback,
+    std::unique_ptr<folly::IOBuf> frameworkMetadata) {
   DestructorGuard dg(this);
   if (!canHandleRequest(clientCallback)) {
     return;
@@ -962,7 +967,8 @@ void RocketClientChannel::sendThriftRequest(
       getInteractionHandle(rpcOptions),
       getServerZstdSupported(),
       buf->computeChainDataLength(),
-      *header);
+      *header,
+      std::move(frameworkMetadata));
   header.reset();
 
   switch (kind) {

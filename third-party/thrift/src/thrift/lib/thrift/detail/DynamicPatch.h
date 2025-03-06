@@ -92,6 +92,14 @@ type::Type toPatchType(type::Type input);
 void checkSameType(
     const apache::thrift::protocol::Value& v1,
     const apache::thrift::protocol::Value& v2);
+void checkCompatibleType(
+    const ValueList& l, const apache::thrift::protocol::Value& v);
+void checkCompatibleType(
+    const ValueSet& s, const apache::thrift::protocol::Value& v);
+void checkCompatibleType(
+    const ValueMap& m,
+    const apache::thrift::protocol::Value& k,
+    const apache::thrift::protocol::Value& v);
 } // namespace detail
 
 class DynamicPatch;
@@ -218,16 +226,12 @@ class DynamicListPatch : public DynamicPatchBase {
 
   void push_back(detail::Badge, Value v) {
     if (auto assign = get_ptr(op::PatchOp::Assign)) {
-      if (!assign->as_list().empty()) {
-        detail::checkSameType(assign->as_list().back(), v);
-      }
+      detail::checkCompatibleType(assign->as_list(), v);
       assign->as_list().push_back(std::move(v));
       return;
     }
     auto& l = get(op::PatchOp::Put).ensure_list();
-    if (!l.empty()) {
-      detail::checkSameType(l.back(), v);
-    }
+    detail::checkCompatibleType(l, v);
     l.push_back(std::move(v));
   }
 
@@ -275,9 +279,7 @@ class DynamicSetPatch : public DynamicPatchBase {
 
   void insert(detail::Badge, Value v) {
     if (auto assign = get_ptr(op::PatchOp::Assign)) {
-      if (!assign->as_set().empty()) {
-        detail::checkSameType(*assign->as_set().begin(), v);
-      }
+      detail::checkCompatibleType(assign->as_set(), v);
       assign->as_set().insert(std::move(v));
       return;
     }
@@ -285,9 +287,7 @@ class DynamicSetPatch : public DynamicPatchBase {
       remove->as_set().erase(v);
     }
     auto& s = get(op::PatchOp::Add).ensure_set();
-    if (!s.empty()) {
-      detail::checkSameType(*s.begin(), v);
-    }
+    detail::checkCompatibleType(s, v);
     s.insert(std::move(v));
   }
 

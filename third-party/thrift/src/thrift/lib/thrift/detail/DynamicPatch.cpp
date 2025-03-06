@@ -221,6 +221,49 @@ void checkSameType(
         apache::thrift::util::enumNameSafe(v2.getType())));
   }
 }
+void checkCompatibleType(
+    const ValueList& l, const apache::thrift::protocol::Value& v) {
+  if (!l.empty()) {
+    if (l.back().getType() != v.getType()) {
+      throw std::runtime_error(fmt::format(
+          "Type of value ({}) does not match value type of list ({}) in patch.",
+          apache::thrift::util::enumNameSafe(l.back().getType()),
+          apache::thrift::util::enumNameSafe(v.getType())));
+    }
+  }
+}
+void checkCompatibleType(
+    const ValueSet& s, const apache::thrift::protocol::Value& v) {
+  if (!s.empty()) {
+    auto it = s.begin();
+    if (it->getType() != v.getType()) {
+      throw std::runtime_error(fmt::format(
+          "Type of value ({}) does not match value type of set ({}) in patch.",
+          apache::thrift::util::enumNameSafe(it->getType()),
+          apache::thrift::util::enumNameSafe(v.getType())));
+    }
+  }
+}
+void checkCompatibleType(
+    const ValueMap& m,
+    const apache::thrift::protocol::Value& k,
+    const apache::thrift::protocol::Value& v) {
+  if (!m.empty()) {
+    auto it = m.begin();
+    if (it->first.getType() != k.getType()) {
+      throw std::runtime_error(fmt::format(
+          "Type of value ({}) does not match key type of map ({}) in patch.",
+          apache::thrift::util::enumNameSafe(it->first.getType()),
+          apache::thrift::util::enumNameSafe(k.getType())));
+    }
+    if (it->second.getType() != v.getType()) {
+      throw std::runtime_error(fmt::format(
+          "Type of value ({}) does not match value type of map ({}) in patch.",
+          apache::thrift::util::enumNameSafe(it->second.getType()),
+          apache::thrift::util::enumNameSafe(v.getType())));
+    }
+  }
+}
 
 } // namespace detail
 

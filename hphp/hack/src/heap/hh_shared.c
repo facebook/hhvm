@@ -952,12 +952,6 @@ static void assert_allow_hashtable_writes_by_current_process(void) {
   assert(allow_hashtable_writes_by_current_process);
 }
 
-CAMLprim value hh_assert_master(void) {
-  CAMLparam0();
-  assert_master();
-  CAMLreturn(Val_unit);
-}
-
 /*****************************************************************************/
 
 CAMLprim value hh_stop_workers(void) {

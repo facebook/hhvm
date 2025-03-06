@@ -497,13 +497,10 @@ module CustomGraph = struct
   external hh_custom_dep_graph_register_custom_types : unit -> unit
     = "hh_custom_dep_graph_register_custom_types"
 
-  (* from hh_shared.h *)
-  external assert_master : unit -> unit = "hh_assert_master"
-
   let allow_reads_ref = ref false
 
   let allow_dependency_table_reads flag =
-    assert_master ();
+    assert (not (Worker_utils.is_worker_process ()));
     let prev = !allow_reads_ref in
     allow_reads_ref := flag;
     prev
@@ -590,7 +587,7 @@ module CustomGraph = struct
 
   let register_discovered_dep_edges : DepEdgeSet.t -> unit =
    fun s ->
-    assert_master ();
+    assert (not (Worker_utils.is_worker_process ()));
     DepEdgeSet.iter
       begin
         fun { idependent; idependency } ->
@@ -600,7 +597,7 @@ module CustomGraph = struct
 
   let remove_edges : DepEdgeSet.t -> unit =
    fun s ->
-    assert_master ();
+    assert (not (Worker_utils.is_worker_process ()));
     DepEdgeSet.iter
       begin
         (fun { idependent; idependency } -> remove_edge idependent idependency)
@@ -942,6 +939,8 @@ let merge_dep_edges (x : dep_edges) (y : dep_edges) : dep_edges =
 let register_discovered_dep_edges : dep_edges -> unit = function
   | None -> ()
   | Some batch -> CustomGraph.register_discovered_dep_edges batch
+
+let flush_deps mode = flush_ideps_batch mode |> register_discovered_dep_edges
 
 let remove_edges mode edges =
   match mode with

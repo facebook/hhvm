@@ -10,6 +10,7 @@
 open Reordered_argument_collections
 open Aast
 open Typing_defs
+open Hh_prelude
 module SN = Naming_special_names
 
 let unwrap_class_hint = function
@@ -32,7 +33,7 @@ let unwrap_class_hint = function
     in
     ((Pos.none, "", []), Some err)
 
-let unwrap_class_type ty =
+let unwrap_class_type ty : _ Reason.t_ * pos_id * decl_ty list =
   match deref ty with
   | (r, Tapply (name, tparaml)) -> (r, name, tparaml)
   | (r, Tgeneric _) ->
@@ -41,6 +42,53 @@ let unwrap_class_type ty =
   | (r, _) ->
     let p = Typing_reason.to_pos r in
     (r, (p, ""), [])
+
+let parentish_names
+    {
+      Shallow_decl_defs.sc_mode = _;
+      sc_final = _;
+      sc_abstract = _;
+      sc_is_xhp = _;
+      sc_internal = _;
+      sc_has_xhp_keyword = _;
+      sc_kind = _;
+      sc_module = _;
+      sc_name = _;
+      sc_tparams = _;
+      sc_extends;
+      sc_uses;
+      sc_xhp_attr_uses;
+      sc_xhp_enum_values = _;
+      sc_xhp_marked_empty = _;
+      sc_req_extends;
+      sc_req_implements;
+      sc_req_constraints = _;
+      sc_implements;
+      sc_support_dynamic_type = _;
+      sc_consts = _;
+      sc_typeconsts = _;
+      sc_props = _;
+      sc_sprops = _;
+      sc_constructor = _;
+      sc_static_methods = _;
+      sc_methods = _;
+      sc_user_attributes = _;
+      sc_enum_type = _;
+      sc_docs_url = _;
+      sc_package = _;
+    } =
+  let get_names tys acc =
+    List.fold tys ~init:acc ~f:(fun acc ty ->
+        let (_, (_, name), _) = unwrap_class_type ty in
+        SSet.add acc name)
+  in
+  SSet.empty
+  |> get_names sc_extends
+  |> get_names sc_implements
+  |> get_names sc_uses
+  |> get_names sc_req_extends
+  |> get_names sc_req_implements
+  |> get_names sc_xhp_attr_uses
 
 (** Given sets A and B return a tuple (AnB, A\B), i.e split A into the part
     that is common with B, and which is unique to A *)

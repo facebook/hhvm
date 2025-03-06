@@ -145,7 +145,7 @@ type decl_class_type = {
           plus some extends and other ancestors of these.
           Does not include `require class` *)
   dc_req_constraints_ancestors: constraint_requirement list;
-      (** dc_req_constraints_ancestors gathers all the `require class` and 
+      (** dc_req_constraints_ancestors gathers all the `require class` and
           `require this as` requirements declared in ancestors.  Remark that
           `require class` and `require this as` requirements are _not_ stored
            in `dc_req_ancestors` or `dc_req_ancestors_extends` fields. *)

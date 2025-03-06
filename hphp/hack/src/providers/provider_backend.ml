@@ -255,6 +255,7 @@ type local_memory = {
   reverse_naming_table_delta: Reverse_naming_table_delta.t;
   fixmes: Fixmes.t;
   naming_db_path_ref: Naming_sqlite.db_path option ref;
+  dep_table: (Typing_deps.Dep.t, string) Stdlib.Hashtbl.t;
 }
 
 type t =
@@ -306,7 +307,7 @@ let make_decl_store_from_local_memory
     Decl_store.decl_store =
   {
     Decl_store.add_class =
-      (fun k v ->
+      (fun k (v : Decl_defs.decl_class_type) ->
         Folded_class_cache.add
           folded_class_cache
           ~key:(Folded_class_cache_entry.Folded_class_decl k)
@@ -385,6 +386,7 @@ let set_local_memory_backend_internal
       reverse_naming_table_delta = Reverse_naming_table_delta.make ();
       fixmes = empty_fixmes;
       naming_db_path_ref = ref None;
+      dep_table = Stdlib.Hashtbl.create 5000;
     }
   in
   backend_ref := Local_memory local_memory;

@@ -36,7 +36,8 @@
   sqlite3
   sqlite_utils
   typing_deps_rust
-  worker_cancel)
+  worker_cancel
+  worker_utils)
  (preprocess
   (pps ppx_deriving.std)))
 

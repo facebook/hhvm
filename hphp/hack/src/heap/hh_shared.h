@@ -94,7 +94,5 @@ CAMLprim value hh_remove(value key);
 /*****************************************************************************/
 /* Get the hash of a string, based on MD5. */
 CAMLprim value hh_get_hash_ocaml(value key);
-/* This assert will fail if the current process is not the master process. */
-CAMLprim value hh_assert_master(void);
 
 #endif

@@ -208,6 +208,7 @@ type local_memory = {
           an arbitrary one of them. *)
   fixmes: Fixmes.t;
   naming_db_path_ref: Naming_sqlite.db_path option ref;
+  dep_table: (Typing_deps.Dep.t, string) Hashtbl.t;
 }
 
 type t =

@@ -233,6 +233,7 @@ let get_telemetry (t : t) : Telemetry.t =
         reverse_naming_table_delta;
         fixmes;
         naming_db_path_ref = _;
+        dep_table;
       } ->
     let open Provider_backend in
     telemetry
@@ -259,6 +260,9 @@ let get_telemetry (t : t) : Telemetry.t =
          reverse_naming_table_delta
          ~key:"reverse_naming_table_delta"
     |> Fixmes.get_telemetry fixmes ~key:"fixmes"
+    |> Telemetry.int_
+         ~key:"dep_table_entry_count"
+         ~value:(Stdlib.Hashtbl.length dep_table)
   | _ -> telemetry
 
 let reset_telemetry (t : t) : unit =
@@ -272,6 +276,7 @@ let reset_telemetry (t : t) : unit =
         reverse_naming_table_delta = _;
         fixmes = _;
         naming_db_path_ref = _;
+        dep_table = _;
       } ->
     Provider_backend.Decl_cache.reset_telemetry decl_cache;
     Provider_backend.Shallow_decl_cache.reset_telemetry shallow_decl_cache;

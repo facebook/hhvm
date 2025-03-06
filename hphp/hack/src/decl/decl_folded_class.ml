@@ -172,7 +172,7 @@ let get_class_parent_or_trait
     (parent_cache : Decl_store.class_entries SMap.t)
     ((parents, pass, decl_errors) :
       SSet.t * [ `Extends_pass | `Traits_pass | `Xhp_pass ] * decl_error list)
-    (ty : Typing_defs.decl_phase Typing_defs.ty) : SSet.t * 'a * decl_error list
+    (ty : Typing_defs.decl_phase Typing_defs.ty) : SSet.t * _ * decl_error list
     =
   let (_, (parent_pos, parent), _) = Decl_utils.unwrap_class_type ty in
   (* If we already had this exact trait, we need to flag trait reuse *)
@@ -191,10 +191,12 @@ let get_class_parent_or_trait
     let acc = (parents, pass, decl_errors) in
     add_grand_parents_or_traits parent_pos shallow_class acc parent_type
 
+(** The first set is the names of the `extend`ed parents, `use`d traits and XHP attributes.
+    It does not include the `implement`ed interfaces. *)
 let get_class_parents_and_traits
     (env : Decl_env.env)
     (shallow_class : Shallow_decl_defs.shallow_class)
-    parent_cache
+    ~parent_cache
     decl_errors : SSet.t * SSet.t * decl_error list =
   let parents = SSet.empty in
   (* extends parents *)
@@ -948,7 +950,7 @@ and class_decl
       ~init:SMap.empty
   in
   let (extends, xhp_attr_deps, decl_errors) =
-    get_class_parents_and_traits env c parents decl_errors
+    get_class_parents_and_traits env c ~parent_cache:parents decl_errors
   in
   let {
     cr_req_ancestors;

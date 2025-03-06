@@ -43,20 +43,23 @@ let invalidate_shallow_decls symbols local_memory =
     n_classes;
   ()
 
+let remove_folded_decl local_memory name =
+  let open Provider_backend in
+  Decl_cache.remove
+    local_memory.decl_cache
+    ~key:(Provider_backend.Decl_cache_entry.Class_decl name);
+  Folded_class_cache.remove
+    local_memory.folded_class_cache
+    ~key:(Folded_class_cache_entry.Folded_class_decl name)
+
 (** This is a leftover function, because we haven't yet migrated to
 sticky decls and more correct invalidation. *)
 let invalidate_shallow_and_some_folded_decls
     (local_memory : Provider_backend.local_memory) (ids : FileInfo.ids) : unit =
   invalidate_shallow_decls (FileInfo.ids_to_names ids) local_memory;
-  let open Provider_backend in
   let { FileInfo.classes; _ } = ids in
   List.iter classes ~f:(fun { FileInfo.name; _ } ->
-      Decl_cache.remove
-        local_memory.decl_cache
-        ~key:(Provider_backend.Decl_cache_entry.Class_decl name);
-      Folded_class_cache.remove
-        local_memory.folded_class_cache
-        ~key:(Folded_class_cache_entry.Folded_class_decl name));
+      remove_folded_decl local_memory name);
   ()
 
 (** This is a leftover function, because we haven't yet migrated to
@@ -99,6 +102,40 @@ let invalidate_all_folded_decls ~local_memory =
   let open Provider_backend in
   Decl_cache.clear local_memory.decl_cache;
   Folded_class_cache.clear local_memory.folded_class_cache;
+  ()
+
+let resolve_deps
+    (dep_table : (Typing_deps.Dep.t, string) Stdlib.Hashtbl.t)
+    (deps : Typing_deps.DepSet.t) : SSet.t =
+  Typing_deps.DepSet.fold deps ~init:SSet.empty ~f:(fun dep set ->
+      match Stdlib.Hashtbl.find_opt dep_table dep with
+      | None -> set
+      | Some name -> SSet.add name set)
+
+(** Optimised folded decl invalidation using the dependency graph.
+    This will flush the dependency edges before querying the graph. *)
+let invalidate_folded_decls_flush_deps
+    ctx
+    ({ FileInfo.n_classes; _ } : FileInfo.names)
+    ~(local_memory : Provider_backend.local_memory) =
+  let deps_mode = Provider_context.get_deps_mode ctx in
+  Typing_deps.flush_deps deps_mode;
+  let classes_depset =
+    SSet.fold
+      (fun class_name set ->
+        Typing_deps.DepSet.add
+          set
+          (Typing_deps.Dep.make (Typing_deps.Dep.Type class_name)))
+      n_classes
+      (Typing_deps.DepSet.make ())
+  in
+  let to_invalidate_depset =
+    Typing_deps.add_extend_deps deps_mode classes_depset
+  in
+  let to_invalidate_class_names =
+    resolve_deps local_memory.Provider_backend.dep_table to_invalidate_depset
+  in
+  SSet.iter (remove_folded_decl local_memory) to_invalidate_class_names;
   ()
 
 (** This invalidates (evicts) every folded decl in cache that depends upon
@@ -146,11 +183,7 @@ let invalidate_folded_decls_by_checking_each_ones_ancestor_list
         else
           (to_remove, SSet.add name to_keep))
   in
-  List.iter to_remove ~f:(fun name ->
-      Folded_class_cache.remove
-        folded_class_cache
-        ~key:(Folded_class_cache_entry.Folded_class_decl name);
-      Decl_cache.remove decl_cache ~key:(Decl_cache_entry.Class_decl name));
+  List.iter to_remove ~f:(remove_folded_decl local_memory);
   let to_remove =
     Decl_cache.fold
       decl_cache
@@ -369,7 +402,7 @@ let invalidate_upon_file_changes
         if must_invalidate_all_folded_decls_upon_file_change then (
           let symbols = combine_old_and_new_symbols changes in
           invalidate_shallow_decls symbols local_memory;
-          invalidate_all_folded_decls ~local_memory;
+          invalidate_folded_decls_flush_deps ctx symbols ~local_memory;
           ("exhaustive", None, entries)
         ) else (
           List.iter changes ~f:(fun { FileInfo.old_ids; _ } ->

@@ -363,7 +363,7 @@ struct Reserved {
   9: i64 __mangled_int;
 }
 
-struct __Reserved {
+struct _Reserved {
   1: string __mangled_str;
   2: i64 __mangled_int;
 }

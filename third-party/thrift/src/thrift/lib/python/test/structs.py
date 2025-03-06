@@ -34,10 +34,10 @@ from folly.iobuf import IOBuf
 
 from parameterized import parameterized_class
 
-from testing.thrift_mutable_types import __Reserved as DoubleUnderscoreReservedMutable
+from testing.thrift_mutable_types import _Reserved as _ReservedMutable
 
 from testing.thrift_types import (
-    __Reserved as DoubleUnderscoreReserved,
+    _Reserved,
     Color,
     ComplexRef,
     customized,
@@ -111,10 +111,8 @@ class StructTestsParameterized(unittest.TestCase):
             "thrift_mutable_types"
         )
         # pyre-ignore[8]: Intentional for test
-        self.DoubleUnderscoreReserved: Type[DoubleUnderscoreReserved] = (
-            DoubleUnderscoreReserved
-            if not self.is_mutable_run
-            else DoubleUnderscoreReservedMutable
+        self._Reserved: Type[_Reserved] = (
+            _Reserved if not self.is_mutable_run else _ReservedMutable
         )
         # pyre-ignore[16]: has no attribute `serializer_module`
         self.serializer: types.ModuleType = self.serializer_module
@@ -335,7 +333,7 @@ class StructTestsParameterized(unittest.TestCase):
 
         self.assertEqual(x, x)
 
-        y = self.DoubleUnderscoreReserved(
+        y = self._Reserved(
             _Reserved__mangled_str="secret",
             _Reserved__mangled_int=42,
         )

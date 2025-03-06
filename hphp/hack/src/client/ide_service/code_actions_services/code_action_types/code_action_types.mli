@@ -30,6 +30,12 @@ type refactor = Refactor of edit_data [@@ocaml.unboxed]
 type quickfix = Quickfix of edit_data [@@ocaml.unboxed]
 
 module Show_inline_chat_command_args : sig
+  type model =
+    | GPT4o
+    | SONNET_37
+    | CODE_31
+    | LLAMA_405B
+
   type predefined_prompt = {
     command: string;
     display_prompt: string;
@@ -38,7 +44,7 @@ module Show_inline_chat_command_args : sig
     rules: string option;
     task: string option;
     prompt_template: string option;
-    model: string option;
+    model: model option;
     add_diagnostics: bool option;
   }
 

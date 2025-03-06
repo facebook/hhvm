@@ -68,18 +68,19 @@ let error_to_show_inline_chat_command user_error line_agnostic_hash =
   let display_prompt = Format.sprintf {|Fix inline - %s|} (snd claim) in
   let user_prompt = create_user_prompt override_selection user_error in
   let predefined_prompt =
-    Code_action_types.Show_inline_chat_command_args.
-      {
-        command = "Fix Hack error inline";
-        description = Some "Fix Hack error inline";
-        display_prompt;
-        user_prompt;
-        model = Some "iCodeLlama 3.1 405B";
-        rules = None;
-        task = None;
-        prompt_template = None;
-        add_diagnostics = None;
-      }
+    Code_action_types.(
+      Show_inline_chat_command_args.
+        {
+          command = "Fix Hack error inline";
+          description = Some "Fix Hack error inline";
+          display_prompt;
+          user_prompt;
+          model = Some CODE_31;
+          rules = None;
+          task = None;
+          prompt_template = None;
+          add_diagnostics = None;
+        })
   in
   let extras =
     Hh_json.(JSON_Object [("lineAgnosticHash", int_ line_agnostic_hash)])

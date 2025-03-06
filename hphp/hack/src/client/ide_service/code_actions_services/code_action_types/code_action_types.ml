@@ -26,6 +26,18 @@ type refactor = Refactor of edit_data [@@ocaml.unboxed]
 type quickfix = Quickfix of edit_data [@@ocaml.unboxed]
 
 module Show_inline_chat_command_args = struct
+  type model =
+    | GPT4o
+    | SONNET_37
+    | CODE_31
+    | LLAMA_405B
+
+  let model_to_json = function
+    | GPT4o -> Hh_json.string_ "GPT-4o"
+    | SONNET_37 -> Hh_json.string_ "Claude 3.7 Sonnet"
+    | CODE_31 -> Hh_json.string_ "iCodeLlama 3.1 70B"
+    | LLAMA_405B -> Hh_json.string_ "iCodeLlama 3.1 405B"
+
   type predefined_prompt = {
     command: string;
     display_prompt: string;
@@ -34,7 +46,7 @@ module Show_inline_chat_command_args = struct
     rules: string option;
     task: string option;
     prompt_template: string option;
-    model: string option;
+    model: model option;
     add_diagnostics: bool option;
   }
 
@@ -64,7 +76,7 @@ module Show_inline_chat_command_args = struct
                field_opt "rules" string_ rules;
                field_opt "task" string_ task;
                field_opt "promptTemplate" string_ prompt_template;
-               field_opt "model" string_ model;
+               field_opt "model" model_to_json model;
                field_opt "addDiagnostics" bool_ add_diagnostics;
              ]))
 

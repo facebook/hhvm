@@ -483,7 +483,7 @@ impl<'a, T: serde::Serialize> FileRwLockWriteGuard<'a, T> {
             .path_context(path, "write(value@1)")?;
         // do the truncate here, after writing json, so as to minimize how much we
         // jiggle the file's size.
-        file.set_len(1 + json.as_bytes().len() as u64)
+        file.set_len(1 + json.len() as u64)
             .path_context(path, "trunc")?;
         file.write_all_at(&[State::Present as u8], 0)
             .path_context(path, "write(value@0)")?;

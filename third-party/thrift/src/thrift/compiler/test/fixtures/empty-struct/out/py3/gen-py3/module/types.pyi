@@ -14,6 +14,7 @@ import typing as _typing
 
 import sys
 import itertools
+import module.thrift_types
 
 
 class Empty(thrift.py3.types.Struct, _typing.Hashable):
@@ -38,7 +39,7 @@ class Empty(thrift.py3.types.Struct, _typing.Hashable):
     def __le__(self, other: 'Empty') -> bool: ...
     def __ge__(self, other: 'Empty') -> bool: ...
 
-    def _to_python(self) -> "module.thrift_types.Empty": ...   # type: ignore
+    def _to_python(self) -> module.thrift_types.Empty: ...
     def _to_py3(self) -> Empty: ...
     def _to_py_deprecated(self) -> "module.ttypes.Empty": ...   # type: ignore
 
@@ -70,7 +71,7 @@ class Nada(thrift.py3.types.Union, _typing.Hashable):
     value: _typing.Final[_NadaValueType]
     def get_type(self) -> Nada.Type: ...
 
-    def _to_python(self) -> "module.thrift_types.Nada": ...   # type: ignore
+    def _to_python(self) -> module.thrift_types.Nada: ...
     def _to_py3(self) -> Nada: ...
     def _to_py_deprecated(self) -> "module.ttypes.Nada": ...   # type: ignore
 

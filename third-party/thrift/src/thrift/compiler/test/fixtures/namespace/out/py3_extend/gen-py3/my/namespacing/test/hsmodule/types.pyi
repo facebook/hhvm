@@ -14,6 +14,7 @@ import typing as _typing
 
 import sys
 import itertools
+import my.namespacing.test.hsmodule.thrift_types
 
 
 class HsFoo(thrift.py3.types.Struct, _typing.Hashable):
@@ -42,7 +43,7 @@ class HsFoo(thrift.py3.types.Struct, _typing.Hashable):
     def __le__(self, other: 'HsFoo') -> bool: ...
     def __ge__(self, other: 'HsFoo') -> bool: ...
 
-    def _to_python(self) -> "my.namespacing.test.hsmodule.thrift_types.HsFoo": ...   # type: ignore
+    def _to_python(self) -> my.namespacing.test.hsmodule.thrift_types.HsFoo: ...
     def _to_py3(self) -> HsFoo: ...
     def _to_py_deprecated(self) -> "hsmodule.ttypes.HsFoo": ...   # type: ignore
 

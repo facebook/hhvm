@@ -14,6 +14,7 @@ import typing as _typing
 
 import sys
 import itertools
+import foo.thrift_types
 
 
 class Fields(thrift.py3.types.Struct, _typing.Hashable):
@@ -50,7 +51,7 @@ class Fields(thrift.py3.types.Struct, _typing.Hashable):
     def __le__(self, other: 'Fields') -> bool: ...
     def __ge__(self, other: 'Fields') -> bool: ...
 
-    def _to_python(self) -> "foo.thrift_types.Fields": ...   # type: ignore
+    def _to_python(self) -> foo.thrift_types.Fields: ...
     def _to_py3(self) -> Fields: ...
     def _to_py_deprecated(self) -> "foo.ttypes.Fields": ...   # type: ignore
 

@@ -15,6 +15,7 @@ import typing as _typing
 import sys
 import itertools
 import thrift.py3.stream
+import module.thrift_types
 
 
 class Foo(thrift.py3.types.Struct, _typing.Hashable):
@@ -43,7 +44,7 @@ class Foo(thrift.py3.types.Struct, _typing.Hashable):
     def __le__(self, other: 'Foo') -> bool: ...
     def __ge__(self, other: 'Foo') -> bool: ...
 
-    def _to_python(self) -> "module.thrift_types.Foo": ...   # type: ignore
+    def _to_python(self) -> module.thrift_types.Foo: ...
     def _to_py3(self) -> Foo: ...
     def _to_py_deprecated(self) -> "module.ttypes.Foo": ...   # type: ignore
 
@@ -57,5 +58,5 @@ class ServerStream__i32(thrift.py3.stream.ServerStream[int]):
 
 class ServerPublisher_cint32_t(thrift.py3.stream.ServerPublisher):
     def complete(self) -> None: ...
-    def send(self, item: cint32_t) -> None: ...
+    def send(self, item: int) -> None: ...
 

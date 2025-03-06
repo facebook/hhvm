@@ -15,6 +15,7 @@ import typing as _typing
 import sys
 import itertools
 import transitive.types as _transitive_types
+import includes.thrift_types
 
 
 class Included(thrift.py3.types.Struct, _typing.Hashable):
@@ -47,7 +48,7 @@ class Included(thrift.py3.types.Struct, _typing.Hashable):
     def __le__(self, other: 'Included') -> bool: ...
     def __ge__(self, other: 'Included') -> bool: ...
 
-    def _to_python(self) -> "includes.thrift_types.Included": ...   # type: ignore
+    def _to_python(self) -> includes.thrift_types.Included: ...
     def _to_py3(self) -> Included: ...
     def _to_py_deprecated(self) -> "includes.ttypes.Included": ...   # type: ignore
 

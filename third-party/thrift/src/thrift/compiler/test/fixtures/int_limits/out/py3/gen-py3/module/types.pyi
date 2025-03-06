@@ -14,6 +14,7 @@ import typing as _typing
 
 import sys
 import itertools
+import module.thrift_types
 
 
 class Limits(thrift.py3.types.Struct, _typing.Hashable):
@@ -70,7 +71,7 @@ class Limits(thrift.py3.types.Struct, _typing.Hashable):
     def __le__(self, other: 'Limits') -> bool: ...
     def __ge__(self, other: 'Limits') -> bool: ...
 
-    def _to_python(self) -> "module.thrift_types.Limits": ...   # type: ignore
+    def _to_python(self) -> module.thrift_types.Limits: ...
     def _to_py3(self) -> Limits: ...
     def _to_py_deprecated(self) -> "module.ttypes.Limits": ...   # type: ignore
 

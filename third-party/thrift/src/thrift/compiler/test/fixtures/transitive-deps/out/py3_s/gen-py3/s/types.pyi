@@ -16,5 +16,6 @@ import sys
 import itertools
 import b.types as _b_types
 import c.types as _c_types
+import s.thrift_types
 
 

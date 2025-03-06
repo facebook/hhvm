@@ -14,6 +14,7 @@ import typing as _typing
 
 import sys
 import itertools
+import test.fixtures.another_interactions.shared.thrift_types
 
 
 class DoSomethingResult(thrift.py3.types.Struct, _typing.Hashable):
@@ -46,7 +47,7 @@ class DoSomethingResult(thrift.py3.types.Struct, _typing.Hashable):
     def __le__(self, other: 'DoSomethingResult') -> bool: ...
     def __ge__(self, other: 'DoSomethingResult') -> bool: ...
 
-    def _to_python(self) -> "test.fixtures.another_interactions.shared.thrift_types.DoSomethingResult": ...   # type: ignore
+    def _to_python(self) -> test.fixtures.another_interactions.shared.thrift_types.DoSomethingResult: ...
     def _to_py3(self) -> DoSomethingResult: ...
     def _to_py_deprecated(self) -> "test.fixtures.another_interactions.ttypes.DoSomethingResult": ...   # type: ignore
 

@@ -15,6 +15,7 @@ import typing as _typing
 import sys
 import itertools
 import includes.types as _includes_types
+import module.thrift_types
 
 
 class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
@@ -51,7 +52,7 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
     def __le__(self, other: 'MyStruct') -> bool: ...
     def __ge__(self, other: 'MyStruct') -> bool: ...
 
-    def _to_python(self) -> "module.thrift_types.MyStruct": ...   # type: ignore
+    def _to_python(self) -> module.thrift_types.MyStruct: ...
     def _to_py3(self) -> MyStruct: ...
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...   # type: ignore
 

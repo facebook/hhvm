@@ -43,6 +43,7 @@ struct TestingObject {
 
   template <typename T, typename ProtocolWriter, typename ProtocolReader>
   static TestingObject make() {
+    folly::BenchmarkSuspender suspender{};
     T value = create<T>();
     std::unique_ptr<folly::IOBuf> buf = serialize<ProtocolWriter>(value);
     protocol::Object obj = protocol::parseObject<ProtocolReader>(*buf);

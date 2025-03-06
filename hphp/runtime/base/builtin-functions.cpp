@@ -1012,6 +1012,11 @@ create_object(const String& s, const Array& params, bool init /* = true */) {
   return Object::attach(g_context->createObject(s.get(), params, init));
 }
 
+Object
+create_object(const Class* cls, const Array& params, bool init /* = true */) {
+  return Object::attach(g_context->createObject(cls, params, init));
+}
+
 void throw_object(const Object& e) {
   throw req::root<Object>(e);
 }

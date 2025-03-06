@@ -212,7 +212,7 @@ void warnOrThrowUnknownClass(const String& clsName) {
       clsName.toCppString()
     );
     if (Cfg::Eval::ForbidUnserializeIncompleteClass > 1) {
-      throw_object("Exception", make_vec_array(msg));
+      SystemLib::throwExceptionObject(msg);
     } else {
       raise_warning(msg);
     }

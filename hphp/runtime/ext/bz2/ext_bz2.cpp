@@ -296,11 +296,7 @@ struct ChunkedBunzipper {
       } else {
         m_eof = true;
         BZ2_bzDecompressEnd(&m_bzstream);
-        throw_object(
-          "Exception",
-          make_vec_array(folly::sformat("bz2 error status={}", status))
-        );
-        return empty_string();
+        SystemLib::throwExceptionObject(folly::sformat("bz2 error status={}", status));
       }
     }
 
@@ -309,11 +305,7 @@ struct ChunkedBunzipper {
       BZ2_bzDecompressEnd(&m_bzstream);
     }
     if (!completed) {
-      throw_object(
-        "Exception",
-        make_vec_array("inflate failed: output too large")
-      );
-      return empty_string();
+      SystemLib::throwExceptionObject("inflate failed: output too large");
     }
     return result;
   }

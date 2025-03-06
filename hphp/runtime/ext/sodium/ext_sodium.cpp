@@ -33,11 +33,11 @@ namespace {
 const StaticString s_arithmetic_overflow("arithmetic overflow");
 const StaticString s_internal_error("internal error");
 
+struct SodiumException : SystemLib::ClassLoader<"SodiumException"> {};
+
 [[noreturn]]
 void throwSodiumException(const String& message) {
-  Array params;
-  params.append(message);
-  throw_object("SodiumException", params, true /* init */);
+  throw_object(SodiumException::classof(), make_vec_array(message));
 }
 
 const StaticString s_non_string_inout(

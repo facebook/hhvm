@@ -501,16 +501,12 @@ struct ChunkedDecompressor {
       } else {
         m_eof = true;
         inflateEnd(&m_zstream);
-        throw_object(
-          "Exception",
-          make_vec_array(
-            folly::sformat("zlib error status={} msg=\"{}\"",
-              status,
-              m_zstream.msg
-            )
+        SystemLib::throwExceptionObject(
+          folly::sformat("zlib error status={} msg=\"{}\"",
+            status,
+            m_zstream.msg
           )
         );
-        return empty_string();
       }
     }
 
@@ -520,11 +516,7 @@ struct ChunkedDecompressor {
     }
     if (!completed) {
       // output too large
-      throw_object(
-        "Exception",
-        make_vec_array("inflate failed: output too large")
-      );
-      return empty_string();
+      SystemLib::throwExceptionObject("inflate failed: output too large");
     }
     return result;
   }

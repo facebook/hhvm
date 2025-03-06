@@ -267,6 +267,7 @@ void check_collection_cast_to_array();
 
 Object create_object_only(const String& s);
 Object create_object(const String& s, const Array &params, bool init = true);
+Object create_object(const Class* cls, const Array &params, bool init = true);
 Object init_object(const String& s, const Array &params, ObjectData* o);
 
 [[noreturn]] void throw_object(const Object& e);
@@ -279,6 +280,11 @@ Object init_object(const String& s, const Array &params, ObjectData* o);
 [[noreturn]] inline
 void throw_object(const String& s, const Array& params, bool init = true) {
   throw_object(create_object(s, params, init));
+}
+
+[[noreturn]] inline
+void throw_object(const Class* cls, const Array& params, bool init = true) {
+  throw_object(create_object(cls, params, init));
 }
 
 void throw_missing_arguments_nr(const char *fn, int expected, int got)

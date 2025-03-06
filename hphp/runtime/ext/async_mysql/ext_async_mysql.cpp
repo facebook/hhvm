@@ -1712,9 +1712,11 @@ req::ptr<c_Vector> transformQueryResults(
   return results;
 }
 
-void throwAsyncMysqlException(const char* exception_type,
-                              std::shared_ptr<am::Operation> op,
-                              db::ClientPerfStats clientStats) {
+struct AsyncMysqlQueryException: SystemLib::ClassLoader<"AsyncMysqlQueryException"> {};
+struct AsyncMysqlConnectException: SystemLib::ClassLoader<"AsyncMysqlConnectException"> {};
+
+void throwAsyncMysqlConnectException(std::shared_ptr<am::Operation> op,
+                                     db::ClientPerfStats clientStats) {
   auto error =
       AsyncMysqlErrorResult::newInstance(op, std::move(clientStats));
 
@@ -1723,13 +1725,11 @@ void throwAsyncMysqlException(const char* exception_type,
          op->result() == am::OperationResult::Cancelled);
 
   throw_object(
-    exception_type,
-    make_vec_array(std::move(error)),
-    true /* init */);
+    AsyncMysqlConnectException::classof(),
+    make_vec_array(std::move(error)));
 }
 
-void throwAsyncMysqlQueryException(const char* exception_type,
-                                   std::shared_ptr<am::Operation> op,
+void throwAsyncMysqlQueryException(std::shared_ptr<am::Operation> op,
                                    db::ClientPerfStats clientStats,
                                    req::ptr<c_Vector> res) {
   auto error = AsyncMysqlQueryErrorResult::newInstance(
@@ -1740,9 +1740,8 @@ void throwAsyncMysqlQueryException(const char* exception_type,
          op->result() == am::OperationResult::Cancelled);
 
   throw_object(
-    exception_type,
-    make_vec_array(std::move(error)),
-    true /* init */);
+    AsyncMysqlQueryException::classof(),
+    make_vec_array(std::move(error)));
 }
 
 }
@@ -1754,8 +1753,7 @@ void AsyncMysqlConnectEvent::unserialize(TypedValue& result) {
 
     tvCopy(make_tv<KindOfObject>(ret.detach()), result);
   } else {
-    throwAsyncMysqlException("AsyncMysqlConnectException", m_op,
-                             std::move(m_clientStats));
+    throwAsyncMysqlConnectException(m_op, std::move(m_clientStats));
   }
 }
 
@@ -1773,8 +1771,7 @@ void AsyncMysqlQueryEvent::unserialize(TypedValue& result) {
       m_query_op->noIndexUsed());
     tvCopy(make_tv<KindOfObject>(ret.detach()), result);
   } else {
-    throwAsyncMysqlQueryException("AsyncMysqlQueryException",
-                                  m_query_op,
+    throwAsyncMysqlQueryException(m_query_op,
                                   std::move(m_clientStats),
                                   req::make<c_Vector>());
   }
@@ -1794,15 +1791,13 @@ void AsyncMysqlMultiQueryEvent::unserialize(TypedValue& result) {
   if (m_multi_op->ok()) {
     tvDup(make_tv<KindOfObject>(results.get()), result);
   } else {
-    throwAsyncMysqlQueryException("AsyncMysqlQueryException", m_multi_op,
-                                  std::move(m_clientStats), results);
+    throwAsyncMysqlQueryException(m_multi_op, std::move(m_clientStats), results);
   }
 }
 
 void AsyncMysqlConnectAndMultiQueryEvent::unserialize(TypedValue& result) {
   if (!m_connect_op->ok()) {
-    throwAsyncMysqlException("AsyncMysqlConnectException", m_connect_op,
-                             std::move(m_clientStats));
+    throwAsyncMysqlConnectException(m_connect_op, std::move(m_clientStats));
   }
   // Retrieving the results for all executed queries
   auto queryResults = transformQueryResults(m_multi_query_op, m_clientStats);
@@ -1812,8 +1807,7 @@ void AsyncMysqlConnectAndMultiQueryEvent::unserialize(TypedValue& result) {
     auto resTuple = make_vec_array(connResult, queryResults);
     tvCopy(make_array_like_tv(resTuple.detach()), result);
   } else {
-    throwAsyncMysqlQueryException("AsyncMysqlQueryException", m_multi_query_op,
-                                  std::move(m_clientStats), queryResults);
+    throwAsyncMysqlQueryException(m_multi_query_op, std::move(m_clientStats), queryResults);
   }
 }
 

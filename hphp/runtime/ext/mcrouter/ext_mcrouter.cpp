@@ -103,14 +103,8 @@ static void mcr_throwException(const std::string& message,
                                mc_op_t op = mc_op_unknown,
                                carbon::Result result = compatibility::mc_res_unknown,
                                const std::string& key = "") {
-  auto cls = MCRouterException::classof();
-  Object obj{ cls };
-  tvDecRefGen(
-    g_context->invokeFunc(cls->getCtor(),
-      make_vec_array(message, (int64_t)op, (int64_t)result, key),
-      obj.get())
-  );
-  throw_object(obj);
+  throw_object(MCRouterException::classof(),
+               make_vec_array(message, (int64_t)op, (int64_t)result, key));
 }
 
 [[noreturn]]
@@ -127,16 +121,8 @@ static void mcr_throwOptionException(
     errorArray.append(e);
   }
 
-  auto cls = MCRouterOptionException::classof();
-  Object obj{ cls };
-  tvDecRefGen(
-    g_context->invokeFunc(
-      cls->getCtor(),
-      make_vec_array(errorArray.toArray()),
-      obj.get()
-    )
-  );
-  throw_object(obj);
+  throw_object(MCRouterOptionException::classof(),
+               make_vec_array(errorArray.toArray()));
 }
 
 namespace {

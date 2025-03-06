@@ -644,14 +644,7 @@ String HHVM_FUNCTION(type_structure_classname,
 
 [[noreturn]]
 void Reflection::ThrowReflectionExceptionObject(const Variant& message) {
-  auto cls = ReflectionException::classof();
-  Object inst { cls };
-  tvDecRefGen(
-    g_context->invokeFunc(cls->getCtor(),
-                          make_vec_array(message),
-                          inst.get())
-  );
-  throw_object(inst);
+  throw_object(ReflectionException::classof(), make_vec_array(message));
 }
 
 namespace {

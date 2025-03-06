@@ -246,110 +246,110 @@ Object AllocDeploymentBoundaryViolationExceptionObject(const Variant& message) {
   return createAndConstructThrowable(getDeploymentBoundaryViolationExceptionClass(), message);
 }
 
-void throwExceptionObject(const Variant& message) {
+[[noreturn]] void throwExceptionObject(const Variant& message) {
   throw_object(AllocExceptionObject(message));
 }
 
-void throwErrorObject(const Variant& message) {
+[[noreturn]] void throwErrorObject(const Variant& message) {
   throw_object(AllocErrorObject(message));
 }
 
-void throwArithmeticErrorObject(const Variant& message) {
+[[noreturn]] void throwArithmeticErrorObject(const Variant& message) {
   throw_object(AllocArithmeticErrorObject(message));
 }
 
-void throwArgumentCountErrorObject(const Variant& message) {
+[[noreturn]] void throwArgumentCountErrorObject(const Variant& message) {
   throw_object(AllocArgumentCountErrorObject(message));
 }
 
-void throwDivisionByZeroErrorObject(const Variant& message) {
+[[noreturn]] void throwDivisionByZeroErrorObject(const Variant& message) {
   throw_object(AllocDivisionByZeroErrorObject(message));
 }
 
-void throwParseErrorObject(const Variant& message) {
+[[noreturn]] void throwParseErrorObject(const Variant& message) {
   throw_object(AllocParseErrorObject(message));
 }
 
-void throwTypeErrorObject(const Variant& message) {
+[[noreturn]] void throwTypeErrorObject(const Variant& message) {
   throw_object(AllocTypeErrorObject(message));
 }
 
-void throwBadMethodCallExceptionObject(const Variant& message) {
+[[noreturn]] void throwBadMethodCallExceptionObject(const Variant& message) {
   throw_object(AllocBadMethodCallExceptionObject(message));
 }
 
-void throwInvalidArgumentExceptionObject(const Variant& message) {
+[[noreturn]] void throwInvalidArgumentExceptionObject(const Variant& message) {
   throw_object(AllocInvalidArgumentExceptionObject(message));
 }
 
-void throwTypeAssertionExceptionObject(const Variant& message) {
+[[noreturn]] void throwTypeAssertionExceptionObject(const Variant& message) {
   throw_object(AllocTypeAssertionExceptionObject(message));
 }
 
-void throwRuntimeExceptionObject(const Variant& message) {
+[[noreturn]] void throwRuntimeExceptionObject(const Variant& message) {
   throw_object(AllocRuntimeExceptionObject(message));
 }
 
-void throwOutOfBoundsExceptionObject(const Variant& message) {
+[[noreturn]] void throwOutOfBoundsExceptionObject(const Variant& message) {
   throw_object(AllocOutOfBoundsExceptionObject(message));
 }
 
-void throwInvalidOperationExceptionObject(const Variant& message) {
+[[noreturn]] void throwInvalidOperationExceptionObject(const Variant& message) {
   throw_object(AllocInvalidOperationExceptionObject(message));
 }
 
-void throwUnexpectedValueExceptionObject(const Variant& message) {
+[[noreturn]] void throwUnexpectedValueExceptionObject(const Variant& message) {
   throw_object(AllocUnexpectedValueExceptionObject(message));
 }
 
-void throwDOMExceptionObject(const Variant& message) {
+[[noreturn]] void throwDOMExceptionObject(const Variant& message) {
   throw_object(AllocDOMExceptionObject(message));
 }
 
-void throwDivisionByZeroExceptionObject() {
+[[noreturn]] void throwDivisionByZeroExceptionObject() {
   throw_object(AllocDivisionByZeroExceptionObject());
 }
 
-void throwSoapFaultObject(const Variant& code,
-                          const Variant& message,
-                          const Variant& actor /* = uninit_variant */,
-                          const Variant& detail /* = uninit_variant */,
-                          const Variant& name /* = uninit_variant */,
-                          const Variant& header /* = uninit_variant */) {
+[[noreturn]] void throwSoapFaultObject(const Variant& code,
+                                       const Variant& message,
+                                       const Variant& actor /* = uninit_variant */,
+                                       const Variant& detail /* = uninit_variant */,
+                                       const Variant& name /* = uninit_variant */,
+                                       const Variant& header /* = uninit_variant */) {
   throw_object(Object{AllocSoapFaultObject(code, message,
                                     actor, detail,
                                     name, header)});
 }
 
-void throwInvalidForeachArgumentExceptionObject() {
+[[noreturn]] void throwInvalidForeachArgumentExceptionObject() {
   throw_object(AllocInvalidForeachArgumentExceptionObject());
 }
 
-void throwUndefinedPropertyExceptionObject(const Variant& message) {
+[[noreturn]] void throwUndefinedPropertyExceptionObject(const Variant& message) {
   throw_object(AllocUndefinedPropertyExceptionObject(message));
 }
 
-void throwUndefinedVariableExceptionObject(const Variant& message) {
+[[noreturn]] void throwUndefinedVariableExceptionObject(const Variant& message) {
   throw_object(AllocUndefinedVariableExceptionObject(message));
 }
 
-void throwTypecastExceptionObject(const Variant& message) {
+[[noreturn]] void throwTypecastExceptionObject(const Variant& message) {
   throw_object(AllocTypecastExceptionObject(message));
 }
 
-void throwReadonlyViolationExceptionObject(const Variant& message) {
+[[noreturn]] void throwReadonlyViolationExceptionObject(const Variant& message) {
   throw_object(AllocReadonlyViolationExceptionObject(message));
 }
 
-void throwCoeffectViolationExceptionObject(const Variant& message) {
+[[noreturn]] void throwCoeffectViolationExceptionObject(const Variant& message) {
   throw_object(AllocCoeffectViolationExceptionObject(message));
 }
 
-void throwModuleBoundaryViolationExceptionObject(const Variant& message) {
+[[noreturn]] void throwModuleBoundaryViolationExceptionObject(const Variant& message) {
   throw_object(AllocModuleBoundaryViolationExceptionObject(message));
 }
 
-void throwDeploymentBoundaryViolationExceptionObject(const Variant& message) {
+[[noreturn]] void throwDeploymentBoundaryViolationExceptionObject(const Variant& message) {
   throw_object(AllocDeploymentBoundaryViolationExceptionObject(message));
 }
 

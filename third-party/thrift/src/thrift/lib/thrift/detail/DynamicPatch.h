@@ -275,22 +275,29 @@ class DynamicSetPatch : public DynamicPatchBase {
 
   void insert(detail::Badge, Value v) {
     if (auto assign = get_ptr(op::PatchOp::Assign)) {
-      assign->ensure_set().insert(std::move(v));
+      if (!assign->as_set().empty()) {
+        detail::checkSameType(*assign->as_set().begin(), v);
+      }
+      assign->as_set().insert(std::move(v));
       return;
     }
     if (auto remove = get_ptr(op::PatchOp::Remove)) {
-      remove->ensure_set().erase(v);
+      remove->as_set().erase(v);
     }
-    get(op::PatchOp::Add).ensure_set().insert(std::move(v));
+    auto& s = get(op::PatchOp::Add).ensure_set();
+    if (!s.empty()) {
+      detail::checkSameType(*s.begin(), v);
+    }
+    s.insert(std::move(v));
   }
 
   void erase(detail::Badge, Value v) {
     if (auto assign = get_ptr(op::PatchOp::Assign)) {
-      assign->ensure_set().erase(v);
+      assign->as_set().erase(v);
       return;
     }
     if (auto add = get_ptr(op::PatchOp::Add)) {
-      add->ensure_set().erase(v);
+      add->as_set().erase(v);
     }
     get(op::PatchOp::Remove).ensure_set().insert(std::move(v));
   }

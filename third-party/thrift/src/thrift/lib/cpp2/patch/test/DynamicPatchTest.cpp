@@ -531,6 +531,21 @@ TEST(DynamicPatch, Set) {
   EXPECT_TRUE(s.empty());
 }
 
+TEST(DynamicPatch, InvalidSetPatch) {
+  {
+    DynamicSetPatch p;
+    p.insert(badge, asValueStruct<type::i32_t>(1));
+    EXPECT_THROW(
+        p.insert(badge, asValueStruct<type::i64_t>(2)), std::runtime_error);
+  }
+  {
+    DynamicSetPatch p;
+    p.assign(badge, asValueStruct<type::set<type::i32_t>>({1}).as_set());
+    EXPECT_THROW(
+        p.insert(badge, asValueStruct<type::i64_t>(2)), std::runtime_error);
+  }
+}
+
 struct StringVsBinaryTest : testing::Test {
   using StringSetPatch = std::remove_cvref_t<
       decltype(op::patch_type<Sets>().patch<ident::stringSet>())>;

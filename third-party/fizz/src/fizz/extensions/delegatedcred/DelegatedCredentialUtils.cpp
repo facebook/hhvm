@@ -186,7 +186,7 @@ void DelegatedCredentialUtils::checkCredentialTimeValidity(
   auto now = clock->getCurrentTime();
   if (now >= credentialExpiresTime) {
     throw FizzException(
-        "credential is no longer valid", AlertDescription::illegal_parameter);
+        "credential is no longer valid", AlertDescription::certificate_expired);
   }
 
   // Credentials may be valid for max 1 week according to spec

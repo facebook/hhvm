@@ -106,14 +106,21 @@ class DelegatedCredentialUtilsTest : public Test {
             std::chrono::seconds(1560190138))));
   }
 
-  void expectThrows(std::function<void()> f, std::string errorStr) {
+  void expectThrows(
+      std::function<void()> f,
+      std::string errorStr,
+      AlertDescription alertType) {
     std::string what;
+    folly::Optional<AlertDescription> desc;
     try {
       f();
     } catch (const FizzException& e) {
       what = e.what();
+      desc = e.getAlert();
     }
 
+    EXPECT_TRUE(desc.hasValue());
+    EXPECT_EQ(desc.value(), alertType);
     EXPECT_THAT(what, HasSubstr(errorStr));
   }
 
@@ -137,7 +144,8 @@ TEST_F(DelegatedCredentialUtilsTest, TestCredentialNoX509Extension) {
         DelegatedCredentialUtils::checkExtensions(
             getCert(kCertNoDelegatedExtension));
       },
-      "cert is missing DelegationUsage extension");
+      "cert is missing DelegationUsage extension",
+      AlertDescription::illegal_parameter);
 }
 
 TEST_F(DelegatedCredentialUtilsTest, TestCredentialNoKeyUsage) {
@@ -145,7 +153,8 @@ TEST_F(DelegatedCredentialUtilsTest, TestCredentialNoKeyUsage) {
       [&]() {
         DelegatedCredentialUtils::checkExtensions(getCert(kCertNoKeyUsage));
       },
-      "cert is missing KeyUsage extension");
+      "cert is missing KeyUsage extension",
+      AlertDescription::illegal_parameter);
 }
 
 TEST_F(DelegatedCredentialUtilsTest, TestCredentialWrongKeyUsage) {
@@ -153,7 +162,8 @@ TEST_F(DelegatedCredentialUtilsTest, TestCredentialWrongKeyUsage) {
       [&]() {
         DelegatedCredentialUtils::checkExtensions(getCert(kCertWrongKeyUsage));
       },
-      "cert lacks digital signature key usage");
+      "cert lacks digital signature key usage",
+      AlertDescription::illegal_parameter);
 }
 
 TEST_F(DelegatedCredentialUtilsTest, TestGetCredentialExpiresTime) {
@@ -186,7 +196,8 @@ TEST_F(DelegatedCredentialUtilsTest, TestCertExpiredCredential) {
         DelegatedCredentialUtils::checkCredentialTimeValidity(
             fizz::test::getCert(kCert), credential, clock_);
       },
-      "credential is no longer valid");
+      "credential is no longer valid",
+      AlertDescription::certificate_expired);
 }
 
 TEST_F(DelegatedCredentialUtilsTest, TestCredentialValidForTooLong) {
@@ -198,7 +209,8 @@ TEST_F(DelegatedCredentialUtilsTest, TestCredentialValidForTooLong) {
         DelegatedCredentialUtils::checkCredentialTimeValidity(
             fizz::test::getCert(kCert), credential, clock_);
       },
-      "credential validity is longer than a week from now");
+      "credential validity is longer than a week from now",
+      AlertDescription::illegal_parameter);
 }
 
 TEST_F(DelegatedCredentialUtilsTest, TestCertNotAfter) {
@@ -224,7 +236,8 @@ TEST_F(DelegatedCredentialUtilsTest, TestCertNotAfter) {
         DelegatedCredentialUtils::checkCredentialTimeValidity(
             cert, credential, clock_);
       },
-      "credential validity is longer than parent cert validity");
+      "credential validity is longer than parent cert validity",
+      AlertDescription::illegal_parameter);
 }
 } // namespace test
 } // namespace extensions

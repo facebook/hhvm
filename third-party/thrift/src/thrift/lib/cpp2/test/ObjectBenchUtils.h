@@ -129,6 +129,17 @@ inline void encode(const TestingObject& input) {
 }
 
 template <typename ProtocolWriter, typename ProtocolReader>
+inline void roundtrip(const TestingObject& input) {
+  auto obj = protocol::parseObject<ProtocolReader>(*input.buf);
+  folly::doNotOptimizeAway(obj);
+  protocol::serializeObject<ProtocolWriter>(obj, get_queue());
+  BENCHMARK_SUSPEND {
+    get_queue().clearAndTryReuseLargestBuffer();
+  }
+  // Include Object dtor in timing
+}
+
+template <typename ProtocolWriter, typename ProtocolReader>
 inline void read_all(const TestingObject& input) {
   const auto val = read_all(input.obj);
   folly::doNotOptimizeAway(val);
@@ -156,6 +167,7 @@ inline void read_first(const TestingObject& input) {
   EACH_TY_HANDLER(T, WRITER, READER)                        \
   HANDLER(PROT_NAME, decode, WRITER, READER, T)             \
   HANDLER(PROT_NAME, encode, WRITER, READER, T)             \
+  HANDLER(PROT_NAME, roundtrip, WRITER, READER, T)          \
   HANDLER(PROT_NAME, read_all, WRITER, READER, T)           \
   HANDLER(PROT_NAME, read_half, WRITER, READER, T)          \
   HANDLER(PROT_NAME, read_first, WRITER, READER, T)

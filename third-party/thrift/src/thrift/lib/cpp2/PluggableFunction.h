@@ -67,28 +67,16 @@ class PluggableFunction<Ret(Args...)> {
   using signature = Ret(Args...);
 
   constexpr explicit PluggableFunction(
-      signature& init, const char* name, bool allowLateOverride) noexcept
-      : init_{init}, name_{name}, allowLateOverride_(allowLateOverride) {}
+      signature& init, const char* name) noexcept
+      : init_{init}, name_{name} {}
 
   const PluggableFunction& operator=(signature& next) const noexcept {
     if (auto prev = impl_.exchange(&next)) {
-      enum class Reason { OVERRIDE_AFTER_INVOCATION, OVERRIDE_AFTER_OVERRIDE };
-      Reason reason = prev == &init_ ? Reason::OVERRIDE_AFTER_INVOCATION
-                                     : Reason::OVERRIDE_AFTER_OVERRIDE;
-      const char* reasonText = [&]() {
-        switch (reason) {
-          case Reason::OVERRIDE_AFTER_INVOCATION:
-            return " pluggable function: override after invocation";
-          case Reason::OVERRIDE_AFTER_OVERRIDE:
-            return " pluggable function: override after override";
-        }
-      }();
-
-      if (!(allowLateOverride_ &&
-            reason == Reason::OVERRIDE_AFTER_INVOCATION)) {
-        std::string msg = fmt::format("[{}] {}", name_, reasonText);
-        folly::terminate_with<std::logic_error>(msg);
-      }
+      auto reason = prev == &init_
+          ? " pluggable function: override after invocation"
+          : " pluggable function: override after override";
+      std::string msg = fmt::format("[{}] {}", name_, reason);
+      folly::terminate_with<std::logic_error>(msg);
     }
     return *this;
   }
@@ -119,7 +107,6 @@ class PluggableFunction<Ret(Args...)> {
   mutable folly::relaxed_atomic<signature*> impl_{nullptr};
   signature& init_;
   const char* name_;
-  const bool allowLateOverride_;
 };
 
 } // namespace apache::thrift::detail
@@ -132,13 +119,7 @@ class PluggableFunction<Ret(Args...)> {
 #define THRIFT_PLUGGABLE_FUNC_REGISTER(_ret, _name, ...)                     \
   FOLLY_STORAGE_CONSTEXPR const ::apache::thrift::detail::PluggableFunction< \
       _ret(__VA_ARGS__)>                                                     \
-      _name{THRIFT__PLUGGABLE_FUNC_DEFAULT_##_name, #_name, false};          \
-  _ret THRIFT__PLUGGABLE_FUNC_DEFAULT_##_name(__VA_ARGS__)
-
-#define THRIFT_PLUGGABLE_FUNC_REGISTER_ALLOW_LATE_OVERRIDE(_ret, _name, ...) \
-  FOLLY_STORAGE_CONSTEXPR const ::apache::thrift::detail::PluggableFunction< \
-      _ret(__VA_ARGS__)>                                                     \
-      _name{THRIFT__PLUGGABLE_FUNC_DEFAULT_##_name, #_name, true};           \
+      _name{THRIFT__PLUGGABLE_FUNC_DEFAULT_##_name, #_name};                 \
   _ret THRIFT__PLUGGABLE_FUNC_DEFAULT_##_name(__VA_ARGS__)
 
 #define THRIFT_PLUGGABLE_FUNC_SET(_ret, _name, ...)      \

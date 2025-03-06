@@ -41,6 +41,8 @@
 #include <variant>
 #include <vector>
 
+#include <thrift/lib/cpp2/schema/gen-cpp2/syntax_graph_types.h>
+
 #ifdef THRIFT_SCHEMA_AVAILABLE
 
 namespace apache::thrift::schema {
@@ -478,18 +480,6 @@ struct MaybeManaged {
 
 } // namespace detail
 
-enum class Primitive {
-  BOOL,
-  BYTE,
-  I16,
-  I32,
-  I64,
-  FLOAT,
-  DOUBLE,
-  STRING,
-  BINARY,
-};
-
 class FieldNode final : folly::MoveOnly,
                         detail::WithResolver,
                         detail::WithName {
@@ -503,7 +493,7 @@ class FieldNode final : folly::MoveOnly,
    * serialization. However, such fields still "has a value" according to
    * Thrift's type system.
    */
-  enum class PresenceQualifier { UNQUALIFIED, OPTIONAL };
+  using PresenceQualifier = schema::FieldPresenceQualifier;
 
   using detail::WithName::name;
   FieldId id() const { return id_; }

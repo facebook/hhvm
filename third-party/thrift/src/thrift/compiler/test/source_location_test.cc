@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
+#include <fstream>
+
+#include <boost/filesystem/operations.hpp>
+#include <fmt/core.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <folly/testing/TestUtil.h>
 #include <thrift/compiler/source_location.h>
 
 using namespace apache::thrift::compiler;
+namespace fs = boost::filesystem;
 
 TEST(SourceLocationTest, get_file) {
   auto sm = source_manager();
   auto text = std::string("test");
-  auto file = folly::test::TemporaryFile();
-  auto file_name = file.path().string();
+  auto file = fs::temp_directory_path() / fs::unique_path();
+  const auto& file_name = file.string();
   std::ofstream(file_name) << text;
   auto source = sm.get_file(file_name);
   auto loc = resolved_location(source->start, sm);

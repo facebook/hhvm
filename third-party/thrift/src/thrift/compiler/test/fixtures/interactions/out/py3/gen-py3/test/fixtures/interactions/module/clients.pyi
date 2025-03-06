@@ -24,22 +24,26 @@ class MyService(thrift.py3.client.Client):
 
     async def foo(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
     async def interact(
         self,
         arg: int,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
     async def interactFast(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> int: ...
 
     async def serialize(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _test_fixtures_interactions_module_types.ResponseAndClientBufferedStream__i32_i32: ...
 
@@ -57,16 +61,19 @@ class MyService_MyInteraction(thrift.py3.client.Client):
 
     async def frobnicate(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> int: ...
 
     async def ping(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
     async def truthify(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _test_fixtures_interactions_module_types.ClientBufferedStream__bool: ...
 
@@ -78,16 +85,19 @@ class MyService_MyInteractionFast(thrift.py3.client.Client):
 
     async def frobnicate(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> int: ...
 
     async def ping(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
     async def truthify(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _test_fixtures_interactions_module_types.ClientBufferedStream__bool: ...
 
@@ -99,6 +109,7 @@ class MyService_SerialInteraction(thrift.py3.client.Client):
 
     async def frobnicate(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
@@ -111,22 +122,26 @@ class Factories(thrift.py3.client.Client):
 
     async def foo(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
     async def interact(
         self,
         arg: int,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
     async def interactFast(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> int: ...
 
     async def serialize(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _test_fixtures_interactions_module_types.ResponseAndClientBufferedStream__i32_i32: ...
 
@@ -139,6 +154,7 @@ class Perform(thrift.py3.client.Client):
 
     async def foo(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
@@ -156,16 +172,19 @@ class Perform_MyInteraction(thrift.py3.client.Client):
 
     async def frobnicate(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> int: ...
 
     async def ping(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
     async def truthify(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _test_fixtures_interactions_module_types.ClientBufferedStream__bool: ...
 
@@ -177,16 +196,19 @@ class Perform_MyInteractionFast(thrift.py3.client.Client):
 
     async def frobnicate(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> int: ...
 
     async def ping(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
     async def truthify(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _test_fixtures_interactions_module_types.ClientBufferedStream__bool: ...
 
@@ -198,6 +220,7 @@ class Perform_SerialInteraction(thrift.py3.client.Client):
 
     async def frobnicate(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
@@ -210,6 +233,7 @@ class InteractWithShared(thrift.py3.client.Client):
 
     async def do_some_similar_things(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _test_fixtures_another_interactions_shared_types.DoSomethingResult: ...
 
@@ -225,16 +249,19 @@ class InteractWithShared_SharedInteraction(thrift.py3.client.Client):
 
     async def init(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> int: ...
 
     async def do_something(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _test_fixtures_another_interactions_shared_types.DoSomethingResult: ...
 
     async def tear_down(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
@@ -246,16 +273,19 @@ class InteractWithShared_MyInteraction(thrift.py3.client.Client):
 
     async def frobnicate(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> int: ...
 
     async def ping(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
     async def truthify(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _test_fixtures_interactions_module_types.ClientBufferedStream__bool: ...
 
@@ -269,6 +299,7 @@ class BoxService(thrift.py3.client.Client):
     async def getABoxSession(
         self,
         req: _test_fixtures_interactions_module_types.ShouldBeBoxed,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _test_fixtures_interactions_module_types.ShouldBeBoxed: ...
 

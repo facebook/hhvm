@@ -27,6 +27,7 @@ class MyService(thrift.py3.client.Client):
         self,
         s: _module_types.MyStruct,
         i: _includes_types.Included,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
@@ -34,6 +35,7 @@ class MyService(thrift.py3.client.Client):
         self,
         s: _module_types.MyStruct,
         i: _includes_types.Included,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 

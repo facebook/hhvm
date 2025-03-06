@@ -22,6 +22,7 @@ class FooService(thrift.py3.client.Client):
 
     async def simple_rpc(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
@@ -35,6 +36,7 @@ class FB303Service(thrift.py3.client.Client):
     async def simple_rpc(
         self,
         int_parameter: int,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _test_fixtures_basic_module_types.ReservedKeyword: ...
 
@@ -47,17 +49,20 @@ class MyService(thrift.py3.client.Client):
 
     async def ping(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
     async def getRandomData(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> str: ...
 
     async def sink(
         self,
         sink: int,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
@@ -65,24 +70,28 @@ class MyService(thrift.py3.client.Client):
         self,
         id: int,
         data: str,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
     async def hasDataById(
         self,
         id: int,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> bool: ...
 
     async def getDataById(
         self,
         id: int,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> str: ...
 
     async def deleteDataById(
         self,
         id: int,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
@@ -90,16 +99,19 @@ class MyService(thrift.py3.client.Client):
         self,
         id: int,
         data: str,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
     async def invalid_return_for_hack(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _typing.AbstractSet[float]: ...
 
     async def rpc_skipped_codegen(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
@@ -113,12 +125,14 @@ class DbMixedStackArguments(thrift.py3.client.Client):
     async def getDataByKey0(
         self,
         key: str,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> bytes: ...
 
     async def getDataByKey1(
         self,
         key: str,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> bytes: ...
 

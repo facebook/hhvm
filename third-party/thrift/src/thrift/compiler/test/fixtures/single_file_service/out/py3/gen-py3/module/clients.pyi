@@ -22,6 +22,7 @@ class A(thrift.py3.client.Client):
 
     async def foo(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _module_types.Foo: ...
 
@@ -35,6 +36,7 @@ class A_I(thrift.py3.client.Client):
 
     async def interact(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
@@ -48,11 +50,13 @@ class B(A):
     async def bar(
         self,
         foo: _module_types.Foo,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
     async def stream_stuff(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _module_types.ClientBufferedStream__i32: ...
 
@@ -73,6 +77,7 @@ class C_I(thrift.py3.client.Client):
 
     async def interact(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 

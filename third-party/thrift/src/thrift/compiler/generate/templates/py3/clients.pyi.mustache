@@ -52,6 +52,7 @@ class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
     async def {{function:name}}(
         self{{#function:args}},
         {{field:py_name}}: {{#field:type}}{{> types/pep484_type}}{{/field:type}}{{/function:args}},
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> {{#function:return_type}}{{!
         }}{{#function:stream?}}{{> clients/stream_response_class_name}}{{/function:stream?}}{{!
@@ -82,6 +83,7 @@ class {{service:parent_service_name}}_{{service:name}}({{#service:extends}}{{#se
     async def {{function:name}}(
         self{{#function:args}},
         {{field:py_name}}: {{#field:type}}{{> types/pep484_type}}{{/field:type}}{{/function:args}},
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> {{#function:return_type}}{{!
         }}{{#function:stream?}}{{> clients/stream_response_class_name}}{{/function:stream?}}{{!

@@ -23,12 +23,14 @@ class MyService(thrift.py3.client.Client):
     async def hasDataById(
         self,
         id: int,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> bool: ...
 
     async def getDataById(
         self,
         id: int,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> str: ...
 
@@ -36,6 +38,7 @@ class MyService(thrift.py3.client.Client):
         self,
         id: int,
         data: str,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
@@ -43,6 +46,7 @@ class MyService(thrift.py3.client.Client):
         self,
         id: int,
         data: str,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
@@ -56,12 +60,14 @@ class MyServiceFast(thrift.py3.client.Client):
     async def hasDataById(
         self,
         id: int,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> bool: ...
 
     async def getDataById(
         self,
         id: int,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> str: ...
 
@@ -69,6 +75,7 @@ class MyServiceFast(thrift.py3.client.Client):
         self,
         id: int,
         data: str,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
@@ -76,6 +83,7 @@ class MyServiceFast(thrift.py3.client.Client):
         self,
         id: int,
         data: str,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
@@ -89,12 +97,14 @@ class DbMixedStackArguments(thrift.py3.client.Client):
     async def getDataByKey0(
         self,
         key: str,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> bytes: ...
 
     async def getDataByKey1(
         self,
         key: str,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> bytes: ...
 

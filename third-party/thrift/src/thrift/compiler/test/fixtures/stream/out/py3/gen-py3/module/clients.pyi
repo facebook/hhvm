@@ -24,48 +24,56 @@ class PubSubStreamingService(thrift.py3.client.Client):
         self,
         i32_from: int,
         i32_to: int,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _module_types.ClientBufferedStream__i32: ...
 
     async def streamthrows(
         self,
         foo: int,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _module_types.ClientBufferedStream__i32: ...
 
     async def servicethrows(
         self,
         foo: int,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _module_types.ClientBufferedStream__i32: ...
 
     async def servicethrows2(
         self,
         foo: int,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _module_types.ClientBufferedStream__i32: ...
 
     async def boththrows(
         self,
         foo: int,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _module_types.ClientBufferedStream__i32: ...
 
     async def responseandstreamstreamthrows(
         self,
         foo: int,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _module_types.ResponseAndClientBufferedStream__i32_i32: ...
 
     async def responseandstreamservicethrows(
         self,
         foo: int,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _module_types.ResponseAndClientBufferedStream__i32_i32: ...
 
     async def responseandstreamboththrows(
         self,
         foo: int,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _module_types.ResponseAndClientBufferedStream__i32_i32: ...
 
@@ -73,6 +81,7 @@ class PubSubStreamingService(thrift.py3.client.Client):
         self,
         i32_from: int,
         i32_to: int,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _module_types.ClientBufferedStream__i32: ...
 

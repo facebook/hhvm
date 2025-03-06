@@ -23,30 +23,35 @@ class NestedContainers(thrift.py3.client.Client):
     async def mapList(
         self,
         foo: _typing.Mapping[int, _typing.Sequence[int]],
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
     async def mapSet(
         self,
         foo: _typing.Mapping[int, _typing.AbstractSet[int]],
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
     async def listMap(
         self,
         foo: _typing.Sequence[_typing.Mapping[int, int]],
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
     async def listSet(
         self,
         foo: _typing.Sequence[_typing.AbstractSet[int]],
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
     async def turtles(
         self,
         foo: _typing.Sequence[_typing.Sequence[_typing.Mapping[int, _typing.Mapping[int, _typing.AbstractSet[int]]]]],
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 

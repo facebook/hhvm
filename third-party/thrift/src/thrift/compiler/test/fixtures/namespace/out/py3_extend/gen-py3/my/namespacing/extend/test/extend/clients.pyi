@@ -25,6 +25,7 @@ class ExtendTestService(_my_namespacing_test_hsmodule_clients.HsTestService):
     async def check(
         self,
         struct1: _my_namespacing_test_hsmodule_types.HsFoo,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> bool: ...
 

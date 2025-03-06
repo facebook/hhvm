@@ -24,6 +24,7 @@ class TestService(thrift.py3.client.Client):
 
     async def test(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 

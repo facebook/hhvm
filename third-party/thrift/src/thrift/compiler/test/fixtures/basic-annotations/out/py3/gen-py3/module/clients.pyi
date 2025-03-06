@@ -22,23 +22,27 @@ class MyService(thrift.py3.client.Client):
 
     async def ping(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
     async def getRandomData(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> str: ...
 
     async def hasDataById(
         self,
         id: int,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> bool: ...
 
     async def getDataById(
         self,
         id: int,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> str: ...
 
@@ -46,6 +50,7 @@ class MyService(thrift.py3.client.Client):
         self,
         id: int,
         data: str,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
@@ -53,11 +58,13 @@ class MyService(thrift.py3.client.Client):
         self,
         id: int,
         data: str,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
     async def doNothing(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
@@ -70,11 +77,13 @@ class MyServicePrioParent(thrift.py3.client.Client):
 
     async def ping(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
     async def pong(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
@@ -87,6 +96,7 @@ class MyServicePrioChild(MyServicePrioParent):
 
     async def pang(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
@@ -99,6 +109,7 @@ class BadService(thrift.py3.client.Client):
 
     async def bar(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> int: ...
 
@@ -112,6 +123,7 @@ class BadService_BadInteraction(thrift.py3.client.Client):
 
     async def foo(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
@@ -124,16 +136,19 @@ class FooBarBazService(thrift.py3.client.Client):
 
     async def foo(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
     async def bar(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
     async def baz(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 

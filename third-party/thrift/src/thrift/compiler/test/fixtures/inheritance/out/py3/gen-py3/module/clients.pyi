@@ -22,6 +22,7 @@ class MyRoot(thrift.py3.client.Client):
 
     async def do_root(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
@@ -34,6 +35,7 @@ class MyNode(MyRoot):
 
     async def do_mid(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 
@@ -46,6 +48,7 @@ class MyLeaf(MyNode):
 
     async def do_leaf(
         self,
+        *,
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> None: ...
 

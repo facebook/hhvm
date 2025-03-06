@@ -24,6 +24,8 @@
 THRIFT_PLUGGABLE_FUNC_DECLARE(int, functionDefault, int);
 THRIFT_PLUGGABLE_FUNC_DECLARE(int, functionWithOverride, int, int);
 
+THRIFT_PLUGGABLE_FUNC_DECLARE(int, lateOverride);
+
 extern "C" FOLLY_KEEP int check_pluggable_func_invoke_default(int a) {
   return functionDefault(a);
 }
@@ -40,8 +42,16 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(int, functionWithOverride, int a, int b) {
   return a + b;
 }
 
+THRIFT_PLUGGABLE_FUNC_REGISTER_ALLOW_LATE_OVERRIDE(int, lateOverride) {
+  return 2;
+}
+
 THRIFT_PLUGGABLE_FUNC_SET(int, functionWithOverride, int a, int b) {
   return a * b;
+}
+
+int THRIFT__PLUGGABLE_FUNC_IMPL_lateOverride() {
+  return 3;
 }
 
 TEST(PluggableFunction, Default) {
@@ -52,4 +62,11 @@ TEST(PluggableFunction, Default) {
 TEST(PluggableFunction, Override) {
   EXPECT_EQ(4, functionWithOverride(2, 2));
   EXPECT_EQ(10, functionWithOverride(2, 5));
+}
+
+TEST(PluggableFunction, LateOverride) {
+  EXPECT_EQ(2, lateOverride());
+  [[maybe_unused]] static bool THRIFT__PLUGGABLE_FUNC_SETTER_lateOverride =
+      (lateOverride = THRIFT__PLUGGABLE_FUNC_IMPL_lateOverride, 0);
+  EXPECT_EQ(3, lateOverride());
 }

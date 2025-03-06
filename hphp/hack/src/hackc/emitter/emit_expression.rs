@@ -209,7 +209,7 @@ mod inout_locals {
     ) -> bool {
         aliases
             .get(name)
-            .map_or(false, |alias| alias.in_range(i as isize))
+            .is_some_and(|alias| alias.in_range(i as isize))
     }
 
     pub(super) fn should_move_local_value(
@@ -1923,7 +1923,7 @@ where
     {
         tparams.len() == targs.len()
             && tparams.iter().zip(targs).all(|(tp, ta)| {
-                ta.1.as_happly().map_or(false, |(id, hs)| {
+                ta.1.as_happly().is_some_and(|(id, hs)| {
                     id.1 == tp.name.1
                         && hs.is_empty()
                         && !is_soft(&tp.user_attributes)
@@ -6097,7 +6097,7 @@ pub fn emit_lval_op_list<'a, 'd>(
                         local,
                         &new_indices[..],
                         expr,
-                        last_non_omitted.map_or(false, |j| j == i),
+                        last_non_omitted.is_some_and(|j| j == i),
                         rhs_readonly,
                     )
                 })
@@ -6471,7 +6471,7 @@ fn emit_class_expr<'a, 'd>(
                 || expr
                     .2
                     .as_lvar()
-                    .map_or(false, |ast::Lid(_, id)| local_id::get_name(id) == "$this") =>
+                    .is_some_and(|ast::Lid(_, id)| local_id::get_name(id) == "$this") =>
         {
             let cexpr_local = emit_expr(e, env, expr)?;
             (

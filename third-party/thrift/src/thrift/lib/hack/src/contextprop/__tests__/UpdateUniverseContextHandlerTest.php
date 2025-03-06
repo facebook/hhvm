@@ -188,7 +188,7 @@ final class UpdateUniverseContextHandlerTest
 
   private async function genInitPZ2(): Awaitable<void> {
     await MockPZ2::genInitRequest(
-      PZ2CodeAnnotationStatic::get()->withPolicy(
+      PZ2CodeAnnotation::get()->withPolicy(
         PZXSUPolicy::create(PZXSUPolicyState::FACEBOOK),
       ),
     );

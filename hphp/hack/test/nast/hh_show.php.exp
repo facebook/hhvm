@@ -49,21 +49,7 @@
                                            { ef_fun =
                                              { f_span = [6:14-9:4]; f_readonly_this = None; 
                                                f_annotation = (); f_readonly_ret = None; 
-                                               f_ret = ((), None);
-                                               f_params =
-                                               [{ param_annotation = ();
-                                                  param_type_hint =
-                                                  ((),
-                                                   (Some ([6:14-9:4], (Happly (([6:14-9:4], "\\HH\\supportdyn"), [([6:14-9:4], (Hshape { nsi_allows_unknown_fields = true; nsi_field_map = [] }))])))));
-                                                  param_pos = [6:14-9:4]; 
-                                                  param_name = "$0fv_shape"; 
-                                                  param_info = (Param_optional (Some ((), [6:14-9:4], (Shape [])))); 
-                                                  param_readonly = None; 
-                                                  param_splat = None; 
-                                                  param_callconv = Pnormal; 
-                                                  param_user_attributes = []; 
-                                                  param_visibility = None }
-                                                 ];
+                                               f_ret = ((), None); f_params = []; 
                                                f_ctxs = (Some ([6:14-9:4], [([6:14-9:4], (Happly (([6:14-9:4], "\\HH\\Contexts\\defaults"), [])))])); 
                                                f_unsafe_ctxs = None;
                                                f_body =

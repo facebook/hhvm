@@ -71,9 +71,24 @@ let is_sub_entry is_subtype env ctx1 ctx2 =
       | (None, None) -> true
       | (Some local, None) -> not (Option.is_some local.bound_ty)
       | (None, Some _) -> false
-      | ( Some { ty = ty1; defined = defined1; bound_ty = _; pos = _; eid = _ },
-          Some { ty = ty2; defined = defined2; bound_ty = _; pos = _; eid = _ }
-        ) ->
+      | ( Some
+            {
+              ty = ty1;
+              defined = defined1;
+              bound_ty = _;
+              pos = _;
+              eid = _;
+              macro_splice_vars = _;
+            },
+          Some
+            {
+              ty = ty2;
+              defined = defined2;
+              bound_ty = _;
+              pos = _;
+              eid = _;
+              macro_splice_vars = _;
+            } ) ->
         (not defined2) || (defined1 && is_subtype env ty1 ty2))
     ctx1.local_types
     ctx2.local_types

@@ -362,6 +362,7 @@ val all_continuations : env -> Typing_continuations.t list
 
 val set_local :
   ?immutable:bool ->
+  ?macro_splice_vars:Typing_defs.locl_ty Local_id.Map.t ->
   is_defined:bool ->
   bound_ty:locl_ty option ->
   env ->

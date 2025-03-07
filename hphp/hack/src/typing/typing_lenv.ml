@@ -35,6 +35,7 @@ let union
         bound_ty = bound_ty1;
         pos = pos1;
         eid = eid1;
+        macro_splice_vars = macro_splice_vars1;
       }
     Typing_local_types.
       {
@@ -43,6 +44,7 @@ let union
         bound_ty = bound_ty2;
         pos = pos2;
         eid = eid2;
+        macro_splice_vars = macro_splice_vars2;
       } =
   (* TODO(mjt) Use a more specific reason here provided as an argument *)
   let reason = Some (Typing_reason.join_point join_pos) in
@@ -79,10 +81,36 @@ let union
     else
       Env.make_expression_id env
   in
+  let (env, macro_splice_vars) =
+    match (macro_splice_vars1, macro_splice_vars2) with
+    | (x, None) -> (env, x)
+    | (None, x) -> (env, x)
+    | (Some map1, Some map2) ->
+      let (env, map) =
+        Local_id.Map.union_env
+          env
+          ~combine:(fun env _ t1 t2 ->
+            let (env, t) =
+              Union.union ?reason ~approx_cancel_neg:true env t1 t2
+            in
+            (env, Some t))
+          map1
+          map2
+      in
+      (env, Some map)
+  in
   match bound_ty with
   | None ->
     Typing_local_types.
-      (env, { ty; defined = defined1 && defined2; bound_ty; pos; eid })
+      ( env,
+        {
+          ty;
+          defined = defined1 && defined2;
+          bound_ty;
+          pos;
+          eid;
+          macro_splice_vars;
+        } )
   | Some bound_ty ->
     let (env, err_opt) =
       Typing_subtype.sub_type
@@ -109,6 +137,7 @@ let union
           bound_ty = Some bound_ty;
           pos;
           eid;
+          macro_splice_vars;
         } )
 
 let get_cont_option env cont =

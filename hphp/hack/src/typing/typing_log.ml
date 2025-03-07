@@ -385,7 +385,9 @@ let continuations_map_as_value f m =
        SMap.empty)
 
 let local_as_value
-    env Typing_local_types.{ ty; defined; bound_ty; pos = _; eid } =
+    env
+    Typing_local_types.
+      { ty; defined; bound_ty; pos = _; eid; macro_splice_vars = _ } =
   let bound =
     match bound_ty with
     | None -> ""

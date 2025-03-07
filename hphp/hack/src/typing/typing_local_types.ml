@@ -24,6 +24,9 @@ type local = {
           type. The idea is that if two local variables have the same expression_id
           then they refer to the same late bound type, and thus have compatible
           'this' types. *)
+  macro_splice_vars: locl_ty Local_id.Map.t option;
+      (** If the variable is bound to a expression tree splice that has nested expression
+          trees with free variables, this records the types of those variables. *)
 }
 [@@deriving show]
 

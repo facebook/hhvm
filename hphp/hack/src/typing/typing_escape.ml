@@ -532,7 +532,8 @@ let refresh_locals renv =
   let on_error = renv.on_error in
   Local_id.Map.fold
     (fun local
-         Typing_local_types.{ ty = lty; defined; bound_ty; pos; eid = _ }
+         Typing_local_types.
+           { ty = lty; defined; bound_ty; pos; eid = _; macro_splice_vars = _ }
          renv ->
       if defined then
         let on_error =

@@ -1153,7 +1153,15 @@ let make_expression_id env = Expression_id.make env.expression_id_provider
  * that the local currently has, and an expression_id generated from
  * the last assignment to this local.
  *)
-let set_local ?(immutable = false) ~is_defined ~bound_ty env x new_type pos =
+let set_local
+    ?(immutable = false)
+    ?macro_splice_vars
+    ~is_defined
+    ~bound_ty
+    env
+    x
+    new_type
+    pos =
   let new_type =
     match get_node new_type with
     | Tunion [ty] -> ty
@@ -1175,7 +1183,14 @@ let set_local ?(immutable = false) ~is_defined ~bound_ty env x new_type pos =
     in
     let local =
       Typing_local_types.
-        { ty = new_type; defined = is_defined; bound_ty; pos; eid = expr_id }
+        {
+          ty = new_type;
+          defined = is_defined;
+          bound_ty;
+          pos;
+          eid = expr_id;
+          macro_splice_vars;
+        }
     in
     set_local_ env x local
 
@@ -1283,6 +1298,7 @@ let get_local_in_ctx ~undefined_err_fun env x ctx_opt =
           bound_ty = None;
           pos = Pos.none;
           eid = make_expression_id env;
+          macro_splice_vars = None;
         }
   | Some ctx ->
     let lcl = LID.Map.find_opt x ctx.LEnvC.local_types in
@@ -1314,6 +1330,7 @@ let get_local_ty_in_ctx ~undefined_err_fun env x ctx_opt =
           bound_ty = None;
           pos = Pos.none;
           eid = make_expression_id env;
+          macro_splice_vars = None;
         } )
   | Some local ->
     let open Typing_local_types in
@@ -1370,9 +1387,13 @@ let set_local_expr_id env x new_eid =
   | Some next_cont -> begin
     let open Typing_local_types in
     match LID.Map.find_opt x next_cont.LEnvC.local_types with
-    | Some Typing_local_types.{ ty; defined; bound_ty; pos; eid }
+    | Some
+        Typing_local_types.
+          { ty; defined; bound_ty; pos; eid; macro_splice_vars }
       when not (Expression_id.equal eid new_eid) ->
-      let local = { ty; defined; bound_ty; pos; eid = new_eid } in
+      let local =
+        { ty; defined; bound_ty; pos; eid = new_eid; macro_splice_vars }
+      in
       let per_cont_env = LEnvC.add_to_cont C.Next x local per_cont_env in
       let env = { env with lenv = { env.lenv with per_cont_env } } in
       if Expression_id.is_immutable eid then

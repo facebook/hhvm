@@ -18,7 +18,6 @@ package thrift
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"testing"
 )
@@ -60,19 +59,4 @@ func (r *mockReader) Read(p []byte) (int, error) {
 		p[0] = r.v
 	}
 	return r.n, r.err
-}
-
-func TestIsEOF(t *testing.T) {
-	if !isEOF(io.EOF) {
-		t.Fatalf("expected true")
-	}
-	if !isEOF(fmt.Errorf("wrapped error: %w", io.EOF)) {
-		t.Fatalf("expected true")
-	}
-	if !isEOF(NewTransportException(END_OF_FILE, "dummy")) {
-		t.Fatalf("expected true")
-	}
-	if !isEOF(fmt.Errorf("wrapped trasport error: %w", NewTransportException(END_OF_FILE, "dummy"))) {
-		t.Fatalf("expected true")
-	}
 }

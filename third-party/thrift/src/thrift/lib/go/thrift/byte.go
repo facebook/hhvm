@@ -17,7 +17,6 @@
 package thrift
 
 import (
-	"errors"
 	"io"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
@@ -37,21 +36,6 @@ func flush(writer io.Writer) error {
 		return nil
 	}
 	return types.NewProtocolException(flusher.Flush())
-}
-
-func isEOF(err error) bool {
-	if err == nil {
-		return false
-	}
-	if errors.Is(err, io.EOF) {
-		return true
-	}
-	var exp types.TransportException
-	if errors.As(err, &exp) && exp.TypeID() == types.END_OF_FILE {
-		// connection terminated because client closed connection
-		return true
-	}
-	return false
 }
 
 func readByte(reader io.Reader) (byte, error) {

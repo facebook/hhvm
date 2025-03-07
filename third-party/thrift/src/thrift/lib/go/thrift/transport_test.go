@@ -17,6 +17,7 @@
 package thrift
 
 import (
+	"fmt"
 	"io"
 	"testing"
 )
@@ -143,5 +144,20 @@ func transportHTTPClientTest(t *testing.T, writer io.Writer, reader io.Reader) {
 		if v != transport_bdata[k] {
 			t.Fatalf("Transport %T read %d instead of %d for index %d of binary data 2", reader, v, transport_bdata[k], k)
 		}
+	}
+}
+
+func TestIsEOF(t *testing.T) {
+	if !isEOF(io.EOF) {
+		t.Fatalf("expected true")
+	}
+	if !isEOF(fmt.Errorf("wrapped error: %w", io.EOF)) {
+		t.Fatalf("expected true")
+	}
+	if !isEOF(NewTransportException(END_OF_FILE, "dummy")) {
+		t.Fatalf("expected true")
+	}
+	if !isEOF(fmt.Errorf("wrapped trasport error: %w", NewTransportException(END_OF_FILE, "dummy"))) {
+		t.Fatalf("expected true")
 	}
 }

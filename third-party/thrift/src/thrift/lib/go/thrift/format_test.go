@@ -17,14 +17,10 @@
 package thrift
 
 import (
-	"fmt"
 	"io"
 	"math"
-	"net"
-	"net/http"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -82,88 +78,6 @@ func init() {
 		protocolBdata[i] = byte((i + 'a') % 255)
 	}
 	data = string(protocolBdata)
-}
-
-type HTTPEchoServer struct{}
-type HTTPHeaderEchoServer struct{}
-
-func (p *HTTPEchoServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	buf, err := io.ReadAll(req.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(buf)
-	} else {
-		w.WriteHeader(http.StatusOK)
-		w.Write(buf)
-	}
-}
-
-func (p *HTTPHeaderEchoServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	buf, err := io.ReadAll(req.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(buf)
-	} else {
-		w.WriteHeader(http.StatusOK)
-		w.Write(buf)
-	}
-}
-
-func HTTPClientSetupForTest(t *testing.T) net.Listener {
-	l, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		t.Fatalf("Unable to setup tcp listener on local port: %s", err)
-		return l
-	}
-	go http.Serve(l, &HTTPEchoServer{})
-	return l
-}
-
-func HTTPClientSetupForHeaderTest(t *testing.T) net.Listener {
-	l, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		t.Fatalf("Unable to setup tcp listener on local port: %s", err)
-		return l
-	}
-	go http.Serve(l, &HTTPHeaderEchoServer{})
-	return l
-}
-
-func tcpStreamSetupForTest(t *testing.T) (io.Reader, io.Writer) {
-	l, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		t.Fatal(err)
-	}
-	rCh := make(chan io.Reader)
-	errCh := make(chan error)
-	go func() {
-		defer close(rCh)
-		for {
-			conn, err := l.Accept()
-			if err != nil {
-				errCh <- fmt.Errorf("could not accept tcp: %w", err)
-			}
-			rCh <- conn
-		}
-	}()
-
-	var (
-		rConn io.Reader
-		wConn io.Writer
-	)
-
-	wConn, err = net.Dial(l.Addr().Network(), l.Addr().String())
-	if err != nil {
-		t.Fatalf("could not dial tcp: %s", err.Error())
-	}
-	select {
-	case rConn = <-rCh:
-	case err = <-errCh:
-		t.Fatalf(err.Error())
-	case <-time.After(1 * time.Second):
-		t.Fatalf("timed out waiting on a tcp connection")
-	}
-	return rConn, wConn
 }
 
 type protocolTest func(t testing.TB, p types.Format)
@@ -239,18 +153,8 @@ func ReadWriteProtocolParallelTest(t *testing.T, newFormat func(io.ReadWriteClos
 }
 
 func ReadWriteProtocolTest(t *testing.T, newFormat func(io.ReadWriteCloser) types.Format) {
-	l := HTTPClientSetupForTest(t)
-	defer l.Close()
-
 	transports := []func() io.ReadWriteCloser{
 		func() io.ReadWriteCloser { return NewMemoryBufferLen(1024) },
-		func() io.ReadWriteCloser {
-			http, err := newHTTPPostClient("http://" + l.Addr().String())
-			if err != nil {
-				panic(err)
-			}
-			return http
-		},
 	}
 
 	doForAllTransports := func(protTest protocolTest) {

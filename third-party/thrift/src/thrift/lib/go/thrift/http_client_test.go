@@ -17,9 +17,34 @@
 package thrift
 
 import (
+	"io"
+	"net"
 	"net/http"
 	"testing"
 )
+
+type HTTPEchoServer struct{}
+
+func (p *HTTPEchoServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	buf, err := io.ReadAll(req.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(buf)
+	} else {
+		w.WriteHeader(http.StatusOK)
+		w.Write(buf)
+	}
+}
+
+func HTTPClientSetupForTest(t *testing.T) net.Listener {
+	l, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("Unable to setup tcp listener on local port: %s", err)
+		return l
+	}
+	go http.Serve(l, &HTTPEchoServer{})
+	return l
+}
 
 func TestHTTPClient(t *testing.T) {
 	l := HTTPClientSetupForTest(t)

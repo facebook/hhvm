@@ -24,7 +24,10 @@ import (
 	"testing"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
+	"github.com/facebook/fbthrift/thrift/test/go/if/my_test_struct"
 )
+
+type MyTestStruct = my_test_struct.MyTestStruct
 
 func compareStructs(m, m1 MyTestStruct) (bool, error) {
 	switch {
@@ -73,7 +76,7 @@ func compareStructs(m, m1 MyTestStruct) (bool, error) {
 func ProtocolTest1(test *testing.T, serial *Serializer, deserial *Deserializer) (bool, error) {
 	var m = MyTestStruct{}
 	m.On = true
-	m.B = byte(0)
+	m.B = int8(0)
 	m.Int16 = 1
 	m.Int32 = 2
 	m.Int64 = 3
@@ -82,7 +85,7 @@ func ProtocolTest1(test *testing.T, serial *Serializer, deserial *Deserializer) 
 	m.Bin = make([]byte, 10)
 	m.StringMap = make(map[string]string, 5)
 	m.StringList = make([]string, 5)
-	m.StringSet = make(map[string]bool, 5)
+	m.StringSet = make([]string, 5)
 	m.E = 2
 
 	s, err := serial.WriteString(&m)
@@ -102,7 +105,7 @@ func ProtocolTest1(test *testing.T, serial *Serializer, deserial *Deserializer) 
 func ProtocolTest2(test *testing.T, serial *Serializer, deserial *Deserializer) (bool, error) {
 	var m = MyTestStruct{}
 	m.On = false
-	m.B = byte(0)
+	m.B = int8(0)
 	m.Int16 = 1
 	m.Int32 = 2
 	m.Int64 = 3
@@ -111,7 +114,7 @@ func ProtocolTest2(test *testing.T, serial *Serializer, deserial *Deserializer) 
 	m.Bin = make([]byte, 10)
 	m.StringMap = make(map[string]string, 5)
 	m.StringList = make([]string, 5)
-	m.StringSet = make(map[string]bool, 5)
+	m.StringSet = make([]string, 5)
 	m.E = 2
 
 	s, err := serial.WriteString(&m)

@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/facebook/fbthrift/thrift/test/go/if/my_test_struct"
 )
 
 func TestReadWriteBinaryFormat(t *testing.T) {
@@ -31,7 +32,7 @@ func TestReadWriteBinaryFormat(t *testing.T) {
 }
 
 func TestWriteBinaryEmptyBinaryFormat(t *testing.T) {
-	m := NewMyTestStruct()
+	m := my_test_struct.NewMyTestStruct()
 	m.Bin = nil
 	format := NewBinaryFormat(NewMemoryBufferWithData([]byte(nil)))
 	if err := m.Write(format); err != nil {

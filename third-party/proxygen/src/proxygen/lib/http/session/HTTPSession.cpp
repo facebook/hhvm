@@ -218,8 +218,6 @@ void HTTPSession::setupCodec() {
   if (codec_->supportsSessionFlowControl() && !connFlowControl_) {
     connFlowControl_ = new FlowControlFilter(*this, writeBuf_, codec_.call());
     codec_.addFilters(std::unique_ptr<FlowControlFilter>(connFlowControl_));
-    // if we really support switching from spdy <-> h2, we need to update
-    // existing flow control filter
   }
   if (codec_->supportsParallelRequests() && sock_ &&
       codec_->getTransportDirection() == TransportDirection::DOWNSTREAM) {

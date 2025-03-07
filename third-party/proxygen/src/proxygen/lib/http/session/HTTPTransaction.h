@@ -94,7 +94,7 @@ class DSRRequestSender {
  * by another Transport, and create outgoing requests on the upstream
  * connection(s), with each request represented as a new Transaction.
  *
- * With a multiplexing protocol like SPDY on both sides of a proxy,
+ * With a multiplexing protocol like H2 on both sides of a proxy,
  * the cardinality relationship can be:
  *
  *                 +-----------+     +-----------+     +-------+
@@ -218,7 +218,7 @@ class HTTPTransactionHandler : public TraceEventObserver {
    * previously called pauseIngress(), this callback will be delayed until
    * you call resumeIngress(). Trailers can be received once right before
    * the EOM of a chunked HTTP/1.1 reponse or multiple times per
-   * transaction from SPDY and HTTP/2.0 HEADERS frames.
+   * transaction from HTTP/2 HEADERS frames.
    */
   virtual void onTrailers(std::unique_ptr<HTTPHeaders> trailers) noexcept = 0;
 
@@ -293,7 +293,7 @@ class HTTPTransactionHandler : public TraceEventObserver {
   /**
    * Inform the handler that a GOAWAY has been received on the
    * transport. This callback will only be invoked if the transport is
-   * SPDY or HTTP/2. It may be invoked multiple times, as HTTP/2 allows this.
+   * HTTP/2 or HTTP/3. It may be invoked multiple times.
    *
    * @param code The error code received in the GOAWAY frame
    */
@@ -769,7 +769,7 @@ class HTTPTransaction
    * made on the borders of the L7 chunking/data frames of the outbound
    * messages.
    *
-   * priority is only used by SPDY. The -1 default makes sure that all
+   * priority is not used by HTTP/1.1. The -1 default makes sure that all
    * plain HTTP transactions land up in the same queue as the control data.
    */
   HTTPTransaction(

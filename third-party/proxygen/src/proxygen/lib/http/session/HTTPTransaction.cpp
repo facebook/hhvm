@@ -1567,8 +1567,7 @@ void HTTPTransaction::sendEOM() {
   }
 
   if (getOutstandingEgressBodyBytes() == 0 && chunkHeaders_.empty()) {
-    // there is nothing left to send, egress the EOM directly.  For SPDY
-    // this will jump the txn queue
+    // there is nothing left to send, egress the EOM directly.
     if (!isEnqueued()) {
       size_t nbytes = sendEOMNow();
       transport_.notifyPendingEgress();

@@ -52,7 +52,7 @@ bool HTTPTransactionSink::safeToUpgrade(HTTPMessage* req) const {
   // terminated by content-length.  If that's the case, don't request an upgrade
   // on this connection.  We can live with a little HTTP/1.1 for now.
 
-  // Because HTTP/2 and SPDY now reported "chunked" messages for requests that
+  // Because HTTP/2 and HTTP/3 reported "chunked" messages for requests that
   // will see DATA frames, the only unsafe type of request is HTTP/1.1 with
   // Content-Length terminated body.  We could force this to use chunked
   // encoding to make it safe, but for now we won't.

@@ -23,7 +23,7 @@ class HTTPCodecPrinter : public PassThroughHTTPCodecFilter {
   /*
    * Called from HTTP2Codec::parseIngress()
    *             HTTP2Codec::onIngress()
-   * when SPDY and HTTP/2 frame headers are parsed
+   * when HTTP frame headers are parsed
    */
   void onFrameHeader(StreamID stream_id,
                      uint8_t flags,

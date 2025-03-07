@@ -17,14 +17,53 @@
 package thrift
 
 import (
+	cryptorand "crypto/rand"
+	"math/rand"
 	"testing"
 )
+
+func testReadWriteNonComparable[T any](b *testing.B, genRandValue func() T, writeFunc func(T) error, readFunc func() (T, error), flushFunc func() error) {
+	randomValue := genRandValue()
+	if err := writeFunc(randomValue); err != nil {
+		b.Fatalf("failed to write value: %v", err)
+	}
+	if err := flushFunc(); err != nil {
+		b.Fatalf("failed to flush: %v", err)
+	}
+	_, err := readFunc()
+	if err != nil {
+		b.Fatalf("failed to read value: %v", err)
+	}
+}
+
+func testReadWrite[T comparable](b *testing.B, genRandValue func() T, writeFunc func(T) error, readFunc func() (T, error), flushFunc func() error) {
+	randomValue := genRandValue()
+	if err := writeFunc(randomValue); err != nil {
+		b.Fatalf("failed to write value: %v", err)
+	}
+	if err := flushFunc(); err != nil {
+		b.Fatalf("failed to flush: %v", err)
+	}
+	readValue, err := readFunc()
+	if err != nil {
+		b.Fatalf("failed to read value: %v", err)
+	}
+	if readValue != randomValue {
+		b.Fatalf("value mismatch")
+	}
+}
 
 func BenchmarkBinaryBool_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteBool(b, p)
+		testReadWrite(
+			b,
+			func() bool { return rand.Intn(2) == 0 },
+			p.WriteBool,
+			p.ReadBool,
+			p.Flush,
+		)
 	}
 }
 
@@ -32,7 +71,13 @@ func BenchmarkBinaryByte_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteByte(b, p)
+		testReadWrite(
+			b,
+			func() byte { return byte(rand.Intn(256) - 128) },
+			p.WriteByte,
+			p.ReadByte,
+			p.Flush,
+		)
 	}
 }
 
@@ -40,7 +85,13 @@ func BenchmarkBinaryI16_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteI16(b, p)
+		testReadWrite(
+			b,
+			func() int16 { return int16(rand.Intn(int(32767*2)) - 32767) },
+			p.WriteI16,
+			p.ReadI16,
+			p.Flush,
+		)
 	}
 }
 
@@ -48,35 +99,79 @@ func BenchmarkBinaryI32_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteI32(b, p)
+		testReadWrite(
+			b,
+			rand.Int31,
+			p.WriteI32,
+			p.ReadI32,
+			p.Flush,
+		)
 	}
 }
 func BenchmarkBinaryI64_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteI64(b, p)
+		testReadWrite(
+			b,
+			rand.Int63,
+			p.WriteI64,
+			p.ReadI64,
+			p.Flush,
+		)
 	}
 }
 func BenchmarkBinaryDouble_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteDouble(b, p)
+		testReadWrite(
+			b,
+			rand.Float64,
+			p.WriteDouble,
+			p.ReadDouble,
+			p.Flush,
+		)
 	}
 }
 func BenchmarkBinaryString_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewBinaryFormat(trans)
+
+	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	randString := func() string {
+		b := make([]rune, 16)
+		for i := range b {
+			b[i] = letters[rand.Intn(len(letters))]
+		}
+		return string(b)
+	}
+
 	for i := 0; i < b.N; i++ {
-		ReadWriteString(b, p)
+		testReadWrite(
+			b,
+			randString,
+			p.WriteString,
+			p.ReadString,
+			p.Flush,
+		)
 	}
 }
 func BenchmarkBinaryBinary_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteBinary(b, p)
+		testReadWriteNonComparable(
+			b,
+			func() []byte {
+				data := make([]byte, 16)
+				_, _ = cryptorand.Read(data)
+				return data
+			},
+			p.WriteBinary,
+			p.ReadBinary,
+			p.Flush,
+		)
 	}
 }
 
@@ -84,7 +179,13 @@ func BenchmarkCompactBool_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewCompactFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteBool(b, p)
+		testReadWrite(
+			b,
+			func() bool { return rand.Intn(2) == 0 },
+			p.WriteBool,
+			p.ReadBool,
+			p.Flush,
+		)
 	}
 }
 
@@ -92,7 +193,13 @@ func BenchmarkCompactByte_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewCompactFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteByte(b, p)
+		testReadWrite(
+			b,
+			func() byte { return byte(rand.Intn(256) - 128) },
+			p.WriteByte,
+			p.ReadByte,
+			p.Flush,
+		)
 	}
 }
 
@@ -100,7 +207,13 @@ func BenchmarkCompactI16_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewCompactFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteI16(b, p)
+		testReadWrite(
+			b,
+			func() int16 { return int16(rand.Intn(int(32767*2)) - 32767) },
+			p.WriteI16,
+			p.ReadI16,
+			p.Flush,
+		)
 	}
 }
 
@@ -108,34 +221,78 @@ func BenchmarkCompactI32_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewCompactFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteI32(b, p)
+		testReadWrite(
+			b,
+			rand.Int31,
+			p.WriteI32,
+			p.ReadI32,
+			p.Flush,
+		)
 	}
 }
 func BenchmarkCompactI64_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewCompactFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteI64(b, p)
+		testReadWrite(
+			b,
+			rand.Int63,
+			p.WriteI64,
+			p.ReadI64,
+			p.Flush,
+		)
 	}
 }
-func BenchmarkCompactDouble0(b *testing.B) {
+func BenchmarkCompactDouble_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewCompactFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteDouble(b, p)
+		testReadWrite(
+			b,
+			rand.Float64,
+			p.WriteDouble,
+			p.ReadDouble,
+			p.Flush,
+		)
 	}
 }
-func BenchmarkCompactString0(b *testing.B) {
+func BenchmarkCompactString_0(b *testing.B) {
+	trans := NewMemoryBufferLen(1024)
+	p := NewCompactFormat(trans)
+
+	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	randString := func() string {
+		b := make([]rune, 16)
+		for i := range b {
+			b[i] = letters[rand.Intn(len(letters))]
+		}
+		return string(b)
+	}
+
+	for i := 0; i < b.N; i++ {
+		testReadWrite(
+			b,
+			randString,
+			p.WriteString,
+			p.ReadString,
+			p.Flush,
+		)
+	}
+}
+func BenchmarkCompactBinary_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewCompactFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteString(b, p)
-	}
-}
-func BenchmarkCompactBinary0(b *testing.B) {
-	trans := NewMemoryBufferLen(1024)
-	p := NewCompactFormat(trans)
-	for i := 0; i < b.N; i++ {
-		ReadWriteBinary(b, p)
+		testReadWriteNonComparable(
+			b,
+			func() []byte {
+				data := make([]byte, 16)
+				_, _ = cryptorand.Read(data)
+				return data
+			},
+			p.WriteBinary,
+			p.ReadBinary,
+			p.Flush,
+		)
 	}
 }

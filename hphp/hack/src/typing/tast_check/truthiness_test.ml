@@ -36,9 +36,26 @@ let add_warning env ~as_lint pos kind ty e not =
       { Typing_warning.Truthiness_test.kind; ty; expr = get_lvar_name e; not }
     )
 
+let is_like_null env ty =
+  Tast_env.is_sub_type
+    env
+    ty
+    (Typing_make_type.locl_like
+       Typing_reason.none
+       (Typing_make_type.null Typing_reason.none))
+
 let truthiness_test env ~as_lint (ty, p, e) ~not : unit =
   let prim_to_string prim =
     Env.print_error_ty env (MakeType.prim_type (get_reason ty) prim)
+  in
+  let ty =
+    (* We don't strip the like if is ~null because this leads to false positives
+       in the truthiness warning. Specifically like null frequently arises through
+       calling `idx` on `dynamic` typed data. *)
+    if is_like_null env ty then
+      ty
+    else
+      Tast_env.strip_dynamic env ty
   in
   List.iter (Tast_utils.find_sketchy_types env ty) ~f:(function
       | Tast_utils.String ->

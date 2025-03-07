@@ -136,6 +136,14 @@ type compactEncoder struct {
 	version int
 }
 
+// IsCompactFramed Check if the magic value corresponds to compact proto
+func IsCompactFramed(magic uint32) bool {
+	protocolID := int8(magic >> 24)
+	protocolVersion := int8((magic >> 16) & uint32(COMPACT_VERSION_MASK))
+	return uint8(protocolID) == uint8(COMPACT_PROTOCOL_ID) && (protocolVersion == int8(COMPACT_VERSION) ||
+		protocolVersion == int8(COMPACT_VERSION_BE))
+}
+
 //
 // Public Writing methods.
 //

@@ -59,6 +59,11 @@ func newBinaryDecoder(reader io.Reader) types.Decoder {
 	return &binaryDecoder{reader: reader, strictRead: false}
 }
 
+// IsBinaryFramed checks if the magic value corresponds to binary proto
+func IsBinaryFramed(magic uint32) bool {
+	return (magic & BinaryVersionMask) == BinaryVersion1
+}
+
 /**
  * Writing Methods
  */

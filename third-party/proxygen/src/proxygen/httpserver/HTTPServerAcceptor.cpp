@@ -36,9 +36,7 @@ std::shared_ptr<const AcceptorConfiguration> HTTPServerAcceptor::makeConfig(
         HTTPSetting(SettingsId::ENABLE_EX_HEADERS, 1));
   }
 
-  if (ipConfig.protocol == HTTPServer::Protocol::SPDY) {
-    conf->plaintextProtocol = "spdy/3.1";
-  } else if (ipConfig.protocol == HTTPServer::Protocol::HTTP2) {
+  if (ipConfig.protocol == HTTPServer::Protocol::HTTP2) {
     conf->plaintextProtocol = http2::kProtocolCleartextString;
   } else if (opts.h2cEnabled) {
     conf->allowedPlaintextUpgradeProtocols = {http2::kProtocolCleartextString};

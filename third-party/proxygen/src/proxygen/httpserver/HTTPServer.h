@@ -39,7 +39,6 @@ class HTTPServer final {
    */
   enum class Protocol : uint8_t {
     HTTP,
-    SPDY,
     HTTP2,
   };
 

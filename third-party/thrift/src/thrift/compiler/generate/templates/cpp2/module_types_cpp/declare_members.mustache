@@ -26,8 +26,13 @@
 
 {{struct:cpp_underlying_name}}::~{{struct:cpp_underlying_name}}() {}
 
-{{/struct:is_large?}}
-{{^struct:is_eligible_for_constexpr?}}
+{{/struct:is_large?}}{{!
+
+}}{{#struct:cpp_allocator}}
+{{> module_types_cpp/alloc_extended_ctors}}
+{{/struct:cpp_allocator}}{{!
+
+}}{{^struct:is_eligible_for_constexpr?}}
 {{struct:cpp_underlying_name}}::{{> module_types_cpp/move_ctor}}
 {{struct:cpp_underlying_name}}& {{struct:cpp_underlying_name}}::operator=([[maybe_unused]] {{struct:cpp_underlying_name}}&& other) noexcept {
 {{#struct:lazy_fields?}}

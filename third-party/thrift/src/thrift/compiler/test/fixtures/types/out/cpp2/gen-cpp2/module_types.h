@@ -7057,38 +7057,9 @@ class AllocatorAware final  {
   AllocatorAware(AllocatorAware&&) noexcept;
   AllocatorAware(const AllocatorAware& src);
 
-  explicit AllocatorAware(const allocator_type& alloc) noexcept :
-    __fbthrift_alloc(alloc),
-    __fbthrift_field_aa_list(alloc),
-    __fbthrift_field_aa_set(alloc),
-    __fbthrift_field_aa_map(alloc),
-    __fbthrift_field_aa_string(alloc),
-    __fbthrift_field_not_a_container(),
-    __fbthrift_field_aa_unique(folly::allocate_unique<::apache::thrift::fixtures::types::i32_9314>(alloc)),
-    __fbthrift_field_aa_shared(std::allocate_shared<::apache::thrift::fixtures::types::i32_9314>(alloc)) {}
-
-  explicit AllocatorAware(const AllocatorAware& other, const allocator_type& alloc) :
-    __fbthrift_alloc(alloc),
-    __fbthrift_field_aa_list(other.__fbthrift_field_aa_list, alloc),
-    __fbthrift_field_aa_set(other.__fbthrift_field_aa_set, alloc),
-    __fbthrift_field_aa_map(other.__fbthrift_field_aa_map, alloc),
-    __fbthrift_field_aa_string(other.__fbthrift_field_aa_string, alloc),
-    __fbthrift_field_not_a_container(other.__fbthrift_field_not_a_container),
-    __fbthrift_field_aa_unique(folly::allocate_unique<::apache::thrift::fixtures::types::i32_9314>(alloc, *other.__fbthrift_field_aa_unique)),
-    __fbthrift_field_aa_shared(std::allocate_shared<::apache::thrift::fixtures::types::i32_9314>(alloc, *other.__fbthrift_field_aa_shared)),
-    __isset(other.__isset) {}
-
-  explicit AllocatorAware(AllocatorAware&& other, const allocator_type& alloc) :
-    __fbthrift_alloc(alloc),
-    __fbthrift_field_aa_list(std::move(other.__fbthrift_field_aa_list), alloc),
-    __fbthrift_field_aa_set(std::move(other.__fbthrift_field_aa_set), alloc),
-    __fbthrift_field_aa_map(std::move(other.__fbthrift_field_aa_map), alloc),
-    __fbthrift_field_aa_string(std::move(other.__fbthrift_field_aa_string), alloc),
-    __fbthrift_field_not_a_container(std::move(other.__fbthrift_field_not_a_container)),
-    __fbthrift_field_aa_unique(folly::allocate_unique<::apache::thrift::fixtures::types::i32_9314>(alloc, std::move(*other.__fbthrift_field_aa_unique))),
-    __fbthrift_field_aa_shared(std::allocate_shared<::apache::thrift::fixtures::types::i32_9314>(alloc, std::move(*other.__fbthrift_field_aa_shared))),
-    __isset(other.__isset) {}
-
+  explicit AllocatorAware(const allocator_type& alloc) noexcept;
+  explicit AllocatorAware(const AllocatorAware& other, const allocator_type& alloc);
+  explicit AllocatorAware(AllocatorAware&& other, const allocator_type& alloc);
   AllocatorAware& operator=(AllocatorAware&&) noexcept;
   AllocatorAware& operator=(const AllocatorAware& src);
 
@@ -7626,23 +7597,9 @@ class AllocatorAware2 final  {
   AllocatorAware2(AllocatorAware2&&) noexcept;
   AllocatorAware2(const AllocatorAware2& src);
 
-  explicit AllocatorAware2(const allocator_type& alloc) noexcept :
-    __fbthrift_alloc(alloc),
-    __fbthrift_field_not_a_container(),
-    __fbthrift_field_box_field() {}
-
-  explicit AllocatorAware2(const AllocatorAware2& other, const allocator_type& alloc) :
-    __fbthrift_alloc(alloc),
-    __fbthrift_field_not_a_container(other.__fbthrift_field_not_a_container),
-    __fbthrift_field_box_field(),
-    __isset(other.__isset) {}
-
-  explicit AllocatorAware2(AllocatorAware2&& other, const allocator_type& alloc) :
-    __fbthrift_alloc(alloc),
-    __fbthrift_field_not_a_container(std::move(other.__fbthrift_field_not_a_container)),
-    __fbthrift_field_box_field(),
-    __isset(other.__isset) {}
-
+  explicit AllocatorAware2(const allocator_type& alloc) noexcept;
+  explicit AllocatorAware2(const AllocatorAware2& other, const allocator_type& alloc);
+  explicit AllocatorAware2(AllocatorAware2&& other, const allocator_type& alloc);
   AllocatorAware2& operator=(AllocatorAware2&&) noexcept;
   AllocatorAware2& operator=(const AllocatorAware2& src);
 

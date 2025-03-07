@@ -15,7 +15,7 @@
   limitations under the License.
 
 }}
-  explicit {{struct:cpp_underlying_name}}(const allocator_type& alloc) noexcept :
+{{struct:cpp_underlying_name}}::{{struct:cpp_underlying_name}}(const allocator_type& alloc) noexcept :
 {{^struct:cpp_allocator_via}}
     __fbthrift_alloc(alloc),
 {{/struct:cpp_allocator_via}}
@@ -30,7 +30,7 @@
     }}){{/field:type}}{{^last?}},{{/last?}}{{#last?}} {}{{/last?}}
 {{/struct:fields_in_layout_order}}
 
-  explicit {{struct:cpp_underlying_name}}(const {{struct:cpp_underlying_name}}& other, const allocator_type& alloc) :
+{{struct:cpp_underlying_name}}::{{struct:cpp_underlying_name}}(const {{struct:cpp_underlying_name}}& other, const allocator_type& alloc) :
 {{^struct:cpp_allocator_via}}
     __fbthrift_alloc(alloc),
 {{/struct:cpp_allocator_via}}
@@ -50,7 +50,7 @@
     __isset(other.__isset) {}
 {{/struct:isset_fields?}}
 
-  explicit {{struct:cpp_underlying_name}}({{struct:cpp_underlying_name}}&& other, const allocator_type& alloc) :
+{{struct:cpp_underlying_name}}::{{struct:cpp_underlying_name}}({{struct:cpp_underlying_name}}&& other, const allocator_type& alloc) :
 {{^struct:cpp_allocator_via}}
     __fbthrift_alloc(alloc),
 {{/struct:cpp_allocator_via}}

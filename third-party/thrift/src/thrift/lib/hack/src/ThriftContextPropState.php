@@ -97,7 +97,6 @@ final class ThriftContextPropState {
          * see evidence of them, so we need to add code to check if we're
          * ingesting the ids here.
          * ~15B occurrences per hour, 15B / 60 = 250M per minute
-         * 250M / 50M = 5 samples per minute
          */
         if ($tfm->experiment_ids is nonnull) {
           $ids = $tfm->experiment_ids;
@@ -108,7 +107,7 @@ final class ThriftContextPropState {
             FBLogger('lumos_experimentation', 'unexpected experiment ids')
               ->setBlameOwner('lumos')
               ->warn(
-                'Ingested TFM should not contain experiment IDs: [%s]',
+                'Ingested TFM should not contain experiment IDs: %s',
                 JSON::encode($ids),
               );
           }
@@ -462,6 +461,7 @@ final class ThriftContextPropState {
     if (!static::isExperimentIdModificationAllowed()) {
       return;
     }
+
     $v = $this->getExperimentIds();
     $v[] = $eid;
     $this->storage->experiment_ids = $v;

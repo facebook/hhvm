@@ -44,6 +44,27 @@ final class ThriftContextPropHandler extends TClientEventHandler {
       return null;
     }
 
+    /**
+     * TEMPORARY CHECK BELOW
+     *
+     * See ThriftContextPropState::initFromString for context
+     *
+     */
+    $exp_ids = $st->getExperimentIds();
+    if ($exp_ids is nonnull && !C\is_empty($exp_ids)) {
+      $sampling_rate = JustKnobs::getInt(
+        'lumos/experimentation:www_experiment_id_api_violation_sampling_rate',
+      );
+      if (coinflip($sampling_rate)) {
+        FBLogger('lumos_experimentation', 'unexpected experiment ids')
+          ->setBlameOwner('lumos')
+          ->warn(
+            'Calling makeV with experiment ids: %s',
+            JSON::encode($exp_ids),
+          );
+      }
+    }
+
     // Encapsulated logic: If the origin ID we obtain from the stack is null,
     // we'll just use the globally set one.
     return

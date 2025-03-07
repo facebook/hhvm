@@ -104,7 +104,7 @@ func (p *httpClient) Read(buf []byte) (int, error) {
 }
 
 func (p *httpClient) ReadByte() (byte, error) {
-	return readByte(&p.responseBuffer)
+	return p.responseBuffer.ReadByte()
 }
 
 func (p *httpClient) Write(buf []byte) (int, error) {

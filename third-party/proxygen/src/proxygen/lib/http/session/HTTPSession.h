@@ -924,7 +924,7 @@ class HTTPSession
       pendingWrite_;
 
   /**
-   * Connection level flow control for SPDY >= 3.1 and HTTP/2
+   * Connection level flow control for HTTP/2
    */
   FlowControlFilter* connFlowControl_{nullptr};
 

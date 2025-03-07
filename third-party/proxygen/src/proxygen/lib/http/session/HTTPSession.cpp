@@ -583,7 +583,7 @@ void HTTPSession::readEOF() noexcept {
   VLOG(4) << "EOF on " << *this;
   // for SSL only: error without any bytes from the client might happen
   // due to client-side issues with the SSL cert. Note that it can also
-  // happen if the client sends a SPDY frame header but no body.
+  // happen if the client sends a H2 frame header but no body.
   if (infoCallback_ && transportInfo_.secure && getNumTxnServed() == 0 &&
       readBuf_.empty()) {
     infoCallback_->onIngressError(*this, kErrorClientSilent);
@@ -637,10 +637,6 @@ HTTPTransaction* HTTPSession::newPushedTransaction(
 
   if (outgoingStreams_ >= maxConcurrentOutgoingStreamsRemote_) {
     // This session doesn't support any more push transactions
-    // This could be an actual problem - since a single downstream SPDY session
-    // might be connected to N upstream hosts, each of which send M pushes,
-    // which exceeds the limit.
-    // should we queue?
     SET_PROXYGEN_ERROR_IF(
         error, ProxygenError::kErrorMaxConcurrentOutgoingStreamLimitReached);
     return nullptr;
@@ -1048,9 +1044,8 @@ void HTTPSession::onMessageComplete(HTTPCodec::StreamID streamID,
   }
 
   if (upgrade) {
-    /* Send the upgrade callback to the transaction and the handler.
-     * Currently we support upgrades for only HTTP sessions and not SPDY
-     * sessions.
+    /* Send the upgrade callback to the transaction and the handler. Only
+     * relevant for HTTP/1.1.
      */
     ingressUpgraded_ = true;
     txn->onIngressUpgrade(UpgradeProtocol::TCP);
@@ -1063,8 +1058,7 @@ void HTTPSession::onMessageComplete(HTTPCodec::StreamID streamID,
   // The codec knows, based on the semantics of whatever protocol it
   // supports, whether it's valid for any more ingress messages to arrive
   // after this one.  For example, an HTTP/1.1 request containing
-  // "Connection: close" indicates the end of the ingress, whereas a
-  // SPDY session generally can handle more messages at any time.
+  // "Connection: close" indicates the end of the ingress.
   //
   // If the connection is not reusable, we close the read side of it
   // but not the write side.  There are two reasons why more writes
@@ -1299,12 +1293,6 @@ void HTTPSession::onWindowUpdate(HTTPCodec::StreamID streamID,
           << amount << " bytes.";
   HTTPTransaction* txn = findTransaction(streamID);
   if (!txn) {
-    // We MUST be using SPDY/3+ if we got WINDOW_UPDATE. The spec says that -
-    //
-    // A sender should ignore all the WINDOW_UPDATE frames associated with the
-    // stream after it send the last frame for the stream.
-    //
-    // TODO: Only ignore if this is from some past transaction
     return;
   }
   txn->onIngressWindowUpdate(amount);
@@ -1607,7 +1595,7 @@ void HTTPSession::sendHeaders(HTTPTransaction* txn,
   if (draining_ && isUpstream() && codec_->isReusable() &&
       allTransactionsStarted()) {
     // For HTTP/1.1, add Connection: close
-    // For SPDY/H2, save the goaway for AFTER the request
+    // For H2, save the goaway for AFTER the request
     auto writeBuf = writeBuf_.move();
     drainImpl();
     goawayBuf = writeBuf_.move();

@@ -374,6 +374,9 @@ and ('ex, 'en) et_splice = {
           Spliceable<t1, t2, u1>,..,Spliceable<t1, t2, un> then the splice should have
           type Spliceable<t1, t2, (function (u1, .., un): t3)>.
           None is the splice is not a macro. *)
+  temp_lid: local_id;
+      (** Splices are hoisted out and assigned to a temporary variable. This
+          records the name of the temporary *)
   spliced_expr: ('ex, 'en) expr;
 }
 

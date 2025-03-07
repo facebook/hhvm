@@ -3908,6 +3908,29 @@ end = struct
         bop
         e1
         (Either.First e2)
+    | Assign (((_, _, Lvar (_, v)) as e1), None, (_, _, ET_Splice splice))
+      when (not splice.extract_client_type)
+           && Option.is_some splice.macro_variables ->
+      let (env, expr, ty, macro_splice_vars) = check_et_splice env p splice in
+      let (env, te, ty) =
+        Binop.check_assign
+          ~check_defined:ctxt.Context.check_defined
+          ~expected
+          env
+          outer
+          p
+          None
+          e1
+          (Either.Second (expr, ty))
+      in
+      let local = Typing_env.get_local env v in
+      let env =
+        Typing_env.set_local_
+          env
+          v
+          Typing_local_types.{ local with macro_splice_vars }
+      in
+      (env, te, ty)
     | Assign (e1, bop, e2) ->
       Binop.check_assign
         ~check_defined:ctxt.Context.check_defined
@@ -4769,8 +4792,8 @@ end = struct
         (Aast.Shape (List.map ~f:(fun (k, te, _) -> (k, te)) tfdm))
         (MakeType.closed_shape (Reason.shape_literal p) fdm)
     | ET_Splice splice ->
-      Env.with_outside_expr_tree env (fun env dsl_name ->
-          et_splice env dsl_name p splice)
+      let (env, te, ty, _) = check_et_splice env p splice in
+      (env, te, ty)
     | EnumClassLabel (None, name) ->
       let label_ty = mk (Reason.witness p, Tlabel name) in
       let env = check_expected_ty "Label" env label_ty expected in
@@ -4879,11 +4902,64 @@ end = struct
     in
     make_result env p (Aast.Class_const (ce, mid)) const_ty
 
+  and check_et_splice env p splice =
+    let (env, tast, ty, macro_vars) =
+      Env.with_outside_expr_tree
+        env
+        ~macro_variables:splice.macro_variables
+        (fun env dsl_name -> et_splice env dsl_name p splice)
+    in
+    (* If we are extracting the client type from a spliced variable, and the binding
+       for that variable indicates that the bound value came from a macro splice,
+       check that the enclosing expression tree has appropriate bindings.
+    *)
+    match splice with
+    | {
+     extract_client_type = true;
+     contains_await = _;
+     macro_variables = _;
+     spliced_expr = _;
+     temp_lid = v;
+    } ->
+      let local = Typing_env.get_local env v in
+      (match local.Typing_local_types.macro_splice_vars with
+      | Some vars ->
+        let env =
+          Local_id.Map.fold
+            (fun id (pos, ty_super) env ->
+              let ty_sub =
+                Typing_local_types.(
+                  (Typing_env.get_local_check_defined env (pos, id)).ty)
+              in
+              let (env, ty_err_opt) =
+                SubType.sub_type
+                  env
+                  ty_sub
+                  ty_super
+                  (Some (Typing_error.Reasons_callback.unify_error_at p))
+              in
+              Option.iter
+                ~f:(Typing_error_utils.add_typing_error ~env)
+                ty_err_opt;
+              env)
+            vars
+            env
+        in
+        (env, tast, ty, macro_vars)
+      | None -> (env, tast, ty, macro_vars))
+    | _ -> (env, tast, ty, macro_vars)
+
   and et_splice
       env
       dsl_opt
       p
-      { spliced_expr; extract_client_type; contains_await; macro_variables } =
+      {
+        spliced_expr;
+        extract_client_type;
+        contains_await;
+        macro_variables;
+        temp_lid;
+      } =
     let open Option.Let_syntax in
     let dsl_opt =
       let* (_, dsl_name) = dsl_opt in
@@ -4978,6 +5054,7 @@ end = struct
            extract_client_type;
            contains_await;
            macro_variables;
+           temp_lid;
          })
       ty
 

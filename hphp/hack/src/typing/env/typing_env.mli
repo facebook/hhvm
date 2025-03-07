@@ -210,11 +210,18 @@ val with_inside_expr_tree :
   env -> Aast_defs.class_name -> (env -> env * 'a * 'b) -> env * 'a * 'b
 
 val with_outside_expr_tree :
-  env -> (env -> Aast.class_name option -> env * 'a * 'b) -> env * 'a * 'b
+  env ->
+  macro_variables:Aast_defs.lid list option ->
+  (env -> Aast.class_name option -> env * 'a * 'b) ->
+  env * 'a * 'b * (Pos.t * locl_ty) Local_id.Map.t option
 
-val inside_expr_tree : env -> Aast_defs.class_name -> env
+val inside_expr_tree :
+  env ->
+  macro_variables:Typing_local_types.t option ->
+  Aast_defs.class_name ->
+  env
 
-val outside_expr_tree : env -> env
+val outside_expr_tree : env -> macro_variables:Aast_defs.lid list option -> env
 
 val is_in_expr_tree : env -> bool
 
@@ -362,7 +369,7 @@ val all_continuations : env -> Typing_continuations.t list
 
 val set_local :
   ?immutable:bool ->
-  ?macro_splice_vars:Typing_defs.locl_ty Local_id.Map.t ->
+  ?macro_splice_vars:(Pos.t * Typing_defs.locl_ty) Local_id.Map.t ->
   is_defined:bool ->
   bound_ty:locl_ty option ->
   env ->
@@ -370,6 +377,8 @@ val set_local :
   locl_ty ->
   Pos.t ->
   env
+
+val set_local_ : env -> Local_id.t -> Typing_local_types.local -> env
 
 val is_using_var : env -> Local_id.t -> bool
 

@@ -35,7 +35,8 @@
                                              (ET_Splice
                                                 { extract_client_type = false; 
                                                   contains_await = false; 
-                                                  macro_variables = None;
+                                                  macro_variables = None; 
+                                                  temp_lid = $0splice0;
                                                   spliced_expr = ((), [4:25-31], (Binop { bop = Plus; lhs = ((), [4:25-27], (Lvar ([4:25-27], $x))); rhs = ((), [4:30-31], (Int "2")) })) }))
                                             )))));
                                      ([4:14-32],
@@ -115,6 +116,7 @@
                                                                     { extract_client_type = true; 
                                                                     contains_await = false; 
                                                                     macro_variables = None; 
+                                                                    temp_lid = $0splice0; 
                                                                     spliced_expr = ((), [4:25-31], (Lvar ([4:25-31], $0splice0))) })))]; 
                                                                     unpacked_arg = None })))))] }; 
                                                                     f_fun_kind = FSync; 

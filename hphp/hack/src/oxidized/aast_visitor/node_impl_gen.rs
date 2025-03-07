@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b230303d8dd9a1b309b87c19dfa33222>>
+// @generated SignedSource<<9f7ee3af4270435b92026b34fad7bbf3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -802,6 +802,7 @@ impl<P: Params> Node<P> for EtSplice<P::Ex, P::En> {
         self.extract_client_type.accept(c, v)?;
         self.contains_await.accept(c, v)?;
         self.macro_variables.accept(c, v)?;
+        self.temp_lid.accept(c, v)?;
         self.spliced_expr.accept(c, v)
     }
 }

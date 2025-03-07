@@ -1,0 +1,12 @@
+ERROR: File "simple_error.php", line 6, characters 31-51:
+Typing error (Typing[4110])
+  File "expr_tree.php", line 364, characters 26-35:
+  Expected `ExampleInt`
+  File "expr_tree.php", line 88, characters 40-52:
+  But got `ExampleString`
+ERROR: File "simple_error.php", line 7, characters 30-50:
+Typing error (Typing[4110])
+  File "simple_error.php", line 7, characters 43-44:
+  Expected `nothing` because a type could not be determined here
+  File "expr_tree.php", line 79, characters 39-48:
+  But got `ExampleInt`

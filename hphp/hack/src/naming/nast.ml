@@ -867,6 +867,7 @@ module Visitor_DEPRECATED = struct
               extract_client_type = _;
               contains_await = _;
               macro_variables = _;
+              temp_lid = _;
             } ->
           this#on_et_splice acc spliced_expr
         | EnumClassLabel (opt_sid, name) ->

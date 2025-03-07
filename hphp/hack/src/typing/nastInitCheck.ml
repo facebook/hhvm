@@ -645,6 +645,7 @@ and expr_ env acc p e =
         extract_client_type = _;
         contains_await = _;
         macro_variables = _;
+        temp_lid = _;
       } ->
     expr acc e
   | ReadonlyExpr e -> expr acc e

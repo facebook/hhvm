@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9d45af9036e955832dd27ae23d689114>>
+// @generated SignedSource<<b249c7ee9b910ad6af18f5c989589302>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -899,6 +899,10 @@ pub struct EtSplice<'a, Ex, En> {
     /// None is the splice is not a macro.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub macro_variables: Option<&'a [&'a Lid<'a>]>,
+    /// Splices are hoisted out and assigned to a temporary variable. This
+    /// records the name of the temporary
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub temp_lid: &'a LocalId<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub spliced_expr: &'a Expr<'a, Ex, En>,
 }

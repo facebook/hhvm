@@ -1,0 +1,10 @@
+ERROR: File "simple_error.php", line 6, characters 31-51:
+Typing error (Typing[4110])
+  File "expr_tree.php", line 364, characters 26-35:
+  Expected `ExampleInt`
+  File "expr_tree.php", line 88, characters 40-52:
+  But got `ExampleString`
+ERROR: File "simple_error.php", line 7, characters 43-44:
+Was expecting an object but type is unknown (Typing[4297])
+  File "simple_error.php", line 7, characters 43-44:
+  It is unknown because a type could not be determined here

@@ -1,4 +1,4 @@
 ERROR: File "deep.php", line 8, characters 77-78:
 Variable `$x` is undefined in this `ExampleDsl` expression tree. (Naming[2050])
-  File "deep.php", line 8, characters 35-52:
-  Did you forget to splice in `$x`?
+  File "deep.php", line 7, characters 3-89:
+  Did you forget to splice in `$y`?

@@ -1017,37 +1017,6 @@ let with_origin2 env origin f =
   let env = { env with tracing_info = ti1 } in
   (env, r1, r2)
 
-let inside_expr_tree env expr_tree_hint =
-  let outer_locals =
-    match next_cont_opt env with
-    | None -> LID.Map.empty
-    | Some cont -> cont.LEnvC.local_types
-  in
-  { env with in_expr_tree = Some { dsl = expr_tree_hint; outer_locals } }
-
-let outside_expr_tree env = { env with in_expr_tree = None }
-
-let with_inside_expr_tree env expr_tree_hint f =
-  let old_in_expr_tree = env.in_expr_tree in
-  let env = inside_expr_tree env expr_tree_hint in
-  let (env, r1, r2) = f env in
-  let env = { env with in_expr_tree = old_in_expr_tree } in
-  (env, r1, r2)
-
-let with_outside_expr_tree env f =
-  let old_in_expr_tree = env.in_expr_tree in
-  let dsl =
-    match old_in_expr_tree with
-    | Some { dsl = cls; outer_locals = _ } -> Some cls
-    | _ -> None
-  in
-  let env = outside_expr_tree env in
-  let (env, r1, r2) = f env dsl in
-  let env = { env with in_expr_tree = old_in_expr_tree } in
-  (env, r1, r2)
-
-let is_in_expr_tree env = Option.is_some env.in_expr_tree
-
 let is_static env = env.genv.static
 
 let get_val_kind env = env.genv.val_kind
@@ -2068,3 +2037,93 @@ let update_ity_reason t ity ~f =
   match ity with
   | LoclType lty -> LoclType (update_reason t lty ~f)
   | ConstraintType cty -> ConstraintType (update_cty_reason t cty ~f)
+
+let inside_expr_tree env ~macro_variables expr_tree_hint =
+  let outer_locals =
+    match next_cont_opt env with
+    | None -> LID.Map.empty
+    | Some cont -> cont.LEnvC.local_types
+  in
+  let env =
+    match macro_variables with
+    | None -> env
+    | Some locals -> set_locals env locals
+  in
+  {
+    env with
+    in_expr_tree = Some { dsl = expr_tree_hint; outer_locals };
+    in_macro_splice = None;
+  }
+
+let outside_expr_tree env ~macro_variables =
+  let (env, macro_locals) =
+    match macro_variables with
+    | None -> (env, None)
+    | Some lids ->
+      let (env, local_env) =
+        List.fold_left_env
+          env
+          lids
+          ~init:Typing_local_types.empty
+          ~f:(fun env locals (pos, local_id) ->
+            let (env, ty) = fresh_type_invariant env pos in
+            let local =
+              Typing_local_types.
+                {
+                  ty;
+                  defined = true;
+                  bound_ty = None;
+                  pos;
+                  eid = Expression_id.make env.expression_id_provider;
+                  macro_splice_vars = None;
+                }
+            in
+            (env, Typing_local_types.add_to_local_types local_id local locals))
+      in
+      (env, Some local_env)
+  in
+  { env with in_expr_tree = None; in_macro_splice = macro_locals }
+
+let with_inside_expr_tree env expr_tree_hint f =
+  let old_in_expr_tree = env.in_expr_tree in
+  let old_in_macro_splice = env.in_macro_splice in
+  let env =
+    inside_expr_tree env ~macro_variables:old_in_macro_splice expr_tree_hint
+  in
+  let (env, r1, r2) = f env in
+  let env =
+    {
+      env with
+      in_expr_tree = old_in_expr_tree;
+      in_macro_splice = old_in_macro_splice;
+    }
+  in
+  (env, r1, r2)
+
+let with_outside_expr_tree env ~macro_variables f =
+  let old_in_expr_tree = env.in_expr_tree in
+  let old_in_macro_splice = env.in_macro_splice in
+  let dsl =
+    match old_in_expr_tree with
+    | Some { dsl = cls; outer_locals = _ } -> Some cls
+    | _ -> None
+  in
+  let env = outside_expr_tree env ~macro_variables in
+  let (env, r1, r2) = f env dsl in
+  let new_macro_type_mapping =
+    Option.map
+      ~f:
+        (Local_id.Map.map (fun local ->
+             Typing_local_types.(local.pos, local.ty)))
+      env.in_macro_splice
+  in
+  let env =
+    {
+      env with
+      in_expr_tree = old_in_expr_tree;
+      in_macro_splice = old_in_macro_splice;
+    }
+  in
+  (env, r1, r2, new_macro_type_mapping)
+
+let is_in_expr_tree env = Option.is_some env.in_expr_tree

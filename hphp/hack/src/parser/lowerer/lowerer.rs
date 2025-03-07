@@ -2455,6 +2455,7 @@ fn p_et_splice_expr<'a>(expr: S<'a>, env: &mut Env<'a>, location: ExprLocation) 
         contains_await,
         extract_client_type: true,
         macro_variables,
+        temp_lid: (0, "".to_string()), // This gets replaced during expression tree desugaring
     }))
 }
 

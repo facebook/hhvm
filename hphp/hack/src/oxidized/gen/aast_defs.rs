@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<55509d66235bcc3b20c63de82d0faff7>>
+// @generated SignedSource<<7b42fb9c6d5f2ff0320ded825434dfcf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -701,6 +701,9 @@ pub struct EtSplice<Ex, En> {
     /// type Spliceable<t1, t2, (function (u1, .., un): t3)>.
     /// None is the splice is not a macro.
     pub macro_variables: Option<Vec<Lid>>,
+    /// Splices are hoisted out and assigned to a temporary variable. This
+    /// records the name of the temporary
+    pub temp_lid: LocalId,
     pub spliced_expr: Expr<Ex, En>,
 }
 

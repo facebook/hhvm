@@ -172,6 +172,12 @@ pub fn desugar(
             )
         });
         use_.extend(static_method_vars);
+        if is_nested {
+            let fvs = free_vars
+                .iter()
+                .map(|(v, pos)| ast::CaptureLid((), ast::Lid(pos.clone(), v.clone())));
+            use_.extend(fvs);
+        }
         Expr::new(
             (),
             et_literal_pos.clone(),
@@ -1374,8 +1380,8 @@ impl RewriteState {
             // Desugared to $0v->splice(new ExprPos(...), '$0splice', $0splice)
             //
             // Splices can also be macro splices. In that case, we wrap with a lambda to delay evaluation
-            // Source: MyDsl`${ ...}` where there are nested free variables (say $x and $y) in ETs in the splice
-            // Lifted to $0splice = () ==> ${ ... };
+            // Source: MyDsl`${ ... }` where there are nested free variables (say $x and $y) in ETs in the splice
+            // Lifted to $0splice = ${ () ==> ... };
             // Virtualized to ${ $0splice() } where the splice records $x and $y
             // Desugared to $0v->macro_splice(new ExprPos(...), '$0splice', $0splice, vec!['$x', '$y'])
             // Where there is an await inside of the splice, the lambda created is async.
@@ -1385,6 +1391,7 @@ impl RewriteState {
                 contains_await,
                 extract_client_type: _,
                 macro_variables,
+                temp_lid: _,
             }) => {
                 let len = self.splices.len();
                 let expr_pos = spliced_expr.1.clone();
@@ -1425,7 +1432,7 @@ impl RewriteState {
                         (),
                         pos.clone(),
                         Expr_::mk_call(aast::CallExpr {
-                            func: temp_variable,
+                            func: temp_variable.clone(),
                             targs: vec![],
                             args: vec![],
                             unpacked_arg: None,
@@ -1437,8 +1444,9 @@ impl RewriteState {
                         e
                     }
                 } else {
-                    temp_variable
+                    temp_variable.clone()
                 };
+                let temp_lid = temp_variable.2.as_lvar_into().unwrap().1;
                 let virtual_expr = Expr(
                     (),
                     pos,
@@ -1447,33 +1455,35 @@ impl RewriteState {
                         extract_client_type: true,
                         contains_await,
                         macro_variables: None,
+                        temp_lid: temp_lid.clone(),
                     }),
                 );
                 // Compute the rhs of the assignment to the temporary
-                let expr_ = Expr_::mk_etsplice(aast::EtSplice {
-                    spliced_expr,
-                    contains_await,
-                    extract_client_type: false,
-                    macro_variables,
-                });
-                let wrapped_expr_ = if !is_macro {
-                    expr_
+                let wrapped_expr = if !is_macro {
+                    spliced_expr
                 } else {
                     let fun_ = wrap_fun_(
                         contains_await,
                         ast::FuncBody {
                             fb_ast: ast::Block(vec![Stmt::new(
                                 expr_pos.clone(),
-                                Stmt_::mk_return(Some(Expr::new((), expr_pos.clone(), expr_))),
+                                Stmt_::mk_return(Some(spliced_expr)),
                             )]),
                         },
                         vec![],
                         expr_pos.clone(),
                     );
-                    Expr_::mk_lfun(fun_, vec![])
+                    Expr::new((), expr_pos.clone(), Expr_::mk_lfun(fun_, vec![]))
                 };
-                let wrapped_expr = Expr::new((), expr_pos, wrapped_expr_);
-                self.splices.push(wrapped_expr);
+                let expr_ = Expr_::mk_etsplice(aast::EtSplice {
+                    spliced_expr: wrapped_expr,
+                    contains_await,
+                    extract_client_type: false,
+                    macro_variables,
+                    temp_lid,
+                });
+                let expr = Expr::new((), expr_pos, expr_);
+                self.splices.push(expr);
 
                 self.contains_spliced_await |= contains_await;
                 RewriteResult {

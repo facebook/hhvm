@@ -597,6 +597,12 @@ let in_expr_tree_as_value env = function
         ("outer_locals", local_id_map_as_value (local_as_value env) outer_locals);
       ]
 
+let in_macro_splice_as_value env = function
+  | None -> bool_as_value false
+  | Some macro_vars ->
+    make_map
+      [("macro_vars", local_id_map_as_value (local_as_value env) macro_vars)]
+
 let env_as_value env =
   let {
     expression_id_provider = _;
@@ -610,6 +616,7 @@ let env_as_value env =
     in_try;
     in_lambda;
     in_expr_tree;
+    in_macro_splice;
     inside_constructor;
     checked;
     tpenv;
@@ -632,6 +639,7 @@ let env_as_value env =
       ("in_try", bool_as_value in_try);
       ("in_lambda", bool_as_value in_lambda);
       ("in_expr_tree", in_expr_tree_as_value env in_expr_tree);
+      ("in_macro_splice", in_macro_splice_as_value env in_macro_splice);
       ("inside_constructor", bool_as_value inside_constructor);
       ("checked", checked_as_value checked);
       ("tpenv", tpenv_as_value env tpenv);

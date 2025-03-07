@@ -46,6 +46,11 @@ type env = {
   in_expr_tree: expr_tree_env option;
       (** If set to Some(_), then we are performing type checking within a
           expression tree. *)
+  in_macro_splice: Typing_local_types.t option;
+      (**  If set to Some(local_env) then we are type checking within a splice that
+           contains nested expression trees with free variables. local_env contains
+           the bindings for those free variables
+      *)
   inside_constructor: bool;
   checked: Tast.check_status;
       (** Set to true when checking if a <<__SoundDynamicallyCallable>> method body

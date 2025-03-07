@@ -89,11 +89,11 @@ let union
       let (env, map) =
         Local_id.Map.union_env
           env
-          ~combine:(fun env _ t1 t2 ->
+          ~combine:(fun env _ (p1, t1) (_p2, t2) ->
             let (env, t) =
               Union.union ?reason ~approx_cancel_neg:true env t1 t2
             in
-            (env, Some t))
+            (env, Some (p1, t)))
           map1
           map2
       in

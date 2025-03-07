@@ -557,7 +557,7 @@ TEST(RuntimeTest, IntInterOp) {
   auto largeInt = Value::of<i64_t>(2);
 
   EXPECT_EQ(smallInt, int8_t(1));
-  EXPECT_LT(largeInt, 5L);
+  EXPECT_LT(largeInt, int64_t(5L));
 
   EXPECT_EQ(smallInt, 1);
   EXPECT_EQ(smallInt, 1.0);

@@ -2179,7 +2179,7 @@ unique_ptr<IOBuf> HTTPSession::getNextToSend(bool* cork,
       }
       toSend = std::min(toSend, connFlowControl_->getAvailableSend());
     }
-    txnEgressQueue_.nextEgress(nextEgressResults_, false);
+    txnEgressQueue_.nextEgress(nextEgressResults_);
     CHECK(!nextEgressResults_.empty()); // Queue was non empty, so this must be
     // The maximum we will send for any transaction in this loop
     uint32_t txnMaxToSend = toSend * nextEgressResults_.front().second;

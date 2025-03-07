@@ -161,7 +161,7 @@ class HTTP2PriorityQueue : public HTTP2PriorityQueueBase {
 
   using NextEgressResult = std::vector<std::pair<HTTPTransaction*, double>>;
 
-  void nextEgress(NextEgressResult& result, bool spdyMode = false);
+  void nextEgress(NextEgressResult& result);
 
   static void setNodeLifetime(std::chrono::milliseconds lifetime) {
     kNodeLifetime_ = lifetime;

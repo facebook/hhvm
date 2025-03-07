@@ -195,3 +195,20 @@ func NewClient(opts ...ClientOption) (Protocol, error) {
 
 	return protocol, protocolErr
 }
+
+// NewClientV2 will return a connected thrift RequestChannel object.
+// Effectively, this is an open thrift connection to a server.
+// A thrift client can use this connection to communicate with a server.
+func NewClientV2(opts ...ClientOption) (RequestChannel, error) {
+	proto, err := NewClient(opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	// RocketClient (protocol) implements RequestChannel.
+	// It doesn't need to be wrapped in a SerialChannel.
+	if channel, ok := proto.(RequestChannel); ok {
+		return channel, nil
+	}
+	return NewSerialChannel(proto), nil
+}

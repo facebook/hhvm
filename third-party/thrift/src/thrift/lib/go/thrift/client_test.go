@@ -26,6 +26,8 @@ import (
 	"testing"
 	"time"
 
+	"golang.org/x/sync/errgroup"
+
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -37,14 +39,11 @@ func TestClient(t *testing.T) {
 	}
 	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
 	server := NewServer(processor, listener, TransportIDRocket)
-	serverCtx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	go func() {
-		err := server.ServeContext(serverCtx)
-		if !errors.Is(err, context.Canceled) {
-			t.Fatalf("unexpected error in ServeContext: %v", err)
-		}
-	}()
+	serverCtx, serverCancel := context.WithCancel(context.Background())
+	var serverEG errgroup.Group
+	serverEG.Go(func() error {
+		return server.ServeContext(serverCtx)
+	})
 
 	addr := listener.Addr()
 
@@ -108,6 +107,13 @@ func TestClient(t *testing.T) {
 	if fdCountAfter > fdCountBefore {
 		t.Fatalf("FDs got leaked: %d (before), %d (after)", fdCountBefore, fdCountAfter)
 	}
+
+	// Shut down server.
+	serverCancel()
+	err = serverEG.Wait()
+	if err != nil && !errors.Is(err, context.Canceled) {
+		t.Fatalf("unexpected error in ServeContext: %v", err)
+	}
 }
 
 func getNumFileDesciptors() (int, error) {
@@ -123,4 +129,75 @@ func getNumFileDesciptors() (int, error) {
 	}
 
 	return len(files), nil
+}
+
+func TestClientV2(t *testing.T) {
+	listener, err := net.Listen("tcp", ":0")
+	if err != nil {
+		t.Fatalf("failed to listen: %v", err)
+	}
+	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
+	server := NewServer(processor, listener, TransportIDRocket)
+	serverCtx, serverCancel := context.WithCancel(context.Background())
+	var serverEG errgroup.Group
+	serverEG.Go(func() error {
+		return server.ServeContext(serverCtx)
+	})
+
+	addr := listener.Addr()
+
+	t.Run("Rocket", func(t *testing.T) {
+		channel, err := NewClientV2(
+			WithRocket(),
+			WithDialer(func() (net.Conn, error) {
+				return net.Dial(addr.Network(), addr.String())
+			}),
+		)
+		if err != nil {
+			t.Fatalf("failed to create client: %v", err)
+		}
+		err = channel.Close()
+		if err != nil {
+			t.Fatalf("failed to close client: %v", err)
+		}
+	})
+
+	t.Run("UpgradeToRocket", func(t *testing.T) {
+		channel, err := NewClientV2(
+			WithUpgradeToRocket(),
+			WithDialer(func() (net.Conn, error) {
+				return net.Dial(addr.Network(), addr.String())
+			}),
+		)
+		if err != nil {
+			t.Fatalf("failed to create client: %v", err)
+		}
+		err = channel.Close()
+		if err != nil {
+			t.Fatalf("failed to close client: %v", err)
+		}
+	})
+
+	t.Run("Header", func(t *testing.T) {
+		channel, err := NewClientV2(
+			WithHeader(),
+			WithDialer(func() (net.Conn, error) {
+				return net.Dial(addr.Network(), addr.String())
+			}),
+		)
+		if err != nil {
+			t.Fatalf("failed to create client: %v", err)
+		}
+		err = channel.Close()
+		if err != nil {
+			t.Fatalf("failed to close client: %v", err)
+		}
+	})
+
+	// Shut down server.
+	serverCancel()
+	err = serverEG.Wait()
+	if err != nil && !errors.Is(err, context.Canceled) {
+		t.Fatalf("unexpected error in ServeContext: %v", err)
+	}
 }

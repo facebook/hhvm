@@ -571,6 +571,9 @@ class DynamicPatch {
   /// Applies the patch to the given value. Throws if the patch is not
   /// applicable to the value.
   void apply(Value&) const;
+  /// Applies the patch to the given Thrift Any. Throws if the patch is not
+  /// applicable.
+  void applyToDataFieldInsideAny(type::AnyStruct&) const;
 
   void fromObject(detail::Badge, Object);
   void fromAny(detail::Badge, const type::AnyStruct& any);

@@ -1556,6 +1556,17 @@ void DynamicPatch::apply(Value& value) const {
   visitPatch(badge, applier);
 }
 
+void DynamicPatch::applyToDataFieldInsideAny(type::AnyStruct& any) const {
+  // TODO(dokwon): Consider checking type on any directly for optimization.
+  auto value = protocol::detail::parseValueFromAny(any);
+  apply(value);
+  any = detail::toAny(
+            value,
+            std::move(any.type().value()),
+            std::move(any.protocol().value()))
+            .toThrift();
+}
+
 Object DynamicPatch::toObject() && {
   return std::visit([&](auto&& v) { return std::move(v).toObject(); }, *patch_);
 }

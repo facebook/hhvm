@@ -1277,4 +1277,28 @@ TEST(DynamicPatch, DynamicSafePatchV2) {
   }
 }
 
+TEST(DynamicPatch, applyToDataFieldInsideAny) {
+  MyUnion obj;
+  obj.s_ref().emplace("123");
+
+  MyUnionPatch patch;
+  patch.patchIfSet<ident::s>() = "hello world";
+  MyUnionSafePatch safePatch = patch.toSafePatch();
+
+  // store obj in Thrift Any
+  type::AnyStruct objAny = type::AnyData::toAny(obj).toThrift();
+
+  // store SafePatch in Thrift Any
+  type::AnyStruct safePatchAny = type::AnyData::toAny(safePatch).toThrift();
+
+  // apply patch
+  DynamicPatch dynPatch;
+  dynPatch.fromSafePatch(safePatchAny);
+  dynPatch.applyToDataFieldInsideAny(objAny);
+
+  EXPECT_EQ(
+      type::AnyData{objAny}.get<type::union_t<MyUnion>>().s_ref().value(),
+      "hello world");
+}
+
 } // namespace apache::thrift::protocol

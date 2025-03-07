@@ -80,6 +80,7 @@ type built_in_type_hint =
   | BIshape
   | BIthis
   | BIoption
+  | BIclass_ptr
 [@@deriving eq]
 
 type receiver =

@@ -75,6 +75,7 @@ type built_in_type_hint =
   (* TODO: support self and static too.*)
   | BIthis
   | BIoption
+  | BIclass_ptr
 [@@deriving ord, eq, show]
 
 type receiver =
@@ -253,3 +254,5 @@ let built_in_type_hover (bt : built_in_type_hint) : string =
     "`this` represents the current class.\n\n"
     ^ "`this` refers to the type of the current instance at runtime. In a child class, `this` refers to the child class, even if the method is defined in the parent."
   | BIoption -> "The type `?Foo` allows either `Foo` or `null`."
+  | BIclass_ptr ->
+    "For any class C, C::class creates a class<C>. This value is used for\nexpressions like `new $c()` and `$c::foo()`."

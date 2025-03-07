@@ -47,7 +47,7 @@ which is defined here
 
 File classname.hhi, line 21, character 42 - line 21, character 52:
 
- 19 |    */
+ 19 |    * package boundaries. */
  20 |   <<__NoAutoDynamic>>
  21 |   newtype classname<+T> as typename<T> = »typename<T>«;
  22 | 
@@ -266,7 +266,7 @@ which is defined here
 
 File classname.hhi, line 21, character 42 - line 21, character 52:
 
- 19 |    */
+ 19 |    * package boundaries. */
  20 |   <<__NoAutoDynamic>>
  21 |   newtype classname<+T> as typename<T> = »typename<T>«;
  22 | 
@@ -462,7 +462,7 @@ which is defined here
 
 File classname.hhi, line 21, character 42 - line 21, character 52:
 
- 19 |    */
+ 19 |    * package boundaries. */
  20 |   <<__NoAutoDynamic>>
  21 |   newtype classname<+T> as typename<T> = »typename<T>«;
  22 | 

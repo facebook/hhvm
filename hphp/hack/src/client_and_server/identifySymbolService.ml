@@ -900,6 +900,7 @@ type keyword_context =
   | TypeConst
   | AsyncBlockHeader
   | ModuleDecl of module_decl_kind
+  | ClassType
 
 let trivia_pos (t : Full_fidelity_positioned_trivia.t) : Pos.t =
   let open Full_fidelity_positioned_trivia in
@@ -962,6 +963,14 @@ let keywords (tree : FFP.t) : Result_set.elt list =
           {
             name = "enum class";
             type_ = Keyword EnumClass;
+            is_declaration = None;
+            pos = token_pos t;
+          }
+      | Some ClassType ->
+        Some
+          {
+            name = "class pointer";
+            type_ = BuiltInType BIclass_ptr;
             is_declaration = None;
             pos = token_pos t;
           }
@@ -1314,6 +1323,8 @@ let keywords (tree : FFP.t) : Result_set.elt list =
       (match elt_of_token ctx t with
       | Some elt -> elt :: acc
       | None -> acc)
+    | ClassPtrTypeSpecifier _ ->
+      List.fold (children s) ~init:acc ~f:(aux (Some ClassType))
     | _ -> List.fold (children s) ~init:acc ~f:(aux ctx)
   in
 

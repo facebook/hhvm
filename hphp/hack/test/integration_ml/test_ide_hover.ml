@@ -185,7 +185,8 @@ let class_members_cases =
               Lsp.MarkedString "---";
               Lsp.MarkedCode
                 ( "hack",
-                  "protected final static async\nfunction genLotsOfModifiers(): Awaitable<void>"
+                  "protected final static async
+function genLotsOfModifiers(): Awaitable<void>"
                 );
             ];
           addendum = [];
@@ -201,12 +202,13 @@ let class_members_cases =
               Lsp.MarkedString "---";
               Lsp.MarkedCode
                 ( "hack",
-                  "public function calculateDistance(\n"
-                  ^ "  float $originalPositionX,\n"
-                  ^ "  float $finalPositionX,\n"
-                  ^ "  float $originalPositionY,\n"
-                  ^ "  float $finalPositionY\n"
-                  ^ "): float" );
+                  "public function calculateDistance(
+  float $originalPositionX,
+  float $finalPositionX,
+  float $originalPositionY,
+  float $finalPositionY
+): float"
+                );
             ];
           addendum = [Lsp.MarkedString "Another method doc block"];
           pos = pos_at (34, 12) (34, 28);
@@ -369,6 +371,48 @@ let classname_variable_cases =
       ] );
   ]
 
+let class_type =
+  "<?hh
+class K {}
+
+function test_class(
+  class<K> $c,
+//   ^5:6
+  classname<K> $cn,
+//   ^7:6
+): void {}"
+
+let class_type_cases =
+  [
+    ( ("class_type.php", 5, 6),
+      [
+        {
+          snippet = [Lsp.MarkedCode ("hack", "class pointer")];
+          addendum =
+            [
+              Lsp.MarkedString
+                "For any class C, C::class creates a class<C>. This value is used for
+expressions like `new $c()` and `$c::foo()`.";
+            ];
+          pos = pos_at (5, 3) (5, 7);
+        };
+      ] );
+    ( ("class_type.php", 7, 6),
+      [
+        {
+          snippet = [Lsp.MarkedCode ("hack", "classname")];
+          addendum =
+            [
+              Lsp.MarkedString
+                "For any class C, nameof C creates a classname<C> string. The typechecker
+enforces that C is a defined class, but it does not enforce module or
+package boundaries.";
+            ];
+          pos = pos_at (7, 3) (7, 11);
+        };
+      ] );
+  ]
+
 let docblock =
   "<?hh // strict
 
@@ -488,7 +532,13 @@ let docblock_cases =
           addendum =
             [
               Lsp.MarkedString
-                "Class doc block.\nThis\ndoc\nblock\nhas\nmultiple\nlines.";
+                "Class doc block.
+This
+doc
+block
+has
+multiple
+lines.";
             ];
           pos = pos_at (7, 3) (7, 10);
         };
@@ -510,7 +560,9 @@ let docblock_cases =
       [
         {
           snippet = [Lsp.MarkedCode ("hack", "function queryDocBlocks(): void")];
-          addendum = [Lsp.MarkedString "Multiline\nfunction\ndoc block."];
+          addendum = [Lsp.MarkedString "Multiline
+function
+doc block."];
           pos = pos_at (9, 3) (9, 16);
         };
       ] );
@@ -570,7 +622,13 @@ the other stars.";
           addendum =
             [
               Lsp.MarkedString
-                "This method has many line breaks, which\n\nsomeone might use if they wanted\n\nto have separate paragraphs\n\nin Markdown.";
+                "This method has many line breaks, which
+
+someone might use if they wanted
+
+to have separate paragraphs
+
+in Markdown.";
             ];
           pos = pos_at (15, 13) (15, 26);
         };
@@ -654,7 +712,8 @@ the other stars.";
           addendum =
             [
               Lsp.MarkedString
-                "We don't want the line comment above to be part of this docblock.\nWe do want both these lines though.";
+                "We don't want the line comment above to be part of this docblock.
+We do want both these lines though.";
             ];
           pos = pos_at (89, 44) (89, 66);
         };
@@ -713,12 +772,18 @@ let special_cases_cases =
                 );
               Lsp.MarkedString "---";
               Lsp.MarkedString "Instantiation:";
-              Lsp.MarkedCode ("hack", "  Tk = int;\n  Tv = ?int;");
+              Lsp.MarkedCode ("hack", "  Tk = int;
+  Tv = ?int;");
             ];
           addendum =
             [
               Lsp.MarkedString
-                "Index into the given KeyedContainer using the provided key.\n\nIf the key doesn't exist, the key is `null`, or the collection is `null`,\nreturn the provided default value instead, or `null` if no default value was\nprovided. If the key is `null`, the default value will be returned even if\n`null` is a valid key in the container.";
+                "Index into the given KeyedContainer using the provided key.
+
+If the key doesn't exist, the key is `null`, or the collection is `null`,
+return the provided default value instead, or `null` if no default value was
+provided. If the key is `null`, the default value will be returned even if
+`null` is a valid key in the container.";
             ];
           pos = pos_at (3, 3) (3, 5);
         };
@@ -763,7 +828,8 @@ let bounded_generic_fun_cases =
     ( ("bounded_generic_fun.php", 9, 5),
       [
         {
-          snippet = [Lsp.MarkedCode ("hack", "(C & T)\nwhere T as Base")];
+          snippet = [Lsp.MarkedCode ("hack", "(C & T)
+where T as Base")];
           addendum = [];
           pos = pos_at (9, 5) (9, 6);
         };
@@ -890,7 +956,13 @@ let doc_block_fallback_cases =
           addendum =
             [
               Lsp.MarkedString
-                "DBFBInterface2.\n(from DBFBInterface2)\n\n---\n\nDBFBInterface1.\n(from DBFBInterface1)";
+                "DBFBInterface2.
+(from DBFBInterface2)
+
+---
+
+DBFBInterface1.
+(from DBFBInterface1)";
             ];
           pos = pos_at (3, 7) (3, 16);
         };
@@ -934,7 +1006,13 @@ let doc_block_fallback_cases =
           addendum =
             [
               Lsp.MarkedString
-                "Slightly more different.\n(from DBFBInterface3)\n\n---\n\nSlightly different.\n(from DBFBInterface1, DBFBInterface2)";
+                "Slightly more different.
+(from DBFBInterface3)
+
+---
+
+Slightly different.
+(from DBFBInterface1, DBFBInterface2)";
             ];
           pos = pos_at (9, 7) (9, 23);
         };
@@ -1135,6 +1213,7 @@ let files =
     ("classname_call.php", classname_call);
     ("chained_calls.php", chained_calls);
     ("classname_variable.php", classname_variable);
+    ("class_type.php", class_type);
     ("docblock.php", docblock);
     ("special_cases.php", special_cases);
     ("bounded_generic_fun.php", bounded_generic_fun);
@@ -1161,6 +1240,7 @@ let cases =
   @ classname_call_cases
   @ chained_calls_cases
   @ classname_variable_cases
+  @ class_type_cases
   @ bounded_generic_fun_cases
 
 let test () =

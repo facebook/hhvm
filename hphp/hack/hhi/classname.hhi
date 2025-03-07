@@ -14,18 +14,18 @@ namespace HH {
   newtype typename<+T> as string = string;
 
   /**
-   * For any class C, C::class creates a classname<C>. Due to the properties
-   * of opaque types, C::class is the only way of obtaining a classname.
-   */
+   * For any class C, nameof C creates a classname<C> string. The typechecker
+   * enforces that C is a defined class, but it does not enforce module or
+   * package boundaries. */
   <<__NoAutoDynamic>>
   newtype classname<+T> as typename<T> = typename<T>;
 
   <<__NoAutoDynamic>>
   newtype concreteclassname<+T> as classname<T> = classname<T>;
-  
-  /** 
+
+  /**
    * Similar to vec_or_dict, this type is a migration type to cover places that
-   * need to handle both class<T> and classname<T> without raising notices and it 
+   * need to handle both class<T> and classname<T> without raising notices and it
    * should generally never be used. When typechecker flag class_sub_classname=true,
    * this type is equivalent to classname<T>.
    */

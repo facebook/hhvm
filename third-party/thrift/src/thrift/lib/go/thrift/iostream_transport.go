@@ -19,6 +19,8 @@ package thrift
 import (
 	"bufio"
 	"io"
+
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 // StreamTransport is a Transport made of an io.Reader and/or an io.Writer
@@ -56,5 +58,8 @@ func (p *StreamTransport) Close() error {
 
 // Flush flushes the underlying output stream if not null.
 func (p *StreamTransport) Flush() error {
-	return flush(p.Writer)
+	if flusher, ok := p.Writer.(types.Flusher); ok {
+		return flusher.Flush()
+	}
+	return nil
 }

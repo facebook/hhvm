@@ -24,7 +24,7 @@ func BenchmarkBinaryBool_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteBool(b, p, trans)
+		ReadWriteBool(b, p)
 	}
 }
 
@@ -32,7 +32,7 @@ func BenchmarkBinaryByte_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteByte(b, p, trans)
+		ReadWriteByte(b, p)
 	}
 }
 
@@ -40,7 +40,7 @@ func BenchmarkBinaryI16_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteI16(b, p, trans)
+		ReadWriteI16(b, p)
 	}
 }
 
@@ -48,35 +48,35 @@ func BenchmarkBinaryI32_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteI32(b, p, trans)
+		ReadWriteI32(b, p)
 	}
 }
 func BenchmarkBinaryI64_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteI64(b, p, trans)
+		ReadWriteI64(b, p)
 	}
 }
 func BenchmarkBinaryDouble_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteDouble(b, p, trans)
+		ReadWriteDouble(b, p)
 	}
 }
 func BenchmarkBinaryString_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteString(b, p, trans)
+		ReadWriteString(b, p)
 	}
 }
 func BenchmarkBinaryBinary_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewBinaryFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteBinary(b, p, trans)
+		ReadWriteBinary(b, p)
 	}
 }
 
@@ -84,7 +84,7 @@ func BenchmarkCompactBool_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewCompactFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteBool(b, p, trans)
+		ReadWriteBool(b, p)
 	}
 }
 
@@ -92,7 +92,7 @@ func BenchmarkCompactByte_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewCompactFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteByte(b, p, trans)
+		ReadWriteByte(b, p)
 	}
 }
 
@@ -100,7 +100,7 @@ func BenchmarkCompactI16_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewCompactFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteI16(b, p, trans)
+		ReadWriteI16(b, p)
 	}
 }
 
@@ -108,34 +108,34 @@ func BenchmarkCompactI32_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewCompactFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteI32(b, p, trans)
+		ReadWriteI32(b, p)
 	}
 }
 func BenchmarkCompactI64_0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewCompactFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteI64(b, p, trans)
+		ReadWriteI64(b, p)
 	}
 }
 func BenchmarkCompactDouble0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewCompactFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteDouble(b, p, trans)
+		ReadWriteDouble(b, p)
 	}
 }
 func BenchmarkCompactString0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewCompactFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteString(b, p, trans)
+		ReadWriteString(b, p)
 	}
 }
 func BenchmarkCompactBinary0(b *testing.B) {
 	trans := NewMemoryBufferLen(1024)
 	p := NewCompactFormat(trans)
 	for i := 0; i < b.N; i++ {
-		ReadWriteBinary(b, p, trans)
+		ReadWriteBinary(b, p)
 	}
 }

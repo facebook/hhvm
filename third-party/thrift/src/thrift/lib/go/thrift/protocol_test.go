@@ -166,9 +166,9 @@ func tcpStreamSetupForTest(t *testing.T) (io.Reader, io.Writer) {
 	return rConn, wConn
 }
 
-type protocolTest func(t testing.TB, p types.Format, readWriter io.ReadWriter)
-type protocolReaderTest func(t testing.TB, p types.Format, reader io.Reader)
-type protocolWriterTest func(t testing.TB, p types.Format, writer io.Writer)
+type protocolTest func(t testing.TB, p types.Format)
+type protocolReaderTest func(t testing.TB, p types.Format)
+type protocolWriterTest func(t testing.TB, p types.Format)
 
 // ReadWriteProtocolParallelTest tests that a given protocol is safe to read
 // from and write to in different goroutines. This requires both a protocol
@@ -190,11 +190,11 @@ func ReadWriteProtocolParallelTest(t *testing.T, newFormat func(io.ReadWriteClos
 			go func() {
 				defer wg.Done()
 				for i := 0; i < iterations; i++ {
-					write(t, p, trans)
+					write(t, p)
 				}
 			}()
 			for i := 0; i < iterations; i++ {
-				read(t, p, trans)
+				read(t, p)
 			}
 			wg.Wait()
 			trans.Close()
@@ -213,28 +213,28 @@ func ReadWriteProtocolParallelTest(t *testing.T, newFormat func(io.ReadWriteClos
 	doForAllTransportsParallel(ReadStruct, WriteStruct)
 
 	// perform set of many sequenced sets of reads and writes
-	doForAllTransportsParallel(func(t testing.TB, p types.Format, reader io.Reader) {
-		ReadBool(t, p, reader)
-		ReadByte(t, p, reader)
-		ReadI16(t, p, reader)
-		ReadI32(t, p, reader)
-		ReadI64(t, p, reader)
-		ReadDouble(t, p, reader)
-		ReadFloat(t, p, reader)
-		ReadString(t, p, reader)
-		ReadBinary(t, p, reader)
-		ReadStruct(t, p, reader)
-	}, func(t testing.TB, p types.Format, writer io.Writer) {
-		WriteBool(t, p, writer)
-		WriteByte(t, p, writer)
-		WriteI16(t, p, writer)
-		WriteI32(t, p, writer)
-		WriteI64(t, p, writer)
-		WriteDouble(t, p, writer)
-		WriteFloat(t, p, writer)
-		WriteString(t, p, writer)
-		WriteBinary(t, p, writer)
-		WriteStruct(t, p, writer)
+	doForAllTransportsParallel(func(t testing.TB, p types.Format) {
+		ReadBool(t, p)
+		ReadByte(t, p)
+		ReadI16(t, p)
+		ReadI32(t, p)
+		ReadI64(t, p)
+		ReadDouble(t, p)
+		ReadFloat(t, p)
+		ReadString(t, p)
+		ReadBinary(t, p)
+		ReadStruct(t, p)
+	}, func(t testing.TB, p types.Format) {
+		WriteBool(t, p)
+		WriteByte(t, p)
+		WriteI16(t, p)
+		WriteI32(t, p)
+		WriteI64(t, p)
+		WriteDouble(t, p)
+		WriteFloat(t, p)
+		WriteString(t, p)
+		WriteBinary(t, p)
+		WriteStruct(t, p)
 	})
 }
 
@@ -257,7 +257,7 @@ func ReadWriteProtocolTest(t *testing.T, newFormat func(io.ReadWriteCloser) type
 		for _, tf := range transports {
 			trans := tf()
 			p := newFormat(trans)
-			protTest(t, p, trans)
+			protTest(t, p)
 			trans.Close()
 		}
 	}
@@ -274,135 +274,135 @@ func ReadWriteProtocolTest(t *testing.T, newFormat func(io.ReadWriteCloser) type
 	doForAllTransports(ReadWriteStruct)
 
 	// perform set of many sequenced reads and writes
-	doForAllTransports(func(t testing.TB, p types.Format, readWriter io.ReadWriter) {
-		ReadWriteI64(t, p, readWriter)
-		ReadWriteDouble(t, p, readWriter)
-		ReadWriteFloat(t, p, readWriter)
-		ReadWriteBinary(t, p, readWriter)
-		ReadWriteByte(t, p, readWriter)
-		ReadWriteStruct(t, p, readWriter)
+	doForAllTransports(func(t testing.TB, p types.Format) {
+		ReadWriteI64(t, p)
+		ReadWriteDouble(t, p)
+		ReadWriteFloat(t, p)
+		ReadWriteBinary(t, p)
+		ReadWriteByte(t, p)
+		ReadWriteStruct(t, p)
 	})
 }
 
-func ReadBool(t testing.TB, p types.Format, reader io.Reader) {
+func ReadBool(t testing.TB, p types.Format) {
 	thetype := types.BOOL
 	thelen := len(boolValues)
 	thetype2, thelen2, err := p.ReadListBegin()
 	if err != nil {
-		t.Fatalf("%s: %T %T %q Error reading list: %v", "ReadBool", p, reader, err, boolValues)
+		t.Fatalf("%s: %T %q Error reading list: %v", "ReadBool", p, err, boolValues)
 	}
 	_, ok := p.(*simpleJSONFormat)
 	if !ok {
 		if thetype != thetype2 {
-			t.Fatalf("%s: %T %T type %s != type %s", "ReadBool", p, reader, thetype, thetype2)
+			t.Fatalf("%s: %T type %s != type %s", "ReadBool", p, thetype, thetype2)
 		}
 		if thelen != thelen2 {
-			t.Fatalf("%s: %T %T len %d != len %d", "ReadBool", p, reader, thelen, thelen2)
+			t.Fatalf("%s: %T len %d != len %d", "ReadBool", p, thelen, thelen2)
 		}
 	}
 	for k, v := range boolValues {
 		value, err := p.ReadBool()
 		if err != nil {
-			t.Fatalf("%s: %T %T %q Error reading bool at index %d: %t", "ReadBool", p, reader, err, k, v)
+			t.Fatalf("%s: %T %q Error reading bool at index %d: %t", "ReadBool", p, err, k, v)
 		}
 		if v != value {
-			t.Fatalf("%s: index %d %q %q %t != %t", "ReadBool", k, p, reader, v, value)
+			t.Fatalf("%s: index %d %q %q %t != %t", "ReadBool", k, p, v, value)
 		}
 	}
 	err = p.ReadListEnd()
 	if err != nil {
-		t.Fatalf("%s: %T %T Unable to read list end: %q", "ReadBool", p, reader, err)
+		t.Fatalf("%s: %T Unable to read list end: %q", "ReadBool", p, err)
 	}
 }
 
-func WriteBool(t testing.TB, p types.Format, writer io.Writer) {
+func WriteBool(t testing.TB, p types.Format) {
 	thetype := types.BOOL
 	thelen := len(boolValues)
 	err := p.WriteListBegin(thetype, thelen)
 	if err != nil {
-		t.Fatalf("%s: %T %T %q Error writing list begin: %q", "WriteBool", p, writer, err, thetype)
+		t.Fatalf("%s: %T %q Error writing list begin: %q", "WriteBool", p, err, thetype)
 	}
 	for k, v := range boolValues {
 		err = p.WriteBool(v)
 		if err != nil {
-			t.Fatalf("%s: %T %T %q Error writing bool in list at index %d: %t", "WriteBool", p, writer, err, k, v)
+			t.Fatalf("%s: %T %q Error writing bool in list at index %d: %t", "WriteBool", p, err, k, v)
 		}
 	}
 	p.WriteListEnd()
 	if err != nil {
-		t.Fatalf("%s: %T %T %q Error writing list end: %v", "WriteBool", p, writer, err, boolValues)
+		t.Fatalf("%s: %T %q Error writing list end: %v", "WriteBool", p, err, boolValues)
 	}
 	err = p.Flush()
 	if err != nil {
-		t.Fatalf("%s: %T %T Unable to flush: %q", "WriteBool", p, writer, err)
+		t.Fatalf("%s: %T Unable to flush: %q", "WriteBool", p, err)
 	}
 }
 
-func ReadWriteBool(t testing.TB, p types.Format, readWriter io.ReadWriter) {
-	WriteBool(t, p, readWriter)
-	ReadBool(t, p, readWriter)
+func ReadWriteBool(t testing.TB, p types.Format) {
+	WriteBool(t, p)
+	ReadBool(t, p)
 }
 
-func WriteByte(t testing.TB, p types.Format, writer io.Writer) {
+func WriteByte(t testing.TB, p types.Format) {
 	thetype := types.BYTE
 	thelen := len(byteValues)
 	err := p.WriteListBegin(thetype, thelen)
 	if err != nil {
-		t.Fatalf("%s: %T %T %q Error writing list begin: %q", "WriteByte", p, writer, err, thetype)
+		t.Fatalf("%s: %T %q Error writing list begin: %q", "WriteByte", p, err, thetype)
 	}
 	for k, v := range byteValues {
 		err = p.WriteByte(v)
 		if err != nil {
-			t.Fatalf("%s: %T %T %q Error writing byte in list at index %d: %q", "WriteByte", p, writer, err, k, v)
+			t.Fatalf("%s: %T %q Error writing byte in list at index %d: %q", "WriteByte", p, err, k, v)
 		}
 	}
 	err = p.WriteListEnd()
 	if err != nil {
-		t.Fatalf("%s: %T %T %q Error writing list end: %q", "WriteByte", p, writer, err, byteValues)
+		t.Fatalf("%s: %T %q Error writing list end: %q", "WriteByte", p, err, byteValues)
 	}
 	err = p.Flush()
 	if err != nil {
-		t.Fatalf("%s: %T %T %q Error flushing list of bytes: %q", "WriteByte", p, writer, err, byteValues)
+		t.Fatalf("%s: %T %q Error flushing list of bytes: %q", "WriteByte", p, err, byteValues)
 	}
 }
 
-func ReadByte(t testing.TB, p types.Format, reader io.Reader) {
+func ReadByte(t testing.TB, p types.Format) {
 	thetype := types.BYTE
 	thelen := len(byteValues)
 	thetype2, thelen2, err := p.ReadListBegin()
 	if err != nil {
-		t.Fatalf("%s: %T %T %q Error reading list: %q", "ReadByte", p, reader, err, byteValues)
+		t.Fatalf("%s: %T %q Error reading list: %q", "ReadByte", p, err, byteValues)
 	}
 	_, ok := p.(*simpleJSONFormat)
 	if !ok {
 		if thetype != thetype2 {
-			t.Fatalf("%s: %T %T type %s != type %s", "ReadByte", p, reader, thetype, thetype2)
+			t.Fatalf("%s: %T type %s != type %s", "ReadByte", p, thetype, thetype2)
 		}
 		if thelen != thelen2 {
-			t.Fatalf("%s: %T %T len %d != len %d", "ReadByte", p, reader, thelen, thelen2)
+			t.Fatalf("%s: %T len %d != len %d", "ReadByte", p, thelen, thelen2)
 		}
 	}
 	for k, v := range byteValues {
 		value, err := p.ReadByte()
 		if err != nil {
-			t.Fatalf("%s: %T %T %q Error reading byte at index %d: %q", "ReadByte", p, reader, err, k, v)
+			t.Fatalf("%s: %T %q Error reading byte at index %d: %q", "ReadByte", p, err, k, v)
 		}
 		if v != value {
-			t.Fatalf("%s: %T %T %d != %d", "ReadByte", p, reader, v, value)
+			t.Fatalf("%s: %T %d != %d", "ReadByte", p, v, value)
 		}
 	}
 	err = p.ReadListEnd()
 	if err != nil {
-		t.Fatalf("%s: %T %T Unable to read list end: %q", "ReadByte", p, reader, err)
+		t.Fatalf("%s: %T Unable to read list end: %q", "ReadByte", p, err)
 	}
 }
 
-func ReadWriteByte(t testing.TB, p types.Format, readWriter io.ReadWriter) {
-	WriteByte(t, p, readWriter)
-	ReadByte(t, p, readWriter)
+func ReadWriteByte(t testing.TB, p types.Format) {
+	WriteByte(t, p)
+	ReadByte(t, p)
 }
 
-func WriteI16(t testing.TB, p types.Format, writer io.Writer) {
+func WriteI16(t testing.TB, p types.Format) {
 	thetype := types.I16
 	thelen := len(int16Values)
 	p.WriteListBegin(thetype, thelen)
@@ -413,43 +413,43 @@ func WriteI16(t testing.TB, p types.Format, writer io.Writer) {
 	p.Flush()
 }
 
-func ReadI16(t testing.TB, p types.Format, reader io.Reader) {
+func ReadI16(t testing.TB, p types.Format) {
 	thetype := types.I16
 	thelen := len(int16Values)
 	thetype2, thelen2, err := p.ReadListBegin()
 	if err != nil {
-		t.Fatalf("%s: %T %T %q Error reading list: %q", "ReadI16", p, reader, err, int16Values)
+		t.Fatalf("%s: %T %q Error reading list: %q", "ReadI16", p, err, int16Values)
 	}
 	_, ok := p.(*simpleJSONFormat)
 	if !ok {
 		if thetype != thetype2 {
-			t.Fatalf("%s: %T %T type %s != type %s", "ReadI16", p, reader, thetype, thetype2)
+			t.Fatalf("%s: %T type %s != type %s", "ReadI16", p, thetype, thetype2)
 		}
 		if thelen != thelen2 {
-			t.Fatalf("%s: %T %T len %d != len %d", "ReadI16", p, reader, thelen, thelen2)
+			t.Fatalf("%s: %T len %d != len %d", "ReadI16", p, thelen, thelen2)
 		}
 	}
 	for k, v := range int16Values {
 		value, err := p.ReadI16()
 		if err != nil {
-			t.Fatalf("%s: %T %T %q Error reading int16 at index %d: %q", "ReadI16", p, reader, err, k, v)
+			t.Fatalf("%s: %T %q Error reading int16 at index %d: %q", "ReadI16", p, err, k, v)
 		}
 		if v != value {
-			t.Fatalf("%s: %T %T %d != %d", "ReadI16", p, reader, v, value)
+			t.Fatalf("%s: %T %d != %d", "ReadI16", p, v, value)
 		}
 	}
 	err = p.ReadListEnd()
 	if err != nil {
-		t.Fatalf("%s: %T %T Unable to read list end: %q", "ReadI16", p, reader, err)
+		t.Fatalf("%s: %T Unable to read list end: %q", "ReadI16", p, err)
 	}
 }
 
-func ReadWriteI16(t testing.TB, p types.Format, readWriter io.ReadWriter) {
-	WriteI16(t, p, readWriter)
-	ReadI16(t, p, readWriter)
+func ReadWriteI16(t testing.TB, p types.Format) {
+	WriteI16(t, p)
+	ReadI16(t, p)
 }
 
-func WriteI32(t testing.TB, p types.Format, writer io.Writer) {
+func WriteI32(t testing.TB, p types.Format) {
 	thetype := types.I32
 	thelen := len(int32Values)
 	p.WriteListBegin(thetype, thelen)
@@ -460,42 +460,42 @@ func WriteI32(t testing.TB, p types.Format, writer io.Writer) {
 	p.Flush()
 }
 
-func ReadI32(t testing.TB, p types.Format, reader io.Reader) {
+func ReadI32(t testing.TB, p types.Format) {
 	thetype := types.I32
 	thelen := len(int32Values)
 	thetype2, thelen2, err := p.ReadListBegin()
 	if err != nil {
-		t.Fatalf("%s: %T %T %q Error reading list: %q", "ReadI32", p, reader, err, int32Values)
+		t.Fatalf("%s: %T %q Error reading list: %q", "ReadI32", p, err, int32Values)
 	}
 	_, ok := p.(*simpleJSONFormat)
 	if !ok {
 		if thetype != thetype2 {
-			t.Fatalf("%s: %T %T type %s != type %s", "ReadI32", p, reader, thetype, thetype2)
+			t.Fatalf("%s: %T type %s != type %s", "ReadI32", p, thetype, thetype2)
 		}
 		if thelen != thelen2 {
-			t.Fatalf("%s: %T %T len %d != len %d", "ReadI32", p, reader, thelen, thelen2)
+			t.Fatalf("%s: %T len %d != len %d", "ReadI32", p, thelen, thelen2)
 		}
 	}
 	for k, v := range int32Values {
 		value, err := p.ReadI32()
 		if err != nil {
-			t.Fatalf("%s: %T %T %q Error reading int32 at index %d: %q", "ReadI32", p, reader, err, k, v)
+			t.Fatalf("%s: %T %q Error reading int32 at index %d: %q", "ReadI32", p, err, k, v)
 		}
 		if v != value {
-			t.Fatalf("%s: %T %T %d != %d", "ReadI32", p, reader, v, value)
+			t.Fatalf("%s: %T %d != %d", "ReadI32", p, v, value)
 		}
 	}
 	if err != nil {
-		t.Fatalf("%s: %T %T Unable to read list end: %q", "ReadI32", p, reader, err)
+		t.Fatalf("%s: %T Unable to read list end: %q", "ReadI32", p, err)
 	}
 }
 
-func ReadWriteI32(t testing.TB, p types.Format, readWriter io.ReadWriter) {
-	WriteI32(t, p, readWriter)
-	ReadI32(t, p, readWriter)
+func ReadWriteI32(t testing.TB, p types.Format) {
+	WriteI32(t, p)
+	ReadI32(t, p)
 }
 
-func WriteI64(t testing.TB, p types.Format, writer io.Writer) {
+func WriteI64(t testing.TB, p types.Format) {
 	thetype := types.I64
 	thelen := len(int64Values)
 	p.WriteListBegin(thetype, thelen)
@@ -506,42 +506,42 @@ func WriteI64(t testing.TB, p types.Format, writer io.Writer) {
 	p.Flush()
 }
 
-func ReadI64(t testing.TB, p types.Format, reader io.Reader) {
+func ReadI64(t testing.TB, p types.Format) {
 	thetype := types.I64
 	thelen := len(int64Values)
 	thetype2, thelen2, err := p.ReadListBegin()
 	if err != nil {
-		t.Fatalf("%s: %T %T %q Error reading list: %q", "ReadI64", p, reader, err, int64Values)
+		t.Fatalf("%s: %T %q Error reading list: %q", "ReadI64", p, err, int64Values)
 	}
 	_, ok := p.(*simpleJSONFormat)
 	if !ok {
 		if thetype != thetype2 {
-			t.Fatalf("%s: %T %T type %s != type %s", "ReadI64", p, reader, thetype, thetype2)
+			t.Fatalf("%s: %T type %s != type %s", "ReadI64", p, thetype, thetype2)
 		}
 		if thelen != thelen2 {
-			t.Fatalf("%s: %T %T len %d != len %d", "ReadI64", p, reader, thelen, thelen2)
+			t.Fatalf("%s: %T len %d != len %d", "ReadI64", p, thelen, thelen2)
 		}
 	}
 	for k, v := range int64Values {
 		value, err := p.ReadI64()
 		if err != nil {
-			t.Fatalf("%s: %T %T %q Error reading int64 at index %d: %q", "ReadI64", p, reader, err, k, v)
+			t.Fatalf("%s: %T %q Error reading int64 at index %d: %q", "ReadI64", p, err, k, v)
 		}
 		if v != value {
-			t.Fatalf("%s: %T %T %q != %q", "ReadI64", p, reader, v, value)
+			t.Fatalf("%s: %T %q != %q", "ReadI64", p, v, value)
 		}
 	}
 	if err != nil {
-		t.Fatalf("%s: %T %T Unable to read list end: %q", "ReadI64", p, reader, err)
+		t.Fatalf("%s: %T Unable to read list end: %q", "ReadI64", p, err)
 	}
 }
 
-func ReadWriteI64(t testing.TB, p types.Format, readWriter io.ReadWriter) {
-	WriteI64(t, p, readWriter)
-	ReadI64(t, p, readWriter)
+func ReadWriteI64(t testing.TB, p types.Format) {
+	WriteI64(t, p)
+	ReadI64(t, p)
 }
 
-func WriteDouble(t testing.TB, p types.Format, writer io.Writer) {
+func WriteDouble(t testing.TB, p types.Format) {
 	doubleValues = []float64{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float64(), NEGATIVE_INFINITY.Float64(), NAN.Float64()}
 	thetype := types.DOUBLE
 	thelen := len(doubleValues)
@@ -554,45 +554,45 @@ func WriteDouble(t testing.TB, p types.Format, writer io.Writer) {
 
 }
 
-func ReadDouble(t testing.TB, p types.Format, reader io.Reader) {
+func ReadDouble(t testing.TB, p types.Format) {
 	doubleValues = []float64{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float64(), NEGATIVE_INFINITY.Float64(), NAN.Float64()}
 	thetype := types.DOUBLE
 	thelen := len(doubleValues)
 	thetype2, thelen2, err := p.ReadListBegin()
 	if err != nil {
-		t.Fatalf("%s: %T %T %q Error reading list: %v", "ReadDouble", p, reader, err, doubleValues)
+		t.Fatalf("%s: %T %q Error reading list: %v", "ReadDouble", p, err, doubleValues)
 	}
 	if thetype != thetype2 {
-		t.Fatalf("%s: %T %T type %s != type %s", "ReadDouble", p, reader, thetype, thetype2)
+		t.Fatalf("%s: %T type %s != type %s", "ReadDouble", p, thetype, thetype2)
 	}
 	if thelen != thelen2 {
-		t.Fatalf("%s: %T %T len %d != len %d", "ReadDouble", p, reader, thelen, thelen2)
+		t.Fatalf("%s: %T len %d != len %d", "ReadDouble", p, thelen, thelen2)
 	}
 	for k, v := range doubleValues {
 		value, err := p.ReadDouble()
 		if err != nil {
-			t.Fatalf("%s: %T %T %q Error reading double at index %d: %f", "ReadDouble", p, reader, err, k, v)
+			t.Fatalf("%s: %T %q Error reading double at index %d: %f", "ReadDouble", p, err, k, v)
 		}
 		if math.IsNaN(v) {
 			if !math.IsNaN(value) {
-				t.Fatalf("%s: %T %T math.IsNaN(%f) != math.IsNaN(%f)", "ReadDouble", p, reader, v, value)
+				t.Fatalf("%s: %T math.IsNaN(%f) != math.IsNaN(%f)", "ReadDouble", p, v, value)
 			}
 		} else if v != value {
-			t.Fatalf("%s: %T %T %f != %f", "ReadDouble", p, reader, v, value)
+			t.Fatalf("%s: %T %f != %f", "ReadDouble", p, v, value)
 		}
 	}
 	err = p.ReadListEnd()
 	if err != nil {
-		t.Fatalf("%s: %T %T Unable to read list end: %q", "ReadDouble", p, reader, err)
+		t.Fatalf("%s: %T Unable to read list end: %q", "ReadDouble", p, err)
 	}
 }
 
-func ReadWriteDouble(t testing.TB, p types.Format, readWriter io.ReadWriter) {
-	WriteDouble(t, p, readWriter)
-	ReadDouble(t, p, readWriter)
+func ReadWriteDouble(t testing.TB, p types.Format) {
+	WriteDouble(t, p)
+	ReadDouble(t, p)
 }
 
-func WriteFloat(t testing.TB, p types.Format, writer io.Writer) {
+func WriteFloat(t testing.TB, p types.Format) {
 	floatValues = []float32{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float32(), NEGATIVE_INFINITY.Float32(), NAN.Float32()}
 
 	thetype := types.FLOAT
@@ -606,7 +606,7 @@ func WriteFloat(t testing.TB, p types.Format, writer io.Writer) {
 
 }
 
-func ReadFloat(t testing.TB, p types.Format, reader io.Reader) {
+func ReadFloat(t testing.TB, p types.Format) {
 	floatValues = []float32{459.3, 0.0, -1.0, 1.0, 0.5, 0.3333, 3.14159, 1.537e-38, 1.673e25, 6.02214179e23, -6.02214179e23, INFINITY.Float32(), NEGATIVE_INFINITY.Float32(), NAN.Float32()}
 
 	thetype := types.FLOAT
@@ -614,40 +614,40 @@ func ReadFloat(t testing.TB, p types.Format, reader io.Reader) {
 
 	thetype2, thelen2, err := p.ReadListBegin()
 	if err != nil {
-		t.Fatalf("%s: %T %T %q Error reading list: %v", "ReadFloat", p, reader, err, floatValues)
+		t.Fatalf("%s: %T %q Error reading list: %v", "ReadFloat", p, err, floatValues)
 	}
 	if thetype != thetype2 {
-		t.Fatalf("%s: %T %T type %s != type %s", "ReadFloat", p, reader, thetype, thetype2)
+		t.Fatalf("%s: %T type %s != type %s", "ReadFloat", p, thetype, thetype2)
 	}
 	if thelen != thelen2 {
-		t.Fatalf("%s: %T %T len %d != len %d", "ReadFloat", p, reader, thelen, thelen2)
+		t.Fatalf("%s: %T len %d != len %d", "ReadFloat", p, thelen, thelen2)
 	}
 	for k, v := range floatValues {
 		value, err := p.ReadFloat()
 		if err != nil {
-			t.Fatalf("%s: %T %T %q Error reading double at index %d: %f", "ReadFloat", p, reader, err, k, v)
+			t.Fatalf("%s: %T %q Error reading double at index %d: %f", "ReadFloat", p, err, k, v)
 		}
 		if math.IsNaN(float64(v)) {
 			if !math.IsNaN(float64(value)) {
-				t.Fatalf("%s: %T %T math.IsNaN(%f) != math.IsNaN(%f)", "ReadFloat", p, reader, v, value)
+				t.Fatalf("%s: %T math.IsNaN(%f) != math.IsNaN(%f)", "ReadFloat", p, v, value)
 			}
 		} else if v != value {
-			t.Fatalf("%s: %T %T %f != %f", "ReadFloat", p, reader, v, value)
+			t.Fatalf("%s: %T %f != %f", "ReadFloat", p, v, value)
 		}
 	}
 	err = p.ReadListEnd()
 	if err != nil {
-		t.Fatalf("%s: %T %T Unable to read list end: %q", "ReadFloat", p, reader, err)
+		t.Fatalf("%s: %T Unable to read list end: %q", "ReadFloat", p, err)
 	}
 
 }
 
-func ReadWriteFloat(t testing.TB, p types.Format, readWriter io.ReadWriter) {
-	WriteFloat(t, p, readWriter)
-	ReadFloat(t, p, readWriter)
+func ReadWriteFloat(t testing.TB, p types.Format) {
+	WriteFloat(t, p)
+	ReadFloat(t, p)
 }
 
-func WriteString(t testing.TB, p types.Format, writer io.Writer) {
+func WriteString(t testing.TB, p types.Format) {
 	thetype := types.STRING
 	thelen := len(stringValues)
 	p.WriteListBegin(thetype, thelen)
@@ -658,156 +658,156 @@ func WriteString(t testing.TB, p types.Format, writer io.Writer) {
 	p.Flush()
 }
 
-func ReadString(t testing.TB, p types.Format, reader io.Reader) {
+func ReadString(t testing.TB, p types.Format) {
 	thetype := types.STRING
 	thelen := len(stringValues)
 
 	thetype2, thelen2, err := p.ReadListBegin()
 	if err != nil {
-		t.Fatalf("%s: %T %T %q Error reading list: %q", "ReadString", p, reader, err, stringValues)
+		t.Fatalf("%s: %T %q Error reading list: %q", "ReadString", p, err, stringValues)
 	}
 	_, ok := p.(*simpleJSONFormat)
 	if !ok {
 		if thetype != thetype2 {
-			t.Fatalf("%s: %T %T type %s != type %s", "ReadString", p, reader, thetype, thetype2)
+			t.Fatalf("%s: %T type %s != type %s", "ReadString", p, thetype, thetype2)
 		}
 		if thelen != thelen2 {
-			t.Fatalf("%s: %T %T len %d != len %d", "ReadString", p, reader, thelen, thelen2)
+			t.Fatalf("%s: %T len %d != len %d", "ReadString", p, thelen, thelen2)
 		}
 	}
 	for k, v := range stringValues {
 		value, err := p.ReadString()
 		if err != nil {
-			t.Fatalf("%s: %T %T %q Error reading string at index %d: %q", "ReadString", p, reader, err, k, v)
+			t.Fatalf("%s: %T %q Error reading string at index %d: %q", "ReadString", p, err, k, v)
 		}
 		if v != value {
-			t.Fatalf("%s: %T %T %s != %s", "ReadString", p, reader, v, value)
+			t.Fatalf("%s: %T %s != %s", "ReadString", p, v, value)
 		}
 	}
 	if err != nil {
-		t.Fatalf("%s: %T %T Unable to read list end: %q", "ReadString", p, reader, err)
+		t.Fatalf("%s: %T Unable to read list end: %q", "ReadString", p, err)
 	}
 }
 
-func ReadWriteString(t testing.TB, p types.Format, readWriter io.ReadWriter) {
-	WriteString(t, p, readWriter)
-	ReadString(t, p, readWriter)
+func ReadWriteString(t testing.TB, p types.Format) {
+	WriteString(t, p)
+	ReadString(t, p)
 }
 
-func WriteBinary(t testing.TB, p types.Format, writer io.Writer) {
+func WriteBinary(t testing.TB, p types.Format) {
 	v := protocolBdata
 	p.WriteBinary(v)
 	p.Flush()
 }
 
-func ReadBinary(t testing.TB, p types.Format, reader io.Reader) {
+func ReadBinary(t testing.TB, p types.Format) {
 	v := protocolBdata
 	value, err := p.ReadBinary()
 	if err != nil {
-		t.Fatalf("%s: %T %T Unable to read binary: %s", "ReadBinary", p, reader, err.Error())
+		t.Fatalf("%s: %T Unable to read binary: %s", "ReadBinary", p, err.Error())
 	}
 	if len(v) != len(value) {
-		t.Fatalf("%s: %T %T len(v) != len(value)... %d != %d", "ReadBinary", p, reader, len(v), len(value))
+		t.Fatalf("%s: %T len(v) != len(value)... %d != %d", "ReadBinary", p, len(v), len(value))
 	} else {
 		for i := 0; i < len(v); i++ {
 			if v[i] != value[i] {
-				t.Fatalf("%s: %T %T %s != %s", "ReadBinary", p, reader, v, value)
+				t.Fatalf("%s: %T %s != %s", "ReadBinary", p, v, value)
 			}
 		}
 	}
 
 }
 
-func ReadWriteBinary(t testing.TB, p types.Format, readWriter io.ReadWriter) {
-	WriteBinary(t, p, readWriter)
-	ReadBinary(t, p, readWriter)
+func ReadWriteBinary(t testing.TB, p types.Format) {
+	WriteBinary(t, p)
+	ReadBinary(t, p)
 }
 
-func WriteStruct(t testing.TB, p types.Format, writer io.Writer) {
+func WriteStruct(t testing.TB, p types.Format) {
 	v := structTestData
 	p.WriteStructBegin(v.name)
 	p.WriteFieldBegin(v.fields[0].name, v.fields[0].typ, v.fields[0].id)
 	err := p.WriteBool(v.fields[0].value.(bool))
 	if err != nil {
-		t.Fatalf("%s: %T %T Unable to read bool: %s", "WriteStruct", p, writer, err.Error())
+		t.Fatalf("%s: %T Unable to read bool: %s", "WriteStruct", p, err.Error())
 	}
 	p.WriteFieldEnd()
 	p.WriteFieldBegin(v.fields[1].name, v.fields[1].typ, v.fields[1].id)
 	err = p.WriteString(v.fields[1].value.(string))
 	if err != nil {
-		t.Fatalf("%s: %T %T Unable to read string: %s", "WriteStruct", p, writer, err.Error())
+		t.Fatalf("%s: %T Unable to read string: %s", "WriteStruct", p, err.Error())
 	}
 	p.WriteFieldEnd()
 	p.WriteStructEnd()
 	err = p.Flush()
 	if err != nil {
-		t.Fatalf("%s: %T %T Unable to flush: %s", "WriteStruct", p, writer, err.Error())
+		t.Fatalf("%s: %T Unable to flush: %s", "WriteStruct", p, err.Error())
 	}
 }
 
-func ReadStruct(t testing.TB, p types.Format, reader io.Reader) {
+func ReadStruct(t testing.TB, p types.Format) {
 	v := structTestData
 	_, err := p.ReadStructBegin()
 	if err != nil {
-		t.Fatalf("%s: %T %T Unable to read struct begin: %s", "ReadStruct", p, reader, err.Error())
+		t.Fatalf("%s: %T Unable to read struct begin: %s", "ReadStruct", p, err.Error())
 	}
 	_, typeID, id, err := p.ReadFieldBegin()
 	if err != nil {
-		t.Fatalf("%s: %T %T Unable to read field begin: %s", "ReadStruct", p, reader, err.Error())
+		t.Fatalf("%s: %T Unable to read field begin: %s", "ReadStruct", p, err.Error())
 	}
 	if v.fields[0].typ != typeID {
-		t.Fatalf("%s: %T %T type (%d) != (%d)", "ReadStruct", p, reader, v.fields[0].typ, typeID)
+		t.Fatalf("%s: %T type (%d) != (%d)", "ReadStruct", p, v.fields[0].typ, typeID)
 	}
 	if v.fields[0].id != id {
-		t.Fatalf("%s: %T %T id (%d) != (%d)", "ReadStruct", p, reader, v.fields[0].id, id)
+		t.Fatalf("%s: %T id (%d) != (%d)", "ReadStruct", p, v.fields[0].id, id)
 	}
 
 	val, err := p.ReadBool()
 	if err != nil {
-		t.Fatalf("%s: %T %T Unable to read bool: %s", "ReadStruct", p, reader, err.Error())
+		t.Fatalf("%s: %T Unable to read bool: %s", "ReadStruct", p, err.Error())
 	}
 	if v.fields[0].value != val {
-		t.Fatalf("%s: %T %T value (%v) != (%v)", "ReadStruct", p, reader, v.fields[0].value, val)
+		t.Fatalf("%s: %T value (%v) != (%v)", "ReadStruct", p, v.fields[0].value, val)
 	}
 
 	err = p.ReadFieldEnd()
 	if err != nil {
-		t.Fatalf("%s: %T %T Unable to read field end: %s", "ReadStruct", p, reader, err.Error())
+		t.Fatalf("%s: %T Unable to read field end: %s", "ReadStruct", p, err.Error())
 	}
 
 	_, typeID, id, err = p.ReadFieldBegin()
 	if err != nil {
-		t.Fatalf("%s: %T %T Unable to read field begin: %s", "ReadStruct", p, reader, err.Error())
+		t.Fatalf("%s: %T Unable to read field begin: %s", "ReadStruct", p, err.Error())
 	}
 	if v.fields[1].typ != typeID {
-		t.Fatalf("%s: %T %T type (%d) != (%d)", "ReadStruct", p, reader, v.fields[1].typ, typeID)
+		t.Fatalf("%s: %T type (%d) != (%d)", "ReadStruct", p, v.fields[1].typ, typeID)
 	}
 	if v.fields[1].id != id {
-		t.Fatalf("%s: %T %T id (%d) != (%d)", "ReadStruct", p, reader, v.fields[1].id, id)
+		t.Fatalf("%s: %T id (%d) != (%d)", "ReadStruct", p, v.fields[1].id, id)
 	}
 
 	strVal, err := p.ReadString()
 	if err != nil {
-		t.Fatalf("%s: %T %T Unable to read string: %s", "ReadStruct", p, reader, err.Error())
+		t.Fatalf("%s: %T Unable to read string: %s", "ReadStruct", p, err.Error())
 	}
 	if v.fields[1].value != strVal {
-		t.Fatalf("%s: %T value %T (%s) != (%s)", "ReadStruct", p, reader, v.fields[1].value, strVal)
+		t.Fatalf("%s: %T value %T (%s) != (%s)", "ReadStruct", p, v.fields[1].value, strVal)
 	}
 
 	err = p.ReadFieldEnd()
 	if err != nil {
-		t.Fatalf("%s: %T %T Unable to read field end: %s", "ReadStruct", p, reader, err.Error())
+		t.Fatalf("%s: %T Unable to read field end: %s", "ReadStruct", p, err.Error())
 	}
 
 	err = p.ReadStructEnd()
 	if err != nil {
-		t.Fatalf("%s: %T %T Unable to read struct end: %s", "ReadStruct", p, reader, err.Error())
+		t.Fatalf("%s: %T Unable to read struct end: %s", "ReadStruct", p, err.Error())
 	}
 }
 
-func ReadWriteStruct(t testing.TB, p types.Format, readWriter io.ReadWriter) {
-	WriteStruct(t, p, readWriter)
-	ReadStruct(t, p, readWriter)
+func ReadWriteStruct(t testing.TB, p types.Format) {
+	WriteStruct(t, p)
+	ReadStruct(t, p)
 }
 
 func UnmatchedBeginEndProtocolTest(t *testing.T, formatFactory func(io.ReadWriter) types.Format) {

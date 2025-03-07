@@ -373,10 +373,10 @@ class DynamicMapPatch {
       erase(badge, k);
     }
   }
-  void putMulti(detail::Badge badge, const detail::ValueMap& m) {
-    for (const auto& [k, v] : m) {
-      insert_or_assign(badge, k, v);
-    }
+  void putMulti(detail::Badge badge, detail::ValueMap m) {
+    m.eraseInto(m.begin(), m.end(), [&](auto&& k, auto&& v) {
+      insert_or_assign(badge, std::move(k), std::move(v));
+    });
   }
 
   // Return the subPatch. We can use it to provide similar APIs to static patch.

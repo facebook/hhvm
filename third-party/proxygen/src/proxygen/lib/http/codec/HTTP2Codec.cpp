@@ -1625,7 +1625,6 @@ size_t HTTP2Codec::generateGoaway(folly::IOBufQueue& writeBuf,
     case ClosingState::FIRST_GOAWAY_SENT:
       sessionClosing_ = ClosingState::CLOSED;
       break;
-    case ClosingState::CLOSING:
     case ClosingState::CLOSED:
       LOG(FATAL) << "unreachable";
   }

@@ -42,12 +42,6 @@ struct AcceptorConfiguration : public wangle::ServerSocketConfig {
   std::chrono::milliseconds transactionIdleTimeout{600000};
 
   /**
-   * The compression level to use for SPDY headers with responses from
-   * this Acceptor.
-   */
-  int spdyCompressionLevel{Z_NO_COMPRESSION};
-
-  /**
    * The name of the protocol to use on non-TLS connections.
    */
   std::string plaintextProtocol;

@@ -492,11 +492,15 @@ def gen_container_fields(target: Target) -> Dict[str, str]:
     return {**lists, **sets, **maps, **maps_to_sets}
 
 
-def gen_union_fields(target: Target) -> Dict[str, str]:
+def gen_structured_fields(target: Target) -> Dict[str, str]:
     ret = gen_container_fields(target)
     ret.update(**gen_cpp_ref(target, ret), **gen_shared_cpp_ref(target, ret))
     ret.update(gen_primatives(target, PRIMITIVE_TYPES))
     return ret
+
+
+def gen_union_fields(target: Target) -> Dict[str, str]:
+    return gen_structured_fields(target)
 
 
 def gen_lazy_fields(target: Target) -> Dict[str, str]:
@@ -511,7 +515,7 @@ def gen_optional_box_fields(target: Target) -> Dict[str, str]:
 
 def gen_struct_fields(target: Target) -> Dict[str, str]:
     """Generates field name -> type that are appropriate for use in structs."""
-    ret = gen_union_fields(target)
+    ret = gen_structured_fields(target)
     ret.update(**gen_primatives_with_custom_default(target))
     ret.update(**gen_primatives_with_alternative_custom_default(target))
     ret.update(

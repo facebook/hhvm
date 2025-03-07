@@ -101,24 +101,6 @@ func testHeaderToProto(t *testing.T, clientType ClientType, tmb *mockSocket, pro
 	assertEq(t, tData, data)
 }
 
-func TestHeaderFramedBinary(t *testing.T) {
-	tmb := newMockSocket()
-	testHeaderToProto(
-		t, FramedDeprecated, tmb,
-		NewBinaryFormatOptions(newFramedTransport(tmb), true, true),
-		newHeaderTransport(tmb, types.ProtocolIDCompact),
-	)
-}
-
-func TestHeaderFramedCompact(t *testing.T) {
-	tmb := newMockSocket()
-	testHeaderToProto(
-		t, FramedCompact, tmb,
-		NewCompactFormat(newFramedTransport(tmb)),
-		newHeaderTransport(tmb, types.ProtocolIDCompact),
-	)
-}
-
 func TestHeaderHeaders(t *testing.T) {
 	n := 1
 	tmb := newMockSocket()

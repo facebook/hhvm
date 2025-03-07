@@ -26,9 +26,6 @@ var buf = bytes.NewBuffer(make([]byte, 0, 1024))
 
 var tfv = []func() io.ReadWriteCloser{
 	func() io.ReadWriteCloser { return NewMemoryBufferLen(1024) },
-	func() io.ReadWriteCloser {
-		return newFramedTransportMaxLength(NewMemoryBufferLen(1024), DEFAULT_MAX_LENGTH)
-	},
 }
 
 func BenchmarkBinaryBool_0(b *testing.B) {

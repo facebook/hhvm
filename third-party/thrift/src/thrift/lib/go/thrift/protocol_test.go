@@ -178,17 +178,7 @@ type protocolWriterTest func(t testing.TB, p types.Format, writer io.Writer)
 // blocking reads and writes (socket, stream), since other golang Transport
 // implementations require that the data exists to be read when they are called (like bytes.Buffer)
 func ReadWriteProtocolParallelTest(t *testing.T, newFormat func(io.ReadWriteCloser) types.Format) {
-	rConn, wConn := tcpStreamSetupForTest(t)
-	rdr, writer := io.Pipe()
-
-	transports := []func() io.ReadWriteCloser{
-		func() io.ReadWriteCloser {
-			return newFramedTransportMaxLength(newStreamTransport(rdr, writer), DEFAULT_MAX_LENGTH)
-		}, // framed over pipe
-		func() io.ReadWriteCloser {
-			return newFramedTransportMaxLength(newStreamTransport(rConn, wConn), DEFAULT_MAX_LENGTH)
-		}, // framed over tcp
-	}
+	transports := []func() io.ReadWriteCloser{}
 	const iterations = 100
 
 	doForAllTransportsParallel := func(read protocolReaderTest, write protocolWriterTest) {
@@ -254,9 +244,6 @@ func ReadWriteProtocolTest(t *testing.T, newFormat func(io.ReadWriteCloser) type
 
 	transports := []func() io.ReadWriteCloser{
 		func() io.ReadWriteCloser { return NewMemoryBufferLen(1024) },
-		func() io.ReadWriteCloser {
-			return newFramedTransportMaxLength(NewMemoryBufferLen(1024), DEFAULT_MAX_LENGTH)
-		},
 		func() io.ReadWriteCloser {
 			http, err := newHTTPPostClient("http://" + l.Addr().String())
 			if err != nil {

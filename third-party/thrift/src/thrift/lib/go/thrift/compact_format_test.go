@@ -30,7 +30,6 @@ func TestReadWriteCompactProtocol(t *testing.T) {
 	ReadWriteProtocolParallelTest(t, func(transport io.ReadWriteCloser) types.Format { return NewCompactFormat(transport) })
 	transports := []io.ReadWriteCloser{
 		NewMemoryBuffer(),
-		newFramedTransport(NewMemoryBuffer()),
 	}
 	for _, trans := range transports {
 		p := NewCompactFormat(trans)

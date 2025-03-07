@@ -13,8 +13,6 @@
 
 namespace proxygen {
 
-// Will never be valid HTTP/2 which only has 16 bits
-#define SPDY_SETTINGS_MASK (1 << 16)
 #define HQ_SETTINGS_MASK (1ull << 32)
 
 enum class SettingsId : uint64_t {
@@ -36,16 +34,6 @@ enum class SettingsId : uint64_t {
 
   // For secondary authentication in HTTP/2
   SETTINGS_HTTP_CERT_AUTH = 0xff00,
-
-  // From SPDY, mostly unused
-  _SPDY_UPLOAD_BANDWIDTH = SPDY_SETTINGS_MASK | 1,
-  _SPDY_DOWNLOAD_BANDWIDTH = SPDY_SETTINGS_MASK | 2,
-  _SPDY_ROUND_TRIP_TIME = SPDY_SETTINGS_MASK | 3,
-  //  MAX_CONCURRENT_STREAMS = 4,
-  _SPDY_CURRENT_CWND = SPDY_SETTINGS_MASK | 5,
-  _SPDY_DOWNLOAD_RETRANS_RATE = SPDY_SETTINGS_MASK | 6,
-  //  INITIAL_WINDOW_SIZE = 7,
-  _SPDY_CLIENT_CERTIFICATE_VECTOR_SIZE = SPDY_SETTINGS_MASK | 8,
 
   // From HQ
   //_HQ_HEADER_TABLE_SIZE = HQ_SETTINGS_MASK | 1, -- use HEADER_TABLE_SIZE

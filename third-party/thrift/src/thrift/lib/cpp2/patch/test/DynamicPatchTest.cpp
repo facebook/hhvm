@@ -546,6 +546,70 @@ TEST(DynamicPatch, InvalidSetPatch) {
   }
 }
 
+TEST(DynamicPatch, InvalidMapPatch) {
+  auto testInvalidMapPatch = [](auto& p) {
+    EXPECT_THROW(
+        p.insert_or_assign(
+            badge,
+            asValueStruct<type::i64_t>(1),
+            asValueStruct<type::i32_t>(1)),
+        std::runtime_error);
+    EXPECT_THROW(
+        p.insert_or_assign(
+            badge,
+            asValueStruct<type::i32_t>(1),
+            asValueStruct<type::i64_t>(1)),
+        std::runtime_error);
+    EXPECT_THROW(
+        p.tryPutMulti(
+            badge,
+            {{asValueStruct<type::i64_t>(1), asValueStruct<type::i32_t>(1)}}),
+        std::runtime_error);
+    EXPECT_THROW(
+        p.tryPutMulti(
+            badge,
+            {{asValueStruct<type::i32_t>(1), asValueStruct<type::i64_t>(1)}}),
+        std::runtime_error);
+    EXPECT_THROW(
+        p.putMulti(
+            badge,
+            {{asValueStruct<type::i64_t>(1), asValueStruct<type::i32_t>(1)}}),
+        std::runtime_error);
+    EXPECT_THROW(
+        p.putMulti(
+            badge,
+            {{asValueStruct<type::i32_t>(1), asValueStruct<type::i64_t>(1)}}),
+        std::runtime_error);
+  };
+  {
+    DynamicMapPatch p;
+    p.insert_or_assign(
+        badge, asValueStruct<type::i32_t>(1), asValueStruct<type::i32_t>(1));
+    testInvalidMapPatch(p);
+  }
+  {
+    DynamicMapPatch p;
+    p.assign(
+        badge,
+        {{asValueStruct<type::i32_t>(1), asValueStruct<type::i32_t>(1)}});
+    testInvalidMapPatch(p);
+  }
+  {
+    DynamicMapPatch p;
+    p.putMulti(
+        badge,
+        {{asValueStruct<type::i32_t>(1), asValueStruct<type::i32_t>(1)}});
+    testInvalidMapPatch(p);
+  }
+  {
+    DynamicMapPatch p;
+    p.tryPutMulti(
+        badge,
+        {{asValueStruct<type::i32_t>(1), asValueStruct<type::i32_t>(1)}});
+    testInvalidMapPatch(p);
+  }
+}
+
 struct StringVsBinaryTest : testing::Test {
   using StringSetPatch = std::remove_cvref_t<
       decltype(op::patch_type<Sets>().patch<ident::stringSet>())>;

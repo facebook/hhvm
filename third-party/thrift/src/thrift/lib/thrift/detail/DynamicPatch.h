@@ -96,10 +96,6 @@ void checkCompatibleType(
     const ValueList& l, const apache::thrift::protocol::Value& v);
 void checkCompatibleType(
     const ValueSet& s, const apache::thrift::protocol::Value& v);
-void checkCompatibleType(
-    const ValueMap& m,
-    const apache::thrift::protocol::Value& k,
-    const apache::thrift::protocol::Value& v);
 } // namespace detail
 
 class DynamicPatch;
@@ -356,6 +352,7 @@ class DynamicMapPatch {
  public:
   void assign(detail::Badge, detail::ValueMap v) {
     *this = {};
+    setOrCheckMapType(v);
     assign_ = std::move(v);
   }
 
@@ -426,6 +423,12 @@ class DynamicMapPatch {
  private:
   void undoChanges(const Value& k);
   void ensurePatchable();
+  void setOrCheckMapType(const protocol::Value& k, const protocol::Value& v);
+  void setOrCheckMapType(const detail::ValueMap& m) {
+    if (!m.empty()) {
+      setOrCheckMapType(m.begin()->first, m.begin()->second);
+    }
+  }
 
   template <class SubPatch>
   DynamicPatch& patchByKeyImpl(Value k, SubPatch&& p);
@@ -438,6 +441,9 @@ class DynamicMapPatch {
   detail::ValueSet remove_;
   detail::ValueMap put_;
   detail::DynamicPatchOptions options_;
+
+  std::optional<detail::Value::Type> keyType_;
+  std::optional<detail::Value::Type> valueType_;
 };
 
 template <bool IsUnion>

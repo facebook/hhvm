@@ -244,26 +244,6 @@ void checkCompatibleType(
     }
   }
 }
-void checkCompatibleType(
-    const ValueMap& m,
-    const apache::thrift::protocol::Value& k,
-    const apache::thrift::protocol::Value& v) {
-  if (!m.empty()) {
-    auto it = m.begin();
-    if (it->first.getType() != k.getType()) {
-      throw std::runtime_error(fmt::format(
-          "Type of value ({}) does not match key type of map ({}) in patch.",
-          apache::thrift::util::enumNameSafe(it->first.getType()),
-          apache::thrift::util::enumNameSafe(k.getType())));
-    }
-    if (it->second.getType() != v.getType()) {
-      throw std::runtime_error(fmt::format(
-          "Type of value ({}) does not match value type of map ({}) in patch.",
-          apache::thrift::util::enumNameSafe(it->second.getType()),
-          apache::thrift::util::enumNameSafe(v.getType())));
-    }
-  }
-}
 
 } // namespace detail
 
@@ -396,6 +376,7 @@ void DynamicMapPatch::fromObject(detail::Badge, Object obj) {
 
 void DynamicMapPatch::insert_or_assign(detail::Badge, Value k, Value v) {
   undoChanges(k);
+  setOrCheckMapType(k, v);
   put_.insert_or_assign(std::move(k), std::move(v));
 }
 
@@ -406,6 +387,7 @@ void DynamicMapPatch::erase(detail::Badge, Value k) {
 void DynamicMapPatch::tryPutMulti(detail::Badge, detail::ValueMap map) {
   ensurePatchable();
   map.eraseInto(map.begin(), map.end(), [&](auto&& k, auto&& v) {
+    setOrCheckMapType(k, v);
     if (put_.contains(k)) {
       // We already `put` the value, ignore `add`
       return;
@@ -478,6 +460,31 @@ void DynamicMapPatch::apply(detail::Badge, detail::ValueMap& v) const {
 
   return customVisit(badge, Visitor{v});
 }
+
+void DynamicMapPatch::setOrCheckMapType(
+    const protocol::Value& k, const protocol::Value& v) {
+  if (keyType_) {
+    if (*keyType_ != k.getType()) {
+      throw std::runtime_error(fmt::format(
+          "Type of value ({}) does not match key type of map ({}) in patch.",
+          apache::thrift::util::enumNameSafe(k.getType()),
+          apache::thrift::util::enumNameSafe(*keyType_)));
+    }
+  } else {
+    keyType_ = k.getType();
+  }
+  if (valueType_) {
+    if (*valueType_ != v.getType()) {
+      throw std::runtime_error(fmt::format(
+          "Type of value ({}) does not match value type of map ({}) in patch.",
+          apache::thrift::util::enumNameSafe(v.getType()),
+          apache::thrift::util::enumNameSafe(*valueType_)));
+    }
+  } else {
+    valueType_ = v.getType();
+  }
+}
+
 template <bool IsUnion>
 void DynamicStructurePatch<IsUnion>::ensurePatchable() {
   if (!assign_) {

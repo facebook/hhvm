@@ -382,7 +382,7 @@ func (hdr *tHeader) readVarHeader(buf byteReader) error {
 	return nil
 }
 
-// isCompactFramed Check if the magic value corresponds to compact proto
+// isCompactFramed checks if the magic value corresponds to compact proto
 func isCompactFramed(magic uint32) bool {
 	protocolID := int8(magic >> 24)
 	protocolVersion := int8((magic >> 16) & uint32(COMPACT_VERSION_MASK))
@@ -390,9 +390,14 @@ func isCompactFramed(magic uint32) bool {
 		protocolVersion == int8(COMPACT_VERSION_BE))
 }
 
+// isBinaryFramed checks if the magic value corresponds to binary proto
+func isBinaryFramed(magic uint32) bool {
+	return (magic & BinaryVersionMask) == BinaryVersion1
+}
+
 // analyzeFirst32Bit Guess client type from the first 4 bytes
 func analyzeFirst32Bit(word uint32) ClientType {
-	if (word & BinaryVersionMask) == BinaryVersion1 {
+	if isBinaryFramed(word) {
 		return UnframedDeprecated
 	} else if isCompactFramed(word) {
 		return UnframedCompactDeprecated
@@ -413,7 +418,7 @@ func analyzeFirst32Bit(word uint32) ClientType {
 
 // analyzeSecond32Bit Find the header client type from the 4-8th bytes of header
 func analyzeSecond32Bit(word uint32) ClientType {
-	if (word & BinaryVersionMask) == BinaryVersion1 {
+	if isBinaryFramed(word) {
 		return FramedDeprecated
 	}
 	if isCompactFramed(word) {

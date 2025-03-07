@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <algorithm>
 #include <folly/Overload.h>
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Patch.h>
@@ -245,6 +246,32 @@ void checkCompatibleType(
   }
 }
 
+void checkHomogeneousContainerImpl(const auto& l) {
+  if (std::adjacent_find(
+          l.begin(), l.end(), [](const Value& v1, const Value& v2) {
+            return v1.getType() != v2.getType();
+          }) == l.end()) {
+    return;
+  }
+  throw std::runtime_error("Thrift does not support heterogeneous conatiner.");
+}
+void checkHomogeneousContainer(const ValueList& l) {
+  checkHomogeneousContainerImpl(l);
+}
+void checkHomogeneousContainer(const ValueSet& s) {
+  checkHomogeneousContainerImpl(s);
+}
+void checkHomogeneousContainer(const ValueMap& m) {
+  if (std::adjacent_find(
+          m.begin(), m.end(), [](const auto& p1, const auto& p2) {
+            return p1.first.getType() != p2.first.getType() ||
+                p1.second.getType() != p2.second.getType();
+          }) == m.end()) {
+    return;
+  }
+  throw std::runtime_error("Thrift does not support heterogeneous conatiner.");
+}
+
 } // namespace detail
 
 std::string toPatchUri(std::string s) {
@@ -385,6 +412,7 @@ void DynamicMapPatch::erase(detail::Badge, Value k) {
   remove_.insert(std::move(k));
 }
 void DynamicMapPatch::tryPutMulti(detail::Badge, detail::ValueMap map) {
+  detail::checkHomogeneousContainer(map);
   ensurePatchable();
   map.eraseInto(map.begin(), map.end(), [&](auto&& k, auto&& v) {
     setOrCheckMapType(k, v);

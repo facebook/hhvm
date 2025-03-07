@@ -492,6 +492,14 @@ TEST(DynamicPatch, List) {
 TEST(DynamicPatch, InvalidListPatch) {
   {
     DynamicListPatch p;
+    EXPECT_THROW(
+        p.assign(
+            badge,
+            {asValueStruct<type::i32_t>(1), asValueStruct<type::i64_t>(1)}),
+        std::runtime_error);
+  }
+  {
+    DynamicListPatch p;
     p.push_back(badge, asValueStruct<type::i32_t>(1));
     EXPECT_THROW(
         p.push_back(badge, asValueStruct<type::i64_t>(2)), std::runtime_error);
@@ -534,6 +542,14 @@ TEST(DynamicPatch, Set) {
 TEST(DynamicPatch, InvalidSetPatch) {
   {
     DynamicSetPatch p;
+    EXPECT_THROW(
+        p.assign(
+            badge,
+            {asValueStruct<type::i32_t>(1), asValueStruct<type::i64_t>(1)}),
+        std::runtime_error);
+  }
+  {
+    DynamicSetPatch p;
     p.insert(badge, asValueStruct<type::i32_t>(1));
     EXPECT_THROW(
         p.insert(badge, asValueStruct<type::i64_t>(2)), std::runtime_error);
@@ -547,6 +563,33 @@ TEST(DynamicPatch, InvalidSetPatch) {
 }
 
 TEST(DynamicPatch, InvalidMapPatch) {
+  {
+    DynamicMapPatch p;
+    EXPECT_THROW(
+        p.assign(
+            badge,
+            {{asValueStruct<type::i32_t>(1), asValueStruct<type::i64_t>(1)},
+             {asValueStruct<type::i32_t>(2), asValueStruct<type::i32_t>(1)}}),
+        std::runtime_error);
+  }
+  {
+    DynamicMapPatch p;
+    EXPECT_THROW(
+        p.putMulti(
+            badge,
+            {{asValueStruct<type::i32_t>(1), asValueStruct<type::i64_t>(1)},
+             {asValueStruct<type::i32_t>(2), asValueStruct<type::i32_t>(1)}}),
+        std::runtime_error);
+  }
+  {
+    DynamicMapPatch p;
+    EXPECT_THROW(
+        p.tryPutMulti(
+            badge,
+            {{asValueStruct<type::i32_t>(1), asValueStruct<type::i64_t>(1)},
+             {asValueStruct<type::i32_t>(2), asValueStruct<type::i32_t>(1)}}),
+        std::runtime_error);
+  }
   auto testInvalidMapPatch = [](auto& p) {
     EXPECT_THROW(
         p.insert_or_assign(

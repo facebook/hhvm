@@ -96,6 +96,10 @@ void checkCompatibleType(
     const ValueList& l, const apache::thrift::protocol::Value& v);
 void checkCompatibleType(
     const ValueSet& s, const apache::thrift::protocol::Value& v);
+void checkHomogeneousContainer(const ValueList& l);
+void checkHomogeneousContainer(const ValueSet& s);
+void checkHomogeneousContainer(const ValueMap& m);
+
 } // namespace detail
 
 class DynamicPatch;
@@ -216,6 +220,7 @@ class DynamicListPatch : public DynamicPatchBase {
  public:
   using DynamicPatchBase::DynamicPatchBase;
   void assign(detail::Badge, detail::ValueList v) {
+    checkHomogeneousContainer(v);
     patch_.members()->clear();
     get(op::PatchOp::Assign).emplace_list(std::move(v));
   }
@@ -269,6 +274,7 @@ class DynamicSetPatch : public DynamicPatchBase {
  public:
   using DynamicPatchBase::DynamicPatchBase;
   void assign(detail::Badge, detail::ValueSet v) {
+    detail::checkHomogeneousContainer(v);
     patch_.members()->clear();
     get(op::PatchOp::Assign).emplace_set(std::move(v));
   }
@@ -351,6 +357,7 @@ class DynamicSetPatch : public DynamicPatchBase {
 class DynamicMapPatch {
  public:
   void assign(detail::Badge, detail::ValueMap v) {
+    detail::checkHomogeneousContainer(v);
     *this = {};
     setOrCheckMapType(v);
     assign_ = std::move(v);
@@ -371,6 +378,7 @@ class DynamicMapPatch {
     }
   }
   void putMulti(detail::Badge badge, detail::ValueMap m) {
+    detail::checkHomogeneousContainer(m);
     m.eraseInto(m.begin(), m.end(), [&](auto&& k, auto&& v) {
       insert_or_assign(badge, std::move(k), std::move(v));
     });

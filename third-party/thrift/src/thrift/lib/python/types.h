@@ -514,9 +514,12 @@ size_t SetTypeInfoTemplate<T>::write(
   return written;
 }
 
-// keep until python3.9, where Py_SET_REFCNT is available officially
 inline void _fbthrift_Py_SET_REFCNT(PyObject* ob, Py_ssize_t refcnt) {
+#if PY_VERSION_HEX < 0x03090000
   ob->ob_refcnt = refcnt;
+#else
+  Py_SET_REFCNT(ob, refcnt);
+#endif
 }
 
 template <typename T>

@@ -88,11 +88,13 @@ TEST(CompressionTest, zstdCompressSucceeds) {
   testCompress(CompressionAlgorithm::ZSTD_MORE);
 }
 
+#if FOLLY_HAVE_LIBLZ4
 TEST(CompressionTest, Lz4CompressSucceeds) {
   testCompress(CompressionAlgorithm::LZ4);
   testCompress(CompressionAlgorithm::LZ4_LESS);
   testCompress(CompressionAlgorithm::LZ4_MORE);
 }
+#endif
 
 // Test uncompress.
 
@@ -121,11 +123,13 @@ TEST(CompressionTest, zstdUncompressSucceeds) {
   testUncompress(CompressionAlgorithm::ZSTD_MORE);
 }
 
+#if FOLLY_HAVE_LIBLZ4
 TEST(CompressionTest, lz4UncompressSucceeds) {
   testUncompress(CompressionAlgorithm::LZ4);
   testUncompress(CompressionAlgorithm::LZ4_LESS);
   testUncompress(CompressionAlgorithm::LZ4_MORE);
 }
+#endif
 
 // Test setCompressionCodec.
 

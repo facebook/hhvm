@@ -66,12 +66,21 @@ class FakeStreamHandle
       std::unique_ptr<folly::IOBuf> data,
       bool fin,
       WebTransport::ByteEventCallback* deliveryCallback) override {
+    if (data) {
+      dataWritten_ += data->computeChainDataLength();
+    }
     buf_.append(std::move(data));
     fin_ = fin;
     if (promise_) {
       promise_->setValue(WebTransport::StreamData({buf_.move(), fin_}));
       promise_.reset();
     } else {
+    }
+    if (deliveryCallback) {
+      // Consider data sent to be immediately delivered to the peer
+      // (this doesn't necessarily mean the application has read
+      // this data)
+      deliveryCallback->onByteEvent(getID(), dataWritten_);
     }
     return WebTransport::FCState::UNBLOCKED;
   }
@@ -104,6 +113,7 @@ class FakeStreamHandle
   folly::CancellationSource cs_;
   folly::Optional<folly::Promise<WebTransport::StreamData>> promise_;
   folly::IOBufQueue buf_{folly::IOBufQueue::cacheChainLength()};
+  uint32_t dataWritten_{0};
   bool fin_{false};
   folly::Optional<std::tuple<uint8_t, uint64_t, bool>> pri;
   folly::Optional<uint32_t> writeErr_;

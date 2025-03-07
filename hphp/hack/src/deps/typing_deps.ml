@@ -547,9 +547,6 @@ module CustomGraph = struct
 
   external save_delta : string -> bool -> int = "hh_custom_dep_graph_save_delta"
 
-  external load_delta : Mode.t -> string -> int
-    = "hh_custom_dep_graph_load_delta"
-
   let add_all_deps mode x = x |> add_extend_deps mode |> add_typing_deps mode
 
   (** A batch of discovered dependency edges, of which some might
@@ -731,15 +728,7 @@ module SaveCustomGraph : sig
 
   (** Write to disk the dep edges which are not already in the depgraph. *)
   val filter_discovered_deps_batch : flush:bool -> Mode.t -> unit
-
-  (** Move the source file to the worker's depgraph directory. *)
-  val save_delta : Typing_deps_mode.t -> source:string -> int
 end = struct
-  (** [hh_save_custom_dep_graph_save_delta src dest_dir]
-    moves the [src] file to the [dest_dir] directory. *)
-  external hh_save_custom_dep_graph_save_delta : string -> string -> int
-    = "hh_save_custom_dep_graph_save_delta"
-
   let discovered_deps_batch : (dep_edge, unit) Hashtbl.t = Hashtbl.create 1000
 
   let destination_file_handle_ref : Out_channel.t option ref = ref None
@@ -763,11 +752,6 @@ end = struct
       in
       destination_file_handle_ref := Some handle;
       handle
-
-  let destination_dir mode =
-    match mode with
-    | SaveToDiskMode { new_edges_dir; _ } -> new_edges_dir
-    | _ -> failwith "programming error: wrong mode"
 
   (** Write to disk the dep edges which are not already in the depgraph. *)
   let filter_discovered_deps_batch ~flush mode =
@@ -813,11 +797,6 @@ end = struct
       let () = SaveHumanReadableDepMap.add mode (dependent, idependent) in
       SaveHumanReadableDepMap.add mode (dependency, idependency)
     )
-
-  (** Move the source file to the worker's depgraph directory. *)
-  let save_delta mode ~source =
-    let dest = destination_dir mode in
-    hh_save_custom_dep_graph_save_delta source dest
 end
 
 (** Registers Rust custom types with the OCaml runtime, supporting deserialization *)
@@ -961,11 +940,6 @@ let save_discovered_edges mode ~dest ~reset_state_after_saving =
   | InMemoryMode _ -> CustomGraph.save_delta dest reset_state_after_saving
   | SaveToDiskMode _ ->
     failwith "save_discovered_edges not supported for SaveToDiskMode"
-
-let load_discovered_edges mode source =
-  match mode with
-  | InMemoryMode _ -> CustomGraph.load_delta mode source
-  | SaveToDiskMode _ -> SaveCustomGraph.save_delta mode ~source
 
 let get_ideps_from_hash mode hash =
   match mode with

@@ -4,8 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::collections::VecDeque;
-use std::ffi::OsString;
-use std::fs::File;
 use std::sync::OnceLock;
 
 use dep_graph_delta::DepGraphDelta;
@@ -89,9 +87,10 @@ impl<B: BaseDepgraphTrait> DepGraphWithDelta<B> {
         let Self { base, delta } = self;
         let HashSetDelta { added, removed } = delta.get(dependency);
         added.is_some_and(|added| added.contains(&dependent))
-            || (base.as_ref().map_or(false, |g| {
-                g.dependent_dependency_edge_exists(dependent, dependency)
-            }) && !removed.is_some_and(|removed| removed.contains(&dependent)))
+            || (base
+                .as_ref()
+                .is_some_and(|g| g.dependent_dependency_edge_exists(dependent, dependency))
+                && !removed.is_some_and(|removed| removed.contains(&dependent)))
     }
 
     /// Returns the recursive 'extends' dependents of a dep.
@@ -253,24 +252,6 @@ impl<B: BaseDepgraphTrait> DepGraphWithDelta<B> {
                 }
             });
         }
-    }
-
-    pub fn load_delta(&mut self, source: OsString) -> usize {
-        let f = File::open(source).unwrap();
-        let mut r = std::io::BufReader::new(f);
-
-        let Self { base, delta } = self;
-        let result = match base {
-            Some(base) => {
-                delta.read_added_edges_from(&mut r, |dependent, dependency| {
-                    // Only add when it's not already in
-                    // the graph!
-                    !base.dependent_dependency_edge_exists(dependent, dependency)
-                })
-            }
-            None => delta.read_added_edges_from(&mut r, |_, _| true),
-        };
-        result.unwrap()
     }
 
     pub fn remove(&mut self, dependent: Dep, dependency: Dep) {
@@ -460,7 +441,7 @@ mod tests {
         fn dependent_dependency_edge_exists(&self, dependent: Dep, dependency: Dep) -> bool {
             self.graph
                 .get(&dependency)
-                .map_or(false, |set| set.contains(&dependent))
+                .is_some_and(|set| set.contains(&dependent))
         }
     }
 

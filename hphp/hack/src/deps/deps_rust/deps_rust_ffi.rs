@@ -7,7 +7,6 @@
 
 use std::cell::RefCell;
 use std::ffi::OsString;
-use std::path::Path;
 
 use dep::Dep;
 use deps_rust::DepSet;
@@ -230,20 +229,6 @@ ocaml_ffi! {
 
     fn hh_custom_dep_graph_save_delta(dest: OsString, reset_state_after_saving: bool) -> usize {
         save_delta(dest, reset_state_after_saving)
-    }
-
-    fn hh_custom_dep_graph_load_delta(mode: RawTypingDepsMode, source: OsString) -> usize {
-        DEP_GRAPH.write(mode).load_delta(source)
-    }
-
-    // Moves the source file to the destination directory.
-    fn hh_save_custom_dep_graph_save_delta(source: OsString, dest_dir: OsString) -> usize {
-        let dest_file = Path::new(&dest_dir)
-            .join(source.to_str().unwrap().replace('/', "-"));
-        std::fs::rename(&source, dest_file).unwrap();
-
-        // Technically we loaded 0 deps into the hh_server dep graph
-        0
     }
 }
 

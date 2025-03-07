@@ -263,17 +263,6 @@ val remove_declared_tags : Mode.t -> DepSet.t -> unit
 val save_discovered_edges :
   Mode.t -> dest:string -> reset_state_after_saving:bool -> int
 
-(** Load discovered edges from a binary file.
-
-  - If mode is [InMemoryMode], the binary file is assumed to contain 64-bit
-    hashes and they will be added to the dep table delta in [typing_deps.rs].
-    If we have an existing table attached, we will first filter out edges
-    that are already present in the attached table.
-  - If mode is [SaveToDiskMode], the file is assumed to contain 64-bit
-    hashes and they will be added ot the current worker's on-disk
-    dependency edge file. *)
-val load_discovered_edges : Mode.t -> string -> int
-
 val get_ideps_from_hash : Mode.t -> Dep.t -> DepSet.t
 
 val get_ideps : Mode.t -> Dep.dependency Dep.variant -> DepSet.t

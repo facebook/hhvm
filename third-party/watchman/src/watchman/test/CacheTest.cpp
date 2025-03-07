@@ -8,7 +8,6 @@
 #include <folly/executors/ManualExecutor.h>
 #include <folly/init/Init.h>
 #include <folly/portability/GTest.h>
-#include <gtest/gtest-printers.h>
 #include <deque>
 #include <stdexcept>
 #include <string>

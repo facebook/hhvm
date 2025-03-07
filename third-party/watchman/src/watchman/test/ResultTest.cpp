@@ -9,7 +9,6 @@
 #include <folly/portability/GTest.h>
 #include <folly/test/TestUtils.h>
 #include <string>
-#include "watchman/watchman_system.h"
 
 using namespace watchman;
 

@@ -10,7 +10,6 @@
 #include "watchman/Logging.h"
 #include "watchman/Poison.h"
 #include "watchman/root/Root.h"
-#include "watchman/watchman_dir.h"
 
 namespace watchman {
 

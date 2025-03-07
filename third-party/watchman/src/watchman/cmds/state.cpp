@@ -12,7 +12,6 @@
 #include "watchman/query/parse.h"
 #include "watchman/root/Root.h"
 #include "watchman/watchman_cmd.h"
-#include "watchman/watchman_system.h"
 
 using namespace watchman;
 using ms = std::chrono::milliseconds;

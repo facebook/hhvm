@@ -7,7 +7,6 @@
 
 #include "watchman/Client.h"
 #include "watchman/CommandRegistry.h"
-#include "watchman/Logging.h"
 #include "watchman/TriggerCommand.h"
 #include "watchman/query/Query.h"
 #include "watchman/query/parse.h"
@@ -15,7 +14,6 @@
 #include "watchman/saved_state/SavedStateFactory.h"
 #include "watchman/state.h"
 #include "watchman/watchman_cmd.h"
-#include "watchman/watchman_stream.h"
 
 #include <memory>
 

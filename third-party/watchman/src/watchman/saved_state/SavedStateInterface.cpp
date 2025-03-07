@@ -9,7 +9,6 @@
 #include <memory>
 #include "watchman/Errors.h"
 #include "watchman/Logging.h"
-#include "watchman/saved_state/LocalSavedStateInterface.h"
 
 namespace watchman {
 

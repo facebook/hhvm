@@ -12,7 +12,6 @@
 #include <optional>
 #include "watchman/Logging.h"
 #include "watchman/watchman_stream.h"
-#include "watchman/watchman_system.h"
 
 namespace watchman {
 

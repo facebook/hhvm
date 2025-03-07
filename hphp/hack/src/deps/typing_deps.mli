@@ -40,9 +40,6 @@ module Dep : sig
         (** Represents another class depending on a class via an
           inheritance-like mechanism (`extends`, `implements`, `use`, `require
           extends`, `require implements`, etc.) *)
-    | RequireExtends : string -> dependency variant
-        (** Whenever a type A has `require extends B` or `require implements B`
-          or `require class B`, we add an edge from `RequireExtends B` to `Type A` *)
     | NotSubtype : string -> dependency variant
         (** Whenever we use the fact that 'A is not a subtype of X' to conclude that
           a def F typechecks, we add an edge from `NotSubtype A` to the variant for F.
@@ -82,7 +79,6 @@ module Dep : sig
     | KFun
     | KType
     | KExtends
-    | KRequireExtends
     | KConst
     | KConstructor
     | KProp
@@ -131,9 +127,6 @@ module Dep : sig
   val to_int : t -> int
 
   val is_class : t -> bool
-
-  (** Return the 'Extends' and 'RequireExtends' deps for a class from its 'Type' dep  *)
-  val extends_and_req_extends_of_class : t -> t * t
 
   val compare : t -> t -> int
 

@@ -45,12 +45,9 @@ val add_member_dep :
 val make_depend_on_parent :
   Typing_env_types.env ->
   skip_constructor_dep:bool ->
-  is_req:bool ->
   string ->
   Folded_class.t Decl_entry.t ->
   unit
-
-val add_not_subtype_dep : Typing_env_types.env -> string -> unit
 
 val mark_class_constant_declared :
   Typing_env_types.env -> string -> string -> unit

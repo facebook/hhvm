@@ -34,17 +34,6 @@ let tcopt =
       default with
       po = popt;
       tco_allow_all_files_for_module_declarations = true;
-      tco_saved_state =
-        {
-          default_saved_state with
-          rollouts =
-            {
-              Saved_state_rollouts.default with
-              Saved_state_rollouts.optimized_member_fanout = true;
-              optimized_parent_fanout = true;
-              optimized_attribute_fanout = true;
-            };
-        };
     }
 
 let log_section ~name ~content =

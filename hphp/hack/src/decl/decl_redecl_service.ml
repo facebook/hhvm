@@ -622,7 +622,7 @@ let redo_type_decl
       ~bucket_size
       ~get_classes_in_file:get_classes
       changes;
-    let fanout = Shallow_decl_compare.compute_class_fanout ctx changes in
+    let fanout = Shallow_class_fanout.fanout_of_changes ~ctx changes in
     Fanout.union fanout fanout_acc
   in
   remove_old_defs ctx all_old_defs all_elems;

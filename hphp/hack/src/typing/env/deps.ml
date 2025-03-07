@@ -129,15 +129,10 @@ let make_depend_on_constructor_name env class_name =
 let make_depend_on_constructor env class_ =
   if not (Pos_or_decl.is_hhi (Cls.pos class_)) then (
     make_depend_on_constructor_name env (Cls.name class_);
-    if
-      not
-        (TypecheckerOptions.optimized_member_fanout
-           Typing_env_types.(env.genv.tcopt))
-    then
-      Option.iter
-        (fst (Cls.construct class_))
-        ~f:(fun ce ->
-          make_depend_on_constructor_name env ce.Typing_defs.ce_origin)
+    Option.iter
+      (fst (Cls.construct class_))
+      ~f:(fun ce ->
+        make_depend_on_constructor_name env ce.Typing_defs.ce_origin)
   )
 
 let make_depend_on_module_name env module_name =
@@ -148,28 +143,12 @@ let make_depend_on_module env name md =
   | Some md when Pos_or_decl.is_hhi md.Typing_defs.mdt_pos -> ()
   | _ -> make_depend_on_module_name env name
 
-let make_depend_on_parent env ~skip_constructor_dep ~is_req name class_ =
+let make_depend_on_parent env ~skip_constructor_dep name class_ =
   match class_ with
   | Decl_entry.Found cd when Pos_or_decl.is_hhi (Cls.pos cd) -> ()
   | _ ->
     if not skip_constructor_dep then make_depend_on_constructor_name env name;
-    let dep =
-      if
-        TypecheckerOptions.optimized_member_fanout
-          Typing_env_types.(env.genv.tcopt)
-        && is_req
-      then
-        Dep.RequireExtends name
-      else
-        Dep.Extends name
-    in
-    add_dependency_edge env dep
-
-let add_not_subtype_dep env name =
-  if
-    TypecheckerOptions.optimized_parent_fanout Typing_env_types.(env.genv.tcopt)
-  then
-    add_dependency_edge env (Dep.NotSubtype name)
+    add_dependency_edge env (Dep.Extends name)
 
 let add_member_dep ~is_method ~is_static env (class_ : Cls.t) mid class_elt_opt
     =
@@ -186,12 +165,7 @@ let add_member_dep ~is_method ~is_static env (class_ : Cls.t) mid class_elt_opt
   if not (Pos_or_decl.is_hhi (Cls.pos class_)) then (
     make_depend_on_class_name env (Cls.name class_);
     add_dep (Cls.name class_);
-    if
-      not
-        (TypecheckerOptions.optimized_member_fanout
-           Typing_env_types.(env.genv.tcopt))
-    then
-      Option.iter class_elt_opt ~f:(fun ce -> add_dep ce.Typing_defs.ce_origin)
+    Option.iter class_elt_opt ~f:(fun ce -> add_dep ce.Typing_defs.ce_origin)
   );
   ()
 

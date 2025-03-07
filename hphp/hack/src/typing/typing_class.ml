@@ -591,14 +591,11 @@ let rec check_implements_or_extends_unique impl ~env =
 
 (** Add a dependency to constructors or produce an error if not a Tapply. *)
 let check_is_tapply_add_constructor_extends_dep
-    env
-    ?(skip_constructor_dep = false)
-    (deps : ((pos * _) * decl_ty) list)
-    ~is_req =
+    env ?(skip_constructor_dep = false) (deps : ((pos * _) * decl_ty) list) =
   List.iter deps ~f:(fun ((p, _dep_hint), dep) ->
       match get_node dep with
       | Tapply ((_, class_name), _) ->
-        Env.add_parent_dep env ~skip_constructor_dep ~is_req class_name
+        Env.add_parent_dep env ~skip_constructor_dep class_name
       | Tgeneric _ ->
         Typing_error_utils.add_typing_error
           ~env
@@ -1671,25 +1668,21 @@ let check_parents_are_tapply_add_constructor_deps
   } =
     parents
   in
-  check_is_tapply_add_constructor_extends_dep env ~is_req:false extends;
+  check_is_tapply_add_constructor_extends_dep env extends;
   check_is_tapply_add_constructor_extends_dep
     env
     implements
     ~skip_constructor_dep:
-      (not (Ast_defs.is_c_trait c.c_kind || Ast_defs.is_c_abstract c.c_kind))
-    ~is_req:false;
-  check_is_tapply_add_constructor_extends_dep env ~is_req:false uses;
-  check_is_tapply_add_constructor_extends_dep env ~is_req:true req_class;
-  check_is_tapply_add_constructor_extends_dep env ~is_req:true req_this_as;
-  check_is_tapply_add_constructor_extends_dep env ~is_req:true req_extends;
-  check_is_tapply_add_constructor_extends_dep env ~is_req:true req_implements;
-  Option.iter
-    enum_includes
-    ~f:(check_is_tapply_add_constructor_extends_dep env ~is_req:false);
+      (not (Ast_defs.is_c_trait c.c_kind || Ast_defs.is_c_abstract c.c_kind));
+  check_is_tapply_add_constructor_extends_dep env uses;
+  check_is_tapply_add_constructor_extends_dep env req_class;
+  check_is_tapply_add_constructor_extends_dep env req_this_as;
+  check_is_tapply_add_constructor_extends_dep env req_extends;
+  check_is_tapply_add_constructor_extends_dep env req_implements;
+  Option.iter enum_includes ~f:(check_is_tapply_add_constructor_extends_dep env);
   check_is_tapply_add_constructor_extends_dep
     env
     xhp_attr_uses
-    ~is_req:false
     ~skip_constructor_dep:true;
   ()
 
@@ -1961,7 +1954,7 @@ let class_def ctx (c : _ class_) =
     let env =
       Env.set_support_dynamic_type env (Cls.get_support_dynamic_type tc)
     in
-    Env.add_non_external_deps env c;
+    Env.make_depend_on_current_module env;
     Typing_helpers.add_decl_errors ~env (Cls.decl_errors tc);
     Some (class_def_ env c tc)
 

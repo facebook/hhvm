@@ -9,12 +9,8 @@
 open Hh_prelude
 
 type t = {
-  dummy_one: bool;
-  dummy_two: bool;
-  dummy_three: bool;
   optimized_member_fanout: bool;
-  optimized_parent_fanout: bool;
-  optimized_attribute_fanout: bool;
+      (** optimized_member_fanout is not used but we leave it as a template *)
   new_naming_table: bool;
 }
 [@@deriving eq, show]
@@ -29,12 +25,7 @@ type t = {
       My_flag
 *)
 type flag =
-  | Dummy_one
-  | Dummy_two
-  | Dummy_three
   | Optimized_member_fanout
-  | Optimized_parent_fanout
-  | Optimized_attribute_fanout
   | New_naming_table
 [@@deriving show { with_path = false }]
 
@@ -74,23 +65,8 @@ let output t =
   let print_flag flag value =
     Printf.eprintf "%s = %b\n" (flag_name flag) value
   in
-  let {
-    dummy_one;
-    dummy_two;
-    dummy_three;
-    optimized_member_fanout;
-    optimized_parent_fanout;
-    optimized_attribute_fanout;
-    new_naming_table;
-  } =
-    t
-  in
-  print_flag Dummy_one dummy_one;
-  print_flag Dummy_two dummy_two;
-  print_flag Dummy_three dummy_three;
+  let { optimized_member_fanout; new_naming_table } = t in
   print_flag Optimized_member_fanout optimized_member_fanout;
-  print_flag Optimized_parent_fanout optimized_parent_fanout;
-  print_flag Optimized_attribute_fanout optimized_attribute_fanout;
   print_flag New_naming_table new_naming_table;
   ()
 
@@ -99,41 +75,13 @@ let to_bit_array_string t : string =
     | true -> "1"
     | false -> "0"
   in
-  let {
-    dummy_one;
-    dummy_two;
-    dummy_three;
-    optimized_member_fanout;
-    optimized_parent_fanout;
-    optimized_attribute_fanout;
-    new_naming_table;
-  } =
-    t
-  in
-  s dummy_one
-  ^ s dummy_two
-  ^ s dummy_three
-  ^ s optimized_member_fanout
-  ^ s optimized_parent_fanout
-  ^ s optimized_attribute_fanout
-  ^ s new_naming_table
+  let { optimized_member_fanout; new_naming_table } = t in
+  s optimized_member_fanout ^ s new_naming_table
 
 let to_hh_json t : Hh_json.json =
-  let {
-    dummy_one = _;
-    dummy_two = _;
-    dummy_three = _;
-    optimized_member_fanout;
-    optimized_parent_fanout;
-    optimized_attribute_fanout;
-    new_naming_table;
-  } =
-    t
-  in
+  let { optimized_member_fanout; new_naming_table } = t in
   Hh_json.JSON_Object
     [
       ("optimized_member_fanout", Hh_json.bool_ optimized_member_fanout);
-      ("optimized_parent_fanout", Hh_json.bool_ optimized_parent_fanout);
-      ("optimized_attribute_fanout", Hh_json.bool_ optimized_attribute_fanout);
       ("new_naming_table", Hh_json.bool_ new_naming_table);
     ]

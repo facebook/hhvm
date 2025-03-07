@@ -242,17 +242,6 @@ let optimized_member_fanout t =
   GlobalOptions.(t.tco_saved_state.rollouts)
     .Saved_state_rollouts.optimized_member_fanout
 
-let optimized_parent_fanout t =
-  GlobalOptions.(t.tco_saved_state.rollouts)
-    .Saved_state_rollouts.optimized_parent_fanout
-
-let optimized_attribute_fanout t =
-  GlobalOptions.(t.tco_saved_state.rollouts)
-    .Saved_state_rollouts.optimized_attribute_fanout
-
-let dummy_one t =
-  GlobalOptions.(t.tco_saved_state.rollouts).Saved_state_rollouts.dummy_one
-
 let profile_top_level_definitions t =
   t.GlobalOptions.tco_profile_top_level_definitions
 

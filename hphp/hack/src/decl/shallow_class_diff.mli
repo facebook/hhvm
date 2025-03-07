@@ -10,8 +10,4 @@
 open Shallow_decl_defs
 
 val diff_class :
-  Provider_context.t ->
-  PackageInfo.t ->
-  shallow_class ->
-  shallow_class ->
-  ClassDiff.t option
+  PackageInfo.t -> shallow_class -> shallow_class -> ClassDiff.t option

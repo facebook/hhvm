@@ -38,24 +38,14 @@ impl Flag {
     /// because we want the indices to stay consistent when we remove flags.
     pub fn rollout_order(&self) -> isize {
         match self {
-            Self::DummyOne => 0,
-            Self::DummyTwo => 1,
-            Self::DummyThree => 2,
             Self::OptimizedMemberFanout => 4,
-            Self::OptimizedParentFanout => 5,
-            Self::OptimizedAttributeFanout => 6,
             Self::NewNamingTable => 7,
         }
     }
 
     pub fn get_current_rollout_flag(current_rollout_flag_index: isize) -> Option<Self> {
         match current_rollout_flag_index {
-            0 => Some(Self::DummyOne),
-            1 => Some(Self::DummyTwo),
-            2 => Some(Self::DummyThree),
             4 => Some(Self::OptimizedMemberFanout),
-            5 => Some(Self::OptimizedParentFanout),
-            6 => Some(Self::OptimizedAttributeFanout),
             7 => Some(Self::NewNamingTable),
             _ => None,
         }
@@ -63,12 +53,7 @@ impl Flag {
 
     pub fn flag_name(&self) -> &'static str {
         match self {
-            Self::DummyOne => "dummy_one",
-            Self::DummyTwo => "dummy_two",
-            Self::DummyThree => "dummy_three",
             Self::OptimizedMemberFanout => "optimized_member_fanout",
-            Self::OptimizedParentFanout => "optimized_parent_fanout",
-            Self::OptimizedAttributeFanout => "optimized_attribute_fanout",
             Self::NewNamingTable => "new_naming_table",
         }
     }
@@ -108,12 +93,7 @@ impl SavedStateRollouts {
             }
         };
         Ok(Self {
-            dummy_one: get_flag_value(Flag::DummyOne)?,
-            dummy_two: get_flag_value(Flag::DummyTwo)?,
-            dummy_three: get_flag_value(Flag::DummyThree)?,
             optimized_member_fanout: get_flag_value(Flag::OptimizedMemberFanout)?,
-            optimized_parent_fanout: get_flag_value(Flag::OptimizedParentFanout)?,
-            optimized_attribute_fanout: get_flag_value(Flag::OptimizedAttributeFanout)?,
             new_naming_table: get_flag_value(Flag::NewNamingTable)?,
         })
     }

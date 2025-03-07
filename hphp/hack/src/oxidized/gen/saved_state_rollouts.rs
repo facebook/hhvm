@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6bf34b1048481a6ef1a097e97980512a>>
+// @generated SignedSource<<acccdec6aa1a55fe913271fbe79d0338>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -38,12 +38,8 @@ use crate::*;
 #[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C)]
 pub struct SavedStateRollouts {
-    pub dummy_one: bool,
-    pub dummy_two: bool,
-    pub dummy_three: bool,
+    /// optimized_member_fanout is not used but we leave it as a template
     pub optimized_member_fanout: bool,
-    pub optimized_parent_fanout: bool,
-    pub optimized_attribute_fanout: bool,
     pub new_naming_table: bool,
 }
 
@@ -67,18 +63,8 @@ pub struct SavedStateRollouts {
 #[rust_to_ocaml(attr = "deriving show { with_path = false }")]
 #[repr(u8)]
 pub enum Flag {
-    #[rust_to_ocaml(name = "Dummy_one")]
-    DummyOne,
-    #[rust_to_ocaml(name = "Dummy_two")]
-    DummyTwo,
-    #[rust_to_ocaml(name = "Dummy_three")]
-    DummyThree,
     #[rust_to_ocaml(name = "Optimized_member_fanout")]
     OptimizedMemberFanout,
-    #[rust_to_ocaml(name = "Optimized_parent_fanout")]
-    OptimizedParentFanout,
-    #[rust_to_ocaml(name = "Optimized_attribute_fanout")]
-    OptimizedAttributeFanout,
     #[rust_to_ocaml(name = "New_naming_table")]
     NewNamingTable,
 }

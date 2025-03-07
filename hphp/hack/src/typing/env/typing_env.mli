@@ -135,8 +135,7 @@ val env_with_constructor_droot_member : env -> env
 (** Get class declaration from the appropriate backend and add dependency. *)
 val get_class : env -> type_key -> class_decl Decl_entry.t
 
-val add_parent_dep :
-  env -> skip_constructor_dep:bool -> is_req:bool -> string -> unit
+val add_parent_dep : env -> skip_constructor_dep:bool -> string -> unit
 
 (** Get function declaration from the appropriate backend and add dependency. *)
 val get_fun :
@@ -300,12 +299,6 @@ val set_current_package_membership :
 (** Register the current top-level structure as being dependent on the current
     module *)
 val make_depend_on_current_module : Typing_env_types.env -> unit
-
-(** Update the dep graph with info inherent to the class,
-    e.g. its kind, module, declared members. *)
-val add_non_external_deps : Typing_env_types.env -> Nast.class_ -> unit
-
-val add_not_subtype_dep : Typing_env_types.env -> string -> unit
 
 val get_internal : env -> bool
 

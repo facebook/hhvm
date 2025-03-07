@@ -573,35 +573,21 @@ module Subtype_negation = struct
     else
       match (Env.get_class env c1, Env.get_class env c2) with
       | (Decl_entry.Found c1_def, Decl_entry.Found c2_def) ->
-        let is_disjoint =
-          if Cls.final c1_def then
-            (* if c1 is final, then c3 would have to be equal to c1 *)
-            not (Cls.has_ancestor c1_def c2)
-          else if Cls.final c2_def then
-            (* if c2 is final, then c3 would have to be equal to c2 *)
-            not (Cls.has_ancestor c2_def c1)
-          else
-            (* Given two non-final classes, if either is an interface or trait, then
-               there could be a c3, and so we consider the classes to not be disjoint.
-               However, if they are both classes, then c3 must be either c1 or c2 since
-               we don't have multiple inheritance. *)
-            (not (is_interface_or_trait c1_def))
-            && (not (is_interface_or_trait c2_def))
-            && (not (Cls.has_ancestor c2_def c1))
-            && not (Cls.has_ancestor c1_def c2)
-        in
-        if is_disjoint then (
-          (* We've used the facts that 'c1 is not a subtype of c2'
-           * and 'c2 is not a subtype of c1' to conclude that a type is nothing
-           * and therefore a bunch of things typecheck.
-           * If these facts get invalidated by a decl change,
-           * e.g. adding c2 as a parent of c1, we'd therefore need
-           * to recheck the current def. *)
-          Typing_env.add_not_subtype_dep env c1;
-          Typing_env.add_not_subtype_dep env c2;
-          ()
-        );
-        is_disjoint
+        if Cls.final c1_def then
+          (* if c1 is final, then c3 would have to be equal to c1 *)
+          not (Cls.has_ancestor c1_def c2)
+        else if Cls.final c2_def then
+          (* if c2 is final, then c3 would have to be equal to c2 *)
+          not (Cls.has_ancestor c2_def c1)
+        else
+          (* Given two non-final classes, if either is an interface or trait, then
+             there could be a c3, and so we consider the classes to not be disjoint.
+             However, if they are both classes, then c3 must be either c1 or c2 since
+             we don't have multiple inheritance. *)
+          (not (is_interface_or_trait c1_def))
+          && (not (is_interface_or_trait c2_def))
+          && (not (Cls.has_ancestor c2_def c1))
+          && not (Cls.has_ancestor c1_def c2)
       | _ ->
         (* This is a decl error that should have already been caught *)
         false

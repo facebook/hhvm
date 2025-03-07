@@ -75,7 +75,7 @@ cdef class MutableList:
 
     def insert(self, index, value):
         internal_value = self._val_typeinfo.to_internal_data(value)
-        self._list_data.insert(index, value)
+        self._list_data.insert(index, internal_value)
 
     def append(self, value):
         internal_value = self._val_typeinfo.to_internal_data(value)

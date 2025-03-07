@@ -19,6 +19,8 @@ import unittest
 from collections.abc import MutableSequence
 from typing import cast
 
+from python_test.containers.thrift_mutable_types import Foo, Lists
+
 from thrift.python.mutable_containers import MutableList
 
 from thrift.python.mutable_typeinfos import MutableListTypeInfo
@@ -136,6 +138,16 @@ class MutableListTest(unittest.TestCase):
         mutable_list.insert(50, 103)
         python_list.insert(50, 103)
         self.assertEqual(python_list, mutable_list)
+
+    def test_insert_struct(self) -> None:
+        l = Lists(structList=to_thrift_list([Foo(value=1)]))
+        foo_list = l.structList
+        python_foo_list = list(l.structList)
+        self.assertEqual(foo_list, python_foo_list)
+
+        foo_list.insert(0, Foo(value=0))
+        python_foo_list.insert(0, Foo(value=0))
+        self.assertEqual(foo_list, python_foo_list)
 
     def test_insert_wrong_type(self) -> None:
         mutable_list = _create_MutableList_i32([])

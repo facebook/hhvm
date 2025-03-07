@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <forward_list>
 #include <iostream>
 #include <stdexcept>
 #include <unordered_map>
@@ -349,7 +350,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
       // We are going to delete key, thus patchByKey is no-op and we just return
       // a dummy patch for optimization.
       dummy_.resize(1);
-      return dummy_[0];
+      return dummy_.front();
     }
     return isKeyModified(key) ? data_.patch()->operator[](key)
                               : data_.patchPrior()->operator[](key);
@@ -472,9 +473,9 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   using Base::hasAssign;
 
   // Used to return a dummy patch that can be discarded.
-  // We use std::vector here since VP might be an incomplete type,
+  // We use std::forward_list here since VP might be an incomplete type,
   // e.g., struct Foo { 1: map<i32, Foo> foos; }
-  std::vector<VP> dummy_;
+  std::forward_list<VP> dummy_;
 };
 
 } // namespace apache::thrift::op::detail

@@ -63,7 +63,7 @@ func runHeaderTest(t *testing.T, serverTransport thrift.TransportID) {
 	addr, stopServer := startE2EServer(t, serverTransport, thrift.WithNumWorkers(10))
 	defer stopServer()
 
-	conn, err := thrift.NewClient(
+	channel, err := thrift.NewClientV2(
 		clientTransportOption,
 		thrift.WithDialer(func() (net.Conn, error) {
 			return net.DialTimeout("unix", addr.String(), 5*time.Second)
@@ -74,7 +74,7 @@ func runHeaderTest(t *testing.T, serverTransport thrift.TransportID) {
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}
-	client := service.NewE2EChannelClient(thrift.NewSerialChannel(conn))
+	client := service.NewE2EChannelClient(channel)
 	defer client.Close()
 	ctx := thrift.WithHeaders(context.Background(), map[string]string{rpcHeaderKey: rpcHeaderValue})
 	echoedHeaders, err := client.EchoHeaders(ctx)

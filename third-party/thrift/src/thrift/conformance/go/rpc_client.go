@@ -52,7 +52,7 @@ func newRPCClientConformanceTester(port int) *rpcClientConformanceTester {
 
 func (t *rpcClientConformanceTester) getClient() (*rpc.RPCConformanceServiceClient, error) {
 	addr := fmt.Sprintf("localhost:%d", t.port)
-	proto, err := thrift.NewClient(
+	channel, err := thrift.NewClientV2(
 		thrift.WithRocket(),
 		thrift.WithDialer(func() (net.Conn, error) {
 			return net.Dial("tcp", addr)
@@ -61,7 +61,7 @@ func (t *rpcClientConformanceTester) getClient() (*rpc.RPCConformanceServiceClie
 	if err != nil {
 		return nil, fmt.Errorf("unable to upgrade to rocket protocol: %w", err)
 	}
-	return rpc.NewRPCConformanceServiceClient(proto), nil
+	return rpc.NewRPCConformanceServiceChannelClient(channel), nil
 }
 
 func (t *rpcClientConformanceTester) execute() {

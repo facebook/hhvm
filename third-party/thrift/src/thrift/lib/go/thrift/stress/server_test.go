@@ -88,7 +88,7 @@ func runStressTest(t *testing.T, serverTransport thrift.TransportID) {
 	var successRequestCount atomic.Uint64
 
 	makeRequestFunc := func() error {
-		conn, err := thrift.NewClient(
+		channel, err := thrift.NewClientV2(
 			clientTransportOption,
 			thrift.WithDialer(func() (net.Conn, error) {
 				return net.DialTimeout("unix", addr.String(), 60*time.Second)
@@ -100,7 +100,7 @@ func runStressTest(t *testing.T, serverTransport thrift.TransportID) {
 			t.Log(errRes.Error())
 			return errRes
 		}
-		client := dummy.NewDummyChannelClient(thrift.NewSerialChannel(conn))
+		client := dummy.NewDummyChannelClient(channel)
 		defer client.Close()
 		result, err := client.Echo(context.Background(), "hello")
 		if err != nil {

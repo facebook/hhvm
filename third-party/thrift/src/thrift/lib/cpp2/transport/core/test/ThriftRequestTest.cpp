@@ -27,7 +27,8 @@ namespace apache::thrift::detail {
 THRIFT_PLUGGABLE_FUNC_SET(
     void,
     handleFrameworkMetadata,
-    std::unique_ptr<folly::IOBuf>&& frameworkMetadata) {
+    std::unique_ptr<folly::IOBuf>&& frameworkMetadata,
+    Cpp2RequestContext*) {
   const auto& buf = *frameworkMetadata;
   std::string content(reinterpret_cast<const char*>(buf.data()), buf.length());
   EXPECT_EQ(content, "abc");

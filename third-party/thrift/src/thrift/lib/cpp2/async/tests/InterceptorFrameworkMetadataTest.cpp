@@ -74,6 +74,15 @@ THRIFT_PLUGGABLE_FUNC_SET(
   return ret;
 }
 
+THRIFT_PLUGGABLE_FUNC_SET(
+    void,
+    handleFrameworkMetadata,
+    std::unique_ptr<folly::IOBuf>&& frameworkMetadata,
+    Cpp2RequestContext* requestContextPtr) {
+  Cpp2RequestContextUnsafeAPI(*requestContextPtr)
+      .initializeInterceptorFrameworkMetadata(*frameworkMetadata);
+}
+
 } // namespace detail
 
 namespace {

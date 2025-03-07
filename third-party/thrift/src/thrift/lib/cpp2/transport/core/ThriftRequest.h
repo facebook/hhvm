@@ -52,11 +52,15 @@ namespace apache::thrift {
 
 namespace detail {
 THRIFT_PLUGGABLE_FUNC_DECLARE(
-    void, handleFrameworkMetadata, std::unique_ptr<folly::IOBuf>&&);
+    void,
+    handleFrameworkMetadata,
+    std::unique_ptr<folly::IOBuf>&&,
+    Cpp2RequestContext*);
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     bool,
     handleFrameworkMetadataHeader,
-    folly::F14NodeMap<std::string, std::string>&);
+    folly::F14NodeMap<std::string, std::string>&,
+    Cpp2RequestContext*);
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     std::unique_ptr<folly::IOBuf>,
     makeThriftFrameworkMetadataOnResponse,

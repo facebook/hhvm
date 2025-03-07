@@ -28,11 +28,15 @@ namespace apache::thrift {
 
 namespace detail {
 THRIFT_PLUGGABLE_FUNC_REGISTER(
-    void, handleFrameworkMetadata, std::unique_ptr<folly::IOBuf>&&) {}
+    void,
+    handleFrameworkMetadata,
+    std::unique_ptr<folly::IOBuf>&&,
+    Cpp2RequestContext*) {}
 THRIFT_PLUGGABLE_FUNC_REGISTER(
     bool,
     handleFrameworkMetadataHeader,
-    folly::F14NodeMap<std::string, std::string>&) {
+    folly::F14NodeMap<std::string, std::string>&,
+    Cpp2RequestContext*) {
   return false;
 }
 THRIFT_PLUGGABLE_FUNC_REGISTER(
@@ -94,15 +98,11 @@ ThriftRequestCore::ThriftRequestCore(
 
   // When processing ThriftFrameworkMetadata, the header takes priority.
   if (!otherMetadata ||
-      !detail::handleFrameworkMetadataHeader(*otherMetadata)) {
+      !detail::handleFrameworkMetadataHeader(*otherMetadata, &reqContext_)) {
     if (auto frameworkMetadata = metadata.frameworkMetadata_ref()) {
       DCHECK(*frameworkMetadata && !(**frameworkMetadata).empty());
-      // This path handles setting InterceptorFrameworkMetata for
-      // ServiceInterceptors
-      detail::Cpp2RequestContextUnsafeAPI(reqContext_)
-          .initializeInterceptorFrameworkMetadata(**frameworkMetadata);
-      // Handling path using pluggable function
-      detail::handleFrameworkMetadata(std::move(*frameworkMetadata));
+      detail::handleFrameworkMetadata(
+          std::move(*frameworkMetadata), &reqContext_);
     }
   }
   if (otherMetadata) {

@@ -816,6 +816,11 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
         detail::deserializeFrameworkMetadata(interceptorFrameworkMetadata);
   }
 
+  const InterceptorFrameworkMetadataStorage&
+  getServiceInterceptorFrameworkMetadata() {
+    return serviceInterceptorsStorage_.frameworkMetadata;
+  }
+
   Cpp2ConnContext* ctx_;
   folly::erased_unique_ptr requestData_{nullptr, nullptr};
   std::chrono::milliseconds requestTimeout_{0};
@@ -850,6 +855,11 @@ class Cpp2RequestContextUnsafeAPI {
     }
     requestContext_.initializeInterceptorFrameworkMetadata(
         interceptorFrameworkMetadata);
+  }
+
+  const InterceptorFrameworkMetadataStorage&
+  getServiceInterceptorFrameworkMetadata() {
+    return requestContext_.getServiceInterceptorFrameworkMetadata();
   }
 
  private:

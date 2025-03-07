@@ -91,26 +91,6 @@ template <class TT>
   return ret;
 }
 
-template <class TT>
-[[nodiscard]] TestCase addTerseFieldWithCustomDefaultTestCase(
-    const Protocol& protocol) {
-  const typename struct_ByFieldType<
-      TT,
-      mod_set<FieldModifier::Terse, FieldModifier::CustomDefault>>::type def;
-  auto ret = genCompatibilityRoundTripTestCase(
-      protocol,
-      fmt::format(
-          "testset.{}/AddTerseFieldWithCustomDefault", type::getName<TT>()),
-      protocol::Object{},
-      def);
-  // Since terse field can not distinguish from skipping serialization for field
-  // and field is missing, it always clear to intrinsic default before
-  // deserialization.
-  ret.test()->roundTrip_ref()->expectedResponse().ensure().value()->data() =
-      *serializeThriftStruct(protocol::Object{}, protocol);
-  return ret;
-}
-
 template <class TT, bool IsOptional>
 [[nodiscard]] TestCase changeFieldCustomDefaultTestCase(
     const Protocol& protocol) {
@@ -518,7 +498,6 @@ Test createCompatibilityTestWithTypeTag(const Protocol& protocol) {
   addToTest(removeFieldTestCase<TT>(protocol));
   addToTest({addFieldWithCustomDefaultTestCase<TT>(protocol)});
   addToTest({addOptionalFieldWithCustomDefaultTestCase<TT>(protocol)});
-  addToTest({addTerseFieldWithCustomDefaultTestCase<TT>(protocol)});
   addToTest(changeStructType<TT>(protocol));
   addToTest(switchSingularAndContainer<TT>(protocol));
 

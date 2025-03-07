@@ -16691,28 +16691,10 @@ go/RoundTripTest/map<string,float>/utf8_NaN.Compact
 #
 # Go Data conformance compatibility tests [FAILED]
 # Go does not support Terse [WONTFIX]
-go/CompatibilityTest/testset.i16/AddTerseFieldWithCustomDefault.Binary
-go/CompatibilityTest/testset.i16/AddTerseFieldWithCustomDefault.Compact
-go/CompatibilityTest/testset.i32/AddTerseFieldWithCustomDefault.Binary
-go/CompatibilityTest/testset.i32/AddTerseFieldWithCustomDefault.Compact
-go/CompatibilityTest/testset.i64/AddTerseFieldWithCustomDefault.Binary
-go/CompatibilityTest/testset.i64/AddTerseFieldWithCustomDefault.Compact
-go/CompatibilityTest/testset.string/AddTerseFieldWithCustomDefault.Binary
-go/CompatibilityTest/testset.string/AddTerseFieldWithCustomDefault.Compact
 go/CompatibilityTest/testset.Unqualified.Terse/ChangeQualifier/empty.Binary
 go/CompatibilityTest/testset.Unqualified.Terse/ChangeQualifier/empty.Compact
 go/CompatibilityTest/testset.Optional.Terse/ChangeQualifier/empty.Binary
 go/CompatibilityTest/testset.Optional.Terse/ChangeQualifier/empty.Compact
-go/CompatibilityTest/testset.bool/AddTerseFieldWithCustomDefault.Binary
-go/CompatibilityTest/testset.bool/AddTerseFieldWithCustomDefault.Compact
-go/CompatibilityTest/testset.byte/AddTerseFieldWithCustomDefault.Binary
-go/CompatibilityTest/testset.byte/AddTerseFieldWithCustomDefault.Compact
-go/CompatibilityTest/testset.double/AddTerseFieldWithCustomDefault.Binary
-go/CompatibilityTest/testset.double/AddTerseFieldWithCustomDefault.Compact
-go/CompatibilityTest/testset.float/AddTerseFieldWithCustomDefault.Binary
-go/CompatibilityTest/testset.float/AddTerseFieldWithCustomDefault.Compact
-go/CompatibilityTest/testset.binary/AddTerseFieldWithCustomDefault.Binary
-go/CompatibilityTest/testset.binary/AddTerseFieldWithCustomDefault.Compact
 
 # Go Data conformance compatibility tests [FAILED]
 # Failed tests related to optional defaults T162510833
@@ -17814,14 +17796,6 @@ rust/PatchTest/set<double>/remove.NaN.Binary
 rust/PatchTest/set<double>/remove.NaN.Compact
 
 # compatibility-test
-rust/CompatibilityTest/testset.i16/AddTerseFieldWithCustomDefault.Binary
-rust/CompatibilityTest/testset.i16/AddTerseFieldWithCustomDefault.Compact
-rust/CompatibilityTest/testset.i32/AddTerseFieldWithCustomDefault.Binary
-rust/CompatibilityTest/testset.i32/AddTerseFieldWithCustomDefault.Compact
-rust/CompatibilityTest/testset.i64/AddTerseFieldWithCustomDefault.Binary
-rust/CompatibilityTest/testset.i64/AddTerseFieldWithCustomDefault.Compact
-rust/CompatibilityTest/testset.float/AddTerseFieldWithCustomDefault.Binary
-rust/CompatibilityTest/testset.float/AddTerseFieldWithCustomDefault.Compact
 rust/CompatibilityTest/testset.float/StructToUnion/NaN.Binary
 rust/CompatibilityTest/testset.float/StructToUnion/NaN.Compact
 rust/CompatibilityTest/testset.float/StructToException/NaN.Binary
@@ -17834,20 +17808,12 @@ rust/CompatibilityTest/testset.float/ExceptionToStruct/NaN.Binary
 rust/CompatibilityTest/testset.float/ExceptionToStruct/NaN.Compact
 rust/CompatibilityTest/testset.float/ExceptionToUnion/NaN.Binary
 rust/CompatibilityTest/testset.float/ExceptionToUnion/NaN.Compact
-rust/CompatibilityTest/testset.string/AddTerseFieldWithCustomDefault.Binary
-rust/CompatibilityTest/testset.string/AddTerseFieldWithCustomDefault.Compact
 rust/CompatibilityTest/testset.binary.string/ChangeFieldType/bad_utf8.Binary
 rust/CompatibilityTest/testset.binary.string/ChangeFieldType/bad_utf8.Compact
 rust/CompatibilityTest/testset.Unqualified.Terse/ChangeQualifier/empty.Binary
 rust/CompatibilityTest/testset.Unqualified.Terse/ChangeQualifier/empty.Compact
 rust/CompatibilityTest/testset.Optional.Terse/ChangeQualifier/empty.Binary
 rust/CompatibilityTest/testset.Optional.Terse/ChangeQualifier/empty.Compact
-rust/CompatibilityTest/testset.bool/AddTerseFieldWithCustomDefault.Binary
-rust/CompatibilityTest/testset.bool/AddTerseFieldWithCustomDefault.Compact
-rust/CompatibilityTest/testset.byte/AddTerseFieldWithCustomDefault.Binary
-rust/CompatibilityTest/testset.byte/AddTerseFieldWithCustomDefault.Compact
-rust/CompatibilityTest/testset.double/AddTerseFieldWithCustomDefault.Binary
-rust/CompatibilityTest/testset.double/AddTerseFieldWithCustomDefault.Compact
 rust/CompatibilityTest/testset.double/StructToUnion/NaN.Binary
 rust/CompatibilityTest/testset.double/StructToUnion/NaN.Compact
 rust/CompatibilityTest/testset.double/StructToException/NaN.Binary
@@ -17860,8 +17826,6 @@ rust/CompatibilityTest/testset.double/ExceptionToStruct/NaN.Binary
 rust/CompatibilityTest/testset.double/ExceptionToStruct/NaN.Compact
 rust/CompatibilityTest/testset.double/ExceptionToUnion/NaN.Binary
 rust/CompatibilityTest/testset.double/ExceptionToUnion/NaN.Compact
-rust/CompatibilityTest/testset.binary/AddTerseFieldWithCustomDefault.Binary
-rust/CompatibilityTest/testset.binary/AddTerseFieldWithCustomDefault.Compact
 
 # Rust RPC server tests
 

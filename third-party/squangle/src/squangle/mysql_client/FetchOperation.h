@@ -158,6 +158,18 @@ class FetchOperationImpl : virtual public OperationBase {
     CompleteOperation
   };
 
+  FetchAction getActiveFetchAction() const {
+    return active_fetch_action_.load(std::memory_order_relaxed);
+  }
+
+  void setActiveFetchAction(FetchAction action) {
+    active_fetch_action_.store(action, std::memory_order_relaxed);
+  }
+
+  FetchAction exchangeActiveFetchAction(FetchAction action) {
+    return active_fetch_action_.exchange(action);
+  }
+
   void setFetchAction(FetchAction action);
   static folly::StringPiece toString(FetchAction action);
 
@@ -205,11 +217,13 @@ class FetchOperationImpl : virtual public OperationBase {
   std::string current_recv_gtid_;
   RespAttrs current_resp_attrs_;
 
-  // When the Fetch gets paused, active fetch action moves to
-  // `WaitForConsumer` and the action that got paused gets saved so tat
-  // `resume` can set it properly afterwards.
-  FetchAction active_fetch_action_ = FetchAction::StartQuery;
+  // When the Fetch gets paused, active fetch action moves to `WaitForConsumer`
+  // and the action that got paused gets saved so that `resume` can set it
+  // properly afterwards.
   FetchAction paused_action_ = FetchAction::StartQuery;
+
+ private:
+  std::atomic<FetchAction> active_fetch_action_ = FetchAction::StartQuery;
 };
 
 // A fetching operation (query or multiple queries) use the same primary

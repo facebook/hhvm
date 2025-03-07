@@ -24,18 +24,8 @@ bool MysqlFetchOperationImpl::isStreamAccessAllowed() const {
   return isPaused() || isInEventBaseThread();
 }
 
-bool MysqlFetchOperationImpl::isPausedImpl() const {
-  return active_fetch_action_ == FetchAction::WaitForConsumer;
-}
-
 bool MysqlFetchOperationImpl::isPaused() const {
-  if (client_.isInCorrectThread(true)) {
-    return isPausedImpl();
-  }
-
-  bool isPaused = false;
-  client_.runInThread([&]() { isPaused = isPausedImpl(); }, true);
-  return isPaused;
+  return getActiveFetchAction() == FetchAction::WaitForConsumer;
 }
 
 void MysqlFetchOperationImpl::specializedRun() {
@@ -74,7 +64,7 @@ void MysqlFetchOperationImpl::specializedRunImpl() {
 
 void MysqlFetchOperationImpl::actionable() {
   DCHECK(isInEventBaseThread());
-  DCHECK(active_fetch_action_ != FetchAction::WaitForConsumer);
+  DCHECK(getActiveFetchAction() != FetchAction::WaitForConsumer);
 
   folly::stop_watch<Duration> sw;
   auto logThreadBlockTimeGuard =
@@ -105,7 +95,7 @@ void MysqlFetchOperationImpl::actionable() {
     //  - CompleteOperation: if it fails to execute query or request next
     //                       results.
     //  - InitFetch: no errors during results request, so we initiate fetch.
-    if (active_fetch_action_ == FetchAction::StartQuery) {
+    if (getActiveFetchAction() == FetchAction::StartQuery) {
       auto status = PENDING;
 
       if (query_executed_) {
@@ -126,9 +116,9 @@ void MysqlFetchOperationImpl::actionable() {
       current_recv_gtid_ = std::string();
       query_executed_ = true;
       if (status == ERROR) {
-        active_fetch_action_ = FetchAction::CompleteQuery;
+        setActiveFetchAction(FetchAction::CompleteQuery);
       } else {
-        active_fetch_action_ = FetchAction::InitFetch;
+        setActiveFetchAction(FetchAction::InitFetch);
       }
     }
 
@@ -140,22 +130,22 @@ void MysqlFetchOperationImpl::actionable() {
     //  - Fetch: there are rows to fetch in this query
     //  - CompleteQuery: no rows to fetch (complete query will read rowsAffected
     //                   and lastInsertId to add to result
-    if (active_fetch_action_ == FetchAction::InitFetch) {
+    if (getActiveFetchAction() == FetchAction::InitFetch) {
       auto mysql_query_result = mysql_conn->getResult();
       auto num_fields = mysql_conn->getFieldCount();
 
       // Check to see if this an empty query or an error
       if (!mysql_query_result && num_fields > 0) {
         // Failure. CompleteQuery will read errors.
-        active_fetch_action_ = FetchAction::CompleteQuery;
+        setActiveFetchAction(FetchAction::CompleteQuery);
       } else {
         if (num_fields > 0) {
           auto row_metadata = mysql_query_result->getRowMetadata();
           current_row_stream_.assign(RowStream(
               std::move(mysql_query_result), std::move(row_metadata)));
-          active_fetch_action_ = FetchAction::Fetch;
+          setActiveFetchAction(FetchAction::Fetch);
         } else {
-          active_fetch_action_ = FetchAction::CompleteQuery;
+          setActiveFetchAction(FetchAction::CompleteQuery);
         }
         op.notifyInitQuery();
       }
@@ -172,9 +162,9 @@ void MysqlFetchOperationImpl::actionable() {
     //           for actionable to be called again
     //  - CompleteQuery: an error occurred or rows finished to fetch
     //  - WaitForConsumer: in case `pause` is called during `notifyRowsReady`
-    if (active_fetch_action_ == FetchAction::Fetch) {
+    if (getActiveFetchAction() == FetchAction::Fetch) {
       if (!current_row_stream_) {
-        active_fetch_action_ = FetchAction::CompleteQuery;
+        setActiveFetchAction(FetchAction::CompleteQuery);
         continue;
       }
 
@@ -192,7 +182,7 @@ void MysqlFetchOperationImpl::actionable() {
         break;
       }
       if (hasQueryFinished()) {
-        active_fetch_action_ = FetchAction::CompleteQuery;
+        setActiveFetchAction(FetchAction::CompleteQuery);
       } else {
         op.notifyRowsReady();
       }
@@ -211,13 +201,13 @@ void MysqlFetchOperationImpl::actionable() {
     //  - CompleteOperation: In case an error occurred during query or there are
     //                       no more results to read.
     //  - WaitForConsumer: In case `pause` is called during notification.
-    if (active_fetch_action_ == FetchAction::CompleteQuery) {
+    if (getActiveFetchAction() == FetchAction::CompleteQuery) {
       getOp().snapshotMysqlErrors(
           mysql_conn->getErrno(), mysql_conn->getErrorMessage());
 
       bool more_results = false;
       if (mysql_errno() != 0 || cancel_) {
-        active_fetch_action_ = FetchAction::CompleteOperation;
+        setActiveFetchAction(FetchAction::CompleteOperation);
       } else {
         current_last_insert_id_ = mysql_conn->getLastInsertId();
         current_affected_rows_ = mysql_conn->getAffectedRows();
@@ -230,10 +220,11 @@ void MysqlFetchOperationImpl::actionable() {
         }
         current_resp_attrs_ = readResponseAttributes();
         more_results = mysql_conn->hasMoreResults();
-        active_fetch_action_ = more_results ? FetchAction::StartQuery
-                                            : FetchAction::CompleteOperation;
+        setActiveFetchAction(
+            more_results ? FetchAction::StartQuery
+                         : FetchAction::CompleteOperation);
 
-        // Call it after setting the active_fetch_action_ so the child class can
+        // Call it after setting the active fetch action so the child class can
         // decide if it wants to change the state
 
         if (current_row_stream_) {
@@ -245,7 +236,7 @@ void MysqlFetchOperationImpl::actionable() {
         was_slow_ |= mysql_conn->wasSlow();
         if (!op.notifyQuerySuccess(more_results)) {
           // This usually means a multi-query was passed to the single query API
-          active_fetch_action_ = FetchAction::CompleteOperation;
+          setActiveFetchAction(FetchAction::CompleteOperation);
           return;
         }
       }
@@ -254,7 +245,7 @@ void MysqlFetchOperationImpl::actionable() {
 
     // Once this action is set, the operation is going to be completed no matter
     // the reason it was called. It exists the loop.
-    if (active_fetch_action_ == FetchAction::CompleteOperation) {
+    if (getActiveFetchAction() == FetchAction::CompleteOperation) {
       logThreadBlockTimeGuard.dismiss();
       if (cancel_) {
         setState(OperationState::Cancelling);
@@ -271,7 +262,7 @@ void MysqlFetchOperationImpl::actionable() {
     // should come to.
     // It's not necessary to unregister the socket event,  so just cancel the
     // timeout and wait for `resume` to be called.
-    if (active_fetch_action_ == FetchAction::WaitForConsumer) {
+    if (getActiveFetchAction() == FetchAction::WaitForConsumer) {
       cancelTimeout();
       break;
     }
@@ -282,12 +273,11 @@ void MysqlFetchOperationImpl::pauseForConsumer() {
   DCHECK(isInEventBaseThread());
   DCHECK(state() == OperationState::Pending);
 
-  paused_action_ = active_fetch_action_;
-  active_fetch_action_ = FetchAction::WaitForConsumer;
+  paused_action_ = exchangeActiveFetchAction(FetchAction::WaitForConsumer);
 }
 
 void MysqlFetchOperationImpl::resumeImpl() {
-  CHECK_THROW(isPausedImpl(), db::OperationStateException);
+  CHECK_THROW(isPaused(), db::OperationStateException);
 
   // We should only allow pauses during fetch or between queries.
   // If we come back as RowsFetched and the stream has completed the query,
@@ -295,19 +285,19 @@ void MysqlFetchOperationImpl::resumeImpl() {
   // start the Query completion process.
   // When we pause between queries, the value of `paused_action_` is already
   // the value of the next states: StartQuery or CompleteOperation.
-  active_fetch_action_ = paused_action_;
+  setActiveFetchAction(paused_action_);
   // Leave timeout to be reset or checked when we hit
   // `waitForActionable`
   actionable();
 }
 
 void MysqlFetchOperationImpl::resume() {
-  DCHECK(active_fetch_action_ == FetchAction::WaitForConsumer);
+  DCHECK(getActiveFetchAction() == FetchAction::WaitForConsumer);
   conn().runInThread(this, &MysqlFetchOperationImpl::resumeImpl);
 }
 
 void MysqlFetchOperationImpl::specializedTimeoutTriggered() {
-  DCHECK(active_fetch_action_ != FetchAction::WaitForConsumer);
+  DCHECK(getActiveFetchAction() != FetchAction::WaitForConsumer);
   auto delta = opElapsedMs();
 
   if (conn().getKillOnQueryTimeout()) {

@@ -483,17 +483,20 @@ def check_expected_equal_actual(
 
 
 def check_included(test_case: TestCase, output: str) -> Result:
-    elts = set(output.splitlines())
-    expected_elts = set(test_case.expected.splitlines())
+    sections = output.split("--\n")
+    expected_sections = test_case.expected.split("--\n")
     is_failure = False
-    for expected_elt in expected_elts:
-        if expected_elt not in elts:
-            is_failure = True
-            break
     output = ""
-    if is_failure:
+    for section, expected_section in zip(sections, expected_sections):
+        elts = set(section.splitlines())
+        expected_elts = set(expected_section.splitlines())
+        for expected_elt in expected_elts:
+            if expected_elt not in elts:
+                is_failure = True
+                break
         for elt in expected_elts.intersection(elts):
             output += elt + "\n"
+        output += "--\n"
     return Result(test_case, output, is_failure)
 
 

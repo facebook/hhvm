@@ -201,7 +201,7 @@ let print_fanout (symbols, files) =
         (Relative_path.suffix file
         |> Str.split (Str.regexp "--")
         |> List.last_exn));
-  Printf.printf "\n";
+  Printf.printf "--\n";
   ()
 
 let compute_fanout_and_resolve_deps

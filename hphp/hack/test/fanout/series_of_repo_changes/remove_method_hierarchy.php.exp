@@ -1,7 +1,7 @@
 Fun f_g
 Type F
 Type G
-
+--
 Fun f_c
 Fun f_g
 Type C
@@ -9,3 +9,4 @@ Type D
 Type E
 Type F
 Type G
+--

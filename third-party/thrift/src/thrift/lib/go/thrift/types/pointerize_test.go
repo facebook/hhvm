@@ -16,7 +16,34 @@
 
 package types
 
-// Pointerize returns a pointer to the given value.
-func Pointerize[T any](val T) *T {
-	return &val
+import (
+	"reflect"
+	"testing"
+)
+
+func TestPointerize(t *testing.T) {
+	testInputs := []any{
+		bool(true),
+		byte(128),
+		int(1),
+		int8(2),
+		int16(3),
+		int32(4),
+		int64(5),
+		uint(6),
+		uint8(7),
+		uint16(8),
+		uint32(9),
+		uint64(10),
+		float32(123.4),
+		float64(567.8),
+		string("hello"),
+	}
+
+	for _, testInput := range testInputs {
+		testInputPtr := Pointerize(testInput)
+		if !reflect.DeepEqual(testInput, *testInputPtr) {
+			t.Fatalf("values are not equal: %v != %v", testInput, *testInputPtr)
+		}
+	}
 }

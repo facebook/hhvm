@@ -27,7 +27,7 @@ var (
     }()
     premadeThriftType_string = func() *metadata.ThriftType {
         return metadata.NewThriftType().SetTPrimitive(
-            metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
+            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE),
         )
     }()
     premadeThriftType_module_MyStructNestedAnnotation = func() *metadata.ThriftType {
@@ -44,7 +44,7 @@ var (
     }()
     premadeThriftType_i64 = func() *metadata.ThriftType {
         return metadata.NewThriftType().SetTPrimitive(
-            metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
+            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I64_TYPE),
         )
     }()
     premadeThriftType_list_string = func() *metadata.ThriftType {
@@ -94,17 +94,17 @@ var (
     }()
     premadeThriftType_void = func() *metadata.ThriftType {
         return metadata.NewThriftType().SetTPrimitive(
-            metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
+            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
         )
     }()
     premadeThriftType_bool = func() *metadata.ThriftType {
         return metadata.NewThriftType().SetTPrimitive(
-            metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
+            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE),
         )
     }()
     premadeThriftType_i32 = func() *metadata.ThriftType {
         return metadata.NewThriftType().SetTPrimitive(
-            metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
+            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_I32_TYPE),
         )
     }()
 )
@@ -282,7 +282,7 @@ var serviceMetadatas = func() []*metadata.ThriftService {
     ))
     fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
     SetName("module.MyServicePrioChild").
-    SetParent(thrift.StringPtr("module.MyServicePrioParent")).
+    SetParent(thrift.Pointerize("module.MyServicePrioParent")).
     SetFunctions(
         []*metadata.ThriftFunction{
             metadata.NewThriftFunction().
@@ -417,7 +417,7 @@ func getMetadataThriftPrimitiveType(s *thrift.CodecPrimitiveSpec) *metadata.Thri
 		value = metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE
 	}
 
-	return value.Ptr()
+	return thrift.Pointerize(value)
 }
 
 func getMetadataThriftEnumType(s *thrift.CodecEnumSpec) *metadata.ThriftEnumType {

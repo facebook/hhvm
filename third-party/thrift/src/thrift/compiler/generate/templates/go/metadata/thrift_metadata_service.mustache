@@ -23,7 +23,7 @@
     SetName("{{service:scoped_name}}").
     {{#service:extends?}}
     {{#service:extends}}
-    SetParent(thrift.StringPtr("{{service:scoped_name}}")).
+    SetParent(thrift.Pointerize("{{service:scoped_name}}")).
     {{/service:extends}}
     {{/service:extends?}}
     SetFunctions(

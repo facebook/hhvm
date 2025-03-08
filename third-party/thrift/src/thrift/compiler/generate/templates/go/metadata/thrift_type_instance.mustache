@@ -35,7 +35,7 @@
 {{/type:typedef?}}
 {{^type:typedef?}}
 {{#type:metadata_primitive?}}
-{{program:metadata_qualifier}}ThriftPrimitiveType_{{> metadata/thrift_primitive_type}}.Ptr(),
+thrift.Pointerize({{program:metadata_qualifier}}ThriftPrimitiveType_{{> metadata/thrift_primitive_type}}),
 {{/type:metadata_primitive?}}
 {{#type:enum?}}
 {{#type:enum}}

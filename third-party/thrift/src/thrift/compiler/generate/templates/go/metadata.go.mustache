@@ -213,7 +213,7 @@ func getMetadataThriftPrimitiveType(s *thrift.CodecPrimitiveSpec) *{{program:met
 		value = {{program:metadata_qualifier}}ThriftPrimitiveType_THRIFT_STRING_TYPE
 	}
 
-	return value.Ptr()
+	return thrift.Pointerize(value)
 }
 
 func getMetadataThriftEnumType(s *thrift.CodecEnumSpec) *{{program:metadata_qualifier}}ThriftEnumType {

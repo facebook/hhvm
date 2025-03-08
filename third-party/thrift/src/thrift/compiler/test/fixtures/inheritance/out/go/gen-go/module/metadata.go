@@ -21,7 +21,7 @@ var _ = metadata.GoUnusedProtection__
 var (
     premadeThriftType_void = func() *metadata.ThriftType {
         return metadata.NewThriftType().SetTPrimitive(
-            metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
+            thrift.Pointerize(metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE),
         )
     }()
 )
@@ -84,7 +84,7 @@ var serviceMetadatas = func() []*metadata.ThriftService {
     ))
     fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
     SetName("module.MyNode").
-    SetParent(thrift.StringPtr("module.MyRoot")).
+    SetParent(thrift.Pointerize("module.MyRoot")).
     SetFunctions(
         []*metadata.ThriftFunction{
             metadata.NewThriftFunction().
@@ -95,7 +95,7 @@ var serviceMetadatas = func() []*metadata.ThriftService {
     ))
     fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
     SetName("module.MyLeaf").
-    SetParent(thrift.StringPtr("module.MyNode")).
+    SetParent(thrift.Pointerize("module.MyNode")).
     SetFunctions(
         []*metadata.ThriftFunction{
             metadata.NewThriftFunction().
@@ -202,7 +202,7 @@ func getMetadataThriftPrimitiveType(s *thrift.CodecPrimitiveSpec) *metadata.Thri
 		value = metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE
 	}
 
-	return value.Ptr()
+	return thrift.Pointerize(value)
 }
 
 func getMetadataThriftEnumType(s *thrift.CodecEnumSpec) *metadata.ThriftEnumType {

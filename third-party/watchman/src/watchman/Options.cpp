@@ -27,7 +27,7 @@ const OptDesc opts[] = {
      "Show this help",
      OPT_NONE,
      &flags.show_help,
-     NULL,
+     nullptr,
      NOT_DAEMON},
 #ifndef _WIN32
     {"inetd",
@@ -35,7 +35,7 @@ const OptDesc opts[] = {
      "Spawning from an inetd style supervisor",
      OPT_NONE,
      &flags.inetd_style,
-     NULL,
+     nullptr,
      IS_DAEMON},
 #endif
     {"no-site-spawner",
@@ -43,7 +43,7 @@ const OptDesc opts[] = {
      "Don't use the site or system spawner",
      OPT_NONE,
      &flags.no_site_spawner,
-     NULL,
+     nullptr,
      IS_DAEMON},
     {"version",
      'v',

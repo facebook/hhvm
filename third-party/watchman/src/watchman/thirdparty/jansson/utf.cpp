@@ -123,13 +123,13 @@ const char* utf8_iterate(const char* buffer, int32_t* codepoint) {
 
   count = utf8_check_first(buffer[0]);
   if (count <= 0)
-    return NULL;
+    return nullptr;
 
   if (count == 1)
     value = (unsigned char)buffer[0];
   else {
     if (!utf8_check_full(buffer, count, &value))
-      return NULL;
+      return nullptr;
   }
 
   if (codepoint)
@@ -152,7 +152,7 @@ int utf8_check_string(const char* string, int length) {
       if (i + count > length)
         return 0;
 
-      if (!utf8_check_full(&string[i], count, NULL))
+      if (!utf8_check_full(&string[i], count, nullptr))
         return 0;
 
       i += count - 1;

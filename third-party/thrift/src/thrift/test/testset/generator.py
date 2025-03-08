@@ -521,7 +521,8 @@ def gen_struct_fields(target: Target) -> Dict[str, str]:
     ret.update(
         **gen_optional(target, ret),
         **gen_required(target, ret),
-        **gen_terse(target, ret),
+        # Custom default is not allowed in terse fields.
+        **gen_terse(target, gen_structured_fields(target)),
         **gen_optional_box_fields(target),
         **gen_adapted(target, gen_primatives(target)),
         **gen_adapted(target, gen_container_fields(target)),

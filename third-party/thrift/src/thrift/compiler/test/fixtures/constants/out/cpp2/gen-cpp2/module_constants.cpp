@@ -310,10 +310,10 @@ namespace module_constants {
 }
 
 
-::std::string_view _fbthrift_schema_15f49ce5899b4ce6() {
+::std::string_view _fbthrift_schema_3e52b9a9fabc0c36() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_15f49ce5899b4ce6_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_3e52b9a9fabc0c36_includes() {
   return {};
 }
 

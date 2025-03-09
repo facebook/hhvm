@@ -21,9 +21,9 @@ include "thrift/annotation/thrift.thrift"
 package "facebook.com/thrift/compiler/test"
 
 struct MyStruct {
-    1: i32 def_field;
-    2: optional i32 opt_field;
-    3: required i32 req_field;
-    @thrift.TerseWrite
-    4: i32 terse_field;
+  1: i32 def_field;
+  2: optional i32 opt_field;
+  3: required i32 req_field;
+  @thrift.TerseWrite
+  4: i32 terse_field;
 }

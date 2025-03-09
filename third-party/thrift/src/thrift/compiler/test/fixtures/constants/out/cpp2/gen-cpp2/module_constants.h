@@ -456,8 +456,8 @@ namespace module_constants {
   /** Glean {"constant": "I2B_REF"} */
   ::std::map<::std::int32_t, bool> const& I2B_REF();
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_15f49ce5899b4ce6();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_15f49ce5899b4ce6_includes();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_3e52b9a9fabc0c36();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_3e52b9a9fabc0c36_includes();
 
 } // namespace module_constants
 } // namespace cpp2

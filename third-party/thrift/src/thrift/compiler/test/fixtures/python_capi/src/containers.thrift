@@ -59,8 +59,8 @@ struct TemplateLists {
   4: list<fbvector_string> nested_small_vector;
   @cpp.Type{template = "folly::fbvector"}
   5: list<fbvector_fbvector_string> small_vector_tensor;
-// @cpp.Type{template = "std::list"}
-// 6: list<string> list_string;
+  // @cpp.Type{template = "std::list"}
+  // 6: list<string> list_string;
 } (cpp.noncomparable)
 
 struct TemplateSets {

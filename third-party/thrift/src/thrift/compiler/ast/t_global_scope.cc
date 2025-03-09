@@ -76,7 +76,8 @@ void t_global_scope::add_definition(
   all_definitions_[global_id{node.program()->name(), name, value_name}] = &node;
 }
 
-scope::program_scope::ScopePriority t_global_scope::global_priority(const t_program& program) const {
+scope::program_scope::ScopePriority t_global_scope::global_priority(
+    const t_program& program) const {
   const auto it = program_order_.find(&program);
   if (it == program_order_.end()) {
     // Only the root program should be missing.

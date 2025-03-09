@@ -33,12 +33,13 @@
 namespace apache::thrift::compiler {
 
 /**
- * This represents a global-level scope, i.e. a scope shared between all programs parsed by a single compiler
- * invocation. The global scope is used for looking up types, services and other
- * definitions that cannot be resolved directly via the relevant program they're used in, e.g. lookups via Uri.
- * While every program has access to the global scope, only the root t_program creates an instance of it.
- * Note: Scopes are not used to determine code generation, but rather to resolve identifiers at
- * parse time.
+ * This represents a global-level scope, i.e. a scope shared between all
+ * programs parsed by a single compiler invocation. The global scope is used for
+ * looking up types, services and other definitions that cannot be resolved
+ * directly via the relevant program they're used in, e.g. lookups via Uri.
+ * While every program has access to the global scope, only the root t_program
+ * creates an instance of it. Note: Scopes are not used to determine code
+ * generation, but rather to resolve identifiers at parse time.
  */
 class t_global_scope {
  public:
@@ -81,7 +82,8 @@ class t_global_scope {
   // Returns the global priority of the given program.
   // The priority is the order in which the program was added to the global
   // scope.
-  scope::program_scope::ScopePriority global_priority(const t_program& program) const;
+  scope::program_scope::ScopePriority global_priority(
+      const t_program& program) const;
 
   // Returns the definition with the given Thrift URI, or nullptr if there is
   // no such definition.

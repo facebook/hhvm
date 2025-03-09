@@ -174,7 +174,7 @@ class parser {
     auto str_range = token_.range;
     consume_token();
     switch (kind) {
-      case tok::kw_include:{
+      case tok::kw_include: {
         auto alias = try_parse_include_alias();
         actions_.on_include(range, str, alias, str_range);
         break;

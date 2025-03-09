@@ -45,7 +45,8 @@ class program_scope {
   struct id_hasher {
     size_t operator()(const id& id) const {
       return std::hash<std::string_view>{}(id.definition_name) ^
-          std::hash<std::string_view>{}(id.subdefinition_name.value_or(scope::identifier::UNUSED));
+          std::hash<std::string_view>{}(
+                 id.subdefinition_name.value_or(scope::identifier::UNUSED));
     }
   };
 
@@ -53,8 +54,10 @@ class program_scope {
   using Definitions = std::unordered_map<id, const t_named*, id_hasher>;
   using ScopePriority = std::uint64_t;
 
-  constexpr static ScopePriority ROOT_PROGRAM_PRIORITY = std::numeric_limits<ScopePriority>::max() - 1;
-  constexpr static ScopePriority ALIAS_PRIORITY = std::numeric_limits<ScopePriority>::max();
+  constexpr static ScopePriority ROOT_PROGRAM_PRIORITY =
+      std::numeric_limits<ScopePriority>::max() - 1;
+  constexpr static ScopePriority ALIAS_PRIORITY =
+      std::numeric_limits<ScopePriority>::max();
 
   // Find a definition by either:
   // * one-part identifier, e.g. `Foo`
@@ -62,7 +65,8 @@ class program_scope {
   //   * This is used for enum values, e.g. enum Foo { Bar = 1 }
   template <typename Node = t_named>
   const Node* find_by_name(
-      std::string_view definition_name, std::optional<std::string_view> subdefinition_name = std::nullopt) const {
+      std::string_view definition_name,
+      std::optional<std::string_view> subdefinition_name = std::nullopt) const {
     auto it = definitions_.find(id{definition_name, subdefinition_name});
     if (it == definitions_.end()) {
       return nullptr;
@@ -72,7 +76,10 @@ class program_scope {
 
   void add_definition(scope::identifier ident, const t_named* named) {
     const auto [definition_name, subdefinition_name] = ident.unscope();
-    std::optional<std::string_view> subdef_name = subdefinition_name == scope::identifier::UNUSED ?  std::optional<std::string_view>{std::nullopt} : subdefinition_name;
+    std::optional<std::string_view> subdef_name =
+        subdefinition_name == scope::identifier::UNUSED
+        ? std::optional<std::string_view>{std::nullopt}
+        : subdefinition_name;
     definitions_.insert_or_assign(id{definition_name, subdef_name}, named);
 
     if (const enum_id* enum_id_ = ident.get_enum_id()) {
@@ -81,18 +88,19 @@ class program_scope {
       // Note: These definitions are not allowed to redefine existing
       // definitions, to prevent e.g. enum variants overriding types
       // TODO: T212609345 Remove the ability to access unscoped enum
-      auto [_, inserted] = definitions_.emplace(
-          id{enum_id_->value_name, std::nullopt},
-          named);
+      auto [_, inserted] =
+          definitions_.emplace(id{enum_id_->value_name, std::nullopt}, named);
 
       const auto* constant = dynamic_cast<const t_const*>(named);
       assert(constant->value()->is_enum());
       const std::string& enum_value_name =
           constant->value()->get_enum_value()->get_name();
 
-      // DEVNOTE: UNKNOWN is excluded from this check because it is widely used & would lead to a lot of false positives.
-      // This (likely) relied on the assumption that UNKNOWN has value 0, which is not guaranteed.
-      // This should be removed once enum values cannot no longer be accessed without the enum name.
+      // DEVNOTE: UNKNOWN is excluded from this check because it is widely used
+      // & would lead to a lot of false positives. This (likely) relied on the
+      // assumption that UNKNOWN has value 0, which is not guaranteed. This
+      // should be removed once enum values cannot no longer be accessed without
+      // the enum name.
       if (!inserted && enum_value_name != "UNKNOWN") {
         redefined_enum_values_.insert(enum_value_name);
       }
@@ -108,7 +116,8 @@ class program_scope {
     std::unordered_set<std::string> ambiguous_values;
     for (const auto& [id, _] : definitions_) {
       if (id.subdefinition_name && id.subdefinition_name.value() == name) {
-        ambiguous_values.insert(fmt::format("{}.{}", id.definition_name, id.subdefinition_name.value()));
+        ambiguous_values.insert(fmt::format(
+            "{}.{}", id.definition_name, id.subdefinition_name.value()));
       }
     }
 

@@ -256,6 +256,7 @@ const map<string, string> unicode_map = {"BG": "Bulgaria", "BH": "Bahrain", "BÉ
 const i64 maxIntDec = 9223372036854775807;
 const i64 maxIntOct = 0777777777777777777777;
 const i64 maxIntHex = 0x7FFFFFFFFFFFFFFF;
+// @lint-ignore THRIFTFORMAT — a bug in the formatter
 const i64 maxIntBin = 0b111111111111111111111111111111111111111111111111111111111111111;
 const double maxDub = 1.7976931348623157e308;
 const double minDub = 2.2250738585072014e-308;

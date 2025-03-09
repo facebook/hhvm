@@ -14,10 +14,10 @@ namespace facebook::thrift::compiler::test {
 namespace module_constants {
 
 
-::std::string_view _fbthrift_schema_709b2525c0eb9689() {
+::std::string_view _fbthrift_schema_1e046bdc4067735a() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_709b2525c0eb9689_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_1e046bdc4067735a_includes() {
   return {};
 }
 

@@ -161,7 +161,8 @@ t_program::resolved_node t_program::find_by_id(scope::identifier id) const {
 
         // Check if the full identifier is available in the current program.
         // e.g. for enum values `Foo.Bar`
-        if (const auto* local_node = program_scope_.find_by_name(id.scope, id.name)) {
+        if (const auto* local_node =
+                program_scope_.find_by_name(id.scope, id.name)) {
           return resolved_node{local_node, false};
         }
 
@@ -170,11 +171,12 @@ t_program::resolved_node t_program::find_by_id(scope::identifier id) const {
         if (const auto scope_it = available_scopes_.find(id.scope);
             scope_it != available_scopes_.end()) {
           for (const scope_by_priority& scope_prio : scope_it->second) {
-            if (auto* res =  scope_prio.scope->find_by_name(id.name)) {
+            if (auto* res = scope_prio.scope->find_by_name(id.name)) {
               return resolved_node{res, scope_prio.is_alias()};
             }
 
-            // If this scope was an alias, don't fall back to checking other scopes
+            // If this scope was an alias, don't fall back to checking other
+            // scopes
             if (scope_prio.is_alias()) {
               break;
             }
@@ -189,7 +191,8 @@ t_program::resolved_node t_program::find_by_id(scope::identifier id) const {
         if (const auto scope_it = available_scopes_.find(id.scope);
             scope_it != available_scopes_.end()) {
           for (const scope_by_priority& scope_prio : scope_it->second) {
-            if (auto* res = scope_prio.scope->find_by_name(id.enum_name, id.value_name)) {
+            if (auto* res = scope_prio.scope->find_by_name(
+                    id.enum_name, id.value_name)) {
               return resolved_node{res, scope_prio.is_alias()};
             }
           }

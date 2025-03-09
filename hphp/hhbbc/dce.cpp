@@ -27,6 +27,7 @@
 #include <boost/container/flat_map.hpp>
 
 #include <folly/gen/Base.h>
+#include <folly/CPortability.h>
 #include <folly/gen/String.h>
 
 #include "hphp/runtime/base/array-iterator.h"
@@ -2537,7 +2538,10 @@ void apply_remapping(const FuncAnalysis& ainfo, php::WideFunc& func,
         UNUSED auto& op = o.opcode; IMM_##imms; \
         break; \
       }
+      FOLLY_PUSH_WARNING
+      FOLLY_CLANG_DISABLE_WARNING("-Wunused-value")
       switch (o.op) { OPCODES }
+      FOLLY_POP_WARNING
 #undef O
 
 #undef IMM_BLA

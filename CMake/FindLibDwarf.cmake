@@ -25,36 +25,72 @@ endif (LIBDWARF_LIBRARIES AND LIBDWARF_INCLUDE_DIRS)
 find_package(PkgConfig)
 pkg_check_modules(PkgConfig_LibDwarf QUIET libdwarf)
 
+set(
+  LIBDWARF_INCLUDE_PATHS
+  ${PkgConfig_LibDwarf_INCLUDE_DIRS}
+  /usr/include
+  /usr/include/libdwarf
+  /usr/local/include
+  /usr/local/include/libdwarf
+  /opt/local/include
+  /sw/include
+)
+
 find_path (DWARF_INCLUDE_DIR
   NAMES
     libdwarf.h dwarf.h
   PATHS
-    ${PkgConfig_LibDwarf_INCLUDE_DIRS}
-    /usr/include
-    /usr/include/libdwarf
-    /usr/local/include
-    /usr/local/include/libdwarf
-    /opt/local/include
-    /sw/include
+    ${LIBDWARF_INCLUDE_PATHS}
     ENV CPATH) # PATH and INCLUDE will also work
 
 if (DWARF_INCLUDE_DIR)
   set (LIBDWARF_INCLUDE_DIRS  ${DWARF_INCLUDE_DIR})
 endif ()
 
+set(LIBDWARF_LIBRARY_NAMES dwarf libdwarf)
+
+find_path (LIBDWARF_PRODUCER_PATHS
+  NAMES
+    libdwarfp.h
+  PATHS
+    ${LIBDWARF_INCLUDE_PATHS}
+  ENV CPATH
+)
+
+set(
+  LIBDWARF_LIBRARY_PATHS
+  /usr/lib
+  /usr/local/lib
+  /opt/local/lib
+  /sw/lib
+  ${PkgConfig_LibDwarf_LIBRARY_DIRS}
+  ENV LIBRARY_PATH   # PATH and LIB will also work
+  ENV LD_LIBRARY_PATH
+)
+
+if (LIBDWARF_PRODUCER_PATHS)
+  set(LIBDWARF_USE_NEW_PRODUCER_API 1)
+else()
+  set(LIBDWARF_USE_NEW_PRODUCER_API 0)
+endif()
+
 find_library (LIBDWARF_LIBRARIES
   NAMES
     dwarf libdwarf
   PATHS
-    /usr/lib
-    /usr/local/lib
-    /opt/local/lib
-    /sw/lib
-    ${PkgConfig_LibDwarf_LIBRARY_DIRS}
-    ENV LIBRARY_PATH   # PATH and LIB will also work
-    ENV LD_LIBRARY_PATH)
-include (FindPackageHandleStandardArgs)
+    ${LIBDWARF_LIBRARY_PATHS})
 
+if (LIBDWARF_USE_NEW_PRODUCER_API)
+  find_library (LIBDWARFP_LIBRARIES
+    NAMES
+      dwarfp libdwarfp
+    PATHS
+      ${LIBDWARF_LIBRARY_PATHS})
+
+  list(PREPEND LIBDWARF_LIBRARIES ${LIBDWARFP_LIBRARIES})
+endif()
+
+include (FindPackageHandleStandardArgs)
 
 # handle the QUIETLY and REQUIRED arguments and set LIBDWARF_FOUND to TRUE
 # if all listed variables are TRUE
@@ -127,3 +163,4 @@ endif()
 mark_as_advanced(LIBDW_INCLUDE_DIR DWARF_INCLUDE_DIR)
 mark_as_advanced(LIBDWARF_INCLUDE_DIRS LIBDWARF_LIBRARIES)
 mark_as_advanced(LIBDWARF_CONST_NAME LIBDWARF_USE_INIT_C)
+mark_as_advanced(LIBDWARF_USE_NEW_PRODUCER_API)

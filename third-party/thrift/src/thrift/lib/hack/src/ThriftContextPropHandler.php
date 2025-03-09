@@ -67,10 +67,7 @@ final class ThriftContextPropHandler extends TClientEventHandler {
      */
     $exp_ids = $st->getExperimentIds();
     if ($exp_ids is nonnull && !C\is_empty($exp_ids)) {
-      $sampling_rate = JustKnobs::getInt(
-        'lumos/experimentation:www_experiment_id_api_violation_sampling_rate',
-      );
-      if (coinflip($sampling_rate)) {
+      if (ThriftFrameworkMetadataUtils::shouldLogExperimentIdModifications()) {
         FBLogger('lumos_experimentation', 'unexpected experiment ids')
           ->setBlameOwner('lumos')
           ->warn(

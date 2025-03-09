@@ -43,6 +43,15 @@ abstract final class ThriftFrameworkMetadataUtils {
   }
 
   <<__Memoize>>
+  public static function shouldLogExperimentIdModifications(): bool {
+    $ctx_ids = ThriftContextPropState::get()->getExperimentIds();
+    return !C\is_empty($ctx_ids) &&
+      coinflip(JustKnobs::getInt(
+        'lumos/experimentation:www_experiment_id_api_violation_sampling_rate',
+      ));
+  }
+
+  <<__Memoize>>
   public static function decodeFrameworkMetadataOnResponse(
     string $encoded_response_tfm,
   ): ThriftFrameworkMetadataOnResponse {

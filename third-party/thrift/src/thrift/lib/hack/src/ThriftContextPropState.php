@@ -113,19 +113,15 @@ final class ThriftContextPropState {
          * ingesting the ids here.
          * ~15B occurrences per hour, 15B / 60 = 250M per minute
          */
-        if ($tfm->experiment_ids is nonnull) {
-          $ids = $tfm->experiment_ids;
-          $sample_rate = JustKnobs::getInt(
-            'lumos/experimentation:ingested_exp_id_sample_rate',
-          );
-          if (coinflip($sample_rate)) {
-            FBLogger('lumos_experimentation', 'unexpected experiment ids')
-              ->setBlameOwner('lumos')
-              ->warn(
-                'Ingested TFM should not contain experiment IDs: %s',
-                JSON::encode($ids),
-              );
-          }
+        if (
+          ThriftFrameworkMetadataUtils::shouldLogExperimentIdModifications()
+        ) {
+          FBLogger('lumos_experimentation', 'unexpected experiment ids')
+            ->setBlameOwner('lumos')
+            ->warn(
+              'Ingested TFM should not contain experiment IDs: %s',
+              JSON::encode($tfm->experiment_ids),
+            );
         }
 
         self::get()->storage = $tfm;
@@ -472,8 +468,8 @@ final class ThriftContextPropState {
     return vec[];
   }
 
-  public function addExperimentId(int $eid)[zoned_shallow]: void {
-    if (!static::isExperimentIdModificationAllowed()) {
+  public function addExperimentId(int $eid): void {
+    if (!static::isExperimentIdModificationAllowed(vec[$eid])) {
       return;
     }
 
@@ -483,8 +479,8 @@ final class ThriftContextPropState {
     $this->dirty();
   }
 
-  public function setExperimentIds(vec<int> $eids)[zoned_shallow]: void {
-    if (!static::isExperimentIdModificationAllowed()) {
+  public function setExperimentIds(vec<int> $eids): void {
+    if (!static::isExperimentIdModificationAllowed($eids)) {
       return;
     }
     $this->storage->experiment_ids = $eids;
@@ -492,16 +488,17 @@ final class ThriftContextPropState {
   }
 
   private static function isExperimentIdModificationAllowed(
-  )[zoned_shallow]: bool {
+    vec<int> $ids,
+  ): bool {
     if (
       !JustKnobs::eval('lumos/experimentation:enable_www_experiment_id_api')
     ) {
-      $sampling_rate = JustKnobs::getInt(
-        'lumos/experimentation:www_experiment_id_api_violation_sampling_rate',
-      );
-      if (coinflip($sampling_rate)) {
+      if (ThriftFrameworkMetadataUtils::shouldLogExperimentIdModifications()) {
         FBLogger('lumos_experimentation', 'disallowed experiment id call')
           ->setBlameOwner('lumos')
+          ->addLoggableMetadata(dict[
+            'ids' => Str\join($ids, ','),
+          ])
           ->warn('Experiment ID modifications are disallowed!');
       }
       return false;

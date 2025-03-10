@@ -285,8 +285,10 @@ folly::Optional<HTTPHeaders> HQDownstreamSession::getExtraHeaders(
   }
   HTTPHeaders extraHeaders;
   extraHeaders.add(HTTP_HEADER_PRIORITY,
-                   httpPriorityToString(
-                       HTTPPriority(priority->level, priority->incremental)));
+                   httpPriorityToString(HTTPPriority(priority->level,
+                                                     priority->incremental,
+                                                     priority->orderId,
+                                                     priority->paused)));
   return extraHeaders;
 }
 

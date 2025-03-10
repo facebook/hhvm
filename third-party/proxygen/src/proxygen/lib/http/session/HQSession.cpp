@@ -88,7 +88,7 @@ quic::QuicErrorCode quicControlStreamError(quic::QuicErrorCode error) {
 }
 
 quic::Priority toQuicPriority(const proxygen::HTTPPriority& pri) {
-  return quic::Priority(pri.urgency, pri.incremental, pri.orderId);
+  return {pri.urgency, pri.incremental, pri.orderId, pri.paused};
 }
 
 // Get the size of the WebTransport stream preface without actually encoding it

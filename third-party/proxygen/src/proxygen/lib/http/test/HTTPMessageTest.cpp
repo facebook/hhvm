@@ -776,6 +776,14 @@ TEST(HTTPMessage, HTTPPriorityOrderIdSetGet) {
   EXPECT_EQ(priHeaderViaGetter->orderId, 10);
 }
 
+TEST(HTTPMessage, HTTPPriorityPausedSetGet) {
+  HTTPMessage message;
+  message.setHTTPPriority(HTTPPriority(7, false, 0, true /* paused */));
+  EXPECT_TRUE(httpPriorityFromHTTPMessage(message)->paused);
+  auto& priHeader = message.getHeaders().getSingleOrEmpty(HTTP_HEADER_PRIORITY);
+  EXPECT_EQ("u=7,p", priHeader);
+}
+
 TEST(HTTPHeaders, GetSetOnResize) {
   HTTPHeaders headers;
   for (size_t i = 0; i < kInitialVectorReserve - 1; i++) {

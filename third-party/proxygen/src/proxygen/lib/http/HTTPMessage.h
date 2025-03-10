@@ -36,32 +36,37 @@ constexpr uint8_t kDefaultHttpPriorityUrgency = 3;
 // We default incremental to True, different from the draft
 constexpr bool kDefaultHttpPriorityIncremental = true;
 constexpr uint64_t kDefaultOrderId = 0;
+constexpr bool kDefaultPaused = false;
 constexpr int8_t kMinPriority = 0;
 constexpr int8_t kMaxPriority = 7;
 
 struct HTTPPriority {
   uint8_t urgency : 3;
   bool incremental : 1;
-  uint64_t orderId : 58;
+  uint64_t orderId : 57;
+  bool paused : 1;
 
   HTTPPriority()
       : urgency(kDefaultHttpPriorityUrgency),
         incremental(kDefaultHttpPriorityIncremental),
-        orderId(kDefaultOrderId) {
+        orderId(kDefaultOrderId),
+        paused(kDefaultPaused) {
   }
 
   HTTPPriority(uint8_t urgencyIn,
                bool incrementalIn,
-               uint64_t orderIdIn = kDefaultOrderId)
+               uint64_t orderIdIn = kDefaultOrderId,
+               bool pausedIn = kDefaultPaused)
       : urgency(std::min(urgencyIn, static_cast<uint8_t>(kMaxPriority))),
         incremental(incrementalIn),
-        orderId(orderIdIn) {
+        orderId(orderIdIn),
+        paused(pausedIn) {
   }
 };
 
 inline bool operator==(const HTTPPriority& a, const HTTPPriority& b) {
   return a.urgency == b.urgency && a.incremental == b.incremental &&
-         a.orderId == b.orderId;
+         a.orderId == b.orderId && a.paused == b.paused;
 }
 
 // Convert Priority to a string representation in the form of "u=urgency[,i]"

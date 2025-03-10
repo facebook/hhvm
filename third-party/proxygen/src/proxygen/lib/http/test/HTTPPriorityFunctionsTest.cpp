@@ -94,12 +94,12 @@ TEST(HTTPPriorityFunctionsTest, PriorityHeaderUrgencyAndIncrementalUppercase) {
 
 TEST(HTTPPriorityFunctionsTest, PriorityHeaderBadUrgency) {
   HTTPMessage req;
-  req.getHeaders().add(HTTP_HEADER_PRIORITY, "p=3");
+  req.getHeaders().add(HTTP_HEADER_PRIORITY, "x=3");
   auto priority = httpPriorityFromHTTPMessage(req);
   EXPECT_FALSE(priority.hasValue());
 
   // same as above but with incremental flag
-  req.getHeaders().set(HTTP_HEADER_PRIORITY, "p=2, i");
+  req.getHeaders().set(HTTP_HEADER_PRIORITY, "x=2, i");
   priority = httpPriorityFromHTTPMessage(req);
   // default to u=3 if urgency is missing but incremental is present
   ASSERT_TRUE(priority.hasValue());
@@ -122,9 +122,16 @@ TEST(HTTPPriorityFunctionsTest, PriorityHeaderBadUrgency) {
   EXPECT_FALSE(priority.hasValue());
 }
 
-TEST(HTTPPriorityFunctionsTest, PriorityHeaderBadPriority) {
+TEST(HTTPPriorityFunctionsTest, PriorityHeaderBadIncremental) {
   HTTPMessage req;
   req.getHeaders().add(HTTP_HEADER_PRIORITY, "u=3, i=0");
+  auto priority = httpPriorityFromHTTPMessage(req);
+  EXPECT_FALSE(priority.hasValue());
+}
+
+TEST(HTTPPriorityFunctionsTest, PriorityHeaderBadPaused) {
+  HTTPMessage req;
+  req.getHeaders().add(HTTP_HEADER_PRIORITY, "u=3, p=0");
   auto priority = httpPriorityFromHTTPMessage(req);
   EXPECT_FALSE(priority.hasValue());
 }
@@ -142,4 +149,18 @@ TEST(HTTPPriorityFunctionsTest, PriorityHeaderCustomOrderId) {
   auto priority = httpPriorityFromHTTPMessage(req);
   EXPECT_EQ(priority->urgency, 3);
   EXPECT_EQ(priority->orderId, 100);
+}
+
+TEST(HTTPPriorityFunctionsTest, PriorityHeaderDefaultUnpaused) {
+  HTTPMessage req;
+  req.getHeaders().add(HTTP_HEADER_PRIORITY, "u=3");
+  auto priority = httpPriorityFromHTTPMessage(req);
+  EXPECT_FALSE(priority->paused);
+}
+
+TEST(HTTPPriorityFunctionsTest, PriorityHeaderPaused) {
+  HTTPMessage req;
+  req.getHeaders().add(HTTP_HEADER_PRIORITY, "u=3, p");
+  auto priority = httpPriorityFromHTTPMessage(req);
+  EXPECT_TRUE(priority->paused);
 }

@@ -46,7 +46,8 @@
 #include <immintrin.h>
 #endif
 
-#if defined(__BMI2__)
+#if defined(__BMI2__) && !defined(__APPLE__)
+// apple silicon can run most x86-64 instructions, but not necessarily all
 #define THRIFT_UTIL_VARINTUTILS_BRANCH_FREE_ENCODER 1
 #elif defined(__ARM_FEATURE_SVE) && defined(__ARM_FEATURE_SVE2_BITPERM) && \
     __has_include(<arm_neon_sve_bridge.h>)

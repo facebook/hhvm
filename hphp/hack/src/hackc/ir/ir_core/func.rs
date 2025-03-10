@@ -315,8 +315,7 @@ impl IrRepr {
     }
 
     pub fn is_terminal(&self, vid: ValueId) -> bool {
-        vid.instr()
-            .map_or(false, |iid| self.instr(iid).is_terminal())
+        vid.instr().is_some_and(|iid| self.instr(iid).is_terminal())
     }
 
     pub fn loc(&self, loc: LocId) -> &SrcLoc {

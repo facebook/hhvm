@@ -112,7 +112,7 @@ impl<'a> Tokenizer<'a> {
                             _ => self.read_operator(first, cur_loc)?,
                         }
                     }
-                    b'-' if self.peek_any_byte()?.map_or(false, |c| c.is_ascii_digit()) => {
+                    b'-' if self.peek_any_byte()?.is_some_and(|c| c.is_ascii_digit()) => {
                         self.read_number(first, cur_loc)?
                     }
                     b'0' | b'1' | b'2' | b'3' | b'4' | b'5' | b'6' | b'7' | b'8' | b'9' => {

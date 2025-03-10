@@ -134,7 +134,7 @@ impl<'a> Lexer<'a> {
     where
         F: Fn(&Token<'a>) -> bool,
     {
-        self.peek().map_or(false, f)
+        self.peek().is_some_and(f)
     }
 
     /// Applies f() to the next token and then compares the result with the
@@ -516,7 +516,7 @@ fn parse_token(mut source: &[u8], line: Line) -> (Option<Token<'_>>, &[u8]) {
                 }
             }
             b'-' => {
-                if source.get(1).copied().map_or(false, is_number_lead) {
+                if source.get(1).copied().is_some_and(is_number_lead) {
                     // Negative number
                     let tok;
                     (tok, source) = gather_number(source);

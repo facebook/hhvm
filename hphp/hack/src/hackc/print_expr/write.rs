@@ -32,7 +32,7 @@ impl Error {
 }
 
 pub(crate) fn into_error(e: io::Error) -> Error {
-    if e.kind() == io::ErrorKind::Other && e.get_ref().map_or(false, |e| e.is::<Error>()) {
+    if e.kind() == io::ErrorKind::Other && e.get_ref().is_some_and(|e| e.is::<Error>()) {
         let err: Error = *e.into_inner().unwrap().downcast::<Error>().unwrap();
         return err;
     }

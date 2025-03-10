@@ -186,7 +186,7 @@ impl<'a> Scope<'a> {
     }
 
     pub fn is_in_lambda(&self) -> bool {
-        self.items.last().map_or(false, ScopeItem::is_in_lambda)
+        self.items.last().is_some_and(ScopeItem::is_in_lambda)
     }
 
     pub fn coeffects_of_scope(&self) -> Coeffects {

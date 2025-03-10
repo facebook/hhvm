@@ -55,7 +55,7 @@ use crate::tokenizer::Tokenizer;
 use crate::util::unescape;
 
 pub(crate) fn is_block(id: &str) -> bool {
-    id.starts_with('b') && id.as_bytes().get(1).map_or(false, u8::is_ascii_digit)
+    id.starts_with('b') && id.as_bytes().get(1).is_some_and(u8::is_ascii_digit)
 }
 
 pub(crate) fn is_lid(id: &[u8]) -> bool {

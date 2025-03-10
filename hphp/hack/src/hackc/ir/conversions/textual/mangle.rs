@@ -18,7 +18,7 @@ pub(crate) trait Mangle {
 }
 
 fn starts_like_a_textual_ident(name: &[u8]) -> bool {
-    name.first().map_or(false, |&x| x == b'n') && name.len() > 1 && name[1].is_ascii_digit()
+    name.first().is_some_and(|&x| x == b'n') && name.len() > 1 && name[1].is_ascii_digit()
 }
 
 //precondition: name should not contain non-utf8 chars
@@ -48,7 +48,7 @@ impl Mangle for [u8] {
                 // \ -> ::
                 // anything else -> xx (hex digits)
                 let mut res = String::with_capacity(self.len());
-                if self.first().map_or(false, u8::is_ascii_digit) {
+                if self.first().is_some_and(u8::is_ascii_digit) {
                     res.push('_');
                 }
                 for &ch in self {

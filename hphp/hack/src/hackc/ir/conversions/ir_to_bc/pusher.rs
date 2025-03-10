@@ -252,9 +252,8 @@ impl PushInserter {
             .iter()
             .copied()
             .filter(|vid| {
-                vid.instr().map_or(false, |iid| {
-                    self.liveness.instr_last_use[iid].contains(&cur_iid)
-                })
+                vid.instr()
+                    .is_some_and(|iid| self.liveness.instr_last_use[iid].contains(&cur_iid))
             })
             .sorted_by_key(|vid| vid.raw())
             .dedup_with_count()
@@ -262,7 +261,7 @@ impl PushInserter {
             .collect();
 
         for vid in vids {
-            let vid_consume = vid_histogram.get_mut(vid).map_or(false, |count| {
+            let vid_consume = vid_histogram.get_mut(vid).is_some_and(|count| {
                 *count -= 1;
                 *count == 0
             });

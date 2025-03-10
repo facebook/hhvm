@@ -318,7 +318,7 @@ impl Ast {
         };
 
         // check for trailing comma
-        let pat = if it.peek().map_or(false, |t| t.is_punct(',')) {
+        let pat = if it.peek().is_some_and(|t| t.is_punct(',')) {
             it.next();
             let count = it.expect_tt()?;
             if count.is_punct('+') {
@@ -335,19 +335,19 @@ impl Ast {
         };
 
         // check for trailing +,*,?
-        let pat = if it.peek().map_or(false, |t| t.is_punct('+')) {
+        let pat = if it.peek().is_some_and(|t| t.is_punct('+')) {
             it.next();
             Ast::OneOrMore(Box::new(pat))
         } else {
             pat
         };
-        let pat = if it.peek().map_or(false, |t| t.is_punct('*')) {
+        let pat = if it.peek().is_some_and(|t| t.is_punct('*')) {
             it.next();
             Ast::ZeroOrMore(Box::new(pat))
         } else {
             pat
         };
-        let pat = if it.peek().map_or(false, |t| t.is_punct('?')) {
+        let pat = if it.peek().is_some_and(|t| t.is_punct('?')) {
             let t = it.next().unwrap();
             if !pat.is_predicate() {
                 return Err(t.error("Error: '?' only works with basic patterns"));
@@ -388,12 +388,12 @@ impl Ast {
             // f(a, b, c)
             let mut name = vec![t];
 
-            while it.peek().map_or(false, |t| t.is_punct('.')) {
+            while it.peek().is_some_and(|t| t.is_punct('.')) {
                 name.push(it.next().unwrap());
                 name.push(it.expect_ident()?);
             }
 
-            if it.peek().map_or(false, TokenTree::is_group) {
+            if it.peek().is_some_and(TokenTree::is_group) {
                 let group = it.expect_group()?;
                 let stream = group.group_stream()?;
                 Ast::FnCall {

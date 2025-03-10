@@ -1009,7 +1009,7 @@ fn check_l_iter<'a, 'd>(
         return Ok(None);
     }
 
-    if key_loc.map_or(false, |k| *k == special_idents::THIS) {
+    if key_loc.is_some_and(|k| *k == special_idents::THIS) {
         return Ok(None);
     }
 
@@ -1027,7 +1027,7 @@ fn check_l_iter<'a, 'd>(
         }
 
         fn is_key(&self, name: &str) -> bool {
-            self.key_loc.map_or(false, |kl| *kl == *name)
+            self.key_loc.is_some_and(|kl| *kl == *name)
         }
 
         fn check_lval(&self, expr: &ast::Expr, is_unset: bool) -> bool {

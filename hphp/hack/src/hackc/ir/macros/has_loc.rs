@@ -81,7 +81,7 @@ fn build_has_loc_struct(input: &DeriveInput, data: &DataStruct) -> Result<TokenS
                 let field = data
                     .fields
                     .iter()
-                    .find(|field| field.ident.as_ref().map_or(false, |id| id == &name))
+                    .find(|field| field.ident.as_ref().is_some_and(|id| id == &name))
                     .ok_or_else(|| Error::new(input.span(), format!("Field '{name}' not found")))?
                     .ident
                     .as_ref()

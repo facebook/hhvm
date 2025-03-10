@@ -121,7 +121,7 @@ fn has_bc_to_ir_attr(attrs: &mut [Attribute]) -> bool {
     attrs
         .iter()
         .next()
-        .map_or(false, |attr| attr.path.is_ident("bc_to_ir"))
+        .is_some_and(|attr| attr.path.is_ident("bc_to_ir"))
 }
 
 fn expr_to_path(expr: Expr) -> Result<Path> {

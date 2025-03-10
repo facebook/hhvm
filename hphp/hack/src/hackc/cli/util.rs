@@ -52,7 +52,7 @@ pub(crate) fn collect_files(
                 children: &mut Vec<Result<DirEntry<((), ())>>>,
             ) {
                 children.retain(|dir_entry_result| {
-                    dir_entry_result.as_ref().map_or(false, |dir_entry| {
+                    dir_entry_result.as_ref().is_ok_and(|dir_entry| {
                         let file_type = &dir_entry.file_type;
                         if file_type.is_file() {
                             is_php_file_name(dir_entry.file_name())

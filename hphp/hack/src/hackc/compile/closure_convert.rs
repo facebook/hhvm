@@ -299,7 +299,7 @@ impl<'b> Scope<'b> {
                 }
                 ScopeSummary::Method(x) => {
                     parts.push(strip_id(x.name).to_string());
-                    if !parts.last().map_or(false, |x| x.ends_with("::")) {
+                    if !parts.last().is_some_and(|x| x.ends_with("::")) {
                         parts.push("::".into())
                     };
                 }
@@ -1042,12 +1042,12 @@ impl<'ast, 'a: 'b, 'b> VisitorMut<'ast> for ClosureVisitor<'a, 'b> {
                         .as_class_get()
                         .and_then(|(id, _, _)| id.as_ciexpr())
                         .and_then(|x| x.as_id())
-                        .map_or(false, string_utils::is_parent)
+                        .is_some_and(string_utils::is_parent)
                         || (x.func)
                             .as_class_const()
                             .and_then(|(id, _)| id.as_ciexpr())
                             .and_then(|x| x.as_id())
-                            .map_or(false, string_utils::is_parent) =>
+                            .is_some_and(string_utils::is_parent) =>
                 {
                     self.state_mut().add_var(scope, "$this");
                     let mut res = Expr_::Call(x);
@@ -1153,7 +1153,7 @@ impl<'a: 'b, 'b> ClosureVisitor<'a, 'b> {
                     if cid
                         .as_ciexpr()
                         .and_then(Expr::as_id)
-                        .map_or(false, |id| !is_selflike_keyword(id))
+                        .is_some_and(|id| !is_selflike_keyword(id))
                     {
                         let mut res = Expr_::Call(x);
                         res.recurse(scope, self)?;

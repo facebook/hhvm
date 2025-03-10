@@ -150,7 +150,7 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                 let has_use_list = self
                     .context
                     .explicit_use_set_opt
-                    .map_or(false, |s| s.contains(fn_name));
+                    .is_some_and(|s| s.contains(fn_name));
                 if self.context.capture_debugger_vars || has_use_list {
                     use_list.iter().for_each(|id| self.add_local(id.1.name()));
                 }

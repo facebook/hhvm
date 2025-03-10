@@ -524,10 +524,7 @@ impl FunctionParser<'_> {
                                 "?->": "?->" { ObjMethodOp::NullSafe }]> );
                 operands.push(obj);
                 let next = tokenizer.peek_expect_token()?;
-                if next
-                    .get_identifier()
-                    .map_or(false, |n| is_vid(n.as_bytes()))
-                {
+                if next.get_identifier().is_some_and(|n| is_vid(n.as_bytes())) {
                     // vid->vid => FCallObjMethod
                     let method = self.vid(tokenizer)?;
                     operands_suffix.push(method);

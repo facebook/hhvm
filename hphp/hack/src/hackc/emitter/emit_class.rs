@@ -412,7 +412,7 @@ fn emit_reified_init_method<'a, 'd>(
         .filter(|x| x.reified != ReifyKind::Erased)
         .count();
     let maybe_has_reified_parents = match ast_class.extends.first().as_ref() {
-        Some(Hint(_, h)) if h.as_happly().map_or(false, |(_, l)| !l.is_empty()) => true,
+        Some(Hint(_, h)) if h.as_happly().is_some_and(|(_, l)| !l.is_empty()) => true,
         _ => false, // Hack classes can only extend a single parent
     };
     if num_reified == 0 && !maybe_has_reified_parents {
@@ -577,7 +577,7 @@ pub fn emit_class<'a, 'd>(emitter: &mut Emitter<'d>, ast_class: &'a ast::Class_)
 
     let base_is_closure = || {
         base.as_ref()
-            .map_or(false, |cls| cls.as_str().eq_ignore_ascii_case("Closure"))
+            .is_some_and(|cls| cls.as_str().eq_ignore_ascii_case("Closure"))
     };
     if !is_closure && base_is_closure() {
         return Err(Error::fatal_runtime(

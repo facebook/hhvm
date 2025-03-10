@@ -652,7 +652,7 @@ mod string_utils_tests {
 
         #[test]
         fn test_negative_nan() {
-            assert_eq!(float::to_string(-std::f32::NAN), "NAN")
+            assert_eq!(float::to_string(-f32::NAN), "NAN")
         }
     }
 

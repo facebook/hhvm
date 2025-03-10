@@ -234,3 +234,27 @@ func TestSerializationBufferOwnership(t *testing.T) {
 		prevRes = pay
 	}
 }
+
+func BenchmarkBinarySerializer(b *testing.B) {
+	// Run: buck run @mode/opt thrift/lib/go/thrift:thrift_test -- --test.bench=BenchmarkBinarySerializer -test.benchtime=100x
+
+	ser := NewBinarySerializer()
+
+	val := dummy.NewDummyStruct1().
+		SetField1(int8(12)).
+		SetField2(true).
+		SetField3(int16(12345)).
+		SetField4(int32(123456)).
+		SetField5(int64(1234567)).
+		SetField6(float32(1234.567)).
+		SetField7(float64(123456.7)).
+		SetField8([]byte{1, 2, 3, 4}).
+		SetField9("hello")
+
+	for b.Loop() {
+		_, err := ser.Write(val)
+		if err != nil {
+			b.Fatalf("failed to write: %v", err)
+		}
+	}
+}

@@ -48,20 +48,18 @@ class ThreadManagerTest : public testing::Test {
   gflags::FlagSaver flagsaver_;
 };
 
+#if FOLLY_HAVE_WEAK_SYMBOLS
 static folly::WorkerProvider* kWorkerProviderGlobal = nullptr;
 
 namespace folly {
-
-#if FOLLY_HAVE_WEAK_SYMBOLS
 FOLLY_KEEP std::unique_ptr<folly::QueueObserverFactory>
 make_queue_observer_factory(
     const std::string&, size_t, folly::WorkerProvider* workerProvider) {
   kWorkerProviderGlobal = workerProvider;
   return {};
 }
-#endif
-
 } // namespace folly
+#endif
 
 // Loops until x==y for up to timeout ms.
 // The end result is the same as of {EXPECT,ASSERT}_EQ(x,y)
@@ -879,6 +877,7 @@ TEST_P(JoinTest, DISABLED_Join) {
 INSTANTIATE_TEST_CASE_P(
     ThreadManagerTest, JoinTest, ::testing::ValuesIn(factories));
 
+#if FOLLY_HAVE_WEAK_SYMBOLS
 class TMThreadIDCollectorTest : public ::testing::Test {
  protected:
   void SetUp() override { kWorkerProviderGlobal = nullptr; }
@@ -987,6 +986,7 @@ TEST_F(TMThreadIDCollectorTest, CollectIDBlocksThreadExitTest) {
   EXPECT_EQ(tm->workerCount(), 2);
   tm->join();
 }
+#endif
 
 //
 // =============================================================================

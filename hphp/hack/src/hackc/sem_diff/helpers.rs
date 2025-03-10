@@ -88,15 +88,15 @@ where
     Ok(())
 }
 
-pub(crate) fn sem_diff_map_t<'a, 'b, Ta: 'a, Tb: 'b, F>(
+pub(crate) fn sem_diff_map_t<'a, 'b, Ta, Tb, F>(
     path: &CodePath<'_>,
     a: &'a [Ta],
     b: &'b [Tb],
     f_eq: F,
 ) -> Result<()>
 where
-    Ta: MapName,
-    Tb: MapName,
+    Ta: MapName + 'a,
+    Tb: MapName + 'b,
     F: Fn(&CodePath<'_>, &'a Ta, &'b Tb) -> Result<()>,
 {
     let a_hash: HashMap<&str, &Ta> = a.iter().map(|t| (t.get_name(), t)).collect();

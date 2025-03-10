@@ -484,8 +484,7 @@ fn int_expr_to_typed_value(s: &str) -> Result<TypedValue, Error> {
 
 fn update_duplicates_in_map(
     kvs: Vec<(TypedValue, TypedValue)>,
-) -> impl IntoIterator<Item = DictEntry, IntoIter = impl Iterator<Item = DictEntry> + ExactSizeIterator>
-{
+) -> impl IntoIterator<Item = DictEntry, IntoIter = impl ExactSizeIterator<Item = DictEntry>> {
     kvs.into_iter()
         .collect::<IndexMap<_, _, RandomState>>()
         .into_iter()

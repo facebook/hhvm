@@ -50,7 +50,7 @@ impl std::fmt::Debug for GetName {
     }
 }
 
-thread_local!(static MANGLE_XHP_MODE: Cell<bool> = Cell::new(true));
+thread_local!(static MANGLE_XHP_MODE: Cell<bool> = const { Cell::new(true) });
 
 pub fn without_xhp_mangling<T>(f: impl FnOnce() -> T) -> T {
     MANGLE_XHP_MODE.with(|cur| {
@@ -62,7 +62,7 @@ pub fn without_xhp_mangling<T>(f: impl FnOnce() -> T) -> T {
 }
 
 pub fn is_xhp(name: &str) -> bool {
-    name.chars().next().map_or(false, |c| c == ':')
+    name.starts_with(':')
 }
 
 pub fn clean(s: &str) -> &str {

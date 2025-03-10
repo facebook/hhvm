@@ -139,8 +139,8 @@ pub type Func = crate::BodyImpl<IrRepr>;
 ///
 /// Funcs also contain some amount of storage for data associated with the code
 /// - such as immediate constants or locations - so they can referred to with
-/// indices instead of having to deal with refereces and ownerhip (and to make
-/// them smaller).
+///   indices instead of having to deal with references and ownership (and to make
+///   them smaller).
 ///
 /// Exception frames are tracked as a separate tree structure made up of Blocks.
 /// Each exception frame says where to jump in the case of a thrown exception.

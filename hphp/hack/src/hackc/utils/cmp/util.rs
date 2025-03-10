@@ -46,7 +46,7 @@ impl<T: MapName> MapName for &T {
     }
 }
 
-pub(crate) fn cmp_map_t<'a, 'b, Ta: 'a, Tb: 'b, F>(
+pub(crate) fn cmp_map_t<'a, 'b, Ta, Tb, F>(
     a: impl IntoIterator<Item = Ta>,
     b: impl IntoIterator<Item = Tb>,
     f_eq: F,

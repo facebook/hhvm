@@ -377,7 +377,7 @@ impl Coeffects {
         } else {
             // Inaccessible IC set can be optimized away if all
             // static coeffects are within this list
-            return !self.get_static_coeffects().iter().all(|ctx| {
+            !self.get_static_coeffects().iter().all(|ctx| {
                 matches!(
                     ctx,
                     Ctx::LeakSafe
@@ -387,7 +387,7 @@ impl Coeffects {
                         | Ctx::WriteThisProps
                         | Ctx::WriteProps
                 )
-            });
+            })
         }
     }
 

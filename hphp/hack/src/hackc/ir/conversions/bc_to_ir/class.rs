@@ -7,24 +7,24 @@ use hhbc::Class;
 
 pub(crate) fn convert_class(cls: Class) -> ir::Class {
     ir::Class {
-        attributes: cls.attributes.into(),
-        base: cls.base.into(),
-        constants: cls.constants.into(),
-        ctx_constants: cls.ctx_constants.into(),
-        doc_comment: cls.doc_comment.map(|c| c.into()).into(),
-        enum_includes: cls.enum_includes.into(),
-        enum_type: cls.enum_type.into(),
+        attributes: cls.attributes,
+        base: cls.base,
+        constants: cls.constants,
+        ctx_constants: cls.ctx_constants,
+        doc_comment: cls.doc_comment,
+        enum_includes: cls.enum_includes,
+        enum_type: cls.enum_type,
         flags: cls.flags,
-        implements: cls.implements.into(),
+        implements: cls.implements,
         methods: (cls.methods.into_iter())
             .map(crate::func::convert_method)
             .collect(),
         name: cls.name,
-        properties: cls.properties.into(),
-        requirements: cls.requirements.into(),
+        properties: cls.properties,
+        requirements: cls.requirements,
         span: cls.span,
-        type_constants: cls.type_constants.into(),
-        upper_bounds: cls.upper_bounds.into(),
-        uses: cls.uses.into(),
+        type_constants: cls.type_constants,
+        upper_bounds: cls.upper_bounds,
+        uses: cls.uses,
     }
 }

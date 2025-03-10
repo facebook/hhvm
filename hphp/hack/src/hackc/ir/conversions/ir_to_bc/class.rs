@@ -33,23 +33,23 @@ pub(crate) fn convert_class(unit: &mut UnitBuilder, class: ir::Class) {
     );
 
     let class = hhbc::Class {
-        attributes: attributes.into(),
-        base: base.into(),
-        constants: constants.into(),
-        ctx_constants: ctx_constants.into(),
-        doc_comment: doc_comment.map(|c| c.into()).into(),
-        enum_includes: enum_includes.into(),
-        enum_type: enum_type.into(),
+        attributes,
+        base,
+        constants,
+        ctx_constants,
+        doc_comment,
+        enum_includes,
+        enum_type,
         flags,
-        implements: implements.into(),
+        implements,
         methods: methods.into(),
         name,
-        properties: properties.into(),
-        requirements: requirements.into(),
+        properties,
+        requirements,
         span,
-        type_constants: type_constants.into(),
-        upper_bounds: upper_bounds.into(),
-        uses: uses.into(),
+        type_constants,
+        upper_bounds,
+        uses,
     };
     unit.classes.push(class);
 }

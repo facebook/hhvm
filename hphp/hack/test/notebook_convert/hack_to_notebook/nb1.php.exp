@@ -20,7 +20,7 @@
       "execution_count":null,
       "metadata":{},
       "outputs":[],
-      "source":["# Check it out","","I am a *markdown* **cell**"]
+      "source":["# Check it out","\n","I am a *markdown* **cell**"]
     },
     {
       "cell_type":"code",

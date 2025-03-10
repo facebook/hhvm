@@ -58,11 +58,24 @@ let make_ipynb_cell
     ~(cell_type : string)
     ~(source : string list)
     ~(cell_bento_metadata : Hh_json.json option) =
+  let source =
+    source
+    |> List.map ~f:(fun s ->
+           if String.is_empty s then
+             (* We mimic VSCode's behavior of normalizing "" to "\n".
+              * Why: A notebook validator rejects notebooks that have empty lines
+              * in the `source` array.
+              *)
+             "\n"
+           else
+             s)
+    |> List.map ~f:Hh_json.string_
+  in
   Hh_json.(
     JSON_Object
       [
         ("cell_type", JSON_String cell_type);
-        ("source", JSON_Array (List.map source ~f:Hh_json.string_));
+        ("source", JSON_Array source);
         ("outputs", JSON_Array []);
         ("execution_count", JSON_Null);
         ( "metadata",

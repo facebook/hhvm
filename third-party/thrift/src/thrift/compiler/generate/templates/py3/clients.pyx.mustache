@@ -144,6 +144,7 @@ cdef class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
                 }}{{#type:hasCythonType?}}{{^type:integer?}}{{> types/cython_python_type}} {{/type:integer?}}{{/type:hasCythonType?}}{{!
                 }}{{field:py_name}}{{#type:integer?}} not None{{/type:integer?}}{{^type:number?}} not None{{/type:number?}}{{!
             }}{{/field:type}}{{/function:args}},
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -223,6 +224,7 @@ cdef class {{service:parent_service_name}}_{{service:name}}({{#service:extends}}
                 }}{{#type:hasCythonType?}}{{^type:integer?}}{{> types/cython_python_type}} {{/type:integer?}}{{/type:hasCythonType?}}{{!
                 }}{{field:py_name}}{{#type:integer?}} not None{{/type:integer?}}{{^type:number?}} not None{{/type:number?}}{{!
             }}{{/field:type}}{{/function:args}},
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:

@@ -149,6 +149,7 @@ cdef class NestedContainers(thrift.py3.client.Client):
     def mapList(
             NestedContainers self,
             foo not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -178,6 +179,7 @@ cdef class NestedContainers(thrift.py3.client.Client):
     def mapSet(
             NestedContainers self,
             foo not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -207,6 +209,7 @@ cdef class NestedContainers(thrift.py3.client.Client):
     def listMap(
             NestedContainers self,
             foo not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -236,6 +239,7 @@ cdef class NestedContainers(thrift.py3.client.Client):
     def listSet(
             NestedContainers self,
             foo not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -265,6 +269,7 @@ cdef class NestedContainers(thrift.py3.client.Client):
     def turtles(
             NestedContainers self,
             foo not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:

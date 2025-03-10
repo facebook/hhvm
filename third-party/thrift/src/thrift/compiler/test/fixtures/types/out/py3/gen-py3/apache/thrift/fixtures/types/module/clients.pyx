@@ -113,6 +113,7 @@ cdef class SomeService(thrift.py3.client.Client):
     def bounce_map(
             SomeService self,
             m not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -142,6 +143,7 @@ cdef class SomeService(thrift.py3.client.Client):
     def binary_keyed_map(
             SomeService self,
             r not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:

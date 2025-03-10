@@ -216,6 +216,7 @@ cdef class MyService(thrift.py3.client.Client):
     def hasDataById(
             MyService self,
             id not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -247,6 +248,7 @@ cdef class MyService(thrift.py3.client.Client):
     def getDataById(
             MyService self,
             id not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -279,6 +281,7 @@ cdef class MyService(thrift.py3.client.Client):
             MyService self,
             id not None,
             str data not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -312,6 +315,7 @@ cdef class MyService(thrift.py3.client.Client):
             MyService self,
             id not None,
             str data not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -371,6 +375,7 @@ cdef class MyServiceFast(thrift.py3.client.Client):
     def hasDataById(
             MyServiceFast self,
             id not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -402,6 +407,7 @@ cdef class MyServiceFast(thrift.py3.client.Client):
     def getDataById(
             MyServiceFast self,
             id not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -434,6 +440,7 @@ cdef class MyServiceFast(thrift.py3.client.Client):
             MyServiceFast self,
             id not None,
             str data not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -467,6 +474,7 @@ cdef class MyServiceFast(thrift.py3.client.Client):
             MyServiceFast self,
             id not None,
             str data not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -526,6 +534,7 @@ cdef class DbMixedStackArguments(thrift.py3.client.Client):
     def getDataByKey0(
             DbMixedStackArguments self,
             str key not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -553,6 +562,7 @@ cdef class DbMixedStackArguments(thrift.py3.client.Client):
     def getDataByKey1(
             DbMixedStackArguments self,
             str key not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:

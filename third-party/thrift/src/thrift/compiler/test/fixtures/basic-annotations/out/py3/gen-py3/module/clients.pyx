@@ -290,6 +290,7 @@ cdef class MyService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def ping(
             MyService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -315,6 +316,7 @@ cdef class MyService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def getRandomData(
             MyService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -341,6 +343,7 @@ cdef class MyService(thrift.py3.client.Client):
     def hasDataById(
             MyService self,
             id not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -372,6 +375,7 @@ cdef class MyService(thrift.py3.client.Client):
     def getDataById(
             MyService self,
             id not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -404,6 +408,7 @@ cdef class MyService(thrift.py3.client.Client):
             MyService self,
             id not None,
             str data not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -437,6 +442,7 @@ cdef class MyService(thrift.py3.client.Client):
             MyService self,
             id not None,
             str data not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -468,6 +474,7 @@ cdef class MyService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def doNothing(
             MyService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -520,6 +527,7 @@ cdef class MyServicePrioParent(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def ping(
             MyServicePrioParent self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -545,6 +553,7 @@ cdef class MyServicePrioParent(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def pong(
             MyServicePrioParent self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -597,6 +606,7 @@ cdef class MyServicePrioChild(MyServicePrioParent):
     @cython.always_allow_keywords(True)
     def pang(
             MyServicePrioChild self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -649,6 +659,7 @@ cdef class BadService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def bar(
             BadService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -700,6 +711,7 @@ cdef class BadService_BadInteraction(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def foo(
             BadService_BadInteraction self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -741,6 +753,7 @@ cdef class FooBarBazService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def foo(
             FooBarBazService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -766,6 +779,7 @@ cdef class FooBarBazService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def bar(
             FooBarBazService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -791,6 +805,7 @@ cdef class FooBarBazService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def baz(
             FooBarBazService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:

@@ -124,6 +124,7 @@ cdef class MyRoot(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def do_root(
             MyRoot self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -176,6 +177,7 @@ cdef class MyNode(MyRoot):
     @cython.always_allow_keywords(True)
     def do_mid(
             MyNode self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -228,6 +230,7 @@ cdef class MyLeaf(MyNode):
     @cython.always_allow_keywords(True)
     def do_leaf(
             MyLeaf self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:

@@ -149,6 +149,7 @@ cdef class InteractLocally_SharedInteraction(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def init(
             InteractLocally_SharedInteraction self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -169,6 +170,7 @@ cdef class InteractLocally_SharedInteraction(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def do_something(
             InteractLocally_SharedInteraction self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -189,6 +191,7 @@ cdef class InteractLocally_SharedInteraction(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def tear_down(
             InteractLocally_SharedInteraction self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:

@@ -651,6 +651,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def get_five(
             SimpleService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -677,6 +678,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def add_five(
             SimpleService self,
             num not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -707,6 +709,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def do_nothing(
             SimpleService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -734,6 +737,7 @@ cdef class SimpleService(thrift.py3.client.Client):
             SimpleService self,
             str first not None,
             str second not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -762,6 +766,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def get_value(
             SimpleService self,
             _module_types.SimpleStruct simple_struct not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -789,6 +794,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def negate(
             SimpleService self,
             pbool input not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -816,6 +822,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def tiny(
             SimpleService self,
             input not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -847,6 +854,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def small(
             SimpleService self,
             input not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -878,6 +886,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def big(
             SimpleService self,
             input not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -909,6 +918,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def two(
             SimpleService self,
             double input,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -935,6 +945,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def expected_exception(
             SimpleService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -960,6 +971,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def unexpected_exception(
             SimpleService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -986,6 +998,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def sum_i16_list(
             SimpleService self,
             numbers not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1015,6 +1028,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def sum_i32_list(
             SimpleService self,
             numbers not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1044,6 +1058,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def sum_i64_list(
             SimpleService self,
             numbers not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1073,6 +1088,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def concat_many(
             SimpleService self,
             words not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1102,6 +1118,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def count_structs(
             SimpleService self,
             items not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1131,6 +1148,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def sum_set(
             SimpleService self,
             numbers not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1161,6 +1179,7 @@ cdef class SimpleService(thrift.py3.client.Client):
             SimpleService self,
             words not None,
             str word not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1192,6 +1211,7 @@ cdef class SimpleService(thrift.py3.client.Client):
             SimpleService self,
             words not None,
             str key not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1222,6 +1242,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def map_length(
             SimpleService self,
             items not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1251,6 +1272,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def sum_map_values(
             SimpleService self,
             items not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1280,6 +1302,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def complex_sum_i32(
             SimpleService self,
             _module_types.ComplexStruct counter not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1307,6 +1330,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def repeat_name(
             SimpleService self,
             _module_types.ComplexStruct counter not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1333,6 +1357,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def get_struct(
             SimpleService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1359,6 +1384,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def fib(
             SimpleService self,
             n not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1390,6 +1416,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def unique_words(
             SimpleService self,
             words not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1419,6 +1446,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def words_count(
             SimpleService self,
             words not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1448,6 +1476,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def set_enum(
             SimpleService self,
             object in_enum not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1476,6 +1505,7 @@ cdef class SimpleService(thrift.py3.client.Client):
             SimpleService self,
             num_lists not None,
             num_items not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1512,6 +1542,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def word_character_frequency(
             SimpleService self,
             str sentence not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1539,6 +1570,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def list_of_sets(
             SimpleService self,
             str some_words not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1566,6 +1598,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def nested_map_argument(
             SimpleService self,
             struct_map not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1595,6 +1628,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def make_sentence(
             SimpleService self,
             word_chars not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1624,6 +1658,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def get_union(
             SimpleService self,
             sets not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1653,6 +1688,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def get_keys(
             SimpleService self,
             string_map not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1682,6 +1718,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def lookup_double(
             SimpleService self,
             key not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1713,6 +1750,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def retrieve_binary(
             SimpleService self,
             bytes something not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1740,6 +1778,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def contain_binary(
             SimpleService self,
             binaries not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1769,6 +1808,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def contain_enum(
             SimpleService self,
             the_enum not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1798,6 +1838,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     def get_binary_union_struct(
             SimpleService self,
             _module_types.BinaryUnion u not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1852,6 +1893,7 @@ cdef class DerivedService(SimpleService):
     @cython.always_allow_keywords(True)
     def get_six(
             DerivedService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1904,6 +1946,7 @@ cdef class RederivedService(DerivedService):
     @cython.always_allow_keywords(True)
     def get_seven(
             RederivedService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:

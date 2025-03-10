@@ -268,6 +268,7 @@ cdef class FooService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def simple_rpc(
             FooService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -321,6 +322,7 @@ cdef class FB303Service(thrift.py3.client.Client):
     def simple_rpc(
             FB303Service self,
             int_parameter not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -378,6 +380,7 @@ cdef class MyService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def ping(
             MyService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -403,6 +406,7 @@ cdef class MyService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def getRandomData(
             MyService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -429,6 +433,7 @@ cdef class MyService(thrift.py3.client.Client):
     def sink(
             MyService self,
             sink not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -461,6 +466,7 @@ cdef class MyService(thrift.py3.client.Client):
             MyService self,
             id not None,
             str data not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -493,6 +499,7 @@ cdef class MyService(thrift.py3.client.Client):
     def hasDataById(
             MyService self,
             id not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -524,6 +531,7 @@ cdef class MyService(thrift.py3.client.Client):
     def getDataById(
             MyService self,
             id not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -555,6 +563,7 @@ cdef class MyService(thrift.py3.client.Client):
     def deleteDataById(
             MyService self,
             id not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -587,6 +596,7 @@ cdef class MyService(thrift.py3.client.Client):
             MyService self,
             id not None,
             str data not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -618,6 +628,7 @@ cdef class MyService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def invalid_return_for_hack(
             MyService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -643,6 +654,7 @@ cdef class MyService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def rpc_skipped_codegen(
             MyService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -696,6 +708,7 @@ cdef class DbMixedStackArguments(thrift.py3.client.Client):
     def getDataByKey0(
             DbMixedStackArguments self,
             str key not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -723,6 +736,7 @@ cdef class DbMixedStackArguments(thrift.py3.client.Client):
     def getDataByKey1(
             DbMixedStackArguments self,
             str key not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:

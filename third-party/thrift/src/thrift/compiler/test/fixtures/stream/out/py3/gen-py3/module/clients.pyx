@@ -245,6 +245,7 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
             PubSubStreamingService self,
             i32_from not None,
             i32_to not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -281,6 +282,7 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
     def streamthrows(
             PubSubStreamingService self,
             foo not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -312,6 +314,7 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
     def servicethrows(
             PubSubStreamingService self,
             foo not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -343,6 +346,7 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
     def servicethrows2(
             PubSubStreamingService self,
             foo not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -374,6 +378,7 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
     def boththrows(
             PubSubStreamingService self,
             foo not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -405,6 +410,7 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
     def responseandstreamstreamthrows(
             PubSubStreamingService self,
             foo not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -436,6 +442,7 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
     def responseandstreamservicethrows(
             PubSubStreamingService self,
             foo not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -467,6 +474,7 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
     def responseandstreamboththrows(
             PubSubStreamingService self,
             foo not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -499,6 +507,7 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
             PubSubStreamingService self,
             i32_from not None,
             i32_to not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:

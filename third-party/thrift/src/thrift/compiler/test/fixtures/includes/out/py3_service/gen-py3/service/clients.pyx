@@ -120,6 +120,7 @@ cdef class MyService(thrift.py3.client.Client):
             MyService self,
             _module_types.MyStruct s not None,
             _includes_types.Included i not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -149,6 +150,7 @@ cdef class MyService(thrift.py3.client.Client):
             MyService self,
             _module_types.MyStruct s not None,
             _includes_types.Included i not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:

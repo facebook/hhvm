@@ -97,6 +97,7 @@ cdef class TestService(thrift.py3.client.Client):
     def init(
             TestService self,
             int1 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:

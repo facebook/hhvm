@@ -153,6 +153,7 @@ cdef class A(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def foo(
             A self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -204,6 +205,7 @@ cdef class A_I(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def interact(
             A_I self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -246,6 +248,7 @@ cdef class B(A):
     def bar(
             B self,
             _module_types.Foo foo not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -272,6 +275,7 @@ cdef class B(A):
     @cython.always_allow_keywords(True)
     def stream_stuff(
             B self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -350,6 +354,7 @@ cdef class C_I(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def interact(
             C_I self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:

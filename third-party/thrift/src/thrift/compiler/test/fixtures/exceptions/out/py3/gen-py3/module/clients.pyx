@@ -177,6 +177,7 @@ cdef class Raiser(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def doBland(
             Raiser self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -202,6 +203,7 @@ cdef class Raiser(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def doRaise(
             Raiser self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -227,6 +229,7 @@ cdef class Raiser(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def get200(
             Raiser self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -252,6 +255,7 @@ cdef class Raiser(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def get500(
             Raiser self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:

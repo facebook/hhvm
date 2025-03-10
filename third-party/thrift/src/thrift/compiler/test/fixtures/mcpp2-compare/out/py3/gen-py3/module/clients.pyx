@@ -765,6 +765,7 @@ cdef class ReturnService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def noReturn(
             ReturnService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -790,6 +791,7 @@ cdef class ReturnService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def boolReturn(
             ReturnService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -815,6 +817,7 @@ cdef class ReturnService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def i16Return(
             ReturnService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -840,6 +843,7 @@ cdef class ReturnService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def i32Return(
             ReturnService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -865,6 +869,7 @@ cdef class ReturnService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def i64Return(
             ReturnService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -890,6 +895,7 @@ cdef class ReturnService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def floatReturn(
             ReturnService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -915,6 +921,7 @@ cdef class ReturnService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def doubleReturn(
             ReturnService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -940,6 +947,7 @@ cdef class ReturnService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def stringReturn(
             ReturnService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -965,6 +973,7 @@ cdef class ReturnService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def binaryReturn(
             ReturnService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -990,6 +999,7 @@ cdef class ReturnService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def mapReturn(
             ReturnService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1015,6 +1025,7 @@ cdef class ReturnService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def simpleTypedefReturn(
             ReturnService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1040,6 +1051,7 @@ cdef class ReturnService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def complexTypedefReturn(
             ReturnService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1065,6 +1077,7 @@ cdef class ReturnService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def list_mostComplexTypedefReturn(
             ReturnService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1090,6 +1103,7 @@ cdef class ReturnService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def enumReturn(
             ReturnService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1115,6 +1129,7 @@ cdef class ReturnService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def list_EnumReturn(
             ReturnService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1140,6 +1155,7 @@ cdef class ReturnService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def structReturn(
             ReturnService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1165,6 +1181,7 @@ cdef class ReturnService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def set_StructReturn(
             ReturnService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1190,6 +1207,7 @@ cdef class ReturnService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def unionReturn(
             ReturnService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1215,6 +1233,7 @@ cdef class ReturnService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def list_UnionReturn(
             ReturnService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1241,6 +1260,7 @@ cdef class ReturnService(thrift.py3.client.Client):
     def readDataEb(
             ReturnService self,
             size not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1272,6 +1292,7 @@ cdef class ReturnService(thrift.py3.client.Client):
     def readData(
             ReturnService self,
             size not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1330,6 +1351,7 @@ cdef class ParamService(thrift.py3.client.Client):
     def void_ret_i16_param(
             ParamService self,
             param1 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1362,6 +1384,7 @@ cdef class ParamService(thrift.py3.client.Client):
             ParamService self,
             param1 not None,
             param2 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1398,6 +1421,7 @@ cdef class ParamService(thrift.py3.client.Client):
     def void_ret_map_param(
             ParamService self,
             param1 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1428,6 +1452,7 @@ cdef class ParamService(thrift.py3.client.Client):
             ParamService self,
             param1 not None,
             param2 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1460,6 +1485,7 @@ cdef class ParamService(thrift.py3.client.Client):
     def void_ret_map_typedef_param(
             ParamService self,
             param1 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1491,6 +1517,7 @@ cdef class ParamService(thrift.py3.client.Client):
     def void_ret_enum_param(
             ParamService self,
             object param1 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1518,6 +1545,7 @@ cdef class ParamService(thrift.py3.client.Client):
     def void_ret_struct_param(
             ParamService self,
             _module_types.MyStruct param1 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1545,6 +1573,7 @@ cdef class ParamService(thrift.py3.client.Client):
     def void_ret_listunion_param(
             ParamService self,
             param1 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1575,6 +1604,7 @@ cdef class ParamService(thrift.py3.client.Client):
             ParamService self,
             param1 not None,
             param2 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1611,6 +1641,7 @@ cdef class ParamService(thrift.py3.client.Client):
     def bool_ret_map_param(
             ParamService self,
             param1 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1640,6 +1671,7 @@ cdef class ParamService(thrift.py3.client.Client):
     def bool_ret_union_param(
             ParamService self,
             _module_types.ComplexUnion param1 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1668,6 +1700,7 @@ cdef class ParamService(thrift.py3.client.Client):
             ParamService self,
             float param1,
             double param2,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1697,6 +1730,7 @@ cdef class ParamService(thrift.py3.client.Client):
             ParamService self,
             str param1 not None,
             param2 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1731,6 +1765,7 @@ cdef class ParamService(thrift.py3.client.Client):
             param3 not None,
             param4 not None,
             param5 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1782,6 +1817,7 @@ cdef class ParamService(thrift.py3.client.Client):
     def double_ret_setstruct_param(
             ParamService self,
             param1 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1811,6 +1847,7 @@ cdef class ParamService(thrift.py3.client.Client):
     def string_ret_string_param(
             ParamService self,
             str param1 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1838,6 +1875,7 @@ cdef class ParamService(thrift.py3.client.Client):
     def binary_ret_binary_param(
             ParamService self,
             bytes param1 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1865,6 +1903,7 @@ cdef class ParamService(thrift.py3.client.Client):
     def map_ret_bool_param(
             ParamService self,
             pbool param1 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1893,6 +1932,7 @@ cdef class ParamService(thrift.py3.client.Client):
             ParamService self,
             param1 not None,
             param2 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1925,6 +1965,7 @@ cdef class ParamService(thrift.py3.client.Client):
     def mapsetlistmapliststring_ret_listlistlist_param(
             ParamService self,
             param1 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1954,6 +1995,7 @@ cdef class ParamService(thrift.py3.client.Client):
     def typedef_ret_i32_param(
             ParamService self,
             param1 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1985,6 +2027,7 @@ cdef class ParamService(thrift.py3.client.Client):
     def listtypedef_ret_typedef_param(
             ParamService self,
             param1 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -2014,6 +2057,7 @@ cdef class ParamService(thrift.py3.client.Client):
     def enum_ret_double_param(
             ParamService self,
             double param1,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -2042,6 +2086,7 @@ cdef class ParamService(thrift.py3.client.Client):
             ParamService self,
             double param1,
             object param2 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -2070,6 +2115,7 @@ cdef class ParamService(thrift.py3.client.Client):
     def listenum_ret_map_param(
             ParamService self,
             param1 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -2099,6 +2145,7 @@ cdef class ParamService(thrift.py3.client.Client):
     def struct_ret_i16_param(
             ParamService self,
             param1 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -2130,6 +2177,7 @@ cdef class ParamService(thrift.py3.client.Client):
     def setstruct_ret_set_param(
             ParamService self,
             param1 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -2160,6 +2208,7 @@ cdef class ParamService(thrift.py3.client.Client):
             ParamService self,
             param1 not None,
             param2 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -2196,6 +2245,7 @@ cdef class ParamService(thrift.py3.client.Client):
     def listunion_string_param(
             ParamService self,
             str param1 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:

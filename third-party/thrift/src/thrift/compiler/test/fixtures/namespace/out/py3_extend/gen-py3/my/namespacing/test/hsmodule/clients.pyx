@@ -97,6 +97,7 @@ cdef class HsTestService(thrift.py3.client.Client):
     def init(
             HsTestService self,
             int1 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:

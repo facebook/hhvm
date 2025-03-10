@@ -109,6 +109,7 @@ cdef class TestService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def test(
             TestService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:

@@ -103,6 +103,7 @@ cdef class ExtendTestService(_my_namespacing_test_hsmodule_clients.HsTestService
     def check(
             ExtendTestService self,
             _my_namespacing_test_hsmodule_types.HsFoo struct1 not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:

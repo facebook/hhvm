@@ -636,6 +636,7 @@ cdef class MyService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def foo(
             MyService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -662,6 +663,7 @@ cdef class MyService(thrift.py3.client.Client):
     def interact(
             MyService self,
             arg not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -692,6 +694,7 @@ cdef class MyService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def interactFast(
             MyService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -717,6 +720,7 @@ cdef class MyService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def serialize(
             MyService self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -802,6 +806,7 @@ cdef class MyService_MyInteraction(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def frobnicate(
             MyService_MyInteraction self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -822,6 +827,7 @@ cdef class MyService_MyInteraction(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def ping(
             MyService_MyInteraction self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -842,6 +848,7 @@ cdef class MyService_MyInteraction(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def truthify(
             MyService_MyInteraction self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -865,6 +872,7 @@ cdef class MyService_MyInteractionFast(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def frobnicate(
             MyService_MyInteractionFast self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -885,6 +893,7 @@ cdef class MyService_MyInteractionFast(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def ping(
             MyService_MyInteractionFast self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -905,6 +914,7 @@ cdef class MyService_MyInteractionFast(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def truthify(
             MyService_MyInteractionFast self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -928,6 +938,7 @@ cdef class MyService_SerialInteraction(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def frobnicate(
             MyService_SerialInteraction self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -969,6 +980,7 @@ cdef class Factories(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def foo(
             Factories self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -995,6 +1007,7 @@ cdef class Factories(thrift.py3.client.Client):
     def interact(
             Factories self,
             arg not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1025,6 +1038,7 @@ cdef class Factories(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def interactFast(
             Factories self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1050,6 +1064,7 @@ cdef class Factories(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def serialize(
             Factories self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1102,6 +1117,7 @@ cdef class Perform(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def foo(
             Perform self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1187,6 +1203,7 @@ cdef class Perform_MyInteraction(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def frobnicate(
             Perform_MyInteraction self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1207,6 +1224,7 @@ cdef class Perform_MyInteraction(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def ping(
             Perform_MyInteraction self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1227,6 +1245,7 @@ cdef class Perform_MyInteraction(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def truthify(
             Perform_MyInteraction self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1250,6 +1269,7 @@ cdef class Perform_MyInteractionFast(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def frobnicate(
             Perform_MyInteractionFast self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1270,6 +1290,7 @@ cdef class Perform_MyInteractionFast(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def ping(
             Perform_MyInteractionFast self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1290,6 +1311,7 @@ cdef class Perform_MyInteractionFast(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def truthify(
             Perform_MyInteractionFast self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1313,6 +1335,7 @@ cdef class Perform_SerialInteraction(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def frobnicate(
             Perform_SerialInteraction self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1354,6 +1377,7 @@ cdef class InteractWithShared(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def do_some_similar_things(
             InteractWithShared self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1422,6 +1446,7 @@ cdef class InteractWithShared_SharedInteraction(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def init(
             InteractWithShared_SharedInteraction self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1442,6 +1467,7 @@ cdef class InteractWithShared_SharedInteraction(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def do_something(
             InteractWithShared_SharedInteraction self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1462,6 +1488,7 @@ cdef class InteractWithShared_SharedInteraction(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def tear_down(
             InteractWithShared_SharedInteraction self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1485,6 +1512,7 @@ cdef class InteractWithShared_MyInteraction(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def frobnicate(
             InteractWithShared_MyInteraction self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1505,6 +1533,7 @@ cdef class InteractWithShared_MyInteraction(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def ping(
             InteractWithShared_MyInteraction self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1525,6 +1554,7 @@ cdef class InteractWithShared_MyInteraction(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def truthify(
             InteractWithShared_MyInteraction self,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:
@@ -1567,6 +1597,7 @@ cdef class BoxService(thrift.py3.client.Client):
     def getABoxSession(
             BoxService self,
             _test_fixtures_interactions_module_types.ShouldBeBoxed req not None,
+            *,
             __RpcOptions rpc_options=None
     ):
         if rpc_options is None:

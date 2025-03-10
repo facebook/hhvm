@@ -35,12 +35,12 @@ external parse_decls :
   DeclParserOptions.t -> Relative_path.t -> string -> parsed_file
   = "hh_parse_decls_ffi"
 
-external parse_and_hash_decls :
+external parse_and_hash_decls_obr :
   DeclParserOptions.t ->
   bool ->
   Relative_path.t ->
   string ->
-  parsed_file_with_hashes = "hh_parse_and_hash_decls_ffi"
+  parsed_file_with_hashes = "hh_parse_and_hash_decls_ffi_obr"
 
 (* NB: Must be manually kept in sync with Rust function
    `hackrs_provider_backend::FileInfo::from::<ParsedFileWithHashes>` *)

@@ -33,7 +33,7 @@ val parse_decls :
   DeclParserOptions.t -> Relative_path.t -> string -> parsed_file
 
 (** NOTE: this doesn't respect deregister_php_lib, and has decls in reverse lexical order *)
-val parse_and_hash_decls :
+val parse_and_hash_decls_obr :
   DeclParserOptions.t ->
   bool ->
   Relative_path.t ->

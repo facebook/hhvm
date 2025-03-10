@@ -75,7 +75,7 @@ ocaml_ffi_arena_result! {
         direct_decl_parser::parse_decls_for_typechecking_obr(&opts, filename, text, arena)
     }
 
-    fn hh_parse_and_hash_decls_ffi<'a>(
+    fn hh_parse_and_hash_decls_ffi_obr<'a>(
         arena: &'a Bump,
         opts: DeclParserOptions,
         deregister_php_stdlib_if_hhi: bool,

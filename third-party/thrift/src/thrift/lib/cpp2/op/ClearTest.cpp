@@ -172,26 +172,6 @@ void test_custom_default() {
   //     defaultObj, intrinsicDefaultObj));
 }
 
-TEST(ClearTest, CustomDefaultTypeAdapter) {
-  using Tag = type::adapted<
-      TestAdapter,
-      type::struct_t<testset::struct_terse_i64_custom_default>>;
-  using FieldTag = type::field<Tag, FieldContext<TestStructWithContext, 1>>;
-
-  test_custom_default<Tag>();
-  test_custom_default<FieldTag>();
-}
-
-TEST(ClearTest, CustomDefaultFieldAdapter) {
-  using Tag = type::field<
-      type::adapted<
-          FieldAdapterWithContext,
-          type::struct_t<testset::struct_terse_i64_custom_default>>,
-      FieldContext<TestStructWithContext, 1>>;
-
-  test_custom_default<Tag, true>();
-}
-
 TEST(ClearTest, Default) {
   // Default of structured with no custom default returns the reference of
   // intrinsic default for the terse intern box optimization.

@@ -319,6 +319,7 @@ final class ThriftPolicyEnforcerTest extends WWWTest {
     expect($mock)->toBeCalledWithInAnyOrder(
       vec[vec[
         ThriftServiceMethodNameAssetXID::get('fake_service', 'fake_method'),
+        'fake_service',
       ]],
     );
   }
@@ -351,6 +352,7 @@ final class ThriftPolicyEnforcerTest extends WWWTest {
     expect($mock)->toBeCalledWithInAnyOrder(
       vec[vec[
         ThriftServiceMethodNameAssetXID::get('PrivacyLibEchoService', 'echo'),
+        'sr_config_1',
       ]],
     );
   }

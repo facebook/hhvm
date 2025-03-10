@@ -45,7 +45,12 @@ final class UpdateUniverseContextHandler implements IContextHandler {
   ): void {
     $service_interface = Shapes::idx($params, 'service_interface');
     $function_name = Shapes::idx($params, 'fn_name');
-    if ($service_interface is null || $function_name is null) {
+    $sr_config_service_name = Shapes::idx($params, 'service_name');
+    if (
+      $service_interface is null ||
+      $function_name is null ||
+      $sr_config_service_name is null
+    ) {
       return;
     }
     $thrift_name = ThriftServiceHelper::extractServiceName($service_interface);
@@ -57,6 +62,7 @@ final class UpdateUniverseContextHandler implements IContextHandler {
     self::updateContextPropUniverseInThriftFrameworkMetadata(
       $thrift_name,
       $function_name,
+      $sr_config_service_name,
       $mutable_tfm,
     );
   }
@@ -64,6 +70,7 @@ final class UpdateUniverseContextHandler implements IContextHandler {
   private static function updateContextPropUniverseInThriftFrameworkMetadata(
     string $thrift_name,
     string $function_name,
+    string $sr_config_service_name,
     ThriftFrameworkMetadata $mutable_tfm,
   )[zoned_local]: void {
     if (PrivacyLibKS::isKilled(PLKS::XSU_UNIVERSE_CONTEXT_PROP)) {
@@ -71,8 +78,11 @@ final class UpdateUniverseContextHandler implements IContextHandler {
     }
 
     try {
-      $current_universe =
-        self::getCurrentUniverse($thrift_name, $function_name);
+      $current_universe = self::getThriftCurrentUniverse(
+        $thrift_name,
+        $function_name,
+        $sr_config_service_name,
+      );
       // set current universe in TFM
       $current_universe_int = $current_universe?->getValue();
       if (
@@ -91,16 +101,18 @@ final class UpdateUniverseContextHandler implements IContextHandler {
     }
   }
 
-  private static function getCurrentUniverse(
+  private static function getThriftCurrentUniverse(
     string $thrift_name,
     string $function_name,
+    string $sr_config_service_name,
   ): ?UniverseDesignator {
     try {
       $xid = ThriftServiceMethodNameAssetXID::unsafeGet(
         $thrift_name,
         $function_name,
       );
-      $privacy_lib = ThriftServiceMethodNamePrivacyLib::get($xid);
+      $privacy_lib =
+        ThriftServiceMethodNamePrivacyLib::get($xid, $sr_config_service_name);
       $asset_universe = self::getPLArtifactUniverse($privacy_lib);
       if ($asset_universe is nonnull) {
         if ($asset_universe->shouldDynamicallyPropagate()) {

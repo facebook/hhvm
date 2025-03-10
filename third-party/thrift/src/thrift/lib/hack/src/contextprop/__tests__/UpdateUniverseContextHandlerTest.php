@@ -114,6 +114,7 @@ final class UpdateUniverseContextHandlerTest
       'thrift_class' => $thrift_service_name,
       'client' =>
         new ThriftShimClient(new TBinaryProtocol(new TNullTransport())),
+      'service_name' => 'EXAMPLE_SR_CONFIG_SERVICE_NAME',
     );
     $transport =
       TServiceRouterTransport::create($thrift_service_name, dict[], dict[]);

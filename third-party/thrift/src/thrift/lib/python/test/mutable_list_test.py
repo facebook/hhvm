@@ -140,9 +140,9 @@ class MutableListTest(unittest.TestCase):
         self.assertEqual(python_list, mutable_list)
 
     def test_insert_struct(self) -> None:
-        l = Lists(structList=to_thrift_list([Foo(value=1)]))
-        foo_list = l.structList
-        python_foo_list = list(l.structList)
+        lists = Lists(structList=to_thrift_list([Foo(value=1)]))
+        foo_list = lists.structList
+        python_foo_list = list(lists.structList)
         self.assertEqual(foo_list, python_foo_list)
 
         foo_list.insert(0, Foo(value=0))

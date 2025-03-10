@@ -95,7 +95,7 @@ ocaml_ffi_with_arena! {
         backend: UnsafeOcamlPtr,
         path: RelativePath,
         text: UnsafeOcamlPtr,
-    ) -> rust_decl_ffi::OcamlParsedFileWithHashes<'a> {
+    ) -> rust_decl_ffi::OcamlParsedFileWithHashesObr<'a> {
         let backend = unsafe { get_backend(backend) };
         backend.direct_decl_parse_and_cache(path, text, arena).into()
     }

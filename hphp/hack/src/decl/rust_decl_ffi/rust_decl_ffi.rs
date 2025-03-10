@@ -20,10 +20,19 @@ use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
 use relative_path::RelativePath;
 
 #[derive(Debug, Clone)]
-pub struct OcamlParsedFileWithHashes<'a>(ParsedFileWithHashes<'a>);
+pub struct OcamlParsedFileWithHashesObr<'a>(ParsedFileWithHashes<'a>);
 
-impl<'a> From<ParsedFileWithHashes<'a>> for OcamlParsedFileWithHashes<'a> {
+impl<'a> From<ParsedFileWithHashes<'a>> for OcamlParsedFileWithHashesObr<'a> {
     fn from(file: ParsedFileWithHashes<'a>) -> Self {
+        Self(file)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct OcamlParsedFileWithHashes(oxidized::direct_decl_parser::ParsedFileWithHashes);
+
+impl From<oxidized::direct_decl_parser::ParsedFileWithHashes> for OcamlParsedFileWithHashes {
+    fn from(file: oxidized::direct_decl_parser::ParsedFileWithHashes) -> Self {
         Self(file)
     }
 }
@@ -33,7 +42,34 @@ impl<'a> From<ParsedFileWithHashes<'a>> for OcamlParsedFileWithHashes<'a> {
 // even if it did, its self.0.decls structure stores hh24_types::DeclHash
 // but we here need an Int64. Writing manually is slicker than constructing
 // a temporary vec.
-impl ocamlrep::ToOcamlRep for OcamlParsedFileWithHashes<'_> {
+impl ocamlrep::ToOcamlRep for OcamlParsedFileWithHashesObr<'_> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
+        let mut block = alloc.block_with_size(3);
+        alloc.set_field(&mut block, 0, alloc.add(&self.0.mode));
+        alloc.set_field(
+            &mut block,
+            1,
+            alloc.add_copy(Int64(self.0.file_decls_hash.as_u64() as i64)),
+        );
+        let mut hd = alloc.add(&());
+        for (name, decl, hash, sort_text) in self.0.iter() {
+            let mut tuple = alloc.block_with_size(4);
+            alloc.set_field(&mut tuple, 0, alloc.add(name));
+            alloc.set_field(&mut tuple, 1, alloc.add(decl));
+            alloc.set_field(&mut tuple, 2, alloc.add_copy(Int64(hash.as_u64() as i64)));
+            alloc.set_field(&mut tuple, 3, alloc.add(sort_text));
+
+            let mut cons_cell = alloc.block_with_size(2);
+            alloc.set_field(&mut cons_cell, 0, tuple.build());
+            alloc.set_field(&mut cons_cell, 1, hd);
+            hd = cons_cell.build();
+        }
+        alloc.set_field(&mut block, 2, hd);
+        block.build()
+    }
+}
+
+impl ocamlrep::ToOcamlRep for OcamlParsedFileWithHashes {
     fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         let mut block = alloc.block_with_size(3);
         alloc.set_field(&mut block, 0, alloc.add(&self.0.mode));
@@ -81,7 +117,7 @@ ocaml_ffi_arena_result! {
         deregister_php_stdlib_if_hhi: bool,
         filename: RelativePath,
         text: UnsafeOcamlPtr,
-    ) -> OcamlParsedFileWithHashes<'a> {
+    ) -> OcamlParsedFileWithHashesObr<'a> {
         let prefix = filename.prefix();
         // SAFETY: Borrow the contents of the source file from the value on the
         // OCaml heap rather than copying it over. This is safe as long as we
@@ -106,6 +142,23 @@ ocaml_ffi! {
         let text_value: ocamlrep::Value<'_> = unsafe { text.as_value() };
         let text = bytes_from_ocamlrep(text_value).expect("expected string");
         direct_decl_parser::parse_decls_for_typechecking(&opts, filename, text)
+    }
+
+    fn hh_parse_and_hash_decls_ffi(
+        opts: DeclParserOptions,
+        deregister_php_stdlib_if_hhi: bool,
+        filename: RelativePath,
+        text: UnsafeOcamlPtr,
+    ) -> OcamlParsedFileWithHashes {
+        let prefix = filename.prefix();
+        // SAFETY: Borrow the contents of the source file from the value on the
+        // OCaml heap rather than copying it over. This is safe as long as we
+        // don't call into OCaml within this function scope.
+        let text_value: ocamlrep::Value<'_> = unsafe { text.as_value() };
+        let text = bytes_from_ocamlrep(text_value).expect("expected string");
+        let parsed_file = direct_decl_parser::parse_decls_for_typechecking(&opts, filename, text);
+        let with_hashes = oxidized::direct_decl_parser::ParsedFileWithHashes::new(parsed_file, deregister_php_stdlib_if_hhi, prefix);
+        with_hashes.into()
     }
 }
 

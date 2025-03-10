@@ -71,7 +71,7 @@ func connectTestHeaderServer(
 		thrift.WithDialer(func() (net.Conn, error) {
 			return net.Dial("tcp", addr.String())
 		}),
-		thrift.WithTimeout(localConnTimeout),
+		thrift.WithIoTimeout(localConnTimeout),
 	)
 	if err != nil {
 		return nil, err

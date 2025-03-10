@@ -1,5 +1,0 @@
-C: (Minor_change
-      { consts = { "X" -> Added }; typeconsts = { "T" -> Added };
-        props = { "x" -> Added }; sprops = { "$y" -> Added };
-        methods = { "f" -> Added }; smethods = { "g" -> Added };
-        constructor = Added })

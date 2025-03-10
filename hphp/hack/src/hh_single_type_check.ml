@@ -62,7 +62,6 @@ type mode =
   | Dump_tast
   | Find_refs of File_content.Position.t
   | Highlight_refs of File_content.Position.t
-  | Shallow_class_diff
   | Go_to_impl of File_content.Position.t
   | Hover of File_content.Position.t option
   | Apply_quickfixes
@@ -514,10 +513,6 @@ let parse_options () =
                    ());
            ]),
         "<pos> Highlight all usages of a symbol at given line and column" );
-      ( "--shallow-class-diff",
-        Arg.Unit (set_mode Shallow_class_diff),
-        " Test shallow class comparison used in incremental mode on shallow class declarations"
-      );
       ( "--forbid_nullable_cast",
         Arg.Set forbid_nullable_cast,
         " Forbid casting from nullable values." );
@@ -1182,45 +1177,6 @@ let parse_name_and_decl ctx files_contents =
           Decl.make_env ~sh:SharedMem.Uses ctx fn);
 
       files_info)
-
-(** This function doesn't have side-effects. Its sole job is to return shallow decls. *)
-let get_shallow_decls ctx filename file_contents :
-    Shallow_decl_defs.shallow_class SMap.t =
-  let popt = Provider_context.get_popt ctx in
-  let opts = DeclParserOptions.from_parser_options popt in
-  (Direct_decl_parser.parse_decls_obr opts filename file_contents)
-    .Direct_decl_parser.pf_decls
-  |> List.fold ~init:SMap.empty ~f:(fun acc (name, decl) ->
-         match decl with
-         | Shallow_decl_defs.Class c -> SMap.add name c acc
-         | _ -> acc)
-
-let test_shallow_class_diff ctx filename =
-  let filename_after = Relative_path.to_absolute filename ^ ".after" in
-  let contents1 = Sys_utils.cat (Relative_path.to_absolute filename) in
-  let contents2 = Sys_utils.cat filename_after in
-  let decls1 = get_shallow_decls ctx filename contents1 in
-  let decls2 = get_shallow_decls ctx filename contents2 in
-  let decls =
-    SMap.merge (fun _ a b -> Some (a, b)) decls1 decls2 |> SMap.bindings
-  in
-  let diffs =
-    List.map decls ~f:(fun (cid, old_and_new) ->
-        ( Utils.strip_ns cid,
-          match old_and_new with
-          | (Some c1, Some c2) ->
-            Shallow_class_diff.diff_class
-              (Provider_context.get_package_info ctx)
-              c1
-              c2
-          | (None, None) ->
-            Some ClassDiff.(Major_change (MajorChange.Unknown Neither_found))
-          | (None, Some _) -> Some ClassDiff.(Major_change MajorChange.Added)
-          | (Some _, None) -> Some ClassDiff.(Major_change MajorChange.Removed)
-        ))
-  in
-  List.iter diffs ~f:(fun (cid, diff) ->
-      Format.printf "%s: %a@." cid (Format.pp_print_option ClassDiff.pp) diff)
 
 let compute_nasts ctx files_info interesting_files =
   let nasts = create_nasts ctx files_info in
@@ -2198,10 +2154,6 @@ let handle_mode
     in
     print_error_list error_format errors max_errors;
     if not (Errors.is_empty errors) then exit 2
-  | Shallow_class_diff ->
-    print_errors_if_present parse_errors;
-    let filename = expect_single_file () in
-    test_shallow_class_diff ctx filename
   | Get_member class_and_member_id ->
     let (cid, mid) =
       match Str.split (Str.regexp "::") class_and_member_id with

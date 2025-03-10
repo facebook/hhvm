@@ -74,10 +74,6 @@ func (x Animal) String() string {
     return "<UNSET>"
 }
 
-func (x Animal) Ptr() *Animal {
-    return &x
-}
-
 // Deprecated: Use AnimalToValue instead (e.g. `x, ok := AnimalToValue["name"]`).
 func AnimalFromString(s string) (Animal, error) {
     if v, ok := AnimalToValue[s]; ok {

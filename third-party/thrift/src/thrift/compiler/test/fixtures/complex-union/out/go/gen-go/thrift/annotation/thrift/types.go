@@ -54,10 +54,6 @@ func (x RpcPriority) String() string {
     return "<UNSET>"
 }
 
-func (x RpcPriority) Ptr() *RpcPriority {
-    return &x
-}
-
 // Deprecated: Use RpcPriorityToValue instead (e.g. `x, ok := RpcPriorityToValue["name"]`).
 func RpcPriorityFromString(s string) (RpcPriority, error) {
     if v, ok := RpcPriorityToValue[s]; ok {

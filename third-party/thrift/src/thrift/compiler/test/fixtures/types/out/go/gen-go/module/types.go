@@ -550,10 +550,6 @@ func (x HasBitwiseOps) String() string {
     return "<UNSET>"
 }
 
-func (x HasBitwiseOps) Ptr() *HasBitwiseOps {
-    return &x
-}
-
 // Deprecated: Use HasBitwiseOpsToValue instead (e.g. `x, ok := HasBitwiseOpsToValue["name"]`).
 func HasBitwiseOpsFromString(s string) (HasBitwiseOps, error) {
     if v, ok := HasBitwiseOpsToValue[s]; ok {
@@ -590,10 +586,6 @@ func (x IsUnscoped) String() string {
     return "<UNSET>"
 }
 
-func (x IsUnscoped) Ptr() *IsUnscoped {
-    return &x
-}
-
 // Deprecated: Use IsUnscopedToValue instead (e.g. `x, ok := IsUnscopedToValue["name"]`).
 func IsUnscopedFromString(s string) (IsUnscoped, error) {
     if v, ok := IsUnscopedToValue[s]; ok {
@@ -628,10 +620,6 @@ func (x MyForwardRefEnum) String() string {
         return v
     }
     return "<UNSET>"
-}
-
-func (x MyForwardRefEnum) Ptr() *MyForwardRefEnum {
-    return &x
 }
 
 // Deprecated: Use MyForwardRefEnumToValue instead (e.g. `x, ok := MyForwardRefEnumToValue["name"]`).

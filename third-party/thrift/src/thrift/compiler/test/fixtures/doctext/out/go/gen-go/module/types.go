@@ -94,10 +94,6 @@ func (x B) String() string {
     return "<UNSET>"
 }
 
-func (x B) Ptr() *B {
-    return &x
-}
-
 // Deprecated: Use BToValue instead (e.g. `x, ok := BToValue["name"]`).
 func BFromString(s string) (B, error) {
     if v, ok := BToValue[s]; ok {

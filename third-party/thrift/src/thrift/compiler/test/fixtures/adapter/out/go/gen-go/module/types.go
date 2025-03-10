@@ -1181,10 +1181,6 @@ func (x Color) String() string {
     return "<UNSET>"
 }
 
-func (x Color) Ptr() *Color {
-    return &x
-}
-
 // Deprecated: Use ColorToValue instead (e.g. `x, ok := ColorToValue["name"]`).
 func ColorFromString(s string) (Color, error) {
     if v, ok := ColorToValue[s]; ok {
@@ -1219,10 +1215,6 @@ func (x ThriftAdaptedEnum) String() string {
         return v
     }
     return "<UNSET>"
-}
-
-func (x ThriftAdaptedEnum) Ptr() *ThriftAdaptedEnum {
-    return &x
 }
 
 // Deprecated: Use ThriftAdaptedEnumToValue instead (e.g. `x, ok := ThriftAdaptedEnumToValue["name"]`).

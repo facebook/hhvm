@@ -48,10 +48,6 @@ func (x {{enum:go_name}}) String() string {
     }
     return "<UNSET>"
 }
-
-func (x {{enum:go_name}}) Ptr() *{{enum:go_name}} {
-    return &x
-}
 {{#program:compat?}}
 
 // Deprecated: Use {{enum:go_name}}ToValue instead (e.g. `x, ok := {{enum:go_name}}ToValue["name"]`).

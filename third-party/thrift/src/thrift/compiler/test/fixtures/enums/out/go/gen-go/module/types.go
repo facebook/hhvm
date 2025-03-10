@@ -51,10 +51,6 @@ func (x Metasyntactic) String() string {
     return "<UNSET>"
 }
 
-func (x Metasyntactic) Ptr() *Metasyntactic {
-    return &x
-}
-
 // Deprecated: Use MetasyntacticToValue instead (e.g. `x, ok := MetasyntacticToValue["name"]`).
 func MetasyntacticFromString(s string) (Metasyntactic, error) {
     if v, ok := MetasyntacticToValue[s]; ok {
@@ -103,10 +99,6 @@ func (x MyEnum1) String() string {
     return "<UNSET>"
 }
 
-func (x MyEnum1) Ptr() *MyEnum1 {
-    return &x
-}
-
 // Deprecated: Use MyEnum1ToValue instead (e.g. `x, ok := MyEnum1ToValue["name"]`).
 func MyEnum1FromString(s string) (MyEnum1, error) {
     if v, ok := MyEnum1ToValue[s]; ok {
@@ -144,10 +136,6 @@ func (x MyEnum2) String() string {
         return v
     }
     return "<UNSET>"
-}
-
-func (x MyEnum2) Ptr() *MyEnum2 {
-    return &x
 }
 
 // Deprecated: Use MyEnum2ToValue instead (e.g. `x, ok := MyEnum2ToValue["name"]`).
@@ -198,10 +186,6 @@ func (x MyEnum3) String() string {
     return "<UNSET>"
 }
 
-func (x MyEnum3) Ptr() *MyEnum3 {
-    return &x
-}
-
 // Deprecated: Use MyEnum3ToValue instead (e.g. `x, ok := MyEnum3ToValue["name"]`).
 func MyEnum3FromString(s string) (MyEnum3, error) {
     if v, ok := MyEnum3ToValue[s]; ok {
@@ -244,10 +228,6 @@ func (x MyEnum4) String() string {
     return "<UNSET>"
 }
 
-func (x MyEnum4) Ptr() *MyEnum4 {
-    return &x
-}
-
 // Deprecated: Use MyEnum4ToValue instead (e.g. `x, ok := MyEnum4ToValue["name"]`).
 func MyEnum4FromString(s string) (MyEnum4, error) {
     if v, ok := MyEnum4ToValue[s]; ok {
@@ -287,10 +267,6 @@ func (x MyBitmaskEnum1) String() string {
     return "<UNSET>"
 }
 
-func (x MyBitmaskEnum1) Ptr() *MyBitmaskEnum1 {
-    return &x
-}
-
 // Deprecated: Use MyBitmaskEnum1ToValue instead (e.g. `x, ok := MyBitmaskEnum1ToValue["name"]`).
 func MyBitmaskEnum1FromString(s string) (MyBitmaskEnum1, error) {
     if v, ok := MyBitmaskEnum1ToValue[s]; ok {
@@ -328,10 +304,6 @@ func (x MyBitmaskEnum2) String() string {
         return v
     }
     return "<UNSET>"
-}
-
-func (x MyBitmaskEnum2) Ptr() *MyBitmaskEnum2 {
-    return &x
 }
 
 // Deprecated: Use MyBitmaskEnum2ToValue instead (e.g. `x, ok := MyBitmaskEnum2ToValue["name"]`).

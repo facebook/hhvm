@@ -209,10 +209,6 @@ func (x EmptyEnum) String() string {
     return "<UNSET>"
 }
 
-func (x EmptyEnum) Ptr() *EmptyEnum {
-    return &x
-}
-
 // Deprecated: Use EmptyEnumToValue instead (e.g. `x, ok := EmptyEnumToValue["name"]`).
 func EmptyEnumFromString(s string) (EmptyEnum, error) {
     if v, ok := EmptyEnumToValue[s]; ok {
@@ -253,10 +249,6 @@ func (x City) String() string {
         return v
     }
     return "<UNSET>"
-}
-
-func (x City) Ptr() *City {
-    return &x
 }
 
 // Deprecated: Use CityToValue instead (e.g. `x, ok := CityToValue["name"]`).
@@ -302,10 +294,6 @@ func (x Company) String() string {
         return v
     }
     return "<UNSET>"
-}
-
-func (x Company) Ptr() *Company {
-    return &x
 }
 
 // Deprecated: Use CompanyToValue instead (e.g. `x, ok := CompanyToValue["name"]`).

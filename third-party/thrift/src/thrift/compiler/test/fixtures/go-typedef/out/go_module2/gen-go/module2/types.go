@@ -48,10 +48,6 @@ func (x Enum) String() string {
     return "<UNSET>"
 }
 
-func (x Enum) Ptr() *Enum {
-    return &x
-}
-
 // Deprecated: Use EnumToValue instead (e.g. `x, ok := EnumToValue["name"]`).
 func EnumFromString(s string) (Enum, error) {
     if v, ok := EnumToValue[s]; ok {

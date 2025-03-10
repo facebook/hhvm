@@ -48,10 +48,6 @@ func (x RefType) String() string {
     return "<UNSET>"
 }
 
-func (x RefType) Ptr() *RefType {
-    return &x
-}
-
 // Deprecated: Use RefTypeToValue instead (e.g. `x, ok := RefTypeToValue["name"]`).
 func RefTypeFromString(s string) (RefType, error) {
     if v, ok := RefTypeToValue[s]; ok {
@@ -95,10 +91,6 @@ func (x EnumUnderlyingType) String() string {
         return v
     }
     return "<UNSET>"
-}
-
-func (x EnumUnderlyingType) Ptr() *EnumUnderlyingType {
-    return &x
 }
 
 // Deprecated: Use EnumUnderlyingTypeToValue instead (e.g. `x, ok := EnumUnderlyingTypeToValue["name"]`).

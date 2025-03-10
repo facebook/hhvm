@@ -116,16 +116,6 @@ void pushTypedValue(Registers& regs, TypedValue tv) {
   }
 }
 
-// Push a native argument (e.g an ArrayData / TypedValue, not Array / Variant).
-void pushNativeArg(Registers& regs, const Func* const func, const int i,
-                   MaybeDataType builtinType, TypedValue arg) {
-  // If the param type is known, just pass the value.
-  if (builtinType) return pushInt(regs, val(arg).num);
-
-  // Pass both the type and value for TypedValue parameters.
-  pushTypedValue(regs, arg);
-}
-
 // Push each argument, spilling ones we don't have registers for to the stack.
 void populateArgs(Registers& regs,
                   const ActRec* fp,
@@ -138,38 +128,43 @@ void populateArgs(Registers& regs,
   for (auto i = 0; i < numArgs; ++i) {
     auto const arg = frame_local(fp, i);
     auto const& pi = func->params()[i];
-    auto const type = pi.builtinType();
-    if (func->isInOut(i)) {
-      if (auto const iv = builtinInValue(func, i)) {
-        *io = *iv;
-        tvDecRefGen(arg);
-      } else {
-        *io = *arg;
-      }
+    switch (pi.builtinAbi) {
+      case Func::ParamInfo::BuiltinAbi::Value:
+        pushInt(regs, val(arg).num);
+        break;
+      case Func::ParamInfo::BuiltinAbi::FPValue:
+        pushDouble(regs, val(arg));
+        break;
+      case Func::ParamInfo::BuiltinAbi::ValueByRef:
+        pushInt(regs, (int64_t)&val(arg));
+        break;
+      case Func::ParamInfo::BuiltinAbi::TypedValue:
+        pushTypedValue(regs, *arg);
+        break;
+      case Func::ParamInfo::BuiltinAbi::TypedValueByRef:
+        pushRval(regs, arg);
+        break;
+      case Func::ParamInfo::BuiltinAbi::InOutByRef:
+        assertx(func->isInOut(i));
+        if (auto const iv = builtinInValue(func, i)) {
+          *io = *iv;
+          tvDecRefGen(arg);
+        } else {
+          *io = *arg;
+        }
 
-      // Any persistent values may become counted...
-      if (isArrayLikeType(io->m_type)) {
-        io->m_type = io->m_data.parr->toDataType();
-      } else if (isStringType(io->m_type)) {
-        io->m_type = KindOfString;
-      }
+        // Any persistent values may become counted...
+        if (isArrayLikeType(io->m_type)) {
+          io->m_type = io->m_data.parr->toDataType();
+        } else if (isStringType(io->m_type)) {
+          io->m_type = KindOfString;
+        }
 
-      // Set the input value to null to avoid double freeing it
-      tvWriteNull(arg);
+        // Set the input value to null to avoid double freeing it
+        tvWriteNull(arg);
 
-      pushInt(regs, (int64_t)io++);
-    } else if (pi.isTakenAsTypedValue()) {
-      pushTypedValue(regs, *arg);
-    } else if (pi.isNativeArg()) {
-      pushNativeArg(regs, func, i, type, *arg);
-    } else if (pi.isTakenAsVariant() || !type) {
-      pushRval(regs, arg);
-    } else if (type == KindOfDouble) {
-      pushDouble(regs, val(arg));
-    } else if (isBuiltinByRef(type)) {
-      pushInt(regs, (int64_t)&val(arg));
-    } else {
-      pushInt(regs, val(arg).num);
+        pushInt(regs, (int64_t)io++);
+        break;
     }
   }
 }
@@ -260,7 +255,6 @@ void callFuncImpl(const Func* const func,
     case KindOfObject:
     case KindOfEnumClassLabel:
     case KindOfResource: {
-      assertx(isBuiltinByRef(ret.m_type));
       if (func->isReturnByValue()) {
         auto val = callFuncInt64Impl(f, GP_args, GP_count, SIMD_args,
                                      SIMD_count);

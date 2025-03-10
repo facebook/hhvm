@@ -1475,38 +1475,6 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Return the target type of  a parameter to a builtin function.
- *
- * If the builtin parameter has no type hints to cause coercion, this function
- * returns TBottom.
- */
-Optional<Type> param_target_type(const Func* callee, uint32_t paramIdx) {
-  auto const& pi = callee->params()[paramIdx];
-  auto const& tc = pi.typeConstraints.main();
-  if (tc.typeName() && interface_supports_arrlike(tc.typeName())) {
-    // If we're dealing with an array-like interface, then there's no need to
-    // check the input type: it's going to be mixed on the C++ side anyhow.
-    return std::nullopt;
-  }
-  if (tc.isNullable()) {
-    // FIXME(T116301380): native builtins don't resolve properly
-    auto const dt = tc.isUnresolved() ? KindOfObject : tc.underlyingDataType();
-    if (!dt) return std::nullopt;
-    return TNull | Type(*dt);
-  }
-  if (!pi.builtinType()) {
-    return tc.isVecOrDict() ? make_optional(TVec|TDict) : std::nullopt;
-  }
-  if (pi.builtinType() == KindOfObject &&
-      pi.defaultValue.m_type == KindOfNull) {
-    return TNullableObj;
-  }
-  return Type(*pi.builtinType());
-}
-
-//////////////////////////////////////////////////////////////////////
-
-/*
  * Collect parameters for a call to a builtin.  Also determine which ones will
  * need to be passed through the eval stack, and which ones will need
  * conversions.
@@ -1520,26 +1488,27 @@ prepare_params(IRGS& env, const Func* callee, SSATmp* ctx,
   // Fill in in reverse order, since they may come from popC's (depending on
   // what loadParam wants to do).
   for (auto offset = uint32_t{numArgs}; offset-- > 0;) {
-    auto const ty = param_target_type(callee, offset);
     auto& cur = ret[offset];
     auto& pi = callee->params()[offset];
 
     cur.isInOut = callee->isInOut(offset);
     cur.value = ldLoc(env, offset, DataTypeSpecific);
-    // We do actually mean exact type equality here.  We're only capable of
-    // passing the following primitives through registers; everything else goes
-    // by address unless its flagged "NativeArg".
-    auto const nonrefType = !pi.isTakenAsVariant() &&
-      (ty == TBool || ty == TInt || ty == TDbl ||
-       pi.isNativeArg() || pi.isTakenAsTypedValue());
-    if (cur.isInOut || nonrefType) {
-      cur.argValue = cur.value;
-      continue;
+    switch (pi.builtinAbi) {
+      case Func::ParamInfo::BuiltinAbi::Value:
+      case Func::ParamInfo::BuiltinAbi::FPValue:
+      case Func::ParamInfo::BuiltinAbi::TypedValue:
+      case Func::ParamInfo::BuiltinAbi::InOutByRef:
+        // Pass by value, inout params are processed further by builtinCall().
+        cur.argValue = cur.value;
+        break;
+      case Func::ParamInfo::BuiltinAbi::ValueByRef:
+      case Func::ParamInfo::BuiltinAbi::TypedValueByRef:
+        // Pass by reference.
+        cur.argValue = gen(env, LdLocAddr, LocalId(offset), fp(env));
+        cur.passByAddr = true;
+        ++ret.numByAddr;
+        break;
     }
-
-    cur.argValue = gen(env, LdLocAddr, LocalId(offset), fp(env));
-    ++ret.numByAddr;
-    cur.passByAddr = true;
   }
 
   return ret;

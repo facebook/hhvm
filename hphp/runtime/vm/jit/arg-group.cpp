@@ -120,6 +120,13 @@ ArgGroup& ArgGroup::ssa(int i, bool allowFP) {
   return *this;
 }
 
+ArgGroup& ArgGroup::fp(int i) {
+  auto const s = m_inst->src(i);
+  auto const loc = m_locs[s];
+  push_SIMDarg(ArgDesc{s, loc}, s->type());
+  return *this;
+}
+
 ArgGroup& ArgGroup::typedValue(int i, Optional<AuxUnion> aux) {
   // If there's exactly one register argument slot left, the whole TypedValue
   // goes on the stack instead of being split between a register and the stack.

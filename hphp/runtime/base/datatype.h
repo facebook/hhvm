@@ -269,19 +269,6 @@ constexpr bool isRealType(DataType t) {
 }
 
 /*
- * Whether a builtin return or param type is not a simple type.
- *
- * This is different from isRefcountedType because builtins can accept and
- * return Variants, and we use std::nullopt to denote these cases.
- */
-inline bool isBuiltinByRef(MaybeDataType t) {
-  return t != KindOfNull &&
-         t != KindOfBoolean &&
-         t != KindOfInt64 &&
-         t != KindOfDouble;
-}
-
-/*
  * Whether a type's value is an integral value in m_data.num.
  */
 constexpr bool hasNumData(DataType t) {

@@ -465,23 +465,46 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
       int extra = isMethod() ? 1 : 0;
       assertx(info.sig.args.size() == params.size() + extra);
       for (auto i = params.size(); i--; ) {
-        switch (info.sig.args[extra + i]) {
-          case Native::NativeSig::Type::ObjectNN:
-          case Native::NativeSig::Type::StringNN:
-          case Native::NativeSig::Type::ArrayNN:
-          case Native::NativeSig::Type::ResourceArg:
-            fParams[i].setFlag(Func::ParamInfo::Flags::NativeArg);
-            break;
-          case Native::NativeSig::Type::MixedTV:
-            fParams[i].setFlag(Func::ParamInfo::Flags::NativeArg);
-            fParams[i].setFlag(Func::ParamInfo::Flags::AsTypedValue);
-            break;
-          case Native::NativeSig::Type::Mixed:
-            fParams[i].setFlag(Func::ParamInfo::Flags::AsVariant);
-            break;
-          default:
-            break;
-        }
+        fParams[i].builtinAbi = [&] {
+          switch (info.sig.args[extra + i]) {
+            case Native::NativeSig::Type::Int64:
+            case Native::NativeSig::Type::Bool:
+            case Native::NativeSig::Type::Func:
+            case Native::NativeSig::Type::Class:
+            case Native::NativeSig::Type::ClsMeth:
+            case Native::NativeSig::Type::ObjectNN:
+            case Native::NativeSig::Type::StringNN:
+            case Native::NativeSig::Type::ArrayNN:
+            case Native::NativeSig::Type::ResourceArg:
+            case Native::NativeSig::Type::This:
+              return Func::ParamInfo::BuiltinAbi::Value;
+            case Native::NativeSig::Type::Double:
+              return Func::ParamInfo::BuiltinAbi::FPValue;
+            case Native::NativeSig::Type::Object:
+            case Native::NativeSig::Type::String:
+            case Native::NativeSig::Type::Array:
+            case Native::NativeSig::Type::Resource:
+              return Func::ParamInfo::BuiltinAbi::ValueByRef;
+            case Native::NativeSig::Type::MixedTV:
+              return Func::ParamInfo::BuiltinAbi::TypedValue;
+            case Native::NativeSig::Type::Mixed:
+              return Func::ParamInfo::BuiltinAbi::TypedValueByRef;
+            case Native::NativeSig::Type::IntIO:
+            case Native::NativeSig::Type::DoubleIO:
+            case Native::NativeSig::Type::BoolIO:
+            case Native::NativeSig::Type::ObjectIO:
+            case Native::NativeSig::Type::StringIO:
+            case Native::NativeSig::Type::ArrayIO:
+            case Native::NativeSig::Type::ResourceIO:
+            case Native::NativeSig::Type::FuncIO:
+            case Native::NativeSig::Type::ClassIO:
+            case Native::NativeSig::Type::ClsMethIO:
+            case Native::NativeSig::Type::MixedIO:
+              return Func::ParamInfo::BuiltinAbi::InOutByRef;
+            case Native::NativeSig::Type::Void:
+              not_reached();
+          }
+        }();
       }
     }
   }

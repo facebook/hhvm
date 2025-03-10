@@ -234,6 +234,7 @@ struct ArgGroup {
   }
 
   ArgGroup& ssa(int i, bool allowFP = true);
+  ArgGroup& fp(int i);
 
   /*
    * Pass tmp as a TypedValue passed by value.

@@ -136,10 +136,16 @@ struct Func final {
       InOut,      // Is this an `inout' parameter?
       Readonly,   // Is this a `readonly` parameter?
       Variadic,   // Is this a `...' parameter?
-      NativeArg,  // Does this use a NativeArg?
-      AsVariant,  // Native function takes as const Variant&
-      AsTypedValue, // Native function takes as TypedValue
       Optional,   // Marked as `optional` in an abstract method
+    };
+
+    enum class BuiltinAbi : uint8_t {
+      Value,            // HPHP::Value, non-floating point
+      FPValue,          // HPHP::Value, floating point (might need a SIMD reg)
+      ValueByRef,       // reference to HPHP::Value
+      TypedValue,       // HPHP::TypedValue
+      TypedValueByRef,  // reference to HPHP::TypedValue (equivalent to Variant)
+      InOutByRef,       // reference to HPHP::Value or HPHP::TypedValue (inout)
     };
 
     ParamInfo();
@@ -150,17 +156,15 @@ struct Func final {
     bool isInOut() const;
     bool isReadonly() const;
     bool isVariadic() const;
-    bool isNativeArg() const;
-    bool isTakenAsVariant() const;
-    bool isTakenAsTypedValue() const;
     bool isOptional() const;
     void setFlag(Flags flag);
-    MaybeDataType builtinType() const;
 
     template<class SerDe> void serde(SerDe& sd);
 
     // Flags as defined by the Flags enum.
     uint8_t flags{0};
+    // If this is a builtin, how to pass the value to the C++ impl.
+    BuiltinAbi builtinAbi;
     // DV initializer funclet offset.
     Offset funcletOff{kInvalidOffset};
     // Set to Uninit if there is no DV, or if there's a nonscalar DV.

@@ -514,14 +514,6 @@ size_t SetTypeInfoTemplate<T>::write(
   return written;
 }
 
-inline void _fbthrift_Py_SET_REFCNT(PyObject* ob, Py_ssize_t refcnt) {
-#if PY_VERSION_HEX < 0x03090000
-  ob->ob_refcnt = refcnt;
-#else
-  Py_SET_REFCNT(ob, refcnt);
-#endif
-}
-
 template <typename T>
 void SetTypeInfoTemplate<T>::consumeElem(
     const void* context,
@@ -535,13 +527,13 @@ void SetTypeInfoTemplate<T>::consumeElem(
   // This is nasty hack since Cython generated code will incr the refcnt
   // so PySet_Add will fail. Need to temporarily decrref.
   const Py_ssize_t currentRefCnt = Py_REFCNT(*pyObjPtr);
-  _fbthrift_Py_SET_REFCNT(*pyObjPtr, 1);
+  Py_SET_REFCNT(*pyObjPtr, 1);
   if (PySet_Add(*pyObjPtr, elem) == -1) {
-    _fbthrift_Py_SET_REFCNT(*pyObjPtr, currentRefCnt);
+    Py_SET_REFCNT(*pyObjPtr, currentRefCnt);
     THRIFT_PY3_CHECK_ERROR();
   }
   Py_DECREF(elem);
-  _fbthrift_Py_SET_REFCNT(*pyObjPtr, currentRefCnt);
+  Py_SET_REFCNT(*pyObjPtr, currentRefCnt);
 }
 
 /**

@@ -37,7 +37,7 @@ type clientOptions struct {
 // ClientOption is a single configuration setting for the thrift client
 type ClientOption func(*clientOptions)
 
-// NoTimeout is a special value for WithTimeout that disables timeouts.
+// NoTimeout is a special value for WithIoTimeout that disables timeouts.
 const NoTimeout = time.Duration(0)
 
 // WithProtocolID sets protocol to given protocolID
@@ -99,11 +99,6 @@ func WithIoTimeout(ioTimeout time.Duration) ClientOption {
 	return func(opts *clientOptions) {
 		opts.ioTimeout = ioTimeout
 	}
-}
-
-// Deprecated: use WithIoTimeout() instead.
-func WithTimeout(ioTimeout time.Duration) ClientOption {
-	return WithIoTimeout(ioTimeout)
 }
 
 // WithTLS is a creates a TLS connection to the given address, including ALPN for thrift.

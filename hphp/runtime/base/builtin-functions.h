@@ -248,10 +248,6 @@ bool is_constructor_name(const char* func);
 [[noreturn]] void throw_late_init_prop(const Class* cls,
                                        const StringData* propName,
                                        bool isSProp);
-[[noreturn]] void throw_parameter_wrong_type(TypedValue tv,
-                                             const Func* callee,
-                                             unsigned int arg_num,
-                                             const StringData* type);
 
 [[noreturn]] void throw_must_be_mutable(const char* className, const char* propName);
 [[noreturn]] void throw_must_be_readonly(const char* className, const char* propName);

@@ -299,106 +299,12 @@ TypedValue callFunc(const Func* const func,
 
 //////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
-template <typename F>
-void coerceFCallArgsImpl(int32_t numArgs, const Func* func, F args) {
-  assertx(func->isBuiltin() && "func is not a builtin");
-  assertx(numArgs == func->numParams());
-
-  for (int32_t i = 0; i < numArgs; i++) {
-    const Func::ParamInfo& pi = func->params()[i];
-
-    auto const tv = args(i);
-
-    auto tc = pi.typeConstraints.main();
-    auto targetType = pi.builtinType();
-
-    if (tc.typeName() && interface_supports_arrlike(tc.typeName())) {
-      // If we're dealing with an array-like interface, then there's no need to
-      // coerce the input type: it's going to be mixed on the C++ side anyhow.
-      continue;
-    }
-
-    if (tc.isNullable()) {
-      if (tvIsNull(tv)) {
-        // No need to coerce when passed a null for a nullable type
-        continue;
-      }
-      // Arg isn't null, so treat it like the underlying type for coersion
-      // purposes.  The ABI-passed type will still be mixed/Variant.
-      targetType = std::nullopt;
-    }
-    if (!targetType) {
-      // FIXME(T116301380): native builtins don't resolve properly
-      targetType = tc.isUnresolved() ? KindOfObject : tc.underlyingDataType();
-    }
-
-    auto const raise_type_error = [&]{
-      auto const expected_type = [&]{
-        if (tc.isVecOrDict()) return "vec_or_dict";
-        return getDataTypeString(*targetType).data();
-      }();
-      auto const msg = param_type_error_message(
-        func->name()->data(), i+1, expected_type, *tv);
-      if (Cfg::PHP7::EngineExceptions) {
-        SystemLib::throwTypeErrorObject(msg);
-      }
-      SystemLib::throwRuntimeExceptionObject(msg);
-    };
-
-    // Check the varray_or_darray and vec_or_dict union types.
-    // Precondition: the DataType of the TypedValue is correct.
-    auto const check_dvarray = [&]{
-      assertx(IMPLIES(targetType, equivDataTypes(type(tv), *targetType)));
-      if (tc.isVecOrDict() && !tvIsVec(tv) && !tvIsDict(tv)) {
-        raise_type_error();
-      }
-    };
-
-    // Check if we have the right type, or if its a Variant.
-    if (!targetType || equivDataTypes(type(tv), *targetType)) {
-      check_dvarray();
-      continue;
-    }
-
-    if ((tvIsClass(tv) || tvIsLazyClass(tv)) && isStringType(*targetType)) {
-      val(tv).pstr = tvIsClass(tv) ?
-        const_cast<StringData*>(val(tv).pclass->name()) :
-        const_cast<StringData*>(val(tv).plazyclass.name());
-      type(tv) = KindOfPersistentString;
-      if (folly::Random::oneIn(Cfg::Eval::ClassStringHintNoticesSampleRate)) {
-        auto reason = folly::sformat(
-          "argument {} passed to {}()", i+1, func->fullName());
-        raise_notice(Strings::CLASS_TO_STRING_IMPLICIT, reason.c_str());
-      }
-      continue;
-    }
-
-    raise_type_error();
-  }
-}
-
-}
-
-void coerceFCallArgsFromLocals(const ActRec* fp,
-                               int32_t numArgs,
-                               const Func* func) {
-  coerceFCallArgsImpl(
-    numArgs, func,
-    [&] (int32_t idx) { return frame_local(fp, idx); }
-  );
-}
-
 #undef CASE
 #undef COERCE_OR_CAST
 
 TypedValue* functionWrapper(ActRec* ar) {
   assertx(ar);
   auto func = ar->func();
-  auto numArgs = func->numParams();
-
-  coerceFCallArgsFromLocals(ar, numArgs, func);
 
   TypedValue rv = callFunc(func, ar, nullptr);
 
@@ -416,10 +322,7 @@ TypedValue* functionWrapper(ActRec* ar) {
 TypedValue* methodWrapper(ActRec* ar) {
   assertx(ar);
   auto func = ar->func();
-  auto numArgs = func->numParams();
   bool isStatic = func->isStatic();
-
-  coerceFCallArgsFromLocals(ar, numArgs, func);
 
   // Prepend a context arg for methods
   // Class when it's being called statically Foo::bar()

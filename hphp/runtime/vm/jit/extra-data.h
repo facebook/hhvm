@@ -510,37 +510,6 @@ struct FuncArgData : IRExtraData {
 };
 
 /*
- * Func with argument index and expected type.
- */
-struct FuncArgTypeData : IRExtraData {
-  explicit FuncArgTypeData(const Func* f, int64_t arg, const StringData* t)
-    : func(f)
-    , argNum(arg)
-    , type(t)
-  {}
-
-  std::string show() const {
-    return folly::format("{},{},{}", func->name(), argNum, type).str();
-  }
-
-  bool equals(const FuncArgTypeData& o) const {
-    return func == o.func && argNum == o.argNum && type == o.type;
-  }
-
-  size_t stableHash() const {
-    return folly::hash::hash_combine(
-      func->stableHash(),
-      std::hash<int64_t>()(argNum),
-      type->hashStatic()
-    );
-  }
-
-  const Func* func;
-  int64_t argNum;
-  const StringData* type;
-};
-
-/*
  * Local variable ID.
  */
 struct LocalId : IRExtraData {
@@ -3136,7 +3105,6 @@ X(CheckInOutMismatch,           BoolVecArgsData);
 X(ThrowInOutMismatch,           ParamData);
 X(CheckReadonlyMismatch,        BoolVecArgsData);
 X(ThrowReadonlyMismatch,        ParamData);
-X(ThrowParameterWrongType,      FuncArgTypeData);
 X(IsFunReifiedGenericsMatched,  FuncData);
 X(IsTypeStruct,                 RDSHandleData);
 X(IsTypeStructShallow,          RDSHandleData);

@@ -450,7 +450,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ThrowMustBeReadonlyException:
   case ThrowMustBeValueTypeException:
   case ThrowOutOfBounds:
-  case ThrowParameterWrongType:
   case ThrowReadonlyMismatch:
   case ThrowUndefPropException:
   case ThrowUninitLoc:

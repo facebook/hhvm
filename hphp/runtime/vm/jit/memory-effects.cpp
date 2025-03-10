@@ -1975,7 +1975,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowLateInitPropError:
   case ThrowMissingArg:
   case ThrowMissingThis:
-  case ThrowParameterWrongType:
   case ArrayMarkLegacyShallow:
   case ArrayMarkLegacyRecursive:
   case ThrowCannotModifyReadonlyCollection:

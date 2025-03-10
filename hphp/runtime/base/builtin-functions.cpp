@@ -977,19 +977,6 @@ void throw_late_init_prop(const Class* cls,
   );
 }
 
-NEVER_INLINE
-void throw_parameter_wrong_type(TypedValue tv,
-                                const Func* callee,
-                                unsigned int arg_num,
-                                const StringData* expected_type) {
-  auto const msg = param_type_error_message(
-    callee->name()->data(), arg_num, expected_type->data(), tv);
-  if (Cfg::PHP7::EngineExceptions) {
-    SystemLib::throwTypeErrorObject(msg);
-  }
-  SystemLib::throwRuntimeExceptionObject(msg);
-}
-
 void check_collection_cast_to_array() {
   if (Cfg::Server::WarnOnCollectionToArray) {
     raise_warning("Casting a collection to an array is an expensive operation "

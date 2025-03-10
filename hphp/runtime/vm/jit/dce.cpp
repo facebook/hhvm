@@ -693,7 +693,6 @@ bool canDCE(const IRInstruction& inst) {
   case ThrowLateInitPropError:
   case ThrowMissingArg:
   case ThrowMissingThis:
-  case ThrowParameterWrongType:
   case ThrowInOutMismatch:
   case ThrowReadonlyMismatch:
   case ThrowCannotModifyReadonlyCollection:

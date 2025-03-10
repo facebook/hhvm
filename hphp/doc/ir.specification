@@ -3443,11 +3443,6 @@ fields of that struct for holding intermediate values.
   property. S0 is the class the property was declared on. S1 is the property
   name. S2 is true if its a static property, false otherwise.
 
-| ThrowParameterWrongType<expectedType, func, argNum>, ND, S(Cell), T
-
-  Throws a RuntimeException if calling a function with an argument that has the
-  wrong type
-
 | ThrowMustBeMutableException<cls>, ND, S(Str), T
 
   Throws an InvalidOperationException indicating a readonly semantics violation

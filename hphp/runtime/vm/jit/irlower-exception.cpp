@@ -351,7 +351,6 @@ IMPL_OPCODE_CALL(ThrowMustBeMutableException)
 IMPL_OPCODE_CALL(ThrowMustBeReadonlyException)
 IMPL_OPCODE_CALL(ThrowMustBeValueTypeException)
 IMPL_OPCODE_CALL(ThrowOutOfBounds)
-IMPL_OPCODE_CALL(ThrowParameterWrongType)
 IMPL_OPCODE_CALL(ThrowReadonlyMismatch)
 
 ///////////////////////////////////////////////////////////////////////////////

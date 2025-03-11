@@ -55,6 +55,19 @@ class double_property_name
   mutable std::map<std::string, object, std::less<>> cached_;
 };
 
+class throws_on_lookup : public native_object,
+                         public native_object::map_like,
+                         public std::enable_shared_from_this<throws_on_lookup> {
+ public:
+  native_object::map_like::ptr as_map_like() const override {
+    return shared_from_this();
+  }
+
+  object::ptr lookup_property(std::string_view) const override {
+    throw fatal_error{"I always throw!"};
+  }
+};
+
 } // namespace
 
 TEST_F(RenderTest, basic) {
@@ -70,8 +83,27 @@ TEST_F(RenderTest, variable_missing_in_scope) {
       diagnostics(),
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "Name 'foo' was not found in the current scope. Tried to search through the following scopes:\n"
+          "Name 'foo' was not found in the current scope.\n"
+          "Tried to search through the following scopes:\n"
           "#0 map (size=0)\n"
+          "\n"
+          "#1 <global scope> (size=0)\n",
+          path_to_file,
+          1)));
+}
+
+TEST_F(RenderTest, variable_throws_on_scope_lookup) {
+  auto result =
+      render("{{foo}}", w::native_object(std::make_shared<throws_on_lookup>()));
+  EXPECT_FALSE(result.has_value());
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Name 'foo' was not found in the current scope.\n"
+          "Cause: I always throw!\n"
+          "Tried to search through the following scopes:\n"
+          "#0 <native_object>\n"
           "\n"
           "#1 <global scope> (size=0)\n",
           path_to_file,
@@ -87,10 +119,29 @@ TEST_F(RenderTest, variable_missing_property_in_object) {
       diagnostics(),
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "Object 'foo' has no property named 'bar'. The object with the missing property is:\n"
+          "Object 'foo' has no property named 'bar'.\n"
+          "The object with the missing property is:\n"
           "map (size=1)\n"
           "`-'baz'\n"
           "  |-'qux'\n",
+          path_to_file,
+          1)));
+}
+
+TEST_F(RenderTest, variable_throws_on_property_lookup) {
+  auto result = render(
+      "{{foo.bar}}",
+      w::map(
+          {{"foo", w::native_object(std::make_shared<throws_on_lookup>())}}));
+  EXPECT_FALSE(result.has_value());
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Object 'foo' has no property named 'bar'.\n"
+          "Cause: I always throw!\n"
+          "The object with the missing property is:\n"
+          "<native_object>\n",
           path_to_file,
           1)));
 }
@@ -180,7 +231,8 @@ TEST_F(RenderTest, section_block_array_asymmetric_nested_scopes) {
       testing::ElementsAre(
           diagnostic(
               diagnostic_level::error,
-              "Name 'value' was not found in the current scope. Tried to search through the following scopes:\n"
+              "Name 'value' was not found in the current scope.\n"
+              "Tried to search through the following scopes:\n"
               "#0 map (size=1)\n"
               "`-'oops'\n"
               "  |-null\n"
@@ -1951,7 +2003,8 @@ TEST_F(RenderTest, partial_derived_context) {
       testing::ElementsAre(
           diagnostic(
               diagnostic_level::error,
-              "Name 'x' was not found in the current scope. Tried to search through the following scopes:\n"
+              "Name 'x' was not found in the current scope.\n"
+              "Tried to search through the following scopes:\n"
               "#0 <global scope> (size=1)\n"
               "`-'global'\n"
               "  |-i64(42)\n",
@@ -1980,7 +2033,8 @@ TEST_F(RenderTest, partial_derived_context_no_leak) {
       testing::ElementsAre(
           diagnostic(
               diagnostic_level::error,
-              "Name 'x' was not found in the current scope. Tried to search through the following scopes:\n"
+              "Name 'x' was not found in the current scope.\n"
+              "Tried to search through the following scopes:\n"
               "#0 map (size=0)\n"
               "\n"
               "#1 <global scope> (size=1)\n"
@@ -2012,7 +2066,8 @@ TEST_F(RenderTest, partial_nested_backtrace) {
       testing::ElementsAre(
           diagnostic(
               diagnostic_level::error,
-              "Name 'undefined' was not found in the current scope. Tried to search through the following scopes:\n"
+              "Name 'undefined' was not found in the current scope.\n"
+              "Tried to search through the following scopes:\n"
               "#0 <global scope> (size=0)\n",
               path_to_file,
               4),
@@ -2035,7 +2090,8 @@ TEST_F(RenderTest, partials_capture_error) {
       testing::ElementsAre(
           diagnostic(
               diagnostic_level::error,
-              "Name 'bar' was not found in the current scope. Tried to search through the following scopes:\n"
+              "Name 'bar' was not found in the current scope.\n"
+              "Tried to search through the following scopes:\n"
               "#0 map (size=0)\n"
               "\n"
               "#1 <global scope> (size=0)\n",
@@ -2197,7 +2253,8 @@ TEST_F(RenderTest, macro_nested_undefined_variable_trace) {
       testing::ElementsAre(
           diagnostic(
               diagnostic_level::error,
-              "Name 'undefined' was not found in the current scope. Tried to search through the following scopes:\n"
+              "Name 'undefined' was not found in the current scope.\n"
+              "Tried to search through the following scopes:\n"
               "#0 map (size=0)\n"
               "\n"
               "#1 <global scope> (size=0)\n",
@@ -2272,7 +2329,8 @@ TEST_F(RenderTest, imports_undefined) {
       diagnostics(),
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "Object 'lib' has no property named 'oops'. The object with the missing property is:\n"
+          "Object 'lib' has no property named 'oops'.\n"
+          "The object with the missing property is:\n"
           "map (size=1)\n"
           "`-'answer'\n"
           "  |-i64(42)\n",
@@ -2408,7 +2466,8 @@ TEST_F(RenderTest, imports_no_implicit_transitive_exports) {
       diagnostics(),
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "Object 'lib' has no property named 'lib'. The object with the missing property is:\n"
+          "Object 'lib' has no property named 'lib'.\n"
+          "The object with the missing property is:\n"
           "map (size=0)\n",
           path_to_file,
           2)));

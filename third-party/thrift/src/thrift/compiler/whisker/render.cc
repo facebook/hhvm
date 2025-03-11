@@ -511,28 +511,31 @@ class virtual_machine {
         current_frame().context.lookup_object(path),
         [](const object::ptr& value) -> object::ptr { return value; },
         [&](const eval_scope_lookup_error& err) -> object::ptr {
-          auto scope_trace = [&]() -> std::string {
-            std::string result =
-                "Tried to search through the following scopes:\n";
+          diags_.maybe_report(variable_lookup.loc, undefined_diag_level, [&] {
+            std::string message;
+            auto out = std::back_inserter(message);
+            fmt::format_to(
+                out,
+                "Name '{}' was not found in the current scope.\n",
+                err.property_name());
+
+            if (!err.cause().empty()) {
+              fmt::format_to(out, "Cause: {}\n", err.cause());
+            }
+
+            message += "Tried to search through the following scopes:\n";
             for (std::size_t i = 0; i < err.searched_scopes().size(); ++i) {
               const std::string_view maybe_newline = i == 0 ? "" : "\n";
               object_print_options print_opts;
               print_opts.max_depth = 1;
               fmt::format_to(
-                  std::back_inserter(result),
+                  out,
                   "{}#{} {}",
                   maybe_newline,
                   i,
                   to_string(*err.searched_scopes()[i], std::move(print_opts)));
             }
-            return result;
-          }();
-
-          diags_.maybe_report(variable_lookup.loc, undefined_diag_level, [&] {
-            return fmt::format(
-                "Name '{}' was not found in the current scope. {}",
-                err.property_name(),
-                scope_trace);
+            return message;
           });
           if (undefined_diag_level == diagnostic_level::error) {
             // Fail rendering in strict mode
@@ -554,9 +557,13 @@ class virtual_machine {
             object_print_options print_opts;
             print_opts.max_depth = 1;
             return fmt::format(
-                "Object '{}' has no property named '{}'. The object with the missing property is:\n{}",
+                "Object '{}' has no property named '{}'.\n"
+                "{}"
+                "The object with the missing property is:\n{}",
                 fmt::join(err.success_path(), "."),
                 err.property_name(),
+                err.cause().empty() ? std::string()
+                                    : fmt::format("Cause: {}\n", err.cause()),
                 to_string(*err.missing_from(), std::move(print_opts)));
           });
           if (undefined_diag_level == diagnostic_level::error) {

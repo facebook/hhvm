@@ -90,6 +90,12 @@ var (
                 SetName("hack.ModuleInternal"),
         )
     }()
+    premadeThriftType_hack_GenerateClientMethodsWithHeaders = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("hack.GenerateClientMethodsWithHeaders"),
+        )
+    }()
 )
 
 // Helper type to allow us to store Thrift types in a slice at compile time,
@@ -113,6 +119,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.Attributes", premadeThriftType_hack_Attributes })
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.StructAsTrait", premadeThriftType_hack_StructAsTrait })
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.ModuleInternal", premadeThriftType_hack_ModuleInternal })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.GenerateClientMethodsWithHeaders", premadeThriftType_hack_GenerateClientMethodsWithHeaders })
 
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
     for _, value := range thriftTypesWithFullName {

@@ -190,3 +190,23 @@ struct StructAsTrait {}
 @scope.Function
 @scope.Service
 struct ModuleInternal {}
+
+/**
+ * Given either of the following Thrift service definitions:
+ *
+ *     @hack.GenerateClientMethodsWithHeaders
+ *     service Foo {
+ *       FooResponse bar();
+ *     }
+ *
+ *     service Foo {
+ *       @hack.GenerateClientMethodsWithHeaders
+ *       FooResponse bar();
+ *     }
+ *
+ * This annotation instructs the compiler to generate the following client method that returns both the response and headers in addition to the bar() method:
+ *   - (FooResponse, ?dict<string, string>) header_bar()
+ */
+@scope.Service
+@scope.Function
+struct GenerateClientMethodsWithHeaders {}

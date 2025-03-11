@@ -1102,3 +1102,84 @@ class ModuleInternal implements \IThriftSyncStruct, \IThriftStructMetadata {
 
 }
 
+/**
+ * Given either of the following Thrift service definitions:
+ * 
+ *     @hack.GenerateClientMethodsWithHeaders
+ *     service Foo {
+ *       FooResponse bar();
+ *     }
+ * 
+ *     service Foo {
+ *       @hack.GenerateClientMethodsWithHeaders
+ *       FooResponse bar();
+ *     }
+ * 
+ * This annotation instructs the compiler to generate the following client method that returns both the response and headers in addition to the bar() method:
+ *   - (FooResponse, ?dict<string, string>) header_bar()
+ *
+ * Original thrift struct:-
+ * GenerateClientMethodsWithHeaders
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/hack/GenerateClientMethodsWithHeaders'))>>
+class GenerateClientMethodsWithHeaders implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'GenerateClientMethodsWithHeaders';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "hack.GenerateClientMethodsWithHeaders",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Service' => \facebook\thrift\annotation\Service::fromShape(
+          shape(
+          )
+        ),
+        '\facebook\thrift\annotation\TFunction' => \facebook\thrift\annotation\TFunction::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+

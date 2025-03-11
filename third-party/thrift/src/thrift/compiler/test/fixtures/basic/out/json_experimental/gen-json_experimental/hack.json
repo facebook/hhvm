@@ -401,6 +401,31 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 185
+      },
+      "GenerateClientMethodsWithHeaders" : {
+        "name" : "GenerateClientMethodsWithHeaders",
+        "structured_annotations": {
+          "scope.Service" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Service",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
+          "scope.Function" : {
+            "type" : {
+          "type" : "struct",
+          "name" : "Function",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
+        },
+        "docstring" : "Given either of the following Thrift service definitions:\n\n    @hack.GenerateClientMethodsWithHeaders\n    service Foo {\n      FooResponse bar();\n    }\n\n    service Foo {\n      @hack.GenerateClientMethodsWithHeaders\n      FooResponse bar();\n    }\n\nThis annotation instructs the compiler to generate the following client method that returns both the response and headers in addition to the bar() method:\n  - (FooResponse, ?dict<string, string>) header_bar()\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 210
       }
   },
   "source_path" : "thrift/annotation/hack",

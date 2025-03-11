@@ -144,6 +144,17 @@ var (
 
         }
     }()
+    premadeCodecTypeSpec_hack_GenerateClientMethodsWithHeaders = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "hack.GenerateClientMethodsWithHeaders",
+            CodecStructSpec: &thrift.CodecStructSpec{
+    ScopedName: "hack.GenerateClientMethodsWithHeaders",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewGenerateClientMethodsWithHeaders() },
+},
+
+        }
+    }()
 )
 
 // Premade struct specs
@@ -398,6 +409,20 @@ var (
     },
 }
     }()
+    premadeStructSpec_GenerateClientMethodsWithHeaders = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
+    Name:                 "GenerateClientMethodsWithHeaders",
+    ScopedName:           "hack.GenerateClientMethodsWithHeaders",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
+    },
+    FieldSpecIDToIndex:   map[int16]int{
+    },
+    FieldSpecNameToIndex: map[string]int{
+    },
+}
+    }()
 )
 
 // Premade slice of all struct specs
@@ -413,6 +438,7 @@ var premadeStructSpecs = func() []*thrift.StructSpec {
     fbthriftResults = append(fbthriftResults, premadeStructSpec_Attributes)
     fbthriftResults = append(fbthriftResults, premadeStructSpec_StructAsTrait)
     fbthriftResults = append(fbthriftResults, premadeStructSpec_ModuleInternal)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_GenerateClientMethodsWithHeaders)
     return fbthriftResults
 }()
 
@@ -429,6 +455,7 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_Attributes.FullName] = premadeCodecTypeSpec_hack_Attributes
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_StructAsTrait.FullName] = premadeCodecTypeSpec_hack_StructAsTrait
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_ModuleInternal.FullName] = premadeCodecTypeSpec_hack_ModuleInternal
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_GenerateClientMethodsWithHeaders.FullName] = premadeCodecTypeSpec_hack_GenerateClientMethodsWithHeaders
     return fbthriftTypeSpecsMap
 }()
 

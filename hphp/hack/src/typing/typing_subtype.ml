@@ -9724,6 +9724,13 @@ let rec is_type_disjoint_help visited env ty1 ty2 =
   | (Tprim (Aast.Tarraykey | Aast.Tstring), Tclass ((_, cname), ex, _))
     when String.equal cname SN.Classes.cStringish && is_nonexact ex ->
     false
+  (* Same as above case, runtime conflates equality of "A" === A::class *)
+  | (Tprim (Aast.Tarraykey | Aast.Tstring), Tclass_ptr _)
+  | (Tclass_ptr _, Tprim (Aast.Tarraykey | Aast.Tstring)) ->
+    false
+  | (Tprim _, Tclass_ptr _)
+  | (Tclass_ptr _, Tprim _) ->
+    true
   (* A function type can be an instance of a Closure *)
   | (Tfun _, Tclass ((_, closure), _, _))
   | (Tclass ((_, closure), _, _), Tfun _)

@@ -369,6 +369,9 @@ and intersect_ env (rec_tracker : Recursion_tracker.t) ~r ty1 ty2 =
                           s_unknown_value = shape_kind;
                           s_fields = fdm;
                         } ) )
+              | ((_, Tclass_ptr ty_c1), (_, Tclass_ptr ty_c2)) ->
+                let (env, ty) = intersect ~r env rec_tracker ty_c1 ty_c2 in
+                (env, mk (r, Tclass_ptr ty))
               | ((_, Tintersection tyl1), (_, Tintersection tyl2)) ->
                 intersect_lists env rec_tracker r tyl1 tyl2
               (* Simplify `supportdyn<t> & u` to `supportdyn<t & u>`. Do not apply if `u` is
@@ -385,6 +388,14 @@ and intersect_ env (rec_tracker : Recursion_tracker.t) ~r ty1 ty2 =
                 let (env, ty) = intersect ~r env rec_tracker ty1 ty2arg in
                 let (env, res) = Utils.simple_make_supportdyn r env ty in
                 (env, res)
+              (* If class<T> <: classname<T>, class<U> & classname<V> -> classname<U & V> *)
+              | ((_, Tnewtype (cn, [ty_cn], _)), (_, Tclass_ptr ty_c))
+              | ((_, Tclass_ptr ty_c), (_, Tnewtype (cn, [ty_cn], _)))
+                when TypecheckerOptions.class_sub_classname (Env.get_tcopt env)
+                     && String.equal cn Naming_special_names.Classes.cClassname
+                ->
+                let (env, ty) = intersect ~r env rec_tracker ty_c ty_cn in
+                (env, MkType.classname r [ty])
               | ((_, Tintersection tyl), _) ->
                 intersect_lists env rec_tracker r [ty2] tyl
               | (_, (_, Tintersection tyl)) ->

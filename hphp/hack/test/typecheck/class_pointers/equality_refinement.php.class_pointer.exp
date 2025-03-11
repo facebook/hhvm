@@ -1,0 +1,12 @@
+ERROR: File "equality_refinement.php", line 27, characters 15-16:
+Invalid argument (Typing[4110])
+  File "equality_refinement.php", line 18, characters 20-28:
+  Expected `class<C1>`
+  File "equality_refinement.php", line 25, characters 7-22:
+  But got `string` from this equality test
+ERROR: File "equality_refinement.php", line 32, characters 15-16:
+Invalid argument (Typing[4110])
+  File "equality_refinement.php", line 20, characters 20-28:
+  Expected `class<C2>`
+  File "equality_refinement.php", line 30, characters 7-22:
+  But got `string` from this equality test

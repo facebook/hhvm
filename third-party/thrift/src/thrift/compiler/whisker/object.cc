@@ -19,11 +19,9 @@
 #include <thrift/compiler/whisker/detail/overload.h>
 
 #include <cassert>
-#include <iterator>
 #include <ostream>
 #include <sstream>
 #include <type_traits>
-#include <unordered_set>
 
 #include <fmt/core.h>
 #include <fmt/ranges.h>
@@ -57,6 +55,9 @@ class to_string_visitor {
         },
         [&](const native_function::ptr& f) {
           visit_maybe_truncate(f, std::move(scope));
+        },
+        [&](const native_handle<>& h) {
+          visit_maybe_truncate(h, std::move(scope));
         },
         // All other types are printed inline so no truncation is necessary.
         [&](auto&& alternative) { visit(alternative, std::move(scope)); });
@@ -130,6 +131,22 @@ class to_string_visitor {
   void visit(const native_handle<>& handle, tree_printer::scope scope) const {
     require_within_max_depth(scope);
     scope.println("<native_handle type='{}'>", demangle(handle.type()));
+    if (const prototype<>::ptr& proto = handle.proto()) {
+      visit_maybe_truncate(proto, scope.open_node());
+    }
+  }
+
+  void visit(const prototype<>::ptr& proto, tree_printer::scope scope) const {
+    require_within_max_depth(scope);
+    std::set<std::string> keys = proto->keys();
+    scope.println("<prototype (size={})>", keys.size());
+    for (const auto& key : keys) {
+      auto element_scope = scope.open_transparent_property();
+      element_scope.println("'{}'", key);
+    }
+    if (const prototype<>::ptr& parent = proto->parent()) {
+      visit_maybe_truncate(parent, scope.open_node());
+    }
   }
 
   [[nodiscard]] bool at_max_depth(const tree_printer::scope& scope) const {
@@ -310,6 +327,12 @@ void native_function::print_to(
 
 std::string native_function::describe_type() const {
   return fmt::format("<native_function type='{}'>", demangle(typeid(*this)));
+}
+
+/* static */ prototype<>::ptr prototype<>::from(
+    descriptors_map descriptors, prototype::ptr parent) {
+  return std::make_shared<basic_prototype<>>(
+      std::move(descriptors), std::move(parent));
 }
 
 std::string detail::describe_native_handle_for_type(

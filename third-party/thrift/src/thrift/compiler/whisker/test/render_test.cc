@@ -1132,7 +1132,8 @@ TEST_F(RenderTest, user_defined_function_native_ref_argument) {
         "{{ (describe native_instance) }}\n",
         w::map({
             {"native_instance",
-             w::native_handle(manage_as_static(native_instance))},
+             w::native_handle(
+                 manage_as_static(native_instance), nullptr /* prototype */)},
             {"describe", w::make_native_function<describe>()},
         }));
     EXPECT_THAT(diagnostics(), testing::IsEmpty());
@@ -1144,7 +1145,9 @@ TEST_F(RenderTest, user_defined_function_native_ref_argument) {
         "{{ (describe wrong_native_instance) }}\n",
         w::map({
             {"wrong_native_instance",
-             w::native_handle(manage_owned<RenderTestUnknownCppType>())},
+             w::native_handle(
+                 manage_owned<RenderTestUnknownCppType>(),
+                 nullptr /* prototype */)},
             {"describe", w::make_native_function<describe>()},
         }));
     EXPECT_FALSE(result.has_value());
@@ -1177,9 +1180,13 @@ TEST_F(RenderTest, user_defined_function_polymorphic_native_ref_argument) {
         "{{ (describe mid) }}\n"
         "{{ (describe derived) }}\n",
         w::map({
-            {"mid", w::native_handle(manage_owned<RenderTestPolyMid>())},
+            {"mid",
+             w::native_handle(
+                 manage_owned<RenderTestPolyMid>(), nullptr /* prototype */)},
             {"derived",
-             w::native_handle(manage_owned<RenderTestPolyDerived>())},
+             w::native_handle(
+                 manage_owned<RenderTestPolyDerived>(),
+                 nullptr /* prototype */)},
             {"describe", w::native_function(describe)},
         }));
     EXPECT_THAT(diagnostics(), testing::IsEmpty());
@@ -1194,7 +1201,9 @@ TEST_F(RenderTest, user_defined_function_polymorphic_native_ref_argument) {
         "{{ (describe wrong_native_instance) }}\n",
         w::map({
             {"wrong_native_instance",
-             w::native_handle(manage_owned<RenderTestUnknownCppType>())},
+             w::native_handle(
+                 manage_owned<RenderTestUnknownCppType>(),
+                 nullptr /* prototype */)},
             {"describe", w::native_function(describe)},
         }));
     EXPECT_FALSE(result.has_value());
@@ -1215,7 +1224,9 @@ TEST_F(RenderTest, user_defined_function_polymorphic_native_ref_argument) {
         "{{ (describe alternate) }}\n",
         w::map({
             {"alternate",
-             w::native_handle(manage_owned<RenderTestPolyAlternate>())},
+             w::native_handle(
+                 manage_owned<RenderTestPolyAlternate>(),
+                 nullptr /* prototype */)},
             {"describe", w::native_function(describe)},
         }));
     EXPECT_FALSE(result.has_value());
@@ -1271,6 +1282,81 @@ TEST_F(RenderTest, user_defined_function_self_argument) {
     EXPECT_THAT(diagnostics(), testing::IsEmpty());
     EXPECT_EQ(*result, "It was null!\n");
   }
+}
+
+TEST_F(RenderTest, user_defined_function_native_ref_prototype) {
+  class SomeCppObjectBase {
+   public:
+    virtual ~SomeCppObjectBase() = default;
+    int return42() const { return 42; }
+  };
+
+  class SomeCppObject : public SomeCppObjectBase {
+   public:
+    void increment() const { ++value_; }
+
+    int get() const { return value_; }
+
+   private:
+    mutable int value_ = 0;
+  };
+  SomeCppObject cpp_object;
+
+  auto return42 = dsl::make_function([](dsl::function::context ctx) -> object {
+    ctx.declare_arity(0);
+    ctx.declare_named_arguments({});
+    using handle_type =
+        dsl::polymorphic_native_handle<SomeCppObjectBase, SomeCppObject>;
+    native_handle<SomeCppObjectBase> ref = ctx.self<handle_type>();
+    return w::i64(ref->return42());
+  });
+
+  auto increment = dsl::make_function([](dsl::function::context ctx) -> object {
+    ctx.declare_arity(0);
+    ctx.declare_named_arguments({});
+    auto ref = ctx.self<native_handle<SomeCppObject>>();
+    ref->increment();
+    return w::string("incremented!");
+  });
+
+  auto get = dsl::make_function([](dsl::function::context ctx) -> object {
+    ctx.declare_arity(0);
+    ctx.declare_named_arguments({});
+    auto ref = ctx.self<native_handle<SomeCppObject>>();
+    return w::i64(ref->get());
+  });
+
+  const auto base_proto = prototype<>::from({
+      {"return42", return42},
+  });
+
+  const auto proto = prototype<>::from(
+      {
+          {"increment", manage_owned<object>(w::native_function(increment))},
+          {"get", get},
+      },
+      base_proto);
+
+  const auto context = w::map({
+      {"foo", w::native_handle(manage_as_static(cpp_object), proto)},
+  });
+  auto result = render(
+      "{{ foo.get }}\n"
+      "{{ (foo.increment) }}\n"
+      "{{ foo.get }}\n"
+      "{{ (foo.increment) }}\n"
+      "{{ foo.get }}\n"
+      "{{ foo.return42 }}\n",
+      context);
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(
+      *result,
+      "0\n"
+      "incremented!\n"
+      "1\n"
+      "incremented!\n"
+      "2\n"
+      "42\n");
 }
 
 TEST_F(RenderTest, let_statement) {

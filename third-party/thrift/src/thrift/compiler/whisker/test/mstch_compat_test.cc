@@ -49,7 +49,16 @@ ast::variable_lookup path(Components&&... components) {
 }
 } // namespace
 
-class MstchCompatTest : public RenderTest {};
+class MstchCompatTest : public RenderTest {
+ public:
+  MstchCompatTest() : diags_(diagnostics_engine::ignore_all(src_manager_)) {}
+
+  diagnostics_engine& diags() { return diags_; }
+
+ private:
+  source_manager src_manager_;
+  diagnostics_engine diags_;
+};
 
 TEST_F(MstchCompatTest, basic) {
   mstch_array arr{
@@ -102,7 +111,7 @@ TEST_F(MstchCompatTest, map_lookups) {
       "`-'key2'\n"
       "  |-null\n");
 
-  auto ctx = eval_context::with_root_scope(converted);
+  auto ctx = eval_context::with_root_scope(diags(), converted);
   EXPECT_EQ(**ctx.lookup_object({}), converted);
   EXPECT_TRUE(is_mstch_map(**ctx.lookup_object(path("key"))));
   EXPECT_FALSE(is_mstch_array(**ctx.lookup_object(path("key"))));
@@ -179,7 +188,7 @@ TEST_F(MstchCompatTest, array_iteration) {
   }
 
   {
-    auto ctx = eval_context::with_root_scope(converted);
+    auto ctx = eval_context::with_root_scope(diags(), converted);
     EXPECT_TRUE(is_mstch_array(**ctx.lookup_object(path("key"))));
     EXPECT_FALSE(is_mstch_map(**ctx.lookup_object(path("key"))));
     EXPECT_FALSE(is_mstch_object(**ctx.lookup_object(path("key"))));
@@ -244,7 +253,8 @@ TEST_F(MstchCompatTest, mstch_object) {
       return manage_owned<object>(w::string("whisker object ptr"));
     }
     whisker::native_handle<> w_self_handle() {
-      return native_handle<object_impl>(shared_from_this());
+      return native_handle<object_impl>(
+          shared_from_this(), nullptr /* prototype */);
     }
 
     std::string cpp_only_method() const { return "hello from C++"; }
@@ -262,7 +272,7 @@ TEST_F(MstchCompatTest, mstch_object) {
   auto converted = from_mstch(mstch_obj);
 
   {
-    auto ctx = eval_context::with_root_scope(converted);
+    auto ctx = eval_context::with_root_scope(diags(), converted);
     EXPECT_TRUE(is_mstch_object(**ctx.lookup_object({})));
     EXPECT_FALSE(is_mstch_map(**ctx.lookup_object({})));
     EXPECT_FALSE(is_mstch_array(**ctx.lookup_object({})));

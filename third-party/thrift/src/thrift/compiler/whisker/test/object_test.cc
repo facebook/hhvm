@@ -17,6 +17,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <thrift/compiler/whisker/dsl.h>
 #include <thrift/compiler/whisker/object.h>
 
 namespace w = whisker::make;
@@ -387,16 +388,16 @@ TEST(ObjectTest, assign_copy_alternatives) {
 
 TEST(ObjectTest, native_handle_equality) {
   {
-    native_handle handle1{manage_owned<int>(42)};
-    native_handle handle2{manage_owned<int>(42)};
+    native_handle handle1{manage_owned<int>(42), nullptr /* prototype */};
+    native_handle handle2{manage_owned<int>(42), nullptr /* prototype */};
     // Points to different objects, even though they have the same value.
     EXPECT_NE(handle1, handle2);
   }
 
   {
     auto integer = manage_owned<int>(42);
-    native_handle handle1{integer};
-    native_handle handle2{integer};
+    native_handle handle1{integer, nullptr /* prototype */};
+    native_handle handle2{integer, nullptr /* prototype */};
     EXPECT_EQ(handle1, handle2);
 
     // The underlying object is the same, even though the handles are of
@@ -407,7 +408,14 @@ TEST(ObjectTest, native_handle_equality) {
   }
 }
 
+// External linkage to avoid noise in demangled type name.
+struct ObjectTestSomeNativeType {};
+
 TEST(ObjectTest, to_string) {
+  const auto constant = [](auto x) {
+    return dsl::make_function([x](auto&&) { return x; });
+  };
+  ObjectTestSomeNativeType cpp_object;
   object o = w::map({
       {"foo", w::i64(1)},
       {"baz",
@@ -421,10 +429,16 @@ TEST(ObjectTest, to_string) {
            {w::f64(2.f),
             w::array({w::string("foo")}),
             w::map({{"bar", w::i64(1)}, {"baz", w::array({w::null})}})})},
+      {"native",
+       w::native_handle(
+           manage_as_static(cpp_object),
+           prototype<>::from(
+               {{"foo", constant(w::string("bar"))}},
+               prototype<>::from({{"abc", constant(w::string("xyz"))}})))},
   });
 
   constexpr std::string_view full_output =
-      "map (size=4)\n"
+      "map (size=5)\n"
       "`-'abc'\n"
       "  |-null\n"
       "`-'baz'\n"
@@ -452,7 +466,13 @@ TEST(ObjectTest, to_string) {
       "  |   | `-'baz'\n"
       "  |   |   |-array (size=1)\n"
       "  |   |   | `-[0]\n"
-      "  |   |   |   |-null\n";
+      "  |   |   |   |-null\n"
+      "`-'native'\n"
+      "  |-<native_handle type='whisker::ObjectTestSomeNativeType'>\n"
+      "  | |-<prototype (size=1)>\n"
+      "  | | `-'foo'\n"
+      "  | | |-<prototype (size=1)>\n"
+      "  | | | `-'abc'\n";
 
   EXPECT_EQ(to_string(o), full_output);
 
@@ -465,7 +485,7 @@ TEST(ObjectTest, to_string) {
 
   EXPECT_EQ(
       to_string(o, with_depth(1)),
-      "map (size=4)\n"
+      "map (size=5)\n"
       "`-'abc'\n"
       "  |-null\n"
       "`-'baz'\n"
@@ -473,11 +493,13 @@ TEST(ObjectTest, to_string) {
       "`-'foo'\n"
       "  |-i64(1)\n"
       "`-'fun'\n"
+      "  |-...\n"
+      "`-'native'\n"
       "  |-...\n");
 
   EXPECT_EQ(
       to_string(o, with_depth(2)),
-      "map (size=4)\n"
+      "map (size=5)\n"
       "`-'abc'\n"
       "  |-null\n"
       "`-'baz'\n"
@@ -497,11 +519,14 @@ TEST(ObjectTest, to_string) {
       "  | `-[1]\n"
       "  |   |-...\n"
       "  | `-[2]\n"
-      "  |   |-...\n");
+      "  |   |-...\n"
+      "`-'native'\n"
+      "  |-<native_handle type='whisker::ObjectTestSomeNativeType'>\n"
+      "  | |-...\n");
 
   EXPECT_EQ(
       to_string(o, with_depth(3)),
-      "map (size=4)\n"
+      "map (size=5)\n"
       "`-'abc'\n"
       "  |-null\n"
       "`-'baz'\n"
@@ -527,11 +552,16 @@ TEST(ObjectTest, to_string) {
       "  |   | `-'bar'\n"
       "  |   |   |-i64(1)\n"
       "  |   | `-'baz'\n"
-      "  |   |   |-...\n");
+      "  |   |   |-...\n"
+      "`-'native'\n"
+      "  |-<native_handle type='whisker::ObjectTestSomeNativeType'>\n"
+      "  | |-<prototype (size=1)>\n"
+      "  | | `-'foo'\n"
+      "  | | |-...\n");
 
   EXPECT_EQ(
       to_string(w::proxy(manage_as_static(o)), with_depth(3)),
-      "map (size=4)\n"
+      "map (size=5)\n"
       "`-'abc'\n"
       "  |-null\n"
       "`-'baz'\n"
@@ -557,7 +587,12 @@ TEST(ObjectTest, to_string) {
       "  |   | `-'bar'\n"
       "  |   |   |-i64(1)\n"
       "  |   | `-'baz'\n"
-      "  |   |   |-...\n");
+      "  |   |   |-...\n"
+      "`-'native'\n"
+      "  |-<native_handle type='whisker::ObjectTestSomeNativeType'>\n"
+      "  | |-<prototype (size=1)>\n"
+      "  | | `-'foo'\n"
+      "  | | |-...\n");
   EXPECT_EQ(w::proxy(manage_as_static(o)), o);
 
   EXPECT_EQ(to_string(o, with_depth(4)), full_output);

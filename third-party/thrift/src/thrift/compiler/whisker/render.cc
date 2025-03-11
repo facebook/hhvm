@@ -961,7 +961,9 @@ class render_engine {
     try {
       auto flush_guard = out_.make_flush_guard();
       auto eval_ctx = eval_context::with_root_scope(
-          std::move(root_context), std::exchange(opts_.globals, {}));
+          vm_.diags().engine(),
+          std::move(root_context),
+          std::exchange(opts_.globals, {}));
       auto source_frame_guard = vm_.stack().make_frame_guard(
           std::move(eval_ctx), frame::for_root{}, source_location());
       visit(root.header_elements);

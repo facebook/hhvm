@@ -27,9 +27,12 @@ namespace whisker {
 
 namespace {
 
-object::ptr find_property(const object& o, const ast::identifier& identifier) {
+object::ptr find_property(
+    diagnostics_engine& diags,
+    const object::ptr& self,
+    const ast::identifier& identifier) {
   using result = object::ptr;
-  return o.visit(
+  return self->visit(
       [](null) -> result { return nullptr; },
       [](i64) -> result { return nullptr; },
       [](f64) -> result { return nullptr; },
@@ -43,7 +46,32 @@ object::ptr find_property(const object& o, const ast::identifier& identifier) {
         return nullptr;
       },
       [](const native_function::ptr&) -> result { return nullptr; },
-      [](const native_handle<>&) -> result { return nullptr; },
+      [&](const native_handle<>& h) -> result {
+        // Recurse through the prototype chain until the first matching
+        // descriptor is found. This is similar to JavaScript:
+        //   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Inheritance_and_the_prototype_chain
+        prototype<>::ptr proto = h.proto();
+        while (proto != nullptr) {
+          if (auto* descriptor = proto->find_descriptor(identifier.name)) {
+            return detail::variant_match(
+                *descriptor,
+                [&](const prototype<>::property& prop) -> object::ptr {
+                  return prop.function->invoke(native_function::context{
+                      identifier.loc,
+                      diags,
+                      self,
+                      {} /* positional arguments */,
+                      {} /* named arguments */,
+                  });
+                },
+                [&](const prototype<>::fixed_object& fixed) -> object::ptr {
+                  return fixed.value;
+                });
+          }
+          proto = proto->parent();
+        }
+        return nullptr;
+      },
       [&](const map& m) -> result {
         if (auto it = m.find(identifier.name); it != m.end()) {
           return manage_as_static(it->second);
@@ -96,24 +124,28 @@ class global_scope_object
 } // namespace
 
 object::ptr eval_context::lexical_scope::lookup_property(
-    const ast::identifier& identifier) {
+    diagnostics_engine& diags, const ast::identifier& identifier) {
   if (auto local = locals_.find(identifier.name); local != locals_.end()) {
     return local->second;
   }
-  return find_property(*this_ref_, identifier);
+  return find_property(diags, this_ref_, identifier);
 }
 
-eval_context::eval_context(object::ptr globals)
-    : global_scope_(std::move(globals)),
+eval_context::eval_context(diagnostics_engine& diags, object::ptr globals)
+    : diags_(diags),
+      global_scope_(std::move(globals)),
       stack_({lexical_scope(global_scope_)}) {}
 
-eval_context::eval_context(map globals)
-    : eval_context(manage_owned<object>(
-          w::make_native_object<global_scope_object>(std::move(globals)))) {}
+eval_context::eval_context(diagnostics_engine& diags, map globals)
+    : eval_context(
+          diags,
+          manage_owned<object>(
+              w::make_native_object<global_scope_object>(std::move(globals)))) {
+}
 
 /* static */ eval_context eval_context::with_root_scope(
-    object::ptr root_scope, map globals) {
-  eval_context result{std::move(globals)};
+    diagnostics_engine& diags, object::ptr root_scope, map globals) {
+  eval_context result{diags, std::move(globals)};
   result.push_scope(root_scope);
   return result;
 }
@@ -192,7 +224,7 @@ eval_context::lookup_object(const ast::variable_lookup& lookup) {
         // Crawl up through the scope stack since names can be shadowed.
         for (auto scope = stack_.rbegin(); scope != stack_.rend(); ++scope) {
           try {
-            if (auto result = scope->lookup_property(path.front())) {
+            if (auto result = scope->lookup_property(diags_, path.front())) {
               current = result;
               break;
             }
@@ -213,7 +245,7 @@ eval_context::lookup_object(const ast::variable_lookup& lookup) {
         for (auto component = std::next(path.begin()); component != path.end();
              ++component) {
           try {
-            object::ptr next = find_property(*current, *component);
+            object::ptr next = find_property(diags_, current, *component);
             if (next == nullptr) {
               return unexpected(eval_property_lookup_error(
                   current, /* missing_from */

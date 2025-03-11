@@ -163,8 +163,9 @@ class eval_name_already_bound_error {
  */
 class eval_context {
  public:
-  eval_context() : eval_context(map()) {}
-  explicit eval_context(map globals);
+  explicit eval_context(diagnostics_engine& diags)
+      : eval_context(diags, map()) {}
+  eval_context(diagnostics_engine&, map globals);
 
   /**
    * Creates an eval_context with an initial root scope.
@@ -172,10 +173,12 @@ class eval_context {
    * Post-conditions:
    *   - stack_depth() == 1
    */
-  static eval_context with_root_scope(object::ptr root_scope, map globals = {});
-  static eval_context with_root_scope(object root_scope, map globals = {}) {
+  static eval_context with_root_scope(
+      diagnostics_engine&, object::ptr root_scope, map globals = {});
+  static eval_context with_root_scope(
+      diagnostics_engine& diags, object root_scope, map globals = {}) {
     return with_root_scope(
-        manage_owned<object>(std::move(root_scope)), std::move(globals));
+        diags, manage_owned<object>(std::move(root_scope)), std::move(globals));
   }
 
   ~eval_context() noexcept;
@@ -279,10 +282,12 @@ class eval_context {
    * A derived eval_context has a fresh stack (empty) but retains the same
    * global scope from the current one.
    */
-  eval_context make_derived() const { return eval_context(global_scope_); }
+  eval_context make_derived() const {
+    return eval_context(diags_, global_scope_);
+  }
 
  private:
-  explicit eval_context(object::ptr globals);
+  explicit eval_context(diagnostics_engine&, object::ptr globals);
 
   /**
    * A lexical scope which determines how name lookups are performed within the
@@ -325,7 +330,8 @@ class eval_context {
      *   - `native_object::fatal_error` if the lookup into the backing object
      *     throws
      */
-    object::ptr lookup_property(const ast::identifier& identifier);
+    object::ptr lookup_property(
+        diagnostics_engine& diags, const ast::identifier& identifier);
 
     // Before C++20, std::unordered_map does not support heterogenous lookups
     using locals_map = std::map<std::string, object::ptr, std::less<>>;
@@ -337,6 +343,7 @@ class eval_context {
     locals_map locals_;
   };
 
+  std::reference_wrapper<diagnostics_engine> diags_;
   // The bottom of the stack that holds all global bindings.
   object::ptr global_scope_;
   // We're using a deque because we want to maintain reference stability when

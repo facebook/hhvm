@@ -103,12 +103,23 @@ ast::variable_lookup path(Components&&... components) {
   }
 }
 
+class EvalContextTest : public testing::Test {
+ public:
+  EvalContextTest() : diags_(diagnostics_engine::ignore_all(src_manager_)) {}
+
+  diagnostics_engine& diags() { return diags_; }
+
+ private:
+  source_manager src_manager_;
+  diagnostics_engine diags_;
+};
+
 } // namespace
 
-TEST(EvalContextTest, basic_name_resolution) {
+TEST_F(EvalContextTest, basic_name_resolution) {
   auto root =
       w::map({{"foo", w::map({{"bar", w::i64(3)}, {"baz", w::i64(4)}})}});
-  auto ctx = eval_context::with_root_scope(root);
+  auto ctx = eval_context::with_root_scope(diags(), root);
   EXPECT_EQ(**ctx.lookup_object(path("foo", "bar")), i64(3));
   EXPECT_EQ(**ctx.lookup_object(path("foo", "baz")), i64(4));
   EXPECT_EQ(
@@ -117,13 +128,13 @@ TEST(EvalContextTest, basic_name_resolution) {
   EXPECT_EQ(**ctx.lookup_object(path()), root);
 }
 
-TEST(EvalContextTest, parent_scope) {
+TEST_F(EvalContextTest, parent_scope) {
   object root = w::map(
       {{"foo", w::map({{"bar", w::i64(3)}, {"baz", w::i64(4)}})},
        {"parent", w::string("works")}});
   object child_1 = w::map({{"foo", w::map({{"abc", w::i64(5)}})}});
   object child_2 = w::map({{"bar", w::map({{"baz", w::boolean(true)}})}});
-  auto ctx = eval_context::with_root_scope(manage_as_static(root));
+  auto ctx = eval_context::with_root_scope(diags(), manage_as_static(root));
   ctx.push_scope(manage_as_static(child_1));
   ctx.push_scope(manage_as_static(child_2));
 
@@ -168,13 +179,13 @@ TEST(EvalContextTest, parent_scope) {
   EXPECT_EQ(**ctx.lookup_object(path("foo", "bar")), i64(3));
 }
 
-TEST(EvalContextTest, locals) {
+TEST_F(EvalContextTest, locals) {
   object root = w::map(
       {{"foo", w::map({{"bar", w::i64(3)}, {"baz", w::i64(4)}})},
        {"foo-2", w::f64(2.0)}});
   object child_1 = w::map({{"foo-2", w::string("shadowed")}});
 
-  auto ctx = eval_context::with_root_scope(root);
+  auto ctx = eval_context::with_root_scope(diags(), root);
   ctx.push_scope(manage_as_static(child_1));
 
   EXPECT_EQ(**ctx.lookup_object(path("foo-2")), "shadowed");
@@ -194,7 +205,7 @@ TEST(EvalContextTest, locals) {
   EXPECT_EQ(**ctx.lookup_object(path("foo-2")), 2.0);
 }
 
-TEST(EvalContextTest, self_reference) {
+TEST_F(EvalContextTest, self_reference) {
   const std::vector<object> objects = {
       w::i64(1),
       w::f64(2.0),
@@ -206,25 +217,25 @@ TEST(EvalContextTest, self_reference) {
       w::native_object(std::make_shared<empty_native_object>())};
 
   for (const auto& obj : objects) {
-    auto ctx = eval_context::with_root_scope(obj);
+    auto ctx = eval_context::with_root_scope(diags(), obj);
     EXPECT_EQ(**ctx.lookup_object(path()), obj);
   }
 }
 
-TEST(EvalContextTest, native_object_basic) {
+TEST_F(EvalContextTest, native_object_basic) {
   auto o = w::make_native_object<double_property_name>();
-  auto ctx = eval_context::with_root_scope(o);
+  auto ctx = eval_context::with_root_scope(diags(), o);
   EXPECT_EQ(**ctx.lookup_object(path("foo")), string("foofoo"));
   EXPECT_EQ(**ctx.lookup_object(path("bar")), string("barbar"));
 }
 
-TEST(EvalContextTest, native_object_delegator) {
+TEST_F(EvalContextTest, native_object_delegator) {
   native_object::ptr doubler_ref = std::make_shared<double_property_name>();
 
   object doubler = w::native_object(doubler_ref);
   object delegator = w::make_native_object<delegate_to>(doubler);
 
-  auto ctx = eval_context::with_root_scope(delegator);
+  auto ctx = eval_context::with_root_scope(diags(), delegator);
   EXPECT_EQ(**ctx.lookup_object(path("foo")), doubler);
   EXPECT_EQ(**ctx.lookup_object(path("foo", "bar")), string("barbar"));
 
@@ -236,7 +247,7 @@ TEST(EvalContextTest, native_object_delegator) {
   EXPECT_EQ(**ctx.lookup_object(path("foo")), "foofoo");
 }
 
-TEST(EvalContextTest, native_object_lookup_throws) {
+TEST_F(EvalContextTest, native_object_lookup_throws) {
   class throws_on_lookup
       : public native_object,
         public native_object::map_like,
@@ -253,7 +264,7 @@ TEST(EvalContextTest, native_object_lookup_throws) {
   object thrower = w::native_object(std::make_shared<throws_on_lookup>());
 
   {
-    auto ctx = eval_context::with_root_scope(thrower);
+    auto ctx = eval_context::with_root_scope(diags(), thrower);
     auto err = get_error<eval_scope_lookup_error>(
         ctx.lookup_object(path("will-throw")));
     EXPECT_EQ(err.property_name(), "will-throw");
@@ -261,7 +272,8 @@ TEST(EvalContextTest, native_object_lookup_throws) {
   }
 
   {
-    auto ctx = eval_context::with_root_scope(w::map({{"foo", thrower}}));
+    auto ctx =
+        eval_context::with_root_scope(diags(), w::map({{"foo", thrower}}));
     auto err = get_error<eval_property_lookup_error>(
         ctx.lookup_object(path("foo", "will-throw")));
     EXPECT_EQ(*err.missing_from(), thrower);
@@ -271,11 +283,11 @@ TEST(EvalContextTest, native_object_lookup_throws) {
   }
 }
 
-TEST(EvalContextTest, globals) {
+TEST_F(EvalContextTest, globals) {
   map globals{{"global", w::i64(1)}};
   object root;
 
-  auto ctx = eval_context::with_root_scope(root, globals);
+  auto ctx = eval_context::with_root_scope(diags(), root, globals);
   EXPECT_EQ(**ctx.lookup_object(path("global")), i64(1));
 
   object shadowing = w::map({{"global", w::i64(2)}});

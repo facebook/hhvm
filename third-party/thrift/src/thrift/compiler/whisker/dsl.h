@@ -166,9 +166,10 @@ struct polymorphic_native_handle {
           }
           if (std::optional<native_handle<SubClass>> converted =
                   handle.try_as<SubClass>()) {
-            managed_ptr<Base> upcasted = std::static_pointer_cast<const Base>(
-                std::move(*converted).ptr());
-            result = native_handle<Base>(std::move(upcasted));
+            managed_ptr<Base> upcasted =
+                std::static_pointer_cast<const Base>(converted->ptr());
+            result = native_handle<Base>(
+                std::move(upcasted), std::move(*converted).proto());
           }
         }(),
         ...);

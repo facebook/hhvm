@@ -22021,10 +22021,9 @@ void AnalysisScheduler::addDepClassToInput(SString cls,
     input.classes[cls] |= K::Dep;
   }
 
-  if (auto const r = folly::get_ptr(index.m_data->classInfoRefs, cls)) {
+  if (folly::get_ptr(index.m_data->classInfoRefs, cls)) {
     input.classes[cls] |= K::Info;
-  } else if (auto const r =
-             folly::get_ptr(index.m_data->uninstantiableClsMethRefs, cls)) {
+  } else if (folly::get_ptr(index.m_data->uninstantiableClsMethRefs, cls)) {
     input.classes[cls] |= K::MInfo;
   } else {
     badClass();

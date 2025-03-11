@@ -19,9 +19,6 @@
 This is a template for creating thrift-python enums
 
 }}
-{{#program:enums}}
-
-
 class {{enum:name}}(thrift.py3.types.{{!
         }}{{^enum:flags?}}CompiledEnum{{/enum:flags?}}{{!
         }}{{#enum:flags?}}Flag{{/enum:flags?}}):
@@ -65,6 +62,3 @@ class {{enum:name}}(thrift.py3.types.{{!
 
     def __index__(self):
         return self._fbthrift_value_
-
-
-{{/program:enums}}

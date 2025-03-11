@@ -52,9 +52,6 @@ class MyEnumA(thrift.py3.types.CompiledEnum):
     def __index__(self):
         return self._fbthrift_value_
 
-
-
-
 class AnnotatedEnum(thrift.py3.types.CompiledEnum):
     FIELDA = 2
     FIELDB = 4
@@ -93,9 +90,6 @@ class AnnotatedEnum(thrift.py3.types.CompiledEnum):
 
     def __index__(self):
         return self._fbthrift_value_
-
-
-
 
 class AnnotatedEnum2(thrift.py3.types.CompiledEnum):
     FIELDA = 2
@@ -136,9 +130,6 @@ class AnnotatedEnum2(thrift.py3.types.CompiledEnum):
     def __index__(self):
         return self._fbthrift_value_
 
-
-
-
 class MyEnumB(thrift.py3.types.CompiledEnum):
     AField = 0
 
@@ -177,9 +168,6 @@ class MyEnumB(thrift.py3.types.CompiledEnum):
         return self._fbthrift_value_
 
 
-
-
-
 class __SimpleUnionType(enum.Enum):
     intValue = 7
     stringValue = 2
@@ -187,7 +175,6 @@ class __SimpleUnionType(enum.Enum):
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
-
 
 class __ComplexUnionType(enum.Enum):
     intValue = 1
@@ -223,7 +210,6 @@ class __ComplexUnionType(enum.Enum):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
-
 class __FloatUnionType(enum.Enum):
     floatSide = 1
     doubleSide = 2
@@ -231,4 +217,3 @@ class __FloatUnionType(enum.Enum):
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
-

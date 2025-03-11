@@ -54,9 +54,6 @@ class has_bitwise_ops(thrift.py3.types.CompiledEnum):
     def __index__(self):
         return self._fbthrift_value_
 
-
-
-
 class is_unscoped(thrift.py3.types.CompiledEnum):
     hello = 0
     world = 1
@@ -95,9 +92,6 @@ class is_unscoped(thrift.py3.types.CompiledEnum):
     def __index__(self):
         return self._fbthrift_value_
 
-
-
-
 class MyForwardRefEnum(thrift.py3.types.CompiledEnum):
     ZERO = 0
     NONZERO = 12
@@ -135,7 +129,4 @@ class MyForwardRefEnum(thrift.py3.types.CompiledEnum):
 
     def __index__(self):
         return self._fbthrift_value_
-
-
-
 

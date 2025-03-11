@@ -28,6 +28,17 @@ import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:n
 
 _fbthrift__module_name__ = "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types"
 
-{{> types/enum_py }}
 
-{{> types/union_type_enum_py }}
+{{#program:enums}}
+
+{{> inplace/enum_py }}
+
+{{/program:enums}}
+
+{{#program:filtered_structs}}
+{{#struct:union?}}
+
+{{> inplace/union_enum_py }}
+
+{{/struct:union?}}
+{{/program:filtered_structs}}

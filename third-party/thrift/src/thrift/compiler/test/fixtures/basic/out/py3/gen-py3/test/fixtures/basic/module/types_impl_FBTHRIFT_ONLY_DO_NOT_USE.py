@@ -51,9 +51,6 @@ class MyEnum(thrift.py3.types.CompiledEnum):
     def __index__(self):
         return self._fbthrift_value_
 
-
-
-
 class HackEnum(thrift.py3.types.CompiledEnum):
     Value1 = 0
     Value2 = 1
@@ -93,9 +90,6 @@ class HackEnum(thrift.py3.types.CompiledEnum):
         return self._fbthrift_value_
 
 
-
-
-
 class __MyUnionType(enum.Enum):
     myEnum = 1
     myStruct = 2
@@ -106,11 +100,9 @@ class __MyUnionType(enum.Enum):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
-
 class __UnionToBeRenamedType(enum.Enum):
     reserved_field = 1
     EMPTY = 0
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
-

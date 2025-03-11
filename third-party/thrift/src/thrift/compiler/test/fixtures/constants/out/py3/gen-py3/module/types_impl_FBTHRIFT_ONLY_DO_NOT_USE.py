@@ -49,9 +49,6 @@ class EmptyEnum(thrift.py3.types.CompiledEnum):
     def __index__(self):
         return self._fbthrift_value_
 
-
-
-
 class City(thrift.py3.types.CompiledEnum):
     NYC = 0
     MPK = 1
@@ -91,9 +88,6 @@ class City(thrift.py3.types.CompiledEnum):
 
     def __index__(self):
         return self._fbthrift_value_
-
-
-
 
 class Company(thrift.py3.types.CompiledEnum):
     FACEBOOK = 0
@@ -137,9 +131,6 @@ class Company(thrift.py3.types.CompiledEnum):
         return self._fbthrift_value_
 
 
-
-
-
 class __union1Type(enum.Enum):
     i = 1
     d = 2
@@ -147,7 +138,6 @@ class __union1Type(enum.Enum):
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
-
 
 class __union2Type(enum.Enum):
     i = 1
@@ -158,4 +148,3 @@ class __union2Type(enum.Enum):
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
-

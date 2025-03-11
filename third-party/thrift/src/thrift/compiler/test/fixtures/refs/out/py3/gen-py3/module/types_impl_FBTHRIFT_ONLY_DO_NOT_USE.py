@@ -51,9 +51,6 @@ class MyEnum(thrift.py3.types.CompiledEnum):
     def __index__(self):
         return self._fbthrift_value_
 
-
-
-
 class TypedEnum(thrift.py3.types.CompiledEnum):
     VAL1 = 0
     VAL2 = 1
@@ -93,9 +90,6 @@ class TypedEnum(thrift.py3.types.CompiledEnum):
         return self._fbthrift_value_
 
 
-
-
-
 class __MyUnionType(enum.Enum):
     anInteger = 1
     aString = 2
@@ -104,11 +98,9 @@ class __MyUnionType(enum.Enum):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
-
 class __NonTriviallyDestructibleUnionType(enum.Enum):
     int_field = 1
     EMPTY = 0
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
-

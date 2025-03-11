@@ -53,9 +53,6 @@ class Metasyntactic(thrift.py3.types.CompiledEnum):
     def __index__(self):
         return self._fbthrift_value_
 
-
-
-
 class MyEnum1(thrift.py3.types.CompiledEnum):
     ME1_0 = 0
     ME1_1 = 1
@@ -98,9 +95,6 @@ class MyEnum1(thrift.py3.types.CompiledEnum):
     def __index__(self):
         return self._fbthrift_value_
 
-
-
-
 class MyEnum2(thrift.py3.types.CompiledEnum):
     ME2_0 = 0
     ME2_1 = 1
@@ -139,9 +133,6 @@ class MyEnum2(thrift.py3.types.CompiledEnum):
 
     def __index__(self):
         return self._fbthrift_value_
-
-
-
 
 class MyEnum3(thrift.py3.types.CompiledEnum):
     ME3_0 = 0
@@ -185,9 +176,6 @@ class MyEnum3(thrift.py3.types.CompiledEnum):
     def __index__(self):
         return self._fbthrift_value_
 
-
-
-
 class MyEnum4(thrift.py3.types.CompiledEnum):
     ME4_A = 2147483645
     ME4_B = 2147483646
@@ -228,9 +216,6 @@ class MyEnum4(thrift.py3.types.CompiledEnum):
     def __index__(self):
         return self._fbthrift_value_
 
-
-
-
 class MyBitmaskEnum1(thrift.py3.types.CompiledEnum):
     ONE = 1
     TWO = 2
@@ -270,9 +255,6 @@ class MyBitmaskEnum1(thrift.py3.types.CompiledEnum):
     def __index__(self):
         return self._fbthrift_value_
 
-
-
-
 class MyBitmaskEnum2(thrift.py3.types.CompiledEnum):
     ONE = 1
     TWO = 2
@@ -311,7 +293,4 @@ class MyBitmaskEnum2(thrift.py3.types.CompiledEnum):
 
     def __index__(self):
         return self._fbthrift_value_
-
-
-
 

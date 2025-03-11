@@ -19,4 +19,3 @@ class __NadaType(enum.Enum):
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
-

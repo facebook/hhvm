@@ -26,7 +26,6 @@ class __ComplexUnionType(enum.Enum):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
-
 class __ListUnionType(enum.Enum):
     intListValue = 2
     stringListValue = 3
@@ -34,7 +33,6 @@ class __ListUnionType(enum.Enum):
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
-
 
 class __DataUnionType(enum.Enum):
     binaryData = 1
@@ -44,7 +42,6 @@ class __DataUnionType(enum.Enum):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
-
 class __ValUnionType(enum.Enum):
     v1 = 1
     v2 = 2
@@ -52,7 +49,6 @@ class __ValUnionType(enum.Enum):
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
-
 
 class __VirtualComplexUnionType(enum.Enum):
     thingOne = 1
@@ -62,11 +58,9 @@ class __VirtualComplexUnionType(enum.Enum):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
-
 class __NonCopyableUnionType(enum.Enum):
     s = 1
     EMPTY = 0
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
-

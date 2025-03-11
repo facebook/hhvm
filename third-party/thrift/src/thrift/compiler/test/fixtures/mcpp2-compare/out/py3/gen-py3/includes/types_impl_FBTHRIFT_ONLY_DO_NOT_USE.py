@@ -51,6 +51,3 @@ class AnEnum(thrift.py3.types.CompiledEnum):
     def __index__(self):
         return self._fbthrift_value_
 
-
-
-

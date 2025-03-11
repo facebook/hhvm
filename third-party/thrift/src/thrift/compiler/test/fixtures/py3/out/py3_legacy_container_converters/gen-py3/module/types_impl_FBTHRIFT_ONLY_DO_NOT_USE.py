@@ -54,9 +54,6 @@ class AnEnum(thrift.py3.types.CompiledEnum):
     def __index__(self):
         return self._fbthrift_value_
 
-
-
-
 class AnEnumRenamed(thrift.py3.types.CompiledEnum):
     name_ = 0
     value_ = 1
@@ -95,9 +92,6 @@ class AnEnumRenamed(thrift.py3.types.CompiledEnum):
 
     def __index__(self):
         return self._fbthrift_value_
-
-
-
 
 class Flags(thrift.py3.types.Flag):
     flag_A = 1
@@ -140,13 +134,9 @@ class Flags(thrift.py3.types.Flag):
         return self._fbthrift_value_
 
 
-
-
-
 class __BinaryUnionType(enum.Enum):
     iobuf_val = 1
     EMPTY = 0
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
-

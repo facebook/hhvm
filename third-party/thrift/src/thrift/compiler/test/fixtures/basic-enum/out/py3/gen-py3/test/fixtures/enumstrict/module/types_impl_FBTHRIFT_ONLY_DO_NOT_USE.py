@@ -49,9 +49,6 @@ class EmptyEnum(thrift.py3.types.CompiledEnum):
     def __index__(self):
         return self._fbthrift_value_
 
-
-
-
 class MyEnum(thrift.py3.types.CompiledEnum):
     ONE = 1
     TWO = 2
@@ -89,9 +86,6 @@ class MyEnum(thrift.py3.types.CompiledEnum):
 
     def __index__(self):
         return self._fbthrift_value_
-
-
-
 
 class MyUseIntrinsicDefaultEnum(thrift.py3.types.CompiledEnum):
     ZERO = 0
@@ -131,9 +125,6 @@ class MyUseIntrinsicDefaultEnum(thrift.py3.types.CompiledEnum):
 
     def __index__(self):
         return self._fbthrift_value_
-
-
-
 
 class MyBigEnum(thrift.py3.types.CompiledEnum):
     UNKNOWN = 0
@@ -190,7 +181,4 @@ class MyBigEnum(thrift.py3.types.CompiledEnum):
 
     def __index__(self):
         return self._fbthrift_value_
-
-
-
 

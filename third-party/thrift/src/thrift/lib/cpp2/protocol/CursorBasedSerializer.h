@@ -55,6 +55,23 @@
 
 namespace apache::thrift {
 
+struct CursorWriteOpts {
+  size_t minGrowth;
+  size_t maxGrowth;
+  bool padBuffer;
+  size_t padSize;
+  ExternalBufferSharing sharing;
+};
+
+constexpr CursorWriteOpts defaultCursorWriteOpts() {
+  return CursorWriteOpts{
+      (1 << 14) - 16,
+      (1 << 14) - 16,
+      false,
+      128,
+      ExternalBufferSharing::SHARE_EXTERNAL_BUFFER};
+}
+
 /**
  * Manages the lifetime of a Thrift object being used with cursor
  * de/serialization.
@@ -98,7 +115,9 @@ class CursorSerializationWrapper {
    */
   /* implicit */ CursorSerializationWrapper(
       const T& t, ExternalBufferSharing sharing = COPY_EXTERNAL_BUFFER) {
-    t.write(writer(sharing));
+    auto opts = defaultCursorWriteOpts();
+    opts.sharing = sharing;
+    t.write(writer(opts));
     serializedData_ = queue_.move();
     done();
   }
@@ -152,10 +171,15 @@ class CursorSerializationWrapper {
   }
 
   /** Cursor write path */
-  StructuredCursorWriter<Tag> beginWrite() {
+  StructuredCursorWriter<Tag> beginWriteWithOpts(const CursorWriteOpts& opts) {
     serializedData_.reset(); // Prevent concurrent read from seeing wrong data.
-    return StructuredCursorWriter<Tag>(writer());
+    return StructuredCursorWriter<Tag>(writer(opts));
   }
+
+  StructuredCursorWriter<Tag> beginWrite() {
+    return beginWriteWithOpts(defaultCursorWriteOpts());
+  }
+
   void endWrite(StructuredCursorWriter<Tag>&& writer) {
     writer.finalize();
     serializedData_ = queue_.move();
@@ -180,13 +204,20 @@ class CursorSerializationWrapper {
     reader.setInput(cursor);
     return &reader;
   }
-  ProtocolWriter* writer(
-      ExternalBufferSharing sharing = SHARE_EXTERNAL_BUFFER) {
+
+  ProtocolWriter* writer(const CursorWriteOpts& opts) {
     checkInactive();
-    auto& writer = protocol_.template emplace<ProtocolWriter>(sharing);
-    writer.setOutput(&queue_);
+    auto& writer = protocol_.template emplace<ProtocolWriter>(opts.sharing);
+    if (opts.padBuffer) {
+      queue_.preallocate(opts.minGrowth, opts.minGrowth);
+      queue_.trimStart(opts.padSize);
+    }
+    writer.setOutput(
+        folly::io::QueueAppender{&queue_, opts.minGrowth, opts.maxGrowth});
+
     return &writer;
   }
+
   void done() { protocol_.template emplace<std::monostate>(); }
 
   void checkInactive() const {

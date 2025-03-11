@@ -116,11 +116,12 @@ final class ThriftContextPropState {
          * ~15B occurrences per hour, 15B / 60 = 250M per minute
          */
         if (
+          !C\is_empty($tfm->experiment_ids ?? vec[]) &&
           coinflip(JustKnobs::getInt(
             'lumos/experimentation:ingested_exp_id_sample_rate',
           ))
         ) {
-          FBLogger('lumos_experimentation', 'unexpected experiment ids')
+          FBLogger('lumos_experimentation', 'unexpected experiment ids at init')
             ->setBlameOwner('lumos')
             ->warn(
               'Ingested TFM should not contain experiment IDs: %s',

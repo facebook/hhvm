@@ -65,13 +65,14 @@ final class ThriftContextPropHandler extends TClientEventHandler {
      * See ThriftContextPropState::initFromString for context
      *
      */
-    if (ThriftFrameworkMetadataUtils::shouldLogExperimentIdModifications()) {
-      FBLogger('lumos_experimentation', 'unexpected experiment ids')
+    $ctx_ids = $st->getExperimentIds();
+    if (
+      !C\is_empty($ctx_ids) &&
+      ThriftFrameworkMetadataUtils::shouldLogExperimentIdModifications()
+    ) {
+      FBLogger('lumos_experimentation', 'unexpected experiment ids in make')
         ->setBlameOwner('lumos')
-        ->warn(
-          'Calling makeV with experiment ids: %s',
-          JSON::encode($st->getExperimentIds()),
-        );
+        ->warn('Calling makeV with experiment ids: %s', JSON::encode($ctx_ids));
     }
 
     // Encapsulated logic: If the origin ID we obtain from the stack is null,

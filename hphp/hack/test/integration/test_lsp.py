@@ -5177,6 +5177,106 @@ class BaseClassIncremental {
 
         self.run_spec(spec, variables)
 
+    def test_incrementality(self) -> None:
+        variables = self.write_hhconf_and_naming_table()
+        variables.update(self.setup_php_file("incrementality_use.php"))
+        parent_php_file_uri = self.repo_file("incrementality_parent.php")
+        variables.update({"parent_php_file_uri": parent_php_file_uri})
+        child_php_file_uri = self.repo_file("incrementality_child.php")
+        variables.update({"child_php_file_uri": child_php_file_uri})
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("incrementality"),
+            )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${parent_php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": self.read_repo_file("incrementality_parent.php"),
+                    }
+                },
+            )
+            .request(
+                line=line(),
+                comment="hover before change to class hierarchy should be `int`",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 6},
+                },
+                result={
+                    "contents": [
+                        "Defined in `Parentt`",
+                        "---",
+                        {
+                            "language": "hack",
+                            "value": "public function m(int $_): void",
+                        },
+                    ],
+                    "range": {
+                        "start": {"line": 3, "character": 6},
+                        "end": {"line": 3, "character": 7},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .write_to_disk(
+                uri=parent_php_file_uri,
+                contents="""\
+<?hh
+
+class Parentt {
+  public function m(string $_): void {}
+}
+""",
+                notify=True,
+            )
+            .request(
+                line=line(),
+                comment="hover after change to class hierarchy should be `string`",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 6},
+                },
+                result={
+                    "contents": [
+                        "Defined in `Parentt`",
+                        "---",
+                        {
+                            "language": "hack",
+                            "value": "public function m(string $_): void",
+                        },
+                    ],
+                    "range": {
+                        "start": {"line": 3, "character": 6},
+                        "end": {"line": 3, "character": 7},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+
+        self.run_spec(spec, variables)
+
     def test_serverless_ide_decl_in_unsaved_buffer_changed(self) -> None:
         variables = self.write_hhconf_and_naming_table()
         variables.update(self.setup_php_file("hover.php"))

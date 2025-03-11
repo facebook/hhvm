@@ -116,7 +116,9 @@ final class ThriftContextPropState {
          * ~15B occurrences per hour, 15B / 60 = 250M per minute
          */
         if (
-          ThriftFrameworkMetadataUtils::shouldLogExperimentIdModifications()
+          coinflip(JustKnobs::getInt(
+            'lumos/experimentation:ingested_exp_id_sample_rate',
+          ))
         ) {
           FBLogger('lumos_experimentation', 'unexpected experiment ids')
             ->setBlameOwner('lumos')

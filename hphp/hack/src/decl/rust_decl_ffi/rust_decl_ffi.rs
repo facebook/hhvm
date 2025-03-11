@@ -238,7 +238,7 @@ unsafe impl Send for SendableOcamlPtrPtr {}
 /// it wants to prefetch the ancestors for class C, (2) it enqueues a work item to direct-decl-parse c.php, (3) when it gets the
 /// parse results back for the entire c.php, it needs to remember which class "C" it was prefetching ancestors for. The metadata
 /// tag provides a place to store this.
-pub struct Concurrent {
+struct Concurrent {
     /// This controls the behavior of `direct_decl_parser::parse_decls_for_typechecking_obr`
     opts: DeclParserOptions,
 

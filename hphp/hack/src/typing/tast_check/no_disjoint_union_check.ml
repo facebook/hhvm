@@ -20,6 +20,14 @@ let rec is_pairwise_disjoint env = function
       tyl
     && is_pairwise_disjoint env tyl
 
+let rec tyl_of_union env ty =
+  let ty = Tast_env.strip_dynamic env ty in
+  let (_, ty) = Tast_env.strip_supportdyn env ty in
+  match Typing_defs.get_node ty with
+  | Typing_defs.Tunion tyl -> Some tyl
+  | Typing_defs.Toption ty -> tyl_of_union env ty
+  | _ -> None
+
 (** Looks for pairwise disjointness of a union in a type argument if the
     corresponding type parameter is annotated with __NoDisjointUnion. If found,
     we raise a warning. *)
@@ -30,9 +38,11 @@ let check pos env user_attributesl targs =
         if List.exists user_attributes ~f:is_no_union then begin
           let ty = Tast_env.strip_dynamic env ty in
           let (_, ty) = Tast_env.strip_supportdyn env ty in
-          match Typing_defs.get_node ty with
-          | Typing_defs.Tunion ([] | [_]) -> ()
-          | Typing_defs.Tunion tyl -> begin
+          match tyl_of_union env ty with
+          | Some ([] | [_])
+          | None ->
+            ()
+          | Some tyl -> begin
             if is_pairwise_disjoint env tyl then
               Typing_warning_utils.add
                 (Tast_env.tast_env_as_typing_env env)
@@ -40,7 +50,6 @@ let check pos env user_attributesl targs =
                   Typing_warning.No_disjoint_union_check,
                   lazy (Tast_env.print_ty env ty) )
           end
-          | _ -> ()
         end)
   | List.Or_unequal_lengths.Unequal_lengths -> ()
 

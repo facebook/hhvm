@@ -373,7 +373,6 @@ class CarbonProtocolReader {
   CarbonCursor cursor_;
   folly::small_vector<int16_t, detail::kDefaultStackSize> nestedStructFieldIds_;
   int16_t lastFieldId_{0};
-  FieldType boolFieldType_;
 };
 
 } // namespace carbon

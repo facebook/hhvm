@@ -66,7 +66,7 @@ func createTestHeaderServer(handler thrifttest.ThriftTest) (context.CancelFunc, 
 func connectTestHeaderServer(
 	addr net.Addr,
 ) (*thrifttest.ThriftTestClient, error) {
-	prot, err := thrift.NewClient(
+	channel, err := thrift.NewClientV2(
 		thrift.WithUpgradeToRocket(),
 		thrift.WithDialer(func() (net.Conn, error) {
 			return net.Dial("tcp", addr.String())
@@ -76,7 +76,7 @@ func connectTestHeaderServer(
 	if err != nil {
 		return nil, err
 	}
-	return thrifttest.NewThriftTestClient(prot), nil
+	return thrifttest.NewThriftTestChannelClient(channel), nil
 }
 
 func doClientTest(ctx context.Context, t *testing.T) {

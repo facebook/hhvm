@@ -456,15 +456,13 @@ void callProfiledFunc(IRGS& env, SSATmp* callee, SSATmp* objOrClass,
       folly::sformat("BC={} FN={}: {}\n", bcOff(env), fnName, data.toString())
     );
   }
-
   auto choices = [&]() {
     jit::vector<CallTargetProfile::Choice> result;
-    auto const funcName = curFunc(env)->name();
     const Class* targetClass = objOrClass ? objOrClass->type().clsSpec().cls() : nullptr;
     for (auto const& choice: data.choose()) {
       auto const choiceClass = choice.func->implCls();
       bool includeChoice = !targetClass || !choiceClass || choiceClass->classof(targetClass) ||
-                           targetClass->lookupMethod(funcName) == choice.func;
+                           targetClass->lookupMethod(choice.func->name()) == choice.func;
       if (includeChoice) {
         result.push_back(choice);
       }

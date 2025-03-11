@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <thrift/compiler/whisker/ast.h>
 #include <thrift/compiler/whisker/expected.h>
 #include <thrift/compiler/whisker/object.h>
 
@@ -270,7 +271,7 @@ class eval_context {
    *     the chain of resolved whisker::objects.
    */
   expected<lookup_result, lookup_error> lookup_object(
-      const std::vector<std::string>& path);
+      const ast::variable_lookup& path);
 
   /**
    * Creates a new "derived" eval_context from the current one.
@@ -324,7 +325,7 @@ class eval_context {
      *   - `native_object::fatal_error` if the lookup into the backing object
      *     throws
      */
-    object::ptr lookup_property(std::string_view identifier);
+    object::ptr lookup_property(const ast::identifier& identifier);
 
     // Before C++20, std::unordered_map does not support heterogenous lookups
     using locals_map = std::map<std::string, object::ptr, std::less<>>;

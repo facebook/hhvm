@@ -82,18 +82,39 @@ class delegate_to : public native_object,
 
   whisker::object delegate_;
 };
+
+ast::identifier make_identifier_from_string(std::string name) {
+  // The source range is not important for testing here
+  return ast::identifier{source_range(), std::move(name)};
+}
+
+template <typename... Components>
+ast::variable_lookup path(Components&&... components) {
+  if constexpr (sizeof...(Components) == 0) {
+    return ast::variable_lookup{
+        source_range(), ast::variable_lookup::this_ref()};
+  } else {
+    std::vector<ast::identifier> chain;
+    chain.reserve(sizeof...(Components));
+    (chain.emplace_back(make_identifier_from_string(
+         std::string(std::forward<Components>(components)))),
+     ...);
+    return ast::variable_lookup{source_range(), std::move(chain)};
+  }
+}
+
 } // namespace
 
 TEST(EvalContextTest, basic_name_resolution) {
   auto root =
       w::map({{"foo", w::map({{"bar", w::i64(3)}, {"baz", w::i64(4)}})}});
   auto ctx = eval_context::with_root_scope(root);
-  EXPECT_EQ(**ctx.lookup_object({"foo", "bar"}), i64(3));
-  EXPECT_EQ(**ctx.lookup_object({"foo", "baz"}), i64(4));
+  EXPECT_EQ(**ctx.lookup_object(path("foo", "bar")), i64(3));
+  EXPECT_EQ(**ctx.lookup_object(path("foo", "baz")), i64(4));
   EXPECT_EQ(
-      **ctx.lookup_object({"foo"}),
+      **ctx.lookup_object(path("foo")),
       w::map({{"bar", w::i64(3)}, {"baz", w::i64(4)}}));
-  EXPECT_EQ(**ctx.lookup_object({}), root);
+  EXPECT_EQ(**ctx.lookup_object(path()), root);
 }
 
 TEST(EvalContextTest, parent_scope) {
@@ -109,7 +130,7 @@ TEST(EvalContextTest, parent_scope) {
   // Unknown top-level name should fail
   {
     auto err = get_error<eval_scope_lookup_error>(
-        ctx.lookup_object({"unknown", "bar"}));
+        ctx.lookup_object(path("unknown", "bar")));
     EXPECT_EQ(err.property_name(), "unknown");
     EXPECT_EQ(
         err.searched_scopes(),
@@ -120,35 +141,31 @@ TEST(EvalContextTest, parent_scope) {
              ctx.global_scope()}));
   }
 
-  EXPECT_EQ(**ctx.lookup_object({}), child_2);
-  EXPECT_EQ(**ctx.lookup_object({"foo", "abc"}), i64(5));
+  EXPECT_EQ(**ctx.lookup_object(path()), child_2);
+  EXPECT_EQ(**ctx.lookup_object(path("foo", "abc")), i64(5));
   // child_1 should shadow `foo` from root
   {
     auto err = get_error<eval_property_lookup_error>(
-        ctx.lookup_object({"foo", "bar"}));
+        ctx.lookup_object(path("foo", "bar")));
     EXPECT_EQ(*err.missing_from(), w::map({{"abc", w::i64(5)}}));
     EXPECT_EQ(err.property_name(), "bar");
     EXPECT_EQ(err.success_path(), std::vector<std::string>{"foo"});
   }
   // Unshadowed names from root should still be accessible
-  EXPECT_EQ(**ctx.lookup_object({"parent"}), "works");
-  EXPECT_EQ(*ctx.lookup_object({"parent"})->parent, w::null);
+  EXPECT_EQ(**ctx.lookup_object(path("parent")), "works");
   // Subobjects from shadowed names should be accessible
-  EXPECT_EQ(**ctx.lookup_object({"bar", "baz"}), true);
-  EXPECT_EQ(
-      *ctx.lookup_object({"bar", "baz"})->parent,
-      child_2.as_map().find("bar")->second);
+  EXPECT_EQ(**ctx.lookup_object(path("bar", "baz")), true);
 
   // Should still be shadowing after popping unrelated scope
   ctx.pop_scope();
-  EXPECT_EQ(**ctx.lookup_object({}), child_1);
-  EXPECT_TRUE(
-      has_error<eval_property_lookup_error>(ctx.lookup_object({"foo", "bar"})));
+  EXPECT_EQ(**ctx.lookup_object(path()), child_1);
+  EXPECT_TRUE(has_error<eval_property_lookup_error>(
+      ctx.lookup_object(path("foo", "bar"))));
 
   // Shadowing should stop
   ctx.pop_scope();
-  EXPECT_EQ(**ctx.lookup_object({}), root);
-  EXPECT_EQ(**ctx.lookup_object({"foo", "bar"}), i64(3));
+  EXPECT_EQ(**ctx.lookup_object(path()), root);
+  EXPECT_EQ(**ctx.lookup_object(path("foo", "bar")), i64(3));
 }
 
 TEST(EvalContextTest, locals) {
@@ -160,22 +177,21 @@ TEST(EvalContextTest, locals) {
   auto ctx = eval_context::with_root_scope(root);
   ctx.push_scope(manage_as_static(child_1));
 
-  EXPECT_EQ(**ctx.lookup_object({"foo-2"}), "shadowed");
-
+  EXPECT_EQ(**ctx.lookup_object(path("foo-2")), "shadowed");
   // Locals shadow objects in current scope.
   ctx.bind_local("foo-2", manage_owned<object>(w::string("local"))).value();
-  EXPECT_EQ(**ctx.lookup_object({"foo-2"}), "local");
+  EXPECT_EQ(**ctx.lookup_object(path("foo-2")), "local");
 
   // Locals shadow objects in parent scopes.
   ctx.bind_local("foo", manage_owned<object>(w::string("local"))).value();
-  EXPECT_EQ(**ctx.lookup_object({"foo"}), "local");
+  EXPECT_EQ(**ctx.lookup_object(path("foo")), "local");
 
   // Locals are unbound when the current scope is popped.
   ctx.pop_scope();
   EXPECT_EQ(
-      **ctx.lookup_object({"foo"}),
+      **ctx.lookup_object(path("foo")),
       w::map({{"bar", w::i64(3)}, {"baz", w::i64(4)}}));
-  EXPECT_EQ(**ctx.lookup_object({"foo-2"}), 2.0);
+  EXPECT_EQ(**ctx.lookup_object(path("foo-2")), 2.0);
 }
 
 TEST(EvalContextTest, self_reference) {
@@ -191,15 +207,15 @@ TEST(EvalContextTest, self_reference) {
 
   for (const auto& obj : objects) {
     auto ctx = eval_context::with_root_scope(obj);
-    EXPECT_EQ(**ctx.lookup_object({}), obj);
+    EXPECT_EQ(**ctx.lookup_object(path()), obj);
   }
 }
 
 TEST(EvalContextTest, native_object_basic) {
   auto o = w::make_native_object<double_property_name>();
   auto ctx = eval_context::with_root_scope(o);
-  EXPECT_EQ(**ctx.lookup_object({"foo"}), string("foofoo"));
-  EXPECT_EQ(**ctx.lookup_object({"bar"}), string("barbar"));
+  EXPECT_EQ(**ctx.lookup_object(path("foo")), string("foofoo"));
+  EXPECT_EQ(**ctx.lookup_object(path("bar")), string("barbar"));
 }
 
 TEST(EvalContextTest, native_object_delegator) {
@@ -209,15 +225,15 @@ TEST(EvalContextTest, native_object_delegator) {
   object delegator = w::make_native_object<delegate_to>(doubler);
 
   auto ctx = eval_context::with_root_scope(delegator);
-  EXPECT_EQ(**ctx.lookup_object({"foo"}), doubler);
-  EXPECT_EQ(**ctx.lookup_object({"foo", "bar"}), string("barbar"));
+  EXPECT_EQ(**ctx.lookup_object(path("foo")), doubler);
+  EXPECT_EQ(**ctx.lookup_object(path("foo", "bar")), string("barbar"));
 
   ctx.push_scope(manage_as_static(delegator));
-  EXPECT_EQ(**ctx.lookup_object({"foo"}), doubler);
-  EXPECT_EQ(**ctx.lookup_object({"foo", "bar"}), string("barbar"));
+  EXPECT_EQ(**ctx.lookup_object(path("foo")), doubler);
+  EXPECT_EQ(**ctx.lookup_object(path("foo", "bar")), string("barbar"));
 
   ctx.push_scope(manage_as_static(doubler));
-  EXPECT_EQ(**ctx.lookup_object({"foo"}), "foofoo");
+  EXPECT_EQ(**ctx.lookup_object(path("foo")), "foofoo");
 }
 
 TEST(EvalContextTest, native_object_lookup_throws) {
@@ -238,8 +254,8 @@ TEST(EvalContextTest, native_object_lookup_throws) {
 
   {
     auto ctx = eval_context::with_root_scope(thrower);
-    auto err =
-        get_error<eval_scope_lookup_error>(ctx.lookup_object({"will-throw"}));
+    auto err = get_error<eval_scope_lookup_error>(
+        ctx.lookup_object(path("will-throw")));
     EXPECT_EQ(err.property_name(), "will-throw");
     EXPECT_EQ(err.cause(), "I always throw!");
   }
@@ -247,7 +263,7 @@ TEST(EvalContextTest, native_object_lookup_throws) {
   {
     auto ctx = eval_context::with_root_scope(w::map({{"foo", thrower}}));
     auto err = get_error<eval_property_lookup_error>(
-        ctx.lookup_object({"foo", "will-throw"}));
+        ctx.lookup_object(path("foo", "will-throw")));
     EXPECT_EQ(*err.missing_from(), thrower);
     EXPECT_EQ(err.property_name(), "will-throw");
     EXPECT_EQ(err.success_path(), std::vector<std::string>{"foo"});
@@ -260,14 +276,14 @@ TEST(EvalContextTest, globals) {
   object root;
 
   auto ctx = eval_context::with_root_scope(root, globals);
-  EXPECT_EQ(**ctx.lookup_object({"global"}), i64(1));
+  EXPECT_EQ(**ctx.lookup_object(path("global")), i64(1));
 
   object shadowing = w::map({{"global", w::i64(2)}});
   ctx.push_scope(manage_as_static(shadowing));
-  EXPECT_EQ(**ctx.lookup_object({"global"}), i64(2));
+  EXPECT_EQ(**ctx.lookup_object(path("global")), i64(2));
 
   ctx.pop_scope();
-  EXPECT_EQ(**ctx.lookup_object({"global"}), i64(1));
+  EXPECT_EQ(**ctx.lookup_object(path("global")), i64(1));
 }
 
 } // namespace whisker

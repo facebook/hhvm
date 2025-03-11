@@ -27,6 +27,28 @@ namespace w = whisker::make;
 
 namespace whisker {
 
+namespace {
+ast::identifier make_identifier_from_string(std::string name) {
+  // The source range is not important for testing here
+  return ast::identifier{source_range(), std::move(name)};
+}
+
+template <typename... Components>
+ast::variable_lookup path(Components&&... components) {
+  if constexpr (sizeof...(Components) == 0) {
+    return ast::variable_lookup{
+        source_range(), ast::variable_lookup::this_ref()};
+  } else {
+    std::vector<ast::identifier> chain;
+    chain.reserve(sizeof...(Components));
+    (chain.emplace_back(make_identifier_from_string(
+         std::string(std::forward<Components>(components)))),
+     ...);
+    return ast::variable_lookup{source_range(), std::move(chain)};
+  }
+}
+} // namespace
+
 class MstchCompatTest : public RenderTest {};
 
 TEST_F(MstchCompatTest, basic) {
@@ -82,19 +104,19 @@ TEST_F(MstchCompatTest, map_lookups) {
 
   auto ctx = eval_context::with_root_scope(converted);
   EXPECT_EQ(**ctx.lookup_object({}), converted);
-  EXPECT_TRUE(is_mstch_map(**ctx.lookup_object({"key"})));
-  EXPECT_FALSE(is_mstch_array(**ctx.lookup_object({"key"})));
-  EXPECT_FALSE(is_mstch_object(**ctx.lookup_object({"key"})));
+  EXPECT_TRUE(is_mstch_map(**ctx.lookup_object(path("key"))));
+  EXPECT_FALSE(is_mstch_array(**ctx.lookup_object(path("key"))));
+  EXPECT_FALSE(is_mstch_object(**ctx.lookup_object(path("key"))));
 
-  EXPECT_EQ(**ctx.lookup_object({"key", "nested"}), i64(1));
-  EXPECT_EQ(**ctx.lookup_object({"key", "bool"}), true);
-  EXPECT_EQ(**ctx.lookup_object({"key", "float"}), f64(2.0));
-  EXPECT_EQ(**ctx.lookup_object({"key2"}), w::null);
+  EXPECT_EQ(**ctx.lookup_object(path("key", "nested")), i64(1));
+  EXPECT_EQ(**ctx.lookup_object(path("key", "bool")), true);
+  EXPECT_EQ(**ctx.lookup_object(path("key", "float")), f64(2.0));
+  EXPECT_EQ(**ctx.lookup_object(path("key2")), w::null);
 
   EXPECT_TRUE(
-      has_error<eval_scope_lookup_error>(ctx.lookup_object({"unknown"})));
+      has_error<eval_scope_lookup_error>(ctx.lookup_object(path("unknown"))));
   EXPECT_TRUE(has_error<eval_property_lookup_error>(
-      ctx.lookup_object({"key", "unknown"})));
+      ctx.lookup_object(path("key", "unknown"))));
 }
 
 TEST_F(MstchCompatTest, array_iteration) {
@@ -158,9 +180,9 @@ TEST_F(MstchCompatTest, array_iteration) {
 
   {
     auto ctx = eval_context::with_root_scope(converted);
-    EXPECT_TRUE(is_mstch_array(**ctx.lookup_object({"key"})));
-    EXPECT_FALSE(is_mstch_map(**ctx.lookup_object({"key"})));
-    EXPECT_FALSE(is_mstch_object(**ctx.lookup_object({"key"})));
+    EXPECT_TRUE(is_mstch_array(**ctx.lookup_object(path("key"))));
+    EXPECT_FALSE(is_mstch_map(**ctx.lookup_object(path("key"))));
+    EXPECT_FALSE(is_mstch_object(**ctx.lookup_object(path("key"))));
   }
   {
     strict_printable_types(diagnostic_level::debug);

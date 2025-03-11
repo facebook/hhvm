@@ -491,26 +491,9 @@ class virtual_machine {
   // Performs a lookup of a variable in the current scope or reports diagnostics
   // on failure. Failing to lookup a variable is a fatal error.
   lookup_result lookup_variable(const ast::variable_lookup& variable_lookup) {
-    using path_type = std::vector<std::string>;
-    const path_type path = detail::variant_match(
-        variable_lookup.chain,
-        [](ast::variable_lookup::this_ref) -> path_type {
-          // path should be empty for {{.}} lookups
-          return {};
-        },
-        [&](const std::vector<ast::identifier>& chain) -> path_type {
-          path_type result;
-          result.reserve(chain.size());
-          for (const ast::identifier& id : chain) {
-            result.push_back(id.name);
-          }
-          return result;
-        });
-
     auto undefined_diag_level = opts_.strict_undefined_variables;
-
     return whisker::visit(
-        current_frame().context.lookup_object(path),
+        current_frame().context.lookup_object(variable_lookup),
         [](const lookup_result& value) -> lookup_result { return value; },
         [&](const eval_scope_lookup_error& err) -> lookup_result {
           diags_.maybe_report(variable_lookup.loc, undefined_diag_level, [&] {

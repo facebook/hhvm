@@ -27,7 +27,7 @@ namespace whisker {
 
 namespace {
 
-object::ptr find_property(const object& o, std::string_view identifier) {
+object::ptr find_property(const object& o, const ast::identifier& identifier) {
   using result = object::ptr;
   return o.visit(
       [](null) -> result { return nullptr; },
@@ -36,16 +36,16 @@ object::ptr find_property(const object& o, std::string_view identifier) {
       [](const string&) -> result { return nullptr; },
       [](boolean) -> result { return nullptr; },
       [](const array&) -> result { return nullptr; },
-      [identifier](const native_object::ptr& o) -> result {
+      [&](const native_object::ptr& o) -> result {
         if (auto map_like = o->as_map_like()) {
-          return map_like->lookup_property(identifier);
+          return map_like->lookup_property(identifier.name);
         }
         return nullptr;
       },
       [](const native_function::ptr&) -> result { return nullptr; },
       [](const native_handle<>&) -> result { return nullptr; },
-      [identifier](const map& m) -> result {
-        if (auto it = m.find(identifier); it != m.end()) {
+      [&](const map& m) -> result {
+        if (auto it = m.find(identifier.name); it != m.end()) {
           return manage_as_static(it->second);
         }
         return nullptr;
@@ -96,8 +96,8 @@ class global_scope_object
 } // namespace
 
 object::ptr eval_context::lexical_scope::lookup_property(
-    std::string_view identifier) {
-  if (auto local = locals_.find(identifier); local != locals_.end()) {
+    const ast::identifier& identifier) {
+  if (auto local = locals_.find(identifier.name); local != locals_.end()) {
     return local->second;
   }
   return find_property(*this_ref_, identifier);
@@ -152,71 +152,89 @@ eval_context::bind_local(std::string name, object::ptr value) {
 }
 
 expected<eval_context::lookup_result, eval_context::lookup_error>
-eval_context::lookup_object(const std::vector<std::string>& path) {
+eval_context::lookup_object(const ast::variable_lookup& lookup) {
   assert(!stack_.empty());
+  using result = expected<lookup_result, lookup_error>;
 
-  if (path.empty()) {
-    // Lookup is {{.}}
-    return lookup_result::without_parent(stack_.back().this_ref());
-  }
+  return detail::variant_match(
+      lookup.chain,
+      [&](ast::variable_lookup::this_ref) -> result {
+        return lookup_result::without_parent(stack_.back().this_ref());
+      },
+      [&](const std::vector<ast::identifier>& path) -> result {
+        const auto make_searched_scopes = [&]() -> std::vector<object::ptr> {
+          std::vector<object::ptr> result;
+          result.reserve(stack_.size());
+          // Searching happened in reverse order.
+          std::transform(
+              stack_.rbegin(),
+              stack_.rend(),
+              std::back_inserter(result),
+              [](const auto& scope) { return scope.this_ref(); });
+          return result;
+        };
 
-  const auto make_searched_scopes = [&]() -> std::vector<object::ptr> {
-    std::vector<object::ptr> result;
-    result.reserve(stack_.size());
-    // Searching happened in reverse order.
-    std::transform(
-        stack_.rbegin(),
-        stack_.rend(),
-        std::back_inserter(result),
-        [](const auto& scope) { return scope.this_ref(); });
-    return result;
-  };
+        using component_iterator = std::vector<ast::identifier>::const_iterator;
+        const auto make_success_path =
+            [](component_iterator begin,
+               component_iterator end) -> std::vector<std::string> {
+          std::vector<std::string> result;
+          result.reserve(std::distance(begin, end));
+          std::transform(
+              begin,
+              end,
+              std::back_inserter(result),
+              [](const auto& component) { return component.name; });
+          return result;
+        };
 
-  object::ptr current = nullptr;
-  // Crawl up through the scope stack since names can be shadowed.
-  for (auto scope = stack_.rbegin(); scope != stack_.rend(); ++scope) {
-    try {
-      if (auto result = scope->lookup_property(path.front())) {
-        current = result;
-        break;
-      }
-    } catch (const native_object::fatal_error& err) {
-      return unexpected(eval_scope_lookup_error(
-          path.front(), make_searched_scopes(), err.what() /* cause */));
-    }
-  }
+        object::ptr current = nullptr;
+        // Crawl up through the scope stack since names can be shadowed.
+        for (auto scope = stack_.rbegin(); scope != stack_.rend(); ++scope) {
+          try {
+            if (auto result = scope->lookup_property(path.front())) {
+              current = result;
+              break;
+            }
+          } catch (const native_object::fatal_error& err) {
+            return unexpected(eval_scope_lookup_error(
+                path.front().name,
+                make_searched_scopes(),
+                err.what() /* cause */));
+          }
+        }
 
-  if (current == nullptr) {
-    return unexpected(
-        eval_scope_lookup_error(path.front(), make_searched_scopes()));
-  }
-  object::ptr parent = manage_as_static(whisker::make::null);
+        if (current == nullptr) {
+          return unexpected(eval_scope_lookup_error(
+              path.front().name, make_searched_scopes()));
+        }
+        object::ptr parent = manage_as_static(whisker::make::null);
 
-  for (auto component = std::next(path.begin()); component != path.end();
-       ++component) {
-    try {
-      object::ptr next = find_property(*current, *component);
-      if (next == nullptr) {
-        return unexpected(eval_property_lookup_error(
-            current, /* missing_from */
-            std::vector<std::string>(
-                path.begin(), component), /* success_path */
-            *component /* missing_name */));
-      }
-      parent = current;
-      current = next;
-    } catch (const native_object::fatal_error& err) {
-      return unexpected(eval_property_lookup_error(
-          current, /* missing_from */
-          std::vector<std::string>(path.begin(), component), /* success_path */
-          *component /* missing_name */,
-          err.what() /* cause */));
-    }
-  }
+        for (auto component = std::next(path.begin()); component != path.end();
+             ++component) {
+          try {
+            object::ptr next = find_property(*current, *component);
+            if (next == nullptr) {
+              return unexpected(eval_property_lookup_error(
+                  current, /* missing_from */
+                  make_success_path(path.begin(), component),
+                  component->name /* missing_name */));
+            }
+            parent = current;
+            current = next;
+          } catch (const native_object::fatal_error& err) {
+            return unexpected(eval_property_lookup_error(
+                current, /* missing_from */
+                make_success_path(path.begin(), component),
+                component->name /* missing_name */,
+                err.what() /* cause */));
+          }
+        }
 
-  assert(current != nullptr);
-  assert(parent != nullptr);
-  return lookup_result{current, parent};
+        assert(current != nullptr);
+        assert(parent != nullptr);
+        return lookup_result{current, parent};
+      });
 }
 
 } // namespace whisker

@@ -486,9 +486,11 @@ class virtual_machine {
     return *source_stack_.top();
   }
 
+  using lookup_result = eval_context::lookup_result;
+
   // Performs a lookup of a variable in the current scope or reports diagnostics
   // on failure. Failing to lookup a variable is a fatal error.
-  object::ptr lookup_variable(const ast::variable_lookup& variable_lookup) {
+  lookup_result lookup_variable(const ast::variable_lookup& variable_lookup) {
     using path_type = std::vector<std::string>;
     const path_type path = detail::variant_match(
         variable_lookup.chain,
@@ -509,8 +511,8 @@ class virtual_machine {
 
     return whisker::visit(
         current_frame().context.lookup_object(path),
-        [](const object::ptr& value) -> object::ptr { return value; },
-        [&](const eval_scope_lookup_error& err) -> object::ptr {
+        [](const lookup_result& value) -> lookup_result { return value; },
+        [&](const eval_scope_lookup_error& err) -> lookup_result {
           diags_.maybe_report(variable_lookup.loc, undefined_diag_level, [&] {
             std::string message;
             auto out = std::back_inserter(message);
@@ -541,9 +543,10 @@ class virtual_machine {
             // Fail rendering in strict mode
             diags_.abort_rendering(variable_lookup.loc.begin);
           }
-          return manage_as_static(whisker::make::null);
+          return lookup_result::without_parent(
+              manage_as_static(whisker::make::null));
         },
-        [&](const eval_property_lookup_error& err) -> object::ptr {
+        [&](const eval_property_lookup_error& err) -> lookup_result {
           auto src_range = detail::variant_match(
               variable_lookup.chain,
               [&](ast::variable_lookup::this_ref) -> source_range {
@@ -570,7 +573,8 @@ class virtual_machine {
             // Fail rendering in strict mode
             diags_.abort_rendering(variable_lookup.loc.begin);
           }
-          return manage_as_static(whisker::make::null);
+          return lookup_result::without_parent(
+              manage_as_static(whisker::make::null));
         });
   }
 
@@ -623,7 +627,7 @@ class virtual_machine {
           return manage_as_static(whisker::make::false_);
         },
         [&](const ast::variable_lookup& variable_lookup) -> object::ptr {
-          return lookup_variable(variable_lookup);
+          return lookup_variable(variable_lookup).found;
         },
         [&](const function_call& func) -> object::ptr {
           return detail::variant_match(
@@ -659,16 +663,15 @@ class virtual_machine {
               [&](const function_call::user_defined& user_defined)
                   -> object::ptr {
                 const ast::variable_lookup& name = user_defined.name;
-                object::ptr lookup_result = lookup_variable(name);
-                if (!lookup_result->is_native_function()) {
+                lookup_result lookup = lookup_variable(name);
+                if (!lookup->is_native_function()) {
                   diags_.report_fatal_error(
                       name.loc.begin,
                       "Object '{}' is not a function. The encountered value is:\n{}",
                       name.chain_string(),
-                      to_string(*lookup_result));
+                      to_string(*lookup));
                 }
-                const native_function::ptr& f =
-                    lookup_result->as_native_function();
+                const native_function::ptr& f = lookup->as_native_function();
 
                 native_function::positional_arguments_t positional_args;
                 positional_args.reserve(func.positional_arguments.size());
@@ -748,8 +751,10 @@ class virtual_machine {
     std::map<ast::identifier, object::ptr, ast::identifier::compare_by_name>
         captures;
     for (const ast::identifier& capture : partial_block.captures) {
-      object::ptr captured_object = lookup_variable(
-          ast::variable_lookup{capture.loc, std::vector{capture}});
+      object::ptr captured_object =
+          lookup_variable(
+              ast::variable_lookup{capture.loc, std::vector{capture}})
+              .found;
       captures.emplace(std::pair{capture, std::move(captured_object)});
     }
 
@@ -1131,7 +1136,7 @@ class render_engine {
   }
 
   void visit(const ast::section_block& section) {
-    object::ptr section_variable = vm_.lookup_variable(section.variable);
+    object::ptr section_variable = vm_.lookup_variable(section.variable).found;
 
     const auto maybe_report_coercion = [&] {
       vm_.maybe_report_boolean_coercion(

@@ -151,15 +151,13 @@ eval_context::bind_local(std::string name, object::ptr value) {
   return {};
 }
 
-expected<
-    object::ptr,
-    std::variant<eval_scope_lookup_error, eval_property_lookup_error>>
+expected<eval_context::lookup_result, eval_context::lookup_error>
 eval_context::lookup_object(const std::vector<std::string>& path) {
   assert(!stack_.empty());
 
   if (path.empty()) {
     // Lookup is {{.}}
-    return stack_.back().this_ref();
+    return lookup_result::without_parent(stack_.back().this_ref());
   }
 
   const auto make_searched_scopes = [&]() -> std::vector<object::ptr> {
@@ -192,6 +190,7 @@ eval_context::lookup_object(const std::vector<std::string>& path) {
     return unexpected(
         eval_scope_lookup_error(path.front(), make_searched_scopes()));
   }
+  object::ptr parent = manage_as_static(whisker::make::null);
 
   for (auto component = std::next(path.begin()); component != path.end();
        ++component) {
@@ -204,6 +203,7 @@ eval_context::lookup_object(const std::vector<std::string>& path) {
                 path.begin(), component), /* success_path */
             *component /* missing_name */));
       }
+      parent = current;
       current = next;
     } catch (const native_object::fatal_error& err) {
       return unexpected(eval_property_lookup_error(
@@ -215,7 +215,8 @@ eval_context::lookup_object(const std::vector<std::string>& path) {
   }
 
   assert(current != nullptr);
-  return current;
+  assert(parent != nullptr);
+  return lookup_result{current, parent};
 }
 
 } // namespace whisker

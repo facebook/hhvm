@@ -19,6 +19,7 @@
 #include <thrift/compiler/whisker/expected.h>
 #include <thrift/compiler/whisker/object.h>
 
+#include <cassert>
 #include <cstddef>
 #include <deque>
 #include <functional>
@@ -225,12 +226,39 @@ class eval_context {
   [[nodiscard]] expected<std::monostate, eval_name_already_bound_error>
   bind_local(std::string name, object::ptr value);
 
+  struct lookup_result {
+    /**
+     * The found object at the end of a lookup path. That is, for the lookup
+     * `a.b.c`, the result is `c`.
+     */
+    object::ptr found;
+    const object* operator->() const noexcept { return found.get(); }
+    const object& operator*() const noexcept { return *found; }
+
+    /**
+     * The found object's predecessor. That is, for the lookup `a.b.c`, the
+     * parent is `b`.
+     *
+     * When the path only has one component, this points to a null whisker
+     * object (see whisker::make::null).
+     */
+    object::ptr parent;
+    static lookup_result without_parent(object::ptr found) {
+      assert(found != nullptr);
+      return lookup_result{found, manage_as_static(whisker::make::null)};
+    }
+  };
+  using lookup_error =
+      std::variant<eval_scope_lookup_error, eval_property_lookup_error>;
   /**
    * Performs a lexical search for an object by name (chain of properties)
    * within the current scope (top of the stack).
    *
    * If the provided path is empty, the object backing the current scope is
    * returned. That is, the "{{.}}" object. This is infallible.
+   *
+   * This function returns the object at the provided path as well as its
+   * precedessor.
    *
    * Preconditions:
    *   - The provided path is a series of valid Whisker identifier
@@ -241,10 +269,8 @@ class eval_context {
    *   - eval_property_lookup_error if any subsequent identifier is not found in
    *     the chain of resolved whisker::objects.
    */
-  expected<
-      object::ptr,
-      std::variant<eval_scope_lookup_error, eval_property_lookup_error>>
-  lookup_object(const std::vector<std::string>& path);
+  expected<lookup_result, lookup_error> lookup_object(
+      const std::vector<std::string>& path);
 
   /**
    * Creates a new "derived" eval_context from the current one.

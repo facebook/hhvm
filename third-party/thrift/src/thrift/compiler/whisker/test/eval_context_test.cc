@@ -132,8 +132,12 @@ TEST(EvalContextTest, parent_scope) {
   }
   // Unshadowed names from root should still be accessible
   EXPECT_EQ(**ctx.lookup_object({"parent"}), "works");
+  EXPECT_EQ(*ctx.lookup_object({"parent"})->parent, w::null);
   // Subobjects from shadowed names should be accessible
   EXPECT_EQ(**ctx.lookup_object({"bar", "baz"}), true);
+  EXPECT_EQ(
+      *ctx.lookup_object({"bar", "baz"})->parent,
+      child_2.as_map().find("bar")->second);
 
   // Should still be shadowing after popping unrelated scope
   ctx.pop_scope();
@@ -157,6 +161,7 @@ TEST(EvalContextTest, locals) {
   ctx.push_scope(manage_as_static(child_1));
 
   EXPECT_EQ(**ctx.lookup_object({"foo-2"}), "shadowed");
+
   // Locals shadow objects in current scope.
   ctx.bind_local("foo-2", manage_owned<object>(w::string("local"))).value();
   EXPECT_EQ(**ctx.lookup_object({"foo-2"}), "local");

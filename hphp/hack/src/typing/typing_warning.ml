@@ -133,7 +133,10 @@ module Class_pointer_to_string = struct
 end
 
 module No_disjoint_union_check = struct
-  type t = string Lazy.t
+  type t = {
+    disjuncts: (Pos_or_decl.t * string) list Lazy.t;
+    tparam_pos: Pos_or_decl.t;
+  }
 end
 
 type (_, _) kind =

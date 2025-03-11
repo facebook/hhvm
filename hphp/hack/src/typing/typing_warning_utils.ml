@@ -8,6 +8,7 @@
 
 open Core
 module Codes = Error_codes.Warning
+module SN = Naming_special_names
 
 let severity = User_error.Warning
 
@@ -496,15 +497,21 @@ module No_disjoint_union_check = struct
 
   let code _ = code
 
-  let claim ty =
-    "This call has a type argument that is inferred to be a union of disjoint types,"
-    ^ " but the API is marked to indicate that this is an error."
-    ^ " This is typically the case because two entities that are not related to each other are compared to each other."
-    ^ " For example, comparing a value of `int` type to a value of `string` type will always result in `false` and is likely a coding mistake."
-    ^ " The inferred type in this case is: "
-    ^ Lazy.force ty
+  let claim _ = "Invalid type argument due to disjoint types in a union"
 
-  let reasons _ = []
+  let reasons Typing_warning.No_disjoint_union_check.{ disjuncts; tparam_pos } =
+    let disjuncts = Lazy.force disjuncts in
+    let disjunct_reasons =
+      List.map disjuncts ~f:(fun (pos, ty) ->
+          (pos, Markdown_lite.md_codify ty ^ " is one of the disjoint types"))
+    in
+    disjunct_reasons
+    @ [
+        ( tparam_pos,
+          "This type parameter is marked with "
+          ^ Markdown_lite.md_codify SN.UserAttributes.uaNoDisjointUnion
+          ^ " to indicate that disjoint unions are errors" );
+      ]
 
   let quickfixes _ = []
 end

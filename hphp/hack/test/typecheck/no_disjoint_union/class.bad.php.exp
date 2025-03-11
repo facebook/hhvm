@@ -1,2 +1,8 @@
 WARN: File "class.bad.php", line 10, characters 3-15:
-This call has a type argument that is inferred to be a union of disjoint types, but the API is marked to indicate that this is an error. This is typically the case because two entities that are not related to each other are compared to each other. For example, comparing a value of `int` type to a value of `string` type will always result in `false` and is likely a coding mistake. The inferred type in this case is: (int | string) (Warn[12017])
+Invalid type argument due to disjoint types in a union (Warn[12017])
+  File "class.bad.php", line 9, characters 15-17:
+  `int` is one of the disjoint types
+  File "class.bad.php", line 9, characters 23-28:
+  `string` is one of the disjoint types
+  File "class.bad.php", line 5, characters 31-31:
+  This type parameter is marked with `__NoDisjointUnion` to indicate that disjoint unions are errors

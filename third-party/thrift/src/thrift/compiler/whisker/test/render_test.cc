@@ -1230,6 +1230,49 @@ TEST_F(RenderTest, user_defined_function_polymorphic_native_ref_argument) {
   }
 }
 
+TEST_F(RenderTest, user_defined_function_self_argument) {
+  use_library(load_standard_library);
+
+  const auto return_self =
+      dsl::make_function([](dsl::function::context ctx) -> object::ptr {
+        ctx.declare_arity(0);
+        ctx.declare_named_arguments({});
+        return ctx.raw().self();
+      });
+
+  const auto self_object = w::map({
+      {"answer", w::i64(42)},
+      {"return_self", w::native_function(return_self)},
+  });
+  const auto context = w::map({
+      {"foo", self_object},
+      {"answer", w::i64(100)},
+  });
+
+  {
+    auto result = render(
+        "{{#let s = (foo.return_self)}}\n"
+        "{{s.answer}}\n",
+        context);
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(*result, "42\n");
+  }
+
+  {
+    auto result = render(
+        "{{#let func = foo.return_self}}\n"
+        "{{#let s = (func)}}\n"
+        "{{#if (object.eq? s null)}}\n"
+        "It was null!\n"
+        "{{#else}}\n"
+        "It was not null!\n"
+        "{{/if (object.eq? s null)}}\n",
+        context);
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(*result, "It was null!\n");
+  }
+}
+
 TEST_F(RenderTest, let_statement) {
   auto result = render(
       "{{#let cond = (not false)}}\n"

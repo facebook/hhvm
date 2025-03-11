@@ -364,13 +364,13 @@ class native_function {
    * An ordered list of positional argument values. The position is equal to
    * the index in this vector.
    */
-  using positional_arguments_t = std::vector<std::shared_ptr<const object>>;
+  using positional_arguments_t = std::vector<managed_ptr<object>>;
   /**
    * A map of argument names to their values. The names are guaranteed to be a
    * valid Whisker identifier.
    */
   using named_arguments_t =
-      std::unordered_map<std::string_view, std::shared_ptr<const object>>;
+      std::unordered_map<std::string_view, managed_ptr<object>>;
 
   /**
    * A class that provides information about the executing function to
@@ -386,10 +386,12 @@ class native_function {
     context(
         source_range loc,
         diagnostics_engine& diags,
+        managed_ptr<object> self,
         positional_arguments_t&& positional_args,
         named_arguments_t&& named_args)
         : loc_(std::move(loc)),
           diags_(diags),
+          self_(std::move(self)),
           positional_args_(std::move(positional_args)),
           named_args_(std::move(named_args)) {}
 
@@ -401,6 +403,7 @@ class native_function {
 
     source_range location() const noexcept { return loc_; }
     diagnostics_engine& diagnostics() const noexcept { return diags_; }
+    const managed_ptr<object>& self() const noexcept { return self_; }
     const positional_arguments_t& positional_arguments() const noexcept {
       return positional_args_;
     }
@@ -410,6 +413,7 @@ class native_function {
 
     source_range loc_;
     std::reference_wrapper<diagnostics_engine> diags_;
+    managed_ptr<object> self_;
     positional_arguments_t positional_args_;
     named_arguments_t named_args_;
   };

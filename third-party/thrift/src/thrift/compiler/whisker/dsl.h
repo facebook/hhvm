@@ -296,6 +296,19 @@ class function : public native_function {
     template <typename T>
     using argument_result_t =
         typename detail::function_argument_result<T>::type;
+
+    /**
+     * Returns a reference to the implicit `self` argument, checked against the
+     * desired type `T`.
+     *
+     * If the argument is not of the correct type, then this throws an error.
+     */
+    template <typename T>
+    argument_result_t<T> self() const {
+      return extract_argument<T>(
+          raw().self(), [] { return std::string("'self' argument"); });
+    }
+
     /**
      * Returns a reference to a positional argument, checked against the desired
      * type `T`.

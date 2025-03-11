@@ -689,6 +689,7 @@ class virtual_machine {
                 native_function::context ctx{
                     expr.loc,
                     diags_.engine(),
+                    lookup.parent,
                     std::move(positional_args),
                     std::move(named_args)};
                 try {

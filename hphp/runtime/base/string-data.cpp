@@ -842,7 +842,7 @@ void BlobEncoderHelper<const StringData*>::serde(BlobEncoder& encoder,
     encoder(id);
     return;
   }
-  if (auto const indexer = tl_indexer) {
+  if (tl_indexer) {
     auto const it = tl_indexer->m_indices.find(sd);
     if (it == end(tl_indexer->m_indices)) {
       auto const id = tl_indexer->m_indices.size();

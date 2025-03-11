@@ -43,9 +43,12 @@ namespace whisker {
 class eval_scope_lookup_error {
  public:
   explicit eval_scope_lookup_error(
-      std::string property_name, std::vector<object::ptr> searched_scopes)
+      std::string property_name,
+      std::vector<object::ptr> searched_scopes,
+      std::string cause = {})
       : property_name_(std::move(property_name)),
-        searched_scopes_(std::move(searched_scopes)) {}
+        searched_scopes_(std::move(searched_scopes)),
+        cause_(std::move(cause)) {}
 
   /**
    * The name of the property that was missing.
@@ -61,10 +64,16 @@ class eval_scope_lookup_error {
   const std::vector<object::ptr>& searched_scopes() const {
     return searched_scopes_;
   }
+  /**
+   * The underlying cause of the failed lookup, or empty string if simply
+   * missing.
+   */
+  const std::string& cause() const { return cause_; }
 
  private:
   std::string property_name_;
   std::vector<object::ptr> searched_scopes_;
+  std::string cause_;
 };
 
 /**
@@ -80,10 +89,12 @@ class eval_property_lookup_error {
   explicit eval_property_lookup_error(
       object::ptr missing_from,
       std::vector<std::string> success_path,
-      std::string property_name)
+      std::string property_name,
+      std::string cause = std::string())
       : missing_from_(std::move(missing_from)),
         success_path_(std::move(success_path)),
-        property_name_(std::move(property_name)) {}
+        property_name_(std::move(property_name)),
+        cause_(std::move(cause)) {}
 
   /**
    * The object on which the property named by property_name() was missing.
@@ -97,11 +108,17 @@ class eval_property_lookup_error {
    * The name of the property that was missing.
    */
   const std::string& property_name() const { return property_name_; }
+  /**
+   * The underlying cause of the failed lookup, or empty string if simply
+   * missing.
+   */
+  const std::string& cause() const { return cause_; }
 
  private:
   object::ptr missing_from_;
   std::vector<std::string> success_path_;
   std::string property_name_;
+  std::string cause_;
 };
 
 /**
@@ -276,6 +293,10 @@ class eval_context {
      * Looks up a properties in the following order:
      *   1. Locals
      *   2. Backing object (this_ref())
+     *
+     * Throws:
+     *   - `native_object::fatal_error` if the lookup into the backing object
+     *     throws
      */
     object::ptr lookup_property(std::string_view identifier);
 

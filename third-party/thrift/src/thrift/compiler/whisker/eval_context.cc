@@ -17,7 +17,6 @@
 #include <thrift/compiler/whisker/eval_context.h>
 
 #include <algorithm>
-#include <functional>
 #include <iterator>
 
 #include <fmt/core.h>
@@ -163,40 +162,56 @@ eval_context::lookup_object(const std::vector<std::string>& path) {
     return stack_.back().this_ref();
   }
 
-  auto current = std::invoke([&]() -> object::ptr {
-    const auto& id = path.front();
-    // Crawl up through the scope stack since names can be shadowed.
-    for (auto scope = stack_.rbegin(); scope != stack_.rend(); ++scope) {
-      if (auto result = scope->lookup_property(id)) {
-        return result;
-      }
-    }
-    return nullptr;
-  });
-
-  if (current == nullptr) {
-    std::vector<object::ptr> searched_scopes;
-    searched_scopes.reserve(stack_.size());
+  const auto make_searched_scopes = [&]() -> std::vector<object::ptr> {
+    std::vector<object::ptr> result;
+    result.reserve(stack_.size());
     // Searching happened in reverse order.
     std::transform(
         stack_.rbegin(),
         stack_.rend(),
-        std::back_inserter(searched_scopes),
+        std::back_inserter(result),
         [](const auto& scope) { return scope.this_ref(); });
+    return result;
+  };
+
+  object::ptr current = nullptr;
+  // Crawl up through the scope stack since names can be shadowed.
+  for (auto scope = stack_.rbegin(); scope != stack_.rend(); ++scope) {
+    try {
+      if (auto result = scope->lookup_property(path.front())) {
+        current = result;
+        break;
+      }
+    } catch (const native_object::fatal_error& err) {
+      return unexpected(eval_scope_lookup_error(
+          path.front(), make_searched_scopes(), err.what() /* cause */));
+    }
+  }
+
+  if (current == nullptr) {
     return unexpected(
-        eval_scope_lookup_error(path.front(), std::move(searched_scopes)));
+        eval_scope_lookup_error(path.front(), make_searched_scopes()));
   }
 
   for (auto component = std::next(path.begin()); component != path.end();
        ++component) {
-    object::ptr next = find_property(*current, *component);
-    if (next == nullptr) {
+    try {
+      object::ptr next = find_property(*current, *component);
+      if (next == nullptr) {
+        return unexpected(eval_property_lookup_error(
+            current, /* missing_from */
+            std::vector<std::string>(
+                path.begin(), component), /* success_path */
+            *component /* missing_name */));
+      }
+      current = next;
+    } catch (const native_object::fatal_error& err) {
       return unexpected(eval_property_lookup_error(
           current, /* missing_from */
           std::vector<std::string>(path.begin(), component), /* success_path */
-          *component /* missing_name */));
+          *component /* missing_name */,
+          err.what() /* cause */));
     }
-    current = next;
   }
 
   assert(current != nullptr);

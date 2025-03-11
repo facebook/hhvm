@@ -215,6 +215,41 @@ TEST(EvalContextTest, native_object_delegator) {
   EXPECT_EQ(**ctx.lookup_object({"foo"}), "foofoo");
 }
 
+TEST(EvalContextTest, native_object_lookup_throws) {
+  class throws_on_lookup
+      : public native_object,
+        public native_object::map_like,
+        public std::enable_shared_from_this<throws_on_lookup> {
+   public:
+    native_object::map_like::ptr as_map_like() const override {
+      return shared_from_this();
+    }
+
+    object::ptr lookup_property(std::string_view) const override {
+      throw fatal_error{"I always throw!"};
+    }
+  };
+  object thrower = w::native_object(std::make_shared<throws_on_lookup>());
+
+  {
+    auto ctx = eval_context::with_root_scope(thrower);
+    auto err =
+        get_error<eval_scope_lookup_error>(ctx.lookup_object({"will-throw"}));
+    EXPECT_EQ(err.property_name(), "will-throw");
+    EXPECT_EQ(err.cause(), "I always throw!");
+  }
+
+  {
+    auto ctx = eval_context::with_root_scope(w::map({{"foo", thrower}}));
+    auto err = get_error<eval_property_lookup_error>(
+        ctx.lookup_object({"foo", "will-throw"}));
+    EXPECT_EQ(*err.missing_from(), thrower);
+    EXPECT_EQ(err.property_name(), "will-throw");
+    EXPECT_EQ(err.success_path(), std::vector<std::string>{"foo"});
+    EXPECT_EQ(err.cause(), "I always throw!");
+  }
+}
+
 TEST(EvalContextTest, globals) {
   map globals{{"global", w::i64(1)}};
   object root;

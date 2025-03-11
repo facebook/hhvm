@@ -132,6 +132,20 @@ class native_object {
   virtual ~native_object() = default;
 
   /**
+   * An exception that can be thrown to indicate a fatal error in property
+   * lookup.
+   *
+   * This exception is intended to be thrown for any failed expression
+   * evaluation. For example:
+   *   - failed property lookups (map_like::lookup_property)
+   *   - failed array lookups (array_like::at)
+   *   - failed function calls (native_function::invoke)
+   */
+  struct fatal_error : std::runtime_error {
+    using std::runtime_error::runtime_error;
+  };
+
+  /**
    * A class that allows "map-like" named property access over an underlying
    * C++ object.
    *
@@ -158,6 +172,13 @@ class native_object {
      *
      * Preconditions:
      *   - The provided string is a valid Whisker identifier
+     *
+     * Throws:
+     *   - `fatal_error` if the property lookup fails in an irrecoverable way.
+     *     Failing to find a property matching the identifier is not a fatal
+     *     error. In that case, this function returns nullptr.
+     *     This function should only throw if the identifier is recognized but
+     *     evaluating its value failed.
      */
     virtual managed_ptr<object> lookup_property(
         std::string_view identifier) const = 0;
@@ -337,9 +358,7 @@ class native_function {
    * An exception that can be thrown to indicate a fatal error in function
    * evaluation. See `context::error(...)` for more details.
    */
-  struct fatal_error : std::runtime_error {
-    using std::runtime_error::runtime_error;
-  };
+  using fatal_error = native_object::fatal_error;
 
   /**
    * An ordered list of positional argument values. The position is equal to

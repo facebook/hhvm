@@ -43,7 +43,7 @@ ProfilingTimeseriesWithOutliers::ProfilingTimeseriesWithOutliers(
   for (const auto& thresholdMs : thresholdsMs) {
     std::stringstream ss;
     ss << keyName << ".over_" << thresholdMs << "_ms";
-    mOutlierTimeseriesMsMap[thresholdMs * 1000] = ServiceData::createTimeSeries(
+    mOutlierTimeseriesMsMap[thresholdMs] = ServiceData::createTimeSeries(
       ss.str(),
       {ServiceData::StatsType::COUNT},
       {std::chrono::seconds(60)}

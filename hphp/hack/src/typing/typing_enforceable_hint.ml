@@ -104,13 +104,23 @@ let validator =
                         end else if
                               Aast.(equal_reify_kind tparam.tp_reified Reified)
                             then
-                          this#on_type
-                            {
-                              acc with
-                              Type_validator
-                              .inside_reified_class_generic_position = true;
-                            }
-                            targ
+                          let old_inside_reified_class_generic_position =
+                            inside_reified_class_generic_position
+                          in
+                          let acc =
+                            this#on_type
+                              {
+                                acc with
+                                Type_validator
+                                .inside_reified_class_generic_position = true;
+                              }
+                              targ
+                          in
+                          {
+                            acc with
+                            Type_validator.inside_reified_class_generic_position =
+                              old_inside_reified_class_generic_position;
+                          }
                         else if inside_reified_class_generic_position then
                           this#on_type acc targ
                         else

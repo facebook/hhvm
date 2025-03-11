@@ -1,0 +1,28 @@
+ERROR: File "is_hint_with_multiple_generics.php", line 10, characters 14-37:
+Invalid `is` expression hint (Typing[4195])
+  File "is_hint_with_multiple_generics.php", line 10, characters 14-37:
+  The `is` operator cannot be used with a type with an erased generic type argument
+ERROR: File "is_hint_with_multiple_generics.php", line 12, characters 14-35:
+Invalid `is` expression hint (Typing[4195])
+  File "is_hint_with_multiple_generics.php", line 12, characters 14-35:
+  The `is` operator cannot be used with a type with an erased generic type argument
+ERROR: File "is_hint_with_multiple_generics.php", line 15, characters 14-38:
+Invalid `is` expression hint (Typing[4195])
+  File "is_hint_with_multiple_generics.php", line 15, characters 14-38:
+  The `is` operator cannot be used with a type with an erased generic type argument
+ERROR: File "is_hint_with_multiple_generics.php", line 16, characters 14-36:
+Invalid `is` expression hint (Typing[4195])
+  File "is_hint_with_multiple_generics.php", line 16, characters 14-36:
+  The `is` operator cannot be used with a type with an erased generic type argument
+ERROR: File "is_hint_with_multiple_generics.php", line 20, characters 14-37:
+Invalid `is` expression hint (Typing[4195])
+  File "is_hint_with_multiple_generics.php", line 20, characters 14-37:
+  The `is` operator cannot be used with a type with an erased generic type argument
+ERROR: File "is_hint_with_multiple_generics.php", line 21, characters 14-35:
+Invalid `is` expression hint (Typing[4195])
+  File "is_hint_with_multiple_generics.php", line 21, characters 14-35:
+  The `is` operator cannot be used with a type with an erased generic type argument
+ERROR: File "is_hint_with_multiple_generics.php", line 22, characters 14-35:
+Invalid `is` expression hint (Typing[4195])
+  File "is_hint_with_multiple_generics.php", line 22, characters 14-35:
+  The `is` operator cannot be used with a type with an erased generic type argument

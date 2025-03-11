@@ -2,12 +2,10 @@ HHVM_DEFINE_EXTENSION("std" REQUIRED
   SOURCES
     ext_std.cpp
     ext_std_classobj.cpp
-    ext_std_closure.cpp
     ext_std_errorfunc.cpp
     ext_std_file.cpp
     ext_std_function.cpp
     ext_std_gc.cpp
-    ext_std_intrinsics.cpp
     ext_std_math.cpp
     ext_std_misc.cpp
     ext_std_network.cpp
@@ -21,7 +19,6 @@ HHVM_DEFINE_EXTENSION("std" REQUIRED
   HEADERS
     ext_std.h
     ext_std_classobj.h
-    ext_std_closure.h
     ext_std_errorfunc.h
     ext_std_file.h
     ext_std_function.h
@@ -39,7 +36,6 @@ HHVM_DEFINE_EXTENSION("std" REQUIRED
     ext_std_file.php
     ext_std_function.php
     ext_std_gc.php
-    ext_std_intrinsics.php
     ext_std_math.php
     ext_std_misc.php
     ext_std_network.php

@@ -4891,7 +4891,7 @@ function call_method(ClassWithFooBar $mc): void {
                                     },
                                     "webviewStartLine": 6,
                                     "extras": {
-                                        "lineAgnosticHash": -1328940512569485162
+                                        "lineAgnosticHash": "-1328940512569485162"
                                     },
                                 }
                             ],

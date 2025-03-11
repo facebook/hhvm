@@ -9,7 +9,7 @@ JSON for selected code action:
     "arguments":[
       {
         "entrypoint":"FixLintErrorCodeAction",
-        "extras":{"lineAgnosticHash":1373246366156123083},
+        "extras":{"lineAgnosticHash":"1373246366156123083"},
         "overrideSelection":{"end":{"character":3,"line":14},"start":{"character":2,"line":11}},
         "predefinedPrompt":{
           "command":"Fix Hack error inline",

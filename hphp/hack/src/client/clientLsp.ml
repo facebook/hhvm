@@ -1188,7 +1188,10 @@ let ide_diagnostics_to_lsp_diagnostics
       first_message
     in
     let data =
-      Some Hh_json.(JSON_Object [("line_agnostic_hash", int_ diagnostic_hash)])
+      Some
+        Hh_json.(
+          JSON_Object
+            [("lineAgnosticHash", string_ (string_of_int diagnostic_hash))])
     in
     let relatedInformation =
       additional_messages

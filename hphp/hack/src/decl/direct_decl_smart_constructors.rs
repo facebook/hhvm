@@ -3495,7 +3495,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             .rev()
             .filter_map(|attribute| {
                 if let Node::Attribute(attr) = attribute {
-                    if self.opts.keep_user_attributes {
+                    if self.keep_user_attribute(&attr) {
                         Some(self.user_attribute_to_decl(*attr))
                     } else {
                         None

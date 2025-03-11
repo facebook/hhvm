@@ -51,8 +51,8 @@ File classname.hhi, line 21, character 42 - line 21, character 52:
  20 |   <<__NoAutoDynamic>>
  21 |   newtype classname<+T> as typename<T> = »typename<T>«;
  22 | 
- 23 |   <<__NoAutoDynamic>>
- 24 |   newtype concreteclassname<+T> as classname<T> = classname<T>;
+ 23 |   /**
+ 24 |    * When a class is concrete, you know that all its methods are non-abstract
 
 and flows into this class constant access expression
 
@@ -270,8 +270,8 @@ File classname.hhi, line 21, character 42 - line 21, character 52:
  20 |   <<__NoAutoDynamic>>
  21 |   newtype classname<+T> as typename<T> = »typename<T>«;
  22 | 
- 23 |   <<__NoAutoDynamic>>
- 24 |   newtype concreteclassname<+T> as classname<T> = classname<T>;
+ 23 |   /**
+ 24 |    * When a class is concrete, you know that all its methods are non-abstract
 
 and flows into this class constant access expression
 
@@ -466,8 +466,8 @@ File classname.hhi, line 21, character 42 - line 21, character 52:
  20 |   <<__NoAutoDynamic>>
  21 |   newtype classname<+T> as typename<T> = »typename<T>«;
  22 | 
- 23 |   <<__NoAutoDynamic>>
- 24 |   newtype concreteclassname<+T> as classname<T> = classname<T>;
+ 23 |   /**
+ 24 |    * When a class is concrete, you know that all its methods are non-abstract
 
 and flows into this class constant access expression
 

@@ -64,7 +64,7 @@ pub mod classes {
 
     pub const CLASS_NAME: &str = "\\HH\\classname";
 
-    pub const CONCRETE_CLASS_NAME: &str = "\\HH\\concreteclassname";
+    pub const CONCRETE: &str = "\\HH\\concrete";
 
     pub const ENUM_NAME: &str = "\\HH\\enumname";
 

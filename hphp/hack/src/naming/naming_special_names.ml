@@ -65,7 +65,7 @@ module Classes = struct
 
   let cClassname = "\\HH\\classname"
 
-  let cConcreteclassname = "\\HH\\concreteclassname"
+  let cConcrete = "\\HH\\concrete"
 
   let cTypename = "\\HH\\typename"
 

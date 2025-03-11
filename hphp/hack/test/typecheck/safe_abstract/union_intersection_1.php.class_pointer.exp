@@ -1,44 +1,8 @@
 WARN: File "union_intersection_1.php", line 21, characters 3-14:
 Unsafe use of `new`: `Abs1` might be abstract (Warn[12015])
-  File "union_intersection_1.php", line 12, characters 29-32:
+  File "union_intersection_1.php", line 11, characters 29-32:
   Abs1 is from 
 WARN: File "union_intersection_1.php", line 21, characters 3-14:
 Unsafe use of `new`: `Abs2` might be abstract (Warn[12015])
-  File "union_intersection_1.php", line 12, characters 47-50:
+  File "union_intersection_1.php", line 11, characters 47-50:
   Abs2 is from 
-ERROR: File "union_intersection_1.php", line 13, characters 10-18:
-Invalid return type (Typing[4110])
-  File "union_intersection_1.php", line 12, characters 18-76:
-  Expected `(classname<(Abs1 | Abs2)> | concreteclassname<C1>)`
-  File "union_intersection_1.php", line 9, characters 13-14:
-  But got `class<C1>`; implicitly defined constant `::class` is a reference to class `C1`
-ERROR: File "union_intersection_1.php", line 13, characters 10-18:
-Invalid return type (Typing[4110])
-  File "union_intersection_1.php", line 12, characters 29-32:
-  Expected `(Abs1 | Abs2)`
-  File "union_intersection_1.php", line 13, characters 10-11:
-  But got `C1`
-  File "union_intersection_1.php", line 9, characters 13-14:
-    via this generic `this`; implicitly defined constant `::class` is a reference to class `C1`
-ERROR: File "union_intersection_1.php", line 13, characters 10-18:
-Invalid return type (Typing[4110])
-  File "union_intersection_1.php", line 12, characters 29-32:
-  Expected `Abs1`
-  File "union_intersection_1.php", line 13, characters 10-11:
-  But got `C1`
-  File "union_intersection_1.php", line 9, characters 13-14:
-    via this generic `this`; implicitly defined constant `::class` is a reference to class `C1`
-ERROR: File "union_intersection_1.php", line 13, characters 10-18:
-Invalid return type (Typing[4110])
-  File "union_intersection_1.php", line 12, characters 47-50:
-  Expected `Abs2`
-  File "union_intersection_1.php", line 13, characters 10-11:
-  But got `C1`
-  File "union_intersection_1.php", line 9, characters 13-14:
-    via this generic `this`; implicitly defined constant `::class` is a reference to class `C1`
-ERROR: File "union_intersection_1.php", line 13, characters 10-18:
-Invalid return type (Typing[4110])
-  File "union_intersection_1.php", line 12, characters 55-75:
-  Expected `concreteclassname<C1>`
-  File "union_intersection_1.php", line 9, characters 13-14:
-  But got `class<C1>`; implicitly defined constant `::class` is a reference to class `C1`

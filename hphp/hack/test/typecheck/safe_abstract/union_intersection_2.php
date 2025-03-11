@@ -8,7 +8,9 @@ abstract class Abs2 {}
 
 
 function make(): (classname<Abs1> & classname<Abs2>) {
-  return make();
+  while (true) {
+
+  }
 }
 
 <<__EntryPoint>>

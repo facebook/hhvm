@@ -20,8 +20,20 @@ namespace HH {
   <<__NoAutoDynamic>>
   newtype classname<+T> as typename<T> = typename<T>;
 
+  /**
+   * When a class is concrete, you know that all its methods are non-abstract
+   * and that (if it has a public constructor and is __Consistent construct)
+   * you can construct an instance of the class with `new`.
+   *
+   * - concrete<class<T>> is a pointer to a concrete class
+   *   that is T or a descendent of T.
+   *
+   * - concrete<classname<T>> is the name for a concrete class
+   * that is T or a descendent of T.
+   *
+   */
   <<__NoAutoDynamic>>
-  newtype concreteclassname<+T> as classname<T> = classname<T>;
+  newtype concrete<+T> as T = T;
 
   /**
    * Similar to vec_or_dict, this type is a migration type to cover places that

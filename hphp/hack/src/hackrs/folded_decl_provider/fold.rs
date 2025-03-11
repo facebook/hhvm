@@ -153,25 +153,32 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             ClassishKind::Cenum | ClassishKind::Ctrait | ClassishKind::Cinterface => true,
             ClassishKind::Cclass(c) | ClassishKind::CenumClass(c) => c.is_abstract(),
         };
-        let id = if is_abstract || !self.opts.safe_abstract {
-            &sn::classes::cClassname
-        } else {
-            &sn::classes::cConcreteclassname
-        };
-        let classname_ty = if self.opts.class_class_type {
-            Ty::class_ptr(reason.clone(), Ty::this(reason))
-        } else {
-            Ty::apply(
-                reason.clone(),
-                Positioned::new(pos.clone(), **id),
-                [Ty::this(reason)].into(),
-            )
+        // Examples: classname<this>, class<this>, concrete<classname<this>> ...
+        let ty = {
+            let classname_or_class_ptr_ty = if self.opts.class_class_type {
+                Ty::class_ptr(reason.clone(), Ty::this(reason.clone()))
+            } else {
+                Ty::apply(
+                    reason.clone(),
+                    Positioned::new(pos.clone(), *sn::classes::cClassname),
+                    [Ty::this(reason.clone())].into(),
+                )
+            };
+            if is_abstract || !self.opts.safe_abstract {
+                classname_or_class_ptr_ty
+            } else {
+                Ty::apply(
+                    reason,
+                    Positioned::new(pos.clone(), *sn::classes::cConcrete),
+                    [classname_or_class_ptr_ty].into(),
+                )
+            }
         };
         let class_const = ClassConst {
             is_synthesized: true,
             kind: ClassConstKind::CCConcrete,
             pos: pos.clone(),
-            ty: classname_ty,
+            ty,
             origin: name,
             refs: Box::default(),
         };

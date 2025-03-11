@@ -4,13 +4,13 @@
 <<__ConsistentConstruct>>
 abstract class Abs1 {}
 <<__ConsistentConstruct>>
-abstract class Abs2 { }
+abstract class Abs2 {}
 <<__ConsistentConstruct>>
-final class C1 { }
+final class C1 {}
 
-
-function make(): (classname<Abs1> | classname<Abs2> | concreteclassname<C1>) {
-  return C1::class;
+function make(): (classname<Abs1> | classname<Abs2> | concrete<classname<C1>>) {
+  while (true) {
+  }
 }
 
 <<__EntryPoint>>

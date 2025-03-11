@@ -6,14 +6,13 @@ abstract class Abs1 {
 }
 abstract class Abs2 {
   public static abstract function foo(): void;
- }
+}
 final class C1 {
   public static function foo(): void {}
 }
 
-
-function make(): (classname<Abs1> | classname<Abs2> | concreteclassname<C1>) {
-  return make();
+function make(): (classname<Abs1> | classname<Abs2> | concrete<classname<C1>>) {
+  while (true) {}
 }
 
 <<__EntryPoint>>

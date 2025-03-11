@@ -7,7 +7,8 @@ abstract class Abs1 {}
 
 
 function make(): (string & ~classname<Abs1>) {
-  return make();
+  while (true) {
+  }
 }
 
 <<__EntryPoint>>

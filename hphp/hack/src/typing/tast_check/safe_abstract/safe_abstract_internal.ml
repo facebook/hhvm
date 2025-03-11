@@ -154,21 +154,20 @@ end = struct
       in
       (* extract class information from classname<T> or concrete_classname<T>
        * `None` indicates no class information found *)
-      let rec fold_ty ty : acc option =
+      let rec fold_ty abstractness ty : acc option =
         match snd @@ Typing_defs_core.deref ty with
         | Typing_defs.Tnewtype (new_type, [hd_targ], _)
+          when String.equal new_type Naming_special_names.Classes.cConcrete ->
+          fold_ty Concrete hd_targ
+        | Typing_defs.Tnewtype (new_type, [hd_targ], _)
           when String.equal new_type Naming_special_names.Classes.cClassname ->
-          fold_targ Maybe_abstract hd_targ
-        | Typing_defs.Tnewtype (new_type, hd_targ :: [], _)
-          when String.equal
-                 new_type
-                 Naming_special_names.Classes.cConcreteclassname ->
-          fold_targ Concrete hd_targ
-        | Typing_defs.Tintersection tys -> aggregate tys fold_ty intersect
-        | Typing_defs.Tunion tys -> aggregate tys fold_ty union
+          fold_targ abstractness hd_targ
+        | Typing_defs.Tintersection tys ->
+          aggregate tys (fold_ty abstractness) intersect
+        | Typing_defs.Tunion tys -> aggregate tys (fold_ty abstractness) union
         | _ -> None
       in
-      fold_ty ty
+      fold_ty Maybe_abstract ty
 end
 
 let check_for_call_abstract

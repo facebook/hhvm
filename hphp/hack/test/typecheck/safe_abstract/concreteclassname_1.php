@@ -9,7 +9,7 @@ class C extends A {
   }
 }
 
-function expect_concrete(concreteclassname<A> $an): void {}
+function expect_concrete(concrete<classname<A>> $an): void {}
 
 function expect_classname(classname<A> $an): void {}
 

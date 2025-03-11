@@ -3,6 +3,6 @@
 <<__ConsistentConstruct>>
 abstract class A {}
 
-function example(concreteclassname<A> $cls): void {
+function example(concrete<classname<A>> $cls): void {
   new $cls(); // ok
 }

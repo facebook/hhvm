@@ -5,9 +5,9 @@
 final class C1 {}
 final class C2 {}
 
-
-function make(): (concreteclassname<C1> | concreteclassname<C2>) {
-  return make();
+function make(): (concrete<classname<C1>> | concrete<classname<C2>>) {
+  while (true) {
+  }
 }
 
 <<__EntryPoint>>

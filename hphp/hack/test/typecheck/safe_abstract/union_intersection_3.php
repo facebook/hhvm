@@ -9,7 +9,9 @@ abstract class Abs2 {}
 type Classes = (Abs1 & Abs2);
 
 function make(): classname<Classes> {
-  return make();
+  while (true) {
+
+  }
 }
 
 <<__EntryPoint>>

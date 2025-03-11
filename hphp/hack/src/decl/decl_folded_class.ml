@@ -446,26 +446,28 @@ let class_class_decl
     (ctx : Provider_context.t)
     (class_id : Typing_defs.pos_id) : Typing_defs.class_const =
   let (pos, name) = class_id in
-  let reason = Reason.class_class (pos, name) in
   let tco = Provider_context.get_tcopt ctx in
-  let classname_ty =
-    if TypecheckerOptions.(class_class_type tco) then
-      mk (reason, Tclass_ptr (mk (reason, Tthis)))
+  (* Examples: classname<C>, class<C>, concrete<classname<C>> ... *)
+  let cc_type =
+    let reason = Reason.class_class (pos, name) in
+    let classname_or_class_ptr_ty =
+      if TypecheckerOptions.(class_class_type tco) then
+        mk (reason, Tclass_ptr (mk (reason, Tthis)))
+      else
+        mk (reason, Tapply ((pos, SN.Classes.cClassname), [mk (reason, Tthis)]))
+    in
+    if is_abstract || not (TypecheckerOptions.safe_abstract tco) then
+      classname_or_class_ptr_ty
     else
-      let name =
-        let safe_abstract = TypecheckerOptions.safe_abstract tco in
-        if is_abstract || not safe_abstract then
-          SN.Classes.cClassname
-        else
-          SN.Classes.cConcreteclassname
-      in
-      mk (reason, Tapply ((pos, name), [mk (reason, Tthis)]))
+      mk
+        ( reason,
+          Tapply ((pos, SN.Classes.cConcrete), [classname_or_class_ptr_ty]) )
   in
   {
     cc_abstract = CCConcrete;
     cc_pos = pos;
     cc_synthesized = true;
-    cc_type = classname_ty;
+    cc_type;
     cc_origin = name;
     cc_refs = [];
   }

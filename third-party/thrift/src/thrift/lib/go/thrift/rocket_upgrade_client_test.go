@@ -59,7 +59,7 @@ func TestUpgradeToRocketClientUnix(t *testing.T) {
 	go func() {
 		errChan <- server.ServeContext(ctx)
 	}()
-	proto, err := NewClient(
+	proto, err := DeprecatedNewClient(
 		WithUpgradeToRocket(),
 		WithDialer(func() (net.Conn, error) {
 			return net.Dial(addr.Network(), addr.String())

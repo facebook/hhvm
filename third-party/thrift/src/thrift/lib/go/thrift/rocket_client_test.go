@@ -135,7 +135,7 @@ func TestFDRelease(t *testing.T) {
 	})
 
 	for range 10000 {
-		proto, err := NewClient(
+		proto, err := DeprecatedNewClient(
 			WithRocket(),
 			WithIoTimeout(60*time.Second),
 			WithDialer(func() (net.Conn, error) {

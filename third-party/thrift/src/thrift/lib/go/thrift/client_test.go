@@ -48,7 +48,7 @@ func TestClient(t *testing.T) {
 	addr := listener.Addr()
 
 	// Testing successful client connection
-	client, err := NewClient(
+	client, err := DeprecatedNewClient(
 		WithRocket(),
 		WithIoTimeout(time.Second),
 		WithProtocolID(types.ProtocolIDCompact),
@@ -67,7 +67,7 @@ func TestClient(t *testing.T) {
 	}
 
 	// Testing unsuccessful client connection (cannot connect at all)
-	client, err = NewClient(
+	client, err = DeprecatedNewClient(
 		WithRocket(),
 		WithDialer(func() (net.Conn, error) {
 			return net.Dial("unix", "/tmp/non_existent_garbage_socket_12345")
@@ -83,7 +83,7 @@ func TestClient(t *testing.T) {
 	if err != nil {
 		t.Fatal(fmt.Sprintf("failed to get FD count: %#v", err))
 	}
-	client, err = NewClient(
+	client, err = DeprecatedNewClient(
 		WithRocket(),
 		// Invalid protocol that intentionally breaks client creation
 		WithProtocolID(types.ProtocolID(12345)),
@@ -96,7 +96,7 @@ func TestClient(t *testing.T) {
 		t.Fatalf("unexpected error when creating client: %v", err)
 	}
 	// IMPORTANT!
-	// Even though we perform an explicit call to Close() in NewClient()
+	// Even though we perform an explicit call to Close() in DeprecatedNewClient()
 	// upon protocol error, actual FD closing is done by the garbage collector.
 	// Without the GC call below - the FD may still linger and affect test results.
 	runtime.GC()

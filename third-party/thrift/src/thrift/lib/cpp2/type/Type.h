@@ -124,13 +124,13 @@ class Type : public detail::Wrap<TypeStruct> {
       bool ensure_params = false,
       bool validate_uri = false);
 
-  friend bool operator==(Type lhs, Type rhs) noexcept {
+  friend bool operator==(const Type& lhs, const Type& rhs) noexcept {
     return lhs.data_ == rhs.data_;
   }
-  friend bool operator!=(Type lhs, Type rhs) noexcept {
+  friend bool operator!=(const Type& lhs, const Type& rhs) noexcept {
     return lhs.data_ != rhs.data_;
   }
-  friend bool operator<(Type lhs, Type rhs) noexcept {
+  friend bool operator<(const Type& lhs, const Type& rhs) noexcept {
     return lhs.data_ < rhs.data_;
   }
 

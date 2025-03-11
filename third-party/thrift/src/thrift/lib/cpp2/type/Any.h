@@ -93,13 +93,13 @@ class AnyData : public detail::Wrap<AnyStruct> {
   static bool isValid(const AnyStruct& any) noexcept;
 
  private:
-  friend bool operator==(AnyData lhs, AnyData rhs) noexcept {
+  friend bool operator==(const AnyData& lhs, const AnyData& rhs) noexcept {
     return lhs.data_ == rhs.data_;
   }
-  friend bool operator!=(AnyData lhs, AnyData rhs) noexcept {
+  friend bool operator!=(const AnyData& lhs, const AnyData& rhs) noexcept {
     return lhs.data_ != rhs.data_;
   }
-  friend bool operator<(AnyData lhs, AnyData rhs) noexcept {
+  friend bool operator<(const AnyData& lhs, const AnyData& rhs) noexcept {
     return lhs.data_ < rhs.data_;
   }
 

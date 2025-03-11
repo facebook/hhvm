@@ -24,15 +24,32 @@ type t = {
   kernelspec: Hh_json.json;
 }
 
+(* Normalize the "source" field (string list) into a single string.
+   * Note that Jupyter docs don't specify whether such source lines should
+   * end in "\n" or not and we receive notebooks in either format,
+   * so we allow either and try to do the right thing.
+   * https://ipython.org/ipython-doc/3/notebook/nbformat.html
+*)
+let cell_contents_of_source_lines (source_lines : string list) : string =
+  source_lines
+  |> List.map ~f:(fun s ->
+         if String.is_suffix ~suffix:"\n" s then
+           String.sub s ~pos:0 ~len:(String.length s - 1)
+         else
+           s)
+  |> String.concat ~sep:"\n"
+
 let ipynb_of_json (ipynb_json : Hh_json.json) : (t, string) Result.t =
   let cell_of_json_exn (cell_json : Hh_json.json) : cell =
     let find_exn = List.Assoc.find_exn ~equal:String.equal in
     let obj = Hh_json.get_object_exn cell_json in
-    let source_json = find_exn obj "source" in
-    let source_lines_json = Hh_json.get_array_exn source_json in
-    let source_lines = List.map source_lines_json ~f:Hh_json.get_string_exn in
     let type_json = find_exn obj "cell_type" in
-    let contents = String.concat ~sep:"\n" source_lines in
+    let contents =
+      let source_json = find_exn obj "source" in
+      let source_lines_json = Hh_json.get_array_exn source_json in
+      let source_lines = List.map source_lines_json ~f:Hh_json.get_string_exn in
+      cell_contents_of_source_lines source_lines
+    in
     let cell_bento_metadata =
       List.Assoc.find obj "metadata" ~equal:String.equal
     in

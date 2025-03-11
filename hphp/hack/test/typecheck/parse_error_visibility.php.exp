@@ -1,2 +1,2 @@
 ERROR: File "parse_error_visibility.php", line 14, characters 12-15:
-Methods need to be marked `public`, `private`, or `protected`. (Naming[2086])
+Methods need to be marked `public`, `private`, `protected`, or `internal`. (Naming[2086])

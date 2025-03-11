@@ -177,7 +177,7 @@ impl Naming {
             Self::MethodNeedsVisibility as isize,
             Message(
                 name_p,
-                "Methods need to be marked `public`, `private`, or `protected`.".into(),
+                "Methods need to be marked `public`, `private`, `protected`, or `internal`.".into(),
             ),
             vec![],
             Explanation::Empty,
@@ -196,6 +196,11 @@ impl Naming {
                 Quickfix {
                     title: "Add `public` modifier".into(),
                     edits: Edits::Eager(vec![("public ".into(), (fix_pos.clone()))]),
+                    hint_styles: vec![],
+                },
+                Quickfix {
+                    title: "Add `internal` modifier".into(),
+                    edits: Edits::Eager(vec![("internal ".into(), (fix_pos.clone()))]),
                     hint_styles: vec![],
                 },
             ],

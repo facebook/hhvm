@@ -1,5 +1,5 @@
 ERROR: File "trait_require_error_trait_2.php", line 13, characters 12-14:
-Methods need to be marked `public`, `private`, or `protected`. (Naming[2086])
+Methods need to be marked `public`, `private`, `protected`, or `internal`. (Naming[2086])
 ERROR: File "trait_require_error_trait_2.php", line 20, characters 5-25:
 You cannot return a value (Typing[4084])
   File "trait_require_error_trait_2.php", line 19, characters 26-29:

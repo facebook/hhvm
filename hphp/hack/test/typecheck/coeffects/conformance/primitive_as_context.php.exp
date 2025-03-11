@@ -1,5 +1,5 @@
 ERROR: File "primitive_as_context.php", line 4, characters 12-37:
-Methods need to be marked `public`, `private`, or `protected`. (Naming[2086])
+Methods need to be marked `public`, `private`, `protected`, or `internal`. (Naming[2086])
 ERROR: File "primitive_as_context.php", line 4, characters 40-44:
 Illegal context: `int`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])

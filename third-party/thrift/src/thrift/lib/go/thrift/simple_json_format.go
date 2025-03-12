@@ -394,7 +394,7 @@ func (p *simpleJSONFormat) ReadListEnd() error {
 	return p.ParseListEnd()
 }
 
-func (p *simpleJSONFormat) ReadSetBegin() (elemType types.Type, size int, err error) {
+func (p *simpleJSONFormat) ReadSetBegin() (types.Type /* elemType */, int /* size */, error) {
 	return p.ParseElemListBegin()
 }
 

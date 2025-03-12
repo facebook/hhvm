@@ -527,7 +527,7 @@ func (p *compactDecoder) ReadListEnd() error { return nil }
 // be packed into the element type header. If it's a longer set, the 4 MSB
 // of the element type header will be 0xF, and a varint will follow with the
 // true size.
-func (p *compactDecoder) ReadSetBegin() (elemType types.Type, size int, err error) {
+func (p *compactDecoder) ReadSetBegin() (types.Type /* elemType */, int /* size */, error) {
 	return p.ReadListBegin()
 }
 

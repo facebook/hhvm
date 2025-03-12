@@ -347,7 +347,7 @@ func (p *compactJSONFormat) ReadListEnd() error {
 	return p.ParseListEnd()
 }
 
-func (p *compactJSONFormat) ReadSetBegin() (elemType types.Type, size int, err error) {
+func (p *compactJSONFormat) ReadSetBegin() (types.Type /* elemType */, int /* size */, error) {
 	return p.ParseElemListBegin()
 }
 

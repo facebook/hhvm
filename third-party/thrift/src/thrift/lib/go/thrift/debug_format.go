@@ -190,10 +190,10 @@ func (tdp *debugFormat) ReadListEnd() error {
 	log.Printf("%sReadListEnd() err=%#v", tdp.LogPrefix, err)
 	return err
 }
-func (tdp *debugFormat) ReadSetBegin() (elemType types.Type, size int, err error) {
-	elemType, size, err = tdp.Delegate.ReadSetBegin()
+func (tdp *debugFormat) ReadSetBegin() (types.Type /* elemType */, int /* size */, error) {
+	elemType, size, err := tdp.Delegate.ReadSetBegin()
 	log.Printf("%sReadSetBegin() (elemType=%#v, size=%#v, err=%#v)", tdp.LogPrefix, elemType, size, err)
-	return
+	return elemType, size, err
 }
 func (tdp *debugFormat) ReadSetEnd() error {
 	err := tdp.Delegate.ReadSetEnd()

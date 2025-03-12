@@ -29,6 +29,12 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
 }
 
 THRIFT_PLUGGABLE_FUNC_REGISTER(
+    void,
+    postProcessFrameworkMetadata,
+    InterceptorFrameworkMetadataStorage&,
+    const RpcOptions&) {}
+
+THRIFT_PLUGGABLE_FUNC_REGISTER(
     std::unique_ptr<folly::IOBuf>,
     serializeFrameworkMetadata,
     InterceptorFrameworkMetadataStorage&& /* unused */) {

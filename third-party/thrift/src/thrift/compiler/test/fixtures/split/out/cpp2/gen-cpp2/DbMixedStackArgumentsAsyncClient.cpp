@@ -73,7 +73,7 @@ void apache::thrift::Client<::cpp2::DbMixedStackArguments>::fbthrift_serialize_a
   apache::thrift::SerializedRequest request = fbthrift_serialize_getDataByKey0(rpcOptions, *header, contextStack, p_key);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
-    interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata();
+    interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
   }
   if (stealRpcOptions) {
     fbthrift_send_getDataByKey0(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback), std::move(interceptorFrameworkMetadata));
@@ -160,7 +160,7 @@ folly::SemiFuture<::std::string> apache::thrift::Client<::cpp2::DbMixedStackArgu
         exTry.hasException()) {
       return folly::makeSemiFuture<::std::string>(std::move(exTry).exception());
     }
-    interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata();
+    interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
   }
   apache::thrift::SerializedRequest request = fbthrift_serialize_getDataByKey0(rpcOptions, *header, contextStack, p_key);
   fbthrift_send_getDataByKey0(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback), std::move(interceptorFrameworkMetadata));
@@ -272,7 +272,7 @@ void apache::thrift::Client<::cpp2::DbMixedStackArguments>::fbthrift_serialize_a
   apache::thrift::SerializedRequest request = fbthrift_serialize_getDataByKey1(rpcOptions, *header, contextStack, p_key);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
-    interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata();
+    interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
   }
   if (stealRpcOptions) {
     fbthrift_send_getDataByKey1(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback), std::move(interceptorFrameworkMetadata));
@@ -359,7 +359,7 @@ folly::SemiFuture<::std::string> apache::thrift::Client<::cpp2::DbMixedStackArgu
         exTry.hasException()) {
       return folly::makeSemiFuture<::std::string>(std::move(exTry).exception());
     }
-    interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata();
+    interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
   }
   apache::thrift::SerializedRequest request = fbthrift_serialize_getDataByKey1(rpcOptions, *header, contextStack, p_key);
   fbthrift_send_getDataByKey1(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback), std::move(interceptorFrameworkMetadata));

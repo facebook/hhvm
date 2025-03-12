@@ -19,6 +19,7 @@
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
+#include <thrift/lib/cpp2/async/RpcOptions.h>
 #include <thrift/lib/cpp2/util/TypeErasedValue.h>
 
 namespace apache::thrift {
@@ -42,6 +43,12 @@ THRIFT_FLAG_DECLARE_bool(enable_service_interceptor_framework_metadata);
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     InterceptorFrameworkMetadataStorage,
     initializeInterceptorFrameworkMetadataStorage);
+
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    void,
+    postProcessFrameworkMetadata,
+    InterceptorFrameworkMetadataStorage& storage,
+    const RpcOptions& rpcOptions);
 
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     std::unique_ptr<folly::IOBuf>,

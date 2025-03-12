@@ -40,7 +40,8 @@ class ContextStackUnsafeAPI {
  public:
   explicit ContextStackUnsafeAPI(ContextStack&);
   void*& contextAt(size_t index) const;
-  std::unique_ptr<folly::IOBuf> getInterceptorFrameworkMetadata();
+  std::unique_ptr<folly::IOBuf> getInterceptorFrameworkMetadata(
+      const RpcOptions& rpcOptions);
 
  private:
   ContextStack& contextStack_;
@@ -173,7 +174,8 @@ class ContextStack {
   detail::ClientInterceptorOnRequestStorage*
   getStorageForClientInterceptorOnRequestByIndex(std::size_t index);
 
-  std::unique_ptr<folly::IOBuf> getInterceptorFrameworkMetadata();
+  std::unique_ptr<folly::IOBuf> getInterceptorFrameworkMetadata(
+      const RpcOptions& rpcOptions);
 };
 
 } // namespace apache::thrift

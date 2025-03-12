@@ -72,7 +72,7 @@ void apache::thrift::Client<::facebook::thrift::test::AdapterService>::fbthrift_
   apache::thrift::SerializedRequest request = fbthrift_serialize_count(rpcOptions, *header, contextStack);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
-    interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata();
+    interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
   }
   if (stealRpcOptions) {
     fbthrift_send_count(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback), std::move(interceptorFrameworkMetadata));
@@ -159,7 +159,7 @@ folly::SemiFuture<::facebook::thrift::test::CountingStruct> apache::thrift::Clie
         exTry.hasException()) {
       return folly::makeSemiFuture<::facebook::thrift::test::CountingStruct>(std::move(exTry).exception());
     }
-    interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata();
+    interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
   }
   apache::thrift::SerializedRequest request = fbthrift_serialize_count(rpcOptions, *header, contextStack);
   fbthrift_send_count(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback), std::move(interceptorFrameworkMetadata));
@@ -271,7 +271,7 @@ void apache::thrift::Client<::facebook::thrift::test::AdapterService>::fbthrift_
   apache::thrift::SerializedRequest request = fbthrift_serialize_adaptedTypes(rpcOptions, *header, contextStack, p_arg);
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
-    interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata();
+    interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
   }
   if (stealRpcOptions) {
     fbthrift_send_adaptedTypes(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback), std::move(interceptorFrameworkMetadata));
@@ -358,7 +358,7 @@ folly::SemiFuture<::facebook::thrift::test::HeapAllocated> apache::thrift::Clien
         exTry.hasException()) {
       return folly::makeSemiFuture<::facebook::thrift::test::HeapAllocated>(std::move(exTry).exception());
     }
-    interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata();
+    interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
   }
   apache::thrift::SerializedRequest request = fbthrift_serialize_adaptedTypes(rpcOptions, *header, contextStack, p_arg);
   fbthrift_send_adaptedTypes(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback), std::move(interceptorFrameworkMetadata));

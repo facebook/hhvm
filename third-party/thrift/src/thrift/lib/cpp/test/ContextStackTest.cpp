@@ -16,6 +16,7 @@
 
 #include <folly/portability/GTest.h>
 
+#include <folly/Format.h>
 #include <thrift/lib/cpp/ContextStack.h>
 #include <thrift/lib/cpp2/test/util/TrackingTProcessorEventHandler.h>
 
@@ -30,6 +31,15 @@ THRIFT_PLUGGABLE_FUNC_SET(
   InterceptorFrameworkMetadataStorage storage;
   storage.emplace<std::string>(value);
   return storage;
+}
+
+THRIFT_PLUGGABLE_FUNC_SET(
+    void,
+    postProcessFrameworkMetadata,
+    InterceptorFrameworkMetadataStorage& storage,
+    const RpcOptions&) {
+  storage.emplace<std::string>(
+      folly::sformat("{}_postprocessed", storage.value<std::string>()));
 }
 
 THRIFT_PLUGGABLE_FUNC_SET(
@@ -170,11 +180,11 @@ TEST(ContextStack, FrameworkMetadataInitialized) {
 
   std::unique_ptr<folly::IOBuf> metadataBuf =
       detail::ContextStackUnsafeAPI(*contextStack)
-          .getInterceptorFrameworkMetadata();
+          .getInterceptorFrameworkMetadata(RpcOptions());
   EXPECT_TRUE(metadataBuf != nullptr);
 
   std::string metadataStr = metadataBuf->toString();
-  EXPECT_EQ(metadataStr, "test");
+  EXPECT_EQ(metadataStr, "test_postprocessed");
 }
 
 } // namespace test

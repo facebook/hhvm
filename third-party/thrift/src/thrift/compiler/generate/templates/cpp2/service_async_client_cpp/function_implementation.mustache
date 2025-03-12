@@ -63,7 +63,7 @@ void {{> service_common/client_class_name}}::fbthrift_serialize_and_send_{{funct
   apache::thrift::SerializedRequest request = fbthrift_serialize_{{function:cpp_name}}(rpcOptions, *header, contextStack{{function:comma}}{{> service_common/param_list}});
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
-    interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata();
+    interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata(rpcOptions);
   }
   if (stealRpcOptions) {
     fbthrift_send_{{function:cpp_name}}(std::move(request), std::move(rpcOptions), std::move(header), std::move(callback), std::move(interceptorFrameworkMetadata){{#function:creates_interaction?}}, handle{{/function:creates_interaction?}});

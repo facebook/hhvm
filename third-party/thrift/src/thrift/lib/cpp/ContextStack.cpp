@@ -446,7 +446,10 @@ ContextStack::getStorageForClientInterceptorOnRequestByIndex(
   return &clientInterceptorsStorage_[index];
 }
 
-std::unique_ptr<folly::IOBuf> ContextStack::getInterceptorFrameworkMetadata() {
+std::unique_ptr<folly::IOBuf> ContextStack::getInterceptorFrameworkMetadata(
+    const RpcOptions& rpcOptions) {
+  detail::postProcessFrameworkMetadata(
+      clientInterceptorFrameworkMetadata_, rpcOptions);
   return detail::serializeFrameworkMetadata(
       std::move(clientInterceptorFrameworkMetadata_));
 }
@@ -460,11 +463,12 @@ void*& ContextStackUnsafeAPI::contextAt(size_t index) const {
 }
 
 std::unique_ptr<folly::IOBuf>
-ContextStackUnsafeAPI::getInterceptorFrameworkMetadata() {
+ContextStackUnsafeAPI::getInterceptorFrameworkMetadata(
+    const RpcOptions& rpcOptions) {
   if (!THRIFT_FLAG(enable_client_interceptor_framework_metadata)) {
     return nullptr;
   }
-  return contextStack_.getInterceptorFrameworkMetadata();
+  return contextStack_.getInterceptorFrameworkMetadata(rpcOptions);
 }
 } // namespace detail
 

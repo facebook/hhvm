@@ -36,6 +36,7 @@ struct RequestArgsStruct {
  */
 struct FrameworkMetadata {
   1: string value;
+  2: string postProcessing;
 }
 
 service ClientInterceptorTest {

@@ -40,6 +40,7 @@ namespace {
 constexpr std::string_view kInitialFrameworkMetadataValue = "FRAMEWORK_INIT";
 constexpr std::string_view kWrittenByInterceptorValue =
     "WRITTEN_BY_INTERCEPTOR";
+constexpr std::string_view kPostProcessing = "POSTPROCESSING";
 
 } // namespace
 
@@ -53,6 +54,15 @@ THRIFT_PLUGGABLE_FUNC_SET(
   InterceptorFrameworkMetadataStorage storage;
   storage.emplace<FrameworkMetadata>(std::move(metadata));
   return storage;
+}
+
+THRIFT_PLUGGABLE_FUNC_SET(
+    void,
+    postProcessFrameworkMetadata,
+    InterceptorFrameworkMetadataStorage& storage,
+    const RpcOptions&) {
+  auto& frameworkMetadata = storage.value<FrameworkMetadata>();
+  frameworkMetadata.postProcessing() = kPostProcessing;
 }
 
 THRIFT_PLUGGABLE_FUNC_SET(
@@ -239,6 +249,7 @@ CO_TEST_F(InterceptorFrameworkMetadataTest, RocketChannelRequestResponse) {
       getMetadataReadByServiceInterceptor();
   EXPECT_NE(interceptedMetadata, nullptr);
   EXPECT_EQ(*interceptedMetadata->value(), kWrittenByInterceptorValue);
+  EXPECT_EQ(*interceptedMetadata->postProcessing(), kPostProcessing);
 }
 
 CO_TEST_F(InterceptorFrameworkMetadataTest, RocketChannelStream) {
@@ -252,6 +263,7 @@ CO_TEST_F(InterceptorFrameworkMetadataTest, RocketChannelStream) {
       getMetadataReadByServiceInterceptor();
   EXPECT_NE(interceptedMetadata, nullptr);
   EXPECT_EQ(*interceptedMetadata->value(), kWrittenByInterceptorValue);
+  EXPECT_EQ(*interceptedMetadata->postProcessing(), kPostProcessing);
 }
 
 CO_TEST_F(InterceptorFrameworkMetadataTest, RocketChannelSink) {
@@ -270,6 +282,7 @@ CO_TEST_F(InterceptorFrameworkMetadataTest, RocketChannelSink) {
       getMetadataReadByServiceInterceptor();
   EXPECT_NE(interceptedMetadata, nullptr);
   EXPECT_EQ(*interceptedMetadata->value(), kWrittenByInterceptorValue);
+  EXPECT_EQ(*interceptedMetadata->postProcessing(), kPostProcessing);
 }
 
 CO_TEST_F(InterceptorFrameworkMetadataTest, RocketChannelRequestNoResponse) {
@@ -280,6 +293,7 @@ CO_TEST_F(InterceptorFrameworkMetadataTest, RocketChannelRequestNoResponse) {
       getMetadataReadByServiceInterceptor();
   EXPECT_NE(interceptedMetadata, nullptr);
   EXPECT_EQ(*interceptedMetadata->value(), kWrittenByInterceptorValue);
+  EXPECT_EQ(*interceptedMetadata->postProcessing(), kPostProcessing);
 }
 
 } // namespace apache::thrift

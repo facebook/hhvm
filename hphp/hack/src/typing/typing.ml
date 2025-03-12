@@ -9606,24 +9606,11 @@ end = struct
      *)
       when Tast.is_under_dynamic_assumptions env.checked ->
       make_result env p Aast.Omitted (MakeType.dynamic (Reason.witness p))
-    | Some (_pos, _ur, supportdyn, ty, Tfun expected_ft) ->
+    | Some (_pos, _ur, supportdyn, ty, Tfun expected_ft)
+      when expected_ft.ft_instantiated ->
       (* First check that arities match up *)
       let arity_ok =
         check_lambda_arity env p (get_pos ty) declared_ft expected_ft
-      in
-      (* Instantiate polymorphic function type before using in bidirectional
-         typing *)
-      let (env, expected_ft) =
-        if expected_ft.ft_instantiated then
-          (env, expected_ft)
-        else
-          let ((env, err_opt), expected_ft) =
-            Typing_subtype.instantiate_fun_type p expected_ft ~env
-          in
-          let (_ : unit) =
-            Option.iter err_opt ~f:(Typing_error_utils.add_typing_error ~env)
-          in
-          (env, expected_ft)
       in
       (* Use declared types for parameters in preference to those determined
        * by the context (expected parameters): they might be more general. *)

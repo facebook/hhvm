@@ -22,5 +22,9 @@ function mock_it(): void {
 
   $mock = new TypedMockFunction($fptr);
 
+  $f = (int $_) ==> false;
+  $mock->mockImplementation($f);
+
   $mock->mockImplementation((int $_) ==> false);
+
 }

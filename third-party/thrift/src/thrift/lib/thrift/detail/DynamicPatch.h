@@ -356,44 +356,44 @@ class DynamicSetPatch : public DynamicPatchBase {
 
 class DynamicMapPatch {
  public:
-  void assign(detail::Badge, detail::ValueMap v) {
+  void assign(detail::ValueMap v) {
     detail::checkHomogeneousContainer(v);
     *this = {};
     setOrCheckMapType(v);
     assign_ = std::move(v);
   }
 
-  void clear(detail::Badge) {
+  void clear() {
     *this = {};
     clear_ = true;
   }
 
-  void insert_or_assign(detail::Badge, Value k, Value v);
-  void erase(detail::Badge, Value k);
+  void insert_or_assign(Value k, Value v);
+  void erase(Value k);
 
-  void tryPutMulti(detail::Badge, detail::ValueMap v);
-  void removeMulti(detail::Badge badge, const detail::ValueSet& v) {
+  void tryPutMulti(detail::ValueMap v);
+  void removeMulti(const detail::ValueSet& v) {
     for (const auto& k : v) {
-      erase(badge, k);
+      erase(k);
     }
   }
-  void putMulti(detail::Badge badge, detail::ValueMap m) {
+  void putMulti(detail::ValueMap m) {
     detail::checkHomogeneousContainer(m);
     m.eraseInto(m.begin(), m.end(), [&](auto&& k, auto&& v) {
-      insert_or_assign(badge, std::move(k), std::move(v));
+      insert_or_assign(std::move(k), std::move(v));
     });
   }
 
   // Return the subPatch. We can use it to provide similar APIs to static patch.
-  DynamicPatch& patchByKey(detail::Badge, Value k, const DynamicPatch& p) {
+  DynamicPatch& patchByKey(Value k, const DynamicPatch& p) {
     return patchByKeyImpl(std::move(k), p);
   }
-  DynamicPatch& patchByKey(detail::Badge, Value k, DynamicPatch&& p) {
+  DynamicPatch& patchByKey(Value k, DynamicPatch&& p) {
     return patchByKeyImpl(std::move(k), std::move(p));
   }
 
-  DynamicPatch& patchByKey(detail::Badge, Value&&);
-  DynamicPatch& patchByKey(detail::Badge, const Value&);
+  DynamicPatch& patchByKey(Value&&);
+  DynamicPatch& patchByKey(const Value&);
 
   [[nodiscard]] Object toObject() &&;
   [[nodiscard]] Object toObject() const&;
@@ -411,7 +411,7 @@ class DynamicMapPatch {
 
  private:
   template <class Self, class Visitor>
-  static void customVisitImpl(Self&& self, detail::Badge badge, Visitor&& v);
+  static void customVisitImpl(Self&& self, Visitor&& v);
 
  public:
   FOLLY_FOR_EACH_THIS_OVERLOAD_IN_CLASS_BODY_DELEGATE(
@@ -420,8 +420,8 @@ class DynamicMapPatch {
 
   template <class Next>
   detail::if_same_type_after_remove_cvref<Next, DynamicMapPatch> merge(
-      detail::Badge badge, Next&& other) {
-    std::forward<Next>(other).customVisit(badge, *this);
+      detail::Badge, Next&& other) {
+    std::forward<Next>(other).customVisit(*this);
   }
 
   void doNotConvertStringToBinary(detail::Badge) {
@@ -800,27 +800,26 @@ void DynamicUnknownPatch::customVisitImpl(
 }
 
 template <class Self, class Visitor>
-void DynamicMapPatch::customVisitImpl(
-    Self&& self, detail::Badge badge, Visitor&& v) {
+void DynamicMapPatch::customVisitImpl(Self&& self, Visitor&& v) {
   if (self.assign_) {
-    std::forward<Visitor>(v).assign(badge, *std::forward<Self>(self).assign_);
+    std::forward<Visitor>(v).assign(*std::forward<Self>(self).assign_);
     return;
   }
 
   if (self.clear_) {
-    std::forward<Visitor>(v).clear(badge);
+    std::forward<Visitor>(v).clear();
   }
 
   for (auto& [k, p] : self.patchPrior_) {
-    std::forward<Visitor>(v).patchByKey(badge, k, folly::forward_like<Self>(p));
+    std::forward<Visitor>(v).patchByKey(k, folly::forward_like<Self>(p));
   }
 
-  std::forward<Visitor>(v).tryPutMulti(badge, std::forward<Self>(self).add_);
-  std::forward<Visitor>(v).removeMulti(badge, std::forward<Self>(self).remove_);
-  std::forward<Visitor>(v).putMulti(badge, std::forward<Self>(self).put_);
+  std::forward<Visitor>(v).tryPutMulti(std::forward<Self>(self).add_);
+  std::forward<Visitor>(v).removeMulti(std::forward<Self>(self).remove_);
+  std::forward<Visitor>(v).putMulti(std::forward<Self>(self).put_);
 
   for (auto& [k, p] : self.patchAfter_) {
-    std::forward<Visitor>(v).patchByKey(badge, k, folly::forward_like<Self>(p));
+    std::forward<Visitor>(v).patchByKey(k, folly::forward_like<Self>(p));
   }
 }
 

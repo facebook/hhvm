@@ -571,7 +571,7 @@ TEST(DynamicPatch, InvalidMapPatch) {
     DynamicMapPatch p;
     EXPECT_THROW(
         p.assign(
-            badge,
+
             {{asValueStruct<type::i32_t>(1), asValueStruct<type::i64_t>(1)},
              {asValueStruct<type::i32_t>(2), asValueStruct<type::i32_t>(1)}}),
         std::runtime_error);
@@ -580,7 +580,6 @@ TEST(DynamicPatch, InvalidMapPatch) {
     DynamicMapPatch p;
     EXPECT_THROW(
         p.putMulti(
-            badge,
             {{asValueStruct<type::i32_t>(1), asValueStruct<type::i64_t>(1)},
              {asValueStruct<type::i32_t>(2), asValueStruct<type::i32_t>(1)}}),
         std::runtime_error);
@@ -589,7 +588,6 @@ TEST(DynamicPatch, InvalidMapPatch) {
     DynamicMapPatch p;
     EXPECT_THROW(
         p.tryPutMulti(
-            badge,
             {{asValueStruct<type::i32_t>(1), asValueStruct<type::i64_t>(1)},
              {asValueStruct<type::i32_t>(2), asValueStruct<type::i32_t>(1)}}),
         std::runtime_error);
@@ -597,61 +595,49 @@ TEST(DynamicPatch, InvalidMapPatch) {
   auto testInvalidMapPatch = [](auto& p) {
     EXPECT_THROW(
         p.insert_or_assign(
-            badge,
-            asValueStruct<type::i64_t>(1),
-            asValueStruct<type::i32_t>(1)),
+            asValueStruct<type::i64_t>(1), asValueStruct<type::i32_t>(1)),
         std::runtime_error);
     EXPECT_THROW(
         p.insert_or_assign(
-            badge,
-            asValueStruct<type::i32_t>(1),
-            asValueStruct<type::i64_t>(1)),
+            asValueStruct<type::i32_t>(1), asValueStruct<type::i64_t>(1)),
         std::runtime_error);
     EXPECT_THROW(
         p.tryPutMulti(
-            badge,
             {{asValueStruct<type::i64_t>(1), asValueStruct<type::i32_t>(1)}}),
         std::runtime_error);
     EXPECT_THROW(
         p.tryPutMulti(
-            badge,
             {{asValueStruct<type::i32_t>(1), asValueStruct<type::i64_t>(1)}}),
         std::runtime_error);
     EXPECT_THROW(
         p.putMulti(
-            badge,
             {{asValueStruct<type::i64_t>(1), asValueStruct<type::i32_t>(1)}}),
         std::runtime_error);
     EXPECT_THROW(
         p.putMulti(
-            badge,
             {{asValueStruct<type::i32_t>(1), asValueStruct<type::i64_t>(1)}}),
         std::runtime_error);
   };
   {
     DynamicMapPatch p;
     p.insert_or_assign(
-        badge, asValueStruct<type::i32_t>(1), asValueStruct<type::i32_t>(1));
+        asValueStruct<type::i32_t>(1), asValueStruct<type::i32_t>(1));
     testInvalidMapPatch(p);
   }
   {
     DynamicMapPatch p;
-    p.assign(
-        badge,
-        {{asValueStruct<type::i32_t>(1), asValueStruct<type::i32_t>(1)}});
+    p.assign({{asValueStruct<type::i32_t>(1), asValueStruct<type::i32_t>(1)}});
     testInvalidMapPatch(p);
   }
   {
     DynamicMapPatch p;
     p.putMulti(
-        badge,
         {{asValueStruct<type::i32_t>(1), asValueStruct<type::i32_t>(1)}});
     testInvalidMapPatch(p);
   }
   {
     DynamicMapPatch p;
     p.tryPutMulti(
-        badge,
         {{asValueStruct<type::i32_t>(1), asValueStruct<type::i32_t>(1)}});
     testInvalidMapPatch(p);
   }
@@ -756,7 +742,7 @@ TEST(DynamicPatch, Map) {
 
   {
     DynamicMapPatch patch;
-    patch.erase(badge, asValueStruct<type::i32_t>(1));
+    patch.erase(asValueStruct<type::i32_t>(1));
     patch.apply(badge, m);
     EXPECT_EQ(m.size(), 1);
     EXPECT_EQ(
@@ -766,9 +752,9 @@ TEST(DynamicPatch, Map) {
     DynamicMapPatch patch;
     op::I32Patch p;
     p += 100;
-    patch.patchByKey(badge, asValueStruct<type::i32_t>(1), DynamicPatch{p});
+    patch.patchByKey(asValueStruct<type::i32_t>(1), DynamicPatch{p});
     p += 100;
-    patch.patchByKey(badge, asValueStruct<type::i32_t>(2), DynamicPatch{p});
+    patch.patchByKey(asValueStruct<type::i32_t>(2), DynamicPatch{p});
     patch.apply(badge, m);
     EXPECT_EQ(m.size(), 1);
     EXPECT_EQ(
@@ -779,7 +765,7 @@ TEST(DynamicPatch, Map) {
   add[asValueStruct<type::i32_t>(3)] = asValueStruct<type::i32_t>(300);
   {
     DynamicMapPatch patch;
-    patch.tryPutMulti(badge, add);
+    patch.tryPutMulti(add);
     patch.apply(badge, m);
     EXPECT_EQ(m.size(), 2);
     EXPECT_EQ(
@@ -789,7 +775,7 @@ TEST(DynamicPatch, Map) {
   }
   {
     DynamicMapPatch patch;
-    patch.putMulti(badge, add);
+    patch.putMulti(add);
     patch.apply(badge, m);
     EXPECT_EQ(m.size(), 2);
     EXPECT_EQ(
@@ -803,7 +789,7 @@ TEST(DynamicPatch, Map) {
     remove.insert(asValueStruct<type::i32_t>(4));
 
     DynamicMapPatch patch;
-    patch.removeMulti(badge, remove);
+    patch.removeMulti(remove);
     patch.apply(badge, m);
     EXPECT_EQ(m.size(), 1);
     EXPECT_EQ(
@@ -811,7 +797,7 @@ TEST(DynamicPatch, Map) {
   }
   {
     DynamicMapPatch patch;
-    patch.clear(badge);
+    patch.clear();
     patch.apply(badge, m);
     EXPECT_TRUE(m.empty());
   }
@@ -1124,9 +1110,7 @@ void testMergeMovedPatch(T t) {
           [&](const DynamicSetPatch& patch) {
             patch.customVisit(badge, checkAssign);
           },
-          [&](const DynamicMapPatch& patch) {
-            patch.customVisit(badge, checkAssign);
-          },
+          [&](const DynamicMapPatch& patch) { patch.customVisit(checkAssign); },
           [&](const DynamicStructPatch& patch) {
             patch.customVisit(checkAssign);
           },

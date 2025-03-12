@@ -183,24 +183,24 @@ class TaggedPatchRef<type::map<K, V>> {
 
   void operator=(const value_type& v) { assign(v); }
 
-  void clear() { patch_.get().clear(badge); }
+  void clear() { patch_.get().clear(); }
 
   void insert_or_assign(
       const type::native_type<K>& key, const type::native_type<V>& value) {
     patch_.get().insert_or_assign(
-        badge, asValueStruct<K>(key), asValueStruct<V>(value));
+        asValueStruct<K>(key), asValueStruct<V>(value));
   }
 
   void tryPutMulti(const type::native_type<Map>& map) {
-    patch_.get().tryPutMulti(badge, asValueStruct<Map>(map).as_map());
+    patch_.get().tryPutMulti(asValueStruct<Map>(map).as_map());
   }
 
   void erase(const type::native_type<K>& key) {
-    patch_.get().erase(badge, asValueStruct<K>(key));
+    patch_.get().erase(asValueStruct<K>(key));
   }
 
   auto& patchByKey(const type::native_type<K>& key) {
-    auto& subPatch = patch_.get().patchByKey(badge, asValueStruct<K>(key));
+    auto& subPatch = patch_.get().patchByKey(asValueStruct<K>(key));
     return valuePatchRef_.bind<V>(subPatch);
   }
 
@@ -226,7 +226,7 @@ class TaggedPatchRef<type::map<K, V>> {
   }
   template <class Value>
   void assign_impl(const Value& v) {
-    patch_.get().assign(badge, asValueStruct<Map>(v).as_map());
+    patch_.get().assign(asValueStruct<Map>(v).as_map());
   }
 
  private:

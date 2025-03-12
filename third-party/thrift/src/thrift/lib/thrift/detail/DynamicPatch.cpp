@@ -305,11 +305,11 @@ bool DynamicPatch::empty(detail::Badge badge) const {
 bool DynamicPatch::empty() const {
   return empty(badge);
 }
-DynamicPatch& DynamicMapPatch::patchByKey(detail::Badge, Value&& k) {
-  return patchByKey(badge, std::move(k), {});
+DynamicPatch& DynamicMapPatch::patchByKey(Value&& k) {
+  return patchByKey(std::move(k), {});
 }
-DynamicPatch& DynamicMapPatch::patchByKey(detail::Badge, const Value& k) {
-  return patchByKey(badge, k, {});
+DynamicPatch& DynamicMapPatch::patchByKey(const Value& k) {
+  return patchByKey(k, {});
 }
 
 template <class SubPatch>
@@ -401,17 +401,17 @@ void DynamicMapPatch::fromObject(detail::Badge, Object obj) {
   }
 }
 
-void DynamicMapPatch::insert_or_assign(detail::Badge, Value k, Value v) {
+void DynamicMapPatch::insert_or_assign(Value k, Value v) {
   undoChanges(k);
   setOrCheckMapType(k, v);
   put_.insert_or_assign(std::move(k), std::move(v));
 }
 
-void DynamicMapPatch::erase(detail::Badge, Value k) {
+void DynamicMapPatch::erase(Value k) {
   undoChanges(k);
   remove_.insert(std::move(k));
 }
-void DynamicMapPatch::tryPutMulti(detail::Badge, detail::ValueMap map) {
+void DynamicMapPatch::tryPutMulti(detail::ValueMap map) {
   detail::checkHomogeneousContainer(map);
   ensurePatchable();
   map.eraseInto(map.begin(), map.end(), [&](auto&& k, auto&& v) {
@@ -448,24 +448,24 @@ void DynamicMapPatch::undoChanges(const Value& k) {
 
 void DynamicMapPatch::apply(detail::Badge, detail::ValueMap& v) const {
   struct Visitor {
-    void assign(detail::Badge, detail::ValueMap v) {
+    void assign(detail::ValueMap v) {
       detail::convertStringToBinary(v);
       value = std::move(v);
     }
-    void clear(detail::Badge) { value.clear(); }
-    void patchByKey(detail::Badge, Value key, const DynamicPatch& p) {
+    void clear() { value.clear(); }
+    void patchByKey(Value key, const DynamicPatch& p) {
       detail::convertStringToBinary(key);
       if (auto ptr = folly::get_ptr(value, key)) {
         p.apply(*ptr);
       }
     }
-    void removeMulti(detail::Badge, const detail::ValueSet& v) {
+    void removeMulti(const detail::ValueSet& v) {
       for (auto i : v) {
         detail::convertStringToBinary(i);
         value.erase(i);
       }
     }
-    void tryPutMulti(detail::Badge, const detail::ValueMap& map) {
+    void tryPutMulti(const detail::ValueMap& map) {
       for (const auto& kv : map) {
         auto k = kv.first;
         auto v = kv.second;
@@ -474,7 +474,7 @@ void DynamicMapPatch::apply(detail::Badge, detail::ValueMap& v) const {
         value.emplace(std::move(k), std::move(v));
       }
     }
-    void putMulti(detail::Badge, const detail::ValueMap& map) {
+    void putMulti(const detail::ValueMap& map) {
       for (const auto& kv : map) {
         auto k = kv.first;
         auto v = kv.second;
@@ -486,7 +486,7 @@ void DynamicMapPatch::apply(detail::Badge, detail::ValueMap& v) const {
     detail::ValueMap& value;
   };
 
-  return customVisit(badge, Visitor{v});
+  return customVisit(Visitor{v});
 }
 
 void DynamicMapPatch::setOrCheckMapType(
@@ -897,7 +897,7 @@ DynamicMapPatch DiffVisitorBase::diffMap(
   patch.doNotConvertStringToBinary(badge);
 
   if (dst.empty()) {
-    patch.clear(badge);
+    patch.clear();
     return patch;
   }
 
@@ -924,7 +924,7 @@ DynamicMapPatch DiffVisitorBase::diffMap(
   });
 
   if (dst.size() < keys.size()) {
-    patch.assign(badge, dst);
+    patch.assign(dst);
     return patch;
   }
 
@@ -979,12 +979,12 @@ void DiffVisitorBase::diffElement(
   }
 
   if (inSrc && !inDst) {
-    patch.erase(badge, key);
+    patch.erase(key);
     return;
   }
 
   if (!inSrc && inDst) {
-    patch.insert_or_assign(badge, key, dst.at(key));
+    patch.insert_or_assign(key, dst.at(key));
     return;
   }
 
@@ -992,7 +992,7 @@ void DiffVisitorBase::diffElement(
   pushKey(key);
   auto guard = folly::makeGuard([&] { pop(); });
   auto subPatch = diff(badge, src.at(key), dst.at(key));
-  patch.patchByKey(badge, key, DynamicPatch{std::move(subPatch)});
+  patch.patchByKey(key, DynamicPatch{std::move(subPatch)});
 }
 
 DynamicPatch DiffVisitorBase::diffStructured(
@@ -1750,7 +1750,7 @@ class MinSafePatchVersionVisitor {
     patch.visitPatch(
         badge,
         folly::overload(
-            [&](const DynamicMapPatch& p) { p.customVisit(badge, *this); },
+            [&](const DynamicMapPatch& p) { p.customVisit(*this); },
             [&](const DynamicStructPatch& p) { p.customVisit(*this); },
             [&](const DynamicUnionPatch& p) { p.customVisit(*this); },
             [&](const op::AnyPatch& p) {
@@ -1769,12 +1769,10 @@ class MinSafePatchVersionVisitor {
   }
 
   // Map
-  void putMulti(detail::Badge, const detail::ValueMap&) {}
-  void tryPutMulti(detail::Badge, const detail::ValueMap&) {}
-  void removeMulti(detail::Badge, const detail::ValueSet&) {}
-  void patchByKey(detail::Badge, const Value&, const DynamicPatch& p) {
-    recurse(p);
-  }
+  void putMulti(const detail::ValueMap&) {}
+  void tryPutMulti(const detail::ValueMap&) {}
+  void removeMulti(const detail::ValueSet&) {}
+  void patchByKey(const Value&, const DynamicPatch& p) { recurse(p); }
 
   // Structured
   void ensure(FieldId, const Value&) {}
@@ -1787,6 +1785,7 @@ class MinSafePatchVersionVisitor {
   void patchIfSet(detail::Badge, FieldId, const DynamicPatch& fieldPatch) {
     recurse(fieldPatch);
   }
+  void removeMulti(detail::Badge, const detail::ValueSet&) {}
 
   // Thrift Any
   template <typename... T>

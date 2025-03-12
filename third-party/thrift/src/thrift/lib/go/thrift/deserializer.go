@@ -75,6 +75,11 @@ func DecodeCompactJSON(data []byte, msg types.ReadableStruct) error {
 	return NewCompactJSONDeserializer().Read(msg, data)
 }
 
+// DecodeSimpleJSON deserializes a simple JSON format message
+func DecodeSimpleJSON(data []byte, msg types.ReadableStruct) error {
+	return NewSimpleJSONDeserializer().Read(msg, data)
+}
+
 // ReadString deserializes a Thrift struct from a string
 func (t *Deserializer) ReadString(msg types.ReadableStruct, s string) error {
 	return t.Read(msg, []byte(s))

@@ -32,7 +32,7 @@ import (
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
-func TestClient(t *testing.T) {
+func TestNewClientConnectionScenarios(t *testing.T) {
 	listener, err := net.Listen("tcp", ":0")
 	if err != nil {
 		t.Fatalf("failed to listen: %v", err)
@@ -48,7 +48,7 @@ func TestClient(t *testing.T) {
 	addr := listener.Addr()
 
 	// Testing successful client connection
-	client, err := DeprecatedNewClient(
+	client, err := NewClient(
 		WithRocket(),
 		WithIoTimeout(time.Second),
 		WithProtocolID(types.ProtocolIDCompact),
@@ -67,7 +67,7 @@ func TestClient(t *testing.T) {
 	}
 
 	// Testing unsuccessful client connection (cannot connect at all)
-	client, err = DeprecatedNewClient(
+	client, err = NewClient(
 		WithRocket(),
 		WithDialer(func() (net.Conn, error) {
 			return net.Dial("unix", "/tmp/non_existent_garbage_socket_12345")
@@ -83,7 +83,7 @@ func TestClient(t *testing.T) {
 	if err != nil {
 		t.Fatal(fmt.Sprintf("failed to get FD count: %#v", err))
 	}
-	client, err = DeprecatedNewClient(
+	client, err = NewClient(
 		WithRocket(),
 		// Invalid protocol that intentionally breaks client creation
 		WithProtocolID(types.ProtocolID(12345)),
@@ -96,7 +96,7 @@ func TestClient(t *testing.T) {
 		t.Fatalf("unexpected error when creating client: %v", err)
 	}
 	// IMPORTANT!
-	// Even though we perform an explicit call to Close() in DeprecatedNewClient()
+	// Even though we perform an explicit call to Close() in NewClient()
 	// upon protocol error, actual FD closing is done by the garbage collector.
 	// Without the GC call below - the FD may still linger and affect test results.
 	runtime.GC()
@@ -131,7 +131,7 @@ func getNumFileDesciptors() (int, error) {
 	return len(files), nil
 }
 
-func TestClientV2(t *testing.T) {
+func TestNewClientCreation(t *testing.T) {
 	listener, err := net.Listen("tcp", ":0")
 	if err != nil {
 		t.Fatalf("failed to listen: %v", err)
@@ -153,6 +153,9 @@ func TestClientV2(t *testing.T) {
 				return net.Dial(addr.Network(), addr.String())
 			}),
 		)
+		if _, ok := channel.(*rocketClient); !ok {
+			t.Fatalf("channel is not of the correct underlying type")
+		}
 		if err != nil {
 			t.Fatalf("failed to create client: %v", err)
 		}
@@ -169,6 +172,9 @@ func TestClientV2(t *testing.T) {
 				return net.Dial(addr.Network(), addr.String())
 			}),
 		)
+		if _, ok := channel.(*SerialChannel); !ok {
+			t.Fatalf("channel is not of the correct underlying type")
+		}
 		if err != nil {
 			t.Fatalf("failed to create client: %v", err)
 		}
@@ -185,6 +191,9 @@ func TestClientV2(t *testing.T) {
 				return net.Dial(addr.Network(), addr.String())
 			}),
 		)
+		if _, ok := channel.(*SerialChannel); !ok {
+			t.Fatalf("channel is not of the correct underlying type")
+		}
 		if err != nil {
 			t.Fatalf("failed to create client: %v", err)
 		}

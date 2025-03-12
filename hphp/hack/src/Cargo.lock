@@ -101,7 +101,7 @@ name = "analysis"
 version = "0.0.0"
 dependencies = [
  "ir_core",
- "itertools 0.14.0",
+ "itertools",
  "newtype",
  "print",
 ]
@@ -120,12 +120,6 @@ checksum = "819e7219dbd41043ac279b19830f2efc897156490d7fd6ea916720117ee66311"
 dependencies = [
  "libc",
 ]
-
-[[package]]
-name = "anes"
-version = "0.1.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4b46cbb362ab8752921c97e041f5e366ee6297bd428a31275b9fcf1e380f7299"
 
 [[package]]
 name = "ansi_term"
@@ -295,7 +289,7 @@ dependencies = [
  "anyhow",
  "hash",
  "ir_core",
- "itertools 0.14.0",
+ "itertools",
  "log",
  "naming_special_names_rust",
  "parse_macro_ir",
@@ -306,23 +300,10 @@ name = "assemble_opcode_macro"
 version = "0.0.0"
 dependencies = [
  "hhbc-gen",
- "itertools 0.14.0",
+ "itertools",
  "proc-macro2",
  "quote",
  "syn 1.0.109",
-]
-
-[[package]]
-name = "ast_and_decl_parser"
-version = "0.0.0"
-dependencies = [
- "aast_parser",
- "bumpalo",
- "cst_and_decl_parser",
- "oxidized",
- "oxidized_by_ref",
- "parser_core_types",
- "rust_aast_parser_types",
 ]
 
 [[package]]
@@ -390,7 +371,7 @@ dependencies = [
 name = "balanced_partition"
 version = "0.0.0"
 dependencies = [
- "itertools 0.14.0",
+ "itertools",
  "log",
  "rayon",
 ]
@@ -414,21 +395,6 @@ dependencies = [
  "ir",
  "log",
  "newtype",
-]
-
-[[package]]
-name = "bench"
-version = "0.0.0"
-dependencies = [
- "aast_parser",
- "ast_and_decl_parser",
- "bumpalo",
- "clap 4.5.30",
- "criterion",
- "cst_and_decl_parser",
- "direct_decl_parser",
- "parser_core_types",
- "relative_path",
 ]
 
 [[package]]
@@ -608,7 +574,7 @@ dependencies = [
  "hhbc_string_utils",
  "hhvm_hhbc_defs_ffi",
  "hhvm_types_ffi",
- "itertools 0.14.0",
+ "itertools",
  "print_opcode",
  "relative_path",
  "thiserror 2.0.7",
@@ -652,12 +618,6 @@ name = "cactus"
 version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf034765b7d19a011c6d619e880582bf95e8186b580e6fab56589872dd87dcf5"
-
-[[package]]
-name = "cast"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "37b2a672a2cb129a2e41c10b1224bb368f9f37a2b16b612598138befd7b37eb5"
 
 [[package]]
 name = "cbindgen"
@@ -733,33 +693,6 @@ dependencies = [
  "serde",
  "wasm-bindgen",
  "windows-targets 0.52.6",
-]
-
-[[package]]
-name = "ciborium"
-version = "0.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "42e69ffd6f0917f5c029256a24d0161db17cea3997d185db0d35926308770f0e"
-dependencies = [
- "ciborium-io",
- "ciborium-ll",
- "serde",
-]
-
-[[package]]
-name = "ciborium-io"
-version = "0.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "05afea1e0a06c9be33d539b876f1ce3692f4afea2cb41f740e7743225ed1c757"
-
-[[package]]
-name = "ciborium-ll"
-version = "0.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57663b653d948a338bfb3eeba9bb2fd5fcfaecb9e199e87e1eda4d9e8b240fd9"
-dependencies = [
- "ciborium-io",
- "half",
 ]
 
 [[package]]
@@ -859,7 +792,7 @@ dependencies = [
  "hash",
  "hhbc",
  "hhbc_string_utils",
- "itertools 0.14.0",
+ "itertools",
  "naming_special_names_rust",
  "oxidized",
  "stack_limit",
@@ -1019,7 +952,7 @@ dependencies = [
  "hhbc",
  "hhbc_string_utils",
  "indexmap 2.2.6",
- "itertools 0.14.0",
+ "itertools",
  "naming_special_names_rust",
  "oxidized",
  "stack_limit",
@@ -1069,45 +1002,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a97769d94ddab943e4510d138150169a2758b5ef3eb191a9ee688de3e23ef7b3"
 dependencies = [
  "cfg-if 1.0.0",
-]
-
-[[package]]
-name = "criterion"
-version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f2b12d017a929603d80db1831cd3a24082f8137ce19c69e6447f54f5fc8d692f"
-dependencies = [
- "anes",
- "cast",
- "ciborium",
- "clap 4.5.30",
- "criterion-plot",
- "csv",
- "futures",
- "is-terminal",
- "itertools 0.10.5",
- "num-traits",
- "once_cell",
- "oorandom",
- "plotters",
- "rayon",
- "regex",
- "serde",
- "serde_derive",
- "serde_json",
- "tinytemplate",
- "tokio",
- "walkdir",
-]
-
-[[package]]
-name = "criterion-plot"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b50826342786a51a89e2da3a28f1c32b06e387201bc2d19791f622c673706b1"
-dependencies = [
- "cast",
- "itertools 0.10.5",
 ]
 
 [[package]]
@@ -1209,12 +1103,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "22ec99545bb0ed0ea7bb9b8e1e9122ea386ff8a48c0922e43f36d45ab09e0e80"
 
 [[package]]
-name = "crunchy"
-version = "0.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7a81dae078cea95a014a339291cec439d2f232ebe854a9d672b796c6afafa9b7"
-
-[[package]]
 name = "crypto-common"
 version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1237,27 +1125,6 @@ dependencies = [
  "parser",
  "parser_core_types",
  "positioned_smart_constructors",
-]
-
-[[package]]
-name = "csv"
-version = "1.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "acdc4883a9c96732e4733212c01447ebd805833b7275a73ca3ee080fd77afdaf"
-dependencies = [
- "csv-core",
- "itoa",
- "ryu",
- "serde",
-]
-
-[[package]]
-name = "csv-core"
-version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5efa2b3d7902f4b634a20cae3c9c4e6209dc4779feb6863329607560143efa70"
-dependencies = [
- "memchr",
 ]
 
 [[package]]
@@ -1485,7 +1352,7 @@ dependencies = [
  "dep_graph_delta",
  "depgraph_reader",
  "hash",
- "itertools 0.14.0",
+ "itertools",
  "ocamlrep",
  "ocamlrep_custom",
  "parking_lot",
@@ -1578,7 +1445,7 @@ dependencies = [
  "flatten_smart_constructors",
  "hash",
  "hh_autoimport_rust",
- "itertools 0.14.0",
+ "itertools",
  "namespaces_rust",
  "naming_special_names_rust",
  "oxidized",
@@ -1661,7 +1528,7 @@ dependencies = [
  "bstr",
  "elaborate_namespaces_visitor",
  "hack_macros",
- "itertools 0.14.0",
+ "itertools",
  "naming_special_names_rust",
  "oxidized",
  "relative_path",
@@ -1748,7 +1615,7 @@ dependencies = [
  "hhvm_types_ffi",
  "indexmap 2.2.6",
  "instruction_sequence",
- "itertools 0.14.0",
+ "itertools",
  "label_rewriter",
  "lazy_static",
  "naming_special_names_rust",
@@ -2080,7 +1947,7 @@ dependencies = [
  "eq_modulo_pos",
  "hash",
  "indexmap 2.2.6",
- "itertools 0.14.0",
+ "itertools",
  "oxidized",
  "pos",
  "shallow_decl_provider",
@@ -2110,40 +1977,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e6d5a32815ae3f33302d95fdcb2ce17862f8c65363dcfd29360480ba1001fc9c"
 
 [[package]]
-name = "futures"
-version = "0.3.30"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "645c6916888f6cb6350d2550b80fb63e734897a8498abe35cfb732b6487804b0"
-dependencies = [
- "futures-channel",
- "futures-core",
- "futures-io",
- "futures-sink",
- "futures-task",
- "futures-util",
-]
-
-[[package]]
-name = "futures-channel"
-version = "0.3.30"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eac8f7d7865dcb88bd4373ab671c8cf4508703796caa2b1985a9ca867b3fcb78"
-dependencies = [
- "futures-core",
- "futures-sink",
-]
-
-[[package]]
 name = "futures-core"
 version = "0.3.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dfc6580bb841c5a68e9ef15c77ccc837b40a7504914d52e47b8b0e9bbda25a1d"
-
-[[package]]
-name = "futures-io"
-version = "0.3.30"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a44623e20b9681a318efdd71c299b6b222ed6f231972bfe2f224ebad6311f0c1"
 
 [[package]]
 name = "futures-macro"
@@ -2155,12 +1992,6 @@ dependencies = [
  "quote",
  "syn 2.0.96",
 ]
-
-[[package]]
-name = "futures-sink"
-version = "0.3.30"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9fb8e00e87438d937621c1c6269e53f536c14d3fbd6a042bb24879e57d474fb5"
 
 [[package]]
 name = "futures-task"
@@ -2176,7 +2007,6 @@ checksum = "3d6401deb83407ab3da39eba7e33987a73c3df0c82b4bb5813ee871c19c41d48"
 dependencies = [
  "futures-core",
  "futures-macro",
- "futures-sink",
  "futures-task",
  "pin-project-lite",
  "pin-utils",
@@ -2352,7 +2182,7 @@ dependencies = [
  "hhvm_options",
  "ir",
  "ir_to_bc",
- "itertools 0.14.0",
+ "itertools",
  "jwalk",
  "log",
  "multifile_rust",
@@ -2402,16 +2232,6 @@ dependencies = [
  "shallow_decl_provider",
  "ty",
  "zstd",
-]
-
-[[package]]
-name = "half"
-version = "2.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6dd08c532ae367adf81c312a4580bc67f1d0fe8bc9c460520283f4c0ff277888"
-dependencies = [
- "cfg-if 1.0.0",
- "crunchy",
 ]
 
 [[package]]
@@ -2951,7 +2771,7 @@ dependencies = [
  "hhbc",
  "instruction_sequence",
  "ir",
- "itertools 0.14.0",
+ "itertools",
  "log",
  "smallvec",
  "stack_depth",
@@ -2973,15 +2793,6 @@ name = "is_terminal_polyfill"
 version = "1.70.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7943c866cc5cd64cbc25b2e01621d07fa8eb2a1a23160ee81ce38704e97b8ecf"
-
-[[package]]
-name = "itertools"
-version = "0.10.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b0fd2260e829bddf4cb6ea802289de2f86d6a7a690192fbe91b3f46e0f2c8473"
-dependencies = [
- "either",
-]
 
 [[package]]
 name = "itertools"
@@ -3164,7 +2975,7 @@ dependencies = [
  "hash",
  "hhbc_string_utils",
  "html_entities",
- "itertools 0.14.0",
+ "itertools",
  "lazy_static",
  "lint_rust",
  "naming_special_names_rust",
@@ -3722,12 +3533,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1261fe7e33c73b354eab43b1273a57c8f967d0391e80353e51f764ac02cf6775"
 
 [[package]]
-name = "oorandom"
-version = "11.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ab1bc2a289d34bd04a330323ac98a1b4bc82c9d9fcb1e66b63caa84da26b575"
-
-[[package]]
 name = "opcode_test_data"
 version = "0.0.0"
 dependencies = [
@@ -3793,7 +3598,7 @@ dependencies = [
  "hh24_types",
  "hh_autoimport_rust",
  "hh_hash",
- "itertools 0.14.0",
+ "itertools",
  "naming_types",
  "no_pos_hash",
  "ocamlrep",
@@ -3957,7 +3762,7 @@ version = "0.0.0"
 dependencies = [
  "bitflags 2.6.0",
  "bumpalo",
- "itertools 0.14.0",
+ "itertools",
  "line_break_map",
  "ocaml_helper",
  "ocamlrep",
@@ -3985,7 +3790,7 @@ dependencies = [
  "analysis",
  "hash",
  "ir_core",
- "itertools 0.14.0",
+ "itertools",
  "log",
  "newtype",
  "print",
@@ -4022,34 +3827,6 @@ name = "pkg-config"
 version = "0.3.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d231b230927b5e4ad203db57bbcbee2802f6bce620b1e4a9024a07d94e2907ec"
-
-[[package]]
-name = "plotters"
-version = "0.3.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5aeb6f403d7a4911efb1e33402027fc44f29b5bf6def3effcc22d7bb75f2b747"
-dependencies = [
- "num-traits",
- "plotters-backend",
- "plotters-svg",
- "wasm-bindgen",
- "web-sys",
-]
-
-[[package]]
-name = "plotters-backend"
-version = "0.3.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df42e13c12958a16b3f7f4386b9ab1f3e7933914ecea48da7139435263a4172a"
-
-[[package]]
-name = "plotters-svg"
-version = "0.3.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "51bae2ac328883f7acdfea3d66a7c35751187f870bc81f94563733a154d7a670"
-dependencies = [
- "plotters-backend",
-]
 
 [[package]]
 name = "portable-atomic"
@@ -4643,7 +4420,7 @@ dependencies = [
  "escaper",
  "hash",
  "hh_autoimport_rust",
- "itertools 0.14.0",
+ "itertools",
  "naming_special_names_rust",
  "oxidized",
  "parser_core_types",
@@ -4804,7 +4581,7 @@ dependencies = [
  "hash",
  "hhbc",
  "hhbc-gen",
- "itertools 0.14.0",
+ "itertools",
  "log",
  "newtype",
 ]
@@ -4901,7 +4678,7 @@ dependencies = [
  "anyhow",
  "datastore",
  "decl_parser",
- "itertools 0.14.0",
+ "itertools",
  "naming_provider",
  "oxidized",
  "pos",
@@ -5351,7 +5128,7 @@ dependencies = [
  "hhbc",
  "hhbc_string_utils",
  "ir",
- "itertools 0.14.0",
+ "itertools",
  "log",
  "naming_special_names_rust",
  "newtype",
@@ -5364,7 +5141,7 @@ dependencies = [
 name = "textual_macros"
 version = "0.0.0"
 dependencies = [
- "itertools 0.14.0",
+ "itertools",
  "proc-macro-error",
  "proc-macro2",
  "quote",
@@ -5459,16 +5236,6 @@ checksum = "3f252a68540fde3a3877aeea552b832b40ab9a69e318efd078774a01ddee1ccf"
 dependencies = [
  "num-conv",
  "time-core",
-]
-
-[[package]]
-name = "tinytemplate"
-version = "1.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "be4d6b5f19ff7664e8c98d03e2139cb510db9b0a60b55f8e8709b689d939b6bc"
-dependencies = [
- "serde",
- "serde_json",
 ]
 
 [[package]]
@@ -5788,7 +5555,7 @@ version = "0.0.0"
 dependencies = [
  "analysis",
  "ir_core",
- "itertools 0.14.0",
+ "itertools",
  "print",
 ]
 
@@ -5896,16 +5663,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1a05d73b933a847d6cccdda8f838a22ff101ad9bf93e33684f39c1f5f0eece3d"
 dependencies = [
  "unicode-ident",
-]
-
-[[package]]
-name = "web-sys"
-version = "0.3.72"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6488b90108c040df0fe62fa815cbdee25124641df01814dd7282749234c6112"
-dependencies = [
- "js-sys",
- "wasm-bindgen",
 ]
 
 [[package]]

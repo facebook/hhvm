@@ -62,7 +62,6 @@ members = [
     "parser/api/cargo/rescan_trivia",
     "parser/cargo/aast_parser",
     "parser/cargo/aast_parser_ffi",
-    "parser/cargo/bench",
     "parser/cargo/core_types",
     "parser/cargo/decl_mode_parser",
     "parser/cargo/errors",

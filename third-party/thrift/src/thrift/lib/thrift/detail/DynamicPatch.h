@@ -457,34 +457,34 @@ class DynamicMapPatch {
 template <bool IsUnion>
 class DynamicStructurePatch {
  public:
-  void assign(detail::Badge, Object v) {
+  void assign(Object v) {
     *this = {};
     assign_ = std::move(v);
   }
 
-  void clear(detail::Badge) {
+  void clear() {
     *this = {};
     clear_ = true;
   }
 
-  void remove(detail::Badge, FieldId id) {
+  void remove(FieldId id) {
     undoChanges(id);
     remove_.insert(id);
   }
 
-  void ensure(detail::Badge, FieldId id, Value v) {
+  void ensure(FieldId id, Value v) {
     return IsUnion ? ensureUnion(id, std::move(v))
                    : ensureStruct(id, std::move(v));
   }
 
   // patchIfSet
   template <class Tag>
-  auto& patchIfSet(detail::Badge badge, FieldId id) {
-    auto& subPatch = patchIfSet(badge, id);
-    return subPatch.template getStoredPatchByTag<Tag>(badge);
+  auto& patchIfSet(FieldId id) {
+    auto& subPatch = patchIfSet(id);
+    return subPatch.template getStoredPatchByTag<Tag>();
   }
 
-  DynamicPatch& patchIfSet(detail::Badge, FieldId id) {
+  DynamicPatch& patchIfSet(FieldId id) {
     ensurePatchable();
     return ensure_.contains(id) ? patchAfter_[id] : patchPrior_[id];
   }
@@ -511,12 +511,12 @@ class DynamicStructurePatch {
 
  private:
   template <class Self, class Visitor>
-  static void customVisitImpl(Self&& self, detail::Badge, Visitor&& v);
+  static void customVisitImpl(Self&& self, Visitor&& v);
 
   // Needed for merge(...). We can consider making this a public API.
   template <class SubPatch>
-  void patchIfSet(detail::Badge badge, FieldId id, SubPatch&& patch) {
-    patchIfSet(badge, id).merge(std::forward<SubPatch>(patch));
+  void patchIfSet(FieldId id, SubPatch&& patch) {
+    patchIfSet(id).merge(std::forward<SubPatch>(patch));
   }
 
  public:
@@ -545,16 +545,16 @@ class DynamicStructPatch : public DynamicStructurePatch<false> {
  public:
   template <class Next>
   detail::if_same_type_after_remove_cvref<Next, DynamicStructPatch> merge(
-      detail::Badge badge, Next&& other) {
-    std::forward<Next>(other).customVisit(badge, *this);
+      detail::Badge, Next&& other) {
+    std::forward<Next>(other).customVisit(*this);
   }
 };
 class DynamicUnionPatch : public DynamicStructurePatch<true> {
  public:
   template <class Next>
   detail::if_same_type_after_remove_cvref<Next, DynamicUnionPatch> merge(
-      detail::Badge badge, Next&& other) {
-    std::forward<Next>(other).customVisit(badge, *this);
+      detail::Badge, Next&& other) {
+    std::forward<Next>(other).customVisit(*this);
   }
 
  private:
@@ -613,7 +613,7 @@ class DynamicPatch {
   }
 
   template <class PatchType>
-  PatchType* get_if(detail::Badge) {
+  PatchType* get_if() {
     return std::get_if<PatchType>(patch_.get());
   }
 
@@ -624,55 +624,55 @@ class DynamicPatch {
   detail::if_same_type_after_remove_cvref<Other, DynamicPatch> merge(Other&&);
 
   template <class Tag>
-  auto& getStoredPatchByTag(detail::Badge badge) {
-    return getStoredPatchByTag(Tag{}, badge);
+  auto& getStoredPatchByTag() {
+    return getStoredPatchByTag(Tag{});
   }
 
  private:
   template <class Tag>
-  auto& getStoredPatchByTag(type::list<Tag>, detail::Badge badge) {
-    return getStoredPatch<DynamicListPatch>(badge);
+  auto& getStoredPatchByTag(type::list<Tag>) {
+    return getStoredPatch<DynamicListPatch>();
   }
   template <class Tag>
-  auto& getStoredPatchByTag(type::set<Tag>, detail::Badge badge) {
-    return getStoredPatch<DynamicSetPatch>(badge);
+  auto& getStoredPatchByTag(type::set<Tag>) {
+    return getStoredPatch<DynamicSetPatch>();
   }
   template <class K, class V>
-  auto& getStoredPatchByTag(type::map<K, V>, detail::Badge badge) {
-    return getStoredPatch<DynamicMapPatch>(badge);
+  auto& getStoredPatchByTag(type::map<K, V>) {
+    return getStoredPatch<DynamicMapPatch>();
   }
   template <class T>
-  auto& getStoredPatchByTag(type::struct_t<T>, detail::Badge badge) {
-    return getStoredPatch<DynamicStructPatch>(badge);
+  auto& getStoredPatchByTag(type::struct_t<T>) {
+    return getStoredPatch<DynamicStructPatch>();
   }
   template <class T>
-  auto& getStoredPatchByTag(type::union_t<T>, detail::Badge badge) {
-    return getStoredPatch<DynamicUnionPatch>(badge);
+  auto& getStoredPatchByTag(type::union_t<T>) {
+    return getStoredPatch<DynamicUnionPatch>();
   }
   template <class T, class Tag>
-  auto& getStoredPatchByTag(type::cpp_type<T, Tag>, detail::Badge badge) {
-    return getStoredPatchByTag(Tag{}, badge);
+  auto& getStoredPatchByTag(type::cpp_type<T, Tag>) {
+    return getStoredPatchByTag(Tag{});
   }
   template <class T>
-  auto& getStoredPatchByTag(type::enum_t<T>, detail::Badge badge) {
-    return getStoredPatch<op::I32Patch>(badge);
+  auto& getStoredPatchByTag(type::enum_t<T>) {
+    return getStoredPatch<op::I32Patch>();
   }
   template <class Tag>
-  auto& getStoredPatchByTag(Tag, detail::Badge badge) {
+  auto& getStoredPatchByTag(Tag) {
     static_assert(type::is_a_v<Tag, type::primitive_c>);
-    return getStoredPatch<op::patch_type<Tag>>(badge);
+    return getStoredPatch<op::patch_type<Tag>>();
   }
 
   template <class Patch>
-  Patch& getStoredPatch(detail::Badge badge) {
+  Patch& getStoredPatch() {
     // patch already has the correct type, return it directly.
-    if (auto p = get_if<Patch>(badge)) {
+    if (auto p = get_if<Patch>()) {
       return *p;
     }
 
     // Use merge to change patch's type.
     merge(DynamicPatch{Patch{}});
-    return *get_if<Patch>(badge);
+    return *get_if<Patch>();
   }
 
   template <class Self, class Visitor>
@@ -826,35 +826,31 @@ void DynamicMapPatch::customVisitImpl(
 
 template <bool IsUnion>
 template <class Self, class Visitor>
-void DynamicStructurePatch<IsUnion>::customVisitImpl(
-    Self&& self, detail::Badge badge, Visitor&& v) {
+void DynamicStructurePatch<IsUnion>::customVisitImpl(Self&& self, Visitor&& v) {
   if (self.assign_) {
-    std::forward<Visitor>(v).assign(badge, *std::forward<Self>(self).assign_);
+    std::forward<Visitor>(v).assign(*std::forward<Self>(self).assign_);
     return;
   }
 
   if (self.clear_) {
-    std::forward<Visitor>(v).clear(badge);
+    std::forward<Visitor>(v).clear();
   }
 
   for (auto& [id, p] : self.patchPrior_) {
-    std::forward<Visitor>(v).patchIfSet(
-        badge, id, folly::forward_like<Self>(p));
+    std::forward<Visitor>(v).patchIfSet(id, folly::forward_like<Self>(p));
   }
 
   for (auto& [id, value] : self.ensure_) {
-    std::forward<Visitor>(v).ensure(
-        badge, id, folly::forward_like<Self>(value));
+    std::forward<Visitor>(v).ensure(id, folly::forward_like<Self>(value));
   }
 
   for (auto& [id, p] : self.patchAfter_) {
-    std::forward<Visitor>(v).patchIfSet(
-        badge, id, folly::forward_like<Self>(p));
+    std::forward<Visitor>(v).patchIfSet(id, folly::forward_like<Self>(p));
   }
 
   if constexpr (!IsUnion) {
     for (const auto& id : self.remove_) {
-      std::forward<Visitor>(v).remove(badge, id);
+      std::forward<Visitor>(v).remove(id);
     }
   }
 }

@@ -150,7 +150,7 @@ class TaggedPatchAnyRef {
  public:
   template <class Tag>
   auto& bind(DynamicPatch& patch) {
-    auto& stored = patch.getStoredPatchByTag<Tag>(BadgeHolder::get());
+    auto& stored = patch.getStoredPatchByTag<Tag>();
     if constexpr (!kHasTaggedPatchRef<Tag>) {
       // For primitive patches we return the stored patch directly.
       return stored;
@@ -254,7 +254,7 @@ class TaggedStructurePatchRef {
 
   void operator=(const value_type& v) { assign(v); }
 
-  void clear() { patch_.get().clear(badge); }
+  void clear() { patch_.get().clear(); }
 
   template <class Id>
   void ensure() {
@@ -274,7 +274,7 @@ class TaggedStructurePatchRef {
     }
 
     FieldId id = op::get_field_id_v<value_type, Id>;
-    auto& subPatch = patch_.get().patchIfSet(badge, id);
+    auto& subPatch = patch_.get().patchIfSet(id);
     return fieldPatchRef_.bind<op::get_type_tag<value_type, Id>>(subPatch);
   }
 
@@ -286,7 +286,7 @@ class TaggedStructurePatchRef {
 
   template <class Id>
   void remove() {
-    patch_.get().remove(badge, op::get_field_id_v<value_type, Id>);
+    patch_.get().remove(op::get_field_id_v<value_type, Id>);
   }
 
   void apply(value_type& v) { apply_impl(v); }
@@ -321,7 +321,7 @@ class TaggedStructurePatchRef {
   }
   template <class Value>
   void assign_impl(const Value& v) {
-    patch_.get().assign(badge, asValueStruct<Tag>(v).as_object());
+    patch_.get().assign(asValueStruct<Tag>(v).as_object());
   }
 
  private:
@@ -330,7 +330,6 @@ class TaggedStructurePatchRef {
   template <class Id>
   void ensureImpl(const op::get_native_type<value_type, Id>& d) {
     patch_.get().ensure(
-        badge,
         op::get_field_id_v<value_type, Id>,
         asValueStruct<op::get_type_tag<value_type, Id>>(d));
   }

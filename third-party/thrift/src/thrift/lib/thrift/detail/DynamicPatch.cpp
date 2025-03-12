@@ -549,7 +549,7 @@ void DynamicStructurePatch<IsUnion>::ensureUnion(FieldId id, Value v) {
   if (clear_ || !ensure_.empty()) {
     Object obj;
     obj[id] = std::move(v);
-    assign(badge, std::move(obj));
+    assign(std::move(obj));
     return;
   }
 
@@ -672,18 +672,18 @@ void DynamicStructurePatch<IsUnion>::fromObject(detail::Badge, Object obj) {
 template <bool IsUnion>
 void DynamicStructurePatch<IsUnion>::apply(detail::Badge, Object& obj) const {
   struct Visitor {
-    void assign(detail::Badge, Object v) {
+    void assign(Object v) {
       detail::convertStringToBinary(v);
       obj = std::move(v);
     }
-    void clear(detail::Badge) { obj.members()->clear(); }
-    void patchIfSet(detail::Badge, FieldId id, const DynamicPatch& p) {
+    void clear() { obj.members()->clear(); }
+    void patchIfSet(FieldId id, const DynamicPatch& p) {
       if (obj.contains(id)) {
         p.apply(obj[id]);
       }
     }
-    void remove(detail::Badge, FieldId id) { obj.erase(id); }
-    void ensure(detail::Badge, FieldId id, const Value& v) {
+    void remove(FieldId id) { obj.erase(id); }
+    void ensure(FieldId id, const Value& v) {
       if (obj.contains(id)) {
         return;
       }
@@ -699,7 +699,7 @@ void DynamicStructurePatch<IsUnion>::apply(detail::Badge, Object& obj) const {
     Object& obj;
   };
 
-  return customVisit(badge, Visitor{obj});
+  return customVisit(Visitor{obj});
 }
 
 template class DynamicStructurePatch<true>;
@@ -1063,13 +1063,13 @@ DynamicUnionPatch DiffVisitorBase::diffUnion(
 
   if (dst.empty()) {
     if (!src.empty()) {
-      patch.clear(badge);
+      patch.clear();
     }
     return patch;
   }
 
   if (src.empty() || src.begin()->first != dst.begin()->first) {
-    patch.assign(badge, dst);
+    patch.assign(dst);
     return patch;
   }
 
@@ -1078,7 +1078,7 @@ DynamicUnionPatch DiffVisitorBase::diffUnion(
   auto guard = folly::makeGuard([&] { pop(); });
   auto subPatch = diff(badge, src.at(id), dst.at(id));
   if (!subPatch.empty(badge)) {
-    patch.patchIfSet(badge, id).merge(DynamicPatch{std::move(subPatch)});
+    patch.patchIfSet(id).merge(DynamicPatch{std::move(subPatch)});
   }
 
   return patch;
@@ -1136,7 +1136,7 @@ void DiffVisitorBase::diffField(
   }
 
   if (inSrc && !inDst) {
-    patch.remove(badge, id);
+    patch.remove(id);
     return;
   }
 
@@ -1150,8 +1150,8 @@ void DiffVisitorBase::diffField(
     // field when applied statically.
     auto empty = emptyValue(field.getType());
     auto subPatch = diff(badge, empty, field);
-    patch.ensure(badge, id, std::move(empty));
-    patch.patchIfSet(badge, id).merge(DynamicPatch{std::move(subPatch)});
+    patch.ensure(id, std::move(empty));
+    patch.patchIfSet(id).merge(DynamicPatch{std::move(subPatch)});
     return;
   }
 
@@ -1160,9 +1160,9 @@ void DiffVisitorBase::diffField(
   auto subPatch = diff(badge, src.at(id), dst.at(id));
   if (!subPatch.empty(badge)) {
     if (maybeEmptyDeprecatedTerseField(src.at(id))) {
-      patch.ensure(badge, id, emptyValue(src.at(id).getType()));
+      patch.ensure(id, emptyValue(src.at(id).getType()));
     }
-    patch.patchIfSet(badge, id).merge(DynamicPatch{std::move(subPatch)});
+    patch.patchIfSet(id).merge(DynamicPatch{std::move(subPatch)});
   }
 }
 
@@ -1751,8 +1751,8 @@ class MinSafePatchVersionVisitor {
         badge,
         folly::overload(
             [&](const DynamicMapPatch& p) { p.customVisit(badge, *this); },
-            [&](const DynamicStructPatch& p) { p.customVisit(badge, *this); },
-            [&](const DynamicUnionPatch& p) { p.customVisit(badge, *this); },
+            [&](const DynamicStructPatch& p) { p.customVisit(*this); },
+            [&](const DynamicUnionPatch& p) { p.customVisit(*this); },
             [&](const op::AnyPatch& p) {
               // recurse AnyPatch in case it only uses `assign` or `clear`
               // operations that are V1.
@@ -1777,8 +1777,13 @@ class MinSafePatchVersionVisitor {
   }
 
   // Structured
-  void ensure(detail::Badge, FieldId, const Value&) {}
-  void remove(detail::Badge, FieldId) {}
+  void ensure(FieldId, const Value&) {}
+  void remove(FieldId) {}
+  void patchIfSet(FieldId, const DynamicPatch& fieldPatch) {
+    recurse(fieldPatch);
+  }
+
+  // Unknown
   void patchIfSet(detail::Badge, FieldId, const DynamicPatch& fieldPatch) {
     recurse(fieldPatch);
   }

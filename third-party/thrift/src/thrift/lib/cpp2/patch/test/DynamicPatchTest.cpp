@@ -85,7 +85,11 @@ TYPED_TEST_SUITE(DynamicPatchesTest, DynamicPatches);
 
 TYPED_TEST(DynamicPatchesTest, Clear) {
   TypeParam patch;
-  patch.clear(badge);
+  if constexpr (__FBTHRIFT_IS_VALID(patch, patch.clear(badge))) {
+    patch.clear(badge);
+  } else {
+    patch.clear();
+  }
   const auto& obj = patch.toObject();
   EXPECT_EQ(obj.size(), 1);
   EXPECT_EQ(obj.at(static_cast<FieldId>(op::PatchOp::Clear)).as_bool(), true);
@@ -953,7 +957,7 @@ TEST(PatchMergeTest, DynamicStructPatch) {
 
   op::I32Patch foo;
   foo += 1;
-  p.patchIfSet<type::i32_t>(badge, FieldId{1}).merge(foo);
+  p.patchIfSet<type::i32_t>(FieldId{1}).merge(foo);
 
   Object obj;
   obj[FieldId(1)].emplace_i32(3);
@@ -970,7 +974,7 @@ TEST(PatchMergeTest, DynamicStructPatch) {
   obj[FieldId(1)].emplace_i32(3);
 
   // patch becomes += 2
-  p.patchIfSet<type::i32_t>(badge, FieldId{1}).merge(foo);
+  p.patchIfSet<type::i32_t>(FieldId{1}).merge(foo);
 
   p.apply(badge, obj);
   EXPECT_EQ(obj[FieldId(1)].as_i32(), 5);
@@ -980,15 +984,15 @@ TEST(PatchMergeTest, DynamicStructPatch) {
   // In dynamic patch, we only use Remove operation to remove field
   // Clear operation will just set field to intrinsic default
   foo.clear();
-  p.patchIfSet<type::i32_t>(badge, FieldId{1}).merge(foo);
+  p.patchIfSet<type::i32_t>(FieldId{1}).merge(foo);
   p.apply(badge, obj);
   EXPECT_EQ(obj[FieldId(1)].as_i32(), 0);
 
-  p.remove(badge, FieldId(1));
+  p.remove(FieldId(1));
   p.apply(badge, obj);
   EXPECT_FALSE(obj.contains(FieldId(1)));
 
-  p.ensure(badge, FieldId(1), detail::asValueStruct<type::i32_t>(10));
+  p.ensure(FieldId(1), detail::asValueStruct<type::i32_t>(10));
   p.apply(badge, obj);
   EXPECT_EQ(obj[FieldId(1)].as_i32(), 10);
   p.apply(badge, obj);
@@ -1091,11 +1095,24 @@ void testMergeMovedPatch(T t) {
   CheckAssign checkAssign{&*t.begin()};
 
   Patch p1, p2;
-  p1.assign(badge, std::move(t)); // we moved `t` into p1's assign field
-  p1.customVisit(badge, checkAssign);
+  // we moved `t` into p1's assign field
+  if constexpr (__FBTHRIFT_IS_VALID(p1, p1.assign(badge, std::move(t)))) {
+    p1.assign(badge, std::move(t));
+  } else {
+    p1.assign(std::move(t));
+  }
 
-  p2.merge(badge, std::move(p1)); // we moved assign field from p1 to p2
-  p2.customVisit(badge, checkAssign);
+  if constexpr (__FBTHRIFT_IS_VALID(p1, p1.customVisit(badge, checkAssign))) {
+    p1.customVisit(badge, checkAssign);
+
+    p2.merge(badge, std::move(p1)); // we moved assign field from p1 to p2
+    p2.customVisit(badge, checkAssign);
+  } else {
+    p1.customVisit(checkAssign);
+
+    p2.merge(badge, std::move(p1)); // we moved assign field from p1 to p2
+    p2.customVisit(checkAssign);
+  }
 
   DynamicPatch dp{std::move(p2)};
   dp.visitPatch(
@@ -1111,7 +1128,7 @@ void testMergeMovedPatch(T t) {
             patch.customVisit(badge, checkAssign);
           },
           [&](const DynamicStructPatch& patch) {
-            patch.customVisit(badge, checkAssign);
+            patch.customVisit(checkAssign);
           },
           [&](const auto&) {
             folly::throw_exception<std::runtime_error>("not reachable.");

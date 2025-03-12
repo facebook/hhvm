@@ -7,7 +7,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use datastore::NonEvictingStore;
-use decl_parser::DeclParser;
+use decl_parser::DeclParserObr;
 use folded_decl_provider::FoldedDeclProvider;
 use folded_decl_provider::LazyFoldedDeclProvider;
 use naming_provider::SqliteNamingTable;
@@ -26,7 +26,7 @@ pub fn make_folded_decl_provider<R: Reason>(
     naming_table: Option<&PathBuf>,
     shallow_decl_store: ShallowDeclStore<R>,
     opts: Arc<DeclFoldOptions>,
-    decl_parser: DeclParser<R>,
+    decl_parser: DeclParserObr<R>,
 ) -> impl FoldedDeclProvider<R> {
     let shallow_decl_provider: Arc<dyn ShallowDeclProvider<R>> =
         if let Some(naming_table_path) = naming_table {

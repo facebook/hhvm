@@ -29,7 +29,7 @@ pub struct FileSummary {
 }
 
 impl FileSummary {
-    pub fn new<'a>(parsed_file: &ParsedFileWithHashes<'a>) -> Self {
+    pub fn new_obr<'a>(parsed_file: &ParsedFileWithHashes<'a>) -> Self {
         Self {
             mode: parsed_file.mode,
             file_decls_hash: parsed_file.file_decls_hash,

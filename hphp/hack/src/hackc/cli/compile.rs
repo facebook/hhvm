@@ -18,7 +18,7 @@ use clap::Parser;
 use compile::EnvFlags;
 use compile::NativeEnv;
 use compile::Profile;
-use decl_parser::DeclParser;
+use decl_parser::DeclParserObr;
 use decl_parser::DeclParserOptions;
 use decl_provider::ConstDecl;
 use decl_provider::DeclProvider;
@@ -426,7 +426,7 @@ fn make_naming_table_powered_shallow_decl_provider<R: Reason>(
     let file_provider: Arc<dyn file_provider::FileProvider> = Arc::new(
         file_provider::DiskProvider::new(Arc::clone(&ctx), Some(hhi_root)),
     );
-    let parser = DeclParser::new(file_provider, DeclParserOptions::default());
+    let parser = DeclParserObr::new(file_provider, DeclParserOptions::default());
 
     let shallow_decl_store = make_shallow_decl_store::<R>(StoreOpts::Unserialized);
 

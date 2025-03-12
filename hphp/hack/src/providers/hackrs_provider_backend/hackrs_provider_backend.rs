@@ -13,7 +13,7 @@ use std::sync::Arc;
 use anyhow::Result;
 use datastore::ChangesStore;
 use datastore::Store;
-use decl_parser::DeclParser;
+use decl_parser::DeclParserObr;
 use decl_parser::DeclParserOptions;
 use file_provider::DiskProvider;
 use file_provider::FileProvider;
@@ -45,7 +45,7 @@ pub struct HhServerProviderBackend {
     path_ctx: Arc<RelativePathCtx>,
     pub fold_opts: DeclFoldOptions,
     pub parse_opts: DeclParserOptions,
-    decl_parser: DeclParser<BR>,
+    decl_parser: DeclParserObr<BR>,
     file_store: Arc<ChangesStore<RelativePath, bstr::BString>>,
     file_provider: Arc<FileProviderWithContext>,
     /// Our implementation of NamingProvider, which calls into OCaml to
@@ -92,7 +92,7 @@ impl HhServerProviderBackend {
                 disk: DiskProvider::new(Arc::clone(&path_ctx), None),
             },
         });
-        let decl_parser = DeclParser::new(Arc::clone(&file_provider) as _, parse_opts.clone());
+        let decl_parser = DeclParserObr::new(Arc::clone(&file_provider) as _, parse_opts.clone());
         let naming_table = Arc::new(NamingTableWithContext {
             ctx_is_empty: Arc::clone(&ctx_is_empty),
             fallback: NamingTable::new(db_path)?,

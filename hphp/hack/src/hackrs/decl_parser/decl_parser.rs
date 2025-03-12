@@ -16,7 +16,7 @@ use ty::decl::shallow::NamedDecl;
 use ty::reason::Reason;
 
 #[derive(Debug, Clone)]
-pub struct DeclParser<R: Reason> {
+pub struct DeclParserObr<R: Reason> {
     file_provider: Arc<dyn FileProvider>,
     decl_parser_opts: DeclParserOptions,
     // We could make our parse methods generic over `R` instead, but it's
@@ -25,7 +25,7 @@ pub struct DeclParser<R: Reason> {
     _phantom: PhantomData<R>,
 }
 
-impl<R: Reason> DeclParser<R> {
+impl<R: Reason> DeclParserObr<R> {
     pub fn new(file_provider: Arc<dyn FileProvider>, decl_parser_opts: DeclParserOptions) -> Self {
         Self {
             file_provider,
@@ -51,7 +51,7 @@ impl<R: Reason> DeclParser<R> {
         let arena = bumpalo::Bump::new();
         let text = self.file_provider.get(path)?;
         let hashed_file = self.parse_impl(path, &text, &arena);
-        let summary = names::FileSummary::new(&hashed_file);
+        let summary = names::FileSummary::new_obr(&hashed_file);
         let decls = hashed_file
             .into_iter()
             .map(|(name, decl, _, _)| NamedDecl::from(&(name, decl)))

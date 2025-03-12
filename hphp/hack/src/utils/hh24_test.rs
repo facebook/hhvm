@@ -92,7 +92,7 @@ pub fn parse_and_summarize(relpath: &RelativePath, text: &str) -> Result<FileSum
         prefix,
         arena,
     );
-    Ok(names::FileSummary::new(&parsed_file_with_hashes))
+    Ok(names::FileSummary::new_obr(&parsed_file_with_hashes))
 }
 
 pub fn calculate_checksum(summaries: &[(RelativePath, FileSummary)]) -> Checksum {

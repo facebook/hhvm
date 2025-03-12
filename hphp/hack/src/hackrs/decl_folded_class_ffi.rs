@@ -9,7 +9,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use bumpalo::Bump;
-use decl_parser::DeclParser;
+use decl_parser::DeclParserObr;
 use decl_parser::DeclParserOptions;
 use folded_decl_provider::FoldedDeclProvider;
 use hackrs_test_utils::serde_store::Compression;
@@ -89,7 +89,7 @@ ocaml_ffi! {
         });
         let file_provider: Arc<dyn file_provider::FileProvider> =
             Arc::new(file_provider::DiskProvider::new(path_ctx, None));
-        let decl_parser = DeclParser::new(file_provider, parse_opts);
+        let decl_parser = DeclParserObr::new(file_provider, parse_opts);
         let shallow_decl_store = make_shallow_decl_store(StoreOpts::Unserialized);
 
         let reverse_files = files.iter().copied().rev().collect::<Vec<_>>();
@@ -203,7 +203,7 @@ ocaml_ffi! {
         // Parse and gather shallow decls
         let file_provider: Arc<dyn file_provider::FileProvider> =
             Arc::new(file_provider::DiskProvider::new(path_ctx, Some(hhi_root)));
-        let decl_parser: DeclParser<BReason> = DeclParser::new(
+        let decl_parser: DeclParserObr<BReason> = DeclParserObr::new(
             file_provider,
         parse_opts
         );

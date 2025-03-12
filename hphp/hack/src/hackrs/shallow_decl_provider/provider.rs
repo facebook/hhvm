@@ -5,7 +5,7 @@
 
 use std::sync::Arc;
 
-use decl_parser::DeclParser;
+use decl_parser::DeclParserObr;
 use itertools::Itertools;
 use naming_provider::NamingProvider;
 use oxidized::naming_types::KindOfType;
@@ -35,14 +35,14 @@ use super::TypeDecl;
 pub struct LazyShallowDeclProvider<R: Reason> {
     store: Arc<ShallowDeclStore<R>>,
     naming_provider: Arc<dyn NamingProvider>,
-    parser: DeclParser<R>,
+    parser: DeclParserObr<R>,
 }
 
 impl<R: Reason> LazyShallowDeclProvider<R> {
     pub fn new(
         store: Arc<ShallowDeclStore<R>>,
         naming_provider: Arc<dyn NamingProvider>,
-        parser: DeclParser<R>,
+        parser: DeclParserObr<R>,
     ) -> Self {
         Self {
             store,

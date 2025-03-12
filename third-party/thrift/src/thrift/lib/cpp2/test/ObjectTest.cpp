@@ -1692,5 +1692,55 @@ TEST(ObjectTest, ToThriftStructTypeMismatch) {
   }
 }
 
+TEST(ObjectTest, MaybeAny) {
+  using facebook::thrift::lib::test::Bar;
+  auto any = type::AnyData::toAny(Bar{}).toThrift();
+  auto obj = asValueStruct<type::struct_t<type::AnyStruct>>(any).as_object();
+  EXPECT_TRUE(maybeAny(obj));
+  {
+    auto obj2 = obj;
+    obj2[FieldId{4}].emplace_binary();
+    EXPECT_FALSE(maybeAny(obj2));
+  }
+  {
+    auto obj2 = obj;
+    obj2[FieldId{5}].emplace_binary();
+    EXPECT_TRUE(maybeAny(obj2));
+  }
+  {
+    auto obj2 = obj;
+    obj2.erase(FieldId{1});
+    EXPECT_FALSE(maybeAny(obj2));
+  }
+  {
+    auto obj2 = obj;
+    obj2.erase(FieldId{2});
+    EXPECT_FALSE(maybeAny(obj2));
+  }
+  {
+    auto obj2 = obj;
+    obj2.erase(FieldId{3});
+    EXPECT_FALSE(maybeAny(obj2));
+  }
+  {
+    auto obj2 = obj;
+    obj2[FieldId{1}].emplace_binary();
+    EXPECT_FALSE(maybeAny(obj2));
+  }
+  {
+    auto obj2 = obj;
+    obj2[FieldId{2}].emplace_binary();
+    EXPECT_FALSE(maybeAny(obj2));
+  }
+  {
+    auto obj2 = obj;
+    obj2[FieldId{3}].emplace_object();
+    EXPECT_FALSE(maybeAny(obj2));
+  }
+
+  obj = asValueStruct<type::struct_t<Bar>>(Bar{}).as_object();
+  EXPECT_FALSE(maybeAny(obj));
+}
+
 } // namespace
 } // namespace apache::thrift::protocol

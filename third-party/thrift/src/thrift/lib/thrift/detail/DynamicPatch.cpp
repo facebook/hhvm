@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <folly/Overload.h>
+#include <folly/portability/GFlags.h>
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Patch.h>
 #include <thrift/lib/cpp2/protocol/Patch.h>
@@ -26,8 +27,12 @@
 
 #include <thrift/lib/cpp2/patch/detail/PatchBadge.h>
 
-namespace apache::thrift::protocol {
+DEFINE_bool(
+    thrift_patch_use_assign_patch_in_diff_visitor_for_any_like_struct,
+    false,
+    "Whether to use assign patch in DiffVisitor if the struct looks like Any");
 
+namespace apache::thrift::protocol {
 using detail::badge;
 using detail::ValueList;
 using detail::ValueMap;
@@ -995,6 +1000,18 @@ DynamicPatch DiffVisitorBase::diffStructured(
     const Object& src, const Object& dst) {
   if (src.empty() && dst.empty()) {
     return {};
+  }
+
+  // If src and dst looks like a thrift.Any, only use assign operator since
+  // we can't tell whether we should use AnyPatch or StructPatch.
+  if (FLAGS_thrift_patch_use_assign_patch_in_diff_visitor_for_any_like_struct &&
+      maybeAny(src) && maybeAny(dst)) {
+    DynamicUnknownPatch patch;
+    if (src != dst) {
+      patch.doNotConvertStringToBinary(badge);
+      patch.assign(badge, dst);
+    }
+    return DynamicPatch{std::move(patch)};
   }
 
   if (src.size() <= 1 && dst.size() <= 1) {

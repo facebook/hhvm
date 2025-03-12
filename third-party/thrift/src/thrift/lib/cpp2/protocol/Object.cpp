@@ -152,4 +152,35 @@ folly::dynamic toDynamic(const Object& obj) {
   return toDynamic(v);
 }
 
+bool maybeAny(const protocol::Object& obj) {
+  // Add static_assert to make sure this function is updated when we changed
+  // Thrift.Any's schema in the future.
+  static_assert(op::size_v<type::AnyStruct> == 3);
+
+  // Make sure field id matches
+  static_assert(op::get_field_id_v<type::AnyStruct, ident::type> == FieldId{1});
+  static_assert(
+      op::get_field_id_v<type::AnyStruct, ident::protocol> == FieldId{2});
+  static_assert(op::get_field_id_v<type::AnyStruct, ident::data> == FieldId{3});
+  static_assert(
+      op::get_ordinal_v<type::AnyStruct, field_id<4>> == FieldOrdinal{0});
+
+  // Make sure fields are not optional, not terse write.
+  static_assert(std::is_same_v<
+                op::get_field_ref<type::AnyStruct, ident::type>,
+                field_ref<type::Type&>>);
+  static_assert(std::is_same_v<
+                op::get_field_ref<type::AnyStruct, ident::protocol>,
+                field_ref<type::Protocol&>>);
+  static_assert(std::is_same_v<
+                op::get_field_ref<type::AnyStruct, ident::data>,
+                field_ref<folly::IOBuf&>>);
+
+  auto type = folly::get_ptr(*obj.members(), 1);
+  auto protocol = folly::get_ptr(*obj.members(), 2);
+  auto data = folly::get_ptr(*obj.members(), 3);
+
+  return type && type->is_object() && protocol && protocol->is_object() &&
+      data && data->is_binary() && !obj.contains(FieldId{4});
+}
 } // namespace apache::thrift::protocol

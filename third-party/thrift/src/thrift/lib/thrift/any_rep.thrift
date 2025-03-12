@@ -43,6 +43,7 @@ namespace py thrift.lib.thrift.any_rep
 /** A struct that can hold any thrift supported value, encoded in any format. */
 @rust.Ord
 @thrift.Uri{value = "facebook.com/thrift/type/Any"}
+@thrift.ReserveIds{ids = [4]} // maybeAny(...) use Field{4} as an anti-marker.
 struct AnyStruct {
   /**
    * The type stored in `data`.

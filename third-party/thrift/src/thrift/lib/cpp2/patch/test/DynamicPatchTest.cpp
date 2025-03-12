@@ -1415,4 +1415,119 @@ TEST(DynamicPatch, applyToDataFieldInsideAny) {
       "hello world");
 }
 
+TEST(DynamicPatchTest, Any) {
+  constexpr auto kAssignOp = static_cast<FieldId>(op::PatchOp::Assign);
+  constexpr auto kRemoveOp = static_cast<FieldId>(op::PatchOp::Remove);
+  constexpr auto kEnsureStructOp =
+      static_cast<FieldId>(op::PatchOp::EnsureStruct);
+  constexpr auto kPatchPriorOp = static_cast<FieldId>(op::PatchOp::PatchPrior);
+  constexpr auto kPatchAfterOp = static_cast<FieldId>(op::PatchOp::PatchAfter);
+
+  MyUnion src, dst;
+  src.s_ref() = "123";
+  dst.s_ref() = "1234";
+
+  auto any = type::AnyData::toAny(src).toThrift();
+  const auto srcObj =
+      asValueStruct<type::struct_t<type::AnyStruct>>(any).as_object();
+
+  any = type::AnyData::toAny(dst).toThrift();
+  const auto dstObj =
+      asValueStruct<type::struct_t<type::AnyStruct>>(any).as_object();
+
+  {
+    auto src2 = srcObj;
+    auto dst2 = dstObj;
+
+    // If src and dst look like thrift.Any, we only use Assign operator
+    auto patch = DemoDiffVisitor{}.diff(src2, dst2);
+    auto dynPatch = patch.toObject();
+    EXPECT_EQ(dynPatch.size(), 1);
+    EXPECT_TRUE(dynPatch.contains(kAssignOp));
+
+    src2[FieldId{3}].emplace_binary(folly::IOBuf::wrapBufferAsValue("123", 3));
+    dst2[FieldId{3}].emplace_binary(folly::IOBuf::wrapBufferAsValue("1234", 4));
+
+    // We don't check the content, we only check whether type matches.
+    patch = DemoDiffVisitor{}.diff(src2, dst2);
+    dynPatch = patch.toObject();
+    EXPECT_EQ(dynPatch.size(), 1);
+    EXPECT_TRUE(dynPatch.contains(kAssignOp));
+
+    src2[FieldId{5}].emplace_bool();
+    dst2[FieldId{5}].emplace_bool();
+
+    // Struct with extra fields still look like Any
+    patch = DemoDiffVisitor{}.diff(src2, dst2);
+    dynPatch = patch.toObject();
+    EXPECT_EQ(dynPatch.size(), 1);
+    EXPECT_TRUE(dynPatch.contains(kAssignOp));
+  }
+
+  {
+    auto src2 = srcObj;
+    auto dst2 = dstObj;
+    src2[FieldId{1}].emplace_binary();
+    dst2[FieldId{1}].emplace_binary();
+
+    // If src does not look like thrift.Any, we can use any operations.
+    auto patch = DemoDiffVisitor{}.diff(src2, dst2);
+    auto dynPatch = patch.toObject();
+    EXPECT_TRUE(dynPatch.contains(kPatchPriorOp));
+  }
+
+  {
+    auto src2 = srcObj;
+    auto dst2 = dstObj;
+    src2[FieldId{2}].emplace_binary();
+    dst2[FieldId{2}].emplace_binary();
+
+    auto patch = DemoDiffVisitor{}.diff(src2, dst2);
+    auto dynPatch = patch.toObject();
+    EXPECT_TRUE(dynPatch.contains(kPatchPriorOp));
+  }
+
+  {
+    auto src2 = srcObj;
+    auto dst2 = dstObj;
+    src2[FieldId{3}].emplace_object()[FieldId{1}].emplace_i32(123);
+    dst2[FieldId{3}].emplace_object()[FieldId{1}].emplace_i32(1234);
+
+    auto patch = DemoDiffVisitor{}.diff(src2, dst2);
+    auto dynPatch = patch.toObject();
+    EXPECT_TRUE(dynPatch.contains(kPatchPriorOp));
+  }
+
+  {
+    auto src2 = srcObj;
+    const auto& dst2 = dstObj;
+    src2.erase(FieldId{3});
+
+    auto patch = DemoDiffVisitor{}.diff(src2, dst2);
+    auto dynPatch = patch.toObject();
+    EXPECT_TRUE(dynPatch.contains(kEnsureStructOp));
+    EXPECT_TRUE(dynPatch.contains(kPatchAfterOp));
+  }
+
+  {
+    const auto& src2 = srcObj;
+    auto dst2 = dstObj;
+    dst2.erase(FieldId{3});
+
+    auto patch = DemoDiffVisitor{}.diff(src2, dst2);
+    auto dynPatch = patch.toObject();
+    EXPECT_TRUE(dynPatch.contains(kRemoveOp));
+  }
+
+  {
+    auto src2 = srcObj;
+    const auto& dst2 = dstObj;
+    src2[FieldId{4}].emplace_bool();
+
+    auto patch = DemoDiffVisitor{}.diff(src2, dst2);
+    auto dynPatch = patch.toObject();
+    EXPECT_TRUE(dynPatch.contains(kPatchPriorOp));
+  }
+}
+
 } // namespace apache::thrift::protocol

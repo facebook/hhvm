@@ -219,4 +219,11 @@ folly::dynamic toDynamic(const Object& obj);
 
 using detail::toAny;
 
+// Check whether a protocol object maybe a thrift.Any based on a heuristic field
+// id and type checking. A return value of
+// - true indicates that the object COULD be Any (but there may be false
+// positives if the Object's schema is simlar to Any's)
+// - false indicates that the object is NOT Any (i.e. no false negatives)
+bool maybeAny(const protocol::Object&);
+
 } // namespace apache::thrift::protocol

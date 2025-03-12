@@ -9,7 +9,8 @@ final abstract class C2 extends C1 {
   const int abs = 1;
 }
 
-function foo(classname<C1> $class): void {
+function foo(): void {
+  $class = C1::class;
   $class::abs; // warn
   $class::concr; // OK
 }

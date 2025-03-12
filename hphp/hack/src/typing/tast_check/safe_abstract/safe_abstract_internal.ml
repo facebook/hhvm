@@ -162,6 +162,7 @@ end = struct
         | Typing_defs.Tnewtype (new_type, [hd_targ], _)
           when String.equal new_type Naming_special_names.Classes.cClassname ->
           fold_targ abstractness hd_targ
+        | Typing_defs.Tclass_ptr ty -> fold_targ abstractness ty
         | Typing_defs.Tintersection tys ->
           aggregate tys (fold_ty abstractness) intersect
         | Typing_defs.Tunion tys -> aggregate tys (fold_ty abstractness) union

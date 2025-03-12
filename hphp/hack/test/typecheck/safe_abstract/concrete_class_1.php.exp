@@ -1,0 +1,24 @@
+ERROR: File "concrete_class_1.php", line 20, characters 20-22:
+Invalid argument (Typing[4110])
+  File "concrete_class_1.php", line 14, characters 27-34:
+  Expected `class<A>`
+  File "classname.hhi", line 14, characters 27-32:
+  But got `string`
+ERROR: File "concrete_class_1.php", line 21, characters 20-22:
+Invalid argument (Typing[4110])
+  File "concrete_class_1.php", line 14, characters 27-34:
+  Expected `class<A>`
+  File "classname.hhi", line 14, characters 27-32:
+  But got `string`
+ERROR: File "concrete_class_1.php", line 22, characters 19-21:
+Invalid argument (Typing[4110])
+  File "concrete_class_1.php", line 12, characters 35-42:
+  Expected `class<A>`
+  File "classname.hhi", line 14, characters 27-32:
+  But got `string`
+ERROR: File "concrete_class_1.php", line 23, characters 19-21:
+Invalid argument (Typing[4110])
+  File "concrete_class_1.php", line 12, characters 26-43:
+  Expected `concrete<class<A>>`
+  File "classname.hhi", line 14, characters 27-32:
+  But got `string`

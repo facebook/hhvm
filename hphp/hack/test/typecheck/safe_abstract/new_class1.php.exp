@@ -1,0 +1,4 @@
+WARN: File "new_class1.php", line 7, characters 3-12:
+Unsafe use of `new`: `A` might be abstract (Warn[12015])
+  File "new_class1.php", line 6, characters 24-24:
+  A is from 

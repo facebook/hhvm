@@ -1,4 +1,4 @@
-WARN: File "safe_abstract_consts_1.php", line 13, characters 3-13:
+WARN: File "safe_abstract_consts_1.php", line 14, characters 3-13:
 Unsafe class constant access: C1::abs might not exist because the receiver might be abstract. (Warn[12018])
-  File "safe_abstract_consts_1.php", line 12, characters 24-25:
+  File "safe_abstract_consts_1.php", line 3, characters 16-17:
   C1 is from 

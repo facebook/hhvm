@@ -282,6 +282,8 @@ class function : public native_function {
   using raw_context = native_function::context;
   class context {
    public:
+    explicit context(raw_context&& raw) : raw_(std::move(raw)) {}
+
     /**
      * The raw native_function::context object that this type is wrapping.
      */
@@ -526,10 +528,7 @@ class function : public native_function {
       }
     }
 
-    explicit context(raw_context&& raw) : raw_(std::move(raw)) {}
     raw_context raw_;
-
-    friend class function;
   };
   static_assert(std::is_move_constructible_v<context>);
 
@@ -577,7 +576,7 @@ class make_function_delegate final : public function {
 
  private:
   std::string name_;
-  F impl_;
+  std::decay_t<F> impl_;
 };
 
 } // namespace detail
@@ -640,7 +639,8 @@ template <
         detail::is_function_returning<F, object>)>
 function::ptr make_function(std::string name, F&& function) {
   return make_function(
-      std::move(name), [f = std::forward<F>(function)](function::context ctx) {
+      std::move(name),
+      [f = std::decay_t<F>(std::forward<F>(function))](function::context ctx) {
         if constexpr (detail::is_function_returning<F, boolean>) {
           return manage_as_static(
               f(std::move(ctx)) ? whisker::make::true_ : whisker::make::false_);
@@ -661,6 +661,152 @@ function::ptr make_function(std::string name, F&& function) {
 template <typename F>
 function::ptr make_function(F&& function) {
   return make_function("" /* name */, std::forward<F>(function));
+}
+
+/**
+ * A class that provides an ergonomic way to build prototype objects.
+ *
+ * The provided handle type must be either:
+ *   - native_handle<S>, or
+ *   - polymorphic_native_handle<S, ...>
+ *
+ * The handle's element type (S) is called the "self type" of the prototype. The
+ * prototype is designed to operate as members of the self type only.
+ *
+ * Example (property):
+ *
+ *    struct Foo {
+ *      whisker::i64 woah() const { return 42; }
+ *    };
+ *    using foo_handle = native_handle<Foo>;
+ *    prototype_builder<foo_handle> def;
+ *    def.property("woah", [](const Foo& self) { return self.woah(); });
+ *    prototype_ptr<Foo> proto = std::move(def).make();
+ *
+ *    {{ foo.woah }}
+ *    {{! Produces 42 }}
+ *
+ * Example (function):
+ *
+ *    struct Bar {
+ *      i64 add1(i64 x) const { return x + 1; }
+ *    };
+ *    using bar_handle = native_handle<Bar>;
+ *    prototype_builder<bar_handle> def;
+ *    def.function("add1", [](const Bar& self, function::context ctx) {
+ *      return self.add1(ctx.argument<i64>(0));
+ *    });
+ *    prototype_ptr<Bar> proto = std::move(def).make();
+ *
+ *    {{ (bar.add1 41) }}
+ *    {{! Produces 42 }}
+ */
+template <typename Handle>
+class prototype_builder {
+ public:
+  using self_type = typename Handle::element_type;
+  using result = typename prototype<self_type>::ptr;
+
+  template <
+      typename Parent,
+      WHISKER_DSL_REQUIRES(std::is_base_of_v<Parent, self_type>)>
+  explicit prototype_builder(prototype_ptr<Parent> parent)
+      : parent_(std::move(parent)) {
+    assert(parent_ != nullptr);
+  }
+  prototype_builder() = default;
+
+  /**
+   * Registers a property descriptor with the provided name.
+   *
+   * Throws:
+   *   - `std::runtime_error` if there is another descriptor with the same name.
+   */
+  template <typename F>
+  void property(std::string name, F&& function) {
+    try_emplace(
+        std::move(name),
+        dsl::make_function([f = std::decay_t<F>(std::forward<F>(function))](
+                               function::context ctx) {
+          native_handle<self_type> self = ctx.self<Handle>();
+          return f(*self);
+        }));
+  }
+
+  /**
+   * Registers a "member function" descriptor with the provided name. The
+   * underlying descriptor is a fixed_object descriptor which is a
+   * native_function instance.
+   *
+   * Throws:
+   *   - `std::runtime_error` if there is another descriptor with the same name.
+   */
+  template <typename F>
+  void function(std::string name, F&& function) {
+    auto fn =
+        dsl::make_function([f = std::decay_t<F>(std::forward<F>(function))](
+                               function::context ctx) {
+          native_handle<self_type> self = ctx.self<Handle>();
+          return f(*self, std::move(ctx));
+        });
+    try_emplace(
+        std::move(name),
+        prototype<>::fixed_object(manage_owned<object>(
+            whisker::make::native_function(std::move(fn)))));
+  }
+
+  /**
+   * Finalizes the prototype, and returns the resultant object. No further
+   * changes can be made to this prototype builder.
+   */
+  result make() && {
+    return std::make_shared<basic_prototype<self_type>>(
+        std::move(descriptors_), std::move(parent_));
+  }
+
+  template <
+      typename Parent,
+      WHISKER_DSL_REQUIRES(std::is_base_of_v<Parent, self_type>)>
+  static prototype_builder extends(prototype_ptr<Parent> parent) {
+    return prototype_builder{std::move(parent)};
+  }
+
+ private:
+  void try_emplace(std::string name, prototype<>::descriptor descriptor) {
+    auto [_, inserted] = descriptors_.emplace(name, std::move(descriptor));
+    if (!inserted) {
+      throw std::runtime_error(
+          fmt::format("Descriptor named '{}' already exists.", name));
+    }
+  }
+
+  prototype<>::ptr parent_;
+  prototype<>::descriptors_map descriptors_;
+};
+
+/**
+ * A helper function for `prototype_builder<Handle>` where the creation of the
+ * builder object and materializing an instance are hidden from the user.
+ *
+ * The user provided a function will be called with a
+ * `prototype_builder<Handle>`.
+ *
+ * The primary benefit of this function is to avoid the creation (and thus
+ * naming) of a temporary prototype_builder object.
+ */
+template <typename Handle, typename Parent, typename F>
+typename prototype_builder<Handle>::result make_prototype(
+    prototype_ptr<Parent> parent, F&& build) {
+  prototype_builder<Handle> builder{std::move(parent)};
+  std::invoke(std::forward<F>(build), builder);
+  return std::move(builder).make();
+}
+
+template <typename Handle, typename F>
+typename prototype_builder<Handle>::result make_prototype(F&& build) {
+  prototype_builder<Handle> builder;
+  std::invoke(std::forward<F>(build), builder);
+  return std::move(builder).make();
 }
 
 namespace detail {

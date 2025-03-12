@@ -1302,40 +1302,28 @@ TEST_F(RenderTest, user_defined_function_native_ref_prototype) {
   };
   SomeCppObject cpp_object;
 
-  auto return42 = dsl::make_function([](dsl::function::context ctx) -> object {
-    ctx.declare_arity(0);
-    ctx.declare_named_arguments({});
-    using handle_type =
-        dsl::polymorphic_native_handle<SomeCppObjectBase, SomeCppObject>;
-    native_handle<SomeCppObjectBase> ref = ctx.self<handle_type>();
-    return w::i64(ref->return42());
+  using base_handle_type =
+      dsl::polymorphic_native_handle<SomeCppObjectBase, SomeCppObject>;
+  const auto base_proto = dsl::make_prototype<base_handle_type>([](auto&& def) {
+    def.property("return42", [](const SomeCppObjectBase& self) {
+      return w::i64(self.return42());
+    });
   });
 
-  auto increment = dsl::make_function([](dsl::function::context ctx) -> object {
-    ctx.declare_arity(0);
-    ctx.declare_named_arguments({});
-    auto ref = ctx.self<native_handle<SomeCppObject>>();
-    ref->increment();
-    return w::string("incremented!");
-  });
-
-  auto get = dsl::make_function([](dsl::function::context ctx) -> object {
-    ctx.declare_arity(0);
-    ctx.declare_named_arguments({});
-    auto ref = ctx.self<native_handle<SomeCppObject>>();
-    return w::i64(ref->get());
-  });
-
-  const auto base_proto = prototype<>::from({
-      {"return42", return42},
-  });
-
-  const auto proto = prototype<>::from(
-      {
-          {"increment", manage_owned<object>(w::native_function(increment))},
-          {"get", get},
-      },
-      base_proto);
+  const auto proto = dsl::make_prototype<native_handle<SomeCppObject>>(
+      base_proto, [](auto&& def) {
+        def.property("get", [](const SomeCppObject& self) {
+          return w::i64(self.get());
+        });
+        def.function(
+            "increment",
+            [](const SomeCppObject& self, dsl::function::context ctx) {
+              ctx.declare_arity(0);
+              ctx.declare_named_arguments({});
+              self.increment();
+              return w::string("incremented!");
+            });
+      });
 
   const auto context = w::map({
       {"foo", w::native_handle(manage_as_static(cpp_object), proto)},

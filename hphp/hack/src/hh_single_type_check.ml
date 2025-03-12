@@ -968,7 +968,6 @@ let parse_options () =
       ~tco_allow_all_files_for_module_declarations:
         !allow_all_files_for_module_declarations
       ~tco_loop_iteration_upper_bound:!loop_iteration_upper_bound
-      ~improved_hover:true
       GlobalOptions.default
   in
   let tcopt = ServerConfig.load_config config tcopt in

@@ -1251,7 +1251,7 @@ let test () =
       ~silent:false
       ~from:""
       ~ai_options:None
-      ~cli_config_overrides:[("improved_hover", "true")]
+      ~cli_config_overrides:[]
   in
   let env =
     Test.setup_server

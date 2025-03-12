@@ -85,11 +85,7 @@ let identify_tests =
         [
           {
             HoverService.snippet =
-              [
-                Lsp.MarkedCode
-                  ( "hack",
-                    "HH\\FunctionRef<(readonly function(string $s): string)>" );
-              ];
+              make_hack_marked_code "function foo(string $s): string";
             addendum = [Lsp.MarkedString "foo_docblock"];
             pos = pos_at (17, 8) (17, 10);
           };
@@ -131,8 +127,10 @@ let identify_tests =
               [
                 Lsp.MarkedString "Defined in `Cardoor`";
                 Lsp.MarkedString "---";
-                Lsp.MarkedCode
-                  ("hack", "public static function bar<T>(string $x): string");
+                Lsp.MarkedCode ("hack", "public static function bar<T>(T $x): T");
+                Lsp.MarkedString "---";
+                Lsp.MarkedString "Instantiation:";
+                Lsp.MarkedCode ("hack", "  T = string;");
               ];
             addendum = [Lsp.MarkedString "bar_docblock"];
             pos = pos_at (20, 17) (20, 19);

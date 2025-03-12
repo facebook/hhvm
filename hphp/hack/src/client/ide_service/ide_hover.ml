@@ -589,9 +589,6 @@ let make_hover_info
   let { SymbolOccurrence.name; type_; is_declaration = _; pos = _ } =
     occurrence
   in
-  let improved_hover =
-    (Provider_context.get_tcopt ctx).GlobalOptions.improved_hover
-  in
   let (defined_in, snippet, instantiation_section) =
     match (type_, info_opt) with
     | (_, None) -> (None, Utils.strip_hh_lib_ns name, None)
@@ -604,8 +601,8 @@ let make_hover_info
     | (SymbolOccurrence.ClassConst _, Some info)
     | (SymbolOccurrence.Property _, Some info) ->
       let ((snippet, instantiation_section), class_tparams) =
-        match (improved_hover, get_decl_ty ctx def_opt type_) with
-        | (true, (Some class_tparams, Some decl_ty)) ->
+        match get_decl_ty ctx def_opt type_ with
+        | (Some class_tparams, Some decl_ty) ->
           ( show_type_with_instantiation occurrence def_opt decl_ty info,
             class_tparams )
         | _ -> ((print_locl_ty_with_identity info, None), [])
@@ -621,8 +618,8 @@ let make_hover_info
         None )
     | (SymbolOccurrence.Function, Some info) ->
       let (snippet, instantiation_section) =
-        match (improved_hover, get_decl_ty ctx def_opt type_) with
-        | (true, (_, Some decl_ty)) ->
+        match get_decl_ty ctx def_opt type_ with
+        | (_, Some decl_ty) ->
           show_type_with_instantiation occurrence def_opt decl_ty info
         | _ ->
           (print_locl_ty_with_identity ~do_not_strip_dynamic:true info, None)

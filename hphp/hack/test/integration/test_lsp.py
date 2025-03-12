@@ -2754,7 +2754,7 @@ class TestLsp(LspTestBase):
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "int"},
+                        {"language": "hack", "value": "function b_hover(): int"},
                         "---",
                         "A comment describing b_hover.",
                     ],
@@ -3054,7 +3054,7 @@ class TestLsp(LspTestBase):
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "int"},
+                        {"language": "hack", "value": "function b_hover(): int"},
                         "---",
                         "A comment describing b_hover.",
                     ],
@@ -5307,7 +5307,7 @@ class Parentt {
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "int"},
+                        {"language": "hack", "value": "function b_hover(): int"},
                         "---",
                         "A comment describing b_hover.",
                     ],
@@ -5350,7 +5350,7 @@ function b_hover(): string {
                 },
                 result={
                     "contents": [
-                        {"language": "hack", "value": "string"},
+                        {"language": "hack", "value": "function b_hover(): string"},
                         "---",
                         "A comment describing b_hover differently.",
                     ],

@@ -106,7 +106,6 @@ let default =
     autocomplete_sort_text = false;
     hack_warnings = true;
     warnings_default_all = false;
-    improved_hover = false;
   }
 
 let system_config_path =
@@ -823,9 +822,6 @@ let load_
   let warnings_default_all =
     bool_ "warnings_default_all" ~default:default.warnings_default_all config
   in
-  let improved_hover =
-    bool_ "improved_hover" ~default:default.improved_hover config
-  in
   {
     saved_state =
       {
@@ -935,7 +931,6 @@ let load_
     autocomplete_sort_text;
     hack_warnings;
     warnings_default_all;
-    improved_hover;
   }
 
 let load :
@@ -983,5 +978,4 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
         options.invalidate_all_folded_decls_upon_file_change;
       autocomplete_sort_text = options.autocomplete_sort_text;
       warnings_default_all = options.warnings_default_all;
-      improved_hover = options.improved_hover;
     }

@@ -628,22 +628,23 @@ func (p *compactDecoder) ReadString() (string, error) {
 
 // Read a []byte from the wire.
 func (p *compactDecoder) ReadBinary() ([]byte, error) {
-	length, err := p.readVarint32()
+	size32, err := p.readVarint32()
 	if err != nil {
 		return nil, types.NewProtocolException(err)
 	}
-	if length == 0 {
+	if size32 == 0 {
 		return []byte{}, nil
 	}
-	if length < 0 {
+	if size32 < 0 {
 		return nil, invalidDataLength
 	}
+	size := int(size32)
 	remainingBytes := remainingBytes(p.reader)
-	if uint64(length) > remainingBytes || remainingBytes == types.UnknownRemaining {
+	if uint64(size32) > remainingBytes || remainingBytes == types.UnknownRemaining {
 		return nil, invalidDataLength
 	}
 
-	buf := make([]byte, length)
+	buf := make([]byte, size)
 	_, err = io.ReadFull(p.reader, buf)
 	return buf, types.NewProtocolException(err)
 }

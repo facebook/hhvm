@@ -438,20 +438,20 @@ func (p *binaryDecoder) ReadString() (string, error) {
 }
 
 func (p *binaryDecoder) ReadBinary() ([]byte, error) {
-	size, err := p.ReadI32()
+	size32, err := p.ReadI32()
 	if err != nil {
 		return nil, err
 	}
-	if size < 0 {
+	if size32 < 0 {
 		return nil, invalidDataLength
 	}
+	size := int(size32)
 	remainingBytes := remainingBytes(p.reader)
-	if uint64(size) > remainingBytes || remainingBytes == types.UnknownRemaining {
+	if uint64(size32) > remainingBytes || remainingBytes == types.UnknownRemaining {
 		return nil, invalidDataLength
 	}
 
-	isize := int(size)
-	buf := make([]byte, isize)
+	buf := make([]byte, size)
 	_, err = io.ReadFull(p.reader, buf)
 	return buf, types.NewProtocolException(err)
 }

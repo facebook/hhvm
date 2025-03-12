@@ -1009,6 +1009,23 @@ class StructuredCursorWriter : detail::BaseCursorWriter {
         [&] { op::encode<type_tag<Ident>>(*protocol_, value); }, value);
   }
 
+  /** This is a niche API to support writing the fields of a struct temporally
+   * out of order in cases where both fields need to be written using CurSe, the
+   * computation of the second field that produces its serialized value must
+   * happen before the computation of the first field can proceed, and
+   * reordering the fields in the struct is not feasible. In other cases,
+   * migrating one of the fields to change the order in the struct or performing
+   * the computation in field order is preferable due to the added cost and
+   * complexity of using this API. */
+  template <typename Ident, enable_for<type::structured_c, Ident> = 0>
+  void writeSerialized(
+      CursorSerializationWrapper<native_type<Ident>>&& cursorValue) {
+    beforeWriteField<Ident>();
+    // Will fail if the cursor value is not finalized
+    protocol_->writeRaw(cursorValue.serializedData());
+    afterWriteField();
+  }
+
  private:
   explicit StructuredCursorWriter(BinaryProtocolWriter* p)
       : BaseCursorWriter(p) {

@@ -643,6 +643,50 @@ TEST(CursorSerializer, NestedStructWrite) {
   EXPECT_THAT(*obj.list_field(), ElementsAre(42));
 }
 
+TEST(CursorSerializer, NestedStructWriteWithSeparateCursor) {
+  CursorSerializationWrapper<Meal> mealCursor;
+  CursorSerializationWrapper<Cookie> cookieCursor;
+  CursorSerializationWrapper<Struct> structCursor;
+
+  auto cookieWriter = cookieCursor.beginWrite();
+  cookieWriter.write<ident::id>(42);
+  cookieWriter.write<ident::fortune>("Meaning of life...");
+  cookieWriter.write<ident::flavor>("None");
+  cookieCursor.endWrite(std::move(cookieWriter));
+
+  auto structWriter = structCursor.beginWrite();
+  structWriter.write<ident::i32_field>(42);
+  structCursor.endWrite(std::move(structWriter));
+
+  auto mealWriter = mealCursor.beginWrite();
+  mealWriter.write<ident::appetizer>(2);
+  mealWriter.write<ident::main>(4);
+  mealWriter.writeSerialized<ident::cookie>(std::move(cookieCursor));
+  // Doesn't compile
+  // mealWriter.writeSerialized<ident::cookie>(std::move(structCursor));
+  mealCursor.endWrite(std::move(mealWriter));
+
+  auto deserialized = mealCursor.deserialize();
+  EXPECT_EQ(*deserialized.appetizer(), 2);
+  EXPECT_EQ(*deserialized.main(), 4);
+  EXPECT_EQ(*deserialized.cookie()->flavor(), "None");
+  EXPECT_EQ(*deserialized.cookie()->id(), 42);
+  EXPECT_EQ(*deserialized.cookie()->fortune(), "Meaning of life...");
+
+  {
+    auto mealReader = mealCursor.beginRead();
+    EXPECT_EQ(mealReader.read<ident::appetizer>(), 2);
+    EXPECT_EQ(mealReader.read<ident::main>(), 4);
+
+    auto cookieReader = mealReader.beginRead<ident::cookie>();
+    EXPECT_EQ(cookieReader.read<ident::id>(), 42);
+    EXPECT_EQ(cookieReader.read<ident::fortune>(), "Meaning of life...");
+    EXPECT_EQ(cookieReader.read<ident::flavor>(), "None");
+    mealReader.endRead(std::move(cookieReader));
+    mealCursor.endRead(std::move(mealReader));
+  }
+}
+
 TEST(CursorSerializer, CursorWriteInContainer) {
   StructCursor wrapper;
   auto writer = wrapper.beginWrite();

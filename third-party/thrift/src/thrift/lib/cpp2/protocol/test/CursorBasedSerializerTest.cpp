@@ -68,7 +68,7 @@ TEST(CursorSerializer, QualifierRead) {
   auto reader = wrapper.beginRead();
   EXPECT_EQ(reader.read<ident::opt>(), 3);
   EXPECT_EQ(reader.read<ident::unq>(), 1);
-  EXPECT_EQ(reader.read<ident::terse>(), 2);
+  EXPECT_EQ(reader.read<ident::terse>(), 0);
   wrapper.endRead(std::move(reader));
 
   // Reading from a serialized empty object applies the appropriate default

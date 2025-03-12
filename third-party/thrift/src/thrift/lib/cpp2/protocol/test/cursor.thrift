@@ -48,7 +48,7 @@ struct Qualifiers {
   1: optional i32 opt;
   2: i32 unq = 1;
   @thrift.TerseWrite
-  3: i32 terse = 2;
+  3: i32 terse;
 }
 
 struct Cookie {

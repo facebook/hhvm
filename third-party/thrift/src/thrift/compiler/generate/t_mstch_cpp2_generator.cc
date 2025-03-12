@@ -1633,7 +1633,8 @@ class cpp_mstch_struct : public mstch_struct {
 
   mstch::node scoped_enum_as_union_type() {
     return !!struct_->find_structured_annotation_or_null(
-        kCppScopedEnumAsUnionTypeUri);
+               kCppScopedEnumAsUnionTypeUri) ||
+        has_option("fbthrift_internal_scoped_enum_as_union_type");
   }
 
   mstch::node extra_namespace() {

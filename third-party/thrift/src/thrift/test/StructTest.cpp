@@ -800,7 +800,9 @@ TEST_F(StructTest, TerseFields) {
   EXPECT_EQ(terse.struct_field()->int_field(), 42);
   EXPECT_EQ(terse.exception_field()->int_field(), 42);
   // Custom default on union is not honored.
-  EXPECT_EQ(terse.union_field()->getType(), terse.union_field()->__EMPTY__);
+  EXPECT_EQ(
+      terse.union_field()->getType(),
+      apache::thrift::test::NestedUnion::Type::__EMPTY__);
 
   // cpp.ref Structures
   EXPECT_NE(terse.cpp_ref_struct_field(), nullptr);

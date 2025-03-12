@@ -64,6 +64,11 @@ func EncodeBinary(msg types.WritableStruct) ([]byte, error) {
 	return NewBinarySerializer().Write(msg)
 }
 
+// EncodeCompactJSON serializes msg using the compact JSON format
+func EncodeCompactJSON(msg types.WritableStruct) ([]byte, error) {
+	return NewCompactJSONSerializer().Write(msg)
+}
+
 // WriteString writes msg to the serializer and returns it as a string
 func (s *Serializer) WriteString(msg types.WritableStruct) (string, error) {
 	serBytes, err := s.Write(msg)

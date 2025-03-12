@@ -266,13 +266,19 @@ class FakeSharedWebTransport : public WebTransport {
     }
     readHandles.clear();
     peerHandler_->onSessionEnd(error);
+    sessionClosed_ = true;
     return folly::unit;
+  }
+
+  bool isSessionClosed() const {
+    return sessionClosed_;
   }
 
   std::map<uint64_t, std::shared_ptr<FakeStreamHandle>> writeHandles;
   std::map<uint64_t, std::shared_ptr<FakeStreamHandle>> readHandles;
 
  private:
+  bool sessionClosed_{false};
   uint64_t nextBidiStreamId_{0};
   uint64_t nextUniStreamId_{2};
   FakeSharedWebTransport* peer_{nullptr};

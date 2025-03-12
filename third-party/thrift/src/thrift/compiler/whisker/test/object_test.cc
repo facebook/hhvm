@@ -560,7 +560,8 @@ TEST(ObjectTest, to_string) {
       "  | | |-...\n");
 
   EXPECT_EQ(
-      to_string(w::proxy(manage_as_static(o)), with_depth(3)),
+      // Proxied objects should be printed the same as the underlying object.
+      to_string(object(manage_as_static(o)), with_depth(3)),
       "map (size=5)\n"
       "`-'abc'\n"
       "  |-null\n"
@@ -593,7 +594,8 @@ TEST(ObjectTest, to_string) {
       "  | |-<prototype (size=1)>\n"
       "  | | `-'foo'\n"
       "  | | |-...\n");
-  EXPECT_EQ(w::proxy(manage_as_static(o)), o);
+  // Proxied objects should compare equal to the underlying object.
+  EXPECT_EQ(object(manage_as_static(o)), o);
 
   EXPECT_EQ(to_string(o, with_depth(4)), full_output);
   EXPECT_EQ(to_string(o, with_depth(5)), full_output);

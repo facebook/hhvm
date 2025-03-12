@@ -867,7 +867,7 @@ class module_importer {
       do_export(
           exports,
           let_statement.id.name,
-          whisker::make::proxy(value),
+          std::move(value),
           let_statement.loc.begin);
     }
   }

@@ -171,7 +171,7 @@ map::value_type create_map_functions() {
             assert(value != nullptr);
             return manage_owned<object>(w::map({
                 {"key", w::string(property_name)},
-                {"value", w::proxy(value)},
+                {"value", std::move(value)},
             }));
           }
 

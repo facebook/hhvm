@@ -873,7 +873,17 @@ class object final : private detail::object_base<object> {
   }
   explicit object(map&& value) : base(std::move(value)) {}
   explicit object(array&& value) : base(std::move(value)) {}
-  explicit object(ptr proxied) : base(std::move(proxied)) {}
+  /**
+   * Creates a "proxy" object that behaves the same as the provided object. This
+   * function is useful, for example, for storing an owning reference to
+   * existing objects in an array or map without deep-copying.
+   *
+   * This object will keep the source object alive.
+   *
+   * Postconditions:
+   *   - *this == *object
+   */
+  /* implicit */ object(ptr source) : base(std::move(source)) {}
 
   object(const object&) = default;
   object& operator=(const object&) = default;
@@ -1412,20 +1422,6 @@ object native_handle(managed_ptr<T> value, prototype<>::ptr prototype) {
 template <typename T>
 object native_handle(whisker::native_handle<T> handle) {
   return object(std::move(handle));
-}
-
-/**
- * Creates a "proxy" object that behaves the same as the provided object. This
- * function is useful, for example, for storing an owning reference to existing
- * objects in an array or map without deep-copying.
- *
- * The returned object keeps the source object alive, as needed.
- *
- * Postconditions:
- *   - proxy(object) == *object
- */
-inline object proxy(object::ptr source) {
-  return object(std::move(source));
 }
 
 } // namespace make

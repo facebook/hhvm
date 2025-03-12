@@ -69,7 +69,16 @@
         #[inline]
         fn read(p: &mut P) -> ::anyhow::Result<Self> {
             let (_elem_ty, len) = p.read_set_begin()?;
-            let mut set = <{{> lib/type}}>::with_capacity(len.unwrap_or_default());
+            let mut set = {
+                let cap = len.unwrap_or(0);
+                if match cap.checked_mul(P::min_size::<{{#type:set_elem_type}}{{> lib/type}}{{/type:set_elem_type}}>()) {
+                    ::std::option::Option::None => true,
+                    ::std::option::Option::Some(total) => !p.can_advance(total),
+                } {
+                    ::anyhow::bail!(::fbthrift::ProtocolError::EOF);
+                }
+                <{{> lib/type}}>::with_capacity(cap)
+            };
 
             if let ::std::option::Option::Some(0) = len {
                 return ::std::result::Result::Ok(LocalImpl(set));
@@ -126,7 +135,16 @@
         #[inline]
         fn read(p: &mut P) -> ::anyhow::Result<Self> {
             let (_key_ty, _val_ty, len) = p.read_map_begin()?;
-            let mut map = <{{> lib/type}}>::with_capacity(len.unwrap_or_default());
+            let mut map = {
+                let cap = len.unwrap_or(0);
+                if match cap.checked_mul(P::min_size::<{{#type:key_type}}{{> lib/type}}{{/type:key_type}}>() + P::min_size::<{{#type:value_type}}{{> lib/type}}{{/type:value_type}}>()) {
+                    ::std::option::Option::None => true,
+                    ::std::option::Option::Some(total) => !p.can_advance(total),
+                } {
+                    ::anyhow::bail!(::fbthrift::ProtocolError::EOF);
+                }
+                <{{> lib/type}}>::with_capacity(cap)
+            };
 
             if let ::std::option::Option::Some(0) = len {
                 return ::std::result::Result::Ok(LocalImpl(map));
@@ -178,7 +196,7 @@
     }
 
     impl ::fbthrift::binary_type::BinaryType for LocalImpl<{{> lib/rawtype}}> {
-        fn with_capacity(capacity: usize) -> Self {
+        fn with_safe_capacity(capacity: usize) -> Self {
             LocalImpl(<{{> lib/rawtype}}>::with_capacity(capacity))
         }
         fn extend_from_slice(&mut self, other: &[::std::primitive::u8]) {
@@ -244,7 +262,16 @@
         #[inline]
         fn read(p: &mut P) -> ::anyhow::Result<Self> {
             let (_elem_ty, len) = p.read_set_begin()?;
-            let mut set = <{{> lib/annfieldtype}}>::with_capacity(len.unwrap_or_default());
+            let mut set = {
+                let cap = len.unwrap_or(0);
+                if match cap.checked_mul(P::min_size::<{{#type:set_elem_type}}{{> lib/type}}{{/type:set_elem_type}}>()) {
+                    ::std::option::Option::None => true,
+                    ::std::option::Option::Some(total) => !p.can_advance(total),
+                } {
+                    ::anyhow::bail!(::fbthrift::ProtocolError::EOF);
+                }
+                <{{> lib/annfieldtype}}>::with_capacity(cap)
+            };
 
             if let ::std::option::Option::Some(0) = len {
                 return ::std::result::Result::Ok(LocalImpl(set));
@@ -301,7 +328,16 @@
         #[inline]
         fn read(p: &mut P) -> ::anyhow::Result<Self> {
             let (_key_ty, _val_ty, len) = p.read_map_begin()?;
-            let mut map = <{{> lib/annfieldtype}}>::with_capacity(len.unwrap_or_default());
+            let mut map = {
+                let cap = len.unwrap_or(0);
+                if match cap.checked_mul(P::min_size::<{{#type:key_type}}{{> lib/type}}{{/type:key_type}}>() + P::min_size::<{{#type:value_type}}{{> lib/type}}{{/type:value_type}}>()) {
+                    ::std::option::Option::None => true,
+                    ::std::option::Option::Some(total) => !p.can_advance(total),
+                } {
+                    ::anyhow::bail!(::fbthrift::ProtocolError::EOF);
+                }
+                <{{> lib/annfieldtype}}>::with_capacity(cap)
+            };
 
             if let ::std::option::Option::Some(0) = len {
                 return ::std::result::Result::Ok(LocalImpl(map));
@@ -353,7 +389,7 @@
     }
 
     impl ::fbthrift::binary_type::BinaryType for LocalImpl<{{> lib/annfieldtype}}> {
-        fn with_capacity(capacity: usize) -> Self {
+        fn with_safe_capacity(capacity: usize) -> Self {
             LocalImpl(<{{> lib/annfieldtype}}>::with_capacity(capacity))
         }
         fn extend_from_slice(&mut self, other: &[::std::primitive::u8]) {

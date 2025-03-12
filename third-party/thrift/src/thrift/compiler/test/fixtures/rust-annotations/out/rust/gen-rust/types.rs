@@ -2742,7 +2742,7 @@ pub(crate) mod r#impl {
     }
 
     impl ::fbthrift::binary_type::BinaryType for LocalImpl<::smallvec::SmallVec<[u8; 16]>> {
-        fn with_capacity(capacity: usize) -> Self {
+        fn with_safe_capacity(capacity: usize) -> Self {
             LocalImpl(<::smallvec::SmallVec<[u8; 16]>>::with_capacity(capacity))
         }
         fn extend_from_slice(&mut self, other: &[::std::primitive::u8]) {
@@ -2781,7 +2781,16 @@ pub(crate) mod r#impl {
         #[inline]
         fn read(p: &mut P) -> ::anyhow::Result<Self> {
             let (_key_ty, _val_ty, len) = p.read_map_begin()?;
-            let mut map = <::sorted_vector_map::SortedVectorMap<::std::string::String, ::std::primitive::i64>>::with_capacity(len.unwrap_or_default());
+            let mut map = {
+                let cap = len.unwrap_or(0);
+                if match cap.checked_mul(P::min_size::<::std::string::String>() + P::min_size::<::std::primitive::i64>()) {
+                    ::std::option::Option::None => true,
+                    ::std::option::Option::Some(total) => !p.can_advance(total),
+                } {
+                    ::anyhow::bail!(::fbthrift::ProtocolError::EOF);
+                }
+                <::sorted_vector_map::SortedVectorMap<::std::string::String, ::std::primitive::i64>>::with_capacity(cap)
+            };
 
             if let ::std::option::Option::Some(0) = len {
                 return ::std::result::Result::Ok(LocalImpl(map));

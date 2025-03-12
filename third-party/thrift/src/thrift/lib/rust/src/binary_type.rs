@@ -23,10 +23,14 @@ use crate::bufext::BufExt;
 /// Trait implemented on types that can be used as `binary` types in
 /// thrift.  These types copy data from the Thrift buffer.
 pub trait BinaryType: Sized {
-    fn with_capacity(capacity: usize) -> Self;
+    /// The argument is known to not be an arbitrarily large DoS-triggering
+    /// value, either because this many bytes are known to exist in the buffer
+    /// being deserialized from, or because we already hold a collection of this
+    /// size in memory.
+    fn with_safe_capacity(capacity: usize) -> Self;
     fn extend_from_slice(&mut self, other: &[u8]);
     fn from_vec(vec: Vec<u8>) -> Self {
-        let mut binary = Self::with_capacity(vec.len());
+        let mut binary = Self::with_safe_capacity(vec.len());
         binary.extend_from_slice(&vec);
         binary
     }
@@ -42,7 +46,7 @@ pub trait CopyFromBuf: Sized {
 }
 
 impl BinaryType for Vec<u8> {
-    fn with_capacity(capacity: usize) -> Self {
+    fn with_safe_capacity(capacity: usize) -> Self {
         Vec::with_capacity(capacity)
     }
     fn extend_from_slice(&mut self, other: &[u8]) {
@@ -56,7 +60,7 @@ impl BinaryType for Vec<u8> {
 impl<T: BinaryType> CopyFromBuf for T {
     fn copy_from_buf<B: BufExt>(buffer: &mut B, len: usize) -> Self {
         assert!(buffer.remaining() >= len);
-        let mut result = T::with_capacity(len);
+        let mut result = T::with_safe_capacity(len);
         let mut remaining = len;
 
         while remaining > 0 {

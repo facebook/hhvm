@@ -356,29 +356,30 @@ func (p *simpleJSONFormat) ReadFieldEnd() error {
 	return nil
 }
 
-func (p *simpleJSONFormat) ReadMapBegin() (keyType types.Type, valueType types.Type, size int, err error) {
-	if isNull, err := p.ParseListBegin(); isNull || err != nil {
-		return types.VOID, types.VOID, 0, err
+func (p *simpleJSONFormat) ReadMapBegin() (types.Type /* kType */, types.Type /* vType */, int /* size */, error) {
+	isNull, err := p.ParseListBegin()
+	if isNull || err != nil {
+		return 0, 0, 0, err
 	}
 
-	// read keyType
-	bKeyType, err := p.ReadByte()
-	keyType = types.Type(bKeyType)
+	// read kType
+	kTypeByte, err := p.ReadByte()
+	kType := types.Type(kTypeByte)
 	if err != nil {
-		return keyType, valueType, size, err
+		return 0, 0, 0, err
 	}
 
-	// read valueType
-	bValueType, err := p.ReadByte()
-	valueType = types.Type(bValueType)
+	// read vType
+	vTypeByte, err := p.ReadByte()
+	vType := types.Type(vTypeByte)
 	if err != nil {
-		return keyType, valueType, size, err
+		return 0, 0, 0, err
 	}
 
 	// read size
-	iSize, err := p.ReadI64()
-	size = int(iSize)
-	return keyType, valueType, size, err
+	size64, err := p.ReadI64()
+	size := int(size64)
+	return kType, vType, size, err
 }
 
 func (p *simpleJSONFormat) ReadMapEnd() error {

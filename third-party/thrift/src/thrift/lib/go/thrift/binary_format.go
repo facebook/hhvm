@@ -312,34 +312,31 @@ func (p *binaryDecoder) ReadFieldEnd() error {
 
 var invalidDataLength = types.NewProtocolExceptionWithType(types.INVALID_DATA, errors.New("Invalid data length"))
 
-func (p *binaryDecoder) ReadMapBegin() (kType, vType types.Type, size int, err error) {
-	k, e := p.ReadByte()
-	if e != nil {
-		err = types.NewProtocolException(e)
-		return
+func (p *binaryDecoder) ReadMapBegin() (types.Type /* kType */, types.Type /* vType */, int /* size */, error) {
+	kTypeByte, err := p.ReadByte()
+	if err != nil {
+		return 0, 0, 0, types.NewProtocolException(err)
 	}
-	kType = types.Type(k)
-	v, e := p.ReadByte()
-	if e != nil {
-		err = types.NewProtocolException(e)
-		return
+	kType := types.Type(kTypeByte)
+
+	vTypeByte, err := p.ReadByte()
+	if err != nil {
+		return 0, 0, 0, types.NewProtocolException(err)
 	}
-	vType = types.Type(v)
-	size32, e := p.ReadI32()
-	if e != nil {
-		err = types.NewProtocolException(e)
-		return
+	vType := types.Type(vTypeByte)
+
+	size32, err := p.ReadI32()
+	if err != nil {
+		return 0, 0, 0, types.NewProtocolException(err)
 	}
 	if size32 < 0 {
-		err = invalidDataLength
-		return
+		return 0, 0, 0, invalidDataLength
 	}
 	remainingBytes := remainingBytes(p.reader)
 	if uint64(size32*2) > remainingBytes || remainingBytes == types.UnknownRemaining {
-		err = invalidDataLength
-		return
+		return 0, 0, 0, invalidDataLength
 	}
-	size = int(size32)
+	size := int(size32)
 	return kType, vType, size, nil
 }
 

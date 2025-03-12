@@ -461,33 +461,30 @@ func (p *compactDecoder) ReadFieldEnd() error { return nil }
 // Read a map header off the wire. If the size is zero, skip reading the key
 // and value type. This means that 0-length maps will yield Maps without the
 // "correct" types.
-func (p *compactDecoder) ReadMapBegin() (keyType types.Type, valueType types.Type, size int, err error) {
-	size32, e := p.readVarint32()
-	if e != nil {
-		err = types.NewProtocolException(e)
-		return
+func (p *compactDecoder) ReadMapBegin() (types.Type /* kType */, types.Type /* vType */, int /* size */, error) {
+	size32, err := p.readVarint32()
+	if err != nil {
+		return 0, 0, 0, types.NewProtocolException(err)
 	}
 	if size32 < 0 {
-		err = invalidDataLength
-		return
+		return 0, 0, 0, invalidDataLength
 	}
 	remainingBytes := remainingBytes(p.reader)
 	if uint64(size32*2) > remainingBytes || remainingBytes == types.UnknownRemaining {
-		err = invalidDataLength
-		return
+		return 0, 0, 0, invalidDataLength
 	}
-	size = int(size32)
+	size := int(size32)
 
-	keyAndValueType := byte(types.STOP)
+	kvTypeByte := byte(types.STOP)
 	if size != 0 {
-		keyAndValueType, err = p.ReadByte()
+		kvTypeByte, err = p.ReadByte()
 		if err != nil {
-			return
+			return 0, 0, 0, err
 		}
 	}
-	keyType, _ = compactToThriftType(compactType(keyAndValueType >> 4))
-	valueType, _ = compactToThriftType(compactType(keyAndValueType & 0xf))
-	return
+	kType, _ := compactToThriftType(compactType(kvTypeByte >> 4))
+	vType, _ := compactToThriftType(compactType(kvTypeByte & 0xf))
+	return kType, vType, size, nil
 }
 
 func (p *compactDecoder) ReadMapEnd() error { return nil }

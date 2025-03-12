@@ -170,10 +170,10 @@ func (tdp *debugFormat) ReadFieldEnd() error {
 	log.Printf("%sReadFieldEnd() err=%#v", tdp.LogPrefix, err)
 	return err
 }
-func (tdp *debugFormat) ReadMapBegin() (keyType types.Type, valueType types.Type, size int, err error) {
-	keyType, valueType, size, err = tdp.Delegate.ReadMapBegin()
-	log.Printf("%sReadMapBegin() (keyType=%#v, valueType=%#v, size=%#v, err=%#v)", tdp.LogPrefix, keyType, valueType, size, err)
-	return
+func (tdp *debugFormat) ReadMapBegin() (types.Type /* kType */, types.Type /* vType */, int /* size */, error) {
+	kType, vType, size, err := tdp.Delegate.ReadMapBegin()
+	log.Printf("%sReadMapBegin() (keyType=%#v, valueType=%#v, size=%#v, err=%#v)", tdp.LogPrefix, kType, vType, size, err)
+	return kType, vType, size, err
 }
 func (tdp *debugFormat) ReadMapEnd() error {
 	err := tdp.Delegate.ReadMapEnd()

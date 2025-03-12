@@ -294,40 +294,41 @@ func (p *compactJSONFormat) ReadFieldEnd() error {
 	return p.ParseObjectEnd()
 }
 
-func (p *compactJSONFormat) ReadMapBegin() (keyType types.Type, valueType types.Type, size int, err error) {
-	if isNull, err := p.ParseListBegin(); isNull || err != nil {
-		return types.VOID, types.VOID, 0, err
+func (p *compactJSONFormat) ReadMapBegin() (types.Type /* kType */, types.Type /* vType */, int /* size */, error) {
+	isNull, err := p.ParseListBegin()
+	if isNull || err != nil {
+		return 0, 0, 0, err
 	}
 
-	// read keyType
-	sKeyType, err := p.ReadString()
+	// read kType
+	kTypeStr, err := p.ReadString()
 	if err != nil {
-		return keyType, valueType, size, err
+		return 0, 0, 0, err
 	}
-	keyType, err = p.StringToTypeId(sKeyType)
+	kType, err := p.StringToTypeId(kTypeStr)
 	if err != nil {
-		return keyType, valueType, size, err
+		return 0, 0, 0, err
 	}
 
-	// read valueType
-	sValueType, err := p.ReadString()
+	// read vType
+	vTypeStr, err := p.ReadString()
 	if err != nil {
-		return keyType, valueType, size, err
+		return 0, 0, 0, err
 	}
-	valueType, err = p.StringToTypeId(sValueType)
+	vType, err := p.StringToTypeId(vTypeStr)
 	if err != nil {
-		return keyType, valueType, size, err
+		return 0, 0, 0, err
 	}
 
 	// read size
-	iSize, err := p.ReadI64()
+	size64, err := p.ReadI64()
 	if err != nil {
-		return keyType, valueType, size, err
+		return 0, 0, 0, err
 	}
-	size = int(iSize)
+	size := int(size64)
 
 	_, err = p.ParseObjectStart()
-	return keyType, valueType, size, err
+	return kType, vType, size, err
 }
 
 func (p *compactJSONFormat) ReadMapEnd() error {

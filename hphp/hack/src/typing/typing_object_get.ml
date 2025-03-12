@@ -260,13 +260,13 @@ let widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
   match deref ty with
   | (_, Tprim Tnull) ->
     if Option.is_some nullsafe then
-      ((env, None), Some ty)
+      (env, Some ty)
     else
-      ((env, None), None)
+      (env, None)
   | (r2, Tclass (((_, class_name) as class_id), _, tyl)) ->
     let default () =
       let ty = mk (r2, Tclass (class_id, nonexact, tyl)) in
-      ((env, None), Some ty)
+      (env, Some ty)
     in
     begin
       match Env.get_class env class_name with
@@ -292,12 +292,12 @@ let widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
                   this_ty = ty;
                 }
               in
-              let (env, basety) = Phase.localize ~ety_env env basety in
+              let ((env, _), basety) = Phase.localize ~ety_env env basety in
               (env, Some basety)
           )
-        | None -> ((env, None), None))
+        | None -> (env, None))
     end
-  | _ -> ((env, None), None)
+  | _ -> (env, None)
 
 (* `ty` is expected to be the type for a property or method that has been
  * accessed using the nullsafe operatore e.g. $x?->prop or $x?->foo(...).

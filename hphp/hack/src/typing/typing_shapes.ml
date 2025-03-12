@@ -35,7 +35,7 @@ let widen_for_refine_shape ~expr_pos field_name env ty =
     | None ->
       let (env, element_ty) = Env.fresh_type_invariant env expr_pos in
       let sft = { sft_optional = true; sft_ty = element_ty } in
-      ( (env, None),
+      ( env,
         Some
           (mk
              ( r,
@@ -45,9 +45,9 @@ let widen_for_refine_shape ~expr_pos field_name env ty =
                    s_unknown_value = shape_kind;
                    s_fields = TShapeMap.add field_name sft fields;
                  } )) )
-    | Some _ -> ((env, None), Some ty)
+    | Some _ -> (env, Some ty)
   end
-  | _ -> ((env, None), None)
+  | _ -> (env, None)
 
 let tshape_field_name_with_ty_err env (_, pos, field) =
   let resolve_self env =

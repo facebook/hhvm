@@ -49,7 +49,7 @@ val expand_type_and_narrow :
   ?allow_nothing:bool ->
   ?force_solve:bool ->
   description_of_expected:string ->
-  (env -> locl_ty -> (env * Typing_error.t option) * locl_ty option) ->
+  (env -> locl_ty -> env * locl_ty option) ->
   Pos.t ->
   locl_ty ->
   (env * Typing_error.t option) * locl_ty

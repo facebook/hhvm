@@ -859,29 +859,22 @@ let widen env widen_concrete_type ty =
     (* Don't widen the `this` type, because the field type changes up the hierarchy
      * so we lose precision
      *)
-    | (_, Tgeneric ("this", [])) -> ((env, None), ty)
+    | (_, Tgeneric ("this", [])) -> (env, ty)
     (* For other abstract types, just widen to the bound, if possible *)
     | (r, Tnewtype (name, [ty], _))
       when String.equal name Naming_special_names.Classes.cSupportDyn ->
-      let ((env, err), ty) = widen env ty in
-      let (env, ty) = TUtils.make_supportdyn r env ty in
-      ((env, err), ty)
+      let (env, ty) = widen env ty in
+      TUtils.make_supportdyn r env ty
     | (_, Tdependent (_, ty))
     | (_, Tnewtype (_, _, ty)) ->
       widen env ty
     | _ ->
-      let ((env, ty_err_opt), ty_opt) = widen_concrete_type env ty in
+      let (env, ty_opt) = widen_concrete_type env ty in
       let ty = Option.value ~default:ty_nothing ty_opt in
-      ((env, ty_err_opt), ty)
+      (env, ty)
   and widen_all env r tyl =
-    let (env, ty_errs, rev_tyl) =
-      List.fold tyl ~init:(env, [], []) ~f:(fun (env, ty_errs, tys) ty ->
-          match widen env ty with
-          | ((env, Some ty_err), ty) -> (env, ty_err :: ty_errs, ty :: tys)
-          | ((env, _), ty) -> (env, ty_errs, ty :: tys))
-    in
-    let (env, ty) = Typing_union.union_list env r @@ List.rev rev_tyl in
-    ((env, Typing_error.union_opt ty_errs), ty)
+    let (env, tyl) = List.map_env env tyl ~f:widen in
+    Typing_union.union_list env r tyl
   in
   widen env ty
 
@@ -954,10 +947,8 @@ let expand_type_and_narrow
     if not !has_tyvar then
       ((env, ty_err_opt1), ty)
     else
-      let ((env, ty_err_opt2), widened_ty) =
-        widen env widen_concrete_type concretized_ty
-      in
-      let ((env, ty_err_opt3), ty) =
+      let (env, widened_ty) = widen env widen_concrete_type concretized_ty in
+      let ((env, ty_err_opt2), ty) =
         match
           ((not allow_nothing) && is_nothing env widened_ty, default, widened_ty)
         with
@@ -995,7 +986,7 @@ let expand_type_and_narrow
       in
       let ty_err_opt =
         Typing_error.union_opt
-        @@ List.filter_map ~f:Fn.id [ty_err_opt1; ty_err_opt2; ty_err_opt3]
+        @@ List.filter_map ~f:Fn.id [ty_err_opt1; ty_err_opt2]
       in
       ((env, ty_err_opt), ty)
   in

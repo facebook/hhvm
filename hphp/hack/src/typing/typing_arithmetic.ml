@@ -74,8 +74,8 @@ let expand_type_and_narrow_to_numeric ~allow_nothing env p ty =
     | Tprim Tast.Tnum
     | Tprim Tast.Tfloat
     | Tprim Tast.Tint ->
-      ((env, None), Some ty)
-    | _ -> ((env, None), None)
+      (env, Some ty)
+    | _ -> (env, None)
   in
   let default = MakeType.int (Reason.arith p) in
   Typing_solver.expand_type_and_narrow
@@ -94,14 +94,14 @@ let expand_type_and_narrow_to_numeric ~allow_nothing env p ty =
 let expand_type_and_try_narrow_to_float env p ty =
   let widen_for_arithmetic env ty =
     match get_node ty with
-    | Tprim Tast.Tfloat -> ((env, None), Some ty)
+    | Tprim Tast.Tfloat -> (env, Some ty)
     | Tgeneric _ ->
       let float = MakeType.float (get_reason ty) in
       if Typing_subtype.is_sub_type env ty float then
-        ((env, None), Some float)
+        (env, Some float)
       else
-        ((env, None), None)
-    | _ -> ((env, None), None)
+        (env, None)
+    | _ -> (env, None)
   in
   Typing_solver.expand_type_and_narrow
     env
@@ -116,7 +116,7 @@ let expand_type_and_try_narrow_to_float env p ty =
   nothing, based on its lower bounds. If it isn't solved to nothing, no narrowing
   is done. *)
 let expand_type_and_try_narrow_to_nothing env p ty =
-  let widen_for_arithmetic env _ty = ((env, None), None) in
+  let widen_for_arithmetic env _ty = (env, None) in
   Typing_solver.expand_type_and_narrow
     env
     ~force_solve:false

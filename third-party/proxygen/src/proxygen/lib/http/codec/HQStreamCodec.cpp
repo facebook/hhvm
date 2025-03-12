@@ -196,7 +196,7 @@ void HQStreamCodec::onHeadersComplete(HTTPHeaderSize decodedSize,
     LOG(ERROR) << "Failed parsing header list for stream=" << streamId_
                << ", error=" << decodeInfo_.parsingError;
     if (!decodeInfo_.headerErrorValue.empty()) {
-      std::cerr << " value=" << decodeInfo_.headerErrorValue << std::endl;
+      DVLOG(4) << " value=" << decodeInfo_.headerErrorValue;
     }
     HTTPException err(
         HTTPException::Direction::INGRESS,

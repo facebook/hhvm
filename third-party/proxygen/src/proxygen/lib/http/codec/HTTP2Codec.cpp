@@ -622,7 +622,7 @@ HTTP2Codec::parseHeadersDecodeFrames(
     LOG(ERROR) << "Failed parsing header list for stream=" << curHeader_.stream
                << ", error=" << decodeInfo_.parsingError;
     if (!decodeInfo_.headerErrorValue.empty()) {
-      std::cerr << " value=" << decodeInfo_.headerErrorValue << std::endl;
+      DVLOG(4) << " value=" << decodeInfo_.headerErrorValue;
     }
     VLOG(3) << "Header block="
             << IOBufPrinter::printHexFolly(curHeaderBlock_.front(), true);

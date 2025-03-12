@@ -794,5 +794,4 @@ func UnmatchedBeginEndProtocolTest(t *testing.T, formatFactory func(io.ReadWrite
 			p.WriteSetEnd()
 		})
 	})
-	trans.Close()
 }

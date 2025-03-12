@@ -49,7 +49,6 @@ func TestWriteSimpleJSONProtocolBool(t *testing.T) {
 		}
 		trans.Reset()
 	}
-	trans.Close()
 }
 
 func TestReadSimpleJSONProtocolBool(t *testing.T) {
@@ -75,7 +74,6 @@ func TestReadSimpleJSONProtocolBool(t *testing.T) {
 			t.Fatalf("Bad json-decoded value for %s %v, wrote: '%s', expected: '%v'", thetype, value, s, v)
 		}
 		trans.Reset()
-		trans.Close()
 	}
 }
 
@@ -100,7 +98,6 @@ func TestWriteSimpleJSONProtocolByte(t *testing.T) {
 		}
 		trans.Reset()
 	}
-	trans.Close()
 }
 
 func TestReadSimpleJSONProtocolByte(t *testing.T) {
@@ -122,7 +119,6 @@ func TestReadSimpleJSONProtocolByte(t *testing.T) {
 			t.Fatalf("Bad json-decoded value for %s %v, wrote: '%s', expected: '%v'", thetype, value, s, v)
 		}
 		trans.Reset()
-		trans.Close()
 	}
 }
 
@@ -147,7 +143,6 @@ func TestWriteSimpleJSONProtocolI16(t *testing.T) {
 		}
 		trans.Reset()
 	}
-	trans.Close()
 }
 
 func TestReadSimpleJSONProtocolI16(t *testing.T) {
@@ -169,7 +164,6 @@ func TestReadSimpleJSONProtocolI16(t *testing.T) {
 			t.Fatalf("Bad json-decoded value for %s %v, wrote: '%s', expected: '%v'", thetype, value, s, v)
 		}
 		trans.Reset()
-		trans.Close()
 	}
 }
 
@@ -194,7 +188,6 @@ func TestWriteSimpleJSONProtocolI32(t *testing.T) {
 		}
 		trans.Reset()
 	}
-	trans.Close()
 }
 
 func TestReadSimpleJSONProtocolI32(t *testing.T) {
@@ -216,7 +209,6 @@ func TestReadSimpleJSONProtocolI32(t *testing.T) {
 			t.Fatalf("Bad json-decoded value for %s %v, wrote: '%s', expected: '%v'", thetype, value, s, v)
 		}
 		trans.Reset()
-		trans.Close()
 	}
 }
 
@@ -237,7 +229,6 @@ func TestReadSimpleJSONProtocolI32Null(t *testing.T) {
 		t.Fatalf("Bad value for %s value %v, wrote: %v, received: %v", thetype, value, s, v)
 	}
 	trans.Reset()
-	trans.Close()
 }
 
 func TestWriteSimpleJSONProtocolI64(t *testing.T) {
@@ -261,7 +252,6 @@ func TestWriteSimpleJSONProtocolI64(t *testing.T) {
 		}
 		trans.Reset()
 	}
-	trans.Close()
 }
 
 func TestReadSimpleJSONProtocolI64(t *testing.T) {
@@ -283,7 +273,6 @@ func TestReadSimpleJSONProtocolI64(t *testing.T) {
 			t.Fatalf("Bad json-decoded value for %s %v, wrote: '%s', expected: '%v'", thetype, value, s, v)
 		}
 		trans.Reset()
-		trans.Close()
 	}
 }
 
@@ -304,7 +293,6 @@ func TestReadSimpleJSONProtocolI64Null(t *testing.T) {
 		t.Fatalf("Bad value for %s value %v, wrote: %v, received: %v", thetype, value, s, v)
 	}
 	trans.Reset()
-	trans.Close()
 }
 
 func TestWriteSimpleJSONProtocolDouble(t *testing.T) {
@@ -342,7 +330,6 @@ func TestWriteSimpleJSONProtocolDouble(t *testing.T) {
 		}
 		trans.Reset()
 	}
-	trans.Close()
 }
 
 func TestReadSimpleJSONProtocolDouble(t *testing.T) {
@@ -379,7 +366,6 @@ func TestReadSimpleJSONProtocolDouble(t *testing.T) {
 			}
 		}
 		trans.Reset()
-		trans.Close()
 	}
 }
 
@@ -418,7 +404,6 @@ func TestWriteSimpleJSONProtocolFloat(t *testing.T) {
 		}
 		trans.Reset()
 	}
-	trans.Close()
 }
 
 func TestReadSimpleJSONProtocolFloat(t *testing.T) {
@@ -455,7 +440,6 @@ func TestReadSimpleJSONProtocolFloat(t *testing.T) {
 			}
 		}
 		trans.Reset()
-		trans.Close()
 	}
 }
 
@@ -480,7 +464,6 @@ func TestWriteSimpleJSONProtocolString(t *testing.T) {
 		}
 		trans.Reset()
 	}
-	trans.Close()
 }
 
 func TestReadSimpleJSONProtocolString(t *testing.T) {
@@ -503,7 +486,6 @@ func TestReadSimpleJSONProtocolString(t *testing.T) {
 			t.Fatalf("Bad json-decoded value for %s %v, wrote: '%s', expected: '%v'", thetype, value, s, *v1)
 		}
 		trans.Reset()
-		trans.Close()
 	}
 }
 func TestReadSimpleJSONProtocolStringNull(t *testing.T) {
@@ -522,7 +504,6 @@ func TestReadSimpleJSONProtocolStringNull(t *testing.T) {
 		t.Fatalf("Bad value for %s value %v, wrote: %v, received: %v", thetype, value, s, v)
 	}
 	trans.Reset()
-	trans.Close()
 }
 
 func TestWriteSimpleJSONProtocolBinary(t *testing.T) {
@@ -547,7 +528,6 @@ func TestWriteSimpleJSONProtocolBinary(t *testing.T) {
 	if err := json.Unmarshal([]byte(s), v1); err != nil || *v1 != b64String {
 		t.Fatalf("Bad json-decoded value for %s %v, wrote: '%s', expected: '%v'", thetype, value, s, *v1)
 	}
-	trans.Close()
 }
 
 func TestReadSimpleJSONProtocolBinary(t *testing.T) {
@@ -577,7 +557,6 @@ func TestReadSimpleJSONProtocolBinary(t *testing.T) {
 		t.Fatalf("Bad json-decoded value for %s %v, wrote: '%s', expected: '%v'", thetype, value, s, *v1)
 	}
 	trans.Reset()
-	trans.Close()
 }
 
 func TestReadSimpleJSONProtocolBinaryNull(t *testing.T) {
@@ -598,7 +577,6 @@ func TestReadSimpleJSONProtocolBinaryNull(t *testing.T) {
 		t.Fatalf("Bad value for %s value %v, wrote: %v, received: %v", thetype, value, s, v)
 	}
 	trans.Reset()
-	trans.Close()
 }
 
 func TestWriteSimpleJSONProtocolList(t *testing.T) {
@@ -652,7 +630,6 @@ func TestWriteSimpleJSONProtocolList(t *testing.T) {
 		}
 		trans.Reset()
 	}
-	trans.Close()
 }
 
 func TestWriteSimpleJSONProtocolSet(t *testing.T) {
@@ -706,7 +683,6 @@ func TestWriteSimpleJSONProtocolSet(t *testing.T) {
 		}
 		trans.Reset()
 	}
-	trans.Close()
 }
 
 func TestWriteSimpleJSONProtocolMap(t *testing.T) {
@@ -781,7 +757,6 @@ func TestWriteSimpleJSONProtocolMap(t *testing.T) {
 		}
 		trans.Reset()
 	}
-	trans.Close()
 }
 
 func TestWriteSimpleJSONProtocolSafePeek(t *testing.T) {

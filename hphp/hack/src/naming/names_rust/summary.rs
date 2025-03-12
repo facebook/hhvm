@@ -7,10 +7,11 @@ use hh24_types::DeclHash;
 use hh24_types::FileDeclsHash;
 use hh24_types::ToplevelCanonSymbolHash;
 use hh24_types::ToplevelSymbolHash;
+use oxidized::direct_decl_parser::ParsedFileWithHashes;
 use oxidized::file_info;
 use oxidized::file_info::NameType;
 use oxidized_by_ref::direct_decl_parser::Decl;
-use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
+use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes as ParsedFileWithHashesObr;
 use relative_path::RelativePath;
 use serde::Deserialize;
 use serde::Serialize;
@@ -29,7 +30,7 @@ pub struct FileSummary {
 }
 
 impl FileSummary {
-    pub fn new_obr<'a>(parsed_file: &ParsedFileWithHashes<'a>) -> Self {
+    pub fn new_obr<'a>(parsed_file: &ParsedFileWithHashesObr<'a>) -> Self {
         Self {
             mode: parsed_file.mode,
             file_decls_hash: parsed_file.file_decls_hash,
@@ -40,6 +41,23 @@ impl FileSummary {
                     symbol: symbol.to_owned(),
                     hash,
                     sort_text: sort_text.map(|s| s.to_string()),
+                })
+                .collect(),
+            file_digest: None,
+        }
+    }
+
+    pub fn new(parsed_file: &ParsedFileWithHashes) -> Self {
+        Self {
+            mode: parsed_file.mode,
+            file_decls_hash: parsed_file.file_decls_hash,
+            decls: parsed_file
+                .iter()
+                .map(|(symbol, decl, hash, sort_text)| DeclSummary {
+                    name_type: decl.kind(),
+                    symbol: symbol.clone(),
+                    hash: hash.clone(),
+                    sort_text: sort_text.clone(),
                 })
                 .collect(),
             file_digest: None,

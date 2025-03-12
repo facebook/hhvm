@@ -370,24 +370,7 @@ func (p *binaryDecoder) ReadListEnd() error {
 }
 
 func (p *binaryDecoder) ReadSetBegin() (types.Type /* elemType */, int /* size */, error) {
-	elemTypeByte, err := p.ReadByte()
-	if err != nil {
-		return 0, 0, types.NewProtocolException(err)
-	}
-	elemType := types.Type(elemTypeByte)
-	size32, err := p.ReadI32()
-	if err != nil {
-		return 0, 0, types.NewProtocolException(err)
-	}
-	if size32 < 0 {
-		return 0, 0, invalidDataLength
-	}
-	remainingBytes := remainingBytes(p.reader)
-	if uint64(size32) > remainingBytes || remainingBytes == types.UnknownRemaining {
-		return 0, 0, invalidDataLength
-	}
-	size := int(size32)
-	return elemType, size, nil
+	return p.ReadListBegin()
 }
 
 func (p *binaryDecoder) ReadSetEnd() error {

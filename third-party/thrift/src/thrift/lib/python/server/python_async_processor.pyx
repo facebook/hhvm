@@ -258,13 +258,15 @@ async def serverCallback_coro(object callFunc, str funcName, Promise_Py promise,
             file=sys.stderr)
         traceback.print_exc()
         promise.error_ta(cTApplicationException(
-            cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
+            cTApplicationExceptionType__UNKNOWN,
+            repr(ex).encode('UTF-8'),
         ))
     except asyncio.CancelledError as ex:
         print(f"Coroutine was cancelled in service handler {funcName}:", file=sys.stderr)
         traceback.print_exc()
         promise.error_ta(cTApplicationException(
-            cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
+            cTApplicationExceptionType__UNKNOWN,
+            (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8'),
         ))
     else:
         promise.complete(val)
@@ -299,7 +301,15 @@ async def lifecycle_coro(object func, str funcName, Promise_Py promise):
     else:
         promise.complete(c_unit)
 
-cdef void combinedHandler(object func, string funcName, Cpp2RequestContext* ctx, Promise_Py promise, SerializedRequest serializedRequest, Protocol prot, RpcKind kind):
+cdef int combinedHandler(
+    object func,
+    string funcName,
+    Cpp2RequestContext* ctx,
+    Promise_Py promise,
+    SerializedRequest serializedRequest,
+    Protocol prot,
+    RpcKind kind,
+) except -1:
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = THRIFT_REQUEST_CONTEXT.set(__context)
 
@@ -310,27 +320,53 @@ cdef void combinedHandler(object func, string funcName, Cpp2RequestContext* ctx,
             promise,
             from_unique_ptr(cmove(serializedRequest.buffer)),
             prot,
-            kind
+            kind,
         )
     )
 
     THRIFT_REQUEST_CONTEXT.reset(__context_token)
+    return 0
 
 cdef api void handleLifecycleCallback(object func, string funcName, cFollyPromise[cFollyUnit] cPromise):
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit.create(cmove(cPromise))
     asyncio.get_event_loop().create_task(lifecycle_coro(func, funcName.decode('UTF-8'), __promise))
 
-cdef api void handleServerCallback(object func, string funcName, Cpp2RequestContext* ctx, cFollyPromise[unique_ptr[cIOBuf]] cPromise, SerializedRequest serializedRequest, Protocol prot, RpcKind kind):
+cdef api int handleServerCallback(
+    object func,
+    string funcName,
+    Cpp2RequestContext* ctx,
+    cFollyPromise[unique_ptr[cIOBuf]] cPromise,
+    SerializedRequest serializedRequest,
+    Protocol prot,
+    RpcKind kind,
+) except -1:
     cdef Promise_IOBuf __promise = Promise_IOBuf.create(cmove(cPromise))
-    combinedHandler(func, funcName, ctx, __promise, cmove(serializedRequest), prot, kind)
+    return combinedHandler(func, funcName, ctx, __promise, cmove(serializedRequest), prot, kind)
 
-cdef api void handleServerStreamCallback(object func, string funcName, Cpp2RequestContext* ctx, cFollyPromise[cResponseAndServerStream[unique_ptr[cIOBuf], unique_ptr[cIOBuf]]] cPromise, SerializedRequest serializedRequest, Protocol prot, RpcKind kind):
+cdef api int handleServerStreamCallback(
+    object func,
+    string funcName,
+    Cpp2RequestContext* ctx,
+    cFollyPromise[cResponseAndServerStream[unique_ptr[cIOBuf],
+    unique_ptr[cIOBuf]]] cPromise,
+    SerializedRequest serializedRequest,
+    Protocol prot,
+    RpcKind kind,
+) except -1:
     cdef Promise_Stream __promise = Promise_Stream.create(cmove(cPromise))
-    combinedHandler(func, funcName, ctx, __promise, cmove(serializedRequest), prot, kind)
+    return combinedHandler(func, funcName, ctx, __promise, cmove(serializedRequest), prot, kind)
 
-cdef api void handleServerCallbackOneway(object func, string funcName, Cpp2RequestContext* ctx, cFollyPromise[cFollyUnit] cPromise, SerializedRequest serializedRequest, Protocol prot, RpcKind kind):
+cdef api int handleServerCallbackOneway(
+    object func,
+    string funcName,
+    Cpp2RequestContext* ctx,
+    cFollyPromise[cFollyUnit] cPromise,
+    SerializedRequest serializedRequest,
+    Protocol prot,
+    RpcKind kind,
+) except -1:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit.create(cmove(cPromise))
-    combinedHandler(func, funcName, ctx, __promise, cmove(serializedRequest), prot, kind)
+    return combinedHandler(func, funcName, ctx, __promise, cmove(serializedRequest), prot, kind)
 
 cdef api unique_ptr[cIOBuf] getSerializedPythonMetadata(object server):
     metadata = server.__get_metadata_service_response__()

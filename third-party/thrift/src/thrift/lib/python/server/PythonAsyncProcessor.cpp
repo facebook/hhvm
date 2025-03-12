@@ -15,6 +15,8 @@
  */
 
 #include <memory>
+
+#include <folly/python/error.h>
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/python/server/PythonAsyncProcessor.h>
 #include <thrift/lib/python/server/python_async_processor_api.h> // @manual
@@ -56,7 +58,7 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::handlePythonServerCallback(
   [[maybe_unused]] static bool done = (do_import(), false);
   auto [promise, future] =
       folly::makePromiseContract<std::unique_ptr<folly::IOBuf>>();
-  handleServerCallback(
+  const int retcode = handleServerCallback(
       functions_.at(context->getMethodName()).second,
       serviceName_ + "." + context->getMethodName(),
       context,
@@ -64,6 +66,12 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::handlePythonServerCallback(
       std::move(serializedRequest),
       protocol,
       kind);
+  if (retcode != 0) {
+    DCHECK(PyErr_Occurred());
+    // converts python error to thrown std::runtime_error
+    folly::python::handlePythonError(
+        "PythonAsyncProcessor::handlePythonServerCallback: ");
+  }
   return std::move(future).defer([callback = std::move(callback)](auto&& t) {
     callback->complete(std::move(t));
   });
@@ -84,7 +92,7 @@ PythonAsyncProcessor::handlePythonServerCallbackStreaming(
       folly::makePromiseContract<::apache::thrift::ResponseAndServerStream<
           std::unique_ptr<::folly::IOBuf>,
           std::unique_ptr<::folly::IOBuf>>>();
-  handleServerStreamCallback(
+  const int retcode = handleServerStreamCallback(
       functions_.at(context->getMethodName()).second,
       serviceName_ + "." + context->getMethodName(),
       context,
@@ -92,6 +100,12 @@ PythonAsyncProcessor::handlePythonServerCallbackStreaming(
       std::move(serializedRequest),
       protocol,
       kind);
+  if (retcode != 0) {
+    DCHECK(PyErr_Occurred());
+    // converts python error to thrown std::runtime_error
+    folly::python::handlePythonError(
+        "PythonAsyncProcessor::handlePythonServerCallbackStreaming: ");
+  }
   return std::move(future).defer([callback = std::move(callback)](auto&& t) {
     callback->complete(std::move(t));
   });
@@ -106,7 +120,7 @@ PythonAsyncProcessor::handlePythonServerCallbackOneway(
     std::unique_ptr<apache::thrift::HandlerCallbackBase>&& callback) {
   [[maybe_unused]] static bool done = (do_import(), false);
   auto [promise, future] = folly::makePromiseContract<folly::Unit>();
-  handleServerCallbackOneway(
+  const int retcode = handleServerCallbackOneway(
       functions_.at(context->getMethodName()).second,
       serviceName_ + "." + context->getMethodName(),
       context,
@@ -114,6 +128,12 @@ PythonAsyncProcessor::handlePythonServerCallbackOneway(
       std::move(serializedRequest),
       protocol,
       kind);
+  if (retcode != 0) {
+    DCHECK(PyErr_Occurred());
+    // converts python error to thrown std::runtime_error
+    folly::python::handlePythonError(
+        "PythonAsyncProcessor::handlePythonServerCallbackOneway: ");
+  }
   return std::move(future).defer([callback = std::move(callback)](auto&&) {});
 }
 

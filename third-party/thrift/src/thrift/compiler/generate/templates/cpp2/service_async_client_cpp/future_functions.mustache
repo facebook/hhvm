@@ -48,7 +48,7 @@ folly::SemiFuture<{{> types/return_type_client_lift_unit}}> {{> service_common/c
         exTry.hasException()) {
       return folly::makeSemiFuture<{{> types/return_type_client_lift_unit}}>(std::move(exTry).exception());
     }
-    interceptorFrameworkMetadata = detail::ContextStackInternals::getInterceptorFrameworkMetadata(*contextStack);
+    interceptorFrameworkMetadata = detail::ContextStackUnsafeAPI(*contextStack).getInterceptorFrameworkMetadata();
   }
   apache::thrift::SerializedRequest request = fbthrift_serialize_{{function:cpp_name}}(rpcOptions, *header, contextStack{{function:comma}}{{> service_common/param_list}});
   fbthrift_send_{{function:cpp_name}}(std::move(request), rpcOptions, std::move(header), std::move(wrappedCallback), std::move(interceptorFrameworkMetadata){{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}});

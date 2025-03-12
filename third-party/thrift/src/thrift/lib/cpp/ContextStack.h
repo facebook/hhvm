@@ -32,17 +32,24 @@ namespace apache::thrift {
 class ContextStack;
 
 namespace detail {
-class ContextStackInternals {
+/**
+ * Internal API for use within thrift library - users should not use this
+ * directly.
+ */
+class ContextStackUnsafeAPI {
  public:
-  static void*& contextAt(ContextStack&, size_t index);
-  static std::unique_ptr<folly::IOBuf> getInterceptorFrameworkMetadata(
-      ContextStack&);
+  explicit ContextStackUnsafeAPI(ContextStack&);
+  void*& contextAt(size_t index) const;
+  std::unique_ptr<folly::IOBuf> getInterceptorFrameworkMetadata();
+
+ private:
+  ContextStack& contextStack_;
 };
 } // namespace detail
 
 class ContextStack {
   friend class EventHandlerBase;
-  friend class detail::ContextStackInternals;
+  friend class detail::ContextStackUnsafeAPI;
 
  public:
   using UniquePtr =

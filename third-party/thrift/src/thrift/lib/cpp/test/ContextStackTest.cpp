@@ -87,12 +87,9 @@ TEST(ContextStack, LegacyEventHandlersInvoked) {
   EXPECT_EQ(handler2->getHistory(), kExpected);
 
   // TrackingTProcessorEventHandler::getServiceContext returns `this`
-  EXPECT_EQ(
-      detail::ContextStackInternals::contextAt(*contextStack, 0),
-      handler1.get());
-  EXPECT_EQ(
-      detail::ContextStackInternals::contextAt(*contextStack, 1),
-      handler2.get());
+  auto unsafeAPI = detail::ContextStackUnsafeAPI(*contextStack);
+  EXPECT_EQ(unsafeAPI.contextAt(0), handler1.get());
+  EXPECT_EQ(unsafeAPI.contextAt(1), handler2.get());
 }
 
 TEST(ContextStack, ClientHeaders) {
@@ -172,8 +169,8 @@ TEST(ContextStack, FrameworkMetadataInitialized) {
   ASSERT_NE(contextStack, nullptr);
 
   std::unique_ptr<folly::IOBuf> metadataBuf =
-      detail::ContextStackInternals::getInterceptorFrameworkMetadata(
-          *contextStack);
+      detail::ContextStackUnsafeAPI(*contextStack)
+          .getInterceptorFrameworkMetadata();
   EXPECT_TRUE(metadataBuf != nullptr);
 
   std::string metadataStr = metadataBuf->toString();

@@ -452,18 +452,19 @@ std::unique_ptr<folly::IOBuf> ContextStack::getInterceptorFrameworkMetadata() {
 }
 
 namespace detail {
-/* static */ void*& ContextStackInternals::contextAt(
-    ContextStack& contextStack, size_t index) {
-  return contextStack.contextAt(index);
+ContextStackUnsafeAPI::ContextStackUnsafeAPI(ContextStack& contextStack)
+    : contextStack_{contextStack} {}
+
+void*& ContextStackUnsafeAPI::contextAt(size_t index) const {
+  return contextStack_.contextAt(index);
 }
 
-/* static */ std::unique_ptr<folly::IOBuf>
-ContextStackInternals::getInterceptorFrameworkMetadata(
-    ContextStack& contextStack) {
+std::unique_ptr<folly::IOBuf>
+ContextStackUnsafeAPI::getInterceptorFrameworkMetadata() {
   if (!THRIFT_FLAG(enable_client_interceptor_framework_metadata)) {
     return nullptr;
   }
-  return contextStack.getInterceptorFrameworkMetadata();
+  return contextStack_.getInterceptorFrameworkMetadata();
 }
 } // namespace detail
 

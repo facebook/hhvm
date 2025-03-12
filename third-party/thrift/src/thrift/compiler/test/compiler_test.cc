@@ -1866,20 +1866,6 @@ TEST(CompilerTest, nonexist_type_in_variable) {
   )");
 }
 
-TEST(CompilerTest, terse_write_outside_experimental_mode) {
-  check_compile(R"(
-    include "thrift/annotation/thrift.thrift"
-
-    package "meta.com/thrift/test"
-
-    struct MyStruct {
-        @thrift.TerseWrite
-        1: i32 field1 = 1;
-        # expected-warning@-2: Terse field should not have custom default value: `field1` (in `MyStruct`).
-    }
-  )");
-}
-
 TEST(CompilerTest, cyclic_dependency) {
   check_compile(R"(
     # expected-error@-1: Cyclic dependency: A -> B -> A
@@ -2269,7 +2255,7 @@ TEST(Compilertest, custom_default_values) {
 
       @thrift.TerseWrite
       5: i32 e = 43;
-        # expected-warning@-2: Terse field should not have custom default value: `e` (in `Widget`).
+        # expected-error@-2: Terse field should not have custom default value: `e` (in `Widget`).
 
       6: TestUnion f = {};
         # expected-warning@-1: Explicit default value is redundant for (unqualified) field: `f` (in `Widget`).
@@ -2282,8 +2268,7 @@ TEST(Compilertest, custom_default_values) {
 
       @thrift.TerseWrite
       9: i32 i = 0;
-        # expected-warning@-2: Terse field should not have custom default value: `i` (in `Widget`).
-        # expected-warning@-3: Explicit default value is redundant for (terse) field: `i` (in `Widget`).
+        # expected-warning@-2: Explicit default value is redundant for (terse) field: `i` (in `Widget`).
 
       10: optional bool j = false;
         # expected-warning@-1: Explicit default value is redundant for (optional) field: `j` (in `Widget`).

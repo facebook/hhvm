@@ -709,14 +709,19 @@ void validate_field_default_value(sema_context& ctx, const t_field& field) {
           field.name(),
           parent_node.name());
       break;
-    case t_field_qualifier::terse:
-      ctx.warning(
+    case t_field_qualifier::terse: {
+      if (detail::is_initializer_default_value(
+              field.type().deref(), *field.default_value())) {
+        return;
+      }
+      ctx.error(
           field,
           "Terse field should not have custom default value: "
           "`{}` (in `{}`).",
           field.name(),
           parent_node.name());
       break;
+    }
     default:
       break;
   }

@@ -386,7 +386,7 @@ func (p *simpleJSONFormat) ReadMapEnd() error {
 	return p.ParseListEnd()
 }
 
-func (p *simpleJSONFormat) ReadListBegin() (elemType types.Type, size int, err error) {
+func (p *simpleJSONFormat) ReadListBegin() (types.Type /* elemType */, int /* size */, error) {
 	return p.ParseElemListBegin()
 }
 

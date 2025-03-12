@@ -180,10 +180,10 @@ func (tdp *debugFormat) ReadMapEnd() error {
 	log.Printf("%sReadMapEnd() err=%#v", tdp.LogPrefix, err)
 	return err
 }
-func (tdp *debugFormat) ReadListBegin() (elemType types.Type, size int, err error) {
-	elemType, size, err = tdp.Delegate.ReadListBegin()
+func (tdp *debugFormat) ReadListBegin() (types.Type /* elemType */, int /* size */, error) {
+	elemType, size, err := tdp.Delegate.ReadListBegin()
 	log.Printf("%sReadListBegin() (elemType=%#v, size=%#v, err=%#v)", tdp.LogPrefix, elemType, size, err)
-	return
+	return elemType, size, err
 }
 func (tdp *debugFormat) ReadListEnd() error {
 	err := tdp.Delegate.ReadListEnd()

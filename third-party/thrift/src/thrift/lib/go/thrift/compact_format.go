@@ -493,36 +493,32 @@ func (p *compactDecoder) ReadMapEnd() error { return nil }
 // be packed into the element type header. If it's a longer list, the 4 MSB
 // of the element type header will be 0xF, and a varint will follow with the
 // true size.
-func (p *compactDecoder) ReadListBegin() (elemType types.Type, size int, err error) {
-	size_and_type, err := p.ReadByte()
+func (p *compactDecoder) ReadListBegin() (types.Type /* elemType */, int /* size */, error) {
+	sizeAndTypeByte, err := p.ReadByte()
 	if err != nil {
-		return
+		return 0, 0, err
 	}
-	size = int((size_and_type >> 4) & 0x0f)
+	size := int((sizeAndTypeByte >> 4) & 0x0f)
 	if size == 15 {
-		size2, e := p.readVarint32()
-		if e != nil {
-			err = types.NewProtocolException(e)
-			return
+		size2, err := p.readVarint32()
+		if err != nil {
+			return 0, 0, types.NewProtocolException(err)
 		}
 		if size2 < 0 {
-			err = invalidDataLength
-			return
+			return 0, 0, invalidDataLength
 		}
 		size = int(size2)
 	}
 	remainingBytes := remainingBytes(p.reader)
 	if uint64(size) > remainingBytes || remainingBytes == types.UnknownRemaining {
-		err = invalidDataLength
-		return
+		return 0, 0, invalidDataLength
 	}
 
-	elemType, e := compactToThriftType(compactType(size_and_type))
-	if e != nil {
-		err = types.NewProtocolException(e)
-		return
+	elemType, err := compactToThriftType(compactType(sizeAndTypeByte))
+	if err != nil {
+		return 0, 0, types.NewProtocolException(err)
 	}
-	return
+	return elemType, size, nil
 }
 
 func (p *compactDecoder) ReadListEnd() error { return nil }

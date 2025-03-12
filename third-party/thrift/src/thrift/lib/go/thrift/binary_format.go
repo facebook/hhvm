@@ -344,30 +344,25 @@ func (p *binaryDecoder) ReadMapEnd() error {
 	return nil
 }
 
-func (p *binaryDecoder) ReadListBegin() (elemType types.Type, size int, err error) {
-	b, e := p.ReadByte()
-	if e != nil {
-		err = types.NewProtocolException(e)
-		return
+func (p *binaryDecoder) ReadListBegin() (types.Type /* elemType */, int /* size */, error) {
+	elemTypeByte, err := p.ReadByte()
+	if err != nil {
+		return 0, 0, types.NewProtocolException(err)
 	}
-	elemType = types.Type(b)
-	size32, e := p.ReadI32()
-	if e != nil {
-		err = types.NewProtocolException(e)
-		return
+	elemType := types.Type(elemTypeByte)
+	size32, err := p.ReadI32()
+	if err != nil {
+		return 0, 0, types.NewProtocolException(err)
 	}
 	if size32 < 0 {
-		err = invalidDataLength
-		return
+		return 0, 0, invalidDataLength
 	}
 	remainingBytes := remainingBytes(p.reader)
 	if uint64(size32) > remainingBytes || remainingBytes == types.UnknownRemaining {
-		err = invalidDataLength
-		return
+		return 0, 0, invalidDataLength
 	}
-	size = int(size32)
-
-	return
+	size := int(size32)
+	return elemType, size, nil
 }
 
 func (p *binaryDecoder) ReadListEnd() error {

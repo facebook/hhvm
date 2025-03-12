@@ -198,10 +198,6 @@ type::Type toPatchType(type::Type input) {
       *p = toPatchUri(*p);
       return input;
     }
-    if (auto p = t->scopedName_ref()) {
-      *p = toPatchUri(*p);
-      return input;
-    }
     folly::throw_exception<std::runtime_error>(fmt::format(
         "Unsupported Uri: {}",
         apache::thrift::util::enumNameSafe(t->getType())));

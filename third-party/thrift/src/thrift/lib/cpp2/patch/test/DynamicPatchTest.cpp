@@ -1016,6 +1016,12 @@ class AnyDiffVisitor : public DiffVisitorBase {
   }
 };
 
+TEST(DynamicPatchTest, InvalidToPatchType) {
+  type::Type type = type::Type::get<type::union_t<MyUnion>>();
+  type.toThrift().name()->unionType_ref()->scopedName_ref() = "scoped.name";
+  EXPECT_THROW(detail::toPatchType(type), std::runtime_error);
+}
+
 TEST(DynamicPatchTest, AnyPatch) {
   StructWithAny src, dst;
 

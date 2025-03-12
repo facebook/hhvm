@@ -35,18 +35,28 @@ class(C)
 Notice: Class passed to classname type-hint in %s/class-ptr/memoize.php on line 52
 class(C)
 ===== class<C> =====
+
+Notice: String passed to class type-hint in %s/class-ptr/memoize.php on line 55
+
+Notice: String passed to class type-hint in %s/class-ptr/memoize.php on line 19
 ** Called x
 string(1) "C"
+
+Notice: String passed to class type-hint in %s/class-ptr/memoize.php on line 56
 string(1) "C"
 string(1) "C"
 string(1) "C"
 ** Called y
 lazyclass(C)
+
+Notice: String passed to class type-hint in %s/class-ptr/memoize.php on line 61
 lazyclass(C)
 lazyclass(C)
 lazyclass(C)
 ** Called z
 class(C)
+
+Notice: String passed to class type-hint in %s/class-ptr/memoize.php on line 66
 class(C)
 class(C)
 class(C)

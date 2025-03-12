@@ -145,7 +145,7 @@ func newOptions(opts ...ClientOption) *clientOptions {
 // DeprecatedNewClient will return a connected thrift protocol object.
 // Effectively, this is an open thrift connection to a server.
 // A thrift client can use this connection to communicate with a server.
-// Deprecated: use NewClientV2 instead.
+// Deprecated: use NewClient instead.
 func DeprecatedNewClient(opts ...ClientOption) (Protocol, error) {
 	options := newOptions(opts...)
 
@@ -192,10 +192,10 @@ func DeprecatedNewClient(opts ...ClientOption) (Protocol, error) {
 	return protocol, protocolErr
 }
 
-// NewClientV2 will return a connected thrift RequestChannel object.
+// NewClient will return a connected thrift RequestChannel object.
 // Effectively, this is an open thrift connection to a server.
 // A thrift client can use this connection to communicate with a server.
-func NewClientV2(opts ...ClientOption) (RequestChannel, error) {
+func NewClient(opts ...ClientOption) (RequestChannel, error) {
 	proto, err := DeprecatedNewClient(opts...)
 	if err != nil {
 		return nil, err

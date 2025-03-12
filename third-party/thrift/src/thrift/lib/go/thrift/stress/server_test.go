@@ -88,7 +88,7 @@ func runStressTest(t *testing.T, serverTransport thrift.TransportID) {
 	var successRequestCount atomic.Uint64
 
 	makeRequestFunc := func() error {
-		channel, err := thrift.NewClientV2(
+		channel, err := thrift.NewClient(
 			clientTransportOption,
 			thrift.WithDialer(func() (net.Conn, error) {
 				return net.DialTimeout("unix", addr.String(), 60*time.Second)

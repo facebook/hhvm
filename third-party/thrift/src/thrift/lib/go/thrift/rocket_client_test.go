@@ -135,7 +135,7 @@ func TestFDRelease(t *testing.T) {
 	})
 
 	for range 10000 {
-		proto, err := DeprecatedNewClient(
+		channel, err := NewClient(
 			WithRocket(),
 			WithIoTimeout(60*time.Second),
 			WithDialer(func() (net.Conn, error) {
@@ -148,7 +148,7 @@ func TestFDRelease(t *testing.T) {
 		// NOTE!!!!!!
 		// Close() call is missing intentionally!!!!
 		// We are testing that the FD is released when the client is GCed.
-		client := dummy.NewDummyChannelClient(NewSerialChannel(proto))
+		client := dummy.NewDummyChannelClient(channel)
 		_, err = client.Echo(context.Background(), "hello")
 		if err != nil {
 			t.Fatalf("failed to make RPC: %v", err)

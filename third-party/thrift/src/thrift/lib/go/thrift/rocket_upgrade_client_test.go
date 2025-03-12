@@ -59,7 +59,7 @@ func TestUpgradeToRocketClientUnix(t *testing.T) {
 	go func() {
 		errChan <- server.ServeContext(ctx)
 	}()
-	proto, err := DeprecatedNewClient(
+	channel, err := NewClient(
 		WithUpgradeToRocket(),
 		WithDialer(func() (net.Conn, error) {
 			return net.Dial(addr.Network(), addr.String())
@@ -68,7 +68,7 @@ func TestUpgradeToRocketClientUnix(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}
-	client := dummy.NewDummyChannelClient(NewSerialChannel(proto))
+	client := dummy.NewDummyChannelClient(channel)
 	defer client.Close()
 	result, err := client.Echo(context.TODO(), "hello")
 	if err != nil {

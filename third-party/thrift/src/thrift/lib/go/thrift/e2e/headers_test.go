@@ -63,7 +63,7 @@ func runHeaderTest(t *testing.T, serverTransport thrift.TransportID) {
 	addr, stopServer := startE2EServer(t, serverTransport, thrift.WithNumWorkers(10))
 	defer stopServer()
 
-	channel, err := thrift.NewClientV2(
+	channel, err := thrift.NewClient(
 		clientTransportOption,
 		thrift.WithDialer(func() (net.Conn, error) {
 			return net.DialTimeout("unix", addr.String(), 5*time.Second)

@@ -147,7 +147,7 @@ func TestClientV2(t *testing.T) {
 	addr := listener.Addr()
 
 	t.Run("Rocket", func(t *testing.T) {
-		channel, err := NewClientV2(
+		channel, err := NewClient(
 			WithRocket(),
 			WithDialer(func() (net.Conn, error) {
 				return net.Dial(addr.Network(), addr.String())
@@ -163,7 +163,7 @@ func TestClientV2(t *testing.T) {
 	})
 
 	t.Run("UpgradeToRocket", func(t *testing.T) {
-		channel, err := NewClientV2(
+		channel, err := NewClient(
 			WithUpgradeToRocket(),
 			WithDialer(func() (net.Conn, error) {
 				return net.Dial(addr.Network(), addr.String())
@@ -179,7 +179,7 @@ func TestClientV2(t *testing.T) {
 	})
 
 	t.Run("Header", func(t *testing.T) {
-		channel, err := NewClientV2(
+		channel, err := NewClient(
 			WithHeader(),
 			WithDialer(func() (net.Conn, error) {
 				return net.Dial(addr.Network(), addr.String())

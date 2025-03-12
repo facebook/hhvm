@@ -52,7 +52,7 @@ func newRPCClientConformanceTester(port int) *rpcClientConformanceTester {
 
 func (t *rpcClientConformanceTester) getClient() (*rpc.RPCConformanceServiceClient, error) {
 	addr := fmt.Sprintf("localhost:%d", t.port)
-	channel, err := thrift.NewClientV2(
+	channel, err := thrift.NewClient(
 		thrift.WithRocket(),
 		thrift.WithDialer(func() (net.Conn, error) {
 			return net.Dial("tcp", addr)

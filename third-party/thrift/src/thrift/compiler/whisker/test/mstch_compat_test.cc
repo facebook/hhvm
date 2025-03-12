@@ -39,11 +39,10 @@ ast::variable_lookup path(Components&&... components) {
     return ast::variable_lookup{
         source_range(), ast::variable_lookup::this_ref()};
   } else {
-    std::vector<ast::identifier> chain;
-    chain.reserve(sizeof...(Components));
-    (chain.emplace_back(make_identifier_from_string(
-         std::string(std::forward<Components>(components)))),
-     ...);
+    std::vector<ast::identifier> chain = {
+        make_identifier_from_string(
+            std::string(std::forward<Components>(components)))...,
+    };
     return ast::variable_lookup{source_range(), std::move(chain)};
   }
 }

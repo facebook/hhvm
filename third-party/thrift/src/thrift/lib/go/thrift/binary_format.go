@@ -182,15 +182,15 @@ func (p *binaryEncoder) WriteByte(value byte) error {
 func (p *binaryEncoder) WriteI16(value int16) error {
 	v := p.buffer[0:2]
 	binary.BigEndian.PutUint16(v, uint16(value))
-	_, e := p.writer.Write(v)
-	return types.NewProtocolException(e)
+	_, err := p.writer.Write(v)
+	return types.NewProtocolException(err)
 }
 
 func (p *binaryEncoder) WriteI32(value int32) error {
 	v := p.buffer[0:4]
 	binary.BigEndian.PutUint32(v, uint32(value))
-	_, e := p.writer.Write(v)
-	return types.NewProtocolException(e)
+	_, err := p.writer.Write(v)
+	return types.NewProtocolException(err)
 }
 
 func (p *binaryEncoder) WriteI64(value int64) error {
@@ -378,12 +378,12 @@ func (p *binaryDecoder) ReadSetEnd() error {
 }
 
 func (p *binaryDecoder) ReadBool() (bool, error) {
-	b, e := p.ReadByte()
+	b, err := p.ReadByte()
 	v := true
 	if b != 1 {
 		v = false
 	}
-	return v, e
+	return v, err
 }
 
 func (p *binaryDecoder) ReadByte() (byte, error) {
@@ -438,9 +438,9 @@ func (p *binaryDecoder) ReadString() (string, error) {
 }
 
 func (p *binaryDecoder) ReadBinary() ([]byte, error) {
-	size, e := p.ReadI32()
-	if e != nil {
-		return nil, e
+	size, err := p.ReadI32()
+	if err != nil {
+		return nil, err
 	}
 	if size < 0 {
 		return nil, invalidDataLength
@@ -452,7 +452,7 @@ func (p *binaryDecoder) ReadBinary() ([]byte, error) {
 
 	isize := int(size)
 	buf := make([]byte, isize)
-	_, err := io.ReadFull(p.reader, buf)
+	_, err = io.ReadFull(p.reader, buf)
 	return buf, types.NewProtocolException(err)
 }
 

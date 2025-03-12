@@ -345,13 +345,13 @@ func (p *compactEncoder) WriteString(value string) error {
 
 // Write a byte array, using a varint for the size.
 func (p *compactEncoder) WriteBinary(bin []byte) error {
-	_, e := p.writeVarint32(int32(len(bin)))
-	if e != nil {
-		return types.NewProtocolException(e)
+	_, err := p.writeVarint32(int32(len(bin)))
+	if err != nil {
+		return types.NewProtocolException(err)
 	}
 	if len(bin) > 0 {
-		_, e = p.writer.Write(bin)
-		return types.NewProtocolException(e)
+		_, err = p.writer.Write(bin)
+		return types.NewProtocolException(err)
 	}
 	return nil
 }

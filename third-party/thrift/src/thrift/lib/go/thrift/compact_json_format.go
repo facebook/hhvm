@@ -62,20 +62,20 @@ func NewCompactJSONFormat(readWriter io.ReadWriter) types.Format {
 
 func (p *compactJSONFormat) WriteMessageBegin(name string, typeID types.MessageType, seqID int32) error {
 	p.resetContextStack() // THRIFT-3735
-	if e := p.OutputListBegin(); e != nil {
-		return e
+	if err := p.OutputListBegin(); err != nil {
+		return err
 	}
-	if e := p.WriteI32(THRIFT_JSON_PROTOCOL_VERSION); e != nil {
-		return e
+	if err := p.WriteI32(THRIFT_JSON_PROTOCOL_VERSION); err != nil {
+		return err
 	}
-	if e := p.WriteString(name); e != nil {
-		return e
+	if err := p.WriteString(name); err != nil {
+		return err
 	}
-	if e := p.WriteByte(byte(typeID)); e != nil {
-		return e
+	if err := p.WriteByte(byte(typeID)); err != nil {
+		return err
 	}
-	if e := p.WriteI32(seqID); e != nil {
-		return e
+	if err := p.WriteI32(seqID); err != nil {
+		return err
 	}
 	return nil
 }
@@ -85,10 +85,7 @@ func (p *compactJSONFormat) WriteMessageEnd() error {
 }
 
 func (p *compactJSONFormat) WriteStructBegin(name string) error {
-	if e := p.OutputObjectBegin(); e != nil {
-		return e
-	}
-	return nil
+	return p.OutputObjectBegin()
 }
 
 func (p *compactJSONFormat) WriteStructEnd() error {
@@ -96,18 +93,18 @@ func (p *compactJSONFormat) WriteStructEnd() error {
 }
 
 func (p *compactJSONFormat) WriteFieldBegin(name string, typeID types.Type, id int16) error {
-	if e := p.WriteI16(id); e != nil {
-		return e
+	if err := p.WriteI16(id); err != nil {
+		return err
 	}
-	if e := p.OutputObjectBegin(); e != nil {
-		return e
+	if err := p.OutputObjectBegin(); err != nil {
+		return err
 	}
-	s, e1 := p.TypeIdToString(typeID)
-	if e1 != nil {
-		return e1
+	s, err := p.TypeIdToString(typeID)
+	if err != nil {
+		return err
 	}
-	if e := p.WriteString(s); e != nil {
-		return e
+	if err := p.WriteString(s); err != nil {
+		return err
 	}
 	return nil
 }
@@ -119,32 +116,32 @@ func (p *compactJSONFormat) WriteFieldEnd() error {
 func (p *compactJSONFormat) WriteFieldStop() error { return nil }
 
 func (p *compactJSONFormat) WriteMapBegin(keyType types.Type, valueType types.Type, size int) error {
-	if e := p.OutputListBegin(); e != nil {
-		return e
+	if err := p.OutputListBegin(); err != nil {
+		return err
 	}
-	s, e1 := p.TypeIdToString(keyType)
-	if e1 != nil {
-		return e1
+	s, err := p.TypeIdToString(keyType)
+	if err != nil {
+		return err
 	}
-	if e := p.WriteString(s); e != nil {
-		return e
+	if err := p.WriteString(s); err != nil {
+		return err
 	}
-	s, e1 = p.TypeIdToString(valueType)
-	if e1 != nil {
-		return e1
+	s, err = p.TypeIdToString(valueType)
+	if err != nil {
+		return err
 	}
-	if e := p.WriteString(s); e != nil {
-		return e
+	if err := p.WriteString(s); err != nil {
+		return err
 	}
-	if e := p.WriteI64(int64(size)); e != nil {
-		return e
+	if err := p.WriteI64(int64(size)); err != nil {
+		return err
 	}
 	return p.OutputObjectBegin()
 }
 
 func (p *compactJSONFormat) WriteMapEnd() error {
-	if e := p.OutputObjectEnd(); e != nil {
-		return e
+	if err := p.OutputObjectEnd(); err != nil {
+		return err
 	}
 	return p.OutputListEnd()
 }
@@ -205,24 +202,24 @@ func (p *compactJSONFormat) WriteBinary(v []byte) error {
 	// not an arbitrary byte array, to ensure bytes are transmitted
 	// efficiently we must convert this into a valid JSON string
 	// therefore we use base64 encoding to avoid excessive escaping/quoting
-	if e := p.OutputPreValue(); e != nil {
-		return e
+	if err := p.OutputPreValue(); err != nil {
+		return err
 	}
-	if _, e := p.write(JSON_QUOTE_BYTES); e != nil {
-		return types.NewProtocolException(e)
+	if _, err := p.write(JSON_QUOTE_BYTES); err != nil {
+		return types.NewProtocolException(err)
 	}
 	if len(v) > 0 {
 		writer := base64.NewEncoder(base64.StdEncoding, p.writer)
-		if _, e := writer.Write(v); e != nil {
+		if _, err := writer.Write(v); err != nil {
 			p.writer.Reset(p.buffer) // THRIFT-3735
-			return types.NewProtocolException(e)
+			return types.NewProtocolException(err)
 		}
-		if e := writer.Close(); e != nil {
-			return types.NewProtocolException(e)
+		if err := writer.Close(); err != nil {
+			return types.NewProtocolException(err)
 		}
 	}
-	if _, e := p.write(JSON_QUOTE_BYTES); e != nil {
-		return types.NewProtocolException(e)
+	if _, err := p.write(JSON_QUOTE_BYTES); err != nil {
+		return types.NewProtocolException(err)
 	}
 	return p.OutputPostValue()
 }
@@ -464,18 +461,18 @@ func (p *compactJSONFormat) Skip(fieldType types.Type) error {
 }
 
 func (p *compactJSONFormat) OutputElemListBegin(elemType types.Type, size int) error {
-	if e := p.OutputListBegin(); e != nil {
-		return e
+	if err := p.OutputListBegin(); err != nil {
+		return err
 	}
-	s, e1 := p.TypeIdToString(elemType)
-	if e1 != nil {
-		return e1
+	s, err := p.TypeIdToString(elemType)
+	if err != nil {
+		return err
 	}
-	if e := p.WriteString(s); e != nil {
-		return e
+	if err := p.WriteString(s); err != nil {
+		return err
 	}
-	if e := p.WriteI64(int64(size)); e != nil {
-		return e
+	if err := p.WriteI64(int64(size)); err != nil {
+		return err
 	}
 	return nil
 }

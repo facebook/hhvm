@@ -543,8 +543,7 @@ let typedef tenv (t : (_, _) typedef) =
   let ( should_check_internal_signature,
         ignore_package_errors,
         typedef_tparams,
-        hints,
-        where_constraints ) =
+        hint_constraints_pairs ) =
     match t_assignment with
     (* We only need to check that the type alias as a public API if it's transparent, since
        an opaque type alias is inherently internal *)
@@ -552,16 +551,15 @@ let typedef tenv (t : (_, _) typedef) =
        if its type params satisfy the constraints of any tapply it
        references. *)
     | SimpleTypeDef { tvh_vis = Transparent; tvh_hint } ->
-      (true, false, t_tparams, [tvh_hint], [])
+      (true, false, t_tparams, [(tvh_hint, [])])
     | SimpleTypeDef { tvh_vis = _; tvh_hint } ->
-      (false, true, [], [tvh_hint], [])
+      (false, true, [], [(tvh_hint, [])])
     | CaseType (variant, variants) ->
       let variants = variant :: variants in
-      let hints = List.map variants ~f:(fun v -> v.tctv_hint) in
-      let where_constraints =
-        List.map variants ~f:(fun v -> v.tctv_where_constraints)
+      let hint_constraints_pairs =
+        List.map variants ~f:(fun v -> (v.tctv_hint, v.tctv_where_constraints))
       in
-      (false, false, [], hints, List.concat where_constraints)
+      (false, false, [], hint_constraints_pairs)
   in
   (* We don't allow constraints on typdef parameters, but we still
      need to record their kinds in the generic var environment *)
@@ -595,7 +593,8 @@ let typedef tenv (t : (_, _) typedef) =
        ~ignore_package_errors)
     tenv_with_typedef_tparams
     t_super_constraint;
-  List.iter hints ~f:(fun hint ->
+  (* TODO check kinded-ness for constraints too *)
+  List.iter hint_constraints_pairs ~f:(fun (hint, _constraints) ->
       Typing_type_integrity.Simple.check_well_kinded_hint
         ~in_signature:should_check_internal_signature
         ~ignore_package_errors
@@ -608,8 +607,15 @@ let typedef tenv (t : (_, _) typedef) =
       ~default:[]
       ~f:(hint_no_kind_check env)
       t.t_super_constraint
-  @ List.concat_map hints ~f:(hint_no_kind_check env)
-  @ where_constrs env where_constraints
+  @ List.concat_map hint_constraints_pairs ~f:(fun (hint, constraints) ->
+        let (tenv, _err) =
+          Phase.localize_and_add_where_constraints
+            tenv
+            ~ignore_errors:true
+            constraints
+        in
+        let env = { typedef_tparams; tenv } in
+        hint_no_kind_check env hint @ where_constrs env constraints)
 
 let global_constant tenv gconst =
   let env = { typedef_tparams = []; tenv } in

@@ -212,6 +212,13 @@ val decl : decl_ty -> phase_ty
 
 val locl : locl_ty -> phase_ty
 
+(** Add consequences of `where` constraints *)
+val localize_and_add_where_constraints :
+  env ->
+  ignore_errors:bool ->
+  (Aast.hint * Ast_defs.constraint_kind * Aast.hint) list ->
+  env * Typing_error.t option
+
 (** Add generic parameters to the environment, with localized bounds,
   and also add any consequences of `where` constraints *)
 val localize_and_add_generic_parameters_and_where_constraints :

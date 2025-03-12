@@ -1,0 +1,46 @@
+ERROR: File "assume_where_clause_for_variant.php", line 7, characters 5-13:
+Some type arguments violate their constraints (Typing[4323])
+  File "hackarray.hhi", line 43, characters 50-50:
+  `T` is a constrained type parameter
+  File "hackarray.hhi", line 43, characters 55-62:
+  This type constraint is violated
+  File "hackarray.hhi", line 43, characters 55-62:
+  Expected `arraykey`
+  File "assume_where_clause_for_variant.php", line 5, characters 14-14:
+  But got `mixed`
+ERROR: File "assume_where_clause_for_variant.php", line 7, characters 5-13:
+Some type arguments violate their constraints (Typing[4323])
+  File "hackarray.hhi", line 43, characters 50-50:
+  `T` is a constrained type parameter
+  File "hackarray.hhi", line 43, characters 55-62:
+  This type constraint is violated
+  File "hackarray.hhi", line 43, characters 55-62:
+  Expected `arraykey`
+  File "assume_where_clause_for_variant.php", line 7, characters 12-12:
+  But got `T`
+ERROR: File "assume_where_clause_for_variant.php", line 16, characters 11-23:
+Invalid constraint on `newtype` (Typing[4332])
+  File "assume_where_clause_for_variant.php", line 16, characters 36-41:
+  Expected `string`
+  File "assume_where_clause_for_variant.php", line 16, characters 25-25:
+  But got `mixed`
+ERROR: File "assume_where_clause_for_variant.php", line 16, characters 11-23:
+Invalid constraint on `newtype` (Typing[4332])
+  File "assume_where_clause_for_variant.php", line 16, characters 36-41:
+  Expected `string`
+  File "assume_where_clause_for_variant.php", line 18, characters 9-9:
+  But got `T`
+  File "assume_where_clause_for_variant.php", line 12, characters 36-36:
+    via this generic `T`
+  File "assume_where_clause_for_variant.php", line 12, characters 36-36:
+  This type argument to `IFoo` must match exactly (it is invariant)
+ERROR: File "assume_where_clause_for_variant.php", line 16, characters 11-23:
+Invalid constraint on `newtype` (Typing[4332])
+  File "assume_where_clause_for_variant.php", line 18, characters 9-9:
+  Expected `T`
+  File "assume_where_clause_for_variant.php", line 12, characters 36-36:
+    via this generic `T`
+  File "assume_where_clause_for_variant.php", line 16, characters 36-41:
+  But got `string`
+  File "assume_where_clause_for_variant.php", line 16, characters 36-41:
+  This type argument to `IFoo` must match exactly (it is invariant)

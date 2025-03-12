@@ -1939,6 +1939,16 @@ let localize_and_add_ast_generic_parameters_and_where_constraints
     tparams
     where_constraints
 
+let localize_and_add_where_constraints
+    env
+    ~ignore_errors
+    (where_constraints : Aast_defs.where_constraint_hint list) =
+  localize_and_add_ast_generic_parameters_and_where_constraints
+    env
+    ~ignore_errors
+    []
+    where_constraints
+
 let ignore_cycles ((env, err, _cycles), res) = ((env, err), res)
 
 let ignore_cycles_ (env, err, _cycles) = (env, err)

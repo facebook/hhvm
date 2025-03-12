@@ -1,4 +1,4 @@
 WARN: File "union_intersection_2.php", line 20, characters 3-14:
-Unsafe use of `new`: `Abs1` might be abstract (Warn[12015])
-  File "union_intersection_2.php", line 10, characters 29-32:
-  Abs1 is from 
+Unsafe use of `new`: `I1` might be abstract (Warn[12015])
+  File "union_intersection_2.php", line 10, characters 29-30:
+  I1 is from 

@@ -396,6 +396,13 @@ and intersect_ env (rec_tracker : Recursion_tracker.t) ~r ty1 ty2 =
                 ->
                 let (env, ty) = intersect ~r env rec_tracker ty_c ty_cn in
                 (env, MkType.classname r [ty])
+              | ( (_, Tnewtype (cn1, [ty_cn1], _)),
+                  (_, Tnewtype (cn2, [ty_cn2], _)) )
+                when String.equal cn1 Naming_special_names.Classes.cClassname
+                     && String.equal cn2 Naming_special_names.Classes.cClassname
+                ->
+                let (env, ty) = intersect ~r env rec_tracker ty_cn1 ty_cn2 in
+                (env, MkType.classname r [ty])
               | ((_, Tintersection tyl), _) ->
                 intersect_lists env rec_tracker r [ty2] tyl
               | (_, (_, Tintersection tyl)) ->

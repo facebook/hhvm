@@ -2,12 +2,12 @@
 <<file: __EnableUnstableFeatures('union_intersection_type_hints')>>
 
 <<__ConsistentConstruct>>
-abstract class Abs1 {}
+interface I1 {}
 <<__ConsistentConstruct>>
-abstract class Abs2 {}
+interface I2 {}
 
 
-function make(): (classname<Abs1> & classname<Abs2>) {
+function make(): (classname<I1> & classname<I2>) {
   while (true) {
 
   }
@@ -16,6 +16,6 @@ function make(): (classname<Abs1> & classname<Abs2>) {
 <<__EntryPoint>>
 function main(): void {
   $class = make();
-  // Unsafe use of new: Abs1 might be abstract
+  // Unsafe use of new: I1 might be abstract
   new $class();
 }

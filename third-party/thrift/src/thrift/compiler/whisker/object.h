@@ -785,7 +785,8 @@ using object_base = std::variant<
     native_function::ptr,
     native_handle<>,
     std::vector<Self>,
-    std::map<std::string, Self, std::less<>>>;
+    std::map<std::string, Self, std::less<>>,
+    managed_ptr<Self> /* proxied */>;
 } // namespace detail
 
 /**
@@ -811,16 +812,18 @@ using object_base = std::variant<
  * whose value is whisker::null.
  */
 class object final : private detail::object_base<object> {
+ public:
+  using ptr = managed_ptr<object>;
+
  private:
   using base = detail::object_base<object>;
   base& as_variant() & { return *this; }
   const base& as_variant() const& { return *this; }
 
-  template <typename T>
-  bool holds_alternative() const noexcept {
-    assert(!valueless_by_exception());
-    return std::holds_alternative<T>(*this);
-  }
+  // If this object contains the ptr variant, it behaves exactly like the target
+  // object of that ptr.
+  bool is_proxy() const { return std::holds_alternative<ptr>(*this); }
+  const ptr& as_proxy() const { return std::get<ptr>(*this); }
 
   // This function moves out the base variant object which would normally leave
   // the object in a partially moved-from state. However, moving a variant
@@ -832,17 +835,27 @@ class object final : private detail::object_base<object> {
  public:
   template <typename T>
   bool is() const noexcept {
+    static_assert(
+        !std::is_same_v<T, ptr>,
+        "The proxied ptr should never be exposed via public API");
     assert(!valueless_by_exception());
+    if (is_proxy()) {
+      return as_proxy()->is<T>();
+    }
     return std::holds_alternative<T>(*this);
   }
 
   template <typename T>
-  decltype(auto) as() const {
+  auto as() const -> decltype(std::get<T>(*this)) {
+    static_assert(
+        !std::is_same_v<T, ptr>,
+        "The proxied ptr should never be exposed via public API");
     assert(!valueless_by_exception());
+    if (is_proxy()) {
+      return as_proxy()->as<T>();
+    }
     return std::get<T>(*this);
   }
-
-  using ptr = managed_ptr<object>;
 
   /* implicit */ object(null = {}) : base(std::in_place_type<null>) {}
   explicit object(boolean value) : base(bool(value)) {}
@@ -860,6 +873,7 @@ class object final : private detail::object_base<object> {
   }
   explicit object(map&& value) : base(std::move(value)) {}
   explicit object(array&& value) : base(std::move(value)) {}
+  explicit object(ptr proxied) : base(std::move(proxied)) {}
 
   object(const object&) = default;
   object& operator=(const object&) = default;
@@ -882,50 +896,74 @@ class object final : private detail::object_base<object> {
 
   template <typename... Visitors>
   decltype(auto) visit(Visitors&&... visitors) const {
-    return detail::variant_match(
-        as_variant(), std::forward<Visitors>(visitors)...);
+    // Remove any layers of proxying since we do not expose it to callers.
+    const object* resolved = this;
+    while (resolved->is_proxy()) {
+      resolved = resolved->as_proxy().get();
+    }
+
+    auto overloaded = detail::overload(std::forward<Visitors>(visitors)...);
+    // This macro could be implemented using variant_match + overload, but that
+    // would require two levels of indirection. That leads to some really ugly
+    // template-related compiler errors.
+#define WHISKER_OBJECT_TRY_VISIT(type)                 \
+  do {                                                 \
+    if (const auto* v = std::get_if<type>(resolved)) { \
+      return overloaded(*v);                           \
+    }                                                  \
+  } while (false)
+    WHISKER_OBJECT_TRY_VISIT(null);
+    WHISKER_OBJECT_TRY_VISIT(i64);
+    WHISKER_OBJECT_TRY_VISIT(f64);
+    WHISKER_OBJECT_TRY_VISIT(string);
+    WHISKER_OBJECT_TRY_VISIT(boolean);
+    WHISKER_OBJECT_TRY_VISIT(native_object::ptr);
+    WHISKER_OBJECT_TRY_VISIT(native_function::ptr);
+    WHISKER_OBJECT_TRY_VISIT(native_handle<>);
+    WHISKER_OBJECT_TRY_VISIT(array);
+    WHISKER_OBJECT_TRY_VISIT(map);
+#undef WHISKER_OBJECT_TRY_VISIT
+    assert(!static_cast<bool>(
+        "There is a missed variant alternative in object::visit() implementation"));
+    throw std::bad_variant_access();
   }
 
   const i64& as_i64() const { return as<i64>(); }
-  bool is_i64() const noexcept { return holds_alternative<i64>(); }
+  bool is_i64() const noexcept { return is<i64>(); }
 
   const f64& as_f64() const { return as<f64>(); }
-  bool is_f64() const noexcept { return holds_alternative<f64>(); }
+  bool is_f64() const noexcept { return is<f64>(); }
 
   const string& as_string() const { return as<string>(); }
-  bool is_string() const noexcept { return holds_alternative<string>(); }
+  bool is_string() const noexcept { return is<string>(); }
 
   const boolean& as_boolean() const { return as<boolean>(); }
-  bool is_boolean() const noexcept { return holds_alternative<boolean>(); }
+  bool is_boolean() const noexcept { return is<boolean>(); }
 
-  bool is_null() const noexcept { return holds_alternative<null>(); }
+  bool is_null() const noexcept { return is<null>(); }
 
   const native_object::ptr& as_native_object() const {
     return as<native_object::ptr>();
   }
-  bool is_native_object() const noexcept {
-    return holds_alternative<native_object::ptr>();
-  }
+  bool is_native_object() const noexcept { return is<native_object::ptr>(); }
 
   const native_function::ptr& as_native_function() const {
     return as<native_function::ptr>();
   }
   bool is_native_function() const noexcept {
-    return holds_alternative<native_function::ptr>();
+    return is<native_function::ptr>();
   }
 
   const native_handle<>& as_native_handle() const {
     return as<native_handle<>>();
   }
-  bool is_native_handle() const noexcept {
-    return holds_alternative<native_handle<>>();
-  }
+  bool is_native_handle() const noexcept { return is<native_handle<>>(); }
 
   const array& as_array() const { return as<array>(); }
-  bool is_array() const noexcept { return holds_alternative<array>(); }
+  bool is_array() const noexcept { return is<array>(); }
 
   const map& as_map() const { return as<map>(); }
-  bool is_map() const noexcept { return holds_alternative<map>(); }
+  bool is_map() const noexcept { return is<map>(); }
 
   friend bool operator==(const object& lhs, null) noexcept {
     return lhs.is_null();
@@ -1381,23 +1419,14 @@ object native_handle(whisker::native_handle<T> handle) {
  * function is useful, for example, for storing an owning reference to existing
  * objects in an array or map without deep-copying.
  *
- * For primitive types (i64, f64, string, boolean, null), this returns a copy
- * of the object, and so behaves like a value type.
- *
- * For arrays and maps, the returned object uses array_like and map_like
- * respectively, and so behaves like a reference type.
- *
- * For native objects, native functions, and native handles, a copy of the
- * underlying shared_ptr is stored, meaning that the underlying object is kept
- * alive at least as long as the returned object.
- *
- * The returned object keeps the source object alive, as needed. For primitive
- * types, ownership of the source is not necessary.
+ * The returned object keeps the source object alive, as needed.
  *
  * Postconditions:
  *   - proxy(object) == *object
  */
-object proxy(const object::ptr& source);
+inline object proxy(object::ptr source) {
+  return object(std::move(source));
+}
 
 } // namespace make
 

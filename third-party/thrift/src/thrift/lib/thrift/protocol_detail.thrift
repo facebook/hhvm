@@ -90,14 +90,18 @@ union Value {
   7: Double doubleValue;
 
   // Strings.
+  @cpp.Ref{type = cpp.RefType.Unique}
   8: binary stringValue; // Might not be valid UTF-8
 
+  @cpp.Ref{type = cpp.RefType.Unique}
   9: standard.ByteBuffer binaryValue;
 
   // A dynamic object value.
+  @cpp.Ref{type = cpp.RefType.Unique}
   11: Object objectValue;
 
   // Containers of values.
+  @cpp.Ref{type = cpp.RefType.Unique}
   14: list<Value> listValue;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.Type{template = "::folly::F14FastSet"}

@@ -35,7 +35,9 @@ using InterceptorFrameworkMetadataStorage =
 
 namespace detail {
 
-THRIFT_FLAG_DECLARE_bool(enable_interceptor_framework_metadata);
+THRIFT_FLAG_DECLARE_bool(enable_client_interceptor_framework_metadata);
+
+THRIFT_FLAG_DECLARE_bool(enable_service_interceptor_framework_metadata);
 
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     InterceptorFrameworkMetadataStorage,

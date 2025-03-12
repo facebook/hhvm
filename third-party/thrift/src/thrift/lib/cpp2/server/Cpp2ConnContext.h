@@ -850,7 +850,7 @@ class Cpp2RequestContextUnsafeAPI {
 
   void initializeInterceptorFrameworkMetadata(
       const folly::IOBuf& interceptorFrameworkMetadata) {
-    if (!THRIFT_FLAG(enable_interceptor_framework_metadata)) {
+    if (!THRIFT_FLAG(enable_service_interceptor_framework_metadata)) {
       return;
     }
     requestContext_.initializeInterceptorFrameworkMetadata(

@@ -76,8 +76,6 @@ CompressionCodecManager::CompressionCodecManager(
       }
     }
     size_ = largestId - smallestCodecId_ + 1;
-    LOG(INFO) << "Using " << size_ << " compression codecs (range: ["
-              << smallestCodecId_ << ", " << largestId << "])";
   } else {
     LOG(WARNING) << "No valid compression codec found. Compression disabled.";
   }

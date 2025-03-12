@@ -25,10 +25,10 @@ import (
 )
 
 func TestReadWriteCompactProtocol(t *testing.T) {
-	ReadWriteProtocolTest(t, func(transport io.ReadWriteCloser) types.Format { return NewCompactFormat(transport) })
+	ReadWriteProtocolTest(t, func(transport io.ReadWriter) types.Format { return NewCompactFormat(transport) })
 	// CompactProtocol is capable of reading and writing in different goroutines.
-	ReadWriteProtocolParallelTest(t, func(transport io.ReadWriteCloser) types.Format { return NewCompactFormat(transport) })
-	transports := []io.ReadWriteCloser{
+	ReadWriteProtocolParallelTest(t, func(transport io.ReadWriter) types.Format { return NewCompactFormat(transport) })
+	transports := []io.ReadWriter{
 		NewMemoryBuffer(),
 	}
 	for _, trans := range transports {
@@ -52,7 +52,6 @@ func TestReadWriteCompactProtocol(t *testing.T) {
 		ReadWriteBinary(t, p)
 		p = NewCompactFormat(trans)
 		ReadWriteStruct(t, p)
-		trans.Close()
 	}
 }
 

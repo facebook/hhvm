@@ -186,6 +186,18 @@ class CursorSerializationWrapper {
     done();
   }
 
+  /**
+   * Allows writing to be aborted. This is useful when you have an error
+   * condition and you want to avoid writing to the buffer. Prevents
+   * CursorSerializationWrapper dtor from throwing if the write was not
+   * completed.
+   */
+  void abandonWrite(StructuredCursorWriter<Tag>&& writer) {
+    writer.abandon();
+    queue_.reset();
+    done();
+  }
+
   /** Access to serialized data */
   const folly::IOBuf& serializedData() const& {
     checkHasData();

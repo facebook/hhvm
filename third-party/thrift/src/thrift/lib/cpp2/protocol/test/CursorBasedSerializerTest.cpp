@@ -765,3 +765,10 @@ TEST(CursorBasedSerializer, ConcurrentAccess) {
   EXPECT_THROW(wrapper.beginWrite(), std::runtime_error);
   wrapper.endRead(std::move(reader));
 }
+
+TEST(CursorSerializer, AbandonedWrite) {
+  CursorSerializationWrapper<Qualifiers> wrapper;
+  auto writer = wrapper.beginWrite();
+  writer.write<ident::opt>(3);
+  wrapper.abandonWrite(std::move(writer));
+}

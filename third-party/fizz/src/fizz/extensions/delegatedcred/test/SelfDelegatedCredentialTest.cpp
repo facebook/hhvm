@@ -24,7 +24,7 @@ namespace fizz {
 namespace extensions {
 namespace test {
 
-StringPiece kDelegatedCert{
+StringPiece kDelegatedCredentialCert{
     "-----BEGIN CERTIFICATE-----\n"
     "MIICKzCCAdGgAwIBAgIJAPi2vMRfOVd0MAoGCCqGSM49BAMCMGIxCzAJBgNVBAYT\n"
     "AlhYMRUwEwYDVQQHDAxEZWZhdWx0IENpdHkxHDAaBgNVBAoME0RlZmF1bHQgQ29t\n"
@@ -142,8 +142,8 @@ class SelfDelegatedCredentialTest : public Test {
 
   folly::ssl::X509UniquePtr getCert() {
     folly::ssl::BioUniquePtr b(BIO_new_mem_buf(
-        reinterpret_cast<const void*>(kDelegatedCert.data()),
-        kDelegatedCert.size()));
+        reinterpret_cast<const void*>(kDelegatedCredentialCert.data()),
+        kDelegatedCredentialCert.size()));
 
     if (!b) {
       throw std::runtime_error("failed to create BIO");

@@ -859,6 +859,11 @@ void checked_local_free(void* ptr) {
 }
 
 void* checked_local_realloc(void* ptr, size_t size) {
+  if (ptr == NULL) {
+    // system realloc with a nullptr behaves like malloc
+    return checked_local_malloc(size);
+  }
+
   if (!size) {
     checked_local_free(ptr);
     return nullptr;

@@ -235,14 +235,7 @@ let defer_or_do_type_check
           (ServerCheckUtils.get_check_info
              ~check_reason:(ServerEnv.Init_telemetry.get_reason init_telemetry)
              ~log_errors:true
-             ~discard_warnings:
-               (let mergebase_has_saved_state =
-                  let open Option.Monad_infix in
-                  env.init_env.saved_state_revs_info
-                  >>= ServerEnv.mergebase_has_saved_state
-                  |> Option.value ~default:false
-                in
-                not mergebase_has_saved_state)
+             ~discard_warnings:(ServerEnv.discard_warnings env)
              genv
              env)
         ~warnings_saved_state:ServerEnv.(env.init_env.mergebase_warning_hashes)

@@ -133,6 +133,7 @@ impl Default for GlobalOptions {
             tco_disable_physical_equality: false,
             hack_warnings: NoneOrAllExcept::AllExcept(vec![]),
             warnings_default_all: false,
+            warnings_in_sandcastle: true,
             tco_strict_switch: false,
             tco_allowed_files_for_ignore_readonly: vec![],
             tco_package_v2_exclude_patterns: vec![String::from(".*/__tests__/.*")],

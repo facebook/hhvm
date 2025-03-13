@@ -654,6 +654,7 @@ let load
           else
             GlobalOptions.NNone)
         ~warnings_default_all:local_config.warnings_default_all
+        ~warnings_in_sandcastle:local_config.warnings_in_sandcastle
         ~hh_distc_exponential_backoff_num_retries:
           local_config.hh_distc_exponential_backoff_num_retries
         GlobalOptions.default

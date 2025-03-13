@@ -106,6 +106,7 @@ let default =
     autocomplete_sort_text = false;
     hack_warnings = true;
     warnings_default_all = false;
+    warnings_in_sandcastle = true;
   }
 
 let system_config_path =
@@ -822,6 +823,12 @@ let load_
   let warnings_default_all =
     bool_ "warnings_default_all" ~default:default.warnings_default_all config
   in
+  let warnings_in_sandcastle =
+    bool_
+      "warnings_in_sandcastle"
+      ~default:default.warnings_in_sandcastle
+      config
+  in
   {
     saved_state =
       {
@@ -931,6 +938,7 @@ let load_
     autocomplete_sort_text;
     hack_warnings;
     warnings_default_all;
+    warnings_in_sandcastle;
   }
 
 let load :

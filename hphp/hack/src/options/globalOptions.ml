@@ -182,6 +182,7 @@ type t = {
   tco_disable_physical_equality: bool;
   hack_warnings: int none_or_all_except;
   warnings_default_all: bool;
+  warnings_in_sandcastle: bool;
   tco_strict_switch: bool;
   tco_allowed_files_for_ignore_readonly: string list;
   tco_package_v2_exclude_patterns: string list;
@@ -295,6 +296,7 @@ let default =
     tco_disable_physical_equality = false;
     hack_warnings = All_except [];
     warnings_default_all = false;
+    warnings_in_sandcastle = true;
     tco_strict_switch = false;
     tco_allowed_files_for_ignore_readonly = [];
     tco_package_v2_exclude_patterns = [{|.*/__tests__/.*|}];
@@ -406,6 +408,7 @@ let set
     ?tco_disable_physical_equality
     ?hack_warnings
     ?warnings_default_all
+    ?warnings_in_sandcastle
     ?tco_strict_switch
     ?tco_allowed_files_for_ignore_readonly
     ?tco_package_v2_exclude_patterns
@@ -678,6 +681,8 @@ let set
     hack_warnings = setting hack_warnings options.hack_warnings;
     warnings_default_all =
       setting warnings_default_all options.warnings_default_all;
+    warnings_in_sandcastle =
+      setting warnings_in_sandcastle options.warnings_in_sandcastle;
     tco_strict_switch = setting tco_strict_switch options.tco_strict_switch;
     tco_allowed_files_for_ignore_readonly =
       setting

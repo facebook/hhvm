@@ -542,6 +542,8 @@ impl HhConfig {
             },
             warnings_default_all: hhconfig
                 .get_bool_or("warnings_default_all", default.warnings_default_all)?,
+            warnings_in_sandcastle: hhconfig
+                .get_bool_or("warnings_in_sandcastle", default.warnings_in_sandcastle)?,
             tco_strict_switch: hhconfig.get_bool_or("strict_switch", default.tco_strict_switch)?,
             tco_package_v2_bypass_package_check_for_classptr_migration: hhconfig.get_bool_or(
                 "package_v2_bypass_package_check_for_classptr_migration",

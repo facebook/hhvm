@@ -255,4 +255,5 @@ type t = {
   warnings_default_all: bool;
       (** If true, `hh` is equivalent to `hh -Wall`, i.e. warnings are shown.
         Otherwise, `hh` is equivalent to `hh -Wnone`, i.e. warnings are not shown. *)
+  warnings_in_sandcastle: bool;
 }

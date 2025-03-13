@@ -66,8 +66,6 @@ type saved_state_revs_info = {
 }
 [@@deriving show, yojson]
 
-val mergebase_has_saved_state : saved_state_revs_info -> bool option
-
 module SavedStateRevsInfo : sig
   type t = saved_state_revs_info
 
@@ -249,6 +247,8 @@ type env = {
   last_recheck_loop_stats_for_actual_work: RecheckLoopStats.t option;
 }
 [@@deriving show]
+
+val discard_warnings : env -> bool
 
 val is_full_check_done : full_check_status -> bool
 

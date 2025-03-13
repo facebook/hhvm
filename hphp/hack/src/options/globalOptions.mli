@@ -256,6 +256,7 @@ type t = {
       (** If set to true, this disables the use of physical equality in subtyping *)
   hack_warnings: int none_or_all_except;  (** turn on hack warnings *)
   warnings_default_all: bool;
+  warnings_in_sandcastle: bool;
   tco_strict_switch: bool;
       (** Enable strict case checking in switch statements *)
   tco_allowed_files_for_ignore_readonly: string list;
@@ -381,6 +382,7 @@ val set :
   ?tco_disable_physical_equality:bool ->
   ?hack_warnings:int none_or_all_except ->
   ?warnings_default_all:bool ->
+  ?warnings_in_sandcastle:bool ->
   ?tco_strict_switch:bool ->
   ?tco_allowed_files_for_ignore_readonly:string list ->
   ?tco_package_v2_exclude_patterns:string list ->

@@ -354,6 +354,15 @@ type env = {
 }
 [@@deriving show]
 
+let discard_warnings env =
+  if Sandcastle.is_sandcastle () then
+    not env.tcopt.GlobalOptions.warnings_in_sandcastle
+  else
+    let open Option.Monad_infix in
+    env.init_env.saved_state_revs_info
+    >>= mergebase_has_saved_state
+    |> Option.value ~default:false
+
 let list_files_with_errors env =
   let acc =
     List.fold_right

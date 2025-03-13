@@ -256,17 +256,18 @@ vector<McrouterOptionMismatch> McrouterOptionsBase::compare(
 
       // config_params is a string of comma separated key-value pairs
       // e.g. "key1:value1,key2:value2", and are stored as
-      // McrouterOptionData::Type::string_map. we need to compare them
-      // separately
+      // McrouterOptionData::Type::string_map. we need to compare as maps
       bool isSame = false;
       if (type == McrouterOptionData::Type::string_map) {
-        boost::any newValue;
+        unordered_map<string, string> newValueMap;
+        boost::any newValue{boost::any(
+            const_cast<unordered_map<string, string>*>(&newValueMap))};
         auto oldValuePtr =
             boost::any_cast<unordered_map<string, string>*>(&value);
         if (oldValuePtr != nullptr &&
             tryFromString<unordered_map<string, string>>(subValue, newValue)) {
-          isSame = *boost::any_cast<unordered_map<string, string>*>(
-                       &newValue) == *oldValuePtr;
+          isSame = **boost::any_cast<unordered_map<string, string>*>(
+                       &newValue) == **oldValuePtr;
         } else {
           isSame = false;
         }

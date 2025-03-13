@@ -1417,8 +1417,11 @@ static Variant HHVM_METHOD(SimpleXMLElement, asXML,
     if (node->parent && (XML_DOCUMENT_NODE == node->parent->type)) {
       xmlChar* strval;
       int strval_len;
+      auto saveempty = xmlSaveNoEmptyTags;
+      xmlSaveNoEmptyTags = 1;
       xmlDocDumpMemoryEnc(doc, &strval, &strval_len,
                           (const char*)doc->encoding);
+      xmlSaveNoEmptyTags = saveempty;
       if (!strval) {
         return false;
       }

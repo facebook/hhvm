@@ -40,18 +40,33 @@ bool HeaderDecodeInfo::onHeader(const HPACKHeaderName& name,
       switch (headerCode) {
         case HTTP_HEADER_COLON_METHOD:
           ok = verifier.setMethod(valueSp);
+          if (verifier.hasValidationError()) {
+            proxygenError = kErrorHeaderContentValidation;
+          }
           break;
         case HTTP_HEADER_COLON_SCHEME:
           ok = verifier.setScheme(valueSp);
+          if (verifier.hasValidationError()) {
+            proxygenError = kErrorHeaderContentValidation;
+          }
           break;
         case HTTP_HEADER_COLON_AUTHORITY:
           ok = verifier.setAuthority(valueSp, validate_, strictValidation_);
+          if (verifier.hasValidationError()) {
+            proxygenError = kErrorHeaderContentValidation;
+          }
           break;
         case HTTP_HEADER_COLON_PATH:
           ok = verifier.setPath(valueSp, strictValidation_, allowEmptyPath_);
+          if (verifier.hasValidationError()) {
+            proxygenError = kErrorHeaderContentValidation;
+          }
           break;
         case HTTP_HEADER_COLON_PROTOCOL:
           ok = verifier.setUpgradeProtocol(valueSp, strictValidation_);
+          if (verifier.hasValidationError()) {
+            proxygenError = kErrorHeaderContentValidation;
+          }
           break;
         default:
           parsingError = folly::to<string>("Invalid req header name=", nameSp);
@@ -114,6 +129,10 @@ bool HeaderDecodeInfo::onHeader(const HPACKHeaderName& name,
             strictValidation_ ? CodecUtil::CtlEscapeMode::STRICT
                               : CodecUtil::CtlEscapeMode::STRICT_COMPAT);
     if (!nameOk || !valueOk) {
+      proxygenError = kErrorHeaderContentValidation;
+      if (nameSp.empty()) {
+        proxygenError = kErrorParseHeader;
+      }
       parsingError = folly::to<string>("Invalid header name=", nameSp);
       headerErrorValue = valueSp;
       return false;

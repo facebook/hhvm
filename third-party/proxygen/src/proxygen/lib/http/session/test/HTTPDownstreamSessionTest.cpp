@@ -1580,7 +1580,7 @@ TEST_F(HTTP2DownstreamSessionTest, ServerStatusHeaderOnError) {
   EXPECT_CALL(callbacks, onHeadersComplete(1, _))
       .WillOnce(Invoke([](HTTPCodec::StreamID,
                           std::shared_ptr<HTTPMessage> msg) {
-        EXPECT_EQ(msg->getHeaders().getSingleOrEmpty("Server-Status"), "16");
+        EXPECT_EQ(msg->getHeaders().getSingleOrEmpty("Server-Status"), "27");
       }));
 
   auto req = getGetRequest("/");

@@ -508,7 +508,8 @@ TEST_F(HTTP2CodecTest, BadHeaderValues) {
   EXPECT_EQ(callbacks_.headersComplete, 0);
   EXPECT_EQ(callbacks_.messageComplete, 0);
   EXPECT_EQ(callbacks_.streamErrors, 4);
-  EXPECT_EQ(callbacks_.lastParseError->getProxygenError(), kErrorParseHeader);
+  EXPECT_EQ(callbacks_.lastParseError->getProxygenError(),
+            kErrorHeaderContentValidation);
   EXPECT_EQ(callbacks_.sessionErrors, 0);
 }
 
@@ -582,7 +583,8 @@ TEST_F(HTTP2CodecTest, HighAscii) {
   EXPECT_EQ(callbacks_.headersComplete, 0);
   EXPECT_EQ(callbacks_.messageComplete, 0);
   EXPECT_EQ(callbacks_.streamErrors, 4);
-  EXPECT_EQ(callbacks_.lastParseError->getProxygenError(), kErrorParseHeader);
+  EXPECT_EQ(callbacks_.lastParseError->getProxygenError(),
+            kErrorHeaderContentValidation);
   EXPECT_EQ(callbacks_.sessionErrors, 0);
 
   HTTPMessage req5 = getGetRequest("/guacamole");
@@ -596,7 +598,8 @@ TEST_F(HTTP2CodecTest, HighAscii) {
   EXPECT_EQ(callbacks_.headersComplete, 0);
   EXPECT_EQ(callbacks_.messageComplete, 0);
   EXPECT_EQ(callbacks_.streamErrors, 1);
-  EXPECT_EQ(callbacks_.lastParseError->getProxygenError(), kErrorParseHeader);
+  EXPECT_EQ(callbacks_.lastParseError->getProxygenError(),
+            kErrorHeaderContentValidation);
   EXPECT_EQ(callbacks_.sessionErrors, 0);
 }
 

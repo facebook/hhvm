@@ -674,7 +674,7 @@ void HTTP2Codec::deliverDeferredParseError(
     HTTPException err(HTTPException::Direction::INGRESS,
                       parseError.errorMessage);
     err.setHttpStatusCode(400);
-    err.setProxygenError(kErrorParseHeader);
+    err.setProxygenError(decodeInfo_.proxygenError.value_or(kErrorParseHeader));
     err.setPartialMsg(std::move(parseError.partialMessage));
     deliverCallbackIfAllowed(&HTTPCodec::Callback::onError,
                              "onError",

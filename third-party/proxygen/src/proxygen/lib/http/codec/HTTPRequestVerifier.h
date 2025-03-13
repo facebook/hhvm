@@ -27,6 +27,7 @@ class HTTPRequestVerifier {
     hasScheme_ = false;
     hasAuthority_ = false;
     hasUpgradeProtocol_ = false;
+    hasValidationError_ = false;
   }
 
   bool setMethod(folly::StringPiece method) {
@@ -35,6 +36,7 @@ class HTTPRequestVerifier {
       return false;
     }
     if (!CodecUtil::validateMethod(method)) {
+      hasValidationError_ = true;
       error = folly::to<std::string>("Invalid method: ", method);
       return false;
     }
@@ -55,6 +57,7 @@ class HTTPRequestVerifier {
                                 strictValidation
                                     ? URLValidateMode::STRICT
                                     : URLValidateMode::STRICT_COMPAT)) {
+      hasValidationError_ = true;
       error = folly::to<std::string>("Invalid url: ", path);
       return false;
     }
@@ -77,6 +80,7 @@ class HTTPRequestVerifier {
     }
     // This just checks for alpha chars
     if (!CodecUtil::validateScheme(scheme)) {
+      hasValidationError_ = true;
       error = folly::to<std::string>("Invalid scheme: ", scheme);
       return false;
     }
@@ -104,6 +108,7 @@ class HTTPRequestVerifier {
             authority,
             strictValidation ? CodecUtil::CtlEscapeMode::STRICT
                              : CodecUtil::CtlEscapeMode::STRICT_COMPAT)) {
+      hasValidationError_ = true;
       error = folly::to<std::string>("Invalid authority: ", authority);
       return false;
     }
@@ -120,6 +125,7 @@ class HTTPRequestVerifier {
     }
     if (strictValidation && !CodecUtil::validateHeaderValue(
                                 protocol, CodecUtil::CtlEscapeMode::STRICT)) {
+      hasValidationError_ = true;
       error = folly::to<std::string>("Invalid protocol: ", protocol);
       return false;
     }
@@ -186,6 +192,10 @@ class HTTPRequestVerifier {
     return hasUpgradeProtocol_;
   }
 
+  bool hasValidationError() {
+    return hasValidationError_;
+  }
+
   std::string error;
 
  private:
@@ -195,6 +205,7 @@ class HTTPRequestVerifier {
   bool hasScheme_{false};
   bool hasAuthority_{false};
   bool hasUpgradeProtocol_{false};
+  bool hasValidationError_{false};
 };
 
 } // namespace proxygen

@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <proxygen/lib/http/ProxygenErrorEnum.h>
 #include <proxygen/lib/http/codec/HTTPRequestVerifier.h>
 #include <proxygen/lib/http/codec/compress/HPACKConstants.h>
 #include <proxygen/lib/http/codec/compress/HPACKHeaderName.h>
@@ -52,6 +53,7 @@ class HeaderDecodeInfo {
   HTTPRequestVerifier verifier;
   std::string parsingError;
   std::string headerErrorValue;
+  folly::Optional<ProxygenError> proxygenError;
   HPACK::DecodeError decodeError{HPACK::DecodeError::NONE};
 
  private:

@@ -293,7 +293,7 @@ end = struct
 end
 
 (* Top-level evaluation function for user attributes *)
-let eval provider (ua : Tast.user_attribute) =
+let eval provider (ua : Tast.user_attribute) method_name =
   let open Option.Let_syntax in
   let ctx = Context.init provider in
   (* Extract promptlet and arguments *)
@@ -304,7 +304,7 @@ let eval provider (ua : Tast.user_attribute) =
   in
   (* Get class and method *)
   let* promptlet_class = Value.class_ptr @@ Expr.eval ctx promptlet in
-  let* method_ = Context.find_method ~ctx promptlet_class "onClass" in
+  let* method_ = Context.find_method ~ctx promptlet_class method_name in
   (* Evaluate method call *)
   let* value =
     Call.eval ctx method_ @@ List.map ~f:(fun a -> Aast.Anormal a) args

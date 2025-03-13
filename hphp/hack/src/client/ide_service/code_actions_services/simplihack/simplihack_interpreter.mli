@@ -6,4 +6,4 @@
  *
  *)
 
-val eval : Provider_context.t -> Tast.user_attribute -> string option
+val eval : Provider_context.t -> Tast.user_attribute -> string -> string option

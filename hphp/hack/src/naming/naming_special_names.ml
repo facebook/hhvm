@@ -857,7 +857,8 @@ module UserAttributes = struct
             } );
           ( uaSimpliHack,
             {
-              contexts = [cls];
+              contexts = SMap.keys @@ AttributeKinds.plain_english_map;
+              (* We want this to be able to attached to any valid location for an attribute *)
               autocomplete = false;
               doc = "Demo for SimpliHack";
             } );

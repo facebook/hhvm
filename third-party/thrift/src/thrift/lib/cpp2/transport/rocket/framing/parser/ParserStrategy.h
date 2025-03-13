@@ -21,14 +21,18 @@
 
 namespace apache::thrift::rocket {
 
-// C++20 concept
-// template <typename T>
-// concept ParserStrategyConcept = requires(T t, void** bufReturn, size_t*
-// lenReturn, std::unique_ptr<folly::IOBuf> buf) {
-//     { t.getReadBuffer(bufReturn, lenReturn) } -> std::same_as<void>;
-//     { t.readDataAvailable(lenReturn) } -> std::same_as<void>;
-//     { t.readBufferAvailable(std::move(buf)) } -> std::same_as<void>;
-// };
+#if __cplusplus >= 202002L
+template <typename T>
+concept ParserStrategyConcept = requires(
+    T t,
+    void** bufReturn,
+    size_t* lenReturn,
+    std::unique_ptr<folly::IOBuf> buf) {
+  { t.getReadBuffer(bufReturn, lenReturn) } -> std::same_as<void>;
+  { t.readDataAvailable(lenReturn) } -> std::same_as<void>;
+  { t.readBufferAvailable(std::move(buf)) } -> std::same_as<void>;
+};
+#endif
 template <class T, template <typename...> class Strategy, typename... Args>
 class ParserStrategy : private Strategy<T, Args...> {
  public:

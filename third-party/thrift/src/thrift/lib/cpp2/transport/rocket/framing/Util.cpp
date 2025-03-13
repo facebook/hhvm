@@ -48,6 +48,11 @@ size_t readFrameOrMetadataSize(std::array<uint8_t, 3> bytes) {
       (static_cast<size_t>(bytes[1]) << 8) | static_cast<size_t>(bytes[2]);
 }
 
+size_t readFrameOrMetadataSize(const uint8_t* bytes) {
+  return (static_cast<size_t>(bytes[0]) << 16) |
+      (static_cast<size_t>(bytes[1]) << 8) | static_cast<size_t>(bytes[2]);
+}
+
 std::pair<uint8_t, Flags> readFrameTypeAndFlagsUnsafe(
     folly::io::Cursor& cursor) {
   const uint16_t frameTypeAndFlags = cursor.readBE<uint16_t>();

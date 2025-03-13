@@ -41,6 +41,8 @@ size_t readFrameOrMetadataSize(folly::io::Cursor& cursor);
 
 size_t readFrameOrMetadataSize(std::array<uint8_t, 3> bytes);
 
+size_t readFrameOrMetadataSize(const uint8_t* bytes);
+
 std::pair<uint8_t, Flags> readFrameTypeAndFlagsUnsafe(
     folly::io::Cursor& cursor);
 

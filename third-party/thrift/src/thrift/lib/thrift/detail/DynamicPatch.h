@@ -922,4 +922,7 @@ class DiffVisitorBase {
 std::string toPatchUri(std::string s);
 std::string fromPatchUri(std::string s);
 
+// Convert a struct/union type to SafePatch type
+type::Type toSafePatchType(type::Type input);
+
 } // namespace apache::thrift::protocol

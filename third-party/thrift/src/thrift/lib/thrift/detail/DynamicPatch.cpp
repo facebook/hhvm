@@ -128,6 +128,7 @@ Value emptyValue(const Value::Type& type) {
 namespace detail {
 
 constexpr std::string_view kPatchUriSuffix = "Patch";
+constexpr std::string_view kSafePatchUriSuffix = "SafePatch";
 
 void convertStringToBinary(ValueList& list) {
   for (Value& i : list) {
@@ -278,6 +279,11 @@ void checkHomogeneousContainer(const ValueMap& m) {
   throw std::runtime_error("Thrift does not support heterogeneous conatiner.");
 }
 
+std::string toSafePatchUri(std::string s) {
+  s += kSafePatchUriSuffix;
+  return s;
+}
+
 } // namespace detail
 
 std::string toPatchUri(std::string s) {
@@ -294,6 +300,32 @@ std::string fromPatchUri(std::string s) {
   }
   s.resize(newSize);
   return s;
+}
+
+type::Type toSafePatchType(type::Type input) {
+  auto& name = input.toThrift().name().value();
+  auto handleUri = [&](auto& type) {
+    if (auto p = type.uri_ref()) {
+      *p = detail::toSafePatchUri(*p);
+      return std::move(input);
+    }
+    folly::throw_exception<std::runtime_error>(fmt::format(
+        "Unsupported Uri: {}",
+        apache::thrift::util::enumNameSafe(type.getType())));
+  };
+
+  if (auto structType = name.structType_ref()) {
+    return handleUri(*structType);
+  } else if (auto unionType = name.unionType_ref()) {
+    // All Thrift SafePatch is struct type.
+    auto temp = std::move(*unionType);
+    name.structType_ref() = std::move(temp);
+    return handleUri(*name.structType_ref());
+  }
+
+  folly::throw_exception<std::runtime_error>(fmt::format(
+      "Unsupported type: {}",
+      apache::thrift::util::enumNameSafe(name.getType())));
 }
 
 bool DynamicPatch::empty(detail::Badge badge) const {

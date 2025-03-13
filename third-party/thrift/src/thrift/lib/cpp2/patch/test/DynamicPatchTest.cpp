@@ -1031,6 +1031,21 @@ TEST(DynamicPatchTest, InvalidToPatchType) {
   EXPECT_THROW(detail::toPatchType(type), std::runtime_error);
 }
 
+TEST(DynamicPatchTest, ToSafePatchType) {
+  EXPECT_EQ(
+      toSafePatchType(type::Type::get<type::struct_t<MyStruct>>()),
+      type::Type::get<type::struct_t<MyStructSafePatch>>());
+  EXPECT_EQ(
+      toSafePatchType(type::Type::get<type::union_t<MyUnion>>()),
+      type::Type::get<type::struct_t<MyUnionSafePatch>>());
+  EXPECT_THROW(
+      toSafePatchType(type::Type::get<type::i32_t>()), std::runtime_error);
+  type::Type unionScopedName = type::Type::get<type::union_t<MyUnion>>();
+  unionScopedName.toThrift().name()->unionType_ref()->scopedName_ref() =
+      "scoped.name";
+  EXPECT_THROW(toSafePatchType(unionScopedName), std::runtime_error);
+}
+
 TEST(DynamicPatchTest, AnyPatch) {
   StructWithAny src, dst;
 

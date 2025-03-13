@@ -1,0 +1,23 @@
+<?hh
+<<file:
+  __EnableUnstableFeatures(
+    'expression_trees',
+    'expression_tree_shape_creation',
+  )>>
+
+function g(): void {
+  (
+    () ==> {
+      $sm0 = ExampleDsl::shapeAt<>;
+      return ExampleDsl::makeTree(
+        darray["path" => __FILE__, "start_line" => 5, "end_line" => 7, "start_column" => 13, "end_column" => 3],
+        darray["splices" => dict[], "functions" => vec[], "static_methods" => vec[$sm0]],
+        (
+          (ExampleDsl $v) ==> {
+            return $v->visitCall(darray["path" => __FILE__, "start_line" => 5, "end_line" => 7, "start_column" => 13, "end_column" => 3], $v->visitLambda(darray["path" => __FILE__, "start_line" => 5, "end_line" => 7, "start_column" => 13, "end_column" => 3], vec[], vec[$v->visitReturn(darray["path" => __FILE__, "start_line" => 6, "end_line" => 6, "start_column" => 4, "end_column" => 69], $v->visitCall(darray["path" => __FILE__, "start_line" => 6, "end_line" => 6, "start_column" => 11, "end_column" => 68], $v->visitStaticMethod(darray["path" => __FILE__, "start_line" => 6, "end_line" => 6, "start_column" => 11, "end_column" => 68], $sm0), vec[$v->visitShape(darray["path" => __FILE__, "start_line" => 6, "end_line" => 6, "start_column" => 31, "end_column" => 62], vec[varray[$v->visitString(darray["path" => __FILE__, "start_line" => 6, "end_line" => 6, "start_column" => 37, "end_column" => 40], "x"), $v->visitInt(darray["path" => __FILE__, "start_line" => 6, "end_line" => 6, "start_column" => 44, "end_column" => 45], 3)], varray[$v->visitString(darray["path" => __FILE__, "start_line" => 6, "end_line" => 6, "start_column" => 47, "end_column" => 50], "y"), $v->visitString(darray["path" => __FILE__, "start_line" => 6, "end_line" => 6, "start_column" => 54, "end_column" => 61], "hello")]]), $v->visitString(darray["path" => __FILE__, "start_line" => 6, "end_line" => 6, "start_column" => 64, "end_column" => 67], "y")]))]), vec[]);
+          }
+        ),
+      );
+    }
+  )();
+}

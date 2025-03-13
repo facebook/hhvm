@@ -350,6 +350,13 @@ class ExampleDsl {
     $v = HH\Lib\Vec\map($operand, $kv ==> $kv[0]."=>".$kv[1]);
     return "shape(".concat_arg_list($v).")";
   }
+
+  // Note, these types are not super narrow,
+  // but they are inferred by the desugaring process rather than
+  // being run against this specific declaration, so that is fine.
+  public static async function shapeAt(ExampleContext $_): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleMixed>> {
+    throw new Error("No runtime implementation yet");
+  }
 }
 
 // Type declarations used when checking DSL expressions.

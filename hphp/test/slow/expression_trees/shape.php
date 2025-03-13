@@ -8,4 +8,5 @@ function test(): void {
 
   print_et(ExampleDsl`shape()`);
   print_et(ExampleDsl`shape('x' => 1, 'y' => shape('z' => 2))`);
+  print_et(ExampleDsl`ExampleDsl::shapeAt(shape('x' => 1), 'x')`);
 }

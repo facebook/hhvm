@@ -1198,6 +1198,8 @@ pub mod expression_trees {
     pub const ASYNC_MACRO_SPLICE: &str = "asyncMacroSplice";
 
     pub const DOLLARDOLLAR_TMP_VAR: &str = "$0dollardollar";
+
+    pub const BUILTIN_SHAPE_AT: &str = "shapeAt";
 }
 
 pub mod modules {

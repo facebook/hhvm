@@ -33,148 +33,220 @@
 
 using whisker::map;
 
+template <typename T>
+using prototype = whisker::prototype<T>;
+
+namespace dsl = whisker::dsl;
+template <typename T>
+using prototype_builder = dsl::prototype_builder<T>;
+
 namespace apache::thrift::compiler {
 
-map t_whisker_generator::make_functions_for_const() const {
-  return {};
+prototype<t_node>::ptr t_whisker_generator::make_prototype_for_node(
+    const prototype_database&) const {
+  prototype_builder<h_node> def;
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_container() const {
-  return {};
+prototype<t_named>::ptr t_whisker_generator::make_prototype_for_named(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_named>::extends(proto.of<t_node>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_enum() const {
-  return {};
+prototype<t_type>::ptr t_whisker_generator::make_prototype_for_type(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_type>::extends(proto.of<t_named>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_exception() const {
-  return {};
+prototype<t_typedef>::ptr t_whisker_generator::make_prototype_for_typedef(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_typedef>::extends(proto.of<t_type>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_field() const {
-  return {};
+prototype<t_structured>::ptr t_whisker_generator::make_prototype_for_structured(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_structured>::extends(proto.of<t_type>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_function() const {
-  return {};
+prototype<t_struct>::ptr t_whisker_generator::make_prototype_for_struct(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_struct>::extends(proto.of<t_structured>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_include() const {
-  return {};
+prototype<t_paramlist>::ptr t_whisker_generator::make_prototype_for_paramlist(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_paramlist>::extends(proto.of<t_struct>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_interaction() const {
-  return {};
+prototype<t_throws>::ptr t_whisker_generator::make_prototype_for_throws(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_throws>::extends(proto.of<t_struct>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_interface() const {
-  return {};
+prototype<t_union>::ptr t_whisker_generator::make_prototype_for_union(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_union>::extends(proto.of<t_struct>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_list() const {
-  return {};
+prototype<t_exception>::ptr t_whisker_generator::make_prototype_for_exception(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_exception>::extends(proto.of<t_structured>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_map() const {
-  return {};
+prototype<t_primitive_type>::ptr
+t_whisker_generator::make_prototype_for_primitive_type(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_primitive_type>::extends(proto.of<t_type>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_named() const {
-  return {};
+prototype<t_field>::ptr t_whisker_generator::make_prototype_for_field(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_field>::extends(proto.of<t_named>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_node() const {
-  return {};
+prototype<t_enum>::ptr t_whisker_generator::make_prototype_for_enum(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_enum>::extends(proto.of<t_type>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_package() const {
-  return {};
+prototype<t_const>::ptr t_whisker_generator::make_prototype_for_const(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_const>::extends(proto.of<t_named>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_paramlist() const {
-  return {};
+prototype<t_container>::ptr t_whisker_generator::make_prototype_for_container(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_container>::extends(proto.of<t_type>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_primitive_type() const {
-  return {};
+prototype<t_map>::ptr t_whisker_generator::make_prototype_for_map(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_map>::extends(proto.of<t_container>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_program() const {
-  return {};
+prototype<t_set>::ptr t_whisker_generator::make_prototype_for_set(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_set>::extends(proto.of<t_container>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_service() const {
-  return {};
+prototype<t_list>::ptr t_whisker_generator::make_prototype_for_list(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_list>::extends(proto.of<t_container>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_set() const {
-  return {};
+prototype<t_program>::ptr t_whisker_generator::make_prototype_for_program(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_program>::extends(proto.of<t_named>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_sink() const {
-  return {};
+prototype<t_package>::ptr t_whisker_generator::make_prototype_for_package(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_package>::extends(proto.of<t_node>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_stream() const {
-  return {};
+prototype<t_include>::ptr t_whisker_generator::make_prototype_for_include(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_include>::extends(proto.of<t_node>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_struct() const {
-  return {};
+prototype<t_sink>::ptr t_whisker_generator::make_prototype_for_sink(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_sink>::extends(proto.of<t_node>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_structured() const {
-  return {};
+prototype<t_stream>::ptr t_whisker_generator::make_prototype_for_stream(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_stream>::extends(proto.of<t_node>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_throws() const {
-  return {};
+prototype<t_function>::ptr t_whisker_generator::make_prototype_for_function(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_function>::extends(proto.of<t_named>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_type() const {
-  return {};
+prototype<t_interface>::ptr t_whisker_generator::make_prototype_for_interface(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_interface>::extends(proto.of<t_type>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_typedef() const {
-  return {};
+prototype<t_service>::ptr t_whisker_generator::make_prototype_for_service(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_service>::extends(proto.of<t_interface>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::make_functions_for_union() const {
-  return {};
+prototype<t_interaction>::ptr
+t_whisker_generator::make_prototype_for_interaction(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_interaction>::extends(proto.of<t_service>());
+  return std::move(def).make();
 }
 
-map t_whisker_generator::globals() const {
-  map lib;
-  // clang-format off
-  lib["t_const"]          = make_functions_for_const();
-  lib["t_container"]      = make_functions_for_container();
-  lib["t_enum"]           = make_functions_for_enum();
-  lib["t_exception"]      = make_functions_for_exception();
-  lib["t_field"]          = make_functions_for_field();
-  lib["t_function"]       = make_functions_for_function();
-  lib["t_include"]        = make_functions_for_include();
-  lib["t_interaction"]    = make_functions_for_interaction();
-  lib["t_interface"]      = make_functions_for_interface();
-  lib["t_list"]           = make_functions_for_list();
-  lib["t_map"]            = make_functions_for_map();
-  lib["t_named"]          = make_functions_for_named();
-  lib["t_node"]           = make_functions_for_node();
-  lib["t_package"]        = make_functions_for_package();
-  lib["t_paramlist"]      = make_functions_for_paramlist();
-  lib["t_primitive_type"] = make_functions_for_primitive_type();
-  lib["t_program"]        = make_functions_for_program();
-  lib["t_service"]        = make_functions_for_service();
-  lib["t_set"]            = make_functions_for_set();
-  lib["t_sink"]           = make_functions_for_sink();
-  lib["t_stream"]         = make_functions_for_stream();
-  lib["t_struct"]         = make_functions_for_struct();
-  lib["t_structured"]     = make_functions_for_structured();
-  lib["t_throws"]         = make_functions_for_throws();
-  lib["t_type"]           = make_functions_for_type();
-  lib["t_typedef"]        = make_functions_for_typedef();
-  lib["t_union"]          = make_functions_for_union();
-  // clang-format on
-  return lib;
+void t_whisker_generator::define_prototypes(prototype_database& db) const {
+  // WARNING: the order of these calls must be sorted with base classes first.
+  // The derived classes require the base class prototypes to be defined first.
+  //
+  // As a reference, the `make_prototype_for_*` family of functions are declared
+  // in the same order.
+  db.define(make_prototype_for_node(db));
+  db.define(make_prototype_for_named(db));
+
+  db.define(make_prototype_for_type(db));
+  db.define(make_prototype_for_typedef(db));
+  db.define(make_prototype_for_structured(db));
+  db.define(make_prototype_for_struct(db));
+  db.define(make_prototype_for_paramlist(db));
+  db.define(make_prototype_for_throws(db));
+  db.define(make_prototype_for_union(db));
+  db.define(make_prototype_for_exception(db));
+
+  db.define(make_prototype_for_primitive_type(db));
+  db.define(make_prototype_for_field(db));
+  db.define(make_prototype_for_enum(db));
+  db.define(make_prototype_for_const(db));
+
+  db.define(make_prototype_for_container(db));
+  db.define(make_prototype_for_map(db));
+  db.define(make_prototype_for_set(db));
+  db.define(make_prototype_for_list(db));
+
+  db.define(make_prototype_for_program(db));
+
+  db.define(make_prototype_for_package(db));
+  db.define(make_prototype_for_include(db));
+  db.define(make_prototype_for_sink(db));
+  db.define(make_prototype_for_stream(db));
+  db.define(make_prototype_for_function(db));
+
+  db.define(make_prototype_for_interface(db));
+  db.define(make_prototype_for_service(db));
+  db.define(make_prototype_for_interaction(db));
+
+  define_additional_prototypes(db);
 }
 
 using fs_path = std::filesystem::path;
@@ -191,6 +263,8 @@ void chomp_last_char(std::string* data, char c) {
   }
 }
 
+} // namespace
+
 /**
  * This implementation of whisker's source resolver builds on top of the
  * template_map that already used by mstch. This allows template names to
@@ -199,11 +273,11 @@ void chomp_last_char(std::string* data, char c) {
  * When a new partial is requested, we lazily parse the corresponding entry
  * in the template_map and cache the parsed AST.
  */
-class whisker_source_parser : public whisker::source_resolver {
+class t_whisker_generator::whisker_source_parser
+    : public whisker::source_resolver {
  public:
   explicit whisker_source_parser(
-      const t_whisker_generator::templates_map& templates_by_path,
-      std::string template_prefix)
+      const templates_map& templates_by_path, std::string template_prefix)
       : templates_by_path_(templates_by_path),
         template_prefix_(std::move(template_prefix)) {}
 
@@ -271,8 +345,6 @@ class whisker_source_parser : public whisker::source_resolver {
       cached_asts_;
 };
 
-} // namespace
-
 /* static */ const t_whisker_generator::templates_map&
 t_whisker_generator::templates_by_path() {
   static const auto cached_result = [] {
@@ -316,6 +388,9 @@ t_whisker_generator::cached_render_state& t_whisker_generator::render_state() {
     whisker::load_standard_library(options.globals);
     options.globals.merge(globals());
 
+    auto prototypes = std::make_unique<prototype_database>();
+    define_prototypes(*prototypes);
+
     cached_render_state_ = cached_render_state{
         whisker::diagnostics_engine(
             source_resolver->source_manager(),
@@ -323,6 +398,7 @@ t_whisker_generator::cached_render_state& t_whisker_generator::render_state() {
             diagnostic_params::only_errors()),
         source_resolver,
         std::move(options),
+        std::move(prototypes),
     };
   }
 

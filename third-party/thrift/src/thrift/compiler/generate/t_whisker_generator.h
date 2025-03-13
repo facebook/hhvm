@@ -51,11 +51,19 @@
 #include <thrift/compiler/ast/t_union.h>
 #include <thrift/compiler/whisker/dsl.h>
 
+#include <fmt/core.h>
+
+#include <boost/core/demangle.hpp>
+
 #include <filesystem>
 #include <functional>
 #include <map>
+#include <stdexcept>
 #include <string>
 #include <string_view>
+#include <typeindex>
+#include <typeinfo>
+#include <unordered_map>
 
 namespace apache::thrift::compiler {
 
@@ -66,6 +74,7 @@ class t_whisker_generator : public t_generator {
  public:
   using t_generator::t_generator;
 
+ protected:
   /**
    * The subdirectory within templates/ where the Whisker source files reside.
    * This is primarily used to resolve partial application within template
@@ -77,7 +86,7 @@ class t_whisker_generator : public t_generator {
    * The global context used for whisker rendering. This function can be used,
    * for example, to add globally available helper functions.
    */
-  virtual whisker::map globals() const;
+  virtual whisker::map globals() const { return {}; }
 
   // See whisker::render_options
   struct strictness_options {
@@ -103,7 +112,6 @@ class t_whisker_generator : public t_generator {
    */
   static const templates_map& templates_by_path();
 
- protected:
   /**
    * Returns the rendered output of a Whisker template source file evaluated
    * with the provided context object.
@@ -147,64 +155,178 @@ class t_whisker_generator : public t_generator {
   //
   // In Whisker, passing around the AST nodes (C++ objects) is achieved using
   // whisker::native_handle. Whisker templates cannot directly interact with
-  // native_handle objects — they must delegate to native_functions to extract
-  // usable data out of these objects.
+  // native_handle objects.
   //
-  // The make_functions_for_<node_type>() family of functions provide "free
-  // functions" that allow extracting usable information out of the
-  // aforementioned node type. This leads to a pattern resembling "opaque
-  // pointers" commonly used in languages like C:
-  //   https://en.wikipedia.org/wiki/Opaque_pointer#C
+  // The make_prototype_for_<node_type>() family of functions allow
+  // prototype-based programming by associating a prototype with AST nodes. When
+  // a property access happens in Whisker templates, and the target is a
+  // whisker::native_handle, the lookup is forwarded to its prototype.
+  //
+  // This is modeled after JavaScript's prototype chains:
+  //   https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Advanced_JavaScript_objects/Object_prototypes
   //
   // For example:
   //
-  //   make_functions_for_named() may expose a native_function, `name_of`,
-  //   which corresponds to `const std::string& t_named::name()` member function
-  //   in C++.
-  //   `name_of` would accept a single argument, native_handle<t_named>, and
-  //   return a whisker::string.
+  //   make_prototype_for_named() may expose a property, `name`, which
+  //   corresponds to `const std::string& t_named::name()` member function in
+  //   C++.
   //
-  //   In Whisker code, this function can be invoked like so:
-  //     {{ (t_named.name_of program_node) }}
-  //     {{ (t_named.name_of struct_node) }}
-  //     {{ (t_named.name_of <any node deriving from t_named in C++>) }}
-  //
-  // Note that, for each node type, the result of
-  // make_function_for_<node_type>() is injected into the global scope under the
-  // corresponding node's class name.
+  //   In Whisker code, this property can be accessed like so:
+  //     {{ program_node.name }}
+  //     {{ struct_node.name }}
+  //     {{ <any node deriving from t_named in C++>.name }}
   //
   // By default, this generator will provide the basic functions defined in the
   // AST node classes. Derived generators may override any overload of
-  // make_function_for_<node_type>(...) to add or remove new functions to its
+  // make_prototype_for_<node_type>(...) to add new functions to its
   // library.
 
-  virtual whisker::map make_functions_for_const() const;
-  virtual whisker::map make_functions_for_container() const;
-  virtual whisker::map make_functions_for_enum() const;
-  virtual whisker::map make_functions_for_exception() const;
-  virtual whisker::map make_functions_for_field() const;
-  virtual whisker::map make_functions_for_function() const;
-  virtual whisker::map make_functions_for_include() const;
-  virtual whisker::map make_functions_for_interaction() const;
-  virtual whisker::map make_functions_for_interface() const;
-  virtual whisker::map make_functions_for_list() const;
-  virtual whisker::map make_functions_for_map() const;
-  virtual whisker::map make_functions_for_named() const;
-  virtual whisker::map make_functions_for_node() const;
-  virtual whisker::map make_functions_for_package() const;
-  virtual whisker::map make_functions_for_paramlist() const;
-  virtual whisker::map make_functions_for_primitive_type() const;
-  virtual whisker::map make_functions_for_program() const;
-  virtual whisker::map make_functions_for_service() const;
-  virtual whisker::map make_functions_for_set() const;
-  virtual whisker::map make_functions_for_sink() const;
-  virtual whisker::map make_functions_for_stream() const;
-  virtual whisker::map make_functions_for_struct() const;
-  virtual whisker::map make_functions_for_structured() const;
-  virtual whisker::map make_functions_for_throws() const;
-  virtual whisker::map make_functions_for_type() const;
-  virtual whisker::map make_functions_for_typedef() const;
-  virtual whisker::map make_functions_for_union() const;
+ protected:
+  template <typename T = void>
+  using prototype = whisker::prototype<T>;
+  template <typename T = void>
+  using prototype_ptr = whisker::prototype_ptr<T>;
+
+  /**
+   * The prototype database stores and caches prototype indexed by typeid.
+   *
+   * This is primarily used for the `make_prototype_for*` family of functions
+   * below.
+   */
+  class prototype_database {
+   public:
+    template <typename T>
+    void define(prototype_ptr<T> prototype) {
+      auto [_, inserted] =
+          prototypes_.emplace(std::type_index(typeid(T)), std::move(prototype));
+      if (!inserted) {
+        throw std::runtime_error(fmt::format(
+            "Prototype for type '{}' already exists.",
+            boost::core::demangle(typeid(T).name())));
+      }
+    }
+
+    /**
+     * Gets the cached prototype for the given type, or throws an exception if
+     * the type is unknown.
+     */
+    template <typename T>
+    prototype_ptr<T> of() const {
+      auto found = prototypes_.find(std::type_index(typeid(T)));
+      if (found == prototypes_.end()) {
+        throw std::runtime_error(fmt::format(
+            "Prototype for type '{}' does not exist.",
+            boost::core::demangle(typeid(T).name())));
+      }
+      auto casted =
+          std::dynamic_pointer_cast<const prototype<T>>(found->second);
+      if (casted == nullptr) {
+        throw std::runtime_error(fmt::format(
+            "Prototype for type '{}' is of an unexpected type.",
+            typeid(T).name()));
+      }
+      return casted;
+    }
+
+   private:
+    std::unordered_map<std::type_index, whisker::prototype<>::ptr> prototypes_;
+  };
+
+  /**
+   * Registers the `make_prototype_for_*` functions with the prototype database.
+   *
+   * A derived generator may override the `define_additional_prototype` function
+   * to add new prototypes.
+   */
+  void define_prototypes(prototype_database&) const;
+  virtual void define_additional_prototypes(prototype_database&) const {}
+
+  // WARNING: the order of the functions below match the order in which they are
+  // called — base classes first, derived classes last.
+  //
+  // When defining the prototype for a type, the proto of a type that is later
+  // in the order will not be available.
+
+  virtual prototype<t_node>::ptr make_prototype_for_node(
+      const prototype_database&) const;
+
+  virtual prototype<t_named>::ptr make_prototype_for_named(
+      const prototype_database&) const;
+
+  virtual prototype<t_type>::ptr make_prototype_for_type(
+      const prototype_database&) const;
+
+  virtual prototype<t_typedef>::ptr make_prototype_for_typedef(
+      const prototype_database&) const;
+
+  virtual prototype<t_structured>::ptr make_prototype_for_structured(
+      const prototype_database&) const;
+
+  virtual prototype<t_struct>::ptr make_prototype_for_struct(
+      const prototype_database&) const;
+
+  virtual prototype<t_paramlist>::ptr make_prototype_for_paramlist(
+      const prototype_database&) const;
+
+  virtual prototype<t_throws>::ptr make_prototype_for_throws(
+      const prototype_database&) const;
+
+  virtual prototype<t_union>::ptr make_prototype_for_union(
+      const prototype_database&) const;
+
+  virtual prototype<t_exception>::ptr make_prototype_for_exception(
+      const prototype_database&) const;
+
+  virtual prototype<t_primitive_type>::ptr make_prototype_for_primitive_type(
+      const prototype_database&) const;
+
+  virtual prototype<t_field>::ptr make_prototype_for_field(
+      const prototype_database&) const;
+
+  virtual prototype<t_enum>::ptr make_prototype_for_enum(
+      const prototype_database&) const;
+
+  virtual prototype<t_const>::ptr make_prototype_for_const(
+      const prototype_database&) const;
+
+  virtual prototype<t_container>::ptr make_prototype_for_container(
+      const prototype_database&) const;
+
+  virtual prototype<t_map>::ptr make_prototype_for_map(
+      const prototype_database&) const;
+
+  virtual prototype<t_set>::ptr make_prototype_for_set(
+      const prototype_database&) const;
+
+  virtual prototype<t_list>::ptr make_prototype_for_list(
+      const prototype_database&) const;
+
+  virtual prototype<t_program>::ptr make_prototype_for_program(
+      const prototype_database&) const;
+
+  virtual prototype<t_package>::ptr make_prototype_for_package(
+      const prototype_database&) const;
+
+  virtual prototype<t_include>::ptr make_prototype_for_include(
+      const prototype_database&) const;
+
+  virtual prototype<t_sink>::ptr make_prototype_for_sink(
+      const prototype_database&) const;
+
+  virtual prototype<t_stream>::ptr make_prototype_for_stream(
+      const prototype_database&) const;
+
+  virtual prototype<t_function>::ptr make_prototype_for_function(
+      const prototype_database&) const;
+
+  virtual prototype<t_interface>::ptr make_prototype_for_interface(
+      const prototype_database&) const;
+
+  virtual prototype<t_service>::ptr make_prototype_for_service(
+      const prototype_database&) const;
+
+  virtual prototype<t_interaction>::ptr make_prototype_for_interaction(
+      const prototype_database&) const;
 
   // This list represents the polymorphic class hierarchy of the Thrift's AST.
   // It does not need to be a complete representation but the subset that is
@@ -266,14 +388,19 @@ class t_whisker_generator : public t_generator {
       h_program>;
   using h_node = make_handle<t_node, h_named>;
 
- private:
   struct cached_render_state {
     whisker::diagnostics_engine diagnostic_engine;
     std::shared_ptr<whisker::source_resolver> source_resolver;
     whisker::render_options render_options;
+    std::unique_ptr<prototype_database> prototypes;
   };
-  std::optional<cached_render_state> cached_render_state_;
   cached_render_state& render_state();
+
+ private:
+  std::optional<cached_render_state> cached_render_state_;
+
+  // whisker::source_resolver implementation
+  class whisker_source_parser;
 };
 
 } // namespace apache::thrift::compiler

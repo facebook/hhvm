@@ -17,6 +17,7 @@
 package thrift
 
 import (
+	"bytes"
 	"strings"
 	"testing"
 
@@ -28,7 +29,7 @@ func TestReadWriteCompactProtocol(t *testing.T) {
 	// CompactProtocol is capable of reading and writing in different goroutines.
 	ReadWriteProtocolParallelTest(t, func(transport types.ReadWriteSizer) types.Format { return NewCompactFormat(transport) })
 	transports := []types.ReadWriteSizer{
-		NewMemoryBuffer(),
+		new(bytes.Buffer),
 	}
 	for _, trans := range transports {
 		p := NewCompactFormat(trans)
@@ -58,7 +59,7 @@ func TestInitialAllocationMapCompactProtocol(t *testing.T) {
 	var m MyTestStruct
 	// attempts to allocate a map of 930M elements for a 9 byte message
 	data := []byte("%0\x88\x8a\x97\xb7\xc4\x030")
-	format := NewCompactFormat(NewMemoryBufferWithData(data))
+	format := NewCompactFormat(bytes.NewBuffer(data))
 	err := m.Read(format)
 	if err == nil {
 		t.Fatalf("Parsed invalid message correctly")
@@ -71,7 +72,7 @@ func TestInitialAllocationListCompactProtocol(t *testing.T) {
 	var m MyTestStruct
 	// attempts to allocate a list of 950M elements for an 11 byte message
 	data := []byte("%0\x98\xfa\xb7\xb7\xc4\xc4\x03\x01a")
-	format := NewCompactFormat(NewMemoryBufferWithData(data))
+	format := NewCompactFormat(bytes.NewBuffer(data))
 	err := m.Read(format)
 	if err == nil {
 		t.Fatalf("Parsed invalid message correctly")
@@ -84,7 +85,7 @@ func TestInitialAllocationSetCompactProtocol(t *testing.T) {
 	var m MyTestStruct
 	// attempts to allocate a list of 950M elements for an 11 byte message
 	data := []byte("%0\xa8\xfa\x97\xb7\xc4\xc4\x03\x01a")
-	format := NewCompactFormat(NewMemoryBufferWithData(data))
+	format := NewCompactFormat(bytes.NewBuffer(data))
 	err := m.Read(format)
 	if err == nil {
 		t.Fatalf("Parsed invalid message correctly")
@@ -98,7 +99,7 @@ func TestInitialAllocationMapCompactProtocolLimitedR(t *testing.T) {
 
 	// attempts to allocate a map of 930M elements for a 9 byte message
 	data := []byte("%0\x88\x8a\x97\xb7\xc4\x030")
-	p := NewCompactFormat(NewMemoryBufferWithData(data))
+	p := NewCompactFormat(bytes.NewBuffer(data))
 
 	err := m.Read(p)
 	if err == nil {

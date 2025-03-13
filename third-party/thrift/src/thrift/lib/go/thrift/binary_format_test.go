@@ -17,6 +17,7 @@
 package thrift
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 	"testing"
@@ -33,7 +34,7 @@ func TestReadWriteBinaryFormat(t *testing.T) {
 func TestWriteBinaryEmptyBinaryFormat(t *testing.T) {
 	m := my_test_struct.NewMyTestStruct()
 	m.Bin = nil
-	format := NewBinaryFormat(NewMemoryBufferWithData([]byte(nil)))
+	format := NewBinaryFormat(bytes.NewBuffer([]byte(nil)))
 	if err := m.Write(format); err != nil {
 		t.Fatal(err)
 	}
@@ -44,7 +45,7 @@ func TestSkipUnknownTypeBinaryFormat(t *testing.T) {
 	// skip over a map with invalid key/value type and ~550M entries
 	data := make([]byte, 1100000000)
 	copy(data[:], []byte("\n\x10\rO\t6\x03\n\n\n\x10\r\n\tsl ce\x00"))
-	format := NewBinaryFormat(NewMemoryBufferWithData(data))
+	format := NewBinaryFormat(bytes.NewBuffer(data))
 	start := time.Now()
 	err := m.Read(format)
 	if err == nil {
@@ -62,7 +63,7 @@ func TestInitialAllocationMapBinaryFormat(t *testing.T) {
 	var m MyTestStruct
 	// attempts to allocate a map with 1.8B elements for a 20 byte message
 	data := []byte("\n\x10\rO\t6\x03\n\n\n\x10\r\n\tslice\x00")
-	format := NewBinaryFormat(NewMemoryBufferWithData(data))
+	format := NewBinaryFormat(bytes.NewBuffer(data))
 	err := m.Read(format)
 	if err == nil {
 		t.Fatalf("Parsed invalid message correctly")
@@ -75,7 +76,7 @@ func TestInitialAllocationListBinaryFormat(t *testing.T) {
 	var m MyTestStruct
 	// attempts to allocate a list with 1.8B elements for a 20 byte message
 	data := []byte("\n\x10\rO\t6\x03\n\n\n\x10\x0f\n\tslice\x00")
-	format := NewBinaryFormat(NewMemoryBufferWithData(data))
+	format := NewBinaryFormat(bytes.NewBuffer(data))
 	err := m.Read(format)
 	if err == nil {
 		t.Fatalf("Parsed invalid message correctly")
@@ -88,7 +89,7 @@ func TestInitialAllocationSetBinaryFormat(t *testing.T) {
 	var m MyTestStruct
 	// attempts to allocate a set with 1.8B elements for a 20 byte message
 	data := []byte("\n\x12\rO\t6\x03\n\n\n\x10\x0e\n\tslice\x00")
-	format := NewBinaryFormat(NewMemoryBufferWithData(data))
+	format := NewBinaryFormat(bytes.NewBuffer(data))
 	err := m.Read(format)
 	if err == nil {
 		t.Fatalf("Parsed invalid message correctly")

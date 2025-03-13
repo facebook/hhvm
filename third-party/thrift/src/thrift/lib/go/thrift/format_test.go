@@ -17,6 +17,7 @@
 package thrift
 
 import (
+	"bytes"
 	"io"
 	"math"
 	"sync"
@@ -153,7 +154,7 @@ func ReadWriteProtocolParallelTest(t *testing.T, newFormat func(types.ReadWriteS
 
 func ReadWriteProtocolTest(t *testing.T, newFormat func(types.ReadWriteSizer) types.Format) {
 	transports := []func() types.ReadWriteSizer{
-		func() types.ReadWriteSizer { return NewMemoryBufferLen(1024) },
+		func() types.ReadWriteSizer { return new(bytes.Buffer) },
 	}
 
 	doForAllTransports := func(protTest protocolTest) {
@@ -717,7 +718,7 @@ func UnmatchedBeginEndProtocolTest(t *testing.T, formatFactory func(io.ReadWrite
 	// return an error on unmatched Begin/End calls.
 	// This test is only meant to make sure that those unmatched Begin/End
 	// calls won't cause panic. There's no real "test" here.
-	trans := NewMemoryBuffer()
+	trans := new(bytes.Buffer)
 	t.Run("Read", func(t *testing.T) {
 		t.Run("Message", func(t *testing.T) {
 			trans.Reset()

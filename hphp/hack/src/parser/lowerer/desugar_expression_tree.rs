@@ -519,7 +519,7 @@ fn v_meth_call(meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
     Expr::new((), pos.clone(), c)
 }
 
-fn meth_call(receiver: Expr, meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
+fn meth_call(receiver: Expr, meth_name: &str, args: Vec<Expr>, nullsafe: bool, pos: &Pos) -> Expr {
     let meth = Expr::new(
         (),
         pos.clone(),
@@ -533,7 +533,11 @@ fn meth_call(receiver: Expr, meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Exp
             Expr_::mk_obj_get(
                 receiver,
                 meth,
-                OgNullFlavor::OGNullthrows,
+                if nullsafe {
+                    OgNullFlavor::OGNullsafe
+                } else {
+                    OgNullFlavor::OGNullthrows
+                },
                 ast::PropOrMethod::IsMethod,
             ),
         ),
@@ -726,7 +730,7 @@ fn shape_literal(pos: &Pos, fields: Vec<(&str, Expr)>) -> Expr {
 
 fn boolify(receiver: Expr) -> Expr {
     let pos = receiver.1.clone();
-    meth_call(receiver, "__bool", vec![], &pos)
+    meth_call(receiver, "__bool", vec![], false, &pos)
 }
 
 struct RewriteState {
@@ -905,6 +909,7 @@ impl RewriteState {
                     rewritten_lhs.virtual_expr,
                     binop_str,
                     vec![rewritten_rhs.virtual_expr],
+                    false,
                     &pos,
                 );
                 let desugar_expr = v_meth_call(
@@ -1005,7 +1010,8 @@ impl RewriteState {
                         "__unsupported"
                     }
                 };
-                let virtual_expr = meth_call(rewritten_operand.virtual_expr, op_str, vec![], &pos);
+                let virtual_expr =
+                    meth_call(rewritten_operand.virtual_expr, op_str, vec![], false, &pos);
                 let desugar_expr = v_meth_call(
                     et::VISIT_UNOP,
                     vec![
@@ -1157,6 +1163,7 @@ impl RewriteState {
                                         vec![temp_variable],
                                         &pos,
                                     ),
+                                    false,
                                     &pos,
                                 ),
                                 targs: vec![],
@@ -1226,6 +1233,7 @@ impl RewriteState {
                                             vec![temp_variable],
                                             &pos,
                                         ),
+                                        false,
                                         &pos,
                                     ),
                                     targs: vec![],
@@ -1266,7 +1274,7 @@ impl RewriteState {
                             pos.clone(),
                             Expr_::mk_call(ast::CallExpr {
                                 func: if should_virtualize_call {
-                                    _virtualize_call(rewritten_recv.virtual_expr, &pos)
+                                    _virtualize_call(rewritten_recv.virtual_expr, false, &pos)
                                 } else {
                                     rewritten_recv.virtual_expr
                                 },
@@ -1721,7 +1729,7 @@ impl RewriteState {
                 let virtual_expr = static_meth_call(
                     visitor_name,
                     et::SHAPE_TYPE,
-                    vec![Expr((), pos.clone(), Shape(virtual_shape_fields))],
+                    vec![Expr((), pos.clone(), Expr_::mk_shape(virtual_shape_fields))],
                     &pos,
                 );
                 let desugar_expr = v_meth_call(
@@ -2063,8 +2071,8 @@ fn strip_ns(name: &str) -> &str {
     }
 }
 
-fn _virtualize_call(e: Expr, pos: &Pos) -> Expr {
-    meth_call(e, "__unwrap", vec![], pos)
+fn _virtualize_call(e: Expr, nullsafe: bool, pos: &Pos) -> Expr {
+    meth_call(e, "__unwrap", vec![], nullsafe, pos)
 }
 
 fn _virtualize_lambda(visitor_name: &str, e: Expr, pos: &Pos) -> Expr {
@@ -2411,11 +2419,13 @@ fn handle_reserved_call(
                 (_, method),
             ) = cc
             {
-                if clz_box.1 == visitor_name && method == et::BUILTIN_SHAPE_AT {
-                    return handle_shapes_at(state, visitor_name, pos, args);
-                }
-                if clz_box.1 == visitor_name && method == et::BUILTIN_SHAPE_PUT {
-                    return handle_shapes_put(state, visitor_name, pos, args);
+                if clz_box.1 == visitor_name {
+                    return match method.as_ref() {
+                        et::BUILTIN_SHAPE_AT => handle_shapes_at(state, visitor_name, pos, args),
+                        et::BUILTIN_SHAPE_PUT => handle_shapes_put(state, visitor_name, pos, args),
+                        et::BUILTIN_SHAPE_IDX => handle_shapes_idx(state, visitor_name, pos, args),
+                        _ => None,
+                    };
                 }
             }
             None
@@ -2441,10 +2451,38 @@ fn handle_shapes_at(
         // Nit: we are actually only interested in the shape's virtual_expr
         // so we unwrap the first argument here.
         let shape = state.rewrite_expr(args[0].clone(), visitor_name);
-        args[0] = _virtualize_call(shape.virtual_expr, pos)
+        args[0] = _virtualize_call(shape.virtual_expr, false, pos)
     }
-
     Some(static_meth_call("Shapes", "at", args.to_vec(), pos))
+}
+
+fn handle_shapes_idx(
+    state: &mut RewriteState,
+    visitor_name: &str,
+    pos: &Pos,
+    args: &[Expr],
+) -> Option<Expr> {
+    let mut args = args.to_vec();
+    if args.len() == 2 || args.len() == 3 {
+        // unwrap the shape type
+        args[0] = _virtualize_call(
+            state
+                .rewrite_expr(args[0].clone(), visitor_name)
+                .virtual_expr,
+            true,
+            pos,
+        );
+        if args.len() > 2 {
+            // With 3 args, we need the virtual type of the default value,
+            args[2] = state
+                .rewrite_expr(args[2].clone(), visitor_name)
+                .virtual_expr
+        } else {
+            // ..Otherwise, we need the null type as additional argument
+            args.push(static_meth_call(visitor_name, et::NULL_TYPE, vec![], pos));
+        };
+    }
+    Some(static_meth_call("Shapes", "idx", args, pos))
 }
 
 fn handle_shapes_put(
@@ -2457,10 +2495,9 @@ fn handle_shapes_put(
     if args.len() > 2 {
         let shape = state.rewrite_expr(args[0].clone(), visitor_name);
         let value = state.rewrite_expr(args[2].clone(), visitor_name);
-        args[0] = _virtualize_call(shape.virtual_expr, pos);
+        args[0] = _virtualize_call(shape.virtual_expr, false, pos);
         args[2] = value.virtual_expr;
     }
-
     Some(static_meth_call(
         visitor_name,
         et::SHAPE_TYPE,

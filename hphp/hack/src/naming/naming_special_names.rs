@@ -1201,6 +1201,7 @@ pub mod expression_trees {
 
     pub const BUILTIN_SHAPE_AT: &str = "shapeAt";
     pub const BUILTIN_SHAPE_PUT: &str = "shapePut";
+    pub const BUILTIN_SHAPE_IDX: &str = "shapeIdx";
 }
 
 pub mod modules {

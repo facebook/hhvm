@@ -4,7 +4,7 @@ You are trying to access the method `__barbar` but this object can be null. (Typ
   This can be null
 ERROR: File "boolean_operators.php", line 28, characters 19-33:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 399, characters 28-38:
+  File "expr_tree.php", line 403, characters 28-38:
   Expected `~ExampleBool`
   File "boolean_operators.php", line 7, characters 82-93:
   But got `?ExampleBool`
@@ -14,7 +14,7 @@ You are trying to access the method `__ampamp` but this object can be null. (Typ
   This can be null
 ERROR: File "boolean_operators.php", line 33, characters 19-33:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 398, characters 28-38:
+  File "expr_tree.php", line 402, characters 28-38:
   Expected `~ExampleBool`
   File "boolean_operators.php", line 7, characters 82-93:
   But got `?ExampleBool`

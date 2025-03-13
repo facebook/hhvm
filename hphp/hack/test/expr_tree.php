@@ -361,6 +361,10 @@ class ExampleDsl {
   public static async function shapePut(ExampleContext $_): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleMixed>> {
     throw new Error("No runtime implementation yet");
   }
+
+  public static async function shapeIdx(ExampleContext $_): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleMixed>> {
+    throw new Error("No runtime implementation yet");
+  }
 }
 
 // Type declarations used when checking DSL expressions.

@@ -1,0 +1,24 @@
+<?hh
+<<file:
+  __EnableUnstableFeatures(
+    'expression_trees',
+    'expression_tree_shape_creation',
+  )>>
+
+function g(): void {
+  (
+    () ==> {
+      $sm0 = ExampleDsl::shapeIdx<>;
+      $sm1 = ExampleDsl::shapeIdx<>;
+      return ExampleDsl::makeTree(
+        darray["path" => __FILE__, "start_line" => 5, "end_line" => 8, "start_column" => 13, "end_column" => 3],
+        darray["splices" => dict[], "functions" => vec[], "static_methods" => vec[$sm0, $sm1]],
+        (
+          (ExampleDsl $v) ==> {
+            return $v->visitCall(darray["path" => __FILE__, "start_line" => 5, "end_line" => 8, "start_column" => 13, "end_column" => 3], $v->visitLambda(darray["path" => __FILE__, "start_line" => 5, "end_line" => 8, "start_column" => 13, "end_column" => 3], vec[], vec[$v->visitCall(darray["path" => __FILE__, "start_line" => 6, "end_line" => 6, "start_column" => 4, "end_column" => 46], $v->visitStaticMethod(darray["path" => __FILE__, "start_line" => 6, "end_line" => 6, "start_column" => 4, "end_column" => 46], $sm0), vec[$v->visitShape(darray["path" => __FILE__, "start_line" => 6, "end_line" => 6, "start_column" => 25, "end_column" => 40], vec[varray[$v->visitString(darray["path" => __FILE__, "start_line" => 6, "end_line" => 6, "start_column" => 31, "end_column" => 34], "x"), $v->visitInt(darray["path" => __FILE__, "start_line" => 6, "end_line" => 6, "start_column" => 38, "end_column" => 39], 3)]]), $v->visitString(darray["path" => __FILE__, "start_line" => 6, "end_line" => 6, "start_column" => 42, "end_column" => 45], "x")]), $v->visitCall(darray["path" => __FILE__, "start_line" => 7, "end_line" => 7, "start_column" => 4, "end_column" => 49], $v->visitStaticMethod(darray["path" => __FILE__, "start_line" => 7, "end_line" => 7, "start_column" => 4, "end_column" => 49], $sm1), vec[$v->visitShape(darray["path" => __FILE__, "start_line" => 7, "end_line" => 7, "start_column" => 25, "end_column" => 40], vec[varray[$v->visitString(darray["path" => __FILE__, "start_line" => 7, "end_line" => 7, "start_column" => 31, "end_column" => 34], "x"), $v->visitInt(darray["path" => __FILE__, "start_line" => 7, "end_line" => 7, "start_column" => 38, "end_column" => 39], 3)]]), $v->visitString(darray["path" => __FILE__, "start_line" => 7, "end_line" => 7, "start_column" => 42, "end_column" => 45], "y"), $v->visitInt(darray["path" => __FILE__, "start_line" => 7, "end_line" => 7, "start_column" => 47, "end_column" => 48], 4)])]), vec[]);
+          }
+        ),
+      );
+    }
+  )();
+}

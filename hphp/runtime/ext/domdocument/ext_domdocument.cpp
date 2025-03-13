@@ -3706,7 +3706,7 @@ Variant HHVM_METHOD(DOMDocument, saveHTMLFile,
 
   /* encoding handled by property on doc */
   format = data->doc()->m_formatoutput;
-  bytes = htmlSaveFileFormat(file.data(), docp, nullptr, format);
+  bytes = htmlSaveFileFormat(file.data(), docp, "UTF-8", format);
   if (bytes == -1) {
     return false;
   }

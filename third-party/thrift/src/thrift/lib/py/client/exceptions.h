@@ -23,10 +23,7 @@
 
 #include <folly/ExceptionWrapper.h>
 
-namespace thrift {
-namespace py {
-namespace client {
-namespace exception {
+namespace thrift::py::client::exception {
 
 template <class T>
 std::unique_ptr<T> try_make_unique_exception(
@@ -35,7 +32,4 @@ std::unique_ptr<T> try_make_unique_exception(
   return e ? std::make_unique<T>(*e) : std::unique_ptr<T>();
 }
 
-} // namespace exception
-} // namespace client
-} // namespace py
-} // namespace thrift
+} // namespace thrift::py::client::exception

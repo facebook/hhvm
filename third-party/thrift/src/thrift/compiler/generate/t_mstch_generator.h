@@ -35,11 +35,11 @@ class t_mstch_generator : public t_whisker_generator {
  public:
   using t_whisker_generator::t_whisker_generator;
 
-  using compiler_options_map = mstch_context::compiler_options_map;
+  using compiler_options_map = t_whisker_generator::compiler_options_map;
   void process_options(
       const std::map<std::string, std::string>& options) override {
-    options_ = {options.begin(), options.end()};
-    mstch_context_.options = options_;
+    t_whisker_generator::process_options(options);
+    mstch_context_.options = compiler_options();
   }
 
  protected:
@@ -210,16 +210,14 @@ class t_mstch_generator : public t_whisker_generator {
     }
   }
 
+  // DEPRECATED: use has_compiler_option() instead
   bool has_option(const std::string& option) const;
+  // DEPRECATED: use get_compiler_option() instead
   std::optional<std::string> get_option(const std::string& option) const;
-  const compiler_options_map& options() const { return options_; }
+  // DEPRECATED: use compiler_options() instead
+  const compiler_options_map& options() const { return compiler_options(); }
 
  private:
-  /**
-   * Option pairs specified on command line for influencing generation behavior.
-   */
-  compiler_options_map options_;
-
   whisker::map globals() const final override;
   strictness_options strictness() const final;
 

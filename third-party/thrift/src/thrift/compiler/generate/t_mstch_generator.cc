@@ -320,7 +320,7 @@ mstch::map t_mstch_generator::dump(const string& value) {
 
 mstch::map t_mstch_generator::dump_options() {
   mstch::map result;
-  for (auto& elem : options_) {
+  for (auto& elem : compiler_options()) {
     result.emplace(elem.first, elem.second);
   }
   return prepend_prefix("option", std::move(result));
@@ -392,13 +392,15 @@ const std::string& t_mstch_generator::get_template(
 }
 
 bool t_mstch_generator::has_option(const std::string& option) const {
-  return options_.find(option) != options_.end();
+  return has_compiler_option(option);
 }
 
 std::optional<std::string> t_mstch_generator::get_option(
     const std::string& option) const {
-  auto itr = options_.find(option);
-  return itr != options_.end() ? itr->second : std::optional<std::string>();
+  if (std::optional<std::string_view> found = get_compiler_option(option)) {
+    return std::string{*found};
+  }
+  return std::nullopt;
 }
 
 mstch::map t_mstch_generator::prepend_prefix(

@@ -388,6 +388,39 @@ class t_whisker_generator : public t_generator {
       h_program>;
   using h_node = make_handle<t_node, h_named>;
 
+  bool has_compiler_option(std::string_view name) const {
+    return compiler_options_.find(name) != compiler_options_.end();
+  }
+  std::optional<std::string_view> get_compiler_option(
+      std::string_view name) const {
+    if (auto option = compiler_options_.find(name);
+        option != compiler_options_.end()) {
+      return std::string_view{option->second};
+    }
+    return std::nullopt;
+  }
+
+  void process_options(
+      const std::map<std::string, std::string>& options) override {
+    compiler_options_ = {options.begin(), options.end()};
+  }
+
+  using compiler_options_map = std::map<std::string, std::string, std::less<>>;
+  const compiler_options_map& compiler_options() const {
+    return compiler_options_;
+  }
+
+  /**
+   * Returns the source manager associated with parsing the Thrift AST.
+   */
+  const source_manager& source_mgr() const noexcept { return source_mgr_; }
+  /**
+   * Sets the output directory (`gen-*`).
+   */
+  void set_output_base_directory(std::string directory) noexcept {
+    out_dir_base_ = std::move(directory);
+  }
+
   struct cached_render_state {
     whisker::diagnostics_engine diagnostic_engine;
     std::shared_ptr<whisker::source_resolver> source_resolver;
@@ -398,6 +431,7 @@ class t_whisker_generator : public t_generator {
 
  private:
   std::optional<cached_render_state> cached_render_state_;
+  compiler_options_map compiler_options_;
 
   // whisker::source_resolver implementation
   class whisker_source_parser;

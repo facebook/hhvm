@@ -17,6 +17,7 @@
 package gotest
 
 import (
+	"bytes"
 	"testing"
 
 	"thrift/lib/go/thrift"
@@ -42,7 +43,7 @@ func BenchmarkStructRead(b *testing.B) {
 		{"hello1", "hello2", "hello3"}: "value1",
 	}
 
-	buffer := thrift.NewMemoryBufferLen(10 * 1024 * 1024)
+	buffer := bytes.NewBuffer(make([]byte, 0, 10*1024*1024))
 	proto := thrift.NewBinaryFormat(buffer)
 	err := originalStruct.Write(proto)
 	if err != nil {
@@ -53,7 +54,8 @@ func BenchmarkStructRead(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		buffer.Init(dataBytes)
+		buffer.Reset()
+		buffer.Write(dataBytes)
 		readTargetStruct := reflecttest.NewVariousFieldsStruct()
 		err = readTargetStruct.Read(proto)
 		if err != nil {
@@ -78,7 +80,7 @@ func BenchmarkStructWrite(b *testing.B) {
 		{"hello1", "hello2", "hello3"}: "value1",
 	}
 
-	buffer := thrift.NewMemoryBufferLen(10 * 1024 * 1024)
+	buffer := bytes.NewBuffer(make([]byte, 0, 10*1024*1024))
 	proto := thrift.NewBinaryFormat(buffer)
 
 	b.ResetTimer()

@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <chrono>
 #include <utility>
 
 #include <folly/ExceptionWrapper.h>
@@ -88,6 +87,74 @@ class Parser final : public folly::AsyncTransport::ReadCallback {
       allocatingParser_;
 };
 
-} // namespace apache::thrift::rocket
+template <class T>
+void Parser<T>::getReadBuffer(void** bufout, size_t* lenout) {
+  switch (mode_) {
+    case (detail::ParserMode::STRATEGY):
+      frameLengthParser_->getReadBuffer(bufout, lenout);
+      break;
+    case (detail::ParserMode::ALLOCATING):
+      allocatingParser_->getReadBuffer(bufout, lenout);
+      break;
+  }
+}
 
-#include <thrift/lib/cpp2/transport/rocket/framing/Parser-inl.h>
+template <class T>
+void Parser<T>::readDataAvailable(size_t nbytes) noexcept {
+  folly::DelayedDestruction::DestructorGuard dg(&this->owner_);
+  try {
+    switch (mode_) {
+      case (detail::ParserMode::STRATEGY):
+        frameLengthParser_->readDataAvailable(nbytes);
+        break;
+      case (detail::ParserMode::ALLOCATING):
+        allocatingParser_->readDataAvailable(nbytes);
+        break;
+    }
+  } catch (...) {
+    auto exceptionStr =
+        folly::exceptionStr(folly::current_exception()).toStdString();
+    LOG(ERROR) << "Bad frame received, closing connection: " << exceptionStr;
+    owner_.close(transport::TTransportException(exceptionStr));
+  }
+}
+
+template <class T>
+void Parser<T>::readEOF() noexcept {
+  folly::DelayedDestruction::DestructorGuard dg(&this->owner_);
+
+  owner_.close(transport::TTransportException(
+      transport::TTransportException::TTransportExceptionType::END_OF_FILE,
+      "Channel got EOF. Check for server hitting connection limit, "
+      "connection age timeout, server connection idle timeout, and server crashes."));
+}
+
+template <class T>
+void Parser<T>::readErr(const folly::AsyncSocketException& ex) noexcept {
+  folly::DelayedDestruction::DestructorGuard dg(&this->owner_);
+  owner_.close(transport::TTransportException(ex));
+}
+
+template <class T>
+void Parser<T>::readBufferAvailable(
+    std::unique_ptr<folly::IOBuf> buf) noexcept {
+  folly::DelayedDestruction::DestructorGuard dg(&this->owner_);
+  try {
+    switch (mode_) {
+      case (detail::ParserMode::STRATEGY):
+        frameLengthParser_->readBufferAvailable(std::move(buf));
+        break;
+      case (detail::ParserMode::ALLOCATING):
+        // Will throw not implemented runtime exception
+        allocatingParser_->readBufferAvailable(std::move(buf));
+        break;
+    }
+  } catch (...) {
+    auto exceptionStr =
+        folly::exceptionStr(folly::current_exception()).toStdString();
+    LOG(ERROR) << "Bad frame received, closing connection: " << exceptionStr;
+    owner_.close(transport::TTransportException(exceptionStr));
+  }
+}
+
+} // namespace apache::thrift::rocket

@@ -52,8 +52,7 @@ class EnumTest(unittest.TestCase):
 
         self.assertEqual(MyEnum1.ME1_1, 1)
         self.assertNotEqual(MyEnum1.ME1_1, 2)
-        with self.assertRaises(TypeError):
-            MyEnum1.ME1_1 > 0  # noqa
+        self.assertGreater(MyEnum1.ME1_1, 0)
 
 
 if __name__ == "__main__":

@@ -13,7 +13,7 @@ _fbthrift__module_name__ = "module.types"
 
 
 
-class MyEnum(thrift.py3.types.CompiledEnum):
+class MyEnum(thrift.py3.types.CompiledEnum, int):
     Zero = 0
     One = 1
 
@@ -37,13 +37,6 @@ class MyEnum(thrift.py3.types.CompiledEnum):
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
-    def __lt__(self, other):
-        if isinstance(other, MyEnum):
-            return self._fbthrift_value_ < other._fbthrift_value_
-
-        raise NotImplementedError(
-            "'<' only implemented for comparisons with MyEnum"
-        )
 
     def __int__(self):
         return self._fbthrift_value_
@@ -51,7 +44,7 @@ class MyEnum(thrift.py3.types.CompiledEnum):
     def __index__(self):
         return self._fbthrift_value_
 
-class TypedEnum(thrift.py3.types.CompiledEnum):
+class TypedEnum(thrift.py3.types.CompiledEnum, int):
     VAL1 = 0
     VAL2 = 1
 
@@ -75,13 +68,6 @@ class TypedEnum(thrift.py3.types.CompiledEnum):
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
-    def __lt__(self, other):
-        if isinstance(other, TypedEnum):
-            return self._fbthrift_value_ < other._fbthrift_value_
-
-        raise NotImplementedError(
-            "'<' only implemented for comparisons with TypedEnum"
-        )
 
     def __int__(self):
         return self._fbthrift_value_

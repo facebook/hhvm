@@ -13,7 +13,7 @@ _fbthrift__module_name__ = "module.types"
 
 
 
-class MyEnum(thrift.py3.types.CompiledEnum):
+class MyEnum(thrift.py3.types.CompiledEnum, int):
     MyValue1 = 0
     MyValue2 = 1
 
@@ -37,13 +37,6 @@ class MyEnum(thrift.py3.types.CompiledEnum):
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
-    def __lt__(self, other):
-        if isinstance(other, MyEnum):
-            return self._fbthrift_value_ < other._fbthrift_value_
-
-        raise NotImplementedError(
-            "'<' only implemented for comparisons with MyEnum"
-        )
 
     def __int__(self):
         return self._fbthrift_value_

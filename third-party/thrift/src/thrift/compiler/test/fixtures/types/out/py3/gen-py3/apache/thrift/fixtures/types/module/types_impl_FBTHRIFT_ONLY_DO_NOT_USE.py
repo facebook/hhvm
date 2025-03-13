@@ -13,7 +13,7 @@ _fbthrift__module_name__ = "apache.thrift.fixtures.types.module.types"
 
 
 
-class has_bitwise_ops(thrift.py3.types.CompiledEnum):
+class has_bitwise_ops(thrift.py3.types.CompiledEnum, int):
     none = 0
     zero = 1
     one = 2
@@ -40,13 +40,6 @@ class has_bitwise_ops(thrift.py3.types.CompiledEnum):
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
-    def __lt__(self, other):
-        if isinstance(other, has_bitwise_ops):
-            return self._fbthrift_value_ < other._fbthrift_value_
-
-        raise NotImplementedError(
-            "'<' only implemented for comparisons with has_bitwise_ops"
-        )
 
     def __int__(self):
         return self._fbthrift_value_
@@ -54,7 +47,7 @@ class has_bitwise_ops(thrift.py3.types.CompiledEnum):
     def __index__(self):
         return self._fbthrift_value_
 
-class is_unscoped(thrift.py3.types.CompiledEnum):
+class is_unscoped(thrift.py3.types.CompiledEnum, int):
     hello = 0
     world = 1
 
@@ -78,13 +71,6 @@ class is_unscoped(thrift.py3.types.CompiledEnum):
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
-    def __lt__(self, other):
-        if isinstance(other, is_unscoped):
-            return self._fbthrift_value_ < other._fbthrift_value_
-
-        raise NotImplementedError(
-            "'<' only implemented for comparisons with is_unscoped"
-        )
 
     def __int__(self):
         return self._fbthrift_value_
@@ -92,7 +78,7 @@ class is_unscoped(thrift.py3.types.CompiledEnum):
     def __index__(self):
         return self._fbthrift_value_
 
-class MyForwardRefEnum(thrift.py3.types.CompiledEnum):
+class MyForwardRefEnum(thrift.py3.types.CompiledEnum, int):
     ZERO = 0
     NONZERO = 12
 
@@ -116,13 +102,6 @@ class MyForwardRefEnum(thrift.py3.types.CompiledEnum):
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
-    def __lt__(self, other):
-        if isinstance(other, MyForwardRefEnum):
-            return self._fbthrift_value_ < other._fbthrift_value_
-
-        raise NotImplementedError(
-            "'<' only implemented for comparisons with MyForwardRefEnum"
-        )
 
     def __int__(self):
         return self._fbthrift_value_

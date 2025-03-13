@@ -42,7 +42,10 @@ import {{> common/thrift_types_module_path}}
 
 
 {{#program:enums}}
-class {{enum:name}}(thrift.python.types.{{^enum:flags?}}Enum{{/enum:flags?}}{{#enum:flags?}}Flag{{/enum:flags?}}{{!
+class {{enum:name}}(thrift.python.types.{{^enum:flags?}}Enum{{!
+}}{{^enum:no_int_base?}}, int{{/enum:no_int_base?}}{{!
+}}{{/enum:flags?}}{{!
+}}{{#enum:flags?}}Flag{{/enum:flags?}}{{!
 }}{{#program:intercompatible?}}, {{> common/thrift_types_module_path}}._fbthrift_compatible_with_{{enum:name}}{{/program:intercompatible?}}):
     {{#enum:values}}
     {{enum_value:py_name}}: {{enum:name}} = ...

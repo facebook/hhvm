@@ -13,7 +13,7 @@ _fbthrift__module_name__ = "module.types"
 
 
 
-class MyEnumA(thrift.py3.types.CompiledEnum):
+class MyEnumA(thrift.py3.types.CompiledEnum, int):
     fieldA = 1
     fieldB = 2
     fieldC = 4
@@ -38,13 +38,6 @@ class MyEnumA(thrift.py3.types.CompiledEnum):
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
-    def __lt__(self, other):
-        if isinstance(other, MyEnumA):
-            return self._fbthrift_value_ < other._fbthrift_value_
-
-        raise NotImplementedError(
-            "'<' only implemented for comparisons with MyEnumA"
-        )
 
     def __int__(self):
         return self._fbthrift_value_
@@ -52,7 +45,7 @@ class MyEnumA(thrift.py3.types.CompiledEnum):
     def __index__(self):
         return self._fbthrift_value_
 
-class AnnotatedEnum(thrift.py3.types.CompiledEnum):
+class AnnotatedEnum(thrift.py3.types.CompiledEnum, int):
     FIELDA = 2
     FIELDB = 4
     FIELDC = 9
@@ -77,13 +70,6 @@ class AnnotatedEnum(thrift.py3.types.CompiledEnum):
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
-    def __lt__(self, other):
-        if isinstance(other, AnnotatedEnum):
-            return self._fbthrift_value_ < other._fbthrift_value_
-
-        raise NotImplementedError(
-            "'<' only implemented for comparisons with AnnotatedEnum"
-        )
 
     def __int__(self):
         return self._fbthrift_value_
@@ -91,7 +77,7 @@ class AnnotatedEnum(thrift.py3.types.CompiledEnum):
     def __index__(self):
         return self._fbthrift_value_
 
-class AnnotatedEnum2(thrift.py3.types.CompiledEnum):
+class AnnotatedEnum2(thrift.py3.types.CompiledEnum, int):
     FIELDA = 2
     FIELDB = 4
     FIELDC = 9
@@ -116,13 +102,6 @@ class AnnotatedEnum2(thrift.py3.types.CompiledEnum):
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
-    def __lt__(self, other):
-        if isinstance(other, AnnotatedEnum2):
-            return self._fbthrift_value_ < other._fbthrift_value_
-
-        raise NotImplementedError(
-            "'<' only implemented for comparisons with AnnotatedEnum2"
-        )
 
     def __int__(self):
         return self._fbthrift_value_
@@ -130,7 +109,7 @@ class AnnotatedEnum2(thrift.py3.types.CompiledEnum):
     def __index__(self):
         return self._fbthrift_value_
 
-class MyEnumB(thrift.py3.types.CompiledEnum):
+class MyEnumB(thrift.py3.types.CompiledEnum, int):
     AField = 0
 
     __module__ = _fbthrift__module_name__
@@ -153,13 +132,6 @@ class MyEnumB(thrift.py3.types.CompiledEnum):
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
-    def __lt__(self, other):
-        if isinstance(other, MyEnumB):
-            return self._fbthrift_value_ < other._fbthrift_value_
-
-        raise NotImplementedError(
-            "'<' only implemented for comparisons with MyEnumB"
-        )
 
     def __int__(self):
         return self._fbthrift_value_

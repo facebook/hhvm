@@ -1090,12 +1090,18 @@ class py3_mstch_enum : public mstch_enum {
         {
             {"enum:flags?", &py3_mstch_enum::hasFlags},
             {"enum:cpp_name", &py3_mstch_enum::cpp_name},
+            {"enum:no_int_base?", &py3_mstch_enum::no_int_base},
         });
   }
 
   mstch::node hasFlags() {
     return enum_->has_annotation("py3.flags") ||
         enum_->find_structured_annotation_or_null(kPythonFlagsUri);
+  }
+
+  mstch::node no_int_base() {
+    return enum_->find_structured_annotation_or_null(
+               kPythonNoIntBaseClassDeprecatedUri) != nullptr;
   }
   mstch::node cpp_name() { return cpp2::get_name(enum_); }
 };

@@ -13,7 +13,7 @@ _fbthrift__module_name__ = "module.types"
 
 
 
-class EmptyEnum(thrift.py3.types.CompiledEnum):
+class EmptyEnum(thrift.py3.types.CompiledEnum, int):
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -35,13 +35,6 @@ class EmptyEnum(thrift.py3.types.CompiledEnum):
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
-    def __lt__(self, other):
-        if isinstance(other, EmptyEnum):
-            return self._fbthrift_value_ < other._fbthrift_value_
-
-        raise NotImplementedError(
-            "'<' only implemented for comparisons with EmptyEnum"
-        )
 
     def __int__(self):
         return self._fbthrift_value_
@@ -49,7 +42,7 @@ class EmptyEnum(thrift.py3.types.CompiledEnum):
     def __index__(self):
         return self._fbthrift_value_
 
-class City(thrift.py3.types.CompiledEnum):
+class City(thrift.py3.types.CompiledEnum, int):
     NYC = 0
     MPK = 1
     SEA = 2
@@ -75,13 +68,6 @@ class City(thrift.py3.types.CompiledEnum):
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
-    def __lt__(self, other):
-        if isinstance(other, City):
-            return self._fbthrift_value_ < other._fbthrift_value_
-
-        raise NotImplementedError(
-            "'<' only implemented for comparisons with City"
-        )
 
     def __int__(self):
         return self._fbthrift_value_
@@ -89,7 +75,7 @@ class City(thrift.py3.types.CompiledEnum):
     def __index__(self):
         return self._fbthrift_value_
 
-class Company(thrift.py3.types.CompiledEnum):
+class Company(thrift.py3.types.CompiledEnum, int):
     FACEBOOK = 0
     WHATSAPP = 1
     OCULUS = 2
@@ -116,13 +102,6 @@ class Company(thrift.py3.types.CompiledEnum):
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
-    def __lt__(self, other):
-        if isinstance(other, Company):
-            return self._fbthrift_value_ < other._fbthrift_value_
-
-        raise NotImplementedError(
-            "'<' only implemented for comparisons with Company"
-        )
 
     def __int__(self):
         return self._fbthrift_value_

@@ -221,10 +221,6 @@ type Flusher interface {
 	Flush() (err error)
 }
 
-// UnknownRemaining is used by transports that can not return a real answer
-// for RemainingBytes()
-const UnknownRemaining = ^uint64(0)
-
 // ReadSizer is a Reader with an additional RemainingBytes() capability (to get remaining bytes count).
 type ReadSizer interface {
 	io.Reader

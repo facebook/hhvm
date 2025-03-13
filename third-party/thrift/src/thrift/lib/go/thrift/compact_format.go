@@ -470,7 +470,7 @@ func (p *compactDecoder) ReadMapBegin() (types.Type /* kType */, types.Type /* v
 		return 0, 0, 0, invalidDataLength
 	}
 	remainingBytes := p.reader.RemainingBytes()
-	if uint64(size32*2) > remainingBytes || remainingBytes == types.UnknownRemaining {
+	if uint64(size32*2) > remainingBytes {
 		return 0, 0, 0, invalidDataLength
 	}
 	size := int(size32)
@@ -510,7 +510,7 @@ func (p *compactDecoder) ReadListBegin() (types.Type /* elemType */, int /* size
 		size = int(size2)
 	}
 	remainingBytes := p.reader.RemainingBytes()
-	if uint64(size) > remainingBytes || remainingBytes == types.UnknownRemaining {
+	if uint64(size) > remainingBytes {
 		return 0, 0, invalidDataLength
 	}
 
@@ -609,7 +609,7 @@ func (p *compactDecoder) ReadString() (string, error) {
 		return "", invalidDataLength
 	}
 	remainingBytes := p.reader.RemainingBytes()
-	if uint64(length) > remainingBytes || remainingBytes == types.UnknownRemaining {
+	if uint64(length) > remainingBytes {
 		return "", invalidDataLength
 	}
 
@@ -640,7 +640,7 @@ func (p *compactDecoder) ReadBinary() ([]byte, error) {
 	}
 	size := int(size32)
 	remainingBytes := p.reader.RemainingBytes()
-	if uint64(size32) > remainingBytes || remainingBytes == types.UnknownRemaining {
+	if uint64(size32) > remainingBytes {
 		return nil, invalidDataLength
 	}
 

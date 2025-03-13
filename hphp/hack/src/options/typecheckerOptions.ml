@@ -323,3 +323,5 @@ let enable_class_pointer_hint t =
 let class_class_type t = t.GlobalOptions.class_class_type
 
 let safe_abstract t = t.GlobalOptions.safe_abstract
+
+let allow_class_string_cast t = t.GlobalOptions.allow_class_string_cast

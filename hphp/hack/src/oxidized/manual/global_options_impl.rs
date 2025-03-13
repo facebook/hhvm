@@ -145,6 +145,7 @@ impl Default for GlobalOptions {
             class_sub_classname: true,
             class_class_type: false,
             safe_abstract: false,
+            allow_class_string_cast: true,
             tco_new_exhaustivity_check: false,
         }
     }

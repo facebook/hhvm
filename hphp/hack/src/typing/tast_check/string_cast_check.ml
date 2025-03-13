@@ -63,8 +63,7 @@ let rec is_stringish env ty =
   | Taccess _ ->
     false
   | Tclass_ptr _ ->
-    (* TODO(T199606542) May need to relax this, possibly can use this to drive a codemod *)
-    false
+    TypecheckerOptions.allow_class_string_cast (Env.get_tcopt env)
   | Tunapplied_alias _ ->
     Typing_defs.error_Tunapplied_alias_in_illegal_context ()
 

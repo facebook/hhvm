@@ -279,6 +279,7 @@ type t = {
   class_class_type: bool;  (** When true, C::class : class<C> *)
   safe_abstract: bool;
       (** Enable Safe Abstract features https://fburl.com/hack-safe-abstract *)
+  allow_class_string_cast: bool;  (** Admits (string)$c when $c: class<T>  *)
   tco_new_exhaustivity_check: bool;
       (** Enables strict exhaustivity checks on switch statements and disables
           the legacy ones *)
@@ -392,6 +393,7 @@ val set :
   ?class_sub_classname:bool ->
   ?class_class_type:bool ->
   ?safe_abstract:bool ->
+  ?allow_class_string_cast:bool ->
   ?tco_new_exhaustivity_check:bool ->
   t ->
   t

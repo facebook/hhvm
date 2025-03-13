@@ -704,7 +704,7 @@ impl<B: Buf> SimpleJsonProtocolDeserializer<B> {
             }
             ValueKind::Array => {
                 let mut vec = Vec::new();
-                self.read_list_begin()?;
+                self.read_list_begin_unchecked()?;
                 while self.read_list_value_begin()? {
                     let element = self.read_json_value(max_depth - 1)?;
                     vec.push(element);
@@ -776,7 +776,7 @@ impl<B: Buf> SimpleJsonProtocolDeserializer<B> {
                 self.read_struct_end()?;
             }
             TType::List => {
-                let (_, len) = self.read_list_begin()?;
+                let (_, len) = self.read_list_begin_unchecked()?;
                 let mut idx = 0;
                 loop {
                     let more = self.read_list_value_begin()?;
@@ -915,7 +915,7 @@ impl<B: Buf> ProtocolReader for SimpleJsonProtocolDeserializer<B> {
         Ok(())
     }
     #[inline]
-    fn read_map_begin(&mut self) -> Result<(TType, TType, Option<usize>)> {
+    fn read_map_begin_unchecked(&mut self) -> Result<(TType, TType, Option<usize>)> {
         self.eat(b"{").context("Expected a start of a list")?;
         // Meaningless type, self.skip_inner and deserialize do not depend on it
         Ok((TType::Stop, TType::Stop, None))
@@ -954,7 +954,7 @@ impl<B: Buf> ProtocolReader for SimpleJsonProtocolDeserializer<B> {
         Ok(())
     }
     #[inline]
-    fn read_list_begin(&mut self) -> Result<(TType, Option<usize>)> {
+    fn read_list_begin_unchecked(&mut self) -> Result<(TType, Option<usize>)> {
         self.eat(b"[").context("Expected a start of a list")?;
         Ok((TType::Stop, None))
     }
@@ -982,8 +982,8 @@ impl<B: Buf> ProtocolReader for SimpleJsonProtocolDeserializer<B> {
         Ok(())
     }
     #[inline]
-    fn read_set_begin(&mut self) -> Result<(TType, Option<usize>)> {
-        self.read_list_begin()
+    fn read_set_begin_unchecked(&mut self) -> Result<(TType, Option<usize>)> {
+        self.read_list_begin_unchecked()
     }
     #[inline]
     fn read_set_value_begin(&mut self) -> Result<bool> {

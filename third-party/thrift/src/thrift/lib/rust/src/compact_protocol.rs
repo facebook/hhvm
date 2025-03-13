@@ -680,7 +680,7 @@ impl<B: BufExt> ProtocolReader for CompactProtocolDeserializer<B> {
     }
 
     #[inline]
-    fn read_map_begin(&mut self) -> Result<(TType, TType, Option<usize>)> {
+    fn read_map_begin_unchecked(&mut self) -> Result<(TType, TType, Option<usize>)> {
         let size = self.read_varint_u64()? as usize;
 
         ensure_err!(
@@ -718,7 +718,7 @@ impl<B: BufExt> ProtocolReader for CompactProtocolDeserializer<B> {
     }
 
     #[inline]
-    fn read_list_begin(&mut self) -> Result<(TType, Option<usize>)> {
+    fn read_list_begin_unchecked(&mut self) -> Result<(TType, Option<usize>)> {
         let szty = self.read_byte()?;
         let cty = CType::try_from(szty & 0x0f)?;
         let elem_type = TType::from(cty);
@@ -752,8 +752,8 @@ impl<B: BufExt> ProtocolReader for CompactProtocolDeserializer<B> {
     }
 
     #[inline]
-    fn read_set_begin(&mut self) -> Result<(TType, Option<usize>)> {
-        self.read_list_begin()
+    fn read_set_begin_unchecked(&mut self) -> Result<(TType, Option<usize>)> {
+        self.read_list_begin_unchecked()
     }
 
     #[inline]

@@ -59,7 +59,7 @@ fn read_write_bool_list() {
     let mut deserializer = <BinaryProtocol>::deserializer(Cursor::new(buf));
     {
         let (thetype2, thelen2) = deserializer
-            .read_list_begin()
+            .read_list_begin_unchecked()
             .expect("failed to read header");
 
         assert_eq!(thetype, thetype2);
@@ -98,7 +98,7 @@ fn read_write_string_list() {
     let mut deserializer = <BinaryProtocol>::deserializer(Cursor::new(buf));
     {
         let (thetype2, thelen2) = deserializer
-            .read_list_begin()
+            .read_list_begin_unchecked()
             .expect("failed to read header");
 
         assert_eq!(thetype, thetype2);
@@ -133,7 +133,7 @@ fn read_write_byte_list() {
     let mut deserializer = <BinaryProtocol>::deserializer(Cursor::new(buf));
     {
         let (thetype2, thelen2) = deserializer
-            .read_list_begin()
+            .read_list_begin_unchecked()
             .expect("failed to read header");
 
         assert_eq!(thetype, thetype2);
@@ -165,7 +165,7 @@ fn read_write_i16_list() {
     let mut deserializer = <BinaryProtocol>::deserializer(Cursor::new(buf));
     {
         let (thetype2, thelen2) = deserializer
-            .read_list_begin()
+            .read_list_begin_unchecked()
             .expect("failed to read header");
 
         assert_eq!(thetype, thetype2);
@@ -197,7 +197,7 @@ fn read_write_i32_list() {
     let mut deserializer = <BinaryProtocol>::deserializer(Cursor::new(buf));
     {
         let (thetype2, thelen2) = deserializer
-            .read_list_begin()
+            .read_list_begin_unchecked()
             .expect("failed to read header");
 
         assert_eq!(thetype, thetype2);
@@ -229,7 +229,7 @@ fn read_write_i64_list() {
     let mut deserializer = <BinaryProtocol>::deserializer(Cursor::new(buf));
     {
         let (thetype2, thelen2) = deserializer
-            .read_list_begin()
+            .read_list_begin_unchecked()
             .expect("failed to read header");
 
         assert_eq!(thetype, thetype2);
@@ -261,7 +261,7 @@ fn read_write_f32_list() {
     let mut deserializer = <BinaryProtocol>::deserializer(Cursor::new(buf));
     {
         let (thetype2, thelen2) = deserializer
-            .read_list_begin()
+            .read_list_begin_unchecked()
             .expect("failed to read header");
 
         assert_eq!(thetype, thetype2);
@@ -299,7 +299,7 @@ fn read_write_f64_list() {
     let mut deserializer = <BinaryProtocol>::deserializer(Cursor::new(buf));
     {
         let (thetype2, thelen2) = deserializer
-            .read_list_begin()
+            .read_list_begin_unchecked()
             .expect("failed to read header");
 
         assert_eq!(thetype, thetype2);
@@ -337,7 +337,7 @@ fn read_write_f64_set() {
     let mut deserializer = <BinaryProtocol>::deserializer(Cursor::new(buf));
     {
         let (thetype2, thelen2) = deserializer
-            .read_set_begin()
+            .read_set_begin_unchecked()
             .expect("failed to read header");
 
         assert_eq!(thetype, thetype2);
@@ -376,7 +376,7 @@ fn read_write_string_i64_map() {
     let mut deserializer = <BinaryProtocol>::deserializer(Cursor::new(buf));
     {
         let (key_type2, value_type2, thelen2) = deserializer
-            .read_map_begin()
+            .read_map_begin_unchecked()
             .expect("failed to read header");
 
         assert_eq!(key_type, key_type2);

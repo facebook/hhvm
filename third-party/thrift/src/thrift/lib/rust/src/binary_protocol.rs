@@ -332,7 +332,7 @@ impl<B: BufExt> ProtocolReader for BinaryProtocolDeserializer<B> {
         Ok(())
     }
     #[inline]
-    fn read_map_begin(&mut self) -> Result<(TType, TType, Option<usize>)> {
+    fn read_map_begin_unchecked(&mut self) -> Result<(TType, TType, Option<usize>)> {
         let k_type = TType::try_from(self.read_byte()?)?;
         let v_type = TType::try_from(self.read_byte()?)?;
 
@@ -360,7 +360,7 @@ impl<B: BufExt> ProtocolReader for BinaryProtocolDeserializer<B> {
         Ok(())
     }
     #[inline]
-    fn read_list_begin(&mut self) -> Result<(TType, Option<usize>)> {
+    fn read_list_begin_unchecked(&mut self) -> Result<(TType, Option<usize>)> {
         let elem_type = TType::try_from(self.read_byte()?)?;
         let size = self.read_i32()?;
         ensure_err!(size >= 0, ProtocolError::InvalidDataLength);
@@ -381,7 +381,7 @@ impl<B: BufExt> ProtocolReader for BinaryProtocolDeserializer<B> {
         Ok(())
     }
     #[inline]
-    fn read_set_begin(&mut self) -> Result<(TType, Option<usize>)> {
+    fn read_set_begin_unchecked(&mut self) -> Result<(TType, Option<usize>)> {
         let elem_type = TType::try_from(self.read_byte()?)?;
         let size = self.read_i32()?;
         ensure_err!(size >= 0, ProtocolError::InvalidDataLength);

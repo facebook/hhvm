@@ -2780,17 +2780,8 @@ pub(crate) mod r#impl {
     {
         #[inline]
         fn read(p: &mut P) -> ::anyhow::Result<Self> {
-            let (_key_ty, _val_ty, len) = p.read_map_begin()?;
-            let mut map = {
-                let cap = len.unwrap_or(0);
-                if match cap.checked_mul(P::min_size::<::std::string::String>() + P::min_size::<::std::primitive::i64>()) {
-                    ::std::option::Option::None => true,
-                    ::std::option::Option::Some(total) => !p.can_advance(total),
-                } {
-                    ::anyhow::bail!(::fbthrift::ProtocolError::EOF);
-                }
-                <::sorted_vector_map::SortedVectorMap<::std::string::String, ::std::primitive::i64>>::with_capacity(cap)
-            };
+            let (_key_ty, _val_ty, len) = p.read_map_begin(P::min_size::<::std::string::String>() + P::min_size::<::std::primitive::i64>())?;
+            let mut map = <::sorted_vector_map::SortedVectorMap<::std::string::String, ::std::primitive::i64>>::with_capacity(len.unwrap_or(0));
 
             if let ::std::option::Option::Some(0) = len {
                 return ::std::result::Result::Ok(LocalImpl(map));

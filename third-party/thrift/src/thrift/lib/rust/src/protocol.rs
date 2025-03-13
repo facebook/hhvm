@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use anyhow::bail;
+
 use crate::binary_type::CopyFromBuf;
 use crate::binary_type::Discard;
 use crate::bufext::BufMutExt;
@@ -117,7 +119,7 @@ fn skip_inner<P: ProtocolReader + ?Sized>(
             p.read_struct_end()?;
         }
         TType::Map => {
-            let (key_type, value_type, len) = p.read_map_begin()?;
+            let (key_type, value_type, len) = p.read_map_begin_unchecked()?;
             if len != Some(0) {
                 let mut idx = 0;
                 loop {
@@ -139,7 +141,7 @@ fn skip_inner<P: ProtocolReader + ?Sized>(
             p.read_map_end()?;
         }
         TType::Set => {
-            let (elem_type, len) = p.read_set_begin()?;
+            let (elem_type, len) = p.read_set_begin_unchecked()?;
             if len != Some(0) {
                 let mut idx = 0;
                 loop {
@@ -159,7 +161,7 @@ fn skip_inner<P: ProtocolReader + ?Sized>(
             p.read_set_end()?;
         }
         TType::List => {
-            let (elem_type, len) = p.read_list_begin()?;
+            let (elem_type, len) = p.read_list_begin_unchecked()?;
             if len != Some(0) {
                 let mut idx = 0;
                 loop {
@@ -232,36 +234,120 @@ pub trait ProtocolReader {
     fn read_message_begin<F, T>(&mut self, method: F) -> Result<(T, MessageType, u32)>
     where
         F: FnOnce(&[u8]) -> T;
+
     fn read_message_end(&mut self) -> Result<()>;
+
     fn read_struct_begin<F, T>(&mut self, strukt: F) -> Result<T>
     where
         F: FnOnce(&[u8]) -> T;
+
     fn read_struct_end(&mut self) -> Result<()>;
+
     fn read_field_begin<F, T>(&mut self, field: F, fields: &[Field]) -> Result<(T, TType, i16)>
     where
         F: FnOnce(&[u8]) -> T;
+
     fn read_field_end(&mut self) -> Result<()>;
-    fn read_map_begin(&mut self) -> Result<(TType, TType, Option<usize>)>;
+
+    /// Callers must not directly use the returned size for preallocation such
+    /// as `with_capacity`, as this would expose DoS. For a size that's safe to
+    /// preallocate, use `read_map_begin`.
+    fn read_map_begin_unchecked(&mut self) -> Result<(TType, TType, Option<usize>)>;
+
+    fn read_map_begin(
+        &mut self,
+        necessary_minimum_size_per_entry: usize,
+    ) -> Result<(TType, TType, Option<usize>)> {
+        let (key_type, value_type, size) = self.read_map_begin_unchecked()?;
+        if let Some(size) = size {
+            if match size.checked_mul(necessary_minimum_size_per_entry) {
+                None => true,
+                Some(total) => !self.can_advance(total),
+            } {
+                bail!(ProtocolError::EOF);
+            }
+        }
+        Ok((key_type, value_type, size))
+    }
+
     fn read_map_key_begin(&mut self) -> Result<bool>;
+
     fn read_map_value_begin(&mut self) -> Result<()>;
+
     fn read_map_value_end(&mut self) -> Result<()>;
+
     fn read_map_end(&mut self) -> Result<()>;
-    fn read_list_begin(&mut self) -> Result<(TType, Option<usize>)>;
+
+    /// Callers must not directly use the returned size for preallocation such
+    /// as `with_capacity`, as this would expose DoS. For a size that's safe to
+    /// preallocate, use `read_list_begin`.
+    fn read_list_begin_unchecked(&mut self) -> Result<(TType, Option<usize>)>;
+
+    fn read_list_begin(
+        &mut self,
+        necessary_minimum_size_per_entry: usize,
+    ) -> Result<(TType, Option<usize>)> {
+        let (element_type, size) = self.read_list_begin_unchecked()?;
+        if let Some(size) = size {
+            if match size.checked_mul(necessary_minimum_size_per_entry) {
+                None => true,
+                Some(total) => !self.can_advance(total),
+            } {
+                bail!(ProtocolError::EOF);
+            }
+        }
+        Ok((element_type, size))
+    }
+
     fn read_list_value_begin(&mut self) -> Result<bool>;
+
     fn read_list_value_end(&mut self) -> Result<()>;
+
     fn read_list_end(&mut self) -> Result<()>;
-    fn read_set_begin(&mut self) -> Result<(TType, Option<usize>)>;
+
+    /// Callers must not directly use the returned size for preallocation such
+    /// as `with_capacity`, as this would expose DoS. For a size that's safe to
+    /// preallocate, use `read_set_begin`.
+    fn read_set_begin_unchecked(&mut self) -> Result<(TType, Option<usize>)>;
+
+    fn read_set_begin(
+        &mut self,
+        necessary_minimum_size_per_entry: usize,
+    ) -> Result<(TType, Option<usize>)> {
+        let (entry_type, size) = self.read_set_begin_unchecked()?;
+        if let Some(size) = size {
+            if match size.checked_mul(necessary_minimum_size_per_entry) {
+                None => true,
+                Some(total) => !self.can_advance(total),
+            } {
+                bail!(ProtocolError::EOF);
+            }
+        }
+        Ok((entry_type, size))
+    }
+
     fn read_set_value_begin(&mut self) -> Result<bool>;
+
     fn read_set_value_end(&mut self) -> Result<()>;
+
     fn read_set_end(&mut self) -> Result<()>;
+
     fn read_bool(&mut self) -> Result<bool>;
+
     fn read_byte(&mut self) -> Result<i8>;
+
     fn read_i16(&mut self) -> Result<i16>;
+
     fn read_i32(&mut self) -> Result<i32>;
+
     fn read_i64(&mut self) -> Result<i64>;
+
     fn read_double(&mut self) -> Result<f64>;
+
     fn read_float(&mut self) -> Result<f32>;
+
     fn read_string(&mut self) -> Result<String>;
+
     fn read_binary<V: CopyFromBuf>(&mut self) -> Result<V>;
 
     /// The smallest number of bytes in which a collection element of type `T`

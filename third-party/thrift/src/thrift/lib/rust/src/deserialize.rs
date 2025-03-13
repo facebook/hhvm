@@ -21,11 +21,9 @@ use std::collections::HashSet;
 use std::hash::Hash;
 use std::sync::Arc;
 
-use anyhow::bail;
 use bytes::Bytes;
 use ordered_float::OrderedFloat;
 
-use crate::errors::ProtocolError;
 use crate::protocol::should_break;
 use crate::protocol::ProtocolReader;
 use crate::ttype::GetTType;
@@ -196,7 +194,8 @@ where
     T: Deserialize<P> + Ord,
 {
     fn read(p: &mut P) -> Result<Self> {
-        let (_elem_ty, len) = p.read_set_begin()?;
+        // Unchecked: must not use `len` for preallocation (`with_capacity`)
+        let (_elem_ty, len) = p.read_set_begin_unchecked()?;
         let mut bset = BTreeSet::new();
 
         if let Some(0) = len {
@@ -230,17 +229,8 @@ where
     S: std::hash::BuildHasher + Default,
 {
     fn read(p: &mut P) -> Result<Self> {
-        let (_elem_ty, len) = p.read_set_begin()?;
-        let mut hset = {
-            let cap = len.unwrap_or(0);
-            if match cap.checked_mul(P::min_size::<T>()) {
-                None => true,
-                Some(total) => !p.can_advance(total),
-            } {
-                bail!(ProtocolError::EOF);
-            }
-            HashSet::with_capacity_and_hasher(cap, S::default())
-        };
+        let (_elem_ty, len) = p.read_set_begin(P::min_size::<T>())?;
+        let mut hset = HashSet::with_capacity_and_hasher(len.unwrap_or(0), S::default());
 
         if let Some(0) = len {
             return Ok(hset);
@@ -273,7 +263,8 @@ where
     V: Deserialize<P>,
 {
     fn read(p: &mut P) -> Result<Self> {
-        let (_key_ty, _val_ty, len) = p.read_map_begin()?;
+        // Unchecked: must not use `len` for preallocation (`with_capacity`)
+        let (_key_ty, _val_ty, len) = p.read_map_begin_unchecked()?;
         let mut btree = BTreeMap::new();
 
         if let Some(0) = len {
@@ -310,17 +301,8 @@ where
     S: std::hash::BuildHasher + Default,
 {
     fn read(p: &mut P) -> Result<Self> {
-        let (_key_ty, _val_ty, len) = p.read_map_begin()?;
-        let mut hmap = {
-            let cap = len.unwrap_or(0);
-            if match cap.checked_mul(P::min_size::<K>() + P::min_size::<V>()) {
-                None => true,
-                Some(total) => !p.can_advance(total),
-            } {
-                bail!(ProtocolError::EOF);
-            }
-            HashMap::with_capacity_and_hasher(cap, S::default())
-        };
+        let (_key_ty, _val_ty, len) = p.read_map_begin(P::min_size::<K>() + P::min_size::<V>())?;
+        let mut hmap = HashMap::with_capacity_and_hasher(len.unwrap_or(0), S::default());
 
         if let Some(0) = len {
             return Ok(hmap);
@@ -355,17 +337,8 @@ where
 {
     /// Vec<T> is Thrift List type
     fn read(p: &mut P) -> Result<Self> {
-        let (_elem_ty, len) = p.read_list_begin()?;
-        let mut list = {
-            let cap = len.unwrap_or(0);
-            if match cap.checked_mul(P::min_size::<T>()) {
-                None => true,
-                Some(total) => !p.can_advance(total),
-            } {
-                bail!(ProtocolError::EOF);
-            }
-            Vec::with_capacity(cap)
-        };
+        let (_elem_ty, len) = p.read_list_begin(P::min_size::<T>())?;
+        let mut list = Vec::with_capacity(len.unwrap_or(0));
 
         if let Some(0) = len {
             return Ok(list);

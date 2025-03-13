@@ -31,12 +31,18 @@
 
 #include <boost/algorithm/string/split.hpp>
 
+namespace w = whisker::make;
+using whisker::array;
+using whisker::i64;
 using whisker::map;
+using whisker::object;
+using whisker::string;
 
 template <typename T>
 using prototype = whisker::prototype<T>;
 
 namespace dsl = whisker::dsl;
+using dsl::function;
 template <typename T>
 using prototype_builder = dsl::prototype_builder<T>;
 
@@ -45,30 +51,70 @@ namespace apache::thrift::compiler {
 prototype<t_node>::ptr t_whisker_generator::make_prototype_for_node(
     const prototype_database&) const {
   prototype_builder<h_node> def;
+  def.property("lineno", [&](const t_node& self) {
+    auto loc = self.src_range().begin;
+    return loc != source_location()
+        ? i64(resolved_location(self.src_range().begin, source_mgr()).line())
+        : i64(0);
+  });
   return std::move(def).make();
 }
 
 prototype<t_named>::ptr t_whisker_generator::make_prototype_for_named(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_named>::extends(proto.of<t_node>());
+  def.property("name", mem_fn(&t_named::name));
+  def.property("program", mem_fn(&t_named::program, proto.of<t_program>()));
   return std::move(def).make();
 }
 
 prototype<t_type>::ptr t_whisker_generator::make_prototype_for_type(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_type>::extends(proto.of<t_named>());
+  // clang-format off
+  def.property("void?",             mem_fn(&t_type::is_void));
+  def.property("primitive?",        mem_fn(&t_type::is_primitive_type));
+  def.property("string?",           mem_fn(&t_type::is_string));
+  def.property("bool?",             mem_fn(&t_type::is_bool));
+  def.property("byte?",             mem_fn(&t_type::is_byte));
+  def.property("i16?",              mem_fn(&t_type::is_i16));
+  def.property("i32?",              mem_fn(&t_type::is_i32));
+  def.property("i64?",              mem_fn(&t_type::is_i64));
+  def.property("float?",            mem_fn(&t_type::is_float));
+  def.property("double?",           mem_fn(&t_type::is_double));
+  def.property("typedef?",          mem_fn(&t_type::is_typedef));
+  def.property("enum?",             mem_fn(&t_type::is_enum));
+  def.property("struct?",           mem_fn(&t_type::is_struct));
+  def.property("union?",            mem_fn(&t_type::is_union));
+  def.property("exception?",        mem_fn(&t_type::is_exception));
+  def.property("container?",        mem_fn(&t_type::is_container));
+  def.property("list?",             mem_fn(&t_type::is_list));
+  def.property("set?",              mem_fn(&t_type::is_set));
+  def.property("map?",              mem_fn(&t_type::is_map));
+  def.property("binary?",           mem_fn(&t_type::is_binary));
+  def.property("paramlist?",        mem_fn(&t_type::is_paramlist));
+  def.property("string_or_binary?", mem_fn(&t_type::is_string_or_binary));
+  def.property("any_int?",          mem_fn(&t_type::is_any_int));
+  def.property("floating_point?",   mem_fn(&t_type::is_floating_point));
+  def.property("scalar?",           mem_fn(&t_type::is_scalar));
+  def.property("int_or_enum?",      mem_fn(&t_type::is_int_or_enum));
+  // clang-format on
   return std::move(def).make();
 }
 
 prototype<t_typedef>::ptr t_whisker_generator::make_prototype_for_typedef(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_typedef>::extends(proto.of<t_type>());
+  def.property("resolved", [&](const t_typedef& self) {
+    return proto.create<t_type>(self.type().deref());
+  });
   return std::move(def).make();
 }
 
 prototype<t_structured>::ptr t_whisker_generator::make_prototype_for_structured(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_structured>::extends(proto.of<t_type>());
+  def.property("fields", mem_fn(&t_structured::fields, proto.of<t_field>()));
   return std::move(def).make();
 }
 
@@ -112,6 +158,10 @@ t_whisker_generator::make_prototype_for_primitive_type(
 prototype<t_field>::ptr t_whisker_generator::make_prototype_for_field(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_field>::extends(proto.of<t_named>());
+  def.property("id", [](const t_field& self) { return i64(self.id()); });
+  def.property("type", [&](const t_field& self) {
+    return proto.create<t_type>(self.type().deref());
+  });
   return std::move(def).make();
 }
 
@@ -154,18 +204,46 @@ prototype<t_list>::ptr t_whisker_generator::make_prototype_for_list(
 prototype<t_program>::ptr t_whisker_generator::make_prototype_for_program(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_program>::extends(proto.of<t_named>());
+  def.property("package", mem_fn(&t_program::package, proto.of<t_package>()));
+  def.property("doc", mem_fn(&t_program::doc));
+  def.property("include_prefix", mem_fn(&t_program::include_prefix));
+  def.property("includes", mem_fn(&t_program::includes, proto.of<t_include>()));
+  def.property("namespaces", [&](const t_program& self) -> map {
+    map result;
+    for (const auto& [language, value] : self.namespaces()) {
+      result[language] = string(value);
+    }
+    return result;
+  });
+  def.function(
+      "namespace_of", [&](const t_program& self, function::context ctx) {
+        ctx.declare_arity(0);
+        ctx.declare_named_arguments({"language"});
+        return self.get_namespace(*ctx.named_argument<string>("language"));
+      });
+  def.property(
+      "structured_definitions",
+      mem_fn(&t_program::structured_definitions, proto.of<t_structured>()));
+  def.property("services", mem_fn(&t_program::services, proto.of<t_service>()));
+  def.property("typedefs", mem_fn(&t_program::typedefs, proto.of<t_typedef>()));
   return std::move(def).make();
 }
 
 prototype<t_package>::ptr t_whisker_generator::make_prototype_for_package(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_package>::extends(proto.of<t_node>());
+  def.property("explicit?", mem_fn(&t_package::is_explicit));
+  def.property("empty?", mem_fn(&t_package::empty));
+  def.property("name", mem_fn(&t_package::name));
   return std::move(def).make();
 }
 
 prototype<t_include>::ptr t_whisker_generator::make_prototype_for_include(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_include>::extends(proto.of<t_node>());
+  def.property("program", [&](const t_include& self) {
+    return proto.create<t_program>(*self.get_program());
+  });
   return std::move(def).make();
 }
 
@@ -190,12 +268,15 @@ prototype<t_function>::ptr t_whisker_generator::make_prototype_for_function(
 prototype<t_interface>::ptr t_whisker_generator::make_prototype_for_interface(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_interface>::extends(proto.of<t_type>());
+  def.property(
+      "functions", mem_fn(&t_interface::functions, proto.of<t_function>()));
   return std::move(def).make();
 }
 
 prototype<t_service>::ptr t_whisker_generator::make_prototype_for_service(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_service>::extends(proto.of<t_interface>());
+  def.property("extends", mem_fn(&t_service::extends, proto.of<t_service>()));
   return std::move(def).make();
 }
 

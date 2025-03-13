@@ -209,11 +209,18 @@ class t_whisker_generator : public t_generator {
     /**
      * Gets the cached prototype for the given type, or throws an exception if
      * the type is unknown.
+     *
+     * If allow_lazy is true, then a failed lookup falls back to a "lazy"
+     * prototype which is resolved when used. This is helpful when there is a
+     * cycle of type references.
      */
     template <typename T>
-    prototype_ptr<T> of() const {
+    prototype_ptr<T> of(bool allow_lazy = true) const {
       auto found = prototypes_.find(std::type_index(typeid(T)));
       if (found == prototypes_.end()) {
+        if (allow_lazy) {
+          return this->lazy<T>();
+        }
         throw std::runtime_error(fmt::format(
             "Prototype for type '{}' does not exist.",
             boost::core::demangle(typeid(T).name())));
@@ -226,6 +233,62 @@ class t_whisker_generator : public t_generator {
             typeid(T).name()));
       }
       return casted;
+    }
+
+    /**
+     * Creates a native_handle for the given reference with a prototype stored
+     * in this database.
+     *
+     * std::remove_reference_t<T> forces the caller to explicitly specify the
+     * template argument. This is to prevent accidental use of the wrong type.
+     */
+    template <typename T>
+    whisker::native_handle<T> create(
+        whisker::managed_ptr<std::remove_reference_t<T>> o) const {
+      return whisker::native_handle<T>(std::move(o), of<T>());
+    }
+    template <typename T>
+    whisker::native_handle<T> create(
+        const std::remove_reference_t<T>& o) const {
+      return this->create<T>(whisker::manage_as_static(o));
+    }
+    template <typename T>
+    whisker::object create_nullable(const std::remove_reference_t<T>* o) const {
+      return o == nullptr ? whisker::make::null
+                          : whisker::object(this->create<T>(*o));
+    }
+
+    /**
+     * A "lazy" prototype is one whose definition can be deferred until first
+     * use. This allows prototypes to refer to each other in cycles that have
+     * cyclic references.
+     *
+     * Note that cyclical prototypes chains are still disallowed.
+     */
+    template <typename T>
+    prototype_ptr<T> lazy() const {
+      class lazy_prototype final : public prototype<T> {
+       public:
+        explicit lazy_prototype(const prototype_database& db) : db_(db) {}
+
+        const prototype<>::descriptor* find_descriptor(
+            std::string_view name) const final {
+          return this->resolve()->find_descriptor(name);
+        }
+        std::set<std::string> keys() const final {
+          return this->resolve()->keys();
+        }
+        const prototype<>::ptr& parent() const final {
+          return this->resolve()->parent();
+        }
+
+       private:
+        prototype_ptr<T> resolve() const {
+          return db_.of<T>(false /* allow_lazy */);
+        }
+        const prototype_database& db_;
+      };
+      return std::make_shared<const lazy_prototype>(*this);
     }
 
    private:
@@ -387,6 +450,108 @@ class t_whisker_generator : public t_generator {
       h_type,
       h_program>;
   using h_node = make_handle<t_node, h_named>;
+
+  // The `mem_fn` family of functions below are intended to create properties in
+  // `dsl::make_prototype`. These helpers make it easy to map member functions
+  // of `t_*` AST nodes to a property returning whisker::object.
+
+  /**
+   * Marshals any whisker-compatible object directly.
+   */
+  template <
+      typename R,
+      typename Self,
+      std::enable_if_t<whisker::is_any_object_type<std::decay_t<R>>>* = nullptr>
+  static auto mem_fn(R (Self::*function)() const) {
+    return [function](const Self& self) -> whisker::object {
+      return whisker::object(std::decay_t<R>((self.*function)()));
+    };
+  }
+  // Special case for std::string_view, which is *not* a whisker-compatible
+  // object but we can copy it into std::string.
+  template <typename Self>
+  static auto mem_fn(std::string_view (Self::*function)() const) {
+    return [function](const Self& self) -> whisker::object {
+      return whisker::object(whisker::string((self.*function)()));
+    };
+  }
+
+  /**
+   * Marshals any `t_*` AST node with the provided prototype.
+   */
+  template <
+      typename R,
+      typename Self,
+      std::enable_if_t<std::is_base_of_v<t_node, R>>* = nullptr>
+  static auto mem_fn(
+      R* (Self::*function)() const, prototype_ptr<std::decay_t<R>> prototype) {
+    return [function,
+            proto = std::move(prototype)](const Self& self) -> whisker::object {
+      const std::decay_t<R>* ptr = (self.*function)();
+      return ptr == nullptr
+          ? whisker::make::null
+          : whisker::object(whisker::native_handle<std::decay_t<R>>(
+                whisker::manage_as_static(*ptr), proto));
+    };
+  }
+  template <
+      typename R,
+      typename Self,
+      std::enable_if_t<std::is_base_of_v<t_node, R>>* = nullptr>
+  static auto mem_fn(
+      R& (Self::*function)() const, prototype_ptr<std::decay_t<R>> prototype) {
+    return [function, proto = std::move(prototype)](const Self& self) {
+      return whisker::native_handle<std::decay_t<R>>(
+          whisker::manage_as_static((self.*function)()), proto);
+    };
+  }
+
+  /**
+   * Marshals a member function returning node_list_view<T> to a property that
+   * produces whisker::array.
+   *
+   * The provided prototype is attached to each node in the list.
+   */
+  template <typename T, typename Self>
+  static auto mem_fn(
+      node_list_view<const T> (Self::*function)() const,
+      prototype_ptr<T> prototype) {
+    return [function, proto = std::move(prototype)](const Self& self) {
+      node_list_view<const T> nodes = (self.*function)();
+      whisker::array refs;
+      refs.reserve(nodes.size());
+      for (const T& ref : nodes) {
+        refs.emplace_back(whisker::make::native_handle(
+            whisker::manage_as_static(ref), proto));
+      }
+      return refs;
+    };
+  }
+
+  /**
+   * Marshals a member function returning std::vector<T*> to a property that
+   * produces whisker::array.
+   *
+   * The provided prototype is attached to each node in the list.
+   *
+   * The node_list_view<T> variant should be preferred where possible. However,
+   * some existing nodes still use this legacy approach.
+   */
+  template <typename T, typename Self>
+  static auto mem_fn(
+      const std::vector<T*>& (Self::*function)() const,
+      prototype_ptr<T> prototype) {
+    return [function, proto = std::move(prototype)](const Self& self) {
+      const std::vector<T*>& nodes = (self.*function)();
+      whisker::array refs;
+      refs.reserve(nodes.size());
+      for (const T* ref : nodes) {
+        refs.emplace_back(whisker::make::native_handle(
+            whisker::manage_as_static(*ref), proto));
+      }
+      return refs;
+    };
+  }
 
   bool has_compiler_option(std::string_view name) const {
     return compiler_options_.find(name) != compiler_options_.end();

@@ -24,8 +24,10 @@
 
 #include <scripts/rroeser/src/executor/WorkStealingExecutor.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
+#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/server/ParallelConcurrencyController.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
+#include <thrift/lib/cpp2/transport/rocket/framing/Parser.h>
 
 DEFINE_int32(port, 5000, "Server port");
 DEFINE_int32(io_threads, 0, "Number of IO threads (0 == number of cores)");
@@ -65,6 +67,7 @@ DEFINE_bool(enable_resource_pools, false, "Enable resource pools");
 DEFINE_bool(
     disable_active_request_tracking, false, "Disabled Active Request Tracking");
 DEFINE_bool(enable_checksum, false, "Enable Server Side Checksum support");
+DEFINE_bool(aligned_parser, false, "Enable AlignedParser");
 
 namespace apache {
 namespace thrift {
@@ -165,6 +168,11 @@ std::shared_ptr<ThriftServer> createStressTestServer(
   if (!handler) {
     handler = createStressTestHandler();
   }
+
+  if (FLAGS_aligned_parser) {
+    THRIFT_FLAG_SET_MOCK(rocket_frame_parser, "aligned");
+  }
+
   auto server = std::make_shared<ThriftServer>();
   server->setInterface(std::move(handler));
   server->setPort(FLAGS_port);

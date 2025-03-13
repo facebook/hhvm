@@ -55,9 +55,19 @@ THRIFT_STRESS_TEST(Echo512k) {
   co_await client->co_echo(s);
 }
 
+THRIFT_STRESS_TEST(Echo512k_eb) {
+  static std::string const s(1 << 19, '?');
+  co_await client->co_echoEb(s);
+}
+
 THRIFT_STRESS_TEST(Echo4M) {
   static std::string const s(4096000, '?');
   co_await client->co_echo(s);
+}
+
+THRIFT_STRESS_TEST(Echo4M_eb) {
+  static std::string const s(4096000, '?');
+  co_await client->co_echoEb(s);
 }
 
 /**

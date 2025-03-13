@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include <folly/String.h>
 #include <folly/io/IOBuf.h>
+#include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/AlignedParserStrategy.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/test/TestUtil.h>

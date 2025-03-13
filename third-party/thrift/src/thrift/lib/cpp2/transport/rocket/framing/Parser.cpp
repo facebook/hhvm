@@ -38,6 +38,8 @@ ParserMode stringToMode(const std::string& modeStr) noexcept {
     return ParserMode::STRATEGY;
   } else if (modeStr == "allocating") {
     return ParserMode::ALLOCATING;
+  } else if (modeStr == "aligned") {
+    return ParserMode::ALIGNED;
   }
 
   LOG(WARNING) << "Invalid parser mode: '" << modeStr

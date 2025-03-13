@@ -26,6 +26,7 @@
 
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/RpcOptions.h>
+#include <thrift/lib/cpp2/transport/rocket/framing/parser/AlignedParserStrategy.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/AllocatingParserStrategy.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/FrameLengthParserStrategy.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/ParserStrategy.h>
@@ -35,33 +36,42 @@ THRIFT_FLAG_DECLARE_string(rocket_frame_parser);
 namespace apache::thrift::rocket {
 
 namespace detail {
-enum class ParserMode { STRATEGY, ALLOCATING };
+enum class ParserMode { STRATEGY, ALLOCATING, ALIGNED };
 ParserMode stringToMode(const std::string& modeStr) noexcept;
 ParserAllocatorType& getDefaultAllocator();
 } // namespace detail
 
-// TODO (T160861572): deprecate most of logic in this class and replace with
-// either AllocatingParserStrategy or FrameLengthParserStrategy
 template <class T>
 class Parser final : public folly::AsyncTransport::ReadCallback {
+  using FrameLengthParser = ParserStrategy<T, FrameLengthParserStrategy>;
+  using AllocatingParser =
+      ParserStrategy<T, AllocatingParserStrategy, ParserAllocatorType>;
+  using AlignedParser = ParserStrategy<T, AlignedParserStrategy>;
+  using ParserVariant = std::variant<
+      std::monostate,
+      FrameLengthParser,
+      AllocatingParser,
+      AlignedParser>;
+
  public:
   explicit Parser(
       T& owner, std::shared_ptr<ParserAllocatorType> alloc = nullptr)
       : owner_(owner),
         mode_(detail::stringToMode(THRIFT_FLAG(rocket_frame_parser))) {
-    if (mode_ == detail::ParserMode::STRATEGY) {
-      frameLengthParser_ =
-          std::make_unique<ParserStrategy<T, FrameLengthParserStrategy>>(
-              owner_);
-    }
-    if (mode_ == detail::ParserMode::ALLOCATING) {
-      allocatingParser_ = std::make_unique<
-          ParserStrategy<T, AllocatingParserStrategy, ParserAllocatorType>>(
-          owner_, alloc ? *alloc : detail::getDefaultAllocator());
+    switch (mode_) {
+      case detail::ParserMode::STRATEGY: {
+        parser_.template emplace<FrameLengthParser>(owner_);
+      } break;
+      case detail::ParserMode::ALLOCATING: {
+        parser_.template emplace<AllocatingParser>(
+            owner_, alloc ? *alloc : detail::getDefaultAllocator());
+      } break;
+      case detail::ParserMode::ALIGNED:
+        parser_.template emplace<AlignedParser>(owner_);
+        break;
     }
   }
 
-  // AsyncTransport::ReadCallback implementation
   FOLLY_NOINLINE void getReadBuffer(void** bufout, size_t* lenout) override;
   FOLLY_NOINLINE void readDataAvailable(size_t nbytes) noexcept override;
   FOLLY_NOINLINE void readEOF() noexcept override;
@@ -80,37 +90,46 @@ class Parser final : public folly::AsyncTransport::ReadCallback {
   T& owner_;
 
   detail::ParserMode mode_;
-  std::unique_ptr<ParserStrategy<T, FrameLengthParserStrategy>>
-      frameLengthParser_;
-  std::unique_ptr<
-      ParserStrategy<T, AllocatingParserStrategy, ParserAllocatorType>>
-      allocatingParser_;
+  ParserVariant parser_;
+
+  template <typename DelegateFunc>
+  FOLLY_ALWAYS_INLINE decltype(auto) visit(DelegateFunc&& delegate);
 };
 
 template <class T>
-void Parser<T>::getReadBuffer(void** bufout, size_t* lenout) {
+template <typename DelegateFunc>
+FOLLY_ALWAYS_INLINE decltype(auto) Parser<T>::visit(DelegateFunc&& delegate) {
+  FOLLY_SAFE_DCHECK(
+      std::holds_alternative<std::monostate>(parser_) == false,
+      "parser variant must be set");
   switch (mode_) {
-    case (detail::ParserMode::STRATEGY):
-      frameLengthParser_->getReadBuffer(bufout, lenout);
-      break;
-    case (detail::ParserMode::ALLOCATING):
-      allocatingParser_->getReadBuffer(bufout, lenout);
-      break;
+    case detail::ParserMode::STRATEGY:
+      return std::invoke(
+          std::forward<DelegateFunc>(delegate),
+          std::get<FrameLengthParser>(parser_));
+    case detail::ParserMode::ALLOCATING:
+      return std::invoke(
+          std::forward<DelegateFunc>(delegate),
+          std::get<AllocatingParser>(parser_));
+    case detail::ParserMode::ALIGNED:
+      return std::invoke(
+          std::forward<DelegateFunc>(delegate),
+          std::get<AlignedParser>(parser_));
+    default:
+      LOG(FATAL) << "Unknown parser type";
   }
+}
+
+template <class T>
+void Parser<T>::getReadBuffer(void** bufout, size_t* lenout) {
+  visit([&](auto& parser) { parser.getReadBuffer(bufout, lenout); });
 }
 
 template <class T>
 void Parser<T>::readDataAvailable(size_t nbytes) noexcept {
   folly::DelayedDestruction::DestructorGuard dg(&this->owner_);
   try {
-    switch (mode_) {
-      case (detail::ParserMode::STRATEGY):
-        frameLengthParser_->readDataAvailable(nbytes);
-        break;
-      case (detail::ParserMode::ALLOCATING):
-        allocatingParser_->readDataAvailable(nbytes);
-        break;
-    }
+    visit([&](auto& parser) { parser.readDataAvailable(nbytes); });
   } catch (...) {
     auto exceptionStr =
         folly::exceptionStr(folly::current_exception()).toStdString();
@@ -140,15 +159,7 @@ void Parser<T>::readBufferAvailable(
     std::unique_ptr<folly::IOBuf> buf) noexcept {
   folly::DelayedDestruction::DestructorGuard dg(&this->owner_);
   try {
-    switch (mode_) {
-      case (detail::ParserMode::STRATEGY):
-        frameLengthParser_->readBufferAvailable(std::move(buf));
-        break;
-      case (detail::ParserMode::ALLOCATING):
-        // Will throw not implemented runtime exception
-        allocatingParser_->readBufferAvailable(std::move(buf));
-        break;
-    }
+    visit([&](auto& parser) { parser.readBufferAvailable(std::move(buf)); });
   } catch (...) {
     auto exceptionStr =
         folly::exceptionStr(folly::current_exception()).toStdString();

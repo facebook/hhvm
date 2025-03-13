@@ -387,6 +387,7 @@
  (libraries
   ci_util
   client_provider
+  sandcastle
   server_config
   server_notifier)
  (preprocess

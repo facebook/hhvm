@@ -1016,6 +1016,15 @@ class AnyDiffVisitor : public DiffVisitorBase {
   }
 };
 
+TEST(DynamicPatchTest, ToPatchType) {
+  EXPECT_EQ(
+      detail::toPatchType(type::Type::get<type::struct_t<MyStruct>>()),
+      type::Type::get<type::infer_tag<MyStructPatch>>());
+  EXPECT_EQ(
+      detail::toPatchType(type::Type::get<type::union_t<MyUnion>>()),
+      type::Type::get<type::infer_tag<MyUnionPatch>>());
+}
+
 TEST(DynamicPatchTest, InvalidToPatchType) {
   type::Type type = type::Type::get<type::union_t<MyUnion>>();
   type.toThrift().name()->unionType_ref()->scopedName_ref() = "scoped.name";

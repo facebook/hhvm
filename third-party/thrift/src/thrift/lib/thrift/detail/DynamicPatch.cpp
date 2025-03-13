@@ -193,24 +193,29 @@ void convertStringToBinary(Value& v) {
 }
 
 type::Type toPatchType(type::Type input) {
-  for (auto t :
-       {input.toThrift().name()->structType_ref(),
-        input.toThrift().name()->unionType_ref()}) {
-    if (!t) {
-      continue;
-    }
-    if (auto p = t->uri_ref()) {
+  auto& name = input.toThrift().name().value();
+  auto handleUri = [&](auto& type) {
+    if (auto p = type.uri_ref()) {
       *p = toPatchUri(*p);
-      return input;
+      return std::move(input);
     }
     folly::throw_exception<std::runtime_error>(fmt::format(
         "Unsupported Uri: {}",
-        apache::thrift::util::enumNameSafe(t->getType())));
+        apache::thrift::util::enumNameSafe(type.getType())));
+  };
+
+  if (auto structType = name.structType_ref()) {
+    return handleUri(*structType);
+  } else if (auto unionType = name.unionType_ref()) {
+    // All Thrift Patch is struct type.
+    auto temp = std::move(*unionType);
+    name.structType_ref() = std::move(temp);
+    return handleUri(*name.structType_ref());
   }
 
   folly::throw_exception<std::runtime_error>(fmt::format(
       "Unsupported type: {}",
-      apache::thrift::util::enumNameSafe(input.toThrift().name()->getType())));
+      apache::thrift::util::enumNameSafe(name.getType())));
 }
 
 void checkSameType(

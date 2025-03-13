@@ -17,6 +17,7 @@
 package thrift
 
 import (
+	"bytes"
 	"fmt"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
@@ -30,8 +31,8 @@ import (
 type protocolBuffer struct {
 	types.Decoder
 	types.Encoder
-	wbuf        *MemoryBuffer
-	rbuf        *MemoryBuffer
+	wbuf        *bytes.Buffer
+	rbuf        *bytes.Buffer
 	name        string
 	messageType types.MessageType
 	seqID       int32
@@ -45,8 +46,8 @@ func newProtocolBuffer(respHeaders map[string]string, protoID types.ProtocolID, 
 	p := &protocolBuffer{
 		respHeaders: respHeaders,
 		reqHeaders:  map[string]string{},
-		wbuf:        NewMemoryBuffer(),
-		rbuf:        NewMemoryBufferWithData(data),
+		wbuf:        new(bytes.Buffer),
+		rbuf:        bytes.NewBuffer(data),
 	}
 	switch protoID {
 	case types.ProtocolIDBinary:

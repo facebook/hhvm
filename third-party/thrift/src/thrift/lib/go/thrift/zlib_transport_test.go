@@ -17,12 +17,22 @@
 package thrift
 
 import (
+	"bytes"
 	"compress/zlib"
 	"testing"
 )
 
+type closeableBuffer struct {
+	bytes.Buffer
+}
+
+func (b *closeableBuffer) Close() error {
+	b.Reset()
+	return nil
+}
+
 func TestZlibTransport(t *testing.T) {
-	trans, err := NewZlibTransport(NewMemoryBuffer(), zlib.BestCompression)
+	trans, err := NewZlibTransport(&closeableBuffer{}, zlib.BestCompression)
 	if err != nil {
 		t.Fatal(err)
 	}

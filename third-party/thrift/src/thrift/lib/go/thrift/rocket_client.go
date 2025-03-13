@@ -17,6 +17,7 @@
 package thrift
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"maps"
@@ -48,8 +49,8 @@ type rocketClient struct {
 	resultErr   error
 	reqHeaders  map[string]string
 	respHeaders map[string]string
-	rbuf        *MemoryBuffer
-	wbuf        *MemoryBuffer
+	rbuf        *bytes.Buffer
+	wbuf        *bytes.Buffer
 }
 
 var _ Protocol = (*rocketClient)(nil)
@@ -69,8 +70,8 @@ func newRocketClientFromRsocket(client RSocketClient, protoID types.ProtocolID, 
 		client:            client,
 		protoID:           protoID,
 		persistentHeaders: persistentHeaders,
-		rbuf:              NewMemoryBuffer(),
-		wbuf:              NewMemoryBuffer(),
+		rbuf:              new(bytes.Buffer),
+		wbuf:              new(bytes.Buffer),
 		ioTimeout:         ioTimeout,
 		reqHeaders:        make(map[string]string),
 	}
@@ -216,7 +217,13 @@ func (p *rocketClient) ReadMessageBegin() (string, types.MessageType, int32, err
 		return name, types.EXCEPTION, p.seqID, p.resultErr
 	}
 
-	p.rbuf.Init(p.resultData)
+	// Clear the buffer, but keep the underlying storage.
+	p.rbuf.Reset()
+	// Write the result data into the buffer.
+	_, err := p.rbuf.Write(p.resultData)
+	if err != nil {
+		return name, types.EXCEPTION, p.seqID, err
+	}
 	return name, types.REPLY, p.seqID, nil
 }
 

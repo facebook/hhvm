@@ -1,6 +1,6 @@
 ERROR: File "simple_error.php", line 6, characters 31-51:
 Typing error (Typing[4110])
-  File "expr_tree.php", line 371, characters 26-35:
+  File "expr_tree.php", line 375, characters 26-35:
   Expected `ExampleInt`
   File "expr_tree.php", line 88, characters 40-52:
   But got `ExampleString`

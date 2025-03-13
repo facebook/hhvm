@@ -6,7 +6,7 @@ ERROR: File "collection_error.php", line 6, characters 14-22:
 Unbound name: `wrongCtor` (an object type) (Naming[2049])
 ERROR: File "collection_error.php", line 7, characters 14-35:
 Could not find `exampleKeyedCollection`. (Naming[2006])
-  File "expr_tree.php", line 418, characters 16-37:
+  File "expr_tree.php", line 422, characters 16-37:
   Did you mean `~~E~~xampleKeyedCollection` instead (which only differs by case)?
 ERROR: File "collection_error.php", line 11, characters 14-23:
 Unbound name: `symbolType` (an object type) (Naming[2049])

@@ -2414,6 +2414,9 @@ fn handle_reserved_call(
                 if clz_box.1 == visitor_name && method == et::BUILTIN_SHAPE_AT {
                     return handle_shapes_at(state, visitor_name, pos, args);
                 }
+                if clz_box.1 == visitor_name && method == et::BUILTIN_SHAPE_PUT {
+                    return handle_shapes_put(state, visitor_name, pos, args);
+                }
             }
             None
         }
@@ -2442,4 +2445,26 @@ fn handle_shapes_at(
     }
 
     Some(static_meth_call("Shapes", "at", args.to_vec(), pos))
+}
+
+fn handle_shapes_put(
+    state: &mut RewriteState,
+    visitor_name: &str,
+    pos: &Pos,
+    args: &[Expr],
+) -> Option<Expr> {
+    let mut args = args.to_vec();
+    if args.len() > 2 {
+        let shape = state.rewrite_expr(args[0].clone(), visitor_name);
+        let value = state.rewrite_expr(args[2].clone(), visitor_name);
+        args[0] = _virtualize_call(shape.virtual_expr, pos);
+        args[2] = value.virtual_expr;
+    }
+
+    Some(static_meth_call(
+        visitor_name,
+        et::SHAPE_TYPE,
+        vec![static_meth_call("Shapes", "put", args, pos)],
+        pos,
+    ))
 }

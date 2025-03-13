@@ -1550,7 +1550,7 @@ TEST_F(HTTPDownstreamSessionTest, ServerStatusHeaderOnError) {
   EXPECT_CALL(callbacks, onHeadersComplete(1, _))
       .WillOnce(Invoke([](HTTPCodec::StreamID,
                           std::shared_ptr<HTTPMessage> msg) {
-        EXPECT_EQ(msg->getHeaders().getSingleOrEmpty("Server-Status"), "16");
+        EXPECT_EQ(msg->getHeaders().getSingleOrEmpty("Server-Status"), "27");
       }));
 
   auto req = getGetRequest("/");                 // construct basic get req
@@ -1563,7 +1563,7 @@ TEST_F(HTTPDownstreamSessionTest, ServerStatusHeaderOnError) {
   eventBase_.loopOnce();
   eventBase_.loopOnce();
   parseOutput(*clientCodec_); // client parses resp with server-status set to
-                              // kErrorParseHeader (16)
+                              // kErrorHeaderContentValidation (27)
   expectDetachSession();
 }
 

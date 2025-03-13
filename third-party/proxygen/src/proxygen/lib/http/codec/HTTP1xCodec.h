@@ -228,6 +228,7 @@ class HTTP1xCodec : public HTTPCodec {
   TransportDirection transportDirection_;
   KeepaliveRequested keepaliveRequested_; // only used in DOWNSTREAM mode
   std::pair<CodecProtocol, std::string> upgradeResult_; // DOWNSTREAM only
+  folly::Optional<ProxygenError> validationError_;
   bool force1_1_ : 1; // Use HTTP/1.1 even if msg is 1.0
   bool strictValidation_ : 1;
   bool parserActive_ : 1;

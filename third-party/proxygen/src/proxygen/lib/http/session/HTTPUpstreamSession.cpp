@@ -17,6 +17,57 @@
 
 namespace proxygen {
 
+HTTPUpstreamSession::HTTPUpstreamSession(
+    const WheelTimerInstance& wheelTimer,
+    folly::AsyncTransport::UniquePtr&& sock,
+    const folly::SocketAddress& localAddr,
+    const folly::SocketAddress& peerAddr,
+    std::unique_ptr<HTTPCodec> codec,
+    const wangle::TransportInfo& tinfo,
+    InfoCallback* infoCallback,
+    uint8_t maxVirtualPri,
+    std::shared_ptr<const PriorityMapFactory> priorityMapFactory)
+    : HTTPSession(wheelTimer,
+                  std::move(sock),
+                  localAddr,
+                  peerAddr,
+                  nullptr,
+                  std::move(codec),
+                  tinfo,
+                  infoCallback),
+      maxVirtualPriorityLevel_(priorityMapFactory ? 0 : maxVirtualPri),
+      priorityMapFactory_(priorityMapFactory) {
+  if (sock_) {
+    auto asyncSocket = sock_->getUnderlyingTransport<folly::AsyncSocket>();
+    if (asyncSocket) {
+      asyncSocket->setBufferCallback(this);
+    }
+  }
+  CHECK_EQ(codec_->getTransportDirection(), TransportDirection::UPSTREAM);
+}
+
+// uses folly::HHWheelTimer instance which is used on client side & thrift
+HTTPUpstreamSession::HTTPUpstreamSession(
+    folly::HHWheelTimer* wheelTimer,
+    folly::AsyncTransport::UniquePtr&& sock,
+    const folly::SocketAddress& localAddr,
+    const folly::SocketAddress& peerAddr,
+    std::unique_ptr<HTTPCodec> codec,
+    const wangle::TransportInfo& tinfo,
+    InfoCallback* infoCallback,
+    uint8_t maxVirtualPri,
+    std::shared_ptr<const PriorityMapFactory> priorityMapFactory)
+    : HTTPUpstreamSession(WheelTimerInstance(wheelTimer),
+                          std::move(sock),
+                          localAddr,
+                          peerAddr,
+                          std::move(codec),
+                          tinfo,
+                          infoCallback,
+                          maxVirtualPri,
+                          priorityMapFactory) {
+}
+
 HTTPUpstreamSession::~HTTPUpstreamSession() {
 }
 

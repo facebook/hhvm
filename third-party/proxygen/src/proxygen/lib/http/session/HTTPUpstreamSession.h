@@ -41,25 +41,7 @@ class HTTPUpstreamSession : public HTTPSession {
       InfoCallback* infoCallback,
       uint8_t maxVirtualPri = 0,
       std::shared_ptr<const PriorityMapFactory> priorityMapFactory =
-          std::shared_ptr<const PriorityMapFactory>())
-      : HTTPSession(wheelTimer,
-                    std::move(sock),
-                    localAddr,
-                    peerAddr,
-                    nullptr,
-                    std::move(codec),
-                    tinfo,
-                    infoCallback),
-        maxVirtualPriorityLevel_(priorityMapFactory ? 0 : maxVirtualPri),
-        priorityMapFactory_(priorityMapFactory) {
-    if (sock_) {
-      auto asyncSocket = sock_->getUnderlyingTransport<folly::AsyncSocket>();
-      if (asyncSocket) {
-        asyncSocket->setBufferCallback(this);
-      }
-    }
-    CHECK_EQ(codec_->getTransportDirection(), TransportDirection::UPSTREAM);
-  }
+          std::shared_ptr<const PriorityMapFactory>());
 
   // uses folly::HHWheelTimer instance which is used on client side & thrift
   HTTPUpstreamSession(
@@ -72,17 +54,7 @@ class HTTPUpstreamSession : public HTTPSession {
       InfoCallback* infoCallback,
       uint8_t maxVirtualPri = 0,
       std::shared_ptr<const PriorityMapFactory> priorityMapFactory =
-          std::shared_ptr<const PriorityMapFactory>())
-      : HTTPUpstreamSession(WheelTimerInstance(wheelTimer),
-                            std::move(sock),
-                            localAddr,
-                            peerAddr,
-                            std::move(codec),
-                            tinfo,
-                            infoCallback,
-                            maxVirtualPri,
-                            priorityMapFactory) {
-  }
+          std::shared_ptr<const PriorityMapFactory>());
 
   using FilterIteratorFn = std::function<void(HTTPCodecFilter*)>;
 

@@ -636,6 +636,9 @@ template <
     typename F,
     WHISKER_DSL_REQUIRES(
         whisker::is_any_object_type<detail::function_return_t<F>> ||
+        whisker::detail::is_specialization_v<
+            detail::function_return_t<F>,
+            whisker::native_handle> ||
         detail::is_function_returning<F, object>)>
 function::ptr make_function(std::string name, F&& function) {
   return make_function(

@@ -813,7 +813,8 @@ TEST_F(HQCodecTest, HighAscii) {
   EXPECT_EQ(callbacks_.headersComplete, 0);
   EXPECT_EQ(callbacks_.messageComplete, 0);
   EXPECT_EQ(callbacks_.streamErrors, 4);
-  EXPECT_EQ(callbacks_.lastParseError->getProxygenError(), kErrorParseHeader);
+  EXPECT_EQ(callbacks_.lastParseError->getProxygenError(),
+            kErrorHeaderContentValidation);
   EXPECT_EQ(callbacks_.sessionErrors, 0);
   callbacks_.reset();
 
@@ -832,7 +833,8 @@ TEST_F(HQCodecTest, HighAscii) {
   EXPECT_EQ(callbacks_.headersComplete, 1);
   EXPECT_EQ(callbacks_.messageComplete, 0);
   EXPECT_EQ(callbacks_.streamErrors, 1);
-  EXPECT_EQ(callbacks_.lastParseError->getProxygenError(), kErrorParseHeader);
+  EXPECT_EQ(callbacks_.lastParseError->getProxygenError(),
+            kErrorHeaderContentValidation);
   EXPECT_EQ(callbacks_.sessionErrors, 0);
 }
 

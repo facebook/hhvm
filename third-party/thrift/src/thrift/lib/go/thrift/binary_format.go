@@ -37,12 +37,12 @@ type binaryFormat struct {
 var _ types.Format = (*binaryFormat)(nil)
 
 // NewBinaryFormat creates a new Format handler using a buffer
-func NewBinaryFormat(readWriter io.ReadWriter) types.Format {
+func NewBinaryFormat(readWriter types.ReadWriteSizer) types.Format {
 	return NewBinaryFormatOptions(readWriter, false /* strict read */, true /* strict write */)
 }
 
 // NewBinaryFormatOptions creates a new Format handler using a buffer
-func NewBinaryFormatOptions(readWriter io.ReadWriter, strictRead, strictWrite bool) types.Format {
+func NewBinaryFormatOptions(readWriter types.ReadWriteSizer, strictRead, strictWrite bool) types.Format {
 	return &binaryFormat{
 		binaryDecoder: binaryDecoder{reader: readWriter, strictRead: strictRead},
 		binaryEncoder: binaryEncoder{writer: readWriter, strictWrite: strictWrite},
@@ -54,7 +54,7 @@ func newBinaryEncoder(writer io.Writer) types.Encoder {
 	return &binaryEncoder{writer: writer, strictWrite: true}
 }
 
-func newBinaryDecoder(reader io.Reader) types.Decoder {
+func newBinaryDecoder(reader types.ReadSizer) types.Decoder {
 	// This default for binaryEncoder's strictRead matches cpp implementation
 	return &binaryDecoder{reader: reader, strictRead: false}
 }
@@ -237,7 +237,7 @@ func (p *binaryEncoder) Flush() error {
  */
 
 type binaryDecoder struct {
-	reader     io.Reader
+	reader     types.ReadSizer
 	strictRead bool
 	buffer     [64]byte
 }

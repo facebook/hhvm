@@ -91,8 +91,8 @@ type protocolWriterTest func(t testing.TB, p types.Format)
 // It also should only be used with an underlying Transport that is capable of
 // blocking reads and writes (socket, stream), since other golang Transport
 // implementations require that the data exists to be read when they are called (like bytes.Buffer)
-func ReadWriteProtocolParallelTest(t *testing.T, newFormat func(io.ReadWriter) types.Format) {
-	transports := []func() io.ReadWriter{}
+func ReadWriteProtocolParallelTest(t *testing.T, newFormat func(types.ReadWriteSizer) types.Format) {
+	transports := []func() types.ReadWriteSizer{}
 	const iterations = 100
 
 	doForAllTransportsParallel := func(read protocolReaderTest, write protocolWriterTest) {
@@ -151,9 +151,9 @@ func ReadWriteProtocolParallelTest(t *testing.T, newFormat func(io.ReadWriter) t
 	})
 }
 
-func ReadWriteProtocolTest(t *testing.T, newFormat func(io.ReadWriter) types.Format) {
-	transports := []func() io.ReadWriter{
-		func() io.ReadWriter { return NewMemoryBufferLen(1024) },
+func ReadWriteProtocolTest(t *testing.T, newFormat func(types.ReadWriteSizer) types.Format) {
+	transports := []func() types.ReadWriteSizer{
+		func() types.ReadWriteSizer { return NewMemoryBufferLen(1024) },
 	}
 
 	doForAllTransports := func(protTest protocolTest) {

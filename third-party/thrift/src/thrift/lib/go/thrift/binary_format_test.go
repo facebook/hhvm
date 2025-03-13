@@ -18,7 +18,6 @@ package thrift
 
 import (
 	"fmt"
-	"io"
 	"strings"
 	"testing"
 	"time"
@@ -28,7 +27,7 @@ import (
 )
 
 func TestReadWriteBinaryFormat(t *testing.T) {
-	ReadWriteProtocolTest(t, func(transport io.ReadWriter) types.Format { return NewBinaryFormat(transport) })
+	ReadWriteProtocolTest(t, func(transport types.ReadWriteSizer) types.Format { return NewBinaryFormat(transport) })
 }
 
 func TestWriteBinaryEmptyBinaryFormat(t *testing.T) {

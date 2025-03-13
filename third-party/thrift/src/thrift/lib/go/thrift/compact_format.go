@@ -78,7 +78,7 @@ type compactFormat struct {
 var _ types.Format = (*compactFormat)(nil)
 
 // NewCompactFormat creates a CompactFormat
-func NewCompactFormat(readWriter io.ReadWriter) types.Format {
+func NewCompactFormat(readWriter types.ReadWriteSizer) types.Format {
 	p := &compactFormat{}
 	p.compactDecoder.version = COMPACT_VERSION_BE
 	p.compactDecoder.reader = readWriter
@@ -91,7 +91,7 @@ func newCompactEncoder(writer io.Writer) types.Encoder {
 	return &compactEncoder{writer: writer, version: COMPACT_VERSION_BE}
 }
 
-func newCompactDecoder(reader io.Reader) types.Decoder {
+func newCompactDecoder(reader types.ReadSizer) types.Decoder {
 	return &compactDecoder{reader: reader, version: COMPACT_VERSION_BE}
 }
 
@@ -102,7 +102,7 @@ func (p *compactFormat) WriteMessageBegin(name string, typeID types.MessageType,
 }
 
 type compactDecoder struct {
-	reader io.Reader
+	reader types.ReadSizer
 	// Used to keep track of the last field for the current and previous structs,
 	// so we can do the delta stuff.
 	lastFieldRead   []int

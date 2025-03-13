@@ -19,6 +19,7 @@ package types
 import (
 	"errors"
 	"fmt"
+	"io"
 	"math"
 )
 
@@ -228,3 +229,15 @@ type ReadSizeProvider interface {
 // UnknownRemaining is used by transports that can not return a real answer
 // for RemainingBytes()
 const UnknownRemaining = ^uint64(0)
+
+// ReadSizer is a Reader with an additional RemainingBytes() capability (to get remaining bytes count).
+type ReadSizer interface {
+	io.Reader
+	RemainingBytes() (numBytes uint64)
+}
+
+// ReadWriteSizer is a ReadWriter with an additional RemainingBytes() capability (to get remaining bytes count).
+type ReadWriteSizer interface {
+	io.ReadWriter
+	RemainingBytes() (numBytes uint64)
+}

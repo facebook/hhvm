@@ -5,5 +5,4 @@
 -vEval.JitGlobalDataSize=2097152
 -vResourceLimit.SerializationSizeLimit=134217728
 -vEnvVariables.HPHP_INTERPRETER="1"
--vServerVariables.ALPHA_CONSOLE="1"
 -vServerVariables.TFBENV="16777216"

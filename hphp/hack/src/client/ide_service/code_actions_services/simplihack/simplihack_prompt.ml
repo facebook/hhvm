@@ -14,25 +14,7 @@ type t = {
   edit_span: Pos.t;
 }
 
-let derive_prompt ctx ua () =
-  let open Option.Let_syntax in
-  match ua.Aast.ua_params with
-  | (_, _, Aast.Class_const ((_, _p, Aast.CI cid), (_, x))) :: _args
-    when String.equal x Naming_special_names.Members.mClass ->
-    let* path = Naming_provider.get_class_path ctx (snd cid) in
-    let* ast = Ast_provider.find_class_in_file ~full:true ctx path (snd cid) in
-    let* meth =
-      List.find ast.Aast.c_methods ~f:(fun meth ->
-          String.equal (snd meth.Aast.m_name) "onClass")
-    in
-    let { Aast.fb_ast } = meth.Aast.m_body in
-    let* prompt =
-      match fb_ast with
-      | (_, Aast.Return (Some (_, _, Aast.String prompt))) :: _ -> Some prompt
-      | _ -> None
-    in
-    return prompt
-  | _ -> None
+let derive_prompt ctx ua () = Simplihack_interpreter.eval ctx ua
 
 let find ctx tast =
   let user_attribute cls_pos acc ua =

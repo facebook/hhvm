@@ -280,6 +280,10 @@ void checkHomogeneousContainer(const ValueMap& m) {
 }
 
 std::string toSafePatchUri(std::string s) {
+  if (folly::StringPiece(s).endsWith(kPatchUriSuffix)) {
+    folly::throw_exception<std::runtime_error>(
+        fmt::format("Uri {} is already Patch.", s));
+  }
   s += kSafePatchUriSuffix;
   return s;
 }
@@ -287,6 +291,10 @@ std::string toSafePatchUri(std::string s) {
 } // namespace detail
 
 std::string toPatchUri(std::string s) {
+  if (folly::StringPiece(s).endsWith(detail::kPatchUriSuffix)) {
+    folly::throw_exception<std::runtime_error>(
+        fmt::format("Uri {} is already Patch.", s));
+  }
   s += detail::kPatchUriSuffix;
   return s;
 }

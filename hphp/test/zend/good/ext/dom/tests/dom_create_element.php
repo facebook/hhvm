@@ -246,7 +246,7 @@ try {
     print $e->getMessage() . "\n";
 }
 
-/* This isn't because the xml namespace isn't there and we can't create it */
+/* This is also valid, as newer libxmls let you create the `xml` namespace */
 print "29 DOMElement::__construct('xml:valid', '', 'http://www.w3.org/XML/1998/namespace')\n";
 try {
     $element = new DOMElement('xml:valid', '', 'http://www.w3.org/XML/1998/namespace');

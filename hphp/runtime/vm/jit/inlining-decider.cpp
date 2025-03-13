@@ -822,7 +822,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
 
   if (profData()) {
     auto region = selectCalleeCFG(callerSk, entry, ctxType, inputTypes,
-                                  Cfg::Jit::MaxRegionInstrs, annotationsPtr);
+                                  Cfg::Jit::MaxInlineRegionInstrs, annotationsPtr);
     if (region) return region;
     // Special case: even if we don't have prof data for this func, if
     // it takes no arguments and returns a constant, it might be a
@@ -837,7 +837,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
   }
 
   return selectCalleeTracelet(entry, ctxType, inputTypes,
-                              Cfg::Jit::MaxRegionInstrs);
+                              Cfg::Jit::MaxInlineRegionInstrs);
 }
 
 void setBaseInliningProfCount(uint64_t value) {

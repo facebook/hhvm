@@ -1,1 +1,2 @@
 -vEval.JitMaxRegionInstrs=2
+-vEval.JitMaxInitialRegionInstrs=2

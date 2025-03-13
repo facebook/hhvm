@@ -1866,14 +1866,14 @@ void DynamicPatch::fromSafePatch(const type::AnyStruct& any) {
   decode<apache::thrift::CompactProtocolReader>(badge, *safePatch.data());
 }
 type::AnyStruct DynamicPatch::toSafePatch(type::Type type) const {
-  // TODO: Add SafePatch check based on Uri
+  auto safePatchType = toSafePatchType(std::move(type));
   MinSafePatchVersionVisitor visitor;
   visitor.recurse(*this);
   DynamicSafePatch safePatch{
       visitor.version, encode<CompactProtocolWriter>(badge)};
 
   type::AnyStruct anyStruct;
-  anyStruct.type() = std::move(type);
+  anyStruct.type() = std::move(safePatchType);
   anyStruct.protocol() = type::StandardProtocol::Compact;
   anyStruct.data() = *safePatch.encode<CompactProtocolWriter>();
   return anyStruct;

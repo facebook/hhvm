@@ -1289,7 +1289,7 @@ TEST(DynamicPatch, DynamicSafePatch) {
           [&](const DynamicUnknownPatch&) {},
           [&](const auto&) { EXPECT_TRUE(false) << "not reachable"; }));
   type::AnyStruct rSafePatchAny =
-      dynPatch.toSafePatch(type::Type::get<type::struct_t<MyUnionSafePatch>>());
+      dynPatch.toSafePatch(type::Type::get<type::union_t<MyUnion>>());
 
   // apply patch
   MyUnionSafePatch rSafePatch = type::AnyData{std::move(rSafePatchAny)}
@@ -1318,8 +1318,8 @@ TEST(DynamicPatch, DynamicSafePatchV2) {
     anyPatch.ensureAny(type::AnyData::toAny(MyUnion{}).toThrift());
 
     DynamicPatch dynPatch{std::move(anyPatch)};
-    type::AnyStruct safePatchAny = dynPatch.toSafePatch(
-        type::Type::get<type::struct_t<MyUnionSafePatch>>());
+    type::AnyStruct safePatchAny =
+        dynPatch.toSafePatch(type::Type::get<type::union_t<MyUnion>>());
 
     MyUnionSafePatch safePatch = type::AnyData{std::move(safePatchAny)}
                                      .get<type::struct_t<MyUnionSafePatch>>();
@@ -1331,8 +1331,8 @@ TEST(DynamicPatch, DynamicSafePatchV2) {
     anyPatch.clear();
 
     DynamicPatch dynPatch{std::move(anyPatch)};
-    type::AnyStruct safePatchAny = dynPatch.toSafePatch(
-        type::Type::get<type::struct_t<MyUnionSafePatch>>());
+    type::AnyStruct safePatchAny =
+        dynPatch.toSafePatch(type::Type::get<type::union_t<MyUnion>>());
 
     MyUnionSafePatch safePatch = type::AnyData{std::move(safePatchAny)}
                                      .get<type::struct_t<MyUnionSafePatch>>();
@@ -1348,8 +1348,8 @@ TEST(DynamicPatch, DynamicSafePatchV2) {
     // Round trip
     DynamicPatch dynPatch;
     dynPatch.fromSafePatch(safePatchAny);
-    type::AnyStruct rSafePatchAny = dynPatch.toSafePatch(
-        type::Type::get<type::struct_t<MyStructSafePatch>>());
+    type::AnyStruct rSafePatchAny =
+        dynPatch.toSafePatch(type::Type::get<type::struct_t<MyStruct>>());
     MyStructSafePatch rSafePatch =
         type::AnyData{std::move(rSafePatchAny)}
             .get<type::struct_t<MyStructSafePatch>>();
@@ -1365,8 +1365,8 @@ TEST(DynamicPatch, DynamicSafePatchV2) {
     // Round trip
     DynamicPatch dynPatch;
     dynPatch.fromSafePatch(safePatchAny);
-    type::AnyStruct rSafePatchAny = dynPatch.toSafePatch(
-        type::Type::get<type::struct_t<MyStructSafePatch>>());
+    type::AnyStruct rSafePatchAny =
+        dynPatch.toSafePatch(type::Type::get<type::struct_t<MyStruct>>());
     MyStructSafePatch rSafePatch =
         type::AnyData{std::move(rSafePatchAny)}
             .get<type::struct_t<MyStructSafePatch>>();
@@ -1387,8 +1387,8 @@ TEST(DynamicPatch, DynamicSafePatchV2) {
         folly::overload(
             [&](const DynamicUnknownPatch&) {},
             [&](const auto&) { EXPECT_TRUE(false) << "not reachable"; }));
-    type::AnyStruct rSafePatchAny = dynPatch.toSafePatch(
-        type::Type::get<type::struct_t<MyUnionSafePatch>>());
+    type::AnyStruct rSafePatchAny =
+        dynPatch.toSafePatch(type::Type::get<type::union_t<MyUnion>>());
 
     // apply patch
     MyUnionSafePatch rSafePatch = type::AnyData{std::move(rSafePatchAny)}
@@ -1407,8 +1407,8 @@ TEST(DynamicPatch, DynamicSafePatchV2) {
     // Round trip
     DynamicPatch dynPatch;
     dynPatch.fromSafePatch(safePatchAny);
-    type::AnyStruct rSafePatchAny = dynPatch.toSafePatch(
-        type::Type::get<type::struct_t<MyUnionSafePatch>>());
+    type::AnyStruct rSafePatchAny =
+        dynPatch.toSafePatch(type::Type::get<type::union_t<MyUnion>>());
     MyUnionSafePatch rSafePatch = type::AnyData{std::move(rSafePatchAny)}
                                       .get<type::struct_t<MyUnionSafePatch>>();
     EXPECT_EQ(rSafePatch.version(), 2);

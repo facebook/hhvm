@@ -1,23 +1,15 @@
 (library
- (name code_actions_services)
- (wrapped true)
+ (name simplihack_prompt)
  (libraries
   annotated_ast
   ast
-  code_action_types
-  code_actions_services_refactors
   collections
   decl_provider
   errors
-  extract_classish
-  extract_method
-  inline_method
   full_fidelity
   logging
-  lsp
   pos
   provider_context
-  simplihack_prompt
   tast_env
   tast_provider
   typing_skeleton

@@ -115,8 +115,74 @@ let errors_to_commands errors selection =
       else
         None)
 
+let generate_simplihack_commands ctx tast pos =
+  let prompts =
+    Simplihack_prompt.find ctx tast.Tast_with_dynamic.under_normal_assumptions
+  in
+  let create_code_action
+      Simplihack_prompt.{ attribute_pos; derive_prompt; edit_span } =
+    let open Option.Let_syntax in
+    (* Convert the relative position to an absolute position *)
+    let attribute_pos = Pos.to_absolute attribute_pos in
+    let* derived_prompt = derive_prompt () in
+    let user_prompt =
+      Format.sprintf
+        {| Edit <selection_to_edit> in the following way:
+        %s
+
+        Do exactly as instructed above. Do not make any assumptions on what to do unless specifically instructed to do so.
+      |}
+        derived_prompt
+    in
+    let predefined_prompt =
+      Code_action_types.Show_inline_chat_command_args.
+        {
+          command = "SimpliHack";
+          description = Some "Handle __SimpliHack attribute";
+          display_prompt = derived_prompt;
+          user_prompt;
+          model = Some CODE_31;
+          rules = None;
+          task = None;
+          prompt_template = None;
+          add_diagnostics = None;
+        }
+    in
+    (* Calculate the webview start line (LSP uses 0-based line numbers) *)
+    let webview_start_line = Pos.line attribute_pos - 1 in
+    let command_args =
+      Code_action_types.(
+        Show_inline_chat
+          Show_inline_chat_command_args.
+            {
+              entrypoint = "HandleUserAttributeCodeAction";
+              predefined_prompt;
+              override_selection = Pos.to_absolute edit_span;
+              webview_start_line;
+              extras = Hh_json.JSON_Object [];
+            })
+    in
+    return
+      Code_action_types.{ title = "Generate Code for SimpliHack"; command_args }
+  in
+  let (cursor_line, cursor_col) = Pos.line_column pos in
+  List.filter_map
+    ~f:(fun prompt ->
+      if
+        Pos.inside_one_based
+          prompt.Simplihack_prompt.attribute_pos
+          cursor_line
+          cursor_col
+      then
+        create_code_action prompt
+      else
+        None)
+    prompts
+
 let find ~entry pos ctx ~error_filter : Code_action_types.command list =
-  let { Tast_provider.Compute_tast_and_errors.errors; _ } =
+  let { Tast_provider.Compute_tast_and_errors.errors; tast; telemetry = _ } =
     Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry ~error_filter
   in
-  errors_to_commands errors pos
+  let error_commands = errors_to_commands errors pos in
+  let simplihack_commands = generate_simplihack_commands ctx tast pos in
+  error_commands @ simplihack_commands

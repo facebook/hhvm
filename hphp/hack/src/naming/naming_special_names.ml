@@ -398,6 +398,8 @@ module UserAttributes = struct
 
   let uaPackageOverride = "__PackageOverride"
 
+  let uaSimpliHack = "__SimpliHack"
+
   type attr_info = {
     contexts: string list;
     doc: string;
@@ -852,6 +854,12 @@ module UserAttributes = struct
                 (* TODO(T213971384): set to `true` when safe abstract features are ready for WWW devs to use *);
               doc =
                 "Indicates that the method can only be called on concrete classes. Inside the method, `static` refers to a concrete class.";
+            } );
+          ( uaSimpliHack,
+            {
+              contexts = [cls];
+              autocomplete = false;
+              doc = "Demo for SimpliHack";
             } );
         ])
 

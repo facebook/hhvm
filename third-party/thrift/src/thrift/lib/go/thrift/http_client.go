@@ -156,6 +156,6 @@ func (p *httpClient) Flush() error {
 	return nil
 }
 
-func (p *httpClient) RemainingBytes() uint64 {
-	return uint64(p.responseBuffer.Len())
+func (p *httpClient) Len() int {
+	return p.responseBuffer.Len()
 }

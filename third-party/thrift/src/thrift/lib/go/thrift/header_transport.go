@@ -257,9 +257,9 @@ func (t *headerTransport) WriteString(s string) (int, error) {
 	return n, types.NewTransportExceptionFromError(err)
 }
 
-// RemainingBytes returns how many bytes remain in the current recv framebuffer.
-func (t *headerTransport) RemainingBytes() uint64 {
-	return t.frameSize
+// Len returns how many bytes remain in the current recv framebuffer.
+func (t *headerTransport) Len() int {
+	return int(t.frameSize)
 }
 
 func applyTransforms(buf *bytes.Buffer, transforms []TransformID) (*bytes.Buffer, error) {

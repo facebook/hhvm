@@ -17,6 +17,7 @@
 package types
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -221,14 +222,22 @@ type Flusher interface {
 	Flush() (err error)
 }
 
-// ReadSizer is a Reader with an additional RemainingBytes() capability (to get remaining bytes count).
+// ReadSizer is a Reader with an additional Len() capability (to get remaining bytes count).
 type ReadSizer interface {
 	io.Reader
-	RemainingBytes() (numBytes uint64)
+	// https://pkg.go.dev/bytes#Reader.Len
+	// Len returns the number of bytes of the unread portion of the slice.
+	Len() int
 }
 
-// ReadWriteSizer is a ReadWriter with an additional RemainingBytes() capability (to get remaining bytes count).
+// ReadWriteSizer is a ReadWriter with an additional Len() capability (to get remaining bytes count).
 type ReadWriteSizer interface {
 	io.ReadWriter
-	RemainingBytes() (numBytes uint64)
+	// https://pkg.go.dev/bytes#Reader.Len
+	// Len returns the number of bytes of the unread portion of the slice.
+	Len() int
 }
+
+// Compile-time check to ensure that 'bytes.Reader' and 'bytes.Buffer' implement ReadSizer.
+var _ ReadSizer = (*bytes.Reader)(nil)
+var _ ReadSizer = (*bytes.Buffer)(nil)

@@ -51,8 +51,3 @@ func (m *MemoryBuffer) Close() error {
 	m.Buffer.Reset()
 	return nil
 }
-
-// RemainingBytes returns the number of bytes remaining in the buffer.
-func (m *MemoryBuffer) RemainingBytes() uint64 {
-	return uint64(m.Buffer.Len())
-}

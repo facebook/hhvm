@@ -167,7 +167,7 @@ func TestGiantStructSerialization(t *testing.T) {
 
 	ser := NewBinarySerializer()
 
-	giantByteBlob := make([]byte, defaultMemoryBufferSize*10)
+	giantByteBlob := make([]byte, defaultBufferSize*10)
 	_, err := rand.Read(giantByteBlob)
 	if err != nil {
 		t.Fatalf("failed to rand read: %v", err)

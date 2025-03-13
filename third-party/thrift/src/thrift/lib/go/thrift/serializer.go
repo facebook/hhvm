@@ -17,41 +17,50 @@
 package thrift
 
 import (
+	"bytes"
+
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
+// Default initial size for serializer/deserializer memory buffer.
+// The buffer grows automatically when needed during ser/des.
+// The initial bufer size is meant to fit most messages, in order to
+// completely avoid buffer growth/reallocation and improve ser/des
+// performance for the most common usecase (a.k.a. a <1KB message).
+const defaultBufferSize = 1024 // 1KB
+
 // A Serializer is used to turn a Struct in to a byte stream
 type Serializer struct {
-	transport *MemoryBuffer
-	encoder   types.Encoder
+	buffer  *bytes.Buffer
+	encoder types.Encoder
 }
 
 // NewBinarySerializer create a new serializer using the binary format
 func NewBinarySerializer() *Serializer {
-	transport := NewMemoryBufferLen(defaultMemoryBufferSize)
-	encoder := NewBinaryFormat(transport)
-	return &Serializer{transport: transport, encoder: encoder}
+	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
+	encoder := NewBinaryFormat(buffer)
+	return &Serializer{buffer: buffer, encoder: encoder}
 }
 
 // NewCompactSerializer creates a new serializer using the compact format
 func NewCompactSerializer() *Serializer {
-	transport := NewMemoryBufferLen(defaultMemoryBufferSize)
-	encoder := NewCompactFormat(transport)
-	return &Serializer{transport: transport, encoder: encoder}
+	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
+	encoder := NewCompactFormat(buffer)
+	return &Serializer{buffer: buffer, encoder: encoder}
 }
 
 // NewCompactJSONSerializer creates a new serializer using the compact JSON format
 func NewCompactJSONSerializer() *Serializer {
-	transport := NewMemoryBufferLen(defaultMemoryBufferSize)
-	encoder := NewCompactJSONFormat(transport)
-	return &Serializer{transport: transport, encoder: encoder}
+	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
+	encoder := NewCompactJSONFormat(buffer)
+	return &Serializer{buffer: buffer, encoder: encoder}
 }
 
 // NewSimpleJSONSerializer creates a new serializer using the SimpleJSON format
 func NewSimpleJSONSerializer() *Serializer {
-	transport := NewMemoryBufferLen(defaultMemoryBufferSize)
-	encoder := NewSimpleJSONFormat(transport)
-	return &Serializer{transport: transport, encoder: encoder}
+	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
+	encoder := NewSimpleJSONFormat(buffer)
+	return &Serializer{buffer: buffer, encoder: encoder}
 }
 
 // EncodeCompact serializes msg using the compact format
@@ -76,7 +85,7 @@ func EncodeSimpleJSON(msg types.WritableStruct) ([]byte, error) {
 
 // Write writes msg to the serializer and returns it as a byte array
 func (s *Serializer) Write(msg types.WritableStruct) ([]byte, error) {
-	s.transport.Reset()
+	s.buffer.Reset()
 
 	if err := msg.Write(s.encoder); err != nil {
 		return nil, err
@@ -91,8 +100,8 @@ func (s *Serializer) Write(msg types.WritableStruct) ([]byte, error) {
 	// The contents of the internal Transport buffer will be overwritten
 	// on the next call to Write()/WriteString(). We don't want that to
 	// affect the caller's buffer. Hence, the copy.
-	serBytes := make([]byte, s.transport.Len())
-	copy(serBytes, s.transport.Bytes())
+	serBytes := make([]byte, s.buffer.Len())
+	copy(serBytes, s.buffer.Bytes())
 
 	return serBytes, nil
 }

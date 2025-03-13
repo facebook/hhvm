@@ -17,47 +17,43 @@
 package thrift
 
 import (
+	"bytes"
+
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
-// Default initial size for serializer/deserializer memory buffer.
-// The buffer grows automatically when needed during ser/des.
-// The initial bufer size is meant to fit most messages, in order to
-// completely avoid buffer growth/reallocation and improve ser/des
-// performance for the most common usecase (a.k.a. a <1KB message).
-const defaultMemoryBufferSize = 1024 // 1KB
-
+// A Deserializer is used to turn a byte stream into a Struct
 type Deserializer struct {
-	transport *MemoryBuffer
-	decoder   types.Decoder
+	buffer  *bytes.Buffer
+	decoder types.Decoder
 }
 
 // NewBinaryDeserializer creates a new deserializer using the binary format
 func NewBinaryDeserializer() *Deserializer {
-	transport := NewMemoryBufferLen(defaultMemoryBufferSize)
-	decoder := NewBinaryFormat(transport)
-	return &Deserializer{transport: transport, decoder: decoder}
+	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
+	decoder := NewBinaryFormat(buffer)
+	return &Deserializer{buffer: buffer, decoder: decoder}
 }
 
 // NewCompactDeserializer creates a new deserializer using the compact format
 func NewCompactDeserializer() *Deserializer {
-	transport := NewMemoryBufferLen(defaultMemoryBufferSize)
-	decoder := NewCompactFormat(transport)
-	return &Deserializer{transport: transport, decoder: decoder}
+	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
+	decoder := NewCompactFormat(buffer)
+	return &Deserializer{buffer: buffer, decoder: decoder}
 }
 
 // NewCompactJSONDeserializer creates a new deserializer using the JSON format
 func NewCompactJSONDeserializer() *Deserializer {
-	transport := NewMemoryBufferLen(defaultMemoryBufferSize)
-	decoder := NewCompactJSONFormat(transport)
-	return &Deserializer{transport: transport, decoder: decoder}
+	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
+	decoder := NewCompactJSONFormat(buffer)
+	return &Deserializer{buffer: buffer, decoder: decoder}
 }
 
 // NewSimpleJSONDeserializer creates a new deserializer using the simple JSON format
 func NewSimpleJSONDeserializer() *Deserializer {
-	transport := NewMemoryBufferLen(defaultMemoryBufferSize)
-	decoder := NewSimpleJSONFormat(transport)
-	return &Deserializer{transport: transport, decoder: decoder}
+	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
+	decoder := NewSimpleJSONFormat(buffer)
+	return &Deserializer{buffer: buffer, decoder: decoder}
 }
 
 // DecodeCompact deserializes a compact format message
@@ -83,9 +79,9 @@ func DecodeSimpleJSON(data []byte, msg types.ReadableStruct) error {
 // Read deserializes a Thrift struct from a byte slice
 func (t *Deserializer) Read(msg types.ReadableStruct, b []byte) error {
 	// Reset the internal buffer (while keeping the underlying storage)
-	t.transport.Reset()
+	t.buffer.Reset()
 
-	if _, err := t.transport.Write(b); err != nil {
+	if _, err := t.buffer.Write(b); err != nil {
 		return err
 	}
 	if err := msg.Read(t.decoder); err != nil {

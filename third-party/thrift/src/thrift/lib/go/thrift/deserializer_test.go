@@ -31,7 +31,7 @@ func TestGiantStructDeserialization(t *testing.T) {
 
 	des := NewBinaryDeserializer()
 
-	giantByteBlob := make([]byte, defaultMemoryBufferSize*10)
+	giantByteBlob := make([]byte, defaultBufferSize*10)
 	_, err := rand.Read(giantByteBlob)
 	if err != nil {
 		t.Fatalf("failed to rand read: %v", err)
@@ -80,8 +80,8 @@ func TestConsequentDeserialization(t *testing.T) {
 
 	// The internal memory buffer should not have grown at all,
 	// since we were deserializing small structs.
-	if des.transport.Cap() != defaultMemoryBufferSize {
-		t.Fatalf("deserializer memory buffer grew: %d", des.transport.Cap())
+	if des.buffer.Cap() != defaultBufferSize {
+		t.Fatalf("deserializer memory buffer grew: %d", des.buffer.Cap())
 	}
 }
 

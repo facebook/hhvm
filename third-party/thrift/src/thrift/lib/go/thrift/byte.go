@@ -22,14 +22,6 @@ import (
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
-func remainingBytes(reader io.Reader) uint64 {
-	readSizeProvider, ok := reader.(types.ReadSizeProvider)
-	if !ok {
-		return types.UnknownRemaining
-	}
-	return readSizeProvider.RemainingBytes()
-}
-
 func flush(writer io.Writer) error {
 	flusher, ok := writer.(types.Flusher)
 	if !ok {

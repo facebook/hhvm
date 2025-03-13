@@ -221,11 +221,6 @@ type Flusher interface {
 	Flush() (err error)
 }
 
-// ReadSizeProvider is the interface that wraps the basic RemainingBytes method
-type ReadSizeProvider interface {
-	RemainingBytes() (numBytes uint64)
-}
-
 // UnknownRemaining is used by transports that can not return a real answer
 // for RemainingBytes()
 const UnknownRemaining = ^uint64(0)

@@ -332,7 +332,7 @@ func (p *binaryDecoder) ReadMapBegin() (types.Type /* kType */, types.Type /* vT
 	if size32 < 0 {
 		return 0, 0, 0, invalidDataLength
 	}
-	remainingBytes := remainingBytes(p.reader)
+	remainingBytes := p.reader.RemainingBytes()
 	if uint64(size32*2) > remainingBytes || remainingBytes == types.UnknownRemaining {
 		return 0, 0, 0, invalidDataLength
 	}
@@ -357,7 +357,7 @@ func (p *binaryDecoder) ReadListBegin() (types.Type /* elemType */, int /* size 
 	if size32 < 0 {
 		return 0, 0, invalidDataLength
 	}
-	remainingBytes := remainingBytes(p.reader)
+	remainingBytes := p.reader.RemainingBytes()
 	if uint64(size32) > remainingBytes || remainingBytes == types.UnknownRemaining {
 		return 0, 0, invalidDataLength
 	}
@@ -446,7 +446,7 @@ func (p *binaryDecoder) ReadBinary() ([]byte, error) {
 		return nil, invalidDataLength
 	}
 	size := int(size32)
-	remainingBytes := remainingBytes(p.reader)
+	remainingBytes := p.reader.RemainingBytes()
 	if uint64(size32) > remainingBytes || remainingBytes == types.UnknownRemaining {
 		return nil, invalidDataLength
 	}
@@ -469,7 +469,7 @@ func (p *binaryDecoder) readStringBody(size int32) (string, error) {
 	if size < 0 {
 		return "", nil
 	}
-	remainingBytes := remainingBytes(p.reader)
+	remainingBytes := p.reader.RemainingBytes()
 	if uint64(size) > remainingBytes || remainingBytes == types.UnknownRemaining {
 		return "", invalidDataLength
 	}

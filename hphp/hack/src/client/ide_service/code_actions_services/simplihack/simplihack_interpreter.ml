@@ -26,6 +26,11 @@ module Value = struct
     | Str s -> Some s
     | _ -> None
 
+  let str_ish = function
+    | Str s -> Some s
+    | ClassPtr c -> Some (Utils.strip_ns @@ snd c.Aast.c_name)
+    | _ -> None
+
   let class_ptr = function
     | ClassPtr c -> Some c
     | _ -> None
@@ -152,7 +157,7 @@ end = struct
           ~init:(Some "")
           ~f:(fun acc e ->
             let* lhs = acc in
-            let* rhs = Value.str @@ expr ctx e in
+            let* rhs = Value.str_ish @@ expr ctx e in
             return @@ lhs ^ rhs)
           exprs
       in
@@ -281,8 +286,8 @@ end = struct
     match bop with
     | Ast_defs.Dot ->
       let open Option.Let_syntax in
-      let* lhs_str = Value.str @@ Expr.eval ctx lhs_expr in
-      let* rhs_str = Value.str @@ Expr.eval ctx rhs_expr in
+      let* lhs_str = Value.str_ish @@ Expr.eval ctx lhs_expr in
+      let* rhs_str = Value.str_ish @@ Expr.eval ctx rhs_expr in
       Some (Value.Str (lhs_str ^ rhs_str))
     | _ -> None
 end

@@ -74,15 +74,6 @@ func EncodeSimpleJSON(msg types.WritableStruct) ([]byte, error) {
 	return NewSimpleJSONSerializer().Write(msg)
 }
 
-// WriteString writes msg to the serializer and returns it as a string
-func (s *Serializer) WriteString(msg types.WritableStruct) (string, error) {
-	serBytes, err := s.Write(msg)
-	if err != nil {
-		return "", err
-	}
-	return string(serBytes), nil
-}
-
 // Write writes msg to the serializer and returns it as a byte array
 func (s *Serializer) Write(msg types.WritableStruct) ([]byte, error) {
 	s.transport.Reset()

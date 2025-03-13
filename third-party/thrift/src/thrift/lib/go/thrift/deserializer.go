@@ -80,11 +80,6 @@ func DecodeSimpleJSON(data []byte, msg types.ReadableStruct) error {
 	return NewSimpleJSONDeserializer().Read(msg, data)
 }
 
-// ReadString deserializes a Thrift struct from a string
-func (t *Deserializer) ReadString(msg types.ReadableStruct, s string) error {
-	return t.Read(msg, []byte(s))
-}
-
 // Read deserializes a Thrift struct from a byte slice
 func (t *Deserializer) Read(msg types.ReadableStruct, b []byte) error {
 	// Reset the internal buffer (while keeping the underlying storage)

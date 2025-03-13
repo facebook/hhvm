@@ -339,7 +339,7 @@ abstract final class ThriftSerializationHelper {
         break;
       case TType::STRUCT:
         $cls = Shapes::at($tspec, 'class');
-        $struct = new $cls();
+        $struct = HH_FIXME::tryClassnameToClass($cls) |> new $$();
         $xfer += PHPism_FIXME::castForArithmetic($struct->read($protocol));
         $object = $struct;
         break;

@@ -109,6 +109,8 @@ class AlignedParserStrategy {
 
   std::unique_ptr<folly::IOBuf> createHeaderBuffer();
   std::unique_ptr<folly::IOBuf> createDataBuffer();
+  std::unique_ptr<folly::IOBuf> createRequestResponseDataBuffer();
+  std::unique_ptr<folly::IOBuf> createPayloadDataBuffer();
 
   void handleAwaitingHeader(size_t len);
 
@@ -133,8 +135,24 @@ std::unique_ptr<folly::IOBuf> AlignedParserStrategy<T>::createHeaderBuffer() {
 }
 
 template <typename T>
-std::unique_ptr<folly::IOBuf> AlignedParserStrategy<T>::createDataBuffer() {
+std::unique_ptr<folly::IOBuf>
+AlignedParserStrategy<T>::createRequestResponseDataBuffer() {
   return folly::IOBuf::createCombined(remainingData_);
+}
+
+template <typename T>
+std::unique_ptr<folly::IOBuf>
+AlignedParserStrategy<T>::createPayloadDataBuffer() {
+  return folly::IOBuf::createCombined(remainingData_);
+}
+
+template <typename T>
+std::unique_ptr<folly::IOBuf> AlignedParserStrategy<T>::createDataBuffer() {
+  if (frameType_ == FrameType::PAYLOAD) {
+    return createPayloadDataBuffer();
+  } else {
+    return createRequestResponseDataBuffer();
+  }
 }
 
 template <typename T>

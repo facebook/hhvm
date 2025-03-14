@@ -51,19 +51,11 @@
 #include <thrift/compiler/ast/t_union.h>
 #include <thrift/compiler/whisker/dsl.h>
 
-#include <fmt/core.h>
-
-#include <boost/core/demangle.hpp>
-
 #include <filesystem>
 #include <functional>
 #include <map>
-#include <stdexcept>
 #include <string>
 #include <string_view>
-#include <typeindex>
-#include <typeinfo>
-#include <unordered_map>
 
 namespace apache::thrift::compiler {
 
@@ -186,114 +178,7 @@ class t_whisker_generator : public t_generator {
   using prototype = whisker::prototype<T>;
   template <typename T = void>
   using prototype_ptr = whisker::prototype_ptr<T>;
-
-  /**
-   * The prototype database stores and caches prototype indexed by typeid.
-   *
-   * This is primarily used for the `make_prototype_for*` family of functions
-   * below.
-   */
-  class prototype_database {
-   public:
-    template <typename T>
-    void define(prototype_ptr<T> prototype) {
-      auto [_, inserted] =
-          prototypes_.emplace(std::type_index(typeid(T)), std::move(prototype));
-      if (!inserted) {
-        throw std::runtime_error(fmt::format(
-            "Prototype for type '{}' already exists.",
-            boost::core::demangle(typeid(T).name())));
-      }
-    }
-
-    /**
-     * Gets the cached prototype for the given type, or throws an exception if
-     * the type is unknown.
-     *
-     * If allow_lazy is true, then a failed lookup falls back to a "lazy"
-     * prototype which is resolved when used. This is helpful when there is a
-     * cycle of type references.
-     */
-    template <typename T>
-    prototype_ptr<T> of(bool allow_lazy = true) const {
-      auto found = prototypes_.find(std::type_index(typeid(T)));
-      if (found == prototypes_.end()) {
-        if (allow_lazy) {
-          return this->lazy<T>();
-        }
-        throw std::runtime_error(fmt::format(
-            "Prototype for type '{}' does not exist.",
-            boost::core::demangle(typeid(T).name())));
-      }
-      auto casted =
-          std::dynamic_pointer_cast<const prototype<T>>(found->second);
-      if (casted == nullptr) {
-        throw std::runtime_error(fmt::format(
-            "Prototype for type '{}' is of an unexpected type.",
-            typeid(T).name()));
-      }
-      return casted;
-    }
-
-    /**
-     * Creates a native_handle for the given reference with a prototype stored
-     * in this database.
-     *
-     * std::remove_reference_t<T> forces the caller to explicitly specify the
-     * template argument. This is to prevent accidental use of the wrong type.
-     */
-    template <typename T>
-    whisker::native_handle<T> create(
-        whisker::managed_ptr<std::remove_reference_t<T>> o) const {
-      return whisker::native_handle<T>(std::move(o), of<T>());
-    }
-    template <typename T>
-    whisker::native_handle<T> create(
-        const std::remove_reference_t<T>& o) const {
-      return this->create<T>(whisker::manage_as_static(o));
-    }
-    template <typename T>
-    whisker::object create_nullable(const std::remove_reference_t<T>* o) const {
-      return o == nullptr ? whisker::make::null
-                          : whisker::object(this->create<T>(*o));
-    }
-
-    /**
-     * A "lazy" prototype is one whose definition can be deferred until first
-     * use. This allows prototypes to refer to each other in cycles that have
-     * cyclic references.
-     *
-     * Note that cyclical prototypes chains are still disallowed.
-     */
-    template <typename T>
-    prototype_ptr<T> lazy() const {
-      class lazy_prototype final : public prototype<T> {
-       public:
-        explicit lazy_prototype(const prototype_database& db) : db_(db) {}
-
-        const prototype<>::descriptor* find_descriptor(
-            std::string_view name) const final {
-          return this->resolve()->find_descriptor(name);
-        }
-        std::set<std::string> keys() const final {
-          return this->resolve()->keys();
-        }
-        const prototype<>::ptr& parent() const final {
-          return this->resolve()->parent();
-        }
-
-       private:
-        prototype_ptr<T> resolve() const {
-          return db_.of<T>(false /* allow_lazy */);
-        }
-        const prototype_database& db_;
-      };
-      return std::make_shared<const lazy_prototype>(*this);
-    }
-
-   private:
-    std::unordered_map<std::type_index, whisker::prototype<>::ptr> prototypes_;
-  };
+  using prototype_database = whisker::prototype_database;
 
   /**
    * Registers the `make_prototype_for_*` functions with the prototype database.

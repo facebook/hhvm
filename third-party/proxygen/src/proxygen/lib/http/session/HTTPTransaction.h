@@ -257,7 +257,6 @@ class HTTPTransactionHandler : public TraceEventObserver {
    * invoked in cases that violate an internal invariant that is fatal to the
    * transaction but can be recoverable for the session or library.  One such
    * example is mis-use of the egress APIs (sendBody() before sendHeaders()).
-   *
    */
   virtual void onInvariantViolation(const HTTPException& error) noexcept {
     LOG(FATAL) << error.what();

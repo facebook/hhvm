@@ -650,7 +650,7 @@ void HTTPTransaction::invariantViolation(HTTPException ex) {
   }
   // In http/1.1, this will send TCP reset and ungracefully terminate the
   // connection. In h2, this will send stream reset but keep the connection
-  // open.
+  // open. Should this be INTERNAL_ERROR?
   sendAbort(ErrorCode::NO_ERROR);
 }
 

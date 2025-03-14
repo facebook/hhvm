@@ -4947,3 +4947,61 @@ TEST_F(HTTP2DownstreamSessionTest, Observer_PreWrite) {
 
   expectDetachSession();
 }
+
+TEST_F(HTTPDownstreamSessionTest, InvariantViolation) {
+  folly::DelayedDestruction::DestructorGuard g(httpSession_);
+
+  auto handler = addSimpleStrictHandler();
+  auto& txn = handler->txn_;
+  // attempting to egress body first => invariantViolation
+  handler->expectHeaders([&]() { handler->sendBody(100); });
+
+  EXPECT_CALL(*handler, _onInvariantViolation(_)).WillOnce([&]() {
+    // invariantViolation callback can send headers if allowed
+    CHECK(txn->canSendHeaders());
+    txn->sendHeaders(getResponse(500, 0));
+  });
+
+  sendRequest(getGetRequest(), /*eom=*/true);
+
+  // this should detach transaction since invariantViolation triggers abort
+  EXPECT_CALL(*handler, _detachTransaction);
+  flushRequestsAndLoopN(1);
+  evbLoopNonBlockN(1);
+
+  EXPECT_CALL(callbacks_, onHeadersComplete(_, _)).WillOnce([](auto, auto msg) {
+    EXPECT_EQ(msg->getStatusCode(), 500);
+  });
+
+  parseOutput(*clientCodec_);
+  gracefulShutdown();
+}
+
+TEST_F(HTTP2DownstreamSessionTest, InvariantViolation) {
+  auto handler = addSimpleStrictHandler();
+  auto& txn = handler->txn_;
+  // attempting to egress body first => invariantViolation
+  handler->expectHeaders([&]() { handler->sendBody(100); });
+
+  EXPECT_CALL(*handler, _onInvariantViolation(_)).WillOnce([&]() {
+    // invariantViolation callback can send headers if allowed
+    CHECK(txn->canSendHeaders());
+    txn->sendHeaders(getResponse(500, 0));
+    txn->sendEOM();
+  });
+
+  sendRequest(getGetRequest(), /*eom=*/true);
+
+  // this should detach transaction since invariantViolation triggers abort
+  EXPECT_CALL(*handler, _detachTransaction);
+  flushRequestsAndLoopN(1);
+  evbLoopNonBlockN(2);
+
+  EXPECT_CALL(callbacks_, onHeadersComplete(_, _)).WillOnce([](auto, auto msg) {
+    EXPECT_EQ(msg->getStatusCode(), 500);
+  });
+  EXPECT_CALL(callbacks_, onAbort(_, ErrorCode::NO_ERROR));
+
+  parseOutput(*clientCodec_);
+  gracefulShutdown();
+}

@@ -1546,6 +1546,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - bool HHIR.GenOpts = true, UNKNOWN
 - bool HHIR.RefcountOpts = true, UNKNOWN
 - bool HHIR.EnableGenTimeInlining = true, UNKNOWN
+- bool HHIR.EnableInliningPass = false, UNKNOWN
 - uint32_t HHIR.InliningCostFactorMain = 100, UNKNOWN
 - uint32_t HHIR.InliningCostFactorCold = 32, UNKNOWN
 - uint32_t HHIR.InliningCostFactorFrozen = 10, UNKNOWN

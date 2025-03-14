@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
+#include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-sib.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
@@ -401,36 +402,36 @@ bool inEntryRetransChain(RegionDesc::BlockId bid, const RegionDesc& region) {
  * Otherwise, select a region for `callee' if one is not already present in
  * `retry'.  Update `inl' and return the region if it's inlinable.
  */
-RegionDescPtr getInlinableCalleeRegion(const irgen::IRGS& irgs,
-                                       SrcKey entry,
-                                       Type ctxType,
-                                       const ProfSrcKey& psk,
-                                       int& calleeCost) {
+irgen::RegionAndLazyUnit getInlinableCalleeRegionAndLazyUnit(const irgen::IRGS& irgs,
+                                                             SrcKey entry,
+                                                             Type ctxType,
+                                                             const ProfSrcKey& psk,
+                                                             int& calleeCost) {
   assertx(entry.funcEntry());
   if (isProfiling(irgs.context.kind) || irgs.inlineState.conjure) {
-    return nullptr;
+    return {psk.srcKey, nullptr};
   }
   if (!irgs.region || !irgs.retryContext) {
-    return nullptr;
+    return {psk.srcKey, nullptr};
   }
   auto annotationsPtr = mcgen::dumpTCAnnotation(irgs.context.kind) ?
                         irgs.unit.annotationData.get() : nullptr;
-  if (!canInlineAt(psk.srcKey, entry, annotationsPtr)) return nullptr;
+  if (!canInlineAt(psk.srcKey, entry, annotationsPtr)) return {psk.srcKey, nullptr};
+
 
   auto const& inlineBlacklist = irgs.retryContext->inlineBlacklist;
   if (inlineBlacklist.find(psk) != inlineBlacklist.end()) {
-    return nullptr;
+    return {psk.srcKey, nullptr};
   }
 
-  auto calleeRegion = selectCalleeRegion(irgs, entry, ctxType, psk.srcKey);
-  if (!calleeRegion) {
-    return nullptr;
+  auto regionAndLazyUnit = selectCalleeRegion(irgs, entry, ctxType, psk.srcKey);
+  if (!regionAndLazyUnit.region()) {
+    return {psk.srcKey, nullptr};
   }
-
-  if (!shouldInline(irgs, psk.srcKey, entry.func(), *calleeRegion, calleeCost)) {                  
-    return nullptr;
+  if (!shouldInline(irgs, psk.srcKey, entry.func(), regionAndLazyUnit, calleeCost)) {                  
+    return {psk.srcKey, nullptr};
   }
-  return calleeRegion;
+  return regionAndLazyUnit;
 }
 
 static bool needsSurpriseCheck(Op op) {
@@ -889,8 +890,9 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
   int calleeCost{0};
 
   // See if we have a callee region we can inline.
-  auto const calleeRegion = getInlinableCalleeRegion(
+  auto calleeRegionAndUnit = getInlinableCalleeRegionAndLazyUnit(
     irgs, entry, ctx->type(), psk, calleeCost);
+  auto const calleeRegion = calleeRegionAndUnit.region();
   if (!calleeRegion) return false;
 
   // We shouldn't be inlining profiling translations.
@@ -907,6 +909,13 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
          entry.func()->fullName()->data(),
          entry.numEntryArgs(),
          show(irgs));
+
+  if (Cfg::HHIR::EnableInliningPass) {
+    assertx(calleeRegionAndUnit.unit());
+    auto unit = calleeRegionAndUnit.unit();
+    return stitchInlinedRegion(irgs, psk.srcKey, entry, *calleeRegion,
+                               *unit);
+  }
 
   irgen::beginInlining(irgs, entry, ctx, asyncEagerOffset, calleeCost,
                        calleeFP);

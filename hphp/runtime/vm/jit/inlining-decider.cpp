@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/jit/irgen.h"
+#include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
@@ -299,29 +300,15 @@ using InlineCostCache = folly::ConcurrentHashMap<
 >;
 
 Vcost computeTranslationCostSlow(SrcKey at,
-                                 const RegionDesc& region,
+                                 const irgen::RegionAndLazyUnit& regionAndLazyUnit,
                                  AnnotationData* annotationData) {
-  TransContext ctx {
-    TransIDSet{},
-    0,  // optIndex
-    TransKind::Optimize,
-    at,
-    &region,
-    at.packageInfo(),
-    PrologueID(),
-  };
-
-  tracing::Block _{"compute-inline-cost", [&] { return traceProps(ctx); }};
-
-  rqtrace::DisableTracing notrace;
-  auto const unbumper = mcgen::unbumpFunctions();
-
-  auto const unit = irGenInlineRegion(ctx, region);
+  auto const unit = regionAndLazyUnit.unit();
   if (!unit) return {0, true};
 
   // TODO(T52856776) - annotations should be copied from unit into outer unit
   // via annotationData
-
+  rqtrace::DisableTracing notrace;
+  auto const unbumper = mcgen::unbumpFunctions();
   SCOPE_ASSERT_DETAIL("Inline-IRUnit") { return show(*unit); };
   return irlower::computeIRUnitCost(*unit);
 }
@@ -329,13 +316,14 @@ Vcost computeTranslationCostSlow(SrcKey at,
 InlineCostCache s_inlCostCache;
 
 int computeTranslationCost(SrcKey at,
-                           const RegionDesc& region,
+                           const irgen::RegionAndLazyUnit& regionAndLazyUnit,
                            AnnotationData* annotationData) {
+  auto const region = *regionAndLazyUnit.region();
   InlineRegionKey irk{region};
   auto f = s_inlCostCache.find(irk);
   if (f != s_inlCostCache.end()) return f->second;
 
-  auto const info = computeTranslationCostSlow(at, region, annotationData);
+  auto const info = computeTranslationCostSlow(at, regionAndLazyUnit, annotationData);
   auto cost = info.cost;
 
   // We normally store the computed cost into the cache.  However, if the region
@@ -420,7 +408,7 @@ uint64_t adjustedMaxVasmCost(const irgen::IRGS& env,
  */
 int costOfInlining(SrcKey callerSk,
                    const Func* callee,
-                   const RegionDesc& region,
+                   const irgen::RegionAndLazyUnit& regionAndLazyUnit,
                    AnnotationData* annotationData) {
   auto const alwaysInl =
     (!Cfg::HHIR::InliningIgnoreHints &&
@@ -430,7 +418,7 @@ int costOfInlining(SrcKey callerSk,
   // Functions marked as always inline don't contribute to overall cost
   return alwaysInl ?
     0 :
-    computeTranslationCost(callerSk, region, annotationData);
+    computeTranslationCost(callerSk, regionAndLazyUnit, annotationData);
 }
 
 bool isCoeffectsBackdoor(SrcKey callerSk, const Func* callee) {
@@ -463,8 +451,9 @@ bool isCoeffectsBackdoor(SrcKey callerSk, const Func* callee) {
 bool shouldInline(const irgen::IRGS& irgs,
                   SrcKey callerSk,
                   const Func* callee,
-                  const RegionDesc& region,
+                  const irgen::RegionAndLazyUnit& regionAndUnit,
                   int& cost) {
+  auto const region = *regionAndUnit.region();
   auto sk = region.empty() ? SrcKey() : region.start();
   assertx(callee);
   assertx(sk.func() == callee);
@@ -581,7 +570,7 @@ bool shouldInline(const irgen::IRGS& irgs,
     // In debug builds compute the cost anyway to catch bugs in the inlining
     // machinery. Many inlining tests utilize the __ALWAYS_INLINE attribute.
     if (debug) {
-      computeTranslationCost(callerSk, region, annotationsPtr);
+      computeTranslationCost(callerSk, regionAndUnit, annotationsPtr);
     }
     return accept("callee marked as __ALWAYS_INLINE");
   }
@@ -590,7 +579,7 @@ bool shouldInline(const irgen::IRGS& irgs,
   // We measure the cost of inlining each callstack and stop when it exceeds a
   // certain threshold.  (Note that we do not measure the total cost of all the
   // inlined calls for a given caller---just the cost of each nested stack.)
-  cost = costOfInlining(callerSk, callee, region, annotationsPtr);
+  cost = costOfInlining(callerSk, callee, regionAndUnit, annotationsPtr);
   if (cost <= Cfg::HHIR::AlwaysInlineVasmCostLimit) {
     return accept(folly::sformat("cost={} within always-inline limit", cost));
   }
@@ -744,10 +733,10 @@ RegionDescPtr selectCalleeCFG(SrcKey callerSk, SrcKey entry,
 }
 }
 
-RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
-                                 SrcKey entry,
-                                 Type ctxType,
-                                 SrcKey callerSk) {
+irgen::RegionAndLazyUnit selectCalleeRegion(const irgen::IRGS& irgs,
+                                            SrcKey entry,
+                                            Type ctxType,
+                                            SrcKey callerSk) {
   assertx(entry.funcEntry());
   auto const callee = entry.func();
 
@@ -761,7 +750,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
 
   if (ctxType == TBottom) {
     traceRefusal(callerSk, callee, "ctx is TBottom", annotationsPtr);
-    return nullptr;
+    return {callerSk, nullptr};
   }
   if (callee->isClosureBody()) {
     if (!callee->cls()) {
@@ -778,7 +767,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
          (!callerSk.hasThis() && isFCallClsMethod(callerSk.op())))) {
       traceRefusal(callerSk, callee, "calling static method with an object",
                    annotationsPtr);
-      return nullptr;
+      return {callerSk, nullptr};
     }
   }
 
@@ -786,13 +775,13 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
     if (callee->isStatic() && !ctxType.maybe(TCls)) {
       traceRefusal(callerSk, callee, "calling a static method with an instance",
                    annotationsPtr);
-      return nullptr;
+      return {callerSk, nullptr};
     }
     if (!callee->isStatic() && !ctxType.maybe(TObj)) {
       traceRefusal(callerSk, callee,
                    "calling an instance method without an instance",
                    annotationsPtr);
-      return nullptr;
+      return {callerSk, nullptr};
     }
   }
 
@@ -808,7 +797,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
 
     // If we don't have sufficient type information to inline the region return
     // early
-    if (type == TBottom) return nullptr;
+    if (type == TBottom) return {callerSk, nullptr};
     FTRACE(2, "input {}: {}\n", i + 1, type);
     inputTypes.push_back(type);
   }
@@ -823,21 +812,22 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
   if (profData()) {
     auto region = selectCalleeCFG(callerSk, entry, ctxType, inputTypes,
                                   Cfg::Jit::MaxInlineRegionInstrs, annotationsPtr);
-    if (region) return region;
+    if (region) return {callerSk, region};
     // Special case: even if we don't have prof data for this func, if
     // it takes no arguments and returns a constant, it might be a
     // trivial function (IE, "return 123;"). Attempt to inline it
     // anyways using the tracelet selector.
-    if (callee->numFuncEntryInputs() > 0) return nullptr;
+    if (callee->numFuncEntryInputs() > 0) return {callerSk, nullptr};
     auto const retType =
       typeFromRAT(callee->repoReturnType(), callerSk.func()->cls());
     // Deliberately using hasConstVal, not admitsSingleVal, since we
     // don't want TInitNull, etc.
-    if (!retType.hasConstVal()) return nullptr;
+    if (!retType.hasConstVal()) return {callerSk, nullptr};
   }
 
-  return selectCalleeTracelet(entry, ctxType, inputTypes,
-                              Cfg::Jit::MaxInlineRegionInstrs);
+  auto region = selectCalleeTracelet(entry, ctxType, inputTypes,
+                                     Cfg::Jit::MaxInlineRegionInstrs);
+  return {callerSk, region};
 }
 
 void setBaseInliningProfCount(uint64_t value) {

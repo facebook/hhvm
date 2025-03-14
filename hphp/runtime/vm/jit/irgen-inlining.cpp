@@ -192,10 +192,38 @@ Outer:                                 | Inner:
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/unwind.h"
+#include "hphp/runtime/vm/jit/inlining-decider.h"
+#include "hphp/runtime/vm/jit/mcgen-translate.h"
+#include "hphp/runtime/vm/jit/translate-region.h"
 
 namespace HPHP::jit::irgen {
 
 TRACE_SET_MOD(hhir);  
+
+RegionAndLazyUnit::RegionAndLazyUnit(
+    SrcKey callerSk,
+    RegionDescPtr region
+  ) : m_callerSk(callerSk)
+    , m_region(std::move(region)) {}
+
+IRUnit* RegionAndLazyUnit::unit() const {
+    if (m_unit) return m_unit.get();
+    always_assert(m_region);
+    TransContext ctx {
+      TransIDSet{},
+      0,  // optIndex
+      TransKind::Optimize,
+      m_callerSk,
+      m_region.get(),
+      m_callerSk.packageInfo(),
+      PrologueID(),
+    };
+    tracing::Block _{"compute-inline-cost", [&] { return traceProps(ctx); }};
+    rqtrace::DisableTracing notrace;
+    auto const unbumper = mcgen::unbumpFunctions();
+    m_unit = irGenInlineRegion(ctx, *m_region);
+    return m_unit.get();
+}
 
 bool isInlining(const IRGS& env) {
   return !env.inlineState.frames.empty();
@@ -749,6 +777,16 @@ bool spillInlinedFrames(IRGS& env) {
     }
   }
   return spilled;
+}
+
+void fixCalleeUnit(const IRGS& env, IRUnit& unit) {
+}
+
+
+bool stitchInlinedRegion(irgen::IRGS& irgs, SrcKey callerSk, SrcKey calleeSk,
+                         const RegionDesc& calleeRegion, IRUnit& calleeUnit) {
+    fixCalleeUnit(irgs, calleeUnit);                          
+    return true;
 }
 
 //////////////////////////////////////////////////////////////////////

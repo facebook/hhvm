@@ -64,11 +64,15 @@ type common_state = {
 }
 [@@deriving show]
 
+type open_file_state = {
+  entry: Provider_context.entry;
+  errors: Errors.t option ref;
+}
+
 (** The [entry] caches the TAST+errors; the [Errors.t option] stores what was
 the most recent version of the errors to have been returned to clientLsp
 by didOpen/didChange/didClose/codeAction. *)
-type open_files_state =
-  (Provider_context.entry * Errors.t option ref) Relative_path.Map.t
+type open_files_state = open_file_state Relative_path.Map.t
 
 (** istate, "initialized state", is the state the daemon after it has
 finished initialization (i.e. finished loading saved state),
@@ -282,8 +286,7 @@ let batch_update_naming_table_and_invalidate_caches
     ~(naming_table : Naming_table.t)
     ~(sienv : SearchUtils.si_env)
     ~(local_memory : Provider_backend.local_memory)
-    ~(open_files :
-       (Provider_context.entry * Errors.t option ref) Relative_path.Map.t)
+    ~(open_files : open_files_state)
     (changes : Relative_path.Set.t) : Naming_table.t * SearchUtils.si_env =
   let start_time = Unix.gettimeofday () in
   let ClientIdeIncremental.{ changes; naming_table; sienv } =
@@ -298,7 +301,7 @@ let batch_update_naming_table_and_invalidate_caches
       ~ctx
       ~local_memory
       ~changes
-      ~entries:(Relative_path.Map.map open_files ~f:fst)
+      ~entries:(Relative_path.Map.map open_files ~f:(fun { entry; _ } -> entry))
   in
   HackEventLogger.ProfileTypeCheck.invalidate
     ~count:(List.length changes)
@@ -383,10 +386,13 @@ let initialize1
            path |> Path.to_string |> Relative_path.create_detect_prefix)
     |> List.map ~f:(fun path ->
            ( path,
-             ( Provider_context.make_entry
-                 ~path
-                 ~contents:Provider_context.Raise_exn_on_attempt_to_read,
-               ref None ) ))
+             {
+               entry =
+                 Provider_context.make_entry
+                   ~path
+                   ~contents:Provider_context.Raise_exn_on_attempt_to_read;
+               errors = ref None;
+             } ))
     |> Relative_path.Map.of_list
   in
   let start_time =
@@ -493,7 +499,10 @@ let open_or_change_file_during_init
       ~contents:(Provider_context.Provided_contents contents)
   in
   let dopen_files =
-    Relative_path.Map.add dstate.dopen_files ~key:path ~data:(entry, ref None)
+    Relative_path.Map.add
+      dstate.dopen_files
+      ~key:path
+      ~data:{ entry; errors = ref None }
   in
   { dstate with dopen_files }
 
@@ -518,7 +527,7 @@ let update_file
     |> Relative_path.create_detect_prefix
   in
   let contents = document.ClientIdeMessage.file_contents in
-  let (entry, published_errors) =
+  let (entry, errors) =
     match Relative_path.Map.find_opt open_files path with
     | None ->
       (* This is a common scenario although I'm not quite sure why *)
@@ -526,13 +535,13 @@ let update_file
           ~path
           ~contents:(Provider_context.Provided_contents contents),
         ref None )
-    | Some (entry, published_errors)
+    | Some { entry; errors }
       when Option.equal
              String.equal
              (Some contents)
              (Provider_context.get_file_contents_if_present entry) ->
       (* we can just re-use the existing entry; contents haven't changed *)
-      (entry, published_errors)
+      (entry, errors)
     | Some _ ->
       (* We'll create a new entry; existing entry caches, if present, will be dropped
          But first, need to clear the Fixme cache. This is a global cache
@@ -544,9 +553,9 @@ let update_file
         ref None )
   in
   let open_files =
-    Relative_path.Map.add open_files ~key:path ~data:(entry, published_errors)
+    Relative_path.Map.add open_files ~key:path ~data:{ entry; errors }
   in
-  (open_files, entry, published_errors)
+  (open_files, entry, errors)
 
 (** like [update_file], but for convenience also produces a ctx for
 use in typechecking. Also ensures that hhi files haven't been deleted
@@ -595,13 +604,16 @@ let get_errors_for_path (istate : istate) (path : Relative_path.t) : Errors.t =
       None
     | ( Some disk_content,
         Some
-          ( ({
-               Provider_context.contents =
-                 Provider_context.(
-                   Contents_from_disk str | Provided_contents str);
-               _;
-             } as entry),
-            _ ) )
+          {
+            entry =
+              {
+                Provider_context.contents =
+                  Provider_context.(
+                    Contents_from_disk str | Provided_contents str);
+                _;
+              } as entry;
+            _;
+          } )
       when String.equal disk_content str ->
       (* file on disk was the same as what we currently have in the entry, and
          the entry very likely already has errors computed for it, so as an optimization

@@ -14,6 +14,8 @@ val to_string : ?pretty:bool -> t -> string
 
 val to_json : t -> Hh_json.json
 
+val of_json_opt : Hh_json.json -> t option
+
 (** `diff ~all current ~prev` is for when `current` and `prev` have the same structure.
 It produces a hybrid telemetry object where, element by element, if they're the same
 then we only see the current element, but if they're different then we see both.

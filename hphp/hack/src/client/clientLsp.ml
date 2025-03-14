@@ -3450,6 +3450,12 @@ let publish_and_report_after_recomputing_live_squiggles
           uris
     in
     let params = ide_diagnostics_to_lsp_diagnostics file_path diagnostics in
+    let _ =
+      (* Log diagnostics so we can track error lifetime *)
+      Option.iter
+        (Telemetry.of_json_opt (Lsp_fmt.print_diagnostics params))
+        ~f:HackEventLogger.Diagnostics.log
+    in
     let notification = PublishDiagnosticsNotification params in
     notify_jsonrpc ~powered_by:Serverless_ide notification;
     report_recheck_telemetry ~trigger ~ref_unblocked_time uri (Ok diagnostics);

@@ -13,6 +13,10 @@ type key_value_pair = string * Hh_json.json [@@deriving show]
 (** This list is in reverse order (i.e. most recent first) *)
 type t = key_value_pair list [@@deriving show]
 
+let of_json_opt = function
+  | Hh_json.JSON_Object kvs -> Some kvs
+  | _ -> None
+
 (* Ignore - we only use the generated `pp_key_value_pair` in deriving `show` for t *)
 let _ = show_key_value_pair
 

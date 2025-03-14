@@ -1,5 +1,4 @@
 safe_abstract_logger:{"filename":"safe_abstract_logging_consts.php","safe_news":0,"unsafe_news":0,"safe_calls":0,"unsafe_calls":0,"safe_const_accesses":0,"unsafe_const_accesses":1}
-safe_abstract_logger:{"filename":"safe_abstract_logging_consts.php","safe_news":0,"unsafe_news":0,"safe_calls":0,"unsafe_calls":0,"safe_const_accesses":0,"unsafe_const_accesses":1}
 WARN: File "safe_abstract_logging_consts.php", line 18, characters 3-13:
 Unsafe class constant access: C1::abs might not exist because the receiver might be abstract. (Warn[12018])
   File "safe_abstract_logging_consts.php", line 17, characters 27-28:

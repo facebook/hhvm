@@ -124,8 +124,8 @@ let handler =
       let infos = (collect_infos ~current_method:None)#on_fun_def env f in
       log_infos env infos
 
-    method! at_class_ env c =
-      let infos = (collect_infos ~current_method:None)#on_class_ env c in
+    method! at_method_ env m =
+      let infos = (collect_infos ~current_method:(Some m))#on_method_ env m in
       log_infos env infos
   end
 

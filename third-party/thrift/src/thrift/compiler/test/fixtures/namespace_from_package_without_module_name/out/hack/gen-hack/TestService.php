@@ -81,7 +81,7 @@ trait TestServiceClientBase {
     ));
     await $this->asyncHandler_->genBefore(TestServiceStaticMetadata::THRIFT_SVC_NAME, "init", $args);
     $currentseqid = $this->sendImplHelper($args, "init", false, TestServiceStaticMetadata::THRIFT_SVC_NAME );
-    return await $this->genAwaitResponse(\test\namespace_from_package_without_module_name\TestService_init_result::class, "init", false, $currentseqid, $rpc_options);
+    return (await $this->genAwaitResponseWithReadHeaders(\test\namespace_from_package_without_module_name\TestService_init_result::class, "init", false, $currentseqid, $rpc_options))[0];
   }
 
 }

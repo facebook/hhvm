@@ -100,7 +100,7 @@ trait MyServiceClientBase {
     $args = \test\fixtures\basic-structured-annotations\MyService_first_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "first", $args);
     $currentseqid = $this->sendImplHelper($args, "first", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
-    return await $this->genAwaitResponse(\test\fixtures\basic-structured-annotations\MyService_first_result::class, "first", false, $currentseqid, $rpc_options);
+    return (await $this->genAwaitResponseWithReadHeaders(\test\fixtures\basic-structured-annotations\MyService_first_result::class, "first", false, $currentseqid, $rpc_options))[0];
   }
 
   /**
@@ -119,7 +119,7 @@ trait MyServiceClientBase {
     ));
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "second", $args);
     $currentseqid = $this->sendImplHelper($args, "second", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
-    return await $this->genAwaitResponse(\test\fixtures\basic-structured-annotations\MyService_second_result::class, "second", false, $currentseqid, $rpc_options);
+    return (await $this->genAwaitResponseWithReadHeaders(\test\fixtures\basic-structured-annotations\MyService_second_result::class, "second", false, $currentseqid, $rpc_options))[0];
   }
 
 }

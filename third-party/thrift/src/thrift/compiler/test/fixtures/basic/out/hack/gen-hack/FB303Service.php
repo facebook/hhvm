@@ -82,7 +82,7 @@ internal trait FB303ServiceClientBase {
     ));
     await $this->asyncHandler_->genBefore(FB303ServiceStaticMetadata::THRIFT_SVC_NAME, "renamed_rpc", $args);
     $currentseqid = $this->sendImplHelper($args, "renamed_rpc", false, FB303ServiceStaticMetadata::THRIFT_SVC_NAME );
-    return await $this->genAwaitResponse(\test\fixtures\basic\FB303Service_renamed_rpc_result::class, "simple_rpc", false, $currentseqid, $rpc_options);
+    return (await $this->genAwaitResponseWithReadHeaders(\test\fixtures\basic\FB303Service_renamed_rpc_result::class, "simple_rpc", false, $currentseqid, $rpc_options))[0];
   }
 
 }

@@ -94,7 +94,7 @@ trait MyServicePrioParentClientBase {
     $args = MyServicePrioParent_ping_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(MyServicePrioParentStaticMetadata::THRIFT_SVC_NAME, "ping", $args);
     $currentseqid = $this->sendImplHelper($args, "ping", false, MyServicePrioParentStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponse(MyServicePrioParent_ping_result::class, "ping", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponseWithReadHeaders(MyServicePrioParent_ping_result::class, "ping", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -111,7 +111,7 @@ trait MyServicePrioParentClientBase {
     $args = MyServicePrioParent_pong_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(MyServicePrioParentStaticMetadata::THRIFT_SVC_NAME, "pong", $args);
     $currentseqid = $this->sendImplHelper($args, "pong", false, MyServicePrioParentStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponse(MyServicePrioParent_pong_result::class, "pong", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponseWithReadHeaders(MyServicePrioParent_pong_result::class, "pong", true, $currentseqid, $rpc_options);
   }
 
 }

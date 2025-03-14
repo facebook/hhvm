@@ -80,7 +80,7 @@ internal trait RenamedServiceClientBase {
     $args = \test\fixtures\basic\RenamedService_simple_rpc_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(RenamedServiceStaticMetadata::THRIFT_SVC_NAME, "simple_rpc", $args);
     $currentseqid = $this->sendImplHelper($args, "simple_rpc", false, RenamedServiceStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponse(\test\fixtures\basic\RenamedService_simple_rpc_result::class, "simple_rpc", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponseWithReadHeaders(\test\fixtures\basic\RenamedService_simple_rpc_result::class, "simple_rpc", true, $currentseqid, $rpc_options);
   }
 
 }

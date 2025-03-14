@@ -81,7 +81,7 @@ trait TestServiceClientBase {
     ));
     await $this->asyncHandler_->genBefore(TestServiceStaticMetadata::THRIFT_SVC_NAME, "ping", $args);
     $currentseqid = $this->sendImplHelper($args, "ping", false, TestServiceStaticMetadata::THRIFT_SVC_NAME );
-    return await $this->genAwaitResponse(\hack_ns2\TestService_ping_result::class, "ping", false, $currentseqid, $rpc_options);
+    return (await $this->genAwaitResponseWithReadHeaders(\hack_ns2\TestService_ping_result::class, "ping", false, $currentseqid, $rpc_options))[0];
   }
 
 }

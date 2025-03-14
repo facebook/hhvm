@@ -887,6 +887,11 @@ class t_hack_generator : public t_concat_generator {
         nullptr;
   }
 
+  bool should_generate_client_header_methods(const t_named* tnamed) const {
+    return tnamed->find_structured_annotation_or_null(
+               kHackGenerateClientMethodsWithHeaders) != nullptr;
+  }
+
   std::string php_namespace(const t_program* p) const {
     std::string php_ns = p->get_namespace("php");
     if (!php_ns.empty()) {
@@ -7133,6 +7138,11 @@ void t_hack_generator::_generate_service_client_child_fn(
     return;
   }
 
+  bool is_oneway = tfunction->qualifier() == t_function_qualifier::oneway;
+  bool gen_header_method = !is_oneway &&
+      (should_generate_client_header_methods(tfunction) ||
+       should_generate_client_header_methods(tservice));
+  bool is_void = tfunction->return_type()->is_void();
   std::string funname =
       find_hack_name(tfunction) + (legacy_arrays ? "__LEGACY_ARRAYS" : "");
   std::string long_name = php_servicename_mangle(mangled_services_, tservice);
@@ -7144,16 +7154,44 @@ void t_hack_generator::_generate_service_client_child_fn(
       type_to_typehint(tfunction->return_type().get_type());
 
   generate_php_docstring(out, tfunction);
-  indent(out) << (has_hack_module_internal(tservice) ||
-                          has_hack_module_internal(tfunction)
-                      ? "internal"
-                      : "public")
-              << " async function " << funname << "("
-              << argument_list(
-                     tfunction->params(), "", true, nullable_everything_)
-              << "): Awaitable<" + return_typehint + "> {\n";
+  auto generate_method_decl = [&](bool is_header_method) {
+    indent(out) << (has_hack_module_internal(tservice) ||
+                            has_hack_module_internal(tfunction)
+                        ? "internal"
+                        : "public")
+                << " async function " << (is_header_method ? "header_" : "")
+                << funname << "("
+                << argument_list(
+                       tfunction->params(), "", true, nullable_everything_)
+                << "): Awaitable<";
 
+    if (is_header_method) {
+      if (!is_void) {
+        out << "(" << return_typehint << ", ?dict<string,string>)";
+      } else {
+        out << "?dict<string,string>";
+      }
+    } else {
+      out << return_typehint;
+    }
+    out << "> {\n";
+  };
+
+  generate_method_decl(false);
   indent_up();
+  if (gen_header_method) {
+    indent(out) << (!is_void ? "return (" : "") << "await $this->header_"
+                << funname << "("
+                << argument_list(tfunction->params(), "", false) << ")";
+    if (!is_void) {
+      out << ")[0]";
+    }
+    out << ";\n";
+    scope_down(out);
+    out << "\n";
+    generate_method_decl(true);
+    indent_up();
+  }
 
   indent(out) << "$hh_frame_metadata = $this->getHHFrameMetadata();\n";
   indent(out) << "if ($hh_frame_metadata !== null) {\n";
@@ -7178,24 +7216,40 @@ void t_hack_generator::_generate_service_client_child_fn(
               << "\", $args);\n";
   _generate_current_seq_id(out, tservice, tfunction);
 
-  if (tfunction->qualifier() != t_function_qualifier::oneway) {
-    if (!tfunction->return_type()->is_void()) {
-      indent(out) << "return ";
-    } else {
-      indent(out);
-    }
-    std::string resultname = generate_function_helper_name(
-        tservice, tfunction, PhpFunctionNameSuffix::RESULT);
-    bool is_void = tfunction->return_type()->is_void();
-    out << "await $this->genAwaitResponse(" << resultname << "::class, " << "\""
-        << tfunction->name() << "\", " << (is_void ? "true" : "false")
-        << ", $currentseqid, $rpc_options";
-    if (legacy_arrays) {
-      out << ", shape('read_options' => \\THRIFT_MARK_LEGACY_ARRAYS)";
-    }
-    out << ");\n";
-  } else {
+  if (is_oneway) {
     out << indent() << "await $this->genAwaitNoResponse($rpc_options);\n";
+    scope_down(out);
+    out << "\n";
+    return;
+  }
+
+  std::string resultname = generate_function_helper_name(
+      tservice, tfunction, PhpFunctionNameSuffix::RESULT);
+
+  std::string rpc_call = fmt::format(
+      "await $this->genAwaitResponseWithReadHeaders({}::class, \"{}\", {}, $currentseqid, $rpc_options{})",
+      resultname,
+      tfunction->name(),
+      is_void ? "true" : "false",
+      legacy_arrays ? ", shape('read_options' => \\THRIFT_MARK_LEGACY_ARRAYS)"
+                    : "");
+
+  if (gen_header_method) {
+    if (is_void) {
+      // return headers only if void
+      indent(out) << "return (" << rpc_call << ")[1];\n";
+    } else {
+      // return both response and headers
+      indent(out) << "return " << rpc_call << ";\n";
+    }
+  } else {
+    // return nothing if void
+    if (is_void) {
+      indent(out) << rpc_call << ";\n";
+    } else {
+      // return response only
+      indent(out) << "return (" << rpc_call << ")[0];\n";
+    }
   }
   scope_down(out);
   out << "\n";

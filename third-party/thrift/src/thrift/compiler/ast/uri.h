@@ -170,6 +170,8 @@ inline constexpr auto kHackWrapperUri =
     "facebook.com/thrift/annotation/hack/Wrapper";
 inline constexpr auto kHackModuleInternalUri =
     "facebook.com/thrift/annotation/hack/ModuleInternal";
+inline constexpr auto kHackGenerateClientMethodsWithHeaders =
+    "facebook.com/thrift/annotation/hack/GenerateClientMethodsWithHeaders";
 
 // Go:
 inline constexpr auto kGoNameUri = "facebook.com/thrift/annotation/go/Name";

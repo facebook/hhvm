@@ -20,6 +20,13 @@ interface TestServiceAsyncIf extends \foo\hack_ns\FooHackServiceAsyncIf {
    *   throws (1: module.ExTypedef ex);
    */
   public function ping(string $str_arg): Awaitable<int>;
+
+  /**
+   * Original thrift definition:-
+   * void
+   *   voidMethod();
+   */
+  public function voidMethod(): Awaitable<void>;
 }
 
 /**
@@ -34,6 +41,13 @@ interface TestServiceIf extends \foo\hack_ns\FooHackServiceIf {
    *   throws (1: module.ExTypedef ex);
    */
   public function ping(string $str_arg): int;
+
+  /**
+   * Original thrift definition:-
+   * void
+   *   voidMethod();
+   */
+  public function voidMethod(): void;
 }
 
 /**
@@ -55,6 +69,13 @@ interface TestServiceClientIf extends \foo\hack_ns\FooHackServiceClientIf {
    *   throws (1: module.ExTypedef ex);
    */
   public function ping(string $str_arg): Awaitable<int>;
+
+  /**
+   * Original thrift definition:-
+   * void
+   *   voidMethod();
+   */
+  public function voidMethod(): Awaitable<void>;
 }
 
 /**
@@ -71,6 +92,10 @@ trait TestServiceClientBase {
    *   throws (1: module.ExTypedef ex);
    */
   public async function ping(string $str_arg): Awaitable<int> {
+    return (await $this->header_ping($str_arg))[0];
+  }
+
+  public async function header_ping(string $str_arg): Awaitable<(int, ?dict<string,string>)> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -81,7 +106,28 @@ trait TestServiceClientBase {
     ));
     await $this->asyncHandler_->genBefore(TestServiceStaticMetadata::THRIFT_SVC_NAME, "ping", $args);
     $currentseqid = $this->sendImplHelper($args, "ping", false, TestServiceStaticMetadata::THRIFT_SVC_NAME );
-    return await $this->genAwaitResponse(\hack_ns2\TestService_ping_result::class, "ping", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponseWithReadHeaders(\hack_ns2\TestService_ping_result::class, "ping", false, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * void
+   *   voidMethod();
+   */
+  public async function voidMethod(): Awaitable<void> {
+    await $this->header_voidMethod();
+  }
+
+  public async function header_voidMethod(): Awaitable<?dict<string,string>> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = \hack_ns2\TestService_voidMethod_args::withDefaultValues();
+    await $this->asyncHandler_->genBefore(TestServiceStaticMetadata::THRIFT_SVC_NAME, "voidMethod", $args);
+    $currentseqid = $this->sendImplHelper($args, "voidMethod", false, TestServiceStaticMetadata::THRIFT_SVC_NAME );
+    return (await $this->genAwaitResponseWithReadHeaders(\hack_ns2\TestService_voidMethod_result::class, "voidMethod", true, $currentseqid, $rpc_options))[1];
   }
 
 }
@@ -126,6 +172,22 @@ abstract class TestServiceAsyncProcessorBase extends \foo\hack_ns\FooHackService
     }
     $this->writeHelper($result, 'ping', $seqid, $handler_ctx, $output, $reply_type);
   }
+  protected async function process_voidMethod(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
+    $handler_ctx = $this->eventHandler_->getHandlerContext('voidMethod');
+    $reply_type = \TMessageType::REPLY;
+    $args = $this->readHelper(\hack_ns2\TestService_voidMethod_args::class, $input, 'voidMethod', $handler_ctx);
+    $result = \hack_ns2\TestService_voidMethod_result::withDefaultValues();
+    try {
+      $this->eventHandler_->preExec($handler_ctx, '\hack_ns2\TestService', 'voidMethod', $args);
+      await $this->handler->voidMethod();
+      $this->eventHandler_->postExec($handler_ctx, 'voidMethod', $result);
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $this->eventHandler_->handlerError($handler_ctx, 'voidMethod', $ex);
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    }
+    $this->writeHelper($result, 'voidMethod', $seqid, $handler_ctx, $output, $reply_type);
+  }
   protected async function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, TestServiceStaticMetadata::class);
   }
@@ -159,6 +221,22 @@ abstract class TestServiceSyncProcessorBase extends \foo\hack_ns\FooHackServiceS
       }
     }
     $this->writeHelper($result, 'ping', $seqid, $handler_ctx, $output, $reply_type);
+  }
+  protected function process_voidMethod(int $seqid, \TProtocol $input, \TProtocol $output): void {
+    $handler_ctx = $this->eventHandler_->getHandlerContext('voidMethod');
+    $reply_type = \TMessageType::REPLY;
+    $args = $this->readHelper(\hack_ns2\TestService_voidMethod_args::class, $input, 'voidMethod', $handler_ctx);
+    $result = \hack_ns2\TestService_voidMethod_result::withDefaultValues();
+    try {
+      $this->eventHandler_->preExec($handler_ctx, '\hack_ns2\TestService', 'voidMethod', $args);
+      $this->handler->voidMethod();
+      $this->eventHandler_->postExec($handler_ctx, 'voidMethod', $result);
+    } catch (\Exception $ex) {
+      $reply_type = \TMessageType::EXCEPTION;
+      $this->eventHandler_->handlerError($handler_ctx, 'voidMethod', $ex);
+      $result = new \TApplicationException($ex->getMessage()."\n".$ex->getTraceAsString());
+    }
+    $this->writeHelper($result, 'voidMethod', $seqid, $handler_ctx, $output, $reply_type);
   }
   protected function process_getThriftServiceMetadata(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $this->process_getThriftServiceMetadataHelper($seqid, $input, $output, TestServiceStaticMetadata::class);
@@ -370,6 +448,110 @@ class TestService_ping_result extends \ThriftSyncStructWithResult implements \IT
   }
 }
 
+class TestService_voidMethod_args implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'TestService_voidMethod_args';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module2.voidMethod_args",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+class TestService_voidMethod_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'TestService_voidMethod_result';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module2.TestService_voidMethod_result",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
 class TestServiceStaticMetadata implements \IThriftServiceStaticMetadata {
   const string THRIFT_SVC_NAME = 'TestService';
 
@@ -427,6 +609,16 @@ class TestServiceStaticMetadata implements \IThriftServiceStaticMetadata {
               ],
             )
           ),
+          \tmeta_ThriftFunction::fromShape(
+            shape(
+              "name" => "voidMethod",
+              "return_type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_VOID_TYPE,
+                )
+              ),
+            )
+          ),
         ],
         "parent" => "module.FooHackService",
       )
@@ -468,6 +660,18 @@ class TestServiceStaticMetadata implements \IThriftServiceStaticMetadata {
     return shape(
       'service' => dict[],
       'functions' => dict[
+        'ping' => dict[
+          '\facebook\thrift\annotation\hack\GenerateClientMethodsWithHeaders' => \facebook\thrift\annotation\hack\GenerateClientMethodsWithHeaders::fromShape(
+            shape(
+            )
+          ),
+        ],
+        'voidMethod' => dict[
+          '\facebook\thrift\annotation\hack\GenerateClientMethodsWithHeaders' => \facebook\thrift\annotation\hack\GenerateClientMethodsWithHeaders::fromShape(
+            shape(
+            )
+          ),
+        ],
       ],
     );
   }

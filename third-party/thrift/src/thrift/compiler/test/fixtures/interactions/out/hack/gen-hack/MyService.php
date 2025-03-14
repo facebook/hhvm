@@ -92,7 +92,7 @@ trait MyServiceClientBase {
     $args = MyService_foo_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "foo", $args);
     $currentseqid = $this->sendImplHelper($args, "foo", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponse(MyService_foo_result::class, "foo", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponseWithReadHeaders(MyService_foo_result::class, "foo", true, $currentseqid, $rpc_options);
   }
 
 }
@@ -143,7 +143,7 @@ class MyService_MyInteraction extends \ThriftClientBase {
     $args = MyService_MyInteraction_frobnicate_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("MyService", "MyInteraction.frobnicate", $args);
     $currentseqid = $this->sendImpl_frobnicate();
-    return await $this->genAwaitResponse(MyService_MyInteraction_frobnicate_result::class, "frobnicate", false, $currentseqid, $rpc_options);
+    return (await $this->genAwaitResponseWithReadHeaders(MyService_MyInteraction_frobnicate_result::class, "frobnicate", false, $currentseqid, $rpc_options))[0];
   }
 
   protected function sendImpl_frobnicate(): int {
@@ -383,7 +383,7 @@ class MyService_MyInteractionFast extends \ThriftClientBase {
     $args = MyService_MyInteractionFast_frobnicate_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("MyService", "MyInteractionFast.frobnicate", $args);
     $currentseqid = $this->sendImpl_frobnicate();
-    return await $this->genAwaitResponse(MyService_MyInteractionFast_frobnicate_result::class, "frobnicate", false, $currentseqid, $rpc_options);
+    return (await $this->genAwaitResponseWithReadHeaders(MyService_MyInteractionFast_frobnicate_result::class, "frobnicate", false, $currentseqid, $rpc_options))[0];
   }
 
   protected function sendImpl_frobnicate(): int {
@@ -623,7 +623,7 @@ class MyService_SerialInteraction extends \ThriftClientBase {
     $args = MyService_SerialInteraction_frobnicate_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("MyService", "SerialInteraction.frobnicate", $args);
     $currentseqid = $this->sendImpl_frobnicate();
-    await $this->genAwaitResponse(MyService_SerialInteraction_frobnicate_result::class, "frobnicate", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponseWithReadHeaders(MyService_SerialInteraction_frobnicate_result::class, "frobnicate", true, $currentseqid, $rpc_options);
   }
 
   protected function sendImpl_frobnicate(): int {

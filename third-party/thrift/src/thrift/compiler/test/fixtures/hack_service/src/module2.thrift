@@ -16,6 +16,8 @@
 
 include "module.thrift"
 
+include "thrift/annotation/hack.thrift"
+
 namespace hack hack_ns2
 
 enum Status {
@@ -27,5 +29,8 @@ struct FBStruct {
 }
 
 service TestService extends module.FooHackService {
+  @hack.GenerateClientMethodsWithHeaders{}
   i32 ping(1: string str_arg) throws (1: module.ExTypedef ex);
+  @hack.GenerateClientMethodsWithHeaders{}
+  void voidMethod();
 }

@@ -95,7 +95,7 @@ class InteractLocally_SharedInteraction extends \ThriftClientBase {
     $args = InteractLocally_SharedInteraction_init_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("InteractLocally", "SharedInteraction.init", $args);
     $currentseqid = $this->sendImpl_init();
-    return await $this->genAwaitResponse(InteractLocally_SharedInteraction_init_result::class, "init", false, $currentseqid, $rpc_options);
+    return (await $this->genAwaitResponseWithReadHeaders(InteractLocally_SharedInteraction_init_result::class, "init", false, $currentseqid, $rpc_options))[0];
   }
 
   protected function sendImpl_init(): int {
@@ -151,7 +151,7 @@ class InteractLocally_SharedInteraction extends \ThriftClientBase {
     $args = InteractLocally_SharedInteraction_do_something_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("InteractLocally", "SharedInteraction.do_something", $args);
     $currentseqid = $this->sendImpl_do_something();
-    return await $this->genAwaitResponse(InteractLocally_SharedInteraction_do_something_result::class, "do_something", false, $currentseqid, $rpc_options);
+    return (await $this->genAwaitResponseWithReadHeaders(InteractLocally_SharedInteraction_do_something_result::class, "do_something", false, $currentseqid, $rpc_options))[0];
   }
 
   protected function sendImpl_do_something(): int {
@@ -207,7 +207,7 @@ class InteractLocally_SharedInteraction extends \ThriftClientBase {
     $args = InteractLocally_SharedInteraction_tear_down_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("InteractLocally", "SharedInteraction.tear_down", $args);
     $currentseqid = $this->sendImpl_tear_down();
-    await $this->genAwaitResponse(InteractLocally_SharedInteraction_tear_down_result::class, "tear_down", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponseWithReadHeaders(InteractLocally_SharedInteraction_tear_down_result::class, "tear_down", true, $currentseqid, $rpc_options);
   }
 
   protected function sendImpl_tear_down(): int {

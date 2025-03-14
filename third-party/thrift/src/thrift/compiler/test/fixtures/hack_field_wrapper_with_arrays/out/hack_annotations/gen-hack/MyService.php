@@ -75,7 +75,7 @@ trait MyServiceClientBase {
     ));
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "second", $args);
     $currentseqid = $this->sendImplHelper($args, "second", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
-    return await $this->genAwaitResponse(MyService_second_result::class, "second", false, $currentseqid, $rpc_options);
+    return (await $this->genAwaitResponseWithReadHeaders(MyService_second_result::class, "second", false, $currentseqid, $rpc_options))[0];
   }
 
 }

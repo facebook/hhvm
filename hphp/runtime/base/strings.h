@@ -138,7 +138,8 @@ constexpr char MUST_BE_VALUE_TYPE[] = "Property %s of class %s is readonly, and 
 constexpr char MUST_BE_ENCLOSED_IN_READONLY[] =
   "Property %s of class %s is readonly, but isn't enclosed in a readonly expression.";
 constexpr char MISSING_DYNAMICALLY_REFERENCED[] =
-  "Missing __DynamicallyReferenced attribute on class %s for classname_to_class";
+  "Class %s was loaded from a string, but it is missing the "
+  "__DynamicallyReferenced attribute";
 constexpr char CLASSNAME_TO_CLASS_NOEXIST_EXCEPTION[] =
   "Failed to load class from %s %s for classname_to_class.";
 constexpr char REFLECTION_MISS_CONSTANTS_FROM_INCLUDED_ENUMS[] =

@@ -1,6 +1,6 @@
 class(C)
 
-Notice: Missing __DynamicallyReferenced attribute on class D for classname_to_class in %s/class-ptr/classname-to-class-launder.php on line 16
+Notice: Class D was loaded from a string, but it is missing the __DynamicallyReferenced attribute in %s/class-ptr/classname-to-class-launder.php on line 16
 class(D)
 lazyclass(C)
 class(C)

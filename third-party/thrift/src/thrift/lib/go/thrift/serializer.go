@@ -91,22 +91,42 @@ func NewSimpleJSONSerializerV2(readWriter io.ReadWriter) *SerializerV2 {
 
 // EncodeCompact serializes msg using the compact format
 func EncodeCompact(msg types.WritableStruct) ([]byte, error) {
-	return NewCompactSerializer().Write(msg)
+	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
+	err := NewCompactSerializerV2(buffer).Encode(msg)
+	if err != nil {
+		return nil, err
+	}
+	return buffer.Bytes(), nil
 }
 
 // EncodeBinary serializes msg using the binary format
 func EncodeBinary(msg types.WritableStruct) ([]byte, error) {
-	return NewBinarySerializer().Write(msg)
+	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
+	err := NewBinarySerializerV2(buffer).Encode(msg)
+	if err != nil {
+		return nil, err
+	}
+	return buffer.Bytes(), nil
 }
 
 // EncodeCompactJSON serializes msg using the compact JSON format
 func EncodeCompactJSON(msg types.WritableStruct) ([]byte, error) {
-	return NewCompactJSONSerializer().Write(msg)
+	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
+	err := NewCompactJSONSerializerV2(buffer).Encode(msg)
+	if err != nil {
+		return nil, err
+	}
+	return buffer.Bytes(), nil
 }
 
 // EncodeSimpleJSON serializes msg using the simple JSON format
 func EncodeSimpleJSON(msg types.WritableStruct) ([]byte, error) {
-	return NewSimpleJSONSerializer().Write(msg)
+	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
+	err := NewSimpleJSONSerializerV2(buffer).Encode(msg)
+	if err != nil {
+		return nil, err
+	}
+	return buffer.Bytes(), nil
 }
 
 // Write writes msg to the serializer and returns it as a byte array

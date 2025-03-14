@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 func TestBasicSerDes(t *testing.T) {
@@ -35,60 +36,31 @@ func TestBasicSerDes(t *testing.T) {
 		SetField8([]byte{1, 2, 3, 4}).
 		SetField9("hello")
 
-	t.Run("Binary", func(t *testing.T) {
-		data, err := EncodeBinary(val)
+	encodeDecodeTestFn := func(t *testing.T, encodeFn func(types.WritableStruct) ([]byte, error), decodeFn func([]byte, types.ReadableStruct) error) {
+		data, err := encodeFn(val)
 		if err != nil {
 			t.Fatalf("failed to encode: %v", err)
 		}
 		var res dummy.DummyStruct1
-		err = DecodeBinary(data, &res)
+		err = decodeFn(data, &res)
 		if err != nil {
-			t.Fatalf("failed to encode: %v", err)
+			t.Fatalf("failed to decode: %v", err)
 		}
 		if !reflect.DeepEqual(*val, res) {
 			t.Fatalf("values are not equal: %+v != %+v", *val, res)
 		}
+	}
+
+	t.Run("Binary", func(t *testing.T) {
+		encodeDecodeTestFn(t, EncodeBinary, DecodeBinary)
 	})
 	t.Run("Compact", func(t *testing.T) {
-		data, err := EncodeCompact(val)
-		if err != nil {
-			t.Fatalf("failed to encode: %v", err)
-		}
-		var res dummy.DummyStruct1
-		err = DecodeCompact(data, &res)
-		if err != nil {
-			t.Fatalf("failed to encode: %v", err)
-		}
-		if !reflect.DeepEqual(*val, res) {
-			t.Fatalf("values are not equal: %+v != %+v", *val, res)
-		}
+		encodeDecodeTestFn(t, EncodeCompact, DecodeCompact)
 	})
 	t.Run("CompactJSON", func(t *testing.T) {
-		data, err := EncodeCompactJSON(val)
-		if err != nil {
-			t.Fatalf("failed to encode: %v", err)
-		}
-		var res dummy.DummyStruct1
-		err = DecodeCompactJSON(data, &res)
-		if err != nil {
-			t.Fatalf("failed to encode: %v", err)
-		}
-		if !reflect.DeepEqual(*val, res) {
-			t.Fatalf("values are not equal: %+v != %+v", *val, res)
-		}
+		encodeDecodeTestFn(t, EncodeCompactJSON, DecodeCompactJSON)
 	})
 	t.Run("SimpleJSON", func(t *testing.T) {
-		data, err := EncodeSimpleJSON(val)
-		if err != nil {
-			t.Fatalf("failed to encode: %v", err)
-		}
-		var res dummy.DummyStruct1
-		err = DecodeSimpleJSON(data, &res)
-		if err != nil {
-			t.Fatalf("failed to encode: %v", err)
-		}
-		if !reflect.DeepEqual(*val, res) {
-			t.Fatalf("values are not equal: %+v != %+v", *val, res)
-		}
+		encodeDecodeTestFn(t, EncodeSimpleJSON, DecodeSimpleJSON)
 	})
 }

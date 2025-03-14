@@ -27,6 +27,8 @@ import (
 	"github.com/facebook/fbthrift/thrift/test/go/if/my_test_struct"
 )
 
+type MyTestStruct = my_test_struct.MyTestStruct
+
 func TestReadWriteBinaryFormat(t *testing.T) {
 	ReadWriteProtocolTest(t, func(transport types.ReadWriteSizer) types.Format { return NewBinaryFormat(transport) })
 }

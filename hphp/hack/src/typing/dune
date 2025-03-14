@@ -281,6 +281,7 @@
   typing_common
   typing_error_utils
   type_mapper
+  typing_json
   typing_modules)
  (preprocess
   (pps
@@ -454,6 +455,15 @@
  (modules
   typing_print)
  (libraries decl_provider hackfmt typing_logic typing_env_types)
+ (preprocess
+  (pps ppx_deriving.std)))
+
+(library
+ (name typing_json)
+ (wrapped false)
+ (modules
+  typing_json)
+ (libraries decl_provider hackfmt typing_env_types)
  (preprocess
   (pps ppx_deriving.std)))
 

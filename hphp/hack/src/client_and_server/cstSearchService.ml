@@ -491,10 +491,7 @@ let compile_pattern (ctx : Provider_context.t) (json : Hh_json.json) :
     get_obj "subtype_of" (json, keytrace)
     >>= fun (subtype_of_json, subtype_of_keytrace) ->
     let locl_ty =
-      Typing_print.json_to_locl_ty
-        ~keytrace:subtype_of_keytrace
-        ctx
-        subtype_of_json
+      Typing_json.to_locl_ty ~keytrace:subtype_of_keytrace ctx subtype_of_json
     in
     match locl_ty with
     | Ok locl_ty -> Ok (TypePattern { subtype_of = locl_ty })

@@ -90,12 +90,12 @@ let rec validate_free_type env locl_ty =
     in
     validate_l env field_tys
   | Tnewtype (_name, tyargs, as_ty) ->
-    (* Typing_print.json_to_locl_ty already validates the name
+    (* Typing_json.to_locl_ty already validates the name
        Interestingly it doesn't validate that the given "as" matches
        the defined one *)
     validate_l env tyargs @ validate_free_type env as_ty
   | Tclass_ptr ty -> validate_free_type env ty
-  (* These aren't even created by Typing_print.json_to_locl_ty *)
+  (* These aren't even created by Typing_json.to_locl_ty *)
   | Tneg _
   | Tvar _
   | Taccess _
@@ -113,7 +113,7 @@ and validate_l env locl_tyl =
   List.concat_map locl_tyl ~f:(validate_free_type env)
 
 let get_type_from_json ctx json : (locl_ty, string list) result =
-  let locl_ty = Typing_print.json_to_locl_ty ~keytrace:[] ctx json in
+  let locl_ty = Typing_json.to_locl_ty ~keytrace:[] ctx json in
   match locl_ty with
   | Ok locl_ty ->
     let env = Typing_env_types.empty ctx Relative_path.default ~droot:None in

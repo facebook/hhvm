@@ -58,9 +58,10 @@ let print_decl_ty_with_identity env ty sym_occurrence sym_definition =
     sym_occurrence
     sym_definition
 
-let ty_to_json env ?show_like_ty ty = Typing_print.to_json env ?show_like_ty ty
+let ty_to_json env ?show_like_ty ty =
+  Typing_json.from_locl_ty env ?show_like_ty ty
 
-let json_to_locl_ty = Typing_print.json_to_locl_ty
+let json_to_locl_ty = Typing_json.to_locl_ty
 
 let get_self_id = Typing_env.get_self_id
 

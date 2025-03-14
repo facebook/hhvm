@@ -18,6 +18,7 @@ package thrift
 
 import (
 	"bytes"
+	"io"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -63,6 +64,31 @@ func NewSimpleJSONSerializer() *Serializer {
 	return &Serializer{buffer: buffer, encoder: encoder}
 }
 
+// A SerializerV2 is used to turn a Struct in to a byte stream
+type SerializerV2 struct {
+	format types.Format
+}
+
+// NewBinarySerializerV2 creates a new serializer using the binary format
+func NewBinarySerializerV2(readWriter types.ReadWriteSizer) *SerializerV2 {
+	return &SerializerV2{format: NewBinaryFormat(readWriter)}
+}
+
+// NewCompactSerializerV2 creates a new serializer using the compact format
+func NewCompactSerializerV2(readWriter types.ReadWriteSizer) *SerializerV2 {
+	return &SerializerV2{format: NewCompactFormat(readWriter)}
+}
+
+// NewCompactJSONSerializerV2 creates a new serializer using the CompactJSON format
+func NewCompactJSONSerializerV2(readWriter io.ReadWriter) *SerializerV2 {
+	return &SerializerV2{format: NewCompactJSONFormat(readWriter)}
+}
+
+// NewSimpleJSONSerializerV2 creates a new serializer using the SimpleJSON format
+func NewSimpleJSONSerializerV2(readWriter io.ReadWriter) *SerializerV2 {
+	return &SerializerV2{format: NewSimpleJSONFormat(readWriter)}
+}
+
 // EncodeCompact serializes msg using the compact format
 func EncodeCompact(msg types.WritableStruct) ([]byte, error) {
 	return NewCompactSerializer().Write(msg)
@@ -104,4 +130,12 @@ func (s *Serializer) Write(msg types.WritableStruct) ([]byte, error) {
 	copy(serBytes, s.buffer.Bytes())
 
 	return serBytes, nil
+}
+
+// Encode encodes a Thrift struct into the underlying format/writer.
+func (s *SerializerV2) Encode(msg types.WritableStruct) error {
+	if err := msg.Write(s.format); err != nil {
+		return err
+	}
+	return s.format.Flush()
 }

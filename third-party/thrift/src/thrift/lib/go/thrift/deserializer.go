@@ -18,6 +18,7 @@ package thrift
 
 import (
 	"bytes"
+	"io"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -56,6 +57,31 @@ func NewSimpleJSONDeserializer() *Deserializer {
 	return &Deserializer{buffer: buffer, decoder: decoder}
 }
 
+// A DeserializerV2 is used to turn a byte stream into a Struct
+type DeserializerV2 struct {
+	format types.Format
+}
+
+// NewBinaryDeserializerV2 creates a new deserializer using the binary format
+func NewBinaryDeserializerV2(readWriter types.ReadWriteSizer) *DeserializerV2 {
+	return &DeserializerV2{format: NewBinaryFormat(readWriter)}
+}
+
+// NewCompactDeserializerV2 creates a new deserializer using the compact format
+func NewCompactDeserializerV2(readWriter types.ReadWriteSizer) *DeserializerV2 {
+	return &DeserializerV2{format: NewCompactFormat(readWriter)}
+}
+
+// NewCompactJSONDeserializerV2 creates a new deserializer using the JSON format
+func NewCompactJSONDeserializerV2(readWriter io.ReadWriter) *DeserializerV2 {
+	return &DeserializerV2{format: NewCompactJSONFormat(readWriter)}
+}
+
+// NewSimpleJSONDeserializerV2 creates a new deserializer using the simple JSON format
+func NewSimpleJSONDeserializerV2(readWriter io.ReadWriter) *DeserializerV2 {
+	return &DeserializerV2{format: NewSimpleJSONFormat(readWriter)}
+}
+
 // DecodeCompact deserializes a compact format message
 func DecodeCompact(data []byte, msg types.ReadableStruct) error {
 	return NewCompactDeserializer().Read(msg, data)
@@ -88,4 +114,9 @@ func (t *Deserializer) Read(msg types.ReadableStruct, b []byte) error {
 		return err
 	}
 	return nil
+}
+
+// Decode deserializes a Thrift struct from the underlying format
+func (d *DeserializerV2) Decode(msg types.ReadableStruct) error {
+	return msg.Read(d.format)
 }

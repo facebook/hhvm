@@ -84,22 +84,26 @@ func NewSimpleJSONDeserializerV2(readWriter io.ReadWriter) *DeserializerV2 {
 
 // DecodeCompact deserializes a compact format message
 func DecodeCompact(data []byte, msg types.ReadableStruct) error {
-	return NewCompactDeserializer().Read(msg, data)
+	reader := bytes.NewBuffer(data)
+	return NewCompactDeserializerV2(reader).Decode(msg)
 }
 
 // DecodeBinary deserializes a binary format message
 func DecodeBinary(data []byte, msg types.ReadableStruct) error {
-	return NewBinaryDeserializer().Read(msg, data)
+	reader := bytes.NewBuffer(data)
+	return NewBinaryDeserializerV2(reader).Decode(msg)
 }
 
 // DecodeCompactJSON deserializes a compact JSON format message
 func DecodeCompactJSON(data []byte, msg types.ReadableStruct) error {
-	return NewCompactJSONDeserializer().Read(msg, data)
+	reader := bytes.NewBuffer(data)
+	return NewCompactJSONDeserializerV2(reader).Decode(msg)
 }
 
 // DecodeSimpleJSON deserializes a simple JSON format message
 func DecodeSimpleJSON(data []byte, msg types.ReadableStruct) error {
-	return NewSimpleJSONDeserializer().Read(msg, data)
+	reader := bytes.NewBuffer(data)
+	return NewSimpleJSONDeserializerV2(reader).Decode(msg)
 }
 
 // Read deserializes a Thrift struct from a byte slice

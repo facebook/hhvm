@@ -206,6 +206,7 @@ func newResponse(request *thrift_any.Any, data []byte) *thrift_any.Any {
 func serialize(obj thrift.Struct, protoc *protocol.ProtocolStruct) ([]byte, error) {
 	switch protoc.GetStandard() {
 	case protocol.StandardProtocol_Custom:
+		return thrift.EncodeCompact(obj)
 	case protocol.StandardProtocol_Binary:
 		return thrift.EncodeBinary(obj)
 	case protocol.StandardProtocol_Compact:
@@ -214,9 +215,10 @@ func serialize(obj thrift.Struct, protoc *protocol.ProtocolStruct) ([]byte, erro
 		return thrift.EncodeCompactJSON(obj)
 	case protocol.StandardProtocol_SimpleJson:
 		return thrift.EncodeSimpleJSON(obj)
+	default:
+		// default value in case the protocol is unknown, as seen in the java implementation of conformance tests.
+		return thrift.EncodeCompact(obj)
 	}
-	// default value in case the protocol is unknown, as seen in the java implementation of conformance tests.
-	return thrift.EncodeCompact(obj)
 }
 
 // loadStruct loads a thrift.Struct from the typeRegistry for a given thrift.Any.
@@ -255,6 +257,7 @@ func deserialize(registry *typeRegistry, value *thrift_any.Any) (thrift.Struct, 
 	protoc := getProtocol(value)
 	switch protoc.GetStandard() {
 	case protocol.StandardProtocol_Custom:
+		err = thrift.DecodeCompact(value.GetData(), obj)
 	case protocol.StandardProtocol_Binary:
 		err = thrift.DecodeBinary(value.GetData(), obj)
 	case protocol.StandardProtocol_Compact:

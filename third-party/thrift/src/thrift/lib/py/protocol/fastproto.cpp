@@ -1187,6 +1187,8 @@ static PyObject* decode(PyObject* /*self*/, PyObject* args, PyObject* kws) {
 
 /* -- PYTHON MODULE SETUP STUFF --- */
 
+FOLLY_PUSH_WARNING
+FOLLY_GNU_DISABLE_WARNING("-Wcast-function-type-mismatch")
 static PyMethodDef ThriftFastProtoMethods[] = {
 
     {"encode", (PyCFunction)encode, METH_VARARGS | METH_KEYWORDS, ""},
@@ -1194,6 +1196,7 @@ static PyMethodDef ThriftFastProtoMethods[] = {
 
     {nullptr, nullptr, 0, nullptr} /* Sentinel */
 };
+FOLLY_POP_WARNING
 
 extern "C" {
 struct module_state {

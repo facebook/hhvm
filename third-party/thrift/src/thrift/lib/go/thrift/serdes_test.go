@@ -72,7 +72,7 @@ func TestConsequentSerDes(t *testing.T) {
 	// A single Serializer/Deserializer instance should be able to
 	// perform multiple sequential serializations/deserializations.
 
-	encodeDecodeTestFn := func(t *testing.T, encoder *SerializerV2, decoder *DeserializerV2) {
+	encodeDecodeTestFn := func(t *testing.T, encoder *Serializer, decoder *Deserializer) {
 		for i := range 1000 {
 			val := dummy.NewDummyStruct1().
 				SetField9(fmt.Sprintf("sequential_test_value_%d", i))
@@ -94,26 +94,26 @@ func TestConsequentSerDes(t *testing.T) {
 
 	t.Run("Binary", func(t *testing.T) {
 		buffer := new(bytes.Buffer)
-		serializer := NewBinarySerializerV2(buffer)
-		deserializer := NewBinaryDeserializerV2(buffer)
+		serializer := NewBinarySerializer(buffer)
+		deserializer := NewBinaryDeserializer(buffer)
 		encodeDecodeTestFn(t, serializer, deserializer)
 	})
 	t.Run("Compact", func(t *testing.T) {
 		buffer := new(bytes.Buffer)
-		serializer := NewCompactSerializerV2(buffer)
-		deserializer := NewCompactDeserializerV2(buffer)
+		serializer := NewCompactSerializer(buffer)
+		deserializer := NewCompactDeserializer(buffer)
 		encodeDecodeTestFn(t, serializer, deserializer)
 	})
 	t.Run("CompactJSON", func(t *testing.T) {
 		buffer := new(bytes.Buffer)
-		serializer := NewCompactJSONSerializerV2(buffer)
-		deserializer := NewCompactJSONDeserializerV2(buffer)
+		serializer := NewCompactJSONSerializer(buffer)
+		deserializer := NewCompactJSONDeserializer(buffer)
 		encodeDecodeTestFn(t, serializer, deserializer)
 	})
 	t.Run("SimpleJSON", func(t *testing.T) {
 		buffer := new(bytes.Buffer)
-		serializer := NewSimpleJSONSerializerV2(buffer)
-		deserializer := NewSimpleJSONDeserializerV2(buffer)
+		serializer := NewSimpleJSONSerializer(buffer)
+		deserializer := NewSimpleJSONDeserializer(buffer)
 		encodeDecodeTestFn(t, serializer, deserializer)
 	})
 }

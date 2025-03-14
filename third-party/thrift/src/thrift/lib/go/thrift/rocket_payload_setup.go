@@ -78,8 +78,7 @@ func newRequestSetupMetadataVersion8Bytes() ([]byte, error) {
 	}
 	prefix := buf.Bytes()
 	// then write newRequestSetupMetadataVersion8
-	serial := NewCompactSerializer()
-	bytes, err := serial.Write(newRequestSetupMetadataVersion8())
+	bytes, err := EncodeCompact(newRequestSetupMetadataVersion8())
 	if err != nil {
 		return nil, err
 	}

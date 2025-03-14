@@ -32,67 +32,33 @@ const defaultBufferSize = 1024 // 1KB
 
 // A Serializer is used to turn a Struct in to a byte stream
 type Serializer struct {
-	buffer  *bytes.Buffer
-	encoder types.Encoder
-}
-
-// NewBinarySerializer create a new serializer using the binary format
-func NewBinarySerializer() *Serializer {
-	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
-	encoder := NewBinaryFormat(buffer)
-	return &Serializer{buffer: buffer, encoder: encoder}
-}
-
-// NewCompactSerializer creates a new serializer using the compact format
-func NewCompactSerializer() *Serializer {
-	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
-	encoder := NewCompactFormat(buffer)
-	return &Serializer{buffer: buffer, encoder: encoder}
-}
-
-// NewCompactJSONSerializer creates a new serializer using the compact JSON format
-func NewCompactJSONSerializer() *Serializer {
-	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
-	encoder := NewCompactJSONFormat(buffer)
-	return &Serializer{buffer: buffer, encoder: encoder}
-}
-
-// NewSimpleJSONSerializer creates a new serializer using the SimpleJSON format
-func NewSimpleJSONSerializer() *Serializer {
-	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
-	encoder := NewSimpleJSONFormat(buffer)
-	return &Serializer{buffer: buffer, encoder: encoder}
-}
-
-// A SerializerV2 is used to turn a Struct in to a byte stream
-type SerializerV2 struct {
 	format types.Format
 }
 
-// NewBinarySerializerV2 creates a new serializer using the binary format
-func NewBinarySerializerV2(readWriter types.ReadWriteSizer) *SerializerV2 {
-	return &SerializerV2{format: NewBinaryFormat(readWriter)}
+// NewBinarySerializer creates a new serializer using the binary format
+func NewBinarySerializer(readWriter types.ReadWriteSizer) *Serializer {
+	return &Serializer{format: NewBinaryFormat(readWriter)}
 }
 
-// NewCompactSerializerV2 creates a new serializer using the compact format
-func NewCompactSerializerV2(readWriter types.ReadWriteSizer) *SerializerV2 {
-	return &SerializerV2{format: NewCompactFormat(readWriter)}
+// NewCompactSerializer creates a new serializer using the compact format
+func NewCompactSerializer(readWriter types.ReadWriteSizer) *Serializer {
+	return &Serializer{format: NewCompactFormat(readWriter)}
 }
 
-// NewCompactJSONSerializerV2 creates a new serializer using the CompactJSON format
-func NewCompactJSONSerializerV2(readWriter io.ReadWriter) *SerializerV2 {
-	return &SerializerV2{format: NewCompactJSONFormat(readWriter)}
+// NewCompactJSONSerializer creates a new serializer using the CompactJSON format
+func NewCompactJSONSerializer(readWriter io.ReadWriter) *Serializer {
+	return &Serializer{format: NewCompactJSONFormat(readWriter)}
 }
 
-// NewSimpleJSONSerializerV2 creates a new serializer using the SimpleJSON format
-func NewSimpleJSONSerializerV2(readWriter io.ReadWriter) *SerializerV2 {
-	return &SerializerV2{format: NewSimpleJSONFormat(readWriter)}
+// NewSimpleJSONSerializer creates a new serializer using the SimpleJSON format
+func NewSimpleJSONSerializer(readWriter io.ReadWriter) *Serializer {
+	return &Serializer{format: NewSimpleJSONFormat(readWriter)}
 }
 
 // EncodeCompact serializes msg using the compact format
 func EncodeCompact(msg types.WritableStruct) ([]byte, error) {
 	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
-	err := NewCompactSerializerV2(buffer).Encode(msg)
+	err := NewCompactSerializer(buffer).Encode(msg)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +68,7 @@ func EncodeCompact(msg types.WritableStruct) ([]byte, error) {
 // EncodeBinary serializes msg using the binary format
 func EncodeBinary(msg types.WritableStruct) ([]byte, error) {
 	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
-	err := NewBinarySerializerV2(buffer).Encode(msg)
+	err := NewBinarySerializer(buffer).Encode(msg)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +78,7 @@ func EncodeBinary(msg types.WritableStruct) ([]byte, error) {
 // EncodeCompactJSON serializes msg using the compact JSON format
 func EncodeCompactJSON(msg types.WritableStruct) ([]byte, error) {
 	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
-	err := NewCompactJSONSerializerV2(buffer).Encode(msg)
+	err := NewCompactJSONSerializer(buffer).Encode(msg)
 	if err != nil {
 		return nil, err
 	}
@@ -122,38 +88,15 @@ func EncodeCompactJSON(msg types.WritableStruct) ([]byte, error) {
 // EncodeSimpleJSON serializes msg using the simple JSON format
 func EncodeSimpleJSON(msg types.WritableStruct) ([]byte, error) {
 	buffer := bytes.NewBuffer(make([]byte, 0, defaultBufferSize))
-	err := NewSimpleJSONSerializerV2(buffer).Encode(msg)
+	err := NewSimpleJSONSerializer(buffer).Encode(msg)
 	if err != nil {
 		return nil, err
 	}
 	return buffer.Bytes(), nil
 }
 
-// Write writes msg to the serializer and returns it as a byte array
-func (s *Serializer) Write(msg types.WritableStruct) ([]byte, error) {
-	s.buffer.Reset()
-
-	if err := msg.Write(s.encoder); err != nil {
-		return nil, err
-	}
-
-	if err := s.encoder.Flush(); err != nil {
-		return nil, err
-	}
-
-	// Copy the bytes from our internal Transport buffer into
-	// a separate fresh buffer that will be fully owned by the caller.
-	// The contents of the internal Transport buffer will be overwritten
-	// on the next call to Write()/WriteString(). We don't want that to
-	// affect the caller's buffer. Hence, the copy.
-	serBytes := make([]byte, s.buffer.Len())
-	copy(serBytes, s.buffer.Bytes())
-
-	return serBytes, nil
-}
-
 // Encode encodes a Thrift struct into the underlying format/writer.
-func (s *SerializerV2) Encode(msg types.WritableStruct) error {
+func (s *Serializer) Encode(msg types.WritableStruct) error {
 	if err := msg.Write(s.format); err != nil {
 		return err
 	}

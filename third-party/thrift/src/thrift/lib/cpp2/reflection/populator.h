@@ -20,6 +20,7 @@
 #include <iostream>
 #include <random>
 #include <type_traits>
+#include <typeindex>
 #include <vector>
 
 #include <folly/FBString.h>
@@ -48,6 +49,7 @@ struct populator_opts {
   range<> str_len = range<>(0, 0xFF);
   // Probability to use for populating optional fields.
   float optional_field_prob = 0.0;
+  size_t recursion_limit = 0;
 };
 
 namespace detail {
@@ -144,6 +146,44 @@ struct deref<PtrType, enable_if_smart_pointer<PtrType>> {
 template <typename T>
 using infer_tag = type::infer_tag<T, true /* GuessStringTag */>;
 
+template <typename Rng>
+struct State {
+  Rng& rng;
+  const populator_opts& opts;
+  std::map<std::type_index, size_t> tag_counts;
+};
+
+// Using the type_info of the tags to check if we are populating recursively
+template <typename Tag>
+class RecursionGuard {
+ private:
+  size_t& cnt_;
+  const bool can_recurse_;
+
+ public:
+  template <typename Rng>
+  explicit RecursionGuard(State<Rng>& state)
+      : cnt_(state.tag_counts[typeid(Tag)]),
+        can_recurse_(cnt_ <= state.opts.recursion_limit) {
+    if (can_recurse_) {
+      cnt_++;
+    }
+  }
+
+  ~RecursionGuard() {
+    if (can_recurse_) {
+      cnt_--;
+    }
+  }
+
+  operator bool() const { return can_recurse_; }
+
+  RecursionGuard(const RecursionGuard&) = delete;
+  RecursionGuard(RecursionGuard&&) = delete;
+  RecursionGuard& operator=(const RecursionGuard&) = delete;
+  RecursionGuard& operator=(RecursionGuard&&) = delete;
+};
+
 } // namespace detail
 
 template <typename Tag, typename Type, typename Enable = void>
@@ -166,13 +206,13 @@ struct populator_methods<
   // Special overload to work with lists of booleans.
   template <typename Rng>
   static void populate(
-      Rng& rng, const populator_opts&, std::vector<bool>::reference out) {
-    out = next_value(rng);
+      detail::State<Rng>& state, std::vector<bool>::reference out) {
+    out = next_value(state.rng);
   }
 
   template <typename Rng>
-  static void populate(Rng& rng, const populator_opts&, Int& out) {
-    out = next_value(rng);
+  static void populate(detail::State<Rng>& state, Int& out) {
+    out = next_value(state.rng);
   }
 };
 
@@ -183,9 +223,9 @@ struct populator_methods<
     std::enable_if_t<
         type::is_a_v<detail::infer_tag<Fp>, type::floating_point_c>>> {
   template <typename Rng>
-  static void populate(Rng& rng, const populator_opts&, Fp& out) {
+  static void populate(detail::State<Rng>& state, Fp& out) {
     std::uniform_real_distribution<Fp> gen;
-    out = gen(rng);
+    out = gen(state.rng);
     DVLOG(4) << "generated real: " << out;
   }
 };
@@ -193,18 +233,19 @@ struct populator_methods<
 template <>
 struct populator_methods<type::string_t, std::string> {
   template <typename Rng>
-  static void populate(Rng& rng, const populator_opts& opts, std::string& str) {
+  static void populate(detail::State<Rng>& state, std::string& str) {
     using larger_char =
         std::conditional_t<std::numeric_limits<char>::is_signed, int, unsigned>;
 
     // all printable chars (see `man ascii`)
     std::uniform_int_distribution<larger_char> char_gen(0x20, 0x7E);
 
-    const std::size_t length = detail::rand_in_range(rng, opts.str_len);
+    const std::size_t length =
+        detail::rand_in_range(state.rng, state.opts.str_len);
 
     str = std::string(length, 0);
     std::generate_n(str.begin(), length, [&]() {
-      return static_cast<char>(char_gen(rng));
+      return static_cast<char>(char_gen(state.rng));
     });
 
     DVLOG(4) << "generated string of len" << length;
@@ -216,10 +257,9 @@ struct populator_methods<
     type::cpp_type<folly::fbstring, type::string_t>,
     folly::fbstring> {
   template <typename Rng>
-  static void populate(
-      Rng& rng, const populator_opts& opts, folly::fbstring& bin) {
+  static void populate(detail::State<Rng>& state, folly::fbstring& bin) {
     std::string t;
-    populator_methods<type::string_t, std::string>::populate(rng, opts, t);
+    populator_methods<type::string_t, std::string>::populate(state, t);
     bin = folly::fbstring(std::move(t));
   }
 };
@@ -237,11 +277,11 @@ void generate_bytes(
 template <>
 struct populator_methods<type::binary_t, std::string> {
   template <typename Rng>
-  static void populate(Rng& rng, const populator_opts& opts, std::string& bin) {
-    const auto length = detail::rand_in_range(rng, opts.bin_len);
+  static void populate(detail::State<Rng>& state, std::string& bin) {
+    const auto length = detail::rand_in_range(state.rng, state.opts.bin_len);
     bin = std::string(length, 0);
     auto iter = bin.begin();
-    generate_bytes(rng, bin, length, [&](uint8_t c) { *iter++ = c; });
+    generate_bytes(state.rng, bin, length, [&](uint8_t c) { *iter++ = c; });
   }
 };
 
@@ -250,10 +290,9 @@ struct populator_methods<
     type::cpp_type<folly::fbstring, type::binary_t>,
     folly::fbstring> {
   template <typename Rng>
-  static void populate(
-      Rng& rng, const populator_opts& opts, folly::fbstring& bin) {
+  static void populate(detail::State<Rng>& state, folly::fbstring& bin) {
     std::string t;
-    populator_methods<type::binary_t, std::string>::populate(rng, opts, t);
+    populator_methods<type::binary_t, std::string>::populate(state, t);
     bin = folly::fbstring(std::move(t));
   }
 };
@@ -263,14 +302,13 @@ struct populator_methods<
     type::cpp_type<folly::IOBuf, type::binary_t>,
     folly::IOBuf> {
   template <typename Rng>
-  static void populate(
-      Rng& rng, const populator_opts& opts, folly::IOBuf& bin) {
-    const auto length = detail::rand_in_range(rng, opts.bin_len);
+  static void populate(detail::State<Rng>& state, folly::IOBuf& bin) {
+    const auto length = detail::rand_in_range(state.rng, state.opts.bin_len);
     bin = folly::IOBuf(folly::IOBuf::CREATE, length);
     bin.append(length);
     folly::io::RWUnshareCursor range(&bin);
     generate_bytes(
-        rng, range, length, [&](uint8_t c) { range.write<uint8_t>(c); });
+        state.rng, range, length, [&](uint8_t c) { range.write<uint8_t>(c); });
   }
 };
 
@@ -280,13 +318,11 @@ struct populator_methods<
     std::unique_ptr<folly::IOBuf>> {
   template <typename Rng>
   static void populate(
-      Rng& rng,
-      const populator_opts& opts,
-      std::unique_ptr<folly::IOBuf>& bin) {
+      detail::State<Rng>& state, std::unique_ptr<folly::IOBuf>& bin) {
     bin = std::make_unique<folly::IOBuf>();
     return populator_methods<
         type::cpp_type<folly::IOBuf, type::binary_t>,
-        folly::IOBuf>::populate(rng, opts, *bin);
+        folly::IOBuf>::populate(state, *bin);
   }
 };
 
@@ -300,8 +336,8 @@ struct populator_methods<
   using type_methods = populator_methods<Tag, element_type>;
 
   template <typename Rng>
-  static void populate(Rng& rng, const populator_opts& opts, PtrType& out) {
-    return type_methods::populate(rng, opts, *out);
+  static void populate(detail::State<Rng>& state, PtrType& out) {
+    return type_methods::populate(state, *out);
   }
 };
 
@@ -315,9 +351,9 @@ struct populator_methods<
   using int_methods = populator_methods<detail::infer_tag<int_type>, int_type>;
 
   template <typename Rng>
-  static void populate(Rng& rng, const populator_opts& opts, Type& out) {
+  static void populate(detail::State<Rng>& state, Type& out) {
     int_type tmp;
-    int_methods::populate(rng, opts, tmp);
+    int_methods::populate(state, tmp);
     out = static_cast<Type>(tmp);
   }
 };
@@ -329,15 +365,21 @@ struct populator_methods<type::list<ElemTag>, Type> {
   using elem_methods = populator_methods<ElemTag, elem_type>;
 
   template <typename Rng>
-  static void populate(Rng& rng, const populator_opts& opts, Type& out) {
-    std::uint32_t list_size = detail::rand_in_range(rng, opts.list_len);
+  static void populate(detail::State<Rng>& state, Type& out) {
+    auto recursion_guard = detail::RecursionGuard<type::list<ElemTag>>(state);
+    if (!recursion_guard) {
+      return;
+    }
+
+    std::uint32_t list_size =
+        detail::rand_in_range(state.rng, state.opts.list_len);
     out = Type();
 
     DVLOG(3) << "populating list size " << list_size;
 
     out.resize(list_size);
     for (decltype(list_size) i = 0; i < list_size; i++) {
-      elem_methods::populate(rng, opts, out[i]);
+      elem_methods::populate(state, out[i]);
     }
   }
 };
@@ -351,15 +393,21 @@ struct populator_methods<type::set<ElemTag>, Type> {
   using elem_methods = populator_methods<ElemTag, elem_type>;
 
   template <typename Rng>
-  static void populate(Rng& rng, const populator_opts& opts, Type& out) {
-    std::uint32_t set_size = detail::rand_in_range(rng, opts.set_len);
+  static void populate(detail::State<Rng>& state, Type& out) {
+    auto recursion_guard = detail::RecursionGuard<type::set<ElemTag>>(state);
+    if (!recursion_guard) {
+      return;
+    }
+
+    std::uint32_t set_size =
+        detail::rand_in_range(state.rng, state.opts.set_len);
 
     DVLOG(3) << "populating set size " << set_size;
     out = Type();
 
     for (decltype(set_size) i = 0; i < set_size; i++) {
       elem_type tmp;
-      elem_methods::populate(rng, opts, tmp);
+      elem_methods::populate(state, tmp);
       out.insert(std::move(tmp));
     }
   }
@@ -375,16 +423,23 @@ struct populator_methods<type::map<KeyTag, MappedTag>, Type> {
   using mapped_methods = populator_methods<MappedTag, mapped_type>;
 
   template <typename Rng>
-  static void populate(Rng& rng, const populator_opts& opts, Type& out) {
-    std::uint32_t map_size = detail::rand_in_range(rng, opts.map_len);
+  static void populate(detail::State<Rng>& state, Type& out) {
+    auto recursion_guard =
+        detail::RecursionGuard<type::map<KeyTag, MappedTag>>(state);
+    if (!recursion_guard) {
+      return;
+    }
+
+    std::uint32_t map_size =
+        detail::rand_in_range(state.rng, state.opts.map_len);
 
     DVLOG(3) << "populating map size " << map_size;
     out = Type();
 
     for (decltype(map_size) i = 0; i < map_size; i++) {
       key_type key_tmp;
-      key_methods::populate(rng, opts, key_tmp);
-      mapped_methods::populate(rng, opts, out[std::move(key_tmp)]);
+      key_methods::populate(state, key_tmp);
+      mapped_methods::populate(state, out[std::move(key_tmp)]);
     }
   }
 };
@@ -393,13 +448,13 @@ struct populator_methods<type::map<KeyTag, MappedTag>, Type> {
 template <typename Union>
 struct populator_methods<type::union_t<Union>, Union> {
   template <typename Rng>
-  static void populate(Rng& rng, const populator_opts& opts, Union& out) {
+  static void populate(detail::State<Rng>& state, Union& out) {
     DVLOG(3) << "begin writing union: "
              << op::get_class_name_v<Union> << ", type: "
              << folly::to_underlying(out.getType());
 
     const auto selected = static_cast<type::Ordinal>(detail::rand_in_range(
-        rng, populator_opts::range<size_t>{0, op::size_v<Union> - 1}));
+        state.rng, populator_opts::range<size_t>{0, op::size_v<Union> - 1}));
 
     op::for_each_ordinal<Union>([&](auto ord) {
       using Ord = decltype(ord);
@@ -414,7 +469,7 @@ struct populator_methods<type::union_t<Union>, Union> {
                << op::get_name_v<Union, Ord> << ", fid: "
                << folly::to_underlying(op::get_field_id_v<Union, Ord>);
 
-      methods::populate(rng, opts, op::get<Ord>(out).ensure());
+      methods::populate(state, op::get<Ord>(out).ensure());
     });
 
     DVLOG(3) << "end writing union";
@@ -428,7 +483,7 @@ struct populator_methods<type::struct_t<Struct>, Struct> {
   class member_populator {
    public:
     template <typename Ord, typename Rng>
-    void operator()(Ord, Rng& rng, const populator_opts& opts, Struct& out) {
+    void operator()(Ord, detail::State<Rng>& state, Struct& out) {
       using methods = populator_methods<
           op::get_type_tag<Struct, Ord>,
           op::get_native_type<Struct, Ord>>;
@@ -439,7 +494,7 @@ struct populator_methods<type::struct_t<Struct>, Struct> {
       // Popualate optional fields with `optional_field_prob` probability.
       const auto skip = //
           ::apache::thrift::detail::is_optional_field_ref_v<field_ref_type> &&
-          !detail::get_bernoulli(rng, opts.optional_field_prob);
+          !detail::get_bernoulli(state.rng, state.opts.optional_field_prob);
       if (skip) {
         return;
       }
@@ -448,15 +503,20 @@ struct populator_methods<type::struct_t<Struct>, Struct> {
 
       op::ensure<Ord>(out);
       methods::populate(
-          rng, opts, detail::deref<field_ref_type>::clear_and_get(got));
+          state, detail::deref<field_ref_type>::clear_and_get(got));
     }
   };
 
  public:
   template <typename Rng>
-  static void populate(Rng& rng, const populator_opts& opts, Struct& out) {
+  static void populate(detail::State<Rng>& state, Struct& out) {
+    auto recursion_guard =
+        detail::RecursionGuard<type::struct_t<Struct>>(state);
+    if (!recursion_guard) {
+      return;
+    }
     op::for_each_ordinal<Struct>(
-        [&](auto ord) { member_populator()(ord, rng, opts, out); });
+        [&](auto ord) { member_populator()(ord, state, out); });
   }
 };
 template <typename Exn>
@@ -470,9 +530,9 @@ struct populator_methods<type::adapted<Adapter, InnerTag>, T> {
   using inner_methods = populator_methods<InnerTag, inner_type>;
 
   template <typename Rng>
-  static void populate(Rng& rng, const populator_opts& opts, T& out) {
+  static void populate(detail::State<Rng>& state, T& out) {
     inner_type tmp;
-    inner_methods::populate(rng, opts, tmp);
+    inner_methods::populate(state, tmp);
     out = Adapter::fromThrift(std::move(tmp));
   }
 };
@@ -500,7 +560,8 @@ struct populator_methods<
 
 template <typename Type, typename Rng, typename Tag = detail::infer_tag<Type>>
 void populate(Type& out, const populator_opts& opts, Rng& rng) {
-  return populator_methods<Tag, Type>::populate(rng, opts, out);
+  detail::State<Rng> state{rng, opts, {}};
+  return populator_methods<Tag, Type>::populate(state, out);
 }
 
 } // namespace apache::thrift::populator

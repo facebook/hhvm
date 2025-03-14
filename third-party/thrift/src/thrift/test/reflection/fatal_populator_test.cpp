@@ -139,5 +139,21 @@ TYPED_TEST(MultiProtocolTest, test_populating_optional_fields_p100) {
   }
   ASSERT_EQ(100, set_count);
 }
+
+TYPED_TEST(MultiProtocolTest, test_populating_recursive_type) {
+  std::mt19937 rng;
+  populator_opts opts;
+  opts.optional_field_prob = 1.0;
+  opts.recursion_limit = 5;
+  recursive1 t;
+  uint32_t count = 0;
+  for (populator::populate(t, opts, rng); t.next().has_value();
+       t = t.next().value()) {
+    count++;
+  }
+  // There should be `opts.recursion_limit` number of fully populated
+  // `recursive1`s and one additonal default-initialized `recursive1` at the end
+  ASSERT_EQ(opts.recursion_limit + 1, count);
+}
 } // namespace simple_cpp_reflection
 } // namespace test_cpp2

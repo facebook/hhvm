@@ -179,3 +179,8 @@ exception except1 {
   1: i32 field1;
   2: string field2;
 }
+
+struct recursive1 {
+  @thrift.Box
+  1: optional recursive1 next;
+}

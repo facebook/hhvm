@@ -3550,7 +3550,7 @@ let handle_errors_file_item
           lenv.Run_env.uris_with_standalone_diagnostics
           |> UriMap.filter_map (fun uri (existing_time, diagnostics_from) ->
                  if
-                   UriMap.mem uri lenv.Run_env.editor_open_files
+                   UriSet.mem uri lenv.Run_env.uris_with_unsaved_changes
                    || Float.(existing_time > start_time)
                  then begin
                    Some (existing_time, diagnostics_from)
@@ -3597,7 +3597,7 @@ let handle_errors_file_item
         ~f:(fun path file_errors acc ->
           let path = Relative_path.to_absolute path in
           let uri = path_string_to_lsp_uri path ~default_path:path in
-          if UriMap.mem uri lenv.Run_env.editor_open_files then
+          if UriSet.mem uri lenv.Run_env.uris_with_unsaved_changes then
             acc
           else
             match UriMap.find_opt uri acc with

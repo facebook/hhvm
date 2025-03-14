@@ -5751,15 +5751,39 @@ function unsaved_bar(): string { return "hello"; }
                 notify=False,
             )
             .notification(
-                comment="actually open something that's different from what was on disk (with extra newline)",
+                comment="open errors_b.php",
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${errors_b_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "<?hh\nfunction bbb(): int { return 2 }\n",
+                    }
+                },
+            )
+            .notification(
+                comment="open errors_a.php",
                 method="textDocument/didOpen",
                 params={
                     "textDocument": {
                         "uri": "${errors_a_uri}",
                         "languageId": "hack",
                         "version": 1,
-                        "text": "<?hh\n\n\n\nfunction aaa(): int { return 1 }\n",
+                        "text": "<?hh\nfunction aaa(): int { return 1 }\n",
                     }
+                },
+            )
+            .notification(
+                comment="edit errors_a.php",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${errors_a_uri}", "version": 1},
+                    "contentChanges": [
+                        {
+                            "text": "<?hh\n\n\n\nfunction aaa(): int { return 1 }\n",
+                        }
+                    ],
                 },
             )
             .wait_for_notification(

@@ -38,7 +38,7 @@ namespace HH\Lib\Regex {
    * positional arguments. This can then be used with various Regex\ functions,
    * the results of which represent a Match.
    */
-  newtype Pattern<+T as Match> = string;
+  newtype Pattern<+T as Match> as string = string;
 }
 
 namespace HH\Lib\_Private\_Regex {

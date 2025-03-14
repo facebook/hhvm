@@ -107,6 +107,23 @@ final class ThriftContextPropState {
           $rid_set = true;
         }
 
+        if (
+          !C\is_empty($tfm->experiment_ids ?? vec[]) &&
+          coinflip(JustKnobs::getInt(
+            'lumos/experimentation:ingested_exp_id_sample_rate',
+          ))
+        ) {
+          FBLogger(
+            'lumos_experimentation',
+            'ingested experiment IDs from string',
+          )
+            ->setBlameOwner('lumos')
+            ->warn(
+              'Ingested TFM contains experiment IDs: %s',
+              JSON::encode($tfm->experiment_ids),
+            );
+        }
+
         self::get()->storage = $tfm;
         self::get()->dirty();
       }

@@ -158,7 +158,6 @@ TEST_F(DownstreamTransactionTest, InvariantViolationHandler) {
   EXPECT_CALL(transport_, sendAbort(_, _));
   EXPECT_CALL(handler_, _detachTransaction());
   EXPECT_CALL(transport_, detach(&txn));
-
   txn.setHandler(&handler_);
   // Send body before headers -- oops;
   txn.sendBody(makeBuf(10));

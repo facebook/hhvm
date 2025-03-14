@@ -640,14 +640,18 @@ bool HTTPTransaction::validateEgressStateTransition(
 }
 
 void HTTPTransaction::invariantViolation(HTTPException ex) {
+  DestructorGuard g(this);
   LOG(ERROR) << "invariantViolation msg=" << ex.what()
              << " aborted_=" << uint32_t(aborted_) << " " << *this;
-  sendAbort();
   if (handler_) {
     handler_->onInvariantViolation(ex);
   } else {
     LOG(FATAL) << "Invariant violation with no handler; ex=" << ex.what();
   }
+  // In http/1.1, this will send TCP reset and ungracefully terminate the
+  // connection. In h2, this will send stream reset but keep the connection
+  // open.
+  sendAbort(ErrorCode::NO_ERROR);
 }
 
 void HTTPTransaction::abortAndDeliverError(ErrorCode codecError,

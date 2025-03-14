@@ -1,6 +1,6 @@
 <?hh
 
-class A {}
+<<__DynamicallyReferenced>> class A {}
 
 function serde($val) :mixed{
   print "* serialize result:\n";

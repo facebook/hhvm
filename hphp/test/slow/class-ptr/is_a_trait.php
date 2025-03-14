@@ -1,10 +1,10 @@
 <?hh
 
-interface I {}
-trait T implements I {}
+<<__DynamicallyReferenced>> interface I {}
+<<__DynamicallyReferenced>> trait T implements I {}
 
-trait T1 {}
-trait T2 { use T1; }
+<<__DynamicallyReferenced>> trait T1 {}
+<<__DynamicallyReferenced>> trait T2 { use T1; }
 
 class A { use T; }
 class B { use T1; }

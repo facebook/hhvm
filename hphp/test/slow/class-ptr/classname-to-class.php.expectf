@@ -1,0 +1,6 @@
+class(C)
+
+Notice: Missing __DynamicallyReferenced attribute on class D for classname_to_class in %s/class-ptr/classname-to-class.php on line 13
+class(D)
+lazyclass(C)
+class(C)

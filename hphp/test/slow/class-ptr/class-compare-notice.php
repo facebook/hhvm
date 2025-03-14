@@ -18,7 +18,7 @@ function handle_error($_errno, $msg, ...$_rest) :mixed{
   return false;
 }
 
-class foobar {}
+<<__DynamicallyReferenced>> class foobar {}
 
 class StrObj {
   public function __construct(private string $s)[] {}

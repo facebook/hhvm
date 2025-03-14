@@ -1,1 +1,2 @@
 -vEval.EnforceModules=2
+-vEval.DynamicallyReferencedNoticeSampleRate=0

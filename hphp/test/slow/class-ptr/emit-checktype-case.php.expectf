@@ -1,0 +1,7 @@
+
+Notice: Missing __DynamicallyReferenced attribute on class C for classname_to_class in %s/class-ptr/emit-checktype-case.php on line 9
+hello
+bye
+
+Notice: Missing __DynamicallyReferenced attribute on class C for classname_to_class in %s/class-ptr/emit-checktype-case.php on line 13
+bye

@@ -1,2 +1,3 @@
 --inputs=__DIR__/module-pair-a.inc
 --inputs=__DIR__/module-pair-b-launder.inc
+-vRuntime.Eval.DynamicallyReferencedNoticeSampleRate=0

@@ -1,1 +1,2 @@
 --inputs=__DIR__/module.inc
+-vRuntime.Eval.DynamicallyReferencedNoticeSampleRate=0

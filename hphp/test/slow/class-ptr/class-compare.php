@@ -1,6 +1,6 @@
 <?hh
 
-class foobar {}
+<<__DynamicallyReferenced>> class foobar {}
 function foobar() :mixed{}
 class StrObj {
   public function __construct(private string $s)[] {}

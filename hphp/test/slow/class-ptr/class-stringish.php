@@ -1,6 +1,6 @@
 <?hh
 
-class main {}
+<<__DynamicallyReferenced>> class main {}
 
 function foo(Stringish $s) :mixed{
   var_dump($s);

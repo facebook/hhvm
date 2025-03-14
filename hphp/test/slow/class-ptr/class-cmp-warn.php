@@ -1,7 +1,7 @@
 <?hh
 
-class foo {}
-class bar {}
+<<__DynamicallyReferenced>> class foo {}
+<<__DynamicallyReferenced>> class bar {}
 
 function baz($a, $b, $c, $d, $e) :mixed{
   var_dump($a === $b); var_dump($a == $b);

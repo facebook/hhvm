@@ -5,10 +5,10 @@ class Props {
   public static string $b;
 }
 
-class foo {}
-class bar {}
-class baz {}
-class buz {}
+<<__DynamicallyReferenced>> class foo {}
+<<__DynamicallyReferenced>> class bar {}
+<<__DynamicallyReferenced>> class baz {}
+<<__DynamicallyReferenced>> class buz {}
 
 function foo(string $s) :mixed{
   var_dump($s);

@@ -1,6 +1,6 @@
 <?hh
 
-class foo {}
+<<__DynamicallyReferenced>> class foo {}
 
 function getStr() :mixed{
   return __hhvm_intrinsics\launder_value("foo");

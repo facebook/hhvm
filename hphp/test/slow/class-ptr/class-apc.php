@@ -1,6 +1,6 @@
 <?hh
 
-class main {}
+<<__DynamicallyReferenced>> class main {}
 
 <<__EntryPoint>>
 function main() :mixed{

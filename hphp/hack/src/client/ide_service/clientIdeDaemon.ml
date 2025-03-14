@@ -637,6 +637,9 @@ let get_errors_for_path (istate : istate) (path : Relative_path.t) : Errors.t =
     let ctx = make_singleton_ctx istate.icommon entry in
     get_user_facing_errors ~ctx ~error_filter:istate.error_filter ~entry
 
+let path_to_relative_path path =
+  path |> Path.to_string |> Relative_path.create_detect_prefix
+
 (** handle_request invariants: Messages are only ever handled serially; we never
 handle one message while another is being handled. It is a bug if the client sends
 anything other than [Initialize_from_saved_state] as its first message. Upon
@@ -736,16 +739,12 @@ let handle_request
     (Initialized istate, Ok ())
     (* didClose *)
   | (During_init dstate, Did_close file_path) ->
-    let path =
-      file_path |> Path.to_string |> Relative_path.create_detect_prefix
-    in
+    let path = path_to_relative_path file_path in
     ( During_init
         { dstate with dopen_files = close_file dstate.dopen_files path },
       Ok [] )
   | (Initialized istate, Did_close file_path) ->
-    let path =
-      file_path |> Path.to_string |> Relative_path.create_detect_prefix
-    in
+    let path = path_to_relative_path file_path in
     let errors =
       Errors.get_sorted_error_list (get_errors_for_path istate path)
     in
@@ -763,9 +762,7 @@ let handle_request
       Ok diagnostics )
   (* didOpen or didChange *)
   | (During_init dstate, Did_open_or_change { file_path; file_contents }) ->
-    let path =
-      file_path |> Path.to_string |> Relative_path.create_detect_prefix
-    in
+    let path = path_to_relative_path file_path in
     let dstate = open_or_change_file_during_init dstate path file_contents in
     (During_init dstate, Ok ())
   | (Initialized istate, Did_open_or_change document) ->
@@ -1140,9 +1137,7 @@ let handle_request
        Hence, we construct temporary entry to reflect the file which
        contained the target of the resolve. *)
     HackEventLogger.completion_call ~method_name:"Completion_resolve_location";
-    let path =
-      file_path |> Path.to_string |> Relative_path.create_detect_prefix
-    in
+    let path = path_to_relative_path file_path in
     let ctx = make_empty_ctx istate.icommon in
     let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
     let result =

@@ -17,6 +17,9 @@
 package thrift
 
 import (
+	"bytes"
+	"crypto/rand"
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -35,6 +38,97 @@ func TestBasicSerDes(t *testing.T) {
 		SetField7(float64(123456.7)).
 		SetField8([]byte{1, 2, 3, 4}).
 		SetField9("hello")
+
+	encodeDecodeTestFn := func(t *testing.T, encodeFn func(types.WritableStruct) ([]byte, error), decodeFn func([]byte, types.ReadableStruct) error) {
+		data, err := encodeFn(val)
+		if err != nil {
+			t.Fatalf("failed to encode: %v", err)
+		}
+		var res dummy.DummyStruct1
+		err = decodeFn(data, &res)
+		if err != nil {
+			t.Fatalf("failed to decode: %v", err)
+		}
+		if !reflect.DeepEqual(*val, res) {
+			t.Fatalf("values are not equal: %+v != %+v", *val, res)
+		}
+	}
+
+	t.Run("Binary", func(t *testing.T) {
+		encodeDecodeTestFn(t, EncodeBinary, DecodeBinary)
+	})
+	t.Run("Compact", func(t *testing.T) {
+		encodeDecodeTestFn(t, EncodeCompact, DecodeCompact)
+	})
+	t.Run("CompactJSON", func(t *testing.T) {
+		encodeDecodeTestFn(t, EncodeCompactJSON, DecodeCompactJSON)
+	})
+	t.Run("SimpleJSON", func(t *testing.T) {
+		encodeDecodeTestFn(t, EncodeSimpleJSON, DecodeSimpleJSON)
+	})
+}
+
+func TestConsequentSerDes(t *testing.T) {
+	// A single Serializer/Deserializer instance should be able to
+	// perform multiple sequential serializations/deserializations.
+
+	encodeDecodeTestFn := func(t *testing.T, encoder *SerializerV2, decoder *DeserializerV2) {
+		for i := range 1000 {
+			val := dummy.NewDummyStruct1().
+				SetField9(fmt.Sprintf("sequential_test_value_%d", i))
+
+			err := encoder.Encode(val)
+			if err != nil {
+				t.Fatalf("failed to encode: %v", err)
+			}
+			var res dummy.DummyStruct1
+			err = decoder.Decode(&res)
+			if err != nil {
+				t.Fatalf("failed to decode: %v", err)
+			}
+			if !reflect.DeepEqual(*val, res) {
+				t.Fatalf("values are not equal: %+v != %+v", *val, res)
+			}
+		}
+	}
+
+	t.Run("Binary", func(t *testing.T) {
+		buffer := new(bytes.Buffer)
+		serializer := NewBinarySerializerV2(buffer)
+		deserializer := NewBinaryDeserializerV2(buffer)
+		encodeDecodeTestFn(t, serializer, deserializer)
+	})
+	t.Run("Compact", func(t *testing.T) {
+		buffer := new(bytes.Buffer)
+		serializer := NewCompactSerializerV2(buffer)
+		deserializer := NewCompactDeserializerV2(buffer)
+		encodeDecodeTestFn(t, serializer, deserializer)
+	})
+	t.Run("CompactJSON", func(t *testing.T) {
+		buffer := new(bytes.Buffer)
+		serializer := NewCompactJSONSerializerV2(buffer)
+		deserializer := NewCompactJSONDeserializerV2(buffer)
+		encodeDecodeTestFn(t, serializer, deserializer)
+	})
+	t.Run("SimpleJSON", func(t *testing.T) {
+		buffer := new(bytes.Buffer)
+		serializer := NewSimpleJSONSerializerV2(buffer)
+		deserializer := NewSimpleJSONDeserializerV2(buffer)
+		encodeDecodeTestFn(t, serializer, deserializer)
+	})
+}
+
+func TestGiantStructSerDes(t *testing.T) {
+	// Serializer should be able to serialize a giant struct.
+
+	giantByteBlob := make([]byte, 32*1024*1024 /* 32MB */)
+	_, err := rand.Read(giantByteBlob)
+	if err != nil {
+		t.Fatalf("failed to rand read: %v", err)
+	}
+	val := dummy.NewDummyStruct1().
+		SetField8(giantByteBlob).
+		SetField9("giant_struct")
 
 	encodeDecodeTestFn := func(t *testing.T, encodeFn func(types.WritableStruct) ([]byte, error), decodeFn func([]byte, types.ReadableStruct) error) {
 		data, err := encodeFn(val)

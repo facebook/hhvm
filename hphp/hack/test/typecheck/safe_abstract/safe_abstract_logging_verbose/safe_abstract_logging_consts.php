@@ -3,6 +3,9 @@
 abstract class C1 {
   abstract const int abs;
   const int concr = 1;
+  public function meth(): void {
+    static::abs; // use_kind: const_access, is_safe: true
+  }
 }
 
 final abstract class C2 extends C1 {

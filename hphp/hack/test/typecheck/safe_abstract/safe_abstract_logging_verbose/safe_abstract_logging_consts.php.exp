@@ -1,6 +1,7 @@
-safe_abstract_logger:{"pos":"(Relative_path.Dummy, \"safe_abstract_logging_consts.php\") 13:2","use_kind":"const_access","is_safe":false}
-safe_abstract_logger:{"pos":"(Relative_path.Dummy, \"safe_abstract_logging_consts.php\") 14:2","use_kind":"const_access","is_safe":true}
-WARN: File "safe_abstract_logging_consts.php", line 13, characters 3-13:
+safe_abstract_logger:{"pos":"(Relative_path.Dummy, \"safe_abstract_logging_consts.php\") 16:2","use_kind":"const_access","is_safe":false}
+safe_abstract_logger:{"pos":"(Relative_path.Dummy, \"safe_abstract_logging_consts.php\") 17:2","use_kind":"const_access","is_safe":true}
+safe_abstract_logger:{"pos":"(Relative_path.Dummy, \"safe_abstract_logging_consts.php\") 7:4","use_kind":"const_access","is_safe":false}
+WARN: File "safe_abstract_logging_consts.php", line 16, characters 3-13:
 Unsafe class constant access: C1::abs might not exist because the receiver might be abstract. (Warn[12018])
-  File "safe_abstract_logging_consts.php", line 12, characters 24-25:
+  File "safe_abstract_logging_consts.php", line 15, characters 24-25:
   C1 is from 

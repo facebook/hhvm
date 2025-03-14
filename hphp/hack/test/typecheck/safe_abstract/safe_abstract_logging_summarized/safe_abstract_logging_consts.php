@@ -1,8 +1,12 @@
 <?hh
 
+// safe_const_accesses":1,"unsafe_const_accesses":0
 abstract class C1 {
   abstract const int abs;
   const int concr = 1;
+  public function meth(): void {
+    static::abs;
+  }
 }
 
 final abstract class C2 extends C1 {

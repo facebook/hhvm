@@ -811,7 +811,7 @@ irgen::RegionAndLazyUnit selectCalleeRegion(const irgen::IRGS& irgs,
 
   if (profData()) {
     auto region = selectCalleeCFG(callerSk, entry, ctxType, inputTypes,
-                                  Cfg::Jit::MaxInlineRegionInstrs, annotationsPtr);
+                                  Cfg::Jit::MaxRegionInstrs, annotationsPtr);
     if (region) return {callerSk, region};
     // Special case: even if we don't have prof data for this func, if
     // it takes no arguments and returns a constant, it might be a
@@ -826,7 +826,7 @@ irgen::RegionAndLazyUnit selectCalleeRegion(const irgen::IRGS& irgs,
   }
 
   auto region = selectCalleeTracelet(entry, ctxType, inputTypes,
-                                     Cfg::Jit::MaxInlineRegionInstrs);
+                                     Cfg::Jit::MaxRegionInstrs);
   return {callerSk, region};
 }
 

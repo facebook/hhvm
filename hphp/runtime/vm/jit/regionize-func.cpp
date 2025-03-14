@@ -389,7 +389,7 @@ RegionVec regionizeFunc(const Func* func, std::string& transCFGAnnot) {
       ctx.cfg = &cfg;
       ctx.profData = profData;
       ctx.entries = {newHead};
-      ctx.maxBCInstrs = Cfg::Jit::MaxInitialRegionInstrs;
+      ctx.maxBCInstrs = Cfg::Jit::MaxRegionInstrs;
       switch (regionMode) {
         case PGORegionMode::Hottrace:
           region = selectHotTrace(ctx);

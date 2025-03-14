@@ -1648,8 +1648,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - int64_t Jit.MaxRequestTranslationTime = -1, UNKNOWN
 - uint32_t Jit.MaxRegionInstrs = 3000, UNKNOWN
 - uint32_t Jit.MaxLiveRegionInstrs = 50, UNKNOWN
-- uint32_t Jit.MaxInitialRegionInstrs = 3000, UNKNOWN
-- uint32_t Jit.MaxInlineRegionInstrs = 3000, UNKNOWN
 - uint32_t Jit.MaxAwaitAllUnroll = 8, UNKNOWN
 - bool Jit.ProfileWarmupRequests = false, UNKNOWN
 - uint32_t Jit.ProfileRequests, UNKNOWN

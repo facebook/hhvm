@@ -920,7 +920,7 @@ RegionDescPtr selectRegion(const RegionContext& context,
         case RegionMode::Tracelet: {
           auto const maxBCInstrs = kind == TransKind::Live
             ? Cfg::Jit::MaxLiveRegionInstrs
-            : Cfg::Jit::MaxInitialRegionInstrs;
+            : Cfg::Jit::MaxRegionInstrs;
           return selectTracelet(context, kind, maxBCInstrs);
         }
       }
@@ -941,7 +941,7 @@ RegionDescPtr selectRegion(const RegionContext& context,
   if (region) {
     FTRACE(3, "{}", show(*region));
     always_assert(
-      region->instrSize() <= std::max(Cfg::Jit::MaxInitialRegionInstrs,
+      region->instrSize() <= std::max(Cfg::Jit::MaxRegionInstrs,
                                       Cfg::Jit::MaxLiveRegionInstrs)
     );
   } else {
@@ -963,7 +963,7 @@ RegionDescPtr selectHotRegion(TransID transId) {
   ctx.cfg = &cfg;
   ctx.profData = profData;
   ctx.entries = {transId};
-  ctx.maxBCInstrs = Cfg::Jit::MaxInitialRegionInstrs;
+  ctx.maxBCInstrs = Cfg::Jit::MaxRegionInstrs;
   switch (pgoRegionMode(func)) {
     case PGORegionMode::Hottrace:
       region = selectHotTrace(ctx);
@@ -994,7 +994,7 @@ RegionDescPtr selectHotRegion(TransID transId) {
            dotFileName, region ? show(*region) : std::string("empty region"));
   }
 
-  always_assert(region->instrSize() <= Cfg::Jit::MaxInitialRegionInstrs);
+  always_assert(region->instrSize() <= Cfg::Jit::MaxRegionInstrs);
 
   if (region->empty()) return nullptr;
   return region;

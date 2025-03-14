@@ -33,7 +33,7 @@ struct ProfilingTimeseriesWithOutliers {
       const std::vector<uint64_t>& thresholdsMs
   );
 
-  void update(const uint64_t valueUs);
+  void update(const uint64_t valueUs, const uint64_t num_samples);
 
 private:
   ServiceData::ExportedTimeSeries* mTimeseriesUs;
@@ -45,7 +45,9 @@ struct PspAndNonPspProfilingTimeseries {
   PspAndNonPspProfilingTimeseries(
       const std::string& keyBaseName,
       const std::string& totalUsNoteName,
+      const std::string& totalCountNoteName,
       const std::string& pspUsNoteName,
+      const std::string& pspCountNoteName,
       const std::vector<uint64_t>& thresholdsMs
   );
 
@@ -53,7 +55,9 @@ struct PspAndNonPspProfilingTimeseries {
 
 private:
   std::string mTotalUsNoteName;
+  std::string mTotalCountNoteName;
   std::string mPspUsNoteName;
+  std::string mPspCountNoteName;
   ProfilingTimeseriesWithOutliers mTotalTimeseries;
   ProfilingTimeseriesWithOutliers mNonPspTimeseries;
 };
@@ -64,19 +68,28 @@ struct ProfilingCounters {
      * STATIC -- this is where the following timeseries are created:
      *   - {BASE}_us.sum.60: total duration from entire request, in us
      *   - {BASE}_non_psp_us.sum.60: duration from only non-PSP, in us
-     *   - {BASE}.over_{THRESHOLD}ms.sum.60: count of requests with duration
-     *     over THRESHOLD ms
-     *   - {BASE}_non_psp.over_{THRESHOLD}ms.sum.60: count of requests with 
+     *   - {BASE}.over_{THRESHOLD}ms.count.60: count of www requests with duration 
+     *       of all {BASE} calls in a single request over {THRESHOLD} ms
+     *   - {BASE}_non_psp.over_{THRESHOLD}ms.count.60: count of requests with 
      *     duration from non-PSP over THRESHOLD ms
      * NOTE: duration timeseries are in us, while outlier timeseries are in ms
      * for consistency with the old dyno timeseries they're replacing.
+     * 
+     * Example outlier:  hhvm.tao.dispatch_duration.over_1000_ms.count
+     * if a single www request has 3 tao calls of 500ms, 600 ms, 700 ms, then
+     * hhvm.tao.dispatch_duration_us.avg sum that request will be 1_800_000 us
+     * hhvm.tao.dispatch_duration_us.count for that request will be 3
+     * hhvm.tao.dispatch_duration_us.avg for that request will be 600_000 us
+     * total time will be 1_800 ms so the outlier counter will be bumped by 1
      **/
     static std::vector<PspAndNonPspProfilingTimeseries> timeseriesDefinitions = { 
       // Memcache
       PspAndNonPspProfilingTimeseries(
         "memcache.get_duration", // base name
         "DYNO_CACHE_GET_DURATION", // server note for total duration, in us
+        "DYNO_CACHE_GET_COUNT", // server note for count
         "DYNO_CACHE_GET_DURATION_PSP", // server note for PSP duration only, in us
+        "DYNO_CACHE_GET_COUNT_PSP", // server note for PSP count
         {100} // count outliers over 100ms
       ),
 
@@ -84,13 +97,17 @@ struct ProfilingCounters {
       PspAndNonPspProfilingTimeseries(
         "tao.dispatch_duration",
         "DYNO_TAO_DISPATCH_DURATION", // total duration in us
+        "DYNO_TAO_DISPATCH_COUNT",
         "DYNO_TAO_DISPATCH_DURATION_PSP", // PSP only in us
+        "DYNO_TAO_DISPATCH_COUNT_PSP",
         {1000} // count outliers over 1000ms
       ),
       PspAndNonPspProfilingTimeseries(
         "tao.update_duration",
         "DYNO_TAO_UPDATE_DURATION",
+        "DYNO_TAO_UPDATE_COUNT",
         "DYNO_TAO_UPDATE_DURATION_PSP", 
+        "DYNO_TAO_UPDATE_COUNT_PSP",
         {1000}
       )
     };

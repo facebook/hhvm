@@ -37,7 +37,7 @@ ProfilingTimeseriesWithOutliers::ProfilingTimeseriesWithOutliers(
     const std::vector<uint64_t>& thresholdsMs
 ) : mTimeseriesUs(ServiceData::createTimeSeries(
       keyName + "_us",
-      {ServiceData::StatsType::SUM},
+      {ServiceData::StatsType::SUM, ServiceData::StatsType::COUNT, ServiceData::StatsType::AVG},
       {std::chrono::seconds(60)}
     )) {
   for (const auto& thresholdMs : thresholdsMs) {
@@ -51,8 +51,8 @@ ProfilingTimeseriesWithOutliers::ProfilingTimeseriesWithOutliers(
   }
 }
 
-void ProfilingTimeseriesWithOutliers::update(uint64_t valueUs) {
-  mTimeseriesUs->addValue(valueUs);
+void ProfilingTimeseriesWithOutliers::update(uint64_t valueUs, uint64_t num_samples) {
+  mTimeseriesUs->addValueAggregated(valueUs, num_samples);
   for (const auto& entryMs : mOutlierTimeseriesMsMap) {
     if (valueUs > entryMs.first * 1000) {
       entryMs.second->addValue(1);
@@ -63,18 +63,24 @@ void ProfilingTimeseriesWithOutliers::update(uint64_t valueUs) {
 PspAndNonPspProfilingTimeseries::PspAndNonPspProfilingTimeseries(
     const std::string& keyBaseName,
     const std::string& totalUsNoteName,
+    const std::string& totalCountNoteName,
     const std::string& pspUsNoteName,
+    const std::string& pspCountNoteName,
     const std::vector<uint64_t>& thresholdsMs
 ) : mTotalUsNoteName(totalUsNoteName)
+  , mTotalCountNoteName(totalCountNoteName)
   , mPspUsNoteName(pspUsNoteName)
+  , mPspCountNoteName(pspCountNoteName)
   , mTotalTimeseries(ProfilingTimeseriesWithOutliers(keyBaseName, thresholdsMs))
   , mNonPspTimeseries(ProfilingTimeseriesWithOutliers(keyBaseName + "_non_psp", thresholdsMs)) {}
 
 void PspAndNonPspProfilingTimeseries::update() {
   const auto totalValueUs = ProfilingCounters::getStatFromServerNote(mTotalUsNoteName);
+  const auto totalCount = ProfilingCounters::getStatFromServerNote(mTotalCountNoteName);
   const auto pspValueUs = ProfilingCounters::getStatFromServerNote(mPspUsNoteName);
-  mTotalTimeseries.update(totalValueUs.value_or(0));
-  mNonPspTimeseries.update(totalValueUs.value_or(0) - pspValueUs.value_or(0));
+  const auto pspCount = ProfilingCounters::getStatFromServerNote(mPspCountNoteName);
+  mTotalTimeseries.update(totalValueUs.value_or(0), totalCount.value_or(0));
+  mNonPspTimeseries.update(totalValueUs.value_or(0) - pspValueUs.value_or(0), totalCount.value_or(0) - pspCount.value_or(0));
 }
 ///////////////////////////////////////////////////////////////////////////////
 }

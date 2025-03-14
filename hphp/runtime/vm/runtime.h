@@ -99,6 +99,8 @@ void raiseModulePropertyViolation(const Class* cls,
 void raiseDeploymentBoundaryViolation(const Func* callee);
 void raiseDeploymentBoundaryViolation(const Class* cls);
 
+void raiseMissingDynamicallyReferenced(const Class* cls);
+
 inline Iter*
 frame_iter(const ActRec* fp, int i) {
   return (Iter*)(uintptr_t(fp)

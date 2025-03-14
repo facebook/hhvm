@@ -223,12 +223,6 @@ void cgRaiseForbiddenDynConstruct(IRLS& env, const IRInstruction* inst) {
                kVoidDest, SyncOptions::Sync, argGroup(env, inst).ssa(0));
 }
 
-static void raiseMissingDynamicallyReferenced(const Class* cls) {
-  if (folly::Random::oneIn(Cfg::Eval::DynamicallyReferencedNoticeSampleRate)) {
-    raise_notice(Strings::MISSING_DYNAMICALLY_REFERENCED, cls->name()->data());
-  }
-}
-
 void cgRaiseMissingDynamicallyReferenced(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(
     vmain(env),

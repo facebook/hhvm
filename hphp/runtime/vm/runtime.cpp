@@ -554,6 +554,13 @@ void raiseDeploymentBoundaryViolation(const Class* cls) {
   }
 }
 
+const StaticString s___DynamicallyReferenced("__DynamicallyReferenced");
+
+void raiseMissingDynamicallyReferenced(const Class* cls) {
+  if (folly::Random::oneIn(Cfg::Eval::DynamicallyReferencedNoticeSampleRate)) {
+    raise_notice(Strings::MISSING_DYNAMICALLY_REFERENCED, cls->name()->data());
+  }
+}
 //////////////////////////////////////////////////////////////////////
 
 int64_t zero_error_level() {

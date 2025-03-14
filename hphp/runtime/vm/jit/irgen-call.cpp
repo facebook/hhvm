@@ -470,7 +470,7 @@ void callProfiledFunc(IRGS& env, SSATmp* callee, SSATmp* objOrClass,
     return result;
   }();
 
-  speculateTargetFunction(env, callee, callKnown, callUnknown, choices, 
+  speculateTargetFunction(env, callee, callKnown, callUnknown, choices,
                           0, Cfg::Jit::PGOCalledFuncCheckNumSpeculations);
 }
 
@@ -2225,13 +2225,15 @@ void emitFCallClsMethodM(IRGS& env, FCallArgs fca, const StringData* clsHint,
   }
   auto const cls = [&] {
     if (name->isA(TCls)) return name;
-    if (name->isA(TStr) &&
-      Cfg::Eval::RaiseStrToClsConversionNoticeSampleRate > 0) {
-      gen(env, RaiseStrToClassNotice, name);
-    }
     auto const ret = name->isA(TObj) ?
       gen(env, LdObjClass, name) : ldCls(env, name);
-    if (name->isA(TStr)) emitModuleBoundaryCheck(env, ret, false);
+    if (name->isA(TStr)) {
+      emitModuleBoundaryCheck(env, ret, false);
+
+      if(Cfg::Eval::RaiseStrToClsConversionNoticeSampleRate > 0) {
+        gen(env, RaiseStrToClassNotice, name);
+      }
+    }
     decRef(env, name);
     return ret;
   }();

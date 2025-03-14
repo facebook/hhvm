@@ -60,47 +60,56 @@ void emitClassGetC(IRGS& env, ClassGetCMode mode) {
     return;
   }
 
-  auto const cls = [&] {
+  auto const fallback = [&] {
     switch (mode) {
       case ClassGetCMode::Normal:
-        if (Cfg::Eval::RaiseStrToClsConversionNoticeSampleRate > 0
-            && name->isA(TStr)) {
-          gen(env, RaiseStrToClassNotice, name);
-        }
-        return ldCls(env, name);
+        return LdClsFallback::Fatal;
       case ClassGetCMode::ExplicitConversion:
         // HH\classname_to_class throws a catchable InvalidArgumentException
         // instead of raising a fatal error
         if (name->isA(TStr)) {
-          auto const cls = ldCls(env, name, LdClsFallback::ThrowClassnameToClassString);
-          if (Cfg::Eval::DynamicallyReferencedNoticeSampleRate > 0) {
-            if (cls->hasConstVal() &&
-                !cls->clsVal()->isDynamicallyReferenced()) {
-              gen(env, RaiseMissingDynamicallyReferenced, cls);
-            } else {
-              ifThen(
-                env,
-                [&] (Block* taken) {
-                  auto const data = AttrData { AttrDynamicallyReferenced };
-                  gen(env, JmpZero, taken, gen(env, ClassHasAttr, data, cls));
-                },
-                [&] {
-                  hint(env, Block::Hint::Unlikely);
-                  gen(env, RaiseMissingDynamicallyReferenced, cls);
-                }
-              );
-            }
-          }
-          return cls;
+          return LdClsFallback::ThrowClassnameToClassString;
         } else { // TLazyCls
-          return ldCls(env, name, LdClsFallback::ThrowClassnameToClassLazyClass);
+          return LdClsFallback::ThrowClassnameToClassLazyClass;
         }
     }
   }();
+  auto const cls = ldCls(env, name, fallback);
+
+  if (name->isA(TStr)) {
+    emitModuleBoundaryCheck(env, cls, false);
+
+    switch (mode) {
+      case ClassGetCMode::Normal:
+        if (Cfg::Eval::RaiseStrToClsConversionNoticeSampleRate > 0) {
+          gen(env, RaiseStrToClassNotice, name);
+        }
+        break;
+      case ClassGetCMode::ExplicitConversion:
+        if (Cfg::Eval::DynamicallyReferencedNoticeSampleRate > 0) {
+          if (cls->hasConstVal() &&
+              !cls->clsVal()->isDynamicallyReferenced()) {
+            gen(env, RaiseMissingDynamicallyReferenced, cls);
+          } else {
+            ifThen(
+              env,
+              [&] (Block* taken) {
+                auto const data = AttrData { AttrDynamicallyReferenced };
+                gen(env, JmpZero, taken, gen(env, ClassHasAttr, data, cls));
+              },
+              [&] {
+                hint(env, Block::Hint::Unlikely);
+                gen(env, RaiseMissingDynamicallyReferenced, cls);
+              }
+            );
+          }
+        }
+        break;
+    }
+  }
 
   popC(env);
   decRef(env, name);
-  if (name->isA(TStr)) emitModuleBoundaryCheck(env, cls, false);
   push(env, cls);
 }
 

@@ -979,9 +979,8 @@ static inline Class* classnameToClass(TypedValue* input) {
   if (tvIsString(input)) {
     auto const name = input->m_data.pstr;
     if (Class* class_ = Class::resolve(name, vmfp()->func())) {
-      if (folly::Random::oneIn(Cfg::Eval::DynamicallyReferencedNoticeSampleRate) &&
-          !class_->isDynamicallyReferenced()) {
-        raise_notice(Strings::MISSING_DYNAMICALLY_REFERENCED, name->data());
+      if (!class_->isDynamicallyReferenced()) {
+        raiseMissingDynamicallyReferenced(class_);
       }
       return class_;
     }
@@ -1006,8 +1005,8 @@ static inline Class* classnameToClass(TypedValue* input) {
 static inline Class* lookupClsRef(TypedValue* input) {
   if (tvIsString(input)) {
     auto const name = input->m_data.pstr;
-    raise_str_to_class_notice(name);
     if (Class* class_ = Class::resolve(name, vmfp()->func())) {
+      raise_str_to_class_notice(name);
       return class_;
     }
     raise_error(Strings::UNKNOWN_CLASS, name->data());

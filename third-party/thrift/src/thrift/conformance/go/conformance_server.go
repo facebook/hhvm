@@ -204,11 +204,19 @@ func newResponse(request *thrift_any.Any, data []byte) *thrift_any.Any {
 
 // serialize serializes a thrift.Struct with a target protocol to be stored inside a thrift.Any.
 func serialize(obj thrift.Struct, protoc *protocol.ProtocolStruct) ([]byte, error) {
-	s, err := newSerializer(protoc)
-	if err != nil {
-		return nil, err
+	switch protoc.GetStandard() {
+	case protocol.StandardProtocol_Custom:
+	case protocol.StandardProtocol_Binary:
+		return thrift.EncodeBinary(obj)
+	case protocol.StandardProtocol_Compact:
+		return thrift.EncodeCompact(obj)
+	case protocol.StandardProtocol_Json:
+		return thrift.EncodeCompactJSON(obj)
+	case protocol.StandardProtocol_SimpleJson:
+		return thrift.EncodeSimpleJSON(obj)
 	}
-	return s.Write(obj)
+	// default value in case the protocol is unknown, as seen in the java implementation of conformance tests.
+	return thrift.EncodeCompact(obj)
 }
 
 // loadStruct loads a thrift.Struct from the typeRegistry for a given thrift.Any.
@@ -245,48 +253,24 @@ func deserialize(registry *typeRegistry, value *thrift_any.Any) (thrift.Struct, 
 		return nil, err
 	}
 	protoc := getProtocol(value)
-	d, err := newDeserializer(protoc)
+	switch protoc.GetStandard() {
+	case protocol.StandardProtocol_Custom:
+	case protocol.StandardProtocol_Binary:
+		err = thrift.DecodeBinary(value.GetData(), obj)
+	case protocol.StandardProtocol_Compact:
+		err = thrift.DecodeCompact(value.GetData(), obj)
+	case protocol.StandardProtocol_Json:
+		err = thrift.DecodeCompactJSON(value.GetData(), obj)
+	case protocol.StandardProtocol_SimpleJson:
+		err = thrift.DecodeSimpleJSON(value.GetData(), obj)
+	default:
+		// default value in case the protocol is unknown, as seen in the java implementation of conformance tests.
+		err = thrift.DecodeCompact(value.GetData(), obj)
+	}
 	if err != nil {
 		return nil, err
 	}
-	if err := d.Read(obj, value.GetData()); err != nil {
-		return nil, err
-	}
 	return obj, nil
-}
-
-// newSerializer initializes the appropriate serializer for the specific protocol.
-func newSerializer(protoc *protocol.ProtocolStruct) (*thrift.Serializer, error) {
-	switch protoc.GetStandard() {
-	case protocol.StandardProtocol_Custom:
-	case protocol.StandardProtocol_Binary:
-		return thrift.NewBinarySerializer(), nil
-	case protocol.StandardProtocol_Compact:
-		return thrift.NewCompactSerializer(), nil
-	case protocol.StandardProtocol_Json:
-		return thrift.NewSimpleJSONSerializer(), nil
-	case protocol.StandardProtocol_SimpleJson:
-		return thrift.NewCompactJSONSerializer(), nil
-	}
-	// default value in case the protocol is unknown, as seen in the java implementation of conformance tests.
-	return thrift.NewCompactSerializer(), nil
-}
-
-// newDeserializer initializes the appropriate deserializer for the specific protocol.
-func newDeserializer(protoc *protocol.ProtocolStruct) (*thrift.Deserializer, error) {
-	switch protoc.GetStandard() {
-	case protocol.StandardProtocol_Custom:
-	case protocol.StandardProtocol_Binary:
-		return thrift.NewBinaryDeserializer(), nil
-	case protocol.StandardProtocol_Compact:
-		return thrift.NewCompactDeserializer(), nil
-	case protocol.StandardProtocol_Json:
-		return thrift.NewSimpleJSONDeserializer(), nil
-	case protocol.StandardProtocol_SimpleJson:
-		return thrift.NewCompactJSONDeserializer(), nil
-	}
-	// default value in case the protocol is unknown, as seen in the java implementation of conformance tests.
-	return thrift.NewCompactDeserializer(), nil
 }
 
 // getTargetProtocol returns a consistent target protocol in the ProtocolStruct, whether the target protocol was set or not.

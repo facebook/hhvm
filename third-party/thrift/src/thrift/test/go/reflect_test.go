@@ -42,15 +42,13 @@ func TestReflectCodec(t *testing.T) {
 		{"hello1", "hello2", "hello3"}: "value1",
 	}
 
-	serializer := thrift.NewCompactSerializer()
-	originalBuf, err := serializer.Write(writeTarget)
+	originalBuf, err := thrift.EncodeCompact(writeTarget)
 	if err != nil {
 		t.Fatalf("failed to serialize struct: %v", err)
 	}
 
 	readTarget := &reflecttest.VariousFieldsStruct{}
-	deserializer := thrift.NewCompactDeserializer()
-	err = deserializer.Read(readTarget, originalBuf)
+	err = thrift.DecodeCompact(originalBuf, readTarget)
 	if err != nil {
 		t.Fatalf("failed to deserialize struct: %v", err)
 	}

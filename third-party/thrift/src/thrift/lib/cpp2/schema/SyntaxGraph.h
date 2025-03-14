@@ -980,15 +980,25 @@ class RpcInterfaceNode : detail::WithDefinition, detail::WithUri {
   using detail::WithUri::uri;
   folly::span<const FunctionNode> functions() const { return functions_; }
 
+  // We outline this destructor because `FunctionNode` is incomplete at the
+  // time of declaration.
+  // https://eel.is/c++draft/vector#overview-4 states that the type must be
+  // complete when any of vector's members are referenced.
+  ~RpcInterfaceNode();
+
+  // We need to explicitly declare a default move constructor here because
+  // https://eel.is/c++draft/class.copy.ctor#8.4 states that the move
+  // constructor is implicitly declared as defaulted only if there's no user
+  // declared destructor, even if we default the destructor later.
+  RpcInterfaceNode(RpcInterfaceNode&&) = default;
+  RpcInterfaceNode& operator=(RpcInterfaceNode&&) = default;
+
  protected:
   RpcInterfaceNode(
       const detail::Resolver& resolver,
       const apache::thrift::type::DefinitionKey& definitionKey,
       std::string_view uri,
-      std::vector<FunctionNode>&& functions)
-      : detail::WithDefinition(resolver, definitionKey),
-        detail::WithUri(uri),
-        functions_(std::move(functions)) {}
+      std::vector<FunctionNode>&& functions);
 
   using detail::WithDefinition::WithResolver::resolver;
 
@@ -1485,6 +1495,17 @@ class SyntaxGraph final {
 };
 static_assert(std::is_move_constructible_v<SyntaxGraph>);
 static_assert(std::is_move_assignable_v<SyntaxGraph>);
+
+inline RpcInterfaceNode::RpcInterfaceNode(
+    const detail::Resolver& resolver,
+    const apache::thrift::type::DefinitionKey& definitionKey,
+    std::string_view uri,
+    std::vector<FunctionNode>&& functions)
+    : detail::WithDefinition(resolver, definitionKey),
+      detail::WithUri(uri),
+      functions_(std::move(functions)) {}
+
+inline RpcInterfaceNode::~RpcInterfaceNode() = default;
 
 namespace detail {
 template <typename T>

@@ -9,7 +9,7 @@
 #include <folly/Try.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/futures/Future.h>
-#include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
+#include "hphp/hack/src/hhvm_ffi/compiler_ffi.rs.h"
 #include "hphp/runtime/ext/facts/path-and-hash.h"
 
 namespace HPHP {

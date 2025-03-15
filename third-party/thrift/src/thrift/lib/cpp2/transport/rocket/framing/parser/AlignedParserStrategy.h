@@ -111,6 +111,7 @@ class AlignedParserStrategy {
   std::unique_ptr<folly::IOBuf> createDataBuffer();
   std::unique_ptr<folly::IOBuf> createRequestResponseDataBuffer();
   std::unique_ptr<folly::IOBuf> createPayloadDataBuffer();
+  std::unique_ptr<folly::IOBuf> createAlignedBuffer(size_t size);
 
   void handleAwaitingHeader(size_t len);
 
@@ -135,15 +136,27 @@ std::unique_ptr<folly::IOBuf> AlignedParserStrategy<T>::createHeaderBuffer() {
 }
 
 template <typename T>
+std::unique_ptr<folly::IOBuf> AlignedParserStrategy<T>::createAlignedBuffer(
+    const size_t size) {
+  // We need to allocate an extra byte for the IOBuf to be able to
+  // make sure the first field in a binary encoded thrift struct is
+  // aligned. There are 7 bytes between the start of the first field and
+  // the start of the struct.
+  auto buffer = folly::IOBuf::createSeparate(size + 1);
+  buffer->advance(1);
+  return buffer;
+}
+
+template <typename T>
 std::unique_ptr<folly::IOBuf>
 AlignedParserStrategy<T>::createRequestResponseDataBuffer() {
-  return folly::IOBuf::createCombined(remainingData_);
+  return createAlignedBuffer(remainingData_);
 }
 
 template <typename T>
 std::unique_ptr<folly::IOBuf>
 AlignedParserStrategy<T>::createPayloadDataBuffer() {
-  return folly::IOBuf::createCombined(remainingData_);
+  return createAlignedBuffer(remainingData_);
 }
 
 template <typename T>

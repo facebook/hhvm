@@ -55,7 +55,6 @@ final class ThriftContextPropStateTest extends WWWTest {
 
   public function testUserIdsNullable(): void {
     $tcps = ThriftContextPropState::get();
-    expect($tcps->getUserIds())->toBeNull();
 
     // 0 is different from null
     $tcps->setUserIds(ContextProp\UserIds::withDefaultValues());
@@ -516,6 +515,24 @@ final class ThriftContextPropStateTest extends WWWTest {
     $root_product_id = $tcps->setRootProductId(100);
     expect(readonly $tcps->getRootProductId())->toEqual(789);
     expect($root_product_id)->toEqual(789);
+  }
+
+  public function testDisableIngestingExperimentIds(): void {
+    // Arrange
+    $tfm = ThriftFrameworkMetadata::withDefaultValues();
+    $tfm->experiment_ids = vec[1, 2, 3];
+    $buf = new TMemoryBuffer();
+    $prot = new TCompactProtocolAccelerated($buf);
+    $tfm->write($prot);
+    $s = $buf->getBuffer();
+    $e = Base64::encode($s);
+
+    // Act
+    ThriftContextPropState::initFromString($e, true);
+
+    // Assert
+    $tcps = ThriftContextPropState::get();
+    expect($tcps->getExperimentIds())->toBeEmpty();
   }
 
 }

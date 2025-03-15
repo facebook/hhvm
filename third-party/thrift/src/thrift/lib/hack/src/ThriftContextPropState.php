@@ -92,7 +92,10 @@ final class ThriftContextPropState {
    * Initizes ThriftContextPropState from a string (base64-encoded
    * compact-serialized ThriftFrameworkMetadata).
    */
-  public static function initFromString(?string $s)[defaults]: void {
+  public static function initFromString(
+    ?string $s,
+    bool $skip_experiment_id_ingestion = false,
+  )[defaults]: void {
     try {
       $rid_set = false;
       if ($s !== null) {
@@ -107,21 +110,8 @@ final class ThriftContextPropState {
           $rid_set = true;
         }
 
-        if (
-          !C\is_empty($tfm->experiment_ids ?? vec[]) &&
-          coinflip(JustKnobs::getInt(
-            'lumos/experimentation:ingested_exp_id_sample_rate',
-          ))
-        ) {
-          FBLogger(
-            'lumos_experimentation',
-            'ingested experiment IDs from string',
-          )
-            ->setBlameOwner('lumos')
-            ->warn(
-              'Ingested TFM contains experiment IDs: %s',
-              JSON::encode($tfm->experiment_ids),
-            );
+        if ($skip_experiment_id_ingestion && $tfm->experiment_ids is nonnull) {
+          $tfm->experiment_ids = vec[];
         }
 
         self::get()->storage = $tfm;

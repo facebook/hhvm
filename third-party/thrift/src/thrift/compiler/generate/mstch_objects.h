@@ -237,6 +237,8 @@ struct mstch_context : mstch_factories {
 
   node_metadata_cache metadata_cache;
 
+  const whisker::prototype_database* prototypes = nullptr;
+
   /**
    * Sets or erases the option with the given `key` depending on the
    * `condition`.
@@ -1196,6 +1198,7 @@ class mstch_enum : public mstch_base {
     register_methods(
         this,
         {
+            {"enum:self", &mstch_enum::self},
             {"enum:name", &mstch_enum::name},
             {"enum:values", &mstch_enum::values},
             {"enum:structured_annotations?",
@@ -1210,6 +1213,10 @@ class mstch_enum : public mstch_base {
         });
   }
 
+  whisker::object self() {
+    return whisker::object(whisker::native_handle<t_enum>(
+        whisker::manage_as_static(*enum_), context_.prototypes->of<t_enum>()));
+  }
   mstch::node name() { return enum_->get_name(); }
   mstch::node values();
   mstch::node unused_value() { return enum_->unused(); }

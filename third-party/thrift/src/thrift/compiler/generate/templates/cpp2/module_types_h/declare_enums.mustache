@@ -59,7 +59,7 @@ template <> struct TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_nam
   static bool findValue(std::string_view name, type* out) noexcept;
 
   FOLLY_ERASE static std::string_view typeName() noexcept {
-    return "{{enum:name}}";
+    return "{{enum:self.name}}";
   }
 
   FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {

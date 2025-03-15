@@ -28,7 +28,6 @@
 #include <string>
 #include <string_view>
 #include <type_traits>
-#include <vector>
 
 namespace whisker::dsl {
 
@@ -53,12 +52,12 @@ class array_like final : public native_object::array_like {
    */
   static std::optional<array_like> try_from(const object::ptr&);
 
-  explicit array_like(native_object::array_like::ptr&& arr)
+  explicit array_like(native_object::array_like::ptr arr)
       : which_(std::move(arr)) {}
-  explicit array_like(managed_ptr<array>&& arr) : which_(std::move(arr)) {}
+  explicit array_like(managed_array arr) : which_(std::move(arr)) {}
 
  private:
-  std::variant<native_object::array_like::ptr, managed_ptr<array>> which_;
+  std::variant<native_object::array_like::ptr, managed_array> which_;
 };
 static_assert(std::is_move_constructible_v<array_like>);
 static_assert(std::is_copy_constructible_v<array_like>);
@@ -81,11 +80,11 @@ class map_like final : public native_object::map_like {
    */
   static std::optional<map_like> try_from(const object::ptr&);
 
-  explicit map_like(native_object::map_like::ptr&& m) : which_(std::move(m)) {}
-  explicit map_like(managed_ptr<map>&& m) : which_(std::move(m)) {}
+  explicit map_like(native_object::map_like::ptr m) : which_(std::move(m)) {}
+  explicit map_like(managed_map m) : which_(std::move(m)) {}
 
  private:
-  std::variant<native_object::map_like::ptr, managed_ptr<map>> which_;
+  std::variant<native_object::map_like::ptr, managed_map> which_;
 };
 static_assert(std::is_move_constructible_v<map_like>);
 static_assert(std::is_copy_constructible_v<map_like>);

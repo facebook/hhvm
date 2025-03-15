@@ -35,7 +35,7 @@ object::ptr array_like::at(std::size_t index) const {
       [&](const native_object::array_like::ptr& arr) -> object::ptr {
         return arr->at(index);
       },
-      [&](const managed_ptr<array>& arr) -> object::ptr {
+      [&](const managed_array& arr) -> object::ptr {
         return manage_derived_ref(arr, (*arr)[index]);
       });
 }
@@ -43,7 +43,7 @@ object::ptr array_like::at(std::size_t index) const {
 /* static */ std::optional<array_like> array_like::try_from(
     const object::ptr& o) {
   if (o->is_array()) {
-    return array_like(manage_derived_ref(o, o->as_array()));
+    return array_like(o->as_array());
   }
   if (o->is_native_object()) {
     if (native_object::array_like::ptr arr =
@@ -60,9 +60,9 @@ object::ptr map_like::lookup_property(std::string_view identifier) const {
       [&](const native_object::map_like::ptr& m) -> object::ptr {
         return m->lookup_property(identifier);
       },
-      [&](const managed_ptr<map>& m) -> object::ptr {
+      [&](const managed_map& m) -> object::ptr {
         if (auto it = m->find(identifier); it != m->end()) {
-          return manage_as_static(it->second);
+          return manage_derived_ref(m, it->second);
         }
         return nullptr;
       });
@@ -75,7 +75,7 @@ std::optional<std::set<std::string>> map_like::keys() const {
       [&](const native_object::map_like::ptr& m) -> result {
         return m->keys();
       },
-      [&](const managed_ptr<map>& m) -> result {
+      [&](const managed_map& m) -> result {
         std::set<std::string> keys;
         for (const auto& [key, _] : *m) {
           keys.insert(key);
@@ -86,7 +86,7 @@ std::optional<std::set<std::string>> map_like::keys() const {
 
 /* static */ std::optional<map_like> map_like::try_from(const object::ptr& o) {
   if (o->is_map()) {
-    return map_like(manage_derived_ref(o, o->as_map()));
+    return map_like(o->as_map());
   }
   if (o->is_native_object()) {
     if (native_object::map_like::ptr m = o->as_native_object()->as_map_like()) {

@@ -432,8 +432,8 @@ bool coerce_to_boolean(f64 value) {
 bool coerce_to_boolean(const string& value) {
   return !value.empty();
 }
-bool coerce_to_boolean(const array& value) {
-  return !value.empty();
+bool coerce_to_boolean(const managed_array& value) {
+  return !value->empty();
 }
 bool coerce_to_boolean(const native_object::ptr& value) {
   if (auto array_like = value->as_array_like(); array_like != nullptr) {
@@ -450,7 +450,7 @@ bool coerce_to_boolean(const native_function::ptr&) {
 bool coerce_to_boolean(const native_handle<>&) {
   return true;
 }
-bool coerce_to_boolean(const map&) {
+bool coerce_to_boolean(const managed_map&) {
   return true;
 }
 
@@ -1145,7 +1145,7 @@ class render_engine {
     // See render_options::strict_boolean_conditional for the coercion
     // rules
     section_variable->visit(
-        [&](const array& value) {
+        [&](const managed_array& value) {
           if (section.inverted) {
             // This array is being used as a conditional
             maybe_report_coercion();
@@ -1155,7 +1155,7 @@ class render_engine {
             }
             return;
           }
-          for (const auto& element : value) {
+          for (const auto& element : *value) {
             do_visit(manage_derived_ref(section_variable, element));
           }
         },
@@ -1195,7 +1195,7 @@ class render_engine {
             do_visit(manage_as_static(whisker::make::null));
           }
         },
-        [&](const map&) {
+        [&](const managed_map&) {
           if (section.inverted) {
             // This map is being used as a conditional
             maybe_report_coercion();
@@ -1245,7 +1245,7 @@ class render_engine {
     const ast::expression& expr = with_block.value;
     object::ptr result = vm_.evaluate(expr);
     result->visit(
-        [&](const map&) {
+        [&](const managed_map&) {
           // maps can be de-structured.
         },
         [&](const native_object::ptr& o) {
@@ -1306,13 +1306,13 @@ class render_engine {
     };
 
     result->visit(
-        [&](const array& arr) {
-          if (arr.empty()) {
+        [&](const managed_array& arr) {
+          if (arr->empty()) {
             do_visit_else();
             return;
           }
-          for (std::size_t i = 0; i < arr.size(); ++i) {
-            do_visit(i64(i), manage_derived_ref(result, arr[i]));
+          for (std::size_t i = 0; i < arr->size(); ++i) {
+            do_visit(i64(i), manage_derived_ref(result, (*arr)[i]));
           }
         },
         [&](const native_object::ptr& o) {

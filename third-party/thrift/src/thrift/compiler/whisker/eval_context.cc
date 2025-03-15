@@ -38,7 +38,7 @@ object::ptr find_property(
       [](f64) -> result { return nullptr; },
       [](const string&) -> result { return nullptr; },
       [](boolean) -> result { return nullptr; },
-      [](const array&) -> result { return nullptr; },
+      [](const managed_array&) -> result { return nullptr; },
       [&](const native_object::ptr& o) -> result {
         if (auto map_like = o->as_map_like()) {
           return map_like->lookup_property(identifier.name);
@@ -72,8 +72,8 @@ object::ptr find_property(
         }
         return nullptr;
       },
-      [&](const map& m) -> result {
-        if (auto it = m.find(identifier.name); it != m.end()) {
+      [&](const managed_map& m) -> result {
+        if (auto it = m->find(identifier.name); it != m->end()) {
           return manage_as_static(it->second);
         }
         return nullptr;

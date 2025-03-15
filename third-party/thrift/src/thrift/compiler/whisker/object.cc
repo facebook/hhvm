@@ -48,8 +48,12 @@ class to_string_visitor {
       typename = std::enable_if_t<std::is_same_v<T, object>>>
   void visit(const T& value, tree_printer::scope scope) const {
     value.visit(
-        [&](const array& a) { visit_maybe_truncate(a, std::move(scope)); },
-        [&](const map& m) { visit_maybe_truncate(m, std::move(scope)); },
+        [&](const managed_array& a) {
+          visit_maybe_truncate(a, std::move(scope));
+        },
+        [&](const managed_map& m) {
+          visit_maybe_truncate(m, std::move(scope));
+        },
         [&](const native_object::ptr& o) {
           visit_maybe_truncate(o, std::move(scope));
         },
@@ -98,20 +102,20 @@ class to_string_visitor {
     scope.println("null");
   }
 
-  void visit(const array& arr, tree_printer::scope scope) const {
+  void visit(const managed_array& arr, tree_printer::scope scope) const {
     require_within_max_depth(scope);
-    scope.println("array (size={})", arr.size());
-    for (std::size_t i = 0; i < arr.size(); ++i) {
+    scope.println("array (size={})", arr->size());
+    for (std::size_t i = 0; i < arr->size(); ++i) {
       auto element_scope = scope.open_transparent_property();
       element_scope.println("[{}]", i);
-      visit(arr[i], element_scope.open_node());
+      visit((*arr)[i], element_scope.open_node());
     }
   }
 
-  void visit(const map& m, tree_printer::scope scope) const {
+  void visit(const managed_map& m, tree_printer::scope scope) const {
     require_within_max_depth(scope);
-    scope.println("map (size={})", m.size());
-    for (const auto& [key, value] : m) {
+    scope.println("map (size={})", m->size());
+    for (const auto& [key, value] : *m) {
       auto element_scope = scope.open_transparent_property();
       element_scope.println("'{}'", key);
       visit(value, element_scope.open_node());
@@ -354,8 +358,8 @@ std::string object::describe_type() const {
       [](const string&) -> std::string { return "string"; },
       [](boolean) -> std::string { return "boolean"; },
       [](null) -> std::string { return "null"; },
-      [](const array&) -> std::string { return "array"; },
-      [](const map&) -> std::string { return "map"; },
+      [](const managed_array&) -> std::string { return "array"; },
+      [](const managed_map&) -> std::string { return "map"; },
       [](const native_object::ptr& o) -> std::string {
         return o->describe_type();
       },

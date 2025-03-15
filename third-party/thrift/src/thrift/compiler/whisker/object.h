@@ -82,7 +82,10 @@ class object;
  *      std::unordered_map actually breaks for incomplete types in practice.
  */
 using map = std::map<std::string, object, std::less<>>;
+using managed_map = managed_ptr<map>;
+
 using array = std::vector<object>;
+using managed_array = managed_ptr<array>;
 
 /**
  * Options for whisker::to_string() and whisker::print_to().
@@ -787,8 +790,8 @@ using object_base = std::variant<
     native_object::ptr,
     native_function::ptr,
     native_handle<>,
-    std::vector<Self>,
-    std::map<std::string, Self, std::less<>>,
+    managed_ptr<std::vector<Self>>,
+    managed_ptr<std::map<std::string, Self, std::less<>>>,
     managed_ptr<Self> /* proxied */>;
 } // namespace detail
 
@@ -849,7 +852,7 @@ class object final : private detail::object_base<object> {
   }
 
   template <typename T>
-  auto as() const -> decltype(std::get<T>(*this)) {
+  const T& as() const {
     static_assert(
         !std::is_same_v<T, ptr>,
         "The proxied ptr should never be exposed via public API");
@@ -864,18 +867,28 @@ class object final : private detail::object_base<object> {
   explicit object(boolean value) : base(bool(value)) {}
   explicit object(i64 value) : base(value) {}
   explicit object(f64 value) : base(value) {}
-  explicit object(string&& value) : base(std::move(value)) {}
-  explicit object(native_object::ptr&& value) : base(std::move(value)) {
+  explicit object(string value) : base(std::move(value)) {}
+  explicit object(native_object::ptr value) : base(std::move(value)) {
     assert(as_native_object() != nullptr);
   }
-  explicit object(native_function::ptr&& value) : base(std::move(value)) {
+  explicit object(native_function::ptr value) : base(std::move(value)) {
     assert(as_native_function() != nullptr);
   }
-  explicit object(native_handle<>&& value) : base(std::move(value)) {
+  explicit object(native_handle<> value) : base(std::move(value)) {
     assert(as_native_handle().ptr() != nullptr);
   }
-  explicit object(map&& value) : base(std::move(value)) {}
-  explicit object(array&& value) : base(std::move(value)) {}
+
+  explicit object(managed_map value) : base(std::move(value)) {
+    assert(as_map() != nullptr);
+  }
+  explicit object(map value) : object(manage_owned<map>(std::move(value))) {}
+
+  explicit object(managed_array value) : base(std::move(value)) {
+    assert(as_array() != nullptr);
+  }
+  explicit object(array value)
+      : object(manage_owned<array>(std::move(value))) {}
+
   /**
    * Creates a "proxy" object that behaves the same as the provided object. This
    * function is useful, for example, for storing an owning reference to
@@ -886,7 +899,11 @@ class object final : private detail::object_base<object> {
    * Postconditions:
    *   - *this == *object
    */
-  /* implicit */ object(ptr source) : base(std::move(source)) {}
+  /* implicit */ object(ptr source) : base(std::move(source)) {
+    assert(as_proxy() != nullptr);
+  }
+
+  /* implicit */ object(std::nullptr_t) = delete;
 
   object(const object&) = default;
   object& operator=(const object&) = default;
@@ -900,8 +917,27 @@ class object final : private detail::object_base<object> {
     other = null();
     return *this;
   }
+
   // Pull in all the variant alternative operator= overloads
   using base::operator=;
+
+  object& operator=(const array& other) {
+    *this = manage_owned<array>(other);
+    return *this;
+  }
+  object& operator=(array&& other) {
+    *this = manage_owned<array>(std::move(other));
+    return *this;
+  }
+
+  object& operator=(const map& other) {
+    *this = manage_owned<map>(other);
+    return *this;
+  }
+  object& operator=(map&& other) {
+    *this = manage_owned<map>(std::move(other));
+    return *this;
+  }
 
   void swap(object& other) noexcept(noexcept(base::swap(other))) {
     base::swap(other);
@@ -933,8 +969,8 @@ class object final : private detail::object_base<object> {
     WHISKER_OBJECT_TRY_VISIT(native_object::ptr);
     WHISKER_OBJECT_TRY_VISIT(native_function::ptr);
     WHISKER_OBJECT_TRY_VISIT(native_handle<>);
-    WHISKER_OBJECT_TRY_VISIT(array);
-    WHISKER_OBJECT_TRY_VISIT(map);
+    WHISKER_OBJECT_TRY_VISIT(managed_array);
+    WHISKER_OBJECT_TRY_VISIT(managed_map);
 #undef WHISKER_OBJECT_TRY_VISIT
     assert(!static_cast<bool>(
         "There is a missed variant alternative in object::visit() implementation"));
@@ -972,11 +1008,11 @@ class object final : private detail::object_base<object> {
   }
   bool is_native_handle() const noexcept { return is<native_handle<>>(); }
 
-  const array& as_array() const { return as<array>(); }
-  bool is_array() const noexcept { return is<array>(); }
+  const managed_array& as_array() const { return as<managed_array>(); }
+  bool is_array() const noexcept { return is<managed_array>(); }
 
-  const map& as_map() const { return as<map>(); }
-  bool is_map() const noexcept { return is<map>(); }
+  const managed_map& as_map() const { return as<managed_map>(); }
+  bool is_map() const noexcept { return is<managed_map>(); }
 
   friend bool operator==(const object& lhs, null) noexcept {
     return lhs.is_null();
@@ -1035,10 +1071,10 @@ class object final : private detail::object_base<object> {
       return *lhs.as_native_object() == *rhs;
     }
     if (lhs.is_array()) {
-      return detail::array_eq(lhs.as_array(), rhs->as_array_like());
+      return detail::array_eq(*lhs.as_array(), rhs->as_array_like());
     }
     if (lhs.is_map()) {
-      return detail::map_eq(lhs.as_map(), rhs->as_map_like());
+      return detail::map_eq(*lhs.as_map(), rhs->as_map_like());
     }
     return false;
   }
@@ -1071,7 +1107,7 @@ class object final : private detail::object_base<object> {
 
   friend bool operator==(const object& lhs, const array& rhs) noexcept {
     if (lhs.is_array()) {
-      return lhs.as_array() == rhs;
+      return *lhs.as_array() == rhs;
     }
     if (lhs.is_native_object()) {
       return detail::array_eq(lhs.as_native_object()->as_array_like(), rhs);
@@ -1081,10 +1117,16 @@ class object final : private detail::object_base<object> {
   friend bool operator==(const array& lhs, const object& rhs) noexcept {
     return rhs == lhs;
   }
+  friend bool operator==(const object& lhs, const managed_array& rhs) noexcept {
+    return rhs != nullptr && lhs == *rhs;
+  }
+  friend bool operator==(const managed_array& lhs, const object& rhs) noexcept {
+    return rhs == lhs;
+  }
 
   friend bool operator==(const object& lhs, const map& rhs) noexcept {
     if (lhs.is_map()) {
-      return lhs.as_map() == rhs;
+      return *lhs.as_map() == rhs;
     }
     if (lhs.is_native_object()) {
       return detail::map_eq(lhs.as_native_object()->as_map_like(), rhs);
@@ -1092,6 +1134,12 @@ class object final : private detail::object_base<object> {
     return false;
   }
   friend bool operator==(const map& lhs, const object& rhs) noexcept {
+    return rhs == lhs;
+  }
+  friend bool operator==(const object& lhs, const managed_map& rhs) noexcept {
+    return rhs != nullptr && lhs == *rhs;
+  }
+  friend bool operator==(const managed_map& lhs, const object& rhs) noexcept {
     return rhs == lhs;
   }
 
@@ -1179,11 +1227,23 @@ class object final : private detail::object_base<object> {
   friend bool operator!=(const array& lhs, const object& rhs) noexcept {
     return !(lhs == rhs);
   }
+  friend bool operator!=(const object& lhs, const managed_array& rhs) noexcept {
+    return !(lhs == rhs);
+  }
+  friend bool operator!=(const managed_array& lhs, const object& rhs) noexcept {
+    return !(lhs == rhs);
+  }
 
   friend bool operator!=(const object& lhs, const map& rhs) noexcept {
     return !(lhs == rhs);
   }
   friend bool operator!=(const map& lhs, const object& rhs) noexcept {
+    return !(lhs == rhs);
+  }
+  friend bool operator!=(const object& lhs, const managed_map& rhs) noexcept {
+    return !(lhs == rhs);
+  }
+  friend bool operator!=(const managed_map& lhs, const object& rhs) noexcept {
     return !(lhs == rhs);
   }
 
@@ -1198,22 +1258,26 @@ static constexpr bool is_any_of = (std::is_same_v<T, Alternatives> || ...);
 }
 
 /**
- * A type trait which checks that the provided type T is one of the possible
- * alternatives for whisker::object.
+ * A type trait which checks that the provided type T can be used to construct
+ * whisker::object.
  */
 template <typename T>
-constexpr inline bool is_any_object_type = detail::is_any_of<
-    T,
-    i64,
-    f64,
-    string,
-    boolean,
-    null,
-    array,
-    map,
-    native_object::ptr,
-    native_function::ptr,
-    native_handle<>>;
+constexpr inline bool is_any_object_type =
+    detail::is_specialization_v<T, whisker::native_handle> ||
+    detail::is_any_of<
+        T,
+        i64,
+        f64,
+        string,
+        boolean,
+        null,
+        array,
+        managed_array,
+        map,
+        managed_map,
+        native_object::ptr,
+        native_function::ptr,
+        native_handle<>>;
 
 /**
  * An alternative to to_string() that allows printing a whisker::object within

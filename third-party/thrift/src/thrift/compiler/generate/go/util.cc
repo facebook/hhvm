@@ -703,7 +703,7 @@ int get_field_size(const t_field* field, bool is_inside_union) {
 }
 
 void optimize_fields_layout(std::vector<t_field*>& fields, bool is_union) {
-  std::sort(
+  std::stable_sort(
       fields.begin(),
       fields.end(),
       [is_union](const auto* lhs, const auto* rhs) {

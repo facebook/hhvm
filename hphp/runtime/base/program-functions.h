@@ -128,7 +128,7 @@ bool is_hphp_session_initialized();
 std::string get_embedded_section(const std::string& section_name);
 
 // Helper function for stats tracking with exceptions.
-void bump_counter_and_rethrow(bool isPsp);
+void bump_counter_and_rethrow(bool isPsp, ExecutionContext* context);
 
 std::vector<int> get_executable_lines(const Unit*);
 

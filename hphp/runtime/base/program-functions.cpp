@@ -474,7 +474,7 @@ static void handle_exception_append_bt(std::string& errorMsg,
   }
 }
 
-void bump_counter_and_rethrow(bool isPsp) {
+void bump_counter_and_rethrow(bool isPsp, ExecutionContext* context) {
   try {
     throw;
   } catch (const RequestTimeoutException&) {
@@ -489,6 +489,7 @@ void bump_counter_and_rethrow(bool isPsp) {
       requestTimeoutCounter->addValue(1);
       ServerStats::Log("request.timed_out.non_psp", 1);
     }
+    context->markTimedOut();
     throw;
   } catch (const RequestCPUTimeoutException&) {
     if (isPsp) {
@@ -502,6 +503,7 @@ void bump_counter_and_rethrow(bool isPsp) {
       requestCPUTimeoutCounter->addValue(1);
       ServerStats::Log("request.cpu_timed_out.non_psp", 1);
     }
+    context->markTimedOut();
     throw;
   } catch (const RequestMemoryExceededException&) {
     if (isPsp) {
@@ -533,11 +535,10 @@ void bump_counter_and_rethrow(bool isPsp) {
       StructuredLogEntry entry;
       entry.setInt("mem_used", e.m_usedBytes);
       entry.setInt("is_psp", static_cast<int>(isPsp));
-      if (g_context) {
-        entry.setStr("url", g_context->getRequestUrl());
-      }
+      entry.setStr("url", context->getRequestUrl());
       StructuredLog::log("hhvm_oom_killed", entry);
     }
+    context->markOOMKilled();
     throw;
   }
 }
@@ -557,7 +558,7 @@ static void handle_exception_helper(bool& ret,
   };
 
   try {
-    bump_counter_and_rethrow(false /* isPsp */);
+    bump_counter_and_rethrow(false /* isPsp */, context);
   } catch (const Eval::DebuggerException&) {
     throw;
   } catch (const ExitException& e) {

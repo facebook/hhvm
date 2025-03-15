@@ -349,6 +349,14 @@ public:
   // options.
   void onLoadWithOptions(const char* f, const RepoOptions& options);
 
+  // Check if request timed out (e.g., due to overload)
+  void markTimedOut();
+  bool isTimedOut() const;
+
+  // Check if request got killed by the request OOM killer.
+  void markOOMKilled();
+  bool isOOMKilled() const;
+
 private:
   struct OutputBuffer {
     explicit OutputBuffer(Variant&& h, int chunk_sz, OBFlags flgs)
@@ -561,6 +569,8 @@ private:
   req::list<OutputBuffer> m_buffers; // a stack of output buffers
   bool m_insideOBHandler{false};
   bool m_implicitFlush;
+  bool m_timedOut{false};
+  bool m_killed{false};
   int m_protectedLevel;
 
   // Debugger stdout hook is treated differently. If it is non-null,

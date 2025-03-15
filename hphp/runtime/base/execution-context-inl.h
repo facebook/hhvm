@@ -212,6 +212,22 @@ inline void ExecutionContext::setSandboxId(const String& sandboxId) {
   m_sandboxId = sandboxId;
 }
 
+inline void ExecutionContext::markTimedOut() {
+  m_timedOut = true;
+}
+
+inline bool ExecutionContext::isTimedOut() const {
+  return m_timedOut;
+}
+
+inline void ExecutionContext::markOOMKilled() {
+  m_killed = true;
+}
+
+inline bool ExecutionContext::isOOMKilled() const {
+  return m_killed;
+}
+
 inline bool ExecutionContext::hasRequestEventHandlers() const {
   return !m_requestEventHandlers.empty();
 }

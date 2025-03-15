@@ -714,7 +714,7 @@ void ExecutionContext::onShutdownPostSend() {
       executeFunctions(PostSend);
     } catch (...) {
       try {
-        bump_counter_and_rethrow(true /* isPsp */);
+        bump_counter_and_rethrow(true /* isPsp */, this);
       } catch (const ExitException&) {
         // do nothing
       } catch (const Exception& e) {
@@ -734,8 +734,8 @@ void ExecutionContext::onShutdownPostSend() {
 // error handling
 
 bool ExecutionContext::errorNeedsHandling(int errnum,
-                                              bool callUserHandler,
-                                              ErrorThrowMode mode) {
+                                          bool callUserHandler,
+                                          ErrorThrowMode mode) {
   if (UNLIKELY(m_throwAllErrors)) {
     throw Exception(folly::sformat("throwAllErrors: {}", errnum));
   }
@@ -914,7 +914,7 @@ bool ExecutionContext::callUserErrorHandler(const Exception& e, int errnum,
                                         {ServiceData::StatsType::COUNT});
       requestErrorHandlerTimeoutCounter->addValue(1);
       ServerStats::Log("request.timed_out.error_handler", 1);
-
+      markTimedOut();
       if (!swallowExceptions) throw;
     } catch (const RequestCPUTimeoutException&) {
       static auto requestErrorHandlerCPUTimeoutCounter =
@@ -922,7 +922,7 @@ bool ExecutionContext::callUserErrorHandler(const Exception& e, int errnum,
                                         {ServiceData::StatsType::COUNT});
       requestErrorHandlerCPUTimeoutCounter->addValue(1);
       ServerStats::Log("request.cpu_timed_out.error_handler", 1);
-
+      markTimedOut();
       if (!swallowExceptions) throw;
     } catch (const RequestMemoryExceededException&) {
       static auto requestErrorHandlerMemoryExceededCounter =

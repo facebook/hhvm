@@ -21,7 +21,9 @@ namespace mcrouter {
 
 class ProxyStats {
  public:
-  explicit ProxyStats(const std::vector<std::string>& statsEnabledPools);
+  explicit ProxyStats(
+      const std::vector<std::string>& statsEnabledPools,
+      StatsApi* statsApi);
 
   /**
    * Aggregate proxy stat with the given index.
@@ -107,7 +109,7 @@ class ProxyStats {
    * @param amount  Amount to increment the stat
    */
   void increment(stat_name_t stat, int64_t amount = 1) {
-    stat_incr(stats_, stat, amount);
+    stat_incr(stats_, statsApi_, stat, amount);
   }
 
   /**
@@ -127,7 +129,7 @@ class ProxyStats {
    * @param amount  Amount to increment the stat
    */
   void incrementSafe(stat_name_t stat, int64_t amount = 1) {
-    stat_fetch_add(stats_, stat, amount);
+    stat_fetch_add(stats_, statsApi_, stat, amount);
   }
 
   /**
@@ -147,7 +149,7 @@ class ProxyStats {
    * @param newValue  New value of the stat
    */
   void setValue(stat_name_t stat, uint64_t newValue) {
-    stat_set(stats_, stat, newValue);
+    stat_set(stats_, statsApi_, stat, newValue);
   }
 
   uint64_t getValue(stat_name_t stat) {
@@ -190,6 +192,7 @@ class ProxyStats {
   stat_t stats_[num_stats]{};
   // vector of the PoolStats
   std::vector<PoolStats> poolStats_;
+  StatsApi* statsApi_{nullptr};
 
   ExponentialSmoothData<64> durationUs_;
   // Duration microseconds, broken down by get-like request type

@@ -11,7 +11,10 @@ namespace facebook {
 namespace memcache {
 namespace mcrouter {
 
-ProxyStats::ProxyStats(const std::vector<std::string>& statsEnabledPools) {
+ProxyStats::ProxyStats(
+    const std::vector<std::string>& statsEnabledPools,
+    StatsApi* statsApi)
+    : statsApi_(statsApi) {
   init_stats(stats_);
   poolStats_.reserve(statsEnabledPools.size());
   for (const auto& curPoolName : statsEnabledPools) {

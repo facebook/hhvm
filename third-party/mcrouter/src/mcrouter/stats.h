@@ -138,11 +138,6 @@ class StatsApi {
   virtual ~StatsApi() = default;
 
   /**
-   * Called once on startup with the router instance
-   */
-  virtual void init(const CarbonRouterInstanceBase&) = 0;
-
-  /**
    * Called on every increment or decrement for the stat.
    *
    * MT-safety: must be able to be called concurrently from multiple
@@ -161,35 +156,48 @@ class StatsApi {
 
 void init_stats(stat_t* stats);
 
-FOLLY_ALWAYS_INLINE uint64_t
-stat_fetch_add(stat_t* stats, stat_name_t stat_num, int64_t amount) {
-  if (gStatsApiHook) {
-    gStatsApiHook().addSample(stat_num, amount);
+FOLLY_ALWAYS_INLINE uint64_t stat_fetch_add(
+    stat_t* stats,
+    StatsApi* statsApi,
+    stat_name_t stat_num,
+    int64_t amount) {
+  if (statsApi) {
+    statsApi->addSample(stat_num, amount);
   }
   auto ref = folly::make_atomic_ref(stats[stat_num].data.uint64);
   return ref.fetch_add(amount, std::memory_order_relaxed);
 }
 
-FOLLY_ALWAYS_INLINE void
-stat_incr(stat_t* stats, stat_name_t stat_num, int64_t amount) {
-  if (gStatsApiHook) {
-    gStatsApiHook().addSample(stat_num, amount);
+FOLLY_ALWAYS_INLINE void stat_incr(
+    stat_t* stats,
+    StatsApi* statsApi,
+    stat_name_t stat_num,
+    int64_t amount) {
+  if (statsApi) {
+    statsApi->addSample(stat_num, amount);
   }
   detail::stat_incr_internal(stats, stat_num, amount);
 }
 
-FOLLY_ALWAYS_INLINE void
-stat_incr(stat_t* stats, stat_name_t stat_num, double amount) {
-  if (gStatsApiHook) {
-    gStatsApiHook().addSample(stat_num, amount);
+FOLLY_ALWAYS_INLINE void stat_incr(
+    stat_t* stats,
+    StatsApi* statsApi,
+    stat_name_t stat_num,
+    double amount) {
+  if (statsApi) {
+    statsApi->addSample(stat_num, amount);
   }
   detail::stat_incr_internal(stats, stat_num, amount);
 }
 
 FOLLY_ALWAYS_INLINE
-void stat_set(stat_t* stats, stat_name_t stat_num, uint64_t value) {
-  if (gStatsApiHook) {
-    gStatsApiHook().setValue(stat_num, value);
+void stat_set(
+    stat_t* stats,
+    StatsApi* statsApi,
+    stat_name_t stat_num,
+    uint64_t value) {
+  if (statsApi) {
+    statsApi->setValue(stat_num, value);
   }
   stat_t* stat = &stats[stat_num];
   assert(stat->type == stat_uint64);
@@ -198,9 +206,13 @@ void stat_set(stat_t* stats, stat_name_t stat_num, uint64_t value) {
 }
 
 FOLLY_ALWAYS_INLINE
-void stat_set(stat_t* stats, stat_name_t stat_num, double value) {
-  if (gStatsApiHook) {
-    gStatsApiHook().setValue(stat_num, value);
+void stat_set(
+    stat_t* stats,
+    StatsApi* statsApi,
+    stat_name_t stat_num,
+    double value) {
+  if (statsApi) {
+    statsApi->setValue(stat_num, value);
   }
   stat_t* stat = &stats[stat_num];
   assert(stat->type == stat_double);

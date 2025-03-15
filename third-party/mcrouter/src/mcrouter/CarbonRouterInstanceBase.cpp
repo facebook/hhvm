@@ -76,11 +76,8 @@ CarbonRouterInstanceBase::CarbonRouterInstanceBase(McrouterOptions inputOptions)
       configApi_(createConfigApi(opts_)),
       rtVarsData_(std::make_shared<ObservableRuntimeVars>()),
       leaseTokenMap_(globalFunctionScheduler.try_get()),
-      statsUpdateFunctionHandle_(statsUpdateFunctionName(opts_.router_name)) {
-  if (gStatsApiInitHook) {
-    gStatsApiInitHook(*this);
-  }
-
+      statsUpdateFunctionHandle_(statsUpdateFunctionName(opts_.router_name)),
+      statsApi_(gMakeStatsApiHook ? gMakeStatsApiHook(*this) : nullptr) {
   if (auto statsLogger = statsLogWriter()) {
     if (opts_.stats_async_queue_length) {
       statsLogger->increaseMaxQueueSize(opts_.stats_async_queue_length);

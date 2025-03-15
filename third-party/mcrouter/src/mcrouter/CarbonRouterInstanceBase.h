@@ -254,6 +254,10 @@ class CarbonRouterInstanceBase {
     axonProxyClientFactory_ = std::move(clientFactory);
   }
 
+  StatsApi* statsApi() {
+    return statsApi_.get();
+  }
+
   /**
    * Runtime features that can be enabled from runtime_features block
    * in routing config
@@ -352,6 +356,8 @@ class CarbonRouterInstanceBase {
   std::shared_ptr<void> metadata_;
 
   std::shared_ptr<void> axonProxyClientFactory_;
+
+  std::unique_ptr<StatsApi> statsApi_;
 };
 
 } // namespace mcrouter

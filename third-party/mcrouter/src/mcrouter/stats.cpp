@@ -433,6 +433,7 @@ void prepare_stats(CarbonRouterInstanceBase& router, stat_t* stats) {
 
   stat_set(
       stats,
+      router.statsApi(),
       num_suspect_servers_stat,
       router.tkoTrackerMap().getSuspectServersCount());
 
@@ -440,13 +441,14 @@ void prepare_stats(CarbonRouterInstanceBase& router, stat_t* stats) {
   if (destinationBatchesSum != 0) {
     avgBatchSize = destinationRequestsSum / (double)destinationBatchesSum;
   }
-  stat_set(stats, destination_batch_size_stat, avgBatchSize);
+  stat_set(stats, router.statsApi(), destination_batch_size_stat, avgBatchSize);
 
   double avgRetransPerKByte = 0.0;
   if (retransNumTotal != 0) {
     avgRetransPerKByte = retransPerKByteSum / (double)retransNumTotal;
   }
-  stat_set(stats, retrans_per_kbyte_avg_stat, avgRetransPerKByte);
+  stat_set(
+      stats, router.statsApi(), retrans_per_kbyte_avg_stat, avgRetransPerKByte);
 
   double reqsDirtyBufferRatio = 0.0;
   if (destinationRequestsTotalSum != 0) {
@@ -455,30 +457,50 @@ void prepare_stats(CarbonRouterInstanceBase& router, stat_t* stats) {
   }
 
   stat_set(
-      stats, destination_reqs_dirty_buffer_ratio_stat, reqsDirtyBufferRatio);
-  stat_set(stats, outstanding_route_get_avg_queue_size_stat, 0.0);
-  stat_set(stats, outstanding_route_get_avg_wait_time_sec_stat, 0.0);
+      stats,
+      router.statsApi(),
+      destination_reqs_dirty_buffer_ratio_stat,
+      reqsDirtyBufferRatio);
+  stat_set(
+      stats, router.statsApi(), outstanding_route_get_avg_queue_size_stat, 0.0);
+  stat_set(
+      stats,
+      router.statsApi(),
+      outstanding_route_get_avg_wait_time_sec_stat,
+      0.0);
 
   if (outstandingGetReqsTotal > 0) {
     stat_set(
         stats,
+        router.statsApi(),
         outstanding_route_get_avg_queue_size_stat,
         outstandingGetReqsHelper / (double)outstandingGetReqsTotal);
     stat_set(
         stats,
+        router.statsApi(),
         outstanding_route_get_avg_wait_time_sec_stat,
         outstandingGetWaitTimeSumUs / (1000000.0 * outstandingGetReqsTotal));
   }
 
-  stat_set(stats, outstanding_route_update_avg_queue_size_stat, 0.0);
-  stat_set(stats, outstanding_route_update_avg_wait_time_sec_stat, 0.0);
+  stat_set(
+      stats,
+      router.statsApi(),
+      outstanding_route_update_avg_queue_size_stat,
+      0.0);
+  stat_set(
+      stats,
+      router.statsApi(),
+      outstanding_route_update_avg_wait_time_sec_stat,
+      0.0);
   if (outstandingUpdateReqsTotal > 0) {
     stat_set(
         stats,
+        router.statsApi(),
         outstanding_route_update_avg_queue_size_stat,
         outstandingUpdateReqsHelper / (double)outstandingUpdateReqsTotal);
     stat_set(
         stats,
+        router.statsApi(),
         outstanding_route_update_avg_wait_time_sec_stat,
         outstandingUpdateWaitTimeSumUs /
             (1000000.0 * outstandingUpdateReqsTotal));
@@ -488,28 +510,47 @@ void prepare_stats(CarbonRouterInstanceBase& router, stat_t* stats) {
       .store(gStandaloneArgs, std::memory_order_relaxed);
 
   uint64_t now = time(nullptr);
-  stat_set(stats, time_stat, now);
-  stat_set(stats, uptime_stat, now - router.startTime());
-  stat_set(stats, config_age_stat, now - config_last_success);
-  stat_set(stats, config_age_sr_stat, now - config_last_sr_update);
-  stat_set(stats, config_last_sr_update_stat, config_last_sr_update);
-  stat_set(stats, config_last_success_stat, config_last_success);
+  stat_set(stats, router.statsApi(), time_stat, now);
+  stat_set(stats, router.statsApi(), uptime_stat, now - router.startTime());
+  stat_set(
+      stats, router.statsApi(), config_age_stat, now - config_last_success);
   stat_set(
       stats,
+      router.statsApi(),
+      config_age_sr_stat,
+      now - config_last_sr_update);
+  stat_set(
+      stats,
+      router.statsApi(),
+      config_last_sr_update_stat,
+      config_last_sr_update);
+  stat_set(
+      stats, router.statsApi(), config_last_success_stat, config_last_success);
+  stat_set(
+      stats,
+      router.statsApi(),
       config_last_attempt_stat,
       static_cast<uint64_t>(router.lastConfigAttempt()));
-  stat_set(stats, config_failures_stat, router.configFailures());
-  stat_set(stats, config_full_attempt_stat, router.configFullAttempt());
+  stat_set(
+      stats, router.statsApi(), config_failures_stat, router.configFailures());
   stat_set(
       stats,
+      router.statsApi(),
+      config_full_attempt_stat,
+      router.configFullAttempt());
+  stat_set(
+      stats,
+      router.statsApi(),
       configs_from_disk_stat,
       static_cast<uint64_t>(router.configuredFromDisk()));
   stat_set(
       stats,
+      router.statsApi(),
       config_partial_reconfig_attempt_stat,
       router.partialReconfigAttempt());
   stat_set(
       stats,
+      router.statsApi(),
       config_partial_reconfig_success_stat,
       router.partialReconfigSuccess());
 
@@ -523,86 +564,127 @@ void prepare_stats(CarbonRouterInstanceBase& router, stat_t* stats) {
 
   stat_set(
       stats,
+      router.statsApi(),
       rusage_user_stat,
       ru.ru_utime.tv_sec + ru.ru_utime.tv_usec / 1000000.0);
   stat_set(
       stats,
+      router.statsApi(),
       rusage_system_stat,
       ru.ru_stime.tv_sec + ru.ru_stime.tv_usec / 1000000.0);
 
   proc_stat_data_t ps_data;
   get_proc_stat(getpid(), &ps_data);
-  stat_set(stats, ps_num_minor_faults_stat, ps_data.num_minor_faults);
-  stat_set(stats, ps_num_major_faults_stat, ps_data.num_major_faults);
-  stat_set(stats, ps_user_time_sec_stat, ps_data.user_time_sec);
-  stat_set(stats, ps_system_time_sec_stat, ps_data.system_time_sec);
-  stat_set(stats, ps_rss_stat, ps_data.rss);
-  stat_set(stats, ps_vsize_stat, ps_data.vsize);
+  stat_set(
+      stats,
+      router.statsApi(),
+      ps_num_minor_faults_stat,
+      ps_data.num_minor_faults);
+  stat_set(
+      stats,
+      router.statsApi(),
+      ps_num_major_faults_stat,
+      ps_data.num_major_faults);
+  stat_set(
+      stats, router.statsApi(), ps_user_time_sec_stat, ps_data.user_time_sec);
+  stat_set(
+      stats,
+      router.statsApi(),
+      ps_system_time_sec_stat,
+      ps_data.system_time_sec);
+  stat_set(stats, router.statsApi(), ps_rss_stat, ps_data.rss);
+  stat_set(stats, router.statsApi(), ps_vsize_stat, ps_data.vsize);
 
-  stat_set(stats, fibers_allocated_stat, UINT64_C(0));
-  stat_set(stats, fibers_pool_size_stat, UINT64_C(0));
-  stat_set(stats, fibers_stack_high_watermark_stat, UINT64_C(0));
+  stat_set(stats, router.statsApi(), fibers_allocated_stat, UINT64_C(0));
+  stat_set(stats, router.statsApi(), fibers_pool_size_stat, UINT64_C(0));
+  stat_set(
+      stats, router.statsApi(), fibers_stack_high_watermark_stat, UINT64_C(0));
   for (size_t i = 0; i < router.opts().num_proxies; ++i) {
     auto pr = router.getProxyBase(i);
     stat_incr(
         stats,
+        router.statsApi(),
         fibers_allocated_stat,
         static_cast<int64_t>(pr->fiberManager().fibersAllocated()));
     stat_incr(
         stats,
+        router.statsApi(),
         fibers_pool_size_stat,
         static_cast<int64_t>(pr->fiberManager().fibersPoolSize()));
     stat_set(
         stats,
+        router.statsApi(),
         fibers_stack_high_watermark_stat,
         std::max(
             stat_get_uint64(stats, fibers_stack_high_watermark_stat),
             pr->fiberManager().stackHighWatermark()));
-    stat_incr(stats, duration_us_stat, pr->stats().durationUs().value());
-    stat_incr(stats, duration_get_us_stat, pr->stats().durationGetUs().value());
-    stat_incr(
-        stats, duration_update_us_stat, pr->stats().durationUpdateUs().value());
     stat_incr(
         stats,
+        router.statsApi(),
+        duration_us_stat,
+        pr->stats().durationUs().value());
+    stat_incr(
+        stats,
+        router.statsApi(),
+        duration_get_us_stat,
+        pr->stats().durationGetUs().value());
+    stat_incr(
+        stats,
+        router.statsApi(),
+        duration_update_us_stat,
+        pr->stats().durationUpdateUs().value());
+    stat_incr(
+        stats,
+        router.statsApi(),
         inactive_connection_closed_interval_sec_stat,
         pr->stats().inactiveConnectionClosedIntervalSec().value());
     stat_incr(
         stats,
+        router.statsApi(),
         client_queue_notify_period_stat,
         static_cast<int64_t>(pr->queueNotifyPeriod()));
     stat_incr(
         stats,
+        router.statsApi(),
         asynclog_duration_us_stat,
         pr->stats().asyncLogDurationUs().value());
     stat_incr(
         stats,
+        router.statsApi(),
         axon_proxy_duration_us_stat,
         pr->stats().axonProxyDurationUs().value());
     stat_set(
         stats,
+        router.statsApi(),
         proxy_queue_full_stat,
         std::max(
             stat_get_uint64(stats, proxy_queue_full_stat),
             static_cast<uint64_t>(pr->messageQueueFull() ? 1 : 0)));
     stat_set(
         stats,
+        router.statsApi(),
         proxy_queues_all_full_stat,
         std::min(
             i ? stat_get_uint64(stats, proxy_queue_full_stat) : 0,
             static_cast<uint64_t>(pr->messageQueueFull() ? 1 : 0)));
     stat_incr(
-        stats, processing_time_us_stat, pr->stats().processingTimeUs().value());
+        stats,
+        router.statsApi(),
+        processing_time_us_stat,
+        pr->stats().processingTimeUs().value());
   }
 
   if (router.opts().num_proxies > 0) {
     // Set the number of proxy threads
-    stat_set(stats, num_proxies_stat, router.opts().num_proxies);
+    stat_set(
+        stats, router.statsApi(), num_proxies_stat, router.opts().num_proxies);
     // Set avg proxy cpu
     if (router.opts().proxy_cpu_interval_s > 0) {
-      stat_set(stats, proxy_cpu_stat, router.getProxyCpu());
+      stat_set(stats, router.statsApi(), proxy_cpu_stat, router.getProxyCpu());
     }
     stat_set(
         stats,
+        router.statsApi(),
         proxy_cpu_enabled_stat,
         static_cast<uint64_t>(router.proxyCpuEnabled() ? 1 : 0));
     stat_div_internal(stats, duration_us_stat, router.opts().num_proxies);

@@ -143,6 +143,11 @@ class source_manager {
   // Adds a virtual file with the specified name and content.
   source add_virtual_file(std::string_view file_name, std::string_view src);
 
+  // Returns whether a given virtual file was added.
+  bool has_virtual_file(std::string_view file_name) const {
+    return file_source_map_.count(file_name);
+  }
+
   // Returns the start location of a source containing the specified location.
   // It is a member function in case we add clang-like compression of locations.
   source_location get_source_start(source_location loc) const {

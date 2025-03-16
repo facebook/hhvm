@@ -61,7 +61,7 @@ class mstch_array_proxy final
 
   std::size_t size() const override { return proxied_.size(); }
 
-  object::ptr at(std::size_t index) const override {
+  object at(std::size_t index) const override {
     assert(index < proxied_.size());
     // Only allocate the converted vector when the array is used
     if (converted_.size() == 0) {
@@ -70,7 +70,7 @@ class mstch_array_proxy final
         converted_.emplace_back(from_mstch(std::move(node)));
       }
     }
-    return manage_derived_ref(shared_from_this(), converted_[index]);
+    return converted_[index];
   }
 
   void print_to(tree_printer::scope scope, const object_print_options& options)
@@ -99,17 +99,17 @@ class mstch_map_proxy final
     return shared_from_this();
   }
 
-  object::ptr lookup_property(std::string_view id) const override {
+  std::optional<object> lookup_property(std::string_view id) const override {
     if (auto cached = converted_.find(id); cached != converted_.end()) {
-      return manage_derived_ref(shared_from_this(), cached->second);
+      return cached->second;
     }
     if (auto property = proxied_.find(id); property != proxied_.end()) {
       auto [result, inserted] = converted_.insert(
           {std::string(id), from_mstch(std::move(property->second))});
       assert(inserted);
-      return manage_derived_ref(shared_from_this(), result->second);
+      return result->second;
     }
-    return nullptr;
+    return std::nullopt;
   }
 
   std::optional<std::set<std::string>> keys() const override {
@@ -147,18 +147,18 @@ class mstch_object_proxy
     return shared_from_this();
   }
 
-  object::ptr lookup_property(std::string_view id) const override {
+  std::optional<object> lookup_property(std::string_view id) const override {
     if (!proxied_->has(id)) {
-      return nullptr;
+      return std::nullopt;
     }
 
     return detail::variant_match(
         proxied_->at(id),
-        [&](const mstch_node& node) -> object::ptr {
+        [&](const mstch_node& node) -> object {
           object::ptr converted = manage_owned<object>(from_mstch(node));
           return manage_derived(shared_from_this(), std::move(converted));
         },
-        [](object::ptr o) -> object::ptr { return o; });
+        [](const object& o) -> object { return o; });
   }
 
   std::optional<std::set<std::string>> keys() const override {

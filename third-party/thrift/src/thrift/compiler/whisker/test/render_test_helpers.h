@@ -58,9 +58,7 @@ class RenderTest : public testing::Test {
       return shared_from_this();
     }
     std::size_t size() const override { return values_.size(); }
-    object::ptr at(std::size_t index) const override {
-      return manage_as_static(values_.at(index));
-    }
+    object at(std::size_t index) const override { return values_.at(index); }
 
    private:
     array values_;
@@ -77,11 +75,11 @@ class RenderTest : public testing::Test {
       return shared_from_this();
     }
 
-    object::ptr lookup_property(std::string_view id) const override {
+    std::optional<object> lookup_property(std::string_view id) const override {
       if (auto value = values_.find(id); value != values_.end()) {
-        return manage_as_static(value->second);
+        return value->second;
       }
-      return nullptr;
+      return std::nullopt;
     }
 
     std::optional<std::set<std::string>> keys() const override {

@@ -42,17 +42,9 @@ class double_property_name
     return shared_from_this();
   }
 
-  object::ptr lookup_property(std::string_view id) const override {
-    if (auto cached = cached_.find(id); cached != cached_.end()) {
-      return manage_as_static(cached->second);
-    }
-    auto [result, inserted] =
-        cached_.insert({std::string(id), w::string(fmt::format("{0}{0}", id))});
-    assert(inserted);
-    return manage_as_static(result->second);
+  std::optional<object> lookup_property(std::string_view id) const override {
+    return w::string(fmt::format("{0}{0}", id));
   }
-
-  mutable std::map<std::string, object, std::less<>> cached_;
 };
 
 class throws_on_lookup : public native_object,
@@ -63,7 +55,8 @@ class throws_on_lookup : public native_object,
     return shared_from_this();
   }
 
-  object::ptr lookup_property(std::string_view) const override {
+  [[noreturn]] std::optional<object> lookup_property(
+      std::string_view) const override {
     throw fatal_error{"I always throw!"};
   }
 };
@@ -712,7 +705,7 @@ namespace functions {
  * negated.
  */
 class add : public dsl::function {
-  object::ptr invoke(context ctx) override {
+  object invoke(context ctx) override {
     ctx.declare_named_arguments({"negate"});
     const bool negate = [&] {
       auto arg = ctx.named_argument<boolean>("negate", context::optional);
@@ -722,7 +715,7 @@ class add : public dsl::function {
     for (std::size_t i = 0; i < ctx.arity(); ++i) {
       result += ctx.argument<i64>(i);
     }
-    return manage_owned<object>(w::i64(negate ? -result : result));
+    return w::i64(negate ? -result : result);
   }
 };
 
@@ -730,12 +723,12 @@ class add : public dsl::function {
  * Returns a boolean indicating if two i64 are equal or not.
  */
 class i64_eq : public dsl::function {
-  object::ptr invoke(context ctx) override {
+  object invoke(context ctx) override {
     ctx.declare_arity(2);
     ctx.declare_named_arguments({});
     i64 a = ctx.argument<i64>(0);
     i64 b = ctx.argument<i64>(1);
-    return manage_owned<object>(w::boolean(a == b));
+    return w::boolean(a == b);
   }
 };
 
@@ -744,20 +737,20 @@ class i64_eq : public dsl::function {
  * provided, then it is used as the delimiter between elements.
  */
 class str_concat : public dsl::function {
-  object::ptr invoke(context ctx) override {
+  object invoke(context ctx) override {
     ctx.declare_named_arguments({"sep"});
     const std::string sep = [&] {
       auto arg = ctx.named_argument<string>("sep", context::optional);
-      return arg == nullptr ? "" : *arg;
+      return arg.has_value() ? std::string{*arg} : "";
     }();
     string result;
     for (std::size_t i = 0; i < ctx.arity(); ++i) {
       if (i != 0) {
         result += sep;
       }
-      result += *ctx.argument<string>(i);
+      result += ctx.argument<string>(i);
     }
-    return manage_owned<object>(w::string(std::move(result)));
+    return w::string(std::move(result));
   }
 };
 
@@ -765,11 +758,11 @@ class str_concat : public dsl::function {
  * Returns the length of an array.
  */
 class array_len : public dsl::function {
-  object::ptr invoke(context ctx) override {
+  object invoke(context ctx) override {
     ctx.declare_arity(1);
     ctx.declare_named_arguments({});
     auto len = i64(ctx.argument<array>(0).size());
-    return manage_owned<object>(w::i64(len));
+    return w::i64(len);
   }
 };
 
@@ -778,14 +771,14 @@ class array_len : public dsl::function {
  * present.
  */
 class map_get : public dsl::function {
-  object::ptr invoke(context ctx) override {
+  object invoke(context ctx) override {
     ctx.declare_arity(1);
     ctx.declare_named_arguments({"key"});
     auto m = ctx.argument<map>(0);
     auto key = ctx.named_argument<string>("key", context::required);
 
-    if (object::ptr result = m.lookup_property(*key)) {
-      return result;
+    if (std::optional<object> result = m.lookup_property(*key)) {
+      return std::move(*result);
     }
     throw ctx.make_error("Key '{}' not found.", *key);
   }
@@ -965,11 +958,11 @@ TEST_F(RenderTest, user_defined_function_array_like_argument) {
 
 TEST_F(RenderTest, user_defined_function_array_like_named_argument) {
   class describe_array_len : public dsl::function {
-    object::ptr invoke(context ctx) override {
+    object invoke(context ctx) override {
       ctx.declare_arity(0);
       ctx.declare_named_arguments({"input"});
       auto len = i64(ctx.named_argument<array>("input")->size());
-      return manage_owned<object>(w::string(fmt::format("length is {}", len)));
+      return w::string(fmt::format("length is {}", len));
     }
   };
 
@@ -1043,16 +1036,15 @@ TEST_F(RenderTest, user_defined_function_map_like_argument) {
 
 TEST_F(RenderTest, user_defined_function_map_like_named_argument) {
   class describe_map_get : public dsl::function {
-    object::ptr invoke(context ctx) override {
+    object invoke(context ctx) override {
       ctx.declare_arity(0);
       ctx.declare_named_arguments({"input", "key"});
       auto m = ctx.named_argument<map>("input", context::required);
       auto key = ctx.named_argument<string>("key", context::required);
 
       std::string_view result =
-          m->lookup_property(*key) == nullptr ? "missing" : "present";
-      return manage_owned<object>(
-          w::string(fmt::format("map element is {}", result)));
+          m->lookup_property(*key).has_value() ? "present" : "missing";
+      return w::string(fmt::format("map element is {}", result));
     }
   };
 
@@ -1117,13 +1109,11 @@ TEST_F(RenderTest, user_defined_function_native_ref_argument) {
   const RenderTestMyCppType native_instance{"Hello from C++!"};
 
   class describe : public dsl::function {
-    object::ptr invoke(context ctx) override {
+    object invoke(context ctx) override {
       ctx.declare_arity(1);
       ctx.declare_named_arguments({});
       auto cpp_type = ctx.argument<native_handle<RenderTestMyCppType>>(0);
-      return manage_derived(
-          cpp_type.ptr(),
-          manage_owned<object>(w::string(cpp_type->description)));
+      return w::string(cpp_type->description);
     }
   };
 
@@ -1245,7 +1235,7 @@ TEST_F(RenderTest, user_defined_function_self_argument) {
   use_library(load_standard_library);
 
   const auto return_self =
-      dsl::make_function([](dsl::function::context ctx) -> object::ptr {
+      dsl::make_function([](dsl::function::context ctx) -> object {
         ctx.declare_arity(0);
         ctx.declare_named_arguments({});
         return ctx.raw().self();

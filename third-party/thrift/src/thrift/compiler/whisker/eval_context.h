@@ -46,7 +46,7 @@ class eval_scope_lookup_error {
  public:
   explicit eval_scope_lookup_error(
       std::string property_name,
-      std::vector<object::ptr> searched_scopes,
+      std::vector<object> searched_scopes,
       std::string cause = {})
       : property_name_(std::move(property_name)),
         searched_scopes_(std::move(searched_scopes)),
@@ -63,7 +63,7 @@ class eval_scope_lookup_error {
    * The order of objects on the stack is the order of search (most to least
    * local).
    */
-  const std::vector<object::ptr>& searched_scopes() const {
+  const std::vector<object>& searched_scopes() const {
     return searched_scopes_;
   }
   /**
@@ -74,7 +74,7 @@ class eval_scope_lookup_error {
 
  private:
   std::string property_name_;
-  std::vector<object::ptr> searched_scopes_;
+  std::vector<object> searched_scopes_;
   std::string cause_;
 };
 
@@ -89,7 +89,7 @@ class eval_scope_lookup_error {
 class eval_property_lookup_error {
  public:
   explicit eval_property_lookup_error(
-      object::ptr missing_from,
+      object missing_from,
       std::vector<std::string> success_path,
       std::string property_name,
       std::string cause = std::string())
@@ -101,7 +101,7 @@ class eval_property_lookup_error {
   /**
    * The object on which the property named by property_name() was missing.
    */
-  const object::ptr& missing_from() const { return missing_from_; }
+  const object& missing_from() const { return missing_from_; }
   /**
    * The path of property lookups that succeeded before the failure.
    */
@@ -117,7 +117,7 @@ class eval_property_lookup_error {
   const std::string& cause() const { return cause_; }
 
  private:
-  object::ptr missing_from_;
+  object missing_from_;
   std::vector<std::string> success_path_;
   std::string property_name_;
   std::string cause_;
@@ -174,12 +174,7 @@ class eval_context {
    *   - stack_depth() == 1
    */
   static eval_context with_root_scope(
-      diagnostics_engine&, object::ptr root_scope, map globals = {});
-  static eval_context with_root_scope(
-      diagnostics_engine& diags, object root_scope, map globals = {}) {
-    return with_root_scope(
-        diags, manage_owned<object>(std::move(root_scope)), std::move(globals));
-  }
+      diagnostics_engine&, object root_scope, map globals = {});
 
   ~eval_context() noexcept;
 
@@ -196,7 +191,7 @@ class eval_context {
    *
    * Calling push_scope() increases the stack depth by 1.
    */
-  void push_scope(object::ptr object);
+  void push_scope(object);
 
   /**
    * Pops the top-most lexical scope from the stack. The previous scope becomes
@@ -216,7 +211,7 @@ class eval_context {
    *
    * The global scope cannot be popped off the stack.
    */
-  const object::ptr& global_scope() const;
+  const object& global_scope() const;
 
   /**
    * Binds a name to an object. This binding is local to the current scope,
@@ -228,16 +223,16 @@ class eval_context {
    *     the current scope.
    */
   [[nodiscard]] expected<std::monostate, eval_name_already_bound_error>
-  bind_local(std::string name, object::ptr value);
+  bind_local(std::string name, object value);
 
   struct lookup_result {
     /**
      * The found object at the end of a lookup path. That is, for the lookup
      * `a.b.c`, the result is `c`.
      */
-    object::ptr found;
-    const object* operator->() const noexcept { return found.get(); }
-    const object& operator*() const noexcept { return *found; }
+    object found;
+    const object* operator->() const noexcept { return &found; }
+    const object& operator*() const noexcept { return found; }
 
     /**
      * The found object's predecessor. That is, for the lookup `a.b.c`, the
@@ -246,10 +241,9 @@ class eval_context {
      * When the path only has one component, this points to a null whisker
      * object (see whisker::make::null).
      */
-    object::ptr parent;
-    static lookup_result without_parent(object::ptr found) {
-      assert(found != nullptr);
-      return lookup_result{found, manage_as_static(whisker::make::null)};
+    object parent;
+    static lookup_result without_parent(object found) {
+      return lookup_result{found, whisker::make::null};
     }
   };
   using lookup_error =
@@ -287,7 +281,7 @@ class eval_context {
   }
 
  private:
-  explicit eval_context(diagnostics_engine&, object::ptr globals);
+  explicit eval_context(diagnostics_engine&, object globals);
 
   /**
    * A lexical scope which determines how name lookups are performed within the
@@ -314,12 +308,11 @@ class eval_context {
    */
   class lexical_scope {
    public:
-    explicit lexical_scope(object::ptr this_ref)
-        : this_ref_(std::move(this_ref)) {}
+    explicit lexical_scope(object this_ref) : this_ref_(std::move(this_ref)) {}
 
     // The {{.}} object is always available in the current scope (or else the
     // scope couldn't exist).
-    const object::ptr& this_ref() const { return this_ref_; }
+    const object& this_ref() const { return this_ref_; }
 
     /**
      * Looks up a properties in the following order:
@@ -330,22 +323,22 @@ class eval_context {
      *   - `native_object::fatal_error` if the lookup into the backing object
      *     throws
      */
-    object::ptr lookup_property(
+    std::optional<object> lookup_property(
         diagnostics_engine& diags, const ast::identifier& identifier);
 
     // Before C++20, std::unordered_map does not support heterogenous lookups
-    using locals_map = std::map<std::string, object::ptr, std::less<>>;
+    using locals_map = std::map<std::string, object, std::less<>>;
     locals_map& locals() noexcept { return locals_; }
     const locals_map& locals() const noexcept { return locals_; }
 
    private:
-    object::ptr this_ref_;
+    object this_ref_;
     locals_map locals_;
   };
 
   std::reference_wrapper<diagnostics_engine> diags_;
   // The bottom of the stack that holds all global bindings.
-  object::ptr global_scope_;
+  object global_scope_;
   // We're using a deque because we want to maintain reference stability when
   // push_scope() / pop_scope() are called. This is because there may be
   // references passed around to those scope objects.

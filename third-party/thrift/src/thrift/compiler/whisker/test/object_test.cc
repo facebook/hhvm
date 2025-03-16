@@ -155,8 +155,8 @@ TEST(ObjectTest, native_object_equality) {
       return shared_from_this();
     }
 
-    object::ptr lookup_property(std::string_view) const override {
-      return manage_owned<object>(w::i64(0));
+    std::optional<object> lookup_property(std::string_view) const override {
+      return w::i64(0);
     }
 
     std::optional<std::set<std::string>> keys() const override { return keys_; }
@@ -182,9 +182,7 @@ TEST(ObjectTest, native_object_equality) {
 
     std::size_t size() const override { return size_; }
 
-    object::ptr at(std::size_t) const override {
-      return manage_owned<object>(w::i64(0));
-    }
+    object at(std::size_t) const override { return w::i64(0); }
 
     void print_to(
         tree_printer::scope scope,
@@ -416,6 +414,7 @@ TEST(ObjectTest, to_string) {
     return dsl::make_function([x](auto&&) { return x; });
   };
   ObjectTestSomeNativeType cpp_object;
+
   object o = w::map({
       {"foo", w::i64(1)},
       {"baz",

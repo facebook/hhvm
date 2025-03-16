@@ -48,8 +48,8 @@ map::value_type create_array_functions() {
         ctx.declare_named_arguments({});
         array result;
         result.reserve(ctx.arity());
-        for (const object::ptr& arg : ctx.raw().positional_arguments()) {
-          result.emplace_back(object(*arg));
+        for (const object& arg : ctx.raw().positional_arguments()) {
+          result.emplace_back(arg);
         }
         return result;
       });
@@ -103,8 +103,8 @@ map::value_type create_array_functions() {
    * Returns:
    *   [object] the item at the given index.
    */
-  array_functions["at"] = dsl::make_function(
-      "array.at", [](dsl::function::context ctx) -> object::ptr {
+  array_functions["at"] =
+      dsl::make_function("array.at", [](dsl::function::context ctx) -> object {
         ctx.declare_named_arguments({});
         ctx.declare_arity(2);
 
@@ -143,8 +143,8 @@ map::value_type create_map_functions() {
    * Returns:
    *   [array] items (key-value pairs) of the provided map.
    */
-  map_functions["items"] = dsl::make_function(
-      "map.items", [](dsl::function::context ctx) -> object::ptr {
+  map_functions["items"] =
+      dsl::make_function("map.items", [](dsl::function::context ctx) -> object {
         ctx.declare_named_arguments({});
         ctx.declare_arity(1);
 
@@ -164,15 +164,15 @@ map::value_type create_map_functions() {
           }
 
           std::size_t size() const final { return keys_.size(); }
-          object::ptr at(std::size_t index) const final {
+          object at(std::size_t index) const final {
             const std::string& property_name = keys_.at(index);
             auto value = map_like_.lookup_property(property_name);
             // The name is guaranteed to exist because it was enumerated
-            assert(value != nullptr);
-            return manage_owned<object>(w::map({
+            assert(value.has_value());
+            return w::map({
                 {"key", w::string(property_name)},
-                {"value", std::move(value)},
-            }));
+                {"value", std::move(*value)},
+            });
           }
 
           void print_to(
@@ -191,12 +191,11 @@ map::value_type create_map_functions() {
           throw ctx.make_error(
               "map-like object does not have enumerable properties.");
         }
-        auto view = w::make_native_object<items_view>(
+        return w::make_native_object<items_view>(
             std::move(m),
             std::vector<std::string>(
                 std::make_move_iterator(keys->begin()),
                 std::make_move_iterator(keys->end())));
-        return manage_owned<object>(std::move(view));
       });
 
   /**
@@ -217,8 +216,8 @@ map::value_type create_map_functions() {
         ctx.declare_arity(2);
 
         dsl::map_like m = ctx.argument<map>(0);
-        managed_ptr<std::string> key = ctx.argument<string>(1);
-        return m.lookup_property(*key) != nullptr;
+        std::string key = ctx.argument<string>(1);
+        return m.lookup_property(key).has_value();
       });
 
   return map::value_type{"map", std::move(map_functions)};
@@ -242,7 +241,7 @@ map::value_type create_string_functions() {
       dsl::make_function("string.len", [](dsl::function::context ctx) -> i64 {
         ctx.declare_named_arguments({});
         ctx.declare_arity(1);
-        return i64(ctx.argument<string>(0)->length());
+        return i64(ctx.argument<string>(0).length());
       });
 
   /**
@@ -260,7 +259,7 @@ map::value_type create_string_functions() {
       "string.empty?", [](dsl::function::context ctx) -> boolean {
         ctx.declare_named_arguments({});
         ctx.declare_arity(1);
-        return ctx.argument<string>(0)->empty();
+        return ctx.argument<string>(0).empty();
       });
 
   /**
@@ -279,7 +278,7 @@ map::value_type create_string_functions() {
         ctx.declare_named_arguments({});
         std::string result;
         for (std::size_t i = 0; i < ctx.arity(); ++i) {
-          result += *ctx.argument<string>(i);
+          result += ctx.argument<string>(i);
         }
         return result;
       });
@@ -507,9 +506,9 @@ map::value_type create_object_functions() {
       "object.eq?", [](dsl::function::context ctx) -> boolean {
         ctx.declare_named_arguments({});
         ctx.declare_arity(2);
-        const object::ptr& lhs = ctx.raw().positional_arguments()[0];
-        const object::ptr& rhs = ctx.raw().positional_arguments()[1];
-        return *lhs == *rhs;
+        const object& lhs = ctx.raw().positional_arguments()[0];
+        const object& rhs = ctx.raw().positional_arguments()[1];
+        return lhs == rhs;
       });
 
   return map::value_type{"object", std::move(object_functions)};

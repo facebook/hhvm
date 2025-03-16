@@ -186,7 +186,7 @@ class native_object {
      *     This function should only throw if the identifier is recognized but
      *     evaluating its value failed.
      */
-    virtual managed_ptr<object> lookup_property(
+    virtual std::optional<object> lookup_property(
         std::string_view identifier) const = 0;
 
     /**
@@ -261,7 +261,7 @@ class native_object {
      * Preconditions:
      *   - index < size()
      */
-    virtual managed_ptr<object> at(std::size_t index) const = 0;
+    virtual object at(std::size_t index) const = 0;
 
    protected:
     /**
@@ -346,6 +346,15 @@ class native_function {
   using ptr = std::shared_ptr<native_function>;
   virtual ~native_function() = default;
 
+  /**
+   * A class that provides information about the executing function to
+   * invoke(...).
+   *
+   * This includes:
+   *   - Access to positional and named arguments to the function call
+   *   - The ability to output diagnostics
+   *   - The source location of the function call
+   */
   class context;
   /**
    * The implementation-defined behavior for this function.
@@ -358,7 +367,7 @@ class native_function {
    * Postconditions:
    *  - The returned object is non-null.
    */
-  virtual managed_ptr<object> invoke(context) = 0;
+  virtual object invoke(context) = 0;
 
   /**
    * An exception that can be thrown to indicate a fatal error in function
@@ -370,60 +379,12 @@ class native_function {
    * An ordered list of positional argument values. The position is equal to
    * the index in this vector.
    */
-  using positional_arguments_t = std::vector<managed_ptr<object>>;
+  using positional_arguments_t = std::vector<object>;
   /**
    * A map of argument names to their values. The names are guaranteed to be a
    * valid Whisker identifier.
    */
-  using named_arguments_t =
-      std::unordered_map<std::string_view, managed_ptr<object>>;
-
-  /**
-   * A class that provides information about the executing function to
-   * invoke(...).
-   *
-   * This includes:
-   *   - Access to positional and named arguments to the function call
-   *   - The ability to output diagnostics
-   *   - The source location of the function call
-   */
-  class context {
-   public:
-    context(
-        source_range loc,
-        diagnostics_engine& diags,
-        managed_ptr<object> self,
-        positional_arguments_t&& positional_args,
-        named_arguments_t&& named_args)
-        : loc_(std::move(loc)),
-          diags_(diags),
-          self_(std::move(self)),
-          positional_args_(std::move(positional_args)),
-          named_args_(std::move(named_args)) {}
-
-    context(const context&) = delete;
-    context& operator=(const context&) = delete;
-    context(context&&) = default;
-    context& operator=(context&&) = default;
-    ~context() noexcept = default;
-
-    source_range location() const noexcept { return loc_; }
-    diagnostics_engine& diagnostics() const noexcept { return diags_; }
-    const managed_ptr<object>& self() const noexcept { return self_; }
-    const positional_arguments_t& positional_arguments() const noexcept {
-      return positional_args_;
-    }
-    const named_arguments_t& named_arguments() const noexcept {
-      return named_args_;
-    }
-
-    source_range loc_;
-    std::reference_wrapper<diagnostics_engine> diags_;
-    managed_ptr<object> self_;
-    positional_arguments_t positional_args_;
-    named_arguments_t named_args_;
-  };
-  static_assert(std::is_move_constructible_v<context>);
+  using named_arguments_t = std::unordered_map<std::string_view, object>;
 
   /**
    * Produces a textual representation of the function represented by this
@@ -467,10 +428,10 @@ class native_handle;
  * forms a "chain of prototypes", which can be used to emulate an inheritance
  * hierarchy.
  *
- * Strictly speaking, a prototype is should be object::ptr because the
+ * Strictly speaking, a prototype is should be a whisker::object because the
  * definition of prototype-based programming requires "reusing existing
  * objects".
- * The implementation here *could* be changed to use object::ptr, but we
+ * The implementation here *could* be changed to use whisker::object, but we
  * intentionally choose to use a separate type that is more constrained.
  * The main advantages of this decision are:
  *   - We achieve type-safety in C++ (native_handle<T> only allows
@@ -480,78 +441,6 @@ class native_handle;
  */
 template <typename T = void>
 class prototype;
-
-template <>
-class prototype<void> {
- public:
-  using ptr = std::shared_ptr<const prototype>;
-  virtual ~prototype() noexcept = default;
-
-  /**
-   * Property descriptors are immediately invoked during property lookup.
-   *
-   * For the property lookup `foo.bar`, if `bar` is a property descriptor, then
-   * the result of the lookup is computed by invoking the function stored in the
-   * `bar`.
-   *
-   * A property descriptor behaves like a native_function with no arguments.
-   */
-  struct property {
-    native_function::ptr function;
-    /* implicit */ property(native_function::ptr f) : function(std::move(f)) {}
-  };
-  /**
-   * Fixed object descriptors are statically bound objects to the prototype.
-   *
-   * For the property lookup `foo.bar`, if `bar` is a fixed object descriptor,
-   * then the result of the lookup is the object stored in the `bar`.
-   *
-   * Objects such as native_function that are intended to be "member functions"
-   * are a good candidate for a fixed object descriptor.
-   */
-  struct fixed_object {
-    managed_ptr<object> value;
-    /* implicit */ fixed_object(managed_ptr<object> o) : value(std::move(o)) {}
-  };
-  using descriptor = std::variant<property, fixed_object>;
-
-  /**
-   * Tries to look up a descriptor defined in this prototype. If there is no
-   * entry for an identifier in this map, this should return nullptr.
-   */
-  virtual const descriptor* find_descriptor(std::string_view) const = 0;
-  /**
-   * Returns the names of all descriptors defined in this prototype.
-   */
-  virtual std::set<std::string> keys() const = 0;
-  /**
-   * Returns the fallback parent prototype, if one is provided.
-   * This is used in case find_descriptor returns nullptr.
-   */
-  virtual const ptr& parent() const = 0;
-
-  using descriptors_map = std::map<std::string, descriptor, std::less<>>;
-  /**
-   * Creates a prototype from the provided map of descriptors and
-   * (optionally) a parent.
-   */
-  static ptr from(descriptors_map, ptr parent = nullptr);
-};
-
-/**
- * A type-tagged prototype that is intended for native_handle<Self>.
- */
-template <typename Self>
-class prototype : public prototype<> {
- public:
-  using ptr = std::shared_ptr<const prototype>;
-  /**
-   * Creates a prototype from the provided map of descriptors and
-   * (optionally) a parent.
-   */
-  static ptr from(descriptors_map, prototype<>::ptr parent);
-};
-
 /**
  * Same as prototype<T>::ptr but avoids dependent template type. This
  * allows template argument deduction.
@@ -559,57 +448,13 @@ class prototype : public prototype<> {
 template <typename Self = void>
 using prototype_ptr = std::shared_ptr<const prototype<Self>>;
 
-/**
- * A "basic" untyped implementation of a prototype that is backed by a
- * static map.
- *
- * Prototypes *should* be static so this implementation is sufficient for most
- * use cases.
- */
-template <typename T = void>
-class basic_prototype : public prototype<T> {
- public:
-  const prototype<>::descriptor* find_descriptor(
-      std::string_view name) const override {
-    if (auto found = descriptors_.find(name); found != descriptors_.end()) {
-      return &found->second;
-    }
-    return nullptr;
-  }
-
-  std::set<std::string> keys() const override {
-    std::set<std::string> result;
-    for (const auto& [key, _] : descriptors_) {
-      result.insert(key);
-    }
-    return result;
-  }
-
-  const prototype<>::ptr& parent() const override { return parent_; }
-
-  basic_prototype(
-      prototype<>::descriptors_map descriptors, prototype<>::ptr parent)
-      : descriptors_(std::move(descriptors)), parent_(std::move(parent)) {}
-
- private:
-  prototype<>::descriptors_map descriptors_;
-  prototype<>::ptr parent_;
-};
-
-template <typename T>
-/* static */ typename prototype<T>::ptr prototype<T>::from(
-    descriptors_map descriptors, prototype<>::ptr parent) {
-  return std::make_shared<basic_prototype<T>>(
-      std::move(descriptors), std::move(parent));
-}
-
 namespace detail {
 
 template <typename T>
 class native_handle_base {
  public:
   explicit native_handle_base(
-      managed_ptr<T> ref, prototype<>::ptr proto) noexcept
+      managed_ptr<T> ref, prototype_ptr<> proto) noexcept
       : ref_(std::move(ref)), proto_(std::move(proto)) {
     assert(ref_ != nullptr);
   }
@@ -617,12 +462,12 @@ class native_handle_base {
   const managed_ptr<T>& ptr() const& { return ref_; }
   managed_ptr<T>&& ptr() && { return std::move(ref_); }
 
-  const prototype<>::ptr& proto() const& { return proto_; }
-  prototype<>::ptr&& proto() && { return std::move(proto_); }
+  const prototype_ptr<>& proto() const& { return proto_; }
+  prototype_ptr<>&& proto() && { return std::move(proto_); }
 
  private:
   managed_ptr<T> ref_;
-  prototype<>::ptr proto_;
+  prototype_ptr<> proto_;
 };
 
 std::string describe_native_handle_for_type(const std::type_info&);
@@ -649,7 +494,7 @@ class native_handle<void> final : private detail::native_handle_base<void> {
       : native_handle(std::move(ref), nullptr /* prototype */) {}
 
   template <typename T>
-  explicit native_handle(managed_ptr<T> ref, prototype<>::ptr proto) noexcept
+  explicit native_handle(managed_ptr<T> ref, prototype_ptr<> proto) noexcept
       : base(
             managed_ptr<void>(ref, static_cast<const void*>(ref.get())),
             std::move(proto)),
@@ -732,7 +577,7 @@ class native_handle final : private detail::native_handle_base<T> {
 template <typename T>
 native_handle(managed_ptr<T>) -> native_handle<T>;
 template <typename T>
-native_handle(managed_ptr<T>, prototype<>::ptr) -> native_handle<T>;
+native_handle(managed_ptr<T>, prototype_ptr<>) -> native_handle<T>;
 
 /**
  * Two native_handle objects are equal iff they point to the same data.
@@ -1251,6 +1096,160 @@ class object final : private detail::object_base<object> {
     return !(lhs == rhs);
   }
 };
+
+// Defined here because object is an incomplete type where this is declared.
+class native_function::context {
+ public:
+  context(
+      source_range loc,
+      diagnostics_engine& diags,
+      object self,
+      positional_arguments_t positional_args,
+      named_arguments_t named_args)
+      : loc_(loc),
+        diags_(diags),
+        self_(std::move(self)),
+        positional_args_(std::move(positional_args)),
+        named_args_(std::move(named_args)) {}
+
+  context(const context&) = delete;
+  context& operator=(const context&) = delete;
+  context(context&&) = default;
+  context& operator=(context&&) = default;
+  ~context() noexcept = default;
+
+  source_range location() const noexcept { return loc_; }
+  diagnostics_engine& diagnostics() const noexcept { return diags_; }
+  const object& self() const noexcept { return self_; }
+  const positional_arguments_t& positional_arguments() const noexcept {
+    return positional_args_;
+  }
+  const named_arguments_t& named_arguments() const noexcept {
+    return named_args_;
+  }
+
+  source_range loc_;
+  std::reference_wrapper<diagnostics_engine> diags_;
+  object self_;
+  positional_arguments_t positional_args_;
+  named_arguments_t named_args_;
+};
+static_assert(std::is_move_constructible_v<native_function::context>);
+
+template <>
+class prototype<void> {
+ public:
+  using ptr = std::shared_ptr<const prototype>;
+  virtual ~prototype() noexcept = default;
+
+  /**
+   * Property descriptors are immediately invoked during property lookup.
+   *
+   * For the property lookup `foo.bar`, if `bar` is a property descriptor, then
+   * the result of the lookup is computed by invoking the function stored in the
+   * `bar`.
+   *
+   * A property descriptor behaves like a native_function with no arguments.
+   */
+  struct property {
+    native_function::ptr function;
+    /* implicit */ property(native_function::ptr f) : function(std::move(f)) {}
+  };
+  /**
+   * Fixed object descriptors are statically bound objects to the prototype.
+   *
+   * For the property lookup `foo.bar`, if `bar` is a fixed object descriptor,
+   * then the result of the lookup is the object stored in the `bar`.
+   *
+   * Objects such as native_function that are intended to be "member functions"
+   * are a good candidate for a fixed object descriptor.
+   */
+  struct fixed_object {
+    object value;
+    /* implicit */ fixed_object(object o) : value(std::move(o)) {}
+  };
+  using descriptor = std::variant<property, fixed_object>;
+
+  /**
+   * Tries to look up a descriptor defined in this prototype. If there is no
+   * entry for an identifier in this map, this should return nullptr.
+   */
+  virtual const descriptor* find_descriptor(std::string_view) const = 0;
+  /**
+   * Returns the names of all descriptors defined in this prototype.
+   */
+  virtual std::set<std::string> keys() const = 0;
+  /**
+   * Returns the fallback parent prototype, if one is provided.
+   * This is used in case find_descriptor returns nullptr.
+   */
+  virtual const ptr& parent() const = 0;
+
+  using descriptors_map = std::map<std::string, descriptor, std::less<>>;
+  /**
+   * Creates a prototype from the provided map of descriptors and
+   * (optionally) a parent.
+   */
+  static ptr from(descriptors_map, ptr parent = nullptr);
+};
+
+/**
+ * A type-tagged prototype that is intended for native_handle<Self>.
+ */
+template <typename Self>
+class prototype : public prototype<> {
+ public:
+  using ptr = std::shared_ptr<const prototype>;
+  /**
+   * Creates a prototype from the provided map of descriptors and
+   * (optionally) a parent.
+   */
+  static ptr from(descriptors_map, prototype<>::ptr parent);
+};
+
+/**
+ * A "basic" untyped implementation of a prototype that is backed by a
+ * static map.
+ *
+ * Prototypes *should* be static so this implementation is sufficient for most
+ * use cases.
+ */
+template <typename T = void>
+class basic_prototype : public prototype<T> {
+ public:
+  const prototype<>::descriptor* find_descriptor(
+      std::string_view name) const override {
+    if (auto found = descriptors_.find(name); found != descriptors_.end()) {
+      return &found->second;
+    }
+    return nullptr;
+  }
+
+  std::set<std::string> keys() const override {
+    std::set<std::string> result;
+    for (const auto& [key, _] : descriptors_) {
+      result.insert(key);
+    }
+    return result;
+  }
+
+  const prototype<>::ptr& parent() const override { return parent_; }
+
+  basic_prototype(
+      prototype<>::descriptors_map descriptors, prototype<>::ptr parent)
+      : descriptors_(std::move(descriptors)), parent_(std::move(parent)) {}
+
+ private:
+  prototype<>::descriptors_map descriptors_;
+  prototype<>::ptr parent_;
+};
+
+template <typename T>
+/* static */ typename prototype<T>::ptr prototype<T>::from(
+    descriptors_map descriptors, prototype<>::ptr parent) {
+  return std::make_shared<basic_prototype<T>>(
+      std::move(descriptors), std::move(parent));
+}
 
 namespace detail {
 template <typename T, typename... Alternatives>

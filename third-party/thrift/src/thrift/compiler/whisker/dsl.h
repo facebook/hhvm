@@ -44,13 +44,13 @@ namespace whisker::dsl {
 class array_like final : public native_object::array_like {
  public:
   std::size_t size() const final;
-  object::ptr at(std::size_t index) const final;
+  object at(std::size_t index) const final;
 
   /**
    * Tries to marshal the provided object into an array-like object, if the
    * underlying type matches. Otherwise, returns an empty optional.
    */
-  static std::optional<array_like> try_from(const object::ptr&);
+  static std::optional<array_like> try_from(const object&);
 
   explicit array_like(native_object::array_like::ptr arr)
       : which_(std::move(arr)) {}
@@ -71,14 +71,15 @@ static_assert(std::is_copy_constructible_v<array_like>);
  */
 class map_like final : public native_object::map_like {
  public:
-  object::ptr lookup_property(std::string_view identifier) const final;
+  std::optional<object> lookup_property(
+      std::string_view identifier) const final;
   std::optional<std::set<std::string>> keys() const final;
 
   /**
    * Tries to marshal the provided object into an map-like object, if the
    * underlying type matches. Otherwise, returns an empty optional.
    */
-  static std::optional<map_like> try_from(const object::ptr&);
+  static std::optional<map_like> try_from(const object&);
 
   explicit map_like(native_object::map_like::ptr m) : which_(std::move(m)) {}
   explicit map_like(managed_map m) : which_(std::move(m)) {}
@@ -94,13 +95,9 @@ namespace detail {
  * Determines the result of trying to access a typed argument via
  * argument<T>(...) or named_argument<T>(...).
  *
- * Small primitive types (i64, f64, boolean) are returned by value.
- * The larger primitive type (string) is returned as a managed_ptr<string>.
- * native_handle<T> is returned by value.
- *
- * Maps and arrays are wrapped by helper classes, in order to abstract away
- * differences with native_object::array_like and native_object::map_like
- * respectively.
+ * Most types are returned by value. Maps and arrays are wrapped by helper
+ * classes, in order to abstract away differences with native_object::array_like
+ * and native_object::map_like respectively.
  */
 template <typename T>
 struct function_argument_result;
@@ -229,12 +226,12 @@ using make_polymorphic_native_handle =
  * Example:
  *
  *     class i64_eq : public function {
- *       object::ptr invoke(context ctx) override {
+ *       object invoke(context ctx) override {
  *         ctx.declare_arity(2);
  *         ctx.declare_named_arguments({});
  *         i64 a = ctx.argument<i64>(0);
  *         i64 b = ctx.argument<i64>(1);
- *         return manage_owned<object>(whisker::make::boolean(a == b));
+ *         return whisker::make::boolean(a == b);
  *       }
  *     };
  *
@@ -244,21 +241,20 @@ using make_polymorphic_native_handle =
  * Example (variadic, named arguments):
  *
  *     class str_concat : public function {
- *       object::ptr invoke(context ctx) override {
+ *       object invoke(context ctx) override {
  *         ctx.declare_named_arguments({"sep"});
  *         const std::string sep = [&] {
  *           auto arg = ctx.named_argument<string>("sep", context::optional);
- *           return arg == nullptr ? "" : *arg;
+ *           return arg.has_value() ? std::string{*arg} : "";
  *         }();
  *         string result;
  *         for (std::size_t i = 0; i < ctx.arity(); ++i) {
  *           if (i != 0) {
  *             result += sep;
  *           }
- *           result += *ctx.argument<string>(i);
+ *           result += ctx.argument<string>(i);
  *         }
- *         return manage_owned<object>(
- *             whisker::make::string(std::move(result)));
+ *         return whisker::make::string(std::move(result));
  *       }
  *     };
  *
@@ -276,7 +272,7 @@ class function : public native_function {
    * Postconditions:
    *  - The returned object is non-null.
    */
-  virtual object::ptr invoke(context) = 0;
+  virtual object invoke(context) = 0;
 
   using raw_context = native_function::context;
   class context {
@@ -348,9 +344,9 @@ class function : public native_function {
      * Returns a pointer to a named argument, if present.
      *
      * If the argument is not present and presence is required, then this throws
-     * an error. Otherwise, returns nullptr.
+     * an error. Otherwise, returns empty optional.
      */
-    object::ptr named_argument(
+    std::optional<object> named_argument(
         std::string_view name,
         named_argument_presence = named_argument_presence::required) const;
 
@@ -372,14 +368,14 @@ class function : public native_function {
         std::string_view name,
         named_argument_presence presence =
             named_argument_presence::required) const {
-      const object::ptr& arg = this->named_argument(name, presence);
-      if (arg == nullptr) {
+      std::optional<object> arg = this->named_argument(name, presence);
+      if (!arg.has_value()) {
         assert(presence == named_argument_presence::optional);
         // either nullptr or empty optional
         return {};
       }
       return extract_argument<T>(
-          arg, [name] { return fmt::format("named argument '{}'", name); });
+          *arg, [name] { return fmt::format("named argument '{}'", name); });
     }
 
     /**
@@ -442,8 +438,7 @@ class function : public native_function {
 
     template <typename T, typename DescribeArgumentFunc>
     argument_result_t<T> extract_argument(
-        const object::ptr& arg,
-        DescribeArgumentFunc&& describe_argument) const {
+        const object& arg, DescribeArgumentFunc&& describe_argument) const {
       if constexpr (std::is_same_v<T, array>) {
         if (auto arr = array_like::try_from(arg)) {
           return std::move(*arr);
@@ -451,7 +446,7 @@ class function : public native_function {
         throw make_error(
             "Expected type of {} to be `array` or `array-like native_object`, but found `{}`.",
             describe_argument(),
-            arg->describe_type());
+            arg.describe_type());
       } else if constexpr (std::is_same_v<T, map>) {
         if (auto m = map_like::try_from(arg)) {
           return std::move(*m);
@@ -459,7 +454,7 @@ class function : public native_function {
         throw make_error(
             "Expected type of {} to be `map` or `map-like native_object`, but found `{}`.",
             describe_argument(),
-            arg->describe_type());
+            arg.describe_type());
       } else if constexpr (whisker::detail::is_specialization_v<
                                T,
                                polymorphic_native_handle>) {
@@ -470,13 +465,13 @@ class function : public native_function {
               "Expected type of {} to be `{}` (polymorphic), but found `{}`.",
               describe_argument(),
               native_handle<element_type>::describe_class_type(),
-              arg->describe_type());
+              arg.describe_type());
         };
 
-        if (!arg->is_native_handle()) {
+        if (!arg.is_native_handle()) {
           throw abort();
         }
-        const native_handle<>& handle = arg->as_native_handle();
+        const native_handle<>& handle = arg.as_native_handle();
         if (std::optional<native_handle<element_type>> converted =
                 T::try_as(handle)) {
           return std::move(*converted);
@@ -491,13 +486,13 @@ class function : public native_function {
               "Expected type of {} to be `{}`, but found `{}`.",
               describe_argument(),
               T::describe_class_type(),
-              arg->describe_type());
+              arg.describe_type());
         };
 
-        if (!arg->is_native_handle()) {
+        if (!arg.is_native_handle()) {
           throw abort();
         }
-        const native_handle<>& handle = arg->as_native_handle();
+        const native_handle<>& handle = arg.as_native_handle();
         if constexpr (std::is_same_v<element_type, void>) {
           return handle;
         } else {
@@ -512,18 +507,14 @@ class function : public native_function {
             std::is_same_v<T, boolean> || std::is_same_v<T, i64> ||
             std::is_same_v<T, f64> || std::is_same_v<T, string> ||
             std::is_same_v<T, null>);
-        if (!arg->is<T>()) {
+        if (!arg.is<T>()) {
           throw make_error(
               "Expected type of {} to be `{}`, but found `{}`.",
               describe_argument(),
               describe_primitive_type<T>(),
-              arg->describe_type());
+              arg.describe_type());
         }
-        if constexpr (std::is_same_v<T, string>) {
-          return manage_derived_ref<T>(arg, arg->as<T>());
-        } else {
-          return arg->as<T>();
-        }
+        return arg.as<T>();
       }
     }
 
@@ -532,7 +523,7 @@ class function : public native_function {
   static_assert(std::is_move_constructible_v<context>);
 
  private:
-  object::ptr invoke(raw_context) final;
+  object invoke(raw_context) final;
 };
 
 namespace detail {
@@ -548,14 +539,13 @@ constexpr inline bool is_function_returning =
 // However, MSVC fails to compile that.
 template <
     typename F,
-    WHISKER_DSL_REQUIRES(
-        std::is_same_v<detail::function_return_t<F>, object::ptr>)>
+    WHISKER_DSL_REQUIRES(std::is_same_v<detail::function_return_t<F>, object>)>
 class make_function_delegate final : public function {
  public:
   make_function_delegate(std::string name, F&& impl)
       : name_(std::move(name)), impl_(std::forward<F>(impl)) {}
 
-  object::ptr invoke(context ctx) final { return impl_(std::move(ctx)); }
+  object invoke(context ctx) final { return impl_(std::move(ctx)); }
 
   std::string describe_type() const final {
     if (name_.empty()) {
@@ -588,12 +578,12 @@ class make_function_delegate final : public function {
  * Example:
  *
  *     dsl::make_function(
- *         "i64_eq", [](dsl::function::context ctx) -> object::ptr {
+ *         "i64_eq", [](dsl::function::context ctx) -> object {
  *           ctx.declare_arity(2);
  *           ctx.declare_named_arguments({});
  *           i64 a = ctx.argument<i64>(0);
  *           i64 b = ctx.argument<i64>(1);
- *           return manage_owned<object>(whisker::make::boolean(a == b));
+ *           return whisker::make::boolean(a == b);
  *         });
  *
  *     {{ (i64_eq 42 42) }}
@@ -604,7 +594,7 @@ class make_function_delegate final : public function {
  */
 template <
     typename F,
-    WHISKER_DSL_REQUIRES(detail::is_function_returning<F, object::ptr>)>
+    WHISKER_DSL_REQUIRES(detail::is_function_returning<F, object>)>
 function::ptr make_function(std::string name, F&& function) {
   return std::make_shared<detail::make_function_delegate<F>>(
       std::move(name), std::forward<F>(function));
@@ -634,23 +624,20 @@ function::ptr make_function(std::string name, F&& function) {
 template <
     typename F,
     WHISKER_DSL_REQUIRES(
-        whisker::is_any_object_type<detail::function_return_t<F>> ||
-        whisker::detail::is_specialization_v<
-            detail::function_return_t<F>,
-            whisker::native_handle> ||
-        detail::is_function_returning<F, object>)>
+        whisker::is_any_object_type<detail::function_return_t<F>>)>
 function::ptr make_function(std::string name, F&& function) {
   return make_function(
       std::move(name),
-      [f = std::decay_t<F>(std::forward<F>(function))](function::context ctx) {
+      [f = std::decay_t<F>(std::forward<F>(function))](
+          function::context ctx) -> object {
         if constexpr (detail::is_function_returning<F, boolean>) {
-          return manage_as_static(
-              f(std::move(ctx)) ? whisker::make::true_ : whisker::make::false_);
+          return f(std::move(ctx)) ? whisker::make::true_
+                                   : whisker::make::false_;
         } else if constexpr (detail::is_function_returning<F, null>) {
           f(std::move(ctx));
-          return manage_as_static(whisker::make::null);
+          return whisker::make::null;
         } else {
-          return manage_owned<object>(f(std::move(ctx)));
+          return object(f(std::move(ctx)));
         }
       });
 }
@@ -753,8 +740,8 @@ class prototype_builder {
         });
     try_emplace(
         std::move(name),
-        prototype<>::fixed_object(manage_owned<object>(
-            whisker::make::native_function(std::move(fn)))));
+        prototype<>::fixed_object(
+            whisker::make::native_function(std::move(fn))));
   }
 
   /**
@@ -819,12 +806,6 @@ struct by_value {
   using optional_type = std::optional<T>;
 };
 
-template <typename T>
-struct by_ptr {
-  using type = managed_ptr<T>;
-  using optional_type = type;
-};
-
 template <>
 struct function_argument_result<i64> : by_value<i64> {};
 
@@ -835,7 +816,7 @@ template <>
 struct function_argument_result<boolean> : by_value<boolean> {};
 
 template <>
-struct function_argument_result<string> : by_ptr<string> {};
+struct function_argument_result<string> : by_value<string> {};
 
 template <>
 struct function_argument_result<array> : by_value<array_like> {};

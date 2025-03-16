@@ -188,8 +188,7 @@ class partial_definition final {
   source_range loc;
   std::string name;
   std::set<std::string> arguments;
-  std::map<ast::identifier, object::ptr, ast::identifier::compare_by_name>
-      captures;
+  std::map<ast::identifier, object, ast::identifier::compare_by_name> captures;
   // The AST's lifetime is managed by the renderer.
   std::reference_wrapper<const ast::bodies> bodies;
 };
@@ -518,7 +517,7 @@ class virtual_machine {
                   "{}#{} {}",
                   maybe_newline,
                   i,
-                  to_string(*err.searched_scopes()[i], std::move(print_opts)));
+                  to_string(err.searched_scopes()[i], print_opts));
             }
             return message;
           });
@@ -526,8 +525,7 @@ class virtual_machine {
             // Fail rendering in strict mode
             diags_.abort_rendering(variable_lookup.loc.begin);
           }
-          return lookup_result::without_parent(
-              manage_as_static(whisker::make::null));
+          return lookup_result::without_parent(whisker::make::null);
         },
         [&](const eval_property_lookup_error& err) -> lookup_result {
           auto src_range = detail::variant_match(
@@ -550,14 +548,13 @@ class virtual_machine {
                 err.property_name(),
                 err.cause().empty() ? std::string()
                                     : fmt::format("Cause: {}\n", err.cause()),
-                to_string(*err.missing_from(), std::move(print_opts)));
+                to_string(err.missing_from(), print_opts));
           });
           if (undefined_diag_level == diagnostic_level::error) {
             // Fail rendering in strict mode
             diags_.abort_rendering(variable_lookup.loc.begin);
           }
-          return lookup_result::without_parent(
-              manage_as_static(whisker::make::null));
+          return lookup_result::without_parent(whisker::make::null);
         });
   }
 
@@ -580,71 +577,70 @@ class virtual_machine {
     }
   }
   bool evaluate_as_bool(const ast::expression& expr) {
-    object::ptr result = evaluate(expr);
-    return result->visit(
+    object result = evaluate(expr);
+    return result.visit(
         [&](boolean value) { return value; },
         [&](const auto& value) {
-          maybe_report_boolean_coercion(expr, *result);
+          maybe_report_boolean_coercion(expr, result);
           return coerce_to_boolean(value);
         });
   }
 
-  object::ptr evaluate(const ast::expression& expr) {
+  object evaluate(const ast::expression& expr) {
     using expression = ast::expression;
     using function_call = expression::function_call;
     return detail::variant_match(
         expr.which,
-        [](const expression::string_literal& s) -> object::ptr {
-          return manage_owned<object>(whisker::make::string(s.text));
+        [](const expression::string_literal& s) -> object {
+          return whisker::make::string(s.text);
         },
-        [](const expression::i64_literal& i) -> object::ptr {
-          return manage_owned<object>(whisker::make::i64(i.value));
+        [](const expression::i64_literal& i) -> object {
+          return whisker::make::i64(i.value);
         },
-        [](const expression::null_literal&) -> object::ptr {
-          return manage_as_static(whisker::make::null);
+        [](const expression::null_literal&) -> object {
+          return whisker::make::null;
         },
-        [](const expression::true_literal&) -> object::ptr {
-          return manage_as_static(whisker::make::true_);
+        [](const expression::true_literal&) -> object {
+          return whisker::make::true_;
         },
-        [](const expression::false_literal&) -> object::ptr {
-          return manage_as_static(whisker::make::false_);
+        [](const expression::false_literal&) -> object {
+          return whisker::make::false_;
         },
-        [&](const ast::variable_lookup& variable_lookup) -> object::ptr {
+        [&](const ast::variable_lookup& variable_lookup) -> object {
           return lookup_variable(variable_lookup).found;
         },
-        [&](const function_call& func) -> object::ptr {
+        [&](const function_call& func) -> object {
           return detail::variant_match(
               func.which,
-              [&](function_call::builtin_not) -> object::ptr {
+              [&](function_call::builtin_not) -> object {
                 // enforced by the parser
                 assert(func.positional_arguments.size() == 1);
                 assert(func.named_arguments.empty());
                 return evaluate_as_bool(func.positional_arguments[0])
-                    ? manage_as_static(whisker::make::false_)
-                    : manage_as_static(whisker::make::true_);
+                    ? whisker::make::false_
+                    : whisker::make::true_;
               },
-              [&](function_call::builtin_and) -> object::ptr {
+              [&](function_call::builtin_and) -> object {
                 // enforced by the parser
                 assert(func.named_arguments.empty());
                 for (const expression& arg : func.positional_arguments) {
                   if (!evaluate_as_bool(arg)) {
-                    return manage_as_static(whisker::make::false_);
+                    return whisker::make::false_;
                   }
                 }
-                return manage_as_static(whisker::make::true_);
+                return whisker::make::true_;
               },
-              [&](function_call::builtin_or) -> object::ptr {
+              [&](function_call::builtin_or) -> object {
                 // enforced by the parser
                 assert(func.named_arguments.empty());
                 for (const expression& arg : func.positional_arguments) {
                   if (evaluate_as_bool(arg)) {
-                    return manage_as_static(whisker::make::true_);
+                    return whisker::make::true_;
                   }
                 }
-                return manage_as_static(whisker::make::false_);
+                return whisker::make::false_;
               },
-              [&](const function_call::user_defined& user_defined)
-                  -> object::ptr {
+              [&](const function_call::user_defined& user_defined) -> object {
                 const ast::variable_lookup& name = user_defined.name;
                 lookup_result lookup = lookup_variable(name);
                 if (!lookup->is_native_function()) {
@@ -693,12 +689,9 @@ class virtual_machine {
    * provided value.
    */
   void bind_local_in(
-      eval_context& ctx,
-      source_location loc,
-      std::string name,
-      object::ptr value) {
+      eval_context& ctx, source_location loc, std::string name, object value) {
     whisker::visit(
-        ctx.bind_local(std::move(name), value),
+        ctx.bind_local(std::move(name), std::move(value)),
         [](std::monostate) {
           // The binding was successful
         },
@@ -709,7 +702,7 @@ class virtual_machine {
               err.name());
         });
   }
-  void bind_local(source_location loc, std::string name, object::ptr value) {
+  void bind_local(source_location loc, std::string name, object value) {
     bind_local_in(
         current_frame().context, loc, std::move(name), std::move(value));
   }
@@ -732,10 +725,10 @@ class virtual_machine {
       }
     }
 
-    std::map<ast::identifier, object::ptr, ast::identifier::compare_by_name>
+    std::map<ast::identifier, object, ast::identifier::compare_by_name>
         captures;
     for (const ast::identifier& capture : partial_block.captures) {
-      object::ptr captured_object =
+      object captured_object =
           lookup_variable(
               ast::variable_lookup{capture.loc, std::vector{capture}})
               .found;
@@ -776,8 +769,7 @@ class module_importer {
    *
    * The resulting export map is cached for future imports of the same module.
    */
-  object::ptr resolve_exports_of(
-      const ast::import_statement& import_statement) {
+  object resolve_exports_of(const ast::import_statement& import_statement) {
     source_resolver* resolver = opts_.src_resolver.get();
     if (resolver == nullptr) {
       vm_.diags().report_fatal_error(
@@ -799,7 +791,7 @@ class module_importer {
 
     if (auto cached = cached_export_maps_.find(module);
         cached != cached_export_maps_.end()) {
-      return manage_as_static(cached->second);
+      return cached->second;
     }
 
     eval_context eval_ctx = vm_.stack().top()->context.make_derived();
@@ -820,7 +812,7 @@ class module_importer {
     auto [cached, inserted] = cached_export_maps_.emplace(
         module, whisker::make::map(std::move(exports)));
     assert(inserted);
-    return manage_as_static(cached->second);
+    return cached->second;
   }
 
  private:
@@ -848,7 +840,7 @@ class module_importer {
     vm_.bind_local(
         partial_block.name.loc.begin,
         partial_block.name.name,
-        manage_owned<object>(native_handle<>(definition)));
+        object(native_handle<>(definition)));
 
     if (partial_block.exported) {
       do_export(
@@ -860,7 +852,7 @@ class module_importer {
   }
 
   void visit(map& exports, const ast::let_statement& let_statement) {
-    object::ptr value = vm_.evaluate(let_statement.value);
+    object value = vm_.evaluate(let_statement.value);
     vm_.bind_local(let_statement.loc.begin, let_statement.id.name, value);
 
     if (let_statement.exported) {
@@ -957,7 +949,7 @@ class render_engine {
         vm_(opts_, diags),
         importer_(opts_, vm_) {}
 
-  bool visit(const ast::root& root, object::ptr root_context) && {
+  bool visit(const ast::root& root, object root_context) && {
     try {
       auto flush_guard = out_.make_flush_guard();
       auto eval_ctx = eval_context::with_root_scope(
@@ -1048,7 +1040,7 @@ class render_engine {
   }
 
   void visit(const ast::import_statement& import_statement) {
-    object::ptr export_map = importer_.resolve_exports_of(import_statement);
+    object export_map = importer_.resolve_exports_of(import_statement);
     vm_.bind_local(
         import_statement.loc.begin,
         import_statement.name.name,
@@ -1077,14 +1069,14 @@ class render_engine {
   }
 
   void visit(const ast::interpolation& interpolation) {
-    object::ptr result = vm_.evaluate(interpolation.content);
+    object result = vm_.evaluate(interpolation.content);
 
     const auto report_unprintable_message_only = [&](diagnostic_level level) {
       vm_.diags().maybe_report(interpolation.loc, level, [&] {
         return fmt::format(
             "Object named '{}' is not printable. The encountered value is:\n{}",
             interpolation.to_string(),
-            to_string(*result));
+            to_string(result));
       });
     };
 
@@ -1098,7 +1090,7 @@ class render_engine {
     };
 
     // See render_options::strict_printable_types for printing rules
-    auto output = result->visit(
+    auto output = result.visit(
         [](const string& value) -> std::string { return value; },
         [](i64 value) -> std::string { return std::to_string(value); },
         [&](f64 value) -> std::string {
@@ -1122,15 +1114,15 @@ class render_engine {
   }
 
   void visit(const ast::section_block& section) {
-    object::ptr section_variable = vm_.lookup_variable(section.variable).found;
+    object section_variable = vm_.lookup_variable(section.variable).found;
 
     const auto maybe_report_coercion = [&] {
       vm_.maybe_report_boolean_coercion(
           ast::expression{section.variable.loc, section.variable},
-          *section_variable);
+          section_variable);
     };
 
-    const auto do_visit = [&](object::ptr scope) {
+    const auto do_visit = [&](object scope) {
       eval_ctx().push_scope(std::move(scope));
       visit(section.body_elements);
       eval_ctx().pop_scope();
@@ -1144,19 +1136,19 @@ class render_engine {
 
     // See render_options::strict_boolean_conditional for the coercion
     // rules
-    section_variable->visit(
+    section_variable.visit(
         [&](const managed_array& value) {
           if (section.inverted) {
             // This array is being used as a conditional
             maybe_report_coercion();
             if (!coerce_to_boolean(value)) {
               // Empty arrays are falsy
-              do_visit(manage_as_static(whisker::make::null));
+              do_visit(whisker::make::null);
             }
             return;
           }
           for (const auto& element : *value) {
-            do_visit(manage_derived_ref(section_variable, element));
+            do_visit(element);
           }
         },
         [&](const native_object::ptr& value) {
@@ -1165,7 +1157,7 @@ class render_engine {
             maybe_report_coercion();
             if (!coerce_to_boolean(value)) {
               // Empty array-like objects are falsy
-              do_visit(manage_as_static(whisker::make::null));
+              do_visit(whisker::make::null);
             }
             return;
           }
@@ -1192,7 +1184,7 @@ class render_engine {
           // being used as a conditional
           maybe_report_coercion();
           if (coerce_to_boolean(value)) {
-            do_visit(manage_as_static(whisker::make::null));
+            do_visit(whisker::make::null);
           }
         },
         [&](const managed_map&) {
@@ -1215,7 +1207,7 @@ class render_engine {
 
   void visit(const ast::conditional_block& conditional_block) {
     const auto do_visit = [&](const ast::bodies& body_elements) {
-      eval_ctx().push_scope(manage_as_static(whisker::make::null));
+      eval_ctx().push_scope(whisker::make::null);
       visit(body_elements);
       eval_ctx().pop_scope();
     };
@@ -1243,8 +1235,8 @@ class render_engine {
 
   void visit(const ast::with_block& with_block) {
     const ast::expression& expr = with_block.value;
-    object::ptr result = vm_.evaluate(expr);
-    result->visit(
+    object result = vm_.evaluate(expr);
+    result.visit(
         [&](const managed_map&) {
           // maps can be de-structured.
         },
@@ -1255,7 +1247,7 @@ class render_engine {
                 expr.loc.begin,
                 "Expression '{}' is a native_object which is not map-like. The encountered value is:\n{}",
                 expr.to_string(),
-                to_string(*result));
+                to_string(result));
           }
         },
         [&](auto&&) {
@@ -1263,7 +1255,7 @@ class render_engine {
               expr.loc.begin,
               "Expression '{}' does not evaluate to a map. The encountered value is:\n{}",
               expr.to_string(),
-              to_string(*result));
+              to_string(result));
         });
     eval_ctx().push_scope(std::move(result));
     visit(with_block.body_elements);
@@ -1272,11 +1264,11 @@ class render_engine {
 
   void visit(const ast::each_block& each_block) {
     const ast::expression& expr = each_block.iterable;
-    object::ptr result = vm_.evaluate(expr);
+    object result = vm_.evaluate(expr);
 
-    const auto do_visit = [this, &each_block](i64 index, object::ptr scope) {
+    const auto do_visit = [this, &each_block](i64 index, object scope) {
       if (const auto& captured = each_block.captured) {
-        eval_ctx().push_scope(manage_as_static(whisker::make::null));
+        eval_ctx().push_scope(whisker::make::null);
         vm_.bind_local(
             captured->element.loc.begin,
             captured->element.name,
@@ -1285,7 +1277,7 @@ class render_engine {
           vm_.bind_local(
               captured->index->loc.begin,
               captured->index->name,
-              manage_owned<object>(whisker::make::i64(index)));
+              whisker::make::i64(index));
         }
       } else {
         // When captures are not present, each element becomes the implicit
@@ -1300,19 +1292,19 @@ class render_engine {
       if (!each_block.else_clause.has_value()) {
         return;
       }
-      eval_ctx().push_scope(manage_as_static(whisker::make::null));
+      eval_ctx().push_scope(whisker::make::null);
       visit(each_block.else_clause->body_elements);
       eval_ctx().pop_scope();
     };
 
-    result->visit(
+    result.visit(
         [&](const managed_array& arr) {
           if (arr->empty()) {
             do_visit_else();
             return;
           }
           for (std::size_t i = 0; i < arr->size(); ++i) {
-            do_visit(i64(i), manage_derived_ref(result, (*arr)[i]));
+            do_visit(i64(i), (*arr)[i]);
           }
         },
         [&](const native_object::ptr& o) {
@@ -1323,7 +1315,7 @@ class render_engine {
                 expr.loc.begin,
                 "Expression '{}' is a native_object which is not array-like. The encountered value is:\n{}",
                 expr.to_string(),
-                to_string(*result));
+                to_string(result));
           }
           const std::size_t size = array_like->size();
           if (size == 0) {
@@ -1339,7 +1331,7 @@ class render_engine {
               expr.loc.begin,
               "Expression '{}' does not evaluate to an array. The encountered value is:\n{}",
               expr.to_string(),
-              to_string(*result));
+              to_string(result));
         });
   }
 
@@ -1354,16 +1346,16 @@ class render_engine {
     vm_.bind_local(
         partial_block.name.loc.begin,
         partial_block.name.name,
-        manage_owned<object>(std::move(definition)));
+        object(std::move(definition)));
   }
 
   void visit(const ast::partial_statement& partial_statement) {
-    object::ptr lookup = vm_.evaluate(partial_statement.partial);
+    object lookup = vm_.evaluate(partial_statement.partial);
 
     partial_definition::ptr partial = std::invoke([&] {
-      if (lookup->is_native_handle()) {
+      if (lookup.is_native_handle()) {
         if (std::optional<native_handle<partial_definition>> handle =
-                lookup->as_native_handle().try_as<partial_definition>()) {
+                lookup.as_native_handle().try_as<partial_definition>()) {
           return handle->ptr();
         }
       }
@@ -1371,7 +1363,7 @@ class render_engine {
           partial_statement.partial.loc.begin,
           "Expression '{}' does not evaluate to a partial. The encountered value is:\n{}",
           partial_statement.partial.to_string(),
-          to_string(*lookup));
+          to_string(lookup));
     });
 
     const auto& named_arguments = partial_statement.named_arguments;
@@ -1407,7 +1399,7 @@ class render_engine {
         derived_ctx,
         partial_statement.partial.loc.begin,
         partial->name,
-        lookup);
+        std::move(lookup));
 
     for (const std::string& argument : partial->arguments) {
       auto arg = named_arguments.find(argument);
@@ -1488,7 +1480,7 @@ bool render(
     diagnostics_engine& diags,
     render_options opts) {
   render_engine engine{out, diags, std::move(opts)};
-  return std::move(engine).visit(root, manage_as_static(root_context));
+  return std::move(engine).visit(root, root_context);
 }
 
 } // namespace whisker

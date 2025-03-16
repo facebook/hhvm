@@ -27,25 +27,25 @@ namespace whisker {
 
 namespace {
 
-object::ptr find_property(
+std::optional<object> find_property(
     diagnostics_engine& diags,
-    const object::ptr& self,
+    const object& self,
     const ast::identifier& identifier) {
-  using result = object::ptr;
-  return self->visit(
-      [](null) -> result { return nullptr; },
-      [](i64) -> result { return nullptr; },
-      [](f64) -> result { return nullptr; },
-      [](const string&) -> result { return nullptr; },
-      [](boolean) -> result { return nullptr; },
-      [](const managed_array&) -> result { return nullptr; },
+  using result = std::optional<object>;
+  return self.visit(
+      [](null) -> result { return std::nullopt; },
+      [](i64) -> result { return std::nullopt; },
+      [](f64) -> result { return std::nullopt; },
+      [](const string&) -> result { return std::nullopt; },
+      [](boolean) -> result { return std::nullopt; },
+      [](const managed_array&) -> result { return std::nullopt; },
       [&](const native_object::ptr& o) -> result {
         if (auto map_like = o->as_map_like()) {
           return map_like->lookup_property(identifier.name);
         }
-        return nullptr;
+        return std::nullopt;
       },
-      [](const native_function::ptr&) -> result { return nullptr; },
+      [](const native_function::ptr&) -> result { return std::nullopt; },
       [&](const native_handle<>& h) -> result {
         // Recurse through the prototype chain until the first matching
         // descriptor is found. This is similar to JavaScript:
@@ -55,7 +55,7 @@ object::ptr find_property(
           if (auto* descriptor = proto->find_descriptor(identifier.name)) {
             return detail::variant_match(
                 *descriptor,
-                [&](const prototype<>::property& prop) -> object::ptr {
+                [&](const prototype<>::property& prop) -> object {
                   return prop.function->invoke(native_function::context{
                       identifier.loc,
                       diags,
@@ -64,19 +64,19 @@ object::ptr find_property(
                       {} /* named arguments */,
                   });
                 },
-                [&](const prototype<>::fixed_object& fixed) -> object::ptr {
+                [&](const prototype<>::fixed_object& fixed) -> object {
                   return fixed.value;
                 });
           }
           proto = proto->parent();
         }
-        return nullptr;
+        return std::nullopt;
       },
       [&](const managed_map& m) -> result {
         if (auto it = m->find(identifier.name); it != m->end()) {
-          return manage_as_static(it->second);
+          return it->second;
         }
-        return nullptr;
+        return std::nullopt;
       });
 }
 
@@ -99,12 +99,13 @@ class global_scope_object
     return shared_from_this();
   }
 
-  object::ptr lookup_property(std::string_view identifier) const override {
+  std::optional<object> lookup_property(
+      std::string_view identifier) const override {
     if (auto property = properties_.find(identifier);
         property != properties_.end()) {
-      return manage_as_static(property->second);
+      return property->second;
     }
-    return nullptr;
+    return std::nullopt;
   }
 
   void print_to(tree_printer::scope scope, const object_print_options& options)
@@ -123,7 +124,7 @@ class global_scope_object
 
 } // namespace
 
-object::ptr eval_context::lexical_scope::lookup_property(
+std::optional<object> eval_context::lexical_scope::lookup_property(
     diagnostics_engine& diags, const ast::identifier& identifier) {
   if (auto local = locals_.find(identifier.name); local != locals_.end()) {
     return local->second;
@@ -131,7 +132,7 @@ object::ptr eval_context::lexical_scope::lookup_property(
   return find_property(diags, this_ref_, identifier);
 }
 
-eval_context::eval_context(diagnostics_engine& diags, object::ptr globals)
+eval_context::eval_context(diagnostics_engine& diags, object globals)
     : diags_(diags),
       global_scope_(std::move(globals)),
       stack_({lexical_scope(global_scope_)}) {}
@@ -139,12 +140,10 @@ eval_context::eval_context(diagnostics_engine& diags, object::ptr globals)
 eval_context::eval_context(diagnostics_engine& diags, map globals)
     : eval_context(
           diags,
-          manage_owned<object>(
-              w::make_native_object<global_scope_object>(std::move(globals)))) {
-}
+          w::make_native_object<global_scope_object>(std::move(globals))) {}
 
 /* static */ eval_context eval_context::with_root_scope(
-    diagnostics_engine& diags, object::ptr root_scope, map globals) {
+    diagnostics_engine& diags, object root_scope, map globals) {
   eval_context result{diags, std::move(globals)};
   result.push_scope(root_scope);
   return result;
@@ -158,7 +157,7 @@ std::size_t eval_context::stack_depth() const {
   return stack_.size() - 1;
 }
 
-void eval_context::push_scope(object::ptr object) {
+void eval_context::push_scope(object object) {
   stack_.emplace_back(std::move(object));
 }
 
@@ -168,12 +167,12 @@ void eval_context::pop_scope() {
   stack_.pop_back();
 }
 
-const object::ptr& eval_context::global_scope() const {
+const object& eval_context::global_scope() const {
   return global_scope_;
 }
 
 expected<std::monostate, eval_name_already_bound_error>
-eval_context::bind_local(std::string name, object::ptr value) {
+eval_context::bind_local(std::string name, object value) {
   assert(!stack_.empty());
   if (auto [_, inserted] =
           stack_.back().locals().insert(std::pair{name, std::move(value)});
@@ -194,8 +193,8 @@ eval_context::lookup_object(const ast::variable_lookup& lookup) {
         return lookup_result::without_parent(stack_.back().this_ref());
       },
       [&](const std::vector<ast::identifier>& path) -> result {
-        const auto make_searched_scopes = [&]() -> std::vector<object::ptr> {
-          std::vector<object::ptr> result;
+        const auto make_searched_scopes = [&]() -> std::vector<object> {
+          std::vector<object> result;
           result.reserve(stack_.size());
           // Searching happened in reverse order.
           std::transform(
@@ -220,7 +219,7 @@ eval_context::lookup_object(const ast::variable_lookup& lookup) {
           return result;
         };
 
-        object::ptr current = nullptr;
+        std::optional<object> current;
         // Crawl up through the scope stack since names can be shadowed.
         for (auto scope = stack_.rbegin(); scope != stack_.rend(); ++scope) {
           try {
@@ -236,36 +235,36 @@ eval_context::lookup_object(const ast::variable_lookup& lookup) {
           }
         }
 
-        if (current == nullptr) {
+        if (!current.has_value()) {
           return unexpected(eval_scope_lookup_error(
               path.front().name, make_searched_scopes()));
         }
-        object::ptr parent = manage_as_static(whisker::make::null);
+        object parent = whisker::make::null;
 
         for (auto component = std::next(path.begin()); component != path.end();
              ++component) {
           try {
-            object::ptr next = find_property(diags_, current, *component);
-            if (next == nullptr) {
+            std::optional<object> next =
+                find_property(diags_, *current, *component);
+            if (!next.has_value()) {
               return unexpected(eval_property_lookup_error(
-                  current, /* missing_from */
+                  *current, /* missing_from */
                   make_success_path(path.begin(), component),
                   component->name /* missing_name */));
             }
-            parent = current;
+            parent = *current;
             current = next;
           } catch (const native_object::fatal_error& err) {
             return unexpected(eval_property_lookup_error(
-                current, /* missing_from */
+                *current, /* missing_from */
                 make_success_path(path.begin(), component),
                 component->name /* missing_name */,
                 err.what() /* cause */));
           }
         }
 
-        assert(current != nullptr);
-        assert(parent != nullptr);
-        return lookup_result{current, parent};
+        assert(current.has_value());
+        return lookup_result{*current, parent};
       });
 }
 

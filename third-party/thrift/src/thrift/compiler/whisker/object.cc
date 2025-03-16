@@ -180,7 +180,7 @@ bool array_eq(const array& lhs, const native_object::array_like::ptr& rhs) {
     return false;
   }
   for (std::size_t i = 0; i < size; ++i) {
-    if (lhs[i] != *rhs->at(i)) {
+    if (lhs[i] != rhs->at(i)) {
       return false;
     }
   }
@@ -203,12 +203,10 @@ bool array_eq(
     return false;
   }
   for (std::size_t i = 0; i < size; ++i) {
-    object::ptr lhs_value = lhs->at(i);
-    object::ptr rhs_value = rhs->at(i);
+    object lhs_value = lhs->at(i);
+    object rhs_value = rhs->at(i);
     // Within size so it must not be null.
-    assert(lhs_value != nullptr);
-    assert(rhs_value != nullptr);
-    if (*lhs_value != *rhs_value) {
+    if (lhs_value != rhs_value) {
       return false;
     }
   }
@@ -237,7 +235,7 @@ bool map_eq(const map& lhs, const native_object::map_like::ptr& rhs) {
     }
     auto rhs_value = rhs->lookup_property(key);
     // Key was enumerated so it must not be null.
-    assert(rhs_value != nullptr);
+    assert(rhs_value.has_value());
     if (lhs_value != *rhs_value) {
       return false;
     }
@@ -262,8 +260,10 @@ bool map_eq(
     return false;
   }
   for (const std::string& key : *lhs_keys) {
-    object::ptr lhs_value = lhs->lookup_property(key);
-    object::ptr rhs_value = rhs->lookup_property(key);
+    std::optional<object> lhs_value = lhs->lookup_property(key);
+    std::optional<object> rhs_value = rhs->lookup_property(key);
+    assert(lhs_value.has_value());
+    assert(rhs_value.has_value());
     if (*lhs_value != *rhs_value) {
       return false;
     }
@@ -283,7 +283,7 @@ void native_object::map_like::default_print_to(
 
   for (const std::string& key : property_names) {
     auto cached = lookup_property(key);
-    assert(cached != nullptr);
+    assert(cached.has_value());
     auto element_scope = scope.open_transparent_property();
     element_scope.println("'{}'", key);
     whisker::print_to(*cached, element_scope.open_node(), options);
@@ -301,7 +301,7 @@ void native_object::array_like::default_print_to(
   for (std::size_t i = 0; i < sz; ++i) {
     auto element_scope = scope.open_transparent_property();
     element_scope.println("[{}]", i);
-    whisker::print_to(*at(i), element_scope.open_node(), options);
+    whisker::print_to(at(i), element_scope.open_node(), options);
   }
 }
 

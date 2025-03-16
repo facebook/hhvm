@@ -216,8 +216,8 @@ TEST_F(StandardLibraryTest, map_items) {
         return shared_from_this();
       }
 
-      object::ptr lookup_property(std::string_view) const override {
-        return nullptr;
+      std::optional<object> lookup_property(std::string_view) const override {
+        return std::nullopt;
       }
     };
 

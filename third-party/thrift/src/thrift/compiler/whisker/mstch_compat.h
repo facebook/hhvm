@@ -42,7 +42,7 @@ template <class N>
 class object_t {
  public:
   using node_ref = std::reference_wrapper<const N>;
-  using lookup_result = std::variant<whisker::object::ptr, node_ref>;
+  using lookup_result = std::variant<whisker::object, node_ref>;
 
   lookup_result at(std::string_view name) const {
     assert(has(name));
@@ -161,19 +161,18 @@ class object_t {
     template <typename T>
     static binder cached_whisker_object(T (Self::*method)()) {
       return [method](Self* self) -> property_dispatcher {
-        return [self,
-                method,
-                cache = std::optional<whisker::object::ptr>()]() mutable
-               -> lookup_result {
-          if (!cache) {
-            if constexpr (std::is_same_v<T, whisker::object::ptr>) {
-              cache = (self->*method)();
-            } else {
-              cache = whisker::manage_owned<whisker::object>((self->*method)());
-            }
-          }
-          return *cache;
-        };
+        return
+            [self, method, cache = std::optional<whisker::object>()]() mutable
+            -> lookup_result {
+              if (!cache) {
+                if constexpr (std::is_same_v<T, whisker::object::ptr>) {
+                  cache = (self->*method)();
+                } else {
+                  cache = whisker::object((self->*method)());
+                }
+              }
+              return *cache;
+            };
       };
     }
   };

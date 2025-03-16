@@ -19,9 +19,6 @@
 
 #include <thrift/compiler/whisker/eval_context.h>
 
-#include <cassert>
-#include <map>
-
 #include <fmt/core.h>
 
 namespace w = whisker::make;
@@ -47,17 +44,9 @@ class double_property_name
     return shared_from_this();
   }
 
-  object::ptr lookup_property(std::string_view id) const override {
-    if (auto cached = cached_.find(id); cached != cached_.end()) {
-      return manage_as_static(cached->second);
-    }
-    auto [result, inserted] =
-        cached_.insert({std::string(id), w::string(fmt::format("{0}{0}", id))});
-    assert(inserted);
-    return manage_as_static(result->second);
+  std::optional<object> lookup_property(std::string_view id) const override {
+    return w::string(fmt::format("{0}{0}", id));
   }
-
-  mutable std::map<std::string, object, std::less<>> cached_;
 };
 
 /**
@@ -76,8 +65,8 @@ class delegate_to : public native_object,
     return shared_from_this();
   }
 
-  object::ptr lookup_property(std::string_view) const override {
-    return manage_as_static(delegate_);
+  std::optional<object> lookup_property(std::string_view) const override {
+    return delegate_;
   }
 
   whisker::object delegate_;
@@ -133,9 +122,9 @@ TEST_F(EvalContextTest, parent_scope) {
        {"parent", w::string("works")}});
   object child_1 = w::map({{"foo", w::map({{"abc", w::i64(5)}})}});
   object child_2 = w::map({{"bar", w::map({{"baz", w::boolean(true)}})}});
-  auto ctx = eval_context::with_root_scope(diags(), manage_as_static(root));
-  ctx.push_scope(manage_as_static(child_1));
-  ctx.push_scope(manage_as_static(child_2));
+  auto ctx = eval_context::with_root_scope(diags(), root);
+  ctx.push_scope(child_1);
+  ctx.push_scope(child_2);
 
   // Unknown top-level name should fail
   {
@@ -144,11 +133,7 @@ TEST_F(EvalContextTest, parent_scope) {
     EXPECT_EQ(err.property_name(), "unknown");
     EXPECT_EQ(
         err.searched_scopes(),
-        std::vector<object::ptr>(
-            {manage_as_static(child_2),
-             manage_as_static(child_1),
-             manage_as_static(root),
-             ctx.global_scope()}));
+        std::vector<object>({child_2, child_1, root, ctx.global_scope()}));
   }
 
   EXPECT_EQ(**ctx.lookup_object(path()), child_2);
@@ -157,7 +142,7 @@ TEST_F(EvalContextTest, parent_scope) {
   {
     auto err = get_error<eval_property_lookup_error>(
         ctx.lookup_object(path("foo", "bar")));
-    EXPECT_EQ(*err.missing_from(), w::map({{"abc", w::i64(5)}}));
+    EXPECT_EQ(err.missing_from(), w::map({{"abc", w::i64(5)}}));
     EXPECT_EQ(err.property_name(), "bar");
     EXPECT_EQ(err.success_path(), std::vector<std::string>{"foo"});
   }
@@ -185,7 +170,7 @@ TEST_F(EvalContextTest, locals) {
   object child_1 = w::map({{"foo-2", w::string("shadowed")}});
 
   auto ctx = eval_context::with_root_scope(diags(), root);
-  ctx.push_scope(manage_as_static(child_1));
+  ctx.push_scope(child_1);
 
   EXPECT_EQ(**ctx.lookup_object(path("foo-2")), "shadowed");
   // Locals shadow objects in current scope.
@@ -238,11 +223,11 @@ TEST_F(EvalContextTest, native_object_delegator) {
   EXPECT_EQ(**ctx.lookup_object(path("foo")), doubler);
   EXPECT_EQ(**ctx.lookup_object(path("foo", "bar")), string("barbar"));
 
-  ctx.push_scope(manage_as_static(delegator));
+  ctx.push_scope(delegator);
   EXPECT_EQ(**ctx.lookup_object(path("foo")), doubler);
   EXPECT_EQ(**ctx.lookup_object(path("foo", "bar")), string("barbar"));
 
-  ctx.push_scope(manage_as_static(doubler));
+  ctx.push_scope(doubler);
   EXPECT_EQ(**ctx.lookup_object(path("foo")), "foofoo");
 }
 
@@ -256,7 +241,7 @@ TEST_F(EvalContextTest, native_object_lookup_throws) {
       return shared_from_this();
     }
 
-    object::ptr lookup_property(std::string_view) const override {
+    std::optional<object> lookup_property(std::string_view) const override {
       throw fatal_error{"I always throw!"};
     }
   };
@@ -275,7 +260,7 @@ TEST_F(EvalContextTest, native_object_lookup_throws) {
         eval_context::with_root_scope(diags(), w::map({{"foo", thrower}}));
     auto err = get_error<eval_property_lookup_error>(
         ctx.lookup_object(path("foo", "will-throw")));
-    EXPECT_EQ(*err.missing_from(), thrower);
+    EXPECT_EQ(err.missing_from(), thrower);
     EXPECT_EQ(err.property_name(), "will-throw");
     EXPECT_EQ(err.success_path(), std::vector<std::string>{"foo"});
     EXPECT_EQ(err.cause(), "I always throw!");
@@ -290,7 +275,7 @@ TEST_F(EvalContextTest, globals) {
   EXPECT_EQ(**ctx.lookup_object(path("global")), i64(1));
 
   object shadowing = w::map({{"global", w::i64(2)}});
-  ctx.push_scope(manage_as_static(shadowing));
+  ctx.push_scope(shadowing);
   EXPECT_EQ(**ctx.lookup_object(path("global")), i64(2));
 
   ctx.pop_scope();

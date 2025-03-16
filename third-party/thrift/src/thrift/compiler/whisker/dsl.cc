@@ -29,42 +29,41 @@ std::size_t array_like::size() const {
       which_, [](const auto& arr) -> std::size_t { return arr->size(); });
 }
 
-object::ptr array_like::at(std::size_t index) const {
+object array_like::at(std::size_t index) const {
   return whisker::detail::variant_match(
       which_,
-      [&](const native_object::array_like::ptr& arr) -> object::ptr {
+      [&](const native_object::array_like::ptr& arr) -> object {
         return arr->at(index);
       },
-      [&](const managed_array& arr) -> object::ptr {
-        return manage_derived_ref(arr, (*arr)[index]);
-      });
+      [&](const managed_array& arr) -> object { return (*arr)[index]; });
 }
 
-/* static */ std::optional<array_like> array_like::try_from(
-    const object::ptr& o) {
-  if (o->is_array()) {
-    return array_like(o->as_array());
+/* static */ std::optional<array_like> array_like::try_from(const object& o) {
+  if (o.is_array()) {
+    return array_like(o.as_array());
   }
-  if (o->is_native_object()) {
+  if (o.is_native_object()) {
     if (native_object::array_like::ptr arr =
-            o->as_native_object()->as_array_like()) {
+            o.as_native_object()->as_array_like()) {
       return array_like(std::move(arr));
     }
   }
   return std::nullopt;
 }
 
-object::ptr map_like::lookup_property(std::string_view identifier) const {
+std::optional<object> map_like::lookup_property(
+    std::string_view identifier) const {
+  using result = std::optional<object>;
   return whisker::detail::variant_match(
       which_,
-      [&](const native_object::map_like::ptr& m) -> object::ptr {
+      [&](const native_object::map_like::ptr& m) -> result {
         return m->lookup_property(identifier);
       },
-      [&](const managed_map& m) -> object::ptr {
+      [&](const managed_map& m) -> result {
         if (auto it = m->find(identifier); it != m->end()) {
-          return manage_derived_ref(m, it->second);
+          return it->second;
         }
-        return nullptr;
+        return std::nullopt;
       });
 }
 
@@ -84,24 +83,24 @@ std::optional<std::set<std::string>> map_like::keys() const {
       });
 }
 
-/* static */ std::optional<map_like> map_like::try_from(const object::ptr& o) {
-  if (o->is_map()) {
-    return map_like(o->as_map());
+/* static */ std::optional<map_like> map_like::try_from(const object& o) {
+  if (o.is_map()) {
+    return map_like(o.as_map());
   }
-  if (o->is_native_object()) {
-    if (native_object::map_like::ptr m = o->as_native_object()->as_map_like()) {
+  if (o.is_native_object()) {
+    if (native_object::map_like::ptr m = o.as_native_object()->as_map_like()) {
       return map_like(std::move(m));
     }
   }
   return std::nullopt;
 }
 
-object::ptr function::context::named_argument(
+std::optional<object> function::context::named_argument(
     std::string_view name, named_argument_presence presence) const {
   auto arg = raw().named_arguments().find(name);
   if (arg == raw().named_arguments().end()) {
     if (presence == named_argument_presence::optional) {
-      return nullptr;
+      return std::nullopt;
     }
     throw make_error("Missing named argument '{}'.", name);
   }
@@ -134,7 +133,7 @@ void function::context::declare_named_arguments(
   }
 }
 
-object::ptr function::invoke(raw_context raw) {
+object function::invoke(raw_context raw) {
   return this->invoke(context{std::move(raw)});
 }
 

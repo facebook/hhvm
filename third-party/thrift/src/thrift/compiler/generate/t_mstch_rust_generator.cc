@@ -1787,11 +1787,15 @@ class mstch_rust_value : public mstch_base {
 
     for (auto&& field : struct_type->fields()) {
       if (field.name() == variant) {
-        if (!field.has_annotation("rust.name") &&
-            !field.find_structured_annotation_or_null(kRustNameUri)) {
+        if (field.has_annotation("rust.name")) {
+          return field.get_annotation("rust.name");
+        } else if (
+            const t_const* annot =
+                field.find_structured_annotation_or_null(kRustNameUri)) {
+          return get_annotation_property_string(annot, "name");
+        } else {
           return variant;
         }
-        return field.get_annotation("rust.name");
       }
     }
     return mstch::node();

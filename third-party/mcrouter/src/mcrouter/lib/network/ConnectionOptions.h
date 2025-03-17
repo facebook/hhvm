@@ -29,21 +29,21 @@ struct ConnectionOptions {
   using SocketOptions = folly::SocketOptionMap;
 
   ConnectionOptions(
-      folly::StringPiece host_,
-      uint16_t port_,
-      mc_protocol_t protocol_,
-      SecurityMech mech_ = SecurityMech::NONE,
-      const std::optional<std::string>& serviceIdOverride_ = std::nullopt)
+      folly::StringPiece host,
+      uint16_t port,
+      mc_protocol_t protocol,
+      SecurityMech mech = SecurityMech::NONE,
+      const std::optional<std::string>& serviceIdOverride = std::nullopt)
       : accessPoint(std::make_shared<AccessPoint>(
-            host_,
-            port_,
-            protocol_,
-            mech_,
+            host,
+            port,
+            protocol,
+            mech,
             false,
             false,
             0,
             std::nullopt,
-            serviceIdOverride_)) {}
+            serviceIdOverride)) {}
 
   explicit ConnectionOptions(std::shared_ptr<const AccessPoint> ap)
       : accessPoint(std::move(ap)) {}

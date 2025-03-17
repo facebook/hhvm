@@ -23,11 +23,14 @@ namespace memcache {
 
 template <class ThriftClient>
 std::optional<ThriftClient> ThriftTransportBase::createThriftClient() {
-  std::optional<ThriftClient> client;
   channel_ = createChannel();
   if (!channel_) {
     return std::nullopt;
   }
+  if (flushList_) {
+    channel_->setFlushList(flushList_);
+  }
+  std::optional<ThriftClient> client;
   client = ThriftClient(channel_);
   // Avoid any static default-registered event handlers.
   client->clearEventHandlers();

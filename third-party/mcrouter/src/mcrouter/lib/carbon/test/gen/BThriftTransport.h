@@ -129,17 +129,8 @@ class ThriftTransport<carbon::test::B::BRouterInfo> : public ThriftTransportMeth
       : ThriftTransportBase(eventBase, std::move(options)) {}
   ThriftTransport(folly::VirtualEventBase& eventBase, ConnectionOptions options)
       : ThriftTransportBase(eventBase.getEventBase(), std::move(options)) {}
-  ~ThriftTransport() override {
+  ~ThriftTransport() {
     resetClient();
-  }
-
-  void setFlushList(FlushList* flushList) override final {
-    flushList_ = flushList;
-    if (thriftClient_) {
-      auto* channel = static_cast<apache::thrift::RocketClientChannel*>(
-          thriftClient_->getChannel());
-      channel->setFlushList(flushList_);
-    }
   }
 
   carbon::test::B::TestBReply sendSync(
@@ -181,16 +172,9 @@ class ThriftTransport<carbon::test::B::BRouterInfo> : public ThriftTransportMeth
   }
 
  private:
-  FlushList* flushList_{nullptr};
-
   apache::thrift::Client<carbon::test::B::thrift::B>* getThriftClient() {
     if (FOLLY_UNLIKELY(!thriftClient_)) {
       thriftClient_ = createThriftClient<apache::thrift::Client<carbon::test::B::thrift::B>>();
-      if (thriftClient_.has_value() && flushList_) {
-        auto* channel = static_cast<apache::thrift::RocketClientChannel*>(
-            thriftClient_->getChannel());
-        channel->setFlushList(flushList_);
-      }
     }
     if (FOLLY_LIKELY(thriftClient_.has_value())) {
       return &thriftClient_.value();
@@ -200,30 +184,7 @@ class ThriftTransport<carbon::test::B::BRouterInfo> : public ThriftTransportMeth
 
   void resetClient() override final {
     if (thriftClient_) {
-      if (auto* channel = static_cast<apache::thrift::RocketClientChannel*>(
-            thriftClient_->getChannel())) {
-        if (auto* transport = channel->getTransport()) {
-          const auto securityMech =
-              connectionOptions_.accessPoint->getSecurityMech();
-          if (securityMech == SecurityMech::TLS) {
-            if (auto* socket = transport->getUnderlyingTransport<folly::AsyncSSLSocket>()) {
-              socket->cancelConnect();
-            }
-          } else if (securityMech == SecurityMech::TLS_TO_PLAINTEXT) {
-            if (auto* socket = transport->getUnderlyingTransport<AsyncTlsToPlaintextSocket>()) {
-              socket->getUnderlyingTransport<AsyncTlsToPlaintextSocket>()->closeNow();
-            }
-          } else if (securityMech == SecurityMech::NONE) {
-            if (auto* socket = transport->getUnderlyingTransport<folly::AsyncSocket>()) {
-              socket->cancelConnect();
-            }
-          }
-        }
-        // Reset the callback to avoid the following cycle:
-        //  ~ThriftAsyncClient() -> ~RocketClientChannel() ->
-        //  channelClosed() -> ~ThriftAsyncClient()
-        channel->setCloseCallback(nullptr);
-      }
+      ThriftTransportBase::resetClient();
       thriftClient_.reset();
     }
   }

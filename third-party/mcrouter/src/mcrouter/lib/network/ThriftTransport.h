@@ -72,9 +72,13 @@ class ThriftTransportBase : public Transport,
 
   double getRetransmitsPerKb() override final;
 
+  void setFlushList(FlushList*) override final;
+
  protected:
   folly::EventBase& eventBase_;
   const ConnectionOptions connectionOptions_;
+
+ private:
   std::shared_ptr<apache::thrift::RocketClientChannel> channel_;
 
   // Callbacks
@@ -90,6 +94,9 @@ class ThriftTransportBase : public Transport,
   ConnectionState connectionState_{ConnectionState::Down};
   bool connectionTimedOut_{false};
 
+  FlushList* flushList_{nullptr};
+
+ protected:
   template <class ThriftClient>
   std::optional<ThriftClient> createThriftClient();
 
@@ -97,7 +104,7 @@ class ThriftTransportBase : public Transport,
    * Resets the client pointer.
    * Will only be called after draining the request queue.
    */
-  virtual void resetClient() = 0;
+  virtual void resetClient();
 
   template <class F>
   auto sendSyncImpl(F&& sendFunc);
@@ -144,10 +151,6 @@ class ThriftTransport : public ThriftTransportBase {
     throw std::logic_error(folly::to<std::string>(
         "Router ", RouterInfo::name, " does not support thrift transport"));
   }
-
-  void resetClient() override final {}
-
-  void setFlushList(FlushList* /* flushList */) override final {}
 };
 
 class ThriftTransportUtil {

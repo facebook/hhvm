@@ -39,6 +39,13 @@ void ThriftTransportBase::closeNow() {
   resetClient();
 }
 
+void ThriftTransportBase::setFlushList(FlushList* flushList) {
+  flushList_ = flushList;
+  if (channel_) {
+    channel_->setFlushList(flushList_);
+  }
+}
+
 void ThriftTransportBase::setConnectionStatusCallbacks(
     ConnectionStatusCallbacks callbacks) {
   connectionCallbacks_ = std::move(callbacks);
@@ -230,6 +237,38 @@ void ThriftTransportBase::channelClosed() {
     connectionCallbacks_.onDown(ConnectionDownReason::ABORTED, 0);
   }
   resetClient();
+}
+
+void ThriftTransportBase::resetClient() {
+  if (channel_) {
+    if (auto* transport = channel_->getTransport()) {
+      const auto securityMech =
+          connectionOptions_.accessPoint->getSecurityMech();
+      if (securityMech == SecurityMech::TLS) {
+        if (auto* socket =
+                transport->getUnderlyingTransport<folly::AsyncSSLSocket>()) {
+          socket->cancelConnect();
+        }
+      } else if (securityMech == SecurityMech::TLS_TO_PLAINTEXT) {
+        if (auto* socket =
+                transport
+                    ->getUnderlyingTransport<AsyncTlsToPlaintextSocket>()) {
+          socket->getUnderlyingTransport<AsyncTlsToPlaintextSocket>()
+              ->closeNow();
+        }
+      } else if (securityMech == SecurityMech::NONE) {
+        if (auto* socket =
+                transport->getUnderlyingTransport<folly::AsyncSocket>()) {
+          socket->cancelConnect();
+        }
+      }
+    }
+    // Reset the callback to avoid the following cycle:
+    //  ~ThriftAsyncClient() -> ~RocketClientChannel() ->
+    //  channelClosed() -> ~ThriftAsyncClient()
+    channel_->setCloseCallback(nullptr);
+    channel_.reset();
+  }
 }
 
 #ifndef LIBMC_FBTRACE_DISABLE

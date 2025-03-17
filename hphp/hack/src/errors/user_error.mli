@@ -116,6 +116,8 @@ val to_json :
 
 val claim_message : ('a, _) t -> 'a Message.t
 
+val reason_messages : (_, 'a) t -> 'a Message.t list
+
 val function_pos : ('a, _) t -> 'a option
 
 val custom_errors : (_, _) t -> string list

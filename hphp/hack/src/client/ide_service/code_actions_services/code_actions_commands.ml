@@ -9,42 +9,131 @@ open Hh_prelude
 
 let max_file_content_lines = 400
 
-let extract_prompt_context buf pos =
-  let path = Pos.(filename pos) in
-  let start_ln = Pos.line pos - 1 and end_ln = Pos.end_line pos - 1 in
+let cursor_l = "[DIAGNOSTIC_START]"
+
+let cursor_r = "[DIAGNOSTIC_END]"
+
+let extract_prompt_context buf ~ctxt_pos ~claim_pos =
+  let path = Pos.(filename ctxt_pos) in
+  let ctxt_start_ln = Pos.line ctxt_pos - 1
+  and ctxt_end_ln = Pos.end_line ctxt_pos - 1 in
+  let (start_ln, end_ln, start_col, end_col) =
+    let (start_ln, end_ln, start_col, end_col) =
+      Pos.info_pos_extended claim_pos
+    in
+    (start_ln - 1, end_ln - 1, start_col - 1, end_col - 1)
+  in
   let line_num_width = 1 + (String.length @@ string_of_int end_ln) in
   List.iteri (Errors.read_lines path) ~f:(fun ln str ->
-      if ln >= start_ln && ln <= end_ln then (
+      if ln < ctxt_start_ln || ln > ctxt_end_ln then
+        (* This line isn't in our containing span so skip it *)
+        ()
+      else if
+        (ln = ctxt_start_ln || ln = ctxt_end_ln)
+        && String.(is_empty @@ lstrip str)
+      then
+        (* If the line is blank and is either the first of last line, skip it *)
+        ()
+      else begin
+        (* First write the line number and gutter marker  *)
         let ln_num =
           String.pad_left (Int.to_string (ln + 1)) ~char:' ' ~len:line_num_width
         in
-        Buffer.add_string buf ln_num;
-        Buffer.add_string buf " | ";
-        Buffer.add_string buf str;
+        let (_ : unit) =
+          Buffer.add_string buf ln_num;
+          Buffer.add_string buf " | "
+        in
+        let is_start = ln = start_ln and is_end = ln = end_ln in
+        let (_ : unit) =
+          if is_start && is_end then (
+            (* If our target pos starts and ends on the line..
+               - write the prefix before the start of the marked pos
+               - write the lhs cursor marker
+               - write the marked string
+               - write the rhs cursor marker
+               - write the suffix after the end of the marked pos
+            *)
+            Buffer.add_string buf (String.prefix str start_col);
+            Buffer.add_string buf cursor_l;
+            Buffer.add_string buf (String.slice str start_col (end_col + 1));
+            Buffer.add_string buf cursor_r;
+            Buffer.add_string buf (String.drop_prefix str (end_col + 1))
+          ) else if is_start then (
+            (* If this is the start line, write the prefix, the lhs cursor and
+               substring of the marked pos that is on this line *)
+            Buffer.add_string buf (String.prefix str start_col);
+            Buffer.add_string buf cursor_l;
+            Buffer.add_string buf (String.drop_prefix str start_col)
+          ) else if is_end then (
+            (* If this is the end line, write the substring of the marked pos
+               that is on the line, the rhs cursor and the suffix *)
+            Buffer.add_string buf (String.prefix str end_col);
+            Buffer.add_string buf cursor_r;
+            Buffer.add_string buf (String.drop_prefix str end_col)
+          ) else if ln < start_ln || ln > end_ln then
+            (* Either the whole line is part of the target pos or the target
+               is not on the line at all; either way, write the entire line *)
+            Buffer.add_string buf str
+          else
+            Buffer.add_string buf str
+        in
         Buffer.add_string buf "\n"
-      ))
+      end)
+
+let user_prompt_prefix buf ctxt_pos user_error =
+  let claim_pos =
+    Message.get_message_pos (User_error.claim_message user_error)
+  in
+  Buffer.add_string
+    buf
+    "Given the following snippet of Hack code that is part of the file:\n<SNIPPET>\n```hack";
+  extract_prompt_context buf ~ctxt_pos ~claim_pos;
+  Buffer.add_string buf "\n```</SNIPPET>\n"
+
+let user_prompt_suffix buf =
+  Buffer.add_string
+    buf
+    {|Edit <SNIPPET> in a way that would fix that lint.
+   If there are multiple ways to fix this issue, please return in the code section the most strightforward one that is part of <SNIPPET>,
+   any further suggestions can be added in the explanation section.|}
+
+let extended_diagnostics buf user_error =
+  Buffer.add_string buf "<DIAGNOSTIC>\n";
+  Buffer.add_string buf (Extended_error_formatter.to_string user_error);
+  Buffer.add_string buf "\n</DIAGNOSTIC>\n";
+  match User_error.custom_errors user_error with
+  | [] -> ()
+  | msgs ->
+    List.iter msgs ~f:(fun str ->
+        Buffer.add_string buf (Format.sprintf {|<HINT>%s<\HINT>\n|} str))
 
 let create_user_prompt selection user_error =
   let buf = Buffer.create 500 in
-  let () =
-    Buffer.add_string
-      buf
-      "Given the following snippet of Hack code that is part of the file:\n<SNIPPET>";
-    extract_prompt_context buf selection;
-    Buffer.add_string buf "\n</SNIPPET>\n<DIAGNOSTIC>\n";
-    Buffer.add_string buf (Extended_error_formatter.to_string user_error);
-    Buffer.add_string buf "\n</DIAGNOSTIC>\n";
-    (match User_error.custom_errors user_error with
-    | [] -> ()
-    | msgs ->
-      List.iter msgs ~f:(fun str ->
-          Buffer.add_string buf (Format.sprintf {|<HINT>%s<\HINT>\n|} str)));
-    Buffer.add_string
-      buf
-      {|Edit <SNIPPET> in a way that would fix that lint.
-   If there are multiple ways to fix this issue, please return in the code section the most strightforward one that is part of <SNIPPET>,
-   any further suggestions can be added in the explanation section.|}
-  in
+  user_prompt_prefix buf selection user_error;
+  extended_diagnostics buf user_error;
+  user_prompt_suffix buf;
+  Buffer.contents buf
+
+let legacy_diagnostics buf user_error =
+  Buffer.add_string buf "<DIAGNOSTIC>\n";
+  Buffer.add_string buf (snd (User_error.claim_message user_error));
+  Buffer.add_string buf "\n</DIAGNOSTIC>\n";
+  match User_error.reason_messages user_error with
+  | [] -> ()
+  | msgs ->
+    List.iter msgs ~f:(fun (pos, str) ->
+        Buffer.add_string
+          buf
+          (Format.sprintf
+             {|<HINT>%s\nlocation uri:%s\n<\HINT>\n|}
+             str
+             (Pos.filename pos)))
+
+let create_legacy_user_prompt selection user_error =
+  let buf = Buffer.create 500 in
+  user_prompt_prefix buf selection user_error;
+  legacy_diagnostics buf user_error;
+  user_prompt_suffix buf;
   Buffer.contents buf
 
 let error_to_show_inline_chat_command user_error line_agnostic_hash =
@@ -67,6 +156,9 @@ let error_to_show_inline_chat_command user_error line_agnostic_hash =
   let webview_start_line = Pos.line override_selection - 1 in
   let display_prompt = Format.sprintf {|Fix inline - %s|} (snd claim) in
   let user_prompt = create_user_prompt override_selection user_error in
+  let legacy_user_prompt =
+    create_legacy_user_prompt override_selection user_error
+  in
   let predefined_prompt =
     Code_action_types.(
       Show_inline_chat_command_args.
@@ -85,7 +177,10 @@ let error_to_show_inline_chat_command user_error line_agnostic_hash =
   let extras =
     Hh_json.(
       JSON_Object
-        [("lineAgnosticHash", string_ (string_of_int line_agnostic_hash))])
+        [
+          ("lineAgnosticHash", string_ (string_of_int line_agnostic_hash));
+          ("legacyUserPrompt", string_ legacy_user_prompt);
+        ])
   in
   let command_args =
     Code_action_types.(

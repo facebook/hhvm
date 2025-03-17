@@ -87,7 +87,8 @@ struct Exhaustive {
 struct Ord {
 // # `rust.Ord`
 //
-// Require that the type being defined derive `Ord`.
+// Generate trait impls for `Ord`, `PartialOrd`, `Eq`, and `Hash`.
+// This makes a type usable as the key in a hash-map or B-tree map.
 }
 
 @scope.Typedef

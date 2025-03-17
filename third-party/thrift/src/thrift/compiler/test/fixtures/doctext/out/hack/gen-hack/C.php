@@ -437,6 +437,15 @@ class C_numbers_StreamResponse extends \ThriftSyncStructWithResult implements \I
     return shape(
       'struct' => dict[],
       'fields' => dict[
+        'success' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\facebook\thrift\annotation\rust\NewType' => \facebook\thrift\annotation\rust\NewType::fromShape(
+              shape(
+              )
+            ),
+          ],
+        ),
       ],
     );
   }

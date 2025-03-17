@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/rust.thrift"
+
+@rust.Serde{enabled = false}
 struct NoSerde {
   1: bool a;
-} (rust.serde = "false")
+}
 
 struct Serde {
   1: bool a;

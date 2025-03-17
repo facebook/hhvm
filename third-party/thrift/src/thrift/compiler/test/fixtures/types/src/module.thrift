@@ -16,6 +16,7 @@
 
 include "included.thrift"
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/rust.thrift"
 include "thrift/annotation/thrift.thrift"
 
 package "apache.org/thrift/fixtures/types"
@@ -250,10 +251,10 @@ typedef TBinary (noop_annotation = "1") TBinary_8623
 typedef i32 (cpp.use_allocator = "1") i32_9314
 typedef list<i32> (cpp.use_allocator = "1") list_i32_9187
 typedef map<i32, i32> (cpp.use_allocator = "1") map_i32_i32_9565
-typedef map<i32, string> (
-  rust.type = "sorted_vector_map::SortedVectorMap",
-) map_i32_string_1261
+@rust.Type{name = "sorted_vector_map::SortedVectorMap"}
+typedef map<i32, string> map_i32_string_1261
 typedef set<i32> (cpp.use_allocator = "1") set_i32_7070
 @cpp.Type{template = "folly::sorted_vector_set"}
-typedef set<i32> (rust.type = "sorted_vector_map::SortedVectorSet") set_i32_7194
+@rust.Type{name = "sorted_vector_map::SortedVectorSet"}
+typedef set<i32> set_i32_7194
 typedef string (cpp.use_allocator = "1") string_5252

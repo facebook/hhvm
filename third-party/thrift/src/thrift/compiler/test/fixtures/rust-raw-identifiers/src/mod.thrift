@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/rust.thrift"
+
 struct ThereAreNoPascalCaseKeywords {
   1: bool return;
-  2: bool super (rust.name = "super_");
+  @rust.Name{name = "super_"}
+  2: bool super;
 }
 
 service Foo {
   void return(1: ThereAreNoPascalCaseKeywords bar);
-  void super(1: ThereAreNoPascalCaseKeywords bar) (rust.name = "super_");
+  @rust.Name{name = "super_"}
+  void super(1: ThereAreNoPascalCaseKeywords bar);
 }

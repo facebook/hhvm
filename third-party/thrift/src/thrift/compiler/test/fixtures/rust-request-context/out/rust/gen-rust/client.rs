@@ -1544,7 +1544,6 @@ pub struct make_MyService;
 /// # };
 /// ```
 impl dyn MyService {
-    pub const rust_request_context: &'static ::std::primitive::str = "1";
     pub fn new<P, T>(
         protocol: P,
         transport: T,

@@ -129,6 +129,20 @@ impl ::fbthrift::metadata::ThriftAnnotations for ThereAreNoPascalCaseKeywords {
             1 => {
             },
             2 => {
+
+                if type_id == ::std::any::TypeId::of::<rust__types::Name>() {
+                    let mut tmp = ::std::option::Option::Some(rust__types::Name {
+                        name: "super_".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <rust__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
+                }
             },
             _ => {}
         }

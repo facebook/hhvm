@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/rust.thrift"
+
 /** Constant foo */
 const string FOO = "foo";
 
@@ -35,7 +37,8 @@ const i32 SHOUTY = 11;
 typedef string lanyard
 
 /** Secret name */
-typedef i32 number (rust.newtype)
+@rust.NewType
+typedef i32 number
 
 /**
  * DefinitionList doctext.

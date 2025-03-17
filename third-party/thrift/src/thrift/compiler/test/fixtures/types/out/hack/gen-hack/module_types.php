@@ -718,6 +718,11 @@ class ContainerStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
                 "template" => "folly::sorted_vector_set",
               )
             ),
+            '\facebook\thrift\annotation\rust\Type' => \facebook\thrift\annotation\rust\Type::fromShape(
+              shape(
+                "name" => "sorted_vector_map::SortedVectorSet",
+              )
+            ),
           ],
         ),
         'fieldG' => shape(

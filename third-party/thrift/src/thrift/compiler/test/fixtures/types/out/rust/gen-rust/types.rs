@@ -63,7 +63,7 @@ pub struct ContainerStruct {
     pub fieldD: ::std::vec::Vec<::std::primitive::i32>,
     pub fieldE: ::std::vec::Vec<::std::primitive::i32>,
     pub fieldF: ::sorted_vector_map::SortedVectorSet<::std::primitive::i32>,
-    pub fieldG: ::sorted_vector_map::SortedVectorMap<::std::primitive::i32, ::std::string::String>,
+    pub fieldG: crate::types::map_i32_string_1261,
     pub fieldH: included__types::SomeMap,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
@@ -1117,7 +1117,7 @@ where
         crate::r#impl::write(&self.fieldF, p);
         p.write_field_end();
         p.write_field_begin("fieldG", ::fbthrift::TType::Map, 7);
-        crate::r#impl::write(&self.fieldG, p);
+        ::fbthrift::Serialize::write(&self.fieldG, p);
         p.write_field_end();
         p.write_field_begin("fieldH", ::fbthrift::TType::Map, 8);
         ::fbthrift::Serialize::write(&self.fieldH, p);
@@ -1162,7 +1162,7 @@ where
                 (::fbthrift::TType::List, 4) => field_fieldD = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::List, 5) => field_fieldE = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Set, 6) => field_fieldF = ::std::option::Option::Some(crate::r#impl::read(p)?),
-                (::fbthrift::TType::Map, 7) => field_fieldG = ::std::option::Option::Some(crate::r#impl::read(p)?),
+                (::fbthrift::TType::Map, 7) => field_fieldG = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Map, 8) => field_fieldH = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }

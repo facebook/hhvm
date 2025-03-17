@@ -44,8 +44,9 @@ struct T4 {
 
 // --
 
+@rust.NewType
 @rust.Type{name = "smallvec::SmallVec<[u8; 16]>"}
-typedef binary binary_t (rust.newtype)
+typedef binary binary_t
 
 @rust.NewType
 typedef i64 Generation
@@ -181,7 +182,8 @@ service OneMethodOptOut {
 }
 
 union Bar {
-  1: i32 WithAnnotation (rust.name = "Annotated");
+  @rust.Name{name = "Annotated"}
+  1: i32 WithAnnotation;
   2: i32 WithoutAnnotation;
 }
 

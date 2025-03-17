@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/rust.thrift"
+
+@rust.Derive{derives = ["Foo", "Bar"]}
 struct WithCustomDerives {
   1: bool a;
-} (rust.derive = "Foo, Bar")
+}

@@ -120,6 +120,16 @@ impl ::fbthrift::metadata::ThriftAnnotations for NoSerde {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        if type_id == ::std::any::TypeId::of::<rust__types::Serde>() {
+            let mut tmp = ::std::option::Option::Some(rust__types::Serde {
+                enabled: false,
+                ..::std::default::Default::default()
+            });
+            let r: &mut dyn ::std::any::Any = &mut tmp;
+            let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+            return r.take();
+        }
+
         ::std::option::Option::None
     }
 

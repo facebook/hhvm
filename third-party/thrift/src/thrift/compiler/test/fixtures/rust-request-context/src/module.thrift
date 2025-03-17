@@ -18,6 +18,8 @@ namespace android test.fixtures.basic
 namespace java test.fixtures.basic
 namespace java.swift test.fixtures.basic
 
+include "thrift/annotation/rust.thrift"
+
 enum MyEnum {
   MyValue1 = 0,
   MyValue2 = 1,
@@ -45,6 +47,7 @@ interaction MyInteraction {
   void ping();
 }
 
+@rust.RequestContext
 service MyService {
   void ping();
   string getRandomData();
@@ -57,4 +60,4 @@ service MyService {
   MyDataItem, stream<MyStruct> streamByIdWithResponse(1: i64 id);
   performs MyInteraction;
   MyInteraction startPingInteraction();
-} (rust.request_context)
+}

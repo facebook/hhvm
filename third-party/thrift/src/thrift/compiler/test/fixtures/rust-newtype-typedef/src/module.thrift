@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
-typedef map<i32, i32> MapType (
-  rust.newtype,
-  rust.type = "sorted_vector_map::SortedVectorMap",
-)
+include "thrift/annotation/rust.thrift"
 
-typedef binary BinType (
-  rust.newtype,
-  rust.type = "smallvec::SmallVec<[u8; 16]>",
-)
+@rust.NewType
+@rust.Type{name = "sorted_vector_map::SortedVectorMap"}
+typedef map<i32, i32> MapType
 
-typedef double (rust.type = "OrderedFloat<f64>") Double
+@rust.NewType
+@rust.Type{name = "smallvec::SmallVec<[u8; 16]>"}
+typedef binary BinType
 
-typedef binary BytesType (rust.newtype, rust.type = "Bytes")
+@rust.Type{name = "OrderedFloat<f64>"}
+typedef double Double
 
+@rust.NewType
+@rust.Type{name = "Bytes"}
+typedef binary BytesType
+
+@rust.Ord
 struct MyStruct {
   1: MapType the_map;
   2: BinType the_bin;
@@ -36,9 +40,12 @@ struct MyStruct {
   5: binary_9564 inline_bytes;
   6: Double floaty;
   7: double_8056 doublefloaty;
-} (rust.ord)
+}
 
 // The following were automatically generated and may benefit from renaming.
-typedef binary (rust.type = "smallvec::SmallVec<[u8; 32]>") binary_8247
-typedef binary (rust.type = "Bytes") binary_9564
-typedef double (rust.type = "OrderedFloat<f64>") double_8056
+@rust.Type{name = "smallvec::SmallVec<[u8; 32]>"}
+typedef binary binary_8247
+@rust.Type{name = "Bytes"}
+typedef binary binary_9564
+@rust.Type{name = "OrderedFloat<f64>"}
+typedef double double_8056

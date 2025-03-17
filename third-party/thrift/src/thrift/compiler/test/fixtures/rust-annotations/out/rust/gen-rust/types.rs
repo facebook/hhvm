@@ -2674,6 +2674,20 @@ impl ::fbthrift::metadata::ThriftAnnotations for Bar {
         #[allow(clippy::match_single_binding)]
         match field_id {
             1 => {
+
+                if type_id == ::std::any::TypeId::of::<rust__types::Name>() {
+                    let mut tmp = ::std::option::Option::Some(rust__types::Name {
+                        name: "Annotated".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <rust__types::Name as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
+                }
             },
             2 => {
             },

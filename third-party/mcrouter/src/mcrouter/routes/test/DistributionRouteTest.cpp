@@ -34,7 +34,7 @@ struct AxonMockResult {
 namespace {
 AxonMockResult setupAxonFn(std::shared_ptr<AxonContext>& ctx) {
   AxonMockResult res;
-  ctx->writeProxyFn = [&](auto bucketId, auto&& payload) {
+  ctx->writeProxyFn = [&](auto bucketId, auto&& payload, bool) {
     res.bucketId = bucketId;
     if (payload.find(invalidation::kRegion) != payload.end()) {
       res.region = payload.at(invalidation::kRegion);

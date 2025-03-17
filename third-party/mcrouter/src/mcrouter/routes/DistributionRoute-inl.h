@@ -32,6 +32,11 @@ inline DistributionRouteSettings parseDistributionRouteSettings(
         "DistributionRoute: distribution_source_region must be a string");
     settings.srcRegion = jDistributionSourceRegion->getString();
   }
+  if (auto* jDistributionSecureWrites =
+          json.get_ptr("distribution_secure_writes_enabled")) {
+    settings.secureWrites = parseBool(
+        *jDistributionSecureWrites, "distribution_secure_writes_enabled");
+  }
   return settings;
 }
 

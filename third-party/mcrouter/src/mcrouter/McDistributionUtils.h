@@ -56,6 +56,7 @@ memcache::McDeleteRequest addDeleteRequestSource(
  * @param targetRegion Target region for the distribution
  * @param sourceRegion Source (client) region of the distribution
  * @param message Optional message to pass down with the record
+ * @param secureWrites enable client identity check for writes
  */
 FOLLY_NOINLINE bool distributeWriteRequest(
     const memcache::McSetRequest& req,
@@ -63,7 +64,8 @@ FOLLY_NOINLINE bool distributeWriteRequest(
     uint64_t bucketId,
     const std::string& targetRegion,
     const std::string& sourceRegion,
-    std::optional<std::string> message = std::nullopt);
+    std::optional<std::string> message = std::nullopt,
+    bool secureWrites = false);
 
 /**
  * Distribute delete requests to Distribution layer.

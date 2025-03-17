@@ -25,6 +25,7 @@ struct DistributionRouteSettings {
   bool distributedDeleteRpcEnabled{true};
   bool replay{false};
   std::string srcRegion;
+  bool secureWrites{false};
 };
 
 constexpr std::string_view kAsynclogDistributionEndpoint = "0.0.0.0";
@@ -49,14 +50,16 @@ class DistributionRoute {
       : rh_(std::move(rh)),
         distributedDeleteRpcEnabled_(settings.distributedDeleteRpcEnabled),
         replay_{settings.replay},
-        srcRegion_{settings.srcRegion} {}
+        srcRegion_{settings.srcRegion},
+        secureWrites_(settings.secureWrites) {}
 
   std::string routeName() const {
     return fmt::format(
-        "distribution|distributed_delete_rpc_enabled={}|replay={}|distribution_source_region={}",
+        "distribution|distributed_delete_rpc_enabled={}|replay={}|distribution_source_region={}|secure_writes={}",
         distributedDeleteRpcEnabled_ ? "true" : "false",
         replay_ ? "true" : "false",
-        srcRegion_);
+        srcRegion_,
+        secureWrites_ ? "true" : "false");
   }
 
   template <class Request>
@@ -117,7 +120,8 @@ class DistributionRoute {
                  *bucketId,
                  distributionRegion,
                  srcRegion_,
-                 std::nullopt)
+                 std::nullopt,
+                 secureWrites_)
           .first;
     }
     folly::fibers::addTask([this,
@@ -134,7 +138,8 @@ class DistributionRoute {
           *bucketId,
           distributionRegion,
           srcRegion_,
-          std::nullopt);
+          std::nullopt,
+          secureWrites_);
       if (axonLogRes) {
         ctx->proxy().stats().increment(
             distribution_set_axon_write_success_stat);
@@ -247,6 +252,7 @@ class DistributionRoute {
   const bool distributedDeleteRpcEnabled_;
   const bool replay_;
   const std::string srcRegion_;
+  const bool secureWrites_;
 
   std::optional<std::string> inferDistributionRegionForReplay(
       const McDeleteRequest& req,

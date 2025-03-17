@@ -28,7 +28,8 @@ FOLLY_NOINLINE bool distributeWriteRequest(
     uint64_t bucketId,
     const std::string& targetRegion,
     const std::string& sourceRegion,
-    std::optional<std::string> message) {
+    std::optional<std::string> message,
+    bool secureWrites) {
   std::optional<std::string> pool;
   if (!axonCtx->poolFilter.empty()) {
     pool.emplace(axonCtx->poolFilter);
@@ -55,7 +56,7 @@ FOLLY_NOINLINE bool distributeWriteRequest(
         invalidation::DistributionOperation::Write,
         sourceRegion);
   });
-  return axonCtx->writeProxyFn(bucketId, std::move(kvPairs));
+  return axonCtx->writeProxyFn(bucketId, std::move(kvPairs), secureWrites);
 }
 
 FOLLY_NOINLINE bool distributeDeleteRequest(
@@ -105,7 +106,8 @@ FOLLY_NOINLINE bool distributeDeleteRequest(
             invalidation::DistributionOperation::Delete,
             sourceRegion);
       });
-  return axonCtx->writeProxyFn(bucketId, std::move(kvPairs));
+  return axonCtx->writeProxyFn(
+      bucketId, std::move(kvPairs), /*secureWrites*/ false);
 }
 
 FOLLY_NOINLINE bool spoolAsynclog(

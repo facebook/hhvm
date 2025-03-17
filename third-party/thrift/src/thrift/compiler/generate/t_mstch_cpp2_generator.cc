@@ -2205,9 +2205,6 @@ class cpp_mstch_enum : public mstch_enum {
             {"enum:cpp_declare_bitwise_ops",
              &cpp_mstch_enum::cpp_declare_bitwise_ops},
             {"enum:has_zero", &cpp_mstch_enum::has_zero},
-            {"enum:fatal_annotations?", &cpp_mstch_enum::has_fatal_annotations},
-            {"enum:fatal_annotations", &cpp_mstch_enum::fatal_annotations},
-            {"enum:legacy_type_id", &cpp_mstch_enum::get_legacy_type_id},
             {"enum:legacy_api?", &cpp_mstch_enum::legacy_api},
         });
   }
@@ -2252,15 +2249,6 @@ class cpp_mstch_enum : public mstch_enum {
           enum_value, context_, pos_);
     }
     return mstch::node();
-  }
-  mstch::node has_fatal_annotations() {
-    return get_fatal_annotations(enum_->annotations()).size() > 0;
-  }
-  mstch::node fatal_annotations() {
-    return make_mstch_annotations(get_fatal_annotations(enum_->annotations()));
-  }
-  mstch::node get_legacy_type_id() {
-    return std::to_string(enum_->get_type_id());
   }
   mstch::node legacy_api() {
     return ::apache::thrift::compiler::generate_legacy_api(*enum_);

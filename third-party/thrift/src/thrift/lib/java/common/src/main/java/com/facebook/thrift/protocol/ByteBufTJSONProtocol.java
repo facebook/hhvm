@@ -596,34 +596,41 @@ public class ByteBufTJSONProtocol extends ByteBufTProtocol {
   // Read in a JSON string, unescaping as appropriate.. Skip reading from the
   // context if skipContext is true.
   private ByteBuf readJSONString(boolean skipContext) throws TException {
-    ByteBuf arr = ByteBufAllocator.DEFAULT.buffer(DEF_STRING_SIZE);
-    if (!skipContext) {
-      context_.read();
-    }
-    readJSONSyntaxChar(QUOTE);
-    while (true) {
-      byte ch = reader_.read();
-      if (ch == QUOTE[0]) {
-        break;
+    ByteBuf arr = null;
+    try {
+      arr = ByteBufAllocator.DEFAULT.buffer(DEF_STRING_SIZE);
+      if (!skipContext) {
+        context_.read();
       }
-      if (ch == ESCSEQ[0]) {
-        ch = reader_.read();
-        if (ch == ESCSEQ[1]) {
-          readJSONSyntaxChar(ZERO);
-          readJSONSyntaxChar(ZERO);
-          trans_.readAll(tmpbuf_, 0, 2);
-          ch = (byte) ((hexVal((byte) tmpbuf_[0]) << 4) + hexVal(tmpbuf_[1]));
-        } else {
-          int off = ESCAPE_CHARS.indexOf(ch);
-          if (off == -1) {
-            throw new TProtocolException(TProtocolException.INVALID_DATA, "Expected control char");
-          }
-          ch = ESCAPE_CHAR_VALS[off];
+      readJSONSyntaxChar(QUOTE);
+      while (true) {
+        byte ch = reader_.read();
+        if (ch == QUOTE[0]) {
+          break;
         }
+        if (ch == ESCSEQ[0]) {
+          ch = reader_.read();
+          if (ch == ESCSEQ[1]) {
+            readJSONSyntaxChar(ZERO);
+            readJSONSyntaxChar(ZERO);
+            trans_.readAll(tmpbuf_, 0, 2);
+            ch = (byte) ((hexVal((byte) tmpbuf_[0]) << 4) + hexVal(tmpbuf_[1]));
+          } else {
+            int off = ESCAPE_CHARS.indexOf(ch);
+            if (off == -1) {
+              throw new TProtocolException(
+                  TProtocolException.INVALID_DATA, "Expected control char");
+            }
+            ch = ESCAPE_CHAR_VALS[off];
+          }
+        }
+        arr.writeByte(ch);
       }
-      arr.writeByte(ch);
+      return arr;
+    } catch (Throwable ex) {
+      ReferenceCountUtil.safeRelease(arr);
+      throw ex;
     }
-    return arr;
   }
 
   // Return true if the given byte could be a valid part of a JSON number.
@@ -794,7 +801,7 @@ public class ByteBufTJSONProtocol extends ByteBufTProtocol {
       throw new TProtocolException(
           TProtocolException.BAD_VERSION, "Message contained bad version.");
     }
-    String name = readJSONString(false).toString(StandardCharsets.UTF_8);
+    String name = readString();
     byte type = (byte) readJSONInteger();
     int seqid = (int) readJSONInteger();
     return new TMessage(name, type, seqid);
@@ -915,7 +922,13 @@ public class ByteBufTJSONProtocol extends ByteBufTProtocol {
 
   @Override
   public String readString() throws TException {
-    return readJSONString(false).toString(StandardCharsets.UTF_8);
+    ByteBuf buf = null;
+    try {
+      buf = readJSONString(false);
+      return buf.toString(StandardCharsets.UTF_8);
+    } finally {
+      ReferenceCountUtil.safeRelease(buf);
+    }
   }
 
   @Override

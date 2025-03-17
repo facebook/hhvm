@@ -20,7 +20,9 @@ include "thrift/annotation/scope.thrift"
 @rust.Adapter{name = "::adapters::StringAdapter"}
 typedef string AdaptedString
 
-typedef AdaptedString WrappedAdaptedString (rust.newtype, rust.ord)
+@rust.NewType
+@rust.Ord
+typedef AdaptedString WrappedAdaptedString
 
 @rust.Adapter{name = "::adapters::NonZeroI64Adapter"}
 typedef i64 AdaptedI64
@@ -29,34 +31,37 @@ typedef AdaptedI64 PassThroughAdaptedI64
 
 typedef list<PassThroughAdaptedI64> NestedPassThroughAdaptedI64
 
-typedef list<AdaptedString> AdaptedListNewType (rust.newtype)
+@rust.NewType
+typedef list<AdaptedString> AdaptedListNewType
 
-typedef binary (rust.type = "Bytes") IOBuf
+@rust.Type{name = "Bytes"}
+typedef binary IOBuf
 
 @rust.Adapter{name = "crate::types::IOBufIdentityAdapter"}
 typedef IOBuf AdaptedBytes
 
-typedef AdaptedBytes WrappedAdaptedBytes (rust.newtype)
+@rust.NewType
+typedef AdaptedBytes WrappedAdaptedBytes
 
 @rust.Adapter{name = "crate::WrappedAdaptedBytesIdentityAdapter"}
 typedef WrappedAdaptedBytes AdaptedWrappedAdaptedBytes
 
 typedef AdaptedWrappedAdaptedBytes PassThroughAdaptedWrappedAdaptedBytes
 
-typedef PassThroughAdaptedWrappedAdaptedBytes WrappedAdaptedWrappedAdaptedBytes (
-  rust.newtype,
-)
+@rust.NewType
+typedef PassThroughAdaptedWrappedAdaptedBytes WrappedAdaptedWrappedAdaptedBytes
 
 const AdaptedI64 adapted_int = 5;
 const PassThroughAdaptedI64 pass_through_adapted_int = 6;
 const WrappedAdaptedWrappedAdaptedBytes adapted_bytes_const = "some_bytes";
 const AdaptedListNewType adapted_list_const = ["hello", "world"];
 
+@rust.Name{name = "ThriftAssetType"}
 enum AssetType {
   UNKNOWN = 0,
   LAPTOP = 1,
   SERVER = 2,
-} (rust.name = "ThriftAssetType")
+}
 
 @rust.Adapter{name = "crate::types::AssetAdapter"}
 struct Asset {
@@ -169,4 +174,5 @@ struct TransitiveStruct {
   2: string test_field_2;
 }
 
-typedef TransitiveStruct TransitiveStructWrapper (rust.newtype)
+@rust.NewType
+typedef TransitiveStruct TransitiveStructWrapper

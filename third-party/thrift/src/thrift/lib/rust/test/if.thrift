@@ -16,13 +16,17 @@
 
 namespace rust interface
 
+include "thrift/annotation/rust.thrift"
+
+@rust.Exhaustive
 struct WrapBinary {
   1: binary data;
-} (rust.exhaustive)
+}
 
+@rust.Exhaustive
 struct WrapString {
   1: string data;
-} (rust.exhaustive)
+}
 
 // The field types here are each of a form `typedef a (rust.type="c") b`. That
 // is, are non-default types given as `rust.type` annotations where the

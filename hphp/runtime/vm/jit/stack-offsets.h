@@ -32,25 +32,28 @@
  * Stack reference frames:
  *
  * Actual memory layout of non-resumed functions:
+ * (size of locals and iterators is arbitrary. In this case, it's 5 cells)
  *
  *    |  ActRec     |                    higher addresses
  *    |  ActRec     |                           |
- *    |  ActRec     |                           |
- *    +-------------+ <--- fp                   |
- *    | locals and  |                           |
- *    | iterators   |                           |
- *    +-------------+ <--- stack base           |
+ *    +-------------+ <--- fp, sp               |
+ *    | local       |                           |
+ *    | local       |                           |
+ *    | local       |                           |
+ *    | iterator    |                           |
+ *    | iterator    |                           |
+ *    +-------------+ <--- sb                   |
  *    | evalslot AA |                           |
  *    +-------------+                           |
  *    | evalslot BB |                           |
  *    +-------------+                           |
  *    | evalslot CC |                           |
- *    +-------------+ <--- sp                   |
+ *    +-------------+                           |
  *    | evalslot DD |                           |
  *    +-------------+                           |
  *    | evalslot EE |                           |
- *    +-------------+                           |
- *    | ........... |                           |
+ *    +-------------+ <--- top of stack         |
+ *    | garbage     |                           |
  *                                      lower addresses
  *
  * SBInv:   Offset in cells relative to the stack base in reverse address order
@@ -58,16 +61,18 @@
  * IRSPRel: Offset in cells relative to the IR stack pointer in address order.
  * BCSPRel: Offset in cells relative to the top of the stack at the start of
  *          the current bytecode in address order.
+ * irSPOff: Offset between stack base and the sp (in the above example: SBInv irSPOff = -5)
+ * bcSPOff: Offset between top of the stack and sb (in the above example: SBInv bcSPOff = 5)
  *
  * Supposing we're translating a bytecode instruction where EE is "top of
  * stack" in HHBC semantics, then here are some examples:
  *
  *  slot    SBInv   IRSPRel   BCSPRel
- *    EE      5       -2         0
- *    DD      4       -1         1
- *    CC      3        0         2
- *    BB      2        1         3
- *    AA      1        2         4
+ *    EE      5       -10        0
+ *    DD      4       -9         1
+ *    CC      3       -8         2
+ *    BB      2       -7         3
+ *    AA      1       -6         4
  *
  * SBInvOffsets are usually used for the IR and BC stack pointer offsets,
  * relative to the stack base.  {IR,BC}SPRelOffsets are then offsets
@@ -275,12 +280,12 @@ IRSPRelOffset::to<SBInvOffset>(SBInvOffset sp) const {
  * SBInvOffset -> {BC,IR}SPRelOffset
  */
 template<> inline BCSPRelOffset
-SBInvOffset::to<BCSPRelOffset>(SBInvOffset sp) const {
-  return BCSPRelOffset{sp.offset - offset};
+SBInvOffset::to<BCSPRelOffset>(SBInvOffset bcSPOff) const {
+  return BCSPRelOffset{bcSPOff.offset - offset};
 }
 template<> inline IRSPRelOffset
-SBInvOffset::to<IRSPRelOffset>(SBInvOffset sp) const {
-  return IRSPRelOffset{sp.offset - offset};
+SBInvOffset::to<IRSPRelOffset>(SBInvOffset irSPOff) const {
+  return IRSPRelOffset{irSPOff.offset - offset};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

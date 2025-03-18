@@ -871,9 +871,9 @@ TEST(EncryptionTest, TestGenerateGreasePsk) {
   EXPECT_EQ(greasePsk->identities.size(), psk->identities.size());
   EXPECT_EQ(greasePsk->binders.size(), psk->binders.size());
   for (size_t i = 0; i < greasePsk->identities.size(); i++) {
-    auto idSz = psk->identities[i].psk_identity->computeChainDataLength();
     auto binderSz = psk->binders[i].binder->computeChainDataLength();
-    auto randomId = folly::IOBuf::copyBuffer(std::string(idSz, 0x44));
+    // We set fixed size (16 bytes) identity for grease PSK
+    auto randomId = folly::IOBuf::copyBuffer(std::string(16, 0x44));
     auto randomBinder = folly::IOBuf::copyBuffer(std::string(binderSz, 0x44));
     EXPECT_TRUE(
         folly::IOBufEqualTo()(greasePsk->identities[i].psk_identity, randomId));

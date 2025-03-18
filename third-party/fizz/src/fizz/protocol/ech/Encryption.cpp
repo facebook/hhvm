@@ -20,6 +20,8 @@ namespace ech {
 
 namespace {
 
+static const size_t kGreasePSKIdentitySize = 16;
+
 std::unique_ptr<folly::IOBuf> makeClientHelloOuterForAad(
     const ClientHello& clientHelloOuter) {
   // Copy client hello outer
@@ -410,8 +412,8 @@ ClientPresharedKey generateGreasePskCommon(
     if (keepIdentity) {
       greaseIdentity.psk_identity = identity.psk_identity->clone();
     } else {
-      size_t identitySize = identity.psk_identity->computeChainDataLength();
-      greaseIdentity.psk_identity = factory->makeRandomIOBuf(identitySize);
+      greaseIdentity.psk_identity =
+          factory->makeRandomIOBuf(kGreasePSKIdentitySize);
     }
 
     factory->makeRandomBytes(

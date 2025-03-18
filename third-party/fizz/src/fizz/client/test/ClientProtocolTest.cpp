@@ -1329,7 +1329,8 @@ TEST_F(ClientProtocolTest, TestConnectECHWithPSK) {
   EXPECT_EQ(greasePskExt->identities.size(), 1);
   EXPECT_EQ(greasePskExt->binders.size(), 1);
   auto idRange = greasePskExt->identities.front().psk_identity->coalesce();
-  EXPECT_EQ(idRange.size(), psk.psk.size());
+  // We set fixed size (16 bytes) identity for grease PSK
+  EXPECT_EQ(16, idRange.size());
   for (size_t i = 0; i < idRange.size(); i++) {
     EXPECT_EQ(idRange.data()[i], 0x44);
   }

@@ -16,6 +16,7 @@
 
 #pragma once
 #include <folly/Try.h>
+#include <thrift/lib/cpp/ContextStack.h>
 #include <thrift/lib/cpp2/async/Interaction.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 
@@ -27,6 +28,10 @@ struct ServerStreamFactory {
 
   void setInteraction(TilePtr&& interaction) {
     interaction_ = std::move(interaction);
+  }
+
+  void setContextStack(ContextStack::UniquePtr contextStack) {
+    contextStack_ = std::move(contextStack);
   }
 
   void operator()(
@@ -46,6 +51,7 @@ struct ServerStreamFactory {
       TilePtr&&)>
       fn_;
   TilePtr interaction_;
+  ContextStack::UniquePtr contextStack_;
 };
 
 template <typename T>

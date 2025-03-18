@@ -26,6 +26,7 @@
 
 #include <thrift/lib/cpp2/async/SinkBridgeUtil.h>
 #endif
+#include <thrift/lib/cpp/ContextStack.h>
 #include <thrift/lib/cpp2/async/Interaction.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/async/TwoWayBridge.h>
@@ -42,7 +43,7 @@ struct SinkConsumerImpl {
   std::chrono::milliseconds chunkTimeout;
   folly::Executor::KeepAlive<> executor;
   TilePtr interaction{};
-
+  ContextStack::UniquePtr contextStack = nullptr;
   explicit operator bool() const { return (bool)consumer; }
 #endif
 };

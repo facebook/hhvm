@@ -426,6 +426,21 @@ EventHandler<ServerTypes, StateEnum::Uninitialized, Event::Accept>::handle(
       MutateState(&Transition<StateEnum::ExpectingClientHello>));
 }
 
+/**
+ * ECH may change the effective client hello we deal with. Some logging may
+ * actually want to observe fields on the ClientHelloOuter, which is why there
+ * is an explicitly separate logging hook for these cases.
+ */
+static void addHandshakeLogginPreECH(
+    const State& state,
+    const ClientHello& chlo) {
+  auto logging = state.handshakeLogging();
+  if (logging && chlo.originalEncoding.hasValue()) {
+    logging->originalChloSize =
+        chlo.originalEncoding.value()->computeChainDataLength();
+  }
+}
+
 static void addHandshakeLogging(const State& state, const ClientHello& chlo) {
   auto logging = state.handshakeLogging();
   if (!logging) {
@@ -1212,6 +1227,7 @@ AsyncActions
 EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
     handle(const State& state, Param& param) {
   ClientHello chlo = std::move(*param.asClientHello());
+  addHandshakeLogginPreECH(state, chlo);
 
   auto cookieState = getCookieState(chlo, state.context()->getCookieCipher());
 

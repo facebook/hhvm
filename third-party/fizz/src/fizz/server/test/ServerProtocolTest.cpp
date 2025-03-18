@@ -349,6 +349,8 @@ class ServerProtocolTest : public ProtocolTest<ServerTypes, Actions> {
 
   ClientHello setupClientHelloOuter() {
     ClientHello testChlo = TestMessages::clientHello();
+    testChlo.originalEncoding =
+        folly::IOBuf::copyBuffer("outerclienthelloencoding");
     // Set fake SNI
     ::fizz::test::TestMessages::removeExtension(
         testChlo, ExtensionType::server_name);
@@ -1115,17 +1117,23 @@ TEST_F(ServerProtocolTest, TestClientHelloCompressedCertFlow) {
 
 TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
   setUpExpectingClientHello();
+  state_.handshakeLogging() = std::make_unique<HandshakeLogging>();
   Sequence contextSeq;
   context_->setClientAuthMode(ClientAuthMode::Required);
 
+  size_t innerChloSize = 0;
   auto decrypter = std::make_shared<MockECHDecrypter>();
   EXPECT_CALL(*decrypter, decryptClientHello(_))
-      .WillOnce(
-          InvokeWithoutArgs([=]() -> folly::Optional<ech::DecrypterResult> {
+      .WillOnce(InvokeWithoutArgs(
+          [&innerChloSize]() mutable -> folly::Optional<ech::DecrypterResult> {
             auto chlo = TestMessages::clientHello();
             chlo.random.fill(0xEC);
             chlo.extensions.push_back(
                 encodeExtension(ech::InnerECHClientHello()));
+            if (chlo.originalEncoding.hasValue()) {
+              innerChloSize =
+                  chlo.originalEncoding.value()->computeChainDataLength();
+            }
             return ech::DecrypterResult{
                 std::move(chlo),
                 0xFB,
@@ -1387,6 +1395,13 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
       }));
 
   fizz::Param param = setupClientHelloOuter();
+  const auto& chlo = *param.asClientHello();
+  size_t originalEncodingSize = 0;
+  if (chlo.originalEncoding.hasValue()) {
+    originalEncodingSize =
+        chlo.originalEncoding.value()->computeChainDataLength();
+  }
+
   auto actions = getActions(detail::processEvent(state_, param));
 
   expectActions<MutateState, WriteToSocket, SecretAvailable>(actions);
@@ -1434,6 +1449,8 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
   EXPECT_TRUE(folly::IOBufEqualTo()(
       *state_.exporterMasterSecret(), folly::IOBuf::copyBuffer("expm")));
   EXPECT_FALSE(state_.earlyExporterMasterSecret().has_value());
+  EXPECT_EQ(originalEncodingSize, state_.handshakeLogging()->originalChloSize);
+  EXPECT_NE(innerChloSize, state_.handshakeLogging()->originalChloSize);
 }
 
 TEST_F(ServerProtocolTest, TestECHMissingInnerExtension) {
@@ -1487,7 +1504,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
       }));
   EXPECT_CALL(
       *mockHandshakeContext_,
-      appendToTranscript(BufMatches("clienthelloencoding")))
+      appendToTranscript(BufMatches("outerclienthelloencoding")))
       .InSequence(contextSeq);
   EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(_))
       .InSequence(contextSeq);

@@ -1772,8 +1772,10 @@ void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
   TypedValue* savedSP = vmStack().top();
   tvDup(awaitResult, *vmStack().allocC());
 
-  // decref after awaitResult is on the stack
-  decRefObj(freeObj);
+  // decref after awaitResult is on the stack (null when no child on WH)
+  if (freeObj) {
+    decRefObj(freeObj);
+  }
 
   pushVMState(savedSP);
   SCOPE_EXIT { popVMState(); };

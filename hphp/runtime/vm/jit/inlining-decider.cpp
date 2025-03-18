@@ -495,10 +495,6 @@ bool shouldInline(const irgen::IRGS& irgs,
     return refuse("inlining stack depth limit exceeded");
   }
 
-  auto isAwaitish = [&] (Op opcode) {
-    return opcode == OpAwait || opcode == OpAwaitAll;
-  };
-
   // Try to inline CPP builtin functions. Inline regions for these functions
   // must end with a unique NativeImpl, which may not be true:
   //  - If we only include the initial Asserts in the region, we may have zero
@@ -547,7 +543,7 @@ bool shouldInline(const irgen::IRGS& irgs,
       // if no returns appeared in the region then we likely suspend on all
       // calls to the callee.
       if (block->profTransID() != kInvalidTransID) {
-        if (region.isExit(block->id()) && i + 1 == n && isAwaitish(sk.op())) {
+        if (region.isExit(block->id()) && i + 1 == n && isAwait(sk.op())) {
           hasRet = true;
         }
       }

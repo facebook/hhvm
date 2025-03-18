@@ -163,13 +163,18 @@ void suspendHook(IRGS& env, Hook hook) {
   );
 }
 
+template <bool lowPri>
 void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
                 Offset resumeOffset) {
   assertx(curFunc(env)->isAsync());
   assertx(resumeMode(env) != ResumeMode::Async);
   // FIXME(T88328140): ifThenElse() emits unreachable code with bad state
   // assertx(spOffBCFromStackBase(env) == spOffEmpty(env));
-  assertx(child->type() <= TObj);
+  if constexpr (lowPri) {
+    assertx(!child);
+  } else {
+    assertx(child && child->type() <= TObj);
+  }
 
   // Bind address at which the execution should resume after awaiting.
   auto const func = curFunc(env);
@@ -186,9 +191,11 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
     // we do the tail-call optimization, so we push the suspend hook here.
     auto const createNewAFWH = [&]{
       if (isInlining(env)) gen(env, StFrameFunc, FuncData { func }, fp(env));
-      auto const wh = gen(env, CreateAFWH, fp(env),
-                          cns(env, func->numSlotsInFrame()),
-                          resumeAddr(), suspendOff, child);
+      auto const wh = lowPri ?
+        gen(env, CreateAFWHL, fp(env), cns(env, func->numSlotsInFrame()), 
+            resumeAddr(), suspendOff) :
+        gen(env, CreateAFWH, fp(env), cns(env, func->numSlotsInFrame()), 
+            resumeAddr(), suspendOff, child);
       // Constructing a waithandle teleports locals and iterators to the heap,
       // kill them here to improve alias analysis.
       for (uint32_t i = 0; i < func->numLocals(); ++i) {
@@ -214,7 +221,6 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
       auto const tailFrameId = getAsyncFrameId(curSrcKey(env));
       if (tailFrameId == kInvalidAsyncFrameId) return createNewAFWH();
       auto const type = Type::ExactObj(c_AsyncFunctionWaitHandle::classof());
-
       return cond(env,
         [&](Block* taken) {
           gen(env, CheckSurpriseFlags, taken, anyStackRegister(env));
@@ -426,7 +432,7 @@ Type awaitedTypeFromSSATmp(const SSATmp* awaitable) {
     return !extra->asyncEagerReturn()
       ? awaitedCallReturnType(extra->target.func()) : TInitCell;
   }
-  if (inst->is(CreateAFWH)) {
+  if (inst->is(CreateAFWH) || inst->is(CreateAFWHL)) {
     return awaitedCallReturnType(inst->func());
   }
   if (inst->is(DefLabel)) {
@@ -457,7 +463,7 @@ bool likelySuspended(const SSATmp* awaitable) {
       inst->extra<CallFuncEntry>()->asyncEagerReturn()) {
     return true;
   }
-  if (inst->is(CreateAFWH)) return true;
+  if (inst->is(CreateAFWH) || inst->is(CreateAFWHL)) return true;
   if (inst->is(DefLabel)) {
     auto likely = true;
     auto const dsts = inst->dsts();
@@ -599,7 +605,7 @@ void emitAwait(IRGS& env) {
     if (resumeMode(env) == ResumeMode::Async) {
       implAwaitR(env, child, bcOff(env), nextBcOff(env));
     } else {
-      implAwaitE(env, child, bcOff(env), nextBcOff(env));
+      implAwaitE<false>(env, child, bcOff(env), nextBcOff(env));
     }
   });
 }
@@ -682,12 +688,25 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
           if (resumeMode(env) == ResumeMode::Async) {
             implAwaitR(env, wh, suspendOffset, resumeOffset);
           } else {
-            implAwaitE(env, wh, suspendOffset, resumeOffset);
+            implAwaitE<false>(env, wh, suspendOffset, resumeOffset);
           }
         }
       );
     }
   );
+}
+
+void emitAwaitLowPri(IRGS& env) {
+  assertx(resumeMode(env) == ResumeMode::None);
+  assertx(curFunc(env)->isAsyncFunction());
+  assertx(spOffBCFromStackBase(env) == spOffEmpty(env));
+
+  if (!Cfg::Eval::EnableLowPriorityAwaitables) {
+    push(env, cns(env, TInitNull));
+    return;
+  }
+
+  implAwaitE<true>(env, nullptr, bcOff(env), nextBcOff(env));
 }
 
 //////////////////////////////////////////////////////////////////////

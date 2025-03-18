@@ -573,6 +573,7 @@ bool canDCE(const IRInstruction& inst) {
   case CreateAGen:
   case CreateCCWH:
   case CreateAFWH:
+  case CreateAFWHL:
   case CreateAGWH:
   case AFWHPrepareChild:
   case StArResumeAddr:

@@ -1,0 +1,6 @@
+start main()
+start lowpri
+start normal
+end lowpri
+end normal
+end main()

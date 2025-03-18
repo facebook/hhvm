@@ -402,6 +402,7 @@ impl<'b> InstrEmitter<'b> {
                 let locals = self.convert_local_range(locals);
                 Opcode::AwaitAll(locals)
             }
+            Hhbc::AwaitLowPri(..) => Opcode::AwaitLowPri,
             Hhbc::BareThis(op, _) => Opcode::BareThis(op),
             Hhbc::BitAnd(..) => Opcode::BitAnd,
             Hhbc::BitNot(..) => Opcode::BitNot,

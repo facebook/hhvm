@@ -307,6 +307,7 @@ fn is_cow_instr(instr: &NodeInstr) -> bool {
             | Opcode::AssertRATStk(..)
             | Opcode::Await
             | Opcode::AwaitAll(..)
+            | Opcode::AwaitLowPri
             | Opcode::BareThis(..)
             | Opcode::BreakTraceHint
             | Opcode::CheckProp(..)

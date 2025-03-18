@@ -1333,6 +1333,7 @@ impl FunctionParser<'_> {
             "async_call" => self.parse_call(tok, true, loc)?,
             "await" => I::Hhbc(H::Await(self.vid(tok)?, loc)),
             "await_all" => parse_instr!(tok, I::Hhbc(H::AwaitAll(p0.into(), loc)), "[" <p0:self.lid,*> "]"),
+            "await_low_pri" => I::Hhbc(H::AwaitLowPri(loc)),
             "bare_this" => I::Hhbc(H::BareThis(parse_bare_this_op(tok)?, loc)),
             "bit_and" => I::Hhbc(H::BitAnd(self.vid2(tok)?, loc)),
             "bit_not" => I::Hhbc(H::BitNot(self.vid(tok)?, loc)),

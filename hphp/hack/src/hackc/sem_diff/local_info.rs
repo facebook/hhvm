@@ -75,6 +75,7 @@ impl LocalInfo {
             | Opcode::ArrayUnmarkLegacy
             | Opcode::AssertRATStk(..)
             | Opcode::Await
+            | Opcode::AwaitLowPri
             | Opcode::BareThis(..)
             | Opcode::BaseC(..)
             | Opcode::BaseGC(..)

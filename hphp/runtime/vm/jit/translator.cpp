@@ -409,6 +409,7 @@ static const struct {
   { OpWHResult,    {Stack1,           Stack1,       OutUnknown      }},
   { OpAwait,       {Stack1,           Stack1,       OutUnknown      }},
   { OpAwaitAll,    {LocalRange,       Stack1,       OutNull         }},
+  { OpAwaitLowPri, {None,             Stack1,       OutNull         }},
 
   /*** 16. Member instructions ***/
 
@@ -896,8 +897,7 @@ bool instrBreaksProfileBB(const NormalizedInstruction& inst) {
   if (isFCall(op)) return true;
 
   if (instrIsNonCallControlFlow(op) ||
-      op == OpAwait || // may branch to scheduler and suspend execution
-      op == OpAwaitAll || // similar to Await
+      isAwait(op) || // may branch to scheduler and suspend execution
       op == OpClsCnsD || // side exits if misses in the RDS
       op == OpThrowNonExhaustiveSwitch || // control flow breaks bb
       op == OpVerifyParamTypeTS) { // avoids combinatorial explosion

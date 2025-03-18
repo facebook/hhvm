@@ -584,6 +584,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CountVec:
   case CountWHNotDone:
   case CreateAFWH:
+  case CreateAFWHL:
   case CreateAGWH:
   case CreateAGen:
   case CreateGen:

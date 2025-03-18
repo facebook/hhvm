@@ -3358,6 +3358,15 @@ AwaitAll<local-range>    []  ->  [C:Null]
   already be complete a null will be pushed to the stack without suspending
   the current function.
 
+AwaitLowPri []  ->  [C:Null]
+
+  This instruction may only appear in bodies of async functions, and there
+  cannot be another await instruction before this one. This instruction suspends
+  execution into a new low priority AsyncFunctionWaitHandle. Moves all local
+  variables from the current frame into the object, sets resume offset at the
+  next opcode and suspends execution by transferring control flow back to the
+  caller.
+
 Basic statement transformations
 -------------------------------
 

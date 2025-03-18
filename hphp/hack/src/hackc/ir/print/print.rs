@@ -726,6 +726,7 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext, func: &Func, hhbc: &Hhbc) ->
         Hhbc::AwaitAll(ref range, _) => {
             write!(w, "await_all {}", FmtLids(range))?;
         }
+        Hhbc::AwaitLowPri(_) => write!(w, "await_low_pri")?,
         Hhbc::BareThis(op, _) => {
             write!(w, "bare_this {}", FmtBareThisOp(op))?;
         }

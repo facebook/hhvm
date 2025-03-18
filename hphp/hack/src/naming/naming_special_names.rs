@@ -336,6 +336,8 @@ pub mod user_attributes {
 
     pub const NO_DISJOINT_UNION: &str = "__NoDisjointUnion";
 
+    pub const ASIO_LOW_PRI: &str = "__AsioLowPri";
+
     pub fn is_memoized(name: &str) -> bool {
         name == MEMOIZE || name == MEMOIZE_LSB
     }
@@ -385,6 +387,10 @@ pub mod user_attributes {
 
     pub fn is_no_disjoint_union(name: &str) -> bool {
         name == NO_DISJOINT_UNION
+    }
+
+    pub fn is_asio_low_pri(name: &str) -> bool {
+        name == ASIO_LOW_PRI
     }
 }
 

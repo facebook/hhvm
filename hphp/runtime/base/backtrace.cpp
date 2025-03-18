@@ -124,7 +124,7 @@ bool BTFrame::localsAvailable() const {
     // have been teleported off the stack and into the wait handle.
     auto pc = func()->at(bcOff());
     auto const op = decode_op(pc);
-    return op != OpAwait && op != OpAwaitAll;
+    return !isAwait(op);
   }
   if (m_afwhTailFrameIdx != kInvalidAfwhTailFrameIdx) return false;
   return !m_fp->localsDecRefd();

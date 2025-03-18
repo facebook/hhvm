@@ -73,6 +73,7 @@ impl<'a> PushCount<'a> for instr::Hhbc {
             | Hhbc::ArrayUnmarkLegacy(..)
             | Hhbc::Await(..)
             | Hhbc::AwaitAll(..)
+            | Hhbc::AwaitLowPri(..)
             | Hhbc::BareThis(..)
             | Hhbc::BitAnd(..)
             | Hhbc::BitNot(..)

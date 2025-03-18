@@ -400,6 +400,8 @@ module UserAttributes = struct
 
   let uaSimpliHack = "__SimpliHack"
 
+  let uaAsioLowPri = "__AsioLowPri"
+
   type attr_info = {
     contexts: string list;
     doc: string;
@@ -862,6 +864,13 @@ module UserAttributes = struct
               (* We want this to be able to attached to any valid location for an attribute *)
               autocomplete = false;
               doc = "Demo for SimpliHack";
+            } );
+          ( uaAsioLowPri,
+            {
+              contexts = [fn; mthd];
+              autocomplete = false;
+              doc =
+                "Marks the function as low priority. Will suspend eager execution into a low priority awaitable.";
             } );
         ])
 

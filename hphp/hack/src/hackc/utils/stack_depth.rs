@@ -237,7 +237,12 @@ impl ComputeStackDepth<'_> {
                             return Err(Error::UnexpectedExitWithStack);
                         }
                     }
-                    Opcode::CreateCont | Opcode::Await | Opcode::Yield | Opcode::YieldK => {
+
+                    Opcode::CreateCont
+                    | Opcode::Await
+                    | Opcode::AwaitLowPri
+                    | Opcode::Yield
+                    | Opcode::YieldK => {
                         // Stack depth should be 1 after resume from suspend.
                         if self.cur_depth != 1 {
                             return Err(Error::UnexpectedStackAfterResume);

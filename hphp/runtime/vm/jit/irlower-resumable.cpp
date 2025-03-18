@@ -270,6 +270,7 @@ void emitIsAwaitable(Vout& v, Vreg obj, Vreg sf) {
 }
 
 IMPL_OPCODE_CALL(CreateAFWH)
+IMPL_OPCODE_CALL(CreateAFWHL)
 IMPL_OPCODE_CALL(CreateAGWH)
 IMPL_OPCODE_CALL(AFWHPrepareChild)
 

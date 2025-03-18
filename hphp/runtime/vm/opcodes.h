@@ -255,6 +255,7 @@ namespace HPHP {
                      NA,               NOV,             ONE(CV),    NF) \
   O(Await,           NA,               ONE(CV),         ONE(CV),    CF) \
   O(AwaitAll,        ONE(LAR),         NOV,             ONE(CV),    CF) \
+  O(AwaitLowPri,     NA,               NOV,             ONE(CV),    CF) \
   O(Idx,             NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(ArrayIdx,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(ArrayMarkLegacy,    NA,            TWO(CV,CV),      ONE(CV),    NF) \

@@ -766,6 +766,7 @@ fn cmp_instr_hhbc((a, a_func): (&Hhbc, &Func), (b, b_func): (&Hhbc, &Func)) -> R
         | (Hhbc::ArrayUnmarkLegacy(_, _), _)
         | (Hhbc::Await(_, _), _)
         | (Hhbc::AwaitAll(_, _), _)
+        | (Hhbc::AwaitLowPri(_), _)
         | (Hhbc::BitAnd(_, _), _)
         | (Hhbc::BitNot(_, _), _)
         | (Hhbc::BitOr(_, _), _)

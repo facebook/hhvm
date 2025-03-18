@@ -126,6 +126,14 @@ fn is_enum_class(attr: &Attribute) -> bool {
     is(ua::ENUM_CLASS, attr)
 }
 
+fn is_asio_low_pri(attr: &Attribute) -> bool {
+    is(ua::ASIO_LOW_PRI, attr)
+}
+
+pub fn has_asio_low_pri(attrs: &[Attribute]) -> bool {
+    has(attrs, is_asio_low_pri)
+}
+
 pub fn has_enum_class(attrs: &[Attribute]) -> bool {
     has(attrs, is_enum_class)
 }

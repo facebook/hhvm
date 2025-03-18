@@ -2547,6 +2547,10 @@ ReqBindJmp and CallFuncEntry.
   the native resume address to S2, resume offset to S3, and mark it blocked on
   non-finished child S4.
 
+| CreateAFWHL, DAllocObj, S(FramePtr) C(Int) S(TCA,Nullptr) C(Int), PRc
+
+  Same as `CreateAFWH`, but force low priority on the awaitable.
+
 | CreateAGWH, DAllocObj,
 |             S(FramePtr) S(TCA,Nullptr) C(Int) S(Obj),
 |             CRc|PRc

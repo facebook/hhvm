@@ -1589,6 +1589,7 @@ void dce(Env& env, const bc::AwaitAll& op) {
   pinLocals(env, env.states.mayReadLocalSet());
   no_dce(env, op);
 }
+void dce(Env& env, const bc::AwaitLowPri& op) { no_dce(env, op); }
 void dce(Env& env, const bc::BaseGL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::BaseH& op) { no_dce(env, op); }
 void dce(Env& env, const bc::BreakTraceHint& op) { no_dce(env, op); }

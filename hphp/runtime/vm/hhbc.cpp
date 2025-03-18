@@ -1119,11 +1119,13 @@ bool instrMayVMCall(Op opcode) {
 }
 
 bool instrIsNonCallControlFlow(Op opcode) {
-  if (!instrIsControlFlow(opcode) || instrIsVMCall(opcode)) return false;
+  if (!instrIsControlFlow(opcode) || 
+      instrIsVMCall(opcode) || 
+      isAwait(opcode)) {
+    return false;
+  }
 
   switch (opcode) {
-    case OpAwait:
-    case OpAwaitAll:
     case OpYield:
     case OpYieldK:
       return false;

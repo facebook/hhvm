@@ -97,16 +97,18 @@ c_AsyncFunctionWaitHandle::~c_AsyncFunctionWaitHandle() {
   if (LIKELY(isFinished())) {
     return;
   }
-
   assertx(!isRunning());
   frame_free_locals_inl_no_hook(actRec(), actRec()->func()->numLocals());
-  decRefObj(m_children[0].getChild());
+  if (auto const child = m_children[0].getChild()) {
+    decRefObj(child);
+  }
 }
 
 namespace {
   const StaticString s__closure_("{closure}");
 }
 
+template <bool lowPri>
 c_AsyncFunctionWaitHandle*
 c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
                                   size_t numSlots,
@@ -116,9 +118,14 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
   assertx(fp);
   assertx(!isResumed(fp));
   assertx(fp->func()->isAsyncFunction());
-  assertx(child);
-  assertx(child->instanceof(c_WaitableWaitHandle::classof()));
-  assertx(!child->isFinished());
+
+  if constexpr (lowPri) {
+    assertx(!child);
+  } else {
+    assertx(child);
+    assertx(child->instanceof(c_WaitableWaitHandle::classof()));
+    assertx(!child->isFinished());
+  }
 
   const size_t frameSize = Resumable::getFrameSize(numSlots);
   const size_t totalSize = sizeof(NativeNode) + frameSize + sizeof(Resumable) +
@@ -134,7 +141,7 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
   waitHandle->actRec()->setReturnVMExit();
   waitHandle->m_packedTailFrameIds = -1;
   assertx(!waitHandle->hasTailFrames());
-  waitHandle->initialize(child);
+  waitHandle->initialize<lowPri>(child);
   assertx(*ImplicitContext::activeCtx);
   waitHandle->m_implicitContext = *ImplicitContext::activeCtx;
   return waitHandle;
@@ -145,26 +152,47 @@ void c_AsyncFunctionWaitHandle::PrepareChild(const ActRec* fp,
   frame_afwh(fp)->prepareChild(child);
 }
 
+template <bool lowPri>
 void c_AsyncFunctionWaitHandle::initialize(c_WaitableWaitHandle* child) {
-  setState(STATE_BLOCKED);
-  setContextIdx(child->getContextIdx());
-  m_children[0].setChild(child);
-  incRefCount(); // account for child->this back-reference
+  if constexpr (lowPri) {
+    assertx(!child);
+    setState(STATE_READY);
+    setContextIdx(AsioSession::Get()->getCurrentContextIdx());
+    m_children[0].setChild<lowPri>(nullptr);
+
+    // Not blocked on anything, so schedule immediately if in context. Otherwise,
+    // caller will await/join and schedule later.
+    if (isInContext()) {
+      AsioSession::Get()->getCurrentContext()->schedule(this);
+      incRefCount(); // account for the runnable queue holding this
+    }
+  } else {
+    assertx(child);
+    setState(STATE_BLOCKED);
+    setContextIdx(child->getContextIdx());
+    m_children[0].setChild<lowPri>(child);
+    incRefCount(); // account for child->this back-reference
+  }
 }
 
 void c_AsyncFunctionWaitHandle::resume() {
   auto const child = m_children[0].getChild();
   assertx(getState() == STATE_READY);
-  assertx(child->isFinished());
   setState(STATE_RUNNING);
 
-  if (LIKELY(child->isSucceeded())) {
-    // child succeeded, pass the result to the async function
-    g_context->resumeAsyncFunc(resumable(), child, child->getResult());
+  if (child) {
+    assertx(child->isFinished());
+    if (LIKELY(child->isSucceeded())) {
+      // child succeeded, pass the result to the async function
+      g_context->resumeAsyncFunc(resumable(), child, child->getResult());
+    } else {
+      // child failed, raise the exception inside the async function
+      g_context->resumeAsyncFuncThrow(resumable(), child,
+                                      child->getException());
+    }
   } else {
-    // child failed, raise the exception inside the async function
-    g_context->resumeAsyncFuncThrow(resumable(), child,
-                                    child->getException());
+    // No child, pass null tv to the async function for consistency
+    g_context->resumeAsyncFunc(resumable(), nullptr, make_tv<KindOfNull>());
   }
 }
 
@@ -193,6 +221,7 @@ void c_AsyncFunctionWaitHandle::onUnblocked() {
 
 void c_AsyncFunctionWaitHandle::await(Offset suspendOffset,
                                       req::ptr<c_WaitableWaitHandle>&& child) {
+  assertx(child);
   // Prepare child for establishing dependency. May throw.
   prepareChild(child.get());
   assertx(*ImplicitContext::activeCtx);
@@ -203,7 +232,7 @@ void c_AsyncFunctionWaitHandle::await(Offset suspendOffset,
 
   // Set up the dependency.
   setState(STATE_BLOCKED);
-  m_children[0].setChild(child.detach());
+  m_children[0].setChild<false>(child.detach());
 }
 
 void c_AsyncFunctionWaitHandle::ret(TypedValue& result) {
@@ -372,6 +401,14 @@ void AsioExtension::registerNativeAsyncFunctionWaitHandle() {
     c_AsyncFunctionWaitHandle::className(),
     finish_class<c_AsyncFunctionWaitHandle>);
 }
+
+template c_AsyncFunctionWaitHandle* c_AsyncFunctionWaitHandle::Create<true>(
+  const ActRec* fp, size_t numSlots, jit::TCA resumeAddr, Offset suspendOffset,
+  c_WaitableWaitHandle* child);
+
+template c_AsyncFunctionWaitHandle* c_AsyncFunctionWaitHandle::Create<false>(
+  const ActRec* fp, size_t numSlots, jit::TCA resumeAddr, Offset suspendOffset,
+  c_WaitableWaitHandle* child);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

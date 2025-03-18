@@ -1358,7 +1358,6 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       }
       break;
     }
-
     case Op::AwaitAll: {
       auto const& range = getImm(pc, 0).u_LAR;
       if (range.count == 0) {
@@ -1370,6 +1369,21 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
     case Op::Await: {
       if (!m_func->isAsync) {
         ferror("{} may only appear in an async function\n", opcodeToName(op));
+        return false;
+      }
+      if (cur->stklen != instrNumPops(pc)) {
+        ferror("{} may not be used with non-empty stack\n", opcodeToName(op));
+        return false;
+      }
+      break;
+    }
+    case Op::AwaitLowPri: {
+      if (!m_func->isAsync) {
+        ferror("{} may only appear in an async function\n", opcodeToName(op));
+        return false;
+      }
+      if (m_func->isGenerator) {
+        ferror("{} may not appear in a generator\n", opcodeToName(op));
         return false;
       }
       if (cur->stklen != instrNumPops(pc)) {

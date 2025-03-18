@@ -420,6 +420,7 @@ pub enum Hhbc {
     Await(ValueId, LocId),
     #[has_operands(none)]
     AwaitAll(Box<[LocalId]>, LocId),
+    AwaitLowPri(LocId),
     #[has_operands(none)]
     BareThis(BareThisOp, LocId),
     BitAnd([ValueId; 2], LocId),

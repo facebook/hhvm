@@ -58,7 +58,9 @@ namespace {
     }
 
     void discover(c_AsyncFunctionWaitHandle* node) {
-      if (discoverResumable(node)) enqueue(node->getChild());
+      if (discoverResumable(node)) {
+        if (auto const child = node->getChild()) enqueue(child);
+      }
     }
 
     void discover(c_AsyncGeneratorWaitHandle* node) {

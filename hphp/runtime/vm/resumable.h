@@ -191,7 +191,7 @@ struct alignas(16) Resumable {
   Offset resumeFromAwaitOffset() const {
     assertx(m_actRec.func()->contains(m_suspendOffset));
     auto const suspendPC = m_actRec.func()->at(m_suspendOffset);
-    assertx(peek_op(suspendPC) == OpAwait || peek_op(suspendPC) == OpAwaitAll);
+    assertx(isAwait(peek_op(suspendPC)));
     auto const resumeOffset = m_suspendOffset + instrLen(suspendPC);
     assertx(m_actRec.func()->contains(resumeOffset));
     return resumeOffset;

@@ -187,8 +187,9 @@ where
             | Opcode::ArrayUnmarkLegacy
             | Opcode::AssertRATL(..)
             | Opcode::AssertRATStk(..)
-            | Opcode::AwaitAll(..)
             | Opcode::Await
+            | Opcode::AwaitAll(..)
+            | Opcode::AwaitLowPri
             | Opcode::BareThis(..)
             | Opcode::BaseC(..)
             | Opcode::BaseGC(..)

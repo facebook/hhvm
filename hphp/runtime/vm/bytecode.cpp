@@ -4968,23 +4968,28 @@ OPTBLD_INLINE void iopContGetReturn() {
   tvDup(cont->m_value, *vmStack().allocC());
 }
 
+template <bool lowPri>
 OPTBLD_INLINE void asyncSuspendE(PC origpc, PC& pc) {
   auto const fp = vmfp();
   auto const func = fp->func();
+  auto const numSlots = func->numSlotsInFrame();
   auto const suspendOffset = func->offsetOf(origpc);
   assertx(func->isAsync());
   assertx(resumeModeFromActRec(fp) != ResumeMode::Async);
 
-  // Pop the dependency we are blocked on.
-  auto child = wait_handle<c_WaitableWaitHandle>(*vmStack().topC());
-  assertx(!child->isFinished());
-  vmStack().discard();
+  // Pop the dependency we are blocked on unless we are in low-pri mode.
+  c_WaitableWaitHandle* child = nullptr;
+  if constexpr (!lowPri) {
+    child = wait_handle<c_WaitableWaitHandle>(*vmStack().topC());
+    assertx(!child->isFinished());
+    vmStack().discard();
+  }
 
   if (!func->isGenerator()) {  // Async function.
     // Create the AsyncFunctionWaitHandle object. Create takes care of
-    // copying local variables and itertors.
-    auto waitHandle = c_AsyncFunctionWaitHandle::Create(
-      fp, func->numSlotsInFrame(), nullptr, suspendOffset, child);
+    // copying local variables and iterators.
+    auto waitHandle = c_AsyncFunctionWaitHandle::Create<lowPri>(
+      fp, numSlots, nullptr, suspendOffset, child);
 
     // Call the suspend hook. It will decref the newly allocated waitHandle
     // if it throws.
@@ -5000,7 +5005,7 @@ OPTBLD_INLINE void asyncSuspendE(PC origpc, PC& pc) {
 
     // Free ActRec and store the return value. In case async eager return was
     // requested by the caller, let it know that we did not finish eagerly.
-    vmStack().ndiscard(func->numSlotsInFrame());
+    vmStack().ndiscard(numSlots);
     vmStack().ret();
     tvCopy(make_tv<KindOfObject>(waitHandle), *vmStack().topTV());
     vmStack().topTV()->m_aux.u_asyncEagerReturnFlag = 0;
@@ -5009,6 +5014,7 @@ OPTBLD_INLINE void asyncSuspendE(PC origpc, PC& pc) {
     // Return control to the caller.
     returnToCaller(pc, sfp, callOff);
   } else {  // Async generator.
+    assertx(!lowPri);
     // Create new AsyncGeneratorWaitHandle.
     auto waitHandle = c_AsyncGeneratorWaitHandle::Create(
       fp, nullptr, suspendOffset, child);
@@ -5071,7 +5077,7 @@ JitResumeAddr suspendStack(PC origpc, PC &pc) {
     asyncSuspendR(origpc, pc);
   } else {
     // suspend eager execution
-    asyncSuspendE(origpc, pc);
+    asyncSuspendE<false>(origpc, pc);
   }
   return jitReturnPost(jitReturn);
 }
@@ -5092,6 +5098,16 @@ OPTBLD_INLINE JitResumeAddr iopAwait(PC origpc, PC& pc) {
     return JitResumeAddr::none();
   }
   return suspendStack(origpc, pc);
+}
+
+OPTBLD_INLINE JitResumeAddr iopAwaitLowPri(PC origpc, PC& pc) {
+  if (!Cfg::Eval::EnableLowPriorityAwaitables) {
+    vmStack().pushNull();
+    return JitResumeAddr::none();
+  }
+  auto const jitReturn = jitReturnPre(vmfp());
+  asyncSuspendE<true>(origpc, pc);
+  return jitReturnPost(jitReturn);
 }
 
 OPTBLD_INLINE JitResumeAddr iopAwaitAll(PC origpc, PC& pc, LocalRange locals) {

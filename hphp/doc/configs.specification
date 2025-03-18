@@ -1400,6 +1400,11 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   Whether ReflectionClass::getConstants raises notice if it misses constants from
   enums/enum classes included via enum inclusion
 
+- bool Eval.EnableLowPriorityAwaitables = true, jtwarren
+
+  Whether or not to support low priority awaitables in the runtime. If disabled,
+  will turn AwaitLowPri instructions into noops.
+
 # Hack.Lang
 
 - bool Hack.Lang.DisableLvalAsAnExpression = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)

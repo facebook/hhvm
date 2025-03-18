@@ -184,7 +184,7 @@ namespace HH {
     public static function setOnCreateCallback(
       ?(function(
         AsyncFunctionWaitHandle<mixed>,
-        WaitableWaitHandle<mixed>,
+        ?WaitableWaitHandle<mixed>,
       ): void) $callback,
     ): \HH\FIXME\MISSING_RETURN_TYPE {}
     public static function setOnAwaitCallback(

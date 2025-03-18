@@ -530,6 +530,13 @@ constexpr bool instrIsControlFlow(Op opcode) {
   return (instrFlags(opcode) & CF) != 0;
 }
 
+constexpr bool isAwait(Op opcode) {
+  return 
+    opcode == Op::Await || 
+    opcode == Op::AwaitAll || 
+    opcode == Op::AwaitLowPri;
+}
+
 constexpr bool isUnconditionalJmp(Op opcode) {
   return opcode == Op::Jmp;
 }
@@ -709,10 +716,9 @@ inline MOpMode finalMemberOpMode(Op op) {
 
 // true if the opcode body can set pc=0 to halt the interpreter.
 constexpr bool instrCanHalt(Op op) {
-  return op == OpRetC || op == OpNativeImpl ||
-         op == OpAwait || op == OpAwaitAll || op == OpCreateCont ||
-         op == OpYield || op == OpYieldK || op == OpRetM ||
-         op == OpRetCSuspended;
+  return isAwait(op) || op == OpRetC || op == OpNativeImpl ||
+         op == OpCreateCont || op == OpYield || op == OpYieldK || 
+         op == OpRetM || op == OpRetCSuspended;
 }
 
 int instrNumPops(PC opcode);

@@ -1354,3 +1354,6 @@ pub fn no_continue_in_finally(blk_token: TokenKind, stmt_token: TokenKind) -> Er
         blk_token.to_string()
     ))
 }
+
+pub const asio_low_pri_check: Error =
+    Cow::Borrowed("Only non-generator async functions can be marked low priority.");

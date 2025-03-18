@@ -1487,7 +1487,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
     }                                                                  \
                                                                        \
     /* Stack depth should be 1 after resume from suspend. */           \
-    if (thisOpcode == OpCreateCont || thisOpcode == OpAwait ||         \
+    if (isAwait(thisOpcode) || thisOpcode == OpCreateCont ||           \
         thisOpcode == OpYield || thisOpcode == OpYieldK) {             \
       as.enforceStackDepth(1);                                         \
     }                                                                  \

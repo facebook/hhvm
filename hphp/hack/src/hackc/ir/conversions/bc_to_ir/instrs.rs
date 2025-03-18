@@ -930,6 +930,7 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::AssertRATStk => todo!(),
         Opcode::Await => simple!(Hhbc::Await),
         Opcode::AwaitAll => simple!(Hhbc::AwaitAll),
+        Opcode::AwaitLowPri => simple!(Hhbc::AwaitLowPri),
         Opcode::BareThis => simple!(Hhbc::BareThis),
         Opcode::BitAnd => simple!(Hhbc::BitAnd),
         Opcode::BitNot => simple!(Hhbc::BitNot),

@@ -5420,8 +5420,10 @@ fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
             *env.in_static_method() = false;
             let is_abstract = kinds.has(modifier::ABSTRACT);
             let is_external = !is_abstract && c.function_body.is_external();
+            let fun_kind = mk_fun_kind(hdr.suspension_kind, body_has_yield);
             let user_attributes = p_user_attributes(&c.attribute, env);
             check_effect_memoized(hdr.contexts.as_ref(), &user_attributes, "method", env);
+            check_asio_lowpri(fun_kind, &user_attributes, env);
             let method = ast::Method_ {
                 span: p_fun_pos(node, env),
                 annotation: (),
@@ -5437,7 +5439,7 @@ fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
                 ctxs: hdr.contexts,
                 unsafe_ctxs: hdr.unsafe_contexts,
                 body: ast::FuncBody { fb_ast: body },
-                fun_kind: mk_fun_kind(hdr.suspension_kind, body_has_yield),
+                fun_kind,
                 user_attributes,
                 readonly_ret: hdr.readonly_return,
                 ret: ast::TypeHint((), hdr.return_type),
@@ -5797,6 +5799,22 @@ fn check_effect_polymorphic_reification<'a>(
     }
 }
 
+fn check_asio_lowpri<'a>(
+    fun_kind: ast::FunKind,
+    user_attributes: &[aast::UserAttribute<(), ()>],
+    env: &mut Env<'a>,
+) {
+    // asio low pri attributes are only valid on non-generator async functions
+    if let Some(u) = user_attributes
+        .iter()
+        .find(|u| sn::user_attributes::is_asio_low_pri(&u.name.1))
+    {
+        if fun_kind != ast::FunKind::FAsync {
+            raise_parsing_error_pos(&u.name.0, env, &syntax_error::asio_low_pri_check)
+        }
+    }
+}
+
 fn p_const_value<'a>(node: S<'a>, env: &mut Env<'a>, default_pos: Pos) -> Result<ast::Expr> {
     match &node.children {
         SimpleInitializer(c) => p_expr(&c.value, env),
@@ -5847,9 +5865,11 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             } else {
                 env.reset_for_function_body(body, hdr.suspension_kind, p_function_body)?
             };
+            let fun_kind = mk_fun_kind(hdr.suspension_kind, yield_);
             let user_attributes = p_user_attributes(attribute_spec, env);
             check_effect_memoized(hdr.contexts.as_ref(), &user_attributes, "function", env);
             check_context_has_this(hdr.contexts.as_ref(), env);
+            check_asio_lowpri(fun_kind, &user_attributes, env);
             let ret = ast::TypeHint((), hdr.return_type);
 
             let fun = ast::Fun_ {
@@ -5862,7 +5882,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 ctxs: hdr.contexts,
                 unsafe_ctxs: hdr.unsafe_contexts,
                 body: ast::FuncBody { fb_ast: block },
-                fun_kind: mk_fun_kind(hdr.suspension_kind, yield_),
+                fun_kind,
                 user_attributes,
                 external: is_external,
                 doc_comment: doc_comment_opt,

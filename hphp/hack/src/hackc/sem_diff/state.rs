@@ -1321,6 +1321,7 @@ fn is_checkpoint_instr(instr: &NodeInstr) -> bool {
             | Opcode::AssertRATStk(..)
             | Opcode::Await
             | Opcode::AwaitAll(..)
+            | Opcode::AwaitLowPri
             | Opcode::BareThis(..)
             | Opcode::BaseC(..)
             | Opcode::BaseGC(..)
@@ -1529,6 +1530,7 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         | Opcode::ArrayMarkLegacy
         | Opcode::ArrayUnmarkLegacy
         | Opcode::Await
+        | Opcode::AwaitLowPri
         | Opcode::BaseH
         | Opcode::BitAnd
         | Opcode::BitNot

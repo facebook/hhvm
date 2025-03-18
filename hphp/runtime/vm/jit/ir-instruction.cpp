@@ -319,6 +319,7 @@ Type allocObjReturn(const IRInstruction* inst) {
       return Type::ExactObj(AsyncGenerator::classof());
 
     case CreateAFWH:
+    case CreateAFWHL:
       return Type::ExactObj(c_AsyncFunctionWaitHandle::classof());
 
     case CreateAGWH:

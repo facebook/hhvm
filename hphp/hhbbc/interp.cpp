@@ -5552,6 +5552,10 @@ void in(ISS& env, const bc::AwaitAll& op) {
   push(env, TInitNull);
 }
 
+void in(ISS& env, const bc::AwaitLowPri& /*op*/) {
+  push(env, TInitNull);
+}
+
 void in(ISS& env, const bc::SetImplicitContextByValue&) {
   popC(env);
   push(env, TObj);

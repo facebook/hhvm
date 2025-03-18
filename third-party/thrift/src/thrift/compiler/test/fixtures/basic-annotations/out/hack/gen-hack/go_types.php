@@ -246,3 +246,113 @@ class Tag implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
 
 }
 
+/**
+ * This annotation enables reordering of fields in the generated Go structs to minimize padding.
+ * This is achieved by placing the fields in the order of decreasing alignments.
+ * The order of fields with the same alignment is preserved.
+ * 
+ * ```
+ * @go.MinimizePadding
+ * struct Padded {
+ *   1: byte small
+ *   2: i64 big
+ *   3: i16 medium
+ *   4: i32 biggish
+ *   5: byte tiny
+ * }
+ * ```
+ * 
+ * For example, the Go fields for the `Padded` Thrift struct above will be generated in the following order:
+ * 
+ * ```
+ * int64 big;
+ * int32 biggish;
+ * int16 medium;
+ * int8 small;
+ * int8 tiny;
+ * ```
+ * 
+ * which gives the size of 16 bytes compared to 32 bytes if `go.MinimizePadding` was not specified.
+ *
+ * Original thrift struct:-
+ * MinimizePadding
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/go/MinimizePadding'))>>
+class MinimizePadding implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const type TShape = shape(
+    ...
+  );
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'MinimizePadding';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "go.MinimizePadding",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+  }
+
+}
+

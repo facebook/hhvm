@@ -176,5 +176,7 @@ inline constexpr auto kHackGenerateClientMethodsWithHeaders =
 // Go:
 inline constexpr auto kGoNameUri = "facebook.com/thrift/annotation/go/Name";
 inline constexpr auto kGoTagUri = "facebook.com/thrift/annotation/go/Tag";
+inline constexpr auto kGoMinimizePaddingUri =
+    "facebook.com/thrift/annotation/go/MinimizePadding";
 
 } // namespace apache::thrift::compiler

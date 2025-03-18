@@ -38,3 +38,34 @@ struct Name {
 struct Tag {
   1: string tag;
 }
+
+/**
+  This annotation enables reordering of fields in the generated Go structs to minimize padding.
+  This is achieved by placing the fields in the order of decreasing alignments.
+  The order of fields with the same alignment is preserved.
+
+  ```
+  @go.MinimizePadding
+  struct Padded {
+    1: byte small
+    2: i64 big
+    3: i16 medium
+    4: i32 biggish
+    5: byte tiny
+  }
+  ```
+
+  For example, the Go fields for the `Padded` Thrift struct above will be generated in the following order:
+
+  ```
+  int64 big;
+  int32 biggish;
+  int16 medium;
+  int8 small;
+  int8 tiny;
+  ```
+
+  which gives the size of 16 bytes compared to 32 bytes if `go.MinimizePadding` was not specified.
+*/
+@scope.Structured
+struct MinimizePadding {}

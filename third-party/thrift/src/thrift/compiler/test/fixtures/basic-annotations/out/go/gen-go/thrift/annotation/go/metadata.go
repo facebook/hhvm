@@ -36,6 +36,12 @@ var (
                 SetName("go.Tag"),
         )
     }()
+    premadeThriftType_go_MinimizePadding = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("go.MinimizePadding"),
+        )
+    }()
 )
 
 // Helper type to allow us to store Thrift types in a slice at compile time,
@@ -51,6 +57,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "go.Name", premadeThriftType_go_Name })
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "go.Tag", premadeThriftType_go_Tag })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "go.MinimizePadding", premadeThriftType_go_MinimizePadding })
 
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
     for _, value := range thriftTypesWithFullName {

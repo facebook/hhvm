@@ -360,6 +360,103 @@ void ContextStack::userExceptionWrapped(
   }
 }
 
+void ContextStack::onStreamSubscribe() {
+  FOLLY_SDT(
+      thrift,
+      thrift_context_stack_on_stream_subscribe,
+      serviceName_,
+      methodNamePrefixed_);
+
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      (*handlers_)[i]->onStreamSubscribe(contextAt(i));
+    }
+  }
+}
+
+void ContextStack::onStreamCredit(uint32_t credits) {
+  FOLLY_SDT(
+      thrift,
+      thrift_context_stack_on_credit_received,
+      serviceName_,
+      methodNamePrefixed_);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      (*handlers_)[i]->onStreamCredit(contextAt(i), credits);
+    }
+  }
+}
+
+void ContextStack::onStreamNext() {
+  FOLLY_SDT(
+      thrift,
+      thrift_context_stack_on_stream_item,
+      serviceName_,
+      methodNamePrefixed_);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      (*handlers_)[i]->onStreamNext(contextAt(i));
+    }
+  }
+}
+
+void ContextStack::onStreamPauseReceive() {
+  FOLLY_SDT(
+      thrift,
+      thrift_context_stack_on_stream_pause_receive,
+      serviceName_,
+      methodNamePrefixed_);
+
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      (*handlers_)[i]->onStreamPauseReceive(contextAt(i));
+    }
+  }
+}
+
+void ContextStack::onStreamResumeReceive() {
+  FOLLY_SDT(
+      thrift,
+      thrift_context_stack_on_stream_resume_receive,
+      serviceName_,
+      methodNamePrefixed_);
+
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      (*handlers_)[i]->onStreamResumeReceive(contextAt(i));
+    }
+  }
+}
+
+void ContextStack::handleStreamErrorWrapped(
+    const folly::exception_wrapper& ew) {
+  FOLLY_SDT(
+      thrift,
+      thrift_context_stack_on_stream_error,
+      serviceName_,
+      methodNamePrefixed_);
+
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      (*handlers_)[i]->handleStreamErrorWrapped(contextAt(i), ew);
+    }
+  }
+}
+
+void ContextStack::onStreamFinally(details::STREAM_ENDING_TYPES endReason) {
+  FOLLY_SDT(
+      thrift,
+      thrift_context_stack_on_stream_finally,
+      serviceName_,
+      methodNamePrefixed_);
+
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      (*handlers_)[i]->onStreamFinally(contextAt(i), endReason);
+    }
+  }
+}
+
 void ContextStack::resetClientRequestContextHeader() {
   if (embeddedClientContext_ == nullptr) {
     return;

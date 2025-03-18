@@ -27,6 +27,13 @@
 
 namespace apache {
 namespace thrift {
+namespace details {
+enum class STREAM_ENDING_TYPES {
+  COMPLETE = 0,
+  ERROR = 1,
+  CANCEL = 2,
+};
+} // namespace details
 
 using server::TConnectionContext;
 
@@ -182,6 +189,17 @@ class TProcessorEventHandler {
     }
     return userException(ctx, fn_name, type.toStdString(), what);
   }
+
+  // Experimental: callbacks for stream events, please do not use without asking
+  // help from Thrift team.
+  virtual void onStreamSubscribe(void*) {}
+  virtual void onStreamNext(void*) {}
+  virtual void onStreamCredit(void*, uint32_t) {}
+  virtual void onStreamPauseReceive(void*) {}
+  virtual void onStreamResumeReceive(void*) {}
+  virtual void handleStreamErrorWrapped(
+      void*, const folly::exception_wrapper&) {}
+  virtual void onStreamFinally(void*, details::STREAM_ENDING_TYPES) {}
 
  protected:
   TProcessorEventHandler() {}

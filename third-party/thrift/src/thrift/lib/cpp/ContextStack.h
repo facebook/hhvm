@@ -108,6 +108,14 @@ class ContextStack {
   void handlerErrorWrapped(const folly::exception_wrapper& ew);
   void userExceptionWrapped(bool declared, const folly::exception_wrapper& ew);
 
+  void onStreamSubscribe();
+  void onStreamNext();
+  void onStreamCredit(uint32_t credits);
+  void onStreamPauseReceive();
+  void onStreamResumeReceive();
+  void handleStreamErrorWrapped(const folly::exception_wrapper& ew);
+  void onStreamFinally(details::STREAM_ENDING_TYPES endReason);
+
   void resetClientRequestContextHeader();
 
   const std::shared_ptr<std::vector<std::shared_ptr<ClientInterceptorBase>>>&

@@ -38,7 +38,8 @@ ServerGeneratorStream::~ServerGeneratorStream() {}
                                  FirstResponsePayload&& payload,
                                  StreamClientCallback* callback,
                                  folly::EventBase* clientEb,
-                                 TilePtr&&) mutable {
+                                 TilePtr&&,
+                                 ContextStack::UniquePtr) mutable {
     DCHECK(clientEb->isInEventBaseThread());
     auto stream = new ServerGeneratorStream(callback, clientEb);
     std::ignore =

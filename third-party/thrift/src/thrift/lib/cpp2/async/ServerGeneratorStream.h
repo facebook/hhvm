@@ -91,7 +91,8 @@ class ServerGeneratorStream : public TwoWayBridge<
       StreamElementEncoder<T>* encode,
       folly::coro::AsyncGenerator<
           std::conditional_t<WithHeader, MessageVariant<T>, T>&&> gen,
-      TileStreamGuard);
+      TileStreamGuard,
+      ContextStack::UniquePtr contextStack);
 
  public:
   template <bool WithHeader, typename T>

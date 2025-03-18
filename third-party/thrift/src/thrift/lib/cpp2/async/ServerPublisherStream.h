@@ -299,7 +299,8 @@ class ServerPublisherStream : private StreamServerCallback {
                                    FirstResponsePayload&& payload,
                                    StreamClientCallback* callback,
                                    folly::EventBase* clientEb,
-                                   TilePtr&& interaction) mutable {
+                                   TilePtr&& interaction,
+                                   ContextStack::UniquePtr) mutable {
       stream->streamClientCallback_ = callback;
       stream->clientEventBase_ = clientEb;
       stream->interaction_ =

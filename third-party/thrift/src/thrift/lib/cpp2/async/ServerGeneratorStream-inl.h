@@ -23,9 +23,9 @@ folly::coro::Task<> ServerGeneratorStream::fromAsyncGeneratorImpl(
     StreamElementEncoder<T>* encode,
     folly::coro::AsyncGenerator<
         std::conditional_t<WithHeader, MessageVariant<T>, T>&&> gen,
-    TileStreamGuard) {
+    TileStreamGuard,
+    ContextStack::UniquePtr) {
   using ReadyCallback = ServerStreamConsumerBaton<folly::coro::Baton>;
-
   bool pauseStream = false;
   int64_t credits = 0;
   SCOPE_EXIT {
@@ -109,7 +109,9 @@ ServerStreamFn<T> ServerGeneratorStream::fromAsyncGenerator(
                                    FirstResponsePayload&& payload,
                                    StreamClientCallback* callback,
                                    folly::EventBase* clientEb,
-                                   TilePtr&& interaction) mutable {
+                                   TilePtr&& interaction,
+                                   ContextStack::UniquePtr
+                                       contextStack) mutable {
       DCHECK(clientEb->isInEventBaseThread());
       auto stream = new ServerGeneratorStream(callback, clientEb);
       auto streamPtr = stream->copy();
@@ -117,7 +119,8 @@ ServerStreamFn<T> ServerGeneratorStream::fromAsyncGenerator(
           std::move(streamPtr),
           encode,
           std::move(gen),
-          TileStreamGuard::transferFrom(std::move(interaction)))
+          TileStreamGuard::transferFrom(std::move(interaction)),
+          std::move(contextStack))
           .scheduleOn(std::move(serverExecutor))
           .start([sp = stream->copy()](folly::Try<folly::Unit> t) {
             if (t.hasException()) {

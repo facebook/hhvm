@@ -131,11 +131,10 @@ final class TCompactProtocolAcceleratedTest extends WWWTest {
   }
 
   private async function genEncode(TProtocol $prot): Awaitable<string> {
-    self::mockInstanceMethodUNSAFE(
+    ThriftClientTestUtils::mockRPCResponse(
+      CompactTestStruct::withDefaultValues(),
       CompactTestServiceClient::class,
-      'genAwaitResponse',
-    )
-      ->mockYield(CompactTestStruct::withDefaultValues());
+    );
     $client = new CompactTestServiceClient($prot);
     await $client->test($this->getTestData());
     // TODO (partisan): Migrate to a singleton serializer

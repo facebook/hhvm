@@ -59,9 +59,7 @@ final class TBinaryProtocolAcceleratedTestCase extends WWWTest {
 
     $client1 = new scribeClient($protocol1);
     $client2 = new scribeClient($protocol2);
-
-    self::mockInstanceMethodUNSAFE(scribeClient::class, 'genAwaitResponse')
-      ->mockYield(ResultCode::OK);
+    ThriftClientTestUtils::mockRPCResponse(ResultCode::OK, scribeClient::class);
     await $client1->Log($messages);
     await $client2->Log($messages);
 
@@ -94,8 +92,7 @@ final class TBinaryProtocolAcceleratedTestCase extends WWWTest {
     $client1 = new scribeClient($protocol1);
     $client2 = new scribeClient($protocol2);
 
-    self::mockInstanceMethodUNSAFE(scribeClient::class, 'genAwaitResponse')
-      ->mockYield(ResultCode::OK);
+    ThriftClientTestUtils::mockRPCResponse(ResultCode::OK, scribeClient::class);
     await $client1->Log($messages);
     await $client2->Log($messages);
 

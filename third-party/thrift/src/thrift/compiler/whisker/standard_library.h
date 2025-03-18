@@ -26,6 +26,6 @@ namespace whisker {
  *
  * See standard_library.cc for available functions.
  */
-void load_standard_library(map& module);
+void load_standard_library(map::raw& module);
 
 } // namespace whisker

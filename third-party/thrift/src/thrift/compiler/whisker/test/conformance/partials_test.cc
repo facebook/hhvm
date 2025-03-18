@@ -30,7 +30,7 @@ class PartialsTest : public RenderTest {};
 TEST_F(PartialsTest, BasicBehavior) {
   EXPECT_EQ(
       "\"from partial\"",
-      render("\"{{>text}}\"", w::map({}), sources({{"text", "from partial"}})));
+      render("\"{{>text}}\"", w::map(), sources({{"text", "from partial"}})));
 }
 
 // NOTE:
@@ -41,7 +41,7 @@ TEST_F(PartialsTest, BasicBehavior) {
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/partials.yml#L24-L29
 TEST_F(PartialsTest, FailedLookup) {
   // In Mustache, the expected output is "".
-  EXPECT_EQ(std::nullopt, render("\"{{>text}}\"", w::map({})));
+  EXPECT_EQ(std::nullopt, render("\"{{>text}}\"", w::map()));
 }
 
 // The greater-than operator should operate within the current context.
@@ -66,8 +66,7 @@ TEST_F(PartialsTest, Recursion) {
               {{"content", w::string("X")},
                {"nodes",
                 w::array({w::map(
-                    {{"content", w::string("Y")},
-                     {"nodes", w::array({})}})})}}),
+                    {{"content", w::string("Y")}, {"nodes", w::array()}})})}}),
           sources({{"node", "{{content}}<{{#nodes}}{{>node}}{{/nodes}}>"}})));
 }
 
@@ -87,7 +86,7 @@ TEST_F(PartialsTest, Nested) {
 TEST_F(PartialsTest, SurroundingWhitespace) {
   EXPECT_EQ(
       "| \t|\t |",
-      *render("| {{>partial}} |", w::map({}), sources({{"partial", "\t|\t"}})));
+      *render("| {{>partial}} |", w::map(), sources({{"partial", "\t|\t"}})));
 }
 
 // Whitespace should be left untouched.
@@ -106,8 +105,7 @@ TEST_F(PartialsTest, InlineIndentation) {
 TEST_F(PartialsTest, StandaloneLineEndings) {
   EXPECT_EQ(
       "|\r\n>|",
-      *render(
-          "|\r\n{{>partial}}\r\n|", w::map({}), sources({{"partial", ">"}})));
+      *render("|\r\n{{>partial}}\r\n|", w::map(), sources({{"partial", ">"}})));
 }
 
 // Standalone tags should not require a newline to precede them.
@@ -115,7 +113,7 @@ TEST_F(PartialsTest, StandaloneLineEndings) {
 TEST_F(PartialsTest, StandaloneWithoutPreviousLine) {
   EXPECT_EQ(
       "  >\n  >>",
-      *render("  {{>partial}}\n>", w::map({}), sources({{"partial", ">\n>"}})));
+      *render("  {{>partial}}\n>", w::map(), sources({{"partial", ">\n>"}})));
 }
 
 // Standalone tags should not require a newline to follow them.
@@ -123,7 +121,7 @@ TEST_F(PartialsTest, StandaloneWithoutPreviousLine) {
 TEST_F(PartialsTest, StandaloneWithoutNewline) {
   EXPECT_EQ(
       ">\n  >\n  >",
-      *render(">\n  {{>partial}}", w::map({}), sources({{"partial", ">\n>"}})));
+      *render(">\n  {{>partial}}", w::map(), sources({{"partial", ">\n>"}})));
 }
 
 // Each line of the partial should be indented before rendering.

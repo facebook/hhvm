@@ -91,8 +91,7 @@ TEST_F(InvertedTest, EmptyList) {
   EXPECT_EQ(
       "\"Yay lists!\"",
       *render(
-          "\"{{^list}}Yay lists!{{/list}}\"",
-          w::map({{"list", w::array({})}})));
+          "\"{{^list}}Yay lists!{{/list}}\"", w::map({{"list", w::array()}})));
 }
 
 // Multiple inverted sections per template should be permitted.
@@ -141,7 +140,7 @@ TEST_F(InvertedTest, ContextMisses) {
   EXPECT_EQ(
       "[Cannot find key 'missing'!]",
       *render(
-          "[{{^missing}}Cannot find key 'missing'!{{/missing}}]", w::map({})));
+          "[{{^missing}}Cannot find key 'missing'!{{/missing}}]", w::map()));
 }
 
 // Dotted names should be valid for Inverted Section tags.
@@ -174,7 +173,7 @@ TEST_F(InvertedTest, DottedNamesBrokenChains) {
       "\"Not Here\" == \"Not Here\"",
       *render(
           "\"{{^a.b.c}}Not Here{{/a.b.c}}\" == \"Not Here\"",
-          w::map({{"a", w::map({})}})));
+          w::map({{"a", w::map()}})));
 }
 
 // Inverted sections should not alter surrounding whitespace.

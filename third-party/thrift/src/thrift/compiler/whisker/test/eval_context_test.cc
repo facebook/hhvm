@@ -29,21 +29,21 @@ namespace {
 /**
  * An object with no properties.
  */
-class empty_native_object : public native_object {};
+class empty_map : public map {
+ public:
+  std::optional<object> lookup_property(std::string_view) const override {
+    return std::nullopt;
+  }
+};
 
 /**
  * When looking up a property, always returns a whisker::string that is the
  * property name repeated twice.
  */
 class double_property_name
-    : public native_object,
-      public native_object::map_like,
+    : public map,
       public std::enable_shared_from_this<double_property_name> {
  public:
-  native_object::map_like::ptr as_map_like() const override {
-    return shared_from_this();
-  }
-
   std::optional<object> lookup_property(std::string_view id) const override {
     return w::string(fmt::format("{0}{0}", id));
   }
@@ -53,18 +53,12 @@ class double_property_name
  * When looking up a property, always returns the same whisker::object as a
  * reference.
  */
-class delegate_to : public native_object,
-                    public native_object::map_like,
-                    public std::enable_shared_from_this<delegate_to> {
+class delegate_to : public map {
  public:
   explicit delegate_to(whisker::object delegate)
       : delegate_(std::move(delegate)) {}
 
  private:
-  native_object::map_like::ptr as_map_like() const override {
-    return shared_from_this();
-  }
-
   std::optional<object> lookup_property(std::string_view) const override {
     return delegate_;
   }
@@ -198,7 +192,7 @@ TEST_F(EvalContextTest, self_reference) {
       w::null,
       w::array({w::i64(1), w::f64(2.0), w::string("foo"), w::boolean(true)}),
       w::map({{"foo", w::i64(1)}, {"bar", w::f64(2.0)}}),
-      w::native_object(std::make_shared<empty_native_object>())};
+      w::make_map<empty_map>()};
 
   for (const auto& obj : objects) {
     auto ctx = eval_context::with_root_scope(diags(), obj);
@@ -206,18 +200,18 @@ TEST_F(EvalContextTest, self_reference) {
   }
 }
 
-TEST_F(EvalContextTest, native_object_basic) {
-  auto o = w::make_native_object<double_property_name>();
+TEST_F(EvalContextTest, custom_map_basic) {
+  auto o = w::make_map<double_property_name>();
   auto ctx = eval_context::with_root_scope(diags(), o);
   EXPECT_EQ(**ctx.lookup_object(path("foo")), string("foofoo"));
   EXPECT_EQ(**ctx.lookup_object(path("bar")), string("barbar"));
 }
 
-TEST_F(EvalContextTest, native_object_delegator) {
-  native_object::ptr doubler_ref = std::make_shared<double_property_name>();
+TEST_F(EvalContextTest, custom_map_delegator) {
+  map::ptr doubler_ref = std::make_shared<double_property_name>();
 
-  object doubler = w::native_object(doubler_ref);
-  object delegator = w::make_native_object<delegate_to>(doubler);
+  object doubler = w::map(doubler_ref);
+  object delegator = w::make_map<delegate_to>(doubler);
 
   auto ctx = eval_context::with_root_scope(diags(), delegator);
   EXPECT_EQ(**ctx.lookup_object(path("foo")), doubler);
@@ -231,21 +225,14 @@ TEST_F(EvalContextTest, native_object_delegator) {
   EXPECT_EQ(**ctx.lookup_object(path("foo")), "foofoo");
 }
 
-TEST_F(EvalContextTest, native_object_lookup_throws) {
-  class throws_on_lookup
-      : public native_object,
-        public native_object::map_like,
-        public std::enable_shared_from_this<throws_on_lookup> {
+TEST_F(EvalContextTest, custom_map_lookup_throws) {
+  class throws_on_lookup : public map {
    public:
-    native_object::map_like::ptr as_map_like() const override {
-      return shared_from_this();
-    }
-
     std::optional<object> lookup_property(std::string_view) const override {
-      throw fatal_error{"I always throw!"};
+      throw eval_error{"I always throw!"};
     }
   };
-  object thrower = w::native_object(std::make_shared<throws_on_lookup>());
+  object thrower = w::make_map<throws_on_lookup>();
 
   {
     auto ctx = eval_context::with_root_scope(diags(), thrower);
@@ -268,7 +255,7 @@ TEST_F(EvalContextTest, native_object_lookup_throws) {
 }
 
 TEST_F(EvalContextTest, globals) {
-  map globals{{"global", w::i64(1)}};
+  map::raw globals{{"global", w::i64(1)}};
   object root;
 
   auto ctx = eval_context::with_root_scope(diags(), root, globals);

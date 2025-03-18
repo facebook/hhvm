@@ -86,14 +86,11 @@ class object_t {
         : bind(cached_whisker_object(method)) {}
     /* implicit */ property_descriptor(whisker::string (Self::*method)())
         : bind(cached_whisker_object(method)) {}
-    /* implicit */ property_descriptor(whisker::array (Self::*method)())
+    /* implicit */ property_descriptor(whisker::array::ptr (Self::*method)())
         : bind(cached_whisker_object(method)) {}
-    /* implicit */ property_descriptor(whisker::map (Self::*method)())
+    /* implicit */ property_descriptor(whisker::map::ptr (Self::*method)())
         : bind(cached_whisker_object(method)) {}
     /* implicit */ property_descriptor(whisker::object (Self::*method)())
-        : bind(cached_whisker_object(method)) {}
-    /* implicit */ property_descriptor(
-        whisker::native_object::ptr (Self::*method)())
         : bind(cached_whisker_object(method)) {}
     /* implicit */ property_descriptor(
         whisker::native_function::ptr (Self::*method)())
@@ -247,7 +244,7 @@ using array = std::vector<node>;
 namespace whisker {
 
 /**
- * A mstch::object is analogous to whisker::native_object.
+ * A mstch::object is analogous to whisker::map.
  */
 using mstch_object = apache::thrift::mstch::object;
 /**
@@ -283,26 +280,7 @@ using mstch_node = apache::thrift::mstch::node;
  * Note that, such data contained within a mstch_array or mstch_map will be
  * lazily marshaled. In other words, the eager marshaling only applies to values
  * in the object tree at depth 0.
- *
- * Internally, this function uses whisker::native_object to implement proxying.
- * Therefore, from_mstch() with a mstch_array as input will not create a
- * whisker::array and so calling is_array() on it will return false. Instead the
- * helper functions of the family, is_mstch_<type>, can be used to check for
- * such objects.
  */
 object from_mstch(mstch_node);
-
-/**
- * Determines if the provided object is proxying a mstch_object internally.
- */
-bool is_mstch_object(const object&);
-/**
- * Determines if the provided object is proxying a mstch_map internally.
- */
-bool is_mstch_map(const object&);
-/**
- * Determines if the provided object is proxying a mstch_array internally.
- */
-bool is_mstch_array(const object&);
 
 } // namespace whisker

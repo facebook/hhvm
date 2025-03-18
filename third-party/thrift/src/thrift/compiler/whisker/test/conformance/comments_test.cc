@@ -28,8 +28,7 @@ class CommentsTest : public RenderTest {};
 // Comment blocks should be removed from the template.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/comments.yml#L10-L14
 TEST_F(CommentsTest, Inline) {
-  EXPECT_EQ(
-      "1234567890", *render("12345{{! Comment Block! }}67890", w::map({})));
+  EXPECT_EQ("1234567890", *render("12345{{! Comment Block! }}67890", w::map()));
 }
 
 // Multiline comments should be permitted.
@@ -39,7 +38,7 @@ TEST_F(CommentsTest, Multiline) {
       "1234567890\n",
       *render(
           "12345{{!\n  This is a\n  multi-line comment...\n}}67890\n",
-          w::map({})));
+          w::map()));
 }
 
 // All standalone comment lines should be removed.
@@ -52,7 +51,7 @@ TEST_F(CommentsTest, Standalone) {
           "Begin.\n"
           "{{! Comment Block! }}\n"
           "End.\n",
-          w::map({})));
+          w::map()));
 }
 
 // All standalone comment lines should be removed.
@@ -65,26 +64,25 @@ TEST_F(CommentsTest, IndentedStandalone) {
           "Begin.\n"
           "  {{! Indented Comment Block! }}\n"
           "End.\n",
-          w::map({})));
+          w::map()));
 }
 
 // "\r\n" should be considered a newline for standalone tags.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/comments.yml#L49-L53
 TEST_F(CommentsTest, StandaloneLineEndings) {
-  EXPECT_EQ(
-      "|\r\n|", *render("|\r\n{{! Standalone Comment }}\r\n|", w::map({})));
+  EXPECT_EQ("|\r\n|", *render("|\r\n{{! Standalone Comment }}\r\n|", w::map()));
 }
 
 // Standalone tags should not require a newline to precede them.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/comments.yml#L55-L59
 TEST_F(CommentsTest, StandaloneWithoutPreviousLine) {
-  EXPECT_EQ("!", *render("  {{! I'm Still Standalone }}\n!", w::map({})));
+  EXPECT_EQ("!", *render("  {{! I'm Still Standalone }}\n!", w::map()));
 }
 
 // Standalone tags should not require a newline to follow them.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/comments.yml#L61-L65
 TEST_F(CommentsTest, StandaloneWithoutNewline) {
-  EXPECT_EQ("!\n", *render("!\n  {{! I'm Still Standalone }}", w::map({})));
+  EXPECT_EQ("!\n", *render("!\n  {{! I'm Still Standalone }}", w::map()));
 }
 
 // All standalone comment lines should be removed.
@@ -99,7 +97,7 @@ TEST_F(CommentsTest, MultilineStandalone) {
           "Something's going on here...\n"
           "}}\n"
           "End.\n",
-          w::map({})));
+          w::map()));
 }
 
 // All standalone comment lines should be removed.
@@ -114,20 +112,20 @@ TEST_F(CommentsTest, IndentedMultilineStandalone) {
           "    Something's going on here...\n"
           "  }}\n"
           "End.\n",
-          w::map({})));
+          w::map()));
 }
 
 // Inline comments should not strip whitespace
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/comments.yml#L93-L97
 TEST_F(CommentsTest, IndentedInline) {
-  EXPECT_EQ("  12 \n", *render("  12 {{! 34 }}\n", w::map({})));
+  EXPECT_EQ("  12 \n", *render("  12 {{! 34 }}\n", w::map()));
 }
 
 // Comment removal should preserve surrounding whitespace.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/comments.yml#L99-L103
 TEST_F(CommentsTest, SurroundingWhitespace) {
   EXPECT_EQ(
-      "12345  67890", *render("12345 {{! Comment Block! }} 67890", w::map({})));
+      "12345  67890", *render("12345 {{! Comment Block! }} 67890", w::map()));
 }
 
 // Comments must never render, even if variable with same name exists.

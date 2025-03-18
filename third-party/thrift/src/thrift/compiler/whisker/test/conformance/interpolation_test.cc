@@ -38,7 +38,7 @@ class InterpolationTest : public RenderTest {};
 TEST_F(InterpolationTest, NoInterpolation) {
   EXPECT_EQ(
       "Hello from {Mustache}!\n",
-      *render("Hello from {Mustache}!\n", w::map({})));
+      *render("Hello from {Mustache}!\n", w::map()));
 }
 
 // Unadorned tags should interpolate content into the template.
@@ -93,7 +93,7 @@ TEST_F(InterpolationTest, BasicNullInterpolation) {
 TEST_F(InterpolationTest, BasicContextMissInterpolation) {
   strict_undefined_variables(diagnostic_level::debug);
   strict_printable_types(diagnostic_level::debug);
-  EXPECT_EQ("I () be seen!", *render("I ({{cannot}}) be seen!", w::map({})));
+  EXPECT_EQ("I () be seen!", *render("I ({{cannot}}) be seen!", w::map()));
 }
 
 // Dotted names should be considered a form of shorthand for sections.
@@ -136,7 +136,7 @@ TEST_F(InterpolationTest, DottedNamesBrokenChains) {
   strict_printable_types(diagnostic_level::debug);
   EXPECT_EQ(
       "\"\" == \"\"",
-      *render("\"{{a.b.c}}\" == \"\"", w::map({{"a", w::map({})}})));
+      *render("\"{{a.b.c}}\" == \"\"", w::map({{"a", w::map()}})));
 }
 
 // Each part of a dotted name should resolve only against its parent.
@@ -149,7 +149,7 @@ TEST_F(InterpolationTest, DottedNamesBrokenChainResolution) {
       *render(
           "\"{{a.b.c.name}}\" == \"\"",
           w::map(
-              {{"a", w::map({{"b", w::map({})}})},
+              {{"a", w::map({{"b", w::map()}})},
                {"c", w::map({{"name", w::string("Jim")}})}})));
 }
 
@@ -195,7 +195,7 @@ TEST_F(InterpolationTest, DottedNameContextPrecedence) {
       *render(
           "{{#a}}{{b.c}}{{/a}}",
           w::map(
-              {{"a", w::map({{"b", w::map({})}})},
+              {{"a", w::map({{"b", w::map()}})},
                {"b", w::map({{"c", w::string("ERROR")}})}})));
 }
 

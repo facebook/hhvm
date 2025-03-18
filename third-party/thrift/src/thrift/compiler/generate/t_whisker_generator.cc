@@ -208,12 +208,12 @@ prototype<t_program>::ptr t_whisker_generator::make_prototype_for_program(
   def.property("doc", mem_fn(&t_program::doc));
   def.property("include_prefix", mem_fn(&t_program::include_prefix));
   def.property("includes", mem_fn(&t_program::includes, proto.of<t_include>()));
-  def.property("namespaces", [&](const t_program& self) -> map {
-    map result;
+  def.property("namespaces", [&](const t_program& self) -> map::ptr {
+    map::raw result;
     for (const auto& [language, value] : self.namespaces()) {
       result[language] = string(value);
     }
-    return result;
+    return map::of(std::move(result));
   });
   def.function(
       "namespace_of", [&](const t_program& self, function::context ctx) {

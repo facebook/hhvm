@@ -112,9 +112,8 @@ TEST_F(MstchCompatTest, map_lookups) {
 
   auto ctx = eval_context::with_root_scope(diags(), converted);
   EXPECT_EQ(**ctx.lookup_object({}), converted);
-  EXPECT_TRUE(is_mstch_map(**ctx.lookup_object(path("key"))));
-  EXPECT_FALSE(is_mstch_array(**ctx.lookup_object(path("key"))));
-  EXPECT_FALSE(is_mstch_object(**ctx.lookup_object(path("key"))));
+  EXPECT_TRUE((*ctx.lookup_object(path("key")))->is_map());
+  EXPECT_FALSE((*ctx.lookup_object(path("key")))->is_array());
 
   EXPECT_EQ(**ctx.lookup_object(path("key", "nested")), i64(1));
   EXPECT_EQ(**ctx.lookup_object(path("key", "bool")), true);
@@ -188,9 +187,8 @@ TEST_F(MstchCompatTest, array_iteration) {
 
   {
     auto ctx = eval_context::with_root_scope(diags(), converted);
-    EXPECT_TRUE(is_mstch_array(**ctx.lookup_object(path("key"))));
-    EXPECT_FALSE(is_mstch_map(**ctx.lookup_object(path("key"))));
-    EXPECT_FALSE(is_mstch_object(**ctx.lookup_object(path("key"))));
+    EXPECT_FALSE((*ctx.lookup_object(path("key")))->is_map());
+    EXPECT_TRUE((*ctx.lookup_object(path("key")))->is_array());
   }
   {
     strict_printable_types(diagnostic_level::debug);
@@ -244,8 +242,8 @@ TEST_F(MstchCompatTest, mstch_object) {
     mstch_node error_func() { throw std::runtime_error("do not call me"); }
 
     whisker::i64 w_i64() { return 1; }
-    whisker::array w_array() {
-      return {w::i64(1), w::string("two"), w::i64(3)};
+    whisker::array::ptr w_array() {
+      return whisker::array::of({w::i64(1), w::string("two"), w::i64(3)});
     }
     whisker::object w_object() { return w::string("whisker object"); }
     whisker::object::ptr w_object_ptr() {
@@ -272,9 +270,8 @@ TEST_F(MstchCompatTest, mstch_object) {
 
   {
     auto ctx = eval_context::with_root_scope(diags(), converted);
-    EXPECT_TRUE(is_mstch_object(**ctx.lookup_object({})));
-    EXPECT_FALSE(is_mstch_map(**ctx.lookup_object({})));
-    EXPECT_FALSE(is_mstch_array(**ctx.lookup_object({})));
+    EXPECT_TRUE((*ctx.lookup_object({}))->is_map());
+    EXPECT_FALSE((*ctx.lookup_object({}))->is_array());
   }
   {
     auto result = render("{{foo:bar.key}}", converted);

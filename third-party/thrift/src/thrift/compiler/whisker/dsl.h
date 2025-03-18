@@ -34,70 +34,10 @@ namespace whisker::dsl {
 // This macro greatly simplifies the SFINAE tricks required by dsl.
 #define WHISKER_DSL_REQUIRES(...) std::enable_if_t<__VA_ARGS__>* = nullptr
 
-/**
- * A class that abstracts over the difference between a whisker::array and a
- * native_object::array_like object.
- *
- * This is useful for the common case where native_function implementations
- * are ambivalent to the underlying array-like type.
- */
-class array_like final : public native_object::array_like {
- public:
-  std::size_t size() const final;
-  object at(std::size_t index) const final;
-
-  /**
-   * Tries to marshal the provided object into an array-like object, if the
-   * underlying type matches. Otherwise, returns an empty optional.
-   */
-  static std::optional<array_like> try_from(const object&);
-
-  explicit array_like(native_object::array_like::ptr arr)
-      : which_(std::move(arr)) {}
-  explicit array_like(managed_array arr) : which_(std::move(arr)) {}
-
- private:
-  std::variant<native_object::array_like::ptr, managed_array> which_;
-};
-static_assert(std::is_move_constructible_v<array_like>);
-static_assert(std::is_copy_constructible_v<array_like>);
-
-/**
- * A class that abstracts over the difference between a whisker::map and a
- * native_object::map_like object.
- *
- * This is useful for the common case where native_function implementations
- * are ambivalent to the underlying map-like type.
- */
-class map_like final : public native_object::map_like {
- public:
-  std::optional<object> lookup_property(
-      std::string_view identifier) const final;
-  std::optional<std::set<std::string>> keys() const final;
-
-  /**
-   * Tries to marshal the provided object into an map-like object, if the
-   * underlying type matches. Otherwise, returns an empty optional.
-   */
-  static std::optional<map_like> try_from(const object&);
-
-  explicit map_like(native_object::map_like::ptr m) : which_(std::move(m)) {}
-  explicit map_like(managed_map m) : which_(std::move(m)) {}
-
- private:
-  std::variant<native_object::map_like::ptr, managed_map> which_;
-};
-static_assert(std::is_move_constructible_v<map_like>);
-static_assert(std::is_copy_constructible_v<map_like>);
-
 namespace detail {
 /**
  * Determines the result of trying to access a typed argument via
  * argument<T>(...) or named_argument<T>(...).
- *
- * Most types are returned by value. Maps and arrays are wrapped by helper
- * classes, in order to abstract away differences with native_object::array_like
- * and native_object::map_like respectively.
  */
 template <typename T>
 struct function_argument_result;
@@ -221,7 +161,6 @@ using make_polymorphic_native_handle =
  * Features include:
  *   - arguments validation (type checking)
  *   - diagnostics formatting APIs
- *   - Exposing better APIs like array_like and map_like instead of raw objects.
  *
  * Example:
  *
@@ -379,17 +318,15 @@ class function : public native_function {
     }
 
     /**
-     * Creates a native_function::fatal_error instance that can be thrown to
-     * indicate an error in function evaluation.
+     * Creates a eval_error instance that can be thrown to indicate an error in
+     * function evaluation.
      *
      * Calling this function will prevent further evaluation of this function
      * and cause text rendering to fail.
      */
     template <typename... T>
-    native_function::fatal_error make_error(
-        fmt::format_string<T...> msg, T&&... args) const {
-      return native_function::fatal_error{
-          fmt::format(msg, std::forward<T>(args)...)};
+    eval_error make_error(fmt::format_string<T...> msg, T&&... args) const {
+      return eval_error{fmt::format(msg, std::forward<T>(args)...)};
     }
 
     /**
@@ -440,19 +377,19 @@ class function : public native_function {
     argument_result_t<T> extract_argument(
         const object& arg, DescribeArgumentFunc&& describe_argument) const {
       if constexpr (std::is_same_v<T, array>) {
-        if (auto arr = array_like::try_from(arg)) {
-          return std::move(*arr);
+        if (arg.is_array()) {
+          return arg.as_array();
         }
         throw make_error(
-            "Expected type of {} to be `array` or `array-like native_object`, but found `{}`.",
+            "Expected type of {} to be `array`, but found `{}`.",
             describe_argument(),
             arg.describe_type());
       } else if constexpr (std::is_same_v<T, map>) {
-        if (auto m = map_like::try_from(arg)) {
-          return std::move(*m);
+        if (arg.is_map()) {
+          return arg.as_map();
         }
         throw make_error(
-            "Expected type of {} to be `map` or `map-like native_object`, but found `{}`.",
+            "Expected type of {} to be `map`, but found `{}`.",
             describe_argument(),
             arg.describe_type());
       } else if constexpr (whisker::detail::is_specialization_v<
@@ -806,6 +743,12 @@ struct by_value {
   using optional_type = std::optional<T>;
 };
 
+template <typename T>
+struct by_managed_ptr {
+  using type = managed_ptr<T>;
+  using optional_type = type;
+};
+
 template <>
 struct function_argument_result<i64> : by_value<i64> {};
 
@@ -819,10 +762,10 @@ template <>
 struct function_argument_result<string> : by_value<string> {};
 
 template <>
-struct function_argument_result<array> : by_value<array_like> {};
+struct function_argument_result<array> : by_managed_ptr<array> {};
 
 template <>
-struct function_argument_result<map> : by_value<map_like> {};
+struct function_argument_result<map> : by_managed_ptr<map> {};
 
 template <typename T>
 struct function_argument_result<native_handle<T>> : by_value<native_handle<T>> {

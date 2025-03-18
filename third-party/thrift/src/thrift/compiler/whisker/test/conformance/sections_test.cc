@@ -186,8 +186,7 @@ TEST_F(SectionsTest, EmptyList) {
   EXPECT_EQ(
       "\"\"",
       *render(
-          "\"{{#list}}Yay lists!{{/list}}\"",
-          w::map({{"list", w::array({})}})));
+          "\"{{#list}}Yay lists!{{/list}}\"", w::map({{"list", w::array()}})));
 }
 
 // Multiple sections per template should be permitted.
@@ -235,7 +234,7 @@ TEST_F(SectionsTest, ContextMisses) {
   strict_undefined_variables(diagnostic_level::debug);
   EXPECT_EQ(
       "[]",
-      *render("[{{#missing}}Found key 'missing'!{{/missing}}]", w::map({})));
+      *render("[{{#missing}}Found key 'missing'!{{/missing}}]", w::map()));
 }
 
 // Implicit iterators should directly interpolate strings.
@@ -379,7 +378,7 @@ TEST_F(SectionsTest, DottedNamesBrokenChains) {
   EXPECT_EQ(
       "\"\" == \"\"",
       render(
-          "\"{{#a.b.c}}Here{{/a.b.c}}\" == \"\"", w::map({{"a", w::map({})}})));
+          "\"{{#a.b.c}}Here{{/a.b.c}}\" == \"\"", w::map({{"a", w::map()}})));
 }
 
 // Sections should not alter surrounding whitespace.

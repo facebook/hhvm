@@ -28,8 +28,8 @@ namespace whisker {
 
 namespace {
 
-map::value_type create_array_functions() {
-  map array_functions;
+map::raw::value_type create_array_functions() {
+  map::raw array_functions;
 
   /**
    * Creates an array with the provided arguments in order. This function can
@@ -43,19 +43,19 @@ map::value_type create_array_functions() {
    * Returns:
    *   [array] provided arguments in order.
    */
-  array_functions["of"] =
-      dsl::make_function("array.of", [](dsl::function::context ctx) -> array {
+  array_functions["of"] = dsl::make_function(
+      "array.of", [](dsl::function::context ctx) -> array::ptr {
         ctx.declare_named_arguments({});
-        array result;
+        array::raw result;
         result.reserve(ctx.arity());
         for (const object& arg : ctx.raw().positional_arguments()) {
           result.emplace_back(arg);
         }
-        return result;
+        return array::of(std::move(result));
       });
 
   /**
-   * Produces the length of an array or array-like object.
+   * Produces the length of an array.
    *
    * Name: array.len
    *
@@ -69,7 +69,7 @@ map::value_type create_array_functions() {
       dsl::make_function("array.len", [](dsl::function::context ctx) -> i64 {
         ctx.declare_named_arguments({});
         ctx.declare_arity(1);
-        return i64(ctx.argument<array>(0).size());
+        return i64(ctx.argument<array>(0)->size());
       });
 
   /**
@@ -87,7 +87,7 @@ map::value_type create_array_functions() {
       "array.empty?", [](dsl::function::context ctx) -> boolean {
         ctx.declare_named_arguments({});
         ctx.declare_arity(1);
-        return ctx.argument<array>(0).size() == 0;
+        return ctx.argument<array>(0)->size() == 0;
       });
 
   /**
@@ -111,26 +111,24 @@ map::value_type create_array_functions() {
         auto a = ctx.argument<array>(0);
         auto index = ctx.argument<i64>(1);
 
-        if (index < 0 || std::size_t(index) >= a.size()) {
+        if (index < 0 || std::size_t(index) >= a->size()) {
           throw ctx.make_error(
-              "Index '{}' is out of bounds (size is {}).", index, a.size());
+              "Index '{}' is out of bounds (size is {}).", index, a->size());
         }
-        return a.at(index);
+        return a->at(index);
       });
 
-  return map::value_type{"array", std::move(array_functions)};
+  return map::raw::value_type{"array", w::map(std::move(array_functions))};
 }
 
-map::value_type create_map_functions() {
-  map map_functions;
+map::raw::value_type create_map_functions() {
+  map::raw map_functions;
 
   /**
    * Returns a view of the provided map's items. The output is an array where
    * each element is a map with "key" and "value" properties.
    *
-   * This function fails if the provided map is not enumerable:
-   * - whisker::map objects are enumerable.
-   * - map-like native objects are enumerable iff map_like::keys() is provided.
+   * This function fails if the provided map is not enumerable.
    *
    * The order of items in the produced array matches the enumeration above.
    * For whisker::map, properties are sorted lexicographically by name.
@@ -148,25 +146,17 @@ map::value_type create_map_functions() {
         ctx.declare_named_arguments({});
         ctx.declare_arity(1);
 
-        dsl::map_like m = ctx.argument<map>(0);
+        map::ptr m = ctx.argument<map>(0);
 
-        class items_view
-            : public native_object,
-              public native_object::array_like,
-              public std::enable_shared_from_this<native_object::array_like> {
+        class items_view : public array {
          public:
-          explicit items_view(
-              dsl::map_like&& m, std::vector<std::string>&& keys)
-              : map_like_(std::move(m)), keys_(std::move(keys)) {}
-
-          native_object::array_like::ptr as_array_like() const override {
-            return shared_from_this();
-          }
+          explicit items_view(map::ptr&& m, std::vector<std::string>&& keys)
+              : map_(std::move(m)), keys_(std::move(keys)) {}
 
           std::size_t size() const final { return keys_.size(); }
           object at(std::size_t index) const final {
             const std::string& property_name = keys_.at(index);
-            auto value = map_like_.lookup_property(property_name);
+            auto value = map_->lookup_property(property_name);
             // The name is guaranteed to exist because it was enumerated
             assert(value.has_value());
             return w::map({
@@ -182,16 +172,15 @@ map::value_type create_map_functions() {
           }
 
          private:
-          dsl::map_like map_like_;
+          map::ptr map_;
           std::vector<std::string> keys_;
         };
 
-        auto keys = m.keys();
+        auto keys = m->keys();
         if (!keys.has_value()) {
-          throw ctx.make_error(
-              "map-like object does not have enumerable properties.");
+          throw ctx.make_error("map does not have enumerable properties.");
         }
-        return w::make_native_object<items_view>(
+        return w::make_array<items_view>(
             std::move(m),
             std::vector<std::string>(
                 std::make_move_iterator(keys->begin()),
@@ -215,16 +204,16 @@ map::value_type create_map_functions() {
         ctx.declare_named_arguments({});
         ctx.declare_arity(2);
 
-        dsl::map_like m = ctx.argument<map>(0);
+        map::ptr m = ctx.argument<map>(0);
         std::string key = ctx.argument<string>(1);
-        return m.lookup_property(key).has_value();
+        return m->lookup_property(key).has_value();
       });
 
-  return map::value_type{"map", std::move(map_functions)};
+  return map::raw::value_type{"map", w::map(std::move(map_functions))};
 }
 
-map::value_type create_string_functions() {
-  map string_functions;
+map::raw::value_type create_string_functions() {
+  map::raw string_functions;
 
   /**
    * Produces the length of string.
@@ -283,11 +272,11 @@ map::value_type create_string_functions() {
         return result;
       });
 
-  return map::value_type{"string", std::move(string_functions)};
+  return map::raw::value_type{"string", w::map(std::move(string_functions))};
 }
 
-map::value_type create_int_functions() {
-  map int_functions;
+map::raw::value_type create_int_functions() {
+  map::raw int_functions;
 
   const auto make_i64_binary_predicate = [](std::string name,
                                             auto&& predicate) {
@@ -460,11 +449,11 @@ map::value_type create_int_functions() {
         return ctx.argument<i64>(0) - ctx.argument<i64>(1);
       });
 
-  return map::value_type{"int", std::move(int_functions)};
+  return map::raw::value_type{"int", w::map(std::move(int_functions))};
 }
 
-map::value_type create_object_functions() {
-  map object_functions;
+map::raw::value_type create_object_functions() {
+  map::raw object_functions;
 
   /**
    * Returns true if two objects are equal in value, otherwise false.
@@ -478,17 +467,9 @@ map::value_type create_object_functions() {
    *   - {boolean, boolean} → equal if same value
    *   - {array, array}
    *        → equal if all corresponding elements are equal (recursive)
-   *   - {array, native_object::array_like}
-   *        → equal if all corresponding elements are equal (recursive)
    *   - {map, map}
-   *        → equal if all key-value pairs are equal between the two maps
-   *          (recursive)
-   *   - {map, native_object::map_like}
-   *        → true if native_object::keys() presents enumerable property keys
-   *          and each key-value pairs are equal between the two maps
-   *          (recursive)
-   *   - {native_object, native_object}
-   *        → equal if both are equivalent array-like or equivalent map-like
+   *        → equal if all both maps have enumerable property keys and each
+   *          key-value pairs are equal between the two maps (recursive)
    *   - {native_function, native_function} → equal if same pointer to function
    *   - {native_handle, native_handle} → equal if same pointer to handle
    *   - all other pair of objects are NOT equal
@@ -511,12 +492,12 @@ map::value_type create_object_functions() {
         return lhs == rhs;
       });
 
-  return map::value_type{"object", std::move(object_functions)};
+  return map::raw::value_type{"object", w::map(std::move(object_functions))};
 }
 
 } // namespace
 
-void load_standard_library(map& module) {
+void load_standard_library(map::raw& module) {
   module.emplace(create_array_functions());
   module.emplace(create_map_functions());
   module.emplace(create_string_functions());

@@ -164,8 +164,8 @@ class eval_name_already_bound_error {
 class eval_context {
  public:
   explicit eval_context(diagnostics_engine& diags)
-      : eval_context(diags, map()) {}
-  eval_context(diagnostics_engine&, map globals);
+      : eval_context(diags, map::raw()) {}
+  eval_context(diagnostics_engine&, map::raw globals);
 
   /**
    * Creates an eval_context with an initial root scope.
@@ -174,7 +174,7 @@ class eval_context {
    *   - stack_depth() == 1
    */
   static eval_context with_root_scope(
-      diagnostics_engine&, object root_scope, map globals = {});
+      diagnostics_engine&, object root_scope, map::raw globals = {});
 
   ~eval_context() noexcept;
 
@@ -298,7 +298,7 @@ class eval_context {
    * stack of lexical_scope).
    *
    * In Whisker, all lexical scopes are backed by whisker::object. However, only
-   * whisker::map and whisker::native_object have enumerable property names.
+   * whisker::map and whisker::native_handle<> have enumerable property names.
    * Other types only allow the self-referential {{.}} lookup.
    *
    * Lexical scopes can also have "locals" — these are names bound to the
@@ -320,7 +320,7 @@ class eval_context {
      *   2. Backing object (this_ref())
      *
      * Throws:
-     *   - `native_object::fatal_error` if the lookup into the backing object
+     *   - `eval_error` if the lookup into the backing object
      *     throws
      */
     std::optional<object> lookup_property(

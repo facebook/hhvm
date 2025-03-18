@@ -46,19 +46,12 @@ namespace {
  *
  * All array elements are marshaled to whisker::object on first use.
  */
-class mstch_array_proxy final
-    : public native_object,
-      public native_object::array_like,
-      public std::enable_shared_from_this<mstch_array_proxy> {
+class mstch_array_proxy final : public array {
  public:
   explicit mstch_array_proxy(mstch_array&& array)
       : proxied_(std::move(array)) {}
 
  private:
-  native_object::array_like::ptr as_array_like() const override {
-    return shared_from_this();
-  }
-
   std::size_t size() const override { return proxied_.size(); }
 
   object at(std::size_t index) const override {
@@ -88,17 +81,12 @@ class mstch_array_proxy final
  * Properties are lazily marshaled to whisker::object on first access by name.
  */
 class mstch_map_proxy final
-    : public native_object,
-      public native_object::map_like,
+    : public map,
       public std::enable_shared_from_this<mstch_map_proxy> {
  public:
   explicit mstch_map_proxy(mstch_map&& map) : proxied_(std::move(map)) {}
 
  private:
-  native_object::map_like::ptr as_map_like() const override {
-    return shared_from_this();
-  }
-
   std::optional<object> lookup_property(std::string_view id) const override {
     if (auto cached = converted_.find(id); cached != converted_.end()) {
       return cached->second;
@@ -136,16 +124,11 @@ class mstch_map_proxy final
  * mstch::object may be volatile.
  */
 class mstch_object_proxy
-    : public native_object,
-      public native_object::map_like,
+    : public map,
       public std::enable_shared_from_this<mstch_object_proxy> {
  public:
   explicit mstch_object_proxy(std::shared_ptr<mstch_object>&& obj)
       : proxied_(std::move(obj)) {}
-
-  native_object::map_like::ptr as_map_like() const override {
-    return shared_from_this();
-  }
 
   std::optional<object> lookup_property(std::string_view id) const override {
     if (!proxied_->has(id)) {
@@ -195,29 +178,14 @@ object from_mstch(mstch_node node) {
       [](double value) { return w::f64(value); },
       [](bool value) { return w::boolean(value); },
       [](std::shared_ptr<mstch_object>&& mstch_obj) -> object {
-        return w::make_native_object<mstch_object_proxy>(std::move(mstch_obj));
+        return w::make_map<mstch_object_proxy>(std::move(mstch_obj));
       },
       [](mstch_map&& map) -> object {
-        return w::make_native_object<mstch_map_proxy>(std::move(map));
+        return w::make_map<mstch_map_proxy>(std::move(map));
       },
       [](mstch_array&& array) -> object {
-        return w::make_native_object<mstch_array_proxy>(std::move(array));
+        return w::make_array<mstch_array_proxy>(std::move(array));
       });
-}
-
-bool is_mstch_object(const object& o) {
-  return o.is_native_object() &&
-      dynamic_cast<mstch_object_proxy*>(o.as_native_object().get()) != nullptr;
-}
-
-bool is_mstch_map(const object& o) {
-  return o.is_native_object() &&
-      dynamic_cast<mstch_map_proxy*>(o.as_native_object().get()) != nullptr;
-}
-
-bool is_mstch_array(const object& o) {
-  return o.is_native_object() &&
-      dynamic_cast<mstch_array_proxy*>(o.as_native_object().get()) != nullptr;
 }
 
 } // namespace whisker

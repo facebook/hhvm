@@ -78,7 +78,7 @@ class t_whisker_generator : public t_generator {
    * The global context used for whisker rendering. This function can be used,
    * for example, to add globally available helper functions.
    */
-  virtual whisker::map globals() const { return {}; }
+  virtual whisker::map::raw globals() const { return {}; }
 
   // See whisker::render_options
   struct strictness_options {
@@ -403,13 +403,13 @@ class t_whisker_generator : public t_generator {
       prototype_ptr<T> prototype) {
     return [function, proto = std::move(prototype)](const Self& self) {
       node_list_view<const T> nodes = (self.*function)();
-      whisker::array refs;
+      whisker::array::raw refs;
       refs.reserve(nodes.size());
       for (const T& ref : nodes) {
         refs.emplace_back(whisker::make::native_handle(
             whisker::manage_as_static(ref), proto));
       }
-      return refs;
+      return whisker::make::array(refs);
     };
   }
 
@@ -428,13 +428,13 @@ class t_whisker_generator : public t_generator {
       prototype_ptr<T> prototype) {
     return [function, proto = std::move(prototype)](const Self& self) {
       const std::vector<T*>& nodes = (self.*function)();
-      whisker::array refs;
+      whisker::array::raw refs;
       refs.reserve(nodes.size());
       for (const T* ref : nodes) {
         refs.emplace_back(whisker::make::native_handle(
             whisker::manage_as_static(*ref), proto));
       }
-      return refs;
+      return whisker::make::array(std::move(refs));
     };
   }
 

@@ -38,12 +38,9 @@ std::optional<object> find_property(
       [](f64) -> result { return std::nullopt; },
       [](const string&) -> result { return std::nullopt; },
       [](boolean) -> result { return std::nullopt; },
-      [](const managed_array&) -> result { return std::nullopt; },
-      [&](const native_object::ptr& o) -> result {
-        if (auto map_like = o->as_map_like()) {
-          return map_like->lookup_property(identifier.name);
-        }
-        return std::nullopt;
+      [](const array::ptr&) -> result { return std::nullopt; },
+      [&](const map::ptr& m) -> result {
+        return m->lookup_property(identifier.name);
       },
       [](const native_function::ptr&) -> result { return std::nullopt; },
       [&](const native_handle<>& h) -> result {
@@ -71,12 +68,6 @@ std::optional<object> find_property(
           proto = proto->parent();
         }
         return std::nullopt;
-      },
-      [&](const managed_map& m) -> result {
-        if (auto it = m->find(identifier.name); it != m->end()) {
-          return it->second;
-        }
-        return std::nullopt;
       });
 }
 
@@ -84,20 +75,12 @@ std::optional<object> find_property(
  * A class representing the bag of properties at the global scope (even before
  * the root scope).
  *
- * This could be a w::map but for debugging purposes, a native_object with a
- * custom print_to function is beneficial.
+ * This is a bespoke implementation primarily for debugging purposes.
  */
-class global_scope_object
-    : public native_object,
-      public native_object::map_like,
-      public std::enable_shared_from_this<global_scope_object> {
+class global_scope_object : public map {
  public:
-  explicit global_scope_object(map properties)
+  explicit global_scope_object(map::raw properties)
       : properties_(std::move(properties)) {}
-
-  native_object::map_like::ptr as_map_like() const override {
-    return shared_from_this();
-  }
 
   std::optional<object> lookup_property(
       std::string_view identifier) const override {
@@ -119,7 +102,7 @@ class global_scope_object
   }
 
  private:
-  map properties_;
+  map::raw properties_;
 };
 
 } // namespace
@@ -137,13 +120,12 @@ eval_context::eval_context(diagnostics_engine& diags, object globals)
       global_scope_(std::move(globals)),
       stack_({lexical_scope(global_scope_)}) {}
 
-eval_context::eval_context(diagnostics_engine& diags, map globals)
+eval_context::eval_context(diagnostics_engine& diags, map::raw globals)
     : eval_context(
-          diags,
-          w::make_native_object<global_scope_object>(std::move(globals))) {}
+          diags, w::make_map<global_scope_object>(std::move(globals))) {}
 
 /* static */ eval_context eval_context::with_root_scope(
-    diagnostics_engine& diags, object root_scope, map globals) {
+    diagnostics_engine& diags, object root_scope, map::raw globals) {
   eval_context result{diags, std::move(globals)};
   result.push_scope(root_scope);
   return result;
@@ -227,7 +209,7 @@ eval_context::lookup_object(const ast::variable_lookup& lookup) {
               current = result;
               break;
             }
-          } catch (const native_object::fatal_error& err) {
+          } catch (const eval_error& err) {
             return unexpected(eval_scope_lookup_error(
                 path.front().name,
                 make_searched_scopes(),
@@ -254,7 +236,7 @@ eval_context::lookup_object(const ast::variable_lookup& lookup) {
             }
             parent = *current;
             current = next;
-          } catch (const native_object::fatal_error& err) {
+          } catch (const eval_error& err) {
             return unexpected(eval_property_lookup_error(
                 *current, /* missing_from */
                 make_success_path(path.begin(), component),

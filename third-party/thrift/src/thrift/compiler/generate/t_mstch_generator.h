@@ -219,7 +219,7 @@ class t_mstch_generator : public t_whisker_generator {
   const compiler_options_map& options() const { return compiler_options(); }
 
  private:
-  whisker::map globals() const final override;
+  whisker::map::raw globals() const final;
   strictness_options strictness() const final;
 
   /**

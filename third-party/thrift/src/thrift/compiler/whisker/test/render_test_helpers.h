@@ -44,35 +44,27 @@ class RenderTest : public testing::Test {
  public:
   static const inline std::string path_to_file = "path/to/test.whisker";
 
-  class empty_native_object : public native_object {};
-
-  class array_like_native_object
-      : public native_object,
-        public native_object::array_like,
-        public std::enable_shared_from_this<array_like_native_object> {
+  class custom_array : public array {
    public:
-    explicit array_like_native_object(array values)
-        : values_(std::move(values)) {}
+    explicit custom_array(array::raw values) : values_(std::move(values)) {}
 
-    native_object::array_like::ptr as_array_like() const override {
-      return shared_from_this();
+    static object make(array::raw values) {
+      return object(std::make_shared<custom_array>(std::move(values)));
     }
+
     std::size_t size() const override { return values_.size(); }
     object at(std::size_t index) const override { return values_.at(index); }
 
    private:
-    array values_;
+    array::raw values_;
   };
 
-  class map_like_native_object
-      : public native_object,
-        public native_object::map_like,
-        public std::enable_shared_from_this<map_like_native_object> {
+  class custom_map : public map {
    public:
-    explicit map_like_native_object(map values) : values_(std::move(values)) {}
+    explicit custom_map(map::raw values) : values_(std::move(values)) {}
 
-    native_object::map_like::ptr as_map_like() const override {
-      return shared_from_this();
+    static object make(map::raw values) {
+      return object(std::make_shared<custom_map>(std::move(values)));
     }
 
     std::optional<object> lookup_property(std::string_view id) const override {
@@ -91,7 +83,7 @@ class RenderTest : public testing::Test {
     }
 
    private:
-    map values_;
+    map::raw values_;
   };
 
  private:
@@ -146,7 +138,7 @@ class RenderTest : public testing::Test {
     std::optional<diagnostic_level> strict_undefined_variables;
     // Backtraces are disabled by default since they add generally add noise.
     bool show_source_backtrace_on_failure = false;
-    std::vector<std::function<void(map&)>> libraries_to_load;
+    std::vector<std::function<void(map::raw&)>> libraries_to_load;
 
     void apply_to(render_options& options) const {
       if (strict_boolean_conditional.has_value()) {
@@ -187,7 +179,7 @@ class RenderTest : public testing::Test {
   void show_source_backtrace_on_failure(bool enabled) {
     render_test_options_.show_source_backtrace_on_failure = enabled;
   }
-  void use_library(std::function<void(map&)> library_loader) {
+  void use_library(std::function<void(map::raw&)> library_loader) {
     render_test_options_.libraries_to_load.push_back(std::move(library_loader));
   }
 
@@ -209,12 +201,12 @@ class RenderTest : public testing::Test {
     /**
      * Mapping of name in the global scope to whisker::object.
      */
-    map value;
+    map::raw value;
   };
 
   static globals_by_name globals(
       std::initializer_list<std::pair<const std::string, object>> entries) {
-    return {map{std::move(entries)}};
+    return {map::raw{std::move(entries)}};
   }
 
   std::optional<std::string> render(

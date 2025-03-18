@@ -485,7 +485,7 @@ struct conditional_block {
 };
 
 /**
- * A Whisker construct for "de-structuring" a map-like object.
+ * A Whisker construct for "de-structuring" a map object.
  * This matches Handlebars:
  *   https://handlebarsjs.com/guide/builtin-helpers.html#with
  */

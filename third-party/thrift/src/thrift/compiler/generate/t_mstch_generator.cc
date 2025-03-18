@@ -412,9 +412,9 @@ mstch::map t_mstch_generator::prepend_prefix(
   return res;
 }
 
-whisker::map t_mstch_generator::globals() const {
+whisker::map::raw t_mstch_generator::globals() const {
   auto options = render_options();
-  whisker::map result = t_whisker_generator::globals();
+  whisker::map::raw result = t_whisker_generator::globals();
   for (const auto& undefined_name : options.allowed_undefined_variables) {
     result.insert({undefined_name, whisker::make::null});
   }

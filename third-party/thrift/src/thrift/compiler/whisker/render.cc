@@ -431,17 +431,8 @@ bool coerce_to_boolean(f64 value) {
 bool coerce_to_boolean(const string& value) {
   return !value.empty();
 }
-bool coerce_to_boolean(const managed_array& value) {
-  return !value->empty();
-}
-bool coerce_to_boolean(const native_object::ptr& value) {
-  if (auto array_like = value->as_array_like(); array_like != nullptr) {
-    return array_like->size() != 0;
-  }
-  if (auto map_like = value->as_map_like(); map_like != nullptr) {
-    return true;
-  }
-  return false;
+bool coerce_to_boolean(const array::ptr& value) {
+  return value->size() > 0;
 }
 bool coerce_to_boolean(const native_function::ptr&) {
   return true;
@@ -449,7 +440,7 @@ bool coerce_to_boolean(const native_function::ptr&) {
 bool coerce_to_boolean(const native_handle<>&) {
   return true;
 }
-bool coerce_to_boolean(const managed_map&) {
+bool coerce_to_boolean(const map::ptr&) {
   return true;
 }
 
@@ -673,7 +664,7 @@ class virtual_machine {
                     std::move(named_args)};
                 try {
                   return f->invoke(std::move(ctx));
-                } catch (const native_function::fatal_error& err) {
+                } catch (const eval_error& err) {
                   diags_.report_fatal_error(
                       name.loc.begin,
                       "Function '{}' threw an error:\n{}",
@@ -800,7 +791,7 @@ class module_importer {
         source_stack::frame::for_import{},
         import_statement.loc.begin);
 
-    map exports;
+    map::raw exports;
     for (const ast::header& header : module->header_elements) {
       detail::variant_match(
           header, [&](const auto& node) { visit(exports, node); });
@@ -819,7 +810,7 @@ class module_importer {
   eval_context& eval_ctx() { return vm_.stack().top()->context; }
 
   void do_export(
-      map& exports, std::string name, object value, source_location loc) {
+      map::raw& exports, std::string name, object value, source_location loc) {
     auto [_, inserted] = exports.emplace(name, std::move(value));
     if (!inserted) {
       vm_.diags().report_fatal_error(
@@ -827,7 +818,7 @@ class module_importer {
     }
   }
 
-  void visit(map&, const ast::import_statement& import_statement) {
+  void visit(map::raw&, const ast::import_statement& import_statement) {
     auto export_map = resolve_exports_of(import_statement);
     vm_.bind_local(
         import_statement.loc.begin,
@@ -835,7 +826,7 @@ class module_importer {
         std::move(export_map));
   }
 
-  void visit(map& exports, const ast::partial_block& partial_block) {
+  void visit(map::raw& exports, const ast::partial_block& partial_block) {
     native_handle<> definition = vm_.create_partial_definition(partial_block);
     vm_.bind_local(
         partial_block.name.loc.begin,
@@ -851,7 +842,7 @@ class module_importer {
     }
   }
 
-  void visit(map& exports, const ast::let_statement& let_statement) {
+  void visit(map::raw& exports, const ast::let_statement& let_statement) {
     object value = vm_.evaluate(let_statement.value);
     vm_.bind_local(let_statement.loc.begin, let_statement.id.name, value);
 
@@ -864,7 +855,7 @@ class module_importer {
     }
   }
 
-  void visit(map&, const ast::text& text) {
+  void visit(map::raw&, const ast::text& text) {
     for (const ast::text::content& part : text.parts) {
       detail::variant_match(
           part,
@@ -879,49 +870,49 @@ class module_importer {
     }
   }
 
-  void visit(map&, const ast::newline&) {
+  void visit(map::raw&, const ast::newline&) {
     // newline can be safely ignored
   }
-  void visit(map&, const ast::comment&) {
+  void visit(map::raw&, const ast::comment&) {
     // comments can be safely ignored
   }
-  void visit(map&, const ast::pragma_statement&) {
+  void visit(map::raw&, const ast::pragma_statement&) {
     // The only supported pragma (ignore-newlines) is safe to ignore.
   }
 
-  [[noreturn]] void visit(map&, const ast::interpolation& variable) {
+  [[noreturn]] void visit(map::raw&, const ast::interpolation& variable) {
     vm_.diags().report_fatal_error(
         variable.loc.begin,
         "Modules cannot have interpolations at the top-level");
   }
-  [[noreturn]] void visit(map&, const ast::section_block& section_block) {
+  [[noreturn]] void visit(map::raw&, const ast::section_block& section_block) {
     vm_.diags().report_fatal_error(
         section_block.loc.begin,
         "Modules cannot have section blocks at the top-level");
   }
   [[noreturn]] void visit(
-      map&, const ast::conditional_block& conditional_block) {
+      map::raw&, const ast::conditional_block& conditional_block) {
     vm_.diags().report_fatal_error(
         conditional_block.loc.begin,
         "Modules cannot have conditional blocks at the top-level");
   }
-  [[noreturn]] void visit(map&, const ast::with_block& with_block) {
+  [[noreturn]] void visit(map::raw&, const ast::with_block& with_block) {
     vm_.diags().report_fatal_error(
         with_block.loc.begin,
         "Modules cannot have with blocks at the top-level");
   }
-  [[noreturn]] void visit(map&, const ast::each_block& each_block) {
+  [[noreturn]] void visit(map::raw&, const ast::each_block& each_block) {
     vm_.diags().report_fatal_error(
         each_block.loc.begin,
         "Modules cannot have each blocks at the top-level");
   }
   [[noreturn]] void visit(
-      map&, const ast::partial_statement& partial_statement) {
+      map::raw&, const ast::partial_statement& partial_statement) {
     vm_.diags().report_fatal_error(
         partial_statement.loc.begin,
         "Modules cannot have partial statements at the top-level");
   }
-  [[noreturn]] void visit(map&, const ast::macro& macro) {
+  [[noreturn]] void visit(map::raw&, const ast::macro& macro) {
     vm_.diags().report_fatal_error(
         macro.loc.begin, "Modules cannot have macros at the top-level");
   }
@@ -1137,7 +1128,7 @@ class render_engine {
     // See render_options::strict_boolean_conditional for the coercion
     // rules
     section_variable.visit(
-        [&](const managed_array& value) {
+        [&](const array::ptr& value) {
           if (section.inverted) {
             // This array is being used as a conditional
             maybe_report_coercion();
@@ -1147,47 +1138,12 @@ class render_engine {
             }
             return;
           }
-          for (const auto& element : *value) {
-            do_visit(element);
+          const std::size_t size = value->size();
+          for (std::size_t i = 0; i < size; ++i) {
+            do_visit(value->at(i));
           }
         },
-        [&](const native_object::ptr& value) {
-          if (section.inverted) {
-            // This native_object is being used as a conditional
-            maybe_report_coercion();
-            if (!coerce_to_boolean(value)) {
-              // Empty array-like objects are falsy
-              do_visit(whisker::make::null);
-            }
-            return;
-          }
-          // When used as a section_block, a native_object which is both
-          // "map"-like and "array"-like is ambiguous. We arbitrarily choose
-          // "array"-like as the winner. In practice, a native_object is most
-          // likely to be one or the other.
-          //
-          // This is one of the reasons that section blocks are deprecated in
-          // favor of `{{#each}}` and `{{#with}}`.
-          if (auto array_like = value->as_array_like()) {
-            const std::size_t size = array_like->size();
-            for (std::size_t i = 0; i < size; ++i) {
-              do_visit(array_like->at(i));
-            }
-            return;
-          }
-          if (auto map_like = value->as_map_like()) {
-            do_visit(section_variable);
-            return;
-          }
-
-          // Since this native_object is neither array-like nor map-like, it is
-          // being used as a conditional
-          maybe_report_coercion();
-          if (coerce_to_boolean(value)) {
-            do_visit(whisker::make::null);
-          }
-        },
-        [&](const managed_map&) {
+        [&](const map::ptr&) {
           if (section.inverted) {
             // This map is being used as a conditional
             maybe_report_coercion();
@@ -1237,18 +1193,8 @@ class render_engine {
     const ast::expression& expr = with_block.value;
     object result = vm_.evaluate(expr);
     result.visit(
-        [&](const managed_map&) {
+        [&](const map::ptr&) {
           // maps can be de-structured.
-        },
-        [&](const native_object::ptr& o) {
-          // map-like native objects can be de-structured.
-          if (o->as_map_like() == nullptr) {
-            vm_.diags().report_fatal_error(
-                expr.loc.begin,
-                "Expression '{}' is a native_object which is not map-like. The encountered value is:\n{}",
-                expr.to_string(),
-                to_string(result));
-          }
         },
         [&](auto&&) {
           vm_.diags().report_fatal_error(
@@ -1298,32 +1244,14 @@ class render_engine {
     };
 
     result.visit(
-        [&](const managed_array& arr) {
-          if (arr->empty()) {
-            do_visit_else();
-            return;
-          }
-          for (std::size_t i = 0; i < arr->size(); ++i) {
-            do_visit(i64(i), (*arr)[i]);
-          }
-        },
-        [&](const native_object::ptr& o) {
-          // array-like native objects are iterable.
-          native_object::array_like::ptr array_like = o->as_array_like();
-          if (array_like == nullptr) {
-            vm_.diags().report_fatal_error(
-                expr.loc.begin,
-                "Expression '{}' is a native_object which is not array-like. The encountered value is:\n{}",
-                expr.to_string(),
-                to_string(result));
-          }
-          const std::size_t size = array_like->size();
+        [&](const array::ptr& arr) {
+          const std::size_t size = arr->size();
           if (size == 0) {
             do_visit_else();
             return;
           }
           for (std::size_t i = 0; i < size; ++i) {
-            do_visit(i64(i), array_like->at(i));
+            do_visit(i64(i), arr->at(i));
           }
         },
         [&](auto&&) {

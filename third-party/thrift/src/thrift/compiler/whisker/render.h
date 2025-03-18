@@ -94,9 +94,6 @@ struct render_options {
    *     - ±0.0, NaN (f64)
    *     - empty string
    *     - empty array
-   *     - native_object which is...
-   *       - array-like with size of 0
-   *       - neither map-like nor array-like
    *   - All other values are considered "truthy".
    *
    * This *mostly* matches "falsy" values in JavaScript for the subset of its
@@ -136,7 +133,6 @@ struct render_options {
    * The following types are never printable:
    *   - array
    *   - map
-   *   - native_object
    *   - native_function
    *   - native_handle
    */
@@ -182,7 +178,7 @@ struct render_options {
    * before even the root scope. These names will be available in the search
    * path for every lookup.
    */
-  map globals;
+  map::raw globals;
 };
 
 /**

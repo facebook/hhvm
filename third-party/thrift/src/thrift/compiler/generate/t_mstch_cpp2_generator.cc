@@ -2293,25 +2293,10 @@ class cpp_mstch_enum_value : public mstch_enum_value {
     register_methods(
         this,
         {
-            {"enum_value:name_hash", &cpp_mstch_enum_value::name_hash},
             {"enum_value:cpp_name", &cpp_mstch_enum_value::cpp_name},
-            {"enum_value:fatal_annotations?",
-             &cpp_mstch_enum_value::has_fatal_annotations},
-            {"enum_value:fatal_annotations",
-             &cpp_mstch_enum_value::fatal_annotations},
         });
   }
-  mstch::node name_hash() {
-    return "__fbthrift_hash_" + cpp2::sha256_hex(enum_value_->get_name());
-  }
   mstch::node cpp_name() { return cpp2::get_name(enum_value_); }
-  mstch::node has_fatal_annotations() {
-    return get_fatal_annotations(enum_value_->annotations()).size() > 0;
-  }
-  mstch::node fatal_annotations() {
-    return make_mstch_annotations(
-        get_fatal_annotations(enum_value_->annotations()));
-  }
 };
 
 class cpp_mstch_const : public mstch_const {

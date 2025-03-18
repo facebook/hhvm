@@ -577,3 +577,7 @@ end
 module TypingErrors = struct
     let log_errors ~type_check_end_id:_ ~data:_ = ()
 end
+
+module Diagnostics = struct
+  let log _ = ()
+end

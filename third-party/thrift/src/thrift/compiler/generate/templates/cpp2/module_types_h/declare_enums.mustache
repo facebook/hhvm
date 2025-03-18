@@ -71,10 +71,10 @@ template <> struct TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_nam
     (void)findName(value, &ret);
     return ret.data();
   }
-  {{^enum:empty?}}
+  {{#if (not (array.empty? enum:self.values))}}
   static constexpr type min() { return type::{{enum:min}}; }
   static constexpr type max() { return type::{{enum:max}}; }
-  {{/enum:empty?}}
+  {{/if (not (array.empty? enum:self.values))}}
 };
 
 {{/program:enums}}

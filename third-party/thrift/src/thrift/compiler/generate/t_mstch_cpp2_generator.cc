@@ -2195,7 +2195,6 @@ class cpp_mstch_enum : public mstch_enum {
     register_methods(
         this,
         {
-            {"enum:empty?", &cpp_mstch_enum::is_empty},
             {"enum:min", &cpp_mstch_enum::min},
             {"enum:max", &cpp_mstch_enum::max},
             {"enum:cpp_is_unscoped", &cpp_mstch_enum::cpp_is_unscoped},
@@ -2207,7 +2206,6 @@ class cpp_mstch_enum : public mstch_enum {
             {"enum:legacy_api?", &cpp_mstch_enum::legacy_api},
         });
   }
-  mstch::node is_empty() { return enum_->get_enum_values().empty(); }
   mstch::node min() {
     if (!enum_->get_enum_values().empty()) {
       auto e_min = std::min_element(

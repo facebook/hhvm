@@ -1446,7 +1446,14 @@ impl RewriteState {
                     )
                 };
                 let virtual_spliced_expr = if is_macro {
-                    let e = Expr::new(
+                    // If the splice contains an await, then it will be an async lambda, which we
+                    // should in principle await. However, we are inside of a FSync lambda here, so
+                    // we will rely on the type checker removing the Awaitable from the type of the
+                    // splice. It can do this since the splice itself has a contains_await field.
+                    // This is the virtual expression, so there is no runtime difference.
+                    // We instead could placing an await here, and making the containing lambda async,
+                    // but that would change the interface between make_tree on the DSL and the desugaring.
+                    Expr::new(
                         (),
                         pos.clone(),
                         Expr_::mk_call(aast::CallExpr {
@@ -1455,12 +1462,7 @@ impl RewriteState {
                             args: vec![],
                             unpacked_arg: None,
                         }),
-                    );
-                    if contains_await {
-                        Expr::new((), pos.clone(), Expr_::mk_await(e))
-                    } else {
-                        e
-                    }
+                    )
                 } else {
                     temp_variable.clone()
                 };
@@ -1472,7 +1474,7 @@ impl RewriteState {
                         spliced_expr: virtual_spliced_expr,
                         extract_client_type: true,
                         contains_await,
-                        macro_variables: None,
+                        macro_variables: macro_variables.clone(),
                         temp_lid: temp_lid.clone(),
                     }),
                 );

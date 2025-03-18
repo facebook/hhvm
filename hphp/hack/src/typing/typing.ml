@@ -5019,14 +5019,23 @@ end = struct
         let (env, ty_res) = Env.fresh_type env p in
         let (env, ty_infer) = Env.fresh_type env p in
         let r = Reason.splice p in
-        let spliceable_type =
-          let raw_spliceable_type =
-            MakeType.spliceable r ty_visitor ty_res ty_infer
-          in
-          if TCO.pessimise_builtins (Env.get_tcopt env) then
-            MakeType.locl_like r raw_spliceable_type
+        let raw_spliceable_type =
+          MakeType.spliceable r ty_visitor ty_res ty_infer
+        in
+        let awaitable_ty =
+          if contains_await && Option.is_some macro_variables then
+            (* In this case, the splice is a macro splice that has been turned into an async lambda
+               and called in the virtual expression, but not awaited, so we need to strip off the
+               Awaitable wrapper. *)
+            MakeType.awaitable r raw_spliceable_type
           else
             raw_spliceable_type
+        in
+        let spliceable_type =
+          if TCO.pessimise_builtins (Env.get_tcopt env) then
+            MakeType.locl_like r awaitable_ty
+          else
+            awaitable_ty
         in
 
         let (_, expr_pos, _) = spliced_expr in

@@ -168,6 +168,13 @@ prototype<t_field>::ptr t_whisker_generator::make_prototype_for_field(
 prototype<t_enum>::ptr t_whisker_generator::make_prototype_for_enum(
     const prototype_database& proto) const {
   auto def = prototype_builder<h_enum>::extends(proto.of<t_type>());
+  def.property("values", mem_fn(&t_enum::values, proto.of<t_enum_value>()));
+  return std::move(def).make();
+}
+
+prototype<t_enum_value>::ptr t_whisker_generator::make_prototype_for_enum_value(
+    const prototype_database& proto) const {
+  auto def = prototype_builder<h_enum_value>::extends(proto.of<t_named>());
   return std::move(def).make();
 }
 

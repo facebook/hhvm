@@ -234,6 +234,9 @@ class t_whisker_generator : public t_generator {
   virtual prototype<t_enum>::ptr make_prototype_for_enum(
       const prototype_database&) const;
 
+  virtual prototype<t_enum_value>::ptr make_prototype_for_enum_value(
+      const prototype_database&) const;
+
   virtual prototype<t_const>::ptr make_prototype_for_const(
       const prototype_database&) const;
 

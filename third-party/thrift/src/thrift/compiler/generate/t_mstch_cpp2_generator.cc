@@ -2196,7 +2196,6 @@ class cpp_mstch_enum : public mstch_enum {
         this,
         {
             {"enum:empty?", &cpp_mstch_enum::is_empty},
-            {"enum:size", &cpp_mstch_enum::size},
             {"enum:min", &cpp_mstch_enum::min},
             {"enum:max", &cpp_mstch_enum::max},
             {"enum:cpp_is_unscoped", &cpp_mstch_enum::cpp_is_unscoped},
@@ -2209,7 +2208,6 @@ class cpp_mstch_enum : public mstch_enum {
         });
   }
   mstch::node is_empty() { return enum_->get_enum_values().empty(); }
-  mstch::node size() { return enum_->get_enum_values().size(); }
   mstch::node min() {
     if (!enum_->get_enum_values().empty()) {
       auto e_min = std::min_element(

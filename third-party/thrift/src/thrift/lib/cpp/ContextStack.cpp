@@ -468,7 +468,8 @@ void ContextStack::resetClientRequestContextHeader() {
 
 folly::Try<void> ContextStack::processClientInterceptorsOnRequest(
     ClientInterceptorOnRequestArguments arguments,
-    apache::thrift::transport::THeader* headers) noexcept {
+    apache::thrift::transport::THeader* headers,
+    RpcOptions& options) noexcept {
   if (clientInterceptors_ == nullptr) {
     return {};
   }
@@ -481,7 +482,8 @@ folly::Try<void> ContextStack::processClientInterceptorsOnRequest(
         headers,
         serviceName_,
         methodNameUnprefixed_,
-        &clientInterceptorFrameworkMetadata_};
+        &clientInterceptorFrameworkMetadata_,
+        &options};
     try {
       clientInterceptor->internal_onRequest(std::move(requestInfo));
     } catch (...) {

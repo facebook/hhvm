@@ -103,7 +103,7 @@ std::pair<apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction, ::cpp2::
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
     auto argsAsRefs = std::tie(p_req);
-    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), ctxAndHeader.second.get()).throwUnlessValue();
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), ctxAndHeader.second.get(), rpcOptions).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -148,7 +148,7 @@ folly::SemiFuture<std::pair<apache::thrift::Client<::cpp2::BoxService>::BoxedInt
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     auto argsAsRefs = std::tie(p_req);
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get());
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions);
         exTry.hasException()) {
       return folly::makeSemiFuture<std::pair<apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction, ::cpp2::ShouldBeBoxed>>(std::move(exTry).exception());
     }
@@ -321,7 +321,7 @@ void apache::thrift::Client<::cpp2::BoxService>::BoxedInteraction::sync_getABox(
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
     auto argsAsRefs = std::tie();
-    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), ctxAndHeader.second.get()).throwUnlessValue();
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), ctxAndHeader.second.get(), rpcOptions).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -362,7 +362,7 @@ folly::SemiFuture<::cpp2::ShouldBeBoxed> apache::thrift::Client<::cpp2::BoxServi
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     auto argsAsRefs = std::tie();
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get());
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions);
         exTry.hasException()) {
       return folly::makeSemiFuture<::cpp2::ShouldBeBoxed>(std::move(exTry).exception());
     }

@@ -202,7 +202,7 @@ folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalR
 
   if (ctx != nullptr) {
     auto argsAsRefs = std::tie();
-    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get()).throwUnlessValue();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
   }
 
   fbthrift_serialize_and_send_method(rpcOptions, std::move(header), ctx.get(), wrappedCallback);
@@ -342,7 +342,7 @@ folly::coro::Task<apache::thrift::ResponseAndClientSink<::cpp2::InitialResponse,
 
   if (ctx != nullptr) {
     auto argsAsRefs = std::tie();
-    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get()).throwUnlessValue();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
   }
 
   fbthrift_serialize_and_send_methodAndReponse(rpcOptions, std::move(header), ctx.get(), wrappedCallback);
@@ -482,7 +482,7 @@ folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalR
 
   if (ctx != nullptr) {
     auto argsAsRefs = std::tie();
-    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get()).throwUnlessValue();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
   }
 
   fbthrift_serialize_and_send_methodThrow(rpcOptions, std::move(header), ctx.get(), wrappedCallback);
@@ -622,7 +622,7 @@ folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalR
 
   if (ctx != nullptr) {
     auto argsAsRefs = std::tie();
-    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get()).throwUnlessValue();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
   }
 
   fbthrift_serialize_and_send_methodSinkThrow(rpcOptions, std::move(header), ctx.get(), wrappedCallback);
@@ -772,7 +772,7 @@ folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalR
 
   if (ctx != nullptr) {
     auto argsAsRefs = std::tie();
-    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get()).throwUnlessValue();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
   }
 
   fbthrift_serialize_and_send_methodFinalThrow(rpcOptions, std::move(header), ctx.get(), wrappedCallback);
@@ -912,7 +912,7 @@ folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalR
 
   if (ctx != nullptr) {
     auto argsAsRefs = std::tie();
-    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get()).throwUnlessValue();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
   }
 
   fbthrift_serialize_and_send_methodBothThrow(rpcOptions, std::move(header), ctx.get(), wrappedCallback);
@@ -1062,7 +1062,7 @@ folly::coro::Task<apache::thrift::ClientSink<::cpp2::SinkPayload, ::cpp2::FinalR
 
   if (ctx != nullptr) {
     auto argsAsRefs = std::tie();
-    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get()).throwUnlessValue();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
   }
 
   fbthrift_serialize_and_send_methodFast(rpcOptions, std::move(header), ctx.get(), wrappedCallback);

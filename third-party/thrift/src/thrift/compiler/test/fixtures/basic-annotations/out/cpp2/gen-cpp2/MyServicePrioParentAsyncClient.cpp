@@ -114,7 +114,7 @@ void apache::thrift::Client<::cpp2::MyServicePrioParent>::sync_ping(apache::thri
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
     auto argsAsRefs = std::tie();
-    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), ctxAndHeader.second.get()).throwUnlessValue();
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), ctxAndHeader.second.get(), rpcOptions).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -155,7 +155,7 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::MyServicePrioParen
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     auto argsAsRefs = std::tie();
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get());
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions);
         exTry.hasException()) {
       return folly::makeSemiFuture<folly::Unit>(std::move(exTry).exception());
     }
@@ -312,7 +312,7 @@ void apache::thrift::Client<::cpp2::MyServicePrioParent>::sync_pong(apache::thri
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
     auto argsAsRefs = std::tie();
-    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), ctxAndHeader.second.get()).throwUnlessValue();
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), ctxAndHeader.second.get(), rpcOptions).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -353,7 +353,7 @@ folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::MyServicePrioParen
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     auto argsAsRefs = std::tie();
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get());
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions);
         exTry.hasException()) {
       return folly::makeSemiFuture<folly::Unit>(std::move(exTry).exception());
     }

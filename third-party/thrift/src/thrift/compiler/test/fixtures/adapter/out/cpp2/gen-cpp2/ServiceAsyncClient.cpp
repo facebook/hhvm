@@ -104,7 +104,7 @@ std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::t
   auto* contextStack  = ctxAndHeader.first.get();
   if (contextStack != nullptr) {
     auto argsAsRefs = std::tie(p_arg1, p_arg2, p_arg3);
-    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), ctxAndHeader.second.get()).throwUnlessValue();
+    contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), ctxAndHeader.second.get(), rpcOptions).throwUnlessValue();
   }
   callback.waitUntilDone(
     evb,
@@ -145,7 +145,7 @@ folly::SemiFuture<::facebook::thrift::test::MyI32_4873> apache::thrift::Client<:
   std::unique_ptr<folly::IOBuf> interceptorFrameworkMetadata = nullptr;
   if (contextStack != nullptr) {
     auto argsAsRefs = std::tie(p_arg1, p_arg2, p_arg3);
-    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get());
+    if (auto exTry = contextStack->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions);
         exTry.hasException()) {
       return folly::makeSemiFuture<::facebook::thrift::test::MyI32_4873>(std::move(exTry).exception());
     }

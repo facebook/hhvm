@@ -93,7 +93,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie(p_from, p_to);
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get()).throwUnlessValue();
+      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_returnstream(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_from, p_to);
@@ -212,7 +212,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie(p_foo);
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get()).throwUnlessValue();
+      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_streamthrows(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_foo);
@@ -331,7 +331,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie(p_foo);
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get()).throwUnlessValue();
+      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_servicethrows(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_foo);
@@ -450,7 +450,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie(p_foo);
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get()).throwUnlessValue();
+      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_servicethrows2(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_foo);
@@ -569,7 +569,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie(p_foo);
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get()).throwUnlessValue();
+      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_boththrows(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_foo);
@@ -688,7 +688,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie(p_foo);
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get()).throwUnlessValue();
+      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_responseandstreamstreamthrows(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_foo);
@@ -807,7 +807,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie(p_foo);
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get()).throwUnlessValue();
+      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_responseandstreamservicethrows(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_foo);
@@ -926,7 +926,7 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
       hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie(p_foo);
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get()).throwUnlessValue();
+      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_responseandstreamboththrows(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), p_foo);

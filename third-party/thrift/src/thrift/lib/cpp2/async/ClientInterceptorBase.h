@@ -50,7 +50,16 @@ class ClientInterceptorBase {
      * in the format `{interaction_name}.{method_name}`.
      */
     const char* methodName = nullptr;
+    /**
+     * Mutable access to interceptor framework metadata storage - this is
+     * typically initialized by the framework and will be passed along the
+     * the channel as part of RpcMetadata.
+     */
     InterceptorFrameworkMetadataStorage* frameworkMetadata = nullptr;
+    /**
+     * RpcOptions that were applied to this request
+     */
+    const RpcOptions* rpcOptions = nullptr;
   };
   virtual void internal_onRequest(RequestInfo) = 0;
 

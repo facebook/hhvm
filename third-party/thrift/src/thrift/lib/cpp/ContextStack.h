@@ -125,7 +125,8 @@ class ContextStack {
 
   [[nodiscard]] folly::Try<void> processClientInterceptorsOnRequest(
       ClientInterceptorOnRequestArguments arguments,
-      apache::thrift::transport::THeader* headers) noexcept;
+      apache::thrift::transport::THeader* headers,
+      RpcOptions& options) noexcept;
   [[nodiscard]] folly::Try<void> processClientInterceptorsOnResponse(
       const apache::thrift::transport::THeader* headers) noexcept;
 

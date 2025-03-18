@@ -39,7 +39,7 @@ folly::coro::Task<{{> types/return_type_client}}> {{> service_common/client_clas
 
   if (ctx != nullptr) {
     auto argsAsRefs = std::tie({{> service_common/param_list}});
-    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get()).throwUnlessValue();
+    ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), rpcOptions).throwUnlessValue();
   }
 
   fbthrift_serialize_and_send_{{function:cpp_name}}(rpcOptions, std::move(header), ctx.get(), wrappedCallback{{#function:creates_interaction?}}, interactionHandle{{/function:creates_interaction?}}{{function:comma}}{{> service_common/param_list}});

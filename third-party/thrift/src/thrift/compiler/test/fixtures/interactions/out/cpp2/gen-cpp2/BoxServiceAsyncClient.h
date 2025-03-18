@@ -99,7 +99,7 @@ class BoxedInteraction final : public apache::thrift::InteractionHandle {
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie();
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get()).throwUnlessValue();
+      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_getABox(*rpcOptions, header, ctx.get(), std::move(wrappedCallback));
@@ -212,7 +212,7 @@ class BoxedInteraction final : public apache::thrift::InteractionHandle {
     BoxedInteraction interactionHandle(channel_, "BoxedInteraction", ctx ? ctx->getClientInterceptors() : nullptr);
     if (ctx != nullptr) {
       auto argsAsRefs = std::tie(p_req);
-      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get()).throwUnlessValue();
+      ctx->processClientInterceptorsOnRequest(apache::thrift::ClientInterceptorOnRequestArguments(argsAsRefs), header.get(), hasRpcOptions ? *rpcOptions : *defaultRpcOptions).throwUnlessValue();
     }
     if constexpr (hasRpcOptions) {
       fbthrift_serialize_and_send_getABoxSession(*rpcOptions, header, ctx.get(), std::move(wrappedCallback), interactionHandle, p_req);

@@ -50,7 +50,6 @@ struct VMProtect {
 
 private:
   void* m_oldBase;
-  VMRegState m_oldState;
 #else
   VMProtect() {}
 #endif

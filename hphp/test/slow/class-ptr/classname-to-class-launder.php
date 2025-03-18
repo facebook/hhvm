@@ -5,6 +5,8 @@ function v(mixed $m): void {
 }
 <<__DynamicallyReferenced>> class C {}
 class D {}
+<<__DynamicallyReferenced(1)>> class E {}
+<<__DynamicallyReferenced(0)>> class F {}
 
 <<__EntryPoint>>
 function main(): void {
@@ -29,4 +31,11 @@ function main(): void {
     __hhvm_intrinsics\launder_value($z)
   );
   invariant($z === $zz, "Should be same");
+
+  $_ = HH\classname_to_class(
+    __hhvm_intrinsics\launder_value(nameof E)
+  );
+  $_ = HH\classname_to_class(
+    __hhvm_intrinsics\launder_value(nameof F)
+  );
 }

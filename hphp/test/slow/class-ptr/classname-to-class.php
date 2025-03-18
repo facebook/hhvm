@@ -5,6 +5,8 @@ function v(mixed $m): void {
 }
 <<__DynamicallyReferenced>> class C {}
 class D {}
+<<__DynamicallyReferenced(1)>> class E {}
+<<__DynamicallyReferenced(0)>> class F {}
 
 <<__EntryPoint>>
 function main(): void {
@@ -21,4 +23,7 @@ function main(): void {
   $z = HH\classname_to_class(D::class);
   $zz = HH\classname_to_class($z);
   invariant($z === $zz, "Should be same");
+
+  $_ = HH\classname_to_class(nameof E);
+  $_ = HH\classname_to_class(nameof F);
 }

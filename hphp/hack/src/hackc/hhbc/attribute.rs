@@ -99,7 +99,7 @@ fn is_dynamically_constructible(attr: &Attribute) -> bool {
 }
 
 fn is_dynamically_referenced(attr: &Attribute) -> bool {
-    is(ua::DYNAMICALLY_REFERENCED, attr)
+    is(ua::DYNAMICALLY_REFERENCED, attr) && attr.arguments.len() == 0
 }
 
 fn is_sealed(attr: &Attribute) -> bool {

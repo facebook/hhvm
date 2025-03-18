@@ -1,0 +1,8 @@
+ERROR: File "dynamically_referenced.php", line 9, characters 27-33:
+This attribute parameter should be an integer literal (Typing[4127])
+ERROR: File "dynamically_referenced.php", line 11, characters 27-30:
+This attribute parameter should be an integer literal (Typing[4127])
+ERROR: File "dynamically_referenced.php", line 13, characters 27-31:
+This attribute parameter should be an integer literal (Typing[4127])
+ERROR: File "dynamically_referenced.php", line 15, characters 3-25:
+The attribute `__DynamicallyReferenced` expects at most 1 argument (Typing[4126])

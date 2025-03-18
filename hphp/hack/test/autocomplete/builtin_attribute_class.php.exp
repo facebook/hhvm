@@ -17,7 +17,7 @@ __DynamicallyReferenced
   INSERT __DynamicallyReferenced
   built-in attribute
 SORT TEXT: none
-  Allows a user to get a pointer to this class from a string of its name. HHVM will warn or error (depending on settings) on dynamic references without this attribute.
+  Allows a user to get a pointer to this class from a string using `HH\classname_to_class()`. HHVM will raise a notice if this attribute is not present. For migration, this can also be set to soft logging by passing an integer sample rate (1 of N) as an argument.
 __EnableMethodTraitDiamond
   INSERT __EnableMethodTraitDiamond
   built-in attribute

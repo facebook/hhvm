@@ -558,9 +558,24 @@ const StaticString s___DynamicallyReferenced("__DynamicallyReferenced");
 
 void raiseMissingDynamicallyReferenced(const Class* cls) {
   if (folly::Random::oneIn(Cfg::Eval::DynamicallyReferencedNoticeSampleRate)) {
-    raise_notice(Strings::MISSING_DYNAMICALLY_REFERENCED, cls->name()->data());
+    auto const& attrs = cls->preClass()->userAttributes();
+    auto const it = attrs.find(s___DynamicallyReferenced.get());
+    if (it != attrs.end()) {
+      assertx(tvIsVec(it->second));
+      auto const args = val(it->second).parr;
+      assertx(args->size() == 1);
+      auto const rate = tvAssertInt(args->at(int64_t{0}));
+      if (folly::Random::oneIn(rate)) {
+        raise_notice(Strings::SOFT_MISSING_DYNAMICALLY_REFERENCED,
+                     cls->name()->data(),
+                     rate);
+      }
+    } else {
+      raise_notice(Strings::MISSING_DYNAMICALLY_REFERENCED, cls->name()->data());
+    }
   }
 }
+
 //////////////////////////////////////////////////////////////////////
 
 int64_t zero_error_level() {

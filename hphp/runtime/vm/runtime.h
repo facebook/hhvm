@@ -99,6 +99,14 @@ void raiseModulePropertyViolation(const Class* cls,
 void raiseDeploymentBoundaryViolation(const Func* callee);
 void raiseDeploymentBoundaryViolation(const Class* cls);
 
+/**
+ * We enter this function if a class is loaded from a string and missing
+ * AttrDynamicallyReferenced. This attr is set by hackc if the
+ * <<__DynamicallyReferenced>> attribute is present and has no arguments.
+ * If we pass an int argument to the attribute, we treat it as "soft" missing
+ * and go down the slow path; then we look up the user attributes on the
+ * resolved Class* at runtime to determine the sample rate for the notice.
+ */
 void raiseMissingDynamicallyReferenced(const Class* cls);
 
 inline Iter*

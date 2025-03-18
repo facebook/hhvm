@@ -2230,7 +2230,9 @@ class cpp_mstch_enum : public mstch_enum {
     }
     return mstch::node();
   }
-  mstch::node cpp_is_unscoped() { return cpp_is_unscoped_(); }
+  mstch::node cpp_is_unscoped() {
+    return enum_->get_annotation("cpp.deprecated_enum_unscoped");
+  }
   mstch::node cpp_name() { return cpp2::get_name(enum_); }
   mstch::node cpp_enum_type() { return cpp_enum_type(*enum_); }
   mstch::node cpp_declare_bitwise_ops() {
@@ -2251,11 +2253,6 @@ class cpp_mstch_enum : public mstch_enum {
   }
 
  private:
-  const std::string& cpp_is_unscoped_() {
-    return enum_->get_annotation(
-        {"cpp2.deprecated_enum_unscoped", "cpp.deprecated_enum_unscoped"});
-  }
-
   std::string_view cpp_enum_type(const t_enum& e) {
     if (const auto* annot =
             e.find_structured_annotation_or_null(kCppEnumTypeUri)) {
@@ -2279,7 +2276,8 @@ class cpp_mstch_enum : public mstch_enum {
     static std::string kInt = "int";
     if (const std::string& type = e.get_annotation(
             {"cpp.enum_type", "cpp2.enum_type"},
-            cpp_is_unscoped_().empty() ? nullptr : &kInt);
+            e.get_annotation("cpp.deprecated_enum_unscoped").empty() ? nullptr
+                                                                     : &kInt);
         !type.empty()) {
       return type;
     }

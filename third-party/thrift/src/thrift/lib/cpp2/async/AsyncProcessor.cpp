@@ -901,6 +901,7 @@ void HandlerCallbackBase::doExceptionWrapped(folly::exception_wrapper ew) {
 }
 
 void HandlerCallbackBase::sendReply(SerializedResponse response) {
+  this->ctx_.reset();
   folly::Optional<uint32_t> crc32c = checksumIfNeeded(response);
   auto payload = std::move(response).extractPayload(
       req_->includeEnvelope(),
@@ -922,6 +923,7 @@ void HandlerCallbackBase::sendReply(SerializedResponse response) {
 
 void HandlerCallbackBase::sendReply(
     ResponseAndServerStreamFactory&& responseAndStream) {
+  this->ctx_.reset();
   folly::Optional<uint32_t> crc32c =
       checksumIfNeeded(responseAndStream.response);
   auto payload = std::move(responseAndStream.response)
@@ -951,6 +953,7 @@ void HandlerCallbackBase::sendReply(
     [[maybe_unused]] std::pair<
         SerializedResponse,
         apache::thrift::detail::SinkConsumerImpl>&& responseAndSinkConsumer) {
+  this->ctx_.reset();
 #if FOLLY_HAS_COROUTINES
   folly::Optional<uint32_t> crc32c =
       checksumIfNeeded(responseAndSinkConsumer.first);

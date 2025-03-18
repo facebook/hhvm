@@ -1904,7 +1904,6 @@ void HandlerCallback<T>::doResult(InputType r) {
       this->ctx_.get(),
       executor_ ? executor_.get() : eb_,
       std::forward<InputType>(r));
-  this->ctx_.reset();
   sendReply(std::move(reply));
 }
 

@@ -426,19 +426,24 @@ inline void JSONProtocolReaderCommon::readBinary(folly::IOBuf& str) {
  */
 
 inline void JSONProtocolReaderCommon::skipWhitespace() {
-  for (auto peek = in_.peekBytes(); !peek.empty(); peek = in_.peekBytes()) {
+  while (true) { // for loop generates larger code with 2 calls to peekBytesSlow
+    auto const peek = in_.peek();
+    if (peek.empty()) {
+      return;
+    }
     uint32_t size = 0;
     for (char ch : peek) {
       if (ch != apache::thrift::detail::json::kJSONSpace &&
           ch != apache::thrift::detail::json::kJSONNewline &&
           ch != apache::thrift::detail::json::kJSONTab &&
           ch != apache::thrift::detail::json::kJSONCarriageReturn) {
+        skippedWhitespace_ += size;
         in_.skip(size);
         return;
       }
-      ++skippedWhitespace_;
       ++size;
     }
+    skippedWhitespace_ += size;
     in_.skip(size);
   }
 }

@@ -178,5 +178,7 @@ inline constexpr auto kGoNameUri = "facebook.com/thrift/annotation/go/Name";
 inline constexpr auto kGoTagUri = "facebook.com/thrift/annotation/go/Tag";
 inline constexpr auto kGoMinimizePaddingUri =
     "facebook.com/thrift/annotation/go/MinimizePadding";
+inline constexpr auto kGoUseReflectCodecUri =
+    "facebook.com/thrift/annotation/go/UseReflectCodec";
 
 } // namespace apache::thrift::compiler

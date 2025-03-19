@@ -17,6 +17,7 @@ namespace go {
   ::apache::thrift::detail::md::StructMetadata<Name>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Tag>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MinimizePadding>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<UseReflectCodec>::gen(metadata);
   return metadata;
 }
 } // namespace facebook

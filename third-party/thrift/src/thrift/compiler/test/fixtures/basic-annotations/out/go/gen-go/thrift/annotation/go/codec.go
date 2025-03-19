@@ -57,6 +57,17 @@ var (
 
         }
     }()
+    premadeCodecTypeSpec_go_UseReflectCodec = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "go.UseReflectCodec",
+            CodecStructSpec: &thrift.CodecStructSpec{
+    ScopedName: "go.UseReflectCodec",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewUseReflectCodec() },
+},
+
+        }
+    }()
 )
 
 // Premade struct specs
@@ -123,6 +134,20 @@ var (
     },
 }
     }()
+    premadeStructSpec_UseReflectCodec = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
+    Name:                 "UseReflectCodec",
+    ScopedName:           "go.UseReflectCodec",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
+    },
+    FieldSpecIDToIndex:   map[int16]int{
+    },
+    FieldSpecNameToIndex: map[string]int{
+    },
+}
+    }()
 )
 
 // Premade slice of all struct specs
@@ -131,6 +156,7 @@ var premadeStructSpecs = func() []*thrift.StructSpec {
     fbthriftResults = append(fbthriftResults, premadeStructSpec_Name)
     fbthriftResults = append(fbthriftResults, premadeStructSpec_Tag)
     fbthriftResults = append(fbthriftResults, premadeStructSpec_MinimizePadding)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_UseReflectCodec)
     return fbthriftResults
 }()
 
@@ -140,6 +166,7 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_go_Name.FullName] = premadeCodecTypeSpec_go_Name
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_go_Tag.FullName] = premadeCodecTypeSpec_go_Tag
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_go_MinimizePadding.FullName] = premadeCodecTypeSpec_go_MinimizePadding
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_go_UseReflectCodec.FullName] = premadeCodecTypeSpec_go_UseReflectCodec
     return fbthriftTypeSpecsMap
 }()
 

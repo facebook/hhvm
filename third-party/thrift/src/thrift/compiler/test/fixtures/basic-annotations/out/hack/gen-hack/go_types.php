@@ -356,3 +356,95 @@ class MinimizePadding implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
 
 }
 
+/**
+ * This annotation enables reflect-based encoding/decoding of the given struct.
+ * Rather than generating long manual code for encoding/decoding a struct,
+ * the struct would be encoded/decoded using a generic reflect-based encoder/decoder.
+ * 
+ * This results in fewer lines of code in the resulting codegen, which in turn makes
+ * the compilation faster and makes the resulting binary smaller. The performance of
+ * encoding/decoding becomes a little bit slower as a trade off.
+ * 
+ *
+ * Original thrift struct:-
+ * UseReflectCodec
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/go/UseReflectCodec'))>>
+class UseReflectCodec implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const type TShape = shape(
+    ...
+  );
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'UseReflectCodec';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "go.UseReflectCodec",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Structured' => \facebook\thrift\annotation\Structured::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+  }
+
+}
+

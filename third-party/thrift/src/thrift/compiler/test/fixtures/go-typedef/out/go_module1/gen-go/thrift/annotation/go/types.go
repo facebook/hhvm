@@ -327,6 +327,78 @@ func (x *MinimizePadding) setDefaults() *MinimizePadding {
     return x
 }
 
+type UseReflectCodec struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*UseReflectCodec)(nil)
+
+func NewUseReflectCodec() *UseReflectCodec {
+    return (&UseReflectCodec{}).setDefaults()
+}
+
+
+
+func (x *UseReflectCodec) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("UseReflectCodec"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *UseReflectCodec) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *UseReflectCodec) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *UseReflectCodec) setDefaults() *UseReflectCodec {
+    return x
+}
+
 
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
@@ -336,5 +408,6 @@ func RegisterTypes(registry interface {
     registry.RegisterType("facebook.com/thrift/annotation/go/Name", func() any { return NewName() })
     registry.RegisterType("facebook.com/thrift/annotation/go/Tag", func() any { return NewTag() })
     registry.RegisterType("facebook.com/thrift/annotation/go/MinimizePadding", func() any { return NewMinimizePadding() })
+    registry.RegisterType("facebook.com/thrift/annotation/go/UseReflectCodec", func() any { return NewUseReflectCodec() })
 
 }

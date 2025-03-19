@@ -69,3 +69,16 @@ struct Tag {
 */
 @scope.Structured
 struct MinimizePadding {}
+
+/**
+  This annotation enables reflect-based encoding/decoding of the given struct.
+  Rather than generating long manual code for encoding/decoding a struct,
+  the struct would be encoded/decoded using a generic reflect-based encoder/decoder.
+
+  This results in fewer lines of code in the resulting codegen, which in turn makes
+  the compilation faster and makes the resulting binary smaller. The performance of
+  encoding/decoding becomes a little bit slower as a trade off.
+
+*/
+@scope.Structured
+struct UseReflectCodec {}

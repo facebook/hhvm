@@ -39,7 +39,9 @@ final class ThriftContextPropState {
    */
   public static function initFromHeaders()[defaults]: void {
     $tfm = HTTPHeaders::get()->getHeader(HTTPRequestHeader::THRIFT_FMHK);
-    self::initFromString($tfm);
+    $skip_experiment_id_ingestion =
+      !JustKnobs::eval('lumos/experimentation:enable_www_experiment_id_api');
+    self::initFromString($tfm, $skip_experiment_id_ingestion);
   }
 
   // If anything changes with the ThriftFrameworkMetadata, throw out the
@@ -94,7 +96,7 @@ final class ThriftContextPropState {
    */
   public static function initFromString(
     ?string $s,
-    bool $skip_experiment_id_ingestion = false,
+    bool $skip_experiment_id_ingestion = true,
   )[defaults]: void {
     try {
       $rid_set = false;

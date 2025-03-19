@@ -689,6 +689,24 @@ class Connection {
       std::vector<std::unique_ptr<QueryGenerator>>&& query_generators,
       MultiQueryCallback&& cb,
       QueryOptions&& options);
+
+ private:
+  template <typename QueryOperationType>
+  static void checkForQueryTimeoutOverride(
+      QueryOperationType& op,
+      const std::optional<Duration>& timeoutOverride) {
+    if (timeoutOverride) {
+      op.setTimeout(*timeoutOverride);
+      // If the connection had a query timeout set, it was put into the query
+      // attributes and would tell MyRouter to do a query timeout on that
+      // number. We need to override that here.
+      op.setAttribute(
+          "query_timeout",
+          folly::to<std::string>(
+              std::chrono::duration_cast<std::chrono::seconds>(*timeoutOverride)
+                  .count()));
+    }
+  }
 };
 
 template <>

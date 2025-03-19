@@ -209,9 +209,7 @@ folly::SemiFuture<DbQueryResult> Connection::querySemiFuture(
   conn->mergePersistentQueryAttributes(options.getAttributes());
   auto op = beginQuery(std::move(conn), std::move(query));
   op->setAttributes(std::move(options.getAttributes()));
-  if (const auto& timeoutOverride = options.getQueryTimeout()) {
-    op->setTimeout(*timeoutOverride);
-  }
+  checkForQueryTimeoutOverride(*op, options.getQueryTimeout());
   if (cb) {
     op->setCallback(std::move(cb));
   }
@@ -229,9 +227,7 @@ folly::SemiFuture<DbMultiQueryResult> Connection::multiQuerySemiFuture(
   conn->mergePersistentQueryAttributes(options.getAttributes());
   auto op = beginMultiQuery(std::move(conn), std::move(args));
   op->setAttributes(std::move(options.getAttributes()));
-  if (const auto& timeoutOverride = options.getQueryTimeout()) {
-    op->setTimeout(*timeoutOverride);
-  }
+  checkForQueryTimeoutOverride(*op, options.getQueryTimeout());
   if (cb) {
     op->setCallback(std::move(cb));
   }
@@ -249,9 +245,7 @@ folly::SemiFuture<DbMultiQueryResult> Connection::multiQuerySemiFuture(
   conn->mergePersistentQueryAttributes(options.getAttributes());
   auto op = beginMultiQuery(std::move(conn), std::move(args));
   op->setAttributes(std::move(options.getAttributes()));
-  if (const auto& timeoutOverride = options.getQueryTimeout()) {
-    op->setTimeout(*timeoutOverride);
-  }
+  checkForQueryTimeoutOverride(*op, options.getQueryTimeout());
   if (cb) {
     op->setCallback(std::move(cb));
   }
@@ -269,9 +263,7 @@ DbQueryResult Connection::internalQuery(
       std::move(query));
   mergePersistentQueryAttributes(options.getAttributes());
   op->setAttributes(std::move(options.getAttributes()));
-  if (const auto& timeoutOverride = options.getQueryTimeout()) {
-    op->setTimeout(*timeoutOverride);
-  }
+  checkForQueryTimeoutOverride(*op, options.getQueryTimeout());
   if (cb) {
     op->setCallback(std::move(cb));
   }
@@ -417,9 +409,7 @@ DbMultiQueryResult Connection::internalMultiQuery(
       std::move(queries));
   mergePersistentQueryAttributes(options.getAttributes());
   op->setAttributes(std::move(options.getAttributes()));
-  if (const auto& timeoutOverride = options.getQueryTimeout()) {
-    op->setTimeout(*timeoutOverride);
-  }
+  checkForQueryTimeoutOverride(*op, options.getQueryTimeout());
   if (cb) {
     op->setCallback(std::move(cb));
   }

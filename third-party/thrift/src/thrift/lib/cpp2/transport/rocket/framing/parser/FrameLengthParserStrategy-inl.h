@@ -63,6 +63,11 @@ void FrameLengthParserStrategy<T>::readBufferAvailable(
 }
 
 template <class T>
+bool FrameLengthParserStrategy<T>::isBufferMovable() {
+  return true;
+}
+
+template <class T>
 template <bool resize>
 void FrameLengthParserStrategy<T>::drainReadBufQueue() {
   while (size_ >= Serializer::kBytesForFrameOrMetadataLength) {

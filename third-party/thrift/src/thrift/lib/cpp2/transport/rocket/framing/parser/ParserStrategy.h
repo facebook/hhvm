@@ -31,6 +31,7 @@ concept ParserStrategyConcept = requires(
   { t.getReadBuffer(bufReturn, lenReturn) } -> std::same_as<void>;
   { t.readDataAvailable(lenReturn) } -> std::same_as<void>;
   { t.readBufferAvailable(std::move(buf)) } -> std::same_as<void>;
+  { t.isBufferMovable() } -> std::same_as<bool>;
 };
 #endif
 template <class T, template <typename...> class Strategy, typename... Args>
@@ -49,6 +50,8 @@ class ParserStrategy : private Strategy<T, Args...> {
   void readBufferAvailable(std::unique_ptr<folly::IOBuf> buf) {
     Strategy<T, Args...>::readBufferAvailable(std::move(buf));
   }
+
+  bool isBufferMovable() { return Strategy<T, Args...>::isBufferMovable(); }
 };
 
 } // namespace apache::thrift::rocket

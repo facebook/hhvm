@@ -81,7 +81,7 @@ class Parser final : public folly::AsyncTransport::ReadCallback {
       std::unique_ptr<folly::IOBuf> /*readBuf*/) noexcept override;
 
   bool isBufferMovable() noexcept override {
-    return mode_ != detail::ParserMode::ALLOCATING;
+    return visit([](auto& parser) { return parser.isBufferMovable(); });
   }
 
   const folly::IOBuf& getReadBuffer() const;

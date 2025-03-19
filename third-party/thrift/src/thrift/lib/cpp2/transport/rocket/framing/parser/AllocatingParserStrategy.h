@@ -143,6 +143,8 @@ class AllocatingParserStrategy {
         "not implemented - AllocatingParserStrategy doesn't support readBufferAvailable");
   }
 
+  bool isBufferMovable() { return false; }
+
   // Functions for testing
   size_t getMinBufferSize() const { return minBufferSize_; }
   size_t getCurrentBufferSize() const { return currentBufferSize_; }

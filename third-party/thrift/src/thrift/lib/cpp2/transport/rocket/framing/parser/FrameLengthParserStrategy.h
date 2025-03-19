@@ -37,6 +37,7 @@ class FrameLengthParserStrategy {
   void getReadBuffer(void** bufReturn, size_t* lenReturn);
   void readDataAvailable(size_t len);
   void readBufferAvailable(std::unique_ptr<folly::IOBuf> buf);
+  bool isBufferMovable();
 
   // Functions for testing
   size_t getFrameLength() { return frameLength_; }

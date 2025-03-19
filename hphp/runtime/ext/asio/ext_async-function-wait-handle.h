@@ -159,8 +159,7 @@ struct c_AsyncFunctionWaitHandle final :
   bool isFastResumable() const {
     assertx(getState() == STATE_READY);
     auto const child = m_children[0].getChild();
-    assertx(child);
-    return resumable()->resumeAddr() && child->isSucceeded();
+    return resumable()->resumeAddr() && child && child->isSucceeded();
   }
 
   // Access to merged tail frames. We optimize hard for writing these tail

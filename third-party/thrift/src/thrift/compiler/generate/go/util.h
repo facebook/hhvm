@@ -46,8 +46,6 @@ class codegen_data {
   bool gen_default_get = true;
   // whether to use reflect codec
   bool use_reflect_codec = false;
-  // whether to optimize struct layout
-  bool optimize_struct_layout = false;
 
   // Records field names for every struct in the program.
   // This is needed to resolve some edge case name collisions.

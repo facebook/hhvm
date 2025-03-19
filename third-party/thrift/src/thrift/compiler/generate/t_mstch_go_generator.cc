@@ -479,7 +479,9 @@ class mstch_go_struct : public mstch_struct {
   mstch::node fields_sorted() {
     auto fields_in_id_order = struct_->get_sorted_members();
     // Fields (optionally) in the most optimal (memory-saving) layout order.
-    if (data_.optimize_struct_layout) {
+    auto minimizePadding =
+        struct_->find_structured_annotation_or_null(kGoMinimizePaddingUri);
+    if (minimizePadding) {
       std::vector<t_field*> fields_in_layout_order;
       std::copy(
           fields_in_id_order.begin(),
@@ -851,9 +853,6 @@ void t_mstch_go_generator::generate_program() {
   }
   if (auto use_reflect_codec = get_option("use_reflect_codec")) {
     data_.use_reflect_codec = (use_reflect_codec.value() == "true");
-  }
-  if (auto optimize_struct_layout = get_option("optimize_struct_layout")) {
-    data_.optimize_struct_layout = (optimize_struct_layout.value() == "true");
   }
 
   const auto& prog = cached_program(program);

@@ -20,6 +20,7 @@ import (
 	"reflect"
 	"sort"
 	"testing"
+	"unsafe"
 
 	"thrift/lib/go/thrift"
 	"thrift/test/go/if/reflecttest"
@@ -202,5 +203,17 @@ func TestSimpleJSONSerialization(t *testing.T) {
 
 	if writeTarget.String() != readTarget.String() {
 		t.Fatalf("values are not equal")
+	}
+}
+
+func TestMinimizePadding(t *testing.T) {
+	valOptimized := thrifttest.LayoutOptimizedStruct{}
+	if unsafe.Sizeof(valOptimized) != 16 {
+		t.Fatalf("layout is not optimized")
+	}
+
+	valUnoptimized := thrifttest.LayoutUnoptimizedStruct{}
+	if unsafe.Sizeof(valUnoptimized) != 32 {
+		t.Fatalf("unexpected unoptimized size")
 	}
 }

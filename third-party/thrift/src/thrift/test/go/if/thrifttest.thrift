@@ -268,3 +268,20 @@ struct StructWithManyFields {
   812: i64 field18;
   945: i64 field19;
 }
+
+@go.MinimizePadding
+struct LayoutOptimizedStruct {
+  1: byte small;
+  2: i64 big;
+  3: i16 medium;
+  4: i32 biggish;
+  5: byte tiny;
+}
+
+struct LayoutUnoptimizedStruct {
+  1: byte small;
+  2: i64 big;
+  3: i16 medium;
+  4: i32 biggish;
+  5: byte tiny;
+}

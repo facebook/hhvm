@@ -25,6 +25,13 @@ import (
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
+func assertEq(t *testing.T, expected interface{}, actual interface{}) {
+	t.Helper()
+	if expected != actual {
+		t.Errorf("assertEq failed: actual=%+v expected=%+v", actual, expected)
+	}
+}
+
 func TestHeaderTransport(t *testing.T) {
 	trans := newHeaderTransport(newMockSocket(), types.ProtocolIDCompact)
 	TransportTest(t, trans, trans)

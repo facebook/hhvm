@@ -20,11 +20,11 @@ import (
 	"bytes"
 	"crypto/rand"
 	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBasicSerDes(t *testing.T) {
@@ -41,17 +41,11 @@ func TestBasicSerDes(t *testing.T) {
 
 	encodeDecodeTestFn := func(t *testing.T, encodeFn func(types.WritableStruct) ([]byte, error), decodeFn func([]byte, types.ReadableStruct) error) {
 		data, err := encodeFn(val)
-		if err != nil {
-			t.Fatalf("failed to encode: %v", err)
-		}
+		require.NoError(t, err)
 		var res dummy.DummyStruct1
 		err = decodeFn(data, &res)
-		if err != nil {
-			t.Fatalf("failed to decode: %v", err)
-		}
-		if !reflect.DeepEqual(*val, res) {
-			t.Fatalf("values are not equal: %+v != %+v", *val, res)
-		}
+		require.NoError(t, err)
+		require.Equal(t, *val, res)
 	}
 
 	t.Run("Binary", func(t *testing.T) {
@@ -78,17 +72,11 @@ func TestConsequentSerDes(t *testing.T) {
 				SetField9(fmt.Sprintf("sequential_test_value_%d", i))
 
 			err := encoder.Encode(val)
-			if err != nil {
-				t.Fatalf("failed to encode: %v", err)
-			}
+			require.NoError(t, err)
 			var res dummy.DummyStruct1
 			err = decoder.Decode(&res)
-			if err != nil {
-				t.Fatalf("failed to decode: %v", err)
-			}
-			if !reflect.DeepEqual(*val, res) {
-				t.Fatalf("values are not equal: %+v != %+v", *val, res)
-			}
+			require.NoError(t, err)
+			require.Equal(t, *val, res)
 		}
 	}
 
@@ -123,26 +111,18 @@ func TestGiantStructSerDes(t *testing.T) {
 
 	giantByteBlob := make([]byte, 32*1024*1024 /* 32MB */)
 	_, err := rand.Read(giantByteBlob)
-	if err != nil {
-		t.Fatalf("failed to rand read: %v", err)
-	}
+	require.NoError(t, err)
 	val := dummy.NewDummyStruct1().
 		SetField8(giantByteBlob).
 		SetField9("giant_struct")
 
 	encodeDecodeTestFn := func(t *testing.T, encodeFn func(types.WritableStruct) ([]byte, error), decodeFn func([]byte, types.ReadableStruct) error) {
 		data, err := encodeFn(val)
-		if err != nil {
-			t.Fatalf("failed to encode: %v", err)
-		}
+		require.NoError(t, err)
 		var res dummy.DummyStruct1
 		err = decodeFn(data, &res)
-		if err != nil {
-			t.Fatalf("failed to decode: %v", err)
-		}
-		if !reflect.DeepEqual(*val, res) {
-			t.Fatalf("values are not equal: %+v != %+v", *val, res)
-		}
+		require.NoError(t, err)
+		require.Equal(t, *val, res)
 	}
 
 	t.Run("Binary", func(t *testing.T) {

@@ -18,7 +18,6 @@ package thrift
 
 import (
 	"context"
-	"errors"
 	"net"
 	"testing"
 	"time"
@@ -26,14 +25,13 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
+	"github.com/stretchr/testify/require"
 )
 
 func TestServerCancellation(t *testing.T) {
 	runCancellationTestFunc := func(t *testing.T, serverTransport TransportID) {
 		listener, err := net.Listen("tcp", "[::]:0")
-		if err != nil {
-			t.Fatalf("could not create listener: %s", err)
-		}
+		require.NoError(t, err)
 		addr := listener.Addr()
 		t.Logf("Server listening on %v", addr)
 
@@ -52,9 +50,7 @@ func TestServerCancellation(t *testing.T) {
 		// Shut down server.
 		serverCancel()
 		err = serverEG.Wait()
-		if !errors.Is(err, context.Canceled) {
-			t.Fatalf("unexpected error in ServeContext: %v", err)
-		}
+		require.ErrorIs(t, err, context.Canceled)
 	}
 
 	t.Run("NewServer/Header", func(t *testing.T) {

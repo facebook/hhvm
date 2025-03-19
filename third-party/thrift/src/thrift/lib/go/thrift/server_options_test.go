@@ -18,8 +18,9 @@ package thrift
 
 import (
 	"crypto/tls"
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestListenerALPNOptions(t *testing.T) {
@@ -37,9 +38,7 @@ func TestListenerALPNOptions(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tlsConfig := &tls.Config{}
 			tc.option(tlsConfig)
-			if !reflect.DeepEqual(tlsConfig.NextProtos, tc.expectedNextProtos) {
-				t.Fatalf("unexpected NextProtos: %v (expected), %v (actual)", tc.expectedNextProtos, tlsConfig.NextProtos)
-			}
+			require.Equal(t, tc.expectedNextProtos, tlsConfig.NextProtos)
 		})
 	}
 }

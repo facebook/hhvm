@@ -18,7 +18,6 @@ package e2e
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net"
 	"testing"
@@ -29,13 +28,13 @@ import (
 	"thrift/lib/go/thrift"
 	"thrift/lib/go/thrift/e2e/handler"
 	"thrift/lib/go/thrift/e2e/service"
+
+	"github.com/stretchr/testify/require"
 )
 
 func startE2EServer(t *testing.T, serverTransport thrift.TransportID, options ...thrift.ServerOption) (net.Addr, func()) {
 	listener, err := net.Listen("unix", fmt.Sprintf("/tmp/thrift_e2e_test_%d.sock", time.Now().UnixNano()))
-	if err != nil {
-		t.Fatalf("could not create listener: %s", err)
-	}
+	require.NoError(t, err)
 	addr := listener.Addr()
 	t.Logf("Server listening on %v", addr)
 
@@ -52,9 +51,7 @@ func startE2EServer(t *testing.T, serverTransport thrift.TransportID, options ..
 		// Shut down server.
 		serverCancel()
 		err = serverEG.Wait()
-		if err != nil && !errors.Is(err, context.Canceled) {
-			t.Fatalf("unexpected error in ServeContext: %v", err)
-		}
+		require.ErrorIs(t, err, context.Canceled)
 	}
 	return addr, stopServer
 }

@@ -24,6 +24,8 @@ import (
 
 	"thrift/lib/go/thrift"
 	"thrift/lib/go/thrift/e2e/service"
+
+	"github.com/stretchr/testify/require"
 )
 
 // TestServiceHeaders ensures that persistent headers can be retrieved
@@ -71,20 +73,12 @@ func runHeaderTest(t *testing.T, serverTransport thrift.TransportID) {
 		thrift.WithIoTimeout(5*time.Second),
 		thrift.WithPersistentHeader(persistentHeaderKey, persistentHeaderValue),
 	)
-	if err != nil {
-		t.Fatalf("failed to create client: %v", err)
-	}
+	require.NoError(t, err)
 	client := service.NewE2EChannelClient(channel)
 	defer client.Close()
 	ctx := thrift.WithHeaders(context.Background(), map[string]string{rpcHeaderKey: rpcHeaderValue})
 	echoedHeaders, err := client.EchoHeaders(ctx)
-	if err != nil {
-		t.Fatalf("failed to make RPC: %v", err)
-	}
-	if echoedHeaders[persistentHeaderKey] != persistentHeaderValue {
-		t.Fatalf("unexpected or missing persistent header value: '%v'", echoedHeaders)
-	}
-	if echoedHeaders[rpcHeaderKey] != rpcHeaderValue {
-		t.Fatalf("unexpected or missing header value: '%v'", echoedHeaders)
-	}
+	require.NoError(t, err)
+	require.Equal(t, echoedHeaders[persistentHeaderKey], persistentHeaderValue)
+	require.Equal(t, echoedHeaders[rpcHeaderKey], rpcHeaderValue)
 }

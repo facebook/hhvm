@@ -20,6 +20,8 @@ import (
 	"bytes"
 	"compress/zlib"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 type closeableBuffer struct {
@@ -33,8 +35,6 @@ func (b *closeableBuffer) Close() error {
 
 func TestZlibTransport(t *testing.T) {
 	trans, err := NewZlibTransport(&closeableBuffer{}, zlib.BestCompression)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	TransportTest(t, trans, trans)
 }

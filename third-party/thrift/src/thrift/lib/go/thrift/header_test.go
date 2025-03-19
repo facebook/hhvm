@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/stretchr/testify/require"
 )
 
 func MustDecodeHex(s string) []byte {
@@ -51,27 +52,10 @@ func TestHeaderDeserSer(t *testing.T) {
 	buf := bufio.NewReader(bytes.NewBuffer(GetStatusCall))
 	hdr := &tHeader{}
 	err := hdr.Read(buf)
-
-	if err != nil {
-		t.Fatalf("failed to parse correct header: %s", err.Error())
-	}
-
-	if hdr.protoID != types.ProtocolIDCompact {
-		t.Errorf("expected compact proto, got: %#x", int64(hdr.protoID))
-	}
+	require.NoError(t, err)
+	require.Equal(t, types.ProtocolIDCompact, hdr.protoID)
 
 	wbuf := bytes.NewBuffer(nil)
 	err = hdr.Write(wbuf)
-
-	if err != nil {
-		t.Fatalf("failed to write correct header: %s", err.Error())
-	}
-
-}
-
-func assertEq(t *testing.T, expected interface{}, actual interface{}) {
-	t.Helper()
-	if expected != actual {
-		t.Errorf("assertEq failed: actual=%+v expected=%+v", actual, expected)
-	}
+	require.NoError(t, err)
 }

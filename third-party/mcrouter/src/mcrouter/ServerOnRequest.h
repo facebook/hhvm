@@ -175,13 +175,14 @@ class ServerOnRequest {
         ctxRef.getThriftRequestContext()) {
       auto mayBeHashedIdentities =
           core_infra_security::thrift_authentication_module::
-              ClientIdentifierHelper::getTlsClientIdentifier(
+              ClientIdentifierHelper::getClientIdentityHash(
                   *ctxRef.getThriftRequestContext());
       // if has valid hashed identity string, set it on the request
-      if (mayBeHashedIdentities.hasValue() &&
-          std::holds_alternative<std::string>(mayBeHashedIdentities.value())) {
+      if (mayBeHashedIdentities.has_value() &&
+          mayBeHashedIdentities->hasValue() &&
+          std::holds_alternative<std::string>(mayBeHashedIdentities->value())) {
         reqRef.setClientIdentifier(
-            std::get<std::string>(mayBeHashedIdentities.value()));
+            std::get<std::string>(mayBeHashedIdentities->value()));
       }
     }
 #endif

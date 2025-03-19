@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <memory>
+
 namespace apache::thrift {
 
 class AlwaysAllowSheddingInteractionOverloadPolicy;

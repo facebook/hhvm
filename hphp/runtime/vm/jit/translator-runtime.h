@@ -81,7 +81,8 @@ void VerifyParamTypeCls(ObjectData* obj,
                         const TypeConstraint* expected);
 void VerifyParamTypeCallable(TypedValue value,
                              const Func* func,
-                             int32_t paramId);
+                             int32_t paramId,
+                             const TypeConstraint* tc);
 TypedValue VerifyParamType(TypedValue value,
                            const Class* ctx,
                            const Func* func,
@@ -97,7 +98,10 @@ void VerifyRetTypeCls(ObjectData* obj,
                       const Func* func,
                       int32_t retId,
                       const TypeConstraint* expected);
-void VerifyRetTypeCallable(TypedValue value, const Func* func, int32_t retId);
+void VerifyRetTypeCallable(TypedValue value,
+                           const Func* func,
+                           int32_t retId,
+                           const TypeConstraint* tc);
 TypedValue VerifyRetType(TypedValue value,
                          const Class* ctx,
                          const Func* func,

@@ -223,11 +223,10 @@ void VerifyParamTypeCls(ObjectData* obj,
 }
 
 void VerifyParamTypeCallable(TypedValue value, const Func* func,
-                             int32_t paramId) {
+                             int32_t paramId, const TypeConstraint* tc) {
   if (UNLIKELY(!is_callable(tvAsCVarRef(&value)))) {
-    auto const& tc = func->params()[paramId].typeConstraints.main();
-    assertx(tc.isCallable());
-    VerifyParamTypeFail(value, nullptr, func, paramId, &tc);
+    assertx(tc->isCallable());
+    VerifyParamTypeFail(value, nullptr, func, paramId, tc);
   }
 }
 
@@ -263,13 +262,11 @@ void VerifyRetTypeCls(ObjectData* obj,
   }
 }
 
-void VerifyRetTypeCallable(TypedValue value, const Func* func, int32_t retId) {
+void VerifyRetTypeCallable(TypedValue value, const Func* func,
+  int32_t retId, const TypeConstraint* tc) {
   if (UNLIKELY(!is_callable(tvAsCVarRef(&value)))) {
-    auto const& tc = retId == TypeConstraint::ReturnId
-      ? func->returnTypeConstraints().main()
-      : func->params()[retId].typeConstraints.main();
-    assertx(tc.isCallable());
-    VerifyRetTypeFail(value, nullptr, func, retId, &tc);
+    assertx(tc->isCallable());
+    VerifyRetTypeFail(value, nullptr, func, retId, tc);
   }
 }
 

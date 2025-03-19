@@ -1437,7 +1437,7 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
         gen(
           env,
           VerifyRetCallable,
-          FuncParamData { func, id },
+          FuncParamWithTCData { func, id, &tc },
           val
         );
       },
@@ -1530,7 +1530,7 @@ void verifyParamType(IRGS& env, const Func* func, int32_t id,
         gen(
           env,
           VerifyParamCallable,
-          FuncParamData { func, id },
+          FuncParamWithTCData { func, id, &tc },
           val
         );
       },

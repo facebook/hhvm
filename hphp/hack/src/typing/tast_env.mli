@@ -150,9 +150,8 @@ val get_class_ids : env -> Tast.ty -> string list
 (** For an `EnumClass\Label<T, _>` returns `T`. *)
 val get_label_receiver_ty : env -> Tast.ty -> env * Tast.ty
 
-(** Strip away all Toptions that we possibly can in a type, expanding type
-    variables along the way, turning ?T -> T. *)
-val non_null : env -> Pos_or_decl.t -> Tast.ty -> env * Tast.ty
+(** Intersect type with nonnull *)
+val intersect_with_nonnull : env -> Pos_or_decl.t -> Tast.ty -> env * Tast.ty
 
 (** Get the "as" constraints from an abstract type or generic parameter, or
     return the type itself if there is no "as" constraint. In the case of a

@@ -342,7 +342,10 @@ let rec make_nullable_member_type env ~is_method id_pos pos ty =
       make_nullable_member_type ~is_method:false env id_pos pos ty
   else
     let (env, ty) =
-      Typing_solver.non_null env (Pos_or_decl.of_raw_pos id_pos) ty
+      Typing_intersection.intersect_with_nonnull
+        env
+        (Pos_or_decl.of_raw_pos id_pos)
+        ty
     in
     (env, MakeType.nullable (Reason.nullsafe_op pos) ty)
 
@@ -1185,7 +1188,10 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error :
       let (env, ty) = Inter.intersect_list env r tyl in
       let (env, ty) =
         if args.is_nonnull then
-          Typing_solver.non_null env (Pos_or_decl.of_raw_pos args.obj_pos) ty
+          Typing_intersection.intersect_with_nonnull
+            env
+            (Pos_or_decl.of_raw_pos args.obj_pos)
+            ty
         else
           (env, ty)
       in

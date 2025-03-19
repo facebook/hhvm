@@ -17,8 +17,6 @@ open Typing_env_types
 *)
 val is_sub_type : env -> locl_ty -> locl_ty -> bool * Typing_error.t option
 
-val non_null : env -> Pos_or_decl.t -> locl_ty -> env * locl_ty
-
 (* Force solve all remaining unsolved type variables *)
 val solve_all_unsolved_tyvars : env -> env * Typing_error.t option
 

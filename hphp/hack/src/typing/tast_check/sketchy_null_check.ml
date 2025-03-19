@@ -42,7 +42,7 @@ let sketchy_null_check env ~as_lint (ty, p, e) kind =
   then
     let name = get_lvar_name e in
     Tast_utils.(
-      let (env, nonnull_ty) = Env.non_null env (get_pos ty) ty in
+      let (env, nonnull_ty) = Env.intersect_with_nonnull env (get_pos ty) ty in
       match truthiness env nonnull_ty with
       | Possibly_falsy ->
         Typing_warning_utils.add_for_migration

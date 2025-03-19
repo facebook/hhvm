@@ -1991,7 +1991,10 @@ let rec condition_nullity ~is_sketchy ~nonnull (env : env) te =
   | (_, p, _) ->
     let refine env ty =
       if nonnull then
-        Typing_solver.non_null env (Pos_or_decl.of_raw_pos p) ty
+        Typing_intersection.intersect_with_nonnull
+          env
+          (Pos_or_decl.of_raw_pos p)
+          ty
       else if not is_sketchy then
         let r = Reason.witness_from_decl (get_pos ty) in
         Inter.intersect env ~r ty (MakeType.null r)
@@ -2747,7 +2750,10 @@ end = struct
       match e1 with
       | None ->
         let (env, ty) =
-          Typing_solver.non_null env (Pos_or_decl.of_raw_pos p) tyc
+          Typing_intersection.intersect_with_nonnull
+            env
+            (Pos_or_decl.of_raw_pos p)
+            tyc
         in
         (env, None, ty)
       | Some e1 ->

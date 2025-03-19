@@ -19,6 +19,8 @@ val intersect : env -> r:Reason.t -> locl_ty -> locl_ty -> env * locl_ty
 
 val intersect_list : env -> Reason.t -> locl_ty list -> env * locl_ty
 
+val intersect_with_nonnull : env -> Pos_or_decl.t -> locl_ty -> env * locl_ty
+
 val simplify_intersections :
   env ->
   ?on_tyvar:(env -> Reason.t -> Tvid.t -> env * locl_ty) ->

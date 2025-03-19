@@ -1020,44 +1020,6 @@ let is_sub_type env ty1 ty2 =
   let ty_err_opt = Option.merge ty_err_opt1 ty_err_opt2 ~f:Typing_error.both in
   (TUtils.is_sub_type env ty1 ty2, ty_err_opt)
 
-(**
- * Strips away all Toption that we possible can in a type, expanding type
- * variables along the way, turning ?T -> T. This exists to avoid ??T when
- * we wrap a type in Toption while typechecking.
- *)
-let rec non_null env pos ty =
-  (* This is to mimic the previous behaviour of non_null on Tabstract, but
-     is hacky. We basically non_nullify the concrete supertypes of abstract
-     types. *)
-  let make_concrete_super_types_nonnull =
-    object
-      inherit Type_mapper.tvar_expanding_type_mapper as super
-
-      method! on_tdependent env r dep cstr =
-        let ty = mk (r, Tdependent (dep, cstr)) in
-        match TUtils.get_concrete_supertypes ~abstract_enum:true env ty with
-        | (env, [ty'])
-          when TUtils.is_sub_type_for_union env (MakeType.null Reason.none) ty'
-          ->
-          let (env, ty') = non_null env pos ty' in
-          (env, mk (r, Tdependent (dep, ty')))
-        | (env, _) -> super#on_tdependent env r dep cstr
-
-      method! on_tnewtype env r x tyl cstr =
-        let ty = mk (r, Tnewtype (x, tyl, cstr)) in
-        match TUtils.get_concrete_supertypes ~abstract_enum:true env ty with
-        | (env, [ty'])
-          when TUtils.is_sub_type_for_union env (MakeType.null Reason.none) ty'
-          ->
-          let (env, ty') = non_null env pos ty' in
-          (env, mk (r, Tnewtype (x, tyl, ty')))
-        | (env, _) -> super#on_tnewtype env r x tyl cstr
-    end
-  in
-  let (env, ty) = make_concrete_super_types_nonnull#on_type env ty in
-  let r = Reason.witness_from_decl pos in
-  Inter.intersect env ~r ty (MakeType.nonnull r)
-
 let try_bind_to_equal_bound env v =
   (* The reason we pass here doesn't matter since it's used only when `freshen` is true. *)
   try_bind_to_equal_bound ~freshen:false env Reason.none v

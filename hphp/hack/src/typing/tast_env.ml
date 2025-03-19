@@ -215,7 +215,7 @@ let get_label_receiver_ty env ty =
   let (env, _ty_err) = Typing_solver.close_tyvars_and_solve env in
   Typing_env.expand_type env ty_in
 
-let non_null = Typing_solver.non_null
+let intersect_with_nonnull = Typing_intersection.intersect_with_nonnull
 
 let get_concrete_supertypes =
   Typing_utils.get_concrete_supertypes ~include_case_types:false

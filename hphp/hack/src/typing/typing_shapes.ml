@@ -307,7 +307,10 @@ let shapes_idx_not_null_with_ty_err field_p env ~shape_ty field =
           | None -> shape_kind
         in
         let (env, sft_ty) =
-          Typing_solver.non_null env (Pos_or_decl.of_raw_pos field_p) sft_ty
+          Typing_intersection.intersect_with_nonnull
+            env
+            (Pos_or_decl.of_raw_pos field_p)
+            sft_ty
         in
         (env, { sft_optional = false; sft_ty })
       in

@@ -713,6 +713,10 @@ let intersect env ~r ty1 ty2 =
 
 let intersect_list env = intersect_list env Recursion_tracker.empty
 
+let intersect_with_nonnull env pos ty =
+  let r = Reason.witness_from_decl pos in
+  intersect env ~r ty (Typing_make_type.nonnull r)
+
 let () = Utils.negate_type_ref := negate_type
 
 let () = Utils.simplify_intersections_ref := simplify_intersections

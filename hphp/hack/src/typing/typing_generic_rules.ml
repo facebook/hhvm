@@ -188,7 +188,7 @@ let apply_rules_with_array_index_value_ty_mismatches
         let (env, ty) = Typing_intersection.intersect_list env r tyl in
         let (env, ty) =
           if is_nonnull then
-            Typing_solver.non_null env (get_pos ty) ty
+            Typing_intersection.intersect_with_nonnull env (get_pos ty) ty
           else
             (env, ty)
         in

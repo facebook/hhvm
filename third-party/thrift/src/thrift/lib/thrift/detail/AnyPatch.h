@@ -137,7 +137,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   using Base::assign;
   using Base::clear;
 
-  /// @copybrief AssignPatch::customVisit
+  /// @copybrief StructPatch::customVisit
   ///
   /// Users should provide a visitor with the following methods
   ///

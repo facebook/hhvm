@@ -94,7 +94,7 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
     assignOr(*data_.append()).push_back(std::forward<U>(val));
   }
 
-  /// @copybrief AssignPatch::customVisit
+  /// @copybrief StructPatch::customVisit
   ///
   /// Users should provide a visitor with the following methods
   ///
@@ -211,7 +211,7 @@ class SetPatch : public BaseContainerPatch<Patch, SetPatch<Patch>> {
     removeMulti(single(std::forward<U>(val)));
   }
 
-  /// @copybrief AssignPatch::customVisit
+  /// @copybrief StructPatch::customVisit
   ///
   /// Users should provide a visitor with the following methods
   ///
@@ -363,7 +363,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
     return patchByKey(key);
   }
 
-  /// @copybrief AssignPatch::customVisit
+  /// @copybrief StructPatch::customVisit
   ///
   /// Users should provide a visitor with the following methods
   ///

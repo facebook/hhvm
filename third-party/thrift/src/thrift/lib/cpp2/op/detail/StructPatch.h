@@ -417,7 +417,9 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
                          : getRawPatch<Id>(data_.patchPrior());
   }
 
-  /// @copybrief AssignPatch::customVisit
+  /// @brief This API uses the Visitor pattern to describe how Patch is applied.
+  /// For each operation that will be performed by the patch, the corresponding
+  /// method (that matches the write API) will be invoked.
   ///
   /// Users should provide a visitor with the following methods
   ///

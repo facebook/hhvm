@@ -46,7 +46,7 @@ class BoolPatch : public BaseClearPatch<Patch, BoolPatch<Patch>> {
     val = !val;
   }
 
-  /// @copybrief AssignPatch::customVisit
+  /// @copybrief StructPatch::customVisit
   ///
   /// Users should provide a visitor with the following methods
   ///
@@ -127,7 +127,7 @@ class NumberPatch : public BaseClearPatch<Patch, NumberPatch<Patch>> {
     assignOr(*data_.add()) -= std::forward<U>(val);
   }
 
-  /// @copybrief AssignPatch::customVisit
+  /// @copybrief StructPatch::customVisit
   ///
   /// Users should provide a visitor with the following methods
   ///
@@ -232,7 +232,7 @@ class BaseStringPatch : public BaseContainerPatch<Patch, Derived> {
   }
 
  private:
-  /// @copybrief AssignPatch::customVisit
+  /// @copybrief StructPatch::customVisit
   ///
   /// Users should provide a visitor with the following methods
   ///

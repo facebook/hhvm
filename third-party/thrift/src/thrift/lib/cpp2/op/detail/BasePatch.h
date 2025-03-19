@@ -109,6 +109,7 @@ class BasePatch
       std::forward<U>(next).customVisit(derived());
     }
   }
+  /// @cond
   [[deprecated("ERROR: Use customVisit(...) method to read the patch.")]] auto&&
   toThrift() & {
     return Base::toThrift();
@@ -125,13 +126,16 @@ class BasePatch
   toThrift() const&& {
     return Base::toThrift();
   }
+  /// @endcond
 
-  // Convert Static Patch to Dynamic Patch.
+  /// @cond
+  // Convert Static Patch to Protocol Object.
   protocol::Object toObject() const {
     // Pass the adapted type rather than the underlying thrift structure
     // directly to use `adapter::encode(...)` hook
     return protocol::asValueStruct<type::struct_c>(derived()).as_object();
   }
+  /// @endcond
 
  protected:
   using Base::derived;

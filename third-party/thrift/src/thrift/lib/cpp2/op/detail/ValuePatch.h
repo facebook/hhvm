@@ -341,7 +341,9 @@ class StringPatch : public BaseStringPatch<Patch, StringPatch<Patch>> {
   }
 
  public:
+  /// @cond
   FOLLY_FOR_EACH_THIS_OVERLOAD_IN_CLASS_BODY_DELEGATE(apply, applyImpl);
+  /// @endcond
 
  private:
   using Base::assignOr;

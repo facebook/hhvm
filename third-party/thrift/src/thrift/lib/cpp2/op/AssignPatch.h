@@ -112,6 +112,7 @@ class AssignPatch : public BaseAssignPatch<Patch, AssignPatch<Patch>> {
     }
   }
 
+  /// @cond
   template <class Protocol>
   uint32_t encode(Protocol& prot) const {
     if (!kProtocolSupportsDynamicPatch<Protocol> || !dynPatch_) {
@@ -148,6 +149,7 @@ class AssignPatch : public BaseAssignPatch<Patch, AssignPatch<Patch>> {
   auto toSafePatch() const {
     return toSafePatchImpl<typename SafePatchType<Tag>::type>(*this);
   }
+  /// @endcond
 
  private:
   using Base::data_;

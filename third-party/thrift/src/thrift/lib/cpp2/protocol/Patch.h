@@ -87,6 +87,7 @@ struct ExtractedMasksFromPatch {
   Mask write; // write mask from patch
 };
 
+/// @cond
 inline ExtractedMasksFromPatch operator|(
     const ExtractedMasksFromPatch& lhs, const ExtractedMasksFromPatch& rhs) {
   ExtractedMasksFromPatch ret;
@@ -94,7 +95,9 @@ inline ExtractedMasksFromPatch operator|(
   ret.write = lhs.write | rhs.write;
   return ret;
 }
+/// @endcond
 
+/// @cond
 /// Constructs read and write Thrift Mask that only contain fields that are
 /// modified by the Patch. It will construct nested Mask for map and object
 /// patches. For map, it uses the address of Value key as the key for the
@@ -106,6 +109,7 @@ extractMaskViewFromPatch(const protocol::Object& patch);
 
 // Extracting mask from a temporary patch is dangerous and should be disallowed.
 ExtractedMasksFromPatch extractMaskViewFromPatch(Object&& patch) = delete;
+/// @endcond
 
 /// Constructs read and write Thrift Mask that only contain fields that are
 /// modified by the Patch. It will construct nested Mask for map and object
@@ -113,11 +117,13 @@ ExtractedMasksFromPatch extractMaskViewFromPatch(Object&& patch) = delete;
 /// map is not integer or string, it throws.
 ExtractedMasksFromPatch extractMaskFromPatch(const protocol::Object& patch);
 
+/// @cond
 // Constructs read and write Thrift Map Mask of a given patch originating from
 // the field, map entry, or type entry specified mask. YOU PROBABLY SHOULDN'T BE
 // CALLING THIS!
 [[deprecated]] ExtractedMasksFromPatch extractMapMaskFromPatch_DO_NOT_USE(
     const protocol::Object& patch, const Mask& mask);
+/// @endcond
 
 template <type::StandardProtocol Protocol>
 std::unique_ptr<folly::IOBuf> applyPatchToSerializedData(

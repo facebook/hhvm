@@ -305,6 +305,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
     return !isAbsent(getEnsure<Id>(data_));
   }
 
+  /// Returns if the patch is no-op.
   bool empty() const {
     bool b = true;
     op::for_each_ordinal<T>([&](auto id) {
@@ -317,6 +318,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
     return b;
   }
 
+  /// Remove the given field. This is only valid for optional fields.
   template <typename Id>
   std::enable_if_t<
       type::is_optional_or_union_field_v<T, Id> && !is_thrift_union_v<T>>
@@ -758,6 +760,7 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
     }
   }
 
+  /// @cond
   template <class Protocol>
   uint32_t encode(Protocol& prot) const {
     // PatchOp::Remove
@@ -795,6 +798,7 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
     s += prot.writeStructEnd();
     return s;
   }
+  /// @endcond
 
  private:
   using Base::data_;

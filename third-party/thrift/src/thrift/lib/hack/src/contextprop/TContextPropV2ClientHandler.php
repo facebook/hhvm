@@ -72,6 +72,20 @@ final class TContextPropV2ClientHandler extends TClientEventHandler {
         );
       }
 
+      if (
+        $tfm_copy->experiment_ids is nonnull &&
+        coinflip(JustKnobs::getInt(
+          'lumos/experimentation:www_experiment_id_api_violation_sampling_rate',
+        ))
+      ) {
+        FBLogger('lumos_experimentation', 'unexpected experiment ids')
+          ->setBlameOwner('lumos')
+          ->warn(
+            'Unexpected experiment ids in TFM: %s',
+            JSON::encode($tfm_copy->experiment_ids),
+          );
+      }
+
       $v =
         ThriftFrameworkMetadataUtils::encodeThriftFrameworkMetadata($tfm_copy);
       $headers_transport->setWriteHeader(

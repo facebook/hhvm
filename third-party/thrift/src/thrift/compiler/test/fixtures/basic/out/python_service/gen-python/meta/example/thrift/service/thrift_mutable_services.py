@@ -19,6 +19,8 @@ from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
 import meta.example.thrift.service.thrift_mutable_types as _fbthrift__meta__example__thrift__service__thrift_mutable_types
 import meta.example.thrift.service.thrift_metadata
+import test.fixtures.basic.module.thrift_services
+import test.fixtures.basic.module.thrift_mutable_types as _fbthrift__test__fixtures__basic__module__thrift_mutable_types
 
 class EchoServiceInterface(
     ServiceInterface,
@@ -65,5 +67,94 @@ class EchoServiceInterface(
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('meta.example.thrift.WhisperException', str(e), buf)
             raise exp
+        return serialize_iobuf(return_struct, protocol)
+
+class ExtendedEchoServiceInterface(
+EchoServiceInterface,
+    metaclass=ABCMeta
+):
+
+    @staticmethod
+    def service_name() -> bytes:
+        return b"ExtendedEchoService"
+
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+        functionTable = {
+            b"echo_2": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_echo_2),
+        }
+        return {**super().getFunctionTable(), **functionTable}
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "service.ExtendedEchoService"
+
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return meta.example.thrift.service.thrift_metadata.gen_metadata_service_ExtendedEchoService()
+
+    @staticmethod
+    def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+        return meta.example.thrift.service.thrift_metadata._fbthrift_metadata_service_response_ExtendedEchoService()
+
+
+
+    async def echo_2(
+            self,
+            request: _fbthrift__meta__example__thrift__service__thrift_mutable_types.EchoRequest
+        ) -> _fbthrift__meta__example__thrift__service__thrift_mutable_types.EchoResponse:
+        raise NotImplementedError("async def echo_2 is not implemented")
+
+    async def _fbthrift__handler_echo_2(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
+        args_struct = deserialize(_fbthrift__meta__example__thrift__service__thrift_mutable_types._fbthrift_ExtendedEchoService_echo_2_args, args, protocol)
+        try:
+            value = await self.echo_2(args_struct.request,)
+            return_struct = _fbthrift__meta__example__thrift__service__thrift_mutable_types._fbthrift_ExtendedEchoService_echo_2_result(success=value)
+        except _fbthrift__meta__example__thrift__service__thrift_mutable_types.WhisperException as e:
+            return_struct = _fbthrift__meta__example__thrift__service__thrift_mutable_types._fbthrift_ExtendedEchoService_echo_2_result(ex=e)
+            buf = serialize_iobuf(return_struct, protocol)
+            exp = PythonUserException('meta.example.thrift.WhisperException', str(e), buf)
+            raise exp
+        return serialize_iobuf(return_struct, protocol)
+
+class ExtendedMyServiceInterface(
+    test.fixtures.basic.module.thrift_services.MyServiceInterface,
+    metaclass=ABCMeta
+):
+
+    @staticmethod
+    def service_name() -> bytes:
+        return b"ExtendedMyService"
+
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+        functionTable = {
+            b"putDataById_2": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_putDataById_2),
+        }
+        return {**super().getFunctionTable(), **functionTable}
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "service.ExtendedMyService"
+
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return meta.example.thrift.service.thrift_metadata.gen_metadata_service_ExtendedMyService()
+
+    @staticmethod
+    def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+        return meta.example.thrift.service.thrift_metadata._fbthrift_metadata_service_response_ExtendedMyService()
+
+
+
+    async def putDataById_2(
+            self,
+            id: int,
+            data: str
+        ) -> None:
+        raise NotImplementedError("async def putDataById_2 is not implemented")
+
+    async def _fbthrift__handler_putDataById_2(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
+        args_struct = deserialize(_fbthrift__meta__example__thrift__service__thrift_mutable_types._fbthrift_ExtendedMyService_putDataById_2_args, args, protocol)
+        value = await self.putDataById_2(args_struct.id,args_struct.data,)
+        return_struct = _fbthrift__meta__example__thrift__service__thrift_mutable_types._fbthrift_ExtendedMyService_putDataById_2_result()
         return serialize_iobuf(return_struct, protocol)
 

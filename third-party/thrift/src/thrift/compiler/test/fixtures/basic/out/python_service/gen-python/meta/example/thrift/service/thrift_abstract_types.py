@@ -17,6 +17,7 @@ import builtins as _fbthrift_builtins
 
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
+import test.fixtures.basic.module.thrift_abstract_types as _fbthrift__test__fixtures__basic__module__thrift_abstract_types
 
 class EchoRequest(_abc.ABC):
     # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.

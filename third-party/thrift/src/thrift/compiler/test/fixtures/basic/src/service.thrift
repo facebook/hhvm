@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+include "module.thrift"
+
 namespace py3 meta.example.thrift
 
 struct EchoRequest {
@@ -30,4 +32,12 @@ exception WhisperException {
 
 service EchoService {
   EchoResponse echo(1: EchoRequest request) throws (1: WhisperException ex);
+}
+
+service ExtendedEchoService extends EchoService {
+  EchoResponse echo_2(1: EchoRequest request) throws (1: WhisperException ex);
+}
+
+service ExtendedMyService extends module.MyService {
+  void putDataById_2(1: i64 id, 2: string data);
 }

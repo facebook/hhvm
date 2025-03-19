@@ -14,6 +14,8 @@ import meta.example.thrift.service.thrift_abstract_types as _fbthrift_python_abs
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
+import test.fixtures.basic.module.thrift_types as _fbthrift__test__fixtures__basic__module__thrift_types
+
 
 class _fbthrift_compatible_with_EchoRequest:
     pass
@@ -104,4 +106,62 @@ class _fbthrift_EchoService_echo_result(_fbthrift_python_types.Struct):
         _typing.Union[
             _fbthrift_EchoResponse,
             _fbthrift_WhisperException,
+        ]]]: ...
+
+
+class _fbthrift_ExtendedEchoService_echo_2_args(_fbthrift_python_types.Struct):
+    request: _typing.Final[_fbthrift_EchoRequest] = ...
+
+    def __init__(
+        self, *,
+        request: _typing.Optional[_fbthrift_EchoRequest]=...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None, _fbthrift_EchoRequest]]]: ...
+
+
+class _fbthrift_ExtendedEchoService_echo_2_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[_fbthrift_EchoResponse]
+    ex: _typing.Final[_fbthrift_WhisperException]
+
+    def __init__(
+        self, *, success: _typing.Optional[_fbthrift_EchoResponse] = ..., ex: _typing.Optional[_fbthrift_WhisperException]=...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            _fbthrift_EchoResponse,
+            _fbthrift_WhisperException,
+        ]]]: ...
+
+
+class _fbthrift_ExtendedMyService_putDataById_2_args(_fbthrift_python_types.Struct):
+    id: _typing.Final[int] = ...
+    data: _typing.Final[str] = ...
+
+    def __init__(
+        self, *,
+        id: _typing.Optional[int]=...,
+        data: _typing.Optional[str]=...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None, int, str]]]: ...
+
+
+class _fbthrift_ExtendedMyService_putDataById_2_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[None]
+
+    def __init__(
+        self, *, success: _typing.Optional[None] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            None,
         ]]]: ...

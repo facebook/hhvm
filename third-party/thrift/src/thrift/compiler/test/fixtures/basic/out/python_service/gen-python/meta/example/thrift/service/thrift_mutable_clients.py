@@ -25,6 +25,8 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import meta.example.thrift.service.thrift_mutable_types as _fbthrift__meta__example__thrift__service__thrift_mutable_types
 import meta.example.thrift.service.thrift_metadata
+import test.fixtures.basic.module.thrift_mutable_types as _fbthrift__test__fixtures__basic__module__thrift_mutable_types
+import test.fixtures.basic.module.thrift_clients
 
 class EchoService(_fbthrift_python_Client["EchoService.Async", "EchoService.Sync"]):
     @staticmethod
@@ -125,5 +127,195 @@ class EchoService(_fbthrift_python_Client["EchoService.Async", "EchoService.Sync
             raise _fbthrift_python_exceptions.ApplicationError(
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",
+            )
+
+
+class ExtendedEchoService(_fbthrift_python_Client["ExtendedEchoService.Async", "ExtendedEchoService.Sync"]):
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "service.ExtendedEchoService"
+    
+    @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return None
+    
+    @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+        }
+    
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return meta.example.thrift.service.thrift_metadata.gen_metadata_service_ExtendedEchoService()
+    
+    class Async(EchoService.Async):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "service.ExtendedEchoService"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return meta.example.thrift.service.thrift_metadata.gen_metadata_service_ExtendedEchoService()
+    
+        async def echo_2(
+            self,
+            request: _fbthrift__meta__example__thrift__service__thrift_mutable_types.EchoRequest,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> _fbthrift__meta__example__thrift__service__thrift_mutable_types.EchoResponse:
+            _fbthrift_resp = await self._send_request(
+                "ExtendedEchoService",
+                "echo_2",
+                _fbthrift__meta__example__thrift__service__thrift_mutable_types._fbthrift_ExtendedEchoService_echo_2_args(
+                    request=request,),
+                _fbthrift__meta__example__thrift__service__thrift_mutable_types._fbthrift_ExtendedEchoService_echo_2_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                uri_or_name="ExtendedEchoService",
+                rpc_options=rpc_options,
+                is_mutable_types=True,
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_resp.success
+            if _fbthrift_resp.ex is not None:
+                raise _fbthrift_resp.ex
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
+    
+    # pyre-ignore[4]: Missing annotation.
+    echo_2 = Async.echo_2
+    
+    class Sync(EchoService.Sync):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "service.ExtendedEchoService"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return meta.example.thrift.service.thrift_metadata.gen_metadata_service_ExtendedEchoService()
+    
+        def echo_2(
+            self,
+            request: _fbthrift__meta__example__thrift__service__thrift_mutable_types.EchoRequest,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> _fbthrift__meta__example__thrift__service__thrift_mutable_types.EchoResponse:
+            _fbthrift_resp = self._send_request(
+                "ExtendedEchoService",
+                "echo_2",
+                _fbthrift__meta__example__thrift__service__thrift_mutable_types._fbthrift_ExtendedEchoService_echo_2_args(
+                    request=request,),
+                _fbthrift__meta__example__thrift__service__thrift_mutable_types._fbthrift_ExtendedEchoService_echo_2_result,
+                uri_or_name="ExtendedEchoService",
+                rpc_options=rpc_options,
+                is_mutable_types=True,
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_resp.success
+            if _fbthrift_resp.ex is not None:
+                raise _fbthrift_resp.ex
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+
+
+class ExtendedMyService(_fbthrift_python_Client["ExtendedMyService.Async", "ExtendedMyService.Sync"]):
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "service.ExtendedMyService"
+    
+    @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return None
+    
+    @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+        }
+    
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return meta.example.thrift.service.thrift_metadata.gen_metadata_service_ExtendedMyService()
+    
+    class Async(test.fixtures.basic.module.thrift_clients.MyService.Async):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "service.ExtendedMyService"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return meta.example.thrift.service.thrift_metadata.gen_metadata_service_ExtendedMyService()
+    
+        async def putDataById_2(
+            self,
+            id: int,
+            data: str,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> None:
+            _fbthrift_resp = await self._send_request(
+                "ExtendedMyService",
+                "putDataById_2",
+                _fbthrift__meta__example__thrift__service__thrift_mutable_types._fbthrift_ExtendedMyService_putDataById_2_args(
+                    id=id,
+                    data=data,),
+                _fbthrift__meta__example__thrift__service__thrift_mutable_types._fbthrift_ExtendedMyService_putDataById_2_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                uri_or_name="ExtendedMyService",
+                rpc_options=rpc_options,
+                is_mutable_types=True,
+            )
+    
+    
+    # pyre-ignore[4]: Missing annotation.
+    putDataById_2 = Async.putDataById_2
+    
+    class Sync(test.fixtures.basic.module.thrift_clients.MyService.Sync):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "service.ExtendedMyService"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return meta.example.thrift.service.thrift_metadata.gen_metadata_service_ExtendedMyService()
+    
+        def putDataById_2(
+            self,
+            id: int,
+            data: str,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> None:
+            _fbthrift_resp = self._send_request(
+                "ExtendedMyService",
+                "putDataById_2",
+                _fbthrift__meta__example__thrift__service__thrift_mutable_types._fbthrift_ExtendedMyService_putDataById_2_args(
+                    id=id,
+                    data=data,),
+                _fbthrift__meta__example__thrift__service__thrift_mutable_types._fbthrift_ExtendedMyService_putDataById_2_result,
+                uri_or_name="ExtendedMyService",
+                rpc_options=rpc_options,
+                is_mutable_types=True,
             )
 

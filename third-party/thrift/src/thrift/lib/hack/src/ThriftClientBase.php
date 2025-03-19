@@ -331,17 +331,15 @@ abstract class ThriftClientBase implements IThriftClient {
     int $expectedsequenceid,
     RpcOptions $rpc_options,
     shape(?'read_options' => int) $options = shape(),
-  ): Awaitable<TRet> {
-    list($result, $_read_headers) =
-      await $this->genAwaitResponseWithReadHeaders(
-        $result,
-        $name,
-        $is_return_void,
-        $expectedsequenceid,
-        $rpc_options,
-        $options,
-      );
-    return $result;
+  ): Awaitable<(TRet, ?dict<string, string>)> {
+    return await $this->genAwaitResponseWithReadHeaders(
+      $result,
+      $name,
+      $is_return_void,
+      $expectedsequenceid,
+      $rpc_options,
+      $options,
+    );
   }
 
   protected async function genAwaitResponseWithReadHeaders<

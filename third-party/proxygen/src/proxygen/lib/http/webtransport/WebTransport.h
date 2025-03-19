@@ -47,7 +47,7 @@ class WebTransport {
   };
 
   static bool isConnectMessage(const proxygen::HTTPMessage& msg) {
-    static const std::string kWebTransport{"webtransport"};
+    constexpr std::string_view kWebTransport{"webtransport"};
     return msg.isRequest() &&
            msg.getMethod() == proxygen::HTTPMethod::CONNECT &&
            msg.getUpgradeProtocol() &&

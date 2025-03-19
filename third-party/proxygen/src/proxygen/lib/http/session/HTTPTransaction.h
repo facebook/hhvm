@@ -759,6 +759,10 @@ class HTTPTransaction
 
     virtual folly::Optional<HTTPTransaction::ConnectionToken>
     getConnectionToken() const noexcept = 0;
+
+    virtual bool serverEarlyResponseEnabled() const noexcept {
+      return false;
+    }
   };
 
   using TransportCallback = HTTPTransactionTransportCallback;
@@ -1907,6 +1911,11 @@ class HTTPTransaction
   // and returns the number of bytes written to the transport
   size_t maybeSendDeferredNoError();
 
+  // Whether the stream has been upgraded to some other protocol
+  bool isUpgraded() const {
+    return upgraded_ || wtConnectStream_ || isExTransaction();
+  }
+
   class RateLimitCallback : public folly::HHWheelTimer::Callback {
    public:
     explicit RateLimitCallback(HTTPTransaction& txn) : txn_(txn) {
@@ -2108,6 +2117,8 @@ class HTTPTransaction
    * been queued.
    */
   bool deferredNoError_ : 1;
+
+  bool upgraded_ : 1;
 
   /**
    * If this transaction represents a request (ie, it is backed by an

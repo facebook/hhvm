@@ -5005,3 +5005,37 @@ TEST_F(HTTP2DownstreamSessionTest, InvariantViolation) {
   parseOutput(*clientCodec_);
   gracefulShutdown();
 }
+
+TEST_F(HTTP2DownstreamSessionTest, EnableServerEarlyResponse) {
+  httpSession_->enableServerEarlyResponse();
+
+  // send only headers of large post request
+  HTTPMessage req = getPostRequest(/*contentLength=*/1'000'000);
+  sendRequest(req, /*eom=*/false);
+
+  // send full response upon post headers
+  auto handler = addSimpleStrictHandler();
+  handler->expectHeaders([&](std::shared_ptr<HTTPMessage> msg) {
+    EXPECT_EQ(msg->getMethod(), HTTPMethod::POST);
+    handler->txn_->sendHeaders(getResponse(200));
+    handler->txn_->sendEOM();
+  });
+
+  // early resp should abort & detach txn
+  handler->expectDetachTransaction();
+  expectDetachSession();
+  flushRequestsAndLoop();
+
+  // expect RST_STREAM/NO_ERROR
+  NiceMock<MockHTTPCodecCallback> callbacks;
+  clientCodec_->setCallback(&callbacks);
+  EXPECT_CALL(callbacks, onHeadersComplete(_, _));
+  EXPECT_CALL(callbacks, onMessageComplete(_, _));
+  EXPECT_CALL(callbacks, onAbort(_, ErrorCode::NO_ERROR));
+
+  eventBase_.loopOnce();
+  httpSession_->closeWhenIdle();
+  eventBase_.loop();
+  parseOutput(*clientCodec_);
+  httpSession_->timeoutExpired();
+}

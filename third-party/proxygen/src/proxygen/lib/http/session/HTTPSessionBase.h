@@ -593,6 +593,14 @@ class HTTPSessionBase : public wangle::ManagedConnection {
     return false;
   }
 
+  void enableServerEarlyResponse() noexcept {
+    CHECK_EQ(codec_->getTransportDirection(), TransportDirection::DOWNSTREAM);
+    enableServerEarlyResponse_ = codec_->supportsParallelRequests();
+  }
+  bool getServerEarlyResponseEnabled() const {
+    return enableServerEarlyResponse_;
+  }
+
  protected:
   bool notifyEgressBodyBuffered(int64_t bytes, bool update);
 
@@ -844,6 +852,14 @@ class HTTPSessionBase : public wangle::ManagedConnection {
    * Indicates whether quic stream ID limit is exceeded.
    */
   bool streamLimitExceeded_{false};
+
+  /**
+   * When the server sends a complete response prior to the client sending an
+   * entire request (for non-upgraded streams), the server will subsequently
+   * write RST_STREAM/NO_ERROR (h2) or STOP_SENDING/NO_ERROR (h3). This has no
+   * effect in http/1.1.
+   */
+  bool enableServerEarlyResponse_{false};
 };
 
 } // namespace proxygen

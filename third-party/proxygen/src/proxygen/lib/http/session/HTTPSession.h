@@ -530,6 +530,9 @@ class HTTPSession
       HTTPTransaction::Handler* handler,
       HTTPCodec::StreamID controlStream,
       bool unidirectional = false) noexcept override;
+  bool serverEarlyResponseEnabled() const noexcept override {
+    return HTTPSessionBase::getServerEarlyResponseEnabled();
+  }
 
   const HTTPCodec& getCodec() const noexcept override {
     return codec_.getChainEnd();

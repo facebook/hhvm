@@ -113,6 +113,7 @@ HTTPTransaction::HTTPTransaction(
       has1xxResponse_(false),
       isDelegated_(false),
       deferredNoError_(false),
+      upgraded_(false),
       idleTimeout_(defaultIdleTimeout),
       timer_(timer),
       setIngressTimeoutAfterEom_(setIngressTimeoutAfterEom),
@@ -222,7 +223,9 @@ void HTTPTransaction::onIngressHeadersComplete(
     return;
   }
   if (msg->isRequest()) {
-    headRequest_ = (msg->getMethod() == HTTPMethod::HEAD);
+    auto method = msg->getMethod();
+    headRequest_ = (method == HTTPMethod::HEAD);
+    upgraded_ = (method == HTTPMethod::CONNECT);
     wtConnectStream_ = WebTransport::isConnectMessage(*msg);
   }
 
@@ -478,6 +481,7 @@ void HTTPTransaction::onIngressUpgrade(UpgradeProtocol protocol) {
           HTTPTransactionIngressSM::Event::onUpgrade)) {
     return;
   }
+  upgraded_ = true;
   if (mustQueueIngress()) {
     checkCreateDeferredIngress();
     deferredIngress_->emplace(id_, HTTPEvent::Type::UPGRADE, protocol);
@@ -1483,6 +1487,10 @@ size_t HTTPTransaction::sendEOMNow() {
   size_t nbytes = transport_.sendEOM(this, trailers_.get());
   trailers_.reset();
   updateReadTimeout();
+  // rst_stream/no_error if downstream egresses eom before ingress eom seen
+  deferredNoError_ = transport_.serverEarlyResponseEnabled() &&
+                     isDownstream() && !isIngressEOMSeen() && !isUpgraded();
+
   nbytes += maybeSendDeferredNoError();
 
   return nbytes;

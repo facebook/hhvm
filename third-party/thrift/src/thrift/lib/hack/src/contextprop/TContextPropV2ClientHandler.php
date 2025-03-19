@@ -73,7 +73,7 @@ final class TContextPropV2ClientHandler extends TClientEventHandler {
       }
 
       if (
-        $tfm_copy->experiment_ids is nonnull &&
+        C\is_empty($tfm_copy->experiment_ids ?? vec[]) &&
         coinflip(JustKnobs::getInt(
           'lumos/experimentation:www_experiment_id_api_violation_sampling_rate',
         ))

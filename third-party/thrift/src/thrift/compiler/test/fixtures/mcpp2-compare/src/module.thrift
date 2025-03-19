@@ -62,7 +62,7 @@ enum AnnotatedEnum {
   FIELDA = 2,
   FIELDB = 4,
   FIELDC = 9,
-} (cpp2.declare_bitwise_ops)
+} (cpp.declare_bitwise_ops)
 
 @cpp.EnumType{type = cpp.EnumUnderlyingType.I16}
 enum AnnotatedEnum2 {

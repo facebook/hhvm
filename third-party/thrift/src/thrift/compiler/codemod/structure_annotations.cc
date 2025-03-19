@@ -273,9 +273,7 @@ class structure_annotations {
               "@cpp.EnumType{{type = cpp.EnumUnderlyingType.{}}}", type));
           fm_.add_include("thrift/annotation/cpp.thrift");
         }
-      } else if (
-          name == "cpp.declare_bitwise_ops" ||
-          name == "cpp2.declare_bitwise_ops") {
+      } else if (name == "cpp.declare_bitwise_ops") {
         // This annotation is a subset of @thrift.BitmaskEnum, which carries
         // additional restrictions. We can't turn this into that but we can use
         // it if already present to remove this.

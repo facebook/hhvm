@@ -775,6 +775,13 @@ TEST(CompilerTest, deprecated_annotations) {
   )");
 }
 
+TEST(CompilerTest, removed_annotations) {
+  check_compile(R"(
+    enum E {} (cpp2.declare_bitwise_ops)
+    # expected-error@-1: The annotation cpp2.declare_bitwise_ops has been removed. Please use @thrift.BitmaskEnum instead.
+  )");
+}
+
 TEST(CompilerTest, invalid_enum_constant) {
   check_compile(R"(
     enum E {}

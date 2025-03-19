@@ -1432,29 +1432,36 @@ void deprecate_annotations(sema_context& ctx, const t_named& node) {
       {"erl.default_value", erlang("DefaultValue")},
       {"iq.node_type", erlang("Iq")},
   };
+  std::set<std::string> removed_annotations = {"cpp2.declare_bitwise_ops"};
 
   for (const auto& [k, v] : node.annotations()) {
-    if (deprecations.count(k)) {
-      std::vector<std::string> parts;
-      boost::split(parts, deprecations.at(k), [](char c) { return c == '/'; });
-      std::string replacement;
-      if (parts.size() == 1) {
-        replacement = parts[0];
-      } else if (parts.size() == 4) {
-        replacement = fmt::format("@thrift.{}", parts[3]);
-      } else {
-        assert(parts.size() == 5);
-        replacement = fmt::format("@{}.{}", parts[3], parts[4]);
-      }
+    if (deprecations.count(k) == 0) {
+      continue;
+    }
+    std::vector<std::string> parts;
+    boost::split(parts, deprecations.at(k), [](char c) { return c == '/'; });
+    std::string replacement;
+    if (parts.size() == 1) {
+      replacement = parts[0];
+    } else if (parts.size() == 4) {
+      replacement = fmt::format("@thrift.{}", parts[3]);
+    } else {
+      assert(parts.size() == 5);
+      replacement = fmt::format("@{}.{}", parts[3], parts[4]);
+    }
 
-      if (node.find_structured_annotation_or_null(deprecations.at(k).c_str())) {
-        ctx.error("Duplicate annotations {} and {}.", k, replacement);
-      } else {
-        ctx.warning(
-            "The annotation {} is deprecated. Please use {} instead.",
-            k,
-            replacement);
-      }
+    if (node.find_structured_annotation_or_null(deprecations.at(k).c_str())) {
+      ctx.error("Duplicate annotations {} and {}.", k, replacement);
+    } else if (removed_annotations.count(k) != 0) {
+      ctx.error(
+          "The annotation {} has been removed. Please use {} instead.",
+          k,
+          replacement);
+    } else {
+      ctx.warning(
+          "The annotation {} is deprecated. Please use {} instead.",
+          k,
+          replacement);
     }
   }
 }

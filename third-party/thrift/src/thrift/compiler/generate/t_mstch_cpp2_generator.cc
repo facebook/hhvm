@@ -2236,8 +2236,7 @@ class cpp_mstch_enum : public mstch_enum {
   mstch::node cpp_name() { return cpp2::get_name(enum_); }
   mstch::node cpp_enum_type() { return cpp_enum_type(*enum_); }
   mstch::node cpp_declare_bitwise_ops() {
-    return enum_->find_annotation_or_null(
-               {"cpp.declare_bitwise_ops", "cpp2.declare_bitwise_ops"}) ||
+    return enum_->find_annotation_or_null("cpp.declare_bitwise_ops") ||
         enum_->find_structured_annotation_or_null(kBitmaskEnumUri);
   }
   mstch::node has_zero() {

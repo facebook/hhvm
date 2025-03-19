@@ -18,7 +18,6 @@ module ITySet = Internal_type_set
 module TL = Typing_logic
 module TUtils = Typing_utils
 module Utils = Typing_solver_utils
-module Cls = Folded_class
 module TySet = Typing_set
 module MakeType = Typing_make_type
 
@@ -159,31 +158,25 @@ let rec freshen_inside_ty env ty :
   | Tnewtype (name, tyl, ty) ->
     if List.is_empty tyl then
       default ()
-    else begin
-      match Env.get_typedef env name with
-      | Decl_entry.DoesNotExist
-      | Decl_entry.NotYetAvailable ->
+    else
+      let tparams = Env.get_class_or_typedef_tparams env name in
+      if List.is_empty tparams then
         default ()
-      | Decl_entry.Found td ->
-        let variancel = List.map td.td_tparams ~f:(fun t -> t.tp_variance) in
+      else
+        let variancel = List.map tparams ~f:(fun t -> t.tp_variance) in
         let* (env, tyl) = freshen_tparams env variancel tyl in
         return (env, mk (r, Tnewtype (name, tyl, ty)))
-    end
   | Tclass ((p, cid), e, tyl) ->
     if List.is_empty tyl then
       default ()
-    else begin
-      match Env.get_class env cid with
-      | Decl_entry.DoesNotExist
-      | Decl_entry.NotYetAvailable ->
+    else
+      let tparams = Env.get_class_or_typedef_tparams env cid in
+      if List.is_empty tparams then
         default ()
-      | Decl_entry.Found cls ->
-        let variancel =
-          List.map (Cls.tparams cls) ~f:(fun t -> t.tp_variance)
-        in
+      else
+        let variancel = List.map tparams ~f:(fun t -> t.tp_variance) in
         let* (env, tyl) = freshen_tparams env variancel tyl in
         return (env, mk (r, Tclass ((p, cid), e, tyl)))
-    end
   | Tvec_or_dict (ty1, ty2) ->
     let (env, ty1) = freshen_ty env ty1 in
     let (env, ty2) = freshen_ty env ty2 in

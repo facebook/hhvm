@@ -757,6 +757,14 @@ let get_class_or_typedef env x :
   else
     Decl_entry.map (get_class env x) ~f:(fun cd -> ClassResult cd)
 
+let get_class_or_typedef_tparams env x =
+  match get_class_or_typedef env x with
+  | Decl_entry.Found (TypedefResult { td_tparams; _ }) -> td_tparams
+  | Decl_entry.Found (ClassResult cls) -> Cls.tparams cls
+  | Decl_entry.DoesNotExist
+  | Decl_entry.NotYetAvailable ->
+    []
+
 let get_fun env x =
   let res =
     Decl_provider.get_fun ?tracing_info:(get_tracing_info env) (get_ctx env) x

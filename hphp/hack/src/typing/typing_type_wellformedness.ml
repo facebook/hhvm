@@ -17,7 +17,6 @@ module FunUtils = Decl_fun_utils
 module Inst = Decl_instantiate
 module Phase = Typing_phase
 module Subst = Decl_subst
-module Cls = Folded_class
 
 (** This module checks well-formedness of type hints. See .mli file for more. *)
 
@@ -124,20 +123,10 @@ let check_happly unchecked_tparams env h =
   let (env, hint_pos, locl_ty) = loclty_of_hint unchecked_tparams env h in
   let (env, ty_err_opt) =
     match get_node locl_ty with
-    | Tnewtype (type_name, targs, _cstr_ty) ->
-      (match Env.get_typedef env type_name with
-      | Decl_entry.DoesNotExist
-      | Decl_entry.NotYetAvailable ->
-        (env, None)
-      | Decl_entry.Found typedef ->
-        check_tparams_constraints env hint_pos typedef.td_tparams targs)
-    | Tclass (cls, _, targs) ->
-      (match Env.get_class env (snd cls) with
-      | Decl_entry.Found cls ->
-        check_tparams_constraints env hint_pos (Cls.tparams cls) targs
-      | Decl_entry.DoesNotExist
-      | Decl_entry.NotYetAvailable ->
-        (env, None))
+    | Tnewtype (name, targs, _)
+    | Tclass ((_, name), _, targs) ->
+      let tparams = Env.get_class_or_typedef_tparams env name in
+      check_tparams_constraints env hint_pos tparams targs
     | _ -> (env, None)
   in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;

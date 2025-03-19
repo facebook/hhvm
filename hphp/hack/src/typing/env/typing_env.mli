@@ -147,6 +147,8 @@ val get_typedef : env -> type_key -> typedef_decl Decl_entry.t
 val get_class_or_typedef :
   env -> type_key -> Folded_class.t class_or_typedef_result Decl_entry.t
 
+val get_class_or_typedef_tparams : env -> type_key -> decl_tparam list
+
 (** Get class constant declaration from the appropriate backend and add dependency. *)
 val get_const : env -> class_decl -> string -> class_const option
 

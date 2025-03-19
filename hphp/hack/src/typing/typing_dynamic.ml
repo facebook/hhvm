@@ -261,32 +261,22 @@ let rec try_push_like env ty =
                  } ))
       else
         None )
-  | (r, Tnewtype (n, tyl, bound)) -> begin
-    match Env.get_typedef env n with
-    | Decl_entry.DoesNotExist
-    | Decl_entry.NotYetAvailable ->
-      (env, None)
-    | Decl_entry.Found td ->
-      let (changed, tyl) = push_like_tyargs env tyl td.td_tparams in
-      ( env,
-        if changed then
-          Some (mk (r, Tnewtype (n, tyl, bound)))
-        else
-          None )
-  end
-  | (r, Tclass ((p, n), exact, tyl)) -> begin
-    match Env.get_class env n with
-    | Decl_entry.DoesNotExist
-    | Decl_entry.NotYetAvailable ->
-      (env, None)
-    | Decl_entry.Found cd ->
-      let (changed, tyl) = push_like_tyargs env tyl (Cls.tparams cd) in
-      ( env,
-        if changed then
-          Some (mk (r, Tclass ((p, n), exact, tyl)))
-        else
-          None )
-  end
+  | (r, Tnewtype (n, tyl, bound)) ->
+    let tparams = Env.get_class_or_typedef_tparams env n in
+    let (changed, tyl) = push_like_tyargs env tyl tparams in
+    ( env,
+      if changed then
+        Some (mk (r, Tnewtype (n, tyl, bound)))
+      else
+        None )
+  | (r, Tclass ((p, n), exact, tyl)) ->
+    let tparams = Env.get_class_or_typedef_tparams env n in
+    let (changed, tyl) = push_like_tyargs env tyl tparams in
+    ( env,
+      if changed then
+        Some (mk (r, Tclass ((p, n), exact, tyl)))
+      else
+        None )
   | (r, Toption ty) -> begin
     match try_push_like env ty with
     | (env, Some ty) -> (env, Some (mk (r, Toption ty)))
@@ -348,30 +338,20 @@ let rec strip_covariant_like env ty =
                 s_unknown_value = kind;
                 s_fields = fields;
               } ) )
-    | (r, Tnewtype (n, tyl, bound)) -> begin
-      match Env.get_typedef env n with
-      | Decl_entry.DoesNotExist
-      | Decl_entry.NotYetAvailable ->
-        (env, ty)
-      | Decl_entry.Found td ->
-        let (env, tyl) = strip_covariant_like_tyargs env tyl td.td_tparams in
-        let (env, bound) =
-          if String.equal n Naming_special_names.Classes.cMemberOf then
-            strip_covariant_like env bound
-          else
-            (env, bound)
-        in
-        (env, mk (r, Tnewtype (n, tyl, bound)))
-    end
-    | (r, Tclass ((p, n), exact, tyl)) -> begin
-      match Env.get_class env n with
-      | Decl_entry.DoesNotExist
-      | Decl_entry.NotYetAvailable ->
-        (env, ty)
-      | Decl_entry.Found cd ->
-        let (env, tyl) = strip_covariant_like_tyargs env tyl (Cls.tparams cd) in
-        (env, mk (r, Tclass ((p, n), exact, tyl)))
-    end
+    | (r, Tnewtype (n, tyl, bound)) ->
+      let tparams = Env.get_class_or_typedef_tparams env n in
+      let (env, tyl) = strip_covariant_like_tyargs env tyl tparams in
+      let (env, bound) =
+        if String.equal n Naming_special_names.Classes.cMemberOf then
+          strip_covariant_like env bound
+        else
+          (env, bound)
+      in
+      (env, mk (r, Tnewtype (n, tyl, bound)))
+    | (r, Tclass ((p, n), exact, tyl)) ->
+      let tparams = Env.get_class_or_typedef_tparams env n in
+      let (env, tyl) = strip_covariant_like_tyargs env tyl tparams in
+      (env, mk (r, Tclass ((p, n), exact, tyl)))
     | (r, Toption ty) -> begin
       let (env, ty) = strip_covariant_like env ty in
       (env, mk (r, Toption ty))

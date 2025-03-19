@@ -11,7 +11,6 @@ open Hh_prelude
 open Typing_defs
 open Utils
 module SN = Naming_special_names
-module Cls = Folded_class
 
 (*****************************************************************************)
 (* Module checking the (co/contra)variance annotations (+/-).
@@ -285,23 +284,9 @@ let check_final_this_pos_variance :
  *)
 (*****************************************************************************)
 
-let get_class_variance : Typing_env_types.env -> Ast_defs.id -> _ =
- fun env (pos, class_name) ->
-  match class_name with
-  | name when String.equal name SN.Classes.cAwaitable ->
-    [Vcovariant [(pos, Rtype_argument (Utils.strip_ns name), Pcovariant)]]
-  | _ ->
-    let tparams =
-      match Typing_env.get_class_or_typedef env class_name with
-      | Decl_entry.Found (Typing_env.TypedefResult { td_tparams; _ }) ->
-        td_tparams
-      | Decl_entry.Found (Typing_env.ClassResult cls) -> Cls.tparams cls
-      | Decl_entry.DoesNotExist
-      | Decl_entry.NotYetAvailable ->
-        []
-    in
-
-    List.map tparams ~f:make_decl_tparam_variance
+let get_class_variance env class_name =
+  let tparams = Typing_env.get_class_or_typedef_tparams env class_name in
+  List.map tparams ~f:make_decl_tparam_variance
 
 let union (pos1, neg1) (pos2, neg2) =
   ( SMap.union ~combine:(fun _ x y -> Some (x @ y)) pos1 pos2,
@@ -542,10 +527,8 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
       acc
     in
     List.fold_left ft.ft_tparams ~init:result ~f:propagate_typarams_tparam
-  | Tapply (pos_name, tyl) ->
-    let variancel =
-      get_class_variance tenv (Positioned.unsafe_to_raw_positioned pos_name)
-    in
+  | Tapply ((_, name), tyl) ->
+    let variancel = get_class_variance tenv name in
     get_typarams_variance_list empty variancel tyl
   | Tvec_or_dict (ty1, ty2) -> union (get_typarams ty1) (get_typarams ty2)
   | Tclass_ptr ty -> get_typarams ty
@@ -699,7 +682,7 @@ let rec hint : Env.t -> variance -> Aast_defs.hint -> unit =
     fun_ret env variance hf_return_ty
   | Happly (_, []) -> ()
   | Happly (name, hl) ->
-    let variancel = get_class_variance env.Env.env name in
+    let variancel = get_class_variance env.Env.env (Ast_defs.get_id name) in
     iter2_shortest
       begin
         fun tparam_variance h ->

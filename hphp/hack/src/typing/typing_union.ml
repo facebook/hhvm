@@ -293,7 +293,9 @@ and simplify_non_subtype_union ~approx_cancel_neg env ty1 ty2 r =
       if List.is_empty tyl1 then
         (env, Some (mk (r, Tclass ((p, id1), e, tyl1))))
       else
-        let (env, tyl) = union_class ~approx_cancel_neg env id1 tyl1 tyl2 in
+        let (env, tyl) =
+          union_class_or_newtype ~approx_cancel_neg env id1 tyl1 tyl2
+        in
         (env, Some (mk (r, Tclass ((p, id1), e, tyl))))
     | ((_, Tgeneric (name1, [])), (_, Tgeneric (name2, [])))
       when String.equal name1 name2 ->
@@ -325,7 +327,9 @@ and simplify_non_subtype_union ~approx_cancel_neg env ty1 ty2 r =
       if List.is_empty tyl1 then
         (env, Some ty1)
       else
-        let (env, tyl) = union_newtype ~approx_cancel_neg env id1 tyl1 tyl2 in
+        let (env, tyl) =
+          union_class_or_newtype ~approx_cancel_neg env id1 tyl1 tyl2
+        in
         let (env, tcstr) = union ~approx_cancel_neg env tcstr1 tcstr2 in
         (env, Some (mk (r, Tnewtype (id1, tyl, tcstr))))
     | ((_, Tclass_ptr ty1), (_, Tclass_ptr ty2)) ->
@@ -641,24 +645,8 @@ and union_funs ~approx_cancel_neg env fty1 fty2 =
   else
     raise Dont_simplify
 
-and union_class ~approx_cancel_neg env name tyl1 tyl2 =
-  let tparams =
-    match Env.get_class env name with
-    | Decl_entry.DoesNotExist
-    | Decl_entry.NotYetAvailable ->
-      []
-    | Decl_entry.Found c -> Cls.tparams c
-  in
-  union_tylists_w_variances ~approx_cancel_neg env tparams tyl1 tyl2
-
-and union_newtype ~approx_cancel_neg env typename tyl1 tyl2 =
-  let tparams =
-    match Env.get_typedef env typename with
-    | Decl_entry.DoesNotExist
-    | Decl_entry.NotYetAvailable ->
-      []
-    | Decl_entry.Found t -> t.td_tparams
-  in
+and union_class_or_newtype ~approx_cancel_neg env name tyl1 tyl2 =
+  let tparams = Env.get_class_or_typedef_tparams env name in
   union_tylists_w_variances ~approx_cancel_neg env tparams tyl1 tyl2
 
 and union_tylists_w_variances ~approx_cancel_neg env tparams tyl1 tyl2 =

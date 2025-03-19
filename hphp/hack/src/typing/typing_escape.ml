@@ -10,7 +10,6 @@
 open Hh_prelude
 open Common
 open Typing_defs
-module Cls = Folded_class
 module Env = Typing_env
 module ITySet = Internal_type_set
 module Reason = Typing_reason
@@ -319,26 +318,12 @@ and refresh_type renv v ty_orig =
     let (renv, ty1, ch1) = refresh_type renv Ast_defs.Invariant ty1 in
     (renv, mk (r, Taccess (ty1, id)), ch1)
   | (r, Tnewtype (name, l, bnd)) ->
-    let vl =
-      match Env.get_typedef env name with
-      | Decl_entry.Found { td_tparams; _ } ->
-        List.map td_tparams ~f:(fun t -> t.tp_variance)
-      | Decl_entry.DoesNotExist
-      | Decl_entry.NotYetAvailable ->
-        List.map l ~f:(fun _ -> Ast_defs.Invariant)
-    in
-    let (renv, l, ch) = refresh_types_w_variance renv v vl l in
+    let tparams = Env.get_class_or_typedef_tparams env name in
+    let (renv, l, ch) = refresh_types_w_variance renv v tparams l in
     (renv, mk (r, Tnewtype (name, l, bnd)), ch)
   | (r, Tclass ((p, cid), e, l)) ->
-    let vl =
-      match Env.get_class env cid with
-      | Decl_entry.DoesNotExist
-      | Decl_entry.NotYetAvailable ->
-        List.map l ~f:(fun _ -> Ast_defs.Invariant)
-      | Decl_entry.Found cls ->
-        List.map (Cls.tparams cls) ~f:(fun t -> t.tp_variance)
-    in
-    let (renv, l, ch) = refresh_types_w_variance renv v vl l in
+    let tparams = Env.get_class_or_typedef_tparams env cid in
+    let (renv, l, ch) = refresh_types_w_variance renv v tparams l in
     (renv, mk (r, Tclass ((p, cid), e, l)), ch)
   | (r, Tclass_ptr ty1) ->
     let (renv, ty1, changed) = refresh_type renv v ty1 in
@@ -354,23 +339,24 @@ and refresh_types renv v l =
   in
   with_default ~default:l (go renv Unchanged l [])
 
-and refresh_types_w_variance renv v vl tl =
-  let rec go renv changed vl tl acc =
-    match (vl, tl) with
-    | ([], _)
-    | (_, []) ->
-      (renv, List.rev acc, changed)
-    | (var :: vl, ty :: tl) ->
+and refresh_types_w_variance renv v tpl tl =
+  let rec go renv changed tpl tl acc =
+    match (tpl, tl) with
+    | (_, []) -> (renv, List.rev acc, changed)
+    | ([], ty :: tl) ->
+      let (renv, ty, changed') = refresh_type renv Ast_defs.Invariant ty in
+      go renv (changed || changed') [] tl (ty :: acc)
+    | (tp :: tpl, ty :: tl) ->
       let v =
-        match var with
+        match tp.tp_variance with
         | Ast_defs.Invariant -> Ast_defs.Invariant
         | Ast_defs.Covariant -> v
         | Ast_defs.Contravariant -> Ast_defs.swap_variance v
       in
       let (renv, ty, changed') = refresh_type renv v ty in
-      go renv (changed || changed') vl tl (ty :: acc)
+      go renv (changed || changed') tpl tl (ty :: acc)
   in
-  with_default ~default:tl (go renv Unchanged vl tl [])
+  with_default ~default:tl (go renv Unchanged tpl tl [])
 
 let refresh_type_opt renv v tyo =
   match tyo with

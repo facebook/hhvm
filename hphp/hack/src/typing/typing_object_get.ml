@@ -394,14 +394,7 @@ let rec this_appears_covariantly ~contra env ty =
     this_appears_covariantly ~contra env ty1
     || this_appears_covariantly ~contra env ty2
   | Tapply (pos_name, tyl) ->
-    let tparams =
-      match Env.get_class_or_typedef env (snd pos_name) with
-      | Decl_entry.Found (Env.TypedefResult { td_tparams; _ }) -> td_tparams
-      | Decl_entry.Found (Env.ClassResult cls) -> Cls.tparams cls
-      | Decl_entry.DoesNotExist
-      | Decl_entry.NotYetAvailable ->
-        []
-    in
+    let tparams = Env.get_class_or_typedef_tparams env (snd pos_name) in
     this_appears_covariantly_params tparams tyl
   | Tmixed
   | Twildcard

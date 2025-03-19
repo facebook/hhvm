@@ -63,6 +63,18 @@ where
         stream: Option<BoxStream<'static, SerializedStreamElement<FramingEncodedFinal<F>>>>,
         protocol_id: ProtocolID,
     ) -> Result<()>;
+
+    fn send_sink_reply(
+        &self,
+        first_response: FramingEncodedFinal<F>,
+        buffer_size: u64,
+        chunk_timeout: std::time::Duration,
+        protocol_id: ProtocolID,
+    ) -> (
+        impl futures::Stream<Item = bytes::Bytes>,
+        impl FnMut(SerializedStreamElement<FramingEncodedFinal<F>>),
+    );
+
     fn set_interaction_processor(
         &self,
         _processor: Arc<

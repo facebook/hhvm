@@ -59,6 +59,7 @@ final class ThriftContextPropHandlers {
     try {
       if (
         $context_prop_state->getOriginId() == MCPProductID::L4_MARKETING_API &&
+        Environment::isAsyncEnvironment() &&
         JustKnobs::evalString(
           "ads/marketing_api/context_prop:set_thrift_request_priority",
           $context_prop_state->getRequestId(),

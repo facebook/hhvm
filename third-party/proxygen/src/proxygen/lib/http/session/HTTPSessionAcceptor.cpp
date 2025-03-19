@@ -90,6 +90,7 @@ void HTTPSessionAcceptor::onNewConnection(folly::AsyncTransport::UniquePtr sock,
   auto sessionInfoCb = sessionInfoCb_ ? sessionInfoCb_ : this;
   VLOG(4) << "Created new " << nextProtocol << " session for peer "
           << *peerAddress;
+  auto codecProtocol = codec->getProtocol();
   HTTPDownstreamSession* session =
       new HTTPDownstreamSession(getTransactionTimeoutSet(),
                                 std::move(sock),
@@ -113,6 +114,11 @@ void HTTPSessionAcceptor::onNewConnection(folly::AsyncTransport::UniquePtr sock,
   session->setFlowControl(getConfig()->initialReceiveWindow,
                           getConfig()->receiveStreamWindowSize,
                           getConfig()->receiveSessionWindowSize);
+  // TODO(@damlaj): support server early resp for http/3
+  if (getConfig()->serverEarlyResponseEnabled &&
+      codecProtocol == CodecProtocol::HTTP_2) {
+    session->enableServerEarlyResponse();
+  }
   if (getConfig()->writeBufferLimit > 0) {
     session->setWriteBufferLimit(getConfig()->writeBufferLimit);
   }

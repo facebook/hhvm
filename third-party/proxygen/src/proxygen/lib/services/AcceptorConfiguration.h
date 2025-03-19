@@ -96,6 +96,14 @@ struct AcceptorConfiguration : public wangle::ServerSocketConfig {
    **/
   bool HTTP2PingEnabled{false};
 
+  /**
+   * When the server sends a complete response prior to the client sending an
+   * entire request (for non-upgraded streams), the server will subsequently
+   * write RST_STREAM/NO_ERROR (h2) or STOP_SENDING/NO_ERROR (h3). This has no
+   * effect in http/1.1.
+   */
+  bool serverEarlyResponseEnabled{false};
+
   /* Strategy for which headers to insert into HPACK/QPACK dynamic table */
   const HeaderIndexingStrategy* headerIndexingStrategy{nullptr};
 };

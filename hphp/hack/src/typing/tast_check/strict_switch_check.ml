@@ -269,14 +269,13 @@ let rec symbolic_dnf_values env ty : ValueSet.t =
   end
   | Tany _ -> ValueSet.universe
   | Tnewtype (newtype_name, args, _) ->
-    let open If_enum_or_enum_class in
-    apply
+    If_enum_or_enum_class.apply
       env
       newtype_name
       args
       ~default:(ValueSet.singleton Value.Unsupported)
       ~f:(function
-        | Enum { name; class_decl } ->
+        | If_enum_or_enum_class.Enum { name; class_decl } ->
           ValueSet.singleton (Value.Enum (EnumInfo.of_decl ~name class_decl))
         | EnumClassLabel _ -> ValueSet.singleton Value.Unsupported
         | EnumClass { name; interface; class_decl } ->
@@ -290,10 +289,10 @@ let rec symbolic_dnf_values env ty : ValueSet.t =
               interface
           in
           let info = EnumInfo.of_decl class_decl ~filter ~name in
-          if Set.is_empty info.EnumInfo.consts then
-            ValueSet.singleton Value.Unsupported
+          if Set.is_empty info.consts then
+            ValueSet.singleton Unsupported
           else
-            ValueSet.singleton (Value.Enum info))
+            ValueSet.singleton (Enum info))
   | Tdynamic -> ValueSet.singleton Value.Dynamic
   | Tlabel _
   | Ttuple _

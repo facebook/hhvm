@@ -333,22 +333,22 @@ let typedef_def ctx typedef =
   let (env, file_attributes) = Typing.file_attributes env t_file_attributes in
   {
     Aast.t_annotation = Env.save (Env.get_tpenv env) env;
-    Aast.t_name;
-    Aast.t_mode;
-    Aast.t_user_attributes = user_attributes;
-    Aast.t_as_constraint;
-    Aast.t_super_constraint;
-    Aast.t_assignment;
-    Aast.t_runtime_type;
-    Aast.t_tparams = tparams;
-    Aast.t_namespace;
-    Aast.t_span;
-    Aast.t_emit_id;
-    Aast.t_is_ctx;
-    Aast.t_file_attributes = file_attributes;
-    Aast.t_internal;
-    Aast.t_module;
-    Aast.t_docs_url;
-    Aast.t_doc_comment;
-    Aast.t_package;
+    t_name;
+    t_mode;
+    t_user_attributes = user_attributes;
+    t_as_constraint;
+    t_super_constraint;
+    t_assignment;
+    t_runtime_type;
+    t_tparams = tparams;
+    t_namespace;
+    t_span;
+    t_emit_id;
+    t_is_ctx;
+    t_file_attributes = file_attributes;
+    t_internal;
+    t_module;
+    t_docs_url;
+    t_doc_comment;
+    t_package;
   }

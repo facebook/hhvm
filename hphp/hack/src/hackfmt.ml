@@ -407,7 +407,7 @@ type validate_options_input = {
 }
 
 let validate_options
-    env
+    (env : Env.t)
     Raw_options.
       {
         files;
@@ -444,7 +444,7 @@ let validate_options
       if not (file_exists path) then fail ("No such file or directory: " ^ path)
   in
   assert_file_exists filename;
-  assert_file_exists (Some env.Env.www_root);
+  assert_file_exists (Some env.www_root);
   let files =
     if multifile_allowed then
       List.rev_filter files ~f:(fun path ->
@@ -468,7 +468,7 @@ let validate_options
   (* Let --diff-dry-run imply --diff *)
   let diff = diff || diff_dry in
   match { diff; inplace; text_source; range; at_char; check } with
-  | _ when env.Env.debug && diff -> fail "Can't format diff in debug mode"
+  | _ when env.debug && diff -> fail "Can't format diff in debug mode"
   | { diff = true; text_source = File _; _ }
   | { diff = true; text_source = Stdin (Some _); _ } ->
     fail "--diff mode expects no files"
@@ -553,17 +553,17 @@ let parse ~parser_env text_source =
   in
   parse_text ~parser_env source_text
 
-let logging_time_taken env logger thunk =
+let logging_time_taken (env : Env.t) logger thunk =
   let start_t = Unix.gettimeofday () in
   let res = thunk () in
   let end_t = Unix.gettimeofday () in
-  if not env.Env.test then
+  if not env.test then
     logger
       ~start_t
       ~end_t
-      ~mode:env.Env.mode
-      ~file:(text_source_to_filename env.Env.text_source)
-      ~root:env.Env.www_root;
+      ~mode:env.mode
+      ~file:(text_source_to_filename env.text_source)
+      ~root:env.www_root;
   res
 
 (* If the range is a byte range, expand it to line boundaries.
@@ -639,19 +639,19 @@ let main
     (env : Env.t)
     (options : format_options)
     (parser_env : Full_fidelity_parser_env.t) =
-  env.Env.mode <- Some (mode_string options);
+  env.mode <- Some (mode_string options);
   match options with
   | Print { text_source; range; config } ->
-    env.Env.text_source <- text_source;
-    if env.Env.debug then
+    env.text_source <- text_source;
+    if env.debug then
       debug_print ?range ~config text_source
     else
       text_source |> parse ~parser_env |> format ?range ~config env |> output
   | InPlace { files; config } ->
     List.iter files ~f:(fun filename ->
         let text_source = File filename in
-        env.Env.text_source <- text_source;
-        if env.Env.debug then debug_print ~config text_source;
+        env.text_source <- text_source;
+        if env.debug then debug_print ~config text_source;
         let source_text = read_file filename in
         let source_text_string = SourceText.text source_text in
         try
@@ -665,7 +665,7 @@ let main
   | Check { files; config } ->
     List.iter files ~f:(fun filename ->
         let text_source = File filename in
-        env.Env.text_source <- text_source;
+        env.text_source <- text_source;
         let source_text = read_file filename in
         let source_text_string = SourceText.text source_text in
         try
@@ -677,7 +677,7 @@ let main
         with
         | InvalidSyntax -> eprintf "Parse error in file: %s\n%!" filename)
   | AtChar { text_source; pos; config } ->
-    env.Env.text_source <- text_source;
+    env.text_source <- text_source;
     let tree = parse ~parser_env text_source in
     let (range, formatted) =
       try
@@ -686,7 +686,7 @@ let main
       with
       | Invalid_argument s -> raise (InvalidCliArg s)
     in
-    if env.Env.debug then debug_print text_source ~range:(Byte range) ~config;
+    if env.debug then debug_print text_source ~range:(Byte range) ~config;
     Printf.printf "%d %d\n" (fst range) (snd range);
     output formatted
   | Diff { dry; config } ->
@@ -703,16 +703,14 @@ let main
             * Similarly, InvalidDiff exceptions thrown by format_diff_intervals
             * (caused by out-of-bounds line numbers, etc) will cause us to bail
             * before writing to any files. *)
-           let filename =
-             Path.to_string (Path.concat env.Env.diff_root rel_path)
-           in
+           let filename = Path.to_string (Path.concat env.diff_root rel_path) in
            if not (file_exists filename) then
              raise (InvalidDiff ("No such file or directory: " ^ rel_path));
 
            (* Store the name of the file we're working with, so if we encounter an
             * exception, this filename will be the one that is logged. *)
            let text_source = File filename in
-           env.Env.text_source <- text_source;
+           env.text_source <- text_source;
            try
              let contents =
                text_source
@@ -729,7 +727,7 @@ let main
              None)
     |> List.iter ~f:(fun (text_source, rel_path, contents) ->
            (* Log this filename in the event of an exception. *)
-           env.Env.text_source <- text_source;
+           env.text_source <- text_source;
            if dry then printf "*** %s\n" rel_path;
            let output_text_source =
              if dry then
@@ -760,7 +758,7 @@ let () =
       }
     in
     let start_time = Unix.gettimeofday () in
-    if not env.Env.test then Logger.init start_time;
+    if not env.test then Logger.init start_time;
 
     let (err_msg, exit_code) =
       try
@@ -782,15 +780,15 @@ let () =
         in
         (Some err_msg, exit_code)
     in
-    (if not env.Env.test then
+    (if not env.test then
       let time_taken = Unix.gettimeofday () -. start_time in
       Logger.exit
         ~time_taken
         ~error:err_msg
         ~exit_code:(Some exit_code)
-        ~mode:env.Env.mode
-        ~file:(text_source_to_filename env.Env.text_source)
-        ~root:env.Env.www_root);
+        ~mode:env.mode
+        ~file:(text_source_to_filename env.text_source)
+        ~root:env.www_root);
 
     Option.iter err_msg ~f:(eprintf "%s\n");
     exit exit_code

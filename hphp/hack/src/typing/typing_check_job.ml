@@ -130,4 +130,4 @@ let calc_errors_and_tast_for
   Errors.do_with_context ~drop_fixmed fn (fun () ->
       typecheck ctx ~full_ast
       |> Option.fold ~init:SMap.empty ~f:(fun acc tast ->
-             SMap.add id.FileInfo.name tast acc))
+             SMap.add id.name tast acc))

@@ -1850,10 +1850,8 @@ let print_lsp_notification (notification : lsp_notification) : json =
     | FindReferencesPartialResultNotification (token, r) ->
       print_findReferencesPartialResult token r
     | TelemetryNotification (r, extras) -> print_telemetryNotification r extras
-    | LogMessageNotification r ->
-      print_logMessage r.LogMessage.type_ r.LogMessage.message
-    | ShowMessageNotification r ->
-      print_showMessage r.ShowMessage.type_ r.ShowMessage.message
+    | LogMessageNotification r -> print_logMessage r.type_ r.message
+    | ShowMessageNotification r -> print_showMessage r.type_ r.message
     | ConnectionStatusNotificationFB r -> print_connectionStatus r
     | ExitNotification
     | InitializedNotification

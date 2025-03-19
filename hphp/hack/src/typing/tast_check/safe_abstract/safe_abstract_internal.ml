@@ -210,9 +210,9 @@ let check_for_abstract_const_access
     match class_abstractness with
     | Abstract
     | Maybe_abstract -> begin
-      match const.Typing_defs.cc_abstract with
+      match const.cc_abstract with
       | Typing_defs.CCAbstract _has_default -> true
-      | Typing_defs.CCConcrete -> false
+      | CCConcrete -> false
     end
     | Concrete -> false
   in
@@ -373,7 +373,7 @@ let calc_warnings env expr ~(current_method : Tast.method_ option) :
         | None -> []
       in
       Some (Static_method_call, call_pos, warnings)
-    | Aast.(_, const_pos, Class_const ((_, _, class_id), (_, const_name))) ->
+    | (_, const_pos, Class_const ((_, _, class_id), (_, const_name))) ->
       let make_warnings class_use =
         let const_opt =
           Tast_env.get_const env class_use.Class_use.class_ const_name
@@ -398,8 +398,7 @@ let calc_warnings env expr ~(current_method : Tast.method_ option) :
         | None -> []
       in
       Some (Const_access, const_pos, warnings)
-    | Aast.
-        (_, new_pos, New ((_, _, class_id), _targs, _exprs, _expr, _constructor))
+    | (_, new_pos, New ((_, _, class_id), _targs, _exprs, _expr, _constructor))
       ->
       let make_warnings class_use =
         Option.to_list (check_for_new_abstract class_use)

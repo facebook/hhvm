@@ -2039,7 +2039,7 @@ let handle_mode
         (ServerEnvBuild.make_env
            ~init_id
            ~deps_mode:(Typing_deps_mode.InMemoryMode None)
-           genv.ServerEnv.config)
+           genv.config)
         with
         ServerEnv.naming_table;
         ServerEnv.tcopt = Provider_context.get_tcopt ctx;
@@ -2085,7 +2085,7 @@ let handle_mode
            genv.ServerEnv.config)
         with
         ServerEnv.naming_table;
-        ServerEnv.tcopt = Provider_context.get_tcopt ctx;
+        tcopt = Provider_context.get_tcopt ctx;
       }
     in
     let filename = Relative_path.to_absolute filename in
@@ -2183,7 +2183,7 @@ let handle_mode
             else
               ""
           in
-          let origin = ce.Typing_defs.ce_origin in
+          let origin = ce.ce_origin in
           let from =
             if String.equal origin cid then
               ""
@@ -2195,7 +2195,7 @@ let handle_mode
             abstract
             member_type
             from
-            (ty_to_string (Lazy.force ce.Typing_defs.ce_type))
+            (ty_to_string (Lazy.force ce.ce_type))
       in
       Printf.printf "%s::%s\n" cid mid;
       print_class_element "method" Cls.get_method mid;
@@ -2212,19 +2212,19 @@ let handle_mode
             | CCAbstract _ -> "abstract "
             | CCConcrete -> "")
         in
-        let origin = cc.Typing_defs.cc_origin in
+        let origin = cc.cc_origin in
         let from =
           if String.equal origin cid then
             ""
           else
             Printf.sprintf " from %s" (Utils.strip_ns origin)
         in
-        let ty = ty_to_string cc.Typing_defs.cc_type in
+        let ty = ty_to_string cc.cc_type in
         Printf.printf "  %sconst%s: %s\n" abstract from ty);
       (match Cls.get_typeconst cls mid with
       | None -> ()
       | Some ttc ->
-        let origin = ttc.Typing_defs.ttc_origin in
+        let origin = ttc.ttc_origin in
         let from =
           if String.equal origin cid then
             ""
@@ -2232,7 +2232,6 @@ let handle_mode
             Printf.sprintf " from %s" (Utils.strip_ns origin)
         in
         let ty =
-          let open Typing_defs in
           match ttc.ttc_kind with
           | TCConcrete { tc_type = ty } -> "= " ^ ty_to_string ty
           | TCAbstract
@@ -2251,10 +2250,9 @@ let handle_mode
                  ~f:(fun x -> x))
         in
         let abstract =
-          Typing_defs.(
-            match ttc.ttc_kind with
-            | TCConcrete _ -> ""
-            | TCAbstract _ -> "abstract ")
+          match ttc.ttc_kind with
+          | TCConcrete _ -> ""
+          | TCAbstract _ -> "abstract "
         in
         Printf.printf "  %stypeconst%s: %s %s\n" abstract from mid ty);
       ())

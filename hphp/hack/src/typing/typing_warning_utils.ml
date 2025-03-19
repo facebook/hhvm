@@ -165,20 +165,17 @@ module Is_as_always = struct
     match kind with
     | Typing_warning.Is_as_always.Is_is_always_true ->
       Lints_codes.Codes.is_always_true
-    | Typing_warning.Is_as_always.Is_is_always_false ->
-      Lints_codes.Codes.is_always_false
-    | Typing_warning.Is_as_always.As_always_succeeds _ ->
-      Lints_codes.Codes.as_always_succeeds
-    | Typing_warning.Is_as_always.As_always_fails ->
-      Lints_codes.Codes.as_always_fails
+    | Is_is_always_false -> Lints_codes.Codes.is_always_false
+    | As_always_succeeds _ -> Lints_codes.Codes.as_always_succeeds
+    | As_always_fails -> Lints_codes.Codes.as_always_fails
 
   let lint_quickfix { Typing_warning.Is_as_always.kind; _ } =
     match kind with
     | Typing_warning.Is_as_always.Is_is_always_true
-    | Typing_warning.Is_as_always.Is_is_always_false
-    | Typing_warning.Is_as_always.As_always_fails ->
+    | Is_is_always_false
+    | As_always_fails ->
       None
-    | Typing_warning.Is_as_always.As_always_succeeds quickfix -> Some quickfix
+    | As_always_succeeds quickfix -> Some quickfix
 
   let quickfixes _ = []
 end
@@ -212,10 +209,8 @@ module Sketchy_null_check = struct
         "use `%s ?? $default` instead of `%s ?: $default`"
         name
         name
-    | Typing_warning.Sketchy_null_check.Eq ->
-      Printf.sprintf "use `%s is null` instead" name
-    | Typing_warning.Sketchy_null_check.Neq ->
-      Printf.sprintf "use `%s is nonnull` instead" name
+    | Eq -> Printf.sprintf "use `%s is null` instead" name
+    | Neq -> Printf.sprintf "use `%s is nonnull` instead" name
 
   let reasons _ = []
 

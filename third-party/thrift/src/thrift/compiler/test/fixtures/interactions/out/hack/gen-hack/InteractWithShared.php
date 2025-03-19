@@ -86,7 +86,7 @@ trait InteractWithSharedClientBase {
     $args = InteractWithShared_do_some_similar_things_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(InteractWithSharedStaticMetadata::THRIFT_SVC_NAME, "do_some_similar_things", $args);
     $currentseqid = $this->sendImplHelper($args, "do_some_similar_things", false, InteractWithSharedStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponseWithReadHeaders(InteractWithShared_do_some_similar_things_result::class, "do_some_similar_things", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(InteractWithShared_do_some_similar_things_result::class, "do_some_similar_things", false, $currentseqid, $rpc_options))[0];
   }
 
 }
@@ -137,7 +137,7 @@ class InteractWithShared_MyInteraction extends \ThriftClientBase {
     $args = InteractWithShared_MyInteraction_frobnicate_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("InteractWithShared", "MyInteraction.frobnicate", $args);
     $currentseqid = $this->sendImpl_frobnicate();
-    return (await $this->genAwaitResponseWithReadHeaders(InteractWithShared_MyInteraction_frobnicate_result::class, "frobnicate", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(InteractWithShared_MyInteraction_frobnicate_result::class, "frobnicate", false, $currentseqid, $rpc_options))[0];
   }
 
   protected function sendImpl_frobnicate(): int {
@@ -377,7 +377,7 @@ class InteractWithShared_SharedInteraction extends \ThriftClientBase {
     $args = InteractWithShared_SharedInteraction_init_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("InteractWithShared", "SharedInteraction.init", $args);
     $currentseqid = $this->sendImpl_init();
-    return (await $this->genAwaitResponseWithReadHeaders(InteractWithShared_SharedInteraction_init_result::class, "init", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(InteractWithShared_SharedInteraction_init_result::class, "init", false, $currentseqid, $rpc_options))[0];
   }
 
   protected function sendImpl_init(): int {
@@ -433,7 +433,7 @@ class InteractWithShared_SharedInteraction extends \ThriftClientBase {
     $args = InteractWithShared_SharedInteraction_do_something_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("InteractWithShared", "SharedInteraction.do_something", $args);
     $currentseqid = $this->sendImpl_do_something();
-    return (await $this->genAwaitResponseWithReadHeaders(InteractWithShared_SharedInteraction_do_something_result::class, "do_something", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(InteractWithShared_SharedInteraction_do_something_result::class, "do_something", false, $currentseqid, $rpc_options))[0];
   }
 
   protected function sendImpl_do_something(): int {
@@ -489,7 +489,7 @@ class InteractWithShared_SharedInteraction extends \ThriftClientBase {
     $args = InteractWithShared_SharedInteraction_tear_down_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("InteractWithShared", "SharedInteraction.tear_down", $args);
     $currentseqid = $this->sendImpl_tear_down();
-    await $this->genAwaitResponseWithReadHeaders(InteractWithShared_SharedInteraction_tear_down_result::class, "tear_down", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(InteractWithShared_SharedInteraction_tear_down_result::class, "tear_down", true, $currentseqid, $rpc_options);
   }
 
   protected function sendImpl_tear_down(): int {

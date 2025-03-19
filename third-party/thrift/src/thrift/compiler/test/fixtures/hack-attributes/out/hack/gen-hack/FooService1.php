@@ -77,7 +77,7 @@ trait FooService1ClientBase {
     ));
     await $this->asyncHandler_->genBefore(FooService1StaticMetadata::THRIFT_SVC_NAME, "ping", $args);
     $currentseqid = $this->sendImplHelper($args, "ping", false, FooService1StaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponseWithReadHeaders(\test\fixtures\jsenum\FooService1_ping_result::class, "ping", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(\test\fixtures\jsenum\FooService1_ping_result::class, "ping", false, $currentseqid, $rpc_options))[0];
   }
 
 }

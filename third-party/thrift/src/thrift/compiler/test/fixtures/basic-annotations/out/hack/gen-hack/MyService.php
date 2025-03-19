@@ -209,7 +209,7 @@ trait MyServiceClientBase {
     $args = MyService_ping_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "ping", $args);
     $currentseqid = $this->sendImplHelper($args, "ping", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponseWithReadHeaders(MyService_ping_result::class, "ping", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(MyService_ping_result::class, "ping", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -226,7 +226,7 @@ trait MyServiceClientBase {
     $args = MyService_getRandomData_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "getRandomData", $args);
     $currentseqid = $this->sendImplHelper($args, "getRandomData", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponseWithReadHeaders(MyService_getRandomData_result::class, "getRandomData", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(MyService_getRandomData_result::class, "getRandomData", false, $currentseqid, $rpc_options))[0];
   }
 
   /**
@@ -245,7 +245,7 @@ trait MyServiceClientBase {
     ));
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "hasDataById", $args);
     $currentseqid = $this->sendImplHelper($args, "hasDataById", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponseWithReadHeaders(MyService_hasDataById_result::class, "hasDataById", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(MyService_hasDataById_result::class, "hasDataById", false, $currentseqid, $rpc_options))[0];
   }
 
   /**
@@ -264,7 +264,7 @@ trait MyServiceClientBase {
     ));
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "getDataById", $args);
     $currentseqid = $this->sendImplHelper($args, "getDataById", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponseWithReadHeaders(MyService_getDataById_result::class, "getDataById", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(MyService_getDataById_result::class, "getDataById", false, $currentseqid, $rpc_options))[0];
   }
 
   /**
@@ -285,7 +285,7 @@ trait MyServiceClientBase {
     ));
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "putDataById", $args);
     $currentseqid = $this->sendImplHelper($args, "putDataById", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponseWithReadHeaders(MyService_putDataById_result::class, "putDataById", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(MyService_putDataById_result::class, "putDataById", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -323,7 +323,7 @@ trait MyServiceClientBase {
     $args = MyService_doNothing_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "doNothing", $args);
     $currentseqid = $this->sendImplHelper($args, "doNothing", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponseWithReadHeaders(MyService_doNothing_result::class, "doNothing", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(MyService_doNothing_result::class, "doNothing", true, $currentseqid, $rpc_options);
   }
 
 }

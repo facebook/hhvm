@@ -80,7 +80,7 @@ trait BadServiceClientBase {
     $args = BadService_bar_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(BadServiceStaticMetadata::THRIFT_SVC_NAME, "bar", $args);
     $currentseqid = $this->sendImplHelper($args, "bar", false, BadServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponseWithReadHeaders(BadService_bar_result::class, "bar", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(BadService_bar_result::class, "bar", false, $currentseqid, $rpc_options))[0];
   }
 
 }
@@ -130,7 +130,7 @@ class BadService_BadInteraction extends \ThriftClientBase {
     $args = BadService_BadInteraction_foo_args::withDefaultValues();
     await $this->asyncHandler_->genBefore("BadService", "BadInteraction.foo", $args);
     $currentseqid = $this->sendImpl_foo();
-    await $this->genAwaitResponseWithReadHeaders(BadService_BadInteraction_foo_result::class, "foo", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(BadService_BadInteraction_foo_result::class, "foo", true, $currentseqid, $rpc_options);
   }
 
   protected function sendImpl_foo(): int {

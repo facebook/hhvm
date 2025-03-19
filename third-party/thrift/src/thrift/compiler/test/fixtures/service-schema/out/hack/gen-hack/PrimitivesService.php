@@ -125,7 +125,7 @@ trait PrimitivesServiceClientBase {
     ));
     await $this->asyncHandler_->genBefore(PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME, "init", $args);
     $currentseqid = $this->sendImplHelper($args, "init", false, PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponseWithReadHeaders(PrimitivesService_init_result::class, "init", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(PrimitivesService_init_result::class, "init", false, $currentseqid, $rpc_options))[0];
   }
 
   /**
@@ -143,7 +143,7 @@ trait PrimitivesServiceClientBase {
     $args = PrimitivesService_method_that_throws_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME, "method_that_throws", $args);
     $currentseqid = $this->sendImplHelper($args, "method_that_throws", false, PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponseWithReadHeaders(PrimitivesService_method_that_throws_result::class, "method_that_throws", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(PrimitivesService_method_that_throws_result::class, "method_that_throws", false, $currentseqid, $rpc_options))[0];
   }
 
   /**
@@ -162,7 +162,7 @@ trait PrimitivesServiceClientBase {
     ));
     await $this->asyncHandler_->genBefore(PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME, "return_void_method", $args);
     $currentseqid = $this->sendImplHelper($args, "return_void_method", false, PrimitivesServiceStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponseWithReadHeaders(PrimitivesService_return_void_method_result::class, "return_void_method", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(PrimitivesService_return_void_method_result::class, "return_void_method", true, $currentseqid, $rpc_options);
   }
 
 }

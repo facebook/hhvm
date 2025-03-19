@@ -73,7 +73,7 @@ trait MyServicePrioChildClientBase {
     $args = MyServicePrioChild_pang_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(MyServicePrioChildStaticMetadata::THRIFT_SVC_NAME, "pang", $args);
     $currentseqid = $this->sendImplHelper($args, "pang", false, MyServicePrioChildStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponseWithReadHeaders(MyServicePrioChild_pang_result::class, "pang", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(MyServicePrioChild_pang_result::class, "pang", true, $currentseqid, $rpc_options);
   }
 
 }

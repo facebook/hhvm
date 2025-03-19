@@ -154,7 +154,7 @@ trait RaiserClientBase {
     $args = Raiser_doBland_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(RaiserStaticMetadata::THRIFT_SVC_NAME, "doBland", $args);
     $currentseqid = $this->sendImplHelper($args, "doBland", false, RaiserStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponseWithReadHeaders(Raiser_doBland_result::class, "doBland", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(Raiser_doBland_result::class, "doBland", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -174,7 +174,7 @@ trait RaiserClientBase {
     $args = Raiser_doRaise_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(RaiserStaticMetadata::THRIFT_SVC_NAME, "doRaise", $args);
     $currentseqid = $this->sendImplHelper($args, "doRaise", false, RaiserStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponseWithReadHeaders(Raiser_doRaise_result::class, "doRaise", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(Raiser_doRaise_result::class, "doRaise", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -191,7 +191,7 @@ trait RaiserClientBase {
     $args = Raiser_get200_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(RaiserStaticMetadata::THRIFT_SVC_NAME, "get200", $args);
     $currentseqid = $this->sendImplHelper($args, "get200", false, RaiserStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponseWithReadHeaders(Raiser_get200_result::class, "get200", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(Raiser_get200_result::class, "get200", false, $currentseqid, $rpc_options))[0];
   }
 
   /**
@@ -211,7 +211,7 @@ trait RaiserClientBase {
     $args = Raiser_get500_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(RaiserStaticMetadata::THRIFT_SVC_NAME, "get500", $args);
     $currentseqid = $this->sendImplHelper($args, "get500", false, RaiserStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponseWithReadHeaders(Raiser_get500_result::class, "get500", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(Raiser_get500_result::class, "get500", false, $currentseqid, $rpc_options))[0];
   }
 
 }

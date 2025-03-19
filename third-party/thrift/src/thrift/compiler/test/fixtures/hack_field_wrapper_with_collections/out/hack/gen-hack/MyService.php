@@ -104,7 +104,7 @@ trait MyServiceClientBase {
     ));
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "func", $args);
     $currentseqid = $this->sendImplHelper($args, "func", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponseWithReadHeaders(MyService_func_result::class, "func", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(MyService_func_result::class, "func", false, $currentseqid, $rpc_options))[0];
   }
 
   /**
@@ -125,7 +125,7 @@ trait MyServiceClientBase {
     ));
     await $this->asyncHandler_->genBefore(MyServiceStaticMetadata::THRIFT_SVC_NAME, "func1", $args);
     $currentseqid = $this->sendImplHelper($args, "func1", false, MyServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponseWithReadHeaders(MyService_func1_result::class, "func1", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(MyService_func1_result::class, "func1", false, $currentseqid, $rpc_options))[0];
   }
 
 }

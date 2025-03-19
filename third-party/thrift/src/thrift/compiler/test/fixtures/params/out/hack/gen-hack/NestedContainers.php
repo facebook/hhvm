@@ -161,7 +161,7 @@ trait NestedContainersClientBase {
     ));
     await $this->asyncHandler_->genBefore(NestedContainersStaticMetadata::THRIFT_SVC_NAME, "mapList", $args);
     $currentseqid = $this->sendImplHelper($args, "mapList", false, NestedContainersStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponseWithReadHeaders(NestedContainers_mapList_result::class, "mapList", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(NestedContainers_mapList_result::class, "mapList", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -180,7 +180,7 @@ trait NestedContainersClientBase {
     ));
     await $this->asyncHandler_->genBefore(NestedContainersStaticMetadata::THRIFT_SVC_NAME, "mapSet", $args);
     $currentseqid = $this->sendImplHelper($args, "mapSet", false, NestedContainersStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponseWithReadHeaders(NestedContainers_mapSet_result::class, "mapSet", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(NestedContainers_mapSet_result::class, "mapSet", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -201,7 +201,7 @@ trait NestedContainersClientBase {
     ));
     await $this->asyncHandler_->genBefore(NestedContainersStaticMetadata::THRIFT_SVC_NAME, "listMap", $args);
     $currentseqid = $this->sendImplHelper($args, "listMap", false, NestedContainersStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponseWithReadHeaders(NestedContainers_listMap_result::class, "listMap", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(NestedContainers_listMap_result::class, "listMap", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -220,7 +220,7 @@ trait NestedContainersClientBase {
     ));
     await $this->asyncHandler_->genBefore(NestedContainersStaticMetadata::THRIFT_SVC_NAME, "listSet", $args);
     $currentseqid = $this->sendImplHelper($args, "listSet", false, NestedContainersStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponseWithReadHeaders(NestedContainers_listSet_result::class, "listSet", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(NestedContainers_listSet_result::class, "listSet", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -245,7 +245,7 @@ trait NestedContainersClientBase {
     ));
     await $this->asyncHandler_->genBefore(NestedContainersStaticMetadata::THRIFT_SVC_NAME, "turtles", $args);
     $currentseqid = $this->sendImplHelper($args, "turtles", false, NestedContainersStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponseWithReadHeaders(NestedContainers_turtles_result::class, "turtles", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(NestedContainers_turtles_result::class, "turtles", true, $currentseqid, $rpc_options);
   }
 
 }

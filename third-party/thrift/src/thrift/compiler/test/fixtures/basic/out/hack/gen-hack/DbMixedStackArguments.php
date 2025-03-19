@@ -103,7 +103,7 @@ internal trait DbMixedStackArgumentsClientBase {
     ));
     await $this->asyncHandler_->genBefore(DbMixedStackArgumentsStaticMetadata::THRIFT_SVC_NAME, "getDataByKey0", $args);
     $currentseqid = $this->sendImplHelper($args, "getDataByKey0", false, DbMixedStackArgumentsStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponseWithReadHeaders(\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_result::class, "getDataByKey0", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(\test\fixtures\basic\DbMixedStackArguments_getDataByKey0_result::class, "getDataByKey0", false, $currentseqid, $rpc_options))[0];
   }
 
   /**
@@ -122,7 +122,7 @@ internal trait DbMixedStackArgumentsClientBase {
     ));
     await $this->asyncHandler_->genBefore(DbMixedStackArgumentsStaticMetadata::THRIFT_SVC_NAME, "getDataByKey1", $args);
     $currentseqid = $this->sendImplHelper($args, "getDataByKey1", false, DbMixedStackArgumentsStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponseWithReadHeaders(\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_result::class, "getDataByKey1", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(\test\fixtures\basic\DbMixedStackArguments_getDataByKey1_result::class, "getDataByKey1", false, $currentseqid, $rpc_options))[0];
   }
 
 }

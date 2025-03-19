@@ -91,7 +91,7 @@ trait ServiceClientBase {
     ));
     await $this->asyncHandler_->genBefore(ServiceStaticMetadata::THRIFT_SVC_NAME, "func", $args);
     $currentseqid = $this->sendImplHelper($args, "func", false, ServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponseWithReadHeaders(\facebook\thrift\test\Service_func_result::class, "func", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(\facebook\thrift\test\Service_func_result::class, "func", false, $currentseqid, $rpc_options))[0];
   }
 
 }

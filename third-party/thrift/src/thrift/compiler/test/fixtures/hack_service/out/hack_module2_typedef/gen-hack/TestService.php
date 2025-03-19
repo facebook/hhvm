@@ -106,7 +106,7 @@ trait TestServiceClientBase {
     ));
     await $this->asyncHandler_->genBefore(TestServiceStaticMetadata::THRIFT_SVC_NAME, "ping", $args);
     $currentseqid = $this->sendImplHelper($args, "ping", false, TestServiceStaticMetadata::THRIFT_SVC_NAME );
-    return await $this->genAwaitResponseWithReadHeaders(\hack_ns2\TestService_ping_result::class, "ping", false, $currentseqid, $rpc_options);
+    return await $this->genAwaitResponse(\hack_ns2\TestService_ping_result::class, "ping", false, $currentseqid, $rpc_options);
   }
 
   /**
@@ -127,7 +127,7 @@ trait TestServiceClientBase {
     $args = \hack_ns2\TestService_voidMethod_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(TestServiceStaticMetadata::THRIFT_SVC_NAME, "voidMethod", $args);
     $currentseqid = $this->sendImplHelper($args, "voidMethod", false, TestServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponseWithReadHeaders(\hack_ns2\TestService_voidMethod_result::class, "voidMethod", true, $currentseqid, $rpc_options))[1];
+    return (await $this->genAwaitResponse(\hack_ns2\TestService_voidMethod_result::class, "voidMethod", true, $currentseqid, $rpc_options))[1];
   }
 
 }

@@ -141,7 +141,7 @@ trait CClientBase {
     $args = C_f_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(CStaticMetadata::THRIFT_SVC_NAME, "f", $args);
     $currentseqid = $this->sendImplHelper($args, "f", false, CStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponseWithReadHeaders(C_f_result::class, "f", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(C_f_result::class, "f", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -185,7 +185,7 @@ trait CClientBase {
     ));
     await $this->asyncHandler_->genBefore(CStaticMetadata::THRIFT_SVC_NAME, "thing", $args);
     $currentseqid = $this->sendImplHelper($args, "thing", false, CStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponseWithReadHeaders(C_thing_result::class, "thing", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(C_thing_result::class, "thing", false, $currentseqid, $rpc_options))[0];
   }
 
 }

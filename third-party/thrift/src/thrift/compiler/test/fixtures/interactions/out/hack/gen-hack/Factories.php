@@ -73,7 +73,7 @@ trait FactoriesClientBase {
     $args = Factories_foo_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(FactoriesStaticMetadata::THRIFT_SVC_NAME, "foo", $args);
     $currentseqid = $this->sendImplHelper($args, "foo", false, FactoriesStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponseWithReadHeaders(Factories_foo_result::class, "foo", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(Factories_foo_result::class, "foo", true, $currentseqid, $rpc_options);
   }
 
 }

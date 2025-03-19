@@ -115,7 +115,7 @@ trait FooBarBazServiceClientBase {
     $args = FooBarBazService_foo_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME, "foo", $args);
     $currentseqid = $this->sendImplHelper($args, "foo", false, FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponseWithReadHeaders(FooBarBazService_foo_result::class, "foo", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(FooBarBazService_foo_result::class, "foo", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -132,7 +132,7 @@ trait FooBarBazServiceClientBase {
     $args = FooBarBazService_bar_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME, "bar", $args);
     $currentseqid = $this->sendImplHelper($args, "bar", false, FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponseWithReadHeaders(FooBarBazService_bar_result::class, "bar", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(FooBarBazService_bar_result::class, "bar", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -149,7 +149,7 @@ trait FooBarBazServiceClientBase {
     $args = FooBarBazService_baz_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME, "baz", $args);
     $currentseqid = $this->sendImplHelper($args, "baz", false, FooBarBazServiceStaticMetadata::THRIFT_SVC_NAME );
-    await $this->genAwaitResponseWithReadHeaders(FooBarBazService_baz_result::class, "baz", true, $currentseqid, $rpc_options);
+    await $this->genAwaitResponse(FooBarBazService_baz_result::class, "baz", true, $currentseqid, $rpc_options);
   }
 
 }

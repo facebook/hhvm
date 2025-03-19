@@ -102,7 +102,7 @@ trait SomeServiceClientBase {
     ));
     await $this->asyncHandler_->genBefore(SomeServiceStaticMetadata::THRIFT_SVC_NAME, "bounce_map", $args);
     $currentseqid = $this->sendImplHelper($args, "bounce_map", false, SomeServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponseWithReadHeaders(\apache\thrift\fixtures\types\SomeService_bounce_map_result::class, "bounce_map", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(\apache\thrift\fixtures\types\SomeService_bounce_map_result::class, "bounce_map", false, $currentseqid, $rpc_options))[0];
   }
 
   /**
@@ -121,7 +121,7 @@ trait SomeServiceClientBase {
     ));
     await $this->asyncHandler_->genBefore(SomeServiceStaticMetadata::THRIFT_SVC_NAME, "binary_keyed_map", $args);
     $currentseqid = $this->sendImplHelper($args, "binary_keyed_map", false, SomeServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponseWithReadHeaders(\apache\thrift\fixtures\types\SomeService_binary_keyed_map_result::class, "binary_keyed_map", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(\apache\thrift\fixtures\types\SomeService_binary_keyed_map_result::class, "binary_keyed_map", false, $currentseqid, $rpc_options))[0];
   }
 
 }

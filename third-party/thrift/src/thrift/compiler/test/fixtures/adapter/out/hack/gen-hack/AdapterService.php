@@ -100,7 +100,7 @@ trait AdapterServiceClientBase {
     $args = \facebook\thrift\test\AdapterService_count_args::withDefaultValues();
     await $this->asyncHandler_->genBefore(AdapterServiceStaticMetadata::THRIFT_SVC_NAME, "count", $args);
     $currentseqid = $this->sendImplHelper($args, "count", false, AdapterServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponseWithReadHeaders(\facebook\thrift\test\AdapterService_count_result::class, "count", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(\facebook\thrift\test\AdapterService_count_result::class, "count", false, $currentseqid, $rpc_options))[0];
   }
 
   /**
@@ -119,7 +119,7 @@ trait AdapterServiceClientBase {
     ));
     await $this->asyncHandler_->genBefore(AdapterServiceStaticMetadata::THRIFT_SVC_NAME, "adaptedTypes", $args);
     $currentseqid = $this->sendImplHelper($args, "adaptedTypes", false, AdapterServiceStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponseWithReadHeaders(\facebook\thrift\test\AdapterService_adaptedTypes_result::class, "adaptedTypes", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(\facebook\thrift\test\AdapterService_adaptedTypes_result::class, "adaptedTypes", false, $currentseqid, $rpc_options))[0];
   }
 
 }

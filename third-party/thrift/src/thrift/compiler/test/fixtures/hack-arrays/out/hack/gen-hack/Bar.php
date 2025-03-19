@@ -82,7 +82,7 @@ trait BarClientBase {
     ));
     await $this->asyncHandler_->genBefore(BarStaticMetadata::THRIFT_SVC_NAME, "baz", $args);
     $currentseqid = $this->sendImplHelper($args, "baz", false, BarStaticMetadata::THRIFT_SVC_NAME );
-    return (await $this->genAwaitResponseWithReadHeaders(Bar_baz_result::class, "baz", false, $currentseqid, $rpc_options))[0];
+    return (await $this->genAwaitResponse(Bar_baz_result::class, "baz", false, $currentseqid, $rpc_options))[0];
   }
 
 }

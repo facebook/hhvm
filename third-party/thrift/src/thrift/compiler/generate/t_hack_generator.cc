@@ -7227,7 +7227,7 @@ void t_hack_generator::_generate_service_client_child_fn(
       tservice, tfunction, PhpFunctionNameSuffix::RESULT);
 
   std::string rpc_call = fmt::format(
-      "await $this->genAwaitResponseWithReadHeaders({}::class, \"{}\", {}, $currentseqid, $rpc_options{})",
+      "await $this->genAwaitResponse({}::class, \"{}\", {}, $currentseqid, $rpc_options{})",
       resultname,
       tfunction->name(),
       is_void ? "true" : "false",

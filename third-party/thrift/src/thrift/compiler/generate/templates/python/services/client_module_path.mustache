@@ -16,4 +16,15 @@
 
 }}{{!
 This generates module path to the client given a service
-}}{{#service:external_program?}}{{service:module_path}}.thrift_clients.{{/service:external_program?}}{{service:name}}
+}}
+{{#pragma ignore-newlines}}
+{{#service:external_program?}}
+{{service:module_path}}.
+{{#program:generate_immutable_types}}
+thrift_clients
+{{/program:generate_immutable_types}}
+{{#program:generate_mutable_types}}
+thrift_mutable_clients
+{{/program:generate_mutable_types}}
+.{{/service:external_program?}}
+{{service:name}}

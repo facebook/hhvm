@@ -44,7 +44,12 @@ import {{program:module_path}}.thrift_metadata
 import {{included_module_path}}.{{> types/types_import_path}} as {{included_module_mangle}}__{{> types/types_import_path}}
 {{/has_types?}}
 {{#has_services?}}
+{{#program:generate_immutable_types}}
 import {{included_module_path}}.thrift_clients
+{{/program:generate_immutable_types}}
+{{#program:generate_mutable_types}}
+import {{included_module_path}}.thrift_mutable_clients
+{{/program:generate_mutable_types}}
 {{/has_services?}}
 {{/program:include_namespaces}}
 {{#program:adapter_modules}}

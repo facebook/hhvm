@@ -26,7 +26,7 @@ import thrift.python.types as _fbthrift_python_types
 import test.fixtures.interactions.module.thrift_mutable_types as _fbthrift__test__fixtures__interactions__module__thrift_mutable_types
 import test.fixtures.interactions.module.thrift_metadata
 import test.fixtures.another_interactions.shared.thrift_mutable_types as _fbthrift__test__fixtures__another_interactions__shared__thrift_mutable_types
-import test.fixtures.another_interactions.shared.thrift_clients
+import test.fixtures.another_interactions.shared.thrift_mutable_clients
 
 class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     @staticmethod

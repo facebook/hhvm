@@ -26,7 +26,7 @@ import thrift.python.types as _fbthrift_python_types
 import meta.example.thrift.service.thrift_mutable_types as _fbthrift__meta__example__thrift__service__thrift_mutable_types
 import meta.example.thrift.service.thrift_metadata
 import test.fixtures.basic.module.thrift_mutable_types as _fbthrift__test__fixtures__basic__module__thrift_mutable_types
-import test.fixtures.basic.module.thrift_clients
+import test.fixtures.basic.module.thrift_mutable_clients
 
 class EchoService(_fbthrift_python_Client["EchoService.Async", "EchoService.Sync"]):
     @staticmethod
@@ -250,7 +250,7 @@ class ExtendedMyService(_fbthrift_python_Client["ExtendedMyService.Async", "Exte
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return meta.example.thrift.service.thrift_metadata.gen_metadata_service_ExtendedMyService()
     
-    class Async(test.fixtures.basic.module.thrift_clients.MyService.Async):
+    class Async(test.fixtures.basic.module.thrift_mutable_clients.MyService.Async):
         @staticmethod
         def __get_thrift_name__() -> str:
             return "service.ExtendedMyService"
@@ -287,7 +287,7 @@ class ExtendedMyService(_fbthrift_python_Client["ExtendedMyService.Async", "Exte
     # pyre-ignore[4]: Missing annotation.
     putDataById_2 = Async.putDataById_2
     
-    class Sync(test.fixtures.basic.module.thrift_clients.MyService.Sync):
+    class Sync(test.fixtures.basic.module.thrift_mutable_clients.MyService.Sync):
         @staticmethod
         def __get_thrift_name__() -> str:
             return "service.ExtendedMyService"

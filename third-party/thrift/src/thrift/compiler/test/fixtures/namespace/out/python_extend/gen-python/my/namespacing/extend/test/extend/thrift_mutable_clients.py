@@ -26,7 +26,7 @@ import thrift.python.types as _fbthrift_python_types
 import python_module_root.my.namespacing.extend.test.extend.thrift_mutable_types as python_module_root__my__namespacing__extend__test__extend__thrift_mutable_types
 import python_module_root.my.namespacing.extend.test.extend.thrift_metadata
 import python_module_root.my.namespacing.test.hsmodule.thrift_mutable_types as python_module_root__my__namespacing__test__hsmodule__thrift_mutable_types
-import python_module_root.my.namespacing.test.hsmodule.thrift_clients
+import python_module_root.my.namespacing.test.hsmodule.thrift_mutable_clients
 
 class ExtendTestService(_fbthrift_python_Client["ExtendTestService.Async", "ExtendTestService.Sync"]):
     @staticmethod
@@ -46,7 +46,7 @@ class ExtendTestService(_fbthrift_python_Client["ExtendTestService.Async", "Exte
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return python_module_root.my.namespacing.extend.test.extend.thrift_metadata.gen_metadata_service_ExtendTestService()
     
-    class Async(python_module_root.my.namespacing.test.hsmodule.thrift_clients.HsTestService.Async):
+    class Async(python_module_root.my.namespacing.test.hsmodule.thrift_mutable_clients.HsTestService.Async):
         @staticmethod
         def __get_thrift_name__() -> str:
             return "extend.ExtendTestService"
@@ -88,7 +88,7 @@ class ExtendTestService(_fbthrift_python_Client["ExtendTestService.Async", "Exte
     # pyre-ignore[4]: Missing annotation.
     check = Async.check
     
-    class Sync(python_module_root.my.namespacing.test.hsmodule.thrift_clients.HsTestService.Sync):
+    class Sync(python_module_root.my.namespacing.test.hsmodule.thrift_mutable_clients.HsTestService.Sync):
         @staticmethod
         def __get_thrift_name__() -> str:
             return "extend.ExtendTestService"

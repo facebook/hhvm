@@ -19,13 +19,13 @@ package thrift
 import (
 	"testing"
 
-	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
+	dummyif "github.com/facebook/fbthrift/thrift/test/go/if/dummy"
 )
 
 func BenchmarkEncodeBinary(b *testing.B) {
 	// Run: buck run @mode/opt thrift/lib/go/thrift:thrift_test -- --test.bench=BenchmarkDecodeBinary -test.benchtime=1000x
 
-	val := dummy.NewDummyStruct1().
+	val := dummyif.NewDummyStruct1().
 		SetField1(int8(12)).
 		SetField2(true).
 		SetField3(int16(12345)).
@@ -47,7 +47,7 @@ func BenchmarkEncodeBinary(b *testing.B) {
 func BenchmarkEncodeCompact(b *testing.B) {
 	// Run: buck run @mode/opt thrift/lib/go/thrift:thrift_test -- --test.bench=BenchmarkEncodeCompact -test.benchtime=1000x
 
-	val := dummy.NewDummyStruct1().
+	val := dummyif.NewDummyStruct1().
 		SetField1(int8(12)).
 		SetField2(true).
 		SetField3(int16(12345)).
@@ -69,7 +69,7 @@ func BenchmarkEncodeCompact(b *testing.B) {
 func BenchmarkEncodeCompactJSON(b *testing.B) {
 	// Run: buck run @mode/opt thrift/lib/go/thrift:thrift_test -- --test.bench=BenchmarkEncodeCompact -test.benchtime=1000x
 
-	val := dummy.NewDummyStruct1().
+	val := dummyif.NewDummyStruct1().
 		SetField1(int8(12)).
 		SetField2(true).
 		SetField3(int16(12345)).
@@ -91,7 +91,7 @@ func BenchmarkEncodeCompactJSON(b *testing.B) {
 func BenchmarkEncodeSimpleJSON(b *testing.B) {
 	// Run: buck run @mode/opt thrift/lib/go/thrift:thrift_test -- --test.bench=BenchmarkEncodeCompact -test.benchtime=1000x
 
-	val := dummy.NewDummyStruct1().
+	val := dummyif.NewDummyStruct1().
 		SetField1(int8(12)).
 		SetField2(true).
 		SetField3(int16(12345)).
@@ -113,7 +113,7 @@ func BenchmarkEncodeSimpleJSON(b *testing.B) {
 func BenchmarkDecodeBinary(b *testing.B) {
 	// Run: buck run @mode/opt thrift/lib/go/thrift:thrift_test -- --test.bench=BenchmarkDecodeBinary -test.benchtime=1000x
 
-	val := dummy.NewDummyStruct1().
+	val := dummyif.NewDummyStruct1().
 		SetField1(int8(12)).
 		SetField2(true).
 		SetField3(int16(12345)).
@@ -129,7 +129,7 @@ func BenchmarkDecodeBinary(b *testing.B) {
 	}
 
 	for b.Loop() {
-		var res dummy.DummyStruct1
+		var res dummyif.DummyStruct1
 		err = DecodeBinary(pay, &res)
 		if err != nil {
 			b.Fatalf("failed to decode: %v", err)
@@ -140,7 +140,7 @@ func BenchmarkDecodeBinary(b *testing.B) {
 func BenchmarkDecodeCompact(b *testing.B) {
 	// Run: buck run @mode/opt thrift/lib/go/thrift:thrift_test -- --test.bench=BenchmarkDecodeCompact -test.benchtime=1000x
 
-	val := dummy.NewDummyStruct1().
+	val := dummyif.NewDummyStruct1().
 		SetField1(int8(12)).
 		SetField2(true).
 		SetField3(int16(12345)).
@@ -156,7 +156,7 @@ func BenchmarkDecodeCompact(b *testing.B) {
 	}
 
 	for b.Loop() {
-		var res dummy.DummyStruct1
+		var res dummyif.DummyStruct1
 		err = DecodeCompact(pay, &res)
 		if err != nil {
 			b.Fatalf("failed to decode: %v", err)
@@ -167,7 +167,7 @@ func BenchmarkDecodeCompact(b *testing.B) {
 func BenchmarkDecodeCompactJSON(b *testing.B) {
 	// Run: buck run @mode/opt thrift/lib/go/thrift:thrift_test -- --test.bench=BenchmarkDecodeCompactJSON -test.benchtime=1000x
 
-	val := dummy.NewDummyStruct1().
+	val := dummyif.NewDummyStruct1().
 		SetField1(int8(12)).
 		SetField2(true).
 		SetField3(int16(12345)).
@@ -183,7 +183,7 @@ func BenchmarkDecodeCompactJSON(b *testing.B) {
 	}
 
 	for b.Loop() {
-		var res dummy.DummyStruct1
+		var res dummyif.DummyStruct1
 		err = DecodeCompactJSON(pay, &res)
 		if err != nil {
 			b.Fatalf("failed to decode: %v", err)
@@ -194,7 +194,7 @@ func BenchmarkDecodeCompactJSON(b *testing.B) {
 func BenchmarkDecodeSimpleJSON(b *testing.B) {
 	// Run: buck run @mode/opt thrift/lib/go/thrift:thrift_test -- --test.bench=BenchmarkDecodeSimpleJSON -test.benchtime=1000x
 
-	val := dummy.NewDummyStruct1().
+	val := dummyif.NewDummyStruct1().
 		SetField1(int8(12)).
 		SetField2(true).
 		SetField3(int16(12345)).
@@ -210,7 +210,7 @@ func BenchmarkDecodeSimpleJSON(b *testing.B) {
 	}
 
 	for b.Loop() {
-		var res dummy.DummyStruct1
+		var res dummyif.DummyStruct1
 		err = DecodeSimpleJSON(pay, &res)
 		if err != nil {
 			b.Fatalf("failed to decode: %v", err)

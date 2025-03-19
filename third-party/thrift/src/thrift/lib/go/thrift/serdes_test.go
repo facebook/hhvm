@@ -22,13 +22,13 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	dummyif "github.com/facebook/fbthrift/thrift/test/go/if/dummy"
 	"github.com/stretchr/testify/require"
 )
 
 func TestBasicSerDes(t *testing.T) {
-	val := dummy.NewDummyStruct1().
+	val := dummyif.NewDummyStruct1().
 		SetField1(int8(12)).
 		SetField2(true).
 		SetField3(int16(12345)).
@@ -42,7 +42,7 @@ func TestBasicSerDes(t *testing.T) {
 	encodeDecodeTestFn := func(t *testing.T, encodeFn func(types.WritableStruct) ([]byte, error), decodeFn func([]byte, types.ReadableStruct) error) {
 		data, err := encodeFn(val)
 		require.NoError(t, err)
-		var res dummy.DummyStruct1
+		var res dummyif.DummyStruct1
 		err = decodeFn(data, &res)
 		require.NoError(t, err)
 		require.Equal(t, *val, res)
@@ -68,12 +68,12 @@ func TestConsequentSerDes(t *testing.T) {
 
 	encodeDecodeTestFn := func(t *testing.T, encoder *Serializer, decoder *Deserializer) {
 		for i := range 1000 {
-			val := dummy.NewDummyStruct1().
+			val := dummyif.NewDummyStruct1().
 				SetField9(fmt.Sprintf("sequential_test_value_%d", i))
 
 			err := encoder.Encode(val)
 			require.NoError(t, err)
-			var res dummy.DummyStruct1
+			var res dummyif.DummyStruct1
 			err = decoder.Decode(&res)
 			require.NoError(t, err)
 			require.Equal(t, *val, res)
@@ -112,14 +112,14 @@ func TestGiantStructSerDes(t *testing.T) {
 	giantByteBlob := make([]byte, 32*1024*1024 /* 32MB */)
 	_, err := rand.Read(giantByteBlob)
 	require.NoError(t, err)
-	val := dummy.NewDummyStruct1().
+	val := dummyif.NewDummyStruct1().
 		SetField8(giantByteBlob).
 		SetField9("giant_struct")
 
 	encodeDecodeTestFn := func(t *testing.T, encodeFn func(types.WritableStruct) ([]byte, error), decodeFn func([]byte, types.ReadableStruct) error) {
 		data, err := encodeFn(val)
 		require.NoError(t, err)
-		var res dummy.DummyStruct1
+		var res dummyif.DummyStruct1
 		err = decodeFn(data, &res)
 		require.NoError(t, err)
 		require.Equal(t, *val, res)

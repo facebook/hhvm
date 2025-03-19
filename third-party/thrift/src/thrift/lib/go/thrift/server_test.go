@@ -25,6 +25,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
+	dummyif "github.com/facebook/fbthrift/thrift/test/go/if/dummy"
 	"github.com/stretchr/testify/require"
 )
 
@@ -35,7 +36,7 @@ func TestServerCancellation(t *testing.T) {
 		addr := listener.Addr()
 		t.Logf("Server listening on %v", addr)
 
-		processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
+		processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
 		server := NewServer(processor, listener, serverTransport)
 
 		serverCtx, serverCancel := context.WithCancel(context.Background())

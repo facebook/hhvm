@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-namespace go thrift.test.go.if.dummy
+namespace go 'github.com/facebook/fbthrift/thrift/test/go/if/dummy'
 
 // !!! DO NOT MODIFY !!!
 //

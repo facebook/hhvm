@@ -29,13 +29,14 @@ import (
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	dummyif "github.com/facebook/fbthrift/thrift/test/go/if/dummy"
 	"github.com/stretchr/testify/require"
 )
 
 func TestNewClientConnectionScenarios(t *testing.T) {
 	listener, err := net.Listen("tcp", ":0")
 	require.NoError(t, err)
-	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
+	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
 	server := NewServer(processor, listener, TransportIDRocket)
 	serverCtx, serverCancel := context.WithCancel(context.Background())
 	var serverEG errgroup.Group
@@ -116,7 +117,7 @@ func getNumFileDesciptors() (int, error) {
 func TestNewClientCreation(t *testing.T) {
 	listener, err := net.Listen("tcp", ":0")
 	require.NoError(t, err)
-	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
+	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
 	server := NewServer(processor, listener, TransportIDRocket)
 	serverCtx, serverCancel := context.WithCancel(context.Background())
 	var serverEG errgroup.Group

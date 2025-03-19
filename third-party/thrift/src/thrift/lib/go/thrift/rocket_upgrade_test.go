@@ -23,6 +23,7 @@ import (
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	dummyif "github.com/facebook/fbthrift/thrift/test/go/if/dummy"
 )
 
 // This tests the upgradeToRocket client against a header server.
@@ -35,7 +36,7 @@ func TestUpgradeToRocketFallbackAgainstHeaderServer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to listen: %v", err)
 	}
-	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
+	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
 	server := NewServer(processor, listener, TransportIDHeader)
 	go func() {
 		errChan <- server.ServeContext(ctx)
@@ -49,7 +50,7 @@ func TestUpgradeToRocketFallbackAgainstHeaderServer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}
-	client := dummy.NewDummyChannelClient(NewSerialChannel(proto))
+	client := dummyif.NewDummyChannelClient(NewSerialChannel(proto))
 	defer client.Close()
 	result, err := client.Echo(context.TODO(), "hello")
 	if err != nil {
@@ -72,7 +73,7 @@ func TestUpgradeToRocketServerAgainstHeaderClient(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to listen: %v", err)
 	}
-	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
+	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
 	server := NewServer(processor, listener, TransportIDUpgradeToRocket)
 	go func() {
 		errChan <- server.ServeContext(ctx)
@@ -86,7 +87,7 @@ func TestUpgradeToRocketServerAgainstHeaderClient(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}
-	client := dummy.NewDummyChannelClient(NewSerialChannel(proto))
+	client := dummyif.NewDummyChannelClient(NewSerialChannel(proto))
 	defer client.Close()
 	result, err := client.Echo(context.TODO(), "hello")
 	if err != nil {
@@ -109,7 +110,7 @@ func TestUpgradeToRocketAgainstUpgradeToRocketServer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to listen: %v", err)
 	}
-	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
+	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
 	server := NewServer(processor, listener, TransportIDUpgradeToRocket)
 	go func() {
 		errChan <- server.ServeContext(ctx)
@@ -123,7 +124,7 @@ func TestUpgradeToRocketAgainstUpgradeToRocketServer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}
-	client := dummy.NewDummyChannelClient(NewSerialChannel(proto))
+	client := dummyif.NewDummyChannelClient(NewSerialChannel(proto))
 	defer client.Close()
 	result, err := client.Echo(context.TODO(), "hello")
 	if err != nil {

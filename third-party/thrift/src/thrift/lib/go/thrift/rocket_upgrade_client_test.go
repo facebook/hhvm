@@ -23,6 +23,7 @@ import (
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	dummyif "github.com/facebook/fbthrift/thrift/test/go/if/dummy"
 )
 
 func TestCloseWithoutSendingMessages(t *testing.T) {
@@ -54,7 +55,7 @@ func TestUpgradeToRocketClientUnix(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to listen: %v", err)
 	}
-	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
+	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
 	server := NewServer(processor, listener, TransportIDUpgradeToRocket)
 	go func() {
 		errChan <- server.ServeContext(ctx)
@@ -68,7 +69,7 @@ func TestUpgradeToRocketClientUnix(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}
-	client := dummy.NewDummyChannelClient(channel)
+	client := dummyif.NewDummyChannelClient(channel)
 	defer client.Close()
 	result, err := client.Echo(context.TODO(), "hello")
 	if err != nil {

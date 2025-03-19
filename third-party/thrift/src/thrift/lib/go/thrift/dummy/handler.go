@@ -18,6 +18,8 @@ package dummy
 
 import (
 	"context"
+
+	"github.com/facebook/fbthrift/thrift/test/go/if/dummy"
 )
 
 type DummyHandler struct {
@@ -26,7 +28,7 @@ type DummyHandler struct {
 }
 
 // Compile time interface enforcer
-var _ Dummy = (*DummyHandler)(nil)
+var _ dummy.Dummy = (*DummyHandler)(nil)
 
 func (h *DummyHandler) Echo(ctx context.Context, value string) (string, error) {
 	return value, nil

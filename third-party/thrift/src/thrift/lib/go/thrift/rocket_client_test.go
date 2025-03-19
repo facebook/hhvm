@@ -26,6 +26,7 @@ import (
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	dummyif "github.com/facebook/fbthrift/thrift/test/go/if/dummy"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -48,7 +49,7 @@ func TestRocketClientClose(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to listen: %v", err)
 	}
-	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
+	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
 	server := NewServer(processor, listener, TransportIDRocket)
 	go func() {
 		errChan <- server.ServeContext(ctx)
@@ -63,7 +64,7 @@ func TestRocketClientClose(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}
-	client := dummy.NewDummyChannelClient(NewSerialChannel(proto))
+	client := dummyif.NewDummyChannelClient(NewSerialChannel(proto))
 	result, err := client.Echo(context.TODO(), "hello")
 	if err != nil {
 		t.Fatalf("could not complete call: %v", err)
@@ -89,7 +90,7 @@ func TestRocketClientUnix(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to listen: %v", err)
 	}
-	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
+	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
 	server := NewServer(processor, listener, TransportIDRocket)
 	go func() {
 		errChan <- server.ServeContext(ctx)
@@ -103,7 +104,7 @@ func TestRocketClientUnix(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}
-	client := dummy.NewDummyChannelClient(NewSerialChannel(proto))
+	client := dummyif.NewDummyChannelClient(NewSerialChannel(proto))
 	defer client.Close()
 	result, err := client.Echo(context.TODO(), "hello")
 	if err != nil {
@@ -125,7 +126,7 @@ func TestFDRelease(t *testing.T) {
 	addr := listener.Addr().(*net.TCPAddr)
 	t.Logf("Server listening on %v", addr)
 
-	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
+	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
 	server := NewServer(processor, listener, TransportIDRocket)
 
 	serverCtx, serverCancel := context.WithCancel(context.Background())
@@ -148,7 +149,7 @@ func TestFDRelease(t *testing.T) {
 		// NOTE!!!!!!
 		// Close() call is missing intentionally!!!!
 		// We are testing that the FD is released when the client is GCed.
-		client := dummy.NewDummyChannelClient(channel)
+		client := dummyif.NewDummyChannelClient(channel)
 		_, err = client.Echo(context.Background(), "hello")
 		if err != nil {
 			t.Fatalf("failed to make RPC: %v", err)

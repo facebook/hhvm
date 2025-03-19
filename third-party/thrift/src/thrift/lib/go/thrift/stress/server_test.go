@@ -29,6 +29,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
+	dummyif "github.com/facebook/fbthrift/thrift/test/go/if/dummy"
 	"thrift/lib/go/thrift"
 
 	"github.com/stretchr/testify/require"
@@ -75,7 +76,7 @@ func runStressTest(t *testing.T, serverTransport thrift.TransportID) {
 		},
 	)
 
-	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
+	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
 	server := thrift.NewServer(processor, listener, serverTransport, connContextOption, thrift.WithNumWorkers(10))
 
 	serverCtx, serverCancel := context.WithCancel(context.Background())
@@ -99,7 +100,7 @@ func runStressTest(t *testing.T, serverTransport thrift.TransportID) {
 			t.Log(errRes.Error())
 			return errRes
 		}
-		client := dummy.NewDummyChannelClient(channel)
+		client := dummyif.NewDummyChannelClient(channel)
 		defer client.Close()
 		result, err := client.Echo(context.Background(), "hello")
 		if err != nil {

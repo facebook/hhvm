@@ -22,9 +22,7 @@
 #include <folly/io/IOBufQueue.h>
 #include <thrift/lib/cpp/transport/TBufferTransports.h>
 
-namespace apache {
-namespace thrift {
-namespace util {
+namespace apache::thrift::util {
 
 class THttpParser {
  protected:
@@ -148,8 +146,6 @@ class THttpClientParser : public THttpParser {
   std::string userAgent_;
 };
 
-} // namespace util
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::util
 
 #endif // #ifndef THRIFT_TRANSPORT_THTTPPARSER_H_

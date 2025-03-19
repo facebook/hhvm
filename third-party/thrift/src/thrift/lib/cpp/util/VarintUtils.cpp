@@ -20,9 +20,7 @@
 
 #include <stdint.h>
 
-namespace apache {
-namespace thrift {
-namespace util {
+namespace apache::thrift::util {
 
 /**
  * Read an i16 from the wire as a varint. The MSB of each byte is set
@@ -129,6 +127,4 @@ namespace detail {
 }
 } // namespace detail
 
-} // namespace util
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::util

@@ -20,10 +20,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-namespace apache {
-namespace thrift {
-
-namespace util {
+namespace apache::thrift::util {
 
 /**
  * Read an i16 from the wire as a varint. The MSB of each byte is set
@@ -76,9 +73,7 @@ uint32_t toI32ZigZagOrdinal(size_t pos);
 
 size_t fromI32ZigZagOrdinal(uint32_t pos);
 
-} // namespace util
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::util
 
 #include <thrift/lib/cpp/util/VarintUtils-inl.h>
 

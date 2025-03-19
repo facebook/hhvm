@@ -20,9 +20,7 @@
 
 #include <folly/portability/SysTime.h>
 
-namespace apache {
-namespace thrift {
-namespace util {
+namespace apache::thrift::util {
 
 PausableTimer::PausableTimer(int timeLimit) {
   isTimeLimitFinite_ = timeLimit > 0;
@@ -79,6 +77,4 @@ bool PausableTimer::didLastRunningTimeExceedLimit(
       limit_in_microseconds;
 }
 
-} // namespace util
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::util

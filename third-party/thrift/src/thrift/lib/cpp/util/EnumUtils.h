@@ -30,10 +30,7 @@
 
 #include <thrift/lib/cpp/Thrift.h>
 
-namespace apache {
-namespace thrift {
-
-namespace util {
+namespace apache::thrift::util {
 
 /// Return whether EnumType is a thrift defined enum type
 template <typename EnumType, typename = void>
@@ -119,8 +116,6 @@ const char* enumNameOrThrow(EnumType value) {
   folly::throw_exception<std::out_of_range>("value not found in enum");
 }
 
-} // namespace util
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::util
 
 #endif // THRIFT_UTIL_ENUMUTILS_H_ 1

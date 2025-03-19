@@ -27,9 +27,7 @@
 #include <cstdlib>
 #include <sstream>
 
-namespace apache {
-namespace thrift {
-namespace util {
+namespace apache::thrift::util {
 
 using namespace std;
 using namespace folly;
@@ -440,6 +438,4 @@ void THttpClientParser::appendHeadersToQueue(
   }
 }
 
-} // namespace util
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::util

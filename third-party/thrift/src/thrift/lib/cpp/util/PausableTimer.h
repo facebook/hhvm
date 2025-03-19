@@ -21,9 +21,7 @@
 
 #include <folly/portability/SysTime.h>
 
-namespace apache {
-namespace thrift {
-namespace util {
+namespace apache::thrift::util {
 
 class PausableTimer {
  public:
@@ -56,6 +54,4 @@ class PausableTimer {
   struct timeval lastRunningTime_;
 };
 
-} // namespace util
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::util

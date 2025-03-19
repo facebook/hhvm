@@ -20,9 +20,7 @@
 #include <folly/testing/TestUtil.h>
 #include <thrift/lib/cpp/util/FrozenUtil.h>
 
-namespace apache {
-namespace thrift {
-namespace util {
+namespace apache::thrift::util {
 
 template <class T>
 folly::test::TemporaryFile freezeToTempFile(const T& value) {
@@ -31,8 +29,6 @@ folly::test::TemporaryFile freezeToTempFile(const T& value) {
   return tmp;
 }
 
-} // namespace util
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::util
 
 #endif // include guard

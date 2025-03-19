@@ -21,9 +21,7 @@
 #include <folly/system/MemoryMapping.h>
 #include <thrift/lib/cpp/Frozen.h>
 
-namespace apache {
-namespace thrift {
-namespace util {
+namespace apache::thrift::util {
 
 template <class T, class Frozen = typename Freezer<T>::FrozenType>
 const Frozen* freezeToFile(const T& value, const folly::MemoryMapping& mapping);
@@ -44,9 +42,7 @@ const Frozen* mapFrozen(folly::ByteRange mapping);
 template <class T, class Frozen = typename Freezer<T>::FrozenType>
 const Frozen* mapFrozen(const folly::MemoryMapping& mapping);
 
-} // namespace util
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::util
 
 #include <thrift/lib/cpp/util/FrozenUtil-inl.h>
 

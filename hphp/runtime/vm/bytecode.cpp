@@ -2299,7 +2299,7 @@ OPTBLD_INLINE void iopClassGetC(ClassGetCMode mode) {
   vmStack().pushClass(cls);
 }
 
-OPTBLD_INLINE void iopClassGetTS() {
+OPTBLD_INLINE void iopClassGetTSWithGenerics() {
   auto const cell = vmStack().topC();
   if (!tvIsDict(cell)) {
     raise_error("Reified type must be a type structure");

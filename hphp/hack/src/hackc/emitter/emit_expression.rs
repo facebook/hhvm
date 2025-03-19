@@ -2919,7 +2919,7 @@ fn emit_special_function<'a, 'd>(
             }
             Ok(Some(InstrSeq::gather(vec![
                 emit_reified_arg(e, env, pos, false, targs[0].hint())?.0,
-                instr::class_get_ts(),
+                instr::class_get_ts_with_generics(),
                 instr::pop_c(),
             ])))
         }
@@ -3834,7 +3834,7 @@ fn emit_new_obj_reified_instrs<'a, 'd>(
                 try_parent_has_reified_generics,
             ]),
             NewObjOpInfo::NewObj(true) => InstrSeq::gather(vec![
-                instr::class_get_ts(),
+                instr::class_get_ts_with_generics(),
                 instr::pop_l(ts_local),
                 instr::set_l(class_local),
                 instr::new_obj(),

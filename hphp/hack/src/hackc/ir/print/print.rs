@@ -779,7 +779,11 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext, func: &Func, hhbc: &Hhbc) ->
             FmtClassGetCMode(mode),
             FmtVid(func, vid, verbose)
         )?,
-        Hhbc::ClassGetTS(vid, _) => write!(w, "class_get_ts {}", FmtVid(func, vid, verbose))?,
+        Hhbc::ClassGetTSWithGenerics(vid, _) => write!(
+            w,
+            "class_get_ts_with_generics {}",
+            FmtVid(func, vid, verbose)
+        )?,
         Hhbc::ClassHasReifiedGenerics(vid, _) => write!(
             w,
             "class_has_reified_generics {}",

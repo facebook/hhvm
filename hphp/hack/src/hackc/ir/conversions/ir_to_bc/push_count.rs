@@ -188,7 +188,7 @@ impl<'a> PushCount<'a> for instr::Hhbc {
             | Hhbc::YieldK(..) => 1,
 
             // --- 2 pushed values
-            Hhbc::ClassGetTS(..) => 2,
+            Hhbc::ClassGetTSWithGenerics(..) => 2,
         }
     }
 }

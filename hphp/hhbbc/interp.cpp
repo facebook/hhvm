@@ -2410,7 +2410,7 @@ void in(ISS& env, const bc::ClassGetC& op) {
   push(env, TCls);
 }
 
-void in(ISS& env, const bc::ClassGetTS& op) {
+void in(ISS& env, const bc::ClassGetTSWithGenerics& op) {
   auto const ts = popC(env);
   if (!ts.couldBe(BDict)) {
     push(env, TBottom);

@@ -113,9 +113,12 @@ void emitClassGetC(IRGS& env, ClassGetCMode mode) {
   push(env, cls);
 }
 
-void emitClassGetTS(IRGS& env) {
+void emitClassGetTSWithGenerics(IRGS& env) {
   auto const ts = topC(env);
-  if (!ts->isA(TDict)) { if (ts->type().maybe(TDict)) { PUNT(ClassGetTS-UnguardedTS); } else {
+  if (!ts->isA(TDict)) {
+    if (ts->type().maybe(TDict)) {
+      PUNT(ClassGetTSWithGenerics-UnguardedTS);
+    } else {
       gen(env, RaiseError, cns(env, s_reified_type_must_be_ts.get()));
     }
   }

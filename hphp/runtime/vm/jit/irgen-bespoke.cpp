@@ -950,12 +950,12 @@ void emitBespokeColFromArray(IRGS& env,
   push(env, col);
 }
 
-void emitBespokeClassGetTS(IRGS& env) {
+void emitBespokeClassGetTSWithGenerics(IRGS& env) {
   auto const arr = topC(env);
   auto const arrType = arr->type();
   if (!(arrType <= TDict)) {
     if (arrType.maybe(TDict)) {
-      PUNT(Bespoke-ClassGetTS-UnguardedTS);
+      PUNT(Bespoke-ClassGetTSWithGenerics-UnguardedTS);
     } else {
       gen(env, RaiseError, cns(env, s_reified_type_must_be_ts.get()));
       return;
@@ -1231,8 +1231,8 @@ void emitBespoke(IRGS& env, const NormalizedInstruction& ni,
     case Op::ColFromArray:
       emitBespokeColFromArray(env, (CollectionType) ni.imm[0].u_OA);
       return;
-    case Op::ClassGetTS:
-      emitBespokeClassGetTS(env);
+    case Op::ClassGetTSWithGenerics:
+      emitBespokeClassGetTSWithGenerics(env);
       return;
     case Op::FCallClsMethodD: {
       using LSC = LayoutSensitiveCall;
@@ -1267,7 +1267,7 @@ Optional<Location> getVanillaLocation(const IRGS& env, SrcKey sk) {
     case Op::AddNewElemC:
       return {Location::Stack{soff - 1}};
     case Op::AKExists:
-    case Op::ClassGetTS:
+    case Op::ClassGetTSWithGenerics:
     case Op::ColFromArray:
       return {Location::Stack{soff}};
 

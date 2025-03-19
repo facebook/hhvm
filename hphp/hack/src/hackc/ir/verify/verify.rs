@@ -426,7 +426,7 @@ impl<'b> VerifyFunc<'b> {
             // instruction.
             let expects_select = match *prev_instr {
                 Instr::Call(ref call) => call.num_rets >= 2,
-                Instr::Hhbc(Hhbc::ClassGetTS(..)) => true,
+                Instr::Hhbc(Hhbc::ClassGetTSWithGenerics(..)) => true,
                 Instr::MemberOp(ref op) => op.num_values() >= 2,
                 _ => false,
             };
@@ -484,7 +484,7 @@ impl<'b> VerifyFunc<'b> {
                     self.verify_selects(call.num_rets as usize, block, iid, iid_idx);
                 }
             }
-            Instr::Hhbc(Hhbc::ClassGetTS(..)) => {
+            Instr::Hhbc(Hhbc::ClassGetTSWithGenerics(..)) => {
                 self.verify_selects(2, block, iid, iid_idx);
             }
             Instr::MemberOp(ref op) => {

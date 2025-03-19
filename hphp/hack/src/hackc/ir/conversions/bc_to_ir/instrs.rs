@@ -1098,9 +1098,9 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::Yield => simple!(Hhbc::Yield),
         Opcode::YieldK => simple!(Hhbc::YieldK),
 
-        Opcode::ClassGetTS => {
+        Opcode::ClassGetTSWithGenerics => {
             let s1 = ctx.pop();
-            let vid = ctx.emit(Instr::Hhbc(Hhbc::ClassGetTS(s1, ctx.loc)));
+            let vid = ctx.emit(Instr::Hhbc(Hhbc::ClassGetTSWithGenerics(s1, ctx.loc)));
             ctx.emit_selects(vid, 2);
             Action::None
         }

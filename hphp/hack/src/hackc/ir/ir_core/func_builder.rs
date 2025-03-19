@@ -262,7 +262,7 @@ impl FuncBuilder {
     fn num_selects(instr: &Instr) -> u32 {
         let num_rets = match instr {
             Instr::Call(call) => call.num_rets,
-            Instr::Hhbc(Hhbc::ClassGetTS(..)) => 2,
+            Instr::Hhbc(Hhbc::ClassGetTSWithGenerics(..)) => 2,
             Instr::MemberOp(ref op) => op.num_values() as u32,
             _ => 1,
         };

@@ -1357,7 +1357,7 @@ ClassGetC <mode>                   [C]  ->  [C:Class]
   sampled notice otherwise. If the target class fails to load, we throw a
   catchable InvalidArgumentException.
 
-ClassGetTS                         [C:Dict]  ->  [C:Class, C:StaticVec|Null]
+ClassGetTSWithGenerics             [C:Dict]  ->  [C:Class, C:StaticVec|Null]
 
   Fetch class from type-structure. This instruction checks if $1 is a valid
   type-structure (darray or dict). If not, this instruction throws a fatal

@@ -435,7 +435,7 @@ impl<'b> InstrEmitter<'b> {
             Hhbc::CheckProp(prop, _) => Opcode::CheckProp(prop),
             Hhbc::CheckThis(_) => Opcode::CheckThis,
             Hhbc::ClassGetC(_, mode, _) => Opcode::ClassGetC(mode),
-            Hhbc::ClassGetTS(_, _) => Opcode::ClassGetTS,
+            Hhbc::ClassGetTSWithGenerics(_, _) => Opcode::ClassGetTSWithGenerics,
             Hhbc::ClassHasReifiedGenerics(_, _) => Opcode::ClassHasReifiedGenerics,
             Hhbc::ClassName(..) => Opcode::ClassName,
             Hhbc::Clone(..) => Opcode::Clone,

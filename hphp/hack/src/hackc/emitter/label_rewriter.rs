@@ -222,7 +222,7 @@ where
             | Opcode::CheckProp(..)
             | Opcode::CheckThis
             | Opcode::ClassGetC(..)
-            | Opcode::ClassGetTS
+            | Opcode::ClassGetTSWithGenerics
             | Opcode::ClassHasReifiedGenerics
             | Opcode::ClassName
             | Opcode::Clone

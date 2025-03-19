@@ -134,7 +134,8 @@ namespace HPHP {
                      TWO(CV,CV),      ONE(CV),    NF) \
   O(ClassGetC,       ONE(OA(ClassGetCMode)),                            \
                                        ONE(CV),         ONE(CV),    NF) \
-  O(ClassGetTS,      NA,               ONE(CV),         TWO(CV,CV), NF) \
+  O(ClassGetTSWithGenerics,                                             \
+                     NA,               ONE(CV),         TWO(CV,CV), NF) \
   O(GetMemoKeyL,     ONE(NLA),         NOV,             ONE(CV),    NF) \
   O(AKExists,        NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(IssetL,          ONE(LA),          NOV,             ONE(CV),    NF) \

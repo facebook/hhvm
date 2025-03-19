@@ -170,6 +170,23 @@ abstract final class ThriftUtil {
     return $val;
   }
 
+  public static function getFieldValue(
+    IThriftSyncStruct $thrift_object,
+    string $field_name,
+  )[]: dynamic {
+    $is_union = $thrift_object is IThriftUnion<_>;
+    $thrift_object as dynamic;
+    if ($is_union) {
+      $acc_meth = 'get_'.$field_name;
+      // @lint-ignore DYNAMICALLY_INVOKING_TARGETS_CONSIDERED_HARMFUL
+      // Wrapped fields and unions have a getter.
+      $val = $thrift_object->$acc_meth();
+    } else {
+      $val = $thrift_object->$field_name;
+    }
+    return $val;
+  }
+
   public static async function genSetField(
     IThriftStruct $thrift_object,
     ThriftStructTypes::TFieldSpec $field_spec,

@@ -86,9 +86,9 @@ let user_prompt_prefix buf ctxt_pos user_error =
   in
   Buffer.add_string
     buf
-    "Given the following snippet of Hack code that is part of the file:\n<SNIPPET>\n```hack";
+    "Given the following snippet of Hack code that is part of the file:\n<SNIPPET>\n```hack\n";
   extract_prompt_context buf ~ctxt_pos ~claim_pos;
-  Buffer.add_string buf "\n```</SNIPPET>\n"
+  Buffer.add_string buf "```\n</SNIPPET>\n"
 
 let user_prompt_suffix buf =
   Buffer.add_string
@@ -105,7 +105,7 @@ let extended_diagnostics buf user_error =
   | [] -> ()
   | msgs ->
     List.iter msgs ~f:(fun str ->
-        Buffer.add_string buf (Format.sprintf {|<HINT>%s<\HINT>\n|} str))
+        Buffer.add_string buf (Format.sprintf "<HINT>\n%s\n</HINT>\n" str))
 
 let create_user_prompt selection user_error =
   let buf = Buffer.create 500 in
@@ -125,7 +125,7 @@ let legacy_diagnostics buf user_error =
         Buffer.add_string
           buf
           (Format.sprintf
-             {|<HINT>%s\nlocation uri:%s\n<\HINT>\n|}
+             "<HINT>\n%s\nlocation uri:%s\n</HINT>\n"
              str
              (Pos.filename pos)))
 

@@ -310,36 +310,31 @@ let widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
  *)
 let rec make_nullable_member_type env ~is_method id_pos pos ty =
   if is_method then
-    let (env, ty) = Env.expand_type env ty in
-    match deref ty with
-    | (r, Tfun tf) ->
-      let (env, ty) =
-        make_nullable_member_type ~is_method:false env id_pos pos tf.ft_ret
-      in
-      (env, mk (r, Tfun { tf with ft_ret = ty }))
-    | (r, Tunion (_ :: _ as tyl)) ->
-      let (env, tyl) =
-        List.map_env env tyl ~f:(fun env ty ->
-            make_nullable_member_type ~is_method env id_pos pos ty)
-      in
-      Union.union_list env r tyl
-    | (r, Tintersection tyl) ->
-      let (env, tyl) =
-        List.map_env env tyl ~f:(fun env ty ->
-            make_nullable_member_type ~is_method env id_pos pos ty)
-      in
-      Inter.intersect_list env r tyl
-    | (r, Tnewtype (name, [tyarg], _))
-      when String.equal name SN.Classes.cSupportDyn ->
-      let (env, ty) =
-        make_nullable_member_type ~is_method env id_pos pos tyarg
-      in
-      (env, MakeType.supportdyn r ty)
-    | (_, (Tdynamic | Tany _)) -> (env, ty)
-    | (_, Tunion []) -> (env, MakeType.null (Reason.nullsafe_op pos))
-    | _ ->
-      (* Shouldn't happen *)
-      make_nullable_member_type ~is_method:false env id_pos pos ty
+    Typing_utils.map_supportdyn env ty (fun env ty ->
+        let (env, ty) = Env.expand_type env ty in
+        match deref ty with
+        | (r, Tfun tf) ->
+          let (env, ty) =
+            make_nullable_member_type ~is_method:false env id_pos pos tf.ft_ret
+          in
+          (env, mk (r, Tfun { tf with ft_ret = ty }))
+        | (r, Tunion (_ :: _ as tyl)) ->
+          let (env, tyl) =
+            List.map_env env tyl ~f:(fun env ty ->
+                make_nullable_member_type ~is_method env id_pos pos ty)
+          in
+          Union.union_list env r tyl
+        | (r, Tintersection tyl) ->
+          let (env, tyl) =
+            List.map_env env tyl ~f:(fun env ty ->
+                make_nullable_member_type ~is_method env id_pos pos ty)
+          in
+          Inter.intersect_list env r tyl
+        | (_, (Tdynamic | Tany _)) -> (env, ty)
+        | (_, Tunion []) -> (env, MakeType.null (Reason.nullsafe_op pos))
+        | _ ->
+          (* Shouldn't happen *)
+          make_nullable_member_type ~is_method:false env id_pos pos ty)
   else
     let (env, ty) =
       Typing_intersection.intersect_with_nonnull

@@ -20,10 +20,9 @@ let name ty =
   | T.Tprim tp -> A.string_of_tprim tp
   | _ -> ""
 
-let rec find_ft ty =
+let find_ft env ty =
+  let (_, ty) = Tast_env.strip_supportdyn env ty in
   match T.get_node ty with
-  | T.Tnewtype (name, _, ty) when String.equal name SN.Classes.cSupportDyn ->
-    find_ft ty
   | T.Tfun ft -> Some ft
   | _ -> None
 
@@ -173,5 +172,5 @@ let create_handler _ctx =
           arg_types
           (pos |> Pos.to_relative_string)
       in
-      Option.iter (find_ft fx_ty) ~f:check
+      Option.iter (find_ft env fx_ty) ~f:check
   end

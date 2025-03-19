@@ -124,6 +124,7 @@
   typing
   typing_check
   typing_deps
+  typing_json
   utils_core)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))

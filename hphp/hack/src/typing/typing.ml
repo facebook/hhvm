@@ -906,26 +906,22 @@ let localize_targ env ta =
   let (env, targ) = Phase.localize_targ ~check_well_kinded:true env ta in
   (env, targ, ExpectedTy.make pos Reason.URhint (fst targ))
 
-let rec set_function_pointer env ty =
-  match get_node ty with
-  | Tfun ft ->
-    let ft = set_ft_is_function_pointer ft true in
-    (env, mk (get_reason ty, Tfun ft))
-  | Tnewtype (name, _, ty1) when String.equal name SN.Classes.cSupportDyn ->
-    let (env, ty1) = set_function_pointer env ty1 in
-    TUtils.make_supportdyn (get_reason ty) env ty1
-  | _ -> (env, ty)
+let set_function_pointer env ty =
+  Typing_utils.map_supportdyn env ty (fun env ty ->
+      match get_node ty with
+      | Tfun ft ->
+        let ft = set_ft_is_function_pointer ft true in
+        (env, mk (get_reason ty, Tfun ft))
+      | _ -> (env, ty))
 
 (* Set the function type to be capturing readonly values only *)
-let rec set_capture_only_readonly pos env ty =
-  match get_node ty with
-  | Tfun ft ->
-    let ft = set_ft_readonly_this ft true in
-    (env, mk (get_reason ty, Tfun ft))
-  | Tnewtype (name, _, ty1) when String.equal name SN.Classes.cSupportDyn ->
-    let (env, ty1) = set_capture_only_readonly pos env ty1 in
-    TUtils.make_supportdyn (get_reason ty) env ty1
-  | _ -> (env, ty)
+let set_capture_only_readonly env ty =
+  Typing_utils.map_supportdyn env ty (fun env ty ->
+      match get_node ty with
+      | Tfun ft ->
+        let ft = set_ft_readonly_this ft true in
+        (env, mk (get_reason ty, Tfun ft))
+      | _ -> (env, ty))
 
 let xhp_attribute_decl_ty env sid obj attr =
   let (namepstr, valpty) = attr in
@@ -1934,13 +1930,6 @@ let rec make_a_local_of ~include_this env e =
   | (_, _, ReadonlyExpr e) ->
     make_a_local_of ~include_this env e
   | _ -> (env, None)
-
-let strip_supportdyn ty =
-  (* Currently we don't check for support dynamic at runtime, so we
-   * must simply treat supportdyn<t> as t when refining *)
-  match get_node ty with
-  | Tnewtype (name, [ty], _) when String.equal name SN.Classes.cSupportDyn -> ty
-  | _ -> ty
 
 let get_bound_ty_for_lvar env e =
   match e with
@@ -3504,8 +3493,9 @@ end = struct
             local_obj_ty
         in
         Option.iter ty_err_opt2 ~f:(Typing_error_utils.add_typing_error ~env);
+        let (_, env, fty) = TUtils.strip_supportdyn env fty in
         let (env, fty) = Env.expand_type env fty in
-        (match deref (strip_supportdyn fty) with
+        (match deref fty with
         | (reason, Tfun ftype) ->
           (* We are creating a fake closure:
            * function(Class $x, arg_types_of(Class::meth_name))
@@ -3553,7 +3543,7 @@ end = struct
               caller
           in
           (* The function type itself is readonly because we don't capture any values *)
-          let (env, ty) = set_capture_only_readonly pos env ty in
+          let (env, ty) = set_capture_only_readonly env ty in
           let ty =
             make_function_ref
               ~contains_generics:(not (List.is_empty fty.ft_tparams))
@@ -3587,7 +3577,7 @@ end = struct
       let env = Env.set_tyvar_variance env fpty in
       let (env, fpty) = set_function_pointer env fpty in
       (* All function pointers are readonly since they don't capture any values *)
-      let (env, fpty) = set_capture_only_readonly p env fpty in
+      let (env, fpty) = set_capture_only_readonly env fpty in
       let fpty =
         make_function_ref
           ~contains_generics:(not (List.is_empty tal))
@@ -3888,7 +3878,7 @@ end = struct
       in
       let (env, ty) = set_function_pointer env ty in
       (* All function pointers are readonly since they capture no values *)
-      let (env, ty) = set_capture_only_readonly p env ty in
+      let (env, ty) = set_capture_only_readonly env ty in
       let ty = make_function_ref ~contains_generics:false env p ty in
       make_result env p (FunctionPointer (FP_id fid, [])) ty
     | FunctionPointer (FP_id fid, targs) ->
@@ -3896,7 +3886,7 @@ end = struct
       let e = Aast.FunctionPointer (FP_id fid, targs) in
       let (env, fty) = set_function_pointer env fty in
       (* All function pointers are readonly since they capture no values *)
-      let (env, fty) = set_capture_only_readonly p env fty in
+      let (env, fty) = set_capture_only_readonly env fty in
       let fty =
         make_function_ref
           ~contains_generics:(not (List.is_empty targs))
@@ -6361,12 +6351,10 @@ end = struct
                   [Log_type ("fty", fty)] );
             ]));
 
-    let rec is_fun_type ty =
+    let is_fun_type ty =
+      let (_, _env, ty) = TUtils.strip_supportdyn env ty in
       match get_node ty with
       | Tfun _ -> true
-      | Tnewtype (name, [ty], _) when String.equal name SN.Classes.cSupportDyn
-        ->
-        is_fun_type ty
       | _ -> false
     in
     (* When we enter a like function, it is safe to ignore the like type if we are
@@ -6643,6 +6631,7 @@ end = struct
             | Some param ->
               let rec set_params_variance env ty =
                 let (env, ty) = Typing_dynamic_utils.strip_dynamic env ty in
+                let (_, env, ty) = Typing_utils.strip_supportdyn env ty in
                 let (env, ty) = Env.expand_type env ty in
                 match get_node ty with
                 | Tunion [ty] -> set_params_variance env ty
@@ -6656,9 +6645,6 @@ end = struct
                       ft_params
                   in
                   Env.set_tyvar_variance env ft_ret ~flip:true
-                | Tnewtype (name, [ty], _)
-                  when String.equal name SN.Classes.cSupportDyn ->
-                  set_params_variance env ty
                 | _ -> env
               in
               set_params_variance env param.fp_type

@@ -21,6 +21,7 @@ let check_parameters env =
       ftype.ft_params
   in
   let rec check pos ft =
+    let (_, ft) = Tast_env.strip_supportdyn env ft in
     match get_node ft with
     | Tfun ftype -> begin
       match get_illegal_parameter ftype with
@@ -31,7 +32,7 @@ let check_parameters env =
           | FPnormal -> "normal"
         in
         Typing_error_utils.add_typing_error
-          ~env
+          ~env:(Tast_env.tast_env_as_typing_env env)
           Typing_error.(
             primary
             @@ Primary.Invalid_meth_caller_calling_convention
@@ -39,8 +40,7 @@ let check_parameters env =
       | None -> ()
     end
     | Tnewtype (name, [ty], _)
-      when String.equal Naming_special_names.Classes.cSupportDyn name
-           || String.equal Naming_special_names.Classes.cFunctionRef name ->
+      when String.equal Naming_special_names.Classes.cFunctionRef name ->
       check pos ty
     | _ -> ()
   in
@@ -61,12 +61,12 @@ let check_readonly_return env pos ft =
                { pos; decl_pos = rpos })
   | _ -> ()
 
-let rec strip_supportdyn ty =
+let rec strip_supportdyn env ty =
+  let (_, ty) = Tast_env.strip_supportdyn env ty in
   match get_node ty with
   | Tnewtype (name, [ty], _)
-    when String.equal name Naming_special_names.Classes.cSupportDyn
-         || String.equal name Naming_special_names.Classes.cFunctionRef ->
-    strip_supportdyn ty
+    when String.equal name Naming_special_names.Classes.cFunctionRef ->
+    strip_supportdyn env ty
   | _ -> ty
 
 let handler =
@@ -76,8 +76,8 @@ let handler =
     method! at_expr env e =
       match e with
       | (ft, pos, Method_caller _) ->
-        let ft = strip_supportdyn ft in
-        check_parameters (Tast_env.tast_env_as_typing_env env) pos ft;
+        let ft = strip_supportdyn env ft in
+        check_parameters env pos ft;
         check_readonly_return env pos ft
       | _ -> ()
   end

@@ -667,6 +667,7 @@ end = struct
   }
 
   let rec fromTy (ctx : context) (env : env) (ty : locl_ty) : env * t =
+    let (_, env, ty) = Typing_utils.strip_supportdyn env ty in
     let (env, ty) = Env.expand_type env ty in
     let trail = ctx.trail in
     let reason = DataTypeReason.(make NoSubreason trail) in
@@ -747,9 +748,6 @@ end = struct
       in
       cycle_handler ~env ~trail ty
     | Tdependent (_, ty) -> fromTy ctx env ty
-    | Tnewtype (name, _, as_ty)
-      when String.equal name Naming_special_names.Classes.cSupportDyn ->
-      fromTy ctx env as_ty
     | Tnewtype (name, _, _)
       when String.equal name Naming_special_names.Classes.cEnumClassLabel ->
       (env, label_to_datatypes ~trail)

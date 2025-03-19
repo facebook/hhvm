@@ -46,17 +46,16 @@ let union_fty_readonly
   in
   { fty with Typing_defs.ft_params = fps }
 
-let rec get_fty ty =
+let rec get_fty env ty =
   let open Typing_defs in
+  let (_, ty) = Tast_env.strip_supportdyn env ty in
   match get_node ty with
-  | Tnewtype (name, _, ty2)
-    when String.equal name SN.Classes.cSupportDyn
-         || String.equal name SN.Classes.cFunctionRef ->
-    get_fty ty2
+  | Tnewtype (name, _, ty2) when String.equal name SN.Classes.cFunctionRef ->
+    get_fty env ty2
   | Tfun fty -> Some fty
   | Tunion tyl ->
     (* Filter out dynamic types *)
-    let ftys = List.filter_map tyl ~f:get_fty in
+    let ftys = List.filter_map tyl ~f:(get_fty env) in
     (* Because Typing_union already aggressively simplifies function unions to a single function type,
        there should be a single function type here 99% of the time. *)
     (match ftys with
@@ -280,7 +279,7 @@ let rec check_readonly_return_call env pos caller_ty is_readonly =
       List.iter tyl ~f:(fun ty ->
           check_readonly_return_call env pos ty is_readonly)
     | _ ->
-      (match get_fty caller_ty with
+      (match get_fty env caller_ty with
       | Some fty when get_ft_returns_readonly fty ->
         Typing_error_utils.add_typing_error
           ~env:(Tast_env.tast_env_as_typing_env env)
@@ -448,7 +447,7 @@ let method_call env caller =
   match caller with
   (* Readonly call checks *)
   | (ty, _, ReadonlyExpr (_, _, Obj_get (e1, _, _, Is_method))) ->
-    (match get_fty ty with
+    (match get_fty env ty with
     | Some fty when not (get_ft_readonly_this fty) ->
       Typing_error_utils.add_typing_error
         ~env:(Tast_env.tast_env_as_typing_env env)
@@ -488,7 +487,7 @@ let call
   let open Typing_defs in
   let (env, caller_ty) = Tast_env.expand_type env caller_ty in
   let check_readonly_closure caller_ty caller_rty =
-    match (get_fty caller_ty, caller_rty) with
+    match (get_fty env caller_ty, caller_rty) with
     | (Some fty, Readonly)
       when (not (get_ft_readonly_this fty)) && not method_call ->
       (* Get the position of why this function is its current type (usually a typehint) *)
@@ -537,7 +536,7 @@ let call
 
   (* Check that readonly arguments match their parameters *)
   let check_args env caller_ty args unpacked_arg =
-    match get_fty caller_ty with
+    match get_fty env caller_ty with
     | Some fty ->
       let rec check args params =
         match (args, params) with

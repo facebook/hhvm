@@ -567,12 +567,8 @@ and try_special_union_of_intersection ~approx_cancel_neg env tyl1 tyl2 r :
         None )
   in
   let is_intersection env ty =
-    let (_env, ty) = Env.expand_type env ty in
-    match get_node ty with
-    | Tnewtype (n, [ty], _)
-      when String.equal n Naming_special_names.Classes.cSupportDyn ->
-      Utils.is_tintersection env ty
-    | _ -> Utils.is_tintersection env ty
+    let (_, env, ty) = Typing_utils.strip_supportdyn env ty in
+    Utils.is_tintersection env ty
   in
   let (inter_tyl1, not_inter_tyl1) =
     List.partition_tf tyl1 ~f:(is_intersection env)

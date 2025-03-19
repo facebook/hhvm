@@ -102,30 +102,27 @@ let remove_tyvar_from_upper_bound env var upper_bound =
     || ty_equal ty (MakeType.intersection Reason.none [])
   in
   let rec remove env ty =
-    let (env, ty) = Env.expand_type env ty in
-    match deref ty with
-    | (_, Tvar v) when Tvid.equal v var -> (env, MakeType.mixed Reason.none)
-    | (r, Toption ty) ->
-      let (env, ty) = remove env ty in
-      (env, MakeType.nullable r ty)
-    | (r, Tunion tyl) ->
-      let (env, tyl) = List.fold_map tyl ~init:env ~f:remove in
-      let ty =
-        if List.exists tyl ~f:is_mixed then
-          MakeType.mixed r
-        else
-          MakeType.union r tyl
-      in
-      (env, ty)
-    | (r, Tnewtype (name, [tyarg], _))
-      when String.equal name Naming_special_names.Classes.cSupportDyn ->
-      let (env, ty) = remove env tyarg in
-      (env, MakeType.supportdyn r ty)
-    | (r, Tintersection tyl) ->
-      let (env, tyl) = List.fold_map tyl ~init:env ~f:remove in
-      let tyl = List.filter tyl ~f:(fun ty -> not (is_mixed ty)) in
-      (env, MakeType.intersection r tyl)
-    | _ -> (env, ty)
+    Typing_utils.map_supportdyn env ty (fun env ty ->
+        let (env, ty) = Env.expand_type env ty in
+        match deref ty with
+        | (_, Tvar v) when Tvid.equal v var -> (env, MakeType.mixed Reason.none)
+        | (r, Toption ty) ->
+          let (env, ty) = remove env ty in
+          (env, MakeType.nullable r ty)
+        | (r, Tunion tyl) ->
+          let (env, tyl) = List.fold_map tyl ~init:env ~f:remove in
+          let ty =
+            if List.exists tyl ~f:is_mixed then
+              MakeType.mixed r
+            else
+              MakeType.union r tyl
+          in
+          (env, ty)
+        | (r, Tintersection tyl) ->
+          let (env, tyl) = List.fold_map tyl ~init:env ~f:remove in
+          let tyl = List.filter tyl ~f:(fun ty -> not (is_mixed ty)) in
+          (env, MakeType.intersection r tyl)
+        | _ -> (env, ty))
   and remove_i env ty =
     match ty with
     | LoclType ty ->

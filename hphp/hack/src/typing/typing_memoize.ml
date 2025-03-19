@@ -34,6 +34,7 @@ let check_param : env -> Nast.fun_param -> unit =
       let ((env, ty_err_opt), ty, _) =
         Typing_tdef.force_expand_typedef ~ety_env env ty
       in
+      let (_, env, ty) = Typing_utils.strip_supportdyn env ty in
       Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
       if not (Typing_utils.is_tyvar_error env ty) then
         match get_node ty with
@@ -64,9 +65,6 @@ let check_param : env -> Nast.fun_param -> unit =
         | Tnewtype (id, _, _) when String.equal SN.Classes.cEnumClassLabel id ->
           (* EnumClassLabels are memoizable *)
           ()
-        | Tnewtype (name, [ty], _) when String.equal name SN.Classes.cSupportDyn
-          ->
-          check_memoizable env ty
         (* For parameter type 'this::TID' defined by 'type const TID as Bar' check_memoizables
          * Bar recursively. Also enums represented using AKnewtype.
          *)

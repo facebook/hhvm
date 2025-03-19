@@ -852,26 +852,23 @@ let expand_type_and_solve_eq env ty =
 let widen env widen_concrete_type ty =
   let ty_nothing = MakeType.nothing Reason.none in
   let rec widen env ty =
-    let (env, ty) = Env.expand_type env ty in
-    match deref ty with
-    | (r, Tunion tyl) -> widen_all env r tyl
-    | (r, Toption ty) -> widen_all env r [MakeType.null r; ty]
-    (* Don't widen the `this` type, because the field type changes up the hierarchy
-     * so we lose precision
-     *)
-    | (_, Tgeneric ("this", [])) -> (env, ty)
-    (* For other abstract types, just widen to the bound, if possible *)
-    | (r, Tnewtype (name, [ty], _))
-      when String.equal name Naming_special_names.Classes.cSupportDyn ->
-      let (env, ty) = widen env ty in
-      TUtils.make_supportdyn r env ty
-    | (_, Tdependent (_, ty))
-    | (_, Tnewtype (_, _, ty)) ->
-      widen env ty
-    | _ ->
-      let (env, ty_opt) = widen_concrete_type env ty in
-      let ty = Option.value ~default:ty_nothing ty_opt in
-      (env, ty)
+    TUtils.map_supportdyn env ty (fun env ty ->
+        let (env, ty) = Env.expand_type env ty in
+        match deref ty with
+        | (r, Tunion tyl) -> widen_all env r tyl
+        | (r, Toption ty) -> widen_all env r [MakeType.null r; ty]
+        (* Don't widen the `this` type, because the field type changes up the hierarchy
+         * so we lose precision
+         *)
+        | (_, Tgeneric ("this", [])) -> (env, ty)
+        (* For abstract types, just widen to the bound, if possible *)
+        | (_, Tdependent (_, ty))
+        | (_, Tnewtype (_, _, ty)) ->
+          widen env ty
+        | _ ->
+          let (env, ty_opt) = widen_concrete_type env ty in
+          let ty = Option.value ~default:ty_nothing ty_opt in
+          (env, ty))
   and widen_all env r tyl =
     let (env, tyl) = List.map_env env tyl ~f:widen in
     Typing_union.union_list env r tyl

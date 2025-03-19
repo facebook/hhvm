@@ -751,6 +751,16 @@ let simple_make_supportdyn r env ty =
     | Tnewtype (n, _, _) when String.equal n SN.Classes.cSupportDyn -> ty
     | _ -> MakeType.supportdyn r ty )
 
+let map_supportdyn env ty f =
+  let (env, ty) = Env.expand_type env ty in
+  match deref ty with
+  | (r, Tnewtype (name, [tyarg], _))
+    when String.equal name SN.Classes.cSupportDyn ->
+    let (_, env, ty) = strip_supportdyn env tyarg in
+    let (env, ty) = f env ty in
+    make_supportdyn r env ty
+  | _ -> f env ty
+
 let make_supportdyn_decl_type p r ty =
   mk (r, Tapply ((p, SN.Classes.cSupportDyn), [ty]))
 

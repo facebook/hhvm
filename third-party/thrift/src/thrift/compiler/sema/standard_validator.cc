@@ -1459,6 +1459,16 @@ void deprecate_annotations(sema_context& ctx, const t_named& node) {
   }
 }
 
+void deny_rust_annotations(sema_context& ctx, const t_named& node) {
+  for (const auto& annot : node.annotations()) {
+    if (annot.first.find("rust.") == 0) {
+      ctx.error(
+          "Unstructured `{}` annotation is not allowed, use a structured annotation from thrift/annotation/rust.thrift",
+          annot.first);
+    }
+  }
+}
+
 template <typename Node>
 bool has_cursor_serialization_adapter(const Node& node) {
   try {
@@ -1601,6 +1611,7 @@ ast_validator standard_validator() {
   validator.add_named_visitor(&validate_java_wrapper_and_adapter_annotation);
   validator.add_named_visitor(&validate_custom_cpp_type_annotations);
   validator.add_named_visitor(&deprecate_annotations);
+  validator.add_named_visitor(&deny_rust_annotations);
 
   validator.add_typedef_visitor(&validate_cpp_type_annotation<t_typedef>);
   validator.add_typedef_visitor(&validate_py3_enable_cpp_adapter);

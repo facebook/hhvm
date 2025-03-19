@@ -28,11 +28,8 @@ struct WrapString {
   1: string data;
 }
 
-// The field types here are each of a form `typedef a (rust.type="c") b`. That
-// is, are non-default types given as `rust.type` annotations where the
-// annotations attach to the **left** type of the thrift `typedef` in which they
-// appear.
-struct TypedefNondefaultTypes_1 {
+// The field types here are each of a form `@rust.Type{name = "C"} typedef A B`.
+struct TypedefNondefaultTypes {
   10: set<string> defaultset;
   11: set_string_9948 btreeset;
   12: set_string_3129 hashset;
@@ -49,37 +46,6 @@ struct TypedefNondefaultTypes_1 {
 
   30: binary_459 bin_smallvec;
   31: binary_1562 bin_bytes;
-}
-
-// The field types here are each of a form `typedef a b (rust.type="c")`. That
-// is, are non-default types given as `rust.type` annotations where the
-// annotations attach to the **right** type of the thrift `typedef` in which
-// they appear.
-struct TypedefNondefaultTypes_2 {
-  10: set<string> defaultset;
-  11: set_string_9949 btreeset;
-  12: set_string_3130 hashset;
-  13: set_string_8509 indexset_a;
-  14: set_string_8509 indexset_b;
-  15: set_i64_4483 indexset_c;
-
-  20: map<string, string> defaultmap;
-  21: map_string_string_4845 btreemap;
-  22: map_string_string_2455 hashmap;
-  23: map_string_string_4180 indexmap_a;
-  24: map_string_string_4180 indexmap_b;
-  25: map_string_i64_1189 indexmap_c;
-
-  30: binary_460 bin_smallvec;
-  31: binary_1563 bin_bytes;
-}
-
-// The field types are in terms of typedefs of form `typedef a b` but associated
-// with non-default types given by `rust.type` annotations attached to the type
-// alias in the field definition.
-struct TypedefNondefaultTypes_3 {
-  10: binary_t_480 bytes;
-  20: map_string_string_t_8520 dict;
 }
 
 enum TestEnum {
@@ -103,37 +69,26 @@ struct TestBytesShared {
   1: binary_1562 b;
 }
 
-typedef binary (rust.type = "Bytes") binary_1562
-typedef binary (rust.type = "smallvec::SmallVec<[u8; 32]>") binary_459
-typedef map<string, i64> (rust.type = "indexmap::IndexMap") map_string_i64_1188
-typedef map<string, string> (rust.type = "HashMap") map_string_string_2454
-typedef map<string, string> (
-  rust.type = "indexmap::IndexMap",
-) map_string_string_4179
-typedef map<string, string> (rust.type = "BTreeMap") map_string_string_4844
-typedef set<i64> (rust.type = "indexmap::IndexSet") set_i64_4482
-typedef set<string> (rust.type = "HashSet") set_string_3129
-typedef set<string> (rust.type = "indexmap::IndexSet") set_string_8508
-typedef set<string> (rust.type = "BTreeSet") set_string_9948
-
-typedef binary binary_1563 (rust.type = "Bytes")
-typedef binary binary_460 (rust.type = "smallvec::SmallVec<[u8; 32]>")
-typedef map<string, i64> map_string_i64_1189 (rust.type = "indexmap::IndexMap")
-typedef map<string, string> map_string_string_2455 (rust.type = "HashMap")
-typedef map<string, string> map_string_string_4180 (
-  rust.type = "indexmap::IndexMap",
-)
-typedef map<string, string> map_string_string_4845 (rust.type = "BTreeMap")
-typedef set<i64> set_i64_4483 (rust.type = "indexmap::IndexSet")
-typedef set<string> set_string_3130 (rust.type = "HashSet")
-typedef set<string> set_string_8509 (rust.type = "indexmap::IndexSet")
-typedef set<string> set_string_9949 (rust.type = "BTreeSet")
+@rust.Type{name = "Bytes"}
+typedef binary binary_1562
+@rust.Type{name = "smallvec::SmallVec<[u8; 32]>"}
+typedef binary binary_459
+@rust.Type{name = "indexmap::IndexMap"}
+typedef map<string, i64> map_string_i64_1188
+@rust.Type{name = "HashMap"}
+typedef map<string, string> map_string_string_2454
+@rust.Type{name = "indexmap::IndexMap"}
+typedef map<string, string> map_string_string_4179
+@rust.Type{name = "BTreeMap"}
+typedef map<string, string> map_string_string_4844
+@rust.Type{name = "indexmap::IndexSet"}
+typedef set<i64> set_i64_4482
+@rust.Type{name = "HashSet"}
+typedef set<string> set_string_3129
+@rust.Type{name = "indexmap::IndexSet"}
+typedef set<string> set_string_8508
+@rust.Type{name = "BTreeSet"}
+typedef set<string> set_string_9948
 
 typedef binary binary_t
 typedef map<string, string> map_string_string_t
-
-// The following were automatically generated and may benefit from renaming.
-typedef binary_t (rust.type = "smallvec::SmallVec<[u8; 32]>") binary_t_480
-typedef map_string_string_t (
-  rust.type = "indexmap::IndexMap",
-) map_string_string_t_8520

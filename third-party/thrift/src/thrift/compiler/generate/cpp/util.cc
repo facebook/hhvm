@@ -240,9 +240,9 @@ bool is_orderable_walk(
     t_type const& type,
     t_type const* prev,
     is_orderable_walk_context& context,
-    bool enabledReflection) {
+    bool forceCustomTypeOrderable) {
   const bool has_disqualifying_annotation =
-      is_custom_type(type) && !enabledReflection;
+      is_custom_type(type) && !forceCustomTypeOrderable;
   auto memo_it = memo.find(&type);
   if (memo_it != memo.end()) {
     return memo_it->second;
@@ -272,7 +272,7 @@ bool is_orderable_walk(
     auto const& real = [&]() -> auto&& { return *type.get_true_type(); };
     auto const& next = *(dynamic_cast<t_typedef const&>(type).get_type());
     return result = is_orderable_walk(
-                        memo, next, &type, context, enabledReflection) &&
+                        memo, next, &type, context, forceCustomTypeOrderable) &&
         (!(real().is_set() || real().is_map()) ||
          !has_disqualifying_annotation);
   } else if (type.is_struct() || type.is_exception()) {
@@ -294,7 +294,7 @@ bool is_orderable_walk(
                *(dynamic_cast<t_list const&>(type).get_elem_type()),
                &type,
                context,
-               enabledReflection);
+               forceCustomTypeOrderable);
   } else if (type.is_set()) {
     return result = !has_disqualifying_annotation &&
         is_orderable_walk(
@@ -302,7 +302,7 @@ bool is_orderable_walk(
                *(dynamic_cast<t_set const&>(type).get_elem_type()),
                &type,
                context,
-               enabledReflection);
+               forceCustomTypeOrderable);
   } else if (type.is_map()) {
     return result = !has_disqualifying_annotation &&
         is_orderable_walk(
@@ -310,13 +310,13 @@ bool is_orderable_walk(
                *(dynamic_cast<t_map const&>(type).get_key_type()),
                &type,
                context,
-               enabledReflection) &&
+               forceCustomTypeOrderable) &&
         is_orderable_walk(
                memo,
                *(dynamic_cast<t_map const&>(type).get_val_type()),
                &type,
                context,
-               enabledReflection);
+               forceCustomTypeOrderable);
   }
   return false;
 }

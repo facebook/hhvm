@@ -1305,10 +1305,12 @@ class mstch_enum_value : public mstch_base {
     register_methods(
         this,
         {
+            {"enum_value:self", &mstch_enum_value::self},
             {"enum_value:name", &mstch_enum_value::name},
             {"enum_value:value", &mstch_enum_value::value},
         });
   }
+  whisker::object self() { return make_self(*enum_value_); }
   mstch::node name() { return enum_value_->get_name(); }
   mstch::node value() { return enum_value_->get_value(); }
 

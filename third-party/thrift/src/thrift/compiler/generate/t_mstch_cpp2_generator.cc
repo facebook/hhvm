@@ -311,6 +311,16 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
   void generate_out_of_line_services(const std::vector<t_service*>& services);
   void generate_inline_services(const std::vector<t_service*>& services);
 
+  prototype<t_named>::ptr make_prototype_for_named(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_named(proto);
+    auto def = whisker::dsl::prototype_builder<h_named>::extends(base);
+    def.property("cpp_name", [](const t_named& named) {
+      return cpp2::get_name(&named);
+    });
+    return std::move(def).make();
+  }
+
   std::unordered_map<std::string, int> get_client_name_to_split_count() const;
 
   std::shared_ptr<cpp2_generator_context> cpp_context_;
@@ -2284,20 +2294,6 @@ class cpp_mstch_enum : public mstch_enum {
   }
 };
 
-class cpp_mstch_enum_value : public mstch_enum_value {
- public:
-  cpp_mstch_enum_value(
-      const t_enum_value* ev, mstch_context& ctx, mstch_element_position pos)
-      : mstch_enum_value(ev, ctx, pos) {
-    register_methods(
-        this,
-        {
-            {"enum_value:cpp_name", &cpp_mstch_enum_value::cpp_name},
-        });
-  }
-  mstch::node cpp_name() { return cpp2::get_name(enum_value_); }
-};
-
 class cpp_mstch_const : public mstch_const {
  public:
   cpp_mstch_const(
@@ -2469,7 +2465,6 @@ void t_mstch_cpp2_generator::set_mstch_factories() {
   mstch_context_.add<cpp_mstch_struct>(cpp_context_);
   mstch_context_.add<cpp_mstch_field>(cpp_context_);
   mstch_context_.add<cpp_mstch_enum>();
-  mstch_context_.add<cpp_mstch_enum_value>();
   mstch_context_.add<cpp_mstch_const>(cpp_context_);
   mstch_context_.add<cpp_mstch_const_value>();
   mstch_context_.add<cpp_mstch_deprecated_annotation>();

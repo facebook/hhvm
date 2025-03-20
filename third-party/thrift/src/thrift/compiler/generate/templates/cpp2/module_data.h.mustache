@@ -30,7 +30,7 @@ template <> struct TEnumDataStorage<::{{program:qualified_namespace}}::{{enum:cp
   static constexpr const std::size_t size = {{(array.len enum:self.values)}};
   static constexpr std::array<type, size> values = { {
 {{#enum:values}}{{!
-}}      type::{{enum_value:cpp_name}},
+}}      type::{{enum_value:self.cpp_name}},
 {{/enum:values}}
   }};
   static constexpr std::array<std::string_view, size> names = { {

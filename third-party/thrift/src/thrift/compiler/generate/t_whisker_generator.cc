@@ -315,6 +315,7 @@ void t_whisker_generator::define_prototypes(prototype_database& db) const {
   db.define(make_prototype_for_primitive_type(db));
   db.define(make_prototype_for_field(db));
   db.define(make_prototype_for_enum(db));
+  db.define(make_prototype_for_enum_value(db));
   db.define(make_prototype_for_const(db));
 
   db.define(make_prototype_for_container(db));

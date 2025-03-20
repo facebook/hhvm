@@ -22,7 +22,7 @@ namespace {{program:qualified_namespace}} {
 {{> common/enum_docblock }}
 enum {{^enum:cpp_is_unscoped}}class {{/enum:cpp_is_unscoped}}{{enum:cpp_name}}{{#enum:cpp_enum_type}} : {{enum:cpp_enum_type}}{{/enum:cpp_enum_type}} {
 {{#enum:values}}
-  {{enum_value:cpp_name}} = {{enum_value:value}},
+  {{enum_value:self.cpp_name}} = {{enum_value:value}},
 {{/enum:values}}
 };
 

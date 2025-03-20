@@ -484,6 +484,12 @@ val strip_supportdyn :
   Typing_defs.locl_ty ->
   bool * Typing_env_types.env * Typing_defs.locl_ty
 
+val get_underlying_function_type :
+  Typing_env_types.env ->
+  Typing_defs.locl_ty ->
+  Typing_env_types.env
+  * (Typing_reason.t * Typing_defs.locl_ty Typing_defs.fun_type) option
+
 val map_supportdyn :
   Typing_env_types.env ->
   Typing_defs.locl_ty ->

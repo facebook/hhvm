@@ -131,6 +131,9 @@ val is_disjoint :
 (** Strip supportdyn from type, return whether it was there or not *)
 val strip_supportdyn : env -> Tast.ty -> bool * Tast.ty
 
+val get_underlying_function_type :
+  env -> Tast.ty -> (Typing_reason.t * Tast.ty Typing_defs.fun_type) option
+
 (** Types that can have methods called on them. Usually a class but
     also includes dynamic types *)
 type receiver_identifier =

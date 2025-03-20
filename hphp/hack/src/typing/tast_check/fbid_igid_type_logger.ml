@@ -20,12 +20,6 @@ let name ty =
   | T.Tprim tp -> A.string_of_tprim tp
   | _ -> ""
 
-let find_ft env ty =
-  let (_, ty) = Tast_env.strip_supportdyn env ty in
-  match T.get_node ty with
-  | T.Tfun ft -> Some ft
-  | _ -> None
-
 let is_int ty = Typing_defs.is_prim Aast.Tint ty
 
 let is_igid_of_meta_ent_instagram_user env ty =
@@ -159,7 +153,7 @@ let create_handler _ctx =
       let extract_arg_types arg_exp : T.locl_ty =
         Tast.get_type (Aast_utils.arg_to_expr arg_exp)
       in
-      let check ft =
+      let check (_, ft) =
         let param_names_and_types =
           List.map ft.T.ft_params ~f:(fun p ->
               (p.T.fp_name, extract_param_types p))
@@ -172,5 +166,5 @@ let create_handler _ctx =
           arg_types
           (pos |> Pos.to_relative_string)
       in
-      Option.iter (find_ft env fx_ty) ~f:check
+      Option.iter (Tast_env.get_underlying_function_type env fx_ty) ~f:check
   end

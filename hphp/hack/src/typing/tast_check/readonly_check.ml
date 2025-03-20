@@ -50,9 +50,6 @@ let rec get_fty env ty =
   let open Typing_defs in
   let (_, ty) = Tast_env.strip_supportdyn env ty in
   match get_node ty with
-  | Tnewtype (name, _, ty2) when String.equal name SN.Classes.cFunctionRef ->
-    get_fty env ty2
-  | Tfun fty -> Some fty
   | Tunion tyl ->
     (* Filter out dynamic types *)
     let ftys = List.filter_map tyl ~f:(get_fty env) in
@@ -65,7 +62,10 @@ let rec get_fty env ty =
     | fty1 :: rest ->
       let result = List.fold ~init:fty1 ~f:union_fty_readonly rest in
       Some result)
-  | _ -> None
+  | _ ->
+    (match Tast_env.get_underlying_function_type env ty with
+    | None -> None
+    | Some (_, ft) -> Some ft)
 
 type rty =
   | Readonly

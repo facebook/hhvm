@@ -137,6 +137,10 @@ let strip_supportdyn env ty =
   let (sd, _, ty) = Typing_utils.strip_supportdyn env ty in
   (sd, ty)
 
+let get_underlying_function_type env ty =
+  let (_, opt_ft) = Typing_utils.get_underlying_function_type env ty in
+  opt_ft
+
 let set_static = Typing_env.set_static
 
 let set_val_kind = Typing_env.set_val_kind

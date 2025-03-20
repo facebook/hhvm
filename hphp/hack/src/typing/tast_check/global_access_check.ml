@@ -521,9 +521,8 @@ let rec print_global_expr env expr =
 let check_func_is_memoized func_expr env =
   let open Typing_defs in
   let (func_ty, _, te) = func_expr in
-  let (_, ty) = Tast_env.strip_supportdyn env func_ty in
-  match get_node ty with
-  | Tfun fty when get_ft_is_memoized fty -> Some (print_global_expr env te)
+  match Tast_env.get_underlying_function_type env func_ty with
+  | Some (_, fty) when get_ft_is_memoized fty -> Some (print_global_expr env te)
   | _ -> None
 
 (* Check if type is a collection. *)

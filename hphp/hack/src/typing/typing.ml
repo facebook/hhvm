@@ -480,17 +480,14 @@ let get_kvc_inst env p kvc_kind ty =
 (* Check whether this is a function type that (a) either returns a disposable
  * or (b) has the <<__ReturnDisposable>> attribute
  *)
-let rec is_return_disposable_fun_type env ty =
-  let (_env, ty) = Env.expand_type env ty in
-  let (_env, ty) = Typing_dynamic_utils.strip_dynamic env ty in
-  let (_, _env, ty) = TUtils.strip_supportdyn env ty in
-  match get_node ty with
-  | Tfun ft ->
+let is_return_disposable_fun_type env ty =
+  let (env, ty) = Typing_dynamic_utils.strip_dynamic env ty in
+  let (env, opt_ft) = Typing_utils.get_underlying_function_type env ty in
+  match opt_ft with
+  | None -> false
+  | Some (_, ft) ->
     get_ft_return_disposable ft
     || Option.is_some (Typing_disposable.is_disposable_type env ft.ft_ret)
-  | Tnewtype (n, _, ty) when String.equal n SN.Classes.cFunctionRef ->
-    is_return_disposable_fun_type env ty
-  | _ -> false
 
 let set_tcopt_unstable_features env { fa_user_attributes; _ } =
   match

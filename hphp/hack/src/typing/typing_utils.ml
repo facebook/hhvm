@@ -527,6 +527,16 @@ let rec strip_supportdyn env ty =
     (true, env, ty)
   | _ -> (false, env, ty)
 
+let rec get_underlying_function_type env ty =
+  let (env, ty) = Env.expand_type env ty in
+  match get_node ty with
+  | Tnewtype (name, [tyarg], _)
+    when String.equal name SN.Classes.cSupportDyn
+         || String.equal name SN.Classes.cFunctionRef ->
+    get_underlying_function_type env tyarg
+  | Tfun ft -> (env, Some (get_reason ty, ft))
+  | _ -> (env, None)
+
 (* The list of types should not be considered to be a bound if it is all mixed
    or supportdyn<mixed> (when include_sd_mixed is set *)
 let no_upper_bound ~include_sd_mixed env tyl =

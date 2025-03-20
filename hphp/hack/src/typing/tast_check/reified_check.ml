@@ -164,14 +164,12 @@ let verify_call_targs env expr_pos decl_pos tparams targs =
     List.iter2 tparams targs ~f:(verify_targ_valid env Type_validator.Resolved)
     |> ignore
 
-let rec get_ft_tparams env fun_ty =
+let get_ft_tparams env fun_ty =
   let fun_ty = Tast_env.strip_dynamic env fun_ty in
-  let (_, fun_ty) = Tast_env.strip_supportdyn env fun_ty in
-  match get_node fun_ty with
-  | Tnewtype (name, _, ty1) when String.equal name SN.Classes.cFunctionRef ->
-    get_ft_tparams env ty1
-  | Tfun ({ ft_tparams; _ } as fun_ty) -> Some (ft_tparams, fun_ty)
-  | _ -> None
+  match Tast_env.get_underlying_function_type env fun_ty with
+  | None -> None
+  | Some (_, fun_ty) ->
+    Some (fun_ty.ft_tparams, get_ft_is_function_pointer fun_ty)
 
 let handler =
   object
@@ -218,7 +216,8 @@ let handler =
       | (_, pos, Call { func = (fun_ty, _, _); targs; _ }) ->
         let (env, efun_ty) = Env.expand_type env fun_ty in
         (match get_ft_tparams env efun_ty with
-        | Some (ft_tparams, ty) when not @@ get_ft_is_function_pointer ty ->
+        | Some (ft_tparams, is_function_pointer) when not @@ is_function_pointer
+          ->
           verify_call_targs env pos (get_pos efun_ty) ft_tparams targs
         | _ -> ())
       | (_, pos, New ((ty, _, CI (_, class_id)), targs, _, _, _)) ->

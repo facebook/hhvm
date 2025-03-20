@@ -689,15 +689,14 @@ class DynamicPatch {
   }
 
   template <class Self, class Visitor>
-  static decltype(auto) visitPatchImpl(
-      Self&& self, detail::Badge, Visitor&& visitor) {
+  static decltype(auto) visitPatchImpl(Self&& self, Visitor&& visitor) {
     return std::visit(
         std::forward<Visitor>(visitor), *std::forward<Self>(self).patch_);
   }
 
   template <class Self, class Visitor>
   static void customVisitImpl(Self&& self, detail::Badge badge, Visitor&& v) {
-    std::forward<Self>(self).visitPatch(badge, [&](auto&& patch) {
+    std::forward<Self>(self).visitPatch([&](auto&& patch) {
       using PatchType = folly::remove_cvref_t<decltype(patch)>;
       if constexpr (__FBTHRIFT_IS_VALID(
                         patch,

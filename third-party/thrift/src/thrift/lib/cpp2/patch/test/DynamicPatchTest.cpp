@@ -1143,22 +1143,18 @@ void testMergeMovedPatch(T t) {
   }
 
   DynamicPatch dp{std::move(p2)};
-  dp.visitPatch(
-      badge,
-      folly::overload(
-          [&](const DynamicListPatch& patch) {
-            patch.customVisit(badge, checkAssign);
-          },
-          [&](const DynamicSetPatch& patch) {
-            patch.customVisit(badge, checkAssign);
-          },
-          [&](const DynamicMapPatch& patch) { patch.customVisit(checkAssign); },
-          [&](const DynamicStructPatch& patch) {
-            patch.customVisit(checkAssign);
-          },
-          [&](const auto&) {
-            folly::throw_exception<std::runtime_error>("not reachable.");
-          }));
+  dp.visitPatch(folly::overload(
+      [&](const DynamicListPatch& patch) {
+        patch.customVisit(badge, checkAssign);
+      },
+      [&](const DynamicSetPatch& patch) {
+        patch.customVisit(badge, checkAssign);
+      },
+      [&](const DynamicMapPatch& patch) { patch.customVisit(checkAssign); },
+      [&](const DynamicStructPatch& patch) { patch.customVisit(checkAssign); },
+      [&](const auto&) {
+        folly::throw_exception<std::runtime_error>("not reachable.");
+      }));
   dp.customVisit(badge, checkAssign);
 }
 
@@ -1295,11 +1291,9 @@ TEST(DynamicPatch, DynamicSafePatch) {
   // round trip
   DynamicPatch dynPatch;
   dynPatch.fromSafePatch(safePatchAny);
-  dynPatch.visitPatch(
-      badge,
-      folly::overload(
-          [&](const DynamicUnknownPatch&) {},
-          [&](const auto&) { EXPECT_TRUE(false) << "not reachable"; }));
+  dynPatch.visitPatch(folly::overload(
+      [&](const DynamicUnknownPatch&) {},
+      [&](const auto&) { EXPECT_TRUE(false) << "not reachable"; }));
   type::AnyStruct rSafePatchAny =
       dynPatch.toSafePatch(type::Type::get<type::union_t<MyUnion>>());
 
@@ -1394,11 +1388,9 @@ TEST(DynamicPatch, DynamicSafePatchV2) {
     // round trip
     DynamicPatch dynPatch;
     dynPatch.fromSafePatch(safePatchAny);
-    dynPatch.visitPatch(
-        badge,
-        folly::overload(
-            [&](const DynamicUnknownPatch&) {},
-            [&](const auto&) { EXPECT_TRUE(false) << "not reachable"; }));
+    dynPatch.visitPatch(folly::overload(
+        [&](const DynamicUnknownPatch&) {},
+        [&](const auto&) { EXPECT_TRUE(false) << "not reachable"; }));
     type::AnyStruct rSafePatchAny =
         dynPatch.toSafePatch(type::Type::get<type::union_t<MyUnion>>());
 

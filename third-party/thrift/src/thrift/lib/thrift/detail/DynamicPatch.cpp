@@ -1656,7 +1656,7 @@ void DynamicPatch::apply(Value& value) const {
         patch.apply(any);
         value = asValueStruct<Tag>(std::move(any));
       });
-  visitPatch(badge, applier);
+  visitPatch(applier);
 }
 
 void DynamicPatch::applyToDataFieldInsideAny(type::AnyStruct& any) const {
@@ -1703,7 +1703,7 @@ void DynamicPatch::fromAny(detail::Badge, const type::AnyStruct& any) {
 
 template <typename Protocol>
 std::uint32_t DynamicPatch::encode(detail::Badge, Protocol& prot) const {
-  return visitPatch(badge, [&](const auto& patch) {
+  return visitPatch([&](const auto& patch) {
     if constexpr (__FBTHRIFT_IS_VALID(patch, patch.encode(prot))) {
       return patch.encode(prot);
     } else {
@@ -1817,25 +1817,23 @@ class MinSafePatchVersionVisitor {
   void clear(detail::Badge) {}
   void recurse(const DynamicPatch& patch) {
     // recurse visitPatch
-    patch.visitPatch(
-        badge,
-        folly::overload(
-            [&](const DynamicMapPatch& p) { p.customVisit(*this); },
-            [&](const DynamicStructPatch& p) { p.customVisit(*this); },
-            [&](const DynamicUnionPatch& p) { p.customVisit(*this); },
-            [&](const op::AnyPatch& p) {
-              // recurse AnyPatch in case it only uses `assign` or `clear`
-              // operations that are V1.
-              p.customVisit(*this);
-            },
-            [&](const DynamicUnknownPatch& p) {
-              // recurse DynamicUnknownPatch for `patchPrior/patchAfter` in
-              // `StructuredOrAnyPatch`.
-              p.customVisit(badge, *this);
-            },
-            [&](const auto&) {
-              // Short circuit all other patch types.
-            }));
+    patch.visitPatch(folly::overload(
+        [&](const DynamicMapPatch& p) { p.customVisit(*this); },
+        [&](const DynamicStructPatch& p) { p.customVisit(*this); },
+        [&](const DynamicUnionPatch& p) { p.customVisit(*this); },
+        [&](const op::AnyPatch& p) {
+          // recurse AnyPatch in case it only uses `assign` or `clear`
+          // operations that are V1.
+          p.customVisit(*this);
+        },
+        [&](const DynamicUnknownPatch& p) {
+          // recurse DynamicUnknownPatch for `patchPrior/patchAfter` in
+          // `StructuredOrAnyPatch`.
+          p.customVisit(badge, *this);
+        },
+        [&](const auto&) {
+          // Short circuit all other patch types.
+        }));
   }
 
   // Map

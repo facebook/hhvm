@@ -12,7 +12,7 @@ path = "../multifile.rs"
 
 [dependencies]
 anyhow = "1.0.95"
-lazy_static = "1.5"
+lazy_static = { version = "1.5", features = ["spin_no_std"], default-features = false }
 regex = "1.11.1"
 
 [dev-dependencies]

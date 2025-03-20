@@ -13,7 +13,7 @@ path = "../../string_utils.rs"
 [dependencies]
 bstr = { version = "1.10.0", features = ["serde", "std", "unicode"] }
 escaper = { version = "0.0.0", path = "../../../../utils/escaper" }
-lazy_static = "1.5"
+lazy_static = { version = "1.5", features = ["spin_no_std"], default-features = false }
 libc = "0.2.139"
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
 ocaml_helper = { version = "0.0.0", path = "../../../../utils/ocaml_helper" }

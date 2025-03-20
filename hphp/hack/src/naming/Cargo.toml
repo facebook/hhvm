@@ -12,6 +12,6 @@ path = "naming_special_names.rs"
 
 [dependencies]
 hash = { version = "0.0.0", path = "../utils/hash" }
-lazy_static = "1.5"
+lazy_static = { version = "1.5", features = ["spin_no_std"], default-features = false }
 serde = { version = "1.0.185", features = ["derive", "rc"] }
 write_bytes = { version = "0.0.0", path = "../utils/write_bytes/write_bytes" }

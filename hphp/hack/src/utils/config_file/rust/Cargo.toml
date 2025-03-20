@@ -12,7 +12,7 @@ path = "config_file.rs"
 
 [dependencies]
 bstr = { version = "1.10.0", features = ["serde", "std", "unicode"] }
-lazy_static = "1.5"
+lazy_static = { version = "1.5", features = ["spin_no_std"], default-features = false }
 oxidized = { version = "0.0.0", path = "../../../oxidized" }
 regex = "1.11.1"
 serde_json = { version = "1.0.140", features = ["float_roundtrip", "unbounded_depth"] }

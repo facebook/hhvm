@@ -34,7 +34,7 @@ indexmap = { version = "2.2.6", features = ["arbitrary", "rayon", "serde"] }
 instruction_sequence = { version = "0.0.0", path = "../instruction_sequence" }
 itertools = "0.14.0"
 label_rewriter = { version = "0.0.0", path = "../label_rewriter" }
-lazy_static = "1.5"
+lazy_static = { version = "1.5", features = ["spin_no_std"], default-features = false }
 naming_special_names_rust = { version = "0.0.0", path = "../../../../naming" }
 options = { version = "0.0.0", path = "../../../compile/cargo/options" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }

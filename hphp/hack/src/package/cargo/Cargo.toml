@@ -18,5 +18,5 @@ serde = { version = "1.0.185", features = ["derive", "rc"] }
 toml = "0.8.19"
 
 [dev-dependencies]
-lazy_static = "1.5"
+lazy_static = { version = "1.5", features = ["spin_no_std"], default-features = false }
 regex = "1.11.1"

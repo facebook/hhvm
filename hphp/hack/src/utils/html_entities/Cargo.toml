@@ -11,7 +11,7 @@ license = "MIT"
 path = "html_entities.rs"
 
 [dependencies]
-lazy_static = "1.5"
+lazy_static = { version = "1.5", features = ["spin_no_std"], default-features = false }
 ocaml_helper = { version = "0.0.0", path = "../ocaml_helper" }
 regex = "1.11.1"
 

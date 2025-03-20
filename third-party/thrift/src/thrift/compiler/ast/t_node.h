@@ -27,6 +27,13 @@ namespace apache::thrift::compiler {
 struct deprecated_annotation_value {
   source_range src_range;
   std::string value;
+
+  enum class origin {
+    unknown,
+    lowered_unstructured,
+    lowered_cpp_type,
+    unstructured,
+  } from;
 };
 
 using deprecated_annotation_map =
@@ -84,8 +91,9 @@ class t_node {
   void set_annotation(
       const std::string& key,
       const std::string& value = {},
-      const source_range& range = {}) {
-    annotations_[key] = {range, value};
+      const source_range& range = {},
+      deprecated_annotation_value::origin origin = {}) {
+    annotations_[key] = {range, value, origin};
   }
 
  protected:

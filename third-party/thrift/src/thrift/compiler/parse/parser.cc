@@ -343,7 +343,10 @@ class parser {
           report_expected("integer, bool or string");
         }
       }
-      annotations->strings[fmt::to_string(key.str)] = {range, std::move(value)};
+      annotations->strings[fmt::to_string(key.str)] = {
+          range,
+          std::move(value),
+          deprecated_annotation_value::origin::unstructured};
       if (!try_parse_comma_or_semicolon()) {
         break;
       }

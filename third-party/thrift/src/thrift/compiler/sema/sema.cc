@@ -487,7 +487,9 @@ void mutate_inject_metadata_fields(
 
 // Strips haskell annotations and optionally inserts new annotations.
 void update_annotations(
-    t_named& node, std::map<std::string, std::string> new_annotations = {}) {
+    t_named& node,
+    std::map<std::string, std::string> new_annotations = {},
+    deprecated_annotation_value::origin new_annotation_origin = {}) {
   auto annotations = node.annotations();
   // First strip any haskell annotations
   for (auto it = annotations.begin(); it != annotations.end();) {
@@ -498,7 +500,7 @@ void update_annotations(
     }
   }
   for (auto& [k, v] : new_annotations) {
-    annotations[k] = {source_range{}, v};
+    annotations[k] = {source_range{}, v, new_annotation_origin};
   }
   node.reset_annotations(std::move(annotations));
 }
@@ -508,7 +510,8 @@ template <typename Node>
 void add_annotations_to_node_type(
     Node& node,
     std::map<std::string, std::string> annotations,
-    t_program& program) {
+    t_program& program,
+    deprecated_annotation_value::origin origin) {
   const t_type* node_type = node.get_type();
 
   if (annotations.empty()) {
@@ -524,13 +527,14 @@ void add_annotations_to_node_type(
            t_typedef::kind::defined) ||
       (node_type->is_primitive_type() && !node_type->annotations().empty())) {
     // This is a new type we can modify in place
-    update_annotations(const_cast<t_type&>(*node_type), std::move(annotations));
+    update_annotations(
+        const_cast<t_type&>(*node_type), std::move(annotations), origin);
   } else if (node_type->is_primitive_type()) {
     // Copy type as we don't handle unnamed typedefs to base types :(
     auto unnamed = std::make_unique<t_primitive_type>(
         *static_cast<const t_primitive_type*>(node_type));
     for (auto& pair : annotations) {
-      unnamed->set_annotation(pair.first, pair.second);
+      unnamed->set_annotation(pair.first, pair.second, {}, origin);
     }
     node.set_type(t_type_ref::from_ptr(unnamed.get()));
     program.add_unnamed_type(std::move(unnamed));
@@ -541,7 +545,7 @@ void add_annotations_to_node_type(
         node_type->get_name(),
         t_type_ref::from_ptr(node_type));
     for (auto& pair : annotations) {
-      unnamed->set_annotation(pair.first, pair.second);
+      unnamed->set_annotation(pair.first, pair.second, {}, origin);
     }
     node.set_type(t_type_ref::from_ptr(unnamed.get()));
     program.add_unnamed_typedef(std::move(unnamed));
@@ -567,7 +571,10 @@ void lower_deprecated_annotations(
     if (!ctx.sema_parameters().skip_lowering_annotations) {
       deprecated_annotation_map map;
       for (auto& [k, v] : val->get_map()) {
-        map[k->get_string()] = {{}, v->get_string()};
+        map[k->get_string()] = {
+            {},
+            v->get_string(),
+            deprecated_annotation_value::origin::lowered_unstructured};
       }
 
       // The java generator has some interesting logic due to limitations in
@@ -603,7 +610,11 @@ void lower_deprecated_annotations(
             mCtx.program().add_unnamed_type(std::move(new_type));
           }
 
-          inner_type->set_annotation(annot, map[annot].value);
+          inner_type->set_annotation(
+              annot,
+              map[annot].value,
+              {},
+              deprecated_annotation_value::origin::lowered_unstructured);
         }
 
         map.erase(annot);
@@ -615,7 +626,8 @@ void lower_deprecated_annotations(
         add_annotations_to_node_type(
             *typedf,
             {{"cpp.indirection", map.at("cpp.indirection").value}},
-            mCtx.program());
+            mCtx.program(),
+            deprecated_annotation_value::origin::lowered_unstructured);
         map.erase("cpp.indirection");
       }
 
@@ -665,7 +677,11 @@ void lower_type_annotations(
     }
   }
 
-  add_annotations_to_node_type(node, std::move(unstructured), mctx.program());
+  add_annotations_to_node_type(
+      node,
+      std::move(unstructured),
+      mctx.program(),
+      deprecated_annotation_value::origin::lowered_cpp_type);
 }
 
 void inject_schema_const(sema_context& ctx, mutator_context&, t_program& prog) {

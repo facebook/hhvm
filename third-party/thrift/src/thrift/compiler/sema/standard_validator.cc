@@ -1272,10 +1272,6 @@ void validate_custom_cpp_type_annotations(
       hasUnnamedCppType = true;
     }
   }
-  if (hasUnnamedCppType) {
-    ctx.warning(
-        "The cpp.type/cpp.template annotations are deprecated, use @cpp.Type instead");
-  }
   if (hasAdapter && (hasUnnamedCppType || hasStructuredCppType)) {
     // TODO (T169470476): make this an error
     ctx.warning(
@@ -1434,26 +1430,47 @@ void deprecate_annotations(sema_context& ctx, const t_named& node) {
       {"iq.node_type", erlang("Iq")},
   };
   std::set<std::string> removed_annotations = {"cpp2.declare_bitwise_ops"};
+  std::map<std::string, std::string> removed_prefixes = {{"rust.", "rust"}};
 
   for (const auto& [k, v] : node.annotations()) {
-    if (deprecations.count(k) == 0) {
+    // Exclude lowered type annotations.
+    if (v.from == deprecated_annotation_value::origin::lowered_cpp_type) {
       continue;
     }
-    std::vector<std::string> parts;
-    boost::split(parts, deprecations.at(k), [](char c) { return c == '/'; });
+    std::optional<std::string> prefix;
+    std::string lang;
+    for (const auto& [p, l] : removed_prefixes) {
+      if (k.find(p) == 0) {
+        prefix = p;
+        lang = l;
+        break;
+      }
+    }
+    bool directly_deprecated = deprecations.count(k) != 0;
+    if (!prefix && !directly_deprecated) {
+      continue;
+    }
     std::string replacement;
-    if (parts.size() == 1) {
-      replacement = parts[0];
-    } else if (parts.size() == 4) {
-      replacement = fmt::format("@thrift.{}", parts[3]);
+    if (directly_deprecated) {
+      std::vector<std::string> parts;
+      boost::split(parts, deprecations.at(k), [](char c) { return c == '/'; });
+      if (parts.size() == 1) {
+        replacement = parts[0];
+      } else if (parts.size() == 4) {
+        replacement = fmt::format("@thrift.{}", parts[3]);
+      } else {
+        assert(parts.size() == 5);
+        replacement = fmt::format("@{}.{}", parts[3], parts[4]);
+      }
     } else {
-      assert(parts.size() == 5);
-      replacement = fmt::format("@{}.{}", parts[3], parts[4]);
+      replacement = fmt::format(
+          "a structured annotation from thrift/annotation/{}.thrift", lang);
     }
 
-    if (node.find_structured_annotation_or_null(deprecations.at(k).c_str())) {
+    if (directly_deprecated &&
+        node.find_structured_annotation_or_null(deprecations.at(k).c_str())) {
       ctx.error("Duplicate annotations {} and {}.", k, replacement);
-    } else if (removed_annotations.count(k) != 0) {
+    } else if (removed_annotations.count(k) != 0 || prefix) {
       ctx.error(
           "The annotation {} has been removed. Please use {} instead.",
           k,
@@ -1466,14 +1483,16 @@ void deprecate_annotations(sema_context& ctx, const t_named& node) {
     }
   }
 }
-
-void deny_rust_annotations(sema_context& ctx, const t_named& node) {
-  for (const auto& annot : node.annotations()) {
-    if (annot.first.find("rust.") == 0) {
-      ctx.error(
-          "Unstructured `{}` annotation is not allowed, use a structured annotation from thrift/annotation/rust.thrift",
-          annot.first);
-    }
+void deprecate_typedef_type_annotations(
+    sema_context& ctx, const t_typedef& node) {
+  if (owns_annotations(node.type())) {
+    deprecate_annotations(ctx, *node.type());
+  }
+}
+void deprecate_function_parameter_annotations(
+    sema_context& ctx, const t_function& node) {
+  for (const auto& field : node.params().fields()) {
+    deprecate_annotations(ctx, field);
   }
 }
 
@@ -1619,10 +1638,10 @@ ast_validator standard_validator() {
   validator.add_named_visitor(&validate_java_wrapper_and_adapter_annotation);
   validator.add_named_visitor(&validate_custom_cpp_type_annotations);
   validator.add_named_visitor(&deprecate_annotations);
-  validator.add_named_visitor(&deny_rust_annotations);
 
   validator.add_typedef_visitor(&validate_cpp_type_annotation<t_typedef>);
   validator.add_typedef_visitor(&validate_py3_enable_cpp_adapter);
+  validator.add_typedef_visitor(&deprecate_typedef_type_annotations);
 
   validator.add_container_visitor(ValidateAnnotationPositions());
   validator.add_enum_visitor(&validate_cpp_enum_type);
@@ -1636,6 +1655,8 @@ ast_validator standard_validator() {
   validator.add_container_visitor(
       &validate_cursor_serialization_adapter_in_container);
   validator.add_function_visitor(&forbid_exception_as_method_type);
+  validator.add_function_visitor(&deprecate_function_parameter_annotations);
+
   validator.add_const_visitor(&forbid_exception_as_const_type);
 
   add_explicit_include_validators(validator);

@@ -760,6 +760,7 @@ TEST(CompilerTest, interactions_as_first_response_type) {
 
 TEST(CompilerTest, deprecated_annotations) {
   check_compile(R"(
+    include "thrift/annotation/cpp.thrift"
     include "thrift/annotation/hack.thrift"
     include "thrift/annotation/thrift.thrift"
 
@@ -768,17 +769,47 @@ TEST(CompilerTest, deprecated_annotations) {
         1: optional i64 field (cpp.box) # expected-warning: The annotation cpp.box is deprecated. Please use @thrift.Box instead.
         2: i64 with (py3.name = "w", go.name = "w") # expected-warning: The annotation py3.name is deprecated. Please use @python.Name instead.
         # expected-warning@-1: The annotation go.name is deprecated. Please use @go.Name instead.
-        3: i64 removed_unstructured (rust.foo) # expected-error: Unstructured `rust.foo` annotation is not allowed, use a structured annotation from thrift/annotation/rust.thrift
+        3: i64 removed_unstructured (rust.foo) # expected-error: The annotation rust.foo has been removed. Please use a structured annotation from thrift/annotation/rust.thrift instead.
         @thrift.DeprecatedUnvalidatedAnnotations{items = {"rust.foo": "1"}}
-        4: i64 removed_catchall # expected-error@-1: Unstructured `rust.foo` annotation is not allowed, use a structured annotation from thrift/annotation/rust.thrift
+        4: i64 removed_catchall # expected-error@-1: The annotation rust.foo has been removed. Please use a structured annotation from thrift/annotation/rust.thrift instead.
     } (hack.attributes = "")
+
+    typedef i64 (cpp.type = "std::uint64_t") T # expected-warning: The annotation cpp.type is deprecated. Please use @cpp.Type instead.
+
+    # This should not produce a warning even though the annotation is currently lowered.
+    @cpp.Type{name = "std::uint64_t"}
+    typedef i64 T2
   )");
 }
 
 TEST(CompilerTest, removed_annotations) {
   check_compile(R"(
+    include "thrift/annotation/thrift.thrift"
+
     enum E {} (cpp2.declare_bitwise_ops)
     # expected-error@-1: The annotation cpp2.declare_bitwise_ops has been removed. Please use @thrift.BitmaskEnum instead.
+
+    @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp2.declare_bitwise_ops": "1"}}
+    enum F {}
+    # expected-error@-2: The annotation cpp2.declare_bitwise_ops has been removed. Please use @thrift.BitmaskEnum instead.
+
+    struct A {
+        1: i64 removed_unstructured (rust.foo) 
+        # expected-error@-1: The annotation rust.foo has been removed. Please use a structured annotation from thrift/annotation/rust.thrift instead.
+        @thrift.DeprecatedUnvalidatedAnnotations{items = {"rust.foo": "1"}}
+        2: i64 removed_catchall 
+        # expected-error@-2: The annotation rust.foo has been removed. Please use a structured annotation from thrift/annotation/rust.thrift instead.
+    }
+
+    typedef map<string, string> (rust.type = "HashMap") HashMap
+    # expected-error@-1: The annotation rust.type has been removed. Please use a structured annotation from thrift/annotation/rust.thrift instead.
+
+    struct S {} (cpp.type = "foo") # expected-warning: The annotation cpp.type is deprecated. Please use @cpp.Type instead.
+    typedef S T
+
+    service J {
+        i64 foo(1: i64 arg (rust.name = "bar")) # expected-error: The annotation rust.name has been removed. Please use a structured annotation from thrift/annotation/rust.thrift instead.
+    }
   )");
 }
 
@@ -810,7 +841,7 @@ TEST(CompilerTest, cpp_type_compatibility) {
 
     struct B {
       @cpp.Adapter{name="Adapter"} # expected-warning: At most one of @cpp.Type/@cpp.Adapter/cpp.type/cpp.template can be specified on a definition.
-      1: i32 (cpp.type = "std::uint32_t") field; # expected-warning@-1: The cpp.type/cpp.template annotations are deprecated, use @cpp.Type instead
+      1: i32 (cpp.type = "std::uint32_t") field; 
       # expected-error@-2: Annotations are not allowed in this position. Extract the type into a named typedef instead.
       @cpp.Adapter{name="Adapter"} # expected-warning: At most one of @cpp.Type/@cpp.Adapter/cpp.type/cpp.template can be specified on a definition.
       @cpp.Type{name="std::uint32_t"}

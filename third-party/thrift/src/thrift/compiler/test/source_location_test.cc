@@ -32,7 +32,6 @@ TEST(SourceLocationTest, get_file) {
   auto file = fs::temp_directory_path() / fs::unique_path();
   const auto& file_name = file.string();
   std::ofstream(file_name) << text;
-  EXPECT_FALSE(sm.has_virtual_file(file_name));
   auto source = sm.get_file(file_name);
   auto loc = resolved_location(source->start, sm);
   EXPECT_EQ(loc.file_name(), file_name);
@@ -44,14 +43,12 @@ TEST(SourceLocationTest, get_file) {
 TEST(SourceLocationTest, get_file_error) {
   auto sm = source_manager();
   EXPECT_FALSE(sm.get_file("nonexistent"));
-  EXPECT_FALSE(sm.has_virtual_file("nonexistent"));
 }
 
 TEST(SourceLocationTest, add_virtual_file) {
   auto sm = source_manager();
   auto text = std::string("test");
   auto source = sm.add_virtual_file("path/to/file", text);
-  EXPECT_TRUE(sm.has_virtual_file("path/to/file"));
   auto loc = resolved_location(source.start, sm);
   EXPECT_STREQ(loc.file_name(), "path/to/file");
   EXPECT_EQ(loc.line(), 1);

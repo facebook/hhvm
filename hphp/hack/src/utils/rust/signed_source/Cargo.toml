@@ -12,7 +12,7 @@ path = "../signed_source.rs"
 
 [dependencies]
 bstr = { version = "1.10.0", features = ["serde", "std", "unicode"] }
-hex = "0.4.3"
+hex = { version = "0.4.3", features = ["alloc"] }
 md-5 = "0.10"
 once_cell = "1.12"
 regex = "1.11.1"

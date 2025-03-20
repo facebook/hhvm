@@ -7,5 +7,6 @@ python_capi: mstch_python_capi src/module.thrift
 python_capi_empty: mstch_python_capi src/empty.thrift
 python: mstch_python:auto_migrate,base_library_package=fbcode.thrift.python,import_static src/module.thrift
 py3_auto_migrate: mstch_py3:auto_migrate src/module.thrift
+py3_inplace: mstch_py3:inplace_migrate src/module.thrift
 py3_legacy_container_converters: mstch_py3:gen_legacy_container_converters src/module.thrift
 py3_auto_migrate_legacy_container_converters: mstch_py3:auto_migrate,gen_legacy_container_converters src/module.thrift

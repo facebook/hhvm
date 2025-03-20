@@ -185,8 +185,13 @@ class RootRoute {
           rh,
       const Request& req,
       carbon::ArithmeticLikeT<Request> = 0) const {
-    return opts_.allow_only_gets ? createReply(DefaultReply, req)
-                                 : doRoute(rh, req);
+    auto reply = opts_.allow_only_gets ? createReply(DefaultReply, req)
+                                       : doRoute(rh, req);
+    if (isErrorResult(*reply.result_ref()) &&
+        !opts_.disable_miss_on_arith_errors) {
+      reply = createReply(DefaultReply, req);
+    }
+    return reply;
   }
 
   template <class Request>

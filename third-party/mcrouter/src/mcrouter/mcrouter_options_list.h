@@ -532,13 +532,6 @@ MCROUTER_OPTION(
     routing_prefix)
 
 MCROUTER_OPTION_TOGGLE(
-    disable_miss_on_arith_errors,
-    false,
-    "disable-miss-on-arith-errors",
-    no_short,
-    "Disable reporting arithmetic operation errors as misses")
-
-MCROUTER_OPTION_TOGGLE(
     group_remote_errors,
     false,
     "group-remote-errors",

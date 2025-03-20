@@ -20,18 +20,16 @@ import (
 	"errors"
 	"io"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 // TestReadByte tests whether readByte handles error cases correctly.
 func TestReadByte(t *testing.T) {
 	for i, test := range readByteTests {
 		v, err := readByte(test.r)
-		if v != test.v {
-			t.Fatalf("TestReadByte %d: value differs. Expected %d, got %d", i, test.v, test.r.v)
-		}
-		if err != test.err {
-			t.Fatalf("TestReadByte %d: error differs. Expected %s, got %s", i, test.err, test.r.err)
-		}
+		require.Equal(t, test.err, err, "test %d", i)
+		require.Equal(t, test.v, v, "test %d", i)
 	}
 }
 

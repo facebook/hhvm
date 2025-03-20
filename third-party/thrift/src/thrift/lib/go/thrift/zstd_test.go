@@ -17,74 +17,49 @@
 package thrift
 
 import (
-	"bytes"
 	"io"
 	"testing"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/stretchr/testify/require"
 )
 
 func TestHeaderZstd(t *testing.T) {
-	n := 1
 	tmb := newMockSocket()
 	trans := newHeaderTransport(tmb, types.ProtocolIDCompact)
 	data := []byte("ASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDFASDF")
 	uncompressedlen := 30
 
 	err := trans.AddTransform(TransformSnappy)
-	if err == nil {
-		t.Fatalf("should have failed adding unsupported transform")
-	}
+	require.Error(t, err, "should have failed adding unsupported transform")
 
 	err = trans.AddTransform(TransformZstd)
-	if err != nil {
-		t.Fatalf("failed to add transform to frame %d: %s", n, err)
-	}
+	require.NoError(t, err)
 
 	_, err = trans.Write(data)
-	if err != nil {
-		t.Fatalf("failed to write frame %d: %s", n, err)
-	}
+	require.NoError(t, err)
+
 	err = trans.Flush()
-	if err != nil {
-		t.Fatalf("failed to xmit frame %d: %s", n, err)
-	}
+	require.NoError(t, err)
 
 	err = trans.ResetProtocol()
-	if err != nil {
-		t.Fatalf("failed to reset proto for frame %d: %s", n, err)
-	}
+	require.NoError(t, err)
 
 	frame, err := io.ReadAll(trans)
-	if err != nil {
-		t.Fatalf("failed to read frame %d: %s", n, err)
-	}
-
-	if !bytes.Equal(data, frame) {
-		t.Fatalf("data sent does not match receieve on frame %d", n)
-	}
-
+	require.NoError(t, err)
+	require.Equal(t, data, frame)
 	// This is a bit of a stupid test, but make sure that the data
 	// got changed somehow
-	if len(frame) == uncompressedlen {
-		t.Fatalf("data sent was not compressed on frame %d", n)
-	}
+	require.NotEqual(t, uncompressedlen, len(frame))
 }
 
 func TestZstd(t *testing.T) {
 	want := []byte{0x28, 0xb5, 0x2f, 0xfd}
 	compressed, err := compressZstd(want)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if bytes.Equal(compressed, want) {
-		t.Fatal("zstd compression failed")
-	}
+	require.NoError(t, err)
+	require.NotEqual(t, want, compressed)
+
 	got, err := decompressZstd(compressed)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !bytes.Equal(got, want) {
-		t.Fatalf("zstd roundtrip failed: got %v, want %v", got, want)
-	}
+	require.NoError(t, err)
+	require.Equal(t, want, got)
 }

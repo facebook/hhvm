@@ -18,13 +18,12 @@ package thrift
 
 import (
 	"bytes"
-	"fmt"
-	"strings"
 	"testing"
 	"time"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/facebook/fbthrift/thrift/test/go/if/my_test_struct"
+	"github.com/stretchr/testify/require"
 )
 
 type MyTestStruct = my_test_struct.MyTestStruct
@@ -50,15 +49,8 @@ func TestSkipUnknownTypeBinaryFormat(t *testing.T) {
 	format := NewBinaryFormat(bytes.NewBuffer(data))
 	start := time.Now()
 	err := m.Read(format)
-	if err == nil {
-		t.Fatalf("Parsed invalid message correctly")
-	} else if !strings.Contains(err.Error(), "unknown type") {
-		t.Fatalf("Failed for reason besides unknown type")
-	}
-
-	if time.Now().Sub(start).Seconds() > 5 {
-		t.Fatalf("It should not take seconds to parse a small message")
-	}
+	require.ErrorContains(t, err, "unknown type")
+	require.True(t, time.Now().Sub(start).Seconds() < 5, "It should not take seconds to parse a small message")
 }
 
 func TestInitialAllocationMapBinaryFormat(t *testing.T) {
@@ -67,11 +59,7 @@ func TestInitialAllocationMapBinaryFormat(t *testing.T) {
 	data := []byte("\n\x10\rO\t6\x03\n\n\n\x10\r\n\tslice\x00")
 	format := NewBinaryFormat(bytes.NewBuffer(data))
 	err := m.Read(format)
-	if err == nil {
-		t.Fatalf("Parsed invalid message correctly")
-	} else if !strings.Contains(err.Error(), "Invalid data length") {
-		t.Fatalf("Failed for reason besides Invalid data length")
-	}
+	require.ErrorIs(t, err, invalidDataLength)
 }
 
 func TestInitialAllocationListBinaryFormat(t *testing.T) {
@@ -80,11 +68,7 @@ func TestInitialAllocationListBinaryFormat(t *testing.T) {
 	data := []byte("\n\x10\rO\t6\x03\n\n\n\x10\x0f\n\tslice\x00")
 	format := NewBinaryFormat(bytes.NewBuffer(data))
 	err := m.Read(format)
-	if err == nil {
-		t.Fatalf("Parsed invalid message correctly")
-	} else if !strings.Contains(err.Error(), "Invalid data length") {
-		t.Fatalf("Failed for reason besides Invalid data length")
-	}
+	require.ErrorIs(t, err, invalidDataLength)
 }
 
 func TestInitialAllocationSetBinaryFormat(t *testing.T) {
@@ -93,10 +77,5 @@ func TestInitialAllocationSetBinaryFormat(t *testing.T) {
 	data := []byte("\n\x12\rO\t6\x03\n\n\n\x10\x0e\n\tslice\x00")
 	format := NewBinaryFormat(bytes.NewBuffer(data))
 	err := m.Read(format)
-	if err == nil {
-		t.Fatalf("Parsed invalid message correctly")
-	} else if !strings.Contains(err.Error(), "Invalid data length") {
-		fmt.Printf("Got %+v", err)
-		t.Fatalf("Failed for reason besides Invalid data length")
-	}
+	require.ErrorIs(t, err, invalidDataLength)
 }

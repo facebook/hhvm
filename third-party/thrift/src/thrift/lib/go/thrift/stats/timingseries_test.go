@@ -22,6 +22,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 // lots of emperically generated test data which represents
@@ -105,14 +107,10 @@ func TestTimeseriesMisconfig(t *testing.T) {
 	ts := NewTimingSeries(nil)
 	// you can't summarize a larger period than you are recording
 	_, err := ts.Summarize(DefaultConfig.History + DefaultConfig.Interval)
-	if err == nil {
-		t.Fatalf("expected error")
-	}
+	require.Error(t, err)
 	// you can summarize all of your history
 	_, err = ts.Summarize(DefaultConfig.History)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 }
 
 func TestBasicTimeseries(t *testing.T) {
@@ -136,12 +134,8 @@ func TestBasicTimeseries(t *testing.T) {
 	// now wait at least one interval so summary will include all data
 	time.Sleep(config.Interval)
 	summary, err := ts.Summarize(10 * time.Second)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if want, got := int(len(testData)), int(summary.Count); want != got {
-		t.Fatalf("want %v got %v", want, got)
-	}
+	require.NoError(t, err)
+	require.Len(t, testData, int(summary.Count))
 	// verify error is < 10x precision
 	if want, got := avg, summary.Average.Seconds(); !inEpsilon(want, got, config.Precision.Seconds()*10.) {
 		t.Fatalf("verify error is < 10x precision: want %v got %v", want, got)
@@ -197,9 +191,7 @@ func TestMultiThreadedTimeseries(t *testing.T) {
 	time.Sleep(config.Interval * 2.)
 
 	summary, err := ts.Summarize(config.History)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 	avg := sum / float64(len(testData)*repeatDataN)
 
 	if want, got := int(len(testData)*repeatDataN), int(summary.Count); want != got {

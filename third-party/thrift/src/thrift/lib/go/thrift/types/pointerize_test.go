@@ -17,8 +17,9 @@
 package types
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestPointerize(t *testing.T) {
@@ -42,8 +43,6 @@ func TestPointerize(t *testing.T) {
 
 	for _, testInput := range testInputs {
 		testInputPtr := Pointerize(testInput)
-		if !reflect.DeepEqual(testInput, *testInputPtr) {
-			t.Fatalf("values are not equal: %v != %v", testInput, *testInputPtr)
-		}
+		require.Equal(t, testInput, *testInputPtr)
 	}
 }

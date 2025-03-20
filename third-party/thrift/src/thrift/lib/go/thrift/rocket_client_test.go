@@ -18,7 +18,6 @@ package thrift
 
 import (
 	"context"
-	"errors"
 	"net"
 	"runtime"
 	"testing"
@@ -27,6 +26,7 @@ import (
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	dummyif "github.com/facebook/fbthrift/thrift/test/go/if/dummy"
+	"github.com/stretchr/testify/require"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -46,9 +46,8 @@ func TestRocketClientClose(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	errChan := make(chan error)
 	listener, err := net.Listen("tcp", ":0")
-	if err != nil {
-		t.Fatalf("failed to listen: %v", err)
-	}
+	require.NoError(t, err)
+
 	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
 	server := NewServer(processor, listener, TransportIDRocket)
 	go func() {
@@ -56,22 +55,17 @@ func TestRocketClientClose(t *testing.T) {
 	}()
 	addr := listener.Addr()
 	conn, err := net.Dial(addr.Network(), addr.String())
-	if err != nil {
-		t.Fatalf("failed to dial: %v", err)
-	}
+	require.NoError(t, err)
+
 	cconn := &closeConn{Conn: conn, closed: make(chan struct{}, 10)}
 	proto, err := newRocketClient(cconn, types.ProtocolIDCompact, 0, nil)
-	if err != nil {
-		t.Fatalf("could not create client protocol: %s", err)
-	}
+	require.NoError(t, err)
+
 	client := dummyif.NewDummyChannelClient(NewSerialChannel(proto))
 	result, err := client.Echo(context.TODO(), "hello")
-	if err != nil {
-		t.Fatalf("could not complete call: %v", err)
-	}
-	if result != "hello" {
-		t.Fatalf("expected response to be a hello, got %s", result)
-	}
+	require.NoError(t, err)
+	require.Equal(t, "hello", result)
+
 	go client.Close()
 	select {
 	case <-cconn.closed:
@@ -87,9 +81,8 @@ func TestRocketClientUnix(t *testing.T) {
 	errChan := make(chan error)
 	path := t.TempDir() + "/test.sock"
 	listener, err := net.Listen("unix", path)
-	if err != nil {
-		t.Fatalf("failed to listen: %v", err)
-	}
+	require.NoError(t, err)
+
 	processor := dummyif.NewDummyProcessor(&dummy.DummyHandler{})
 	server := NewServer(processor, listener, TransportIDRocket)
 	go func() {
@@ -97,31 +90,24 @@ func TestRocketClientUnix(t *testing.T) {
 	}()
 	addr := listener.Addr()
 	conn, err := net.Dial(addr.Network(), addr.String())
-	if err != nil {
-		t.Fatalf("failed to dial: %v", err)
-	}
+	require.NoError(t, err)
+
 	proto, err := newRocketClient(conn, types.ProtocolIDCompact, 0, nil)
-	if err != nil {
-		t.Fatalf("could not create client protocol: %s", err)
-	}
+	require.NoError(t, err)
+
 	client := dummyif.NewDummyChannelClient(NewSerialChannel(proto))
 	defer client.Close()
 	result, err := client.Echo(context.TODO(), "hello")
-	if err != nil {
-		t.Fatalf("could not complete call: %v", err)
-	}
-	if result != "hello" {
-		t.Fatalf("expected response to be a hello, got %s", result)
-	}
+	require.NoError(t, err)
+	require.Equal(t, "hello", result)
+
 	cancel()
 	<-errChan
 }
 
 func TestFDRelease(t *testing.T) {
 	listener, err := net.Listen("tcp", "[::]:0")
-	if err != nil {
-		t.Fatalf("failed to listen: %v", err)
-	}
+	require.NoError(t, err)
 
 	addr := listener.Addr().(*net.TCPAddr)
 	t.Logf("Server listening on %v", addr)
@@ -143,36 +129,27 @@ func TestFDRelease(t *testing.T) {
 				return net.DialTimeout("tcp", addr.String(), 60*time.Second)
 			}),
 		)
-		if err != nil {
-			t.Fatalf("failed to get client: %v", err)
-		}
+		require.NoError(t, err)
 		// NOTE!!!!!!
 		// Close() call is missing intentionally!!!!
 		// We are testing that the FD is released when the client is GCed.
 		client := dummyif.NewDummyChannelClient(channel)
 		_, err = client.Echo(context.Background(), "hello")
-		if err != nil {
-			t.Fatalf("failed to make RPC: %v", err)
-		}
+		require.NoError(t, err)
 	}
 
 	// Run GC to ensure it releases the underlying FDs
 	runtime.GC()
 	fdCount, err := getNumFileDesciptors()
-	if err != nil {
-		t.Fatalf("failed to get FD count: %v", err)
-	}
+	require.NoError(t, err)
+
 	// Because we run alongside other tests concurrently - we cannot assert zero.
 	// But it is sufficient to assert that we are down to below 200 FDs.
 	// This is a very solid assertion, given that we opened 10,000 connections (FDs)
 	// in the for-loop above.
-	if fdCount > 200 {
-		t.Fatalf("too many FDs: %d", fdCount)
-	}
+	require.Less(t, fdCount, 200)
 
 	serverCancel()
 	err = serverEG.Wait()
-	if err != nil && !errors.Is(err, context.Canceled) {
-		t.Fatalf("unexpected error in ServeContext: %v", err)
-	}
+	require.ErrorIs(t, err, context.Canceled)
 }

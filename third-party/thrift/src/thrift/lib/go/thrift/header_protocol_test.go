@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/stretchr/testify/require"
 )
 
 func TestHeaderProtocolHeaders(t *testing.T) {
@@ -29,13 +30,10 @@ func TestHeaderProtocolHeaders(t *testing.T) {
 		IDVersionHeader:    IDVersion,
 		IdentityHeader:     "batman",
 	})
-	if err != nil {
-		t.Fatalf("failed to create header protocol: %s", err)
-	}
+	require.NoError(t, err)
+
 	proto2, err := NewHeaderProtocol(mockSocket)
-	if err != nil {
-		t.Fatalf("failed to create header protocol: %s", err)
-	}
+	require.NoError(t, err)
 
 	proto1.setRequestHeader("preferred_cheese", "cheddar")
 	if v, _ := proto1.(*headerProtocol).trans.writeInfoHeaders["preferred_cheese"]; v != "cheddar" {
@@ -50,9 +48,7 @@ func TestHeaderProtocolHeaders(t *testing.T) {
 	proto1.Flush()
 
 	_, _, _, err = proto2.ReadMessageBegin()
-	if err != nil {
-		t.Fatalf("failed to read message from proto1 in proto2")
-	}
+	require.NoError(t, err)
 
 	if v, _ := proto2.getResponseHeaders()["preferred_cheese"]; v != "gouda" {
 		t.Fatalf("failed to read header, got: %s", v)

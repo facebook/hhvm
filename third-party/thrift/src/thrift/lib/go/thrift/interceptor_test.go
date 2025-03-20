@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/stretchr/testify/require"
 )
 
 type exampleProcessor struct {
@@ -39,12 +40,8 @@ func TestInterceptorWrapperNilFunctionContext(t *testing.T) {
 
 	derivedProc := WrapInterceptor(emptyInterceptor, proc)
 	pFunc := derivedProc.ProcessorFunctionMap()["blah"]
-	if hit != true {
-		t.Fatalf("interceptor should have called underlying processor function handler.")
-	}
-	if pFunc != nil {
-		t.Fatalf("derived interceptor context should return underlying nil processor function context.")
-	}
+	require.True(t, hit)
+	require.Nil(t, pFunc)
 }
 
 func emptyInterceptor(ctx context.Context, methodName string, pfunc types.ProcessorFunction, args types.Struct) (types.WritableStruct, types.ApplicationException) {

@@ -18,10 +18,10 @@ package thrift
 
 import (
 	"bytes"
-	"strings"
 	"testing"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/stretchr/testify/require"
 )
 
 func TestReadWriteCompactProtocol(t *testing.T) {
@@ -61,11 +61,7 @@ func TestInitialAllocationMapCompactProtocol(t *testing.T) {
 	data := []byte("%0\x88\x8a\x97\xb7\xc4\x030")
 	format := NewCompactFormat(bytes.NewBuffer(data))
 	err := m.Read(format)
-	if err == nil {
-		t.Fatalf("Parsed invalid message correctly")
-	} else if !strings.Contains(err.Error(), "Invalid data length") {
-		t.Fatalf("Failed for reason besides Invalid data length")
-	}
+	require.ErrorIs(t, err, invalidDataLength)
 }
 
 func TestInitialAllocationListCompactProtocol(t *testing.T) {
@@ -74,11 +70,7 @@ func TestInitialAllocationListCompactProtocol(t *testing.T) {
 	data := []byte("%0\x98\xfa\xb7\xb7\xc4\xc4\x03\x01a")
 	format := NewCompactFormat(bytes.NewBuffer(data))
 	err := m.Read(format)
-	if err == nil {
-		t.Fatalf("Parsed invalid message correctly")
-	} else if !strings.Contains(err.Error(), "Invalid data length") {
-		t.Fatalf("Failed for reason besides Invalid data length")
-	}
+	require.ErrorIs(t, err, invalidDataLength)
 }
 
 func TestInitialAllocationSetCompactProtocol(t *testing.T) {
@@ -87,11 +79,7 @@ func TestInitialAllocationSetCompactProtocol(t *testing.T) {
 	data := []byte("%0\xa8\xfa\x97\xb7\xc4\xc4\x03\x01a")
 	format := NewCompactFormat(bytes.NewBuffer(data))
 	err := m.Read(format)
-	if err == nil {
-		t.Fatalf("Parsed invalid message correctly")
-	} else if !strings.Contains(err.Error(), "Invalid data length") {
-		t.Fatalf("Failed for reason besides Invalid data length")
-	}
+	require.ErrorIs(t, err, invalidDataLength)
 }
 
 func TestInitialAllocationMapCompactProtocolLimitedR(t *testing.T) {
@@ -100,11 +88,6 @@ func TestInitialAllocationMapCompactProtocolLimitedR(t *testing.T) {
 	// attempts to allocate a map of 930M elements for a 9 byte message
 	data := []byte("%0\x88\x8a\x97\xb7\xc4\x030")
 	p := NewCompactFormat(bytes.NewBuffer(data))
-
 	err := m.Read(p)
-	if err == nil {
-		t.Fatalf("Parsed invalid message correctly")
-	} else if !strings.Contains(err.Error(), "Invalid data length") {
-		t.Fatalf("Failed for reason besides Invalid data length")
-	}
+	require.ErrorIs(t, err, invalidDataLength)
 }

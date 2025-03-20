@@ -250,6 +250,7 @@ Optional<ALocMeta> AliasAnalysis::find(AliasClass acls) const {
 /**/
 
 #define ALIAS_CLASSES(X)      \
+  X(ClosureArg, closureArg, all_closureArg) \
   X(Prop, prop, all_props)    \
   X(ElemI, elemI, all_elemIs) \
   X(ElemS, elemS, all_elemSs) \
@@ -395,12 +396,22 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
    * object property offsets, and for arrays based only on index.  Everything
    * colliding in that regard is assumed to possibly alias.
    */
+  
+  auto conflict_closure_arg_offset = jit::fast_map<uint32_t,ALocBits>{};
   auto conflict_prop_offset = jit::fast_map<uint32_t,ALocBits>{};
   auto conflict_array_index = jit::fast_map<int64_t,ALocBits>{};
   auto conflict_array_key = jit::fast_map<const StringData*,ALocBits>{};
   auto prop_array_map = jit::fast_map<int64_t,AliasClass>{};
 
   visit_locations(blocks, [&] (AliasClass acls) {
+    if (auto const closure_arg = acls.is_closureArg()) {
+      if (auto const index = add_class(ret, acls)) {
+        conflict_closure_arg_offset[closure_arg->offset].set(*index);
+        prop_array_map.emplace(*index, acls);
+      }
+      return;
+    }
+
     if (auto const prop = acls.is_prop()) {
       if (auto const index = add_class(ret, acls)) {
         conflict_prop_offset[prop->offset].set(*index);
@@ -500,6 +511,11 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
     };
 
   auto make_conflict_set = [&] (AliasClass acls, ALocMeta& meta) {
+    if (auto const closure_arg = acls.is_closureArg()) {
+      maybe_set_conflicts(conflict_closure_arg_offset[closure_arg->offset], meta, acls);
+      ret.all_closureArg.set(meta.index);
+      return;
+    }
     if (auto const prop = acls.is_prop()) {
       maybe_set_conflicts(conflict_prop_offset[prop->offset], meta, acls);
       ret.all_props.set(meta.index);

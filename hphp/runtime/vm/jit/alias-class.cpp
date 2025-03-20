@@ -49,6 +49,7 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
   case A::BVMReg:          return "VmRegAny";
   case A::BLocal:          break;
   case A::BIter:           break;
+  case A::BClosureArg:     break;
   case A::BProp:           break;
   case A::BElemI:          break;
   case A::BElemS:          break;
@@ -85,6 +86,7 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
       always_assert(0);
     case A::BLocal:          ret += "Lv"; break;
     case A::BIter:           ret += "It"; break;
+    case A::BClosureArg:     ret += "ClArg"; break;
     case A::BProp:           ret += "Pr"; break;
     case A::BElemI:          ret += "Ei"; break;
     case A::BElemS:          ret += "Es"; break;
@@ -176,6 +178,10 @@ size_t AliasClass::Hash::operator()(AliasClass acls) const {
   case STag::Iter:  return framelike_hash(hash, acls.m_iter);
   case STag::Local: return framelike_hash(hash, acls.m_local);
 
+  case STag::ClosureArg:
+    return folly::hash::hash_combine(hash,
+                                     acls.m_closureArg.closure,
+                                     acls.m_closureArg.offset); 
   case STag::Prop:
     return folly::hash::hash_combine(hash,
                                      acls.m_prop.obj,
@@ -219,6 +225,7 @@ size_t AliasClass::Hash::operator()(AliasClass acls) const {
 
 X(Local, local)
 X(Iter, iter)
+X(ClosureArg, closureArg)
 X(Prop, prop)
 X(ElemI, elemI)
 X(ElemS, elemS)
@@ -235,6 +242,7 @@ X(Rds, rds)
 
 X(Local, local)
 X(Iter, iter)
+X(ClosureArg, closureArg)
 X(Prop, prop)
 X(ElemI, elemI)
 X(ElemS, elemS)
@@ -329,14 +337,15 @@ Optional<AliasClass> AliasClass::exclude_vm_reg() const {
     switch (stagFor(m_stagBits)) {
     case STag::None:
       break;
-    case STag::Iter:     new (&ret.m_iter) AIter(m_iter); break;
-    case STag::FrameAll: new (&ret.m_frameAll) UFrameBase(m_frameAll);break;
-    case STag::Local:    new (&ret.m_local) ALocal(m_local); break;
-    case STag::Prop:     new (&ret.m_prop) AProp(m_prop); break;
-    case STag::ElemI:    new (&ret.m_elemI) AElemI(m_elemI); break;
-    case STag::ElemS:    new (&ret.m_elemS) AElemS(m_elemS); break;
-    case STag::Stack:    new (&ret.m_stack) AStack(m_stack); break;
-    case STag::Rds:      new (&ret.m_rds) ARds(m_rds); break;
+    case STag::Iter:       new (&ret.m_iter) AIter(m_iter); break;
+    case STag::FrameAll:   new (&ret.m_frameAll) UFrameBase(m_frameAll);break;
+    case STag::Local:      new (&ret.m_local) ALocal(m_local); break;
+    case STag::ClosureArg: new (&ret.m_closureArg) AClosureArg(m_closureArg); break;
+    case STag::Prop:       new (&ret.m_prop) AProp(m_prop); break;
+    case STag::ElemI:      new (&ret.m_elemI) AElemI(m_elemI); break;
+    case STag::ElemS:      new (&ret.m_elemS) AElemS(m_elemS); break;
+    case STag::Stack:      new (&ret.m_stack) AStack(m_stack); break;
+    case STag::Rds:        new (&ret.m_rds) ARds(m_rds); break;
     }
 
     return ret;
@@ -361,6 +370,7 @@ bool AliasClass::checkInvariants() const {
   case STag::Iter:           framelike_checkInvariants(m_iter);  break;
   case STag::Local:          framelike_checkInvariants(m_local); break;
   case STag::FrameAll:       break;
+  case STag::ClosureArg:     break;
   case STag::Prop:           break;
   case STag::ElemI:          break;
   case STag::Stack:
@@ -382,19 +392,21 @@ bool AliasClass::checkInvariants() const {
 bool AliasClass::equivData(AliasClass o) const {
   assertx(stagFor(m_stagBits) == stagFor(o.m_stagBits));
   switch (stagFor(m_stagBits)) {
-  case STag::None:     return true;
-  case STag::Local:    return framelike_equal(m_local, o.m_local);
-  case STag::Iter:     return framelike_equal(m_iter, o.m_iter);
-  case STag::FrameAll: return m_frameAll.frameIdx == o.m_frameAll.frameIdx;
-  case STag::Prop:     return m_prop.obj == o.m_prop.obj &&
+  case STag::None:       return true;
+  case STag::Local:      return framelike_equal(m_local, o.m_local);
+  case STag::Iter:       return framelike_equal(m_iter, o.m_iter);
+  case STag::FrameAll:   return m_frameAll.frameIdx == o.m_frameAll.frameIdx;
+  case STag::ClosureArg: return m_closureArg.closure == o.m_closureArg.closure &&
+                               m_closureArg.offset == o.m_closureArg.offset;
+  case STag::Prop:       return m_prop.obj == o.m_prop.obj &&
                               m_prop.offset == o.m_prop.offset;
-  case STag::ElemI:    return m_elemI.arr == o.m_elemI.arr &&
+  case STag::ElemI:      return m_elemI.arr == o.m_elemI.arr &&
                               m_elemI.idx == o.m_elemI.idx;
-  case STag::ElemS:    return m_elemS.arr == o.m_elemS.arr &&
+  case STag::ElemS:      return m_elemS.arr == o.m_elemS.arr &&
                               m_elemS.key == o.m_elemS.key;
-  case STag::Stack:    return m_stack.low == o.m_stack.low &&
+  case STag::Stack:      return m_stack.low == o.m_stack.low &&
                               m_stack.high == o.m_stack.high;
-  case STag::Rds:      return m_rds.handle == o.m_rds.handle;
+  case STag::Rds:        return m_rds.handle == o.m_rds.handle;
   }
   not_reached();
 }
@@ -411,6 +423,7 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
   switch (stagFor(a.m_stagBits)) {
   case STag::None:
     break;
+  case STag::ClosureArg:
   case STag::Prop:
   case STag::ElemI:
   case STag::ElemS:
@@ -542,14 +555,15 @@ AliasClass AliasClass::operator|(AliasClass o) const {
   switch (stag) {
   case STag::None:
     break;
-  case STag::Iter:     new (&ret.m_iter) AIter(best->m_iter); break;
-  case STag::FrameAll: new (&ret.m_frameAll) UFrameBase(best->m_frameAll);break;
-  case STag::Local:    new (&ret.m_local) ALocal(best->m_local); break;
-  case STag::Prop:     new (&ret.m_prop) AProp(best->m_prop); break;
-  case STag::ElemI:    new (&ret.m_elemI) AElemI(best->m_elemI); break;
-  case STag::ElemS:    new (&ret.m_elemS) AElemS(best->m_elemS); break;
-  case STag::Stack:    new (&ret.m_stack) AStack(best->m_stack); break;
-  case STag::Rds:      new (&ret.m_rds) ARds(best->m_rds); break;
+  case STag::Iter:       new (&ret.m_iter) AIter(best->m_iter); break;
+  case STag::FrameAll:   new (&ret.m_frameAll) UFrameBase(best->m_frameAll);break;
+  case STag::Local:      new (&ret.m_local) ALocal(best->m_local); break;
+  case STag::ClosureArg: new (&ret.m_closureArg) AClosureArg(best->m_closureArg); break;
+  case STag::Prop:       new (&ret.m_prop) AProp(best->m_prop); break;
+  case STag::ElemI:      new (&ret.m_elemI) AElemI(best->m_elemI); break;
+  case STag::ElemS:      new (&ret.m_elemS) AElemS(best->m_elemS); break;
+  case STag::Stack:      new (&ret.m_stack) AStack(best->m_stack); break;
+  case STag::Rds:        new (&ret.m_rds) ARds(best->m_rds); break;
   }
 
   // If both alias classes have compatible frames we can merge their frame
@@ -566,6 +580,7 @@ bool AliasClass::subclassData(AliasClass o) const {
   assertx(stagFor(m_stagBits) == stagFor(o.m_stagBits));
   switch (stagFor(m_stagBits)) {
   case STag::None:
+  case STag::ClosureArg:
   case STag::Prop:
   case STag::ElemI:
   case STag::ElemS:
@@ -585,6 +600,7 @@ bool AliasClass::subclassData(AliasClass o) const {
 Optional<UFrameBase> AliasClass::asUFrameBase() const {
   switch (stagFor(m_stagBits)) {
   case STag::None:
+  case STag::ClosureArg:
   case STag::Prop:
   case STag::ElemI:
   case STag::ElemS:
@@ -700,6 +716,11 @@ bool AliasClass::maybeData(AliasClass o) const {
   case STag::Iter:   return framelike_maybe(m_iter, o.m_iter);
   case STag::Local:  return framelike_maybe(m_local, o.m_local);
   case STag::FrameAll: return m_frameAll.frameIdx == o.m_frameAll.frameIdx;
+  case STag::ClosureArg:
+    if (m_closureArg.offset != o.m_closureArg.offset) return false;
+    if (!m_closureArg.closure->type().maybe(o.m_closureArg.closure->type())) return false;
+    return true;
+
   case STag::Prop:
     /*
      * We can't tell if two objects could be the same from here in general, but
@@ -805,9 +826,10 @@ AliasClass canonicalize(AliasClass a) {
   case T::Stack:          return a;
   case T::Rds:            return a;
   case T::FrameAll:       return a;
-  case T::Prop:     a.m_prop.obj = canonical(a.m_prop.obj);   return a;
-  case T::ElemI:    a.m_elemI.arr = canonical(a.m_elemI.arr); return a;
-  case T::ElemS:    a.m_elemS.arr = canonical(a.m_elemS.arr); return a;
+  case T::ClosureArg:     a.m_closureArg.closure = canonical(a.m_closureArg.closure); return a;
+  case T::Prop:           a.m_prop.obj = canonical(a.m_prop.obj);                     return a;
+  case T::ElemI:          a.m_elemI.arr = canonical(a.m_elemI.arr);                   return a;
+  case T::ElemS:          a.m_elemS.arr = canonical(a.m_elemS.arr);                   return a;
   }
   not_reached();
 }
@@ -839,6 +861,9 @@ std::string show(AliasClass acls) {
                   show(acls.m_iter.ids));
     break;
   case A::STag::FrameAll:
+    break;
+  case A::STag::ClosureArg:
+    folly::format(&ret, "ClArg t{}:{}", acls.m_closureArg.closure->id(), acls.m_closureArg.offset);
     break;
   case A::STag::Prop:
     folly::format(&ret, "Pr t{}:{}", acls.m_prop.obj->id(), acls.m_prop.offset);

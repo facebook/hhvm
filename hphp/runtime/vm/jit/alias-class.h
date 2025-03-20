@@ -174,6 +174,8 @@ FRAME_RELATIVE0(AActRec);
  */
 struct AProp  { SSATmp* obj; uint16_t offset; };
 
+struct AClosureArg { SSATmp* closure; uint16_t offset; };
+
 /*
  * A integer index inside of an array, with base `arr'.  The `arr' tmp is any
  * kind of array (not necessarily a vec).
@@ -267,6 +269,7 @@ struct ARds { rds::Handle handle; };
   O(None,     BEmpty)             \
   O(Local,    (BLocal | BActRec)) \
   O(Iter,     (BIter | BActRec))  \
+  O(ClosureArg, BClosureArg)      \
   O(Prop,     BProp)              \
   O(ElemI,    BElemI)             \
   O(ElemS,    BElemS)             \
@@ -284,30 +287,31 @@ struct AliasClass {
     // which specialization is more useful.
     BLocal      = 1U << 0,
     BIter       = 1U << 1,
-    BProp       = 1U << 2,
-    BElemI      = 1U << 3,
-    BElemS      = 1U << 4,
-    BStack      = 1U << 5,
-    BRds        = 1U << 6,
-    BFContext   = 1U << 7,
-    BFFunc      = 1U << 8,
-    BFMeta      = 1U << 9,
+    BClosureArg = 1U << 2,
+    BProp       = 1U << 3,
+    BElemI      = 1U << 4,
+    BElemS      = 1U << 5,
+    BStack      = 1U << 6,
+    BRds        = 1U << 7,
+    BFContext   = 1U << 8,
+    BFFunc      = 1U << 9,
+    BFMeta      = 1U << 10,
 
     // Have no specialization, put them last.
-    BMITempBase = 1U << 10,
-    BMIBase     = 1U << 11,
-    BMIROProp   = 1U << 12,
-    BFBasePtr   = 1U << 13,
-    BVMFP       = 1U << 14,
-    BVMSP       = 1U << 15,
-    BVMPC       = 1U << 16,
-    BVMRetAddr  = 1U << 17,
-    BVMRegState = 1U << 18,
-    BOther      = 1U << 19,
+    BMITempBase = 1U << 11,
+    BMIBase     = 1U << 12,
+    BMIROProp   = 1U << 13,
+    BFBasePtr   = 1U << 14,
+    BVMFP       = 1U << 15,
+    BVMSP       = 1U << 16,
+    BVMPC       = 1U << 17,
+    BVMRetAddr  = 1U << 18,
+    BVMRegState = 1U << 19,
+    BOther      = 1U << 20,
 
     BVMReg     = BVMFP | BVMSP | BVMPC | BVMRetAddr,
     BElem      = BElemI | BElemS,
-    BHeap      = BElem | BProp,
+    BHeap      = BElem | BProp | BClosureArg,
     BMIState   = BMITempBase | BMIBase | BMIROProp,
 
     BActRec = BFContext | BFFunc | BFMeta,
@@ -334,6 +338,7 @@ struct AliasClass {
    */
   /* implicit */ AliasClass(ALocal);
   /* implicit */ AliasClass(AIter);
+  /* implicit */ AliasClass(AClosureArg);
   /* implicit */ AliasClass(AProp);
   /* implicit */ AliasClass(AElemI);
   /* implicit */ AliasClass(AElemS);
@@ -397,6 +402,7 @@ struct AliasClass {
    */
   Optional<ALocal>          local() const;
   Optional<AIter>           iter() const;
+  Optional<AClosureArg>     closureArg() const;
   Optional<AProp>           prop() const;
   Optional<AElemI>          elemI() const;
   Optional<AElemS>          elemS() const;
@@ -417,6 +423,7 @@ struct AliasClass {
    */
   Optional<ALocal>          is_local() const;
   Optional<AIter>           is_iter() const;
+  Optional<AClosureArg>     is_closureArg() const;
   Optional<AProp>           is_prop() const;
   Optional<AElemI>          is_elemI() const;
   Optional<AElemS>          is_elemS() const;
@@ -474,6 +481,7 @@ private:
   union {
     ALocal          m_local;
     AIter           m_iter;
+    AClosureArg     m_closureArg;
     AProp           m_prop;
     AElemI          m_elemI;
     AElemS          m_elemS;
@@ -490,6 +498,7 @@ private:
 auto const AEmpty             = AliasClass{AliasClass::BEmpty};
 auto const ALocalAny          = AliasClass{AliasClass::BLocal};
 auto const AIterAny           = AliasClass{AliasClass::BIter};
+auto const AClosureArgAny     = AliasClass{AliasClass::BClosureArg};
 auto const APropAny           = AliasClass{AliasClass::BProp};
 auto const AHeapAny           = AliasClass{AliasClass::BHeap};
 auto const AStackAny          = AliasClass{AliasClass::BStack};

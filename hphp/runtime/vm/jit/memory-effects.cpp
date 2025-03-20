@@ -1660,14 +1660,14 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case LdClosureArg:
     return PureLoad { 
-      AProp {
+      AClosureArg {
         inst.src(0),
         safe_cast<uint16_t>(inst.extra<LdClosureArg>()->index)
-      }};
+    }};
 
   case StClosureArg:
     return PureStore {
-      AProp {
+      AClosureArg {
         inst.src(0),
         safe_cast<uint16_t>(inst.extra<StClosureArg>()->index)
       },

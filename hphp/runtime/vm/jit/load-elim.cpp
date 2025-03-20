@@ -650,7 +650,8 @@ void handle_call_effects(Local& env,
                     env.global.ainfo.all_ffunc    |
                     env.global.ainfo.all_fmeta    |
                     env.global.ainfo.all_local    |
-                    env.global.ainfo.all_iter;
+                    env.global.ainfo.all_iter     |
+                    env.global.ainfo.all_closureArg;
   env.state.avail &= keep;
 
   // Any stack locations modified by the callee are no longer valid

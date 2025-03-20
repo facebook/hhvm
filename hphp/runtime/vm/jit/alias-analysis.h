@@ -97,6 +97,7 @@ struct AliasAnalysis {
    * Several larger sets of locations, we have a set of all the ids assigned to
    * properties, elemIs, frame locals, etc.  This is used by may_alias below.
    */
+  ALocBits all_closureArg;
   ALocBits all_props;
   ALocBits all_elemIs;
   ALocBits all_elemSs;
@@ -179,4 +180,3 @@ std::string show(ALocBits);
 //////////////////////////////////////////////////////////////////////
 
 }
-

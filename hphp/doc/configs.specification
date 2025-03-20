@@ -1555,14 +1555,14 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - uint32_t HHIR.InliningCostFactorMain = 100, UNKNOWN
 - uint32_t HHIR.InliningCostFactorCold = 32, UNKNOWN
 - uint32_t HHIR.InliningCostFactorFrozen = 10, UNKNOWN
-- uint32_t HHIR.InliningVasmCostLimit = 80000, UNKNOWN
+- uint32_t HHIR.InliningVasmCostLimit = 150000, UNKNOWN
 - uint32_t HHIR.InliningMinVasmCostLimit = 5000, UNKNOWN
 - uint32_t HHIR.InliningMaxVasmCostLimit = 25000, UNKNOWN
 - uint32_t HHIR.AlwaysInlineVasmCostLimit = 5000, UNKNOWN
-- uint32_t HHIR.InliningMaxDepth = 5, UNKNOWN
+- uint32_t HHIR.InliningMaxDepth = 8, UNKNOWN
 - double HHIR.InliningVasmCallerExp = .5, UNKNOWN
 - double HHIR.InliningVasmCalleeExp = .5, UNKNOWN
-- double HHIR.InliningDepthExp = 0, UNKNOWN
+- double HHIR.InliningDepthExp = 1.5, UNKNOWN
 - uint32_t HHIR.InliningMaxReturnDecRefs = 24, UNKNOWN
 - uint32_t HHIR.InliningMaxReturnLocals = 40, UNKNOWN
 - uint32_t HHIR.InliningMaxInitObjProps = 12, UNKNOWN
@@ -1731,7 +1731,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - double Jit.PGODecRefNopDecPercentCOW, UNKNOWN
 - double Jit.PGODecRefNopDecPercent, UNKNOWN
 - bool Jit.PGOArrayGetStress = false, UNKNOWN
-- double Jit.PGOMinBlockCountPercent = 0.25, UNKNOWN
+- double Jit.PGOMinBlockCountPercent = 0.23, UNKNOWN
 
   Mininum weight of a tracelet to include it in HotCFG as a percentage
   of the weight of the first tracelet in the region. [0,100]

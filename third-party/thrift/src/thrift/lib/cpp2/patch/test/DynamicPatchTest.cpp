@@ -488,7 +488,7 @@ TEST(DynamicPatch, List) {
   EXPECT_EQ(l.size(), 1);
   EXPECT_EQ(l[0].as_i32(), 5);
 
-  p.clear(badge);
+  p.clear();
   p.apply(badge, l);
   EXPECT_TRUE(l.empty());
 }
@@ -538,7 +538,7 @@ TEST(DynamicPatch, Set) {
   EXPECT_EQ(s.size(), 1);
   EXPECT_TRUE(s.contains(asValueStruct<type::i32_t>(5)));
 
-  p.clear(badge);
+  p.clear();
   p.apply(badge, s);
   EXPECT_TRUE(s.empty());
 }
@@ -806,7 +806,7 @@ TEST(DynamicPatch, Map) {
 TEST(DynamicPatch, TestEmptyPatch) {
   Object obj;
   DynamicPatch patch;
-  patch.fromObject(badge, obj);
+  patch.fromObject(obj);
   EXPECT_TRUE(patch.holds_alternative<DynamicUnknownPatch>(badge));
 }
 
@@ -814,7 +814,7 @@ TEST(DynamicPatch, TestClearPatch) {
   Object obj;
   obj[static_cast<FieldId>(op::PatchOp::Clear)].emplace_bool(true);
   DynamicPatch patch;
-  patch.fromObject(badge, obj);
+  patch.fromObject(obj);
   EXPECT_TRUE(patch.holds_alternative<DynamicUnknownPatch>(badge));
 }
 
@@ -824,7 +824,7 @@ void testDynamicUnknownPatch(const auto& t) {
   Object obj;
   obj[static_cast<FieldId>(op::PatchOp::Assign)] = v;
   DynamicPatch assignPatch;
-  assignPatch.fromObject(badge, obj);
+  assignPatch.fromObject(obj);
   EXPECT_TRUE(assignPatch.holds_alternative<PatchType>(badge));
 
   obj = {};
@@ -871,14 +871,14 @@ TEST(DynamicPatch, FromSetOrMapPatch) {
       asValueStruct<type::i32_t>(1)};
   {
     DynamicPatch patch;
-    patch.fromObject(badge, obj);
+    patch.fromObject(obj);
     EXPECT_TRUE(patch.holds_alternative<DynamicUnknownPatch>(badge));
   }
   {
     obj[static_cast<FieldId>(op::PatchOp::Add)].emplace_set() = {
         asValueStruct<type::i32_t>(1)};
     DynamicPatch patch;
-    patch.fromObject(badge, obj);
+    patch.fromObject(obj);
     EXPECT_TRUE(patch.holds_alternative<DynamicSetPatch>(badge));
   }
   {
@@ -886,14 +886,14 @@ TEST(DynamicPatch, FromSetOrMapPatch) {
     obj[static_cast<FieldId>(op::PatchOp::Put)].emplace_set() = {
         asValueStruct<type::i32_t>(1)};
     DynamicPatch patch;
-    patch.fromObject(badge, obj);
+    patch.fromObject(obj);
     EXPECT_TRUE(patch.holds_alternative<DynamicSetPatch>(badge));
   }
   {
     obj[static_cast<FieldId>(op::PatchOp::Put)].emplace_map() = {
         {asValueStruct<type::i32_t>(1), asValueStruct<type::i32_t>(2)}};
     DynamicPatch patch;
-    patch.fromObject(badge, obj);
+    patch.fromObject(obj);
     EXPECT_TRUE(patch.holds_alternative<DynamicMapPatch>(badge));
   }
 }
@@ -910,7 +910,7 @@ TEST(DynamicPatch, FromStructOrUnionPatch) {
       asValueStruct<type::infer_tag<op::I32Patch>>(fieldPatch);
   {
     DynamicPatch patch;
-    patch.fromObject(badge, obj);
+    patch.fromObject(obj);
     EXPECT_TRUE(patch.holds_alternative<DynamicUnknownPatch>(badge));
 
     MyUnion u;
@@ -924,7 +924,7 @@ TEST(DynamicPatch, FromStructOrUnionPatch) {
         .emplace_object()[FieldId{2}]
         .emplace_i32(1);
     DynamicPatch patch;
-    patch.fromObject(badge, obj);
+    patch.fromObject(obj);
     EXPECT_TRUE(patch.holds_alternative<DynamicUnionPatch>(badge));
   }
   {
@@ -933,7 +933,7 @@ TEST(DynamicPatch, FromStructOrUnionPatch) {
         .emplace_object()[FieldId{1}]
         .emplace_i32(1);
     DynamicPatch patch;
-    patch.fromObject(badge, obj);
+    patch.fromObject(obj);
     EXPECT_TRUE(patch.holds_alternative<DynamicStructPatch>(badge));
   }
 }

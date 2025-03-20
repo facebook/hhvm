@@ -21,12 +21,9 @@
 #include <thrift/conformance/cpp2/ConformanceHandler.h>
 #include <thrift/conformance/cpp2/Protocol.h>
 #include <thrift/lib/cpp2/patch/DynamicPatch.h>
-#include <thrift/lib/cpp2/patch/detail/PatchBadge.h>
 #include <thrift/lib/cpp2/protocol/Patch.h>
 
 namespace apache::thrift::conformance {
-
-using apache::thrift::protocol::detail::badge;
 
 void ConformanceHandler::roundTrip(
     RoundTripResponse& res, std::unique_ptr<RoundTripRequest> req) {
@@ -54,7 +51,7 @@ void ConformanceHandler::patch(
       static_cast<type::BaseType>(value.getType()));
 
   protocol::DynamicPatch patch;
-  patch.fromObject(badge, patchValue.as_object());
+  patch.fromObject(patchValue.as_object());
   patch.apply(rvalue);
 
   res.result() = AnyRegistry::generated().store(

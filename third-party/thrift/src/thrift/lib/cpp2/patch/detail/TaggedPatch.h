@@ -60,7 +60,7 @@ class TaggedPatchRef<type::list<Tag>> {
 
   void operator=(const value_type& v) { assign(v); }
 
-  void clear() { patch_.get().clear(badge); }
+  void clear() { patch_.get().clear(); }
 
   void push_back(const typename type::native_type<Tag>& v) {
     patch_.get().push_back(badge, asValueStruct<Tag>(v));
@@ -106,7 +106,7 @@ class TaggedPatchRef<type::set<Tag>> {
 
   void operator=(const value_type& v) { assign(v); }
 
-  void clear() { patch_.get().clear(badge); }
+  void clear() { patch_.get().clear(); }
 
   void insert(const typename type::native_type<Tag>& v) {
     patch_.get().insert(badge, asValueStruct<Tag>(v));

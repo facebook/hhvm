@@ -430,13 +430,13 @@ void DynamicMapPatch::fromObject(detail::Badge, Object obj) {
 
   if (auto patchPrior = get_ptr(obj, op::PatchOp::PatchPrior)) {
     for (auto& [k, v] : patchPrior->as_map()) {
-      patchPrior_[k].fromObject(badge, std::move(v.as_object()));
+      patchPrior_[k].fromObject(std::move(v.as_object()));
     }
   }
 
   if (auto patchAfter = get_ptr(obj, op::PatchOp::PatchAfter)) {
     for (auto& [k, v] : patchAfter->as_map()) {
-      patchAfter_[k].fromObject(badge, std::move(v.as_object()));
+      patchAfter_[k].fromObject(std::move(v.as_object()));
     }
   }
 
@@ -577,7 +577,7 @@ void DynamicStructurePatch<IsUnion>::ensurePatchable() {
     ensure_[fieldId] = emptyValue(field.getType());
     Object patch;
     patch[static_cast<FieldId>(op::PatchOp::Assign)] = std::move(field);
-    patchAfter_[fieldId].fromObject(badge, patch);
+    patchAfter_[fieldId].fromObject(patch);
   }
   assign_.reset();
 }
@@ -626,7 +626,7 @@ void DynamicStructurePatch<IsUnion>::ensureStruct(FieldId id, Value v) {
     ensure_[id] = emptyValue(v.getType());
     Object patch;
     patch[static_cast<FieldId>(op::PatchOp::Assign)] = std::move(v);
-    patchAfter_[id].fromObject(badge, patch);
+    patchAfter_[id].fromObject(patch);
     return;
   }
 
@@ -708,15 +708,13 @@ void DynamicStructurePatch<IsUnion>::fromObject(detail::Badge, Object obj) {
 
   if (auto patchPrior = get_ptr(obj, op::PatchOp::PatchPrior)) {
     for (auto& [k, v] : patchPrior->as_object()) {
-      patchPrior_[static_cast<FieldId>(k)].fromObject(
-          badge, std::move(v.as_object()));
+      patchPrior_[static_cast<FieldId>(k)].fromObject(std::move(v.as_object()));
     }
   }
 
   if (auto patchAfter = get_ptr(obj, op::PatchOp::PatchAfter)) {
     for (auto& [k, v] : patchAfter->as_object()) {
-      patchAfter_[static_cast<FieldId>(k)].fromObject(
-          badge, std::move(v.as_object()));
+      patchAfter_[static_cast<FieldId>(k)].fromObject(std::move(v.as_object()));
     }
   }
 }
@@ -892,7 +890,7 @@ DynamicListPatch DiffVisitorBase::diffList(
   patch.doNotConvertStringToBinary(badge);
 
   if (dst.empty()) {
-    patch.clear(badge);
+    patch.clear();
     return patch;
   }
 
@@ -914,7 +912,7 @@ DynamicSetPatch DiffVisitorBase::diffSet(
   patch.doNotConvertStringToBinary(badge);
 
   if (dst.empty()) {
-    patch.clear(badge);
+    patch.clear();
     return patch;
   }
 
@@ -1062,7 +1060,7 @@ DynamicPatch DiffVisitorBase::diffStructured(
     DynamicUnknownPatch patch;
     if (src != dst) {
       patch.doNotConvertStringToBinary(badge);
-      patch.assign(badge, dst);
+      patch.assign(dst);
     }
     return DynamicPatch{std::move(patch)};
   }
@@ -1090,7 +1088,7 @@ DynamicPatch DiffVisitorBase::diffStructured(
     if (shouldUseAssignPatch) {
       DynamicUnknownPatch patch;
       patch.doNotConvertStringToBinary(badge);
-      patch.assign(badge, dst);
+      patch.assign(dst);
       return DynamicPatch{std::move(patch)};
     }
   }
@@ -1269,7 +1267,7 @@ DynamicPatch DiffVisitorBase::createDynamicUnknownPatchWithAssign(
     const Object& obj) {
   DynamicUnknownPatch patch;
   patch.doNotConvertStringToBinary(badge);
-  patch.assign(badge, obj);
+  patch.assign(obj);
   return DynamicPatch{std::move(patch)};
 }
 
@@ -1299,7 +1297,7 @@ void DynamicListPatch::apply(detail::Badge, detail::ValueList& v) const {
       detail::convertStringToBinary(v);
       value = std::move(v);
     }
-    void clear(detail::Badge) { value.clear(); }
+    void clear() { value.clear(); }
     void push_back(detail::Badge, detail::Value v) {
       detail::convertStringToBinary(v);
       value.push_back(std::move(v));
@@ -1316,7 +1314,7 @@ void DynamicSetPatch::apply(detail::Badge, detail::ValueSet& v) const {
       detail::convertStringToBinary(v);
       value = std::move(v);
     }
-    void clear(detail::Badge) { value.clear(); }
+    void clear() { value.clear(); }
     void addMulti(detail::Badge, const detail::ValueSet& v) {
       for (auto i : v) {
         detail::convertStringToBinary(i);
@@ -1410,7 +1408,7 @@ template void DynamicPatch::merge(DynamicPatch&&);
 template void DynamicPatch::merge(const DynamicPatch&);
 template void DynamicPatch::merge(const DynamicPatch&&);
 
-void DynamicPatch::fromObject(detail::Badge, Object obj) {
+void DynamicPatch::fromObject(Object obj) {
   if (auto p = get_ptr(obj, op::PatchOp::EnsureStruct)) {
     if (p->getType() == Value::Type::objectValue) {
       DynamicStructPatch patch;
@@ -1531,8 +1529,7 @@ void DynamicUnknownPatch::throwIncompatibleCategory(
       method,
       debugStringViaEncode(patch_)));
 }
-void DynamicUnknownPatch::removeMulti(
-    detail::Badge, const detail::ValueSet& v) {
+void DynamicUnknownPatch::removeMulti(const detail::ValueSet& v) {
   if (!isOneOfCategory(
           {Category::EmptyPatch,
            Category::ClearPatch,
@@ -1545,7 +1542,7 @@ void DynamicUnknownPatch::removeMulti(
     s.insert(k);
   }
 }
-void DynamicUnknownPatch::assign(detail::Badge, Object v) {
+void DynamicUnknownPatch::assign(Object v) {
   if (!isOneOfCategory(
           {Category::EmptyPatch,
            Category::ClearPatch,
@@ -1556,8 +1553,7 @@ void DynamicUnknownPatch::assign(detail::Badge, Object v) {
   patch_.members()->clear();
   get(op::PatchOp::Assign).emplace_object(std::move(v));
 }
-void DynamicUnknownPatch::patchIfSet(
-    detail::Badge, FieldId id, const DynamicPatch& p) {
+void DynamicUnknownPatch::patchIfSet(FieldId id, const DynamicPatch& p) {
   if (!isOneOfCategory(
           {Category::EmptyPatch,
            Category::ClearPatch,
@@ -1574,9 +1570,9 @@ void DynamicUnknownPatch::patchIfSet(
   // TODO: optimize this
   DynamicPatch prior, after;
   prior.fromObject(
-      badge, get(op::PatchOp::PatchPrior).ensure_object()[id].ensure_object());
+      get(op::PatchOp::PatchPrior).ensure_object()[id].ensure_object());
   after.fromObject(
-      badge, get(op::PatchOp::PatchAfter).ensure_object()[id].ensure_object());
+      get(op::PatchOp::PatchAfter).ensure_object()[id].ensure_object());
   prior.merge(after);
   prior.merge(p);
   get(op::PatchOp::PatchAfter).ensure_object().erase(id);
@@ -1585,12 +1581,12 @@ void DynamicUnknownPatch::patchIfSet(
 }
 void DynamicUnknownPatch::apply(detail::Badge, Value& v) const {
   struct Visitor {
-    void assign(detail::Badge, detail::Object obj) {
+    void assign(detail::Object obj) {
       detail::convertStringToBinary(obj);
       value.as_object() = std::move(obj);
     }
-    void clear(detail::Badge) { value = emptyValue(value.getType()); }
-    void removeMulti(detail::Badge, const detail::ValueSet& v) {
+    void clear() { value = emptyValue(value.getType()); }
+    void removeMulti(const detail::ValueSet& v) {
       if (auto p = value.if_set()) {
         for (auto k : v) {
           detail::convertStringToBinary(k);
@@ -1603,7 +1599,7 @@ void DynamicUnknownPatch::apply(detail::Badge, Value& v) const {
         }
       }
     }
-    void patchIfSet(detail::Badge, FieldId id, const DynamicPatch& p) {
+    void patchIfSet(FieldId id, const DynamicPatch& p) {
       if (auto field = value.as_object().if_contains(id)) {
         p.apply(*field);
       }
@@ -1611,7 +1607,7 @@ void DynamicUnknownPatch::apply(detail::Badge, Value& v) const {
     Value& value;
   };
 
-  return customVisit(badge, Visitor{v});
+  return customVisit(Visitor{v});
 }
 void DynamicPatch::apply(Value& value) const {
   auto applier = folly::overload(
@@ -1698,7 +1694,7 @@ type::AnyStruct DynamicPatch::toAny(detail::Badge, type::Type type) const {
 
 void DynamicPatch::fromAny(detail::Badge, const type::AnyStruct& any) {
   auto v = protocol::detail::parseValueFromAny(any);
-  fromObject(badge, std::move(v.as_object()));
+  fromObject(std::move(v.as_object()));
 }
 
 template <typename Protocol>
@@ -1716,7 +1712,7 @@ std::uint32_t DynamicPatch::encode(detail::Badge, Protocol& prot) const {
 template <typename Protocol>
 void DynamicPatch::decode(detail::Badge, Protocol& prot) {
   // TODO(dokwon): Provide direct decode to DynamicPatch.
-  fromObject(badge, protocol::parseObject(prot));
+  fromObject(protocol::parseObject(prot));
 }
 
 template <typename Protocol>
@@ -1811,10 +1807,7 @@ class MinSafePatchVersionVisitor {
   // Shared
   template <typename T>
   void assign(const T&) {}
-  template <typename T>
-  void assign(detail::Badge, const T&) {}
   void clear() {}
-  void clear(detail::Badge) {}
   void recurse(const DynamicPatch& patch) {
     // recurse visitPatch
     patch.visitPatch(folly::overload(
@@ -1829,7 +1822,7 @@ class MinSafePatchVersionVisitor {
         [&](const DynamicUnknownPatch& p) {
           // recurse DynamicUnknownPatch for `patchPrior/patchAfter` in
           // `StructuredOrAnyPatch`.
-          p.customVisit(badge, *this);
+          p.customVisit(*this);
         },
         [&](const auto&) {
           // Short circuit all other patch types.
@@ -1848,12 +1841,6 @@ class MinSafePatchVersionVisitor {
   void patchIfSet(FieldId, const DynamicPatch& fieldPatch) {
     recurse(fieldPatch);
   }
-
-  // Unknown
-  void patchIfSet(detail::Badge, FieldId, const DynamicPatch& fieldPatch) {
-    recurse(fieldPatch);
-  }
-  void removeMulti(detail::Badge, const detail::ValueSet&) {}
 
   // Thrift Any
   template <typename... T>

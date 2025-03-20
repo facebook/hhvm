@@ -196,7 +196,7 @@ void AnyPatch<Patch>::DynamicPatchExtractionVisitor::assign(
     protocol::Object patch;
     patch[static_cast<FieldId>(PatchOp::Assign)] =
         protocol::detail::parseValueFromAny(any);
-    patch_.fromObject(badge, patch);
+    patch_.fromObject(patch);
   }
 }
 template <class Patch>

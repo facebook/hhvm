@@ -290,6 +290,7 @@ std::string toSafePatchUri(std::string s) {
 
 } // namespace detail
 
+/// @cond
 std::string toPatchUri(std::string s) {
   if (folly::StringPiece(s).endsWith(detail::kPatchUriSuffix)) {
     folly::throw_exception<std::runtime_error>(
@@ -298,7 +299,9 @@ std::string toPatchUri(std::string s) {
   s += detail::kPatchUriSuffix;
   return s;
 }
+/// @endcond
 
+/// @cond
 std::string fromPatchUri(std::string s) {
   auto newSize = s.size() - detail::kPatchUriSuffix.size();
   if (s.size() <= detail::kPatchUriSuffix.size() ||
@@ -309,7 +312,9 @@ std::string fromPatchUri(std::string s) {
   s.resize(newSize);
   return s;
 }
+/// @endcond
 
+/// @cond
 type::Type toSafePatchType(type::Type input) {
   auto& name = input.toThrift().name().value();
   auto handleUri = [&](auto& type) {
@@ -335,6 +340,7 @@ type::Type toSafePatchType(type::Type input) {
       "Unsupported type: {}",
       apache::thrift::util::enumNameSafe(name.getType())));
 }
+/// @endcond
 
 bool DynamicPatch::empty(detail::Badge badge) const {
   return std::visit(
@@ -980,6 +986,7 @@ DynamicMapPatch DiffVisitorBase::diffMap(
   return patch;
 }
 
+/// @cond
 // Check whether value should not be serialized due to deprecated_terse_writes,
 // but serialized in languages other than C++.
 static bool maybeEmptyDeprecatedTerseField(const Value& value) {
@@ -1011,6 +1018,7 @@ static bool maybeEmptyDeprecatedTerseField(const Value& value) {
       notImpl();
   }
 }
+/// @endcond
 
 void DiffVisitorBase::diffElement(
     const ValueMap& src,
@@ -1238,6 +1246,7 @@ void DiffVisitorBase::pushType(type::Type type) {
   maskInPath_.push(next);
 }
 
+/// @cond
 static std::optional<std::int64_t> getIntegral(const Value& v) {
   switch (v.getType()) {
     case Value::Type::boolValue:
@@ -1254,6 +1263,7 @@ static std::optional<std::int64_t> getIntegral(const Value& v) {
       return {};
   }
 }
+/// @endcond
 
 DynamicPatch DiffVisitorBase::createDynamicUnknownPatchWithAssign(
     const Object& obj) {
@@ -1725,6 +1735,7 @@ void DynamicPatch::decode(detail::Badge, const folly::IOBuf& buf) {
   decode(badge, prot);
 }
 
+/// @cond
 template std::uint32_t DynamicPatch::encode(
     detail::Badge, apache::thrift::BinaryProtocolWriter&) const;
 template std::uint32_t DynamicPatch::encode(
@@ -1741,6 +1752,7 @@ template void DynamicPatch::decode<apache::thrift::BinaryProtocolReader>(
     detail::Badge, const folly::IOBuf&);
 template void DynamicPatch::decode<apache::thrift::CompactProtocolReader>(
     detail::Badge, const folly::IOBuf&);
+/// @endcond
 
 template <typename Protocol>
 std::uint32_t DynamicPatch::DynamicSafePatch::encode(Protocol& prot) const {

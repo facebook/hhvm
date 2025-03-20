@@ -562,24 +562,30 @@ class DynamicUnionPatch : public DynamicStructurePatch<true> {
   using DynamicStructurePatch::remove;
 };
 
+/// Schema-less Patch.
+///
+/// When Static Patch is unavailable, Dynamic Patch offers a schema-less patch
+/// apply, merge, and introspection (requires advanced knowledge of Thrift
+/// Patch).
 class DynamicPatch {
  public:
+  /// @cond
   DynamicPatch();
   DynamicPatch(const DynamicPatch&);
   DynamicPatch& operator=(const DynamicPatch&);
-
   DynamicPatch(DynamicPatch&&) noexcept;
   DynamicPatch& operator=(DynamicPatch&&) noexcept;
   ~DynamicPatch();
+  /// @endcond
 
   template <class T>
   explicit DynamicPatch(T t) : patch_(std::make_unique<Patch>(std::move(t))) {}
 
+  /// Convert DynamicPatch to Protocol Object
   Object toObject() &&;
   Object toObject() const&;
-  type::AnyStruct toAny(detail::Badge, type::Type type) const;
 
-  [[nodiscard]] bool empty(detail::Badge) const;
+  /// Returns if the patch is no-op.
   [[nodiscard]] bool empty() const;
 
   /// Applies the patch to the given value. Throws if the patch is not
@@ -589,19 +595,31 @@ class DynamicPatch {
   /// applicable.
   void applyToDataFieldInsideAny(type::AnyStruct&) const;
 
-  void fromObject(detail::Badge, Object);
-  void fromAny(detail::Badge, const type::AnyStruct& any);
-
   /// Converts SafePatch stored in Thrift Any to DynamicPatch.
   void fromSafePatch(const type::AnyStruct& any);
   /// Stores DynamicPatch as SafePatch in Thrift Any with the provided type
   /// using CompactProtocol.
   type::AnyStruct toSafePatch(type::Type type) const;
 
+  /// Merges another patch into this patch. After the merge
+  /// (`patch.merge(next)`), `patch.apply(value)` is equivalent to
+  /// `next.apply(patch.apply(value))`.
+  template <class Other>
+  detail::if_same_type_after_remove_cvref<Other, DynamicPatch> merge(Other&&);
+
+  /// @cond
+  [[nodiscard]] bool empty(detail::Badge) const;
+
+  void fromAny(detail::Badge, const type::AnyStruct& any);
+  type::AnyStruct toAny(detail::Badge, type::Type type) const;
+
+  void fromObject(detail::Badge, Object);
+
   template <typename Protocol>
   std::uint32_t encode(detail::Badge, Protocol& prot) const;
   template <typename Protocol>
   std::unique_ptr<folly::IOBuf> encode(detail::Badge) const;
+
   template <typename Protocol>
   void decode(detail::Badge, Protocol& prot);
   template <typename Protocol>
@@ -617,16 +635,11 @@ class DynamicPatch {
     return std::get_if<PatchType>(patch_.get());
   }
 
-  /// Merges another patch into this patch. After the merge
-  /// (`patch.merge(next)`), `patch.apply(value)` is equivalent to
-  /// `next.apply(patch.apply(value))`.
-  template <class Other>
-  detail::if_same_type_after_remove_cvref<Other, DynamicPatch> merge(Other&&);
-
   template <class Tag>
   auto& getStoredPatchByTag() {
     return getStoredPatchByTag(Tag{});
   }
+  /// @endcond
 
  private:
   template <class Tag>
@@ -918,11 +931,12 @@ class DiffVisitorBase {
   std::stack<Mask*> maskInPath_{{&path_}};
 };
 
+/// @cond
 // Convert a normal struct uri to patch uri
 std::string toPatchUri(std::string s);
 std::string fromPatchUri(std::string s);
-
 // Convert a struct/union type to SafePatch type
 type::Type toSafePatchType(type::Type input);
+/// @endcond
 
 } // namespace apache::thrift::protocol

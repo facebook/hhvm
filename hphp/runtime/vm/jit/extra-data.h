@@ -3185,6 +3185,7 @@ X(JmpExit,                      IRSPRelOffsetData);
 X(DbgTrashStk,                  IRSPRelOffsetData);
 X(DbgTrashFrame,                IRSPRelOffsetData);
 X(DbgTraceCall,                 IRSPRelOffsetData);
+X(LdClosureArg,                 IndexData);
 X(LdPropAddr,                   IndexData);
 X(LdInitPropAddr,               IndexData);
 X(DeserializeLazyProp,          IndexData);

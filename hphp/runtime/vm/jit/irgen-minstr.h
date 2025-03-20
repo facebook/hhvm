@@ -70,6 +70,13 @@ SSATmp* ldPropAddr(IRGS& env, SSATmp* obj, Block* taken,
                    const Class* cls, Slot slot, const Type& type);
 
 /*
+ * Load a pointer to the argument at the given physical index of some closure.
+ * The caller must know that the argument exists on the closure.
+ */
+SSATmp* ldClosureArg(IRGS& env, SSATmp* obj,
+                   const Class* cls, Slot slot, const Type& type);
+
+/*
  * If the op and operand types are a supported combination, return the modified
  * value. Otherwise, return nullptr. The returned value always has an uncounted
  * type.

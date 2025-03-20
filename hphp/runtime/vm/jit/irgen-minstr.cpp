@@ -1450,6 +1450,16 @@ SSATmp* ldPropAddr(IRGS& env, SSATmp* obj, Block* taken,
     : gen(env, LdPropAddr, data, type, obj);
 }
 
+SSATmp* ldClosureArg(IRGS& env, SSATmp* obj, const Class* cls, Slot slot, const Type& type) {
+  assertx(type <= TCell);
+  assertx(cls != nullptr);
+  assertx(slot != kInvalidSlot);
+
+  auto const data = IndexData { cls->propSlotToIndex(slot) };
+  return gen(env, LdClosureArg, data, type, obj);
+}
+
+
 SSATmp* ptrToInitNull(IRGS& env) {
   // Nothing is allowed to write anything to the init null variant, so this
   // inner type is always true.

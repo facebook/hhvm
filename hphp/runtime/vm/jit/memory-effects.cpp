@@ -1658,6 +1658,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LookupClsCtxCns:
     return may_load_store(AEmpty, AEmpty);
 
+  case LdClosureArg:
+    return PureLoad { 
+      AProp {
+        inst.src(0),
+        safe_cast<uint16_t>(inst.extra<LdClosureArg>()->index)
+      }};
+
   case StClosureArg:
     return PureStore {
       AProp {

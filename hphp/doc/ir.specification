@@ -1197,6 +1197,10 @@ To string conversions:
   deserialized APC value, check if the property is lazy and deserialize it in
   place if so. After this op, the prop will be a valid TypedValue.
 
+| LdClosureArg<T, index>, DParam(Cell), S(Obj), NF
+
+  Loads the argument of closure S0 at physical index `index` into D.
+
 | LdPropAddr<T,index>, D(LvalToProp), S(Obj), NF
 
   Load the address of the object property at physical index `index`.

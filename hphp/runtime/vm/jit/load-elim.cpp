@@ -318,6 +318,7 @@ using Flags = boost::variant<FNone,FRedundant,FReducible,FRefinableLoad,
 // Conservative list of instructions which have type-parameters safe to refine.
 bool refinable_load_eligible(const IRInstruction& inst) {
   switch (inst.op()) {
+    case LdClosureArg:
     case LdLoc:
     case LdStk:
     case LdMem:

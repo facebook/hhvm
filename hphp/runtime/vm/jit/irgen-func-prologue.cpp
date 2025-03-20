@@ -615,8 +615,7 @@ void emitInitClosureLocals(IRGS& env, const Func* callee) {
     auto const slot = index + (cls->hasClosureCoeffectsProp() ? 1 : 0);
     auto const type =
       typeFromRAT(cls->declPropRepoAuthType(slot), callee->cls()) & TCell;
-    auto const addr = ldPropAddr(env, closure, nullptr, cls, slot, type);
-    return gen(env, LdMem, type, addr);
+    return ldClosureArg(env, closure, cls, slot, type);
   };
 
   // Move props and skip incref when closure refcount is 1 and going to be

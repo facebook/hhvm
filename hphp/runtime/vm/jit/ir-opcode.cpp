@@ -730,6 +730,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdARFlags:
   case LdARFunc:
   case LdBindAddr:
+  case LdClosureArg:
   case LdClosureCls:
   case LdClosureThis:
   case LdClsCns:

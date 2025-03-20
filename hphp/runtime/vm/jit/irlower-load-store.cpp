@@ -440,6 +440,18 @@ void cgDeserializeLazyProp(IRLS& env, const IRInstruction* inst) {
   });
 }
 
+void cgLdClosureArg(IRLS& env, const IRInstruction* inst) {
+  auto const src = srcLoc(env, inst, 0).reg();
+  auto const offs = ObjectProps::offsetOf(inst->extra<LdClosureArg>()->index)
+    .shift(sizeof(ObjectData));
+  loadTV(vmain(env), 
+         inst->dst()->type(), 
+         dstLoc(env, inst, 0), 
+         src[offs.typeOffset()], 
+         src[offs.dataOffset()]);
+}
+
+
 void cgLdPropAddr(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const dstLoc = irlower::dstLoc(env, inst, 0);

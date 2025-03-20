@@ -174,6 +174,7 @@ bool canDCE(const IRInstruction& inst) {
   case LdClsMethod:
   case LdSubClsCns:
   case LdIfaceMethod:
+  case LdClosureArg:
   case LdPropAddr:
   case LdObjClass:
   case LdObjInvoke:

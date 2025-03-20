@@ -653,7 +653,7 @@ using TypeNames::TCA;
     always_assert(acls <= AUnknownTV);
     always_assert(acls <= canonicalize(pointee(inst->typeParam())));
   }
-  if (inst->is(LdPropAddr, LdInitPropAddr,
+  if (inst->is(LdClosureArg, LdPropAddr, LdInitPropAddr,
                LdClsPropAddrOrNull, LdClsPropAddrOrRaise)) {
     always_assert(inst->typeParam() <= TCell);
   }

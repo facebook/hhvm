@@ -50,64 +50,9 @@ import weakref as __weakref
 import builtins as _builtins
 import importlib
 
-import apache.thrift.fixtures.types.included.thrift_types as _fbthrift_python_types
-
-from apache.thrift.fixtures.types.included.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
-    std_unordered_map__Map__i32_string,
-    List__std_unordered_map__Map__i32_string,
-)
-
-_fbthrift__module_name__ = "apache.thrift.fixtures.types.included.types"
-
-cdef object get_types_reflection():
-    return importlib.import_module(
-        "apache.thrift.fixtures.types.included.types_reflection"
-    )
-
-cdef _apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string] std_unordered_map__Map__i32_string__make_instance(object items) except *:
-    cdef _apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string] c_inst
-    cdef cint32_t c_key
-    if items is None:
-        return cmove(c_inst)
-    for key, item in items.items():
-        if not isinstance(key, int):
-            raise TypeError(f"{key!r} is not of type int")
-        c_key = <cint32_t> key
-        if not isinstance(item, str):
-            raise TypeError(f"{item!r} is not of type str")
-
-        c_inst[c_key] = item.encode('UTF-8')
-    return cmove(c_inst)
-
-cdef object std_unordered_map__Map__i32_string__from_cpp(const _apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]& c_map) except *:
-    cdef dict py_items = {}
-    cdef __map_iter[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]] iter = __map_iter[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]](c_map)
-    cdef cint32_t ckey = 0
-    cdef string cval
-    for i in range(c_map.size()):
-        iter.genNextKeyVal(ckey, cval)
-        py_items[ckey] = __init_unicode_from_cpp(cval)
-    return std_unordered_map__Map__i32_string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
-
-cdef vector[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]] List__std_unordered_map__Map__i32_string__make_instance(object items) except *:
-    cdef vector[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]] c_inst
-    if items is None:
-        return cmove(c_inst)
-    for item in items:
-        if item is None:
-            raise TypeError("None is not of the type _typing.Mapping[int, str]")
-        if not isinstance(item, std_unordered_map__Map__i32_string):
-            item = std_unordered_map__Map__i32_string(item)
-        c_inst.push_back(std_unordered_map__Map__i32_string__make_instance(item))
-    return cmove(c_inst)
-
-cdef object List__std_unordered_map__Map__i32_string__from_cpp(const vector[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]]& c_vec) except *:
-    cdef list py_list = []
-    cdef int idx = 0
-    for idx in range(c_vec.size()):
-        py_list.append(std_unordered_map__Map__i32_string__from_cpp(c_vec[idx]))
-    return List__std_unordered_map__Map__i32_string(py_list, thrift.py3.types._fbthrift_list_private_ctor)
-
+import apache.thrift.fixtures.types.included.types_inplace_FBTHRIFT_ONLY_DO_NOT_USE as _fbthrift_types_inplace
+std_unordered_map__Map__i32_string = _fbthrift_types_inplace.std_unordered_map__Map__i32_string
+List__std_unordered_map__Map__i32_string = _fbthrift_types_inplace.List__std_unordered_map__Map__i32_string
 
 SomeMap = std_unordered_map__Map__i32_string
 SomeListOfTypeMap = List__std_unordered_map__Map__i32_string

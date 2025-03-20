@@ -97,6 +97,7 @@ import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeN
 {{/hasTypes?}}
 {{/program:includeNamespaces}}
 
+{{^program:inplace_migrate?}}
 import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types as _fbthrift_python_types
 {{#program:hasEnumTypes}}
 from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
@@ -116,7 +117,24 @@ from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:nam
 {{/program:containerTypes}}
 )
 {{/program:hasContainerTypes}}
+{{/program:inplace_migrate?}}
+{{#program:inplace_migrate?}}
+import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types_inplace_FBTHRIFT_ONLY_DO_NOT_USE as _fbthrift_types_inplace
+{{#program:filtered_structs}}
+{{struct:name}} = _fbthrift_types_inplace.{{struct:name}}
+{{/program:filtered_structs}}
+{{#program:enums}}
+{{enum:name}} = _fbthrift_types_inplace.{{enum:name}}
+{{/program:enums}}
+{{#program:containerTypes}}
+{{type:flat_name}} = _fbthrift_types_inplace.{{type:flat_name}}
+{{/program:containerTypes}}
+{{#program:constants}}{{#constant:value}}
+{{constant:name}} = _fbthrift_types_inplace.{{constant:name}}
+{{/constant:value}}{{/program:constants}}
+{{/program:inplace_migrate?}}
 
+{{^program:inplace_migrate?}}
 _fbthrift__module_name__ = "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types"
 
 cdef object get_types_reflection():
@@ -589,6 +607,7 @@ cdef object {{type:flat_name}}__from_cpp(const {{> types/cython_cpp_type}}& c_ma
 {{#program:constants}}{{#constant:value}}
 {{constant:name}} = {{> types/constant_value}}
 {{/constant:value}}{{/program:constants}}
+{{/program:inplace_migrate?}}
 {{#program:filtered_typedefs}}
 {{typedef:name}} = {{#typedef:asType}}{{> types/python_type}}{{/typedef:asType}}
 {{/program:filtered_typedefs}}

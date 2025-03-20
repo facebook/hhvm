@@ -17,6 +17,7 @@
 }}
 {{> common/auto_generated_py}}
 {{^program:auto_migrate?}}
+{{^program:inplace_migrate?}}
 
 {{> types/cimport_std }}
 
@@ -66,4 +67,5 @@ cdef class __{{struct:name}}_FieldsSetter(__StructFieldsSetter):
 
 {{/struct:union?}}
 {{/program:filtered_structs}}
+{{/program:inplace_migrate?}}
 {{/program:auto_migrate?}}

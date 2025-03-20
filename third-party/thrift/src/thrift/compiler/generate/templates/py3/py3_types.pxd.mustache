@@ -60,6 +60,7 @@ cdef extern from "{{program:includePrefix}}gen-python-capi/{{program:name}}/thri
   pass
 {{/program:python_capi_converter?}}
 
+{{^program:inplace_migrate?}}
 {{#program:filtered_structs}}
 
 
@@ -121,6 +122,7 @@ cdef object {{type:flat_name}}__from_cpp(const {{> types/cython_cpp_type}}&) exc
 {{/program:auto_migrate?}}
 
 {{/program:containerTypes}}
+{{/program:inplace_migrate?}}
 
 {{#program:has_stream?}}{{! check if it's a stream case and if not short-circuit it to save get stream_types calls }}
 

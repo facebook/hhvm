@@ -38,12 +38,6 @@ ERROR: File "shape_put_wrong.php", line 22, characters 5-32:
 Too few arguments (required 3 but got 1) (Typing[4104])
   File "Shapes.hhi", line 108, characters 28-30:
   Definition is here
-ERROR: File "shape_put_wrong.php", line 22, characters 26-31:
-Invalid argument (Typing[4110])
-  File "Shapes.hhi", line 109, characters 7-16:
-  Expected `shape(...)`
-  File "shape_put_wrong.php", line 17, characters 15-28:
-  But got `ExampleShape<shape('y' => ExampleString)>`
 ERROR: File "shape_put_wrong.php", line 25, characters 34-39:
 Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
 ERROR: File "shape_put_wrong.php", line 28, characters 5-37:

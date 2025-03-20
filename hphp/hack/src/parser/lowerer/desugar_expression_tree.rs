@@ -1123,22 +1123,16 @@ impl RewriteState {
                     }
                 }
 
-                // type check any special function calls
-                let builtin_virtual_expr =
-                    handle_reserved_call(self, visitor_name, &pos, &recv.2, &args_without_inout);
-
-                let (virtual_args, desugar_args) =
-                    self.rewrite_exprs(args_without_inout, visitor_name);
-
                 match recv.2 {
                     // Source: MyDsl`foo()`
                     // Virtualized: (MyDsl::symbolType($0fpXX)->__unwrap())()
                     // Desugared: $0v->visitCall(new ExprPos(...), $0v->visitGlobalFunction(new ExprPos(...), $0fpXX), vec[])
                     Id(sid) => {
+                        let (virtual_args, desugar_args) =
+                            self.rewrite_exprs(args_without_inout, visitor_name);
                         let len = self.global_function_pointers.len();
                         self.global_function_pointers.push(global_func_ptr(&sid));
                         let temp_variable = temp_function_pointer_lvar(&recv.1, len);
-
                         let desugar_expr = v_meth_call(
                             et::VISIT_CALL,
                             vec![
@@ -1179,8 +1173,7 @@ impl RewriteState {
                     // Source: MyDsl`Foo::bar()`
                     // Virtualized: (MyDsl::symbolType($0smXX)->__unwrap())()
                     // Desugared: $0v->visitCall(new ExprPos(...), $0v->visitStaticMethod(new ExprPos(...), $0smXX, vec[])
-                    ClassConst(cc) => {
-                        let (cid, s) = *cc;
+                    ClassConst(box (cid, s)) => {
                         if let ClassId_::CIexpr(Expr(_, _, Id(sid))) = &cid.2 {
                             if sid.1 == classes::PARENT
                                 || sid.1 == classes::SELF
@@ -1204,45 +1197,55 @@ impl RewriteState {
                         self.static_method_pointers
                             .push(static_meth_ptr(&recv.1, &cid, &s));
                         let temp_variable = temp_static_method_lvar(&recv.1, len);
-
+                        let (virtual_expr, desugar_args) = match cid {
+                            ClassId(
+                                _,
+                                _,
+                                ClassId_::CIexpr(Expr(
+                                    _,
+                                    _,
+                                    aast::Expr_::Id(box ast_defs::Id(_, name)),
+                                )),
+                            ) if name == visitor_name => match s.1.as_ref() {
+                                // type check any special function calls
+                                et::BUILTIN_SHAPE_AT => {
+                                    handle_shapes_at(self, visitor_name, &pos, args_without_inout)
+                                }
+                                et::BUILTIN_SHAPE_PUT => {
+                                    handle_shapes_put(self, visitor_name, &pos, args_without_inout)
+                                }
+                                et::BUILTIN_SHAPE_IDX => {
+                                    handle_shapes_idx(self, visitor_name, &pos, args_without_inout)
+                                }
+                                _ => handle_class_const(
+                                    self,
+                                    visitor_name,
+                                    &pos,
+                                    args_without_inout,
+                                    temp_variable.clone(),
+                                ),
+                            },
+                            _ => handle_class_const(
+                                self,
+                                visitor_name,
+                                &pos,
+                                args_without_inout,
+                                temp_variable.clone(),
+                            ),
+                        };
                         let desugar_expr = v_meth_call(
                             et::VISIT_CALL,
                             vec![
                                 pos_expr.clone(),
                                 v_meth_call(
                                     et::VISIT_STATIC_METHOD,
-                                    vec![pos_expr, temp_variable.clone()],
+                                    vec![pos_expr, temp_variable],
                                     &pos,
                                 ),
                                 vec_literal(desugar_args),
                             ],
                             &pos,
                         );
-
-                        let virtual_expr = match builtin_virtual_expr {
-                            Some(built_in_virtual_expr) => built_in_virtual_expr,
-                            // no builtin, fallback to default behavior
-                            None => Expr(
-                                (),
-                                pos.clone(),
-                                Expr_::mk_call(ast::CallExpr {
-                                    func: _virtualize_call(
-                                        static_meth_call(
-                                            visitor_name,
-                                            et::SYMBOL_TYPE,
-                                            vec![temp_variable],
-                                            &pos,
-                                        ),
-                                        false,
-                                        &pos,
-                                    ),
-                                    targs: vec![],
-                                    args: build_args(virtual_args),
-                                    unpacked_arg: None,
-                                }),
-                            ),
-                        };
-
                         RewriteResult {
                             virtual_expr,
                             desugar_expr,
@@ -1257,6 +1260,8 @@ impl RewriteState {
                             ObjGet(ref og) if og.3 == ast::PropOrMethod::IsMethod => false,
                             _ => true,
                         };
+                        let (virtual_args, desugar_args) =
+                            self.rewrite_exprs(args_without_inout, visitor_name);
                         let rewritten_recv =
                             self.rewrite_expr(Expr((), recv.1, recv.2), visitor_name);
 
@@ -2403,37 +2408,63 @@ impl<'ast> Visitor<'ast> for LiveVars {
     }
 }
 
-// There is a set of static functions that have special meaning in the
-// typechecking process.
-// If this function returns something, the returned expression will be used
-// as virtualization, instead of the call that would otherwise be generated
-fn handle_reserved_call(
+/**
+ * Rewrite the args into virtual and desugared args, treating the second
+ * virtual argument (if present) as a shape field and so using the source
+ * rather than virtualized expression. Wrap the first virtual argument with
+ * an ->unwrap() call.
+ */
+fn rewrite_and_fixup_for_shape_op(
     state: &mut RewriteState,
     visitor_name: &str,
     pos: &Pos,
-    receiver: &Expr_,
-    args: &[Expr],
-) -> Option<Expr> {
-    match receiver {
-        aast::Expr_::ClassConst(cc) => {
-            if let box (
-                ClassId(_, _, ClassId_::CIexpr(Expr(_, _, aast::Expr_::Id(clz_box)))),
-                (_, method),
-            ) = cc
-            {
-                if clz_box.1 == visitor_name {
-                    return match method.as_ref() {
-                        et::BUILTIN_SHAPE_AT => handle_shapes_at(state, visitor_name, pos, args),
-                        et::BUILTIN_SHAPE_PUT => handle_shapes_put(state, visitor_name, pos, args),
-                        et::BUILTIN_SHAPE_IDX => handle_shapes_idx(state, visitor_name, pos, args),
-                        _ => None,
-                    };
-                }
-            }
-            None
-        }
-        _ => None,
+    args: Vec<Expr>,
+    nullsafe: bool,
+) -> (Vec<Expr>, Vec<Expr>) {
+    let field_arg = if args.len() > 1 {
+        Some(args[1].clone())
+    } else {
+        None
+    };
+    let (mut virtual_args, desugar_args) = state.rewrite_exprs(args, visitor_name);
+    if !virtual_args.is_empty() {
+        let mut a = Expr((), Pos::NONE, Expr_::Null);
+        std::mem::swap(&mut virtual_args[0], &mut a);
+        virtual_args[0] = _virtualize_call(a, nullsafe, pos);
     }
+    if let Some(arg) = field_arg {
+        virtual_args[1] = arg;
+    }
+    (virtual_args, desugar_args)
+}
+
+/**
+ * Rewrite the args into virtual and desugared args. Create a virtual expression
+ * that passes the virtual arguments to a call to symbolType(temp_variable)
+ */
+fn handle_class_const(
+    state: &mut RewriteState,
+    visitor_name: &str,
+    pos: &Pos,
+    args: Vec<Expr>,
+    temp_variable: Expr,
+) -> (Expr, Vec<Expr>) {
+    let (virtual_args, desugar_args) = state.rewrite_exprs(args, visitor_name);
+    let virtual_expr = Expr(
+        (),
+        pos.clone(),
+        Expr_::mk_call(ast::CallExpr {
+            func: _virtualize_call(
+                static_meth_call(visitor_name, et::SYMBOL_TYPE, vec![temp_variable], pos),
+                false,
+                pos,
+            ),
+            targs: vec![],
+            args: build_args(virtual_args),
+            unpacked_arg: None,
+        }),
+    );
+    (virtual_expr, desugar_args)
 }
 
 /**
@@ -2446,64 +2477,43 @@ fn handle_shapes_at(
     state: &mut RewriteState,
     visitor_name: &str,
     pos: &Pos,
-    args: &[Expr],
-) -> Option<Expr> {
-    let mut args = args.to_vec();
-    if !args.is_empty() {
-        // Nit: we are actually only interested in the shape's virtual_expr
-        // so we unwrap the first argument here.
-        let shape = state.rewrite_expr(args[0].clone(), visitor_name);
-        args[0] = _virtualize_call(shape.virtual_expr, false, pos)
-    }
-    Some(static_meth_call("Shapes", "at", args.to_vec(), pos))
+    args: Vec<Expr>,
+) -> (Expr, Vec<Expr>) {
+    let (virtual_args, desugar_args) =
+        rewrite_and_fixup_for_shape_op(state, visitor_name, pos, args, false);
+    let virtual_expr = static_meth_call("Shapes", "at", virtual_args, pos);
+    (virtual_expr, desugar_args)
 }
 
 fn handle_shapes_idx(
     state: &mut RewriteState,
     visitor_name: &str,
     pos: &Pos,
-    args: &[Expr],
-) -> Option<Expr> {
-    let mut args = args.to_vec();
-    if args.len() == 2 || args.len() == 3 {
-        // unwrap the shape type
-        args[0] = _virtualize_call(
-            state
-                .rewrite_expr(args[0].clone(), visitor_name)
-                .virtual_expr,
-            true,
-            pos,
-        );
-        if args.len() > 2 {
-            // With 3 args, we need the virtual type of the default value,
-            args[2] = state
-                .rewrite_expr(args[2].clone(), visitor_name)
-                .virtual_expr
-        } else {
-            // ..Otherwise, we need the null type as additional argument
-            args.push(static_meth_call(visitor_name, et::NULL_TYPE, vec![], pos));
-        };
+    args: Vec<Expr>,
+) -> (Expr, Vec<Expr>) {
+    let (mut virtual_args, desugar_args) =
+        rewrite_and_fixup_for_shape_op(state, visitor_name, pos, args, true);
+    if virtual_args.len() == 2 {
+        // We need the null type as additional argument
+        virtual_args.push(static_meth_call(visitor_name, et::NULL_TYPE, vec![], pos));
     }
-    Some(static_meth_call("Shapes", "idx", args, pos))
+    let virtual_expr = static_meth_call("Shapes", "idx", virtual_args, pos);
+    (virtual_expr, desugar_args)
 }
 
 fn handle_shapes_put(
     state: &mut RewriteState,
     visitor_name: &str,
     pos: &Pos,
-    args: &[Expr],
-) -> Option<Expr> {
-    let mut args = args.to_vec();
-    if args.len() > 2 {
-        let shape = state.rewrite_expr(args[0].clone(), visitor_name);
-        let value = state.rewrite_expr(args[2].clone(), visitor_name);
-        args[0] = _virtualize_call(shape.virtual_expr, false, pos);
-        args[2] = value.virtual_expr;
-    }
-    Some(static_meth_call(
+    args: Vec<Expr>,
+) -> (Expr, Vec<Expr>) {
+    let (virtual_args, desugar_args) =
+        rewrite_and_fixup_for_shape_op(state, visitor_name, pos, args, false);
+    let virtual_expr = static_meth_call(
         visitor_name,
         et::SHAPE_TYPE,
-        vec![static_meth_call("Shapes", "put", args, pos)],
+        vec![static_meth_call("Shapes", "put", virtual_args, pos)],
         pos,
-    ))
+    );
+    (virtual_expr, desugar_args)
 }

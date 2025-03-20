@@ -21,6 +21,7 @@ are re-exported via types.pyx
 
 }}
 {{> common/auto_generated_py}}
+{{^program:inplace_migrate?}}
 
 import enum
 import thrift.py3.types
@@ -42,3 +43,4 @@ _fbthrift__module_name__ = "{{#program:py3Namespaces}}{{value}}.{{/program:py3Na
 
 {{/struct:union?}}
 {{/program:filtered_structs}}
+{{/program:inplace_migrate?}}

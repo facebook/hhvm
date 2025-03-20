@@ -60,6 +60,8 @@ class AnEnum(thrift.py3.types.CompiledEnum, int):
 
     def __index__(self):
         return self._fbthrift_value_
+__all__.append("AnEnum")
+
 
 class AnEnumRenamed(thrift.py3.types.CompiledEnum, int):
     name_ = 0
@@ -92,6 +94,8 @@ class AnEnumRenamed(thrift.py3.types.CompiledEnum, int):
 
     def __index__(self):
         return self._fbthrift_value_
+__all__.append("AnEnumRenamed")
+
 
 class Flags(thrift.py3.types.Flag):
     flag_A = 1
@@ -125,6 +129,8 @@ class Flags(thrift.py3.types.Flag):
 
     def __index__(self):
         return self._fbthrift_value_
+__all__.append("Flags")
+
 
 ### Union Enums ###
 
@@ -134,6 +140,8 @@ class __BinaryUnionType(enum.Enum):
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
+__all__.append("__BinaryUnionType")
+
 
 ### Containers ###
 class List__i16(thrift.py3.types.List):
@@ -176,6 +184,8 @@ class List__i16(thrift.py3.types.List):
 Sequence.register(List__i16)
 
 
+__all__.append("List__i16")
+
 class List__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -216,6 +226,8 @@ class List__i32(thrift.py3.types.List):
 Sequence.register(List__i32)
 
 
+__all__.append("List__i32")
+
 class List__i64(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -255,6 +267,8 @@ class List__i64(thrift.py3.types.List):
 
 Sequence.register(List__i64)
 
+
+__all__.append("List__i64")
 
 class List__string(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
@@ -298,6 +312,8 @@ class List__string(thrift.py3.types.List):
 Sequence.register(List__string)
 
 
+__all__.append("List__string")
+
 class List__SimpleStruct(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -338,6 +354,8 @@ class List__SimpleStruct(thrift.py3.types.List):
 Sequence.register(List__SimpleStruct)
 
 
+__all__.append("List__SimpleStruct")
+
 class Set__i32(thrift.py3.types.Set):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -377,6 +395,8 @@ class Set__i32(thrift.py3.types.Set):
 
 Set.register(Set__i32)
 
+
+__all__.append("Set__i32")
 
 class Set__string(thrift.py3.types.Set):
     __module__ = _fbthrift__module_name__
@@ -419,6 +439,8 @@ class Set__string(thrift.py3.types.Set):
 
 Set.register(Set__string)
 
+
+__all__.append("Set__string")
 
 class Map__string_string(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
@@ -470,6 +492,8 @@ class Map__string_string(thrift.py3.types.Map):
 
 Mapping.register(Map__string_string)
 
+__all__.append("Map__string_string")
+
 class Map__string_SimpleStruct(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -519,6 +543,8 @@ class Map__string_SimpleStruct(thrift.py3.types.Map):
 
 
 Mapping.register(Map__string_SimpleStruct)
+
+__all__.append("Map__string_SimpleStruct")
 
 class Map__string_i16(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
@@ -570,6 +596,8 @@ class Map__string_i16(thrift.py3.types.Map):
 
 Mapping.register(Map__string_i16)
 
+__all__.append("Map__string_i16")
+
 class List__List__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -613,6 +641,8 @@ class List__List__i32(thrift.py3.types.List):
 
 Sequence.register(List__List__i32)
 
+
+__all__.append("List__List__i32")
 
 class Map__string_i32(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
@@ -664,6 +694,8 @@ class Map__string_i32(thrift.py3.types.Map):
 
 Mapping.register(Map__string_i32)
 
+__all__.append("Map__string_i32")
+
 class Map__string_Map__string_i32(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -714,6 +746,8 @@ class Map__string_Map__string_i32(thrift.py3.types.Map):
 
 Mapping.register(Map__string_Map__string_i32)
 
+__all__.append("Map__string_Map__string_i32")
+
 class List__Set__string(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -757,6 +791,8 @@ class List__Set__string(thrift.py3.types.List):
 
 Sequence.register(List__Set__string)
 
+
+__all__.append("List__Set__string")
 
 class Map__string_List__SimpleStruct(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
@@ -808,6 +844,8 @@ class Map__string_List__SimpleStruct(thrift.py3.types.Map):
 
 Mapping.register(Map__string_List__SimpleStruct)
 
+__all__.append("Map__string_List__SimpleStruct")
+
 class List__List__string(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -851,6 +889,8 @@ class List__List__string(thrift.py3.types.List):
 
 Sequence.register(List__List__string)
 
+
+__all__.append("List__List__string")
 
 class List__Set__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
@@ -896,6 +936,8 @@ class List__Set__i32(thrift.py3.types.List):
 Sequence.register(List__Set__i32)
 
 
+__all__.append("List__Set__i32")
+
 class List__Map__string_string(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -940,6 +982,8 @@ class List__Map__string_string(thrift.py3.types.List):
 Sequence.register(List__Map__string_string)
 
 
+__all__.append("List__Map__string_string")
+
 class List__binary(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -981,6 +1025,8 @@ class List__binary(thrift.py3.types.List):
 
 Sequence.register(List__binary)
 
+
+__all__.append("List__binary")
 
 class Set__binary(thrift.py3.types.Set):
     __module__ = _fbthrift__module_name__
@@ -1024,6 +1070,8 @@ class Set__binary(thrift.py3.types.Set):
 Set.register(Set__binary)
 
 
+__all__.append("Set__binary")
+
 class List__AnEnum(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -1064,6 +1112,8 @@ class List__AnEnum(thrift.py3.types.List):
 
 Sequence.register(List__AnEnum)
 
+
+__all__.append("List__AnEnum")
 
 class _std_unordered_map__Map__i32_i32(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
@@ -1115,6 +1165,8 @@ class _std_unordered_map__Map__i32_i32(thrift.py3.types.Map):
 
 Mapping.register(_std_unordered_map__Map__i32_i32)
 
+__all__.append("_std_unordered_map__Map__i32_i32")
+
 class _MyType__List__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -1155,6 +1207,8 @@ class _MyType__List__i32(thrift.py3.types.List):
 Sequence.register(_MyType__List__i32)
 
 
+__all__.append("_MyType__List__i32")
+
 class _MyType__Set__i32(thrift.py3.types.Set):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -1194,6 +1248,8 @@ class _MyType__Set__i32(thrift.py3.types.Set):
 
 Set.register(_MyType__Set__i32)
 
+
+__all__.append("_MyType__Set__i32")
 
 class _MyType__Map__i32_i32(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
@@ -1245,6 +1301,8 @@ class _MyType__Map__i32_i32(thrift.py3.types.Map):
 
 Mapping.register(_MyType__Map__i32_i32)
 
+__all__.append("_MyType__Map__i32_i32")
+
 class _py3_simple_AdaptedList__List__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -1285,6 +1343,8 @@ class _py3_simple_AdaptedList__List__i32(thrift.py3.types.List):
 Sequence.register(_py3_simple_AdaptedList__List__i32)
 
 
+__all__.append("_py3_simple_AdaptedList__List__i32")
+
 class _py3_simple_AdaptedSet__Set__i32(thrift.py3.types.Set):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -1324,6 +1384,8 @@ class _py3_simple_AdaptedSet__Set__i32(thrift.py3.types.Set):
 
 Set.register(_py3_simple_AdaptedSet__Set__i32)
 
+
+__all__.append("_py3_simple_AdaptedSet__Set__i32")
 
 class _py3_simple_AdaptedMap__Map__i32_i32(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
@@ -1375,6 +1437,8 @@ class _py3_simple_AdaptedMap__Map__i32_i32(thrift.py3.types.Map):
 
 Mapping.register(_py3_simple_AdaptedMap__Map__i32_i32)
 
+__all__.append("_py3_simple_AdaptedMap__Map__i32_i32")
+
 class Map__i32_double(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -1425,6 +1489,8 @@ class Map__i32_double(thrift.py3.types.Map):
 
 Mapping.register(Map__i32_double)
 
+__all__.append("Map__i32_double")
+
 class List__Map__i32_double(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -1468,6 +1534,8 @@ class List__Map__i32_double(thrift.py3.types.List):
 
 Sequence.register(List__Map__i32_double)
 
+
+__all__.append("List__Map__i32_double")
 
 class Map__AnEnumRenamed_i32(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
@@ -1520,45 +1588,85 @@ class Map__AnEnumRenamed_i32(thrift.py3.types.Map):
 
 Mapping.register(Map__AnEnumRenamed_i32)
 
+__all__.append("Map__AnEnumRenamed_i32")
+
 
 ### Structured Types ###
 class SimpleException:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("SimpleException")
+
 class OptionalRefStruct:
     __module__ = _fbthrift__module_name__
 
+
+__all__.append("OptionalRefStruct")
 
 class SimpleStruct:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("SimpleStruct")
+
 class HiddenTypeFieldsStruct:
     __module__ = _fbthrift__module_name__
 
+
+__all__.append("HiddenTypeFieldsStruct")
 
 class ComplexStruct:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("ComplexStruct")
+
 class BinaryUnion:
     __module__ = _fbthrift__module_name__
 
+
+__all__.append("BinaryUnion")
 
 class BinaryUnionStruct:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("BinaryUnionStruct")
+
 class CustomFields:
     __module__ = _fbthrift__module_name__
 
+
+__all__.append("CustomFields")
 
 class CustomTypedefFields:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("CustomTypedefFields")
+
 class AdaptedTypedefFields:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("AdaptedTypedefFields")
+
+
+### Constants
+A_BOOL = True
+A_BYTE = 8
+THE_ANSWER = 42
+A_NUMBER = 84
+A_BIG_NUMBER = 102
+A_REAL_NUMBER = 3.14
+A_FAKE_NUMBER = 3.0
+A_WORD = "Good word"
+SOME_BYTES = b"bytes"
+A_STRUCT = SimpleStruct(is_on=True, tiny_int=5, small_int=6, nice_sized_int=7, big_int=8, real=9.9)
+EMPTY = SimpleStruct()
+WORD_LIST = List__string(("the", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog", ))
+SOME_MAP = List__Map__i32_double((Map__i32_double( { 1: 1.1, 2: 2.2 }), Map__i32_double( { 3: 3.3 }), ))
+DIGITS = Set__i32((1, 2, 3, 4, 5, ))
+A_CONST_MAP = Map__string_SimpleStruct( { "simple": SimpleStruct(is_on=False, tiny_int=50, small_int=61, nice_sized_int=72, big_int=83, real=99.9) })
+ANOTHER_CONST_MAP = Map__AnEnumRenamed_i32( { AnEnumRenamed.name_: 0, AnEnumRenamed.value_: 1, AnEnumRenamed.renamed_: 2 })

@@ -80,6 +80,8 @@ class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
 
 Mapping.register(std_unordered_map__Map__i32_string)
 
+__all__.append("std_unordered_map__Map__i32_string")
+
 class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -124,5 +126,9 @@ class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
 Sequence.register(List__std_unordered_map__Map__i32_string)
 
 
+__all__.append("List__std_unordered_map__Map__i32_string")
+
 
 ### Structured Types ###
+
+### Constants

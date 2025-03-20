@@ -42,6 +42,6 @@ from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:nam
 {{/program:hasContainerTypes}}
 
 {{#program:constants}}{{#constant:value}}
-{{constant:name}} = {{> types/constant_value_py }}
+{{constant:name}} = {{> inplace/constant_value_py }}
 {{/constant:value}}{{/program:constants}}
 {{/program:hasConstants}}

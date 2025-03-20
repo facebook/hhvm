@@ -61,6 +61,8 @@ class has_bitwise_ops(thrift.py3.types.CompiledEnum, int):
 
     def __index__(self):
         return self._fbthrift_value_
+__all__.append("has_bitwise_ops")
+
 
 class is_unscoped(thrift.py3.types.CompiledEnum, int):
     hello = 0
@@ -92,6 +94,8 @@ class is_unscoped(thrift.py3.types.CompiledEnum, int):
 
     def __index__(self):
         return self._fbthrift_value_
+__all__.append("is_unscoped")
+
 
 class MyForwardRefEnum(thrift.py3.types.CompiledEnum, int):
     ZERO = 0
@@ -123,6 +127,8 @@ class MyForwardRefEnum(thrift.py3.types.CompiledEnum, int):
 
     def __index__(self):
         return self._fbthrift_value_
+__all__.append("MyForwardRefEnum")
+
 
 ### Union Enums ###
 
@@ -177,6 +183,8 @@ class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
 
 Mapping.register(std_unordered_map__Map__i32_string)
 
+__all__.append("std_unordered_map__Map__i32_string")
+
 class List__i64(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -216,6 +224,8 @@ class List__i64(thrift.py3.types.List):
 
 Sequence.register(List__i64)
 
+
+__all__.append("List__i64")
 
 class Map__binary_i64(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
@@ -267,6 +277,8 @@ class Map__binary_i64(thrift.py3.types.Map):
 
 Mapping.register(Map__binary_i64)
 
+__all__.append("Map__binary_i64")
+
 class List__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -306,6 +318,8 @@ class List__i32(thrift.py3.types.List):
 
 Sequence.register(List__i32)
 
+
+__all__.append("List__i32")
 
 class std_list__List__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
@@ -347,6 +361,8 @@ class std_list__List__i32(thrift.py3.types.List):
 Sequence.register(std_list__List__i32)
 
 
+__all__.append("std_list__List__i32")
+
 class std_deque__List__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -386,6 +402,8 @@ class std_deque__List__i32(thrift.py3.types.List):
 
 Sequence.register(std_deque__List__i32)
 
+
+__all__.append("std_deque__List__i32")
 
 class folly_fbvector__List__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
@@ -427,6 +445,8 @@ class folly_fbvector__List__i32(thrift.py3.types.List):
 Sequence.register(folly_fbvector__List__i32)
 
 
+__all__.append("folly_fbvector__List__i32")
+
 class folly_small_vector__List__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -467,6 +487,8 @@ class folly_small_vector__List__i32(thrift.py3.types.List):
 Sequence.register(folly_small_vector__List__i32)
 
 
+__all__.append("folly_small_vector__List__i32")
+
 class folly_sorted_vector_set__Set__i32(thrift.py3.types.Set):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -506,6 +528,8 @@ class folly_sorted_vector_set__Set__i32(thrift.py3.types.Set):
 
 Set.register(folly_sorted_vector_set__Set__i32)
 
+
+__all__.append("folly_sorted_vector_set__Set__i32")
 
 class Map__i32_string(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
@@ -557,6 +581,8 @@ class Map__i32_string(thrift.py3.types.Map):
 
 Mapping.register(Map__i32_string)
 
+__all__.append("Map__i32_string")
+
 class std_list_int32_t__List__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -596,6 +622,8 @@ class std_list_int32_t__List__i32(thrift.py3.types.List):
 
 Sequence.register(std_list_int32_t__List__i32)
 
+
+__all__.append("std_list_int32_t__List__i32")
 
 class Map__string_i32(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
@@ -647,6 +675,8 @@ class Map__string_i32(thrift.py3.types.Map):
 
 Mapping.register(Map__string_i32)
 
+__all__.append("Map__string_i32")
+
 class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -690,6 +720,8 @@ class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
 
 Sequence.register(List__std_unordered_map__Map__i32_string)
 
+
+__all__.append("List__std_unordered_map__Map__i32_string")
 
 class Map__i32_IncompleteMapDep(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
@@ -741,6 +773,8 @@ class Map__i32_IncompleteMapDep(thrift.py3.types.Map):
 
 Mapping.register(Map__i32_IncompleteMapDep)
 
+__all__.append("Map__i32_IncompleteMapDep")
+
 class std_unordered_map__Map__i32_CompleteMapDep(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -791,6 +825,8 @@ class std_unordered_map__Map__i32_CompleteMapDep(thrift.py3.types.Map):
 
 Mapping.register(std_unordered_map__Map__i32_CompleteMapDep)
 
+__all__.append("std_unordered_map__Map__i32_CompleteMapDep")
+
 class _std_list__List__IncompleteListDep(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -830,6 +866,8 @@ class _std_list__List__IncompleteListDep(thrift.py3.types.List):
 
 Sequence.register(_std_list__List__IncompleteListDep)
 
+
+__all__.append("_std_list__List__IncompleteListDep")
 
 class folly_small_vector__List__CompleteListDep(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
@@ -871,6 +909,8 @@ class folly_small_vector__List__CompleteListDep(thrift.py3.types.List):
 Sequence.register(folly_small_vector__List__CompleteListDep)
 
 
+__all__.append("folly_small_vector__List__CompleteListDep")
+
 class List__AdaptedListDep(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -910,6 +950,8 @@ class List__AdaptedListDep(thrift.py3.types.List):
 
 Sequence.register(List__AdaptedListDep)
 
+
+__all__.append("List__AdaptedListDep")
 
 class List__DependentAdaptedListDep(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
@@ -951,6 +993,8 @@ class List__DependentAdaptedListDep(thrift.py3.types.List):
 Sequence.register(List__DependentAdaptedListDep)
 
 
+__all__.append("List__DependentAdaptedListDep")
+
 class Set__i32(thrift.py3.types.Set):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -990,6 +1034,8 @@ class Set__i32(thrift.py3.types.Set):
 
 Set.register(Set__i32)
 
+
+__all__.append("Set__i32")
 
 class Map__i32_i32(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
@@ -1041,137 +1087,207 @@ class Map__i32_i32(thrift.py3.types.Map):
 
 Mapping.register(Map__i32_i32)
 
+__all__.append("Map__i32_i32")
+
 
 ### Structured Types ###
 class empty_struct:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("empty_struct")
+
 class decorated_struct:
     __module__ = _fbthrift__module_name__
 
+
+__all__.append("decorated_struct")
 
 class ContainerStruct:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("ContainerStruct")
+
 class CppTypeStruct:
     __module__ = _fbthrift__module_name__
 
+
+__all__.append("CppTypeStruct")
 
 class VirtualStruct:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("VirtualStruct")
+
 class MyStructWithForwardRefEnum:
     __module__ = _fbthrift__module_name__
 
+
+__all__.append("MyStructWithForwardRefEnum")
 
 class TrivialNumeric:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("TrivialNumeric")
+
 class TrivialNestedWithDefault:
     __module__ = _fbthrift__module_name__
 
+
+__all__.append("TrivialNestedWithDefault")
 
 class ComplexString:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("ComplexString")
+
 class ComplexNestedWithDefault:
     __module__ = _fbthrift__module_name__
 
+
+__all__.append("ComplexNestedWithDefault")
 
 class MinPadding:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("MinPadding")
+
 class MinPaddingWithCustomType:
     __module__ = _fbthrift__module_name__
 
+
+__all__.append("MinPaddingWithCustomType")
 
 class MyStruct:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("MyStruct")
+
 class MyDataItem:
     __module__ = _fbthrift__module_name__
 
+
+__all__.append("MyDataItem")
 
 class Renaming:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("Renaming")
+
 class AnnotatedTypes:
     __module__ = _fbthrift__module_name__
 
+
+__all__.append("AnnotatedTypes")
 
 class ForwardUsageRoot:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("ForwardUsageRoot")
+
 class ForwardUsageStruct:
     __module__ = _fbthrift__module_name__
 
+
+__all__.append("ForwardUsageStruct")
 
 class ForwardUsageByRef:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("ForwardUsageByRef")
+
 class IncompleteMap:
     __module__ = _fbthrift__module_name__
 
+
+__all__.append("IncompleteMap")
 
 class IncompleteMapDep:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("IncompleteMapDep")
+
 class CompleteMap:
     __module__ = _fbthrift__module_name__
 
+
+__all__.append("CompleteMap")
 
 class CompleteMapDep:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("CompleteMapDep")
+
 class IncompleteList:
     __module__ = _fbthrift__module_name__
 
+
+__all__.append("IncompleteList")
 
 class IncompleteListDep:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("IncompleteListDep")
+
 class CompleteList:
     __module__ = _fbthrift__module_name__
 
+
+__all__.append("CompleteList")
 
 class CompleteListDep:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("CompleteListDep")
+
 class AdaptedList:
     __module__ = _fbthrift__module_name__
 
+
+__all__.append("AdaptedList")
 
 class DependentAdaptedList:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("DependentAdaptedList")
+
 class AllocatorAware:
     __module__ = _fbthrift__module_name__
 
+
+__all__.append("AllocatorAware")
 
 class AllocatorAware2:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("AllocatorAware2")
+
 class TypedefStruct:
     __module__ = _fbthrift__module_name__
 
+
+__all__.append("TypedefStruct")
 
 class StructWithDoubleUnderscores:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("StructWithDoubleUnderscores")
+
+
+### Constants

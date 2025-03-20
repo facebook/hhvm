@@ -41,7 +41,7 @@ file.
     }}{{/value:const_struct_type}}{{!
     }}({{#value:const_struct}}{{!
         }}{{constant:name}}={{#constant:type}}{{#constant:value}}{{!
-            }}{{> types/constant_value_py }}{{!
+            }}{{> inplace/constant_value_py }}{{!
         }}{{/constant:value}}{{/constant:type}}{{^last?}}, {{/last?}}{{!
     }}{{/value:const_struct}}){{!
 }}{{/value:const_struct?}}{{!
@@ -53,15 +53,15 @@ file.
 }}{{#value:map?}}{{!
     }}{{#value:const_container_type}}{{type:flat_name}}( { {{! open brace
         }}{{#value:map_elements}}{{!
-            }}{{#element:key}}{{> types/constant_value_py }}{{/element:key}}: {{!
-            }}{{#element:value}}{{> types/constant_value_py }}{{/element:value}}{{^last?}}, {{/last?}}{{!
+            }}{{#element:key}}{{> inplace/constant_value_py }}{{/element:key}}: {{!
+            }}{{#element:value}}{{> inplace/constant_value_py }}{{/element:value}}{{^last?}}, {{/last?}}{{!
         }}{{/value:map_elements}} }){{!
     }}{{/value:const_container_type}}{{!
 }}{{/value:map?}}{{!
 }}{{#value:list?}}{{! note, this includes set as well
     }}{{#value:const_container_type}}{{type:flat_name}}(({{!
         }}{{! trailing comma mandatory for one-item case
-        }}{{#value:list_elements}}{{> types/constant_value_py }}, {{!
+        }}{{#value:list_elements}}{{> inplace/constant_value_py }}, {{!
     }}{{/value:list_elements}})){{/value:const_container_type}}{{!
 }}{{/value:list?}}{{!
 }}{{/value:const_struct?}}{{!

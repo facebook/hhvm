@@ -33,6 +33,7 @@ want to include.
 
 }}
 {{> common/auto_generated_py}}
+{{^program:inplace_migrate?}}
 
 import thrift.py3.types
 import importlib
@@ -67,3 +68,4 @@ __all__.append('{{type:flat_name}}')
 
 
 {{/program:containerTypes}}
+{{/program:inplace_migrate?}}

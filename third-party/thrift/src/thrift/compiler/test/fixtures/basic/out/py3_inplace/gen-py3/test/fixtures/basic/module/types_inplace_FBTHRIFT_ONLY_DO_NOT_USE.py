@@ -57,6 +57,8 @@ class MyEnum(thrift.py3.types.CompiledEnum, int):
 
     def __index__(self):
         return self._fbthrift_value_
+__all__.append("MyEnum")
+
 
 class HackEnum(thrift.py3.types.CompiledEnum, int):
     Value1 = 0
@@ -88,6 +90,8 @@ class HackEnum(thrift.py3.types.CompiledEnum, int):
 
     def __index__(self):
         return self._fbthrift_value_
+__all__.append("HackEnum")
+
 
 ### Union Enums ###
 
@@ -100,6 +104,8 @@ class __MyUnionType(enum.Enum):
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
+__all__.append("__MyUnionType")
+
 
 class __UnionToBeRenamedType(enum.Enum):
     reserved_field = 1
@@ -107,6 +113,8 @@ class __UnionToBeRenamedType(enum.Enum):
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()
+__all__.append("__UnionToBeRenamedType")
+
 
 ### Containers ###
 class Set__float(thrift.py3.types.Set):
@@ -149,6 +157,8 @@ class Set__float(thrift.py3.types.Set):
 Set.register(Set__float)
 
 
+__all__.append("Set__float")
+
 class List__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -188,6 +198,8 @@ class List__i32(thrift.py3.types.List):
 
 Sequence.register(List__i32)
 
+
+__all__.append("List__i32")
 
 class Set__string(thrift.py3.types.Set):
     __module__ = _fbthrift__module_name__
@@ -230,6 +242,8 @@ class Set__string(thrift.py3.types.Set):
 
 Set.register(Set__string)
 
+
+__all__.append("Set__string")
 
 class Map__string_i64(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
@@ -281,6 +295,8 @@ class Map__string_i64(thrift.py3.types.Map):
 
 Mapping.register(Map__string_i64)
 
+__all__.append("Map__string_i64")
+
 class Map__string_List__i32(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -331,37 +347,66 @@ class Map__string_List__i32(thrift.py3.types.Map):
 
 Mapping.register(Map__string_List__i32)
 
+__all__.append("Map__string_List__i32")
+
 
 ### Structured Types ###
 class MyStruct:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("MyStruct")
+
 class Containers:
     __module__ = _fbthrift__module_name__
 
+
+__all__.append("Containers")
 
 class MyDataItem:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("MyDataItem")
+
 class MyUnion:
     __module__ = _fbthrift__module_name__
 
+
+__all__.append("MyUnion")
 
 class MyException:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("MyException")
+
 class MyExceptionWithMessage:
     __module__ = _fbthrift__module_name__
 
+
+__all__.append("MyExceptionWithMessage")
 
 class ReservedKeyword:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("ReservedKeyword")
+
 class UnionToBeRenamed:
     __module__ = _fbthrift__module_name__
 
 
+__all__.append("UnionToBeRenamed")
+
+
+### Constants
+FLAG = True
+OFFSET = -10
+COUNT = 200
+MASK = 16388846
+E = 2.718281828459
+DATE = "June 28, 2017"
+AList = List__i32((2, 3, 5, 7, ))
+ASet = Set__string(("foo", "bar", "baz", ))
+AMap = Map__string_List__i32( { "foo": List__i32((1, 2, 3, 4, )), "bar": List__i32((10, 32, 54, )) })

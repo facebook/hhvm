@@ -21,6 +21,7 @@ are re-exported via types.pyx
 
 }}
 {{> common/auto_generated_py}}
+{{#program:inplace_migrate?}}
 
 from __future__ import annotations
 
@@ -52,6 +53,10 @@ __all__ = []
 
 {{> inplace/enum_py }}
 
+{{#program:inplace_migrate?}}
+__all__.append("{{enum:name}}")
+
+{{/program:inplace_migrate?}}
 {{/program:enums}}
 
 ### Union Enums ###
@@ -60,6 +65,10 @@ __all__ = []
 
 {{> inplace/union_enum_py }}
 
+{{#program:inplace_migrate?}}
+__all__.append("__{{struct:name}}Type")
+
+{{/program:inplace_migrate?}}
 {{/struct:union?}}
 {{/program:filtered_structs}}
 
@@ -67,6 +76,10 @@ __all__ = []
 {{#program:containerTypes}}
 {{> inplace/container }}
 
+{{#program:inplace_migrate?}}
+__all__.append("{{type:flat_name}}")
+
+{{/program:inplace_migrate?}}
 {{/program:containerTypes}}
 
 ### Structured Types ###
@@ -75,4 +88,14 @@ class {{struct:name}}:
     __module__ = _fbthrift__module_name__
 
 
+{{#program:inplace_migrate?}}
+__all__.append("{{struct:name}}")
+
+{{/program:inplace_migrate?}}
 {{/program:filtered_structs}}
+
+### Constants
+{{#program:constants}}{{#constant:value}}
+{{constant:name}} = {{> inplace/constant_value_py }}
+{{/constant:value}}{{/program:constants}}
+{{/program:inplace_migrate?}}

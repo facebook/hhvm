@@ -176,22 +176,7 @@ class RootRoute {
           rh,
       const Request& req,
       carbon::GetLikeT<Request> = 0) const {
-    auto reply = doRoute(rh, req);
-    if (FOLLY_UNLIKELY(
-            isErrorResult(*reply.result_ref()) && opts_.miss_on_get_errors &&
-            !rh.empty())) {
-      /* rh.empty() case: for backwards compatibility,
-         always surface invalid routing errors */
-      auto originalResult = *reply.result_ref();
-      reply = createReply(DefaultReply, req);
-      carbon::setMessageIfPresent(
-          reply,
-          folly::to<std::string>(
-              "Error reply transformed into miss due to miss_on_get_errors. "
-              "Original reply result: ",
-              carbon::resultToString(originalResult)));
-    }
-    return reply;
+    return doRoute(rh, req);
   }
 
   template <class Request>

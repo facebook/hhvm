@@ -669,6 +669,7 @@ std::string_view field_qualifier_to_string(t_field_qualifier qualifier) {
     case t_field_qualifier::terse:
       return "terse";
   }
+  abort();
 }
 
 void validate_field_default_value(sema_context& ctx, const t_field& field) {

@@ -159,6 +159,7 @@ std::optional<t_type::value_type> t_type::as_value_type() const {
     case type::t_void:
       return std::nullopt;
   }
+  abort();
 }
 
 } // namespace apache::thrift::compiler

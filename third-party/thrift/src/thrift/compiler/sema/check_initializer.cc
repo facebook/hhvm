@@ -198,6 +198,7 @@ class compatibility_checker {
       case t_primitive_type::type::t_float:
         return check_float<float>(value, type);
     }
+    abort();
   }
 
   bool check_enum(const t_enum* type, const t_const_value* value) {
@@ -407,6 +408,7 @@ class default_value_checker final {
         // Should never be called for void
         throw std::logic_error("t_void does not have a default value.");
     }
+    abort();
   }
 
   static bool check_enum(const t_const_value& value) {

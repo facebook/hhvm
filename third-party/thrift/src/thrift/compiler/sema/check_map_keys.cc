@@ -73,6 +73,7 @@ std::string to_string(const t_const_value* val) {
     case t_const_value::CV_MAP:
       return to_string(val->get_map());
   }
+  abort();
 }
 
 bool equal_value(const t_const_value* a, const t_const_value* b);
@@ -118,6 +119,7 @@ bool equal_value(const t_const_value* a, const t_const_value* b) {
     case t_const_value::CV_MAP:
       return equal_value(a->get_map(), b->get_map());
   }
+  abort();
 }
 
 bool lt_value(const t_const_value* a, const t_const_value* b);
@@ -164,6 +166,7 @@ bool lt_value(const t_const_value* a, const t_const_value* b) {
     case t_const_value::CV_MAP:
       return lt_value(a->get_map(), b->get_map());
   }
+  abort();
 }
 
 struct const_value_comp {

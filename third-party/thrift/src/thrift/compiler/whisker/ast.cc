@@ -115,6 +115,7 @@ std::string_view pragma_statement::to_string() const {
     case pragma_statement::pragmas::ignore_newlines:
       return "ignore-newlines";
   }
+  abort();
 }
 
 } // namespace whisker::ast

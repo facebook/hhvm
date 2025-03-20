@@ -72,6 +72,7 @@ t_type::value_type from_const_value_type(
     case t_const_value::t_const_value_kind::CV_IDENTIFIER:
       return t_type::value_type::STRING;
   }
+  abort();
 }
 } // namespace
 
@@ -780,6 +781,7 @@ const char* protocol_value_type_name(t_type::value_type ty) {
     case t_type::value_type::MAP:
       return "mapValue";
   }
+  abort();
 }
 
 protocol_value_builder::protocol_value_builder(const t_type& struct_ty)

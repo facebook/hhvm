@@ -71,6 +71,7 @@ decltype(auto) visit_type(const t_type& ty, Visitors&&... visitors) {
     case t_type::type::t_service:
       return std::invoke(f, dynamic_cast<const t_service&>(ty));
   }
+  abort();
 }
 
 } // namespace apache::thrift::compiler::detail

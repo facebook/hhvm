@@ -134,7 +134,7 @@ void Controller::runMonitor(double interval) {
       uint64_t currentQps = monitor_->getCurrentQps();
       uint64_t desiredQps = config_->getDesiredQPS();
 
-      if (currentQps < desiredQps) {
+      if (currentQps != 0 && currentQps < desiredQps) {
         uint32_t numNewWorkerThreads =
             (desiredQps - currentQps) * numThreads_ / currentQps;
         numNewWorkerThreads =

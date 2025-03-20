@@ -101,6 +101,16 @@ struct source {
   std::string_view text; // The source text including a terminating '\0'.
 };
 
+namespace detail {
+// Due to clang/gcc bugs we can't put this inside `source_manager`
+// clang bug: https://bugs.llvm.org/show_bug.cgi?id=36684
+// gcc bug: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=96645
+struct source_manager_options {
+  /// If this is disabled, we will only read files from SourceManager.
+  bool read_from_file_system = true;
+};
+} // namespace detail
+
 // A source manager that caches sources in memory, loads files and enables
 // resolution of offset-based source locations into file names, lines and
 // columns.
@@ -120,6 +130,8 @@ class source_manager {
   // Maps from filepaths present in the AST to filepaths on disk.
   std::map<std::string, std::string, std::less<>> found_includes_;
 
+  detail::source_manager_options options_;
+
   const source_info* get_source(uint_least32_t source_id) const {
     return source_id > 0 && source_id <= sources_.size()
         ? &sources_[source_id - 1]
@@ -131,11 +143,15 @@ class source_manager {
   source add_source(std::string_view file_name, std::vector<char> text);
 
  public:
+  using options = detail::source_manager_options;
+  explicit source_manager(options opts = {}) : options_(opts) {}
+
   // Loads a file and returns a source object representing its content.
-  // The file can be a real file or a virtual one previously registered with
-  // add_virtual_file.
-  // Returns an empty optional if opening or reading the file fails.
-  // Makes use of the result of previous calls to find_include_file.
+  // The file can be a real file (unless read_from_file_system is set to false),
+  // or a virtual one previously registered with add_virtual_file.
+  //
+  // Returns an empty optional if opening or reading the file fails. Makes use
+  // of the result of previous calls to find_include_file.
   std::optional<source> get_file(std::string_view file_name);
 
   std::string get_file_path(std::string_view file_name) const;

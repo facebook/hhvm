@@ -20,6 +20,7 @@
 #include <fmt/core.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <folly/ScopeGuard.h>
 #include <thrift/compiler/source_location.h>
 
 using namespace apache::thrift::compiler;
@@ -145,4 +146,20 @@ TEST(SourceLocationTest, get_cached_virtual_file) {
   EXPECT_EQ(loc.line(), 1);
   EXPECT_EQ(loc.column(), 1);
   EXPECT_EQ(fmt::string_view(text.c_str(), text.size() + 1), source->text);
+}
+
+TEST(SourceLocationTest, ignore_file_system) {
+  auto text = std::string("test");
+  auto file = fs::temp_directory_path() / fs::unique_path();
+  const auto& file_name = file.string();
+  std::ofstream(file_name) << text;
+  auto guard = folly::makeGuard([&] { fs::remove(file); });
+
+  auto sm = source_manager({.read_from_file_system = false});
+  EXPECT_FALSE(sm.get_file(file_name));
+  sm.add_virtual_file(file_name, text);
+
+  // sm.get_file(file_name)->text has an extra \0 at the end. Adding `data()` to
+  // avoid this issue.
+  EXPECT_EQ(text, sm.get_file(file_name)->text.data());
 }

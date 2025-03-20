@@ -120,6 +120,10 @@ std::optional<source> source_manager::get_file(std::string_view file_name) {
     return source->second;
   }
 
+  if (!options_.read_from_file_system) {
+    return {};
+  }
+
   std::string absPath;
   if (detail::platform_is_windows()) {
     // Without the "\\?\" prefix, path in Windows can not exceed 260 characters.

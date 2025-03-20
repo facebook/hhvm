@@ -275,8 +275,6 @@ class LspTestBase(TestCase[LspTestDriver]):
         lsp_args = [
             "--config",
             f"ide_fall_back_to_full_index={str(fall_back_to_full_index).lower()}",
-            "--config",
-            "invalidate_all_folded_decls_upon_file_change=true",
         ] + lsp_extra_args
         with LspCommandProcessor.create(
             self.test_driver.test_env, lsp_args, self.test_driver.repo_dir

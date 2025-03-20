@@ -248,7 +248,6 @@ type t = {
       (** POC: @ljw - if true, only exit quarantine when entering a new one *)
   lsp_invalidation: bool;
       (** POC: @ljw - controls how quarantine invalidates folded decls *)
-  invalidate_all_folded_decls_upon_file_change: bool;  (** POC: @catg *)
   autocomplete_sort_text: bool;
       (** POC: @mckenzie - if true, autocomplete sorts using sort text attribute *)
   hack_warnings: bool;  (** POC: @catg - turn on hack warnings. *)

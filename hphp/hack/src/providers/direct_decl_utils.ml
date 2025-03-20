@@ -144,11 +144,7 @@ let cache_decls ctx file decls =
                 (Provider_backend.Shallow_decl_cache_entry.Shallow_class_decl
                    name)
               ~default:(fun () ->
-                if
-                  (Provider_context.get_tcopt ctx)
-                    .GlobalOptions.invalidate_all_folded_decls_upon_file_change
-                then
-                  add_extends_dep_edges ctx (name, decl) dep_table;
+                add_extends_dep_edges ctx (name, decl) dep_table;
                 Some decl)
           in
           ()

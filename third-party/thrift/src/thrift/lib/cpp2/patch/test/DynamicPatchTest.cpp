@@ -85,11 +85,7 @@ TYPED_TEST_SUITE(DynamicPatchesTest, DynamicPatches);
 
 TYPED_TEST(DynamicPatchesTest, Clear) {
   TypeParam patch;
-  if constexpr (__FBTHRIFT_IS_VALID(patch, patch.clear(badge))) {
-    patch.clear(badge);
-  } else {
-    patch.clear();
-  }
+  patch.clear();
   const auto& obj = patch.toObject();
   EXPECT_EQ(obj.size(), 1);
   EXPECT_EQ(obj.at(static_cast<FieldId>(op::PatchOp::Clear)).as_bool(), true);

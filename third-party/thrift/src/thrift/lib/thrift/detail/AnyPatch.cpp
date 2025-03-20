@@ -201,13 +201,7 @@ void AnyPatch<Patch>::DynamicPatchExtractionVisitor::assign(
 }
 template <class Patch>
 void AnyPatch<Patch>::DynamicPatchExtractionVisitor::clear() {
-  patch_.visitPatch([&](auto& patch) {
-    if constexpr (__FBTHRIFT_IS_VALID(patch, patch.clear(badge))) {
-      patch.clear(badge);
-    } else {
-      patch.clear();
-    }
-  });
+  patch_.visitPatch([&](auto& patch) { patch.clear(); });
 }
 template <class Patch>
 void AnyPatch<Patch>::DynamicPatchExtractionVisitor::patchIfTypeIs(

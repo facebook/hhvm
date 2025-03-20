@@ -1618,6 +1618,12 @@ void t_mstch_py3_generator::generate_types() {
   if (has_option("enable_container_pickling_DO_NOT_USE")) {
     generate_file("__init__.py", FileType::TypesFile, generateRootPath_);
   }
+  if (has_option("inplace_migrate")) {
+    generate_file(
+        "types_inplace_FBTHRIFT_ONLY_DO_NOT_USE.py",
+        FileType::TypesFile,
+        generateRootPath_);
+  }
   for (const auto& file : converterFiles) {
     generate_file(file, FileType::NotTypesFile, generateRootPath_);
   }

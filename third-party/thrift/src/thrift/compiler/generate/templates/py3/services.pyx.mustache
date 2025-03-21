@@ -69,7 +69,8 @@ from thrift.python.common cimport (
     MetadataBox as __MetadataBox,
 )
 
-from thrift.py3.types cimport make_unique
+from thrift.py3.types cimport make_unique{{!
+}}{{#program:inplace_migrate?}}, deref_const{{/program:inplace_migrate?}}
 
 cimport folly.futures
 from folly.executor cimport get_executor
@@ -84,6 +85,9 @@ from thrift.py3.stream cimport cServerStream, cServerStreamPublisher, cResponseA
 {{/program:has_stream?}}
 cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types
 cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.cbindings as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_cbindings
+{{#program:inplace_migrate?}}
+cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_converter as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter
+{{/program:inplace_migrate?}}
 import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types
 {{#program:includeNamespaces}}
 {{#hasServices?}}
@@ -94,6 +98,9 @@ import {{#includeNamespace}}{{value}}.{{/includeNamespace}}services as _{{#inclu
 import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
 cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
 cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}cbindings as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}cbindings
+{{#program:inplace_migrate?}}
+cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}thrift_converter as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}thrift_converter
+{{/program:inplace_migrate?}}
 {{/hasTypes?}}
 {{/program:includeNamespaces}}
 

@@ -50,6 +50,7 @@ cdef extern from "thrift/lib/py3/types.h" namespace "::thrift::py3" nogil:
     string_view get_field_name_by_index[T](size_t idx) except +
     object init_unicode_from_cpp(...)
     T* get_union_field_value[T](...) except +
+    const T& deref_const[T](const unique_ptr[T]& ptr)
 
     cdef cppclass set_iter[T]:
         set_iter()

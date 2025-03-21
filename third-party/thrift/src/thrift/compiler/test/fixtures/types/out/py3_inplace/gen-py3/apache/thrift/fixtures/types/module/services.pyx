@@ -48,7 +48,7 @@ from thrift.python.common cimport (
     MetadataBox as __MetadataBox,
 )
 
-from thrift.py3.types cimport make_unique
+from thrift.py3.types cimport make_unique, deref_const
 
 cimport folly.futures
 from folly.executor cimport get_executor
@@ -59,10 +59,12 @@ from folly.memory cimport to_shared_ptr as __to_shared_ptr
 
 cimport apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_types_module_types
 cimport apache.thrift.fixtures.types.module.cbindings as _apache_thrift_fixtures_types_module_cbindings
+cimport apache.thrift.fixtures.types.module.thrift_converter as _apache_thrift_fixtures_types_module_thrift_converter
 import apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_types_module_types
 import apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 cimport apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 cimport apache.thrift.fixtures.types.included.cbindings as _apache_thrift_fixtures_types_included_cbindings
+cimport apache.thrift.fixtures.types.included.thrift_converter as _apache_thrift_fixtures_types_included_thrift_converter
 
 cimport apache.thrift.fixtures.types.module.services_interface as _fbthrift_services_interface
 

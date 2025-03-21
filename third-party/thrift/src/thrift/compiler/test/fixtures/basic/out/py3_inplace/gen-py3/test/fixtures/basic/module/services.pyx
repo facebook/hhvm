@@ -48,7 +48,7 @@ from thrift.python.common cimport (
     MetadataBox as __MetadataBox,
 )
 
-from thrift.py3.types cimport make_unique
+from thrift.py3.types cimport make_unique, deref_const
 
 cimport folly.futures
 from folly.executor cimport get_executor
@@ -59,6 +59,7 @@ from folly.memory cimport to_shared_ptr as __to_shared_ptr
 
 cimport test.fixtures.basic.module.types as _test_fixtures_basic_module_types
 cimport test.fixtures.basic.module.cbindings as _test_fixtures_basic_module_cbindings
+cimport test.fixtures.basic.module.thrift_converter as _test_fixtures_basic_module_thrift_converter
 import test.fixtures.basic.module.types as _test_fixtures_basic_module_types
 
 cimport test.fixtures.basic.module.services_interface as _fbthrift_services_interface
@@ -604,7 +605,7 @@ async def FB303Service_simple_rpc_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[_test_fixtures_basic_module_cbindings.cReservedKeyword](deref((<_test_fixtures_basic_module_types.ReservedKeyword?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        promise.cPromise.setValue(make_unique[_test_fixtures_basic_module_cbindings.cReservedKeyword](_test_fixtures_basic_module_thrift_converter.ReservedKeyword_convert_to_cpp(result._to_python())))
 
 async def FB303Service_onStartServing_coro(
     object self,

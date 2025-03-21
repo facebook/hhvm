@@ -48,7 +48,7 @@ from thrift.python.common cimport (
     MetadataBox as __MetadataBox,
 )
 
-from thrift.py3.types cimport make_unique
+from thrift.py3.types cimport make_unique, deref_const
 
 cimport folly.futures
 from folly.executor cimport get_executor
@@ -59,6 +59,7 @@ from folly.memory cimport to_shared_ptr as __to_shared_ptr
 
 cimport module.types as _module_types
 cimport module.cbindings as _module_cbindings
+cimport module.thrift_converter as _module_thrift_converter
 import module.types as _module_types
 
 cimport module.services_interface as _fbthrift_services_interface
@@ -995,7 +996,7 @@ cdef api void call_cy_SimpleService_get_value(
     unique_ptr[_module_cbindings.cSimpleStruct] simple_struct
 ) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
-    arg_simple_struct = _module_types.SimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cSimpleStruct](simple_struct.release()))
+    arg_simple_struct = _module_thrift_converter.SimpleStruct_from_cpp(deref_const(simple_struct))._to_py3()
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1319,7 +1320,7 @@ cdef api void call_cy_SimpleService_complex_sum_i32(
     unique_ptr[_module_cbindings.cComplexStruct] counter
 ) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
-    arg_counter = _module_types.ComplexStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cComplexStruct](counter.release()))
+    arg_counter = _module_thrift_converter.ComplexStruct_from_cpp(deref_const(counter))._to_py3()
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1337,7 +1338,7 @@ cdef api void call_cy_SimpleService_repeat_name(
     unique_ptr[_module_cbindings.cComplexStruct] counter
 ) noexcept:
     cdef Promise_string __promise = Promise_string._fbthrift_create(cmove(cPromise))
-    arg_counter = _module_types.ComplexStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cComplexStruct](counter.release()))
+    arg_counter = _module_thrift_converter.ComplexStruct_from_cpp(deref_const(counter))._to_py3()
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1643,7 +1644,7 @@ cdef api void call_cy_SimpleService_get_binary_union_struct(
     unique_ptr[_module_cbindings.cBinaryUnion] u
 ) noexcept:
     cdef Promise__module_cbindings_cBinaryUnionStruct __promise = Promise__module_cbindings_cBinaryUnionStruct._fbthrift_create(cmove(cPromise))
-    arg_u = _module_types.BinaryUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cBinaryUnion](u.release()))
+    arg_u = _module_thrift_converter.BinaryUnion_from_cpp(deref_const(u))._to_py3()
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1981,7 +1982,7 @@ async def SimpleService_expected_exception_coro(
     try:
         result = await self.expected_exception()
     except _module_types.SimpleException as ex:
-        promise.cPromise.setException(deref((<_module_types.SimpleException> ex)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        promise.cPromise.setException(_module_thrift_converter.SimpleException_convert_to_cpp(ex._to_python()))
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one
         promise.cPromise.setException(cTApplicationException(
@@ -2422,7 +2423,7 @@ async def SimpleService_get_struct_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[_module_cbindings.cSimpleStruct](deref((<_module_types.SimpleStruct?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        promise.cPromise.setValue(make_unique[_module_cbindings.cSimpleStruct](_module_thrift_converter.SimpleStruct_convert_to_cpp(result._to_python())))
 
 async def SimpleService_fib_coro(
     object self,
@@ -2914,7 +2915,7 @@ async def SimpleService_get_binary_union_struct_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[_module_cbindings.cBinaryUnionStruct](deref((<_module_types.BinaryUnionStruct?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        promise.cPromise.setValue(make_unique[_module_cbindings.cBinaryUnionStruct](_module_thrift_converter.BinaryUnionStruct_convert_to_cpp(result._to_python())))
 
 async def SimpleService_onStartServing_coro(
     object self,

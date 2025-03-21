@@ -37,6 +37,11 @@ std::shared_ptr<T> constant_shared_ptr(const T& x) {
   return std::shared_ptr<T>(std::shared_ptr<T>{}, const_cast<T*>(&x));
 }
 
+template <typename T>
+const T& deref_const(const std::unique_ptr<T>& ptr) {
+  return *ptr;
+}
+
 // the folly::remove_cvref_t conversions work around Cython's limitation on
 // const/reference qualifier when custom cpp.type with those are defined
 template <typename T, typename S>

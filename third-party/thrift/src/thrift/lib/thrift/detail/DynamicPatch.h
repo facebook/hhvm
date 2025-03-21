@@ -332,10 +332,9 @@ class DynamicSetPatch : public DynamicPatchBase {
     get(op::PatchOp::Remove).ensure_set().insert(std::move(v));
   }
 
-  void addMulti(detail::Badge badge, const detail::ValueSet& add) {
-    for (const auto& i : add) {
-      insert(badge, i);
-    }
+  void addMulti(detail::Badge badge, detail::ValueSet add) {
+    add.eraseInto(
+        add.begin(), add.end(), [&](auto&& k) { insert(badge, std::move(k)); });
   }
 
   void removeMulti(detail::Badge badge, detail::ValueSet remove) {

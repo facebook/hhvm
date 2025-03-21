@@ -60,6 +60,10 @@ c_ResumableWaitHandle* GetResumedWaitHandle() {
   return ret;
 }
 
+int64_t HHVM_FUNCTION(asio_get_current_context_depth) {
+  return AsioSession::Get()->getCurrentContextDepth();
+}
+
 int64_t HHVM_FUNCTION(asio_get_current_context_idx) {
   return AsioSession::Get()->getCurrentContextIdx();
 }
@@ -191,6 +195,9 @@ std::vector<std::string> AsioExtension::hackFiles() const {
 void AsioExtension::requestInit() { requestInitSingletons(); }
 
 void AsioExtension::registerNativeFunctions() {
+  HHVM_FALIAS(
+    HH\\asio_get_current_context_depth,
+    asio_get_current_context_depth);
   HHVM_FALIAS(
     HH\\asio_get_current_context_idx,
     asio_get_current_context_idx);

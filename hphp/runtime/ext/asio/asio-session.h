@@ -57,6 +57,10 @@ struct AsioSession final {
     return m_contexts.back();
   }
 
+  size_t getCurrentContextDepth() {
+    return m_contexts.size();
+  }
+
   context_idx_t getCurrentContextIdx() {
     assertx(static_cast<context_idx_t>(m_contexts.size()) == m_contexts.size());
     return static_cast<context_idx_t>(m_contexts.size());

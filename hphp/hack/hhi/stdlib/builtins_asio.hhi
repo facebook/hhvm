@@ -8,6 +8,7 @@
  *
  */
 namespace HH {
+  function asio_get_current_context_depth(): int;
   function asio_get_current_context_idx(): \HH\FIXME\MISSING_RETURN_TYPE;
   function asio_get_running_in_context(
     \HH\FIXME\MISSING_PARAM_TYPE $ctx_idx,

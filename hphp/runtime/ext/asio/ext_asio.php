@@ -273,7 +273,15 @@ final class ExternalThreadEventWaitHandle extends WaitableWaitHandle<void> {
 }
 
 /**
+ * Get the depth of the current scheduler context, 0 if there is none.
+ */
+<<__Native>>
+function asio_get_current_context_depth(): int;
+
+/**
  * Get index of the current scheduler context, or 0 if there is none.
+ *
+ * DEPRECATED: use HH\asio_get_current_context_depth()
  */
 <<__Native>>
 function asio_get_current_context_idx(): int;

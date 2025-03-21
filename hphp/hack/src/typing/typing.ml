@@ -5500,7 +5500,7 @@ end = struct
         | Decl_entry.Found _self_tc ->
           Typing_error_utils.add_typing_error
             ~env
-            Typing_error.(primary @@ Primary.Undefined_parent pos);
+            Typing_error.(primary @@ Primary.Parent_undefined pos);
           default
         | Decl_entry.NotYetAvailable
         | Decl_entry.DoesNotExist ->

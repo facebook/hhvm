@@ -1029,7 +1029,6 @@ module Primary : sig
         class_name: string;
         kind: [ `static | `classname ];
       }
-    | Undefined_parent of Pos.t
     | Parent_outside_class of Pos.t
     | Parent_abstract_call of {
         pos: Pos.t;

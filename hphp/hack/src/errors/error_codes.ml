@@ -398,7 +398,7 @@ module Typing = struct
     | UnboundGlobal [@value 4106]
     | UnboundNameTyping [@value 4107]
     | UndefinedField [@value 4108]
-    | UndefinedParent [@value 4109]
+    (* | UndefinedParentDEPRECATED [@value 4109] *)
     | UnifyError [@value 4110]
     | UnsatisfiedReq [@value 4111]
     | Visibility [@value 4112]

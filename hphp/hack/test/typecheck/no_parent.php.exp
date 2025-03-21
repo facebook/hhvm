@@ -1,2 +1,2 @@
 ERROR: File "no_parent.php", line 14, characters 5-25:
-The parent class is undefined (Typing[4109])
+parent is undefined (Typing[4076])

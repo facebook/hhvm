@@ -4580,14 +4580,6 @@ end = struct
       [],
       User_error_flags.empty )
 
-  let undefined_parent pos =
-    ( Error_code.UndefinedParent,
-      lazy (pos, "The parent class is undefined"),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
-
   let parent_outside_class pos =
     ( Error_code.ParentOutsideClass,
       lazy (pos, "`parent` is undefined outside of a class"),
@@ -6003,7 +5995,6 @@ end = struct
     | Self_outside_class pos -> self_outside_class pos
     | New_inconsistent_construct { pos; class_pos; class_name; kind } ->
       new_inconsistent_construct pos (class_pos, class_name) kind
-    | Undefined_parent pos -> undefined_parent pos
     | Parent_outside_class pos -> parent_outside_class pos
     | Parent_abstract_call { pos; meth_name; decl_pos } ->
       parent_abstract_call pos meth_name decl_pos

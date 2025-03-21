@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<68e4b83733c67304cefadd7e120759e6>>
+// @generated SignedSource<<d8453ef1c3cfb0069b93eedcc9a9c9da>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -340,7 +340,6 @@ pub enum Typing {
     UnboundGlobal = 4106,
     UnboundNameTyping = 4107,
     UndefinedField = 4108,
-    UndefinedParent = 4109,
     UnifyError = 4110,
     UnsatisfiedReq = 4111,
     Visibility = 4112,

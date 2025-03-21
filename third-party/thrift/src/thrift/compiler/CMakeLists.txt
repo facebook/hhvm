@@ -128,6 +128,7 @@ add_library(
   sema/schematizer.cc
   sema/standard_validator.cc
 )
+target_compile_definitions(compiler_lib PRIVATE THRIFT_OSS)
 target_link_libraries(
   compiler_lib
   compiler_base
@@ -196,7 +197,6 @@ add_executable(
   main.cc
   compiler.cc
 )
-target_compile_definitions(thrift1 PRIVATE THRIFT_OSS)
 target_link_libraries(
   thrift1
   compiler_ast

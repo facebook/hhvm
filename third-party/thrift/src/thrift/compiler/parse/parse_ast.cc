@@ -25,6 +25,7 @@
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 
+#include <thrift/annotation/bundled_annotations.h>
 #include <thrift/compiler/ast/t_const_value.h>
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/ast/t_global_scope.h>
@@ -41,6 +42,13 @@
 
 namespace apache::thrift::compiler {
 namespace {
+constexpr bool bundle_annotations() {
+#ifdef THRIFT_OSS
+  return false;
+#else
+  return true;
+#endif
+}
 
 // Cleans up text commonly found in doxygen-like comments.
 //
@@ -977,6 +985,19 @@ std::unique_ptr<t_program_bundle> parse_ast(
     const parsing_params& params,
     const sema_params* sparams,
     t_program_bundle* already_parsed) {
+  if constexpr (bundle_annotations()) {
+    const auto& annotation_files =
+        apache::thrift::detail::bundled_annotations::files();
+    for (const auto& [annot_path, content] : annotation_files) {
+      auto found_or_error =
+          sm.find_include_file(annot_path, path, params.incl_searchpath);
+      if (found_or_error.index() != 0) {
+        // Fall back to the bundled annotation files.
+        sm.add_virtual_file(annot_path, content);
+      }
+    }
+  }
+
   std::string full_root_path = sm.get_file_path(path);
   auto root_prog = std::make_unique<t_program>(
       path,

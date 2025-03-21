@@ -40,7 +40,6 @@
 
 #include <boost/algorithm/string/split.hpp>
 
-#include <thrift/annotation/bundled_annotations.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
 #include <thrift/compiler/detail/system.h>
 #include <thrift/compiler/diagnostic.h>
@@ -53,14 +52,6 @@
 
 namespace apache::thrift::compiler {
 namespace {
-
-constexpr bool bundle_annotations() {
-#ifdef THRIFT_OSS
-  return false;
-#else
-  return true;
-#endif
-}
 
 /**
  * Display the usage message to the given C stream.
@@ -579,20 +570,6 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
     const std::string& input_filename,
     const parsing_params& pparams,
     const gen_params& gparams) {
-  auto found_or_error = source_manager::path_or_error();
-  if constexpr (bundle_annotations()) {
-    const auto& annotation_files =
-        apache::thrift::detail::bundled_annotations::files();
-    for (const auto& [path, content] : annotation_files) {
-      found_or_error = source_mgr.find_include_file(
-          path, input_filename, pparams.incl_searchpath);
-      if (found_or_error.index() != 0) {
-        // Fall back to the bundled annotation files.
-        source_mgr.add_virtual_file(path, content);
-      }
-    }
-  }
-
   // Parse it!
   std::unique_ptr<t_program_bundle> program_bundle = parse_ast(
       source_mgr, ctx, input_filename, pparams, &ctx.sema_parameters());
@@ -602,7 +579,7 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
 
   // Load standard library if available.
   const std::string schema_path = "thrift/lib/thrift/schema.thrift";
-  found_or_error =
+  auto found_or_error =
       source_mgr.find_include_file(schema_path, "", pparams.incl_searchpath);
   if (found_or_error.index() == 0) {
     if (!program_bundle->find_program_by_full_path(

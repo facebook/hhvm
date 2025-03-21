@@ -23,6 +23,9 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * Mark the generated struct `#[derive(Copy)]`.
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class Copy implements TBase, java.io.Serializable, Cloneable, Comparable<Copy> {
   private static final TStruct STRUCT_DESC = new TStruct("Copy");

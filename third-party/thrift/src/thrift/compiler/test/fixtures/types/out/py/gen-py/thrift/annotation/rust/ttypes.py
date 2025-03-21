@@ -52,6 +52,8 @@ __all__ = ['UTF8STRINGS', 'Name', 'Copy', 'RequestContext', 'Arc', 'Box', 'Exhau
 
 class Name:
   r"""
+  Override the Thrift identifier of the entity with the given name.
+  
   Attributes:
    - name
   """
@@ -148,6 +150,9 @@ class Name:
     return self
 
 class Copy:
+  r"""
+  Mark the generated struct `#[derive(Copy)]`.
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -226,6 +231,11 @@ class Copy:
     return self
 
 class RequestContext:
+  r"""
+  Opt-in to request contexts for your service (which can be used to ensure that
+  only authorized clients can access your service by identity checks against
+  Hipster ACLs).
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -304,6 +314,9 @@ class RequestContext:
     return self
 
 class Arc:
+  r"""
+  Indicates that a field's value should be shared.
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -382,6 +395,9 @@ class Arc:
     return self
 
 class Box:
+  r"""
+  Indicates that a field's value should not be stored on the stack.
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -460,6 +476,11 @@ class Box:
     return self
 
 class Exhaustive:
+  r"""
+  Generated struct definitions generally include an additional member to
+  force use of `..Default::default()` when initalizing instances. Use this
+  annotation to prevent this.
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -538,6 +559,10 @@ class Exhaustive:
     return self
 
 class Ord:
+  r"""
+  Generate trait impls for `Ord`, `PartialOrd`, `Eq`, and `Hash`.
+  This makes a type usable as the key in a hash-map or B-tree map.
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -616,6 +641,27 @@ class Ord:
     return self
 
 class NewType:
+  r"""
+  Make a newtype from a typedef. For example,
+  
+  ```
+  @rust.NewType
+  typedef binary Sha1
+  ```
+  
+  will result in `pub struct Sha1(pub std::vec::Vec<u8>)`.
+  
+  Another common idiom is to use `rust.Type` and `rust.NewType` together like
+  this:
+  
+  ```
+  @rust.NewType
+  @rust.Type{name = "smallvec::SmallVec<[u8; 20]>"}
+  typedef binary Sha1
+  ```
+  
+  in this case we'll get `pub struct Sha1(smallvec::SmallVec[u8; 20])`.
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -695,6 +741,169 @@ class NewType:
 
 class Type:
   r"""
+  There is a default Rust type associated with each Thrift type. For
+  example, the default Rust type to represent Thrift `map<>`s is
+  `std::collections::BTreeMap<>`.
+  
+  The `rust.Type` annotation provides an ability to "override"
+  (substitute) a non-default Rust type in certain circumstances (full
+  details below). We might say for example, `@rust.Type{name="HashMap"}`
+  to override an instance of a specific Thrift `map<>`.
+  
+  The `rust.Type` annotation can be applied to any type but has no
+  effect when applied to `string`, `list<>`, `struct` or `enum` types.
+  
+  The `name` argument of a `rust.Type` annotation may specify a
+  "standard" or "nonstandard" type: a name containing a '`::`' is
+  classified as a nonstandard type whereas, a name without a '`::`' is
+  classified as standard.
+  
+  Standard types that may appear in `@rust.Type` annotations are exactly
+  types that are (re-)exported from the `fbthrift::builtin_types`
+  module. For such types, the `fbthift` package provides stock
+  `fbthrift::Serialize<>` and `fbthrift::Deserialize<>` instances for
+  them. At the current time the full set of such types is
+  `std::collections::*`, `bytes::Bytes` and
+  `ordered_float::OrderedFloat`.
+  
+  This is an example of an application of a `@rust.Type` annotation with a
+  standard type:
+  
+  ```
+  @rust.Type{name = "OrderdedFloat<f64>"}
+  typedef double Double
+  
+  struct T {
+    1: Double data; // `data: fbthrift::builtin_types::OrderedFloat<f64>`
+  }
+  ```
+  
+  This is an example of application of a `@rust.Type` annotation with a
+  nonstandard type:
+  
+  ```
+  @rust.Type{name = "smallvec::SmallVec<[u8; 32]>"}
+  typedef binary binary_t
+  
+  struct T {
+    1: binary_t data; // `data: smallvec::SmallVec<[u8; 32]>`
+  }
+  ```
+  
+  Nonstandard types, when they appear in `@rust.Type` annotations
+  applied to Thrift `map<>`, `set<>` or `binary` types will result in
+  the generation of `fbthrift::Serialize<>` and
+  `fbthrift::Deserialize<>` instances for those types. The serialization
+  code makes assumptions about valid expressions and the existence of
+  trait implementations for such types that are documented below.
+  
+  A nonstandard type say can also be applied to `i64`. In this case, the
+  resulting generated serialization code assumes the existence of
+  `fbthrift::Serialize<>` and `fbthrift::Deserialize<>` for that
+  nonstandard type.
+  
+  A nonstandard type applied to Thrift `void`, `bool`, `float`, `byte`,
+  `i16`, `i32`, `double`, and `float` types will not result in the
+  generation of any serialization code for the nonstandard type
+  (rendering nonstandard types applied to these types effectively
+  unsupported at this time).
+  
+  "Codegen" errors or bugs resulting from the use of standard types in
+  valid positions in `@rust.Type` annotations should be considered the
+  responsibility of the the Rust Thrift maintainers to address. Less
+  "formal" support should be expected from the Rust Thrift maintainers
+  when nonstandard types are involved.
+  
+  ## `binary`
+  
+  The default Rust type for a Thrift `binary` is
+  `std::vec::Vec<std::primitive::u8>`. An example override:
+  
+  ```
+  @rust.Type{name = "smallvec::SmallVec<[u8; 32]>"}
+  typedef binary binary_t
+  
+  struct T {
+    1: binary_t data;
+  }
+  ```
+  
+  If nonstandard `B` models Thrift `binary`, `b : B`, `other: &[u8]` and
+  `vec : std::vec::Vec<u8>` then the following expressions are required
+  to be valid and the following trait instances must exist:
+  
+  | expression                                            |
+  | :---------------------------------------------------- |
+  | `let _: &[u8]  = b.as_slice()`                        |
+  | `let _: B = <B>::with_capacity(l)`                    |
+  | `b.extend_from_slice(other)`                          |
+  
+  | type           | traits                               |
+  | :------------- | :----------------------------------  |
+  | `B`            | `Debug`, `Default`,                  |
+  |                | `From<std::vec::Vec<u8>>`            |
+  
+  ## `set`
+  
+  The default Rust type for a thrift `set` is
+  `std::collections::BTreeSet<>`. An example override:
+  
+  ```
+  @rust.Type{name = "sorted_vector_map::SortedVectorSet"}
+  typedef set<string> set_t
+  
+  struct T {
+    1: set_t data; // `data: sorted_vector_map::SortedVectorSet<String>`
+  }
+  ```
+  
+  If nonstandard `S` models thrift `set`, `K` is the Rust element type,
+  `k : K`, `l : usize`, `s : S<K>` and `'a` a lifetime, required valid
+  expressions and trait implementations are as follows:
+  
+  | expression                                            |
+  | :---------------------------------------------------- |
+  | `for _ in &s { ... }`                                 |
+  | `let _: usize = s.len()`                              |
+  | `let mut _: T<K> = <S<K>>::with_capacity(l);`         |
+  | `s.insert(k)`                                         |
+  
+  | type           | traits                               |
+  | :------------- | :----------------------------------  |
+  | `S<K>`         | `Debug`, `Default`                   |
+  | `&'a S<K>`     | `IntoIterator<Item = &'a K>`         |
+  
+  ## `map`
+  
+  The default rust type for a thrift `map` is
+  `std::collections::BTreeMap<>`. An example override:
+  
+  ```
+  @rust.Type{name = "sorted_vector_map::SortedVectorMap"}
+  typedef map<string, i64> map_t
+  
+  struct T {
+    1: map_t data; // `data: sorted_vector_map::SortedVectorMap<String, i64>`
+  }
+  ```
+  
+  If nonstandard `T` models thrift `map`, `K` and `V` are the Rust map
+  key and value types respectively, `k : K`, `v : V`, `l : usize`, `m :
+  T<K, V>` and `'a` a lifetime, required valid expressions and trait
+  implementations are:
+  
+  | expression                                            |
+  | :---------------------------------------------------- |
+  | `for (key, val) in &m { ... }`                        |
+  | `let _: usize = m.len()`                              |
+  | `let mut _: T<K, V> = <T<K, V>>::with_capacity(l);`   |
+  | `m.insert(k, v)`                                      |
+  
+  | type           | traits
+  | :------------- | :----------------------------------
+  | `T<K, V>`      | `Debug`, `Default`
+  | `&'a T<K, V>`  | `IntoIterator<Item = (&'a K, &'a V)>`
+  
   Attributes:
    - name
   """
@@ -792,6 +1001,9 @@ class Type:
 
 class Serde:
   r"""
+  Selectively enable/disable derivation of serde serialization functions for a
+  given type.
+  
   Attributes:
    - enabled
   """
@@ -889,6 +1101,9 @@ class Serde:
 
 class Mod:
   r"""
+  Use this annotation to explicitly set a non-default name for the module that
+  contains the services exceptions and error types.
+  
   Attributes:
    - name
   """
@@ -986,6 +1201,51 @@ class Mod:
 
 class Adapter:
   r"""
+  A fully qualified path to a struct that implements `fbthrift::adapter::ThriftTypeAdapter`.
+  
+  This will transform the type of this field to that struct's `AdaptedType`, and the corresponding
+  `ThriftTypeAdapter` methods will be called in the serialization and deserialization paths.
+  
+  Example:
+  If you have a Thrift struct like:
+  
+  ```
+  struct Foo {
+    @rust.Adapter{
+      name = "fbthrift_adapters::DurationSecondsAdapter",
+    }
+    1: i64 duration_secs;
+  }
+  ```
+  
+  The generated Rust struct's `duration_secs` field will be set to the type
+  `<fbthrift_adapters::DurationSecondsAdapter as ::fbthrift::adapter::ThriftTypeAdapter>::AdaptedType`
+  (which is `std::time::Duration`) and marshalling the `i64` to and from `Duration` will be handled
+  in the serialization/deserialization path with the methods defined on the `ThriftTypeAdapter` impl.
+  
+  The name provided here must be a valid Rust path, i.e. the `fbthrift_adapters` crate must be added
+  to the Thrift library's `rust_deps`. Alternatively, you define the adapter in a file added to the
+  Thrift library's `rust_include_srcs`, and use the `crate::` prefix in your adapter name.
+  
+  If `<>` is present at the end of the name, we will treat the name as a generic and fill it in with
+  the original unadapted type.
+  For example:
+  
+  ```
+  struct Foo {
+    @rust.Adapter{
+      name = "fbthrift_adapters::DurationSecondsAdapter<>",
+    }
+    1: i64 duration_secs;
+  }
+  ```
+  
+  will use `fbthrift_adapters::DurationSecondsAdapter<i64>` as the adapter.
+  
+  If the adapter name starts with `crate::` and this `@rust.Adapter` is applied transitively with
+  @scope.Transitive, `crate::` will be replaced with the name of the crate in which the
+  transitive annotation is defined.
+  
   Attributes:
    - name
   """
@@ -1083,6 +1343,30 @@ class Adapter:
 
 class Derive:
   r"""
+  List of additional derives to apply to the generated struct.
+  
+  Example:
+  
+  ```
+  @rust.Derive{derives = ["Foo"]}
+  struct SomeStruct {
+    1: string some_field;
+  }
+  ```
+  
+  will generated the Rust struct
+  
+  ```
+  #[derive(Foo)]
+  pub struct SomeStruct {
+      pub some_field: String,
+  }
+  ```
+  
+  If the derive starts with `crate::` and this `@rust.Derive` is applied transitively with
+  @scope.Transitive, `crate::` will be replaced with the name of the crate in which the
+  transitive annotation is defined.
+  
   Attributes:
    - derives
   """
@@ -1193,6 +1477,59 @@ class Derive:
 
 class ServiceExn:
   r"""
+  If `anyhow_to_application_exn` is true, this allows returning an `anyhow::Error` from within a Thrift server handler method,
+  and that `anyhow::Error` will be turned into an `ApplicationException`. This is similar in behavior
+  to what happens if you throw an unhandled exception type in Python Thrift server or C++ Thrift server.
+  
+  The `ApplicationException` returned will have the error code `Unknown` and message
+  `format!("{:#}", anyhow_err)`.
+  
+  NOTE: it is generally considered bad practice to use this because it eliminates the ability
+  to match on specific error types on the client side. When possible, it is recommended you
+  always return structured error types (though it is more verbose). This annotation is provided
+  solely for convenience and should not be used services where error type matching is needed.
+  
+  Example, the following Thrift:
+  
+  ```
+  service Foo {
+    @rust.ServiceExn{anyhow_to_application_exn = true}
+    void bar();
+  }
+  ```
+  
+  would allow for the following Rust server impl:
+  
+  ```
+  #[async_trait]
+  impl Foo for FooServerImpl {
+      async fn bar() -> Result<(), BarExn> {
+          if some_condition {
+              Err(anyhow::anyhow!("some error"))?
+          }
+  
+          // Note you must always convert to `anyhow::Error` first for non-`anyhow::Error`
+          // types.
+          some_client_call.await.context("failed some_client_call")?;
+  
+          // you can still return a structured exn type if desired
+          return Err(BarExn::ie(...));
+      }
+  }
+  ```
+  
+  You can also use this annotation on the service definition itself to have it apply to all
+  methods on the service, e.g.
+  
+  ```
+  @rust.ServiceExn{anyhow_to_application_exn = true}
+  service Foo {
+    // Both `bar` and `baz` will support `anyhow::Error` -> `ApplicationException`.
+    void bar();
+    void baz();
+  }
+  ```
+  
   Attributes:
    - anyhow_to_application_exn
   """

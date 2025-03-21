@@ -23,6 +23,10 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * Selectively enable/disable derivation of serde serialization functions for a
+ * given type.
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class Serde implements TBase, java.io.Serializable, Cloneable, Comparable<Serde> {
   private static final TStruct STRUCT_DESC = new TStruct("Serde");

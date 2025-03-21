@@ -23,6 +23,31 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * List of additional derives to apply to the generated struct.
+ * 
+ * Example:
+ * 
+ * ```
+ * @rust.Derive{derives = ["Foo"]}
+ * struct SomeStruct {
+ *   1: string some_field;
+ * }
+ * ```
+ * 
+ * will generated the Rust struct
+ * 
+ * ```
+ * #[derive(Foo)]
+ * pub struct SomeStruct {
+ *     pub some_field: String,
+ * }
+ * ```
+ * 
+ * If the derive starts with `crate::` and this `@rust.Derive` is applied transitively with
+ * @scope.Transitive, `crate::` will be replaced with the name of the crate in which the
+ * transitive annotation is defined.
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class Derive implements TBase, java.io.Serializable, Cloneable, Comparable<Derive> {
   private static final TStruct STRUCT_DESC = new TStruct("Derive");

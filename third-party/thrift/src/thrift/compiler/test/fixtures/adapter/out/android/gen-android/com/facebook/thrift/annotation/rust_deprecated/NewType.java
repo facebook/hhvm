@@ -23,6 +23,27 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * Make a newtype from a typedef. For example,
+ * 
+ * ```
+ * @rust.NewType
+ * typedef binary Sha1
+ * ```
+ * 
+ * will result in `pub struct Sha1(pub std::vec::Vec<u8>)`.
+ * 
+ * Another common idiom is to use `rust.Type` and `rust.NewType` together like
+ * this:
+ * 
+ * ```
+ * @rust.NewType
+ * @rust.Type{name = "smallvec::SmallVec<[u8; 20]>"}
+ * typedef binary Sha1
+ * ```
+ * 
+ * in this case we'll get `pub struct Sha1(smallvec::SmallVec[u8; 20])`.
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class NewType implements TBase, java.io.Serializable, Cloneable {
   private static final TStruct STRUCT_DESC = new TStruct("NewType");

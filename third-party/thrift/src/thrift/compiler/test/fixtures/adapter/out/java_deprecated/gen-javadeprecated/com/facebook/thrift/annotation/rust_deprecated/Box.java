@@ -23,6 +23,9 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * Indicates that a field's value should not be stored on the stack.
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class Box implements TBase, java.io.Serializable, Cloneable, Comparable<Box> {
   private static final TStruct STRUCT_DESC = new TStruct("Box");

@@ -23,6 +23,11 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * Opt-in to request contexts for your service (which can be used to ensure that
+ * only authorized clients can access your service by identity checks against
+ * Hipster ACLs).
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class RequestContext implements TBase, java.io.Serializable, Cloneable {
   private static final TStruct STRUCT_DESC = new TStruct("RequestContext");

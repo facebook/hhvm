@@ -23,6 +23,11 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * Generated struct definitions generally include an additional member to
+ * force use of `..Default::default()` when initalizing instances. Use this
+ * annotation to prevent this.
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class Exhaustive implements TBase, java.io.Serializable, Cloneable, Comparable<Exhaustive> {
   private static final TStruct STRUCT_DESC = new TStruct("Exhaustive");

@@ -23,6 +23,10 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * Use this annotation to explicitly set a non-default name for the module that
+ * contains the services exceptions and error types.
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class Mod implements TBase, java.io.Serializable, Cloneable, Comparable<Mod> {
   private static final TStruct STRUCT_DESC = new TStruct("Mod");

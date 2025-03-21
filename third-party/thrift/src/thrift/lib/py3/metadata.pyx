@@ -27,7 +27,7 @@ from thrift.python.client import (
 )
 from thrift.python.common cimport MetadataBox
 from thrift.python.exceptions import GeneratedError as PyGeneratedError
-from thrift.python.metadata import gen_metadata as python_gen_metadata
+from thrift.python.metadata import gen_metadata as python_gen_metadata, ThriftKind, ThriftConstKind
 from thrift.python.types import (
     Enum as PyEnum,
     ServiceInterface as PyServiceInterface,
@@ -68,34 +68,11 @@ from apache.thrift.metadata.thrift_types import (
 from apache.thrift.metadata.converter cimport ThriftMetadata_from_cpp
 
 
-cpdef enum ThriftKind:
-    PRIMITIVE = 0
-    LIST = 1
-    SET = 2
-    MAP = 3
-    ENUM = 4
-    STRUCT = 5
-    UNION = 6
-    TYPEDEF = 7
-    STREAM = 8
-    SINK = 9
-
-
-cpdef enum ThriftConstKind:
-    CV_BOOL = 0
-    CV_INT = 1
-    CV_FLOAT = 2
-    CV_STRING = 3
-    CV_MAP = 4
-    CV_LIST = 5
-    CV_STRUCT = 6
-
-
 cdef class ThriftTypeProxy:
     # A union of a bunch of thrift metadata types
-    cdef readonly object thriftType
-    cdef readonly object thriftMeta #: ThriftMetadata
-    cdef readonly ThriftKind kind
+    cdef readonly thriftType
+    cdef readonly thriftMeta #: ThriftMetadata
+    cdef readonly kind # :ThriftKind
 
     def __init__(self, object thriftType not None, thriftMeta not None: ThriftMetadata):
         if not isinstance(thriftType, (
@@ -313,30 +290,30 @@ cdef class ThriftStructProxy(ThriftTypeProxy):
 
 
 cdef class ThriftConstValueProxy:
-    cdef readonly object thriftType # :ThriftConstValue
-    cdef readonly ThriftConstKind kind
-    cdef readonly object type
+    cdef readonly thriftType # :ThriftConstValue
+    cdef readonly kind # : ThriftKind
+    cdef readonly type
     def __init__(self, value not None: ThriftConstValue):
         self.thriftType = value
         if self.thriftType.type in (ThriftConstValue.Type.cv_bool, ThriftConstValue.Type.cv_integer, ThriftConstValue.Type.cv_double, ThriftConstValue.Type.cv_string):
             self.type = self.thriftType.value
             if self.thriftType.type is ThriftConstValue.Type.cv_bool:
-                self.kind = CV_BOOL
+                self.kind = ThriftConstKind.CV_BOOL
             elif self.thriftType.type is ThriftConstValue.Type.cv_integer:
-                self.kind = CV_INT
+                self.kind = ThriftConstKind.CV_INT
             elif self.thriftType.type is ThriftConstValue.Type.cv_double:
-                self.kind = CV_FLOAT
+                self.kind = ThriftConstKind.CV_FLOAT
             else:
-                self.kind = CV_STRING
+                self.kind = ThriftConstKind.CV_STRING
         if self.thriftType.type is ThriftConstValue.Type.cv_struct:
             self.type = ThriftConstStructProxy(self.thriftType.value)
-            self.kind = CV_STRUCT
+            self.kind = ThriftConstKind.CV_STRUCT
         if self.thriftType.type is ThriftConstValue.Type.cv_list:
             self.type = tuple(ThriftConstValueProxy(ele) for ele in self.thriftType.value)
-            self.kind = CV_LIST
+            self.kind = ThriftConstKind.CV_LIST
         if self.thriftType.type is ThriftConstValue.Type.cv_map:
             self.type = MappingProxyType({ThriftConstValueProxy(ele.key).type: ThriftConstValueProxy(ele.value) for ele in self.thriftType.value})
-            self.kind = CV_MAP
+            self.kind = ThriftConstKind.CV_MAP
 
     def as_bool(self):
         if self.kind == ThriftConstKind.CV_BOOL:
@@ -373,9 +350,9 @@ cdef class ThriftConstValueProxy:
         raise TypeError('Type is not a map')
 
 cdef class ThriftConstStructProxy:
-    cdef readonly object thriftType # :ThriftConstStruct
+    cdef readonly thriftType # :ThriftConstStruct
     cdef readonly str name
-    cdef readonly ThriftKind kind
+    cdef readonly kind # :ThriftKind
     def __init__(self, struct not None: ThriftConstStruct):
         self.name = struct.type.name
         self.kind = ThriftKind.STRUCT

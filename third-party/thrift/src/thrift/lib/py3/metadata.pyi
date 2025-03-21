@@ -53,6 +53,10 @@ from thrift.py3.client import Client
 from thrift.py3.exceptions import GeneratedError
 from thrift.py3.server import ServiceInterface
 from thrift.py3.types import Enum as ThriftEnumClass, Struct
+from thrift.python.metadata import (
+    ThriftConstKind as ThriftConstKind,
+    ThriftKind as ThriftKind,
+)
 
 class ThriftKind(Enum):
     PRIMITIVE: ThriftKind = ...
@@ -215,5 +219,4 @@ def gen_metadata(
     cls: Union[ServiceInterface, Type[ServiceInterface], Client, Type[Client]],
 ) -> ThriftServiceProxy: ...
 @overload
-# pyre-fixme[43]: Signature of overloaded function `gen_metadata` will never be matched.
 def gen_metadata(cls: Union[ThriftEnumClass, Type[ThriftEnumClass]]) -> ThriftEnum: ...

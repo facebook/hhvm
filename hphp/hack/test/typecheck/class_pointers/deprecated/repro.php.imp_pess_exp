@@ -1,0 +1,4 @@
+ERROR: File "repro.php", line 23, characters 8-10:
+The method gen is deprecated: DO NOT CALL (Typing[4128])
+  File "repro.php", line 19, characters 26-28:
+  Definition is here

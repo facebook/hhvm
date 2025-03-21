@@ -765,8 +765,7 @@ inline void JSONProtocolReaderCommon::readJSONString(StrType& val) {
   if (fullDecodeRequired) {
     json += "\"";
     try {
-      folly::dynamic parsed = folly::parseJson(json);
-      val += parsed.getString();
+      val += readJSONStringViaDynamic(json);
     } catch (const std::exception& e) {
       throwUnrecognizableAsString(json, e);
     }

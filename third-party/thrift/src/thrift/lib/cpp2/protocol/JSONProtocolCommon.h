@@ -276,6 +276,8 @@ class JSONProtocolReaderCommon : public detail::ProtocolBase {
   // Returns next character, or \0 if at the end.
   int8_t peekCharSafe();
 
+  static std::string readJSONStringViaDynamic(std::string const& json);
+
   [[noreturn]] static void throwBadVersion();
   [[noreturn]] static void throwUnrecognizableAsBoolean(const std::string& s);
   [[noreturn]] static void throwUnrecognizableAsIntegral(

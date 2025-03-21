@@ -21,6 +21,7 @@
 #include <fmt/core.h>
 
 #include <folly/String.h>
+#include <folly/json.h>
 
 namespace {
 
@@ -143,6 +144,11 @@ static std::string escape(folly::StringPiece str) {
 
 static std::string quote(folly::StringPiece str) {
   return fmt::format("\"{}\"", escape(str));
+}
+
+std::string JSONProtocolReaderCommon::readJSONStringViaDynamic(
+    std::string const& json) {
+  return folly::parseJson(json).getString();
 }
 
 [[noreturn]] void JSONProtocolReaderCommon::throwBadVersion() {

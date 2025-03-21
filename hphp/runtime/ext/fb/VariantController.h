@@ -250,6 +250,13 @@ struct VariantControllerImpl {
                      VariantType&& v) {
     map.setIntishCast(idx, k, std::move(v));
   }
+
+  // this function is only added to keep the FBObject decoder buildable it cannot be
+  // called.
+  static void mapSet(StructDictInit& /* map */, int64_t /* k */,
+                     VariantType&& /* v */) {
+    throw std::runtime_error("mapSet for StructDictInit with int key is not supported");
+  }
   static int64_t mapSize(const MapType& map) { return map.size(); }
   static int64_t mapSize(const_variant_ref map) { return map.toArray().size(); }
   static ArrayIter mapIterator(const MapType& map) {

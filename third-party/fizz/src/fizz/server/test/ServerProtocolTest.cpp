@@ -351,6 +351,7 @@ class ServerProtocolTest : public ProtocolTest<ServerTypes, Actions> {
     ClientHello testChlo = TestMessages::clientHello();
     testChlo.originalEncoding =
         folly::IOBuf::copyBuffer("outerclienthelloencoding");
+    testChlo.random.fill(0xAC);
     // Set fake SNI
     ::fizz::test::TestMessages::removeExtension(
         testChlo, ExtensionType::server_name);
@@ -1396,10 +1397,9 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
 
   fizz::Param param = setupClientHelloOuter();
   const auto& chlo = *param.asClientHello();
-  size_t originalEncodingSize = 0;
+  size_t outerChloSize = 0;
   if (chlo.originalEncoding.hasValue()) {
-    originalEncodingSize =
-        chlo.originalEncoding.value()->computeChainDataLength();
+    outerChloSize = chlo.originalEncoding.value()->computeChainDataLength();
   }
 
   auto actions = getActions(detail::processEvent(state_, param));
@@ -1448,8 +1448,13 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
       *state_.clientHandshakeSecret(), folly::IOBuf::copyBuffer("cht")));
   EXPECT_TRUE(folly::IOBufEqualTo()(
       *state_.exporterMasterSecret(), folly::IOBuf::copyBuffer("expm")));
-  EXPECT_FALSE(state_.earlyExporterMasterSecret().has_value());
-  EXPECT_EQ(originalEncodingSize, state_.handshakeLogging()->originalChloSize);
+  EXPECT_FALSE(state_.earlyExporterMasterSecret().hasValue());
+  ASSERT_TRUE(state_.handshakeLogging()->outerChloInfo.clientRandom.hasValue());
+  ASSERT_TRUE(state_.handshakeLogging()->clientRandom.hasValue());
+  EXPECT_NE(
+      state_.handshakeLogging()->outerChloInfo.clientRandom.value(),
+      state_.handshakeLogging()->clientRandom.value());
+  EXPECT_EQ(outerChloSize, state_.handshakeLogging()->originalChloSize);
   EXPECT_NE(innerChloSize, state_.handshakeLogging()->originalChloSize);
 }
 

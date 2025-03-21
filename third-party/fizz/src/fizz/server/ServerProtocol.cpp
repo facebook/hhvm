@@ -431,13 +431,12 @@ EventHandler<ServerTypes, StateEnum::Uninitialized, Event::Accept>::handle(
  * actually want to observe fields on the ClientHelloOuter, which is why there
  * is an explicitly separate logging hook for these cases.
  */
-static void addHandshakeLogginPreECH(
+static void addHandshakeLoggingPreECH(
     const State& state,
     const ClientHello& chlo) {
   auto logging = state.handshakeLogging();
-  if (logging && chlo.originalEncoding.hasValue()) {
-    logging->originalChloSize =
-        chlo.originalEncoding.value()->computeChainDataLength();
+  if (logging) {
+    logging->populateFromPreECHClientHello(chlo);
   }
 }
 
@@ -1227,7 +1226,7 @@ AsyncActions
 EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
     handle(const State& state, Param& param) {
   ClientHello chlo = std::move(*param.asClientHello());
-  addHandshakeLogginPreECH(state, chlo);
+  addHandshakeLoggingPreECH(state, chlo);
 
   auto cookieState = getCookieState(chlo, state.context()->getCookieCipher());
 

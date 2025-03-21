@@ -11,6 +11,11 @@
 namespace fizz {
 namespace server {
 
+void SharedChloFields::populateSharedFieldsFromClientHello(
+    const ClientHello& chlo) {
+  clientRandom = chlo.random;
+}
+
 void HandshakeLogging::populateFromClientHello(const ClientHello& chlo) {
   clientLegacyVersion = chlo.legacy_version;
   auto supportedVersions = getExtension<SupportedVersions>(chlo.extensions);
@@ -65,7 +70,15 @@ void HandshakeLogging::populateFromClientHello(const ClientHello& chlo) {
 
   clientSessionIdSent =
       chlo.legacy_session_id && !chlo.legacy_session_id->empty();
-  clientRandom = chlo.random;
+
+  populateSharedFieldsFromClientHello(chlo);
+}
+
+void HandshakeLogging::populateFromPreECHClientHello(const ClientHello& chlo) {
+  if (chlo.originalEncoding.hasValue()) {
+    originalChloSize = chlo.originalEncoding.value()->computeChainDataLength();
+  }
+  outerChloInfo.populateSharedFieldsFromClientHello(chlo);
 }
 } // namespace server
 } // namespace fizz

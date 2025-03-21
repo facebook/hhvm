@@ -21,7 +21,7 @@ from libcpp.utility cimport move as cmove
 from cython.operator cimport dereference as deref, typeid
 from cpython.ref cimport PyObject
 from thrift.py3.client cimport cRequestChannel_ptr, makeClientWrapper, cClientWrapper
-from thrift.py3.exceptions cimport try_make_shared_exception
+from thrift.py3.exceptions cimport unwrap_exception
 from thrift.python.exceptions cimport create_py_exception
 from folly cimport cFollyTry, cFollyUnit, c_unit
 from folly.cast cimport down_cast_ptr
@@ -51,9 +51,11 @@ from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_
 
 cimport apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_types_module_types
 cimport apache.thrift.fixtures.types.module.cbindings as _apache_thrift_fixtures_types_module_cbindings
+cimport apache.thrift.fixtures.types.module.thrift_converter as _apache_thrift_fixtures_types_module_thrift_converter
 import apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_types_module_types
 cimport apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 cimport apache.thrift.fixtures.types.included.cbindings as _apache_thrift_fixtures_types_included_cbindings
+cimport apache.thrift.fixtures.types.included.thrift_converter as _apache_thrift_fixtures_types_included_thrift_converter
 import apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 
 cimport apache.thrift.fixtures.types.module.services_interface as _fbthrift_services_interface

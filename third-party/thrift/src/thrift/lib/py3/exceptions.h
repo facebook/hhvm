@@ -32,4 +32,14 @@ std::shared_ptr<T> try_make_shared_exception(
   return e ? std::make_shared<T>(*e) : std::shared_ptr<T>();
 }
 
+template <class T>
+const T& unwrap_exception(const folly::exception_wrapper& exception) {
+  if (exception.is_compatible_with<T>()) {
+    return *exception.get_exception<T>();
+  }
+  // relying on reference lifetime extension ok because only called
+  // synchronously
+  return T();
+}
+
 } // namespace thrift::py3::exception

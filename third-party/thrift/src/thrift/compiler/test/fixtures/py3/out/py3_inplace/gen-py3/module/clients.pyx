@@ -21,7 +21,7 @@ from libcpp.utility cimport move as cmove
 from cython.operator cimport dereference as deref, typeid
 from cpython.ref cimport PyObject
 from thrift.py3.client cimport cRequestChannel_ptr, makeClientWrapper, cClientWrapper
-from thrift.py3.exceptions cimport try_make_shared_exception
+from thrift.py3.exceptions cimport unwrap_exception
 from thrift.python.exceptions cimport create_py_exception
 from folly cimport cFollyTry, cFollyUnit, c_unit
 from folly.cast cimport down_cast_ptr
@@ -51,6 +51,7 @@ from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_
 
 cimport module.types as _module_types
 cimport module.cbindings as _module_cbindings
+cimport module.thrift_converter as _module_thrift_converter
 import module.types as _module_types
 
 cimport module.services_interface as _fbthrift_services_interface
@@ -197,7 +198,9 @@ cdef void SimpleService_expected_exception_callback(
     client, pyfuture, options = <object> userdata  
     if result.hasException[_module_cbindings.cSimpleException]():
         try:
-            exc = _module_types.SimpleException._create_FBTHRIFT_ONLY_DO_NOT_USE(try_make_shared_exception[_module_cbindings.cSimpleException](result.exception()))
+            exc = _module_thrift_converter.SimpleException_from_cpp(
+                unwrap_exception[_module_cbindings.cSimpleException](result.exception())
+            )._to_py3()
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
@@ -388,7 +391,7 @@ cdef void SimpleService_get_struct_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.SimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_cbindings.cSimpleStruct](cmove(result.value()))))
+            pyfuture.set_result(_module_thrift_converter.SimpleStruct_from_cpp(result.value())._to_py3())
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -596,7 +599,7 @@ cdef void SimpleService_get_binary_union_struct_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.BinaryUnionStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_cbindings.cBinaryUnionStruct](cmove(result.value()))))
+            pyfuture.set_result(_module_thrift_converter.BinaryUnionStruct_from_cpp(result.value())._to_py3())
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -765,7 +768,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def get_value(
             SimpleService self,
-            _module_types.SimpleStruct simple_struct not None,
+            simple_struct not None,
             *,
             __RpcOptions rpc_options=None
     ):
@@ -778,7 +781,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cint32_t](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).get_value(rpc_options._cpp_obj, 
-                deref((<_module_types.SimpleStruct>simple_struct)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
+                _module_thrift_converter.SimpleStruct_convert_to_cpp(simple_struct._to_python()),
             ),
             SimpleService_get_value_callback,
             <PyObject *> __userdata
@@ -1301,7 +1304,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def complex_sum_i32(
             SimpleService self,
-            _module_types.ComplexStruct counter not None,
+            counter not None,
             *,
             __RpcOptions rpc_options=None
     ):
@@ -1314,7 +1317,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cint32_t](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).complex_sum_i32(rpc_options._cpp_obj, 
-                deref((<_module_types.ComplexStruct>counter)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
+                _module_thrift_converter.ComplexStruct_convert_to_cpp(counter._to_python()),
             ),
             SimpleService_complex_sum_i32_callback,
             <PyObject *> __userdata
@@ -1329,7 +1332,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def repeat_name(
             SimpleService self,
-            _module_types.ComplexStruct counter not None,
+            counter not None,
             *,
             __RpcOptions rpc_options=None
     ):
@@ -1342,7 +1345,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[string](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).repeat_name(rpc_options._cpp_obj, 
-                deref((<_module_types.ComplexStruct>counter)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
+                _module_thrift_converter.ComplexStruct_convert_to_cpp(counter._to_python()),
             ),
             SimpleService_repeat_name_callback,
             <PyObject *> __userdata
@@ -1837,7 +1840,7 @@ cdef class SimpleService(thrift.py3.client.Client):
     @cython.always_allow_keywords(True)
     def get_binary_union_struct(
             SimpleService self,
-            _module_types.BinaryUnion u not None,
+            u not None,
             *,
             __RpcOptions rpc_options=None
     ):
@@ -1850,7 +1853,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[_module_cbindings.cBinaryUnionStruct](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).get_binary_union_struct(rpc_options._cpp_obj, 
-                deref((<_module_types.BinaryUnion>u)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
+                _module_thrift_converter.BinaryUnion_convert_to_cpp(u._to_python()),
             ),
             SimpleService_get_binary_union_struct_callback,
             <PyObject *> __userdata

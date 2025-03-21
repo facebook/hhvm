@@ -39,10 +39,13 @@ to a python type.
 }}{{#type:float?}}result.value(){{/type:float?}}{{!
 }}{{#type:string?}}result.value().data().decode('UTF-8'){{/type:string?}}{{!
 }}{{#type:binary?}}result.value(){{/type:binary?}}{{!
-}}{{#type:struct}}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
+}}{{#type:struct}}{{^program:inplace_migrate?}}{{!
+  }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
   }}make_shared[{{> types/cython_cpp_type}}]({{!
   }}cmove(result.value()))){{!
-}}{{/type:struct}}{{!
+}}{{/program:inplace_migrate?}}{{#program:inplace_migrate?}}{{!
+  }}{{type:capi_converter_path}}.{{struct:name}}_from_cpp(result.value())._to_py3(){{!
+}}{{/program:inplace_migrate?}}{{/type:struct}}{{!
 }}{{#type:container?}}{{!
   }}{{> types/container_from_cpp}}(cmove(result.value())){{!
 }}{{/type:container?}}{{!

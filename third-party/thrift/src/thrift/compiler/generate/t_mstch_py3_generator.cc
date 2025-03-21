@@ -728,7 +728,9 @@ class py3_mstch_type : public mstch_type {
     return is_list_of_string() || is_set_of_string();
   }
 
-  mstch::node cythonTypeNoneable() { return !is_number() && has_cython_type(); }
+  mstch::node cythonTypeNoneable() {
+    return !(is_number() || type_->is_container());
+  }
 
   mstch::node hasCythonType() { return has_cython_type(); }
 
@@ -814,7 +816,11 @@ class py3_mstch_type : public mstch_type {
     return get_set_elem_type(*type_)->is_string_or_binary();
   }
 
-  bool has_cython_type() const { return !type_->is_container(); }
+  bool has_cython_type() const {
+    return has_option("inplace_migrate")
+        ? !(type_->is_container() || type_->is_struct())
+        : !type_->is_container();
+  }
 
   bool is_iobuf() const { return cached_props_.cpp_type() == "folly::IOBuf"; }
 

@@ -55,6 +55,7 @@ cdef extern from *:
 cdef extern from "thrift/lib/py3/exceptions.h" namespace "::thrift::py3::exception":
     cdef shared_ptr[T] try_make_shared_exception[T](
         const cFollyExceptionWrapper& excepton)
+    cdef const T& unwrap_exception[T](const cFollyExceptionWrapper& excepton)
 
 
 cdef class GeneratedError(BaseError):

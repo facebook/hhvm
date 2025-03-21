@@ -21,7 +21,7 @@ from libcpp.utility cimport move as cmove
 from cython.operator cimport dereference as deref, typeid
 from cpython.ref cimport PyObject
 from thrift.py3.client cimport cRequestChannel_ptr, makeClientWrapper, cClientWrapper
-from thrift.py3.exceptions cimport try_make_shared_exception
+from thrift.py3.exceptions cimport unwrap_exception
 from thrift.python.exceptions cimport create_py_exception
 from folly cimport cFollyTry, cFollyUnit, c_unit
 from folly.cast cimport down_cast_ptr
@@ -51,6 +51,7 @@ from asyncio import get_event_loop as asyncio_get_event_loop, shield as asyncio_
 
 cimport test.fixtures.basic.module.types as _test_fixtures_basic_module_types
 cimport test.fixtures.basic.module.cbindings as _test_fixtures_basic_module_cbindings
+cimport test.fixtures.basic.module.thrift_converter as _test_fixtures_basic_module_thrift_converter
 import test.fixtures.basic.module.types as _test_fixtures_basic_module_types
 
 cimport test.fixtures.basic.module.services_interface as _fbthrift_services_interface
@@ -83,7 +84,7 @@ cdef void FB303Service_simple_rpc_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_test_fixtures_basic_module_types.ReservedKeyword._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_test_fixtures_basic_module_cbindings.cReservedKeyword](cmove(result.value()))))
+            pyfuture.set_result(_test_fixtures_basic_module_thrift_converter.ReservedKeyword_from_cpp(result.value())._to_py3())
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 

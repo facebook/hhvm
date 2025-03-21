@@ -23,9 +23,7 @@
 #include <stdint.h>
 #include <atomic>
 
-namespace apache {
-namespace thrift {
-namespace test {
+namespace apache::thrift::test {
 
 /**
  * Stats class use by the client to keep track of any request/response related
@@ -89,6 +87,4 @@ class Client {
   Stats stats_;
 };
 
-} // namespace test
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::test

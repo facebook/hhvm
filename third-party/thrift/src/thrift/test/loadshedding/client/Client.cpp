@@ -34,9 +34,7 @@ DEFINE_bool(
     true,
     "Generated traffic follow a Poisson distribution, a fixed interval is used otherwise [default: true]");
 
-namespace apache {
-namespace thrift {
-namespace test {
+namespace apache::thrift::test {
 
 using namespace facebook::thrift::test;
 
@@ -96,6 +94,4 @@ void Client::runSynchronously(
   }
 }
 
-} // namespace test
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::test

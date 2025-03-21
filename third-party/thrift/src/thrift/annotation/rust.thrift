@@ -96,19 +96,23 @@ struct NewType {
 // # `rust.NewType`
 //
 // Make a newtype from a typedef. For example,
+//
 // ```
 // @rust.NewType
 // typedef binary Sha1
 // ```
+//
 // will result in `pub struct Sha1(pub std::vec::Vec<u8>)`.
 //
 // Another common idiom is to use `rust.Type` and `rust.NewType` together like
 // this:
+//
 // ```
 // @rust.NewType
-// @rust.Type { name =  "smallvec::SmallVec<[u8; 20]>" }
+// @rust.Type{name = "smallvec::SmallVec<[u8; 20]>"}
 // typedef binary Sha1
 // ```
+//
 // in this case we'll get `pub struct Sha1(smallvec::SmallVec[u8; 20])`.
 }
 
@@ -144,18 +148,26 @@ struct Type {
   //
   // This is an example of an application of a `@rust.Type` annotation with a
   // standard type:
+  //
   // ```
-  //   @rust.Type { name = "OrderdedFloat<f64>" }
-  //   typedef double Double
-  //   struct T { 1: Double data; } // `data : fbthrift::builtin_types::OrderedFloat<f64>`
+  // @rust.Type{name = "OrderdedFloat<f64>"}
+  // typedef double Double
+  //
+  // struct T {
+  //   1: Double data; // `data: fbthrift::builtin_types::OrderedFloat<f64>`
+  // }
   // ```
   //
   // This is an example of application of a `@rust.Type` annotation with a
   // nonstandard type:
+  //
   // ```
-  //   @rust.Type { name = "smallvec::SmallVec<[u8; 32]>" }
-  //   typedef binary binary_t
-  //   struct T { 1: binary_t data; } // `data : smallvec::SmallVec<[u8; 32]>`
+  // @rust.Type{name = "smallvec::SmallVec<[u8; 32]>"}
+  // typedef binary binary_t
+  //
+  // struct T {
+  //   1: binary_t data; // `data: smallvec::SmallVec<[u8; 32]>`
+  // }
   // ```
   //
   // Nonstandard types, when they appear in `@rust.Type` annotations
@@ -186,12 +198,14 @@ struct Type {
   //
   // The default Rust type for a Thrift `binary` is
   // `std::vec::Vec<std::primitive::u8>`. An example override:
+  //
   // ```
-  //   @rust.Type{name = "smallvec::SmallVec<[u8; 32]>"}
-  //   typedef binary binary_t
-  //   struct T {
-  //     1: binary_t data;
-  //   }
+  // @rust.Type{name = "smallvec::SmallVec<[u8; 32]>"}
+  // typedef binary binary_t
+  //
+  // struct T {
+  //   1: binary_t data;
+  // }
   // ```
   //
   // If nonstandard `B` models Thrift `binary`, `b : B`, `other: &[u8]` and
@@ -213,12 +227,14 @@ struct Type {
   //
   // The default Rust type for a thrift `set` is
   // `std::collections::BTreeSet<>`. An example override:
+  //
   // ```
-  //   @rust.Type{name = "sorted_vector_map::SortedVectorSet"}
-  //   typedef set<string> set_t
-  //   struct T {
-  //     1: set_t data; // data : sorted_vector_map::SortedVectorSet<string>
-  //   }
+  // @rust.Type{name = "sorted_vector_map::SortedVectorSet"}
+  // typedef set<string> set_t
+  //
+  // struct T {
+  //   1: set_t data; // `data: sorted_vector_map::SortedVectorSet<String>`
+  // }
   // ```
   //
   // If nonstandard `S` models thrift `set`, `K` is the Rust element type,
@@ -241,12 +257,14 @@ struct Type {
   //
   // The default rust type for a thrift `map` is
   // `std::collections::BTreeMap<>`. An example override:
+  //
   // ```
-  //  @rust.Type{name = "sorted_vector_map::SortedVectorMap"}
-  //  typedef map<string, i64> map_t
-  //  struct T {
-  //    1: map_t data; // data: sorted_vector_map::SortedVectorMap<string, i64>
-  //  }
+  // @rust.Type{name = "sorted_vector_map::SortedVectorMap"}
+  // typedef map<string, i64> map_t
+  //
+  // struct T {
+  //   1: map_t data; // `data: sorted_vector_map::SortedVectorMap<String, i64>`
+  // }
   // ```
   //
   // If nonstandard `T` models thrift `map`, `K` and `V` are the Rust map
@@ -300,10 +318,11 @@ struct Adapter {
   //
   // Example:
   // If you have a Thrift struct like:
+  //
   // ```
   // struct Foo {
   //   @rust.Adapter{
-  //    name = "fbthrift_adapters::DurationSecondsAdapter"
+  //     name = "fbthrift_adapters::DurationSecondsAdapter",
   //   }
   //   1: i64 duration_secs;
   // }
@@ -321,14 +340,16 @@ struct Adapter {
   // If `<>` is present at the end of the name, we will treat the name as a generic and fill it in with
   // the original unadapted type.
   // For example:
+  //
   // ```
   // struct Foo {
   //   @rust.Adapter{
-  //    name = "fbthrift_adapters::DurationSecondsAdapter<>"
+  //     name = "fbthrift_adapters::DurationSecondsAdapter<>",
   //   }
   //   1: i64 duration_secs;
   // }
   // ```
+  //
   // will use `fbthrift_adapters::DurationSecondsAdapter<i64>` as the adapter.
   //
   // If the adapter name starts with `crate::` and this `@rust.Adapter` is applied transitively with
@@ -344,17 +365,20 @@ struct Derive {
   // List of additional derives to apply to the generated struct.
   //
   // Example:
+  //
   // ```
-  // @rust.Derive{ derives = ["Foo"] }
+  // @rust.Derive{derives = ["Foo"]}
   // struct SomeStruct {
-  //    1: string some_field;
+  //   1: string some_field;
   // }
   // ```
+  //
   // will generated the Rust struct
+  //
   // ```
   // #[derive(Foo)]
-  // struct SomeStruct {
-  //    some_field: String,
+  // pub struct SomeStruct {
+  //     pub some_field: String,
   // }
   // ```
   //
@@ -380,13 +404,16 @@ struct ServiceExn {
   // solely for convenience and should not be used services where error type matching is needed.
   //
   // Example, the following Thrift:
+  //
   // ```
   // service Foo {
-  //   @rust.ServiceExn{ anyhow_to_application_exn = true }
+  //   @rust.ServiceExn{anyhow_to_application_exn = true}
   //   void bar();
   // }
   // ```
+  //
   // would allow for the following Rust server impl:
+  //
   // ```
   // #[async_trait]
   // impl Foo for FooServerImpl {
@@ -407,8 +434,9 @@ struct ServiceExn {
   //
   // You can also use this annotation on the service definition itself to have it apply to all
   // methods on the service, e.g.
+  //
   // ```
-  // @rust.ServiceExn{ anyhow_to_application_exn = true }
+  // @rust.ServiceExn{anyhow_to_application_exn = true}
   // service Foo {
   //   // Both `bar` and `baz` will support `anyhow::Error` -> `ApplicationException`.
   //   void bar();

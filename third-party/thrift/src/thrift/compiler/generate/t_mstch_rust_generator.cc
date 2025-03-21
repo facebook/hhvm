@@ -419,12 +419,13 @@ bool node_has_custom_rust_type(const t_named& node) {
 
 // NOTE: a transitive _adapter_ is different from a transitive _annotation_. A
 // transitive adapter is defined as one applied transitively through types. E.g.
+//
 // ```
-// @rust.Adapter{ name = "Foo" }
+// @rust.Adapter{name = "Foo"}
 // typedef string AdaptedString
 //
 // struct Bar {
-//    1: AdaptedString field1;
+//   1: AdaptedString field1;
 // }
 // ```
 //
@@ -432,14 +433,15 @@ bool node_has_custom_rust_type(const t_named& node) {
 //
 // A transitive annotation is one that is applied through `@scope.Transitive`.
 // E.g.
+//
 // ```
-// @rust.Adapter{ name = "Foo" }
+// @rust.Adapter{name = "Foo"}
 // @scope.Transitive
 // struct SomeAnnotation {}
 //
 // struct Bar {
-//    @SomeAnnotation
-//    1: string field1;
+//   @SomeAnnotation
+//   1: string field1;
 // }
 // ```
 //
@@ -2458,19 +2460,20 @@ bool validate_program_annotations(sema_context& ctx, const t_program& program) {
 
       // To be spec compliant, adapted typedefs can be composed only if they are
       // wrapped. For example, the following is not allowed:
+      //
       // ```
-      // @rust.Adapter{ name = "Foo" }
+      // @rust.Adapter{name = "Foo"}
       // typedef string Foo
       //
-      // @rust.Adapter{ name = "Bar" }
+      // @rust.Adapter{name = "Bar"}
       // typedef Foo Bar
       // ```
       // But the following is allowed:
       // ```
-      // @rust.Adapter{ name = "Foo" }
+      // @rust.Adapter{name = "Foo"}
       // typedef string Foo
       //
-      // @rust.Adapter{ name = "Bar" }
+      // @rust.Adapter{name = "Bar"}
       // typedef list<Foo> Bar
       // ```
       const t_type* typedef_stepped =

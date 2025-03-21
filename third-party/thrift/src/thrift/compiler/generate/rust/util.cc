@@ -410,22 +410,20 @@ std::string unmangled_rust_name(const t_named* node) {
           node->find_structured_annotation_or_null(kRustNameUri)) {
     return get_annotation_property_string(annot, "name");
   }
-  return node->get_annotation("rust.name");
+  return "";
 }
 
 } // namespace
 
 std::string type_rust_name(const t_type* t) {
-  if (!t->has_annotation("rust.name") &&
-      !t->find_structured_annotation_or_null(kRustNameUri)) {
+  if (!t->find_structured_annotation_or_null(kRustNameUri)) {
     return mangle_type(t->name());
   }
   return unmangled_rust_name(t);
 }
 
 std::string named_rust_name(const t_named* node) {
-  if (!node->has_annotation("rust.name") &&
-      !node->find_structured_annotation_or_null(kRustNameUri)) {
+  if (!node->find_structured_annotation_or_null(kRustNameUri)) {
     return mangle(node->name());
   }
   return unmangled_rust_name(node);

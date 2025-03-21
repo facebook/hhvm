@@ -121,11 +121,6 @@ std::string get_type_annotation(const t_named* node) {
           node->find_structured_annotation_or_null(kRustTypeUri)) {
     return get_annotation_property_string(annot, "name");
   }
-
-  if (const t_type* type = dynamic_cast<const t_type*>(node)) {
-    return t_typedef::get_first_annotation(type, {"rust.type"});
-  }
-
   return "";
 }
 
@@ -138,15 +133,8 @@ bool has_nonstandard_type_annotation(const t_named* node) {
 }
 
 bool has_newtype_annotation(const t_named* node) {
-  if (const t_typedef* type = dynamic_cast<const t_typedef*>(node)) {
-    if (node->find_structured_annotation_or_null(kRustNewTypeUri)) {
-      return true;
-    }
-
-    return type->has_annotation("rust.newtype");
-  }
-
-  return false;
+  const t_typedef* type = dynamic_cast<const t_typedef*>(node);
+  return type && node->find_structured_annotation_or_null(kRustNewTypeUri);
 }
 
 bool can_derive_ord(const t_type* type) {
@@ -158,8 +146,7 @@ bool can_derive_ord(const t_type* type) {
       type->is_enum() || type->is_void()) {
     return true;
   }
-  if (type->has_annotation("rust.ord") ||
-      type->find_structured_annotation_or_null(kRustOrdUri)) {
+  if (type->find_structured_annotation_or_null(kRustOrdUri)) {
     return true;
   }
   if (type->is_list()) {
@@ -179,30 +166,11 @@ bool can_derive_ord(const t_type* type) {
   return false;
 }
 
-bool validate_rust_serde(const t_named& node) {
-  if (const std::string* ann = node.find_annotation_or_null("rust.serde")) {
-    return ann == nullptr || *ann == "true" || *ann == "false";
-  }
-  // The structued form `@rust.Serde { enabled = ... }` if it exists, does not
-  // require further validation.
-  return true;
-}
-
 bool rust_serde_enabled(
     const rust_codegen_options& options, const t_named& node) {
   if (const t_const* annot =
           node.find_structured_annotation_or_null(kRustSerdeUri)) {
     return get_annotation_property_bool(annot, "enabled", true);
-  }
-
-  if (const std::string* ann = node.find_annotation_or_null("rust.serde")) {
-    if (*ann == "true") {
-      return true;
-    }
-    if (*ann == "false") {
-      return false;
-    }
-    throw std::runtime_error("rust.serde should be `true` or `false`");
   }
 
   return options.serde;
@@ -327,14 +295,13 @@ std::string get_mock_crate(
 }
 
 bool node_is_boxed(const t_named& node) {
-  return node.has_annotation("rust.box") || node.has_annotation("thrift.box") ||
+  return node.has_annotation("thrift.box") ||
       node.find_structured_annotation_or_null(kBoxUri) ||
       node.find_structured_annotation_or_null(kRustBoxUri);
 }
 
 bool node_is_arced(const t_named& node) {
-  return node.has_annotation("rust.arc") ||
-      node.find_structured_annotation_or_null(kRustArcUri);
+  return node.find_structured_annotation_or_null(kRustArcUri);
 }
 
 FieldKind field_kind(const t_named& node) {
@@ -447,8 +414,7 @@ const t_type* step_through_typedefs(const t_type* t, bool break_on_adapter) {
 
 bool node_has_custom_rust_type(const t_named& node) {
   return node.find_structured_annotation_or_null(kRustTypeUri) ||
-      node.find_structured_annotation_or_null(kRustNewTypeUri) ||
-      node.has_annotation("rust.type") || node.has_annotation("rust.newtype");
+      node.find_structured_annotation_or_null(kRustNewTypeUri);
 }
 
 // NOTE: a transitive _adapter_ is different from a transitive _annotation_. A
@@ -741,14 +707,13 @@ class rust_mstch_program : public mstch_program {
   mstch::node rust_nonexhaustive_structs() {
     for (t_structured* strct : program_->structs_and_unions()) {
       // The is_union is because `union` are also in this collection.
-      if (!strct->is_union() && !strct->has_annotation("rust.exhaustive") &&
+      if (!strct->is_union() &&
           !strct->find_structured_annotation_or_null(kRustExhaustiveUri)) {
         return true;
       }
     }
     for (t_exception* strct : program_->exceptions()) {
-      if (!strct->has_annotation("rust.exhaustive") &&
-          !strct->find_structured_annotation_or_null(kRustExhaustiveUri)) {
+      if (!strct->find_structured_annotation_or_null(kRustExhaustiveUri)) {
         return true;
       }
     }
@@ -1042,25 +1007,20 @@ class rust_mstch_service : public mstch_service {
     return get_mock_crate(service_->program(), options_);
   }
   mstch::node rust_snake() {
-    if (service_->has_annotation("rust.mod")) {
-      return service_->get_annotation("rust.mod");
-    } else if (
-        const t_const* annot_mod =
+    if (const t_const* annot_mod =
             service_->find_structured_annotation_or_null(kRustModUri)) {
       return get_annotation_property_string(annot_mod, "name");
     } else if (
         const t_const* annot_name =
             service_->find_structured_annotation_or_null(kRustNameUri)) {
       return snakecase(get_annotation_property_string(annot_name, "name"));
-    } else if (service_->has_annotation("rust.name")) {
-      return snakecase(service_->get_annotation("rust.name"));
     } else {
       return mangle_type(snakecase(service_->get_name()));
     }
   }
   mstch::node rust_request_context() {
-    return service_->has_annotation("rust.request_context") ||
-        service_->find_structured_annotation_or_null(kRustRequestContextUri);
+    return service_->find_structured_annotation_or_null(
+               kRustRequestContextUri) != nullptr;
   }
   mstch::node rust_extended_clients() {
     mstch::array extended_services;
@@ -1344,8 +1304,7 @@ class rust_mstch_struct : public mstch_struct {
     return get_types_import_name(struct_->program(), options_);
   }
   mstch::node rust_is_ord() {
-    if (struct_->has_annotation("rust.ord") ||
-        struct_->find_structured_annotation_or_null(kRustOrdUri)) {
+    if (struct_->find_structured_annotation_or_null(kRustOrdUri)) {
       return true;
     }
 
@@ -1367,12 +1326,11 @@ class rust_mstch_struct : public mstch_struct {
     return true;
   }
   mstch::node rust_is_copy() {
-    return struct_->has_annotation("rust.copy") ||
-        struct_->find_structured_annotation_or_null(kRustCopyUri);
+    return struct_->find_structured_annotation_or_null(kRustCopyUri) != nullptr;
   }
   mstch::node rust_is_exhaustive() {
-    return struct_->has_annotation("rust.exhaustive") ||
-        struct_->find_structured_annotation_or_null(kRustExhaustiveUri);
+    return struct_->find_structured_annotation_or_null(kRustExhaustiveUri) !=
+        nullptr;
   }
   mstch::node rust_fields_by_name() {
     auto fields = struct_->fields().copy();
@@ -1415,10 +1373,7 @@ class rust_mstch_struct : public mstch_struct {
       return ret;
     }
 
-    if (!struct_->has_annotation("rust.derive")) {
-      return nullptr;
-    }
-    return struct_->get_annotation("rust.derive");
+    return nullptr;
   }
   mstch::node has_exception_message() {
     return !!dynamic_cast<const t_exception&>(*struct_).get_message_field();
@@ -1787,10 +1742,7 @@ class mstch_rust_value : public mstch_base {
 
     for (auto&& field : struct_type->fields()) {
       if (field.name() == variant) {
-        if (field.has_annotation("rust.name")) {
-          return field.get_annotation("rust.name");
-        } else if (
-            const t_const* annot =
+        if (const t_const* annot =
                 field.find_structured_annotation_or_null(kRustNameUri)) {
           return get_annotation_property_string(annot, "name");
         } else {
@@ -2039,8 +1991,7 @@ mstch::node mstch_rust_value::struct_fields() {
 mstch::node mstch_rust_value::is_exhaustive() {
   auto struct_type = dynamic_cast<const t_struct*>(type_);
   return struct_type &&
-      (struct_type->has_annotation("rust.exhaustive") ||
-       struct_type->find_structured_annotation_or_null(kRustExhaustiveUri));
+      struct_type->find_structured_annotation_or_null(kRustExhaustiveUri);
 }
 
 class rust_mstch_const : public mstch_const {
@@ -2202,8 +2153,6 @@ class rust_mstch_typedef : public mstch_typedef {
     if (const t_const* annot =
             typedef_->find_structured_annotation_or_null(kRustTypeUri)) {
       rust_type = get_annotation_property_string(annot, "name");
-    } else {
-      rust_type = typedef_->get_annotation("rust.type");
     }
     if (!rust_type.empty() && rust_type.find("::") == std::string::npos) {
       return "fbthrift::builtin_types::" + rust_type;
@@ -2211,8 +2160,7 @@ class rust_mstch_typedef : public mstch_typedef {
     return rust_type;
   }
   mstch::node rust_ord() {
-    return typedef_->has_annotation("rust.ord") ||
-        typedef_->find_structured_annotation_or_null(kRustOrdUri) ||
+    return typedef_->find_structured_annotation_or_null(kRustOrdUri) ||
         (can_derive_ord(typedef_) &&
          !type_has_transitive_adapter(typedef_->get_type(), true));
   }
@@ -2224,9 +2172,6 @@ class rust_mstch_typedef : public mstch_typedef {
           inner->is_void()) {
         return true;
       }
-    }
-    if (typedef_->has_annotation("rust.copy")) {
-      return true;
     }
     return false;
   }
@@ -2241,8 +2186,6 @@ class rust_mstch_typedef : public mstch_typedef {
     if (const t_const* annot =
             typedef_->find_structured_annotation_or_null(kRustTypeUri)) {
       rust_type = get_annotation_property_string(annot, "name");
-    } else {
-      rust_type = typedef_->get_annotation("rust.type");
     }
     return rust_type.find("::") != std::string::npos;
   }
@@ -2475,14 +2418,6 @@ void validate_struct_annotations(
     sema_context& ctx,
     const t_structured& s,
     const rust_codegen_options& options) {
-  if (!validate_rust_serde(s)) {
-    ctx.report(
-        s,
-        "rust-serde-true-false-rule",
-        diagnostic_level::error,
-        "`rust.serde` must be `true` or `false`");
-  }
-
   for (auto& field : s.fields()) {
     FieldKind kind = field_kind(field);
     bool box = node_is_boxed(field) || kind == FieldKind::Box;
@@ -2507,17 +2442,6 @@ void validate_struct_annotations(
           field.name());
     }
   }
-}
-
-bool validate_enum_annotations(sema_context& ctx, const t_enum& e) {
-  if (!validate_rust_serde(e)) {
-    ctx.report(
-        e,
-        "rust-serde-true-false-rule",
-        diagnostic_level::error,
-        "`rust.serde` must be `true` or `false`");
-  }
-  return true;
 }
 
 bool validate_program_annotations(sema_context& ctx, const t_program& program) {
@@ -2575,7 +2499,6 @@ void t_mstch_rust_generator::fill_validator_visitors(
       std::placeholders::_1,
       std::placeholders::_2,
       options_));
-  validator.add_enum_visitor(validate_enum_annotations);
   validator.add_program_visitor(validate_program_annotations);
 }
 

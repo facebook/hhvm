@@ -169,4 +169,5 @@ namespace HH {
     (function ()[defaults]: Awaitable<T>) $f,
   )[leak_safe]: (function ()[defaults]: Awaitable<T>);
 
+  function active_config_experiments(): vec<string>;
 } // HH namespace

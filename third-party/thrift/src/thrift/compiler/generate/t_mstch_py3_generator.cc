@@ -179,6 +179,7 @@ class py3_mstch_program : public mstch_program {
             {"program:filtered_typedefs",
              &py3_mstch_program::filtered_typedefs},
             {"program:inplace_migrate?", &py3_mstch_program::inplace_migrate},
+            {"program:gen_py3_cython?", &py3_mstch_program::gen_py3_cython},
         });
     gather_included_program_namespaces();
     visit_types_for_services_and_interactions();
@@ -302,6 +303,10 @@ class py3_mstch_program : public mstch_program {
   mstch::node intercompatible() { return has_option("intercompatible"); }
 
   mstch::node auto_migrate() { return has_option("auto_migrate"); }
+
+  mstch::node gen_py3_cython() {
+    return !(has_option("auto_migrate") || has_option("inplace_migrate"));
+  }
 
   // this option triggers generation of py3 structs as wrappers around
   // thrift-python structs

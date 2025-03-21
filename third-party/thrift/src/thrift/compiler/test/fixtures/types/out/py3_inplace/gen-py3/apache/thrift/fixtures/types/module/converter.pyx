@@ -6,205 +6,242 @@
 #  @generated
 #
 
-cimport apache.thrift.fixtures.types.module.types as _fbthrift_ctypes
+from libcpp.memory cimport make_shared
+from cython.operator cimport dereference as deref
+from thrift.py3.types cimport const_pointer_cast
+cimport apache.thrift.fixtures.types.module.thrift_converter as _apache_thrift_fixtures_types_module_thrift_converter
+import apache.thrift.fixtures.types.module.types as _apache_thrift_fixtures_types_module_types
 
 
 cdef shared_ptr[_fbthrift_cbindings.cempty_struct] empty_struct_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.empty_struct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cempty_struct](
+        _apache_thrift_fixtures_types_module_thrift_converter.empty_struct_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object empty_struct_from_cpp(const shared_ptr[_fbthrift_cbindings.cempty_struct]& c_struct):
-    return _fbthrift_ctypes.empty_struct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.empty_struct.from_python(_apache_thrift_fixtures_types_module_thrift_converter.empty_struct_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cdecorated_struct] decorated_struct_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.decorated_struct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cdecorated_struct](
+        _apache_thrift_fixtures_types_module_thrift_converter.decorated_struct_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object decorated_struct_from_cpp(const shared_ptr[_fbthrift_cbindings.cdecorated_struct]& c_struct):
-    return _fbthrift_ctypes.decorated_struct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.decorated_struct.from_python(_apache_thrift_fixtures_types_module_thrift_converter.decorated_struct_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cContainerStruct] ContainerStruct_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.ContainerStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cContainerStruct](
+        _apache_thrift_fixtures_types_module_thrift_converter.ContainerStruct_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object ContainerStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cContainerStruct]& c_struct):
-    return _fbthrift_ctypes.ContainerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.ContainerStruct.from_python(_apache_thrift_fixtures_types_module_thrift_converter.ContainerStruct_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cCppTypeStruct] CppTypeStruct_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.CppTypeStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cCppTypeStruct](
+        _apache_thrift_fixtures_types_module_thrift_converter.CppTypeStruct_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object CppTypeStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cCppTypeStruct]& c_struct):
-    return _fbthrift_ctypes.CppTypeStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.CppTypeStruct.from_python(_apache_thrift_fixtures_types_module_thrift_converter.CppTypeStruct_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cVirtualStruct] VirtualStruct_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.VirtualStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cVirtualStruct](
+        _apache_thrift_fixtures_types_module_thrift_converter.VirtualStruct_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object VirtualStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cVirtualStruct]& c_struct):
-    return _fbthrift_ctypes.VirtualStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.VirtualStruct.from_python(_apache_thrift_fixtures_types_module_thrift_converter.VirtualStruct_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cMyStructWithForwardRefEnum] MyStructWithForwardRefEnum_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.MyStructWithForwardRefEnum?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cMyStructWithForwardRefEnum](
+        _apache_thrift_fixtures_types_module_thrift_converter.MyStructWithForwardRefEnum_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object MyStructWithForwardRefEnum_from_cpp(const shared_ptr[_fbthrift_cbindings.cMyStructWithForwardRefEnum]& c_struct):
-    return _fbthrift_ctypes.MyStructWithForwardRefEnum._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.MyStructWithForwardRefEnum.from_python(_apache_thrift_fixtures_types_module_thrift_converter.MyStructWithForwardRefEnum_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cTrivialNumeric] TrivialNumeric_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.TrivialNumeric?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cTrivialNumeric](
+        _apache_thrift_fixtures_types_module_thrift_converter.TrivialNumeric_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object TrivialNumeric_from_cpp(const shared_ptr[_fbthrift_cbindings.cTrivialNumeric]& c_struct):
-    return _fbthrift_ctypes.TrivialNumeric._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.TrivialNumeric.from_python(_apache_thrift_fixtures_types_module_thrift_converter.TrivialNumeric_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cTrivialNestedWithDefault] TrivialNestedWithDefault_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.TrivialNestedWithDefault?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cTrivialNestedWithDefault](
+        _apache_thrift_fixtures_types_module_thrift_converter.TrivialNestedWithDefault_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object TrivialNestedWithDefault_from_cpp(const shared_ptr[_fbthrift_cbindings.cTrivialNestedWithDefault]& c_struct):
-    return _fbthrift_ctypes.TrivialNestedWithDefault._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.TrivialNestedWithDefault.from_python(_apache_thrift_fixtures_types_module_thrift_converter.TrivialNestedWithDefault_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cComplexString] ComplexString_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.ComplexString?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cComplexString](
+        _apache_thrift_fixtures_types_module_thrift_converter.ComplexString_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object ComplexString_from_cpp(const shared_ptr[_fbthrift_cbindings.cComplexString]& c_struct):
-    return _fbthrift_ctypes.ComplexString._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.ComplexString.from_python(_apache_thrift_fixtures_types_module_thrift_converter.ComplexString_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cComplexNestedWithDefault] ComplexNestedWithDefault_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.ComplexNestedWithDefault?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cComplexNestedWithDefault](
+        _apache_thrift_fixtures_types_module_thrift_converter.ComplexNestedWithDefault_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object ComplexNestedWithDefault_from_cpp(const shared_ptr[_fbthrift_cbindings.cComplexNestedWithDefault]& c_struct):
-    return _fbthrift_ctypes.ComplexNestedWithDefault._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.ComplexNestedWithDefault.from_python(_apache_thrift_fixtures_types_module_thrift_converter.ComplexNestedWithDefault_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cMinPadding] MinPadding_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.MinPadding?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cMinPadding](
+        _apache_thrift_fixtures_types_module_thrift_converter.MinPadding_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object MinPadding_from_cpp(const shared_ptr[_fbthrift_cbindings.cMinPadding]& c_struct):
-    return _fbthrift_ctypes.MinPadding._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.MinPadding.from_python(_apache_thrift_fixtures_types_module_thrift_converter.MinPadding_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cMinPaddingWithCustomType] MinPaddingWithCustomType_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.MinPaddingWithCustomType?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cMinPaddingWithCustomType](
+        _apache_thrift_fixtures_types_module_thrift_converter.MinPaddingWithCustomType_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object MinPaddingWithCustomType_from_cpp(const shared_ptr[_fbthrift_cbindings.cMinPaddingWithCustomType]& c_struct):
-    return _fbthrift_ctypes.MinPaddingWithCustomType._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.MinPaddingWithCustomType.from_python(_apache_thrift_fixtures_types_module_thrift_converter.MinPaddingWithCustomType_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cMyStruct] MyStruct_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.MyStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cMyStruct](
+        _apache_thrift_fixtures_types_module_thrift_converter.MyStruct_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object MyStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cMyStruct]& c_struct):
-    return _fbthrift_ctypes.MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.MyStruct.from_python(_apache_thrift_fixtures_types_module_thrift_converter.MyStruct_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cMyDataItem] MyDataItem_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.MyDataItem?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cMyDataItem](
+        _apache_thrift_fixtures_types_module_thrift_converter.MyDataItem_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object MyDataItem_from_cpp(const shared_ptr[_fbthrift_cbindings.cMyDataItem]& c_struct):
-    return _fbthrift_ctypes.MyDataItem._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.MyDataItem.from_python(_apache_thrift_fixtures_types_module_thrift_converter.MyDataItem_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cRenaming] Renaming_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.Renaming?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cRenaming](
+        _apache_thrift_fixtures_types_module_thrift_converter.Renaming_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object Renaming_from_cpp(const shared_ptr[_fbthrift_cbindings.cRenaming]& c_struct):
-    return _fbthrift_ctypes.Renaming._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.Renaming.from_python(_apache_thrift_fixtures_types_module_thrift_converter.Renaming_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cAnnotatedTypes] AnnotatedTypes_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.AnnotatedTypes?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cAnnotatedTypes](
+        _apache_thrift_fixtures_types_module_thrift_converter.AnnotatedTypes_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object AnnotatedTypes_from_cpp(const shared_ptr[_fbthrift_cbindings.cAnnotatedTypes]& c_struct):
-    return _fbthrift_ctypes.AnnotatedTypes._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.AnnotatedTypes.from_python(_apache_thrift_fixtures_types_module_thrift_converter.AnnotatedTypes_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cForwardUsageRoot] ForwardUsageRoot_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.ForwardUsageRoot?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cForwardUsageRoot](
+        _apache_thrift_fixtures_types_module_thrift_converter.ForwardUsageRoot_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object ForwardUsageRoot_from_cpp(const shared_ptr[_fbthrift_cbindings.cForwardUsageRoot]& c_struct):
-    return _fbthrift_ctypes.ForwardUsageRoot._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.ForwardUsageRoot.from_python(_apache_thrift_fixtures_types_module_thrift_converter.ForwardUsageRoot_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cForwardUsageStruct] ForwardUsageStruct_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.ForwardUsageStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cForwardUsageStruct](
+        _apache_thrift_fixtures_types_module_thrift_converter.ForwardUsageStruct_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object ForwardUsageStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cForwardUsageStruct]& c_struct):
-    return _fbthrift_ctypes.ForwardUsageStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.ForwardUsageStruct.from_python(_apache_thrift_fixtures_types_module_thrift_converter.ForwardUsageStruct_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cForwardUsageByRef] ForwardUsageByRef_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.ForwardUsageByRef?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cForwardUsageByRef](
+        _apache_thrift_fixtures_types_module_thrift_converter.ForwardUsageByRef_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object ForwardUsageByRef_from_cpp(const shared_ptr[_fbthrift_cbindings.cForwardUsageByRef]& c_struct):
-    return _fbthrift_ctypes.ForwardUsageByRef._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.ForwardUsageByRef.from_python(_apache_thrift_fixtures_types_module_thrift_converter.ForwardUsageByRef_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cIncompleteMap] IncompleteMap_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.IncompleteMap?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cIncompleteMap](
+        _apache_thrift_fixtures_types_module_thrift_converter.IncompleteMap_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object IncompleteMap_from_cpp(const shared_ptr[_fbthrift_cbindings.cIncompleteMap]& c_struct):
-    return _fbthrift_ctypes.IncompleteMap._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.IncompleteMap.from_python(_apache_thrift_fixtures_types_module_thrift_converter.IncompleteMap_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cIncompleteMapDep] IncompleteMapDep_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.IncompleteMapDep?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cIncompleteMapDep](
+        _apache_thrift_fixtures_types_module_thrift_converter.IncompleteMapDep_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object IncompleteMapDep_from_cpp(const shared_ptr[_fbthrift_cbindings.cIncompleteMapDep]& c_struct):
-    return _fbthrift_ctypes.IncompleteMapDep._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.IncompleteMapDep.from_python(_apache_thrift_fixtures_types_module_thrift_converter.IncompleteMapDep_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cCompleteMap] CompleteMap_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.CompleteMap?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cCompleteMap](
+        _apache_thrift_fixtures_types_module_thrift_converter.CompleteMap_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object CompleteMap_from_cpp(const shared_ptr[_fbthrift_cbindings.cCompleteMap]& c_struct):
-    return _fbthrift_ctypes.CompleteMap._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.CompleteMap.from_python(_apache_thrift_fixtures_types_module_thrift_converter.CompleteMap_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cCompleteMapDep] CompleteMapDep_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.CompleteMapDep?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cCompleteMapDep](
+        _apache_thrift_fixtures_types_module_thrift_converter.CompleteMapDep_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object CompleteMapDep_from_cpp(const shared_ptr[_fbthrift_cbindings.cCompleteMapDep]& c_struct):
-    return _fbthrift_ctypes.CompleteMapDep._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.CompleteMapDep.from_python(_apache_thrift_fixtures_types_module_thrift_converter.CompleteMapDep_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cIncompleteList] IncompleteList_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.IncompleteList?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cIncompleteList](
+        _apache_thrift_fixtures_types_module_thrift_converter.IncompleteList_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object IncompleteList_from_cpp(const shared_ptr[_fbthrift_cbindings.cIncompleteList]& c_struct):
-    return _fbthrift_ctypes.IncompleteList._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.IncompleteList.from_python(_apache_thrift_fixtures_types_module_thrift_converter.IncompleteList_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cIncompleteListDep] IncompleteListDep_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.IncompleteListDep?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cIncompleteListDep](
+        _apache_thrift_fixtures_types_module_thrift_converter.IncompleteListDep_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object IncompleteListDep_from_cpp(const shared_ptr[_fbthrift_cbindings.cIncompleteListDep]& c_struct):
-    return _fbthrift_ctypes.IncompleteListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.IncompleteListDep.from_python(_apache_thrift_fixtures_types_module_thrift_converter.IncompleteListDep_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cCompleteList] CompleteList_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.CompleteList?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cCompleteList](
+        _apache_thrift_fixtures_types_module_thrift_converter.CompleteList_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object CompleteList_from_cpp(const shared_ptr[_fbthrift_cbindings.cCompleteList]& c_struct):
-    return _fbthrift_ctypes.CompleteList._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.CompleteList.from_python(_apache_thrift_fixtures_types_module_thrift_converter.CompleteList_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cCompleteListDep] CompleteListDep_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.CompleteListDep?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cCompleteListDep](
+        _apache_thrift_fixtures_types_module_thrift_converter.CompleteListDep_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object CompleteListDep_from_cpp(const shared_ptr[_fbthrift_cbindings.cCompleteListDep]& c_struct):
-    return _fbthrift_ctypes.CompleteListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.CompleteListDep.from_python(_apache_thrift_fixtures_types_module_thrift_converter.CompleteListDep_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cAdaptedList] AdaptedList_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.AdaptedList?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cAdaptedList](
+        _apache_thrift_fixtures_types_module_thrift_converter.AdaptedList_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object AdaptedList_from_cpp(const shared_ptr[_fbthrift_cbindings.cAdaptedList]& c_struct):
-    return _fbthrift_ctypes.AdaptedList._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.AdaptedList.from_python(_apache_thrift_fixtures_types_module_thrift_converter.AdaptedList_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cDependentAdaptedList] DependentAdaptedList_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.DependentAdaptedList?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cDependentAdaptedList](
+        _apache_thrift_fixtures_types_module_thrift_converter.DependentAdaptedList_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object DependentAdaptedList_from_cpp(const shared_ptr[_fbthrift_cbindings.cDependentAdaptedList]& c_struct):
-    return _fbthrift_ctypes.DependentAdaptedList._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.DependentAdaptedList.from_python(_apache_thrift_fixtures_types_module_thrift_converter.DependentAdaptedList_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cAllocatorAware] AllocatorAware_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.AllocatorAware?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cAllocatorAware](
+        _apache_thrift_fixtures_types_module_thrift_converter.AllocatorAware_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object AllocatorAware_from_cpp(const shared_ptr[_fbthrift_cbindings.cAllocatorAware]& c_struct):
-    return _fbthrift_ctypes.AllocatorAware._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.AllocatorAware.from_python(_apache_thrift_fixtures_types_module_thrift_converter.AllocatorAware_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cAllocatorAware2] AllocatorAware2_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.AllocatorAware2?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cAllocatorAware2](
+        _apache_thrift_fixtures_types_module_thrift_converter.AllocatorAware2_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object AllocatorAware2_from_cpp(const shared_ptr[_fbthrift_cbindings.cAllocatorAware2]& c_struct):
-    return _fbthrift_ctypes.AllocatorAware2._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.AllocatorAware2.from_python(_apache_thrift_fixtures_types_module_thrift_converter.AllocatorAware2_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cTypedefStruct] TypedefStruct_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.TypedefStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cTypedefStruct](
+        _apache_thrift_fixtures_types_module_thrift_converter.TypedefStruct_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object TypedefStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cTypedefStruct]& c_struct):
-    return _fbthrift_ctypes.TypedefStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.TypedefStruct.from_python(_apache_thrift_fixtures_types_module_thrift_converter.TypedefStruct_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cStructWithDoubleUnderscores] StructWithDoubleUnderscores_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.StructWithDoubleUnderscores?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cStructWithDoubleUnderscores](
+        _apache_thrift_fixtures_types_module_thrift_converter.StructWithDoubleUnderscores_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object StructWithDoubleUnderscores_from_cpp(const shared_ptr[_fbthrift_cbindings.cStructWithDoubleUnderscores]& c_struct):
-    return _fbthrift_ctypes.StructWithDoubleUnderscores._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _apache_thrift_fixtures_types_module_types.StructWithDoubleUnderscores.from_python(_apache_thrift_fixtures_types_module_thrift_converter.StructWithDoubleUnderscores_from_cpp(deref(const_pointer_cast(c_struct))))
 
 

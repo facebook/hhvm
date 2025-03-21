@@ -6,67 +6,81 @@
 #  @generated
 #
 
-cimport module.types as _fbthrift_ctypes
+from libcpp.memory cimport make_shared
+from cython.operator cimport dereference as deref
+from thrift.py3.types cimport const_pointer_cast
+cimport module.thrift_converter as _module_thrift_converter
+import module.types as _module_types
 
 
 cdef shared_ptr[_fbthrift_cbindings.cSimpleException] SimpleException_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.SimpleException?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cSimpleException](
+        _module_thrift_converter.SimpleException_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object SimpleException_from_cpp(const shared_ptr[_fbthrift_cbindings.cSimpleException]& c_struct):
-    return _fbthrift_ctypes.SimpleException._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _module_types.SimpleException.from_python(_module_thrift_converter.SimpleException_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cOptionalRefStruct] OptionalRefStruct_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.OptionalRefStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cOptionalRefStruct](
+        _module_thrift_converter.OptionalRefStruct_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object OptionalRefStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cOptionalRefStruct]& c_struct):
-    return _fbthrift_ctypes.OptionalRefStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _module_types.OptionalRefStruct.from_python(_module_thrift_converter.OptionalRefStruct_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cSimpleStruct] SimpleStruct_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.SimpleStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cSimpleStruct](
+        _module_thrift_converter.SimpleStruct_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object SimpleStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cSimpleStruct]& c_struct):
-    return _fbthrift_ctypes.SimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _module_types.SimpleStruct.from_python(_module_thrift_converter.SimpleStruct_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cHiddenTypeFieldsStruct] HiddenTypeFieldsStruct_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.HiddenTypeFieldsStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cHiddenTypeFieldsStruct](
+        _module_thrift_converter.HiddenTypeFieldsStruct_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object HiddenTypeFieldsStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cHiddenTypeFieldsStruct]& c_struct):
-    return _fbthrift_ctypes.HiddenTypeFieldsStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _module_types.HiddenTypeFieldsStruct.from_python(_module_thrift_converter.HiddenTypeFieldsStruct_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cComplexStruct] ComplexStruct_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.ComplexStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cComplexStruct](
+        _module_thrift_converter.ComplexStruct_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object ComplexStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cComplexStruct]& c_struct):
-    return _fbthrift_ctypes.ComplexStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _module_types.ComplexStruct.from_python(_module_thrift_converter.ComplexStruct_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cBinaryUnion] BinaryUnion_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.BinaryUnion?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cBinaryUnion](
+        _module_thrift_converter.BinaryUnion_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object BinaryUnion_from_cpp(const shared_ptr[_fbthrift_cbindings.cBinaryUnion]& c_struct):
-    return _fbthrift_ctypes.BinaryUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _module_types.BinaryUnion.from_python(_module_thrift_converter.BinaryUnion_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cBinaryUnionStruct] BinaryUnionStruct_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.BinaryUnionStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cBinaryUnionStruct](
+        _module_thrift_converter.BinaryUnionStruct_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object BinaryUnionStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cBinaryUnionStruct]& c_struct):
-    return _fbthrift_ctypes.BinaryUnionStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _module_types.BinaryUnionStruct.from_python(_module_thrift_converter.BinaryUnionStruct_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cCustomFields] CustomFields_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.CustomFields?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cCustomFields](
+        _module_thrift_converter.CustomFields_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object CustomFields_from_cpp(const shared_ptr[_fbthrift_cbindings.cCustomFields]& c_struct):
-    return _fbthrift_ctypes.CustomFields._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _module_types.CustomFields.from_python(_module_thrift_converter.CustomFields_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cCustomTypedefFields] CustomTypedefFields_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.CustomTypedefFields?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cCustomTypedefFields](
+        _module_thrift_converter.CustomTypedefFields_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object CustomTypedefFields_from_cpp(const shared_ptr[_fbthrift_cbindings.cCustomTypedefFields]& c_struct):
-    return _fbthrift_ctypes.CustomTypedefFields._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _module_types.CustomTypedefFields.from_python(_module_thrift_converter.CustomTypedefFields_from_cpp(deref(const_pointer_cast(c_struct))))
 
 cdef shared_ptr[_fbthrift_cbindings.cAdaptedTypedefFields] AdaptedTypedefFields_convert_to_cpp(object inst) except*:
-    return (<_fbthrift_ctypes.AdaptedTypedefFields?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-
+    return make_shared[_fbthrift_cbindings.cAdaptedTypedefFields](
+        _module_thrift_converter.AdaptedTypedefFields_convert_to_cpp(inst._fbthrift__inner)
+    )
 cdef object AdaptedTypedefFields_from_cpp(const shared_ptr[_fbthrift_cbindings.cAdaptedTypedefFields]& c_struct):
-    return _fbthrift_ctypes.AdaptedTypedefFields._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+    return _module_types.AdaptedTypedefFields.from_python(_module_thrift_converter.AdaptedTypedefFields_from_cpp(deref(const_pointer_cast(c_struct))))
 
 

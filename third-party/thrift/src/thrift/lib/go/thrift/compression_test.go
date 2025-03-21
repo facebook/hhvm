@@ -63,3 +63,14 @@ func TestZstd(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, want, got)
 }
+
+func TestZlib(t *testing.T) {
+	want := []byte{0x28, 0xb5, 0x2f, 0xfd}
+	compressed, err := compressZlib(want)
+	require.NoError(t, err)
+	require.NotEqual(t, want, compressed)
+
+	got, err := decompressZlib(compressed)
+	require.NoError(t, err)
+	require.Equal(t, want, got)
+}

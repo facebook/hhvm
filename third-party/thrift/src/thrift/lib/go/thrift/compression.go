@@ -18,6 +18,9 @@ package thrift
 
 import (
 	"bytes"
+	"compress/zlib"
+	"io"
+
 	"github.com/klauspost/compress/zstd"
 )
 
@@ -66,4 +69,34 @@ func decompressZstd(data []byte) ([]byte, error) {
 	}
 	defer z.Close()
 	return z.DecodeAll(data, nil)
+}
+
+func compressZlib(data []byte) ([]byte, error) {
+	var compressedBuffer bytes.Buffer
+	zlibWriter := zlib.NewWriter(&compressedBuffer)
+	_, err := zlibWriter.Write(data)
+	if err != nil {
+		return nil, err
+	}
+	err = zlibWriter.Close()
+	if err != nil {
+		return nil, err
+	}
+	return compressedBuffer.Bytes(), nil
+}
+
+func decompressZlib(compressedData []byte) ([]byte, error) {
+	bytesReader := bytes.NewReader(compressedData)
+	zlibReader, err := zlib.NewReader(bytesReader)
+	if err != nil {
+		return nil, err
+	}
+	defer zlibReader.Close()
+
+	var decompressedBuffer bytes.Buffer
+	_, err = io.Copy(&decompressedBuffer, zlibReader)
+	if err != nil {
+		return nil, err
+	}
+	return decompressedBuffer.Bytes(), nil
 }

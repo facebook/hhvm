@@ -268,6 +268,7 @@ TEST(CarbonRouterClient, basicUsageRemoteThreadClientThreadAffinityMulti) {
   opts.thread_affinity = true;
   opts.num_proxies = 3;
   opts.server_timeout_ms = 1;
+  opts.miss_on_get_errors = true;
 
   auto router = CarbonRouterInstance<MemcacheRouterInfo>::init(
       "basicUsageRemoteThreadClientThreadAffinityMulti", opts);
@@ -300,7 +301,7 @@ TEST(CarbonRouterClient, basicUsageRemoteThreadClientThreadAffinityMulti) {
       requests.end(),
       [&baton, &replyCount, &requests](
           const McGetRequest&, McGetReply&& reply) {
-        EXPECT_TRUE(facebook::memcache::isErrorResult(*reply.result_ref()));
+        EXPECT_EQ(carbon::Result::NOTFOUND, *reply.result_ref());
         if (++replyCount == requests.size()) {
           baton.post();
         }
@@ -459,6 +460,7 @@ TEST(CarbonRouterClient, requestExpiryTest) {
   opts.thread_affinity = true;
   opts.num_proxies = 3;
   opts.server_timeout_ms = 1;
+  opts.miss_on_get_errors = true;
   // Create client that can safely send requests through a Proxy on another
   // thread
   auto client = router->createClient(0 /* max_outstanding_requests */, false);
@@ -520,6 +522,7 @@ TEST(CarbonRouterClient, requestExpiryTestNoExpiry) {
   opts.thread_affinity = true;
   opts.num_proxies = 3;
   opts.server_timeout_ms = 1;
+  opts.miss_on_get_errors = true;
   // Create client that can safely send requests through a Proxy on another
   // thread
   auto client = router->createClient(0 /* max_outstanding_requests */, false);
@@ -672,6 +675,7 @@ TEST(CarbonRouterClient, requestExpiryTestWithLatencyInjectionRoute) {
   opts.thread_affinity = true;
   opts.num_proxies = 3;
   opts.server_timeout_ms = 1;
+  opts.miss_on_get_errors = true;
   // Create client that can safely send requests through a Proxy on another
   // thread
   auto client = router->createClient(0 /* max_outstanding_requests */, false);

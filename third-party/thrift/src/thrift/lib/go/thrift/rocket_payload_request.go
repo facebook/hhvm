@@ -67,29 +67,41 @@ func encodeRequestPayload(name string, protoID types.ProtocolID, typeID types.Me
 
 func decodeRequestPayload(msg payload.Payload) (*requestPayload, error) {
 	msg = payload.Clone(msg)
-	res := &requestPayload{data: msg.Data()}
-	var err error
+
 	metadataBytes, ok := msg.Metadata()
-	if ok {
-		metadata := &rpcmetadata.RequestRpcMetadata{}
-		if err := DecodeCompact(metadataBytes, metadata); err != nil {
-			return nil, err
-		}
-		res.metadata = metadata
-		if res.Zstd() {
-			res.data, err = decompressZstd(res.data)
-			if err != nil {
-				return nil, err
-			}
-		}
-		res.typeID, err = rpcKindToMessageType(metadata.GetKind())
+	if !ok {
+		return nil, fmt.Errorf("request payload is missing metadata")
+	}
+
+	metadata := &rpcmetadata.RequestRpcMetadata{}
+	err := DecodeCompact(metadataBytes, metadata)
+	if err != nil {
+		return nil, err
+	}
+
+	typeID, err := rpcKindToMessageType(metadata.GetKind())
+	if err != nil {
+		return nil, err
+	}
+
+	protoID, err := rpcProtocolIDToProtocolID(metadata.GetProtocol())
+	if err != nil {
+		return nil, err
+	}
+
+	dataBytes := msg.Data()
+	if metadata.GetCompression() == rpcmetadata.CompressionAlgorithm_ZSTD {
+		dataBytes, err = decompressZstd(dataBytes)
 		if err != nil {
 			return nil, err
 		}
-		res.protoID, err = rpcProtocolIDToProtocolID(metadata.GetProtocol())
-		if err != nil {
-			return nil, err
-		}
+	}
+
+	res := &requestPayload{
+		metadata: metadata,
+		typeID:   typeID,
+		protoID:  protoID,
+		data:     dataBytes,
 	}
 	return res, nil
 }

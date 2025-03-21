@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/rsocket/rsocket-go/payload"
 	"github.com/stretchr/testify/require"
 )
 
@@ -38,4 +39,8 @@ func TestRequestRPCMetadata(t *testing.T) {
 	require.Equal(t, wantProto, got.ProtoID())
 	require.Equal(t, wantZstd, got.Zstd())
 	require.Equal(t, wantOther, got.Headers())
+
+	payloadNoMetadata := payload.New([]byte("data_bytes"), nil /* metadata bytes */)
+	_, err = decodeRequestPayload(payloadNoMetadata)
+	require.ErrorContains(t, err, "request payload is missing metadata")
 }

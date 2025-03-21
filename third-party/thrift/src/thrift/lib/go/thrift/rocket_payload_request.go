@@ -90,11 +90,14 @@ func decodeRequestPayload(msg payload.Payload) (*requestPayload, error) {
 	}
 
 	dataBytes := msg.Data()
-	if metadata.GetCompression() == rpcmetadata.CompressionAlgorithm_ZSTD {
+	switch metadata.GetCompression() {
+	case rpcmetadata.CompressionAlgorithm_ZSTD:
 		dataBytes, err = decompressZstd(dataBytes)
-		if err != nil {
-			return nil, err
-		}
+	case rpcmetadata.CompressionAlgorithm_ZLIB:
+		dataBytes, err = decompressZlib(dataBytes)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("request payload decompression failed: %w", err)
 	}
 
 	res := &requestPayload{

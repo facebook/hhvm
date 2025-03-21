@@ -159,8 +159,26 @@ class DynamicPatchBase {
   detail::DynamicPatchOptions options_;
 };
 
-// For Patches that there are multiple possible types.
-// See DynamicUnknownPatch::Category for all possible scenarios.
+/// DynamicPatch for ambiguous type.
+///
+/// When DynamicPatch is created from serialized blob, there could be an
+/// ambiguity to deduce the exact patch type. It consists of the
+/// following operations: `assign`, `clear`, `patchIfSet`, `removeMulti`. See
+/// DynamicUnknownPatch::Category for all possible scenarios.
+///
+/// For introspection, users should provide a visitor with the following methods
+/// for `customVisit`:
+///
+///     struct Visitor {
+///       // Category::StructuredOrAnyPatch
+///       void assign(const Object&);
+///       // Category::ClearPatch
+///       void clear();
+///       // Category::AssociativeContainerPatch
+///       void removeMulti(const ValueSet&);
+///       // Category::StructuredOrAnyPatch
+///       void patchIfSet(FieldId, const DynamicPatch&);
+///     }
 class DynamicUnknownPatch : public DynamicPatchBase {
  public:
   void assign(Object v);
@@ -216,6 +234,11 @@ class DynamicUnknownPatch : public DynamicPatchBase {
     return std::find(c.begin(), c.end(), validateAndGetCategory()) != c.end();
   }
 };
+
+/// DynamicPatch for a Thrift list.
+///
+/// It consists of the following operations: `assign`, `clear`, and
+/// `appendMulti`.
 class DynamicListPatch : public DynamicPatchBase {
  public:
   using DynamicPatchBase::DynamicPatchBase;
@@ -270,6 +293,10 @@ class DynamicListPatch : public DynamicPatchBase {
   }
 };
 
+/// DynamicPatch for a Thrift set.
+///
+/// It consists of the following operations: `assign`, `clear`, `addMulti`, and
+/// `removeMulti`.
 class DynamicSetPatch : public DynamicPatchBase {
  public:
   using DynamicPatchBase::DynamicPatchBase;
@@ -354,6 +381,22 @@ class DynamicSetPatch : public DynamicPatchBase {
   }
 };
 
+/// DynamicPatch for a Thrift map.
+///
+/// It consists of the following operations: `assign`, `clear`, `putMulti`,
+/// `tryPutMulti`, `removeMulti`, and `patchByKey`.
+///
+/// For introspection, users should provide a visitor with the following methods
+/// for `customVisit`:
+///
+///     struct Visitor {
+///       void assign(const Object&);
+///       void clear();
+///       void putMulti(const ValueMap&);
+///       void tryPutMulti(const ValueMap&);
+///       void removeMulti(const ValueSet&);
+///       void patchByKey(const Value&, const DynamicPatch&);
+///     }
 class DynamicMapPatch {
  public:
   void assign(detail::ValueMap v) {
@@ -541,6 +584,21 @@ class DynamicStructurePatch {
   detail::DynamicPatchOptions options_;
 };
 
+/// DynamicPatch for a Thrift struct.
+///
+/// It consists of the following operations: `assign`, `clear`, `patchIfSet`,
+/// `ensure`, `patch`, and `remove`.
+///
+/// For introspection, users should provide a visitor with the following methods
+/// for `customVisit`:
+///
+///     struct Visitor {
+///       void assign(const Object&);
+///       void clear();
+///       void ensure(FieldId, const Value&);
+///       void patchIfSet(FieldId, const DynamicPatch&);
+///       void remove(FieldId);
+///     }
 class DynamicStructPatch : public DynamicStructurePatch<false> {
  public:
   template <class Next>
@@ -549,6 +607,21 @@ class DynamicStructPatch : public DynamicStructurePatch<false> {
     std::forward<Next>(other).customVisit(*this);
   }
 };
+
+/// DynamicPatch for a Thrift union.
+///
+/// It consists of the following operations: `assign`, `clear`, `patchIfSet`,
+/// `ensure`, and `patch`.
+///
+/// For introspection, users should provide a visitor with the following methods
+/// for `customVisit`:
+///
+///     struct Visitor {
+///       void assign(const Object&);
+///       void clear();
+///       void ensure(FieldId, const Value&);
+///       void patchIfSet(FieldId, const DynamicPatch&);
+///     }
 class DynamicUnionPatch : public DynamicStructurePatch<true> {
  public:
   template <class Next>

@@ -1405,6 +1405,24 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   Whether or not to support low priority awaitables in the runtime. If disabled,
   will turn AwaitLowPri instructions into noops.
 
+- int32_t Eval.CustomSrcKeyFilter = 0, rburks
+
+  Which version of the concurrent storage to use
+  for filtering SrcKeys in the async JIT
+  0 default (ConcurrentHashMap with 8 shard bits)
+  1 ConcurrentHashMap with 9 shard bits
+  2 ConcurrentHashMap with 10 shard bits
+  3 AtomicHashMap
+  4 tbb:concurrent_hash_map with const accessor
+
+- uint32_t Eval.AtomicSrcKeyFilterSize = 120000, rburks
+
+  Size hint to initialize the atomic SrcKey filter with for the async JIT
+
+- bool Eval.CheckValueBeforeEnqueue = false, rburks
+
+  Attempt to get whether or not a function has been enqueued for async JIT before attempting to write
+
 # Hack.Lang
 
 - bool Hack.Lang.DisableLvalAsAnExpression = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)

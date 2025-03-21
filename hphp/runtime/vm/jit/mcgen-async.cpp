@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/vm/jit/prof-data-sb.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
+#include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/srckey.h"
@@ -34,7 +35,10 @@
 #include "hphp/util/managed-arena.h"
 #include "hphp/util/trace.h"
 
+#include <folly/AtomicHashMap.h>
 #include <folly/system/ThreadName.h>
+
+#include <tbb/concurrent_hash_map.h>
 
 TRACE_SET_MOD(async_jit);
 
@@ -42,7 +46,238 @@ namespace HPHP::jit::mcgen {
 
 namespace {
 
-folly_concurrent_hash_map_simd<SrcKey, bool, SrcKey::Hasher> s_enqueuedSKs;
+struct SrcKeySetAtomicBool final {
+  explicit SrcKeySetAtomicBool(bool value) : b(value) {}
+  SrcKeySetAtomicBool(const SrcKeySetAtomicBool& sksab): b(sksab.load()) {}
+  SrcKeySetAtomicBool& operator=(const SrcKeySetAtomicBool& sksab) = delete;
+
+  bool compare_exchange_strong(bool value, bool comparand) const {
+      return b.compare_exchange_strong(value, comparand, std::memory_order_relaxed);
+  }
+  void store(bool value) const { b.store(value, std::memory_order_relaxed); }
+  bool load() const { return b.load(std::memory_order_relaxed); }
+
+private: 
+  mutable std::atomic<bool> b;
+};
+
+struct SrcKeySet {
+  SrcKeySet() {}
+  ~SrcKeySet() { assertx(!inited); }
+  SrcKeySet(SrcKeySet&&) = delete;
+  SrcKeySet& operator=(SrcKeySet&&) = delete;
+  void init() {
+    assertx(!inited);
+
+    sks_type = static_cast<SrcKeySetType>(Cfg::Eval::CustomSrcKeyFilter);
+    switch (sks_type) {
+    case SrcKeySetType::TBB:
+      new (&m_tbbm) TBBM();
+      break;
+    case SrcKeySetType::AHM:
+      new (&m_ahm) AHM(Cfg::Eval::AtomicSrcKeyFilterSize);
+      break;
+    case SrcKeySetType::CHMTenShardBits:
+      new (&m_chm10Shards) CHMTenShardBits();
+      break;
+    case SrcKeySetType::CHMNineShardBits:
+      new (&m_chm9Shards) CHMNineShardBits();
+      break;
+    case SrcKeySetType::CHM:
+    default:
+      new (&m_chm) CHM();
+    }
+    inited = true;
+  }
+
+  void destroy() {
+    assertx(inited);
+    always_assert(static_cast<int>(sks_type) == Cfg::Eval::CustomSrcKeyFilter);
+
+    inited = false;
+    switch (sks_type) {
+    case SrcKeySetType::TBB:
+      m_tbbm.~TBBM();
+      break;
+    case SrcKeySetType::AHM:
+      m_ahm.~AHM();
+      break;
+    case SrcKeySetType::CHMTenShardBits:
+      m_chm10Shards.~CHMTenShardBits();
+      break;
+    case SrcKeySetType::CHMNineShardBits:
+      m_chm9Shards.~CHMNineShardBits();
+      break;
+    case SrcKeySetType::CHM:
+    default:
+      m_chm.~CHM();
+      break;
+    }
+  }
+
+  bool exists(const SrcKey &sk) {
+    assertx(inited);
+    always_assert(static_cast<int>(sks_type) == Cfg::Eval::CustomSrcKeyFilter);
+
+    auto const chmExists = [&](auto &map) {
+      auto const it = map.find(sk);
+      return it != map.end() && it->second;
+    };
+
+    auto const tbbExists = [&](auto &map) {
+      TBBM::const_accessor cacc;
+      return map.find(cacc, sk) && cacc->second.load();
+    };
+
+    auto const ahmExists = [&](auto &map) {
+      auto enqueuedItr = map.find(sk.toAtomicInt());
+      return enqueuedItr != map.end() && enqueuedItr->second;
+    };
+
+    switch (sks_type) {
+    case SrcKeySetType::TBB:
+      return tbbExists(m_tbbm);
+    case SrcKeySetType::AHM:
+      return ahmExists(m_ahm);
+    case SrcKeySetType::CHMTenShardBits:
+      return chmExists(m_chm10Shards);
+    case SrcKeySetType::CHMNineShardBits:
+      return chmExists(m_chm9Shards);
+    case SrcKeySetType::CHM:
+    default:
+      return chmExists(m_chm);
+    }
+  }
+
+  bool enqueue(const SrcKey &sk) {
+    assertx(inited);
+    always_assert(static_cast<int>(sks_type) == Cfg::Eval::CustomSrcKeyFilter);
+
+    auto const chmEnqueue = [&](auto &map) {
+      return map.insert(sk, true).second ||
+             map.assign_if_equal(sk, false, true);
+    };
+
+    auto const tbbEnqueue = [&](auto &map) {
+      TBBM::const_accessor cacc;
+      TBBM::value_type val(sk, false);
+      map.insert(cacc, val);
+
+      bool expected = false;
+      return cacc->second.compare_exchange_strong(expected, true);
+    };
+
+    auto const ahmEnqueue = [&](auto &map) {
+      auto [it, ins] = map.emplace(sk.toAtomicInt(), true);
+      static std::atomic<bool> signaled{false};
+      checkAHMSubMaps(map, "jit queue map", signaled);
+      bool expected = false;
+
+      return ins || const_cast<std::atomic<bool> &>(it->second)
+                        .compare_exchange_strong(expected, true,
+                                                 std::memory_order_relaxed);
+    };
+
+    switch (sks_type) {
+    case SrcKeySetType::TBB:
+      return tbbEnqueue(m_tbbm);
+    case SrcKeySetType::AHM:
+      return ahmEnqueue(m_ahm);
+    case SrcKeySetType::CHMTenShardBits:
+      return chmEnqueue(m_chm10Shards);
+    case SrcKeySetType::CHMNineShardBits:
+      return chmEnqueue(m_chm9Shards);
+    case SrcKeySetType::CHM:
+    default:
+      return chmEnqueue(m_chm);
+    }
+  }
+
+  void dequeue(const SrcKey &sk) {
+    assertx(inited);
+    always_assert(static_cast<int>(sks_type) == Cfg::Eval::CustomSrcKeyFilter);
+
+    auto const chmDequeue = [&](auto &map) { return map.assign(sk, false); };
+    auto const tbbDequeue = [&](auto &map) {
+      TBBM::const_accessor cacc;
+      always_assert(map.find(cacc, sk) &&
+                    cacc->second.load());
+      cacc->second.store(false);
+    };
+
+    auto const ahmDequeue = [&](auto &map) {
+      auto it = map.find(sk.toAtomicInt());
+      always_assert(it->second.load(std::memory_order_relaxed));
+      it->second.store(false, std::memory_order_relaxed);
+    };
+
+    switch (sks_type) {
+    case SrcKeySetType::TBB:
+      tbbDequeue(m_tbbm);
+      break;
+    case SrcKeySetType::AHM:
+      ahmDequeue(m_ahm);
+      break;
+    case SrcKeySetType::CHMTenShardBits:
+      chmDequeue(m_chm10Shards);
+      break;
+    case SrcKeySetType::CHMNineShardBits:
+      chmDequeue(m_chm9Shards);
+      break;
+    case SrcKeySetType::CHM:
+    default:
+      chmDequeue(m_chm);
+      break;
+    }
+  }
+
+private:
+  using CHM =
+      folly_concurrent_hash_map_simd<SrcKey, bool,
+                                     SrcKey::Hasher>; // normal shardBits = 8
+  using CHMNineShardBits =
+      folly_concurrent_hash_map_simd<SrcKey, bool, SrcKey::Hasher,
+                                     std::equal_to<SrcKey>,
+                                     std::allocator<uint8_t>, 9>;
+  using CHMTenShardBits =
+      folly_concurrent_hash_map_simd<SrcKey, bool, SrcKey::Hasher,
+                                     std::equal_to<SrcKey>,
+                                     std::allocator<uint8_t>, 10>;
+  using AHM = folly::AtomicHashMap<SrcKey::AtomicInt, std::atomic<bool>>;
+  using TBBM = tbb::concurrent_hash_map<SrcKey, SrcKeySetAtomicBool,
+                                        SrcKey::TbbHashCompare>;
+
+
+  enum class SrcKeySetType : int {
+    CHM = 0,
+    CHMNineShardBits = 1,
+    CHMTenShardBits = 2,
+    AHM = 3,
+    TBB = 4,
+  };
+
+  bool inited{false};
+  SrcKeySetType sks_type;
+
+  union {
+    CHM m_chm;
+    CHMNineShardBits m_chm9Shards;
+    CHMTenShardBits m_chm10Shards;
+    AHM m_ahm;
+    TBBM m_tbbm;
+  };
+};
+
+SrcKeySet s_enqueuedSKs;
+SrcKeySet& enqueuedSKs() {
+  static const auto enqueuedSKs = [] {
+      s_enqueuedSKs.init();
+      return &s_enqueuedSKs;
+    }();
+  always_assert(enqueuedSKs);
+    
+  return *enqueuedSKs;
+}
 
 struct AsyncRegionTranslationContext {
   AsyncRegionTranslationContext(const RegionContext& ctx,
@@ -143,7 +378,7 @@ struct AsyncTranslationWorker
       if (!Cfg::Repo::Authoritative) {
         assertx(Cfg::Eval::EnableAsyncJIT);
         if (rctx.currNumTranslations != kIgnoreNumTrans) {
-          s_enqueuedSKs.assign(ctx.sk, false);
+          enqueuedSKs().dequeue(ctx.sk);
         }
       } else {
         assertx(Cfg::Eval::EnableAsyncJITLive);
@@ -280,7 +515,7 @@ struct AsyncTranslationWorker
       return;
     }
 
- 		if (auto const s =
+    if (auto const s =
         translator.shouldTranslate(ctx.forJumpstart /*noThreshold */,
                                    false /*noSizeLimit*/);
         s != TranslationResult::Scope::Success) {
@@ -353,12 +588,10 @@ AsyncTranslationDispatcher& dispatcher() {
   always_assert(dispatcher);
   return *dispatcher;
 }
-
 void joinAsyncTranslationWorkerThreads() {
   FTRACE(2, "Waiting for background jit worker threads\n");
   dispatcher().waitEmpty(true);
-  // Clearing the ConcurrentHashMap here avoids a crash in the destructor.
-  s_enqueuedSKs.clear();
+  enqueuedSKs().destroy();
 }
 
 void enqueueAsyncTranslateRequestForJumpstart(const RegionContext& ctx) {
@@ -370,8 +603,12 @@ namespace {
 bool mayEnqueueAsyncTranslateRequest(const SrcKey& sk) {
   if (!Cfg::Repo::Authoritative) {
     assertx(Cfg::Eval::EnableAsyncJIT);
-    return s_enqueuedSKs.insert(sk, true).second ||
-      s_enqueuedSKs.assign_if_equal(sk, false, true);
+    if (!Cfg::Eval::CheckValueBeforeEnqueue) {
+      return enqueuedSKs().enqueue(sk);
+    } else {
+      if (enqueuedSKs().exists(sk)) return false;
+      return enqueuedSKs().enqueue(sk);
+    }
   } else {
     assertx(Cfg::Eval::EnableAsyncJITLive);
     auto const func = sk.func();

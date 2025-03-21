@@ -2011,12 +2011,14 @@ class rust_mstch_const : public mstch_const {
     register_methods(
         this,
         {
+            {"constant:rust_name", &rust_mstch_const::rust_name},
             {"constant:lazy?", &rust_mstch_const::rust_lazy},
             {"constant:rust", &rust_mstch_const::rust_typed_value},
             {"constant:docs?", &rust_mstch_const::rust_has_docs},
             {"constant:docs", &rust_mstch_const::rust_docs},
         });
   }
+  mstch::node rust_name() { return named_rust_name(const_); }
   mstch::node rust_lazy() {
     if (type_has_transitive_adapter(const_->type(), true)) {
       return true;

@@ -21,14 +21,14 @@
 {{#constant:docs?}}
 #[doc = {{constant:docs}}]
 {{/constant:docs?}}{{^constant:lazy?}}
-pub const {{constant:name}}{{!
+pub const {{constant:rust_name}}{{!
 }}: {{!
 }}{{#type:string?}}&::std::primitive::str = {{value:quoted}}{{/type:string?}}{{!
 }}{{^type:string?}}{{> lib/type}} = {{> lib/value}}{{/type:string?}}{{!
 }};
 {{/constant:lazy?}}
 {{#constant:lazy?}}
-pub static {{constant:name}}{{!
+pub static {{constant:rust_name}}{{!
 }}: ::std::sync::LazyLock<{{!
 }}{{#constant:type}}{{!
     }}{{#type:has_adapter?}}{{> lib/adapter/qualified}}::AdaptedType{{/type:has_adapter?}}{{!

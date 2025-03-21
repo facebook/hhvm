@@ -1516,7 +1516,7 @@ auto DynamicUnknownPatch::validateAndGetCategory() const -> Category {
           {op::PatchOp::Clear,
            op::PatchOp::PatchPrior,
            op::PatchOp::PatchAfter})) {
-    return Category::StructuredOrAnyPatch;
+    return Category::StructuredPatch;
   }
 
   throwExceptionIf(true);
@@ -1546,7 +1546,8 @@ void DynamicUnknownPatch::assign(Object v) {
   if (!isOneOfCategory(
           {Category::EmptyPatch,
            Category::ClearPatch,
-           Category::StructuredOrAnyPatch})) {
+           Category::StructuredOrAnyPatch,
+           Category::StructuredPatch})) {
     throwIncompatibleCategory("assign");
   }
 
@@ -1557,7 +1558,8 @@ void DynamicUnknownPatch::patchIfSet(FieldId id, const DynamicPatch& p) {
   if (!isOneOfCategory(
           {Category::EmptyPatch,
            Category::ClearPatch,
-           Category::StructuredOrAnyPatch})) {
+           Category::StructuredOrAnyPatch,
+           Category::StructuredPatch})) {
     throwIncompatibleCategory("patchIfSet");
   }
   if (auto assign = get_ptr(op::PatchOp::Assign)) {
@@ -1821,7 +1823,7 @@ class MinSafePatchVersionVisitor {
         },
         [&](const DynamicUnknownPatch& p) {
           // recurse DynamicUnknownPatch for `patchPrior/patchAfter` in
-          // `StructuredOrAnyPatch`.
+          // `DynamicUnknownPatch::Category::StructuredPatch`.
           p.customVisit(*this);
         },
         [&](const auto&) {

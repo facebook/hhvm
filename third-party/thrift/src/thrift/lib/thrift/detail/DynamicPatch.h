@@ -176,7 +176,7 @@ class DynamicPatchBase {
 ///       void clear();
 ///       // Category::AssociativeContainerPatch
 ///       void removeMulti(const ValueSet&);
-///       // Category::StructuredOrAnyPatch
+///       // Category::StructuredPatch
 ///       void patchIfSet(FieldId, const DynamicPatch&);
 ///     }
 class DynamicUnknownPatch : public DynamicPatchBase {
@@ -212,17 +212,18 @@ class DynamicUnknownPatch : public DynamicPatchBase {
     // The patch has no operation. It can be any kinds of patch.
     EmptyPatch,
 
-    // The patch only has clear operation. It can be any kinds of patch.
+    // The patch only has `clear` operation. It can be any kinds of patch.
     ClearPatch,
 
-    // The patch has assign or patchPrior/patchAfter, but we don't know whether
-    // it is a struct patch or an union patch.
-    // If the patch only has assign, it can be an any patch, which is also under
-    // this category.
+    // The patch has `patchPrior/patchAfter`. It can be a struct patch or
+    // union patch.
+    StructuredPatch,
+
+    // The patch only has `assign` of Object. It can be a struct, union, or
+    // any patch.
     StructuredOrAnyPatch,
 
-    // Patch only has the `remove` operation, we don't know whether it is a set
-    // or a map patch.
+    // The patch only has `remove` operation. It can be a set or map patch.
     AssociativeContainerPatch
   };
 

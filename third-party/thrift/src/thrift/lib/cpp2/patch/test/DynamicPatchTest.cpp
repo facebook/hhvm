@@ -824,23 +824,39 @@ void testDynamicUnknownPatch(const auto& t) {
   EXPECT_TRUE(assignPatch.holds_alternative<PatchType>(badge));
 
   obj = {};
-  DynamicUnknownPatch emptyPatch;
-  emptyPatch.fromObject(badge, obj);
-  emptyPatch.apply(badge, v);
+  DynamicPatch emptyPatch;
+  emptyPatch.fromObject(obj);
+  emptyPatch.apply(v);
+  EXPECT_EQ(v, asValueStruct<Tag>(t));
+  EXPECT_TRUE(emptyPatch.holds_alternative<DynamicUnknownPatch>(badge));
+  emptyPatch.getStoredPatchByTag<Tag>();
+  EXPECT_FALSE(emptyPatch.holds_alternative<DynamicUnknownPatch>(badge));
+  emptyPatch.apply(v);
   EXPECT_EQ(v, asValueStruct<Tag>(t));
 
+  auto checkClearPatch = [&]() {
+    if (std::is_base_of_v<type::struct_c, Tag>) {
+      // If Tag is a struct, `clear` will remove all fields in protocol::Value,
+      // which won't match static patch behavior which only removes optional
+      // field.
+      EXPECT_TRUE(v.as_object().empty());
+    } else {
+      EXPECT_EQ(v, asValueStruct<Tag>({}));
+    }
+  };
+
   obj[static_cast<FieldId>(op::PatchOp::Clear)].emplace_bool(true);
-  DynamicUnknownPatch clearPatch;
-  clearPatch.fromObject(badge, obj);
-  clearPatch.apply(badge, v);
-  if (std::is_base_of_v<type::struct_c, Tag>) {
-    // If Tag is a struct, `clear` will remove all fields in protocol::Value,
-    // which won't match static patch behavior which only removes optional
-    // field.
-    EXPECT_TRUE(v.as_object().empty());
-  } else {
-    EXPECT_EQ(v, asValueStruct<Tag>({}));
-  }
+  DynamicPatch clearPatch;
+  clearPatch.fromObject(obj);
+  clearPatch.apply(v);
+  checkClearPatch();
+  EXPECT_TRUE(clearPatch.holds_alternative<DynamicUnknownPatch>(badge));
+
+  v = asValueStruct<Tag>(t);
+  clearPatch.getStoredPatchByTag<Tag>();
+  EXPECT_FALSE(clearPatch.holds_alternative<DynamicUnknownPatch>(badge));
+  clearPatch.apply(v);
+  checkClearPatch();
 }
 
 TEST(DynamicPatch, Unknown) {

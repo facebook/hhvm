@@ -166,6 +166,9 @@ class DynamicPatchBase {
 /// following operations: `assign`, `clear`, `patchIfSet`, `removeMulti`. See
 /// DynamicUnknownPatch::Category for all possible scenarios.
 ///
+/// If the exact patch type is known, `DynamicPatch::getStoredPatchByTag` can be
+/// used to inform the exact patch type.
+///
 /// For introspection, users should provide a visitor with the following methods
 /// for `customVisit`:
 ///
@@ -681,6 +684,14 @@ class DynamicPatch {
   /// Convert Patch stored in Protocol Object to DynamicPatch.
   void fromObject(Object);
 
+  /// Retrieves the stored patch by the specified tag. Can be used to assert the
+  /// type of DynamicUnknownPatch. Throws if the patch cannot be retrieved with
+  /// the specified tag.
+  template <class Tag>
+  auto& getStoredPatchByTag() {
+    return getStoredPatchByTag(Tag{});
+  }
+
   /// @cond
   [[nodiscard]] bool empty(detail::Badge) const;
 
@@ -705,11 +716,6 @@ class DynamicPatch {
   template <class PatchType>
   PatchType* get_if() {
     return std::get_if<PatchType>(patch_.get());
-  }
-
-  template <class Tag>
-  auto& getStoredPatchByTag() {
-    return getStoredPatchByTag(Tag{});
   }
   /// @endcond
 

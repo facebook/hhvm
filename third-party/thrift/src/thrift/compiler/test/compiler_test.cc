@@ -786,19 +786,22 @@ TEST(CompilerTest, removed_annotations) {
   check_compile(R"(
     include "thrift/annotation/thrift.thrift"
 
-    enum E {} (cpp2.declare_bitwise_ops)
+    enum E1 {} (cpp2.declare_bitwise_ops)
     # expected-error@-1: The annotation cpp2.declare_bitwise_ops has been removed. Please use @thrift.BitmaskEnum instead.
 
     @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp2.declare_bitwise_ops": "1"}}
-    enum F {}
+    enum E2 {}
     # expected-error@-2: The annotation cpp2.declare_bitwise_ops has been removed. Please use @thrift.BitmaskEnum instead.
 
+    enum E3 {} (cpp2.deprecated_enum_unscoped)
+    # expected-error@-1: invalid annotation cpp2.deprecated_enum_unscoped
+
     struct A {
-        1: i64 removed_unstructured (rust.foo) 
-        # expected-error@-1: The annotation rust.foo has been removed. Please use a structured annotation from thrift/annotation/rust.thrift instead.
-        @thrift.DeprecatedUnvalidatedAnnotations{items = {"rust.foo": "1"}}
-        2: i64 removed_catchall 
-        # expected-error@-2: The annotation rust.foo has been removed. Please use a structured annotation from thrift/annotation/rust.thrift instead.
+      1: i64 removed_unstructured (rust.foo)
+      # expected-error@-1: The annotation rust.foo has been removed. Please use a structured annotation from thrift/annotation/rust.thrift instead.
+      @thrift.DeprecatedUnvalidatedAnnotations{items = {"rust.foo": "1"}}
+      2: i64 removed_catchall
+      # expected-error@-2: The annotation rust.foo has been removed. Please use a structured annotation from thrift/annotation/rust.thrift instead.
     }
 
     typedef map<string, string> (rust.type = "HashMap") HashMap
@@ -808,7 +811,7 @@ TEST(CompilerTest, removed_annotations) {
     typedef S T
 
     service J {
-        i64 foo(1: i64 arg (rust.name = "bar")) # expected-error: The annotation rust.name has been removed. Please use a structured annotation from thrift/annotation/rust.thrift instead.
+      i64 foo(1: i64 arg (rust.name = "bar")) # expected-error: The annotation rust.name has been removed. Please use a structured annotation from thrift/annotation/rust.thrift instead.
     }
   )");
 }

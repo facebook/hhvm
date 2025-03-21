@@ -1429,7 +1429,8 @@ void deprecate_annotations(sema_context& ctx, const t_named& node) {
       {"erl.default_value", erlang("DefaultValue")},
       {"iq.node_type", erlang("Iq")},
   };
-  std::set<std::string> removed_annotations = {"cpp2.declare_bitwise_ops"};
+  std::set<std::string> removed_annotations = {
+      "cpp2.declare_bitwise_ops", "cpp2.deprecated_enum_unscoped"};
   std::map<std::string, std::string> removed_prefixes = {{"rust.", "rust"}};
 
   for (const auto& [k, v] : node.annotations()) {
@@ -1448,6 +1449,10 @@ void deprecate_annotations(sema_context& ctx, const t_named& node) {
     }
     bool directly_deprecated = deprecations.count(k) != 0;
     if (!prefix && !directly_deprecated) {
+      if (removed_annotations.count(k) != 0) {
+        ctx.error("invalid annotation {}", k);
+        continue;
+      }
       continue;
     }
     std::string replacement;

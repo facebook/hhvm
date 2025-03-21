@@ -723,6 +723,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
 /// * `terse P patchPrior`
 /// * `terse T ensure`
 /// * `terse P patch`
+/// * `terse list<i16> remove`
 /// Where `P` is the field patch type for the struct type `T`.
 template <typename Patch>
 class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {

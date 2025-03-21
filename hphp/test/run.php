@@ -564,6 +564,7 @@ function find_test_files(string $file): vec<string>{
     'flighttracker' => 'hphp/facebook/extensions/flighttracker/test',
     'fci' => 'hphp/facebook/extensions/fci/test',
     'scribe' => 'hphp/facebook/extensions/scribe/test',
+    'dataflowmonitor' => 'hphp/facebook/extensions/dataflowmonitor/test',
   ];
 
   $pattern = $mappage[$file] ?? null;

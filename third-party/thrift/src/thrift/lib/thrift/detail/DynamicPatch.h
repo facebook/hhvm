@@ -182,7 +182,7 @@ class DynamicPatchBase {
 class DynamicUnknownPatch : public DynamicPatchBase {
  public:
   void assign(Object v);
-  void removeMulti(const detail::ValueSet& v);
+  void removeMulti(detail::ValueSet v);
   void patchIfSet(FieldId, const DynamicPatch&);
 
   void fromObject(detail::Badge badge, Object obj) {
@@ -338,10 +338,10 @@ class DynamicSetPatch : public DynamicPatchBase {
     }
   }
 
-  void removeMulti(detail::Badge badge, const detail::ValueSet& remove) {
-    for (const auto& i : remove) {
-      erase(badge, i);
-    }
+  void removeMulti(detail::Badge badge, detail::ValueSet remove) {
+    remove.eraseInto(remove.begin(), remove.end(), [&](auto&& k) {
+      erase(badge, std::move(k));
+    });
   }
 
  private:
@@ -416,10 +416,8 @@ class DynamicMapPatch {
   void erase(Value k);
 
   void tryPutMulti(detail::ValueMap v);
-  void removeMulti(const detail::ValueSet& v) {
-    for (const auto& k : v) {
-      erase(k);
-    }
+  void removeMulti(detail::ValueSet v) {
+    v.eraseInto(v.begin(), v.end(), [&](auto&& k) { erase(std::move(k)); });
   }
   void putMulti(detail::ValueMap m) {
     detail::checkHomogeneousContainer(m);
@@ -880,7 +878,8 @@ void DynamicUnknownPatch::customVisitImpl(Self&& self, Visitor&& v) {
   }
 
   if (auto remove = self.get_ptr(op::PatchOp::Remove)) {
-    std::forward<Visitor>(v).removeMulti(remove->as_set());
+    std::forward<Visitor>(v).removeMulti(
+        folly::forward_like<Self>(remove->as_set()));
   }
 }
 

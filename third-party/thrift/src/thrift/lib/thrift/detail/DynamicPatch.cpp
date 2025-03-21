@@ -1529,7 +1529,7 @@ void DynamicUnknownPatch::throwIncompatibleCategory(
       method,
       debugStringViaEncode(patch_)));
 }
-void DynamicUnknownPatch::removeMulti(const detail::ValueSet& v) {
+void DynamicUnknownPatch::removeMulti(detail::ValueSet v) {
   if (!isOneOfCategory(
           {Category::EmptyPatch,
            Category::ClearPatch,
@@ -1538,9 +1538,7 @@ void DynamicUnknownPatch::removeMulti(const detail::ValueSet& v) {
   }
 
   auto& s = get(op::PatchOp::Remove).ensure_set();
-  for (const auto& k : v) {
-    s.insert(k);
-  }
+  v.eraseInto(v.begin(), v.end(), [&](auto&& k) { s.insert(std::move(k)); });
 }
 void DynamicUnknownPatch::assign(Object v) {
   if (!isOneOfCategory(

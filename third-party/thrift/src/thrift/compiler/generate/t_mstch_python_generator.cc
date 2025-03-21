@@ -1042,9 +1042,8 @@ class python_mstch_enum : public mstch_enum {
         enum_->find_structured_annotation_or_null(kPythonFlagsUri);
   }
 
-  mstch::node legacy_api() {
-    return ::apache::thrift::compiler::generate_legacy_api(*enum_);
-  }
+  // DEPRECATED!
+  mstch::node legacy_api() { return true; }
 };
 
 class python_mstch_enum_value : public mstch_enum_value {

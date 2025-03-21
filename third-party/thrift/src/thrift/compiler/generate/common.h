@@ -47,9 +47,6 @@ inline bool generate_legacy_api(const t_program&) {
 inline bool generate_legacy_api(const t_structured&) {
   return true;
 }
-inline bool generate_legacy_api(const t_enum&) {
-  return true;
-}
 inline bool generate_legacy_api(const t_service&) {
   return true;
 }

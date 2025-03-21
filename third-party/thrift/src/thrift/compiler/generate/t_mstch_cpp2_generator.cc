@@ -2213,7 +2213,6 @@ class cpp_mstch_enum : public mstch_enum {
             {"enum:cpp_declare_bitwise_ops",
              &cpp_mstch_enum::cpp_declare_bitwise_ops},
             {"enum:has_zero", &cpp_mstch_enum::has_zero},
-            {"enum:legacy_api?", &cpp_mstch_enum::legacy_api},
         });
   }
   mstch::node min() {
@@ -2256,9 +2255,6 @@ class cpp_mstch_enum : public mstch_enum {
           enum_value, context_, pos_);
     }
     return mstch::node();
-  }
-  mstch::node legacy_api() {
-    return ::apache::thrift::compiler::generate_legacy_api(*enum_);
   }
 
  private:

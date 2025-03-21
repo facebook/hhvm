@@ -321,6 +321,42 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     return std::move(def).make();
   }
 
+  prototype<t_enum>::ptr make_prototype_for_enum(
+      const prototype_database& proto) const override {
+    auto base = t_whisker_generator::make_prototype_for_enum(proto);
+    auto def = whisker::dsl::prototype_builder<h_enum>::extends(base);
+
+    def.property("cpp_min", [](const t_enum& e) -> whisker::object {
+      auto values = e.values();
+      if (values.empty()) {
+        return {};
+      }
+      auto min = std::min_element(
+          values.begin(),
+          values.end(),
+          [](const t_enum_value& a, const t_enum_value& b) {
+            return a.get_value() < b.get_value();
+          });
+      return whisker::object(cpp2::get_name(&*min));
+    });
+
+    def.property("cpp_max", [](const t_enum& e) -> whisker::object {
+      auto values = e.values();
+      if (values.empty()) {
+        return {};
+      }
+      auto max = std::max_element(
+          values.begin(),
+          values.end(),
+          [](const t_enum_value& a, const t_enum_value& b) {
+            return a.get_value() < b.get_value();
+          });
+      return whisker::object(cpp2::get_name(&*max));
+    });
+
+    return std::move(def).make();
+  }
+
   std::unordered_map<std::string, int> get_client_name_to_split_count() const;
 
   std::shared_ptr<cpp2_generator_context> cpp_context_;
@@ -2205,39 +2241,12 @@ class cpp_mstch_enum : public mstch_enum {
     register_methods(
         this,
         {
-            {"enum:min", &cpp_mstch_enum::min},
-            {"enum:max", &cpp_mstch_enum::max},
             {"enum:cpp_is_unscoped", &cpp_mstch_enum::cpp_is_unscoped},
             {"enum:cpp_name", &cpp_mstch_enum::cpp_name},
             {"enum:cpp_enum_type", &cpp_mstch_enum::cpp_enum_type},
             {"enum:cpp_declare_bitwise_ops",
              &cpp_mstch_enum::cpp_declare_bitwise_ops},
-            {"enum:has_zero", &cpp_mstch_enum::has_zero},
         });
-  }
-  mstch::node min() {
-    if (!enum_->get_enum_values().empty()) {
-      auto e_min = std::min_element(
-          enum_->get_enum_values().begin(),
-          enum_->get_enum_values().end(),
-          [](t_enum_value* a, t_enum_value* b) {
-            return a->get_value() < b->get_value();
-          });
-      return cpp2::get_name(*e_min);
-    }
-    return mstch::node();
-  }
-  mstch::node max() {
-    if (!enum_->get_enum_values().empty()) {
-      auto e_max = std::max_element(
-          enum_->get_enum_values().begin(),
-          enum_->get_enum_values().end(),
-          [](t_enum_value* a, t_enum_value* b) {
-            return a->get_value() < b->get_value();
-          });
-      return cpp2::get_name(*e_max);
-    }
-    return mstch::node();
   }
   mstch::node cpp_is_unscoped() {
     return enum_->get_annotation("cpp.deprecated_enum_unscoped");
@@ -2247,14 +2256,6 @@ class cpp_mstch_enum : public mstch_enum {
   mstch::node cpp_declare_bitwise_ops() {
     return enum_->find_annotation_or_null("cpp.declare_bitwise_ops") ||
         enum_->find_structured_annotation_or_null(kBitmaskEnumUri);
-  }
-  mstch::node has_zero() {
-    auto* enum_value = enum_->find_value(0);
-    if (enum_value != nullptr) {
-      return context_.enum_value_factory->make_mstch_object(
-          enum_value, context_, pos_);
-    }
-    return mstch::node();
   }
 
  private:

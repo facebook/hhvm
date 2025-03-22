@@ -46,7 +46,8 @@ chunkIOBuf(std::unique_ptr<IOBuf> input, size_t chunks, BufCreator creator) {
   }
   // create IOBuf chunks
   size_t inputLen = input->computeChainDataLength();
-  size_t chunkLen = floor((double)inputLen / (double)chunks);
+  size_t chunkLen =
+      floor(static_cast<double>(inputLen) / static_cast<double>(chunks));
   std::unique_ptr<IOBuf> chunked;
 
   for (size_t i = 0; i < chunks - 1; ++i) {

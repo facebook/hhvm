@@ -48,7 +48,8 @@ ProxyRoute<RouterInfo>::ProxyRoute(
           proxy_,
           routeSelectors,
           rolloutOpts)) {
-  if (proxy_.getRouterOptions().big_value_split_threshold != 0) {
+  if (proxy_.getRouterOptions().big_value_split_threshold != 0 &&
+      rolloutOpts.enableGlobalBigValueRoute) {
     root_ = detail::wrapWithBigValueRoute<RouterInfo>(
         std::move(root_), proxy_.getRouterOptions());
   }

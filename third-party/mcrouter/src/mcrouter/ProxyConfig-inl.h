@@ -133,6 +133,8 @@ ProxyConfig<RouterInfo>::ProxyConfig(
   checkLogic(
       enableSetDistribution || enableCrossRegionSetRpc,
       "ProxyConfig: cannot disable cross-region set rpc if set distribution is disabled");
+  bool enableGlobalBigValueRoute =
+      readBool("enable_global_big_value_route", true);
 
   proxy.router().runtimeFeatures_.enableOdslScuba =
       readBool("enable_odsl_scuba", false);
@@ -151,7 +153,8 @@ ProxyConfig<RouterInfo>::ProxyConfig(
           .enableCrossRegionDeleteRpc = enableCrossRegionDeleteRpc,
           .enableAsyncDlBroadcast = enableAsyncDlBroadcast,
           .enableSetDistribution = enableSetDistribution,
-          .enableCrossRegionSetRpc = enableCrossRegionSetRpc});
+          .enableCrossRegionSetRpc = enableCrossRegionSetRpc,
+          .enableGlobalBigValueRoute = enableGlobalBigValueRoute});
   serviceInfo_ = std::make_shared<ServiceInfo<RouterInfo>>(proxy, *this);
 }
 

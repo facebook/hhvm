@@ -32,6 +32,7 @@ struct RootRouteRolloutOpts {
   bool enableAsyncDlBroadcast = false;
   bool enableSetDistribution = false;
   bool enableCrossRegionSetRpc = true;
+  bool enableGlobalBigValueRoute = true;
 };
 
 template <class RouterInfo>

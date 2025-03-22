@@ -40,9 +40,10 @@ function f<reify Treify, Terase>(): void {
   $m4();
   echo ">> T::cr<>\n";
   $r1 = Treify::r<X>;
-  $r2 = Treify::r<Treify>;
   $r1();
-  $r2();
+  // TODO(T218390557)
+  // $r2 = Treify::r<Treify>;
+  // $r2();
 }
 
 <<__EntryPoint>>

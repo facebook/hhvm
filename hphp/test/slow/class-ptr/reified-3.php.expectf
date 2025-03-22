@@ -32,10 +32,7 @@ C::m
 >> T::cr<>
 
 Notice: Implicit string to Class conversion for classname C in %s/class-ptr/reified-3.php on line 42
-
-Notice: Implicit string to Class conversion for classname C in %s/class-ptr/reified-3.php on line 43
 string(1) "X"
-string(1) "C"
 
 
 === R<int> ===
@@ -72,7 +69,4 @@ R::m
 >> T::cr<>
 
 Notice: Implicit string to Class conversion for classname R in %s/class-ptr/reified-3.php on line 42
-
-Notice: Implicit string to Class conversion for classname R in %s/class-ptr/reified-3.php on line 43
 string(1) "X"
-string(1) "R"

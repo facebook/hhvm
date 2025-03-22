@@ -48,6 +48,8 @@ InputIterator reduce(InputIterator begin, InputIterator end) {
 // complete.
 uint64_t hashBigValue(const folly::IOBuf& value);
 
+BigValueRouteOptions parseBigValueRouteSettings(const folly::dynamic& json);
+
 } // namespace detail
 
 template <class RouterInfo>
@@ -444,6 +446,16 @@ typename RouterInfo::RouteHandlePtr makeBigValueRoute(
     BigValueRouteOptions options) {
   return makeRouteHandleWithInfo<RouterInfo, BigValueRoute>(
       std::move(rh), std::move(options));
+}
+
+template <class RouterInfo>
+typename RouterInfo::RouteHandlePtr makeBigValueRoute(
+    RouteHandleFactory<typename RouterInfo::RouteHandleIf>& factory,
+    const folly::dynamic& json) {
+  checkLogic(json.isObject(), "BigValueRoute is not an object");
+  checkLogic(json.count("target"), "BigValueRoute: Missing target parameter");
+  return makeRouteHandleWithInfo<RouterInfo, BigValueRoute>(
+      factory.create(json["target"]), detail::parseBigValueRouteSettings(json));
 }
 
 } // namespace mcrouter

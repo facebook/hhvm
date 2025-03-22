@@ -219,8 +219,9 @@ inline void jmp(IRGS& env, Block* target) {
  */
 template<class Branch, class Next, class Taken>
 SSATmp* cond(IRGS& env, Branch branch, Next next, Taken taken) {
-  auto const taken_block = defBlock(env);
-  auto const done_block  = defBlock(env);
+  auto const hint = env.irb->curBlock()->hint();
+  auto const taken_block = defBlock(env, std::min(hint, Block::Hint::Neither));
+  auto const done_block  = defBlock(env, hint);
 
   // Jmp to the done block with the given tmp. Returns a tmp whose type we
   // should union into the phi at the start of the done block, or nullptr,
@@ -273,8 +274,9 @@ std::pair<SSATmp*, SSATmp*> condPair(IRGS& env,
                                      Branch branch,
                                      Next next,
                                      Taken taken) {
-  auto const taken_block = defBlock(env);
-  auto const done_block  = defBlock(env);
+  auto const hint = env.irb->curBlock()->hint();
+  auto const taken_block = defBlock(env, std::min(hint, Block::Hint::Neither));
+  auto const done_block  = defBlock(env, hint);
 
   using T = decltype(branch(taken_block));
   auto const v1 = BranchPairImpl<T>::go(branch, taken_block, next);
@@ -306,8 +308,9 @@ std::pair<SSATmp*, SSATmp*> condPair(IRGS& env,
  */
 template<class Branch, class Next, class Taken>
 void ifThenElse(IRGS& env, Branch branch, Next next, Taken taken) {
-  auto const taken_block = defBlock(env);
-  auto const done_block = defBlock(env);
+  auto const hint = env.irb->curBlock()->hint();
+  auto const taken_block = defBlock(env, std::min(hint, Block::Hint::Neither));
+  auto const done_block = defBlock(env, hint);
 
   branch(taken_block);
 
@@ -344,7 +347,8 @@ void ifThen(IRGS& env, Branch branch, Taken taken) {
  */
 template<class Branch, class Next>
 void ifElse(IRGS& env, Branch branch, Next next) {
-  auto const done_block = defBlock(env);
+  auto const hint = env.irb->curBlock()->hint();
+  auto const done_block = defBlock(env, hint);
 
   branch(done_block);
 

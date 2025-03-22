@@ -10,10 +10,10 @@ Index: folly/folly/CMakeLists.txt
    RUNTIME DESTINATION ${BIN_INSTALL_DIR}
    LIBRARY DESTINATION ${LIB_INSTALL_DIR}
    ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
-Index: folly/folly/experimental/exception_tracer/CMakeLists.txt
+Index: folly/folly/debugging/exception_tracer/CMakeLists.txt
 ===================================================================
---- folly.orig/folly/experimental/exception_tracer/CMakeLists.txt
-+++ folly/folly/experimental/exception_tracer/CMakeLists.txt
+--- folly.orig/folly/debugging/exception_tracer/CMakeLists.txt
++++ folly/folly/debugging/exception_tracer/CMakeLists.txt
 @@ -63,7 +63,6 @@ if (FOLLY_HAVE_ELF AND FOLLY_HAVE_DWARF)
        folly_exception_tracer_base
        folly_exception_tracer

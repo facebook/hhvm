@@ -9,6 +9,7 @@ get_target_property(LIBSODIUM_LIBRARY libsodium INTERFACE_LINK_LIBRARIES)
 get_target_property(ZSTD_INCLUDE_DIR zstd INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(ZSTD_LIBRARY zstd INTERFACE_LINK_LIBRARIES)
 get_target_property(JEMALLOC_INCLUDE_DIR jemalloc INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(FAST_FLOAT_INCLUDE_DIR fast_float INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(GFLAGS_INCLUDE_DIR gflags INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(GFLAGS_LIBRARY gflags INTERFACE_LINK_LIBRARIES)
 get_target_property(GLOG_INCLUDE_DIR glog INTERFACE_INCLUDE_DIRECTORIES)
@@ -25,13 +26,6 @@ get_filename_component(BOOST_LIBRARY_DIR "${FIRST_LIB}" DIRECTORY)
 
 set(FOLLY_CXXFLAGS "-I${JEMALLOC_INCLUDE_DIR} -I${CMAKE_CURRENT_LIST_DIR}/include")
 message(STATUS "FOLLY_CXXFLAGS: ${FOLLY_CXXFLAGS}")
-
-if(ENABLE_SSE4_2 OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
-  if(IS_X64)
-    message(STATUS "Enabling SSE 4.2 for bundled folly")
-    set(FOLLY_CXXFLAGS "${FOLLY_CXXFLAGS} -msse4.2")
-  endif()
-endif()
 
 ExternalProject_add(
   bundled_folly
@@ -72,6 +66,7 @@ ExternalProject_add(
     -DBoost_DEBUG=1
     -DDOUBLE_CONVERSION_INCLUDE_DIR=${DOUBLE_CONVERSION_INCLUDE_DIR}
     -DDOUBLE_CONVERSION_LIBRARY=${DOUBLE_CONVERSION_LIBRARY}
+    -DFASTFLOAT_INCLUDE_DIR=${FAST_FLOAT_INCLUDE_DIR}
     "-Dfmt_DIR=${fmt_DIR}"
     -DLIBSODIUM_INCLUDE_DIR=${LIBSODIUM_INCLUDE_DIR}
     -DLIBSODIUM_LIBRARY=${LIBSODIUM_LIBRARY}
@@ -92,6 +87,7 @@ set(
   FOLLY_DEPS
   boost
   double-conversion
+  fast_float
   fmt
   libsodium
   jemalloc

@@ -115,7 +115,7 @@ void cgEndCatch(IRLS& env, const IRInstruction* inst) {
     not_reached();
   }();
 
-  v << jmpi{helper, vm_regs_no_sp()};
+  v << jmpi{helper, doSync ? vm_regs_with_sp() : vm_regs_no_sp()};
 }
 
 void cgUnwindCheckSideExit(IRLS& env, const IRInstruction* inst) {

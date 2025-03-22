@@ -24,29 +24,27 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 /**
- * There is a default Rust type associated with each Thrift type. For
- * example, the default Rust type to represent Thrift `map<>`s is
+ * There is a default Rust type associated with each Thrift type. For example,
+ * the default Rust type to represent Thrift `map<>`s is
  * `std::collections::BTreeMap<>`.
  * 
- * The `rust.Type` annotation provides an ability to "override"
- * (substitute) a non-default Rust type in certain circumstances (full
- * details below). We might say for example, `@rust.Type{name="HashMap"}`
- * to override an instance of a specific Thrift `map<>`.
+ * The `rust.Type` annotation provides an ability to "override" (substitute) a
+ * non-default Rust type in certain circumstances (full details below). We might
+ * say for example, `@rust.Type{name="HashMap"}` to override an instance of a
+ * specific Thrift `map<>`.
  * 
- * The `rust.Type` annotation can be applied to any type but has no
- * effect when applied to `string`, `list<>`, `struct` or `enum` types.
+ * The `rust.Type` annotation can be applied to any type but has no effect when
+ * applied to `string`, `list<>`, `struct` or `enum` types.
  * 
- * The `name` argument of a `rust.Type` annotation may specify a
- * "standard" or "nonstandard" type: a name containing a '`::`' is
- * classified as a nonstandard type whereas, a name without a '`::`' is
- * classified as standard.
+ * The `name` argument of a `rust.Type` annotation may specify a "standard" or
+ * "nonstandard" type: a name containing a '`::`' is classified as a nonstandard
+ * type whereas, a name without a '`::`' is classified as standard.
  * 
- * Standard types that may appear in `@rust.Type` annotations are exactly
- * types that are (re-)exported from the `fbthrift::builtin_types`
- * module. For such types, the `fbthift` package provides stock
- * `fbthrift::Serialize<>` and `fbthrift::Deserialize<>` instances for
- * them. At the current time the full set of such types is
- * `std::collections::*`, `bytes::Bytes` and
+ * Standard types that may appear in `@rust.Type` annotations are exactly types
+ * that are (re-)exported from the `fbthrift::builtin_types` module. For such
+ * types, the `fbthift` package provides stock `fbthrift::Serialize<>` and
+ * `fbthrift::Deserialize<>` instances for them. At the current time the full
+ * set of such types is `std::collections::*`, `bytes::Bytes` and
  * `ordered_float::OrderedFloat`.
  * 
  * This is an example of an application of a `@rust.Type` annotation with a
@@ -73,29 +71,28 @@ import com.facebook.thrift.protocol.*;
  * }
  * ```
  * 
- * Nonstandard types, when they appear in `@rust.Type` annotations
- * applied to Thrift `map<>`, `set<>` or `binary` types will result in
- * the generation of `fbthrift::Serialize<>` and
- * `fbthrift::Deserialize<>` instances for those types. The serialization
- * code makes assumptions about valid expressions and the existence of
- * trait implementations for such types that are documented below.
+ * Nonstandard types, when they appear in `@rust.Type` annotations applied to
+ * Thrift `map<>`, `set<>` or `binary` types will result in the generation of
+ * `fbthrift::Serialize<>` and `fbthrift::Deserialize<>` instances for those
+ * types. The serialization code makes assumptions about valid expressions and
+ * the existence of trait implementations for such types that are documented
+ * below.
  * 
  * A nonstandard type say can also be applied to `i64`. In this case, the
  * resulting generated serialization code assumes the existence of
- * `fbthrift::Serialize<>` and `fbthrift::Deserialize<>` for that
- * nonstandard type.
+ * `fbthrift::Serialize<>` and `fbthrift::Deserialize<>` for that nonstandard
+ * type.
  * 
- * A nonstandard type applied to Thrift `void`, `bool`, `float`, `byte`,
- * `i16`, `i32`, `double`, and `float` types will not result in the
- * generation of any serialization code for the nonstandard type
- * (rendering nonstandard types applied to these types effectively
- * unsupported at this time).
+ * A nonstandard type applied to Thrift `void`, `bool`, `float`, `byte`, `i16`,
+ * `i32`, `double`, and `float` types will not result in the generation of any
+ * serialization code for the nonstandard type (rendering nonstandard types
+ * applied to these types effectively unsupported at this time).
  * 
- * "Codegen" errors or bugs resulting from the use of standard types in
- * valid positions in `@rust.Type` annotations should be considered the
- * responsibility of the the Rust Thrift maintainers to address. Less
- * "formal" support should be expected from the Rust Thrift maintainers
- * when nonstandard types are involved.
+ * "Codegen" errors or bugs resulting from the use of standard types in valid
+ * positions in `@rust.Type` annotations should be considered the responsibility
+ * of the the Rust Thrift maintainers to address. Less "formal" support should
+ * be expected from the Rust Thrift maintainers when nonstandard types are
+ * involved.
  * 
  * ## `binary`
  * 
@@ -111,9 +108,9 @@ import com.facebook.thrift.protocol.*;
  * }
  * ```
  * 
- * If nonstandard `B` models Thrift `binary`, `b : B`, `other: &[u8]` and
- * `vec : std::vec::Vec<u8>` then the following expressions are required
- * to be valid and the following trait instances must exist:
+ * If nonstandard `B` models Thrift `binary`, `b : B`, `other: &[u8]` and `vec :
+ * std::vec::Vec<u8>` then the following expressions are required to be valid
+ * and the following trait instances must exist:
  * 
  * | expression                                            |
  * | :---------------------------------------------------- |
@@ -128,8 +125,8 @@ import com.facebook.thrift.protocol.*;
  * 
  * ## `set`
  * 
- * The default Rust type for a thrift `set` is
- * `std::collections::BTreeSet<>`. An example override:
+ * The default Rust type for a thrift `set` is `std::collections::BTreeSet<>`.
+ * An example override:
  * 
  * ```
  * @rust.Type{name = "sorted_vector_map::SortedVectorSet"}
@@ -140,9 +137,9 @@ import com.facebook.thrift.protocol.*;
  * }
  * ```
  * 
- * If nonstandard `S` models thrift `set`, `K` is the Rust element type,
- * `k : K`, `l : usize`, `s : S<K>` and `'a` a lifetime, required valid
- * expressions and trait implementations are as follows:
+ * If nonstandard `S` models thrift `set`, `K` is the Rust element type, `k :
+ * K`, `l : usize`, `s : S<K>` and `'a` a lifetime, required valid expressions
+ * and trait implementations are as follows:
  * 
  * | expression                                            |
  * | :---------------------------------------------------- |
@@ -158,8 +155,8 @@ import com.facebook.thrift.protocol.*;
  * 
  * ## `map`
  * 
- * The default rust type for a thrift `map` is
- * `std::collections::BTreeMap<>`. An example override:
+ * The default rust type for a thrift `map` is `std::collections::BTreeMap<>`.
+ * An example override:
  * 
  * ```
  * @rust.Type{name = "sorted_vector_map::SortedVectorMap"}
@@ -170,10 +167,9 @@ import com.facebook.thrift.protocol.*;
  * }
  * ```
  * 
- * If nonstandard `T` models thrift `map`, `K` and `V` are the Rust map
- * key and value types respectively, `k : K`, `v : V`, `l : usize`, `m :
- * T<K, V>` and `'a` a lifetime, required valid expressions and trait
- * implementations are:
+ * If nonstandard `T` models thrift `map`, `K` and `V` are the Rust map key and
+ * value types respectively, `k : K`, `v : V`, `l : usize`, `m : T<K, V>` and
+ * `'a` a lifetime, required valid expressions and trait implementations are:
  * 
  * | expression                                            |
  * | :---------------------------------------------------- |

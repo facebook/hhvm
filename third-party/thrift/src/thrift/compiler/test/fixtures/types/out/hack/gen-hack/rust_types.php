@@ -409,9 +409,9 @@ class Box implements \IThriftSyncStruct, \IThriftStructMetadata {
 }
 
 /**
- * Generated struct definitions generally include an additional member to
- * force use of `..Default::default()` when initalizing instances. Use this
- * annotation to prevent this.
+ * Generated struct definitions generally include an additional member to force
+ * use of `..Default::default()` when initalizing instances. Use this annotation
+ * to prevent this.
  *
  * Original thrift struct:-
  * Exhaustive
@@ -488,8 +488,8 @@ class Exhaustive implements \IThriftSyncStruct, \IThriftStructMetadata {
 }
 
 /**
- * Generate trait impls for `Ord`, `PartialOrd`, `Eq`, and `Hash`.
- * This makes a type usable as the key in a hash-map or B-tree map.
+ * Generate trait impls for `Ord`, `PartialOrd`, `Eq`, and `Hash`. This makes a
+ * type usable as the key in a hash-map or B-tree map.
  *
  * Original thrift struct:-
  * Ord
@@ -661,29 +661,27 @@ class NewType implements \IThriftSyncStruct, \IThriftStructMetadata {
 }
 
 /**
- * There is a default Rust type associated with each Thrift type. For
- * example, the default Rust type to represent Thrift `map<>`s is
+ * There is a default Rust type associated with each Thrift type. For example,
+ * the default Rust type to represent Thrift `map<>`s is
  * `std::collections::BTreeMap<>`.
  * 
- * The `rust.Type` annotation provides an ability to "override"
- * (substitute) a non-default Rust type in certain circumstances (full
- * details below). We might say for example, `@rust.Type{name="HashMap"}`
- * to override an instance of a specific Thrift `map<>`.
+ * The `rust.Type` annotation provides an ability to "override" (substitute) a
+ * non-default Rust type in certain circumstances (full details below). We might
+ * say for example, `@rust.Type{name="HashMap"}` to override an instance of a
+ * specific Thrift `map<>`.
  * 
- * The `rust.Type` annotation can be applied to any type but has no
- * effect when applied to `string`, `list<>`, `struct` or `enum` types.
+ * The `rust.Type` annotation can be applied to any type but has no effect when
+ * applied to `string`, `list<>`, `struct` or `enum` types.
  * 
- * The `name` argument of a `rust.Type` annotation may specify a
- * "standard" or "nonstandard" type: a name containing a '`::`' is
- * classified as a nonstandard type whereas, a name without a '`::`' is
- * classified as standard.
+ * The `name` argument of a `rust.Type` annotation may specify a "standard" or
+ * "nonstandard" type: a name containing a '`::`' is classified as a nonstandard
+ * type whereas, a name without a '`::`' is classified as standard.
  * 
- * Standard types that may appear in `@rust.Type` annotations are exactly
- * types that are (re-)exported from the `fbthrift::builtin_types`
- * module. For such types, the `fbthift` package provides stock
- * `fbthrift::Serialize<>` and `fbthrift::Deserialize<>` instances for
- * them. At the current time the full set of such types is
- * `std::collections::*`, `bytes::Bytes` and
+ * Standard types that may appear in `@rust.Type` annotations are exactly types
+ * that are (re-)exported from the `fbthrift::builtin_types` module. For such
+ * types, the `fbthift` package provides stock `fbthrift::Serialize<>` and
+ * `fbthrift::Deserialize<>` instances for them. At the current time the full
+ * set of such types is `std::collections::*`, `bytes::Bytes` and
  * `ordered_float::OrderedFloat`.
  * 
  * This is an example of an application of a `@rust.Type` annotation with a
@@ -710,29 +708,28 @@ class NewType implements \IThriftSyncStruct, \IThriftStructMetadata {
  * }
  * ```
  * 
- * Nonstandard types, when they appear in `@rust.Type` annotations
- * applied to Thrift `map<>`, `set<>` or `binary` types will result in
- * the generation of `fbthrift::Serialize<>` and
- * `fbthrift::Deserialize<>` instances for those types. The serialization
- * code makes assumptions about valid expressions and the existence of
- * trait implementations for such types that are documented below.
+ * Nonstandard types, when they appear in `@rust.Type` annotations applied to
+ * Thrift `map<>`, `set<>` or `binary` types will result in the generation of
+ * `fbthrift::Serialize<>` and `fbthrift::Deserialize<>` instances for those
+ * types. The serialization code makes assumptions about valid expressions and
+ * the existence of trait implementations for such types that are documented
+ * below.
  * 
  * A nonstandard type say can also be applied to `i64`. In this case, the
  * resulting generated serialization code assumes the existence of
- * `fbthrift::Serialize<>` and `fbthrift::Deserialize<>` for that
- * nonstandard type.
+ * `fbthrift::Serialize<>` and `fbthrift::Deserialize<>` for that nonstandard
+ * type.
  * 
- * A nonstandard type applied to Thrift `void`, `bool`, `float`, `byte`,
- * `i16`, `i32`, `double`, and `float` types will not result in the
- * generation of any serialization code for the nonstandard type
- * (rendering nonstandard types applied to these types effectively
- * unsupported at this time).
+ * A nonstandard type applied to Thrift `void`, `bool`, `float`, `byte`, `i16`,
+ * `i32`, `double`, and `float` types will not result in the generation of any
+ * serialization code for the nonstandard type (rendering nonstandard types
+ * applied to these types effectively unsupported at this time).
  * 
- * "Codegen" errors or bugs resulting from the use of standard types in
- * valid positions in `@rust.Type` annotations should be considered the
- * responsibility of the the Rust Thrift maintainers to address. Less
- * "formal" support should be expected from the Rust Thrift maintainers
- * when nonstandard types are involved.
+ * "Codegen" errors or bugs resulting from the use of standard types in valid
+ * positions in `@rust.Type` annotations should be considered the responsibility
+ * of the the Rust Thrift maintainers to address. Less "formal" support should
+ * be expected from the Rust Thrift maintainers when nonstandard types are
+ * involved.
  * 
  * ## `binary`
  * 
@@ -748,9 +745,9 @@ class NewType implements \IThriftSyncStruct, \IThriftStructMetadata {
  * }
  * ```
  * 
- * If nonstandard `B` models Thrift `binary`, `b : B`, `other: &[u8]` and
- * `vec : std::vec::Vec<u8>` then the following expressions are required
- * to be valid and the following trait instances must exist:
+ * If nonstandard `B` models Thrift `binary`, `b : B`, `other: &[u8]` and `vec :
+ * std::vec::Vec<u8>` then the following expressions are required to be valid
+ * and the following trait instances must exist:
  * 
  * | expression                                            |
  * | :---------------------------------------------------- |
@@ -765,8 +762,8 @@ class NewType implements \IThriftSyncStruct, \IThriftStructMetadata {
  * 
  * ## `set`
  * 
- * The default Rust type for a thrift `set` is
- * `std::collections::BTreeSet<>`. An example override:
+ * The default Rust type for a thrift `set` is `std::collections::BTreeSet<>`.
+ * An example override:
  * 
  * ```
  * @rust.Type{name = "sorted_vector_map::SortedVectorSet"}
@@ -777,9 +774,9 @@ class NewType implements \IThriftSyncStruct, \IThriftStructMetadata {
  * }
  * ```
  * 
- * If nonstandard `S` models thrift `set`, `K` is the Rust element type,
- * `k : K`, `l : usize`, `s : S<K>` and `'a` a lifetime, required valid
- * expressions and trait implementations are as follows:
+ * If nonstandard `S` models thrift `set`, `K` is the Rust element type, `k :
+ * K`, `l : usize`, `s : S<K>` and `'a` a lifetime, required valid expressions
+ * and trait implementations are as follows:
  * 
  * | expression                                            |
  * | :---------------------------------------------------- |
@@ -795,8 +792,8 @@ class NewType implements \IThriftSyncStruct, \IThriftStructMetadata {
  * 
  * ## `map`
  * 
- * The default rust type for a thrift `map` is
- * `std::collections::BTreeMap<>`. An example override:
+ * The default rust type for a thrift `map` is `std::collections::BTreeMap<>`.
+ * An example override:
  * 
  * ```
  * @rust.Type{name = "sorted_vector_map::SortedVectorMap"}
@@ -807,10 +804,9 @@ class NewType implements \IThriftSyncStruct, \IThriftStructMetadata {
  * }
  * ```
  * 
- * If nonstandard `T` models thrift `map`, `K` and `V` are the Rust map
- * key and value types respectively, `k : K`, `v : V`, `l : usize`, `m :
- * T<K, V>` and `'a` a lifetime, required valid expressions and trait
- * implementations are:
+ * If nonstandard `T` models thrift `map`, `K` and `V` are the Rust map key and
+ * value types respectively, `k : K`, `v : V`, `l : usize`, `m : T<K, V>` and
+ * `'a` a lifetime, required valid expressions and trait implementations are:
  * 
  * | expression                                            |
  * | :---------------------------------------------------- |
@@ -1142,10 +1138,12 @@ class Mod implements \IThriftSyncStruct, \IThriftStructMetadata {
 }
 
 /**
- * A fully qualified path to a struct that implements `fbthrift::adapter::ThriftTypeAdapter`.
+ * A fully qualified path to a struct that implements
+ * `fbthrift::adapter::ThriftTypeAdapter`.
  * 
- * This will transform the type of this field to that struct's `AdaptedType`, and the corresponding
- * `ThriftTypeAdapter` methods will be called in the serialization and deserialization paths.
+ * This will transform the type of this field to that struct's `AdaptedType`,
+ * and the corresponding `ThriftTypeAdapter` methods will be called in the
+ * serialization and deserialization paths.
  * 
  * Example:
  * If you have a Thrift struct like:
@@ -1160,17 +1158,19 @@ class Mod implements \IThriftSyncStruct, \IThriftStructMetadata {
  * ```
  * 
  * The generated Rust struct's `duration_secs` field will be set to the type
- * `<fbthrift_adapters::DurationSecondsAdapter as ::fbthrift::adapter::ThriftTypeAdapter>::AdaptedType`
- * (which is `std::time::Duration`) and marshalling the `i64` to and from `Duration` will be handled
- * in the serialization/deserialization path with the methods defined on the `ThriftTypeAdapter` impl.
+ * `<fbthrift_adapters::DurationSecondsAdapter as
+ * ::fbthrift::adapter::ThriftTypeAdapter>::AdaptedType` (which is
+ * `std::time::Duration`) and marshalling the `i64` to and from `Duration` will
+ * be handled in the serialization/deserialization path with the methods defined
+ * on the `ThriftTypeAdapter` impl.
  * 
- * The name provided here must be a valid Rust path, i.e. the `fbthrift_adapters` crate must be added
- * to the Thrift library's `rust_deps`. Alternatively, you define the adapter in a file added to the
- * Thrift library's `rust_include_srcs`, and use the `crate::` prefix in your adapter name.
+ * The name provided here must be a valid Rust path, i.e. the
+ * `fbthrift_adapters` crate must be added to the Thrift library's `rust_deps`.
+ * Alternatively, you define the adapter in a file added to the Thrift library's
+ * `rust_include_srcs`, and use the `crate::` prefix in your adapter name.
  * 
- * If `<>` is present at the end of the name, we will treat the name as a generic and fill it in with
- * the original unadapted type.
- * For example:
+ * If `<>` is present at the end of the name, we will treat the name as a
+ * generic and fill it in with the original unadapted type. For example:
  * 
  * ```
  * struct Foo {
@@ -1183,9 +1183,9 @@ class Mod implements \IThriftSyncStruct, \IThriftStructMetadata {
  * 
  * will use `fbthrift_adapters::DurationSecondsAdapter<i64>` as the adapter.
  * 
- * If the adapter name starts with `crate::` and this `@rust.Adapter` is applied transitively with
- * @scope.Transitive, `crate::` will be replaced with the name of the crate in which the
- * transitive annotation is defined.
+ * If the adapter name starts with `crate::` and this `@rust.Adapter` is applied
+ * transitively with @scope.Transitive, `crate::` will be replaced with the name
+ * of the crate in which the transitive annotation is defined.
  *
  * Original thrift struct:-
  * Adapter
@@ -1315,9 +1315,9 @@ class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata {
  * }
  * ```
  * 
- * If the derive starts with `crate::` and this `@rust.Derive` is applied transitively with
- * @scope.Transitive, `crate::` will be replaced with the name of the crate in which the
- * transitive annotation is defined.
+ * If the derive starts with `crate::` and this `@rust.Derive` is applied
+ * transitively with @scope.Transitive, `crate::` will be replaced with the name
+ * of the crate in which the transitive annotation is defined.
  *
  * Original thrift struct:-
  * Derive
@@ -1447,17 +1447,21 @@ class Derive implements \IThriftSyncStruct, \IThriftStructMetadata {
 }
 
 /**
- * If `anyhow_to_application_exn` is true, this allows returning an `anyhow::Error` from within a Thrift server handler method,
- * and that `anyhow::Error` will be turned into an `ApplicationException`. This is similar in behavior
- * to what happens if you throw an unhandled exception type in Python Thrift server or C++ Thrift server.
+ * If `anyhow_to_application_exn` is true, this allows returning an
+ * `anyhow::Error` from within a Thrift server handler method, and that
+ * `anyhow::Error` will be turned into an `ApplicationException`. This is
+ * similar in behavior to what happens if you throw an unhandled exception type
+ * in Python Thrift server or C++ Thrift server.
  * 
- * The `ApplicationException` returned will have the error code `Unknown` and message
- * `format!("{:#}", anyhow_err)`.
+ * The `ApplicationException` returned will have the error code `Unknown` and
+ * message `format!("{:#}", anyhow_err)`.
  * 
- * NOTE: it is generally considered bad practice to use this because it eliminates the ability
- * to match on specific error types on the client side. When possible, it is recommended you
- * always return structured error types (though it is more verbose). This annotation is provided
- * solely for convenience and should not be used services where error type matching is needed.
+ * NOTE: it is generally considered bad practice to use this because it
+ * eliminates the ability to match on specific error types on the client side.
+ * When possible, it is recommended you always return structured error types
+ * (though it is more verbose). This annotation is provided solely for
+ * convenience and should not be used services where error type matching is
+ * needed.
  * 
  * Example, the following Thrift:
  * 
@@ -1488,8 +1492,8 @@ class Derive implements \IThriftSyncStruct, \IThriftStructMetadata {
  * }
  * ```
  * 
- * You can also use this annotation on the service definition itself to have it apply to all
- * methods on the service, e.g.
+ * You can also use this annotation on the service definition itself to have it
+ * apply to all methods on the service, e.g.
  * 
  * ```
  * @rust.ServiceExn{anyhow_to_application_exn = true}

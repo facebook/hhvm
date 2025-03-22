@@ -44,9 +44,9 @@ import com.facebook.thrift.protocol.*;
  * }
  * ```
  * 
- * If the derive starts with `crate::` and this `@rust.Derive` is applied transitively with
- * @scope.Transitive, `crate::` will be replaced with the name of the crate in which the
- * transitive annotation is defined.
+ * If the derive starts with `crate::` and this `@rust.Derive` is applied
+ * transitively with @scope.Transitive, `crate::` will be replaced with the name
+ * of the crate in which the transitive annotation is defined.
  */
 @SuppressWarnings({ "unused", "serial" })
 public class Derive implements TBase, java.io.Serializable, Cloneable, Comparable<Derive> {

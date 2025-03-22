@@ -24,17 +24,21 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 /**
- * If `anyhow_to_application_exn` is true, this allows returning an `anyhow::Error` from within a Thrift server handler method,
- * and that `anyhow::Error` will be turned into an `ApplicationException`. This is similar in behavior
- * to what happens if you throw an unhandled exception type in Python Thrift server or C++ Thrift server.
+ * If `anyhow_to_application_exn` is true, this allows returning an
+ * `anyhow::Error` from within a Thrift server handler method, and that
+ * `anyhow::Error` will be turned into an `ApplicationException`. This is
+ * similar in behavior to what happens if you throw an unhandled exception type
+ * in Python Thrift server or C++ Thrift server.
  * 
- * The `ApplicationException` returned will have the error code `Unknown` and message
- * `format!("{:#}", anyhow_err)`.
+ * The `ApplicationException` returned will have the error code `Unknown` and
+ * message `format!("{:#}", anyhow_err)`.
  * 
- * NOTE: it is generally considered bad practice to use this because it eliminates the ability
- * to match on specific error types on the client side. When possible, it is recommended you
- * always return structured error types (though it is more verbose). This annotation is provided
- * solely for convenience and should not be used services where error type matching is needed.
+ * NOTE: it is generally considered bad practice to use this because it
+ * eliminates the ability to match on specific error types on the client side.
+ * When possible, it is recommended you always return structured error types
+ * (though it is more verbose). This annotation is provided solely for
+ * convenience and should not be used services where error type matching is
+ * needed.
  * 
  * Example, the following Thrift:
  * 
@@ -65,8 +69,8 @@ import com.facebook.thrift.protocol.*;
  * }
  * ```
  * 
- * You can also use this annotation on the service definition itself to have it apply to all
- * methods on the service, e.g.
+ * You can also use this annotation on the service definition itself to have it
+ * apply to all methods on the service, e.g.
  * 
  * ```
  * @rust.ServiceExn{anyhow_to_application_exn = true}

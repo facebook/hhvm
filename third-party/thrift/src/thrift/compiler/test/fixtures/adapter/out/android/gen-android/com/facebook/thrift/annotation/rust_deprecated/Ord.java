@@ -24,8 +24,8 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 /**
- * Generate trait impls for `Ord`, `PartialOrd`, `Eq`, and `Hash`.
- * This makes a type usable as the key in a hash-map or B-tree map.
+ * Generate trait impls for `Ord`, `PartialOrd`, `Eq`, and `Hash`. This makes a
+ * type usable as the key in a hash-map or B-tree map.
  */
 @SuppressWarnings({ "unused", "serial" })
 public class Ord implements TBase, java.io.Serializable, Cloneable {

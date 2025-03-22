@@ -32,7 +32,8 @@ typename RouterInfo::RouteHandlePtr wrapWithBigValueRoute(
       routerOpts.big_value_split_threshold,
       routerOpts.big_value_batch_size,
       routerOpts.big_value_hide_reply_flag);
-  return makeBigValueRoute<RouterInfo>(std::move(ch), std::move(options));
+  return makeBigValueRouteInternal<RouterInfo>(
+      std::move(ch), std::move(options));
 }
 
 } // namespace detail

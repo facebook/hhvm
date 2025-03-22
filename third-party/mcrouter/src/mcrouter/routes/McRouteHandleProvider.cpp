@@ -15,6 +15,7 @@
 #include "mcrouter/routes/AllInitialRouteFactory.h"
 #include "mcrouter/routes/AllMajorityRouteFactory.h"
 #include "mcrouter/routes/AllSyncRouteFactory.h"
+#include "mcrouter/routes/BigValueRoute.h"
 #include "mcrouter/routes/BlackholeRoute.h"
 #include "mcrouter/routes/CarbonLookasideRoute.h"
 #include "mcrouter/routes/DevNullRoute.h"
@@ -251,6 +252,7 @@ McRouteHandleProvider<MemcacheRouterInfo>::buildRouteMap() {
       {"AllInitialRoute", &makeAllInitialRoute<MemcacheRouterInfo>},
       {"AllMajorityRoute", &makeAllMajorityRoute<MemcacheRouterInfo>},
       {"AllSyncRoute", &makeAllSyncRoute<MemcacheRouterInfo>},
+      {"BigValueRoute", &makeBigValueRoute<MemcacheRouterInfo>},
       {"BlackholeRoute", &makeBlackholeRoute<MemcacheRouterInfo>},
       {"CarbonLookasideRoute",
        &createCarbonLookasideRoute<

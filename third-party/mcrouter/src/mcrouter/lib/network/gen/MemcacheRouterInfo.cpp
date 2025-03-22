@@ -28,6 +28,7 @@
 #include <mcrouter/routes/AllInitialRouteFactory.h>
 #include <mcrouter/routes/AllMajorityRouteFactory.h>
 #include <mcrouter/routes/AllSyncRouteFactory.h>
+#include <mcrouter/routes/BigValueRoute.h>
 #include <mcrouter/routes/BlackholeRoute.h>
 #include <mcrouter/routes/DevNullRoute.h>
 #include <mcrouter/routes/ErrorRoute.h>
@@ -76,6 +77,11 @@ const folly::dynamic& json);
 
 extern template facebook::memcache::MemcacheRouterInfo::RouteHandlePtr
 makeAllSyncRoute<facebook::memcache::MemcacheRouterInfo>(
+RouteHandleFactory<facebook::memcache::MemcacheRouterInfo::RouteHandleIf>& factory,
+const folly::dynamic& json);
+
+extern template facebook::memcache::MemcacheRouterInfo::RouteHandlePtr
+makeBigValueRoute<facebook::memcache::MemcacheRouterInfo>(
 RouteHandleFactory<facebook::memcache::MemcacheRouterInfo::RouteHandleIf>& factory,
 const folly::dynamic& json);
 
@@ -168,6 +174,7 @@ MemcacheRouterInfo::buildRouteMap() {
       {"AllInitialRoute", &makeAllInitialRoute<MemcacheRouterInfo>},
       {"AllMajorityRoute", &makeAllMajorityRoute<MemcacheRouterInfo>},
       {"AllSyncRoute", &makeAllSyncRoute<MemcacheRouterInfo>},
+      {"BigValueRoute", &makeBigValueRoute<MemcacheRouterInfo>},
       {"BlackholeRoute", &makeBlackholeRoute<MemcacheRouterInfo>},
       {"DevNullRoute", &makeDevNullRoute<MemcacheRouterInfo>},
       {"ErrorRoute", &makeErrorRoute<MemcacheRouterInfo>},

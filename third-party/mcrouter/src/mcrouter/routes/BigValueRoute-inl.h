@@ -441,7 +441,7 @@ folly::IOBuf BigValueRoute<RouterInfo>::createChunkKey(
 }
 
 template <class RouterInfo>
-typename RouterInfo::RouteHandlePtr makeBigValueRoute(
+typename RouterInfo::RouteHandlePtr makeBigValueRouteInternal(
     typename RouterInfo::RouteHandlePtr rh,
     BigValueRouteOptions options) {
   return makeRouteHandleWithInfo<RouterInfo, BigValueRoute>(
@@ -454,6 +454,7 @@ typename RouterInfo::RouteHandlePtr makeBigValueRoute(
     const folly::dynamic& json) {
   checkLogic(json.isObject(), "BigValueRoute is not an object");
   checkLogic(json.count("target"), "BigValueRoute: Missing target parameter");
+
   return makeRouteHandleWithInfo<RouterInfo, BigValueRoute>(
       factory.create(json["target"]), detail::parseBigValueRouteSettings(json));
 }

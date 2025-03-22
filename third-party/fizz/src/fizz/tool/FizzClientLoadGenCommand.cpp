@@ -196,7 +196,7 @@ int fizzClientLoadGenCommand(const std::vector<std::string>& args) {
       config.jsonOutput = true;
     }}},
     {"-p", {true, [&config](const std::string& arg) {
-      config.percentiles.emplace_back((float)std::stoi(arg) / 100);
+      config.percentiles.emplace_back(static_cast<float>(std::stoi(arg)) / 100);
     }}},
     {"-min", {true, [&config](const std::string& arg) {
       config.minLatency = std::stoi(arg);

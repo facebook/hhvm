@@ -303,12 +303,10 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   }
 
   auto const setFrameCtx = [&] (const SSATmp* fp, SSATmp* ctx) {
-    for (auto& frame : m_stack) {
-      if (frame.fpValue != fp) continue;
-      frame.ctx = ctx;
-      frame.ctxType = ctx->type();
-      frame.origCtxType = ctx->type();
-    }
+    if (cur().fpValue != fp) return;
+    cur().ctx = ctx;
+    cur().ctxType = ctx->type();
+    cur().origCtxType = ctx->type();
   };
 
   switch (inst->op()) {
@@ -437,17 +435,15 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   case AssertType: {
     auto const oldVal = inst->src(0);
     auto const newVal = inst->dst();
-    for (auto& frame : m_stack) {
-      for (auto& it : frame.locals) {
-        refineValue(it.second, oldVal, newVal);
-      }
-      for (auto& it : frame.stack) {
-        refineValue(it.second, oldVal, newVal);
-      }
-      if (frame.ctx && canonical(frame.ctx) == canonical(inst->src(0))) {
-        frame.ctx = inst->dst();
-        frame.ctxType = inst->dst()->type();
-      }
+    for (auto& it : cur().locals) {
+      refineValue(it.second, oldVal, newVal);
+    }
+    for (auto& it : cur().stack) {
+      refineValue(it.second, oldVal, newVal);
+    }
+    if (cur().ctx && canonical(cur().ctx) == canonical(inst->src(0))) {
+      cur().ctx = inst->dst();
+      cur().ctxType = inst->dst()->type();
     }
     // MInstrState can only be live for the current frame.
     refineMBaseValue(oldVal, newVal);

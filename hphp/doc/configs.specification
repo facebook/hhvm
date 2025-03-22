@@ -1726,6 +1726,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - int Jit.RetargetJumps = 1, UNKNOWN
 - bool Jit.ForceVMRegSync = false, UNKNOWN
+- bool Jit.StressEagerVMRegSync = false, UNKNOWN
 
   Sync VM reg state for all native calls.
 

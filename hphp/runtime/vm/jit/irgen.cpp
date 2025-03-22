@@ -171,12 +171,12 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
   };
 
   /*
-   * In debug mode, emit eager syncs with high frequency to ensure that
+   * If configured, emit eager syncs with high frequency to ensure that
    * store and load elimination optimizations are correct. The correctness of
    * the VMRegs is verified in VMRegAnchor.
    */
   auto const shouldStressEagerSync =
-    debug &&
+    Cfg::Jit::StressEagerVMRegSync &&
     inst->maySyncVMRegsWithSources() &&
     !inst->marker().prologue() &&
     !inst->marker().sk().funcEntry() &&

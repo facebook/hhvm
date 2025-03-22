@@ -15,7 +15,6 @@
  */
 
 #include <algorithm>
-#include <array>
 #include <cassert>
 #include <filesystem>
 #include <memory>
@@ -2610,15 +2609,11 @@ void t_mstch_cpp2_generator::generate_out_of_line_service(
         mstch_service, "ServiceAsyncClient.cpp", name + "AsyncClient.cpp");
   }
 
-  std::vector<std::array<std::string, 3>> protocols = {
-      {{"binary", "BinaryProtocol", "T_BINARY_PROTOCOL"}},
-      {{"compact", "CompactProtocol", "T_COMPACT_PROTOCOL"}},
-  };
-  for (const auto& protocol : protocols) {
+  for (const char* protocol : {"binary", "compact"}) {
     render_to_file(
         mstch_service,
         "service_processmap_protocol.cpp",
-        name + "_processmap_" + protocol.at(0) + ".cpp");
+        name + "_processmap_" + protocol + ".cpp");
   }
 }
 

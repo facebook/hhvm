@@ -383,6 +383,9 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
         treat_non_annotated_memoize_as_kbic =
           bool_opt "treat_non_annotated_memoize_as_kbic" config
           >?? po_opt.treat_non_annotated_memoize_as_kbic;
+        use_oxidized_by_ref_decls =
+          bool_opt "use_oxidized_by_ref_decls" config
+          >?? po_opt.use_oxidized_by_ref_decls;
       }
   in
   GlobalOptions.set

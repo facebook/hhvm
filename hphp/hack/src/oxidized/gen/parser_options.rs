@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e546c240a79d6efc49618b9c4d3283b9>>
+// @generated SignedSource<<f8ad800e2803a22ef94ec94c824c54bf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -74,6 +74,7 @@ pub struct ParserOptions {
     pub enable_class_pointer_hint: bool,
     pub disallow_non_annotated_memoize: bool,
     pub treat_non_annotated_memoize_as_kbic: bool,
+    pub use_oxidized_by_ref_decls: bool,
 }
 
 #[derive(
@@ -113,6 +114,7 @@ pub struct FfiT(
     pub bool,
     pub bool,
     pub s_map::SMap<experimental_features::FeatureStatus>,
+    pub bool,
     pub bool,
     pub bool,
 );

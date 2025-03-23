@@ -10,7 +10,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use datastore::NonEvictingStore;
-use decl_parser::DeclParserObr;
+use decl_parser::DeclParser;
 use fbinit::FacebookInit;
 use folded_decl_provider::FoldedDeclProvider;
 use folded_decl_provider::LazyFoldedDeclProvider;
@@ -29,7 +29,7 @@ mod pos_test;
 
 struct TestContext {
     root: TestRepo,
-    decl_parser: DeclParserObr<BReason>,
+    decl_parser: DeclParser<BReason>,
     folded_decl_provider: Arc<dyn FoldedDeclProvider<BReason>>,
 }
 
@@ -48,7 +48,7 @@ impl TestContext {
             dummy: PathBuf::new(),
             tmp: tmpdir.path().to_path_buf(),
         });
-        let decl_parser = DeclParserObr::new(
+        let decl_parser = DeclParser::new(
             Arc::new(file_provider::DiskProvider::new(path_ctx, None)),
             DeclParserOptions::default(),
         );

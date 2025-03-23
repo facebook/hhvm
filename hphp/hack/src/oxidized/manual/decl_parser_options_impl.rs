@@ -34,6 +34,7 @@ impl DeclParserOptions {
             enable_class_pointer_hint: opts.enable_class_pointer_hint,
             disallow_non_annotated_memoize: opts.disallow_non_annotated_memoize,
             treat_non_annotated_memoize_as_kbic: opts.treat_non_annotated_memoize_as_kbic,
+            use_oxidized_by_ref_decls: opts.use_oxidized_by_ref_decls,
         }
     }
 }

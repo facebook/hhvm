@@ -328,6 +328,10 @@ impl HhConfig {
                 "treat_non_annotated_memoize_as_kbic",
                 default.treat_non_annotated_memoize_as_kbic,
             )?,
+            use_oxidized_by_ref_decls: hhconfig.get_bool_or(
+                "use_oxidized_by_ref_decls",
+                default.use_oxidized_by_ref_decls,
+            )?,
         };
         let default = GlobalOptions::default();
         let opts = GlobalOptions {

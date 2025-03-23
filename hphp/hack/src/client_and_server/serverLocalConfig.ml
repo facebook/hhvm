@@ -255,4 +255,5 @@ type t = {
       (** If true, `hh` is equivalent to `hh -Wall`, i.e. warnings are shown.
         Otherwise, `hh` is equivalent to `hh -Wnone`, i.e. warnings are not shown. *)
   warnings_in_sandcastle: bool;
+  use_oxidized_by_ref_decls: bool;
 }

@@ -83,6 +83,8 @@ type t = {
       (** When true, plain <<__Memoize>> will not be allowed. **)
   treat_non_annotated_memoize_as_kbic: bool;
       (** When true, plain <<__Memoize>> will be treated as <<__Memoize(#KeyedByIC)>>. **)
+  use_oxidized_by_ref_decls: bool;
+      (** Controls whether the direct decl parser uses oxidized-by-ref or just plain oxidized *)
 }
 [@@deriving show, eq]
 
@@ -110,6 +112,7 @@ type ffi_t =
   * bool
   * bool
   * Experimental_features.feature_status SMap.t
+  * bool
   * bool
   * bool
 

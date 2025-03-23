@@ -123,4 +123,6 @@ type rollout_flags = {
       (** POC: @mckenzie - if true, autocomplete results will be sorted using sort text attribute *)
   warnings_default_all: bool;
       (** POC: @catg - whether the client shows warnings by default. *)
+  use_oxidized_by_ref_decls: bool;
+      (** POC sowens - whether to decl with oxidized or oxidized-by-ref *)
 }

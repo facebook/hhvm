@@ -6,7 +6,7 @@
 use std::sync::Arc;
 
 use datastore::NonEvictingStore;
-use decl_parser::DeclParserObr;
+use decl_parser::DeclParser;
 use indicatif::ParallelProgressIterator;
 use pos::RelativePath;
 use pos::TypeName;
@@ -50,7 +50,7 @@ pub fn make_non_evicting_shallow_decl_store<R: Reason>() -> ShallowDeclStore<R> 
 
 pub fn populate_shallow_decl_store<R: Reason>(
     shallow_decl_store: &ShallowDeclStore<R>,
-    decl_parser: DeclParserObr<R>,
+    decl_parser: DeclParser<R>,
     filenames: &[RelativePath],
 ) -> Vec<TypeName> {
     let len = filenames.len();

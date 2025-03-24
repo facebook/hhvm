@@ -1340,6 +1340,30 @@ class empty_struct(thrift.py3.types.Struct):
 
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 0
+
+    def __eq__(self, other):
+        return isinstance(other, empty_struct) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, empty_struct):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, empty_struct):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("empty_struct")
@@ -1381,6 +1405,30 @@ class decorated_struct(thrift.py3.types.Struct):
         return self._fbthrift__inner.field
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 1
+
+    def __eq__(self, other):
+        return isinstance(other, decorated_struct) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, decorated_struct):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, decorated_struct):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("decorated_struct")
@@ -1513,6 +1561,30 @@ class ContainerStruct(thrift.py3.types.Struct):
         return self._fbthrift_inner__fieldH
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 8
+
+    def __eq__(self, other):
+        return isinstance(other, ContainerStruct) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, ContainerStruct):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, ContainerStruct):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("ContainerStruct")
@@ -1561,6 +1633,30 @@ class CppTypeStruct(thrift.py3.types.Struct):
         return self._fbthrift_inner__fieldA
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 1
+
+    def __eq__(self, other):
+        return isinstance(other, CppTypeStruct) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, CppTypeStruct):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, CppTypeStruct):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("CppTypeStruct")
@@ -1602,6 +1698,30 @@ class VirtualStruct(thrift.py3.types.Struct):
         return self._fbthrift__inner.MyIntField
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 1
+
+    def __eq__(self, other):
+        return isinstance(other, VirtualStruct) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, VirtualStruct):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, VirtualStruct):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("VirtualStruct")
@@ -1662,6 +1782,30 @@ class MyStructWithForwardRefEnum(thrift.py3.types.Struct):
         return self._fbthrift_inner__b
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 2
+
+    def __eq__(self, other):
+        return isinstance(other, MyStructWithForwardRefEnum) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, MyStructWithForwardRefEnum):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, MyStructWithForwardRefEnum):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("MyStructWithForwardRefEnum")
@@ -1708,6 +1852,30 @@ class TrivialNumeric(thrift.py3.types.Struct):
         return self._fbthrift__inner.b
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 2
+
+    def __eq__(self, other):
+        return isinstance(other, TrivialNumeric) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, TrivialNumeric):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, TrivialNumeric):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("TrivialNumeric")
@@ -1761,6 +1929,30 @@ class TrivialNestedWithDefault(thrift.py3.types.Struct):
         return self._fbthrift_inner__n
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 2
+
+    def __eq__(self, other):
+        return isinstance(other, TrivialNestedWithDefault) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, TrivialNestedWithDefault):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, TrivialNestedWithDefault):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("TrivialNestedWithDefault")
@@ -1814,6 +2006,30 @@ class ComplexString(thrift.py3.types.Struct):
         return self._fbthrift_inner__b
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 2
+
+    def __eq__(self, other):
+        return isinstance(other, ComplexString) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, ComplexString):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, ComplexString):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("ComplexString")
@@ -1867,6 +2083,30 @@ class ComplexNestedWithDefault(thrift.py3.types.Struct):
         return self._fbthrift_inner__n
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 2
+
+    def __eq__(self, other):
+        return isinstance(other, ComplexNestedWithDefault) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, ComplexNestedWithDefault):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, ComplexNestedWithDefault):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("ComplexNestedWithDefault")
@@ -1928,6 +2168,30 @@ class MinPadding(thrift.py3.types.Struct):
         return self._fbthrift__inner.tiny
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 5
+
+    def __eq__(self, other):
+        return isinstance(other, MinPadding) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, MinPadding):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, MinPadding):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("MinPadding")
@@ -1989,6 +2253,30 @@ class MinPaddingWithCustomType(thrift.py3.types.Struct):
         return self._fbthrift__inner.tiny
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 5
+
+    def __eq__(self, other):
+        return isinstance(other, MinPaddingWithCustomType) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, MinPaddingWithCustomType):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, MinPaddingWithCustomType):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("MinPaddingWithCustomType")
@@ -2052,6 +2340,30 @@ class MyStruct(thrift.py3.types.Struct):
         return self._fbthrift_inner__data
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 4
+
+    def __eq__(self, other):
+        return isinstance(other, MyStruct) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, MyStruct):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, MyStruct):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("MyStruct")
@@ -2088,6 +2400,30 @@ class MyDataItem(thrift.py3.types.Struct):
 
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 0
+
+    def __eq__(self, other):
+        return isinstance(other, MyDataItem) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, MyDataItem):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, MyDataItem):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("MyDataItem")
@@ -2129,6 +2465,30 @@ class Renaming(thrift.py3.types.Struct):
         return self._fbthrift__inner.foo
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 1
+
+    def __eq__(self, other):
+        return isinstance(other, Renaming) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, Renaming):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, Renaming):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("Renaming")
@@ -2182,6 +2542,30 @@ class AnnotatedTypes(thrift.py3.types.Struct):
         return self._fbthrift_inner__list_field
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 2
+
+    def __eq__(self, other):
+        return isinstance(other, AnnotatedTypes) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, AnnotatedTypes):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, AnnotatedTypes):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("AnnotatedTypes")
@@ -2246,6 +2630,30 @@ class ForwardUsageRoot(thrift.py3.types.Struct):
         return self._fbthrift_inner__ForwardUsageByRef
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 2
+
+    def __eq__(self, other):
+        return isinstance(other, ForwardUsageRoot) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, ForwardUsageRoot):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, ForwardUsageRoot):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("ForwardUsageRoot")
@@ -2296,6 +2704,30 @@ class ForwardUsageStruct(thrift.py3.types.Struct):
         return self._fbthrift_inner__foo
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 1
+
+    def __eq__(self, other):
+        return isinstance(other, ForwardUsageStruct) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, ForwardUsageStruct):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, ForwardUsageStruct):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("ForwardUsageStruct")
@@ -2346,6 +2778,30 @@ class ForwardUsageByRef(thrift.py3.types.Struct):
         return self._fbthrift_inner__foo
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 1
+
+    def __eq__(self, other):
+        return isinstance(other, ForwardUsageByRef) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, ForwardUsageByRef):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, ForwardUsageByRef):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("ForwardUsageByRef")
@@ -2396,6 +2852,30 @@ class IncompleteMap(thrift.py3.types.Struct):
         return self._fbthrift_inner__field
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 1
+
+    def __eq__(self, other):
+        return isinstance(other, IncompleteMap) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, IncompleteMap):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, IncompleteMap):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("IncompleteMap")
@@ -2432,6 +2912,30 @@ class IncompleteMapDep(thrift.py3.types.Struct):
 
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 0
+
+    def __eq__(self, other):
+        return isinstance(other, IncompleteMapDep) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, IncompleteMapDep):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, IncompleteMapDep):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("IncompleteMapDep")
@@ -2482,6 +2986,30 @@ class CompleteMap(thrift.py3.types.Struct):
         return self._fbthrift_inner__field
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 1
+
+    def __eq__(self, other):
+        return isinstance(other, CompleteMap) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, CompleteMap):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, CompleteMap):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("CompleteMap")
@@ -2518,6 +3046,30 @@ class CompleteMapDep(thrift.py3.types.Struct):
 
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 0
+
+    def __eq__(self, other):
+        return isinstance(other, CompleteMapDep) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, CompleteMapDep):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, CompleteMapDep):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("CompleteMapDep")
@@ -2568,6 +3120,30 @@ class IncompleteList(thrift.py3.types.Struct):
         return self._fbthrift_inner__field
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 1
+
+    def __eq__(self, other):
+        return isinstance(other, IncompleteList) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, IncompleteList):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, IncompleteList):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("IncompleteList")
@@ -2604,6 +3180,30 @@ class IncompleteListDep(thrift.py3.types.Struct):
 
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 0
+
+    def __eq__(self, other):
+        return isinstance(other, IncompleteListDep) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, IncompleteListDep):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, IncompleteListDep):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("IncompleteListDep")
@@ -2654,6 +3254,30 @@ class CompleteList(thrift.py3.types.Struct):
         return self._fbthrift_inner__field
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 1
+
+    def __eq__(self, other):
+        return isinstance(other, CompleteList) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, CompleteList):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, CompleteList):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("CompleteList")
@@ -2690,6 +3314,30 @@ class CompleteListDep(thrift.py3.types.Struct):
 
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 0
+
+    def __eq__(self, other):
+        return isinstance(other, CompleteListDep) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, CompleteListDep):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, CompleteListDep):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("CompleteListDep")
@@ -2740,6 +3388,30 @@ class AdaptedList(thrift.py3.types.Struct):
         return self._fbthrift_inner__field
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 1
+
+    def __eq__(self, other):
+        return isinstance(other, AdaptedList) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, AdaptedList):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, AdaptedList):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("AdaptedList")
@@ -2790,6 +3462,30 @@ class DependentAdaptedList(thrift.py3.types.Struct):
         return self._fbthrift_inner__field
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 1
+
+    def __eq__(self, other):
+        return isinstance(other, DependentAdaptedList) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, DependentAdaptedList):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, DependentAdaptedList):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("DependentAdaptedList")
@@ -2882,6 +3578,30 @@ class AllocatorAware(thrift.py3.types.Struct):
         return self._fbthrift__inner.aa_shared
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 7
+
+    def __eq__(self, other):
+        return isinstance(other, AllocatorAware) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, AllocatorAware):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, AllocatorAware):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("AllocatorAware")
@@ -2928,6 +3648,30 @@ class AllocatorAware2(thrift.py3.types.Struct):
         return self._fbthrift__inner.box_field
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 2
+
+    def __eq__(self, other):
+        return isinstance(other, AllocatorAware2) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, AllocatorAware2):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, AllocatorAware2):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("AllocatorAware2")
@@ -2979,6 +3723,30 @@ class TypedefStruct(thrift.py3.types.Struct):
         return self._fbthrift__inner.UintTypedef_field
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 3
+
+    def __eq__(self, other):
+        return isinstance(other, TypedefStruct) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, TypedefStruct):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, TypedefStruct):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("TypedefStruct")
@@ -3020,6 +3788,30 @@ class StructWithDoubleUnderscores(thrift.py3.types.Struct):
         return self._fbthrift__inner.__field
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 1
+
+    def __eq__(self, other):
+        return isinstance(other, StructWithDoubleUnderscores) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, StructWithDoubleUnderscores):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, StructWithDoubleUnderscores):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("StructWithDoubleUnderscores")

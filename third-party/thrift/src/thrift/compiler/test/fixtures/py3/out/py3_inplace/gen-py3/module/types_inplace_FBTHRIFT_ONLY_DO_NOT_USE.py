@@ -1945,6 +1945,30 @@ class SimpleException(thrift.py3.types.Struct):
         return self._fbthrift__inner.err_code
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 1
+
+    def __eq__(self, other):
+        return isinstance(other, SimpleException) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, SimpleException):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, SimpleException):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("SimpleException")
@@ -1986,6 +2010,30 @@ class OptionalRefStruct(thrift.py3.types.Struct):
         return self._fbthrift__inner.optional_blob
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 1
+
+    def __eq__(self, other):
+        return isinstance(other, OptionalRefStruct) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, OptionalRefStruct):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, OptionalRefStruct):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("OptionalRefStruct")
@@ -2069,6 +2117,20 @@ class SimpleStruct(thrift.py3.types.Struct):
         return self._fbthrift_inner__something
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 8
+
+    def __eq__(self, other):
+        return isinstance(other, SimpleStruct) and self._fbthrift__inner == other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("SimpleStruct")
@@ -2105,6 +2167,20 @@ class HiddenTypeFieldsStruct(thrift.py3.types.Struct):
 
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 0
+
+    def __eq__(self, other):
+        return isinstance(other, HiddenTypeFieldsStruct) and self._fbthrift__inner == other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("HiddenTypeFieldsStruct")
@@ -2207,6 +2283,20 @@ class ComplexStruct(thrift.py3.types.Struct):
         return self._fbthrift__inner.bytes_with_cpp_type
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 9
+
+    def __eq__(self, other):
+        return isinstance(other, ComplexStruct) and self._fbthrift__inner == other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("ComplexStruct")
@@ -2265,6 +2355,30 @@ class BinaryUnion(thrift.py3.types.Union):
                 return self._fbthrift__inner.value
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 1
+
+    def __eq__(self, other):
+        return isinstance(other, BinaryUnion) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, BinaryUnion):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, BinaryUnion):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("BinaryUnion")
@@ -2313,6 +2427,30 @@ class BinaryUnionStruct(thrift.py3.types.Struct):
         return self._fbthrift_inner__u
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 1
+
+    def __eq__(self, other):
+        return isinstance(other, BinaryUnionStruct) and self._fbthrift__inner == other._fbthrift__inner
+
+    def __lt__(self, other):
+        if not isinstance(other, BinaryUnionStruct):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, BinaryUnionStruct):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("BinaryUnionStruct")
@@ -2422,6 +2560,20 @@ class CustomFields(thrift.py3.types.Struct):
         return self._fbthrift_inner__struct_field
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 9
+
+    def __eq__(self, other):
+        return isinstance(other, CustomFields) and self._fbthrift__inner == other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("CustomFields")
@@ -2531,6 +2683,20 @@ class CustomTypedefFields(thrift.py3.types.Struct):
         return self._fbthrift_inner__struct_field
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 9
+
+    def __eq__(self, other):
+        return isinstance(other, CustomTypedefFields) and self._fbthrift__inner == other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("CustomTypedefFields")
@@ -2640,6 +2806,20 @@ class AdaptedTypedefFields(thrift.py3.types.Struct):
         return self._fbthrift_inner__struct_field
 
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return 9
+
+    def __eq__(self, other):
+        return isinstance(other, AdaptedTypedefFields) and self._fbthrift__inner == other._fbthrift__inner
+
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 __all__.append("AdaptedTypedefFields")

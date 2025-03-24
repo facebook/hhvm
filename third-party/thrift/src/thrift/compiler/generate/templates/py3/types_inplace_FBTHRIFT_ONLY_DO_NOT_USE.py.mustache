@@ -190,6 +190,34 @@ class {{struct:name}}(thrift.py3.types.{{!
 
     {{/struct:union?}}
 
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
+        return cls._FBTHRIFT__FIELD_NAMES[idx]
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls) -> int:
+        return {{struct:size}}
+
+    def __eq__(self, other):
+    {{! note that thrift-python implements what thrift-py3 calls noncomparable_eq,
+    so as a result of migration we can start ignoring cpp.noncomparable annotation}}
+        return isinstance(other, {{struct:name}}) and self._fbthrift__inner == other._fbthrift__inner
+
+    {{#struct:is_struct_orderable?}}
+    def __lt__(self, other):
+        if not isinstance(other, {{struct:name}}):
+            return NotImplemented
+        return self._fbthrift__inner < other._fbthrift__inner
+
+    def __le__(self, other):
+        if not isinstance(other, {{struct:name}}):
+            return NotImplemented
+        return self._fbthrift__inner <= other._fbthrift__inner
+
+    {{/struct:is_struct_orderable?}}
+
+    def __hash__(self):
+        return super().__hash__()
 
 
 {{#program:inplace_migrate?}}

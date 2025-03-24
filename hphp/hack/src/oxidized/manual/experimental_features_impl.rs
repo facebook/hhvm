@@ -52,6 +52,7 @@ impl FeatureName {
             ShapeDestructure => Unstable,
             ExpressionTreeShapeCreation => OngoingRelease,
             NoDisjointUnion => OngoingRelease,
+            SimpliHack => Preview,
         }
     }
 

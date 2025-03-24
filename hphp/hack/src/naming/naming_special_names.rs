@@ -338,6 +338,8 @@ pub mod user_attributes {
 
     pub const ASIO_LOW_PRI: &str = "__AsioLowPri";
 
+    pub const SIMPLIHACK: &str = "__SimpliHack";
+
     pub fn is_memoized(name: &str) -> bool {
         name == MEMOIZE || name == MEMOIZE_LSB
     }

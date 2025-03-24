@@ -2018,6 +2018,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         for node in attr_spec_to_node_list(attrs) {
             match self.attr_name(node) {
                 Some(n) => {
+                    if n == sn::user_attributes::SIMPLIHACK {
+                        self.check_can_use_feature(node, &FeatureName::SimpliHack)
+                    }
                     if (sn::user_attributes::ignore_readonly_local_errors(n)
                         || sn::user_attributes::ignore_coeffect_local_errors(n)
                         || sn::user_attributes::is_native(n))
@@ -5856,6 +5859,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         attributes.for_each(|attr| match attr.trim() {
             sn::user_attributes::STRICT_SWITCH => {
                 self.check_can_use_feature(node, &FeatureName::StrictSwitch)
+            }
+            sn::user_attributes::SIMPLIHACK => {
+                self.check_can_use_feature(node, &FeatureName::SimpliHack)
             }
             _ => {}
         });

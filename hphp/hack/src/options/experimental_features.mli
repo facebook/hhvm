@@ -61,6 +61,7 @@ type feature_name =
   | ShapeDestructure
   | ExpressionTreeShapeCreation
   | NoDisjointUnion
+  | SimpliHack
 [@@deriving eq, ord, show]
 
 val feature_status_from_string : string -> feature_status option

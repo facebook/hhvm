@@ -1,0 +1,2 @@
+ERROR: File "simplihack_not_enabled.php", line 2, characters 3-36:
+Cannot use unstable feature: `simpli_hack` (Parsing[1002])

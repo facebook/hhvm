@@ -98,10 +98,7 @@ cdef class FooStreamEx(thrift.py3.exceptions.GeneratedError):
 
 
     def __copy__(FooStreamEx self):
-        cdef shared_ptr[_module_cbindings.cFooStreamEx] cpp_obj = make_shared[_module_cbindings.cFooStreamEx](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return FooStreamEx._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -197,10 +194,7 @@ cdef class FooEx(thrift.py3.exceptions.GeneratedError):
 
 
     def __copy__(FooEx self):
-        cdef shared_ptr[_module_cbindings.cFooEx] cpp_obj = make_shared[_module_cbindings.cFooEx](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return FooEx._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -296,10 +290,7 @@ cdef class FooEx2(thrift.py3.exceptions.GeneratedError):
 
 
     def __copy__(FooEx2 self):
-        cdef shared_ptr[_module_cbindings.cFooEx2] cpp_obj = make_shared[_module_cbindings.cFooEx2](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return FooEx2._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)

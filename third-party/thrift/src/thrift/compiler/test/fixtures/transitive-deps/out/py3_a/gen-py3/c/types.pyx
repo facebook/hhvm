@@ -113,10 +113,7 @@ cdef class C(thrift.py3.types.Struct):
 
 
     def __copy__(C self):
-        cdef shared_ptr[_c_cbindings.cC] cpp_obj = make_shared[_c_cbindings.cC](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return C._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -212,10 +209,7 @@ cdef class E(thrift.py3.exceptions.GeneratedError):
 
 
     def __copy__(E self):
-        cdef shared_ptr[_c_cbindings.cE] cpp_obj = make_shared[_c_cbindings.cE](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return E._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)

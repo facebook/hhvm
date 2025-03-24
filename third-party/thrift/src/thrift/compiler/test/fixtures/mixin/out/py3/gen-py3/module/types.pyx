@@ -113,10 +113,7 @@ cdef class Mixin1(thrift.py3.types.Struct):
 
 
     def __copy__(Mixin1 self):
-        cdef shared_ptr[_module_cbindings.cMixin1] cpp_obj = make_shared[_module_cbindings.cMixin1](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return Mixin1._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -248,10 +245,7 @@ cdef class Mixin2(thrift.py3.types.Struct):
 
 
     def __copy__(Mixin2 self):
-        cdef shared_ptr[_module_cbindings.cMixin2] cpp_obj = make_shared[_module_cbindings.cMixin2](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return Mixin2._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -364,10 +358,7 @@ cdef class Mixin3Base(thrift.py3.types.Struct):
 
 
     def __copy__(Mixin3Base self):
-        cdef shared_ptr[_module_cbindings.cMixin3Base] cpp_obj = make_shared[_module_cbindings.cMixin3Base](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return Mixin3Base._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -532,10 +523,7 @@ cdef class Foo(thrift.py3.types.Struct):
 
 
     def __copy__(Foo self):
-        cdef shared_ptr[_module_cbindings.cFoo] cpp_obj = make_shared[_module_cbindings.cFoo](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return Foo._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)

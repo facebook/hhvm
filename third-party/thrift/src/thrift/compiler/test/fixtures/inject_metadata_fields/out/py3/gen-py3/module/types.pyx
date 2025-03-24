@@ -115,10 +115,7 @@ cdef class Fields(thrift.py3.types.Struct):
 
 
     def __copy__(Fields self):
-        cdef shared_ptr[_module_cbindings.cFields] cpp_obj = make_shared[_module_cbindings.cFields](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return Fields._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -231,10 +228,7 @@ cdef class FieldsInjectedToEmptyStruct(thrift.py3.types.Struct):
 
 
     def __copy__(FieldsInjectedToEmptyStruct self):
-        cdef shared_ptr[_module_cbindings.cFieldsInjectedToEmptyStruct] cpp_obj = make_shared[_module_cbindings.cFieldsInjectedToEmptyStruct](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return FieldsInjectedToEmptyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -355,10 +349,7 @@ cdef class FieldsInjectedToStruct(thrift.py3.types.Struct):
 
 
     def __copy__(FieldsInjectedToStruct self):
-        cdef shared_ptr[_module_cbindings.cFieldsInjectedToStruct] cpp_obj = make_shared[_module_cbindings.cFieldsInjectedToStruct](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return FieldsInjectedToStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -499,10 +490,7 @@ cdef class FieldsInjectedWithIncludedStruct(thrift.py3.types.Struct):
 
 
     def __copy__(FieldsInjectedWithIncludedStruct self):
-        cdef shared_ptr[_module_cbindings.cFieldsInjectedWithIncludedStruct] cpp_obj = make_shared[_module_cbindings.cFieldsInjectedWithIncludedStruct](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return FieldsInjectedWithIncludedStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)

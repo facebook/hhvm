@@ -256,10 +256,7 @@ cdef class ComplexUnion(thrift.py3.types.Union):
         self.py_value = None
 
     def __copy__(ComplexUnion self):
-        cdef shared_ptr[_module_cbindings.cComplexUnion] cpp_obj = make_shared[_module_cbindings.cComplexUnion](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return ComplexUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -418,10 +415,7 @@ cdef class ListUnion(thrift.py3.types.Union):
         self.py_value = None
 
     def __copy__(ListUnion self):
-        cdef shared_ptr[_module_cbindings.cListUnion] cpp_obj = make_shared[_module_cbindings.cListUnion](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return ListUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -580,10 +574,7 @@ cdef class DataUnion(thrift.py3.types.Union):
         self.py_value = None
 
     def __copy__(DataUnion self):
-        cdef shared_ptr[_module_cbindings.cDataUnion] cpp_obj = make_shared[_module_cbindings.cDataUnion](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return DataUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -716,10 +707,7 @@ cdef class Val(thrift.py3.types.Struct):
 
 
     def __copy__(Val self):
-        cdef shared_ptr[_module_cbindings.cVal] cpp_obj = make_shared[_module_cbindings.cVal](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return Val._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -876,10 +864,7 @@ cdef class ValUnion(thrift.py3.types.Union):
         self.py_value = None
 
     def __copy__(ValUnion self):
-        cdef shared_ptr[_module_cbindings.cValUnion] cpp_obj = make_shared[_module_cbindings.cValUnion](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return ValUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -1038,10 +1023,7 @@ cdef class VirtualComplexUnion(thrift.py3.types.Union):
         self.py_value = None
 
     def __copy__(VirtualComplexUnion self):
-        cdef shared_ptr[_module_cbindings.cVirtualComplexUnion] cpp_obj = make_shared[_module_cbindings.cVirtualComplexUnion](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return VirtualComplexUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)

@@ -167,10 +167,7 @@ cdef class Empty(thrift.py3.types.Struct):
 
 
     def __copy__(Empty self):
-        cdef shared_ptr[_module_cbindings.cEmpty] cpp_obj = make_shared[_module_cbindings.cEmpty](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return Empty._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -283,10 +280,7 @@ cdef class ASimpleStruct(thrift.py3.types.Struct):
 
 
     def __copy__(ASimpleStruct self):
-        cdef shared_ptr[_module_cbindings.cASimpleStruct] cpp_obj = make_shared[_module_cbindings.cASimpleStruct](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return ASimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __eq__(ASimpleStruct self, other):
         if not isinstance(other, ASimpleStruct):
@@ -401,10 +395,7 @@ cdef class ASimpleStructNoexcept(thrift.py3.types.Struct):
 
 
     def __copy__(ASimpleStructNoexcept self):
-        cdef shared_ptr[_module_cbindings.cASimpleStructNoexcept] cpp_obj = make_shared[_module_cbindings.cASimpleStructNoexcept](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return ASimpleStructNoexcept._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -609,10 +600,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
 
     def __copy__(MyStruct self):
-        cdef shared_ptr[_module_cbindings.cMyStruct] cpp_obj = make_shared[_module_cbindings.cMyStruct](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -779,10 +767,7 @@ cdef class SimpleUnion(thrift.py3.types.Union):
         self.py_value = None
 
     def __copy__(SimpleUnion self):
-        cdef shared_ptr[_module_cbindings.cSimpleUnion] cpp_obj = make_shared[_module_cbindings.cSimpleUnion](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return SimpleUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -1471,10 +1456,7 @@ cdef class ComplexUnion(thrift.py3.types.Union):
         self.py_value = None
 
     def __copy__(ComplexUnion self):
-        cdef shared_ptr[_module_cbindings.cComplexUnion] cpp_obj = make_shared[_module_cbindings.cComplexUnion](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return ComplexUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -1739,10 +1721,7 @@ cdef class AnException(thrift.py3.exceptions.GeneratedError):
 
 
     def __copy__(AnException self):
-        cdef shared_ptr[_module_cbindings.cAnException] cpp_obj = make_shared[_module_cbindings.cAnException](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return AnException._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -1862,10 +1841,7 @@ cdef class AnotherException(thrift.py3.exceptions.GeneratedError):
 
 
     def __copy__(AnotherException self):
-        cdef shared_ptr[_module_cbindings.cAnotherException] cpp_obj = make_shared[_module_cbindings.cAnotherException](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return AnotherException._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -2552,10 +2528,7 @@ cdef class MyIncludedStruct(thrift.py3.types.Struct):
 
 
     def __copy__(MyIncludedStruct self):
-        cdef shared_ptr[_module_cbindings.cMyIncludedStruct] cpp_obj = make_shared[_module_cbindings.cMyIncludedStruct](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return MyIncludedStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -3195,10 +3168,7 @@ cdef class ComplexContainerStruct(thrift.py3.types.Struct):
 
 
     def __copy__(ComplexContainerStruct self):
-        cdef shared_ptr[_module_cbindings.cComplexContainerStruct] cpp_obj = make_shared[_module_cbindings.cComplexContainerStruct](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return ComplexContainerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -3319,10 +3289,7 @@ cdef class FloatStruct(thrift.py3.types.Struct):
 
 
     def __copy__(FloatStruct self):
-        cdef shared_ptr[_module_cbindings.cFloatStruct] cpp_obj = make_shared[_module_cbindings.cFloatStruct](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return FloatStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -3509,10 +3476,7 @@ cdef class FloatUnion(thrift.py3.types.Union):
         self.py_value = None
 
     def __copy__(FloatUnion self):
-        cdef shared_ptr[_module_cbindings.cFloatUnion] cpp_obj = make_shared[_module_cbindings.cFloatUnion](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return FloatUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -3627,10 +3591,7 @@ cdef class AllRequiredNoExceptMoveCtrStruct(thrift.py3.types.Struct):
 
 
     def __copy__(AllRequiredNoExceptMoveCtrStruct self):
-        cdef shared_ptr[_module_cbindings.cAllRequiredNoExceptMoveCtrStruct] cpp_obj = make_shared[_module_cbindings.cAllRequiredNoExceptMoveCtrStruct](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return AllRequiredNoExceptMoveCtrStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)

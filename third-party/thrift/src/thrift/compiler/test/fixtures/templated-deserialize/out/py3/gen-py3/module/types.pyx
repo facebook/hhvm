@@ -148,10 +148,7 @@ cdef class SmallStruct(thrift.py3.types.Struct):
 
 
     def __copy__(SmallStruct self):
-        cdef shared_ptr[_module_cbindings.cSmallStruct] cpp_obj = make_shared[_module_cbindings.cSmallStruct](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return SmallStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -473,10 +470,7 @@ cdef class containerStruct(thrift.py3.types.Struct):
 
 
     def __copy__(containerStruct self):
-        cdef shared_ptr[_module_cbindings.ccontainerStruct] cpp_obj = make_shared[_module_cbindings.ccontainerStruct](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return containerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)

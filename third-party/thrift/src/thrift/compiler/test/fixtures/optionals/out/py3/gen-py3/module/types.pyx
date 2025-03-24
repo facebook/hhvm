@@ -145,10 +145,7 @@ cdef class Color(thrift.py3.types.Struct):
 
 
     def __copy__(Color self):
-        cdef shared_ptr[_module_cbindings.cColor] cpp_obj = make_shared[_module_cbindings.cColor](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return Color._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -301,10 +298,7 @@ cdef class Vehicle(thrift.py3.types.Struct):
 
 
     def __copy__(Vehicle self):
-        cdef shared_ptr[_module_cbindings.cVehicle] cpp_obj = make_shared[_module_cbindings.cVehicle](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return Vehicle._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -515,10 +509,7 @@ cdef class Person(thrift.py3.types.Struct):
 
 
     def __copy__(Person self):
-        cdef shared_ptr[_module_cbindings.cPerson] cpp_obj = make_shared[_module_cbindings.cPerson](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return Person._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)

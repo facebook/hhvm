@@ -107,10 +107,7 @@ cdef class Fiery(thrift.py3.exceptions.GeneratedError):
 
 
     def __copy__(Fiery self):
-        cdef shared_ptr[_module_cbindings.cFiery] cpp_obj = make_shared[_module_cbindings.cFiery](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return Fiery._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -219,10 +216,7 @@ cdef class Serious(thrift.py3.exceptions.GeneratedError):
 
 
     def __copy__(Serious self):
-        cdef shared_ptr[_module_cbindings.cSerious] cpp_obj = make_shared[_module_cbindings.cSerious](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return Serious._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -337,10 +331,7 @@ cdef class ComplexFieldNames(thrift.py3.exceptions.GeneratedError):
 
 
     def __copy__(ComplexFieldNames self):
-        cdef shared_ptr[_module_cbindings.cComplexFieldNames] cpp_obj = make_shared[_module_cbindings.cComplexFieldNames](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return ComplexFieldNames._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -455,10 +446,7 @@ cdef class CustomFieldNames(thrift.py3.exceptions.GeneratedError):
 
 
     def __copy__(CustomFieldNames self):
-        cdef shared_ptr[_module_cbindings.cCustomFieldNames] cpp_obj = make_shared[_module_cbindings.cCustomFieldNames](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return CustomFieldNames._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -573,10 +561,7 @@ cdef class ExceptionWithPrimitiveField(thrift.py3.exceptions.GeneratedError):
 
 
     def __copy__(ExceptionWithPrimitiveField self):
-        cdef shared_ptr[_module_cbindings.cExceptionWithPrimitiveField] cpp_obj = make_shared[_module_cbindings.cExceptionWithPrimitiveField](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return ExceptionWithPrimitiveField._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -691,10 +676,7 @@ cdef class ExceptionWithStructuredAnnotation(thrift.py3.exceptions.GeneratedErro
 
 
     def __copy__(ExceptionWithStructuredAnnotation self):
-        cdef shared_ptr[_module_cbindings.cExceptionWithStructuredAnnotation] cpp_obj = make_shared[_module_cbindings.cExceptionWithStructuredAnnotation](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return ExceptionWithStructuredAnnotation._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -790,10 +772,7 @@ cdef class Banal(thrift.py3.exceptions.GeneratedError):
 
 
     def __copy__(Banal self):
-        cdef shared_ptr[_module_cbindings.cBanal] cpp_obj = make_shared[_module_cbindings.cBanal](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return Banal._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)

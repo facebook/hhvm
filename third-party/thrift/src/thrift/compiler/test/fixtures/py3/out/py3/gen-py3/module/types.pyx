@@ -144,10 +144,7 @@ cdef class SimpleException(thrift.py3.exceptions.GeneratedError):
 
 
     def __copy__(SimpleException self):
-        cdef shared_ptr[_module_cbindings.cSimpleException] cpp_obj = make_shared[_module_cbindings.cSimpleException](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return SimpleException._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -266,10 +263,7 @@ cdef class OptionalRefStruct(thrift.py3.types.Struct):
 
 
     def __copy__(OptionalRefStruct self):
-        cdef shared_ptr[_module_cbindings.cOptionalRefStruct] cpp_obj = make_shared[_module_cbindings.cOptionalRefStruct](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return OptionalRefStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -440,10 +434,7 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
 
 
     def __copy__(SimpleStruct self):
-        cdef shared_ptr[_module_cbindings.cSimpleStruct] cpp_obj = make_shared[_module_cbindings.cSimpleStruct](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return SimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __eq__(SimpleStruct self, other):
         if not isinstance(other, SimpleStruct):
@@ -554,10 +545,7 @@ cdef class HiddenTypeFieldsStruct(thrift.py3.types.Struct):
 
 
     def __copy__(HiddenTypeFieldsStruct self):
-        cdef shared_ptr[_module_cbindings.cHiddenTypeFieldsStruct] cpp_obj = make_shared[_module_cbindings.cHiddenTypeFieldsStruct](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return HiddenTypeFieldsStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __eq__(HiddenTypeFieldsStruct self, other):
         if not isinstance(other, HiddenTypeFieldsStruct):
@@ -745,10 +733,7 @@ cdef class ComplexStruct(thrift.py3.types.Struct):
 
 
     def __copy__(ComplexStruct self):
-        cdef shared_ptr[_module_cbindings.cComplexStruct] cpp_obj = make_shared[_module_cbindings.cComplexStruct](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return ComplexStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __eq__(ComplexStruct self, other):
         if not isinstance(other, ComplexStruct):
@@ -897,10 +882,7 @@ cdef class BinaryUnion(thrift.py3.types.Union):
         self.py_value = None
 
     def __copy__(BinaryUnion self):
-        cdef shared_ptr[_module_cbindings.cBinaryUnion] cpp_obj = make_shared[_module_cbindings.cBinaryUnion](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return BinaryUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __eq__(BinaryUnion self, other):
         return isinstance(other, BinaryUnion) and self._fbthrift_noncomparable_eq(other)
@@ -1012,10 +994,7 @@ cdef class BinaryUnionStruct(thrift.py3.types.Struct):
 
 
     def __copy__(BinaryUnionStruct self):
-        cdef shared_ptr[_module_cbindings.cBinaryUnionStruct] cpp_obj = make_shared[_module_cbindings.cBinaryUnionStruct](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return BinaryUnionStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __eq__(BinaryUnionStruct self, other):
         return isinstance(other, BinaryUnionStruct) and self._fbthrift_noncomparable_eq(other)
@@ -1195,10 +1174,7 @@ cdef class CustomFields(thrift.py3.types.Struct):
 
 
     def __copy__(CustomFields self):
-        cdef shared_ptr[_module_cbindings.cCustomFields] cpp_obj = make_shared[_module_cbindings.cCustomFields](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return CustomFields._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __eq__(CustomFields self, other):
         if not isinstance(other, CustomFields):
@@ -1385,10 +1361,7 @@ cdef class CustomTypedefFields(thrift.py3.types.Struct):
 
 
     def __copy__(CustomTypedefFields self):
-        cdef shared_ptr[_module_cbindings.cCustomTypedefFields] cpp_obj = make_shared[_module_cbindings.cCustomTypedefFields](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return CustomTypedefFields._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __eq__(CustomTypedefFields self, other):
         if not isinstance(other, CustomTypedefFields):
@@ -1575,10 +1548,7 @@ cdef class AdaptedTypedefFields(thrift.py3.types.Struct):
 
 
     def __copy__(AdaptedTypedefFields self):
-        cdef shared_ptr[_module_cbindings.cAdaptedTypedefFields] cpp_obj = make_shared[_module_cbindings.cAdaptedTypedefFields](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return AdaptedTypedefFields._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __eq__(AdaptedTypedefFields self, other):
         if not isinstance(other, AdaptedTypedefFields):

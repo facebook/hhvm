@@ -196,10 +196,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
 
     def __copy__(MyStruct self):
-        cdef shared_ptr[_test_fixtures_basic_module_cbindings.cMyStruct] cpp_obj = make_shared[_test_fixtures_basic_module_cbindings.cMyStruct](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -334,10 +331,7 @@ cdef class Containers(thrift.py3.types.Struct):
 
 
     def __copy__(Containers self):
-        cdef shared_ptr[_test_fixtures_basic_module_cbindings.cContainers] cpp_obj = make_shared[_test_fixtures_basic_module_cbindings.cContainers](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return Containers._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -435,10 +429,7 @@ cdef class MyDataItem(thrift.py3.types.Struct):
 
 
     def __copy__(MyDataItem self):
-        cdef shared_ptr[_test_fixtures_basic_module_cbindings.cMyDataItem] cpp_obj = make_shared[_test_fixtures_basic_module_cbindings.cMyDataItem](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return MyDataItem._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -631,10 +622,7 @@ cdef class MyUnion(thrift.py3.types.Union):
         self.py_value = None
 
     def __copy__(MyUnion self):
-        cdef shared_ptr[_test_fixtures_basic_module_cbindings.cMyUnion] cpp_obj = make_shared[_test_fixtures_basic_module_cbindings.cMyUnion](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return MyUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -768,10 +756,7 @@ cdef class MyException(thrift.py3.exceptions.GeneratedError):
 
 
     def __copy__(MyException self):
-        cdef shared_ptr[_test_fixtures_basic_module_cbindings.cMyException] cpp_obj = make_shared[_test_fixtures_basic_module_cbindings.cMyException](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return MyException._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -906,10 +891,7 @@ cdef class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
 
 
     def __copy__(MyExceptionWithMessage self):
-        cdef shared_ptr[_test_fixtures_basic_module_cbindings.cMyExceptionWithMessage] cpp_obj = make_shared[_test_fixtures_basic_module_cbindings.cMyExceptionWithMessage](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return MyExceptionWithMessage._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -1022,10 +1004,7 @@ cdef class ReservedKeyword(thrift.py3.types.Struct):
 
 
     def __copy__(ReservedKeyword self):
-        cdef shared_ptr[_test_fixtures_basic_module_cbindings.cReservedKeyword] cpp_obj = make_shared[_test_fixtures_basic_module_cbindings.cReservedKeyword](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return ReservedKeyword._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -1174,10 +1153,7 @@ cdef class UnionToBeRenamed(thrift.py3.types.Union):
         self.py_value = None
 
     def __copy__(UnionToBeRenamed self):
-        cdef shared_ptr[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed] cpp_obj = make_shared[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return UnionToBeRenamed._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)

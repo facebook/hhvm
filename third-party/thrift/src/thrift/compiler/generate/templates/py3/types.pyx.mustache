@@ -428,10 +428,7 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
         raise TypeError("{{struct:name}} is noncopyable")
         {{/struct:cpp_noncopyable?}}
         {{^struct:cpp_noncopyable?}}
-        cdef shared_ptr[{{> types/current_module_cbindings}}.{{> types/c_struct }}] cpp_obj = make_shared[{{> types/current_module_cbindings}}.{{> types/c_struct }}](
-            deref(self.{{> types/cpp_obj}})
-        )
-        return {{struct:name}}._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self{{! Thrift-py3 has immutable semantics}}
         {{/struct:cpp_noncopyable?}}
     {{#struct:cpp_noncomparable}}
 

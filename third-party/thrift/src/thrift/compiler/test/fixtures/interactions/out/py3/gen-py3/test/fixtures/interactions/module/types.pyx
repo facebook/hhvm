@@ -108,10 +108,7 @@ cdef class CustomException(thrift.py3.exceptions.GeneratedError):
 
 
     def __copy__(CustomException self):
-        cdef shared_ptr[_test_fixtures_interactions_module_cbindings.cCustomException] cpp_obj = make_shared[_test_fixtures_interactions_module_cbindings.cCustomException](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return CustomException._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -224,10 +221,7 @@ cdef class ShouldBeBoxed(thrift.py3.types.Struct):
 
 
     def __copy__(ShouldBeBoxed self):
-        cdef shared_ptr[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed] cpp_obj = make_shared[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return ShouldBeBoxed._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)

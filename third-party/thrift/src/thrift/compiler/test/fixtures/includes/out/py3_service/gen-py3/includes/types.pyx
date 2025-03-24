@@ -125,10 +125,7 @@ cdef class Included(thrift.py3.types.Struct):
 
 
     def __copy__(Included self):
-        cdef shared_ptr[_includes_cbindings.cIncluded] cpp_obj = make_shared[_includes_cbindings.cIncluded](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return Included._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)

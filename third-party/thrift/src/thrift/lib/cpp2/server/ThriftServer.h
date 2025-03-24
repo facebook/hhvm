@@ -2212,6 +2212,8 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
 
   void scheduleInMemoryTicketSeeds();
 
+  folly::SocketOptionMap socketOptions_;
+
  public:
   ~ThriftServer() override;
 
@@ -2323,6 +2325,15 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     acceptPool_ = pool;
   }
 
+  // Set socket options to be applied to all server sockets
+  void setSocketOptions(const folly::SocketOptionMap& options) {
+    socketOptions_ = options;
+  }
+
+  // Get current socket options
+  const folly::SocketOptionMap& getSocketOptions() const {
+    return socketOptions_;
+  }
   /**
    * Generally the acceptor should not do any work other than
    * accepting connections, so use this with care.
@@ -2504,6 +2515,10 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
         std::make_shared<ThriftTlsConfig>(thriftTlsConfig_);
     config->socketMaxReadsPerEvent = socketMaxReadsPerEvent_;
 
+    // Apply socket options if any are set
+    if (!socketOptions_.empty()) {
+      config->setSocketOptions(socketOptions_);
+    }
     config->useZeroCopy = !!zeroCopyEnableFunc_;
     config->preferIoUring = preferIoUring_;
     return config;

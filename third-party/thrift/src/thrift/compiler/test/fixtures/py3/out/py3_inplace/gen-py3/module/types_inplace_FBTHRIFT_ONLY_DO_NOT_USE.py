@@ -1927,6 +1927,9 @@ class SimpleException(thrift.py3.types.Struct):
         instance = super().__new__(cls)
         return instance
 
+    def __call__(self, **kwargs) -> SimpleException:
+        return SimpleException.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.SimpleException) -> SimpleException:
         inst = SimpleException.__new__(SimpleException)
@@ -1938,7 +1941,6 @@ class SimpleException(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.SimpleException:
         return self._fbthrift__inner
-
 
     @property
     def err_code(self) -> int:
@@ -1970,6 +1972,9 @@ class SimpleException(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("SimpleException")
 
@@ -1992,6 +1997,9 @@ class OptionalRefStruct(thrift.py3.types.Struct):
         instance = super().__new__(cls)
         return instance
 
+    def __call__(self, **kwargs) -> OptionalRefStruct:
+        return OptionalRefStruct.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.OptionalRefStruct) -> OptionalRefStruct:
         inst = OptionalRefStruct.__new__(OptionalRefStruct)
@@ -2003,7 +2011,6 @@ class OptionalRefStruct(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.OptionalRefStruct:
         return self._fbthrift__inner
-
 
     @property
     def optional_blob(self) -> _typing.Optional[_fbthrift_iobuf.IOBuf]:
@@ -2034,6 +2041,9 @@ class OptionalRefStruct(thrift.py3.types.Struct):
 
     def __hash__(self):
         return super().__hash__()
+
+    def __copy__(self):
+        return self
 
 
 __all__.append("OptionalRefStruct")
@@ -2067,6 +2077,9 @@ class SimpleStruct(thrift.py3.types.Struct):
         instance._fbthrift_inner__something = None
         return instance
 
+    def __call__(self, **kwargs) -> SimpleStruct:
+        return SimpleStruct.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.SimpleStruct) -> SimpleStruct:
         inst = SimpleStruct.__new__(SimpleStruct)
@@ -2078,7 +2091,6 @@ class SimpleStruct(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.SimpleStruct:
         return self._fbthrift__inner
-
 
     @property
     def is_on(self) -> bool:
@@ -2132,6 +2144,9 @@ class SimpleStruct(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("SimpleStruct")
 
@@ -2153,6 +2168,9 @@ class HiddenTypeFieldsStruct(thrift.py3.types.Struct):
         instance = super().__new__(cls)
         return instance
 
+    def __call__(self, **kwargs) -> HiddenTypeFieldsStruct:
+        return HiddenTypeFieldsStruct.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.HiddenTypeFieldsStruct) -> HiddenTypeFieldsStruct:
         inst = HiddenTypeFieldsStruct.__new__(HiddenTypeFieldsStruct)
@@ -2164,7 +2182,6 @@ class HiddenTypeFieldsStruct(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.HiddenTypeFieldsStruct:
         return self._fbthrift__inner
-
 
 
     @classmethod
@@ -2181,6 +2198,9 @@ class HiddenTypeFieldsStruct(thrift.py3.types.Struct):
 
     def __hash__(self):
         return super().__hash__()
+
+    def __copy__(self):
+        return self
 
 
 __all__.append("HiddenTypeFieldsStruct")
@@ -2221,6 +2241,9 @@ class ComplexStruct(thrift.py3.types.Struct):
         instance._fbthrift_inner__an_enum = None
         return instance
 
+    def __call__(self, **kwargs) -> ComplexStruct:
+        return ComplexStruct.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.ComplexStruct) -> ComplexStruct:
         inst = ComplexStruct.__new__(ComplexStruct)
@@ -2232,7 +2255,6 @@ class ComplexStruct(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.ComplexStruct:
         return self._fbthrift__inner
-
 
     @property
     def structOne(self) -> SimpleStruct:
@@ -2298,6 +2320,9 @@ class ComplexStruct(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("ComplexStruct")
 
@@ -2339,7 +2364,6 @@ class BinaryUnion(thrift.py3.types.Union):
     def _to_python(self) -> _fbthrift_python_types.BinaryUnion:
         return self._fbthrift__inner
 
-
     @property
     def iobuf_val(self) -> _fbthrift_iobuf.IOBuf:
         return self._fbthrift__inner.iobuf_val
@@ -2380,6 +2404,9 @@ class BinaryUnion(thrift.py3.types.Union):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("BinaryUnion")
 
@@ -2405,6 +2432,9 @@ class BinaryUnionStruct(thrift.py3.types.Struct):
         instance._fbthrift_inner__u = None
         return instance
 
+    def __call__(self, **kwargs) -> BinaryUnionStruct:
+        return BinaryUnionStruct.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.BinaryUnionStruct) -> BinaryUnionStruct:
         inst = BinaryUnionStruct.__new__(BinaryUnionStruct)
@@ -2416,7 +2446,6 @@ class BinaryUnionStruct(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.BinaryUnionStruct:
         return self._fbthrift__inner
-
 
     @property
     def u(self) -> BinaryUnion:
@@ -2451,6 +2480,9 @@ class BinaryUnionStruct(thrift.py3.types.Struct):
 
     def __hash__(self):
         return super().__hash__()
+
+    def __copy__(self):
+        return self
 
 
 __all__.append("BinaryUnionStruct")
@@ -2494,6 +2526,9 @@ class CustomFields(thrift.py3.types.Struct):
         instance._fbthrift_inner__struct_field = None
         return instance
 
+    def __call__(self, **kwargs) -> CustomFields:
+        return CustomFields.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.CustomFields) -> CustomFields:
         inst = CustomFields.__new__(CustomFields)
@@ -2505,7 +2540,6 @@ class CustomFields(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.CustomFields:
         return self._fbthrift__inner
-
 
     @property
     def bool_field(self) -> bool:
@@ -2575,6 +2609,9 @@ class CustomFields(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("CustomFields")
 
@@ -2617,6 +2654,9 @@ class CustomTypedefFields(thrift.py3.types.Struct):
         instance._fbthrift_inner__struct_field = None
         return instance
 
+    def __call__(self, **kwargs) -> CustomTypedefFields:
+        return CustomTypedefFields.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.CustomTypedefFields) -> CustomTypedefFields:
         inst = CustomTypedefFields.__new__(CustomTypedefFields)
@@ -2628,7 +2668,6 @@ class CustomTypedefFields(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.CustomTypedefFields:
         return self._fbthrift__inner
-
 
     @property
     def bool_field(self) -> bool:
@@ -2698,6 +2737,9 @@ class CustomTypedefFields(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("CustomTypedefFields")
 
@@ -2740,6 +2782,9 @@ class AdaptedTypedefFields(thrift.py3.types.Struct):
         instance._fbthrift_inner__struct_field = None
         return instance
 
+    def __call__(self, **kwargs) -> AdaptedTypedefFields:
+        return AdaptedTypedefFields.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.AdaptedTypedefFields) -> AdaptedTypedefFields:
         inst = AdaptedTypedefFields.__new__(AdaptedTypedefFields)
@@ -2751,7 +2796,6 @@ class AdaptedTypedefFields(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.AdaptedTypedefFields:
         return self._fbthrift__inner
-
 
     @property
     def bool_field(self) -> bool:
@@ -2820,6 +2864,9 @@ class AdaptedTypedefFields(thrift.py3.types.Struct):
 
     def __hash__(self):
         return super().__hash__()
+
+    def __copy__(self):
+        return self
 
 
 __all__.append("AdaptedTypedefFields")

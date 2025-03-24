@@ -447,6 +447,9 @@ class MyStruct(thrift.py3.types.Struct):
         instance._fbthrift_inner__floatSet = None
         return instance
 
+    def __call__(self, **kwargs) -> MyStruct:
+        return MyStruct.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.MyStruct) -> MyStruct:
         inst = MyStruct.__new__(MyStruct)
@@ -458,7 +461,6 @@ class MyStruct(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.MyStruct:
         return self._fbthrift__inner
-
 
     @property
     def MyIntField(self) -> int:
@@ -534,6 +536,9 @@ class MyStruct(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("MyStruct")
 
@@ -567,6 +572,9 @@ class Containers(thrift.py3.types.Struct):
         instance._fbthrift_inner__StringToI64Map = None
         return instance
 
+    def __call__(self, **kwargs) -> Containers:
+        return Containers.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.Containers) -> Containers:
         inst = Containers.__new__(Containers)
@@ -578,7 +586,6 @@ class Containers(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.Containers:
         return self._fbthrift__inner
-
 
     @property
     def I32List(self) -> _typing.Sequence[int]:
@@ -630,6 +637,9 @@ class Containers(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("Containers")
 
@@ -651,6 +661,9 @@ class MyDataItem(thrift.py3.types.Struct):
         instance = super().__new__(cls)
         return instance
 
+    def __call__(self, **kwargs) -> MyDataItem:
+        return MyDataItem.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.MyDataItem) -> MyDataItem:
         inst = MyDataItem.__new__(MyDataItem)
@@ -662,7 +675,6 @@ class MyDataItem(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.MyDataItem:
         return self._fbthrift__inner
-
 
 
     @classmethod
@@ -689,6 +701,9 @@ class MyDataItem(thrift.py3.types.Struct):
 
     def __hash__(self):
         return super().__hash__()
+
+    def __copy__(self):
+        return self
 
 
 __all__.append("MyDataItem")
@@ -745,7 +760,6 @@ class MyUnion(thrift.py3.types.Union):
 
     def _to_python(self) -> _fbthrift_python_types.MyUnion:
         return self._fbthrift__inner
-
 
     @property
     def myEnum(self) -> MyEnum:
@@ -831,6 +845,9 @@ class MyUnion(thrift.py3.types.Union):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("MyUnion")
 
@@ -862,6 +879,9 @@ class MyException(thrift.py3.types.Struct):
         instance._fbthrift_inner__myUnion = None
         return instance
 
+    def __call__(self, **kwargs) -> MyException:
+        return MyException.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.MyException) -> MyException:
         inst = MyException.__new__(MyException)
@@ -873,7 +893,6 @@ class MyException(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.MyException:
         return self._fbthrift__inner
-
 
     @property
     def MyIntField(self) -> int:
@@ -925,6 +944,9 @@ class MyException(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("MyException")
 
@@ -956,6 +978,9 @@ class MyExceptionWithMessage(thrift.py3.types.Struct):
         instance._fbthrift_inner__myUnion = None
         return instance
 
+    def __call__(self, **kwargs) -> MyExceptionWithMessage:
+        return MyExceptionWithMessage.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.MyExceptionWithMessage) -> MyExceptionWithMessage:
         inst = MyExceptionWithMessage.__new__(MyExceptionWithMessage)
@@ -967,7 +992,6 @@ class MyExceptionWithMessage(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.MyExceptionWithMessage:
         return self._fbthrift__inner
-
 
     @property
     def MyIntField(self) -> int:
@@ -1019,6 +1043,9 @@ class MyExceptionWithMessage(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("MyExceptionWithMessage")
 
@@ -1041,6 +1068,9 @@ class ReservedKeyword(thrift.py3.types.Struct):
         instance = super().__new__(cls)
         return instance
 
+    def __call__(self, **kwargs) -> ReservedKeyword:
+        return ReservedKeyword.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.ReservedKeyword) -> ReservedKeyword:
         inst = ReservedKeyword.__new__(ReservedKeyword)
@@ -1052,7 +1082,6 @@ class ReservedKeyword(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.ReservedKeyword:
         return self._fbthrift__inner
-
 
     @property
     def reserved_field(self) -> int:
@@ -1083,6 +1112,9 @@ class ReservedKeyword(thrift.py3.types.Struct):
 
     def __hash__(self):
         return super().__hash__()
+
+    def __copy__(self):
+        return self
 
 
 __all__.append("ReservedKeyword")
@@ -1125,7 +1157,6 @@ class UnionToBeRenamed(thrift.py3.types.Union):
     def _to_python(self) -> _fbthrift_python_types.UnionToBeRenamed:
         return self._fbthrift__inner
 
-
     @property
     def reserved_field(self) -> int:
         return self._fbthrift__inner.reserved_field
@@ -1165,6 +1196,9 @@ class UnionToBeRenamed(thrift.py3.types.Union):
 
     def __hash__(self):
         return super().__hash__()
+
+    def __copy__(self):
+        return self
 
 
 __all__.append("UnionToBeRenamed")

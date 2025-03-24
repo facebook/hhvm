@@ -1326,6 +1326,9 @@ class empty_struct(thrift.py3.types.Struct):
         instance = super().__new__(cls)
         return instance
 
+    def __call__(self, **kwargs) -> empty_struct:
+        return empty_struct.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.empty_struct) -> empty_struct:
         inst = empty_struct.__new__(empty_struct)
@@ -1337,7 +1340,6 @@ class empty_struct(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.empty_struct:
         return self._fbthrift__inner
-
 
 
     @classmethod
@@ -1365,6 +1367,9 @@ class empty_struct(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("empty_struct")
 
@@ -1387,6 +1392,9 @@ class decorated_struct(thrift.py3.types.Struct):
         instance = super().__new__(cls)
         return instance
 
+    def __call__(self, **kwargs) -> decorated_struct:
+        return decorated_struct.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.decorated_struct) -> decorated_struct:
         inst = decorated_struct.__new__(decorated_struct)
@@ -1398,7 +1406,6 @@ class decorated_struct(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.decorated_struct:
         return self._fbthrift__inner
-
 
     @property
     def field(self) -> str:
@@ -1429,6 +1436,9 @@ class decorated_struct(thrift.py3.types.Struct):
 
     def __hash__(self):
         return super().__hash__()
+
+    def __copy__(self):
+        return self
 
 
 __all__.append("decorated_struct")
@@ -1483,6 +1493,9 @@ class ContainerStruct(thrift.py3.types.Struct):
         instance._fbthrift_inner__fieldH = None
         return instance
 
+    def __call__(self, **kwargs) -> ContainerStruct:
+        return ContainerStruct.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.ContainerStruct) -> ContainerStruct:
         inst = ContainerStruct.__new__(ContainerStruct)
@@ -1494,7 +1507,6 @@ class ContainerStruct(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.ContainerStruct:
         return self._fbthrift__inner
-
 
     @property
     def fieldA(self) -> _typing.Sequence[int]:
@@ -1586,6 +1598,9 @@ class ContainerStruct(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("ContainerStruct")
 
@@ -1611,6 +1626,9 @@ class CppTypeStruct(thrift.py3.types.Struct):
         instance._fbthrift_inner__fieldA = None
         return instance
 
+    def __call__(self, **kwargs) -> CppTypeStruct:
+        return CppTypeStruct.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.CppTypeStruct) -> CppTypeStruct:
         inst = CppTypeStruct.__new__(CppTypeStruct)
@@ -1622,7 +1640,6 @@ class CppTypeStruct(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.CppTypeStruct:
         return self._fbthrift__inner
-
 
     @property
     def fieldA(self) -> _typing.Sequence[int]:
@@ -1658,6 +1675,9 @@ class CppTypeStruct(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("CppTypeStruct")
 
@@ -1680,6 +1700,9 @@ class VirtualStruct(thrift.py3.types.Struct):
         instance = super().__new__(cls)
         return instance
 
+    def __call__(self, **kwargs) -> VirtualStruct:
+        return VirtualStruct.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.VirtualStruct) -> VirtualStruct:
         inst = VirtualStruct.__new__(VirtualStruct)
@@ -1691,7 +1714,6 @@ class VirtualStruct(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.VirtualStruct:
         return self._fbthrift__inner
-
 
     @property
     def MyIntField(self) -> int:
@@ -1723,6 +1745,9 @@ class VirtualStruct(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("VirtualStruct")
 
@@ -1752,6 +1777,9 @@ class MyStructWithForwardRefEnum(thrift.py3.types.Struct):
         instance._fbthrift_inner__b = None
         return instance
 
+    def __call__(self, **kwargs) -> MyStructWithForwardRefEnum:
+        return MyStructWithForwardRefEnum.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.MyStructWithForwardRefEnum) -> MyStructWithForwardRefEnum:
         inst = MyStructWithForwardRefEnum.__new__(MyStructWithForwardRefEnum)
@@ -1763,7 +1791,6 @@ class MyStructWithForwardRefEnum(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.MyStructWithForwardRefEnum:
         return self._fbthrift__inner
-
 
     @property
     def a(self) -> MyForwardRefEnum:
@@ -1807,6 +1834,9 @@ class MyStructWithForwardRefEnum(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("MyStructWithForwardRefEnum")
 
@@ -1830,6 +1860,9 @@ class TrivialNumeric(thrift.py3.types.Struct):
         instance = super().__new__(cls)
         return instance
 
+    def __call__(self, **kwargs) -> TrivialNumeric:
+        return TrivialNumeric.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.TrivialNumeric) -> TrivialNumeric:
         inst = TrivialNumeric.__new__(TrivialNumeric)
@@ -1841,7 +1874,6 @@ class TrivialNumeric(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.TrivialNumeric:
         return self._fbthrift__inner
-
 
     @property
     def a(self) -> int:
@@ -1877,6 +1909,9 @@ class TrivialNumeric(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("TrivialNumeric")
 
@@ -1903,6 +1938,9 @@ class TrivialNestedWithDefault(thrift.py3.types.Struct):
         instance._fbthrift_inner__n = None
         return instance
 
+    def __call__(self, **kwargs) -> TrivialNestedWithDefault:
+        return TrivialNestedWithDefault.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.TrivialNestedWithDefault) -> TrivialNestedWithDefault:
         inst = TrivialNestedWithDefault.__new__(TrivialNestedWithDefault)
@@ -1914,7 +1952,6 @@ class TrivialNestedWithDefault(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.TrivialNestedWithDefault:
         return self._fbthrift__inner
-
 
     @property
     def z(self) -> int:
@@ -1954,6 +1991,9 @@ class TrivialNestedWithDefault(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("TrivialNestedWithDefault")
 
@@ -1980,6 +2020,9 @@ class ComplexString(thrift.py3.types.Struct):
         instance._fbthrift_inner__b = None
         return instance
 
+    def __call__(self, **kwargs) -> ComplexString:
+        return ComplexString.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.ComplexString) -> ComplexString:
         inst = ComplexString.__new__(ComplexString)
@@ -1991,7 +2034,6 @@ class ComplexString(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.ComplexString:
         return self._fbthrift__inner
-
 
     @property
     def a(self) -> str:
@@ -2031,6 +2073,9 @@ class ComplexString(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("ComplexString")
 
@@ -2057,6 +2102,9 @@ class ComplexNestedWithDefault(thrift.py3.types.Struct):
         instance._fbthrift_inner__n = None
         return instance
 
+    def __call__(self, **kwargs) -> ComplexNestedWithDefault:
+        return ComplexNestedWithDefault.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.ComplexNestedWithDefault) -> ComplexNestedWithDefault:
         inst = ComplexNestedWithDefault.__new__(ComplexNestedWithDefault)
@@ -2068,7 +2116,6 @@ class ComplexNestedWithDefault(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.ComplexNestedWithDefault:
         return self._fbthrift__inner
-
 
     @property
     def z(self) -> str:
@@ -2108,6 +2155,9 @@ class ComplexNestedWithDefault(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("ComplexNestedWithDefault")
 
@@ -2134,6 +2184,9 @@ class MinPadding(thrift.py3.types.Struct):
         instance = super().__new__(cls)
         return instance
 
+    def __call__(self, **kwargs) -> MinPadding:
+        return MinPadding.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.MinPadding) -> MinPadding:
         inst = MinPadding.__new__(MinPadding)
@@ -2145,7 +2198,6 @@ class MinPadding(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.MinPadding:
         return self._fbthrift__inner
-
 
     @property
     def small(self) -> int:
@@ -2193,6 +2245,9 @@ class MinPadding(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("MinPadding")
 
@@ -2219,6 +2274,9 @@ class MinPaddingWithCustomType(thrift.py3.types.Struct):
         instance = super().__new__(cls)
         return instance
 
+    def __call__(self, **kwargs) -> MinPaddingWithCustomType:
+        return MinPaddingWithCustomType.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.MinPaddingWithCustomType) -> MinPaddingWithCustomType:
         inst = MinPaddingWithCustomType.__new__(MinPaddingWithCustomType)
@@ -2230,7 +2288,6 @@ class MinPaddingWithCustomType(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.MinPaddingWithCustomType:
         return self._fbthrift__inner
-
 
     @property
     def small(self) -> int:
@@ -2278,6 +2335,9 @@ class MinPaddingWithCustomType(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("MinPaddingWithCustomType")
 
@@ -2306,6 +2366,9 @@ class MyStruct(thrift.py3.types.Struct):
         instance._fbthrift_inner__data = None
         return instance
 
+    def __call__(self, **kwargs) -> MyStruct:
+        return MyStruct.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.MyStruct) -> MyStruct:
         inst = MyStruct.__new__(MyStruct)
@@ -2317,7 +2380,6 @@ class MyStruct(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.MyStruct:
         return self._fbthrift__inner
-
 
     @property
     def MyIntField(self) -> int:
@@ -2365,6 +2427,9 @@ class MyStruct(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("MyStruct")
 
@@ -2386,6 +2451,9 @@ class MyDataItem(thrift.py3.types.Struct):
         instance = super().__new__(cls)
         return instance
 
+    def __call__(self, **kwargs) -> MyDataItem:
+        return MyDataItem.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.MyDataItem) -> MyDataItem:
         inst = MyDataItem.__new__(MyDataItem)
@@ -2397,7 +2465,6 @@ class MyDataItem(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.MyDataItem:
         return self._fbthrift__inner
-
 
 
     @classmethod
@@ -2425,6 +2492,9 @@ class MyDataItem(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("MyDataItem")
 
@@ -2447,6 +2517,9 @@ class Renaming(thrift.py3.types.Struct):
         instance = super().__new__(cls)
         return instance
 
+    def __call__(self, **kwargs) -> Renaming:
+        return Renaming.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.Renaming) -> Renaming:
         inst = Renaming.__new__(Renaming)
@@ -2458,7 +2531,6 @@ class Renaming(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.Renaming:
         return self._fbthrift__inner
-
 
     @property
     def foo(self) -> int:
@@ -2490,6 +2562,9 @@ class Renaming(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("Renaming")
 
@@ -2516,6 +2591,9 @@ class AnnotatedTypes(thrift.py3.types.Struct):
         instance._fbthrift_inner__list_field = None
         return instance
 
+    def __call__(self, **kwargs) -> AnnotatedTypes:
+        return AnnotatedTypes.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.AnnotatedTypes) -> AnnotatedTypes:
         inst = AnnotatedTypes.__new__(AnnotatedTypes)
@@ -2527,7 +2605,6 @@ class AnnotatedTypes(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.AnnotatedTypes:
         return self._fbthrift__inner
-
 
     @property
     def binary_field(self) -> bytes:
@@ -2567,6 +2644,9 @@ class AnnotatedTypes(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("AnnotatedTypes")
 
@@ -2596,6 +2676,9 @@ class ForwardUsageRoot(thrift.py3.types.Struct):
         instance._fbthrift_inner__ForwardUsageByRef = None
         return instance
 
+    def __call__(self, **kwargs) -> ForwardUsageRoot:
+        return ForwardUsageRoot.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.ForwardUsageRoot) -> ForwardUsageRoot:
         inst = ForwardUsageRoot.__new__(ForwardUsageRoot)
@@ -2607,7 +2690,6 @@ class ForwardUsageRoot(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.ForwardUsageRoot:
         return self._fbthrift__inner
-
 
     @property
     def ForwardUsageStruct(self) -> _typing.Optional[ForwardUsageStruct]:
@@ -2655,6 +2737,9 @@ class ForwardUsageRoot(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("ForwardUsageRoot")
 
@@ -2680,6 +2765,9 @@ class ForwardUsageStruct(thrift.py3.types.Struct):
         instance._fbthrift_inner__foo = None
         return instance
 
+    def __call__(self, **kwargs) -> ForwardUsageStruct:
+        return ForwardUsageStruct.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.ForwardUsageStruct) -> ForwardUsageStruct:
         inst = ForwardUsageStruct.__new__(ForwardUsageStruct)
@@ -2691,7 +2779,6 @@ class ForwardUsageStruct(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.ForwardUsageStruct:
         return self._fbthrift__inner
-
 
     @property
     def foo(self) -> _typing.Optional[ForwardUsageRoot]:
@@ -2729,6 +2816,9 @@ class ForwardUsageStruct(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("ForwardUsageStruct")
 
@@ -2754,6 +2844,9 @@ class ForwardUsageByRef(thrift.py3.types.Struct):
         instance._fbthrift_inner__foo = None
         return instance
 
+    def __call__(self, **kwargs) -> ForwardUsageByRef:
+        return ForwardUsageByRef.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.ForwardUsageByRef) -> ForwardUsageByRef:
         inst = ForwardUsageByRef.__new__(ForwardUsageByRef)
@@ -2765,7 +2858,6 @@ class ForwardUsageByRef(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.ForwardUsageByRef:
         return self._fbthrift__inner
-
 
     @property
     def foo(self) -> _typing.Optional[ForwardUsageRoot]:
@@ -2803,6 +2895,9 @@ class ForwardUsageByRef(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("ForwardUsageByRef")
 
@@ -2828,6 +2923,9 @@ class IncompleteMap(thrift.py3.types.Struct):
         instance._fbthrift_inner__field = None
         return instance
 
+    def __call__(self, **kwargs) -> IncompleteMap:
+        return IncompleteMap.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.IncompleteMap) -> IncompleteMap:
         inst = IncompleteMap.__new__(IncompleteMap)
@@ -2839,7 +2937,6 @@ class IncompleteMap(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.IncompleteMap:
         return self._fbthrift__inner
-
 
     @property
     def field(self) -> _typing.Optional[_typing.Mapping[int, IncompleteMapDep]]:
@@ -2877,6 +2974,9 @@ class IncompleteMap(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("IncompleteMap")
 
@@ -2898,6 +2998,9 @@ class IncompleteMapDep(thrift.py3.types.Struct):
         instance = super().__new__(cls)
         return instance
 
+    def __call__(self, **kwargs) -> IncompleteMapDep:
+        return IncompleteMapDep.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.IncompleteMapDep) -> IncompleteMapDep:
         inst = IncompleteMapDep.__new__(IncompleteMapDep)
@@ -2909,7 +3012,6 @@ class IncompleteMapDep(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.IncompleteMapDep:
         return self._fbthrift__inner
-
 
 
     @classmethod
@@ -2937,6 +3039,9 @@ class IncompleteMapDep(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("IncompleteMapDep")
 
@@ -2962,6 +3067,9 @@ class CompleteMap(thrift.py3.types.Struct):
         instance._fbthrift_inner__field = None
         return instance
 
+    def __call__(self, **kwargs) -> CompleteMap:
+        return CompleteMap.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.CompleteMap) -> CompleteMap:
         inst = CompleteMap.__new__(CompleteMap)
@@ -2973,7 +3081,6 @@ class CompleteMap(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.CompleteMap:
         return self._fbthrift__inner
-
 
     @property
     def field(self) -> _typing.Optional[_typing.Mapping[int, CompleteMapDep]]:
@@ -3011,6 +3118,9 @@ class CompleteMap(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("CompleteMap")
 
@@ -3032,6 +3142,9 @@ class CompleteMapDep(thrift.py3.types.Struct):
         instance = super().__new__(cls)
         return instance
 
+    def __call__(self, **kwargs) -> CompleteMapDep:
+        return CompleteMapDep.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.CompleteMapDep) -> CompleteMapDep:
         inst = CompleteMapDep.__new__(CompleteMapDep)
@@ -3043,7 +3156,6 @@ class CompleteMapDep(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.CompleteMapDep:
         return self._fbthrift__inner
-
 
 
     @classmethod
@@ -3071,6 +3183,9 @@ class CompleteMapDep(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("CompleteMapDep")
 
@@ -3096,6 +3211,9 @@ class IncompleteList(thrift.py3.types.Struct):
         instance._fbthrift_inner__field = None
         return instance
 
+    def __call__(self, **kwargs) -> IncompleteList:
+        return IncompleteList.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.IncompleteList) -> IncompleteList:
         inst = IncompleteList.__new__(IncompleteList)
@@ -3107,7 +3225,6 @@ class IncompleteList(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.IncompleteList:
         return self._fbthrift__inner
-
 
     @property
     def field(self) -> _typing.Optional[_typing.Sequence[IncompleteListDep]]:
@@ -3145,6 +3262,9 @@ class IncompleteList(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("IncompleteList")
 
@@ -3166,6 +3286,9 @@ class IncompleteListDep(thrift.py3.types.Struct):
         instance = super().__new__(cls)
         return instance
 
+    def __call__(self, **kwargs) -> IncompleteListDep:
+        return IncompleteListDep.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.IncompleteListDep) -> IncompleteListDep:
         inst = IncompleteListDep.__new__(IncompleteListDep)
@@ -3177,7 +3300,6 @@ class IncompleteListDep(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.IncompleteListDep:
         return self._fbthrift__inner
-
 
 
     @classmethod
@@ -3205,6 +3327,9 @@ class IncompleteListDep(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("IncompleteListDep")
 
@@ -3230,6 +3355,9 @@ class CompleteList(thrift.py3.types.Struct):
         instance._fbthrift_inner__field = None
         return instance
 
+    def __call__(self, **kwargs) -> CompleteList:
+        return CompleteList.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.CompleteList) -> CompleteList:
         inst = CompleteList.__new__(CompleteList)
@@ -3241,7 +3369,6 @@ class CompleteList(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.CompleteList:
         return self._fbthrift__inner
-
 
     @property
     def field(self) -> _typing.Optional[_typing.Sequence[CompleteListDep]]:
@@ -3279,6 +3406,9 @@ class CompleteList(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("CompleteList")
 
@@ -3300,6 +3430,9 @@ class CompleteListDep(thrift.py3.types.Struct):
         instance = super().__new__(cls)
         return instance
 
+    def __call__(self, **kwargs) -> CompleteListDep:
+        return CompleteListDep.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.CompleteListDep) -> CompleteListDep:
         inst = CompleteListDep.__new__(CompleteListDep)
@@ -3311,7 +3444,6 @@ class CompleteListDep(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.CompleteListDep:
         return self._fbthrift__inner
-
 
 
     @classmethod
@@ -3339,6 +3471,9 @@ class CompleteListDep(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("CompleteListDep")
 
@@ -3364,6 +3499,9 @@ class AdaptedList(thrift.py3.types.Struct):
         instance._fbthrift_inner__field = None
         return instance
 
+    def __call__(self, **kwargs) -> AdaptedList:
+        return AdaptedList.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.AdaptedList) -> AdaptedList:
         inst = AdaptedList.__new__(AdaptedList)
@@ -3375,7 +3513,6 @@ class AdaptedList(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.AdaptedList:
         return self._fbthrift__inner
-
 
     @property
     def field(self) -> _typing.Optional[_typing.Sequence[AdaptedListDep]]:
@@ -3413,6 +3550,9 @@ class AdaptedList(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("AdaptedList")
 
@@ -3438,6 +3578,9 @@ class DependentAdaptedList(thrift.py3.types.Struct):
         instance._fbthrift_inner__field = None
         return instance
 
+    def __call__(self, **kwargs) -> DependentAdaptedList:
+        return DependentAdaptedList.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.DependentAdaptedList) -> DependentAdaptedList:
         inst = DependentAdaptedList.__new__(DependentAdaptedList)
@@ -3449,7 +3592,6 @@ class DependentAdaptedList(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.DependentAdaptedList:
         return self._fbthrift__inner
-
 
     @property
     def field(self) -> _typing.Optional[_typing.Sequence[DependentAdaptedListDep]]:
@@ -3486,6 +3628,9 @@ class DependentAdaptedList(thrift.py3.types.Struct):
 
     def __hash__(self):
         return super().__hash__()
+
+    def __copy__(self):
+        return self
 
 
 __all__.append("DependentAdaptedList")
@@ -3524,6 +3669,9 @@ class AllocatorAware(thrift.py3.types.Struct):
         instance._fbthrift_inner__aa_map = None
         return instance
 
+    def __call__(self, **kwargs) -> AllocatorAware:
+        return AllocatorAware.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.AllocatorAware) -> AllocatorAware:
         inst = AllocatorAware.__new__(AllocatorAware)
@@ -3535,7 +3683,6 @@ class AllocatorAware(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.AllocatorAware:
         return self._fbthrift__inner
-
 
     @property
     def aa_list(self) -> _typing.Sequence[int]:
@@ -3603,6 +3750,9 @@ class AllocatorAware(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("AllocatorAware")
 
@@ -3626,6 +3776,9 @@ class AllocatorAware2(thrift.py3.types.Struct):
         instance = super().__new__(cls)
         return instance
 
+    def __call__(self, **kwargs) -> AllocatorAware2:
+        return AllocatorAware2.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.AllocatorAware2) -> AllocatorAware2:
         inst = AllocatorAware2.__new__(AllocatorAware2)
@@ -3637,7 +3790,6 @@ class AllocatorAware2(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.AllocatorAware2:
         return self._fbthrift__inner
-
 
     @property
     def not_a_container(self) -> int:
@@ -3673,6 +3825,9 @@ class AllocatorAware2(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("AllocatorAware2")
 
@@ -3697,6 +3852,9 @@ class TypedefStruct(thrift.py3.types.Struct):
         instance = super().__new__(cls)
         return instance
 
+    def __call__(self, **kwargs) -> TypedefStruct:
+        return TypedefStruct.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.TypedefStruct) -> TypedefStruct:
         inst = TypedefStruct.__new__(TypedefStruct)
@@ -3708,7 +3866,6 @@ class TypedefStruct(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.TypedefStruct:
         return self._fbthrift__inner
-
 
     @property
     def i32_field(self) -> int:
@@ -3748,6 +3905,9 @@ class TypedefStruct(thrift.py3.types.Struct):
     def __hash__(self):
         return super().__hash__()
 
+    def __copy__(self):
+        return self
+
 
 __all__.append("TypedefStruct")
 
@@ -3770,6 +3930,9 @@ class StructWithDoubleUnderscores(thrift.py3.types.Struct):
         instance = super().__new__(cls)
         return instance
 
+    def __call__(self, **kwargs) -> StructWithDoubleUnderscores:
+        return StructWithDoubleUnderscores.from_python(self._fbthrift__inner(**kwargs))
+
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.StructWithDoubleUnderscores) -> StructWithDoubleUnderscores:
         inst = StructWithDoubleUnderscores.__new__(StructWithDoubleUnderscores)
@@ -3781,7 +3944,6 @@ class StructWithDoubleUnderscores(thrift.py3.types.Struct):
 
     def _to_python(self) -> _fbthrift_python_types.StructWithDoubleUnderscores:
         return self._fbthrift__inner
-
 
     @property
     def __field(self) -> int:
@@ -3812,6 +3974,9 @@ class StructWithDoubleUnderscores(thrift.py3.types.Struct):
 
     def __hash__(self):
         return super().__hash__()
+
+    def __copy__(self):
+        return self
 
 
 __all__.append("StructWithDoubleUnderscores")

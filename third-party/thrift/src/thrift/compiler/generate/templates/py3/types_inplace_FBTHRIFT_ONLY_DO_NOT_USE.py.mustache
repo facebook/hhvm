@@ -139,6 +139,11 @@ class {{struct:name}}(thrift.py3.types.{{!
         {{/struct:union?}}
         return instance
 
+    {{^struct:union?}}{{^struct:cpp_noncopyable?}}
+    def __call__(self, **kwargs) -> {{struct:name}}:
+        return {{struct:name}}.from_python(self._fbthrift__inner(**kwargs))
+
+    {{/struct:cpp_noncopyable?}}{{/struct:union?}}
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.{{struct:name}}) -> {{struct:name}}:
         inst = {{struct:name}}.__new__({{struct:name}})
@@ -150,7 +155,6 @@ class {{struct:name}}(thrift.py3.types.{{!
 
     def _to_python(self) -> _fbthrift_python_types.{{struct:name}}:
         return self._fbthrift__inner
-
 
     {{#struct:fields_and_mixin_fields}}
     @property
@@ -218,6 +222,14 @@ class {{struct:name}}(thrift.py3.types.{{!
 
     def __hash__(self):
         return super().__hash__()
+
+    def __copy__(self):
+        {{#struct:cpp_noncopyable?}}
+        raise TypeError("{{struct:name}} is noncopyable")
+        {{/struct:cpp_noncopyable?}}
+        {{^struct:cpp_noncopyable?}}
+        return self{{! thrift-py3 / thrift-python is immutable}}
+        {{/struct:cpp_noncopyable?}}
 
 
 {{#program:inplace_migrate?}}

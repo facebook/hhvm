@@ -805,7 +805,7 @@ class t_hack_generator : public t_concat_generator {
           .get_string();
     }
     if (const std::string* annotation =
-            tnamed->find_annotation_or_null("hack.name")) {
+            tnamed->find_unstructured_annotation_or_null("hack.name")) {
       return *annotation;
     }
     return default_name;
@@ -837,7 +837,7 @@ class t_hack_generator : public t_concat_generator {
       const t_named& tnamed, bool include_unstructured) {
     if (include_unstructured) {
       if (const std::string* annotation =
-              tnamed.find_annotation_or_null("hack.attributes")) {
+              tnamed.find_unstructured_annotation_or_null("hack.attributes")) {
         return *annotation;
       }
     }

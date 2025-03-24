@@ -57,7 +57,7 @@ class t_node {
   // Returns true if there exists an annotation with the given name.
   bool has_unstructured_annotation(
       const std::vector<std::string_view>& names) const {
-    return find_annotation_or_null(names) != nullptr;
+    return find_unstructured_annotation_or_null(names) != nullptr;
   }
   bool has_unstructured_annotation(const char* name) const {
     return has_unstructured_annotation({std::string_view(name)});
@@ -67,10 +67,11 @@ class t_node {
   // given name.
   //
   // If not found returns nullptr.
-  const std::string* find_annotation_or_null(
+  const std::string* find_unstructured_annotation_or_null(
       const std::vector<std::string_view>& names) const;
-  const std::string* find_annotation_or_null(const char* name) const {
-    return find_annotation_or_null({std::string_view(name)});
+  const std::string* find_unstructured_annotation_or_null(
+      const char* name) const {
+    return find_unstructured_annotation_or_null({std::string_view(name)});
   }
 
   // Returns the value of an annotation with the given name.
@@ -82,7 +83,8 @@ class t_node {
   decltype(auto) get_annotation(
       const T& names, D&& default_value = nullptr) const {
     return annotation_or(
-        find_annotation_or_null(names), std::forward<D>(default_value));
+        find_unstructured_annotation_or_null(names),
+        std::forward<D>(default_value));
   }
 
   void reset_annotations(deprecated_annotation_map annotations) {

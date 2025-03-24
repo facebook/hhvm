@@ -98,8 +98,8 @@ bool type_needs_convert(const t_type* type) {
 }
 
 std::string get_cpp_template(const t_type& type) {
-  if (const auto* val =
-          type.find_annotation_or_null({"cpp.template", "cpp2.template"})) {
+  if (const auto* val = type.find_unstructured_annotation_or_null(
+          {"cpp.template", "cpp2.template"})) {
     return *val;
   }
   if (type.is_list()) {
@@ -589,7 +589,8 @@ class py3_mstch_function : public mstch_function {
     return function_->get_annotation("thread") == "eb" ||
         function_->find_structured_annotation_or_null(
             kCppProcessInEbThreadUri) ||
-        interface_->find_annotation_or_null("process_in_event_base") ||
+        interface_->find_unstructured_annotation_or_null(
+            "process_in_event_base") ||
         interface_->find_structured_annotation_or_null(
             kCppProcessInEbThreadUri);
   }

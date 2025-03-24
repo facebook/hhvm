@@ -416,7 +416,7 @@ std::string cpp_name_resolver::gen_storage_type(
     cpp_reference_type& ref_type,
     const t_field& field) {
   const std::string* cpp_template =
-      field.find_annotation_or_null("cpp.template");
+      field.find_unstructured_annotation_or_null("cpp.template");
   switch (ref_type) {
     case cpp_reference_type::unique:
       if (cpp_template != nullptr) {
@@ -526,7 +526,7 @@ std::string cpp_name_resolver::gen_type_tag(const t_type& type) {
       ? gen_type_tag(*static_cast<const t_typedef&>(type).get_type())
       : gen_thrift_type_tag(type);
 
-  if (type.find_annotation_or_null("cpp.indirection")) {
+  if (type.find_unstructured_annotation_or_null("cpp.indirection")) {
     return fmt::format(
         "::apache::thrift::type::indirected<{}, {}>",
         get_native_type(type),

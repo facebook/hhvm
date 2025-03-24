@@ -67,7 +67,7 @@ class t_exception : public t_struct {
         return field;
       }
     }
-    const auto* value = find_annotation_or_null("message");
+    const auto* value = find_unstructured_annotation_or_null("message");
     return value ? get_field_by_name(*value) : nullptr;
   }
 

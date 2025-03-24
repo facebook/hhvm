@@ -100,7 +100,8 @@ std::string_view get_python_name_override(const T& node) {
       return name->get_string();
     }
   }
-  if (const auto* name = node.find_annotation_or_null("py3.name")) {
+  if (const auto* name =
+          node.find_unstructured_annotation_or_null("py3.name")) {
     return *name;
   }
   return {};

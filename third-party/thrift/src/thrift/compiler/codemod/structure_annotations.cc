@@ -179,7 +179,8 @@ class structure_annotations {
       } else if (name == "cpp.ref_type" || name == "cpp2.ref_type") {
         to_remove.emplace_back(name, data);
         if (is_field &&
-            !node.find_annotation_or_null({"cpp.box", "thrift.box"}) &&
+            !node.find_unstructured_annotation_or_null(
+                {"cpp.box", "thrift.box"}) &&
             !std::exchange(has_cpp_ref, true)) {
           if (data.value == "unique") {
             to_add.insert("@cpp.Ref{type = cpp.RefType.Unique}");
@@ -193,7 +194,7 @@ class structure_annotations {
       } else if (name == "cpp.ref" || name == "cpp2.ref") {
         to_remove.emplace_back(name, data);
         if (is_field &&
-            !node.find_annotation_or_null(
+            !node.find_unstructured_annotation_or_null(
                 {"cpp.box", "thrift.box", "cpp.ref_type", "cpp2.ref_type"}) &&
             !std::exchange(has_cpp_ref, true)) {
           to_add.insert("@cpp.Ref{type = cpp.RefType.Unique}");

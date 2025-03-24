@@ -24,7 +24,8 @@ namespace apache::thrift::compiler::gen::cpp {
 namespace {
 
 const std::string* find_ref_type_annot(const t_node& node) {
-  return node.find_annotation_or_null({"cpp.ref_type", "cpp2.ref_type"});
+  return node.find_unstructured_annotation_or_null(
+      {"cpp.ref_type", "cpp2.ref_type"});
 }
 
 // Since we can not include `thrift/annotation/cpp.thrift`

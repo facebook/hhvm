@@ -936,7 +936,7 @@ void validate_ref_unique_and_box_annotation(
 
 void validate_function_priority_annotation(
     sema_context& ctx, const t_node& node) {
-  if (auto* priority = node.find_annotation_or_null("priority")) {
+  if (auto* priority = node.find_unstructured_annotation_or_null("priority")) {
     const std::string choices[] = {
         "HIGH_IMPORTANT", "HIGH", "IMPORTANT", "NORMAL", "BEST_EFFORT"};
     auto* end = choices + sizeof(choices) / sizeof(choices[0]);

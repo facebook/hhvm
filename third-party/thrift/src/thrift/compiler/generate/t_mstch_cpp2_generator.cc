@@ -373,11 +373,13 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
         }
       }
       if (const std::string* type =
-              e.find_annotation_or_null("cpp.enum_type")) {
+              e.find_unstructured_annotation_or_null("cpp.enum_type")) {
         return *type;
       }
-      return e.find_annotation_or_null("cpp.deprecated_enum_unscoped") ? "int"
-                                                                       : "";
+      return e.find_unstructured_annotation_or_null(
+                 "cpp.deprecated_enum_unscoped")
+          ? "int"
+          : "";
     });
 
     def.property("cpp_is_unscoped", [](const t_enum& e) {
@@ -385,7 +387,8 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     });
 
     def.property("cpp_declare_bitwise_ops", [](const t_enum& e) {
-      return e.find_annotation_or_null("cpp.declare_bitwise_ops") ||
+      return e.find_unstructured_annotation_or_null(
+                 "cpp.declare_bitwise_ops") ||
           e.find_structured_annotation_or_null(kBitmaskEnumUri);
     });
 
@@ -1051,7 +1054,8 @@ class cpp_mstch_function : public mstch_function {
     return function_->get_annotation("thread") == "eb" ||
         function_->find_structured_annotation_or_null(
             kCppProcessInEbThreadUri) ||
-        interface_->find_annotation_or_null("process_in_event_base") ||
+        interface_->find_unstructured_annotation_or_null(
+            "process_in_event_base") ||
         interface_->find_structured_annotation_or_null(
             kCppProcessInEbThreadUri);
   }
@@ -1084,11 +1088,11 @@ class cpp_mstch_function : public mstch_function {
   mstch::node has_deprecated_header_client_methods() {
     return function_->find_structured_annotation_or_null(
                kCppGenerateDeprecatedHeaderClientMethodsUri) ||
-        function_->find_annotation_or_null(
+        function_->find_unstructured_annotation_or_null(
             "cpp.generate_deprecated_header_client_methods") ||
         interface_->find_structured_annotation_or_null(
             kCppGenerateDeprecatedHeaderClientMethodsUri) ||
-        interface_->find_annotation_or_null(
+        interface_->find_unstructured_annotation_or_null(
             "cpp.generate_deprecated_header_client_methods");
   }
 
@@ -1584,8 +1588,8 @@ class cpp_mstch_struct : public mstch_struct {
         cpp_context_->resolver().is_directly_adapted(*struct_);
   }
   mstch::node cpp_allocator_via() {
-    if (const auto* name =
-            struct_->find_annotation_or_null("cpp.allocator_via")) {
+    if (const auto* name = struct_->find_unstructured_annotation_or_null(
+            "cpp.allocator_via")) {
       for (const auto& field : struct_->fields()) {
         if (cpp2::get_name(&field) == *name) {
           return mangle_field_name(*name);

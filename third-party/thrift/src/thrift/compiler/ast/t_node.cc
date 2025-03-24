@@ -23,7 +23,7 @@ const std::string& t_node::emptyString() {
   return empty;
 }
 
-const std::string* t_node::find_annotation_or_null(
+const std::string* t_node::find_unstructured_annotation_or_null(
     const std::vector<std::string_view>& names) const {
   for (std::string_view name : names) {
     auto itr = annotations_.find(name);

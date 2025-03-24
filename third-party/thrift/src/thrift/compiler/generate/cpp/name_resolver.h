@@ -165,12 +165,13 @@ class cpp_name_resolver {
   static const t_const* find_nontransitive_adapter(const t_type& node);
 
   static const std::string* find_type(const t_type& node) {
-    return node.find_annotation_or_null({"cpp.type", "cpp2.type"});
+    return node.find_unstructured_annotation_or_null({"cpp.type", "cpp2.type"});
   }
   static const std::string* find_first_adapter(const t_type& node);
   static const std::string* find_first_adapter(const t_field& node);
   static const std::string* find_template(const t_type& node) {
-    return node.find_annotation_or_null({"cpp.template", "cpp2.template"});
+    return node.find_unstructured_annotation_or_null(
+        {"cpp.template", "cpp2.template"});
   }
 
   static bool is_directly_adapted(const t_type& node) {

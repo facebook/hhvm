@@ -118,8 +118,9 @@ std::string_view get_cpp_template(const t_node& node) {
   }
   if (auto type = type_of_node(node)) {
     // finds unstructured annotation template, if present
-    if (const auto* _template = type->get_true_type()->find_annotation_or_null(
-            {"cpp.template", "cpp2.template"})) {
+    if (const auto* _template =
+            type->get_true_type()->find_unstructured_annotation_or_null(
+                {"cpp.template", "cpp2.template"})) {
       return *_template;
     }
   }
@@ -524,13 +525,15 @@ class python_capi_mstch_struct : public mstch_struct {
     // used on type or field
     // TODO: delete these if structured annotation migration completed
     if (const std::string* template_anno =
-            type->find_annotation_or_null({"cpp.template", "cpp2.template"})) {
+            type->find_unstructured_annotation_or_null(
+                {"cpp.template", "cpp2.template"})) {
       if (!is_supported_template(*template_anno)) {
         return false;
       }
     }
     if (const std::string* type_anno =
-            type->find_annotation_or_null({"cpp.type", "cpp2.type"})) {
+            type->find_unstructured_annotation_or_null(
+                {"cpp.type", "cpp2.type"})) {
       return is_type_iobuf(*type_anno);
     }
     if (type->is_list() &&

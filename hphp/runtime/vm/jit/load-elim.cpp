@@ -121,8 +121,8 @@ struct State {
 
   /*
    * If we know we've already executed a jmpz on an SSATmp, we can elide
-   * future jmpz instructions on same SSATmp. For jmpnz, we could just 
-   * use the tracked field above, but there is not a current way to 
+   * future jmpz instructions on same SSATmp. For jmpnz, we could just
+   * use the tracked field above, but there is not a current way to
    * specify "not zero" for type/value.
    */
   hphp_fast_set<SSATmp*> jmpz{};
@@ -1281,7 +1281,8 @@ void optimize_end_catch(Global& env, IRInstruction& inst,
     teardownMode,
     original->vmspOffset
   };
-  env.unit.replace(&inst, EndCatch, data, inst.src(0), inst.src(1));
+  env.unit.replace(
+    &inst, EndCatch, data, inst.src(0), inst.src(1), inst.src(2));
   ++env.stackTeardownsOptimized;
 }
 

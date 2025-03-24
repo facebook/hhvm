@@ -325,7 +325,7 @@ void endCatchImpl(IRGS& env, EndCatchData::CatchMode mode, SSATmp* exc,
     teardown,
     vmspOffset
   };
-  gen(env, EndCatch, data, fp(env), sp(env));
+  gen(env, EndCatch, data, fp(env), sp(env), exc);
 }
 
 void emitExceptionHandler(IRGS& env, Offset ehOffset, SSATmp* exc) {
@@ -446,7 +446,7 @@ void emitHandleException(IRGS& env, EndCatchData::CatchMode mode, SSATmp* exc,
       EndCatchData::Teardown::NA,
       std::nullopt
     };
-    gen(env, EndCatch, data, fp(env), sp(env));
+    gen(env, EndCatch, data, fp(env), sp(env), exc);
     return;
   }
 

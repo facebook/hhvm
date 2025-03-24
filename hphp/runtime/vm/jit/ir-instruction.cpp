@@ -168,6 +168,9 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
     case CallFuncEntry:
       return move != MustMove && srcNo == 2;
 
+    case EndCatch:
+      return srcNo == 2;
+
     case EnterTCUnwind:
       return srcNo == 2;
 

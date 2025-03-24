@@ -3610,7 +3610,10 @@ fields of that struct for holding intermediate values.
   Marks the beginning of a catch region. Exact behavior is implementation and
   architecture specific.
 
-| EndCatch<spOffset,mode,stublogue>, ND, S(FramePtr) S(StkPtr), T
+| EndCatch<spOffset,mode,stublogue>,
+|   ND,
+|   S(FramePtr) S(StkPtr) S(Obj|Nullptr),
+|   CRc|T
 
   Marks the end of a catch region and returns control to the unwinder.  The
   `spOffset' field represents a logical adjustment to S1 (in cells) to yield

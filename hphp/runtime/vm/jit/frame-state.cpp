@@ -971,6 +971,27 @@ void FrameStateMgr::clearForUnprocessedPred() {
   clearMInstr();
 }
 
+/*
+ * Modify state to conservative values, allowing the current exception handler
+ * block to be shared.
+ */
+void FrameStateMgr::clearForEH() {
+  ITRACE(1, "clearForEH\n");
+
+  // Forget any non-trivial information about stack values in memory.
+  for (auto& it : cur().stack) {
+    auto const value = it.second.value;
+    it.second = StackState{};
+    it.second.value = value;
+    if (it.second.value != nullptr) it.second.type = value->type();
+  }
+
+  // These values must go toward their conservative state.
+  clearCtx();
+  clearLocals();
+  clearMInstr();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void FrameStateMgr::initStack(SSATmp* sp, SBInvOffset irSPOff,

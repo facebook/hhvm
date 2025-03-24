@@ -428,7 +428,7 @@ irgen::RegionAndLazyUnit getInlinableCalleeRegionAndLazyUnit(const irgen::IRGS& 
   if (!regionAndLazyUnit.region()) {
     return {psk.srcKey, nullptr};
   }
-  if (!shouldInline(irgs, psk.srcKey, entry.func(), regionAndLazyUnit, calleeCost)) {                  
+  if (!shouldInline(irgs, psk.srcKey, entry.func(), regionAndLazyUnit, calleeCost)) {
     return {psk.srcKey, nullptr};
   }
   return regionAndLazyUnit;
@@ -608,11 +608,14 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
   auto prevProfFactor  = irgs.profFactor;  irgs.profFactor  = profFactor;
   auto prevProfTransIDs = irgs.profTransIDs; irgs.profTransIDs = TransIDSet{};
   auto prevOffsetMapping = irb.saveAndClearOffsetMapping();
+  auto prevEHBlockMapping = irb.saveAndClearEHBlockMapping();
+  // Note: no need to save/restore m_skToEHDecRefBlockMap, it is uniquely keyed.
   SCOPE_EXIT {
     irgs.region      = prevRegion;
     irgs.profFactor  = prevProfFactor;
     irgs.profTransIDs = prevProfTransIDs;
     irb.restoreOffsetMapping(std::move(prevOffsetMapping));
+    irb.restoreEHBlockMapping(std::move(prevEHBlockMapping));
   };
 
   FTRACE(1, "translateRegion (mode={}, profFactor={:.2}) starting with:\n{}\n",

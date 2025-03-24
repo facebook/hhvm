@@ -198,7 +198,7 @@ Outer:                                 | Inner:
 
 namespace HPHP::jit::irgen {
 
-TRACE_SET_MOD(hhir);  
+TRACE_SET_MOD(hhir);
 
 RegionAndLazyUnit::RegionAndLazyUnit(
     SrcKey callerSk,
@@ -717,17 +717,10 @@ bool endCatchFromInlined(IRGS& env, EndCatchData::CatchMode mode, SSATmp* exc) {
   assertx(isInlining(env));
   assertx(mode == EndCatchData::CatchMode::UnwindOnly ||
           mode == EndCatchData::CatchMode::LocalsDecRefd);
-
-  if (findExceptionHandler(curFunc(env), bcOff(env)) != kInvalidOffset) {
-    // We are not exiting the frame, as the current opcode has a catch handler.
-    // Use the standard EndCatch logic that will have to spill the frame.
-    return false;
-  }
-
-  if (fp(env) == env.irb->fs().fixupFP()) {
-    // The current frame is already spilled.
-    return false;
-  }
+  assertx(mode == EndCatchData::CatchMode::LocalsDecRefd ||
+          findExceptionHandler(curFunc(env), bcOff(env)) == kInvalidOffset ||
+          exc->type() <= TNullptr);
+  assertx(fp(env) != env.irb->fs().fixupFP());
 
   if (curFunc(env)->isAsync() &&
       env.inlineState.frames.back().asyncEagerOffset == kInvalidOffset) {
@@ -785,7 +778,7 @@ void fixCalleeUnit(const IRGS& env, IRUnit& unit) {
 
 bool stitchInlinedRegion(irgen::IRGS& irgs, SrcKey callerSk, SrcKey calleeSk,
                          const RegionDesc& calleeRegion, IRUnit& calleeUnit) {
-    fixCalleeUnit(irgs, calleeUnit);                          
+    fixCalleeUnit(irgs, calleeUnit);
     return true;
 }
 

@@ -232,6 +232,22 @@ struct IRBuilder {
   void restoreOffsetMapping(SkToBlockMap&& offsetMapping);
 
   /*
+   * Get or set an exception handling block for a given EH at SrcKey assuming
+   * an empty stack, or a parent block, plus a value on top of the stack.
+   */
+  Block* getEHBlock(SrcKey) const;
+  Block* getEHDecRefBlock(Block*, SSATmp*) const;
+  void setEHBlock(SrcKey, Block*);
+  void setEHDecRefBlock(Block*, SSATmp*, Block*);
+
+  /*
+   * Save and restore the m_skToEHBlockMap.
+   */
+  SkToBlockMap saveAndClearEHBlockMapping();
+  void restoreEHBlockMapping(SkToBlockMap&& skToEHBlockMap);
+
+
+  /*
    * To emit code to a block other than the current block, call pushBlock(),
    * emit instructions as usual with gen(...), then call popBlock(). This is
    * best done using the BlockPusher struct:
@@ -373,6 +389,13 @@ private:
 
   // Keep track of blocks created to support bytecode control flow.
   SkToBlockMap m_skToBlockMap;
+
+  // A map from exception handler SKs to blocks implementing their handlers.
+  SkToBlockMap m_skToEHBlockMap;
+
+  // A map from a pair of EH block id and top of the stack value id to another
+  // EH block that is responsible for popping and decreffing that value.
+  jit::fast_map<std::pair<uint32_t, uint32_t>, Block*> m_skToEHDecRefBlockMap;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

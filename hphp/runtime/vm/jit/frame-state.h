@@ -449,6 +449,11 @@ struct FrameStateMgr final {
   Type typeOfPointee(SSATmp*, Type limit = TCell) const;
 
   /*
+   * Clear frame state to make an exception handler shareable.
+   */
+  void clearForEH();
+
+  /*
    * Debug stringification.
    */
   std::string show() const;

@@ -1195,6 +1195,42 @@ void IRBuilder::restoreOffsetMapping(SkToBlockMap&& offsetMapping) {
   m_skToBlockMap = std::move(offsetMapping);
 }
 
+Block* IRBuilder::getEHBlock(SrcKey sk) const {
+  auto const it = m_skToEHBlockMap.find(sk);
+  return it != m_skToEHBlockMap.end() ? it->second : nullptr;
+}
+
+Block* IRBuilder::getEHDecRefBlock(Block* prev, SSATmp* value) const {
+  auto const valueId = value != nullptr
+    ? value->id()
+    : std::numeric_limits<uint32_t>::max();
+  auto const key = std::make_pair(prev->id(), valueId);
+  auto const it = m_skToEHDecRefBlockMap.find(key);
+  return it != m_skToEHDecRefBlockMap.end() ? it->second : nullptr;
+}
+
+void IRBuilder::setEHBlock(SrcKey sk, Block* block) {
+  assertx(getEHBlock(sk) == nullptr);
+  m_skToEHBlockMap[sk] = block;
+}
+
+void IRBuilder::setEHDecRefBlock(Block* prev, SSATmp* value, Block* block) {
+  assertx(getEHDecRefBlock(prev, value) == nullptr);
+  auto const valueId = value != nullptr
+    ? value->id()
+    : std::numeric_limits<uint32_t>::max();
+  auto const key = std::make_pair(prev->id(), valueId);
+  m_skToEHDecRefBlockMap[key] = block;
+}
+
+IRBuilder::SkToBlockMap IRBuilder::saveAndClearEHBlockMapping() {
+  return std::move(m_skToEHBlockMap);
+}
+
+void IRBuilder::restoreEHBlockMapping(SkToBlockMap&& ehBlockMapping) {
+  m_skToEHBlockMap = std::move(ehBlockMapping);
+}
+
 void IRBuilder::pushBlock(const BCMarker& marker, Block* b) {
   FTRACE(2, "IRBuilder::pushBlock:\n  saved: B{} @ {}\n pushed: B{} @ {}\n",
          m_curBlock->id(), curMarker().show(), b->id(), marker.show());

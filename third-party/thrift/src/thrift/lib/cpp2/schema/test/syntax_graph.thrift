@@ -45,6 +45,8 @@ struct TestStructuredAnnotation {
 typedef list<TestStruct> ListOfTestStruct
 typedef ListOfTestStruct TypedefToListOfTestStruct
 
+typedef TestStructuredAnnotation TypedefToTestStructuredAnnotation
+
 @TestStructuredAnnotation{field1 = 3}
 union TestUnion {
   1: TestStruct s;
@@ -69,6 +71,7 @@ interaction TestInteraction {
 }
 
 service TestService {
+  @TypedefToTestStructuredAnnotation{field1 = 3}
   TestStruct foo(1: i32 input);
   TestInteraction createInteraction();
   i32, stream<i32> createStream();

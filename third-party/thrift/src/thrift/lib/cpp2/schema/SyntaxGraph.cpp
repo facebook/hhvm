@@ -94,6 +94,18 @@ class Resolver final {
   folly::not_null<const type::Schema*> rawSchema_;
   folly::not_null<SyntaxGraph*> syntaxGraph_;
 
+  // Annotations are referred to in schema.thrift using DefinitionKey, not
+  // TypeStruct. Therefore, we use this map to keep their resolved TypeStruct
+  // instances alive.
+  //
+  // Using F14NodeMap for reference stability.
+  using AnnotationTypeByDefinitionKey = folly::F14NodeMap<
+      DefinitionKeyRef,
+      type::Type,
+      DefinitionKeyHash,
+      DefinitionKeyEqual>;
+  AnnotationTypeByDefinitionKey annotationTypeByDefinitionKey_;
+
   // Every top-level definition has exactly one associated graph node. These are
   // stored and kept alive in this map.
   using DefinitionsByKey = folly::F14FastMap<
@@ -155,11 +167,18 @@ class Resolver final {
 
   std::vector<Annotation> createAnnotations(
       const std::map<type::DefinitionKey, type::Annotation>& annotations);
+  // Tries to get the TypeStruct representing a structured annotation type.
+  // Due to circular dependency concerns in the Thrift compiler, the
+  // standard annotation library does not bundle its runtime schema
+  // information. For now, we pretend that they do not exist, in which case,
+  // this function returns nullptr.
+  const type::Type* tryGetAnnotationType(const type::DefinitionKey&);
 
  public:
   explicit Resolver(const type::Schema& schema, SyntaxGraph& syntaxGraph)
       : rawSchema_(&schema),
         syntaxGraph_(&syntaxGraph),
+        annotationTypeByDefinitionKey_(),
         definitionsByKey_(createDefinitionsByKey(
             schema, createProgramIdsByDefinitionKey(schema))),
         programsById_(createProgramsById(schema, definitionsByKey_)),
@@ -1040,29 +1059,92 @@ std::vector<Annotation> Resolver::createAnnotations(
     const std::map<type::DefinitionKey, type::Annotation>& annotations) {
   std::vector<Annotation> result;
   for (const auto& [definitionKey, annotation] : annotations) {
-    // We need to access the raw struct because the DefinitionNode for the
-    // annotation might not exist yet.
-    const type::Definition* definition =
-        folly::get_ptr(*rawSchema_->definitionsMap(), definitionKey);
-    if (definition == nullptr) {
-      // Due to circular dependency concerns in the Thrift compiler, the
-      // standard annotation library does not bundle its runtime schema
-      // information. For now, we pretend that they do not exist.
+    const type::Type* rawType = tryGetAnnotationType(definitionKey);
+    if (rawType == nullptr) {
+      // Most likely, a standard annotation library struct, which are not
+      // bundled due to circular dependency issues.
       continue;
     }
     Annotation::Fields fields;
     for (const auto& [fieldName, value] : *annotation.fields()) {
       fields.emplace(fieldName, value);
     }
-
-    FOLLY_SAFE_CHECK(
-        definition->getType() == type::Definition::Type::structDef,
-        "Annotations should always be structs (not unions, nor exceptions)");
-    auto type =
-        TypeRef(detail::Lazy<StructNode>::Unresolved(*this, definitionKey));
-    result.emplace_back(Annotation(std::move(type), std::move(fields)));
+    result.emplace_back(Annotation(typeOf(*rawType), std::move(fields)));
   }
   return result;
+}
+
+namespace {
+
+type::TypeUri createTypeUri(const type::DefinitionKey& definitionKey) {
+  type::TypeUri typeUri;
+  typeUri.definitionKey_ref() = definitionKey;
+  return typeUri;
+}
+
+type::Type createUnparamedType(type::TypeName&& typeName) {
+  type::TypeStruct typeStruct;
+  typeStruct.name() = std::move(typeName);
+  return type::Type(std::move(typeStruct));
+}
+} // namespace
+
+const type::Type* Resolver::tryGetAnnotationType(
+    const type::DefinitionKey& definitionKey) {
+  if (auto found = annotationTypeByDefinitionKey_.find(definitionKey);
+      found != annotationTypeByDefinitionKey_.end()) {
+    return std::addressof(found->second);
+  }
+
+  // We need to access the raw struct because the DefinitionNode for the
+  // annotation might not exist yet.
+  const type::Definition* definition =
+      folly::get_ptr(*rawSchema_->definitionsMap(), definitionKey);
+  if (definition == nullptr) {
+    return nullptr;
+  }
+
+  auto type = std::invoke([&]() -> type::Type {
+    using T = type::Definition::Type;
+    switch (definition->getType()) {
+      case T::typedefDef: {
+        type::TypeName typeName;
+        typeName.typedefType_ref() = createTypeUri(definitionKey);
+        return createUnparamedType(std::move(typeName));
+      }
+      case T::structDef: {
+        type::TypeName typeName;
+        typeName.structType_ref() = createTypeUri(definitionKey);
+        return createUnparamedType(std::move(typeName));
+      }
+      case T::enumDef:
+        FOLLY_SAFE_FATAL("Structured annotation cannot be an enum type");
+        return {};
+      // The cases below should never happen ideally. However, the compiler has
+      // a habit of spitting out invalid schema and the strictness below makes
+      // it much easier to debug failures in cases where the schema information
+      // is incorrect.
+      case T::unionDef: {
+        type::TypeName typeName;
+        typeName.unionType_ref() = createTypeUri(definitionKey);
+        return createUnparamedType(std::move(typeName));
+      }
+      case T::exceptionDef: {
+        type::TypeName typeName;
+        typeName.exceptionType_ref() = createTypeUri(definitionKey);
+        return createUnparamedType(std::move(typeName));
+      }
+      default:
+        FOLLY_SAFE_FATAL(
+            "Structured annotation does not refer to a type definition");
+        return {};
+    }
+  });
+
+  auto [element, inserted] =
+      annotationTypeByDefinitionKey_.emplace(definitionKey, std::move(type));
+  FOLLY_SAFE_CHECK(inserted);
+  return std::addressof(element->second);
 }
 
 } // namespace detail

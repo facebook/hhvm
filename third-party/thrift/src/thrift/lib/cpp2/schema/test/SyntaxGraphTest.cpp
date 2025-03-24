@@ -69,7 +69,7 @@ TEST_F(ServiceSchemaTest, Programs) {
   EXPECT_EQ(programs.size(), 3);
 
   auto mainProgram = findProgramByName(syntaxGraph, "syntax_graph");
-  EXPECT_EQ(mainProgram->definitions().size(), 12);
+  EXPECT_EQ(mainProgram->definitions().size(), 13);
   EXPECT_EQ(&mainProgram->syntaxGraph(), &syntaxGraph);
   {
     ProgramNode::IncludesList includes = mainProgram->includes();
@@ -398,6 +398,30 @@ TEST_F(ServiceSchemaTest, StructuredAnnotationWithoutUri) {
            ->asStruct());
   EXPECT_EQ(annotations[0].fields().size(), 1);
   EXPECT_EQ(annotations[0].fields().at("field1").as_i64(), 3);
+}
+
+TEST_F(ServiceSchemaTest, StructuredAnnotationWhichIsATypedef) {
+  auto syntaxGraph = SyntaxGraph::fromSchema(schemaFor<test::TestService>());
+  auto program = findProgramByName(syntaxGraph, "syntax_graph");
+
+  const ServiceNode& testService =
+      program->definitions().at("TestService")->asService();
+  folly::span<const FunctionNode> functions = testService.functions();
+  const FunctionNode& foo = *std::find_if(
+      functions.begin(), functions.end(), [](const FunctionNode& f) {
+        return f.name() == "foo";
+      });
+
+  const auto& annotations = foo.annotations();
+  EXPECT_EQ(annotations.size(), 1);
+  EXPECT_EQ(
+      &annotations[0].type().asTypedef(),
+      &program->definitions()
+           .at("TypedefToTestStructuredAnnotation")
+           ->asTypedef());
+  EXPECT_EQ(
+      &annotations[0].type().trueType().asStruct(),
+      &program->definitions().at("TestStructuredAnnotation")->asStruct());
 }
 
 TEST_F(ServiceSchemaTest, RecursiveStruct) {

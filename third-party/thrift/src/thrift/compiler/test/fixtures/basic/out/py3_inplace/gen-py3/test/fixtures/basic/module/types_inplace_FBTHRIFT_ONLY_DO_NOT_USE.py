@@ -13,6 +13,8 @@ import importlib
 
 import typing as _typing
 import thrift.py3.types
+import thrift.py3.exceptions
+import thrift.python.exceptions
 import thrift.python.types
 import test.fixtures.basic.module.thrift_enums as _fbthrift_python_enums
 import test.fixtures.basic.module.thrift_types as _fbthrift_python_types
@@ -887,7 +889,7 @@ class MyUnion(thrift.py3.types.Union):
 
 __all__.append("MyUnion")
 
-class MyException(thrift.py3.types.Struct):
+class MyException(thrift.py3.exceptions.GeneratedError):
     __module__ = _fbthrift__module_name__
     __slots__ = (
         "_fbthrift__inner",
@@ -908,6 +910,7 @@ class MyException(thrift.py3.types.Struct):
 
     def __init__(self, *args, **kwargs) -> None:
         self._fbthrift__inner = _fbthrift_python_types.MyException(*args, **kwargs)
+        super(thrift.python.exceptions.Error, self).__init__(*(val for _, val in self))
 
     def __new__(cls, *args, **kwargs) -> MyException:
         instance = super().__new__(cls)
@@ -915,13 +918,11 @@ class MyException(thrift.py3.types.Struct):
         instance._fbthrift_inner__myUnion = None
         return instance
 
-    def __call__(self, **kwargs) -> MyException:
-        return MyException.from_python(self._fbthrift__inner(**kwargs))
-
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.MyException) -> MyException:
         inst = MyException.__new__(MyException)
         inst._fbthrift__inner = thrift_python_inner
+        super(thrift.python.exceptions.Error, inst).__init__(*(val for _, val in inst))
         return inst
 
     def _to_py3(self) -> MyException:
@@ -985,6 +986,9 @@ class MyException(thrift.py3.types.Struct):
         return self._fbthrift__inner <= other._fbthrift__inner
 
 
+    def __str__(self):
+        return super().__str__()
+
     def __hash__(self):
         return super().__hash__()
 
@@ -994,7 +998,7 @@ class MyException(thrift.py3.types.Struct):
 
 __all__.append("MyException")
 
-class MyExceptionWithMessage(thrift.py3.types.Struct):
+class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
     __module__ = _fbthrift__module_name__
     __slots__ = (
         "_fbthrift__inner",
@@ -1015,6 +1019,7 @@ class MyExceptionWithMessage(thrift.py3.types.Struct):
 
     def __init__(self, *args, **kwargs) -> None:
         self._fbthrift__inner = _fbthrift_python_types.MyExceptionWithMessage(*args, **kwargs)
+        super(thrift.python.exceptions.Error, self).__init__(*(val for _, val in self))
 
     def __new__(cls, *args, **kwargs) -> MyExceptionWithMessage:
         instance = super().__new__(cls)
@@ -1022,13 +1027,11 @@ class MyExceptionWithMessage(thrift.py3.types.Struct):
         instance._fbthrift_inner__myUnion = None
         return instance
 
-    def __call__(self, **kwargs) -> MyExceptionWithMessage:
-        return MyExceptionWithMessage.from_python(self._fbthrift__inner(**kwargs))
-
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.MyExceptionWithMessage) -> MyExceptionWithMessage:
         inst = MyExceptionWithMessage.__new__(MyExceptionWithMessage)
         inst._fbthrift__inner = thrift_python_inner
+        super(thrift.python.exceptions.Error, inst).__init__(*(val for _, val in inst))
         return inst
 
     def _to_py3(self) -> MyExceptionWithMessage:
@@ -1091,6 +1094,12 @@ class MyExceptionWithMessage(thrift.py3.types.Struct):
             return NotImplemented
         return self._fbthrift__inner <= other._fbthrift__inner
 
+
+    def __str__(self):
+        field = self.MyStringField
+        if field is None:
+            return str(field)
+        return field
 
     def __hash__(self):
         return super().__hash__()

@@ -31,6 +31,8 @@ import importlib
 
 import typing as _typing
 import thrift.py3.types
+import thrift.py3.exceptions
+import thrift.python.exceptions
 import thrift.python.types
 import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_enums as _fbthrift_python_enums
 import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types as _fbthrift_python_types
@@ -91,10 +93,7 @@ __all__.append("{{type:flat_name}}")
 
 ### Structured Types ###
 {{#program:filtered_structs}}
-class {{struct:name}}(thrift.py3.types.{{!
-}}{{^struct:union?}}Struct{{/struct:union?}}{{!
-}}{{#struct:union?}}Union{{/struct:union?}}{{!
-}}):
+class {{struct:name}}({{> types/python_struct_class }}):
     __module__ = _fbthrift__module_name__
     __slots__ = (
         "_fbthrift__inner",
@@ -128,6 +127,10 @@ class {{struct:name}}(thrift.py3.types.{{!
 
     def __init__(self, *args, **kwargs) -> None:
         self._fbthrift__inner = _fbthrift_python_types.{{struct:name}}(*args, **kwargs)
+        {{! we deliberately omit __init__ of Struct/GeneratedError, which tries to init cpp2 object}}
+        {{#struct:exception?}}
+        super(thrift.python.exceptions.Error, self).__init__(*(val for _, val in self))
+        {{/struct:exception?}}
         {{! There's an optimization opportunity here if convertible objects are already correct type}}
 
     def __new__(cls, *args, **kwargs) -> {{struct:name}}:
@@ -143,15 +146,18 @@ class {{struct:name}}(thrift.py3.types.{{!
         {{/struct:union?}}
         return instance
 
-    {{^struct:union?}}{{^struct:cpp_noncopyable?}}
+    {{^struct:exception?}}{{^struct:union?}}{{^struct:cpp_noncopyable?}}
     def __call__(self, **kwargs) -> {{struct:name}}:
         return {{struct:name}}.from_python(self._fbthrift__inner(**kwargs))
 
-    {{/struct:cpp_noncopyable?}}{{/struct:union?}}
+    {{/struct:cpp_noncopyable?}}{{/struct:union?}}{{/struct:exception?}}
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.{{struct:name}}) -> {{struct:name}}:
         inst = {{struct:name}}.__new__({{struct:name}})
         inst._fbthrift__inner = thrift_python_inner
+        {{#struct:exception?}}
+        super(thrift.python.exceptions.Error, inst).__init__(*(val for _, val in inst))
+        {{/struct:exception?}}
         return inst
 
     def _to_py3(self) -> {{struct:name}}:
@@ -232,6 +238,20 @@ class {{struct:name}}(thrift.py3.types.{{!
 
     {{/struct:is_struct_orderable?}}
 
+    {{#struct:exception?}}
+    def __str__(self):
+        {{#struct:exception_message?}}
+        field = self.{{struct:exception_message}}
+        if field is None:
+            {{! optional field, stringify }}
+            return str(field)
+        return field
+        {{/struct:exception_message?}}
+        {{^struct:exception_message?}}
+        return super().__str__()
+        {{/struct:exception_message?}}
+
+    {{/struct:exception?}}
     def __hash__(self):
         return super().__hash__()
 

@@ -13,6 +13,8 @@ import importlib
 
 import typing as _typing
 import thrift.py3.types
+import thrift.py3.exceptions
+import thrift.python.exceptions
 import thrift.python.types
 import module.thrift_enums as _fbthrift_python_enums
 import module.thrift_types as _fbthrift_python_types
@@ -1912,7 +1914,7 @@ __all__.append("Map__AnEnumRenamed_i32")
 
 
 ### Structured Types ###
-class SimpleException(thrift.py3.types.Struct):
+class SimpleException(thrift.py3.exceptions.GeneratedError):
     __module__ = _fbthrift__module_name__
     __slots__ = (
         "_fbthrift__inner",
@@ -1926,18 +1928,17 @@ class SimpleException(thrift.py3.types.Struct):
 
     def __init__(self, *args, **kwargs) -> None:
         self._fbthrift__inner = _fbthrift_python_types.SimpleException(*args, **kwargs)
+        super(thrift.python.exceptions.Error, self).__init__(*(val for _, val in self))
 
     def __new__(cls, *args, **kwargs) -> SimpleException:
         instance = super().__new__(cls)
         return instance
 
-    def __call__(self, **kwargs) -> SimpleException:
-        return SimpleException.from_python(self._fbthrift__inner(**kwargs))
-
     @staticmethod
     def from_python(thrift_python_inner: _fbthrift_python_types.SimpleException) -> SimpleException:
         inst = SimpleException.__new__(SimpleException)
         inst._fbthrift__inner = thrift_python_inner
+        super(thrift.python.exceptions.Error, inst).__init__(*(val for _, val in inst))
         return inst
 
     def _to_py3(self) -> SimpleException:
@@ -1980,6 +1981,9 @@ class SimpleException(thrift.py3.types.Struct):
             return NotImplemented
         return self._fbthrift__inner <= other._fbthrift__inner
 
+
+    def __str__(self):
+        return super().__str__()
 
     def __hash__(self):
         return super().__hash__()

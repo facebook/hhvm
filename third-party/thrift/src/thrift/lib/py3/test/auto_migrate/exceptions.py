@@ -79,6 +79,9 @@ class ExceptionTests(unittest.TestCase):
         x = UnusedError(msg)
         y = UnusedError(message=msg)
         self.assertEqual(x, y)
+        self.assertEqual(x.args, (msg,))
+        self.assertEqual(x.message, msg)
+        self.assertEqual(str(x), msg)
         self.assertEqual(x.args, y.args)
         self.assertEqual(x.message, y.message)
         self.assertEqual(str(x), str(x))
@@ -103,6 +106,8 @@ class ExceptionTests(unittest.TestCase):
         self.assertEqual(w.code, 0)
         # pyre-fixme[19]: Expected 0 positional arguments.
         x = HardError(msg, code)
+        self.assertEqual(x.args, (msg, code))
+        self.assertEqual(str(x), msg)
         # pyre-fixme[19]: Expected 0 positional arguments.
         y = HardError(msg, code=code)
         self.assertEqual(x, y)

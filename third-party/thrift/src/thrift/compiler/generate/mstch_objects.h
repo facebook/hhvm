@@ -608,7 +608,7 @@ class mstch_service : public mstch_base {
     return service_->is_serial_interaction();
   }
   mstch::node is_event_base_interaction() {
-    return service_->has_annotation("process_in_event_base") ||
+    return service_->has_unstructured_annotation("process_in_event_base") ||
         service_->find_structured_annotation_or_null(kCppProcessInEbThreadUri);
   }
   mstch::node definition_key();

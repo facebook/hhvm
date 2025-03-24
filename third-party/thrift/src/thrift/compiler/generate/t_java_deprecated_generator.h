@@ -290,7 +290,7 @@ class t_java_deprecated_generator : public t_concat_generator {
   }
 
   bool is_field_sensitive(const t_field* field) {
-    return field->has_annotation("java.sensitive");
+    return field->has_unstructured_annotation("java.sensitive");
   }
 
   std::string namespace_key_;

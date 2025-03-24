@@ -439,7 +439,7 @@ void t_cocoa_generator::generate_enum(const t_enum* tenum) {
 
   // fromString
 
-  if (tenum->has_annotation("cocoa.enum_conversion")) {
+  if (tenum->has_unstructured_annotation("cocoa.enum_conversion")) {
     generate_enum_from_string_function(tenum);
   }
 }

@@ -580,12 +580,12 @@ class mstch_java_struct : public mstch_struct {
     return java::mangle_java_name(struct_->get_name(), true);
   }
   mstch::node has_java_annotations() {
-    return struct_->has_annotation("java.swift.annotations") ||
+    return struct_->has_unstructured_annotation("java.swift.annotations") ||
         struct_->find_structured_annotation_or_null(kJavaAnnotationUri) !=
         nullptr;
   }
   mstch::node java_annotations() {
-    if (struct_->has_annotation("java.swift.annotations")) {
+    if (struct_->has_unstructured_annotation("java.swift.annotations")) {
       return struct_->get_annotation("java.swift.annotations");
     }
 
@@ -1057,7 +1057,7 @@ class mstch_java_field : public mstch_field {
   }
 
   mstch::node is_sensitive() {
-    return field_->has_annotation("java.sensitive");
+    return field_->has_unstructured_annotation("java.sensitive");
   }
   std::string constant_name(string name) {
     string constant_str;
@@ -1077,12 +1077,12 @@ class mstch_java_field : public mstch_field {
     return constant_str;
   }
   mstch::node has_java_annotations() {
-    return field_->has_annotation("java.swift.annotations") ||
+    return field_->has_unstructured_annotation("java.swift.annotations") ||
         field_->find_structured_annotation_or_null(kJavaAnnotationUri) !=
         nullptr;
   }
   mstch::node java_annotations() {
-    if (field_->has_annotation("java.swift.annotations")) {
+    if (field_->has_unstructured_annotation("java.swift.annotations")) {
       return field_->get_annotation("java.swift.annotations");
     }
 
@@ -1121,7 +1121,7 @@ class mstch_java_enum : public mstch_enum {
     return java::mangle_java_name(enum_->get_name(), true);
   }
   mstch::node java_skip_enum_name_map() {
-    return enum_->has_annotation("java.swift.skip_enum_name_map");
+    return enum_->has_unstructured_annotation("java.swift.skip_enum_name_map");
   }
   mstch::node num_values() { return enum_->get_enum_values().size(); }
   mstch::node use_intrinsic_default() {
@@ -1195,21 +1195,21 @@ class mstch_java_const : public mstch_const {
     if (const_->type()->is_map()) {
       t_map* map = (t_map*)const_->type();
       if (map->get_key_type()->is_enum()) {
-        return map->get_key_type()->has_annotation(
+        return map->get_key_type()->has_unstructured_annotation(
             "java.swift.skip_enum_name_map");
       }
     }
     if (const_->type()->is_list()) {
       t_list* list = (t_list*)const_->type();
       if (list->get_elem_type()->is_enum()) {
-        return list->get_elem_type()->has_annotation(
+        return list->get_elem_type()->has_unstructured_annotation(
             "java.swift.skip_enum_name_map");
       }
     }
     if (const_->type()->is_set()) {
       t_set* set = (t_set*)const_->type();
       if (set->get_elem_type()->is_enum()) {
-        return set->get_elem_type()->has_annotation(
+        return set->get_elem_type()->has_unstructured_annotation(
             "java.swift.skip_enum_name_map");
       }
     }

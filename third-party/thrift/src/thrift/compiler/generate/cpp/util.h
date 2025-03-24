@@ -115,7 +115,7 @@ inline bool field_has_isset(const t_field* field) {
 }
 
 inline bool is_lazy(const t_field* field) {
-  return field->has_annotation("cpp.experimental.lazy") ||
+  return field->has_unstructured_annotation("cpp.experimental.lazy") ||
       field->find_structured_annotation_or_null(kCppLazyUri) != nullptr;
 }
 

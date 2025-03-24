@@ -38,7 +38,7 @@ enum class RefType {
 } // namespace
 
 reference_type find_ref_type(const t_field& node) {
-  if (node.has_annotation({"cpp.box", "thrift.box"}) ||
+  if (node.has_unstructured_annotation({"cpp.box", "thrift.box"}) ||
       node.find_structured_annotation_or_null(kBoxUri)) {
     return reference_type::boxed;
   }
@@ -65,7 +65,7 @@ reference_type find_ref_type(const t_field& node) {
   }
 
   // Look for the generic annotations, which implies unique.
-  if (node.has_annotation({"cpp.ref", "cpp2.ref"})) {
+  if (node.has_unstructured_annotation({"cpp.ref", "cpp2.ref"})) {
     // TODO(afuller): Seems like this should really be a 'boxed' reference type
     // (e.g. a deep copy smart pointer) by default, so both recursion and copy
     // constructors would work. Maybe that would let us also remove most or all

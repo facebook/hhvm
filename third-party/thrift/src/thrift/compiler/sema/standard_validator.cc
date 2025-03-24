@@ -501,7 +501,7 @@ void validate_boxed_field_attributes(sema_context& ctx, const t_field& node) {
     return;
   }
 
-  const bool ref = node.has_annotation({
+  const bool ref = node.has_unstructured_annotation({
                        "cpp.ref",
                        "cpp2.ref",
                        "cpp.ref_type",
@@ -509,7 +509,7 @@ void validate_boxed_field_attributes(sema_context& ctx, const t_field& node) {
                    }) ||
       node.find_structured_annotation_or_null(kCppRefUri);
 
-  const bool box = node.has_annotation({
+  const bool box = node.has_unstructured_annotation({
                        "cpp.box",
                        "thrift.box",
                    }) ||
@@ -789,7 +789,8 @@ void validate_field_id(sema_context& ctx, const t_field& node) {
 
   ctx.check(
       node.id() != 0 ||
-          node.has_annotation("cpp.deprecated_allow_zero_as_field_id"),
+          node.has_unstructured_annotation(
+              "cpp.deprecated_allow_zero_as_field_id"),
       "Zero value (0) not allowed as a field id for `{}`",
       node.name());
 
@@ -802,7 +803,7 @@ void validate_field_id(sema_context& ctx, const t_field& node) {
 
 void validate_compatibility_with_lazy_field(
     sema_context& ctx, const t_structured& node) {
-  if (has_lazy_field(node) && node.has_annotation("cpp.methods")) {
+  if (has_lazy_field(node) && node.has_unstructured_annotation("cpp.methods")) {
     ctx.error(
         "cpp.methods is incompatible with lazy deserialization in struct `{}`",
         node.get_name());
@@ -818,7 +819,7 @@ void validate_ref_annotation(sema_context& ctx, const t_field& node) {
   const bool hasStructuredAnnotation =
       node.find_structured_annotation_or_null(kCppRefUri) != nullptr;
 
-  const bool hasUnstructuredAnnotation = node.has_annotation(
+  const bool hasUnstructuredAnnotation = node.has_unstructured_annotation(
       {"cpp.ref", "cpp2.ref", "cpp.ref_type", "cpp2.ref_type"});
 
   const int count = hasStructuredAnnotation + hasUnstructuredAnnotation;
@@ -891,7 +892,7 @@ void validate_ref_unique_and_box_annotation(
     return;
   }
 
-  if (node.has_annotation({"cpp.ref", "cpp2.ref"})) {
+  if (node.has_unstructured_annotation({"cpp.ref", "cpp2.ref"})) {
     if (adapter_annotation) {
       ctx.error(
           "cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box "
@@ -904,7 +905,7 @@ void validate_ref_unique_and_box_annotation(
           node.name());
     }
   }
-  if (node.has_annotation({"cpp.ref_type", "cpp2.ref_type"})) {
+  if (node.has_unstructured_annotation({"cpp.ref_type", "cpp2.ref_type"})) {
     if (adapter_annotation) {
       ctx.error(
           "cpp.ref_type = `unique`, cpp2.ref_type = `unique` are deprecated. "
@@ -959,7 +960,7 @@ void validate_exception_message_annotation(
       field = &f;
     }
   }
-  if (node.has_annotation("message")) {
+  if (node.has_unstructured_annotation("message")) {
     ctx.check(!field, "Duplicate message annotation.");
     const std::string& v = node.get_annotation("message");
     field = node.get_field_by_name(v);
@@ -999,15 +1000,15 @@ void validate_interaction_annotations(
     sema_context& ctx, const t_interaction& node) {
   for (auto* func : node.get_functions()) {
     ctx.check(
-        !func->has_annotation("thread") &&
+        !func->has_unstructured_annotation("thread") &&
             !func->find_structured_annotation_or_null(kCppProcessInEbThreadUri),
         "Interaction methods cannot be individually annotated with "
         "thread='eb'. Use process_in_event_base on the interaction instead.");
   }
-  if (node.has_annotation("process_in_event_base") ||
+  if (node.has_unstructured_annotation("process_in_event_base") ||
       node.find_structured_annotation_or_null(kCppProcessInEbThreadUri)) {
     ctx.check(
-        !node.has_annotation("serial") &&
+        !node.has_unstructured_annotation("serial") &&
             !node.find_structured_annotation_or_null(kSerialUri),
         "EB interactions are already serial");
   }
@@ -1233,7 +1234,7 @@ void validate_custom_cpp_type_annotations(
     sema_context& ctx, const t_named& node) {
   const bool hasAdapter =
       node.find_structured_annotation_or_null(kCppAdapterUri);
-  bool hasCppType = node.has_annotation(
+  bool hasCppType = node.has_unstructured_annotation(
       {"cpp.type", "cpp2.type", "cpp.template", "cpp2.template"});
   const bool hasStructuredCppType =
       node.find_structured_annotation_or_null(kCppTypeUri);

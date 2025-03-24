@@ -195,7 +195,7 @@ std::string mangle_field_name(const std::string& name) {
 
 bool should_mangle_field_storage_name_in_struct(const t_structured& s) {
   // We don't mangle field name if cpp.methods exist
-  return !s.has_annotation({"cpp.methods", "cpp2.methods"});
+  return !s.has_unstructured_annotation({"cpp.methods", "cpp2.methods"});
 }
 
 bool resolves_to_container_or_struct(const t_type* type) {
@@ -464,7 +464,8 @@ class cpp_mstch_program : public mstch_program {
     std::vector<const t_typedef*> result;
     for (const t_typedef* i : program_->typedefs()) {
       const t_type* alias = i->get_type();
-      if (alias->is_typedef() && alias->has_annotation("cpp.type")) {
+      if (alias->is_typedef() &&
+          alias->has_unstructured_annotation("cpp.type")) {
         const t_type* ttype = i->get_type()->get_true_type();
         if ((ttype->is_struct() || ttype->is_exception()) &&
             !cpp_name_resolver::find_first_adapter(*ttype)) {
@@ -562,14 +563,14 @@ class cpp_mstch_program : public mstch_program {
         program_->structs_and_unions().begin(),
         program_->structs_and_unions().end(),
         [](const t_structured* strct) {
-          return strct->has_annotation(
+          return strct->has_unstructured_annotation(
               {"cpp.declare_hash", "cpp2.declare_hash"});
         });
     bool cpp_declare_in_typedefs = std::any_of(
         program_->typedefs().begin(),
         program_->typedefs().end(),
         [](const auto* typedf) {
-          return typedf->get_type()->has_annotation(
+          return typedf->get_type()->has_unstructured_annotation(
               {"cpp.declare_hash", "cpp2.declare_hash"});
         });
     return cpp_declare_in_structs || cpp_declare_in_typedefs;
@@ -1272,14 +1273,14 @@ class cpp_mstch_type : public mstch_type {
   }
   mstch::node cpp_template() { return get_cpp_template(type_); }
   mstch::node cpp_indirection() {
-    return resolved_type_->has_annotation("cpp.indirection");
+    return resolved_type_->has_unstructured_annotation("cpp.indirection");
   }
   mstch::node cpp_declare_hash() {
-    return resolved_type_->has_annotation(
+    return resolved_type_->has_unstructured_annotation(
         {"cpp.declare_hash", "cpp2.declare_hash"});
   }
   mstch::node cpp_declare_equal_to() {
-    return resolved_type_->has_annotation(
+    return resolved_type_->has_unstructured_annotation(
         {"cpp.declare_equal_to", "cpp2.declare_equal_to"});
   }
   mstch::node cpp_use_allocator() {
@@ -1471,10 +1472,10 @@ class cpp_mstch_struct : public mstch_struct {
 
   mstch::node is_struct_orderable() {
     return cpp_context_->is_orderable(*struct_) &&
-        !struct_->has_annotation("no_default_comparators");
+        !struct_->has_unstructured_annotation("no_default_comparators");
   }
   mstch::node nondefault_copy_ctor_and_assignment() {
-    if (struct_->has_annotation("cpp.allocator")) {
+    if (struct_->has_unstructured_annotation("cpp.allocator")) {
       return true;
     }
     for (const auto& f : struct_->fields()) {
@@ -1509,20 +1510,22 @@ class cpp_mstch_struct : public mstch_struct {
     return struct_->get_annotation({"cpp.methods", "cpp2.methods"});
   }
   mstch::node cpp_declare_hash() {
-    return struct_->has_annotation({"cpp.declare_hash", "cpp2.declare_hash"});
+    return struct_->has_unstructured_annotation(
+        {"cpp.declare_hash", "cpp2.declare_hash"});
   }
   mstch::node cpp_declare_equal_to() {
-    return struct_->has_annotation(
+    return struct_->has_unstructured_annotation(
         {"cpp.declare_equal_to", "cpp2.declare_equal_to"});
   }
   mstch::node cpp_noncopyable() {
-    if (struct_->has_annotation({"cpp.noncopyable", "cpp2.noncopyable"})) {
+    if (struct_->has_unstructured_annotation(
+            {"cpp.noncopyable", "cpp2.noncopyable"})) {
       return true;
     }
 
     bool result = false;
     cpp2::for_each_transitive_field(struct_, [&result](const t_field* field) {
-      if (!field->get_type()->has_annotation(
+      if (!field->get_type()->has_unstructured_annotation(
               {"cpp.noncopyable", "cpp2.noncopyable"})) {
         return true;
       }
@@ -1543,17 +1546,19 @@ class cpp_mstch_struct : public mstch_struct {
     return result;
   }
   mstch::node cpp_noncomparable() {
-    return struct_->has_annotation({"cpp.noncomparable", "cpp2.noncomparable"});
+    return struct_->has_unstructured_annotation(
+        {"cpp.noncomparable", "cpp2.noncomparable"});
   }
   mstch::node cpp_runtime_annotation() {
     return is_runtime_annotation(*struct_);
   }
   mstch::node is_eligible_for_constexpr() {
     return is_eligible_for_constexpr_(struct_) ||
-        struct_->has_annotation({"cpp.methods", "cpp2.methods"});
+        struct_->has_unstructured_annotation({"cpp.methods", "cpp2.methods"});
   }
   mstch::node cpp_virtual() {
-    return struct_->has_annotation({"cpp.virtual", "cpp2.virtual"});
+    return struct_->has_unstructured_annotation(
+        {"cpp.virtual", "cpp2.virtual"});
   }
   mstch::node message() {
     if (!struct_->is_exception()) {
@@ -1574,7 +1579,7 @@ class cpp_mstch_struct : public mstch_struct {
   }
   mstch::node cpp_frozen2_exclude() {
     // TODO(dokwon): Fix frozen2 compatibility with adapter.
-    return struct_->has_annotation("cpp.frozen2_exclude") ||
+    return struct_->has_unstructured_annotation("cpp.frozen2_exclude") ||
         struct_->find_structured_annotation_or_null(kCppFrozen2ExcludeUri) ||
         cpp_context_->resolver().is_directly_adapted(*struct_);
   }
@@ -1818,7 +1823,7 @@ class cpp_mstch_struct : public mstch_struct {
       return fields_in_layout_order_;
     }
 
-    if (!struct_->has_annotation("cpp.minimize_padding") &&
+    if (!struct_->has_unstructured_annotation("cpp.minimize_padding") &&
         !struct_->find_structured_annotation_or_null(kCppMinimizePaddingUri)) {
       return fields_in_layout_order_ = struct_->fields().copy();
     }
@@ -1864,7 +1869,7 @@ class cpp_mstch_struct : public mstch_struct {
 
   mstch::node any() {
     return struct_->uri() != "" &&
-        !struct_->has_annotation("cpp.detail.no_any");
+        !struct_->has_unstructured_annotation("cpp.detail.no_any");
   }
 
   mstch::node is_trivially_destructible() {
@@ -2124,7 +2129,7 @@ class cpp_mstch_field : public mstch_field {
     return {};
   }
   mstch::node cpp_noncopyable() {
-    return field_->get_type()->has_annotation(
+    return field_->get_type()->has_unstructured_annotation(
         {"cpp.noncopyable", "cpp2.noncopyable"});
   }
   mstch::node enum_has_value() {

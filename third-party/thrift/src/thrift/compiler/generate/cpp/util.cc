@@ -423,7 +423,7 @@ bool is_eligible_for_constexpr::operator()(const t_type* type) {
       return it->second ? eligible::yes : eligible::no;
     }
     bool result = false;
-    if (t->has_annotation("cpp.indirection")) {
+    if (t->has_unstructured_annotation("cpp.indirection")) {
       // Custom types may not have constexpr constructors.
       result = false;
     } else if (
@@ -433,7 +433,7 @@ bool is_eligible_for_constexpr::operator()(const t_type* type) {
     } else if (t->is_union() || t->is_exception()) {
       // Union and exception constructors are not defaulted.
       result = false;
-    } else if (t->has_annotation(
+    } else if (t->has_unstructured_annotation(
                    {"cpp.virtual", "cpp2.virtual", "cpp.allocator"})) {
       result = false;
     } else {
@@ -472,14 +472,14 @@ bool is_eligible_for_constexpr::operator()(const t_type* type) {
 bool is_stack_arguments(
     std::map<std::string, std::string, std::less<>> const& options,
     t_function const& function) {
-  if (function.has_annotation("cpp.stack_arguments")) {
+  if (function.has_unstructured_annotation("cpp.stack_arguments")) {
     return function.get_annotation("cpp.stack_arguments") != "0";
   }
   return options.count("stack_arguments");
 }
 
 bool is_mixin(const t_field& field) {
-  return field.has_annotation("cpp.mixin") ||
+  return field.has_unstructured_annotation("cpp.mixin") ||
       field.find_structured_annotation_or_null(kMixinUri) != nullptr;
 }
 
@@ -539,7 +539,7 @@ std::string get_gen_type_class_(
 
   auto const& type = *type_.get_true_type();
 
-  bool const ind = type.has_annotation("cpp.indirection");
+  bool const ind = type.has_unstructured_annotation("cpp.indirection");
   if (ind && opts.gen_indirection && !opts.gen_indirection_inner_) {
     opts.gen_indirection_inner_ = true;
     auto const inner = get_gen_type_class_(type_, opts);

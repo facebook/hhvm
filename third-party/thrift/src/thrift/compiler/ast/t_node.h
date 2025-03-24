@@ -55,11 +55,12 @@ class t_node {
   const deprecated_annotation_map& annotations() const { return annotations_; }
 
   // Returns true if there exists an annotation with the given name.
-  bool has_annotation(const std::vector<std::string_view>& names) const {
+  bool has_unstructured_annotation(
+      const std::vector<std::string_view>& names) const {
     return find_annotation_or_null(names) != nullptr;
   }
-  bool has_annotation(const char* name) const {
-    return has_annotation({std::string_view(name)});
+  bool has_unstructured_annotation(const char* name) const {
+    return has_unstructured_annotation({std::string_view(name)});
   }
 
   // Returns the pointer to the value of the first annotation found with the

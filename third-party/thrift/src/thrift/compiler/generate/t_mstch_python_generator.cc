@@ -1038,7 +1038,7 @@ class python_mstch_enum : public mstch_enum {
   }
 
   mstch::node has_flags() {
-    return enum_->has_annotation("py3.flags") ||
+    return enum_->has_unstructured_annotation("py3.flags") ||
         enum_->find_structured_annotation_or_null(kPythonFlagsUri);
   }
 

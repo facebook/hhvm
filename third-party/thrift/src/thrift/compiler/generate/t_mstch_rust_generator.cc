@@ -295,7 +295,7 @@ std::string get_mock_crate(
 }
 
 bool node_is_boxed(const t_named& node) {
-  return node.has_annotation("thrift.box") ||
+  return node.has_unstructured_annotation("thrift.box") ||
       node.find_structured_annotation_or_null(kBoxUri) ||
       node.find_structured_annotation_or_null(kRustBoxUri);
 }

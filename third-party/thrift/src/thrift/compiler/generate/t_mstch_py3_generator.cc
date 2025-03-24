@@ -116,16 +116,16 @@ std::string get_cpp_template(const t_type& type) {
 }
 
 bool is_hidden(const t_named& node) {
-  return node.has_annotation("py3.hidden") ||
+  return node.has_unstructured_annotation("py3.hidden") ||
       node.find_structured_annotation_or_null(kPythonPy3HiddenUri);
 }
 bool is_hidden(const t_typedef& node) {
-  return node.generated() || node.has_annotation("py3.hidden") ||
+  return node.generated() || node.has_unstructured_annotation("py3.hidden") ||
       node.find_structured_annotation_or_null(kPythonPy3HiddenUri) ||
       is_hidden(*node.get_true_type());
 }
 bool is_hidden(const t_type& node) {
-  return node.generated() || node.has_annotation("py3.hidden") ||
+  return node.generated() || node.has_unstructured_annotation("py3.hidden") ||
       node.find_structured_annotation_or_null(kPythonPy3HiddenUri) ||
       cpp_name_resolver::is_directly_adapted(node);
 }
@@ -935,7 +935,7 @@ class py3_mstch_struct : public mstch_struct {
             py3_fields_.begin(),
             py3_fields_.end(),
             [this](const t_field* field) {
-              bool hidden = field->has_annotation("py3.hidden") ||
+              bool hidden = field->has_unstructured_annotation("py3.hidden") ||
                   field->find_structured_annotation_or_null(
                       kPythonPy3HiddenUri);
               this->hidden_fields |= hidden;
@@ -953,15 +953,17 @@ class py3_mstch_struct : public mstch_struct {
 
   mstch::node isStructOrderable() {
     return cpp2::is_orderable(*struct_) &&
-        !struct_->has_annotation("no_default_comparators");
+        !struct_->has_unstructured_annotation("no_default_comparators");
   }
 
   mstch::node cppNonComparable() {
-    return struct_->has_annotation({"cpp.noncomparable", "cpp2.noncomparable"});
+    return struct_->has_unstructured_annotation(
+        {"cpp.noncomparable", "cpp2.noncomparable"});
   }
 
   mstch::node cppNonCopyable() {
-    return struct_->has_annotation({"cpp.noncopyable", "cpp2.noncopyable"});
+    return struct_->has_unstructured_annotation(
+        {"cpp.noncopyable", "cpp2.noncopyable"});
   }
 
   mstch::node hasExceptionMessage() {
@@ -1153,7 +1155,7 @@ class py3_mstch_enum : public mstch_enum {
   }
 
   mstch::node hasFlags() {
-    return enum_->has_annotation("py3.flags") ||
+    return enum_->has_unstructured_annotation("py3.flags") ||
         enum_->find_structured_annotation_or_null(kPythonFlagsUri);
   }
 

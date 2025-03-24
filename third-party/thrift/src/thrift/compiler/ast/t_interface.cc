@@ -41,7 +41,7 @@ bool t_interface::is_interaction() const {
 
 bool t_interface::is_serial_interaction() const {
   if (dynamic_cast<const t_interaction*>(this)) {
-    return has_annotation("serial") ||
+    return has_unstructured_annotation("serial") ||
         find_structured_annotation_or_null(kSerialUri);
   }
   return false;

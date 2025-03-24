@@ -570,7 +570,7 @@ void t_java_deprecated_generator::generate_java_union(
 
   generate_java_doc(f_struct, tstruct);
 
-  bool is_final = tstruct->has_annotation("final");
+  bool is_final = tstruct->has_unstructured_annotation("final");
 
   indent(f_struct) << java_suppress_warnings_union() << "public "
                    << (is_final ? "final " : "") << "class "
@@ -1208,7 +1208,7 @@ void t_java_deprecated_generator::generate_java_struct_definition(
     ofstream& out, const t_structured* tstruct, StructGenParams params) {
   generate_java_doc(out, tstruct);
 
-  bool is_final = tstruct->has_annotation("final");
+  bool is_final = tstruct->has_unstructured_annotation("final");
 
   indent(out) << (params.in_class ? string() : java_suppress_warnings_struct())
               << "public " << (is_final ? "final " : "")
@@ -1342,7 +1342,7 @@ void t_java_deprecated_generator::generate_java_struct_definition(
   }
 
   auto forceBuilderGeneration =
-      tstruct->has_annotation("android.generate_builder");
+      tstruct->has_unstructured_annotation("android.generate_builder");
 
   if (forceBuilderGeneration || params.gen_builder ||
       members.size() > MAX_NUM_JAVA_CONSTRUCTOR_PARAMS) {

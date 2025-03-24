@@ -51,7 +51,7 @@ bool should_annotate_field(const t_field& field) {
     return true;
   }
 
-  if (field.has_annotation(
+  if (field.has_unstructured_annotation(
           {"cpp.ref", "cpp2.ref", "cpp.ref_type", "cpp2.ref_type"})) {
     return true;
   }

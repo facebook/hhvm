@@ -278,7 +278,7 @@ class structure_annotations {
         // additional restrictions. We can't turn this into that but we can use
         // it if already present to remove this.
         if (node.find_structured_annotation_or_null(kBitmaskEnumUri) ||
-            node.has_annotation("bitmask")) {
+            node.has_unstructured_annotation("bitmask")) {
           to_remove.emplace_back(name, data);
         }
       } else if (name == "cpp.mixin") {

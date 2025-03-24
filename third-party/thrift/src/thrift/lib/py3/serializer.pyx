@@ -31,6 +31,9 @@ def serialize_iobuf(tstruct, protocol=Protocol.COMPACT):
         raise TypeError(f"{protocol} must of type Protocol")
     if isinstance(tstruct, (PythonStruct, PythonGeneratedError)):
         return python_serializer.serialize_iobuf(tstruct, protocol)
+    # in-place migration logic
+    if hasattr(tstruct, "_fbthrift__inner"):
+        return python_serializer.serialize_iobuf(tstruct._fbthrift__inner, protocol)
     if isinstance(tstruct, Py3GeneratedError):
         return (<Py3GeneratedError>tstruct)._fbthrift_serialize(protocol)
     return (<Py3Struct?>tstruct)._fbthrift_serialize(protocol)
@@ -43,6 +46,13 @@ def deserialize_with_length(structKlass, buf not None, protocol=Protocol.COMPACT
         return python_serializer.deserialize_with_length(structKlass, buf, protocol)
     if not issubclass(structKlass, (Py3Struct, Py3GeneratedError)):
         raise TypeError(f"{structKlass} Must be a py3 thrift struct or exception class")
+    # in-place migration logic
+    if hasattr(structKlass, "_FBTHRIFT__PYTHON_CLASS"):
+        python_instance, length = python_serializer.deserialize_with_length(
+            structKlass._FBTHRIFT__PYTHON_CLASS, buf, protocol,
+        )
+        return structKlass.from_python(python_instance), length
+
     cdef IOBuf iobuf = buf if isinstance(buf, IOBuf) else IOBuf(buf)
     instance = structKlass.__new__(structKlass)
     try:

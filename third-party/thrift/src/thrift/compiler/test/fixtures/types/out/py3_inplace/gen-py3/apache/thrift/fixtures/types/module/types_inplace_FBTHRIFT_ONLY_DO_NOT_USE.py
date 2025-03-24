@@ -1313,6 +1313,9 @@ class empty_struct(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.empty_struct
+    _FBTHRIFT__FIELD_NAMES = (
+    )
     _fbthrift__inner : _fbthrift_python_types.empty_struct
 
 
@@ -1345,6 +1348,10 @@ class decorated_struct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
     __slots__ = (
         "_fbthrift__inner",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.decorated_struct
+    _FBTHRIFT__FIELD_NAMES = (
+        "field",
     )
     _fbthrift__inner : _fbthrift_python_types.decorated_struct
 
@@ -1390,6 +1397,17 @@ class ContainerStruct(thrift.py3.types.Struct):
         "_fbthrift_inner__fieldF",
         "_fbthrift_inner__fieldG",
         "_fbthrift_inner__fieldH",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.ContainerStruct
+    _FBTHRIFT__FIELD_NAMES = (
+        "fieldA",
+        "fieldB",
+        "fieldC",
+        "fieldD",
+        "fieldE",
+        "fieldF",
+        "fieldG",
+        "fieldH",
     )
     _fbthrift__inner : _fbthrift_python_types.ContainerStruct
     _fbthrift_inner__fieldA : _typing.Sequence[int] | None
@@ -1505,6 +1523,10 @@ class CppTypeStruct(thrift.py3.types.Struct):
         "_fbthrift__inner",
         "_fbthrift_inner__fieldA",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.CppTypeStruct
+    _FBTHRIFT__FIELD_NAMES = (
+        "fieldA",
+    )
     _fbthrift__inner : _fbthrift_python_types.CppTypeStruct
     _fbthrift_inner__fieldA : _typing.Sequence[int] | None
 
@@ -1548,6 +1570,10 @@ class VirtualStruct(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.VirtualStruct
+    _FBTHRIFT__FIELD_NAMES = (
+        "MyIntField",
+    )
     _fbthrift__inner : _fbthrift_python_types.VirtualStruct
 
 
@@ -1586,6 +1612,11 @@ class MyStructWithForwardRefEnum(thrift.py3.types.Struct):
         "_fbthrift__inner",
         "_fbthrift_inner__a",
         "_fbthrift_inner__b",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.MyStructWithForwardRefEnum
+    _FBTHRIFT__FIELD_NAMES = (
+        "a",
+        "b",
     )
     _fbthrift__inner : _fbthrift_python_types.MyStructWithForwardRefEnum
     _fbthrift_inner__a : MyForwardRefEnum | None
@@ -1640,6 +1671,11 @@ class TrivialNumeric(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.TrivialNumeric
+    _FBTHRIFT__FIELD_NAMES = (
+        "a",
+        "b",
+    )
     _fbthrift__inner : _fbthrift_python_types.TrivialNumeric
 
 
@@ -1681,6 +1717,11 @@ class TrivialNestedWithDefault(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
         "_fbthrift_inner__n",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.TrivialNestedWithDefault
+    _FBTHRIFT__FIELD_NAMES = (
+        "z",
+        "n",
     )
     _fbthrift__inner : _fbthrift_python_types.TrivialNestedWithDefault
     _fbthrift_inner__n : TrivialNumeric | None
@@ -1730,6 +1771,11 @@ class ComplexString(thrift.py3.types.Struct):
         "_fbthrift__inner",
         "_fbthrift_inner__b",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.ComplexString
+    _FBTHRIFT__FIELD_NAMES = (
+        "a",
+        "b",
+    )
     _fbthrift__inner : _fbthrift_python_types.ComplexString
     _fbthrift_inner__b : _typing.Mapping[str, int] | None
 
@@ -1778,6 +1824,11 @@ class ComplexNestedWithDefault(thrift.py3.types.Struct):
         "_fbthrift__inner",
         "_fbthrift_inner__n",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.ComplexNestedWithDefault
+    _FBTHRIFT__FIELD_NAMES = (
+        "z",
+        "n",
+    )
     _fbthrift__inner : _fbthrift_python_types.ComplexNestedWithDefault
     _fbthrift_inner__n : ComplexString | None
 
@@ -1824,6 +1875,14 @@ class MinPadding(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
     __slots__ = (
         "_fbthrift__inner",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.MinPadding
+    _FBTHRIFT__FIELD_NAMES = (
+        "small",
+        "big",
+        "medium",
+        "biggish",
+        "tiny",
     )
     _fbthrift__inner : _fbthrift_python_types.MinPadding
 
@@ -1878,6 +1937,14 @@ class MinPaddingWithCustomType(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.MinPaddingWithCustomType
+    _FBTHRIFT__FIELD_NAMES = (
+        "small",
+        "biggish",
+        "medium",
+        "big",
+        "tiny",
+    )
     _fbthrift__inner : _fbthrift_python_types.MinPaddingWithCustomType
 
 
@@ -1931,6 +1998,13 @@ class MyStruct(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
         "_fbthrift_inner__data",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.MyStruct
+    _FBTHRIFT__FIELD_NAMES = (
+        "MyIntField",
+        "MyStringField",
+        "majorVer",
+        "data",
     )
     _fbthrift__inner : _fbthrift_python_types.MyStruct
     _fbthrift_inner__data : MyDataItem | None
@@ -1987,6 +2061,9 @@ class MyDataItem(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.MyDataItem
+    _FBTHRIFT__FIELD_NAMES = (
+    )
     _fbthrift__inner : _fbthrift_python_types.MyDataItem
 
 
@@ -2019,6 +2096,10 @@ class Renaming(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
     __slots__ = (
         "_fbthrift__inner",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.Renaming
+    _FBTHRIFT__FIELD_NAMES = (
+        "foo",
     )
     _fbthrift__inner : _fbthrift_python_types.Renaming
 
@@ -2057,6 +2138,11 @@ class AnnotatedTypes(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
         "_fbthrift_inner__list_field",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.AnnotatedTypes
+    _FBTHRIFT__FIELD_NAMES = (
+        "binary_field",
+        "list_field",
     )
     _fbthrift__inner : _fbthrift_python_types.AnnotatedTypes
     _fbthrift_inner__list_field : _typing.Sequence[_typing.Mapping[int, str]] | None
@@ -2106,6 +2192,11 @@ class ForwardUsageRoot(thrift.py3.types.Struct):
         "_fbthrift__inner",
         "_fbthrift_inner__ForwardUsageStruct",
         "_fbthrift_inner__ForwardUsageByRef",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.ForwardUsageRoot
+    _FBTHRIFT__FIELD_NAMES = (
+        "ForwardUsageStruct",
+        "ForwardUsageByRef",
     )
     _fbthrift__inner : _fbthrift_python_types.ForwardUsageRoot
     _fbthrift_inner__ForwardUsageStruct : _typing.Optional[ForwardUsageStruct] | None
@@ -2165,6 +2256,10 @@ class ForwardUsageStruct(thrift.py3.types.Struct):
         "_fbthrift__inner",
         "_fbthrift_inner__foo",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.ForwardUsageStruct
+    _FBTHRIFT__FIELD_NAMES = (
+        "foo",
+    )
     _fbthrift__inner : _fbthrift_python_types.ForwardUsageStruct
     _fbthrift_inner__foo : _typing.Optional[ForwardUsageRoot] | None
 
@@ -2210,6 +2305,10 @@ class ForwardUsageByRef(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
         "_fbthrift_inner__foo",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.ForwardUsageByRef
+    _FBTHRIFT__FIELD_NAMES = (
+        "foo",
     )
     _fbthrift__inner : _fbthrift_python_types.ForwardUsageByRef
     _fbthrift_inner__foo : _typing.Optional[ForwardUsageRoot] | None
@@ -2257,6 +2356,10 @@ class IncompleteMap(thrift.py3.types.Struct):
         "_fbthrift__inner",
         "_fbthrift_inner__field",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.IncompleteMap
+    _FBTHRIFT__FIELD_NAMES = (
+        "field",
+    )
     _fbthrift__inner : _fbthrift_python_types.IncompleteMap
     _fbthrift_inner__field : _typing.Optional[_typing.Mapping[int, IncompleteMapDep]] | None
 
@@ -2302,6 +2405,9 @@ class IncompleteMapDep(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.IncompleteMapDep
+    _FBTHRIFT__FIELD_NAMES = (
+    )
     _fbthrift__inner : _fbthrift_python_types.IncompleteMapDep
 
 
@@ -2335,6 +2441,10 @@ class CompleteMap(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
         "_fbthrift_inner__field",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.CompleteMap
+    _FBTHRIFT__FIELD_NAMES = (
+        "field",
     )
     _fbthrift__inner : _fbthrift_python_types.CompleteMap
     _fbthrift_inner__field : _typing.Optional[_typing.Mapping[int, CompleteMapDep]] | None
@@ -2381,6 +2491,9 @@ class CompleteMapDep(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.CompleteMapDep
+    _FBTHRIFT__FIELD_NAMES = (
+    )
     _fbthrift__inner : _fbthrift_python_types.CompleteMapDep
 
 
@@ -2414,6 +2527,10 @@ class IncompleteList(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
         "_fbthrift_inner__field",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.IncompleteList
+    _FBTHRIFT__FIELD_NAMES = (
+        "field",
     )
     _fbthrift__inner : _fbthrift_python_types.IncompleteList
     _fbthrift_inner__field : _typing.Optional[_typing.Sequence[IncompleteListDep]] | None
@@ -2460,6 +2577,9 @@ class IncompleteListDep(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.IncompleteListDep
+    _FBTHRIFT__FIELD_NAMES = (
+    )
     _fbthrift__inner : _fbthrift_python_types.IncompleteListDep
 
 
@@ -2493,6 +2613,10 @@ class CompleteList(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
         "_fbthrift_inner__field",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.CompleteList
+    _FBTHRIFT__FIELD_NAMES = (
+        "field",
     )
     _fbthrift__inner : _fbthrift_python_types.CompleteList
     _fbthrift_inner__field : _typing.Optional[_typing.Sequence[CompleteListDep]] | None
@@ -2539,6 +2663,9 @@ class CompleteListDep(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.CompleteListDep
+    _FBTHRIFT__FIELD_NAMES = (
+    )
     _fbthrift__inner : _fbthrift_python_types.CompleteListDep
 
 
@@ -2572,6 +2699,10 @@ class AdaptedList(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
         "_fbthrift_inner__field",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.AdaptedList
+    _FBTHRIFT__FIELD_NAMES = (
+        "field",
     )
     _fbthrift__inner : _fbthrift_python_types.AdaptedList
     _fbthrift_inner__field : _typing.Optional[_typing.Sequence[AdaptedListDep]] | None
@@ -2618,6 +2749,10 @@ class DependentAdaptedList(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
         "_fbthrift_inner__field",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.DependentAdaptedList
+    _FBTHRIFT__FIELD_NAMES = (
+        "field",
     )
     _fbthrift__inner : _fbthrift_python_types.DependentAdaptedList
     _fbthrift_inner__field : _typing.Optional[_typing.Sequence[DependentAdaptedListDep]] | None
@@ -2666,6 +2801,16 @@ class AllocatorAware(thrift.py3.types.Struct):
         "_fbthrift_inner__aa_list",
         "_fbthrift_inner__aa_set",
         "_fbthrift_inner__aa_map",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.AllocatorAware
+    _FBTHRIFT__FIELD_NAMES = (
+        "aa_list",
+        "aa_set",
+        "aa_map",
+        "aa_string",
+        "not_a_container",
+        "aa_unique",
+        "aa_shared",
     )
     _fbthrift__inner : _fbthrift_python_types.AllocatorAware
     _fbthrift_inner__aa_list : _typing.Sequence[int] | None
@@ -2746,6 +2891,11 @@ class AllocatorAware2(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.AllocatorAware2
+    _FBTHRIFT__FIELD_NAMES = (
+        "not_a_container",
+        "box_field",
+    )
     _fbthrift__inner : _fbthrift_python_types.AllocatorAware2
 
 
@@ -2786,6 +2936,12 @@ class TypedefStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
     __slots__ = (
         "_fbthrift__inner",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.TypedefStruct
+    _FBTHRIFT__FIELD_NAMES = (
+        "i32_field",
+        "IntTypedef_field",
+        "UintTypedef_field",
     )
     _fbthrift__inner : _fbthrift_python_types.TypedefStruct
 
@@ -2831,6 +2987,10 @@ class StructWithDoubleUnderscores(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
     __slots__ = (
         "_fbthrift__inner",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.StructWithDoubleUnderscores
+    _FBTHRIFT__FIELD_NAMES = (
+        "__field",
     )
     _fbthrift__inner : _fbthrift_python_types.StructWithDoubleUnderscores
 

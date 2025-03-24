@@ -1913,6 +1913,10 @@ class SimpleException(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.SimpleException
+    _FBTHRIFT__FIELD_NAMES = (
+        "err_code",
+    )
     _fbthrift__inner : _fbthrift_python_types.SimpleException
 
 
@@ -1949,6 +1953,10 @@ class OptionalRefStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
     __slots__ = (
         "_fbthrift__inner",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.OptionalRefStruct
+    _FBTHRIFT__FIELD_NAMES = (
+        "optional_blob",
     )
     _fbthrift__inner : _fbthrift_python_types.OptionalRefStruct
 
@@ -1987,6 +1995,17 @@ class SimpleStruct(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
         "_fbthrift_inner__something",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.SimpleStruct
+    _FBTHRIFT__FIELD_NAMES = (
+        "is_on",
+        "tiny_int",
+        "small_int",
+        "nice_sized_int",
+        "big_int",
+        "real",
+        "smaller_real",
+        "something",
     )
     _fbthrift__inner : _fbthrift_python_types.SimpleStruct
     _fbthrift_inner__something : _typing.Mapping[int, int] | None
@@ -2059,6 +2078,9 @@ class HiddenTypeFieldsStruct(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.HiddenTypeFieldsStruct
+    _FBTHRIFT__FIELD_NAMES = (
+    )
     _fbthrift__inner : _fbthrift_python_types.HiddenTypeFieldsStruct
 
 
@@ -2094,6 +2116,18 @@ class ComplexStruct(thrift.py3.types.Struct):
         "_fbthrift_inner__structOne",
         "_fbthrift_inner__structTwo",
         "_fbthrift_inner__an_enum",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.ComplexStruct
+    _FBTHRIFT__FIELD_NAMES = (
+        "structOne",
+        "structTwo",
+        "an_integer",
+        "name",
+        "an_enum",
+        "some_bytes",
+        "sender",
+        "cdef_",
+        "bytes_with_cpp_type",
     )
     _fbthrift__inner : _fbthrift_python_types.ComplexStruct
     _fbthrift_inner__structOne : SimpleStruct | None
@@ -2184,6 +2218,10 @@ class BinaryUnion(thrift.py3.types.Union):
         "_fbthrift_inner__type",
         "_fbthrift_inner__value",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.BinaryUnion
+    _FBTHRIFT__FIELD_NAMES = (
+        "iobuf_val",
+    )
     Type = _fbthrift_python_types.BinaryUnion.Type
     _fbthrift__inner : _fbthrift_python_types.BinaryUnion
     _fbthrift_inner__type: Type
@@ -2237,6 +2275,10 @@ class BinaryUnionStruct(thrift.py3.types.Struct):
         "_fbthrift__inner",
         "_fbthrift_inner__u",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.BinaryUnionStruct
+    _FBTHRIFT__FIELD_NAMES = (
+        "u",
+    )
     _fbthrift__inner : _fbthrift_python_types.BinaryUnionStruct
     _fbthrift_inner__u : BinaryUnion | None
 
@@ -2283,6 +2325,18 @@ class CustomFields(thrift.py3.types.Struct):
         "_fbthrift_inner__set_field",
         "_fbthrift_inner__map_field",
         "_fbthrift_inner__struct_field",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.CustomFields
+    _FBTHRIFT__FIELD_NAMES = (
+        "bool_field",
+        "integer_field",
+        "double_field",
+        "string_field",
+        "binary_field",
+        "list_field",
+        "set_field",
+        "map_field",
+        "struct_field",
     )
     _fbthrift__inner : _fbthrift_python_types.CustomFields
     _fbthrift_inner__list_field : _typing.Sequence[int] | None
@@ -2381,6 +2435,18 @@ class CustomTypedefFields(thrift.py3.types.Struct):
         "_fbthrift_inner__map_field",
         "_fbthrift_inner__struct_field",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.CustomTypedefFields
+    _FBTHRIFT__FIELD_NAMES = (
+        "bool_field",
+        "integer_field",
+        "double_field",
+        "string_field",
+        "binary_field",
+        "list_field",
+        "set_field",
+        "map_field",
+        "struct_field",
+    )
     _fbthrift__inner : _fbthrift_python_types.CustomTypedefFields
     _fbthrift_inner__list_field : _typing.Sequence[int] | None
     _fbthrift_inner__set_field : _typing.AbstractSet[int] | None
@@ -2477,6 +2543,18 @@ class AdaptedTypedefFields(thrift.py3.types.Struct):
         "_fbthrift_inner__set_field",
         "_fbthrift_inner__map_field",
         "_fbthrift_inner__struct_field",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.AdaptedTypedefFields
+    _FBTHRIFT__FIELD_NAMES = (
+        "bool_field",
+        "integer_field",
+        "double_field",
+        "string_field",
+        "binary_field",
+        "list_field",
+        "set_field",
+        "map_field",
+        "struct_field",
     )
     _fbthrift__inner : _fbthrift_python_types.AdaptedTypedefFields
     _fbthrift_inner__list_field : _typing.Sequence[int] | None

@@ -101,6 +101,12 @@ class {{struct:name}}(thrift.py3.types.{{!
         "_fbthrift_inner__value",
     {{/struct:union?}}
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.{{struct:name}}
+    _FBTHRIFT__FIELD_NAMES = (
+        {{#struct:fields_and_mixin_fields}}
+        "{{field:py_name}}",
+        {{/struct:fields_and_mixin_fields}}
+    )
     {{#struct:union?}}
     Type = _fbthrift_python_types.{{struct:name}}.Type
     {{/struct:union?}}

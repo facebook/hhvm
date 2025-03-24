@@ -419,6 +419,18 @@ class MyStruct(thrift.py3.types.Struct):
         "_fbthrift_inner__myEnum",
         "_fbthrift_inner__floatSet",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.MyStruct
+    _FBTHRIFT__FIELD_NAMES = (
+        "MyIntField",
+        "MyStringField",
+        "MyDataField",
+        "myEnum",
+        "oneway",
+        "readonly",
+        "idempotent",
+        "floatSet",
+        "no_hack_codegen_field",
+    )
     _fbthrift__inner : _fbthrift_python_types.MyStruct
     _fbthrift_inner__MyDataField : MyDataItem | None
     _fbthrift_inner__myEnum : MyEnum | None
@@ -509,6 +521,12 @@ class Containers(thrift.py3.types.Struct):
         "_fbthrift_inner__StringSet",
         "_fbthrift_inner__StringToI64Map",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.Containers
+    _FBTHRIFT__FIELD_NAMES = (
+        "I32List",
+        "StringSet",
+        "StringToI64Map",
+    )
     _fbthrift__inner : _fbthrift_python_types.Containers
     _fbthrift_inner__I32List : _typing.Sequence[int] | None
     _fbthrift_inner__StringSet : _typing.AbstractSet[str] | None
@@ -572,6 +590,9 @@ class MyDataItem(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.MyDataItem
+    _FBTHRIFT__FIELD_NAMES = (
+    )
     _fbthrift__inner : _fbthrift_python_types.MyDataItem
 
 
@@ -610,6 +631,13 @@ class MyUnion(thrift.py3.types.Union):
         "_fbthrift_inner__floatSet",
         "_fbthrift_inner__type",
         "_fbthrift_inner__value",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.MyUnion
+    _FBTHRIFT__FIELD_NAMES = (
+        "myEnum",
+        "myStruct",
+        "myDataItem",
+        "floatSet",
     )
     Type = _fbthrift_python_types.MyUnion.Type
     _fbthrift__inner : _fbthrift_python_types.MyUnion
@@ -717,6 +745,13 @@ class MyException(thrift.py3.types.Struct):
         "_fbthrift_inner__myStruct",
         "_fbthrift_inner__myUnion",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.MyException
+    _FBTHRIFT__FIELD_NAMES = (
+        "MyIntField",
+        "MyStringField",
+        "myStruct",
+        "myUnion",
+    )
     _fbthrift__inner : _fbthrift_python_types.MyException
     _fbthrift_inner__myStruct : MyStruct | None
     _fbthrift_inner__myUnion : MyUnion | None
@@ -780,6 +815,13 @@ class MyExceptionWithMessage(thrift.py3.types.Struct):
         "_fbthrift_inner__myStruct",
         "_fbthrift_inner__myUnion",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.MyExceptionWithMessage
+    _FBTHRIFT__FIELD_NAMES = (
+        "MyIntField",
+        "MyStringField",
+        "myStruct",
+        "myUnion",
+    )
     _fbthrift__inner : _fbthrift_python_types.MyExceptionWithMessage
     _fbthrift_inner__myStruct : MyStruct | None
     _fbthrift_inner__myUnion : MyUnion | None
@@ -841,6 +883,10 @@ class ReservedKeyword(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
     )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.ReservedKeyword
+    _FBTHRIFT__FIELD_NAMES = (
+        "reserved_field",
+    )
     _fbthrift__inner : _fbthrift_python_types.ReservedKeyword
 
 
@@ -879,6 +925,10 @@ class UnionToBeRenamed(thrift.py3.types.Union):
         "_fbthrift__inner",
         "_fbthrift_inner__type",
         "_fbthrift_inner__value",
+    )
+    _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.UnionToBeRenamed
+    _FBTHRIFT__FIELD_NAMES = (
+        "reserved_field",
     )
     Type = _fbthrift_python_types.UnionToBeRenamed.Type
     _fbthrift__inner : _fbthrift_python_types.UnionToBeRenamed

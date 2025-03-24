@@ -31,7 +31,7 @@ class TestJSONGenerate(unittest.TestCase):
         "ThriftTest",
         "OptionalRequiredTest",
         "ManyTypedefs",
-        "EnumTest",
+        "enum",
         "DocTest",
         "AnnotationTest",
     ]

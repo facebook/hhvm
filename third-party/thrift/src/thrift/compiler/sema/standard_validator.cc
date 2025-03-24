@@ -1430,7 +1430,9 @@ void deprecate_annotations(sema_context& ctx, const t_named& node) {
       {"iq.node_type", erlang("Iq")},
   };
   std::set<std::string> removed_annotations = {
-      "cpp2.declare_bitwise_ops", "cpp2.deprecated_enum_unscoped"};
+      "cpp2.declare_bitwise_ops",
+      "cpp2.enum_type",
+      "cpp2.deprecated_enum_unscoped"};
   std::map<std::string, std::string> removed_prefixes = {{"rust.", "rust"}};
 
   for (const auto& [k, v] : node.annotations()) {

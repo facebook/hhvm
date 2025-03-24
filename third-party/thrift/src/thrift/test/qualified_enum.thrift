@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/cpp.thrift"
-include "thrift/test/EnumTest.thrift"
+include "thrift/test/enum.thrift"
 
 enum MyQualifiedEnum {
   FOO = 0,
@@ -24,24 +25,26 @@ enum MyQualifiedEnum {
 const MyQualifiedEnum FOO = BAR;
 
 struct MyQualifiedStruct {
-  1: optional MyQualifiedEnum field1 = FOO;
-  2: optional MyQualifiedEnum field2 = MyQualifiedEnum.FOO;
-  3: optional EnumTest.MyEnum1 field3 = EnumTest.ME1_1;
-  4: optional EnumTest.MyEnum1 field4 = EnumTest.MyEnum1.ME1_1;
-  5: optional EnumTest.MyEnum4 field5 = EnumTest.c_me4_a;
+  1: MyQualifiedEnum field1 = FOO;
+  2: MyQualifiedEnum field2 = MyQualifiedEnum.FOO;
+  3: enum.MyEnum1 field3 = enum.ME1_1;
+  4: enum.MyEnum1 field4 = enum.MyEnum1.ME1_1;
+  5: enum.MyEnum4 field5 = enum.c_me4_a;
 }
 
+@thrift.BitmaskEnum
 enum MyBitMaskEnum {
-  kNil = 0,
-  kFoo = 1,
-  kBar = 2,
-  kBaz = 4,
-} (cpp.declare_bitwise_ops)
+  Nil = 0,
+  Foo = 1,
+  Bar = 2,
+  Baz = 4,
+}
 
 @cpp.EnumType{type = cpp.EnumUnderlyingType.I16}
+@thrift.BitmaskEnum
 enum MyBitMaskEnumShort {
-  kNil = 0,
-  kFoo = 1,
-  kBar = 2,
-  kBaz = 4,
-} (cpp.declare_bitwise_ops)
+  Nil = 0,
+  Foo = 1,
+  Bar = 2,
+  Baz = 4,
+}

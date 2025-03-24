@@ -20,15 +20,15 @@ namespace {{program:qualified_namespace}} {
 {{#program:enums}}
 
 {{> common/enum_docblock }}
-enum {{^enum:cpp_is_unscoped}}class {{/enum:cpp_is_unscoped}}{{enum:cpp_name}}{{#enum:cpp_enum_type}} : {{enum:cpp_enum_type}}{{/enum:cpp_enum_type}} {
+enum {{^enum:self.cpp_is_unscoped}}class {{/enum:self.cpp_is_unscoped}}{{enum:self.cpp_name}}{{#enum:self.cpp_enum_type}} : {{enum:self.cpp_enum_type}}{{/enum:self.cpp_enum_type}} {
 {{#enum:values}}
   {{enum_value:self.cpp_name}} = {{enum_value:value}},
 {{/enum:values}}
 };
 
-{{#enum:cpp_declare_bitwise_ops}}
+{{#enum:self.cpp_declare_bitwise_ops}}
 {{> module_types_h/enum_bitwise_ops}}
-{{/enum:cpp_declare_bitwise_ops}}
+{{/enum:self.cpp_declare_bitwise_ops}}
 
 {{/program:enums}}
 

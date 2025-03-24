@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
+
 enum MyEnum1 {
   ME1_0 = 0,
   ME1_1 = 1,
@@ -65,10 +68,13 @@ struct MyStruct {
 
 const MyEnum4 c_me4_a = ME4_A;
 
+@thrift.DeprecatedUnvalidatedAnnotations{
+  items = {"cpp.deprecated_enum_unscoped": "1"},
+}
 enum MyEnumUnscoped {
   MEU_A = 4,
   MEU_B = 3,
-} (cpp.deprecated_enum_unscoped)
+}
 
 struct MyStructWithForwardRefEnum {
   1: MyForwardRefEnum a = NONZERO;
@@ -78,4 +84,24 @@ struct MyStructWithForwardRefEnum {
 enum MyForwardRefEnum {
   ZERO = 0,
   NONZERO = 12,
+}
+
+@cpp.EnumType{type = cpp.EnumUnderlyingType.I8}
+enum I8 {
+}
+
+@cpp.EnumType{type = cpp.EnumUnderlyingType.U8}
+enum U8 {
+}
+
+@cpp.EnumType{type = cpp.EnumUnderlyingType.I16}
+enum I16 {
+}
+
+@cpp.EnumType{type = cpp.EnumUnderlyingType.U16}
+enum U16 {
+}
+
+@cpp.EnumType{type = cpp.EnumUnderlyingType.U32}
+enum U32 {
 }

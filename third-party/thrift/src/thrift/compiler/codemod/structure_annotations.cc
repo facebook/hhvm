@@ -243,7 +243,7 @@ class structure_annotations {
           to_add.insert("@cpp.MinimizePadding");
           fm_.add_include("thrift/annotation/cpp.thrift");
         }
-      } else if (name == "cpp.enum_type" || name == "cpp2.enum_type") {
+      } else if (name == "cpp.enum_type") {
         to_remove.emplace_back(name, data);
         if (!node.find_structured_annotation_or_null(kCppEnumTypeUri)) {
           std::string_view value = data.value;

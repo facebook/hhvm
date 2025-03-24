@@ -20,7 +20,7 @@
 
 #include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
-#include <thrift/test/gen-cpp2/EnumTest_types.h>
+#include <thrift/test/gen-cpp2/enum_types.h>
 
 using apache::thrift::TEnumTraits;
 using namespace apache::thrift::util;
@@ -148,7 +148,15 @@ struct has_type_member<T, folly::void_t<typename T::type>> : std::true_type {};
 } // namespace
 
 TEST(EnumTestCpp2, test_non_thrift_enum_trait) {
-  EXPECT_EQ(true, has_type_member<HasType>::value);
-  EXPECT_EQ(false, has_type_member<TEnumTraits<NonThriftEnum>>::value);
-  EXPECT_EQ(true, has_type_member<TEnumTraits<MyEnum1>>::value);
+  EXPECT_TRUE(has_type_member<HasType>::value);
+  EXPECT_FALSE(has_type_member<TEnumTraits<NonThriftEnum>>::value);
+  EXPECT_TRUE(has_type_member<TEnumTraits<MyEnum1>>::value);
+}
+
+TEST(EnumTestCpp2, UnderlyingType) {
+  EXPECT_TRUE((std::is_same_v<std::underlying_type_t<I8>, std::int8_t>));
+  EXPECT_TRUE((std::is_same_v<std::underlying_type_t<U8>, std::uint8_t>));
+  EXPECT_TRUE((std::is_same_v<std::underlying_type_t<I16>, std::int16_t>));
+  EXPECT_TRUE((std::is_same_v<std::underlying_type_t<U16>, std::uint16_t>));
+  EXPECT_TRUE((std::is_same_v<std::underlying_type_t<U32>, std::uint32_t>));
 }

@@ -44,14 +44,14 @@ using apache::thrift::compiler::detail::schematizer;
 namespace apache::thrift::compiler {
 namespace {
 
-// Since we can not include `thrift/annotation/cpp.thrift`,
-// this is a copy of cpp.EnumUnderlyingType.
-enum class EnumUnderlyingType {
-  I8 = 0,
-  U8 = 1,
-  I16 = 2,
-  U16 = 3,
-  U32 = 4,
+// A compiler counterpart of cpp.EnumUnderlyingType that avoids dependency on
+// the generated code and follows the compiler naming conventions.
+enum class enum_underlying_type {
+  i8 = 0,
+  u8 = 1,
+  i16 = 2,
+  u16 = 3,
+  u32 = 4,
 };
 
 const std::string& get_cpp_template(const t_type* type) {
@@ -351,6 +351,42 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
             return a.get_value() < b.get_value();
           });
       return whisker::object(cpp2::get_name(&*max));
+    });
+
+    def.property("cpp_enum_type", [](const t_enum& e) -> std::string {
+      if (const auto* annot =
+              e.find_structured_annotation_or_null(kCppEnumTypeUri)) {
+        const auto& type = annot->get_value_from_structured_annotation("type");
+        switch (static_cast<enum_underlying_type>(type.get_integer())) {
+          case enum_underlying_type::i8:
+            return "::std::int8_t";
+          case enum_underlying_type::u8:
+            return "::std::uint8_t";
+          case enum_underlying_type::i16:
+            return "::std::int16_t";
+          case enum_underlying_type::u16:
+            return "::std::uint16_t";
+          case enum_underlying_type::u32:
+            return "::std::uint32_t";
+          default:
+            throw std::runtime_error("unknown enum underlying type");
+        }
+      }
+      if (const std::string* type =
+              e.find_annotation_or_null("cpp.enum_type")) {
+        return *type;
+      }
+      return e.find_annotation_or_null("cpp.deprecated_enum_unscoped") ? "int"
+                                                                       : "";
+    });
+
+    def.property("cpp_is_unscoped", [](const t_enum& e) {
+      return e.get_annotation("cpp.deprecated_enum_unscoped");
+    });
+
+    def.property("cpp_declare_bitwise_ops", [](const t_enum& e) {
+      return e.find_annotation_or_null("cpp.declare_bitwise_ops") ||
+          e.find_structured_annotation_or_null(kBitmaskEnumUri);
     });
 
     return std::move(def).make();
@@ -1758,14 +1794,14 @@ class cpp_mstch_struct : public mstch_struct {
     if (const auto* annot =
             e.find_structured_annotation_or_null(kCppEnumTypeUri)) {
       const auto& type = annot->get_value_from_structured_annotation("type");
-      switch (static_cast<EnumUnderlyingType>(type.get_integer())) {
-        case EnumUnderlyingType::I8:
-        case EnumUnderlyingType::U8:
+      switch (static_cast<enum_underlying_type>(type.get_integer())) {
+        case enum_underlying_type::i8:
+        case enum_underlying_type::u8:
           return 1;
-        case EnumUnderlyingType::I16:
-        case EnumUnderlyingType::U16:
+        case enum_underlying_type::i16:
+        case enum_underlying_type::u16:
           return 2;
-        case EnumUnderlyingType::U32:
+        case enum_underlying_type::u32:
           return 4;
         default:
           throw std::runtime_error("unknown enum underlying type");
@@ -2240,54 +2276,10 @@ class cpp_mstch_enum : public mstch_enum {
     register_methods(
         this,
         {
-            {"enum:cpp_is_unscoped", &cpp_mstch_enum::cpp_is_unscoped},
             {"enum:cpp_name", &cpp_mstch_enum::cpp_name},
-            {"enum:cpp_enum_type", &cpp_mstch_enum::cpp_enum_type},
-            {"enum:cpp_declare_bitwise_ops",
-             &cpp_mstch_enum::cpp_declare_bitwise_ops},
         });
   }
-  mstch::node cpp_is_unscoped() {
-    return enum_->get_annotation("cpp.deprecated_enum_unscoped");
-  }
   mstch::node cpp_name() { return cpp2::get_name(enum_); }
-  mstch::node cpp_enum_type() { return cpp_enum_type(*enum_); }
-  mstch::node cpp_declare_bitwise_ops() {
-    return enum_->find_annotation_or_null("cpp.declare_bitwise_ops") ||
-        enum_->find_structured_annotation_or_null(kBitmaskEnumUri);
-  }
-
- private:
-  std::string_view cpp_enum_type(const t_enum& e) {
-    if (const auto* annot =
-            e.find_structured_annotation_or_null(kCppEnumTypeUri)) {
-      const auto& type = annot->get_value_from_structured_annotation("type");
-      switch (static_cast<EnumUnderlyingType>(type.get_integer())) {
-        case EnumUnderlyingType::I8:
-          return "::std::int8_t";
-        case EnumUnderlyingType::U8:
-          return "::std::uint8_t";
-        case EnumUnderlyingType::I16:
-          return "::std::int16_t";
-        case EnumUnderlyingType::U16:
-          return "::std::uint16_t";
-        case EnumUnderlyingType::U32:
-          return "::std::uint32_t";
-        default:
-          throw std::runtime_error("unknown enum underlying type");
-      }
-    }
-    // TODO(dokwon): Deprecate unstructured 'cpp.enum_type' annotation.
-    static std::string kInt = "int";
-    if (const std::string& type = e.get_annotation(
-            {"cpp.enum_type", "cpp2.enum_type"},
-            e.get_annotation("cpp.deprecated_enum_unscoped").empty() ? nullptr
-                                                                     : &kInt);
-        !type.empty()) {
-      return type;
-    }
-    return "";
-  }
 };
 
 class cpp_mstch_const : public mstch_const {

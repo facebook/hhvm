@@ -710,8 +710,6 @@ class DynamicPatch {
   [[nodiscard]] bool isPatchTypeAmbiguous() const;
 
   /// @cond
-  [[nodiscard]] bool empty(detail::Badge) const;
-
   void fromAny(detail::Badge, const type::AnyStruct& any);
   type::AnyStruct toAny(detail::Badge, type::Type type) const;
 

@@ -369,7 +369,7 @@ bool DynamicPatch::isPatchTypeAmbiguous() const {
   return holds_alternative<DynamicUnknownPatch>(badge);
 }
 
-bool DynamicPatch::empty(detail::Badge badge) const {
+bool DynamicPatch::empty() const {
   return std::visit(
       [&](auto&& v) {
         if constexpr (__FBTHRIFT_IS_VALID(v, v.empty(badge))) {
@@ -381,9 +381,6 @@ bool DynamicPatch::empty(detail::Badge badge) const {
       *patch_);
 }
 
-bool DynamicPatch::empty() const {
-  return empty(badge);
-}
 DynamicPatch& DynamicMapPatch::patchByKey(Value&& k) {
   return patchByKey(std::move(k), {});
 }
@@ -1168,7 +1165,7 @@ DynamicUnionPatch DiffVisitorBase::diffUnion(
   pushField(id);
   auto guard = folly::makeGuard([&] { pop(); });
   auto subPatch = diff(badge, src.at(id), dst.at(id));
-  if (!subPatch.empty(badge)) {
+  if (!subPatch.empty()) {
     patch.patchIfSet(id).merge(DynamicPatch{std::move(subPatch)});
   }
 
@@ -1202,7 +1199,7 @@ op::AnyPatch DiffVisitorBase::diffAny(
   pushType(*src.type());
   auto guard = folly::makeGuard([&] { pop(); });
   auto subPatch = diff(badge, srcValue, dstValue);
-  if (!subPatch.empty(badge)) {
+  if (!subPatch.empty()) {
     type::AnyStruct anySubPatch;
     anySubPatch.protocol() = type::StandardProtocol::Compact;
     anySubPatch.data() =
@@ -1249,7 +1246,7 @@ void DiffVisitorBase::diffField(
   pushField(id);
   auto guard = folly::makeGuard([&] { pop(); });
   auto subPatch = diff(badge, src.at(id), dst.at(id));
-  if (!subPatch.empty(badge)) {
+  if (!subPatch.empty()) {
     if (maybeEmptyDeprecatedTerseField(src.at(id))) {
       patch.ensure(id, emptyValue(src.at(id).getType()));
     }
@@ -1397,11 +1394,11 @@ DynamicPatch::merge(Other&& other) {
     return merge(std::forward<Other>(other));
   }
 
-  if (other.empty(badge)) {
+  if (other.empty()) {
     return;
   }
 
-  if (empty(badge)) {
+  if (empty()) {
     *this = other;
     return;
   }

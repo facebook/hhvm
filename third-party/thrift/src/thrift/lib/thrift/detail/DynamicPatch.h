@@ -169,6 +169,20 @@ class DynamicPatchBase {
 /// If the exact patch type is known, `DynamicPatch::getStoredPatchByTag` can be
 /// used to inform the exact patch type.
 ///
+/// Good example:
+///
+/// DynamicPatch dynPatch; // patch with only `patchIfSet`.
+/// EXPECT_TRUE(dynPatch.isPatchTypeAmbiguous());
+/// // Assert Category::StructuredPatch is union patch.
+/// dynPatch.getStoredPatchByTag<type::union_c>();
+///
+///
+/// Bad example:
+///
+/// DynamicPatch dynPatch; // patch with only `removeMulti`.
+/// EXPECT_TRUE(dynPatch.isPatchTypeAmbiguous());
+/// EXPECT_THROW(dynPatch.getStoredPatchByTag<type::union_c>());
+///
 /// For introspection, users should provide a visitor with the following methods
 /// for `customVisit`:
 ///
@@ -691,6 +705,9 @@ class DynamicPatch {
   auto& getStoredPatchByTag() {
     return getStoredPatchByTag(Tag{});
   }
+
+  /// Returns if the patch type is ambiguous.
+  [[nodiscard]] bool isPatchTypeAmbiguous() const;
 
   /// @cond
   [[nodiscard]] bool empty(detail::Badge) const;

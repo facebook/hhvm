@@ -178,7 +178,7 @@ void testMapAndObject(
   EXPECT_EQ(patch.empty(), src == dst);
 
   if (mightBeUnion) {
-    EXPECT_TRUE(patch.holds_alternative<DynamicUnknownPatch>(badge));
+    EXPECT_TRUE(patch.isPatchTypeAmbiguous());
     auto other = detail::createPatchFromObject<DynamicUnknownPatch>(
         badge, patch.toObject());
     EXPECT_EQ(other.toObject(), patch.toObject());
@@ -803,7 +803,7 @@ TEST(DynamicPatch, TestEmptyPatch) {
   Object obj;
   DynamicPatch patch;
   patch.fromObject(obj);
-  EXPECT_TRUE(patch.holds_alternative<DynamicUnknownPatch>(badge));
+  EXPECT_TRUE(patch.isPatchTypeAmbiguous());
 }
 
 TEST(DynamicPatch, TestClearPatch) {
@@ -811,7 +811,7 @@ TEST(DynamicPatch, TestClearPatch) {
   obj[static_cast<FieldId>(op::PatchOp::Clear)].emplace_bool(true);
   DynamicPatch patch;
   patch.fromObject(obj);
-  EXPECT_TRUE(patch.holds_alternative<DynamicUnknownPatch>(badge));
+  EXPECT_TRUE(patch.isPatchTypeAmbiguous());
 }
 
 template <class Tag, class PatchType = op::patch_type<Tag>>
@@ -828,9 +828,9 @@ void testDynamicUnknownPatch(const auto& t) {
   emptyPatch.fromObject(obj);
   emptyPatch.apply(v);
   EXPECT_EQ(v, asValueStruct<Tag>(t));
-  EXPECT_TRUE(emptyPatch.holds_alternative<DynamicUnknownPatch>(badge));
+  EXPECT_TRUE(emptyPatch.isPatchTypeAmbiguous());
   emptyPatch.getStoredPatchByTag<Tag>();
-  EXPECT_FALSE(emptyPatch.holds_alternative<DynamicUnknownPatch>(badge));
+  EXPECT_FALSE(emptyPatch.isPatchTypeAmbiguous());
   emptyPatch.apply(v);
   EXPECT_EQ(v, asValueStruct<Tag>(t));
 
@@ -850,11 +850,11 @@ void testDynamicUnknownPatch(const auto& t) {
   clearPatch.fromObject(obj);
   clearPatch.apply(v);
   checkClearPatch();
-  EXPECT_TRUE(clearPatch.holds_alternative<DynamicUnknownPatch>(badge));
+  EXPECT_TRUE(clearPatch.isPatchTypeAmbiguous());
 
   v = asValueStruct<Tag>(t);
   clearPatch.getStoredPatchByTag<Tag>();
-  EXPECT_FALSE(clearPatch.holds_alternative<DynamicUnknownPatch>(badge));
+  EXPECT_FALSE(clearPatch.isPatchTypeAmbiguous());
   clearPatch.apply(v);
   checkClearPatch();
 }
@@ -882,7 +882,7 @@ TEST(DynamicPatch, FromAnyPatch) {
   anyPatch.assign(type::AnyData::toAny<type::union_t<MyUnion>>({}).toThrift());
   DynamicPatch dynPatch;
   dynPatch.fromObject(anyPatch.toObject());
-  EXPECT_TRUE(dynPatch.holds_alternative<DynamicUnknownPatch>(badge));
+  EXPECT_TRUE(dynPatch.isPatchTypeAmbiguous());
 
   // Assert it is an AnyPatch.
   MyUnionPatch patch;
@@ -905,7 +905,7 @@ TEST(DynamicPatch, FromSetOrMapPatch) {
   {
     DynamicPatch patch;
     patch.fromObject(obj);
-    EXPECT_TRUE(patch.holds_alternative<DynamicUnknownPatch>(badge));
+    EXPECT_TRUE(patch.isPatchTypeAmbiguous());
   }
   {
     obj[static_cast<FieldId>(op::PatchOp::Add)].emplace_set() = {
@@ -944,7 +944,7 @@ TEST(DynamicPatch, FromStructOrUnionPatch) {
   {
     DynamicPatch patch;
     patch.fromObject(obj);
-    EXPECT_TRUE(patch.holds_alternative<DynamicUnknownPatch>(badge));
+    EXPECT_TRUE(patch.isPatchTypeAmbiguous());
 
     MyUnion u;
     u.i_ref() = 5;
@@ -1314,6 +1314,31 @@ TEST(DynamicPatch, MergingIncompatiblePatch) {
   }
 }
 
+TEST(DynamicPatch, InvalidGetStoredPatchByTag) {
+  {
+    MyUnionPatch patch;
+    patch.patchIfSet<ident::s>() = "hello world";
+    DynamicPatch dynPatch;
+    dynPatch.fromObject(patch.toObject());
+    EXPECT_TRUE(dynPatch.isPatchTypeAmbiguous());
+    // TODO(dokwon): Use the category information to provide better error
+    // message.
+    EXPECT_THROW(
+        dynPatch.getStoredPatchByTag<type::i32_t>(), std::runtime_error);
+  }
+  {
+    DynamicMapPatch patch;
+    patch.removeMulti({asValueStruct<type::i32_t>(42)});
+    DynamicPatch dynPatch;
+    dynPatch.fromObject(patch.toObject());
+    EXPECT_TRUE(dynPatch.isPatchTypeAmbiguous());
+    // TODO(dokwon): Use the category information to provide better error
+    // message.
+    EXPECT_THROW(
+        dynPatch.getStoredPatchByTag<type::i32_t>(), std::runtime_error);
+  }
+}
+
 TEST(DynamicPatch, DynamicSafePatch) {
   MyUnion obj;
   obj.s_ref().emplace("123");
@@ -1328,9 +1353,7 @@ TEST(DynamicPatch, DynamicSafePatch) {
   // round trip
   DynamicPatch dynPatch;
   dynPatch.fromSafePatch(safePatchAny);
-  dynPatch.visitPatch(folly::overload(
-      [&](const DynamicUnknownPatch&) {},
-      [&](const auto&) { EXPECT_TRUE(false) << "not reachable"; }));
+  EXPECT_TRUE(dynPatch.isPatchTypeAmbiguous());
   type::AnyStruct rSafePatchAny =
       dynPatch.toSafePatch(type::Type::get<type::union_t<MyUnion>>());
 
@@ -1425,9 +1448,7 @@ TEST(DynamicPatch, DynamicSafePatchV2) {
     // round trip
     DynamicPatch dynPatch;
     dynPatch.fromSafePatch(safePatchAny);
-    dynPatch.visitPatch(folly::overload(
-        [&](const DynamicUnknownPatch&) {},
-        [&](const auto&) { EXPECT_TRUE(false) << "not reachable"; }));
+    EXPECT_TRUE(dynPatch.isPatchTypeAmbiguous());
     type::AnyStruct rSafePatchAny =
         dynPatch.toSafePatch(type::Type::get<type::union_t<MyUnion>>());
 

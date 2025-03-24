@@ -365,6 +365,10 @@ op::AnyPatch& DynamicPatch::getStoredPatchByTag(
   return getStoredPatch<op::AnyPatch>();
 }
 
+bool DynamicPatch::isPatchTypeAmbiguous() const {
+  return holds_alternative<DynamicUnknownPatch>(badge);
+}
+
 bool DynamicPatch::empty(detail::Badge badge) const {
   return std::visit(
       [&](auto&& v) {
@@ -1361,8 +1365,7 @@ detail::if_same_type_after_remove_cvref<Other, DynamicPatch>
 DynamicPatch::merge(Other&& other) {
   // If only one of the patch is Unknown patch, convert the Unknown patch type
   // to the known patch type.
-  if (std::holds_alternative<DynamicUnknownPatch>(*patch_) &&
-      !std::holds_alternative<DynamicUnknownPatch>(*other.patch_)) {
+  if (isPatchTypeAmbiguous() && !other.isPatchTypeAmbiguous()) {
     std::visit(
         [&](auto&& other) {
           *patch_ = detail::createPatchFromObject<
@@ -1371,8 +1374,7 @@ DynamicPatch::merge(Other&& other) {
         },
         *other.patch_);
   }
-  if (!std::holds_alternative<DynamicUnknownPatch>(*patch_) &&
-      std::holds_alternative<DynamicUnknownPatch>(*other.patch_)) {
+  if (!isPatchTypeAmbiguous() && other.isPatchTypeAmbiguous()) {
     return std::visit(
         [&](auto&& patch) {
           auto tmp = DynamicPatch{detail::createPatchFromObject<

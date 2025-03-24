@@ -429,15 +429,12 @@ void validate_extends_service_function_name_uniqueness(
   }
 }
 
-void validate_throws_exceptions(sema_context& ctx, const t_throws& node) {
-  for (const auto& except : node.fields()) {
-    auto except_type = except.type()->get_true_type();
-    ctx.check(
-        dynamic_cast<const t_exception*>(except_type),
-        except,
-        "Non-exception type, `{}`, in throws.",
-        except_type->name());
-  }
+void validate_throws_exceptions(sema_context& ctx, const t_field& except) {
+  auto except_type = except.type()->get_true_type();
+  ctx.check(
+      dynamic_cast<const t_exception*>(except_type),
+      "Non-exception type, `{}`, in throws.",
+      except_type->name());
 }
 
 // Checks for a redefinition of a field in the same t_structured, including
@@ -1496,12 +1493,6 @@ void deprecate_typedef_type_annotations(
     deprecate_annotations(ctx, *node.type());
   }
 }
-void deprecate_function_parameter_annotations(
-    sema_context& ctx, const t_function& node) {
-  for (const auto& field : node.params().fields()) {
-    deprecate_annotations(ctx, field);
-  }
-}
 
 template <typename Node>
 bool has_cursor_serialization_adapter(const Node& node) {
@@ -1599,7 +1590,7 @@ ast_validator standard_validator() {
       &validate_extends_service_function_name_uniqueness);
   validator.add_interaction_visitor(&validate_interaction_nesting);
   validator.add_interaction_visitor(&validate_interaction_annotations);
-  validator.add_throws_visitor(&validate_throws_exceptions);
+  validator.add_thrown_exception_visitor(&validate_throws_exceptions);
   validator.add_function_visitor(&validate_function_priority_annotation);
   validator.add_function_visitor(ValidateAnnotationPositions{});
 
@@ -1662,7 +1653,6 @@ ast_validator standard_validator() {
   validator.add_container_visitor(
       &validate_cursor_serialization_adapter_in_container);
   validator.add_function_visitor(&forbid_exception_as_method_type);
-  validator.add_function_visitor(&deprecate_function_parameter_annotations);
 
   validator.add_const_visitor(&forbid_exception_as_const_type);
 

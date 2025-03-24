@@ -769,9 +769,6 @@ TEST(CompilerTest, deprecated_annotations) {
         1: optional i64 field (cpp.box) # expected-warning: The annotation cpp.box is deprecated. Please use @thrift.Box instead.
         2: i64 with (py3.name = "w", go.name = "w") # expected-warning: The annotation py3.name is deprecated. Please use @python.Name instead.
         # expected-warning@-1: The annotation go.name is deprecated. Please use @go.Name instead.
-        3: i64 removed_unstructured (rust.foo) # expected-error: The annotation rust.foo has been removed. Please use a structured annotation from thrift/annotation/rust.thrift instead.
-        @thrift.DeprecatedUnvalidatedAnnotations{items = {"rust.foo": "1"}}
-        4: i64 removed_catchall # expected-error@-1: The annotation rust.foo has been removed. Please use a structured annotation from thrift/annotation/rust.thrift instead.
     } (hack.attributes = "")
 
     typedef i64 (cpp.type = "std::uint64_t") T # expected-warning: The annotation cpp.type is deprecated. Please use @cpp.Type instead.

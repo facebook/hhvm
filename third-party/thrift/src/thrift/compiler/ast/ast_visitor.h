@@ -101,6 +101,15 @@ class basic_ast_visitor {
   template <typename N>
   using node_type = ast_detail::node_type<is_const, N>;
 
+  // Enables operator() to distinguish structured fields from function params
+  // and exceptions, which also use t_field but don't belong in field_visitor.
+  struct function_param {
+    node_type<t_field>& wrapped;
+  };
+  struct thrown_exception {
+    node_type<t_field>& wrapped;
+  };
+
  public:
   // Adds visitor for all interface node types.
   //
@@ -137,6 +146,8 @@ class basic_ast_visitor {
     add_root_definition_visitor(visitor);
     add_function_visitor(visitor);
     add_field_visitor(visitor);
+    add_function_param_visitor(visitor);
+    add_thrown_exception_visitor(visitor);
     add_enum_value_visitor(std::forward<V>(visitor));
   }
 
@@ -213,30 +224,27 @@ class basic_ast_visitor {
     } else if (auto* stream = ast_detail::as<t_stream>(sink_or_stream)) {
       visit_child(*stream, args...);
     }
-    if (node.exceptions()) {
-      visit_child(*node.exceptions(), args...);
+    visit_children_wrapped<function_param>(node.params().fields(), args...);
+    if (auto throws = node.exceptions()) {
+      visit_children_wrapped<thrown_exception>(throws->fields(), args...);
     }
     end_visit(node, args...);
   }
   FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(sink) {
     begin_visit(sink_visitors_, node, args...);
     if (auto throws = node.sink_exceptions()) {
-      visit_child(*throws, args...);
+      visit_children_wrapped<thrown_exception>(throws->fields(), args...);
     }
     if (auto throws = node.final_response_exceptions()) {
-      visit_child(*throws, args...);
+      visit_children_wrapped<thrown_exception>(throws->fields(), args...);
     }
     end_visit(node, args...);
   }
   FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(stream) {
     begin_visit(stream_visitors_, node, args...);
-    if (node.exceptions()) {
-      visit_child(*node.exceptions(), args...);
+    if (auto throws = node.exceptions()) {
+      visit_children_wrapped<thrown_exception>(throws->fields(), args...);
     }
-    end_visit(node, args...);
-  }
-  FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(throws) {
-    begin_visit(throws_visitors_, node, args...);
     end_visit(node, args...);
   }
 
@@ -277,6 +285,28 @@ class basic_ast_visitor {
   FBTHRIFT_AST_DETAIL_AST_VISITOR_NODE_T_(typedef) {
     begin_visit(typedef_visitors_, node, args...);
     end_visit(node, args...);
+  }
+
+  // Function parameters and exceptions.
+ private:
+  ast_detail::visitor_list<Args..., field_type&> function_param_visitors_;
+  ast_detail::visitor_list<Args..., field_type&> thrown_exception_visitors_;
+
+ public:
+  void add_function_param_visitor(std::function<void(Args..., field_type&)> v) {
+    function_param_visitors_.emplace_back(std::move(v));
+  }
+  void add_thrown_exception_visitor(
+      std::function<void(Args..., field_type&)> v) {
+    thrown_exception_visitors_.emplace_back(std::move(v));
+  }
+  void operator()(Args... args, function_param&& param) const {
+    begin_visit(function_param_visitors_, param.wrapped, args...);
+    end_visit(param.wrapped, args...);
+  }
+  void operator()(Args... args, thrown_exception&& exn) const {
+    begin_visit(thrown_exception_visitors_, exn.wrapped, args...);
+    end_visit(exn.wrapped, args...);
   }
 
   // Container types.
@@ -332,6 +362,13 @@ class basic_ast_visitor {
     // Loop must be resilient to visitor calling push_back.
     for (size_t i = 0; i < children.size(); ++i) {
       (*this)(args..., children[i]);
+    }
+  }
+  template <typename Wrapper, typename C>
+  void visit_children_wrapped(const C& children, Args... args) const {
+    // Loop must be resilient to visitor calling push_back.
+    for (size_t i = 0; i < children.size(); ++i) {
+      (*this)(args..., Wrapper{children[i]});
     }
   }
   template <typename C>

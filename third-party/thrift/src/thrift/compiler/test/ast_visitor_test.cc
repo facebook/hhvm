@@ -69,7 +69,6 @@ class MockAstVisitor {
   MOCK_METHOD(void, visit_service, (const t_service*));
   MOCK_METHOD(void, visit_interaction, (const t_interaction*));
   MOCK_METHOD(void, visit_function, (const t_function*));
-  MOCK_METHOD(void, visit_throws, (const t_throws*));
   MOCK_METHOD(void, visit_sink, (const t_sink*));
   MOCK_METHOD(void, visit_stream, (const t_stream*));
 
@@ -85,6 +84,9 @@ class MockAstVisitor {
   MOCK_METHOD(void, visit_set, (const t_set*));
   MOCK_METHOD(void, visit_list, (const t_list*));
   MOCK_METHOD(void, visit_map, (const t_map*));
+
+  MOCK_METHOD(void, visit_function_param, (const t_field*));
+  MOCK_METHOD(void, visit_thrown_exception, (const t_field*));
 
   // Registers with all ast_visitor registration functions.
   template <typename V>
@@ -112,8 +114,6 @@ class MockAstVisitor {
         [this](const t_interaction& node) { visit_interaction(&node); });
     visitor.add_function_visitor(
         [this](const t_function& node) { visit_function(&node); });
-    visitor.add_throws_visitor(
-        [this](const t_throws& node) { visit_throws(&node); });
     visitor.add_sink_visitor([this](const t_sink& node) { visit_sink(&node); });
     visitor.add_stream_visitor(
         [this](const t_stream& node) { visit_stream(&node); });
@@ -137,6 +137,11 @@ class MockAstVisitor {
     visitor.add_set_visitor([this](const t_set& node) { visit_set(&node); });
     visitor.add_list_visitor([this](const t_list& node) { visit_list(&node); });
     visitor.add_map_visitor([this](const t_map& node) { visit_map(&node); });
+
+    visitor.add_function_param_visitor(
+        [this](const t_field& node) { visit_function_param(&node); });
+    visitor.add_thrown_exception_visitor(
+        [this](const t_field& node) { visit_thrown_exception(&node); });
   }
 };
 
@@ -153,7 +158,6 @@ class OverloadedVisitor {
     mock_->visit_interaction(&node);
   }
   void operator()(const t_function& node) { mock_->visit_function(&node); }
-  void operator()(const t_throws& node) { mock_->visit_throws(&node); }
 
   void operator()(const t_structured& node) { mock_->visit_structured(&node); }
   void operator()(const t_union& node) { mock_->visit_union(&node); }
@@ -218,20 +222,28 @@ TYPED_TEST(AstVisitorTest, interaction) {
   auto void_ref = t_type_ref::from_req_ptr(&t_primitive_type::t_void());
   auto func1 =
       std::make_unique<t_function>(&this->program_, void_ref, "function1");
-  func1->set_exceptions(std::make_unique<t_throws>());
+  auto exn = std::make_unique<t_exception>(nullptr, "Exception");
+  auto thrown = std::make_unique<t_field>(exn.get(), "ex", 1);
+  auto throws = std::make_unique<t_throws>();
+  auto thrownptr = thrown.get();
+  throws->append(std::move(thrown));
+  func1->set_exceptions(std::move(throws));
   auto func2 =
       std::make_unique<t_function>(&this->program_, void_ref, "function2");
 
   EXPECT_CALL(this->mock_, visit_function(func1.get()));
-  EXPECT_CALL(this->mock_, visit_throws(func1->exceptions()));
+  EXPECT_CALL(this->mock_, visit_thrown_exception(thrownptr));
   EXPECT_CALL(this->mock_, visit_function(func2.get()));
   // Matches: definition, named.
   EXPECT_CALL(this->mock_, visit_named(func1.get()));
   EXPECT_CALL(this->mock_, visit_named(func2.get()));
+  EXPECT_CALL(this->mock_, visit_named(thrownptr));
   EXPECT_CALL(this->mock_, visit_definition(func1.get()));
   EXPECT_CALL(this->mock_, visit_definition(func2.get()));
+  EXPECT_CALL(this->mock_, visit_definition(thrownptr));
   EXPECT_CALL(this->overload_mock_, visit_function(func1.get())).Times(2);
   EXPECT_CALL(this->overload_mock_, visit_function(func2.get())).Times(2);
+  EXPECT_CALL(this->overload_mock_, visit_field(thrownptr)).Times(2);
   interaction->add_function(std::move(func1));
   interaction->add_function(std::move(func2));
 
@@ -251,20 +263,37 @@ TYPED_TEST(AstVisitorTest, service) {
   auto void_ref = t_type_ref::from_req_ptr(&t_primitive_type::t_void());
   auto func1 =
       std::make_unique<t_function>(&this->program_, void_ref, "function1");
-  func1->set_exceptions(std::make_unique<t_throws>());
-  auto func2 =
-      std::make_unique<t_function>(&this->program_, void_ref, "function2");
+  auto exn = std::make_unique<t_exception>(nullptr, "Exception");
+  auto thrown = std::make_unique<t_field>(exn.get(), "ex", 1);
+  auto throws = std::make_unique<t_throws>();
+  auto thrownptr = thrown.get();
+  throws->append(std::move(thrown));
+  func1->set_exceptions(std::move(throws));
+  auto field =
+      std::make_unique<t_field>(&t_primitive_type::t_i32(), "field", 1);
+  auto fieldptr = field.get();
+  auto params = std::make_unique<t_paramlist>(nullptr);
+  params->append(std::move(field));
+  auto func2 = std::make_unique<t_function>(
+      &this->program_, void_ref, "function2", std::move(params));
 
   EXPECT_CALL(this->mock_, visit_function(func1.get()));
-  EXPECT_CALL(this->mock_, visit_throws(func1->exceptions()));
+  EXPECT_CALL(this->mock_, visit_thrown_exception(thrownptr));
   EXPECT_CALL(this->mock_, visit_function(func2.get()));
+  EXPECT_CALL(this->mock_, visit_function_param(fieldptr));
   // Matches: definition, named
   EXPECT_CALL(this->mock_, visit_definition(func1.get()));
   EXPECT_CALL(this->mock_, visit_definition(func2.get()));
+  EXPECT_CALL(this->mock_, visit_definition(thrownptr));
+  EXPECT_CALL(this->mock_, visit_definition(fieldptr));
   EXPECT_CALL(this->mock_, visit_named(func1.get()));
   EXPECT_CALL(this->mock_, visit_named(func2.get()));
+  EXPECT_CALL(this->mock_, visit_named(thrownptr));
+  EXPECT_CALL(this->mock_, visit_named(fieldptr));
   EXPECT_CALL(this->overload_mock_, visit_function(func1.get())).Times(2);
   EXPECT_CALL(this->overload_mock_, visit_function(func2.get())).Times(2);
+  EXPECT_CALL(this->overload_mock_, visit_field(thrownptr)).Times(2);
+  EXPECT_CALL(this->overload_mock_, visit_field(fieldptr)).Times(2);
   service->add_function(std::move(func1));
   service->add_function(std::move(func2));
 
@@ -413,12 +442,21 @@ TYPED_TEST(AstVisitorTest, map) {
 TEST(AstVisitorTest, sink) {
   auto sink1 = std::make_unique<t_sink>(
       t_primitive_type::t_i32(), t_primitive_type::t_i32());
+  auto exn = std::make_unique<t_exception>(nullptr, "Exception");
+  auto thrown = std::make_unique<t_field>(exn.get(), "ex", 1);
+  auto throws = std::make_unique<t_throws>();
+  auto thrownptr = thrown.get();
+  auto thrown1 = thrown->clone_DO_NOT_USE();
+  auto thrownptr1 = thrown1.get();
+  throws->append(std::move(thrown));
+  auto throws1 = std::make_unique<t_throws>();
+  throws1->append(std::move(thrown1));
   auto sink1ptr = sink1.get();
-  sink1->set_sink_exceptions(std::make_unique<t_throws>());
+  sink1->set_sink_exceptions(std::move(throws));
   auto sink2 = std::make_unique<t_sink>(
       t_primitive_type::t_i32(), t_primitive_type::t_i32());
   auto sink2ptr = sink2.get();
-  sink2->set_final_response_exceptions(std::make_unique<t_throws>());
+  sink2->set_final_response_exceptions(std::move(throws1));
 
   auto program =
       t_program("path/to/program.thrift", "/root/path/to/program.thrift");
@@ -434,22 +472,25 @@ TEST(AstVisitorTest, sink) {
   auto responses = std::vector<const t_sink*>();
   visitor.add_sink_visitor(
       [&](const t_sink& node) { responses.push_back(&node); });
-  auto throws = std::vector<const t_throws*>();
-  visitor.add_throws_visitor(
-      [&](const t_throws& node) { throws.push_back(&node); });
+  auto exns = std::vector<const t_field*>();
+  visitor.add_thrown_exception_visitor(
+      [&](const t_field& node) { exns.push_back(&node); });
   visitor(program);
 
   EXPECT_THAT(responses, testing::ElementsAre(sink1ptr, sink2ptr));
-  EXPECT_THAT(
-      throws,
-      testing::ElementsAre(
-          sink1ptr->sink_exceptions(), sink2ptr->final_response_exceptions()));
+  EXPECT_THAT(exns, testing::ElementsAre(thrownptr, thrownptr1));
 }
 
 TEST(AstVisitorTest, stream) {
   auto stream1 = std::make_unique<t_stream>(t_primitive_type::t_i32());
   auto stream1ptr = stream1.get();
-  stream1->set_exceptions(std::make_unique<t_throws>());
+
+  auto exn = std::make_unique<t_exception>(nullptr, "Exception");
+  auto thrown = std::make_unique<t_field>(exn.get(), "ex", 1);
+  auto throws = std::make_unique<t_throws>();
+  auto thrownptr = thrown.get();
+  throws->append(std::move(thrown));
+  stream1->set_exceptions(std::move(throws));
   auto stream2 = std::make_unique<t_stream>(t_primitive_type::t_i32());
   auto stream2ptr = stream2.get();
 
@@ -467,13 +508,13 @@ TEST(AstVisitorTest, stream) {
   auto responses = std::vector<const t_stream*>();
   visitor.add_stream_visitor(
       [&](const t_stream& node) { responses.push_back(&node); });
-  auto throws = std::vector<const t_throws*>();
-  visitor.add_throws_visitor(
-      [&](const t_throws& node) { throws.push_back(&node); });
+  auto exns = std::vector<const t_field*>();
+  visitor.add_thrown_exception_visitor(
+      [&](const t_field& node) { exns.push_back(&node); });
   visitor(program);
 
   EXPECT_THAT(responses, testing::ElementsAre(stream1ptr, stream2ptr));
-  EXPECT_THAT(throws, testing::ElementsAre(stream1ptr->exceptions()));
+  EXPECT_THAT(exns, testing::ElementsAre(thrownptr));
 }
 
 TEST(AstVisitorTest, modifications) {

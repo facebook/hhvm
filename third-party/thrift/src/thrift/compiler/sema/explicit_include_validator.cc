@@ -125,15 +125,15 @@ void add_explicit_include_validators(
     if (const t_type_ref& interaction = f.interaction()) {
       visit_type(ctx, f, *interaction);
     }
-    for (const t_field& param : f.params().fields()) {
-      visit_type(ctx, param, *param.get_type());
-    }
   });
-  validator.add_throws_visitor([](sema_context& ctx, const t_throws& exns) {
-    for (const t_field& ex : exns.fields()) {
-      visit_type(ctx, ex, *ex.get_type());
-    }
-  });
+  validator.add_function_param_visitor(
+      [](sema_context& ctx, const t_field& param) {
+        visit_type(ctx, param, *param.get_type());
+      });
+  validator.add_thrown_exception_visitor(
+      [](sema_context& ctx, const t_field& ex) {
+        visit_type(ctx, ex, *ex.get_type());
+      });
   validator.add_stream_visitor([](sema_context& ctx, const t_stream& s) {
     visit_type(ctx, static_cast<const t_named&>(*ctx.parent()), *s.elem_type());
   });
@@ -166,7 +166,7 @@ void add_explicit_include_validators(
   validator.add_named_visitor([](sema_context& ctx, const t_named& n) {
     // Temporary workaround for patch generator
     if (n.generated() ||
-        (ctx.parent() &&
+        (dynamic_cast<const t_named*>(ctx.parent()) &&
          static_cast<const t_named&>(*ctx.parent()).generated())) {
       return;
     }

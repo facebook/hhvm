@@ -128,18 +128,19 @@ class type_ref_resolver {
         });
 
     mutator.add_function_visitor(
-        [&](sema_context& ctx, mutator_context& mctx, t_function& node) {
+        [&](sema_context&, mutator_context&, t_function& node) {
           resolve_in_place(node.return_type());
           resolve_in_place(node.interaction());
-          for (auto& field : node.params().fields()) {
-            mutator(ctx, mctx, field);
-          }
         });
-    mutator.add_throws_visitor(
-        [&](sema_context& ctx, mutator_context& mctx, t_throws& node) {
-          for (auto& field : node.fields()) {
-            mutator(ctx, mctx, field);
-          }
+    mutator.add_function_param_visitor(
+        [&](sema_context& ctx, mutator_context& mctx, t_field& param) {
+          // Delegates to field visitor.
+          mutator(ctx, mctx, param);
+        });
+    mutator.add_thrown_exception_visitor(
+        [&](sema_context& ctx, mutator_context& mctx, t_field& field) {
+          // Delegates to field visitor.
+          mutator(ctx, mctx, field);
         });
     mutator.add_stream_visitor(
         [&](sema_context&, mutator_context&, t_stream& node) {

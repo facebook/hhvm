@@ -50,6 +50,8 @@ class t_named : public t_node {
   }
   void add_structured_annotation(std::unique_ptr<t_const> annot);
 
+  bool has_structured_annotation(const char* uri) const;
+
   const t_const* find_structured_annotation_or_null(const char* uri) const;
 
   // The 'universal' name for this node.

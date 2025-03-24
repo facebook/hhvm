@@ -46,6 +46,10 @@ void t_named::add_structured_annotation(std::unique_ptr<t_const> annot) {
   structured_annotations_.emplace_back(std::move(annot));
 }
 
+bool t_named::has_structured_annotation(const char* uri) const {
+  return find_structured_annotation_or_null(uri) != nullptr;
+}
+
 const t_const* t_named::find_structured_annotation_or_null(
     const char* uri) const {
   for (const auto& annotation : structured_annotations_) {

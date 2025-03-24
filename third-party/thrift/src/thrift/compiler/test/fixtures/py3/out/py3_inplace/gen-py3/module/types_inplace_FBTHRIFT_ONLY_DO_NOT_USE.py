@@ -2181,8 +2181,13 @@ class BinaryUnion(thrift.py3.types.Union):
     __module__ = _fbthrift__module_name__
     __slots__ = (
         "_fbthrift__inner",
+        "_fbthrift_inner__type",
+        "_fbthrift_inner__value",
     )
+    Type = _fbthrift_python_types.BinaryUnion.Type
     _fbthrift__inner : _fbthrift_python_types.BinaryUnion
+    _fbthrift_inner__type: Type
+    _fbthrift_inner__value: _fbthrift_iobuf.IOBuf | None
 
 
     def __init__(self, *args, **kwargs) -> None:
@@ -2190,6 +2195,8 @@ class BinaryUnion(thrift.py3.types.Union):
 
     def __new__(cls, *args, **kwargs) -> BinaryUnion:
         instance = super().__new__(cls)
+        instance._fbthrift_inner__type = None
+        instance._fbthrift_inner__value = None
         return instance
 
     @staticmethod
@@ -2208,6 +2215,16 @@ class BinaryUnion(thrift.py3.types.Union):
     @property
     def iobuf_val(self) -> _fbthrift_iobuf.IOBuf:
         return self._fbthrift__inner.iobuf_val
+
+    @property
+    def type(self) -> _fbthrift_python_types.BinaryUnion.Type:
+        return self._fbthrift__inner.type
+
+    @property
+    def value(self) -> _fbthrift_iobuf.IOBuf | None:
+        match self._fbthrift__inner.type:
+            case _:
+                return self._fbthrift__inner.value
 
 
 

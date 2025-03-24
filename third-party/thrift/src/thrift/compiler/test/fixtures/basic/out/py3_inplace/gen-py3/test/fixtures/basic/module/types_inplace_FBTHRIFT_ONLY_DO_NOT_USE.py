@@ -608,12 +608,17 @@ class MyUnion(thrift.py3.types.Union):
         "_fbthrift_inner__myStruct",
         "_fbthrift_inner__myDataItem",
         "_fbthrift_inner__floatSet",
+        "_fbthrift_inner__type",
+        "_fbthrift_inner__value",
     )
+    Type = _fbthrift_python_types.MyUnion.Type
     _fbthrift__inner : _fbthrift_python_types.MyUnion
     _fbthrift_inner__myEnum : MyEnum | None
     _fbthrift_inner__myStruct : MyStruct | None
     _fbthrift_inner__myDataItem : MyDataItem | None
     _fbthrift_inner__floatSet : _typing.AbstractSet[float] | None
+    _fbthrift_inner__type: Type
+    _fbthrift_inner__value: MyEnum | MyStruct | MyDataItem | _typing.AbstractSet[float] | None
 
 
     def __init__(self, *args, **kwargs) -> None:
@@ -625,6 +630,8 @@ class MyUnion(thrift.py3.types.Union):
         instance._fbthrift_inner__myStruct = None
         instance._fbthrift_inner__myDataItem = None
         instance._fbthrift_inner__floatSet = None
+        instance._fbthrift_inner__type = None
+        instance._fbthrift_inner__value = None
         return instance
 
     @staticmethod
@@ -679,6 +686,24 @@ class MyUnion(thrift.py3.types.Union):
             self._fbthrift_inner__floatSet = Set__float.from_python(__python_val)
 
         return self._fbthrift_inner__floatSet
+
+    @property
+    def type(self) -> _fbthrift_python_types.MyUnion.Type:
+        return self._fbthrift__inner.type
+
+    @property
+    def value(self) -> MyEnum | MyStruct | MyDataItem | _typing.AbstractSet[float] | None:
+        match self._fbthrift__inner.type:
+            case _fbthrift_python_types.MyUnion.Type.myEnum:
+                return self.myEnum
+            case _fbthrift_python_types.MyUnion.Type.myStruct:
+                return self.myStruct
+            case _fbthrift_python_types.MyUnion.Type.myDataItem:
+                return self.myDataItem
+            case _fbthrift_python_types.MyUnion.Type.floatSet:
+                return self.floatSet
+            case _:
+                return self._fbthrift__inner.value
 
 
 
@@ -852,8 +877,13 @@ class UnionToBeRenamed(thrift.py3.types.Union):
     __module__ = _fbthrift__module_name__
     __slots__ = (
         "_fbthrift__inner",
+        "_fbthrift_inner__type",
+        "_fbthrift_inner__value",
     )
+    Type = _fbthrift_python_types.UnionToBeRenamed.Type
     _fbthrift__inner : _fbthrift_python_types.UnionToBeRenamed
+    _fbthrift_inner__type: Type
+    _fbthrift_inner__value: int | None
 
 
     def __init__(self, *args, **kwargs) -> None:
@@ -861,6 +891,8 @@ class UnionToBeRenamed(thrift.py3.types.Union):
 
     def __new__(cls, *args, **kwargs) -> UnionToBeRenamed:
         instance = super().__new__(cls)
+        instance._fbthrift_inner__type = None
+        instance._fbthrift_inner__value = None
         return instance
 
     @staticmethod
@@ -879,6 +911,16 @@ class UnionToBeRenamed(thrift.py3.types.Union):
     @property
     def reserved_field(self) -> int:
         return self._fbthrift__inner.reserved_field
+
+    @property
+    def type(self) -> _fbthrift_python_types.UnionToBeRenamed.Type:
+        return self._fbthrift__inner.type
+
+    @property
+    def value(self) -> int | None:
+        match self._fbthrift__inner.type:
+            case _:
+                return self._fbthrift__inner.value
 
 
 

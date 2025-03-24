@@ -96,14 +96,24 @@ class {{struct:name}}(thrift.py3.types.{{!
         "_fbthrift__inner",
     {{#struct:fields_and_mixin_fields}}{{#field:type}}{{#type:needs_convert?}}
         "_fbthrift_inner__{{field:py_name}}",
-    {{/type:needs_convert?}}{{/field:type}}{{/struct:fields_and_mixin_fields}}
+    {{/type:needs_convert?}}{{/field:type}}{{/struct:fields_and_mixin_fields}}{{#struct:union?}}
+        "_fbthrift_inner__type",
+        "_fbthrift_inner__value",
+    {{/struct:union?}}
     )
+    {{#struct:union?}}
+    Type = _fbthrift_python_types.{{struct:name}}.Type
+    {{/struct:union?}}
     _fbthrift__inner : _fbthrift_python_types.{{struct:name}}
     {{#struct:fields_and_mixin_fields}}
     {{#field:type}}{{#type:needs_convert?}}
     _fbthrift_inner__{{field:py_name}} : {{> inplace/field_type}} | None
     {{/type:needs_convert?}}{{/field:type}}
     {{/struct:fields_and_mixin_fields}}
+    {{#struct:union?}}
+    _fbthrift_inner__type: Type
+    _fbthrift_inner__value: {{> inplace/union_value_type }}
+    {{/struct:union?}}
 
 
     def __init__(self, *args, **kwargs) -> None:
@@ -117,6 +127,10 @@ class {{struct:name}}(thrift.py3.types.{{!
         instance._fbthrift_inner__{{field:py_name}} = None
         {{/type:needs_convert?}}{{/field:type}}
         {{/struct:fields_and_mixin_fields}}
+        {{#struct:union?}}
+        instance._fbthrift_inner__type = None
+        instance._fbthrift_inner__value = None
+        {{/struct:union?}}
         return instance
 
     @staticmethod
@@ -153,6 +167,22 @@ class {{struct:name}}(thrift.py3.types.{{!
 {{/type:needs_convert?}}{{/field:type}}
 
     {{/struct:fields_and_mixin_fields}}
+    {{#struct:union?}}
+    @property
+    def type(self) -> _fbthrift_python_types.{{struct:name}}.Type:
+        return self._fbthrift__inner.type
+
+    @property
+    def value(self) -> {{> inplace/union_value_type }}:
+        match self._fbthrift__inner.type:
+{{#struct:fields_and_mixin_fields}}{{#field:type}}{{#type:needs_convert?}}
+            case _fbthrift_python_types.{{struct:name}}.Type.{{field:py_name}}:
+                return self.{{field:py_name}}
+{{/type:needs_convert?}}{{/field:type}}{{/struct:fields_and_mixin_fields}}
+            case _:
+                return self._fbthrift__inner.value
+
+    {{/struct:union?}}
 
 
 

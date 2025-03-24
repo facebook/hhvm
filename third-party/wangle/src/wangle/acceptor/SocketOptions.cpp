@@ -25,19 +25,29 @@ folly::SocketOptionMap filterIPSocketOptions(
     const folly::SocketOptionMap& allOptions,
     const int addrFamily) {
   folly::SocketOptionMap opts;
-  int exclude = 0;
-  if (addrFamily == AF_INET) {
-    exclude = IPPROTO_IPV6;
-  } else if (addrFamily == AF_INET6) {
-    exclude = IPPROTO_IP;
-  } else {
-    LOG(FATAL) << "Address family " << addrFamily << " was not IPv4 or IPv6";
-  }
+
   for (const auto& opt : allOptions) {
-    if (opt.first.level != exclude) {
+    if (opt.first.level == SOL_SOCKET) {
       opts[opt.first] = opt.second;
+      continue;
     }
+
+    if (addrFamily == AF_INET) {
+      if (opt.first.level == IPPROTO_IPV6) {
+        continue;
+      }
+    } else if (addrFamily == AF_INET6) {
+      if (opt.first.level == IPPROTO_IP) {
+        continue;
+      }
+    } else {
+      LOG(FATAL) << "Address family " << addrFamily << " was not IPv4 or IPv6";
+    }
+
+    // Include all other options
+    opts[opt.first] = opt.second;
   }
+
   return opts;
 }
 

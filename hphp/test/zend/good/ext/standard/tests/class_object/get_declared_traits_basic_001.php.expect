@@ -2,20 +2,20 @@
 
 -- Testing get_declared_traits() function with Zero arguments --
 vec(14) {
-  string(44) "HH\Lib\IO\WriteHandleConvenienceMethodsTrait"
-  string(24) "ReflectionTypedAttribute"
-  string(19) "StrictKeyedIterable"
-  string(14) "StrictIterable"
-  string(50) "HH\Lib\_Private\_IO\FileDescriptorWriteHandleTrait"
-  string(17) "LazyKeyedIterable"
-  string(35) "HH\Lib\_Private\_File\TruncateTrait"
-  string(49) "HH\Lib\_Private\_IO\FileDescriptorReadHandleTrait"
   string(32) "ExceptionWithPureGetMessageTrait"
   string(43) "HH\Lib\IO\ReadHandleConvenienceMethodsTrait"
-  string(25) "ReflectionLegacyAttribute"
-  string(25) "__SystemLib\BaseException"
+  string(44) "HH\Lib\IO\WriteHandleConvenienceMethodsTrait"
+  string(35) "HH\Lib\_Private\_File\TruncateTrait"
+  string(49) "HH\Lib\_Private\_IO\FileDescriptorReadHandleTrait"
+  string(50) "HH\Lib\_Private\_IO\FileDescriptorWriteHandleTrait"
   string(12) "LazyIterable"
+  string(17) "LazyKeyedIterable"
   string(7) "MyTrait"
+  string(25) "ReflectionLegacyAttribute"
+  string(24) "ReflectionTypedAttribute"
+  string(14) "StrictIterable"
+  string(19) "StrictKeyedIterable"
+  string(25) "__SystemLib\BaseException"
 }
 
 -- Ensure trait is listed --

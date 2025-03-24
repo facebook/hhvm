@@ -950,7 +950,7 @@ void emitBespokeColFromArray(IRGS& env,
   push(env, col);
 }
 
-void emitBespokeClassGetTSWithGenerics(IRGS& env) {
+void classGetTSImpl(IRGS& env, bool pushGenerics) {
   auto const arr = topC(env);
   auto const arrType = arr->type();
   if (!(arrType <= TDict)) {
@@ -962,12 +962,14 @@ void emitBespokeClassGetTSWithGenerics(IRGS& env) {
     }
   }
 
-  auto const generics = cns(env, s_generic_types.get());
-  ifElse(
-    env,
-    [&](Block* taken) { emitGet(env, arr, generics, taken); },
-    [&] { gen(env, Jmp, makeExitSlow(env)); }
-  );
+  if (pushGenerics) {
+    auto const generics = cns(env, s_generic_types.get());
+    ifElse(
+      env,
+      [&](Block* taken) { emitGet(env, arr, generics, taken); },
+      [&] { gen(env, Jmp, makeExitSlow(env)); }
+    );
+  }
 
   auto const classKey = cns(env, s_classname.get());
   auto const classVal = cond(
@@ -998,7 +1000,15 @@ void emitBespokeClassGetTSWithGenerics(IRGS& env) {
   auto const cls = ldCls(env, className);
   popDecRef(env);
   push(env, cls);
-  push(env, cns(env, TInitNull));
+  if (pushGenerics) push(env, cns(env, TInitNull));
+}
+
+void emitBespokeClassGetTS(IRGS& env) {
+  classGetTSImpl(env, false);
+}
+
+void emitBespokeClassGetTSWithGenerics(IRGS& env) {
+  classGetTSImpl(env, true);
 }
 
 void emitBespokeShapesAt(IRGS& env, int32_t numArgs) {
@@ -1231,6 +1241,9 @@ void emitBespoke(IRGS& env, const NormalizedInstruction& ni,
     case Op::ColFromArray:
       emitBespokeColFromArray(env, (CollectionType) ni.imm[0].u_OA);
       return;
+    case Op::ClassGetTS:
+      emitBespokeClassGetTS(env);
+      return;
     case Op::ClassGetTSWithGenerics:
       emitBespokeClassGetTSWithGenerics(env);
       return;
@@ -1267,6 +1280,7 @@ Optional<Location> getVanillaLocation(const IRGS& env, SrcKey sk) {
     case Op::AddNewElemC:
       return {Location::Stack{soff - 1}};
     case Op::AKExists:
+    case Op::ClassGetTS:
     case Op::ClassGetTSWithGenerics:
     case Op::ColFromArray:
       return {Location::Stack{soff}};

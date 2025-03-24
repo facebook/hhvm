@@ -787,6 +787,7 @@ fn cmp_instr_hhbc((a, a_func): (&Hhbc, &Func), (b, b_func): (&Hhbc, &Func)) -> R
         | (Hhbc::CheckClsRGSoft(_, _), _)
         | (Hhbc::CheckThis(_), _)
         | (Hhbc::ClassGetC(_, _, _), _)
+        | (Hhbc::ClassGetTS(_, _), _)
         | (Hhbc::ClassGetTSWithGenerics(_, _), _)
         | (Hhbc::ClassHasReifiedGenerics(_, _), _)
         | (Hhbc::ClassName(_, _), _)

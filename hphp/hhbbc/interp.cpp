@@ -2410,11 +2410,11 @@ void in(ISS& env, const bc::ClassGetC& op) {
   push(env, TCls);
 }
 
-void in(ISS& env, const bc::ClassGetTSWithGenerics& op) {
+void classGetTSImpl(ISS& env, bool pushGenerics) {
   auto const ts = popC(env);
   if (!ts.couldBe(BDict)) {
     push(env, TBottom);
-    push(env, TBottom);
+    if (pushGenerics) push(env, TBottom);
     return;
   }
 
@@ -2425,10 +2425,12 @@ void in(ISS& env, const bc::ClassGetTSWithGenerics& op) {
     if (auto const name = type_structure_name(ts_arr)) {
       if (auto const rcls = env.index.resolve_class(name)) {
         push(env, clsExact(*rcls, true));
-        if (auto const rg = get_ts_generic_types_opt(ts_arr)) {
-          push(env, vec_val(rg));
-        } else {
-          push(env, TInitNull);
+        if (pushGenerics) {
+          if (auto const rg = get_ts_generic_types_opt(ts_arr)) {
+            push(env, vec_val(rg));
+          } else {
+            push(env, TInitNull);
+          }
         }
         return;
       }
@@ -2436,7 +2438,15 @@ void in(ISS& env, const bc::ClassGetTSWithGenerics& op) {
   }
 
   push(env, TCls);
-  push(env, TOptVec);
+  if (pushGenerics) push(env, TOptVec);
+}
+
+void in(ISS& env, const bc::ClassGetTS&) {
+  classGetTSImpl(env, false);
+}
+
+void in(ISS& env, const bc::ClassGetTSWithGenerics&) {
+  classGetTSImpl(env, true);
 }
 
 void in(ISS& env, const bc::AKExists&) {

@@ -315,6 +315,7 @@ fn is_cow_instr(instr: &NodeInstr) -> bool {
             | Opcode::CheckClsRGSoft
             | Opcode::CheckThis
             | Opcode::ClassGetC(..)
+            | Opcode::ClassGetTS
             | Opcode::ClassGetTSWithGenerics
             | Opcode::ClassHasReifiedGenerics
             | Opcode::ClassName

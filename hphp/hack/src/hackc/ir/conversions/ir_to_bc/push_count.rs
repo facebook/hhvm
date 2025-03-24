@@ -94,6 +94,7 @@ impl<'a> PushCount<'a> for instr::Hhbc {
             | Hhbc::ChainFaults(..)
             | Hhbc::CheckProp(..)
             | Hhbc::ClassGetC(..)
+            | Hhbc::ClassGetTS(..)
             | Hhbc::ClassHasReifiedGenerics(..)
             | Hhbc::ClassName(..)
             | Hhbc::Clone(..)

@@ -2299,7 +2299,7 @@ OPTBLD_INLINE void iopClassGetC(ClassGetCMode mode) {
   vmStack().pushClass(cls);
 }
 
-OPTBLD_INLINE void iopClassGetTSWithGenerics() {
+OPTBLD_INLINE void classGetTSImpl(bool pushGenerics) {
   auto const cell = vmStack().topC();
   if (!tvIsDict(cell)) {
     raise_error("Reified type must be a type structure");
@@ -2312,15 +2312,19 @@ OPTBLD_INLINE void iopClassGetTSWithGenerics() {
   }
   assertx(isStringType(classname_field.type()));
   auto const name = classname_field.val().pstr;
-  auto const generics_field = ts->get(s_generic_types.get());
+
   ArrayData* reified_types = nullptr;
-  if (generics_field.is_init()) {
-    reified_types = generics_field.val().parr;
-    auto const mangledTypeName =
-      makeStaticString(mangleReifiedGenericsName(reified_types));
-    reified_types->incRefCount();
-    reified_types = addToTypeReifiedGenericsTable(mangledTypeName, reified_types);
+  if (pushGenerics) {
+    auto const generics_field = ts->get(s_generic_types.get());
+    if (generics_field.is_init()) {
+      reified_types = generics_field.val().parr;
+      auto const mangledTypeName =
+        makeStaticString(mangleReifiedGenericsName(reified_types));
+      reified_types->incRefCount();
+      reified_types = addToTypeReifiedGenericsTable(mangledTypeName, reified_types);
+    }
   }
+
   auto const cls = Class::load(name);
   if (cls == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS, name->data());
@@ -2328,11 +2332,21 @@ OPTBLD_INLINE void iopClassGetTSWithGenerics() {
 
   vmStack().popC();
   vmStack().pushClass(cls);
-  if (reified_types) {
-    vmStack().pushStaticArrayLike(reified_types);
-  } else {
-    vmStack().pushNull();
+  if (pushGenerics) {
+    if (reified_types) {
+      vmStack().pushStaticArrayLike(reified_types);
+    } else {
+      vmStack().pushNull();
+    }
   }
+}
+
+OPTBLD_INLINE void iopClassGetTS() {
+  classGetTSImpl(false);
+}
+
+OPTBLD_INLINE void iopClassGetTSWithGenerics() {
+  classGetTSImpl(true);
 }
 
 static void raise_undefined_local(ActRec* fp, LocalName pind) {

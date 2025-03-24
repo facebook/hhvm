@@ -1353,7 +1353,7 @@ impl FunctionParser<'_> {
             "check_prop" => I::Hhbc(H::CheckProp(parse_prop_id(tok)?, loc)),
             "check_this" => I::Hhbc(H::CheckThis(loc)),
             "class_get_c" => parse_instr!(tok, I::Hhbc(H::ClassGetC(p1, p0, loc)), <p0:parse_class_get_c_kind> <p1:self.vid>),
-
+            "class_get_ts" => I::Hhbc(H::ClassGetTS(self.vid(tok)?, loc)),
             "class_get_ts_with_generics" => I::Hhbc(H::ClassGetTSWithGenerics(self.vid(tok)?, loc)),
             "class_has_reified_generics" => I::Hhbc(H::ClassHasReifiedGenerics(self.vid(tok)?, loc)),
             "class_name" => I::Hhbc(H::ClassName(self.vid(tok)?, loc)),

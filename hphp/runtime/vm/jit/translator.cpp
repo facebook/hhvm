@@ -227,6 +227,7 @@ static const struct {
   { OpCGetG,       {Stack1,           Stack1,       OutUnknown      }},
   { OpCGetS,       {StackTop2,        Stack1,       OutUnknown      }},
   { OpClassGetC,   {Stack1,           Stack1,       OutClass        }},
+  { OpClassGetTS,  {Stack1,           Stack1,       OutClass       }},
   { OpClassGetTSWithGenerics,
                    {Stack1,           StackTop2,    OutUnknown      }},
 

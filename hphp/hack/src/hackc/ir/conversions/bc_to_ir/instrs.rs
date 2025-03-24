@@ -956,6 +956,7 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         Opcode::CheckClsRGSoft => simple!(Hhbc::CheckClsRGSoft),
         Opcode::CheckThis => simple!(Hhbc::CheckThis),
         Opcode::ClassGetC => simple!(Hhbc::ClassGetC),
+        Opcode::ClassGetTS => simple!(Hhbc::ClassGetTS),
         Opcode::ClassHasReifiedGenerics => simple!(Hhbc::ClassHasReifiedGenerics),
         Opcode::ClassName => simple!(Hhbc::ClassName),
         Opcode::Clone => simple!(Hhbc::Clone),

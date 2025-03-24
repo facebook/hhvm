@@ -113,7 +113,7 @@ void emitClassGetC(IRGS& env, ClassGetCMode mode) {
   push(env, cls);
 }
 
-void emitClassGetTSWithGenerics(IRGS& env) {
+void classGetTSImpl(IRGS& env, bool pushGenerics) {
   auto const ts = topC(env);
   if (!ts->isA(TDict)) {
     if (ts->type().maybe(TDict)) {
@@ -123,14 +123,16 @@ void emitClassGetTSWithGenerics(IRGS& env) {
     }
   }
 
-  auto const val = gen(
-    env,
-    AKExistsDict,
-    ts,
-    cns(env, s_generic_types.get())
-  );
-  // Side-exit for now if it has reified generics
-  gen(env, JmpNZero, makeExitSlow(env), val);
+  if (pushGenerics) {
+    auto const val = gen(
+      env,
+      AKExistsDict,
+      ts,
+      cns(env, s_generic_types.get())
+    );
+    // Side-exit for now if it has reified generics
+    gen(env, JmpNZero, makeExitSlow(env), val);
+  }
 
   int locId = 0;
   auto const finish = [&] (SSATmp* clsName) {
@@ -149,7 +151,7 @@ void emitClassGetTSWithGenerics(IRGS& env) {
     auto const cls = ldCls(env, name);
     popDecRef(env, static_cast<DecRefProfileId>(locId++));
     push(env, cls);
-    push(env, cns(env, TInitNull));
+    if (pushGenerics) push(env, cns(env, TInitNull));
   };
 
   auto const clsName = profiledArrayAccess(
@@ -167,6 +169,14 @@ void emitClassGetTSWithGenerics(IRGS& env) {
     finish
   );
   finish(clsName);
+}
+
+void emitClassGetTS(IRGS& env) {
+  classGetTSImpl(env, false);
+}
+
+void emitClassGetTSWithGenerics(IRGS& env) {
+  classGetTSImpl(env, true);
 }
 
 void emitCGetL(IRGS& env, NamedLocal loc) {

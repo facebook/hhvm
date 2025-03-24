@@ -1,8 +1,6 @@
 string(5) "cls=C"
 string(6) "dcls=C"
 string(6) "lcls=C"
-
-Notice: Implicit string to Class conversion for classname C in %s/class-ptr/const-fold.php on line 10
 string(7) "dlcls=C"
 string(6) "sstr=C"
 string(7) "dsstr=C"

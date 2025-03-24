@@ -2209,7 +2209,7 @@ fn emit_call_lhs_and_fcall<'a, 'd>(
                         InstrSeq::gather(vec![
                             instr::null_uninit(),
                             instr::null_uninit(),
-                            get_reified_var_cexpr(e, env, &pos, &name)?,
+                            get_reified_class(e, env, &pos, &name)?,
                             instr::pop_l(tmp),
                         ]),
                         InstrSeq::gather(vec![
@@ -2299,7 +2299,7 @@ fn emit_call_lhs_and_fcall<'a, 'd>(
                         InstrSeq::gather(vec![
                             instr::null_uninit(),
                             instr::null_uninit(),
-                            get_reified_var_cexpr(e, env, &pos, &name)?,
+                            get_reified_class(e, env, &pos, &name)?,
                             instr::pop_l(cls),
                             emit_meth_name(e)?,
                             instr::pop_l(meth),
@@ -2354,6 +2354,18 @@ fn emit_call_lhs_and_fcall<'a, 'd>(
         }
         _ => emit_fcall_func(e, env, expr, fcall_args, caller_readonly_opt),
     }
+}
+
+fn get_reified_class<'a>(
+    e: &Emitter<'_>,
+    env: &Env<'a>,
+    pos: &Pos,
+    name: &str,
+) -> Result<InstrSeq> {
+    Ok(InstrSeq::gather(vec![
+        emit_reified_type(e, env, pos, name)?,
+        instr::class_get_ts(),
+    ]))
 }
 
 fn get_reified_var_cexpr<'a>(
@@ -2919,8 +2931,7 @@ fn emit_special_function<'a, 'd>(
             }
             Ok(Some(InstrSeq::gather(vec![
                 emit_reified_arg(e, env, pos, false, targs[0].hint())?.0,
-                instr::class_get_ts_with_generics(),
-                instr::pop_c(),
+                instr::class_get_ts(),
             ])))
         }
         _ => Ok(
@@ -2987,13 +2998,11 @@ fn emit_class_meth_native<'a, 'd>(
             instr::resolve_r_cls_method_s(clsref, method_name),
         ]),
         ClassExpr::Reified(ast_defs::Id(pos, name)) if !has_generics => InstrSeq::gather(vec![
-            get_reified_var_cexpr(e, env, &pos, &name)?,
-            instr::class_get_c(ClassGetCMode::Normal),
+            get_reified_class(e, env, &pos, &name)?,
             instr::resolve_cls_method(method_name),
         ]),
         ClassExpr::Reified(ast_defs::Id(pos, name)) => InstrSeq::gather(vec![
-            get_reified_var_cexpr(e, env, &pos, &name)?,
-            instr::class_get_c(ClassGetCMode::Normal),
+            get_reified_class(e, env, &pos, &name)?,
             emit_generics(e)?,
             instr::resolve_r_cls_method(method_name),
         ]),
@@ -3621,11 +3630,9 @@ fn emit_load_class_ref<'a, 'd>(
             emit_expr(e, env, &expr)?,
             instr::class_get_c(ClassGetCMode::Normal),
         ]),
-        ClassExpr::Reified(ast::Id(p, name)) => InstrSeq::gather(vec![
-            emit_pos(pos),
-            get_reified_var_cexpr(e, env, &p, &name)?,
-            instr::class_get_c(ClassGetCMode::Normal),
-        ]),
+        ClassExpr::Reified(ast::Id(p, name)) => {
+            InstrSeq::gather(vec![emit_pos(pos), get_reified_class(e, env, &p, &name)?])
+        }
     };
     Ok(emit_pos_then(pos, instrs))
 }

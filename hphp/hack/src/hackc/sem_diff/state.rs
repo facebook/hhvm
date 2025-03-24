@@ -1352,6 +1352,7 @@ fn is_checkpoint_instr(instr: &NodeInstr) -> bool {
             | Opcode::CheckClsRGSoft
             | Opcode::CheckThis
             | Opcode::ClassGetC(..)
+            | Opcode::ClassGetTS
             | Opcode::ClassGetTSWithGenerics
             | Opcode::ClassHasReifiedGenerics
             | Opcode::ClassName
@@ -1551,6 +1552,7 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         | Opcode::CheckClsRGSoft
         | Opcode::CheckThis
         | Opcode::ClassGetC(_)
+        | Opcode::ClassGetTS
         | Opcode::ClassGetTSWithGenerics
         | Opcode::ClassHasReifiedGenerics
         | Opcode::ClassName

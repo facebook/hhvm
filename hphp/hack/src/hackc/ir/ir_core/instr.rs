@@ -445,6 +445,7 @@ pub enum Hhbc {
     CheckProp(PropName, LocId),
     CheckThis(LocId),
     ClassGetC(ValueId, ClassGetCMode, LocId),
+    ClassGetTS(ValueId, LocId),
     ClassGetTSWithGenerics(ValueId, LocId),
     ClassHasReifiedGenerics(ValueId, LocId),
     ClassName(ValueId, LocId),

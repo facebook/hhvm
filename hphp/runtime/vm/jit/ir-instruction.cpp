@@ -171,9 +171,6 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
     case EndCatch:
       return srcNo == 2;
 
-    case EnterTCUnwind:
-      return srcNo == 2;
-
     case RaiseTooManyArg:
       // RaiseTooManyArg decrefs the unpack arguments.
       return move == Consume && srcNo == 0;

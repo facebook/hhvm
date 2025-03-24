@@ -303,7 +303,7 @@ struct FJmpTaken {};
 
 /*
  * The instruction can be turned into specialized frame teardown instructions
- * followed by an EndCatch or an EnterTCUnwind that will omit the teardown
+ * followed by an EndCatch that will omit the teardown
  */
 struct FFrameTeardown {
   int32_t numStackElems;
@@ -796,39 +796,6 @@ Flags handle_end_catch(Local& env, const IRInstruction& inst) {
   return FFrameTeardown { numStackElems, std::move(elems) };
 }
 
-Flags handle_enter_tc_unwind(Local& env, const IRInstruction& inst) {
-  if (env.global.unit.context().kind != TransKind::Optimize
-      || !Cfg::HHIR::LoadEnableTeardownOpts) {
-    return FNone{};
-  }
-  assertx(inst.op() == EnterTCUnwind);
-  auto const data = inst.extra<EnterTCUnwind>();
-  if (!data->teardown || inst.func()->isCPPBuiltin()) {
-    FTRACE(2, "      non-reducible EnterTCUnwind\n");
-    return FNone{};
-  }
-  auto const numLocals = inst.func()->numLocals();
-
-  FTRACE(2, "      reducible EnterTCUnwind\n");
-  CompactVector<std::pair<uint32_t, Type>> locals;
-
-  for (uint32_t i = 0; i < numLocals; ++i) {
-    check_decref_eligible(
-      env,
-      locals,
-      i,
-      AliasClass { ALocal { inst.marker().fp(), i }});
-  }
-
-  if (locals.size() > Cfg::HHIR::LoadThrowMaxDecrefs) {
-    FTRACE(2, "      handle_enter_tc_unwind: refusing -- too many decrefs {}\n",
-           locals.size());
-    return FNone{};
-  }
-
-  return FFrameTeardown { 0, std::move(locals) };
-}
-
 void refine_value(Local& env, SSATmp* newVal, SSATmp* oldVal) {
   bitset_for_each_set(
     env.state.avail,
@@ -958,7 +925,6 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
     [&] (const UnknownEffects&)    { clear_everything(env); },
     [&] (const ExitEffects&)       {
       if (inst.op() == EndCatch) flags = handle_end_catch(env, inst);
-      if (inst.op() == EnterTCUnwind) flags = handle_enter_tc_unwind(env, inst);
       clear_everything(env);
     },
     [&] (const ReturnEffects&)     {},
@@ -1286,33 +1252,6 @@ void optimize_end_catch(Global& env, IRInstruction& inst,
   ++env.stackTeardownsOptimized;
 }
 
-void optimize_enter_tc_unwind(
-  Global& env,
-  IRInstruction& inst,
-  CompactVector<std::pair<uint32_t, Type>>& locals) {
-  FTRACE(3, "Optimizing EnterTCUnwind\n{}\n", inst.marker().show());
-
-  auto const block = inst.block();
-  auto const extra = inst.extra<EnterTCUnwind>();
-  assertx(extra->teardown);
-
-  for (auto local : locals) {
-    int locId = local.first;
-    auto const type = local.second;
-    FTRACE(5, "    Emitting decref for LocalId {}\n", locId);
-    auto const loadInst =
-      env.unit.gen(LdLoc, inst.bcctx(), type,
-                   LocalId{(uint32_t)locId}, inst.marker().fixupFP());
-    block->insert(block->iteratorTo(&inst), loadInst);
-    auto const decref =
-      env.unit.gen(DecRef, inst.bcctx(), DecRefData{locId}, loadInst->dst());
-    block->insert(block->iteratorTo(&inst), decref);
-  }
-  auto const etcData = EnterTCUnwindData {extra->offset, false};
-  env.unit.replace(&inst, EnterTCUnwind, etcData, inst.src(0));
-  ++env.stackTeardownsOptimized;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 void optimize_inst(Global& env, IRInstruction& inst, Flags flags,
@@ -1394,15 +1333,11 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags,
 
     [&] (FFrameTeardown f) {
       FTRACE(2, "      frame teardown\n");
-      if (inst.op() == EndCatch) {
-        DEBUG_ONLY auto const data = inst.extra<EndCatchData>();
-        assertx(data->teardown == EndCatchData::Teardown::Full);
-        assertx(data->stublogue == EndCatchData::FrameMode::Phplogue);
-        optimize_end_catch(env, inst, f.numStackElems, f.elems);
-        return;
-      }
-      assertx(inst.op() == EnterTCUnwind && f.numStackElems == 0);
-      optimize_enter_tc_unwind(env, inst, f.elems);
+      assertx(inst.is(EndCatch));
+      DEBUG_ONLY auto const data = inst.extra<EndCatchData>();
+      assertx(data->teardown == EndCatchData::Teardown::Full);
+      assertx(data->stublogue == EndCatchData::FrameMode::Phplogue);
+      optimize_end_catch(env, inst, f.numStackElems, f.elems);
     }
   );
 

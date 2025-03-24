@@ -136,24 +136,12 @@ void cgLdUnwinderValue(IRLS& env, const IRInstruction* inst) {
   loadTV(v, inst->dst(), dstLoc(env, inst, 0), rvmtl()[unwinderTVOff()]);
 }
 
-void cgEnterTCUnwind(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<EnterTCUnwind>();
+void cgStUnwinderExn(IRLS& env, const IRInstruction* inst) {
   auto const exn = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
   markRDSAccess(v, g_unwind_rds.handle());
-  markRDSAccess(v, g_unwind_rds.handle());
   v << store{exn, rvmtl()[unwinderExnOff()]};
-
-  auto const target = [&] {
-    if (extra->teardown) return tc::ustubs().endCatchHelper;
-    if (inst->func()->hasThisInBody()) {
-      return tc::ustubs().endCatchTeardownThisHelper;
-    }
-    return tc::ustubs().endCatchSkipTeardownHelper;
-  }();
-
-  v << jmpi{target, vm_regs_with_sp()};
 }
 
 IMPL_OPCODE_CALL(DebugBacktrace)

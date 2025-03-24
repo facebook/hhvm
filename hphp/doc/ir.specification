@@ -3636,13 +3636,9 @@ fields of that struct for holding intermediate values.
 
   Loads the value contained by the current unwinder exception.
 
-| EnterTCUnwind<spOff,teardown>, ND, S(Obj), CRc|T
+| StUnwinderExn, ND, S(Obj), NF
 
-  Enters tc_unwind_resume by doing a side enter, i.e. skipping
-  itanium ABI. Stores the exception given by S0 to UnwindRDS's exn
-  field as well as true to sideEnter field.
-
-  If teardown is set, it notifies tc_unwind_resume to also teardown the locals.
+  Stores the exception given by S0 to UnwindRDS's exn field.
 
 19. Function prologues
 

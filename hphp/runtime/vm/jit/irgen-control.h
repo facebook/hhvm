@@ -54,10 +54,13 @@ void implCondJmp(IRGS&, Offset taken, bool negate, SSATmp*);
  * represented by TNullptr and must be ultimately handled by EndCatch, which
  * gives control back to the unwinder. Otherwise `exc' will contain an object
  * implementing the Throwable interface. Hack exceptions might be routed
- * directly to the appropriate handlers.
+ * directly to the appropriate handlers. If `sideEntry' is true, we are not
+ * coming from the unwinder, so we will have to do the work that's usually
+ * done by the unwinder (storing the Throwable to UnwindRDS, syncing VM regs).
  */
 void emitHandleException(IRGS& env, EndCatchData::CatchMode mode, SSATmp* exc,
-                         Optional<IRSPRelOffset> vmspOffset);
+                         Optional<IRSPRelOffset> vmspOffset,
+                         bool sideEntry = false);
 
 //////////////////////////////////////////////////////////////////////
 

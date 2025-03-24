@@ -434,11 +434,12 @@ void emitExceptionHandler(IRGS& env, Offset ehOffset, SSATmp* exc) {
 }
 
 void emitHandleException(IRGS& env, EndCatchData::CatchMode mode, SSATmp* exc,
-                         Optional<IRSPRelOffset> vmspOffset) {
+                         Optional<IRSPRelOffset> vmspOffset, bool sideEntry) {
   // Stublogues lack proper frames and need special configuration.
   if (env.irb->fs().stublogue()) {
     assertx(!isInlining(env));
     assertx(mode == EndCatchData::CatchMode::UnwindOnly);
+    assertx(!sideEntry);
     auto const data = EndCatchData {
       spOffBCFromIRSP(env),
       EndCatchData::CatchMode::UnwindOnly,
@@ -453,6 +454,7 @@ void emitHandleException(IRGS& env, EndCatchData::CatchMode mode, SSATmp* exc,
   // Teardown::None can't be used without an empty stack.
   assertx(IMPLIES(mode == EndCatchData::CatchMode::LocalsDecRefd,
                   spOffBCFromStackBase(env) == spOffEmpty(env)));
+  assertx(IMPLIES(sideEntry, exc->isA(TObj)));
 
   if (mode == EndCatchData::CatchMode::UnwindOnly) {
     auto const ehOffset = findExceptionHandler(curFunc(env), bcOff(env));
@@ -461,57 +463,72 @@ void emitHandleException(IRGS& env, EndCatchData::CatchMode mode, SSATmp* exc,
     }
   }
 
+  if (sideEntry) {
+    gen(env, StUnwinderExn, exc);
+    gen(env, StVMFP, fixupFP(env));
+    gen(env, StVMPC, cns(env, uintptr_t(env.irb->curMarker().fixupSk().pc())));
+    gen(env, StVMReturnAddr, cns(env, 0));
+  }
   endCatchImpl(env, mode, exc, std::move(vmspOffset));
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void emitThrow(IRGS& env) {
-  auto const stackEmpty = spOffBCFromStackBase(env) == spOffEmpty(env) + 1;
-  auto const offset = findExceptionHandler(curFunc(env), bcOff(env));
   auto const srcTy = topC(env)->type();
-  auto const maybeThrowable =
-    srcTy.maybe(Type::SubObj(SystemLib::getExceptionClass())) ||
-    srcTy.maybe(Type::SubObj(SystemLib::getErrorClass()));
+  auto const excTy = Type::SubObj(SystemLib::getExceptionClass());
+  auto const errTy = Type::SubObj(SystemLib::getErrorClass());
+  auto const maybeThrowable = srcTy.maybe(excTy) || srcTy.maybe(errTy);
 
-  if (!stackEmpty || !maybeThrowable || !(srcTy <= TObj)) return interpOne(env);
+  if (!maybeThrowable) return interpOne(env);
 
   auto slowExit = makeExitSlow(env);
   if (Cfg::Debugger::EnableVSDebugger && Cfg::Eval::EmitDebuggerIntrCheck) {
     irgen::checkDebuggerExceptionIntr(env, slowExit);
   }
 
-  auto const handleThrow = [&] {
-    if (offset != kInvalidOffset) return jmpImpl(env, offset);
-    // There are no more catch blocks in this function, we are at the top
-    // level throw
-    auto const exn = popC(env);
+  auto const handleException = [&] (SSATmp* exc) {
+    popC(env);
     updateMarker(env);
 
-    spillInlinedFrames(env);
-
-    auto const spOff = spOffBCFromIRSP(env);
-    eagerVMSync(env, spOff);
-    auto const etcData = EnterTCUnwindData { spOff, true };
-    gen(env, EnterTCUnwind, etcData, exn);
+    auto constexpr mode = EndCatchData::CatchMode::UnwindOnly;
+    emitHandleException(env, mode, exc, std::nullopt, true /* sideEntry */);
   };
 
-  if (srcTy <= Type::SubObj(SystemLib::getThrowableClass())) return handleThrow();
+  if (srcTy <= Type::SubObj(SystemLib::getThrowableClass())) {
+    return handleException(topC(env));
+  }
 
-  ifThenElse(env,
-    [&] (Block* taken) {
-      assertx(srcTy <= TObj);
-      auto const srcClass = gen(env, LdObjClass, topC(env));
-      auto const ecdExc = ExtendsClassData { SystemLib::getExceptionClass() };
-      auto const isException = gen(env, ExtendsClass, ecdExc, srcClass);
-      gen(env, JmpNZero, taken, isException);
-      auto const ecdErr = ExtendsClassData { SystemLib::getErrorClass() };
-      auto const isError = gen(env, ExtendsClass, ecdErr, srcClass);
-      gen(env, JmpNZero, taken, isError);
+  handleException(cond(
+    env,
+    [&] (Block* taken) { return gen(env, CheckType, TObj, taken, topC(env)); },
+    [&] (SSATmp* obj) {
+      auto const cls = gen(env, LdObjClass, obj);
+      return cond(
+        env,
+        [&] (Block* taken) {
+          auto const ecd = ExtendsClassData { SystemLib::getExceptionClass() };
+          gen(env, JmpZero, taken, gen(env, ExtendsClass, ecd, cls));
+          return gen(env, AssertType, excTy, obj);
+        },
+        [&] (SSATmp* exc) { return exc; },
+        [&] (Block* taken) {
+          auto const ecd = ExtendsClassData { SystemLib::getErrorClass() };
+          gen(env, JmpZero, taken, gen(env, ExtendsClass, ecd, cls));
+          return gen(env, AssertType, errTy, obj);
+        },
+        [&] (SSATmp* exc) { return exc; },
+        [&] {
+          gen(env, Jmp, slowExit);
+          return cns(env, TBottom);
+        }
+      );
     },
-    [&] { gen(env, Jmp, slowExit); },
-    handleThrow
-  );
+    [&] {
+      gen(env, Jmp, slowExit);
+      return cns(env, TBottom);
+    }
+  ));
 }
 
 //////////////////////////////////////////////////////////////////////

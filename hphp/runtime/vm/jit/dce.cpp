@@ -678,7 +678,7 @@ bool canDCE(const IRInstruction& inst) {
   case LdVectorSize:
   case BeginCatch:
   case EndCatch:
-  case EnterTCUnwind:
+  case StUnwinderExn:
   case UnwindCheckSideExit:
   case DbgTrashStk:
   case DbgTrashFrame:

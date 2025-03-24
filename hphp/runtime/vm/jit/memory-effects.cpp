@@ -482,27 +482,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     };
   }
 
-  case EnterTCUnwind: {
-    auto const data = inst.extra<EnterTCUnwind>();
-    auto const stack_kills = stack_below(data->offset);
-
-    auto const numLocals = inst.func()->numLocals();
-    auto const local_kills = [&](){
-      if (!data->teardown && numLocals > 0) {
-        return static_cast<AliasClass>(
-            ALocal {inst.marker().fixupFP(), AliasIdSet::IdRange(0, numLocals)}
-        );
-      }
-      return AEmpty;
-    }();
-
-    return ExitEffects {
-      AUnknown,
-      stack_kills | AMIStateAny,
-      local_kills
-    };
-  }
-
   /*
    * BeginInlining must always be the first instruction in the inlined call. It
    * defines a new FP for the callee but does not perform any stores or
@@ -1783,6 +1762,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvResToDbl:
   case ExtendsClass:
   case LdUnwinderValue:
+  case StUnwinderExn:
   case LdClsName:
   case LdLazyCls:
   case LdAFWHActRec:

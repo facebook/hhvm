@@ -2690,32 +2690,6 @@ struct EndCatchData : IRExtraData {
   Optional<IRSPRelOffset> vmspOffset;
 };
 
-struct EnterTCUnwindData : IRExtraData {
-  explicit EnterTCUnwindData(IRSPRelOffset offset, bool teardown)
-    : offset{offset}, teardown{teardown} {}
-
-  std::string show() const {
-    return folly::to<std::string>(
-      "IRSPOff ", offset.offset, ",",
-      teardown ? "" : "no-", "teardown"
-    );
-  }
-
-  size_t stableHash() const {
-    return folly::hash::hash_combine(
-      std::hash<int32_t>()(offset.offset),
-      std::hash<bool>()(teardown)
-    );
-  }
-
-  bool equals(const EnterTCUnwindData& o) const {
-    return offset == o.offset && teardown == o.teardown;
-  }
-
-  IRSPRelOffset offset;
-  bool teardown;
-};
-
 /*
  * Func/Class/Prop attributes
  */
@@ -3225,7 +3199,6 @@ X(VerifyPropCoerce,             TypeConstraintData);
 X(VerifyPropFail,               TypeConstraintData);
 X(VerifyPropFailHard,           TypeConstraintData);
 X(EndCatch,                     EndCatchData);
-X(EnterTCUnwind,                EnterTCUnwindData);
 X(FuncHasAttr,                  AttrData);
 X(ClassHasAttr,                 AttrData);
 X(LdMethCallerName,             MethCallerData);

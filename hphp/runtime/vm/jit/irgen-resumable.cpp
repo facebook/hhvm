@@ -489,32 +489,15 @@ void implAwaitSucceeded(IRGS& env, SSATmp* child) {
 }
 
 void implAwaitFailed(IRGS& env, SSATmp* child, Block* exit) {
-  auto const stackEmpty = spOffBCFromStackBase(env) == spOffEmpty(env) + 1;
-  if (!stackEmpty) {
-    assertx(exit);
-    assertx(curSrcKey(env).op() == Op::WHResult);
-    gen(env, Jmp, exit);
-    return;
-  }
-
-  auto const offset = findExceptionHandler(curFunc(env), bcOff(env));
-  auto const exception = gen(env, LdWHResult, TObj, child);
+  auto const ty = Type::SubObj(SystemLib::getThrowableClass());
+  auto const exc = gen(env, LdWHResult, ty, child);
   popC(env);
-  gen(env, IncRef, exception);
+  gen(env, IncRef, exc);
   decRef(env, child);
-  if (offset != kInvalidOffset) {
-    push(env, exception);
-    jmpImpl(env, offset);
-  } else {
-    // There are no more catch blocks in this function, we are at the top
-    // level throw
-    hint(env, Block::Hint::Unlikely);
-    spillInlinedFrames(env);
-    auto const spOff = spOffBCFromIRSP(env);
-    eagerVMSync(env, spOff);
-    auto const etcData = EnterTCUnwindData { spOff, true };
-    gen(env, EnterTCUnwind, etcData, exception);
-  }
+  updateMarker(env);
+
+  auto constexpr mode = EndCatchData::CatchMode::UnwindOnly;
+  emitHandleException(env, mode, exc, std::nullopt, true /* sideEntry */);
 }
 
 template<class T>

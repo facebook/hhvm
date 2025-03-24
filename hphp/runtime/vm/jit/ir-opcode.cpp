@@ -636,7 +636,6 @@ bool opcodeMayRaise(Opcode opc) {
   case EnterFrame:
   case EnterInlineFrame:
   case EnterPrologue:
-  case EnterTCUnwind:
   case EnterTranslation:
   case EqArrayDataPtr:
   case EqBool:
@@ -943,6 +942,7 @@ bool opcodeMayRaise(Opcode opc) {
   case StStkRange:
   case StTVInRDS:
   case StTypeAt:
+  case StUnwinderExn:
   case StVMFP:
   case StVMPC:
   case StVMRegState:

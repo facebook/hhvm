@@ -117,16 +117,16 @@ std::string get_cpp_template(const t_type& type) {
 
 bool is_hidden(const t_named& node) {
   return node.has_unstructured_annotation("py3.hidden") ||
-      node.find_structured_annotation_or_null(kPythonPy3HiddenUri);
+      node.has_structured_annotation(kPythonPy3HiddenUri);
 }
 bool is_hidden(const t_typedef& node) {
   return node.generated() || node.has_unstructured_annotation("py3.hidden") ||
-      node.find_structured_annotation_or_null(kPythonPy3HiddenUri) ||
+      node.has_structured_annotation(kPythonPy3HiddenUri) ||
       is_hidden(*node.get_true_type());
 }
 bool is_hidden(const t_type& node) {
   return node.generated() || node.has_unstructured_annotation("py3.hidden") ||
-      node.find_structured_annotation_or_null(kPythonPy3HiddenUri) ||
+      node.has_structured_annotation(kPythonPy3HiddenUri) ||
       cpp_name_resolver::is_directly_adapted(node);
 }
 
@@ -587,12 +587,9 @@ class py3_mstch_function : public mstch_function {
 
   mstch::node event_based() {
     return function_->get_annotation("thread") == "eb" ||
-        function_->find_structured_annotation_or_null(
-            kCppProcessInEbThreadUri) ||
-        interface_->find_unstructured_annotation_or_null(
-            "process_in_event_base") ||
-        interface_->find_structured_annotation_or_null(
-            kCppProcessInEbThreadUri);
+        function_->has_structured_annotation(kCppProcessInEbThreadUri) ||
+        interface_->has_unstructured_annotation("process_in_event_base") ||
+        interface_->has_structured_annotation(kCppProcessInEbThreadUri);
   }
 
   mstch::node stack_arguments() {
@@ -937,8 +934,7 @@ class py3_mstch_struct : public mstch_struct {
             py3_fields_.end(),
             [this](const t_field* field) {
               bool hidden = field->has_unstructured_annotation("py3.hidden") ||
-                  field->find_structured_annotation_or_null(
-                      kPythonPy3HiddenUri);
+                  field->has_structured_annotation(kPythonPy3HiddenUri);
               this->hidden_fields |= hidden;
               return hidden;
             }),
@@ -948,8 +944,8 @@ class py3_mstch_struct : public mstch_struct {
   mstch::node getSize() { return py3_fields_.size(); }
 
   mstch::node allow_inheritance() {
-    return struct_->find_structured_annotation_or_null(
-               kPythonMigrationBlockingAllowInheritanceUri) != nullptr;
+    return struct_->has_structured_annotation(
+        kPythonMigrationBlockingAllowInheritanceUri);
   }
 
   mstch::node isStructOrderable() {
@@ -1157,12 +1153,11 @@ class py3_mstch_enum : public mstch_enum {
 
   mstch::node hasFlags() {
     return enum_->has_unstructured_annotation("py3.flags") ||
-        enum_->find_structured_annotation_or_null(kPythonFlagsUri);
+        enum_->has_structured_annotation(kPythonFlagsUri);
   }
 
   mstch::node no_int_base() {
-    return enum_->find_structured_annotation_or_null(
-               kPythonNoIntBaseClassDeprecatedUri) != nullptr;
+    return enum_->has_structured_annotation(kPythonNoIntBaseClassDeprecatedUri);
   }
   mstch::node cpp_name() { return cpp2::get_name(enum_); }
 };
@@ -1315,8 +1310,7 @@ class py3_mstch_deprecated_annotation : public mstch_deprecated_annotation {
 std::string py3_mstch_program::visit_type_impl(
     const t_type* orig_type, bool fromTypeDef) {
   bool hasPy3EnableCppAdapterAnnot =
-      orig_type->find_structured_annotation_or_null(
-          kPythonPy3EnableCppAdapterUri);
+      orig_type->has_structured_annotation(kPythonPy3EnableCppAdapterUri);
   auto trueType = orig_type->get_true_type();
   auto baseType = context_.type_factory->make_mstch_object(orig_type, context_);
   py3_mstch_type* type = dynamic_cast<py3_mstch_type*>(baseType.get());
@@ -1546,7 +1540,7 @@ py3_mstch_type::cached_properties& py3_mstch_type::get_cached_props(
   // @python.Py3EnableCppAdapter treats C++ Adapter on typedef as a custom
   // cpp.type.
   auto true_type = type->get_true_type();
-  if (type->find_structured_annotation_or_null(kPythonPy3EnableCppAdapterUri)) {
+  if (type->has_structured_annotation(kPythonPy3EnableCppAdapterUri)) {
     return c.cache
         ->emplace(
             type,

@@ -609,7 +609,7 @@ class mstch_service : public mstch_base {
   }
   mstch::node is_event_base_interaction() {
     return service_->has_unstructured_annotation("process_in_event_base") ||
-        service_->find_structured_annotation_or_null(kCppProcessInEbThreadUri);
+        service_->has_structured_annotation(kCppProcessInEbThreadUri);
   }
   mstch::node definition_key();
 
@@ -1030,8 +1030,7 @@ class mstch_struct : public mstch_base {
   const std::vector<const t_field*>& get_members_in_key_order();
 
   field_range get_members_in_serialization_order() {
-    if (struct_->find_structured_annotation_or_null(
-            kSerializeInFieldIdOrderUri)) {
+    if (struct_->has_structured_annotation(kSerializeInFieldIdOrderUri)) {
       return get_members_in_key_order();
     }
 
@@ -1141,7 +1140,7 @@ class mstch_field : public mstch_base {
         CodingErrorAction::Report);
   }
   bool has_compat_annotation(const char* uri) {
-    if (field_->find_structured_annotation_or_null(uri) != nullptr) {
+    if (field_->has_structured_annotation(uri)) {
       return true;
     }
     auto type = field_->get_type();
@@ -1152,12 +1151,10 @@ class mstch_field : public mstch_base {
       }
     }
     if (field_context_ != nullptr && field_context_->strct != nullptr) {
-      if (field_context_->strct->find_structured_annotation_or_null(uri) !=
-          nullptr) {
+      if (field_context_->strct->has_structured_annotation(uri)) {
         return true;
       }
-      if (field_context_->strct->program()->find_structured_annotation_or_null(
-              uri) != nullptr) {
+      if (field_context_->strct->program()->has_structured_annotation(uri)) {
         return true;
       }
     }
@@ -1249,10 +1246,10 @@ class mstch_enum : public mstch_base {
   }
   mstch::node is_enums_compat() { return has_compat_annotation(kEnumsUri); }
   bool has_compat_annotation(const char* uri) {
-    if (enum_->find_structured_annotation_or_null(uri) != nullptr) {
+    if (enum_->has_structured_annotation(uri)) {
       return true;
     }
-    if (enum_->program()->find_structured_annotation_or_null(uri) != nullptr) {
+    if (enum_->program()->has_structured_annotation(uri)) {
       return true;
     }
 

@@ -62,7 +62,7 @@ string prefix_temporary(const string& name) {
 }
 
 bool is_hidden(const t_field& field) {
-  return field.find_structured_annotation_or_null(kPythonPyDeprecatedHiddenUri);
+  return field.has_structured_annotation(kPythonPyDeprecatedHiddenUri);
 }
 } // namespace
 

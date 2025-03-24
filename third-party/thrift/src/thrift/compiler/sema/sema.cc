@@ -403,7 +403,7 @@ void mutate_terse_write_annotation_structured(
       ctx.program().inherit_annotation_or_null(node, kTerseWriteUri);
   for (auto& field : node.fields()) {
     bool field_has_terse_write =
-        field.find_structured_annotation_or_null(kTerseWriteUri);
+        field.has_structured_annotation(kTerseWriteUri);
     if (!field_has_terse_write && !program_has_terse_write) {
       continue;
     }
@@ -686,7 +686,7 @@ void lower_type_annotations(
 }
 
 void inject_schema_const(sema_context& ctx, mutator_context&, t_program& prog) {
-  if (prog.find_structured_annotation_or_null(kDisableSchemaConstUri)) {
+  if (prog.has_structured_annotation(kDisableSchemaConstUri)) {
     return;
   }
 

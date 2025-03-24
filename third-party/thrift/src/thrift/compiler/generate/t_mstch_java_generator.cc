@@ -554,9 +554,7 @@ class mstch_java_struct : public mstch_struct {
   }
   mstch::node has_wrapper() {
     for (const auto& field : struct_->fields()) {
-      auto has_annotation =
-          field.find_structured_annotation_or_null(kJavaWrapperUri);
-      if (has_annotation) {
+      if (field.has_structured_annotation(kJavaWrapperUri)) {
         return true;
       }
     }
@@ -565,7 +563,7 @@ class mstch_java_struct : public mstch_struct {
   mstch::node is_as_bean() {
     if (!struct_->is_exception() && !struct_->is_union()) {
       return struct_->get_annotation("java.swift.mutable") == "true" ||
-          struct_->find_structured_annotation_or_null(kJavaMutableUri);
+          struct_->has_structured_annotation(kJavaMutableUri);
     } else {
       return false;
     }
@@ -581,8 +579,7 @@ class mstch_java_struct : public mstch_struct {
   }
   mstch::node has_java_annotations() {
     return struct_->has_unstructured_annotation("java.swift.annotations") ||
-        struct_->find_structured_annotation_or_null(kJavaAnnotationUri) !=
-        nullptr;
+        struct_->has_structured_annotation(kJavaAnnotationUri);
   }
   mstch::node java_annotations() {
     if (struct_->has_unstructured_annotation("java.swift.annotations")) {
@@ -853,8 +850,7 @@ class mstch_java_field : public mstch_field {
   bool isNestedContainerFlag = false;
 
   bool _has_wrapper() {
-    return field_->find_structured_annotation_or_null(kJavaWrapperUri) !=
-        nullptr;
+    return field_->has_structured_annotation(kJavaWrapperUri);
   }
 
   mstch::node has_wrapper() { return _has_wrapper(); }
@@ -918,8 +914,7 @@ class mstch_java_field : public mstch_field {
   }
 
   bool _has_field_adapter() {
-    return field_->find_structured_annotation_or_null(kJavaAdapterUri) !=
-        nullptr;
+    return field_->has_structured_annotation(kJavaAdapterUri);
   }
 
   mstch::node has_field_adapter() { return _has_field_adapter(); }
@@ -1021,7 +1016,7 @@ class mstch_java_field : public mstch_field {
   mstch::node java_default_value() { return default_value_for_field(field_); }
   mstch::node is_recursive_reference() {
     return field_->get_annotation("swift.recursive_reference") == "true" ||
-        field_->find_structured_annotation_or_null(kJavaRecursiveUri);
+        field_->has_structured_annotation(kJavaRecursiveUri);
   }
   mstch::node is_negative_id() { return field_->get_key() < 0; }
   std::string default_value_for_field(const t_field* field) {
@@ -1078,8 +1073,7 @@ class mstch_java_field : public mstch_field {
   }
   mstch::node has_java_annotations() {
     return field_->has_unstructured_annotation("java.swift.annotations") ||
-        field_->find_structured_annotation_or_null(kJavaAnnotationUri) !=
-        nullptr;
+        field_->has_structured_annotation(kJavaAnnotationUri);
   }
   mstch::node java_annotations() {
     if (field_->has_unstructured_annotation("java.swift.annotations")) {
@@ -1091,8 +1085,7 @@ class mstch_java_field : public mstch_field {
   }
 
   mstch::node is_field_name_unmangled() {
-    return !!field_->find_structured_annotation_or_null(
-        kJavaFieldUseUnmangledNameUri);
+    return field_->has_structured_annotation(kJavaFieldUseUnmangledNameUri);
   }
 };
 
@@ -1125,8 +1118,7 @@ class mstch_java_enum : public mstch_enum {
   }
   mstch::node num_values() { return enum_->get_enum_values().size(); }
   mstch::node use_intrinsic_default() {
-    if (enum_->find_structured_annotation_or_null(
-            kJavaUseIntrinsicDefaultUri) != nullptr) {
+    if (enum_->has_structured_annotation(kJavaUseIntrinsicDefaultUri)) {
       if (enum_->find_value(0) == nullptr) {
         throw std::runtime_error(
             "Enum " + enum_->get_name() +
@@ -1137,8 +1129,7 @@ class mstch_java_enum : public mstch_enum {
     return false;
   }
   mstch::node find_value_zero() {
-    if (enum_->find_structured_annotation_or_null(
-            kJavaUseIntrinsicDefaultUri) != nullptr) {
+    if (enum_->has_structured_annotation(kJavaUseIntrinsicDefaultUri)) {
       return java::mangle_java_constant_name(enum_->find_value(0)->get_name());
     }
     return mstch::node();
@@ -1395,8 +1386,7 @@ class mstch_java_type : public mstch_type {
     auto type = type_;
     while (type) {
       if (type_->is_typedef() &&
-          type->find_structured_annotation_or_null(kJavaAdapterUri) !=
-              nullptr) {
+          type->has_structured_annotation(kJavaAdapterUri)) {
         count++;
         if (const auto* as_typedef = dynamic_cast<const t_typedef*>(type)) {
           type = as_typedef->get_type();

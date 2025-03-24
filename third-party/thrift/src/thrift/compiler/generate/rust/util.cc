@@ -416,14 +416,14 @@ std::string unmangled_rust_name(const t_named* node) {
 } // namespace
 
 std::string type_rust_name(const t_type* t) {
-  if (!t->find_structured_annotation_or_null(kRustNameUri)) {
+  if (!t->has_structured_annotation(kRustNameUri)) {
     return mangle_type(t->name());
   }
   return unmangled_rust_name(t);
 }
 
 std::string named_rust_name(const t_named* node) {
-  if (!node->find_structured_annotation_or_null(kRustNameUri)) {
+  if (!node->has_structured_annotation(kRustNameUri)) {
     return mangle(node->name());
   }
   return unmangled_rust_name(node);

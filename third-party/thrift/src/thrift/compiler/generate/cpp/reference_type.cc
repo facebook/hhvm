@@ -40,11 +40,11 @@ enum class RefType {
 
 reference_type find_ref_type(const t_field& node) {
   if (node.has_unstructured_annotation({"cpp.box", "thrift.box"}) ||
-      node.find_structured_annotation_or_null(kBoxUri)) {
+      node.has_structured_annotation(kBoxUri)) {
     return reference_type::boxed;
   }
 
-  if (node.find_structured_annotation_or_null(kInternBoxUri)) {
+  if (node.has_structured_annotation(kInternBoxUri)) {
     return reference_type::boxed_intern;
   }
 

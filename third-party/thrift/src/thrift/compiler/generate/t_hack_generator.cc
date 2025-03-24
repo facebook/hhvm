@@ -693,7 +693,7 @@ class t_hack_generator : public t_concat_generator {
 
   bool is_bitmask_enum(const t_enum* tenum) {
     return tenum->has_unstructured_annotation("bitmask") ||
-        tenum->find_structured_annotation_or_null(kBitmaskEnumUri) != nullptr;
+        tenum->has_structured_annotation(kBitmaskEnumUri);
   }
 
   std::optional<std::string> find_hack_adapter(const t_type* type) {
@@ -877,19 +877,16 @@ class t_hack_generator : public t_concat_generator {
   }
 
   bool has_hack_struct_as_trait(const t_structured* tstruct) const {
-    const auto annotation =
-        tstruct->find_structured_annotation_or_null(kHackStructAsTraitUri);
-    return annotation != nullptr;
+    return tstruct->has_structured_annotation(kHackStructAsTraitUri);
   }
 
   bool has_hack_module_internal(const t_named* tnamed) const {
-    return tnamed->find_structured_annotation_or_null(kHackModuleInternalUri) !=
-        nullptr;
+    return tnamed->has_structured_annotation(kHackModuleInternalUri);
   }
 
   bool should_generate_client_header_methods(const t_named* tnamed) const {
-    return tnamed->find_structured_annotation_or_null(
-               kHackGenerateClientMethodsWithHeaders) != nullptr;
+    return tnamed->has_structured_annotation(
+        kHackGenerateClientMethodsWithHeaders);
   }
 
   std::string php_namespace(const t_program* p) const {
@@ -2890,8 +2887,7 @@ bool t_hack_generator::is_valid_hack_type(
 }
 
 bool t_hack_generator::skip_codegen(const t_field* field) {
-  auto skip_codegen =
-      field->find_structured_annotation_or_null(kHackSkipCodegenUri);
+  auto skip_codegen = field->has_structured_annotation(kHackSkipCodegenUri);
   if (!skip_codegen) {
     skip_codegen = t_typedef::get_first_structured_annotation_or_null(
         field->get_type(), kHackSkipCodegenUri);
@@ -2900,7 +2896,7 @@ bool t_hack_generator::skip_codegen(const t_field* field) {
 }
 
 bool t_hack_generator::skip_codegen(const t_function* function) {
-  if (function->find_structured_annotation_or_null(kHackSkipCodegenUri)) {
+  if (function->has_structured_annotation(kHackSkipCodegenUri)) {
     return true;
   }
   bool valid = is_valid_hack_type(function->return_type());
@@ -3043,7 +3039,7 @@ void t_hack_generator::generate_php_struct_spec(
   indent(out) << "const \\ThriftStructTypes::TSpec SPEC = dict[\n";
   indent_up();
   const auto fields =
-      tstruct->find_structured_annotation_or_null(kSerializeInFieldIdOrderUri)
+      tstruct->has_structured_annotation(kSerializeInFieldIdOrderUri)
       ? tstruct->fields_id_order()
       : tstruct->fields().copy();
   for (const auto* field_ptr : fields) {
@@ -6771,8 +6767,7 @@ void t_hack_generator::generate_service_interface(
                           : get_supported_server_functions(tservice, async);
 
   auto svc_mod_int =
-      (tservice->find_structured_annotation_or_null(kHackModuleInternalUri) !=
-       nullptr);
+      tservice->has_structured_annotation(kHackModuleInternalUri);
 
   for (const t_function* function : functions) {
     if (skip_codegen(function) ||

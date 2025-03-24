@@ -203,7 +203,7 @@ bool resolves_to_container_or_struct(const t_type* type) {
 }
 
 bool is_runtime_annotation(const t_named& named) {
-  return named.find_structured_annotation_or_null(kCppRuntimeAnnotation);
+  return named.has_structured_annotation(kCppRuntimeAnnotation);
 }
 
 bool has_runtime_annotation(const t_named& named) {
@@ -376,8 +376,7 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
               e.find_unstructured_annotation_or_null("cpp.enum_type")) {
         return *type;
       }
-      return e.find_unstructured_annotation_or_null(
-                 "cpp.deprecated_enum_unscoped")
+      return e.has_unstructured_annotation("cpp.deprecated_enum_unscoped")
           ? "int"
           : "";
     });
@@ -387,9 +386,8 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     });
 
     def.property("cpp_declare_bitwise_ops", [](const t_enum& e) {
-      return e.find_unstructured_annotation_or_null(
-                 "cpp.declare_bitwise_ops") ||
-          e.find_structured_annotation_or_null(kBitmaskEnumUri);
+      return e.has_unstructured_annotation("cpp.declare_bitwise_ops") ||
+          e.has_structured_annotation(kBitmaskEnumUri);
     });
 
     return std::move(def).make();
@@ -600,7 +598,7 @@ class cpp_mstch_program : public mstch_program {
     auto includes = std::make_unique<transitive_include_map>();
     auto local_includes = program->get_includes_for_codegen();
     for (const auto* include : local_includes) {
-      if (include->find_structured_annotation_or_null(kDisableSchemaConstUri)) {
+      if (include->has_structured_annotation(kDisableSchemaConstUri)) {
         continue;
       }
 
@@ -859,7 +857,7 @@ class cpp_mstch_program : public mstch_program {
           // If you don't have a schema const you don't need schema includes.
           ::apache::thrift::compiler::has_schema(sm_, *program_) &&
           // Opting out of schema const should disable all of its failure modes.
-          !program->find_structured_annotation_or_null(kDisableSchemaConstUri);
+          !program->has_structured_annotation(kDisableSchemaConstUri);
       return std::make_unique<strong_bool>(static_cast<strong_bool>(ret));
     });
     return static_cast<bool>(supports);
@@ -1052,12 +1050,9 @@ class cpp_mstch_function : public mstch_function {
   }
   mstch::node event_based() {
     return function_->get_annotation("thread") == "eb" ||
-        function_->find_structured_annotation_or_null(
-            kCppProcessInEbThreadUri) ||
-        interface_->find_unstructured_annotation_or_null(
-            "process_in_event_base") ||
-        interface_->find_structured_annotation_or_null(
-            kCppProcessInEbThreadUri);
+        function_->has_structured_annotation(kCppProcessInEbThreadUri) ||
+        interface_->has_unstructured_annotation("process_in_event_base") ||
+        interface_->has_structured_annotation(kCppProcessInEbThreadUri);
   }
   mstch::node cpp_name() { return cpp2::get_name(function_); }
   mstch::node cpp_return_type() {
@@ -1086,13 +1081,13 @@ class cpp_mstch_function : public mstch_function {
   }
 
   mstch::node has_deprecated_header_client_methods() {
-    return function_->find_structured_annotation_or_null(
+    return function_->has_structured_annotation(
                kCppGenerateDeprecatedHeaderClientMethodsUri) ||
-        function_->find_unstructured_annotation_or_null(
+        function_->has_unstructured_annotation(
             "cpp.generate_deprecated_header_client_methods") ||
-        interface_->find_structured_annotation_or_null(
+        interface_->has_structured_annotation(
             kCppGenerateDeprecatedHeaderClientMethodsUri) ||
-        interface_->find_unstructured_annotation_or_null(
+        interface_->has_unstructured_annotation(
             "cpp.generate_deprecated_header_client_methods");
   }
 
@@ -1135,7 +1130,7 @@ bool needs_op_encode(const t_field& field, const t_structured& strct) {
   return (strct.program() &&
           strct.program()->inherit_annotation_or_null(
               strct, kCppUseOpEncodeUri)) ||
-      strct.find_structured_annotation_or_null(kCppUseOpEncodeUri) ||
+      strct.has_structured_annotation(kCppUseOpEncodeUri) ||
       cpp_name_resolver::find_first_adapter(field) ||
       check_container_needs_op_encode(*field.type());
 }
@@ -1584,7 +1579,7 @@ class cpp_mstch_struct : public mstch_struct {
   mstch::node cpp_frozen2_exclude() {
     // TODO(dokwon): Fix frozen2 compatibility with adapter.
     return struct_->has_unstructured_annotation("cpp.frozen2_exclude") ||
-        struct_->find_structured_annotation_or_null(kCppFrozen2ExcludeUri) ||
+        struct_->has_structured_annotation(kCppFrozen2ExcludeUri) ||
         cpp_context_->resolver().is_directly_adapted(*struct_);
   }
   mstch::node cpp_allocator_via() {
@@ -1609,8 +1604,7 @@ class cpp_mstch_struct : public mstch_struct {
   }
   mstch::node indexing() { return has_lazy_fields(); }
   mstch::node write_lazy_field_checksum() {
-    if (struct_->find_structured_annotation_or_null(
-            kCppDisableLazyChecksumUri)) {
+    if (struct_->has_structured_annotation(kCppDisableLazyChecksumUri)) {
       return std::string("false");
     }
 
@@ -1710,8 +1704,7 @@ class cpp_mstch_struct : public mstch_struct {
              has_option("deprecated_terse_writes")](auto& field) {
           return (!enabled_terse_write ||
                   !cpp2::deprecated_terse_writes(&field)) &&
-              field.find_structured_annotation_or_null(
-                  kCppDeprecatedTerseWriteUri) == nullptr &&
+              !field.has_structured_annotation(kCppDeprecatedTerseWriteUri) &&
               field.get_req() != t_field::e_req::optional &&
               field.get_req() != t_field::e_req::terse;
         });
@@ -1722,8 +1715,7 @@ class cpp_mstch_struct : public mstch_struct {
   }
 
   mstch::node scoped_enum_as_union_type() {
-    return !!struct_->find_structured_annotation_or_null(
-               kCppScopedEnumAsUnionTypeUri) ||
+    return struct_->has_structured_annotation(kCppScopedEnumAsUnionTypeUri) ||
         has_option("fbthrift_internal_scoped_enum_as_union_type");
   }
 
@@ -1828,7 +1820,7 @@ class cpp_mstch_struct : public mstch_struct {
     }
 
     if (!struct_->has_unstructured_annotation("cpp.minimize_padding") &&
-        !struct_->find_structured_annotation_or_null(kCppMinimizePaddingUri)) {
+        !struct_->has_structured_annotation(kCppMinimizePaddingUri)) {
       return fields_in_layout_order_ = struct_->fields().copy();
     }
 
@@ -2165,8 +2157,7 @@ class cpp_mstch_field : public mstch_field {
         : mstch::node("");
   }
   mstch::node deprecated_terse_writes() {
-    return field_->find_structured_annotation_or_null(
-               kCppDeprecatedTerseWriteUri) != nullptr ||
+    return field_->has_structured_annotation(kCppDeprecatedTerseWriteUri) ||
         (has_option("deprecated_terse_writes") &&
          cpp2::deprecated_terse_writes(field_));
   }
@@ -2857,9 +2848,9 @@ void forbid_deprecated_terse_writes_ref(
     const bool isDeprecatedTerseWrites =
         field.qualifier() == t_field_qualifier::none &&
         (options.count("deprecated_terse_writes") ||
-         field.find_structured_annotation_or_null(kCppDeprecatedTerseWriteUri));
+         field.has_structured_annotation(kCppDeprecatedTerseWriteUri));
 
-    if (field.find_structured_annotation_or_null(
+    if (field.has_structured_annotation(
             kCppAllowLegacyDeprecatedTerseWritesRefUri)) {
       if (!isUniqueRef) {
         ctx.report(
@@ -2923,8 +2914,7 @@ void validate_deprecated_terse_writes(
     const t_field& field,
     const t_mstch_generator::compiler_options_map& options) {
   if (options.count("deprecated_terse_writes") != 0 &&
-      field.find_structured_annotation_or_null(kCppDeprecatedTerseWriteUri) !=
-          nullptr) {
+      field.has_structured_annotation(kCppDeprecatedTerseWriteUri)) {
     ctx.error(
         "Cannot use thrift_cpp2_options `deprecated_terse_writes` with @cpp.DeprecatedTerseWrite.");
   }

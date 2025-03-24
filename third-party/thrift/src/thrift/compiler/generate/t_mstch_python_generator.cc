@@ -69,8 +69,7 @@ const t_const* get_transitive_annotation_of_adapter_or_null(
   for (const auto& annotation : node.structured_annotations()) {
     const t_type& annotation_type = *annotation.type();
     if (is_transitive_annotation(annotation_type)) {
-      if (annotation_type.find_structured_annotation_or_null(
-              kPythonAdapterUri)) {
+      if (annotation_type.has_structured_annotation(kPythonAdapterUri)) {
         return &annotation;
       }
     }
@@ -926,8 +925,8 @@ class python_mstch_struct : public mstch_struct {
   // While inheritance is discouraged, there is limited support for py3
   // auto-migraters
   mstch::node allow_inheritance() {
-    return struct_->find_structured_annotation_or_null(
-               kPythonMigrationBlockingAllowInheritanceUri) != nullptr;
+    return struct_->has_structured_annotation(
+        kPythonMigrationBlockingAllowInheritanceUri);
   }
 
  private:
@@ -1039,7 +1038,7 @@ class python_mstch_enum : public mstch_enum {
 
   mstch::node has_flags() {
     return enum_->has_unstructured_annotation("py3.flags") ||
-        enum_->find_structured_annotation_or_null(kPythonFlagsUri);
+        enum_->has_structured_annotation(kPythonFlagsUri);
   }
 
   // DEPRECATED!

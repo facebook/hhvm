@@ -56,13 +56,13 @@ const t_structured* get_mixin_type(const t_field& field) {
 }
 
 bool has_experimental_annotation(sema_context& ctx, const t_named& node) {
-  if (node.find_structured_annotation_or_null(kExperimentalUri)) {
+  if (node.has_structured_annotation(kExperimentalUri)) {
     return true;
   }
   for (int pos = ctx.nodes().size() - 1; pos >= 0; --pos) {
     const auto* parent = dynamic_cast<const t_named*>(ctx.nodes().at(pos));
     if (parent != nullptr &&
-        parent->find_structured_annotation_or_null(kExperimentalUri)) {
+        parent->has_structured_annotation(kExperimentalUri)) {
       return true;
     }
   }
@@ -212,7 +212,7 @@ class adapter_or_wrapper_checker {
     auto type = field.type().get_type();
 
     bool structured_annotation_on_field =
-        field.find_structured_annotation_or_null(structured_adapter_annotation);
+        field.has_structured_annotation(structured_adapter_annotation);
 
     bool structured_annotation_on_typedef =
         t_typedef::get_first_structured_annotation_or_null(
@@ -236,7 +236,7 @@ class adapter_or_wrapper_checker {
       const char* structured_adapter_annotation_error_name,
       const char* structured_wrapper_annotation_error_name) {
     bool has_adapter_annotation =
-        node.find_structured_annotation_or_null(structured_adapter_annotation);
+        node.has_structured_annotation(structured_adapter_annotation);
     if (!has_adapter_annotation) {
       return;
     }
@@ -253,11 +253,11 @@ class adapter_or_wrapper_checker {
     }
 
     auto has_wrapper =
-        type->find_structured_annotation_or_null(structured_wrapper_annotation);
+        type->has_structured_annotation(structured_wrapper_annotation);
     std::string typedef_name = type->name();
     while (!has_wrapper) {
       if (const auto* inner_typedf = dynamic_cast<const t_typedef*>(type)) {
-        has_wrapper = inner_typedf->find_structured_annotation_or_null(
+        has_wrapper = inner_typedf->has_structured_annotation(
             structured_wrapper_annotation);
         typedef_name = inner_typedf->name();
         type = inner_typedf->get_type();
@@ -270,8 +270,8 @@ class adapter_or_wrapper_checker {
           break;
         }
       } else if (type->is_struct()) {
-        has_wrapper = type->find_structured_annotation_or_null(
-            structured_wrapper_annotation);
+        has_wrapper =
+            type->has_structured_annotation(structured_wrapper_annotation);
         typedef_name = type->name();
         break;
       } else {
@@ -334,8 +334,7 @@ void validate_identifier_is_not_reserved(
   //  1. the node was generated.
   //  2. @thrift.AllowedReservedIdentifier is present.
   if (node.generated() ||
-      node.find_structured_annotation_or_null(kAllowReservedIdentifierUri) !=
-          nullptr) {
+      node.has_structured_annotation(kAllowReservedIdentifierUri)) {
     return;
   }
   ctx.check(
@@ -349,8 +348,7 @@ void validate_filename_is_not_reserved(sema_context& ctx, const t_named& node) {
   //  1. the node was generated.
   //  2. @thrift.AllowReservedFilename is present.
   if (node.generated() ||
-      node.find_structured_annotation_or_null(kAllowReservedFilenameUri) !=
-          nullptr) {
+      node.has_structured_annotation(kAllowReservedFilenameUri)) {
     return;
   }
   ctx.check(
@@ -462,7 +460,7 @@ void validate_field_names_uniqueness(
 void validate_exception_message_annotation_is_only_in_exceptions(
     sema_context& ctx, const t_structured& node) {
   for (const auto& f : node.fields()) {
-    if (f.find_structured_annotation_or_null(kExceptionMessageUri)) {
+    if (f.has_structured_annotation(kExceptionMessageUri)) {
       ctx.check(
           node.is_exception(),
           f,
@@ -484,7 +482,7 @@ void validate_union_field_attributes(sema_context& ctx, const t_union& node) {
           field.qualifier() == t_field_qualifier::required ? "required"
                                                            : "optional",
           field.name());
-    } else if (field.find_structured_annotation_or_null(kTerseWriteUri)) {
+    } else if (field.has_structured_annotation(kTerseWriteUri)) {
       ctx.error(
           field,
           "`@thrift.TerseWrite` cannot be applied to union fields (in `{}`).",
@@ -507,16 +505,15 @@ void validate_boxed_field_attributes(sema_context& ctx, const t_field& node) {
                        "cpp.ref_type",
                        "cpp2.ref_type",
                    }) ||
-      node.find_structured_annotation_or_null(kCppRefUri);
+      node.has_structured_annotation(kCppRefUri);
 
   const bool box = node.has_unstructured_annotation({
                        "cpp.box",
                        "thrift.box",
                    }) ||
-      node.find_structured_annotation_or_null(kBoxUri);
+      node.has_structured_annotation(kBoxUri);
 
-  const bool intern_box =
-      node.find_structured_annotation_or_null(kInternBoxUri);
+  const bool intern_box = node.has_structured_annotation(kInternBoxUri);
 
   if (ref + box + intern_box > 1) {
     ctx.error(
@@ -549,8 +546,7 @@ void validate_boxed_field_attributes(sema_context& ctx, const t_field& node) {
       // annotated with `@cpp.AllowLegacyNonOptionalRef`.
 
       const bool report_error =
-          node.find_structured_annotation_or_null(
-              kCppAllowLegacyNonOptionalRefUri) == nullptr;
+          !node.has_structured_annotation(kCppAllowLegacyNonOptionalRefUri);
 
       ctx.report(
           node,
@@ -649,7 +645,7 @@ void validate_const_type_and_value(sema_context& ctx, const t_const& node) {
     detail::check_duplicate_keys(ctx, node);
   }
   ctx.check(
-      !node.find_structured_annotation_or_null(kCppAdapterUri) ||
+      !node.has_structured_annotation(kCppAdapterUri) ||
           has_experimental_annotation(ctx, node),
       "Using adapters on const `{}` is only allowed in the experimental mode.",
       node.name());
@@ -817,7 +813,7 @@ void validate_compatibility_with_lazy_field(
  */
 void validate_ref_annotation(sema_context& ctx, const t_field& node) {
   const bool hasStructuredAnnotation =
-      node.find_structured_annotation_or_null(kCppRefUri) != nullptr;
+      node.has_structured_annotation(kCppRefUri);
 
   const bool hasUnstructuredAnnotation = node.has_unstructured_annotation(
       {"cpp.ref", "cpp2.ref", "cpp.ref_type", "cpp2.ref_type"});
@@ -827,8 +823,7 @@ void validate_ref_annotation(sema_context& ctx, const t_field& node) {
     // Neither @cpp.Ref nor cpp[2].ref[_type].
     // Check that there is no @cpp.AllowedLegacyNonOptionalRef
     ctx.check(
-        node.find_structured_annotation_or_null(
-            kCppAllowLegacyNonOptionalRefUri) == nullptr,
+        !node.has_structured_annotation(kCppAllowLegacyNonOptionalRefUri),
         "Cannot annotate field with @cpp.AllowLegacyNonOptionalRef unless it "
         "is a reference field (i.e., @cpp.Ref): `{}`.",
         node.name());
@@ -919,7 +914,7 @@ void validate_ref_unique_and_box_annotation(
           node.name());
     }
   }
-  if (node.find_structured_annotation_or_null(kCppRefUri) != nullptr) {
+  if (node.has_structured_annotation(kCppRefUri)) {
     if (adapter_annotation) {
       ctx.error(
           "@cpp.Ref{{type = cpp.RefType.Unique}} is deprecated. Please use "
@@ -955,7 +950,7 @@ void validate_exception_message_annotation(
   // - of type STRING
   const t_field* field = nullptr;
   for (const auto& f : node.fields()) {
-    if (f.find_structured_annotation_or_null(kExceptionMessageUri)) {
+    if (f.has_structured_annotation(kExceptionMessageUri)) {
       ctx.check(!field, f, "Duplicate message annotation.");
       field = &f;
     }
@@ -1001,23 +996,22 @@ void validate_interaction_annotations(
   for (auto* func : node.get_functions()) {
     ctx.check(
         !func->has_unstructured_annotation("thread") &&
-            !func->find_structured_annotation_or_null(kCppProcessInEbThreadUri),
+            !func->has_structured_annotation(kCppProcessInEbThreadUri),
         "Interaction methods cannot be individually annotated with "
         "thread='eb'. Use process_in_event_base on the interaction instead.");
   }
   if (node.has_unstructured_annotation("process_in_event_base") ||
-      node.find_structured_annotation_or_null(kCppProcessInEbThreadUri)) {
+      node.has_structured_annotation(kCppProcessInEbThreadUri)) {
     ctx.check(
         !node.has_unstructured_annotation("serial") &&
-            !node.find_structured_annotation_or_null(kSerialUri),
+            !node.has_structured_annotation(kSerialUri),
         "EB interactions are already serial");
   }
 }
 
 void validate_cpp_deprecated_terse_write_annotation(
     sema_context& ctx, const t_field& field) {
-  if (field.find_structured_annotation_or_null(kCppDeprecatedTerseWriteUri) ==
-      nullptr) {
+  if (!field.has_structured_annotation(kCppDeprecatedTerseWriteUri)) {
     return;
   }
   if (field.qualifier() != t_field_qualifier::none) {
@@ -1232,12 +1226,10 @@ bool owns_annotations(t_type_ref type) {
 
 void validate_custom_cpp_type_annotations(
     sema_context& ctx, const t_named& node) {
-  const bool hasAdapter =
-      node.find_structured_annotation_or_null(kCppAdapterUri);
+  const bool hasAdapter = node.has_structured_annotation(kCppAdapterUri);
   bool hasCppType = node.has_unstructured_annotation(
       {"cpp.type", "cpp2.type", "cpp.template", "cpp2.template"});
-  const bool hasStructuredCppType =
-      node.find_structured_annotation_or_null(kCppTypeUri);
+  const bool hasStructuredCppType = node.has_structured_annotation(kCppTypeUri);
 
   ctx.check(
       !(hasCppType && hasAdapter),
@@ -1473,7 +1465,7 @@ void deprecate_annotations(sema_context& ctx, const t_named& node) {
     }
 
     if (directly_deprecated &&
-        node.find_structured_annotation_or_null(deprecations.at(k).c_str())) {
+        node.has_structured_annotation(deprecations.at(k).c_str())) {
       ctx.error("Duplicate annotations {} and {}.", k, replacement);
     } else if (removed_annotations.count(k) != 0 || prefix) {
       ctx.error(
@@ -1546,13 +1538,13 @@ void validate_cursor_serialization_adapter_in_container(
 }
 
 void validate_py3_enable_cpp_adapter(sema_context& ctx, const t_typedef& node) {
-  if (node.find_structured_annotation_or_null(kPythonPy3EnableCppAdapterUri)) {
+  if (node.has_structured_annotation(kPythonPy3EnableCppAdapterUri)) {
     const auto& true_type = *node.get_true_type();
     if (!true_type.is_container() && !true_type.is_string_or_binary()) {
       ctx.error(
           "The @python.Py3EnableCppAdapter annotation can only be used on containers and strings.");
     }
-    if (!node.find_structured_annotation_or_null(kCppAdapterUri)) {
+    if (!node.has_structured_annotation(kCppAdapterUri)) {
       ctx.error(
           "The @python.Py3EnableCppAdapter annotation requires the @cpp.Adapter annotation to be present in the same typedef.");
     }

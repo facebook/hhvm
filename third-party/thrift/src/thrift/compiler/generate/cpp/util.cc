@@ -480,7 +480,7 @@ bool is_stack_arguments(
 
 bool is_mixin(const t_field& field) {
   return field.has_unstructured_annotation("cpp.mixin") ||
-      field.find_structured_annotation_or_null(kMixinUri) != nullptr;
+      field.has_structured_annotation(kMixinUri);
 }
 
 bool has_ref_annotation(const t_field& field) {
@@ -640,7 +640,7 @@ const t_const* get_transitive_annotation_of_adapter_or_null(
   for (const auto& annotation : node.structured_annotations()) {
     const t_type& annotation_type = *annotation.type();
     if (is_transitive_annotation(annotation_type)) {
-      if (annotation_type.find_structured_annotation_or_null(kCppAdapterUri)) {
+      if (annotation_type.has_structured_annotation(kCppAdapterUri)) {
         return &annotation;
       }
     }

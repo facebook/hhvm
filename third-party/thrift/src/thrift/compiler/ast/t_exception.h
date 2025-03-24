@@ -63,7 +63,7 @@ class t_exception : public t_struct {
 
   const t_field* get_message_field() const {
     for (const auto* field : get_members()) {
-      if (field->find_structured_annotation_or_null(kExceptionMessageUri)) {
+      if (field->has_structured_annotation(kExceptionMessageUri)) {
         return field;
       }
     }

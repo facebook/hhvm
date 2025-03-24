@@ -480,7 +480,7 @@ class mstch_go_struct : public mstch_struct {
     auto fields_in_id_order = struct_->get_sorted_members();
     // Fields (optionally) in the most optimal (memory-saving) layout order.
     auto minimizePadding =
-        struct_->find_structured_annotation_or_null(kGoMinimizePaddingUri);
+        struct_->has_structured_annotation(kGoMinimizePaddingUri);
     if (minimizePadding) {
       std::vector<t_field*> fields_in_layout_order;
       std::copy(

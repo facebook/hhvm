@@ -38,7 +38,7 @@ bool should_annotate_field(const t_field& field) {
     return false;
   }
 
-  if (field.find_structured_annotation_or_null(kAnnotationUri) != nullptr) {
+  if (field.has_structured_annotation(kAnnotationUri)) {
     return false;
   }
 

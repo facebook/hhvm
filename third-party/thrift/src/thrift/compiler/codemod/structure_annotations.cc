@@ -68,7 +68,7 @@ class structure_annotations {
              t_typedef::kind::defined)) {
       auto type = type_ref.get_type();
       std::vector<t_annotation> to_remove;
-      bool has_cpp_type = node.find_structured_annotation_or_null(kCppTypeUri);
+      bool has_cpp_type = node.has_structured_annotation(kCppTypeUri);
       for (const auto& [name, data] : type->annotations()) {
         // cpp type
         if (name == "cpp.template" || name == "cpp2.template") {
@@ -137,10 +137,10 @@ class structure_annotations {
     }
 
     std::vector<t_annotation> to_remove;
-    bool has_cpp_type = node.find_structured_annotation_or_null(kCppTypeUri);
-    bool has_cpp_ref = node.find_structured_annotation_or_null(kBoxUri) ||
-        node.find_structured_annotation_or_null(kInternBoxUri) ||
-        node.find_structured_annotation_or_null(kCppRefUri);
+    bool has_cpp_type = node.has_structured_annotation(kCppTypeUri);
+    bool has_cpp_ref = node.has_structured_annotation(kBoxUri) ||
+        node.has_structured_annotation(kInternBoxUri) ||
+        node.has_structured_annotation(kCppRefUri);
     for (const auto& [name, data] : node.annotations()) {
       // cpp type
       bool is_typedef = dynamic_cast<const t_typedef*>(&node);
@@ -172,7 +172,7 @@ class structure_annotations {
         }
       } else if (name == "cpp.name") {
         to_remove.emplace_back(name, data);
-        if (!node.find_structured_annotation_or_null(kCppNameUri)) {
+        if (!node.has_structured_annotation(kCppNameUri)) {
           to_add.insert(fmt::format("@cpp.Name{{value = \"{}\"}}", data.value));
           fm_.add_include("thrift/annotation/cpp.thrift");
         }
@@ -209,7 +209,7 @@ class structure_annotations {
           continue;
         }
         to_remove.emplace_back(name, data);
-        if (!node.find_structured_annotation_or_null(kPriorityUri) &&
+        if (!node.has_structured_annotation(kPriorityUri) &&
             std::set<std::string>({"HIGH_IMPORTANT",
                                    "HIGH",
                                    "IMPORTANT",
@@ -222,13 +222,13 @@ class structure_annotations {
         }
       } else if (name == "serial") {
         to_remove.emplace_back(name, data);
-        if (!node.find_structured_annotation_or_null(kSerialUri)) {
+        if (!node.has_structured_annotation(kSerialUri)) {
           to_add.insert("@thrift.Serial");
           fm_.add_include("thrift/annotation/thrift.thrift");
         }
       } else if (name == "thrift.uri") {
         to_remove.emplace_back(name, data);
-        if (!node.find_structured_annotation_or_null(kUriUri)) {
+        if (!node.has_structured_annotation(kUriUri)) {
           to_add.insert(
               fmt::format("@thrift.Uri{{value = \"{}\"}}", data.value));
           fm_.add_include("thrift/annotation/thrift.thrift");
@@ -240,13 +240,13 @@ class structure_annotations {
         to_remove.emplace_back(name, data);
       } else if (name == "cpp.minimize_padding") {
         to_remove.emplace_back(name, data);
-        if (!node.find_structured_annotation_or_null(kCppMinimizePaddingUri)) {
+        if (!node.has_structured_annotation(kCppMinimizePaddingUri)) {
           to_add.insert("@cpp.MinimizePadding");
           fm_.add_include("thrift/annotation/cpp.thrift");
         }
       } else if (name == "cpp.enum_type") {
         to_remove.emplace_back(name, data);
-        if (!node.find_structured_annotation_or_null(kCppEnumTypeUri)) {
+        if (!node.has_structured_annotation(kCppEnumTypeUri)) {
           std::string_view value = data.value;
           if (value.substr(0, 2) == "::") {
             value = value.substr(2);
@@ -278,26 +278,25 @@ class structure_annotations {
         // This annotation is a subset of @thrift.BitmaskEnum, which carries
         // additional restrictions. We can't turn this into that but we can use
         // it if already present to remove this.
-        if (node.find_structured_annotation_or_null(kBitmaskEnumUri) ||
+        if (node.has_structured_annotation(kBitmaskEnumUri) ||
             node.has_unstructured_annotation("bitmask")) {
           to_remove.emplace_back(name, data);
         }
       } else if (name == "cpp.mixin") {
         to_remove.emplace_back(name, data);
-        if (!node.find_structured_annotation_or_null(kMixinUri)) {
+        if (!node.has_structured_annotation(kMixinUri)) {
           to_add.insert("@thrift.Mixin");
           fm_.add_include("thrift/annotation/thrift.thrift");
         }
       } else if (name == "cpp.experimental.lazy") {
         to_remove.emplace_back(name, data);
-        if (!node.find_structured_annotation_or_null(kCppLazyUri)) {
+        if (!node.has_structured_annotation(kCppLazyUri)) {
           to_add.insert("@cpp.Lazy");
           fm_.add_include("thrift/annotation/cpp.thrift");
         }
       } else if (name == "thread" || name == "process_in_event_base") {
         to_remove.emplace_back(name, data);
-        if (!node.find_structured_annotation_or_null(
-                kCppProcessInEbThreadUri) &&
+        if (!node.has_structured_annotation(kCppProcessInEbThreadUri) &&
             (name != "thread" || data.value == "eb")) {
           to_add.insert("@cpp.ProcessInEbThreadUnsafe");
           fm_.add_include("thrift/annotation/cpp.thrift");
@@ -342,7 +341,7 @@ class structure_annotations {
           }
         }
         to_remove.emplace_back(name, data);
-        if (!node.find_structured_annotation_or_null(kHackAttributeUri)) {
+        if (!node.has_structured_annotation(kHackAttributeUri)) {
           to_add.insert(fmt::format(
               "@hack.Attributes{{attributes = [{}]}}", fmt::join(attrs, ", ")));
           fm_.add_include("thrift/annotation/hack.thrift");
@@ -358,8 +357,7 @@ class structure_annotations {
         if (auto field =
                 dynamic_cast<const t_structured&>(node).get_field_by_name(
                     data.value);
-            field &&
-            !node.find_structured_annotation_or_null(kExceptionMessageUri)) {
+            field && !node.has_structured_annotation(kExceptionMessageUri)) {
           fm_.add(
               {field->src_range().begin.offset(),
                field->src_range().begin.offset(),
@@ -368,7 +366,7 @@ class structure_annotations {
         }
       } else if (name == "bitmask") {
         to_remove.emplace_back(name, data);
-        if (!node.find_structured_annotation_or_null(kBitmaskEnumUri)) {
+        if (!node.has_structured_annotation(kBitmaskEnumUri)) {
           to_add.insert("@thrift.BitmaskEnum");
           fm_.add_include("thrift/annotation/thrift.thrift");
         }
@@ -377,13 +375,13 @@ class structure_annotations {
       // python
       else if (name == "py3.hidden") {
         to_remove.emplace_back(name, data);
-        if (!node.find_structured_annotation_or_null(kPythonPy3HiddenUri)) {
+        if (!node.has_structured_annotation(kPythonPy3HiddenUri)) {
           to_add.insert("@python.Py3Hidden");
           fm_.add_include("thrift/annotation/python.thrift");
         }
       } else if (name == "py3.name") {
         to_remove.emplace_back(name, data);
-        if (!node.find_structured_annotation_or_null(kPythonNameUri)) {
+        if (!node.has_structured_annotation(kPythonNameUri)) {
           to_add.insert(
               fmt::format("@python.Name{{name = \"{}\"}}", data.value));
           fm_.add_include("thrift/annotation/python.thrift");
@@ -391,7 +389,7 @@ class structure_annotations {
       } else if (name == "py3.flags") {
         to_remove.emplace_back(name, data);
         if (dynamic_cast<const t_enum*>(&node) &&
-            !node.find_structured_annotation_or_null(kPythonFlagsUri)) {
+            !node.has_structured_annotation(kPythonFlagsUri)) {
           to_add.insert("@python.Flags");
           fm_.add_include("thrift/annotation/python.thrift");
         }

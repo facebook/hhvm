@@ -510,7 +510,7 @@ class python_capi_mstch_struct : public mstch_struct {
   }
 
   bool capi_eligible_type(const t_type* type) {
-    if (type->find_structured_annotation_or_null(kCppAdapterUri)) {
+    if (type->has_structured_annotation(kCppAdapterUri)) {
       return false;
     }
 
@@ -561,7 +561,7 @@ class python_capi_mstch_struct : public mstch_struct {
   }
 
   bool capi_eligible_field(const t_field& field) {
-    if (field.find_structured_annotation_or_null(kCppAdapterUri)) {
+    if (field.has_structured_annotation(kCppAdapterUri)) {
       return false;
     }
     if (const auto* cpp_type_anno =

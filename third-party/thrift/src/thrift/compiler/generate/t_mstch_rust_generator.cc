@@ -134,7 +134,7 @@ bool has_nonstandard_type_annotation(const t_named* node) {
 
 bool has_newtype_annotation(const t_named* node) {
   const t_typedef* type = dynamic_cast<const t_typedef*>(node);
-  return type && node->find_structured_annotation_or_null(kRustNewTypeUri);
+  return type && node->has_structured_annotation(kRustNewTypeUri);
 }
 
 bool can_derive_ord(const t_type* type) {
@@ -146,7 +146,7 @@ bool can_derive_ord(const t_type* type) {
       type->is_enum() || type->is_void()) {
     return true;
   }
-  if (type->find_structured_annotation_or_null(kRustOrdUri)) {
+  if (type->has_structured_annotation(kRustOrdUri)) {
     return true;
   }
   if (type->is_list()) {
@@ -296,12 +296,12 @@ std::string get_mock_crate(
 
 bool node_is_boxed(const t_named& node) {
   return node.has_unstructured_annotation("thrift.box") ||
-      node.find_structured_annotation_or_null(kBoxUri) ||
-      node.find_structured_annotation_or_null(kRustBoxUri);
+      node.has_structured_annotation(kBoxUri) ||
+      node.has_structured_annotation(kRustBoxUri);
 }
 
 bool node_is_arced(const t_named& node) {
-  return node.find_structured_annotation_or_null(kRustArcUri);
+  return node.has_structured_annotation(kRustArcUri);
 }
 
 FieldKind field_kind(const t_named& node) {
@@ -413,8 +413,8 @@ const t_type* step_through_typedefs(const t_type* t, bool break_on_adapter) {
 }
 
 bool node_has_custom_rust_type(const t_named& node) {
-  return node.find_structured_annotation_or_null(kRustTypeUri) ||
-      node.find_structured_annotation_or_null(kRustNewTypeUri);
+  return node.has_structured_annotation(kRustTypeUri) ||
+      node.has_structured_annotation(kRustNewTypeUri);
 }
 
 // NOTE: a transitive _adapter_ is different from a transitive _annotation_. A
@@ -546,7 +546,7 @@ mstch::node structured_annotations_node(
 
     mstch::node transitive;
     const t_type* annotation_type = annotation.type();
-    if ((*annotation_type).find_structured_annotation_or_null(kTransitiveUri)) {
+    if (annotation_type->has_structured_annotation(kTransitiveUri)) {
       transitive = context.type_factory->make_mstch_object(
           annotation_type, context, pos);
     }
@@ -710,12 +710,12 @@ class rust_mstch_program : public mstch_program {
     for (t_structured* strct : program_->structs_and_unions()) {
       // The is_union is because `union` are also in this collection.
       if (!strct->is_union() &&
-          !strct->find_structured_annotation_or_null(kRustExhaustiveUri)) {
+          !strct->has_structured_annotation(kRustExhaustiveUri)) {
         return true;
       }
     }
     for (t_exception* strct : program_->exceptions()) {
-      if (!strct->find_structured_annotation_or_null(kRustExhaustiveUri)) {
+      if (!strct->has_structured_annotation(kRustExhaustiveUri)) {
         return true;
       }
     }
@@ -1021,8 +1021,7 @@ class rust_mstch_service : public mstch_service {
     }
   }
   mstch::node rust_request_context() {
-    return service_->find_structured_annotation_or_null(
-               kRustRequestContextUri) != nullptr;
+    return service_->has_structured_annotation(kRustRequestContextUri);
   }
   mstch::node rust_extended_clients() {
     mstch::array extended_services;
@@ -1320,7 +1319,7 @@ class rust_mstch_struct : public mstch_struct {
     return get_types_import_name(struct_->program(), options_);
   }
   mstch::node rust_is_ord() {
-    if (struct_->find_structured_annotation_or_null(kRustOrdUri)) {
+    if (struct_->has_structured_annotation(kRustOrdUri)) {
       return true;
     }
 
@@ -1335,18 +1334,17 @@ class rust_mstch_struct : public mstch_struct {
         return false;
       }
 
-      if (field.find_structured_annotation_or_null(kRustTypeUri)) {
+      if (field.has_structured_annotation(kRustTypeUri)) {
         return false;
       }
     }
     return true;
   }
   mstch::node rust_is_copy() {
-    return struct_->find_structured_annotation_or_null(kRustCopyUri) != nullptr;
+    return struct_->has_structured_annotation(kRustCopyUri);
   }
   mstch::node rust_is_exhaustive() {
-    return struct_->find_structured_annotation_or_null(kRustExhaustiveUri) !=
-        nullptr;
+    return struct_->has_structured_annotation(kRustExhaustiveUri);
   }
   mstch::node rust_fields_by_name() {
     auto fields = struct_->fields().copy();
@@ -2007,7 +2005,7 @@ mstch::node mstch_rust_value::struct_fields() {
 mstch::node mstch_rust_value::is_exhaustive() {
   auto struct_type = dynamic_cast<const t_struct*>(type_);
   return struct_type &&
-      struct_type->find_structured_annotation_or_null(kRustExhaustiveUri);
+      struct_type->has_structured_annotation(kRustExhaustiveUri);
 }
 
 class rust_mstch_const : public mstch_const {
@@ -2178,7 +2176,7 @@ class rust_mstch_typedef : public mstch_typedef {
     return rust_type;
   }
   mstch::node rust_ord() {
-    return typedef_->find_structured_annotation_or_null(kRustOrdUri) ||
+    return typedef_->has_structured_annotation(kRustOrdUri) ||
         (can_derive_ord(typedef_) &&
          !type_has_transitive_adapter(typedef_->get_type(), true));
   }

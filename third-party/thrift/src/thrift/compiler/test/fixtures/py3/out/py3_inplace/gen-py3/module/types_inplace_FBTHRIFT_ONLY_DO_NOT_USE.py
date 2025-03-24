@@ -11,8 +11,11 @@ from collections.abc import Mapping, Sequence, Set
 import enum
 import importlib
 
+import typing as _typing
 import thrift.py3.types
+import thrift.python.types
 import module.thrift_enums as _fbthrift_python_enums
+import module.thrift_types as _fbthrift_python_types
 
 
 
@@ -54,6 +57,12 @@ class AnEnum(thrift.py3.types.CompiledEnum, int):
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
+    @staticmethod
+    def from_python(python_enum: _fbthrift_python_enums.AnEnum) -> AnEnum:
+        if isinstance(python_enum, thrift.python.types.BadEnum):
+            return thrift.python.types.BadEnum(AnEnum, int(python_enum))
+        return python_enum._to_py3()
+
 
     def __int__(self):
         return self._fbthrift_value_
@@ -87,6 +96,12 @@ class AnEnumRenamed(thrift.py3.types.CompiledEnum, int):
 
     def _to_py_deprecated(self):
         return self._fbthrift_value_
+
+    @staticmethod
+    def from_python(python_enum: _fbthrift_python_enums.AnEnumRenamed) -> AnEnumRenamed:
+        if isinstance(python_enum, thrift.python.types.BadEnum):
+            return thrift.python.types.BadEnum(AnEnumRenamed, int(python_enum))
+        return python_enum._to_py3()
 
 
     def __int__(self):
@@ -122,6 +137,12 @@ class Flags(thrift.py3.types.Flag):
 
     def _to_py_deprecated(self):
         return self._fbthrift_value_
+
+    @staticmethod
+    def from_python(python_enum: _fbthrift_python_enums.Flags) -> Flags:
+        if isinstance(python_enum, thrift.python.types.BadEnum):
+            return thrift.python.types.BadEnum(Flags, int(python_enum))
+        return python_enum._to_py3()
 
 
     def __int__(self):
@@ -1887,62 +1908,643 @@ __all__.append("Map__AnEnumRenamed_i32")
 
 
 ### Structured Types ###
-class SimpleException:
+class SimpleException(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
+    __slots__ = (
+        "_fbthrift__inner",
+    )
+    _fbthrift__inner : _fbthrift_python_types.SimpleException
+
+
+    def __init__(self, *args, **kwargs) -> None:
+        self._fbthrift__inner = _fbthrift_python_types.SimpleException(*args, **kwargs)
+
+    def __new__(cls, *args, **kwargs) -> SimpleException:
+        instance = super().__new__(cls)
+        return instance
+
+    @staticmethod
+    def from_python(thrift_python_inner: _fbthrift_python_types.SimpleException) -> SimpleException:
+        inst = SimpleException.__new__(SimpleException)
+        inst._fbthrift__inner = thrift_python_inner
+        return inst
+
+    def _to_py3(self) -> SimpleException:
+        return self
+
+    def _to_python(self) -> _fbthrift_python_types.SimpleException:
+        return self._fbthrift__inner
+
+
+    @property
+    def err_code(self) -> int:
+        return self._fbthrift__inner.err_code
+
+
 
 
 __all__.append("SimpleException")
 
-class OptionalRefStruct:
+class OptionalRefStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
+    __slots__ = (
+        "_fbthrift__inner",
+    )
+    _fbthrift__inner : _fbthrift_python_types.OptionalRefStruct
+
+
+    def __init__(self, *args, **kwargs) -> None:
+        self._fbthrift__inner = _fbthrift_python_types.OptionalRefStruct(*args, **kwargs)
+
+    def __new__(cls, *args, **kwargs) -> OptionalRefStruct:
+        instance = super().__new__(cls)
+        return instance
+
+    @staticmethod
+    def from_python(thrift_python_inner: _fbthrift_python_types.OptionalRefStruct) -> OptionalRefStruct:
+        inst = OptionalRefStruct.__new__(OptionalRefStruct)
+        inst._fbthrift__inner = thrift_python_inner
+        return inst
+
+    def _to_py3(self) -> OptionalRefStruct:
+        return self
+
+    def _to_python(self) -> _fbthrift_python_types.OptionalRefStruct:
+        return self._fbthrift__inner
+
+
+    @property
+    def optional_blob(self) -> _typing.Optional[_fbthrift_iobuf.IOBuf]:
+        return self._fbthrift__inner.optional_blob
+
+
 
 
 __all__.append("OptionalRefStruct")
 
-class SimpleStruct:
+class SimpleStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
+    __slots__ = (
+        "_fbthrift__inner",
+        "_fbthrift_inner__something",
+    )
+    _fbthrift__inner : _fbthrift_python_types.SimpleStruct
+    _fbthrift_inner__something : _typing.Mapping[int, int] | None
+
+
+    def __init__(self, *args, **kwargs) -> None:
+        self._fbthrift__inner = _fbthrift_python_types.SimpleStruct(*args, **kwargs)
+
+    def __new__(cls, *args, **kwargs) -> SimpleStruct:
+        instance = super().__new__(cls)
+        instance._fbthrift_inner__something = None
+        return instance
+
+    @staticmethod
+    def from_python(thrift_python_inner: _fbthrift_python_types.SimpleStruct) -> SimpleStruct:
+        inst = SimpleStruct.__new__(SimpleStruct)
+        inst._fbthrift__inner = thrift_python_inner
+        return inst
+
+    def _to_py3(self) -> SimpleStruct:
+        return self
+
+    def _to_python(self) -> _fbthrift_python_types.SimpleStruct:
+        return self._fbthrift__inner
+
+
+    @property
+    def is_on(self) -> bool:
+        return self._fbthrift__inner.is_on
+
+    @property
+    def tiny_int(self) -> int:
+        return self._fbthrift__inner.tiny_int
+
+    @property
+    def small_int(self) -> int:
+        return self._fbthrift__inner.small_int
+
+    @property
+    def nice_sized_int(self) -> int:
+        return self._fbthrift__inner.nice_sized_int
+
+    @property
+    def big_int(self) -> int:
+        return self._fbthrift__inner.big_int
+
+    @property
+    def real(self) -> float:
+        return self._fbthrift__inner.real
+
+    @property
+    def smaller_real(self) -> float:
+        return self._fbthrift__inner.smaller_real
+
+    @property
+    def something(self) -> _typing.Mapping[int, int]:
+        if self._fbthrift_inner__something is None:
+            __python_val = self._fbthrift__inner.something
+            self._fbthrift_inner__something = _std_unordered_map__Map__i32_i32.from_python(__python_val)
+
+        return self._fbthrift_inner__something
+
+
 
 
 __all__.append("SimpleStruct")
 
-class HiddenTypeFieldsStruct:
+class HiddenTypeFieldsStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
+    __slots__ = (
+        "_fbthrift__inner",
+    )
+    _fbthrift__inner : _fbthrift_python_types.HiddenTypeFieldsStruct
+
+
+    def __init__(self, *args, **kwargs) -> None:
+        self._fbthrift__inner = _fbthrift_python_types.HiddenTypeFieldsStruct(*args, **kwargs)
+
+    def __new__(cls, *args, **kwargs) -> HiddenTypeFieldsStruct:
+        instance = super().__new__(cls)
+        return instance
+
+    @staticmethod
+    def from_python(thrift_python_inner: _fbthrift_python_types.HiddenTypeFieldsStruct) -> HiddenTypeFieldsStruct:
+        inst = HiddenTypeFieldsStruct.__new__(HiddenTypeFieldsStruct)
+        inst._fbthrift__inner = thrift_python_inner
+        return inst
+
+    def _to_py3(self) -> HiddenTypeFieldsStruct:
+        return self
+
+    def _to_python(self) -> _fbthrift_python_types.HiddenTypeFieldsStruct:
+        return self._fbthrift__inner
+
+
+
 
 
 __all__.append("HiddenTypeFieldsStruct")
 
-class ComplexStruct:
+class ComplexStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
+    __slots__ = (
+        "_fbthrift__inner",
+        "_fbthrift_inner__structOne",
+        "_fbthrift_inner__structTwo",
+        "_fbthrift_inner__an_enum",
+    )
+    _fbthrift__inner : _fbthrift_python_types.ComplexStruct
+    _fbthrift_inner__structOne : SimpleStruct | None
+    _fbthrift_inner__structTwo : SimpleStruct | None
+    _fbthrift_inner__an_enum : AnEnum | None
+
+
+    def __init__(self, *args, **kwargs) -> None:
+        self._fbthrift__inner = _fbthrift_python_types.ComplexStruct(*args, **kwargs)
+
+    def __new__(cls, *args, **kwargs) -> ComplexStruct:
+        instance = super().__new__(cls)
+        instance._fbthrift_inner__structOne = None
+        instance._fbthrift_inner__structTwo = None
+        instance._fbthrift_inner__an_enum = None
+        return instance
+
+    @staticmethod
+    def from_python(thrift_python_inner: _fbthrift_python_types.ComplexStruct) -> ComplexStruct:
+        inst = ComplexStruct.__new__(ComplexStruct)
+        inst._fbthrift__inner = thrift_python_inner
+        return inst
+
+    def _to_py3(self) -> ComplexStruct:
+        return self
+
+    def _to_python(self) -> _fbthrift_python_types.ComplexStruct:
+        return self._fbthrift__inner
+
+
+    @property
+    def structOne(self) -> SimpleStruct:
+        if self._fbthrift_inner__structOne is None:
+            __python_val = self._fbthrift__inner.structOne
+            self._fbthrift_inner__structOne = SimpleStruct.from_python(__python_val)
+
+        return self._fbthrift_inner__structOne
+
+    @property
+    def structTwo(self) -> SimpleStruct:
+        if self._fbthrift_inner__structTwo is None:
+            __python_val = self._fbthrift__inner.structTwo
+            self._fbthrift_inner__structTwo = SimpleStruct.from_python(__python_val)
+
+        return self._fbthrift_inner__structTwo
+
+    @property
+    def an_integer(self) -> int:
+        return self._fbthrift__inner.an_integer
+
+    @property
+    def name(self) -> str:
+        return self._fbthrift__inner.name
+
+    @property
+    def an_enum(self) -> AnEnum:
+        if self._fbthrift_inner__an_enum is None:
+            __python_val = self._fbthrift__inner.an_enum
+            self._fbthrift_inner__an_enum = AnEnum.from_python(__python_val)
+
+        return self._fbthrift_inner__an_enum
+
+    @property
+    def some_bytes(self) -> bytes:
+        return self._fbthrift__inner.some_bytes
+
+    @property
+    def sender(self) -> str:
+        return self._fbthrift__inner.sender
+
+    @property
+    def cdef_(self) -> str:
+        return self._fbthrift__inner.cdef_
+
+    @property
+    def bytes_with_cpp_type(self) -> bytes:
+        return self._fbthrift__inner.bytes_with_cpp_type
+
+
 
 
 __all__.append("ComplexStruct")
 
-class BinaryUnion:
+class BinaryUnion(thrift.py3.types.Union):
     __module__ = _fbthrift__module_name__
+    __slots__ = (
+        "_fbthrift__inner",
+    )
+    _fbthrift__inner : _fbthrift_python_types.BinaryUnion
+
+
+    def __init__(self, *args, **kwargs) -> None:
+        self._fbthrift__inner = _fbthrift_python_types.BinaryUnion(*args, **kwargs)
+
+    def __new__(cls, *args, **kwargs) -> BinaryUnion:
+        instance = super().__new__(cls)
+        return instance
+
+    @staticmethod
+    def from_python(thrift_python_inner: _fbthrift_python_types.BinaryUnion) -> BinaryUnion:
+        inst = BinaryUnion.__new__(BinaryUnion)
+        inst._fbthrift__inner = thrift_python_inner
+        return inst
+
+    def _to_py3(self) -> BinaryUnion:
+        return self
+
+    def _to_python(self) -> _fbthrift_python_types.BinaryUnion:
+        return self._fbthrift__inner
+
+
+    @property
+    def iobuf_val(self) -> _fbthrift_iobuf.IOBuf:
+        return self._fbthrift__inner.iobuf_val
+
+
 
 
 __all__.append("BinaryUnion")
 
-class BinaryUnionStruct:
+class BinaryUnionStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
+    __slots__ = (
+        "_fbthrift__inner",
+        "_fbthrift_inner__u",
+    )
+    _fbthrift__inner : _fbthrift_python_types.BinaryUnionStruct
+    _fbthrift_inner__u : BinaryUnion | None
+
+
+    def __init__(self, *args, **kwargs) -> None:
+        self._fbthrift__inner = _fbthrift_python_types.BinaryUnionStruct(*args, **kwargs)
+
+    def __new__(cls, *args, **kwargs) -> BinaryUnionStruct:
+        instance = super().__new__(cls)
+        instance._fbthrift_inner__u = None
+        return instance
+
+    @staticmethod
+    def from_python(thrift_python_inner: _fbthrift_python_types.BinaryUnionStruct) -> BinaryUnionStruct:
+        inst = BinaryUnionStruct.__new__(BinaryUnionStruct)
+        inst._fbthrift__inner = thrift_python_inner
+        return inst
+
+    def _to_py3(self) -> BinaryUnionStruct:
+        return self
+
+    def _to_python(self) -> _fbthrift_python_types.BinaryUnionStruct:
+        return self._fbthrift__inner
+
+
+    @property
+    def u(self) -> BinaryUnion:
+        if self._fbthrift_inner__u is None:
+            __python_val = self._fbthrift__inner.u
+            self._fbthrift_inner__u = BinaryUnion.from_python(__python_val)
+
+        return self._fbthrift_inner__u
+
+
 
 
 __all__.append("BinaryUnionStruct")
 
-class CustomFields:
+class CustomFields(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
+    __slots__ = (
+        "_fbthrift__inner",
+        "_fbthrift_inner__list_field",
+        "_fbthrift_inner__set_field",
+        "_fbthrift_inner__map_field",
+        "_fbthrift_inner__struct_field",
+    )
+    _fbthrift__inner : _fbthrift_python_types.CustomFields
+    _fbthrift_inner__list_field : _typing.Sequence[int] | None
+    _fbthrift_inner__set_field : _typing.AbstractSet[int] | None
+    _fbthrift_inner__map_field : _typing.Mapping[int, int] | None
+    _fbthrift_inner__struct_field : SimpleStruct | None
+
+
+    def __init__(self, *args, **kwargs) -> None:
+        self._fbthrift__inner = _fbthrift_python_types.CustomFields(*args, **kwargs)
+
+    def __new__(cls, *args, **kwargs) -> CustomFields:
+        instance = super().__new__(cls)
+        instance._fbthrift_inner__list_field = None
+        instance._fbthrift_inner__set_field = None
+        instance._fbthrift_inner__map_field = None
+        instance._fbthrift_inner__struct_field = None
+        return instance
+
+    @staticmethod
+    def from_python(thrift_python_inner: _fbthrift_python_types.CustomFields) -> CustomFields:
+        inst = CustomFields.__new__(CustomFields)
+        inst._fbthrift__inner = thrift_python_inner
+        return inst
+
+    def _to_py3(self) -> CustomFields:
+        return self
+
+    def _to_python(self) -> _fbthrift_python_types.CustomFields:
+        return self._fbthrift__inner
+
+
+    @property
+    def bool_field(self) -> bool:
+        return self._fbthrift__inner.bool_field
+
+    @property
+    def integer_field(self) -> int:
+        return self._fbthrift__inner.integer_field
+
+    @property
+    def double_field(self) -> float:
+        return self._fbthrift__inner.double_field
+
+    @property
+    def string_field(self) -> str:
+        return self._fbthrift__inner.string_field
+
+    @property
+    def binary_field(self) -> bytes:
+        return self._fbthrift__inner.binary_field
+
+    @property
+    def list_field(self) -> _typing.Sequence[int]:
+        if self._fbthrift_inner__list_field is None:
+            __python_val = self._fbthrift__inner.list_field
+            self._fbthrift_inner__list_field = _MyType__List__i32.from_python(__python_val)
+
+        return self._fbthrift_inner__list_field
+
+    @property
+    def set_field(self) -> _typing.AbstractSet[int]:
+        if self._fbthrift_inner__set_field is None:
+            __python_val = self._fbthrift__inner.set_field
+            self._fbthrift_inner__set_field = _MyType__Set__i32.from_python(__python_val)
+
+        return self._fbthrift_inner__set_field
+
+    @property
+    def map_field(self) -> _typing.Mapping[int, int]:
+        if self._fbthrift_inner__map_field is None:
+            __python_val = self._fbthrift__inner.map_field
+            self._fbthrift_inner__map_field = _MyType__Map__i32_i32.from_python(__python_val)
+
+        return self._fbthrift_inner__map_field
+
+    @property
+    def struct_field(self) -> SimpleStruct:
+        if self._fbthrift_inner__struct_field is None:
+            __python_val = self._fbthrift__inner.struct_field
+            self._fbthrift_inner__struct_field = SimpleStruct.from_python(__python_val)
+
+        return self._fbthrift_inner__struct_field
+
+
 
 
 __all__.append("CustomFields")
 
-class CustomTypedefFields:
+class CustomTypedefFields(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
+    __slots__ = (
+        "_fbthrift__inner",
+        "_fbthrift_inner__list_field",
+        "_fbthrift_inner__set_field",
+        "_fbthrift_inner__map_field",
+        "_fbthrift_inner__struct_field",
+    )
+    _fbthrift__inner : _fbthrift_python_types.CustomTypedefFields
+    _fbthrift_inner__list_field : _typing.Sequence[int] | None
+    _fbthrift_inner__set_field : _typing.AbstractSet[int] | None
+    _fbthrift_inner__map_field : _typing.Mapping[int, int] | None
+    _fbthrift_inner__struct_field : SimpleStruct | None
+
+
+    def __init__(self, *args, **kwargs) -> None:
+        self._fbthrift__inner = _fbthrift_python_types.CustomTypedefFields(*args, **kwargs)
+
+    def __new__(cls, *args, **kwargs) -> CustomTypedefFields:
+        instance = super().__new__(cls)
+        instance._fbthrift_inner__list_field = None
+        instance._fbthrift_inner__set_field = None
+        instance._fbthrift_inner__map_field = None
+        instance._fbthrift_inner__struct_field = None
+        return instance
+
+    @staticmethod
+    def from_python(thrift_python_inner: _fbthrift_python_types.CustomTypedefFields) -> CustomTypedefFields:
+        inst = CustomTypedefFields.__new__(CustomTypedefFields)
+        inst._fbthrift__inner = thrift_python_inner
+        return inst
+
+    def _to_py3(self) -> CustomTypedefFields:
+        return self
+
+    def _to_python(self) -> _fbthrift_python_types.CustomTypedefFields:
+        return self._fbthrift__inner
+
+
+    @property
+    def bool_field(self) -> bool:
+        return self._fbthrift__inner.bool_field
+
+    @property
+    def integer_field(self) -> int:
+        return self._fbthrift__inner.integer_field
+
+    @property
+    def double_field(self) -> float:
+        return self._fbthrift__inner.double_field
+
+    @property
+    def string_field(self) -> str:
+        return self._fbthrift__inner.string_field
+
+    @property
+    def binary_field(self) -> bytes:
+        return self._fbthrift__inner.binary_field
+
+    @property
+    def list_field(self) -> _typing.Sequence[int]:
+        if self._fbthrift_inner__list_field is None:
+            __python_val = self._fbthrift__inner.list_field
+            self._fbthrift_inner__list_field = _MyType__List__i32.from_python(__python_val)
+
+        return self._fbthrift_inner__list_field
+
+    @property
+    def set_field(self) -> _typing.AbstractSet[int]:
+        if self._fbthrift_inner__set_field is None:
+            __python_val = self._fbthrift__inner.set_field
+            self._fbthrift_inner__set_field = _MyType__Set__i32.from_python(__python_val)
+
+        return self._fbthrift_inner__set_field
+
+    @property
+    def map_field(self) -> _typing.Mapping[int, int]:
+        if self._fbthrift_inner__map_field is None:
+            __python_val = self._fbthrift__inner.map_field
+            self._fbthrift_inner__map_field = _MyType__Map__i32_i32.from_python(__python_val)
+
+        return self._fbthrift_inner__map_field
+
+    @property
+    def struct_field(self) -> SimpleStruct:
+        if self._fbthrift_inner__struct_field is None:
+            __python_val = self._fbthrift__inner.struct_field
+            self._fbthrift_inner__struct_field = SimpleStruct.from_python(__python_val)
+
+        return self._fbthrift_inner__struct_field
+
+
 
 
 __all__.append("CustomTypedefFields")
 
-class AdaptedTypedefFields:
+class AdaptedTypedefFields(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
+    __slots__ = (
+        "_fbthrift__inner",
+        "_fbthrift_inner__list_field",
+        "_fbthrift_inner__set_field",
+        "_fbthrift_inner__map_field",
+        "_fbthrift_inner__struct_field",
+    )
+    _fbthrift__inner : _fbthrift_python_types.AdaptedTypedefFields
+    _fbthrift_inner__list_field : _typing.Sequence[int] | None
+    _fbthrift_inner__set_field : _typing.AbstractSet[int] | None
+    _fbthrift_inner__map_field : _typing.Mapping[int, int] | None
+    _fbthrift_inner__struct_field : SimpleStruct | None
+
+
+    def __init__(self, *args, **kwargs) -> None:
+        self._fbthrift__inner = _fbthrift_python_types.AdaptedTypedefFields(*args, **kwargs)
+
+    def __new__(cls, *args, **kwargs) -> AdaptedTypedefFields:
+        instance = super().__new__(cls)
+        instance._fbthrift_inner__list_field = None
+        instance._fbthrift_inner__set_field = None
+        instance._fbthrift_inner__map_field = None
+        instance._fbthrift_inner__struct_field = None
+        return instance
+
+    @staticmethod
+    def from_python(thrift_python_inner: _fbthrift_python_types.AdaptedTypedefFields) -> AdaptedTypedefFields:
+        inst = AdaptedTypedefFields.__new__(AdaptedTypedefFields)
+        inst._fbthrift__inner = thrift_python_inner
+        return inst
+
+    def _to_py3(self) -> AdaptedTypedefFields:
+        return self
+
+    def _to_python(self) -> _fbthrift_python_types.AdaptedTypedefFields:
+        return self._fbthrift__inner
+
+
+    @property
+    def bool_field(self) -> bool:
+        return self._fbthrift__inner.bool_field
+
+    @property
+    def integer_field(self) -> int:
+        return self._fbthrift__inner.integer_field
+
+    @property
+    def double_field(self) -> float:
+        return self._fbthrift__inner.double_field
+
+    @property
+    def string_field(self) -> str:
+        return self._fbthrift__inner.string_field
+
+    @property
+    def binary_field(self) -> bytes:
+        return self._fbthrift__inner.binary_field
+
+    @property
+    def list_field(self) -> _typing.Sequence[int]:
+        if self._fbthrift_inner__list_field is None:
+            __python_val = self._fbthrift__inner.list_field
+            self._fbthrift_inner__list_field = _py3_simple_AdaptedList__List__i32.from_python(__python_val)
+
+        return self._fbthrift_inner__list_field
+
+    @property
+    def set_field(self) -> _typing.AbstractSet[int]:
+        if self._fbthrift_inner__set_field is None:
+            __python_val = self._fbthrift__inner.set_field
+            self._fbthrift_inner__set_field = _py3_simple_AdaptedSet__Set__i32.from_python(__python_val)
+
+        return self._fbthrift_inner__set_field
+
+    @property
+    def map_field(self) -> _typing.Mapping[int, int]:
+        if self._fbthrift_inner__map_field is None:
+            __python_val = self._fbthrift__inner.map_field
+            self._fbthrift_inner__map_field = _py3_simple_AdaptedMap__Map__i32_i32.from_python(__python_val)
+
+        return self._fbthrift_inner__map_field
+
+    @property
+    def struct_field(self) -> SimpleStruct:
+        if self._fbthrift_inner__struct_field is None:
+            __python_val = self._fbthrift__inner.struct_field
+            self._fbthrift_inner__struct_field = SimpleStruct.from_python(__python_val)
+
+        return self._fbthrift_inner__struct_field
+
+
 
 
 __all__.append("AdaptedTypedefFields")

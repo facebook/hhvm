@@ -11,8 +11,11 @@ from collections.abc import Mapping, Sequence, Set
 import enum
 import importlib
 
+import typing as _typing
 import thrift.py3.types
+import thrift.python.types
 import test.fixtures.basic.module.thrift_enums as _fbthrift_python_enums
+import test.fixtures.basic.module.thrift_types as _fbthrift_python_types
 
 
 
@@ -51,6 +54,12 @@ class MyEnum(thrift.py3.types.CompiledEnum, int):
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
+    @staticmethod
+    def from_python(python_enum: _fbthrift_python_enums.MyEnum) -> MyEnum:
+        if isinstance(python_enum, thrift.python.types.BadEnum):
+            return thrift.python.types.BadEnum(MyEnum, int(python_enum))
+        return python_enum._to_py3()
+
 
     def __int__(self):
         return self._fbthrift_value_
@@ -83,6 +92,12 @@ class HackEnum(thrift.py3.types.CompiledEnum, int):
 
     def _to_py_deprecated(self):
         return self._fbthrift_value_
+
+    @staticmethod
+    def from_python(python_enum: _fbthrift_python_enums.HackEnum) -> HackEnum:
+        if isinstance(python_enum, thrift.python.types.BadEnum):
+            return thrift.python.types.BadEnum(HackEnum, int(python_enum))
+        return python_enum._to_py3()
 
 
     def __int__(self):
@@ -396,50 +411,476 @@ __all__.append("Map__string_List__i32")
 
 
 ### Structured Types ###
-class MyStruct:
+class MyStruct(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
+    __slots__ = (
+        "_fbthrift__inner",
+        "_fbthrift_inner__MyDataField",
+        "_fbthrift_inner__myEnum",
+        "_fbthrift_inner__floatSet",
+    )
+    _fbthrift__inner : _fbthrift_python_types.MyStruct
+    _fbthrift_inner__MyDataField : MyDataItem | None
+    _fbthrift_inner__myEnum : MyEnum | None
+    _fbthrift_inner__floatSet : _typing.AbstractSet[float] | None
+
+
+    def __init__(self, *args, **kwargs) -> None:
+        self._fbthrift__inner = _fbthrift_python_types.MyStruct(*args, **kwargs)
+
+    def __new__(cls, *args, **kwargs) -> MyStruct:
+        instance = super().__new__(cls)
+        instance._fbthrift_inner__MyDataField = None
+        instance._fbthrift_inner__myEnum = None
+        instance._fbthrift_inner__floatSet = None
+        return instance
+
+    @staticmethod
+    def from_python(thrift_python_inner: _fbthrift_python_types.MyStruct) -> MyStruct:
+        inst = MyStruct.__new__(MyStruct)
+        inst._fbthrift__inner = thrift_python_inner
+        return inst
+
+    def _to_py3(self) -> MyStruct:
+        return self
+
+    def _to_python(self) -> _fbthrift_python_types.MyStruct:
+        return self._fbthrift__inner
+
+
+    @property
+    def MyIntField(self) -> int:
+        return self._fbthrift__inner.MyIntField
+
+    @property
+    def MyStringField(self) -> str:
+        return self._fbthrift__inner.MyStringField
+
+    @property
+    def MyDataField(self) -> MyDataItem:
+        if self._fbthrift_inner__MyDataField is None:
+            __python_val = self._fbthrift__inner.MyDataField
+            self._fbthrift_inner__MyDataField = MyDataItem.from_python(__python_val)
+
+        return self._fbthrift_inner__MyDataField
+
+    @property
+    def myEnum(self) -> MyEnum:
+        if self._fbthrift_inner__myEnum is None:
+            __python_val = self._fbthrift__inner.myEnum
+            self._fbthrift_inner__myEnum = MyEnum.from_python(__python_val)
+
+        return self._fbthrift_inner__myEnum
+
+    @property
+    def oneway(self) -> bool:
+        return self._fbthrift__inner.oneway
+
+    @property
+    def readonly(self) -> bool:
+        return self._fbthrift__inner.readonly
+
+    @property
+    def idempotent(self) -> bool:
+        return self._fbthrift__inner.idempotent
+
+    @property
+    def floatSet(self) -> _typing.AbstractSet[float]:
+        if self._fbthrift_inner__floatSet is None:
+            __python_val = self._fbthrift__inner.floatSet
+            self._fbthrift_inner__floatSet = Set__float.from_python(__python_val)
+
+        return self._fbthrift_inner__floatSet
+
+    @property
+    def no_hack_codegen_field(self) -> str:
+        return self._fbthrift__inner.no_hack_codegen_field
+
+
 
 
 __all__.append("MyStruct")
 
-class Containers:
+class Containers(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
+    __slots__ = (
+        "_fbthrift__inner",
+        "_fbthrift_inner__I32List",
+        "_fbthrift_inner__StringSet",
+        "_fbthrift_inner__StringToI64Map",
+    )
+    _fbthrift__inner : _fbthrift_python_types.Containers
+    _fbthrift_inner__I32List : _typing.Sequence[int] | None
+    _fbthrift_inner__StringSet : _typing.AbstractSet[str] | None
+    _fbthrift_inner__StringToI64Map : _typing.Mapping[str, int] | None
+
+
+    def __init__(self, *args, **kwargs) -> None:
+        self._fbthrift__inner = _fbthrift_python_types.Containers(*args, **kwargs)
+
+    def __new__(cls, *args, **kwargs) -> Containers:
+        instance = super().__new__(cls)
+        instance._fbthrift_inner__I32List = None
+        instance._fbthrift_inner__StringSet = None
+        instance._fbthrift_inner__StringToI64Map = None
+        return instance
+
+    @staticmethod
+    def from_python(thrift_python_inner: _fbthrift_python_types.Containers) -> Containers:
+        inst = Containers.__new__(Containers)
+        inst._fbthrift__inner = thrift_python_inner
+        return inst
+
+    def _to_py3(self) -> Containers:
+        return self
+
+    def _to_python(self) -> _fbthrift_python_types.Containers:
+        return self._fbthrift__inner
+
+
+    @property
+    def I32List(self) -> _typing.Sequence[int]:
+        if self._fbthrift_inner__I32List is None:
+            __python_val = self._fbthrift__inner.I32List
+            self._fbthrift_inner__I32List = List__i32.from_python(__python_val)
+
+        return self._fbthrift_inner__I32List
+
+    @property
+    def StringSet(self) -> _typing.AbstractSet[str]:
+        if self._fbthrift_inner__StringSet is None:
+            __python_val = self._fbthrift__inner.StringSet
+            self._fbthrift_inner__StringSet = Set__string.from_python(__python_val)
+
+        return self._fbthrift_inner__StringSet
+
+    @property
+    def StringToI64Map(self) -> _typing.Mapping[str, int]:
+        if self._fbthrift_inner__StringToI64Map is None:
+            __python_val = self._fbthrift__inner.StringToI64Map
+            self._fbthrift_inner__StringToI64Map = Map__string_i64.from_python(__python_val)
+
+        return self._fbthrift_inner__StringToI64Map
+
+
 
 
 __all__.append("Containers")
 
-class MyDataItem:
+class MyDataItem(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
+    __slots__ = (
+        "_fbthrift__inner",
+    )
+    _fbthrift__inner : _fbthrift_python_types.MyDataItem
+
+
+    def __init__(self, *args, **kwargs) -> None:
+        self._fbthrift__inner = _fbthrift_python_types.MyDataItem(*args, **kwargs)
+
+    def __new__(cls, *args, **kwargs) -> MyDataItem:
+        instance = super().__new__(cls)
+        return instance
+
+    @staticmethod
+    def from_python(thrift_python_inner: _fbthrift_python_types.MyDataItem) -> MyDataItem:
+        inst = MyDataItem.__new__(MyDataItem)
+        inst._fbthrift__inner = thrift_python_inner
+        return inst
+
+    def _to_py3(self) -> MyDataItem:
+        return self
+
+    def _to_python(self) -> _fbthrift_python_types.MyDataItem:
+        return self._fbthrift__inner
+
+
+
 
 
 __all__.append("MyDataItem")
 
-class MyUnion:
+class MyUnion(thrift.py3.types.Union):
     __module__ = _fbthrift__module_name__
+    __slots__ = (
+        "_fbthrift__inner",
+        "_fbthrift_inner__myEnum",
+        "_fbthrift_inner__myStruct",
+        "_fbthrift_inner__myDataItem",
+        "_fbthrift_inner__floatSet",
+    )
+    _fbthrift__inner : _fbthrift_python_types.MyUnion
+    _fbthrift_inner__myEnum : MyEnum | None
+    _fbthrift_inner__myStruct : MyStruct | None
+    _fbthrift_inner__myDataItem : MyDataItem | None
+    _fbthrift_inner__floatSet : _typing.AbstractSet[float] | None
+
+
+    def __init__(self, *args, **kwargs) -> None:
+        self._fbthrift__inner = _fbthrift_python_types.MyUnion(*args, **kwargs)
+
+    def __new__(cls, *args, **kwargs) -> MyUnion:
+        instance = super().__new__(cls)
+        instance._fbthrift_inner__myEnum = None
+        instance._fbthrift_inner__myStruct = None
+        instance._fbthrift_inner__myDataItem = None
+        instance._fbthrift_inner__floatSet = None
+        return instance
+
+    @staticmethod
+    def from_python(thrift_python_inner: _fbthrift_python_types.MyUnion) -> MyUnion:
+        inst = MyUnion.__new__(MyUnion)
+        inst._fbthrift__inner = thrift_python_inner
+        return inst
+
+    def _to_py3(self) -> MyUnion:
+        return self
+
+    def _to_python(self) -> _fbthrift_python_types.MyUnion:
+        return self._fbthrift__inner
+
+
+    @property
+    def myEnum(self) -> MyEnum:
+        if self._fbthrift_inner__myEnum is None:
+            __python_val = self._fbthrift__inner.myEnum
+            if __python_val is None:
+                return None
+            self._fbthrift_inner__myEnum = MyEnum.from_python(__python_val)
+
+        return self._fbthrift_inner__myEnum
+
+    @property
+    def myStruct(self) -> MyStruct:
+        if self._fbthrift_inner__myStruct is None:
+            __python_val = self._fbthrift__inner.myStruct
+            if __python_val is None:
+                return None
+            self._fbthrift_inner__myStruct = MyStruct.from_python(__python_val)
+
+        return self._fbthrift_inner__myStruct
+
+    @property
+    def myDataItem(self) -> MyDataItem:
+        if self._fbthrift_inner__myDataItem is None:
+            __python_val = self._fbthrift__inner.myDataItem
+            if __python_val is None:
+                return None
+            self._fbthrift_inner__myDataItem = MyDataItem.from_python(__python_val)
+
+        return self._fbthrift_inner__myDataItem
+
+    @property
+    def floatSet(self) -> _typing.AbstractSet[float]:
+        if self._fbthrift_inner__floatSet is None:
+            __python_val = self._fbthrift__inner.floatSet
+            if __python_val is None:
+                return None
+            self._fbthrift_inner__floatSet = Set__float.from_python(__python_val)
+
+        return self._fbthrift_inner__floatSet
+
+
 
 
 __all__.append("MyUnion")
 
-class MyException:
+class MyException(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
+    __slots__ = (
+        "_fbthrift__inner",
+        "_fbthrift_inner__myStruct",
+        "_fbthrift_inner__myUnion",
+    )
+    _fbthrift__inner : _fbthrift_python_types.MyException
+    _fbthrift_inner__myStruct : MyStruct | None
+    _fbthrift_inner__myUnion : MyUnion | None
+
+
+    def __init__(self, *args, **kwargs) -> None:
+        self._fbthrift__inner = _fbthrift_python_types.MyException(*args, **kwargs)
+
+    def __new__(cls, *args, **kwargs) -> MyException:
+        instance = super().__new__(cls)
+        instance._fbthrift_inner__myStruct = None
+        instance._fbthrift_inner__myUnion = None
+        return instance
+
+    @staticmethod
+    def from_python(thrift_python_inner: _fbthrift_python_types.MyException) -> MyException:
+        inst = MyException.__new__(MyException)
+        inst._fbthrift__inner = thrift_python_inner
+        return inst
+
+    def _to_py3(self) -> MyException:
+        return self
+
+    def _to_python(self) -> _fbthrift_python_types.MyException:
+        return self._fbthrift__inner
+
+
+    @property
+    def MyIntField(self) -> int:
+        return self._fbthrift__inner.MyIntField
+
+    @property
+    def MyStringField(self) -> str:
+        return self._fbthrift__inner.MyStringField
+
+    @property
+    def myStruct(self) -> MyStruct:
+        if self._fbthrift_inner__myStruct is None:
+            __python_val = self._fbthrift__inner.myStruct
+            self._fbthrift_inner__myStruct = MyStruct.from_python(__python_val)
+
+        return self._fbthrift_inner__myStruct
+
+    @property
+    def myUnion(self) -> MyUnion:
+        if self._fbthrift_inner__myUnion is None:
+            __python_val = self._fbthrift__inner.myUnion
+            self._fbthrift_inner__myUnion = MyUnion.from_python(__python_val)
+
+        return self._fbthrift_inner__myUnion
+
+
 
 
 __all__.append("MyException")
 
-class MyExceptionWithMessage:
+class MyExceptionWithMessage(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
+    __slots__ = (
+        "_fbthrift__inner",
+        "_fbthrift_inner__myStruct",
+        "_fbthrift_inner__myUnion",
+    )
+    _fbthrift__inner : _fbthrift_python_types.MyExceptionWithMessage
+    _fbthrift_inner__myStruct : MyStruct | None
+    _fbthrift_inner__myUnion : MyUnion | None
+
+
+    def __init__(self, *args, **kwargs) -> None:
+        self._fbthrift__inner = _fbthrift_python_types.MyExceptionWithMessage(*args, **kwargs)
+
+    def __new__(cls, *args, **kwargs) -> MyExceptionWithMessage:
+        instance = super().__new__(cls)
+        instance._fbthrift_inner__myStruct = None
+        instance._fbthrift_inner__myUnion = None
+        return instance
+
+    @staticmethod
+    def from_python(thrift_python_inner: _fbthrift_python_types.MyExceptionWithMessage) -> MyExceptionWithMessage:
+        inst = MyExceptionWithMessage.__new__(MyExceptionWithMessage)
+        inst._fbthrift__inner = thrift_python_inner
+        return inst
+
+    def _to_py3(self) -> MyExceptionWithMessage:
+        return self
+
+    def _to_python(self) -> _fbthrift_python_types.MyExceptionWithMessage:
+        return self._fbthrift__inner
+
+
+    @property
+    def MyIntField(self) -> int:
+        return self._fbthrift__inner.MyIntField
+
+    @property
+    def MyStringField(self) -> str:
+        return self._fbthrift__inner.MyStringField
+
+    @property
+    def myStruct(self) -> MyStruct:
+        if self._fbthrift_inner__myStruct is None:
+            __python_val = self._fbthrift__inner.myStruct
+            self._fbthrift_inner__myStruct = MyStruct.from_python(__python_val)
+
+        return self._fbthrift_inner__myStruct
+
+    @property
+    def myUnion(self) -> MyUnion:
+        if self._fbthrift_inner__myUnion is None:
+            __python_val = self._fbthrift__inner.myUnion
+            self._fbthrift_inner__myUnion = MyUnion.from_python(__python_val)
+
+        return self._fbthrift_inner__myUnion
+
+
 
 
 __all__.append("MyExceptionWithMessage")
 
-class ReservedKeyword:
+class ReservedKeyword(thrift.py3.types.Struct):
     __module__ = _fbthrift__module_name__
+    __slots__ = (
+        "_fbthrift__inner",
+    )
+    _fbthrift__inner : _fbthrift_python_types.ReservedKeyword
+
+
+    def __init__(self, *args, **kwargs) -> None:
+        self._fbthrift__inner = _fbthrift_python_types.ReservedKeyword(*args, **kwargs)
+
+    def __new__(cls, *args, **kwargs) -> ReservedKeyword:
+        instance = super().__new__(cls)
+        return instance
+
+    @staticmethod
+    def from_python(thrift_python_inner: _fbthrift_python_types.ReservedKeyword) -> ReservedKeyword:
+        inst = ReservedKeyword.__new__(ReservedKeyword)
+        inst._fbthrift__inner = thrift_python_inner
+        return inst
+
+    def _to_py3(self) -> ReservedKeyword:
+        return self
+
+    def _to_python(self) -> _fbthrift_python_types.ReservedKeyword:
+        return self._fbthrift__inner
+
+
+    @property
+    def reserved_field(self) -> int:
+        return self._fbthrift__inner.reserved_field
+
+
 
 
 __all__.append("ReservedKeyword")
 
-class UnionToBeRenamed:
+class UnionToBeRenamed(thrift.py3.types.Union):
     __module__ = _fbthrift__module_name__
+    __slots__ = (
+        "_fbthrift__inner",
+    )
+    _fbthrift__inner : _fbthrift_python_types.UnionToBeRenamed
+
+
+    def __init__(self, *args, **kwargs) -> None:
+        self._fbthrift__inner = _fbthrift_python_types.UnionToBeRenamed(*args, **kwargs)
+
+    def __new__(cls, *args, **kwargs) -> UnionToBeRenamed:
+        instance = super().__new__(cls)
+        return instance
+
+    @staticmethod
+    def from_python(thrift_python_inner: _fbthrift_python_types.UnionToBeRenamed) -> UnionToBeRenamed:
+        inst = UnionToBeRenamed.__new__(UnionToBeRenamed)
+        inst._fbthrift__inner = thrift_python_inner
+        return inst
+
+    def _to_py3(self) -> UnionToBeRenamed:
+        return self
+
+    def _to_python(self) -> _fbthrift_python_types.UnionToBeRenamed:
+        return self._fbthrift__inner
+
+
+    @property
+    def reserved_field(self) -> int:
+        return self._fbthrift__inner.reserved_field
+
+
 
 
 __all__.append("UnionToBeRenamed")

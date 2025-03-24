@@ -11,8 +11,11 @@ from collections.abc import Mapping, Sequence, Set
 import enum
 import importlib
 
+import typing as _typing
 import thrift.py3.types
+import thrift.python.types
 import apache.thrift.fixtures.types.included.thrift_enums as _fbthrift_python_enums
+import apache.thrift.fixtures.types.included.thrift_types as _fbthrift_python_types
 
 
 

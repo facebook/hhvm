@@ -29,8 +29,11 @@ from collections.abc import Mapping, Sequence, Set
 import enum
 import importlib
 
+import typing as _typing
 import thrift.py3.types
+import thrift.python.types
 import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_enums as _fbthrift_python_enums
+import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types as _fbthrift_python_types
 
 
 {{#program:includeNamespaces}}
@@ -84,8 +87,73 @@ __all__.append("{{type:flat_name}}")
 
 ### Structured Types ###
 {{#program:filtered_structs}}
-class {{struct:name}}:
+class {{struct:name}}(thrift.py3.types.{{!
+}}{{^struct:union?}}Struct{{/struct:union?}}{{!
+}}{{#struct:union?}}Union{{/struct:union?}}{{!
+}}):
     __module__ = _fbthrift__module_name__
+    __slots__ = (
+        "_fbthrift__inner",
+    {{#struct:fields_and_mixin_fields}}{{#field:type}}{{#type:needs_convert?}}
+        "_fbthrift_inner__{{field:py_name}}",
+    {{/type:needs_convert?}}{{/field:type}}{{/struct:fields_and_mixin_fields}}
+    )
+    _fbthrift__inner : _fbthrift_python_types.{{struct:name}}
+    {{#struct:fields_and_mixin_fields}}
+    {{#field:type}}{{#type:needs_convert?}}
+    _fbthrift_inner__{{field:py_name}} : {{> inplace/field_type}} | None
+    {{/type:needs_convert?}}{{/field:type}}
+    {{/struct:fields_and_mixin_fields}}
+
+
+    def __init__(self, *args, **kwargs) -> None:
+        self._fbthrift__inner = _fbthrift_python_types.{{struct:name}}(*args, **kwargs)
+        {{! There's an optimization opportunity here if convertible objects are already correct type}}
+
+    def __new__(cls, *args, **kwargs) -> {{struct:name}}:
+        instance = super().__new__(cls)
+        {{#struct:fields_and_mixin_fields}}
+        {{#field:type}}{{#type:needs_convert?}}
+        instance._fbthrift_inner__{{field:py_name}} = None
+        {{/type:needs_convert?}}{{/field:type}}
+        {{/struct:fields_and_mixin_fields}}
+        return instance
+
+    @staticmethod
+    def from_python(thrift_python_inner: _fbthrift_python_types.{{struct:name}}) -> {{struct:name}}:
+        inst = {{struct:name}}.__new__({{struct:name}})
+        inst._fbthrift__inner = thrift_python_inner
+        return inst
+
+    def _to_py3(self) -> {{struct:name}}:
+        return self
+
+    def _to_python(self) -> _fbthrift_python_types.{{struct:name}}:
+        return self._fbthrift__inner
+
+
+    {{#struct:fields_and_mixin_fields}}
+    @property
+    def {{field:py_name}}(self) -> {{> inplace/field_type}}:
+{{#field:type}}{{#type:needs_convert?}}
+        if self._fbthrift_inner__{{field:py_name}} is None:
+            __python_val = self._fbthrift__inner.{{field:py_name}}
+            {{#field:optional?}}
+            if __python_val is None:
+                return None
+            {{/field:optional?}}{{^field:optional?}}{{#struct:union?}}
+            if __python_val is None:
+                return None
+            {{/struct:union?}}{{/field:optional?}}
+            self._fbthrift_inner__{{field:py_name}} = {{> types/python_type}}.from_python(__python_val)
+
+        return self._fbthrift_inner__{{field:py_name}}
+{{/type:needs_convert?}}{{^type:needs_convert?}}
+        return self._fbthrift__inner.{{field:py_name}}
+{{/type:needs_convert?}}{{/field:type}}
+
+    {{/struct:fields_and_mixin_fields}}
+
 
 
 {{#program:inplace_migrate?}}

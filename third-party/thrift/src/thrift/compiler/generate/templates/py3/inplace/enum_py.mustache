@@ -49,6 +49,14 @@ class {{enum:name}}(thrift.py3.types.{{!
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
+{{#program:inplace_migrate?}}
+    @staticmethod
+    def from_python(python_enum: _fbthrift_python_enums.{{enum:name}}) -> {{enum:name}}:
+        if isinstance(python_enum, thrift.python.types.BadEnum):
+            return thrift.python.types.BadEnum({{enum:name}}, int(python_enum))
+        return python_enum._to_py3()
+
+{{/program:inplace_migrate?}}
     {{#enum:no_int_base?}}
     def __lt__(self, other):
         if isinstance(other, {{enum:name}}):

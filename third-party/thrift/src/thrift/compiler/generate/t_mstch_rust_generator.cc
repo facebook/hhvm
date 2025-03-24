@@ -1085,6 +1085,10 @@ class rust_mstch_function : public mstch_function {
           &rust_mstch_function::rust_unique_exceptions},
          {"function:uniqueStreamExceptions",
           &rust_mstch_function::rust_unique_stream_exceptions},
+         {"function:uniqueSinkExceptions",
+          &rust_mstch_function::rust_unique_sink_exceptions},
+         {"function:uniqueSinkFinalExceptions",
+          &rust_mstch_function::rust_unique_sink_final_exceptions},
          {"function:args_by_name", &rust_mstch_function::rust_args_by_name},
          {"function:returns_by_name",
           &rust_mstch_function::rust_returns_by_name},
@@ -1116,6 +1120,16 @@ class rust_mstch_function : public mstch_function {
   mstch::node rust_unique_stream_exceptions() {
     const t_stream* stream = function_->stream();
     return rust_make_unique_exceptions(stream ? stream->exceptions() : nullptr);
+  }
+  mstch::node rust_unique_sink_exceptions() {
+    const t_sink* sink = function_->sink();
+    return rust_make_unique_exceptions(
+        sink ? sink->sink_exceptions() : nullptr);
+  }
+  mstch::node rust_unique_sink_final_exceptions() {
+    const t_sink* sink = function_->sink();
+    return rust_make_unique_exceptions(
+        sink ? sink->final_response_exceptions() : nullptr);
   }
   mstch::node rust_make_unique_exceptions(const t_struct* s) {
     // When generating From<> impls for an error type, we must not generate one

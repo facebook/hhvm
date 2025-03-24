@@ -88,7 +88,7 @@ where
     pub fn into_inner(self) -> H {
         self.service
     }{{!
-    }}{{#service:rustFunctions}}{{^function:starts_interaction?}}{{^function:sink?}}
+    }}{{#service:rustFunctions}}{{^function:starts_interaction?}}
 
     #[::tracing::instrument(skip_all, name = "handler", fields(method = "{{service:name}}.{{function:name}}"))]
     async fn handle_{{function:name}}<'a>(
@@ -160,6 +160,7 @@ where
         };
         {{^function:stream?}}
 
+        {{^function:sink?}}
         let env = ::fbthrift::help::serialize_result_envelope::<P, R, {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn>(
             "{{function:name}}",
             METHOD_NAME,
@@ -170,6 +171,99 @@ where
         )?;
         reply_state.send_reply(env);
         ::std::result::Result::Ok(())
+        {{/function:sink?}}
+        {{#function:sink?}}
+        // Process the Thrift SINK encoded request
+
+        use ::futures::StreamExt as _;
+
+        let (first_result, stream_fn, buffer_size, chunk_timeout): (
+            ::std::result::Result::<{{#function:sink_has_first_response?}}{{#function:return_type}}{{#function:sink_first_response_type}}{{> lib/type}}{{/function:sink_first_response_type}}{{/function:return_type}}{{/function:sink_has_first_response?}}{{^function:sink_has_first_response?}}(){{/function:sink_has_first_response?}}, {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn>,
+            ::std::boxed::Box<dyn ::std::ops::FnOnce(
+                ::futures::stream::BoxStream<'static, ::std::result::Result<{{#function:sink_elem_type}}{{> lib/type}}{{/function:sink_elem_type}}, {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}SinkExn>>
+            ) -> ::futures::future::BoxFuture<'static,
+                ::std::result::Result<{{#function:sink_final_response_type}}{{> lib/type}}{{/function:sink_final_response_type}}, {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}SinkFinalExn>
+            > + Send>,
+            _,
+            _,
+        ) = match res {
+            {{#function:sink_has_first_response?}}
+            Ok({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkResult {
+                initial_response,
+                stream_handler,
+                buffer_size,
+                chunk_timeout,
+            }) => (::std::result::Result::Ok(initial_response), stream_handler, buffer_size, chunk_timeout),
+            {{/function:sink_has_first_response?}}{{^function:sink_has_first_response?}}
+            Ok({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkResult {
+                stream_handler,
+                buffer_size,
+                chunk_timeout,
+            }) => (::std::result::Result::Ok(()), stream_handler, buffer_size, chunk_timeout),
+            {{/function:sink_has_first_response?}}
+            Err(e) => (::std::result::Result::Err(e), Box::new(|_stream| async move {
+                let aexn = ::fbthrift::ApplicationException::handler_panic("{{service:name}}.{{function:name}}", Box::new("Stream function builder failed to execute"));
+                ::std::result::Result::Err({{program:crate}}::services::{{service:snake}}::{{function:upcamel}}SinkFinalExn::ApplicationException(aexn))
+            }.boxed()), 100, ::std::time::Duration::ZERO),
+        };
+
+        let first_result_enc = ::fbthrift::help::serialize_result_envelope::<P, R, {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn>(
+            "{{function:name}}",
+            METHOD_NAME,
+            _seqid,
+            req_ctxt,
+            &mut ctx_stack,
+            first_result,
+        )?;
+        let (input_stream, final_result_callback) = reply_state.send_sink_reply(first_result_enc, buffer_size, chunk_timeout, P::PROTOCOL_ID);
+        let stream =
+            ::std::panic::AssertUnwindSafe(input_stream)
+                .catch_unwind()
+                .map(|item| // item is bytes::Bytes and needs to be decoded to the proper stream item type
+                    match item {
+                        ::std::result::Result::Err(exn) => {
+                            tracing::error!(?exn, method="{{service:name}}.{{function:name}}", "Sink stream unwind");
+                            let aexn = ::fbthrift::ApplicationException::handler_panic("{{service:name}}.{{function:name}}", exn);
+                            ::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkExn::ApplicationException(aexn))
+                        }
+                        ::std::result::Result::Ok(item_enc) => {
+                            let mut de = P::deserializer(item_enc);
+                            let res = <{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de);
+                            match res {
+                                Ok(r) => r,
+                                Err(exn) => {
+                                    let aexn = ::fbthrift::ApplicationException::handler_panic("{{service:name}}.{{function:name}}", Box::new(exn));
+                                    ::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkExn::ApplicationException(aexn))
+                                },
+                            }
+                        }
+                    }
+                )
+                .boxed();
+        let final_result = stream_fn(stream).await;
+        let enc_final_result = match final_result {
+            ::std::result::Result::Ok(ok_result) => {
+                let payload = ::fbthrift::help::serialize_stream_item::<P, {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}SinkFinalExn>(
+                    ::std::result::Result::Ok(ok_result),
+                    "{{function:name}}",
+                );
+                ::fbthrift::SerializedStreamElement::Success(payload)
+            }
+            ::std::result::Result::Err({{program:crate}}::services::{{service:snake}}::{{function:upcamel}}SinkFinalExn::ApplicationException(aexn)) => {
+                tracing::info!(?aexn, method="{{service:name}}.{{function:name}}", "Sink Final ApplicationException");
+                ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
+            }
+            ::std::result::Result::Err(exn) => {
+                let payload = ::fbthrift::help::serialize_stream_item::<P, {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}SinkFinalExn>(
+                    ::std::result::Result::Err(exn),
+                    "{{function:name}}",
+                );
+                ::fbthrift::SerializedStreamElement::DeclaredException(payload)
+            }
+        };
+        final_result_callback(enc_final_result);
+        ::std::result::Result::Ok(())
+        {{/function:sink?}}
         {{/function:stream?}}
         {{#function:stream?}}
 
@@ -238,7 +332,7 @@ where
         ::std::result::Result::Ok(())
         {{/function:stream?}}
     }{{!
-    }}{{/function:sink?}}{{/function:starts_interaction?}}{{#function:starts_interaction?}}
+    }}{{/function:starts_interaction?}}{{#function:starts_interaction?}}
 
     fn handle_{{function:name}}(
         &self,
@@ -278,9 +372,9 @@ where
     #[inline]
     fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
         match name {{> lib/block}}{{!
-            }}{{#service:rustFunctions}}{{^function:starts_interaction?}}{{^function:sink?}}
+            }}{{#service:rustFunctions}}{{^function:starts_interaction?}}
             b"{{#service:interaction?}}{{service:name}}.{{/service:interaction?}}{{function:name}}" => ::std::result::Result::Ok({{function:index}}usize),{{!
-            }}{{/function:sink?}}{{/function:starts_interaction?}}{{/service:rustFunctions}}
+            }}{{/function:starts_interaction?}}{{/service:rustFunctions}}
             _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
         }
     }
@@ -296,11 +390,11 @@ where
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
         match idx {{> lib/block}}{{!
-            }}{{#service:rustFunctions}}{{^function:starts_interaction?}}{{^function:sink?}}
+            }}{{#service:rustFunctions}}{{^function:starts_interaction?}}
             {{function:index}}usize => {
                 self.handle_{{function:name}}(_p, _req, _req_ctxt, _reply_state, _seqid).await
             }{{!
-            }}{{/function:sink?}}{{/function:starts_interaction?}}{{/service:rustFunctions}}
+            }}{{/function:starts_interaction?}}{{/service:rustFunctions}}
             bad => panic!(
                 "{}: unexpected method idx {}",
                 "{{service:rust_name}}Processor",

@@ -71,8 +71,8 @@ where
         chunk_timeout: std::time::Duration,
         protocol_id: ProtocolID,
     ) -> (
-        impl futures::Stream<Item = bytes::Bytes>,
-        impl FnMut(SerializedStreamElement<FramingEncodedFinal<F>>),
+        futures::stream::BoxStream<'static, FramingDecoded<F>>,
+        impl FnOnce(SerializedStreamElement<FramingEncodedFinal<F>>) + Send,
     );
 
     fn set_interaction_processor(

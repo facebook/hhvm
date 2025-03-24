@@ -15,7 +15,7 @@
   limitations under the License.
 
 }}
-{{#service:rustFunctions}}{{^function:starts_interaction?}}{{^function:sink?}}
+{{#service:rustFunctions}}{{^function:starts_interaction?}}
 
 struct Args_{{service:rust_name}}_{{function:name}} {
     {{#function:args}}
@@ -62,4 +62,4 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_{{
     }
 }
 
-{{/function:sink?}}{{/function:starts_interaction?}}{{/service:rustFunctions}}
+{{/function:starts_interaction?}}{{/service:rustFunctions}}

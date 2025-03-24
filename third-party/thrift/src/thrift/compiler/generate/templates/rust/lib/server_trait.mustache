@@ -23,7 +23,7 @@ pub trait {{service:rust_name}}: ::std::marker::Send + ::std::marker::Sync + 'st
 }}{{#service:requestContext?}}
     type RequestContext: ::std::marker::Sync;{{!
 }}{{/service:requestContext?}}
-{{#service:rustFunctions}}{{^function:starts_interaction?}}{{^function:sink?}}
+{{#service:rustFunctions}}{{^function:starts_interaction?}}
     {{#function:docs?}}
     #[doc = {{function:docs}}]
     {{/function:docs?}}
@@ -43,7 +43,7 @@ pub trait {{service:rust_name}}: ::std::marker::Send + ::std::marker::Sync + 'st
             ),
         ))
     }
-{{/function:sink?}}{{/function:starts_interaction?}}{{#function:starts_interaction?}}
+{{/function:starts_interaction?}}{{#function:starts_interaction?}}
     {{#function:docs?}}
     #[doc = {{function:docs}}]
     {{/function:docs?}}
@@ -66,7 +66,7 @@ where
 {{#service:requestContext?}}
     type RequestContext = T::RequestContext;{{!
 }}{{/service:requestContext?}}
-{{#service:rustFunctions}}{{^function:starts_interaction?}}{{^function:sink?}}
+{{#service:rustFunctions}}{{^function:starts_interaction?}}
     async fn {{function:rust_name}}(
         &self,{{!
         }}{{#service:requestContext?}}
@@ -85,7 +85,7 @@ where
             }}{{/function:args}}
         ).await
     }
-{{/function:sink?}}{{/function:starts_interaction?}}{{#function:starts_interaction?}}
+{{/function:starts_interaction?}}{{#function:starts_interaction?}}
     fn {{function:rust_name}}(
         &self,
     ) -> ::anyhow::Result<::std::boxed::Box<dyn {{function:interaction_name}}>> {
@@ -107,7 +107,7 @@ where
 {{#service:requestContext?}}
     type RequestContext = T::RequestContext;{{!
 }}{{/service:requestContext?}}
-{{#service:rustFunctions}}{{^function:starts_interaction?}}{{^function:sink?}}
+{{#service:rustFunctions}}{{^function:starts_interaction?}}
     async fn {{function:rust_name}}(
         &self,{{!
         }}{{#service:requestContext?}}
@@ -126,7 +126,7 @@ where
             }}{{/function:args}}
         ).await
     }
-{{/function:sink?}}{{/function:starts_interaction?}}{{#function:starts_interaction?}}
+{{/function:starts_interaction?}}{{#function:starts_interaction?}}
     fn {{function:rust_name}}(
         &self,
     ) -> ::anyhow::Result<::std::boxed::Box<dyn {{function:interaction_name}}>> {

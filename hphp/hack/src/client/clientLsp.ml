@@ -1191,7 +1191,9 @@ let ide_diagnostics_to_lsp_diagnostics
       Some
         Hh_json.(
           JSON_Object
-            [("lineAgnosticHash", string_ (string_of_int diagnostic_hash))])
+            [
+              ("lineAgnosticHash", string_ (Printf.sprintf "%x" diagnostic_hash));
+            ])
     in
     let relatedInformation =
       additional_messages

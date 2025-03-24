@@ -178,7 +178,7 @@ let error_to_show_inline_chat_command user_error line_agnostic_hash =
     Hh_json.(
       JSON_Object
         [
-          ("lineAgnosticHash", string_ (string_of_int line_agnostic_hash));
+          ("lineAgnosticHash", string_ (Printf.sprintf "%x" line_agnostic_hash));
           ("legacyUserPrompt", string_ legacy_user_prompt);
         ])
   in

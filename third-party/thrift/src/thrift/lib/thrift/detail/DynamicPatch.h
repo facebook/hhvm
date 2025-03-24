@@ -720,37 +720,20 @@ class DynamicPatch {
   /// @endcond
 
  private:
-  template <class Tag>
-  auto& getStoredPatchByTag(type::list<Tag>) {
-    return getStoredPatch<DynamicListPatch>();
-  }
-  template <class Tag>
-  auto& getStoredPatchByTag(type::set<Tag>) {
-    return getStoredPatch<DynamicSetPatch>();
-  }
-  template <class K, class V>
-  auto& getStoredPatchByTag(type::map<K, V>) {
-    return getStoredPatch<DynamicMapPatch>();
-  }
-  template <class T>
-  auto& getStoredPatchByTag(type::struct_t<T>) {
-    return getStoredPatch<DynamicStructPatch>();
-  }
-  template <class T>
-  auto& getStoredPatchByTag(type::union_t<T>) {
-    return getStoredPatch<DynamicUnionPatch>();
-  }
+  DynamicListPatch& getStoredPatchByTag(type::list_c);
+  DynamicSetPatch& getStoredPatchByTag(type::set_c);
+  DynamicMapPatch& getStoredPatchByTag(type::map_c);
+  DynamicStructPatch& getStoredPatchByTag(type::struct_c);
+  DynamicUnionPatch& getStoredPatchByTag(type::union_c);
   template <class T, class Tag>
   auto& getStoredPatchByTag(type::cpp_type<T, Tag>) {
     return getStoredPatchByTag(Tag{});
   }
-  template <class T>
-  auto& getStoredPatchByTag(type::enum_t<T>) {
-    return getStoredPatch<op::I32Patch>();
-  }
+  op::I32Patch& getStoredPatchByTag(type::enum_c);
+  op::AnyPatch& getStoredPatchByTag(type::struct_t<type::AnyStruct>);
   template <class Tag>
-  auto& getStoredPatchByTag(Tag) {
-    static_assert(type::is_a_v<Tag, type::primitive_c>);
+  std::enable_if_t<type::is_a_v<Tag, type::primitive_c>, op::patch_type<Tag>&>
+  getStoredPatchByTag(Tag) {
     return getStoredPatch<op::patch_type<Tag>>();
   }
 

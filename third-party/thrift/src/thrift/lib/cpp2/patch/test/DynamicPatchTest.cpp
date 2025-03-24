@@ -878,22 +878,24 @@ TEST(DynamicPatch, Unknown) {
 }
 
 TEST(DynamicPatch, FromAnyPatch) {
-  type::AnyStruct any =
-      type::AnyData::toAny<type::union_t<MyUnion>>({}).toThrift();
   op::AnyPatch anyPatch;
-  anyPatch.assign(any);
+  anyPatch.assign(type::AnyData::toAny<type::union_t<MyUnion>>({}).toThrift());
   DynamicPatch dynPatch;
   dynPatch.fromObject(anyPatch.toObject());
   EXPECT_TRUE(dynPatch.holds_alternative<DynamicUnknownPatch>(badge));
 
-  // Since DynamicUnknownPatch cannot distinguish any, union, and struct, we can
-  // call `patchIfSet` to DynamicPatch.
-  auto value = asValueStruct<type::struct_t<type::AnyStruct>>(any);
-  dynPatch.get_if<DynamicUnknownPatch>()->patchIfSet(
-      FieldId{3}, DynamicPatch{op::BinaryPatch::createClear()});
-  EXPECT_FALSE(value.as_object().at(FieldId{3}).as_binary().empty());
-  dynPatch.apply(value);
-  EXPECT_TRUE(value.as_object().at(FieldId{3}).as_binary().empty());
+  // Assert it is an AnyPatch.
+  MyUnionPatch patch;
+  patch.patch<ident::s>() = "hello world";
+  dynPatch.getStoredPatchByTag<type::struct_t<type::AnyStruct>>().patchIfTypeIs(
+      patch);
+  auto anyValue = asValueStruct<type::struct_t<type::AnyStruct>>({});
+  dynPatch.apply(anyValue);
+
+  auto any = fromValueStruct<type::struct_t<type::AnyStruct>>(anyValue);
+  MyUnion u = type::AnyData{any}.get<type::union_t<MyUnion>>();
+  EXPECT_TRUE(u.s_ref().has_value());
+  EXPECT_EQ(u.s_ref().value(), "hello world");
 }
 
 TEST(DynamicPatch, FromSetOrMapPatch) {

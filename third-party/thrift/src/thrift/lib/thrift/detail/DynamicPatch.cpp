@@ -342,6 +342,29 @@ type::Type toSafePatchType(type::Type input) {
 }
 /// @endcond
 
+DynamicListPatch& DynamicPatch::getStoredPatchByTag(type::list_c) {
+  return getStoredPatch<DynamicListPatch>();
+}
+DynamicSetPatch& DynamicPatch::getStoredPatchByTag(type::set_c) {
+  return getStoredPatch<DynamicSetPatch>();
+}
+DynamicMapPatch& DynamicPatch::getStoredPatchByTag(type::map_c) {
+  return getStoredPatch<DynamicMapPatch>();
+}
+DynamicStructPatch& DynamicPatch::getStoredPatchByTag(type::struct_c) {
+  return getStoredPatch<DynamicStructPatch>();
+}
+DynamicUnionPatch& DynamicPatch::getStoredPatchByTag(type::union_c) {
+  return getStoredPatch<DynamicUnionPatch>();
+}
+op::I32Patch& DynamicPatch::getStoredPatchByTag(type::enum_c) {
+  return getStoredPatch<op::I32Patch>();
+}
+op::AnyPatch& DynamicPatch::getStoredPatchByTag(
+    type::struct_t<type::AnyStruct>) {
+  return getStoredPatch<op::AnyPatch>();
+}
+
 bool DynamicPatch::empty(detail::Badge badge) const {
   return std::visit(
       [&](auto&& v) {

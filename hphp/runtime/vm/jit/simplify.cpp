@@ -170,9 +170,10 @@ DEBUG_ONLY bool validate(const State& env,
       // Some instructions consume a counted SSATmp and produce a new SSATmp
       // which supports the consumed location. If the result of one such
       // instruction is available then the value whose count it supports must
-      // also be available. For now CreateSSWH, NewRFunc and NewRClsMeth are
-      // the only instructions of this form that we care about.
+      // also be available. We care only about these few instructions below.
       if ((oldSrc->inst()->is(CreateSSWH) &&
+             canonical(oldSrc->inst()->src(0)) == src) ||
+          (oldSrc->inst()->is(CreateFSWH) &&
              canonical(oldSrc->inst()->src(0)) == src) ||
           (oldSrc->inst()->is(NewRFunc) &&
              canonical(oldSrc->inst()->src(1)) == src) ||
@@ -491,8 +492,8 @@ SSATmp* simplifyLookupClsCtxCns(State& env, const IRInstruction* inst) {
   auto const ctxName = nameTmp->strVal();
 
   auto const objectExistsTmp = inst->src(2);
-  bool objectExists = (objectExistsTmp->hasConstVal(TBool) 
-                      ? objectExistsTmp->boolVal() 
+  bool objectExists = (objectExistsTmp->hasConstVal(TBool)
+                      ? objectExistsTmp->boolVal()
                       : false);
 
   if (clsSpec.exact()) {
@@ -3866,12 +3867,15 @@ SSATmp* simplifyLdWHState(State& env, const IRInstruction* inst) {
   if (wh->inst()->is(CreateSSWH)) {
     return cns(env, int64_t{c_Awaitable::STATE_SUCCEEDED});
   }
+  if (wh->inst()->is(CreateFSWH)) {
+    return cns(env, int64_t{c_Awaitable::STATE_FAILED});
+  }
   return nullptr;
 }
 
 SSATmp* simplifyLdWHResult(State& env, const IRInstruction* inst) {
   auto const wh = canonical(inst->src(0));
-  if (wh->inst()->is(CreateSSWH)) {
+  if (wh->inst()->is(CreateSSWH) || wh->inst()->is(CreateFSWH)) {
     return wh->inst()->src(0);
   }
   return nullptr;

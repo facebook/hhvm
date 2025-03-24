@@ -73,7 +73,7 @@ void sideExitFromInlined(IRGS&, SSATmp* target);
 /*
  * Emit an EndCatch equivalent from an inlined function.
  */
-bool endCatchFromInlined(IRGS&, EndCatchData::CatchMode mode, SSATmp* exc);
+void endCatchFromInlined(IRGS&, EndCatchData::CatchMode mode, SSATmp* exc);
 
 /*
  * Make sure all inlined frames are written on the stack and a part of the FP
@@ -86,7 +86,7 @@ bool spillInlinedFrames(IRGS& env);
  * FCall bytecode is being translated.
  */
 SSATmp* genCalleeFP(IRGS& env, const Func* callee);
-	
+
 /**
  * Stitch callee's IRUnit into caller's IRGS.
  */

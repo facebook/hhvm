@@ -215,6 +215,7 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
       return srcNo == 3;
 
     case CreateSSWH:
+    case CreateFSWH:
       return srcNo == 0;
 
     case InitDictElem:
@@ -329,6 +330,7 @@ Type allocObjReturn(const IRInstruction* inst) {
       return Type::ExactObj(c_ConcurrentWaitHandle::classof());
 
     case CreateSSWH:
+    case CreateFSWH:
       return Type::ExactObj(c_StaticWaitHandle::classof());
 
     case FuncCred:

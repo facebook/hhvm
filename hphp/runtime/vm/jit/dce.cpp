@@ -218,6 +218,7 @@ bool canDCE(const IRInstruction& inst) {
   case LdClosureCls:
   case LdClosureThis:
   case CreateSSWH:
+  case CreateFSWH:
   case LdContActRec:
   case LdContArValue:
   case LdContArKey:

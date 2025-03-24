@@ -2574,6 +2574,10 @@ ReqBindJmp and CallFuncEntry.
 
   Call c_StaticWaitHandle::CreateSucceeded.
 
+| CreateFSWH, DAllocObj, S(Cell), CRc|PRc
+
+  Call c_StaticWaitHandle::CreateFailed.
+
 | AFWHPrepareChild, ND, S(FramePtr) S(Obj), NF
 
   Prepare unfinished WaitableWaitHandle object specified by S1 for getting

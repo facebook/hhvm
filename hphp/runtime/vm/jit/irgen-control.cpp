@@ -303,16 +303,11 @@ namespace {
 
 void endCatchImpl(IRGS& env, EndCatchData::CatchMode mode, SSATmp* exc,
                   Optional<IRSPRelOffset> vmspOffset) {
-  // If we are unwinding from an inlined function, try a special logic that
-  // may eliminate the need to spill the current frame.
+  // If we are unwinding from an inlined function, route the exception
+  // to the shared sink.
   if (isInlining(env)) {
-    if (endCatchFromInlined(env, mode, exc)) return;
-  }
-
-  if (spillInlinedFrames(env)) {
-    gen(env, StVMFP, fp(env));
-    gen(env, StVMPC, cns(env, uintptr_t(curSrcKey(env).pc())));
-    gen(env, StVMReturnAddr, cns(env, 0));
+    endCatchFromInlined(env, mode, exc);
+    return;
   }
 
   auto const teardown = mode == EndCatchData::CatchMode::LocalsDecRefd

@@ -1638,7 +1638,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AEmpty, AEmpty);
 
   case LdClosureArg:
-    return PureLoad { 
+    return PureLoad {
       AClosureArg {
         inst.src(0),
         safe_cast<uint16_t>(inst.extra<LdClosureArg>()->index)
@@ -1705,6 +1705,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case OrdStr:
   case ChrInt:
   case CreateSSWH:
+  case CreateFSWH:
   case CheckSurpriseFlags:
   case CheckSurpriseFlagsEnter:
   case CheckType:

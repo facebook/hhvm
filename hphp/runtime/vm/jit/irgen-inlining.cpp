@@ -625,14 +625,44 @@ void implEndCatchBlock(IRGS& env, const RegionDesc& calleeRegion) {
   auto const exc = label->dst(0);
   retypeDests(label, &env.unit);
 
+  // If this async function was called without an associated await,
+  // the exception needs to be wrapped into an Awaitable.
+  auto const wrapToAwaitable =
+    curFunc(env)->isAsync() && frame.asyncEagerOffset == kInvalidOffset;
+
   auto const inlineFrame = implInlineReturn(env);
   SCOPE_EXIT { pushInlineFrame(env, inlineFrame); };
 
   emitLockObjOnFrameUnwind(env, curSrcKey(env).pc());
 
-  // vmspOffset is unknown at this point due to multiple BeginCatches
-  emitHandleException(
-    env, EndCatchData::CatchMode::UnwindOnly, exc, std::nullopt);
+  auto const handleException = [&] {
+    // vmspOffset is unknown at this point due to multiple BeginCatches
+    emitHandleException(
+      env, EndCatchData::CatchMode::UnwindOnly, exc, std::nullopt);
+  };
+
+  if (wrapToAwaitable) {
+    cond(
+      env,
+      [&](Block* taken) {
+        return gen(env, CheckNonNull, taken, exc);
+      },
+      [&](SSATmp* exception) {
+        // Wrap Hack exceptions into Awaitables and continue at the next opcode.
+        push(env, gen(env, CreateFSWH, exception));
+        gen(env, Jmp, makeExit(env, nextSrcKey(env)));
+        return nullptr;
+      },
+      [&] {
+        // C++ exceptions don't get wrapped into an Awaitable.
+        handleException();
+        return nullptr;
+      }
+    );
+    return;
+  }
+
+  handleException();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -713,7 +743,7 @@ void sideExitFromInlined(IRGS& env, SSATmp* target) {
   gen(env, Jmp, env.inlineState.frames.back().sideExitTarget, target);
 }
 
-bool endCatchFromInlined(IRGS& env, EndCatchData::CatchMode mode, SSATmp* exc) {
+void endCatchFromInlined(IRGS& env, EndCatchData::CatchMode mode, SSATmp* exc) {
   assertx(isInlining(env));
   assertx(mode == EndCatchData::CatchMode::UnwindOnly ||
           mode == EndCatchData::CatchMode::LocalsDecRefd);
@@ -721,13 +751,6 @@ bool endCatchFromInlined(IRGS& env, EndCatchData::CatchMode mode, SSATmp* exc) {
           findExceptionHandler(curFunc(env), bcOff(env)) == kInvalidOffset ||
           exc->type() <= TNullptr);
   assertx(fp(env) != env.irb->fs().fixupFP());
-
-  if (curFunc(env)->isAsync() &&
-      env.inlineState.frames.back().asyncEagerOffset == kInvalidOffset) {
-    // This async function was called without associated await, the exception
-    // needs to be wrapped into an Awaitable.
-    return false;
-  }
 
   // Clear the evaluation stack and jump to the shared EndCatch handler.
   int locId = 0;
@@ -738,7 +761,6 @@ bool endCatchFromInlined(IRGS& env, EndCatchData::CatchMode mode, SSATmp* exc) {
     ? env.inlineState.frames.back().endCatchTarget
     : env.inlineState.frames.back().endCatchLocalsDecRefdTarget;
   gen(env, Jmp, target, exc);
-  return true;
 }
 
 bool spillInlinedFrames(IRGS& env) {

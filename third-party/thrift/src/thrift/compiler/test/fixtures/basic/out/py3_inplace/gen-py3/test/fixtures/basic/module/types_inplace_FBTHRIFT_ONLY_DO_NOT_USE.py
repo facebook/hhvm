@@ -153,6 +153,14 @@ class Set__float(thrift.py3.types.Set):
     def __get_reflection__():
         return get_types_reflection().get_reflection__Set__float()
 
+    @staticmethod
+    def from_python(python_set: thrift.python.types.Set) -> Set__float:
+        _items = frozenset(python_set)
+        return Set__float(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_set_private_ctor,
+        )
+
 
 Set.register(Set__float)
 
@@ -194,6 +202,14 @@ class List__i32(thrift.py3.types.List):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__List__i32()
+
+    @staticmethod
+    def from_python(python_list: thrift.python.types.List) -> List__i32:
+        _items = list(python_list)
+        return List__i32(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
+        )
 
 
 Sequence.register(List__i32)
@@ -238,6 +254,14 @@ class Set__string(thrift.py3.types.Set):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__Set__string()
+
+    @staticmethod
+    def from_python(python_set: thrift.python.types.Set) -> Set__string:
+        _items = frozenset(python_set)
+        return Set__string(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_set_private_ctor,
+        )
 
 
 Set.register(Set__string)
@@ -292,6 +316,15 @@ class Map__string_i64(thrift.py3.types.Map):
     def __get_reflection__():
         return get_types_reflection().get_reflection__Map__string_i64()
 
+    @staticmethod
+    def from_python(python_map: thrift.python.types.Map) -> Map__string_i64:
+        _keys = python_map.keys()
+        _values = python_map.values()
+        return Map__string_i64(
+            items=dict(zip(_keys, _values)),
+            private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor,
+        )
+
 
 Mapping.register(Map__string_i64)
 
@@ -343,6 +376,18 @@ class Map__string_List__i32(thrift.py3.types.Map):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__Map__string_List__i32()
+
+    @staticmethod
+    def from_python(python_map: thrift.python.types.Map) -> Map__string_List__i32:
+        _keys = python_map.keys()
+        _values = (
+            List__i32.from_python(item)
+            for item in python_map.values()
+        )
+        return Map__string_List__i32(
+            items=dict(zip(_keys, _values)),
+            private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor,
+        )
 
 
 Mapping.register(Map__string_List__i32)

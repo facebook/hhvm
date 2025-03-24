@@ -100,6 +100,26 @@ class {{type:flat_name}}(thrift.py3.types.List):
     def __get_reflection__():
         return get_types_reflection().get_reflection__{{type:flat_name}}()
 
+{{#program:inplace_migrate?}}
+    @staticmethod
+    def from_python(python_list: thrift.python.types.List) -> {{type:flat_name}}:
+    {{#type:list_elem_type}}
+    {{^type:needs_convert?}}
+        _items = list(python_list)
+    {{/type:needs_convert?}}
+    {{#type:needs_convert?}}
+        _items = [
+            {{> types/python_type}}.from_python(item)
+            for item in python_list
+        ]
+    {{/type:needs_convert?}}
+    {{/type:list_elem_type}}
+        return {{type:flat_name}}(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
+        )
+
+{{/program:inplace_migrate?}}
 
 Sequence.register({{type:flat_name}})
 
@@ -171,6 +191,26 @@ class {{type:flat_name}}(thrift.py3.types.Set):
     def __get_reflection__():
         return get_types_reflection().get_reflection__{{type:flat_name}}()
 
+{{#program:inplace_migrate?}}
+    @staticmethod
+    def from_python(python_set: thrift.python.types.Set) -> {{type:flat_name}}:
+    {{#type:set_elem_type}}
+    {{^type:needs_convert?}}
+        _items = frozenset(python_set)
+    {{/type:needs_convert?}}
+    {{#type:needs_convert?}}
+        _items = frozenset(
+            {{> types/python_type}}.from_python(item)
+            for item in python_set
+        )
+    {{/type:needs_convert?}}
+    {{/type:set_elem_type}}
+        return {{type:flat_name}}(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_set_private_ctor,
+        )
+
+{{/program:inplace_migrate?}}
 
 Set.register({{type:flat_name}})
 
@@ -262,6 +302,37 @@ class {{type:flat_name}}(thrift.py3.types.Map):
     def __get_reflection__():
         return get_types_reflection().get_reflection__{{type:flat_name}}()
 
+{{#program:inplace_migrate?}}
+    @staticmethod
+    def from_python(python_map: thrift.python.types.Map) -> {{type:flat_name}}:
+    {{#type:key_type}}
+    {{^type:needs_convert?}}
+        _keys = python_map.keys()
+    {{/type:needs_convert?}}
+    {{#type:needs_convert?}}
+        _keys = (
+            {{> types/python_type}}.from_python(item)
+            for item in python_map.keys()
+        )
+    {{/type:needs_convert?}}
+    {{/type:key_type}}
+    {{#type:value_type}}
+    {{^type:needs_convert?}}
+        _values = python_map.values()
+    {{/type:needs_convert?}}
+    {{#type:needs_convert?}}
+        _values = (
+            {{> types/python_type}}.from_python(item)
+            for item in python_map.values()
+        )
+    {{/type:needs_convert?}}
+    {{/type:value_type}}
+        return {{type:flat_name}}(
+            items=dict(zip(_keys, _values)),
+            private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor,
+        )
+
+{{/program:inplace_migrate?}}
 
 Mapping.register({{type:flat_name}})
 {{/type:map?}}

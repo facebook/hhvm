@@ -180,6 +180,15 @@ class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
     def __get_reflection__():
         return get_types_reflection().get_reflection__std_unordered_map__Map__i32_string()
 
+    @staticmethod
+    def from_python(python_map: thrift.python.types.Map) -> std_unordered_map__Map__i32_string:
+        _keys = python_map.keys()
+        _values = python_map.values()
+        return std_unordered_map__Map__i32_string(
+            items=dict(zip(_keys, _values)),
+            private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor,
+        )
+
 
 Mapping.register(std_unordered_map__Map__i32_string)
 
@@ -220,6 +229,14 @@ class List__i64(thrift.py3.types.List):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__List__i64()
+
+    @staticmethod
+    def from_python(python_list: thrift.python.types.List) -> List__i64:
+        _items = list(python_list)
+        return List__i64(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
+        )
 
 
 Sequence.register(List__i64)
@@ -274,6 +291,15 @@ class Map__binary_i64(thrift.py3.types.Map):
     def __get_reflection__():
         return get_types_reflection().get_reflection__Map__binary_i64()
 
+    @staticmethod
+    def from_python(python_map: thrift.python.types.Map) -> Map__binary_i64:
+        _keys = python_map.keys()
+        _values = python_map.values()
+        return Map__binary_i64(
+            items=dict(zip(_keys, _values)),
+            private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor,
+        )
+
 
 Mapping.register(Map__binary_i64)
 
@@ -314,6 +340,14 @@ class List__i32(thrift.py3.types.List):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__List__i32()
+
+    @staticmethod
+    def from_python(python_list: thrift.python.types.List) -> List__i32:
+        _items = list(python_list)
+        return List__i32(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
+        )
 
 
 Sequence.register(List__i32)
@@ -357,6 +391,14 @@ class std_list__List__i32(thrift.py3.types.List):
     def __get_reflection__():
         return get_types_reflection().get_reflection__std_list__List__i32()
 
+    @staticmethod
+    def from_python(python_list: thrift.python.types.List) -> std_list__List__i32:
+        _items = list(python_list)
+        return std_list__List__i32(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
+        )
+
 
 Sequence.register(std_list__List__i32)
 
@@ -398,6 +440,14 @@ class std_deque__List__i32(thrift.py3.types.List):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__std_deque__List__i32()
+
+    @staticmethod
+    def from_python(python_list: thrift.python.types.List) -> std_deque__List__i32:
+        _items = list(python_list)
+        return std_deque__List__i32(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
+        )
 
 
 Sequence.register(std_deque__List__i32)
@@ -441,6 +491,14 @@ class folly_fbvector__List__i32(thrift.py3.types.List):
     def __get_reflection__():
         return get_types_reflection().get_reflection__folly_fbvector__List__i32()
 
+    @staticmethod
+    def from_python(python_list: thrift.python.types.List) -> folly_fbvector__List__i32:
+        _items = list(python_list)
+        return folly_fbvector__List__i32(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
+        )
+
 
 Sequence.register(folly_fbvector__List__i32)
 
@@ -483,6 +541,14 @@ class folly_small_vector__List__i32(thrift.py3.types.List):
     def __get_reflection__():
         return get_types_reflection().get_reflection__folly_small_vector__List__i32()
 
+    @staticmethod
+    def from_python(python_list: thrift.python.types.List) -> folly_small_vector__List__i32:
+        _items = list(python_list)
+        return folly_small_vector__List__i32(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
+        )
+
 
 Sequence.register(folly_small_vector__List__i32)
 
@@ -524,6 +590,14 @@ class folly_sorted_vector_set__Set__i32(thrift.py3.types.Set):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__folly_sorted_vector_set__Set__i32()
+
+    @staticmethod
+    def from_python(python_set: thrift.python.types.Set) -> folly_sorted_vector_set__Set__i32:
+        _items = frozenset(python_set)
+        return folly_sorted_vector_set__Set__i32(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_set_private_ctor,
+        )
 
 
 Set.register(folly_sorted_vector_set__Set__i32)
@@ -578,6 +652,15 @@ class Map__i32_string(thrift.py3.types.Map):
     def __get_reflection__():
         return get_types_reflection().get_reflection__Map__i32_string()
 
+    @staticmethod
+    def from_python(python_map: thrift.python.types.Map) -> Map__i32_string:
+        _keys = python_map.keys()
+        _values = python_map.values()
+        return Map__i32_string(
+            items=dict(zip(_keys, _values)),
+            private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor,
+        )
+
 
 Mapping.register(Map__i32_string)
 
@@ -618,6 +701,14 @@ class std_list_int32_t__List__i32(thrift.py3.types.List):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__std_list_int32_t__List__i32()
+
+    @staticmethod
+    def from_python(python_list: thrift.python.types.List) -> std_list_int32_t__List__i32:
+        _items = list(python_list)
+        return std_list_int32_t__List__i32(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
+        )
 
 
 Sequence.register(std_list_int32_t__List__i32)
@@ -672,6 +763,15 @@ class Map__string_i32(thrift.py3.types.Map):
     def __get_reflection__():
         return get_types_reflection().get_reflection__Map__string_i32()
 
+    @staticmethod
+    def from_python(python_map: thrift.python.types.Map) -> Map__string_i32:
+        _keys = python_map.keys()
+        _values = python_map.values()
+        return Map__string_i32(
+            items=dict(zip(_keys, _values)),
+            private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor,
+        )
+
 
 Mapping.register(Map__string_i32)
 
@@ -716,6 +816,17 @@ class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__List__std_unordered_map__Map__i32_string()
+
+    @staticmethod
+    def from_python(python_list: thrift.python.types.List) -> List__std_unordered_map__Map__i32_string:
+        _items = [
+            std_unordered_map__Map__i32_string.from_python(item)
+            for item in python_list
+        ]
+        return List__std_unordered_map__Map__i32_string(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
+        )
 
 
 Sequence.register(List__std_unordered_map__Map__i32_string)
@@ -770,6 +881,18 @@ class Map__i32_IncompleteMapDep(thrift.py3.types.Map):
     def __get_reflection__():
         return get_types_reflection().get_reflection__Map__i32_IncompleteMapDep()
 
+    @staticmethod
+    def from_python(python_map: thrift.python.types.Map) -> Map__i32_IncompleteMapDep:
+        _keys = python_map.keys()
+        _values = (
+            IncompleteMapDep.from_python(item)
+            for item in python_map.values()
+        )
+        return Map__i32_IncompleteMapDep(
+            items=dict(zip(_keys, _values)),
+            private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor,
+        )
+
 
 Mapping.register(Map__i32_IncompleteMapDep)
 
@@ -822,6 +945,18 @@ class std_unordered_map__Map__i32_CompleteMapDep(thrift.py3.types.Map):
     def __get_reflection__():
         return get_types_reflection().get_reflection__std_unordered_map__Map__i32_CompleteMapDep()
 
+    @staticmethod
+    def from_python(python_map: thrift.python.types.Map) -> std_unordered_map__Map__i32_CompleteMapDep:
+        _keys = python_map.keys()
+        _values = (
+            CompleteMapDep.from_python(item)
+            for item in python_map.values()
+        )
+        return std_unordered_map__Map__i32_CompleteMapDep(
+            items=dict(zip(_keys, _values)),
+            private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor,
+        )
+
 
 Mapping.register(std_unordered_map__Map__i32_CompleteMapDep)
 
@@ -862,6 +997,17 @@ class _std_list__List__IncompleteListDep(thrift.py3.types.List):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection___std_list__List__IncompleteListDep()
+
+    @staticmethod
+    def from_python(python_list: thrift.python.types.List) -> _std_list__List__IncompleteListDep:
+        _items = [
+            IncompleteListDep.from_python(item)
+            for item in python_list
+        ]
+        return _std_list__List__IncompleteListDep(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
+        )
 
 
 Sequence.register(_std_list__List__IncompleteListDep)
@@ -905,6 +1051,17 @@ class folly_small_vector__List__CompleteListDep(thrift.py3.types.List):
     def __get_reflection__():
         return get_types_reflection().get_reflection__folly_small_vector__List__CompleteListDep()
 
+    @staticmethod
+    def from_python(python_list: thrift.python.types.List) -> folly_small_vector__List__CompleteListDep:
+        _items = [
+            CompleteListDep.from_python(item)
+            for item in python_list
+        ]
+        return folly_small_vector__List__CompleteListDep(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
+        )
+
 
 Sequence.register(folly_small_vector__List__CompleteListDep)
 
@@ -946,6 +1103,17 @@ class List__AdaptedListDep(thrift.py3.types.List):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__List__AdaptedListDep()
+
+    @staticmethod
+    def from_python(python_list: thrift.python.types.List) -> List__AdaptedListDep:
+        _items = [
+            AdaptedListDep.from_python(item)
+            for item in python_list
+        ]
+        return List__AdaptedListDep(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
+        )
 
 
 Sequence.register(List__AdaptedListDep)
@@ -989,6 +1157,17 @@ class List__DependentAdaptedListDep(thrift.py3.types.List):
     def __get_reflection__():
         return get_types_reflection().get_reflection__List__DependentAdaptedListDep()
 
+    @staticmethod
+    def from_python(python_list: thrift.python.types.List) -> List__DependentAdaptedListDep:
+        _items = [
+            DependentAdaptedListDep.from_python(item)
+            for item in python_list
+        ]
+        return List__DependentAdaptedListDep(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
+        )
+
 
 Sequence.register(List__DependentAdaptedListDep)
 
@@ -1030,6 +1209,14 @@ class Set__i32(thrift.py3.types.Set):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__Set__i32()
+
+    @staticmethod
+    def from_python(python_set: thrift.python.types.Set) -> Set__i32:
+        _items = frozenset(python_set)
+        return Set__i32(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_set_private_ctor,
+        )
 
 
 Set.register(Set__i32)
@@ -1083,6 +1270,15 @@ class Map__i32_i32(thrift.py3.types.Map):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__Map__i32_i32()
+
+    @staticmethod
+    def from_python(python_map: thrift.python.types.Map) -> Map__i32_i32:
+        _keys = python_map.keys()
+        _values = python_map.values()
+        return Map__i32_i32(
+            items=dict(zip(_keys, _values)),
+            private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor,
+        )
 
 
 Mapping.register(Map__i32_i32)

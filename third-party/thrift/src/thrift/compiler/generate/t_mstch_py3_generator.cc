@@ -92,6 +92,11 @@ const t_type* get_map_val_type(const t_type& type) {
   return dynamic_cast<const t_map&>(type).get_val_type();
 }
 
+bool type_needs_convert(const t_type* type) {
+  return type->is_enum() || type->is_struct() || type->is_union() ||
+      type->is_exception() || type->is_container();
+}
+
 std::string get_cpp_template(const t_type& type) {
   if (const auto* val =
           type.find_annotation_or_null({"cpp.template", "cpp2.template"})) {
@@ -652,6 +657,12 @@ class py3_mstch_type : public mstch_type {
             {"type:flexibleBinary?", &py3_mstch_type::isFlexibleBinary},
             {"type:customBinaryType?", &py3_mstch_type::isCustomBinaryType},
             {"type:simple?", &py3_mstch_type::isSimple},
+            {"type:needs_convert?", &py3_mstch_type::needs_convert},
+            {"type:elem_needs_convert?",
+             &py3_mstch_type::element_needs_convert},
+            {"type:key_needs_convert?", &py3_mstch_type::map_key_needs_convert},
+            {"type:val_needs_convert?",
+             &py3_mstch_type::map_value_needs_convert},
             {"type:resolves_to_complex_return?",
              &py3_mstch_type::resolves_to_complex_return},
 
@@ -744,10 +755,41 @@ class py3_mstch_type : public mstch_type {
 
   mstch::node isCustomBinaryType() { return is_custom_binary_type(); }
 
+  // types that don't have an underlying C++ type
+  // i.e., structs, unions, exceptions all enclose a C++ type
   mstch::node isSimple() {
     return (type_->is_primitive_type() || type_->is_enum() ||
             type_->is_container()) &&
         !is_custom_binary_type();
+  }
+
+  // types that need conversion to py3 if accessed from thrift-python struct
+  // fields
+  mstch::node needs_convert() { return type_needs_convert(type_); }
+
+  // type:list_elem_type etc. is defined in mstch_objects, so the returned type
+  // node doesn't define type:needs_convert
+  mstch::node element_needs_convert() {
+    if (type_->is_list()) {
+      return type_needs_convert(get_list_elem_type(*type_));
+    } else if (type_->is_set()) {
+      return type_needs_convert(get_set_elem_type(*type_));
+    }
+    return false;
+  }
+
+  mstch::node map_key_needs_convert() {
+    if (type_->is_map()) {
+      return type_needs_convert(get_map_key_type(*type_));
+    }
+    return false;
+  }
+
+  mstch::node map_value_needs_convert() {
+    if (type_->is_map()) {
+      return type_needs_convert(get_map_val_type(*type_));
+    }
+    return false;
   }
 
   mstch::node resolves_to_complex_return() {

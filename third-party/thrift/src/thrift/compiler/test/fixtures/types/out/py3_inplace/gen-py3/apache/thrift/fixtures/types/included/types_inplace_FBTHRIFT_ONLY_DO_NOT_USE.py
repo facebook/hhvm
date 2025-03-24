@@ -77,6 +77,15 @@ class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
     def __get_reflection__():
         return get_types_reflection().get_reflection__std_unordered_map__Map__i32_string()
 
+    @staticmethod
+    def from_python(python_map: thrift.python.types.Map) -> std_unordered_map__Map__i32_string:
+        _keys = python_map.keys()
+        _values = python_map.values()
+        return std_unordered_map__Map__i32_string(
+            items=dict(zip(_keys, _values)),
+            private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor,
+        )
+
 
 Mapping.register(std_unordered_map__Map__i32_string)
 
@@ -121,6 +130,17 @@ class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__List__std_unordered_map__Map__i32_string()
+
+    @staticmethod
+    def from_python(python_list: thrift.python.types.List) -> List__std_unordered_map__Map__i32_string:
+        _items = [
+            std_unordered_map__Map__i32_string.from_python(item)
+            for item in python_list
+        ]
+        return List__std_unordered_map__Map__i32_string(
+            items=_items,
+            private_ctor_token=thrift.py3.types._fbthrift_list_private_ctor,
+        )
 
 
 Sequence.register(List__std_unordered_map__Map__i32_string)

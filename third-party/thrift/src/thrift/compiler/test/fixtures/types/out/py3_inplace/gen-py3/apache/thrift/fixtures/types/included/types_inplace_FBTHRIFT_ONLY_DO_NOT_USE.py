@@ -24,6 +24,10 @@ def get_types_reflection():
         "apache.thrift.fixtures.types.included.types_reflection"
     )
 
+def _get_py_deprecated_module():
+    import thrift.util.converter # needed by _to_py_deprecated() call
+    return importlib.import_module("included.ttypes")
+
 _fbthrift__module_name__ = "apache.thrift.fixtures.types.included.types"
 
 __all__ = []

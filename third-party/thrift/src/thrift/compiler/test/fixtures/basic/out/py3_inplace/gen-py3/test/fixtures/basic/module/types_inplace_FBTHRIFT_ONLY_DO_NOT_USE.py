@@ -24,6 +24,10 @@ def get_types_reflection():
         "test.fixtures.basic.module.types_reflection"
     )
 
+def _get_py_deprecated_module():
+    import thrift.util.converter # needed by _to_py_deprecated() call
+    return importlib.import_module("module.ttypes")
+
 _fbthrift__module_name__ = "test.fixtures.basic.module.types"
 
 __all__ = []
@@ -462,6 +466,14 @@ class MyStruct(thrift.py3.types.Struct):
     def _to_python(self) -> _fbthrift_python_types.MyStruct:
         return self._fbthrift__inner
 
+    def _to_py_deprecated(self):
+        py_deprecated_types = _get_py_deprecated_module()
+        return thrift.util.converter.to_py_struct(py_deprecated_types.MyStruct, self)
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__MyStruct()
+
     @property
     def MyIntField(self) -> int:
         return self._fbthrift__inner.MyIntField
@@ -587,6 +599,14 @@ class Containers(thrift.py3.types.Struct):
     def _to_python(self) -> _fbthrift_python_types.Containers:
         return self._fbthrift__inner
 
+    def _to_py_deprecated(self):
+        py_deprecated_types = _get_py_deprecated_module()
+        return thrift.util.converter.to_py_struct(py_deprecated_types.Containers, self)
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Containers()
+
     @property
     def I32List(self) -> _typing.Sequence[int]:
         if self._fbthrift_inner__I32List is None:
@@ -676,6 +696,14 @@ class MyDataItem(thrift.py3.types.Struct):
     def _to_python(self) -> _fbthrift_python_types.MyDataItem:
         return self._fbthrift__inner
 
+    def _to_py_deprecated(self):
+        py_deprecated_types = _get_py_deprecated_module()
+        return thrift.util.converter.to_py_struct(py_deprecated_types.MyDataItem, self)
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__MyDataItem()
+
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
@@ -760,6 +788,14 @@ class MyUnion(thrift.py3.types.Union):
 
     def _to_python(self) -> _fbthrift_python_types.MyUnion:
         return self._fbthrift__inner
+
+    def _to_py_deprecated(self):
+        py_deprecated_types = _get_py_deprecated_module()
+        return thrift.util.converter.to_py_struct(py_deprecated_types.MyUnion, self)
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__MyUnion()
 
     @property
     def myEnum(self) -> MyEnum:
@@ -894,6 +930,14 @@ class MyException(thrift.py3.types.Struct):
     def _to_python(self) -> _fbthrift_python_types.MyException:
         return self._fbthrift__inner
 
+    def _to_py_deprecated(self):
+        py_deprecated_types = _get_py_deprecated_module()
+        return thrift.util.converter.to_py_struct(py_deprecated_types.MyException, self)
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__MyException()
+
     @property
     def MyIntField(self) -> int:
         return self._fbthrift__inner.MyIntField
@@ -993,6 +1037,14 @@ class MyExceptionWithMessage(thrift.py3.types.Struct):
     def _to_python(self) -> _fbthrift_python_types.MyExceptionWithMessage:
         return self._fbthrift__inner
 
+    def _to_py_deprecated(self):
+        py_deprecated_types = _get_py_deprecated_module()
+        return thrift.util.converter.to_py_struct(py_deprecated_types.MyExceptionWithMessage, self)
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__MyExceptionWithMessage()
+
     @property
     def MyIntField(self) -> int:
         return self._fbthrift__inner.MyIntField
@@ -1083,6 +1135,14 @@ class ReservedKeyword(thrift.py3.types.Struct):
     def _to_python(self) -> _fbthrift_python_types.ReservedKeyword:
         return self._fbthrift__inner
 
+    def _to_py_deprecated(self):
+        py_deprecated_types = _get_py_deprecated_module()
+        return thrift.util.converter.to_py_struct(py_deprecated_types.ReservedKeyword, self)
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__ReservedKeyword()
+
     @property
     def reserved_field(self) -> int:
         return self._fbthrift__inner.reserved_field
@@ -1156,6 +1216,14 @@ class UnionToBeRenamed(thrift.py3.types.Union):
 
     def _to_python(self) -> _fbthrift_python_types.UnionToBeRenamed:
         return self._fbthrift__inner
+
+    def _to_py_deprecated(self):
+        py_deprecated_types = _get_py_deprecated_module()
+        return thrift.util.converter.to_py_struct(py_deprecated_types.UnionToBeRenamed, self)
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__UnionToBeRenamed()
 
     @property
     def reserved_field(self) -> int:

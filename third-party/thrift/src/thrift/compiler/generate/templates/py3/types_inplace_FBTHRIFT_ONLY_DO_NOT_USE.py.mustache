@@ -47,6 +47,10 @@ def get_types_reflection():
         "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types_reflection"
     )
 
+def _get_py_deprecated_module():
+    import thrift.util.converter # needed by _to_py_deprecated() call
+    return importlib.import_module("{{program:py_deprecated_module_path}}.ttypes")
+
 _fbthrift__module_name__ = "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types"
 
 __all__ = []
@@ -155,6 +159,14 @@ class {{struct:name}}(thrift.py3.types.{{!
 
     def _to_python(self) -> _fbthrift_python_types.{{struct:name}}:
         return self._fbthrift__inner
+
+    def _to_py_deprecated(self):
+        py_deprecated_types = _get_py_deprecated_module()
+        return thrift.util.converter.to_py_struct(py_deprecated_types.{{struct:name}}, self)
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__{{struct:name}}()
 
     {{#struct:fields_and_mixin_fields}}
     @property

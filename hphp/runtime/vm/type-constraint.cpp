@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/vm/type-constraint.h"
 
-#include <boost/variant.hpp>
+#include <variant>
 
 #include <folly/Format.h>
 #include <folly/MapUtil.h>
@@ -999,7 +999,7 @@ const TypeAlias* getTypeAliasWithAutoload(const NamedType* ne,
 struct FoundTypeAlias { const TypeAlias* value; };
 struct FoundClass { const Class* value; };
 struct NotFound {};
-using NamedTypeValue = boost::variant<FoundTypeAlias, FoundClass, NotFound>;
+using NamedTypeValue = std::variant<FoundTypeAlias, FoundClass, NotFound>;
 
 /*
  * Look up a TypeAlias or a Class for the supplied NamedType

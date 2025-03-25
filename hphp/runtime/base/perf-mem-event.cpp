@@ -218,7 +218,7 @@ bool record_vm_metadata_mem_event(data_map::result res, const void* addr,
   auto const pos = reinterpret_cast<const char*>(addr);
 
   assertx(!res.empty());
-  match<void>(
+  match(
     res,
     [&](const ArrayData* arr) {
       record.setInt("offset", pos - reinterpret_cast<const char*>(arr));

@@ -24,7 +24,7 @@
 #include <string>
 #include <vector>
 
-#include <boost/variant.hpp>
+#include <variant>
 
 /*
  * Framework for executing work outside of the HHVM process.
@@ -307,7 +307,7 @@ using PathVec = std::vector<std::filesystem::path>;
 // These are used to describe inputs in a generic way to
 // Client::Impl. An input can be a RefId, an optional RefId, or a
 // vector of RefIds.
-using RefVal = boost::variant<RefId, Optional<RefId>, IdVec>;
+using RefVal = std::variant<RefId, Optional<RefId>, IdVec>;
 using RefValVec = std::vector<RefVal>;
 
 // Likewise, these describe outputs to Client::Impl. We only need to

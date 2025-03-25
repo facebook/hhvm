@@ -2962,7 +2962,7 @@ struct LdClsFallbackData : IRExtraData {
 #define X(op, data)                                                   \
   template<> struct IRExtraDataType<op> { using type = data; };       \
   template<> struct OpHasExtraData<op> { enum { value = 1 }; };       \
-  static_assert(boost::has_trivial_destructor<data>::value,           \
+  static_assert(std::is_trivially_destructible<data>::value,           \
                 "IR extra data type must be trivially destructible")
 
 X(DictIdx,                      SizeHintData);

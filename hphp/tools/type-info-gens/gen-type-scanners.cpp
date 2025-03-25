@@ -31,7 +31,8 @@
 #include <folly/container/F14Set.h>
 
 #include <boost/program_options.hpp>
-#include <boost/variant.hpp>
+#include <utility>
+#include <variant>
 
 #include <tbb/concurrent_unordered_map.h>
 #include <tbb/concurrent_vector.h>
@@ -237,7 +238,7 @@ struct Generator {
   // Indexer<> instantiation (preferred), or its raw memory address. We have to
   // use the raw memory address for Indexer<> instantiations which do not have
   // external linkage.
-  using Address = boost::variant<std::string, uintptr_t>;
+  using Address = std::variant<std::string, uintptr_t>;
 
  public:
   // Parse out all the debug information out of the specified file and do the
@@ -2996,7 +2997,7 @@ void Generator::genForwardDecls(std::ostream& os) const {
   decls.clear();
   for (const auto& indexed : m_indexed_types) {
     for (const auto& addr : indexed.addresses) {
-      if (auto* decl = boost::get<std::string>(&addr)) {
+      if (auto* decl = std::get_if<std::string>(&addr)) {
         decls.emplace(*decl);
       }
     }
@@ -3039,9 +3040,9 @@ void Generator::genIndexInit(std::ostream& os) const {
                         [&](const std::string& s) {
                           os << "  " << s << " = " << index << ";\n";
                         },
-                        [&](uintptr_t /*p*/) {
+                        [&](uintptr_t p) {
                           os << "  *reinterpret_cast<Index*>(0x" << std::hex
-                             << address << std::dec << ") = " << index << ";\n";
+                             << p << std::dec << ") = " << index << ";\n";
                         });
     }
     ++index;

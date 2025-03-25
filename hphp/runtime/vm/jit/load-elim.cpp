@@ -18,7 +18,8 @@
 #include <cstdint>
 #include <algorithm>
 
-#include <boost/variant.hpp>
+#include <utility>
+#include <variant>
 #include <folly/ScopeGuard.h>
 #include <folly/Hash.h>
 
@@ -310,7 +311,7 @@ struct FFrameTeardown {
   CompactVector<std::pair<uint32_t, Type>> elems;
 };
 
-using Flags = boost::variant<FNone,FRedundant,FReducible,FRefinableLoad,
+using Flags = std::variant<FNone,FRedundant,FReducible,FRefinableLoad,
                              FRemovable,FJmpNext,FJmpTaken,FFrameTeardown>;
 
 //////////////////////////////////////////////////////////////////////
@@ -917,7 +918,7 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
             show(effects));
 
   auto flags = Flags{};
-  match<void>(
+  match(
     effects,
     [&] (const IrrelevantEffects&) {
       flags = handle_irrelevant_effects(env, inst);
@@ -1257,7 +1258,7 @@ void optimize_end_catch(Global& env, IRInstruction& inst,
 void optimize_inst(Global& env, IRInstruction& inst, Flags flags,
                    bool createPhis) {
   auto simplify = false;
-  match<void>(
+  match(
     flags,
     [&] (FNone) {},
 
@@ -1363,7 +1364,7 @@ void optimize_edges(Global& env, Block* blk) {
 
     auto const handleCheck = [&](Type typeParam) -> Block* {
       assertx(inst.next() && inst.taken());
-      auto const ge = boost::get<GeneralEffects>(memory_effects(inst));
+      auto const ge = std::get<GeneralEffects>(memory_effects(inst));
       auto const meta = env.ainfo.find(canonicalize(ge.loads));
       if (!meta) return nullptr;
       if (!state.avail[meta->index]) return nullptr;
@@ -1533,7 +1534,7 @@ void save_taken_state(Global& genv, const IRInstruction& inst,
   auto const handleCheck = [&](Type maxTakenType, Type subtractedType) {
     assertx(!inst.maySyncVMRegsWithSources());
     auto const effects = memory_effects(inst);
-    auto const ge = boost::get<GeneralEffects>(effects);
+    auto const ge = std::get<GeneralEffects>(effects);
     assertx(ge.inout == AEmpty);
     assertx(ge.backtrace.empty());
     auto const meta = genv.ainfo.find(canonicalize(ge.loads));

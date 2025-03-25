@@ -4891,7 +4891,7 @@ void in(ISS& env, const bc::IterBase&) {
 
 void in(ISS& env, const bc::IterGetKey& op) {
   assertx(!iterIsDead(env, op.ita.iterId));
-  auto const& li = boost::get<LiveIter>(env.state.iters[op.ita.iterId]);
+  auto const& li = std::get<LiveIter>(env.state.iters[op.ita.iterId]);
   if (!li.types.mayThrowOnGetOrNext) effect_free(env);
   mayReadLocal(env, op.loc2);
   push(env, li.types.key);
@@ -4900,7 +4900,7 @@ void in(ISS& env, const bc::IterGetKey& op) {
 
 void in(ISS& env, const bc::IterGetValue& op) {
   assertx(!iterIsDead(env, op.ita.iterId));
-  auto const& li = boost::get<LiveIter>(env.state.iters[op.ita.iterId]);
+  auto const& li = std::get<LiveIter>(env.state.iters[op.ita.iterId]);
   if (!li.types.mayThrowOnGetOrNext) effect_free(env);
   mayReadLocal(env, op.loc2);
   push(env, li.types.value);
@@ -4908,7 +4908,7 @@ void in(ISS& env, const bc::IterGetValue& op) {
 
 void in(ISS& env, const bc::IterSetValue& op) {
   assertx(!iterIsDead(env, op.ita.iterId));
-  auto const& li = boost::get<LiveIter>(env.state.iters[op.ita.iterId]);
+  auto const& li = std::get<LiveIter>(env.state.iters[op.ita.iterId]);
   auto const base = locAsCell(env, op.loc2);
   auto const key = intersection_of(li.types.key, TArrKey);
   auto const set = array_like_set(base, key, popC(env));

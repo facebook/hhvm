@@ -20,7 +20,7 @@
 
 #include "hphp/util/low-ptr.h"
 
-#include <boost/variant.hpp>
+#include <variant>
 
 #include <string>
 #include <type_traits>
@@ -174,7 +174,7 @@ struct ModuleCache {
   LowStringPtr name;
 };
 
-using Symbol = boost::variant<
+using Symbol = std::variant<
   LinkName,
   LinkID,
   ClsConstant,

@@ -381,7 +381,7 @@ private:
   const StateMutationUndo::Mark& currentMark() const {
     assertx(!m_undos.events.empty());
     auto const mark =
-      boost::get<StateMutationUndo::Mark>(&m_undos.events.back());
+      std::get_if<StateMutationUndo::Mark>(&m_undos.events.back());
     assertx(mark);
     return *mark;
   }

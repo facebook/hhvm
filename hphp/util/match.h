@@ -15,12 +15,7 @@
 */
 #pragma once
 
-#include <type_traits>
-#include <utility>
-
-#include <boost/variant.hpp>
-
-#include <folly/DiscriminatedPtr.h>
+#include <folly/Overload.h>
 
 namespace HPHP {
 
@@ -41,77 +36,14 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-namespace match_detail {
-
-template<class Ret, class... Lambdas> struct visitor;
-
-template<class Ret, class L, class... Lambdas>
-struct visitor<Ret,L,Lambdas...> : L, visitor<Ret,Lambdas...> {
-  using L::operator();
-  using visitor<Ret,Lambdas...>::operator();
-  visitor(L l, Lambdas&&... lambdas)
-    : L(l)
-    , visitor<Ret,Lambdas...>(std::forward<Lambdas>(lambdas)...)
-  {}
-};
-
-template<class Ret, class L>
-struct visitor<Ret,L> : L {
-  typedef Ret result_type;
-  using L::operator();
-  /* implicit */ visitor(L l) : L(l) {}
-};
-
-template<class Ret> struct visitor<Ret> {
-  typedef Ret result_type;
-  visitor() {}
-};
-
-template<class Ret, class... Funcs>
-visitor<Ret,Funcs...> make_visitor(Funcs&&... funcs) {
-  return { std::forward<Funcs>(funcs)... };
+template <class R, class... Args>
+decltype(auto) match(Args&&... args) {
+  return folly::variant_match<R>(std::forward<Args>(args)...);
 }
 
-template <typename T> struct is_variant {
-  static constexpr bool value = false;
-};
-template <typename... T> struct is_variant<boost::variant<T...>> {
-  static constexpr bool value = true;
-};
-
-template <typename T> struct is_discriminated_ptr {
-  static constexpr bool value = false;
-};
-template <typename... T>
-struct is_discriminated_ptr<folly::DiscriminatedPtr<T...>> {
-  static constexpr bool value = true;
-};
-
-}
-
-template<class Ret, class Var, class... Funcs>
-typename std::enable_if<
-  match_detail::is_variant<
-    typename std::remove_cv<Var>::type
-    >::value,
-  Ret>::type
-match(Var& v, Funcs&&... funcs) {
-  return boost::apply_visitor(
-    match_detail::make_visitor<Ret>(std::forward<Funcs>(funcs)...),
-    v
-  );
-}
-
-template<class Ret, class Var, class... Funcs>
-typename std::enable_if<
-  match_detail::is_discriminated_ptr<
-    typename std::remove_cv<Var>::type
-    >::value,
-  Ret>::type
-match(Var& v, Funcs&&... funcs) {
-  return v.apply(
-    match_detail::make_visitor<Ret>(std::forward<Funcs>(funcs)...)
-  );
+template <class... Args>
+decltype(auto) match(Args&&... args) {
+  return folly::variant_match(std::forward<Args>(args)...);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -18,7 +18,7 @@
 #include <chrono>
 #include <cassert>
 
-#include <boost/variant.hpp>
+#include <variant>
 #include <memory>
 
 #include "hphp/hhbbc/options.h"

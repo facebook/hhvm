@@ -45,7 +45,7 @@ void visit_locations(const BlockList& blocks, Visit visit) {
     for (auto& inst : *blk) {
       auto const effects = canonicalize(memory_effects(inst));
       FTRACE(1, "  {: <30} -- {}\n", show(effects), inst.toString());
-      match<void>(
+      match(
         effects,
         [&] (const IrrelevantEffects&)   {},
         [&] (const UnknownEffects&)      {},

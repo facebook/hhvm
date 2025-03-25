@@ -469,7 +469,7 @@ struct OptimizeIterState {
       // At every op, we check the known state of all live iterators and mark it
       // as ineligible as necessary.
       for (IterId it = 0; it < state.iters.size(); ++it) {
-        match<void>(
+        match(
           state.iters[it],
           []  (DeadIter) {},
           [&] (const LiveIter& ti) {
@@ -509,7 +509,7 @@ struct OptimizeIterState {
       };
 
       auto const fixupFromState = [&] (IterId it) {
-        match<void>(
+        match(
           state.iters[it],
           []  (DeadIter) {},
           [&] (const LiveIter& ti) {

@@ -164,7 +164,7 @@ printir::Instr DynamicConverter<printir::Instr>::convert(const dynamic& d) {
     d.getDefault("tc_ranges", dynamic::array));
   for (auto& tcr : tcRanges) tcr.parentInstrId = id;
 
-  // TODO(T52857257) - rewrite to maybe use boost::variant?
+  // TODO(T52857257) - rewrite to maybe use std::variant?
   //                      other options to standardize?
   HPHP::Optional<vector<printir::SSATmp>> srcs;
   HPHP::Optional<string> counterName;

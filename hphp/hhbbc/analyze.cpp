@@ -1424,7 +1424,7 @@ void PropagatedStates::next() {
   // The undo log shouldn't be empty, and we should be at a mark
   // (which marks instruction boundary).
   assertx(!m_undos.events.empty());
-  assertx(boost::get<StateMutationUndo::Mark>(&m_undos.events.back()));
+  assertx(std::get_if<StateMutationUndo::Mark>(&m_undos.events.back()));
 
   m_lastPush.reset();
   m_afterLocals.clear();
@@ -1490,7 +1490,7 @@ locally_propagated_states(const Index& index,
     auto const stepFlags = step(interp, op);
     // Store the step flags in the mark we recorded before the
     // interpret.
-    auto& mark = boost::get<StateMutationUndo::Mark>(undos.events[markIdx]);
+    auto& mark = std::get<StateMutationUndo::Mark>(undos.events[markIdx]);
     mark.wasPEI = stepFlags.wasPEI;
     mark.mayReadLocalSet = stepFlags.mayReadLocalSet;
     mark.unreachable = state.unreachable;

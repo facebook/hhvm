@@ -21,7 +21,7 @@
 #include <map>
 #include <exception>
 
-#include <boost/variant.hpp>
+#include <variant>
 #include <tbb/concurrent_hash_map.h>
 
 #include <folly/Hash.h>
@@ -910,21 +910,21 @@ private:
     CompactVector<const FuncFamily2*> families;
     bool regularOnly{false};
   };
-  using Rep = boost::variant< FuncName
-                            , MethodName
-                            , Fun
-                            , Fun2
-                            , Method
-                            , Method2
-                            , MethodFamily
-                            , MethodFamily2
-                            , MethodOrMissing
-                            , MethodOrMissing2
-                            , MissingFunc
-                            , MissingMethod
-                            , Isect
-                            , Isect2
-                            >;
+  using Rep = std::variant< FuncName
+                          , MethodName
+                          , Fun
+                          , Fun2
+                          , Method
+                          , Method2
+                          , MethodFamily
+                          , MethodFamily2
+                          , MethodOrMissing
+                          , MethodOrMissing2
+                          , MissingFunc
+                          , MissingMethod
+                          , Isect
+                          , Isect2
+                          >;
 
 private:
   explicit Func(Rep);

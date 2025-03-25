@@ -1059,7 +1059,7 @@ struct FuncFamilyEntry {
     template <typename SerDe> void serde(SerDe&) {}
   };
 
-  boost::variant<
+  std::variant<
     BothFF, FFAndSingle, FFAndNone, BothSingle, SingleAndNone, None
   > m_meths{None{}};
   // A resolution is "incomplete" if there's a subclass which does not
@@ -1089,7 +1089,7 @@ struct FuncFamilyEntry {
         }
       }();
     } else {
-      match<void>(
+      match(
         m_meths,
         [&] (const BothFF& e)        { sd(uint8_t(0))(e); },
         [&] (const FFAndSingle& e)   { sd(uint8_t(1))(e); },
@@ -5705,7 +5705,7 @@ Optional<SString> Func::triviallyWrappedFunc() const {
 
 std::string show(const Func& f) {
   auto ret = f.name();
-  match<void>(
+  match(
     f.val,
     [&] (Func::FuncName)          {},
     [&] (Func::MethodName)        {},
@@ -7369,8 +7369,8 @@ struct CheckClassInfoInvariantsJob {
         // No override methods should always have a single entry.
         if (mte.attrs & AttrNoOverride) {
           always_assert(
-            boost::get<FuncFamilyEntry::BothSingle>(&entry.m_meths) ||
-            boost::get<FuncFamilyEntry::SingleAndNone>(&entry.m_meths)
+            std::get_if<FuncFamilyEntry::BothSingle>(&entry.m_meths) ||
+            std::get_if<FuncFamilyEntry::SingleAndNone>(&entry.m_meths)
           );
           continue;
         }
@@ -7383,8 +7383,8 @@ struct CheckClassInfoInvariantsJob {
           // isn't AttrNoOverride, so there *must* be another method. So,
           // it must be a func family.
           always_assert(
-            boost::get<FuncFamilyEntry::BothFF>(&entry.m_meths) ||
-            boost::get<FuncFamilyEntry::FFAndSingle>(&entry.m_meths)
+            std::get_if<FuncFamilyEntry::BothFF>(&entry.m_meths) ||
+            std::get_if<FuncFamilyEntry::FFAndSingle>(&entry.m_meths)
           );
           // This is a regular class, so we cannot have an incomplete
           // entry (can only happen with interfaces).
@@ -12318,7 +12318,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     UniquePtrRef<MethodsWithoutCInfo> methods;
   };
   using Update =
-    boost::variant<ClassUpdate, FuncUpdate, ClosureUpdate, MethodUpdate>;
+    std::variant<ClassUpdate, FuncUpdate, ClosureUpdate, MethodUpdate>;
   using UpdateVec = std::vector<Update>;
 
   tbb::concurrent_hash_map<
@@ -12478,7 +12478,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       if (!flattenMeta.isClosure) {
         assertx(parentIdx < clsMeta.parents.size());
         auto const& parents = clsMeta.parents[parentIdx].names;
-        auto& update = boost::get<ClassUpdate>(updates.back());
+        auto& update = std::get<ClassUpdate>(updates.back());
         update.parents.insert(
           end(update.parents), begin(parents), end(parents)
         );
@@ -12558,7 +12558,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       [&] {
         for (auto& updates : allUpdates) {
           for (auto& update : updates) {
-            auto u = boost::get<ClassUpdate>(&update);
+            auto u = std::get_if<ClassUpdate>(&update);
             if (!u) continue;
             index.classRefs.insert_or_assign(
               u->name,
@@ -12570,7 +12570,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       [&] {
         for (auto& updates : allUpdates) {
           for (auto& update : updates) {
-            auto u = boost::get<ClassUpdate>(&update);
+            auto u = std::get_if<ClassUpdate>(&update);
             if (!u) continue;
             always_assert(
               index.classInfoRefs.emplace(
@@ -12584,7 +12584,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       [&] {
         for (auto& updates : allUpdates) {
           for (auto& update : updates) {
-            auto u = boost::get<ClassUpdate>(&update);
+            auto u = std::get_if<ClassUpdate>(&update);
             if (!u) continue;
             index.classBytecodeRefs.insert_or_assign(
               u->name,
@@ -12596,7 +12596,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       [&] {
         for (auto& updates : allUpdates) {
           for (auto& update : updates) {
-            auto u = boost::get<FuncUpdate>(&update);
+            auto u = std::get_if<FuncUpdate>(&update);
             if (!u) continue;
             index.funcRefs.at(u->name) = std::move(u->func);
           }
@@ -12605,7 +12605,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       [&] {
         for (auto& updates : allUpdates) {
           for (auto& update : updates) {
-            auto u = boost::get<FuncUpdate>(&update);
+            auto u = std::get_if<FuncUpdate>(&update);
             if (!u) continue;
             always_assert(
               index.funcInfoRefs.emplace(
@@ -12620,7 +12620,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
         for (auto& updates : allUpdates) {
           for (auto& update : updates) {
             // Keep closure mappings up to date.
-            auto u = boost::get<ClosureUpdate>(&update);
+            auto u = std::get_if<ClosureUpdate>(&update);
             if (!u) continue;
             initTypesMeta.fixups[u->unit].addClass.emplace_back(u->name);
             assertx(u->context);
@@ -12639,7 +12639,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
         // can gain one due to trait flattening. Update that here.
         for (auto const& updates : allUpdates) {
           for (auto const& update : updates) {
-            auto u = boost::get<ClassUpdate>(&update);
+            auto u = std::get_if<ClassUpdate>(&update);
             if (!u || !u->has86init) continue;
             index.classesWith86Inits.emplace(u->name);
           }
@@ -12651,7 +12651,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
         auto& meta = subclassMeta.meta;
         for (auto& updates : allUpdates) {
           for (auto& update : updates) {
-            auto u = boost::get<ClassUpdate>(&update);
+            auto u = std::get_if<ClassUpdate>(&update);
             if (!u) continue;
 
             // We shouldn't have parents for closures because we
@@ -12683,7 +12683,7 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       [&] {
         for (auto& updates : allUpdates) {
           for (auto& update : updates) {
-            auto u = boost::get<MethodUpdate>(&update);
+            auto u = std::get_if<MethodUpdate>(&update);
             if (!u) continue;
             always_assert(
               index.uninstantiableClsMethRefs.emplace(
@@ -12697,11 +12697,11 @@ flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       [&] {
         for (auto& updates : allUpdates) {
           for (auto& update : updates) {
-            if (auto const u = boost::get<ClassUpdate>(&update)) {
+            if (auto const u = std::get_if<ClassUpdate>(&update)) {
               auto& meta = initTypesMeta.classes[u->name];
               assertx(meta.deps.empty());
               meta.deps.insert(begin(u->typeUses), end(u->typeUses));
-            } else if (auto const u = boost::get<FuncUpdate>(&update)) {
+            } else if (auto const u = std::get_if<FuncUpdate>(&update)) {
               auto& meta = initTypesMeta.funcs[u->name];
               assertx(meta.deps.empty());
               meta.deps.insert(begin(u->typeUses), end(u->typeUses));
@@ -13098,7 +13098,7 @@ struct BuildSubclassListJob {
       meta.funcFamilyDeps.emplace_back();
       auto& deps = meta.funcFamilyDeps.back();
       for (auto const& [_, entry] : cinfo->methodFamilies) {
-        match<void>(
+        match(
           entry.m_meths,
           [&] (const FuncFamilyEntry::BothFF& e)      { deps.emplace(e.m_ff); },
           [&] (const FuncFamilyEntry::FFAndSingle& e) { deps.emplace(e.m_ff); },
@@ -13590,7 +13590,7 @@ protected:
       return *it->second;
     };
 
-    match<void>(
+    match(
       entry.m_meths,
       [&] (const FuncFamilyEntry::BothFF& e) {
         auto const& ff = getFF(e.m_ff);
@@ -13699,8 +13699,8 @@ protected:
 
           if (mte.attrs & AttrNoOverride) {
             always_assert(
-              boost::get<FuncFamilyEntry::BothSingle>(&it->second.m_meths) ||
-              boost::get<FuncFamilyEntry::SingleAndNone>(&it->second.m_meths)
+              std::get_if<FuncFamilyEntry::BothSingle>(&it->second.m_meths) ||
+              std::get_if<FuncFamilyEntry::SingleAndNone>(&it->second.m_meths)
             );
           }
         }
@@ -14315,8 +14315,8 @@ protected:
 
         auto& entry = cinfo->methodFamilies.at(name);
         assertx(
-          boost::get<FuncFamilyEntry::BothSingle>(&entry.m_meths) ||
-          boost::get<FuncFamilyEntry::SingleAndNone>(&entry.m_meths)
+          std::get_if<FuncFamilyEntry::BothSingle>(&entry.m_meths) ||
+          std::get_if<FuncFamilyEntry::SingleAndNone>(&entry.m_meths)
         );
 
         if (debug) {
@@ -14370,8 +14370,8 @@ protected:
           // However, even if the entry changes with AttrNoOverride,
           // it can only be these two cases.
           always_assert(
-            boost::get<FuncFamilyEntry::BothSingle>(&entry.m_meths) ||
-            boost::get<FuncFamilyEntry::SingleAndNone>(&entry.m_meths)
+            std::get_if<FuncFamilyEntry::BothSingle>(&entry.m_meths) ||
+            std::get_if<FuncFamilyEntry::SingleAndNone>(&entry.m_meths)
           );
         }
       }
@@ -14800,7 +14800,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
       };
       std::vector<Data> splits;
     };
-    using Action = boost::variant<Root, Split, Child, RootLeaf>;
+    using Action = std::variant<Root, Split, Child, RootLeaf>;
 
     auto const actions = parallel::map(
       toProcess,
@@ -14923,7 +14923,7 @@ SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
     std::vector<SString> rootLeafs;
 
     for (auto const& action : actions) {
-      match<void>(
+      match(
         action,
         [&] (Root r) {
           assertx(!subclassMeta.meta.at(r.cls).children.empty());
@@ -16199,7 +16199,7 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
       auto& e = meta.nameOnlyFF.at(n);
       entries.emplace_back(n, std::move(e));
       for (auto const& entry : entries.back().second) {
-        match<void>(
+        match(
           entry.m_meths,
           [&] (const FuncFamilyEntry::BothFF& e) {
             funcFamilies.emplace_back(index.funcFamilyRefs.at(e.m_ff));
@@ -16251,7 +16251,7 @@ void init_types(IndexData& index, InitTypesMetadata meta) {
     // Update the dummy entries with the actual result.
     for (size_t i = 0, size = names.size(); i < size; ++i) {
       auto& old = index.nameOnlyMethodFamilies.at(names[i]);
-      assertx(boost::get<FuncFamilyEntry::None>(&old.m_meths));
+      assertx(std::get_if<FuncFamilyEntry::None>(&old.m_meths));
       old = std::move(outMeta.nameOnly[i]);
     }
 
@@ -17048,7 +17048,7 @@ void make_class_infos_local(
             continue;
           }
 
-          match<void>(
+          match(
             entry.m_meths,
             [&, name=name, &entry=entry] (const FuncFamilyEntry::BothFF& e) {
               auto const it = ffState.find(e.m_ff);
@@ -17216,7 +17216,7 @@ void make_class_infos_local(
   remote.shrink_to_fit();
 
   for (auto const& [name, entry] : index.nameOnlyMethodFamilies) {
-    match<void>(
+    match(
       entry.m_meths,
       [&, name=name] (const FuncFamilyEntry::BothFF& e) {
         auto const it = ffState.find(e.m_ff);
@@ -18231,7 +18231,7 @@ res::Func Index::rfunc_from_dcls(const DCls& dcls,
     if (!cinfo) continue;
 
     auto const func = process(cinfo, false, dcls.containsNonRegular());
-    match<void>(
+    match(
       func.val,
       [&] (Func::MethodName) {},
       [&] (Func::Method m) {
@@ -24978,7 +24978,7 @@ res::Func AnalysisIndex::rfunc_from_dcls(const DCls& dcls,
   const php::Func* singleMethod = nullptr;
 
   auto const onFunc = [&] (Func func) {
-    match<void>(
+    match(
       func.val,
       [&] (Func::MethodName)      {},
       [&] (Func::Method)          { always_assert(false); },

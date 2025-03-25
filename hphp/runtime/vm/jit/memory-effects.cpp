@@ -2054,7 +2054,7 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, const MemEffects& me) {
     if (auto const pr = a.prop())  check_obj(pr->obj);
   };
 
-  match<void>(
+  match(
     me,
     [&] (const GeneralEffects& x) {
       check(x.loads);

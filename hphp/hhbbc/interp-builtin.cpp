@@ -51,7 +51,7 @@ const Type getArg(ISS& env, const php::Func* func, const FCallArgs& fca,
 
 struct Reduced {};
 struct NoReduced {};
-using TypeOrReduced = boost::variant<Type, Reduced, NoReduced>;
+using TypeOrReduced = std::variant<Type, Reduced, NoReduced>;
 
 //////////////////////////////////////////////////////////////////////
 

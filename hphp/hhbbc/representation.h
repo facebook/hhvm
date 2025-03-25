@@ -23,7 +23,7 @@
 #include <utility>
 #include <vector>
 
-#include <boost/variant.hpp>
+#include <variant>
 
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/compact-vector.h"

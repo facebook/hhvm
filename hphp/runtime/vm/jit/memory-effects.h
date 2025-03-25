@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include <boost/variant.hpp>
+#include <variant>
 
 #include "hphp/runtime/vm/jit/alias-class.h"
 #include "hphp/runtime/vm/jit/containers.h"
@@ -192,16 +192,16 @@ struct IrrelevantEffects {};
  */
 struct UnknownEffects {};
 
-using MemEffects = boost::variant< GeneralEffects
-                                 , PureLoad
-                                 , PureStore
-                                 , PureInlineCall
-                                 , CallEffects
-                                 , ReturnEffects
-                                 , ExitEffects
-                                 , IrrelevantEffects
-                                 , UnknownEffects
-                                 >;
+using MemEffects = std::variant< GeneralEffects
+                               , PureLoad
+                               , PureStore
+                               , PureInlineCall
+                               , CallEffects
+                               , ReturnEffects
+                               , ExitEffects
+                               , IrrelevantEffects
+                               , UnknownEffects
+                               >;
 
 //////////////////////////////////////////////////////////////////////
 

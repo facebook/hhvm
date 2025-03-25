@@ -758,7 +758,7 @@ void FrameStateMgr::handleConservatively(const IRInstruction* inst) {
   ITRACE(4, "FrameStateMgr::handleConservatively: {}\n", jit::show(effects));
   Indent _i;
 
-  match<void>(
+  match(
     effects,
     [&] (const GeneralEffects& x) {
       store(x.stores);

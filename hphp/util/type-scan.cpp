@@ -69,7 +69,7 @@ const folly::F14FastSet<std::string> forbidden_template = {
 };
 
 const folly::F14FastSet<std::string> forced_conservative = {
-  "boost::variant",
+  "std::variant",
   "boost::Optional",
   "std::optional",
   "std::function"

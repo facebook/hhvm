@@ -15,7 +15,7 @@
 */
 #pragma once
 
-#include <boost/variant.hpp>
+#include <variant>
 #include <type_traits>
 
 #include "hphp/runtime/base/array-data-defs.h"

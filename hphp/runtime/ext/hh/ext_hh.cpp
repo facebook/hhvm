@@ -651,7 +651,7 @@ String HHVM_FUNCTION(ffp_parse_string_native, const String& str) {
   );
 
   FfpJSONString res;
-  match<void>(
+  match(
     result,
     [&](FfpJSONString& r) {
       res = std::move(r);

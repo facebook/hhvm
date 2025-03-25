@@ -20,7 +20,7 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
 
-#include <boost/variant.hpp>
+#include <variant>
 #include <folly/Format.h>
 #include <folly/Hash.h>
 
@@ -33,7 +33,7 @@ namespace HPHP::rds {
 
 namespace {
 
-struct SymbolKind : boost::static_visitor<std::string> {
+struct SymbolKind {
   std::string operator()(LinkName k) const { return k.type; }
   std::string operator()(LinkID k) const { return k.type; }
   std::string operator()(ClsConstant) const { return "ClsConstant"; }
@@ -50,7 +50,7 @@ struct SymbolKind : boost::static_visitor<std::string> {
   std::string operator()(ConstMemoCache) const { return "ConstMemoCache"; }
 };
 
-struct SymbolRep : boost::static_visitor<std::string> {
+struct SymbolRep {
   std::string operator()(LinkName k) const { return k.name->data(); }
   std::string operator()(LinkID) const { return ""; }
 
@@ -126,7 +126,7 @@ struct SymbolRep : boost::static_visitor<std::string> {
   }
 };
 
-struct SymbolEq : boost::static_visitor<bool> {
+struct SymbolEq {
   template<class T, class U>
   typename std::enable_if<
     !std::is_same<T,U>::value,
@@ -205,7 +205,7 @@ struct SymbolEq : boost::static_visitor<bool> {
   }
 };
 
-struct SymbolHash : boost::static_visitor<size_t> {
+struct SymbolHash {
   // NOTE: Any hash functions that are not stable across HHVM
   // restarts should be overridden with an appropriate hash in
   // SymbolStableHash below.
@@ -318,19 +318,19 @@ struct SymbolStableHash : SymbolHash {
 }
 
 std::string symbol_kind(const Symbol& sym) {
-  return boost::apply_visitor(SymbolKind(), sym);
+  return std::visit(SymbolKind(), sym);
 }
 std::string symbol_rep(const Symbol& sym) {
-  return boost::apply_visitor(SymbolRep(), sym);
+  return std::visit(SymbolRep(), sym);
 }
 bool symbol_eq(const Symbol& sym1, const Symbol& sym2) {
-  return boost::apply_visitor(SymbolEq(), sym1, sym2);
+  return std::visit(SymbolEq(), sym1, sym2);
 }
 size_t symbol_hash(const Symbol& sym) {
-  return boost::apply_visitor(SymbolHash(), sym);
+  return std::visit(SymbolHash(), sym);
 }
 size_t symbol_stable_hash(const Symbol& sym) {
-  return boost::apply_visitor(SymbolStableHash(), sym);
+  return std::visit(SymbolStableHash(), sym);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

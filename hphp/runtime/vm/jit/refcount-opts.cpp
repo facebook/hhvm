@@ -1012,7 +1012,7 @@ void mrinfo_step_impl(Env& env,
   };
 
   auto const effects = memory_effects(inst);
-  match<void>(
+  match(
     effects,
     [&](const IrrelevantEffects&) {},
     [&](const ExitEffects&) {},
@@ -1183,7 +1183,7 @@ void weaken_decref_step(const Env& env, const IRInstruction& inst, Gen gen) {
     if (asetID == -1) continue;
     if (!checked) {
       auto const effects = memory_effects(inst);
-      if (boost::get<PureStore>(&effects)) return;
+      if (std::get_if<PureStore>(&effects)) return;
       checked = true;
     }
     gen(asetID);
@@ -2056,7 +2056,7 @@ void analyze_mem_effects(Env& env,
                          PreAdder add_node) {
   auto const effects = canonicalize(memory_effects(inst));
   FTRACE(4, "    mem: {}\n", show(effects));
-  match<void>(
+  match(
     effects,
     [&] (const IrrelevantEffects&) {},
 

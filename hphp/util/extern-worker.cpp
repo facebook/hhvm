@@ -1133,7 +1133,7 @@ SubprocessImpl::exec(const RequestId& requestId,
   BlobEncoder encoder;
   auto const encodeParams = [&] (const RefValVec& params) {
     for (auto const& param : params) {
-      match<void>(
+      match(
         param,
         [&] (const RefId& id) {
           SerializedSink::encodeRefId(id, encoder);

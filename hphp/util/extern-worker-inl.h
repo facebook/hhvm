@@ -915,7 +915,7 @@ Client::exec(const Job<C>& job,
     -> typename decltype(tag)::Type {
     using T = typename decltype(tag)::Type;
     if constexpr (IsVector<T>::value) {
-      auto r = boost::get<IdVec>(&v);
+      auto r = std::get_if<IdVec>(&v);
       assertx(r);
       return from(*r)
         | move
@@ -924,7 +924,7 @@ Client::exec(const Job<C>& job,
           })
         | as<std::vector>();
     } else if constexpr (IsOptional<T>::value) {
-      auto r = boost::get<Optional<RefId>>(&v);
+      auto r = std::get_if<Optional<RefId>>(&v);
       assertx(r);
       using Elem = std::remove_cv_t<
         std::remove_reference_t<decltype(*std::declval<T>())>
@@ -934,7 +934,7 @@ Client::exec(const Job<C>& job,
       return Elem{std::move(**r)};
     } else {
       static_assert(IsRef<T>::value);
-      auto r = boost::get<RefId>(&v);
+      auto r = std::get_if<RefId>(&v);
       assertx(r);
       return T{std::move(*r)};
     }

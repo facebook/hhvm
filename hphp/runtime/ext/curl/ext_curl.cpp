@@ -36,7 +36,7 @@
 #include "hphp/util/compatibility.h"
 #include "hphp/util/lock.h"
 #include <boost/algorithm/string.hpp>
-#include <boost/variant.hpp>
+
 #include <folly/portability/OpenSSL.h>
 #include <curl/curl.h>
 #include <curl/easy.h>

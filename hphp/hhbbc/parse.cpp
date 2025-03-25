@@ -19,7 +19,7 @@
 #include <unordered_map>
 #include <map>
 
-#include <boost/variant.hpp>
+#include <variant>
 #include <algorithm>
 #include <iterator>
 #include <memory>
@@ -81,7 +81,7 @@ struct ParseUnitState {
    * have the full SourceLocTable information in it, so we're limited
    * to line numbers.
    */
-  boost::variant< SourceLocTable
+  std::variant< SourceLocTable
                 , LineTable
                 > srcLocInfo;
 

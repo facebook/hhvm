@@ -19,7 +19,7 @@
 #include <string>
 #include <map>
 
-#include <boost/variant.hpp>
+#include <variant>
 
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/interp.h"
@@ -77,7 +77,7 @@ struct LiveIter {
   // Set whenever we see any mutation, even "safe" ones that don't affect keys.
   bool baseUpdated        = false;
 };
-using Iter = boost::variant<DeadIter, LiveIter>;
+using Iter = std::variant<DeadIter, LiveIter>;
 
 /*
  * Tag indicating what sort of thing contains the current member base.
@@ -450,7 +450,7 @@ struct StateMutationUndo {
   // Stack modification (undone by changing the stack slot to the
   // recorded type).
   struct Stack { size_t idx; Type t; };
-  using Events = boost::variant<Push, Pop, Local, Stack, Mark>;
+  using Events = std::variant<Push, Pop, Local, Stack, Mark>;
 
   std::vector<Events> events;
 

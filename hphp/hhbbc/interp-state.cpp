@@ -55,7 +55,7 @@ bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
   return match<bool>(
     dst,
     [&] (DeadIter) {
-      match<void>(
+      match(
         src,
         [] (DeadIter) {},
         [] (const LiveIter&) {

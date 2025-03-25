@@ -131,7 +131,7 @@ enum RegClass {
 struct None {};
 struct SpillSlot { size_t slot; };
 struct SpillSlotWide { size_t slot; };
-using Color = boost::variant<None, PhysReg, SpillSlot, SpillSlotWide>;
+using Color = std::variant<None, PhysReg, SpillSlot, SpillSlotWide>;
 
 // Rematerialization info for a particular Vreg
 struct RematInfo {
@@ -677,27 +677,27 @@ void set_reg_class_bits(State& state, Vreg r, RegClass cls) {
   }
 }
 
-// Wrappers around boost::get<>. Will assert if you try to retrieve a value from
+// Wrappers around std::get<>. Will assert if you try to retrieve a value from
 // the color that isn't present (so check before calling).
-bool is_color_none(Color c) { return boost::get<None>(&c); }
-bool is_color_reg(Color c) { return boost::get<PhysReg>(&c); }
-bool is_color_spill_slot(Color c) { return boost::get<SpillSlot>(&c); }
-bool is_color_spill_slot_wide(Color c) { return boost::get<SpillSlotWide>(&c); }
+bool is_color_none(Color c) { return std::get_if<None>(&c); }
+bool is_color_reg(Color c) { return std::get_if<PhysReg>(&c); }
+bool is_color_spill_slot(Color c) { return std::get_if<SpillSlot>(&c); }
+bool is_color_spill_slot_wide(Color c) { return std::get_if<SpillSlotWide>(&c); }
 
 PhysReg color_reg(Color c) {
-  auto const r = boost::get<PhysReg>(&c);
+  auto const r = std::get_if<PhysReg>(&c);
   assertx(r);
   return *r;
 }
 
 SpillSlot color_spill_slot(Color c) {
-  auto const s = boost::get<SpillSlot>(&c);
+  auto const s = std::get_if<SpillSlot>(&c);
   assertx(s);
   return *s;
 }
 
 SpillSlotWide color_spill_slot_wide(Color c) {
-  auto const s = boost::get<SpillSlotWide>(&c);
+  auto const s = std::get_if<SpillSlotWide>(&c);
   assertx(s);
   return *s;
 }
@@ -2822,8 +2822,8 @@ bool compare_remat_insts(const Vunit& unit,
     if (!inst1.origin || !inst2.origin) return false;
     auto const effects1 = memory_effects(*inst1.origin);
     auto const effects2 = memory_effects(*inst2.origin);
-    auto const load1 = boost::get<PureLoad>(&effects1);
-    auto const load2 = boost::get<PureLoad>(&effects2);
+    auto const load1 = std::get_if<PureLoad>(&effects1);
+    auto const load2 = std::get_if<PureLoad>(&effects2);
     if (!load1 || !load2) return false;
     if (load1->src != load2->src) return false;
   }
@@ -3187,7 +3187,7 @@ RematLookup find_defining_inst_for_remat_cached(State& state,
       // read from a single (abstract) location. Anything more
       // complicated is beyond our abilities to track safely.
       auto const effects = memory_effects(*result.inst.origin);
-      auto const load = boost::get<PureLoad>(&effects);
+      auto const load = std::get_if<PureLoad>(&effects);
       if (!load || !load->src.isSingleLocation()) return false;
     }
     // Can't rematerialization instructions which define any physical
@@ -4204,7 +4204,7 @@ bool mem_read_available_recurse(State& state,
           assertx(inst.origin);
           if (debug) {
             auto const DEBUG_ONLY effects = memory_effects(*inst.origin);
-            auto const DEBUG_ONLY otherLoad = boost::get<PureLoad>(&effects);
+            auto const DEBUG_ONLY otherLoad = std::get_if<PureLoad>(&effects);
             always_assert(otherLoad && otherLoad->src.isSingleLocation());
             always_assert(load.maybe(otherLoad->src));
           }
@@ -4232,7 +4232,7 @@ bool mem_read_available(State& state,
   assertx(is_mem_read(instr));
   assertx(instr.origin);
   auto const effects = memory_effects(*instr.origin);
-  auto const pureLoad = boost::get<PureLoad>(&effects);
+  auto const pureLoad = std::get_if<PureLoad>(&effects);
   assertx(pureLoad && pureLoad->src.isSingleLocation());
 
   return mem_read_available_recurse(

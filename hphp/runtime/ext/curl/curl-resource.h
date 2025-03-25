@@ -16,7 +16,7 @@ namespace HPHP {
 struct CurlMultiResource;
 
 struct CurlResource : SweepableResourceData {
-  using ExceptionType = req::Optional<boost::variant<Object,Exception*>>;
+  using ExceptionType = req::Optional<std::variant<Object,Exception*>>;
 
   struct WriteHandler {
     int                method{0};
@@ -77,15 +77,15 @@ struct CurlResource : SweepableResourceData {
   void check_exception();
   ExceptionType getAndClearException() { return std::move(m_exception); }
   static bool isPhpException(const ExceptionType& e) {
-    return e && boost::get<Object>(&e.value()) != nullptr;
+    return e && std::get_if<Object>(&e.value()) != nullptr;
   }
   static Object getPhpException(const ExceptionType& e) {
     assertx(e && isPhpException(e));
-    return boost::get<Object>(*e);
+    return std::get<Object>(*e);
   }
   static Exception* getCppException(const ExceptionType& e) {
     assertx(e && !isPhpException(e));
-    return boost::get<Exception*>(*e);
+    return std::get<Exception*>(*e);
   }
   void prepare();
 

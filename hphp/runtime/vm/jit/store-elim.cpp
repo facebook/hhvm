@@ -552,7 +552,7 @@ void visit(Local& env, IRInstruction& inst) {
       mustStore(env, *bit);
       if (!l.value || l.value->inst()->block() != inst.block()) return;
       auto const le = memory_effects(*l.value->inst());
-      auto pl = boost::get<PureLoad>(&le);
+      auto pl = std::get_if<PureLoad>(&le);
       if (!pl) return;
       auto lbit = pure_store_bit(env, pl->src);
       if (!lbit || *lbit != *bit) return;
@@ -587,7 +587,7 @@ void visit(Local& env, IRInstruction& inst) {
     doMustStore(AVMRetAddr);
   };
 
-  match<void>(
+  match(
     effects,
     [&] (const IrrelevantEffects&) {
       switch (inst.op()) {
@@ -614,7 +614,7 @@ void visit(Local& env, IRInstruction& inst) {
       if (auto bit = pure_store_bit(env, l.src)) {
         if (env.reStores[*bit]) {
           auto const st = memory_effects(*env.global.reStores[*bit]);
-          auto const pst = boost::get<PureStore>(&st);
+          auto const pst = std::get_if<PureStore>(&st);
           if (pst && pst->value && pst->value == inst.dst()) {
             FTRACE(4, "Killing self-store: {}\n",
                    env.global.reStores[*bit]->toString());

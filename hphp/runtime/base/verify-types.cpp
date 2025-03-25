@@ -32,7 +32,7 @@ namespace HPHP{
 
 namespace {
 
-using PType = boost::variant<PreClass*, PreTypeAlias*>;
+using PType = std::variant<PreClass*, PreTypeAlias*>;
 
 struct ArgTC {
   const Func* fn;
@@ -128,7 +128,7 @@ bool loadTypeSafe(PType initial, FactsStore* fs) {
         continue;
       }
 
-      match<void>(
+      match(
         p,
         [&] (PreClass* pc) {
           if (auto const parent = pc->parent())    load(parent);

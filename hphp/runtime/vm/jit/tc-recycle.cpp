@@ -122,7 +122,7 @@ struct FuncJob {
   FuncId fid;
 };
 
-using Job = boost::variant<FuncJob, const SrcRec*, TransLoc>;
+using Job = std::variant<FuncJob, const SrcRec*, TransLoc>;
 std::atomic<bool> s_running{false};
 std::queue<Job> s_jobq;
 std::condition_variable s_qcv;
@@ -484,7 +484,7 @@ void recycleInit() {
     SCOPE_EXIT { rds::local::fini(); };
     while (auto j = dequeueJob()) {
       ProfData::Session pds;
-      match<void>(
+      match(
         *j,
         [] (TransLoc loc) { reclaimTranslationSync(loc); },
         [] (const SrcRec* sr) { reclaimSrcRecSync(sr); },

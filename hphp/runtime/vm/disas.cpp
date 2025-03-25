@@ -20,7 +20,7 @@
 #include <queue>
 #include <functional>
 
-#include <boost/variant.hpp>
+#include <variant>
 
 #include <folly/String.h>
 
@@ -139,7 +139,7 @@ std::string opt_escaped_long(const StringData* sd) {
 
 struct EHCatchLegacy { std::string label; };
 struct EHCatch { Offset end; };
-using EHInfo = boost::variant<EHCatchLegacy, EHCatch>;
+using EHInfo = std::variant<EHCatchLegacy, EHCatch>;
 using UBMap =
   std::unordered_map<const StringData*, TypeIntersectionConstraint>;
 struct FuncInfo {
@@ -483,7 +483,7 @@ void print_func_body(Output& out, const FuncInfo& finfo) {
     for (; ehIter != ehStop && ehIter->first == off; ++ehIter) {
       auto const info = finfo.ehInfo.find(ehIter->second);
       always_assert(info != end(finfo.ehInfo));
-      match<void>(
+      match(
         info->second,
         [&] (const EHCatch& ehCatch) {
           assertx(ehIter->second->m_past == ehIter->second->m_handler);

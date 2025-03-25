@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <boost/variant.hpp>
+#include <variant>
 #include <folly/Range.h>
 
 #include "hphp/runtime/vm/as.h"
@@ -38,7 +38,7 @@ struct SHA1;
 
 // On success return a verified unit, and on failure return a string stating the
 // type of error encountered
-using CompilerResult = boost::variant<std::unique_ptr<UnitEmitter>,std::string>;
+using CompilerResult = std::variant<std::unique_ptr<UnitEmitter>,std::string>;
 
 struct FactsBinaryString {
   std::string value;
@@ -50,8 +50,8 @@ struct FfpJSONString {
 
 // On success returns a std::string with value containing binary-serialized
 // results of facts extraction. On failure returns a string with error text
-using ParseFactsResult = boost::variant<FactsBinaryString, std::string>;
-using FfpResult = boost::variant<FfpJSONString, std::string>;
+using ParseFactsResult = std::variant<FactsBinaryString, std::string>;
+using FfpResult = std::variant<FfpJSONString, std::string>;
 
 // Parse facts from the given file with `options`.
 // If expect_sha1 is non-empty, return an error message if

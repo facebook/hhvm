@@ -720,7 +720,7 @@ void killAllStkEquiv(ISS& env) {
 
 void killIterEquivs(ISS& env, LocalId l, LocalId key = NoLocalId) {
   for (auto& i : env.state.iters) {
-    match<void>(
+    match(
       i,
       []  (DeadIter) {},
       [&] (LiveIter& iter) {
@@ -738,7 +738,7 @@ void killIterEquivs(ISS& env, LocalId l, LocalId key = NoLocalId) {
 
 void killAllIterEquivs(ISS& env) {
   for (auto& i : env.state.iters) {
-    match<void>(
+    match(
       i,
       [] (DeadIter) {},
       [] (LiveIter& iter) {
@@ -751,7 +751,7 @@ void killAllIterEquivs(ISS& env) {
 }
 
 void setIterKey(ISS& env, IterId id, LocalId key) {
-  match<void>(
+  match(
     env.state.iters[id],
     []  (DeadIter) {},
     [&] (LiveIter& iter) { iter.keyLocal = key; }

@@ -407,7 +407,7 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
       "4505" # Unreferenced local function has been removed. This is mostly the result of things not being needed under MSVC.
       "4514" # Unreferenced inline function has been removed. (caused by /Zc:inline)
       "4548" # Expression before comma has no effect. I wouldn't disable this normally, but malloc.h triggers this warning.
-      "4555" # Expression has no effect; expected expression with side-effect. This is triggered by boost/variant.hpp.
+      "4555" # Expression has no effect; expected expression with side-effect. This is triggered by variant.
       "4574" # ifdef'd macro was defined to 0.
       "4582" # Constructor is not implicitly called.
       "4583" # Destructor is not implicitly called.

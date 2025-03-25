@@ -25,7 +25,7 @@
 #include <tuple>
 #include <type_traits>
 
-#include <boost/variant.hpp>
+#include <variant>
 
 #include <tbb/concurrent_hash_map.h>
 

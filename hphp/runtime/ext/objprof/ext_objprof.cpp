@@ -789,7 +789,7 @@ void attributeStaticMemoizedFootprint(hphp_fast_map<ClassProp, ObjprofMetrics>* 
     rds::Handle rdsOffset = rds::ptrToHandle<rds::Mode::NonPersistent>(h);
     auto sym = rds::reverseLinkExact(rdsOffset);
     if (sym.has_value()) {
-      match<void>(
+      match(
       sym.value(),
       [&] (const rds::StaticMemoValue& memo_value) {
         auto tv = reinterpret_cast<const TypedValue*>(h);

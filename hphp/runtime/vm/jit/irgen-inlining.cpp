@@ -271,36 +271,6 @@ void beginInlining(IRGS& env,
 
   FTRACE(1, "[[[ begin inlining: {}\n", callee->fullName()->data());
 
-  ctx = [&] () -> SSATmp* {
-    if (callee->isClosureBody()) {
-      return gen(env, AssertType, Type::ExactObj(callee->implCls()), ctx);
-    }
-
-    if (!callee->cls()) {
-      assertx(ctx->isA(TNullptr));
-      return ctx;
-    }
-    assertx(!ctx->type().maybe(TNullptr));
-
-    if (ctx->isA(TBottom)) return ctx;
-
-    if (callee->isStatic()) {
-      assertx(ctx->isA(TCls));
-      if (ctx->hasConstVal(TCls)) {
-        return ctx;
-      }
-
-      auto const ty = ctx->type() & Type::SubCls(callee->cls());
-      if (ctx->type() <= ty) return ctx;
-      return gen(env, AssertType, ty, ctx);
-    }
-
-    assertx(ctx->type().maybe(TObj));
-    auto const ty = ctx->type() & thisTypeFromFunc(callee);
-    if (ctx->type() <= ty) return ctx;
-    return gen(env, AssertType, ty, ctx);
-  }();
-
   auto const numTotalInputs = callee->numFuncEntryInputs();
 
   jit::vector<SSATmp*> inputs{numTotalInputs};

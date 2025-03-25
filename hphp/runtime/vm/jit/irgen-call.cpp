@@ -519,12 +519,47 @@ constParamCacheLink(IRGS& env, const Func* callee, SSATmp* cls,
   return rds::bindConstMemoCache(callee, clsVal, paramVals, asyncEagerReturn);
 }
 
+SSATmp* refineKnownFuncCtx(IRGS& env, const Func* callee, SSATmp* ctx) {
+  if (callee->isClosureBody()) {
+    return gen(env, AssertType, Type::ExactObj(callee->implCls()), ctx);
+  }
+
+  if (!callee->cls()) {
+    assertx(ctx == nullptr);
+    return ctx;
+  }
+  assertx(!ctx->type().maybe(TNullptr));
+
+  if (ctx->isA(TBottom)) return ctx;
+
+  if (callee->isStatic()) {
+    if (!ctx->type().maybe(TCls)) return cns(env, TBottom);
+    if (ctx->hasConstVal(TCls)) return ctx;
+
+    auto const ty = ctx->type() & Type::SubCls(callee->cls());
+    if (ctx->type() <= ty) return ctx;
+    return gen(env, AssertType, ty, ctx);
+  }
+
+  if (!ctx->type().maybe(TObj)) return cns(env, TBottom);
+
+  auto const ty = ctx->type() & thisTypeFromFunc(callee);
+  if (ctx->type() <= ty) return ctx;
+  return gen(env, AssertType, ty, ctx);
+}
+
 void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
                          SSATmp* objOrClass, bool dynamicCall,
                          bool suppressDynCallCheck) {
   assertx(callee);
 
   updateStackOffset(env);
+
+  objOrClass = refineKnownFuncCtx(env, callee, objOrClass);
+  if (objOrClass != nullptr && objOrClass->isA(TBottom)) {
+    gen(env, Unreachable, ASSERT_REASON);
+    return;
+  }
 
   // Caller checks
   if (!emitCallerInOutChecksKnown(env, callee, fca)) return;
@@ -852,7 +887,7 @@ inline SSATmp* ldCtxForClsMethod(IRGS& env,
 
   auto gen_missing_this = [&] {
     gen(env, ThrowMissingThis, cns(env, callee));
-    return callCtx;
+    return cns(env, TBottom);
   };
 
   if (!hasThis(env)) {

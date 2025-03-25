@@ -22,40 +22,40 @@
 
 // template specifications for protobuf message
 template <>
-protobuf::Empty create<protobuf::Empty>() {
+inline protobuf::Empty create<protobuf::Empty>() {
   return protobuf::Empty();
 }
 
 template <>
-protobuf::SmallInt create<protobuf::SmallInt>() {
+inline protobuf::SmallInt create<protobuf::SmallInt>() {
   protobuf::SmallInt i;
   i.set_smallint(5);
   return i;
 }
 
 template <>
-protobuf::BigInt create<protobuf::BigInt>() {
+inline protobuf::BigInt create<protobuf::BigInt>() {
   protobuf::BigInt i;
   i.set_bigint(0x1234567890abcdefL);
   return i;
 }
 
 template <>
-protobuf::SmallString create<protobuf::SmallString>() {
+inline protobuf::SmallString create<protobuf::SmallString>() {
   protobuf::SmallString s;
   s.set_smallstr("small string");
   return s;
 }
 
 template <>
-protobuf::BigString create<protobuf::BigString>() {
+inline protobuf::BigString create<protobuf::BigString>() {
   protobuf::BigString s;
   s.set_bigstr(std::string(10000, 'a'));
   return s;
 }
 
 template <>
-protobuf::Mixed create<protobuf::Mixed>() {
+inline protobuf::Mixed create<protobuf::Mixed>() {
   protobuf::Mixed m;
   m.set_i32(5);
   m.set_i64(12345);
@@ -65,7 +65,7 @@ protobuf::Mixed create<protobuf::Mixed>() {
 }
 
 template <>
-protobuf::SmallListInt create<protobuf::SmallListInt>() {
+inline protobuf::SmallListInt create<protobuf::SmallListInt>() {
   std::srand(1);
   protobuf::SmallListInt l;
   for (int i = 0; i < 10; i++) {
@@ -75,7 +75,7 @@ protobuf::SmallListInt create<protobuf::SmallListInt>() {
 }
 
 template <>
-protobuf::BigListInt create<protobuf::BigListInt>() {
+inline protobuf::BigListInt create<protobuf::BigListInt>() {
   std::srand(1);
   protobuf::BigListInt l;
   for (int i = 0; i < 10000; i++) {
@@ -85,7 +85,7 @@ protobuf::BigListInt create<protobuf::BigListInt>() {
 }
 
 template <>
-protobuf::BigListMixed create<protobuf::BigListMixed>() {
+inline protobuf::BigListMixed create<protobuf::BigListMixed>() {
   protobuf::BigListMixed l;
   for (int i = 0; i < 10000; i++) {
     *l.add_lst() = create<protobuf::Mixed>();
@@ -94,7 +94,7 @@ protobuf::BigListMixed create<protobuf::BigListMixed>() {
 }
 
 template <>
-protobuf::LargeListMixed create<protobuf::LargeListMixed>() {
+inline protobuf::LargeListMixed create<protobuf::LargeListMixed>() {
   protobuf::LargeListMixed l;
   for (int i = 0; i < 1000000; i++) {
     *l.add_lst() = create<protobuf::Mixed>();
@@ -103,7 +103,7 @@ protobuf::LargeListMixed create<protobuf::LargeListMixed>() {
 }
 
 template <>
-protobuf::LargeMapInt create<protobuf::LargeMapInt>() {
+inline protobuf::LargeMapInt create<protobuf::LargeMapInt>() {
   std::srand(1);
   protobuf::LargeMapInt l;
   auto& m = *l.mutable_m();
@@ -114,7 +114,7 @@ protobuf::LargeMapInt create<protobuf::LargeMapInt>() {
 }
 
 template <>
-protobuf::NestedMap create<protobuf::NestedMap>() {
+inline protobuf::NestedMap create<protobuf::NestedMap>() {
   protobuf::NestedMap map;
   populateMap([&](int i, int j, int k, int l, int m, int v) {
     auto& m4 = *map.mutable_m();
@@ -128,7 +128,7 @@ protobuf::NestedMap create<protobuf::NestedMap>() {
 }
 
 template <>
-protobuf::LargeMixed create<protobuf::LargeMixed>() {
+inline protobuf::LargeMixed create<protobuf::LargeMixed>() {
   protobuf::LargeMixed l;
   l.set_var0(5);
   l.set_var1(12345);
@@ -234,7 +234,7 @@ protobuf::LargeMixed create<protobuf::LargeMixed>() {
 }
 
 template <>
-protobuf::MixedInt create<protobuf::MixedInt>() {
+inline protobuf::MixedInt create<protobuf::MixedInt>() {
   std::srand(1);
   protobuf::MixedInt l;
   l.set_var1(std::rand());
@@ -253,7 +253,7 @@ protobuf::MixedInt create<protobuf::MixedInt>() {
 }
 
 template <>
-protobuf::ComplexStruct create<protobuf::ComplexStruct>() {
+inline protobuf::ComplexStruct create<protobuf::ComplexStruct>() {
   protobuf::ComplexStruct l;
   *l.mutable_var0() = create<protobuf::Empty>();
   *l.mutable_var1() = create<protobuf::SmallInt>();

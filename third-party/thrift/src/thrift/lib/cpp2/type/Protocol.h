@@ -24,6 +24,7 @@
 #include <thrift/lib/cpp2/type/detail/Wrap.h>
 #include <thrift/lib/thrift/gen-cpp2/standard_types.h>
 #include <thrift/lib/thrift/gen-cpp2/type_rep_types.h>
+#include <thrift/lib/thrift/gen-cpp2/type_rep_types_custom_protocol.h>
 
 namespace apache::thrift::type {
 

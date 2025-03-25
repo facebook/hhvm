@@ -76,9 +76,23 @@ cdef list_lt(object first, object second):
     return len(first) < len(second)
 
 
-@cython.internal
-@cython.auto_pickle(False)
-cdef class StructMeta(type):
+class StructMeta(type):
+    def __new__(cls, name, bases, classdict):
+        # enforce no inheritance, for in-place migrated structs
+        for base in bases:
+            if (
+                base is Struct or 
+                hasattr(base, '_fbthrift_allow_inheritance_DO_NOT_USE')
+                or not hasattr(base, '_FBTHRIFT__PYTHON_CLASS')
+            ):
+                continue
+            raise TypeError(
+                f"Inheritance of thrift-generated {base.__name__} from {name}"
+                " is deprecated. Please use composition."
+            )
+
+        return type.__new__(cls, name, bases, classdict)
+
     """
     We set helper functions here since they can't possibly confict with field names
     """
@@ -301,9 +315,20 @@ cdef class Union(Struct):
         return self.type
 
 
-@cython.internal
-@cython.auto_pickle(False)
-cdef class UnionMeta(type):
+class UnionMeta(type):
+    def __new__(cls, name, bases, classdict):
+        # enforce no inheritance, for in-place migrated exceptions
+        for base in bases:
+            if base is Union or not hasattr(base, '_FBTHRIFT__PYTHON_CLASS'):
+                continue
+            raise TypeError(
+                f"Inheritance of thrift-generated {base.__name__} from {name}"
+                " is deprecated. Please use composition."
+            )
+
+        return type.__new__(cls, name, bases, classdict)
+
+
     def __dir__(cls):
         return [
             cls._fbthrift_get_field_name_by_index(i)

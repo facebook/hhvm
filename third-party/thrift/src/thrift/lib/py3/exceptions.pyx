@@ -28,9 +28,23 @@ from thrift.python.exceptions import (
     TransportOptions,
 )
 
-@cython.internal
-@cython.auto_pickle(False)
-cdef class ErrorMeta(type):
+class ErrorMeta(type):
+    def __new__(cls, name, bases, classdict):
+        # enforce no inheritance, for in-place migrated exceptions
+        for base in bases:
+            if (
+                base is GeneratedError or 
+                hasattr(base, '_fbthrift_allow_inheritance_DO_NOT_USE')
+                or not hasattr(base, '_FBTHRIFT__PYTHON_CLASS')
+            ):
+                continue
+            raise TypeError(
+                f"Inheritance of thrift-generated {base.__name__} from {name}"
+                " is deprecated. Please use composition."
+            )
+
+        return type.__new__(cls, name, bases, classdict)
+
     def __instancecheck__(cls, inst):
         if isinstance(inst, _fbthrift_python_GeneratedError):
             return inst._fbthrift_auto_migrate_enabled()

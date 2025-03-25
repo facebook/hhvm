@@ -110,6 +110,9 @@ class {{struct:name}}({{> types/python_struct_class }}):
         "{{field:py_name}}",
         {{/struct:fields_and_mixin_fields}}
     )
+    {{#struct:allow_inheritance?}}
+    _fbthrift_allow_inheritance_DO_NOT_USE = True
+    {{/struct:allow_inheritance?}}
     {{#struct:union?}}
     Type = _fbthrift_python_types.{{struct:name}}.Type
     {{/struct:union?}}

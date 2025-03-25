@@ -1606,3 +1606,21 @@ pub(crate) mod r#impl {
     }
 }
 
+
+#[doc(hidden)]
+#[deprecated]
+#[allow(hidden_glob_reexports, unused_imports)]
+pub mod __constructors {
+    mod HackEnum {
+        pub use crate::HackEnum;
+    }
+    pub use self::HackEnum::*;
+    mod MyEnum {
+        pub use crate::MyEnum;
+    }
+    pub use self::MyEnum::*;
+    mod MyEnumAlias {
+        pub use crate::MyEnumAlias;
+    }
+    pub use self::MyEnumAlias::*;
+}

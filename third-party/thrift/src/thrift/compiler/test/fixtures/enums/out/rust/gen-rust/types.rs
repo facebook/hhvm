@@ -1290,3 +1290,37 @@ pub(crate) mod r#impl {
     }
 }
 
+
+#[doc(hidden)]
+#[deprecated]
+#[allow(hidden_glob_reexports, unused_imports)]
+pub mod __constructors {
+    mod Metasyntactic {
+        pub use crate::Metasyntactic;
+    }
+    pub use self::Metasyntactic::*;
+    mod MyBitmaskEnum1 {
+        pub use crate::MyBitmaskEnum1;
+    }
+    pub use self::MyBitmaskEnum1::*;
+    mod MyBitmaskEnum2 {
+        pub use crate::MyBitmaskEnum2;
+    }
+    pub use self::MyBitmaskEnum2::*;
+    mod MyEnum1 {
+        pub use crate::MyEnum1;
+    }
+    pub use self::MyEnum1::*;
+    mod MyEnum2 {
+        pub use crate::MyEnum2;
+    }
+    pub use self::MyEnum2::*;
+    mod MyEnum3 {
+        pub use crate::MyEnum3;
+    }
+    pub use self::MyEnum3::*;
+    mod MyEnum4 {
+        pub use crate::MyEnum4;
+    }
+    pub use self::MyEnum4::*;
+}

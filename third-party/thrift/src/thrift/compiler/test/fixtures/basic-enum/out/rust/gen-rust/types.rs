@@ -735,3 +735,25 @@ pub(crate) mod r#impl {
     }
 }
 
+
+#[doc(hidden)]
+#[deprecated]
+#[allow(hidden_glob_reexports, unused_imports)]
+pub mod __constructors {
+    mod EmptyEnum {
+        pub use crate::EmptyEnum;
+    }
+    pub use self::EmptyEnum::*;
+    mod MyBigEnum {
+        pub use crate::MyBigEnum;
+    }
+    pub use self::MyBigEnum::*;
+    mod MyEnum {
+        pub use crate::MyEnum;
+    }
+    pub use self::MyEnum::*;
+    mod MyUseIntrinsicDefaultEnum {
+        pub use crate::MyUseIntrinsicDefaultEnum;
+    }
+    pub use self::MyUseIntrinsicDefaultEnum::*;
+}

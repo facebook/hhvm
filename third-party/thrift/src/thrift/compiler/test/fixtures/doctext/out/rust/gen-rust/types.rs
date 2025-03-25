@@ -570,3 +570,17 @@ pub(crate) mod r#impl {
     }
 }
 
+
+#[doc(hidden)]
+#[deprecated]
+#[allow(hidden_glob_reexports, unused_imports)]
+pub mod __constructors {
+    mod B {
+        pub use crate::B;
+    }
+    pub use self::B::*;
+    mod number {
+        pub use crate::number;
+    }
+    pub use self::number::*;
+}

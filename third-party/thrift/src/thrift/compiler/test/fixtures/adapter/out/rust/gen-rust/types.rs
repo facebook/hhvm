@@ -6795,3 +6795,21 @@ mod tests {
 // This is here to ensure you enable unittests on your Thrift library.
 #[cfg(feature = "thrift_library_unittests_disabled")]
 compile_error!("You are using Rust adapters in a Thrift library that does not have unittests enabled. For safety reasons, this is forbidden. Please enable Rust unittests for this Thrift library.");
+
+#[doc(hidden)]
+#[deprecated]
+#[allow(hidden_glob_reexports, unused_imports)]
+pub mod __constructors {
+    mod AdaptedEnum {
+        pub use crate::AdaptedEnum;
+    }
+    pub use self::AdaptedEnum::*;
+    mod Color {
+        pub use crate::Color;
+    }
+    pub use self::Color::*;
+    mod ThriftAdaptedEnum {
+        pub use crate::ThriftAdaptedEnum;
+    }
+    pub use self::ThriftAdaptedEnum::*;
+}

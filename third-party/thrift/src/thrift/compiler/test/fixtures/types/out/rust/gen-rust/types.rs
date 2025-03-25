@@ -5483,3 +5483,21 @@ pub(crate) mod r#impl {
     }
 }
 
+
+#[doc(hidden)]
+#[deprecated]
+#[allow(hidden_glob_reexports, unused_imports)]
+pub mod __constructors {
+    mod MyForwardRefEnum {
+        pub use crate::MyForwardRefEnum;
+    }
+    pub use self::MyForwardRefEnum::*;
+    mod has_bitwise_ops {
+        pub use crate::has_bitwise_ops;
+    }
+    pub use self::has_bitwise_ops::*;
+    mod is_unscoped {
+        pub use crate::is_unscoped;
+    }
+    pub use self::is_unscoped::*;
+}

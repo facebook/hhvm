@@ -2824,3 +2824,33 @@ pub(crate) mod r#impl {
     }
 }
 
+
+#[doc(hidden)]
+#[deprecated]
+#[allow(hidden_glob_reexports, unused_imports)]
+pub mod __constructors {
+    mod E1 {
+        pub use crate::E1;
+    }
+    pub use self::E1::*;
+    mod EnumWithDerives {
+        pub use crate::EnumWithDerives;
+    }
+    pub use self::EnumWithDerives::*;
+    mod F2 {
+        pub use crate::F2;
+    }
+    pub use self::F2::*;
+    mod Generation {
+        pub use crate::Generation;
+    }
+    pub use self::Generation::*;
+    mod binary_t {
+        pub use crate::binary_t;
+    }
+    pub use self::binary_t::*;
+    mod binary_t2 {
+        pub use crate::binary_t2;
+    }
+    pub use self::binary_t2::*;
+}

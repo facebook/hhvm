@@ -1545,3 +1545,25 @@ pub(crate) mod r#impl {
     }
 }
 
+
+#[doc(hidden)]
+#[deprecated]
+#[allow(hidden_glob_reexports, unused_imports)]
+pub mod __constructors {
+    mod City {
+        pub use crate::City;
+    }
+    pub use self::City::*;
+    mod Company {
+        pub use crate::Company;
+    }
+    pub use self::Company::*;
+    mod EmptyEnum {
+        pub use crate::EmptyEnum;
+    }
+    pub use self::EmptyEnum::*;
+    mod MyCompany {
+        pub use crate::MyCompany;
+    }
+    pub use self::MyCompany::*;
+}

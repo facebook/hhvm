@@ -135,3 +135,15 @@ pub mod __dependencies {
     {{/program:direct_dependencies}}
 }
 {{/program:direct_dependencies?}}
+
+#[doc(hidden)]
+#[deprecated]
+#[allow(hidden_glob_reexports, unused_imports)]
+pub mod __constructors {
+    {{#program:types_with_constructors}}
+    mod {{.}} {
+        pub use {{program:crate}}::{{.}};
+    }
+    pub use self::{{.}}::*;
+    {{/program:types_with_constructors}}
+}

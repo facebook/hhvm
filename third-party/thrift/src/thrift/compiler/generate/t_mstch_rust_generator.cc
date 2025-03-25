@@ -412,6 +412,31 @@ const t_type* step_through_typedefs(const t_type* t, bool break_on_adapter) {
   return t;
 }
 
+bool typedef_has_constructor_expression(const t_typedef* t) {
+  do {
+    if (has_newtype_annotation(t)) {
+      // Outermost typedef is a newtype or refers to a newtype.
+      return true;
+    }
+    if (node_has_adapter(*t)) {
+      // Outermost typedef refers to an associated type projection through the
+      // ThriftAdapter trait, which is only in the type namespace.
+      break;
+    }
+    if (t->find_structured_annotation_or_null(kRustTypeUri)) {
+      // Outermost typedef refers to a non-Thrift-generated type.
+      break;
+    }
+    const t_type* definition = t->get_type();
+    if (definition->is_enum()) {
+      // Outermost typedef refers to an enum.
+      return true;
+    }
+    t = dynamic_cast<const t_typedef*>(definition);
+  } while (t);
+  return false;
+}
+
 bool node_has_custom_rust_type(const t_named& node) {
   return node.has_structured_annotation(kRustTypeUri) ||
       node.has_structured_annotation(kRustNewTypeUri);
@@ -664,6 +689,8 @@ class rust_mstch_program : public mstch_program {
              &rust_mstch_program::rust_consts_for_test},
             {"program:rust_gen_native_metadata?",
              &rust_mstch_program::rust_gen_native_metadata},
+            {"program:types_with_constructors",
+             &rust_mstch_program::rust_types_with_constructors},
         });
     register_has_option(
         "program:deprecated_optional_with_default_is_some?",
@@ -910,6 +937,23 @@ class rust_mstch_program : public mstch_program {
     return consts;
   }
   mstch::node rust_gen_native_metadata() { return options_.gen_metadata; }
+  mstch::node rust_types_with_constructors() {
+    // Names that this Thrift crate defines in both the type namespace and value
+    // namespace. This is the case for enums, where `E` is a type and `E(0)` is
+    // an expression, and for newtype typedefs, where `T` is a type and
+    // `T(inner)` is an expression, and also for non-newtype typedefs referring
+    // to these.
+    std::set<std::string> types;
+    for (const t_enum* t : program_->enums()) {
+      types.insert(type_rust_name(t));
+    }
+    for (const t_typedef* t : program_->typedefs()) {
+      if (typedef_has_constructor_expression(t)) {
+        types.insert(type_rust_name(t));
+      }
+    }
+    return mstch::array(types.begin(), types.end());
+  }
 
  private:
   const rust_codegen_options& options_;

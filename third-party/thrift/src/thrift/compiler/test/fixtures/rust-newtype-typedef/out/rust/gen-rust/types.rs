@@ -450,3 +450,21 @@ pub(crate) mod r#impl {
     }
 }
 
+
+#[doc(hidden)]
+#[deprecated]
+#[allow(hidden_glob_reexports, unused_imports)]
+pub mod __constructors {
+    mod BinType {
+        pub use crate::BinType;
+    }
+    pub use self::BinType::*;
+    mod BytesType {
+        pub use crate::BytesType;
+    }
+    pub use self::BytesType::*;
+    mod MapType {
+        pub use crate::MapType;
+    }
+    pub use self::MapType::*;
+}

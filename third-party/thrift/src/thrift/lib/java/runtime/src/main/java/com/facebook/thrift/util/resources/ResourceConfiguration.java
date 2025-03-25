@@ -44,6 +44,7 @@ final class ResourceConfiguration {
           1,
           Integer.getInteger(
               "thrift.eventloop-threads.count", Runtime.getRuntime().availableProcessors()));
+
   static final int numThreadsForOffLoop =
       Math.max(
           numThreadsForEventLoop,
@@ -62,6 +63,10 @@ final class ResourceConfiguration {
           Integer.getInteger(
               "thrift.forkjoin-client-threads.count",
               Runtime.getRuntime().availableProcessors() * 4));
+
+  static final boolean capForkJoinThreads =
+      System.getProperty("thrift.enforce-forkjoin-parallelism-limit", "true")
+          .equalsIgnoreCase("true");
 
   static final int minNumThreadsForOffLoop = numThreadsForEventLoop;
 

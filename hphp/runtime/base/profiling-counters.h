@@ -109,7 +109,39 @@ struct ProfilingCounters {
         "DYNO_TAO_UPDATE_DURATION_PSP", 
         "DYNO_TAO_UPDATE_COUNT_PSP",
         {1000}
-      )
+      ),
+      PspAndNonPspProfilingTimeseries(
+        "thrift.flush_duration",
+         "DYNO_THRIFT_FLUSH_DURATION",
+         "DYNO_THRIFT_FLUSH_COUNT",
+         "DYNO_THRIFT_FLUSH_DURATION_PSP",
+         "DYNO_THRIFT_FLUSH_COUNT_PSP",
+         {1000} // count outliers over 1000ms
+      ),
+      PspAndNonPspProfilingTimeseries(
+        "thrift.open_duration",
+         "DYNO_THRIFT_OPEN_DURATION",
+         "DYNO_THRIFT_OPEN_COUNT",
+         "DYNO_THRIFT_OPEN_DURATION_PSP",
+         "DYNO_THRIFT_OPEN_COUNT_PSP",
+         {1000} // count outliers over 1000ms
+      ),
+      PspAndNonPspProfilingTimeseries(
+        "thrift.read_duration",
+         "DYNO_THRIFT_READ_DURATION",
+         "DYNO_THRIFT_READ_COUNT",
+         "DYNO_THRIFT_READ_DURATION_PSP",
+         "DYNO_THRIFT_READ_COUNT_PSP",
+         {1000} // count outliers over 1000ms
+      ),
+      PspAndNonPspProfilingTimeseries(
+        "thrift.write_duration",
+         "DYNO_THRIFT_WRITE_DURATION",
+         "DYNO_THRIFT_WRITE_COUNT",
+         "DYNO_THRIFT_WRITE_DURATION_PSP",
+         "DYNO_THRIFT_WRITE_COUNT_PSP",
+         {1000} // count outliers over 1000ms
+      ),
     };
 
     // update the values of all the timeseries

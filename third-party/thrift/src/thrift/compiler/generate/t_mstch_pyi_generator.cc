@@ -141,7 +141,8 @@ const std::string* get_py_adapter(const t_type* type) {
     return nullptr;
   }
 
-  return t_typedef::get_first_annotation_or_null(type, {"py.adapter"});
+  return t_typedef::get_first_unstructured_annotation_or_null(
+      type, {"py.adapter"});
 }
 
 std::set<std::string> get_distinct_adapters(const t_program* program) {

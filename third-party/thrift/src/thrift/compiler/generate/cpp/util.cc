@@ -52,7 +52,7 @@ std::string_view value_or_empty(const std::string* value) {
 } // namespace
 
 bool is_custom_type(const t_type& type) {
-  return t_typedef::get_first_annotation_or_null(
+  return t_typedef::get_first_unstructured_annotation_or_null(
              &type,
              {
                  "cpp.template",
@@ -75,7 +75,7 @@ bool container_supports_incomplete_params(const t_type& type) {
     return false;
   }
 
-  if (t_typedef::get_first_annotation_or_null(
+  if (t_typedef::get_first_unstructured_annotation_or_null(
           &type,
           {
               "cpp.container_supports_incomplete_params",
@@ -106,7 +106,7 @@ bool container_supports_incomplete_params(const t_type& type) {
     return types;
   }();
   {
-    auto cpp_template = t_typedef::get_first_annotation_or_null(
+    auto cpp_template = t_typedef::get_first_unstructured_annotation_or_null(
         &type,
         {
             "cpp.template",
@@ -117,7 +117,7 @@ bool container_supports_incomplete_params(const t_type& type) {
     }
   }
   {
-    auto cpp_type = t_typedef::get_first_annotation_or_null(
+    auto cpp_type = t_typedef::get_first_unstructured_annotation_or_null(
         &type,
         {
             "cpp.type",

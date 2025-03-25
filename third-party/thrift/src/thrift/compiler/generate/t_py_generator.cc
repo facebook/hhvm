@@ -46,7 +46,8 @@ const std::string* get_py_adapter(const t_type* type) {
   if (!type->get_true_type()->is_struct()) {
     return nullptr;
   }
-  return t_typedef::get_first_annotation_or_null(type, {"py.adapter"});
+  return t_typedef::get_first_unstructured_annotation_or_null(
+      type, {"py.adapter"});
 }
 
 void mark_file_executable(const std::filesystem::path& path) {

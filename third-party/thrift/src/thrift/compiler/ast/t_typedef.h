@@ -57,7 +57,7 @@ class t_typedef : public t_type {
 
   // Finds the first matching annoation in the typedef's type hierarchy.
   // Return null if not found.
-  static const std::string* get_first_annotation_or_null(
+  static const std::string* get_first_unstructured_annotation_or_null(
       const t_type* type, const std::vector<std::string_view>& names);
 
   // Finds the first matching annoation in the typedef's type hierarchy.
@@ -68,7 +68,7 @@ class t_typedef : public t_type {
       const std::vector<std::string_view>& names,
       D&& default_value = nullptr) {
     return unstructured_annotation_or(
-        get_first_annotation_or_null(type, names),
+        get_first_unstructured_annotation_or_null(type, names),
         std::forward<D>(default_value));
   }
 

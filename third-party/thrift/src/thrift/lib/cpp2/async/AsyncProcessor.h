@@ -682,23 +682,20 @@ class ServiceHandlerBase {
 
   virtual folly::SemiFuture<folly::Unit> semifuture_onStartServing() {
 #if FOLLY_HAS_COROUTINES
-    if constexpr (folly::kIsLinux) {
-      return co_onStartServing().semi();
-    }
-#endif
+    return co_onStartServing().semi();
+#else
     return folly::makeSemiFuture();
+#endif
   }
 
   virtual folly::SemiFuture<folly::Unit> semifuture_onStopRequested() {
 #if FOLLY_HAS_COROUTINES
-    if constexpr (folly::kIsLinux) {
-      // TODO(srir): onStopRequested should be implemented similar to
-      // onStartServing
-      try {
-        return co_onStopRequested().semi();
-      } catch (MethodNotImplemented&) {
-        // If co_onStopRequested() is not implemented we just return
-      }
+    // TODO(srir): onStopRequested should be implemented similar to
+    // onStartServing
+    try {
+      return co_onStopRequested().semi();
+    } catch (MethodNotImplemented&) {
+      // If co_onStopRequested() is not implemented we just return
     }
 #endif
     return folly::makeSemiFuture();

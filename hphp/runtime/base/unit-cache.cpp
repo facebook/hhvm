@@ -1351,7 +1351,7 @@ CachedUnit lookupUnitNonRepoAuth(const StringData* requestedPath,
       // this Unit, so bind it to the requested path. If there's a
       // path already bound, it had better be the requested one (we
       // should have created a new Unit otherwise).
-      if (auto const p = cu.unit->perRequestFilepath()) {
+      if (auto const DEBUG_ONLY p = cu.unit->perRequestFilepath()) {
         assertx(p == rpath);
       } else {
         cu.unit->bindPerRequestFilepath(rpath);

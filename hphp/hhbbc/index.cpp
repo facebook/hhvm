@@ -2005,7 +2005,7 @@ struct ClassGraph::LockedSerdeImpl {
     auto& t = table();
     {
       std::shared_lock _{t.locking->equivs};
-      if (auto const old = folly::get_default(t.regOnlyEquivs, &n)) {
+      if (auto const DEBUG_ONLY old = folly::get_default(t.regOnlyEquivs, &n)) {
         assertx(old == &e);
         return;
       }
@@ -6142,7 +6142,7 @@ struct DepTracker {
         if (!f.cls && f2->name->fsame(f.name)) return a;
       }
 
-      if (auto const added = deps[fc].add(f, t)) {
+      if (auto const DEBUG_ONLY added = deps[fc].add(f, t)) {
         FTRACE(
           2, "{} now depends on {}{} {}\n",
           HHBBC::show(fc), displayAdded(added),
@@ -6170,7 +6170,7 @@ struct DepTracker {
       if (auto const c = fc.cls()) {
         if (c->name->tsame(m.cls)) return a;
       }
-      if (auto const added = deps[fc].add(m, t)) {
+      if (auto const DEBUG_ONLY added = deps[fc].add(m, t)) {
         FTRACE(2, "{} now depends on {}method {}\n",
                HHBBC::show(fc), displayAdded(added), display(m));
       }
@@ -6194,7 +6194,7 @@ struct DepTracker {
       if (auto const f2 = fc.func()) {
         if (f2->name->fsame(f.name)) return a;
       }
-      if (auto const added = deps[fc].add(f, t)) {
+      if (auto const DEBUG_ONLY added = deps[fc].add(f, t)) {
         FTRACE(2, "{} now depends on {}func {}\n",
                HHBBC::show(fc), displayAdded(added), f.name);
       }

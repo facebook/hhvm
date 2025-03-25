@@ -16,6 +16,7 @@
 # pyre-unsafe
 
 import asyncio
+from functools import wraps
 
 from thrift.server.TAsyncioServer import ThriftClientProtocolFactory
 from thrift.util.Decorators import protocol_manager
@@ -99,6 +100,14 @@ def create_client(
     return async_protocol_manager(coro)
 
 
+def _asyncify(some_func):
+    @wraps(some_func)
+    async def async_func(*args, **kwargs):
+        return some_func(*args, **kwargs)
+
+    return async_func
+
+
 def call_as_future(f, loop, *args, **kwargs):
     """call_as_future(callable, *args, **kwargs) -> asyncio.Task
 
@@ -106,6 +115,6 @@ def call_as_future(f, loop, *args, **kwargs):
     it to a coroutine function first.
     """
     if not asyncio.iscoroutinefunction(f):
-        f = asyncio.coroutine(f)
+        f = _asyncify(f)
 
     return asyncio.ensure_future(f(*args, **kwargs), loop=loop)

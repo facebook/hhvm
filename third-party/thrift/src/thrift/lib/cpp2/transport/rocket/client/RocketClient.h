@@ -28,6 +28,7 @@
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/EventBaseLocal.h>
+#include <folly/memory/not_null.h>
 
 #include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
@@ -40,6 +41,7 @@
 #include <thrift/lib/cpp2/transport/rocket/flush/FlushManager.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Parser.h>
+#include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 THRIFT_FLAG_DECLARE_bool(rocket_client_binary_rpc_metadata_encoding);
@@ -79,7 +81,8 @@ class RocketClient : public virtual folly::DelayedDestruction,
       folly::AsyncTransport::UniquePtr socket,
       std::unique_ptr<SetupFrame> setupFrame,
       int32_t keepAliveTimeoutMs = 0,
-      std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr = nullptr);
+      std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr = nullptr,
+      std::optional<PayloadSerializer>&& payloadSerializer = std::nullopt);
 
   using WriteSuccessCallback = RequestContext::WriteSuccessCallback;
   class RequestResponseCallback : public WriteSuccessCallback {
@@ -447,7 +450,8 @@ class RocketClient : public virtual folly::DelayedDestruction,
       folly::AsyncTransport::UniquePtr socket,
       std::unique_ptr<SetupFrame> setupFrame,
       int32_t keepAliveTimeoutMs = 0,
-      std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr = nullptr);
+      std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr = nullptr,
+      std::optional<PayloadSerializer>&& payloadSerializer = std::nullopt);
 
   bool encodeMetadataUsingBinary() const { return encodeMetadataUsingBinary_; }
 
@@ -608,6 +612,27 @@ class RocketClient : public virtual folly::DelayedDestruction,
 
   template <class T>
   friend class Parser;
+
+ public:
+  // this is public so client callback methods can use it
+  struct DestructionGuardedClient {
+    RocketClient* client;
+    folly::DelayedDestructionBase::DestructorGuard guard;
+
+    explicit DestructionGuardedClient(RocketClient* c)
+        : client(c), guard(folly::DelayedDestructionBase::DestructorGuard(c)) {}
+  };
+
+  PayloadSerializer::Ptr getPayloadSerializer() {
+    if (payloadSerializer_) {
+      return payloadSerializer_->getNonOwningPtr();
+    }
+
+    return PayloadSerializer::getInstance();
+  }
+
+ protected:
+  std::optional<PayloadSerializer> payloadSerializer_;
 };
 
 } // namespace rocket

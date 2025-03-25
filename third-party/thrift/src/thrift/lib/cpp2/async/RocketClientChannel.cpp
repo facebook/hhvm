@@ -112,7 +112,9 @@ struct ResponseSerializationHandler {
 
 template <class Handler>
 folly::Try<FirstResponsePayload> decodeResponseError(
-    rocket::RocketException&& ex, Handler&& handler) noexcept {
+    rocket::RocketException&& ex,
+    Handler&& handler,
+    rocket::PayloadSerializer& payloadSerializer) noexcept {
   switch (ex.getErrorCode()) {
     case rocket::ErrorCode::CANCELED:
     case rocket::ErrorCode::INVALID:
@@ -127,8 +129,7 @@ folly::Try<FirstResponsePayload> decodeResponseError(
 
   ResponseRpcError responseError;
   try {
-    rocket::PayloadSerializer::getInstance()->unpack(
-        responseError, ex.moveErrorData().get(), false);
+    payloadSerializer.unpack(responseError, ex.moveErrorData().get(), false);
   } catch (...) {
     return folly::Try<FirstResponsePayload>(
         folly::make_exception_wrapper<TApplicationException>(fmt::format(
@@ -393,11 +394,13 @@ class FirstRequestProcessorStream : public StreamClientCallback,
       uint16_t protocolId,
       apache::thrift::ManagedStringView&& methodName,
       StreamClientCallback* clientCallback,
-      folly::EventBase* evb)
+      folly::EventBase* evb,
+      rocket::RocketClient::DestructionGuardedClient guardedClient)
       : protocolId_(protocolId),
         methodName_(std::move(methodName)),
         clientCallback_(clientCallback),
-        evb_(evb) {}
+        evb_(evb),
+        guardedClient_(std::move(guardedClient)) {}
 
   FOLLY_NODISCARD bool onFirstResponse(
       FirstResponsePayload&& firstResponse,
@@ -429,7 +432,10 @@ class FirstRequestProcessorStream : public StreamClientCallback,
         [&](rocket::RocketException& ex) {
           LegacyResponseSerializationHandler handler(
               protocolId_, methodName_.view());
-          auto response = decodeResponseError(std::move(ex), handler);
+          auto response = decodeResponseError(
+              std::move(ex),
+              handler,
+              *guardedClient_.client->getPayloadSerializer());
           if (response.hasException()) {
             clientCallback_->onFirstResponseError(
                 std::move(response).exception());
@@ -461,6 +467,7 @@ class FirstRequestProcessorStream : public StreamClientCallback,
   const ManagedStringView methodName_;
   StreamClientCallback* clientCallback_;
   folly::EventBase* evb_;
+  rocket::RocketClient::DestructionGuardedClient guardedClient_;
 };
 
 class FirstRequestProcessorSink : public SinkClientCallback,
@@ -470,11 +477,13 @@ class FirstRequestProcessorSink : public SinkClientCallback,
       uint16_t protocolId,
       apache::thrift::ManagedStringView&& methodName,
       SinkClientCallback* clientCallback,
-      folly::EventBase* evb)
+      folly::EventBase* evb,
+      rocket::RocketClient::DestructionGuardedClient guardedClient)
       : protocolId_(protocolId),
         methodName_(std::move(methodName)),
         clientCallback_(clientCallback),
-        evb_(evb) {}
+        evb_(evb),
+        guardedClient_(std::move(guardedClient)) {}
 
   FOLLY_NODISCARD bool onFirstResponse(
       FirstResponsePayload&& firstResponse,
@@ -508,7 +517,10 @@ class FirstRequestProcessorSink : public SinkClientCallback,
         [&](rocket::RocketException& ex) {
           LegacyResponseSerializationHandler handler(
               protocolId_, methodName_.view());
-          auto response = decodeResponseError(std::move(ex), handler);
+          auto response = decodeResponseError(
+              std::move(ex),
+              handler,
+              *guardedClient_.client->getPayloadSerializer());
           if (response.hasException()) {
             clientCallback_->onFirstResponseError(
                 std::move(response).exception());
@@ -553,6 +565,7 @@ class FirstRequestProcessorSink : public SinkClientCallback,
   const ManagedStringView methodName_;
   SinkClientCallback* clientCallback_;
   folly::EventBase* evb_;
+  rocket::RocketClient::DestructionGuardedClient guardedClient_;
 };
 } // namespace
 
@@ -568,7 +581,8 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
       size_t requestSerializedSize,
       size_t requestWireSize,
       size_t requestMetadataAndPayloadSize,
-      bool encodeMetadataUsingBinary)
+      bool encodeMetadataUsingBinary,
+      rocket::RocketClient::DestructionGuardedClient guardedClient)
       : cb_(std::move(cb)),
         protocolId_(protocolId),
         methodName_(std::move(methodName)),
@@ -576,7 +590,8 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
         requestWireSize_(requestWireSize),
         requestMetadataAndPayloadSize_(requestMetadataAndPayloadSize),
         timeBeginSend_(clock::now()),
-        encodeMetadataUsingBinary_(encodeMetadataUsingBinary) {}
+        encodeMetadataUsingBinary_(encodeMetadataUsingBinary),
+        guardedClient_(std::move(guardedClient)) {}
 
   void onWriteSuccess() noexcept override { timeEndSend_ = clock::now(); }
 
@@ -595,7 +610,10 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
     if (payload.hasException()) {
       if (!payload.exception().with_exception<rocket::RocketException>(
               [&](auto& ex) {
-                response = decodeResponseError(std::move(ex), handler);
+                response = decodeResponseError(
+                    std::move(ex),
+                    handler,
+                    *guardedClient_.client->getPayloadSerializer());
               })) {
         cb_.release()->onResponseError(std::move(payload.exception()));
         return;
@@ -616,7 +634,7 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
       stats.responseWireSizeBytes =
           payload->metadataAndDataSize() - payload->metadataSize();
 
-      response = rocket::PayloadSerializer::getInstance()
+      response = guardedClient_.client->getPayloadSerializer()
                      ->unpack<FirstResponsePayload>(
                          std::move(*payload), encodeMetadataUsingBinary_);
       if (response.hasException()) {
@@ -685,6 +703,7 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
   const std::chrono::time_point<clock> timeBeginSend_;
   std::chrono::time_point<clock> timeEndSend_;
   const bool encodeMetadataUsingBinary_;
+  rocket::RocketClient::DestructionGuardedClient guardedClient_;
 };
 
 class RocketClientChannel::SingleRequestNoResponseCallback final
@@ -882,7 +901,7 @@ void RocketClientChannel::sendRequestStream(
       *header,
       std::move(frameworkMetadata));
 
-  auto payload = rocket::PayloadSerializer::getInstance()->packWithFds(
+  auto payload = getPayloadSerializer()->packWithFds(
       &metadata,
       std::move(buf),
       rpcOptions.copySocketFdsToSend(),
@@ -897,7 +916,8 @@ void RocketClientChannel::sendRequestStream(
           header->getProtocolId(),
           std::move(*metadata.name_ref()),
           clientCallback,
-          evb_));
+          evb_,
+          DestructionGuardedClient(this)));
 }
 
 void RocketClientChannel::sendRequestSink(
@@ -926,7 +946,7 @@ void RocketClientChannel::sendRequestSink(
       *header,
       std::move(frameworkMetadata));
 
-  auto payload = rocket::PayloadSerializer::getInstance()->packWithFds(
+  auto payload = getPayloadSerializer()->packWithFds(
       &metadata,
       std::move(buf),
       rpcOptions.copySocketFdsToSend(),
@@ -939,7 +959,8 @@ void RocketClientChannel::sendRequestSink(
           header->getProtocolId(),
           std::move(*metadata.name_ref()),
           clientCallback,
-          evb_),
+          evb_,
+          DestructionGuardedClient(this)),
       header->getDesiredCompressionConfig());
 }
 
@@ -999,7 +1020,7 @@ void RocketClientChannel::sendSingleRequestNoResponse(
     RequestRpcMetadata&& metadata,
     std::unique_ptr<folly::IOBuf> buf,
     RequestClientCallback::Ptr cb) {
-  auto requestPayload = rocket::PayloadSerializer::getInstance()->packWithFds(
+  auto requestPayload = getPayloadSerializer()->packWithFds(
       &metadata,
       std::move(buf),
       rpcOptions.copySocketFdsToSend(),
@@ -1025,7 +1046,7 @@ void RocketClientChannel::sendSingleRequestSingleResponse(
     std::unique_ptr<folly::IOBuf> buf,
     RequestClientCallback::Ptr cb) {
   const auto requestSerializedSize = buf->computeChainDataLength();
-  auto requestPayload = rocket::PayloadSerializer::getInstance()->packWithFds(
+  auto requestPayload = getPayloadSerializer()->packWithFds(
       &metadata,
       std::move(buf),
       rpcOptions.copySocketFdsToSend(),
@@ -1042,7 +1063,8 @@ void RocketClientChannel::sendSingleRequestSingleResponse(
       requestSerializedSize,
       requestWireSize,
       requestMetadataAndPayloadSize,
-      encodeMetadataUsingBinary());
+      encodeMetadataUsingBinary(),
+      DestructionGuardedClient(this));
 
   if (isSync && folly::fibers::onFiber()) {
     callback.onResponsePayload(

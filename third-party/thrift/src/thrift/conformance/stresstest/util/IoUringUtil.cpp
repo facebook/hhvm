@@ -80,10 +80,11 @@ folly::IoUringBackend::Options getIoUringOptions() {
     }
   }
 
+  static std::atomic<int32_t> currQueueId{FLAGS_io_zcrx_queue_id};
   if (FLAGS_io_zcrx) {
     options.setZeroCopyRx(true)
         .setZeroCopyRxInterface(FLAGS_io_zcrx_ifname)
-        .setZeroCopyRxQueue(FLAGS_io_zcrx_queue_id)
+        .setZeroCopyRxQueue(currQueueId.fetch_add(1))
         .setZeroCopyRxNumPages(FLAGS_io_zcrx_num_pages)
         .setZeroCopyRxRefillEntries(FLAGS_io_zcrx_refill_entries)
         .setResolveNapiCallback(resolve_napi_callback);

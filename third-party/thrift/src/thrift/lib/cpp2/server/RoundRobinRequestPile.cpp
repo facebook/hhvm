@@ -16,6 +16,8 @@
 
 #include <utility>
 
+#include <folly/executors/CPUThreadPoolExecutor.h>
+
 #include <thrift/lib/cpp/concurrency/Thread.h>
 #include <thrift/lib/cpp2/server/RoundRobinRequestPile.h>
 
@@ -47,9 +49,37 @@ RoundRobinRequestPile::Options::getDefaultPileSelectionFunc(
   };
 }
 
-void RoundRobinRequestPile::Consumer::operator()(
-    ServerRequest&& req, std::shared_ptr<folly::RequestContext>&&) {
-  carrier_ = std::move(req);
+folly::AtomicNotificationQueueTaskStatus
+RoundRobinRequestPile::Consumer::operator()(
+    ServerRequest&& request, std::shared_ptr<folly::RequestContext>&&) {
+  // If Executor for expiring requests is NOT provided, we return even expired
+  // requests to the user
+  if (requestsExpirationExecutor_ == nullptr) {
+    carrier_ = std::move(request);
+    return folly::AtomicNotificationQueueTaskStatus::CONSUMED;
+  }
+
+  // If Executor to expiring requests IS provided, we schedule expiration of
+  // expired requests on that Executor and return only not-yet-expired requests
+  // to the user
+
+  using namespace apache::thrift::detail;
+
+  if (request.request() != nullptr && !request.request()->isActive()) {
+    // NOTE that if request()->isActive() returns false we know *for sure* that
+    // request has expired, but if it returns false then request might be
+    // expired or not.
+    requestsExpirationExecutor_->add([request = std::move(request)]() mutable {
+      auto eb = ServerRequestHelper::eventBase(request);
+      auto req = ServerRequestHelper::request(std::move(request));
+      HandlerCallbackBase::releaseRequest(std::move(req), eb);
+    });
+
+    return folly::AtomicNotificationQueueTaskStatus::DISCARD;
+  }
+
+  carrier_ = std::move(request);
+  return folly::AtomicNotificationQueueTaskStatus::CONSUMED;
 }
 
 RoundRobinRequestPile::RoundRobinRequestPile(Options opts)
@@ -98,13 +128,23 @@ RoundRobinRequestPile::RoundRobinRequestPile(Options opts)
       requestQueues_[i][j].arm();
     }
   }
+
+  if (opts.expireRequestsOnDequeue) {
+    requestsExpirationExecutor_ =
+        std::make_unique<folly::CPUThreadPoolExecutor>(
+            1,
+            std::make_shared<folly::NamedThreadFactory>(
+                "RoundRobinRequestPile-RequestsExpiration"));
+  }
 }
 
-ServerRequest RoundRobinRequestPile::dequeueImpl(
+std::optional<ServerRequest> RoundRobinRequestPile::dequeueImpl(
     unsigned pri, unsigned bucket) {
-  Consumer consumer;
+  Consumer consumer(
+      requestsExpirationExecutor_ ? requestsExpirationExecutor_.get()
+                                  : nullptr);
   auto& queue = requestQueues_[pri][bucket];
-  queue.drive(consumer);
+  bool dequeued = queue.drive(consumer);
 
   // Schedule a callback from the consumer thread iff
   // there is something remaining in the queue
@@ -113,9 +153,12 @@ ServerRequest RoundRobinRequestPile::dequeueImpl(
     retrievalIndexQueues_[pri]->enqueue(bucket);
   }
 
-  RequestPileBase::onDequeued(consumer.carrier_);
-
-  return std::move(consumer.carrier_);
+  if (dequeued) {
+    RequestPileBase::onDequeued(consumer.carrier_);
+    return std::move(consumer.carrier_);
+  } else {
+    return std::nullopt;
+  }
 }
 
 std::optional<ServerRequestRejection> RoundRobinRequestPile::enqueue(

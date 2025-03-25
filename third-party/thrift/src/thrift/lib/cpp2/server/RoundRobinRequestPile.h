@@ -21,8 +21,10 @@
 #include <limits>
 #include <memory>
 
+#include <folly/Executor.h>
 #include <folly/concurrency/UnboundedQueue.h>
 #include <folly/io/async/AtomicNotificationQueue.h>
+
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 #include <thrift/lib/cpp2/server/RequestPileBase.h>
 #include <thrift/lib/cpp2/server/WeightedRequestPileQueue.h>
@@ -55,6 +57,14 @@ class RoundRobinRequestPile : public RequestPileBase {
 
     // Function to route requests to priority/bucket
     PileSelectionFunction pileSelectionFunction;
+
+    // If this flag is set, then expired requests will be scheduled for
+    // expiration processing on the background thread and will *not* be returned
+    // to the client on dequeue().
+    //
+    // If this flag is not set, then the default behavior is to return both
+    // expired and non-expired requests to the client on dequeue().
+    bool expireRequestsOnDequeue{false};
 
     Options() {
       numBucketsPerPriority.reserve(kDefaultNumPriorities);
@@ -170,11 +180,16 @@ class RoundRobinRequestPile : public RequestPileBase {
   // the consumer class used by the AtomicNotificationQueue
   class Consumer {
    public:
+    explicit Consumer(folly::Executor* requestsExpirationExecutor)
+        : requestsExpirationExecutor_(requestsExpirationExecutor) {}
+
     // this operation simply put the retrieved item into the temporary
     // carrier for the caller to extract
-    void operator()(
+
+    folly::AtomicNotificationQueueTaskStatus operator()(
         ServerRequest&& req, std::shared_ptr<folly::RequestContext>&&);
 
+    folly::Executor* requestsExpirationExecutor_;
     ServerRequest carrier_;
   };
 
@@ -191,7 +206,9 @@ class RoundRobinRequestPile : public RequestPileBase {
   std::unique_ptr<std::unique_ptr<SingleBucketRequestQueue>[]>
       singleBucketRequestQueues_;
 
-  ServerRequest dequeueImpl(unsigned pri, unsigned bucket);
+  std::optional<ServerRequest> dequeueImpl(unsigned pri, unsigned bucket);
+
+  std::unique_ptr<folly::Executor> requestsExpirationExecutor_;
 };
 
 // RoundRobinRequestPile is the default request pile used by most of

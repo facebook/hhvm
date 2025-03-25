@@ -16,10 +16,14 @@
 
 use std::io::IsTerminal;
 use std::sync::Arc;
+use std::time::Duration;
 
 use anyhow::Context;
 use clap::Parser;
+use fbthrift::ApplicationException;
+use futures::FutureExt;
 use futures::StreamExt;
+use futures::TryStreamExt;
 use tracing_subscriber::layer::SubscriberExt;
 
 #[derive(Debug, Parser)]
@@ -111,6 +115,24 @@ use rpc::rpc::services::r_p_c_conformance_service::RequestResponseDeclaredExcept
 use rpc::rpc::services::r_p_c_conformance_service::RequestResponseNoArgVoidResponseExn;
 use rpc::rpc::services::r_p_c_conformance_service::RequestResponseUndeclaredExceptionExn;
 use rpc::rpc::services::r_p_c_conformance_service::SendTestCaseExn;
+use rpc::rpc::services::r_p_c_conformance_service::SinkBasicExn;
+use rpc::rpc::services::r_p_c_conformance_service::SinkBasicSinkExn;
+use rpc::rpc::services::r_p_c_conformance_service::SinkBasicSinkFinalExn;
+use rpc::rpc::services::r_p_c_conformance_service::SinkBasicSinkResult;
+use rpc::rpc::services::r_p_c_conformance_service::SinkChunkTimeoutExn;
+use rpc::rpc::services::r_p_c_conformance_service::SinkChunkTimeoutSinkExn;
+use rpc::rpc::services::r_p_c_conformance_service::SinkChunkTimeoutSinkFinalExn;
+use rpc::rpc::services::r_p_c_conformance_service::SinkChunkTimeoutSinkResult;
+use rpc::rpc::services::r_p_c_conformance_service::SinkDeclaredExceptionExn;
+use rpc::rpc::services::r_p_c_conformance_service::SinkDeclaredExceptionSinkExn;
+use rpc::rpc::services::r_p_c_conformance_service::SinkDeclaredExceptionSinkResult;
+use rpc::rpc::services::r_p_c_conformance_service::SinkInitialResponseExn;
+use rpc::rpc::services::r_p_c_conformance_service::SinkInitialResponseSinkExn;
+use rpc::rpc::services::r_p_c_conformance_service::SinkInitialResponseSinkFinalExn;
+use rpc::rpc::services::r_p_c_conformance_service::SinkInitialResponseSinkResult;
+use rpc::rpc::services::r_p_c_conformance_service::SinkUndeclaredExceptionExn;
+use rpc::rpc::services::r_p_c_conformance_service::SinkUndeclaredExceptionSinkExn;
+use rpc::rpc::services::r_p_c_conformance_service::SinkUndeclaredExceptionSinkResult;
 use rpc::rpc::services::r_p_c_conformance_service::StreamBasicExn;
 use rpc::rpc::services::r_p_c_conformance_service::StreamBasicStreamExn;
 use rpc::rpc::services::r_p_c_conformance_service::StreamDeclaredExceptionExn;
@@ -136,6 +158,11 @@ use rpc::rpc::Response;
 use rpc::rpc::RpcTestCase;
 use rpc::rpc::ServerInstruction;
 use rpc::rpc::ServerTestResult;
+use rpc::rpc::SinkBasicServerTestResult;
+use rpc::rpc::SinkChunkTimeoutServerTestResult;
+use rpc::rpc::SinkDeclaredExceptionServerTestResult;
+use rpc::rpc::SinkInitialResponseServerTestResult;
+use rpc::rpc::SinkUndeclaredExceptionServerTestResult;
 use rpc::rpc::StreamBasicServerTestResult;
 use rpc::rpc::StreamDeclaredExceptionServerTestResult;
 use rpc::rpc::StreamInitialDeclaredExceptionServerTestResult;
@@ -561,6 +588,235 @@ impl RPCConformanceService for RPCConformanceServiceImpl {
                 instruction_match_error(),
             )),
         }
+    }
+
+    async fn sinkBasic(&self, request: Request) -> Result<SinkBasicSinkResult, SinkBasicExn> {
+        let self_clone = self.clone();
+        // extract test settings
+        let r = self.test_case.lock().unwrap();
+        let (buffer_size, final_response) = match &r.serverInstruction {
+            ServerInstruction::sinkBasic(instr) => {
+                (instr.bufferSize as u64, instr.finalResponse.clone())
+            }
+            _ => {
+                return Err(SinkBasicExn::ApplicationException(instruction_match_error()));
+            }
+        };
+        drop(r);
+
+        let handler = Box::new(
+            move |stream: BoxStream<'static, Result<Request, SinkBasicSinkExn>>| {
+                (async move {
+                    let stream_items = stream
+                        .try_collect::<Vec<Request>>()
+                        .await
+                        .unwrap_or_default();
+                    let mut w = self_clone.test_result.lock().unwrap();
+                    *w = ServerTestResult::sinkBasic(SinkBasicServerTestResult {
+                        request,
+                        sinkPayloads: stream_items,
+                        ..Default::default()
+                    });
+                    Ok::<Response, SinkBasicSinkFinalExn>(final_response)
+                })
+                .boxed()
+            },
+        );
+        Ok(SinkBasicSinkResult::new(handler).with_buffer_size(buffer_size))
+    }
+
+    async fn sinkChunkTimeout(
+        &self,
+        request: Request,
+    ) -> Result<SinkChunkTimeoutSinkResult, SinkChunkTimeoutExn> {
+        let self_clone = self.clone();
+        // extract test settings
+        let r = self.test_case.lock().unwrap();
+        let (chunk_timeout, final_response) = match &r.serverInstruction {
+            ServerInstruction::sinkChunkTimeout(instr) => (
+                Duration::from_millis(instr.chunkTimeoutMs as u64),
+                instr.finalResponse.clone(),
+            ),
+            _ => {
+                return Err(SinkChunkTimeoutExn::ApplicationException(
+                    instruction_match_error(),
+                ));
+            }
+        };
+        drop(r);
+
+        let handler = Box::new(
+            move |mut stream: BoxStream<'static, Result<Request, SinkChunkTimeoutSinkExn>>| {
+                (async move {
+                    let mut payloads = vec![];
+                    let mut timeout = false;
+                    while let Some(item) = stream.next().await {
+                        match item {
+                            Ok(payload) => payloads.push(payload),
+                            Err(SinkChunkTimeoutSinkExn::ApplicationException(
+                                ApplicationException { .. },
+                            )) => {
+                                timeout = true;
+                            }
+                            #[allow(unreachable_patterns)]
+                            Err(_other) => {
+                                // ignore
+                            }
+                        }
+                    }
+                    let mut w = self_clone.test_result.lock().unwrap();
+                    *w = ServerTestResult::sinkChunkTimeout(SinkChunkTimeoutServerTestResult {
+                        request,
+                        sinkPayloads: payloads,
+                        chunkTimeoutException: timeout,
+                        ..Default::default()
+                    });
+                    Ok::<Response, SinkChunkTimeoutSinkFinalExn>(final_response)
+                })
+                .boxed()
+            },
+        );
+        Ok(SinkChunkTimeoutSinkResult::new(handler).with_chunk_timeout(chunk_timeout))
+    }
+
+    async fn sinkInitialResponse(
+        &self,
+        request: Request,
+    ) -> Result<SinkInitialResponseSinkResult, SinkInitialResponseExn> {
+        let self_clone = self.clone();
+        // extract test settings
+        let r = self.test_case.lock().unwrap();
+        let (buffer_size, initial_response, final_response) = match &r.serverInstruction {
+            ServerInstruction::sinkInitialResponse(instr) => (
+                instr.bufferSize as u64,
+                instr.initialResponse.clone(),
+                instr.finalResponse.clone(),
+            ),
+            _ => {
+                return Err(SinkInitialResponseExn::ApplicationException(
+                    instruction_match_error(),
+                ));
+            }
+        };
+        drop(r);
+
+        let handler = Box::new(
+            move |stream: BoxStream<'static, Result<Request, SinkInitialResponseSinkExn>>| {
+                (async move {
+                    let stream_items = stream
+                        .try_collect::<Vec<Request>>()
+                        .await
+                        .unwrap_or_default();
+                    let mut w = self_clone.test_result.lock().unwrap();
+                    *w = ServerTestResult::sinkInitialResponse(
+                        SinkInitialResponseServerTestResult {
+                            request,
+                            sinkPayloads: stream_items,
+                            ..Default::default()
+                        },
+                    );
+                    Ok::<Response, SinkInitialResponseSinkFinalExn>(final_response)
+                })
+                .boxed()
+            },
+        );
+        Ok(
+            SinkInitialResponseSinkResult::new(initial_response, handler)
+                .with_buffer_size(buffer_size),
+        )
+    }
+
+    async fn sinkUndeclaredException(
+        &self,
+        request: Request,
+    ) -> Result<SinkUndeclaredExceptionSinkResult, SinkUndeclaredExceptionExn> {
+        let self_clone = self.clone();
+        // extract test settings
+        let r = self.test_case.lock().unwrap();
+        let buffer_size = match &r.serverInstruction {
+            ServerInstruction::sinkUndeclaredException(instr) => instr.bufferSize as u64,
+            _ => {
+                return Err(SinkUndeclaredExceptionExn::ApplicationException(
+                    instruction_match_error(),
+                ));
+            }
+        };
+        drop(r);
+
+        let handler = Box::new(
+            move |mut stream: BoxStream<
+                'static,
+                Result<Request, SinkUndeclaredExceptionSinkExn>,
+            >| {
+                (async move {
+                    let message = if let Some(Err(
+                        SinkUndeclaredExceptionSinkExn::ApplicationException(aexn),
+                    )) = stream.next().await
+                    {
+                        Some(aexn.message)
+                    } else {
+                        None
+                    };
+
+                    let mut w = self_clone.test_result.lock().unwrap();
+                    *w = ServerTestResult::sinkUndeclaredException(
+                        SinkUndeclaredExceptionServerTestResult {
+                            request,
+                            exceptionMessage: message,
+                            ..Default::default()
+                        },
+                    );
+
+                    Ok(Response::default())
+                })
+                .boxed()
+            },
+        );
+        Ok(SinkUndeclaredExceptionSinkResult::new(handler).with_buffer_size(buffer_size))
+    }
+
+    async fn sinkDeclaredException(
+        &self,
+        request: Request,
+    ) -> Result<SinkDeclaredExceptionSinkResult, SinkDeclaredExceptionExn> {
+        let self_clone = self.clone();
+        // extract test settings
+        let r = self.test_case.lock().unwrap();
+        let buffer_size = match &r.serverInstruction {
+            ServerInstruction::sinkDeclaredException(instr) => instr.bufferSize as u64,
+            _ => {
+                return Err(SinkDeclaredExceptionExn::ApplicationException(
+                    instruction_match_error(),
+                ));
+            }
+        };
+        drop(r);
+
+        let handler = Box::new(
+            move |mut stream: BoxStream<'static, Result<Request, SinkDeclaredExceptionSinkExn>>| {
+                (async move {
+                    let next = stream.next().await;
+                    let ex = if let Some(Err(SinkDeclaredExceptionSinkExn::e(ue))) = &next {
+                        Some(ue.clone())
+                    } else {
+                        None
+                    };
+
+                    let mut w = self_clone.test_result.lock().unwrap();
+                    *w = ServerTestResult::sinkDeclaredException(
+                        SinkDeclaredExceptionServerTestResult {
+                            request,
+                            userException: ex,
+                            ..Default::default()
+                        },
+                    );
+
+                    Ok(Response::default())
+                })
+                .boxed()
+            },
+        );
+        Ok(SinkDeclaredExceptionSinkResult::new(handler).with_buffer_size(buffer_size))
     }
 }
 

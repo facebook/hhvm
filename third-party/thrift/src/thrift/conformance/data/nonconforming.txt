@@ -17827,16 +17827,13 @@ rust/CompatibilityTest/testset.double/ExceptionToStruct/NaN.Compact
 rust/CompatibilityTest/testset.double/ExceptionToUnion/NaN.Binary
 rust/CompatibilityTest/testset.double/ExceptionToUnion/NaN.Compact
 
-# Rust RPC server tests
+# Rust RPC server tests (all comformant)
 
 # rpc-server-test
-rust/ThriftRPCServerTest/SinkBasic/Success.SinkBasicTest
-rust/ThriftRPCServerTest/SinkInitialResponse/Success.SinkInitialResponseTest
-rust/ThriftRPCServerTest/SinkFragmentation/Success.SinkFragmentationTest
-rust/ThriftRPCServerTest/SinkSubsequestCredits/Success.SinkSubsequentCreditsTest
-rust/ThriftRPCServerTest/SinkDeclaredException/Success.SinkDeclaredExceptionTest
+
+## This is an actual non-conformance failure, because we are trying to send encoded
+## data to a server about a runtime exn T218969298
 rust/ThriftRPCServerTest/SinkUndeclaredException/Success.SinkUndeclaredExceptionTest
-rust/ThriftRPCServerTest/SinkChunkTimeout/Success.SinkChunkTimeoutTest
 
 # Rust RPC client tests
 

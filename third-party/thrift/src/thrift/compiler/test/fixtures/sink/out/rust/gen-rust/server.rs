@@ -488,14 +488,14 @@ where
         let stream =
             ::std::panic::AssertUnwindSafe(input_stream)
                 .catch_unwind()
-                .map(|item| // item is bytes::Bytes and needs to be decoded to the proper stream item type
+                .map(|item| // item is a Result<_payload_, String> wrapped in a assert unwind handler
                     match item {
                         ::std::result::Result::Err(exn) => {
                             tracing::error!(?exn, method="SinkService.method", "Sink stream unwind");
                             let aexn = ::fbthrift::ApplicationException::handler_panic("SinkService.method", exn);
                             ::std::result::Result::Err(crate::errors::sink_service::MethodSinkExn::ApplicationException(aexn))
-                        }
-                        ::std::result::Result::Ok(item_enc) => {
+                        },
+                        ::std::result::Result::Ok(::std::result::Result::Ok(item_enc)) => {
                             let mut de = P::deserializer(item_enc);
                             let res = <crate::errors::sink_service::MethodSinkReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de);
                             match res {
@@ -503,8 +503,11 @@ where
                                 Err(exn) => {
                                     let aexn = ::fbthrift::ApplicationException::handler_panic("SinkService.method", Box::new(exn));
                                     ::std::result::Result::Err(crate::errors::sink_service::MethodSinkExn::ApplicationException(aexn))
-                                },
+                                }
                             }
+                        },
+                        ::std::result::Result::Ok(::std::result::Result::Err(aexn)) => {
+                            ::std::result::Result::Err(crate::errors::sink_service::MethodSinkExn::ApplicationException(aexn))
                         }
                     }
                 )
@@ -621,14 +624,14 @@ where
         let stream =
             ::std::panic::AssertUnwindSafe(input_stream)
                 .catch_unwind()
-                .map(|item| // item is bytes::Bytes and needs to be decoded to the proper stream item type
+                .map(|item| // item is a Result<_payload_, String> wrapped in a assert unwind handler
                     match item {
                         ::std::result::Result::Err(exn) => {
                             tracing::error!(?exn, method="SinkService.methodAndReponse", "Sink stream unwind");
                             let aexn = ::fbthrift::ApplicationException::handler_panic("SinkService.methodAndReponse", exn);
                             ::std::result::Result::Err(crate::errors::sink_service::MethodAndReponseSinkExn::ApplicationException(aexn))
-                        }
-                        ::std::result::Result::Ok(item_enc) => {
+                        },
+                        ::std::result::Result::Ok(::std::result::Result::Ok(item_enc)) => {
                             let mut de = P::deserializer(item_enc);
                             let res = <crate::errors::sink_service::MethodAndReponseSinkReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de);
                             match res {
@@ -636,8 +639,11 @@ where
                                 Err(exn) => {
                                     let aexn = ::fbthrift::ApplicationException::handler_panic("SinkService.methodAndReponse", Box::new(exn));
                                     ::std::result::Result::Err(crate::errors::sink_service::MethodAndReponseSinkExn::ApplicationException(aexn))
-                                },
+                                }
                             }
+                        },
+                        ::std::result::Result::Ok(::std::result::Result::Err(aexn)) => {
+                            ::std::result::Result::Err(crate::errors::sink_service::MethodAndReponseSinkExn::ApplicationException(aexn))
                         }
                     }
                 )
@@ -753,14 +759,14 @@ where
         let stream =
             ::std::panic::AssertUnwindSafe(input_stream)
                 .catch_unwind()
-                .map(|item| // item is bytes::Bytes and needs to be decoded to the proper stream item type
+                .map(|item| // item is a Result<_payload_, String> wrapped in a assert unwind handler
                     match item {
                         ::std::result::Result::Err(exn) => {
                             tracing::error!(?exn, method="SinkService.methodThrow", "Sink stream unwind");
                             let aexn = ::fbthrift::ApplicationException::handler_panic("SinkService.methodThrow", exn);
                             ::std::result::Result::Err(crate::errors::sink_service::MethodThrowSinkExn::ApplicationException(aexn))
-                        }
-                        ::std::result::Result::Ok(item_enc) => {
+                        },
+                        ::std::result::Result::Ok(::std::result::Result::Ok(item_enc)) => {
                             let mut de = P::deserializer(item_enc);
                             let res = <crate::errors::sink_service::MethodThrowSinkReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de);
                             match res {
@@ -768,8 +774,11 @@ where
                                 Err(exn) => {
                                     let aexn = ::fbthrift::ApplicationException::handler_panic("SinkService.methodThrow", Box::new(exn));
                                     ::std::result::Result::Err(crate::errors::sink_service::MethodThrowSinkExn::ApplicationException(aexn))
-                                },
+                                }
                             }
+                        },
+                        ::std::result::Result::Ok(::std::result::Result::Err(aexn)) => {
+                            ::std::result::Result::Err(crate::errors::sink_service::MethodThrowSinkExn::ApplicationException(aexn))
                         }
                     }
                 )
@@ -885,14 +894,14 @@ where
         let stream =
             ::std::panic::AssertUnwindSafe(input_stream)
                 .catch_unwind()
-                .map(|item| // item is bytes::Bytes and needs to be decoded to the proper stream item type
+                .map(|item| // item is a Result<_payload_, String> wrapped in a assert unwind handler
                     match item {
                         ::std::result::Result::Err(exn) => {
                             tracing::error!(?exn, method="SinkService.methodSinkThrow", "Sink stream unwind");
                             let aexn = ::fbthrift::ApplicationException::handler_panic("SinkService.methodSinkThrow", exn);
                             ::std::result::Result::Err(crate::errors::sink_service::MethodSinkThrowSinkExn::ApplicationException(aexn))
-                        }
-                        ::std::result::Result::Ok(item_enc) => {
+                        },
+                        ::std::result::Result::Ok(::std::result::Result::Ok(item_enc)) => {
                             let mut de = P::deserializer(item_enc);
                             let res = <crate::errors::sink_service::MethodSinkThrowSinkReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de);
                             match res {
@@ -900,8 +909,11 @@ where
                                 Err(exn) => {
                                     let aexn = ::fbthrift::ApplicationException::handler_panic("SinkService.methodSinkThrow", Box::new(exn));
                                     ::std::result::Result::Err(crate::errors::sink_service::MethodSinkThrowSinkExn::ApplicationException(aexn))
-                                },
+                                }
                             }
+                        },
+                        ::std::result::Result::Ok(::std::result::Result::Err(aexn)) => {
+                            ::std::result::Result::Err(crate::errors::sink_service::MethodSinkThrowSinkExn::ApplicationException(aexn))
                         }
                     }
                 )
@@ -1017,14 +1029,14 @@ where
         let stream =
             ::std::panic::AssertUnwindSafe(input_stream)
                 .catch_unwind()
-                .map(|item| // item is bytes::Bytes and needs to be decoded to the proper stream item type
+                .map(|item| // item is a Result<_payload_, String> wrapped in a assert unwind handler
                     match item {
                         ::std::result::Result::Err(exn) => {
                             tracing::error!(?exn, method="SinkService.methodFinalThrow", "Sink stream unwind");
                             let aexn = ::fbthrift::ApplicationException::handler_panic("SinkService.methodFinalThrow", exn);
                             ::std::result::Result::Err(crate::errors::sink_service::MethodFinalThrowSinkExn::ApplicationException(aexn))
-                        }
-                        ::std::result::Result::Ok(item_enc) => {
+                        },
+                        ::std::result::Result::Ok(::std::result::Result::Ok(item_enc)) => {
                             let mut de = P::deserializer(item_enc);
                             let res = <crate::errors::sink_service::MethodFinalThrowSinkReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de);
                             match res {
@@ -1032,8 +1044,11 @@ where
                                 Err(exn) => {
                                     let aexn = ::fbthrift::ApplicationException::handler_panic("SinkService.methodFinalThrow", Box::new(exn));
                                     ::std::result::Result::Err(crate::errors::sink_service::MethodFinalThrowSinkExn::ApplicationException(aexn))
-                                },
+                                }
                             }
+                        },
+                        ::std::result::Result::Ok(::std::result::Result::Err(aexn)) => {
+                            ::std::result::Result::Err(crate::errors::sink_service::MethodFinalThrowSinkExn::ApplicationException(aexn))
                         }
                     }
                 )
@@ -1149,14 +1164,14 @@ where
         let stream =
             ::std::panic::AssertUnwindSafe(input_stream)
                 .catch_unwind()
-                .map(|item| // item is bytes::Bytes and needs to be decoded to the proper stream item type
+                .map(|item| // item is a Result<_payload_, String> wrapped in a assert unwind handler
                     match item {
                         ::std::result::Result::Err(exn) => {
                             tracing::error!(?exn, method="SinkService.methodBothThrow", "Sink stream unwind");
                             let aexn = ::fbthrift::ApplicationException::handler_panic("SinkService.methodBothThrow", exn);
                             ::std::result::Result::Err(crate::errors::sink_service::MethodBothThrowSinkExn::ApplicationException(aexn))
-                        }
-                        ::std::result::Result::Ok(item_enc) => {
+                        },
+                        ::std::result::Result::Ok(::std::result::Result::Ok(item_enc)) => {
                             let mut de = P::deserializer(item_enc);
                             let res = <crate::errors::sink_service::MethodBothThrowSinkReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de);
                             match res {
@@ -1164,8 +1179,11 @@ where
                                 Err(exn) => {
                                     let aexn = ::fbthrift::ApplicationException::handler_panic("SinkService.methodBothThrow", Box::new(exn));
                                     ::std::result::Result::Err(crate::errors::sink_service::MethodBothThrowSinkExn::ApplicationException(aexn))
-                                },
+                                }
                             }
+                        },
+                        ::std::result::Result::Ok(::std::result::Result::Err(aexn)) => {
+                            ::std::result::Result::Err(crate::errors::sink_service::MethodBothThrowSinkExn::ApplicationException(aexn))
                         }
                     }
                 )
@@ -1281,14 +1299,14 @@ where
         let stream =
             ::std::panic::AssertUnwindSafe(input_stream)
                 .catch_unwind()
-                .map(|item| // item is bytes::Bytes and needs to be decoded to the proper stream item type
+                .map(|item| // item is a Result<_payload_, String> wrapped in a assert unwind handler
                     match item {
                         ::std::result::Result::Err(exn) => {
                             tracing::error!(?exn, method="SinkService.methodFast", "Sink stream unwind");
                             let aexn = ::fbthrift::ApplicationException::handler_panic("SinkService.methodFast", exn);
                             ::std::result::Result::Err(crate::errors::sink_service::MethodFastSinkExn::ApplicationException(aexn))
-                        }
-                        ::std::result::Result::Ok(item_enc) => {
+                        },
+                        ::std::result::Result::Ok(::std::result::Result::Ok(item_enc)) => {
                             let mut de = P::deserializer(item_enc);
                             let res = <crate::errors::sink_service::MethodFastSinkReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de);
                             match res {
@@ -1296,8 +1314,11 @@ where
                                 Err(exn) => {
                                     let aexn = ::fbthrift::ApplicationException::handler_panic("SinkService.methodFast", Box::new(exn));
                                     ::std::result::Result::Err(crate::errors::sink_service::MethodFastSinkExn::ApplicationException(aexn))
-                                },
+                                }
                             }
+                        },
+                        ::std::result::Result::Ok(::std::result::Result::Err(aexn)) => {
+                            ::std::result::Result::Err(crate::errors::sink_service::MethodFastSinkExn::ApplicationException(aexn))
                         }
                     }
                 )

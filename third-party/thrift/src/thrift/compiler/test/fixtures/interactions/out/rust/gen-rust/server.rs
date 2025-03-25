@@ -982,14 +982,14 @@ pub mod my_service {
             let stream =
                 ::std::panic::AssertUnwindSafe(input_stream)
                     .catch_unwind()
-                    .map(|item| // item is bytes::Bytes and needs to be decoded to the proper stream item type
+                    .map(|item| // item is a Result<_payload_, String> wrapped in a assert unwind handler
                         match item {
                             ::std::result::Result::Err(exn) => {
                                 tracing::error!(?exn, method="MyInteraction.encode", "Sink stream unwind");
                                 let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.encode", exn);
                                 ::std::result::Result::Err(crate::errors::my_interaction::EncodeSinkExn::ApplicationException(aexn))
-                            }
-                            ::std::result::Result::Ok(item_enc) => {
+                            },
+                            ::std::result::Result::Ok(::std::result::Result::Ok(item_enc)) => {
                                 let mut de = P::deserializer(item_enc);
                                 let res = <crate::errors::my_interaction::EncodeSinkReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de);
                                 match res {
@@ -997,8 +997,11 @@ pub mod my_service {
                                     Err(exn) => {
                                         let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.encode", Box::new(exn));
                                         ::std::result::Result::Err(crate::errors::my_interaction::EncodeSinkExn::ApplicationException(aexn))
-                                    },
+                                    }
                                 }
+                            },
+                            ::std::result::Result::Ok(::std::result::Result::Err(aexn)) => {
+                                ::std::result::Result::Err(crate::errors::my_interaction::EncodeSinkExn::ApplicationException(aexn))
                             }
                         }
                     )
@@ -1537,14 +1540,14 @@ pub mod my_service {
             let stream =
                 ::std::panic::AssertUnwindSafe(input_stream)
                     .catch_unwind()
-                    .map(|item| // item is bytes::Bytes and needs to be decoded to the proper stream item type
+                    .map(|item| // item is a Result<_payload_, String> wrapped in a assert unwind handler
                         match item {
                             ::std::result::Result::Err(exn) => {
                                 tracing::error!(?exn, method="MyInteractionFast.encode", "Sink stream unwind");
                                 let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.encode", exn);
                                 ::std::result::Result::Err(crate::errors::my_interaction_fast::EncodeSinkExn::ApplicationException(aexn))
-                            }
-                            ::std::result::Result::Ok(item_enc) => {
+                            },
+                            ::std::result::Result::Ok(::std::result::Result::Ok(item_enc)) => {
                                 let mut de = P::deserializer(item_enc);
                                 let res = <crate::errors::my_interaction_fast::EncodeSinkReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de);
                                 match res {
@@ -1552,8 +1555,11 @@ pub mod my_service {
                                     Err(exn) => {
                                         let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.encode", Box::new(exn));
                                         ::std::result::Result::Err(crate::errors::my_interaction_fast::EncodeSinkExn::ApplicationException(aexn))
-                                    },
+                                    }
                                 }
+                            },
+                            ::std::result::Result::Ok(::std::result::Result::Err(aexn)) => {
+                                ::std::result::Result::Err(crate::errors::my_interaction_fast::EncodeSinkExn::ApplicationException(aexn))
                             }
                         }
                     )
@@ -3267,14 +3273,14 @@ pub mod factories {
             let stream =
                 ::std::panic::AssertUnwindSafe(input_stream)
                     .catch_unwind()
-                    .map(|item| // item is bytes::Bytes and needs to be decoded to the proper stream item type
+                    .map(|item| // item is a Result<_payload_, String> wrapped in a assert unwind handler
                         match item {
                             ::std::result::Result::Err(exn) => {
                                 tracing::error!(?exn, method="MyInteraction.encode", "Sink stream unwind");
                                 let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.encode", exn);
                                 ::std::result::Result::Err(crate::errors::my_interaction::EncodeSinkExn::ApplicationException(aexn))
-                            }
-                            ::std::result::Result::Ok(item_enc) => {
+                            },
+                            ::std::result::Result::Ok(::std::result::Result::Ok(item_enc)) => {
                                 let mut de = P::deserializer(item_enc);
                                 let res = <crate::errors::my_interaction::EncodeSinkReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de);
                                 match res {
@@ -3282,8 +3288,11 @@ pub mod factories {
                                     Err(exn) => {
                                         let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.encode", Box::new(exn));
                                         ::std::result::Result::Err(crate::errors::my_interaction::EncodeSinkExn::ApplicationException(aexn))
-                                    },
+                                    }
                                 }
+                            },
+                            ::std::result::Result::Ok(::std::result::Result::Err(aexn)) => {
+                                ::std::result::Result::Err(crate::errors::my_interaction::EncodeSinkExn::ApplicationException(aexn))
                             }
                         }
                     )
@@ -3822,14 +3831,14 @@ pub mod factories {
             let stream =
                 ::std::panic::AssertUnwindSafe(input_stream)
                     .catch_unwind()
-                    .map(|item| // item is bytes::Bytes and needs to be decoded to the proper stream item type
+                    .map(|item| // item is a Result<_payload_, String> wrapped in a assert unwind handler
                         match item {
                             ::std::result::Result::Err(exn) => {
                                 tracing::error!(?exn, method="MyInteractionFast.encode", "Sink stream unwind");
                                 let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.encode", exn);
                                 ::std::result::Result::Err(crate::errors::my_interaction_fast::EncodeSinkExn::ApplicationException(aexn))
-                            }
-                            ::std::result::Result::Ok(item_enc) => {
+                            },
+                            ::std::result::Result::Ok(::std::result::Result::Ok(item_enc)) => {
                                 let mut de = P::deserializer(item_enc);
                                 let res = <crate::errors::my_interaction_fast::EncodeSinkReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de);
                                 match res {
@@ -3837,8 +3846,11 @@ pub mod factories {
                                     Err(exn) => {
                                         let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.encode", Box::new(exn));
                                         ::std::result::Result::Err(crate::errors::my_interaction_fast::EncodeSinkExn::ApplicationException(aexn))
-                                    },
+                                    }
                                 }
+                            },
+                            ::std::result::Result::Ok(::std::result::Result::Err(aexn)) => {
+                                ::std::result::Result::Err(crate::errors::my_interaction_fast::EncodeSinkExn::ApplicationException(aexn))
                             }
                         }
                     )
@@ -5471,14 +5483,14 @@ pub mod perform {
             let stream =
                 ::std::panic::AssertUnwindSafe(input_stream)
                     .catch_unwind()
-                    .map(|item| // item is bytes::Bytes and needs to be decoded to the proper stream item type
+                    .map(|item| // item is a Result<_payload_, String> wrapped in a assert unwind handler
                         match item {
                             ::std::result::Result::Err(exn) => {
                                 tracing::error!(?exn, method="MyInteraction.encode", "Sink stream unwind");
                                 let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.encode", exn);
                                 ::std::result::Result::Err(crate::errors::my_interaction::EncodeSinkExn::ApplicationException(aexn))
-                            }
-                            ::std::result::Result::Ok(item_enc) => {
+                            },
+                            ::std::result::Result::Ok(::std::result::Result::Ok(item_enc)) => {
                                 let mut de = P::deserializer(item_enc);
                                 let res = <crate::errors::my_interaction::EncodeSinkReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de);
                                 match res {
@@ -5486,8 +5498,11 @@ pub mod perform {
                                     Err(exn) => {
                                         let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.encode", Box::new(exn));
                                         ::std::result::Result::Err(crate::errors::my_interaction::EncodeSinkExn::ApplicationException(aexn))
-                                    },
+                                    }
                                 }
+                            },
+                            ::std::result::Result::Ok(::std::result::Result::Err(aexn)) => {
+                                ::std::result::Result::Err(crate::errors::my_interaction::EncodeSinkExn::ApplicationException(aexn))
                             }
                         }
                     )
@@ -6026,14 +6041,14 @@ pub mod perform {
             let stream =
                 ::std::panic::AssertUnwindSafe(input_stream)
                     .catch_unwind()
-                    .map(|item| // item is bytes::Bytes and needs to be decoded to the proper stream item type
+                    .map(|item| // item is a Result<_payload_, String> wrapped in a assert unwind handler
                         match item {
                             ::std::result::Result::Err(exn) => {
                                 tracing::error!(?exn, method="MyInteractionFast.encode", "Sink stream unwind");
                                 let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.encode", exn);
                                 ::std::result::Result::Err(crate::errors::my_interaction_fast::EncodeSinkExn::ApplicationException(aexn))
-                            }
-                            ::std::result::Result::Ok(item_enc) => {
+                            },
+                            ::std::result::Result::Ok(::std::result::Result::Ok(item_enc)) => {
                                 let mut de = P::deserializer(item_enc);
                                 let res = <crate::errors::my_interaction_fast::EncodeSinkReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de);
                                 match res {
@@ -6041,8 +6056,11 @@ pub mod perform {
                                     Err(exn) => {
                                         let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.encode", Box::new(exn));
                                         ::std::result::Result::Err(crate::errors::my_interaction_fast::EncodeSinkExn::ApplicationException(aexn))
-                                    },
+                                    }
                                 }
+                            },
+                            ::std::result::Result::Ok(::std::result::Result::Err(aexn)) => {
+                                ::std::result::Result::Err(crate::errors::my_interaction_fast::EncodeSinkExn::ApplicationException(aexn))
                             }
                         }
                     )
@@ -7332,14 +7350,14 @@ pub mod interact_with_shared {
             let stream =
                 ::std::panic::AssertUnwindSafe(input_stream)
                     .catch_unwind()
-                    .map(|item| // item is bytes::Bytes and needs to be decoded to the proper stream item type
+                    .map(|item| // item is a Result<_payload_, String> wrapped in a assert unwind handler
                         match item {
                             ::std::result::Result::Err(exn) => {
                                 tracing::error!(?exn, method="MyInteraction.encode", "Sink stream unwind");
                                 let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.encode", exn);
                                 ::std::result::Result::Err(crate::errors::my_interaction::EncodeSinkExn::ApplicationException(aexn))
-                            }
-                            ::std::result::Result::Ok(item_enc) => {
+                            },
+                            ::std::result::Result::Ok(::std::result::Result::Ok(item_enc)) => {
                                 let mut de = P::deserializer(item_enc);
                                 let res = <crate::errors::my_interaction::EncodeSinkReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de);
                                 match res {
@@ -7347,8 +7365,11 @@ pub mod interact_with_shared {
                                     Err(exn) => {
                                         let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.encode", Box::new(exn));
                                         ::std::result::Result::Err(crate::errors::my_interaction::EncodeSinkExn::ApplicationException(aexn))
-                                    },
+                                    }
                                 }
+                            },
+                            ::std::result::Result::Ok(::std::result::Result::Err(aexn)) => {
+                                ::std::result::Result::Err(crate::errors::my_interaction::EncodeSinkExn::ApplicationException(aexn))
                             }
                         }
                     )

@@ -219,14 +219,14 @@ where
         let stream =
             ::std::panic::AssertUnwindSafe(input_stream)
                 .catch_unwind()
-                .map(|item| // item is bytes::Bytes and needs to be decoded to the proper stream item type
+                .map(|item| // item is a Result<_payload_, String> wrapped in a assert unwind handler
                     match item {
                         ::std::result::Result::Err(exn) => {
                             tracing::error!(?exn, method="{{service:name}}.{{function:name}}", "Sink stream unwind");
                             let aexn = ::fbthrift::ApplicationException::handler_panic("{{service:name}}.{{function:name}}", exn);
                             ::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkExn::ApplicationException(aexn))
-                        }
-                        ::std::result::Result::Ok(item_enc) => {
+                        },
+                        ::std::result::Result::Ok(::std::result::Result::Ok(item_enc)) => {
                             let mut de = P::deserializer(item_enc);
                             let res = <{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de);
                             match res {
@@ -234,8 +234,11 @@ where
                                 Err(exn) => {
                                     let aexn = ::fbthrift::ApplicationException::handler_panic("{{service:name}}.{{function:name}}", Box::new(exn));
                                     ::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkExn::ApplicationException(aexn))
-                                },
+                                }
                             }
+                        },
+                        ::std::result::Result::Ok(::std::result::Result::Err(aexn)) => {
+                            ::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}SinkExn::ApplicationException(aexn))
                         }
                     }
                 )

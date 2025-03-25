@@ -71,7 +71,7 @@ where
         chunk_timeout: std::time::Duration,
         protocol_id: ProtocolID,
     ) -> (
-        futures::stream::BoxStream<'static, FramingDecoded<F>>,
+        futures::stream::BoxStream<'static, Result<FramingDecoded<F>, crate::ApplicationException>>,
         impl FnOnce(SerializedStreamElement<FramingEncodedFinal<F>>) + Send,
     );
 

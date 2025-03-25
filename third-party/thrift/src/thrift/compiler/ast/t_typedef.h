@@ -67,7 +67,7 @@ class t_typedef : public t_type {
       const t_type* type,
       const std::vector<std::string_view>& names,
       D&& default_value = nullptr) {
-    return annotation_or(
+    return unstructured_annotation_or(
         get_first_annotation_or_null(type, names),
         std::forward<D>(default_value));
   }

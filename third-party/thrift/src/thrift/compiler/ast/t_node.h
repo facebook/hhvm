@@ -82,7 +82,7 @@ class t_node {
       typename D = const std::string*>
   decltype(auto) get_annotation(
       const T& names, D&& default_value = nullptr) const {
-    return annotation_or(
+    return unstructured_annotation_or(
         find_unstructured_annotation_or_null(names),
         std::forward<D>(default_value));
   }
@@ -106,19 +106,20 @@ class t_node {
   static const std::string& emptyString();
 
   template <typename D>
-  static std::string annotation_or(const std::string* val, D&& def) {
+  static std::string unstructured_annotation_or(
+      const std::string* val, D&& def) {
     if (val != nullptr) {
       return *val;
     }
     return std::forward<D>(def);
   }
 
-  static const std::string& annotation_or(
+  static const std::string& unstructured_annotation_or(
       const std::string* val, const std::string* def) {
     return val ? *val : (def ? *def : emptyString());
   }
 
-  static const std::string& annotation_or(
+  static const std::string& unstructured_annotation_or(
       const std::string* val, std::string* def) {
     return val ? *val : (def ? *def : emptyString());
   }

@@ -91,7 +91,7 @@ mstch::node get_structed_annotation_attribute(
 
 template <typename Node>
 std::string get_java_swift_name(const Node* node) {
-  return node->get_annotation(
+  return node->get_unstructured_annotation(
       "java.swift.name", java::mangle_java_name(node->get_name(), false));
 }
 
@@ -562,7 +562,8 @@ class mstch_java_struct : public mstch_struct {
   }
   mstch::node is_as_bean() {
     if (!struct_->is_exception() && !struct_->is_union()) {
-      return struct_->get_annotation("java.swift.mutable") == "true" ||
+      return struct_->get_unstructured_annotation("java.swift.mutable") ==
+          "true" ||
           struct_->has_structured_annotation(kJavaMutableUri);
     } else {
       return false;
@@ -583,7 +584,7 @@ class mstch_java_struct : public mstch_struct {
   }
   mstch::node java_annotations() {
     if (struct_->has_unstructured_annotation("java.swift.annotations")) {
-      return struct_->get_annotation("java.swift.annotations");
+      return struct_->get_unstructured_annotation("java.swift.annotations");
     }
 
     return get_structed_annotation_attribute(
@@ -1002,11 +1003,13 @@ class mstch_java_field : public mstch_field {
   }
   mstch::node java_capital_name() {
     return java::mangle_java_name(
-        field_->get_annotation("java.swift.name", &field_->get_name()), true);
+        field_->get_unstructured_annotation(
+            "java.swift.name", &field_->get_name()),
+        true);
   }
   mstch::node java_constant_name() {
-    return constant_name(
-        field_->get_annotation("java.swift.name", &field_->get_name()));
+    return constant_name(field_->get_unstructured_annotation(
+        "java.swift.name", &field_->get_name()));
   }
   mstch::node java_all_caps_name() {
     auto field_name = field_->get_name();
@@ -1015,7 +1018,8 @@ class mstch_java_field : public mstch_field {
   }
   mstch::node java_default_value() { return default_value_for_field(field_); }
   mstch::node is_recursive_reference() {
-    return field_->get_annotation("swift.recursive_reference") == "true" ||
+    return field_->get_unstructured_annotation("swift.recursive_reference") ==
+        "true" ||
         field_->has_structured_annotation(kJavaRecursiveUri);
   }
   mstch::node is_negative_id() { return field_->get_key() < 0; }
@@ -1077,7 +1081,7 @@ class mstch_java_field : public mstch_field {
   }
   mstch::node java_annotations() {
     if (field_->has_unstructured_annotation("java.swift.annotations")) {
-      return field_->get_annotation("java.swift.annotations");
+      return field_->get_unstructured_annotation("java.swift.annotations");
     }
 
     return get_structed_annotation_attribute(
@@ -1315,10 +1319,12 @@ class mstch_java_type : public mstch_type {
   }
 
   mstch::node java_type() {
-    return type_->get_true_type()->get_annotation("java.swift.type");
+    return type_->get_true_type()->get_unstructured_annotation(
+        "java.swift.type");
   }
   mstch::node is_binary_string() {
-    return type_->get_true_type()->get_annotation("java.swift.binary_string");
+    return type_->get_true_type()->get_unstructured_annotation(
+        "java.swift.binary_string");
   }
 
   mstch::node has_type_adapter() {

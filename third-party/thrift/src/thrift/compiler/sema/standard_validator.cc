@@ -957,7 +957,7 @@ void validate_exception_message_annotation(
   }
   if (node.has_unstructured_annotation("message")) {
     ctx.check(!field, "Duplicate message annotation.");
-    const std::string& v = node.get_annotation("message");
+    const std::string& v = node.get_unstructured_annotation("message");
     field = node.get_field_by_name(v);
     ctx.check(
         field,

@@ -1069,7 +1069,7 @@ void validate(
     const std::string& name,
     sema_context& ctx,
     Pred&& field_name_predicate) {
-  auto pyname = node->get_annotation("py3.name", &name);
+  auto pyname = node->get_unstructured_annotation("py3.name", &name);
   if (const t_const* annot =
           node->find_structured_annotation_or_null(kPythonNameUri)) {
     if (auto annotation_name =
@@ -1119,7 +1119,7 @@ void validate_module_name_collision(
     diagnostic_level level) {
   // the structured annotation @python.Name overrides unstructured py3.name
   std::reference_wrapper<const std::string> pyname =
-      node.get_annotation("py3.name", &name);
+      node.get_unstructured_annotation("py3.name", &name);
   if (const t_const* annot =
           node.find_structured_annotation_or_null(kPythonNameUri)) {
     if (auto annotation_name =

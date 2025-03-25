@@ -3083,7 +3083,7 @@ std::string t_cocoa_generator::call_field_setter(
 }
 
 std::string t_cocoa_generator::get_cocoa_property_name(const t_field* tfield) {
-  return tfield->get_annotation("cocoa.name", &tfield->name());
+  return tfield->get_unstructured_annotation("cocoa.name", &tfield->name());
 }
 
 THRIFT_REGISTER_GENERATOR(

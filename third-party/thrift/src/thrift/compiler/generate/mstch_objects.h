@@ -720,7 +720,7 @@ class mstch_function : public mstch_base {
           .get_enum_value()
           ->name();
     }
-    return function_->get_annotation("priority", "NORMAL");
+    return function_->get_unstructured_annotation("priority", "NORMAL");
   }
   mstch::node annotations() { return mstch_base::annotations(function_); }
 

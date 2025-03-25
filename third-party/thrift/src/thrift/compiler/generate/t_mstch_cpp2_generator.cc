@@ -55,7 +55,7 @@ enum class enum_underlying_type {
 };
 
 const std::string& get_cpp_template(const t_type* type) {
-  return type->get_annotation({"cpp.template", "cpp2.template"});
+  return type->get_unstructured_annotation({"cpp.template", "cpp2.template"});
 }
 
 bool is_annotation_blacklisted_in_fatal(const std::string& key) {
@@ -382,7 +382,7 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     });
 
     def.property("cpp_is_unscoped", [](const t_enum& e) {
-      return e.get_annotation("cpp.deprecated_enum_unscoped");
+      return e.get_unstructured_annotation("cpp.deprecated_enum_unscoped");
     });
 
     def.property("cpp_declare_bitwise_ops", [](const t_enum& e) {
@@ -1049,7 +1049,7 @@ class cpp_mstch_function : public mstch_function {
         });
   }
   mstch::node event_based() {
-    return function_->get_annotation("thread") == "eb" ||
+    return function_->get_unstructured_annotation("thread") == "eb" ||
         function_->has_structured_annotation(kCppProcessInEbThreadUri) ||
         interface_->has_unstructured_annotation("process_in_event_base") ||
         interface_->has_structured_annotation(kCppProcessInEbThreadUri);
@@ -1506,7 +1506,8 @@ class cpp_mstch_struct : public mstch_struct {
   }
 
   mstch::node cpp_methods() {
-    return struct_->get_annotation({"cpp.methods", "cpp2.methods"});
+    return struct_->get_unstructured_annotation(
+        {"cpp.methods", "cpp2.methods"});
   }
   mstch::node cpp_declare_hash() {
     return struct_->has_unstructured_annotation(
@@ -1574,7 +1575,7 @@ class cpp_mstch_struct : public mstch_struct {
     return mangle_field_name(message_field->name());
   }
   mstch::node cpp_allocator() {
-    return struct_->get_annotation("cpp.allocator");
+    return struct_->get_unstructured_annotation("cpp.allocator");
   }
   mstch::node cpp_frozen2_exclude() {
     // TODO(dokwon): Fix frozen2 compatibility with adapter.

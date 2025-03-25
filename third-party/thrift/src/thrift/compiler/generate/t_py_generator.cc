@@ -3896,7 +3896,7 @@ std::string t_py_generator::get_priority(
           .get_enum_value()
           ->name();
     }
-    return obj->get_annotation("priority", &def);
+    return obj->get_unstructured_annotation("priority", &def);
   }
   return def;
 }

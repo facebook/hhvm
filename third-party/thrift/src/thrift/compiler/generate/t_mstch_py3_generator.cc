@@ -586,7 +586,7 @@ class py3_mstch_function : public mstch_function {
   mstch::node cppName() { return cppName_; }
 
   mstch::node event_based() {
-    return function_->get_annotation("thread") == "eb" ||
+    return function_->get_unstructured_annotation("thread") == "eb" ||
         function_->has_structured_annotation(kCppProcessInEbThreadUri) ||
         interface_->has_unstructured_annotation("process_in_event_base") ||
         interface_->has_structured_annotation(kCppProcessInEbThreadUri);
@@ -1399,7 +1399,7 @@ void validate_no_reserved_key_in_namespace(
 // as enum member or union field names (thrift-py3).
 namespace enum_member_union_field_names_validator {
 void validate(const t_named& node, const std::string& name, sema_context& ctx) {
-  auto pyname = node.get_annotation("py3.name", &name);
+  auto pyname = node.get_unstructured_annotation("py3.name", &name);
   if (const t_const* annot =
           node.find_structured_annotation_or_null(kPythonNameUri)) {
     if (auto annotation_name =

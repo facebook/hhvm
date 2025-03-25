@@ -473,7 +473,7 @@ bool is_stack_arguments(
     std::map<std::string, std::string, std::less<>> const& options,
     t_function const& function) {
   if (function.has_unstructured_annotation("cpp.stack_arguments")) {
-    return function.get_annotation("cpp.stack_arguments") != "0";
+    return function.get_unstructured_annotation("cpp.stack_arguments") != "0";
   }
   return options.count("stack_arguments");
 }

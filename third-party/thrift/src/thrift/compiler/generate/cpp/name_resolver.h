@@ -120,7 +120,7 @@ class cpp_name_resolver {
       return cpp_name->get_value_from_structured_annotation("value")
           .get_string();
     }
-    return node.get_annotation("cpp.name", &node.name());
+    return node.get_unstructured_annotation("cpp.name", &node.name());
   }
 
   static std::string gen_namespace(const t_program& progam);

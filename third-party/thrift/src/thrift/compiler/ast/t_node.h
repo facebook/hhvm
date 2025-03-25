@@ -80,7 +80,7 @@ class t_node {
   template <
       typename T = std::vector<std::string_view>,
       typename D = const std::string*>
-  decltype(auto) get_annotation(
+  decltype(auto) get_unstructured_annotation(
       const T& names, D&& default_value = nullptr) const {
     return unstructured_annotation_or(
         find_unstructured_annotation_or_null(names),

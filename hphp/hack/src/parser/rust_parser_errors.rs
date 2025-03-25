@@ -5656,6 +5656,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
 
         match &node.children {
+            ClosureTypeSpecifier(c) if !c.type_parameters.is_missing() => {
+                self.check_can_use_feature(node, &FeatureName::PolymorphicFunctionHints)
+            }
             UnionTypeSpecifier(_) | IntersectionTypeSpecifier(_) => {
                 self.check_can_use_feature(node, &FeatureName::UnionIntersectionTypeHints)
             }

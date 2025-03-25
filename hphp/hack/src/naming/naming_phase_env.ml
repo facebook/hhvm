@@ -7,9 +7,9 @@
  *)
 
 module Elab_happly_hint = struct
-  type t = { tparams: SSet.t }
+  type t = { tparams: Pos.t SMap.t }
 
-  let empty = { tparams = SSet.empty }
+  let empty = { tparams = SMap.empty }
 end
 
 module Elab_func_body = struct

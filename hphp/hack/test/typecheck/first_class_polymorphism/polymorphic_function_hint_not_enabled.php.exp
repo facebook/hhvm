@@ -1,0 +1,6 @@
+ERROR: File "polymorphic_function_hint_not_enabled.php", line 3, characters 19-44:
+Cannot use unstable feature: `polymorphic_function_hints` (Parsing[1002])
+ERROR: File "polymorphic_function_hint_not_enabled.php", line 5, characters 14-31:
+Cannot use unstable feature: `polymorphic_function_hints` (Parsing[1002])
+ERROR: File "polymorphic_function_hint_not_enabled.php", line 7, characters 20-45:
+Cannot use unstable feature: `polymorphic_function_hints` (Parsing[1002])

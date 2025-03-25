@@ -138,7 +138,8 @@ Errors:
                      (Happly (([9:1-29], "\\HH\\supportdyn"),
                         [([9:1-29],
                           (Hfun
-                             { hf_is_readonly = None; hf_param_tys = [([9:11-14], (Hprim Tint)); ([9:16-21], (Hprim Tfloat))];
+                             { hf_is_readonly = None; hf_tparams = []; 
+                               hf_param_tys = [([9:11-14], (Hprim Tint)); ([9:16-21], (Hprim Tfloat))];
                                hf_param_info =
                                [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None });
                                  (Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None })];
@@ -274,7 +275,8 @@ Errors:
                              (Happly (([22:9-36], "\\HH\\supportdyn"),
                                 [([22:9-36],
                                   (Hfun
-                                     { hf_is_readonly = None; hf_param_tys = [([22:19-24], (Hprim Tfloat)); ([22:26-29], (Hprim Tint))];
+                                     { hf_is_readonly = None; hf_tparams = []; 
+                                       hf_param_tys = [([22:19-24], (Hprim Tfloat)); ([22:26-29], (Hprim Tint))];
                                        hf_param_info =
                                        [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None });
                                          (Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None })];
@@ -299,7 +301,8 @@ Errors:
                              (Happly (([23:9-37], "\\HH\\supportdyn"),
                                 [([23:9-37],
                                   (Hfun
-                                     { hf_is_readonly = None; hf_param_tys = [([23:19-22], (Hprim Tint)); ([23:24-29], (Hprim Tfloat))];
+                                     { hf_is_readonly = None; hf_tparams = []; 
+                                       hf_param_tys = [([23:19-22], (Hprim Tint)); ([23:24-29], (Hprim Tfloat))];
                                        hf_param_info =
                                        [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None });
                                          (Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None })];
@@ -524,7 +527,8 @@ Errors:
                      (Happly (([9:1-29], "\\HH\\supportdyn"),
                         [([9:1-29],
                           (Hfun
-                             { hf_is_readonly = None; hf_param_tys = [([9:11-14], (Hprim Tint)); ([9:16-21], (Hprim Tfloat))];
+                             { hf_is_readonly = None; hf_tparams = []; 
+                               hf_param_tys = [([9:11-14], (Hprim Tint)); ([9:16-21], (Hprim Tfloat))];
                                hf_param_info =
                                [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None });
                                  (Some { hfparam_kind = Pnormal; hfparam_readonlyness = None; hfparam_optional = None; hfparam_splat = None })];

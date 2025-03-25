@@ -1245,6 +1245,7 @@ and hf_param_info = {
 
 and hint_fun = {
   hf_is_readonly: Ast_defs.readonly_kind option; [@transform.opaque]
+  hf_tparams: hint_tparam list;
   hf_param_tys: hint list;
   (* hf_param_info is None when all three are none, for perf optimization reasons.
      It is not semantically incorrect for the record to appear with 3 None values,
@@ -1254,6 +1255,14 @@ and hint_fun = {
   hf_ctxs: contexts option;
   hf_return_ty: hint; [@transform.explicit]
   hf_is_readonly_return: Ast_defs.readonly_kind option; [@transform.opaque]
+}
+
+and hint_tparam = {
+  htp_name: sid;
+  htp_user_attributes: sid list;
+  (* We don't currently allow user attributes on type parameters inside function hints
+     to have parameters *)
+  htp_constraints: ((Ast_defs.constraint_kind[@transform.opaque]) * hint) list;
 }
 
 and class_ptr_kind =
@@ -1437,3 +1446,14 @@ let is_wildcard_hint h =
   match h with
   | (_, Hwildcard) -> true
   | _ -> false
+
+let tparam_of_hint_tparam { htp_name; htp_user_attributes; htp_constraints } =
+  {
+    tp_variance = Ast_defs.Invariant;
+    tp_name = htp_name;
+    tp_parameters = [];
+    tp_constraints = htp_constraints;
+    tp_reified = Erased;
+    tp_user_attributes =
+      List.map (fun ua_name -> { ua_name; ua_params = [] }) htp_user_attributes;
+  }

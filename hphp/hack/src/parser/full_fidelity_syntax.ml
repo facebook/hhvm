@@ -2342,6 +2342,7 @@ module WithToken (Token : TokenType) = struct
             closure_outer_left_paren;
             closure_readonly_keyword;
             closure_function_keyword;
+            closure_type_parameters;
             closure_inner_left_paren;
             closure_parameter_list;
             closure_inner_right_paren;
@@ -2354,6 +2355,7 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc closure_outer_left_paren in
         let acc = f acc closure_readonly_keyword in
         let acc = f acc closure_function_keyword in
+        let acc = f acc closure_type_parameters in
         let acc = f acc closure_inner_left_paren in
         let acc = f acc closure_parameter_list in
         let acc = f acc closure_inner_right_paren in
@@ -4134,6 +4136,7 @@ module WithToken (Token : TokenType) = struct
             closure_outer_left_paren;
             closure_readonly_keyword;
             closure_function_keyword;
+            closure_type_parameters;
             closure_inner_left_paren;
             closure_parameter_list;
             closure_inner_right_paren;
@@ -4147,6 +4150,7 @@ module WithToken (Token : TokenType) = struct
           closure_outer_left_paren;
           closure_readonly_keyword;
           closure_function_keyword;
+          closure_type_parameters;
           closure_inner_left_paren;
           closure_parameter_list;
           closure_inner_right_paren;
@@ -5935,6 +5939,7 @@ module WithToken (Token : TokenType) = struct
             closure_outer_left_paren;
             closure_readonly_keyword;
             closure_function_keyword;
+            closure_type_parameters;
             closure_inner_left_paren;
             closure_parameter_list;
             closure_inner_right_paren;
@@ -5948,6 +5953,7 @@ module WithToken (Token : TokenType) = struct
           "closure_outer_left_paren";
           "closure_readonly_keyword";
           "closure_function_keyword";
+          "closure_type_parameters";
           "closure_inner_left_paren";
           "closure_parameter_list";
           "closure_inner_right_paren";
@@ -7948,6 +7954,7 @@ module WithToken (Token : TokenType) = struct
             closure_outer_left_paren;
             closure_readonly_keyword;
             closure_function_keyword;
+            closure_type_parameters;
             closure_inner_left_paren;
             closure_parameter_list;
             closure_inner_right_paren;
@@ -7962,6 +7969,7 @@ module WithToken (Token : TokenType) = struct
             closure_outer_left_paren;
             closure_readonly_keyword;
             closure_function_keyword;
+            closure_type_parameters;
             closure_inner_left_paren;
             closure_parameter_list;
             closure_inner_right_paren;
@@ -10466,6 +10474,7 @@ module WithToken (Token : TokenType) = struct
           closure_outer_left_paren
           closure_readonly_keyword
           closure_function_keyword
+          closure_type_parameters
           closure_inner_left_paren
           closure_parameter_list
           closure_inner_right_paren
@@ -10480,6 +10489,7 @@ module WithToken (Token : TokenType) = struct
               closure_outer_left_paren;
               closure_readonly_keyword;
               closure_function_keyword;
+              closure_type_parameters;
               closure_inner_left_paren;
               closure_parameter_list;
               closure_inner_right_paren;
@@ -11014,6 +11024,7 @@ module WithToken (Token : TokenType) = struct
             closure_outer_left_paren;
             closure_readonly_keyword;
             closure_function_keyword;
+            closure_type_parameters;
             closure_inner_left_paren;
             closure_parameter_list;
             closure_inner_right_paren;
@@ -11028,6 +11039,7 @@ module WithToken (Token : TokenType) = struct
             closure_outer_left_paren;
             closure_readonly_keyword;
             closure_function_keyword;
+            closure_type_parameters;
             closure_inner_left_paren;
             closure_parameter_list;
             closure_inner_right_paren;
@@ -11187,6 +11199,7 @@ module WithToken (Token : TokenType) = struct
               closure_outer_left_paren;
               closure_readonly_keyword;
               closure_function_keyword;
+              closure_type_parameters;
               closure_inner_left_paren;
               closure_parameter_list;
               closure_inner_right_paren;
@@ -11200,6 +11213,7 @@ module WithToken (Token : TokenType) = struct
             closure_outer_left_paren;
             closure_readonly_keyword;
             closure_function_keyword;
+            closure_type_parameters;
             closure_inner_left_paren;
             closure_parameter_list;
             closure_inner_right_paren;

@@ -1053,6 +1053,7 @@ type witness_decl =
   | Pessimised_this of (Pos_or_decl.t[@hash.ignore])
   | Illegal_recursive_type of (Pos_or_decl.t[@hash.ignore]) * string
   | Support_dynamic_type_assume of (Pos_or_decl.t[@hash.ignore])
+  | Polymorphic_type_param of (Pos_or_decl.t[@hash.ignore]) * string
 [@@deriving hash]
 
 let witness_decl_to_raw_pos = function
@@ -1083,7 +1084,8 @@ let witness_decl_to_raw_pos = function
   | Pessimised_return (pos_or_decl, _)
   | Pessimised_prop (pos_or_decl, _)
   | Illegal_recursive_type (pos_or_decl, _)
-  | Support_dynamic_type_assume pos_or_decl ->
+  | Support_dynamic_type_assume pos_or_decl
+  | Polymorphic_type_param (pos_or_decl, _) ->
     pos_or_decl
 
 let map_pos_witness_decl pos_or_decl witness =
@@ -1119,6 +1121,8 @@ let map_pos_witness_decl pos_or_decl witness =
   | Illegal_recursive_type (p, name) ->
     Illegal_recursive_type (pos_or_decl p, name)
   | Support_dynamic_type_assume p -> Support_dynamic_type_assume (pos_or_decl p)
+  | Polymorphic_type_param (p, orig_name) ->
+    Polymorphic_type_param (pos_or_decl p, orig_name)
 
 let string_of_pessimise_reason = function
   | PRabstract -> "abstract"
@@ -1169,6 +1173,7 @@ let constructor_string_of_witness_decl = function
   | Pessimised_this _ -> "Rpessimised_this"
   | Illegal_recursive_type _ -> "Rillegal_recursive_type"
   | Support_dynamic_type_assume _ -> "Rsupport_dynamic_type_assume"
+  | Polymorphic_type_param _ -> "Rpolymorphic_type_param"
 
 let pp_witness_decl fmt witness =
   let comma_ fmt () = Format.fprintf fmt ",@ " in
@@ -1211,6 +1216,10 @@ let pp_witness_decl fmt witness =
     | Support_dynamic_type_assume p
     | Global_class_prop p ->
       Pos_or_decl.pp fmt p
+    | Polymorphic_type_param (p, s) ->
+      Pos_or_decl.pp fmt p;
+      comma ();
+      Format.pp_print_string fmt s
     | Tconst_no_cstr pid -> pp_pos_id fmt pid
     | Cstr_on_generics (p, pid) ->
       Pos_or_decl.pp fmt p;
@@ -1343,6 +1352,13 @@ let witness_decl_to_json = function
           ( "Support_dynamic_type_assume",
             JSON_Array [Pos_or_decl.json pos_or_decl] );
         ])
+  | Polymorphic_type_param (pos_or_decl, orig_name) ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Polymorphic_type_param",
+            JSON_Array [Pos_or_decl.json pos_or_decl; string_ orig_name] );
+        ])
   | Pessimised_inout pos_or_decl ->
     Hh_json.(
       JSON_Object
@@ -1389,6 +1405,12 @@ let pessimise_reason_to_string pr =
 let witness_decl_to_string prefix witness =
   match witness with
   | Witness_from_decl pos_or_decl -> (pos_or_decl, prefix)
+  | Polymorphic_type_param (pos_or_decl, orig_name) ->
+    ( pos_or_decl,
+      Format.sprintf
+        {|%s which corresponds to the type parameter `%s` in the polymorphic function|}
+        prefix
+        orig_name )
   | Idx_vector_from_decl pos_or_decl ->
     ( pos_or_decl,
       prefix
@@ -2538,6 +2560,9 @@ module Constructors = struct
   let yield_asyncnull p = from_witness_locl @@ Yield_asyncnull p
 
   let yield_send p = from_witness_locl @@ Yield_send p
+
+  let polymorphic_type_param (p, orig_name) =
+    from_witness_decl @@ Polymorphic_type_param (p, orig_name)
 
   let lost_info (s, r, b) = Lost_info (s, r, b)
 

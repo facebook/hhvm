@@ -1708,11 +1708,12 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_closure_type_specifier(_: &C, closure_outer_left_paren: Self, closure_readonly_keyword: Self, closure_function_keyword: Self, closure_inner_left_paren: Self, closure_parameter_list: Self, closure_inner_right_paren: Self, closure_contexts: Self, closure_colon: Self, closure_readonly_return: Self, closure_return_type: Self, closure_outer_right_paren: Self) -> Self {
+    fn make_closure_type_specifier(_: &C, closure_outer_left_paren: Self, closure_readonly_keyword: Self, closure_function_keyword: Self, closure_type_parameters: Self, closure_inner_left_paren: Self, closure_parameter_list: Self, closure_inner_right_paren: Self, closure_contexts: Self, closure_colon: Self, closure_readonly_return: Self, closure_return_type: Self, closure_outer_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::ClosureTypeSpecifier(Box::new(ClosureTypeSpecifierChildren {
             closure_outer_left_paren,
             closure_readonly_keyword,
             closure_function_keyword,
+            closure_type_parameters,
             closure_inner_left_paren,
             closure_parameter_list,
             closure_inner_right_paren,
@@ -3276,10 +3277,11 @@ where
                 acc
             },
             SyntaxVariant::ClosureTypeSpecifier(x) => {
-                let ClosureTypeSpecifierChildren { closure_outer_left_paren, closure_readonly_keyword, closure_function_keyword, closure_inner_left_paren, closure_parameter_list, closure_inner_right_paren, closure_contexts, closure_colon, closure_readonly_return, closure_return_type, closure_outer_right_paren } = *x;
+                let ClosureTypeSpecifierChildren { closure_outer_left_paren, closure_readonly_keyword, closure_function_keyword, closure_type_parameters, closure_inner_left_paren, closure_parameter_list, closure_inner_right_paren, closure_contexts, closure_colon, closure_readonly_return, closure_return_type, closure_outer_right_paren } = *x;
                 let acc = f(closure_outer_left_paren, acc);
                 let acc = f(closure_readonly_keyword, acc);
                 let acc = f(closure_function_keyword, acc);
+                let acc = f(closure_type_parameters, acc);
                 let acc = f(closure_inner_left_paren, acc);
                 let acc = f(closure_parameter_list, acc);
                 let acc = f(closure_inner_right_paren, acc);
@@ -4775,7 +4777,7 @@ where
                  dictionary_type_keyword: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::ClosureTypeSpecifier, 11) => SyntaxVariant::ClosureTypeSpecifier(Box::new(ClosureTypeSpecifierChildren {
+             (SyntaxKind::ClosureTypeSpecifier, 12) => SyntaxVariant::ClosureTypeSpecifier(Box::new(ClosureTypeSpecifierChildren {
                  closure_outer_right_paren: ts.pop().unwrap(),
                  closure_return_type: ts.pop().unwrap(),
                  closure_readonly_return: ts.pop().unwrap(),
@@ -4784,6 +4786,7 @@ where
                  closure_inner_right_paren: ts.pop().unwrap(),
                  closure_parameter_list: ts.pop().unwrap(),
                  closure_inner_left_paren: ts.pop().unwrap(),
+                 closure_type_parameters: ts.pop().unwrap(),
                  closure_function_keyword: ts.pop().unwrap(),
                  closure_readonly_keyword: ts.pop().unwrap(),
                  closure_outer_left_paren: ts.pop().unwrap(),
@@ -5139,7 +5142,7 @@ where
             SyntaxVariant::ContextConstraint(x) => unsafe { std::slice::from_raw_parts(&x.ctx_constraint_keyword, 2) },
             SyntaxVariant::DarrayTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.darray_keyword, 7) },
             SyntaxVariant::DictionaryTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.dictionary_type_keyword, 4) },
-            SyntaxVariant::ClosureTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.closure_outer_left_paren, 11) },
+            SyntaxVariant::ClosureTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.closure_outer_left_paren, 12) },
             SyntaxVariant::ClosureParameterTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.closure_parameter_optional, 6) },
             SyntaxVariant::TupleOrUnionOrIntersectionElementTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.tuple_or_union_or_intersection_element_optional, 4) },
             SyntaxVariant::TypeRefinement(x) => unsafe { std::slice::from_raw_parts(&x.type_refinement_type, 5) },
@@ -5330,7 +5333,7 @@ where
             SyntaxVariant::ContextConstraint(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.ctx_constraint_keyword, 2) },
             SyntaxVariant::DarrayTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.darray_keyword, 7) },
             SyntaxVariant::DictionaryTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.dictionary_type_keyword, 4) },
-            SyntaxVariant::ClosureTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.closure_outer_left_paren, 11) },
+            SyntaxVariant::ClosureTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.closure_outer_left_paren, 12) },
             SyntaxVariant::ClosureParameterTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.closure_parameter_optional, 6) },
             SyntaxVariant::TupleOrUnionOrIntersectionElementTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.tuple_or_union_or_intersection_element_optional, 4) },
             SyntaxVariant::TypeRefinement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.type_refinement_type, 5) },
@@ -6745,6 +6748,7 @@ pub struct ClosureTypeSpecifierChildren<T, V> {
     pub closure_outer_left_paren: Syntax<T, V>,
     pub closure_readonly_keyword: Syntax<T, V>,
     pub closure_function_keyword: Syntax<T, V>,
+    pub closure_type_parameters: Syntax<T, V>,
     pub closure_inner_left_paren: Syntax<T, V>,
     pub closure_parameter_list: Syntax<T, V>,
     pub closure_inner_right_paren: Syntax<T, V>,
@@ -8743,18 +8747,19 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ClosureTypeSpecifier(x) => {
-                get_index(11).and_then(|index| { match index {
+                get_index(12).and_then(|index| { match index {
                         0 => Some(&x.closure_outer_left_paren),
                     1 => Some(&x.closure_readonly_keyword),
                     2 => Some(&x.closure_function_keyword),
-                    3 => Some(&x.closure_inner_left_paren),
-                    4 => Some(&x.closure_parameter_list),
-                    5 => Some(&x.closure_inner_right_paren),
-                    6 => Some(&x.closure_contexts),
-                    7 => Some(&x.closure_colon),
-                    8 => Some(&x.closure_readonly_return),
-                    9 => Some(&x.closure_return_type),
-                    10 => Some(&x.closure_outer_right_paren),
+                    3 => Some(&x.closure_type_parameters),
+                    4 => Some(&x.closure_inner_left_paren),
+                    5 => Some(&x.closure_parameter_list),
+                    6 => Some(&x.closure_inner_right_paren),
+                    7 => Some(&x.closure_contexts),
+                    8 => Some(&x.closure_colon),
+                    9 => Some(&x.closure_readonly_return),
+                    10 => Some(&x.closure_return_type),
+                    11 => Some(&x.closure_outer_right_paren),
                         _ => None,
                     }
                 })

@@ -68,6 +68,12 @@ impl Env {
         }
     }
 
+    fn extend_hint_tparams(&mut self, tparaml: &[HintTparam]) {
+        for tparam in tparaml {
+            self.type_params.insert(tparam.name.1.clone());
+        }
+    }
+
     fn elaborate_type_name(&self, id: &mut Id) {
         let name = &id.1;
         if !self.type_params.contains::<str>(name)
@@ -509,6 +515,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
         if let Some(ctxs) = &mut hf.ctxs {
             self.on_contexts_ns(&contexts_ns(), env, ctxs)?;
         }
+        env.extend_hint_tparams(&hf.tparams);
         hf.recurse(env, self.object())
     }
 

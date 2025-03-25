@@ -1418,12 +1418,13 @@ ss.serialize_field("dictionary_type_members", &self.with(members))?;
 ss.serialize_field("dictionary_type_right_angle", &self.with(right_angle))?;
       ss.end()
 } 
-SyntaxVariant::ClosureTypeSpecifier (ClosureTypeSpecifierChildren{outer_left_paren,readonly_keyword,function_keyword,inner_left_paren,parameter_list,inner_right_paren,contexts,colon,readonly_return,return_type,outer_right_paren} ) => {
-      let mut ss = s.serialize_struct("", 12)?;
+SyntaxVariant::ClosureTypeSpecifier (ClosureTypeSpecifierChildren{outer_left_paren,readonly_keyword,function_keyword,type_parameters,inner_left_paren,parameter_list,inner_right_paren,contexts,colon,readonly_return,return_type,outer_right_paren} ) => {
+      let mut ss = s.serialize_struct("", 13)?;
       ss.serialize_field("kind", "closure_type_specifier")?;
       ss.serialize_field("closure_outer_left_paren", &self.with(outer_left_paren))?;
 ss.serialize_field("closure_readonly_keyword", &self.with(readonly_keyword))?;
 ss.serialize_field("closure_function_keyword", &self.with(function_keyword))?;
+ss.serialize_field("closure_type_parameters", &self.with(type_parameters))?;
 ss.serialize_field("closure_inner_left_paren", &self.with(inner_left_paren))?;
 ss.serialize_field("closure_parameter_list", &self.with(parameter_list))?;
 ss.serialize_field("closure_inner_right_paren", &self.with(inner_right_paren))?;

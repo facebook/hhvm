@@ -8772,12 +8772,14 @@ end = struct
           let (env, new_name) = Typing_env.fresh_param_name env old_name in
           let tparam = { tparam with tp_name = (pos, new_name) } in
           let ty =
-            mk (Typing_reason.witness_from_decl pos, Tgeneric (new_name, []))
+            mk
+              ( Typing_reason.polymorphic_type_param (pos, old_name),
+                Tgeneric (new_name, []) )
           in
           (env, tparam :: acc, SMap.add old_name ty subst))
     in
     let ft_tparams = List.rev ft_tparams_rev in
-    let combine_reasons ~src ~dest:_ = src in
+    let combine_reasons ~src:_ ~dest = dest in
     ( env,
       Locl_subst.apply_fun { fun_ty with ft_tparams } ~subst ~combine_reasons )
 

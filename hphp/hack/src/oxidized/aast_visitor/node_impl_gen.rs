@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9f7ee3af4270435b92026b34fad7bbf3>>
+// @generated SignedSource<<b34007e22dd6b514769f660b4b381b25>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1435,12 +1435,31 @@ impl<P: Params> Node<P> for HintFun {
         v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
         self.is_readonly.accept(c, v)?;
+        self.tparams.accept(c, v)?;
         self.param_tys.accept(c, v)?;
         self.param_info.accept(c, v)?;
         self.variadic_ty.accept(c, v)?;
         self.ctxs.accept(c, v)?;
         self.return_ty.accept(c, v)?;
         self.is_readonly_return.accept(c, v)
+    }
+}
+impl<P: Params> Node<P> for HintTparam {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_hint_tparam(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.name.accept(c, v)?;
+        self.user_attributes.accept(c, v)?;
+        self.constraints.accept(c, v)
     }
 }
 impl<P: Params> Node<P> for Hint_ {

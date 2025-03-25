@@ -668,6 +668,7 @@ let rec hint : Env.t -> variance -> Aast_defs.hint -> unit =
   | Hfun hfun ->
     let {
       hf_is_readonly = _;
+      hf_tparams = _;
       hf_param_tys;
       hf_param_info;
       hf_variadic_ty;

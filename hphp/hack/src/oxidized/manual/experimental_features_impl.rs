@@ -53,6 +53,7 @@ impl FeatureName {
             ExpressionTreeShapeCreation => OngoingRelease,
             NoDisjointUnion => OngoingRelease,
             SimpliHack => Preview,
+            PolymorphicFunctionHints => Preview,
         }
     }
 

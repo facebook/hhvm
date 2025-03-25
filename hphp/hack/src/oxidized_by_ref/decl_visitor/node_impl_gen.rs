@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<de8f9738dc9564e20890359aa073a66e>>
+// @generated SignedSource<<7475f098b31df28cc6b5228331df8c5a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1314,6 +1314,7 @@ impl<'a> Node<'a> for WitnessDecl<'a> {
             WitnessDecl::PessimisedThis(ref __binding_0) => __binding_0.accept(v),
             WitnessDecl::IllegalRecursiveType(ref __binding_0) => __binding_0.accept(v),
             WitnessDecl::SupportDynamicTypeAssume(ref __binding_0) => __binding_0.accept(v),
+            WitnessDecl::PolymorphicTypeParam(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

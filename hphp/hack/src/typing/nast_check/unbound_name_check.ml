@@ -182,7 +182,7 @@ let extend_type_params init paraml =
 
 let handler ctx =
   object
-    inherit [env] Stateful_aast_visitor.default_nast_visitor_with_state
+    inherit [env] Stateful_aast_visitor.default_nast_visitor_with_state as super
 
     (* The following are all setting the environments / context correctly *)
     method initial_state =
@@ -394,6 +394,18 @@ let handler ctx =
 
     method! at_hint env h =
       match snd h with
+      | Aast.Hfun Aast_defs.{ hf_tparams; _ } ->
+        let env =
+          let type_params =
+            List.fold_left
+              hf_tparams
+              ~init:env.type_params
+              ~f:(fun acc Aast_defs.{ htp_name = (_, nm); _ } ->
+                SMap.add nm Aast_defs.Erased acc)
+          in
+          { env with type_params }
+        in
+        super#at_hint env h
       | Aast.Happly (id, _) ->
         let () =
           check_type_hint

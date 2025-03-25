@@ -1106,6 +1106,8 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
         LikeTypeSpecifier(c) => Ok(Hlike(p_hint(&c.type_, env)?)),
         SoftTypeSpecifier(c) => Ok(Hsoft(p_hint(&c.type_, env)?)),
         ClosureTypeSpecifier(c) => {
+            let tparams = p_hint_tparam_l(&c.type_parameters, env)?;
+
             let (param_list, variadic_hints): (Vec<S<'a>>, Vec<S<'a>>) = c
                 .parameter_list
                 .syntax_node_to_list_skip_separator()
@@ -1151,6 +1153,7 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
             Ok(Hfun(ast::HintFun {
                 is_readonly: map_optional(&c.readonly_keyword, env, p_readonly)?,
                 param_tys: type_hints,
+                tparams,
                 param_info: info,
                 variadic_ty: variadic_hints.into_iter().next().unwrap_or(None),
                 ctxs,
@@ -4301,6 +4304,66 @@ fn p_tparam_l<'a>(is_class: bool, node: S<'a>, env: &mut Env<'a>) -> Result<Vec<
     match &node.children {
         Missing => Ok(vec![]),
         TypeParameters(c) => could_map(&c.parameters, env, |n, e| p_tparam(is_class, n, e)),
+        _ => missing_syntax("type parameter", node, env),
+    }
+}
+
+fn p_hint_tparam<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::HintTparam> {
+    match &node.children {
+        TypeParameter(TypeParameterChildren {
+            attribute_spec,
+            reified,
+            variance,
+            name,
+            param_params,
+            constraints,
+        }) => {
+            // HKTs, user attributes with parameters, reified generics and
+            // variance annotations are all disallowed
+            if !reified.is_missing() {
+                raise_parsing_error(node, env, &syntax_error::polymorphic_function_hint_reified);
+            }
+            if !variance.is_missing() {
+                raise_parsing_error(node, env, &syntax_error::polymorphic_function_hint_variance);
+            }
+            if !param_params.is_missing() {
+                raise_parsing_error(node, env, &syntax_error::polymorphic_function_hint_hkt);
+            }
+
+            let type_name = text(name, env);
+            // this is incorrect for type aliases, but it doesn't affect any check
+            env.fn_generics_mut().insert(type_name, false);
+
+            let uas = p_user_attributes(attribute_spec, env);
+            let user_attributes = uas
+                .0
+                .into_iter()
+                .map(|attr| {
+                    if !attr.params.is_empty() {
+                        raise_parsing_error(
+                            node,
+                            env,
+                            &syntax_error::polymorphic_function_hint_attribute_spec,
+                        );
+                    }
+                    attr.name
+                })
+                .collect();
+
+            Ok(ast::HintTparam {
+                name: pos_name(name, env)?,
+                constraints: could_map(constraints, env, p_tconstraint)?,
+                user_attributes,
+            })
+        }
+        _ => missing_syntax("type parameter", node, env),
+    }
+}
+
+fn p_hint_tparam_l<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::HintTparam>> {
+    match &node.children {
+        Missing => Ok(vec![]),
+        TypeParameters(c) => could_map(&c.parameters, env, |n, e| p_hint_tparam(n, e)),
         _ => missing_syntax("type parameter", node, env),
     }
 }

@@ -102,7 +102,8 @@ impl WitnessDecl {
             | Self::PessimisedThis(pos_or_decl)
             | Self::IllegalRecursiveType(pos_or_decl, _)
             | Self::SupportDynamicTypeAssume(pos_or_decl)
-            | Self::TupleFromSplat(pos_or_decl) => pos_or_decl,
+            | Self::TupleFromSplat(pos_or_decl)
+            | Self::PolymorphicTypeParam(pos_or_decl, _) => pos_or_decl,
         }
     }
 }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7b42fb9c6d5f2ff0320ded825434dfcf>>
+// @generated SignedSource<<979ddd193a103de61dfc388188dd379d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2646,6 +2646,7 @@ pub struct HfParamInfo {
 pub struct HintFun {
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub is_readonly: Option<ast_defs::ReadonlyKind>,
+    pub tparams: Vec<HintTparam>,
     pub param_tys: Vec<Hint>,
     pub param_info: Vec<Option<HfParamInfo>>,
     pub variadic_ty: VariadicHint,
@@ -2654,6 +2655,29 @@ pub struct HintFun {
     pub return_ty: Hint,
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub is_readonly_return: Option<ast_defs::ReadonlyKind>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[rust_to_ocaml(prefix = "htp_")]
+#[repr(C)]
+pub struct HintTparam {
+    pub name: Sid,
+    pub user_attributes: Vec<Sid>,
+    pub constraints: Vec<(ast_defs::ConstraintKind, Hint)>,
 }
 
 #[derive(

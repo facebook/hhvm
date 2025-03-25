@@ -1714,11 +1714,12 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_closure_type_specifier(ctx: &C, outer_left_paren: Self, readonly_keyword: Self, function_keyword: Self, inner_left_paren: Self, parameter_list: Self, inner_right_paren: Self, contexts: Self, colon: Self, readonly_return: Self, return_type: Self, outer_right_paren: Self) -> Self {
+    fn make_closure_type_specifier(ctx: &C, outer_left_paren: Self, readonly_keyword: Self, function_keyword: Self, type_parameters: Self, inner_left_paren: Self, parameter_list: Self, inner_right_paren: Self, contexts: Self, colon: Self, readonly_return: Self, return_type: Self, outer_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::ClosureTypeSpecifier(ctx.get_arena().alloc(ClosureTypeSpecifierChildren {
             outer_left_paren,
             readonly_keyword,
             function_keyword,
+            type_parameters,
             inner_left_paren,
             parameter_list,
             inner_right_paren,

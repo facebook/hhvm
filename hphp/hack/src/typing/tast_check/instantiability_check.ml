@@ -127,6 +127,7 @@ let rec check_hint env (pos, hint) =
       Aast.
         {
           hf_is_readonly = _;
+          hf_tparams;
           hf_param_tys = hl;
           hf_param_info = _;
           (* TODO: shouldn't we be checking this hint as well? *)
@@ -136,7 +137,9 @@ let rec check_hint env (pos, hint) =
           hf_is_readonly_return = _;
         } ->
     List.iter hl ~f:(check_hint env);
-    check_hint env h
+    check_hint env h;
+    List.iter hf_tparams ~f:(fun Aast_defs.{ htp_constraints; _ } ->
+        List.iter htp_constraints ~f:(fun (_, h) -> check_hint env h))
   | Aast.Hunion hl
   | Aast.Hintersection hl ->
     List.iter hl ~f:(check_hint env)

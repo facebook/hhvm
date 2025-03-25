@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5fd6d87c48a8249ae2cb1555aff41265>>
+// @generated SignedSource<<98f1a32b9133f6a39d3a40356e4b7915>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2358,11 +2358,12 @@ impl Transform for HintFun {
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
             HintFun {
-                param_tys: ref mut __binding_1,
-                param_info: ref mut __binding_2,
-                variadic_ty: ref mut __binding_3,
-                ctxs: ref mut __binding_4,
-                return_ty: ref mut __binding_5,
+                tparams: ref mut __binding_1,
+                param_tys: ref mut __binding_2,
+                param_info: ref mut __binding_3,
+                variadic_ty: ref mut __binding_4,
+                ctxs: ref mut __binding_5,
+                return_ty: ref mut __binding_6,
                 ..
             } => {
                 {
@@ -2378,17 +2379,47 @@ impl Transform for HintFun {
                     __binding_4.transform(env, &mut pass.clone())
                 }
                 {
+                    __binding_5.transform(env, &mut pass.clone())
+                }
+                {
                     {
                         let pass = &mut pass.clone();
                         let mut in_pass = pass.clone();
-                        if let Break(..) = pass.on_fld_hint_fun_return_ty_top_down(env, __binding_5)
+                        if let Break(..) = pass.on_fld_hint_fun_return_ty_top_down(env, __binding_6)
                         {
                             return;
                         }
-                        __binding_5.transform(env, &mut pass.clone());
-                        in_pass.on_fld_hint_fun_return_ty_bottom_up(env, __binding_5);
+                        __binding_6.transform(env, &mut pass.clone());
+                        in_pass.on_fld_hint_fun_return_ty_bottom_up(env, __binding_6);
                     }
                 }
+            }
+        }
+    }
+}
+impl Transform for HintTparam {
+    fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        let mut in_pass = pass.clone();
+        if let Break(..) = pass.on_ty_hint_tparam_top_down(env, self) {
+            return;
+        }
+        stack_limit::maybe_grow(|| self.traverse(env, pass));
+        in_pass.on_ty_hint_tparam_bottom_up(env, self);
+    }
+    fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        match self {
+            HintTparam {
+                name: ref mut __binding_0,
+                user_attributes: ref mut __binding_1,
+                constraints: ref mut __binding_2,
+            } => {
+                {
+                    __binding_0.transform(env, &mut pass.clone())
+                }
+                {
+                    __binding_1.transform(env, &mut pass.clone())
+                }
+                { __binding_2.transform(env, &mut pass.clone()) }
             }
         }
     }

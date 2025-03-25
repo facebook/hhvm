@@ -2333,6 +2333,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           closure_outer_left_paren = outer_left_p;
           closure_readonly_keyword = ro;
           closure_function_keyword = kw;
+          closure_type_parameters = typarams;
           closure_inner_left_paren = inner_left_p;
           closure_parameter_list = param_list;
           closure_inner_right_paren = inner_right_p;
@@ -2348,6 +2349,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env ro;
           when_present ro space;
           t env kw;
+          t env typarams;
           t env inner_left_p;
           when_present param_list split;
           transform_fn_decl_args env param_list inner_right_p;

@@ -220,6 +220,7 @@ and hint_ ~in_signature env p h_ =
   | Hfun
       {
         hf_is_readonly = _;
+        hf_tparams;
         hf_param_tys = hl;
         hf_param_info;
         hf_variadic_ty = variadic_hint;
@@ -233,11 +234,18 @@ and hint_ ~in_signature env p h_ =
         check_splat_hint env p h
       | _ -> []
     in
+    (* Bind any type parameters bound in the function hint and check the hint *)
+    let env =
+      let tparams = List.map hf_tparams ~f:Aast_defs.tparam_of_hint_tparam in
+      { env with typedef_tparams = tparams @ env.typedef_tparams }
+    in
     hints env hl
     @ splat_err
     @ hint env h
     @ hint_opt env variadic_hint
     @ contexts_opt env hf_ctxs
+    @ List.concat_map hf_tparams ~f:(fun Aast_defs.{ htp_constraints; _ } ->
+          List.concat_map htp_constraints ~f:(fun (_, h) -> hint env h))
   | Happly ((p, "\\Tuple"), _)
   | Happly ((p, "\\tuple"), _) ->
     [Typing_error.(wellformedness @@ Primary.Wellformedness.Tuple_syntax p)]

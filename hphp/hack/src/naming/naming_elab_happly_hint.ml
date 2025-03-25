@@ -16,50 +16,60 @@ module Env = struct
       =
     tparams
 
-  let add_tparams ps init =
-    List.fold
-      ps
-      ~f:(fun acc Aast.{ tp_name = (_, nm); _ } -> SSet.add nm acc)
-      ~init
-
-  let extend_tparams t ps =
+  let extend_tparams_with t ~add ps =
     let elab_happly_hint = t.Naming_phase_env.elab_happly_hint in
     let tparams =
-      add_tparams ps elab_happly_hint.Naming_phase_env.Elab_happly_hint.tparams
+      add ps elab_happly_hint.Naming_phase_env.Elab_happly_hint.tparams
     in
     let elab_happly_hint = Naming_phase_env.Elab_happly_hint.{ tparams } in
     Naming_phase_env.{ t with elab_happly_hint }
 
+  let add_tparams ps init =
+    List.fold
+      ps
+      ~f:(fun acc Aast.{ tp_name = (pos, nm); _ } -> SMap.add nm pos acc)
+      ~init
+
+  let extend_tparams t ps = extend_tparams_with t ~add:add_tparams ps
+
+  let add_hint_tparams ps init =
+    List.fold
+      ps
+      ~f:(fun acc Aast.{ htp_name = (pos, nm); _ } -> SMap.add nm pos acc)
+      ~init
+
+  let extend_hint_tparams t ps = extend_tparams_with t ~add:add_hint_tparams ps
+
   let in_class t Aast.{ c_tparams; _ } =
     let elab_happly_hint =
       Naming_phase_env.Elab_happly_hint.
-        { tparams = add_tparams c_tparams SSet.empty }
+        { tparams = add_tparams c_tparams SMap.empty }
     in
     Naming_phase_env.{ t with elab_happly_hint }
 
   let in_fun_def t Aast.{ fd_tparams; _ } =
     let elab_happly_hint =
       Naming_phase_env.Elab_happly_hint.
-        { tparams = add_tparams fd_tparams SSet.empty }
+        { tparams = add_tparams fd_tparams SMap.empty }
     in
     Naming_phase_env.{ t with elab_happly_hint }
 
   let in_typedef t Aast.{ t_tparams; _ } =
     let elab_happly_hint =
       Naming_phase_env.Elab_happly_hint.
-        { tparams = add_tparams t_tparams SSet.empty }
+        { tparams = add_tparams t_tparams SMap.empty }
     in
     Naming_phase_env.{ t with elab_happly_hint }
 
   let in_gconst t =
     let elab_happly_hint =
-      Naming_phase_env.Elab_happly_hint.{ tparams = SSet.empty }
+      Naming_phase_env.Elab_happly_hint.{ tparams = SMap.empty }
     in
     Naming_phase_env.{ t with elab_happly_hint }
 
   let in_module_def t =
     let elab_happly_hint =
-      Naming_phase_env.Elab_happly_hint.{ tparams = SSet.empty }
+      Naming_phase_env.Elab_happly_hint.{ tparams = SMap.empty }
     in
     Naming_phase_env.{ t with elab_happly_hint }
 end
@@ -143,7 +153,7 @@ let canonical_tycon typarams (pos, name) =
   else if String.(equal name SN.Classes.cClassname || equal name "classname")
   then
     Classname pos
-  else if SSet.mem name typarams then
+  else if SMap.mem name typarams then
     Typaram name
   else
     Tycon (pos, name)
@@ -253,6 +263,28 @@ let on_hint on_error hint ~ctx =
       (ctx, Error hint))
   | _ -> (ctx, Ok hint)
 
+let on_hint_fun on_error hint_fun ~ctx =
+  let Aast.{ hf_tparams; _ } = hint_fun in
+  (* Disallow rebinding type parameters that occur in class or method position
+     but allow names to be reused across different first-class polymorphic function
+     hints *)
+  let (_ : unit) =
+    let bound = Env.tparams ctx in
+    List.iter
+      hf_tparams
+      ~f:(fun Aast_defs.{ htp_name = (pos, tparam_name); _ } ->
+        Option.iter
+          ~f:(fun prev_pos ->
+            let err =
+              Naming_phase_error.naming
+                (Naming_error.Shadowed_tparam { pos; prev_pos; tparam_name })
+            in
+            on_error err)
+          (SMap.find_opt tparam_name bound))
+  in
+  let ctx = Env.extend_hint_tparams ctx hf_tparams in
+  (ctx, Ok hint_fun)
+
 let pass on_error =
   let id = Aast.Pass.identity () in
   Naming_phase_pass.top_down
@@ -267,4 +299,5 @@ let pass on_error =
         on_ty_method_ = Some on_method_;
         on_ty_tparam = Some on_tparam;
         on_ty_hint = Some (on_hint on_error);
+        on_ty_hint_fun = Some (on_hint_fun on_error);
       }

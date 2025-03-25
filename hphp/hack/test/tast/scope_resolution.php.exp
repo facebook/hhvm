@@ -186,7 +186,7 @@ Errors:
                   (Happly (([10:17-34], "\\HH\\supportdyn"),
                      [([10:17-34],
                        (Hfun
-                          { hf_is_readonly = None; hf_param_tys = []; 
+                          { hf_is_readonly = None; hf_tparams = []; hf_param_tys = []; 
                             hf_param_info = []; hf_variadic_ty = None; 
                             hf_ctxs = None; hf_return_ty = ([10:30-33], (Hlike ([10:30-33], (Hprim Tint)))); 
                             hf_is_readonly_return = None }))

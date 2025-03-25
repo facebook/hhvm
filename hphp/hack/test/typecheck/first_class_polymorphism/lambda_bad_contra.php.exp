@@ -2,11 +2,11 @@ ERROR: File "lambda_bad_contra.php", line 25, characters 29-46:
 Invalid argument (Typing[4110])
   File "lambda_bad_contra.php", line 25, characters 30-32:
   Expected `int`
-  File "lambda_bad_contra.php", line 16, characters 22-26:
-  But got `Tblah#2`
+  File "lambda_bad_contra.php", line 16, characters 15-19:
+  But got `Tblah#2` which corresponds to the type parameter `Tblah` in the polymorphic function
 ERROR: File "lambda_bad_contra.php", line 25, characters 29-46:
 Invalid argument (Typing[4110])
   File "lambda_bad_contra.php", line 25, characters 30-32:
   Expected `int`
-  File "lambda_bad_contra.php", line 16, characters 22-26:
+  File "lambda_bad_contra.php", line 16, characters 15-19:
   But got `mixed` arising from an implicit `as mixed` constraint on this type

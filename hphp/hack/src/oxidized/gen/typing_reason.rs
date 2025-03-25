@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2984fba51d925215920068924c33e719>>
+// @generated SignedSource<<fd303fd24eb18fc63536e0b7e2ce03db>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -594,6 +594,8 @@ pub enum WitnessDecl {
     IllegalRecursiveType(pos_or_decl::PosOrDecl, String),
     #[rust_to_ocaml(name = "Support_dynamic_type_assume")]
     SupportDynamicTypeAssume(pos_or_decl::PosOrDecl),
+    #[rust_to_ocaml(name = "Polymorphic_type_param")]
+    PolymorphicTypeParam(pos_or_decl::PosOrDecl, String),
 }
 
 /// Axioms are information about types provided by the user in class or type

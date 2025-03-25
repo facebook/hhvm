@@ -6126,6 +6126,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         outer_left_paren: Self::Output,
         readonly_keyword: Self::Output,
         _function_keyword: Self::Output,
+        type_parameters: Self::Output,
         _inner_left_paren: Self::Output,
         parameter_list: Self::Output,
         _inner_right_paren: Self::Output,
@@ -6181,6 +6182,51 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             _ => None,
         }));
 
+        let tparams = match type_parameters {
+            Node::TypeParameters(&tparams) => tparams,
+            _ => &[],
+        };
+
+        let tparams = if self.implicit_sdt() {
+            // Create a new Vec to hold the updated Tparams
+            let mut updated_tparams = bump::Vec::with_capacity_in(tparams.len(), self.arena);
+            // Iterate over the old tparams and add `supportdyn<mixed>` upper bounds
+            // unless there is `__NoAutoBound` attribute
+            tparams.iter().for_each(|&tparam| {
+                if tparam.user_attributes.iter().any(|ua| {
+                    ua.name.1 == naming_special_names_rust::user_attributes::NO_AUTO_BOUND
+                }) {
+                    updated_tparams.push(tparam);
+                } else {
+                    let mut new_tparam = (*tparam).clone();
+                    let mixed = self.alloc(Ty(
+                        self.alloc(Reason::FromWitnessDecl(
+                            self.alloc(WitnessDecl::Hint(tparam.name.0)),
+                        )),
+                        Ty_::Tmixed,
+                    ));
+                    let ub = self.alloc(Ty(
+                        self.alloc(Reason::FromWitnessDecl(
+                            self.alloc(WitnessDecl::Hint(tparam.name.0)),
+                        )),
+                        Ty_::Tapply(self.alloc((
+                            (tparam.name.0, naming_special_names::classes::SUPPORT_DYN),
+                            self.alloc([mixed]),
+                        ))),
+                    ));
+                    let mut constraints = new_tparam.constraints.to_vec();
+                    constraints.push((ConstraintKind::ConstraintAs, ub));
+                    new_tparam.constraints = self.alloc(constraints);
+                    let x = self.alloc(new_tparam);
+                    updated_tparams.push(x);
+                }
+            });
+            updated_tparams.into_bump_slice()
+        } else {
+            tparams
+        };
+        let instantiated = tparams.is_empty();
+
         let ret = match self.node_to_ty(return_type) {
             Some(ty) => ty,
             None => return Node::Ignored(SK::ClosureTypeSpecifier),
@@ -6208,14 +6254,14 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             ret
         };
         let fty = Ty_::Tfun(self.alloc(FunType {
-            tparams: &[],
+            tparams,
             where_constraints: &[],
             params,
             implicit_params,
             ret: pess_return_type,
             flags,
             cross_package: None,
-            instantiated: true,
+            instantiated,
         }));
 
         if self.implicit_sdt() {

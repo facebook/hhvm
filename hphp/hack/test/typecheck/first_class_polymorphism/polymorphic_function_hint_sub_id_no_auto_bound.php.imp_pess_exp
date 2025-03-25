@@ -1,0 +1,6 @@
+ERROR: File "polymorphic_function_hint_sub_id_no_auto_bound.php", line 21, characters 15-16:
+Invalid argument (Typing[4110])
+  File "polymorphic_function_hint_sub_id_no_auto_bound.php", line 15, characters 10-11:
+  Expected `dynamic`
+  File "polymorphic_function_hint_sub_id_no_auto_bound.php", line 6, characters 31-31:
+  Type `T#1` is not a subtype of `dynamic` under dynamic-aware subtyping

@@ -1252,7 +1252,6 @@ and localize_ft
       ft_ret = ret;
       ft_tparams = tparams;
       ft_where_constraints = where_constraints;
-      ft_instantiated = true;
     } )
 
 (* Given a list of generic parameters [tparams] and a substitution

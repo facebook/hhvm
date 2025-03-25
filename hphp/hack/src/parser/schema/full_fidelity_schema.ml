@@ -9,7 +9,7 @@
 
 (* If you make changes to the schema that cause it to serialize / deserialize
    differently, please update this version number *)
-let full_fidelity_schema_version_number = "2024-11-19-0000"
+let full_fidelity_schema_version_number = "2025-03-24-0000"
 
 (* TODO: Consider basing the version number on an auto-generated
    hash of a file rather than relying on people remembering to update it. *)

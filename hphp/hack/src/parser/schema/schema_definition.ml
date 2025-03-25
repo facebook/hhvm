@@ -2188,6 +2188,7 @@ let schema : schema_node list =
           ("outer_left_paren", Token);
           ("readonly_keyword", ZeroOrOne Token);
           ("function_keyword", Token);
+          ("type_parameters", ZeroOrOne (Just "TypeParameters"));
           ("inner_left_paren", Token);
           ("parameter_list", ZeroOrMore (Just "ClosureParameterTypeSpecifier"));
           ("inner_right_paren", Token);

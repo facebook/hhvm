@@ -242,6 +242,8 @@ val yield_asyncnull : Pos.t -> t
 
 val yield_send : Pos.t -> t
 
+val polymorphic_type_param : Pos_or_decl.t * string -> t
+
 val lost_info : string * t * blame -> t
 
 val format : Pos.t * string * t -> t

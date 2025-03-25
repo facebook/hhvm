@@ -1357,3 +1357,19 @@ pub fn no_continue_in_finally(blk_token: TokenKind, stmt_token: TokenKind) -> Er
 
 pub const asio_low_pri_check: Error =
     Cow::Borrowed("Only non-generator async functions can be marked low priority.");
+
+pub const polymorphic_function_hint_attribute_spec: Error = Cow::Borrowed(
+    "Attributes with parameters are not allowed for type parameters in polymorphic function hints or polymorphic lambda signatures.",
+);
+
+pub const polymorphic_function_hint_reified: Error = Cow::Borrowed(
+    "Reified generics are not allowed in polymorphic function hints or polymorphic lambda signatures.",
+);
+
+pub const polymorphic_function_hint_hkt: Error = Cow::Borrowed(
+    "Higher-kinded generics are not allowed in polymorphic function hints or polymorphic lambda signatures.",
+);
+
+pub const polymorphic_function_hint_variance: Error = Cow::Borrowed(
+    "Variance annotation are not allowed on generics in polymorphic function hints or polymorphic lambda signatures.",
+);

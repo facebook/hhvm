@@ -155,6 +155,7 @@ struct
     closure_outer_left_paren: t;
     closure_readonly_keyword: t;
     closure_function_keyword: t;
+    closure_type_parameters: t;
     closure_inner_left_paren: t;
     closure_parameter_list: t;
     closure_inner_right_paren: t;
@@ -1065,6 +1066,7 @@ struct
         closure_outer_left_paren: t;
         closure_readonly_keyword: t;
         closure_function_keyword: t;
+        closure_type_parameters: t;
         closure_inner_left_paren: t;
         closure_parameter_list: t;
         closure_inner_right_paren: t;

@@ -918,6 +918,7 @@ where
         let olp = self.fetch_token();
         let ro = self.parse_readonly_opt();
         let fnc = self.fetch_token();
+        let typarams = self.parse_generic_type_parameter_list_opt();
         let ilp = self.require_left_paren();
         let (pts, irp) = if self.peek_token_kind() == TokenKind::RightParen {
             let pos = self.pos();
@@ -936,8 +937,9 @@ where
         let readonly = self.parse_readonly_opt();
         let ret = self.parse_type_specifier(false, true);
         let orp = self.require_right_paren();
-        self.sc_mut()
-            .make_closure_type_specifier(olp, ro, fnc, ilp, pts, irp, ctxs, col, readonly, ret, orp)
+        self.sc_mut().make_closure_type_specifier(
+            olp, ro, fnc, typarams, ilp, pts, irp, ctxs, col, readonly, ret, orp,
+        )
     }
 
     fn parse_tuple_or_union_or_intersection_type_specifier(&mut self) -> S::Output {

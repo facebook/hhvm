@@ -411,6 +411,15 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       let hf_ctxs =
         Option.map ~f:(self#on_contexts_ns contexts_ns env) hf.hf_ctxs
       in
+      let env =
+        let type_params =
+          List.fold_left
+            hf.hf_tparams
+            ~f:(fun acc { htp_name = (_, nm); _ } -> SSet.add nm acc)
+            ~init:env.type_params
+        in
+        { env with type_params }
+      in
       { (super#on_hint_fun env hf) with hf_ctxs }
 
     (* For contexts like cipp_of<T>, the type argument needs to be elaborated

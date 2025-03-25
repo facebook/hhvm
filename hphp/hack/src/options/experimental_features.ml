@@ -68,6 +68,7 @@ type feature_name =
   | ExpressionTreeShapeCreation
   | NoDisjointUnion
   | SimpliHack
+  | PolymorphicFunctionHints
 [@@deriving eq, ord, show]
 
 let feature_name_map =
@@ -112,6 +113,7 @@ let feature_name_map =
       ("expression_tree_shape_creation", ExpressionTreeShapeCreation);
       ("no_disjoint_union", NoDisjointUnion);
       ("simplihack", SimpliHack);
+      ("polymorphic_function_hints", PolymorphicFunctionHints);
     ]
 
 let feature_name_from_string s = SMap.find_opt s feature_name_map

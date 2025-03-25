@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d6821a100f7d9912f85752537ad20c9b>>
+// @generated SignedSource<<fb61672ba09f8fd97e6b1ab85de4c45b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1149,6 +1149,14 @@ pub trait Pass: PassClone {
         env: &Env,
         elem: &mut Hint,
     ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_hint_tparam_top_down(&mut self, env: &Env, elem: &mut HintTparam) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_hint_tparam_bottom_up(&mut self, env: &Env, elem: &mut HintTparam) -> ControlFlow<()> {
         Continue(())
     }
     #[inline(always)]
@@ -3022,6 +3030,20 @@ impl Pass for Passes {
     ) -> ControlFlow<()> {
         for pass in &mut self.passes {
             pass.on_fld_hint_fun_return_ty_bottom_up(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_hint_tparam_top_down(&mut self, env: &Env, elem: &mut HintTparam) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_hint_tparam_top_down(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_hint_tparam_bottom_up(&mut self, env: &Env, elem: &mut HintTparam) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_hint_tparam_bottom_up(env, elem)?;
         }
         Continue(())
     }

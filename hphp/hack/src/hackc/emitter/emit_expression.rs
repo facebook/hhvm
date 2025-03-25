@@ -6517,6 +6517,7 @@ fn fixup_type_arg<'a, 'b>(
         }
 
         fn visit_hint_fun(&mut self, c: &mut (), hf: &ast::HintFun) -> Result<(), Option<Error>> {
+            hf.tparams.accept(c, self.object())?;
             hf.param_tys.accept(c, self.object())?;
             hf.return_ty.accept(c, self.object())
         }
@@ -6560,6 +6561,11 @@ fn fixup_type_arg<'a, 'b>(
         }
 
         fn visit_hint_fun(&mut self, c: &mut (), hf: &mut ast::HintFun) -> Result<(), ()> {
+            <Vec<ast::HintTparam> as NodeMut<Self::Params>>::accept(
+                &mut hf.tparams,
+                c,
+                self.object(),
+            )?;
             <Vec<ast::Hint> as NodeMut<Self::Params>>::accept(&mut hf.param_tys, c, self.object())?;
             <ast::Hint as NodeMut<Self::Params>>::accept(&mut hf.return_ty, c, self.object())
         }

@@ -5928,6 +5928,7 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
         outer_left_paren: Self::Output,
         readonly_keyword: Self::Output,
         _function_keyword: Self::Output,
+        type_parameters: Self::Output,
         _inner_left_paren: Self::Output,
         parameter_list: Self::Output,
         _inner_right_paren: Self::Output,
@@ -5986,6 +5987,47 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             })
             .collect();
 
+        let tparams =
+            match type_parameters {
+                Node::TypeParameters(tparams) => {
+                    // Iterate over the old tparams and add `supportdyn<mixed>` upper bounds
+                    // unless there is `__NoAutoBound` attribute
+                    if self.implicit_sdt() {
+                        tparams
+                            .into_iter()
+                            .map(|mut tparam| {
+                                if !tparam.user_attributes.iter().any(|ua| {
+                            ua.name.1 == naming_special_names_rust::user_attributes::NO_AUTO_BOUND
+                        }) {
+                            let mixed = Ty(
+                                Reason::FromWitnessDecl(WitnessDecl::Hint(tparam.name.0.clone())),
+                                Box::new(Ty_::Tmixed),
+                            );
+                            let ub = Ty(
+                                Reason::FromWitnessDecl(WitnessDecl::Hint(tparam.name.0.clone())),
+                                Box::new(Ty_::Tapply(
+                                    (
+                                        tparam.name.0.clone(),
+                                        naming_special_names_rust::classes::SUPPORT_DYN.to_string(),
+                                    ),
+                                    vec![mixed],
+                                )),
+                            );
+                            tparam.constraints.push((ConstraintKind::ConstraintAs, ub));
+                            tparam
+                        } else {
+                            tparam
+                        }
+                            })
+                            .collect()
+                    } else {
+                        tparams
+                    }
+                }
+                _ => vec![],
+            };
+        let instantiated = tparams.is_empty();
+
         let ret = match self.node_to_ty(return_type) {
             Some(ty) => ty,
             None => return Node::Ignored(SK::ClosureTypeSpecifier),
@@ -6013,14 +6055,14 @@ impl<'o, 't> FlattenSmartConstructors for DirectDeclSmartConstructors<'o, 't> {
             ret
         };
         let mut fty = Ty_::Tfun(FunType {
-            tparams: vec![],
+            tparams,
             where_constraints: vec![],
             params,
             implicit_params,
             ret: pess_return_type,
             flags,
             cross_package: None,
-            instantiated: true,
+            instantiated,
         });
 
         if self.implicit_sdt() {

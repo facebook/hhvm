@@ -6,12 +6,12 @@
       "metadata":{"collapsed":true,"output":{"id":1247934846418027,"loadingStatus":"loaded"}},
       "outputs":[],
       "source":[
-        "class MyClass {",
-        "  public function hello(): void {",
-        "    echo \"hello\";",
-        "  }",
-        "}",
-        "$m = new MyClass();",
+        "class MyClass {\n",
+        "  public function hello(): void {\n",
+        "    echo \"hello\";\n",
+        "  }\n",
+        "}\n",
+        "$m = new MyClass();\n",
         "echo \"hi1\";"
       ]
     },
@@ -20,14 +20,14 @@
       "execution_count":null,
       "metadata":{},
       "outputs":[],
-      "source":["# Check it out","\n","I am a *markdown* **cell**"]
+      "source":["# Check it out\n","I am a *markdown* **cell**"]
     },
     {
       "cell_type":"code",
       "execution_count":null,
       "metadata":{},
       "outputs":[],
-      "source":["echo \"hi2\";","$m->hello();"]
+      "source":["echo \"hi2\";\n","$m->hello();"]
     }
   ],
   "metadata":{

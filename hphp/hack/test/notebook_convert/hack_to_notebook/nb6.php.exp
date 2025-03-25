@@ -13,10 +13,9 @@
       },
       "outputs":[],
       "source":[
-        "final class MyClass {",
-        "\n",
-        "  // This is a comment",
-        "  const int METADATA_ID = 219481;",
+        "final class MyClass {\n",
+        "  // This is a comment\n",
+        "  const int METADATA_ID = 219481;\n",
         "}"
       ]
     }

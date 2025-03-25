@@ -71,21 +71,35 @@ let ipynb_of_json (ipynb_json : Hh_json.json) : (t, string) Result.t =
   with
   | e -> Error (Exn.to_string e)
 
+(** Software we work with that consumes notebooks
+* expects that:
+* - Every string in the "source" array (except possibly the last one) ends in "\n".
+* - There are no empty strings (`""`) in the "source" array
+* Note that, afaict, these requirements are not officially specified:
+* https://ipython.org/ipython-doc/3/notebook/nbformat.html
+*)
+let normalize_output_lines_in_source_array (source : string list) : string list
+    =
+  let length = List.length source in
+  let is_last index = index = length - 1 in
+  List.filter_mapi source ~f:(fun i s ->
+      if String.is_empty s then
+        None
+      else if String.is_suffix ~suffix:"\n" s || is_last i then
+        Some s
+      else
+        (* The thing that consumes notebooks expects that every line in the "source" array
+         * (except possibly the last line) ends in "\n".
+         *)
+        Some (s ^ "\n"))
+
 let make_ipynb_cell
     ~(cell_type : string)
     ~(source : string list)
     ~(cell_bento_metadata : Hh_json.json option) =
   let source =
     source
-    |> List.map ~f:(fun s ->
-           if String.is_empty s then
-             (* We mimic VSCode's behavior of normalizing "" to "\n".
-              * Why: A notebook validator rejects notebooks that have empty lines
-              * in the `source` array.
-              *)
-             "\n"
-           else
-             s)
+    |> normalize_output_lines_in_source_array
     |> List.map ~f:Hh_json.string_
   in
   Hh_json.(

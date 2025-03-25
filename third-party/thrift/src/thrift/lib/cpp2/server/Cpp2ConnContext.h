@@ -124,6 +124,8 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
               transport->getPeerCertificate())) {
         peerCert = std::move(osslCert);
       }
+      transportInfo_.receivedCert =
+          (transport->getPeerCertificate() != nullptr);
       transportInfo_.securityProtocol = transport->getSecurityProtocol();
       transportInfo_.cachedEkms = detail::populateCachedEkms(*transport);
 
@@ -285,6 +287,8 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
     }
     return nullptr;
   }
+
+  bool peerCertReceived() const { return transportInfo_.receivedCert; }
 
   /**
    * Get the user data field.
@@ -543,6 +547,9 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
     std::string securityProtocol;
     std::shared_ptr<X509> peerCertificate;
     std::vector<detail::EkmInfo> cachedEkms;
+    // We may not save the peer cert in this object and we may still
+    // need some signal as to whether a cert was received
+    bool receivedCert{false};
   } transportInfo_;
   const folly::AsyncTransport* transport_;
 

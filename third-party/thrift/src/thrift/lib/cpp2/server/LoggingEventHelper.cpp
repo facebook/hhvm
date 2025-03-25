@@ -101,10 +101,14 @@ void logSetupConnectionEventsOnce(
         const auto& protocol = context.getSecurityProtocol();
         if (protocol == "TLS" || protocol == "Fizz" || protocol == "stopTLS" ||
             protocol == "Fizz/KTLS") {
-          // Check if we had cached the cert on the conn context as well, we may
-          // have dropped the cert from the transport
-          if (!transport->getPeerCertificate() &&
-              !context.getPeerCertificate()) {
+          /*
+           * We have to deal with two cases here
+           * 1. no peer cert received at all
+           * 2. If a peer cert was received we can additionally log data from
+           * said cert but only if it hasn't been dropped from
+           * the context/transport, which may have happened to conserve memory
+           */
+          if (!context.peerCertReceived()) {
             logTlsNoPeerCertEvent(context);
           } else if (transport->getPeerCertificate() != nullptr) {
             maybeLogTlsPeerCertEvent(context, transport->getPeerCertificate());

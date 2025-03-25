@@ -1633,13 +1633,13 @@ class mstch_rust_value : public mstch_base {
       : mstch_base(ctx, pos),
         const_value_(const_value),
         local_type_(type),
-        type_(step_through_typedefs(type, false)),
+        underlying_type_(step_through_typedefs(type, false)),
         depth_(depth),
         options_(options) {
     register_methods(
         this,
         {
-            {"value:type", &mstch_rust_value::type},
+            {"value:underlying_type", &mstch_rust_value::underlying_type},
             {"value:local_type", &mstch_rust_value::local_type},
             {"value:newtype?", &mstch_rust_value::is_newtype},
             {"value:inner", &mstch_rust_value::inner},
@@ -1672,16 +1672,17 @@ class mstch_rust_value : public mstch_base {
             {"value:simpleLiteral?", &mstch_rust_value::simple_literal},
         });
   }
-  mstch::node type() {
-    return context_.type_factory->make_mstch_object(type_, context_, pos_);
+  mstch::node underlying_type() {
+    return context_.type_factory->make_mstch_object(
+        underlying_type_, context_, pos_);
   }
   mstch::node local_type() {
     return context_.type_factory->make_mstch_object(
         local_type_, context_, pos_);
   }
-  mstch::node is_newtype() { return has_newtype_annotation(type_); }
+  mstch::node is_newtype() { return has_newtype_annotation(underlying_type_); }
   mstch::node inner() {
-    auto typedef_type = dynamic_cast<const t_typedef*>(type_);
+    auto typedef_type = dynamic_cast<const t_typedef*>(underlying_type_);
     if (typedef_type) {
       auto inner_type = typedef_type->get_type();
       return std::make_shared<mstch_rust_value>(
@@ -1689,7 +1690,7 @@ class mstch_rust_value : public mstch_base {
     }
     return mstch::node();
   }
-  mstch::node is_bool() { return type_->is_bool(); }
+  mstch::node is_bool() { return underlying_type_->is_bool(); }
   mstch::node bool_value() {
     if (const_value_->kind() == value_type::CV_INTEGER) {
       return const_value_->get_integer() != 0;
@@ -1697,14 +1698,14 @@ class mstch_rust_value : public mstch_base {
     return const_value_->get_bool();
   }
   mstch::node is_integer() {
-    return type_->is_byte() || type_->is_i16() || type_->is_i32() ||
-        type_->is_i64();
+    return underlying_type_->is_byte() || underlying_type_->is_i16() ||
+        underlying_type_->is_i32() || underlying_type_->is_i64();
   }
   mstch::node integer_value() {
     return std::to_string(const_value_->get_integer());
   }
   mstch::node is_floating_point() {
-    return type_->is_float() || type_->is_double();
+    return underlying_type_->is_float() || underlying_type_->is_double();
   }
   mstch::node floating_point_value() {
     auto str = fmt::format(
@@ -1720,27 +1721,27 @@ class mstch_rust_value : public mstch_base {
     }
     return str;
   }
-  mstch::node is_string() { return type_->is_string(); }
-  mstch::node is_binary() { return type_->is_binary(); }
+  mstch::node is_string() { return underlying_type_->is_string(); }
+  mstch::node is_binary() { return underlying_type_->is_binary(); }
   mstch::node string_quoted() {
     return quote(const_value_->get_string(), false);
   }
   mstch::node is_list() {
-    return type_->is_list() &&
+    return underlying_type_->is_list() &&
         (const_value_->kind() == value_type::CV_LIST ||
          (const_value_->kind() == value_type::CV_MAP &&
           const_value_->get_map().empty()));
   }
   mstch::node list_elements() {
     const t_type* elem_type;
-    if (type_->is_set()) {
-      auto set_type = dynamic_cast<const t_set*>(type_);
+    if (underlying_type_->is_set()) {
+      auto set_type = dynamic_cast<const t_set*>(underlying_type_);
       if (!set_type) {
         return mstch::node();
       }
       elem_type = set_type->get_elem_type();
     } else {
-      auto list_type = dynamic_cast<const t_list*>(type_);
+      auto list_type = dynamic_cast<const t_list*>(underlying_type_);
       if (!list_type) {
         return mstch::node();
       }
@@ -1755,27 +1756,30 @@ class mstch_rust_value : public mstch_base {
     return elements;
   }
   mstch::node is_set() {
-    return type_->is_set() &&
+    return underlying_type_->is_set() &&
         (const_value_->kind() == value_type::CV_LIST ||
          (const_value_->kind() == value_type::CV_MAP &&
           const_value_->get_map().empty()));
   }
   mstch::node set_members() { return list_elements(); }
   mstch::node is_map() {
-    return type_->is_map() &&
+    return underlying_type_->is_map() &&
         (const_value_->kind() == value_type::CV_MAP ||
          (const_value_->kind() == value_type::CV_LIST &&
           const_value_->get_list().empty()));
   }
   mstch::node map_entries();
   mstch::node is_struct() {
-    return (type_->is_struct() || type_->is_exception()) &&
-        !type_->is_union() && const_value_->kind() == value_type::CV_MAP;
+    return (underlying_type_->is_struct() ||
+            underlying_type_->is_exception()) &&
+        !underlying_type_->is_union() &&
+        const_value_->kind() == value_type::CV_MAP;
   }
   mstch::node struct_fields();
   mstch::node is_exhaustive();
   mstch::node is_union() {
-    if (!type_->is_union() || const_value_->kind() != value_type::CV_MAP) {
+    if (!underlying_type_->is_union() ||
+        const_value_->kind() != value_type::CV_MAP) {
       return false;
     }
     if (const_value_->get_map().empty()) {
@@ -1786,7 +1790,7 @@ class mstch_rust_value : public mstch_base {
         const_value_->get_map().at(0).first->kind() == value_type::CV_STRING;
   }
   mstch::node union_variant() {
-    auto struct_type = dynamic_cast<const t_struct*>(type_);
+    auto struct_type = dynamic_cast<const t_struct*>(underlying_type_);
     if (!struct_type) {
       return mstch::node();
     }
@@ -1811,7 +1815,7 @@ class mstch_rust_value : public mstch_base {
     return mstch::node();
   }
   mstch::node union_value() {
-    auto struct_type = dynamic_cast<const t_struct*>(type_);
+    auto struct_type = dynamic_cast<const t_struct*>(underlying_type_);
     if (!struct_type) {
       return mstch::node();
     }
@@ -1828,7 +1832,7 @@ class mstch_rust_value : public mstch_base {
     }
     return mstch::node();
   }
-  mstch::node is_enum() { return type_->is_enum(); }
+  mstch::node is_enum() { return underlying_type_->is_enum(); }
   mstch::node enum_variant() {
     if (const_value_->is_enum()) {
       auto enum_value = const_value_->get_enum_value();
@@ -1854,12 +1858,13 @@ class mstch_rust_value : public mstch_base {
   mstch::node indent() { return std::string(4 * depth_, ' '); }
   mstch::node simple_literal() {
     // Primitives have simple literals
-    if (type_->is_bool() || type_->is_byte() || type_->is_any_int() ||
-        type_->is_floating_point()) {
+    if (underlying_type_->is_bool() || underlying_type_->is_byte() ||
+        underlying_type_->is_any_int() ||
+        underlying_type_->is_floating_point()) {
       return true;
     }
     // Enum variants as well
-    if (type_->is_enum()) {
+    if (underlying_type_->is_enum()) {
       return enum_variant();
     }
     return false;
@@ -1874,7 +1879,7 @@ class mstch_rust_value : public mstch_base {
 
   // The underlying type of the value after stepping through any non-newtype
   // typedefs.
-  const t_type* type_;
+  const t_type* underlying_type_;
 
   unsigned depth_;
   const rust_codegen_options& options_;
@@ -2001,7 +2006,7 @@ class mstch_rust_struct_field : public mstch_base {
 };
 
 mstch::node mstch_rust_value::map_entries() {
-  auto map_type = dynamic_cast<const t_map*>(type_);
+  auto map_type = dynamic_cast<const t_map*>(underlying_type_);
   if (!map_type) {
     return mstch::node();
   }
@@ -2024,7 +2029,7 @@ mstch::node mstch_rust_value::map_entries() {
 }
 
 mstch::node mstch_rust_value::struct_fields() {
-  auto struct_type = dynamic_cast<const t_struct*>(type_);
+  auto struct_type = dynamic_cast<const t_struct*>(underlying_type_);
   if (!struct_type) {
     return mstch::node();
   }
@@ -2047,7 +2052,7 @@ mstch::node mstch_rust_value::struct_fields() {
 }
 
 mstch::node mstch_rust_value::is_exhaustive() {
-  auto struct_type = dynamic_cast<const t_struct*>(type_);
+  auto struct_type = dynamic_cast<const t_struct*>(underlying_type_);
   return struct_type &&
       struct_type->has_structured_annotation(kRustExhaustiveUri);
 }

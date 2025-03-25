@@ -14,16 +14,16 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#value:type}}{{!
+}}{{#value:underlying_type}}{{!
 }}{{#value:newtype?}}{{!
     }}{{type:package}}::{{type:rust_name}}({{!
-        }}{{#value:type}}{{#type:typedef}}{{#typedef:has_adapter?}}{{!
+        }}{{#value:underlying_type}}{{#type:typedef}}{{#typedef:has_adapter?}}{{!
         }}{{> lib/adapter/qualified}}::from_thrift({{!
-        }}{{/typedef:has_adapter?}}{{/type:typedef}}{{/value:type}}{{!
+        }}{{/typedef:has_adapter?}}{{/type:typedef}}{{/value:underlying_type}}{{!
         }}{{#value:inner}}{{> lib/value}}{{/value:inner}}{{!
-        }}{{#value:type}}{{#type:typedef}}{{#typedef:has_adapter?}}{{!
+        }}{{#value:underlying_type}}{{#type:typedef}}{{#typedef:has_adapter?}}{{!
         }}).expect("constant Thrift value should adapt without error"){{!
-        }}{{/typedef:has_adapter?}}{{/type:typedef}}{{/value:type}}{{!
+        }}{{/typedef:has_adapter?}}{{/type:typedef}}{{/value:underlying_type}}{{!
     }}){{!
 }}{{/value:newtype?}}{{!
 }}{{#value:bool?}}{{value:bool_value}}{{/value:bool?}}{{!
@@ -115,14 +115,14 @@
         }}{{#value:structFields}}
             {{value:indent}}{{field:rust_name}}: {{!
             }}{{#field:has_adapter?}}{{> lib/adapter/qualified}}::from_thrift_default::<{{!
-                }}{{#value:type}}{{#type:struct}}{{!
+                }}{{#value:underlying_type}}{{#type:struct}}{{!
                     }}{{#struct:has_adapter?}}{{!
                         }}{{type:package}}::unadapted::{{struct:rust_name}}{{!
                     }}{{/struct:has_adapter?}}{{!
                     }}{{^struct:has_adapter?}}{{!
                         }}{{type:package}}::{{struct:rust_name}}{{!
                     }}{{/struct:has_adapter?}}{{!
-                }}{{/type:struct}}{{/value:type}}{{!
+                }}{{/type:struct}}{{/value:underlying_type}}{{!
             }}>({{/field:has_adapter?}}{{!
             }}{{#field:explicit_value}}{{!
                 }}{{> lib/fieldvalue}}{{!
@@ -168,5 +168,5 @@
     }}{{#value:enumVariant}}::{{value:enumVariant}}{{/value:enumVariant}}{{!
     }}{{^value:enumVariant}}({{value:integer_value}}){{/value:enumVariant}}{{!
 }}{{/value:enum?}}{{!
-}}{{/value:type}}{{!
+}}{{/value:underlying_type}}{{!
 }}

@@ -69,6 +69,16 @@ DEFINE_bool(
 DEFINE_bool(enable_checksum, false, "Enable Server Side Checksum support");
 DEFINE_bool(aligned_parser, false, "Enable AlignedParser");
 
+#if FOLLY_HAVE_WEAK_SYMBOLS
+FOLLY_ATTR_WEAK int callback_assign_func(
+    folly::AsyncServerSocket*, folly::NetworkSocket);
+#else
+static int callback_assign_func(
+    folly::AsyncServerSocket*, folly::NetworkSocket) {
+  return -1;
+}
+#endif
+
 namespace apache {
 namespace thrift {
 namespace stress {
@@ -213,6 +223,10 @@ std::shared_ptr<ThriftServer> createStressTestServer(
   if (!FLAGS_certPath.empty() && !FLAGS_keyPath.empty() &&
       !FLAGS_caPath.empty()) {
     server->setSSLConfig(getSSLConfig());
+  }
+
+  if (FLAGS_io_uring) {
+    server->setCallbackAssignFunc(callback_assign_func);
   }
 
   if (!isResourcePoolsEnabled()) {

@@ -14,6 +14,7 @@
 
 from enum import Enum
 from typing import Any, Type
+from types import NoneType
 
 from thrift.py3.reflection import inspect
 
@@ -30,6 +31,9 @@ def to_py3_struct(cls, obj):
         return None
     if isinstance(obj, cls):
         return obj
+    # fast path for immutable thrift-python to thrift-py3 when in-place migration activated
+    if isinstance(obj, getattr(cls, "_FBTHRIFT__PYTHON_CLASS", NoneType)):
+        return cls.from_python(obj)
     return _to_py3_struct(cls, obj)
 
 

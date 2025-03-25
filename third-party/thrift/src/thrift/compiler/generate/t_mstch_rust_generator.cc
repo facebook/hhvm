@@ -2479,10 +2479,7 @@ void validate_struct_annotations(
     const t_structured& s,
     const rust_codegen_options& options) {
   for (auto& field : s.fields()) {
-    FieldKind kind = field_kind(field);
-    bool box = node_is_boxed(field) || kind == FieldKind::Box;
-    bool arc = node_is_arced(field) || kind == FieldKind::Arc;
-    if (box && arc) {
+    if (node_is_boxed(field) && node_is_arced(field)) {
       ctx.report(
           field,
           "rust-field-box-arc-rule",

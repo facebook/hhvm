@@ -6,7 +6,7 @@ function foo(int $_): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> {
   throw new Exception();
 }
 
-function bar(ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> $x): ExampleDsl<ExampleDsl, ExampleDsl::TAst, ExampleString> {
+function bar(ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> $x): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleString> {
   throw new Exception();
 }
 

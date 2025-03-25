@@ -477,6 +477,14 @@ class MyStruct(thrift.py3.types.Struct):
     def __get_reflection__():
         return get_types_reflection().get_reflection__MyStruct()
 
+    @staticmethod
+    def __get_metadata__():
+        return MyStruct._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.MyStruct"
+
     @property
     def MyIntField(self) -> int:
         return self._fbthrift__inner.MyIntField
@@ -610,6 +618,14 @@ class Containers(thrift.py3.types.Struct):
     def __get_reflection__():
         return get_types_reflection().get_reflection__Containers()
 
+    @staticmethod
+    def __get_metadata__():
+        return Containers._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.Containers"
+
     @property
     def I32List(self) -> _typing.Sequence[int]:
         if self._fbthrift_inner__I32List is None:
@@ -707,6 +723,14 @@ class MyDataItem(thrift.py3.types.Struct):
     def __get_reflection__():
         return get_types_reflection().get_reflection__MyDataItem()
 
+    @staticmethod
+    def __get_metadata__():
+        return MyDataItem._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.MyDataItem"
+
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
@@ -799,6 +823,14 @@ class MyUnion(thrift.py3.types.Union):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__MyUnion()
+
+    @staticmethod
+    def __get_metadata__():
+        return MyUnion._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.MyUnion"
 
     @property
     def myEnum(self) -> MyEnum:
@@ -954,6 +986,14 @@ class MyException(thrift.py3.exceptions.GeneratedError):
     def __get_reflection__():
         return get_types_reflection().get_reflection__MyException()
 
+    @staticmethod
+    def __get_metadata__():
+        return MyException._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.MyException"
+
     @property
     def MyIntField(self) -> int:
         return self._fbthrift__inner.MyIntField
@@ -1063,6 +1103,14 @@ class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
     def __get_reflection__():
         return get_types_reflection().get_reflection__MyExceptionWithMessage()
 
+    @staticmethod
+    def __get_metadata__():
+        return MyExceptionWithMessage._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.MyExceptionWithMessage"
+
     @property
     def MyIntField(self) -> int:
         return self._fbthrift__inner.MyIntField
@@ -1167,6 +1215,14 @@ class ReservedKeyword(thrift.py3.types.Struct):
     def __get_reflection__():
         return get_types_reflection().get_reflection__ReservedKeyword()
 
+    @staticmethod
+    def __get_metadata__():
+        return ReservedKeyword._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.ReservedKeyword"
+
     @property
     def reserved_field(self) -> int:
         return self._fbthrift__inner.reserved_field
@@ -1248,6 +1304,14 @@ class UnionToBeRenamed(thrift.py3.types.Union):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__UnionToBeRenamed()
+
+    @staticmethod
+    def __get_metadata__():
+        return UnionToBeRenamed._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.UnionToBeRenamed"
 
     @property
     def reserved_field(self) -> int:

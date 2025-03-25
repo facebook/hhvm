@@ -1956,6 +1956,14 @@ class SimpleException(thrift.py3.exceptions.GeneratedError):
     def __get_reflection__():
         return get_types_reflection().get_reflection__SimpleException()
 
+    @staticmethod
+    def __get_metadata__():
+        return SimpleException._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.SimpleException"
+
     @property
     def err_code(self) -> int:
         return self._fbthrift__inner.err_code
@@ -2036,6 +2044,14 @@ class OptionalRefStruct(thrift.py3.types.Struct):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__OptionalRefStruct()
+
+    @staticmethod
+    def __get_metadata__():
+        return OptionalRefStruct._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.OptionalRefStruct"
 
     @property
     def optional_blob(self) -> _typing.Optional[_fbthrift_iobuf.IOBuf]:
@@ -2124,6 +2140,14 @@ class SimpleStruct(thrift.py3.types.Struct):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__SimpleStruct()
+
+    @staticmethod
+    def __get_metadata__():
+        return SimpleStruct._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.SimpleStruct"
 
     @property
     def is_on(self) -> bool:
@@ -2224,6 +2248,14 @@ class HiddenTypeFieldsStruct(thrift.py3.types.Struct):
     def __get_reflection__():
         return get_types_reflection().get_reflection__HiddenTypeFieldsStruct()
 
+    @staticmethod
+    def __get_metadata__():
+        return HiddenTypeFieldsStruct._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.HiddenTypeFieldsStruct"
+
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
@@ -2304,6 +2336,14 @@ class ComplexStruct(thrift.py3.types.Struct):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__ComplexStruct()
+
+    @staticmethod
+    def __get_metadata__():
+        return ComplexStruct._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.ComplexStruct"
 
     @property
     def structOne(self) -> SimpleStruct:
@@ -2421,6 +2461,14 @@ class BinaryUnion(thrift.py3.types.Union):
     def __get_reflection__():
         return get_types_reflection().get_reflection__BinaryUnion()
 
+    @staticmethod
+    def __get_metadata__():
+        return BinaryUnion._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.BinaryUnion"
+
     @property
     def iobuf_val(self) -> _fbthrift_iobuf.IOBuf:
         return self._fbthrift__inner.iobuf_val
@@ -2519,6 +2567,14 @@ class BinaryUnionStruct(thrift.py3.types.Struct):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__BinaryUnionStruct()
+
+    @staticmethod
+    def __get_metadata__():
+        return BinaryUnionStruct._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.BinaryUnionStruct"
 
     @property
     def u(self) -> BinaryUnion:
@@ -2621,6 +2677,14 @@ class CustomFields(thrift.py3.types.Struct):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__CustomFields()
+
+    @staticmethod
+    def __get_metadata__():
+        return CustomFields._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.CustomFields"
 
     @property
     def bool_field(self) -> bool:
@@ -2758,6 +2822,14 @@ class CustomTypedefFields(thrift.py3.types.Struct):
     def __get_reflection__():
         return get_types_reflection().get_reflection__CustomTypedefFields()
 
+    @staticmethod
+    def __get_metadata__():
+        return CustomTypedefFields._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.CustomTypedefFields"
+
     @property
     def bool_field(self) -> bool:
         return self._fbthrift__inner.bool_field
@@ -2893,6 +2965,14 @@ class AdaptedTypedefFields(thrift.py3.types.Struct):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__AdaptedTypedefFields()
+
+    @staticmethod
+    def __get_metadata__():
+        return AdaptedTypedefFields._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.AdaptedTypedefFields"
 
     @property
     def bool_field(self) -> bool:

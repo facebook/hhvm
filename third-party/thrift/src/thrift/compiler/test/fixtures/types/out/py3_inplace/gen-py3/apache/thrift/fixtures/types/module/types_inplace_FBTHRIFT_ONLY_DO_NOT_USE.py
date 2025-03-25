@@ -1356,6 +1356,14 @@ class empty_struct(thrift.py3.types.Struct):
     def __get_reflection__():
         return get_types_reflection().get_reflection__empty_struct()
 
+    @staticmethod
+    def __get_metadata__():
+        return empty_struct._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.empty_struct"
+
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
@@ -1429,6 +1437,14 @@ class decorated_struct(thrift.py3.types.Struct):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__decorated_struct()
+
+    @staticmethod
+    def __get_metadata__():
+        return decorated_struct._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.decorated_struct"
 
     @property
     def field(self) -> str:
@@ -1538,6 +1554,14 @@ class ContainerStruct(thrift.py3.types.Struct):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__ContainerStruct()
+
+    @staticmethod
+    def __get_metadata__():
+        return ContainerStruct._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.ContainerStruct"
 
     @property
     def fieldA(self) -> _typing.Sequence[int]:
@@ -1680,6 +1704,14 @@ class CppTypeStruct(thrift.py3.types.Struct):
     def __get_reflection__():
         return get_types_reflection().get_reflection__CppTypeStruct()
 
+    @staticmethod
+    def __get_metadata__():
+        return CppTypeStruct._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.CppTypeStruct"
+
     @property
     def fieldA(self) -> _typing.Sequence[int]:
         if self._fbthrift_inner__fieldA is None:
@@ -1761,6 +1793,14 @@ class VirtualStruct(thrift.py3.types.Struct):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__VirtualStruct()
+
+    @staticmethod
+    def __get_metadata__():
+        return VirtualStruct._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.VirtualStruct"
 
     @property
     def MyIntField(self) -> int:
@@ -1846,6 +1886,14 @@ class MyStructWithForwardRefEnum(thrift.py3.types.Struct):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__MyStructWithForwardRefEnum()
+
+    @staticmethod
+    def __get_metadata__():
+        return MyStructWithForwardRefEnum._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.MyStructWithForwardRefEnum"
 
     @property
     def a(self) -> MyForwardRefEnum:
@@ -1938,6 +1986,14 @@ class TrivialNumeric(thrift.py3.types.Struct):
     def __get_reflection__():
         return get_types_reflection().get_reflection__TrivialNumeric()
 
+    @staticmethod
+    def __get_metadata__():
+        return TrivialNumeric._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.TrivialNumeric"
+
     @property
     def a(self) -> int:
         return self._fbthrift__inner.a
@@ -2023,6 +2079,14 @@ class TrivialNestedWithDefault(thrift.py3.types.Struct):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__TrivialNestedWithDefault()
+
+    @staticmethod
+    def __get_metadata__():
+        return TrivialNestedWithDefault._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.TrivialNestedWithDefault"
 
     @property
     def z(self) -> int:
@@ -2114,6 +2178,14 @@ class ComplexString(thrift.py3.types.Struct):
     def __get_reflection__():
         return get_types_reflection().get_reflection__ComplexString()
 
+    @staticmethod
+    def __get_metadata__():
+        return ComplexString._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.ComplexString"
+
     @property
     def a(self) -> str:
         return self._fbthrift__inner.a
@@ -2204,6 +2276,14 @@ class ComplexNestedWithDefault(thrift.py3.types.Struct):
     def __get_reflection__():
         return get_types_reflection().get_reflection__ComplexNestedWithDefault()
 
+    @staticmethod
+    def __get_metadata__():
+        return ComplexNestedWithDefault._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.ComplexNestedWithDefault"
+
     @property
     def z(self) -> str:
         return self._fbthrift__inner.z
@@ -2293,6 +2373,14 @@ class MinPadding(thrift.py3.types.Struct):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__MinPadding()
+
+    @staticmethod
+    def __get_metadata__():
+        return MinPadding._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.MinPadding"
 
     @property
     def small(self) -> int:
@@ -2391,6 +2479,14 @@ class MinPaddingWithCustomType(thrift.py3.types.Struct):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__MinPaddingWithCustomType()
+
+    @staticmethod
+    def __get_metadata__():
+        return MinPaddingWithCustomType._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.MinPaddingWithCustomType"
 
     @property
     def small(self) -> int:
@@ -2492,6 +2588,14 @@ class MyStruct(thrift.py3.types.Struct):
     def __get_reflection__():
         return get_types_reflection().get_reflection__MyStruct()
 
+    @staticmethod
+    def __get_metadata__():
+        return MyStruct._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.MyStruct"
+
     @property
     def MyIntField(self) -> int:
         return self._fbthrift__inner.MyIntField
@@ -2585,6 +2689,14 @@ class MyDataItem(thrift.py3.types.Struct):
     def __get_reflection__():
         return get_types_reflection().get_reflection__MyDataItem()
 
+    @staticmethod
+    def __get_metadata__():
+        return MyDataItem._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.MyDataItem"
+
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
@@ -2658,6 +2770,14 @@ class Renaming(thrift.py3.types.Struct):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__Renaming()
+
+    @staticmethod
+    def __get_metadata__():
+        return Renaming._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.Renaming"
 
     @property
     def foo(self) -> int:
@@ -2740,6 +2860,14 @@ class AnnotatedTypes(thrift.py3.types.Struct):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__AnnotatedTypes()
+
+    @staticmethod
+    def __get_metadata__():
+        return AnnotatedTypes._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.AnnotatedTypes"
 
     @property
     def binary_field(self) -> bytes:
@@ -2833,6 +2961,14 @@ class ForwardUsageRoot(thrift.py3.types.Struct):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__ForwardUsageRoot()
+
+    @staticmethod
+    def __get_metadata__():
+        return ForwardUsageRoot._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.ForwardUsageRoot"
 
     @property
     def ForwardUsageStruct(self) -> _typing.Optional[ForwardUsageStruct]:
@@ -2931,6 +3067,14 @@ class ForwardUsageStruct(thrift.py3.types.Struct):
     def __get_reflection__():
         return get_types_reflection().get_reflection__ForwardUsageStruct()
 
+    @staticmethod
+    def __get_metadata__():
+        return ForwardUsageStruct._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.ForwardUsageStruct"
+
     @property
     def foo(self) -> _typing.Optional[ForwardUsageRoot]:
         if self._fbthrift_inner__foo is None:
@@ -3017,6 +3161,14 @@ class ForwardUsageByRef(thrift.py3.types.Struct):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__ForwardUsageByRef()
+
+    @staticmethod
+    def __get_metadata__():
+        return ForwardUsageByRef._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.ForwardUsageByRef"
 
     @property
     def foo(self) -> _typing.Optional[ForwardUsageRoot]:
@@ -3105,6 +3257,14 @@ class IncompleteMap(thrift.py3.types.Struct):
     def __get_reflection__():
         return get_types_reflection().get_reflection__IncompleteMap()
 
+    @staticmethod
+    def __get_metadata__():
+        return IncompleteMap._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.IncompleteMap"
+
     @property
     def field(self) -> _typing.Optional[_typing.Mapping[int, IncompleteMapDep]]:
         if self._fbthrift_inner__field is None:
@@ -3188,6 +3348,14 @@ class IncompleteMapDep(thrift.py3.types.Struct):
     def __get_reflection__():
         return get_types_reflection().get_reflection__IncompleteMapDep()
 
+    @staticmethod
+    def __get_metadata__():
+        return IncompleteMapDep._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.IncompleteMapDep"
+
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
@@ -3264,6 +3432,14 @@ class CompleteMap(thrift.py3.types.Struct):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__CompleteMap()
+
+    @staticmethod
+    def __get_metadata__():
+        return CompleteMap._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.CompleteMap"
 
     @property
     def field(self) -> _typing.Optional[_typing.Mapping[int, CompleteMapDep]]:
@@ -3348,6 +3524,14 @@ class CompleteMapDep(thrift.py3.types.Struct):
     def __get_reflection__():
         return get_types_reflection().get_reflection__CompleteMapDep()
 
+    @staticmethod
+    def __get_metadata__():
+        return CompleteMapDep._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.CompleteMapDep"
+
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
@@ -3424,6 +3608,14 @@ class IncompleteList(thrift.py3.types.Struct):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__IncompleteList()
+
+    @staticmethod
+    def __get_metadata__():
+        return IncompleteList._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.IncompleteList"
 
     @property
     def field(self) -> _typing.Optional[_typing.Sequence[IncompleteListDep]]:
@@ -3508,6 +3700,14 @@ class IncompleteListDep(thrift.py3.types.Struct):
     def __get_reflection__():
         return get_types_reflection().get_reflection__IncompleteListDep()
 
+    @staticmethod
+    def __get_metadata__():
+        return IncompleteListDep._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.IncompleteListDep"
+
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
@@ -3584,6 +3784,14 @@ class CompleteList(thrift.py3.types.Struct):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__CompleteList()
+
+    @staticmethod
+    def __get_metadata__():
+        return CompleteList._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.CompleteList"
 
     @property
     def field(self) -> _typing.Optional[_typing.Sequence[CompleteListDep]]:
@@ -3668,6 +3876,14 @@ class CompleteListDep(thrift.py3.types.Struct):
     def __get_reflection__():
         return get_types_reflection().get_reflection__CompleteListDep()
 
+    @staticmethod
+    def __get_metadata__():
+        return CompleteListDep._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.CompleteListDep"
+
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
@@ -3744,6 +3960,14 @@ class AdaptedList(thrift.py3.types.Struct):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__AdaptedList()
+
+    @staticmethod
+    def __get_metadata__():
+        return AdaptedList._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.AdaptedList"
 
     @property
     def field(self) -> _typing.Optional[_typing.Sequence[AdaptedListDep]]:
@@ -3831,6 +4055,14 @@ class DependentAdaptedList(thrift.py3.types.Struct):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__DependentAdaptedList()
+
+    @staticmethod
+    def __get_metadata__():
+        return DependentAdaptedList._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.DependentAdaptedList"
 
     @property
     def field(self) -> _typing.Optional[_typing.Sequence[DependentAdaptedListDep]]:
@@ -3930,6 +4162,14 @@ class AllocatorAware(thrift.py3.types.Struct):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__AllocatorAware()
+
+    @staticmethod
+    def __get_metadata__():
+        return AllocatorAware._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.AllocatorAware"
 
     @property
     def aa_list(self) -> _typing.Sequence[int]:
@@ -4046,6 +4286,14 @@ class AllocatorAware2(thrift.py3.types.Struct):
     def __get_reflection__():
         return get_types_reflection().get_reflection__AllocatorAware2()
 
+    @staticmethod
+    def __get_metadata__():
+        return AllocatorAware2._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.AllocatorAware2"
+
     @property
     def not_a_container(self) -> int:
         return self._fbthrift__inner.not_a_container
@@ -4129,6 +4377,14 @@ class TypedefStruct(thrift.py3.types.Struct):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__TypedefStruct()
+
+    @staticmethod
+    def __get_metadata__():
+        return TypedefStruct._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.TypedefStruct"
 
     @property
     def i32_field(self) -> int:
@@ -4215,6 +4471,14 @@ class StructWithDoubleUnderscores(thrift.py3.types.Struct):
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__StructWithDoubleUnderscores()
+
+    @staticmethod
+    def __get_metadata__():
+        return StructWithDoubleUnderscores._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.StructWithDoubleUnderscores"
 
     @property
     def __field(self) -> int:

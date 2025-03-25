@@ -178,6 +178,14 @@ class {{struct:name}}({{> types/python_struct_class }}):
     def __get_reflection__():
         return get_types_reflection().get_reflection__{{struct:name}}()
 
+    @staticmethod
+    def __get_metadata__():
+        return {{struct:name}}._FBTHRIFT__PYTHON_CLASS.__get_metadata__()
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "{{program:name}}.{{struct:name}}"
+
     {{#struct:fields_and_mixin_fields}}
     @property
     def {{field:py_name}}(self) -> {{> inplace/field_type}}:

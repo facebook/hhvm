@@ -437,7 +437,7 @@ def use_python_metadata(cls):
     ):
         return True
     if issubclass(cls, PyEnum):
-        return "thrift_types" in cls.__module__ 
+        return cls.__module__.endswith(".thrift_enums")
 
     return False
 
@@ -447,6 +447,11 @@ def gen_metadata(obj_or_cls):
         return obj_or_cls.getThriftModuleMetadata()
 
     cls = obj_or_cls if isinstance(obj_or_cls, type) else type(obj_or_cls)
+
+    # For in-place migrate, just use the thrift-python class
+    # with the thrift-python metadata library.
+    if hasattr(cls, "_FBTHRIFT__PYTHON_CLASS"):
+        return python_gen_metadata(cls._FBTHRIFT__PYTHON_CLASS)
 
     if use_python_metadata(cls):
         return python_gen_metadata(cls)

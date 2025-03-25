@@ -282,6 +282,13 @@ cdef class Struct:
 SetMetaClass(<PyTypeObject*> Struct, <PyTypeObject*> StructMeta)
 
 
+# used by Union.fromValue to avoid matching a python `float` (64-bit) to
+# a thrift `float` (32-bit), when doing so would cause precision loss
+def _fbthrift__is_float32(double f64):
+    cdef float f32 = f64
+    return f32 == f64
+
+
 cdef class Union(Struct):
     """
     Base class for all thrift Unions

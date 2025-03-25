@@ -1,0 +1,58 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+This is a template for the Union.fromValue method
+
+}}
+@staticmethod
+def fromValue(value) -> {{struct:name}}:
+    if value is None:
+        return {{struct:name}}()
+    {{! We do this with strict types first, then we will do int to float conversion}}
+    {{#struct:py3_fields}}{{#field:type}}
+    if isinstance(value, {{> types/python_type}}):
+        {{#type:number?}}
+        if not isinstance(value, bool):
+            try:
+                {{#type:float?}}
+                {{! only allow f64 to match to f32 if no loss of precision}}
+                # pyre-ignore[21]: types does not define type stub for this internal helper method
+                if thrift.py3.types._fbthrift__is_float32(value):
+                    return {{struct:name}}({{field:py_name}}=value)
+                {{/type:float?}}{{^type:float?}}
+                return {{struct:name}}({{field:py_name}}=value)
+                {{/type:float?}}
+            except OverflowError:
+                pass
+        {{/type:number?}}
+        {{^type:number?}}
+        return {{struct:name}}({{field:py_name}}=value)
+        {{/type:number?}}
+    {{/field:type}}{{/struct:py3_fields}}
+    {{! try f32/f64 fields one more time, this time allowing f64 to match to f32,
+    and allow int that overflows i64 to match to f32 or f64}}
+    {{#struct:py3_fields}}{{#field:type}}
+    {{#type:floating_point?}}
+    if isinstance(value, (float, int)):
+        try:
+            return {{struct:name}}({{field:py_name}}=value)
+        except OverflowError:
+            pass
+    {{/type:floating_point?}}
+    {{ /field:type}}{{/struct:py3_fields}}
+    raise ValueError(f"Unable to derive correct union field for value: {value}")

@@ -12,6 +12,7 @@ import enum
 import importlib
 
 import typing as _typing
+import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
 import thrift.python.exceptions

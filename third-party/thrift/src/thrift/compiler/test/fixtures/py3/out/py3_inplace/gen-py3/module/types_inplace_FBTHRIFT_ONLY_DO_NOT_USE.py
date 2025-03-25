@@ -12,6 +12,7 @@ import enum
 import importlib
 
 import typing as _typing
+import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
 import thrift.python.exceptions
@@ -2434,6 +2435,14 @@ class BinaryUnion(thrift.py3.types.Union):
             case _:
                 return self._fbthrift__inner.value
 
+
+    @staticmethod
+    def fromValue(value) -> BinaryUnion:
+        if value is None:
+            return BinaryUnion()
+        if isinstance(value, _fbthrift_iobuf.IOBuf):
+            return BinaryUnion(iobuf_val=value)
+        raise ValueError(f"Unable to derive correct union field for value: {value}")
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:

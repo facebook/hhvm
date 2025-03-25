@@ -30,6 +30,7 @@ import enum
 import importlib
 
 import typing as _typing
+import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
 import thrift.python.exceptions
@@ -212,6 +213,9 @@ class {{struct:name}}({{> types/python_struct_class }}):
 {{/type:needs_convert?}}{{/field:type}}{{/struct:fields_and_mixin_fields}}
             case _:
                 return self._fbthrift__inner.value
+
+
+    {{> inplace/union_from_value}}
 
     {{/struct:union?}}
 

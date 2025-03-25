@@ -12,6 +12,7 @@ import enum
 import importlib
 
 import typing as _typing
+import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.types
 import thrift.py3.exceptions
 import thrift.python.exceptions
@@ -858,6 +859,20 @@ class MyUnion(thrift.py3.types.Union):
                 return self._fbthrift__inner.value
 
 
+    @staticmethod
+    def fromValue(value) -> MyUnion:
+        if value is None:
+            return MyUnion()
+        if isinstance(value, MyEnum):
+            return MyUnion(myEnum=value)
+        if isinstance(value, MyStruct):
+            return MyUnion(myStruct=value)
+        if isinstance(value, MyDataItem):
+            return MyUnion(myDataItem=value)
+        if isinstance(value, Set__float):
+            return MyUnion(floatSet=value)
+        raise ValueError(f"Unable to derive correct union field for value: {value}")
+
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
         return cls._FBTHRIFT__FIELD_NAMES[idx]
@@ -1248,6 +1263,18 @@ class UnionToBeRenamed(thrift.py3.types.Union):
             case _:
                 return self._fbthrift__inner.value
 
+
+    @staticmethod
+    def fromValue(value) -> UnionToBeRenamed:
+        if value is None:
+            return UnionToBeRenamed()
+        if isinstance(value, int):
+            if not isinstance(value, bool):
+                try:
+                    return UnionToBeRenamed(reserved_field=value)
+                except OverflowError:
+                    pass
+        raise ValueError(f"Unable to derive correct union field for value: {value}")
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:

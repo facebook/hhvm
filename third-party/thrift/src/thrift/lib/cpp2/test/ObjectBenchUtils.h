@@ -160,6 +160,10 @@ inline void read_first(const TestingObject& input) {
 
 } // namespace apache::thrift::test::utils
 
+#ifndef FBTHRIFT_DO_NOTHING_HANDLER
+#define FBTHRIFT_DO_NOTHING_HANDLER(...)
+#endif
+
 // Define a list of operations to benchmark for each struct + protocol
 // + invoke a callback handler for each struct + protocol
 #ifndef FBTHRIFT_FOR_EACH_OP
@@ -193,6 +197,44 @@ inline void read_first(const TestingObject& input) {
       ::apache::thrift::CompactProtocolReader)
 #endif
 
+#define FBTHRIFT_FOR_EACH_UNIQUE_TYPE(HANDLER) \
+  HANDLER(Empty)                               \
+  HANDLER(SmallInt)                            \
+  HANDLER(BigInt)                              \
+  HANDLER(SmallString)                         \
+  HANDLER(BigString)                           \
+  HANDLER(Mixed)                               \
+  HANDLER(MixedInt)                            \
+  HANDLER(LargeMixed)                          \
+  HANDLER(SmallListInt)                        \
+  HANDLER(BigListInt)                          \
+  HANDLER(BigListMixed)                        \
+  HANDLER(BigListMixedInt)                     \
+  HANDLER(LargeListMixed)                      \
+  HANDLER(LargeSetInt)                         \
+  HANDLER(UnorderedSetInt)                     \
+  HANDLER(SortedVecSetInt)                     \
+  HANDLER(LargeMapInt)                         \
+  HANDLER(LargeMapMixed)                       \
+  HANDLER(LargeUnorderedMapMixed)              \
+  HANDLER(LargeSortedVecMapMixed)              \
+  HANDLER(UnorderedMapInt)                     \
+  HANDLER(NestedMap)                           \
+  HANDLER(SortedVecNestedMap)                  \
+  HANDLER(ComplexStruct)
+
+#define FBTHRIFT_FOR_EACH_UNIQUE_OPERATION(HANDLER) \
+  HANDLER(decode)                                   \
+  HANDLER(encode)                                   \
+  HANDLER(roundtrip)                                \
+  HANDLER(read_all)                                 \
+  HANDLER(read_half)                                \
+  HANDLER(read_first)
+
+#define FBTHRIFT_FOR_EACH_UNIQUE_PROTOCOL(HANDLER)            \
+  HANDLER(Binary, BinaryProtocolWriter, BinaryProtocolReader) \
+  HANDLER(Compact, CompactProtocolWriter, CompactProtocolReader)
+
 // Define benchmarks for each struct
 #ifndef FBTHRIFT_FOR_EACH_TYPE
 #define FBTHRIFT_FOR_EACH_TYPE(HANDLER, EACH_TY_HANDLER)                   \
@@ -221,10 +263,6 @@ inline void read_first(const TestingObject& input) {
   FBTHRIFT_FOR_EACH_PROT(HANDLER, EACH_TY_HANDLER, SortedVecNestedMap)     \
   FBTHRIFT_FOR_EACH_PROT(HANDLER, EACH_TY_HANDLER, ComplexStruct)
 #endif // FBTHRIFT_FOR_EACH_TYPE
-
-#ifndef FBTHRIFT_DO_NOTHING_HANDLER
-#define FBTHRIFT_DO_NOTHING_HANDLER(...)
-#endif
 
 #ifndef FBTHRIFT_GEN_PROTOCOL_BENCHMARKS
 #define FBTHRIFT_GEN_PROTOCOL_BENCHMARKS(F) \

@@ -535,7 +535,7 @@ void add_annotations_to_node_type(
     auto unnamed = std::make_unique<t_primitive_type>(
         *static_cast<const t_primitive_type*>(node_type));
     for (auto& pair : annotations) {
-      unnamed->set_annotation(pair.first, pair.second, {}, origin);
+      unnamed->set_unstructured_annotation(pair.first, pair.second, {}, origin);
     }
     node.set_type(t_type_ref::from_ptr(unnamed.get()));
     program.add_unnamed_type(std::move(unnamed));
@@ -546,7 +546,7 @@ void add_annotations_to_node_type(
         node_type->get_name(),
         t_type_ref::from_ptr(node_type));
     for (auto& pair : annotations) {
-      unnamed->set_annotation(pair.first, pair.second, {}, origin);
+      unnamed->set_unstructured_annotation(pair.first, pair.second, {}, origin);
     }
     node.set_type(t_type_ref::from_ptr(unnamed.get()));
     program.add_unnamed_typedef(std::move(unnamed));
@@ -611,7 +611,7 @@ void lower_deprecated_annotations(
             mCtx.program().add_unnamed_type(std::move(new_type));
           }
 
-          inner_type->set_annotation(
+          inner_type->set_unstructured_annotation(
               annot,
               map[annot].value,
               {},
@@ -742,14 +742,14 @@ void deduplicate_thrift_includes(
 // so inject annotations here.
 void add_magic_annotations(sema_context&, mutator_context&, t_struct& node) {
   if (node.uri() == "facebook.com/thrift/annotation/Function") {
-    node.set_annotation("hack.name", "TFunction");
-    node.set_annotation("js.name", "TFunction");
+    node.set_unstructured_annotation("hack.name", "TFunction");
+    node.set_unstructured_annotation("js.name", "TFunction");
   } else if (node.uri() == "facebook.com/thrift/annotation/Const") {
-    node.set_annotation("hack.name", "TConst");
+    node.set_unstructured_annotation("hack.name", "TConst");
   } else if (node.uri() == "facebook.com/thrift/annotation/Enum") {
-    node.set_annotation("py3.hidden", "1");
+    node.set_unstructured_annotation("py3.hidden", "1");
   } else if (node.uri() == "facebook.com/thrift/annotation/Interface") {
-    node.set_annotation("hack.name", "TInterface");
+    node.set_unstructured_annotation("hack.name", "TInterface");
   }
 }
 

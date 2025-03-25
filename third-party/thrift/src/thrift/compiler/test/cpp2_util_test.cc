@@ -48,7 +48,7 @@ class UtilTest : public ::testing::Test {};
 
 TEST_F(UtilTest, is_orderable_set_template) {
   t_set t(&t_primitive_type::t_double());
-  t.set_annotation("cpp2.template", "blah");
+  t.set_unstructured_annotation("cpp2.template", "blah");
   t_program p("path/to/program.thrift", "path/to/program.thrift");
   t_struct s(&p, "struct_name");
   s.append(std::make_unique<t_field>(&t, "set_field", 1));
@@ -68,7 +68,7 @@ TEST_F(UtilTest, is_orderable_struct_self_reference) {
   t_program p("path/to/program.thrift", "path/to/program.thrift");
 
   t_set t(&t_primitive_type::t_double());
-  t.set_annotation("cpp2.template", "blah");
+  t.set_unstructured_annotation("cpp2.template", "blah");
 
   t_struct c(&p, "C");
   c.append(std::make_unique<t_field>(&t, "set_field", 1));
@@ -112,13 +112,13 @@ TEST_F(UtilTest, is_eligible_for_constexpr) {
 
   for (auto a : {"cpp.indirection"}) {
     auto ref = t_primitive_type::t_i32();
-    ref.set_annotation(a, "true");
+    ref.set_unstructured_annotation(a, "true");
     EXPECT_FALSE(is_eligible_for_constexpr(&ref));
   }
 
   for (auto a : {"cpp.template", "cpp2.template", "cpp.type", "cpp2.type"}) {
     auto type = i32;
-    type.set_annotation(a, "custom_int");
+    type.set_unstructured_annotation(a, "custom_int");
     EXPECT_TRUE(is_eligible_for_constexpr(&type)) << a;
   }
 
@@ -134,7 +134,7 @@ TEST_F(UtilTest, is_eligible_for_constexpr) {
   }
   for (auto a : {"cpp.virtual", "cpp2.virtual", "cpp.allocator"}) {
     auto s = t_struct(&program, "struct_name");
-    s.set_annotation(a, "true");
+    s.set_unstructured_annotation(a, "true");
     EXPECT_FALSE(is_eligible_for_constexpr(&s)) << a;
   }
   {
@@ -146,14 +146,14 @@ TEST_F(UtilTest, is_eligible_for_constexpr) {
   for (auto a : {"cpp.ref", "cpp2.ref"}) {
     auto s = t_struct(&program, "struct_name");
     auto field = std::make_unique<t_field>(&i32, "field1", 1);
-    field->set_annotation(a, "true");
+    field->set_unstructured_annotation(a, "true");
     s.append(std::move(field));
     EXPECT_FALSE(is_eligible_for_constexpr(&s)) << a;
   }
   for (auto a : {"cpp.ref_type", "cpp2.ref_type"}) {
     auto s = t_struct(&program, "struct_name");
     auto field = std::make_unique<t_field>(&i32, "field1", 1);
-    field->set_annotation(a, "unique");
+    field->set_unstructured_annotation(a, "unique");
     s.append(std::move(field));
     EXPECT_FALSE(is_eligible_for_constexpr(&s)) << a;
   }
@@ -236,7 +236,7 @@ TEST_F(UtilTest, field_transitively_refers_to_unique) {
 
   // typedef binary (cpp.type = "std::unique_ptr<folly::IOBuf>") IOBufPtr;
   auto p = t_primitive_type::t_binary();
-  p.set_annotation("cpp.type", "std::unique_ptr<folly::IOBuf>");
+  p.set_unstructured_annotation("cpp.type", "std::unique_ptr<folly::IOBuf>");
 
   auto lp = t_list(&p);
   auto llp = t_list(t_list(&p));
@@ -254,17 +254,17 @@ TEST_F(UtilTest, field_transitively_refers_to_unique) {
   for (const auto* type : types) {
     // type r (cpp.ref = "true");
     auto r = t_field(type, "r", 1);
-    r.set_annotation("cpp.ref", "true");
+    r.set_unstructured_annotation("cpp.ref", "true");
     EXPECT_TRUE(cpp2::field_transitively_refers_to_unique(&r));
 
     // type u (cpp.ref_type = "unique");
     auto u = t_field(type, "u", 1);
-    u.set_annotation("cpp.ref_type", "unique");
+    u.set_unstructured_annotation("cpp.ref_type", "unique");
     EXPECT_TRUE(cpp2::field_transitively_refers_to_unique(&u));
 
     // type s (cpp.ref_type = "shared");
     auto s = t_field(type, "s", 1);
-    s.set_annotation("cpp.ref_type", "shared");
+    s.set_unstructured_annotation("cpp.ref_type", "shared");
     EXPECT_FALSE(cpp2::field_transitively_refers_to_unique(&s));
   }
 }
@@ -284,7 +284,7 @@ TEST_F(UtilTest, is_custom_type) {
     auto typeDef = t_typedef(&p, "Type", cppType);
     EXPECT_FALSE(cpp2::is_custom_type(cppType));
     EXPECT_FALSE(cpp2::is_custom_type(typeDef));
-    cppType.set_annotation("cpp.type", "folly::fbstring");
+    cppType.set_unstructured_annotation("cpp.type", "folly::fbstring");
     EXPECT_TRUE(cpp2::is_custom_type(cppType));
     EXPECT_TRUE(cpp2::is_custom_type(typeDef));
   }
@@ -294,7 +294,7 @@ TEST_F(UtilTest, is_custom_type) {
     auto typeDef = t_typedef(&p, "Type", cpp2Type);
     EXPECT_FALSE(cpp2::is_custom_type(cpp2Type));
     EXPECT_FALSE(cpp2::is_custom_type(typeDef));
-    cpp2Type.set_annotation("cpp2.type", "folly::fbstring");
+    cpp2Type.set_unstructured_annotation("cpp2.type", "folly::fbstring");
     EXPECT_TRUE(cpp2::is_custom_type(cpp2Type));
     EXPECT_TRUE(cpp2::is_custom_type(typeDef));
   }
@@ -305,7 +305,7 @@ TEST_F(UtilTest, is_custom_type) {
     auto typeDef = t_typedef(&p, "Type", cppTemplate);
     EXPECT_FALSE(cpp2::is_custom_type(cppTemplate));
     EXPECT_FALSE(cpp2::is_custom_type(typeDef));
-    cppTemplate.set_annotation("cpp.template", "std::deque");
+    cppTemplate.set_unstructured_annotation("cpp.template", "std::deque");
     EXPECT_TRUE(cpp2::is_custom_type(cppTemplate));
     EXPECT_TRUE(cpp2::is_custom_type(typeDef));
   }
@@ -315,7 +315,7 @@ TEST_F(UtilTest, is_custom_type) {
     auto typeDef = t_typedef(&p, "Type", cpp2Template);
     EXPECT_FALSE(cpp2::is_custom_type(cpp2Template));
     EXPECT_FALSE(cpp2::is_custom_type(typeDef));
-    cpp2Template.set_annotation("cpp2.template", "std::deque");
+    cpp2Template.set_unstructured_annotation("cpp2.template", "std::deque");
     EXPECT_TRUE(cpp2::is_custom_type(cpp2Template));
     EXPECT_TRUE(cpp2::is_custom_type(typeDef));
   }
@@ -326,7 +326,7 @@ TEST_F(UtilTest, is_custom_type) {
     auto typeDef2 = t_typedef(&p, "TypeDef", typeDef);
     EXPECT_FALSE(cpp2::is_custom_type(cppAdapter));
     EXPECT_FALSE(cpp2::is_custom_type(typeDef));
-    typeDef.set_annotation("cpp.adapter", "Adapter");
+    typeDef.set_unstructured_annotation("cpp.adapter", "Adapter");
     auto adapter = gen::adapter_builder(p, "cpp");
     typeDef.add_structured_annotation(adapter.make("MyAdapter"));
     EXPECT_TRUE(cpp2::is_custom_type(typeDef));

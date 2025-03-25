@@ -136,7 +136,7 @@ TEST(TProgram, AddDefinitionUri) {
   }
   { // Explicit annotation override.
     auto node = std::make_unique<t_union>(&program, "Union");
-    node->set_annotation("thrift.uri");
+    node->set_unstructured_annotation("thrift.uri");
     auto& def = program.add_def(std::move(node));
     EXPECT_TRUE(def.explicit_uri());
     EXPECT_EQ(def.uri(), "");

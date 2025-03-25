@@ -91,7 +91,7 @@ class t_node {
     annotations_ = std::move(annotations);
   }
 
-  void set_annotation(
+  void set_unstructured_annotation(
       const std::string& key,
       const std::string& value = {},
       const source_range& range = {},

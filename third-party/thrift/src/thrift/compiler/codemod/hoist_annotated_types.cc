@@ -239,7 +239,7 @@ class hoist_annotated_types {
         // render_type separates it back out.
         auto begin = annot->src_range().begin.offset();
         auto end = annot->src_range().end.offset();
-        const_cast<t_type&>(*type).set_annotation(
+        const_cast<t_type&>(*type).set_unstructured_annotation(
             std::string(old_content.substr(begin, end - begin)));
         if (old_content[end] == '\n') {
           end++;

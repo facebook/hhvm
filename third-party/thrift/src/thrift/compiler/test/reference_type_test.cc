@@ -33,49 +33,49 @@ TEST_F(ReferenceTypeTest, None) {
 
 TEST_F(ReferenceTypeTest, CppRef) {
   t_field tfield(&t_primitive_type::t_string(), "my_string");
-  tfield.set_annotation("cpp.ref", "");
+  tfield.set_unstructured_annotation("cpp.ref", "");
   EXPECT_EQ(find_ref_type(tfield), reference_type::unique);
 }
 
 TEST_F(ReferenceTypeTest, Cpp2Ref) {
   t_field tfield(&t_primitive_type::t_string(), "my_string");
-  tfield.set_annotation("cpp2.ref", "");
+  tfield.set_unstructured_annotation("cpp2.ref", "");
   EXPECT_EQ(find_ref_type(tfield), reference_type::unique);
 }
 
 TEST_F(ReferenceTypeTest, CppRefType_Unique) {
   t_field tfield(&t_primitive_type::t_string(), "my_string");
-  tfield.set_annotation("cpp.ref_type", "unique");
+  tfield.set_unstructured_annotation("cpp.ref_type", "unique");
   EXPECT_EQ(find_ref_type(tfield), reference_type::unique);
 }
 
 TEST_F(ReferenceTypeTest, CppRefType_Shared) {
   t_field tfield(&t_primitive_type::t_string(), "my_string");
-  tfield.set_annotation("cpp.ref_type", "shared");
+  tfield.set_unstructured_annotation("cpp.ref_type", "shared");
   EXPECT_EQ(find_ref_type(tfield), reference_type::shared_mutable);
 }
 
 TEST_F(ReferenceTypeTest, CppRefType_SharedMutable) {
   t_field tfield(&t_primitive_type::t_string(), "my_string");
-  tfield.set_annotation("cpp.ref_type", "shared_mutable");
+  tfield.set_unstructured_annotation("cpp.ref_type", "shared_mutable");
   EXPECT_EQ(find_ref_type(tfield), reference_type::shared_mutable);
 }
 
 TEST_F(ReferenceTypeTest, CppRefType_SharedConst) {
   t_field tfield(&t_primitive_type::t_string(), "my_string");
-  tfield.set_annotation("cpp.ref_type", "shared_const");
+  tfield.set_unstructured_annotation("cpp.ref_type", "shared_const");
   EXPECT_EQ(find_ref_type(tfield), reference_type::shared_const);
 }
 
 TEST_F(ReferenceTypeTest, CppRefType_Unknown) {
   t_field tfield(&t_primitive_type::t_string(), "my_string");
-  tfield.set_annotation("cpp.ref_type", "blah");
+  tfield.set_unstructured_annotation("cpp.ref_type", "blah");
   EXPECT_THROW(find_ref_type(tfield), std::runtime_error);
 }
 
 TEST_F(ReferenceTypeTest, CppRefType_box) {
   t_field tfield(&t_primitive_type::t_string(), "my_string");
-  tfield.set_annotation("thrift.box", "");
+  tfield.set_unstructured_annotation("thrift.box", "");
   EXPECT_EQ(find_ref_type(tfield), reference_type::boxed);
 }
 

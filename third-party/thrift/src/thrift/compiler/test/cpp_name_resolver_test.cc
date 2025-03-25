@@ -147,7 +147,7 @@ TEST_F(CppNameResolverTest, gen_namespaced_name) {
   p.set_namespace("cpp2", "foo.bar");
   t_enum e1(&p, "MyEnum1");
   t_enum e2(&p, "MyEnum2");
-  e2.set_annotation("cpp.name", "YourEnum");
+  e2.set_unstructured_annotation("cpp.name", "YourEnum");
   EXPECT_EQ("::foo::bar::MyEnum1", resolver_.get_namespaced_name(e1));
   EXPECT_EQ("::foo::bar::YourEnum", resolver_.get_namespaced_name(e2));
 }
@@ -212,7 +212,7 @@ TEST_F(CppNameResolverTest, struct_adapter) {
 
   // cpp.name overrides the 'default' standard type.
   t_struct strct2(&program_, "Foo");
-  strct2.set_annotation("cpp.name", "Bar");
+  strct2.set_unstructured_annotation("cpp.name", "Bar");
   strct2.add_structured_annotation(
       gen::adapter_builder(program_, "cpp").make("FooAdapter"));
   EXPECT_EQ(get_standard_type(strct2), "::path::to::detail::Bar");
@@ -224,7 +224,7 @@ TEST_F(CppNameResolverTest, struct_adapter) {
 
 TEST_F(CppNameResolverTest, cpp_name) {
   t_enum tenum(&program_, "MyEnum");
-  tenum.set_annotation("cpp.name", "YourEnum");
+  tenum.set_unstructured_annotation("cpp.name", "YourEnum");
   EXPECT_EQ(get_native_type(tenum), "::path::to::YourEnum");
 }
 
@@ -247,17 +247,17 @@ TEST_F(CppNameResolverTest, containers_custom_template) {
   // cpp.template could not resolve to a scalar since it can be only used for
   // container fields.
   t_map tmap(t_primitive_type::t_string(), t_primitive_type::t_i32());
-  tmap.set_annotation("cpp.template", "std::unordered_map");
+  tmap.set_unstructured_annotation("cpp.template", "std::unordered_map");
   EXPECT_EQ(
       get_native_type(tmap),
       "std::unordered_map<::std::string, ::std::int32_t>");
   EXPECT_FALSE(can_resolve_to_scalar(tmap));
   t_list tlist(t_primitive_type::t_double());
-  tlist.set_annotation("cpp2.template", "std::list");
+  tlist.set_unstructured_annotation("cpp2.template", "std::list");
   EXPECT_EQ(get_native_type(tlist), "std::list<double>");
   EXPECT_FALSE(can_resolve_to_scalar(tlist));
   t_set tset(t_primitive_type::t_binary());
-  tset.set_annotation("cpp2.template", "::std::unordered_set");
+  tset.set_unstructured_annotation("cpp2.template", "::std::unordered_set");
   EXPECT_EQ(get_native_type(tset), "::std::unordered_set<::std::string>");
   EXPECT_FALSE(can_resolve_to_scalar(tset));
 }
@@ -279,7 +279,7 @@ TEST_F(CppNameResolverTest, containers_adapter) {
 
   // The container can also be addapted.
   t_set tset(strct);
-  tset.set_annotation("cpp.template", "std::unordered_set");
+  tset.set_unstructured_annotation("cpp.template", "std::unordered_set");
   // The template argument is respected for both standard and adapted types.
   EXPECT_EQ(
       get_standard_type(tset), "std::unordered_set<::path::to::detail::Foo>");
@@ -287,7 +287,7 @@ TEST_F(CppNameResolverTest, containers_adapter) {
 
   // cpp.type on the container overrides the 'default' standard type.
   t_list tlist(strct);
-  tlist.set_annotation("cpp.type", "MyList");
+  tlist.set_unstructured_annotation("cpp.type", "MyList");
   EXPECT_EQ(get_standard_type(tlist), "MyList");
   EXPECT_EQ(get_native_type(tlist), "MyList");
 }
@@ -371,22 +371,22 @@ TEST_F(CppNameResolverTest, typedefs_adapter) {
 TEST_F(CppNameResolverTest, custom_type) {
   t_primitive_type tui64(t_primitive_type::t_i64());
   tui64.set_name("ui64");
-  tui64.set_annotation("cpp2.type", "::std::uint64_t");
+  tui64.set_unstructured_annotation("cpp2.type", "::std::uint64_t");
   EXPECT_EQ(get_native_type(tui64), "::std::uint64_t");
   EXPECT_TRUE(can_resolve_to_scalar(tui64));
 
   t_union tunion(&program_, "Bar");
-  tunion.set_annotation("cpp2.type", "Other");
+  tunion.set_unstructured_annotation("cpp2.type", "Other");
   EXPECT_EQ(get_native_type(tunion), "Other");
   EXPECT_TRUE(can_resolve_to_scalar(tunion));
 
   t_typedef ttypedef1(&program_, "Foo", t_primitive_type::t_bool());
-  ttypedef1.set_annotation("cpp2.type", "Other");
+  ttypedef1.set_unstructured_annotation("cpp2.type", "Other");
   EXPECT_EQ(get_native_type(ttypedef1), "Other");
   EXPECT_TRUE(can_resolve_to_scalar(ttypedef1));
 
   t_typedef ttypedef2(&program_, "FooBar", t_primitive_type::t_string());
-  ttypedef2.set_annotation("cpp2.type", "Other");
+  ttypedef2.set_unstructured_annotation("cpp2.type", "Other");
   EXPECT_EQ(get_native_type(ttypedef2), "Other");
   EXPECT_TRUE(can_resolve_to_scalar(ttypedef2));
 
@@ -397,7 +397,7 @@ TEST_F(CppNameResolverTest, custom_type) {
 
   // Can be combined with template.
   t_map tmap2(tmap1);
-  tmap2.set_annotation("cpp.template", "std::unordered_map");
+  tmap2.set_unstructured_annotation("cpp.template", "std::unordered_map");
   EXPECT_EQ(
       get_native_type(tmap2),
       "std::unordered_map<::std::string, ::std::uint64_t>");
@@ -405,14 +405,14 @@ TEST_F(CppNameResolverTest, custom_type) {
 
   // Custom type overrides template.
   t_map tmap3(tmap2);
-  tmap3.set_annotation("cpp.type", "MyMap");
+  tmap3.set_unstructured_annotation("cpp.type", "MyMap");
   EXPECT_EQ(get_native_type(tmap3), "MyMap");
   EXPECT_TRUE(can_resolve_to_scalar(tmap3));
 }
 
 TEST_F(CppNameResolverTest, stream) {
   t_primitive_type ui64(t_primitive_type::t_i64());
-  ui64.set_annotation("cpp.type", "uint64_t");
+  ui64.set_unstructured_annotation("cpp.type", "uint64_t");
 
   auto fun1 = t_function(nullptr, {}, "", {}, std::make_unique<t_stream>(ui64));
   EXPECT_EQ(
@@ -483,7 +483,7 @@ TEST_F(CppNameResolverTest, storage_type) {
 
   // Unrecognized throws an exception.
   t_field unrecognized_strct_field(strct, "hash", 1);
-  unrecognized_strct_field.set_annotation("cpp.ref_type", "blah");
+  unrecognized_strct_field.set_unstructured_annotation("cpp.ref_type", "blah");
   EXPECT_THROW(get_storage_type(unrecognized_strct_field), std::runtime_error);
 }
 
@@ -492,7 +492,7 @@ TEST_F(CppNameResolverTest, typedef_cpptemplate) {
   // container fields.
   t_map imap(t_primitive_type::t_i32(), t_primitive_type::t_string());
   t_typedef iumap(&program_, "iumap", imap);
-  iumap.set_annotation("cpp.template", "std::unorderd_map");
+  iumap.set_unstructured_annotation("cpp.template", "std::unorderd_map");
   t_typedef tiumap(&program_, "tiumap", iumap);
 
   EXPECT_EQ(get_native_type(imap), "::std::map<::std::int32_t, ::std::string>");
@@ -516,7 +516,7 @@ TEST_F(CppNameResolverTest, typedef_cpptemplate) {
 TEST_F(CppNameResolverTest, typedef_cpptype) {
   t_map imap(t_primitive_type::t_i32(), t_primitive_type::t_string());
   t_typedef iumap(&program_, "iumap", imap);
-  iumap.set_annotation(
+  iumap.set_unstructured_annotation(
       "cpp.type", "std::unorderd_map<::std::int32_t, ::std::string>");
   t_typedef tiumap(&program_, "tiumap", iumap);
 
@@ -606,7 +606,7 @@ TEST_F(CppNameResolverTest, adapted_field_storage_type) {
   // Unrecognized throws an exception.
   auto unrecognized_field = t_field(i64, "n", 42);
   unrecognized_field.add_structured_annotation(adapter.make("MyAdapter"));
-  unrecognized_field.set_annotation("cpp.ref_type", "blah");
+  unrecognized_field.set_unstructured_annotation("cpp.ref_type", "blah");
   EXPECT_THROW(get_storage_type(unrecognized_field), std::runtime_error);
 }
 

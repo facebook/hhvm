@@ -1952,6 +1952,9 @@ class SimpleException(thrift.py3.exceptions.GeneratedError):
         py_deprecated_types = _get_py_deprecated_module()
         return thrift.util.converter.to_py_struct(py_deprecated_types.SimpleException, self)
 
+    def _fbthrift__isset(self) -> dict[str, bool]:
+        return thrift.python.types.isset(self._fbthrift__inner)
+
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__SimpleException()
@@ -2040,6 +2043,9 @@ class OptionalRefStruct(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         py_deprecated_types = _get_py_deprecated_module()
         return thrift.util.converter.to_py_struct(py_deprecated_types.OptionalRefStruct, self)
+
+    def _fbthrift__isset(self) -> dict[str, bool]:
+        return thrift.python.types.isset(self._fbthrift__inner)
 
     @staticmethod
     def __get_reflection__():
@@ -2136,6 +2142,9 @@ class SimpleStruct(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         py_deprecated_types = _get_py_deprecated_module()
         return thrift.util.converter.to_py_struct(py_deprecated_types.SimpleStruct, self)
+
+    def _fbthrift__isset(self) -> dict[str, bool]:
+        return thrift.python.types.isset(self._fbthrift__inner)
 
     @staticmethod
     def __get_reflection__():
@@ -2244,6 +2253,9 @@ class HiddenTypeFieldsStruct(thrift.py3.types.Struct):
         py_deprecated_types = _get_py_deprecated_module()
         return thrift.util.converter.to_py_struct(py_deprecated_types.HiddenTypeFieldsStruct, self)
 
+    def _fbthrift__isset(self) -> dict[str, bool]:
+        return thrift.python.types.isset(self._fbthrift__inner)
+
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__HiddenTypeFieldsStruct()
@@ -2332,6 +2344,9 @@ class ComplexStruct(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         py_deprecated_types = _get_py_deprecated_module()
         return thrift.util.converter.to_py_struct(py_deprecated_types.ComplexStruct, self)
+
+    def _fbthrift__isset(self) -> dict[str, bool]:
+        return thrift.python.types.isset(self._fbthrift__inner)
 
     @staticmethod
     def __get_reflection__():
@@ -2457,6 +2472,9 @@ class BinaryUnion(thrift.py3.types.Union):
         py_deprecated_types = _get_py_deprecated_module()
         return thrift.util.converter.to_py_struct(py_deprecated_types.BinaryUnion, self)
 
+    def _fbthrift__isset(self) -> dict[str, bool]:
+        return thrift.python.types.isset(self._fbthrift__inner)
+
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__BinaryUnion()
@@ -2563,6 +2581,9 @@ class BinaryUnionStruct(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         py_deprecated_types = _get_py_deprecated_module()
         return thrift.util.converter.to_py_struct(py_deprecated_types.BinaryUnionStruct, self)
+
+    def _fbthrift__isset(self) -> dict[str, bool]:
+        return thrift.python.types.isset(self._fbthrift__inner)
 
     @staticmethod
     def __get_reflection__():
@@ -2673,6 +2694,9 @@ class CustomFields(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         py_deprecated_types = _get_py_deprecated_module()
         return thrift.util.converter.to_py_struct(py_deprecated_types.CustomFields, self)
+
+    def _fbthrift__isset(self) -> dict[str, bool]:
+        return thrift.python.types.isset(self._fbthrift__inner)
 
     @staticmethod
     def __get_reflection__():
@@ -2818,6 +2842,9 @@ class CustomTypedefFields(thrift.py3.types.Struct):
         py_deprecated_types = _get_py_deprecated_module()
         return thrift.util.converter.to_py_struct(py_deprecated_types.CustomTypedefFields, self)
 
+    def _fbthrift__isset(self) -> dict[str, bool]:
+        return thrift.python.types.isset(self._fbthrift__inner)
+
     @staticmethod
     def __get_reflection__():
         return get_types_reflection().get_reflection__CustomTypedefFields()
@@ -2961,6 +2988,9 @@ class AdaptedTypedefFields(thrift.py3.types.Struct):
     def _to_py_deprecated(self):
         py_deprecated_types = _get_py_deprecated_module()
         return thrift.util.converter.to_py_struct(py_deprecated_types.AdaptedTypedefFields, self)
+
+    def _fbthrift__isset(self) -> dict[str, bool]:
+        return thrift.python.types.isset(self._fbthrift__inner)
 
     @staticmethod
     def __get_reflection__():

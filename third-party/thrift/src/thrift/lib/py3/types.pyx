@@ -100,6 +100,8 @@ class StructMeta(type):
     def isset(struct):
         if isinstance(struct, (_fbthrift_python_Struct, _fbthrift_python_GeneratedError, _fbthrift_python_Union)):
             return _IsSet(type(struct).__name__, _fbthrift_python_isset(struct))
+        if hasattr(struct.__class__, "_FBTHRIFT__PYTHON_CLASS"):
+            return _IsSet(type(struct).__name__, struct._fbthrift__isset())
         elif isinstance(struct, Struct):
             return (<Struct>struct)._fbthrift_isset()
         elif isinstance(struct, GeneratedError):

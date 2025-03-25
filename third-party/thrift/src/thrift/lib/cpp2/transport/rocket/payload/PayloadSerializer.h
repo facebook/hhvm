@@ -60,12 +60,20 @@ class PayloadSerializer : public folly::hazptr_obj_base<PayloadSerializer> {
    private:
     friend struct PayloadSerializerHolder;
 
+    // Used for shared global instance. Co-owns the instance.
     explicit Ptr(std::atomic<PayloadSerializer*>& cell)
         : holder_(folly::make_hazard_pointer()),
           serializer_(holder_.protect(cell)) {}
 
+    // Does not own the instance.
+    explicit Ptr(PayloadSerializer& payloadSerializer)
+        : holder_(folly::make_hazard_pointer()),
+          serializer_(&payloadSerializer) {}
+
     folly::hazptr_holder<> holder_;
     PayloadSerializer* serializer_;
+
+    friend class PayloadSerializer;
   };
 
  private:
@@ -121,6 +129,40 @@ class PayloadSerializer : public folly::hazptr_obj_base<PayloadSerializer> {
    * method.
    */
   static Ptr getInstance();
+
+  /**
+   * Constructs a new PayloadSerializer with the given strategy.
+   */
+  template <
+      typename Strategy = DefaultPayloadSerializerStrategy,
+      typename... Args,
+      typename = std::enable_if_t<
+          std::is_base_of_v<PayloadSerializerStrategy<Strategy>, Strategy>>>
+  static FOLLY_ALWAYS_INLINE PayloadSerializer make(Args... args) {
+    if constexpr (std::is_same_v<Strategy, DefaultPayloadSerializerStrategy>) {
+      return PayloadSerializer{DefaultPayloadSerializerStrategy(args...)};
+    } else if constexpr (std::is_same_v<
+                             Strategy,
+                             LegacyPayloadSerializerStrategy>) {
+      return PayloadSerializer{LegacyPayloadSerializerStrategy(args...)};
+    } else if constexpr (std::is_same_v<
+                             Strategy,
+                             ChecksumPayloadSerializerStrategy<
+                                 DefaultPayloadSerializerStrategy>>) {
+      return PayloadSerializer{
+          ChecksumPayloadSerializerStrategy<DefaultPayloadSerializerStrategy>(
+              args...)};
+    } else if constexpr (std::is_same_v<
+                             Strategy,
+                             ChecksumPayloadSerializerStrategy<
+                                 LegacyPayloadSerializerStrategy>>) {
+      return PayloadSerializer{
+          ChecksumPayloadSerializerStrategy<LegacyPayloadSerializerStrategy>(
+              args...)};
+    }
+  }
+
+  Ptr getNonOwningPtr() { return Ptr(*this); }
 
   template <class T>
   folly::Try<T> unpackAsCompressed(

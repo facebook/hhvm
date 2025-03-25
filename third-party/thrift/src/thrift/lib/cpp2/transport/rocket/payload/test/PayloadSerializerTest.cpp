@@ -66,4 +66,36 @@ TEST(PayloadSerializerTest, TestPackWithoutChecksumUsingFacade) {
   EXPECT_EQ(other.hasException(), false);
 }
 
+TEST(PayloadSerializerTest, TestPtrCoOwnership) {
+  std::unique_ptr<PayloadSerializer::Ptr> ptr = nullptr;
+
+  {
+    PayloadSerializer::initialize(
+        ChecksumPayloadSerializerStrategy<DefaultPayloadSerializerStrategy>());
+    ptr = std::make_unique<PayloadSerializer::Ptr>(
+        PayloadSerializer::getInstance());
+    testPackAndUnpackWithCompactProtocol(**ptr);
+  }
+
+  PayloadSerializer::initialize(
+      ChecksumPayloadSerializerStrategy<DefaultPayloadSerializerStrategy>());
+
+  // **ptr is still valid here, despite the re-initialization
+  testPackAndUnpackWithCompactProtocol(**ptr);
+}
+
+TEST(PayloadSerializerTest, TestMakeAndNonOwningPtr) {
+  std::unique_ptr<PayloadSerializer::Ptr> ptr = nullptr;
+
+  {
+    auto ps = PayloadSerializer::make();
+    ptr = std::make_unique<PayloadSerializer::Ptr>(ps.getNonOwningPtr());
+    // valid here while ps is in scope
+    testPackAndUnpackWithCompactProtocol(**ptr);
+  }
+
+  // ptr does not own, so it is not valid here
+  // testPackAndUnpackWithCompactProtocol(**ptr);
+}
+
 } // namespace apache::thrift::rocket

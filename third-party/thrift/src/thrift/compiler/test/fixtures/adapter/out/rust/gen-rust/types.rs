@@ -59,7 +59,9 @@ pub type CustomProtocolType = crate::types::IOBuf;
 
 pub type IndirectionString = ::std::string::String;
 
-pub use crate::types::ThriftAdaptedEnum as AdaptedEnum;
+pub type AdaptedEnum = crate::types::ThriftAdaptedEnum;
+#[doc(hidden)]
+pub use crate::types::__constructors::ThriftAdaptedEnum as AdaptedEnum;
 
 pub type AdaptedTypedef = crate::types::AdaptedStruct;
 
@@ -6798,7 +6800,7 @@ compile_error!("You are using Rust adapters in a Thrift library that does not ha
 
 #[doc(hidden)]
 #[deprecated]
-#[allow(hidden_glob_reexports, unused_imports)]
+#[allow(hidden_glob_reexports)]
 pub mod __constructors {
     mod AdaptedEnum {
         pub use crate::AdaptedEnum;

@@ -2201,6 +2201,7 @@ class rust_mstch_typedef : public mstch_typedef {
             {"typedef:docs", &rust_mstch_typedef::rust_docs},
             {"typedef:serde?", &rust_mstch_typedef::rust_serde},
             {"typedef:has_adapter?", &rust_mstch_typedef::has_adapter},
+            {"typedef:constructor?", &rust_mstch_typedef::constructor},
         });
   }
   mstch::node rust_name() { return type_rust_name(typedef_); }
@@ -2260,6 +2261,9 @@ class rust_mstch_typedef : public mstch_typedef {
         context_,
         pos_,
         options_);
+  }
+  mstch::node constructor() {
+    return typedef_has_constructor_expression(typedef_);
   }
 
  private:

@@ -2827,7 +2827,7 @@ pub(crate) mod r#impl {
 
 #[doc(hidden)]
 #[deprecated]
-#[allow(hidden_glob_reexports, unused_imports)]
+#[allow(hidden_glob_reexports)]
 pub mod __constructors {
     mod E1 {
         pub use crate::E1;

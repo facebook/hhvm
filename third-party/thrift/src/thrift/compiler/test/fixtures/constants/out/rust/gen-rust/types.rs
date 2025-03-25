@@ -11,7 +11,9 @@ pub use self::consts::*;
 #[allow(unused_imports)]
 pub(crate) use crate as types;
 
-pub use crate::types::Company as MyCompany;
+pub type MyCompany = crate::types::Company;
+#[doc(hidden)]
+pub use crate::types::__constructors::Company as MyCompany;
 
 pub type MyStringIdentifier = ::std::string::String;
 
@@ -1548,7 +1550,7 @@ pub(crate) mod r#impl {
 
 #[doc(hidden)]
 #[deprecated]
-#[allow(hidden_glob_reexports, unused_imports)]
+#[allow(hidden_glob_reexports)]
 pub mod __constructors {
     mod City {
         pub use crate::City;

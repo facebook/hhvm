@@ -13,7 +13,9 @@ pub mod services;
 #[allow(unused_imports)]
 pub(crate) use crate as types;
 
-pub use crate::types::MyEnum as MyEnumAlias;
+pub type MyEnumAlias = crate::types::MyEnum;
+#[doc(hidden)]
+pub use crate::types::__constructors::MyEnum as MyEnumAlias;
 
 pub type MyDataItemAlias = crate::types::MyDataItem;
 
@@ -1609,7 +1611,7 @@ pub(crate) mod r#impl {
 
 #[doc(hidden)]
 #[deprecated]
-#[allow(hidden_glob_reexports, unused_imports)]
+#[allow(hidden_glob_reexports)]
 pub mod __constructors {
     mod HackEnum {
         pub use crate::HackEnum;

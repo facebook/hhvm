@@ -30,17 +30,16 @@ pub type {{typedef:rust_name}} = {{!
   }}{{/adapter:transitive_only?}};
 {{/typedef:has_adapter?}}{{!
 }}{{^typedef:has_adapter?}}{{!
-  }}{{#typedef:type}}{{!
-    }}{{#type:enum}}
-pub use {{type:package}}::{{type:rust_name}} as {{typedef:rust_name}};
-{{/type:enum}}{{!
-    }}{{^type:enum}}
+  }}{{#typedef:type}}
 pub type {{typedef:rust_name}} = {{!
     }}{{#typedef:rust_type}}::{{typedef:rust_type}}{{> lib/type_generics}}{{/typedef:rust_type}}{{!
     }}{{^typedef:rust_type}}{{> lib/type}}{{/typedef:rust_type}}{{!
 }};
-{{/type:enum}}{{!
-  }}{{/typedef:type}}{{!
+{{#typedef:constructor?}}
+#[doc(hidden)]
+pub use {{type:package}}::__constructors::{{type:rust_name}} as {{typedef:rust_name}};
+{{/typedef:constructor?}}
+  {{/typedef:type}}{{!
 }}{{/typedef:has_adapter?}}{{!
 }}{{/typedef:newtype?}}{{!
 }}{{#typedef:newtype?}}

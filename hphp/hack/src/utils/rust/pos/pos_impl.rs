@@ -167,6 +167,7 @@ impl Pos {
         }
     }
 
+    /// Returns (start_line, end_line, start_col, end_col) for multi-line spans.
     pub fn info_pos_extended(&self) -> (usize, usize, usize, usize) {
         let (line_begin, start, end) = self.info_pos();
         let line_end = match &self.0 {

@@ -3,12 +3,43 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use oxidized::message::Message;
+use oxidized::user_error::Severity;
 use oxidized::user_error::UserError;
 use rc_pos::Pos;
 use relative_path::RelativePathCtx;
+use serde_derive::Deserialize;
+use serde_derive::Serialize;
 use serde_json::json;
 
 use crate::ErrorCode;
+
+#[derive(Debug, Deserialize, Clone, Serialize)]
+#[serde(rename_all = "lowercase")]
+enum LinterSeverity {
+    Error,
+    Warning,
+    Advice,
+    Disabled,
+}
+
+/// For lint infrastructure integration.
+#[derive(Debug, Deserialize, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LintMessage {
+    path: String,
+    line: Option<usize>,
+    char: Option<usize>,
+    code: String,
+    severity: LinterSeverity,
+    name: String,
+    description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    original: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    replacement: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    bypass_changed_line_filtering: Option<bool>,
+}
 
 pub fn to_json(e: &UserError<Pos, Pos>, ctx: &RelativePathCtx) -> serde_json::Value {
     let mut messages = Vec::new();
@@ -33,4 +64,46 @@ fn msg_json(
         "end": ecol,
         "code": code,
     })
+}
+
+fn to_lint_message(e: &UserError<Pos, Pos>, ctx: &RelativePathCtx) -> LintMessage {
+    let UserError {
+        severity,
+        code,
+        claim,
+        reasons: _,
+        explanation: _,
+        quickfixes: _,
+        custom_msgs: _,
+        is_fixmed: _,
+        flags: _,
+        function_pos: _,
+    } = e;
+    let Message(pos, claim_descr) = claim;
+    let (stline, _edline, stcol, _edcol) = pos.info_pos_extended();
+    LintMessage {
+        path: pos
+            .filename()
+            .to_absolute(ctx)
+            .into_os_string()
+            .into_string()
+            .unwrap(),
+        line: Some(stline),
+        char: Some(stcol),
+        code: "HACKWARNING".to_string(),
+        severity: match severity {
+            Severity::Err => LinterSeverity::Error,
+            Severity::Warning => LinterSeverity::Warning,
+        },
+        name: code.to_string(),
+        description: Some(claim_descr.to_string()),
+        original: None,
+        replacement: None,
+        bypass_changed_line_filtering: None,
+    }
+}
+
+/// For lint infrastructure integration.
+pub fn to_lint_json(e: &UserError<Pos, Pos>, ctx: &RelativePathCtx) -> serde_json::Value {
+    json!(to_lint_message(e, ctx))
 }

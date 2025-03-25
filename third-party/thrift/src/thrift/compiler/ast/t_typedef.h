@@ -63,7 +63,7 @@ class t_typedef : public t_type {
   // Finds the first matching annoation in the typedef's type hierarchy.
   // Return default_value or "" if not found.
   template <typename D = const std::string*>
-  static auto get_first_annotation(
+  static auto get_first_unstructured_annotation(
       const t_type* type,
       const std::vector<std::string_view>& names,
       D&& default_value = nullptr) {

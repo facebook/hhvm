@@ -60,7 +60,7 @@ bool RocketSinkClientCallback::onFirstResponse(
 
   connection_.sendPayload(
       streamId_,
-      PayloadSerializer::getInstance()->pack(
+      connection_.getPayloadSerializer()->pack(
           std::move(firstResponse),
           connection_.isDecodingMetadataUsingBinaryProtocol(),
           connection_.getRawSocket()),
@@ -78,7 +78,7 @@ void RocketSinkClientCallback::onFirstResponseError(
             DCHECK(encodedError.encoded.payload);
             connection_.sendPayload(
                 streamId_,
-                PayloadSerializer::getInstance()->pack(
+                connection_.getPayloadSerializer()->pack(
                     std::move(encodedError.encoded),
                     connection_.isDecodingMetadataUsingBinaryProtocol(),
                     connection_.getRawSocket()),
@@ -104,7 +104,7 @@ void RocketSinkClientCallback::onFinalResponse(StreamPayload&& finalResponse) {
 
   connection_.sendPayload(
       streamId_,
-      PayloadSerializer::getInstance()->pack(
+      connection_.getPayloadSerializer()->pack(
           std::move(finalResponse),
           connection_.isDecodingMetadataUsingBinaryProtocol(),
           connection_.getRawSocket()),
@@ -136,7 +136,7 @@ void RocketSinkClientCallback::onFinalResponseError(
         }
         connection_.sendPayload(
             streamId_,
-            PayloadSerializer::getInstance()->pack(
+            connection_.getPayloadSerializer()->pack(
                 std::move(err.encoded),
                 connection_.isDecodingMetadataUsingBinaryProtocol(),
                 connection_.getRawSocket()),
@@ -220,7 +220,7 @@ void RocketSinkClientCallback::timeoutExpired() noexcept {
   streamRpcError.what_utf8_ref() = "Sink chunk timeout";
   onFinalResponseError(folly::make_exception_wrapper<rocket::RocketException>(
       rocket::ErrorCode::CANCELED,
-      PayloadSerializer::getInstance()->packCompact(streamRpcError)));
+      connection_.getPayloadSerializer()->packCompact(streamRpcError)));
 }
 
 void RocketSinkClientCallback::setProtoId(protocol::PROTOCOL_TYPES protoId) {

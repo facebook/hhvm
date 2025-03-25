@@ -90,7 +90,9 @@ ResponseRpcError makeResponseRpcError(
   return responseRpcError;
 }
 
-RocketException makeRocketException(const ResponseRpcError& responseRpcError) {
+RocketException makeRocketException(
+    const ResponseRpcError& responseRpcError,
+    PayloadSerializer& payloadSerializer) {
   auto rocketCategory = [&] {
     auto category = ResponseRpcErrorCategory::INTERNAL_ERROR;
     if (auto errorCategory = responseRpcError.category()) {
@@ -108,8 +110,7 @@ RocketException makeRocketException(const ResponseRpcError& responseRpcError) {
   }();
 
   return RocketException(
-      rocketCategory,
-      PayloadSerializer::getInstance()->packCompact(responseRpcError));
+      rocketCategory, payloadSerializer.packCompact(responseRpcError));
 }
 
 template <typename Serializer>
@@ -491,12 +492,13 @@ void ThriftServerRequestResponse::sendThriftResponse(
   // createRequestLoggingCallback must happen after processFirstResponse.
   cb = createRequestLoggingCallback(std::move(cb), metadata, responseRpcError);
 
+  auto payloadSerializerPtr = context_.connection().getPayloadSerializer();
   if (responseRpcError) {
-    auto ex = makeRocketException(*responseRpcError);
+    auto ex = makeRocketException(*responseRpcError, *payloadSerializerPtr);
     context_.sendError(std::move(ex), std::move(cb));
     return;
   }
-  auto payload = PayloadSerializer::getInstance()->packWithFds(
+  auto payload = payloadSerializerPtr->packWithFds(
       &metadata,
       std::move(data),
       std::move(getRequestContext()->getHeader()->fds),
@@ -650,7 +652,8 @@ bool ThriftServerRequestStream::sendStreamThriftResponse(
   }
   if (auto responseRpcError = processFirstResponse(
           metadata, data, getProtoId(), version_, getCompressionConfig())) {
-    auto ex = makeRocketException(*responseRpcError);
+    auto ex = makeRocketException(
+        *responseRpcError, *context_.connection().getPayloadSerializer());
     handleStreamError(std::move(ex), clientCallback_);
     return false;
   }
@@ -674,7 +677,8 @@ void ThriftServerRequestStream::sendStreamThriftResponse(
   }
   if (auto responseRpcError = processFirstResponse(
           metadata, data, getProtoId(), version_, getCompressionConfig())) {
-    auto ex = makeRocketException(*responseRpcError);
+    auto ex = makeRocketException(
+        *responseRpcError, *context_.connection().getPayloadSerializer());
     handleStreamError(std::move(ex), clientCallback_);
     return;
   }
@@ -692,7 +696,8 @@ void ThriftServerRequestStream::sendSerializedError(
     std::unique_ptr<folly::IOBuf> exbuf) noexcept {
   if (auto responseRpcError = processFirstResponse(
           metadata, exbuf, getProtoId(), version_, getCompressionConfig())) {
-    auto ex = makeRocketException(*responseRpcError);
+    auto ex = makeRocketException(
+        *responseRpcError, *context_.connection().getPayloadSerializer());
     handleStreamError(std::move(ex), clientCallback_);
     return;
   }
@@ -763,7 +768,8 @@ void ThriftServerRequestSink::sendSerializedError(
     std::unique_ptr<folly::IOBuf> exbuf) noexcept {
   if (auto responseRpcError = processFirstResponse(
           metadata, exbuf, getProtoId(), version_, getCompressionConfig())) {
-    auto ex = makeRocketException(*responseRpcError);
+    auto ex = makeRocketException(
+        *responseRpcError, *context_.connection().getPayloadSerializer());
     handleStreamError(std::move(ex), clientCallback_);
     return;
   }
@@ -784,7 +790,8 @@ void ThriftServerRequestSink::sendSinkThriftResponse(
   }
   if (auto responseRpcError = processFirstResponse(
           metadata, data, getProtoId(), version_, getCompressionConfig())) {
-    auto ex = makeRocketException(*responseRpcError);
+    auto ex = makeRocketException(
+        *responseRpcError, *context_.connection().getPayloadSerializer());
     handleStreamError(std::move(ex), clientCallback_);
     return;
   }
@@ -817,7 +824,8 @@ bool ThriftServerRequestSink::sendSinkThriftResponse(
   }
   if (auto responseRpcError = processFirstResponse(
           metadata, data, getProtoId(), version_, getCompressionConfig())) {
-    auto ex = makeRocketException(*responseRpcError);
+    auto ex = makeRocketException(
+        *responseRpcError, *context_.connection().getPayloadSerializer());
     handleStreamError(std::move(ex), clientCallback_);
     return false;
   }

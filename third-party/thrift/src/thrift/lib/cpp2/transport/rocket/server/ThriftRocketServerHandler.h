@@ -139,7 +139,7 @@ class ThriftRocketServerHandler : public RocketServerHandler {
       Payload&& payload,
       F&& makeRequest,
       RpcKind expectedKind,
-      bool decodeMetadataUsingBinary);
+      RocketServerConnection& connection);
 
   FOLLY_NOINLINE void handlePreprocessResult(
       ThriftRequestCoreUniquePtr request,

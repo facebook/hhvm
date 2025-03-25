@@ -63,7 +63,8 @@ RocketServerConnection::RocketServerConnection(
     MemoryTracker& ingressMemoryTracker,
     MemoryTracker& egressMemoryTracker,
     StreamMetricCallback& streamMetricCallback,
-    const Config& cfg)
+    const Config& cfg,
+    std::optional<PayloadSerializer>&& payloadSerializer)
     : evb_(*socket->getEventBase()),
       socket_(std::move(socket)),
       rawSocket_(
@@ -86,7 +87,8 @@ RocketServerConnection::RocketServerConnection(
       egressMemoryTracker_(egressMemoryTracker),
       streamMetricCallback_(streamMetricCallback),
       enableObservers_(THRIFT_FLAG(enable_rocket_connection_observers)),
-      observerContainer_(this) {
+      observerContainer_(this),
+      payloadSerializer_(std::move(payloadSerializer)) {
   CHECK(socket_);
   CHECK(frameHandler_);
 
@@ -307,8 +309,7 @@ void RocketServerConnection::closeIfNeeded() {
           .ensure()
           .drainCompleteCode_ref()
           .from_optional(drainCompleteCode_);
-      sendMetadataPush(
-          PayloadSerializer::getInstance()->packCompact(serverMeta));
+      sendMetadataPush(getPayloadSerializer()->packCompact(serverMeta));
       // Send CONNECTION_ERROR error in case client doesn't support
       // DrainCompletePush
       sendError(StreamId{0}, RocketException(ErrorCode::CONNECTION_ERROR));
@@ -352,7 +353,7 @@ void RocketServerConnection::closeIfNeeded() {
                 callback->getStreamId(),
                 RocketException(
                     ErrorCode::CANCELED,
-                    PayloadSerializer::getInstance()->packCompact(
+                    getPayloadSerializer()->packCompact(
                         getStreamConnectionClosingError())));
           }
           callback->onStreamCancel();
@@ -529,7 +530,7 @@ void RocketServerConnection::handleUntrackedFrame(
       MetadataPushFrame metadataFrame(std::move(frame));
       ClientPushMetadata clientMeta;
       try {
-        PayloadSerializer::getInstance()->unpack(
+        getPayloadSerializer()->unpack(
             clientMeta, metadataFrame.metadata(), false);
       } catch (...) {
         close(folly::make_exception_wrapper<RocketException>(
@@ -674,9 +675,8 @@ void RocketServerConnection::handleSinkFrame(
     if (auto fullPayload = bufferOrGetFullPayload(std::move(payloadFrame))) {
       bool notViolateContract = true;
       if (next) {
-        auto streamPayload =
-            PayloadSerializer::getInstance()->unpack<StreamPayload>(
-                std::move(*fullPayload), decodeMetadataUsingBinary_.value());
+        auto streamPayload = getPayloadSerializer()->unpack<StreamPayload>(
+            std::move(*fullPayload), decodeMetadataUsingBinary_.value());
         if (streamPayload.hasException()) {
           notViolateContract =
               clientCallback.onSinkError(std::move(streamPayload.exception()));

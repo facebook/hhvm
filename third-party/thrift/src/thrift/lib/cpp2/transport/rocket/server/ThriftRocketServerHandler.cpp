@@ -322,7 +322,7 @@ void ThriftRocketServerHandler::handleRequestResponseFrame(
       std::move(frame.payload()),
       std::move(makeRequestResponse),
       RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-      context.connection().isDecodingMetadataUsingBinaryProtocol());
+      context.connection());
 }
 
 void ThriftRocketServerHandler::handleRequestFnfFrame(
@@ -349,7 +349,7 @@ void ThriftRocketServerHandler::handleRequestFnfFrame(
       std::move(frame.payload()),
       std::move(makeRequestFnf),
       RpcKind::SINGLE_REQUEST_NO_RESPONSE,
-      context.connection().isDecodingMetadataUsingBinaryProtocol());
+      context.connection());
 }
 
 void ThriftRocketServerHandler::handleRequestStreamFrame(
@@ -377,7 +377,7 @@ void ThriftRocketServerHandler::handleRequestStreamFrame(
       std::move(frame.payload()),
       std::move(makeRequestStream),
       RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
-      context.connection().isDecodingMetadataUsingBinaryProtocol());
+      context.connection());
 }
 
 void ThriftRocketServerHandler::handleRequestChannelFrame(
@@ -405,7 +405,7 @@ void ThriftRocketServerHandler::handleRequestChannelFrame(
       std::move(frame.payload()),
       std::move(makeRequestSink),
       RpcKind::SINK,
-      context.connection().isDecodingMetadataUsingBinaryProtocol());
+      context.connection());
 }
 
 void ThriftRocketServerHandler::connectionClosing() {
@@ -420,16 +420,16 @@ void ThriftRocketServerHandler::handleRequestCommon(
     Payload&& payload,
     F&& makeRequest,
     RpcKind expectedKind,
-    bool decodeMetadataUsingBinary) {
+    RocketServerConnection& connection) {
   std::chrono::steady_clock::time_point readEnd{
       std::chrono::steady_clock::now()};
   auto wiredPayloadSize = payload.metadataAndDataSize();
 
   rocket::Payload debugPayload = payload.clone();
   auto requestPayloadTry =
-      rocket::PayloadSerializer::getInstance()
-          ->unpackAsCompressed<RequestPayload>(
-              std::move(payload), decodeMetadataUsingBinary);
+      connection.getPayloadSerializer()->unpackAsCompressed<RequestPayload>(
+          std::move(payload),
+          connection.isDecodingMetadataUsingBinaryProtocol());
 
   auto makeActiveRequest = [&](auto&& md, auto&& payload, auto&& reqCtx) {
     serverConfigs_->incActiveRequests();

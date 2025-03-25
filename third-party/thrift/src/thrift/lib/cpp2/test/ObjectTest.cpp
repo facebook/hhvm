@@ -772,14 +772,14 @@ TEST(Object, Wrapper) {
   EXPECT_EQ(object.if_contains(FieldId{0}), &object[FieldId{0}]);
   EXPECT_EQ(object.if_contains(FieldId{2}), &object[FieldId{2}]);
 
-  EXPECT_EQ(object.contains(FieldId{0}), true);
-  EXPECT_EQ(object.contains(FieldId{1}), false);
-  EXPECT_EQ(object.contains(FieldId{2}), true);
+  EXPECT_TRUE(object.contains(FieldId{0}));
+  EXPECT_FALSE(object.contains(FieldId{1}));
+  EXPECT_TRUE(object.contains(FieldId{2}));
   EXPECT_THROW(object.at(FieldId{1}), std::out_of_range);
 
   EXPECT_EQ(object.erase(FieldId{0}), 1);
-  EXPECT_EQ(object.contains(FieldId{0}), false);
-  EXPECT_EQ(object.contains(FieldId{2}), true);
+  EXPECT_FALSE(object.contains(FieldId{0}));
+  EXPECT_TRUE(object.contains(FieldId{2}));
   EXPECT_EQ(object.size(), 1);
 
   EXPECT_EQ(object.erase(FieldId{1}), 0);

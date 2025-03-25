@@ -237,6 +237,10 @@ struct CompactProtoTestStruct {
 typedef binary IOBufPtr
 @cpp.Type{name = "folly::IOBuf"}
 typedef binary IOBuf
+struct ManyOfOneOfEach {
+  1: list<OneOfEach> structs;
+}
+
 struct BufferStruct {
   1: binary bin_field;
   2: IOBufPtr iobuf_ptr_field;

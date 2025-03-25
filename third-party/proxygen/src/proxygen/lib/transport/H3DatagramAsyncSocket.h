@@ -69,6 +69,8 @@ class H3DatagramAsyncSocket
     return txn_;
   }
 
+  const folly::AsyncTransportCertificate* getPeerCertificate() const;
+
   /*
    * AsyncUDPSocket
    */

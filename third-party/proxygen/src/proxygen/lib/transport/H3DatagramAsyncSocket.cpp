@@ -29,6 +29,17 @@ H3DatagramAsyncSocket::H3DatagramAsyncSocket(folly::EventBase* evb,
       inResumeRead_(false) {
 }
 
+const folly::AsyncTransportCertificate* FOLLY_NULLABLE
+H3DatagramAsyncSocket::getPeerCertificate() const {
+  if (!upstreamSession_) {
+    return nullptr;
+  }
+  if (const auto sock = upstreamSession_->getQuicSocket()) {
+    return sock->getPeerCertificate().get();
+  }
+  return nullptr;
+}
+
 const folly::SocketAddress& H3DatagramAsyncSocket::address() const {
   static folly::SocketAddress localFallbackAddress;
   if (!upstreamSession_) {

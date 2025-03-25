@@ -24,6 +24,7 @@
 
 #include <scripts/rroeser/src/executor/WorkStealingExecutor.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
+#include <folly/executors/thread_factory/InitThreadFactory.h>
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/server/ParallelConcurrencyController.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
@@ -155,21 +156,20 @@ std::shared_ptr<folly::IOThreadPoolExecutor> getIOThreadPool(
     const std::string& name, size_t numThreads) {
   auto threadFactory = std::make_shared<folly::NamedThreadFactory>(name);
   if (FLAGS_io_uring) {
-    LOG(INFO) << "using io_uring EventBase backend";
-    folly::EventBaseBackendBase::FactoryFunc func(getEventBaseBackendFunc);
-    static folly::EventBaseManager ebm(
-        folly::EventBase::Options().setBackendFactory(std::move(func)));
-
-    auto* evb = folly::EventBaseManager::get()->getEventBase();
-    // use the same EventBase for the main thread
-    if (evb) {
-      ebm.setEventBase(evb, false);
-    }
+    auto initThreadFactory = std::make_shared<folly::InitThreadFactory>(
+        std::move(threadFactory), [] {
+          // Preinitialize EventBase with custom settings on startup.
+          auto* eventBase = new folly::EventBase(
+              folly::EventBase::Options().setBackendFactory(
+                  getEventBaseBackendFunc));
+          folly::EventBaseManager::get()->setEventBase(
+              eventBase, true /* takeOwnership */);
+        });
     return std::make_shared<folly::IOThreadPoolExecutor>(
-        numThreads, threadFactory, &ebm);
+        numThreads, std::move(initThreadFactory));
   } else {
     return std::make_shared<folly::IOThreadPoolExecutor>(
-        numThreads, threadFactory);
+        numThreads, std::move(threadFactory));
   }
 }
 

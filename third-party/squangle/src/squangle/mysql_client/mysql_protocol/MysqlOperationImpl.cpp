@@ -141,6 +141,9 @@ void MysqlOperationImpl::completeOperationInner(OperationResult result) {
 }
 
 std::string MysqlOperationImpl::threadOverloadMessage(double cbDelayUs) const {
+  // This message is used here https://fburl.com/code/d6t3td0r to perform
+  // matching for SLA calculation. Please update the string if you change the
+  // message.
   return fmt::format(
       "(CLIENT_OVERLOADED: cb delay {}ms, {} active conns)",
       std::lround(cbDelayUs / 1000.0),

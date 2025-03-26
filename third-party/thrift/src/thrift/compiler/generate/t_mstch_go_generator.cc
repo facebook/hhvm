@@ -587,9 +587,6 @@ class mstch_go_function : public mstch_function {
             {"function:go_name", &mstch_go_function::go_name},
             {"function:go_supported?", &mstch_go_function::is_go_supported},
             {"function:ctx_arg_name", &mstch_go_function::ctx_arg_name},
-            {"function:out_var_name", &mstch_go_function::out_var_name},
-            {"function:in_var_name", &mstch_go_function::in_var_name},
-            {"function:err_var_name", &mstch_go_function::err_var_name},
             {"function:retval_field_name",
              &mstch_go_function::retval_field_name},
             {"function:retval_nilable?", &mstch_go_function::is_retval_nilable},
@@ -604,27 +601,6 @@ class mstch_go_function : public mstch_function {
     // signature. "ctx" by default, "ctx<num>" in case of name collisions with
     // other function arguments. The name is guaranteed not to collide.
     return get_unique_name("ctx");
-  }
-
-  mstch::node out_var_name() {
-    // This helper function returns a unique "out" variable name,
-    // that doesn't conflict with any parameter names.
-    // The name is guaranteed not to collide.
-    return get_unique_name("out");
-  }
-
-  mstch::node in_var_name() {
-    // This helper function returns a unique "in" variable name,
-    // that doesn't conflict with any parameter names.
-    // The name is guaranteed not to collide.
-    return get_unique_name("in");
-  }
-
-  mstch::node err_var_name() {
-    // This helper function returns a unique "err" variable name,
-    // that doesn't conflict with any parameter names.
-    // The name is guaranteed not to collide.
-    return get_unique_name("err");
   }
 
   std::string get_unique_name(std::string const& name) {

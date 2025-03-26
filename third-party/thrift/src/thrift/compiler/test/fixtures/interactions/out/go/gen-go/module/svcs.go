@@ -60,12 +60,12 @@ func (c *MyServiceClient) Close() error {
 }
 
 func (c *MyServiceClient) Foo(ctx context.Context) (error) {
-    in := &reqMyServiceFoo{
+    fbthriftReq := &reqMyServiceFoo{
     }
-    out := newRespMyServiceFoo()
-    err := c.ch.Call(ctx, "foo", in, out)
-    if err != nil {
-        return err
+    fbthriftResp := newRespMyServiceFoo()
+    fbthriftErr := c.ch.Call(ctx, "foo", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return fbthriftErr
     }
     return nil
 }
@@ -202,12 +202,12 @@ func (c *FactoriesClient) Close() error {
 }
 
 func (c *FactoriesClient) Foo(ctx context.Context) (error) {
-    in := &reqFactoriesFoo{
+    fbthriftReq := &reqFactoriesFoo{
     }
-    out := newRespFactoriesFoo()
-    err := c.ch.Call(ctx, "foo", in, out)
-    if err != nil {
-        return err
+    fbthriftResp := newRespFactoriesFoo()
+    fbthriftErr := c.ch.Call(ctx, "foo", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return fbthriftErr
     }
     return nil
 }
@@ -344,12 +344,12 @@ func (c *PerformClient) Close() error {
 }
 
 func (c *PerformClient) Foo(ctx context.Context) (error) {
-    in := &reqPerformFoo{
+    fbthriftReq := &reqPerformFoo{
     }
-    out := newRespPerformFoo()
-    err := c.ch.Call(ctx, "foo", in, out)
-    if err != nil {
-        return err
+    fbthriftResp := newRespPerformFoo()
+    fbthriftErr := c.ch.Call(ctx, "foo", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return fbthriftErr
     }
     return nil
 }
@@ -486,14 +486,14 @@ func (c *InteractWithSharedClient) Close() error {
 }
 
 func (c *InteractWithSharedClient) DoSomeSimilarThings(ctx context.Context) (*shared.DoSomethingResult, error) {
-    in := &reqInteractWithSharedDoSomeSimilarThings{
+    fbthriftReq := &reqInteractWithSharedDoSomeSimilarThings{
     }
-    out := newRespInteractWithSharedDoSomeSimilarThings()
-    err := c.ch.Call(ctx, "do_some_similar_things", in, out)
-    if err != nil {
-        return nil, err
+    fbthriftResp := newRespInteractWithSharedDoSomeSimilarThings()
+    fbthriftErr := c.ch.Call(ctx, "do_some_similar_things", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return nil, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 

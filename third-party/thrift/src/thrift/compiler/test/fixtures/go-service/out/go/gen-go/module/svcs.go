@@ -79,262 +79,262 @@ func (c *GetEntityClient) Close() error {
 }
 
 func (c *GetEntityClient) GetEntity(ctx context.Context, r *GetEntityRequest) (*GetEntityResponse, error) {
-    in := &reqGetEntityGetEntity{
+    fbthriftReq := &reqGetEntityGetEntity{
         R: r,
     }
-    out := newRespGetEntityGetEntity()
-    err := c.ch.Call(ctx, "getEntity", in, out)
-    if err != nil {
-        return nil, err
+    fbthriftResp := newRespGetEntityGetEntity()
+    fbthriftErr := c.ch.Call(ctx, "getEntity", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return nil, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetBool(ctx context.Context) (bool, error) {
-    in := &reqGetEntityGetBool{
+    fbthriftReq := &reqGetEntityGetBool{
     }
-    out := newRespGetEntityGetBool()
-    err := c.ch.Call(ctx, "getBool", in, out)
-    if err != nil {
-        return false, err
+    fbthriftResp := newRespGetEntityGetBool()
+    fbthriftErr := c.ch.Call(ctx, "getBool", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return false, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetByte(ctx context.Context) (int8, error) {
-    in := &reqGetEntityGetByte{
+    fbthriftReq := &reqGetEntityGetByte{
     }
-    out := newRespGetEntityGetByte()
-    err := c.ch.Call(ctx, "getByte", in, out)
-    if err != nil {
-        return 0, err
+    fbthriftResp := newRespGetEntityGetByte()
+    fbthriftErr := c.ch.Call(ctx, "getByte", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return 0, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetI16(ctx context.Context) (int16, error) {
-    in := &reqGetEntityGetI16{
+    fbthriftReq := &reqGetEntityGetI16{
     }
-    out := newRespGetEntityGetI16()
-    err := c.ch.Call(ctx, "getI16", in, out)
-    if err != nil {
-        return 0, err
+    fbthriftResp := newRespGetEntityGetI16()
+    fbthriftErr := c.ch.Call(ctx, "getI16", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return 0, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetI32(ctx context.Context) (int32, error) {
-    in := &reqGetEntityGetI32{
+    fbthriftReq := &reqGetEntityGetI32{
     }
-    out := newRespGetEntityGetI32()
-    err := c.ch.Call(ctx, "getI32", in, out)
-    if err != nil {
-        return 0, err
+    fbthriftResp := newRespGetEntityGetI32()
+    fbthriftErr := c.ch.Call(ctx, "getI32", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return 0, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetI64(ctx context.Context) (int64, error) {
-    in := &reqGetEntityGetI64{
+    fbthriftReq := &reqGetEntityGetI64{
     }
-    out := newRespGetEntityGetI64()
-    err := c.ch.Call(ctx, "getI64", in, out)
-    if err != nil {
-        return 0, err
+    fbthriftResp := newRespGetEntityGetI64()
+    fbthriftErr := c.ch.Call(ctx, "getI64", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return 0, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetDouble(ctx context.Context) (float64, error) {
-    in := &reqGetEntityGetDouble{
+    fbthriftReq := &reqGetEntityGetDouble{
     }
-    out := newRespGetEntityGetDouble()
-    err := c.ch.Call(ctx, "getDouble", in, out)
-    if err != nil {
-        return 0.0, err
+    fbthriftResp := newRespGetEntityGetDouble()
+    fbthriftErr := c.ch.Call(ctx, "getDouble", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return 0.0, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetString(ctx context.Context) (string, error) {
-    in := &reqGetEntityGetString{
+    fbthriftReq := &reqGetEntityGetString{
     }
-    out := newRespGetEntityGetString()
-    err := c.ch.Call(ctx, "getString", in, out)
-    if err != nil {
-        return "", err
+    fbthriftResp := newRespGetEntityGetString()
+    fbthriftErr := c.ch.Call(ctx, "getString", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return "", fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetBinary(ctx context.Context) ([]byte, error) {
-    in := &reqGetEntityGetBinary{
+    fbthriftReq := &reqGetEntityGetBinary{
     }
-    out := newRespGetEntityGetBinary()
-    err := c.ch.Call(ctx, "getBinary", in, out)
-    if err != nil {
-        return nil, err
+    fbthriftResp := newRespGetEntityGetBinary()
+    fbthriftErr := c.ch.Call(ctx, "getBinary", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return nil, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetMap(ctx context.Context) (map[string]string, error) {
-    in := &reqGetEntityGetMap{
+    fbthriftReq := &reqGetEntityGetMap{
     }
-    out := newRespGetEntityGetMap()
-    err := c.ch.Call(ctx, "getMap", in, out)
-    if err != nil {
-        return nil, err
+    fbthriftResp := newRespGetEntityGetMap()
+    fbthriftErr := c.ch.Call(ctx, "getMap", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return nil, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetSet(ctx context.Context) ([]string, error) {
-    in := &reqGetEntityGetSet{
+    fbthriftReq := &reqGetEntityGetSet{
     }
-    out := newRespGetEntityGetSet()
-    err := c.ch.Call(ctx, "getSet", in, out)
-    if err != nil {
-        return nil, err
+    fbthriftResp := newRespGetEntityGetSet()
+    fbthriftErr := c.ch.Call(ctx, "getSet", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return nil, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetList(ctx context.Context) ([]string, error) {
-    in := &reqGetEntityGetList{
+    fbthriftReq := &reqGetEntityGetList{
     }
-    out := newRespGetEntityGetList()
-    err := c.ch.Call(ctx, "getList", in, out)
-    if err != nil {
-        return nil, err
+    fbthriftResp := newRespGetEntityGetList()
+    fbthriftErr := c.ch.Call(ctx, "getList", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return nil, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetLegacyStuff(ctx context.Context, numPos int64, numNeg1 int64, numNeg2 int64) (int32, error) {
-    in := &reqGetEntityGetLegacyStuff{
+    fbthriftReq := &reqGetEntityGetLegacyStuff{
         NumPos: numPos,
         NumNeg1: numNeg1,
         NumNeg2: numNeg2,
     }
-    out := newRespGetEntityGetLegacyStuff()
-    err := c.ch.Call(ctx, "getLegacyStuff", in, out)
-    if err != nil {
-        return 0, err
+    fbthriftResp := newRespGetEntityGetLegacyStuff()
+    fbthriftErr := c.ch.Call(ctx, "getLegacyStuff", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return 0, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetCtxCollision(ctx1 context.Context, ctx int64) (int32, error) {
-    in := &reqGetEntityGetCtxCollision{
+    fbthriftReq := &reqGetEntityGetCtxCollision{
         Ctx: ctx,
     }
-    out := newRespGetEntityGetCtxCollision()
-    err := c.ch.Call(ctx1, "getCtxCollision", in, out)
-    if err != nil {
-        return 0, err
+    fbthriftResp := newRespGetEntityGetCtxCollision()
+    fbthriftErr := c.ch.Call(ctx1, "getCtxCollision", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return 0, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetCtx1Collision(ctx2 context.Context, ctx int64, ctx1 int64) (int32, error) {
-    in := &reqGetEntityGetCtx1Collision{
+    fbthriftReq := &reqGetEntityGetCtx1Collision{
         Ctx: ctx,
         Ctx1: ctx1,
     }
-    out := newRespGetEntityGetCtx1Collision()
-    err := c.ch.Call(ctx2, "getCtx1Collision", in, out)
-    if err != nil {
-        return 0, err
+    fbthriftResp := newRespGetEntityGetCtx1Collision()
+    fbthriftErr := c.ch.Call(ctx2, "getCtx1Collision", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return 0, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetContextCollision(ctx context.Context, context_ int64) (int32, error) {
-    in := &reqGetEntityGetContextCollision{
+    fbthriftReq := &reqGetEntityGetContextCollision{
         Context: context_,
     }
-    out := newRespGetEntityGetContextCollision()
-    err := c.ch.Call(ctx, "getContextCollision", in, out)
-    if err != nil {
-        return 0, err
+    fbthriftResp := newRespGetEntityGetContextCollision()
+    fbthriftErr := c.ch.Call(ctx, "getContextCollision", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return 0, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetOutCollision(ctx context.Context, out int64) (int32, error) {
-    in := &reqGetEntityGetOutCollision{
+    fbthriftReq := &reqGetEntityGetOutCollision{
         Out: out,
     }
-    out1 := newRespGetEntityGetOutCollision()
-    err := c.ch.Call(ctx, "getOutCollision", in, out1)
-    if err != nil {
-        return 0, err
+    fbthriftResp := newRespGetEntityGetOutCollision()
+    fbthriftErr := c.ch.Call(ctx, "getOutCollision", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return 0, fbthriftErr
     }
-    return out1.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetOut1Collision(ctx context.Context, out int64, out1 int64) (int32, error) {
-    in := &reqGetEntityGetOut1Collision{
+    fbthriftReq := &reqGetEntityGetOut1Collision{
         Out: out,
         Out1: out1,
     }
-    out2 := newRespGetEntityGetOut1Collision()
-    err := c.ch.Call(ctx, "getOut1Collision", in, out2)
-    if err != nil {
-        return 0, err
+    fbthriftResp := newRespGetEntityGetOut1Collision()
+    fbthriftErr := c.ch.Call(ctx, "getOut1Collision", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return 0, fbthriftErr
     }
-    return out2.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetInCollision(ctx context.Context, in int64) (int32, error) {
-    in1 := &reqGetEntityGetInCollision{
+    fbthriftReq := &reqGetEntityGetInCollision{
         In: in,
     }
-    out := newRespGetEntityGetInCollision()
-    err := c.ch.Call(ctx, "getInCollision", in1, out)
-    if err != nil {
-        return 0, err
+    fbthriftResp := newRespGetEntityGetInCollision()
+    fbthriftErr := c.ch.Call(ctx, "getInCollision", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return 0, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetIn1Collision(ctx context.Context, in int64, in1 int64) (int32, error) {
-    in2 := &reqGetEntityGetIn1Collision{
+    fbthriftReq := &reqGetEntityGetIn1Collision{
         In: in,
         In1: in1,
     }
-    out := newRespGetEntityGetIn1Collision()
-    err := c.ch.Call(ctx, "getIn1Collision", in2, out)
-    if err != nil {
-        return 0, err
+    fbthriftResp := newRespGetEntityGetIn1Collision()
+    fbthriftErr := c.ch.Call(ctx, "getIn1Collision", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return 0, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetErrCollision(ctx context.Context, err int64) (int32, error) {
-    in := &reqGetEntityGetErrCollision{
+    fbthriftReq := &reqGetEntityGetErrCollision{
         Err: err,
     }
-    out := newRespGetEntityGetErrCollision()
-    err1 := c.ch.Call(ctx, "getErrCollision", in, out)
-    if err1 != nil {
-        return 0, err1
+    fbthriftResp := newRespGetEntityGetErrCollision()
+    fbthriftErr := c.ch.Call(ctx, "getErrCollision", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return 0, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *GetEntityClient) GetErr1Collision(ctx context.Context, err int64, err1 int64) (int32, error) {
-    in := &reqGetEntityGetErr1Collision{
+    fbthriftReq := &reqGetEntityGetErr1Collision{
         Err: err,
         Err1: err1,
     }
-    out := newRespGetEntityGetErr1Collision()
-    err2 := c.ch.Call(ctx, "getErr1Collision", in, out)
-    if err2 != nil {
-        return 0, err2
+    fbthriftResp := newRespGetEntityGetErr1Collision()
+    fbthriftErr := c.ch.Call(ctx, "getErr1Collision", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return 0, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 

@@ -61,59 +61,59 @@ func (c *RaiserClient) Close() error {
 }
 
 func (c *RaiserClient) DoBland(ctx context.Context) (error) {
-    in := &reqRaiserDoBland{
+    fbthriftReq := &reqRaiserDoBland{
     }
-    out := newRespRaiserDoBland()
-    err := c.ch.Call(ctx, "doBland", in, out)
-    if err != nil {
-        return err
+    fbthriftResp := newRespRaiserDoBland()
+    fbthriftErr := c.ch.Call(ctx, "doBland", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return fbthriftErr
     }
     return nil
 }
 
 func (c *RaiserClient) DoRaise(ctx context.Context) (error) {
-    in := &reqRaiserDoRaise{
+    fbthriftReq := &reqRaiserDoRaise{
     }
-    out := newRespRaiserDoRaise()
-    err := c.ch.Call(ctx, "doRaise", in, out)
-    if err != nil {
-        return err
-    } else if out.B != nil {
-        return out.B
-    } else if out.F != nil {
-        return out.F
-    } else if out.S != nil {
-        return out.S
+    fbthriftResp := newRespRaiserDoRaise()
+    fbthriftErr := c.ch.Call(ctx, "doRaise", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return fbthriftErr
+    } else if fbthriftResp.B != nil {
+        return fbthriftResp.B
+    } else if fbthriftResp.F != nil {
+        return fbthriftResp.F
+    } else if fbthriftResp.S != nil {
+        return fbthriftResp.S
     }
     return nil
 }
 
 func (c *RaiserClient) Get200(ctx context.Context) (string, error) {
-    in := &reqRaiserGet200{
+    fbthriftReq := &reqRaiserGet200{
     }
-    out := newRespRaiserGet200()
-    err := c.ch.Call(ctx, "get200", in, out)
-    if err != nil {
-        return "", err
+    fbthriftResp := newRespRaiserGet200()
+    fbthriftErr := c.ch.Call(ctx, "get200", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return "", fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *RaiserClient) Get500(ctx context.Context) (string, error) {
-    in := &reqRaiserGet500{
+    fbthriftReq := &reqRaiserGet500{
     }
-    out := newRespRaiserGet500()
-    err := c.ch.Call(ctx, "get500", in, out)
-    if err != nil {
-        return "", err
-    } else if out.F != nil {
-        return "", out.F
-    } else if out.B != nil {
-        return "", out.B
-    } else if out.S != nil {
-        return "", out.S
+    fbthriftResp := newRespRaiserGet500()
+    fbthriftErr := c.ch.Call(ctx, "get500", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return "", fbthriftErr
+    } else if fbthriftResp.F != nil {
+        return "", fbthriftResp.F
+    } else if fbthriftResp.B != nil {
+        return "", fbthriftResp.B
+    } else if fbthriftResp.S != nil {
+        return "", fbthriftResp.S
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 

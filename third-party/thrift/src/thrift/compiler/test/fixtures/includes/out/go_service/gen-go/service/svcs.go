@@ -63,27 +63,27 @@ func (c *MyServiceClient) Close() error {
 }
 
 func (c *MyServiceClient) Query(ctx context.Context, s *module.MyStruct, i *includes.Included) (error) {
-    in := &reqMyServiceQuery{
+    fbthriftReq := &reqMyServiceQuery{
         S: s,
         I: i,
     }
-    out := newRespMyServiceQuery()
-    err := c.ch.Call(ctx, "query", in, out)
-    if err != nil {
-        return err
+    fbthriftResp := newRespMyServiceQuery()
+    fbthriftErr := c.ch.Call(ctx, "query", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return fbthriftErr
     }
     return nil
 }
 
 func (c *MyServiceClient) HasArgDocs(ctx context.Context, s *module.MyStruct, i *includes.Included) (error) {
-    in := &reqMyServiceHasArgDocs{
+    fbthriftReq := &reqMyServiceHasArgDocs{
         S: s,
         I: i,
     }
-    out := newRespMyServiceHasArgDocs()
-    err := c.ch.Call(ctx, "has_arg_docs", in, out)
-    if err != nil {
-        return err
+    fbthriftResp := newRespMyServiceHasArgDocs()
+    fbthriftErr := c.ch.Call(ctx, "has_arg_docs", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return fbthriftErr
     }
     return nil
 }

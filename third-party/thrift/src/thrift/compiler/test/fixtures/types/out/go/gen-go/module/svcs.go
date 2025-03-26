@@ -61,27 +61,27 @@ func (c *SomeServiceClient) Close() error {
 }
 
 func (c *SomeServiceClient) BounceMap(ctx context.Context, m included.SomeMap) (included.SomeMap, error) {
-    in := &reqSomeServiceBounceMap{
+    fbthriftReq := &reqSomeServiceBounceMap{
         M: m,
     }
-    out := newRespSomeServiceBounceMap()
-    err := c.ch.Call(ctx, "bounce_map", in, out)
-    if err != nil {
-        return nil, err
+    fbthriftResp := newRespSomeServiceBounceMap()
+    fbthriftErr := c.ch.Call(ctx, "bounce_map", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return nil, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *SomeServiceClient) BinaryKeyedMap(ctx context.Context, r []int64) (map[*TBinary]int64, error) {
-    in := &reqSomeServiceBinaryKeyedMap{
+    fbthriftReq := &reqSomeServiceBinaryKeyedMap{
         R: r,
     }
-    out := newRespSomeServiceBinaryKeyedMap()
-    err := c.ch.Call(ctx, "binary_keyed_map", in, out)
-    if err != nil {
-        return nil, err
+    fbthriftResp := newRespSomeServiceBinaryKeyedMap()
+    fbthriftErr := c.ch.Call(ctx, "binary_keyed_map", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return nil, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 

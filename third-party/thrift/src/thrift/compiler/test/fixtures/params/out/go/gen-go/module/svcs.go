@@ -62,61 +62,61 @@ func (c *NestedContainersClient) Close() error {
 }
 
 func (c *NestedContainersClient) MapList(ctx context.Context, foo map[int32][]int32) (error) {
-    in := &reqNestedContainersMapList{
+    fbthriftReq := &reqNestedContainersMapList{
         Foo: foo,
     }
-    out := newRespNestedContainersMapList()
-    err := c.ch.Call(ctx, "mapList", in, out)
-    if err != nil {
-        return err
+    fbthriftResp := newRespNestedContainersMapList()
+    fbthriftErr := c.ch.Call(ctx, "mapList", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return fbthriftErr
     }
     return nil
 }
 
 func (c *NestedContainersClient) MapSet(ctx context.Context, foo map[int32][]int32) (error) {
-    in := &reqNestedContainersMapSet{
+    fbthriftReq := &reqNestedContainersMapSet{
         Foo: foo,
     }
-    out := newRespNestedContainersMapSet()
-    err := c.ch.Call(ctx, "mapSet", in, out)
-    if err != nil {
-        return err
+    fbthriftResp := newRespNestedContainersMapSet()
+    fbthriftErr := c.ch.Call(ctx, "mapSet", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return fbthriftErr
     }
     return nil
 }
 
 func (c *NestedContainersClient) ListMap(ctx context.Context, foo []map[int32]int32) (error) {
-    in := &reqNestedContainersListMap{
+    fbthriftReq := &reqNestedContainersListMap{
         Foo: foo,
     }
-    out := newRespNestedContainersListMap()
-    err := c.ch.Call(ctx, "listMap", in, out)
-    if err != nil {
-        return err
+    fbthriftResp := newRespNestedContainersListMap()
+    fbthriftErr := c.ch.Call(ctx, "listMap", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return fbthriftErr
     }
     return nil
 }
 
 func (c *NestedContainersClient) ListSet(ctx context.Context, foo [][]int32) (error) {
-    in := &reqNestedContainersListSet{
+    fbthriftReq := &reqNestedContainersListSet{
         Foo: foo,
     }
-    out := newRespNestedContainersListSet()
-    err := c.ch.Call(ctx, "listSet", in, out)
-    if err != nil {
-        return err
+    fbthriftResp := newRespNestedContainersListSet()
+    fbthriftErr := c.ch.Call(ctx, "listSet", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return fbthriftErr
     }
     return nil
 }
 
 func (c *NestedContainersClient) Turtles(ctx context.Context, foo [][]map[int32]map[int32][]int32) (error) {
-    in := &reqNestedContainersTurtles{
+    fbthriftReq := &reqNestedContainersTurtles{
         Foo: foo,
     }
-    out := newRespNestedContainersTurtles()
-    err := c.ch.Call(ctx, "turtles", in, out)
-    if err != nil {
-        return err
+    fbthriftResp := newRespNestedContainersTurtles()
+    fbthriftErr := c.ch.Call(ctx, "turtles", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return fbthriftErr
     }
     return nil
 }

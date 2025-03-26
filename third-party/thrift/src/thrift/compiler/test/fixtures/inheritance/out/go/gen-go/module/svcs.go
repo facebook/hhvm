@@ -58,12 +58,12 @@ func (c *MyRootClient) Close() error {
 }
 
 func (c *MyRootClient) DoRoot(ctx context.Context) (error) {
-    in := &reqMyRootDoRoot{
+    fbthriftReq := &reqMyRootDoRoot{
     }
-    out := newRespMyRootDoRoot()
-    err := c.ch.Call(ctx, "do_root", in, out)
-    if err != nil {
-        return err
+    fbthriftResp := newRespMyRootDoRoot()
+    fbthriftErr := c.ch.Call(ctx, "do_root", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return fbthriftErr
     }
     return nil
 }
@@ -206,12 +206,12 @@ func (c *MyNodeClient) Close() error {
 }
 
 func (c *MyNodeClient) DoMid(ctx context.Context) (error) {
-    in := &reqMyNodeDoMid{
+    fbthriftReq := &reqMyNodeDoMid{
     }
-    out := newRespMyNodeDoMid()
-    err := c.ch.Call(ctx, "do_mid", in, out)
-    if err != nil {
-        return err
+    fbthriftResp := newRespMyNodeDoMid()
+    fbthriftErr := c.ch.Call(ctx, "do_mid", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return fbthriftErr
     }
     return nil
 }
@@ -327,12 +327,12 @@ func (c *MyLeafClient) Close() error {
 }
 
 func (c *MyLeafClient) DoLeaf(ctx context.Context) (error) {
-    in := &reqMyLeafDoLeaf{
+    fbthriftReq := &reqMyLeafDoLeaf{
     }
-    out := newRespMyLeafDoLeaf()
-    err := c.ch.Call(ctx, "do_leaf", in, out)
-    if err != nil {
-        return err
+    fbthriftResp := newRespMyLeafDoLeaf()
+    fbthriftErr := c.ch.Call(ctx, "do_leaf", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return fbthriftErr
     }
     return nil
 }

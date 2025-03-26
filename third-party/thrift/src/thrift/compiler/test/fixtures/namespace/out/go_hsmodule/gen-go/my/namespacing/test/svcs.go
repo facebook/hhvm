@@ -58,15 +58,15 @@ func (c *HsTestServiceClient) Close() error {
 }
 
 func (c *HsTestServiceClient) Init(ctx context.Context, int1 int64) (int64, error) {
-    in := &reqHsTestServiceInit{
+    fbthriftReq := &reqHsTestServiceInit{
         Int1: int1,
     }
-    out := newRespHsTestServiceInit()
-    err := c.ch.Call(ctx, "init", in, out)
-    if err != nil {
-        return 0, err
+    fbthriftResp := newRespHsTestServiceInit()
+    fbthriftErr := c.ch.Call(ctx, "init", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return 0, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 

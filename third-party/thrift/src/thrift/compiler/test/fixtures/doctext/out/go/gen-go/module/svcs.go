@@ -59,30 +59,30 @@ func (c *CClient) Close() error {
 }
 
 func (c *CClient) F(ctx context.Context) (error) {
-    in := &reqCF{
+    fbthriftReq := &reqCF{
     }
-    out := newRespCF()
-    err := c.ch.Call(ctx, "f", in, out)
-    if err != nil {
-        return err
+    fbthriftResp := newRespCF()
+    fbthriftErr := c.ch.Call(ctx, "f", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return fbthriftErr
     }
     return nil
 }
 
 func (c *CClient) Thing(ctx context.Context, a int32, b string, c []int32) (string, error) {
-    in := &reqCThing{
+    fbthriftReq := &reqCThing{
         A: a,
         B: b,
         C: c,
     }
-    out := newRespCThing()
-    err := c.ch.Call(ctx, "thing", in, out)
-    if err != nil {
-        return "", err
-    } else if out.Bang != nil {
-        return "", out.Bang
+    fbthriftResp := newRespCThing()
+    fbthriftErr := c.ch.Call(ctx, "thing", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return "", fbthriftErr
+    } else if fbthriftResp.Bang != nil {
+        return "", fbthriftResp.Bang
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 

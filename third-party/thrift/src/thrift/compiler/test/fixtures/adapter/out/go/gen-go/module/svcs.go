@@ -58,17 +58,17 @@ func (c *ServiceClient) Close() error {
 }
 
 func (c *ServiceClient) Func(ctx context.Context, arg1 StringWithAdapter_7208, arg2 string, arg3 *Foo) (MyI32_4873, error) {
-    in := &reqServiceFunc{
+    fbthriftReq := &reqServiceFunc{
         Arg1: arg1,
         Arg2: arg2,
         Arg3: arg3,
     }
-    out := newRespServiceFunc()
-    err := c.ch.Call(ctx, "func", in, out)
-    if err != nil {
-        return 0, err
+    fbthriftResp := newRespServiceFunc()
+    fbthriftErr := c.ch.Call(ctx, "func", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return 0, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 
@@ -206,26 +206,26 @@ func (c *AdapterServiceClient) Close() error {
 }
 
 func (c *AdapterServiceClient) Count(ctx context.Context) (*CountingStruct, error) {
-    in := &reqAdapterServiceCount{
+    fbthriftReq := &reqAdapterServiceCount{
     }
-    out := newRespAdapterServiceCount()
-    err := c.ch.Call(ctx, "count", in, out)
-    if err != nil {
-        return nil, err
+    fbthriftResp := newRespAdapterServiceCount()
+    fbthriftErr := c.ch.Call(ctx, "count", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return nil, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *AdapterServiceClient) AdaptedTypes(ctx context.Context, arg *HeapAllocated) (*HeapAllocated, error) {
-    in := &reqAdapterServiceAdaptedTypes{
+    fbthriftReq := &reqAdapterServiceAdaptedTypes{
         Arg: arg,
     }
-    out := newRespAdapterServiceAdaptedTypes()
-    err := c.ch.Call(ctx, "adaptedTypes", in, out)
-    if err != nil {
-        return nil, err
+    fbthriftResp := newRespAdapterServiceAdaptedTypes()
+    fbthriftErr := c.ch.Call(ctx, "adaptedTypes", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return nil, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 

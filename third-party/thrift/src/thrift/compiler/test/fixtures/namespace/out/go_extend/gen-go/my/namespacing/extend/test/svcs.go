@@ -66,15 +66,15 @@ func (c *ExtendTestServiceClient) Close() error {
 }
 
 func (c *ExtendTestServiceClient) Check(ctx context.Context, struct1 *test0.HsFoo) (bool, error) {
-    in := &reqExtendTestServiceCheck{
+    fbthriftReq := &reqExtendTestServiceCheck{
         Struct1: struct1,
     }
-    out := newRespExtendTestServiceCheck()
-    err := c.ch.Call(ctx, "check", in, out)
-    if err != nil {
-        return false, err
+    fbthriftResp := newRespExtendTestServiceCheck()
+    fbthriftErr := c.ch.Call(ctx, "check", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return false, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 

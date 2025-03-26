@@ -64,39 +64,39 @@ func (c *FinderClient) Close() error {
 }
 
 func (c *FinderClient) ByPlate(ctx context.Context, plate Plate) (*Automobile, error) {
-    in := &reqFinderByPlate{
+    fbthriftReq := &reqFinderByPlate{
         Plate: plate,
     }
-    out := newRespFinderByPlate()
-    err := c.ch.Call(ctx, "byPlate", in, out)
-    if err != nil {
-        return nil, err
+    fbthriftResp := newRespFinderByPlate()
+    fbthriftErr := c.ch.Call(ctx, "byPlate", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return nil, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *FinderClient) AliasByPlate(ctx context.Context, plate Plate) (*Car, error) {
-    in := &reqFinderAliasByPlate{
+    fbthriftReq := &reqFinderAliasByPlate{
         Plate: plate,
     }
-    out := newRespFinderAliasByPlate()
-    err := c.ch.Call(ctx, "aliasByPlate", in, out)
-    if err != nil {
-        return nil, err
+    fbthriftResp := newRespFinderAliasByPlate()
+    fbthriftErr := c.ch.Call(ctx, "aliasByPlate", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return nil, fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 func (c *FinderClient) PreviousPlate(ctx context.Context, plate Plate) (Plate, error) {
-    in := &reqFinderPreviousPlate{
+    fbthriftReq := &reqFinderPreviousPlate{
         Plate: plate,
     }
-    out := newRespFinderPreviousPlate()
-    err := c.ch.Call(ctx, "previousPlate", in, out)
-    if err != nil {
-        return "", err
+    fbthriftResp := newRespFinderPreviousPlate()
+    fbthriftErr := c.ch.Call(ctx, "previousPlate", fbthriftReq, fbthriftResp)
+    if fbthriftErr != nil {
+        return "", fbthriftErr
     }
-    return out.GetSuccess(), nil
+    return fbthriftResp.GetSuccess(), nil
 }
 
 

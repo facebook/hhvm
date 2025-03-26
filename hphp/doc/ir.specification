@@ -776,6 +776,11 @@ To string conversions:
 
   Set D to true iff S0 has a reified parent.
 
+| ReifiedInit, ND, S(Cls) S(Vec) S(Obj), LA
+
+  Invokes setReifiedInit on S2 if S0 or its parent is a reified class,
+  using the generics specified in S1.
+
 | CallViolatesModuleBoundary<caller>, D(Bool), S(Func,Cls), NF
 
   Set D to true iff function call from caller to S0 violates module boundary.

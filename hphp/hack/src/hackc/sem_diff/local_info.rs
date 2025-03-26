@@ -51,7 +51,8 @@ impl LocalInfo {
             | Opcode::IterGetKey(_, local)
             | Opcode::IterGetValue(_, local)
             | Opcode::IterInit(_, local, _)
-            | Opcode::IterNext(_, local, _) => LocalInfo::Read(*local),
+            | Opcode::IterNext(_, local, _)
+            | Opcode::ReifiedInit(local) => LocalInfo::Read(*local),
 
             Opcode::PopL(local) | Opcode::SetL(local) | Opcode::UnsetL(local) => {
                 LocalInfo::Write(*local)

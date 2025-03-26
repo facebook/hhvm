@@ -331,6 +331,7 @@ where
             | Opcode::QueryM(..)
             | Opcode::RaiseClassStringConversionNotice
             | Opcode::RecordReifiedGeneric
+            | Opcode::ReifiedInit(..)
             | Opcode::ReqDoc
             | Opcode::ReqOnce
             | Opcode::Req

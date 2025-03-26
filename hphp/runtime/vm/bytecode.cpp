@@ -1812,6 +1812,24 @@ OPTBLD_INLINE void iopCheckClsRGSoft() {
   vmStack().popC();
 }
 
+OPTBLD_INLINE void iopReifiedInit(tv_lval val) {
+  auto const class_ = [&] {
+    auto const cls = vmStack().topC();
+    if (LIKELY(tvIsClass(cls))) return cls->m_data.pclass;
+    if (tvIsLazyClass(cls)) return Class::load(cls->m_data.plazyclass.name());
+    raise_error("ReifiedInit called on non-class object");
+  }();
+  auto genericsTv = val.tv();
+  assertx(tvIsVec(genericsTv));
+  auto generics = genericsTv.m_data.parr;
+  auto objTv = vmStack().indC(1);
+  assertx(tvIsObject(objTv)); 
+  auto obj = objTv->m_data.pobj;
+  tryClassReifiedInit(class_, generics, obj);
+  vmStack().popC();
+  vmStack().popC();
+}
+
 OPTBLD_INLINE void iopPrint() {
   TypedValue* c1 = vmStack().topC();
   g_context->write(tvAsVariant(*c1).toString());

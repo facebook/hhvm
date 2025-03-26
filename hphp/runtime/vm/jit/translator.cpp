@@ -391,6 +391,7 @@ static const struct {
                    {Stack1,           Stack1,       OutUnknown      }},
   { OpGetMemoAgnosticImplicitContext,
                    {None,             Stack1,       OutUnknown      }},
+  { OpReifiedInit, {Local|StackTop2,  None,         OutNone         }},
 
   /*** 14. Generator instructions ***/
 

@@ -1100,6 +1100,15 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext, func: &Func, hhbc: &Hhbc) ->
             "record_reified_generic {}",
             FmtVid(func, vid, ctx.verbose)
         )?,
+        Hhbc::ReifiedInit(vids, local, _) => {
+            write!(
+                w,
+                "reified_init {}, {}, {}",
+                FmtLid(local),
+                FmtVid(func, vids[0], verbose),
+                FmtVid(func, vids[1], verbose),
+            )?;
+        }
         Hhbc::ResolveClass(clsid, _) => {
             write!(w, "resolve_class {}", FmtIdentifierId(clsid.as_bytes_id()))?
         }

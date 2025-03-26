@@ -1431,6 +1431,7 @@ impl FunctionParser<'_> {
             "querym" => self.parse_member_op(tok, mnemonic, loc)?,
             "raise_class_string_conversion_notice" => I::Hhbc(H::RaiseClassStringConversionNotice(loc)),
             "record_reified_generic" => I::Hhbc(H::RecordReifiedGeneric(self.vid(tok)?, loc)),
+            "reified_init" => parse_instr!(tok, I::Hhbc(H::ReifiedInit(p0, p1, loc)), <p1:self.lid> "," <p0:self.vid2>),
             "require" => I::Hhbc(H::IncludeEval(IncludeEval { kind: IncludeKind::Require, vid: self.vid(tok)?, loc })),
             "require_once" => I::Hhbc(H::IncludeEval(IncludeEval { kind: IncludeKind::RequireOnce, vid: self.vid(tok)?, loc })),
             "require_once_doc" => I::Hhbc(H::IncludeEval(IncludeEval { kind: IncludeKind::RequireOnceDoc, vid: self.vid(tok)?, loc })),

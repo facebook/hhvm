@@ -1723,6 +1723,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case FuncHasReifiedGenerics:
   case ClassHasReifiedGenerics:
   case HasReifiedParent:
+  case ReifiedInit:
   case InstanceOf:
   case InstanceOfBitmask:
   case NInstanceOfBitmask:

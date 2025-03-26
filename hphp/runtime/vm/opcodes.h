@@ -238,6 +238,7 @@ namespace HPHP {
   O(GetClsRGProp,    NA,               ONE(CV),         ONE(CV),    NF) \
   O(HasReifiedParent, NA,              ONE(CV),         ONE(CV),    NF) \
   O(CheckClsRGSoft,  NA,               ONE(CV),         NOV,        NF) \
+  O(ReifiedInit,     ONE(LA),          TWO(CV,CV),      NOV,        NF) \
   O(NativeImpl,      NA,               NOV,             NOV,        CF_TF) \
   O(CreateCl,        TWO(IVA,SA),      CUMANY,          ONE(CV),    NF) \
   O(CreateCont,      NA,               NOV,             ONE(CV),    CF) \

@@ -229,5 +229,19 @@ void checkClassReifiedGenericsSoft(const Class* cls) {
   }
 }
 
+void tryClassReifiedInit(Class* cls, ArrayData* generics, ObjectData* obj) {
+  if (cls->hasReifiedGenerics()) {
+    if (generics->empty()) {
+      checkClassReifiedGenericsSoft(cls);
+      return;
+    }
+    obj->setReifiedGenerics(cls, generics);
+    return;
+  }
+  if (cls->hasReifiedParent()) {
+    obj->setReifiedGenerics(cls, generics);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

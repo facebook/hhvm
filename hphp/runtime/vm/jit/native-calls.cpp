@@ -490,6 +490,9 @@ static CallMap s_callMap {
                                  extra(&FuncData::func)}},
     {RecordReifiedGenericsAndGetTSList, recordReifiedGenericsAndGetTSList,
                                         DSSA, SSync, {{SSA, 0}}},
+    {ReifiedInit, tryClassReifiedInit,
+                                     DNone, SSync,
+                                     {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
     {RaiseErrorOnInvalidIsAsExpressionType,
       errorOnIsAsExpressionInvalidTypesHelper, DSSA, SSync, {{SSA, 0}}},
 

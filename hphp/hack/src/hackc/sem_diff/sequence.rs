@@ -340,7 +340,8 @@ fn is_cow_instr(instr: &NodeInstr) -> bool {
             | Opcode::MemoGetEager(..)
             | Opcode::ParentCls
             | Opcode::PopU
-            | Opcode::PopU2,
+            | Opcode::PopU2
+            | Opcode::ReifiedInit(..),
         ) => false,
 
         // Casting

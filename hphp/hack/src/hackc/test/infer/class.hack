@@ -91,31 +91,33 @@ class C {
   // CHECK: define C.cons_static($this: .notnull *C) : *void {
   // CHECK: local $a: *void, $0: *void, $1: *void, $2: *void
   // CHECK: #b0:
-  // CHECK:   n0: *C = load &$this
-  // CHECK:   n1 = $builtins.hack_get_static_class(n0)
-  // CHECK:   store &$0 <- n1: *HackMixed
-  // CHECK:   n2: *C = load &$this
-  // CHECK:   n3 = $builtins.hack_get_static_class(n2)
-  // CHECK:   n4 = n3.?.__factory()
-  // CHECK:   store &$2 <- n4: *HackMixed
-  // CHECK:   n5: *HackMixed = load &$0
+  // CHECK:   n0 = $builtins.hhbc_new_vec()
+  // CHECK:   n1: *C = load &$this
+  // CHECK:   n2 = $builtins.hack_get_static_class(n1)
+  // CHECK:   store &$0 <- n2: *HackMixed
+  // CHECK:   n3: *C = load &$this
+  // CHECK:   n4 = $builtins.hack_get_static_class(n3)
+  // CHECK:   n5 = n4.?.__factory()
+  // CHECK:   store &$2 <- n5: *HackMixed
   // CHECK:   n6: *HackMixed = load &$0
-  // CHECK:   n7: *HackMixed = load &$0
-  // CHECK:   n8: *HackMixed = load &$2
+  // CHECK:   store &$1 <- n0: *HackMixed
+  // CHECK:   n7: *HackMixed = load &$2
+  // CHECK:   n8: *HackMixed = load &$0
+  // CHECK:   n9: *HackMixed = load &$2
   // CHECK:   jmp b2
   // CHECK:   .handlers b1
-  // CHECK: #b1(n9: *HackMixed):
+  // CHECK: #b1(n10: *HackMixed):
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   throw n9
+  // CHECK:   throw n10
   // CHECK: #b2:
   // CHECK:   store &$0 <- null: *HackMixed
   // CHECK:   store &$1 <- null: *HackMixed
   // CHECK:   store &$2 <- null: *HackMixed
-  // CHECK:   n10 = n8.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
-  // CHECK:   n11 = $builtins.hhbc_lock_obj(n8)
-  // CHECK:   store &$a <- n8: *HackMixed
+  // CHECK:   n11 = n9.?.__construct($builtins.hack_int(1), $builtins.hack_string("x"), $builtins.hack_int(3))
+  // CHECK:   n12 = $builtins.hhbc_lock_obj(n9)
+  // CHECK:   store &$a <- n9: *HackMixed
   // CHECK:   ret null
   // CHECK: }
   public function cons_static(): void {

@@ -3261,6 +3261,55 @@ void in(ISS& env, const bc::CheckClsRGSoft& op) {
   }
 }
 
+void in(ISS& env, const bc::ReifiedInit& op) {
+  auto const cls = topC(env);
+  mayReadLocal(env, op.loc1);
+  if (!cls.couldBe(BCls | BLazyCls)) {
+    return reduce(env, bc::PopC {}, bc::PopC {});
+  }
+  if (cls.subtypeOf(BCls) &&
+      is_specialized_cls(cls) &&
+      dcls_of(cls).isExact()) {
+    auto const& dcls = dcls_of(cls);
+    if (!dcls.cls().couldHaveReifiedGenerics() && 
+        !dcls.cls().couldHaveReifiedParent()) {
+      // ReifiedInit is a no-op if the class isn't reified
+      // and doesn't have a reified parent.
+      return reduce(env, bc::PopC {}, bc::PopC {});
+    }
+  
+    // if the class has reified generics, and if generics
+    // were not specified at instantiation, then we must emit 
+    // CheckClsRgSoft to raise a warning or fatal.
+    auto const vecAsCell = locAsCell(env, op.loc1);
+    auto isArrLike = vecAsCell.subtypeOf(BVec);
+    auto count = arr_size(vecAsCell);
+    if (dcls.cls().mustHaveReifiedGenerics() && isArrLike && count == 0) {
+      return reduce(
+        env,
+        bc::CheckClsRGSoft {},
+        bc::PopC {}
+      );
+    }
+
+    return reduce(
+      env,
+      bc::PopC {}, // pop the class off the stack
+      bc::NullUninit {},
+      bc::CGetQuietL { op.loc1 }, // push generics onto stack
+      bc::FCallObjMethodD {
+        FCallArgs(1),
+        staticEmptyString(),
+        ObjMethodOp::NullThrows,
+        s_86reifiedinit.get()
+      },
+      bc::PopC {}
+    );
+  }
+  popC(env);
+  popC(env);
+}
+
 namespace {
 
 /*

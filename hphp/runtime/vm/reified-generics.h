@@ -76,7 +76,16 @@ void raise_warning_for_soft_reified(size_t i, bool fun, const StringData *name);
 // otherwise throws an error
 void checkClassReifiedGenericsSoft(const Class* cls);
 
+
+/*
+ * Attempt to invoke 86reifiedinit on the given object. 
+ * Will setReifiedGenerics iff the class has a reified parent.
+ * The function throws if the class has reified generics and 
+ * any reified generics on the class are not soft. 
+ * If no reified generics are passed in, AND all 
+ * reified generics on the class are soft, then raises an error.
+*/
+void tryClassReifiedInit(Class* cls, ArrayData* generics, ObjectData* obj);
 ///////////////////////////////////////////////////////////////////////////////
 
 }
-

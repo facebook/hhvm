@@ -1437,6 +1437,7 @@ fn is_checkpoint_instr(instr: &NodeInstr) -> bool {
             | Opcode::QueryM(..)
             | Opcode::RaiseClassStringConversionNotice
             | Opcode::RecordReifiedGeneric
+            | Opcode::ReifiedInit(..)
             | Opcode::Req
             | Opcode::ReqDoc
             | Opcode::ReqOnce
@@ -1653,6 +1654,7 @@ fn clean_opcode(opcode: &Opcode) -> Opcode {
         Opcode::PushL(_) => Opcode::PushL(Local::INVALID),
         Opcode::SetL(_) => Opcode::SetL(Local::INVALID),
         Opcode::UnsetL(_) => Opcode::UnsetL(Local::INVALID),
+        Opcode::ReifiedInit(..) => Opcode::ReifiedInit(Local::INVALID),
 
         Opcode::AwaitAll(_) => Opcode::AwaitAll(LocalRange::EMPTY),
         Opcode::Enter(_) => Opcode::Enter(Label::INVALID),

@@ -88,7 +88,6 @@ use string_utils::reified::ReifiedTparam;
 
 use super::TypeRefinementInHint;
 use crate::emit_adata;
-use crate::emit_class::REIFIED_INIT_METH_NAME;
 use crate::emit_class::REIFIED_PROP_NAME;
 use crate::emit_fatal;
 use crate::emit_type_constant;
@@ -3765,42 +3764,16 @@ fn emit_new_obj_reified_instrs<'a, 'd>(
     pos: &Pos,
     op: NewObjOpInfo<'_>,
 ) -> Result<InstrSeq> {
-    let call_reified_init = |obj, ts| -> InstrSeq {
-        InstrSeq::gather(vec![
-            obj,
-            instr::null_uninit(),
-            ts,
-            instr::f_call_obj_method_d(
-                FCallArgs::new(FCallArgsFlags::default(), 1, 1, vec![], vec![], None, None),
-                *REIFIED_INIT_METH_NAME,
-            ),
-            instr::pop_c(),
-        ])
-    };
-
     scope::with_unnamed_locals(e, |e| {
         let class_local = e.local_gen_mut().get_unnamed();
         let ts_local = e.local_gen_mut().get_unnamed();
         let obj_local = e.local_gen_mut().get_unnamed();
 
-        let no_reified_generics_passed_in_label = e.label_gen_mut().next_regular();
-        let try_parent_has_reified_generics_label = e.label_gen_mut().next_regular();
+        let reified_init_label = e.label_gen_mut().next_regular();
         let end_label = e.label_gen_mut().next_regular();
-
-        let try_parent_has_reified_generics = InstrSeq::gather(vec![
-            instr::label(try_parent_has_reified_generics_label),
-            instr::c_get_l(class_local),
-            instr::has_reified_parent(),
-            instr::jmp_z(end_label),
-            call_reified_init(
-                instr::c_get_l(obj_local),
-                InstrSeq::gather(vec![
-                    instr::new_col(CollectionType::Vector),
-                    instr::cast_vec(),
-                ]),
-            ),
-            instr::jmp(end_label),
-        ]);
+        let set_empty_ts_label = e.label_gen_mut().next_regular();
+        let empty_vec_tv = TypedValue::vec(Default::default());
+        let empty_vec = emit_adata::typed_value_into_instr(e, empty_vec_tv)?;
 
         let is_ts_empty = InstrSeq::gather(vec![
             instr::null_uninit(),
@@ -3814,22 +3787,18 @@ fn emit_new_obj_reified_instrs<'a, 'd>(
             instr::eq(),
         ]);
 
-        let no_reified_generics_passed_in = InstrSeq::gather(vec![
-            instr::label(no_reified_generics_passed_in_label),
+        let reified_init = InstrSeq::gather(vec![
+            instr::label(reified_init_label),
+            instr::c_get_l(obj_local),
             instr::c_get_l(class_local),
-            instr::class_has_reified_generics(),
-            instr::jmp_z(try_parent_has_reified_generics_label),
-            instr::c_get_l(class_local),
-            instr::check_cls_rg_soft(),
+            instr::reified_init(ts_local),
             instr::jmp(end_label),
         ]);
 
-        let reified_generics_passed_in = InstrSeq::gather(vec![
-            instr::c_get_l(class_local),
-            instr::class_has_reified_generics(),
-            instr::jmp_z(try_parent_has_reified_generics_label),
-            call_reified_init(instr::c_get_l(obj_local), instr::c_get_l(ts_local)),
-            instr::jmp(end_label),
+        let set_empty_ts = InstrSeq::gather(vec![
+            instr::label(set_empty_ts_label),
+            empty_vec,
+            instr::pop_l(ts_local),
         ]);
 
         let instrs = match op {
@@ -3837,8 +3806,8 @@ fn emit_new_obj_reified_instrs<'a, 'd>(
                 instr::set_l(class_local),
                 instr::new_obj(),
                 instr::pop_l(obj_local),
-                no_reified_generics_passed_in,
-                try_parent_has_reified_generics,
+                set_empty_ts,
+                reified_init,
             ]),
             NewObjOpInfo::NewObj(true) => InstrSeq::gather(vec![
                 instr::class_get_ts_with_generics(),
@@ -3847,10 +3816,9 @@ fn emit_new_obj_reified_instrs<'a, 'd>(
                 instr::new_obj(),
                 instr::pop_l(obj_local),
                 is_ts_empty,
-                instr::jmp_nz(no_reified_generics_passed_in_label),
-                reified_generics_passed_in,
-                no_reified_generics_passed_in,
-                try_parent_has_reified_generics,
+                instr::jmp_z(reified_init_label),
+                set_empty_ts,
+                reified_init,
             ]),
             NewObjOpInfo::NewObjD(id, targs) => {
                 let ts = match targs {
@@ -3866,16 +3834,26 @@ fn emit_new_obj_reified_instrs<'a, 'd>(
                 if ts.is_empty() {
                     InstrSeq::gather(vec![
                         store_cls_and_obj,
-                        no_reified_generics_passed_in,
-                        try_parent_has_reified_generics,
+                        instr::c_get_l(class_local),
+                        instr::class_has_reified_generics(),
+                        instr::jmp_nz(set_empty_ts_label),
+                        instr::c_get_l(class_local),
+                        instr::has_reified_parent(),
+                        instr::jmp_nz(set_empty_ts_label),
+                        instr::jmp(end_label),
+                        set_empty_ts,
+                        reified_init,
                     ])
                 } else {
                     InstrSeq::gather(vec![
                         ts,
                         instr::pop_l(ts_local),
                         store_cls_and_obj,
-                        reified_generics_passed_in,
-                        try_parent_has_reified_generics,
+                        instr::c_get_l(class_local),
+                        instr::class_has_reified_generics(),
+                        instr::jmp_nz(reified_init_label),
+                        set_empty_ts,
+                        reified_init,
                     ])
                 }
             }
@@ -3899,21 +3877,19 @@ fn emit_new_obj_reified_instrs<'a, 'd>(
                 let store_ts_if_prop_set = InstrSeq::gather(vec![
                     instr::c_get_l(class_local),
                     instr::class_has_reified_generics(),
-                    instr::jmp_z(no_reified_generics_passed_in_label),
+                    instr::jmp_z(set_empty_ts_label),
                     instr::c_get_l(class_local),
                     instr::get_cls_rg_prop(),
                     instr::set_l(ts_local),
                     instr::is_type_c(IsTypeOp::Null),
-                    instr::jmp_nz(no_reified_generics_passed_in_label),
+                    instr::jmp_nz(set_empty_ts_label),
                 ]);
                 InstrSeq::gather(vec![
                     store_cls_and_obj,
                     store_ts_if_prop_set,
-                    is_ts_empty,
-                    instr::jmp_nz(no_reified_generics_passed_in_label),
-                    reified_generics_passed_in,
-                    no_reified_generics_passed_in,
-                    try_parent_has_reified_generics,
+                    instr::jmp(reified_init_label),
+                    set_empty_ts,
+                    reified_init,
                 ])
             }
         };

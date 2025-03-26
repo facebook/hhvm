@@ -615,6 +615,18 @@ void emitCheckClsRGSoft(IRGS& env) {
   popDecRef(env);
 }
 
+void emitReifiedInit(IRGS& env, int32_t id) { 
+  auto const cls_ = topC(env);
+  if (!cls_->isA(TCls) && !cls_->isA(TLazyCls)) return interpOne(env);
+  auto const cls = cls_->isA(TLazyCls) ? ldCls(env, cls_) : cls_;
+  assertTypeLocal(env, id, TVec);  
+  auto* generics = ldLoc(env, id, DataTypeSpecific);
+  auto const obj = topC(env, BCSPRelOffset{1});
+  gen(env, ReifiedInit, cls, generics, obj);
+  popDecRef(env);
+  popDecRef(env);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }

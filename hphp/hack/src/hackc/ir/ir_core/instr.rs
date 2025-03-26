@@ -533,6 +533,7 @@ pub enum Hhbc {
     Print(ValueId, LocId),
     RaiseClassStringConversionNotice(LocId),
     RecordReifiedGeneric(ValueId, LocId),
+    ReifiedInit([ValueId; 2], LocalId, LocId),
     ResolveClass(ClassName, LocId),
     ResolveClsMethod(ValueId, MethodName, LocId),
     ResolveClsMethodD(ClassName, MethodName, LocId),

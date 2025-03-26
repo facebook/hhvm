@@ -410,6 +410,7 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseTooManyArg:
   case RaiseWarning:
   case RecordReifiedGenericsAndGetTSList:
+  case ReifiedInit:
   case ResolveTypeStruct:
   case ReturnHook:
   case SameArrLike:

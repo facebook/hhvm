@@ -553,6 +553,10 @@ impl<'b> InstrEmitter<'b> {
             Hhbc::Print(..) => Opcode::Print,
             Hhbc::RaiseClassStringConversionNotice(..) => Opcode::RaiseClassStringConversionNotice,
             Hhbc::RecordReifiedGeneric(..) => Opcode::RecordReifiedGeneric,
+            Hhbc::ReifiedInit(_, lid, _) => {
+                let local = self.lookup_local(lid);
+                Opcode::ReifiedInit(local)
+            }
             Hhbc::ResolveClass(clsid, _) => Opcode::ResolveClass(clsid),
             Hhbc::ResolveClsMethod(_, method, _) => Opcode::ResolveClsMethod(method),
             Hhbc::ResolveClsMethodD(clsid, method, _) => Opcode::ResolveClsMethodD(clsid, method),

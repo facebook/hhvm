@@ -835,6 +835,7 @@ fn cmp_instr_hhbc((a, a_func): (&Hhbc, &Func), (b, b_func): (&Hhbc, &Func)) -> R
         | (Hhbc::Print(_, _), _)
         | (Hhbc::RaiseClassStringConversionNotice(_), _)
         | (Hhbc::RecordReifiedGeneric(_, _), _)
+        | (Hhbc::ReifiedInit(_, _, _), _)
         | (Hhbc::SelfCls(_), _)
         | (Hhbc::SetG(_, _), _)
         | (Hhbc::SetImplicitContextByValue(_, _), _)

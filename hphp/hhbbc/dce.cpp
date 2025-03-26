@@ -1675,6 +1675,7 @@ void dce(Env& env, const bc::Nop& op) { no_dce(env, op); }
 void dce(Env& env, const bc::OODeclExists& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Print& op) { no_dce(env, op); }
 void dce(Env& env, const bc::RecordReifiedGeneric& op) { no_dce(env, op); }
+void dce(Env& env, const bc::ReifiedInit& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Req& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ReqDoc& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ReqOnce& op) { no_dce(env, op); }

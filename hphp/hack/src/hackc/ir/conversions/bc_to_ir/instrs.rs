@@ -1054,6 +1054,7 @@ fn convert_opcode(ctx: &mut Context<'_>, opcode: &Opcode) -> bool {
         #[rustfmt::skip]
         Opcode::RaiseClassStringConversionNotice => simple!(Hhbc::RaiseClassStringConversionNotice),
         Opcode::RecordReifiedGeneric => simple!(Hhbc::RecordReifiedGeneric),
+        Opcode::ReifiedInit => simple!(Hhbc::ReifiedInit),
         Opcode::ResolveClass => simple!(Hhbc::ResolveClass),
         Opcode::ResolveClsMethod => simple!(Hhbc::ResolveClsMethod),
         Opcode::ResolveClsMethodD => simple!(Hhbc::ResolveClsMethodD),

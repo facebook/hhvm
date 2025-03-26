@@ -332,27 +332,6 @@ abstract class ThriftClientBase implements IThriftClient {
     RpcOptions $rpc_options,
     shape(?'read_options' => int) $options = shape(),
   ): Awaitable<(TRet, ?dict<string, string>)> {
-    return await $this->genAwaitResponseWithReadHeaders(
-      $result,
-      $name,
-      $is_return_void,
-      $expectedsequenceid,
-      $rpc_options,
-      $options,
-    );
-  }
-
-  protected async function genAwaitResponseWithReadHeaders<
-    TResulttype as IResultThriftStruct with { type TResult = TRet },
-    TRet,
-  >(
-    classname<TResulttype> $result,
-    string $name,
-    bool $is_return_void,
-    int $expectedsequenceid,
-    RpcOptions $rpc_options,
-    shape(?'read_options' => int) $options = shape(),
-  ): Awaitable<(TRet, ?dict<string, string>)> {
     $channel = $this->channel_;
     $out_transport = $this->output_->getTransport();
     $in_transport = $this->input_->getTransport();

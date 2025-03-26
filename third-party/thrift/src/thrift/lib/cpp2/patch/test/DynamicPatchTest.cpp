@@ -94,7 +94,7 @@ TYPED_TEST(DynamicPatchesTest, Clear) {
 DynamicPatch roundTrip(const DynamicPatch& patch) {
   DynamicPatch ret;
   ret.decode<apache::thrift::CompactProtocolReader>(
-      badge, *patch.encode<apache::thrift::CompactProtocolWriter>(badge));
+      *patch.encode<apache::thrift::CompactProtocolWriter>());
   return ret;
 }
 

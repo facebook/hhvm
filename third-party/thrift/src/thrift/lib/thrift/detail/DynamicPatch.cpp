@@ -1725,7 +1725,7 @@ void DynamicPatch::fromAny(detail::Badge, const type::AnyStruct& any) {
 }
 
 template <typename Protocol>
-std::uint32_t DynamicPatch::encode(detail::Badge, Protocol& prot) const {
+std::uint32_t DynamicPatch::encode(Protocol& prot) const {
   return visitPatch([&](const auto& patch) {
     if constexpr (__FBTHRIFT_IS_VALID(patch, patch.encode(prot))) {
       return patch.encode(prot);
@@ -1737,44 +1737,42 @@ std::uint32_t DynamicPatch::encode(detail::Badge, Protocol& prot) const {
 }
 
 template <typename Protocol>
-void DynamicPatch::decode(detail::Badge, Protocol& prot) {
+void DynamicPatch::decode(Protocol& prot) {
   // TODO(dokwon): Provide direct decode to DynamicPatch.
   fromObject(protocol::parseObject(prot));
 }
 
 template <typename Protocol>
-std::unique_ptr<folly::IOBuf> DynamicPatch::encode(detail::Badge) const {
+std::unique_ptr<folly::IOBuf> DynamicPatch::encode() const {
   folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
   Protocol prot;
   prot.setOutput(&queue);
-  encode(badge, prot);
+  encode(prot);
   return queue.move();
 }
 
 template <typename Protocol>
-void DynamicPatch::decode(detail::Badge, const folly::IOBuf& buf) {
+void DynamicPatch::decode(const folly::IOBuf& buf) {
   Protocol prot;
   prot.setInput(&buf);
-  decode(badge, prot);
+  decode(prot);
 }
 
 /// @cond
 template std::uint32_t DynamicPatch::encode(
-    detail::Badge, apache::thrift::BinaryProtocolWriter&) const;
+    apache::thrift::BinaryProtocolWriter&) const;
 template std::uint32_t DynamicPatch::encode(
-    detail::Badge, apache::thrift::CompactProtocolWriter&) const;
-template std::unique_ptr<folly::IOBuf> DynamicPatch::encode<
-    apache::thrift::BinaryProtocolWriter>(detail::Badge) const;
-template std::unique_ptr<folly::IOBuf> DynamicPatch::encode<
-    apache::thrift::CompactProtocolWriter>(detail::Badge) const;
-template void DynamicPatch::decode(
-    detail::Badge, apache::thrift::BinaryProtocolReader&);
-template void DynamicPatch::decode(
-    detail::Badge, apache::thrift::CompactProtocolReader&);
+    apache::thrift::CompactProtocolWriter&) const;
+template std::unique_ptr<folly::IOBuf>
+DynamicPatch::encode<apache::thrift::BinaryProtocolWriter>() const;
+template std::unique_ptr<folly::IOBuf>
+DynamicPatch::encode<apache::thrift::CompactProtocolWriter>() const;
+template void DynamicPatch::decode(apache::thrift::BinaryProtocolReader&);
+template void DynamicPatch::decode(apache::thrift::CompactProtocolReader&);
 template void DynamicPatch::decode<apache::thrift::BinaryProtocolReader>(
-    detail::Badge, const folly::IOBuf&);
+    const folly::IOBuf&);
 template void DynamicPatch::decode<apache::thrift::CompactProtocolReader>(
-    detail::Badge, const folly::IOBuf&);
+    const folly::IOBuf&);
 /// @endcond
 
 template <typename Protocol>
@@ -1895,14 +1893,13 @@ void DynamicPatch::fromSafePatch(const type::AnyStruct& any) {
     throw std::runtime_error(
         fmt::format("Unsupported patch version: {}", safePatch.version()));
   }
-  decode<apache::thrift::CompactProtocolReader>(badge, *safePatch.data());
+  decode<apache::thrift::CompactProtocolReader>(*safePatch.data());
 }
 type::AnyStruct DynamicPatch::toSafePatch(type::Type type) const {
   auto safePatchType = toSafePatchType(std::move(type));
   MinSafePatchVersionVisitor visitor;
   visitor.recurse(*this);
-  DynamicSafePatch safePatch{
-      visitor.version, encode<CompactProtocolWriter>(badge)};
+  DynamicSafePatch safePatch{visitor.version, encode<CompactProtocolWriter>()};
 
   type::AnyStruct anyStruct;
   anyStruct.type() = std::move(safePatchType);

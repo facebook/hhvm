@@ -756,14 +756,14 @@ class DynamicPatch {
   type::AnyStruct toAny(detail::Badge, type::Type type) const;
 
   template <typename Protocol>
-  std::uint32_t encode(detail::Badge, Protocol& prot) const;
+  std::uint32_t encode(Protocol& prot) const;
   template <typename Protocol>
-  std::unique_ptr<folly::IOBuf> encode(detail::Badge) const;
+  std::unique_ptr<folly::IOBuf> encode() const;
 
   template <typename Protocol>
-  void decode(detail::Badge, Protocol& prot);
+  void decode(Protocol& prot);
   template <typename Protocol>
-  void decode(detail::Badge, const folly::IOBuf& buf);
+  void decode(const folly::IOBuf& buf);
 
   template <class T>
   bool holds_alternative(detail::Badge) const {

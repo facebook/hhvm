@@ -950,7 +950,7 @@ TEST(DynamicPatch, FromStructOrUnionPatch) {
     patch.apply(value);
     EXPECT_EQ(value.as_object()[FieldId{2}].as_i32(), 25);
 
-    patch.get_if<DynamicUnknownPatch>()->assign(Object{});
+    patch.get<DynamicUnknownPatch>().assign(Object{});
     patch.apply(value);
     EXPECT_TRUE(value.as_object().empty());
   }

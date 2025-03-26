@@ -1363,7 +1363,7 @@ DynamicPatch::merge(Other&& other) {
     std::visit(
         [&](auto&& other) {
           using PatchType = folly::remove_cvref_t<decltype(other)>;
-          get_if<DynamicUnknownPatch>()->checkConvertible<PatchType>();
+          get<DynamicUnknownPatch>().checkConvertible<PatchType>();
           *patch_ = detail::createPatchFromObject<PatchType>(
               badge, std::move(*this).toObject());
         },
@@ -1373,8 +1373,8 @@ DynamicPatch::merge(Other&& other) {
     return std::visit(
         [&](auto&& patch) {
           using PatchType = folly::remove_cvref_t<decltype(patch)>;
-          other.template get_if<DynamicUnknownPatch>()
-              ->template checkConvertible<PatchType>();
+          other.template get<DynamicUnknownPatch>()
+              .template checkConvertible<PatchType>();
           auto tmp = DynamicPatch{detail::createPatchFromObject<PatchType>(
               badge, std::forward<Other>(other).toObject())};
           return merge(std::move(tmp));

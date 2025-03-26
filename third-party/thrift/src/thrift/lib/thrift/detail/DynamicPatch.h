@@ -778,6 +778,17 @@ class DynamicPatch {
   const PatchType* get_if() const {
     return std::get_if<PatchType>(patch_.get());
   }
+
+  template <class PatchType>
+  PatchType& get() {
+    // std::unique_ptr::operator* requires complete type.
+    return std::get<PatchType>(*patch_.get());
+  }
+  template <class PatchType>
+  const PatchType& get() const {
+    return std::get<PatchType>(*patch_.get());
+  }
+
   /// @endcond
 
  private:
@@ -807,7 +818,7 @@ class DynamicPatch {
 
     // Use merge to change patch's type.
     merge(DynamicPatch{Patch{}});
-    return *get_if<Patch>();
+    return get<Patch>();
   }
 
   template <class Self, class Visitor>

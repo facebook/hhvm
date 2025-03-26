@@ -274,12 +274,7 @@ class {{struct:name}}({{> types/python_struct_class }}):
         return super().__hash__()
 
     def __copy__(self):
-        {{#struct:cpp_noncopyable?}}
-        raise TypeError("{{struct:name}} is noncopyable")
-        {{/struct:cpp_noncopyable?}}
-        {{^struct:cpp_noncopyable?}}
         return self{{! thrift-py3 / thrift-python is immutable}}
-        {{/struct:cpp_noncopyable?}}
 
 
 {{#program:inplace_migrate?}}

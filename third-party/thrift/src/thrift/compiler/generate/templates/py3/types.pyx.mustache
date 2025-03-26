@@ -424,12 +424,7 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
 {{/struct:union?}}
     {{! Below are some things that are common to structs and unions: }}
     def __copy__({{struct:name}} self):
-        {{#struct:cpp_noncopyable?}}
-        raise TypeError("{{struct:name}} is noncopyable")
-        {{/struct:cpp_noncopyable?}}
-        {{^struct:cpp_noncopyable?}}
         return self{{! Thrift-py3 has immutable semantics}}
-        {{/struct:cpp_noncopyable?}}
     {{#struct:cpp_noncomparable}}
 
     def __eq__({{struct:name}} self, other):

@@ -1128,7 +1128,7 @@ cdef class NonCopyableStruct(thrift.py3.types.Struct):
 
 
     def __copy__(NonCopyableStruct self):
-        raise TypeError("NonCopyableStruct is noncopyable")
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -1267,7 +1267,7 @@ cdef class NonCopyableUnion(thrift.py3.types.Union):
         self.py_value = None
 
     def __copy__(NonCopyableUnion self):
-        raise TypeError("NonCopyableUnion is noncopyable")
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)

@@ -2384,7 +2384,7 @@ cdef class containerStruct(thrift.py3.types.Struct):
 
 
     def __copy__(containerStruct self):
-        raise TypeError("containerStruct is noncopyable")
+        return self
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
@@ -3041,7 +3041,7 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
 
 
     def __copy__(AnnotatedStruct self):
-        raise TypeError("AnnotatedStruct is noncopyable")
+        return self
 
     def __eq__(AnnotatedStruct self, other):
         if not isinstance(other, AnnotatedStruct):

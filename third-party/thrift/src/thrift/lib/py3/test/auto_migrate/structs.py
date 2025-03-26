@@ -114,6 +114,18 @@ class StructTests(unittest.TestCase):
         self.assertEqual(x.val_list, dif_list)
         dif_int = copy.copy(x.an_int)
         self.assertEqual(x.an_int, dif_int)
+        self.assertIs(x, copy.copy(x))
+
+        cpp_noncopyable = NonCopyable(num=123)
+        self.assertIs(cpp_noncopyable, copy.copy(cpp_noncopyable))
+        self.assertIs(cpp_noncopyable, copy.deepcopy(cpp_noncopyable))
+
+    @brokenInAutoMigrate()
+    def test_noncopyable(self) -> None:
+        x = NonCopyable(num=123)
+        # when thrift-py3 decoupled from cpp2, call operator will work
+        with self.assertRaises(TypeError):
+            x(num=1234)
 
     def test_hashability(self) -> None:
         hash(easy())
@@ -263,16 +275,6 @@ class StructTests(unittest.TestCase):
         self.assertEqual(File().__class__.__module__, expected)
         self.assertEqual(hard.__module__, expected)
         self.assertEqual(hard().__class__.__module__, expected)
-
-    @brokenInAutoMigrate()
-    def test_noncopyable(self) -> None:
-        x = NonCopyable(num=123)
-        with self.assertRaises(TypeError):
-            x(num=1234)
-        with self.assertRaises(TypeError):
-            copy.copy(x)
-        with self.assertRaises(TypeError):
-            copy.deepcopy(x)
 
     def test_init_with_invalid_field(self) -> None:
         with self.assertRaises(TypeError):

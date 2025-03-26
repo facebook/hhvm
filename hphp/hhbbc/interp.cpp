@@ -2429,7 +2429,7 @@ void classGetTSImpl(ISS& env, bool pushGenerics) {
           if (auto const rg = get_ts_generic_types_opt(ts_arr)) {
             push(env, vec_val(rg));
           } else {
-            push(env, TInitNull);
+            push(env, vec_empty());
           }
         }
         return;
@@ -2438,7 +2438,7 @@ void classGetTSImpl(ISS& env, bool pushGenerics) {
   }
 
   push(env, TCls);
-  if (pushGenerics) push(env, TOptVec);
+  if (pushGenerics) push(env, TVec);
 }
 
 void in(ISS& env, const bc::ClassGetTS&) {

@@ -151,7 +151,7 @@ void classGetTSImpl(IRGS& env, bool pushGenerics) {
     auto const cls = ldCls(env, name);
     popDecRef(env, static_cast<DecRefProfileId>(locId++));
     push(env, cls);
-    if (pushGenerics) push(env, cns(env, TInitNull));
+    if (pushGenerics) push(env, cns(env, ArrayData::CreateVec()));
   };
 
   auto const clsName = profiledArrayAccess(

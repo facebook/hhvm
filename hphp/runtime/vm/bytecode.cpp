@@ -2354,7 +2354,7 @@ OPTBLD_INLINE void classGetTSImpl(bool pushGenerics) {
     if (reified_types) {
       vmStack().pushStaticArrayLike(reified_types);
     } else {
-      vmStack().pushNull();
+      vmStack().pushStaticArrayLike(ArrayData::CreateVec());
     }
   }
 }

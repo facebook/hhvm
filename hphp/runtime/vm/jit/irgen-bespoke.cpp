@@ -1000,7 +1000,7 @@ void classGetTSImpl(IRGS& env, bool pushGenerics) {
   auto const cls = ldCls(env, className);
   popDecRef(env);
   push(env, cls);
-  if (pushGenerics) push(env, cns(env, TInitNull));
+  if (pushGenerics) push(env, cns(env, ArrayData::CreateVec()));
 }
 
 void emitBespokeClassGetTS(IRGS& env) {

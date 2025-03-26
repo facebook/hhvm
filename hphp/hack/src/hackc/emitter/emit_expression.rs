@@ -3775,18 +3775,6 @@ fn emit_new_obj_reified_instrs<'a, 'd>(
         let empty_vec_tv = TypedValue::vec(Default::default());
         let empty_vec = emit_adata::typed_value_into_instr(e, empty_vec_tv)?;
 
-        let is_ts_empty = InstrSeq::gather(vec![
-            instr::null_uninit(),
-            instr::null_uninit(),
-            instr::c_get_l(ts_local),
-            instr::f_call_func_d(
-                FCallArgs::new(FCallArgsFlags::default(), 1, 1, vec![], vec![], None, None),
-                hhbc::FunctionName::intern("count"),
-            ),
-            instr::int(0),
-            instr::eq(),
-        ]);
-
         let reified_init = InstrSeq::gather(vec![
             instr::label(reified_init_label),
             instr::c_get_l(obj_local),
@@ -3815,9 +3803,6 @@ fn emit_new_obj_reified_instrs<'a, 'd>(
                 instr::set_l(class_local),
                 instr::new_obj(),
                 instr::pop_l(obj_local),
-                is_ts_empty,
-                instr::jmp_z(reified_init_label),
-                set_empty_ts,
                 reified_init,
             ]),
             NewObjOpInfo::NewObjD(id, targs) => {

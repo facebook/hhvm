@@ -1364,7 +1364,7 @@ ClassGetTS                         [C:Dict]  ->  [C:Class]
   Otherwise, $1['classname'] is loaded as with ClassGetC in Normal mode
   and the resulting class is pushed.
 
-ClassGetTSWithGenerics             [C:Dict]  ->  [C:Class, C:StaticVec|Null]
+ClassGetTSWithGenerics             [C:Dict]  ->  [C:Class, C:StaticVec]
 
   Fetch class from type-structure. This instruction checks if $1 is a valid
   type-structure (dict). If not, this instruction throws a fatal error.
@@ -1372,7 +1372,7 @@ ClassGetTSWithGenerics             [C:Dict]  ->  [C:Class, C:StaticVec|Null]
   type-structure's generics information (if present). The possibly mangled
   classname is then processed like ClassGetC and the resulting class is
   pushed. If present, the type-structure's generics information is processed as
-  in RecordReifiedGeneric and pushed. If not present, null is pushed.
+  in RecordReifiedGeneric and pushed. If not present, an empty vec is pushed.
 
 
 6. Isset and type querying instructions

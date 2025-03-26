@@ -3780,6 +3780,7 @@ fn emit_new_obj_reified_instrs<'a, 'd>(
             instr::c_get_l(obj_local),
             instr::c_get_l(class_local),
             instr::reified_init(ts_local),
+            instr::unset_l(ts_local),
             instr::jmp(end_label),
         ]);
 

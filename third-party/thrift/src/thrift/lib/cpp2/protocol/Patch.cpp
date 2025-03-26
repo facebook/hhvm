@@ -654,26 +654,8 @@ void insertNextMask(
       masks.write, std::move(writeId), nextMasks.write, getIncludesRef);
 }
 
-// Ensure requires reading existing value to know whether the field is set or
-// not. Insert allMask() if the field was never included in read mask
-// before.
-void insertEnsureFieldsToMask(Mask& mask, const Value& ensureStruct) {
-  const auto& obj = ensureStruct.as_object();
-  for (const auto& [id, value] : obj) {
-    mask.includes_ref().ensure().emplace(id, allMask());
-  }
-}
-
-void insertEnsureFieldsToMaskIfNotAllMask(
-    Mask& mask, const Value& ensureStruct) {
+void insertTypeToMaskIfNotAllMask(Mask& mask, const type::Type& type) {
   if (isAllMask(mask)) {
-    return;
-  }
-  insertEnsureFieldsToMask(mask, ensureStruct);
-}
-
-void insertTypeToMask(Mask& mask, const type::Type& type) {
-  if (mask == allMask()) {
     return;
   }
   mask.includes_type_ref().ensure().emplace(type, allMask());
@@ -724,10 +706,21 @@ void insertKeysToMaskIfNotAllMask(Mask& mask, const Container& c, bool view) {
   insertKeysToMask(mask, c, view);
 }
 
-// Put allMask() iff current mask is not allMask and the key was never included
-// in the mask before.
-void insertFieldsToMask(Mask& mask, const std::vector<Value>& ids) {
-  if (mask == allMask()) {
+void insertFieldsToMask(Mask& mask, const Object& obj) {
+  for (const auto& [id, value] : obj) {
+    mask.includes_ref().ensure().emplace(id, allMask());
+  }
+}
+
+void insertFieldsToMaskIfNotAllMask(Mask& mask, const Object& obj) {
+  if (isAllMask(mask)) {
+    return;
+  }
+  insertFieldsToMask(mask, obj);
+}
+
+void insertFieldsToMaskIfNotAllMask(Mask& mask, const std::vector<Value>& ids) {
+  if (isAllMask(mask)) {
     return;
   }
   for (const Value& id : ids) {
@@ -816,7 +809,7 @@ void insertNextTypesToMask(
         type_to_patch.type().value(),
         view,
         getIncludesTypeRef);
-    insertTypeToMask(masks.read, type_to_patch.type().value());
+    insertTypeToMaskIfNotAllMask(masks.read, type_to_patch.type().value());
   }
 }
 
@@ -871,8 +864,11 @@ ExtractedMasksFromPatch extractMaskFromPatch(
   // If EnsureStruct, add fields/keys to mask.
   if (auto* ensureStruct = findOp(patch, PatchOp::EnsureStruct)) {
     if (ensureStruct->is_object()) {
-      insertEnsureFieldsToMask(masks.read, *ensureStruct);
-      insertEnsureFieldsToMaskIfNotAllMask(masks.write, *ensureStruct);
+      // Ensure requires reading existing value to know whether the field is set
+      // or not. Insert allMask() if the field was never included in read mask
+      // before.
+      insertFieldsToMask(masks.read, ensureStruct->as_object());
+      insertFieldsToMaskIfNotAllMask(masks.write, ensureStruct->as_object());
     } else if (ensureStruct->is_map()) {
       isMap = true;
       insertKeysToMask(masks.read, ensureStruct->as_map(), view);
@@ -883,7 +879,10 @@ ExtractedMasksFromPatch extractMaskFromPatch(
   // If EnsureUnion, add fields to mask for read mask and all mask for write
   // mask.
   if (auto* ensureUnion = findOp(patch, PatchOp::EnsureUnion)) {
-    insertEnsureFieldsToMask(masks.read, *ensureUnion);
+    // Ensure requires reading existing value to know whether the field is set
+    // or not. Insert allMask() if the field was never included in read mask
+    // before.
+    insertFieldsToMask(masks.read, ensureUnion->as_object());
     masks.write = allMask();
   }
 
@@ -897,7 +896,7 @@ ExtractedMasksFromPatch extractMaskFromPatch(
   if (auto* value = findOp(patch, PatchOp::Remove)) {
     if (value->is_list()) {
       // struct patch
-      insertFieldsToMask(masks.write, value->as_list());
+      insertFieldsToMaskIfNotAllMask(masks.write, value->as_list());
     } else if (!isIntrinsicDefault(*value)) {
       if (!view && !isMap) {
         // cannot distinguish between set/map patch
@@ -925,7 +924,7 @@ ExtractedMasksFromPatch extractMaskFromPatch(
     if (!type::AnyData::isValid(anyStruct)) {
       throw std::runtime_error("Invalid AnyStruct");
     }
-    insertTypeToMask(masks.read, anyStruct.type().value());
+    insertTypeToMaskIfNotAllMask(masks.read, anyStruct.type().value());
     masks.write = allMask();
   }
 

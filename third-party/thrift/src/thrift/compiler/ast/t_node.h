@@ -52,7 +52,9 @@ class t_node {
   void set_src_range(const source_range& r) { range_ = r; }
 
   // Returns the map of deprecated annotations associated with this node.
-  const deprecated_annotation_map& annotations() const { return annotations_; }
+  const deprecated_annotation_map& unstructured_annotations() const {
+    return annotations_;
+  }
 
   // Returns true if there exists an annotation with the given name.
   bool has_unstructured_annotation(

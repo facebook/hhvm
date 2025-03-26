@@ -27,13 +27,13 @@ using namespace apache::thrift::compiler;
 
 static bool only_annotations(
     const t_node& node, std::vector<std::string> annotations) {
-  if (node.annotations().size() != annotations.size()) {
+  if (node.unstructured_annotations().size() != annotations.size()) {
     return false;
   }
 
   std::vector<std::string> node_annotations;
 
-  for (const auto& annotation : node.annotations()) {
+  for (const auto& annotation : node.unstructured_annotations()) {
     node_annotations.push_back(annotation.first);
   }
 
@@ -48,8 +48,8 @@ static bool only_annotations(
 // NOTE: Rely on automated formatting to fix formatting issues.
 static void cppref_to_structured(
     codemod::file_manager& fm, const t_field& field) {
-  if (!field.annotations().count("cpp.ref") &&
-      !field.annotations().count("cpp2.ref")) {
+  if (!field.unstructured_annotations().count("cpp.ref") &&
+      !field.unstructured_annotations().count("cpp2.ref")) {
     return;
   }
 
@@ -67,7 +67,7 @@ static void cppref_to_structured(
     return;
   }
 
-  for (const auto& annotation : field.annotations()) {
+  for (const auto& annotation : field.unstructured_annotations()) {
     if (annotation.first == "cpp.ref" || annotation.first == "cpp2.ref") {
       fm.remove(annotation);
     }

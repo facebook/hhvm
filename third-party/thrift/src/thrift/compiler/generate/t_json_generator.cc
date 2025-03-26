@@ -499,21 +499,21 @@ void t_json_generator::print_node_annotations(
     const t_named& node, bool add_heading_comma, bool add_trailing_comma) {
   if (annotate_) {
     if (add_heading_comma &&
-        (!node.annotations().empty() ||
+        (!node.unstructured_annotations().empty() ||
          !node.structured_annotations().empty())) {
       f_out_ << "," << endl;
     }
-    if (!node.annotations().empty()) {
-      print_annotations(node.annotations());
+    if (!node.unstructured_annotations().empty()) {
+      print_annotations(node.unstructured_annotations());
     }
     if (!node.structured_annotations().empty()) {
-      if (!node.annotations().empty()) {
+      if (!node.unstructured_annotations().empty()) {
         f_out_ << "," << endl;
       }
       print_structured_annotations(node.structured_annotations());
     }
     if (add_trailing_comma &&
-        (!node.annotations().empty() ||
+        (!node.unstructured_annotations().empty() ||
          !node.structured_annotations().empty())) {
       f_out_ << "," << endl;
     }

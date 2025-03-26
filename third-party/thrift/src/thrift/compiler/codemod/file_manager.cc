@@ -160,7 +160,7 @@ void file_manager::remove_all_annotations(const t_node& node) {
   size_t begin_offset = SIZE_MAX;
   size_t end_offset = 0;
 
-  for (const auto& annotation : node.annotations()) {
+  for (const auto& annotation : node.unstructured_annotations()) {
     begin_offset = std::min<size_t>(
         begin_offset, to_offset(annotation.second.src_range.begin));
     end_offset = std::max<size_t>(

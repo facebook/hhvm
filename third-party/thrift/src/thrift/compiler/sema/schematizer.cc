@@ -176,7 +176,7 @@ void schematizer::add_definition(
     definition->add_map(val("annotationsByKey"), std::move(annots_by_key));
   }
 
-  if (auto unstructured = node.annotations();
+  if (auto unstructured = node.unstructured_annotations();
       !unstructured.empty() && opts_.include_annotations) {
     auto annots = t_const_value::make_map();
 

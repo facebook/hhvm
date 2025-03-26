@@ -307,7 +307,7 @@ class mstch_base : public mstch::object {
   mstch::node is_struct();
 
   mstch::node annotations(const t_named* annotated) {
-    return make_mstch_annotations(annotated->annotations());
+    return make_mstch_annotations(annotated->unstructured_annotations());
   }
 
   mstch::node structured_annotations(const t_named* annotated) {

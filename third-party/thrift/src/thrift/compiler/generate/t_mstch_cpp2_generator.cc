@@ -482,7 +482,7 @@ class cpp_mstch_program : public mstch_program {
     fatal_strings.emplace(get_fatal_string_short_id(node), node->get_name());
     auto hash = cpp2::sha256_hex(node->get_name());
     fatal_strings.emplace("__fbthrift_hash_" + hash, node->get_name());
-    for (const auto& a : node->annotations()) {
+    for (const auto& a : node->unstructured_annotations()) {
       if (!is_annotation_blacklisted_in_fatal(a.first)) {
         fatal_strings.emplace(get_fatal_string_short_id(a.first), a.first);
       }
@@ -1674,11 +1674,12 @@ class cpp_mstch_struct : public mstch_struct {
     return false;
   }
   mstch::node has_fatal_annotations() {
-    return get_fatal_annotations(struct_->annotations()).size() > 0;
+    return get_fatal_annotations(struct_->unstructured_annotations()).size() >
+        0;
   }
   mstch::node fatal_annotations() {
     return make_mstch_annotations(
-        get_fatal_annotations(struct_->annotations()));
+        get_fatal_annotations(struct_->unstructured_annotations()));
   }
   mstch::node get_legacy_type_id() {
     return std::to_string(struct_->get_type_id());
@@ -2178,11 +2179,12 @@ class cpp_mstch_field : public mstch_field {
     }
   }
   mstch::node has_fatal_annotations() {
-    return get_fatal_annotations(field_->annotations()).size() > 0;
+    return get_fatal_annotations(field_->unstructured_annotations()).size() > 0;
   }
   mstch::node has_isset() { return cpp2::field_has_isset(field_); }
   mstch::node fatal_annotations() {
-    return make_mstch_annotations(get_fatal_annotations(field_->annotations()));
+    return make_mstch_annotations(
+        get_fatal_annotations(field_->unstructured_annotations()));
   }
   mstch::node fatal_required_qualifier() {
     switch (field_->get_req()) {

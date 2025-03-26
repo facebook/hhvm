@@ -69,7 +69,7 @@ class structure_annotations {
       auto type = type_ref.get_type();
       std::vector<t_annotation> to_remove;
       bool has_cpp_type = node.has_structured_annotation(kCppTypeUri);
-      for (const auto& [name, data] : type->annotations()) {
+      for (const auto& [name, data] : type->unstructured_annotations()) {
         // cpp type
         if (name == "cpp.template" || name == "cpp2.template") {
           to_remove.emplace_back(name, data);
@@ -115,7 +115,7 @@ class structure_annotations {
       }
 
       if (!to_remove.empty() &&
-          to_remove.size() == type->annotations().size()) {
+          to_remove.size() == type->unstructured_annotations().size()) {
         fm_.remove_all_annotations(*type);
       } else {
         for (const auto& annot : to_remove) {
@@ -141,7 +141,7 @@ class structure_annotations {
     bool has_cpp_ref = node.has_structured_annotation(kBoxUri) ||
         node.has_structured_annotation(kInternBoxUri) ||
         node.has_structured_annotation(kCppRefUri);
-    for (const auto& [name, data] : node.annotations()) {
+    for (const auto& [name, data] : node.unstructured_annotations()) {
       // cpp type
       bool is_typedef = dynamic_cast<const t_typedef*>(&node);
       bool is_field = dynamic_cast<const t_field*>(&node);
@@ -541,7 +541,8 @@ class structure_annotations {
       }
     }
 
-    if (!to_remove.empty() && to_remove.size() == node.annotations().size()) {
+    if (!to_remove.empty() &&
+        to_remove.size() == node.unstructured_annotations().size()) {
       fm_.remove_all_annotations(node);
     } else {
       for (const auto& annot : to_remove) {

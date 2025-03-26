@@ -491,7 +491,7 @@ void update_annotations(
     t_named& node,
     std::map<std::string, std::string> new_annotations = {},
     deprecated_annotation_value::origin new_annotation_origin = {}) {
-  auto annotations = node.annotations();
+  auto annotations = node.unstructured_annotations();
   // First strip any haskell annotations
   for (auto it = annotations.begin(); it != annotations.end();) {
     if (it->first.find("hs.") == 0) {
@@ -516,7 +516,7 @@ void add_annotations_to_node_type(
   const t_type* node_type = node.get_type();
 
   if (annotations.empty()) {
-    if (!node_type->annotations().empty()) {
+    if (!node_type->unstructured_annotations().empty()) {
       update_annotations(const_cast<t_type&>(*node_type));
     }
     return;
@@ -526,7 +526,8 @@ void add_annotations_to_node_type(
       (node_type->is_typedef() &&
        static_cast<const t_typedef*>(node_type)->typedef_kind() !=
            t_typedef::kind::defined) ||
-      (node_type->is_primitive_type() && !node_type->annotations().empty())) {
+      (node_type->is_primitive_type() &&
+       !node_type->unstructured_annotations().empty())) {
     // This is a new type we can modify in place
     update_annotations(
         const_cast<t_type&>(*node_type), std::move(annotations), origin);
@@ -559,8 +560,8 @@ void lower_deprecated_annotations(
           kDeprecatedUnvalidatedAnnotationsUri)) {
     ctx.check(
         std::all_of(
-            node.annotations().begin(),
-            node.annotations().end(),
+            node.unstructured_annotations().begin(),
+            node.unstructured_annotations().end(),
             [](const auto& pair) { return pair.first.find("hs.") == 0; }),
         "Cannot combine @thrift.DeprecatedUnvalidatedAnnotations with legacy annotation syntax.");
     auto val = cnst->get_value_from_structured_annotation_or_null("items");
@@ -603,7 +604,7 @@ void lower_deprecated_annotations(
         } else {
           // Ensure annotations can be added to inner type
           if (inner_type->is_primitive_type() &&
-              inner_type->annotations().empty()) {
+              inner_type->unstructured_annotations().empty()) {
             auto new_type = std::make_unique<t_primitive_type>(
                 static_cast<const t_primitive_type&>(*inner_type));
             inner_type = new_type.get();

@@ -65,7 +65,7 @@ mstch::map t_mstch_generator::dump(const t_structured& strct, bool shallow) {
       {"exception?", strct.is_exception()},
       {"union?", strct.is_union()},
       {"plain?", !strct.is_exception() && !strct.is_union()},
-      {"annotations", dump_elems(strct.annotations())},
+      {"annotations", dump_elems(strct.unstructured_annotations())},
   };
 
   mstch::map extension = extend_struct(strct);
@@ -85,7 +85,7 @@ mstch::map t_mstch_generator::dump(const t_field& field, int32_t index) {
       {"optional?", req == t_field::e_req::optional},
       {"opt_in_req_out?", req == t_field::e_req::opt_in_req_out},
       {"terse?", req == t_field::e_req::terse},
-      {"annotations", dump_elems(field.annotations())},
+      {"annotations", dump_elems(field.unstructured_annotations())},
   };
 
   if (field.get_value() != nullptr) {
@@ -103,7 +103,7 @@ mstch::map t_mstch_generator::dump(const t_type& orig_type) {
 
   mstch::map result{
       {"name", type.get_name()},
-      {"annotations", dump_elems(type.annotations())},
+      {"annotations", dump_elems(type.unstructured_annotations())},
 
       {"void?", type.is_void()},
       {"string?", type.is_string()},
@@ -159,7 +159,7 @@ mstch::map t_mstch_generator::dump(const t_enum& enm) {
   mstch::map result{
       {"name", enm.get_name()},
       {"values", dump_elems(enm.get_enum_values())},
-      {"annotations", dump_elems(enm.annotations())},
+      {"annotations", dump_elems(enm.unstructured_annotations())},
   };
 
   mstch::map extension = extend_enum(enm);
@@ -182,7 +182,7 @@ mstch::map t_mstch_generator::dump(const t_service& service) {
   const t_service* extends = service.get_extends();
   mstch::map result{
       {"name", service.get_name()},
-      {"annotations", dump_elems(service.annotations())},
+      {"annotations", dump_elems(service.unstructured_annotations())},
       {"functions", dump_elems(service.get_functions())},
       {"functions?", !service.get_functions().empty()},
       {"extends?", extends != nullptr},
@@ -202,7 +202,7 @@ mstch::map t_mstch_generator::dump(const t_function& function) {
       {"return_type", dump(*function.return_type())},
       {"exceptions", dump_elems(exceptions)},
       {"exceptions?", !exceptions.empty()},
-      {"annotations", dump_elems(function.annotations())},
+      {"annotations", dump_elems(function.unstructured_annotations())},
       {"args", dump_elems(function.params().fields())},
   };
 

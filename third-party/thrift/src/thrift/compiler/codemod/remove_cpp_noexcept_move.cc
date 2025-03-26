@@ -26,7 +26,7 @@ using namespace apache::thrift::compiler;
 // Removes cpp.noexcept_move annotation.
 static void remove_cpp_noexcept_move(
     codemod::file_manager& fm, const t_structured& node) {
-  for (const auto& annotation : node.annotations()) {
+  for (const auto& annotation : node.unstructured_annotations()) {
     if (annotation.first == "cpp.noexcept_move") {
       fm.remove(annotation);
     }

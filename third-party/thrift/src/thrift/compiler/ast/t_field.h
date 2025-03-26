@@ -101,7 +101,7 @@ class t_field final : public t_named {
     }
 
     // unstructured annotations
-    clone->reset_annotations(annotations());
+    clone->reset_annotations(unstructured_annotations());
 
     // structued annotations
     for (const auto& annot : structured_annotations()) {

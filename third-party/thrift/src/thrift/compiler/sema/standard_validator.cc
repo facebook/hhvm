@@ -1206,7 +1206,7 @@ void validate_reserved_ids_enum(sema_context& ctx, const t_enum& node) {
 }
 
 bool owns_annotations(const t_type* type) {
-  if (type->annotations().empty()) {
+  if (type->unstructured_annotations().empty()) {
     return false;
   }
   if (dynamic_cast<const t_container*>(type)) {
@@ -1243,7 +1243,8 @@ void validate_custom_cpp_type_annotations(
     }
     std::set<std::string> names{
         "cpp.type", "cpp2.type", "cpp.template", "cpp2.template"};
-    for (const auto& [k, v] : node.type().get_type()->annotations()) {
+    for (const auto& [k, v] :
+         node.type().get_type()->unstructured_annotations()) {
       if (names.count(k) && v.src_range.begin != source_location{}) {
         return true;
       }
@@ -1328,7 +1329,7 @@ struct ValidateAnnotationPositions {
         if (owns_annotations(ex.type())) {
           err(ctx);
         }
-        if (!ex.annotations().empty()) {
+        if (!ex.unstructured_annotations().empty()) {
           err(ctx);
         }
       }
@@ -1360,8 +1361,8 @@ struct ValidateAnnotationPositions {
   void operator()(sema_context& ctx, const t_field& node) {
     if (owns_annotations(node.type()) &&
         std::any_of(
-            node.type()->annotations().begin(),
-            node.type()->annotations().end(),
+            node.type()->unstructured_annotations().begin(),
+            node.type()->unstructured_annotations().end(),
             [](const auto& pair) {
               return pair.second.src_range.begin != source_location{};
             })) {
@@ -1427,7 +1428,7 @@ void deprecate_annotations(sema_context& ctx, const t_named& node) {
       "process_in_event_base"};
   std::map<std::string, std::string> removed_prefixes = {{"rust.", "rust"}};
 
-  for (const auto& [k, v] : node.annotations()) {
+  for (const auto& [k, v] : node.unstructured_annotations()) {
     // Exclude lowered type annotations.
     if (v.from == deprecated_annotation_value::origin::lowered_cpp_type) {
       continue;

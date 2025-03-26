@@ -7,7 +7,7 @@ abstract final class ThriftClientTestUtils {
     ?T $response,
     classname<ThriftClientBase> $cls = ThriftClientBase::class,
   ): void {
-    WWWTest::mockFunctionStaticUNSAFE($cls.'::genAwaitResponseWithReadHeaders')
+    WWWTest::mockFunctionStaticUNSAFE($cls.'::genAwaitResponse')
       ->mockYield(tuple($response, null));
   }
 
@@ -17,9 +17,7 @@ abstract final class ThriftClientTestUtils {
     classname<ThriftClientBase> $cls = ThriftClientBase::class,
   ): void {
 
-    $mock_func = WWWTest::mockFunctionStaticUNSAFE(
-      $cls.'::genAwaitResponseWithReadHeaders',
-    );
+    $mock_func = WWWTest::mockFunctionStaticUNSAFE($cls.'::genAwaitResponse');
     if ($after_execution) {
       $mock_func->mockYieldThenThrow(() ==> $ex);
     } else {

@@ -116,6 +116,13 @@ class ContextStack {
   void handleStreamErrorWrapped(const folly::exception_wrapper& ew);
   void onStreamFinally(details::STREAM_ENDING_TYPES endReason);
 
+  void onSinkSubscribe();
+  void onSinkNext();
+  void onSinkCancel();
+  void onSinkCredit(uint32_t credits);
+  void onSinkFinally(details::SINK_ENDING_TYPES endReason);
+  void handleSinkError(const folly::exception_wrapper& ew);
+
   void resetClientRequestContextHeader();
 
   const std::shared_ptr<std::vector<std::shared_ptr<ClientInterceptorBase>>>&

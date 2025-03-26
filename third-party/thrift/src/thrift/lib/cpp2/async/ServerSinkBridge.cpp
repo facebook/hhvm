@@ -54,12 +54,19 @@ ServerSinkBridge::Ptr ServerSinkBridge::create(
 
 // SinkServerCallback method
 bool ServerSinkBridge::onSinkNext(StreamPayload&& payload) {
+  if (const auto& contextStack = consumer_.contextStack) {
+    contextStack->onSinkNext();
+  }
   clientPush(folly::Try<StreamPayload>(std::move(payload)));
   return true;
 }
 
 void ServerSinkBridge::onSinkError(folly::exception_wrapper ew) {
   using apache::thrift::detail::EncodedError;
+  if (const auto& contextStack = consumer_.contextStack) {
+    contextStack->handleSinkError(ew);
+    contextStack->onSinkFinally(details::SINK_ENDING_TYPES::ERROR);
+  }
   auto rex = ew.get_exception<rocket::RocketException>();
   auto payload = rex
       ? folly::Try<StreamPayload>(EncodedError(rex->moveErrorData()))
@@ -100,13 +107,20 @@ void ServerSinkBridge::consume() {
 
 folly::coro::AsyncGenerator<folly::Try<StreamPayload>&&>
 ServerSinkBridge::makeGenerator() {
+  if (const auto& contextStack = consumer_.contextStack) {
+    contextStack->onSinkSubscribe();
+  }
   uint64_t counter = 0;
   while (true) {
     CoroConsumer consumer;
     if (serverWait(&consumer)) {
       folly::CancellationCallback cb{
-          co_await folly::coro::co_current_cancellation_token,
-          [&]() { serverClose(); }};
+          co_await folly::coro::co_current_cancellation_token, [&]() {
+            if (const auto& contextStack = consumer_.contextStack) {
+              contextStack->onSinkCancel();
+            }
+            serverClose();
+          }};
       co_await consumer.wait();
     }
     co_await folly::coro::co_safe_point;
@@ -149,8 +163,17 @@ void ServerSinkBridge::processClientMessages() {
           [&](folly::Try<StreamPayload>& payload) {
             terminated = true;
             if (payload.hasValue()) {
+              if (const auto& contextStack = consumer_.contextStack) {
+                contextStack->onSinkFinally(
+                    details::SINK_ENDING_TYPES::COMPLETE);
+              }
               clientCallback_->onFinalResponse(std::move(payload).value());
             } else {
+              if (const auto& contextStack = consumer_.contextStack) {
+                contextStack->handleSinkError(payload.exception());
+                contextStack->onSinkFinally(
+                    details::SINK_ENDING_TYPES::COMPLETE_WITH_ERROR);
+              }
               clientCallback_->onFinalResponseError(
                   std::move(payload).exception());
             }
@@ -164,6 +187,9 @@ void ServerSinkBridge::processClientMessages() {
   } while (!clientWait(this));
 
   if (!sinkComplete_ && credits > 0) {
+    if (const auto& contextStack = consumer_.contextStack) {
+      contextStack->onSinkCredit(credits);
+    }
     std::ignore = clientCallback_->onSinkRequestN(credits);
   }
 }

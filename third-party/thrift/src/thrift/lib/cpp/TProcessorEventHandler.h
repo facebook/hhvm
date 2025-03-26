@@ -33,6 +33,12 @@ enum class STREAM_ENDING_TYPES {
   ERROR = 1,
   CANCEL = 2,
 };
+
+enum class SINK_ENDING_TYPES {
+  COMPLETE = 0,
+  COMPLETE_WITH_ERROR = 1,
+  ERROR = 2,
+};
 } // namespace details
 
 using server::TConnectionContext;
@@ -200,6 +206,15 @@ class TProcessorEventHandler {
   virtual void handleStreamErrorWrapped(
       void*, const folly::exception_wrapper&) {}
   virtual void onStreamFinally(void*, details::STREAM_ENDING_TYPES) {}
+
+  // Experimental: callbacks for sink events, please do not use without asking
+  // help from Thrift team.
+  virtual void onSinkSubscribe(void*) {}
+  virtual void onSinkNext(void*) {}
+  virtual void onSinkCancel(void*) {}
+  virtual void onSinkCredit(void*, uint32_t) {}
+  virtual void handleSinkError(void*, const folly::exception_wrapper&) {}
+  virtual void onSinkFinally(void*, details::SINK_ENDING_TYPES) {}
 
  protected:
   TProcessorEventHandler() {}

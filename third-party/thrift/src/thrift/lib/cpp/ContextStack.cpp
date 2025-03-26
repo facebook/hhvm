@@ -457,6 +457,86 @@ void ContextStack::onStreamFinally(details::STREAM_ENDING_TYPES endReason) {
   }
 }
 
+void ContextStack::onSinkSubscribe() {
+  FOLLY_SDT(
+      thrift,
+      thrift_context_stack_on_sink_established,
+      serviceName_,
+      methodNamePrefixed_);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      (*handlers_)[i]->onSinkSubscribe(contextAt(i));
+    }
+  }
+}
+
+void ContextStack::onSinkNext() {
+  FOLLY_SDT(
+      thrift,
+      thrift_context_stack_on_sink_item,
+      serviceName_,
+      methodNamePrefixed_);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      (*handlers_)[i]->onSinkNext(contextAt(i));
+    }
+  }
+}
+
+void ContextStack::onSinkCancel() {
+  FOLLY_SDT(
+      thrift,
+      thrift_context_stack_on_sink_cancel,
+      serviceName_,
+      methodNamePrefixed_);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      (*handlers_)[i]->onSinkCancel(contextAt(i));
+    }
+  }
+}
+
+void ContextStack::onSinkCredit(uint32_t credits) {
+  FOLLY_SDT(
+      thrift,
+      thrift_context_stack_on_credit_received,
+      serviceName_,
+      methodNamePrefixed_);
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      (*handlers_)[i]->onSinkCredit(contextAt(i), credits);
+    }
+  }
+}
+
+void ContextStack::onSinkFinally(details::SINK_ENDING_TYPES endReason) {
+  FOLLY_SDT(
+      thrift,
+      thrift_context_stack_on_sink_finally,
+      serviceName_,
+      methodNamePrefixed_);
+
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      (*handlers_)[i]->onSinkFinally(contextAt(i), endReason);
+    }
+  }
+}
+
+void ContextStack::handleSinkError(const folly::exception_wrapper& ew) {
+  FOLLY_SDT(
+      thrift,
+      thrift_context_stack_on_sink_error,
+      serviceName_,
+      methodNamePrefixed_);
+
+  if (handlers_) {
+    for (size_t i = 0; i < handlers_->size(); i++) {
+      (*handlers_)[i]->handleSinkError(contextAt(i), ew);
+    }
+  }
+}
+
 void ContextStack::resetClientRequestContextHeader() {
   if (embeddedClientContext_ == nullptr) {
     return;

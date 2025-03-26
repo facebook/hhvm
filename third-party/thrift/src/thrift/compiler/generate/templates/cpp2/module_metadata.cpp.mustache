@@ -38,14 +38,14 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 {{#program:enums}}
-void EnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}>::gen(ThriftMetadata& metadata) {
+void EnumMetadata<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}>::gen(ThriftMetadata& metadata) {
   auto res = metadata.enums()->emplace("{{program:name}}.{{enum:name}}", ::apache::thrift::metadata::ThriftEnum{});
   if (!res.second) {
     return;
   }
   ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
   enum_metadata.name() = "{{program:name}}.{{enum:name}}";
-  using EnumTraits = TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_name}}>;
+  using EnumTraits = TEnumTraits<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}>;
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
     enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i]);
   }

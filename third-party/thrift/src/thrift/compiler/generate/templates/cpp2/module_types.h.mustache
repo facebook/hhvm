@@ -401,7 +401,7 @@ struct TypeToInfo<
   template <>
     struct TypeToInfo<
         ::apache::thrift::type_class::enumeration,
-        ::{{program:qualified_namespace}}::{{enum:cpp_name}}> {
+        ::{{program:qualified_namespace}}::{{enum:self.cpp_name}}> {
     static const ::apache::thrift::detail::TypeInfo typeInfo;
   };
 {{/program:enums}}

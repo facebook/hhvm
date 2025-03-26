@@ -2269,20 +2269,6 @@ class cpp_mstch_field : public mstch_field {
   std::shared_ptr<cpp2_generator_context> cpp_context_;
 };
 
-class cpp_mstch_enum : public mstch_enum {
- public:
-  cpp_mstch_enum(
-      const t_enum* e, mstch_context& ctx, mstch_element_position pos)
-      : mstch_enum(e, ctx, pos) {
-    register_methods(
-        this,
-        {
-            {"enum:cpp_name", &cpp_mstch_enum::cpp_name},
-        });
-  }
-  mstch::node cpp_name() { return cpp2::get_name(enum_); }
-};
-
 class cpp_mstch_const : public mstch_const {
  public:
   cpp_mstch_const(
@@ -2453,7 +2439,6 @@ void t_mstch_cpp2_generator::set_mstch_factories() {
   mstch_context_.add<cpp_mstch_typedef>(cpp_context_);
   mstch_context_.add<cpp_mstch_struct>(cpp_context_);
   mstch_context_.add<cpp_mstch_field>(cpp_context_);
-  mstch_context_.add<cpp_mstch_enum>();
   mstch_context_.add<cpp_mstch_const>(cpp_context_);
   mstch_context_.add<cpp_mstch_const_value>();
   mstch_context_.add<cpp_mstch_deprecated_annotation>();

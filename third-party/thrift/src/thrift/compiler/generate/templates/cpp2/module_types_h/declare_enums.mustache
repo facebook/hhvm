@@ -36,8 +36,8 @@ enum {{^enum:self.cpp_is_unscoped}}class {{/enum:self.cpp_is_unscoped}}{{enum:se
 
 namespace std {
 {{#program:enums}}
-template<> struct hash<::{{program:qualified_namespace}}::{{enum:cpp_name}}> :
-  ::apache::thrift::detail::enum_hash<::{{program:qualified_namespace}}::{{enum:cpp_name}}> {};
+template<> struct hash<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}> :
+  ::apache::thrift::detail::enum_hash<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}> {};
 {{/program:enums}}
 } // std
 
@@ -45,10 +45,10 @@ namespace apache { namespace thrift {
 
 {{#program:enums}}
 
-template <> struct TEnumDataStorage<::{{program:qualified_namespace}}::{{enum:cpp_name}}>;
+template <> struct TEnumDataStorage<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}>;
 
-template <> struct TEnumTraits<::{{program:qualified_namespace}}::{{enum:cpp_name}}> {
-  using type = ::{{program:qualified_namespace}}::{{enum:cpp_name}};
+template <> struct TEnumTraits<::{{program:qualified_namespace}}::{{enum:self.cpp_name}}> {
+  using type = ::{{program:qualified_namespace}}::{{enum:self.cpp_name}};
 
   static constexpr std::size_t const size = {{(array.len enum:self.values)}};
   static folly::Range<type const*> const values;

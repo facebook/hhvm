@@ -21,9 +21,7 @@
 
 #include <stack>
 
-namespace apache {
-namespace thrift {
-namespace protocol {
+namespace apache::thrift::protocol {
 
 // Forward declaration
 class TJSONContext;
@@ -403,9 +401,7 @@ class TJSONProtocolFactory : public TProtocolFactory {
   }
 };
 
-} // namespace protocol
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::protocol
 
 // TODO(dreiss): Move part of ThriftJSONString into a .cpp file and remove this.
 #include <thrift/lib/cpp/transport/TBufferTransports.h>

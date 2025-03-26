@@ -18,9 +18,7 @@
 
 using std::string;
 
-namespace apache {
-namespace thrift {
-namespace protocol {
+namespace apache::thrift::protocol {
 
 static const uint8_t* kBase64EncodeTable =
     (const uint8_t*)"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -111,6 +109,4 @@ std::unique_ptr<folly::IOBuf> base64Decode(folly::StringPiece base64) {
   return binary;
 }
 
-} // namespace protocol
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::protocol

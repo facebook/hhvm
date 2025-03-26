@@ -24,9 +24,7 @@
 #include <stack>
 #include <folly/FBVector.h>
 
-namespace apache {
-namespace thrift {
-namespace protocol {
+namespace apache::thrift::protocol {
 
 /**
  * C++ Implementation of the Compact Protocol as described in THRIFT-110
@@ -306,9 +304,7 @@ class TCompactProtocolFactoryT : public TProtocolFactory {
 
 using TCompactProtocolFactory = TCompactProtocolFactoryT<TTransport>;
 
-} // namespace protocol
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::protocol
 
 #include <thrift/lib/cpp/protocol/TCompactProtocol-inl.h>
 

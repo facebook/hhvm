@@ -22,9 +22,7 @@
 
 #include <folly/io/IOBuf.h>
 
-namespace apache {
-namespace thrift {
-namespace protocol {
+namespace apache::thrift::protocol {
 
 // in must be at least len bytes
 // len must be 1, 2, or 3
@@ -42,8 +40,6 @@ std::string base64Encode(folly::ByteRange binary);
 
 std::unique_ptr<folly::IOBuf> base64Decode(folly::StringPiece base64);
 
-} // namespace protocol
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::protocol
 
 #endif // #define _THRIFT_PROTOCOL_TBASE64UTILS_H_

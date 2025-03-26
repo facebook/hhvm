@@ -25,9 +25,7 @@
 
 using namespace apache::thrift::transport;
 
-namespace apache {
-namespace thrift {
-namespace protocol {
+namespace apache::thrift::protocol {
 
 // Static data
 const uint8_t TJSONProtocol::kJSONObjectStart = '{';
@@ -1131,6 +1129,4 @@ uint32_t TJSONProtocol::readBinary(std::string& str) {
   return readJSONBase64(str);
 }
 
-} // namespace protocol
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::protocol

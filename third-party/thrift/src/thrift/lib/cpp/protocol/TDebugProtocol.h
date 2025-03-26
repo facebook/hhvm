@@ -24,9 +24,7 @@
 
 #include <folly/Utility.h>
 
-namespace apache {
-namespace thrift {
-namespace protocol {
+namespace apache::thrift::protocol {
 
 /*
 
@@ -161,16 +159,13 @@ class TDebugProtocolFactory : public TProtocolFactory {
   }
 };
 
-} // namespace protocol
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::protocol
 
 // TODO(dreiss): Move (part of) ThriftDebugString into a .cpp file and remove
 // this.
 #include <thrift/lib/cpp/transport/TBufferTransports.h>
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 template <typename T>
 struct ThriftTypeTraits {
@@ -342,7 +337,6 @@ std::string ThriftDebugString(const T& ts, int32_t string_limit = 0) {
   return std::string((char*)buf, (unsigned int)size);
 }
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift
 
 #endif // #ifndef _THRIFT_PROTOCOL_TDEBUGPROTOCOL_H_

@@ -3281,10 +3281,8 @@ void in(ISS& env, const bc::ReifiedInit& op) {
     // if the class has reified generics, and if generics
     // were not specified at instantiation, then we must emit 
     // CheckClsRgSoft to raise a warning or fatal.
-    auto const vecAsCell = locAsCell(env, op.loc1);
-    auto isArrLike = vecAsCell.subtypeOf(BVec);
-    auto count = arr_size(vecAsCell);
-    if (dcls.cls().mustHaveReifiedGenerics() && isArrLike && count == 0) {
+    auto const cell = locAsCell(env, op.loc1);
+    if (dcls.cls().mustHaveReifiedGenerics() && cell.subtypeOf(BVecE)) {
       return reduce(
         env,
         bc::CheckClsRGSoft {},
@@ -3292,19 +3290,22 @@ void in(ISS& env, const bc::ReifiedInit& op) {
       );
     }
 
-    return reduce(
-      env,
-      bc::PopC {}, // pop the class off the stack
-      bc::NullUninit {},
-      bc::CGetQuietL { op.loc1 }, // push generics onto stack
-      bc::FCallObjMethodD {
-        FCallArgs(1),
-        staticEmptyString(),
-        ObjMethodOp::NullThrows,
-        s_86reifiedinit.get()
-      },
-      bc::PopC {}
-    );
+    if (dcls.cls().mustHaveReifiedGenerics() || 
+        dcls.cls().mustHaveReifiedParent()) {
+      return reduce(
+        env,
+        bc::PopC {}, // pop the class off the stack
+        bc::NullUninit {},
+        bc::CGetQuietL { op.loc1 }, // push generics onto stack
+        bc::FCallObjMethodD {
+          FCallArgs(1),
+          staticEmptyString(),
+          ObjMethodOp::NullThrows,
+          s_86reifiedinit.get()
+        },
+        bc::PopC {}
+      );
+    }
   }
   popC(env);
   popC(env);

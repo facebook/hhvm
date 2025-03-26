@@ -3832,18 +3832,7 @@ fn emit_new_obj_reified_instrs<'a, 'd>(
                     instr::pop_l(obj_local),
                 ]);
                 if ts.is_empty() {
-                    InstrSeq::gather(vec![
-                        store_cls_and_obj,
-                        instr::c_get_l(class_local),
-                        instr::class_has_reified_generics(),
-                        instr::jmp_nz(set_empty_ts_label),
-                        instr::c_get_l(class_local),
-                        instr::has_reified_parent(),
-                        instr::jmp_nz(set_empty_ts_label),
-                        instr::jmp(end_label),
-                        set_empty_ts,
-                        reified_init,
-                    ])
+                    InstrSeq::gather(vec![store_cls_and_obj, set_empty_ts, reified_init])
                 } else {
                     InstrSeq::gather(vec![
                         ts,

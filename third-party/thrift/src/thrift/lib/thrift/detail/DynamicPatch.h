@@ -207,6 +207,46 @@ class DynamicUnknownPatch : public DynamicPatchBase {
     validateAndGetCategory();
   }
 
+  /// Checks if it is convertible to the patch type.
+  template <class Patch>
+  void checkConvertible() const {
+    auto category = validateAndGetCategory();
+    switch (category) {
+      case Category::EmptyPatch:
+        // Empty patch is compatible with any patch type.
+        break;
+      case Category::ClearPatch:
+        // Clear patch is compatible with any patch type.
+        break;
+      case Category::StructuredPatch:
+        // Structured patch is compatible with struct or union patch.
+        if constexpr (
+            !std::is_same_v<Patch, DynamicStructPatch> &&
+            !std::is_same_v<Patch, DynamicUnionPatch>) {
+          throwIncompatibleConversion();
+        }
+        break;
+      case Category::StructuredOrAnyPatch:
+        // Structured or any patch is compatible with struct, union, or any
+        // patch.
+        if constexpr (
+            !std::is_same_v<Patch, DynamicStructPatch> &&
+            !std::is_same_v<Patch, DynamicUnionPatch> &&
+            !std::is_same_v<Patch, op::AnyPatch>) {
+          throwIncompatibleConversion();
+        }
+        break;
+      case Category::AssociativeContainerPatch:
+        // Associative container patch is compatible with set or map patch.
+        if constexpr (
+            !std::is_same_v<Patch, DynamicSetPatch> &&
+            !std::is_same_v<Patch, DynamicMapPatch>) {
+          throwIncompatibleConversion();
+        }
+        break;
+    }
+  }
+
  private:
   template <class Self, class Visitor>
   static void customVisitImpl(Self&&, Visitor&&);
@@ -246,6 +286,7 @@ class DynamicUnknownPatch : public DynamicPatchBase {
 
   Category validateAndGetCategory() const;
 
+  [[noreturn]] void throwIncompatibleConversion() const;
   [[noreturn]] void throwIncompatibleCategory(std::string_view method) const;
 
   bool isOneOfCategory(std::initializer_list<Category> c) const {
@@ -730,6 +771,10 @@ class DynamicPatch {
 
   template <class PatchType>
   PatchType* get_if() {
+    return std::get_if<PatchType>(patch_.get());
+  }
+  template <class PatchType>
+  const PatchType* get_if() const {
     return std::get_if<PatchType>(patch_.get());
   }
   /// @endcond

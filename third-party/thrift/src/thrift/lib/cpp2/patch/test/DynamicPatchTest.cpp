@@ -1321,8 +1321,8 @@ TEST(DynamicPatch, InvalidGetStoredPatchByTag) {
     DynamicPatch dynPatch;
     dynPatch.fromObject(patch.toObject());
     EXPECT_TRUE(dynPatch.isPatchTypeAmbiguous());
-    // TODO(dokwon): Use the category information to provide better error
-    // message.
+    EXPECT_THROW(
+        dynPatch.getStoredPatchByTag<type::map_c>(), std::runtime_error);
     EXPECT_THROW(
         dynPatch.getStoredPatchByTag<type::i32_t>(), std::runtime_error);
   }
@@ -1332,8 +1332,8 @@ TEST(DynamicPatch, InvalidGetStoredPatchByTag) {
     DynamicPatch dynPatch;
     dynPatch.fromObject(patch.toObject());
     EXPECT_TRUE(dynPatch.isPatchTypeAmbiguous());
-    // TODO(dokwon): Use the category information to provide better error
-    // message.
+    EXPECT_THROW(
+        dynPatch.getStoredPatchByTag<type::struct_c>(), std::runtime_error);
     EXPECT_THROW(
         dynPatch.getStoredPatchByTag<type::i32_t>(), std::runtime_error);
   }

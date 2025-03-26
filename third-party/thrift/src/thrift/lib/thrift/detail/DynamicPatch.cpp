@@ -1365,8 +1365,9 @@ DynamicPatch::merge(Other&& other) {
   if (isPatchTypeAmbiguous() && !other.isPatchTypeAmbiguous()) {
     std::visit(
         [&](auto&& other) {
-          *patch_ = detail::createPatchFromObject<
-              folly::remove_cvref_t<decltype(other)>>(
+          using PatchType = folly::remove_cvref_t<decltype(other)>;
+          get_if<DynamicUnknownPatch>()->checkConvertible<PatchType>();
+          *patch_ = detail::createPatchFromObject<PatchType>(
               badge, std::move(*this).toObject());
         },
         *other.patch_);
@@ -1374,8 +1375,10 @@ DynamicPatch::merge(Other&& other) {
   if (!isPatchTypeAmbiguous() && other.isPatchTypeAmbiguous()) {
     return std::visit(
         [&](auto&& patch) {
-          auto tmp = DynamicPatch{detail::createPatchFromObject<
-              folly::remove_cvref_t<decltype(patch)>>(
+          using PatchType = folly::remove_cvref_t<decltype(patch)>;
+          other.template get_if<DynamicUnknownPatch>()
+              ->template checkConvertible<PatchType>();
+          auto tmp = DynamicPatch{detail::createPatchFromObject<PatchType>(
               badge, std::forward<Other>(other).toObject())};
           return merge(std::move(tmp));
         },
@@ -1549,6 +1552,11 @@ void DynamicUnknownPatch::throwIncompatibleCategory(
   folly::throw_exception<std::runtime_error>(fmt::format(
       "Modifying thrift patch in an incompatible way. operation: {}, patch content: {}",
       method,
+      debugStringViaEncode(patch_)));
+}
+void DynamicUnknownPatch::throwIncompatibleConversion() const {
+  folly::throw_exception<std::runtime_error>(fmt::format(
+      "Converting thrift patch in an incompatible way. patch content: {}",
       debugStringViaEncode(patch_)));
 }
 void DynamicUnknownPatch::removeMulti(detail::ValueSet v) {

@@ -21,7 +21,7 @@
 #include <folly/json.h>
 #include <folly/logging/xlog.h>
 #include <thrift/lib/cpp2/op/Patch.h>
-#include <thrift/lib/cpp2/protocol/Patch.h>
+#include <thrift/lib/thrift/detail/DynamicPatch.h>
 
 namespace apache::thrift {
 namespace ident {
@@ -41,6 +41,9 @@ inline constexpr bool kProtocolSupportsDynamicPatch =
     std::is_same_v<Protocol, CompactProtocolReader> ||
     std::is_same_v<Protocol, CompactProtocolWriter> ||
     std::is_same_v<Protocol, protocol::detail::ObjectWriter>;
+
+// TODO(dokwon): Consider removing AssignPatch and provide full patch
+// support with DynamicPatch.
 
 /// A patch adapter that only supports 'assign',
 /// which is the minimum any patch should support.
@@ -74,7 +77,7 @@ class AssignPatch : public BaseAssignPatch<Patch, AssignPatch<Patch>> {
   void apply(T& val) const {
     if (dynPatch_) {
       auto value = protocol::asValueStruct<Tag>(val);
-      protocol::applyPatch(*dynPatch_, value);
+      dynPatch_->apply(value);
       val = protocol::fromValueStruct<Tag>(value);
     } else if (auto p = data_.assign()) {
       val = data_.assign().value();
@@ -88,10 +91,10 @@ class AssignPatch : public BaseAssignPatch<Patch, AssignPatch<Patch>> {
              "The merged result will be incorrect.\n"
              "First Patch = "
           << folly::toPrettyJson(
-                 apache::thrift::protocol::toDynamic(*dynPatch_))
+                 apache::thrift::protocol::toDynamic(dynPatch_->toObject()))
           << "\nSecond Patch = "
-          << folly::toPrettyJson(
-                 apache::thrift::protocol::toDynamic(*other.dynPatch_));
+          << folly::toPrettyJson(apache::thrift::protocol::toDynamic(
+                 other.dynPatch_->toObject()));
 
       // Do nothing, which is the old behavior
       return;
@@ -108,7 +111,6 @@ class AssignPatch : public BaseAssignPatch<Patch, AssignPatch<Patch>> {
       other.apply(*p);
     } else {
       dynPatch_ = std::move(other.dynPatch_);
-      DCHECK(dynPatch_.value().members());
     }
   }
 
@@ -119,7 +121,7 @@ class AssignPatch : public BaseAssignPatch<Patch, AssignPatch<Patch>> {
       return op::encode<type::struct_t<Patch>>(prot, data_);
     }
 
-    return protocol::detail::serializeObject(prot, *dynPatch_);
+    return dynPatch_->encode(prot);
   }
 
   template <class Protocol>
@@ -153,16 +155,16 @@ class AssignPatch : public BaseAssignPatch<Patch, AssignPatch<Patch>> {
 
  private:
   using Base::data_;
-  std::optional<protocol::Object> dynPatch_;
+  std::optional<protocol::DynamicPatch> dynPatch_;
 
   void createFromObject(protocol::Object v) {
     data_ = protocol::fromObjectStruct<type::struct_t<Patch>>(v);
     if (data_.assign()) {
       dynPatch_.reset();
     } else {
-      dynPatch_ = std::move(v);
+      dynPatch_.emplace();
+      dynPatch_->fromObject(std::move(v));
       Base::reset();
-      DCHECK(dynPatch_.value().members());
     }
   }
 

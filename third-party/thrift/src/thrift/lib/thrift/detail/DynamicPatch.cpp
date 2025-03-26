@@ -1763,6 +1763,8 @@ template std::uint32_t DynamicPatch::encode(
     apache::thrift::BinaryProtocolWriter&) const;
 template std::uint32_t DynamicPatch::encode(
     apache::thrift::CompactProtocolWriter&) const;
+template std::uint32_t DynamicPatch::encode(
+    apache::thrift::protocol::detail::ObjectWriter&) const;
 template std::unique_ptr<folly::IOBuf>
 DynamicPatch::encode<apache::thrift::BinaryProtocolWriter>() const;
 template std::unique_ptr<folly::IOBuf>

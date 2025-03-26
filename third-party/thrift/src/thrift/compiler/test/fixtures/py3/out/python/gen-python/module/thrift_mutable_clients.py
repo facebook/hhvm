@@ -343,7 +343,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def sum_i16_list(
             self,
-            numbers: _fbthrift_python_mutable_containers.MutableList[int],
+            numbers: _fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> int:
@@ -368,7 +368,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def sum_i32_list(
             self,
-            numbers: _fbthrift_python_mutable_containers.MutableList[int],
+            numbers: _fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> int:
@@ -393,7 +393,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def sum_i64_list(
             self,
-            numbers: _fbthrift_python_mutable_containers.MutableList[int],
+            numbers: _fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> int:
@@ -418,7 +418,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def concat_many(
             self,
-            words: _fbthrift_python_mutable_containers.MutableList[str],
+            words: _fbthrift_python_mutable_containers.MutableList[str] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> str:
@@ -443,7 +443,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def count_structs(
             self,
-            items: _fbthrift_python_mutable_containers.MutableList[_fbthrift__module__thrift_mutable_types.SimpleStruct],
+            items: _fbthrift_python_mutable_containers.MutableList[_fbthrift__module__thrift_mutable_types.SimpleStruct] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> int:
@@ -468,7 +468,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def sum_set(
             self,
-            numbers: _fbthrift_python_mutable_containers.MutableSet[int],
+            numbers: _fbthrift_python_mutable_containers.MutableSet[int] | _fbthrift_python_mutable_types._ThriftSetWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> int:
@@ -493,7 +493,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def contains_word(
             self,
-            words: _fbthrift_python_mutable_containers.MutableSet[str],
+            words: _fbthrift_python_mutable_containers.MutableSet[str] | _fbthrift_python_mutable_types._ThriftSetWrapper,
             word: str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
@@ -520,7 +520,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def get_map_value(
             self,
-            words: _fbthrift_python_mutable_containers.MutableMap[str, str],
+            words: _fbthrift_python_mutable_containers.MutableMap[str, str] | _fbthrift_python_mutable_types._ThriftMapWrapper,
             key: str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
@@ -547,7 +547,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def map_length(
             self,
-            items: _fbthrift_python_mutable_containers.MutableMap[str, _fbthrift__module__thrift_mutable_types.SimpleStruct],
+            items: _fbthrift_python_mutable_containers.MutableMap[str, _fbthrift__module__thrift_mutable_types.SimpleStruct] | _fbthrift_python_mutable_types._ThriftMapWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> int:
@@ -572,7 +572,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def sum_map_values(
             self,
-            items: _fbthrift_python_mutable_containers.MutableMap[str, int],
+            items: _fbthrift_python_mutable_containers.MutableMap[str, int] | _fbthrift_python_mutable_types._ThriftMapWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> int:
@@ -695,7 +695,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def unique_words(
             self,
-            words: _fbthrift_python_mutable_containers.MutableList[str],
+            words: _fbthrift_python_mutable_containers.MutableList[str] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> _fbthrift_python_mutable_containers.MutableSet[str]:
@@ -720,7 +720,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def words_count(
             self,
-            words: _fbthrift_python_mutable_containers.MutableList[str],
+            words: _fbthrift_python_mutable_containers.MutableList[str] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> _fbthrift_python_mutable_containers.MutableMap[str, int]:
@@ -847,7 +847,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def nested_map_argument(
             self,
-            struct_map: _fbthrift_python_mutable_containers.MutableMap[str, _fbthrift_python_mutable_containers.MutableList[_fbthrift__module__thrift_mutable_types.SimpleStruct]],
+            struct_map: _fbthrift_python_mutable_containers.MutableMap[str, _fbthrift_python_mutable_containers.MutableList[_fbthrift__module__thrift_mutable_types.SimpleStruct]] | _fbthrift_python_mutable_types._ThriftMapWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> int:
@@ -872,7 +872,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def make_sentence(
             self,
-            word_chars: _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableList[str]],
+            word_chars: _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableList[str]] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> str:
@@ -897,7 +897,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def get_union(
             self,
-            sets: _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableSet[int]],
+            sets: _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableSet[int]] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> _fbthrift_python_mutable_containers.MutableSet[int]:
@@ -922,7 +922,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def get_keys(
             self,
-            string_map: _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableMap[str, str]],
+            string_map: _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableMap[str, str]] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> _fbthrift_python_mutable_containers.MutableSet[str]:
@@ -997,7 +997,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def contain_binary(
             self,
-            binaries: _fbthrift_python_mutable_containers.MutableList[bytes],
+            binaries: _fbthrift_python_mutable_containers.MutableList[bytes] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> _fbthrift_python_mutable_containers.MutableSet[bytes]:
@@ -1022,7 +1022,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         async def contain_enum(
             self,
-            the_enum: _fbthrift_python_mutable_containers.MutableList[_fbthrift__module__thrift_mutable_types.AnEnum],
+            the_enum: _fbthrift_python_mutable_containers.MutableList[_fbthrift__module__thrift_mutable_types.AnEnum] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> _fbthrift_python_mutable_containers.MutableList[_fbthrift__module__thrift_mutable_types.AnEnum]:
@@ -1464,7 +1464,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def sum_i16_list(
             self,
-            numbers: _fbthrift_python_mutable_containers.MutableList[int],
+            numbers: _fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> int:
@@ -1488,7 +1488,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def sum_i32_list(
             self,
-            numbers: _fbthrift_python_mutable_containers.MutableList[int],
+            numbers: _fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> int:
@@ -1512,7 +1512,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def sum_i64_list(
             self,
-            numbers: _fbthrift_python_mutable_containers.MutableList[int],
+            numbers: _fbthrift_python_mutable_containers.MutableList[int] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> int:
@@ -1536,7 +1536,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def concat_many(
             self,
-            words: _fbthrift_python_mutable_containers.MutableList[str],
+            words: _fbthrift_python_mutable_containers.MutableList[str] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> str:
@@ -1560,7 +1560,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def count_structs(
             self,
-            items: _fbthrift_python_mutable_containers.MutableList[_fbthrift__module__thrift_mutable_types.SimpleStruct],
+            items: _fbthrift_python_mutable_containers.MutableList[_fbthrift__module__thrift_mutable_types.SimpleStruct] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> int:
@@ -1584,7 +1584,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def sum_set(
             self,
-            numbers: _fbthrift_python_mutable_containers.MutableSet[int],
+            numbers: _fbthrift_python_mutable_containers.MutableSet[int] | _fbthrift_python_mutable_types._ThriftSetWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> int:
@@ -1608,7 +1608,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def contains_word(
             self,
-            words: _fbthrift_python_mutable_containers.MutableSet[str],
+            words: _fbthrift_python_mutable_containers.MutableSet[str] | _fbthrift_python_mutable_types._ThriftSetWrapper,
             word: str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
@@ -1634,7 +1634,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def get_map_value(
             self,
-            words: _fbthrift_python_mutable_containers.MutableMap[str, str],
+            words: _fbthrift_python_mutable_containers.MutableMap[str, str] | _fbthrift_python_mutable_types._ThriftMapWrapper,
             key: str,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
@@ -1660,7 +1660,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def map_length(
             self,
-            items: _fbthrift_python_mutable_containers.MutableMap[str, _fbthrift__module__thrift_mutable_types.SimpleStruct],
+            items: _fbthrift_python_mutable_containers.MutableMap[str, _fbthrift__module__thrift_mutable_types.SimpleStruct] | _fbthrift_python_mutable_types._ThriftMapWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> int:
@@ -1684,7 +1684,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def sum_map_values(
             self,
-            items: _fbthrift_python_mutable_containers.MutableMap[str, int],
+            items: _fbthrift_python_mutable_containers.MutableMap[str, int] | _fbthrift_python_mutable_types._ThriftMapWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> int:
@@ -1802,7 +1802,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def unique_words(
             self,
-            words: _fbthrift_python_mutable_containers.MutableList[str],
+            words: _fbthrift_python_mutable_containers.MutableList[str] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> _fbthrift_python_mutable_containers.MutableSet[str]:
@@ -1826,7 +1826,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def words_count(
             self,
-            words: _fbthrift_python_mutable_containers.MutableList[str],
+            words: _fbthrift_python_mutable_containers.MutableList[str] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> _fbthrift_python_mutable_containers.MutableMap[str, int]:
@@ -1948,7 +1948,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def nested_map_argument(
             self,
-            struct_map: _fbthrift_python_mutable_containers.MutableMap[str, _fbthrift_python_mutable_containers.MutableList[_fbthrift__module__thrift_mutable_types.SimpleStruct]],
+            struct_map: _fbthrift_python_mutable_containers.MutableMap[str, _fbthrift_python_mutable_containers.MutableList[_fbthrift__module__thrift_mutable_types.SimpleStruct]] | _fbthrift_python_mutable_types._ThriftMapWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> int:
@@ -1972,7 +1972,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def make_sentence(
             self,
-            word_chars: _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableList[str]],
+            word_chars: _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableList[str]] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> str:
@@ -1996,7 +1996,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def get_union(
             self,
-            sets: _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableSet[int]],
+            sets: _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableSet[int]] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> _fbthrift_python_mutable_containers.MutableSet[int]:
@@ -2020,7 +2020,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def get_keys(
             self,
-            string_map: _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableMap[str, str]],
+            string_map: _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableMap[str, str]] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> _fbthrift_python_mutable_containers.MutableSet[str]:
@@ -2092,7 +2092,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def contain_binary(
             self,
-            binaries: _fbthrift_python_mutable_containers.MutableList[bytes],
+            binaries: _fbthrift_python_mutable_containers.MutableList[bytes] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> _fbthrift_python_mutable_containers.MutableSet[bytes]:
@@ -2116,7 +2116,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
     
         def contain_enum(
             self,
-            the_enum: _fbthrift_python_mutable_containers.MutableList[_fbthrift__module__thrift_mutable_types.AnEnum],
+            the_enum: _fbthrift_python_mutable_containers.MutableList[_fbthrift__module__thrift_mutable_types.AnEnum] | _fbthrift_python_mutable_types._ThriftListWrapper,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> _fbthrift_python_mutable_containers.MutableList[_fbthrift__module__thrift_mutable_types.AnEnum]:

@@ -74,7 +74,7 @@ class Async({{#service:extends}}{{!
 
     async def {{function:name}}(
         self{{#function:args}},
-        {{field:py_name}}: {{#field:type}}{{> types/pep484_type}}{{/field:type}}{{/function:args}},
+        {{field:py_name}}: {{#field:type}}{{> types/pep484_type}}{{#program:generate_mutable_types}}{{> types/add_wrapper_if_container}}{{/program:generate_mutable_types}}{{/field:type}}{{/function:args}},
         *,
         rpc_options: _typing.Optional[RpcOptions] = None,
     ) -> {{#function:return_type}}{{!
@@ -186,7 +186,7 @@ class Sync({{#service:extends}}{{!
 
     def {{function:name}}(
         self{{#function:args}},
-        {{field:py_name}}: {{#field:type}}{{> types/pep484_type}}{{/field:type}}{{/function:args}},
+        {{field:py_name}}: {{#field:type}}{{> types/pep484_type}}{{#program:generate_mutable_types}}{{> types/add_wrapper_if_container}}{{/program:generate_mutable_types}}{{/field:type}}{{/function:args}},
         *,
         rpc_options: _typing.Optional[RpcOptions] = None,
     ) -> {{#function:return_type}}{{> types/pep484_return_type}}{{/function:return_type}}:

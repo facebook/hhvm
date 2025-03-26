@@ -16,6 +16,7 @@
 
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/Flags.h>
+#include <thrift/lib/cpp2/transport/rocket/payload/CustomCompressionPayloadSerializerStrategy.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/LegacyPayloadSerializerStrategy.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -96,6 +97,12 @@ TEST(PayloadSerializerTest, TestMakeAndNonOwningPtr) {
 
   // ptr does not own, so it is not valid here
   // testPackAndUnpackWithCompactProtocol(**ptr);
+}
+
+TEST(PayloadSerializerTest, TestMakeCustomCompression) {
+  auto ps = PayloadSerializer::make<CustomCompressionPayloadSerializerStrategy<
+      DefaultPayloadSerializerStrategy>>();
+  testPackAndUnpackWithCompactProtocol(ps);
 }
 
 } // namespace apache::thrift::rocket

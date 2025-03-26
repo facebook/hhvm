@@ -19,6 +19,7 @@
 #include <variant>
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/ChecksumPayloadSerializerStrategy.h>
+#include <thrift/lib/cpp2/transport/rocket/payload/CustomCompressionPayloadSerializerStrategy.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/DefaultPayloadSerializerStrategy.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/LegacyPayloadSerializerStrategy.h>
 
@@ -81,7 +82,9 @@ class PayloadSerializer : public folly::hazptr_obj_base<PayloadSerializer> {
       DefaultPayloadSerializerStrategy,
       LegacyPayloadSerializerStrategy,
       ChecksumPayloadSerializerStrategy<DefaultPayloadSerializerStrategy>,
-      ChecksumPayloadSerializerStrategy<LegacyPayloadSerializerStrategy>>
+      ChecksumPayloadSerializerStrategy<LegacyPayloadSerializerStrategy>,
+      CustomCompressionPayloadSerializerStrategy<
+          DefaultPayloadSerializerStrategy>>
       strategy_;
 
   struct PayloadSerializerHolder {
@@ -159,6 +162,12 @@ class PayloadSerializer : public folly::hazptr_obj_base<PayloadSerializer> {
       return PayloadSerializer{
           ChecksumPayloadSerializerStrategy<LegacyPayloadSerializerStrategy>(
               args...)};
+    } else if constexpr (std::is_same_v<
+                             Strategy,
+                             CustomCompressionPayloadSerializerStrategy<
+                                 DefaultPayloadSerializerStrategy>>) {
+      return PayloadSerializer{CustomCompressionPayloadSerializerStrategy<
+          DefaultPayloadSerializerStrategy>(args...)};
     }
   }
 
@@ -272,10 +281,15 @@ class PayloadSerializer : public folly::hazptr_obj_base<PayloadSerializer> {
           ChecksumPayloadSerializerStrategy<DefaultPayloadSerializerStrategy>>(
           strategy_);
       return delegate(strategy);
-    } else {
+    } else if (std::holds_alternative<ChecksumPayloadSerializerStrategy<
+                   LegacyPayloadSerializerStrategy>>(strategy_)) {
       auto& strategy = std::get<
           ChecksumPayloadSerializerStrategy<LegacyPayloadSerializerStrategy>>(
           strategy_);
+      return delegate(strategy);
+    } else {
+      auto& strategy = std::get<CustomCompressionPayloadSerializerStrategy<
+          DefaultPayloadSerializerStrategy>>(strategy_);
       return delegate(strategy);
     }
   }

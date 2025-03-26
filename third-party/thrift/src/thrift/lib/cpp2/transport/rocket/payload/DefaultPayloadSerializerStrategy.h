@@ -45,8 +45,14 @@ class DefaultPayloadSerializerStrategy final
     return folly::makeTryWith([&]() {
       T t = unpackImpl<T>(std::move(payload), decodeMetadataUsingBinary);
       if (auto compression = t.metadata.compression()) {
-        t.payload = CompressionManager().uncompressBuffer(
-            std::move(t.payload), *compression);
+        const auto compressionAlgorithm = *compression;
+        // Custom compression is supported in
+        // CustomCompressionPayloadSerializerStrategy
+        if (compressionAlgorithm != CompressionAlgorithm::NONE &&
+            compressionAlgorithm != CompressionAlgorithm::CUSTOM) {
+          t.payload = CompressionManager().uncompressBuffer(
+              std::move(t.payload), compressionAlgorithm);
+        }
       }
       return t;
     });

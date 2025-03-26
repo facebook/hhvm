@@ -32,9 +32,15 @@ namespace {
 template <typename Metadata>
 void applyCompressionIfNeeded(
     std::unique_ptr<folly::IOBuf>& payload, Metadata* metadata) {
-  if (auto compress = metadata->compression_ref()) {
-    payload =
-        CompressionManager().compressBuffer(std::move(payload), *compress);
+  if (auto compression = metadata->compression_ref()) {
+    const auto compressionAlgorithm = *compression;
+    if (compressionAlgorithm != CompressionAlgorithm::NONE &&
+        compressionAlgorithm != CompressionAlgorithm::CUSTOM) {
+      // Custom compression is supported in
+      // CustomCompressionPayloadSerializerStrategy
+      payload = CompressionManager().compressBuffer(
+          std::move(payload), compressionAlgorithm);
+    }
   }
 }
 

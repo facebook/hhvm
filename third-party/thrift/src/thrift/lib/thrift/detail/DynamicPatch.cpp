@@ -34,9 +34,6 @@ DEFINE_bool(
 
 namespace apache::thrift::protocol {
 using detail::badge;
-using detail::ValueList;
-using detail::ValueMap;
-using detail::ValueSet;
 
 namespace {
 
@@ -487,7 +484,7 @@ void DynamicMapPatch::erase(Value k) {
   undoChanges(k);
   remove_.insert(std::move(k));
 }
-void DynamicMapPatch::tryPutMulti(detail::ValueMap map) {
+void DynamicMapPatch::tryPutMulti(ValueMap map) {
   detail::checkHomogeneousContainer(map);
   ensurePatchable();
   map.eraseInto(map.begin(), map.end(), [&](auto&& k, auto&& v) {
@@ -522,9 +519,9 @@ void DynamicMapPatch::undoChanges(const Value& k) {
   put_.erase(k);
 }
 
-void DynamicMapPatch::apply(detail::Badge, detail::ValueMap& v) const {
+void DynamicMapPatch::apply(detail::Badge, ValueMap& v) const {
   struct Visitor {
-    void assign(detail::ValueMap v) {
+    void assign(ValueMap v) {
       detail::convertStringToBinary(v);
       value = std::move(v);
     }
@@ -535,13 +532,13 @@ void DynamicMapPatch::apply(detail::Badge, detail::ValueMap& v) const {
         p.apply(*ptr);
       }
     }
-    void removeMulti(const detail::ValueSet& v) {
+    void removeMulti(const ValueSet& v) {
       for (auto i : v) {
         detail::convertStringToBinary(i);
         value.erase(i);
       }
     }
-    void tryPutMulti(const detail::ValueMap& map) {
+    void tryPutMulti(const ValueMap& map) {
       for (const auto& kv : map) {
         auto k = kv.first;
         auto v = kv.second;
@@ -550,7 +547,7 @@ void DynamicMapPatch::apply(detail::Badge, detail::ValueMap& v) const {
         value.emplace(std::move(k), std::move(v));
       }
     }
-    void putMulti(const detail::ValueMap& map) {
+    void putMulti(const ValueMap& map) {
       for (const auto& kv : map) {
         auto k = kv.first;
         auto v = kv.second;
@@ -559,7 +556,7 @@ void DynamicMapPatch::apply(detail::Badge, detail::ValueMap& v) const {
         value.insert_or_assign(std::move(k), std::move(v));
       }
     }
-    detail::ValueMap& value;
+    ValueMap& value;
   };
 
   return customVisit(Visitor{v});
@@ -1315,9 +1312,9 @@ void DiffVisitorBase::pop() {
   *maskInPath_.top() = allMask();
 }
 
-void DynamicListPatch::apply(detail::Badge, detail::ValueList& v) const {
+void DynamicListPatch::apply(detail::Badge, ValueList& v) const {
   struct Visitor {
-    void assign(detail::Badge, detail::ValueList v) {
+    void assign(detail::Badge, ValueList v) {
       detail::convertStringToBinary(v);
       value = std::move(v);
     }
@@ -1326,32 +1323,32 @@ void DynamicListPatch::apply(detail::Badge, detail::ValueList& v) const {
       detail::convertStringToBinary(v);
       value.push_back(std::move(v));
     }
-    detail::ValueList& value;
+    ValueList& value;
   };
 
   return customVisit(badge, Visitor{v});
 }
 
-void DynamicSetPatch::apply(detail::Badge, detail::ValueSet& v) const {
+void DynamicSetPatch::apply(detail::Badge, ValueSet& v) const {
   struct Visitor {
-    void assign(detail::Badge, detail::ValueSet v) {
+    void assign(detail::Badge, ValueSet v) {
       detail::convertStringToBinary(v);
       value = std::move(v);
     }
     void clear() { value.clear(); }
-    void addMulti(detail::Badge, const detail::ValueSet& v) {
+    void addMulti(detail::Badge, const ValueSet& v) {
       for (auto i : v) {
         detail::convertStringToBinary(i);
         value.insert(std::move(i));
       }
     }
-    void removeMulti(detail::Badge, const detail::ValueSet& v) {
+    void removeMulti(detail::Badge, const ValueSet& v) {
       for (auto i : v) {
         detail::convertStringToBinary(i);
         value.erase(i);
       }
     }
-    detail::ValueSet& value;
+    ValueSet& value;
   };
 
   return customVisit(badge, Visitor{v});
@@ -1559,7 +1556,7 @@ void DynamicUnknownPatch::throwIncompatibleConversion() const {
       "Converting thrift patch in an incompatible way. patch content: {}",
       debugStringViaEncode(patch_)));
 }
-void DynamicUnknownPatch::removeMulti(detail::ValueSet v) {
+void DynamicUnknownPatch::removeMulti(ValueSet v) {
   if (!isOneOfCategory(
           {Category::EmptyPatch,
            Category::ClearPatch,
@@ -1616,7 +1613,7 @@ void DynamicUnknownPatch::apply(detail::Badge, Value& v) const {
       value.as_object() = std::move(obj);
     }
     void clear() { value = emptyValue(value.getType()); }
-    void removeMulti(const detail::ValueSet& v) {
+    void removeMulti(const ValueSet& v) {
       if (auto p = value.if_set()) {
         for (auto k : v) {
           detail::convertStringToBinary(k);
@@ -1860,9 +1857,9 @@ class MinSafePatchVersionVisitor {
   }
 
   // Map
-  void putMulti(const detail::ValueMap&) {}
-  void tryPutMulti(const detail::ValueMap&) {}
-  void removeMulti(const detail::ValueSet&) {}
+  void putMulti(const ValueMap&) {}
+  void tryPutMulti(const ValueMap&) {}
+  void removeMulti(const ValueSet&) {}
   void patchByKey(const Value&, const DynamicPatch& p) { recurse(p); }
 
   // Structured

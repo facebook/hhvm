@@ -40,10 +40,11 @@ class DynamicMapPatch;
 class DynamicStructPatch;
 class DynamicUnionPatch;
 
-namespace detail {
 using ValueList = std::vector<Value>;
 using ValueSet = folly::F14FastSet<Value>;
 using ValueMap = folly::F14FastMap<Value, Value>;
+
+namespace detail {
 
 // Use Badge pattern to control access.
 // See thrift/lib/cpp2/patch/detail/PatchBadge.h
@@ -199,7 +200,7 @@ class DynamicPatchBase {
 class DynamicUnknownPatch : public DynamicPatchBase {
  public:
   void assign(Object v);
-  void removeMulti(detail::ValueSet v);
+  void removeMulti(ValueSet v);
   void patchIfSet(FieldId, const DynamicPatch&);
 
   void fromObject(detail::Badge badge, Object obj) {
@@ -301,7 +302,7 @@ class DynamicUnknownPatch : public DynamicPatchBase {
 class DynamicListPatch : public DynamicPatchBase {
  public:
   using DynamicPatchBase::DynamicPatchBase;
-  void assign(detail::Badge, detail::ValueList v) {
+  void assign(detail::Badge, ValueList v) {
     checkHomogeneousContainer(v);
     patch_.members()->clear();
     get(op::PatchOp::Assign).emplace_list(std::move(v));
@@ -343,7 +344,7 @@ class DynamicListPatch : public DynamicPatchBase {
   FOLLY_FOR_EACH_THIS_OVERLOAD_IN_CLASS_BODY_DELEGATE(
       customVisit, customVisitImpl);
 
-  void apply(detail::Badge, detail::ValueList& v) const;
+  void apply(detail::Badge, ValueList& v) const;
 
   template <class Next>
   detail::if_same_type_after_remove_cvref<Next, DynamicListPatch> merge(
@@ -359,7 +360,7 @@ class DynamicListPatch : public DynamicPatchBase {
 class DynamicSetPatch : public DynamicPatchBase {
  public:
   using DynamicPatchBase::DynamicPatchBase;
-  void assign(detail::Badge, detail::ValueSet v) {
+  void assign(detail::Badge, ValueSet v) {
     detail::checkHomogeneousContainer(v);
     patch_.members()->clear();
     get(op::PatchOp::Assign).emplace_set(std::move(v));
@@ -390,12 +391,12 @@ class DynamicSetPatch : public DynamicPatchBase {
     get(op::PatchOp::Remove).ensure_set().insert(std::move(v));
   }
 
-  void addMulti(detail::Badge badge, detail::ValueSet add) {
+  void addMulti(detail::Badge badge, ValueSet add) {
     add.eraseInto(
         add.begin(), add.end(), [&](auto&& k) { insert(badge, std::move(k)); });
   }
 
-  void removeMulti(detail::Badge badge, detail::ValueSet remove) {
+  void removeMulti(detail::Badge badge, ValueSet remove) {
     remove.eraseInto(remove.begin(), remove.end(), [&](auto&& k) {
       erase(badge, std::move(k));
     });
@@ -430,7 +431,7 @@ class DynamicSetPatch : public DynamicPatchBase {
   FOLLY_FOR_EACH_THIS_OVERLOAD_IN_CLASS_BODY_DELEGATE(
       customVisit, customVisitImpl);
 
-  void apply(detail::Badge, detail::ValueSet& v) const;
+  void apply(detail::Badge, ValueSet& v) const;
 
   template <class Next>
   detail::if_same_type_after_remove_cvref<Next, DynamicSetPatch> merge(
@@ -457,7 +458,7 @@ class DynamicSetPatch : public DynamicPatchBase {
 ///     }
 class DynamicMapPatch {
  public:
-  void assign(detail::ValueMap v) {
+  void assign(ValueMap v) {
     detail::checkHomogeneousContainer(v);
     *this = {};
     setOrCheckMapType(v);
@@ -472,11 +473,11 @@ class DynamicMapPatch {
   void insert_or_assign(Value k, Value v);
   void erase(Value k);
 
-  void tryPutMulti(detail::ValueMap v);
-  void removeMulti(detail::ValueSet v) {
+  void tryPutMulti(ValueMap v);
+  void removeMulti(ValueSet v) {
     v.eraseInto(v.begin(), v.end(), [&](auto&& k) { erase(std::move(k)); });
   }
-  void putMulti(detail::ValueMap m) {
+  void putMulti(ValueMap m) {
     detail::checkHomogeneousContainer(m);
     m.eraseInto(m.begin(), m.end(), [&](auto&& k, auto&& v) {
       insert_or_assign(std::move(k), std::move(v));
@@ -515,7 +516,7 @@ class DynamicMapPatch {
  public:
   FOLLY_FOR_EACH_THIS_OVERLOAD_IN_CLASS_BODY_DELEGATE(
       customVisit, customVisitImpl);
-  void apply(detail::Badge, detail::ValueMap& v) const;
+  void apply(detail::Badge, ValueMap& v) const;
 
   template <class Next>
   detail::if_same_type_after_remove_cvref<Next, DynamicMapPatch> merge(
@@ -531,7 +532,7 @@ class DynamicMapPatch {
   void undoChanges(const Value& k);
   void ensurePatchable();
   void setOrCheckMapType(const protocol::Value& k, const protocol::Value& v);
-  void setOrCheckMapType(const detail::ValueMap& m) {
+  void setOrCheckMapType(const ValueMap& m) {
     if (!m.empty()) {
       setOrCheckMapType(m.begin()->first, m.begin()->second);
     }
@@ -540,13 +541,13 @@ class DynamicMapPatch {
   template <class SubPatch>
   DynamicPatch& patchByKeyImpl(Value k, SubPatch&& p);
 
-  std::optional<detail::ValueMap> assign_;
+  std::optional<ValueMap> assign_;
   bool clear_ = false;
   folly::F14VectorMap<Value, DynamicPatch> patchPrior_;
-  detail::ValueMap add_;
+  ValueMap add_;
   folly::F14VectorMap<Value, DynamicPatch> patchAfter_;
-  detail::ValueSet remove_;
-  detail::ValueMap put_;
+  ValueSet remove_;
+  ValueMap put_;
   detail::DynamicPatchOptions options_;
 
   std::optional<detail::Value::Type> keyType_;
@@ -1010,11 +1011,11 @@ class DiffVisitorBase {
   [[nodiscard]] virtual op::BinaryPatch diffBinary(
       const folly::IOBuf& src, const folly::IOBuf& dst);
   [[nodiscard]] virtual DynamicListPatch diffList(
-      const detail::ValueList& src, const detail::ValueList& dst);
+      const ValueList& src, const ValueList& dst);
   [[nodiscard]] virtual DynamicSetPatch diffSet(
-      const detail::ValueSet& src, const detail::ValueSet& dst);
+      const ValueSet& src, const ValueSet& dst);
   [[nodiscard]] virtual DynamicMapPatch diffMap(
-      const detail::ValueMap& src, const detail::ValueMap& dst);
+      const ValueMap& src, const ValueMap& dst);
   [[nodiscard]] virtual DynamicPatch diffStructured(
       const Object& src, const Object& dst);
 
@@ -1029,8 +1030,8 @@ class DiffVisitorBase {
       FieldId id,
       DynamicStructPatch& patch);
   void diffElement(
-      const detail::ValueMap& src,
-      const detail::ValueMap& dst,
+      const ValueMap& src,
+      const ValueMap& dst,
       const Value& key,
       DynamicMapPatch& patch);
 

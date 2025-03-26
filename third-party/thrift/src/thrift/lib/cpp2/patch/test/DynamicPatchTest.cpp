@@ -243,17 +243,15 @@ class MaskAndValueCallback : public DiffVisitorBase {
     return {};
   }
   DynamicListPatch diffList(
-      const detail::ValueList& src, const detail::ValueList& dst) override {
+      const ValueList& src, const ValueList& dst) override {
     cb_(getCurrentPath(), src, dst);
     return {};
   }
-  DynamicSetPatch diffSet(
-      const detail::ValueSet& src, const detail::ValueSet& dst) override {
+  DynamicSetPatch diffSet(const ValueSet& src, const ValueSet& dst) override {
     cb_(getCurrentPath(), src, dst);
     return {};
   }
-  DynamicMapPatch diffMap(
-      const detail::ValueMap& src, const detail::ValueMap& dst) override {
+  DynamicMapPatch diffMap(const ValueMap& src, const ValueMap& dst) override {
     cb_(getCurrentPath(), src, dst);
     return DiffVisitorBase::diffMap(src, dst);
   }
@@ -372,8 +370,8 @@ TEST(DiffVisitorTest, path) {
             break;
           case FieldId{3}:
             if (m == allMask()) {
-              EXPECT_TRUE((std::is_same_v<T, detail::ValueMap>));
-              if constexpr (std::is_same_v<T, detail::ValueMap>) {
+              EXPECT_TRUE((std::is_same_v<T, ValueMap>));
+              if constexpr (std::is_same_v<T, ValueMap>) {
                 EXPECT_EQ(&from, &src[fieldId].as_map());
                 EXPECT_EQ(&to, &dst[fieldId].as_map());
               }
@@ -465,7 +463,7 @@ TEST(DynamicPatch, List) {
   p.push_back(badge, asValueStruct<type::i32_t>(1));
   p.push_back(badge, asValueStruct<type::i32_t>(2));
 
-  detail::ValueList l;
+  ValueList l;
 
   p.apply(badge, l);
   EXPECT_EQ(l.size(), 2);
@@ -517,7 +515,7 @@ TEST(DynamicPatch, Set) {
   p.insert(badge, asValueStruct<type::i32_t>(1));
   p.insert(badge, asValueStruct<type::i32_t>(2));
 
-  detail::ValueSet s;
+  ValueSet s;
 
   p.apply(badge, s);
   EXPECT_EQ(s.size(), 2);
@@ -732,7 +730,7 @@ TEST_F(StringVsBinaryTest, PatchingStringWithStringApplyPatch) {
 }
 
 TEST(DynamicPatch, Map) {
-  detail::ValueMap m;
+  ValueMap m;
   m[asValueStruct<type::i32_t>(1)] = asValueStruct<type::i32_t>(10);
   m[asValueStruct<type::i32_t>(2)] = asValueStruct<type::i32_t>(20);
 
@@ -756,7 +754,7 @@ TEST(DynamicPatch, Map) {
     EXPECT_EQ(
         m.at(asValueStruct<type::i32_t>(2)), asValueStruct<type::i32_t>(220));
   }
-  detail::ValueMap add;
+  ValueMap add;
   add[asValueStruct<type::i32_t>(2)] = asValueStruct<type::i32_t>(200);
   add[asValueStruct<type::i32_t>(3)] = asValueStruct<type::i32_t>(300);
   {
@@ -780,7 +778,7 @@ TEST(DynamicPatch, Map) {
         m.at(asValueStruct<type::i32_t>(3)), asValueStruct<type::i32_t>(300));
   }
   {
-    detail::ValueSet remove;
+    ValueSet remove;
     remove.insert(asValueStruct<type::i32_t>(3));
     remove.insert(asValueStruct<type::i32_t>(4));
 
@@ -1196,7 +1194,7 @@ void testMergeMovedPatch(T t) {
 }
 
 TEST(DynamicPatchTest, MergeMovedListPatch) {
-  detail::ValueList l;
+  ValueList l;
   for (int i = 0; i < 100; i++) {
     l.emplace_back().emplace_i32(i);
   }
@@ -1204,7 +1202,7 @@ TEST(DynamicPatchTest, MergeMovedListPatch) {
 }
 
 TEST(DynamicPatchTest, MergeMovedSetPatch) {
-  detail::ValueSet s;
+  ValueSet s;
   for (int i = 0; i < 100; i++) {
     Value v;
     v.emplace_i32(i);
@@ -1214,7 +1212,7 @@ TEST(DynamicPatchTest, MergeMovedSetPatch) {
 }
 
 TEST(DynamicPatchTest, MergeMovedMapPatch) {
-  detail::ValueMap m;
+  ValueMap m;
   for (int i = 0; i < 100; i++) {
     Value v;
     v.emplace_i32(i);

@@ -19,6 +19,7 @@
 #include <utility>
 
 #include <thrift/lib/cpp2/op/detail/BasePatch.h>
+#include <thrift/lib/cpp2/protocol/Patch.h>
 
 namespace apache::thrift::op::detail {
 
@@ -87,6 +88,20 @@ class BoolPatch : public BaseClearPatch<Patch, BoolPatch<Patch>> {
     };
 
     return customVisit(Visitor{val});
+  }
+
+  protocol::ExtractedMasksFromPatch extractMaskFromPatch() const {
+    struct Visitor {
+      void assign(T) { masks = {protocol::noneMask(), protocol::allMask()}; }
+      void clear() { masks = {protocol::noneMask(), protocol::allMask()}; }
+      void invert() { masks = {protocol::allMask(), protocol::allMask()}; }
+
+      protocol::ExtractedMasksFromPatch masks{
+          protocol::noneMask(), protocol::noneMask()};
+    };
+    Visitor v;
+    customVisit(v);
+    return std::move(v.masks);
   }
 
  private:
@@ -170,6 +185,27 @@ class NumberPatch : public BaseClearPatch<Patch, NumberPatch<Patch>> {
     return customVisit(Visitor{val});
   }
 
+  protocol::ExtractedMasksFromPatch extractMaskFromPatch() const {
+    struct Visitor {
+      void assign(const T&) {
+        masks = {protocol::noneMask(), protocol::allMask()};
+      }
+      void clear() { masks = {protocol::noneMask(), protocol::allMask()}; }
+      void add(const T& t) {
+        if (t != op::getIntrinsicDefault<Tag>()) {
+          masks = {protocol::allMask(), protocol::allMask()};
+        }
+      }
+
+      protocol::ExtractedMasksFromPatch masks{
+          protocol::noneMask(), protocol::noneMask()};
+    };
+
+    Visitor v;
+    customVisit(v);
+    return std::move(v.masks);
+  }
+
   /// Increases the value.
   template <typename U>
   NumberPatch& operator+=(U&& val) {
@@ -229,6 +265,31 @@ class BaseStringPatch : public BaseContainerPatch<Patch, Derived> {
   Derived& operator+=(U&& val) {
     derived().append(std::forward<U>(val));
     return derived();
+  }
+
+  protocol::ExtractedMasksFromPatch extractMaskFromPatch() const {
+    struct Visitor {
+      void assign(const T&) {
+        masks = {protocol::noneMask(), protocol::allMask()};
+      }
+      void clear() { masks = {protocol::noneMask(), protocol::allMask()}; }
+      void prepend(const T& t) {
+        if (!t.empty()) {
+          masks = {protocol::allMask(), protocol::allMask()};
+        }
+      }
+      void append(const T& t) {
+        if (!t.empty()) {
+          masks = {protocol::allMask(), protocol::allMask()};
+        }
+      }
+
+      protocol::ExtractedMasksFromPatch masks{
+          protocol::noneMask(), protocol::noneMask()};
+    };
+    Visitor v;
+    customVisit(v);
+    return std::move(v.masks);
   }
 
  private:

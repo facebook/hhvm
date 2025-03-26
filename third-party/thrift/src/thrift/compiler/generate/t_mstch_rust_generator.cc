@@ -294,21 +294,18 @@ std::string get_mock_crate(
   return path;
 }
 
-bool node_is_boxed(const t_named& node) {
-  return node.has_unstructured_annotation("thrift.box") ||
-      node.has_structured_annotation(kBoxUri) ||
-      node.has_structured_annotation(kRustBoxUri);
-}
-
-bool node_is_arced(const t_named& node) {
-  return node.has_structured_annotation(kRustArcUri);
-}
-
 FieldKind field_kind(const t_named& node) {
-  if (node_is_arced(node)) {
+  if (node.has_structured_annotation(kRustBoxUri)) {
+    // @rust.Box
+    return FieldKind::Box;
+  }
+  if (node.has_structured_annotation(kRustArcUri)) {
+    // @rust.Arc takes priority over @thrift.Box, field will be an Arc in Rust
     return FieldKind::Arc;
   }
-  if (node_is_boxed(node)) {
+  if (node.has_unstructured_annotation("thrift.box") ||
+      node.has_structured_annotation(kBoxUri)) {
+    // @thrift.Box
     return FieldKind::Box;
   }
   return FieldKind::Inline;
@@ -2488,7 +2485,8 @@ void validate_struct_annotations(
     const t_structured& s,
     const rust_codegen_options& options) {
   for (auto& field : s.fields()) {
-    if (node_is_boxed(field) && node_is_arced(field)) {
+    if (field.has_structured_annotation(kRustBoxUri) &&
+        field.has_structured_annotation(kRustArcUri)) {
       ctx.report(
           field,
           "rust-field-box-arc-rule",

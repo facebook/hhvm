@@ -16,6 +16,7 @@
 
 include "thrift/annotation/rust.thrift"
 include "thrift/annotation/scope.thrift"
+include "thrift/annotation/thrift.thrift"
 
 // --
 
@@ -79,6 +80,9 @@ struct T7 {
 struct T8 {
   @rust.Arc
   1: i64 data; // `::std::sync::Arc<::std::primitive::i64>`
+  @rust.Arc
+  @thrift.Box
+  2: optional i64 cppbox; // `::std::option::Option<::std::sync::Arc<::std::primitive::i64>>`
 }
 
 // --

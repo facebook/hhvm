@@ -112,6 +112,7 @@ pub struct T7 {
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct T8 {
     pub data: ::std::sync::Arc<::std::primitive::i64>,
+    pub cppbox: ::std::option::Option<::std::sync::Arc<::std::primitive::i64>>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -1507,6 +1508,7 @@ impl ::std::default::Default for self::T8 {
     fn default() -> Self {
         Self {
             data: ::std::default::Default::default(),
+            cppbox: ::std::option::Option::None,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
@@ -1517,6 +1519,7 @@ impl ::std::fmt::Debug for self::T8 {
         formatter
             .debug_struct("T8")
             .field("data", &self.data)
+            .field("cppbox", &self.cppbox)
             .finish()
     }
 }
@@ -1547,6 +1550,11 @@ where
         p.write_field_begin("data", ::fbthrift::TType::I64, 1);
         ::fbthrift::Serialize::write(&self.data, p);
         p.write_field_end();
+        if let ::std::option::Option::Some(some) = &self.cppbox {
+            p.write_field_begin("cppbox", ::fbthrift::TType::I64, 2);
+            ::fbthrift::Serialize::write(some, p);
+            p.write_field_end();
+        }
         p.write_field_stop();
         p.write_struct_end();
     }
@@ -1559,15 +1567,18 @@ where
     #[inline]
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("cppbox", ::fbthrift::TType::I64, 2),
             ::fbthrift::Field::new("data", ::fbthrift::TType::I64, 1),
         ];
         let mut field_data = ::std::option::Option::None;
+        let mut field_cppbox = ::std::option::Option::None;
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a T8")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
                 (::fbthrift::TType::I64, 1) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I64, 2) => field_cppbox = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1575,6 +1586,7 @@ where
         p.read_struct_end()?;
         ::std::result::Result::Ok(Self {
             data: field_data.unwrap_or_default(),
+            cppbox: field_cppbox,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }
@@ -1599,6 +1611,26 @@ impl ::fbthrift::metadata::ThriftAnnotations for T8 {
 
                 if type_id == ::std::any::TypeId::of::<rust__types::Arc>() {
                     let mut tmp = ::std::option::Option::Some(rust__types::Arc {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+            },
+            2 => {
+
+                if type_id == ::std::any::TypeId::of::<rust__types::Arc>() {
+                    let mut tmp = ::std::option::Option::Some(rust__types::Arc {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<thrift__types::Box>() {
+                    let mut tmp = ::std::option::Option::Some(thrift__types::Box {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;

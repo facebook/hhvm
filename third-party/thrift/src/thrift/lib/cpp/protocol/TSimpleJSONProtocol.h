@@ -24,9 +24,7 @@
 #include <stack>
 #include <string>
 
-namespace apache {
-namespace thrift {
-namespace protocol {
+namespace apache::thrift::protocol {
 
 /*
  * TSimpleJSONProtocol overrides parts of the regular JSON serialization to
@@ -145,8 +143,6 @@ class TSimpleJSONProtocolFactory : public TProtocolFactory {
   }
 };
 
-} // namespace protocol
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::protocol
 
 #endif // #define THRIFT_PROTOCOL_TSIMPLEJSONPROTOCOL_H_ 1

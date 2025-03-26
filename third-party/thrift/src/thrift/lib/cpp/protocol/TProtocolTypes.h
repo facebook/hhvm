@@ -19,9 +19,7 @@
 
 #include <cstdint>
 
-namespace apache {
-namespace thrift {
-namespace protocol {
+namespace apache::thrift::protocol {
 
 enum PROTOCOL_TYPES : uint16_t {
   T_BINARY_PROTOCOL = 0,
@@ -34,7 +32,5 @@ enum PROTOCOL_TYPES : uint16_t {
   // T_FROZEN2_PROTOCOL = 6,
 };
 }
-} // namespace thrift
-} // namespace apache
 
 #endif // #define _THRIFT_PROTOCOL_TPROTOCOLTYPES_H_ 1

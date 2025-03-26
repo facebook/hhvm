@@ -18,9 +18,7 @@
 
 #include <fmt/core.h>
 
-namespace apache {
-namespace thrift {
-namespace protocol {
+namespace apache::thrift::protocol {
 
 [[noreturn]] void TProtocolException::throwUnionMissingStop() {
   throw TProtocolException(
@@ -92,6 +90,4 @@ namespace protocol {
       "Not enough bytes to read the entire message, the data appears to be "
       "truncated");
 }
-} // namespace protocol
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::protocol

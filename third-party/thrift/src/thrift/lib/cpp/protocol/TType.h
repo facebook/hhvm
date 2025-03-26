@@ -18,9 +18,7 @@
 
 #include <stdint.h>
 
-namespace apache {
-namespace thrift {
-namespace protocol {
+namespace apache::thrift::protocol {
 
 /**
  * Enumerated definition of the types that the Thrift protocol supports.
@@ -54,6 +52,4 @@ inline uint8_t format_as(TType type) {
   return type;
 }
 
-} // namespace protocol
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::protocol

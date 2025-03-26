@@ -19,9 +19,7 @@
 
 #include <thrift/lib/cpp/protocol/TVirtualProtocol.h>
 
-namespace apache {
-namespace thrift {
-namespace protocol {
+namespace apache::thrift::protocol {
 
 using apache::thrift::transport::TTransport;
 
@@ -180,8 +178,6 @@ class TProtocolTap : public TVirtualProtocol<TProtocolTap> {
   std::shared_ptr<TProtocol> sink_;
 };
 
-} // namespace protocol
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::protocol
 
 #endif // #define _THRIFT_PROTOCOL_TPROTOCOLTAP_H_ 1

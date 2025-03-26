@@ -19,9 +19,7 @@
 
 #include <thrift/lib/cpp/protocol/TProtocol.h>
 
-namespace apache {
-namespace thrift {
-namespace protocol {
+namespace apache::thrift::protocol {
 
 /**
  * Helper class that provides default implementations of TProtocol methods.
@@ -647,8 +645,6 @@ class TVirtualProtocol : public Super_ {
   explicit TVirtualProtocol(transport::TTransport* ptrans) : Super_(ptrans) {}
 };
 
-} // namespace protocol
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::protocol
 
 #endif // #define _THRIFT_PROTOCOL_TVIRTUALPROTOCOL_H_ 1

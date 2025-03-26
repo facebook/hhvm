@@ -22,9 +22,7 @@
 
 #include <string>
 
-namespace apache {
-namespace thrift {
-namespace protocol {
+namespace apache::thrift::protocol {
 
 /**
  * Class to encapsulate all the possible types of protocol errors that may
@@ -124,8 +122,6 @@ class FOLLY_EXPORT TProtocolException
   TProtocolExceptionType type_;
 };
 
-} // namespace protocol
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::protocol
 
 #endif // #ifndef _THRIFT_PROTOCOL_TPROTOCOLEXCEPTION_H_

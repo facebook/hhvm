@@ -31,17 +31,11 @@
 
 #include <folly/FBString.h>
 
-namespace apache {
-namespace thrift {
-namespace reflection {
+namespace apache::thrift::reflection {
 class Schema;
 }
-} // namespace thrift
-} // namespace apache
 
-namespace apache {
-namespace thrift {
-namespace protocol {
+namespace apache::thrift::protocol {
 
 using apache::thrift::transport::TTransport;
 
@@ -630,8 +624,6 @@ class TDualProtocolFactory : public TDuplexProtocolFactory {
  */
 class TDummyProtocol : public TProtocol {};
 
-} // namespace protocol
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::protocol
 
 #endif // #define _THRIFT_PROTOCOL_TPROTOCOL_H_ 1

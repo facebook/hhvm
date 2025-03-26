@@ -19,9 +19,7 @@
 using namespace apache::thrift::transport;
 using namespace apache::thrift::reflection;
 
-namespace apache {
-namespace thrift {
-namespace protocol {
+namespace apache::thrift::protocol {
 
 TSimpleJSONProtocol::TSimpleJSONProtocol(std::shared_ptr<TTransport> ptrans)
     : TVirtualProtocol<TSimpleJSONProtocol, TJSONProtocol>(ptrans),
@@ -424,6 +422,4 @@ bool TSimpleJSONProtocol::isCompoundType(int64_t fieldType) {
   return !isBaseType(getType(fieldType));
 }
 
-} // namespace protocol
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::protocol

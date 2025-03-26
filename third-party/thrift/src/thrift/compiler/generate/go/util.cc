@@ -239,7 +239,7 @@ void codegen_data::compute_thrift_metadata_types() {
 
   for (auto const& service : current_program_->services()) {
     for (const auto& func : service->functions()) {
-      if (!is_func_go_supported(&func)) {
+      if (!is_func_go_server_supported(&func)) {
         continue; // Skip unsupported functions
       }
 
@@ -493,7 +493,11 @@ std::string snakecase(const std::string& name) {
   return snake.str();
 }
 
-bool is_func_go_supported(const t_function* func) {
+bool is_func_go_client_supported(const t_function* func) {
+  return !func->sink_or_stream() && !func->interaction();
+}
+
+bool is_func_go_server_supported(const t_function* func) {
   return !func->sink_or_stream() && !func->interaction();
 }
 
@@ -606,7 +610,8 @@ std::vector<t_struct*> get_service_req_resp_structs(const t_service* service) {
   std::vector<t_struct*> req_resp_structs;
   auto svcGoName = go::munge_ident(service->name());
   for (auto func : service->get_functions()) {
-    if (!go::is_func_go_supported(func)) {
+    if (!go::is_func_go_client_supported(func) &&
+        !go::is_func_go_server_supported(func)) {
       continue;
     }
 

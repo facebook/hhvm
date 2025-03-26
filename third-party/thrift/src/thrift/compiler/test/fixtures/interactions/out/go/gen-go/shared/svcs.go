@@ -29,7 +29,6 @@ type InteractLocally interface {
 
 type InteractLocallyClientInterface interface {
     io.Closer
-    InteractLocally
 }
 
 type InteractLocallyClient struct {

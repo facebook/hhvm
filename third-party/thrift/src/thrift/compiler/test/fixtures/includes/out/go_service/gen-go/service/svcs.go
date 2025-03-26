@@ -35,7 +35,8 @@ type MyService interface {
 
 type MyServiceClientInterface interface {
     io.Closer
-    MyService
+    Query(ctx context.Context, s *module.MyStruct, i *includes.Included) (error)
+    HasArgDocs(ctx context.Context, s *module.MyStruct, i *includes.Included) (error)
 }
 
 type MyServiceClient struct {

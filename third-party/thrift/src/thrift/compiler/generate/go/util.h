@@ -141,7 +141,8 @@ std::string quote(const std::string& data);
 
 std::string snakecase(const std::string& name);
 
-bool is_func_go_supported(const t_function* func);
+bool is_func_go_client_supported(const t_function* func);
+bool is_func_go_server_supported(const t_function* func);
 bool is_go_reserved_word(const std::string& value);
 
 bool is_type_go_struct(const t_type* type);

@@ -51,7 +51,28 @@ type GetEntity interface {
 
 type GetEntityClientInterface interface {
     io.Closer
-    GetEntity
+    GetEntity(ctx context.Context, r *GetEntityRequest) (*GetEntityResponse, error)
+    GetBool(ctx context.Context) (bool, error)
+    GetByte(ctx context.Context) (int8, error)
+    GetI16(ctx context.Context) (int16, error)
+    GetI32(ctx context.Context) (int32, error)
+    GetI64(ctx context.Context) (int64, error)
+    GetDouble(ctx context.Context) (float64, error)
+    GetString(ctx context.Context) (string, error)
+    GetBinary(ctx context.Context) ([]byte, error)
+    GetMap(ctx context.Context) (map[string]string, error)
+    GetSet(ctx context.Context) ([]string, error)
+    GetList(ctx context.Context) ([]string, error)
+    GetLegacyStuff(ctx context.Context, numPos int64, numNeg1 int64, numNeg2 int64) (int32, error)
+    GetCtxCollision(ctx1 context.Context, ctx int64) (int32, error)
+    GetCtx1Collision(ctx2 context.Context, ctx int64, ctx1 int64) (int32, error)
+    GetContextCollision(ctx context.Context, context_ int64) (int32, error)
+    GetOutCollision(ctx context.Context, out int64) (int32, error)
+    GetOut1Collision(ctx context.Context, out int64, out1 int64) (int32, error)
+    GetInCollision(ctx context.Context, in int64) (int32, error)
+    GetIn1Collision(ctx context.Context, in int64, in1 int64) (int32, error)
+    GetErrCollision(ctx context.Context, err int64) (int32, error)
+    GetErr1Collision(ctx context.Context, err int64, err1 int64) (int32, error)
 }
 
 type GetEntityClient struct {

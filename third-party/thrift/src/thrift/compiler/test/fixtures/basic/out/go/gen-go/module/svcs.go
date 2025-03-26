@@ -30,7 +30,7 @@ type FooService interface {
 
 type FooServiceClientInterface interface {
     io.Closer
-    FooService
+    SimpleRPC(ctx context.Context) (error)
 }
 
 type FooServiceClient struct {
@@ -172,7 +172,7 @@ type FB303Service interface {
 
 type FB303ServiceClientInterface interface {
     io.Closer
-    FB303Service
+    SimpleRPC(ctx context.Context, intParameter int32) (*ReservedKeyword, error)
 }
 
 type FB303ServiceClient struct {
@@ -326,7 +326,16 @@ type MyService interface {
 
 type MyServiceClientInterface interface {
     io.Closer
-    MyService
+    Ping(ctx context.Context) (error)
+    GetRandomData(ctx context.Context) (string, error)
+    Sink(ctx context.Context, sink int64) (error)
+    PutDataById(ctx context.Context, id int64, data string) (error)
+    HasDataById(ctx context.Context, id int64) (bool, error)
+    GetDataById(ctx context.Context, id int64) (string, error)
+    DeleteDataById(ctx context.Context, id int64) (error)
+    LobDataById(ctx context.Context, id int64, data string) (error)
+    InvalidReturnForHack(ctx context.Context) ([]float32, error)
+    RpcSkippedCodegen(ctx context.Context) (error)
 }
 
 type MyServiceClient struct {
@@ -1048,7 +1057,8 @@ type DbMixedStackArguments interface {
 
 type DbMixedStackArgumentsClientInterface interface {
     io.Closer
-    DbMixedStackArguments
+    GetDataByKey0(ctx context.Context, key string) ([]byte, error)
+    GetDataByKey1(ctx context.Context, key string) ([]byte, error)
 }
 
 type DbMixedStackArgumentsClient struct {

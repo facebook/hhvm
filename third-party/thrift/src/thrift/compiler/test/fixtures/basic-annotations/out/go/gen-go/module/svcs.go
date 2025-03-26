@@ -36,7 +36,13 @@ type MyService interface {
 
 type MyServiceClientInterface interface {
     io.Closer
-    MyService
+    Ping(ctx context.Context) (error)
+    GetRandomData(ctx context.Context) (string, error)
+    HasDataById(ctx context.Context, id int64) (bool, error)
+    GoGetDataById(ctx context.Context, id int64) (string, error)
+    PutDataById(ctx context.Context, id int64, data string) (error)
+    LobDataById(ctx context.Context, id int64, data string) (error)
+    GoDoNothing(ctx context.Context) (error)
 }
 
 type MyServiceClient struct {
@@ -576,7 +582,8 @@ type MyServicePrioParent interface {
 
 type MyServicePrioParentClientInterface interface {
     io.Closer
-    MyServicePrioParent
+    Ping(ctx context.Context) (error)
+    Pong(ctx context.Context) (error)
 }
 
 type MyServicePrioParentClient struct {
@@ -784,7 +791,10 @@ type MyServicePrioChild interface {
 
 type MyServicePrioChildClientInterface interface {
     io.Closer
-    MyServicePrioChild
+    // Inherited/extended service
+    MyServicePrioParentClientInterface
+
+    Pang(ctx context.Context) (error)
 }
 
 type MyServicePrioChildClient struct {
@@ -902,7 +912,7 @@ type BadService interface {
 
 type BadServiceClientInterface interface {
     io.Closer
-    BadService
+    Bar(ctx context.Context) (int32, error)
 }
 
 type BadServiceClient struct {
@@ -1047,7 +1057,9 @@ type FooBarBazService interface {
 
 type FooBarBazServiceClientInterface interface {
     io.Closer
-    FooBarBazService
+    FooStructured(ctx context.Context) (error)
+    BarNonStructured(ctx context.Context) (error)
+    Baz(ctx context.Context) (error)
 }
 
 type FooBarBazServiceClient struct {

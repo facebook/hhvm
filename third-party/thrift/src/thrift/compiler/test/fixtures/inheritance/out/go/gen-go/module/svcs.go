@@ -30,7 +30,7 @@ type MyRoot interface {
 
 type MyRootClientInterface interface {
     io.Closer
-    MyRoot
+    DoRoot(ctx context.Context) (error)
 }
 
 type MyRootClient struct {
@@ -175,7 +175,10 @@ type MyNode interface {
 
 type MyNodeClientInterface interface {
     io.Closer
-    MyNode
+    // Inherited/extended service
+    MyRootClientInterface
+
+    DoMid(ctx context.Context) (error)
 }
 
 type MyNodeClient struct {
@@ -296,7 +299,10 @@ type MyLeaf interface {
 
 type MyLeafClientInterface interface {
     io.Closer
-    MyLeaf
+    // Inherited/extended service
+    MyNodeClientInterface
+
+    DoLeaf(ctx context.Context) (error)
 }
 
 type MyLeafClient struct {

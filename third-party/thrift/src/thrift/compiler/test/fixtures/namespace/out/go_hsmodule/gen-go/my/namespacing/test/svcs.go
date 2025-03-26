@@ -30,7 +30,7 @@ type HsTestService interface {
 
 type HsTestServiceClientInterface interface {
     io.Closer
-    HsTestService
+    Init(ctx context.Context, int1 int64) (int64, error)
 }
 
 type HsTestServiceClient struct {

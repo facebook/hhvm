@@ -29,7 +29,6 @@ type PubSubStreamingService interface {
 
 type PubSubStreamingServiceClientInterface interface {
     io.Closer
-    PubSubStreamingService
 }
 
 type PubSubStreamingServiceClient struct {

@@ -33,7 +33,10 @@ type Raiser interface {
 
 type RaiserClientInterface interface {
     io.Closer
-    Raiser
+    DoBland(ctx context.Context) (error)
+    DoRaise(ctx context.Context) (error)
+    Get200(ctx context.Context) (string, error)
+    Get500(ctx context.Context) (string, error)
 }
 
 type RaiserClient struct {

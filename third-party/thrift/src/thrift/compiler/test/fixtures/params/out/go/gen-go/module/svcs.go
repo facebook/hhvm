@@ -34,7 +34,11 @@ type NestedContainers interface {
 
 type NestedContainersClientInterface interface {
     io.Closer
-    NestedContainers
+    MapList(ctx context.Context, foo map[int32][]int32) (error)
+    MapSet(ctx context.Context, foo map[int32][]int32) (error)
+    ListMap(ctx context.Context, foo []map[int32]int32) (error)
+    ListSet(ctx context.Context, foo [][]int32) (error)
+    Turtles(ctx context.Context, foo [][]map[int32]map[int32][]int32) (error)
 }
 
 type NestedContainersClient struct {

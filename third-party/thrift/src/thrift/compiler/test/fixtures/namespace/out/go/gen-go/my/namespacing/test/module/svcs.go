@@ -30,7 +30,7 @@ type TestService interface {
 
 type TestServiceClientInterface interface {
     io.Closer
-    TestService
+    Init(ctx context.Context, int1 int64) (int64, error)
 }
 
 type TestServiceClient struct {

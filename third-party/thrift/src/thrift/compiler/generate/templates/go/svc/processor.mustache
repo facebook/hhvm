@@ -48,14 +48,14 @@ func New{{service:go_name}}Processor(handler {{service:go_name}}) *{{service:go_
     {{/service:extends?}}
     }
     {{#service:functions}}
-    {{#function:go_supported?}}
+    {{#function:go_server_supported?}}
     p.AddToProcessorFunctionMap("{{function:name}}", &{{> svc/proc_func_name}}{handler: handler})
-    {{/function:go_supported?}}
+    {{/function:go_server_supported?}}
     {{/service:functions}}
     {{#service:functions}}
-    {{#function:go_supported?}}
+    {{#function:go_server_supported?}}
     p.AddToFunctionServiceMap("{{function:name}}", "{{service:go_name}}")
-    {{/function:go_supported?}}
+    {{/function:go_server_supported?}}
     {{/service:functions}}
 
     return p
@@ -95,7 +95,7 @@ func (p *{{service:go_name}}Processor) GetThriftMetadata() *{{program:metadata_q
 {{/program:gen_metadata?}}
 
 {{#service:functions}}
-{{#function:go_supported?}}
+{{#function:go_server_supported?}}
 
 type {{> svc/proc_func_name}} struct {
     handler {{service:go_name}}
@@ -186,5 +186,5 @@ func (p *{{> svc/proc_func_name}}) RunContext(ctx context.Context, reqStruct thr
     {{/function:oneway?}}
 }
 
-{{/function:go_supported?}}
+{{/function:go_server_supported?}}
 {{/service:functions}}

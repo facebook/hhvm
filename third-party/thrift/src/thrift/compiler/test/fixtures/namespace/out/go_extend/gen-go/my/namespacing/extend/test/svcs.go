@@ -35,7 +35,10 @@ type ExtendTestService interface {
 
 type ExtendTestServiceClientInterface interface {
     io.Closer
-    ExtendTestService
+    // Inherited/extended service
+    test0.HsTestServiceClientInterface
+
+    Check(ctx context.Context, struct1 *test0.HsFoo) (bool, error)
 }
 
 type ExtendTestServiceClient struct {

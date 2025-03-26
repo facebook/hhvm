@@ -33,7 +33,8 @@ type SomeService interface {
 
 type SomeServiceClientInterface interface {
     io.Closer
-    SomeService
+    BounceMap(ctx context.Context, m included.SomeMap) (included.SomeMap, error)
+    BinaryKeyedMap(ctx context.Context, r []int64) (map[*TBinary]int64, error)
 }
 
 type SomeServiceClient struct {

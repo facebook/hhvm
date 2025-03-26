@@ -32,7 +32,7 @@ type MyService interface {
 
 type MyServiceClientInterface interface {
     io.Closer
-    MyService
+    Foo(ctx context.Context) (error)
 }
 
 type MyServiceClient struct {
@@ -174,7 +174,7 @@ type Factories interface {
 
 type FactoriesClientInterface interface {
     io.Closer
-    Factories
+    Foo(ctx context.Context) (error)
 }
 
 type FactoriesClient struct {
@@ -316,7 +316,7 @@ type Perform interface {
 
 type PerformClientInterface interface {
     io.Closer
-    Perform
+    Foo(ctx context.Context) (error)
 }
 
 type PerformClient struct {
@@ -458,7 +458,7 @@ type InteractWithShared interface {
 
 type InteractWithSharedClientInterface interface {
     io.Closer
-    InteractWithShared
+    DoSomeSimilarThings(ctx context.Context) (*shared.DoSomethingResult, error)
 }
 
 type InteractWithSharedClient struct {
@@ -600,7 +600,6 @@ type BoxService interface {
 
 type BoxServiceClientInterface interface {
     io.Closer
-    BoxService
 }
 
 type BoxServiceClient struct {

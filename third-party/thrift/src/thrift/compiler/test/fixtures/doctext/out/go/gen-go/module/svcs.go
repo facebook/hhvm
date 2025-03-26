@@ -31,7 +31,8 @@ type C interface {
 
 type CClientInterface interface {
     io.Closer
-    C
+    F(ctx context.Context) (error)
+    Thing(ctx context.Context, a int32, b string, c []int32) (string, error)
 }
 
 type CClient struct {

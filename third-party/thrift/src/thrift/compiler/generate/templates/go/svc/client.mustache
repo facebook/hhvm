@@ -54,7 +54,7 @@ func (c *{{service:go_name}}Client) Close() error {
     return c.ch.Close()
 }
 {{#service:functions}}
-{{#function:go_supported?}}
+{{#function:go_client_supported?}}
 
 func (c *{{service:go_name}}Client) {{> svc/func_signature}} {
     fbthriftReq := &req{{service:go_name}}{{function:go_name}}{
@@ -82,5 +82,5 @@ func (c *{{service:go_name}}Client) {{> svc/func_signature}} {
     return {{^function:void?}}fbthriftResp.Get{{function:retval_field_name}}(), {{/function:void?}}nil
     {{/function:oneway?}}
 }
-{{/function:go_supported?}}
+{{/function:go_client_supported?}}
 {{/service:functions}}

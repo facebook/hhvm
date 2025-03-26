@@ -30,7 +30,7 @@ type Service interface {
 
 type ServiceClientInterface interface {
     io.Closer
-    Service
+    Func(ctx context.Context, arg1 StringWithAdapter_7208, arg2 string, arg3 *Foo) (MyI32_4873, error)
 }
 
 type ServiceClient struct {
@@ -178,7 +178,8 @@ type AdapterService interface {
 
 type AdapterServiceClientInterface interface {
     io.Closer
-    AdapterService
+    Count(ctx context.Context) (*CountingStruct, error)
+    AdaptedTypes(ctx context.Context, arg *HeapAllocated) (*HeapAllocated, error)
 }
 
 type AdapterServiceClient struct {

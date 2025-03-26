@@ -36,7 +36,9 @@ type Finder interface {
 
 type FinderClientInterface interface {
     io.Closer
-    Finder
+    ByPlate(ctx context.Context, plate Plate) (*Automobile, error)
+    AliasByPlate(ctx context.Context, plate Plate) (*Car, error)
+    PreviousPlate(ctx context.Context, plate Plate) (Plate, error)
 }
 
 type FinderClient struct {

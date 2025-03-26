@@ -29,9 +29,9 @@
     SetFunctions(
         []*{{program:metadata_qualifier}}ThriftFunction{
             {{#service:functions}}
-            {{#function:go_supported?}}
+            {{#function:go_server_supported?}}
             {{> metadata/thrift_metadata_function}},
-            {{/function:go_supported?}}
+            {{/function:go_server_supported?}}
             {{/service:functions}}
         },
     )

@@ -34,6 +34,7 @@
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/FieldMask.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
+#include <thrift/lib/cpp2/protocol/detail/Patch.h>
 #include <thrift/lib/cpp2/type/Id.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/Tag.h>
@@ -652,80 +653,6 @@ void insertNextMask(
       masks.read, std::move(readId), nextMasks.read, getIncludesRef);
   insertMaskUnion(
       masks.write, std::move(writeId), nextMasks.write, getIncludesRef);
-}
-
-void insertTypeToMaskIfNotAllMask(Mask& mask, const type::Type& type) {
-  if (isAllMask(mask)) {
-    return;
-  }
-  mask.includes_type_ref().ensure().emplace(type, allMask());
-}
-
-template <typename T>
-const T& getKeyOrElem(const T& value) {
-  return value;
-}
-template <typename K, typename V>
-const K& getKeyOrElem(const std::pair<const K, V>& value) {
-  return value.first;
-}
-
-// Put allMask() if the key was never included in the mask before. `view`
-// specifies whether to use address of Value to populate map mask (deprecated).
-template <typename Container>
-void insertKeysToMask(Mask& mask, const Container& c, bool view) {
-  if (view) {
-    auto writeValueIndex = buildValueIndex(mask);
-    for (const auto& elem : c) {
-      const auto& v = getKeyOrElem(elem);
-      auto id = static_cast<int64_t>(
-          getMapIdValueAddressFromIndex(writeValueIndex, v));
-      mask.includes_map_ref().ensure().emplace(id, allMask());
-    }
-    return;
-  }
-
-  for (const auto& elem : c) {
-    const auto& v = getKeyOrElem(elem);
-
-    if (getArrayKeyFromValue(v) == ArrayKey::Integer) {
-      mask.includes_map_ref().ensure().emplace(
-          static_cast<int64_t>(getMapIdFromValue(v)), allMask());
-    } else {
-      mask.includes_string_map_ref().ensure().emplace(
-          getStringFromValue(v), allMask());
-    }
-  }
-}
-
-template <typename Container>
-void insertKeysToMaskIfNotAllMask(Mask& mask, const Container& c, bool view) {
-  if (isAllMask(mask)) {
-    return;
-  }
-  insertKeysToMask(mask, c, view);
-}
-
-void insertFieldsToMask(Mask& mask, const Object& obj) {
-  for (const auto& [id, value] : obj) {
-    mask.includes_ref().ensure().emplace(id, allMask());
-  }
-}
-
-void insertFieldsToMaskIfNotAllMask(Mask& mask, const Object& obj) {
-  if (isAllMask(mask)) {
-    return;
-  }
-  insertFieldsToMask(mask, obj);
-}
-
-void insertFieldsToMaskIfNotAllMask(Mask& mask, const std::vector<Value>& ids) {
-  if (isAllMask(mask)) {
-    return;
-  }
-  for (const Value& id : ids) {
-    mask.includes_ref().ensure().emplace(id.as_i16(), allMask());
-  }
 }
 
 // Constructs the field mask from the patch object for the field.

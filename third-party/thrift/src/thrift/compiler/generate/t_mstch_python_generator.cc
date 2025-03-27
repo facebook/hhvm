@@ -365,6 +365,7 @@ class python_mstch_program : public mstch_program {
           mangle_program_path(prog, get_option("root_module_prefix"));
       ns.has_services = false;
       ns.has_types = true;
+      ns.is_patch = is_patch_program(prog);
       include_namespaces_[path] = std::move(ns);
     }
   }

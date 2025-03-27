@@ -1452,6 +1452,41 @@ ExtractedMasksFromPatch DynamicUnionPatch::extractMaskFromPatch() const {
   return std::move(v.masks);
 }
 
+ExtractedMasksFromPatch DynamicUnknownPatch::extractMaskFromPatch() const {
+  struct Visitor {
+    void assign(const Object&) {
+      // Category::StructuredOrAnyPatch
+      // Cannot distinguish between struct/union/any patch
+      masks = {protocol::noneMask(), protocol::allMask()};
+    }
+    void clear() {
+      // Category::ClearPatch
+      // Cannot distinguish patch
+      masks = {protocol::noneMask(), protocol::allMask()};
+    }
+    void removeMulti(const ValueSet& v) {
+      // Category::AssociativeContainerPatch
+      // Cannot distinguish between set/map patch
+      if (v.empty()) {
+        return;
+      }
+      masks = {protocol::allMask(), protocol::allMask()};
+    }
+    [[noreturn]] void patchIfSet(FieldId, const DynamicPatch&) {
+      // Category::StructuredPatch
+      // Cannot distinguish struct/union patch
+      // TODO(dokwon): Add when all recurisve patch extraction is available.
+      folly::throw_exception<std::runtime_error>("not implemented.");
+    }
+
+    protocol::ExtractedMasksFromPatch masks{
+        protocol::noneMask(), protocol::noneMask()};
+  };
+  Visitor v;
+  customVisit(v);
+  return std::move(v.masks);
+}
+
 void DynamicListPatch::apply(detail::Badge, ValueList& v) const {
   struct Visitor {
     void assign(detail::Badge, ValueList v) {

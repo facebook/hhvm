@@ -249,6 +249,8 @@ class DynamicUnknownPatch : public DynamicPatchBase {
     }
   }
 
+  protocol::ExtractedMasksFromPatch extractMaskFromPatch() const;
+
  private:
   template <class Self, class Visitor>
   static void customVisitImpl(Self&&, Visitor&&);

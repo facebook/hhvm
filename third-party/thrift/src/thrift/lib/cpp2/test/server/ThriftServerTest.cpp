@@ -1254,12 +1254,12 @@ TEST_P(HeaderOrRocket, RequestParamsNullCheck) {
 }
 
 TEST_P(HeaderOrRocket, OnewayQueueTimeTest) {
-  static folly::Baton running, finished;
-  static folly::Baton running2;
+  struct TestInterface : apache::thrift::ServiceHandler<TestService> {
+    folly::Baton<> running, finished;
+    folly::Baton<> running2;
+    int once = 0;
 
-  class TestInterface : public apache::thrift::ServiceHandler<TestService> {
     void voidResponse() override {
-      static int once;
       EXPECT_EQ(once++, 0);
       running.post();
       finished.wait();
@@ -1267,21 +1267,22 @@ TEST_P(HeaderOrRocket, OnewayQueueTimeTest) {
     void noResponse(int64_t) override { running2.post(); }
   };
 
-  ScopedServerInterfaceThread runner(std::make_shared<TestInterface>());
+  auto handler = std::make_shared<TestInterface>();
+  ScopedServerInterfaceThread runner(handler);
   runner.getThriftServer().setQueueTimeout(100ms);
 
   auto client = makeClient(runner, nullptr);
 
   auto first = client->semifuture_voidResponse();
-  EXPECT_TRUE(running.try_wait_for(1s));
+  EXPECT_TRUE(handler->running.try_wait_for(1s));
   auto second = client->semifuture_noResponse(0);
   EXPECT_THROW(
       client->sync_voidResponse(RpcOptions{}.setTimeout(1s)),
       TApplicationException);
-  finished.post();
-  // even though 3rd request was loaded shedded, the second is oneway
-  // and should have went through
-  EXPECT_TRUE(running2.try_wait_for(1s));
+  handler->finished.post();
+  // Even though 3rd request was loaded shedded, the second is oneway
+  // and should have went through.
+  EXPECT_TRUE(handler->running2.try_wait_for(1s));
 }
 
 TEST_P(HeaderOrRocket, Priority) {

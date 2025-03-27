@@ -35,7 +35,6 @@ package thrift
 // exported thrift structs, we factor such helpers here.
 ///////////////////////////////////////////////////////////////////////////////
 
-func Int16Ptr(v int16) *int16    { return &v }
 func Int32Ptr(v int32) *int32    { return &v }
 func Int64Ptr(v int64) *int64    { return &v }
 func StringPtr(v string) *string { return &v }

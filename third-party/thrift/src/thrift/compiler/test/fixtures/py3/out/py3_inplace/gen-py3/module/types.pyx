@@ -36,6 +36,7 @@ from thrift.py3.types cimport (
     const_pointer_cast,
     make_const_shared,
     constant_shared_ptr,
+    deref_const as __deref_const,
 )
 cimport thrift.py3.serializer as serializer
 from thrift.python.protocol cimport Protocol as __Protocol
@@ -49,6 +50,8 @@ from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
 import importlib
+
+
 
 import module.types_inplace_FBTHRIFT_ONLY_DO_NOT_USE as _fbthrift_types_inplace
 SimpleException = _fbthrift_types_inplace.SimpleException

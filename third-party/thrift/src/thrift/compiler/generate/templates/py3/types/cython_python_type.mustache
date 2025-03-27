@@ -35,8 +35,11 @@ in the client or server source rather than the type definition source.
 }}{{#type:string?}}str{{/type:string?}}{{!
 }}{{#type:binary?}}bytes{{/type:binary?}}{{!
 }}{{#type:struct}}{{!
-  }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{!
-  }}{{struct:name}}{{!
+  }}{{#program:inplace_migrate?}}object{{/program:inplace_migrate?}}{{!
+  }}{{^program:inplace_migrate?}}{{!
+    }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{!
+    }}{{struct:name}}{{!
+  }}{{/program:inplace_migrate?}}{{!
 }}{{/type:struct}}{{!
 }}{{#type:container?}}object{{/type:container?}}{{!
 }}{{#type:void?}}object{{/type:void?}}{{!

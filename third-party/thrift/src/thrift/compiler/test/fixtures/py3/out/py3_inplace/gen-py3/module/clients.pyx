@@ -28,7 +28,7 @@ from folly.cast cimport down_cast_ptr
 from libcpp.typeinfo cimport type_info
 import thrift.py3.types
 cimport thrift.py3.types
-from thrift.py3.types cimport make_unique
+from thrift.py3.types cimport make_unique, deref_const
 import thrift.py3.client
 cimport thrift.py3.client
 from thrift.python.common cimport (
@@ -198,9 +198,9 @@ cdef void SimpleService_expected_exception_callback(
     client, pyfuture, options = <object> userdata  
     if result.hasException[_module_cbindings.cSimpleException]():
         try:
-            exc = _module_thrift_converter.SimpleException_from_cpp(
+            exc = _module_types.SimpleException.from_python(_module_thrift_converter.SimpleException_from_cpp(
                 unwrap_exception[_module_cbindings.cSimpleException](result.exception())
-            )._to_py3()
+            ))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
         else:
@@ -391,7 +391,7 @@ cdef void SimpleService_get_struct_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_thrift_converter.SimpleStruct_from_cpp(result.value())._to_py3())
+            pyfuture.set_result(_module_types.SimpleStruct.from_python(_module_thrift_converter.SimpleStruct_from_cpp(deref_const[_module_cbindings.cSimpleStruct](result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -599,7 +599,7 @@ cdef void SimpleService_get_binary_union_struct_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_thrift_converter.BinaryUnionStruct_from_cpp(result.value())._to_py3())
+            pyfuture.set_result(_module_types.BinaryUnionStruct.from_python(_module_thrift_converter.BinaryUnionStruct_from_cpp(deref_const[_module_cbindings.cBinaryUnionStruct](result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 

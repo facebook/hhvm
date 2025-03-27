@@ -70,6 +70,9 @@ from thrift.py3.types cimport (
     const_pointer_cast,
     make_const_shared,
     constant_shared_ptr,
+    {{#program:inplace_migrate?}}
+    deref_const as __deref_const,
+    {{/program:inplace_migrate?}}
 )
 {{#program:intercompatible?}}
 from thrift.py3.types import _is_python_enum, _is_python_struct
@@ -94,6 +97,9 @@ from folly.coro cimport bridgeCoroTaskWith
 {{#hasTypes?}}
 cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
 import {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}types
+{{#program:inplace_migrate?}}{{#program:has_stream?}}
+cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}thrift_converter as _{{#includeNamespace}}{{value}}_{{/includeNamespace}}thrift_converter
+{{/program:has_stream?}}{{/program:inplace_migrate?}}
 {{/hasTypes?}}
 {{/program:includeNamespaces}}
 
@@ -119,6 +125,11 @@ from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:nam
 {{/program:hasContainerTypes}}
 {{/program:inplace_migrate?}}
 {{#program:inplace_migrate?}}
+
+{{#program:has_stream?}}
+cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_converter as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter
+{{/program:has_stream?}}
+
 import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types_inplace_FBTHRIFT_ONLY_DO_NOT_USE as _fbthrift_types_inplace
 {{#program:filtered_structs}}
 {{struct:name}} = _fbthrift_types_inplace.{{struct:name}}
@@ -625,9 +636,14 @@ cdef class ClientBufferedStream__{{type:flat_name}}(ClientBufferedStream):
         if {{#program:stream_exceptions}}{{!
         }}result.hasException[{{> types/cython_cpp_type}}]():
             pyfuture.set_exception({{!
-            }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
-            }}thrift.py3.exceptions.try_make_shared_exception[{{> types/cython_cpp_type}}](result.exception()){{!
-            }}))
+            }}{{#program:inplace_migrate?}}{{#type:struct}}{{!
+                }}{{type:capi_converter_path}}.{{struct:name}}_from_cpp({{!
+                }}thrift.py3.exceptions.unwrap_exception[{{> types/cython_cpp_type}}](result.exception())){{!
+            }}{{/type:struct}}{{/program:inplace_migrate?}}{{^program:inplace_migrate?}}{{!
+                }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
+                }}thrift.py3.exceptions.try_make_shared_exception[{{> types/cython_cpp_type}}](result.exception())){{!
+            }}{{/program:inplace_migrate?}}{{!
+            }})
         elif {{/program:stream_exceptions}}{{!
         }}result.hasException():
             pyfuture.set_exception(

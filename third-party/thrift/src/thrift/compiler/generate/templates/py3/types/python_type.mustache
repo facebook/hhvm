@@ -35,7 +35,8 @@ in the client or server source rather than the type definition source.
   }}{{^type:iobufWrapper?}}bytes{{/type:iobufWrapper?}}{{!
 }}{{/type:binary?}}{{!
 }}{{#type:struct}}{{!
-  }}{{> types/cython_python_type}}{{!
+  }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{!
+  }}{{struct:name}}{{!
 }}{{/type:struct}}{{!
 }}{{#type:container?}}{{!
   }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{!

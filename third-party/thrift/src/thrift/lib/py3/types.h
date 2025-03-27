@@ -42,6 +42,21 @@ const T& deref_const(const std::unique_ptr<T>& ptr) {
   return *ptr;
 }
 
+template <typename T>
+const T& deref_const(const std::shared_ptr<T>& ptr) {
+  return *ptr;
+}
+
+template <typename T>
+const T& deref_const(T& x) {
+  return x;
+}
+
+template <typename T>
+const T& deref_const(const T& x) {
+  return x;
+}
+
 // the folly::remove_cvref_t conversions work around Cython's limitation on
 // const/reference qualifier when custom cpp.type with those are defined
 template <typename T, typename S>

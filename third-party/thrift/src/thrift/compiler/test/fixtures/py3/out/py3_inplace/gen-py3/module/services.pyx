@@ -996,7 +996,7 @@ cdef api void call_cy_SimpleService_get_value(
     unique_ptr[_module_cbindings.cSimpleStruct] simple_struct
 ) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
-    arg_simple_struct = _module_thrift_converter.SimpleStruct_from_cpp(deref_const(simple_struct))._to_py3()
+    arg_simple_struct = _module_types.SimpleStruct.from_python(_module_thrift_converter.SimpleStruct_from_cpp(deref_const[_module_cbindings.cSimpleStruct](cmove(simple_struct))))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1320,7 +1320,7 @@ cdef api void call_cy_SimpleService_complex_sum_i32(
     unique_ptr[_module_cbindings.cComplexStruct] counter
 ) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
-    arg_counter = _module_thrift_converter.ComplexStruct_from_cpp(deref_const(counter))._to_py3()
+    arg_counter = _module_types.ComplexStruct.from_python(_module_thrift_converter.ComplexStruct_from_cpp(deref_const[_module_cbindings.cComplexStruct](cmove(counter))))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1338,7 +1338,7 @@ cdef api void call_cy_SimpleService_repeat_name(
     unique_ptr[_module_cbindings.cComplexStruct] counter
 ) noexcept:
     cdef Promise_string __promise = Promise_string._fbthrift_create(cmove(cPromise))
-    arg_counter = _module_thrift_converter.ComplexStruct_from_cpp(deref_const(counter))._to_py3()
+    arg_counter = _module_types.ComplexStruct.from_python(_module_thrift_converter.ComplexStruct_from_cpp(deref_const[_module_cbindings.cComplexStruct](cmove(counter))))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1644,7 +1644,7 @@ cdef api void call_cy_SimpleService_get_binary_union_struct(
     unique_ptr[_module_cbindings.cBinaryUnion] u
 ) noexcept:
     cdef Promise__module_cbindings_cBinaryUnionStruct __promise = Promise__module_cbindings_cBinaryUnionStruct._fbthrift_create(cmove(cPromise))
-    arg_u = _module_thrift_converter.BinaryUnion_from_cpp(deref_const(u))._to_py3()
+    arg_u = _module_types.BinaryUnion.from_python(_module_thrift_converter.BinaryUnion_from_cpp(deref_const[_module_cbindings.cBinaryUnion](cmove(u))))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1981,7 +1981,7 @@ async def SimpleService_expected_exception_coro(
 ):
     try:
         result = await self.expected_exception()
-    except _module_types.SimpleException as ex:
+    except object as ex:
         promise.cPromise.setException(_module_thrift_converter.SimpleException_convert_to_cpp(ex._to_python()))
     except __ApplicationError as ex:
         # If the handler raised an ApplicationError convert it to a C++ one

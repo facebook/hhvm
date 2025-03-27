@@ -322,4 +322,6 @@ let class_class_type t = t.GlobalOptions.class_class_type
 
 let safe_abstract t = t.GlobalOptions.safe_abstract
 
+let needs_concrete t = t.GlobalOptions.needs_concrete
+
 let allow_class_string_cast t = t.GlobalOptions.allow_class_string_cast

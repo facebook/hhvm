@@ -193,6 +193,7 @@ type t = {
   class_sub_classname: bool;
   class_class_type: bool;
   safe_abstract: bool;
+  needs_concrete: bool;
   allow_class_string_cast: bool;
   tco_new_exhaustivity_check: bool;
 }
@@ -305,6 +306,7 @@ let default =
     class_sub_classname = true;
     class_class_type = false;
     safe_abstract = false;
+    needs_concrete = false;
     allow_class_string_cast = true;
     tco_new_exhaustivity_check = false;
   }
@@ -415,6 +417,7 @@ let set
     ?class_sub_classname
     ?class_class_type
     ?safe_abstract
+    ?needs_concrete
     ?allow_class_string_cast
     ?tco_new_exhaustivity_check
     options =
@@ -703,6 +706,7 @@ let set
       setting class_sub_classname options.class_sub_classname;
     class_class_type = setting class_class_type options.class_class_type;
     safe_abstract = setting safe_abstract options.safe_abstract;
+    needs_concrete = setting needs_concrete options.needs_concrete;
     allow_class_string_cast =
       setting allow_class_string_cast options.allow_class_string_cast;
     tco_new_exhaustivity_check =

@@ -571,6 +571,7 @@ impl HhConfig {
                 .get_bool_or("class_sub_classname", default.class_sub_classname)?,
             class_class_type: hhconfig.get_bool_or("class_class_type", default.class_class_type)?,
             safe_abstract: hhconfig.get_bool_or("safe_abstract", default.safe_abstract)?,
+            needs_concrete: hhconfig.get_bool_or("needs_concrete", default.needs_concrete)?,
             allow_class_string_cast: hhconfig
                 .get_bool_or("allow_class_string_cast", default.allow_class_string_cast)?,
             tco_new_exhaustivity_check: hhconfig

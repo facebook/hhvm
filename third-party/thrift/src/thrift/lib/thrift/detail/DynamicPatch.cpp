@@ -15,6 +15,9 @@
  */
 
 #include <algorithm>
+#include <functional>
+#include <optional>
+
 #include <folly/Overload.h>
 #include <folly/portability/GFlags.h>
 #include <thrift/lib/cpp2/op/Clear.h>
@@ -1365,9 +1368,28 @@ ExtractedMasksFromPatch DynamicMapPatch::extractMaskFromPatch() const {
       masks = {protocol::noneMask(), protocol::allMask()};
     }
     void clear() { masks = {protocol::noneMask(), protocol::allMask()}; }
-    [[noreturn]] void patchByKey(const Value&, const DynamicPatch&) {
-      // TODO(dokwon): Add when all recurisve patch extraction is available.
-      folly::throw_exception<std::runtime_error>("not implemented.");
+    void patchByKey(const Value& key, const DynamicPatch& patch) {
+      // granular read/write operation
+      // Insert next extracted mask and insert key to read mask if the next
+      // extracted mask does not include the key.
+      auto getIncludesMapRef = [](Mask& mask) {
+        return mask.includes_map_ref();
+      };
+      auto getIncludesStringMapRef = [](Mask& mask) {
+        return mask.includes_string_map_ref();
+      };
+      if (detail::getArrayKeyFromValue(key) == detail::ArrayKey::Integer) {
+        auto id = static_cast<int64_t>(getMapIdFromValue(key));
+        auto nextMasks = patch.extractMaskFromPatch();
+        detail::insertNextMask(masks, nextMasks, id, id, getIncludesMapRef);
+        detail::insertKeysToMask(masks.read, id);
+      } else {
+        auto id = getStringFromValue(key);
+        auto nextMasks = patch.extractMaskFromPatch();
+        detail::insertNextMask(
+            masks, nextMasks, id, id, getIncludesStringMapRef);
+        detail::insertKeysToMask(masks.read, id);
+      }
     }
     void removeMulti(const ValueSet& set) {
       // write operation if not empty
@@ -1381,8 +1403,7 @@ ExtractedMasksFromPatch DynamicMapPatch::extractMaskFromPatch() const {
       if (map.empty()) {
         return;
       }
-      detail::insertKeysToMask(masks.read, map, false);
-      detail::insertKeysToMaskIfNotAllMask(masks.write, map, false);
+      ensure_ = map;
     }
     void putMulti(const ValueMap& map) {
       // write operation if not empty
@@ -1391,12 +1412,22 @@ ExtractedMasksFromPatch DynamicMapPatch::extractMaskFromPatch() const {
       }
       detail::insertKeysToMaskIfNotAllMask(masks.write, map, false);
     }
+    void finalize() {
+      if (ensure_) {
+        detail::insertKeysToMask(masks.read, ensure_->get(), false);
+        detail::insertKeysToMaskIfNotAllMask(
+            masks.write, ensure_->get(), false);
+      }
+      detail::ensureRWMaskInvariant(masks);
+    }
 
     protocol::ExtractedMasksFromPatch masks{
         protocol::noneMask(), protocol::noneMask()};
+    std::optional<std::reference_wrapper<const ValueMap>> ensure_;
   };
   Visitor v;
   customVisit(v);
+  v.finalize();
   return std::move(v.masks);
 }
 

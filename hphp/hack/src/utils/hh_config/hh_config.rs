@@ -456,10 +456,6 @@ impl HhConfig {
                     allowed_expression_tree_visitors
                 }),
             tco_typeconst_concrete_concrete_error: default.tco_typeconst_concrete_concrete_error,
-            tco_enable_strict_const_semantics: hhconfig.get_int_or(
-                "enable_strict_const_semantics",
-                default.tco_enable_strict_const_semantics,
-            )?,
             tco_meth_caller_only_public_visibility: default.tco_meth_caller_only_public_visibility,
             tco_require_extends_implements_ancestors: default
                 .tco_require_extends_implements_ancestors,

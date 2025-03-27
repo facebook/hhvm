@@ -1,3 +1,9 @@
+ERROR: File "parent_override_trait2.php", line 16, characters 7-7:
+Constant X is defined concretely in multiple ancestors (Typing[4374])
+  File "parent_override_trait2.php", line 4, characters 16-16:
+  One conflicting definition is here, inherited through B
+  File "parent_override_trait2.php", line 7, characters 16-16:
+  Another conflicting definition is here
 ERROR: File "parent_override_trait2.php", line 16, characters 17-17:
 Some members in class `A` are incompatible with those declared in type `B` (Typing[4374])
   File "parent_override_trait2.php", line 7, characters 16-16:

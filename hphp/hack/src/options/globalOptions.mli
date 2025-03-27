@@ -195,11 +195,6 @@ type t = {
   tco_typeconst_concrete_concrete_error: bool;
       (** Raise an error when a concrete type constant is overridden by a concrete type constant
          in a child class. *)
-  tco_enable_strict_const_semantics: int;
-      (** When the value is 1, raises a 4734 error when an inherited constant comes from a conflicting
-         hierarchy, but not if the constant is locally defined. When the value is 2, raises a conflict
-         any time two parents declare concrete constants with the same name, matching HHVM
-         -vEval.TraitConstantInterfaceBehavior=1 *)
   tco_meth_caller_only_public_visibility: bool;
       (** meth_caller can only reference public methods *)
   tco_require_extends_implements_ancestors: bool;
@@ -352,7 +347,6 @@ val set :
   ?tco_enable_function_references:bool ->
   ?tco_allowed_expression_tree_visitors:string list ->
   ?tco_typeconst_concrete_concrete_error:bool ->
-  ?tco_enable_strict_const_semantics:int ->
   ?tco_meth_caller_only_public_visibility:bool ->
   ?tco_require_extends_implements_ancestors:bool ->
   ?tco_strict_value_equality:bool ->

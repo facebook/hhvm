@@ -304,8 +304,6 @@ let () =
         {
           everything_sdt = popt.ParserOptions.everything_sdt;
           implicit_inherit_sdt = GlobalOptions.(tcopt.tco_implicit_inherit_sdt);
-          enable_strict_const_semantics =
-            GlobalOptions.(tcopt.tco_enable_strict_const_semantics);
         }
       (DeclParserOptions.from_parser_options popt)
       !num_partitions

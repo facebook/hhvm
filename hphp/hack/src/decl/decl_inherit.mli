@@ -33,7 +33,6 @@ type inherited = {
     The [cache] parameter is a map of heap entries we might already have at hand
     which acts as a cache for the shared heap. *)
 val make :
-  Decl_env.env ->
   Shallow_decl_defs.shallow_class ->
   cache:Decl_store.class_entries SMap.t ->
   inherited

@@ -1,3 +1,9 @@
+ERROR: File "multiple_concrete_consts.php", line 8, characters 11-11:
+Constant X is defined concretely in multiple ancestors (Typing[4374])
+  File "multiple_concrete_consts.php", line 3, characters 13-13:
+  One conflicting definition is here
+  File "multiple_concrete_consts.php", line 6, characters 13-13:
+  Another conflicting definition is here
 ERROR: File "multiple_concrete_consts.php", line 8, characters 25-26:
 Some members in class `I` are incompatible with those declared in type `I2` (Typing[4374])
   File "multiple_concrete_consts.php", line 3, characters 13-13:

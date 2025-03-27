@@ -196,9 +196,6 @@ let allowed_expression_tree_visitors t =
 let typeconst_concrete_concrete_error t =
   t.GlobalOptions.tco_typeconst_concrete_concrete_error
 
-let enable_strict_const_semantics t =
-  t.GlobalOptions.tco_enable_strict_const_semantics
-
 let meth_caller_only_public_visibility t =
   t.GlobalOptions.tco_meth_caller_only_public_visibility
 

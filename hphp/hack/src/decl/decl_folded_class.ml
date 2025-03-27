@@ -845,7 +845,7 @@ and class_decl
       ctx;
     }
   in
-  let inherited = Decl_inherit.make env c ~cache:parents in
+  let inherited = Decl_inherit.make c ~cache:parents in
   let props = inherited.Decl_inherit.ih_props in
   let props =
     List.fold_left ~f:(prop_decl_eager ~ctx c) ~init:props c.sc_props

@@ -29,18 +29,11 @@ let popt
       enable_class_pointer_hint;
     }
 
-let init ~enable_strict_const_semantics tcopt : Provider_context.t =
+let init tcopt : Provider_context.t =
   let (_handle : SharedMem.handle) =
     SharedMem.init ~num_workers:0 SharedMem.default_config
   in
-  let tcopt =
-    GlobalOptions.
-      {
-        tcopt with
-        tco_higher_kinded_types = true;
-        tco_enable_strict_const_semantics = enable_strict_const_semantics;
-      }
-  in
+  let tcopt = GlobalOptions.{ tcopt with tco_higher_kinded_types = true } in
   let popt = tcopt.GlobalOptions.po in
   let ctx =
     Provider_context.empty_for_tool
@@ -175,7 +168,6 @@ let () =
   let disallow_static_memoized = ref false in
   let interpret_soft_types_as_like_types = ref false in
   let everything_sdt = ref false in
-  let enable_strict_const_semantics = ref 0 in
   let print_ocaml = ref false in
   let print_rupro = ref false in
   let test_ocamlrep_marshal = ref false in
@@ -207,10 +199,6 @@ let () =
       ( "--interpret-soft-types-as-like-types",
         Arg.Set interpret_soft_types_as_like_types,
         "Interpret <<__Soft>> type hints as like types" );
-      ( "--enable-strict-const-semantics",
-        Arg.Int (fun x -> enable_strict_const_semantics := x),
-        " Raise an error when a concrete constants is overridden or multiply defined"
-      );
       ( "--print-ocaml",
         Arg.Set print_ocaml,
         " Print OCaml folded decls to stdout" );
@@ -289,7 +277,6 @@ let () =
     let interpret_soft_types_as_like_types =
       !interpret_soft_types_as_like_types
     in
-    let enable_strict_const_semantics = !enable_strict_const_semantics in
     let everything_sdt = !everything_sdt in
     let print_ocaml = !print_ocaml in
     let print_rupro = !print_rupro in
@@ -310,13 +297,7 @@ let () =
         ~disallow_static_memoized:!disallow_static_memoized
     in
     let tcopt =
-      GlobalOptions.
-        {
-          default with
-          po = popt;
-          tco_experimental_features;
-          tco_enable_strict_const_semantics = enable_strict_const_semantics;
-        }
+      GlobalOptions.{ default with po = popt; tco_experimental_features }
     in
     let tcopt =
       let config =
@@ -354,7 +335,7 @@ let () =
           Disk.write_file ~file:filename ~contents;
           (Relative_path.(create Root filename), contents))
     in
-    let ctx = init ~enable_strict_const_semantics tcopt in
+    let ctx = init tcopt in
     let iter_files f =
       let multifile = List.length files > 1 in
       List.fold files ~init:true ~f:(fun matched (filename, contents) ->

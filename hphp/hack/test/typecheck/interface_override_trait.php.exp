@@ -1,3 +1,9 @@
+ERROR: File "interface_override_trait.php", line 11, characters 7-7:
+Constant FOO1 is defined concretely in multiple ancestors (Typing[4374])
+  File "interface_override_trait.php", line 8, characters 9-12:
+  One conflicting definition is here
+  File "interface_override_trait.php", line 4, characters 9-12:
+  Another conflicting definition is here
 ERROR: File "interface_override_trait.php", line 12, characters 7-7:
 Some members in class `A` are incompatible with those declared in type `T` (Typing[4374])
   File "interface_override_trait.php", line 8, characters 9-12:

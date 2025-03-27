@@ -894,7 +894,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             mut consts,
             mut type_consts,
             support_dynamic_type,
-        } = Inherited::make(self.opts, self.child, self.parents)?;
+        } = Inherited::make(self.child, self.parents)?;
 
         for sp in self.child.props.iter() {
             self.decl_prop(&mut props, sp);

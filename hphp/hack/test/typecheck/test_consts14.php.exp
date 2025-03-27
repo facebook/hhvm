@@ -1,3 +1,9 @@
+ERROR: File "test_consts14.php", line 15, characters 7-7:
+Constant C1 is defined concretely in multiple ancestors (Typing[4374])
+  File "test_consts14.php", line 4, characters 13-14:
+  One conflicting definition is here, inherited through A
+  File "test_consts14.php", line 10, characters 16-17:
+  Another conflicting definition is here
 ERROR: File "test_consts14.php", line 15, characters 17-17:
 Some members in class `B` are incompatible with those declared in type `A` (Typing[4348])
   File "test_consts14.php", line 4, characters 9-11:

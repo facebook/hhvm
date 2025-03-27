@@ -1,3 +1,9 @@
+ERROR: File "abstract_parent_override_interface.php", line 11, characters 16-16:
+Constant FOO is defined concretely in multiple ancestors (Typing[4374])
+  File "abstract_parent_override_interface.php", line 8, characters 9-11:
+  One conflicting definition is here
+  File "abstract_parent_override_interface.php", line 4, characters 9-11:
+  Another conflicting definition is here
 ERROR: File "abstract_parent_override_interface.php", line 11, characters 26-26:
 Some members in class `A` are incompatible with those declared in type `B` (Typing[4374])
   File "abstract_parent_override_interface.php", line 4, characters 9-11:

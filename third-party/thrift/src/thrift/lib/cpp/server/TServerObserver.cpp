@@ -16,12 +16,8 @@
 
 #include <thrift/lib/cpp/server/TServerObserver.h>
 
-namespace apache {
-namespace thrift {
-namespace server {
+namespace apache::thrift::server {
 
 std::shared_ptr<server::TServerObserverFactory> observerFactory_;
 
-} // namespace server
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::server

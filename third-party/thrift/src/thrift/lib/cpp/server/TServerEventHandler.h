@@ -25,9 +25,7 @@ class SocketAddress;
 class RequestContext;
 } // namespace folly
 
-namespace apache {
-namespace thrift {
-namespace server {
+namespace apache::thrift::server {
 
 class TConnectionContext;
 
@@ -96,6 +94,4 @@ class TServerEventHandler {
   TServerEventHandler() {}
 };
 
-} // namespace server
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::server

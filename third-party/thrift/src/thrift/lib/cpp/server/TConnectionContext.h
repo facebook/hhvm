@@ -26,10 +26,7 @@
 #include <folly/io/async/EventBaseManager.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 
-namespace apache {
-namespace thrift {
-
-namespace server {
+namespace apache::thrift::server {
 
 class TConnectionContext {
  public:
@@ -96,8 +93,6 @@ class TConnectionContext {
   static void no_op_destructor(void* /*ptr*/) {}
 };
 
-} // namespace server
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::server
 
 #endif // THRIFT_TCONNECTIONCONTEXT_H_

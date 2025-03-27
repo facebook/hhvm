@@ -28,9 +28,7 @@
 
 #include <thrift/lib/cpp2/server/Overload.h>
 
-namespace apache {
-namespace thrift {
-namespace server {
+namespace apache::thrift::server {
 
 class TServerObserver {
  public:
@@ -225,8 +223,6 @@ class TServerObserverFactory {
 
 extern std::shared_ptr<server::TServerObserverFactory> observerFactory_;
 
-} // namespace server
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::server
 
 #endif

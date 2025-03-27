@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/timestamp.h"
@@ -1294,6 +1295,7 @@ void write_sb_prof_data(ProfDataSerializer& ser,
     write_container(ser, pdr->m_liveProfTypes, write_sb_prof_typed_location);
     write_raw(ser, pdr->m_spOffset);
   }
+  FTRACE_MOD(Trace::prof_sb, 1, "ser f {}\n", pd->m_funcName->data());
 }
 
 void read_sb_prof_data(ProfDataDeserializer& des,
@@ -1302,25 +1304,30 @@ void read_sb_prof_data(ProfDataDeserializer& des,
   auto const kind = read_raw<ProfDataSBKind>(des);
   auto const relPath = read_cpp_string(des);
   auto const filepath = makeStaticString(root + '/' + relPath);
-  // TODO: handle systemlib here
-  auto const unit = lookupUnit(filepath, "", nullptr, nullptr, false);
+  auto const isUnitSyslib = FileUtil::isSystemName(filepath->slice());
+  auto const unit =
+    isUnitSyslib ? nullptr : lookupUnit(filepath, "", nullptr, nullptr, false);
 
   // We need to deserialize all parts of ProfDataSB even if the sha does not
   // match -- otherwise deserialization of the next ProfDataSB will fail.
-  auto const bcUnit = [&] {
+  auto const [bcUnit, isBcUnitSyslib] = [&]() -> std::pair<Unit*,bool> {
     auto const hasBcFilePath = read_raw<int>(des);
     if (hasBcFilePath) {
       auto const relBcPath = read_cpp_string(des);
       auto const bcFilePath = makeStaticString(root + '/' + relBcPath);
-      return lookupUnit(bcFilePath, "", nullptr, nullptr, false);
+      if (FileUtil::isSystemName(bcFilePath->slice())) return {nullptr, true};
+      return {lookupUnit(bcFilePath, "", nullptr, nullptr, false), false};
     }
-    return unit;
+    return {unit, isUnitSyslib};
   }();
   auto const sha1 = read_raw<SHA1>(des);
 
-  auto const shouldDeser = unit && bcUnit && bcUnit->sha1() == sha1;
+  auto const shouldDeser =
+    (isUnitSyslib || unit) &&
+    (isBcUnitSyslib || (bcUnit && bcUnit->sha1() == sha1));
 
   auto const funcName = read_raw_string(des);
+  FTRACE_MOD(Trace::prof_sb, 1, "deser f {} should {}\n", funcName->data(), shouldDeser);
   auto const hasClsName = read_raw<int>(des);
   auto const clsName = hasClsName ? read_raw_string(des) : nullptr;
   auto const ctx = hasClsName > 1 ? read_raw_string(des) : nullptr;
@@ -2254,8 +2261,12 @@ std::string serializeSBProfData(const std::string& root,
       auto unitRelPath = relativePath(root, pd->m_unitPath);
       if (!unitRelPath.empty()) {
         filteredProfData.push_back(pd);
-        relPaths.insert(unitRelPath);
-        relPaths.insert(relativePath(root, pd->m_bcUnitPath));
+        if (!FileUtil::isSystemName(pd->m_unitPath->slice())) {
+          relPaths.insert(unitRelPath);
+        }
+        if (!FileUtil::isSystemName(pd->m_bcUnitPath->slice())) {
+          relPaths.insert(relativePath(root, pd->m_bcUnitPath));
+        }
       }
     }
     write_container(ser, relPaths,

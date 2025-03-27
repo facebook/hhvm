@@ -112,11 +112,6 @@ void addToSBProfile(RegionContext& ctx) {
 
 void addToSBProfile(const Func* func, int nPassed) {
   auto pd = std::make_unique<ProfDataSBPrologueSer>(func, nPassed);
-  // TODO (T208863482): exclude systemlib from preloading, not from jumpstart
-  if (FileUtil::isSystemName(pd->m_unitPath->slice()) ||
-      FileUtil::isSystemName(pd->m_bcUnitPath->slice())) {
-    return;
-  }
   std::lock_guard<std::mutex> l{s_sbProfMutex};
   s_sbProfSer.emplace_back(std::move(pd));
 }

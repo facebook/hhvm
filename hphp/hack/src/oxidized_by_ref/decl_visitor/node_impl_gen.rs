@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7475f098b31df28cc6b5228331df8c5a>>
+// @generated SignedSource<<d94a313f4caef34268f65daaae9dd4db>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -589,6 +589,21 @@ impl<'a> Node<'a> for FunType<'a> {
         }
     }
 }
+impl<'a> Node<'a> for Ty<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_ty(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            Ty(ref __binding_0, ref __binding_1) => {
+                {
+                    __binding_0.accept(v)
+                }
+                { __binding_1.accept(v) }
+            }
+        }
+    }
+}
 impl<'a> Node<'a> for TypeTag<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_type_tag(self)
@@ -662,21 +677,6 @@ impl<'a> Node<'a> for TypePredicate<'a> {
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
             TypePredicate(ref __binding_0, ref __binding_1) => {
-                {
-                    __binding_0.accept(v)
-                }
-                { __binding_1.accept(v) }
-            }
-        }
-    }
-}
-impl<'a> Node<'a> for Ty<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_ty(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            Ty(ref __binding_0, ref __binding_1) => {
                 {
                     __binding_0.accept(v)
                 }

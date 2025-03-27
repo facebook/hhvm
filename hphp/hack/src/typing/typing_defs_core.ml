@@ -232,7 +232,16 @@ type 'ty fun_type = {
 }
 [@@deriving eq, hash, show { with_path = false }, map]
 
-type type_tag =
+(* This is to avoid a compile error with ppx_hash "Unbound value _hash_fold_phase". *)
+let _hash_fold_phase hsv _ = hsv
+
+type 'phase ty = ('phase Reason.t_[@transform.opaque]) * 'phase ty_
+
+and decl_ty = decl_phase ty
+
+and locl_ty = locl_phase ty
+
+and type_tag =
   | BoolTag
   | IntTag
   | StringTag
@@ -242,9 +251,8 @@ type type_tag =
   | ResourceTag
   | NullTag
   | ClassTag of Ast_defs.id_
-[@@deriving eq, ord, hash, show { with_path = false }]
 
-type shape_field_predicate = {
+and shape_field_predicate = {
   (* T196048813 *)
   (* sfp_optional: bool; *)
   sfp_predicate: type_predicate;
@@ -265,22 +273,7 @@ and type_predicate_ =
   | IsShapeOf of shape_predicate
 
 and type_predicate =
-  (Reason.t
-  [@hash.ignore]
-  [@equal (fun _ _ -> true)]
-  [@compare (fun _ _ -> 0)]
-  [@printer (fun _ _ -> ())])
-  * type_predicate_
-[@@deriving eq, ord, hash, show { with_path = false }]
-
-(* This is to avoid a compile error with ppx_hash "Unbound value _hash_fold_phase". *)
-let _hash_fold_phase hsv _ = hsv
-
-type 'phase ty = ('phase Reason.t_[@transform.opaque]) * 'phase ty_
-
-and decl_ty = decl_phase ty
-
-and locl_ty = locl_phase ty
+  (Reason.t[@hash.ignore] [@transform.opaque]) * type_predicate_
 
 (** A shape may specify whether or not fields are required. For example, consider
  * this typedef:
@@ -835,6 +828,59 @@ module Pp = struct
 
     Format.fprintf fmt "@ }@]"
 
+  and pp_type_predicate_ fmt predicate_ =
+    match predicate_ with
+    | IsTag tag ->
+      Format.fprintf fmt "(@[<2>IsTag@ ";
+      pp_type_tag fmt tag;
+      Format.fprintf fmt "@])"
+    | IsTupleOf tuple_predicate ->
+      Format.fprintf fmt "(@[<2>IsTupleOf@ ";
+      pp_tuple_predicate fmt tuple_predicate;
+      Format.fprintf fmt "@])"
+    | IsShapeOf shape_predicate ->
+      Format.fprintf fmt "(@[<2>IsShapeOf@ ";
+      pp_shape_predicate fmt shape_predicate;
+      Format.fprintf fmt "@])"
+
+  and pp_tuple_predicate fmt { tp_required } =
+    Format.fprintf fmt "@[<2>{ ";
+    Format.fprintf fmt "@[%s =@ " "tp_required";
+    pp_list pp_type_predicate fmt tp_required;
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt "@ }@]"
+
+  and pp_shape_predicate fmt { sp_fields } =
+    Format.fprintf fmt "@[<2>{ ";
+    Format.fprintf fmt "@[%s =@ " "sp_fields";
+    TShapeMap.pp pp_shape_field_predicate fmt sp_fields;
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt "@ }@]"
+
+  and pp_shape_field_predicate fmt { sfp_predicate } =
+    Format.fprintf fmt "@[<2>{ ";
+    Format.fprintf fmt "@[%s =@ " "sfp_predicate";
+    pp_type_predicate fmt sfp_predicate;
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt "@ }@]"
+
+  and pp_type_tag fmt tag =
+    match tag with
+    | BoolTag -> Format.pp_print_string fmt "BoolTag"
+    | IntTag -> Format.pp_print_string fmt "IntTag"
+    | StringTag -> Format.pp_print_string fmt "StringTag"
+    | ArraykeyTag -> Format.pp_print_string fmt "ArraykeyTag"
+    | FloatTag -> Format.pp_print_string fmt "FloatTag"
+    | NumTag -> Format.pp_print_string fmt "NumTag"
+    | ResourceTag -> Format.pp_print_string fmt "ResourceTag"
+    | NullTag -> Format.pp_print_string fmt "NullTag"
+    | ClassTag id ->
+      Format.fprintf fmt "(@[<2>ClassTag (@,";
+      Format.pp_print_string fmt id;
+      Format.fprintf fmt "@,))@]"
+
+  and pp_type_predicate fmt predicate = pp_type_predicate_ fmt (snd predicate)
+
   let pp_decl_ty : Format.formatter -> decl_ty -> unit =
    (fun fmt ty -> pp_ty fmt ty)
 
@@ -846,6 +892,9 @@ module Pp = struct
   let show_decl_ty x = show_ty x
 
   let show_locl_ty x = show_ty x
+
+  let show_type_predicate_ predicate_ =
+    Format.asprintf "%a" pp_type_predicate_ predicate_
 end
 
 include Pp
@@ -901,6 +950,24 @@ let same_type_origin (orig1 : type_origin) orig2 =
   match orig1 with
   | Missing_origin -> false
   | _ -> equal_type_origin orig1 orig2
+
+let type_predicate__con_ordinal type_predicate_ =
+  match type_predicate_ with
+  | IsTag _ -> 0
+  | IsTupleOf _ -> 1
+  | IsShapeOf _ -> 2
+
+let type_tag_con_ordinal type_tag =
+  match type_tag with
+  | BoolTag -> 0
+  | IntTag -> 1
+  | StringTag -> 2
+  | ArraykeyTag -> 3
+  | FloatTag -> 4
+  | NumTag -> 5
+  | ResourceTag -> 6
+  | NullTag -> 7
+  | ClassTag _ -> 8
 
 (* Compare two types syntactically, ignoring reason information and other
  * small differences that do not affect type inference behaviour. This
@@ -1216,6 +1283,37 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
    (fun ty1 ty2 -> ty__compare (get_node ty1) (get_node ty2))
   in
   ty__compare ty_1 ty_2
+
+and compare_type_predicate (_, p1) (_, p2) =
+  match (p1, p2) with
+  | (IsTag tag1, IsTag tag2) -> compare_type_tag tag1 tag2
+  | (IsTupleOf tp1, IsTupleOf tp2) -> compare_tuple_predicate tp1 tp2
+  | (IsShapeOf sp1, IsShapeOf sp2) -> compare_shape_predicate sp1 sp2
+  | _ -> type_predicate__con_ordinal p1 - type_predicate__con_ordinal p2
+
+and compare_type_tag tag1 tag2 =
+  match (tag1, tag2) with
+  | (BoolTag, BoolTag)
+  | (IntTag, IntTag)
+  | (StringTag, StringTag)
+  | (ArraykeyTag, ArraykeyTag)
+  | (FloatTag, FloatTag)
+  | (NumTag, NumTag)
+  | (ResourceTag, ResourceTag)
+  | (NullTag, NullTag) ->
+    0
+  | (ClassTag id1, ClassTag id2) -> String.compare id1 id2
+  | _ -> type_tag_con_ordinal tag1 - type_tag_con_ordinal tag2
+
+and compare_tuple_predicate tp1 tp2 =
+  List.compare compare_type_predicate tp1.tp_required tp2.tp_required
+
+and compare_shape_predicate sp1 sp2 =
+  TShapeMap.compare compare_shape_field_predicate sp1.sp_fields sp2.sp_fields
+
+and compare_shape_field_predicate { sfp_predicate = p1 } { sfp_predicate = p2 }
+    =
+  compare_type_predicate p1 p2
 
 and ty_compare : type a. ?normalize_lists:bool -> a ty -> a ty -> int =
  fun ?(normalize_lists = false) ty1 ty2 ->
@@ -1615,6 +1713,8 @@ let equal_internal_type ty1 ty2 =
   | (ConstraintType ty1, ConstraintType ty2) ->
     constraint_ty_equal ~normalize_lists:true ty1 ty2
   | (_, (LoclType _ | ConstraintType _)) -> false
+
+let equal_type_predicate p1 p2 = Int.equal 0 (compare_type_predicate p1 p2)
 
 module Locl_subst = struct
   type t = locl_ty SMap.t

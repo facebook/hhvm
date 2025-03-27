@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d52ed81244e82b9f90919884ca268ddd>>
+// @generated SignedSource<<155e60abc8e82755105c239d5af5b525>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -494,7 +494,25 @@ pub struct FunType {
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, ord, hash, (show { with_path = false }))")]
+#[repr(C)]
+pub struct Ty(pub reason::T_, pub Box<Ty_>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum TypeTag {
     BoolTag,
@@ -523,6 +541,7 @@ pub enum TypeTag {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct ShapeFieldPredicate {
     pub sfp_predicate: TypePredicate,
@@ -609,27 +628,8 @@ pub enum TypePredicate_ {
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
-#[rust_to_ocaml(attr = "deriving (eq, ord, hash, (show { with_path = false }))")]
 #[repr(C)]
 pub struct TypePredicate(pub reason::Reason, pub Box<TypePredicate_>);
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub struct Ty(pub reason::T_, pub Box<Ty_>);
 
 /// A shape may specify whether or not fields are required. For example, consider
 /// this typedef:

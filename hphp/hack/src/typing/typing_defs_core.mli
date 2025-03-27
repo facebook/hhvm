@@ -164,47 +164,6 @@ type enforcement =
   | Enforced  (** The consumer enforces the type at runtime *)
 [@@deriving eq, show, ord]
 
-type type_tag =
-  | BoolTag
-  | IntTag
-  | StringTag
-  | ArraykeyTag
-  | FloatTag
-  | NumTag
-  | ResourceTag
-  | NullTag
-  | ClassTag of Ast_defs.id_
-[@@deriving eq, ord, hash, show { with_path = false }]
-
-type shape_field_predicate = {
-  (* T196048813 *)
-  (* sfp_optional: bool; *)
-  sfp_predicate: type_predicate;
-}
-
-and shape_predicate = {
-  (* T196048813 *)
-  (* sp_allows_unknown_fields: bool; *)
-  sp_fields: shape_field_predicate TShapeMap.t;
-}
-
-(* TODO optional and variadic components T201398626 T201398652 *)
-and tuple_predicate = { tp_required: type_predicate list }
-
-(** Represents the predicate of a type switch, i.e. in the expression
-      ```
-      if ($x is Bool) { ... } else { ... }
-      ```
-
-    The predicate would be `is Bool`
-  *)
-and type_predicate_ =
-  | IsTag of type_tag
-  | IsTupleOf of tuple_predicate
-  | IsShapeOf of shape_predicate
-
-and type_predicate = Reason.t * type_predicate_ [@@deriving eq, ord, hash, show]
-
 (** Because Tfun is currently used as both a decl and locl ty, without this,
   the HH\Contexts\defaults alias must be stored in shared memory for a
   decl Tfun record. We can eliminate this if the majority of usages end up
@@ -249,6 +208,46 @@ type 'phase ty = ('phase Reason.t_[@transform.opaque]) * 'phase ty_
 and decl_ty = decl_phase ty
 
 and locl_ty = locl_phase ty
+
+and type_tag =
+  | BoolTag
+  | IntTag
+  | StringTag
+  | ArraykeyTag
+  | FloatTag
+  | NumTag
+  | ResourceTag
+  | NullTag
+  | ClassTag of Ast_defs.id_
+
+and shape_field_predicate = {
+  (* T196048813 *)
+  (* sfp_optional: bool; *)
+  sfp_predicate: type_predicate;
+}
+
+and shape_predicate = {
+  (* T196048813 *)
+  (* sp_allows_unknown_fields: bool; *)
+  sp_fields: shape_field_predicate TShapeMap.t;
+}
+
+(* TODO optional and variadic components T201398626 T201398652 *)
+and tuple_predicate = { tp_required: type_predicate list }
+
+(** Represents the predicate of a type switch, i.e. in the expression
+      ```
+      if ($x is Bool) { ... } else { ... }
+      ```
+
+    The predicate would be `is Bool`
+  *)
+and type_predicate_ =
+  | IsTag of type_tag
+  | IsTupleOf of tuple_predicate
+  | IsShapeOf of shape_predicate
+
+and type_predicate = (Reason.t[@transform.opaque]) * type_predicate_
 
 (** A shape may specify whether or not fields are required. For example, consider
  * this typedef:
@@ -467,6 +466,8 @@ and 'phase tuple_extra =
 
 val equal_decl_ty : decl_ty -> decl_ty -> bool
 
+val equal_type_predicate : type_predicate -> type_predicate -> bool
+
 val ty_compare : ?normalize_lists:bool -> 'ph ty -> 'ph ty -> int
 
 val ty__compare : ?normalize_lists:bool -> 'ph ty_ -> 'ph ty_ -> int
@@ -555,6 +556,8 @@ module Pp : sig
   val show_decl_ty : decl_ty -> string
 
   val show_locl_ty : locl_ty -> string
+
+  val show_type_predicate_ : type_predicate_ -> string
 end
 
 include module type of Pp

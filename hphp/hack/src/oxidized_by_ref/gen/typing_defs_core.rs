@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8b9c9014a3ec5cd49ac756fa2d5ad3f8>>
+// @generated SignedSource<<418e9c593bda93121a1e621eb40f7bff>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -455,6 +455,25 @@ arena_deserializer::impl_deserialize_in_arena!(FunType<'arena>);
 
 #[derive(
     Clone,
+    Debug,
+    Deserialize,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C)]
+pub struct Ty<'a>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a reason::T_<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub Ty_<'a>,
+);
+impl<'a> TrivialDrop for Ty<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(Ty<'arena>);
+
+#[derive(
+    Clone,
     Copy,
     Debug,
     Deserialize,
@@ -469,7 +488,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunType<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[rust_to_ocaml(attr = "deriving (eq, ord, hash, (show { with_path = false }))")]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum TypeTag<'a> {
     BoolTag,
@@ -501,6 +520,7 @@ arena_deserializer::impl_deserialize_in_arena!(TypeTag<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct ShapeFieldPredicate<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -603,7 +623,6 @@ arena_deserializer::impl_deserialize_in_arena!(TypePredicate_<'arena>);
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
-#[rust_to_ocaml(attr = "deriving (eq, ord, hash, (show { with_path = false }))")]
 #[repr(C)]
 pub struct TypePredicate<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a reason::Reason<'a>,
@@ -611,25 +630,6 @@ pub struct TypePredicate<'a>(
 );
 impl<'a> TrivialDrop for TypePredicate<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(TypePredicate<'arena>);
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    EqModuloPos,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub struct Ty<'a>(
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a reason::T_<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub Ty_<'a>,
-);
-impl<'a> TrivialDrop for Ty<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(Ty<'arena>);
 
 /// A shape may specify whether or not fields are required. For example, consider
 /// this typedef:

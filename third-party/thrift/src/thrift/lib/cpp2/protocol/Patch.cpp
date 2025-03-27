@@ -618,28 +618,15 @@ void ApplyPatch::operator()(Object&& patch, Object& value) const {
   impl(std::move(patch), value);
 }
 
-// Inserts the next mask with union operator to getIncludesRef(mask)[id].
-// Skips if mask is allMask (already includes all fields), or next is noneMask.
-template <typename Id, typename F>
-void insertMaskUnion(
-    Mask& mask, Id id, const Mask& next, const F& getIncludesRef) {
-  if (mask != allMask() && next != noneMask()) {
-    Mask& current = getIncludesRef(mask)
-                        .ensure()
-                        .emplace(std::move(id), noneMask())
-                        .first->second;
-    current = current | next;
-  }
-}
-
 // Insert allMask to getIncludesRef(mask)[id] if id does not exist.
 template <typename Id, typename F>
 void tryInsertAllMask(Mask& mask, Id id, const F& getIncludesRef) {
   getIncludesRef(mask).ensure().emplace(std::move(id), allMask());
 }
 
+// TODO(dokwon): Remove this once view is deprecated.
 template <typename Id, typename F>
-void insertNextMask(
+void insertNextMaskDeprecated(
     ExtractedMasksFromPatch& masks,
     const Value& nextPatch,
     Id readId,
@@ -649,10 +636,8 @@ void insertNextMask(
   auto nextMasks = view
       ? protocol::extractMaskViewFromPatch(nextPatch.as_object())
       : protocol::extractMaskFromPatch(nextPatch.as_object());
-  insertMaskUnion(
-      masks.read, std::move(readId), nextMasks.read, getIncludesRef);
-  insertMaskUnion(
-      masks.write, std::move(writeId), nextMasks.write, getIncludesRef);
+  insertNextMask(
+      masks, nextMasks, std::move(readId), std::move(writeId), getIncludesRef);
 }
 
 // Constructs the field mask from the patch object for the field.
@@ -665,8 +650,8 @@ void insertNextFieldsToMask(
     // operations can/should be applied. Generate allMask() read mask for them
     // if the recursively extracted masks from patch does not include the
     // field.
-    insertNextMask(masks, value, id, id, view, getIncludesObjRef);
-    tryInsertAllMask(masks.read, id, getIncludesObjRef);
+    insertNextMaskDeprecated(masks, value, id, id, view, getIncludesObjRef);
+    insertFieldsToMask(masks.read, FieldId{id});
   }
 }
 
@@ -693,7 +678,9 @@ void insertNextMapItemsToMask(
           getMapIdValueAddressFromIndex(readValueIndex, key));
       auto writeId = static_cast<int64_t>(
           getMapIdValueAddressFromIndex(writeValueIndex, key));
-      insertNextMask(masks, value, readId, writeId, view, getIncludesMapRef);
+
+      insertNextMaskDeprecated(
+          masks, value, readId, writeId, view, getIncludesMapRef);
       tryInsertAllMask(masks.read, readId, getIncludesMapRef);
     }
     return;
@@ -701,12 +688,13 @@ void insertNextMapItemsToMask(
   for (const auto& [key, value] : patch) {
     if (getArrayKeyFromValue(key) == ArrayKey::Integer) {
       auto id = static_cast<int64_t>(getMapIdFromValue(key));
-      insertNextMask(masks, value, id, id, view, getIncludesMapRef);
-      tryInsertAllMask(masks.read, id, getIncludesMapRef);
+      insertNextMaskDeprecated(masks, value, id, id, view, getIncludesMapRef);
+      insertKeysToMask(masks.read, id);
     } else {
       auto id = getStringFromValue(key);
-      insertNextMask(masks, value, id, id, view, getIncludesStringMapRef);
-      tryInsertAllMask(masks.read, id, getIncludesStringMapRef);
+      insertNextMaskDeprecated(
+          masks, value, id, id, view, getIncludesStringMapRef);
+      insertKeysToMask(masks.read, id);
     }
   }
 }
@@ -729,7 +717,7 @@ void insertNextTypesToMask(
     }
     auto dynPatch =
         protocol::detail::parseValueFromAny(type_to_patch.patch().value());
-    insertNextMask(
+    insertNextMaskDeprecated(
         masks,
         dynPatch,
         type_to_patch.type().value(),
@@ -855,12 +843,7 @@ ExtractedMasksFromPatch extractMaskFromPatch(
     masks.write = allMask();
   }
 
-  // Read mask should be always subset of write mask. If not, make read mask
-  // equal to write mask. This can happen for struct or map fields with patch
-  // operations that returns noneMask for read mask (i.e. assign).
-  if ((masks.read | masks.write) != masks.write) {
-    masks.read = masks.write;
-  }
+  ensureRWMaskInvariant(masks);
 
   return masks;
 }

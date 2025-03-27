@@ -18,6 +18,7 @@
 
 #include <folly/Portability.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
+#include <thrift/lib/cpp2/protocol/detail/Patch.h>
 #include <thrift/lib/thrift/detail/protocol.h>
 #include <thrift/lib/thrift/gen-cpp2/field_mask_types.h>
 
@@ -82,20 +83,7 @@ inline constexpr detail::ApplyPatch applyPatch{};
  * avoid full deserialization when applying Thrift Patch to serialized data in a
  * binary blob.
  */
-struct ExtractedMasksFromPatch {
-  Mask read; // read mask from patch
-  Mask write; // write mask from patch
-};
-
-/// @cond
-inline ExtractedMasksFromPatch operator|(
-    const ExtractedMasksFromPatch& lhs, const ExtractedMasksFromPatch& rhs) {
-  ExtractedMasksFromPatch ret;
-  ret.read = lhs.read | rhs.read;
-  ret.write = lhs.write | rhs.write;
-  return ret;
-}
-/// @endcond
+using detail::ExtractedMasksFromPatch;
 
 /// @cond
 /// Constructs read and write Thrift Mask that only contain fields that are

@@ -24,6 +24,19 @@
 
 namespace apache::thrift::protocol::detail {
 
+struct ExtractedMasksFromPatch {
+  Mask read; // read mask from patch
+  Mask write; // write mask from patch
+};
+
+inline ExtractedMasksFromPatch operator|(
+    const ExtractedMasksFromPatch& lhs, const ExtractedMasksFromPatch& rhs) {
+  ExtractedMasksFromPatch ret;
+  ret.read = lhs.read | rhs.read;
+  ret.write = lhs.write | rhs.write;
+  return ret;
+}
+
 inline void insertTypeToMaskIfNotAllMask(Mask& mask, const type::Type& type) {
   if (isAllMask(mask)) {
     return;
@@ -42,6 +55,12 @@ const K& getKeyOrElem(const std::pair<const K, V>& value) {
 
 // Put allMask() if the key was never included in the mask before. `view`
 // specifies whether to use address of Value to populate map mask (deprecated).
+inline void insertKeysToMask(Mask& mask, int64_t k) {
+  mask.includes_map_ref().ensure().emplace(k, allMask());
+}
+inline void insertKeysToMask(Mask& mask, std::string k) {
+  mask.includes_string_map_ref().ensure().emplace(std::move(k), allMask());
+}
 template <typename Container>
 void insertKeysToMask(Mask& mask, const Container& c, bool view) {
   if (view) {
@@ -104,6 +123,42 @@ inline void insertFieldsToMaskIfNotAllMask(
   }
   for (const Value& id : ids) {
     mask.includes_ref().ensure().emplace(id.as_i16(), allMask());
+  }
+}
+
+// Inserts the next mask with union operator to getIncludesRef(mask)[id].
+// Skips if mask is allMask (already includes all fields), or next is noneMask.
+template <typename Id, typename F>
+void insertMaskUnion(
+    Mask& mask, Id id, const Mask& next, const F& getIncludesRef) {
+  if (mask != allMask() && next != noneMask()) {
+    Mask& current = getIncludesRef(mask)
+                        .ensure()
+                        .emplace(std::move(id), noneMask())
+                        .first->second;
+    current = current | next;
+  }
+}
+
+template <typename Id, typename F>
+void insertNextMask(
+    ExtractedMasksFromPatch& masks,
+    const ExtractedMasksFromPatch& nextMasks,
+    Id readId,
+    Id writeId,
+    const F& getIncludesRef) {
+  insertMaskUnion(
+      masks.read, std::move(readId), nextMasks.read, getIncludesRef);
+  insertMaskUnion(
+      masks.write, std::move(writeId), nextMasks.write, getIncludesRef);
+}
+
+// Read mask should be always subset of write mask. If not, make read mask
+// equal to write mask. This can happen for struct or map fields with patch
+// operations that returns noneMask for read mask (i.e. assign).
+inline void ensureRWMaskInvariant(ExtractedMasksFromPatch& masks) {
+  if ((masks.read | masks.write) != masks.write) {
+    masks.read = masks.write;
   }
 }
 

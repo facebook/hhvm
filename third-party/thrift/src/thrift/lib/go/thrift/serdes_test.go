@@ -62,6 +62,40 @@ func TestBasicSerDes(t *testing.T) {
 	})
 }
 
+// Dummy struct for TestErrorSerDes
+type errSerDesStruct struct{}
+
+func (s *errSerDesStruct) Write(Encoder) error {
+	return fmt.Errorf("dummy error")
+}
+func (s *errSerDesStruct) Read(Decoder) error {
+	return fmt.Errorf("dummy error")
+}
+
+func TestErrorSerDes(t *testing.T) {
+	val := &errSerDesStruct{}
+	encodeDecodeTestFn := func(t *testing.T, encodeFn func(types.WritableStruct) ([]byte, error), decodeFn func([]byte, types.ReadableStruct) error) {
+		_, err := encodeFn(val)
+		require.Error(t, err)
+		var res errSerDesStruct
+		err = decodeFn([]byte{}, &res)
+		require.Error(t, err)
+	}
+
+	t.Run("Binary", func(t *testing.T) {
+		encodeDecodeTestFn(t, EncodeBinary, DecodeBinary)
+	})
+	t.Run("Compact", func(t *testing.T) {
+		encodeDecodeTestFn(t, EncodeCompact, DecodeCompact)
+	})
+	t.Run("CompactJSON", func(t *testing.T) {
+		encodeDecodeTestFn(t, EncodeCompactJSON, DecodeCompactJSON)
+	})
+	t.Run("SimpleJSON", func(t *testing.T) {
+		encodeDecodeTestFn(t, EncodeSimpleJSON, DecodeSimpleJSON)
+	})
+}
+
 func TestConsequentSerDes(t *testing.T) {
 	// A single Serializer/Deserializer instance should be able to
 	// perform multiple sequential serializations/deserializations.

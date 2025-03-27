@@ -19,9 +19,7 @@
 #include <thrift/test/gen-cpp2/UnionFieldRef_types.h>
 using namespace std;
 
-namespace apache {
-namespace thrift {
-namespace test {
+namespace apache::thrift::test {
 
 TEST(UnionFieldTest, basic) {
   Basic a;
@@ -335,6 +333,4 @@ TEST(UnionFieldTest, CppRef) {
   EXPECT_EQ(s.shared_const_ref(), "shared_const");
   EXPECT_THROW(*s.box_ref(), bad_union_field_access);
 }
-} // namespace test
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::test

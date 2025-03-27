@@ -20,13 +20,11 @@
 #include <thrift/test/gen-cpp2/ThriftTest_types.h>
 #include <thrift/test/gen-cpp2/ThriftTest_types_custom_protocol.h>
 
-namespace thrift {
-namespace test {
+namespace thrift::test {
 
 bool Insanity::operator<(const thrift::test::Insanity& other) const {
   using apache::thrift::debugString;
   return debugString(*this) < debugString(other);
 }
 
-} // namespace test
-} // namespace thrift
+} // namespace thrift::test

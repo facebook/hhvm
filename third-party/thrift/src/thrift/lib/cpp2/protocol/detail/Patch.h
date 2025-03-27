@@ -76,19 +76,27 @@ void insertKeysToMaskIfNotAllMask(Mask& mask, const Container& c, bool view) {
   insertKeysToMask(mask, c, view);
 }
 
+inline void insertFieldsToMask(Mask& mask, FieldId id) {
+  mask.includes_ref().ensure().emplace(static_cast<int16_t>(id), allMask());
+}
 inline void insertFieldsToMask(Mask& mask, const Object& obj) {
   for (const auto& [id, value] : obj) {
     mask.includes_ref().ensure().emplace(id, allMask());
   }
 }
 
+inline void insertFieldsToMaskIfNotAllMask(Mask& mask, FieldId id) {
+  if (isAllMask(mask)) {
+    return;
+  }
+  insertFieldsToMask(mask, id);
+}
 inline void insertFieldsToMaskIfNotAllMask(Mask& mask, const Object& obj) {
   if (isAllMask(mask)) {
     return;
   }
   insertFieldsToMask(mask, obj);
 }
-
 inline void insertFieldsToMaskIfNotAllMask(
     Mask& mask, const std::vector<Value>& ids) {
   if (isAllMask(mask)) {

@@ -1400,6 +1400,58 @@ ExtractedMasksFromPatch DynamicMapPatch::extractMaskFromPatch() const {
   return std::move(v.masks);
 }
 
+ExtractedMasksFromPatch DynamicStructPatch::extractMaskFromPatch() const {
+  struct Visitor {
+    void assign(const Object&) {
+      masks = {protocol::noneMask(), protocol::allMask()};
+    }
+    void clear() { masks = {protocol::noneMask(), protocol::allMask()}; }
+    void ensure(FieldId id, const Value&) {
+      // granular read/write operation for the field
+      detail::insertFieldsToMask(masks.read, id);
+      detail::insertFieldsToMaskIfNotAllMask(masks.write, id);
+    }
+    [[noreturn]] void patchIfSet(FieldId, const DynamicPatch&) {
+      // TODO(dokwon): Add when all recurisve patch extraction is available.
+      folly::throw_exception<std::runtime_error>("not implemented.");
+    }
+    void remove(FieldId id) {
+      // write operation for the field
+      detail::insertFieldsToMaskIfNotAllMask(masks.write, id);
+    }
+
+    protocol::ExtractedMasksFromPatch masks{
+        protocol::noneMask(), protocol::noneMask()};
+  };
+  Visitor v;
+  customVisit(v);
+  return std::move(v.masks);
+}
+
+ExtractedMasksFromPatch DynamicUnionPatch::extractMaskFromPatch() const {
+  struct Visitor {
+    void assign(const Object&) {
+      masks = {protocol::noneMask(), protocol::allMask()};
+    }
+    void clear() { masks = {protocol::noneMask(), protocol::allMask()}; }
+    void ensure(FieldId id, const Value&) {
+      // granular read operation for the field and full write operation
+      detail::insertFieldsToMask(masks.read, id);
+      masks.write = protocol::allMask();
+    }
+    [[noreturn]] void patchIfSet(FieldId, const DynamicPatch&) {
+      // TODO(dokwon): Add when all recurisve patch extraction is available.
+      folly::throw_exception<std::runtime_error>("not implemented.");
+    }
+
+    protocol::ExtractedMasksFromPatch masks{
+        protocol::noneMask(), protocol::noneMask()};
+  };
+  Visitor v;
+  customVisit(v);
+  return std::move(v.masks);
+}
+
 void DynamicListPatch::apply(detail::Badge, ValueList& v) const {
   struct Visitor {
     void assign(detail::Badge, ValueList v) {

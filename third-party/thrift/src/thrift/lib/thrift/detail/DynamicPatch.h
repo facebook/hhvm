@@ -670,6 +670,8 @@ class DynamicStructPatch : public DynamicStructurePatch<false> {
       detail::Badge, Next&& other) {
     std::forward<Next>(other).customVisit(*this);
   }
+
+  ExtractedMasksFromPatch extractMaskFromPatch() const;
 };
 
 /// DynamicPatch for a Thrift union.
@@ -693,6 +695,8 @@ class DynamicUnionPatch : public DynamicStructurePatch<true> {
       detail::Badge, Next&& other) {
     std::forward<Next>(other).customVisit(*this);
   }
+
+  ExtractedMasksFromPatch extractMaskFromPatch() const;
 
  private:
   // Hide `remove` operation since we can't remove field from union

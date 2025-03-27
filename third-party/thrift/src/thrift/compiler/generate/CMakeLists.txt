@@ -45,6 +45,10 @@ add_library(compiler_generators STATIC ${GENERATOR_FILES}
             ${CMAKE_CURRENT_BINARY_DIR}/templates.cc)
 set_target_properties(compiler_generators PROPERTIES
                       POSITION_INDEPENDENT_CODE "${BUILD_SHARED_LIBS}")
+if(MSVC)
+  set_target_properties(compiler_generators PROPERTIES
+                        COMPILE_FLAGS "/bigobj")
+endif()
 target_link_libraries(
   compiler_generators
   compiler_ast

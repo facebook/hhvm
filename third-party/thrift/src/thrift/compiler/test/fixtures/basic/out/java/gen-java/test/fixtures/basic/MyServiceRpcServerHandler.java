@@ -64,9 +64,9 @@ public class MyServiceRpcServerHandler
     _deleteDataByIdReaders = _create_deleteDataById_request_readers();
     _methodMap.put("lobDataById", this);
     _lobDataByIdReaders = _create_lobDataById_request_readers();
-    _methodMap.put("invalidReturnForHack", this);
+    _methodMap.put("invalid_return_for_hack", this);
     _invalidReturnForHackReaders = _create_invalidReturnForHack_request_readers();
-    _methodMap.put("rpcSkippedCodegen", this);
+    _methodMap.put("rpc_skipped_codegen", this);
     _rpcSkippedCodegenReaders = _create_rpcSkippedCodegen_request_readers();
 
 
@@ -981,10 +981,10 @@ oprot.writeString(_iter0);
         case "deleteDataById":
           _result = _dodeleteDataById(_delegate, _payload, _deleteDataByIdReaders, _chain);
         break;
-        case "invalidReturnForHack":
+        case "invalid_return_for_hack":
           _result = _doinvalidReturnForHack(_delegate, _payload, _invalidReturnForHackReaders, _chain);
         break;
-        case "rpcSkippedCodegen":
+        case "rpc_skipped_codegen":
           _result = _dorpcSkippedCodegen(_delegate, _payload, _rpcSkippedCodegenReaders, _chain);
         break;
         default: {

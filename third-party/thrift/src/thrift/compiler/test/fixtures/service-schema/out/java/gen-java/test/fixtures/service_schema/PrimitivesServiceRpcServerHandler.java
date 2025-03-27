@@ -43,9 +43,9 @@ public class PrimitivesServiceRpcServerHandler
 
     _methodMap.put("init", this);
     _initReaders = _create_init_request_readers();
-    _methodMap.put("methodThatThrows", this);
+    _methodMap.put("method_that_throws", this);
     _methodThatThrowsReaders = _create_methodThatThrows_request_readers();
-    _methodMap.put("returnVoidMethod", this);
+    _methodMap.put("return_void_method", this);
     _returnVoidMethodReaders = _create_returnVoidMethod_request_readers();
 
 
@@ -420,10 +420,10 @@ oprot.writeI32(_iter0 == null ? 0 : _iter0.getValue());
         case "init":
           _result = _doinit(_delegate, _payload, _initReaders, _chain);
         break;
-        case "methodThatThrows":
+        case "method_that_throws":
           _result = _domethodThatThrows(_delegate, _payload, _methodThatThrowsReaders, _chain);
         break;
-        case "returnVoidMethod":
+        case "return_void_method":
           _result = _doreturnVoidMethod(_delegate, _payload, _returnVoidMethodReaders, _chain);
         break;
         default: {

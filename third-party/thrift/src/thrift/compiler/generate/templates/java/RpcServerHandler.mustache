@@ -64,7 +64,7 @@ public class {{service:javaCapitalName}}RpcServerHandler {{#service:extends}} ex
     this._eventHandlers = _eventHandlers;
 
     {{#service:singleRequestFunctions}}
-    _methodMap.put("{{function:javaName}}", this);
+    _methodMap.put("{{function:name}}", this);
     _{{function:javaName}}Readers = _create_{{function:javaName}}_request_readers();
     {{/service:singleRequestFunctions}}
 
@@ -389,7 +389,7 @@ public class {{service:javaCapitalName}}RpcServerHandler {{#service:extends}} ex
     try {
       switch(_name) {
         {{#service:streamingFunctions}}
-        case "{{function:javaName}}":
+        case "{{function:name}}":
           _result = _handler_{{function:javaName}}.handleStream(_payload, _chain);
           break;
         {{/service:streamingFunctions}}
@@ -437,7 +437,7 @@ public class {{service:javaCapitalName}}RpcServerHandler {{#service:extends}} ex
     try {
       switch (_name) {
         {{#service:requestResponseFunctions}}
-        case "{{function:javaName}}":
+        case "{{function:name}}":
           _result = _do{{function:javaName}}(_delegate, _payload, _{{function:javaName}}Readers, _chain);
         break;
         {{/service:requestResponseFunctions}}
@@ -486,7 +486,7 @@ public class {{service:javaCapitalName}}RpcServerHandler {{#service:extends}} ex
     try {
       switch (_name) {
         {{#service:onewayFunctions}}
-        case "{{function:javaName}}":
+        case "{{function:name}}":
           _result = _do{{function:javaName}}(_delegate, _payload, _{{function:javaName}}Readers, _chain);
         break;
         {{/service:onewayFunctions}}

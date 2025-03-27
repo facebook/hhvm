@@ -39,7 +39,7 @@ public class FooServiceRpcServerHandler
     this._delegate = _delegate;
     this._eventHandlers = _eventHandlers;
 
-    _methodMap.put("simpleRpc", this);
+    _methodMap.put("simple_rpc", this);
     _simpleRpcReaders = _create_simpleRpc_request_readers();
 
 
@@ -188,7 +188,7 @@ public class FooServiceRpcServerHandler
     reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _result;
     try {
       switch (_name) {
-        case "simpleRpc":
+        case "simple_rpc":
           _result = _dosimpleRpc(_delegate, _payload, _simpleRpcReaders, _chain);
         break;
         default: {

@@ -39,7 +39,7 @@ public class MyLeafRpcServerHandler  extends test.fixtures.inheritance.MyNodeRpc
     this._delegate = _delegate;
     this._eventHandlers = _eventHandlers;
 
-    _methodMap.put("doLeaf", this);
+    _methodMap.put("do_leaf", this);
     _doLeafReaders = _create_doLeaf_request_readers();
 
 
@@ -185,7 +185,7 @@ public class MyLeafRpcServerHandler  extends test.fixtures.inheritance.MyNodeRpc
     reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _result;
     try {
       switch (_name) {
-        case "doLeaf":
+        case "do_leaf":
           _result = _dodoLeaf(_delegate, _payload, _doLeafReaders, _chain);
         break;
         default: {

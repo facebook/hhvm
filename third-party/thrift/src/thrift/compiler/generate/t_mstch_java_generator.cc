@@ -722,7 +722,6 @@ class mstch_java_function : public mstch_function {
         {
             {"function:javaName", &mstch_java_function::java_name},
             {"function:voidType", &mstch_java_function::is_void_type},
-
             {"function:nestedDepth",
              {with_no_caching, &mstch_java_function::get_nested_depth}},
             {"function:nestedDepth++",

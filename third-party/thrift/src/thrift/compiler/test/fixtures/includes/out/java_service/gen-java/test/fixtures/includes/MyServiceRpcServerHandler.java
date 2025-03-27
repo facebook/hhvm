@@ -42,7 +42,7 @@ public class MyServiceRpcServerHandler
 
     _methodMap.put("query", this);
     _queryReaders = _create_query_request_readers();
-    _methodMap.put("hasArgDocs", this);
+    _methodMap.put("has_arg_docs", this);
     _hasArgDocsReaders = _create_hasArgDocs_request_readers();
 
 
@@ -291,7 +291,7 @@ public class MyServiceRpcServerHandler
         case "query":
           _result = _doquery(_delegate, _payload, _queryReaders, _chain);
         break;
-        case "hasArgDocs":
+        case "has_arg_docs":
           _result = _dohasArgDocs(_delegate, _payload, _hasArgDocsReaders, _chain);
         break;
         default: {

@@ -39,7 +39,7 @@ public class MyNodeRpcServerHandler  extends test.fixtures.inheritance.MyRootRpc
     this._delegate = _delegate;
     this._eventHandlers = _eventHandlers;
 
-    _methodMap.put("doMid", this);
+    _methodMap.put("do_mid", this);
     _doMidReaders = _create_doMid_request_readers();
 
 
@@ -185,7 +185,7 @@ public class MyNodeRpcServerHandler  extends test.fixtures.inheritance.MyRootRpc
     reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _result;
     try {
       switch (_name) {
-        case "doMid":
+        case "do_mid":
           _result = _dodoMid(_delegate, _payload, _doMidReaders, _chain);
         break;
         default: {

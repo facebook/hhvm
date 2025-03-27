@@ -39,7 +39,7 @@ public class MyRootRpcServerHandler
     this._delegate = _delegate;
     this._eventHandlers = _eventHandlers;
 
-    _methodMap.put("doRoot", this);
+    _methodMap.put("do_root", this);
     _doRootReaders = _create_doRoot_request_readers();
 
 
@@ -188,7 +188,7 @@ public class MyRootRpcServerHandler
     reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _result;
     try {
       switch (_name) {
-        case "doRoot":
+        case "do_root":
           _result = _dodoRoot(_delegate, _payload, _doRootReaders, _chain);
         break;
         default: {

@@ -39,7 +39,7 @@ public class InteractWithSharedRpcServerHandler
     this._delegate = _delegate;
     this._eventHandlers = _eventHandlers;
 
-    _methodMap.put("doSomeSimilarThings", this);
+    _methodMap.put("do_some_similar_things", this);
     _doSomeSimilarThingsReaders = _create_doSomeSimilarThings_request_readers();
 
 
@@ -191,7 +191,7 @@ _iter0.write0(oprot);
     reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _result;
     try {
       switch (_name) {
-        case "doSomeSimilarThings":
+        case "do_some_similar_things":
           _result = _dodoSomeSimilarThings(_delegate, _payload, _doSomeSimilarThingsReaders, _chain);
         break;
         default: {

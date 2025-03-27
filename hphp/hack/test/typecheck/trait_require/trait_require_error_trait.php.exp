@@ -5,4 +5,4 @@ You cannot return a value (Typing[4084])
   File "trait_require_error_trait.php", line 17, characters 26-29:
   This is a `void` function
 ERROR: File "trait_require_error_trait.php", line 18, characters 12-17:
-You can only use `parent::` in traits that `require extends` or `require class` a valid class (Typing[4074])
+You can only use `parent::` in traits that `require extends`, `require class` or `require this as` a valid class (Typing[4074])

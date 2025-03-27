@@ -4827,17 +4827,22 @@ end = struct
     ( Error_code.ParentInTrait,
       lazy
         ( pos,
-          "You can only use `parent::` in traits that `require extends` or "
-          ^ "`require class` a valid class" ),
+          "You can only use `parent::` in traits that `require extends`, `require class` "
+          ^ "or `require this as` a valid class" ),
       lazy [],
       lazy Explanation.empty,
       [],
       User_error_flags.empty )
 
-  let parent_undefined pos =
+  let parent_undefined pos trait_reqs =
     ( Error_code.ParentUndefined,
       lazy (pos, "parent is undefined"),
-      lazy [],
+      (match trait_reqs with
+      | Some reqs ->
+        lazy
+          (List.map reqs ~f:(fun p ->
+               (p, "The class required here has no parent")))
+      | None -> lazy []),
       lazy Explanation.empty,
       [],
       User_error_flags.empty )
@@ -6034,7 +6039,7 @@ end = struct
       expected_class pos Option.(value_map ~default:"" ~f:Lazy.force suffix)
     | Unknown_type { pos; expected; reason } -> unknown_type pos expected reason
     | Parent_in_trait pos -> parent_in_trait pos
-    | Parent_undefined pos -> parent_undefined pos
+    | Parent_undefined { pos; trait_reqs } -> parent_undefined pos trait_reqs
     | Constructor_no_args pos -> constructor_no_args pos
     | Visibility { pos; msg; decl_pos; reason_msg } ->
       visibility pos msg decl_pos reason_msg

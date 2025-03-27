@@ -1106,7 +1106,10 @@ module Primary : sig
         reason: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Parent_in_trait of Pos.t
-    | Parent_undefined of Pos.t
+    | Parent_undefined of {
+        pos: Pos.t;
+        trait_reqs: Pos_or_decl.t list option;
+      }
     | Constructor_no_args of Pos.t
     | Visibility of {
         pos: Pos.t;

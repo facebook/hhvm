@@ -1538,60 +1538,91 @@ let class_contains_smethod env cty (_pos, mid) =
   in
   List.exists tyl ~f:lookup_member
 
-(* It the trait has a require class constraint, look for the parent
- * of the required class.  Otherwise, to be a valid trait declaration,
- * all of its 'require extends' must match; since there's no multiple
- * inheritance, it follows that all of the 'require extends' must belong
- * to the same inheritance hierarchy and one of them should be the child
- * of all the others.
+(* It the trait has a require class constraint, parent:: must resolve to the parent
+ * of the required class, if it exists.  If a trait has `require extends` constraints
+ * then parent:: can be approximated with the most precise of the required classes: this
+ * must be unique because in a valid trait declaration all `require extends` must be
+ * belong to the same inheritance hierarchy.  A similar reasoning applies to
+ * `require this as` constraint, except that parent:: must be approximated with the most
+ * precise parent of all the required classes, if it exists (if exists it is unique).
  *)
 
-let trait_most_concrete_req_class trait env =
-  let ancestors =
-    match Cls.all_ancestor_req_class_requirements trait with
-    | (_, ty) :: _ ->
-      let (_r, (_p, name), _paraml) = TUtils.unwrap_class_type ty in
-      (match Env.get_class env name with
-      | Decl_entry.Found required_class ->
-        List.map (Cls.all_ancestors required_class) ~f:snd
-      | Decl_entry.NotYetAvailable
-      | Decl_entry.DoesNotExist ->
-        [])
-    | [] ->
-      List.map
-        (Cls.all_ancestor_reqs trait
-        @ Cls.all_ancestor_req_this_as_requirements trait)
-        ~f:snd
+module TraitMostConcreteParent = struct
+  type t =
+    | Found of Cls.t * Typing_defs.decl_ty
+    | NotFound
+end
+
+let trait_most_concrete_parent trait env =
+  let return_ancestor_list ty =
+    let (_r, (_p, name), _paraml) = TUtils.unwrap_class_type ty in
+    match Env.get_class env name with
+    | Decl_entry.Found required_class ->
+      List.map (Cls.all_ancestors required_class) ~f:snd
+    | Decl_entry.NotYetAvailable
+    | Decl_entry.DoesNotExist ->
+      []
   in
-  List.fold
-    ancestors
-    ~f:
-      begin
-        fun acc ty ->
-          let (_r, (_p, name), _paraml) = TUtils.unwrap_class_type ty in
-          let keep =
-            match acc with
-            | Some (c, _ty) -> Cls.has_ancestor c name
-            | None -> false
-          in
-          if keep then
-            acc
-          else
-            let class_ = Env.get_class env name in
-            match class_ with
-            | Decl_entry.NotYetAvailable
-            | Decl_entry.DoesNotExist ->
-              acc
-            | Decl_entry.Found c when Ast_defs.is_c_interface (Cls.kind c) ->
-              acc
-            | Decl_entry.Found c when Ast_defs.is_c_trait (Cls.kind c) ->
-              (* this is an error case for which Typing_type_wellformedness spits out
-               * an error, but does *not* currently remove the offending
-               * 'require extends' or 'require implements' *)
-              acc
-            | Decl_entry.Found c -> Some (c, ty)
-      end
-    ~init:None
+  let ancestors_class = Cls.all_ancestor_req_class_requirements trait in
+  let ancestors_this_as = Cls.all_ancestor_req_this_as_requirements trait in
+  let ancestors_reqs = Cls.all_ancestor_reqs trait in
+  let ancestors =
+    match ancestors_class with
+    | (_, ty) :: _ -> return_ancestor_list ty
+    | [] ->
+      let ancestors_of_req_this =
+        List.concat
+          (List.map ancestors_this_as ~f:(fun r -> return_ancestor_list (snd r)))
+      in
+      ancestors_of_req_this @ List.map ancestors_reqs ~f:snd
+  in
+  let ancestors_without_interfaces =
+    List.filter_map ancestors ~f:(fun ty ->
+        let (_r, (_p, name), _param) = TUtils.unwrap_class_type ty in
+        let class_ = Env.get_class env name in
+        match class_ with
+        | Decl_entry.NotYetAvailable
+        | Decl_entry.DoesNotExist ->
+          None
+        | Decl_entry.Found c when Ast_defs.is_c_interface (Cls.kind c) -> None
+        | Decl_entry.Found c when Ast_defs.is_c_trait (Cls.kind c) ->
+          (* this is an error case for which Typing_type_wellformedness spits out
+           * an error, but does *not* currently remove the offending
+           * 'require extends' or 'require implements' *)
+          None
+        | Decl_entry.Found c -> Some (name, c, ty))
+  in
+  (* if a trait has no constraints, then parent:: cannot be approximated; decls
+   * do not store trait requirements directly, so the following checks if a trait has
+   * require extends, require class, or require this as constraints from the ancestors
+   * they pull in; the only subtlety is that `require implements` must not be taken
+   * into account. *)
+  let open TraitMostConcreteParent in
+  if
+    List.is_empty ancestors_without_interfaces
+    && List.is_empty ancestors_class
+    && List.is_empty ancestors_this_as
+  then
+    None
+  else
+    (* return the most precise ancestor. *)
+    Some
+      (List.fold
+         ancestors_without_interfaces
+         ~f:
+           begin
+             fun acc (name, c, ty) ->
+               let keep =
+                 match acc with
+                 | Found (acc_c, _ty) -> Cls.has_ancestor acc_c name
+                 | NotFound -> false
+               in
+               if keep then
+                 acc
+               else
+                 Found (c, ty)
+           end
+         ~init:NotFound)
 
 let check_arity ?(did_unpack = false) env pos pos_def ft (arity : int) =
   let exp_min = Typing_defs.arity_min ft in
@@ -5472,15 +5503,29 @@ end = struct
       in
       (match Env.get_self_id env with
       | Some self ->
+        let open TraitMostConcreteParent in
         (match Env.get_class env self with
         | Decl_entry.Found trait when Ast_defs.is_c_trait (Cls.kind trait) ->
-          (match trait_most_concrete_req_class trait env with
+          (match trait_most_concrete_parent trait env with
           | None ->
             Typing_error_utils.add_typing_error
               ~env
               Typing_error.(primary @@ Primary.Parent_in_trait pos);
             default
-          | Some (c, parent_ty) ->
+          | Some NotFound ->
+            let trait_reqs =
+              Some
+                (List.map
+                   ~f:fst
+                   (Cls.all_ancestor_req_class_requirements trait
+                   @ Cls.all_ancestor_req_this_as_requirements trait))
+            in
+            Typing_error_utils.add_typing_error
+              ~env
+              Typing_error.(
+                primary @@ Primary.Parent_undefined { pos; trait_reqs });
+            default
+          | Some (Found (c, parent_ty)) ->
             (match Cls.construct c with
             | (_, Inconsistent) ->
               Typing_error_utils.add_typing_error
@@ -5500,7 +5545,8 @@ end = struct
         | Decl_entry.Found _self_tc ->
           Typing_error_utils.add_typing_error
             ~env
-            Typing_error.(primary @@ Primary.Parent_undefined pos);
+            Typing_error.(
+              primary @@ Primary.Parent_undefined { pos; trait_reqs = None });
           default
         | Decl_entry.NotYetAvailable
         | Decl_entry.DoesNotExist ->
@@ -9952,14 +9998,29 @@ end = struct
       | Some self ->
         (match Env.get_class env self with
         | Decl_entry.Found trait when Ast_defs.is_c_trait (Cls.kind trait) ->
-          (match trait_most_concrete_req_class trait env with
+          let open TraitMostConcreteParent in
+          (match trait_most_concrete_parent trait env with
           | None ->
             Typing_error_utils.add_typing_error
               ~env
               Typing_error.(primary @@ Primary.Parent_in_trait p);
             let (env, ty) = Env.fresh_type_error env p in
             make_result env [] Aast.CIparent ty
-          | Some (_, parent_ty) ->
+          | Some NotFound ->
+            let trait_reqs =
+              Some
+                (List.map
+                   ~f:fst
+                   (Cls.all_ancestor_req_class_requirements trait
+                   @ Cls.all_ancestor_req_this_as_requirements trait))
+            in
+            Typing_error_utils.add_typing_error
+              ~env
+              Typing_error.(
+                primary @@ Primary.Parent_undefined { pos = p; trait_reqs });
+            let (env, ty) = Env.fresh_type_error env p in
+            make_result env [] Aast.CIparent ty
+          | Some (Found (_, parent_ty)) ->
             (* inside a trait, parent is SN.Typehints.this, but with the
              * type of the most concrete class that the trait has
              * "require extend"-ed *)
@@ -9973,7 +10034,9 @@ end = struct
           | None ->
             Typing_error_utils.add_typing_error
               ~env
-              Typing_error.(primary @@ Primary.Parent_undefined p);
+              Typing_error.(
+                primary
+                @@ Primary.Parent_undefined { pos = p; trait_reqs = None });
             let (env, ty) = Env.fresh_type_error env p in
             make_result env [] Aast.CIparent ty
           | Some parent ->
@@ -9989,7 +10052,8 @@ end = struct
         | None ->
           Typing_error_utils.add_typing_error
             ~env
-            Typing_error.(primary @@ Primary.Parent_undefined p);
+            Typing_error.(
+              primary @@ Primary.Parent_undefined { pos = p; trait_reqs = None });
           let (env, ty) = Env.fresh_type_error env p in
           make_result env [] Aast.CIparent ty
         | Some parent ->

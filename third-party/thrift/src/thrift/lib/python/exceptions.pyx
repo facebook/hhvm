@@ -263,7 +263,7 @@ class GeneratedErrorMeta(type):
     def __new__(cls, name, bases, dct):
         for base in bases:
             if getattr(base, '_fbthrift_allow_inheritance_DO_NOT_USE', False):
-                continue
+                return super().__new__(cls, name, bases, dct)
             raise TypeError(
                 f"Inheritance from generated thrift exception {name} is deprecated."
             )

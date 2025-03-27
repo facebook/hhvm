@@ -204,20 +204,22 @@ class ExceptionTests(unittest.TestCase):
             types.new_class("TestSubclass", bases=(HardError,))
 
     def test_subclass_allow_inheritance(self) -> None:
-        c = SubclassError()
+        c = SubclassError(message="halp")
         self.assertIsInstance(c, UnusedError)
         self.assertIsInstance(c, GeneratedError)
         self.assertIsInstance(UnusedError(), GeneratedError)
+        self.assertEqual(c.message, "halp")
 
         for catch in (SubclassError, UnusedError, GeneratedError):
             with self.assertRaises(catch):
                 raise SubclassError()
 
     def test_subclass_allow_inheritance_ancestor(self) -> None:
-        c = SubSubclassError()
+        c = SubSubclassError(message="halp")
         self.assertIsInstance(c, SubclassError)
         self.assertIsInstance(c, UnusedError)
         self.assertIsInstance(c, GeneratedError)
+        self.assertEqual(c.message, "halp")
 
         for catch in (SubSubclassError, SubclassError, UnusedError, GeneratedError):
             with self.assertRaises(catch):
@@ -225,10 +227,8 @@ class ExceptionTests(unittest.TestCase):
 
 
 class SubclassError(UnusedError):
-    def __init__(self) -> None:
-        pass
+    pass
 
 
 class SubSubclassError(SubclassError):
-    def __init__(self) -> None:
-        pass
+    pass

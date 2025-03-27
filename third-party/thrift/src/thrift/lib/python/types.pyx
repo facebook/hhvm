@@ -1716,7 +1716,7 @@ class StructMeta(type):
         """
         for base in bases:
             if getattr(base, '_fbthrift_allow_inheritance_DO_NOT_USE', False):
-                continue
+                return super().__new__(cls, cls_name, bases, dct)
             raise TypeError(
                 f"Inheritance from generated thrift struct {cls_name} is deprecated. Please use composition."
             )

@@ -513,23 +513,23 @@ class NumericalConversionsTests(unittest.TestCase):
             types.new_class("TestSubclass", bases=(File,))
 
     def test_subclass_allow_inheritance(self) -> None:
-        c = TestSubclass()
+        c = TestSubclass(name="bob")
         self.assertIsInstance(c, OptionalFile)
         self.assertIsInstance(c, Struct)
         self.assertIsInstance(OptionalFile(), Struct)
+        self.assertEqual(c.name, "bob")
 
     def test_subclass_allow_inheritance_ancestor(self) -> None:
-        c = TestSubSubclass()
+        c = TestSubSubclass(name="bob")
         self.assertIsInstance(c, TestSubclass)
         self.assertIsInstance(c, OptionalFile)
         self.assertIsInstance(c, Struct)
+        self.assertEqual(c.name, "bob")
 
 
 class TestSubclass(OptionalFile):
-    def __init__(self) -> None:
-        pass
+    pass
 
 
 class TestSubSubclass(TestSubclass):
-    def __init__(self) -> None:
-        pass
+    pass

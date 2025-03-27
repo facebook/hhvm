@@ -62,10 +62,6 @@ class RequestPileInterface : public RequestCompletionCallback {
   // different client.
   virtual std::optional<ServerRequest> dequeue() = 0;
 
-  // If a callback was requested this will be called when the request processing
-  // has finished.
-  void onRequestFinished(ServerRequestData&) override;
-
   virtual std::string describe() const = 0;
 
   virtual serverdbginfo::RequestPileDbgInfo getDbgInfo() const { return {}; }

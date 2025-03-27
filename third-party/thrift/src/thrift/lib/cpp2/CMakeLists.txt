@@ -258,7 +258,6 @@ add_library(
   security/extensions/ThriftParametersContext.cpp
   security/extensions/Types.cpp
   server/AdaptiveConcurrency.cpp
-  server/ConcurrencyControllerInterface.cpp
   server/ConcurrencyControllerBase.cpp
   server/Cpp2ConnContext.cpp
   server/Cpp2Connection.cpp
@@ -276,7 +275,6 @@ add_library(
   server/ThreadManagerLoggingWrapper.cpp
   server/RequestDebugLog.cpp
   server/RequestPileBase.cpp
-  server/RequestPileInterface.cpp
   server/ReactiveToggle.cpp
   server/RequestsRegistry.cpp
   server/ResourcePool.cpp

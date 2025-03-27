@@ -62,9 +62,6 @@ class ConcurrencyControllerInterface : public RequestCompletionCallback {
 
   using UserData = intptr_t;
 
-  // This will be called when the request processing has finished.
-  void onRequestFinished(ServerRequestData&) override;
-
   // Stops the concurrency controller. Stops dispatching new requests. This is
   // thread safe and does not block.
   virtual void stop() = 0;

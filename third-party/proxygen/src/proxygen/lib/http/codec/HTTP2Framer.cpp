@@ -452,6 +452,21 @@ ErrorCode parsePriority(Cursor& cursor,
   return ErrorCode::NO_ERROR;
 }
 
+ErrorCode parseRFC9218Priority(Cursor& cursor,
+                               const FrameHeader& header,
+                               uint32_t& priStream,
+                               std::string& outPriority) {
+  DCHECK_LE(header.length, cursor.totalLength());
+  if (header.stream != 0) {
+    return ErrorCode::PROTOCOL_ERROR;
+  }
+  priStream = parseUint31(cursor);
+  auto priLen = header.length - sizeof(priStream);
+  outPriority.resize(priLen);
+  cursor.pull((void*)outPriority.data(), priLen);
+  return ErrorCode::NO_ERROR;
+}
+
 ErrorCode parseRstStream(Cursor& cursor,
                          const FrameHeader& header,
                          ErrorCode& outCode) noexcept {

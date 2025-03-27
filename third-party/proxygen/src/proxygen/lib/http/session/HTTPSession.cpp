@@ -1341,7 +1341,13 @@ void HTTPSession::onPriority(HTTPCodec::StreamID streamID,
   }
 }
 
-void HTTPSession::onPriority(HTTPCodec::StreamID, const HTTPPriority&) {
+void HTTPSession::onPriority(HTTPCodec::StreamID streamID,
+                             const HTTPPriority&) {
+  if (getNumIncomingStreams() >= codec_->getEgressSettings()->getSetting(
+                                     SettingsId::MAX_CONCURRENT_STREAMS,
+                                     std::numeric_limits<int32_t>::max())) {
+    invalidStream(streamID, ErrorCode::PROTOCOL_ERROR);
+  }
 }
 
 void HTTPSession::onCertificateRequest(uint16_t requestId,

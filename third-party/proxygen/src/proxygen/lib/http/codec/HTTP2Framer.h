@@ -42,7 +42,8 @@ enum class FrameType : uint8_t {
   GOAWAY = 7,
   WINDOW_UPDATE = 8,
   CONTINUATION = 9,
-  ALTSVC = 10,    // not in current draft so frame type has not been assigned
+  ALTSVC = 10, // not in current draft so frame type has not been assigned
+  RFC9218_PRIORITY = 16,
   PADDING = 0xbb, // not in current draft, nor likely to ever be used, so will
                   // be ignored
 
@@ -189,6 +190,11 @@ ErrorCode parseExHeaders(folly::io::Cursor& cursor,
 ErrorCode parsePriority(folly::io::Cursor& cursor,
                         const FrameHeader& header,
                         PriorityUpdate& outPriority) noexcept;
+
+ErrorCode parseRFC9218Priority(folly::io::Cursor& cursor,
+                               const FrameHeader& header,
+                               uint32_t& priStream,
+                               std::string& outPriority);
 
 /**
  * This function parses the section of the RST_STREAM frame after the

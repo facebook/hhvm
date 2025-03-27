@@ -9,6 +9,7 @@
 #include <proxygen/lib/http/codec/HTTP2Codec.h>
 
 #include <folly/base64.h>
+#include <proxygen/lib/http/HTTPPriorityFunctions.h>
 #include <proxygen/lib/http/codec/CodecUtil.h>
 #include <proxygen/lib/http/codec/HTTP2Constants.h>
 #include <proxygen/lib/utils/Logging.h>
@@ -229,6 +230,8 @@ ErrorCode HTTP2Codec::parseFrame(folly::io::Cursor& cursor) {
     case http2::FrameType::ALTSVC:
       // fall through, unimplemented
       break;
+    case http2::FrameType::RFC9218_PRIORITY:
+      return parseRFC9218Priority(cursor);
     case http2::FrameType::CERTIFICATE_REQUEST:
       return parseCertificateRequest(cursor);
     case http2::FrameType::CERTIFICATE:
@@ -789,6 +792,22 @@ size_t HTTP2Codec::addPriorityNodes(PriorityQueue& queue,
     parent = id;
   }
   return bytes;
+}
+
+ErrorCode HTTP2Codec::parseRFC9218Priority(Cursor& cursor) {
+  VLOG(4) << "parsing RFC 9218 PRIORITY_UPDATE frame for stream="
+          << curHeader_.stream << " length=" << curHeader_.length;
+  std::string pri;
+  uint32_t priStream = 0;
+  auto err = http2::parseRFC9218Priority(cursor, curHeader_, priStream, pri);
+  RETURN_IF_ERROR(err);
+  auto httpPri = httpPriorityFromString(pri);
+  auto onPriFunc =
+      static_cast<void (HTTPCodec::Callback::*)(StreamID, const HTTPPriority&)>(
+          &HTTPCodec::Callback::onPriority);
+  deliverCallbackIfAllowed(
+      onPriFunc, "onPriority", priStream, httpPri.value_or(HTTPPriority{}));
+  return ErrorCode::NO_ERROR;
 }
 
 ErrorCode HTTP2Codec::parseRstStream(Cursor& cursor) {

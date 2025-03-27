@@ -18,9 +18,7 @@
 
 #include <folly/io/async/fdsock/AsyncFdSocket.h>
 
-namespace apache {
-namespace thrift {
-namespace perf {
+namespace apache::thrift::perf {
 
 folly::AsyncSocket::UniquePtr getSocket(
     folly::EventBase* evb,
@@ -47,6 +45,4 @@ folly::AsyncSocket::UniquePtr getSocket(
   return sock;
 }
 
-} // namespace perf
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::perf

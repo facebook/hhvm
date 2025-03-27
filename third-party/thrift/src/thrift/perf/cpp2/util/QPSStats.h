@@ -24,9 +24,7 @@
 #include <folly/ThreadCachedInt.h>
 #include <thrift/perf/cpp2/util/Counter.h>
 
-namespace facebook {
-namespace thrift {
-namespace benchmarks {
+namespace facebook::thrift::benchmarks {
 
 class QPSStats {
  public:
@@ -57,6 +55,4 @@ class QPSStats {
   std::mutex mutex_;
 };
 
-} // namespace benchmarks
-} // namespace thrift
-} // namespace facebook
+} // namespace facebook::thrift::benchmarks

@@ -21,9 +21,7 @@
 #include <glog/logging.h>
 #include <folly/ThreadCachedInt.h>
 
-namespace facebook {
-namespace thrift {
-namespace benchmarks {
+namespace facebook::thrift::benchmarks {
 
 class Counter {
  public:
@@ -60,6 +58,4 @@ class Counter {
   double maxPerSec_;
 };
 
-} // namespace benchmarks
-} // namespace thrift
-} // namespace facebook
+} // namespace facebook::thrift::benchmarks

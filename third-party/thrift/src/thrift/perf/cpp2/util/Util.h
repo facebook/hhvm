@@ -36,18 +36,14 @@ using apache::thrift::ThriftClient;
 using apache::thrift::ThriftServerAsyncProcessorFactory;
 using apache::thrift::server::ServerConfigsMock;
 
-namespace apache {
-namespace thrift {
-namespace perf {
+namespace apache::thrift::perf {
 folly::AsyncSocket::UniquePtr getSocket(
     folly::EventBase* evb,
     const folly::SocketAddress& addr,
     bool encrypted,
     std::list<std::string> advertizedProtocols = {});
 
-} // namespace perf
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::perf
 
 template <typename AsyncClient>
 static std::unique_ptr<AsyncClient> newHeaderClient(

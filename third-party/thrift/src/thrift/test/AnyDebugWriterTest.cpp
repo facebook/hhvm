@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-#include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/type/AnyDebugWriter.h>
+
+#include <folly/String.h>
+#include <folly/portability/GTest.h>
 #include <thrift/test/AnyTesting.h>
 
 namespace apache::thrift {

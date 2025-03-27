@@ -32,7 +32,8 @@ bool is_type_iobuf(const t_type* type) {
 }
 
 bool is_patch_program(const t_program* prog) {
-  return prog ? boost::algorithm::starts_with(prog->name(), "gen_patch_")
+  return prog ? (boost::algorithm::starts_with(prog->name(), "gen_patch_") ||
+                 boost::algorithm::starts_with(prog->name(), "gen_safe_patch_"))
               : false;
 }
 

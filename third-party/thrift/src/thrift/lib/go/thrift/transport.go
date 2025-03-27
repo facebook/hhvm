@@ -23,8 +23,6 @@ import (
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
-var errTransportInterrupted = errors.New("Transport Interrupted")
-
 // TransportID is the type of the transport, header, rocket, etc.
 type TransportID int16
 
@@ -50,8 +48,9 @@ func (t TransportID) String() string {
 		return "TransportIDRocket"
 	case TransportIDUpgradeToRocket:
 		return "TransportIDUpgradeToRocket"
+	default:
+		return "UNKNOWN"
 	}
-	panic("unreachable")
 }
 
 func isEOF(err error) bool {

@@ -20,6 +20,8 @@ import (
 	"fmt"
 	"io"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 const TRANSPORT_BINARY_DATA_SIZE = 4096
@@ -48,63 +50,43 @@ func TransportTest(t *testing.T, writer io.Writer, reader io.Reader) {
 	}
 
 	_, err := writer.Write(transport_bdata)
-	if err != nil {
-		t.Fatalf("Transport %T cannot write binary data of length %d: %s", writer, len(transport_bdata), err)
-	}
+	require.NoError(t, err)
+
 	err = flush(writer)
-	if err != nil {
-		t.Fatalf("Transport %T cannot flush write of binary data: %s", writer, err)
-	}
+	require.NoError(t, err)
 
 	if headerTrans != nil {
 		err = headerTrans.ResetProtocol()
-		if err != nil {
-			t.Errorf("Header Transport %T cannot read binary data frame", reader)
-		}
+		require.NoError(t, err)
 	}
 	n, err := io.ReadFull(reader, buf)
-	if err != nil {
-		t.Errorf("Transport %T cannot read binary data of length %d: %s", reader, TRANSPORT_BINARY_DATA_SIZE, err)
-	}
-	if n != TRANSPORT_BINARY_DATA_SIZE {
-		t.Errorf("Transport %T read only %d instead of %d bytes of binary data", reader, n, TRANSPORT_BINARY_DATA_SIZE)
-	}
+	require.NoError(t, err)
+	require.Equal(t, TRANSPORT_BINARY_DATA_SIZE, n)
+
 	for k, v := range buf {
-		if v != transport_bdata[k] {
-			t.Fatalf("Transport %T read %d instead of %d for index %d of binary data 2", reader, v, transport_bdata[k], k)
-		}
+		require.Equal(t, transport_bdata[k], v)
 	}
 	_, err = writer.Write(transport_bdata)
-	if err != nil {
-		t.Fatalf("Transport %T cannot write binary data 2 of length %d: %s", writer, len(transport_bdata), err)
-	}
+	require.NoError(t, err)
+
 	err = flush(writer)
-	if err != nil {
-		t.Fatalf("Transport %T cannot flush write binary data 2: %s", writer, err)
-	}
+	require.NoError(t, err)
 
 	if headerTrans != nil {
 		err = headerTrans.ResetProtocol()
-		if err != nil {
-			t.Errorf("Header Transport %T cannot read binary data frame 2", reader)
-		}
+		require.NoError(t, err)
 	}
 	buf = make([]byte, TRANSPORT_BINARY_DATA_SIZE)
 	read := 1
 	for n = 0; n < TRANSPORT_BINARY_DATA_SIZE && read != 0; {
 		read, err = reader.Read(buf[n:])
-		if err != nil {
-			t.Errorf("Transport %T cannot read binary data 2 of total length %d from offset %d: %s", reader, TRANSPORT_BINARY_DATA_SIZE, n, err)
-		}
+		require.NoError(t, err)
 		n += read
 	}
-	if n != TRANSPORT_BINARY_DATA_SIZE {
-		t.Errorf("Transport %T read only %d instead of %d bytes of binary data 2", reader, n, TRANSPORT_BINARY_DATA_SIZE)
-	}
+	require.Equal(t, TRANSPORT_BINARY_DATA_SIZE, n)
+
 	for k, v := range buf {
-		if v != transport_bdata[k] {
-			t.Fatalf("Transport %T read %d instead of %d for index %d of binary data 2", reader, v, transport_bdata[k], k)
-		}
+		require.Equal(t, transport_bdata[k], v)
 	}
 }
 
@@ -116,48 +98,37 @@ func transportHTTPClientTest(t *testing.T, writer io.Writer, reader io.Reader) {
 	httpWPostTrans.SetHeader(transport_header["key"], transport_header["value"])
 
 	_, err := writer.Write(transport_bdata)
-	if err != nil {
-		t.Fatalf("Transport %T cannot write binary data of length %d: %s", writer, len(transport_bdata), err)
-	}
+	require.NoError(t, err)
+
 	err = flush(writer)
-	if err != nil {
-		t.Fatalf("Transport %T cannot flush write of binary data: %s", writer, err)
-	}
+	require.NoError(t, err)
+
 	// Need to assert type of Transport to HTTPClient to expose the Getter
 	httpRPostTrans := reader.(*httpClient)
 	readHeader := httpRPostTrans.GetHeader(transport_header["key"])
-	if err != nil {
-		t.Errorf("Transport %T cannot read HTTP Header Value", httpRPostTrans)
-	}
+	require.Equal(t, transport_header["value"], readHeader)
 
-	if transport_header["value"] != readHeader {
-		t.Errorf("Expected HTTP Header Value %s, got %s", transport_header["value"], readHeader)
-	}
 	n, err := io.ReadFull(reader, buf)
-	if err != nil {
-		t.Errorf("Transport %T cannot read binary data of length %d: %s", reader, TRANSPORT_BINARY_DATA_SIZE, err)
-	}
-	if n != TRANSPORT_BINARY_DATA_SIZE {
-		t.Errorf("Transport %T read only %d instead of %d bytes of binary data", reader, n, TRANSPORT_BINARY_DATA_SIZE)
-	}
+	require.NoError(t, err)
+	require.Equal(t, TRANSPORT_BINARY_DATA_SIZE, n)
+
 	for k, v := range buf {
-		if v != transport_bdata[k] {
-			t.Fatalf("Transport %T read %d instead of %d for index %d of binary data 2", reader, v, transport_bdata[k], k)
-		}
+		require.Equal(t, transport_bdata[k], v)
 	}
 }
 
 func TestIsEOF(t *testing.T) {
-	if !isEOF(io.EOF) {
-		t.Fatalf("expected true")
-	}
-	if !isEOF(fmt.Errorf("wrapped error: %w", io.EOF)) {
-		t.Fatalf("expected true")
-	}
-	if !isEOF(NewTransportException(END_OF_FILE, "dummy")) {
-		t.Fatalf("expected true")
-	}
-	if !isEOF(fmt.Errorf("wrapped trasport error: %w", NewTransportException(END_OF_FILE, "dummy"))) {
-		t.Fatalf("expected true")
-	}
+	require.True(t, isEOF(io.EOF))
+	require.True(t, isEOF(fmt.Errorf("wrapped error: %w", io.EOF)))
+	require.True(t, isEOF(NewTransportException(END_OF_FILE, "dummy")))
+	require.True(t, isEOF(fmt.Errorf("wrapped trasport error: %w", NewTransportException(END_OF_FILE, "dummy"))))
+	require.False(t, isEOF(io.ErrNoProgress))
+}
+
+func TestString(t *testing.T) {
+	require.Equal(t, "TransportIDUnknown", TransportIDUnknown.String())
+	require.Equal(t, "TransportIDHeader", TransportIDHeader.String())
+	require.Equal(t, "TransportIDRocket", TransportIDRocket.String())
+	require.Equal(t, "TransportIDUpgradeToRocket", TransportIDUpgradeToRocket.String())
+	require.Equal(t, "UNKNOWN", TransportID(12345).String())
 }

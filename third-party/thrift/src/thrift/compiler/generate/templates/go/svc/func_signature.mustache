@@ -26,6 +26,12 @@
 }}{{^last?}}, {{/last?}}{{!
 }}{{/function:args}}{{!
 }}) {{!
-}}{{#function:return_type}}{{!
-}}({{^type:void?}}{{#type:struct?}}*{{/type:struct?}}{{> common/type}}, {{/type:void?}}error){{!
-}}{{/function:return_type}}
+}}{{#if function:oneway?}}{{!
+  }}(error){{!
+}}{{#else if function:sink?}}{{!
+  }}NOT_IMPLEMENTED{{!
+}}{{#else if function:stream?}}{{!
+  }}NOT_IMPLEMENTED{{!
+}}{{#else}}{{!
+  }}({{#function:return_type}}{{^type:void?}}{{#type:struct?}}*{{/type:struct?}}{{> common/type}}, {{/type:void?}}{{/function:return_type}}error){{!
+}}{{/if function:oneway?}}

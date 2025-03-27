@@ -53,34 +53,17 @@ func New{{service:go_name}}Client(prot thrift.DO_NOT_USE_ChannelWrapper) *{{serv
 func (c *{{service:go_name}}Client) Close() error {
     return c.ch.Close()
 }
+
 {{#service:functions}}
 {{#function:go_client_supported?}}
+{{#if function:oneway?}}
+{{> svc/client_func_oneway}}
+{{#else if function:stream?}}
+{{> svc/client_func_stream}}
+{{#else}}
+{{> svc/client_func_request_response}}
+{{/if function:oneway?}}
 
-func (c *{{service:go_name}}Client) {{> svc/func_signature}} {
-    fbthriftReq := &req{{service:go_name}}{{function:go_name}}{
-        {{#function:args}}
-        {{#field:type}}
-        {{field:go_name}}: {{field:go_arg_name}},
-        {{/field:type}}
-        {{/function:args}}
-    }
-    {{#function:oneway?}}
-    return c.ch.Oneway({{function:ctx_arg_name}}, "{{function:name}}", fbthriftReq)
-    {{/function:oneway?}}{{!
 
-    }}{{^function:oneway?}}
-    fbthriftResp := newResp{{service:go_name}}{{function:go_name}}()
-    fbthriftErr := c.ch.Call({{function:ctx_arg_name}}, "{{function:name}}", fbthriftReq, fbthriftResp)
-    if fbthriftErr != nil {
-        return {{^function:void?}}{{#function:return_type}}{{> common/go_zero_value}}{{/function:return_type}}, {{/function:void?}}fbthriftErr
-    }{{#function:exceptions?}}{{!
-    }}{{#function:exceptions}}{{!
-    }} else if fbthriftResp.{{field:go_name}} != nil {
-        return {{^function:void?}}{{#function:return_type}}{{> common/go_zero_value}}{{/function:return_type}}, {{/function:void?}}fbthriftResp.{{field:go_name}}
-    }{{/function:exceptions}}{{!
-    }}{{/function:exceptions?}}
-    return {{^function:void?}}fbthriftResp.Get{{function:retval_field_name}}(), {{/function:void?}}nil
-    {{/function:oneway?}}
-}
 {{/function:go_client_supported?}}
 {{/service:functions}}

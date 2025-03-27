@@ -153,6 +153,8 @@ class py3_mstch_program : public mstch_program {
             {"program:unique_functions_by_return_type",
              &py3_mstch_program::unique_functions_by_return_type},
             {"program:has_types?", &py3_mstch_program::program_has_types},
+            {"program:needs_container_converters?",
+             &py3_mstch_program::needs_container_converters},
             {"program:cppNamespaces", &py3_mstch_program::getCpp2Namespace},
             {"program:py3Namespaces", &py3_mstch_program::getPy3Namespace},
             {"program:includeNamespaces",
@@ -208,6 +210,10 @@ class py3_mstch_program : public mstch_program {
   mstch::node getContainerTypes() { return make_mstch_types(containers_); }
 
   mstch::node hasContainerTypes() { return !containers_.empty(); }
+
+  mstch::node needs_container_converters() {
+    return !containers_.empty() && !program_->services().empty();
+  }
 
   mstch::node hasConstants() {
     for (auto constant : program_->consts()) {

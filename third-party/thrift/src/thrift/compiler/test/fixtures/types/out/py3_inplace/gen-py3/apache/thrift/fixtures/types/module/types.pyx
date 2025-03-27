@@ -50,8 +50,10 @@ from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
 import importlib
+cimport apache.thrift.fixtures.types.module.thrift_converter as _apache_thrift_fixtures_types_module_thrift_converter
 cimport apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 import apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
+cimport apache.thrift.fixtures.types.included.thrift_converter as _apache_thrift_fixtures_types_included_thrift_converter
 
 
 
@@ -126,3 +128,436 @@ map_i32_string_1261 = Map__i32_string
 set_i32_7070 = Set__i32
 set_i32_7194 = folly_sorted_vector_set__Set__i32
 string_5252 = str
+cdef _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string] std_unordered_map__Map__i32_string__make_instance(object items) except *:
+    cdef _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string] c_inst
+    cdef cint32_t c_key
+    if items is None:
+        return cmove(c_inst)
+    for key, item in items.items():
+        if not isinstance(key, int):
+            raise TypeError(f"{key!r} is not of type int")
+        c_key = <cint32_t> key
+        if not isinstance(item, str):
+            raise TypeError(f"{item!r} is not of type str")
+
+        c_inst[c_key] = item.encode('UTF-8')
+    return cmove(c_inst)
+
+cdef object std_unordered_map__Map__i32_string__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]] iter = __map_iter[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]](c_map)
+    cdef cint32_t ckey = 0
+    cdef string cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[ckey] = __init_unicode_from_cpp(cval)
+    return std_unordered_map__Map__i32_string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
+
+cdef vector[cint64_t] List__i64__make_instance(object items) except *:
+    cdef vector[cint64_t] c_inst
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, int):
+            raise TypeError(f"{item!r} is not of type int")
+        item = <cint64_t> item
+        c_inst.push_back(item)
+    return cmove(c_inst)
+
+cdef object List__i64__from_cpp(const vector[cint64_t]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    for idx in range(c_vec.size()):
+        py_list.append(c_vec[idx])
+    return List__i64(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+cdef cmap[string,cint64_t] Map__binary_i64__make_instance(object items) except *:
+    cdef cmap[string,cint64_t] c_inst
+    cdef string c_key
+    if items is None:
+        return cmove(c_inst)
+    for key, item in items.items():
+        if not isinstance(key, bytes):
+            raise TypeError(f"{key!r} is not of type bytes")
+        c_key = key
+        if not isinstance(item, int):
+            raise TypeError(f"{item!r} is not of type int")
+        item = <cint64_t> item
+
+        c_inst[c_key] = item
+    return cmove(c_inst)
+
+cdef object Map__binary_i64__from_cpp(const cmap[string,cint64_t]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[string,cint64_t]] iter = __map_iter[cmap[string,cint64_t]](c_map)
+    cdef string ckey
+    cdef cint64_t cval = 0
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[bytes(<string>ckey)] = cval
+    return Map__binary_i64(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
+
+cdef vector[cint32_t] List__i32__make_instance(object items) except *:
+    cdef vector[cint32_t] c_inst
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, int):
+            raise TypeError(f"{item!r} is not of type int")
+        item = <cint32_t> item
+        c_inst.push_back(item)
+    return cmove(c_inst)
+
+cdef object List__i32__from_cpp(const vector[cint32_t]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    for idx in range(c_vec.size()):
+        py_list.append(c_vec[idx])
+    return List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+cdef _apache_thrift_fixtures_types_module_cbindings.std_list[cint32_t] std_list__List__i32__make_instance(object items) except *:
+    cdef _apache_thrift_fixtures_types_module_cbindings.std_list[cint32_t] c_inst
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, int):
+            raise TypeError(f"{item!r} is not of type int")
+        item = <cint32_t> item
+        c_inst.push_back(item)
+    return cmove(c_inst)
+
+cdef object std_list__List__i32__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.std_list[cint32_t]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    for idx in range(c_vec.size()):
+        py_list.append(c_vec[idx])
+    return std_list__List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+cdef _apache_thrift_fixtures_types_module_cbindings.std_deque[cint32_t] std_deque__List__i32__make_instance(object items) except *:
+    cdef _apache_thrift_fixtures_types_module_cbindings.std_deque[cint32_t] c_inst
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, int):
+            raise TypeError(f"{item!r} is not of type int")
+        item = <cint32_t> item
+        c_inst.push_back(item)
+    return cmove(c_inst)
+
+cdef object std_deque__List__i32__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.std_deque[cint32_t]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    for idx in range(c_vec.size()):
+        py_list.append(c_vec[idx])
+    return std_deque__List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+cdef _apache_thrift_fixtures_types_module_cbindings.folly_fbvector[cint32_t] folly_fbvector__List__i32__make_instance(object items) except *:
+    cdef _apache_thrift_fixtures_types_module_cbindings.folly_fbvector[cint32_t] c_inst
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, int):
+            raise TypeError(f"{item!r} is not of type int")
+        item = <cint32_t> item
+        c_inst.push_back(item)
+    return cmove(c_inst)
+
+cdef object folly_fbvector__List__i32__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.folly_fbvector[cint32_t]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    for idx in range(c_vec.size()):
+        py_list.append(c_vec[idx])
+    return folly_fbvector__List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+cdef _apache_thrift_fixtures_types_module_cbindings.folly_small_vector[cint32_t] folly_small_vector__List__i32__make_instance(object items) except *:
+    cdef _apache_thrift_fixtures_types_module_cbindings.folly_small_vector[cint32_t] c_inst
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, int):
+            raise TypeError(f"{item!r} is not of type int")
+        item = <cint32_t> item
+        c_inst.push_back(item)
+    return cmove(c_inst)
+
+cdef object folly_small_vector__List__i32__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.folly_small_vector[cint32_t]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    for idx in range(c_vec.size()):
+        py_list.append(c_vec[idx])
+    return folly_small_vector__List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+cdef _apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t] folly_sorted_vector_set__Set__i32__make_instance(object items) except *:
+    cdef _apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t] c_inst
+    cdef cint32_t c_item
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, int):
+            raise TypeError(f"{item!r} is not of type int")
+        c_item = <cint32_t> item
+        c_inst.insert(c_item)
+    return cmove(c_inst)
+
+cdef object folly_sorted_vector_set__Set__i32__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[_apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t]] iter = __set_iter[_apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t]](c_set)
+    cdef cint32_t citem = 0
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(citem)
+    return folly_sorted_vector_set__Set__i32(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
+
+cdef cmap[cint32_t,string] Map__i32_string__make_instance(object items) except *:
+    cdef cmap[cint32_t,string] c_inst
+    cdef cint32_t c_key
+    if items is None:
+        return cmove(c_inst)
+    for key, item in items.items():
+        if not isinstance(key, int):
+            raise TypeError(f"{key!r} is not of type int")
+        c_key = <cint32_t> key
+        if not isinstance(item, str):
+            raise TypeError(f"{item!r} is not of type str")
+
+        c_inst[c_key] = item.encode('UTF-8')
+    return cmove(c_inst)
+
+cdef object Map__i32_string__from_cpp(const cmap[cint32_t,string]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[cint32_t,string]] iter = __map_iter[cmap[cint32_t,string]](c_map)
+    cdef cint32_t ckey = 0
+    cdef string cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[ckey] = __init_unicode_from_cpp(cval)
+    return Map__i32_string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
+
+cdef _apache_thrift_fixtures_types_module_cbindings.std_list_int32_t std_list_int32_t__List__i32__make_instance(object items) except *:
+    cdef _apache_thrift_fixtures_types_module_cbindings.std_list_int32_t c_inst
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, int):
+            raise TypeError(f"{item!r} is not of type int")
+        item = <cint32_t> item
+        c_inst.push_back(item)
+    return cmove(c_inst)
+
+cdef object std_list_int32_t__List__i32__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.std_list_int32_t& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    for idx in range(c_vec.size()):
+        py_list.append(c_vec[idx])
+    return std_list_int32_t__List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+cdef cmap[string,cint32_t] Map__string_i32__make_instance(object items) except *:
+    cdef cmap[string,cint32_t] c_inst
+    cdef string c_key
+    if items is None:
+        return cmove(c_inst)
+    for key, item in items.items():
+        if not isinstance(key, str):
+            raise TypeError(f"{key!r} is not of type str")
+        c_key = key.encode('UTF-8')
+        if not isinstance(item, int):
+            raise TypeError(f"{item!r} is not of type int")
+        item = <cint32_t> item
+
+        c_inst[c_key] = item
+    return cmove(c_inst)
+
+cdef object Map__string_i32__from_cpp(const cmap[string,cint32_t]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[string,cint32_t]] iter = __map_iter[cmap[string,cint32_t]](c_map)
+    cdef string ckey
+    cdef cint32_t cval = 0
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[__init_unicode_from_cpp(ckey)] = cval
+    return Map__string_i32(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
+
+cdef vector[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]] List__std_unordered_map__Map__i32_string__make_instance(object items) except *:
+    cdef vector[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]] c_inst
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if item is None:
+            raise TypeError("None is not of the type _typing.Mapping[int, str]")
+        if not isinstance(item, std_unordered_map__Map__i32_string):
+            item = std_unordered_map__Map__i32_string(item)
+        c_inst.push_back(std_unordered_map__Map__i32_string__make_instance(item))
+    return cmove(c_inst)
+
+cdef object List__std_unordered_map__Map__i32_string__from_cpp(const vector[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    for idx in range(c_vec.size()):
+        py_list.append(std_unordered_map__Map__i32_string__from_cpp(c_vec[idx]))
+    return List__std_unordered_map__Map__i32_string(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+cdef cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep] Map__i32_IncompleteMapDep__make_instance(object items) except *:
+    cdef cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep] c_inst
+    cdef cint32_t c_key
+    if items is None:
+        return cmove(c_inst)
+    for key, item in items.items():
+        if not isinstance(key, int):
+            raise TypeError(f"{key!r} is not of type int")
+        c_key = <cint32_t> key
+        if not isinstance(item, IncompleteMapDep):
+            raise TypeError(f"{item!r} is not of type IncompleteMapDep")
+
+        c_inst[c_key] = _apache_thrift_fixtures_types_module_thrift_converter.IncompleteMapDep_convert_to_cpp(item._to_python())
+    return cmove(c_inst)
+
+cdef object Map__i32_IncompleteMapDep__from_cpp(const cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep]] iter = __map_iter[cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep]](c_map)
+    cdef cint32_t ckey = 0
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep] cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[ckey] = IncompleteMapDep.from_python(_apache_thrift_fixtures_types_module_thrift_converter.IncompleteMapDep_from_cpp(__deref_const[_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep](cval)))
+    return Map__i32_IncompleteMapDep(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
+
+cdef _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep] std_unordered_map__Map__i32_CompleteMapDep__make_instance(object items) except *:
+    cdef _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep] c_inst
+    cdef cint32_t c_key
+    if items is None:
+        return cmove(c_inst)
+    for key, item in items.items():
+        if not isinstance(key, int):
+            raise TypeError(f"{key!r} is not of type int")
+        c_key = <cint32_t> key
+        if not isinstance(item, CompleteMapDep):
+            raise TypeError(f"{item!r} is not of type CompleteMapDep")
+
+        c_inst[c_key] = _apache_thrift_fixtures_types_module_thrift_converter.CompleteMapDep_convert_to_cpp(item._to_python())
+    return cmove(c_inst)
+
+cdef object std_unordered_map__Map__i32_CompleteMapDep__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep]] iter = __map_iter[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep]](c_map)
+    cdef cint32_t ckey = 0
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep] cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[ckey] = CompleteMapDep.from_python(_apache_thrift_fixtures_types_module_thrift_converter.CompleteMapDep_from_cpp(__deref_const[_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep](cval)))
+    return std_unordered_map__Map__i32_CompleteMapDep(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
+
+cdef _apache_thrift_fixtures_types_module_cbindings._std_list[_apache_thrift_fixtures_types_module_cbindings.cIncompleteListDep] _std_list__List__IncompleteListDep__make_instance(object items) except *:
+    cdef _apache_thrift_fixtures_types_module_cbindings._std_list[_apache_thrift_fixtures_types_module_cbindings.cIncompleteListDep] c_inst
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, IncompleteListDep):
+            raise TypeError(f"{item!r} is not of type IncompleteListDep")
+        c_inst.push_back(_apache_thrift_fixtures_types_module_thrift_converter.IncompleteListDep_convert_to_cpp(item._to_python()))
+    return cmove(c_inst)
+
+cdef object _std_list__List__IncompleteListDep__from_cpp(const _apache_thrift_fixtures_types_module_cbindings._std_list[_apache_thrift_fixtures_types_module_cbindings.cIncompleteListDep]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    for idx in range(c_vec.size()):
+        py_list.append(IncompleteListDep.from_python(_apache_thrift_fixtures_types_module_thrift_converter.IncompleteListDep_from_cpp(__deref_const[_apache_thrift_fixtures_types_module_cbindings.cIncompleteListDep](c_vec[idx]))))
+    return _std_list__List__IncompleteListDep(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+cdef _apache_thrift_fixtures_types_module_cbindings.folly_small_vector[_apache_thrift_fixtures_types_module_cbindings.cCompleteListDep] folly_small_vector__List__CompleteListDep__make_instance(object items) except *:
+    cdef _apache_thrift_fixtures_types_module_cbindings.folly_small_vector[_apache_thrift_fixtures_types_module_cbindings.cCompleteListDep] c_inst
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, CompleteListDep):
+            raise TypeError(f"{item!r} is not of type CompleteListDep")
+        c_inst.push_back(_apache_thrift_fixtures_types_module_thrift_converter.CompleteListDep_convert_to_cpp(item._to_python()))
+    return cmove(c_inst)
+
+cdef object folly_small_vector__List__CompleteListDep__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.folly_small_vector[_apache_thrift_fixtures_types_module_cbindings.cCompleteListDep]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    for idx in range(c_vec.size()):
+        py_list.append(CompleteListDep.from_python(_apache_thrift_fixtures_types_module_thrift_converter.CompleteListDep_from_cpp(__deref_const[_apache_thrift_fixtures_types_module_cbindings.cCompleteListDep](c_vec[idx]))))
+    return folly_small_vector__List__CompleteListDep(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+cdef vector[_apache_thrift_fixtures_types_module_cbindings.cAdaptedListDep] List__AdaptedListDep__make_instance(object items) except *:
+    cdef vector[_apache_thrift_fixtures_types_module_cbindings.cAdaptedListDep] c_inst
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, AdaptedListDep):
+            raise TypeError(f"{item!r} is not of type AdaptedListDep")
+        c_inst.push_back(_apache_thrift_fixtures_types_module_thrift_converter.AdaptedListDep_convert_to_cpp(item._to_python()))
+    return cmove(c_inst)
+
+cdef object List__AdaptedListDep__from_cpp(const vector[_apache_thrift_fixtures_types_module_cbindings.cAdaptedListDep]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    for idx in range(c_vec.size()):
+        py_list.append(AdaptedListDep.from_python(_apache_thrift_fixtures_types_module_thrift_converter.AdaptedListDep_from_cpp(__deref_const[_apache_thrift_fixtures_types_module_cbindings.cAdaptedListDep](c_vec[idx]))))
+    return List__AdaptedListDep(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+cdef vector[_apache_thrift_fixtures_types_module_cbindings.cDependentAdaptedListDep] List__DependentAdaptedListDep__make_instance(object items) except *:
+    cdef vector[_apache_thrift_fixtures_types_module_cbindings.cDependentAdaptedListDep] c_inst
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, DependentAdaptedListDep):
+            raise TypeError(f"{item!r} is not of type DependentAdaptedListDep")
+        c_inst.push_back(_apache_thrift_fixtures_types_module_thrift_converter.DependentAdaptedListDep_convert_to_cpp(item._to_python()))
+    return cmove(c_inst)
+
+cdef object List__DependentAdaptedListDep__from_cpp(const vector[_apache_thrift_fixtures_types_module_cbindings.cDependentAdaptedListDep]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    for idx in range(c_vec.size()):
+        py_list.append(DependentAdaptedListDep.from_python(_apache_thrift_fixtures_types_module_thrift_converter.DependentAdaptedListDep_from_cpp(__deref_const[_apache_thrift_fixtures_types_module_cbindings.cDependentAdaptedListDep](c_vec[idx]))))
+    return List__DependentAdaptedListDep(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+cdef cset[cint32_t] Set__i32__make_instance(object items) except *:
+    cdef cset[cint32_t] c_inst
+    cdef cint32_t c_item
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, int):
+            raise TypeError(f"{item!r} is not of type int")
+        c_item = <cint32_t> item
+        c_inst.insert(c_item)
+    return cmove(c_inst)
+
+cdef object Set__i32__from_cpp(const cset[cint32_t]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[cset[cint32_t]] iter = __set_iter[cset[cint32_t]](c_set)
+    cdef cint32_t citem = 0
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(citem)
+    return Set__i32(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
+
+cdef cmap[cint32_t,cint32_t] Map__i32_i32__make_instance(object items) except *:
+    cdef cmap[cint32_t,cint32_t] c_inst
+    cdef cint32_t c_key
+    if items is None:
+        return cmove(c_inst)
+    for key, item in items.items():
+        if not isinstance(key, int):
+            raise TypeError(f"{key!r} is not of type int")
+        c_key = <cint32_t> key
+        if not isinstance(item, int):
+            raise TypeError(f"{item!r} is not of type int")
+        item = <cint32_t> item
+
+        c_inst[c_key] = item
+    return cmove(c_inst)
+
+cdef object Map__i32_i32__from_cpp(const cmap[cint32_t,cint32_t]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[cint32_t,cint32_t]] iter = __map_iter[cmap[cint32_t,cint32_t]](c_map)
+    cdef cint32_t ckey = 0
+    cdef cint32_t cval = 0
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[ckey] = cval
+    return Map__i32_i32(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
+

@@ -50,6 +50,7 @@ from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
 import importlib
+cimport test.fixtures.basic.module.thrift_converter as _test_fixtures_basic_module_thrift_converter
 
 
 
@@ -81,3 +82,118 @@ AMap = _fbthrift_types_inplace.AMap
 
 MyEnumAlias = MyEnum
 MyDataItemAlias = MyDataItem
+cdef cset[float] Set__float__make_instance(object items) except *:
+    cdef cset[float] c_inst
+    cdef float c_item
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, (float, int)):
+            raise TypeError(f"{item!r} is not of type float")
+        c_item = item
+        c_inst.insert(c_item)
+    return cmove(c_inst)
+
+cdef object Set__float__from_cpp(const cset[float]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[cset[float]] iter = __set_iter[cset[float]](c_set)
+    cdef float citem = 0
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(citem)
+    return Set__float(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
+
+cdef vector[cint32_t] List__i32__make_instance(object items) except *:
+    cdef vector[cint32_t] c_inst
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, int):
+            raise TypeError(f"{item!r} is not of type int")
+        item = <cint32_t> item
+        c_inst.push_back(item)
+    return cmove(c_inst)
+
+cdef object List__i32__from_cpp(const vector[cint32_t]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    for idx in range(c_vec.size()):
+        py_list.append(c_vec[idx])
+    return List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+cdef cset[string] Set__string__make_instance(object items) except *:
+    cdef cset[string] c_inst
+    cdef string c_item
+    if items is None:
+        return cmove(c_inst)
+    if isinstance(items, str):
+        raise TypeError("If you really want to pass a string into a _typing.AbstractSet[str] field, explicitly convert it first.")
+    for item in items:
+        if not isinstance(item, str):
+            raise TypeError(f"{item!r} is not of type str")
+        c_item = item.encode('UTF-8')
+        c_inst.insert(c_item)
+    return cmove(c_inst)
+
+cdef object Set__string__from_cpp(const cset[string]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[cset[string]] iter = __set_iter[cset[string]](c_set)
+    cdef string citem
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(__init_unicode_from_cpp(citem))
+    return Set__string(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
+
+cdef cmap[string,cint64_t] Map__string_i64__make_instance(object items) except *:
+    cdef cmap[string,cint64_t] c_inst
+    cdef string c_key
+    if items is None:
+        return cmove(c_inst)
+    for key, item in items.items():
+        if not isinstance(key, str):
+            raise TypeError(f"{key!r} is not of type str")
+        c_key = key.encode('UTF-8')
+        if not isinstance(item, int):
+            raise TypeError(f"{item!r} is not of type int")
+        item = <cint64_t> item
+
+        c_inst[c_key] = item
+    return cmove(c_inst)
+
+cdef object Map__string_i64__from_cpp(const cmap[string,cint64_t]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[string,cint64_t]] iter = __map_iter[cmap[string,cint64_t]](c_map)
+    cdef string ckey
+    cdef cint64_t cval = 0
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[__init_unicode_from_cpp(ckey)] = cval
+    return Map__string_i64(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
+
+cdef cmap[string,vector[cint32_t]] Map__string_List__i32__make_instance(object items) except *:
+    cdef cmap[string,vector[cint32_t]] c_inst
+    cdef string c_key
+    if items is None:
+        return cmove(c_inst)
+    for key, item in items.items():
+        if not isinstance(key, str):
+            raise TypeError(f"{key!r} is not of type str")
+        c_key = key.encode('UTF-8')
+        if item is None:
+            raise TypeError("None is not of type _typing.Sequence[int]")
+        if not isinstance(item, List__i32):
+            item = List__i32(item)
+
+        c_inst[c_key] = List__i32__make_instance(item)
+    return cmove(c_inst)
+
+cdef object Map__string_List__i32__from_cpp(const cmap[string,vector[cint32_t]]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[string,vector[cint32_t]]] iter = __map_iter[cmap[string,vector[cint32_t]]](c_map)
+    cdef string ckey
+    cdef vector[cint32_t] cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[__init_unicode_from_cpp(ckey)] = List__i32__from_cpp(cval)
+    return Map__string_List__i32(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
+

@@ -1,0 +1,68 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+This is used to resolve container converter prefix. The prefix used depends whether
+referenced from types.pyx main file, field_setter, or container converter.
+
+}}
+{{! container to cpp converter }}
+cdef {{> types/cython_cpp_type}} {{type:flat_name}}__make_instance(object items) except *:
+{{> types/make_instance }}
+
+
+{{#type:list?}}
+cdef object {{type:flat_name}}__from_cpp(const {{> types/cython_cpp_type}}& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    {{#type:list_elem_type}}
+    for idx in range(c_vec.size()):
+        py_list.append({{> types/vector_cpp_to_python }})
+    {{/type:list_elem_type}}
+    return {{type:flat_name}}(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+{{/type:list?}}
+{{#type:set?}}
+cdef object {{type:flat_name}}__from_cpp(const {{> types/cython_cpp_type}}& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[{{> types/cython_cpp_type}}] iter = __set_iter[{{> types/cython_cpp_type}}](c_set)
+    {{#type:set_elem_type}}
+    cdef {{> types/cython_cpp_container_item_type}} citem{{> types/type_default_value}}
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append({{> types/set_cpp_to_python }})
+    {{/type:set_elem_type}}
+    return {{type:flat_name}}(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
+{{/type:set?}}
+{{#type:map?}}
+cdef object {{type:flat_name}}__from_cpp(const {{> types/cython_cpp_type}}& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[{{> types/cython_cpp_type}}] iter = __map_iter[{{> types/cython_cpp_type}}](c_map)
+    {{#type:key_type}}
+    cdef {{> types/cython_cpp_container_item_type}} ckey{{> types/type_default_value}}
+    {{/type:key_type}}
+    {{#type:value_type}}
+    cdef {{> types/cython_cpp_container_item_type}} cval{{> types/type_default_value}}
+    {{/type:value_type}}
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[{{#type:key_type}}{{!
+            }}{{> types/map_key_cpp_to_python}}{{!
+        }}{{/type:key_type}}] = {{#type:value_type}}{{!
+            }}{{> types/map_val_cpp_to_python }}{{!
+        }}{{/type:value_type}}
+    return {{type:flat_name}}(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
+{{/type:map?}}

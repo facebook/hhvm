@@ -51,3 +51,18 @@ cdef extern from "thrift/compiler/test/fixtures/basic/gen-py3/module/types.h":
   pass
 
 
+cdef cset[float] Set__float__make_instance(object items) except *
+cdef object Set__float__from_cpp(const cset[float]&) except *
+
+cdef vector[cint32_t] List__i32__make_instance(object items) except *
+cdef object List__i32__from_cpp(const vector[cint32_t]&) except *
+
+cdef cset[string] Set__string__make_instance(object items) except *
+cdef object Set__string__from_cpp(const cset[string]&) except *
+
+cdef cmap[string,cint64_t] Map__string_i64__make_instance(object items) except *
+cdef object Map__string_i64__from_cpp(const cmap[string,cint64_t]&) except *
+
+cdef cmap[string,vector[cint32_t]] Map__string_List__i32__make_instance(object items) except *
+cdef object Map__string_List__i32__from_cpp(const cmap[string,vector[cint32_t]]&) except *
+

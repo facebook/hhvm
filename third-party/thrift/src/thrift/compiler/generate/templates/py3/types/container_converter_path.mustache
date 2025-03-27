@@ -19,4 +19,8 @@
 This is used to resolve container converter prefix. The prefix used depends whether
 referenced from types.pyx main file, field_setter, or container converter.
 
-}}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{type:flat_name}}
+}}{{^program:inplace_migrate?}}{{!
+  }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{type:flat_name}}{{!
+}}{{/program:inplace_migrate?}}{{#program:inplace_migrate?}}{{!
+  }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{type:flat_name}}{{!
+}}{{/program:inplace_migrate?}}

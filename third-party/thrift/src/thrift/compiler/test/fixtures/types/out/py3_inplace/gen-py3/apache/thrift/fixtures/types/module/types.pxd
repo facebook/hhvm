@@ -53,3 +53,66 @@ cdef extern from "thrift/compiler/test/fixtures/types/gen-py3/module/types.h":
   pass
 
 
+cdef _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string] std_unordered_map__Map__i32_string__make_instance(object items) except *
+cdef object std_unordered_map__Map__i32_string__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]&) except *
+
+cdef vector[cint64_t] List__i64__make_instance(object items) except *
+cdef object List__i64__from_cpp(const vector[cint64_t]&) except *
+
+cdef cmap[string,cint64_t] Map__binary_i64__make_instance(object items) except *
+cdef object Map__binary_i64__from_cpp(const cmap[string,cint64_t]&) except *
+
+cdef vector[cint32_t] List__i32__make_instance(object items) except *
+cdef object List__i32__from_cpp(const vector[cint32_t]&) except *
+
+cdef _apache_thrift_fixtures_types_module_cbindings.std_list[cint32_t] std_list__List__i32__make_instance(object items) except *
+cdef object std_list__List__i32__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.std_list[cint32_t]&) except *
+
+cdef _apache_thrift_fixtures_types_module_cbindings.std_deque[cint32_t] std_deque__List__i32__make_instance(object items) except *
+cdef object std_deque__List__i32__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.std_deque[cint32_t]&) except *
+
+cdef _apache_thrift_fixtures_types_module_cbindings.folly_fbvector[cint32_t] folly_fbvector__List__i32__make_instance(object items) except *
+cdef object folly_fbvector__List__i32__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.folly_fbvector[cint32_t]&) except *
+
+cdef _apache_thrift_fixtures_types_module_cbindings.folly_small_vector[cint32_t] folly_small_vector__List__i32__make_instance(object items) except *
+cdef object folly_small_vector__List__i32__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.folly_small_vector[cint32_t]&) except *
+
+cdef _apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t] folly_sorted_vector_set__Set__i32__make_instance(object items) except *
+cdef object folly_sorted_vector_set__Set__i32__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t]&) except *
+
+cdef cmap[cint32_t,string] Map__i32_string__make_instance(object items) except *
+cdef object Map__i32_string__from_cpp(const cmap[cint32_t,string]&) except *
+
+cdef _apache_thrift_fixtures_types_module_cbindings.std_list_int32_t std_list_int32_t__List__i32__make_instance(object items) except *
+cdef object std_list_int32_t__List__i32__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.std_list_int32_t&) except *
+
+cdef cmap[string,cint32_t] Map__string_i32__make_instance(object items) except *
+cdef object Map__string_i32__from_cpp(const cmap[string,cint32_t]&) except *
+
+cdef vector[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]] List__std_unordered_map__Map__i32_string__make_instance(object items) except *
+cdef object List__std_unordered_map__Map__i32_string__from_cpp(const vector[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]]&) except *
+
+cdef cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep] Map__i32_IncompleteMapDep__make_instance(object items) except *
+cdef object Map__i32_IncompleteMapDep__from_cpp(const cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep]&) except *
+
+cdef _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep] std_unordered_map__Map__i32_CompleteMapDep__make_instance(object items) except *
+cdef object std_unordered_map__Map__i32_CompleteMapDep__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep]&) except *
+
+cdef _apache_thrift_fixtures_types_module_cbindings._std_list[_apache_thrift_fixtures_types_module_cbindings.cIncompleteListDep] _std_list__List__IncompleteListDep__make_instance(object items) except *
+cdef object _std_list__List__IncompleteListDep__from_cpp(const _apache_thrift_fixtures_types_module_cbindings._std_list[_apache_thrift_fixtures_types_module_cbindings.cIncompleteListDep]&) except *
+
+cdef _apache_thrift_fixtures_types_module_cbindings.folly_small_vector[_apache_thrift_fixtures_types_module_cbindings.cCompleteListDep] folly_small_vector__List__CompleteListDep__make_instance(object items) except *
+cdef object folly_small_vector__List__CompleteListDep__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.folly_small_vector[_apache_thrift_fixtures_types_module_cbindings.cCompleteListDep]&) except *
+
+cdef vector[_apache_thrift_fixtures_types_module_cbindings.cAdaptedListDep] List__AdaptedListDep__make_instance(object items) except *
+cdef object List__AdaptedListDep__from_cpp(const vector[_apache_thrift_fixtures_types_module_cbindings.cAdaptedListDep]&) except *
+
+cdef vector[_apache_thrift_fixtures_types_module_cbindings.cDependentAdaptedListDep] List__DependentAdaptedListDep__make_instance(object items) except *
+cdef object List__DependentAdaptedListDep__from_cpp(const vector[_apache_thrift_fixtures_types_module_cbindings.cDependentAdaptedListDep]&) except *
+
+cdef cset[cint32_t] Set__i32__make_instance(object items) except *
+cdef object Set__i32__from_cpp(const cset[cint32_t]&) except *
+
+cdef cmap[cint32_t,cint32_t] Map__i32_i32__make_instance(object items) except *
+cdef object Map__i32_i32__from_cpp(const cmap[cint32_t,cint32_t]&) except *
+

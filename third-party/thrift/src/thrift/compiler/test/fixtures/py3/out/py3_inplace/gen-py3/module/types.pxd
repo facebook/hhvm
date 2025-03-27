@@ -51,3 +51,96 @@ cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3/module/types.h":
   pass
 
 
+cdef vector[cint16_t] List__i16__make_instance(object items) except *
+cdef object List__i16__from_cpp(const vector[cint16_t]&) except *
+
+cdef vector[cint32_t] List__i32__make_instance(object items) except *
+cdef object List__i32__from_cpp(const vector[cint32_t]&) except *
+
+cdef vector[cint64_t] List__i64__make_instance(object items) except *
+cdef object List__i64__from_cpp(const vector[cint64_t]&) except *
+
+cdef vector[string] List__string__make_instance(object items) except *
+cdef object List__string__from_cpp(const vector[string]&) except *
+
+cdef vector[_module_cbindings.cSimpleStruct] List__SimpleStruct__make_instance(object items) except *
+cdef object List__SimpleStruct__from_cpp(const vector[_module_cbindings.cSimpleStruct]&) except *
+
+cdef cset[cint32_t] Set__i32__make_instance(object items) except *
+cdef object Set__i32__from_cpp(const cset[cint32_t]&) except *
+
+cdef cset[string] Set__string__make_instance(object items) except *
+cdef object Set__string__from_cpp(const cset[string]&) except *
+
+cdef cmap[string,string] Map__string_string__make_instance(object items) except *
+cdef object Map__string_string__from_cpp(const cmap[string,string]&) except *
+
+cdef cmap[string,_module_cbindings.cSimpleStruct] Map__string_SimpleStruct__make_instance(object items) except *
+cdef object Map__string_SimpleStruct__from_cpp(const cmap[string,_module_cbindings.cSimpleStruct]&) except *
+
+cdef cmap[string,cint16_t] Map__string_i16__make_instance(object items) except *
+cdef object Map__string_i16__from_cpp(const cmap[string,cint16_t]&) except *
+
+cdef vector[vector[cint32_t]] List__List__i32__make_instance(object items) except *
+cdef object List__List__i32__from_cpp(const vector[vector[cint32_t]]&) except *
+
+cdef cmap[string,cint32_t] Map__string_i32__make_instance(object items) except *
+cdef object Map__string_i32__from_cpp(const cmap[string,cint32_t]&) except *
+
+cdef cmap[string,cmap[string,cint32_t]] Map__string_Map__string_i32__make_instance(object items) except *
+cdef object Map__string_Map__string_i32__from_cpp(const cmap[string,cmap[string,cint32_t]]&) except *
+
+cdef vector[cset[string]] List__Set__string__make_instance(object items) except *
+cdef object List__Set__string__from_cpp(const vector[cset[string]]&) except *
+
+cdef cmap[string,vector[_module_cbindings.cSimpleStruct]] Map__string_List__SimpleStruct__make_instance(object items) except *
+cdef object Map__string_List__SimpleStruct__from_cpp(const cmap[string,vector[_module_cbindings.cSimpleStruct]]&) except *
+
+cdef vector[vector[string]] List__List__string__make_instance(object items) except *
+cdef object List__List__string__from_cpp(const vector[vector[string]]&) except *
+
+cdef vector[cset[cint32_t]] List__Set__i32__make_instance(object items) except *
+cdef object List__Set__i32__from_cpp(const vector[cset[cint32_t]]&) except *
+
+cdef vector[cmap[string,string]] List__Map__string_string__make_instance(object items) except *
+cdef object List__Map__string_string__from_cpp(const vector[cmap[string,string]]&) except *
+
+cdef vector[string] List__binary__make_instance(object items) except *
+cdef object List__binary__from_cpp(const vector[string]&) except *
+
+cdef cset[string] Set__binary__make_instance(object items) except *
+cdef object Set__binary__from_cpp(const cset[string]&) except *
+
+cdef vector[_module_cbindings.cAnEnum] List__AnEnum__make_instance(object items) except *
+cdef object List__AnEnum__from_cpp(const vector[_module_cbindings.cAnEnum]&) except *
+
+cdef _module_cbindings._std_unordered_map[cint32_t,cint32_t] _std_unordered_map__Map__i32_i32__make_instance(object items) except *
+cdef object _std_unordered_map__Map__i32_i32__from_cpp(const _module_cbindings._std_unordered_map[cint32_t,cint32_t]&) except *
+
+cdef _module_cbindings._MyType _MyType__List__i32__make_instance(object items) except *
+cdef object _MyType__List__i32__from_cpp(const _module_cbindings._MyType&) except *
+
+cdef _module_cbindings._MyType _MyType__Set__i32__make_instance(object items) except *
+cdef object _MyType__Set__i32__from_cpp(const _module_cbindings._MyType&) except *
+
+cdef _module_cbindings._MyType _MyType__Map__i32_i32__make_instance(object items) except *
+cdef object _MyType__Map__i32_i32__from_cpp(const _module_cbindings._MyType&) except *
+
+cdef _module_cbindings._py3_simple_AdaptedList _py3_simple_AdaptedList__List__i32__make_instance(object items) except *
+cdef object _py3_simple_AdaptedList__List__i32__from_cpp(const _module_cbindings._py3_simple_AdaptedList&) except *
+
+cdef _module_cbindings._py3_simple_AdaptedSet _py3_simple_AdaptedSet__Set__i32__make_instance(object items) except *
+cdef object _py3_simple_AdaptedSet__Set__i32__from_cpp(const _module_cbindings._py3_simple_AdaptedSet&) except *
+
+cdef _module_cbindings._py3_simple_AdaptedMap _py3_simple_AdaptedMap__Map__i32_i32__make_instance(object items) except *
+cdef object _py3_simple_AdaptedMap__Map__i32_i32__from_cpp(const _module_cbindings._py3_simple_AdaptedMap&) except *
+
+cdef cmap[cint32_t,double] Map__i32_double__make_instance(object items) except *
+cdef object Map__i32_double__from_cpp(const cmap[cint32_t,double]&) except *
+
+cdef vector[cmap[cint32_t,double]] List__Map__i32_double__make_instance(object items) except *
+cdef object List__Map__i32_double__from_cpp(const vector[cmap[cint32_t,double]]&) except *
+
+cdef cmap[_module_cbindings.cAnEnumRenamed,cint32_t] Map__AnEnumRenamed_i32__make_instance(object items) except *
+cdef object Map__AnEnumRenamed_i32__from_cpp(const cmap[_module_cbindings.cAnEnumRenamed,cint32_t]&) except *
+

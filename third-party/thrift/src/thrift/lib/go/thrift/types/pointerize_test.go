@@ -23,26 +23,12 @@ import (
 )
 
 func TestPointerize(t *testing.T) {
-	testInputs := []any{
-		bool(true),
-		byte(128),
-		int(1),
-		int8(2),
-		int16(3),
-		int32(4),
-		int64(5),
-		uint(6),
-		uint8(7),
-		uint16(8),
-		uint32(9),
-		uint64(10),
-		float32(123.4),
-		float64(567.8),
-		string("hello"),
-	}
-
-	for _, testInput := range testInputs {
-		testInputPtr := Pointerize(testInput)
-		require.Equal(t, testInput, *testInputPtr)
-	}
+	require.Equal(t, bool(true), *Pointerize(bool(true)))
+	require.Equal(t, int8(2), *Pointerize(int8(2)))
+	require.Equal(t, int16(3), *Pointerize(int16(3)))
+	require.Equal(t, int32(4), *Pointerize(int32(4)))
+	require.Equal(t, int64(5), *Pointerize(int64(5)))
+	require.Equal(t, float32(123.4), *Pointerize(float32(123.4)))
+	require.Equal(t, float64(567.8), *Pointerize(float64(567.8)))
+	require.Equal(t, string("hello"), *Pointerize(string("hello")))
 }

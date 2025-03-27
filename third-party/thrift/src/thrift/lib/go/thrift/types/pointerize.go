@@ -16,7 +16,13 @@
 
 package types
 
+// ThriftPointerizable is a type constraint meant to prevent Pointerize() API abuse.
+// e.g. using outside of Thrift context or with non-Thrift types
+type ThriftPointerizable interface {
+	bool | int8 | int16 | ~int32 | int64 | float32 | float64 | string
+}
+
 // Pointerize returns a pointer to the given value.
-func Pointerize[T any](val T) *T {
+func Pointerize[T ThriftPointerizable](val T) *T {
 	return &val
 }

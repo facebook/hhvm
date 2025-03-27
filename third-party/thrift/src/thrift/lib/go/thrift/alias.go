@@ -98,7 +98,7 @@ var INVALID_HEADERS_TYPE = types.INVALID_HEADERS_TYPE
 var BAD_SEQUENCE_ID int32 = types.BAD_SEQUENCE_ID
 
 // Pointerize returns a pointer to the given value.
-func Pointerize[T any](v T) *T {
+func Pointerize[T types.ThriftPointerizable](v T) *T {
 	return types.Pointerize(v)
 }
 

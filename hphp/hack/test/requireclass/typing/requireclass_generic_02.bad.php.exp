@@ -1,3 +1,7 @@
+ERROR: File "requireclass_generic_02.bad.php", line 7, characters 17-17:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+  File "requireclass_generic_02.bad.php", line 10, characters 13-13:
+  Definition is here
 ERROR: File "requireclass_generic_02.bad.php", line 10, characters 13-13:
 This class does not satisfy all the requirements of its traits or interfaces. (Typing[4111])
   File "requireclass_generic_02.bad.php", line 11, characters 7-13:

@@ -1,1 +1,6 @@
-No errors
+ERROR: File "repro.php", line 12, characters 29-48:
+Invalid type hint (Typing[4090])
+  File "repro.php", line 12, characters 37-44:
+  No type constant `TPhantom` in `A`
+  File "repro.php", line 12, characters 16-16:
+  Declaration of `A` is here

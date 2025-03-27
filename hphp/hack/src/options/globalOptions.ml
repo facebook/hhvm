@@ -154,7 +154,6 @@ type t = {
   tco_allowed_expression_tree_visitors: string list;
   tco_typeconst_concrete_concrete_error: bool;
   tco_enable_strict_const_semantics: int;
-  tco_strict_wellformedness: int;
   tco_meth_caller_only_public_visibility: bool;
   tco_require_extends_implements_ancestors: bool;
   tco_strict_value_equality: bool;
@@ -267,7 +266,6 @@ let default =
     tco_allowed_expression_tree_visitors = [];
     tco_typeconst_concrete_concrete_error = false;
     tco_enable_strict_const_semantics = 0;
-    tco_strict_wellformedness = 0;
     tco_meth_caller_only_public_visibility = true;
     tco_require_extends_implements_ancestors = false;
     tco_strict_value_equality = false;
@@ -378,7 +376,6 @@ let set
     ?tco_allowed_expression_tree_visitors
     ?tco_typeconst_concrete_concrete_error
     ?tco_enable_strict_const_semantics
-    ?tco_strict_wellformedness
     ?tco_meth_caller_only_public_visibility
     ?tco_require_extends_implements_ancestors
     ?tco_strict_value_equality
@@ -599,8 +596,6 @@ let set
       setting
         tco_enable_strict_const_semantics
         options.tco_enable_strict_const_semantics;
-    tco_strict_wellformedness =
-      setting tco_strict_wellformedness options.tco_strict_wellformedness;
     tco_meth_caller_only_public_visibility =
       setting
         tco_meth_caller_only_public_visibility

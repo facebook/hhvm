@@ -8,6 +8,12 @@ ERROR: File "typedef_cycles_via_constraints0.php", line 11, characters 9-9:
 Cyclic type definition (Typing[4014])
   File "typedef_cycles_via_constraints0.php", line 9, characters 18-18:
   Cyclic use is here
+ERROR: File "typedef_cycles_via_constraints0.php", line 14, characters 18-18:
+Invalid type hint (Typing[4062])
+  File "typedef_cycles_via_constraints0.php", line 16, characters 17-17:
+  You are trying to access the type constant `T` but this is a mixed value
+  File "typedef_cycles_via_constraints0.php", line 16, characters 14-17:
+  Definition is here
 ERROR: File "typedef_cycles_via_constraints0.php", line 16, characters 9-9:
 Cyclic type definition (Typing[4014])
   File "typedef_cycles_via_constraints0.php", line 16, characters 14-17:

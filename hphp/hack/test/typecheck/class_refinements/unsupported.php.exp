@@ -3,6 +3,14 @@ Invalid type hint (Typing[4469])
   File "unsupported.php", line 14, characters 41-62:
   Unsupported refinement, only class types can be refined
 ERROR: File "unsupported.php", line 26, characters 24-48:
+Invalid type hint (Typing[4469])
+  File "unsupported.php", line 26, characters 24-48:
+  Unsupported refinement, only class types can be refined
+ERROR: File "unsupported.php", line 26, characters 24-48:
 Unsupported refinement, only class types can be refined (Typing[4469])
+ERROR: File "unsupported.php", line 32, characters 23-47:
+Invalid type hint (Typing[4469])
+  File "unsupported.php", line 32, characters 23-47:
+  Unsupported refinement, only class types can be refined
 ERROR: File "unsupported.php", line 32, characters 23-47:
 Unsupported refinement, only class types can be refined (Typing[4469])

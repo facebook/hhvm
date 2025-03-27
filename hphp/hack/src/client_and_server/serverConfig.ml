@@ -461,7 +461,6 @@ let load_config (config : Config_file_common.t) (options : GlobalOptions.t) :
        | Some (Error _) ->
          (* not an int *)
          bool_opt key config |> Option.map ~f:Bool.to_int)
-    ?tco_strict_wellformedness:(int_opt "strict_wellformedness" config)
     ?tco_meth_caller_only_public_visibility:
       (bool_opt "meth_caller_only_public_visibility" config)
     ?tco_require_extends_implements_ancestors:

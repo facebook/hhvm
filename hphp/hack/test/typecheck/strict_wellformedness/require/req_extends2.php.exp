@@ -1,1 +1,6 @@
-No errors
+ERROR: File "req_extends2.php", line 6, characters 19-37:
+Invalid type hint (Typing[4090])
+  File "req_extends2.php", line 6, characters 27-36:
+  No type constant `TUndefined` in `I`
+  File "req_extends2.php", line 5, characters 11-11:
+  Declaration of `I` is here

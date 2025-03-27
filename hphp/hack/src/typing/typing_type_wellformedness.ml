@@ -46,11 +46,8 @@ let loclty_of_hint unchecked_tparams env h =
   let subst = Inst.make_subst unchecked_tparams tyl in
   let decl_ty = Inst.instantiate subst decl_ty in
   let ety_env =
-    if TypecheckerOptions.strict_wellformedness (Env.get_tcopt env) > 1 then
-      empty_expand_env_with_on_error
-        (Typing_error.Reasons_callback.invalid_type_hint hint_pos)
-    else
-      empty_expand_env
+    empty_expand_env_with_on_error
+      (Typing_error.Reasons_callback.invalid_type_hint hint_pos)
   in
   let ety_env = { ety_env with visibility_behavior = Never_expand_newtype } in
   let ((env, ty_err_opt), locl_ty) = Phase.localize env ~ety_env decl_ty in
@@ -499,11 +496,7 @@ let class_ tenv c =
       (* But for interfaces and trait use, we allow internal *)
       hints ~in_signature:false env c_implements;
       hints ~in_signature:false env c_uses;
-      (if TypecheckerOptions.strict_wellformedness (Env.get_tcopt env.tenv) > 0
-      then
-        requirements env c_reqs
-      else
-        []);
+      requirements env c_reqs;
       typeconsts env c_typeconsts;
       class_vars env c_static_vars;
       class_vars env c_vars;

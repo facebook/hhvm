@@ -199,8 +199,6 @@ let typeconst_concrete_concrete_error t =
 let enable_strict_const_semantics t =
   t.GlobalOptions.tco_enable_strict_const_semantics
 
-let strict_wellformedness t = t.GlobalOptions.tco_strict_wellformedness
-
 let meth_caller_only_public_visibility t =
   t.GlobalOptions.tco_meth_caller_only_public_visibility
 

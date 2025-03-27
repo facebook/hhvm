@@ -200,8 +200,6 @@ type t = {
          hierarchy, but not if the constant is locally defined. When the value is 2, raises a conflict
          any time two parents declare concrete constants with the same name, matching HHVM
          -vEval.TraitConstantInterfaceBehavior=1 *)
-  tco_strict_wellformedness: int;
-      (** Different levels here raise previously missing well-formedness errors (see Typing_type_wellformedness) *)
   tco_meth_caller_only_public_visibility: bool;
       (** meth_caller can only reference public methods *)
   tco_require_extends_implements_ancestors: bool;
@@ -353,7 +351,6 @@ val set :
   ?tco_allowed_expression_tree_visitors:string list ->
   ?tco_typeconst_concrete_concrete_error:bool ->
   ?tco_enable_strict_const_semantics:int ->
-  ?tco_strict_wellformedness:int ->
   ?tco_meth_caller_only_public_visibility:bool ->
   ?tco_require_extends_implements_ancestors:bool ->
   ?tco_strict_value_equality:bool ->

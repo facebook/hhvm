@@ -248,7 +248,7 @@ class python_mstch_program : public mstch_program {
           {"included_module_mangle", it->ns_mangle},
           {"has_services?", it->has_services},
           {"has_types?", it->has_types},
-          {"is_unsafe_patch?", it->is_unsafe_patch}});
+          {"is_patch?", it->is_patch}});
     }
     return a;
   }
@@ -329,7 +329,7 @@ class python_mstch_program : public mstch_program {
     std::string ns_mangle;
     bool has_services;
     bool has_types;
-    bool is_unsafe_patch;
+    bool is_patch;
   };
 
   void gather_included_program_namespaces() {
@@ -347,7 +347,7 @@ class python_mstch_program : public mstch_program {
               included_program, get_option("root_module_prefix")),
           !included_program->services().empty(),
           has_types,
-          is_unsafe_patch_program(included_program)};
+          is_patch_program(included_program)};
     }
   }
 
@@ -700,8 +700,7 @@ class python_mstch_type : public mstch_type {
             {"type:external_program?", &python_mstch_type::is_external_program},
             {"type:integer?", &python_mstch_type::is_integer},
             {"type:iobuf?", &python_mstch_type::is_iobuf},
-            {"type:contains_unsafe_patch?",
-             &python_mstch_type::contains_unsafe_patch},
+            {"type:contains_patch?", &python_mstch_type::contains_patch},
             {"type:has_adapter?", &python_mstch_type::adapter},
 
             {"type:module_name",
@@ -807,9 +806,7 @@ class python_mstch_type : public mstch_type {
 
   mstch::node is_iobuf() { return is_type_iobuf(type_); }
 
-  mstch::node contains_unsafe_patch() {
-    return type_contains_unsafe_patch(type_);
-  }
+  mstch::node contains_patch() { return type_contains_patch(type_); }
 
   mstch::node adapter() {
     return adapter_node(

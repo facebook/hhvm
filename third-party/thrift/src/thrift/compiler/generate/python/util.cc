@@ -31,30 +31,30 @@ bool is_type_iobuf(const t_type* type) {
   return is_type_iobuf(cpp2::get_type(type));
 }
 
-bool is_unsafe_patch_program(const t_program* prog) {
+bool is_patch_program(const t_program* prog) {
   return prog ? boost::algorithm::starts_with(prog->name(), "gen_patch_")
               : false;
 }
 
-bool type_contains_unsafe_patch(const t_type* type) {
+bool type_contains_patch(const t_type* type) {
   if (auto typedf = dynamic_cast<t_typedef const*>(type)) {
-    return type_contains_unsafe_patch(typedf->get_type());
+    return type_contains_patch(typedf->get_type());
   }
 
   if (auto map = dynamic_cast<t_map const*>(type)) {
-    return type_contains_unsafe_patch(map->get_key_type()) ||
-        type_contains_unsafe_patch(map->get_val_type());
+    return type_contains_patch(map->get_key_type()) ||
+        type_contains_patch(map->get_val_type());
   }
 
   if (auto set = dynamic_cast<t_set const*>(type)) {
-    return type_contains_unsafe_patch(set->get_elem_type());
+    return type_contains_patch(set->get_elem_type());
   }
 
   if (auto list = dynamic_cast<t_list const*>(type)) {
-    return type_contains_unsafe_patch(list->get_elem_type());
+    return type_contains_patch(list->get_elem_type());
   }
 
-  return is_unsafe_patch_program(type->program());
+  return is_patch_program(type->program());
 }
 
 std::vector<std::string> get_py3_namespace(const t_program* prog) {

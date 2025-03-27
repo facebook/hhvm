@@ -289,243 +289,243 @@ class TemplateLists final  {
  public:
 
   /** Glean { "field": "std_string" } */
-  template <typename..., typename T = std::vector<::std::string>>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> std_string_ref() const& {
+  template <typename..., typename fbthrift_T = std::vector<::std::string>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const fbthrift_T&> std_string_ref() const& {
     return {this->__fbthrift_field_std_string, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "std_string" } */
-  template <typename..., typename T = std::vector<::std::string>>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> std_string_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_std_string), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = std::vector<::std::string>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const fbthrift_T&&> std_string_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_std_string), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "std_string" } */
-  template <typename..., typename T = std::vector<::std::string>>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> std_string_ref() & {
+  template <typename..., typename fbthrift_T = std::vector<::std::string>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<fbthrift_T&> std_string_ref() & {
     return {this->__fbthrift_field_std_string, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "std_string" } */
-  template <typename..., typename T = std::vector<::std::string>>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> std_string_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_std_string), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = std::vector<::std::string>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<fbthrift_T&&> std_string_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_std_string), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "std_string" } */
-  template <typename..., typename T = std::vector<::std::string>>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> std_string() const& {
+  template <typename..., typename fbthrift_T = std::vector<::std::string>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const fbthrift_T&> std_string() const& {
     return {this->__fbthrift_field_std_string, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "std_string" } */
-  template <typename..., typename T = std::vector<::std::string>>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> std_string() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_std_string), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = std::vector<::std::string>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const fbthrift_T&&> std_string() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_std_string), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "std_string" } */
-  template <typename..., typename T = std::vector<::std::string>>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> std_string() & {
+  template <typename..., typename fbthrift_T = std::vector<::std::string>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<fbthrift_T&> std_string() & {
     return {this->__fbthrift_field_std_string, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "std_string" } */
-  template <typename..., typename T = std::vector<::std::string>>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> std_string() && {
-    return {static_cast<T&&>(this->__fbthrift_field_std_string), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = std::vector<::std::string>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<fbthrift_T&&> std_string() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_std_string), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "deque_string" } */
-  template <typename..., typename T = std::deque<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> deque_string_ref() const& {
+  template <typename..., typename fbthrift_T = std::deque<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> deque_string_ref() const& {
     return {this->__fbthrift_field_deque_string, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "deque_string" } */
-  template <typename..., typename T = std::deque<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> deque_string_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_deque_string), __isset.at(1), __isset.bit(1)};
+  template <typename..., typename fbthrift_T = std::deque<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> deque_string_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_deque_string), __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "deque_string" } */
-  template <typename..., typename T = std::deque<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> deque_string_ref() & {
+  template <typename..., typename fbthrift_T = std::deque<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> deque_string_ref() & {
     return {this->__fbthrift_field_deque_string, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "deque_string" } */
-  template <typename..., typename T = std::deque<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> deque_string_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_deque_string), __isset.at(1), __isset.bit(1)};
+  template <typename..., typename fbthrift_T = std::deque<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> deque_string_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_deque_string), __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "deque_string" } */
-  template <typename..., typename T = std::deque<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> deque_string() const& {
+  template <typename..., typename fbthrift_T = std::deque<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> deque_string() const& {
     return {this->__fbthrift_field_deque_string, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "deque_string" } */
-  template <typename..., typename T = std::deque<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> deque_string() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_deque_string), __isset.at(1), __isset.bit(1)};
+  template <typename..., typename fbthrift_T = std::deque<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> deque_string() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_deque_string), __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "deque_string" } */
-  template <typename..., typename T = std::deque<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> deque_string() & {
+  template <typename..., typename fbthrift_T = std::deque<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> deque_string() & {
     return {this->__fbthrift_field_deque_string, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "deque_string" } */
-  template <typename..., typename T = std::deque<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> deque_string() && {
-    return {static_cast<T&&>(this->__fbthrift_field_deque_string), __isset.at(1), __isset.bit(1)};
+  template <typename..., typename fbthrift_T = std::deque<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> deque_string() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_deque_string), __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "small_vector_iobuf" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::small_vector_iobuf>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> small_vector_iobuf_ref() const& {
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::small_vector_iobuf>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> small_vector_iobuf_ref() const& {
     return {this->__fbthrift_field_small_vector_iobuf, __isset.at(2), __isset.bit(2)};
   }
 
   /** Glean { "field": "small_vector_iobuf" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::small_vector_iobuf>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> small_vector_iobuf_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_small_vector_iobuf), __isset.at(2), __isset.bit(2)};
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::small_vector_iobuf>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> small_vector_iobuf_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_small_vector_iobuf), __isset.at(2), __isset.bit(2)};
   }
 
   /** Glean { "field": "small_vector_iobuf" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::small_vector_iobuf>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> small_vector_iobuf_ref() & {
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::small_vector_iobuf>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> small_vector_iobuf_ref() & {
     return {this->__fbthrift_field_small_vector_iobuf, __isset.at(2), __isset.bit(2)};
   }
 
   /** Glean { "field": "small_vector_iobuf" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::small_vector_iobuf>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> small_vector_iobuf_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_small_vector_iobuf), __isset.at(2), __isset.bit(2)};
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::small_vector_iobuf>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> small_vector_iobuf_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_small_vector_iobuf), __isset.at(2), __isset.bit(2)};
   }
 
   /** Glean { "field": "small_vector_iobuf" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::small_vector_iobuf>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> small_vector_iobuf() const& {
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::small_vector_iobuf>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> small_vector_iobuf() const& {
     return {this->__fbthrift_field_small_vector_iobuf, __isset.at(2), __isset.bit(2)};
   }
 
   /** Glean { "field": "small_vector_iobuf" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::small_vector_iobuf>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> small_vector_iobuf() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_small_vector_iobuf), __isset.at(2), __isset.bit(2)};
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::small_vector_iobuf>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> small_vector_iobuf() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_small_vector_iobuf), __isset.at(2), __isset.bit(2)};
   }
 
   /** Glean { "field": "small_vector_iobuf" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::small_vector_iobuf>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> small_vector_iobuf() & {
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::small_vector_iobuf>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> small_vector_iobuf() & {
     return {this->__fbthrift_field_small_vector_iobuf, __isset.at(2), __isset.bit(2)};
   }
 
   /** Glean { "field": "small_vector_iobuf" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::small_vector_iobuf>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> small_vector_iobuf() && {
-    return {static_cast<T&&>(this->__fbthrift_field_small_vector_iobuf), __isset.at(2), __isset.bit(2)};
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::small_vector_iobuf>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> small_vector_iobuf() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_small_vector_iobuf), __isset.at(2), __isset.bit(2)};
   }
 
   /** Glean { "field": "nested_small_vector" } */
-  template <typename..., typename T = folly::small_vector<::test::fixtures::python_capi::fbvector_string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> nested_small_vector_ref() const& {
+  template <typename..., typename fbthrift_T = folly::small_vector<::test::fixtures::python_capi::fbvector_string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> nested_small_vector_ref() const& {
     return {this->__fbthrift_field_nested_small_vector, __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "nested_small_vector" } */
-  template <typename..., typename T = folly::small_vector<::test::fixtures::python_capi::fbvector_string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> nested_small_vector_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_nested_small_vector), __isset.at(3), __isset.bit(3)};
+  template <typename..., typename fbthrift_T = folly::small_vector<::test::fixtures::python_capi::fbvector_string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> nested_small_vector_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_nested_small_vector), __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "nested_small_vector" } */
-  template <typename..., typename T = folly::small_vector<::test::fixtures::python_capi::fbvector_string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> nested_small_vector_ref() & {
+  template <typename..., typename fbthrift_T = folly::small_vector<::test::fixtures::python_capi::fbvector_string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> nested_small_vector_ref() & {
     return {this->__fbthrift_field_nested_small_vector, __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "nested_small_vector" } */
-  template <typename..., typename T = folly::small_vector<::test::fixtures::python_capi::fbvector_string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> nested_small_vector_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_nested_small_vector), __isset.at(3), __isset.bit(3)};
+  template <typename..., typename fbthrift_T = folly::small_vector<::test::fixtures::python_capi::fbvector_string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> nested_small_vector_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_nested_small_vector), __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "nested_small_vector" } */
-  template <typename..., typename T = folly::small_vector<::test::fixtures::python_capi::fbvector_string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> nested_small_vector() const& {
+  template <typename..., typename fbthrift_T = folly::small_vector<::test::fixtures::python_capi::fbvector_string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> nested_small_vector() const& {
     return {this->__fbthrift_field_nested_small_vector, __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "nested_small_vector" } */
-  template <typename..., typename T = folly::small_vector<::test::fixtures::python_capi::fbvector_string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> nested_small_vector() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_nested_small_vector), __isset.at(3), __isset.bit(3)};
+  template <typename..., typename fbthrift_T = folly::small_vector<::test::fixtures::python_capi::fbvector_string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> nested_small_vector() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_nested_small_vector), __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "nested_small_vector" } */
-  template <typename..., typename T = folly::small_vector<::test::fixtures::python_capi::fbvector_string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> nested_small_vector() & {
+  template <typename..., typename fbthrift_T = folly::small_vector<::test::fixtures::python_capi::fbvector_string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> nested_small_vector() & {
     return {this->__fbthrift_field_nested_small_vector, __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "nested_small_vector" } */
-  template <typename..., typename T = folly::small_vector<::test::fixtures::python_capi::fbvector_string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> nested_small_vector() && {
-    return {static_cast<T&&>(this->__fbthrift_field_nested_small_vector), __isset.at(3), __isset.bit(3)};
+  template <typename..., typename fbthrift_T = folly::small_vector<::test::fixtures::python_capi::fbvector_string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> nested_small_vector() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_nested_small_vector), __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "small_vector_tensor" } */
-  template <typename..., typename T = folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> small_vector_tensor_ref() const& {
+  template <typename..., typename fbthrift_T = folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> small_vector_tensor_ref() const& {
     return {this->__fbthrift_field_small_vector_tensor, __isset.at(4), __isset.bit(4)};
   }
 
   /** Glean { "field": "small_vector_tensor" } */
-  template <typename..., typename T = folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> small_vector_tensor_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_small_vector_tensor), __isset.at(4), __isset.bit(4)};
+  template <typename..., typename fbthrift_T = folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> small_vector_tensor_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_small_vector_tensor), __isset.at(4), __isset.bit(4)};
   }
 
   /** Glean { "field": "small_vector_tensor" } */
-  template <typename..., typename T = folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> small_vector_tensor_ref() & {
+  template <typename..., typename fbthrift_T = folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> small_vector_tensor_ref() & {
     return {this->__fbthrift_field_small_vector_tensor, __isset.at(4), __isset.bit(4)};
   }
 
   /** Glean { "field": "small_vector_tensor" } */
-  template <typename..., typename T = folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> small_vector_tensor_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_small_vector_tensor), __isset.at(4), __isset.bit(4)};
+  template <typename..., typename fbthrift_T = folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> small_vector_tensor_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_small_vector_tensor), __isset.at(4), __isset.bit(4)};
   }
 
   /** Glean { "field": "small_vector_tensor" } */
-  template <typename..., typename T = folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> small_vector_tensor() const& {
+  template <typename..., typename fbthrift_T = folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> small_vector_tensor() const& {
     return {this->__fbthrift_field_small_vector_tensor, __isset.at(4), __isset.bit(4)};
   }
 
   /** Glean { "field": "small_vector_tensor" } */
-  template <typename..., typename T = folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> small_vector_tensor() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_small_vector_tensor), __isset.at(4), __isset.bit(4)};
+  template <typename..., typename fbthrift_T = folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> small_vector_tensor() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_small_vector_tensor), __isset.at(4), __isset.bit(4)};
   }
 
   /** Glean { "field": "small_vector_tensor" } */
-  template <typename..., typename T = folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> small_vector_tensor() & {
+  template <typename..., typename fbthrift_T = folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> small_vector_tensor() & {
     return {this->__fbthrift_field_small_vector_tensor, __isset.at(4), __isset.bit(4)};
   }
 
   /** Glean { "field": "small_vector_tensor" } */
-  template <typename..., typename T = folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> small_vector_tensor() && {
-    return {static_cast<T&&>(this->__fbthrift_field_small_vector_tensor), __isset.at(4), __isset.bit(4)};
+  template <typename..., typename fbthrift_T = folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> small_vector_tensor() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_small_vector_tensor), __isset.at(4), __isset.bit(4)};
   }
 
   /** Glean { "field": "std_string" } */
@@ -743,339 +743,339 @@ class TemplateSets final  {
   bool operator<(const TemplateSets&) const;
 
   /** Glean { "field": "std_set" } */
-  template <typename..., typename T = std::set<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> std_set_ref() const& {
+  template <typename..., typename fbthrift_T = std::set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> std_set_ref() const& {
     return {this->__fbthrift_field_std_set, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "std_set" } */
-  template <typename..., typename T = std::set<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> std_set_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_std_set), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = std::set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> std_set_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_std_set), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "std_set" } */
-  template <typename..., typename T = std::set<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> std_set_ref() & {
+  template <typename..., typename fbthrift_T = std::set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> std_set_ref() & {
     return {this->__fbthrift_field_std_set, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "std_set" } */
-  template <typename..., typename T = std::set<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> std_set_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_std_set), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = std::set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> std_set_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_std_set), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "std_set" } */
-  template <typename..., typename T = std::set<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> std_set() const& {
+  template <typename..., typename fbthrift_T = std::set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> std_set() const& {
     return {this->__fbthrift_field_std_set, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "std_set" } */
-  template <typename..., typename T = std::set<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> std_set() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_std_set), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = std::set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> std_set() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_std_set), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "std_set" } */
-  template <typename..., typename T = std::set<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> std_set() & {
+  template <typename..., typename fbthrift_T = std::set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> std_set() & {
     return {this->__fbthrift_field_std_set, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "std_set" } */
-  template <typename..., typename T = std::set<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> std_set() && {
-    return {static_cast<T&&>(this->__fbthrift_field_std_set), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = std::set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> std_set() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_std_set), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "std_unordered" } */
-  template <typename..., typename T = std::unordered_set<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> std_unordered_ref() const& {
+  template <typename..., typename fbthrift_T = std::unordered_set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> std_unordered_ref() const& {
     return {this->__fbthrift_field_std_unordered, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "std_unordered" } */
-  template <typename..., typename T = std::unordered_set<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> std_unordered_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_std_unordered), __isset.at(1), __isset.bit(1)};
+  template <typename..., typename fbthrift_T = std::unordered_set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> std_unordered_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_std_unordered), __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "std_unordered" } */
-  template <typename..., typename T = std::unordered_set<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> std_unordered_ref() & {
+  template <typename..., typename fbthrift_T = std::unordered_set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> std_unordered_ref() & {
     return {this->__fbthrift_field_std_unordered, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "std_unordered" } */
-  template <typename..., typename T = std::unordered_set<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> std_unordered_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_std_unordered), __isset.at(1), __isset.bit(1)};
+  template <typename..., typename fbthrift_T = std::unordered_set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> std_unordered_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_std_unordered), __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "std_unordered" } */
-  template <typename..., typename T = std::unordered_set<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> std_unordered() const& {
+  template <typename..., typename fbthrift_T = std::unordered_set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> std_unordered() const& {
     return {this->__fbthrift_field_std_unordered, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "std_unordered" } */
-  template <typename..., typename T = std::unordered_set<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> std_unordered() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_std_unordered), __isset.at(1), __isset.bit(1)};
+  template <typename..., typename fbthrift_T = std::unordered_set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> std_unordered() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_std_unordered), __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "std_unordered" } */
-  template <typename..., typename T = std::unordered_set<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> std_unordered() & {
+  template <typename..., typename fbthrift_T = std::unordered_set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> std_unordered() & {
     return {this->__fbthrift_field_std_unordered, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "std_unordered" } */
-  template <typename..., typename T = std::unordered_set<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> std_unordered() && {
-    return {static_cast<T&&>(this->__fbthrift_field_std_unordered), __isset.at(1), __isset.bit(1)};
+  template <typename..., typename fbthrift_T = std::unordered_set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> std_unordered() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_std_unordered), __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "folly_fast" } */
-  template <typename..., typename T = folly::F14FastSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> folly_fast_ref() const& {
+  template <typename..., typename fbthrift_T = folly::F14FastSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> folly_fast_ref() const& {
     return {this->__fbthrift_field_folly_fast, __isset.at(2), __isset.bit(2)};
   }
 
   /** Glean { "field": "folly_fast" } */
-  template <typename..., typename T = folly::F14FastSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> folly_fast_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_folly_fast), __isset.at(2), __isset.bit(2)};
+  template <typename..., typename fbthrift_T = folly::F14FastSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> folly_fast_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_folly_fast), __isset.at(2), __isset.bit(2)};
   }
 
   /** Glean { "field": "folly_fast" } */
-  template <typename..., typename T = folly::F14FastSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> folly_fast_ref() & {
+  template <typename..., typename fbthrift_T = folly::F14FastSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> folly_fast_ref() & {
     return {this->__fbthrift_field_folly_fast, __isset.at(2), __isset.bit(2)};
   }
 
   /** Glean { "field": "folly_fast" } */
-  template <typename..., typename T = folly::F14FastSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> folly_fast_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_folly_fast), __isset.at(2), __isset.bit(2)};
+  template <typename..., typename fbthrift_T = folly::F14FastSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> folly_fast_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_folly_fast), __isset.at(2), __isset.bit(2)};
   }
 
   /** Glean { "field": "folly_fast" } */
-  template <typename..., typename T = folly::F14FastSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> folly_fast() const& {
+  template <typename..., typename fbthrift_T = folly::F14FastSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> folly_fast() const& {
     return {this->__fbthrift_field_folly_fast, __isset.at(2), __isset.bit(2)};
   }
 
   /** Glean { "field": "folly_fast" } */
-  template <typename..., typename T = folly::F14FastSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> folly_fast() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_folly_fast), __isset.at(2), __isset.bit(2)};
+  template <typename..., typename fbthrift_T = folly::F14FastSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> folly_fast() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_folly_fast), __isset.at(2), __isset.bit(2)};
   }
 
   /** Glean { "field": "folly_fast" } */
-  template <typename..., typename T = folly::F14FastSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> folly_fast() & {
+  template <typename..., typename fbthrift_T = folly::F14FastSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> folly_fast() & {
     return {this->__fbthrift_field_folly_fast, __isset.at(2), __isset.bit(2)};
   }
 
   /** Glean { "field": "folly_fast" } */
-  template <typename..., typename T = folly::F14FastSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> folly_fast() && {
-    return {static_cast<T&&>(this->__fbthrift_field_folly_fast), __isset.at(2), __isset.bit(2)};
+  template <typename..., typename fbthrift_T = folly::F14FastSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> folly_fast() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_folly_fast), __isset.at(2), __isset.bit(2)};
   }
 
   /** Glean { "field": "folly_node" } */
-  template <typename..., typename T = folly::F14NodeSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> folly_node_ref() const& {
+  template <typename..., typename fbthrift_T = folly::F14NodeSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> folly_node_ref() const& {
     return {this->__fbthrift_field_folly_node, __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "folly_node" } */
-  template <typename..., typename T = folly::F14NodeSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> folly_node_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_folly_node), __isset.at(3), __isset.bit(3)};
+  template <typename..., typename fbthrift_T = folly::F14NodeSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> folly_node_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_folly_node), __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "folly_node" } */
-  template <typename..., typename T = folly::F14NodeSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> folly_node_ref() & {
+  template <typename..., typename fbthrift_T = folly::F14NodeSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> folly_node_ref() & {
     return {this->__fbthrift_field_folly_node, __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "folly_node" } */
-  template <typename..., typename T = folly::F14NodeSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> folly_node_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_folly_node), __isset.at(3), __isset.bit(3)};
+  template <typename..., typename fbthrift_T = folly::F14NodeSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> folly_node_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_folly_node), __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "folly_node" } */
-  template <typename..., typename T = folly::F14NodeSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> folly_node() const& {
+  template <typename..., typename fbthrift_T = folly::F14NodeSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> folly_node() const& {
     return {this->__fbthrift_field_folly_node, __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "folly_node" } */
-  template <typename..., typename T = folly::F14NodeSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> folly_node() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_folly_node), __isset.at(3), __isset.bit(3)};
+  template <typename..., typename fbthrift_T = folly::F14NodeSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> folly_node() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_folly_node), __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "folly_node" } */
-  template <typename..., typename T = folly::F14NodeSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> folly_node() & {
+  template <typename..., typename fbthrift_T = folly::F14NodeSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> folly_node() & {
     return {this->__fbthrift_field_folly_node, __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "folly_node" } */
-  template <typename..., typename T = folly::F14NodeSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> folly_node() && {
-    return {static_cast<T&&>(this->__fbthrift_field_folly_node), __isset.at(3), __isset.bit(3)};
+  template <typename..., typename fbthrift_T = folly::F14NodeSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> folly_node() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_folly_node), __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "folly_value" } */
-  template <typename..., typename T = folly::F14ValueSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> folly_value_ref() const& {
+  template <typename..., typename fbthrift_T = folly::F14ValueSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> folly_value_ref() const& {
     return {this->__fbthrift_field_folly_value, __isset.at(4), __isset.bit(4)};
   }
 
   /** Glean { "field": "folly_value" } */
-  template <typename..., typename T = folly::F14ValueSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> folly_value_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_folly_value), __isset.at(4), __isset.bit(4)};
+  template <typename..., typename fbthrift_T = folly::F14ValueSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> folly_value_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_folly_value), __isset.at(4), __isset.bit(4)};
   }
 
   /** Glean { "field": "folly_value" } */
-  template <typename..., typename T = folly::F14ValueSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> folly_value_ref() & {
+  template <typename..., typename fbthrift_T = folly::F14ValueSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> folly_value_ref() & {
     return {this->__fbthrift_field_folly_value, __isset.at(4), __isset.bit(4)};
   }
 
   /** Glean { "field": "folly_value" } */
-  template <typename..., typename T = folly::F14ValueSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> folly_value_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_folly_value), __isset.at(4), __isset.bit(4)};
+  template <typename..., typename fbthrift_T = folly::F14ValueSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> folly_value_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_folly_value), __isset.at(4), __isset.bit(4)};
   }
 
   /** Glean { "field": "folly_value" } */
-  template <typename..., typename T = folly::F14ValueSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> folly_value() const& {
+  template <typename..., typename fbthrift_T = folly::F14ValueSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> folly_value() const& {
     return {this->__fbthrift_field_folly_value, __isset.at(4), __isset.bit(4)};
   }
 
   /** Glean { "field": "folly_value" } */
-  template <typename..., typename T = folly::F14ValueSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> folly_value() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_folly_value), __isset.at(4), __isset.bit(4)};
+  template <typename..., typename fbthrift_T = folly::F14ValueSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> folly_value() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_folly_value), __isset.at(4), __isset.bit(4)};
   }
 
   /** Glean { "field": "folly_value" } */
-  template <typename..., typename T = folly::F14ValueSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> folly_value() & {
+  template <typename..., typename fbthrift_T = folly::F14ValueSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> folly_value() & {
     return {this->__fbthrift_field_folly_value, __isset.at(4), __isset.bit(4)};
   }
 
   /** Glean { "field": "folly_value" } */
-  template <typename..., typename T = folly::F14ValueSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> folly_value() && {
-    return {static_cast<T&&>(this->__fbthrift_field_folly_value), __isset.at(4), __isset.bit(4)};
+  template <typename..., typename fbthrift_T = folly::F14ValueSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> folly_value() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_folly_value), __isset.at(4), __isset.bit(4)};
   }
 
   /** Glean { "field": "folly_vector" } */
-  template <typename..., typename T = folly::F14VectorSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> folly_vector_ref() const& {
+  template <typename..., typename fbthrift_T = folly::F14VectorSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> folly_vector_ref() const& {
     return {this->__fbthrift_field_folly_vector, __isset.at(5), __isset.bit(5)};
   }
 
   /** Glean { "field": "folly_vector" } */
-  template <typename..., typename T = folly::F14VectorSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> folly_vector_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_folly_vector), __isset.at(5), __isset.bit(5)};
+  template <typename..., typename fbthrift_T = folly::F14VectorSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> folly_vector_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_folly_vector), __isset.at(5), __isset.bit(5)};
   }
 
   /** Glean { "field": "folly_vector" } */
-  template <typename..., typename T = folly::F14VectorSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> folly_vector_ref() & {
+  template <typename..., typename fbthrift_T = folly::F14VectorSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> folly_vector_ref() & {
     return {this->__fbthrift_field_folly_vector, __isset.at(5), __isset.bit(5)};
   }
 
   /** Glean { "field": "folly_vector" } */
-  template <typename..., typename T = folly::F14VectorSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> folly_vector_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_folly_vector), __isset.at(5), __isset.bit(5)};
+  template <typename..., typename fbthrift_T = folly::F14VectorSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> folly_vector_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_folly_vector), __isset.at(5), __isset.bit(5)};
   }
 
   /** Glean { "field": "folly_vector" } */
-  template <typename..., typename T = folly::F14VectorSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> folly_vector() const& {
+  template <typename..., typename fbthrift_T = folly::F14VectorSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> folly_vector() const& {
     return {this->__fbthrift_field_folly_vector, __isset.at(5), __isset.bit(5)};
   }
 
   /** Glean { "field": "folly_vector" } */
-  template <typename..., typename T = folly::F14VectorSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> folly_vector() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_folly_vector), __isset.at(5), __isset.bit(5)};
+  template <typename..., typename fbthrift_T = folly::F14VectorSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> folly_vector() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_folly_vector), __isset.at(5), __isset.bit(5)};
   }
 
   /** Glean { "field": "folly_vector" } */
-  template <typename..., typename T = folly::F14VectorSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> folly_vector() & {
+  template <typename..., typename fbthrift_T = folly::F14VectorSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> folly_vector() & {
     return {this->__fbthrift_field_folly_vector, __isset.at(5), __isset.bit(5)};
   }
 
   /** Glean { "field": "folly_vector" } */
-  template <typename..., typename T = folly::F14VectorSet<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> folly_vector() && {
-    return {static_cast<T&&>(this->__fbthrift_field_folly_vector), __isset.at(5), __isset.bit(5)};
+  template <typename..., typename fbthrift_T = folly::F14VectorSet<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> folly_vector() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_folly_vector), __isset.at(5), __isset.bit(5)};
   }
 
   /** Glean { "field": "folly_sorted_vector" } */
-  template <typename..., typename T = folly::sorted_vector_set<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> folly_sorted_vector_ref() const& {
+  template <typename..., typename fbthrift_T = folly::sorted_vector_set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> folly_sorted_vector_ref() const& {
     return {this->__fbthrift_field_folly_sorted_vector, __isset.at(6), __isset.bit(6)};
   }
 
   /** Glean { "field": "folly_sorted_vector" } */
-  template <typename..., typename T = folly::sorted_vector_set<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> folly_sorted_vector_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_folly_sorted_vector), __isset.at(6), __isset.bit(6)};
+  template <typename..., typename fbthrift_T = folly::sorted_vector_set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> folly_sorted_vector_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_folly_sorted_vector), __isset.at(6), __isset.bit(6)};
   }
 
   /** Glean { "field": "folly_sorted_vector" } */
-  template <typename..., typename T = folly::sorted_vector_set<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> folly_sorted_vector_ref() & {
+  template <typename..., typename fbthrift_T = folly::sorted_vector_set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> folly_sorted_vector_ref() & {
     return {this->__fbthrift_field_folly_sorted_vector, __isset.at(6), __isset.bit(6)};
   }
 
   /** Glean { "field": "folly_sorted_vector" } */
-  template <typename..., typename T = folly::sorted_vector_set<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> folly_sorted_vector_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_folly_sorted_vector), __isset.at(6), __isset.bit(6)};
+  template <typename..., typename fbthrift_T = folly::sorted_vector_set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> folly_sorted_vector_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_folly_sorted_vector), __isset.at(6), __isset.bit(6)};
   }
 
   /** Glean { "field": "folly_sorted_vector" } */
-  template <typename..., typename T = folly::sorted_vector_set<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> folly_sorted_vector() const& {
+  template <typename..., typename fbthrift_T = folly::sorted_vector_set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> folly_sorted_vector() const& {
     return {this->__fbthrift_field_folly_sorted_vector, __isset.at(6), __isset.bit(6)};
   }
 
   /** Glean { "field": "folly_sorted_vector" } */
-  template <typename..., typename T = folly::sorted_vector_set<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> folly_sorted_vector() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_folly_sorted_vector), __isset.at(6), __isset.bit(6)};
+  template <typename..., typename fbthrift_T = folly::sorted_vector_set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> folly_sorted_vector() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_folly_sorted_vector), __isset.at(6), __isset.bit(6)};
   }
 
   /** Glean { "field": "folly_sorted_vector" } */
-  template <typename..., typename T = folly::sorted_vector_set<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> folly_sorted_vector() & {
+  template <typename..., typename fbthrift_T = folly::sorted_vector_set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> folly_sorted_vector() & {
     return {this->__fbthrift_field_folly_sorted_vector, __isset.at(6), __isset.bit(6)};
   }
 
   /** Glean { "field": "folly_sorted_vector" } */
-  template <typename..., typename T = folly::sorted_vector_set<::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> folly_sorted_vector() && {
-    return {static_cast<T&&>(this->__fbthrift_field_folly_sorted_vector), __isset.at(6), __isset.bit(6)};
+  template <typename..., typename fbthrift_T = folly::sorted_vector_set<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> folly_sorted_vector() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_folly_sorted_vector), __isset.at(6), __isset.bit(6)};
   }
 
   /** Glean { "field": "std_set" } */
@@ -1323,339 +1323,339 @@ class TemplateMaps final  {
   bool operator<(const TemplateMaps&) const;
 
   /** Glean { "field": "std_map" } */
-  template <typename..., typename T = std::map<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> std_map_ref() const& {
+  template <typename..., typename fbthrift_T = std::map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> std_map_ref() const& {
     return {this->__fbthrift_field_std_map, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "std_map" } */
-  template <typename..., typename T = std::map<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> std_map_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_std_map), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = std::map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> std_map_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_std_map), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "std_map" } */
-  template <typename..., typename T = std::map<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> std_map_ref() & {
+  template <typename..., typename fbthrift_T = std::map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> std_map_ref() & {
     return {this->__fbthrift_field_std_map, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "std_map" } */
-  template <typename..., typename T = std::map<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> std_map_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_std_map), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = std::map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> std_map_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_std_map), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "std_map" } */
-  template <typename..., typename T = std::map<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> std_map() const& {
+  template <typename..., typename fbthrift_T = std::map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> std_map() const& {
     return {this->__fbthrift_field_std_map, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "std_map" } */
-  template <typename..., typename T = std::map<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> std_map() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_std_map), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = std::map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> std_map() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_std_map), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "std_map" } */
-  template <typename..., typename T = std::map<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> std_map() & {
+  template <typename..., typename fbthrift_T = std::map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> std_map() & {
     return {this->__fbthrift_field_std_map, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "std_map" } */
-  template <typename..., typename T = std::map<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> std_map() && {
-    return {static_cast<T&&>(this->__fbthrift_field_std_map), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = std::map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> std_map() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_std_map), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "std_unordered" } */
-  template <typename..., typename T = std::unordered_map<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> std_unordered_ref() const& {
+  template <typename..., typename fbthrift_T = std::unordered_map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> std_unordered_ref() const& {
     return {this->__fbthrift_field_std_unordered, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "std_unordered" } */
-  template <typename..., typename T = std::unordered_map<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> std_unordered_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_std_unordered), __isset.at(1), __isset.bit(1)};
+  template <typename..., typename fbthrift_T = std::unordered_map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> std_unordered_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_std_unordered), __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "std_unordered" } */
-  template <typename..., typename T = std::unordered_map<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> std_unordered_ref() & {
+  template <typename..., typename fbthrift_T = std::unordered_map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> std_unordered_ref() & {
     return {this->__fbthrift_field_std_unordered, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "std_unordered" } */
-  template <typename..., typename T = std::unordered_map<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> std_unordered_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_std_unordered), __isset.at(1), __isset.bit(1)};
+  template <typename..., typename fbthrift_T = std::unordered_map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> std_unordered_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_std_unordered), __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "std_unordered" } */
-  template <typename..., typename T = std::unordered_map<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> std_unordered() const& {
+  template <typename..., typename fbthrift_T = std::unordered_map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> std_unordered() const& {
     return {this->__fbthrift_field_std_unordered, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "std_unordered" } */
-  template <typename..., typename T = std::unordered_map<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> std_unordered() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_std_unordered), __isset.at(1), __isset.bit(1)};
+  template <typename..., typename fbthrift_T = std::unordered_map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> std_unordered() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_std_unordered), __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "std_unordered" } */
-  template <typename..., typename T = std::unordered_map<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> std_unordered() & {
+  template <typename..., typename fbthrift_T = std::unordered_map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> std_unordered() & {
     return {this->__fbthrift_field_std_unordered, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "std_unordered" } */
-  template <typename..., typename T = std::unordered_map<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> std_unordered() && {
-    return {static_cast<T&&>(this->__fbthrift_field_std_unordered), __isset.at(1), __isset.bit(1)};
+  template <typename..., typename fbthrift_T = std::unordered_map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> std_unordered() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_std_unordered), __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "folly_fast" } */
-  template <typename..., typename T = folly::F14FastMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> folly_fast_ref() const& {
+  template <typename..., typename fbthrift_T = folly::F14FastMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> folly_fast_ref() const& {
     return {this->__fbthrift_field_folly_fast, __isset.at(2), __isset.bit(2)};
   }
 
   /** Glean { "field": "folly_fast" } */
-  template <typename..., typename T = folly::F14FastMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> folly_fast_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_folly_fast), __isset.at(2), __isset.bit(2)};
+  template <typename..., typename fbthrift_T = folly::F14FastMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> folly_fast_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_folly_fast), __isset.at(2), __isset.bit(2)};
   }
 
   /** Glean { "field": "folly_fast" } */
-  template <typename..., typename T = folly::F14FastMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> folly_fast_ref() & {
+  template <typename..., typename fbthrift_T = folly::F14FastMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> folly_fast_ref() & {
     return {this->__fbthrift_field_folly_fast, __isset.at(2), __isset.bit(2)};
   }
 
   /** Glean { "field": "folly_fast" } */
-  template <typename..., typename T = folly::F14FastMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> folly_fast_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_folly_fast), __isset.at(2), __isset.bit(2)};
+  template <typename..., typename fbthrift_T = folly::F14FastMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> folly_fast_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_folly_fast), __isset.at(2), __isset.bit(2)};
   }
 
   /** Glean { "field": "folly_fast" } */
-  template <typename..., typename T = folly::F14FastMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> folly_fast() const& {
+  template <typename..., typename fbthrift_T = folly::F14FastMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> folly_fast() const& {
     return {this->__fbthrift_field_folly_fast, __isset.at(2), __isset.bit(2)};
   }
 
   /** Glean { "field": "folly_fast" } */
-  template <typename..., typename T = folly::F14FastMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> folly_fast() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_folly_fast), __isset.at(2), __isset.bit(2)};
+  template <typename..., typename fbthrift_T = folly::F14FastMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> folly_fast() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_folly_fast), __isset.at(2), __isset.bit(2)};
   }
 
   /** Glean { "field": "folly_fast" } */
-  template <typename..., typename T = folly::F14FastMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> folly_fast() & {
+  template <typename..., typename fbthrift_T = folly::F14FastMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> folly_fast() & {
     return {this->__fbthrift_field_folly_fast, __isset.at(2), __isset.bit(2)};
   }
 
   /** Glean { "field": "folly_fast" } */
-  template <typename..., typename T = folly::F14FastMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> folly_fast() && {
-    return {static_cast<T&&>(this->__fbthrift_field_folly_fast), __isset.at(2), __isset.bit(2)};
+  template <typename..., typename fbthrift_T = folly::F14FastMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> folly_fast() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_folly_fast), __isset.at(2), __isset.bit(2)};
   }
 
   /** Glean { "field": "folly_node" } */
-  template <typename..., typename T = folly::F14NodeMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> folly_node_ref() const& {
+  template <typename..., typename fbthrift_T = folly::F14NodeMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> folly_node_ref() const& {
     return {this->__fbthrift_field_folly_node, __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "folly_node" } */
-  template <typename..., typename T = folly::F14NodeMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> folly_node_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_folly_node), __isset.at(3), __isset.bit(3)};
+  template <typename..., typename fbthrift_T = folly::F14NodeMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> folly_node_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_folly_node), __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "folly_node" } */
-  template <typename..., typename T = folly::F14NodeMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> folly_node_ref() & {
+  template <typename..., typename fbthrift_T = folly::F14NodeMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> folly_node_ref() & {
     return {this->__fbthrift_field_folly_node, __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "folly_node" } */
-  template <typename..., typename T = folly::F14NodeMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> folly_node_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_folly_node), __isset.at(3), __isset.bit(3)};
+  template <typename..., typename fbthrift_T = folly::F14NodeMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> folly_node_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_folly_node), __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "folly_node" } */
-  template <typename..., typename T = folly::F14NodeMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> folly_node() const& {
+  template <typename..., typename fbthrift_T = folly::F14NodeMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> folly_node() const& {
     return {this->__fbthrift_field_folly_node, __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "folly_node" } */
-  template <typename..., typename T = folly::F14NodeMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> folly_node() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_folly_node), __isset.at(3), __isset.bit(3)};
+  template <typename..., typename fbthrift_T = folly::F14NodeMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> folly_node() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_folly_node), __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "folly_node" } */
-  template <typename..., typename T = folly::F14NodeMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> folly_node() & {
+  template <typename..., typename fbthrift_T = folly::F14NodeMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> folly_node() & {
     return {this->__fbthrift_field_folly_node, __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "folly_node" } */
-  template <typename..., typename T = folly::F14NodeMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> folly_node() && {
-    return {static_cast<T&&>(this->__fbthrift_field_folly_node), __isset.at(3), __isset.bit(3)};
+  template <typename..., typename fbthrift_T = folly::F14NodeMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> folly_node() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_folly_node), __isset.at(3), __isset.bit(3)};
   }
 
   /** Glean { "field": "folly_value" } */
-  template <typename..., typename T = folly::F14ValueMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> folly_value_ref() const& {
+  template <typename..., typename fbthrift_T = folly::F14ValueMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> folly_value_ref() const& {
     return {this->__fbthrift_field_folly_value, __isset.at(4), __isset.bit(4)};
   }
 
   /** Glean { "field": "folly_value" } */
-  template <typename..., typename T = folly::F14ValueMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> folly_value_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_folly_value), __isset.at(4), __isset.bit(4)};
+  template <typename..., typename fbthrift_T = folly::F14ValueMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> folly_value_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_folly_value), __isset.at(4), __isset.bit(4)};
   }
 
   /** Glean { "field": "folly_value" } */
-  template <typename..., typename T = folly::F14ValueMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> folly_value_ref() & {
+  template <typename..., typename fbthrift_T = folly::F14ValueMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> folly_value_ref() & {
     return {this->__fbthrift_field_folly_value, __isset.at(4), __isset.bit(4)};
   }
 
   /** Glean { "field": "folly_value" } */
-  template <typename..., typename T = folly::F14ValueMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> folly_value_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_folly_value), __isset.at(4), __isset.bit(4)};
+  template <typename..., typename fbthrift_T = folly::F14ValueMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> folly_value_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_folly_value), __isset.at(4), __isset.bit(4)};
   }
 
   /** Glean { "field": "folly_value" } */
-  template <typename..., typename T = folly::F14ValueMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> folly_value() const& {
+  template <typename..., typename fbthrift_T = folly::F14ValueMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> folly_value() const& {
     return {this->__fbthrift_field_folly_value, __isset.at(4), __isset.bit(4)};
   }
 
   /** Glean { "field": "folly_value" } */
-  template <typename..., typename T = folly::F14ValueMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> folly_value() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_folly_value), __isset.at(4), __isset.bit(4)};
+  template <typename..., typename fbthrift_T = folly::F14ValueMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> folly_value() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_folly_value), __isset.at(4), __isset.bit(4)};
   }
 
   /** Glean { "field": "folly_value" } */
-  template <typename..., typename T = folly::F14ValueMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> folly_value() & {
+  template <typename..., typename fbthrift_T = folly::F14ValueMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> folly_value() & {
     return {this->__fbthrift_field_folly_value, __isset.at(4), __isset.bit(4)};
   }
 
   /** Glean { "field": "folly_value" } */
-  template <typename..., typename T = folly::F14ValueMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> folly_value() && {
-    return {static_cast<T&&>(this->__fbthrift_field_folly_value), __isset.at(4), __isset.bit(4)};
+  template <typename..., typename fbthrift_T = folly::F14ValueMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> folly_value() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_folly_value), __isset.at(4), __isset.bit(4)};
   }
 
   /** Glean { "field": "folly_vector" } */
-  template <typename..., typename T = folly::F14VectorMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> folly_vector_ref() const& {
+  template <typename..., typename fbthrift_T = folly::F14VectorMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> folly_vector_ref() const& {
     return {this->__fbthrift_field_folly_vector, __isset.at(5), __isset.bit(5)};
   }
 
   /** Glean { "field": "folly_vector" } */
-  template <typename..., typename T = folly::F14VectorMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> folly_vector_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_folly_vector), __isset.at(5), __isset.bit(5)};
+  template <typename..., typename fbthrift_T = folly::F14VectorMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> folly_vector_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_folly_vector), __isset.at(5), __isset.bit(5)};
   }
 
   /** Glean { "field": "folly_vector" } */
-  template <typename..., typename T = folly::F14VectorMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> folly_vector_ref() & {
+  template <typename..., typename fbthrift_T = folly::F14VectorMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> folly_vector_ref() & {
     return {this->__fbthrift_field_folly_vector, __isset.at(5), __isset.bit(5)};
   }
 
   /** Glean { "field": "folly_vector" } */
-  template <typename..., typename T = folly::F14VectorMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> folly_vector_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_folly_vector), __isset.at(5), __isset.bit(5)};
+  template <typename..., typename fbthrift_T = folly::F14VectorMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> folly_vector_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_folly_vector), __isset.at(5), __isset.bit(5)};
   }
 
   /** Glean { "field": "folly_vector" } */
-  template <typename..., typename T = folly::F14VectorMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> folly_vector() const& {
+  template <typename..., typename fbthrift_T = folly::F14VectorMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> folly_vector() const& {
     return {this->__fbthrift_field_folly_vector, __isset.at(5), __isset.bit(5)};
   }
 
   /** Glean { "field": "folly_vector" } */
-  template <typename..., typename T = folly::F14VectorMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> folly_vector() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_folly_vector), __isset.at(5), __isset.bit(5)};
+  template <typename..., typename fbthrift_T = folly::F14VectorMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> folly_vector() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_folly_vector), __isset.at(5), __isset.bit(5)};
   }
 
   /** Glean { "field": "folly_vector" } */
-  template <typename..., typename T = folly::F14VectorMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> folly_vector() & {
+  template <typename..., typename fbthrift_T = folly::F14VectorMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> folly_vector() & {
     return {this->__fbthrift_field_folly_vector, __isset.at(5), __isset.bit(5)};
   }
 
   /** Glean { "field": "folly_vector" } */
-  template <typename..., typename T = folly::F14VectorMap<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> folly_vector() && {
-    return {static_cast<T&&>(this->__fbthrift_field_folly_vector), __isset.at(5), __isset.bit(5)};
+  template <typename..., typename fbthrift_T = folly::F14VectorMap<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> folly_vector() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_folly_vector), __isset.at(5), __isset.bit(5)};
   }
 
   /** Glean { "field": "folly_sorted_vector" } */
-  template <typename..., typename T = folly::sorted_vector_map<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> folly_sorted_vector_ref() const& {
+  template <typename..., typename fbthrift_T = folly::sorted_vector_map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> folly_sorted_vector_ref() const& {
     return {this->__fbthrift_field_folly_sorted_vector, __isset.at(6), __isset.bit(6)};
   }
 
   /** Glean { "field": "folly_sorted_vector" } */
-  template <typename..., typename T = folly::sorted_vector_map<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> folly_sorted_vector_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_folly_sorted_vector), __isset.at(6), __isset.bit(6)};
+  template <typename..., typename fbthrift_T = folly::sorted_vector_map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> folly_sorted_vector_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_folly_sorted_vector), __isset.at(6), __isset.bit(6)};
   }
 
   /** Glean { "field": "folly_sorted_vector" } */
-  template <typename..., typename T = folly::sorted_vector_map<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> folly_sorted_vector_ref() & {
+  template <typename..., typename fbthrift_T = folly::sorted_vector_map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> folly_sorted_vector_ref() & {
     return {this->__fbthrift_field_folly_sorted_vector, __isset.at(6), __isset.bit(6)};
   }
 
   /** Glean { "field": "folly_sorted_vector" } */
-  template <typename..., typename T = folly::sorted_vector_map<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> folly_sorted_vector_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_folly_sorted_vector), __isset.at(6), __isset.bit(6)};
+  template <typename..., typename fbthrift_T = folly::sorted_vector_map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> folly_sorted_vector_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_folly_sorted_vector), __isset.at(6), __isset.bit(6)};
   }
 
   /** Glean { "field": "folly_sorted_vector" } */
-  template <typename..., typename T = folly::sorted_vector_map<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> folly_sorted_vector() const& {
+  template <typename..., typename fbthrift_T = folly::sorted_vector_map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> folly_sorted_vector() const& {
     return {this->__fbthrift_field_folly_sorted_vector, __isset.at(6), __isset.bit(6)};
   }
 
   /** Glean { "field": "folly_sorted_vector" } */
-  template <typename..., typename T = folly::sorted_vector_map<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> folly_sorted_vector() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_folly_sorted_vector), __isset.at(6), __isset.bit(6)};
+  template <typename..., typename fbthrift_T = folly::sorted_vector_map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> folly_sorted_vector() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_folly_sorted_vector), __isset.at(6), __isset.bit(6)};
   }
 
   /** Glean { "field": "folly_sorted_vector" } */
-  template <typename..., typename T = folly::sorted_vector_map<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> folly_sorted_vector() & {
+  template <typename..., typename fbthrift_T = folly::sorted_vector_map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> folly_sorted_vector() & {
     return {this->__fbthrift_field_folly_sorted_vector, __isset.at(6), __isset.bit(6)};
   }
 
   /** Glean { "field": "folly_sorted_vector" } */
-  template <typename..., typename T = folly::sorted_vector_map<::std::string, ::std::string>>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> folly_sorted_vector() && {
-    return {static_cast<T&&>(this->__fbthrift_field_folly_sorted_vector), __isset.at(6), __isset.bit(6)};
+  template <typename..., typename fbthrift_T = folly::sorted_vector_map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> folly_sorted_vector() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_folly_sorted_vector), __isset.at(6), __isset.bit(6)};
   }
 
   /** Glean { "field": "std_map" } */
@@ -1883,99 +1883,99 @@ class TWrapped final  {
   bool operator<(const TWrapped&) const;
 
   /** Glean { "field": "fieldA" } */
-  template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> fieldA_ref() const& {
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> fieldA_ref() const& {
     return {this->__fbthrift_field_fieldA, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "fieldA" } */
-  template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> fieldA_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_fieldA), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> fieldA_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_fieldA), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "fieldA" } */
-  template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> fieldA_ref() & {
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> fieldA_ref() & {
     return {this->__fbthrift_field_fieldA, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "fieldA" } */
-  template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> fieldA_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_fieldA), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> fieldA_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_fieldA), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "fieldA" } */
-  template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> fieldA() const& {
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> fieldA() const& {
     return {this->__fbthrift_field_fieldA, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "fieldA" } */
-  template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> fieldA() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_fieldA), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> fieldA() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_fieldA), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "fieldA" } */
-  template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> fieldA() & {
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> fieldA() & {
     return {this->__fbthrift_field_fieldA, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "fieldA" } */
-  template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> fieldA() && {
-    return {static_cast<T&&>(this->__fbthrift_field_fieldA), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> fieldA() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_fieldA), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "fieldB" } */
-  template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> fieldB_ref() const& {
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> fieldB_ref() const& {
     return {this->__fbthrift_field_fieldB, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "fieldB" } */
-  template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> fieldB_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_fieldB), __isset.at(1), __isset.bit(1)};
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> fieldB_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_fieldB), __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "fieldB" } */
-  template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> fieldB_ref() & {
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> fieldB_ref() & {
     return {this->__fbthrift_field_fieldB, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "fieldB" } */
-  template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> fieldB_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_fieldB), __isset.at(1), __isset.bit(1)};
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> fieldB_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_fieldB), __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "fieldB" } */
-  template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> fieldB() const& {
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> fieldB() const& {
     return {this->__fbthrift_field_fieldB, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "fieldB" } */
-  template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> fieldB() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_fieldB), __isset.at(1), __isset.bit(1)};
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> fieldB() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_fieldB), __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "fieldB" } */
-  template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> fieldB() & {
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> fieldB() & {
     return {this->__fbthrift_field_fieldB, __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "fieldB" } */
-  template <typename..., typename T = ::std::string>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> fieldB() && {
-    return {static_cast<T&&>(this->__fbthrift_field_fieldB), __isset.at(1), __isset.bit(1)};
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> fieldB() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_fieldB), __isset.at(1), __isset.bit(1)};
   }
 
   /** Glean { "field": "fieldA" } */
@@ -2127,51 +2127,51 @@ class IndirectionA final  {
   bool operator<(const IndirectionA&) const;
 
   /** Glean { "field": "lst" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrapped>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> lst_ref() const& {
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::ListOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> lst_ref() const& {
     return {this->__fbthrift_field_lst, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "lst" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrapped>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> lst_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::ListOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> lst_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "lst" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrapped>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> lst_ref() & {
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::ListOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> lst_ref() & {
     return {this->__fbthrift_field_lst, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "lst" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrapped>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> lst_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::ListOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> lst_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "lst" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrapped>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> lst() const& {
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::ListOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> lst() const& {
     return {this->__fbthrift_field_lst, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "lst" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrapped>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> lst() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::ListOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> lst() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "lst" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrapped>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> lst() & {
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::ListOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> lst() & {
     return {this->__fbthrift_field_lst, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "lst" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrapped>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> lst() && {
-    return {static_cast<T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::ListOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> lst() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "lst" } */
@@ -2299,51 +2299,51 @@ class IndirectionB final  {
   bool operator<(const IndirectionB&) const;
 
   /** Glean { "field": "lst" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::VecOfWrapped>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> lst_ref() const& {
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::VecOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> lst_ref() const& {
     return {this->__fbthrift_field_lst, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "lst" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::VecOfWrapped>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> lst_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::VecOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> lst_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "lst" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::VecOfWrapped>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> lst_ref() & {
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::VecOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> lst_ref() & {
     return {this->__fbthrift_field_lst, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "lst" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::VecOfWrapped>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> lst_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::VecOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> lst_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "lst" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::VecOfWrapped>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> lst() const& {
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::VecOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> lst() const& {
     return {this->__fbthrift_field_lst, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "lst" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::VecOfWrapped>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> lst() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::VecOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> lst() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "lst" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::VecOfWrapped>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> lst() & {
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::VecOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> lst() & {
     return {this->__fbthrift_field_lst, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "lst" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::VecOfWrapped>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> lst() && {
-    return {static_cast<T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::VecOfWrapped>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> lst() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "lst" } */
@@ -2471,51 +2471,51 @@ class IndirectionC final  {
   bool operator<(const IndirectionC&) const;
 
   /** Glean { "field": "lst" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrappedAlias>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> lst_ref() const& {
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::ListOfWrappedAlias>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> lst_ref() const& {
     return {this->__fbthrift_field_lst, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "lst" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrappedAlias>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> lst_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::ListOfWrappedAlias>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> lst_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "lst" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrappedAlias>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> lst_ref() & {
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::ListOfWrappedAlias>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> lst_ref() & {
     return {this->__fbthrift_field_lst, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "lst" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrappedAlias>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> lst_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::ListOfWrappedAlias>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> lst_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "lst" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrappedAlias>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> lst() const& {
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::ListOfWrappedAlias>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&> lst() const& {
     return {this->__fbthrift_field_lst, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "lst" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrappedAlias>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> lst() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::ListOfWrappedAlias>
+  FOLLY_ERASE ::apache::thrift::field_ref<const fbthrift_T&&> lst() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "lst" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrappedAlias>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> lst() & {
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::ListOfWrappedAlias>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&> lst() & {
     return {this->__fbthrift_field_lst, __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "lst" } */
-  template <typename..., typename T = ::test::fixtures::python_capi::ListOfWrappedAlias>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> lst() && {
-    return {static_cast<T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename fbthrift_T = ::test::fixtures::python_capi::ListOfWrappedAlias>
+  FOLLY_ERASE ::apache::thrift::field_ref<fbthrift_T&&> lst() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
   }
 
   /** Glean { "field": "lst" } */

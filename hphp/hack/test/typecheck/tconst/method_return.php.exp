@@ -11,6 +11,6 @@ Invalid return type (Typing[4336])
 ERROR: File "method_return.php", line 61, characters 29-54:
 Invalid type hint (Typing[4352])
   File "method_return.php", line 61, characters 48-48:
-  An abstract type constant is not allowed in this position.
+  An abstract type constant is not allowed in this position. Did you mean `this::T`?
   File "method_return.php", line 4, characters 23-23:
   `T` is abstract here.

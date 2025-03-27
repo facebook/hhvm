@@ -7,7 +7,7 @@ This `as` assertion will always fail and lead to an exception at runtime. The ex
 ERROR: File "type_constants_across.php", line 5, characters 19-23:
 Invalid type hint (Typing[4352])
   File "type_constants_across.php", line 5, characters 22-23:
-  An abstract type constant is not allowed in this position.
+  An abstract type constant is not allowed in this position. Did you mean `this::Tx`?
   File "type_constants_across.php", line 17, characters 23-24:
   `Tx` is abstract here.
 ERROR: File "type_constants_across.php", line 10, characters 10-17:

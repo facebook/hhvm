@@ -5,6 +5,6 @@ Invalid `is` expression hint (Typing[4195])
 ERROR: File "tconst5.php", line 16, characters 13-24:
 Invalid type hint (Typing[4352])
   File "tconst5.php", line 16, characters 24-24:
-  An abstract type constant is not allowed in this position.
+  An abstract type constant is not allowed in this position. Did you mean `this::T`?
   File "tconst5.php", line 12, characters 23-23:
   `T` is abstract here.

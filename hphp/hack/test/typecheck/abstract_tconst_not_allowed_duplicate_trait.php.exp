@@ -1,6 +1,6 @@
 ERROR: File "abstract_tconst_not_allowed_duplicate_trait.php", line 9, characters 23-26:
 Invalid type hint (Typing[4352])
   File "abstract_tconst_not_allowed_duplicate_trait.php", line 9, characters 26-26:
-  An abstract type constant is not allowed in this position.
+  An abstract type constant is not allowed in this position. Did you mean `this::T`?
   File "abstract_tconst_not_allowed_duplicate_trait.php", line 5, characters 23-23:
   `T` is abstract here.

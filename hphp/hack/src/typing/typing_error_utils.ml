@@ -6668,7 +6668,10 @@ end = struct
     let reasons =
       lazy
         [
-          (pos, "An abstract type constant is not allowed in this position.");
+          ( pos,
+            "An abstract type constant is not allowed in this position. Did you mean "
+            ^ Markdown_lite.md_codify ("this::" ^ tconst_name)
+            ^ "?" );
           ( decl_pos,
             Printf.sprintf
               "%s is abstract here."

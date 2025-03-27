@@ -24,6 +24,7 @@ import (
 	"golang.org/x/sync/singleflight"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 	rsocket "github.com/rsocket/rsocket-go"
 	"github.com/rsocket/rsocket-go/core/transport"
 	"github.com/rsocket/rsocket-go/payload"
@@ -130,7 +131,7 @@ func (r *rsocketClient) resetDeadline() {
 
 func (r *rsocketClient) RequestResponse(ctx context.Context, messageName string, protoID types.ProtocolID, headers map[string]string, dataBytes []byte) (map[string]string, []byte, error) {
 	r.resetDeadline()
-	request, err := encodeRequestPayload(messageName, protoID, types.CALL, headers, r.useZstd, dataBytes)
+	request, err := encodeRequestPayload(messageName, protoID, rpcmetadata.RpcKind_SINGLE_REQUEST_SINGLE_RESPONSE, headers, r.useZstd, dataBytes)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -148,7 +149,7 @@ func (r *rsocketClient) RequestResponse(ctx context.Context, messageName string,
 
 func (r *rsocketClient) FireAndForget(messageName string, protoID types.ProtocolID, headers map[string]string, dataBytes []byte) error {
 	r.resetDeadline()
-	request, err := encodeRequestPayload(messageName, protoID, types.ONEWAY, headers, r.useZstd, dataBytes)
+	request, err := encodeRequestPayload(messageName, protoID, rpcmetadata.RpcKind_SINGLE_REQUEST_NO_RESPONSE, headers, r.useZstd, dataBytes)
 	if err != nil {
 		return err
 	}

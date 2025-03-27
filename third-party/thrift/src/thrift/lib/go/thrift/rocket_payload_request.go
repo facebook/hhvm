@@ -32,7 +32,14 @@ type requestPayload struct {
 	protoID  types.ProtocolID
 }
 
-func encodeRequestPayload(name string, protoID types.ProtocolID, typeID types.MessageType, headers map[string]string, zstd bool, dataBytes []byte) (payload.Payload, error) {
+func encodeRequestPayload(
+	name string,
+	protoID types.ProtocolID,
+	rpcKind rpcmetadata.RpcKind,
+	headers map[string]string,
+	zstd bool,
+	dataBytes []byte,
+) (payload.Payload, error) {
 	metadata := rpcmetadata.NewRequestRpcMetadata()
 	metadata.SetName(&name)
 	rpcProtocolID, err := protocolIDToRPCProtocolID(protoID)
@@ -40,11 +47,7 @@ func encodeRequestPayload(name string, protoID types.ProtocolID, typeID types.Me
 		return nil, err
 	}
 	metadata.SetProtocol(&rpcProtocolID)
-	kind, err := messageTypeToRPCKind(typeID)
-	if err != nil {
-		return nil, err
-	}
-	metadata.SetKind(&kind)
+	metadata.SetKind(&rpcKind)
 	if zstd {
 		compression := rpcmetadata.CompressionAlgorithm_ZSTD
 		metadata.SetCompression(&compression)
@@ -173,16 +176,6 @@ func rpcProtocolIDToProtocolID(protocolID rpcmetadata.ProtocolId) (types.Protoco
 		return types.ProtocolIDCompact, nil
 	}
 	return 0, fmt.Errorf("unsupported ProtocolId %v", protocolID)
-}
-
-func messageTypeToRPCKind(typeID types.MessageType) (rpcmetadata.RpcKind, error) {
-	switch typeID {
-	case types.CALL:
-		return rpcmetadata.RpcKind_SINGLE_REQUEST_SINGLE_RESPONSE, nil
-	case types.ONEWAY:
-		return rpcmetadata.RpcKind_SINGLE_REQUEST_NO_RESPONSE, nil
-	}
-	return 0, fmt.Errorf("unsupported MessageType %v", typeID)
 }
 
 func rpcKindToMessageType(kind rpcmetadata.RpcKind) (types.MessageType, error) {

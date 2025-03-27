@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 	"github.com/rsocket/rsocket-go/payload"
 	"github.com/stretchr/testify/require"
 )
@@ -30,7 +31,7 @@ func TestRequestRPCMetadata(t *testing.T) {
 	wantProto := types.ProtocolIDCompact
 	wantZstd := false
 	wantOther := map[string]string{"header": "1"}
-	data, err := encodeRequestPayload(wantName, wantProto, wantType, wantOther, wantZstd, nil)
+	data, err := encodeRequestPayload(wantName, wantProto, rpcmetadata.RpcKind_SINGLE_REQUEST_SINGLE_RESPONSE, wantOther, wantZstd, nil)
 	require.NoError(t, err)
 	got, err := decodeRequestPayload(data)
 	require.NoError(t, err)

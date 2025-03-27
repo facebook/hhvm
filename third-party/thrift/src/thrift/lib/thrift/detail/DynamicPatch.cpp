@@ -1439,23 +1439,43 @@ ExtractedMasksFromPatch DynamicStructPatch::extractMaskFromPatch() const {
     void clear() { masks = {protocol::noneMask(), protocol::allMask()}; }
     void ensure(FieldId id, const Value&) {
       // granular read/write operation for the field
-      detail::insertFieldsToMask(masks.read, id);
-      detail::insertFieldsToMaskIfNotAllMask(masks.write, id);
+      ensure_ = id;
     }
-    [[noreturn]] void patchIfSet(FieldId, const DynamicPatch&) {
-      // TODO(dokwon): Add when all recurisve patch extraction is available.
-      folly::throw_exception<std::runtime_error>("not implemented.");
+    void patchIfSet(FieldId id, const DynamicPatch& patch) {
+      // granular read/write operation
+      // Insert next extracted mask and insert field to read mask if the next
+      // extracted mask does not include the field.
+      auto getIncludesObjRef = [](Mask& mask) { return mask.includes_ref(); };
+      auto nextMasks = patch.extractMaskFromPatch();
+      detail::insertNextMask(
+          masks,
+          nextMasks,
+          static_cast<int16_t>(id),
+          static_cast<int16_t>(id),
+          getIncludesObjRef);
+      detail::insertFieldsToMask(masks.read, id);
     }
     void remove(FieldId id) {
       // write operation for the field
       detail::insertFieldsToMaskIfNotAllMask(masks.write, id);
     }
+    void finalize() {
+      if (ensure_) {
+        detail::insertFieldsToMask(masks.read, *ensure_);
+        detail::insertFieldsToMaskIfNotAllMask(masks.write, *ensure_);
+      }
+      detail::ensureRWMaskInvariant(masks);
+    }
 
     protocol::ExtractedMasksFromPatch masks{
         protocol::noneMask(), protocol::noneMask()};
+
+   private:
+    std::optional<FieldId> ensure_;
   };
   Visitor v;
   customVisit(v);
+  v.finalize();
   return std::move(v.masks);
 }
 
@@ -1467,19 +1487,39 @@ ExtractedMasksFromPatch DynamicUnionPatch::extractMaskFromPatch() const {
     void clear() { masks = {protocol::noneMask(), protocol::allMask()}; }
     void ensure(FieldId id, const Value&) {
       // granular read operation for the field and full write operation
-      detail::insertFieldsToMask(masks.read, id);
+      ensure_ = id;
       masks.write = protocol::allMask();
     }
-    [[noreturn]] void patchIfSet(FieldId, const DynamicPatch&) {
-      // TODO(dokwon): Add when all recurisve patch extraction is available.
-      folly::throw_exception<std::runtime_error>("not implemented.");
+    void patchIfSet(FieldId id, const DynamicPatch& patch) {
+      // granular read/write operation
+      // Insert next extracted mask and insert field to read mask if the next
+      // extracted mask does not include the field.
+      auto getIncludesObjRef = [](Mask& mask) { return mask.includes_ref(); };
+      auto nextMasks = patch.extractMaskFromPatch();
+      detail::insertNextMask(
+          masks,
+          nextMasks,
+          static_cast<int16_t>(id),
+          static_cast<int16_t>(id),
+          getIncludesObjRef);
+      detail::insertFieldsToMask(masks.read, id);
+    }
+    void finalize() {
+      if (ensure_) {
+        detail::insertFieldsToMask(masks.read, *ensure_);
+      }
+      detail::ensureRWMaskInvariant(masks);
     }
 
     protocol::ExtractedMasksFromPatch masks{
         protocol::noneMask(), protocol::noneMask()};
+
+   private:
+    std::optional<FieldId> ensure_;
   };
   Visitor v;
   customVisit(v);
+  v.finalize();
   return std::move(v.masks);
 }
 
@@ -1503,18 +1543,31 @@ ExtractedMasksFromPatch DynamicUnknownPatch::extractMaskFromPatch() const {
       }
       masks = {protocol::allMask(), protocol::allMask()};
     }
-    [[noreturn]] void patchIfSet(FieldId, const DynamicPatch&) {
+    void patchIfSet(FieldId id, const DynamicPatch& patch) {
       // Category::StructuredPatch
       // Cannot distinguish struct/union patch
-      // TODO(dokwon): Add when all recurisve patch extraction is available.
-      folly::throw_exception<std::runtime_error>("not implemented.");
+      //
+      // granular read/write operation
+      // Insert next extracted mask and insert field to read mask if the next
+      // extracted mask does not include the field.
+      auto getIncludesObjRef = [](Mask& mask) { return mask.includes_ref(); };
+      auto nextMasks = patch.extractMaskFromPatch();
+      detail::insertNextMask(
+          masks,
+          nextMasks,
+          static_cast<int16_t>(id),
+          static_cast<int16_t>(id),
+          getIncludesObjRef);
+      detail::insertFieldsToMask(masks.read, id);
     }
+    void finalize() { detail::ensureRWMaskInvariant(masks); }
 
     protocol::ExtractedMasksFromPatch masks{
         protocol::noneMask(), protocol::noneMask()};
   };
   Visitor v;
   customVisit(v);
+  v.finalize();
   return std::move(v.masks);
 }
 

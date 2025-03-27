@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/atomic-countable.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/low-string-ptr-or-id.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/tracing.h"
 #include "hphp/runtime/base/type-string.h"
@@ -170,9 +171,9 @@ struct Func final {
     // Set to Uninit if there is no DV, or if there's a nonscalar DV.
     TypedValue defaultValue;
     // Eval-able PHP code.
-    LowStringPtr phpCode{nullptr};
+    LowStringPtrOrId phpCode;
     // User-annotated type.
-    LowStringPtr userType{nullptr};
+    LowStringPtrOrId userType;
     // offset of dvi funclet from cti section base.
     Offset ctiFunclet{kInvalidOffset};
     TypeIntersectionConstraint typeConstraints;
@@ -1394,7 +1395,7 @@ private:
 
     uint16_t m_sn;
 
-    LowStringPtr m_retUserType;
+    LowStringPtrOrId m_retUserType;
     UserAttributeMap m_userAttributes;
     // The link can be bound for const Func.
     mutable rds::Link<bool, rds::Mode::Normal> m_funcHasDebuggerIntr;

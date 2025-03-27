@@ -323,7 +323,7 @@ public:
   ParamInfoVec params;
   int16_t maxStackCells{0};
 
-  LowStringPtr retUserType;
+  LowStringPtrOrId retUserType;
   TypeIntersectionConstraint retTypeConstraints;
   StaticCoeffectsVec staticCoeffects;
   CoeffectRuleVec coeffectRules;

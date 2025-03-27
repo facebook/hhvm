@@ -578,14 +578,14 @@ std::string func_param_list(const FuncInfo& finfo) {
       ret += "readonly ";
     }
     ret += type_info(
-      func->params()[i].userType,
+      func->params()[i].userType.ptr(func->unit()),
       func->params()[i].typeConstraints
     );
     ret += folly::format("{}", loc_name(finfo, i)).str();
     if (func->params()[i].hasDefaultValue()) {
       auto const off = func->params()[i].funcletOff;
       ret += folly::format(" = {}", jmp_label(finfo, off)).str();
-      if (auto const code = func->params()[i].phpCode) {
+      if (auto const code = func->params()[i].phpCode.ptr(func->unit())) {
         ret += folly::format("({})", escaped_long(code)).str();
       }
     }

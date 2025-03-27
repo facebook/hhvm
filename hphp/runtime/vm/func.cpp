@@ -622,13 +622,13 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
           out << " " << tc.displayName(cls(), true);
         }
       }
-      if (param.userType) {
-        out << " (" << param.userType->data() << ")";
+      if (auto userType = param.userType.ptr(unit())) {
+        out << " (" << userType->data() << ")";
       }
       if (param.funcletOff != kInvalidOffset) {
         out << " DV" << " at " << param.funcletOff;
-        if (param.phpCode) {
-          out << " = " << param.phpCode->data();
+        if (auto phpCode = param.phpCode.ptr(unit())) {
+          out << " = " << phpCode->data();
         }
       }
       out << std::endl;

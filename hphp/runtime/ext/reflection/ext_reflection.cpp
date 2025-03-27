@@ -166,7 +166,7 @@ Variant default_arg_from_php_code(const Func::ParamInfo& fpi,
 
   try {
     return g_context->getEvaledArg(
-      fpi.phpCode,
+      fpi.phpCode.ptr(func->unit()),
       // We use cls() instead of implCls() because we want the namespace and
       // class context for which the closure is scoped, not that of the
       // Closure subclass (which, among other things, is always globally
@@ -763,8 +763,9 @@ static Array get_function_param_info(const Func* func) {
       : staticEmptyString();
 
     param.set(s_type, make_tv<KindOfPersistentString>(type));
-    const StringData* typeHint = fpi.userType
-      ? fpi.userType
+    auto userType = fpi.userType.ptr(func->unit());
+    const StringData* typeHint = userType
+      ? userType
       : staticEmptyString();
     param.set(s_type_hint, make_tv<KindOfPersistentString>(typeHint));
 
@@ -791,10 +792,10 @@ static Array get_function_param_info(const Func* func) {
       param.set(s_type_hint_nullable, make_tv<KindOfBoolean>(false));
     }
 
-    if (fpi.phpCode) {
+    if (auto phpCode = fpi.phpCode.ptr(func->unit())) {
       Variant v = default_arg_from_php_code(fpi, func, i);
       param.set(s_default, v);
-      param.set(s_defaultText, make_tv<KindOfPersistentString>(fpi.phpCode));
+      param.set(s_defaultText, make_tv<KindOfPersistentString>(phpCode));
     }
 
     if (func->isInOut(i)) {

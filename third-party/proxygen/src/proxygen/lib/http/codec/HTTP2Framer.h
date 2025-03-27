@@ -472,6 +472,10 @@ size_t writePriority(folly::IOBufQueue& writeBuf,
                      uint32_t stream,
                      PriorityUpdate priority) noexcept;
 
+size_t writeRFC9218Priority(folly::IOBufQueue& writeBuf,
+                            uint32_t stream,
+                            std::string& priority);
+
 /**
  * Generate an entire RST_STREAM frame, including the common frame
  * header.

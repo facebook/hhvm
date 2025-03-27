@@ -1890,6 +1890,30 @@ TEST_F(HTTP2CodecTest, ConcurrentStreams) {
             ErrorCode::REFUSED_STREAM);
 }
 
+TEST_F(HTTP2CodecTest, BasicRFC9218Priority) {
+  auto pri = HTTPPriority{7, true};
+  upstreamCodec_.generatePriority(output_, 1, pri);
+
+  parse();
+  EXPECT_EQ(callbacks_.urgency, pri.urgency);
+  EXPECT_EQ(callbacks_.incremental, pri.incremental);
+}
+
+TEST_F(HTTP2CodecTest, BadRFC9218Priority) {
+  auto pri = HTTPPriority{7, true};
+  upstreamCodec_.generatePriority(output_, 1, pri);
+
+  EXPECT_TRUE(parse([&](IOBuf* ingress) {
+    folly::io::RWPrivateCursor c(ingress);
+    c.skip(http2::kFrameHeaderSize + sizeof(uint32_t));
+    c.writeBE<uint32_t>(1);
+  }));
+
+  // ill-formatted priority, so returns default priority
+  EXPECT_EQ(callbacks_.urgency, 3);
+  EXPECT_EQ(callbacks_.incremental, 1);
+}
+
 TEST_F(HTTP2CodecTest, BasicPriority) {
   auto pri = HTTPMessage::HTTP2Priority(0, true, 1);
   upstreamCodec_.generatePriority(output_, 1, pri);

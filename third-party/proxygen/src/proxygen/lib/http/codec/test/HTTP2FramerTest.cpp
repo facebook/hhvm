@@ -294,6 +294,38 @@ TEST_F(HTTP2FramerTest, Priority) {
   ASSERT_EQ(30, priority.weight);
 }
 
+TEST_F(HTTP2FramerTest, BasicRFC9218Priority) {
+  auto pri = httpPriorityToString(HTTPPriority{7, true});
+  writeRFC9218Priority(queue_, 1, pri);
+  FrameHeader header{};
+  std::string priority;
+  uint32_t stream = 0;
+  parse(&parseRFC9218Priority, header, stream, priority);
+
+  ASSERT_EQ(FrameType::RFC9218_PRIORITY, header.type);
+  ASSERT_EQ(0, header.stream);
+  ASSERT_EQ(0, header.flags);
+  ASSERT_EQ(1, stream);
+  ASSERT_EQ("u=7,i", priority);
+}
+
+TEST_F(HTTP2FramerTest, BadRFC9218Priority) {
+  auto pri = httpPriorityToString(HTTPPriority{
+      255, true}); // httpPriorityToString() takes the min of the urgency passed
+                   // in and the "highest" possible urgency (7)
+  writeRFC9218Priority(queue_, 1, pri);
+  FrameHeader header{};
+  std::string priority;
+  uint32_t stream = 0;
+  parse(&parseRFC9218Priority, header, stream, priority);
+
+  ASSERT_EQ(FrameType::RFC9218_PRIORITY, header.type);
+  ASSERT_EQ(0, header.stream);
+  ASSERT_EQ(0, header.flags);
+  ASSERT_EQ(1, stream);
+  ASSERT_EQ("u=7,i", priority);
+}
+
 TEST_F(HTTP2FramerTest, HeadersWithPaddingAndPriority) {
   auto headersLen = 500;
   auto body = makeBuf(headersLen);

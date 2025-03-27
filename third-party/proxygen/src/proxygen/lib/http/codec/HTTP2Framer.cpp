@@ -290,7 +290,7 @@ bool isValidFrameType(FrameType type) {
   auto val = static_cast<uint8_t>(type);
   if (val < kMinExperimentalFrameType) {
     return val <= static_cast<uint8_t>(FrameType::ALTSVC) ||
-           type == FrameType::PADDING;
+           type == FrameType::PADDING || type == FrameType::RFC9218_PRIORITY;
   } else {
     switch (type) {
       case FrameType::EX_HEADERS:
@@ -829,6 +829,26 @@ size_t writePriority(IOBufQueue& queue,
                                          kNoPadding,
                                          priority,
                                          nullptr);
+  return kFrameHeaderSize + frameLen;
+}
+
+size_t writeRFC9218Priority(IOBufQueue& queue,
+                            uint32_t stream,
+                            std::string& priority) {
+  CHECK_NE(0, stream);
+  QueueAppender appender(&queue, sizeof(stream) + priority.size());
+  appender.writeBE<uint32_t>(stream);
+  appender.pushAtMost((const uint8_t*)(priority.data()), priority.size());
+  auto payloadLen = queue.chainLength();
+
+  const auto frameLen = writeFrameHeader(queue,
+                                         payloadLen,
+                                         FrameType::RFC9218_PRIORITY,
+                                         0,
+                                         0,
+                                         kNoPadding,
+                                         folly::none,
+                                         queue.move());
   return kFrameHeaderSize + frameLen;
 }
 

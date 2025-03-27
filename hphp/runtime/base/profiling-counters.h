@@ -92,15 +92,47 @@ struct ProfilingCounters {
         "DYNO_CACHE_GET_COUNT_PSP", // server note for PSP count
         {100} // count outliers over 100ms
       ),
+      PspAndNonPspProfilingTimeseries(
+        "memcache.arith_duration",
+        "DYNO_CACHE_ARITH_DURATION",
+        "DYNO_CACHE_ARITH_COUNT",
+        "DYNO_CACHE_ARITH_DURATION_PSP",
+        "DYNO_CACHE_ARITH_COUNT_PSP",
+        {100}
+      ),
+      PspAndNonPspProfilingTimeseries(
+        "memcache.delete_duration",
+        "DYNO_CACHE_DELETE_DURATION",
+        "DYNO_CACHE_DELETE_COUNT",
+        "DYNO_CACHE_DELETE_DURATION_PSP",
+        "DYNO_CACHE_DELETE_COUNT_PSP",
+        {100}
+      ),
+      PspAndNonPspProfilingTimeseries(
+        "memcache.update_duration",
+        "DYNO_CACHE_UPDATE_DURATION",
+        "DYNO_CACHE_UPDATE_COUNT",
+        "DYNO_CACHE_UPDATE_DURATION_PSP",
+        "DYNO_CACHE_UPDATE_COUNT_PSP",
+        {100}
+      ),
+      PspAndNonPspProfilingTimeseries(
+        "memcache.warm_duration",
+        "DYNO_CACHE_WARM_DURATION",
+        "DYNO_CACHE_WARM_COUNT",
+        "DYNO_CACHE_WARM_DURATION_PSP",
+        "DYNO_CACHE_WARM_COUNT_PSP",
+        {100}
+      ),
 
       // Tao
       PspAndNonPspProfilingTimeseries(
         "tao.dispatch_duration",
-        "DYNO_TAO_DISPATCH_DURATION", // total duration in us
+        "DYNO_TAO_DISPATCH_DURATION", 
         "DYNO_TAO_DISPATCH_COUNT",
-        "DYNO_TAO_DISPATCH_DURATION_PSP", // PSP only in us
+        "DYNO_TAO_DISPATCH_DURATION_PSP", 
         "DYNO_TAO_DISPATCH_COUNT_PSP",
-        {1000} // count outliers over 1000ms
+        {1000} 
       ),
       PspAndNonPspProfilingTimeseries(
         "tao.update_duration",
@@ -111,36 +143,84 @@ struct ProfilingCounters {
         {1000}
       ),
       PspAndNonPspProfilingTimeseries(
-        "thrift.flush_duration",
-         "DYNO_THRIFT_FLUSH_DURATION",
-         "DYNO_THRIFT_FLUSH_COUNT",
-         "DYNO_THRIFT_FLUSH_DURATION_PSP",
-         "DYNO_THRIFT_FLUSH_COUNT_PSP",
-         {1000} // count outliers over 1000ms
+        "tao.delete_duration",
+        "DYNO_TAO_DELETE_DURATION",
+        "DYNO_TAO_DELETE_COUNT",
+        "DYNO_TAO_DELETE_DURATION_PSP",
+        "DYNO_TAO_DELETE_COUNT_PSP",
+        {1000}
+      ),
+      
+      // Database queries
+      PspAndNonPspProfilingTimeseries(
+        "db_query.read_duration",
+        "DYNO_QUERY_READ_DURATION",
+        "DYNO_QUERY_READ_COUNT",
+        "DYNO_QUERY_READ_DURATION_PSP",
+        "DYNO_QUERY_READ_COUNT_PSP",
+        {1000}
       ),
       PspAndNonPspProfilingTimeseries(
-        "thrift.open_duration",
-         "DYNO_THRIFT_OPEN_DURATION",
-         "DYNO_THRIFT_OPEN_COUNT",
-         "DYNO_THRIFT_OPEN_DURATION_PSP",
-         "DYNO_THRIFT_OPEN_COUNT_PSP",
-         {1000} // count outliers over 1000ms
+        "db_query.write_duration",
+        "DYNO_QUERY_WRITE_DURATION",
+        "DYNO_QUERY_WRITE_COUNT",
+        "DYNO_QUERY_WRITE_DURATION_PSP",
+        "DYNO_QUERY_WRITE_COUNT_PSP",
+        {1000}
       ),
       PspAndNonPspProfilingTimeseries(
-        "thrift.read_duration",
-         "DYNO_THRIFT_READ_DURATION",
-         "DYNO_THRIFT_READ_COUNT",
-         "DYNO_THRIFT_READ_DURATION_PSP",
-         "DYNO_THRIFT_READ_COUNT_PSP",
-         {1000} // count outliers over 1000ms
+        "db_query.other_duration",
+        "DYNO_QUERY_OTHER_DURATION",
+        "DYNO_QUERY_OTHER_COUNT",
+        "DYNO_QUERY_OTHER_DURATION_PSP",
+        "DYNO_QUERY_OTHER_COUNT_PSP",
+        {1000}
+      ),
+      
+      // Curl operations
+      PspAndNonPspProfilingTimeseries(
+        "curl.get_duration",
+        "DYNO_CURL_GET_DURATION",
+        "DYNO_CURL_GET_COUNT",
+        "DYNO_CURL_GET_DURATION_PSP",
+        "DYNO_CURL_GET_COUNT_PSP",
+        {1000}
+      ),
+      
+      // Thrift operations
+      // NB: These are called thrift_calls to disambiguate with thrift counters
+      // already existing
+      PspAndNonPspProfilingTimeseries(
+        "thrift_calls.flush_duration",
+        "DYNO_THRIFT_FLUSH_DURATION",
+        "DYNO_THRIFT_FLUSH_COUNT",
+        "DYNO_THRIFT_FLUSH_DURATION_PSP",
+        "DYNO_THRIFT_FLUSH_COUNT_PSP",
+        {1000}
       ),
       PspAndNonPspProfilingTimeseries(
-        "thrift.write_duration",
-         "DYNO_THRIFT_WRITE_DURATION",
-         "DYNO_THRIFT_WRITE_COUNT",
-         "DYNO_THRIFT_WRITE_DURATION_PSP",
-         "DYNO_THRIFT_WRITE_COUNT_PSP",
-         {1000} // count outliers over 1000ms
+        "thrift_calls.open_duration",
+        "DYNO_THRIFT_OPEN_DURATION",
+        "DYNO_THRIFT_OPEN_COUNT",
+        "DYNO_THRIFT_OPEN_DURATION_PSP",
+        "DYNO_THRIFT_OPEN_COUNT_PSP",
+        {1000}
+      ),
+      PspAndNonPspProfilingTimeseries(
+        "thrift_calls.read_duration",
+        "DYNO_THRIFT_READ_DURATION",
+        "DYNO_THRIFT_READ_COUNT",
+        "DYNO_THRIFT_READ_DURATION_PSP",
+        "DYNO_THRIFT_READ_COUNT_PSP",
+        {1000}
+      ),
+      PspAndNonPspProfilingTimeseries(
+        "thrift_calls.write_duration",
+        "DYNO_THRIFT_WRITE_DURATION",
+        "DYNO_THRIFT_WRITE_COUNT",
+        "DYNO_THRIFT_WRITE_DURATION_PSP",
+        "DYNO_THRIFT_WRITE_COUNT_PSP",
+        {1000}
       ),
     };
 

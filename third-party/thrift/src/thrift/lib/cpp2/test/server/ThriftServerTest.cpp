@@ -1175,19 +1175,18 @@ class HeaderOrRocket : public HeaderOrRocketTest,
 };
 
 TEST_P(HeaderOrRocket, OnewayClientConnectionCloseTest) {
-  static folly::Baton baton;
-
-  class OnewayTestInterface
-      : public apache::thrift::ServiceHandler<TestService> {
+  struct OnewayTestInterface : apache::thrift::ServiceHandler<TestService> {
+    folly::Baton<> baton;
     void noResponse(int64_t) override { baton.post(); }
   };
 
-  ScopedServerInterfaceThread runner(std::make_shared<OnewayTestInterface>());
+  auto handler = std::make_shared<OnewayTestInterface>();
+  ScopedServerInterfaceThread runner(handler);
   {
     auto client = makeClient(runner, nullptr);
     client->sync_noResponse(0);
   }
-  bool posted = baton.try_wait_for(1s);
+  bool posted = handler->baton.try_wait_for(1s);
   EXPECT_TRUE(posted);
 }
 

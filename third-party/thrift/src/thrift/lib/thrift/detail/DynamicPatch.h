@@ -764,6 +764,23 @@ class DynamicPatch {
   /// Returns if the patch type is ambiguous.
   [[nodiscard]] bool isPatchTypeAmbiguous() const;
 
+  /// @brief Constructs read and write Thrift Masks that only contain fields
+  /// that are read / written to respectively by the Patch. The read mask
+  /// specifies entries that must be known in advance to correctly apply Thrift
+  /// Patch. The write mask specifies entries that are potentially affected by
+  /// the patch.
+  ///
+  /// It constructs nested Mask for map, struct, union, and any patches. For
+  /// map, it only supports integer or string key. If the type of key map is not
+  /// integer or string, it throws.
+  ///
+  /// Disclaimer: Mask-extraction only guarentees recall (i.e. all fields that
+  /// are read/written to *will* be selected). However, it provides only a
+  /// best-effort guarentee of precision (selected fields are not guarenteed to
+  /// be relevant to a given patch). If high precision is important, the user is
+  /// advised to use visitPatch or customVisit to introspect the patch directly.
+  ExtractedMasksFromPatch extractMaskFromPatch() const;
+
   /// @cond
   void fromAny(detail::Badge, const type::AnyStruct& any);
   type::AnyStruct toAny(detail::Badge, type::Type type) const;

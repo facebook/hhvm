@@ -1487,6 +1487,11 @@ ExtractedMasksFromPatch DynamicUnknownPatch::extractMaskFromPatch() const {
   return std::move(v.masks);
 }
 
+ExtractedMasksFromPatch DynamicPatch::extractMaskFromPatch() const {
+  return visitPatch(folly::overload(
+      [&](const auto& patch) { return patch.extractMaskFromPatch(); }));
+}
+
 void DynamicListPatch::apply(detail::Badge, ValueList& v) const {
   struct Visitor {
     void assign(detail::Badge, ValueList v) {

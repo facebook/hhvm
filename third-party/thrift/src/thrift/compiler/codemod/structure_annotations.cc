@@ -274,14 +274,14 @@ class structure_annotations {
               "@cpp.EnumType{{type = cpp.EnumUnderlyingType.{}}}", type));
           fm_.add_include("thrift/annotation/cpp.thrift");
         }
-      } else if (name == "cpp.declare_bitwise_ops") {
+      } else if (
+          name == "cpp.declare_bitwise_ops" &&
+          (node.has_structured_annotation(kBitmaskEnumUri) ||
+           node.has_unstructured_annotation("bitmask"))) {
         // This annotation is a subset of @thrift.BitmaskEnum, which carries
         // additional restrictions. We can't turn this into that but we can use
         // it if already present to remove this.
-        if (node.has_structured_annotation(kBitmaskEnumUri) ||
-            node.has_unstructured_annotation("bitmask")) {
-          to_remove.emplace_back(name, data);
-        }
+        to_remove.emplace_back(name, data);
       } else if (name == "cpp.mixin") {
         to_remove.emplace_back(name, data);
         if (!node.has_structured_annotation(kMixinUri)) {

@@ -228,22 +228,41 @@ protocol::ExtractedMasksFromPatch AnyPatch<Patch>::extractMaskFromPatch()
       masks = {protocol::noneMask(), protocol::allMask()};
     }
     void clear() { masks = {protocol::noneMask(), protocol::allMask()}; }
-    [[noreturn]] void patchIfTypeIs(
-        const type::Type&, const protocol::DynamicPatch&) {
-      // TODO(dokwon): Add when all recurisve patch extraction is available.
-      folly::throw_exception<std::runtime_error>("not implemented.");
+    void patchIfTypeIs(
+        const type::Type& type, const protocol::DynamicPatch& patch) {
+      // granular read/write operation
+      // Insert next extracted mask and insert type to read mask if the next
+      // extracted mask does not include the type.
+      auto getIncludesTypeRef = [](protocol::Mask& mask) {
+        return mask.includes_type_ref();
+      };
+      auto nextMasks = patch.extractMaskFromPatch();
+      protocol::detail::insertNextMask(
+          masks, nextMasks, type, type, getIncludesTypeRef);
+      protocol::detail::insertTypeToMaskIfNotAllMask(masks.read, type);
     }
     void ensureAny(const type::AnyStruct& anyStruct) {
-      protocol::detail::insertTypeToMaskIfNotAllMask(
-          masks.read, anyStruct.type().value());
+      ensureAnyType_ = anyStruct.type().value();
       masks.write = protocol::allMask();
+    }
+
+    void finalize() {
+      if (ensureAnyType_) {
+        protocol::detail::insertTypeToMaskIfNotAllMask(
+            masks.read, ensureAnyType_->get());
+      }
+      protocol::detail::ensureRWMaskInvariant(masks);
     }
 
     protocol::ExtractedMasksFromPatch masks{
         protocol::noneMask(), protocol::noneMask()};
+
+   private:
+    std::optional<std::reference_wrapper<const type::Type>> ensureAnyType_;
   };
   Visitor v;
   customVisit(v);
+  v.finalize();
   return std::move(v.masks);
 }
 

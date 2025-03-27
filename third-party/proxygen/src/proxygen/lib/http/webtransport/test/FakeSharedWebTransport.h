@@ -60,6 +60,20 @@ class FakeStreamHandle
     return folly::unit;
   }
 
+  void setImmediateDelivery(bool immediateDelivery) {
+    immediateDelivery_ = immediateDelivery;
+  }
+
+  void deliverInflightData() {
+    buf_.append(inflightBuf_.move());
+    for (auto& [offset, deliveryCallbacks] : offsetToDeliveryCallback_) {
+      for (auto& deliveryCallback : deliveryCallbacks) {
+        deliveryCallback->onByteEvent(getID(), offset);
+      }
+    }
+    offsetToDeliveryCallback_.clear();
+  }
+
   using WriteStreamDataRet =
       folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>;
   WriteStreamDataRet writeStreamData(
@@ -69,18 +83,25 @@ class FakeStreamHandle
     if (data) {
       dataWritten_ += data->computeChainDataLength();
     }
-    buf_.append(std::move(data));
+    if (immediateDelivery_) {
+      buf_.append(std::move(data));
+    } else {
+      inflightBuf_.append(std::move(data));
+    }
     fin_ = fin;
     if (promise_) {
-      promise_->setValue(WebTransport::StreamData({buf_.move(), fin_}));
-      promise_.reset();
-    } else {
+      if (immediateDelivery_) {
+        promise_->setValue(WebTransport::StreamData({buf_.move(), fin_}));
+        promise_.reset();
+      }
     }
+
     if (deliveryCallback) {
-      // Consider data sent to be immediately delivered to the peer
-      // (this doesn't necessarily mean the application has read
-      // this data)
-      deliveryCallback->onByteEvent(getID(), dataWritten_);
+      if (immediateDelivery_) {
+        deliveryCallback->onByteEvent(getID(), dataWritten_);
+      } else {
+        offsetToDeliveryCallback_[dataWritten_].push_back(deliveryCallback);
+      }
     }
     return WebTransport::FCState::UNBLOCKED;
   }
@@ -91,6 +112,11 @@ class FakeStreamHandle
   }
 
   GenericApiRet resetStream(uint32_t err) override {
+    for (auto& [offset, deliveryCallback] : offsetToDeliveryCallback_) {
+      for (auto& callback : deliveryCallback) {
+        callback->onByteEventCanceled(getID(), offset);
+      }
+    }
     if (promise_) {
       promise_->setException(WebTransport::Exception(err));
     } else {
@@ -117,6 +143,13 @@ class FakeStreamHandle
   bool fin_{false};
   folly::Optional<std::tuple<uint8_t, uint64_t, bool>> pri;
   folly::Optional<uint32_t> writeErr_;
+
+  // If immediateDelivery_ == false, we stash data in inflightBuf_ until
+  // deliverInflightData() is called.
+  bool immediateDelivery_{true};
+  folly::IOBufQueue inflightBuf_{folly::IOBufQueue::cacheChainLength()};
+  folly::F14FastMap<uint64_t, std::vector<WebTransport::ByteEventCallback*>>
+      offsetToDeliveryCallback_;
 };
 
 // Implementation of WebTransport for testing two connected endpoints.

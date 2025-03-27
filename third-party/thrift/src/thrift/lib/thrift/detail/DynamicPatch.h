@@ -20,6 +20,7 @@
 #include <thrift/lib/cpp2/op/Patch.h>
 #include <thrift/lib/cpp2/protocol/FieldMask.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
+#include <thrift/lib/cpp2/protocol/Patch.h>
 
 namespace apache::thrift::op::detail {
 template <typename>
@@ -346,6 +347,8 @@ class DynamicListPatch : public DynamicPatchBase {
 
   void apply(detail::Badge, ValueList& v) const;
 
+  protocol::ExtractedMasksFromPatch extractMaskFromPatch() const;
+
   template <class Next>
   detail::if_same_type_after_remove_cvref<Next, DynamicListPatch> merge(
       detail::Badge badge, Next&& other) {
@@ -433,6 +436,8 @@ class DynamicSetPatch : public DynamicPatchBase {
 
   void apply(detail::Badge, ValueSet& v) const;
 
+  protocol::ExtractedMasksFromPatch extractMaskFromPatch() const;
+
   template <class Next>
   detail::if_same_type_after_remove_cvref<Next, DynamicSetPatch> merge(
       detail::Badge badge, Next&& other) {
@@ -517,6 +522,8 @@ class DynamicMapPatch {
   FOLLY_FOR_EACH_THIS_OVERLOAD_IN_CLASS_BODY_DELEGATE(
       customVisit, customVisitImpl);
   void apply(detail::Badge, ValueMap& v) const;
+
+  protocol::ExtractedMasksFromPatch extractMaskFromPatch() const;
 
   template <class Next>
   detail::if_same_type_after_remove_cvref<Next, DynamicMapPatch> merge(

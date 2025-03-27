@@ -21,6 +21,7 @@
 #include <thrift/lib/cpp2/op/Patch.h>
 #include <thrift/lib/cpp2/protocol/Patch.h>
 #include <thrift/lib/cpp2/protocol/detail/Object.h>
+#include <thrift/lib/cpp2/protocol/detail/Patch.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/thrift/detail/DynamicPatch.h>
 #include <thrift/lib/thrift/gen-cpp2/any_patch_types.h>
@@ -1310,6 +1311,93 @@ void DiffVisitorBase::pushKey(const Value& k) {
 void DiffVisitorBase::pop() {
   maskInPath_.pop();
   *maskInPath_.top() = allMask();
+}
+
+ExtractedMasksFromPatch DynamicListPatch::extractMaskFromPatch() const {
+  struct Visitor {
+    void assign(detail::Badge, const ValueList&) {
+      masks = {protocol::noneMask(), protocol::allMask()};
+    }
+    void clear() { masks = {protocol::noneMask(), protocol::allMask()}; }
+    void push_back(detail::Badge, const Value&) {
+      // TODO(dokwon): Consider optimizing by not using customVisit.
+      masks = {protocol::allMask(), protocol::allMask()};
+    }
+
+    protocol::ExtractedMasksFromPatch masks{
+        protocol::noneMask(), protocol::noneMask()};
+  };
+  Visitor v;
+  customVisit(badge, v);
+  return std::move(v.masks);
+}
+
+ExtractedMasksFromPatch DynamicSetPatch::extractMaskFromPatch() const {
+  struct Visitor {
+    void assign(detail::Badge, const ValueSet&) {
+      masks = {protocol::noneMask(), protocol::allMask()};
+    }
+    void clear() { masks = {protocol::noneMask(), protocol::allMask()}; }
+    void addMulti(detail::Badge, const ValueSet& v) {
+      if (v.empty()) {
+        return;
+      }
+      masks = {protocol::allMask(), protocol::allMask()};
+    }
+    void removeMulti(detail::Badge, const ValueSet& v) {
+      if (v.empty()) {
+        return;
+      }
+      masks = {protocol::allMask(), protocol::allMask()};
+    }
+
+    protocol::ExtractedMasksFromPatch masks{
+        protocol::noneMask(), protocol::noneMask()};
+  };
+  Visitor v;
+  customVisit(badge, v);
+  return std::move(v.masks);
+}
+
+ExtractedMasksFromPatch DynamicMapPatch::extractMaskFromPatch() const {
+  struct Visitor {
+    void assign(const ValueMap&) {
+      masks = {protocol::noneMask(), protocol::allMask()};
+    }
+    void clear() { masks = {protocol::noneMask(), protocol::allMask()}; }
+    [[noreturn]] void patchByKey(const Value&, const DynamicPatch&) {
+      // TODO(dokwon): Add when all recurisve patch extraction is available.
+      folly::throw_exception<std::runtime_error>("not implemented.");
+    }
+    void removeMulti(const ValueSet& set) {
+      // write operation if not empty
+      if (set.empty()) {
+        return;
+      }
+      detail::insertKeysToMaskIfNotAllMask(masks.write, set, false);
+    }
+    void tryPutMulti(const ValueMap& map) {
+      // granular read/write operation if not empty
+      if (map.empty()) {
+        return;
+      }
+      detail::insertKeysToMask(masks.read, map, false);
+      detail::insertKeysToMaskIfNotAllMask(masks.write, map, false);
+    }
+    void putMulti(const ValueMap& map) {
+      // write operation if not empty
+      if (map.empty()) {
+        return;
+      }
+      detail::insertKeysToMaskIfNotAllMask(masks.write, map, false);
+    }
+
+    protocol::ExtractedMasksFromPatch masks{
+        protocol::noneMask(), protocol::noneMask()};
+  };
+  Visitor v;
+  customVisit(v);
+  return std::move(v.masks);
 }
 
 void DynamicListPatch::apply(detail::Badge, ValueList& v) const {

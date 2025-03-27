@@ -17,6 +17,7 @@
 #include <folly/lang/Exception.h>
 #include <thrift/lib/cpp2/patch/detail/PatchBadge.h>
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
+#include <thrift/lib/cpp2/protocol/detail/Patch.h>
 #include <thrift/lib/cpp2/type/Type.h>
 #include <thrift/lib/thrift/detail/AnyPatch.h>
 #include <thrift/lib/thrift/detail/DynamicPatch.h>
@@ -217,6 +218,33 @@ void AnyPatch<Patch>::DynamicPatchExtractionVisitor::ensureAny(
   if (!type::identicalType(any.type().value(), type_)) {
     patch_ = {};
   }
+}
+
+template <class Patch>
+protocol::ExtractedMasksFromPatch AnyPatch<Patch>::extractMaskFromPatch()
+    const {
+  struct Visitor {
+    void assign(const type::AnyStruct&) {
+      masks = {protocol::noneMask(), protocol::allMask()};
+    }
+    void clear() { masks = {protocol::noneMask(), protocol::allMask()}; }
+    [[noreturn]] void patchIfTypeIs(
+        const type::Type&, const protocol::DynamicPatch&) {
+      // TODO(dokwon): Add when all recurisve patch extraction is available.
+      folly::throw_exception<std::runtime_error>("not implemented.");
+    }
+    void ensureAny(const type::AnyStruct& anyStruct) {
+      protocol::detail::insertTypeToMaskIfNotAllMask(
+          masks.read, anyStruct.type().value());
+      masks.write = protocol::allMask();
+    }
+
+    protocol::ExtractedMasksFromPatch masks{
+        protocol::noneMask(), protocol::noneMask()};
+  };
+  Visitor v;
+  customVisit(v);
+  return std::move(v.masks);
 }
 
 template class AnyPatch<AnyPatchStruct>;

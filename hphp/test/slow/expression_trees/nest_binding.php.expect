@@ -1,12 +1,12 @@
 () ==> {
 $y = 1;
-return ${/* $y */1 __plus $y};}()
+return ${1 __plus $y};}()
 () ==> {
 $y = 1;
-return ${/* $y */1 __plus ${/* $y */2 __plus $y}};}()
+return ${1 __plus ${2 __plus $y}};}()
 () ==> {
 $y = 1;
-return ${/* async $y */ <async function>};}()
+return ${1 __plus $y};}()
 () ==> {
 $y = 1;
-return ${/* async $y */ <async function>};}()
+return ${1 __plus ${2 __plus $y}};}()

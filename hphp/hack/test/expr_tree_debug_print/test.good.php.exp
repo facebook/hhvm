@@ -32,7 +32,7 @@ function f(): void {
   );
   (
     () ==> {
-      $splice0 = ${$x};
+      $splice0 = ${ExampleDsl::lift($x)};
       return ExampleDsl::makeTree(
         darray[
           "path" => __FILE__,

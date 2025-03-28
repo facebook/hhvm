@@ -68,6 +68,10 @@ class ExampleDsl {
     return new ExprTree($pos, $metadata, $ast);
   }
 
+  public static function lift<T>(ExprTree<ExampleDsl, ExampleDsl::TAst, T> $x): ExprTree<ExampleDsl, ExampleDsl::TAst, T> {
+  return $x;
+  }
+
   // Virtual types. These do not have to be implemented, as they are only used
   // in the virtualized version of the expression tree, to work out the virtual type
   // of literals during type checking.

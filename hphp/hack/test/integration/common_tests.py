@@ -837,7 +837,7 @@ class CommonTests(BarebonesTests):
                 + '"line":7,'
                 + '"character":46}}'
                 + ',"type":{{'
-                + '"src_pos":{{"filename":"{root}et_splices.php","line":74,"char_start":39,"char_end":48}},'
+                + '"src_pos":{{"filename":"{root}et_splices.php","line":78,"char_start":39,"char_end":48}},'
                 + '"kind":"class",'
                 + '"name":"\\\\ExampleInt",'
                 + '"args":[]}}'

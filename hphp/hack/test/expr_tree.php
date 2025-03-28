@@ -73,6 +73,10 @@ class ExampleDsl {
     return new ExprTree($pos, $metadata, $ast);
   }
 
+  public static function lift<TInfer>(ExampleDslExpression<TInfer> $x)[]: ExampleDslExpression<TInfer> {
+    return $x;
+  }
+
   // Virtual types. These do not have to be implemented, as they are only used
   // in the virtualized version of the expression tree, to work out the virtual type
   // of literals during type checking.
@@ -321,26 +325,9 @@ class ExampleDsl {
     ?ExprPos $_,
     string $_key,
     ExampleDslExpression<T> $splice_val,
+    ?vec<string> $_macro_vars = null,
   ): ExampleDsl::TAst {
     return "\${".($splice_val->visit($this))."}";
-  }
-
-  public function macroSplice<T>(
-    ?ExprPos $_,
-    string $_key,
-    (function (): ExampleDslExpression<T>) $splice_val,
-    vec<string> $macro_vars,
-  ): ExampleDsl::TAst {
-    return "\${/* ".concat_arg_list($macro_vars)." */".($splice_val()->visit($this))."}";
-  }
-
- public function asyncMacroSplice<T>(
-    ?ExprPos $_,
-    string $_key,
-    (function (): Awaitable<ExampleDslExpression<T>>) $splice_val,
-    vec<string> $macro_vars,
-  ): ExampleDsl::TAst {
-    return "\${/* async ".concat_arg_list($macro_vars)." */ <async function>}";
   }
 
   public function visitShape(

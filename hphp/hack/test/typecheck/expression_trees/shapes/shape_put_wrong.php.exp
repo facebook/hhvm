@@ -2,9 +2,9 @@ ERROR: File "shape_put_wrong.php", line 9, characters 10-152:
 Invalid return type (Typing[4110])
   File "shape_put_wrong.php", line 8, characters 36-45:
   Expected `ExampleInt`
-  File "expr_tree.php", line 448, characters 73-73:
+  File "expr_tree.php", line 435, characters 73-73:
     via this generic `T`
-  File "expr_tree.php", line 85, characters 38-48:
+  File "expr_tree.php", line 89, characters 38-48:
   But got `ExampleBool`
 ERROR: File "shape_put_wrong.php", line 19, characters 5-47:
 Too many arguments (expected 3 but got 4) (Typing[4105])

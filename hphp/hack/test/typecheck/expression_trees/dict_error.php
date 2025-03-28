@@ -18,6 +18,10 @@ class DictError {
     throw new Exception();
   }
 
+  public static function lift<TInfer>(Spliceable<DictError, DictError::TAst, TInfer> $x)[]: Spliceable<DictError, DictError::TAst, TInfer> {
+    return $x;
+  }
+
   public static function voidType(): ExampleVoid {
     throw new Exception();
   }

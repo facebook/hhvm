@@ -28,7 +28,7 @@ ERROR: File "invalid_operator.php", line 16, characters 19-26:
 Invalid argument (Typing[4110])
   File "expr_tree.php", line 60, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 137, characters 5-20:
+  File "expr_tree.php", line 141, characters 5-20:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "invalid_operator.php", line 9, characters 7-9:
   But got `int`
@@ -46,13 +46,13 @@ Invalid return type (Typing[4110])
   But got `(function(): int)`
 ERROR: File "invalid_operator.php", line 29, characters 38-46:
 Typing error (Typing[4110])
-  File "expr_tree.php", line 79, characters 39-48:
+  File "expr_tree.php", line 83, characters 39-48:
   Expected `dynamic`
-  File "expr_tree.php", line 79, characters 39-48:
+  File "expr_tree.php", line 83, characters 39-48:
   Type `ExampleInt` is not a subtype of `dynamic` under dynamic-aware subtyping
 ERROR: File "invalid_operator.php", line 32, characters 40-40:
 Typing error (Typing[4429])
   File "invalid_operator.php", line 32, characters 34-40:
   Expected `num` because this is used in an arithmetic operation
-  File "expr_tree.php", line 79, characters 39-48:
+  File "expr_tree.php", line 83, characters 39-48:
   But got `ExampleInt`

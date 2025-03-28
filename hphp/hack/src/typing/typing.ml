@@ -5004,11 +5004,11 @@ end = struct
         Env.get_member true env cls SN.ExpressionTrees.splice
       in
       (* Pull the type of third argument to `MyDsl::splice()`.
-         If we change the number of arguments this method takes, we will need to
+         If we change the number of arguments this method takes, we might need to
          update this match expression *)
       let* splice_ty =
         match get_node fun_ty with
-        | Tfun { ft_params = [_; _; splice_ty]; _ } ->
+        | Tfun { ft_params = _ :: _ :: splice_ty :: _; _ } ->
           return @@ splice_ty.fp_type
         | _ -> None
       in
@@ -5046,20 +5046,11 @@ end = struct
         let raw_spliceable_type =
           MakeType.spliceable r ty_visitor ty_res ty_infer
         in
-        let awaitable_ty =
-          if contains_await && Option.is_some macro_variables then
-            (* In this case, the splice is a macro splice that has been turned into an async lambda
-               and called in the virtual expression, but not awaited, so we need to strip off the
-               Awaitable wrapper. *)
-            MakeType.awaitable r raw_spliceable_type
-          else
-            raw_spliceable_type
-        in
         let spliceable_type =
           if TCO.pessimise_builtins (Env.get_tcopt env) then
-            MakeType.locl_like r awaitable_ty
+            MakeType.locl_like r raw_spliceable_type
           else
-            awaitable_ty
+            raw_spliceable_type
         in
 
         let (_, expr_pos, _) = spliced_expr in

@@ -1,20 +1,6 @@
-ERROR: File "dict_error.php", line 68, characters 3-11:
-The values of this `dict` are incompatible (Typing[4110])
-  File "dict_error.php", line 12, characters 33-78:
-  Expected `Spliceable<DictError, mixed, _>`
-  File "dict_error.php", line 67, characters 15-24:
-  But got `ExampleInt`
-ERROR: File "dict_error.php", line 70, characters 10-14:
-This value cannot be inserted (spliced) into a `DictError` expression tree (Typing[4110])
-  File "dict_error.php", line 61, characters 5-45:
-  Expected `Spliceable<DictError, DictError::TAst, T>` because you are splicing into a `DictError` expression or block
-  File "dict_error.php", line 67, characters 15-24:
-  But got `ExampleInt`
-  File "dict_error.php", line 70, characters 12-13:
-  Hack values need to be converted (lifted) to compatible types before splicing. For more information see: https://docs.hhvm.com/hack/expression-trees/splicing
-ERROR: File "dict_error.php", line 70, characters 12-13:
+ERROR: File "dict_error.php", line 74, characters 12-13:
 Invalid argument (Typing[4110])
-  File "dict_error.php", line 61, characters 5-45:
+  File "dict_error.php", line 21, characters 39-84:
   Expected `Spliceable<DictError, mixed, _>`
-  File "dict_error.php", line 67, characters 15-24:
+  File "dict_error.php", line 71, characters 15-24:
   But got `ExampleInt`

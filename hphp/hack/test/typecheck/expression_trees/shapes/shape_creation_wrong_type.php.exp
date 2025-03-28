@@ -4,5 +4,5 @@ ERROR: File "shape_creation_wrong_type.php", line 8, characters 8-32:
 Invalid argument (Typing[4110])
   File "shape_creation_wrong_type.php", line 7, characters 56-68:
   Expected `ExampleString`
-  File "expr_tree.php", line 79, characters 39-48:
+  File "expr_tree.php", line 83, characters 39-48:
   But got `ExampleInt`

@@ -3,3 +3,16 @@ function from(string $_): ~ExprTree<
   ExampleDsl::TAst,
   ExampleString
 >
+---
+Parameter: $x
+---
+class ExampleDsl
+---
+The DSL itself: used as in ExampleDsl`...`. hackc generates a call to makeTree, which
+should return something that implements Spliceable, here an ExprTree
+---
+Defined in `ExampleDsl`
+---
+public static function lift<TInfer>(
+  ExampleDslExpression<TInfer> $x
+)[]: ~ExampleDslExpression<TInfer>

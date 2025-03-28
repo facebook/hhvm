@@ -1422,55 +1422,18 @@ impl RewriteState {
                 let temp_variable = temp_splice_lvar(&expr_pos, len);
                 let temp_variable_string =
                     string_literal(expr_pos.clone(), &temp_splice_lvar_string(len));
-                let desugar_expr = if is_macro {
+                let mut args = vec![pos_expr, temp_variable_string, temp_variable.clone()];
+                if is_macro {
                     let macro_var_exprs = macro_variables
                         .as_ref()
                         .unwrap()
                         .iter()
                         .map(|ast::Lid(pos, (_, s))| string_literal(pos.clone(), s))
                         .collect();
-                    v_meth_call(
-                        if contains_await {
-                            et::ASYNC_MACRO_SPLICE
-                        } else {
-                            et::MACRO_SPLICE
-                        },
-                        vec![
-                            pos_expr,
-                            temp_variable_string,
-                            temp_variable.clone(),
-                            vec_literal(macro_var_exprs),
-                        ],
-                        &pos,
-                    )
-                } else {
-                    v_meth_call(
-                        et::SPLICE,
-                        vec![pos_expr, temp_variable_string, temp_variable.clone()],
-                        &pos,
-                    )
-                };
-                let virtual_spliced_expr = if is_macro {
-                    // If the splice contains an await, then it will be an async lambda, which we
-                    // should in principle await. However, we are inside of a FSync lambda here, so
-                    // we will rely on the type checker removing the Awaitable from the type of the
-                    // splice. It can do this since the splice itself has a contains_await field.
-                    // This is the virtual expression, so there is no runtime difference.
-                    // We instead could placing an await here, and making the containing lambda async,
-                    // but that would change the interface between make_tree on the DSL and the desugaring.
-                    Expr::new(
-                        (),
-                        pos.clone(),
-                        Expr_::mk_call(aast::CallExpr {
-                            func: temp_variable.clone(),
-                            targs: vec![],
-                            args: vec![],
-                            unpacked_arg: None,
-                        }),
-                    )
-                } else {
-                    temp_variable.clone()
-                };
+                    args.push(vec_literal(macro_var_exprs));
+                }
+                let desugar_expr = v_meth_call(et::SPLICE, args, &pos);
+                let virtual_spliced_expr = temp_variable.clone();
                 let temp_lid = temp_variable.2.as_lvar_into().unwrap().1;
                 let virtual_expr = Expr(
                     (),
@@ -1483,31 +1446,16 @@ impl RewriteState {
                         temp_lid: temp_lid.clone(),
                     }),
                 );
-                // Compute the rhs of the assignment to the temporary
-                let wrapped_expr = if !is_macro {
-                    spliced_expr
-                } else {
-                    let fun_ = wrap_fun_(
-                        contains_await,
-                        ast::FuncBody {
-                            fb_ast: ast::Block(vec![Stmt::new(
-                                expr_pos.clone(),
-                                Stmt_::mk_return(Some(spliced_expr)),
-                            )]),
-                        },
-                        vec![],
-                        expr_pos.clone(),
-                    );
-                    Expr::new((), expr_pos.clone(), Expr_::mk_lfun(fun_, vec![]))
-                };
+                let spliced_expr =
+                    static_meth_call(visitor_name, et::LIFT, vec![spliced_expr], &expr_pos);
                 let expr_ = Expr_::mk_etsplice(aast::EtSplice {
-                    spliced_expr: wrapped_expr,
+                    spliced_expr,
                     contains_await,
                     extract_client_type: false,
                     macro_variables,
                     temp_lid,
                 });
-                let expr = Expr::new((), expr_pos, expr_);
+                let expr = Expr::new((), expr_pos.clone(), expr_);
                 self.splices.push(expr);
 
                 self.contains_spliced_await |= contains_await;

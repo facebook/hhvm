@@ -4,13 +4,13 @@ ERROR: File "parse_constants.php", line 8, characters 23-30:
 Invalid argument (Typing[4110])
   File "expr_tree.php", line 60, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 139, characters 5-20:
+  File "expr_tree.php", line 143, characters 5-20:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "parse_constants.php", line 5, characters 7-9:
   But got `int`
 ERROR: File "parse_constants.php", line 8, characters 23-30:
 Invalid argument (Typing[4110])
-  File "expr_tree.php", line 379, characters 26-35:
+  File "expr_tree.php", line 366, characters 26-35:
   Expected `ExampleInt`
   File "parse_constants.php", line 5, characters 7-9:
   But got `int`

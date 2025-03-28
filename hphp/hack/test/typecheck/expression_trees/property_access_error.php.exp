@@ -2,5 +2,5 @@ ERROR: File "property_access_error.php", line 7, characters 5-25:
 Invalid assignment (Typing[4110])
   File "property_access_error.php", line 12, characters 10-19:
   Expected `ExampleInt`
-  File "expr_tree.php", line 88, characters 40-52:
+  File "expr_tree.php", line 92, characters 40-52:
   But got `ExampleString`

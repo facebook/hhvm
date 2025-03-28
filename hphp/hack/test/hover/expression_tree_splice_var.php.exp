@@ -1,3 +1,16 @@
-~ExprTree<ExampleDsl, string, ExampleInt>
+~Spliceable<ExampleDsl, string, ExampleInt>
 ---
 I am a comment associated with $one.
+---
+Parameter: $x
+---
+class ExampleDsl
+---
+The DSL itself: used as in ExampleDsl`...`. hackc generates a call to makeTree, which
+should return something that implements Spliceable, here an ExprTree
+---
+Defined in `ExampleDsl`
+---
+public static function lift<TInfer>(
+  ExampleDslExpression<TInfer> $x
+)[]: ~ExampleDslExpression<TInfer>

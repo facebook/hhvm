@@ -4,7 +4,7 @@ ERROR: File "elvis.php", line 7, characters 19-33:
 Invalid argument (Typing[4110])
   File "expr_tree.php", line 60, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 216, characters 6-21:
+  File "expr_tree.php", line 220, characters 6-21:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "elvis.php", line 7, characters 19-22:
   But got `bool`

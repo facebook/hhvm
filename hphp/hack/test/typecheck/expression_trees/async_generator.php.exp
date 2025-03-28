@@ -28,7 +28,7 @@ ERROR: File "async_generator.php", line 6, characters 29-35:
 Some elements in this collection are incompatible (Typing[4110])
   File "expr_tree.php", line 60, characters 21-26:
   Expected `string`
-  File "expr_tree.php", line 168, characters 9-24:
+  File "expr_tree.php", line 172, characters 9-24:
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "async_generator.php", line 6, characters 29-35:
   But got `null` (`$generator->send()` can always send a `null` back to a `yield`)

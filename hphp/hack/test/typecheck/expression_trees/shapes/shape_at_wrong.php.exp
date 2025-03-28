@@ -2,9 +2,9 @@ ERROR: File "shape_at_wrong.php", line 9, characters 10-98:
 Invalid return type (Typing[4110])
   File "shape_at_wrong.php", line 8, characters 36-45:
   Expected `ExampleInt`
-  File "expr_tree.php", line 448, characters 73-73:
+  File "expr_tree.php", line 435, characters 73-73:
     via this generic `T`
-  File "expr_tree.php", line 88, characters 40-52:
+  File "expr_tree.php", line 92, characters 40-52:
   But got `ExampleString`
 ERROR: File "shape_at_wrong.php", line 18, characters 5-41:
 Too many arguments (expected 2 but got 3) (Typing[4105])
@@ -18,7 +18,7 @@ Too few arguments (required 2 but got 1) (Typing[4104])
   Definition is here
 ERROR: File "shape_at_wrong.php", line 27, characters 33-35:
 You are calling `Shapes::at()` on a field known to not exist (Typing[4251])
-  File "expr_tree.php", line 423, characters 31-31:
+  File "expr_tree.php", line 410, characters 31-31:
   The field `x` is not defined in this shape
 ERROR: File "shape_at_wrong.php", line 30, characters 5-33:
 `ExampleString` does not support this operator (it has no instance method named `__unwrap`) (Typing[4053])

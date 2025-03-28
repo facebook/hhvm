@@ -8,7 +8,7 @@ ERROR: File "coeffects.php", line 20, characters 14-21:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "coeffects.php", line 14, characters 16-17:
   From this declaration, the context of this function body provides the capability set {}
-  File "expr_tree.php", line 320, characters 19-24:
+  File "expr_tree.php", line 324, characters 19-24:
   But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
 ERROR: File "coeffects.php", line 20, characters 16-18:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])

@@ -1603,6 +1603,21 @@ bool HHVM_FUNCTION(is_cli_server_mode) {
   return is_cli_server_mode();
 }
 
+String HHVM_FUNCTION(mangle_unit_sha1, const String& sha1, const String& ext,
+                     const Variant& repo) {
+  auto const& ro = [&] () -> const RepoOptions& {
+    if (!repo.isNull()) {
+      auto rpath = realpathLibc(repo.toString().data());
+      if (rpath.empty() || rpath.back() != '/') rpath += '/';
+      return RepoOptions::forFile(rpath);
+    }
+    if (auto const r = g_context->getRepoOptionsForRequest()) return *r;
+    return RepoOptions::defaults();
+  }();
+
+  return mangleUnitSha1(sha1.slice(), ext.slice(), ro.flags());
+}
+
 static struct HHExtension final : Extension {
   HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) { }
   void moduleRegisterNative() override {
@@ -1652,6 +1667,7 @@ static struct HHExtension final : Extension {
     X(active_config_experiments);
     X(inactive_config_experiments);
     X(is_cli_server_mode);
+    X(mangle_unit_sha1);
 #undef X
 #define X(nm) HHVM_NAMED_FE(HH\\rqtrace\\nm, HHVM_FN(nm))
     X(is_enabled);

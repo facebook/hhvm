@@ -369,6 +369,17 @@ function active_config_experiments(): vec<string>;
 <<__Native>>
 function inactive_config_experiments(): vec<string>;
 
+<<__Native>>
+function mangle_unit_sha1(
+  string $sha1 = '',
+  string $ext = '.php',
+  ?string $repo = null,
+): string;
+
+function unit_schema(?string $repo = null): string {
+  return mangle_unit_sha1('', '.php', $repo);
+}
+
 } // HH
 
 namespace HH\Rx {

@@ -192,7 +192,7 @@ class CodecUtil {
                             std::vector<compress::Header>& headers,
                             HTTPHeaderCode headerToCheck);
 
-  static const std::bitset<256>& perHopHeaderCodes();
+  static const std::bitset<256>& disallowedModernHTTPFields();
 
   /**
    * Generates debug strings that omit the header values

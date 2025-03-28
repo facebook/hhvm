@@ -140,7 +140,7 @@ std::unique_ptr<folly::IOBuf> QPACKCodec::encodeHTTP(
   auto headerEncodeHelper = [&](HTTPHeaderCode code,
                                 folly::StringPiece name,
                                 folly::StringPiece value) {
-    if (CodecUtil::perHopHeaderCodes()[code] || name.empty() ||
+    if (CodecUtil::disallowedModernHTTPFields()[code] || name.empty() ||
         name[0] == ':') {
       DCHECK(!name.empty()) << "Empty header";
       DCHECK_NE(name[0], ':') << "Invalid header=" << name;

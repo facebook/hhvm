@@ -119,7 +119,7 @@ void HPACKCodec::encodeHTTP(
   auto headerEncodeHelper = [&](HTTPHeaderCode code,
                                 const std::string& name,
                                 const std::string& value) {
-    if (CodecUtil::perHopHeaderCodes()[code] || name.empty() ||
+    if (CodecUtil::disallowedModernHTTPFields()[code] || name.empty() ||
         name[0] == ':') {
       DCHECK(!name.empty()) << "Empty header";
       DCHECK_NE(name[0], ':') << "Invalid header=" << name;

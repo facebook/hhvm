@@ -89,21 +89,9 @@ bool CodecUtil::appendHeaders(const HTTPHeaders& inputHeaders,
   inputHeaders.forEachWithCode([&](HTTPHeaderCode code,
                                    const std::string& name,
                                    const std::string& value) {
-    static const std::bitset<256> s_perHopHeaderCodes{[] {
-      std::bitset<256> bs;
-      // HTTP/1.x per-hop headers that have no meaning in HTTP/2
-      bs[HTTP_HEADER_CONNECTION] = true;
-      bs[HTTP_HEADER_HOST] = true;
-      bs[HTTP_HEADER_KEEP_ALIVE] = true;
-      bs[HTTP_HEADER_PROXY_CONNECTION] = true;
-      bs[HTTP_HEADER_TRANSFER_ENCODING] = true;
-      bs[HTTP_HEADER_UPGRADE] = true;
-      bs[HTTP_HEADER_SEC_WEBSOCKET_KEY] = true;
-      bs[HTTP_HEADER_SEC_WEBSOCKET_ACCEPT] = true;
-      return bs;
-    }()};
-
-    if (s_perHopHeaderCodes[code] || name.size() == 0 || name[0] == ':') {
+    auto s_disallowedModernHTTPFields = disallowedModernHTTPFields();
+    if (s_disallowedModernHTTPFields[code] || name.size() == 0 ||
+        name[0] == ':') {
       DCHECK_GT(name.size(), 0) << "Empty header";
       DCHECK_NE(name[0], ':') << "Invalid header=" << name;
       return;
@@ -124,8 +112,8 @@ bool CodecUtil::appendHeaders(const HTTPHeaders& inputHeaders,
   return headerToCheckExists;
 }
 
-const std::bitset<256>& CodecUtil::perHopHeaderCodes() {
-  static const std::bitset<256> s_perHopHeaderCodes{[] {
+const std::bitset<256>& CodecUtil::disallowedModernHTTPFields() {
+  static const std::bitset<256> s_disallowedModernHTTPFields{[] {
     std::bitset<256> bs;
     // HTTP/1.x per-hop headers that have no meaning in HTTP/2
     bs[HTTP_HEADER_CONNECTION] = true;
@@ -138,7 +126,7 @@ const std::bitset<256>& CodecUtil::perHopHeaderCodes() {
     bs[HTTP_HEADER_SEC_WEBSOCKET_ACCEPT] = true;
     return bs;
   }()};
-  return s_perHopHeaderCodes;
+  return s_disallowedModernHTTPFields;
 }
 
 std::string CodecUtil::debugString(const HTTPMessage& msg, uint8_t debugLevel) {

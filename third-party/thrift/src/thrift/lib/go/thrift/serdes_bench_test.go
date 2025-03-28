@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	dummyif "github.com/facebook/fbthrift/thrift/test/go/if/dummy"
+	"github.com/stretchr/testify/require"
 )
 
 func BenchmarkEncodeBinary(b *testing.B) {
@@ -38,9 +39,7 @@ func BenchmarkEncodeBinary(b *testing.B) {
 
 	for b.Loop() {
 		_, err := EncodeBinary(val)
-		if err != nil {
-			b.Fatalf("failed to encode: %v", err)
-		}
+		require.NoError(b, err)
 	}
 }
 
@@ -60,9 +59,7 @@ func BenchmarkEncodeCompact(b *testing.B) {
 
 	for b.Loop() {
 		_, err := EncodeCompact(val)
-		if err != nil {
-			b.Fatalf("failed to encode: %v", err)
-		}
+		require.NoError(b, err)
 	}
 }
 
@@ -82,9 +79,7 @@ func BenchmarkEncodeCompactJSON(b *testing.B) {
 
 	for b.Loop() {
 		_, err := EncodeCompactJSON(val)
-		if err != nil {
-			b.Fatalf("failed to encode: %v", err)
-		}
+		require.NoError(b, err)
 	}
 }
 
@@ -104,9 +99,7 @@ func BenchmarkEncodeSimpleJSON(b *testing.B) {
 
 	for b.Loop() {
 		_, err := EncodeSimpleJSON(val)
-		if err != nil {
-			b.Fatalf("failed to encode: %v", err)
-		}
+		require.NoError(b, err)
 	}
 }
 
@@ -124,16 +117,12 @@ func BenchmarkDecodeBinary(b *testing.B) {
 		SetField8([]byte{1, 2, 3, 4}).
 		SetField9("hello")
 	pay, err := EncodeBinary(val)
-	if err != nil {
-		b.Fatalf("failed to encode: %v", err)
-	}
+	require.NoError(b, err)
 
 	for b.Loop() {
 		var res dummyif.DummyStruct1
 		err = DecodeBinary(pay, &res)
-		if err != nil {
-			b.Fatalf("failed to decode: %v", err)
-		}
+		require.NoError(b, err)
 	}
 }
 
@@ -151,16 +140,12 @@ func BenchmarkDecodeCompact(b *testing.B) {
 		SetField8([]byte{1, 2, 3, 4}).
 		SetField9("hello")
 	pay, err := EncodeCompact(val)
-	if err != nil {
-		b.Fatalf("failed to encode: %v", err)
-	}
+	require.NoError(b, err)
 
 	for b.Loop() {
 		var res dummyif.DummyStruct1
 		err = DecodeCompact(pay, &res)
-		if err != nil {
-			b.Fatalf("failed to decode: %v", err)
-		}
+		require.NoError(b, err)
 	}
 }
 
@@ -178,16 +163,12 @@ func BenchmarkDecodeCompactJSON(b *testing.B) {
 		SetField8([]byte{1, 2, 3, 4}).
 		SetField9("hello")
 	pay, err := EncodeCompactJSON(val)
-	if err != nil {
-		b.Fatalf("failed to encode: %v", err)
-	}
+	require.NoError(b, err)
 
 	for b.Loop() {
 		var res dummyif.DummyStruct1
 		err = DecodeCompactJSON(pay, &res)
-		if err != nil {
-			b.Fatalf("failed to decode: %v", err)
-		}
+		require.NoError(b, err)
 	}
 }
 
@@ -205,15 +186,11 @@ func BenchmarkDecodeSimpleJSON(b *testing.B) {
 		SetField8([]byte{1, 2, 3, 4}).
 		SetField9("hello")
 	pay, err := EncodeSimpleJSON(val)
-	if err != nil {
-		b.Fatalf("failed to encode: %v", err)
-	}
+	require.NoError(b, err)
 
 	for b.Loop() {
 		var res dummyif.DummyStruct1
 		err = DecodeSimpleJSON(pay, &res)
-		if err != nil {
-			b.Fatalf("failed to decode: %v", err)
-		}
+		require.NoError(b, err)
 	}
 }

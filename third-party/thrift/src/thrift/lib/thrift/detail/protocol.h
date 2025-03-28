@@ -163,6 +163,7 @@ class ValueWrapper : public ::apache::thrift::type::detail::Wrap<Base> {
   decltype(auto) if_##TYPE() const {                                           \
     return is_##TYPE() ? &*toThrift().TYPE##Value_ref() : nullptr;             \
   }                                                                            \
+  decltype(auto) move_##TYPE() { return toThrift().move_##TYPE##Value(); }     \
   [[deprecated("Prefer as_XYZ()")]] decltype(auto) get_##TYPE##Value() const { \
     return toThrift().get_##TYPE##Value();                                     \
   }                                                                            \

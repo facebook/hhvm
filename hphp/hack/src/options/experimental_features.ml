@@ -112,7 +112,7 @@ let feature_name_map =
       ("shape_destructure", ShapeDestructure);
       ("expression_tree_shape_creation", ExpressionTreeShapeCreation);
       ("no_disjoint_union", NoDisjointUnion);
-      ("simplihack", SimpliHack);
+      ("simpli_hack", SimpliHack);
       ("polymorphic_function_hints", PolymorphicFunctionHints);
     ]
 

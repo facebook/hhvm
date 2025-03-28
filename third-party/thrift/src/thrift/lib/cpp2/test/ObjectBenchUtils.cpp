@@ -73,7 +73,7 @@ std::size_t read_all(
   return res;
 }
 
-std::size_t read_all(const folly::F14FastSet<protocol::detail::Value>& s) {
+std::size_t read_all(const folly::F14VectorSet<protocol::detail::Value>& s) {
   std::size_t res = 0;
   for (const auto& val : s) {
     res += read_all(val);
@@ -206,6 +206,18 @@ auto get_key(const folly::F14FastSet<Key>& m, const std::size_t slot) {
   return key;
 }
 
+template <typename Key>
+auto get_key(const folly::F14VectorSet<Key>& m, const std::size_t slot) {
+  folly::BenchmarkSuspender suspender;
+  auto it = m.begin();
+  for (std::size_t i = 0; i < slot; ++i) {
+    ++it;
+  }
+  auto key = *it;
+  suspender.dismiss();
+  return key;
+}
+
 template <typename Key, typename Value>
 auto get_key(const folly::F14FastMap<Key, Value>& m, const std::size_t slot) {
   folly::BenchmarkSuspender suspender;
@@ -229,6 +241,24 @@ auto get_key(const protocol::detail::ObjectWrapper<>& obj, const std::size_t) {
 
 template <typename Key, typename F>
 void with_half_keys(const folly::F14FastSet<Key>& m, F&& f) {
+  folly::BenchmarkSuspender suspender;
+  std::vector<Key> keys;
+  const auto key_count = std::max<std::size_t>(m.size() / 2, 1);
+  keys.reserve(key_count);
+  auto it = m.begin();
+  for (std::size_t i = 0; i < key_count; ++i) {
+    keys.push_back(*it);
+    ++it;
+    if (it == m.end()) {
+      break;
+    }
+    ++it;
+  }
+  suspender.dismissing([&]() { f(keys); });
+}
+
+template <typename Key, typename F>
+void with_half_keys(const folly::F14VectorSet<Key>& m, F&& f) {
   folly::BenchmarkSuspender suspender;
   std::vector<Key> keys;
   const auto key_count = std::max<std::size_t>(m.size() / 2, 1);
@@ -366,6 +396,12 @@ std::size_t read_some(
     const folly::F14FastMap<protocol::detail::Value, protocol::detail::Value>&
         m) {
   return read_some_map_container(access, m);
+}
+
+std::size_t read_some(
+    SparseAccess access,
+    const folly::F14VectorSet<protocol::detail::Value>& s) {
+  return read_some_set_container(access, s);
 }
 
 std::size_t read_some(

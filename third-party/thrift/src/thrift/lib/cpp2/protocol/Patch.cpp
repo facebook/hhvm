@@ -79,7 +79,7 @@ PatchOp toOp(FieldId id) {
 void checkOps(
     const Object& patch,
     Value::Type valueType,
-    folly::F14FastSet<PatchOp> supportedOps) {
+    folly::F14VectorSet<PatchOp> supportedOps) {
   checkNotSafePatch(patch);
   for (const auto& field : patch) {
     auto op = toOp(FieldId{field.first});
@@ -288,7 +288,7 @@ void ApplyPatch::operator()(
 }
 
 void ApplyPatch::operator()(
-    const Object& patch, folly::F14FastSet<Value>& value) const {
+    const Object& patch, folly::F14VectorSet<Value>& value) const {
   checkOps(
       patch,
       Value::Type::setValue,

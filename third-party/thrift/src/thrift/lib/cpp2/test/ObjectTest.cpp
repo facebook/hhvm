@@ -798,7 +798,7 @@ TEST(Value, Wrapper) {
   const std::vector<Value> l = {
       asValueStruct<type::i32_t>(10), asValueStruct<type::i32_t>(20)};
 
-  const folly::F14FastSet<Value> s = {
+  const folly::F14VectorSet<Value> s = {
       asValueStruct<type::i32_t>(30), asValueStruct<type::i32_t>(40)};
 
   const folly::F14FastMap<Value, Value> m = {

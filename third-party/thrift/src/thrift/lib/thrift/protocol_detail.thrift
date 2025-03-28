@@ -104,7 +104,7 @@ union Value {
   @cpp.Ref{type = cpp.RefType.Unique}
   14: list<Value> listValue;
   @cpp.Ref{type = cpp.RefType.Unique}
-  @cpp.Type{template = "::folly::F14FastSet"}
+  @cpp.Type{template = "::folly::F14VectorSet"}
   @hack.SkipCodegen{
     reason = "Set can only have integer/string/binary/enum values",
   }

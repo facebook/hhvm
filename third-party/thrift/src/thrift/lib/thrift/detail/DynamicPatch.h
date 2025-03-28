@@ -42,7 +42,7 @@ class DynamicStructPatch;
 class DynamicUnionPatch;
 
 using ValueList = std::vector<Value>;
-using ValueSet = folly::F14FastSet<Value>;
+using ValueSet = folly::F14VectorSet<Value>;
 using ValueMap = folly::F14FastMap<Value, Value>;
 
 namespace detail {

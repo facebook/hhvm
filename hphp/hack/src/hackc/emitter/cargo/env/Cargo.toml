@@ -12,7 +12,7 @@ path = "../../env.rs"
 
 [dependencies]
 ast_scope = { version = "0.0.0", path = "../ast_scope" }
-bitflags = { version = "2.6", features = ["serde"] }
+bitflags = { version = "2.6", features = ["serde", "std"], default-features = false }
 decl_provider = { version = "0.0.0", path = "../../../decl_provider" }
 global_state = { version = "0.0.0", path = "../global_state" }
 hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }

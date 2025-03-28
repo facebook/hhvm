@@ -11,7 +11,7 @@ license = "MIT"
 path = "hhbc.rs"
 
 [dependencies]
-bitflags = { version = "2.6", features = ["serde"] }
+bitflags = { version = "2.6", features = ["serde", "std"], default-features = false }
 maplit = "1.0"
 once_cell = "1.12"
 

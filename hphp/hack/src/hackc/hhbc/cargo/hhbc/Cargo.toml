@@ -11,7 +11,7 @@ license = "MIT"
 path = "../../lib.rs"
 
 [dependencies]
-bitflags = { version = "2.6", features = ["serde"] }
+bitflags = { version = "2.6", features = ["serde"], default-features = false }
 bstr = { version = "1.10.0", features = ["serde", "std", "unicode"] }
 emit_opcodes_macro = { version = "0.0.0", path = "../emit_opcodes_macro" }
 ffi = { version = "0.0.0", path = "../../../ffi/ffi" }

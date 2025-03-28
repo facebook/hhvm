@@ -11,7 +11,7 @@ license = "MIT"
 path = "elab.rs"
 
 [dependencies]
-bitflags = { version = "2.6", features = ["serde"] }
+bitflags = { version = "2.6", features = ["serde", "std"], default-features = false }
 bstr = { version = "1.10.0", features = ["serde", "std", "unicode"] }
 elaborate_namespaces_visitor = { version = "0.0.0", path = "../naming/cargo/elaborate_namespaces" }
 hack_macros = { version = "0.0.0", path = "../utils/hack_macros/cargo/hack_macros" }

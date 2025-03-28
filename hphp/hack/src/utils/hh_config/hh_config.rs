@@ -59,6 +59,7 @@ pub struct HhConfig {
     pub naming_table_compression_level: usize,
     pub naming_table_compression_threads: usize,
     pub eden_fetch_parallelism: usize,
+    pub use_distc_crawl_dircache: bool,
 }
 
 impl HhConfig {
@@ -628,6 +629,9 @@ impl HhConfig {
                 }
                 "hh_distc_exponential_backoff_num_retries" => {
                     c.hh_distc_exponential_backoff_num_retries = parse_json(&value)?;
+                }
+                "use_distc_crawl_dircache" => {
+                    c.use_distc_crawl_dircache = parse_json(&value)?;
                 }
                 _ => {}
             }

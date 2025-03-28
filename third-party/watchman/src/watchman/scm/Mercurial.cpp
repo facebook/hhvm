@@ -164,10 +164,30 @@ w_string Mercurial::mergeBaseWith(
           key,
           [this, commit, requestId](const std::string&) {
             auto revset = fmt::format("ancestor(.,{})", commit);
-            auto result = runMercurial(
-                {hgExecutablePath(), "log", "-T", "{node}", "-r", revset},
-                makeHgOptions(requestId),
-                "query for the merge base");
+            MercurialResult result;
+            if (cfg_get_bool("disable_hg_autopullcommits", false)) {
+              result = runMercurial(
+                  {hgExecutablePath(), "log", "-T", "{node}", "-r", revset},
+                  makeHgOptions(requestId),
+                  "query for the merge base");
+
+            } else {
+              result = runMercurial(
+                  {hgExecutablePath(),
+                   "log",
+                   "-T",
+                   "{node}",
+                   "-r",
+                   revset,
+                   "--config",
+                   "ui.autopullcommits=false",
+                   "--config",
+                   "extensions.megarepo=!"}, // disable "megarepo" extension
+                                             // because it does not respect the
+                                             // ui.autopullcommits flag
+                  makeHgOptions(requestId),
+                  "query for the merge base");
+            }
 
             if (result.output.empty()) {
               SCMError::throwf(
@@ -194,11 +214,11 @@ std::vector<w_string> Mercurial::getFilesChangedSinceMergeBaseWith(
   auto key = fmt::format("{}:{}", commitId, clock);
   auto commitCopy = std::string{commitId.view()};
 
-  // This is not going to include changes to directories across commits because
-  // mercurial does not report them. Unclear if we need them in this case.
-  // We fixed missing directory events in getFilesChangedBetweenCommits, but
-  // this is a separate code path into hg status, so we need extra support to
-  // include directory support here if needed.
+  // This is not going to include changes to directories across commits
+  // because mercurial does not report them. Unclear if we need them in this
+  // case. We fixed missing directory events in getFilesChangedBetweenCommits,
+  // but this is a separate code path into hg status, so we need extra support
+  // to include directory support here if needed.
   return filesChangedSinceMergeBaseWith_
       .get(
           key,

@@ -89,12 +89,12 @@ type::AnyData toAny(
 void clearValueInner(Value& value) {
   auto discriminant =
       static_cast<FieldId>(folly::to_underlying(value.getType()));
-  op::invoke_by_field_id<Value>(
+  op::invoke_by_field_id<Value::underlying_type>(
       discriminant,
       folly::overload(
           [&](auto id) {
-            op::clear<op::get_type_tag<Value, decltype(id)>>(
-                *op::get<decltype(id)>(value));
+            op::clear<op::get_type_tag<Value::underlying_type, decltype(id)>>(
+                *op::get<decltype(id)>(value.toThrift()));
           },
           [] {
             folly::throw_exception<std::runtime_error>(

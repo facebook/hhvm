@@ -20,6 +20,7 @@
 
 #include <folly/CPortability.h>
 #include <thrift/conformance/cpp2/AnySerializer.h>
+#include <thrift/lib/cpp2/op/Encode.h>
 
 namespace apache::thrift::conformance {
 
@@ -67,7 +68,7 @@ void BaseAnyStructSerializer<T, Reader, Writer>::encode(
     const T& value, folly::io::QueueAppender&& appender) const {
   Writer writer;
   writer.setOutput(std::move(appender));
-  value.write(&writer);
+  op::encode<type::infer_tag<T>>(writer, value);
 }
 
 template <typename T, typename Reader, typename Writer>
@@ -75,7 +76,7 @@ void BaseAnyStructSerializer<T, Reader, Writer>::decode(
     folly::io::Cursor& cursor, T& value) const {
   Reader reader;
   reader.setInput(cursor);
-  value.read(&reader);
+  op::decode<type::infer_tag<T>>(reader, value);
   cursor = reader.getCursor();
 }
 

@@ -439,7 +439,7 @@ MaskedDecodeResultValue parseValueWithMask(
                 protocolData,
                 string_to_binary);
         // Set nested MaskedDecodeResult if not empty.
-        if (!apache::thrift::empty(nestedResult.included)) {
+        if (!apache::thrift::empty(nestedResult.included.toThrift())) {
           object[FieldId{fid}] = std::move(nestedResult.included);
         }
         if constexpr (KeepExcludedData) {
@@ -480,7 +480,7 @@ MaskedDecodeResultValue parseValueWithMask(
                 protocolData,
                 string_to_binary);
         // Set nested MaskedDecodeResult if not empty.
-        if (!apache::thrift::empty(nestedResult.included)) {
+        if (!apache::thrift::empty(nestedResult.included.toThrift())) {
           map[keyValue] = std::move(nestedResult.included);
         }
         if constexpr (KeepExcludedData) {

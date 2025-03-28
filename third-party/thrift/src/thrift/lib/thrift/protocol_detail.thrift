@@ -38,10 +38,9 @@ namespace py thrift.lib.thrift.protocol_detail
 
 // A dynamic struct/union/exception
 @rust.Ord
-@thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.virtual": "1"}}
 @thrift.Uri{value = "facebook.com/thrift/protocol/Object"}
 @cpp.Adapter{
-  name = "::apache::thrift::protocol::detail::ObjectAdapter",
+  name = "::apache::thrift::InlineAdapter<::apache::thrift::protocol::detail::ObjectWrapper<::apache::thrift::protocol::detail::detail::Object>>",
   adaptedType = "::apache::thrift::protocol::detail::ObjectWrapper<::apache::thrift::protocol::detail::detail::Object>",
 }
 @cpp.UseOpEncode
@@ -69,10 +68,9 @@ typedef double Double
 
 // A dynamic value.
 @rust.Ord
-@thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.virtual": "1"}}
 @thrift.Uri{value = "facebook.com/thrift/protocol/Value"}
 @cpp.Adapter{
-  name = "::apache::thrift::protocol::detail::ValueAdapter",
+  name = "::apache::thrift::InlineAdapter<::apache::thrift::protocol::detail::ValueWrapper<::apache::thrift::protocol::detail::detail::Value>>",
   adaptedType = "::apache::thrift::protocol::detail::ValueWrapper<::apache::thrift::protocol::detail::detail::Value>",
 }
 @cpp.ScopedEnumAsUnionType

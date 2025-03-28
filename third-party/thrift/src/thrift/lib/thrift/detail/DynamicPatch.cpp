@@ -117,9 +117,9 @@ DynamicPatch createPatchFromObjectAsValueType(const Value& value, Object obj) {
 
 Value emptyValue(const Value::Type& type) {
   Value value;
-  op::invoke_by_field_id<Value>(
+  op::invoke_by_field_id<Value::ThriftValue>(
       static_cast<FieldId>(type),
-      [&](auto id) { op::get<decltype(id)>(value).emplace(); },
+      [&](auto id) { op::get<decltype(id)>(value.toThrift()).emplace(); },
       [] { folly::throw_exception<std::runtime_error>("Not Implemented."); });
   return value;
 }

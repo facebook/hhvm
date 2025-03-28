@@ -34,9 +34,67 @@ const char* ObjectWrapper<Base>::__fbthrift_thrift_uri() {
 }
 
 template <class Base>
+bool ObjectWrapper<Base>::__fbthrift_is_empty() const {
+  return empty();
+}
+
+template <class Base>
 const char* ValueWrapper<Base>::__fbthrift_thrift_uri() {
   static const folly::Indestructible<std::string> ret = uri<Base>();
   return ret->c_str();
+}
+
+template <class Base>
+bool ValueWrapper<Base>::__fbthrift_is_empty() const {
+  return ::apache::thrift::empty(toThrift());
+}
+
+using ValueList = Value::ValueList;
+using BoxedValueList = Value::BoxedValueList;
+using ValueSet = Value::ValueSet;
+using BoxedValueSet = Value::BoxedValueSet;
+using ValueMap = Value::ValueMap;
+using BoxedValueMap = Value::BoxedValueMap;
+
+template <>
+BoxedValueList& Value::set_listValue(BoxedValueList t) {
+  return toThrift().set_listValue(std::move(t));
+}
+
+template <>
+BoxedValueList& Value::set_listValue(const ValueList& t) {
+  return toThrift().set_listValue(t);
+}
+
+template <>
+BoxedValueList& Value::set_listValue(ValueList&& t) {
+  return toThrift().set_listValue(std::move(t));
+}
+
+template <>
+BoxedValueSet& Value::set_setValue(BoxedValueSet t) {
+  return toThrift().set_setValue(std::move(t));
+}
+template <>
+BoxedValueSet& Value::set_setValue(const ValueSet& t) {
+  return toThrift().set_setValue(t);
+}
+template <>
+BoxedValueSet& Value::set_setValue(ValueSet&& t) {
+  return toThrift().set_setValue(std::move(t));
+}
+
+template <>
+BoxedValueMap& Value::set_mapValue(BoxedValueMap t) {
+  return toThrift().set_mapValue(std::move(t));
+}
+template <>
+BoxedValueMap& Value::set_mapValue(const ValueMap& t) {
+  return toThrift().set_mapValue(t);
+}
+template <>
+BoxedValueMap& Value::set_mapValue(ValueMap&& t) {
+  return toThrift().set_mapValue(std::move(t));
 }
 
 static std::size_t hashVector(const std::vector<std::size_t>& a) {
@@ -66,7 +124,7 @@ std::size_t hash_value(const Value& s) {
       return folly::hash::hash_combine(
           value_type, folly::IOBufHash()(s.as_binary()));
     case Value::Type::listValue: {
-      const auto& list = *s.listValue_ref();
+      const auto& list = s.as_list();
       std::vector<std::size_t> hashes;
       hashes.reserve(list.size() + 1);
       hashes.push_back(static_cast<std::size_t>(value_type));
@@ -76,7 +134,7 @@ std::size_t hash_value(const Value& s) {
       return hashVector(hashes);
     }
     case Value::Type::setValue: {
-      const auto& set = *s.setValue_ref();
+      const auto& set = s.as_set();
       std::vector<std::size_t> hashes(set.size() + 1);
       hashes[0] = static_cast<std::size_t>(value_type);
       std::size_t* valueHashes = hashes.data() + 1;
@@ -91,7 +149,7 @@ std::size_t hash_value(const Value& s) {
       // Keys and values are sorted independently, so this produces collisions
       // between maps where the same values are mapped to the same keys
       // differently.
-      const auto& map = *s.mapValue_ref();
+      const auto& map = s.as_map();
       std::size_t size = map.size();
       std::vector<std::size_t> hashes(size * 2 + 1);
       hashes[0] = static_cast<std::size_t>(value_type);
@@ -108,7 +166,7 @@ std::size_t hash_value(const Value& s) {
       return hashVector(hashes);
     }
     case Value::Type::objectValue: {
-      const Object& object = *s.objectValue_ref();
+      const Object& object = s.as_object();
       size_t size = object.size();
       std::vector<std::size_t> hashes(size * 2 + 2);
       hashes[0] = static_cast<std::size_t>(value_type);
@@ -132,7 +190,17 @@ std::size_t hash_value(const Value& s) {
   return 0;
 }
 
+const detail::Value* into_inner_value(const Value* v) {
+  return v ? &v->toThrift() : nullptr;
+}
+
+const detail::Object* into_inner_object(const Object* o) {
+  return o ? &o->toThrift() : nullptr;
+}
+
 template const char* ObjectWrapper<detail::Object>::__fbthrift_thrift_uri();
+template bool ObjectWrapper<detail::Object>::__fbthrift_is_empty() const;
 template const char* ValueWrapper<detail::Value>::__fbthrift_thrift_uri();
+template bool ValueWrapper<detail::Value>::__fbthrift_is_empty() const;
 
 } // namespace apache::thrift::protocol::detail

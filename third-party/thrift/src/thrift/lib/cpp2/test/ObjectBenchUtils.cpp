@@ -73,20 +73,21 @@ std::size_t read_all(
   return res;
 }
 
-std::size_t read_all(const folly::F14VectorSet<protocol::detail::Value>& s) {
+template <typename T>
+std::size_t read_all_iter(const T& iterable) {
   std::size_t res = 0;
-  for (const auto& val : s) {
+  for (const auto& val : iterable) {
     res += read_all(val);
   }
   return res;
 }
 
+std::size_t read_all(const folly::F14VectorSet<protocol::detail::Value>& s) {
+  return read_all_iter(s);
+}
+
 std::size_t read_all(const std::vector<protocol::detail::Value>& l) {
-  std::size_t res = 0;
-  for (const auto& val : l) {
-    res += read_all(val);
-  }
-  return res;
+  return read_all_iter(l);
 }
 
 std::size_t read_all(const protocol::detail::Value& val) {

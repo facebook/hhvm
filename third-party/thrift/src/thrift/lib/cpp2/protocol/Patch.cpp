@@ -53,7 +53,8 @@ using value_field_id =
     type::field_id_tag<static_cast<FieldId>(type::base_type_v<Tag>)>;
 
 template <typename Tag>
-using value_native_type = op::get_native_type<Value, value_field_id<Tag>>;
+using value_native_type =
+    op::get_native_type<detail::Value, value_field_id<Tag>>;
 
 constexpr FieldId kSafePatchVersionId = FieldId{1};
 constexpr FieldId kSafePatchDataId = FieldId{2};
@@ -111,7 +112,7 @@ decltype(auto) argAs(V&& value) {
         util::enumNameSafe<Value::Type>(expected),
         util::enumNameSafe<Value::Type>(value.getType())));
   }
-  return *op::get<Id, Value>(std::forward<V>(value));
+  return *op::get<Id, Value::ThriftValue>(std::forward<V>(value).toThrift());
 }
 
 template <typename Tag>

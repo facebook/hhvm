@@ -275,13 +275,7 @@ void registerGeneratedStruct() {
     folly::throw_exception<std::runtime_error>(
         "Could not register: " + type.uri().value());
   }
-  using Tag = std::conditional_t<
-      is_thrift_union_v<T>,
-      type::union_t<T>,
-      std::conditional_t<
-          is_thrift_exception_v<T>,
-          type::exception_t<T>,
-          type::struct_t<T>>>;
+  using Tag = type::infer_tag<T>;
   op::registerStdSerializers<Tag, static_cast<type::StandardProtocol>(Ps)...>(
       type::detail::getGeneratedTypeRegistry());
 }

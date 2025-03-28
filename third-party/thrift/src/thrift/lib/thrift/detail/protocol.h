@@ -16,10 +16,11 @@
 
 #pragma once
 
-#include <optional>
-
 #include <folly/Utility.h>
+#include <folly/container/F14Map-fwd.h>
+#include <folly/container/F14Set-fwd.h>
 #include <thrift/lib/cpp2/Thrift.h>
+#include <thrift/lib/cpp2/type/detail/Wrap.h>
 
 namespace apache::thrift::protocol::detail {
 
@@ -27,8 +28,6 @@ namespace detail {
 class Object;
 class Value;
 } // namespace detail
-
-struct ObjectAdapter;
 
 template <class Base = detail::Object>
 class ObjectWrapper;
@@ -39,22 +38,39 @@ using Object = ObjectWrapper<detail::Object>;
 using Value = ValueWrapper<detail::Value>;
 
 template <class Base>
-class ObjectWrapper : public Base {
+class ObjectWrapper : public ::apache::thrift::type::detail::Wrap<Base> {
  private:
+  using Wrap = ::apache::thrift::type::detail::Wrap<Base>;
+
   static_assert(std::is_same_v<Base, detail::Object>);
   friend struct ::apache::thrift::detail::st::struct_private_access;
   static const char* __fbthrift_thrift_uri();
+  bool __fbthrift_is_empty() const;
 
  public:
-  using Base::Base;
-  using Base::members;
-  using Tag = type::adapted<ObjectAdapter, type::struct_t<detail::Object>>;
+  using Tag = typename Wrap::underlying_tag;
+  using Wrap::toThrift;
+  using Wrap::Wrap;
 
-  explicit ObjectWrapper(const Base& base) : Base(base) {}
-  explicit ObjectWrapper(Base&& base) : Base(std::move(base)) {}
+  decltype(auto) type() & { return toThrift().type(); }
+  decltype(auto) type() const& { return toThrift().type(); }
+  decltype(auto) type() && { return toThrift().type(); }
+  decltype(auto) type() const&& { return toThrift().type(); }
+  decltype(auto) members() & { return toThrift().members(); }
+  decltype(auto) members() const& { return toThrift().members(); }
+  decltype(auto) members() && { return toThrift().members(); }
+  decltype(auto) members() const&& { return toThrift().members(); }
+  [[deprecated("Prefer members()")]] decltype(auto) members_ref() & {
+    return toThrift().members_ref();
+  }
+  [[deprecated("Prefer members()")]] decltype(auto) members_ref() const& {
+    return toThrift().members_ref();
+  }
 
-  // TODO(ytj): Provide boost.json.value like APIs
-  // www.boost.org/doc/libs/release/libs/json/doc/html/json/ref/boost__json__object.html
+  template <typename Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const {
+    return toThrift().serializedSize(prot_);
+  }
 
   Value& operator[](FieldId i) { return (*members())[folly::to_underlying(i)]; }
 
@@ -87,54 +103,86 @@ class ObjectWrapper : public Base {
   [[nodiscard]] auto end() const { return members()->end(); }
   [[nodiscard]] size_t size() const { return members()->size(); }
   [[nodiscard]] bool empty() const { return members()->empty(); }
-};
 
-struct ObjectAdapter {
-  template <class Object>
-  static auto fromThrift(Object&& obj) {
-    return ObjectWrapper<Object>{std::forward<Object>(obj)};
+ private:
+  friend bool operator==(
+      const ObjectWrapper& lhs, const ObjectWrapper& rhs) noexcept {
+    return lhs.data_ == rhs.data_;
   }
-
-  template <class Object>
-  static Object& toThrift(ObjectWrapper<Object>& obj) {
-    return static_cast<Object&>(obj);
+  friend bool operator!=(
+      const ObjectWrapper& lhs, const ObjectWrapper& rhs) noexcept {
+    return lhs.data_ != rhs.data_;
   }
-  template <class Object>
-  static const Object& toThrift(const ObjectWrapper<Object>& obj) {
-    return static_cast<const Object&>(obj);
+  friend bool operator<(
+      const ObjectWrapper& lhs, const ObjectWrapper& rhs) noexcept {
+    return lhs.data_ < rhs.data_;
   }
 };
 
 template <class Base>
-class ValueWrapper : public Base {
+class ValueWrapper : public ::apache::thrift::type::detail::Wrap<Base> {
  private:
+  using Wrap = ::apache::thrift::type::detail::Wrap<Base>;
   static_assert(std::is_same_v<Base, detail::Value>);
-  friend struct ::apache::thrift::detail::st::struct_private_access;
-  static const char* __fbthrift_thrift_uri();
 
  public:
-  using Base::Base;
-  explicit ValueWrapper(const Base& base) : Base(base) {}
-  explicit ValueWrapper(Base&& base) : Base(std::move(base)) {}
+  using ThriftValue = Base;
+  using Type = typename Wrap::underlying_type::Type;
+  using Wrap::toThrift;
 
-  // TODO(ytj): Provide boost.json.value like APIs
-  // www.boost.org/doc/libs/release/libs/json/doc/html/json/ref/boost__json__value.html
+  static const char* __fbthrift_thrift_uri();
+  bool __fbthrift_is_empty() const;
 
-#define FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(TYPE)                      \
-  decltype(auto) as_##TYPE() { return *Base::TYPE##Value_ref(); }             \
-  decltype(auto) as_##TYPE() const { return *Base::TYPE##Value_ref(); }       \
-  bool is_##TYPE() const { return Base::TYPE##Value_ref().has_value(); }      \
-  decltype(auto) ensure_##TYPE() { return Base::TYPE##Value_ref().ensure(); } \
-  template <typename... Args>                                                 \
-  decltype(auto) emplace_##TYPE(Args&&... args) {                             \
-    return Base::TYPE##Value_ref().emplace(static_cast<Args&&>(args)...);     \
-  }                                                                           \
-  decltype(auto) if_##TYPE() {                                                \
-    return is_##TYPE() ? &*Base::TYPE##Value_ref() : nullptr;                 \
-  }                                                                           \
-  decltype(auto) if_##TYPE() const {                                          \
-    return is_##TYPE() ? &*Base::TYPE##Value_ref() : nullptr;                 \
-  }                                                                           \
+  static ValueWrapper fromThrift(const Base& base) {
+    return ValueWrapper<>{base};
+  }
+  static ValueWrapper fromThrift(Base&& base) { return ValueWrapper{base}; }
+
+  ValueWrapper(ValueWrapper&& other) noexcept = default;
+  ValueWrapper(const ValueWrapper& other) = default;
+  ValueWrapper& operator=(ValueWrapper&& other) noexcept = default;
+  ValueWrapper& operator=(const ValueWrapper& other) = default;
+  ~ValueWrapper() = default;
+
+  auto getType() const { return toThrift().getType(); }
+
+#define FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(TYPE)                       \
+  decltype(auto) as_##TYPE() { return *toThrift().TYPE##Value_ref(); }         \
+  decltype(auto) as_##TYPE() const { return *toThrift().TYPE##Value_ref(); }   \
+  bool is_##TYPE() const { return toThrift().TYPE##Value_ref().has_value(); }  \
+  decltype(auto) ensure_##TYPE() {                                             \
+    return toThrift().TYPE##Value_ref().ensure();                              \
+  }                                                                            \
+  template <typename... Args>                                                  \
+  decltype(auto) emplace_##TYPE(Args&&... args) {                              \
+    return toThrift().TYPE##Value_ref().emplace(static_cast<Args&&>(args)...); \
+  }                                                                            \
+  decltype(auto) if_##TYPE() {                                                 \
+    return is_##TYPE() ? &*toThrift().TYPE##Value_ref() : nullptr;             \
+  }                                                                            \
+  decltype(auto) if_##TYPE() const {                                           \
+    return is_##TYPE() ? &*toThrift().TYPE##Value_ref() : nullptr;             \
+  }                                                                            \
+  [[deprecated("Prefer as_XYZ()")]] decltype(auto) get_##TYPE##Value() const { \
+    return toThrift().get_##TYPE##Value();                                     \
+  }                                                                            \
+  [[deprecated("Prefer as_XYZ()")]] decltype(auto) TYPE##Value_ref() {         \
+    return toThrift().TYPE##Value_ref();                                       \
+  }                                                                            \
+  [[deprecated("Prefer as_XYZ()")]] decltype(auto) TYPE##Value_ref() const {   \
+    return toThrift().TYPE##Value_ref();                                       \
+  }                                                                            \
+  template <typename... Args>                                                  \
+  [[deprecated("Prefer emplace_XYZ()")]] decltype(auto) set_##TYPE##Value(     \
+      Args&&... args) {                                                        \
+    return toThrift().set_##TYPE##Value(std::forward<Args>(args)...);          \
+  }                                                                            \
+  [[deprecated("Prefer move_XYZ()")]] decltype(auto) move_##TYPE##Value() {    \
+    return toThrift().move_##TYPE##Value();                                    \
+  }                                                                            \
+  [[deprecated("Prefer as_XYZ()")]] decltype(auto) mutable_##TYPE##Value() {   \
+    return toThrift().mutable_##TYPE##Value();                                 \
+  }                                                                            \
   /* enforce semicolon after macro */ static_assert(true, "")
 
   FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(bool);
@@ -151,33 +199,141 @@ class ValueWrapper : public Base {
   FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(set);
   FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(map);
 
+  using ValueList = ::std::vector<::apache::thrift::protocol::detail::Value>;
+  using BoxedValueList = ::std::unique_ptr<ValueList>;
+
+  // Specializations for list, set, and map, as they are commonly used with
+  // deduced argument types, e.g. `X.set_listValue({1, 2, 3})`
+  [[deprecated("Prefer emplace_list()")]] BoxedValueList& set_listValue(
+      BoxedValueList t);
+  [[deprecated("Prefer emplace_list()")]] BoxedValueList& set_listValue(
+      const ValueList& t);
+  [[deprecated("Prefer emplace_list()")]] BoxedValueList& set_listValue(
+      ValueList&& t);
+
+  using ValueSet =
+      ::folly::F14VectorSet<::apache::thrift::protocol::detail::Value>;
+  using BoxedValueSet = ::std::unique_ptr<ValueSet>;
+
+  [[deprecated("Prefer emplace_set()")]] BoxedValueSet& set_setValue(
+      BoxedValueSet t);
+  [[deprecated("Prefer emplace_set()")]] BoxedValueSet& set_setValue(
+      const ValueSet& t);
+  [[deprecated("Prefer emplace_set()")]] BoxedValueSet& set_setValue(
+      ValueSet&& t);
+
+  using ValueMap = ::folly::F14FastMap<
+      ::apache::thrift::protocol::detail::Value,
+      ::apache::thrift::protocol::detail::Value>;
+  using BoxedValueMap = ::std::unique_ptr<ValueMap>;
+
+  [[deprecated("Prefer emplace_map()")]] BoxedValueMap& set_mapValue(
+      BoxedValueMap t);
+  [[deprecated("Prefer emplace_map()")]] BoxedValueMap& set_mapValue(
+      const ValueMap& t);
+  [[deprecated("Prefer emplace_map()")]] BoxedValueMap& set_mapValue(
+      ValueMap&& t);
+
 #undef FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE
-};
 
-struct ValueAdapter {
-  template <class Value>
-  static auto fromThrift(Value&& obj) {
-    return ValueWrapper<Value>{std::forward<Value>(obj)};
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const {
+    return toThrift().write(prot_);
   }
 
-  template <class Value>
-  static Value& toThrift(ValueWrapper<Value>& obj) {
-    return static_cast<Value&>(obj);
+  friend bool operator==(
+      const ValueWrapper& lhs, const ValueWrapper& rhs) noexcept {
+    return lhs.toThrift() == rhs.toThrift();
   }
-  template <class Value>
-  static const Value& toThrift(const ValueWrapper<Value>& obj) {
-    return static_cast<const Value&>(obj);
+  friend bool operator!=(
+      const ValueWrapper& lhs, const ValueWrapper& rhs) noexcept {
+    return lhs.toThrift() != rhs.toThrift();
   }
+  friend bool operator<(
+      const ValueWrapper& lhs, const ValueWrapper& rhs) noexcept {
+    return lhs.toThrift() < rhs.toThrift();
+  }
+
+ private:
+  using Wrap::Wrap;
 };
 
 size_t hash_value(const Value& s);
 
+const detail::Value* into_inner_value(const Value* v);
+const detail::Object* into_inner_object(const Object* o);
+
 } // namespace apache::thrift::protocol::detail
 
-template <>
-struct std::hash<apache::thrift::protocol::detail::Value> {
+template <class Base>
+struct std::hash<apache::thrift::protocol::detail::ValueWrapper<Base>> {
   std::size_t operator()(
-      const apache::thrift::protocol::detail::Value& s) const noexcept {
+      const apache::thrift::protocol::detail::ValueWrapper<Base>& s)
+      const noexcept {
     return apache::thrift::protocol::detail::hash_value(s);
+  }
+};
+
+// TODO(sadroeck) - Remove Cpp2Ops specialization for Protocol.Object/Value
+// T219294380
+template <class Base>
+class apache::thrift::Cpp2Ops<
+    apache::thrift::protocol::detail::ObjectWrapper<Base>> {
+ public:
+  using Type = apache::thrift::protocol::detail::ObjectWrapper<Base>;
+
+  static constexpr apache::thrift::protocol::TType thriftType() {
+    return apache::thrift::protocol::TType::T_STRUCT;
+  }
+  template <class Protocol>
+  static uint32_t write(Protocol* prot, const Type* value) {
+    return Cpp2Ops<Base>::write(
+        prot, ::apache::thrift::protocol::detail::into_inner_object(value));
+  }
+  template <class Protocol>
+  static void read(Protocol* prot, Type* value) {
+    return Cpp2Ops::read(
+        prot, ::apache::thrift::protocol::detail::into_inner_object(value));
+  }
+  template <class Protocol>
+  static uint32_t serializedSize(Protocol* prot, const Type* value) {
+    return Cpp2Ops::serializedSize(
+        prot, ::apache::thrift::protocol::detail::into_inner_object(value));
+  }
+  template <class Protocol>
+  static uint32_t serializedSizeZC(Protocol* prot, const Type* value) {
+    return Cpp2Ops::serializedSizeZC(
+        prot, ::apache::thrift::protocol::detail::into_inner_object(value));
+  }
+};
+
+template <class Base>
+class apache::thrift::Cpp2Ops<
+    apache::thrift::protocol::detail::ValueWrapper<Base>> {
+ public:
+  using Type = apache::thrift::protocol::detail::ValueWrapper<Base>;
+
+  static constexpr protocol::TType thriftType() {
+    return protocol::TType::T_STRUCT;
+  }
+  template <class Protocol>
+  static uint32_t write(Protocol* prot, const Type* value) {
+    return Cpp2Ops<Base>::write(
+        prot, ::apache::thrift::protocol::detail::into_inner_value(value));
+  }
+  template <class Protocol>
+  static void read(Protocol* prot, Type* value) {
+    return Cpp2Ops<Base>::read(
+        prot, ::apache::thrift::protocol::detail::into_inner_value(value));
+  }
+  template <class Protocol>
+  static uint32_t serializedSize(Protocol* prot, const Type* value) {
+    return Cpp2Ops<Base>::serializedSize(
+        prot, ::apache::thrift::protocol::detail::into_inner_value(value));
+  }
+  template <class Protocol>
+  static uint32_t serializedSizeZC(Protocol* prot, const Type* value) {
+    return Cpp2Ops<Base>::serializedSizeZC(
+        prot, ::apache::thrift::protocol::detail::into_inner_value(value));
   }
 };

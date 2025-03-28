@@ -302,11 +302,17 @@ let eval provider (ua : Tast.user_attribute) method_name =
     | promptlet :: args -> Some (promptlet, args)
     | [] -> None
   in
-  (* Get class and method *)
-  let* promptlet_class = Value.class_ptr @@ Expr.eval ctx promptlet in
-  let* method_ = Context.find_method ~ctx promptlet_class method_name in
-  (* Evaluate method call *)
-  let* value =
-    Call.eval ctx method_ @@ List.map ~f:(fun a -> Aast.Anormal a) args
-  in
-  Value.str value
+  (* Evaluate the first argument *)
+  let promptlet_value = Expr.eval ctx promptlet in
+  (* If it's a string, return it directly *)
+  match Value.str promptlet_value with
+  | Some str -> Some str
+  | None ->
+    (* Otherwise, proceed with the original class pointer logic *)
+    let* promptlet_class = Value.class_ptr promptlet_value in
+    let* method_ = Context.find_method ~ctx promptlet_class method_name in
+    (* Evaluate method call *)
+    let* value =
+      Call.eval ctx method_ @@ List.map ~f:(fun a -> Aast.Anormal a) args
+    in
+    Value.str value

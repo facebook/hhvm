@@ -1,0 +1,34 @@
+Code actions available:
+------------------------------------------
+Generate Code for SimpliHack (CodeActionKind: "") SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "command":{
+    "arguments":[
+      {
+        "entrypoint":"HandleUserAttributeCodeAction",
+        "extras":{},
+        "overrideSelection":{"end":{"character":1,"line":7},"start":{"character":0,"line":1}},
+        "predefinedPrompt":{
+          "command":"SimpliHack",
+          "description":"Handle __SimpliHack attribute",
+          "displayPrompt":"Direct string value",
+          "model":"iCodeLlama 3.1 70B",
+          "userPrompt":" Edit <selection_to_edit> in the following way:\n        Direct string value\n\n        Do exactly as instructed above. Do not make any assumptions on what to do unless specifically instructed to do so.\n      "
+        },
+        "webviewStartLine":1
+      }
+    ],
+    "command":"code-compose.show-inline-chat",
+    "title":"Generate Code for SimpliHack"
+  },
+  "data":{"isAI":true},
+  "diagnostics":[],
+  "edit":{"changes":{}},
+  "kind":"",
+  "title":"Generate Code for SimpliHack"
+}
+
+The code action edit was a no-op

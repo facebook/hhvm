@@ -5,6 +5,4 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-type t =
-  | Invalid_input of string
-  | Internal of exn
+type t = Invalid_input of string

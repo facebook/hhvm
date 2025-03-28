@@ -12,7 +12,8 @@
         "  public function hello(): void {\n",
         "    echo \"hello\";\n",
         "  }\n",
-        "}"
+        "}\n",
+        "async function gen_notebook_main_n1234(): Awaitable<void> {"
       ]
     },
     {
@@ -36,3 +37,6 @@
   },
   "nbformat":4
 }
+Warning: found bad metadata when converting Hack to a notebook: got start-of-cell metadata before the previous cell ended.
+Warning: found bad metadata when converting Hack to a notebook: got start-of-cell metadata before the previous cell ended.
+Warning: found bad metadata when converting Hack to a notebook: got start-of-cell metadata before the previous cell ended.

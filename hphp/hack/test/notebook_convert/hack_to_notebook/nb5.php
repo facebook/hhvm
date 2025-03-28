@@ -5,15 +5,19 @@
 /*
 test another markdown
 */
+//@bento-cell-end
 
 //@bento-cell:{"id": 3, "cell_type": "markdown"}
 /*
 test this is markdown
 */
+//@bento-cell-end
 
 async function gen_notebook_main_N6203962(): Awaitable<void> {
   //@bento-cell:{"id": 2, "cell_type": "code"}
   $a = 10;
+  //@bento-cell-end
   //@bento-cell:{"id": 4, "cell_type": "code"}
   $vc = await gen_myvc();
+  //@bento-cell-end
 }

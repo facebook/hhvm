@@ -7,6 +7,7 @@
 
 I am a *markdown* **cell**
 */
+//@bento-cell-end
 
 // metadata contains invalid json
 //@bento-cell:{"id": 1
@@ -15,3 +16,4 @@ class MyClass {
         echo "hello";
     }
 }
+//@bento-cell-end

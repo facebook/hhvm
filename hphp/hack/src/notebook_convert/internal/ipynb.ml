@@ -144,7 +144,7 @@ let cell_of_chunk
     Notebook_chunk.{ id = _; chunk_kind; contents; cell_bento_metadata } : cell
     =
   match chunk_kind with
-  | Notebook_chunk.(Top_level | Stmt) -> Hack { contents; cell_bento_metadata }
+  | Notebook_chunk.Hack -> Hack { contents; cell_bento_metadata }
   | Notebook_chunk.(Non_hack { cell_type }) ->
     Non_hack { cell_type; contents; cell_bento_metadata }
 

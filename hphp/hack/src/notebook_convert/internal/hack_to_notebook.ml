@@ -6,37 +6,78 @@
  *
  *)
 open Hh_prelude
-module Syn = Full_fidelity_positioned_syntax
 
-let split_by_chunk_comments
-    (hack_lines : string list) ~(is_from_toplevel_statements : bool) :
-    Notebook_chunk.t list =
-  let append_to_previous (item : 'a) : 'a list list -> 'a list list = function
-    | h :: t -> (item :: h) :: t
-    | [] -> [[]]
-    (* ignore anything before the first chunk start comment.
-       In practice this is the <?hh header *)
-  in
-  hack_lines
-  |> List.fold ~init:[] ~f:(fun acc line ->
-         if Notebook_chunk.is_chunk_start_comment line then
-           [line] :: acc
-         else
-           append_to_previous line acc)
-  |> List.rev
-  |> List.map ~f:List.rev
-  |> List.filter_map ~f:(function
-         | [] -> None
-         | chunk_start_comment :: hack_lines_rev ->
-           if Notebook_chunk.is_chunk_start_comment chunk_start_comment then
-             Some
-               (hack_lines_rev
-               |> String.concat ~sep:"\n"
-               |> Notebook_chunk.of_hack_exn
-                    ~comment:chunk_start_comment
-                    ~is_from_toplevel_statements)
-           else
-             None)
+module Hack_to_notebook_chunks : sig
+  val go : string -> (Notebook_chunk.t list, Notebook_convert_error.t) result
+end = struct
+  type state =
+    | In_chunk of {
+        metadata: string;
+        chunk_acc_rev: string list;
+      }
+    | Outside_chunk
+    | Found_error of Notebook_convert_error.t
+
+  type t = {
+    acc: Notebook_chunk.t list;
+    state: state;
+  }
+
+  let end_chunk_exn (t : t) metadata chunk_acc_rev : t =
+    let contents = chunk_acc_rev |> List.rev |> String.concat ~sep:"\n" in
+    match Notebook_chunk.of_hack ~comment:metadata contents with
+    | Ok chunk -> { state = Outside_chunk; acc = chunk :: t.acc }
+    | Error e -> { state = Found_error e; acc = [] }
+
+  let start_chunk (t : t) (line : string) : t =
+    { t with state = In_chunk { metadata = line; chunk_acc_rev = [] } }
+
+  let on_line (t : t) (line : string) : t =
+    match t.state with
+    | In_chunk { metadata; chunk_acc_rev } ->
+      if Notebook_chunk.is_chunk_start_comment line then
+        (* The best we can do is guess that ending the chunk was intended *)
+        let () =
+          Out_channel.output_string
+            stderr
+            ("Warning: found bad metadata when converting Hack to a notebook: "
+            ^ "got start-of-cell metadata before the previous cell ended.\n")
+        in
+        let t = end_chunk_exn t metadata chunk_acc_rev in
+        start_chunk t line
+      else if Notebook_chunk.is_chunk_end_comment line then
+        end_chunk_exn t metadata chunk_acc_rev
+      else
+        {
+          t with
+          state = In_chunk { metadata; chunk_acc_rev = line :: chunk_acc_rev };
+        }
+    | Outside_chunk ->
+      if Notebook_chunk.is_chunk_start_comment line then
+        start_chunk t line
+      else
+        t
+    | Found_error e -> { t with state = Found_error e }
+
+  let go (hack : string) :
+      (Notebook_chunk.t list, Notebook_convert_error.t) result =
+    match
+      hack
+      |> String.split_lines
+      |> List.fold ~init:{ acc = []; state = Outside_chunk } ~f:on_line
+    with
+    | { state = Found_error e; _ } -> Error e
+    | { state = Outside_chunk; acc } -> Ok acc
+    | { state = In_chunk _; acc } ->
+      let () =
+        Out_channel.output_string
+          stderr
+          ("Warning: found bad metadata when converting Hack to a notebook: "
+          ^ "reached the end of the file without finding an end-of-cell marker.\n"
+          )
+      in
+      Ok acc
+end
 
 let format_chunk (chunk : Notebook_chunk.t) : Notebook_chunk.t =
   let contents =
@@ -61,78 +102,9 @@ let format_chunk (chunk : Notebook_chunk.t) : Notebook_chunk.t =
   in
   Notebook_chunk.{ chunk with contents }
 
-let hack_to_notebook_exn
-    (hack : string) (syntax : Full_fidelity_positioned_syntax.t) :
+let hack_to_notebook (hack : string) :
     (Hh_json.json, Notebook_convert_error.t) result =
   let open Result.Let_syntax in
-  let script_children =
-    match syntax with
-    | Syn.{ syntax = Script { script_declarations }; _ } ->
-      Syn.children script_declarations
-    | _ ->
-      failwith
-        "Internal error: expected Hack script. This should be unreachable since we validate inputs are well-formed Hack."
-  in
-  let decls =
-    match script_children with
-    | Syn.{ syntax = MarkupSection _; _ } :: decls -> decls
-    | _ ->
-      failwith
-        "Internal error: expected <?hh at the top of a Hack file. This should be unreachable since we validate inputs are well-formed Hack."
-  in
-  let (main_fn_infos, other) =
-    List.partition_map decls ~f:(function
-        | Syn.
-            {
-              syntax =
-                FunctionDeclaration
-                  {
-                    function_declaration_header =
-                      {
-                        syntax = FunctionDeclarationHeader { function_name; _ };
-                        _;
-                      } as header;
-                    function_body =
-                      {
-                        syntax = CompoundStatement { compound_statements; _ };
-                        _;
-                      };
-                    _;
-                  };
-              _;
-            }
-          when String.is_prefix
-                 ~prefix:Notebook_convert_constants.main_function_prefix
-               @@ String.strip
-               @@ Syn.text function_name ->
-          Either.First (Syn.leading_text header, compound_statements)
-        | other -> Either.Second other)
-  in
-  let* (main_fn_leading_text, body_parts) =
-    match main_fn_infos with
-    | (leading_text, body_parts) :: [] -> Ok (leading_text, body_parts)
-    | _ ->
-      Error
-        (Notebook_convert_error.Invalid_input
-           "Must be exactly one function with prefix notebook_main")
-  in
-  let top_level_statements_chunks =
-    body_parts
-    |> Syn.children
-    |> List.map ~f:Syn.full_text
-    |> List.bind ~f:String.split_lines
-    |> split_by_chunk_comments ~is_from_toplevel_statements:true
-  in
-  let other_chunks =
-    let hack_lines =
-      let lines_from_other =
-        other |> List.map ~f:Syn.full_text |> List.bind ~f:String.split_lines
-      in
-      let lines_from_leading = String.split_lines main_fn_leading_text in
-      lines_from_other @ lines_from_leading
-    in
-    split_by_chunk_comments hack_lines ~is_from_toplevel_statements:false
-  in
   let* Notebook_level_metadata.{ notebook_number = _; kernelspec } =
     List.take (String.split_lines hack) 50
     |> List.find_map ~f:Notebook_level_metadata.of_comment
@@ -141,15 +113,7 @@ let hack_to_notebook_exn
            (Notebook_convert_error.Invalid_input
               {|Could not find notebook-level metadata. Expected a valid comment like: //@bento-notebook:{"notebook_number": "notebook_number", kernelspec: $THE_KERNEL_SPEC_SEE_IPYNB_SPEC}|})
   in
-  let+ ipynb =
-    other_chunks @ top_level_statements_chunks
-    |> List.map ~f:format_chunk
-    |> Ipynb.ipynb_of_chunks ~kernelspec
-  in
+  let* chunks = Hack_to_notebook_chunks.go hack in
+  let chunks = List.map ~f:format_chunk chunks in
+  let+ ipynb = Ipynb.ipynb_of_chunks chunks ~kernelspec in
   Ipynb.ipynb_to_json ipynb
-
-let hack_to_notebook
-    (hack : string) (syntax : Full_fidelity_positioned_syntax.t) :
-    (Hh_json.json, Notebook_convert_error.t) result =
-  try hack_to_notebook_exn hack syntax with
-  | e -> Error (Notebook_convert_error.Internal e)

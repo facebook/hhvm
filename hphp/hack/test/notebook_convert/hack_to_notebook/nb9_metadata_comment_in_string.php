@@ -2,28 +2,20 @@
 // copyright: the company
 //@bento-notebook:{"notebook_number":"N1234","kernelspec":{"display_name":"hack","language":"hack","name":"bento_kernel_hack"}}
 
-//@bento-cell:{"id": 2, "cell_type": "markdown"}
-/*
-# Check it out
-
-I am a *markdown* **cell**
-*/
-//@bento-cell-end
-
-//@bento-cell:{"id": 1, "cell_type": "code"}
-class MyClass {
-  public function hello(): void {
-    echo "hello";
-  }
-}
-//@bento-cell-end
 async function gen_notebook_main_n1234(): Awaitable<void> {
   //@bento-cell:{"cell_bento_metadata":{"output": {"id":1247934846418027,"loadingStatus":"loaded"}, "collapsed": true},"cell_type":"code","id":1}
   $m = new MyClass();
   echo "hi1";
   //@bento-cell-end
-  //@bento-cell:{"id": 3, "cell_type": "code"}
+  // Something that *looks* like a cell marker but is part of a string will break the converter.
+  // This is the price we pay for allowing ill-formed Hack code in Bento notebooks:
+  // the hack->notebook converter doesn't read a Hack file *as* Hack, it reads the file
+  // as a collection of cells baseed on the magic @bento-cell markers and @bento-cell-end markers.
+  $s = "
+  //@bento-cell:adsfdsafdsafds
+  ";
   echo "hi2";
   $m->hello();
   //@bento-cell-end
+
 }

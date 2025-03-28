@@ -1,4 +1,4 @@
  Received input that was not in the expected format.
 Expected a valid Hack file with special comments for notebook cell information.
 Such files should only be created via `hh --notebook-to-hack`. Error:
-Must be exactly one function with prefix notebook_main
+missing key 'cell_type'

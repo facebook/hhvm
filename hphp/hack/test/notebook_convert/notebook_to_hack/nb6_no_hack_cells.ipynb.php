@@ -7,6 +7,7 @@
 
 I am a *markdown* **cell**
 */
+//@bento-cell-end
 
 async function gen_notebook_main_N1234(): Awaitable<void> {
 

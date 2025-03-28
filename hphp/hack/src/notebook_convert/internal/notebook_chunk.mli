@@ -16,8 +16,7 @@ module Id : sig
 end
 
 type chunk_kind =
-  | Top_level
-  | Stmt
+  | Hack
   | Non_hack of { cell_type: string }
 [@@deriving eq, ord]
 
@@ -32,10 +31,11 @@ type t = {
 
 val is_chunk_start_comment : string -> bool
 
+val is_chunk_end_comment : string -> bool
+
 (** Prepend a magic comment that preserves information about cells. This will enable us to
 reconstruct the notebook from the generated Hack (with some loss of position information).
 *)
 val to_hack : t -> string
 
-val of_hack_exn :
-  comment:string -> is_from_toplevel_statements:bool -> string -> t
+val of_hack : comment:string -> string -> (t, Notebook_convert_error.t) result

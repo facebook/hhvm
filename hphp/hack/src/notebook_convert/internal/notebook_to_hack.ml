@@ -8,14 +8,26 @@
 open Hh_prelude
 module Syn = Full_fidelity_positioned_syntax
 
+(** Within Hack chunks, we distinguish statements from things allowed at the top
+ * level (classes, functions, etc.) because we will wrap the former in a top-level
+ * statement.
+ *)
+type annotation =
+  | Anno_hack_stmt
+  | Anno_hack_top_level
+  | Anno_non_hack
+[@@deriving eq]
+
+type annotated_chunk = annotation * Notebook_chunk.t
+
 (** We calculate the current chunk Id by
 * looking at the head of the list of chunks:
 * this works because we build up the list backwards
 * and then reverse.
 *)
-let head_id (chunks : Notebook_chunk.t list) : Notebook_chunk.Id.t =
+let head_id (chunks : annotated_chunk list) : Notebook_chunk.Id.t =
   List.hd chunks
-  |> Option.map ~f:(fun Notebook_chunk.{ id; _ } -> id)
+  |> Option.map ~f:(fun (_, Notebook_chunk.{ id; _ }) -> id)
   |> Option.value ~default:Notebook_chunk.Id.zero
 
 (** A chunk has the information we need to generate Hack
@@ -24,8 +36,8 @@ let head_id (chunks : Notebook_chunk.t list) : Notebook_chunk.Id.t =
 * chunks where we can to avoid redundant comments.
 *)
 let chunks_of_hack_exn
-    ~(acc : Notebook_chunk.t list) ~cell_bento_metadata id (source : string) :
-    Notebook_chunk.t list =
+    ~(acc : annotated_chunk list) ~cell_bento_metadata id (source : string) :
+    annotated_chunk list =
   (* We tolerate some syntax errors in the Hack in notebooks,
      the intent being that users will fix such errors in their editor
      or in the notebook, using standard tooling for feedback on syntax errors.
@@ -44,58 +56,62 @@ let chunks_of_hack_exn
              Here's why: top-level statements are not allowed in "real" WWW Hack but are allowed in notebooks
              for user convenience.
           *)
-          let kind =
+          let anno =
             if Full_fidelity_statement.is_statement (Syn.syntax syn) then
-              Notebook_chunk.Stmt
+              Anno_hack_stmt
             else
-              Notebook_chunk.Top_level
+              Anno_hack_top_level
           in
           match acc with
-          | Notebook_chunk.
-              {
-                chunk_kind;
-                contents = prev_contents;
-                id = prev_id;
-                cell_bento_metadata = _;
-              }
+          | ( prev_anno,
+              Notebook_chunk.
+                {
+                  chunk_kind;
+                  contents = prev_contents;
+                  id = prev_id;
+                  cell_bento_metadata = _;
+                } )
             :: tl
-            when Notebook_chunk.equal_chunk_kind chunk_kind kind
+            when equal_annotation prev_anno anno
                  && Notebook_chunk.Id.compare id prev_id = 0 ->
             (* We merge chunks to avoid redundant comments identifying chunk positions *)
-            Notebook_chunk.
-              {
-                chunk_kind;
-                id;
-                contents = Printf.sprintf "%s\n%s" prev_contents contents;
-                cell_bento_metadata;
-              }
+            ( prev_anno,
+              Notebook_chunk.
+                {
+                  chunk_kind;
+                  id;
+                  contents = Printf.sprintf "%s\n%s" prev_contents contents;
+                  cell_bento_metadata;
+                } )
             :: tl
           | _ :: _
           | [] ->
             (* create a new chunk *)
-            Notebook_chunk.
-              { chunk_kind = kind; id; contents; cell_bento_metadata }
+            ( anno,
+              Notebook_chunk.
+                { chunk_kind = Hack; id; contents; cell_bento_metadata } )
             :: acc)
   | _ -> failwith @@ Printf.sprintf "Could not parse Hack %s" source
 
 (** Massage the cells from the ipynb into an internal format more amenable
 * to generating Hack. *)
-let chunks_of_cells_exn (cells : Ipynb.cell list) : Notebook_chunk.t list =
+let chunks_of_cells_exn (cells : Ipynb.cell list) : annotated_chunk list =
   cells
-  |> List.fold ~init:[] ~f:(fun chunks cell ->
+  |> List.fold ~init:[] ~f:(fun (chunks : annotated_chunk list) cell ->
          let id = Notebook_chunk.Id.next (head_id chunks) in
          match cell with
          | Ipynb.Hack { contents; cell_bento_metadata } ->
            chunks_of_hack_exn ~acc:chunks ~cell_bento_metadata id contents
          | Ipynb.(Non_hack { cell_type; contents; cell_bento_metadata }) ->
            let chunk =
-             Notebook_chunk.
-               {
-                 contents;
-                 chunk_kind = Non_hack { cell_type };
-                 id;
-                 cell_bento_metadata;
-               }
+             ( Anno_non_hack,
+               Notebook_chunk.
+                 {
+                   contents;
+                   chunk_kind = Non_hack { cell_type };
+                   id;
+                   cell_bento_metadata;
+                 } )
            in
            chunk :: chunks)
   |> List.rev
@@ -110,13 +126,13 @@ let hack_of_ipynb_exn
   let (non_stmts, stmts) =
     cells
     |> chunks_of_cells_exn
-    |> List.partition_map ~f:(fun chunk ->
+    |> List.partition_map ~f:(fun (anno, chunk) ->
            let hack = Notebook_chunk.to_hack chunk in
-           match chunk.Notebook_chunk.chunk_kind with
-           | Notebook_chunk.Non_hack _
-           | Notebook_chunk.Top_level ->
+           match anno with
+           | Anno_non_hack
+           | Anno_hack_top_level ->
              Either.First hack
-           | Notebook_chunk.Stmt -> Either.Second hack)
+           | Anno_hack_stmt -> Either.Second hack)
   in
   let non_stmts_code = String.concat non_stmts ~sep:"\n" in
   let main_fn_code =

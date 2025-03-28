@@ -460,6 +460,9 @@ ErrorCode parseRFC9218Priority(Cursor& cursor,
   if (header.stream != 0) {
     return ErrorCode::PROTOCOL_ERROR;
   }
+  if (header.length <= sizeof(priStream)) {
+    return ErrorCode::FRAME_SIZE_ERROR;
+  }
   priStream = parseUint31(cursor);
   auto priLen = header.length - sizeof(priStream);
   outPriority.resize(priLen);

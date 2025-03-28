@@ -105,12 +105,12 @@ apache::thrift::ServerStream<StreamElement> createAsyncIteratorFromPyIterator(
             }};
 
         while (true) {
-          auto [promise, future] =
+          auto [madePromise, future] =
               folly::makePromiseContract<std::optional<StreamElement>>(
                   executor);
           folly::via(
               executor,
-              [&genNext, iter, promise = std::move(promise)]() mutable {
+              [&genNext, iter, promise = std::move(madePromise)]() mutable {
                 genNext(iter, std::move(promise));
               });
           auto val = co_await std::move(future);

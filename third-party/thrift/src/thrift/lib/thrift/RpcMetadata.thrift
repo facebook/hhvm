@@ -562,6 +562,24 @@ struct ClientMetadata {
   3: optional map<string, string> otherMetadata;
 }
 
+struct CustomCompressionSetupRequest {
+  1: string compressorName;
+  2: optional binary payload;
+}
+
+union CompressionSetupRequest {
+  1: CustomCompressionSetupRequest custom;
+}
+
+struct CustomCompressionSetupResponse {
+  1: string compressorName;
+  2: optional binary payload;
+}
+
+union CompressionSetupResponse {
+  1: CustomCompressionSetupResponse custom;
+}
+
 struct RequestSetupMetadata {
   @cpp.Type{template = "apache::thrift::MetadataOpaqueMap"}
   1: optional map<string, binary> opaque;
@@ -589,7 +607,9 @@ struct RequestSetupMetadata {
   12: optional i32 keepAliveTimeoutMs;
   // Encode Thrift Metadata using Binary
   13: optional bool encodeMetadataUsingBinary;
-} // next-id: 14
+  // If provided, we attempt to perform initial negotiation for compression algorithm.
+  14: optional CompressionSetupRequest compressionSetupRequest;
+} // next-id: 15
 
 struct SetupResponse {
   // The Rocket protocol version that server picked. SHOULD be set. MUST be a
@@ -601,6 +621,8 @@ struct SetupResponse {
   // server. SHOULD be set.
   // If not set (or if false) client SHOULD not use ZSTD compression.
   2: optional bool zstdSupported;
+  // If compression setup is successful, the setup response will be returned here.
+  3: optional CompressionSetupResponse compressionSetupResponse;
 }
 
 struct StreamHeadersPush {

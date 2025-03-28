@@ -26,7 +26,8 @@ from common.thrift.patch.detail.py_bindings.DynamicPatch import (
     BinaryPatch,
     StructPatch as DynamicStructPatch,
     UnionPatch as DynamicUnionPatch,
-    DynamicPatch
+    DynamicPatch,
+    EnumPatch
 )
 
 import thrift.python.types as _fbthrift_python_types
@@ -125,9 +126,9 @@ class MyStructPatch(
     @property
     def myEnum(self) -> UnqualifiedFieldPatch[
             _fbthrift__test__fixtures__basic__module__thrift_types.MyEnum,
-            _fbthrift__test__fixtures__basic__module__thrift_types.MyEnum]:
+            EnumPatch]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> _fbthrift__test__fixtures__basic__module__thrift_types.MyEnum:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> EnumPatch:
             return patch.as_enum_patch()
 
         return UnqualifiedFieldPatch(
@@ -385,9 +386,9 @@ class MyUnionPatch(
     @property
     def myEnum(self) -> OptionalFieldPatch[
             _fbthrift__test__fixtures__basic__module__thrift_types.MyEnum,
-            _fbthrift__test__fixtures__basic__module__thrift_types.MyEnum]:
+            EnumPatch]:
 
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> _fbthrift__test__fixtures__basic__module__thrift_types.MyEnum:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> EnumPatch:
             return patch.as_enum_patch()
 
         return OptionalFieldPatch(

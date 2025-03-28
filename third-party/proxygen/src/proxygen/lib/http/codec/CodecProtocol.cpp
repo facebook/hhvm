@@ -24,6 +24,7 @@ static const std::string http_2 = "http/2";
 static const std::string hq = "hq";
 static const std::string h3 = "h3";
 static const std::string http_binary = "bhttp";
+static const std::string tunnel_lite = "lite";
 static const std::string empty = "";
 } // namespace
 
@@ -39,6 +40,8 @@ extern CodecProtocol getCodecProtocolFromStr(folly::StringPiece protocolStr) {
     return CodecProtocol::HTTP_3;
   } else if (protocolStr.find(http_binary) == 0) {
     return CodecProtocol::HTTP_BINARY;
+  } else if (protocolStr.find(tunnel_lite) == 0) {
+    return CodecProtocol::TUNNEL_LITE;
   } else {
     // return default protocol
     return CodecProtocol::HTTP_1_1;
@@ -57,6 +60,8 @@ extern const std::string& getCodecProtocolString(CodecProtocol proto) {
       return hq;
     case CodecProtocol::HTTP_BINARY:
       return http_binary;
+    case CodecProtocol::TUNNEL_LITE:
+      return tunnel_lite;
   }
   LOG(FATAL) << "Unreachable";
   return empty;

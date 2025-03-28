@@ -70,6 +70,9 @@ std::unique_ptr<HTTPCodec> DefaultHTTPCodecFactory::getCodec(
       }
       return codec;
     }
+    case CodecProtocol::TUNNEL_LITE:
+      LOG(WARNING) << __func__ << " doesn't support TUNNEL_LITE";
+      return nullptr;
     default:
       // should be unreachable, getCodecProtocolFromStr returns HTTP_1_1 by
       // default

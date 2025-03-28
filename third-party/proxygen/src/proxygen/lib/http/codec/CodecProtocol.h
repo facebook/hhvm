@@ -22,6 +22,7 @@ enum class CodecProtocol : uint8_t {
   HQ,
   HTTP_3,
   HTTP_BINARY,
+  TUNNEL_LITE,
 };
 
 /**

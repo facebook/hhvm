@@ -525,13 +525,7 @@ where
                 tracing::info!(?aexn, method="SinkService.method", "Sink Final ApplicationException");
                 ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
             }
-            ::std::result::Result::Err(exn) => {
-                let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::sink_service::MethodSinkFinalExn>(
-                    ::std::result::Result::Err(exn),
-                    "method",
-                );
-                ::fbthrift::SerializedStreamElement::DeclaredException(payload)
-            }
+            
         };
         final_result_callback(enc_final_result);
         ::std::result::Result::Ok(())
@@ -661,13 +655,7 @@ where
                 tracing::info!(?aexn, method="SinkService.methodAndReponse", "Sink Final ApplicationException");
                 ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
             }
-            ::std::result::Result::Err(exn) => {
-                let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::sink_service::MethodAndReponseSinkFinalExn>(
-                    ::std::result::Result::Err(exn),
-                    "methodAndReponse",
-                );
-                ::fbthrift::SerializedStreamElement::DeclaredException(payload)
-            }
+            
         };
         final_result_callback(enc_final_result);
         ::std::result::Result::Ok(())
@@ -796,13 +784,7 @@ where
                 tracing::info!(?aexn, method="SinkService.methodThrow", "Sink Final ApplicationException");
                 ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
             }
-            ::std::result::Result::Err(exn) => {
-                let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::sink_service::MethodThrowSinkFinalExn>(
-                    ::std::result::Result::Err(exn),
-                    "methodThrow",
-                );
-                ::fbthrift::SerializedStreamElement::DeclaredException(payload)
-            }
+            
         };
         final_result_callback(enc_final_result);
         ::std::result::Result::Ok(())
@@ -931,13 +913,7 @@ where
                 tracing::info!(?aexn, method="SinkService.methodSinkThrow", "Sink Final ApplicationException");
                 ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
             }
-            ::std::result::Result::Err(exn) => {
-                let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::sink_service::MethodSinkThrowSinkFinalExn>(
-                    ::std::result::Result::Err(exn),
-                    "methodSinkThrow",
-                );
-                ::fbthrift::SerializedStreamElement::DeclaredException(payload)
-            }
+            
         };
         final_result_callback(enc_final_result);
         ::std::result::Result::Ok(())
@@ -1336,13 +1312,7 @@ where
                 tracing::info!(?aexn, method="SinkService.methodFast", "Sink Final ApplicationException");
                 ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
             }
-            ::std::result::Result::Err(exn) => {
-                let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::sink_service::MethodFastSinkFinalExn>(
-                    ::std::result::Result::Err(exn),
-                    "methodFast",
-                );
-                ::fbthrift::SerializedStreamElement::DeclaredException(payload)
-            }
+            
         };
         final_result_callback(enc_final_result);
         ::std::result::Result::Ok(())

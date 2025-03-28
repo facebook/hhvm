@@ -1019,13 +1019,7 @@ pub mod my_service {
                     tracing::info!(?aexn, method="MyInteraction.encode", "Sink Final ApplicationException");
                     ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
                 }
-                ::std::result::Result::Err(exn) => {
-                    let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_interaction::EncodeSinkFinalExn>(
-                        ::std::result::Result::Err(exn),
-                        "encode",
-                    );
-                    ::fbthrift::SerializedStreamElement::DeclaredException(payload)
-                }
+                
             };
             final_result_callback(enc_final_result);
             ::std::result::Result::Ok(())
@@ -1577,13 +1571,7 @@ pub mod my_service {
                     tracing::info!(?aexn, method="MyInteractionFast.encode", "Sink Final ApplicationException");
                     ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
                 }
-                ::std::result::Result::Err(exn) => {
-                    let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_interaction_fast::EncodeSinkFinalExn>(
-                        ::std::result::Result::Err(exn),
-                        "encode",
-                    );
-                    ::fbthrift::SerializedStreamElement::DeclaredException(payload)
-                }
+                
             };
             final_result_callback(enc_final_result);
             ::std::result::Result::Ok(())
@@ -3310,13 +3298,7 @@ pub mod factories {
                     tracing::info!(?aexn, method="MyInteraction.encode", "Sink Final ApplicationException");
                     ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
                 }
-                ::std::result::Result::Err(exn) => {
-                    let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_interaction::EncodeSinkFinalExn>(
-                        ::std::result::Result::Err(exn),
-                        "encode",
-                    );
-                    ::fbthrift::SerializedStreamElement::DeclaredException(payload)
-                }
+                
             };
             final_result_callback(enc_final_result);
             ::std::result::Result::Ok(())
@@ -3868,13 +3850,7 @@ pub mod factories {
                     tracing::info!(?aexn, method="MyInteractionFast.encode", "Sink Final ApplicationException");
                     ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
                 }
-                ::std::result::Result::Err(exn) => {
-                    let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_interaction_fast::EncodeSinkFinalExn>(
-                        ::std::result::Result::Err(exn),
-                        "encode",
-                    );
-                    ::fbthrift::SerializedStreamElement::DeclaredException(payload)
-                }
+                
             };
             final_result_callback(enc_final_result);
             ::std::result::Result::Ok(())
@@ -5520,13 +5496,7 @@ pub mod perform {
                     tracing::info!(?aexn, method="MyInteraction.encode", "Sink Final ApplicationException");
                     ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
                 }
-                ::std::result::Result::Err(exn) => {
-                    let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_interaction::EncodeSinkFinalExn>(
-                        ::std::result::Result::Err(exn),
-                        "encode",
-                    );
-                    ::fbthrift::SerializedStreamElement::DeclaredException(payload)
-                }
+                
             };
             final_result_callback(enc_final_result);
             ::std::result::Result::Ok(())
@@ -6078,13 +6048,7 @@ pub mod perform {
                     tracing::info!(?aexn, method="MyInteractionFast.encode", "Sink Final ApplicationException");
                     ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
                 }
-                ::std::result::Result::Err(exn) => {
-                    let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_interaction_fast::EncodeSinkFinalExn>(
-                        ::std::result::Result::Err(exn),
-                        "encode",
-                    );
-                    ::fbthrift::SerializedStreamElement::DeclaredException(payload)
-                }
+                
             };
             final_result_callback(enc_final_result);
             ::std::result::Result::Ok(())
@@ -7387,13 +7351,7 @@ pub mod interact_with_shared {
                     tracing::info!(?aexn, method="MyInteraction.encode", "Sink Final ApplicationException");
                     ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
                 }
-                ::std::result::Result::Err(exn) => {
-                    let payload = ::fbthrift::help::serialize_stream_item::<P, crate::services::my_interaction::EncodeSinkFinalExn>(
-                        ::std::result::Result::Err(exn),
-                        "encode",
-                    );
-                    ::fbthrift::SerializedStreamElement::DeclaredException(payload)
-                }
+                
             };
             final_result_callback(enc_final_result);
             ::std::result::Result::Ok(())

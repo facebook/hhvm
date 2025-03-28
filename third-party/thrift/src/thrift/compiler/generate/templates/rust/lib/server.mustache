@@ -256,13 +256,13 @@ where
                 tracing::info!(?aexn, method="{{service:name}}.{{function:name}}", "Sink Final ApplicationException");
                 ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
             }
-            ::std::result::Result::Err(exn) => {
+            {{#function:sink_final_response_exceptions?}}::std::result::Result::Err(exn) => {
                 let payload = ::fbthrift::help::serialize_stream_item::<P, {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}SinkFinalExn>(
                     ::std::result::Result::Err(exn),
                     "{{function:name}}",
                 );
                 ::fbthrift::SerializedStreamElement::DeclaredException(payload)
-            }
+            }{{/function:sink_final_response_exceptions?}}
         };
         final_result_callback(enc_final_result);
         ::std::result::Result::Ok(())

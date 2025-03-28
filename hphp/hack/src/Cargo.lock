@@ -813,13 +813,12 @@ dependencies = [
 
 [[package]]
 name = "codespan-reporting"
-version = "0.12.0"
+version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe6d2e5af09e8c8ad56c969f2157a3d4238cebc7c55f0a517728c38f7b200f81"
+checksum = "3538270d33cc669650c4b093848450d380def10c331d38c768e34cac80576e6e"
 dependencies = [
- "serde",
  "termcolor",
- "unicode-width 0.2.0",
+ "unicode-width 0.1.12",
 ]
 
 [[package]]
@@ -1138,24 +1137,23 @@ dependencies = [
 
 [[package]]
 name = "cxx"
-version = "1.0.150"
+version = "1.0.128"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "cc",
- "cxxbridge-cmd",
  "cxxbridge-flags",
  "cxxbridge-macro",
- "foldhash",
  "link-cplusplus",
 ]
 
 [[package]]
 name = "cxx-build"
-version = "1.0.150"
+version = "1.0.128"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "cc",
  "codespan-reporting",
+ "once_cell",
  "proc-macro2",
  "quote",
  "scratch",
@@ -1163,30 +1161,17 @@ dependencies = [
 ]
 
 [[package]]
-name = "cxxbridge-cmd"
-version = "1.0.150"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-dependencies = [
- "clap 4.5.30",
- "codespan-reporting",
- "proc-macro2",
- "quote",
- "syn 2.0.96",
-]
-
-[[package]]
 name = "cxxbridge-flags"
-version = "1.0.150"
+version = "1.0.128"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "cxxbridge-macro"
-version = "1.0.150"
+version = "1.0.128"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "proc-macro2",
  "quote",
- "rustversion",
  "syn 2.0.96",
 ]
 
@@ -1970,12 +1955,6 @@ dependencies = [
  "thiserror 2.0.7",
  "ty",
 ]
-
-[[package]]
-name = "foldhash"
-version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a0d2fde1f7b3d48b8395d5f2de76c18a528bd6a9cdde438df747bfcba3e05d6f"
 
 [[package]]
 name = "fs2"

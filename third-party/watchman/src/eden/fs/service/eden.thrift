@@ -2059,6 +2059,15 @@ struct ListRedirectionsResponse {
   1: list<Redirection> redirections;
 }
 
+struct GetFileContentRequest {
+  1: MountId mount;
+  2: PathString filePath;
+}
+
+struct GetFileContentResponse {
+  1: ScmBlobOrError blob;
+}
+
 service EdenService extends fb303_core.BaseService {
   list<MountInfo> listMounts() throws (1: EdenError ex);
   void mount(1: MountArgument info) throws (1: EdenError ex);
@@ -2925,5 +2934,16 @@ service EdenService extends fb303_core.BaseService {
 
   ListRedirectionsResponse listRedirections(
     1: ListRedirectionsRequest request,
+  ) throws (1: EdenError ex);
+
+  /**
+   * Returns a blobOrError for the given path.
+   * Caller needs to ensure the path goes to a valid file.
+   *
+   * Note that the non-streaming API CANNOT get blobs larger than 2GB,
+   * due to thrift size limits.
+   */
+  GetFileContentResponse getFileContent(
+    1: GetFileContentRequest request,
   ) throws (1: EdenError ex);
 }

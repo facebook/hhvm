@@ -60,7 +60,7 @@ bool isIntrinsicDefault(const Value& value) {
 
 bool isIntrinsicDefault(const Object& obj) {
   Value val;
-  val.objectValue_ref() = obj;
+  val.emplace_object(obj);
   return isIntrinsicDefault(val);
 }
 
@@ -148,7 +148,7 @@ folly::dynamic toDynamic(const Value& value) {
 
 folly::dynamic toDynamic(const Object& obj) {
   Value v;
-  v.objectValue_ref() = obj;
+  v.emplace_object(obj);
   return toDynamic(v);
 }
 

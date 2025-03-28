@@ -39,12 +39,12 @@ type::Type toType(const protocol::Value& value) {
     case Value::Type::binaryValue:
       return type::Type::get<type::binary_t>();
     case Value::Type::listValue: {
-      const auto& c = *value.listValue_ref();
+      const auto& c = value.as_list();
       return type::Type::create<type::list_c>(
           !c.empty() ? toType(c[0]) : type::Type{});
     }
     case Value::Type::mapValue: {
-      const auto& c = *value.mapValue_ref();
+      const auto& c = value.as_map();
       type::Type keyType, valueType;
       if (!c.empty()) {
         keyType = toType(c.begin()->first);
@@ -53,12 +53,12 @@ type::Type toType(const protocol::Value& value) {
       return type::Type::create<type::map_c>(keyType, valueType);
     }
     case Value::Type::setValue: {
-      const auto& c = *value.setValue_ref();
+      const auto& c = value.as_set();
       return type::Type::create<type::set_c>(
           !c.empty() ? toType(*c.begin()) : type::Type{});
     }
     case Value::Type::objectValue: {
-      const std::string& uri = *value.objectValue_ref()->type();
+      const std::string& uri = *value.as_object().type();
       return uri.empty() ? type::Type{}
                          : type::Type::create<type::struct_c>(uri);
     }

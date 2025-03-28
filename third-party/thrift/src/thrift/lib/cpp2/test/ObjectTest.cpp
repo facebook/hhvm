@@ -102,7 +102,7 @@ TEST(ObjectTest, TypeEnforced) {
   // Pointers implicitly converts to bools.
   Value value = asValueStruct<type::bool_t>("");
   ASSERT_EQ(value.getType(), Value::Type::boolValue);
-  EXPECT_TRUE(value.boolValue_ref().value());
+  EXPECT_TRUE(value.as_bool());
 }
 
 TEST(ObjectTest, Empty) {
@@ -116,84 +116,83 @@ TEST(ObjectTest, Empty) {
 TEST(ObjectTest, Bool) {
   Value value = asValueStruct<type::bool_t>(20);
   ASSERT_EQ(value.getType(), Value::Type::boolValue);
-  EXPECT_TRUE(value.boolValue_ref().value());
+  EXPECT_TRUE(value.as_bool());
 
   value = asValueStruct<type::bool_t>(0);
   ASSERT_EQ(value.getType(), Value::Type::boolValue);
-  EXPECT_FALSE(value.boolValue_ref().value());
+  EXPECT_FALSE(value.as_bool());
 }
 
 TEST(ObjectTest, Byte) {
   Value value = asValueStruct<type::byte_t>(7u);
   ASSERT_EQ(value.getType(), Value::Type::byteValue);
-  EXPECT_EQ(value.byteValue_ref().value(), 7);
+  EXPECT_EQ(value.as_byte(), 7);
 }
 
 TEST(ObjectTest, I16) {
   Value value = asValueStruct<type::i16_t>(7u);
   ASSERT_EQ(value.getType(), Value::Type::i16Value);
-  EXPECT_EQ(value.i16Value_ref().value(), 7);
+  EXPECT_EQ(value.as_i16(), 7);
 }
 
 TEST(ObjectTest, I32) {
   Value value = asValueStruct<type::i32_t>(7u);
   ASSERT_EQ(value.getType(), Value::Type::i32Value);
-  EXPECT_EQ(value.i32Value_ref().value(), 7);
+  EXPECT_EQ(value.as_i32(), 7);
 }
 
 TEST(ObjectTest, I64) {
   Value value = asValueStruct<type::i64_t>(7u);
   ASSERT_EQ(value.getType(), Value::Type::i64Value);
-  EXPECT_EQ(value.i64Value_ref().value(), 7);
+  EXPECT_EQ(value.as_i64(), 7);
 }
 
 TEST(ObjectTest, Enum) {
   enum class MyEnum { kValue = 7 };
   Value value = asValueStruct<type::enum_c>(MyEnum::kValue);
   ASSERT_EQ(value.getType(), Value::Type::i32Value);
-  EXPECT_EQ(value.i32Value_ref().value(), 7);
+  EXPECT_EQ(value.as_i32(), 7);
 
   value = asValueStruct<type::enum_c>(static_cast<MyEnum>(2));
   ASSERT_EQ(value.getType(), Value::Type::i32Value);
-  EXPECT_EQ(value.i32Value_ref().value(), 2);
+  EXPECT_EQ(value.as_i32(), 2);
 
   value = asValueStruct<type::enum_c>(21u);
   ASSERT_EQ(value.getType(), Value::Type::i32Value);
-  EXPECT_EQ(value.i32Value_ref().value(), 21);
+  EXPECT_EQ(value.as_i32(), 21);
 }
 
 TEST(ObjectTest, Float) {
   Value value = asValueStruct<type::float_t>(1.5);
   ASSERT_EQ(value.getType(), Value::Type::floatValue);
-  EXPECT_EQ(value.floatValue_ref().value(), 1.5f);
+  EXPECT_EQ(value.as_float(), 1.5f);
 }
 
 TEST(ObjectTest, Double) {
   Value value = asValueStruct<type::double_t>(1.5f);
   ASSERT_EQ(value.getType(), Value::Type::doubleValue);
-  EXPECT_EQ(value.doubleValue_ref().value(), 1.5);
+  EXPECT_EQ(value.as_double(), 1.5);
 }
 
 TEST(ObjectTest, String) {
   Value value = asValueStruct<type::string_t>("hi");
   ASSERT_EQ(value.getType(), Value::Type::stringValue);
-  EXPECT_EQ(value.stringValue_ref().value(), "hi");
+  EXPECT_EQ(value.as_string(), "hi");
 }
 
 TEST(ObjectTest, Binary) {
   Value value = asValueStruct<type::binary_t>("hi");
   ASSERT_EQ(value.getType(), Value::Type::binaryValue);
-  EXPECT_EQ(toString(value.binaryValue_ref().value()), "hi");
+  EXPECT_EQ(toString(value.as_binary()), "hi");
 }
 
 TEST(ObjectTest, List) {
   std::vector<int> data = {1, 4, 2};
   Value value = asValueStruct<type::list<type::i16_t>>(data);
   ASSERT_EQ(value.getType(), Value::Type::listValue);
-  ASSERT_EQ(value.listValue_ref().value().size(), data.size());
+  ASSERT_EQ(value.as_list().size(), data.size());
   for (size_t i = 0; i < data.size(); ++i) {
-    EXPECT_EQ(
-        value.listValue_ref().value()[i], asValueStruct<type::i16_t>(data[i]));
+    EXPECT_EQ(value.as_list()[i], asValueStruct<type::i16_t>(data[i]));
   }
 
   // Works with other containers
@@ -201,10 +200,9 @@ TEST(ObjectTest, List) {
   value = asValueStruct<type::list<type::i16_t>>(s);
   std::sort(data.begin(), data.end());
   ASSERT_EQ(value.getType(), Value::Type::listValue);
-  ASSERT_EQ(value.listValue_ref().value().size(), data.size());
+  ASSERT_EQ(value.as_list().size(), data.size());
   for (size_t i = 0; i < data.size(); ++i) {
-    EXPECT_EQ(
-        value.listValue_ref().value()[i], asValueStruct<type::i16_t>(data[i]));
+    EXPECT_EQ(value.as_list()[i], asValueStruct<type::i16_t>(data[i]));
   }
 
   // Works with cpp_type type tag
@@ -217,8 +215,8 @@ TEST(ObjectTest, Set) {
   std::set<int> data = {1, 4, 2};
   Value value = asValueStruct<type::set<type::i16_t>>(data);
   ASSERT_EQ(value.getType(), Value::Type::setValue);
-  ASSERT_EQ(value.setValue_ref()->size(), data.size());
-  for (const Value& v : value.setValue_ref().value()) {
+  ASSERT_EQ(value.as_set().size(), data.size());
+  for (const Value& v : value.as_set()) {
     ASSERT_TRUE(data.contains(v.as_i16()));
   }
 
@@ -226,8 +224,8 @@ TEST(ObjectTest, Set) {
   value = asValueStruct<type::set<type::i16_t>>(
       std::vector<int>(data.begin(), data.end()));
   ASSERT_EQ(value.getType(), Value::Type::setValue);
-  ASSERT_EQ(value.setValue_ref()->size(), data.size());
-  for (const Value& v : value.setValue_ref().value()) {
+  ASSERT_EQ(value.as_set().size(), data.size());
+  for (const Value& v : value.as_set()) {
     ASSERT_TRUE(data.contains(v.as_i16()));
   }
 }
@@ -236,11 +234,10 @@ TEST(ObjectTest, Map) {
   std::map<std::string, int> data = {{"one", 1}, {"four", 4}, {"two", 2}};
   Value value = asValueStruct<type::map<type::string_t, type::byte_t>>(data);
   ASSERT_EQ(value.getType(), Value::Type::mapValue);
-  ASSERT_EQ(value.mapValue_ref()->size(), data.size());
+  ASSERT_EQ(value.as_map().size(), data.size());
   for (const auto& entry : data) {
-    auto itr =
-        value.mapValue_ref()->find(asValueStruct<type::string_t>(entry.first));
-    ASSERT_NE(itr, value.mapValue_ref()->end());
+    auto itr = value.as_map().find(asValueStruct<type::string_t>(entry.first));
+    ASSERT_NE(itr, value.as_map().end());
     EXPECT_EQ(itr->second, asValueStruct<type::byte_t>(entry.second));
   }
 
@@ -248,11 +245,10 @@ TEST(ObjectTest, Map) {
   std::vector<std::pair<std::string, int>> otherData(data.begin(), data.end());
   value = asValueStruct<type::map<type::string_t, type::byte_t>>(otherData);
   ASSERT_EQ(value.getType(), Value::Type::mapValue);
-  ASSERT_EQ(value.mapValue_ref()->size(), data.size());
+  ASSERT_EQ(value.as_map().size(), data.size());
   for (const auto& entry : data) {
-    auto itr =
-        value.mapValue_ref()->find(asValueStruct<type::string_t>(entry.first));
-    ASSERT_NE(itr, value.mapValue_ref()->end());
+    auto itr = value.as_map().find(asValueStruct<type::string_t>(entry.first));
+    ASSERT_NE(itr, value.as_map().end());
     EXPECT_EQ(itr->second, asValueStruct<type::byte_t>(entry.second));
   }
 }
@@ -262,13 +258,13 @@ TEST(ObjectTest, Struct) {
   auto protocol = ::apache::thrift::conformance::Protocol("hi").asStruct();
   Value value = asValueStruct<type::union_c>(protocol);
   ASSERT_EQ(value.getType(), Value::Type::objectValue);
-  const Object& object = value.objectValue_ref().value();
-  EXPECT_EQ(object.members_ref()->size(), 2);
+  const Object& object = value.as_object();
+  EXPECT_EQ(object.members()->size(), 2);
   EXPECT_EQ(
-      object.members_ref()->at(1),
+      object.members()->at(1),
       asValueStruct<type::enum_c>(
           ::apache::thrift::conformance::StandardProtocol::Custom));
-  EXPECT_EQ(object.members_ref()->at(2), asValueStruct<type::binary_t>("hi"));
+  EXPECT_EQ(object.members()->at(2), asValueStruct<type::binary_t>("hi"));
 }
 
 TEST(ObjectTest, StructWithList) {
@@ -277,10 +273,10 @@ TEST(ObjectTest, StructWithList) {
   s.field_1_ref() = listValues;
   Value value = asValueStruct<type::struct_c>(s);
   ASSERT_EQ(value.getType(), Value::Type::objectValue);
-  const Object& object = value.objectValue_ref().value();
-  EXPECT_EQ(object.members_ref()->size(), 1);
+  const Object& object = value.as_object();
+  EXPECT_EQ(object.members()->size(), 1);
   EXPECT_EQ(
-      object.members_ref()->at(1),
+      object.members()->at(1),
       asValueStruct<type::list<type::i32_t>>(listValues));
 }
 
@@ -290,10 +286,10 @@ TEST(ObjectTest, StructWithMap) {
   s.field_1_ref() = mapValues;
   Value value = asValueStruct<type::struct_c>(s);
   ASSERT_EQ(value.getType(), Value::Type::objectValue);
-  const Object& object = value.objectValue_ref().value();
-  EXPECT_EQ(object.members_ref()->size(), 1);
+  const Object& object = value.as_object();
+  EXPECT_EQ(object.members()->size(), 1);
   auto val = asValueStruct<type::map<type::binary_t, type::i32_t>>(mapValues);
-  EXPECT_EQ(object.members_ref()->at(1), val);
+  EXPECT_EQ(object.members()->at(1), val);
 }
 
 TEST(ObjectTest, StructWithSet) {
@@ -302,10 +298,10 @@ TEST(ObjectTest, StructWithSet) {
   s.field_1_ref() = setValues;
   Value value = asValueStruct<type::struct_c>(s);
   ASSERT_EQ(value.getType(), Value::Type::objectValue);
-  const Object& object = value.objectValue_ref().value();
-  EXPECT_EQ(object.members_ref()->size(), 1);
+  const Object& object = value.as_object();
+  EXPECT_EQ(object.members()->size(), 1);
   EXPECT_EQ(
-      object.members_ref()->at(1),
+      object.members()->at(1),
       asValueStruct<type::set<type::i64_t>>(setValues));
 }
 
@@ -455,10 +451,10 @@ TEST(ObjectTest, DirectlyAdaptedStruct) {
       type::struct_t<
           apache::thrift::test::basic::detail::DirectlyAdaptedStruct>>;
   Value value = asValueStruct<Tag>(s);
-  ASSERT_TRUE(value.objectValue_ref().has_value());
-  const Object& object = *value.objectValue_ref();
-  EXPECT_EQ(object.members_ref()->size(), 1);
-  EXPECT_EQ(object.members_ref()->at(1), asValueStruct<type::i64_t>(42));
+  ASSERT_TRUE(value.is_object());
+  const Object& object = value.as_object();
+  EXPECT_EQ(object.members()->size(), 1);
+  EXPECT_EQ(object.members()->at(1), asValueStruct<type::i64_t>(42));
 
   apache::thrift::test::basic::DirectlyAdaptedStruct s2;
   detail::ProtocolValueToThriftValue<Tag>{}(value, s2);
@@ -473,9 +469,9 @@ TEST(ObjectTest, parseObject) {
   BinarySerializer::serialize(thriftStruct, &iobufQueue);
   auto serialized = iobufQueue.move();
   auto object = parseObject<BinarySerializer::ProtocolReader>(*serialized);
-  EXPECT_EQ(object.members_ref()->size(), 1);
+  EXPECT_EQ(object.members()->size(), 1);
   EXPECT_EQ(
-      object.members_ref()->at(1),
+      object.members()->at(1),
       asValueStruct<type::set<type::i64_t>>(setValues));
 }
 
@@ -489,9 +485,9 @@ TEST(ObjectTest, serializeObject) {
   auto object = parseObject<BinarySerializer::ProtocolReader>(*expected);
   auto actual = serializeObject<BinarySerializer::ProtocolWriter>(object);
   auto objectd = parseObject<BinarySerializer::ProtocolReader>(*actual);
-  EXPECT_EQ(objectd.members_ref()->size(), 1);
+  EXPECT_EQ(objectd.members()->size(), 1);
   EXPECT_EQ(
-      objectd.members_ref()->at(1),
+      objectd.members()->at(1),
       asValueStruct<type::set<type::i64_t>>(setValues));
 }
 
@@ -810,10 +806,8 @@ TEST(Value, Wrapper) {
 #define FBTHRIFT_TEST_THRIFT_VALUE_TYPE(TYPE, VALUE)                   \
   do {                                                                 \
     EXPECT_FALSE(value.is_##TYPE());                                   \
-    EXPECT_FALSE(value.TYPE##Value_ref());                             \
     EXPECT_THROW(value.as_##TYPE(), apache::thrift::bad_field_access); \
     EXPECT_EQ(value.if_##TYPE(), nullptr);                             \
-    EXPECT_FALSE(value.TYPE##Value_ref());                             \
     value.ensure_##TYPE() = VALUE;                                     \
     EXPECT_TRUE(value.is_##TYPE());                                    \
     value.emplace_##TYPE() = VALUE;                                    \
@@ -822,7 +816,6 @@ TEST(Value, Wrapper) {
     EXPECT_TRUE(value.is_##TYPE());                                    \
     EXPECT_EQ(value.as_##TYPE(), VALUE);                               \
     EXPECT_EQ(*value.if_##TYPE(), VALUE);                              \
-    EXPECT_EQ(value.TYPE##Value_ref(), VALUE);                         \
   } while (false)
 
   FBTHRIFT_TEST_THRIFT_VALUE_TYPE(bool, true);
@@ -843,15 +836,12 @@ TEST(Value, Wrapper) {
   // `binary` type requires special code since IOBuf doesn't have operator==
   const auto buf = *folly::IOBuf::copyBuffer("90");
   EXPECT_FALSE(value.is_binary());
-  EXPECT_FALSE(value.binaryValue_ref());
   EXPECT_THROW(value.as_binary(), apache::thrift::bad_field_access);
   EXPECT_EQ(value.if_binary(), nullptr);
-  EXPECT_FALSE(value.binaryValue_ref());
   value.ensure_binary() = buf;
   EXPECT_TRUE(value.is_binary());
   EXPECT_TRUE(folly::IOBufEqualTo{}(value.as_binary(), buf));
   EXPECT_TRUE(folly::IOBufEqualTo{}(*value.if_binary(), buf));
-  EXPECT_TRUE(folly::IOBufEqualTo{}(value.binaryValue_ref().value(), buf));
 }
 
 TEST(Value, IsIntrinsicDefaultTrue) {
@@ -1421,8 +1411,8 @@ void testParseObjectWithTwoMasks() {
     //          2: 2,
     //          4: map{10: {"foo": 1}
     //                 20: {}}}
-    expected[FieldId{1}].objectValue_ref().emplace();
-    expected[FieldId{2}].i32Value_ref() = 2;
+    expected[FieldId{1}].emplace_object();
+    expected[FieldId{2}].emplace_i32(2);
     expected[FieldId{4}] = asValueStruct<
         type::map<type::i16_t, type::map<type::string_t, type::i32_t>>>(
         {{10, {{"foo", 1}}}, {20, {}}});

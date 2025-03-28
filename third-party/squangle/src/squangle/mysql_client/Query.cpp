@@ -7,10 +7,9 @@
  */
 
 #include <boost/algorithm/string.hpp>
-#include <boost/variant.hpp>
-#include <boost/variant/get.hpp>
 #include <folly/String.h>
 #include <algorithm>
+#include <type_traits>
 #include <vector>
 
 #include "squangle/mysql_client/Query.h"
@@ -47,56 +46,55 @@ QueryArgument::QueryArgument(const std::initializer_list<QueryArgument>& list)
 QueryArgument::QueryArgument(std::vector<QueryArgument> arg_list)
     : value_(std::move(arg_list)) {}
 
-QueryArgument::QueryArgument() : value_(std::vector<ArgPair>()) {}
+QueryArgument::QueryArgument() : value_(std::vector<ArgumentPair>()) {}
 
 QueryArgument::QueryArgument(
     folly::StringPiece param1,
     const QueryArgument& param2)
-    : value_(std::vector<ArgPair>()) {
-  getPairs().emplace_back(ArgPair(param1.str(), param2));
+    : value_(std::vector<ArgumentPair>()) {
+  getPairs().emplace_back(param1, param2);
 }
 
 QueryArgument::QueryArgument(Query q) : value_(std::move(q)) {}
 
 bool QueryArgument::isString() const {
-  return value_.type() == typeid(folly::fbstring);
+  return std::holds_alternative<folly::fbstring>(value_);
 }
 
 bool QueryArgument::isQuery() const {
-  return value_.type() == typeid(Query);
+  return std::holds_alternative<Query>(value_);
 }
 
 bool QueryArgument::isPairList() const {
-  return value_.type() == typeid(std::vector<ArgPair>);
+  return std::holds_alternative<std::vector<ArgPair>>(value_);
 }
 
 bool QueryArgument::isBool() const {
-  return value_.type() == typeid(bool);
+  return std::holds_alternative<bool>(value_);
 }
 
 bool QueryArgument::isNull() const {
-  return value_.type() == typeid(std::nullptr_t);
+  return std::holds_alternative<std::monostate>(value_);
 }
 
 bool QueryArgument::isList() const {
-  return value_.type() == typeid(std::vector<QueryArgument>);
+  return std::holds_alternative<std::vector<QueryArgument>>(value_);
 }
 
 bool QueryArgument::isDouble() const {
-  return value_.type() == typeid(double);
+  return std::holds_alternative<double>(value_);
 }
 
 bool QueryArgument::isInt() const {
-  return value_.type() == typeid(int64_t);
+  return std::holds_alternative<int64_t>(value_);
 }
 
 bool QueryArgument::isTwoTuple() const {
-  return value_.type() == typeid(std::tuple<folly::fbstring, folly::fbstring>);
+  return std::holds_alternative<QualifiedColumn>(value_);
 }
 
 bool QueryArgument::isThreeTuple() const {
-  return value_.type() ==
-      typeid(std::tuple<folly::fbstring, folly::fbstring, folly::fbstring>);
+  return std::holds_alternative<AliasedQualifiedColumn>(value_);
 }
 
 QueryArgument&& QueryArgument::operator()(
@@ -114,71 +112,99 @@ QueryArgument&& QueryArgument::operator()(
 }
 
 namespace { // anonymous namespace to prevent class shadowing
-struct FbStringConverter : public boost::static_visitor<folly::fbstring> {
-  folly::fbstring operator()(const double& operand) const {
-    return folly::to<folly::fbstring>(operand);
-  }
-  folly::fbstring operator()(const bool& operand) const {
-    return folly::to<folly::fbstring>(operand);
-  }
-  folly::fbstring operator()(const int64_t& operand) const {
-    return folly::to<folly::fbstring>(operand);
-  }
-  folly::fbstring operator()(const folly::fbstring& operand) const {
-    return folly::to<folly::fbstring>(operand);
-  }
-  template <typename T>
-  folly::fbstring operator()(const T& /*operand*/) const {
-    throw std::invalid_argument(fmt::format(
-        "Only allowed type conversions are Int, Double, Bool and String:"
-        " type found: {}",
-        boost::typeindex::type_id<T>().pretty_name()));
-  }
+
+template <class... Ts>
+struct overloads : Ts... {
+  using Ts::operator()...;
 };
 
 } // namespace
 
 folly::fbstring QueryArgument::asString() const {
-  return boost::apply_visitor(FbStringConverter(), value_);
+  return std::visit(
+      [](auto&& arg) -> folly::fbstring {
+        using T = std::decay_t<decltype(arg)>;
+        if constexpr (
+            std::is_same_v<T, double> || std::is_same_v<T, bool> ||
+            std::is_same_v<T, int64_t> || std::is_same_v<T, folly::fbstring>) {
+          return folly::to<folly::fbstring>(arg);
+        }
+
+        throw std::invalid_argument(fmt::format(
+            "Only allowed type conversions are Int, Double, Bool and String:"
+            " type found: {}",
+            typeid(arg).name()));
+      },
+      value_);
+}
+
+std::string_view QueryArgument::typeName() const {
+  return std::visit(
+      [](auto&& arg) -> std::string_view {
+        using T = std::decay_t<decltype(arg)>;
+        if constexpr (std::is_same_v<T, double>) {
+          return "double";
+        } else if constexpr (std::is_same_v<T, bool>) {
+          return "bool";
+        } else if constexpr (std::is_same_v<T, int64_t>) {
+          return "int64_t";
+        } else if constexpr (std::is_same_v<T, folly::fbstring>) {
+          return "string";
+        } else if constexpr (std::is_same_v<T, std::monostate>) {
+          return "monostate";
+        } else if constexpr (std::is_same_v<T, Query>) {
+          return "Query";
+        } else if constexpr (std::is_same_v<T, std::vector<QueryArgument>>) {
+          return "std::vector<QueryArgument>";
+        } else if constexpr (std::is_same_v<T, std::vector<ArgumentPair>>) {
+          return "std::vector<ArgumentPair>";
+        } else if constexpr (std::is_same_v<T, QualifiedColumn>) {
+          return "QualifiedColumn";
+        } else if constexpr (std::is_same_v<T, AliasedQualifiedColumn>) {
+          return "AliasedQualifiedColumn";
+        } else {
+          // Should be unreachable since we have an entry for each type in the
+          // variant.
+          CHECK(false);
+        }
+      },
+      value_);
 }
 
 double QueryArgument::getDouble() const {
-  return boost::get<double>(value_);
+  return std::get<double>(value_);
 }
 
 int64_t QueryArgument::getInt() const {
-  return boost::get<int64_t>(value_);
+  return std::get<int64_t>(value_);
 }
 
 bool QueryArgument::getBool() const {
-  return boost::get<bool>(value_);
+  return std::get<bool>(value_);
 }
 
 const Query& QueryArgument::getQuery() const {
-  return boost::get<Query>(value_);
+  return std::get<Query>(value_);
 }
 
 const folly::fbstring& QueryArgument::getString() const {
-  return boost::get<folly::fbstring>(value_);
+  return std::get<folly::fbstring>(value_);
 }
 
 const std::vector<QueryArgument>& QueryArgument::getList() const {
-  return boost::get<std::vector<QueryArgument>>(value_);
+  return std::get<std::vector<QueryArgument>>(value_);
 }
 
 const std::vector<ArgPair>& QueryArgument::getPairs() const {
-  return boost::get<std::vector<ArgPair>>(value_);
+  return std::get<std::vector<ArgPair>>(value_);
 }
 
-const std::tuple<folly::fbstring, folly::fbstring>& QueryArgument::getTwoTuple()
-    const {
-  return boost::get<std::tuple<folly::fbstring, folly::fbstring>>(value_);
+const QualifiedColumn& QueryArgument::getTwoTuple() const {
+  return std::get<QualifiedColumn>(value_);
 }
 
-const std::tuple<folly::fbstring, folly::fbstring, folly::fbstring>&
-QueryArgument::getThreeTuple() const {
-  return boost::get<
-      std::tuple<folly::fbstring, folly::fbstring, folly::fbstring>>(value_);
+const AliasedQualifiedColumn& QueryArgument::getThreeTuple() const {
+  return std::get<AliasedQualifiedColumn>(value_);
 }
 
 void QueryArgument::initFromDynamic(const folly::dynamic& param) {
@@ -188,7 +214,7 @@ void QueryArgument::initFromDynamic(const folly::dynamic& param) {
     std::vector<folly::dynamic> keys(param.keys().begin(), param.keys().end());
     std::sort(keys.begin(), keys.end());
     value_ = std::vector<ArgPair>();
-    auto& vec = boost::get<std::vector<ArgPair>>(value_);
+    auto& vec = std::get<std::vector<ArgPair>>(value_);
     vec.reserve(keys.size());
 
     for (const auto& key : keys) {
@@ -197,11 +223,11 @@ void QueryArgument::initFromDynamic(const folly::dynamic& param) {
       vec.emplace_back(ArgPair(key.asString(), q2));
     }
   } else if (param.isNull()) {
-    value_ = nullptr;
+    value_ = {};
   } else if (param.isArray()) {
     value_ = std::vector<QueryArgument>();
-    boost::get<std::vector<QueryArgument>>(value_).reserve(param.size());
-    auto& v = boost::get<std::vector<QueryArgument>>(value_);
+    std::get<std::vector<QueryArgument>>(value_).reserve(param.size());
+    auto& v = std::get<std::vector<QueryArgument>>(value_);
     for (const auto& val : param) {
       v.emplace_back(fromDynamic(val));
     }
@@ -219,7 +245,7 @@ void QueryArgument::initFromDynamic(const folly::dynamic& param) {
 }
 
 std::vector<ArgPair>& QueryArgument::getPairs() {
-  return boost::get<std::vector<ArgPair>>(value_);
+  return std::get<std::vector<ArgPair>>(value_);
 }
 
 // Query can be constructed with or without params.

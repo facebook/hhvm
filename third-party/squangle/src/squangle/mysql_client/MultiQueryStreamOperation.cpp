@@ -33,7 +33,7 @@ void MultiQueryStreamOperation::invokeCallback(StreamState reason) {
   // call the appropriate overaload of 'operator()' depending on the type
   // of callback stored in stream_callback_ i.e. either MultiQueryStreamHandler
   // or MultiQueryStreamOperation::Callback.
-  boost::apply_visitor(CallbackVisitor(*this, reason), stream_callback_);
+  std::visit(CallbackVisitor(*this, reason), stream_callback_);
 }
 
 void MultiQueryStreamOperation::notifyInitQuery() {

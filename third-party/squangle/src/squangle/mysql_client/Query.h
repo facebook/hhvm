@@ -78,7 +78,6 @@
 #include <folly/String.h>
 #include <folly/json/dynamic.h>
 
-#include <boost/variant.hpp>
 #include <glog/logging.h>
 
 #include <mysql.h>
@@ -92,13 +91,14 @@
 
 namespace facebook::common::mysql_client {
 
+class QueryArgument;
+class InternalConnection;
+
+using ArgumentPair = std::pair<folly::fbstring, QueryArgument>;
 using QualifiedColumn = std::tuple<folly::fbstring, folly::fbstring>;
 using AliasedQualifiedColumn =
     std::tuple<folly::fbstring, folly::fbstring, folly::fbstring>;
 using QueryAttributes = AttributeMap;
-
-class QueryArgument;
-class InternalConnection;
 
 /*
  * This class will be responsible of passing various per query options.
@@ -418,17 +418,18 @@ class MultiQuery {
 
 class QueryArgument {
  private:
-  boost::variant<
+  std::variant<
+      // monostate (implying NULL) needs to be the first entry
+      std::monostate,
       int64_t,
       double,
       bool,
       folly::fbstring,
-      std::nullptr_t,
       Query,
       std::vector<QueryArgument>,
-      std::vector<std::pair<folly::fbstring, QueryArgument>>,
-      std::tuple<folly::fbstring, folly::fbstring>,
-      std::tuple<folly::fbstring, folly::fbstring, folly::fbstring>>
+      std::vector<ArgumentPair>,
+      QualifiedColumn,
+      AliasedQualifiedColumn>
       value_;
 
  public:
@@ -455,18 +456,14 @@ class QueryArgument {
   /* implicit */ QueryArgument(
       const std::initializer_list<QueryArgument>& list);
   /* implicit */ QueryArgument(std::vector<QueryArgument> arg_list);
-  /* implicit */ QueryArgument(std::tuple<folly::fbstring, folly::fbstring> tup)
+  /* implicit */ QueryArgument(QualifiedColumn tup) : value_(std::move(tup)) {}
+  /* implicit */ QueryArgument(AliasedQualifiedColumn tup)
       : value_(std::move(tup)) {}
-  /* implicit */ QueryArgument(
-      std::tuple<folly::fbstring, folly::fbstring, folly::fbstring> tup)
-      : value_(std::move(tup)) {}
-  /* implicit */ QueryArgument(std::nullptr_t n) : value_(n) {}
+  /* implicit */ QueryArgument(std::nullptr_t /*n*/) : value_() {}
 
   /* implicit */ QueryArgument(const std::optional<bool>& opt) {
     if (opt) {
       value_ = static_cast<int64_t>(opt.value());
-    } else {
-      value_ = nullptr;
     }
   }
 
@@ -478,22 +475,16 @@ class QueryArgument {
       } else {
         value_ = opt.value();
       }
-    } else {
-      value_ = nullptr;
     }
   }
 
   // Special handling for nullopt optionals to enable
   // callers to directly pass them in as a query argument
-  /* implicit */ QueryArgument(std::nullopt_t /*opt*/) {
-    value_ = nullptr;
-  }
+  /* implicit */ QueryArgument(std::nullopt_t /*opt*/) {}
 
   /* implicit */ QueryArgument(const folly::Optional<bool>& opt) {
     if (opt) {
       value_ = static_cast<int64_t>(opt.value());
-    } else {
-      value_ = nullptr;
     }
   }
 
@@ -505,16 +496,12 @@ class QueryArgument {
       } else {
         value_ = opt.value();
       }
-    } else {
-      value_ = nullptr;
     }
   }
 
   // Special handling for folly::none Optional values to enable
   // callers to directly pass them in as a query argument
-  /* implicit */ QueryArgument(const folly::None& /*opt*/) {
-    value_ = nullptr;
-  }
+  /* implicit */ QueryArgument(const folly::None& /*opt*/) {}
 
   // Pair constructors
   QueryArgument();
@@ -545,9 +532,8 @@ class QueryArgument {
   const std::vector<std::pair<folly::fbstring, QueryArgument>>& getPairs()
       const;
   const std::vector<QueryArgument>& getList() const;
-  const std::tuple<folly::fbstring, folly::fbstring>& getTwoTuple() const;
-  const std::tuple<folly::fbstring, folly::fbstring, folly::fbstring>&
-  getThreeTuple() const;
+  const QualifiedColumn& getTwoTuple() const;
+  const AliasedQualifiedColumn& getThreeTuple() const;
 
   bool isString() const;
   bool isQuery() const;
@@ -560,9 +546,7 @@ class QueryArgument {
   bool isTwoTuple() const;
   bool isThreeTuple() const;
 
-  std::string typeName() const {
-    return value_.type().name();
-  }
+  std::string_view typeName() const;
 
  private:
   void initFromDynamic(const folly::dynamic& dyn);

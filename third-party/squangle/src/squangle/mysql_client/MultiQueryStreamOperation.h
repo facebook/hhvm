@@ -24,7 +24,7 @@ class MultiQueryStreamOperation : public FetchOperation {
   ~MultiQueryStreamOperation() override = default;
 
   using Callback = std::function<void(FetchOperation&, StreamState)>;
-  using StreamCallback = boost::variant<MultiQueryStreamHandler*, Callback>;
+  using StreamCallback = std::variant<MultiQueryStreamHandler*, Callback>;
 
   void notifyInitQuery() override;
   void notifyRowsReady() override;
@@ -68,7 +68,7 @@ class MultiQueryStreamOperation : public FetchOperation {
 
   // Vistor to invoke the right callback depending on the type stored
   // in the variant 'stream_callback_'
-  struct CallbackVisitor : public boost::static_visitor<> {
+  struct CallbackVisitor {
     CallbackVisitor(MultiQueryStreamOperation& op, StreamState state)
         : op_(op), state_(state) {}
 

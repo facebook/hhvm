@@ -63,8 +63,7 @@ RocketServerConnection::RocketServerConnection(
     MemoryTracker& ingressMemoryTracker,
     MemoryTracker& egressMemoryTracker,
     StreamMetricCallback& streamMetricCallback,
-    const Config& cfg,
-    std::optional<PayloadSerializer>&& payloadSerializer)
+    const Config& cfg)
     : evb_(*socket->getEventBase()),
       socket_(std::move(socket)),
       rawSocket_(
@@ -87,8 +86,7 @@ RocketServerConnection::RocketServerConnection(
       egressMemoryTracker_(egressMemoryTracker),
       streamMetricCallback_(streamMetricCallback),
       enableObservers_(THRIFT_FLAG(enable_rocket_connection_observers)),
-      observerContainer_(this),
-      payloadSerializer_(std::move(payloadSerializer)) {
+      observerContainer_(this) {
   CHECK(socket_);
   CHECK(frameHandler_);
 

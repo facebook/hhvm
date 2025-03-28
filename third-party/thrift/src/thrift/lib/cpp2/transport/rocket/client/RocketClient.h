@@ -81,8 +81,7 @@ class RocketClient : public virtual folly::DelayedDestruction,
       folly::AsyncTransport::UniquePtr socket,
       std::unique_ptr<SetupFrame> setupFrame,
       int32_t keepAliveTimeoutMs = 0,
-      std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr = nullptr,
-      std::optional<PayloadSerializer>&& payloadSerializer = std::nullopt);
+      std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr = nullptr);
 
   using WriteSuccessCallback = RequestContext::WriteSuccessCallback;
   class RequestResponseCallback : public WriteSuccessCallback {
@@ -450,8 +449,7 @@ class RocketClient : public virtual folly::DelayedDestruction,
       folly::AsyncTransport::UniquePtr socket,
       std::unique_ptr<SetupFrame> setupFrame,
       int32_t keepAliveTimeoutMs = 0,
-      std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr = nullptr,
-      std::optional<PayloadSerializer>&& payloadSerializer = std::nullopt);
+      std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr = nullptr);
 
   bool encodeMetadataUsingBinary() const { return encodeMetadataUsingBinary_; }
 
@@ -624,15 +622,16 @@ class RocketClient : public virtual folly::DelayedDestruction,
   };
 
   PayloadSerializer::Ptr getPayloadSerializer() {
-    if (payloadSerializer_) {
-      return payloadSerializer_->getNonOwningPtr();
+    if (payloadSerializerHolder_) {
+      return payloadSerializerHolder_->get();
     }
 
     return PayloadSerializer::getInstance();
   }
 
  protected:
-  std::optional<PayloadSerializer> payloadSerializer_;
+  std::optional<PayloadSerializer::PayloadSerializerHolder>
+      payloadSerializerHolder_;
 };
 
 } // namespace rocket

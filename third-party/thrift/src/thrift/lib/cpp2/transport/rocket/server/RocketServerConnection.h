@@ -94,8 +94,7 @@ class RocketServerConnection final
       MemoryTracker& ingressMemoryTracker,
       MemoryTracker& egressMemoryTracker,
       StreamMetricCallback& streamMetricCallback,
-      const Config& cfg = {},
-      std::optional<PayloadSerializer>&& payloadSerializer = std::nullopt);
+      const Config& cfg = {});
 
   void send(
       std::unique_ptr<folly::IOBuf> data,
@@ -651,15 +650,16 @@ class RocketServerConnection final
 
  public:
   PayloadSerializer::Ptr getPayloadSerializer() {
-    if (payloadSerializer_) {
-      return payloadSerializer_->getNonOwningPtr();
+    if (payloadSerializerHolder_) {
+      return payloadSerializerHolder_->get();
     }
 
     return PayloadSerializer::getInstance();
   }
 
  private:
-  std::optional<PayloadSerializer> payloadSerializer_;
+  std::optional<PayloadSerializer::PayloadSerializerHolder>
+      payloadSerializerHolder_;
 };
 
 } // namespace rocket

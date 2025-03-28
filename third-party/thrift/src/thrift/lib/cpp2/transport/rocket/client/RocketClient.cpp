@@ -90,8 +90,7 @@ RocketClient::RocketClient(
     folly::AsyncTransport::UniquePtr socket,
     std::unique_ptr<SetupFrame> setupFrame,
     int32_t keepAliveTimeoutMs,
-    std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr,
-    std::optional<PayloadSerializer>&& payloadSerializer)
+    std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr)
     : evb_(&evb),
       writeLoopCallback_(*this),
       socket_(std::move(socket)),
@@ -100,8 +99,7 @@ RocketClient::RocketClient(
       closeLoopCallback_(*this),
       eventBaseDestructionCallback_(*this),
       setupFrame_(std::move(setupFrame)),
-      encodeMetadataUsingBinary_(setupFrame_->encodeMetadataUsingBinary()),
-      payloadSerializer_(std::move(payloadSerializer)) {
+      encodeMetadataUsingBinary_(setupFrame_->encodeMetadataUsingBinary()) {
   DCHECK(socket_ != nullptr);
   socket_->setReadCB(&parser_);
   if (auto socket_2 = dynamic_cast<folly::AsyncSocket*>(socket_.get())) {
@@ -139,15 +137,13 @@ RocketClient::Ptr RocketClient::create(
     folly::AsyncTransport::UniquePtr socket,
     std::unique_ptr<SetupFrame> setupFrame,
     int32_t keepAliveTimeoutMs,
-    std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr,
-    std::optional<PayloadSerializer>&& payloadSerializer) {
+    std::shared_ptr<rocket::ParserAllocatorType> allocatorPtr) {
   return Ptr(new RocketClient(
       evb,
       std::move(socket),
       std::move(setupFrame),
       keepAliveTimeoutMs,
-      std::move(allocatorPtr),
-      std::move(payloadSerializer)));
+      std::move(allocatorPtr)));
 }
 
 void RocketClient::handleFrame(std::unique_ptr<folly::IOBuf> frame) {

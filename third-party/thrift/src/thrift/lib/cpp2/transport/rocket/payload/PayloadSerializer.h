@@ -35,9 +35,6 @@ namespace apache::thrift::rocket {
  * different strategy.
  */
 class PayloadSerializer : public folly::hazptr_obj_base<PayloadSerializer> {
- private:
-  struct PayloadSerializerHolder;
-
  public:
   class Ptr {
    public:
@@ -77,16 +74,6 @@ class PayloadSerializer : public folly::hazptr_obj_base<PayloadSerializer> {
     friend class PayloadSerializer;
   };
 
- private:
-  std::variant<
-      DefaultPayloadSerializerStrategy,
-      LegacyPayloadSerializerStrategy,
-      ChecksumPayloadSerializerStrategy<DefaultPayloadSerializerStrategy>,
-      ChecksumPayloadSerializerStrategy<LegacyPayloadSerializerStrategy>,
-      CustomCompressionPayloadSerializerStrategy<
-          DefaultPayloadSerializerStrategy>>
-      strategy_;
-
   struct PayloadSerializerHolder {
     PayloadSerializerHolder() {}
     ~PayloadSerializerHolder();
@@ -109,6 +96,16 @@ class PayloadSerializer : public folly::hazptr_obj_base<PayloadSerializer> {
     alignas(folly::hardware_destructive_interference_size)
         std::atomic<PayloadSerializer*> serializer_{nullptr};
   };
+
+ private:
+  std::variant<
+      DefaultPayloadSerializerStrategy,
+      LegacyPayloadSerializerStrategy,
+      ChecksumPayloadSerializerStrategy<DefaultPayloadSerializerStrategy>,
+      ChecksumPayloadSerializerStrategy<LegacyPayloadSerializerStrategy>,
+      CustomCompressionPayloadSerializerStrategy<
+          DefaultPayloadSerializerStrategy>>
+      strategy_;
 
  public:
   template <

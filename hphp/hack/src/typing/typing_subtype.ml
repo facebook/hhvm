@@ -4227,7 +4227,7 @@ end = struct
           simplify
             ~subtype_env
             ~this_ty:None
-            ~lhs:{ sub_supportdyn; ty_sub = ty }
+            ~lhs:{ sub_supportdyn = None; ty_sub = ty }
             ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
             env
         | (_, Tclass ((_, class_id), _exact, tyargs)) ->
@@ -4948,9 +4948,9 @@ end = struct
               || String.equal name SN.Classes.cTypename) ->
       simplify
         ~subtype_env
-        ~this_ty
-        ~lhs:{ sub_supportdyn; ty_sub }
-        ~rhs:{ super_like; super_supportdyn; ty_super }
+        ~this_ty:None
+        ~lhs:{ sub_supportdyn = None; ty_sub }
+        ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
         env
     | (_, (r_super, Tnewtype (name_super, lty_supers, _bound_super))) -> begin
       match deref ty_sub with
@@ -5507,9 +5507,9 @@ end = struct
     | ((_r_sub, Tclass_ptr ty_sub), (_r_super, Tclass_ptr ty_super)) ->
       simplify
         ~subtype_env
-        ~this_ty
-        ~lhs:{ sub_supportdyn; ty_sub }
-        ~rhs:{ super_like; super_supportdyn; ty_super }
+        ~this_ty:None
+        ~lhs:{ sub_supportdyn = None; ty_sub }
+        ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
         env
     | ( ( _,
           ( Tany _ | Tunion _ | Toption _ | Tintersection _ | Tgeneric _

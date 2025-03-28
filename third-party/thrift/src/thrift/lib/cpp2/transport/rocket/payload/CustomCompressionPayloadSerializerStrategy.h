@@ -129,6 +129,31 @@ class CustomCompressionPayloadSerializerStrategy final
     return delegate_.unpackBinary(output, cursor);
   }
 
+  FOLLY_ERASE
+  std::unique_ptr<folly::IOBuf> compressBuffer(
+      std::unique_ptr<folly::IOBuf>&& buffer,
+      CompressionAlgorithm compressionAlgorithm) {
+    if (compressionAlgorithm != CompressionAlgorithm::CUSTOM) {
+      return delegate_.compressBuffer(std::move(buffer), compressionAlgorithm);
+    }
+
+    // todo: implement custom compression logic here
+    return std::move(buffer);
+  }
+
+  FOLLY_ERASE
+  std::unique_ptr<folly::IOBuf> uncompressBuffer(
+      std::unique_ptr<folly::IOBuf>&& buffer,
+      CompressionAlgorithm compressionAlgorithm) {
+    if (compressionAlgorithm != CompressionAlgorithm::CUSTOM) {
+      return delegate_.uncompressBuffer(
+          std::move(buffer), compressionAlgorithm);
+    }
+
+    // todo: implement custom compression logic here
+    return std::move(buffer);
+  }
+
  private:
   DelegateStrategy delegate_;
 };

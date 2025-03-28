@@ -107,10 +107,19 @@ std::unique_ptr<folly::IOBuf> makeEnvelope(
 } // namespace
 
 SerializedRequest SerializedCompressedRequest::uncompress() && {
-  return compression_ == CompressionAlgorithm::NONE
-      ? SerializedRequest(std::move(buffer_))
-      : SerializedRequest(rocket::CompressionManager().uncompressBuffer(
+  if (compression_ == CompressionAlgorithm::NONE) {
+    return SerializedRequest(std::move(buffer_));
+  }
+
+  if (!payloadSerializer_) {
+    return SerializedRequest(
+        rocket::PayloadSerializer::getInstance()->uncompressBuffer(
             std::move(buffer_), compression_));
+  }
+
+  return SerializedRequest(
+      (*payloadSerializer_)
+          ->uncompressBuffer(std::move(buffer_), compression_));
 }
 
 SerializedCompressedRequest SerializedCompressedRequest::clone() const {

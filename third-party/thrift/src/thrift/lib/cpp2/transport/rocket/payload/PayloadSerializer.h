@@ -293,6 +293,23 @@ class PayloadSerializer : public folly::hazptr_obj_base<PayloadSerializer> {
       return delegate(strategy);
     }
   }
+
+ public:
+  std::unique_ptr<folly::IOBuf> compressBuffer(
+      std::unique_ptr<folly::IOBuf>&& buffer,
+      CompressionAlgorithm compressionAlgorithm) {
+    return visit([&](auto& strategy) {
+      return strategy.compressBuffer(std::move(buffer), compressionAlgorithm);
+    });
+  }
+
+  std::unique_ptr<folly::IOBuf> uncompressBuffer(
+      std::unique_ptr<folly::IOBuf>&& buffer,
+      CompressionAlgorithm compressionAlgorithm) {
+    return visit([&](auto& strategy) {
+      return strategy.uncompressBuffer(std::move(buffer), compressionAlgorithm);
+    });
+  }
 };
 
 } // namespace apache::thrift::rocket

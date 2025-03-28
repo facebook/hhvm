@@ -41,7 +41,6 @@
 #include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
 #include <thrift/lib/cpp2/transport/rocket/PayloadUtils.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
-#include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/ErrorCode.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/server/InteractionOverload.h>
@@ -525,7 +524,7 @@ void ThriftRocketServerHandler::handleRequestCommon(
   if (metadata.crc32c_ref()) {
     try {
       if (auto compression = metadata.compression_ref()) {
-        data = CompressionManager().uncompressBuffer(
+        data = connection.getPayloadSerializer()->uncompressBuffer(
             std::move(data), *compression);
       }
     } catch (...) {
@@ -704,7 +703,8 @@ void ThriftRocketServerHandler::handleRequestCommon(
       std::move(data),
       crc32Opt ? CompressionAlgorithm::NONE
                : compressionOpt.value_or(CompressionAlgorithm::NONE),
-      checksumAlgorithm);
+      checksumAlgorithm,
+      connection.getPayloadSerializer());
 
   const auto protocolId = request->getProtoId();
   Cpp2Worker::dispatchRequest(

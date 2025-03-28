@@ -20,6 +20,7 @@
 
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
+#include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift {
@@ -36,10 +37,13 @@ class SerializedCompressedRequest {
   explicit SerializedCompressedRequest(
       std::unique_ptr<folly::IOBuf> buffer,
       CompressionAlgorithm compression = CompressionAlgorithm::NONE,
-      ChecksumAlgorithm checksum = ChecksumAlgorithm::NONE)
+      ChecksumAlgorithm checksum = ChecksumAlgorithm::NONE,
+      std::optional<rocket::PayloadSerializer::Ptr> payloadSerializer =
+          std::nullopt)
       : buffer_(std::move(buffer)),
         compression_(compression),
-        checksum_(checksum) {}
+        checksum_(checksum),
+        payloadSerializer_(std::move(payloadSerializer)) {}
 
   explicit SerializedCompressedRequest(SerializedRequest&& request)
       : buffer_(std::move(request.buffer)),
@@ -59,6 +63,7 @@ class SerializedCompressedRequest {
   std::unique_ptr<folly::IOBuf> buffer_;
   CompressionAlgorithm compression_;
   ChecksumAlgorithm checksum_;
+  std::optional<rocket::PayloadSerializer::Ptr> payloadSerializer_;
 };
 
 struct LegacySerializedRequest {

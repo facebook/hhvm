@@ -50,8 +50,8 @@ class DefaultPayloadSerializerStrategy final
         // CustomCompressionPayloadSerializerStrategy
         if (compressionAlgorithm != CompressionAlgorithm::NONE &&
             compressionAlgorithm != CompressionAlgorithm::CUSTOM) {
-          t.payload = CompressionManager().uncompressBuffer(
-              std::move(t.payload), compressionAlgorithm);
+          t.payload =
+              uncompressBuffer(std::move(t.payload), compressionAlgorithm);
         }
       }
       return t;
@@ -125,6 +125,20 @@ class DefaultPayloadSerializerStrategy final
         std::forward<PayloadType>(payload).fds,
         encodeMetadataUsingBinary,
         transport);
+  }
+
+  std::unique_ptr<folly::IOBuf> compressBuffer(
+      std::unique_ptr<folly::IOBuf>&& buffer,
+      CompressionAlgorithm compressionAlgorithm) {
+    return CompressionManager().compressBuffer(
+        std::move(buffer), compressionAlgorithm);
+  }
+
+  std::unique_ptr<folly::IOBuf> uncompressBuffer(
+      std::unique_ptr<folly::IOBuf>&& buffer,
+      CompressionAlgorithm compressionAlgorithm) {
+    return CompressionManager().uncompressBuffer(
+        std::move(buffer), compressionAlgorithm);
   }
 
  private:

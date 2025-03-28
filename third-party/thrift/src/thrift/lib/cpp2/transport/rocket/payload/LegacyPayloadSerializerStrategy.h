@@ -93,6 +93,20 @@ class LegacyPayloadSerializerStrategy final
         encodeMetadataUsingBinary,
         transport);
   }
+
+  std::unique_ptr<folly::IOBuf> compressBuffer(
+      std::unique_ptr<folly::IOBuf>&& buffer,
+      CompressionAlgorithm compressionAlgorithm) {
+    return CompressionManager().compressBuffer(
+        std::move(buffer), compressionAlgorithm);
+  }
+
+  std::unique_ptr<folly::IOBuf> uncompressBuffer(
+      std::unique_ptr<folly::IOBuf>&& buffer,
+      CompressionAlgorithm compressionAlgorithm) {
+    return CompressionManager().uncompressBuffer(
+        std::move(buffer), compressionAlgorithm);
+  }
 };
 
 } // namespace apache::thrift::rocket

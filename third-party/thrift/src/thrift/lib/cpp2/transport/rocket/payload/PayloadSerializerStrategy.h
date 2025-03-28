@@ -99,6 +99,18 @@ class PayloadSerializerStrategy {
     return child_.unpackBinary(output, cursor);
   }
 
+  FOLLY_ALWAYS_INLINE std::unique_ptr<folly::IOBuf> compressBuffer(
+      std::unique_ptr<folly::IOBuf>&& buffer,
+      CompressionAlgorithm compressionAlgorithm) {
+    return child_.compressBuffer(std::move(buffer), compressionAlgorithm);
+  }
+
+  FOLLY_ALWAYS_INLINE std::unique_ptr<folly::IOBuf> uncompressBuffer(
+      std::unique_ptr<folly::IOBuf>&& buffer,
+      CompressionAlgorithm compressionAlgorithm) {
+    return child_.uncompressBuffer(std::move(buffer), compressionAlgorithm);
+  }
+
   virtual ~PayloadSerializerStrategy() = default;
 
  protected:

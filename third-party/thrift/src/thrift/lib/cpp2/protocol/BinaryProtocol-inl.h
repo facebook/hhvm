@@ -114,7 +114,7 @@ inline uint32_t BinaryProtocolWriter::writeSetEnd() {
 }
 
 inline uint32_t BinaryProtocolWriter::writeBool(bool value) {
-  out_.write(detail::validate_bool(value));
+  out_.write(apache::thrift::detail::validate_bool(value));
   return sizeof(value);
 }
 
@@ -580,7 +580,7 @@ inline void BinaryProtocolReader::readBinary(folly::IOBuf& str) {
 template <typename StrType>
 inline void BinaryProtocolReader::readStringBody(StrType& str, int32_t size) {
   checkStringSize(size);
-  detail::readStringBody(str, in_, size);
+  apache::thrift::detail::readStringBody(str, in_, size);
 }
 
 inline bool BinaryProtocolReader::advanceToNextField(

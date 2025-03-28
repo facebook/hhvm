@@ -244,7 +244,7 @@ inline uint32_t CompactProtocolWriter::writeSetEnd() {
 inline uint32_t CompactProtocolWriter::writeBool(bool value) {
   uint32_t wsize = 0;
 
-  value = detail::validate_bool(value);
+  value = apache::thrift::detail::validate_bool(value);
   if (booleanField_.name != nullptr) {
     // we haven't written the field header yet
     wsize += writeFieldBeginInternal(
@@ -737,7 +737,7 @@ inline void CompactProtocolReader::readStringSize(int32_t& size) {
 template <typename StrType>
 inline void CompactProtocolReader::readStringBody(StrType& str, int32_t size) {
   assert(size >= 0); // Checked in readStringSize
-  detail::readStringBody(str, in_, size);
+  apache::thrift::detail::readStringBody(str, in_, size);
 }
 
 template <typename StrType>

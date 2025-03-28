@@ -105,4 +105,45 @@ TEST(PayloadSerializerTest, TestMakeCustomCompression) {
   testPackAndUnpackWithCompactProtocol(ps);
 }
 
+TEST(PayloadSerializerTest, TestCompressionAndUncompression) {
+  std::vector<std::unique_ptr<PayloadSerializer>> payloadSerializers;
+  payloadSerializers.emplace_back(
+      std::make_unique<PayloadSerializer>(DefaultPayloadSerializerStrategy()));
+  payloadSerializers.emplace_back(
+      std::make_unique<PayloadSerializer>(LegacyPayloadSerializerStrategy()));
+  payloadSerializers.emplace_back(std::make_unique<PayloadSerializer>(
+      ChecksumPayloadSerializerStrategy<DefaultPayloadSerializerStrategy>()));
+  payloadSerializers.emplace_back(std::make_unique<PayloadSerializer>(
+      ChecksumPayloadSerializerStrategy<LegacyPayloadSerializerStrategy>()));
+  payloadSerializers.emplace_back(std::make_unique<PayloadSerializer>(
+      CustomCompressionPayloadSerializerStrategy<
+          DefaultPayloadSerializerStrategy>()));
+
+  std::vector<CompressionAlgorithm> compressionAlgorithms = {
+      CompressionAlgorithm::NONE,
+      CompressionAlgorithm::ZSTD,
+      CompressionAlgorithm::ZLIB,
+      CompressionAlgorithm::LZ4,
+      CompressionAlgorithm::CUSTOM,
+  };
+
+  std::string const expected = "hello world";
+
+  for (auto& ps : payloadSerializers) {
+    for (const auto& compressionAlgorithm : compressionAlgorithms) {
+      auto compressedBuf = ps->compressBuffer(
+          folly::IOBuf::fromString(expected), compressionAlgorithm);
+      // TODO: test for 'custom' will be strenghtened in subsequent diffs
+      if (compressionAlgorithm != CompressionAlgorithm::NONE &&
+          compressionAlgorithm != CompressionAlgorithm::CUSTOM) {
+        EXPECT_NE(compressedBuf->toString(), expected);
+      }
+
+      const auto actual =
+          ps->uncompressBuffer(std::move(compressedBuf), compressionAlgorithm);
+      EXPECT_EQ(actual->toString(), expected);
+    }
+  }
+}
+
 } // namespace apache::thrift::rocket

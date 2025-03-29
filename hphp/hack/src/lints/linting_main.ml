@@ -33,7 +33,6 @@ let typed_linters tcopt =
           Some (M.handler ~as_lint:true))
   in
   [
-    Linter_switch_check.handler;
     Linter_missing_override_attribute.handler;
     Linter_redundant_generics.handler;
     Linter_class_overrides_trait.handler;

@@ -23,11 +23,9 @@
 #include <folly/Conv.h>
 #include <folly/Range.h>
 #include <folly/Traits.h>
-#include <folly/dynamic.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
-#include <folly/json.h>
 #include <thrift/lib/cpp/protocol/TBase64Utils.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 

@@ -120,11 +120,7 @@ public:
   static void SetThreadIOStatus(const char* name, const char* addr,
                                 int64_t usWallTime = -1);
   static Array GetThreadIOStatuses();
-  static void StartNetworkProfile();
-  static Array EndNetworkProfile();
-
-  static bool s_profile_network;
-
+  
 public:
   ServerStats();
   ~ServerStats();

@@ -88,7 +88,6 @@ ServerStats::KeyMap ServerStats::CompileKeys(
 
 Mutex ServerStats::s_lock;
 std::vector<ServerStats*> ServerStats::s_loggers;
-bool ServerStats::s_profile_network = false;
 THREAD_LOCAL_NO_CHECK(ServerStats, ServerStats::s_logger);
 
 void ServerStats::LogPage(const std::string& url, int code) {
@@ -527,43 +526,11 @@ std::string ServerStats::ReportStatus(Writer::Format format) {
   return out.str();
 }
 
-void ServerStats::StartNetworkProfile() {
-  s_profile_network = true;
-
-  // It is necessary to clear leftovers, as EndNetworkProfile() can race with
-  // threads writing their status.
-  Lock lock(s_lock, false);
-  for (unsigned int i = 0; i < s_loggers.size(); i++) {
-    auto ss = s_loggers[i];
-    Lock loggerLock(ss->m_lock, false);
-    ss->m_ioProfiles.clear();
-  }
-}
 
 const StaticString
   s_ct("ct"),
   s_wt("wt");
 
-Array ServerStats::EndNetworkProfile() {
-  s_profile_network = false;
-  Lock lock(s_lock, false);
-
-  Array ret = Array::CreateDict();
-  for (unsigned int i = 0; i < s_loggers.size(); i++) {
-    auto ss = s_loggers[i];
-    Lock loggerLock(ss->m_lock, false);
-
-    IOStatusMap& status = ss->m_ioProfiles;
-    for (auto const& iter : status) {
-      ret.set(String(iter.first),
-              make_dict_array(
-                s_ct, iter.second.count,
-                s_wt, iter.second.wall_time));
-    }
-    status.clear();
-  }
-  return ret;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -697,7 +664,7 @@ void ServerStats::setThreadIOStatus(const char* name, const char* addr,
   if (!starting || usWallTime >= 0) {
     m_threadStatus.m_ioInProcess = false;
 
-    if (Cfg::Stats::NetworkIO || s_profile_network) {
+    if (Cfg::Stats::NetworkIO) {
       int64_t wt = usWallTime;
       if (wt < 0) {
         timespec now;
@@ -718,25 +685,6 @@ void ServerStats::setThreadIOStatus(const char* name, const char* addr,
         io.wall_time += wt;
       }
 
-      if (s_profile_network) {
-        const char* key0 = "main()";
-        const char* key1 = m_threadStatus.m_url;
-        std::string key2 = m_threadStatus.m_url; key2 += "==>"; key2 += ioName;
-        const char* key3 = ioName;
-        std::string key4 = ioName;
-        if (*ioAddr) {
-          key4 += "==>"; key4 += ioAddr;
-        }
-
-        Lock lock(m_lock, false);
-        { IOStatus& io = m_ioProfiles[key0]; ++io.count; io.wall_time += wt;}
-        { IOStatus& io = m_ioProfiles[key1]; ++io.count; io.wall_time += wt;}
-        { IOStatus& io = m_ioProfiles[key2]; ++io.count; io.wall_time += wt;}
-        { IOStatus& io = m_ioProfiles[key3]; ++io.count; io.wall_time += wt;}
-        if (*ioAddr) {
-          IOStatus& io = m_ioProfiles[key4]; ++io.count; io.wall_time += wt;
-        }
-      }
     }
   }
 }
@@ -816,7 +764,7 @@ IOStatusHelper::IOStatusHelper(const char* name,
                                int port /* = 0 */)
   : m_exeProfiler(RequestInfo::NetworkIO) {
   assertx(name && *name);
-  if (Cfg::Stats::Web || ServerStats::s_profile_network) {
+  if (Cfg::Stats::Web) {
     std::string msg;
     if (address) {
       msg = address;
@@ -830,7 +778,7 @@ IOStatusHelper::IOStatusHelper(const char* name,
 }
 
 IOStatusHelper::~IOStatusHelper() {
-  if (Cfg::Stats::Web || ServerStats::s_profile_network) {
+  if (Cfg::Stats::Web) {
     ServerStats::SetThreadIOStatus(nullptr, nullptr);
   }
 }

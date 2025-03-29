@@ -53,6 +53,7 @@ ExternalProject_Add(
 
     -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
     -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+    -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
     -DCMAKE_OSX_SYSROOT=${CMAKE_OSX_SYSROOT}
 
     -DBUILD_TESTS=OFF
@@ -92,5 +93,10 @@ target_link_libraries(
   "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}fizz${CMAKE_STATIC_LIBRARY_SUFFIX}"
   fizz_deps
 )
+
+find_package(liboqs CONFIG)
+if (liboqs_FOUND)
+  target_link_libraries(fizz INTERFACE OQS::oqs)
+endif()
 
 set(FIZZ_INSTALL_DIR "${INSTALL_DIR}" PARENT_SCOPE)

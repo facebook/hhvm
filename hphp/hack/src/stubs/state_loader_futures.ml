@@ -18,8 +18,7 @@ let load
     ~ssopt:_
     ~progress_callback:_
     ~watchman_opts:_
-    ~ignore_hh_version:_
-    ~saved_state_type:_ =
+    ~ignore_hh_version:_ =
   Future.of_value (Error "Not implemented")
 
 let wait_for_finish _ = failwith "Not implemented"

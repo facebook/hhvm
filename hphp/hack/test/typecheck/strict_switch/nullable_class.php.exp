@@ -1,3 +1,6 @@
+WARN: File "nullable_class.php", line 23, characters 10-13:
+Invalid case: This case will never match.
+A value of type `C` can never be equal to a value of type `null` (Warn[12007])
 ERROR: File "nullable_class.php", line 23, characters 10-13:
 Switching on `C` but using constant from `null` (Typing[4023])
   File "nullable_class.php", line 17, characters 35-35:

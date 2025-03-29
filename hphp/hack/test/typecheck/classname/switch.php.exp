@@ -1,1 +1,3 @@
-No errors
+WARN: File "switch.php", line 19, characters 10-10:
+Invalid case: This case will never match.
+A value of type `classname<C>` can never be equal to a value of type `int` (Warn[12007])

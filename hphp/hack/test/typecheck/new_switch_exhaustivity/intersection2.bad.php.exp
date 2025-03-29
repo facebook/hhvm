@@ -1,3 +1,6 @@
+WARN: File "intersection2.bad.php", line 8, characters 10-13:
+Invalid case: This case will never match.
+A value of type `(I & J)` can never be equal to a value of type `null` (Warn[12007])
 ERROR: File "intersection2.bad.php", line 7, characters 3-47:
 This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
   File "intersection2.bad.php", line 7, characters 11-12:

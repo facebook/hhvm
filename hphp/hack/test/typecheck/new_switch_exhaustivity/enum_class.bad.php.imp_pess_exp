@@ -1,6 +1,6 @@
 WARN: File "enum_class.bad.php", line 18, characters 10-16:
 Invalid case: This case will never match.
-A value of type `HH\MemberOf<E, string>` can never be equal to a value of type `HH\MemberOf<E, int>` (Warn[12007])
+A value of type `string` can never be equal to a value of type `int` (Warn[12007])
 ERROR: File "enum_class.bad.php", line 10, characters 3-51:
 This `switch` statement is nonexhaustive. At least the following cases are missing: `E::Int2` (Typing[4019])
   File "enum_class.bad.php", line 10, characters 11-12:

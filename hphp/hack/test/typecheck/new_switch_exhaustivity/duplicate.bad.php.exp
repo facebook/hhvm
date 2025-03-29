@@ -2,6 +2,12 @@ WARN: File "duplicate.bad.php", line 7, characters 10-13:
 This switch case, `true`, occurred before. It will never be matched. (Warn[12019])
   File "duplicate.bad.php", line 5, characters 10-13:
   This is the original occurrence of the case.
+WARN: File "duplicate.bad.php", line 16, characters 10-10:
+Invalid case: This case will never match.
+A value of type `vec<nothing>` can never be equal to a value of type `int` (Warn[12007])
+WARN: File "duplicate.bad.php", line 18, characters 10-10:
+Invalid case: This case will never match.
+A value of type `vec<nothing>` can never be equal to a value of type `int` (Warn[12007])
 WARN: File "duplicate.bad.php", line 18, characters 10-10:
 This switch case, `1`, occurred before. It will never be matched. (Warn[12019])
   File "duplicate.bad.php", line 16, characters 10-10:

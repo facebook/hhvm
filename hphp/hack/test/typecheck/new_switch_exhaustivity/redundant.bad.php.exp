@@ -2,10 +2,16 @@ WARN: File "redundant.bad.php", line 4, characters 3-106:
 This switch statement contains redundant cases. There are 1 redundant cases. (Warn[12019])
   File "redundant.bad.php", line 9, characters 10-10:
   The case is redundant.
+WARN: File "redundant.bad.php", line 9, characters 10-10:
+Invalid case: This case will never match.
+A value of type `bool` can never be equal to a value of type `int` (Warn[12007])
 WARN: File "redundant.bad.php", line 15, characters 3-133:
 This switch statement contains redundant cases. There are 1 redundant cases. (Warn[12019])
   File "redundant.bad.php", line 20, characters 10-10:
   The case is redundant.
+WARN: File "redundant.bad.php", line 20, characters 10-10:
+Invalid case: This case will never match.
+A value of type `bool` can never be equal to a value of type `int` (Warn[12007])
 WARN: File "redundant.bad.php", line 22, characters 5-12:
 All cases are already covered. Redundant `default` cases prevent detection of future errors. (Warn[12019])
 WARN: File "redundant.bad.php", line 33, characters 5-12:

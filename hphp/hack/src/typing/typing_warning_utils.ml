@@ -371,7 +371,9 @@ module Equality_check = struct
 
   let lint_code { kind; _ } =
     match kind with
-    | Equality _ -> Lints_codes.Codes.non_equatable_comparison
+    | Equality _
+    | Switch ->
+      Lints_codes.Codes.non_equatable_comparison
     | Contains
     | Contains_key ->
       Lints_codes.Codes.invalid_contains_check
@@ -384,6 +386,11 @@ module Equality_check = struct
       Printf.sprintf
         "Invalid comparison: This expression will always return %s.\nA value of type %s can never be equal to a value of type %s"
         (string_of_bool b |> Markdown_lite.md_codify)
+        (Markdown_lite.md_codify ty1)
+        (Markdown_lite.md_codify ty2)
+    | Switch ->
+      Printf.sprintf
+        "Invalid case: This case will never match.\nA value of type %s can never be equal to a value of type %s"
         (Markdown_lite.md_codify ty1)
         (Markdown_lite.md_codify ty2)
     | Contains ->

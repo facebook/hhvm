@@ -106,6 +106,7 @@ end
 module Equality_check = struct
   type kind =
     | Equality of bool
+    | Switch
     | Contains
     | Contains_key
 

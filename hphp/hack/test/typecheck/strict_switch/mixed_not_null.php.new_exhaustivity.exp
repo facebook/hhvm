@@ -1,1 +1,3 @@
-No errors
+WARN: File "mixed_not_null.php", line 11, characters 10-13:
+Invalid case: This case will never match.
+A value of type `nonnull` can never be equal to a value of type `null` (Warn[12007])

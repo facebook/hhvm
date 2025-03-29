@@ -1,3 +1,9 @@
+WARN: File "int_string_arraykey.php", line 115, characters 10-13:
+Invalid case: This case will never match.
+A value of type `arraykey` can never be equal to a value of type `bool` (Warn[12007])
+WARN: File "int_string_arraykey.php", line 117, characters 10-13:
+Invalid case: This case will never match.
+A value of type `arraykey` can never be equal to a value of type `null` (Warn[12007])
 ERROR: File "int_string_arraykey.php", line 56, characters 11-12:
 `switch` statement nonexhaustive; at least the following cases are missing: `default`, `int`, `string` (Typing[4019])
   File "int_string_arraykey.php", line 56, characters 11-12:

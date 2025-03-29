@@ -1,3 +1,9 @@
+WARN: File "num_int.php", line 19, characters 10-13:
+Invalid case: This case will never match.
+A value of type `num` can never be equal to a value of type `null` (Warn[12007])
+WARN: File "num_int.php", line 29, characters 10-13:
+Invalid case: This case will never match.
+A value of type `num` can never be equal to a value of type `bool` (Warn[12007])
 ERROR: File "num_int.php", line 9, characters 10-12:
 Case in `switch` must be either an enum constant or a literal expression. (Typing[4020])
 ERROR: File "num_int.php", line 18, characters 11-12:

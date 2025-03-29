@@ -1,3 +1,9 @@
+WARN: File "just_enum_class.php", line 27, characters 10-31:
+Invalid case: This case will never match.
+A value of type `MixedEnumClass` can never be equal to a value of type `HH\MemberOf<MixedEnumClass, IntEnumCD>` (Warn[12007])
+WARN: File "just_enum_class.php", line 60, characters 10-33:
+Invalid case: This case will never match.
+A value of type `HH\MemberOf<MixedEnumClass, string>` can never be equal to a value of type `HH\MemberOf<MixedEnumClass, int>` (Warn[12007])
 ERROR: File "just_enum_class.php", line 27, characters 10-31:
 Switching on `MixedEnumClass` but using constant from `HH\MemberOf<MixedEnumClass, IntEnumCD>` (Typing[4023])
   File "just_enum_class.php", line 25, characters 21-34:

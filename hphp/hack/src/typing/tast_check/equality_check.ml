@@ -99,6 +99,15 @@ let ensure_valid_equality_check env ~as_lint p bop e1 e2 =
        p
        (Typing_warning.Equality_check.Equality (equal_bop bop Diff2)))
 
+let ensure_valid_case_check env ~as_lint p e1 e2 =
+  let ty1 = get_type e1 in
+  let ty2 = get_type e2 in
+  error_if_inequatable
+    env
+    ty1
+    ty2
+    (add_warning env ~as_lint p Typing_warning.Equality_check.Switch)
+
 let ensure_valid_contains_check env ~as_lint p trv_val_ty val_ty =
   error_if_inequatable
     env
@@ -133,5 +142,14 @@ let handler ~as_lint =
         )
         when String.equal id SN.HH.contains_key ->
         ensure_valid_contains_key_check env ~as_lint p tk1 tk2
+      | _ -> ()
+
+    method! at_stmt env =
+      function
+      | (_, Switch (scrutinee, cases, _default)) ->
+        let check_case (((_, case_pos, _) as case), _) =
+          ensure_valid_case_check env ~as_lint case_pos scrutinee case
+        in
+        List.iter cases ~f:check_case
       | _ -> ()
   end

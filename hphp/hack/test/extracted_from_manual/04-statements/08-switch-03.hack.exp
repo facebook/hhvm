@@ -1,0 +1,3 @@
+WARN: File "08-switch-03.hack", line 6, characters 10-13:
+Invalid case: This case will never match.
+A value of type `int` can never be equal to a value of type `float` (Warn[12007])

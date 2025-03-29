@@ -6,6 +6,12 @@ WARN: File "int_string_arraykey.php", line 105, characters 10-10:
 This switch case, `0`, occurred before. It will never be matched. (Warn[12019])
   File "int_string_arraykey.php", line 101, characters 10-10:
   This is the original occurrence of the case.
+WARN: File "int_string_arraykey.php", line 115, characters 10-13:
+Invalid case: This case will never match.
+A value of type `arraykey` can never be equal to a value of type `bool` (Warn[12007])
+WARN: File "int_string_arraykey.php", line 117, characters 10-13:
+Invalid case: This case will never match.
+A value of type `arraykey` can never be equal to a value of type `null` (Warn[12007])
 ERROR: File "int_string_arraykey.php", line 56, characters 3-77:
 This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
   File "int_string_arraykey.php", line 56, characters 11-12:

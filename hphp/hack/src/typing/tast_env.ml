@@ -76,14 +76,12 @@ let get_self_ty_exn env =
 
 let get_class = Typing_env.get_class
 
-let get_class_or_typedef env x =
+let get_class_or_typedef env x : class_or_typedef_result Decl_entry.t =
   match Typing_env.get_class_or_typedef env x with
-  | Decl_entry.Found (Typing_env.ClassResult cd) ->
-    Decl_entry.Found (ClassResult cd)
-  | Decl_entry.Found (Typing_env.TypedefResult td) ->
-    Decl_entry.Found (TypedefResult td)
-  | Decl_entry.DoesNotExist -> Decl_entry.DoesNotExist
-  | Decl_entry.NotYetAvailable -> Decl_entry.NotYetAvailable
+  | Found (ClassResult cd) -> Found (ClassResult cd)
+  | Found (TypedefResult td) -> Found (TypedefResult td)
+  | DoesNotExist -> DoesNotExist
+  | NotYetAvailable -> NotYetAvailable
 
 let is_in_expr_tree = Typing_env.is_in_expr_tree
 
@@ -320,24 +318,23 @@ let referenced_typeconsts env root ids =
 
 let empty ctx = Typing_env_types.empty ctx Relative_path.default ~droot:None
 
-let restore_saved_env env saved_env =
-  let module Env = Typing_env_types in
+let restore_saved_env (env : t) (saved_env : Tast.saved_env) : t =
   let ctx =
-    Provider_context.map_tcopt env.Env.decl_env.Decl_env.ctx ~f:(fun _tcopt ->
-        saved_env.Tast.tcopt)
+    Provider_context.map_tcopt env.decl_env.ctx ~f:(fun _tcopt ->
+        saved_env.tcopt)
   in
-  let decl_env = { env.Env.decl_env with Decl_env.ctx } in
+  let decl_env = { env.decl_env with ctx } in
   {
     env with
-    Env.decl_env;
-    Env.genv = { env.Env.genv with Env.tcopt = saved_env.Tast.tcopt };
-    Env.inference_env =
+    decl_env;
+    genv = { env.genv with tcopt = saved_env.tcopt };
+    inference_env =
       Typing_inference_env.simple_merge
-        env.Env.inference_env
-        saved_env.Tast.inference_env;
-    Env.tpenv = saved_env.Tast.tpenv;
-    Env.fun_tast_info = saved_env.Tast.fun_tast_info;
-    Env.checked = saved_env.Tast.checked;
+        env.inference_env
+        saved_env.inference_env;
+    tpenv = saved_env.tpenv;
+    fun_tast_info = saved_env.fun_tast_info;
+    checked = saved_env.checked;
   }
 
 module EnvFromDef = Typing_env_from_def

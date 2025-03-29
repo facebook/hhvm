@@ -1,0 +1,16 @@
+WARN: File "just_string.php", line 19, characters 10-13:
+This switch case, `"`, occurred before. It will never be matched. (Warn[12019])
+  File "just_string.php", line 17, characters 10-12:
+  This is the original occurrence of the case.
+WARN: File "just_string.php", line 53, characters 10-11:
+This switch case, ``, occurred before. It will never be matched. (Warn[12019])
+  File "just_string.php", line 49, characters 10-11:
+  This is the original occurrence of the case.
+WARN: File "just_string.php", line 55, characters 10-12:
+This switch case, `.`, occurred before. It will never be matched. (Warn[12019])
+  File "just_string.php", line 51, characters 10-12:
+  This is the original occurrence of the case.
+ERROR: File "just_string.php", line 40, characters 3-46:
+This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
+  File "just_string.php", line 40, characters 11-12:
+  The scrutinee has type `string` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.

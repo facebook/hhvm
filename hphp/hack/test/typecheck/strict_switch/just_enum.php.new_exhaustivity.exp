@@ -1,0 +1,6 @@
+WARN: File "just_enum.php", line 27, characters 5-12:
+All cases are already covered. Redundant `default` cases prevent detection of future errors. (Warn[12019])
+WARN: File "just_enum.php", line 37, characters 10-21:
+This switch case, `IntEnumAB::A`, occurred before. It will never be matched. (Warn[12019])
+  File "just_enum.php", line 35, characters 10-21:
+  This is the original occurrence of the case.

@@ -1,0 +1,10 @@
+ERROR: File "switch_throws.php", line 8, characters 5-51:
+This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
+  File "switch_throws.php", line 8, characters 13-14:
+  The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+ERROR: File "switch_throws.php", line 16, characters 19-20:
+Invalid argument (Typing[4110])
+  File "switch_throws.php", line 3, characters 24-30:
+  Expected `nothing`
+  File "switch_throws.php", line 7, characters 10-10:
+  But got `int`

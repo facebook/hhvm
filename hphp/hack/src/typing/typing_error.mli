@@ -72,6 +72,22 @@ module Primary : sig
     [@@deriving show]
   end
 
+  module Switch : sig
+    type t =
+      | Switch_nonexhaustive of {
+          switch_pos: Pos.t;
+          missing: string list Lazy.t;
+          scrutinee_pos: Pos.t;
+          scrutinee_type: string Lazy.t;
+        }
+      | Switch_needs_default of {
+          switch_pos: Pos.t;
+          scrutinee_pos: Pos.t;
+          scrutinee_type: string Lazy.t;
+        }
+    [@@deriving show]
+  end
+
   module Enum : sig
     module Const : sig
       type t =
@@ -395,6 +411,7 @@ module Primary : sig
     | Package of Package.t
     | Readonly of Readonly.t
     | Shape of Shape.t
+    | Switch of Switch.t
     | Wellformedness of Wellformedness.t
     | Xhp of Xhp.t
     | CaseType of CaseType.t
@@ -1983,6 +2000,9 @@ val readonly : Primary.Readonly.t -> t
 
 (** Lift a `Primary.Shape.t` error to a `Typing_error.t` *)
 val shape : Primary.Shape.t -> t
+
+(** Lift a `Primary.Switch.t` error to a `Typing_error.t` *)
+val switch : Primary.Switch.t -> t
 
 (** Lift a `Primary.Wellformedness.t` error to a `Typing_error.t` *)
 val wellformedness : Primary.Wellformedness.t -> t

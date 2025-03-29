@@ -1,0 +1,4 @@
+ERROR: File "fc_enum_case_11.php", line 14, characters 3-46:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `MyEnum::B` (Typing[4019])
+  File "fc_enum_case_11.php", line 14, characters 11-12:
+  The scrutinee has type `MyEnum`.

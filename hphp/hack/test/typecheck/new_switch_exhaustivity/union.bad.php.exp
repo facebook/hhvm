@@ -1,0 +1,28 @@
+ERROR: File "union.bad.php", line 14, characters 3-77:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `null` (Typing[4019])
+  File "union.bad.php", line 14, characters 11-12:
+  The scrutinee has type `?E`.
+ERROR: File "union.bad.php", line 24, characters 3-77:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `E::B` (Typing[4019])
+  File "union.bad.php", line 24, characters 11-12:
+  The scrutinee has type `~?E`.
+ERROR: File "union.bad.php", line 34, characters 3-77:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `E::A` (Typing[4019])
+  File "union.bad.php", line 34, characters 11-12:
+  The scrutinee has type `~?E`.
+ERROR: File "union.bad.php", line 44, characters 3-77:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `null` (Typing[4019])
+  File "union.bad.php", line 44, characters 11-12:
+  The scrutinee has type `~?E`.
+ERROR: File "union.bad.php", line 54, characters 3-77:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `E::B` (Typing[4019])
+  File "union.bad.php", line 54, characters 11-12:
+  The scrutinee has type `~?E`.
+ERROR: File "union.bad.php", line 63, characters 3-106:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `F::B` (Typing[4019])
+  File "union.bad.php", line 63, characters 11-12:
+  The scrutinee has type `(E | F)`.
+ERROR: File "union.bad.php", line 74, characters 3-48:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `E::B` (Typing[4019])
+  File "union.bad.php", line 74, characters 11-12:
+  The scrutinee has type `E`.

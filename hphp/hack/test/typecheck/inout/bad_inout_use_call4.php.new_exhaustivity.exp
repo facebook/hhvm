@@ -1,0 +1,14 @@
+ERROR: File "bad_inout_use_call4.php", line 10, characters 3-122:
+This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
+  File "bad_inout_use_call4.php", line 10, characters 11-23:
+  The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+ERROR: File "bad_inout_use_call4.php", line 21, characters 3-168:
+This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
+  File "bad_inout_use_call4.php", line 21, characters 11-23:
+  The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+ERROR: File "bad_inout_use_call4.php", line 40, characters 5-12:
+Invalid argument (Typing[4110])
+  File "bad_inout_use_call4.php", line 9, characters 18-19:
+  Expected `C2`
+  File "bad_inout_use_call4.php", line 20, characters 18-19:
+  But got `C1`

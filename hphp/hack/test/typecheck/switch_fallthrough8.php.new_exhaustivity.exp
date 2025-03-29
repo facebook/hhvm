@@ -1,0 +1,8 @@
+ERROR: File "switch_fallthrough8.php", line 13, characters 11-11:
+This `switch` has a `case` that implicitly falls through and is not annotated with `// FALLTHROUGH` (NastCheck[3005])
+  File "switch_fallthrough8.php", line 14, characters 10-10:
+  This `case` implicitly falls through. Did you forget to add `break` or `return`?
+ERROR: File "switch_fallthrough8.php", line 13, characters 3-204:
+This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
+  File "switch_fallthrough8.php", line 13, characters 11-11:
+  The scrutinee has type `int` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.

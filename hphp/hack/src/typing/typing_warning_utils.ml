@@ -511,6 +511,46 @@ module No_disjoint_union_check = struct
   let quickfixes _ = []
 end
 
+module Switch_redundancy = struct
+  open Typing_warning.Switch_redundancy
+
+  type t = Typing_warning.Switch_redundancy.t
+
+  let code = Codes.SwitchRedundancy
+
+  let codes = [code]
+
+  let code _ = code
+
+  let claim = function
+    | SwitchHasRedundancy { redundancy_size; _ } ->
+      "This switch statement contains redundant cases."
+      ^ " There are "
+      ^ string_of_int redundancy_size
+      ^ " redundant cases."
+    | DuplicatedCase { case; _ } ->
+      "This switch case, "
+      ^ Markdown_lite.md_codify (Lazy.force case)
+      ^ ", occurred before."
+      ^ " It will never be matched."
+    | RedundantDefault ->
+      "All cases are already covered."
+      ^ " Redundant `default` cases prevent detection of future errors."
+
+  let reasons = function
+    | SwitchHasRedundancy { positions; _ } ->
+      List.map (Lazy.force positions) ~f:(fun p ->
+          (Pos_or_decl.of_raw_pos p, "The case is redundant."))
+    | DuplicatedCase { first_occurrence; _ } ->
+      [
+        ( Pos_or_decl.of_raw_pos first_occurrence,
+          "This is the original occurrence of the case." );
+      ]
+    | RedundantDefault -> []
+
+  let quickfixes _ = []
+end
+
 let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
     (module Warning with type t = x) =
   match kind with
@@ -525,6 +565,7 @@ let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
   | Typing_warning.Duplicate_properties -> (module Duplicated_properties)
   | Typing_warning.Class_pointer_to_string -> (module Class_pointer_to_string)
   | Typing_warning.No_disjoint_union_check -> (module No_disjoint_union_check)
+  | Typing_warning.Switch_redundancy -> (module Switch_redundancy)
 
 let module_of_migrated
     (type x) (kind : (x, Typing_warning.migrated) Typing_warning.kind) :

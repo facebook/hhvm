@@ -1,0 +1,8 @@
+ERROR: File "complex_tuple.bad.php", line 24, characters 3-319:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `(E::A, G::A, ())`, `(E::A, G::B, ())`, `(E::B, G::A, ())`, `(E::B, G::B, ())`, `(F::A, G::A, ())`, `(F::A, G::B, ())`, `(F::B, G::A, ())`, `(F::B, G::B, ())` (Typing[4019])
+  File "complex_tuple.bad.php", line 24, characters 11-12:
+  The scrutinee has type `((E | F), (G & H), ())`.
+ERROR: File "complex_tuple.bad.php", line 24, characters 3-319:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `(F::A, H::A, ())`, `(F::B, H::B, ())` (Typing[4019])
+  File "complex_tuple.bad.php", line 24, characters 11-12:
+  The scrutinee has type `((E | F), (G & H), ())`.

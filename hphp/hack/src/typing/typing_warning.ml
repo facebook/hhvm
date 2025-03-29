@@ -139,6 +139,19 @@ module No_disjoint_union_check = struct
   }
 end
 
+module Switch_redundancy = struct
+  type t =
+    | SwitchHasRedundancy of {
+        positions: Pos.t list Lazy.t;
+        redundancy_size: int;
+      }  (** Primary position on the switch *)
+    | DuplicatedCase of {
+        first_occurrence: Pos.t;
+        case: string Lazy.t;
+      }  (** Primary position is on the duplicate occurrence of the case *)
+    | RedundantDefault  (** Primary position on the default *)
+end
+
 type (_, _) kind =
   | Sketchy_equality : (Sketchy_equality.t, warn) kind
   | Safe_abstract : (Safe_abstract.t, warn) kind
@@ -151,5 +164,6 @@ type (_, _) kind =
   | Duplicate_properties : (Duplicate_properties.t, migrated) kind
   | Class_pointer_to_string : (Class_pointer_to_string.t, warn) kind
   | No_disjoint_union_check : (No_disjoint_union_check.t, warn) kind
+  | Switch_redundancy : (Switch_redundancy.t, warn) kind
 
 type ('x, 'a) t = Pos.t * ('x, 'a) kind * 'x

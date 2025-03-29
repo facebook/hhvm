@@ -1,0 +1,6 @@
+WARN: File "noreturn_case.php", line 7, characters 9-20:
+This `is` check is always `false`. The expression on the left has type `int` which shares no values with `string`. (Warn[12010])
+WARN: File "noreturn_case.php", line 8, characters 7-61:
+This switch statement contains redundant cases. There are 1 redundant cases. (Warn[12019])
+  File "noreturn_case.php", line 9, characters 14-14:
+  The case is redundant.

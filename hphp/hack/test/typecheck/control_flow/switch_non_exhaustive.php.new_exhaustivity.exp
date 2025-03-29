@@ -1,0 +1,6 @@
+File "switch_non_exhaustive.php", line 16, characters 3-13:
+  B
+ERROR: File "switch_non_exhaustive.php", line 9, characters 3-66:
+This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
+  File "switch_non_exhaustive.php", line 9, characters 11-12:
+  The scrutinee has type `string` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.

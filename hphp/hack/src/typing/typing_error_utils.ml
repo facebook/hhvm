@@ -543,6 +543,68 @@ end = struct
         shapes_access_with_non_existent_field pos field_name decl_pos reason
   end
 
+  module Eval_switch = struct
+    let switch_nonexhaustive ~switch_pos ~scrutinee_pos scrutinee_type missing =
+      let claim =
+        lazy
+          ( switch_pos,
+            "This `switch` statement is nonexhaustive."
+            ^ " At least the following cases are missing: "
+            ^ (List.map ~f:Markdown_lite.md_codify (Lazy.force missing)
+              |> String.concat ~sep:", ") )
+      in
+      let reasons =
+        lazy
+          [
+            ( Pos_or_decl.of_raw_pos scrutinee_pos,
+              "The scrutinee has type "
+              ^ Markdown_lite.md_codify (Lazy.force scrutinee_type)
+              ^ "." );
+          ]
+      in
+      ( Error_code.EnumSwitchNonexhaustive,
+        claim,
+        reasons,
+        lazy Explanation.empty,
+        [],
+        User_error_flags.empty )
+
+    let switch_needs_default ~switch_pos ~scrutinee_pos scrutinee_type =
+      let claim =
+        lazy
+          ( switch_pos,
+            "This `switch` case cannot be checked for exhaustivity."
+            ^ " Please provide a default."
+            ^ " Without a default, when none of the cases match, a runtime exception will be thrown."
+          )
+      in
+      let reasons =
+        lazy
+          [
+            ( Pos_or_decl.of_raw_pos scrutinee_pos,
+              "The scrutinee has type "
+              ^ Markdown_lite.md_codify (Lazy.force scrutinee_type)
+              ^ " which is not an enum, enum class, enum class label, null, or nullable or tuples of those types."
+            );
+          ]
+      in
+      ( Error_code.SwitchNeedsDefault,
+        claim,
+        reasons,
+        lazy Explanation.empty,
+        [],
+        User_error_flags.empty )
+
+    let to_error t ~env:_ =
+      let open Typing_error.Primary.Switch in
+      match t with
+      | Switch_nonexhaustive
+          { switch_pos; scrutinee_pos; scrutinee_type; missing } ->
+        switch_nonexhaustive ~switch_pos ~scrutinee_pos scrutinee_type missing
+      | Switch_needs_default { switch_pos; scrutinee_pos; scrutinee_type } ->
+        switch_needs_default ~switch_pos ~scrutinee_pos scrutinee_type
+  end
+
   module Eval_enum = struct
     let enum_class_label_member_mismatch pos label expected_ty_msg_opt =
       let claim = lazy (pos, "Enum class label/member mismatch")
@@ -5546,6 +5608,7 @@ end = struct
     | Package err -> Eval_package.to_error err ~env
     | Readonly err -> Eval_readonly.to_error err ~env
     | Shape err -> Eval_shape.to_error err ~env
+    | Switch err -> Eval_switch.to_error err ~env
     | Wellformedness err -> Eval_wellformedness.to_error err ~env
     | Xhp err -> Eval_xhp.to_error err ~env
     | CaseType err -> Eval_casetype.to_error err ~env

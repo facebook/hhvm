@@ -76,6 +76,22 @@ module Primary = struct
     [@@deriving show]
   end
 
+  module Switch = struct
+    type t =
+      | Switch_nonexhaustive of {
+          switch_pos: Pos.t;
+          missing: string list Lazy.t;
+          scrutinee_pos: Pos.t;
+          scrutinee_type: string Lazy.t;
+        }
+      | Switch_needs_default of {
+          switch_pos: Pos.t;
+          scrutinee_pos: Pos.t;
+          scrutinee_type: string Lazy.t;
+        }
+    [@@deriving show]
+  end
+
   module Enum = struct
     module Const = struct
       type t =
@@ -419,6 +435,7 @@ module Primary = struct
     | Package of Package.t
     | Readonly of Readonly.t
     | Shape of Shape.t
+    | Switch of Switch.t
     | Wellformedness of Wellformedness.t
     | Xhp of Xhp.t
     | CaseType of CaseType.t
@@ -1398,6 +1415,8 @@ module rec Error : sig
 
   val shape : Primary.Shape.t -> t
 
+  val switch : Primary.Switch.t -> t
+
   val wellformedness : Primary.Wellformedness.t -> t
 
   val xhp : Primary.Xhp.t -> t
@@ -1455,6 +1474,8 @@ end = struct
   let readonly err = primary @@ Primary.Readonly err
 
   let shape err = primary @@ Primary.Shape err
+
+  let switch err = primary @@ Primary.Switch err
 
   let wellformedness err = primary @@ Primary.Wellformedness err
 

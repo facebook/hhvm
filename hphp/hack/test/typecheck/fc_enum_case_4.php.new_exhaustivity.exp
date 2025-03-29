@@ -1,0 +1,4 @@
+ERROR: File "fc_enum_case_4.php", line 17, characters 3-138:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `Bar::BAZ` (Typing[4019])
+  File "fc_enum_case_4.php", line 17, characters 11-12:
+  The scrutinee has type `Bar`.

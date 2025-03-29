@@ -1,0 +1,4 @@
+ERROR: File "missing_null.php", line 6, characters 3-46:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `null` (Typing[4019])
+  File "missing_null.php", line 6, characters 11-12:
+  The scrutinee has type `null`.

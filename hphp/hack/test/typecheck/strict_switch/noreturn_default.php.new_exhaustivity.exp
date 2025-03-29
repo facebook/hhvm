@@ -1,0 +1,4 @@
+WARN: File "noreturn_default.php", line 7, characters 9-20:
+This `is` check is always `false`. The expression on the left has type `int` which shares no values with `string`. (Warn[12010])
+WARN: File "noreturn_default.php", line 9, characters 9-16:
+All cases are already covered. Redundant `default` cases prevent detection of future errors. (Warn[12019])

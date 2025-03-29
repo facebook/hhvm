@@ -1,0 +1,4 @@
+WARN: File "int_format.php", line 34, characters 10-20:
+This switch case, `709138457`, occurred before. It will never be matched. (Warn[12019])
+  File "int_format.php", line 30, characters 10-20:
+  This is the original occurrence of the case.

@@ -1,0 +1,8 @@
+WARN: File "fc_enum_case_2.php", line 11, characters 3-159:
+This switch statement contains redundant cases. There are 1 redundant cases. (Warn[12019])
+  File "fc_enum_case_2.php", line 18, characters 10-17:
+  The case is redundant.
+WARN: File "fc_enum_case_2.php", line 18, characters 10-17:
+This switch case, `Bar::FOO`, occurred before. It will never be matched. (Warn[12019])
+  File "fc_enum_case_2.php", line 12, characters 10-17:
+  This is the original occurrence of the case.

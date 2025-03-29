@@ -1,0 +1,32 @@
+ERROR: File "enum_class.bad.php", line 10, characters 3-51:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `E::Int2` (Typing[4019])
+  File "enum_class.bad.php", line 10, characters 11-12:
+  The scrutinee has type `HH\MemberOf<E, int>`.
+ERROR: File "enum_class.bad.php", line 17, characters 3-51:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `E::String1` (Typing[4019])
+  File "enum_class.bad.php", line 17, characters 11-12:
+  The scrutinee has type `HH\MemberOf<E, string>`.
+ERROR: File "enum_class.bad.php", line 24, characters 3-83:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `E::String1` (Typing[4019])
+  File "enum_class.bad.php", line 24, characters 11-12:
+  The scrutinee has type `HH\MemberOf<E, T>`.
+ERROR: File "enum_class.bad.php", line 33, characters 3-50:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `#Int2` (Typing[4019])
+  File "enum_class.bad.php", line 33, characters 11-12:
+  The scrutinee has type `HH\EnumClass\Label<E, int>`.
+ERROR: File "enum_class.bad.php", line 40, characters 3-50:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `#String1` (Typing[4019])
+  File "enum_class.bad.php", line 40, characters 11-12:
+  The scrutinee has type `HH\EnumClass\Label<E, string>`.
+ERROR: File "enum_class.bad.php", line 47, characters 3-81:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `#String1` (Typing[4019])
+  File "enum_class.bad.php", line 47, characters 11-12:
+  The scrutinee has type `HH\EnumClass\Label<E, T>`.
+ERROR: File "enum_class.bad.php", line 56, characters 3-81:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `E::Int1`, `E::Int2` (Typing[4019])
+  File "enum_class.bad.php", line 56, characters 11-12:
+  The scrutinee has type `HH\MemberOf<E, int>`.
+ERROR: File "enum_class.bad.php", line 65, characters 3-83:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `#Int1`, `#Int2` (Typing[4019])
+  File "enum_class.bad.php", line 65, characters 11-12:
+  The scrutinee has type `HH\EnumClass\Label<E, int>`.

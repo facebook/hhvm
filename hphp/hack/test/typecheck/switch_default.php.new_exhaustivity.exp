@@ -1,0 +1,6 @@
+ERROR: File "switch_default.php", line 12, characters 5-12:
+Default case in `switch` must be terminal (Parsing[1002])
+ERROR: File "switch_default.php", line 11, characters 3-88:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `SwitchEnum::B` (Typing[4019])
+  File "switch_default.php", line 11, characters 11-15:
+  The scrutinee has type `SwitchEnum`.

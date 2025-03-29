@@ -1,0 +1,24 @@
+ERROR: File "nullable.bad.php", line 10, characters 3-48:
+This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
+  File "nullable.bad.php", line 10, characters 11-12:
+  The scrutinee has type `~null` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+ERROR: File "nullable.bad.php", line 18, characters 3-48:
+This `switch` case cannot be checked for exhaustivity. Please provide a default. Without a default, when none of the cases match, a runtime exception will be thrown. (Typing[4489])
+  File "nullable.bad.php", line 18, characters 11-12:
+  The scrutinee has type `?dynamic` which is not an enum, enum class, enum class label, null, or nullable or tuples of those types.
+ERROR: File "nullable.bad.php", line 25, characters 3-77:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `null` (Typing[4019])
+  File "nullable.bad.php", line 25, characters 11-12:
+  The scrutinee has type `?E`.
+ERROR: File "nullable.bad.php", line 34, characters 3-48:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `E::A`, `E::B` (Typing[4019])
+  File "nullable.bad.php", line 34, characters 11-12:
+  The scrutinee has type `?E`.
+ERROR: File "nullable.bad.php", line 42, characters 3-77:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `null` (Typing[4019])
+  File "nullable.bad.php", line 42, characters 11-12:
+  The scrutinee has type `~?E`.
+ERROR: File "nullable.bad.php", line 52, characters 3-77:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `null` (Typing[4019])
+  File "nullable.bad.php", line 52, characters 11-12:
+  The scrutinee has type `~?E`.

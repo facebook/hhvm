@@ -1,0 +1,8 @@
+ERROR: File "just_enum_class.php", line 59, characters 3-68:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `MixedEnumClass::LabelString1` (Typing[4019])
+  File "just_enum_class.php", line 59, characters 11-12:
+  The scrutinee has type `HH\MemberOf<MixedEnumClass, string>`.
+ERROR: File "just_enum_class.php", line 77, characters 3-66:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `MixedEnumClass::LabelC` (Typing[4019])
+  File "just_enum_class.php", line 77, characters 11-12:
+  The scrutinee has type `HH\MemberOf<MixedEnumClass, (IntEnumAB | IntEnumCD)>`.

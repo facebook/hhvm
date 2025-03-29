@@ -1,0 +1,2 @@
+WARN: File "nullable_class.php", line 59, characters 5-12:
+All cases are already covered. Redundant `default` cases prevent detection of future errors. (Warn[12019])

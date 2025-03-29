@@ -1,0 +1,4 @@
+ERROR: File "class_const_false_positive.bad.php", line 15, characters 3-63:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `E::B` (Typing[4019])
+  File "class_const_false_positive.bad.php", line 15, characters 11-12:
+  The scrutinee has type `E`.

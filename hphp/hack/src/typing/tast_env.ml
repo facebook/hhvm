@@ -461,3 +461,7 @@ let get_current_decl_and_file = Typing_env.get_current_decl_and_file
 
 let derive_instantiation env =
   Derive_type_instantiation.derive_instantiation env
+
+let add_typing_error = Typing_error_utils.add_typing_error
+
+let add_warning = Typing_warning_utils.add

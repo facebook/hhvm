@@ -389,3 +389,7 @@ val derive_instantiation :
   Typing_defs.decl_ty ->
   Typing_defs.locl_ty ->
   env * Derive_type_instantiation.Instantiation.t
+
+val add_typing_error : Typing_error.t -> env:env -> unit
+
+val add_warning : env -> ('x, 'a) Typing_warning.t -> unit

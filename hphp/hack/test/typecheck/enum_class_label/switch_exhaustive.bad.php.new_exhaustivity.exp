@@ -1,0 +1,12 @@
+ERROR: File "switch_exhaustive.bad.php", line 21, characters 3-41:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `#A` (Typing[4019])
+  File "switch_exhaustive.bad.php", line 21, characters 11-12:
+  The scrutinee has type `HH\EnumClass\Label<E, int>`.
+ERROR: File "switch_exhaustive.bad.php", line 27, characters 3-63:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `#A` (Typing[4019])
+  File "switch_exhaustive.bad.php", line 27, characters 11-12:
+  The scrutinee has type `HH\EnumClass\Label<F, int>`.
+ERROR: File "switch_exhaustive.bad.php", line 34, characters 3-63:
+This `switch` statement is nonexhaustive. At least the following cases are missing: `#C` (Typing[4019])
+  File "switch_exhaustive.bad.php", line 34, characters 11-12:
+  The scrutinee has type `HH\EnumClass\Label<F, int>`.

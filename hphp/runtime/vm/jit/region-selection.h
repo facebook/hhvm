@@ -384,12 +384,15 @@ private:
  * types that we need to be compiling for. There is no implication that
  * the region selected will necessarily be specialized for those types.
  */
+
+using LiveTypesVec = jit::small_vector<RegionDesc::TypedLocation, 1>;
+
 struct RegionContext {
   RegionContext(SrcKey sk, SBInvOffset spOff)
     : sk(sk), spOffset(spOff) {}
 
   SrcKey sk;
-  jit::vector<RegionDesc::TypedLocation> liveTypes;
+  LiveTypesVec liveTypes;
   SBInvOffset spOffset;
 };
 

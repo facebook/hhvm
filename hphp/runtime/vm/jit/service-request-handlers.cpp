@@ -64,14 +64,6 @@ RegionContext getContext(SrcKey sk, bool profiling) {
 
   always_assert(func == fp->func());
   auto const ctxClass = func->cls();
-
-  const size_t numInitedLocals =
-    sk.funcEntry() ? func->numFuncEntryInputs() : func->numLocals();
-  const size_t numStackTypes = Stack::anyFrameStackBase(fp) - sp;
-  auto const liveTypesReserve =
-    numInitedLocals + numStackTypes + (sk.funcEntry() ? 0 : 1);
-  ctx.liveTypes.reserve(liveTypesReserve);
-
   auto const addLiveType = [&](Location loc, tv_rval tv) {
     auto const type = typeFromTV(tv, ctxClass);
     ctx.liveTypes.push_back({loc, type});
@@ -80,6 +72,8 @@ RegionContext getContext(SrcKey sk, bool profiling) {
   };
 
   // Track local types.
+  auto const numInitedLocals = sk.funcEntry()
+    ? func->numFuncEntryInputs() : func->numLocals();
   for (uint32_t i = 0; i < numInitedLocals; ++i) {
     addLiveType(Location::Local{i}, frame_local(fp, i));
   }
@@ -114,8 +108,6 @@ RegionContext getContext(SrcKey sk, bool profiling) {
       addLiveType(Location::MBase{}, mbase);
     }
   }
-
-  assertx(ctx.liveTypes.size() <= liveTypesReserve);
 
   return ctx;
 }

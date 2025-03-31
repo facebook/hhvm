@@ -69,69 +69,75 @@ PackageInfo::PackageInfo(PackageMap& packages,
 }
 
 PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
-  std::ifstream file(path, std::ios::in);
-  if (!file.is_open()) {
-    if (Cfg::Eval::PackagesTomlFileName != Cfg::EvalLoader::PackagesTomlFileNameDefault()) {
-      Logger::FError("Could not open the package specification in {}. "
-                     "Continuing with the empty package specification.",
-                     path.string());
-    }
-    return defaults();
-  }
-
   PackageMap packages;
   DeploymentMap deployments;
 
-  auto info = package::package_info(
-    Cfg::Eval::PackageV2, Cfg::Server::SourceRoot, path.string());
-
-  auto const convert = [&] (auto const& v) {
-    hphp_vector_string_set result;
-    // hphp_vector_string_set inserts to the beginning instead of to the end,
-    // insert in reverse order to make up for this.
-    // rust::Vec does not define rbegin and rend.
-    for (size_t i = v.size(); i > 0; --i) {
-      result.insert(std::string(v[i-1]));
+  try {
+    if (!std::filesystem::exists(path)) {
+      if (Cfg::Eval::PackagesTomlFileName != Cfg::EvalLoader::PackagesTomlFileNameDefault()) {
+        Logger::Warning(
+          "Could not open the package specification: %s. Continuing with the empty package specification.",
+          path.string().c_str());
+      }
+      return defaults();
     }
-    return result;
-  };
 
-  for (auto& p : info.packages) {
-    packages.emplace(std::string(p.name),
-                     Package {
-                       convert(p.package.uses),
-                       convert(p.package.includes),
-                       convert(p.package.soft_includes),
-                       convert(p.package.include_paths)
-                     });
-  }
+    auto info = package::package_info(
+      Cfg::Eval::PackageV2, Cfg::Server::SourceRoot, path.string());
 
-  for (auto& d : info.deployments) {
-    TinyVector<const re2::RE2*> domains;
-    for (auto& s : d.deployment.domains) {
-      domains.push_back(&compilePattern(std::string{s}));
+    auto const convert = [&] (auto const& v) {
+      hphp_vector_string_set result;
+      // hphp_vector_string_set inserts to the beginning instead of to the end,
+      // insert in reverse order to make up for this.
+      // rust::Vec does not define rbegin and rend.
+      for (size_t i = v.size(); i > 0; --i) {
+        result.insert(std::string(v[i-1]));
+      }
+      return result;
+    };
+
+    for (auto& p : info.packages) {
+      packages.emplace(std::string(p.name),
+                       Package {
+                         convert(p.package.uses),
+                         convert(p.package.includes),
+                         convert(p.package.soft_includes),
+                         convert(p.package.include_paths)
+                       });
     }
-    deployments.emplace(std::string(d.name),
-                        Deployment {
-                          convert(d.deployment.packages),
-                          convert(d.deployment.soft_packages),
-                          std::move(domains),
-                        });
-  }
-  if (info.errors.size() > 0) {
-    std::vector<folly::StringPiece> packageConfigErrors;
-    for (auto& error : info.errors) {
-      packageConfigErrors.push_back(error.c_str());
-    }
-    auto const packageConfigError = folly::sformat(
-      "Error parsing {}: {}",
-      path.c_str(),
-      folly::join("\n", packageConfigErrors)
-    );
-    Logger::FError(packageConfigError);
-  }
 
-  return PackageInfo(packages, deployments);
+    for (auto& d : info.deployments) {
+      TinyVector<const re2::RE2*> domains;
+      for (auto& s : d.deployment.domains) {
+        domains.push_back(&compilePattern(std::string{s}));
+      }
+      deployments.emplace(std::string(d.name),
+                          Deployment {
+                            convert(d.deployment.packages),
+                            convert(d.deployment.soft_packages),
+                            std::move(domains),
+                          });
+    }
+    if (info.errors.size() > 0) {
+      std::vector<folly::StringPiece> packageConfigErrors;
+      for (auto& error : info.errors) {
+        packageConfigErrors.push_back(error.c_str());
+      }
+      auto const packageConfigError = folly::sformat(
+        "Error parsing {}: {}",
+        path.c_str(),
+        folly::join("\n", packageConfigErrors)
+      );
+      Logger::FError(packageConfigError);
+    }
+
+    return PackageInfo(packages, deployments);
+  } catch (const std::exception& e) {
+    Logger::Warning(
+      "Exception %s when reading: %s. Continuing with the empty package specification.",
+      e.what(), path.c_str());
+    return defaults();
+  }
 }
 
 PackageInfo PackageInfo::defaults() {

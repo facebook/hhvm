@@ -164,6 +164,25 @@ class ValueWrapper : public ::apache::thrift::type::detail::Wrap<Base> {
     return is_##TYPE() ? &*toThrift().TYPE##Value_ref() : nullptr;             \
   }                                                                            \
   decltype(auto) move_##TYPE() { return toThrift().move_##TYPE##Value(); }     \
+  /* enforce semicolon after macro */ static_assert(true, "")
+
+  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(bool);
+  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(byte);
+  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(i16);
+  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(i32);
+  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(i64);
+  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(float);
+  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(double);
+  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(string);
+  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(binary);
+  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(object);
+  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(list);
+  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(set);
+  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(map);
+
+#undef FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE
+
+#define FBTHRIFT_THRIFT_DEPRECATED_METHOD_FROM_TYPE(TYPE)                      \
   [[deprecated("Prefer as_XYZ()")]] decltype(auto) get_##TYPE##Value() const { \
     return toThrift().get_##TYPE##Value();                                     \
   }                                                                            \
@@ -186,19 +205,21 @@ class ValueWrapper : public ::apache::thrift::type::detail::Wrap<Base> {
   }                                                                            \
   /* enforce semicolon after macro */ static_assert(true, "")
 
-  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(bool);
-  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(byte);
-  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(i16);
-  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(i32);
-  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(i64);
-  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(float);
-  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(double);
-  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(string);
-  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(binary);
-  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(object);
-  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(list);
-  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(set);
-  FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(map);
+  FBTHRIFT_THRIFT_DEPRECATED_METHOD_FROM_TYPE(bool);
+  FBTHRIFT_THRIFT_DEPRECATED_METHOD_FROM_TYPE(byte);
+  FBTHRIFT_THRIFT_DEPRECATED_METHOD_FROM_TYPE(i16);
+  FBTHRIFT_THRIFT_DEPRECATED_METHOD_FROM_TYPE(i32);
+  FBTHRIFT_THRIFT_DEPRECATED_METHOD_FROM_TYPE(i64);
+  FBTHRIFT_THRIFT_DEPRECATED_METHOD_FROM_TYPE(float);
+  FBTHRIFT_THRIFT_DEPRECATED_METHOD_FROM_TYPE(double);
+  FBTHRIFT_THRIFT_DEPRECATED_METHOD_FROM_TYPE(string);
+  FBTHRIFT_THRIFT_DEPRECATED_METHOD_FROM_TYPE(binary);
+  FBTHRIFT_THRIFT_DEPRECATED_METHOD_FROM_TYPE(object);
+  FBTHRIFT_THRIFT_DEPRECATED_METHOD_FROM_TYPE(list);
+  FBTHRIFT_THRIFT_DEPRECATED_METHOD_FROM_TYPE(set);
+  FBTHRIFT_THRIFT_DEPRECATED_METHOD_FROM_TYPE(map);
+
+#undef FBTHRIFT_THRIFT_DEPRECATED_METHOD_FROM_TYPE
 
   using ValueList = ::std::vector<::apache::thrift::protocol::detail::Value>;
   using BoxedValueList = ::std::unique_ptr<ValueList>;
@@ -234,8 +255,6 @@ class ValueWrapper : public ::apache::thrift::type::detail::Wrap<Base> {
       const ValueMap& t);
   [[deprecated("Prefer emplace_map()")]] BoxedValueMap& set_mapValue(
       ValueMap&& t);
-
-#undef FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE
 
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const {

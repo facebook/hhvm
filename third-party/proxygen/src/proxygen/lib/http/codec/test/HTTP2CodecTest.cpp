@@ -2976,3 +2976,40 @@ TEST_F(HTTP2CodecDoubleGoawayTest, EnableDoubleGoawayAfterClose) {
   EXPECT_EQ(callbacks_.streamErrors, 0);
   EXPECT_EQ(callbacks_.sessionErrors, 0);
 }
+
+TEST_F(HTTP2CodecTest, SendEmptyTrailers) {
+  HTTPMessage req = getGetRequest("/guacamole");
+  req.getHeaders().add(HTTP_HEADER_USER_AGENT, "coolio");
+  auto id = upstreamCodec_.createStream();
+  upstreamCodec_.generateHeader(output_, id, req);
+
+  // Send a single trailer "Connection" "keep-alive"
+  HTTPHeaders trailers;
+  trailers.add("Connection", "keep-alive");
+  upstreamCodec_.generateTrailers(output_, id, trailers);
+
+  parse();
+
+  EXPECT_EQ(callbacks_.messageBegin, 1);
+  EXPECT_EQ(callbacks_.headersComplete, 1);
+  EXPECT_EQ(callbacks_.bodyCalls, 0);
+  EXPECT_EQ(callbacks_.trailers, 0);
+  EXPECT_EQ(callbacks_.messageComplete, 1);
+  EXPECT_EQ(callbacks_.streamErrors, 0);
+  EXPECT_EQ(callbacks_.sessionErrors, 0);
+  EXPECT_EQ(callbacks_.msg->getTrailers(), nullptr);
+}
+
+TEST_F(HTTP2CodecTest, GenerateHeadersWithEmptyRequest) {
+  HTTPMessage req;
+  req.getClientAddress(); // Force it to be a request
+  auto id = upstreamCodec_.createStream();
+  upstreamCodec_.generateHeader(output_, id, req, true /* eom */);
+
+  parse();
+  EXPECT_EQ(callbacks_.messageBegin, 1);
+  EXPECT_EQ(callbacks_.headersComplete, 1);
+  EXPECT_EQ(callbacks_.messageComplete, 1);
+  EXPECT_EQ(callbacks_.streamErrors, 0);
+  EXPECT_EQ(callbacks_.sessionErrors, 0);
+}

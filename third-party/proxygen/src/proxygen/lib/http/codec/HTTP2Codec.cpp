@@ -1499,13 +1499,13 @@ size_t HTTP2Codec::generateChunkTerminator(folly::IOBufQueue& /*writeBuf*/,
 size_t HTTP2Codec::generateTrailers(folly::IOBufQueue& writeBuf,
                                     StreamID stream,
                                     const HTTPHeaders& trailers) {
-  if (trailers.size() == 0) {
-    // No point in sending an empty trailer block, convert to EOM.
-    return generateEOM(writeBuf, stream);
-  }
   VLOG(4) << "generating TRAILERS for stream=" << stream;
   std::vector<compress::Header> allHeaders;
   CodecUtil::appendHeaders(trailers, allHeaders, HTTP_HEADER_NONE);
+  if (allHeaders.size() == 0) {
+    // No point in sending an empty trailer block, convert to EOM.
+    return generateEOM(writeBuf, stream);
+  }
 
   HTTPHeaderSize size{0, 0, 0};
   uint8_t headerSize = http2::kFrameHeaderSize;

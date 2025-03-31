@@ -1,0 +1,16 @@
+Packages
+  intern
+    include_paths => [fake_flib/intern]
+    includes => [prod]
+  prod
+    include_paths => [basic-3.php, fake_flib]
+    includes => []
+Deployments
+  my-intern
+    domains => [www\.my-intern\.com]
+    packages => [intern, prod]
+    soft_packages => []
+  my-prod
+    domains => [www\.my-prod\.com]
+    packages => [prod]
+    soft_packages => []

@@ -238,7 +238,7 @@ function bin_root(): string {
   return $home . $routes["cmake"];
 }
 
-function read_opts_file(?string $file): string {
+function read_opts_file(?string $file, ?string $input_dir = null): string {
   if ($file is null || !file_exists($file)) {
     return "";
   }
@@ -256,8 +256,19 @@ function read_opts_file(?string $file): string {
     $line = preg_replace('/^ *#.*$/', ' ', $line);
 
     // Substitute in the directory name
-    $line = str_replace('__DIR__', dirname($file), $line);
-
+    // If input_dir is set, strip it from the expansion of DIR unless
+    // the option is -c, which is not affected by --input-dir
+    if ($input_dir != null && strpos($line, '-c ') == false) {
+      $line = str_replace('__DIR__', realpath(dirname($file)), $line);
+      if (strpos($line, $input_dir.'/') != false) {
+        $line = str_replace($input_dir.'/', '', $line);
+      } else {
+        // --foo=__DIR__ must be substituted with --foo=/, not --foo=
+        $line = str_replace($input_dir, '/', $line);
+      }
+    } else {
+      $line = str_replace('__DIR__', dirname($file), $line);
+    }
     $contents .= $line;
   }
   fclose($fp);
@@ -791,6 +802,14 @@ function find_file_for_dir(string $dir, string $name): ?string {
   return null;
 }
 
+function find_set_input_dir(string $test): ?string {
+  $set_input_dir = find_file_for_dir($test, ".set_input_dir");
+  if ($set_input_dir is nonnull) {
+    return dirname($set_input_dir);
+  }
+  return null;
+}
+
 function find_debug_config(string $test, string $name): string {
   $debug_config = find_file_for_dir(dirname($test), $name);
   if ($debug_config is nonnull) {
@@ -979,6 +998,11 @@ function hhvm_cmd(
   );
   $file_opts = read_opts_file("{$test}.opts");
 
+  $input_dir = find_set_input_dir(dirname($test));
+  if ($input_dir is nonnull) {
+    $input_dir = realpath($input_dir);
+  }
+
   $config_ini = find_file_for_dir(dirname($test), 'config.ini');
   invariant($config_ini is nonnull, "%s", __METHOD__);
   $cmds = hhvm_cmd_impl(
@@ -988,11 +1012,17 @@ function hhvm_cmd(
     Status::getTestWorkingDir($test) . '/autoloadDB',
     $hdf,
     find_debug_config($test, 'hphpd.ini'),
+    $options->repo && $input_dir is nonnull
+      ? '-vServer.SourceRoot='.$input_dir
+      : '',
     $config_opts,
     $file_opts,
     $is_temp_file ? " --temp-file" : "",
     '--file',
-    escapeshellarg($test_run),
+    escapeshellarg(
+      $options->repo && $input_dir is nonnull
+        ? str_replace($input_dir.'/', '', realpath($test_run))
+        : $test_run),
   );
 
   $cmd = "";
@@ -1130,6 +1160,11 @@ function hphp_cmd(Options $options, string $test): string {
     find_file_for_dir(dirname($test), 'config.hphp_opts')
   );
 
+  $input_dir = find_set_input_dir(dirname($test));
+  if ($input_dir is nonnull) {
+    $input_dir = realpath($input_dir);
+  }
+
   return implode(" ", vec[
     hphpc_path($options),
     '--hphp',
@@ -1137,7 +1172,8 @@ function hphp_cmd(Options $options, string $test): string {
     '--config',
     find_test_ext($test, 'ini', 'hphp_config'),
     $hdf,
-    '--repo-options-dir='.\dirname($test),
+    $input_dir is nonnull ? '--input-dir='.$input_dir : '',
+    $input_dir is nonnull ? '-vRuntime.Server.SourceRoot='.$input_dir : '',
     $options->cores ? '' : '-vRuntime.ResourceLimit.CoreFileSize=0',
     '-vRuntime.Debug.CoreDumpReportDirectory='.Status::getWorkingDir(),
     '-vRuntime.Eval.EnableIntrinsicsExtension=true',
@@ -1152,12 +1188,14 @@ function hphp_cmd(Options $options, string $test): string {
     '-l1',
     '-o "' . Status::getTestWorkingDir($test) . '"',
     '--file-cache="'.Status::getTestWorkingDir($test).'/file.cache"',
-    "\"$test\"",
+    $input_dir is nonnull
+      ? str_replace($input_dir.'/', '', realpath($test))
+      : "\"$test\"",
     "-vExternWorker.WorkingDir=".Status::getTestWorkingDir($test),
     $config_hphp_opts,
     $extra_args,
     $compiler_args,
-    read_opts_file(find_test_ext($test, 'hphp_opts')),
+    read_opts_file(find_test_ext($test, 'hphp_opts'), $input_dir),
   ]);
 }
 

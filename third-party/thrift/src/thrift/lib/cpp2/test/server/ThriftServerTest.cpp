@@ -1941,8 +1941,10 @@ TEST_P(HeaderOrRocket, ResponseWriteTimeout) {
     }
 
     void uninstall() {
-      socket_->getEventBase()->runImmediatelyOrRunInEventBaseThreadAndWait(
-          [this]() { socket_->setReadCB(wrapped_); });
+      if (!hasEOF_) {
+        socket_->getEventBase()->runImmediatelyOrRunInEventBaseThreadAndWait(
+            [this]() { socket_->setReadCB(wrapped_); });
+      }
     }
 
     void getReadBuffer(void** bufReturn, size_t* lenReturn) override {
@@ -1980,7 +1982,10 @@ TEST_P(HeaderOrRocket, ResponseWriteTimeout) {
     void readBufferAvailable(std::unique_ptr<IOBuf> readBuf) noexcept override {
       wrapped_->readBufferAvailable(std::move(readBuf));
     }
-    void readEOF() noexcept override { wrapped_->readEOF(); }
+    void readEOF() noexcept override {
+      hasEOF_ = true;
+      wrapped_->readEOF();
+    }
     void readErr(const folly::AsyncSocketException& ex) noexcept override {
       wrapped_->readErr(ex);
     }
@@ -1990,6 +1995,7 @@ TEST_P(HeaderOrRocket, ResponseWriteTimeout) {
     folly::AsyncReader::ReadCallback* wrapped_{nullptr};
     size_t maxBytesPerLoop_;
     std::chrono::milliseconds sleepMsPerLoop_;
+    bool hasEOF_ = false;
   };
 
   folly::Baton<> requestReceivedBaton;
@@ -2035,6 +2041,7 @@ TEST_P(HeaderOrRocket, ResponseWriteTimeout) {
 
   auto t2 = std::move(fut).getTry();
   EXPECT_TRUE(t2.hasException());
+  readCallback->uninstall();
 }
 
 INSTANTIATE_TEST_CASE_P(

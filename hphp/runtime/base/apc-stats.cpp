@@ -238,7 +238,6 @@ void APCStats::Create() {
 
 APCStats::APCStats() : m_valueSize(nullptr)
                      , m_keySize(nullptr)
-                     , m_inFileSize(nullptr)
                      , m_livePrimedSize(nullptr)
                      , m_pendingDeleteSize(nullptr)
                      , m_entries(nullptr)
@@ -248,7 +247,6 @@ APCStats::APCStats() : m_valueSize(nullptr)
                      , m_detailedStats(nullptr) {
   m_valueSize = ServiceData::createCounter("apc.value_size.sum");
   m_keySize = ServiceData::createCounter("apc.key_size.sum");
-  m_inFileSize = ServiceData::createCounter("apc.in_file_size.sum");
   m_livePrimedSize = ServiceData::createCounter("apc.primed_live_size.sum");
   m_pendingDeleteSize =
     ServiceData::createCounter("apc.pending_delete_size.sum");
@@ -272,8 +270,6 @@ std::string APCStats::getStatsInfo() const {
   info += std::to_string(m_valueSize->getValue()) +
           "\nKey size: " +
           std::to_string(m_keySize->getValue()) +
-          "\nMapped to file data size: " +
-          std::to_string(m_inFileSize->getValue()) +
           "\nIn memory primed data size: " +
           std::to_string(m_livePrimedSize->getValue()) +
           "\nEntries count: " +
@@ -298,7 +294,6 @@ const StaticString s_num_entries("num_entries");
 const StaticString s_primedLiveEntries("primed_live_entries");
 const StaticString s_valuesSize("values_size");
 const StaticString s_keysSize("keys_size");
-const StaticString s_primedInFileSize("primed_in_file_size");
 const StaticString s_primeLiveSize("primed_live_size");
 const StaticString s_pendingDeleteSize("pending_delete_size");
 const StaticString s_uncountedEntries("uncounted_entries");
@@ -323,9 +318,6 @@ void APCStats::collectStats(std::map<const StringData*, int64_t>& stats) const {
   stats.insert(
       std::pair<const StringData*, int64_t>(s_keysSize.get(),
                                             m_keySize->getValue()));
-  stats.insert(
-      std::pair<const StringData*, int64_t>(s_primedInFileSize.get(),
-                                            m_inFileSize->getValue()));
   stats.insert(
       std::pair<const StringData*, int64_t>(s_primeLiveSize.get(),
                                             m_livePrimedSize->getValue()));

@@ -185,13 +185,6 @@ struct APCStats {
     m_keySize->addValue(-len);
   }
 
-  // A value of a certain size was added to the primed set that is mapped
-  // to file
-  void addInFileValue(size_t size) {
-    assertx(size > 0);
-    m_inFileSize->addValue(size);
-  }
-
   // Only call this method from ::MakeUncounted()
   void addAPCUncountedBlock() {
     m_uncountedBlocks->increment();
@@ -292,9 +285,6 @@ private:
   ServiceData::ExportedCounter* m_valueSize;
   // Keep track of the overall memory usage of all keys
   ServiceData::ExportedCounter* m_keySize;
-  // Size of data stored in the paged out in memory file. This
-  // is basically the size of the primed data that goes into the file
-  ServiceData::ExportedCounter* m_inFileSize;
   // Size of primed data that is brought to life, that is, that goes
   // into memory
   ServiceData::ExportedCounter* m_livePrimedSize;

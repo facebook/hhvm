@@ -17,6 +17,7 @@ cdef shared_ptr[_fbthrift_cbindings.cFoo] Foo_convert_to_cpp(object inst) except
         _transitive_thrift_converter.Foo_convert_to_cpp(inst)
     )
 cdef object Foo_from_cpp(const shared_ptr[_fbthrift_cbindings.cFoo]& c_struct):
-    return _transitive_thrift_converter.Foo_from_cpp(deref(const_pointer_cast(c_struct)))
+    _py_struct = _transitive_thrift_converter.Foo_from_cpp(deref(const_pointer_cast(c_struct)))
+    return _py_struct
 
 

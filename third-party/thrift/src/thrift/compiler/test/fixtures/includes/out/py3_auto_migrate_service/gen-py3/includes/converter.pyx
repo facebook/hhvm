@@ -17,6 +17,7 @@ cdef shared_ptr[_fbthrift_cbindings.cIncluded] Included_convert_to_cpp(object in
         _includes_thrift_converter.Included_convert_to_cpp(inst)
     )
 cdef object Included_from_cpp(const shared_ptr[_fbthrift_cbindings.cIncluded]& c_struct):
-    return _includes_thrift_converter.Included_from_cpp(deref(const_pointer_cast(c_struct)))
+    _py_struct = _includes_thrift_converter.Included_from_cpp(deref(const_pointer_cast(c_struct)))
+    return _py_struct
 
 

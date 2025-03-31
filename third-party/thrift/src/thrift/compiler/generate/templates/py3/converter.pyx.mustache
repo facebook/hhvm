@@ -54,13 +54,16 @@ import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:n
 {{! direct replacement for ._cpp_obj }}
 cdef shared_ptr[_fbthrift_cbindings.{{> types/c_struct }}] {{struct:name}}_convert_to_cpp(object inst) except*:
 {{^program:gen_py3_cython?}}
+    {{#program:inplace_migrate?}}{{^program:auto_migrate?}}
+    try:
+        inst = inst._fbthrift__inner
+    except AttributeError:{{! let TypeError happen below}}
+        pass
+
+    {{/program:auto_migrate?}}{{/program:inplace_migrate?}}
     return make_shared[_fbthrift_cbindings.{{> types/c_struct }}](
         _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter.{{!
-        }}{{struct:name}}_convert_to_cpp(inst{{!
-        }}{{#program:inplace_migrate?}}{{!
-        }}._fbthrift__inner{{!
-        }}{{/program:inplace_migrate?}}{{!
-        }})
+        }}{{struct:name}}_convert_to_cpp(inst)
     )
 {{/program:gen_py3_cython?}}
 {{#program:gen_py3_cython?}}
@@ -70,13 +73,12 @@ cdef shared_ptr[_fbthrift_cbindings.{{> types/c_struct }}] {{struct:name}}_conve
 {{! direct replacement for ._fbthrift_create }}
 cdef object {{struct:name}}_from_cpp(const shared_ptr[_fbthrift_cbindings.{{> types/c_struct }}]& c_struct):
 {{^program:gen_py3_cython?}}
-    return {{!
-    }}{{#program:inplace_migrate?}}{{!
-    }}{{> types/current_module_types}}.{{struct:name}}.from_python({{!
-    }}{{/program:inplace_migrate?}}{{!
-    }}_{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter.{{!
-        }}{{struct:name}}_from_cpp(deref(const_pointer_cast(c_struct))){{!
-        }}{{#program:inplace_migrate?}}){{/program:inplace_migrate?}}
+    _py_struct = _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_thrift_converter.{{!
+            }}{{struct:name}}_from_cpp(deref(const_pointer_cast(c_struct)))
+    {{#program:inplace_migrate?}}{{^program:auto_migrate?}}
+    _py_struct = {{> types/current_module_types}}.{{struct:name}}.from_python(_py_struct)
+    {{/program:auto_migrate?}}{{/program:inplace_migrate?}}
+    return _py_struct
 {{/program:gen_py3_cython?}}
 {{#program:gen_py3_cython?}}
     return _fbthrift_ctypes.{{struct:name}}._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)

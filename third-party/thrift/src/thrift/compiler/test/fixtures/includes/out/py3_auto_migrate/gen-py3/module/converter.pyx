@@ -17,6 +17,7 @@ cdef shared_ptr[_fbthrift_cbindings.cMyStruct] MyStruct_convert_to_cpp(object in
         _module_thrift_converter.MyStruct_convert_to_cpp(inst)
     )
 cdef object MyStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cMyStruct]& c_struct):
-    return _module_thrift_converter.MyStruct_from_cpp(deref(const_pointer_cast(c_struct)))
+    _py_struct = _module_thrift_converter.MyStruct_from_cpp(deref(const_pointer_cast(c_struct)))
+    return _py_struct
 
 

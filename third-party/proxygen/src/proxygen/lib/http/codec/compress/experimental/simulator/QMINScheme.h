@@ -45,7 +45,7 @@ static struct qmin_enc *qmin_enc_new(int /*side*/,
                                      unsigned /*max_capacity*/,
                                      const struct qmin_ctl_out * /*ctl_out*/,
                                      const char * /*idstr*/) {
-  return NULL;
+  return nullptr;
 }
 static ssize_t qmin_enc_cmds_in(struct qmin_enc * /*enc*/,
                                 const void * /*buf*/,
@@ -77,7 +77,7 @@ static struct qmin_dec *qmin_dec_new(int /*side*/,
                                      unsigned /*max_capacity*/,
                                      const struct qmin_ctl_out * /*ctl_out*/,
                                      const char * /*idstr*/) {
-  return NULL;
+  return nullptr;
 }
 static ssize_t qmin_dec_cmds_in(struct qmin_dec * /*dec*/,
                                 const void * /*buf*/,
@@ -151,7 +151,7 @@ class QMINScheme : public CompressionScheme {
       stream->sm_read_off += chunk->sc_sz;
       return chunk;
     } else
-      return NULL;
+      return nullptr;
   }
 
   explicit QMINScheme(CompressionSimulator *sim, uint32_t /*tableSize*/)

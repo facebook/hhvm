@@ -36,9 +36,8 @@ func TestWriteBinaryEmptyBinaryFormat(t *testing.T) {
 	m := my_test_struct.NewMyTestStruct()
 	m.Bin = nil
 	format := NewBinaryFormat(bytes.NewBuffer([]byte(nil)))
-	if err := m.Write(format); err != nil {
-		t.Fatal(err)
-	}
+	err := m.Write(format)
+	require.NoError(t, err)
 }
 
 func TestSkipUnknownTypeBinaryFormat(t *testing.T) {

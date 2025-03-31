@@ -36,12 +36,8 @@ func TestHeaderProtocolHeaders(t *testing.T) {
 	require.NoError(t, err)
 
 	proto1.setRequestHeader("preferred_cheese", "cheddar")
-	if v, _ := proto1.(*headerProtocol).trans.writeInfoHeaders["preferred_cheese"]; v != "cheddar" {
-		t.Fatalf("failed to set header")
-	}
-	if len(proto1.(*headerProtocol).trans.writeInfoHeaders) != 1 {
-		t.Fatalf("wrong number of headers")
-	}
+	require.Equal(t, "cheddar", proto1.(*headerProtocol).trans.writeInfoHeaders["preferred_cheese"])
+	require.Len(t, proto1.(*headerProtocol).trans.writeInfoHeaders, 1)
 
 	proto1.WriteMessageBegin("", types.CALL, 1)
 	proto1.WriteMessageEnd()
@@ -50,11 +46,6 @@ func TestHeaderProtocolHeaders(t *testing.T) {
 	_, _, _, err = proto2.ReadMessageBegin()
 	require.NoError(t, err)
 
-	if v, _ := proto2.getResponseHeaders()["preferred_cheese"]; v != "gouda" {
-		t.Fatalf("failed to read header, got: %s", v)
-	}
-
-	if peerIdentity(proto2.(*headerProtocol).trans) != "batman" {
-		t.Fatalf("failed to peer identity")
-	}
+	require.Equal(t, "gouda", proto2.getResponseHeaders()["preferred_cheese"])
+	require.Equal(t, "batman", peerIdentity(proto2.(*headerProtocol).trans))
 }

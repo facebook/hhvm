@@ -233,6 +233,10 @@ class ValueWrapper : public ::apache::thrift::type::detail::Wrap<Base> {
   [[deprecated("Prefer emplace_list()")]] BoxedValueList& set_listValue(
       ValueList&& t);
 
+  ValueList& emplace_list(BoxedValueList t);
+  ValueList& emplace_list(const ValueList& t);
+  ValueList& emplace_list(ValueList&& t);
+
   using ValueSet =
       ::folly::F14VectorSet<::apache::thrift::protocol::detail::Value>;
   using BoxedValueSet = ::std::unique_ptr<ValueSet>;

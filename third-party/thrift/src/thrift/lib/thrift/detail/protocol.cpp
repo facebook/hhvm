@@ -57,6 +57,21 @@ using ValueMap = Value::ValueMap;
 using BoxedValueMap = Value::BoxedValueMap;
 
 template <>
+ValueList& Value::emplace_list(BoxedValueList t) {
+  return *toThrift().set_listValue(std::move(t));
+}
+
+template <>
+ValueList& Value::emplace_list(const ValueList& t) {
+  return *toThrift().set_listValue(t);
+}
+
+template <>
+ValueList& Value::emplace_list(ValueList&& t) {
+  return *toThrift().set_listValue(std::move(t));
+}
+
+template <>
 BoxedValueList& Value::set_listValue(BoxedValueList t) {
   return toThrift().set_listValue(std::move(t));
 }

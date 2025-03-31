@@ -16,6 +16,24 @@
 
 package types
 
+///////////////////////////////////////////////////////////////////////////////
+// This file is home to a helper that converts from various base types to
+// respective pointer types. This is necessary because Go does not permit
+// references to constants, nor can a pointer type to base type be allocated
+// and initialized in a single expression.
+//
+// E.g., this is not allowed:
+//
+//    var ip *int = &5
+//
+// But this *is* allowed:
+//
+//    var ip *int = Pointerize(5)
+//
+// Since pointers to base types are commonplace as [optional] fields in
+// exported thrift structs, we factor such helpers here.
+///////////////////////////////////////////////////////////////////////////////
+
 // ThriftPointerizable is a type constraint meant to prevent Pointerize() API abuse.
 // e.g. using outside of Thrift context or with non-Thrift types
 type ThriftPointerizable interface {

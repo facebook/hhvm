@@ -11,6 +11,7 @@ use hh_hash::Hasher;
 use ocamlrep::OCamlInt;
 use rc_pos::with_erased_lines::WithErasedLines;
 
+use crate::explanation::Explanation;
 use crate::user_error::Severity;
 use crate::user_error::UserError;
 use crate::warnings_saved_state::ErrorHash;
@@ -49,24 +50,24 @@ impl<PrimPos: WithErasedLines, Pos: WithErasedLines> WithErasedLines for UserErr
             code,
             claim,
             reasons,
-            explanation,
             quickfixes,
-            custom_msgs,
             is_fixmed,
             flags,
             function_pos,
+            custom_msgs: _,
+            explanation: _,
         } = self;
         UserError {
             severity,
             code,
             claim: claim.with_erased_lines(),
             reasons: reasons.into_iter().map(|r| r.with_erased_lines()).collect(),
-            explanation,
+            explanation: Explanation::Empty,
             quickfixes: quickfixes
                 .into_iter()
                 .map(|q| q.with_erased_lines())
                 .collect(),
-            custom_msgs,
+            custom_msgs: vec![],
             is_fixmed,
             flags,
             function_pos,

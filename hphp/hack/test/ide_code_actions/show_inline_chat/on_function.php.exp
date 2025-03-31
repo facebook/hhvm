@@ -17,7 +17,7 @@ JSON for selected code action:
         "entrypoint":"FixLintErrorCodeAction",
         "extras":{
           "legacyUserPrompt":"Given the following snippet of Hack code that is part of the file:\n<SNIPPET>\n```hack\n  7 | function inter_is(A $a, C $c): C {\n  8 |  if($a is I) {\n  9 |    $z = $a;\n 10 |  } else {\n 11 |    $z = $c;\n 12 |  }\n 13 |  return [DIAGNOSTIC_START]$z[DIAGNOSTIC_END];\n 14 |  //      ^ at-caret\n 15 | }\n```\n</SNIPPET>\n<DIAGNOSTIC>\nInvalid return type\n</DIAGNOSTIC>\n<HINT>\nExpected `C`\nlocation uri:on_function.php\n</HINT>\n<HINT>\nBut got `(I & A)` from this `is` expression test\nlocation uri:on_function.php\n</HINT>\nEdit <SNIPPET> in a way that would fix that lint.\n   If there are multiple ways to fix this issue, please return in the code section the most strightforward one that is part of <SNIPPET>,\n   any further suggestions can be added in the explanation section.",
-          "lineAgnosticHash":"f283a46ddcdefc2"
+          "lineAgnosticHash":"571a5eb9612a61c6"
         },
         "overrideSelection":{"end":{"character":1,"line":14},"start":{"character":0,"line":6}},
         "predefinedPrompt":{
@@ -53,7 +53,7 @@ JSON for selected code action:
         "entrypoint":"FixLintErrorCodeAction",
         "extras":{
           "legacyUserPrompt":"Given the following snippet of Hack code that is part of the file:\n<SNIPPET>\n```hack\n  7 | function inter_is(A $a, C $c): C {\n  8 |  if($a is I) {\n  9 |    $z = $a;\n 10 |  } else {\n 11 |    $z = $c;\n 12 |  }\n 13 |  return [DIAGNOSTIC_START]$z[DIAGNOSTIC_END];\n 14 |  //      ^ at-caret\n 15 | }\n```\n</SNIPPET>\n<DIAGNOSTIC>\nInvalid return type\n</DIAGNOSTIC>\n<HINT>\nExpected `C`\nlocation uri:on_function.php\n</HINT>\n<HINT>\nBut got `(I & A)` from this `is` expression test\nlocation uri:on_function.php\n</HINT>\nEdit <SNIPPET> in a way that would fix that lint.\n   If there are multiple ways to fix this issue, please return in the code section the most strightforward one that is part of <SNIPPET>,\n   any further suggestions can be added in the explanation section.",
-          "lineAgnosticHash":"f283a46ddcdefc2"
+          "lineAgnosticHash":"571a5eb9612a61c6"
         },
         "overrideSelection":{"end":{"character":1,"line":14},"start":{"character":0,"line":6}},
         "predefinedPrompt":{
@@ -89,7 +89,7 @@ JSON for selected code action:
         "entrypoint":"FixLintErrorCodeAction",
         "extras":{
           "legacyUserPrompt":"Given the following snippet of Hack code that is part of the file:\n<SNIPPET>\n```hack\n  7 | function inter_is(A $a, C $c): C {\n  8 |  if($a is I) {\n  9 |    $z = $a;\n 10 |  } else {\n 11 |    $z = $c;\n 12 |  }\n 13 |  return [DIAGNOSTIC_START]$z[DIAGNOSTIC_END];\n 14 |  //      ^ at-caret\n 15 | }\n```\n</SNIPPET>\n<DIAGNOSTIC>\nInvalid return type\n</DIAGNOSTIC>\n<HINT>\nExpected `C`\nlocation uri:on_function.php\n</HINT>\n<HINT>\nBut got `(I & A)` from this `is` expression test\nlocation uri:on_function.php\n</HINT>\nEdit <SNIPPET> in a way that would fix that lint.\n   If there are multiple ways to fix this issue, please return in the code section the most strightforward one that is part of <SNIPPET>,\n   any further suggestions can be added in the explanation section.",
-          "lineAgnosticHash":"f283a46ddcdefc2"
+          "lineAgnosticHash":"571a5eb9612a61c6"
         },
         "overrideSelection":{"end":{"character":1,"line":14},"start":{"character":0,"line":6}},
         "predefinedPrompt":{

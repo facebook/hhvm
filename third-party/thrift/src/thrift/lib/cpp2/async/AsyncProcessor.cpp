@@ -25,7 +25,7 @@
 #include <thrift/lib/cpp2/server/IResourcePoolAcceptor.h>
 
 // Default to ture, so it can be used for killswitch.
-THRIFT_FLAG_DEFINE_bool(thrift_enable_streaming_tracking, true);
+THRIFT_FLAG_DEFINE_bool(thrift_enable_streaming_tracking, false);
 #if defined(__linux__) && !FOLLY_MOBILE
 /**
  * TALK TO THE THRIFT TEAM
@@ -33,11 +33,11 @@ THRIFT_FLAG_DEFINE_bool(thrift_enable_streaming_tracking, true);
  */
 DEFINE_bool(
     EXPERIMENTAL_thrift_enable_streaming_tracking,
-    false,
+    true,
     "Enable Thrift Streaming Tracking.");
 #else
 static constexpr bool FLAGS_EXPERIMENTAL_thrift_enable_streaming_tracking =
-    false;
+    true;
 #endif
 
 namespace {

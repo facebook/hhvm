@@ -28,11 +28,18 @@ import (
 // The interceptor is responsible for calling pfunc.RunContext() and it can
 // return a result or an exception which are then sent back to the caller.
 // The interceptor is expected to be concurrency safe.
-type Interceptor func(ctx context.Context, methodName string, pfunc types.ProcessorFunction, args types.Struct) (types.WritableStruct, types.ApplicationException)
+type Interceptor func(
+	ctx context.Context,
+	methodName string,
+	pfunc types.ProcessorFunction,
+	args types.Struct,
+) (types.WritableStruct, types.ApplicationException)
 
 type interceptorProcessor struct {
-	interceptor Interceptor
+	// Embeds original Processor
 	Processor
+
+	interceptor Interceptor
 }
 
 // WrapInterceptor wraps an interceptor around the Processor p
@@ -43,8 +50,8 @@ func WrapInterceptor(interceptor Interceptor, p Processor) Processor {
 		return p
 	}
 	return &interceptorProcessor{
-		interceptor: interceptor,
 		Processor:   p,
+		interceptor: interceptor,
 	}
 }
 
@@ -53,9 +60,9 @@ func (p *interceptorProcessor) ProcessorFunctionMap() map[string]types.Processor
 	mi := make(map[string]types.ProcessorFunction)
 	for name, pf := range m {
 		mi[name] = &interceptorProcessorFunction{
+			ProcessorFunction: pf,
 			interceptor:       p.interceptor,
 			methodName:        name,
-			ProcessorFunction: pf,
 		}
 	}
 	return mi
@@ -66,9 +73,11 @@ func (p *interceptorProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
 }
 
 type interceptorProcessorFunction struct {
+	// Embeds original ProcessorFunction
+	types.ProcessorFunction
+
 	interceptor Interceptor
 	methodName  string
-	types.ProcessorFunction
 }
 
 func (pf *interceptorProcessorFunction) RunContext(ctx context.Context, args types.Struct) (types.WritableStruct, types.ApplicationException) {

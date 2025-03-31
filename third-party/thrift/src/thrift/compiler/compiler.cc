@@ -108,7 +108,8 @@ Options:
   --extra-validation
               Comma-separated list of opt-in validators to run. Recognized
               values include:
-                unstructured_annotations_on_field_type
+                unstructured_annotations
+                  Forbids all unstructured annotations
 
                 warn_on_redundant_custom_default_values
                   Issues warnings for struct fields that have custom default
@@ -740,8 +741,8 @@ std::string parse_args(
       boost::algorithm::split(
           validators, *arg, [](char c) { return c == ','; });
       for (const auto& validator : validators) {
-        if (validator == "unstructured_annotations_on_field_type") {
-          // no-op
+        if (validator == "unstructured_annotations") {
+          sparams.forbid_unstructured_annotations = true;
         } else if (validator == "warn_on_redundant_custom_default_values") {
           sparams.warn_on_redundant_custom_default_values = true;
         } else if (validator == "forbid_non_optional_cpp_ref_fields") {

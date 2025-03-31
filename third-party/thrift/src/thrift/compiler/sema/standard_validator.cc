@@ -1206,7 +1206,13 @@ void validate_reserved_ids_enum(sema_context& ctx, const t_enum& node) {
 }
 
 bool owns_annotations(const t_type* type) {
-  if (type->unstructured_annotations().empty()) {
+  if (std::none_of(
+          type->unstructured_annotations().begin(),
+          type->unstructured_annotations().end(),
+          [](const auto& a) {
+            return a.second.from ==
+                deprecated_annotation_value::origin::unstructured;
+          })) {
     return false;
   }
   if (dynamic_cast<const t_container*>(type)) {
@@ -1297,6 +1303,14 @@ void validate_cpp_type_annotation(sema_context& ctx, const Node& node) {
 
 struct ValidateAnnotationPositions {
   void operator()(sema_context& ctx, const t_const& node) {
+    if (owns_annotations(node.type())) {
+      err(ctx);
+    }
+  }
+  void operator()(sema_context& ctx, const t_typedef& node) {
+    if (!ctx.sema_parameters().forbid_unstructured_annotations) {
+      return;
+    }
     if (owns_annotations(node.type())) {
       err(ctx);
     }
@@ -1448,6 +1462,10 @@ void deprecate_annotations(sema_context& ctx, const t_named& node) {
         ctx.error("invalid annotation {}", k);
         continue;
       }
+      if (v.from == deprecated_annotation_value::origin::unstructured &&
+          ctx.sema_parameters().forbid_unstructured_annotations) {
+        ctx.error("Unstructured annotations are not allowed.");
+      }
       continue;
     }
     std::string replacement;
@@ -1470,7 +1488,10 @@ void deprecate_annotations(sema_context& ctx, const t_named& node) {
     if (directly_deprecated &&
         node.has_structured_annotation(deprecations.at(k).c_str())) {
       ctx.error("Duplicate annotations {} and {}.", k, replacement);
-    } else if (removed_annotations.count(k) != 0 || prefix) {
+    } else if (
+        removed_annotations.count(k) != 0 || prefix ||
+        (v.from == deprecated_annotation_value::origin::unstructured &&
+         ctx.sema_parameters().forbid_unstructured_annotations)) {
       ctx.error(
           "The annotation {} has been removed. Please use {} instead.",
           k,
@@ -1636,6 +1657,7 @@ ast_validator standard_validator() {
   validator.add_typedef_visitor(&validate_cpp_type_annotation<t_typedef>);
   validator.add_typedef_visitor(&validate_py3_enable_cpp_adapter);
   validator.add_typedef_visitor(&deprecate_typedef_type_annotations);
+  validator.add_typedef_visitor(ValidateAnnotationPositions());
 
   validator.add_container_visitor(ValidateAnnotationPositions());
   validator.add_enum_visitor(&validate_cpp_enum_type);

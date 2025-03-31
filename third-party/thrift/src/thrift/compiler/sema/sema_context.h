@@ -94,6 +94,8 @@ struct sema_params {
   // If true, will issue a warning if a default value is explicitly specified
   // for a field, but that value is equal to the intrinsic default value.
   bool warn_on_redundant_custom_default_values = false;
+
+  bool forbid_unstructured_annotations = false;
 };
 
 // An AST visitor context for semantic analysis. It combines diagnostics

@@ -260,6 +260,10 @@ where
                                         let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::c::NumbersStreamError::ApplicationException(aexn)))
                                     }
+                                    ::fbthrift::ClientStreamElement::DeclaredEx(payload) => {
+                                        let mut de = P::deserializer(payload);
+                                        <crate::errors::c::NumbersStreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                                    }
                                 }
                             }).await.map_err(::anyhow::Error::from)??
                         }

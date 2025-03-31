@@ -898,6 +898,10 @@ where
                                         let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::my_service::StreamByIdStreamError::ApplicationException(aexn)))
                                     }
+                                    ::fbthrift::ClientStreamElement::DeclaredEx(payload) => {
+                                        let mut de = P::deserializer(payload);
+                                        <crate::errors::my_service::StreamByIdStreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                                    }
                                 }
                             }).await.map_err(::anyhow::Error::from)??
                         }
@@ -966,6 +970,10 @@ where
                                         let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::my_service::StreamByIdWithExceptionStreamError::ApplicationException(aexn)))
                                     }
+                                    ::fbthrift::ClientStreamElement::DeclaredEx(payload) => {
+                                        let mut de = P::deserializer(payload);
+                                        <crate::errors::my_service::StreamByIdWithExceptionStreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                                    }
                                 }
                             }).await.map_err(::anyhow::Error::from)??
                         }
@@ -1033,6 +1041,10 @@ where
                                         let mut de = P::deserializer(payload);
                                         let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::my_service::StreamByIdWithResponseStreamError::ApplicationException(aexn)))
+                                    }
+                                    ::fbthrift::ClientStreamElement::DeclaredEx(payload) => {
+                                        let mut de = P::deserializer(payload);
+                                        <crate::errors::my_service::StreamByIdWithResponseStreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
                                     }
                                 }
                             }).await.map_err(::anyhow::Error::from)??

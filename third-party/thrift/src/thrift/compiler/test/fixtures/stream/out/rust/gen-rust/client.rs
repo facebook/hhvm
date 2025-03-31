@@ -393,6 +393,10 @@ where
                                         let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::pub_sub_streaming_service::ReturnstreamStreamError::ApplicationException(aexn)))
                                     }
+                                    ::fbthrift::ClientStreamElement::DeclaredEx(payload) => {
+                                        let mut de = P::deserializer(payload);
+                                        <crate::errors::pub_sub_streaming_service::ReturnstreamStreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                                    }
                                 }
                             }).await.map_err(::anyhow::Error::from)??
                         }
@@ -460,6 +464,10 @@ where
                                         let mut de = P::deserializer(payload);
                                         let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::pub_sub_streaming_service::StreamthrowsStreamError::ApplicationException(aexn)))
+                                    }
+                                    ::fbthrift::ClientStreamElement::DeclaredEx(payload) => {
+                                        let mut de = P::deserializer(payload);
+                                        <crate::errors::pub_sub_streaming_service::StreamthrowsStreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
                                     }
                                 }
                             }).await.map_err(::anyhow::Error::from)??
@@ -529,6 +537,10 @@ where
                                         let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::pub_sub_streaming_service::ServicethrowsStreamError::ApplicationException(aexn)))
                                     }
+                                    ::fbthrift::ClientStreamElement::DeclaredEx(payload) => {
+                                        let mut de = P::deserializer(payload);
+                                        <crate::errors::pub_sub_streaming_service::ServicethrowsStreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                                    }
                                 }
                             }).await.map_err(::anyhow::Error::from)??
                         }
@@ -596,6 +608,10 @@ where
                                         let mut de = P::deserializer(payload);
                                         let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::pub_sub_streaming_service::Servicethrows2StreamError::ApplicationException(aexn)))
+                                    }
+                                    ::fbthrift::ClientStreamElement::DeclaredEx(payload) => {
+                                        let mut de = P::deserializer(payload);
+                                        <crate::errors::pub_sub_streaming_service::Servicethrows2StreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
                                     }
                                 }
                             }).await.map_err(::anyhow::Error::from)??
@@ -665,6 +681,10 @@ where
                                         let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::pub_sub_streaming_service::BoththrowsStreamError::ApplicationException(aexn)))
                                     }
+                                    ::fbthrift::ClientStreamElement::DeclaredEx(payload) => {
+                                        let mut de = P::deserializer(payload);
+                                        <crate::errors::pub_sub_streaming_service::BoththrowsStreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                                    }
                                 }
                             }).await.map_err(::anyhow::Error::from)??
                         }
@@ -732,6 +752,10 @@ where
                                         let mut de = P::deserializer(payload);
                                         let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamError::ApplicationException(aexn)))
+                                    }
+                                    ::fbthrift::ClientStreamElement::DeclaredEx(payload) => {
+                                        let mut de = P::deserializer(payload);
+                                        <crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
                                     }
                                 }
                             }).await.map_err(::anyhow::Error::from)??
@@ -801,6 +825,10 @@ where
                                         let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamError::ApplicationException(aexn)))
                                     }
+                                    ::fbthrift::ClientStreamElement::DeclaredEx(payload) => {
+                                        let mut de = P::deserializer(payload);
+                                        <crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                                    }
                                 }
                             }).await.map_err(::anyhow::Error::from)??
                         }
@@ -868,6 +896,10 @@ where
                                         let mut de = P::deserializer(payload);
                                         let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsStreamError::ApplicationException(aexn)))
+                                    }
+                                    ::fbthrift::ClientStreamElement::DeclaredEx(payload) => {
+                                        let mut de = P::deserializer(payload);
+                                        <crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsStreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
                                     }
                                 }
                             }).await.map_err(::anyhow::Error::from)??
@@ -938,6 +970,10 @@ where
                                         let mut de = P::deserializer(payload);
                                         let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
                                         ::std::result::Result::Ok(::std::result::Result::Err(crate::errors::pub_sub_streaming_service::ReturnstreamFastStreamError::ApplicationException(aexn)))
+                                    }
+                                    ::fbthrift::ClientStreamElement::DeclaredEx(payload) => {
+                                        let mut de = P::deserializer(payload);
+                                        <crate::errors::pub_sub_streaming_service::ReturnstreamFastStreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
                                     }
                                 }
                             }).await.map_err(::anyhow::Error::from)??

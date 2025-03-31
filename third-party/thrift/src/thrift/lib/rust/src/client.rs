@@ -31,25 +31,41 @@ use crate::Protocol;
 #[derive(Debug)]
 pub enum ClientStreamElement<Payload> {
     Reply(Payload),
+    DeclaredEx(Payload),
     ApplicationEx(Payload),
 }
 
 impl<Payload> ClientStreamElement<Payload> {
     pub fn payload(&self) -> &Payload {
         match self {
-            ClientStreamElement::Reply(payload) | ClientStreamElement::ApplicationEx(payload) => {
-                payload
-            }
+            ClientStreamElement::Reply(payload)
+            | ClientStreamElement::ApplicationEx(payload)
+            | ClientStreamElement::DeclaredEx(payload) => payload,
         }
     }
 
     pub fn into_payload(self) -> Payload {
         match self {
-            ClientStreamElement::Reply(payload) | ClientStreamElement::ApplicationEx(payload) => {
-                payload
-            }
+            ClientStreamElement::Reply(payload)
+            | ClientStreamElement::ApplicationEx(payload)
+            | ClientStreamElement::DeclaredEx(payload) => payload,
         }
     }
+}
+
+pub struct SinkReply<P>
+where
+    P: Framing,
+{
+    pub initial_response: FramingDecoded<P>,
+    pub sink_processor: Box<
+        dyn FnOnce(
+                BoxStream<'static, ClientStreamElement<FramingEncodedFinal<P>>>,
+            ) -> BoxFuture<
+                'static,
+                Result<ClientStreamElement<FramingDecoded<P>>, anyhow::Error>,
+            > + Send,
+    >,
 }
 
 pub trait ClientFactory {
@@ -99,6 +115,19 @@ pub trait Transport: Framing + Send + Sync + Sized + 'static {
     > {
         future::err(anyhow::Error::msg(
             "Streaming is not supported by this transport",
+        ))
+        .boxed()
+    }
+
+    fn call_sink(
+        &self,
+        _service_name: &'static CStr,
+        _fn_name: &'static CStr,
+        _req: FramingEncodedFinal<Self>,
+        _rpc_options: Self::RpcOptions,
+    ) -> BoxFuture<anyhow::Result<SinkReply<Self>>> {
+        future::err(anyhow::Error::msg(
+            "Sink is not supported by this transport",
         ))
         .boxed()
     }

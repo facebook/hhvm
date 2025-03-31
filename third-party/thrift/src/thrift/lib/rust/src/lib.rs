@@ -76,6 +76,7 @@ pub use crate::bufext::BufMutExt;
 pub use crate::bufext::DeserializeSource;
 pub use crate::client::ClientFactory;
 pub use crate::client::ClientStreamElement;
+pub use crate::client::SinkReply;
 pub use crate::client::Transport;
 pub use crate::compact_protocol::CompactProtocol;
 pub use crate::context_stack::ContextStack;

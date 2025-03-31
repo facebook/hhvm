@@ -174,6 +174,10 @@ where
                                         let aexn = ::fbthrift::ApplicationException::read(&mut de)?;
                                         ::std::result::Result::Ok(::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}StreamError::ApplicationException(aexn)))
                                     }
+                                    ::fbthrift::ClientStreamElement::DeclaredEx(payload) => {
+                                        let mut de = P::deserializer(payload);
+                                        <{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}StreamReader as ::fbthrift::help::DeserializeExn>::read_result(&mut de)
+                                    }
                                 }
                             }).await.map_err(::anyhow::Error::from)??
                         }

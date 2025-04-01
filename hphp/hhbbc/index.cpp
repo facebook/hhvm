@@ -13538,7 +13538,13 @@ protected:
           auto const cls = sorted[i];
           auto const it = children.find(cls);
           if (it == end(children)) continue;
-          for (auto const c : it->second) {
+          std::vector<SString> clsChildren{begin(it->second), end(it->second)};
+          std::sort(
+            begin(clsChildren),
+            end(clsChildren),
+            string_data_lt_type{}
+          );
+          for (auto const c : clsChildren) {
             indegree[c]--;
             if (indegree[c] == 0) sorted.emplace_back(c);
           }
@@ -13845,7 +13851,7 @@ protected:
     // whereas they would if a class with regular class was
     // processed first. Detect this condition and manually add such
     // methods to data.methods.
-    if (!data.hasRegularClass && childData.hasRegularClass) {
+    if (!data.hasRegularClass) {
       for (auto& [name, info] : childData.methods) {
         if (!info.regularComplete || info.privateAncestor) continue;
         if (is_special_method_name(name)) continue;

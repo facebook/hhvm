@@ -23,7 +23,6 @@ import (
 	"unsafe"
 
 	"thrift/lib/go/thrift"
-	"thrift/test/go/if/reflecttest"
 	"thrift/test/go/if/thrifttest"
 )
 
@@ -188,14 +187,14 @@ func TestFieldSerializationOrderDeterminism(t *testing.T) {
 }
 
 func TestSimpleJSONSerialization(t *testing.T) {
-	writeTarget := reflecttest.VariousFieldsStructConst1
+	writeTarget := thrifttest.VariousFieldsStructConst1
 
 	data, err := thrift.EncodeSimpleJSON(writeTarget)
 	if err != nil {
 		t.Fatalf("failed to serialize struct: %v", err)
 	}
 
-	readTarget := &reflecttest.VariousFieldsStruct{}
+	readTarget := &thrifttest.VariousFieldsStruct{}
 	err = thrift.DecodeSimpleJSON(data, readTarget)
 	if err != nil {
 		t.Fatalf("failed to deserialize struct: %v", err)

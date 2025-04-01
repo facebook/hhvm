@@ -91,8 +91,6 @@ class mstch_go_program : public mstch_program {
             {"program:gen_metadata?", &mstch_go_program::should_gen_metadata},
             {"program:gen_default_get?",
              &mstch_go_program::should_gen_default_get},
-            {"program:use_reflect_codec?",
-             &mstch_go_program::should_use_reflect_codec},
             {"program:import_metadata_package?",
              &mstch_go_program::should_import_metadata_package},
             {"program:metadata_qualifier",
@@ -130,7 +128,6 @@ class mstch_go_program : public mstch_program {
   }
   mstch::node should_gen_metadata() { return data_.gen_metadata; }
   mstch::node should_gen_default_get() { return data_.gen_default_get; }
-  mstch::node should_use_reflect_codec() { return data_.use_reflect_codec; }
   mstch::node should_import_metadata_package() {
     // We don't need to import the metadata package if we are
     // generating metadata inside the metadata package itself. Duh.
@@ -436,6 +433,8 @@ class mstch_go_struct : public mstch_struct {
             {"struct:req?", &mstch_go_struct::is_req_struct},
             {"struct:fields_sorted", &mstch_go_struct::fields_sorted},
             {"struct:scoped_name", &mstch_go_struct::scoped_name},
+            {"struct:use_reflect_codec?",
+             &mstch_go_struct::should_use_reflect_codec},
         });
   }
 
@@ -493,6 +492,11 @@ class mstch_go_struct : public mstch_struct {
     return make_mstch_fields(fields_in_id_order);
   }
   mstch::node scoped_name() { return struct_->get_scoped_name(); }
+  mstch::node should_use_reflect_codec() {
+    auto use_reflect_codec_annotation =
+        struct_->find_structured_annotation_or_null(kGoUseReflectCodecUri);
+    return data_.use_reflect_codec || use_reflect_codec_annotation != nullptr;
+  }
 
  private:
   go::codegen_data& data_;

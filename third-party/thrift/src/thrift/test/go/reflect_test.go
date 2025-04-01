@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	"thrift/lib/go/thrift"
-	"thrift/test/go/if/reflecttest"
+	"thrift/test/go/if/thrifttest"
 )
 
 func TestReflectCodec(t *testing.T) {
@@ -34,8 +34,8 @@ func TestReflectCodec(t *testing.T) {
 	// "field53": {["hello1", "hello2", "hello3"]: "value1"},
 	// ....
 
-	writeTarget := reflecttest.VariousFieldsStructConst1
-	writeTarget.Field51 = map[reflecttest.ComparableStruct]string{
+	writeTarget := thrifttest.VariousFieldsStructConst1
+	writeTarget.Field51 = map[thrifttest.ComparableStruct]string{
 		{Field1: 123}: "value1",
 	}
 	writeTarget.Field53 = map[*[]string]string{
@@ -47,7 +47,7 @@ func TestReflectCodec(t *testing.T) {
 		t.Fatalf("failed to serialize struct: %v", err)
 	}
 
-	readTarget := &reflecttest.VariousFieldsStruct{}
+	readTarget := &thrifttest.VariousFieldsStruct{}
 	err = thrift.DecodeCompact(originalBuf, readTarget)
 	if err != nil {
 		t.Fatalf("failed to deserialize struct: %v", err)

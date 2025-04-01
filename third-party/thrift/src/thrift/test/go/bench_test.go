@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	"thrift/lib/go/thrift"
-	"thrift/test/go/if/reflecttest"
+	"thrift/test/go/if/thrifttest"
 )
 
 // Run this benchmark:
@@ -35,8 +35,8 @@ func BenchmarkStructRead(b *testing.B) {
 	// "field53": {["hello1", "hello2", "hello3"]: "value1"},
 	// ....
 
-	originalStruct := reflecttest.VariousFieldsStructConst1
-	originalStruct.Field51 = map[reflecttest.ComparableStruct]string{
+	originalStruct := thrifttest.VariousFieldsStructConst1
+	originalStruct.Field51 = map[thrifttest.ComparableStruct]string{
 		{Field1: 123}: "value1",
 	}
 	originalStruct.Field53 = map[*[]string]string{
@@ -56,7 +56,7 @@ func BenchmarkStructRead(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		buffer.Reset()
 		buffer.Write(dataBytes)
-		readTargetStruct := reflecttest.NewVariousFieldsStruct()
+		readTargetStruct := thrifttest.NewVariousFieldsStruct()
 		err = readTargetStruct.Read(proto)
 		if err != nil {
 			b.Fatalf("failed to read struct: %v", err)
@@ -72,8 +72,8 @@ func BenchmarkStructWrite(b *testing.B) {
 	// "field53": {["hello1", "hello2", "hello3"]: "value1"},
 	// ....
 
-	originalStruct := reflecttest.VariousFieldsStructConst1
-	originalStruct.Field51 = map[reflecttest.ComparableStruct]string{
+	originalStruct := thrifttest.VariousFieldsStructConst1
+	originalStruct.Field51 = map[thrifttest.ComparableStruct]string{
 		{Field1: 123}: "value1",
 	}
 	originalStruct.Field53 = map[*[]string]string{
@@ -101,8 +101,8 @@ func BenchmarkStructToString(b *testing.B) {
 	// "field53": {["hello1", "hello2", "hello3"]: "value1"},
 	// ....
 
-	originalStruct := reflecttest.VariousFieldsStructConst1
-	originalStruct.Field51 = map[reflecttest.ComparableStruct]string{
+	originalStruct := thrifttest.VariousFieldsStructConst1
+	originalStruct.Field51 = map[thrifttest.ComparableStruct]string{
 		{Field1: 123}: "value1",
 	}
 	originalStruct.Field53 = map[*[]string]string{

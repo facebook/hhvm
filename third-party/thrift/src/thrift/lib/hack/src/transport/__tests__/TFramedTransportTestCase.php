@@ -60,6 +60,7 @@ final class TFramedTransportTestCase extends WWWTest {
     $buffer1 = new TMemoryBuffer($message);
     $buffer2 = new TMemoryBuffer();
 
+    /* HH_FIXME[4489] Revealed through strict exhaustivity checking for switches */
     switch ($tname) {
       case TBufferedTransport::class:
         $transport = new TBufferedTransport<TMemoryBuffer>($buffer2);

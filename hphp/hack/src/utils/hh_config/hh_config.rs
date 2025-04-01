@@ -23,6 +23,7 @@ use oxidized::global_options::GlobalOptions;
 use oxidized::global_options::NoneOrAllExcept;
 use oxidized::parser_options::ParserOptions;
 use package::PackageInfo;
+use serde_json::json;
 use sha1::Digest;
 use sha1::Sha1;
 
@@ -641,6 +642,14 @@ impl HhConfig {
 
     pub fn get_decl_parser_options(&self) -> DeclParserOptions {
         DeclParserOptions::from_parser_options(&self.opts.po)
+    }
+
+    pub fn to_selected_experiments_json(&self) -> String {
+        let experiments = json!({
+            "eden_fetch_parallelism": self.eden_fetch_parallelism,
+            "use_distc_crawl_dircache": self.use_distc_crawl_dircache,
+        });
+        experiments.to_string()
     }
 }
 

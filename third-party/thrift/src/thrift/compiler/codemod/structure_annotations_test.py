@@ -161,7 +161,6 @@ class StructureAnnotations(unittest.TestCase):
                 enum U16 {} (cpp.enum_type="unsigned short")
                 enum U32 {} (cpp.enum_type="::std::uint32_t", cpp.declare_bitwise_ops)
 
-                interaction I {} (process_in_event_base)
                 interaction J {} (serial)
                 service S {
                     void f() (thread = "eb", priority = "HIGH")
@@ -226,10 +225,9 @@ class StructureAnnotations(unittest.TestCase):
                 @cpp.EnumType{type = cpp.EnumUnderlyingType.U16}
                 enum U16 {}
                 @cpp.EnumType{type = cpp.EnumUnderlyingType.U32}
-                enum U32 {} ( cpp.declare_bitwise_ops)
+                @thrift.DeprecatedUnvalidatedAnnotations{items = {"cpp.declare_bitwise_ops": "1"}}
+                enum U32 {}
 
-                @cpp.ProcessInEbThreadUnsafe
-                interaction I {}
                 @thrift.Serial
                 interaction J {}
                 service S {

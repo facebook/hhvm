@@ -1,3 +1,5 @@
+WARN: File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 15, characters 5-14:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `G<T>` which is a subtype of `G<T>`. (Warn[12011])
 ERROR: File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 9, characters 16-18:
 Lacking `__construct`, class `Inf` does not initialize its private member(s): `t` (NastCheck[3030])
 ERROR: File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 11, characters 26-26:

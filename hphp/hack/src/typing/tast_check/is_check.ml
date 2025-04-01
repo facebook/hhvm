@@ -35,8 +35,25 @@ let replace_placeholders_with_tvars env ty =
     (env, T.mk (Typing_reason.none, T.Tclass (id, exact, targs)))
   | _ -> (env, ty)
 
+let is_like_null env ty =
+  Tast_env.is_sub_type
+    env
+    ty
+    (Typing_make_type.locl_like
+       Typing_reason.none
+       (Typing_make_type.null Typing_reason.none))
+
 let trivial_check ~as_lint pos env lhs_ty rhs_ty ~always_kind ~never_kind =
   let (env, lhs_ty) = Env.expand_type env lhs_ty in
+  (* We don't strip the like if is ~null because this leads to false positives
+     in the truthiness warning. Specifically like null frequently arises through
+     calling `idx` on `dynamic` typed data. *)
+  let lhs_ty =
+    if is_like_null env lhs_ty then
+      lhs_ty
+    else
+      Tast_env.strip_dynamic env lhs_ty
+  in
   let (env, rhs_ty) = Env.expand_type env rhs_ty in
   let tenv = Env.tast_env_as_typing_env env in
   let tenv = Typing_env.open_tyvars tenv Pos.none in

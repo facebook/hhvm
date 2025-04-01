@@ -1,1 +1,2 @@
-No errors
+WARN: File "inter_instanceof.php", line 21, characters 6-12:
+This `is` check is always `false`. The expression on the left has type `(int | string)` which shares no values with `A`. (Warn[12010])

@@ -1,3 +1,5 @@
+WARN: File "refinement.php", line 17, characters 7-25:
+This `is` check is always `false`. The expression on the left has type `C<int>` which shares no values with `AnyArray<nothing, nothing>`. (Warn[12010])
 ERROR: File "refinement.php", line 18, characters 11-12:
 Invalid return type (Typing[4110])
   File "refinement.php", line 8, characters 46-70:

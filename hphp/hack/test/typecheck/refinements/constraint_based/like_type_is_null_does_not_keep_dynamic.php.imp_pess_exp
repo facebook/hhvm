@@ -1,1 +1,2 @@
-No errors
+WARN: File "like_type_is_null_does_not_keep_dynamic.php", line 18, characters 9-25:
+This `is` check is always `true`. The expression on the left has type `dict<nothing, nothing>` which is a subtype of `nonnull`. (Warn[12009])

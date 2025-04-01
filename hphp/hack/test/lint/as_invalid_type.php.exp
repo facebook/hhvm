@@ -35,6 +35,8 @@ This expression has a type lie that makes Hack type checker think it is a differ
 File "as_invalid_type.php", line 61, characters 10-51:
 This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using a type assertion through `as`. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5808])
 File "as_invalid_type.php", line 62, characters 10-50:
+This `as` assertion will always succeed and hence is redundant. The expression on the left has a type `?string` which is a subtype of `?string`. (Lint[5628])
+File "as_invalid_type.php", line 62, characters 10-50:
 This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using a type assertion through `as`. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5808])
 File "as_invalid_type.php", line 63, characters 10-47:
 This expression has a type lie that makes Hack type checker think it is a different type than what it inferred. It is achieved using a type assertion through `as`. This can lead to fatals or subtle and latent behaviour changes. Even if the code is correct at the moment, the type checker won't produce any signal when the prerequisites for correctness change. (Lint[5808])

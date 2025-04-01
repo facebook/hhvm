@@ -1,1 +1,2 @@
-No errors
+WARN: File "like_nonnull_is_null_is_not_nothing.php", line 12, characters 7-27:
+This `is` check is always `false`. The expression on the left has type `nonnull` which shares no values with `null`. (Warn[12010])

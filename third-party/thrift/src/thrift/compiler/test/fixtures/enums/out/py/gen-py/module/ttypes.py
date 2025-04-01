@@ -55,147 +55,146 @@ UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 __all__ = ['UTF8STRINGS', 'Metasyntactic', 'MyEnum1', 'MyEnum2', 'MyEnum3', 'MyEnum4', 'MyBitmaskEnum1', 'MyBitmaskEnum2', 'SomeStruct', 'MyStruct']
 
 class Metasyntactic:
-  FOO = 1
-  BAR = 2
-  BAZ = 3
-  BAX = 4
 
-  _VALUES_TO_NAMES = {
-    1: "FOO",
-    2: "BAR",
-    3: "BAZ",
-    4: "BAX",
-  }
+  _NAMES_TO_VALUES = dict(zip((
+    "FOO",
+    "BAR",
+    "BAZ",
+    "BAX",
+),
+(
+    1,
+    2,
+    3,
+    4,
+  )))
+  _VALUES_TO_NAMES = {}
 
-  _NAMES_TO_VALUES = {
-    "FOO": 1,
-    "BAR": 2,
-    "BAZ": 3,
-    "BAX": 4,
-  }
+for k, v in Metasyntactic._NAMES_TO_VALUES.items():
+    setattr(Metasyntactic, k, v)
+    Metasyntactic._VALUES_TO_NAMES[v] = k
 
 class MyEnum1:
-  ME1_0 = 0
-  ME1_1 = 1
-  ME1_2 = 2
-  ME1_3 = 3
-  ME1_5 = 5
-  ME1_6 = 6
 
-  _VALUES_TO_NAMES = {
-    0: "ME1_0",
-    1: "ME1_1",
-    2: "ME1_2",
-    3: "ME1_3",
-    5: "ME1_5",
-    6: "ME1_6",
-  }
+  _NAMES_TO_VALUES = dict(zip((
+    "ME1_0",
+    "ME1_1",
+    "ME1_2",
+    "ME1_3",
+    "ME1_5",
+    "ME1_6",
+),
+(
+    0,
+    1,
+    2,
+    3,
+    5,
+    6,
+  )))
+  _VALUES_TO_NAMES = {}
 
-  _NAMES_TO_VALUES = {
-    "ME1_0": 0,
-    "ME1_1": 1,
-    "ME1_2": 2,
-    "ME1_3": 3,
-    "ME1_5": 5,
-    "ME1_6": 6,
-  }
+for k, v in MyEnum1._NAMES_TO_VALUES.items():
+    setattr(MyEnum1, k, v)
+    MyEnum1._VALUES_TO_NAMES[v] = k
 
 class MyEnum2:
-  ME2_0 = 0
-  ME2_1 = 1
-  ME2_2 = 2
 
-  _VALUES_TO_NAMES = {
-    0: "ME2_0",
-    1: "ME2_1",
-    2: "ME2_2",
-  }
+  _NAMES_TO_VALUES = dict(zip((
+    "ME2_0",
+    "ME2_1",
+    "ME2_2",
+),
+(
+    0,
+    1,
+    2,
+  )))
+  _VALUES_TO_NAMES = {}
 
-  _NAMES_TO_VALUES = {
-    "ME2_0": 0,
-    "ME2_1": 1,
-    "ME2_2": 2,
-  }
+for k, v in MyEnum2._NAMES_TO_VALUES.items():
+    setattr(MyEnum2, k, v)
+    MyEnum2._VALUES_TO_NAMES[v] = k
 
 class MyEnum3:
-  ME3_0 = 0
-  ME3_1 = 1
-  ME3_N2 = -2
-  ME3_N1 = -1
-  ME3_9 = 9
-  ME3_10 = 10
 
-  _VALUES_TO_NAMES = {
-    0: "ME3_0",
-    1: "ME3_1",
-    -2: "ME3_N2",
-    -1: "ME3_N1",
-    9: "ME3_9",
-    10: "ME3_10",
-  }
+  _NAMES_TO_VALUES = dict(zip((
+    "ME3_0",
+    "ME3_1",
+    "ME3_N2",
+    "ME3_N1",
+    "ME3_9",
+    "ME3_10",
+),
+(
+    0,
+    1,
+    -2,
+    -1,
+    9,
+    10,
+  )))
+  _VALUES_TO_NAMES = {}
 
-  _NAMES_TO_VALUES = {
-    "ME3_0": 0,
-    "ME3_1": 1,
-    "ME3_N2": -2,
-    "ME3_N1": -1,
-    "ME3_9": 9,
-    "ME3_10": 10,
-  }
+for k, v in MyEnum3._NAMES_TO_VALUES.items():
+    setattr(MyEnum3, k, v)
+    MyEnum3._VALUES_TO_NAMES[v] = k
 
 class MyEnum4:
-  ME4_A = 2147483645
-  ME4_B = 2147483646
-  ME4_C = 2147483647
-  ME4_D = -2147483648
 
-  _VALUES_TO_NAMES = {
-    2147483645: "ME4_A",
-    2147483646: "ME4_B",
-    2147483647: "ME4_C",
-    -2147483648: "ME4_D",
-  }
+  _NAMES_TO_VALUES = dict(zip((
+    "ME4_A",
+    "ME4_B",
+    "ME4_C",
+    "ME4_D",
+),
+(
+    2147483645,
+    2147483646,
+    2147483647,
+    -2147483648,
+  )))
+  _VALUES_TO_NAMES = {}
 
-  _NAMES_TO_VALUES = {
-    "ME4_A": 2147483645,
-    "ME4_B": 2147483646,
-    "ME4_C": 2147483647,
-    "ME4_D": -2147483648,
-  }
+for k, v in MyEnum4._NAMES_TO_VALUES.items():
+    setattr(MyEnum4, k, v)
+    MyEnum4._VALUES_TO_NAMES[v] = k
 
 class MyBitmaskEnum1:
-  ONE = 1
-  TWO = 2
-  FOUR = 4
 
-  _VALUES_TO_NAMES = {
-    1: "ONE",
-    2: "TWO",
-    4: "FOUR",
-  }
+  _NAMES_TO_VALUES = dict(zip((
+    "ONE",
+    "TWO",
+    "FOUR",
+),
+(
+    1,
+    2,
+    4,
+  )))
+  _VALUES_TO_NAMES = {}
 
-  _NAMES_TO_VALUES = {
-    "ONE": 1,
-    "TWO": 2,
-    "FOUR": 4,
-  }
+for k, v in MyBitmaskEnum1._NAMES_TO_VALUES.items():
+    setattr(MyBitmaskEnum1, k, v)
+    MyBitmaskEnum1._VALUES_TO_NAMES[v] = k
 
 class MyBitmaskEnum2:
-  ONE = 1
-  TWO = 2
-  FOUR = 4
 
-  _VALUES_TO_NAMES = {
-    1: "ONE",
-    2: "TWO",
-    4: "FOUR",
-  }
+  _NAMES_TO_VALUES = dict(zip((
+    "ONE",
+    "TWO",
+    "FOUR",
+),
+(
+    1,
+    2,
+    4,
+  )))
+  _VALUES_TO_NAMES = {}
 
-  _NAMES_TO_VALUES = {
-    "ONE": 1,
-    "TWO": 2,
-    "FOUR": 4,
-  }
+for k, v in MyBitmaskEnum2._NAMES_TO_VALUES.items():
+    setattr(MyBitmaskEnum2, k, v)
+    MyBitmaskEnum2._VALUES_TO_NAMES[v] = k
 
 class SomeStruct:
   r"""

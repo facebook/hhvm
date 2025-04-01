@@ -58,21 +58,22 @@ class RefType:
   r"""
   Optional, defaults to Unique
   """
-  Unique = 0
-  Shared = 1
-  SharedMutable = 2
 
-  _VALUES_TO_NAMES = {
-    0: "Unique",
-    1: "Shared",
-    2: "SharedMutable",
-  }
+  _NAMES_TO_VALUES = dict(zip((
+    "Unique",
+    "Shared",
+    "SharedMutable",
+),
+(
+    0,
+    1,
+    2,
+  )))
+  _VALUES_TO_NAMES = {}
 
-  _NAMES_TO_VALUES = {
-    "Unique": 0,
-    "Shared": 1,
-    "SharedMutable": 2,
-  }
+for k, v in RefType._NAMES_TO_VALUES.items():
+    setattr(RefType, k, v)
+    RefType._VALUES_TO_NAMES[v] = k
 
 class EnumUnderlyingType:
   r"""
@@ -80,27 +81,26 @@ class EnumUnderlyingType:
   underlying type for signed 32 bit integer.
   64-bit is not supported to avoid truncation since enums are sent as 32-bit integers over the wire.
   """
-  I8 = 0
-  U8 = 1
-  I16 = 2
-  U16 = 3
-  U32 = 4
 
-  _VALUES_TO_NAMES = {
-    0: "I8",
-    1: "U8",
-    2: "I16",
-    3: "U16",
-    4: "U32",
-  }
+  _NAMES_TO_VALUES = dict(zip((
+    "I8",
+    "U8",
+    "I16",
+    "U16",
+    "U32",
+),
+(
+    0,
+    1,
+    2,
+    3,
+    4,
+  )))
+  _VALUES_TO_NAMES = {}
 
-  _NAMES_TO_VALUES = {
-    "I8": 0,
-    "U8": 1,
-    "I16": 2,
-    "U16": 3,
-    "U32": 4,
-  }
+for k, v in EnumUnderlyingType._NAMES_TO_VALUES.items():
+    setattr(EnumUnderlyingType, k, v)
+    EnumUnderlyingType._VALUES_TO_NAMES[v] = k
 
 class Name:
   r"""

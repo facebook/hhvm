@@ -51,27 +51,26 @@ UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 __all__ = ['UTF8STRINGS', 'RpcPriority', 'Experimental', 'ReserveIds', 'RequiresBackwardCompatibility', 'TerseWrite', 'Box', 'Mixin', 'SerializeInFieldIdOrder', 'BitmaskEnum', 'ExceptionMessage', 'InternBox', 'Serial', 'Uri', 'Priority', 'DeprecatedUnvalidatedAnnotations', 'AllowReservedIdentifier', 'AllowReservedFilename']
 
 class RpcPriority:
-  HIGH_IMPORTANT = 0
-  HIGH = 1
-  IMPORTANT = 2
-  NORMAL = 3
-  BEST_EFFORT = 4
 
-  _VALUES_TO_NAMES = {
-    0: "HIGH_IMPORTANT",
-    1: "HIGH",
-    2: "IMPORTANT",
-    3: "NORMAL",
-    4: "BEST_EFFORT",
-  }
+  _NAMES_TO_VALUES = dict(zip((
+    "HIGH_IMPORTANT",
+    "HIGH",
+    "IMPORTANT",
+    "NORMAL",
+    "BEST_EFFORT",
+),
+(
+    0,
+    1,
+    2,
+    3,
+    4,
+  )))
+  _VALUES_TO_NAMES = {}
 
-  _NAMES_TO_VALUES = {
-    "HIGH_IMPORTANT": 0,
-    "HIGH": 1,
-    "IMPORTANT": 2,
-    "NORMAL": 3,
-    "BEST_EFFORT": 4,
-  }
+for k, v in RpcPriority._NAMES_TO_VALUES.items():
+    setattr(RpcPriority, k, v)
+    RpcPriority._VALUES_TO_NAMES[v] = k
 
 class Experimental:
   r"""

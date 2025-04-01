@@ -52,54 +52,57 @@ __all__ = ['UTF8STRINGS', 'EmptyEnum', 'City', 'Company', 'Internship', 'Range',
 
 class EmptyEnum:
 
-  _VALUES_TO_NAMES = {
-  }
+  _NAMES_TO_VALUES = dict(zip((
+),
+(
+  )))
+  _VALUES_TO_NAMES = {}
 
-  _NAMES_TO_VALUES = {
-  }
+for k, v in EmptyEnum._NAMES_TO_VALUES.items():
+    setattr(EmptyEnum, k, v)
+    EmptyEnum._VALUES_TO_NAMES[v] = k
 
 class City:
-  NYC = 0
-  MPK = 1
-  SEA = 2
-  LON = 3
 
-  _VALUES_TO_NAMES = {
-    0: "NYC",
-    1: "MPK",
-    2: "SEA",
-    3: "LON",
-  }
+  _NAMES_TO_VALUES = dict(zip((
+    "NYC",
+    "MPK",
+    "SEA",
+    "LON",
+),
+(
+    0,
+    1,
+    2,
+    3,
+  )))
+  _VALUES_TO_NAMES = {}
 
-  _NAMES_TO_VALUES = {
-    "NYC": 0,
-    "MPK": 1,
-    "SEA": 2,
-    "LON": 3,
-  }
+for k, v in City._NAMES_TO_VALUES.items():
+    setattr(City, k, v)
+    City._VALUES_TO_NAMES[v] = k
 
 class Company:
-  FACEBOOK = 0
-  WHATSAPP = 1
-  OCULUS = 2
-  INSTAGRAM = 3
-  __FRIEND__FEED = 4
 
-  _VALUES_TO_NAMES = {
-    0: "FACEBOOK",
-    1: "WHATSAPP",
-    2: "OCULUS",
-    3: "INSTAGRAM",
-    4: "__FRIEND__FEED",
-  }
+  _NAMES_TO_VALUES = dict(zip((
+    "FACEBOOK",
+    "WHATSAPP",
+    "OCULUS",
+    "INSTAGRAM",
+    "__FRIEND__FEED",
+),
+(
+    0,
+    1,
+    2,
+    3,
+    4,
+  )))
+  _VALUES_TO_NAMES = {}
 
-  _NAMES_TO_VALUES = {
-    "FACEBOOK": 0,
-    "WHATSAPP": 1,
-    "OCULUS": 2,
-    "INSTAGRAM": 3,
-    "__FRIEND__FEED": 4,
-  }
+for k, v in Company._NAMES_TO_VALUES.items():
+    setattr(Company, k, v)
+    Company._VALUES_TO_NAMES[v] = k
 
 class Internship:
   r"""

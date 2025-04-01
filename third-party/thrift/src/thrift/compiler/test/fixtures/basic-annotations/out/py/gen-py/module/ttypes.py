@@ -55,21 +55,22 @@ UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 __all__ = ['UTF8STRINGS', 'MyEnum', 'MyStructNestedAnnotation', 'MyUnion', 'MyException', 'MyStruct', 'SecretStruct', 'AwesomeStruct', 'FantasticStruct', 'list_string_6884']
 
 class MyEnum:
-  MyValue1 = 0
-  MyValue2 = 1
-  DOMAIN = 2
 
-  _VALUES_TO_NAMES = {
-    0: "MyValue1",
-    1: "MyValue2",
-    2: "DOMAIN",
-  }
+  _NAMES_TO_VALUES = dict(zip((
+    "MyValue1",
+    "MyValue2",
+    "DOMAIN",
+),
+(
+    0,
+    1,
+    2,
+  )))
+  _VALUES_TO_NAMES = {}
 
-  _NAMES_TO_VALUES = {
-    "MyValue1": 0,
-    "MyValue2": 1,
-    "DOMAIN": 2,
-  }
+for k, v in MyEnum._NAMES_TO_VALUES.items():
+    setattr(MyEnum, k, v)
+    MyEnum._VALUES_TO_NAMES[v] = k
 
 class MyStructNestedAnnotation:
   r"""

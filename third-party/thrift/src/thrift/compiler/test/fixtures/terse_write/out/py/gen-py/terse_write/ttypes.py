@@ -55,18 +55,20 @@ UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 __all__ = ['UTF8STRINGS', 'MyEnum', 'MyStruct', 'MyUnion', 'MyStructWithCustomDefault', 'StructLevelTerseStruct', 'FieldLevelTerseStruct', 'AdaptedFields', 'TerseException', 'MyInteger']
 
 class MyEnum:
-  ME0 = 0
-  ME1 = 1
 
-  _VALUES_TO_NAMES = {
-    0: "ME0",
-    1: "ME1",
-  }
+  _NAMES_TO_VALUES = dict(zip((
+    "ME0",
+    "ME1",
+),
+(
+    0,
+    1,
+  )))
+  _VALUES_TO_NAMES = {}
 
-  _NAMES_TO_VALUES = {
-    "ME0": 0,
-    "ME1": 1,
-  }
+for k, v in MyEnum._NAMES_TO_VALUES.items():
+    setattr(MyEnum, k, v)
+    MyEnum._VALUES_TO_NAMES[v] = k
 
 class MyStruct:
 

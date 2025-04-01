@@ -55,32 +55,36 @@ UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 __all__ = ['UTF8STRINGS', 'MyEnum', 'HackEnum', 'MyStruct', 'Containers', 'MyDataItem', 'MyUnion', 'MyException', 'MyExceptionWithMessage', 'ReservedKeyword', 'UnionToBeRenamed', 'MyEnumAlias', 'MyDataItemAlias']
 
 class MyEnum:
-  MyValue1 = 0
-  MyValue2 = 1
 
-  _VALUES_TO_NAMES = {
-    0: "MyValue1",
-    1: "MyValue2",
-  }
+  _NAMES_TO_VALUES = dict(zip((
+    "MyValue1",
+    "MyValue2",
+),
+(
+    0,
+    1,
+  )))
+  _VALUES_TO_NAMES = {}
 
-  _NAMES_TO_VALUES = {
-    "MyValue1": 0,
-    "MyValue2": 1,
-  }
+for k, v in MyEnum._NAMES_TO_VALUES.items():
+    setattr(MyEnum, k, v)
+    MyEnum._VALUES_TO_NAMES[v] = k
 
 class HackEnum:
-  Value1 = 0
-  Value2 = 1
 
-  _VALUES_TO_NAMES = {
-    0: "Value1",
-    1: "Value2",
-  }
+  _NAMES_TO_VALUES = dict(zip((
+    "Value1",
+    "Value2",
+),
+(
+    0,
+    1,
+  )))
+  _VALUES_TO_NAMES = {}
 
-  _NAMES_TO_VALUES = {
-    "Value1": 0,
-    "Value2": 1,
-  }
+for k, v in HackEnum._NAMES_TO_VALUES.items():
+    setattr(HackEnum, k, v)
+    HackEnum._VALUES_TO_NAMES[v] = k
 
 class MyStruct:
   r"""

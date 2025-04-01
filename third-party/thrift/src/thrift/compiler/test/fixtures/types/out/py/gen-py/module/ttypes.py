@@ -53,55 +53,58 @@ UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 __all__ = ['UTF8STRINGS', 'has_bitwise_ops', 'is_unscoped', 'MyForwardRefEnum', 'empty_struct', 'decorated_struct', 'ContainerStruct', 'CppTypeStruct', 'VirtualStruct', 'MyStructWithForwardRefEnum', 'TrivialNumeric', 'TrivialNestedWithDefault', 'ComplexString', 'ComplexNestedWithDefault', 'MinPadding', 'MinPaddingWithCustomType', 'MyStruct', 'MyDataItem', 'Renaming', 'AnnotatedTypes', 'ForwardUsageRoot', 'ForwardUsageStruct', 'ForwardUsageByRef', 'IncompleteMap', 'IncompleteMapDep', 'CompleteMap', 'CompleteMapDep', 'IncompleteList', 'IncompleteListDep', 'CompleteList', 'CompleteListDep', 'AdaptedList', 'AdaptedListDep', 'DependentAdaptedList', 'DependentAdaptedListDep', 'AllocatorAware', 'AllocatorAware2', 'TypedefStruct', 'StructWithDoubleUnderscores', 'TBinary', 'IntTypedef', 'UintTypedef', 'SomeListOfTypeMap_2468', 'TBinary_8623', 'i32_9314', 'list_i32_9187', 'map_i32_i32_9565', 'map_i32_string_1261', 'set_i32_7070', 'set_i32_7194', 'string_5252']
 
 class has_bitwise_ops:
-  none = 0
-  zero = 1
-  one = 2
-  two = 4
-  three = 8
 
-  _VALUES_TO_NAMES = {
-    0: "none",
-    1: "zero",
-    2: "one",
-    4: "two",
-    8: "three",
-  }
+  _NAMES_TO_VALUES = dict(zip((
+    "none",
+    "zero",
+    "one",
+    "two",
+    "three",
+),
+(
+    0,
+    1,
+    2,
+    4,
+    8,
+  )))
+  _VALUES_TO_NAMES = {}
 
-  _NAMES_TO_VALUES = {
-    "none": 0,
-    "zero": 1,
-    "one": 2,
-    "two": 4,
-    "three": 8,
-  }
+for k, v in has_bitwise_ops._NAMES_TO_VALUES.items():
+    setattr(has_bitwise_ops, k, v)
+    has_bitwise_ops._VALUES_TO_NAMES[v] = k
 
 class is_unscoped:
-  hello = 0
-  world = 1
 
-  _VALUES_TO_NAMES = {
-    0: "hello",
-    1: "world",
-  }
+  _NAMES_TO_VALUES = dict(zip((
+    "hello",
+    "world",
+),
+(
+    0,
+    1,
+  )))
+  _VALUES_TO_NAMES = {}
 
-  _NAMES_TO_VALUES = {
-    "hello": 0,
-    "world": 1,
-  }
+for k, v in is_unscoped._NAMES_TO_VALUES.items():
+    setattr(is_unscoped, k, v)
+    is_unscoped._VALUES_TO_NAMES[v] = k
 
 class MyForwardRefEnum:
-  ZERO = 0
-  NONZERO = 12
 
-  _VALUES_TO_NAMES = {
-    0: "ZERO",
-    12: "NONZERO",
-  }
+  _NAMES_TO_VALUES = dict(zip((
+    "ZERO",
+    "NONZERO",
+),
+(
+    0,
+    12,
+  )))
+  _VALUES_TO_NAMES = {}
 
-  _NAMES_TO_VALUES = {
-    "ZERO": 0,
-    "NONZERO": 12,
-  }
+for k, v in MyForwardRefEnum._NAMES_TO_VALUES.items():
+    setattr(MyForwardRefEnum, k, v)
+    MyForwardRefEnum._VALUES_TO_NAMES[v] = k
 
 class empty_struct:
 

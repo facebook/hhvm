@@ -1073,38 +1073,42 @@ void t_py_generator::generate_typedef(const t_typedef* ttypedef) {
  * @param tenum The enumeration
  */
 void t_py_generator::generate_enum(const t_enum* tenum) {
-  std::ostringstream to_string_mapping, from_string_mapping;
+  std::ostringstream names_list, values_list;
 
-  f_types_ << "class " << rename_reserved_keywords(tenum->get_name()) << ":"
-           << endl;
+  string name = rename_reserved_keywords(tenum->get_name());
+
+  f_types_ << "class " << name << ":" << endl;
 
   indent_up();
   generate_python_docstring(f_types_, tenum);
 
-  to_string_mapping << indent() << "_VALUES_TO_NAMES = {" << endl;
-  from_string_mapping << indent() << "_NAMES_TO_VALUES = {" << endl;
+  names_list << "(" << endl;
+  values_list << "(" << endl;
 
   vector<t_enum_value*> constants = tenum->get_enum_values();
   vector<t_enum_value*>::iterator c_iter;
   for (c_iter = constants.begin(); c_iter != constants.end(); ++c_iter) {
     int32_t value = (*c_iter)->get_value();
 
-    f_types_ << indent() << rename_reserved_keywords((*c_iter)->get_name())
-             << " = " << value << endl;
-
-    // Dictionaries to/from string names of enums
-    to_string_mapping << indent() << indent() << value << ": \""
-                      << (*c_iter)->get_name() << "\"," << endl;
-    from_string_mapping << indent() << indent() << '"' << (*c_iter)->get_name()
-                        << "\": " << value << ',' << endl;
+    // Build up lists of values and names to avoid large dict literals
+    names_list << indent(2) << "\"" << (*c_iter)->get_name() << "\"," << endl;
+    values_list << indent(2) << value << "," << endl;
   }
-  to_string_mapping << indent() << "}" << endl;
-  from_string_mapping << indent() << "}" << endl;
+  names_list << ")";
+  values_list << indent() << ")";
+
+  f_types_ << endl;
+  f_types_ << indent() << "_NAMES_TO_VALUES = dict(zip(" << names_list.str()
+           << "," << endl
+           << values_list.str() << "))" << endl;
+  f_types_ << indent() << "_VALUES_TO_NAMES = {}" << endl;
 
   indent_down();
   f_types_ << endl;
-  f_types_ << to_string_mapping.str() << endl
-           << from_string_mapping.str() << endl;
+  f_types_ << "for k, v in " << name << "._NAMES_TO_VALUES.items():" << endl
+           << indent(2) << "setattr(" << name << ", k, v)" << endl
+           << indent(2) << name << "._VALUES_TO_NAMES[v] = k" << endl
+           << endl;
 }
 
 /**

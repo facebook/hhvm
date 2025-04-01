@@ -22,7 +22,7 @@ import unittest
 
 import pkg_resources
 
-from thrift.compiler.codemod.test_utils import read_file, run_binary, write_file
+from xplat.thrift.compiler.codemod.test_utils import read_file, run_binary, write_file
 
 
 class HoistAnnotatedTypes(unittest.TestCase):

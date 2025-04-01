@@ -281,7 +281,6 @@ class StructTests(unittest.TestCase):
             # pyre-ignore[28]: intentionally used a wrong field name "val_lists" for test
             easy(val=1, an_int=Integers(small=300), name="foo", val_lists=[1, 2, 3, 4])
 
-    @brokenInAutoMigrate()
     def test_iterate(self) -> None:
         x = Reserved(
             from_="hello",
@@ -292,6 +291,12 @@ class StructTests(unittest.TestCase):
             inst="foo",
             changes="bar",
         )
+
+        def auto_migrate_mangle(name: str) -> str:
+            return f"_Reserved{name}" if is_auto_migrated() else name
+
+        mangled_str_name = auto_migrate_mangle("__mangled_str")
+        mangled_int_name = auto_migrate_mangle("__mangled_int")
         self.assertEqual(
             list(x),
             [
@@ -302,8 +307,8 @@ class StructTests(unittest.TestCase):
                 ("move", "Qh4xe1"),
                 ("inst", "foo"),
                 ("changes", "bar"),
-                ("__mangled_str", ""),
-                ("__mangled_int", 0),
+                (mangled_str_name, ""),
+                (mangled_int_name, 0),
             ],
         )
         self.assertEqual(
@@ -316,8 +321,8 @@ class StructTests(unittest.TestCase):
                 "move",
                 "inst",
                 "changes",
-                "__mangled_str",
-                "__mangled_int",
+                mangled_str_name,
+                mangled_int_name,
             ],
         )
 

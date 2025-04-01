@@ -231,7 +231,14 @@ cdef class Struct:
     def __iter__(self):
         for i in range(self._fbthrift_get_struct_size()):
             name = self._fbthrift_get_field_name_by_index(i)
-            yield name, getattr(self, name)
+            try:
+                yield name, getattr(self, name)
+            except AttributeError:
+                if name.startswith("__"):
+                    mangled = f"_{self.__class__.__name__}{name}"
+                    yield name, getattr(self, mangled)
+                else:
+                    raise
 
     def __dir__(self):
         return dir(type(self))

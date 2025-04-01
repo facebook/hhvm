@@ -498,12 +498,43 @@ void ThriftServerRequestResponse::sendThriftResponse(
     context_.sendError(std::move(ex), std::move(cb));
     return;
   }
-  auto payload = payloadSerializerPtr->packWithFds(
-      &metadata,
-      std::move(data),
-      std::move(getRequestContext()->getHeader()->fds),
-      context_.connection().isDecodingMetadataUsingBinaryProtocol(),
-      context_.connection().getRawSocket());
+
+  // Prevents potential complexity (e.g. using custom compression to
+  // encode custom compression failures, or to that matter, any failure at all),
+  // we use ZSTD to compress exception payloads.
+  // custom compression implies ZSTD, so it is safe to fallback to it.
+  if (metadata.compression().value_or(CompressionAlgorithm::NONE) ==
+      CompressionAlgorithm::CUSTOM) {
+    auto payloadIsException = false;
+    if (!metadata.payloadMetadata()) {
+      // unexpected, handle it conservatively
+      payloadIsException = true;
+    } else if (metadata.payloadMetadata()->exceptionMetadata_ref()) {
+      payloadIsException = true;
+    }
+
+    if (payloadIsException) {
+      metadata.compression() = CompressionAlgorithm::ZSTD;
+    }
+  }
+
+  rocket::Payload payload;
+  try {
+    payload = payloadSerializerPtr->packWithFds(
+        &metadata,
+        std::move(data),
+        std::move(getRequestContext()->getHeader()->fds),
+        context_.connection().isDecodingMetadataUsingBinaryProtocol(),
+        context_.connection().getRawSocket());
+  } catch (std::exception const& ex) {
+    auto error = makeResponseRpcError(
+        ResponseRpcErrorCode::UNKNOWN,
+        fmt::format("Failed to pack or send payload due to: {}", ex.what()),
+        metadata);
+    auto rex = makeRocketException(error, *payloadSerializerPtr);
+    context_.sendError(std::move(rex), std::move(cb));
+    return;
+  }
 
   if (maxResponseWriteTime_ > std::chrono::milliseconds{0}) {
     cb = apache::thrift::MessageChannel::SendCallbackPtr(

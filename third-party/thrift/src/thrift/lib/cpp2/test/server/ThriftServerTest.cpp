@@ -82,6 +82,7 @@
 #include <thrift/lib/cpp2/test/gen-cpp2/DummyStatus.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestService.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestServiceAsyncClient.h>
+#include <thrift/lib/cpp2/test/server/ThriftServerTestUtils.h>
 #include <thrift/lib/cpp2/test/util/TestInterface.h>
 #include <thrift/lib/cpp2/test/util/TestThriftServerFactory.h>
 #include <thrift/lib/cpp2/transport/http2/common/HTTP2RoutingHandler.h>
@@ -1029,53 +1030,6 @@ TEST(ThriftServerDeathTest, OnStopRequestedException) {
       }),
       "onStopRequested");
 }
-
-namespace {
-enum class TransportType { Header, Rocket };
-enum class Compression { Enabled, Disabled };
-enum class ErrorType {
-  Overload,
-  AppOverload,
-  MethodOverload,
-  Client,
-  Server,
-  PreprocessorOverload,
-};
-} // namespace
-
-class HeaderOrRocketTest : public testing::Test {
- public:
-  TransportType transport = TransportType::Rocket;
-  Compression compression = Compression::Enabled;
-  auto makeStickyClient(
-      ScopedServerInterfaceThread& runner, folly::EventBase* evb) {
-    return runner.newStickyClient<TestServiceAsyncClient>(
-        evb,
-        [&](auto socket) mutable { return makeChannel(std::move(socket)); });
-  }
-  auto makeClient(ScopedServerInterfaceThread& runner, folly::EventBase* evb) {
-    return runner.newClient<apache::thrift::Client<TestService>>(
-        evb,
-        [&](auto socket) mutable { return makeChannel(std::move(socket)); });
-  }
-
-  ClientChannel::Ptr makeChannel(folly::AsyncTransport::UniquePtr socket) {
-    auto channel = [&]() -> ClientChannel::Ptr {
-      if (transport == TransportType::Header) {
-        return HeaderClientChannel::newChannel(
-            HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket));
-      } else {
-        return RocketClientChannel::newChannel(std::move(socket));
-      }
-    }();
-    if (compression == Compression::Enabled) {
-      apache::thrift::CompressionConfig compressionConfig;
-      compressionConfig.codecConfig_ref().ensure().set_zstdConfig();
-      channel->setDesiredCompressionConfig(compressionConfig);
-    }
-    return channel;
-  }
-};
 
 class OverloadTest
     : public HeaderOrRocketTest,
@@ -4307,197 +4261,6 @@ TEST_P(HeaderOrRocket, StatusOnStartingAndStopping) {
   handler->stopping.post();
 }
 
-namespace {
-enum class ProcessorImplementation {
-  Containment,
-  ContainmentLegacy,
-  Inheritance
-};
-} // namespace
-
-class HeaderOrRocketCompression
-    : public HeaderOrRocketTest,
-      public ::testing::WithParamInterface<
-          std::tuple<TransportType, Compression, ProcessorImplementation>> {
- public:
-  ProcessorImplementation processorImplementation =
-      ProcessorImplementation::Containment;
-
-  void SetUp() override {
-    std::tie(transport, compression, processorImplementation) = GetParam();
-  }
-
-  std::unique_ptr<AsyncProcessorFactory> makeFactory() {
-    // processor can only check for compressed request payload on rocket
-    if (compression == Compression::Enabled &&
-        transport == TransportType::Rocket) {
-      return std::make_unique<CompressionCheckTestInterface>(
-          processorImplementation, CompressionAlgorithm::ZSTD);
-    } else {
-      return std::make_unique<CompressionCheckTestInterface>(
-          processorImplementation, CompressionAlgorithm::NONE);
-    }
-  }
-
- private:
-  // Custom processor derived from AsyncProcessor with compressed request API
-  struct ContainmentCompressionCheckProcessor : public AsyncProcessor {
-    ContainmentCompressionCheckProcessor(
-        std::unique_ptr<AsyncProcessor> underlyingProcessor,
-        CompressionAlgorithm compression)
-        : underlyingProcessor_(std::move(underlyingProcessor)),
-          compression_(compression) {}
-    void executeRequest(
-        ServerRequest&&,
-        const AsyncProcessorFactory::MethodMetadata&) override {
-      LOG(FATAL) << "executeRequest shouldn't be called in this test";
-    }
-
-    void processSerializedCompressedRequestWithMetadata(
-        ResponseChannelRequest::UniquePtr req,
-        SerializedCompressedRequest&& serializedRequest,
-        const AsyncProcessorFactory::MethodMetadata& methodMetadata,
-        protocol::PROTOCOL_TYPES prot,
-        Cpp2RequestContext* ctx,
-        folly::EventBase* eb,
-        concurrency::ThreadManager* tm) override {
-      // check that SerializedCompressedRequest has expected compression
-      EXPECT_EQ(compression_, serializedRequest.getCompressionAlgorithm());
-      underlyingProcessor_->processSerializedCompressedRequestWithMetadata(
-          std::move(req),
-          std::move(serializedRequest),
-          methodMetadata,
-          prot,
-          ctx,
-          eb,
-          tm);
-    }
-
-    void processInteraction(apache::thrift::ServerRequest&&) override {
-      LOG(FATAL)
-          << "This AsyncProcessor doesn't support Thrift interactions. "
-          << "Please implement processInteraction to support interactions.";
-    }
-
-    std::unique_ptr<AsyncProcessor> underlyingProcessor_;
-    CompressionAlgorithm compression_;
-  };
-
-  // Custom processor derived from AsyncProcessor without compressed request API
-  struct LegacyContainmentProcessor : public AsyncProcessor {
-    explicit LegacyContainmentProcessor(
-        std::unique_ptr<AsyncProcessor> underlyingProcessor)
-        : underlyingProcessor_(std::move(underlyingProcessor)) {}
-
-    void executeRequest(
-        ServerRequest&&,
-        const AsyncProcessorFactory::MethodMetadata&) override {
-      LOG(FATAL) << "executeRequest shouldn't be called in this test";
-    }
-
-    void processSerializedCompressedRequestWithMetadata(
-        ResponseChannelRequest::UniquePtr req,
-        SerializedCompressedRequest&& serializedRequest,
-        const AsyncProcessorFactory::MethodMetadata& methodMetadata,
-        protocol::PROTOCOL_TYPES prot,
-        Cpp2RequestContext* ctx,
-        folly::EventBase* eb,
-        concurrency::ThreadManager* tm) override {
-      underlyingProcessor_->processSerializedCompressedRequestWithMetadata(
-          std::move(req),
-          std::move(serializedRequest),
-          methodMetadata,
-          prot,
-          ctx,
-          eb,
-          tm);
-    }
-
-    void processInteraction(apache::thrift::ServerRequest&&) override {
-      LOG(FATAL)
-          << "This AsyncProcessor doesn't support Thrift interactions. "
-          << "Please implement processInteraction to support interactions.";
-    }
-
-    std::unique_ptr<AsyncProcessor> underlyingProcessor_;
-  };
-
-  // Custom processor derived from generated processor
-  struct InheritanceCompressionCheckProcessor
-      : public TestInterface::ProcessorType {
-    InheritanceCompressionCheckProcessor(
-        apache::thrift::ServiceHandler<TestService>* iface,
-        CompressionAlgorithm compression)
-        : TestInterface::ProcessorType(iface), compression_(compression) {}
-
-    void executeRequest(
-        ServerRequest&&,
-        const AsyncProcessorFactory::MethodMetadata&) override {
-      LOG(FATAL) << "executeRequest shouldn't be called in this test";
-    }
-
-    void processSerializedCompressedRequestWithMetadata(
-        apache::thrift::ResponseChannelRequest::UniquePtr req,
-        apache::thrift::SerializedCompressedRequest&& serializedRequest,
-        const apache::thrift::AsyncProcessorFactory::MethodMetadata& mm,
-        apache::thrift::protocol::PROTOCOL_TYPES prot,
-        apache::thrift::Cpp2RequestContext* ctx,
-        folly::EventBase* eb,
-        apache::thrift::concurrency::ThreadManager* tm) override {
-      // check that SerializedCompressedRequest has expected compression
-      EXPECT_EQ(compression_, serializedRequest.getCompressionAlgorithm());
-      TestInterface::ProcessorType::
-          processSerializedCompressedRequestWithMetadata(
-              std::move(req),
-              std::move(serializedRequest),
-              mm,
-              prot,
-              ctx,
-              eb,
-              tm);
-    }
-
-    CompressionAlgorithm compression_;
-  };
-
-  struct CompressionCheckTestInterface : public TestInterface {
-    CompressionCheckTestInterface(
-        ProcessorImplementation processorImplementation,
-        CompressionAlgorithm compression)
-        : processorImplementation_(processorImplementation),
-          compression_(compression) {}
-    std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override {
-      switch (processorImplementation_) {
-        case ProcessorImplementation::Containment:
-          return std::make_unique<ContainmentCompressionCheckProcessor>(
-              std::make_unique<TestInterface::ProcessorType>(this),
-              compression_);
-        case ProcessorImplementation::ContainmentLegacy:
-          return std::make_unique<LegacyContainmentProcessor>(
-              std::make_unique<TestInterface::ProcessorType>(this));
-        case ProcessorImplementation::Inheritance:
-          return std::make_unique<InheritanceCompressionCheckProcessor>(
-              this, compression_);
-      }
-    }
-
-    CreateMethodMetadataResult createMethodMetadata() override {
-      // We want to return WildcardMethodMetadataMap here because default
-      // implementation will return MethodMetadataMap and requests will be
-      // routed to executeRequest rather than to
-      // processSerializedCompressedRequestWithMetadata. This test relies on
-      // routing requests to processSerializedCompressedRequestWithMetadata.
-      WildcardMethodMetadataMap wildcardMap;
-      wildcardMap.wildcardMetadata = std::make_shared<WildcardMethodMetadata>();
-      wildcardMap.knownMethods = {};
-      return wildcardMap;
-    }
-
-    ProcessorImplementation processorImplementation_;
-    CompressionAlgorithm compression_;
-  };
-};
-
 TEST(ThriftServerTest, getResourcePoolServerDbgInfo) {
   // Arrange integration test setup
   auto handler = std::make_shared<TestInterface>();
@@ -4586,6 +4349,213 @@ TEST(ThriftServerTest, getResourcePoolServerDbgInfo) {
   EXPECT_EQ(5, executorDbgInfo.threadsCount().value());
 }
 
+namespace {
+enum class ProcessorImplementation {
+  Containment,
+  ContainmentLegacy,
+  Inheritance
+};
+} // namespace
+
+class HeaderOrRocketCompression
+    : public HeaderOrRocketTest,
+      public ::testing::WithParamInterface<
+          std::tuple<TransportType, Compression, ProcessorImplementation>> {
+ public:
+  ProcessorImplementation processorImplementation =
+      ProcessorImplementation::Containment;
+
+  std::unique_ptr<AsyncProcessorFactory> makeFactory() {
+    // processor can only check for compressed request payload on rocket
+    if (compression == Compression::Enabled &&
+        transport == TransportType::Rocket) {
+      return std::make_unique<CompressionCheckTestInterface>(
+          processorImplementation, CompressionAlgorithm::ZSTD);
+    } else if (
+        compression == Compression::Custom &&
+        transport == TransportType::Rocket) {
+      return std::make_unique<CompressionCheckTestInterface>(
+          processorImplementation, CompressionAlgorithm::CUSTOM);
+    } else {
+      return std::make_unique<CompressionCheckTestInterface>(
+          processorImplementation, CompressionAlgorithm::NONE);
+    }
+  }
+
+ private:
+  // Custom processor derived from AsyncProcessor with compressed request API
+  struct ContainmentCompressionCheckProcessor : public AsyncProcessor {
+    ContainmentCompressionCheckProcessor(
+        std::unique_ptr<AsyncProcessor> underlyingProcessor,
+        CompressionAlgorithm compression)
+        : underlyingProcessor_(std::move(underlyingProcessor)),
+          compression_(compression) {}
+    void executeRequest(
+        ServerRequest&&,
+        const AsyncProcessorFactory::MethodMetadata&) override {
+      LOG(FATAL) << "executeRequest shouldn't be called in this test";
+    }
+
+    void processSerializedCompressedRequestWithMetadata(
+        ResponseChannelRequest::UniquePtr req,
+        SerializedCompressedRequest&& serializedRequest,
+        const AsyncProcessorFactory::MethodMetadata& methodMetadata,
+        protocol::PROTOCOL_TYPES prot,
+        Cpp2RequestContext* ctx,
+        folly::EventBase* eb,
+        concurrency::ThreadManager* tm) override {
+      // check that SerializedCompressedRequest has expected compression
+      if (compression_ == CompressionAlgorithm::CUSTOM) {
+        // custom compression setup failure will fallback to zlib
+        EXPECT_EQ(
+            CompressionAlgorithm::ZLIB,
+            serializedRequest.getCompressionAlgorithm());
+      } else {
+        EXPECT_EQ(compression_, serializedRequest.getCompressionAlgorithm());
+      }
+
+      underlyingProcessor_->processSerializedCompressedRequestWithMetadata(
+          std::move(req),
+          std::move(serializedRequest),
+          methodMetadata,
+          prot,
+          ctx,
+          eb,
+          tm);
+    }
+
+    void processInteraction(apache::thrift::ServerRequest&&) override {
+      LOG(FATAL)
+          << "This AsyncProcessor doesn't support Thrift interactions. "
+          << "Please implement processInteraction to support interactions.";
+    }
+
+    std::unique_ptr<AsyncProcessor> underlyingProcessor_;
+    CompressionAlgorithm compression_;
+  };
+
+  // Custom processor derived from AsyncProcessor without compressed request API
+  struct LegacyContainmentProcessor : public AsyncProcessor {
+    explicit LegacyContainmentProcessor(
+        std::unique_ptr<AsyncProcessor> underlyingProcessor)
+        : underlyingProcessor_(std::move(underlyingProcessor)) {}
+
+    void executeRequest(
+        ServerRequest&&,
+        const AsyncProcessorFactory::MethodMetadata&) override {
+      LOG(FATAL) << "executeRequest shouldn't be called in this test";
+    }
+
+    void processSerializedCompressedRequestWithMetadata(
+        ResponseChannelRequest::UniquePtr req,
+        SerializedCompressedRequest&& serializedRequest,
+        const AsyncProcessorFactory::MethodMetadata& methodMetadata,
+        protocol::PROTOCOL_TYPES prot,
+        Cpp2RequestContext* ctx,
+        folly::EventBase* eb,
+        concurrency::ThreadManager* tm) override {
+      underlyingProcessor_->processSerializedCompressedRequestWithMetadata(
+          std::move(req),
+          std::move(serializedRequest),
+          methodMetadata,
+          prot,
+          ctx,
+          eb,
+          tm);
+    }
+
+    void processInteraction(apache::thrift::ServerRequest&&) override {
+      LOG(FATAL)
+          << "This AsyncProcessor doesn't support Thrift interactions. "
+          << "Please implement processInteraction to support interactions.";
+    }
+
+    std::unique_ptr<AsyncProcessor> underlyingProcessor_;
+  };
+
+  // Custom processor derived from generated processor
+  struct InheritanceCompressionCheckProcessor
+      : public TestInterface::ProcessorType {
+    InheritanceCompressionCheckProcessor(
+        apache::thrift::ServiceHandler<TestService>* iface,
+        CompressionAlgorithm compression)
+        : TestInterface::ProcessorType(iface), compression_(compression) {}
+
+    void executeRequest(
+        ServerRequest&&,
+        const AsyncProcessorFactory::MethodMetadata&) override {
+      LOG(FATAL) << "executeRequest shouldn't be called in this test";
+    }
+
+    void processSerializedCompressedRequestWithMetadata(
+        apache::thrift::ResponseChannelRequest::UniquePtr req,
+        apache::thrift::SerializedCompressedRequest&& serializedRequest,
+        const apache::thrift::AsyncProcessorFactory::MethodMetadata& mm,
+        apache::thrift::protocol::PROTOCOL_TYPES prot,
+        apache::thrift::Cpp2RequestContext* ctx,
+        folly::EventBase* eb,
+        apache::thrift::concurrency::ThreadManager* tm) override {
+      // check that SerializedCompressedRequest has expected compression
+      if (compression_ == CompressionAlgorithm::CUSTOM) {
+        // custom compression setup failure will fallback to zlib
+        EXPECT_EQ(
+            CompressionAlgorithm::ZLIB,
+            serializedRequest.getCompressionAlgorithm());
+      } else {
+        EXPECT_EQ(compression_, serializedRequest.getCompressionAlgorithm());
+      }
+      TestInterface::ProcessorType::
+          processSerializedCompressedRequestWithMetadata(
+              std::move(req),
+              std::move(serializedRequest),
+              mm,
+              prot,
+              ctx,
+              eb,
+              tm);
+    }
+
+    CompressionAlgorithm compression_;
+  };
+
+  struct CompressionCheckTestInterface : public TestInterface {
+    CompressionCheckTestInterface(
+        ProcessorImplementation processorImplementation,
+        CompressionAlgorithm compression)
+        : processorImplementation_(processorImplementation),
+          compression_(compression) {}
+    std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override {
+      switch (processorImplementation_) {
+        case ProcessorImplementation::Containment:
+          return std::make_unique<ContainmentCompressionCheckProcessor>(
+              std::make_unique<TestInterface::ProcessorType>(this),
+              compression_);
+        case ProcessorImplementation::ContainmentLegacy:
+          return std::make_unique<LegacyContainmentProcessor>(
+              std::make_unique<TestInterface::ProcessorType>(this));
+        case ProcessorImplementation::Inheritance:
+          return std::make_unique<InheritanceCompressionCheckProcessor>(
+              this, compression_);
+      }
+    }
+
+    CreateMethodMetadataResult createMethodMetadata() override {
+      // We want to return WildcardMethodMetadataMap here because default
+      // implementation will return MethodMetadataMap and requests will be
+      // routed to executeRequest rather than to
+      // processSerializedCompressedRequestWithMetadata. This test relies on
+      // routing requests to processSerializedCompressedRequestWithMetadata.
+      WildcardMethodMetadataMap wildcardMap;
+      wildcardMap.wildcardMetadata = std::make_shared<WildcardMethodMetadata>();
+      wildcardMap.knownMethods = {};
+      return wildcardMap;
+    }
+
+    ProcessorImplementation processorImplementation_;
+    CompressionAlgorithm compression_;
+  };
+};
+
 TEST_P(HeaderOrRocketCompression, ClientCompressionTest) {
   THRIFT_OMIT_TEST_WITH_RESOURCE_POOLS(
       /* Test mock does not implement executeRequest */);
@@ -4603,7 +4573,8 @@ INSTANTIATE_TEST_CASE_P(
     HeaderOrRocketCompression,
     ::testing::Combine(
         testing::Values(TransportType::Header, TransportType::Rocket),
-        testing::Values(Compression::Enabled, Compression::Disabled),
+        testing::Values(
+            Compression::Enabled, Compression::Disabled, Compression::Custom),
         testing::Values(
             ProcessorImplementation::Containment,
             ProcessorImplementation::ContainmentLegacy,

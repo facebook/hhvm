@@ -1049,12 +1049,22 @@ void RocketClientChannel::sendSingleRequestSingleResponse(
     std::unique_ptr<folly::IOBuf> buf,
     RequestClientCallback::Ptr cb) {
   const auto requestSerializedSize = buf->computeChainDataLength();
-  auto requestPayload = getPayloadSerializer()->packWithFds(
-      &metadata,
-      std::move(buf),
-      rpcOptions.copySocketFdsToSend(),
-      encodeMetadataUsingBinary(),
-      getTransportWrapper());
+  rocket::Payload requestPayload;
+  try {
+    requestPayload = getPayloadSerializer()->packWithFds(
+        &metadata,
+        std::move(buf),
+        rpcOptions.copySocketFdsToSend(),
+        encodeMetadataUsingBinary(),
+        getTransportWrapper());
+  } catch (std::exception const& ex) {
+    cb.release()->onResponseError(
+        folly::make_exception_wrapper<transport::TTransportException>(
+            transport::TTransportException::TTransportExceptionType::UNKNOWN,
+            fmt::format("Failed to pack request payload: {}", ex.what())));
+    return;
+  }
+
   const auto requestWireSize = requestPayload.dataSize();
   const auto requestMetadataAndPayloadSize =
       requestPayload.metadataAndDataSize();

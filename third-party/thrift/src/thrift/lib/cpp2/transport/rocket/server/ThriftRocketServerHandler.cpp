@@ -41,6 +41,7 @@
 #include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
 #include <thrift/lib/cpp2/transport/rocket/PayloadUtils.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/CustomCompressorRegistry.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/ErrorCode.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/server/InteractionOverload.h>
@@ -281,6 +282,26 @@ void ThriftRocketServerHandler::handleSetupFrame(
     serverMeta.set_setupResponse();
     serverMeta.setupResponse_ref()->version_ref() = version_;
     serverMeta.setupResponse_ref()->zstdSupported_ref() = true;
+
+    if (auto ref = meta.compressionSetupRequest()) {
+      auto compressionSetupRes =
+          handleSetupFrameCustomCompression(*ref, connection);
+      if (compressionSetupRes.hasError()) {
+        LOG(WARNING) << fmt::format(
+            "Error setting up custom compression: {}, fallback to not using custom compression.",
+            compressionSetupRes.error());
+      } else {
+        auto optResponse = std::move(compressionSetupRes.value());
+        if (optResponse) {
+          serverMeta.setupResponse_ref()
+              ->compressionSetupResponse()
+              .ensure()
+              .custom_ref() = std::move(*optResponse);
+        }
+        // otherwise, custom compression is simply not used
+      }
+    }
+
     connection.sendMetadataPush(
         PayloadSerializer::getInstance()->packCompact(serverMeta));
   } catch (const std::exception& e) {
@@ -292,6 +313,56 @@ void ThriftRocketServerHandler::handleSetupFrame(
   }
 
   invokeServiceInterceptorsOnConnection(connection);
+}
+
+folly::Expected<std::optional<CustomCompressionSetupResponse>, std::string>
+ThriftRocketServerHandler::handleSetupFrameCustomCompression(
+    CompressionSetupRequest const& setupRequest,
+    RocketServerConnection& connection) {
+  if (!setupRequest.custom_ref()) {
+    return folly::makeUnexpected(
+        "Cannot setup compression on server due to unrecognized request type");
+  }
+
+  auto factory = CustomCompressorRegistry::get(
+      *setupRequest.custom_ref()->compressorName());
+  if (!factory) {
+    return folly::makeUnexpected(fmt::format(
+        "Custom compressor {} is not supported on server.",
+        *setupRequest.custom_ref()->compressorName()));
+  }
+
+  std::optional<CustomCompressionSetupResponse> response;
+  try {
+    response = factory->createCustomCompressorNegotiationResponse(
+        *setupRequest.custom_ref());
+  } catch (const std::exception& ex) {
+    return folly::makeUnexpected(fmt::format(
+        "Failed to make create negotiation response on server due to: {}",
+        ex.what()));
+  }
+
+  if (!response) {
+    // custom compression chooses not to be used for this connection
+    return folly::makeExpected<std::string>(response);
+  }
+
+  std::shared_ptr<CustomCompressor> compressor;
+  try {
+    compressor = factory->make(*response);
+  } catch (const std::exception& ex) {
+    return folly::makeUnexpected(fmt::format(
+        "Failed to make create custom compressor on server due to: {}",
+        ex.what()));
+  }
+
+  if (!compressor) {
+    return folly::makeUnexpected(fmt::format(
+        "Failed to make create custom compressor on server due to unknown error."));
+  }
+
+  connection.applyCustomCompression(compressor);
+  return folly::makeExpected<std::string>(std::move(*response));
 }
 
 void ThriftRocketServerHandler::handleRequestResponseFrame(

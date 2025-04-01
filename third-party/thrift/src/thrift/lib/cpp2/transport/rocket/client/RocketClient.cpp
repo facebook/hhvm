@@ -42,6 +42,7 @@
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RequestContext.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/CustomCompressorRegistry.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Util.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -190,6 +191,16 @@ void RocketClient::handleFrame(std::unique_ptr<folly::IOBuf> frame) {
             (int32_t)std::numeric_limits<int16_t>::max()));
         serverZstdSupported_ =
             serverMeta.setupResponse_ref()->zstdSupported_ref().value_or(false);
+
+        if (auto ref =
+                serverMeta.setupResponse_ref()->compressionSetupResponse()) {
+          auto customCompressionRes =
+              handleSetupResponseCustomCompression(*ref);
+          if (customCompressionRes.hasError()) {
+            close(customCompressionRes.error());
+            return;
+          }
+        }
         break;
       }
       case ServerPushMetadata::Type::streamHeadersPush: {
@@ -243,6 +254,57 @@ void RocketClient::handleFrame(std::unique_ptr<folly::IOBuf> frame) {
   }
 
   handleStreamChannelFrame(streamId, frameType, std::move(frame));
+}
+
+folly::Expected<folly::Unit, transport::TTransportException>
+RocketClient::handleSetupResponseCustomCompression(
+    CompressionSetupResponse const& setupResponse) {
+  if (!setupResponse.custom_ref()) {
+    return folly::makeUnexpected(transport::TTransportException(
+        transport::TTransportException::NOT_SUPPORTED,
+        "Only 'custom' compressor setup response is supported on client."));
+  }
+  const auto& customSetupResponse = setupResponse.custom_ref().value();
+
+  auto factory =
+      CustomCompressorRegistry::get(*customSetupResponse.compressorName());
+  if (!factory) {
+    return folly::makeUnexpected(transport::TTransportException(
+        transport::TTransportException::NOT_SUPPORTED,
+        fmt::format(
+            "Custom compressor {} is not supported on client.",
+            *customSetupResponse.compressorName())));
+  }
+
+  std::shared_ptr<CustomCompressor> compressor;
+  try {
+    compressor = factory->make(customSetupResponse);
+  } catch (const std::exception& ex) {
+    return folly::makeUnexpected(transport::TTransportException(
+        transport::TTransportException::INVALID_SETUP,
+        fmt::format(
+            "Failed to make custom compressor on client due to: {}",
+            ex.what())));
+  }
+
+  if (!compressor) {
+    return folly::makeUnexpected(transport::TTransportException(
+        transport::TTransportException::INVALID_SETUP,
+        "Failed to make custom compressor on client."));
+  }
+
+  if (!payloadSerializerHolder_) {
+    payloadSerializerHolder_.emplace();
+  }
+
+  CustomCompressionPayloadSerializerStrategyOptions options;
+  options.compressor = compressor;
+  CustomCompressionPayloadSerializerStrategy<DefaultPayloadSerializerStrategy>
+      strategy{options};
+  payloadSerializerHolder_->initialize(std::move(strategy));
+  customCompressor_ = compressor;
+
+  return folly::unit;
 }
 
 void RocketClient::handleRequestResponseFrame(

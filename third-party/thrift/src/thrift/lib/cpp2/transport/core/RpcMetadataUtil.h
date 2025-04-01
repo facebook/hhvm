@@ -57,7 +57,8 @@ RequestRpcMetadata makeRequestRpcMetadata(
     bool serverZstdSupported,
     ssize_t payloadSize,
     transport::THeader& header,
-    std::unique_ptr<folly::IOBuf> frameworkMetadata);
+    std::unique_ptr<folly::IOBuf> frameworkMetadata,
+    bool customCompressionEnabled);
 
 void fillTHeaderFromResponseRpcMetadata(
     ResponseRpcMetadata& responseMetadata, transport::THeader& header);

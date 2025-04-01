@@ -56,7 +56,8 @@ TEST(RpcMetadataUtil, frameworkMetadata) {
       false,
       3000,
       header,
-      nullptr);
+      nullptr,
+      /*customCompressionEnabled=*/false);
   const auto& buf = **requestRpcMetadata.frameworkMetadata_ref();
   std::string content(reinterpret_cast<const char*>(buf.data()), buf.length());
   EXPECT_EQ(content, "linked");
@@ -82,8 +83,130 @@ TEST(RpcMetadataUtil, interceptorFrameworkMetadata) {
       false,
       3000,
       header,
-      folly::IOBuf::copyBuffer(std::string("interceptor_metadata")));
+      folly::IOBuf::copyBuffer(std::string("interceptor_metadata")),
+      /*customCompressionEnabled=*/false);
   const auto& buf = **requestRpcMetadata.frameworkMetadata_ref();
   std::string content(reinterpret_cast<const char*>(buf.data()), buf.length());
   EXPECT_EQ(content, "interceptor_metadata");
+}
+
+TEST(RpcMetadataUtil, CustomCompressionFallback) {
+  RpcOptions rpcOptions;
+  auto kind = RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE;
+  std::string methodName = "foo";
+  std::chrono::milliseconds timeout(100);
+  std::variant<InteractionCreate, int64_t, std::monostate> interactionHandle =
+      std::monostate{};
+
+  transport::THeader header;
+  header.setProtocolId(protocol::T_COMPACT_PROTOCOL);
+
+  {
+    CompressionConfig compressionConfig;
+    compressionConfig.codecConfig().ensure().customConfig_ref().emplace();
+    header.setDesiredCompressionConfig(std::move(compressionConfig));
+
+    auto requestRpcMetadata = makeRequestRpcMetadata(
+        rpcOptions,
+        kind,
+        methodName,
+        timeout,
+        interactionHandle,
+        /*serverZstdSupported=*/false,
+        3000,
+        header,
+        folly::IOBuf::copyBuffer(std::string("")),
+        /*customCompressionEnabled=*/false);
+
+    // use zlib if server does not support zstd and custom compression is not
+    // supported
+    EXPECT_TRUE(requestRpcMetadata.compressionConfig()
+                    .value()
+                    .codecConfig()
+                    ->zlibConfig_ref()
+                    .has_value());
+    EXPECT_EQ(
+        requestRpcMetadata.compression().value(), CompressionAlgorithm::ZLIB);
+  }
+
+  {
+    CompressionConfig compressionConfig;
+    compressionConfig.codecConfig().ensure().customConfig_ref().emplace();
+    header.setDesiredCompressionConfig(std::move(compressionConfig));
+
+    auto requestRpcMetadata = makeRequestRpcMetadata(
+        rpcOptions,
+        kind,
+        methodName,
+        timeout,
+        interactionHandle,
+        /*serverZstdSupported=*/true,
+        3000,
+        header,
+        folly::IOBuf::copyBuffer(std::string("")),
+        /*customCompressionEnabled=*/false);
+
+    // use zstd if server supports zstd and custom compression is not supported
+    EXPECT_TRUE(requestRpcMetadata.compressionConfig()
+                    .value()
+                    .codecConfig()
+                    ->zstdConfig_ref()
+                    .has_value());
+    EXPECT_EQ(
+        requestRpcMetadata.compression().value(), CompressionAlgorithm::ZSTD);
+  }
+
+  {
+    CompressionConfig compressionConfig;
+    compressionConfig.codecConfig().ensure().customConfig_ref().emplace();
+    header.setDesiredCompressionConfig(std::move(compressionConfig));
+
+    auto requestRpcMetadata = makeRequestRpcMetadata(
+        rpcOptions,
+        kind,
+        methodName,
+        timeout,
+        interactionHandle,
+        /*serverZstdSupported=*/false,
+        3000,
+        header,
+        folly::IOBuf::copyBuffer(std::string("")),
+        /*customCompressionEnabled=*/true);
+
+    // use custom compression if it is supported
+    EXPECT_TRUE(requestRpcMetadata.compressionConfig()
+                    .value()
+                    .codecConfig()
+                    ->customConfig_ref()
+                    .has_value());
+    EXPECT_EQ(
+        requestRpcMetadata.compression().value(), CompressionAlgorithm::CUSTOM);
+  }
+
+  {
+    CompressionConfig compressionConfig;
+    compressionConfig.codecConfig().ensure().zstdConfig_ref().emplace();
+    header.setDesiredCompressionConfig(std::move(compressionConfig));
+
+    auto requestRpcMetadata = makeRequestRpcMetadata(
+        rpcOptions,
+        kind,
+        methodName,
+        timeout,
+        interactionHandle,
+        /*serverZstdSupported=*/false,
+        3000,
+        header,
+        folly::IOBuf::copyBuffer(std::string("")),
+        /*customCompressionEnabled=*/true);
+
+    // even if custom compression is supported, only use it if user requests it
+    EXPECT_TRUE(requestRpcMetadata.compressionConfig()
+                    .value()
+                    .codecConfig()
+                    ->zstdConfig_ref()
+                    .has_value());
+    EXPECT_EQ(
+        requestRpcMetadata.compression().value(), CompressionAlgorithm::ZSTD);
+  }
 }

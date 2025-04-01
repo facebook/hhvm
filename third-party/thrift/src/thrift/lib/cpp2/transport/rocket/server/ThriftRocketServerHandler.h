@@ -77,6 +77,10 @@ class ThriftRocketServerHandler : public RocketServerHandler {
 
   void handleSetupFrame(
       SetupFrame&& frame, RocketServerConnection& context) final;
+  folly::Expected<std::optional<CustomCompressionSetupResponse>, std::string>
+  handleSetupFrameCustomCompression(
+      CompressionSetupRequest const& setupRequest,
+      RocketServerConnection& connection);
   void handleRequestResponseFrame(
       RequestResponseFrame&& frame, RocketServerFrameContext&& context) final;
   void handleRequestFnfFrame(

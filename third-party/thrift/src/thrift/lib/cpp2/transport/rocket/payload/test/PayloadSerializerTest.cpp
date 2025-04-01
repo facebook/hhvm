@@ -99,25 +99,56 @@ TEST(PayloadSerializerTest, TestMakeAndNonOwningPtr) {
   // testPackAndUnpackWithCompactProtocol(**ptr);
 }
 
+struct MyCustomCompressor : public CustomCompressor {
+  std::unique_ptr<folly::IOBuf> compressBuffer(
+      std::unique_ptr<folly::IOBuf>&& buffer) override {
+    return folly::compression::getCodec(folly::compression::CodecType::ZSTD)
+        ->compress(buffer.get());
+  }
+
+  std::unique_ptr<folly::IOBuf> uncompressBuffer(
+      std::unique_ptr<folly::IOBuf>&& buffer) override {
+    return folly::compression::getCodec(folly::compression::CodecType::ZSTD)
+        ->uncompress(buffer.get());
+  }
+};
+
 TEST(PayloadSerializerTest, TestMakeCustomCompression) {
+  CustomCompressionPayloadSerializerStrategyOptions options;
+  options.compressor = std::make_shared<MyCustomCompressor>();
+
   auto ps = PayloadSerializer::make<CustomCompressionPayloadSerializerStrategy<
-      DefaultPayloadSerializerStrategy>>();
+      DefaultPayloadSerializerStrategy>>(options);
   testPackAndUnpackWithCompactProtocol(ps);
 }
 
 TEST(PayloadSerializerTest, TestCompressionAndUncompression) {
-  std::vector<std::unique_ptr<PayloadSerializer>> payloadSerializers;
+  std::vector<std::pair<
+      std::unique_ptr<PayloadSerializer>,
+      bool /*supports custom compression*/>>
+      payloadSerializers;
   payloadSerializers.emplace_back(
-      std::make_unique<PayloadSerializer>(DefaultPayloadSerializerStrategy()));
+      std::make_unique<PayloadSerializer>(DefaultPayloadSerializerStrategy()),
+      false);
   payloadSerializers.emplace_back(
-      std::make_unique<PayloadSerializer>(LegacyPayloadSerializerStrategy()));
-  payloadSerializers.emplace_back(std::make_unique<PayloadSerializer>(
-      ChecksumPayloadSerializerStrategy<DefaultPayloadSerializerStrategy>()));
-  payloadSerializers.emplace_back(std::make_unique<PayloadSerializer>(
-      ChecksumPayloadSerializerStrategy<LegacyPayloadSerializerStrategy>()));
-  payloadSerializers.emplace_back(std::make_unique<PayloadSerializer>(
-      CustomCompressionPayloadSerializerStrategy<
-          DefaultPayloadSerializerStrategy>()));
+      std::make_unique<PayloadSerializer>(LegacyPayloadSerializerStrategy()),
+      false);
+  payloadSerializers.emplace_back(
+      std::make_unique<PayloadSerializer>(ChecksumPayloadSerializerStrategy<
+                                          DefaultPayloadSerializerStrategy>()),
+      false);
+  payloadSerializers.emplace_back(
+      std::make_unique<PayloadSerializer>(
+          ChecksumPayloadSerializerStrategy<LegacyPayloadSerializerStrategy>()),
+      false);
+
+  CustomCompressionPayloadSerializerStrategyOptions options;
+  options.compressor = std::make_shared<MyCustomCompressor>();
+  payloadSerializers.emplace_back(
+      std::make_unique<PayloadSerializer>(
+          CustomCompressionPayloadSerializerStrategy<
+              DefaultPayloadSerializerStrategy>(options)),
+      true);
 
   std::vector<CompressionAlgorithm> compressionAlgorithms = {
       CompressionAlgorithm::NONE,
@@ -129,13 +160,23 @@ TEST(PayloadSerializerTest, TestCompressionAndUncompression) {
 
   std::string const expected = "hello world";
 
-  for (auto& ps : payloadSerializers) {
+  for (auto& [ps, supportsCustomCompression] : payloadSerializers) {
     for (const auto& compressionAlgorithm : compressionAlgorithms) {
       auto compressedBuf = ps->compressBuffer(
           folly::IOBuf::fromString(expected), compressionAlgorithm);
-      // TODO: test for 'custom' will be strenghtened in subsequent diffs
-      if (compressionAlgorithm != CompressionAlgorithm::NONE &&
-          compressionAlgorithm != CompressionAlgorithm::CUSTOM) {
+
+      bool compressionIsTrivial = false;
+      if (compressionAlgorithm == CompressionAlgorithm::NONE) {
+        compressionIsTrivial = true;
+      } else if (
+          compressionAlgorithm == CompressionAlgorithm::CUSTOM &&
+          !supportsCustomCompression) {
+        compressionIsTrivial = true;
+      }
+
+      if (compressionIsTrivial) {
+        EXPECT_EQ(compressedBuf->toString(), expected);
+      } else {
         EXPECT_NE(compressedBuf->toString(), expected);
       }
 

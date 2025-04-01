@@ -899,7 +899,8 @@ void RocketClientChannel::sendRequestStream(
       getServerZstdSupported(),
       buf->computeChainDataLength(),
       *header,
-      std::move(frameworkMetadata));
+      std::move(frameworkMetadata),
+      customCompressor_ != nullptr);
 
   auto payload = getPayloadSerializer()->packWithFds(
       &metadata,
@@ -944,7 +945,8 @@ void RocketClientChannel::sendRequestSink(
       getServerZstdSupported(),
       buf->computeChainDataLength(),
       *header,
-      std::move(frameworkMetadata));
+      std::move(frameworkMetadata),
+      customCompressor_ != nullptr);
 
   auto payload = getPayloadSerializer()->packWithFds(
       &metadata,
@@ -989,7 +991,8 @@ void RocketClientChannel::sendThriftRequest(
       getServerZstdSupported(),
       buf->computeChainDataLength(),
       *header,
-      std::move(frameworkMetadata));
+      std::move(frameworkMetadata),
+      customCompressor_ != nullptr);
   header.reset();
 
   switch (kind) {

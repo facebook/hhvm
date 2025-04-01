@@ -20,13 +20,14 @@
 #include <folly/Try.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/async/AsyncTransport.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/CustomCompressor.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializerStrategy.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::rocket {
 
 struct CustomCompressionPayloadSerializerStrategyOptions {
-  // Options can be added as needed
+  std::shared_ptr<CustomCompressor> compressor;
 };
 
 /**
@@ -39,12 +40,18 @@ class CustomCompressionPayloadSerializerStrategy final
     : PayloadSerializerStrategy<
           CustomCompressionPayloadSerializerStrategy<DelegateStrategy>> {
  public:
-  CustomCompressionPayloadSerializerStrategy(
-      CustomCompressionPayloadSerializerStrategyOptions /* options */ = {})
+  /*implicit*/ CustomCompressionPayloadSerializerStrategy(
+      CustomCompressionPayloadSerializerStrategyOptions const& options)
       : PayloadSerializerStrategy<
             CustomCompressionPayloadSerializerStrategy<DelegateStrategy>>(
             *this),
-        delegate_(DelegateStrategy()) {}
+        delegate_(DelegateStrategy()),
+        compressor_(options.compressor) {
+    if (compressor_ == nullptr) {
+      throw std::invalid_argument(
+          "compressor cannot be null for CustomCompressionPayloadSerializerStrategy");
+    }
+  }
 
   template <class T>
   FOLLY_ERASE folly::Try<T> unpackAsCompressed(
@@ -62,7 +69,18 @@ class CustomCompressionPayloadSerializerStrategy final
     if (unpackedPayload.hasValue()) {
       if (auto compress = unpackedPayload->metadata.compression()) {
         if (*compress == CompressionAlgorithm::CUSTOM) {
-          // TODO: handle custom compression here
+          try {
+            unpackedPayload->payload =
+                customUncompressBuffer(std::move(unpackedPayload->payload));
+          } catch (std::exception const& ex) {
+            unpackedPayload = folly::Try<T>(
+                folly::make_exception_wrapper<transport::TTransportException>(
+                    transport::TTransportException::TTransportExceptionType::
+                        UNKNOWN,
+                    fmt::format(
+                        "Failed to unpack payload with custom compression: {}",
+                        ex.what())));
+          }
         }
       }
     }
@@ -84,9 +102,10 @@ class CustomCompressionPayloadSerializerStrategy final
       folly::AsyncTransport* transport) {
     if (auto compress = metadata->compression()) {
       if (*compress == CompressionAlgorithm::CUSTOM) {
-        // TODO: handle custom compression here
+        payload = customCompressBuffer(std::move(payload));
       }
     }
+
     return delegate_.packWithFds(
         metadata,
         std::move(payload),
@@ -137,8 +156,7 @@ class CustomCompressionPayloadSerializerStrategy final
       return delegate_.compressBuffer(std::move(buffer), compressionAlgorithm);
     }
 
-    // todo: implement custom compression logic here
-    return std::move(buffer);
+    return customCompressBuffer(std::move(buffer));
   }
 
   FOLLY_ERASE
@@ -150,12 +168,24 @@ class CustomCompressionPayloadSerializerStrategy final
           std::move(buffer), compressionAlgorithm);
     }
 
-    // todo: implement custom compression logic here
-    return std::move(buffer);
+    return customUncompressBuffer(std::move(buffer));
+  }
+
+  FOLLY_ERASE
+  std::unique_ptr<folly::IOBuf> customCompressBuffer(
+      std::unique_ptr<folly::IOBuf>&& buffer) {
+    return compressor_->compressBuffer(std::move(buffer));
+  }
+
+  FOLLY_ERASE
+  std::unique_ptr<folly::IOBuf> customUncompressBuffer(
+      std::unique_ptr<folly::IOBuf>&& buffer) {
+    return compressor_->uncompressBuffer(std::move(buffer));
   }
 
  private:
   DelegateStrategy delegate_;
+  std::shared_ptr<CustomCompressor> compressor_;
 };
 
 } // namespace apache::thrift::rocket

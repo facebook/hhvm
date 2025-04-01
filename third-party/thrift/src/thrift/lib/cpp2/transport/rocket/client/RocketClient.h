@@ -38,6 +38,7 @@
 #include <thrift/lib/cpp2/transport/rocket/client/RequestContext.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RequestContextQueue.h>
 #include <thrift/lib/cpp2/transport/rocket/client/RocketStreamServerCallback.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/CustomCompressor.h>
 #include <thrift/lib/cpp2/transport/rocket/flush/FlushManager.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Parser.h>
@@ -598,6 +599,11 @@ class RocketClient : public virtual folly::DelayedDestruction,
   void setServerVersion(int32_t serverVersion);
   void sendTransportMetadataPush();
 
+  // setup custom compression based on setup frame response
+  folly::Expected<folly::Unit, transport::TTransportException>
+  handleSetupResponseCustomCompression(
+      CompressionSetupResponse const& setupResponse);
+
  protected:
   // Close the connection and fail all the requests *inline*. This should not be
   // called inline from any of the callbacks triggered by RocketClient.
@@ -632,6 +638,7 @@ class RocketClient : public virtual folly::DelayedDestruction,
  protected:
   std::optional<PayloadSerializer::PayloadSerializerHolder>
       payloadSerializerHolder_;
+  std::shared_ptr<CustomCompressor> customCompressor_;
 };
 
 } // namespace rocket

@@ -215,7 +215,6 @@ class ValueWrapper : public ::apache::thrift::type::detail::Wrap<Base> {
   FBTHRIFT_THRIFT_DEPRECATED_METHOD_FROM_TYPE(string);
   FBTHRIFT_THRIFT_DEPRECATED_METHOD_FROM_TYPE(binary);
   FBTHRIFT_THRIFT_DEPRECATED_METHOD_FROM_TYPE(object);
-  FBTHRIFT_THRIFT_DEPRECATED_METHOD_FROM_TYPE(list);
   FBTHRIFT_THRIFT_DEPRECATED_METHOD_FROM_TYPE(set);
   FBTHRIFT_THRIFT_DEPRECATED_METHOD_FROM_TYPE(map);
 
@@ -226,13 +225,6 @@ class ValueWrapper : public ::apache::thrift::type::detail::Wrap<Base> {
 
   // Specializations for list, set, and map, as they are commonly used with
   // deduced argument types, e.g. `X.set_listValue({1, 2, 3})`
-  [[deprecated("Prefer emplace_list()")]] BoxedValueList& set_listValue(
-      BoxedValueList t);
-  [[deprecated("Prefer emplace_list()")]] BoxedValueList& set_listValue(
-      const ValueList& t);
-  [[deprecated("Prefer emplace_list()")]] BoxedValueList& set_listValue(
-      ValueList&& t);
-
   ValueList& emplace_list(BoxedValueList t);
   ValueList& emplace_list(const ValueList& t);
   ValueList& emplace_list(ValueList&& t);

@@ -72,21 +72,6 @@ ValueList& Value::emplace_list(ValueList&& t) {
 }
 
 template <>
-BoxedValueList& Value::set_listValue(BoxedValueList t) {
-  return toThrift().set_listValue(std::move(t));
-}
-
-template <>
-BoxedValueList& Value::set_listValue(const ValueList& t) {
-  return toThrift().set_listValue(t);
-}
-
-template <>
-BoxedValueList& Value::set_listValue(ValueList&& t) {
-  return toThrift().set_listValue(std::move(t));
-}
-
-template <>
 BoxedValueSet& Value::set_setValue(BoxedValueSet t) {
   return toThrift().set_setValue(std::move(t));
 }

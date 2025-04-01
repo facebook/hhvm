@@ -1,2 +1,8 @@
 File "unsurfaced_exception.bad.php", line 9, characters 33-34:
-Generic exceptions cannot be thrown away -- prefer to log exceptions and explain how the program recovers. See https://fburl.com/hacklint5811 for guidance and caveats. (Lint[5811])
+Silencing catches is dangerous because it makes SEVs impossible to debug.
+
+Use `ope($ex, $consequence)` to log how your program recovers. Create the $consequence input with the `causes_the(...)->to(...)` syntax.
+
+For example, if the `try` block was attempting to send a birthday notification, the `catch ($ex)` block would call `ope($ex, cause_the('birthday notification')->to('not be sent'))` since $ex prevents the birthday notification from being sent. This will create a log message like "FooException causes the birthday notification to not be sent..." that goes on to include the the exception message, trace, metadata and more. Opes makes it easy for you to discover, track, and debug these errors. https://fburl.com/opes-getting-started
+
+See https://fburl.com/hacklint5811 for guidance and caveats. (Lint[5811])

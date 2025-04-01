@@ -14,28 +14,24 @@
  * limitations under the License.
  */
 
-#include <thrift/lib/cpp2/protocol/Serializer.h>
-#include <thrift/lib/cpp2/test/gen-cpp2/ProtocolBenchData_types.h>
-
-#include <thrift/lib/cpp2/test/ProtoBufBenchData.pb.h>
+#include <vector>
 
 #include <fmt/format.h>
 #include <gflags/gflags.h>
 #include <glog/logging.h>
 #include <google/protobuf/arena.h> // @manual
+#include <jemalloc/jemalloc.h>
+
 #include <folly/Benchmark.h>
+#include <folly/Format.h>
 #include <folly/Optional.h>
 #include <folly/init/Init.h>
 #include <folly/memory/MallctlHelper.h>
 #include <folly/portability/GFlags.h>
-
+#include <thrift/lib/cpp2/protocol/Serializer.h>
+#include <thrift/lib/cpp2/test/ProtoBufBenchData.pb.h>
 #include <thrift/lib/cpp2/test/Structs.h>
-
-#if !FOLLY_SANITIZE
-#include <jemalloc/jemalloc.h>
-#endif
-
-#include <vector>
+#include <thrift/lib/cpp2/test/gen-cpp2/ProtocolBenchData_types.h>
 
 using namespace std;
 using namespace folly;
@@ -47,8 +43,7 @@ DEFINE_bool(
     false,
     "If true, running memory request count. If false, running benchmark");
 
-#if !FOLLY_SANITIZE
-uint64_t getMemoryRequestsCounter() {
+static uint64_t getMemoryRequestsCounter() {
   size_t narenas = MALLCTL_ARENAS_ALL;
   std::string keySmall =
       folly::sformat("stats.arenas.{}.small.nrequests", narenas);
@@ -63,7 +58,6 @@ uint64_t getMemoryRequestsCounter() {
   folly::mallctlRead(keyLarge.c_str(), &largeCount);
   return smallCount + largeCount;
 }
-#endif
 
 // The benckmark is to measure single struct use case, the iteration here is
 // more like a benchmark artifact, so avoid doing optimizationon iteration
@@ -84,9 +78,8 @@ void writeBench(size_t iter) {
   susp.rehire();
 }
 
-#if !FOLLY_SANITIZE
 template <typename Serializer, typename Struct>
-int writeBenchMemory(size_t iters) {
+static int writeBenchMemory(size_t iters) {
   auto strct = create<Struct>();
   auto before = getMemoryRequestsCounter();
 
@@ -99,12 +92,11 @@ int writeBenchMemory(size_t iters) {
 
   return after - before;
 }
-#endif
 
 /************************ Protobuf write(serialize) ***************************/
 
 template <typename Struct>
-void writeBench(size_t iter) {
+static void writeBench(size_t iter) {
   BenchmarkSuspender susp;
   auto strct = create<Struct>();
   susp.dismiss();
@@ -118,9 +110,8 @@ void writeBench(size_t iter) {
   susp.rehire();
 }
 
-#if !FOLLY_SANITIZE
 template <typename Struct>
-int writeBenchMemory(size_t iters) {
+static int writeBenchMemory(size_t iters) {
   auto strct = create<Struct>();
   auto before = getMemoryRequestsCounter();
 
@@ -133,11 +124,9 @@ int writeBenchMemory(size_t iters) {
   auto after = getMemoryRequestsCounter();
   return after - before;
 }
-#endif
 
-#if !FOLLY_SANITIZE
 template <typename Struct>
-int writeBenchArenaMemory(size_t iters) {
+static int writeBenchArenaMemory(size_t iters) {
   google::protobuf::Arena arena;
   auto* data = google::protobuf::Arena::CreateMessage<Struct>(&arena);
   *data = create<Struct>();
@@ -153,12 +142,11 @@ int writeBenchArenaMemory(size_t iters) {
   auto after = getMemoryRequestsCounter();
   return after - before;
 }
-#endif
 
 /************************ Thrift read(deserialize) **************************/
 
 template <typename Serializer, typename Struct>
-void readBench(size_t iter) {
+static void readBench(size_t iter) {
   BenchmarkSuspender susp;
   auto strct = create<Struct>();
   IOBufQueue q;
@@ -175,9 +163,8 @@ void readBench(size_t iter) {
   susp.rehire();
 }
 
-#if !FOLLY_SANITIZE
 template <typename Serializer, typename Struct>
-int readBenchMemory(size_t iters) {
+static int readBenchMemory(size_t iters) {
   auto strct = create<Struct>();
   IOBufQueue q;
   Serializer::serialize(strct, &q);
@@ -193,12 +180,11 @@ int readBenchMemory(size_t iters) {
   auto after = getMemoryRequestsCounter();
   return after - before;
 }
-#endif
 
 /************************ Protobuf read(deserialize) **************************/
 
 template <typename Struct>
-void readBench(size_t iter) {
+static void readBench(size_t iter) {
   BenchmarkSuspender susp;
   auto strct = create<Struct>();
   string s;
@@ -214,9 +200,8 @@ void readBench(size_t iter) {
   susp.rehire();
 }
 
-#if !FOLLY_SANITIZE
 template <typename Struct>
-int readBenchMemory(size_t iters) {
+static int readBenchMemory(size_t iters) {
   auto strct = create<Struct>();
   string s;
   strct.SerializeToString(&s);
@@ -232,11 +217,9 @@ int readBenchMemory(size_t iters) {
 
   return after - before;
 }
-#endif
 
-#if !FOLLY_SANITIZE
 template <typename Struct>
-int readBenchArenaMemory(size_t iters) {
+static int readBenchArenaMemory(size_t iters) {
   auto strct = create<Struct>();
   string s;
   strct.SerializeToString(&s);
@@ -253,7 +236,6 @@ int readBenchArenaMemory(size_t iters) {
 
   return after - before;
 }
-#endif
 
 #define BENCHMARK_MACRO_RELATIVE(proto, rdwr, bench)  \
   BENCHMARK_RELATIVE(Thrift_##rdwr##_##bench, iter) { \
@@ -309,8 +291,7 @@ BENCHMARK_MACRO_RELATIVE(Compact, read, SortedVecNestedMapRaw)
 BENCHMARK_MACRO_NORM(ProtoBuf1, write, NestedMap)
 BENCHMARK_MACRO_RELATIVE(Compact, write, SortedVecNestedMapRaw)
 
-#if !FOLLY_SANITIZE
-std::string outputFormat(const std::string& name, int a, int b, int c) {
+static std::string outputFormat(const std::string& name, int a, int b, int c) {
   return fmt::format(
       "{:20} Thrift: {:<20} Protobuf: {:<20} "
       "Protobuf with Arena: {:<20}",
@@ -358,14 +339,15 @@ BENCHMARK_MEM(read, NestedMap, 1)
 BENCHMARK_MEM(write, NestedMap, 1)
 BENCHMARK_MEM(read, ComplexStruct, 1)
 BENCHMARK_MEM(write, ComplexStruct, 1)
-#endif
 
 int main(int argc, char** argv) {
   folly::init(&argc, &argv);
   if (FLAGS_memory_request) {
-#if FOLLY_SANITIZE
-    LOG(ERROR) << "cannot use jemalloc with sanitizer, abort!";
-#else
+    if (folly::kIsSanitize) {
+      LOG(ERROR) << "cannot use jemalloc with sanitizer, abort!";
+      return 1;
+    }
+
     LOG(INFO)
         << "number of memeory allocation request called during benchmarking";
     LOG(INFO) << "10000 iterations:";
@@ -414,7 +396,6 @@ int main(int argc, char** argv) {
         "{} sorted_vec_nested_map: {}",
         outputFormat("NestedMap_write", b1, b2, arena2),
         b3);
-#endif
   } else {
     runBenchmarks();
   }

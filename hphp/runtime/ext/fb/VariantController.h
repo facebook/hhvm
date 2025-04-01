@@ -281,6 +281,17 @@ struct VariantControllerImpl {
         return empty_dict_array();
     }
   }
+  static VectorType createVector(size_t size) {
+    switch (HackArraysMode) {
+      case VariantControllerHackArraysMode::ON:
+      case VariantControllerHackArraysMode::ON_AND_KEYSET:
+      case VariantControllerHackArraysMode::MIGRATORY:
+      case VariantControllerHackArraysMode::POST_MIGRATION:
+          return Array::attach(VanillaVec::MakeReserveVec(size));
+      case VariantControllerHackArraysMode::OFF:
+          return Array::attach(VanillaDict::MakeReserveDict(size));
+    }
+  }
   static int64_t vectorSize(const VectorType& vec) {
     return vec.size();
   }
@@ -306,6 +317,9 @@ struct VariantControllerImpl {
   // set methods
   static SetType createSet() {
     return empty_keyset();
+  }
+  static SetType createSet(size_t size) {
+    return Array::attach(VanillaKeyset::MakeReserveSet(size));
   }
   static int64_t setSize(const SetType& set) {
     return set.size();

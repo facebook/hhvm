@@ -602,7 +602,7 @@ let load
   Hh_logger.log "Parsing and loading packages config at %s" pkgs_config_abs_path;
   let package_info =
     let package_v2 = bool_ "package_v2" ~default:false config in
-    PackageConfig.load_and_parse ~strict:true ~package_v2 ~pkgs_config_abs_path
+    PackageConfig.load_and_parse ~package_v2 ~strict:true ~pkgs_config_abs_path
   in
   let global_opts =
     let tco_custom_error_config = CustomErrorConfig.load_and_parse () in

@@ -37,24 +37,13 @@ mod ffi {
         domains: Vec<String>,
     }
     extern "Rust" {
-        pub fn package_info(
-            package_v2: bool,
-            source_root: &CxxString,
-            filename: &CxxString,
-        ) -> PackageInfo;
+        pub fn package_info(package_v2: bool, packages_toml: &CxxString) -> PackageInfo;
     }
 }
 
-pub fn package_info(
-    package_v2: bool,
-    source_root: &CxxString,
-    filename: &CxxString,
-) -> ffi::PackageInfo {
-    let s = package::PackageInfo::from_text_strict(
-        package_v2,
-        &source_root.to_string(),
-        &filename.to_string(),
-    );
+pub fn package_info(package_v2: bool, packages_toml: &CxxString) -> ffi::PackageInfo {
+    // HHVM should not perform validation of include_paths, so invoking from_text_non_strict
+    let s = package::PackageInfo::from_text_non_strict(package_v2, &packages_toml.to_string());
     match s {
         Ok(info) => {
             let convert = |v: Option<&package::NameSet>| {

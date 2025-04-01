@@ -9,13 +9,23 @@ use oxidized::package_info_impl::package_info_to_vec;
 use oxidized::package_info_impl::Errors;
 
 ocaml_ffi! {
-    fn extract_packages_from_text_ffi(
+    fn extract_packages_from_text_strict_ffi(
         package_v2: bool,
-        strict: bool,
-        root: String,
         filename: String,
     ) -> Result<Vec<Package>, Errors> {
-        let info = match package::PackageInfo::from_text(package_v2, strict, &root, &filename) {
+        let info = match package::PackageInfo::from_text_strict(package_v2, &filename) {
+            Ok(info) => info,
+            // TODO(T148525961): Send a proper error when packages.toml fails to parse
+            Err(_) => return Ok(vec![]),
+        };
+        package_info_to_vec(&filename, info)
+    }
+
+    fn extract_packages_from_text_non_strict_ffi(
+        package_v2: bool,
+        filename: String,
+    ) -> Result<Vec<Package>, Errors> {
+        let info = match package::PackageInfo::from_text_non_strict(package_v2, &filename) {
             Ok(info) => info,
             // TODO(T148525961): Send a proper error when packages.toml fails to parse
             Err(_) => return Ok(vec![]),

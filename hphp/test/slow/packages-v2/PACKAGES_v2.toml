@@ -1,7 +1,7 @@
 [packages]
 
 [packages.prod]
-include_paths=["//fake_flib/", "//basic-3.php"]
+include_paths=["//fake_flib/", "//basic-3.php", "//doesnotexists/"]
 
 [packages.intern]
 include_paths=["//fake_flib/intern/"]

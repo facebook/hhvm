@@ -6,7 +6,6 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result;
 use std::ops::Range;
-use std::path::PathBuf;
 
 use toml::Spanned;
 
@@ -27,7 +26,7 @@ pub enum Error {
         soft: bool,
     },
     InvalidIncludePath {
-        abs_path: PathBuf,
+        path: String,
         span: (usize, usize),
     },
     MalformedIncludePath {
@@ -67,10 +66,10 @@ impl Error {
         }
     }
 
-    pub fn invalid_include_path(abs_path: PathBuf, span: Range<usize>) -> Self {
+    pub fn invalid_include_path(path: String, span: Range<usize>) -> Self {
         let Range { start, end } = span;
         Self::InvalidIncludePath {
-            abs_path,
+            path,
             span: (start, end),
         }
     }
@@ -178,8 +177,8 @@ impl Display for Error {
                     }
                 }
             }
-            Self::InvalidIncludePath { abs_path, .. } => {
-                write!(f, "include_path {} does not exist", abs_path.display())?;
+            Self::InvalidIncludePath { path, .. } => {
+                write!(f, "include_path {} does not exist", path)?;
             }
             Self::MalformedIncludePath { include_path, .. } => {
                 write!(

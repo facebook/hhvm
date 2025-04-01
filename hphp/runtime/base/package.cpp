@@ -82,8 +82,7 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
       return defaults();
     }
 
-    auto info = package::package_info(
-      Cfg::Eval::PackageV2, Cfg::Server::SourceRoot, path.string());
+    auto info = package::package_info(Cfg::Eval::PackageV2, path.string());
 
     auto const convert = [&] (auto const& v) {
       hphp_vector_string_set result;

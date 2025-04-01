@@ -90,7 +90,6 @@ impl HhConfig {
             .unwrap_or(GlobalOptions::default().po.package_v2);
         PackageInfo::from_text_strict(
             package_v2,
-            root.as_ref().to_str().unwrap_or_default(),
             root.as_ref()
                 .join(package_config_pathbuf)
                 .to_str()

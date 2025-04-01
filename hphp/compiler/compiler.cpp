@@ -100,7 +100,6 @@ struct CompilerOptions {
   std::vector<std::string> config;
   std::vector<std::string> confStrings;
   std::vector<std::string> iniStrings;
-  std::string repoOptionsDir;
   std::string inputDir;
   std::vector<std::string> inputs;
   std::string inputList;
@@ -198,16 +197,9 @@ bool addAutoloadQueryToPackage(Package& package, const std::string& queryStr) {
 void addListToPackage(Package& package, const std::vector<std::string>& dirs,
                      const CompilerOptions& po) {
   namespace fs = std::filesystem;
-  std::string prefix{""};
-  if (po.repoOptionsDir != po.inputDir) {
-    auto const input = fs::path(po.inputDir);
-    auto const rdr = fs::path(po.repoOptionsDir);
-    prefix = fs::relative(po.repoOptionsDir, po.inputDir).native();
-    if (!prefix.empty() && prefix.back() != '/') prefix += '/';
-  }
   for (auto const& dir : dirs) {
     Logger::FInfo("adding autoload dir {}", dir);
-    package.addDirectory(prefix + dir);
+    package.addDirectory(dir);
   }
 }
 
@@ -505,8 +497,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("version", "display version number")
     ("format,f", value<std::vector<std::string>>(&formats)->composing(),
      "HHBC Output format: binary (default) | hhas | text | none")
-    ("repo-options-dir", value<std::string>(&po.repoOptionsDir),
-     "repo options directory")
     ("input-dir", value<std::string>(&po.inputDir), "input directory")
     ("inputs,i", value<std::vector<std::string>>(&po.inputs)->composing(),
      "input file names")
@@ -717,12 +707,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   if (po.inputDir.empty()) po.inputDir = '.';
   po.inputDir = FileUtil::normalizeDir(po.inputDir);
 
-  if (po.repoOptionsDir.empty()) {
-    po.repoOptionsDir = po.inputDir;
-  } else {
-    po.repoOptionsDir = FileUtil::normalizeDir(po.repoOptionsDir);
-  }
-
   for (auto const& dir : po.excludeDirs) {
     Option::PackageExcludeDirs.insert(FileUtil::normalizeDir(dir));
   }
@@ -888,7 +872,7 @@ std::unique_ptr<UnitIndex> computeIndex(
   Package indexPackage{po.inputDir, executor, client, po.coredump};
   Timer indexTimer(Timer::WallTime, "indexing");
 
-  auto const& repoFlags = RepoOptions::forFile(po.repoOptionsDir).flags();
+  auto const& repoFlags = RepoOptions::forFile(po.inputDir.c_str()).flags();
   auto const& dirs = repoFlags.autoloadRepoBuildSearchDirs();
   auto const queryStr = repoFlags.autoloadQuery();
   if (!dirs.empty()) {
@@ -1125,14 +1109,14 @@ bool process(CompilerOptions &po) {
 
   if (!Cfg::Eval::ActiveDeployment.empty()) {
     auto const& packageInfo =
-      RepoOptions::forFile(po.repoOptionsDir).packageInfo();
+      RepoOptions::forFile(po.inputDir.c_str()).packageInfo();
     auto const activeDeployment =
       packageInfo.deployments().find(Cfg::Eval::ActiveDeployment);
     if (activeDeployment == end(packageInfo.deployments())) {
       Logger::FError("The active deployment is set to {}; "
                      "however, it is not defined in the {}/{} file",
                      Cfg::Eval::ActiveDeployment,
-                     po.repoOptionsDir,
+                     po.inputDir,
                      Cfg::Eval::PackagesTomlFileName);
       return false;
     }
@@ -1150,7 +1134,7 @@ bool process(CompilerOptions &po) {
       // files that do not have a __PackageOverride and do not match an
       // include_path belong to the default package, which is always included
       // in the active deployment
-      pathsInDeployment.push_back(std::pair(Cfg::Server::SourceRoot + po.repoOptionsDir, true));
+      pathsInDeployment.push_back(std::pair(Cfg::Server::SourceRoot + po.inputDir, true));
     } else {
       // PackageV1: precompute the set of modules in the current deployment
       moduleInDeployment.reserve(index->modules.size());
@@ -1357,7 +1341,7 @@ bool process(CompilerOptions &po) {
       if (Cfg::Eval::PackageV2) {
         if (p.m_packageOverride) {
           auto const& packageInfo =
-            RepoOptions::forFile(po.repoOptionsDir).packageInfo();
+            RepoOptions::forFile(po.inputDir.c_str()).packageInfo();
           auto const activeDeployment =
             packageInfo.deployments().find(Cfg::Eval::ActiveDeployment);
           return ((activeDeployment->second).m_packages.contains(p.m_packageOverride->data()));
@@ -1473,7 +1457,7 @@ bool process(CompilerOptions &po) {
 
     // Parse the input files specified on the command line
     addInputsToPackage(*parsePackage, po);
-    auto const& repoFlags = RepoOptions::forFile(po.repoOptionsDir).flags();
+    auto const& repoFlags = RepoOptions::forFile(po.inputDir.c_str()).flags();
     auto const& dirs = repoFlags.autoloadRepoBuildSearchDirs();
     auto const queryStr = repoFlags.autoloadQuery();
     if (!dirs.empty()) {
@@ -1580,7 +1564,7 @@ bool process(CompilerOptions &po) {
     if (!Option::GenerateBinaryHHBC) return true;
     Timer _{Timer::WallTime, "finalizing repo"};
     auto const& packageInfo =
-      RepoOptions::forFile(po.repoOptionsDir).packageInfo();
+      RepoOptions::forFile(po.inputDir.c_str()).packageInfo();
     repo->finish(getGlobalData(), *autoload, packageInfo);
     return true;
   };

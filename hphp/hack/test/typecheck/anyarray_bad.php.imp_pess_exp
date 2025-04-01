@@ -1,0 +1,64 @@
+File "anyarray_bad.php", line 34, characters 5-17:
+  AnyArray<arraykey, mixed>
+ERROR: File "anyarray_bad.php", line 10, characters 15-20:
+Invalid argument (Typing[4110])
+  File "anyarray_bad.php", line 3, characters 22-39:
+  Expected `AnyArray<int, int>`
+  File "anyarray_bad.php", line 10, characters 15-20:
+  But got `Map<(arraykey & _), _>`
+ERROR: File "anyarray_bad.php", line 11, characters 15-20:
+Invalid argument (Typing[4110])
+  File "anyarray_bad.php", line 3, characters 22-39:
+  Expected `AnyArray<int, int>`
+  File "anyarray_bad.php", line 11, characters 15-20:
+  But got `Set<(arraykey & _)>`
+ERROR: File "anyarray_bad.php", line 12, characters 15-26:
+Invalid argument (Typing[4110])
+  File "anyarray_bad.php", line 3, characters 22-39:
+  Expected `AnyArray<int, int>`
+  File "anyarray_bad.php", line 12, characters 15-26:
+  But got `ImmVector<nothing>`
+ERROR: File "anyarray_bad.php", line 13, characters 38-50:
+Invalid argument (Typing[4110])
+  File "anyarray_bad.php", line 13, characters 30-35:
+  Expected `string`
+  File "anyarray_bad.php", line 6, characters 16-17:
+    via this generic `Tv`
+  File "anyarray_bad.php", line 4, characters 39-41:
+  But got `int`
+ERROR: File "anyarray_bad.php", line 17, characters 3-13:
+You cannot mutate this (Typing[4011])
+  File "anyarray_bad.php", line 4, characters 25-42:
+  This is an object of type AnyArray<int, int>
+ERROR: File "anyarray_bad.php", line 25, characters 19-21:
+The method `foo` is not compatible with the overridden method (Typing[4341])
+  File "anyarray_bad.php", line 25, characters 19-21:
+  Method `foo` has type `(function(AnyArray<int, int> $f): void)` in `Child`
+  File "anyarray_bad.php", line 21, characters 19-21:
+  But it has type `(function(AnyArray<arraykey, int> $f): void)` in parent `Parent_`
+  File "anyarray_bad.php", line 25, characters 19-21:
+  Type `(function(AnyArray<int, int> $f): void)` is not a subtype of `(function(AnyArray<arraykey, int> $f): void)`
+  File "anyarray_bad.php", line 25, characters 32-34:
+  Expected `int`
+  File "anyarray_bad.php", line 21, characters 32-39:
+  But got `arraykey`
+ERROR: File "anyarray_bad.php", line 35, characters 18-21:
+Invalid argument (Typing[4110])
+  File "anyarray_bad.php", line 29, characters 10-15:
+  Expected `arraykey`
+  File "anyarray_bad.php", line 31, characters 10-24:
+  But got `nonnull` from the argument to this \HH\is_any_array test
+ERROR: File "anyarray_bad.php", line 35, characters 18-21:
+Invalid argument (Typing[4110])
+  File "anyarray_bad.php", line 29, characters 10-15:
+  Expected `~(arraykey & _)`
+  File "collections/Set.hhi", line 516, characters 41-42:
+    via this generic `Tv`
+  File "anyarray_bad.php", line 31, characters 10-24:
+  But got `mixed` from the argument to this \HH\is_any_array test
+  File "hackarray.hhi", line 22, characters 35-36:
+    via this generic `Tv`
+  File "interfaces.hhi", line 115, characters 23-24:
+    via this generic `Tv`
+  File "interfaces.hhi", line 92, characters 66-67:
+    via this generic `Tv`

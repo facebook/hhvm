@@ -84,7 +84,13 @@ let (is_sub_type_ref : is_sub_type_type ref) =
 
 let is_sub_type x = !is_sub_type_ref x
 
-let (is_sub_type_for_union_ref : (env -> locl_ty -> locl_ty -> bool) ref) =
+let (is_sub_type_for_union_ref :
+      (env ->
+      ?coerce:Typing_logic.coercion_direction option ->
+      locl_ty ->
+      locl_ty ->
+      bool)
+      ref) =
   ref (not_implemented "is_sub_type_for_union")
 
 let is_sub_type_for_union x = !is_sub_type_for_union_ref x
@@ -141,6 +147,7 @@ let expand_typeconst x = !expand_typeconst_ref x
 
 type union =
   env ->
+  ?coerce:Typing_logic.coercion_direction option ->
   ?reason:Typing_reason.t ->
   ?approx_cancel_neg:bool ->
   locl_ty ->

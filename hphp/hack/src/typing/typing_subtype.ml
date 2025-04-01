@@ -1112,7 +1112,13 @@ end = struct
       (* A & B <: C iif A <: C | !B *)
       (match Subtype_negation.find_type_with_exact_negation env tyl with
       | (env, Some non_ty, tyl) -> begin
-        let (env, ty_super) = TUtils.union env ty_super non_ty in
+        let (env, ty_super) =
+          TUtils.union
+            env
+            ~coerce:subtype_env.Subtype_env.coerce
+            ty_super
+            non_ty
+        in
         let ty_sub = MakeType.intersection r_sub tyl in
         simplify
           ~subtype_env
@@ -3567,7 +3573,13 @@ end = struct
         *)
         (match Subtype_negation.find_type_with_exact_negation env tyl with
         | (env, Some non_ty, tyl) ->
-          let (env, ty_super) = TUtils.union env ty_super non_ty in
+          let (env, ty_super) =
+            TUtils.union
+              env
+              ~coerce:subtype_env.Subtype_env.coerce
+              ty_super
+              non_ty
+          in
           let ty_sub = MakeType.intersection r_sub tyl in
           let lhs = { lhs with ty_sub }
           and rhs =
@@ -9568,8 +9580,8 @@ let is_sub_type_for_union_help env ?(coerce = None) ty1 ty2 =
     (LoclType ty2)
   = Some true
 
-let is_sub_type_for_union env ty1 ty2 =
-  is_sub_type_for_union_help ~coerce:None env ty1 ty2
+let is_sub_type_for_union env ?(coerce = None) ty1 ty2 =
+  is_sub_type_for_union_help ~coerce env ty1 ty2
 
 (* Entry point *)
 let is_sub_type_for_union_i env ty1 ty2 =

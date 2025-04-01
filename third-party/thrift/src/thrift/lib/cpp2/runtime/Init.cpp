@@ -17,6 +17,7 @@
 #include <thrift/lib/cpp2/runtime/Init.h>
 
 #include <stdexcept>
+#include <unordered_set>
 
 #include <folly/Memory.h>
 #include <folly/synchronization/DelayedInit.h>

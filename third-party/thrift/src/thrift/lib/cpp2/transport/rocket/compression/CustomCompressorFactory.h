@@ -43,6 +43,8 @@ class CustomCompressorFactory {
    */
 
  public:
+  enum class CompressorLocation { CLIENT, SERVER };
+
   virtual ~CustomCompressorFactory() = default;
 
   virtual std::string getCompressorName() const = 0;
@@ -61,7 +63,8 @@ class CustomCompressorFactory {
   // shared_ptr is used since both payload serializer as well as the
   // client/server connection may need to hold onto the compressor.
   virtual std::shared_ptr<CustomCompressor> make(
-      CustomCompressionSetupResponse response) const = 0;
+      CustomCompressionSetupResponse response,
+      CompressorLocation location) const = 0;
 };
 
 } // namespace apache::thrift::rocket

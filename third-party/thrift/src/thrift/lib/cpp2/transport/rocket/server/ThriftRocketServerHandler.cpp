@@ -349,7 +349,8 @@ ThriftRocketServerHandler::handleSetupFrameCustomCompression(
 
   std::shared_ptr<CustomCompressor> compressor;
   try {
-    compressor = factory->make(*response);
+    compressor = factory->make(
+        *response, CustomCompressorFactory::CompressorLocation::SERVER);
   } catch (const std::exception& ex) {
     return folly::makeUnexpected(fmt::format(
         "Failed to make create custom compressor on server due to: {}",

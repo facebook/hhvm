@@ -21,7 +21,6 @@
 #include <string>
 
 #include <folly/compression/Compression.h>
-
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache {

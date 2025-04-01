@@ -278,7 +278,9 @@ RocketClient::handleSetupResponseCustomCompression(
 
   std::shared_ptr<CustomCompressor> compressor;
   try {
-    compressor = factory->make(customSetupResponse);
+    compressor = factory->make(
+        customSetupResponse,
+        CustomCompressorFactory::CompressorLocation::CLIENT);
   } catch (const std::exception& ex) {
     return folly::makeUnexpected(transport::TTransportException(
         transport::TTransportException::INVALID_SETUP,

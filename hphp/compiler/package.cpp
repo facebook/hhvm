@@ -1623,10 +1623,19 @@ Package::emitAllPackageV2(const EmitCallback& callback, const UnitIndex& index,
   if (buildWithPacakgesAndSymbolRefs) {
     Timer timer{Timer::WallTime, "emitting filtered files included by package rules"};
 
-    // fast_set -> set conversion
+    // Excluded dirs must be scanned for __PackageOverride only if they are
+    // subdirectories of directories explicitly included in the build with --dir
     std::set<std::string> excluded_dirs;
-    for (auto const& d : Option::PackageExcludeDirs) {
-      excluded_dirs.emplace(d);
+    for (auto const& e : Option::PackageExcludeDirs) {
+      if (std::any_of(m_directories.begin(), m_directories.end(),
+          [e](const auto& i){ return e.starts_with(i); } )) {
+        excluded_dirs.emplace(e);
+      } else {
+        Logger::FWarning(
+          "The excluded directory {} is not a subdirectory of a directory included in the build,"
+          " It is not scanned for __PackageOverride annotations.",
+          e);
+      }
     }
 
     // excluded dirs might not exist at all: do not fail hard */
@@ -1634,7 +1643,7 @@ Package::emitAllPackageV2(const EmitCallback& callback, const UnitIndex& index,
       co_await groupAll(excluded_dirs, true, false, /* failHard */ false);
     co_await emitGroups(
       std::move(filtered_groups), callback, index, false /* forceInclusion */);
-      m_filteredPackageMicros = std::chrono::microseconds{timer.getMicroSeconds()};
+    m_filteredPackageMicros = std::chrono::microseconds{timer.getMicroSeconds()};
   }
 
   // Save edge list to a text file, if requested

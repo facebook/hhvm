@@ -16,6 +16,8 @@
 
 import testing.constants_FBTHRIFT_ONLY_DO_NOT_USE as testing_constants
 import testing.types as testing_types
+import transitive_deps.a.constants_FBTHRIFT_ONLY_DO_NOT_USE as transitive_deps_constants
+import transitive_deps.a.types as transitive_deps_types
 from later.unittest import TestCase
 
 from parameterized import parameterized_class
@@ -40,6 +42,7 @@ This test is a prototype for generated tests to verify parity across thrift file
         (testing_constants.RedColour, testing_types.RedColour),
         (testing_constants.BlueColour, testing_types.BlueColour),
         (testing_constants.FANCY_CONST, testing_types.FANCY_CONST),
+        (transitive_deps_constants.kTransitiveD, transitive_deps_types.kTransitiveD),
     ],
 )
 class ConstantTests(TestCase):

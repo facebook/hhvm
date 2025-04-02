@@ -6,9 +6,9 @@
 #
 import thrift.py3.types
 
-import includes.types as _includes_types
-import transitive.types as _transitive_types
+import includes.types
+import transitive.types
 
 
-ExampleIncluded = _includes_types.Included(MyIntField=2, MyTransitiveField=_transitive_types.Foo(a=2))
+ExampleIncluded = includes.types.Included(MyIntField=2, MyTransitiveField=transitive.types.Foo(a=2))
 IncludedConstant = 42

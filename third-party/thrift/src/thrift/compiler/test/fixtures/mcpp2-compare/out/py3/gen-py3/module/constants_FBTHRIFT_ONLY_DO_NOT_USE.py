@@ -6,8 +6,8 @@
 #
 import thrift.py3.types
 
-import module.types as _module_types
-import includes.types as _includes_types
+import module.types
+import includes.types
 
 from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     Map__string_i64,
@@ -82,8 +82,8 @@ aMap = Map__i32_string( { 1: "foo", 2: "bar" })
 aSet = Set__string(("foo", "bar", ))
 aListOfLists = List__List__i32((List__i32((1, 3, 5, 7, 9, )), List__i32((2, 4, 8, 10, 12, )), ))
 states = List__Map__string_i32((Map__string_i32( { "San Diego": 3211000, "Sacramento": 479600, "SF": 837400 }), Map__string_i32( { "New York": 8406000, "Albany": 98400 }), ))
-AConstList = List__MyEnumA((_module_types.MyEnumA.fieldA, _module_types.MyEnumA.fieldB, __BadEnum(_module_types.MyEnumA, 3), ))
+AConstList = List__MyEnumA((module.types.MyEnumA.fieldA, module.types.MyEnumA.fieldB, __BadEnum(module.types.MyEnumA, 3), ))
 AnIntegerEnum2 = 2
 ListOfIntsFromEnums = List__i32((2, 1, ))
-constEnumA = _module_types.MyEnumA.fieldB
-constEnumB = __BadEnum(_module_types.MyEnumA, 3)
+constEnumA = module.types.MyEnumA.fieldB
+constEnumB = __BadEnum(module.types.MyEnumA, 3)

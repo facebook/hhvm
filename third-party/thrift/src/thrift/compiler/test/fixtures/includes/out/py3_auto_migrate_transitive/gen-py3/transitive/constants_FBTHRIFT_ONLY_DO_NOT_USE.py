@@ -6,7 +6,7 @@
 #
 import thrift.py3.types
 
-import transitive.types as _transitive_types
+import transitive.types
 
 
-ExampleFoo = _transitive_types.Foo(a=2)
+ExampleFoo = transitive.types.Foo(a=2)

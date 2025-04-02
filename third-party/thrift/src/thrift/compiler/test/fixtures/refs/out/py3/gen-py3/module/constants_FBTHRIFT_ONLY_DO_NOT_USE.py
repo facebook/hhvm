@@ -6,7 +6,7 @@
 #
 import thrift.py3.types
 
-import module.types as _module_types
+import module.types
 
 from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__RecursiveStruct,
@@ -16,7 +16,7 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__i64,
 )
 
-kStructWithRef = _module_types.StructWithRef(def_field=_module_types.Empty(), opt_field=_module_types.Empty(), req_field=_module_types.Empty())
-kStructWithRefTypeUnique = _module_types.StructWithRefTypeUnique(def_field=_module_types.Empty(), opt_field=_module_types.Empty(), req_field=_module_types.Empty())
-kStructWithRefTypeShared = _module_types.StructWithRefTypeShared(def_field=_module_types.Empty(), opt_field=_module_types.Empty(), req_field=_module_types.Empty())
-kStructWithRefTypeSharedConst = _module_types.StructWithRefTypeSharedConst(def_field=_module_types.Empty(), opt_field=_module_types.Empty(), req_field=_module_types.Empty())
+kStructWithRef = module.types.StructWithRef(def_field=module.types.Empty(), opt_field=module.types.Empty(), req_field=module.types.Empty())
+kStructWithRefTypeUnique = module.types.StructWithRefTypeUnique(def_field=module.types.Empty(), opt_field=module.types.Empty(), req_field=module.types.Empty())
+kStructWithRefTypeShared = module.types.StructWithRefTypeShared(def_field=module.types.Empty(), opt_field=module.types.Empty(), req_field=module.types.Empty())
+kStructWithRefTypeSharedConst = module.types.StructWithRefTypeSharedConst(def_field=module.types.Empty(), opt_field=module.types.Empty(), req_field=module.types.Empty())

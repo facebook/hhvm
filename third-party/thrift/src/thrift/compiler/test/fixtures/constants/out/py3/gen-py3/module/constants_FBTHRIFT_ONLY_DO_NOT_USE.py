@@ -6,7 +6,7 @@
 #
 import thrift.py3.types
 
-import module.types as _module_types
+import module.types
 
 from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__i32,
@@ -34,34 +34,34 @@ z = 1000000000
 zeroDoubleValue = 0
 longDoubleValue = 2.59961000990301e-05
 bin = b"a\000z"
-my_company = _module_types.Company.FACEBOOK
+my_company = module.types.Company.FACEBOOK
 foo = "foo"
 bar = 42
 mymap = Map__string_string( { "keys": "values" })
-my_apps = List__Company((_module_types.Company.FACEBOOK, _module_types.Company._Company__FRIEND__FEED, ))
-instagram = _module_types.Internship(weeks=12, title="Software Engineer", employer=_module_types.Company.INSTAGRAM, compensation=1200, school="Monters University")
-partial_const = _module_types.Internship(weeks=8, title="Some Job")
-kRanges = List__Range((_module_types.Range(min=1, max=2), _module_types.Range(min=5, max=6), ))
-internList = List__Internship((_module_types.Internship(weeks=12, title="Software Engineer", employer=_module_types.Company.INSTAGRAM, compensation=1200, school="Monters University"), _module_types.Internship(weeks=10, title="Sales Intern", employer=_module_types.Company.FACEBOOK, compensation=1000), ))
-pod_0 = _module_types.struct1()
-pod_s_0 = _module_types.struct1()
-pod_1 = _module_types.struct1(a=10, b="foo")
-pod_s_1 = _module_types.struct1(a=10, b="foo")
-pod_2 = _module_types.struct2(a=98, b="gaz", c=_module_types.struct1(a=12, b="bar"), d=List__i32((11, 22, 33, )))
-pod_trailing_commas = _module_types.struct2(a=98, b="gaz", c=_module_types.struct1(a=12, b="bar"), d=List__i32((11, 22, 33, )))
-pod_s_2 = _module_types.struct2(a=98, b="gaz", c=_module_types.struct1(a=12, b="bar"), d=List__i32((11, 22, 33, )))
-pod_3 = _module_types.struct3(a="abc", b=456, c=_module_types.struct2(a=888, c=_module_types.struct1(b="gaz"), d=List__i32((1, 2, 3, ))))
-pod_s_3 = _module_types.struct3(a="abc", b=456, c=_module_types.struct2(a=888, c=_module_types.struct1(b="gaz"), d=List__i32((1, 2, 3, ))))
-pod_4 = _module_types.struct4(a=1234, b=0.333, c=25)
-u_1_1 = _module_types.union1(i=97)
-u_1_2 = _module_types.union1(d=5.6)
-u_1_3 = _module_types.union1()
-u_2_1 = _module_types.union2(i=51)
-u_2_2 = _module_types.union2(d=6.7)
-u_2_3 = _module_types.union2(s=_module_types.struct1(a=8, b="abacabb"))
-u_2_4 = _module_types.union2(u=_module_types.union1(i=43))
-u_2_5 = _module_types.union2(u=_module_types.union1(d=9.8))
-u_2_6 = _module_types.union2(u=_module_types.union1())
+my_apps = List__Company((module.types.Company.FACEBOOK, module.types.Company._Company__FRIEND__FEED, ))
+instagram = module.types.Internship(weeks=12, title="Software Engineer", employer=module.types.Company.INSTAGRAM, compensation=1200, school="Monters University")
+partial_const = module.types.Internship(weeks=8, title="Some Job")
+kRanges = List__Range((module.types.Range(min=1, max=2), module.types.Range(min=5, max=6), ))
+internList = List__Internship((module.types.Internship(weeks=12, title="Software Engineer", employer=module.types.Company.INSTAGRAM, compensation=1200, school="Monters University"), module.types.Internship(weeks=10, title="Sales Intern", employer=module.types.Company.FACEBOOK, compensation=1000), ))
+pod_0 = module.types.struct1()
+pod_s_0 = module.types.struct1()
+pod_1 = module.types.struct1(a=10, b="foo")
+pod_s_1 = module.types.struct1(a=10, b="foo")
+pod_2 = module.types.struct2(a=98, b="gaz", c=module.types.struct1(a=12, b="bar"), d=List__i32((11, 22, 33, )))
+pod_trailing_commas = module.types.struct2(a=98, b="gaz", c=module.types.struct1(a=12, b="bar"), d=List__i32((11, 22, 33, )))
+pod_s_2 = module.types.struct2(a=98, b="gaz", c=module.types.struct1(a=12, b="bar"), d=List__i32((11, 22, 33, )))
+pod_3 = module.types.struct3(a="abc", b=456, c=module.types.struct2(a=888, c=module.types.struct1(b="gaz"), d=List__i32((1, 2, 3, ))))
+pod_s_3 = module.types.struct3(a="abc", b=456, c=module.types.struct2(a=888, c=module.types.struct1(b="gaz"), d=List__i32((1, 2, 3, ))))
+pod_4 = module.types.struct4(a=1234, b=0.333, c=25)
+u_1_1 = module.types.union1(i=97)
+u_1_2 = module.types.union1(d=5.6)
+u_1_3 = module.types.union1()
+u_2_1 = module.types.union2(i=51)
+u_2_2 = module.types.union2(d=6.7)
+u_2_3 = module.types.union2(s=module.types.struct1(a=8, b="abacabb"))
+u_2_4 = module.types.union2(u=module.types.union1(i=43))
+u_2_5 = module.types.union2(u=module.types.union1(d=9.8))
+u_2_6 = module.types.union2(u=module.types.union1())
 apostrophe = "'"
 tripleApostrophe = "'''"
 quotationMark = "\""

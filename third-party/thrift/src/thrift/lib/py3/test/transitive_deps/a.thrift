@@ -22,3 +22,6 @@ struct A {
   1: list<b.B> b;
   2: b.B other;
 }
+
+// Tests how python handles initialization of implicitly included thrift modules
+const b.BofD kTransitiveD = {"d": {"n": 31}};

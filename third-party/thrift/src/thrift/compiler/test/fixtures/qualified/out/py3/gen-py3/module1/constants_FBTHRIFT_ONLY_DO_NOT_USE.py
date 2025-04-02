@@ -6,11 +6,11 @@
 #
 import thrift.py3.types
 
-import module1.types as _module1_types
+import module1.types
 
 from module1.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__Enum,
 )
 
-c1 = _module1_types.Struct(first=201, second="module1_str")
-e1s = List__Enum((_module1_types.Enum.ONE, _module1_types.Enum.THREE, ))
+c1 = module1.types.Struct(first=201, second="module1_str")
+e1s = List__Enum((module1.types.Enum.ONE, module1.types.Enum.THREE, ))

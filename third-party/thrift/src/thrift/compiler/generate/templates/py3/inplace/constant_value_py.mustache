@@ -36,7 +36,7 @@ file.
 }}{{#value:double?}}{{value:double_value}}{{/value:double?}}{{!
 }}{{#value:const_struct?}}{{!
     }}{{#value:const_struct_type}}{{!
-    }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{!
+    }}{{#type:need_module_path?}}{{type:module_path_period_separated}}.{{/type:need_module_path?}}{{!
     }}{{#type:struct}}{{struct:name}}{{/type:struct}}{{!
     }}{{/value:const_struct_type}}{{!
     }}({{#value:const_struct}}{{!
@@ -67,7 +67,7 @@ file.
 }}{{/value:const_struct?}}{{!
 }}{{#value:enum?}}{{!
     }}{{^value:enum_value?}}__BadEnum({{/value:enum_value?}}{{!
-    }}{{#value:const_enum_type}}{{#type:need_module_path?}}{{type:modulePath}}.{{!
+    }}{{#value:const_enum_type}}{{#type:need_module_path?}}{{type:module_path_period_separated}}.{{!
     }}{{/type:need_module_path?}}{{/value:const_enum_type}}{{!
     }}{{value:enum_name}}{{#value:enum_value?}}.{{value:py3_enum_value_name}}{{/value:enum_value?}}{{!
     }}{{^value:enum_value?}}, {{value:integer_value}}){{/value:enum_value?}}{{!

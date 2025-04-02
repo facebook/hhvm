@@ -6,7 +6,7 @@
 #
 import thrift.py3.types
 
-import module.types as _module_types
+import module.types
 
 from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__string,

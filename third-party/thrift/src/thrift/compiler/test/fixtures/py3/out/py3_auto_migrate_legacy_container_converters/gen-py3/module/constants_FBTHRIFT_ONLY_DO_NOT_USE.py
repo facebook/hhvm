@@ -6,7 +6,7 @@
 #
 import thrift.py3.types
 
-import module.types as _module_types
+import module.types
 
 from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__i16,
@@ -51,10 +51,10 @@ A_REAL_NUMBER = 3.14
 A_FAKE_NUMBER = 3.0
 A_WORD = "Good word"
 SOME_BYTES = b"bytes"
-A_STRUCT = _module_types.SimpleStruct(is_on=True, tiny_int=5, small_int=6, nice_sized_int=7, big_int=8, real=9.9)
-EMPTY = _module_types.SimpleStruct()
+A_STRUCT = module.types.SimpleStruct(is_on=True, tiny_int=5, small_int=6, nice_sized_int=7, big_int=8, real=9.9)
+EMPTY = module.types.SimpleStruct()
 WORD_LIST = List__string(("the", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog", ))
 SOME_MAP = List__Map__i32_double((Map__i32_double( { 1: 1.1, 2: 2.2 }), Map__i32_double( { 3: 3.3 }), ))
 DIGITS = Set__i32((1, 2, 3, 4, 5, ))
-A_CONST_MAP = Map__string_SimpleStruct( { "simple": _module_types.SimpleStruct(is_on=False, tiny_int=50, small_int=61, nice_sized_int=72, big_int=83, real=99.9) })
-ANOTHER_CONST_MAP = Map__AnEnumRenamed_i32( { _module_types.AnEnumRenamed.name_: 0, _module_types.AnEnumRenamed.value_: 1, _module_types.AnEnumRenamed.renamed_: 2 })
+A_CONST_MAP = Map__string_SimpleStruct( { "simple": module.types.SimpleStruct(is_on=False, tiny_int=50, small_int=61, nice_sized_int=72, big_int=83, real=99.9) })
+ANOTHER_CONST_MAP = Map__AnEnumRenamed_i32( { module.types.AnEnumRenamed.name_: 0, module.types.AnEnumRenamed.value_: 1, module.types.AnEnumRenamed.renamed_: 2 })

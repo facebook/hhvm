@@ -17,9 +17,12 @@
 
 import unittest
 
-from transitive_deps.a.types import A
+from transitive_deps.a.types import A, kTransitiveD
 
 
 class TransitiveDepsTest(unittest.TestCase):
     def test_a(self) -> None:
         A()
+
+    def test_transitive_const(self) -> None:
+        self.assertEqual(kTransitiveD.d.n, 31)

@@ -6,11 +6,11 @@
 #
 import thrift.py3.types
 
-import module2.types as _module2_types
-import module0.types as _module0_types
-import module1.types as _module1_types
+import module2.types
+import module0.types
+import module1.types
 
 
-c2 = _module2_types.Struct(first=_module0_types.Struct(first=101, second="module0_str"), second=_module1_types.Struct(first=201, second="module1_str"))
-c3 = _module2_types.Struct(first=_module0_types.Struct(first=101, second="module0_str"), second=_module1_types.Struct(first=201, second="module1_str"))
-c4 = _module2_types.Struct(first=_module0_types.Struct(first=101, second="module0_str"), second=_module1_types.Struct(first=201, second="module1_str"))
+c2 = module2.types.Struct(first=module0.types.Struct(first=101, second="module0_str"), second=module1.types.Struct(first=201, second="module1_str"))
+c3 = module2.types.Struct(first=module0.types.Struct(first=101, second="module0_str"), second=module1.types.Struct(first=201, second="module1_str"))
+c4 = module2.types.Struct(first=module0.types.Struct(first=101, second="module0_str"), second=module1.types.Struct(first=201, second="module1_str"))

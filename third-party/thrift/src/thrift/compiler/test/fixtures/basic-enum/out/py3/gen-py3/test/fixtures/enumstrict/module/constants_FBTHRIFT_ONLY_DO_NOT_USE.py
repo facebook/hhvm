@@ -6,11 +6,11 @@
 #
 import thrift.py3.types
 
-import test.fixtures.enumstrict.module.types as _test_fixtures_enumstrict_module_types
+import test.fixtures.enumstrict.module.types
 
 from test.fixtures.enumstrict.module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     Map__MyEnum_string,
 )
 
-kOne = _test_fixtures_enumstrict_module_types.MyEnum.ONE
-enumNames = Map__MyEnum_string( { _test_fixtures_enumstrict_module_types.MyEnum.ONE: "one", _test_fixtures_enumstrict_module_types.MyEnum.TWO: "two" })
+kOne = test.fixtures.enumstrict.module.types.MyEnum.ONE
+enumNames = Map__MyEnum_string( { test.fixtures.enumstrict.module.types.MyEnum.ONE: "one", test.fixtures.enumstrict.module.types.MyEnum.TWO: "two" })

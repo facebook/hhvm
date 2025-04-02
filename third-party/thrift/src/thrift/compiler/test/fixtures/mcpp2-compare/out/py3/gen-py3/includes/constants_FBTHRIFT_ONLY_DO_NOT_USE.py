@@ -6,7 +6,7 @@
 #
 import thrift.py3.types
 
-import includes.types as _includes_types
+import includes.types
 
 
 IncludedConstant = 42

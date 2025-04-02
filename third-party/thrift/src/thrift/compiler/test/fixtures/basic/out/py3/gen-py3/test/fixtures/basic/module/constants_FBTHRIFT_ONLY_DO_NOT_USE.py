@@ -6,7 +6,7 @@
 #
 import thrift.py3.types
 
-import test.fixtures.basic.module.types as _test_fixtures_basic_module_types
+import test.fixtures.basic.module.types
 
 from test.fixtures.basic.module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     Set__float,

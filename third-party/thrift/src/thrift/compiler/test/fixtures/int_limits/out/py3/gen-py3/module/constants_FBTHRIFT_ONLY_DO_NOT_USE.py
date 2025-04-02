@@ -6,7 +6,7 @@
 #
 import thrift.py3.types
 
-import module.types as _module_types
+import module.types
 
 
 max_i64_const = 9223372036854775807

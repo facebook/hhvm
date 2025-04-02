@@ -5297,23 +5297,30 @@ end = struct
       else
         class_types_and_ctor_types
     in
+    let check_args env =
+      let (env, tel, _) =
+        argument_list_exprs (expr ~expected:None ~ctxt:Context.default) env el
+      in
+      let (env, typed_unpack_element, _) =
+        match unpacked_element with
+        | None -> (env, None, MakeType.nothing Reason.none)
+        | Some unpacked_element ->
+          let (env, e, ty) =
+            expr ~expected:None ~ctxt:Context.default env unpacked_element
+          in
+          (env, Some e, ty)
+      in
+      (env, tel, typed_unpack_element)
+    in
     let (env, tel, typed_unpack_element, ty, ctor_fty) =
       match class_types_and_ctor_types with
       | [] ->
-        let (env, tel, _) =
-          argument_list_exprs (expr ~expected:None ~ctxt:Context.default) env el
-        in
-        let (env, typed_unpack_element, _) =
-          match unpacked_element with
-          | None -> (env, None, MakeType.nothing Reason.none)
-          | Some unpacked_element ->
-            let (env, e, ty) =
-              expr ~expected:None ~ctxt:Context.default env unpacked_element
-            in
-            (env, Some e, ty)
-        in
+        let (env, tel, typed_unpack_element) = check_args env in
         let (env, ty) = Env.fresh_type_error env p in
         (env, tel, typed_unpack_element, ty, ty)
+      | [(ty, ctor_fty)] when Typing_defs.is_dynamic ty ->
+        let (env, tel, typed_unpack_element) = check_args env in
+        (env, tel, typed_unpack_element, ty, ctor_fty)
       | [(ty, ctor_fty)] -> (env, tel, typed_unpack_element, ty, ctor_fty)
       | l ->
         let (tyl, ctyl) = List.unzip l in

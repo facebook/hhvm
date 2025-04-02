@@ -1332,11 +1332,7 @@ void HTTPSession::onPriority(HTTPCodec::StreamID streamID,
   http2::PriorityUpdate h2Pri{
       std::get<0>(pri), std::get<1>(pri), std::get<2>(pri)};
   HTTPTransaction* txn = findTransaction(streamID);
-  if (txn) {
-    // existing txn, change pri
-    txn->onPriorityUpdate(h2Pri);
-  } else {
-    // virtual node
+  if (!txn) {
     txnEgressQueue_.addOrUpdatePriorityNode(streamID, h2Pri);
   }
 }
@@ -1604,17 +1600,6 @@ void HTTPSession::sendHeaders(HTTPTransaction* txn,
     drainImpl();
     goawayBuf = writeBuf_.move();
     writeBuf_.append(std::move(writeBuf));
-  }
-  if (isUpstream() || (txn->isPushed() && headers.isRequest())) {
-    // upstream picks priority
-    if (getHTTP2PrioritiesEnabled()) {
-      auto pri = getMessagePriority(&headers);
-      if (pri.streamDependency == txn->getID()) {
-        LOG(ERROR) << "Attempted to create circular dependency txn=" << *this;
-      } else {
-        txn->onPriorityUpdate(pri);
-      }
-    }
   }
 
   const bool wasReusable = codec_->isReusable();

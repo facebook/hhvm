@@ -2023,41 +2023,10 @@ std::ostream& operator<<(std::ostream& os, const HTTPTransaction& txn) {
   return os;
 }
 
-void HTTPTransaction::updateAndSendPriority(int8_t newPriority) {
-  newPriority = HTTPMessage::normalizePriority(newPriority);
-  INVARIANT(newPriority >= 0);
-  priority_.streamDependency =
-      transport_.getCodec().mapPriorityToDependency(newPriority);
-  if (queueHandle_) {
-    queueHandle_ = egressQueue_.updatePriority(queueHandle_, priority_);
-  }
-  transport_.sendPriority(this, priority_);
-}
-
-void HTTPTransaction::updateAndSendPriority(
-    const http2::PriorityUpdate& newPriority) {
-  onPriorityUpdate(newPriority);
-  transport_.sendPriority(this, priority_);
-}
-
 void HTTPTransaction::updateAndSendPriority(HTTPPriority pri) {
   pri.urgency = HTTPMessage::normalizePriority((int8_t)pri.urgency);
   // Note we no longer want to play with the egressQueue_ with the new API.
   transport_.changePriority(this, pri);
-}
-
-void HTTPTransaction::onPriorityUpdate(const http2::PriorityUpdate& priority) {
-  if (!queueHandle_) {
-    LOG(ERROR) << "Received priority update on ingress only transaction";
-    return;
-  }
-  priority_ = priority;
-  queueHandle_ =
-      egressQueue_.updatePriority(queueHandle_, priority_, &currentDepth_);
-  if (priority_.streamDependency != egressQueue_.getRootId() &&
-      currentDepth_ == 1) {
-    priorityFallback_ = true;
-  }
 }
 
 void HTTPTransaction::checkIfEgressRateLimitedByUpstream() {

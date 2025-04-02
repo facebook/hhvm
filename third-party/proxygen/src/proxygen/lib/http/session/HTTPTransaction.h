@@ -1672,17 +1672,8 @@ class HTTPTransaction
 
   /**
    * Change the priority of this transaction, may generate a PRIORITY frame.
-   * The first variant is SPDY priority. The second is HTTP/2 priority. The
-   * third one is a new proposal in a draft for both HTTP/2 and HTTP/3.
    */
-  void updateAndSendPriority(int8_t newPriority);
-  void updateAndSendPriority(const http2::PriorityUpdate& pri);
   virtual void updateAndSendPriority(HTTPPriority pri);
-
-  /**
-   * Notify of priority change, will not generate a PRIORITY frame
-   */
-  void onPriorityUpdate(const http2::PriorityUpdate& priority);
 
   /**
    * Add a callback waiting for this transaction to have a transport with

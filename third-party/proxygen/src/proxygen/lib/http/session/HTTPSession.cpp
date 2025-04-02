@@ -1855,11 +1855,6 @@ size_t HTTPSession::sendAbort(HTTPTransaction* txn,
   return rstStreamSize;
 }
 
-size_t HTTPSession::sendPriority(HTTPTransaction* txn,
-                                 const http2::PriorityUpdate& pri) noexcept {
-  return sendPriorityImpl(txn->getID(), pri);
-}
-
 size_t HTTPSession::changePriority(HTTPTransaction* /*txn*/,
                                    HTTPPriority /*pri*/) noexcept {
   return 0;

@@ -512,8 +512,6 @@ class HTTPSession
                  const HTTPHeaders* trailers) noexcept override;
   size_t sendAbort(HTTPTransaction* txn,
                    ErrorCode statusCode) noexcept override;
-  size_t sendPriority(HTTPTransaction* txn,
-                      const http2::PriorityUpdate& pri) noexcept override;
   size_t changePriority(HTTPTransaction* /*txn*/,
                         HTTPPriority /* pri */) noexcept override;
   void detach(HTTPTransaction* txn) noexcept override;

@@ -1348,9 +1348,6 @@ class HQSession
 
     size_t sendAbortImpl(HTTP3::ErrorCode errorCode, std::string errorMsg);
 
-    size_t sendPriority(
-        HTTPTransaction* /* txn */,
-        const http2::PriorityUpdate& /* pri */) noexcept override;
     size_t changePriority(HTTPTransaction* txn,
                           HTTPPriority pri) noexcept override;
 

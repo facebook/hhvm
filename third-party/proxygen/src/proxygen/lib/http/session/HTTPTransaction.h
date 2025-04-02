@@ -553,9 +553,6 @@ class HTTPTransaction
 
     virtual size_t sendAbort(HTTPTransaction* txn,
                              ErrorCode statusCode) noexcept = 0;
-
-    virtual size_t sendPriority(HTTPTransaction* txn,
-                                const http2::PriorityUpdate& pri) noexcept = 0;
     /*
      * Updates the Local priority for the transaction.
      * For an upstream transaction it also sends the priority update to the peer

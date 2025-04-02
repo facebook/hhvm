@@ -657,11 +657,6 @@ size_t HQSession::HQStreamTransportBase::changePriority(
   return session_.sendPriority(txn->getID(), priority);
 }
 
-size_t HQSession::HQStreamTransportBase::sendPriority(
-    HTTPTransaction*, const http2::PriorityUpdate&) noexcept {
-  return 0;
-}
-
 size_t HQSession::HQStreamTransportBase::writeBufferSize() const {
   return writeBuf_.chainLength() + bufMeta_.length;
 }

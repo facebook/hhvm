@@ -298,7 +298,9 @@ def get_all_fixture_names(fixtures_root_dir_path: Path) -> list[str]:
     ```
     """
 
-    assert fixtures_root_dir_path.is_dir()
+    assert (
+        fixtures_root_dir_path.is_dir()
+    ), f"{fixtures_root_dir_path} is not a directory"
 
     fixture_dirs = (
         fixture_dir

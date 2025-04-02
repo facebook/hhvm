@@ -89,7 +89,7 @@ bool CodecUtil::appendHeaders(const HTTPHeaders& inputHeaders,
   inputHeaders.forEachWithCode([&](HTTPHeaderCode code,
                                    const std::string& name,
                                    const std::string& value) {
-    auto s_disallowedModernHTTPFields = disallowedModernHTTPFields();
+    const auto& s_disallowedModernHTTPFields = disallowedModernHTTPFields();
     if (s_disallowedModernHTTPFields[code] || name.size() == 0 ||
         name[0] == ':') {
       DCHECK_GT(name.size(), 0) << "Empty header";

@@ -23,6 +23,7 @@
 #include <random>
 #include <thread>
 
+#include <fmt/chrono.h>
 #include <folly/CPortability.h>
 #include <folly/Synchronized.h>
 #include <folly/executors/Codel.h>
@@ -85,24 +86,25 @@ make_queue_observer_factory(
 #define CHECK_EQUAL_TIMEOUT(x, y) CHECK_EQUAL_SPECIFIC_TIMEOUT(1000, x, y)
 #define REQUIRE_EQUAL_TIMEOUT(x, y) REQUIRE_EQUAL_SPECIFIC_TIMEOUT(1000, x, y)
 
+using TimePoint = std::chrono::time_point<std::chrono::steady_clock>;
+
+std::chrono::milliseconds toMilliseconds(TimePoint::duration d) {
+  return std::chrono::duration_cast<std::chrono::milliseconds>(d);
+}
+
 class LoadTask : public Runnable {
  public:
   LoadTask(
       std::mutex* mutex,
       std::condition_variable* cond,
       size_t* count,
-      int64_t timeout)
-      : mutex_(mutex),
-        cond_(cond),
-        count_(count),
-        timeout_(timeout),
-        startTime_(0),
-        endTime_(0) {}
+      std::chrono::milliseconds timeout)
+      : mutex_(mutex), cond_(cond), count_(count), timeout_(timeout) {}
 
   void run() override {
-    startTime_ = Util::currentTime();
-    usleep(timeout_ * Util::US_PER_MS);
-    endTime_ = Util::currentTime();
+    startTime_ = std::chrono::steady_clock::now();
+    usleep(std::chrono::microseconds(timeout_).count());
+    endTime_ = std::chrono::steady_clock::now();
 
     {
       std::unique_lock<std::mutex> l(*mutex_);
@@ -117,9 +119,9 @@ class LoadTask : public Runnable {
   std::mutex* mutex_;
   std::condition_variable* cond_;
   size_t* count_;
-  int64_t timeout_;
-  int64_t startTime_;
-  int64_t endTime_;
+  std::chrono::milliseconds timeout_;
+  TimePoint startTime_;
+  TimePoint endTime_;
 };
 
 /**
@@ -127,7 +129,8 @@ class LoadTask : public Runnable {
  * completes. Verify that all tasks completed and that thread manager cleans
  * up properly on delete.
  */
-static void loadTest(size_t numTasks, int64_t timeout, size_t numWorkers) {
+static void loadTest(
+    size_t numTasks, std::chrono::milliseconds timeout, size_t numWorkers) {
   std::mutex mutex;
   std::condition_variable cond;
   size_t tasksLeft = numTasks;
@@ -143,12 +146,12 @@ static void loadTest(size_t numTasks, int64_t timeout, size_t numWorkers) {
         std::make_shared<LoadTask>(&mutex, &cond, &tasksLeft, timeout));
   }
 
-  int64_t startTime = Util::currentTime();
+  TimePoint startTime = std::chrono::steady_clock::now();
   for (const auto& task : tasks) {
     threadManager->add(task);
   }
 
-  int64_t tasksStartedTime = Util::currentTime();
+  TimePoint tasksStartedTime = std::chrono::steady_clock::now();
 
   {
     std::unique_lock<std::mutex> l(mutex);
@@ -156,55 +159,64 @@ static void loadTest(size_t numTasks, int64_t timeout, size_t numWorkers) {
       cond.wait(l);
     }
   }
-  int64_t endTime = Util::currentTime();
+  TimePoint endTime = std::chrono::steady_clock::now();
 
-  int64_t firstTime = std::numeric_limits<int64_t>::max();
-  int64_t lastTime = 0;
-  double averageTime = 0;
-  int64_t minTime = std::numeric_limits<int64_t>::max();
-  int64_t maxTime = 0;
+  TimePoint firstTime = TimePoint::max();
+  TimePoint lastTime = TimePoint::min();
+  double averageTimeMs = 0;
+  using Duration = TimePoint::duration;
+  Duration minTime = Duration::max();
+  Duration maxTime = Duration::min();
 
   for (const auto& task : tasks) {
-    EXPECT_GT(task->startTime_, 0);
-    EXPECT_GT(task->endTime_, 0);
+    EXPECT_GT(task->startTime_, TimePoint());
+    EXPECT_GT(task->endTime_, TimePoint());
 
-    int64_t delta = task->endTime_ - task->startTime_;
-    assert(delta > 0);
+    Duration delta = task->endTime_ - task->startTime_;
+    assert(delta > Duration());
 
     firstTime = std::min(firstTime, task->startTime_);
     lastTime = std::max(lastTime, task->endTime_);
     minTime = std::min(minTime, delta);
     maxTime = std::max(maxTime, delta);
 
-    averageTime += delta;
+    averageTimeMs += toMilliseconds(delta).count();
   }
-  averageTime /= numTasks;
+  averageTimeMs /= numTasks;
 
-  LOG(INFO) << "first start: " << firstTime << "ms " << "last end: " << lastTime
-            << "ms " << "min: " << minTime << "ms " << "max: " << maxTime
-            << "ms " << "average: " << averageTime << "ms";
+  GTEST_LOG_(INFO) << fmt::format(
+      "first start: {} last end: {} min: {} max {} average: {}ms",
+      toMilliseconds(firstTime.time_since_epoch()),
+      toMilliseconds(lastTime.time_since_epoch()),
+      toMilliseconds(minTime),
+      toMilliseconds(maxTime),
+      averageTimeMs);
 
-  double idealTime = ((numTasks + (numWorkers - 1)) / numWorkers) * timeout;
-  double actualTime = endTime - startTime;
-  double taskStartTime = tasksStartedTime - startTime;
+  double idealTimeMs =
+      ((numTasks + (numWorkers - 1)) / numWorkers) * averageTimeMs;
+  double actualTimeMs = toMilliseconds(endTime - startTime).count();
+  Duration taskStartTime = tasksStartedTime - startTime;
 
-  double overheadPct = (actualTime - idealTime) / idealTime;
+  double overheadPct = (actualTimeMs - idealTimeMs) / idealTimeMs;
   if (overheadPct < 0) {
     overheadPct *= -1.0;
   }
 
-  LOG(INFO) << "ideal time: " << idealTime << "ms "
-            << "actual time: " << actualTime << "ms "
-            << "task startup time: " << taskStartTime << "ms "
-            << "overhead: " << overheadPct * 100.0 << "%";
+  GTEST_LOG_(INFO) << fmt::format(
+      "ideal time: {:.2f}ms actual time: {:.2f}ms "
+      "task startup time: {} overhead: {:.2f}ms",
+      idealTimeMs,
+      actualTimeMs,
+      toMilliseconds(taskStartTime),
+      overheadPct * 100);
 
-  // Fail if the test took 10% more time than the ideal time
+  // Fail if the test took 10% more time than the ideal time.
   EXPECT_LT(overheadPct, 0.10);
 }
 
 TEST_F(ThreadManagerTest, LoadTest) {
   size_t numTasks = 10000;
-  int64_t timeout = 50;
+  std::chrono::milliseconds timeout(50);
   size_t numWorkers = 100;
   loadTest(numTasks, timeout, numWorkers);
 }
@@ -689,7 +701,8 @@ TEST_F(ThreadManagerTest, ObserverTest) {
   threadManager->threadFactory(std::make_shared<PosixThreadFactory>());
   threadManager->start();
 
-  auto task = std::make_shared<LoadTask>(&mutex, &cond, &tasks, 1000);
+  auto task = std::make_shared<LoadTask>(
+      &mutex, &cond, &tasks, std::chrono::milliseconds(1000));
   threadManager->add(task);
   threadManager->join();
   EXPECT_EQ(1, observer->timesCalled);

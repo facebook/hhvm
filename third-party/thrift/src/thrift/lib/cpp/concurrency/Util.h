@@ -17,7 +17,6 @@
 #ifndef _THRIFT_CONCURRENCY_UTIL_H_
 #define _THRIFT_CONCURRENCY_UTIL_H_ 1
 
-#include <cstddef>
 #include <cstdint>
 #include <ctime>
 
@@ -106,14 +105,9 @@ class Util {
   }
 
   /**
-   * Get current time as a number of arbitrary-size ticks from epoch
-   */
-  static int64_t currentTimeTicks(int64_t ticksPerSec);
-
-  /**
    * Get current time as milliseconds from epoch
    */
-  static int64_t currentTime() { return currentTimeTicks(MS_PER_S); }
+  static int64_t currentTime();
 };
 
 } // namespace concurrency

@@ -16,8 +16,6 @@
 
 #include <thrift/lib/cpp/concurrency/Util.h>
 
-#include <cassert>
-#include <cerrno>
 #include <ctime>
 
 #include <glog/logging.h>
@@ -30,7 +28,7 @@ namespace apache {
 namespace thrift {
 namespace concurrency {
 
-int64_t Util::currentTimeTicks(int64_t ticksPerSec) {
+int64_t Util::currentTime() {
 #if defined(THRIFT_HAVE_CLOCK_GETTIME)
   struct timespec now;
   int ret = clock_gettime(CLOCK_REALTIME, &now);
@@ -41,7 +39,7 @@ int64_t Util::currentTimeTicks(int64_t ticksPerSec) {
 
   DCHECK(ret == 0);
   int64_t result;
-  toTicks(result, now, ticksPerSec);
+  toTicks(result, now, MS_PER_S);
   return result;
 }
 

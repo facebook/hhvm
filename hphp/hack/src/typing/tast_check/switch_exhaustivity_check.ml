@@ -190,6 +190,10 @@ module AlternativeSet = struct
          that needs matching. *)
       (env, Some [ValueSet.empty])
     else
+      let dep = Typing_deps.Dep.AllMembers name in
+      let decl_env = Tast_env.get_decl_env env in
+      Option.iter decl_env.Decl_env.droot ~f:(fun root ->
+          Typing_deps.add_idep (Tast_env.get_deps_mode env) root dep);
       match Tast_env.get_enum env name with
       | Decl_entry.DoesNotExist
       | Decl_entry.NotYetAvailable ->

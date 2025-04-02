@@ -74,6 +74,11 @@ class StructTests(unittest.TestCase):
         #  param but got `File`.
         self.assertFalse(Struct.isset(file).type)
 
+    def test_property(self) -> None:
+        r = Runtime(property="foo", int_list_val=[2, 3, 4])
+        self.assertEqual(r.property, "foo")
+        self.assertEqual(r.int_list_val, [2, 3, 4])
+
     def test_isset_repr(self) -> None:
         serialized = b'{"name":"/dev/null","type":8}'
         file = deserialize(File, serialized, protocol=Protocol.JSON)

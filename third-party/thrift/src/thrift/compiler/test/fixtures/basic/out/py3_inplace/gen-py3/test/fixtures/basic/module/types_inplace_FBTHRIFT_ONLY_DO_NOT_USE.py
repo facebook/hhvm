@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence, Set
 import enum
 import importlib
+from builtins import property as _python__property
 
 import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
@@ -488,15 +489,15 @@ class MyStruct(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.MyStruct"
 
-    @property
+    @_python__property
     def MyIntField(self) -> int:
         return self._fbthrift__inner.MyIntField
 
-    @property
+    @_python__property
     def MyStringField(self) -> str:
         return self._fbthrift__inner.MyStringField
 
-    @property
+    @_python__property
     def MyDataField(self) -> MyDataItem:
         if self._fbthrift_inner__MyDataField is None:
             __python_val = self._fbthrift__inner.MyDataField
@@ -504,7 +505,7 @@ class MyStruct(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__MyDataField
 
-    @property
+    @_python__property
     def myEnum(self) -> MyEnum:
         if self._fbthrift_inner__myEnum is None:
             __python_val = self._fbthrift__inner.myEnum
@@ -512,19 +513,19 @@ class MyStruct(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__myEnum
 
-    @property
+    @_python__property
     def oneway(self) -> bool:
         return self._fbthrift__inner.oneway
 
-    @property
+    @_python__property
     def readonly(self) -> bool:
         return self._fbthrift__inner.readonly
 
-    @property
+    @_python__property
     def idempotent(self) -> bool:
         return self._fbthrift__inner.idempotent
 
-    @property
+    @_python__property
     def floatSet(self) -> _typing.AbstractSet[float]:
         if self._fbthrift_inner__floatSet is None:
             __python_val = self._fbthrift__inner.floatSet
@@ -532,7 +533,7 @@ class MyStruct(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__floatSet
 
-    @property
+    @_python__property
     def no_hack_codegen_field(self) -> str:
         return self._fbthrift__inner.no_hack_codegen_field
 
@@ -632,7 +633,7 @@ class Containers(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.Containers"
 
-    @property
+    @_python__property
     def I32List(self) -> _typing.Sequence[int]:
         if self._fbthrift_inner__I32List is None:
             __python_val = self._fbthrift__inner.I32List
@@ -640,7 +641,7 @@ class Containers(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__I32List
 
-    @property
+    @_python__property
     def StringSet(self) -> _typing.AbstractSet[str]:
         if self._fbthrift_inner__StringSet is None:
             __python_val = self._fbthrift__inner.StringSet
@@ -648,7 +649,7 @@ class Containers(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__StringSet
 
-    @property
+    @_python__property
     def StringToI64Map(self) -> _typing.Mapping[str, int]:
         if self._fbthrift_inner__StringToI64Map is None:
             __python_val = self._fbthrift__inner.StringToI64Map
@@ -844,7 +845,7 @@ class MyUnion(thrift.py3.types.Union):
     def __get_thrift_name__():
         return "module.MyUnion"
 
-    @property
+    @_python__property
     def myEnum(self) -> MyEnum:
         if self._fbthrift_inner__myEnum is None:
             __python_val = self._fbthrift__inner.myEnum
@@ -854,7 +855,7 @@ class MyUnion(thrift.py3.types.Union):
 
         return self._fbthrift_inner__myEnum
 
-    @property
+    @_python__property
     def myStruct(self) -> MyStruct:
         if self._fbthrift_inner__myStruct is None:
             __python_val = self._fbthrift__inner.myStruct
@@ -864,7 +865,7 @@ class MyUnion(thrift.py3.types.Union):
 
         return self._fbthrift_inner__myStruct
 
-    @property
+    @_python__property
     def myDataItem(self) -> MyDataItem:
         if self._fbthrift_inner__myDataItem is None:
             __python_val = self._fbthrift__inner.myDataItem
@@ -874,7 +875,7 @@ class MyUnion(thrift.py3.types.Union):
 
         return self._fbthrift_inner__myDataItem
 
-    @property
+    @_python__property
     def floatSet(self) -> _typing.AbstractSet[float]:
         if self._fbthrift_inner__floatSet is None:
             __python_val = self._fbthrift__inner.floatSet
@@ -884,11 +885,11 @@ class MyUnion(thrift.py3.types.Union):
 
         return self._fbthrift_inner__floatSet
 
-    @property
+    @_python__property
     def type(self) -> _fbthrift_python_types.MyUnion.Type:
         return self._fbthrift__inner.type
 
-    @property
+    @_python__property
     def value(self) -> MyEnum | MyStruct | MyDataItem | _typing.AbstractSet[float] | None:
         match self._fbthrift__inner.type:
             case _fbthrift_python_types.MyUnion.Type.myEnum:
@@ -1009,15 +1010,15 @@ class MyException(thrift.py3.exceptions.GeneratedError):
     def __get_thrift_name__():
         return "module.MyException"
 
-    @property
+    @_python__property
     def MyIntField(self) -> int:
         return self._fbthrift__inner.MyIntField
 
-    @property
+    @_python__property
     def MyStringField(self) -> str:
         return self._fbthrift__inner.MyStringField
 
-    @property
+    @_python__property
     def myStruct(self) -> MyStruct:
         if self._fbthrift_inner__myStruct is None:
             __python_val = self._fbthrift__inner.myStruct
@@ -1025,7 +1026,7 @@ class MyException(thrift.py3.exceptions.GeneratedError):
 
         return self._fbthrift_inner__myStruct
 
-    @property
+    @_python__property
     def myUnion(self) -> MyUnion:
         if self._fbthrift_inner__myUnion is None:
             __python_val = self._fbthrift__inner.myUnion
@@ -1129,15 +1130,15 @@ class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
     def __get_thrift_name__():
         return "module.MyExceptionWithMessage"
 
-    @property
+    @_python__property
     def MyIntField(self) -> int:
         return self._fbthrift__inner.MyIntField
 
-    @property
+    @_python__property
     def MyStringField(self) -> str:
         return self._fbthrift__inner.MyStringField
 
-    @property
+    @_python__property
     def myStruct(self) -> MyStruct:
         if self._fbthrift_inner__myStruct is None:
             __python_val = self._fbthrift__inner.myStruct
@@ -1145,7 +1146,7 @@ class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
 
         return self._fbthrift_inner__myStruct
 
-    @property
+    @_python__property
     def myUnion(self) -> MyUnion:
         if self._fbthrift_inner__myUnion is None:
             __python_val = self._fbthrift__inner.myUnion
@@ -1244,7 +1245,7 @@ class ReservedKeyword(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.ReservedKeyword"
 
-    @property
+    @_python__property
     def reserved_field(self) -> int:
         return self._fbthrift__inner.reserved_field
 
@@ -1337,15 +1338,15 @@ class UnionToBeRenamed(thrift.py3.types.Union):
     def __get_thrift_name__():
         return "module.UnionToBeRenamed"
 
-    @property
+    @_python__property
     def reserved_field(self) -> int:
         return self._fbthrift__inner.reserved_field
 
-    @property
+    @_python__property
     def type(self) -> _fbthrift_python_types.UnionToBeRenamed.Type:
         return self._fbthrift__inner.type
 
-    @property
+    @_python__property
     def value(self) -> int | None:
         match self._fbthrift__inner.type:
             case _:

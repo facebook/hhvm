@@ -28,6 +28,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence, Set
 import enum
 import importlib
+from builtins import property as _python__property
 
 import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
@@ -190,7 +191,7 @@ class {{struct:name}}({{> types/python_struct_class }}):
         return "{{program:name}}.{{struct:name}}"
 
     {{#struct:fields_and_mixin_fields}}
-    @property
+    @_python__property
     def {{field:py_name}}(self) -> {{> inplace/field_type}}:
 {{#field:type}}{{#type:needs_convert?}}
         if self._fbthrift_inner__{{field:py_name}} is None:
@@ -211,11 +212,11 @@ class {{struct:name}}({{> types/python_struct_class }}):
 
     {{/struct:fields_and_mixin_fields}}
     {{#struct:union?}}
-    @property
+    @_python__property
     def type(self) -> _fbthrift_python_types.{{struct:name}}.Type:
         return self._fbthrift__inner.type
 
-    @property
+    @_python__property
     def value(self) -> {{> inplace/union_value_type }}:
         match self._fbthrift__inner.type:
 {{#struct:fields_and_mixin_fields}}{{#field:type}}{{#type:needs_convert?}}

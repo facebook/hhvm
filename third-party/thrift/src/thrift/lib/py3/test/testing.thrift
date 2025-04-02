@@ -273,6 +273,7 @@ struct hard {
 struct Runtime {
   1: bool bool_val;
   2: Color enum_val;
+  6: string property;
   3: list<i64> int_list_val;
 }
 

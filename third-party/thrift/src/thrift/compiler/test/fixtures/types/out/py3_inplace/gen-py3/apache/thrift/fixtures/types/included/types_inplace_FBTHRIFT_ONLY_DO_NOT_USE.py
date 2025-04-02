@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence, Set
 import enum
 import importlib
+from builtins import property as _python__property
 
 import typing as _typing
 import folly.iobuf as _fbthrift_iobuf

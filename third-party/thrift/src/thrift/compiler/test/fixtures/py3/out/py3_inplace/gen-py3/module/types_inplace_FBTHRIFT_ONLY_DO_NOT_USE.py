@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence, Set
 import enum
 import importlib
+from builtins import property as _python__property
 
 import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
@@ -1967,7 +1968,7 @@ class SimpleException(thrift.py3.exceptions.GeneratedError):
     def __get_thrift_name__():
         return "module.SimpleException"
 
-    @property
+    @_python__property
     def err_code(self) -> int:
         return self._fbthrift__inner.err_code
 
@@ -2059,7 +2060,7 @@ class OptionalRefStruct(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.OptionalRefStruct"
 
-    @property
+    @_python__property
     def optional_blob(self) -> _typing.Optional[_fbthrift_iobuf.IOBuf]:
         return self._fbthrift__inner.optional_blob
 
@@ -2158,35 +2159,35 @@ class SimpleStruct(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.SimpleStruct"
 
-    @property
+    @_python__property
     def is_on(self) -> bool:
         return self._fbthrift__inner.is_on
 
-    @property
+    @_python__property
     def tiny_int(self) -> int:
         return self._fbthrift__inner.tiny_int
 
-    @property
+    @_python__property
     def small_int(self) -> int:
         return self._fbthrift__inner.small_int
 
-    @property
+    @_python__property
     def nice_sized_int(self) -> int:
         return self._fbthrift__inner.nice_sized_int
 
-    @property
+    @_python__property
     def big_int(self) -> int:
         return self._fbthrift__inner.big_int
 
-    @property
+    @_python__property
     def real(self) -> float:
         return self._fbthrift__inner.real
 
-    @property
+    @_python__property
     def smaller_real(self) -> float:
         return self._fbthrift__inner.smaller_real
 
-    @property
+    @_python__property
     def something(self) -> _typing.Mapping[int, int]:
         if self._fbthrift_inner__something is None:
             __python_val = self._fbthrift__inner.something
@@ -2360,7 +2361,7 @@ class ComplexStruct(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.ComplexStruct"
 
-    @property
+    @_python__property
     def structOne(self) -> SimpleStruct:
         if self._fbthrift_inner__structOne is None:
             __python_val = self._fbthrift__inner.structOne
@@ -2368,7 +2369,7 @@ class ComplexStruct(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__structOne
 
-    @property
+    @_python__property
     def structTwo(self) -> SimpleStruct:
         if self._fbthrift_inner__structTwo is None:
             __python_val = self._fbthrift__inner.structTwo
@@ -2376,15 +2377,15 @@ class ComplexStruct(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__structTwo
 
-    @property
+    @_python__property
     def an_integer(self) -> int:
         return self._fbthrift__inner.an_integer
 
-    @property
+    @_python__property
     def name(self) -> str:
         return self._fbthrift__inner.name
 
-    @property
+    @_python__property
     def an_enum(self) -> AnEnum:
         if self._fbthrift_inner__an_enum is None:
             __python_val = self._fbthrift__inner.an_enum
@@ -2392,19 +2393,19 @@ class ComplexStruct(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__an_enum
 
-    @property
+    @_python__property
     def some_bytes(self) -> bytes:
         return self._fbthrift__inner.some_bytes
 
-    @property
+    @_python__property
     def sender(self) -> str:
         return self._fbthrift__inner.sender
 
-    @property
+    @_python__property
     def cdef_(self) -> str:
         return self._fbthrift__inner.cdef_
 
-    @property
+    @_python__property
     def bytes_with_cpp_type(self) -> bytes:
         return self._fbthrift__inner.bytes_with_cpp_type
 
@@ -2487,15 +2488,15 @@ class BinaryUnion(thrift.py3.types.Union):
     def __get_thrift_name__():
         return "module.BinaryUnion"
 
-    @property
+    @_python__property
     def iobuf_val(self) -> _fbthrift_iobuf.IOBuf:
         return self._fbthrift__inner.iobuf_val
 
-    @property
+    @_python__property
     def type(self) -> _fbthrift_python_types.BinaryUnion.Type:
         return self._fbthrift__inner.type
 
-    @property
+    @_python__property
     def value(self) -> _fbthrift_iobuf.IOBuf | None:
         match self._fbthrift__inner.type:
             case _:
@@ -2597,7 +2598,7 @@ class BinaryUnionStruct(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.BinaryUnionStruct"
 
-    @property
+    @_python__property
     def u(self) -> BinaryUnion:
         if self._fbthrift_inner__u is None:
             __python_val = self._fbthrift__inner.u
@@ -2710,27 +2711,27 @@ class CustomFields(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.CustomFields"
 
-    @property
+    @_python__property
     def bool_field(self) -> bool:
         return self._fbthrift__inner.bool_field
 
-    @property
+    @_python__property
     def integer_field(self) -> int:
         return self._fbthrift__inner.integer_field
 
-    @property
+    @_python__property
     def double_field(self) -> float:
         return self._fbthrift__inner.double_field
 
-    @property
+    @_python__property
     def string_field(self) -> str:
         return self._fbthrift__inner.string_field
 
-    @property
+    @_python__property
     def binary_field(self) -> bytes:
         return self._fbthrift__inner.binary_field
 
-    @property
+    @_python__property
     def list_field(self) -> _typing.Sequence[int]:
         if self._fbthrift_inner__list_field is None:
             __python_val = self._fbthrift__inner.list_field
@@ -2738,7 +2739,7 @@ class CustomFields(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__list_field
 
-    @property
+    @_python__property
     def set_field(self) -> _typing.AbstractSet[int]:
         if self._fbthrift_inner__set_field is None:
             __python_val = self._fbthrift__inner.set_field
@@ -2746,7 +2747,7 @@ class CustomFields(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__set_field
 
-    @property
+    @_python__property
     def map_field(self) -> _typing.Mapping[int, int]:
         if self._fbthrift_inner__map_field is None:
             __python_val = self._fbthrift__inner.map_field
@@ -2754,7 +2755,7 @@ class CustomFields(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__map_field
 
-    @property
+    @_python__property
     def struct_field(self) -> SimpleStruct:
         if self._fbthrift_inner__struct_field is None:
             __python_val = self._fbthrift__inner.struct_field
@@ -2857,27 +2858,27 @@ class CustomTypedefFields(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.CustomTypedefFields"
 
-    @property
+    @_python__property
     def bool_field(self) -> bool:
         return self._fbthrift__inner.bool_field
 
-    @property
+    @_python__property
     def integer_field(self) -> int:
         return self._fbthrift__inner.integer_field
 
-    @property
+    @_python__property
     def double_field(self) -> float:
         return self._fbthrift__inner.double_field
 
-    @property
+    @_python__property
     def string_field(self) -> str:
         return self._fbthrift__inner.string_field
 
-    @property
+    @_python__property
     def binary_field(self) -> bytes:
         return self._fbthrift__inner.binary_field
 
-    @property
+    @_python__property
     def list_field(self) -> _typing.Sequence[int]:
         if self._fbthrift_inner__list_field is None:
             __python_val = self._fbthrift__inner.list_field
@@ -2885,7 +2886,7 @@ class CustomTypedefFields(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__list_field
 
-    @property
+    @_python__property
     def set_field(self) -> _typing.AbstractSet[int]:
         if self._fbthrift_inner__set_field is None:
             __python_val = self._fbthrift__inner.set_field
@@ -2893,7 +2894,7 @@ class CustomTypedefFields(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__set_field
 
-    @property
+    @_python__property
     def map_field(self) -> _typing.Mapping[int, int]:
         if self._fbthrift_inner__map_field is None:
             __python_val = self._fbthrift__inner.map_field
@@ -2901,7 +2902,7 @@ class CustomTypedefFields(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__map_field
 
-    @property
+    @_python__property
     def struct_field(self) -> SimpleStruct:
         if self._fbthrift_inner__struct_field is None:
             __python_val = self._fbthrift__inner.struct_field
@@ -3004,27 +3005,27 @@ class AdaptedTypedefFields(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.AdaptedTypedefFields"
 
-    @property
+    @_python__property
     def bool_field(self) -> bool:
         return self._fbthrift__inner.bool_field
 
-    @property
+    @_python__property
     def integer_field(self) -> int:
         return self._fbthrift__inner.integer_field
 
-    @property
+    @_python__property
     def double_field(self) -> float:
         return self._fbthrift__inner.double_field
 
-    @property
+    @_python__property
     def string_field(self) -> str:
         return self._fbthrift__inner.string_field
 
-    @property
+    @_python__property
     def binary_field(self) -> bytes:
         return self._fbthrift__inner.binary_field
 
-    @property
+    @_python__property
     def list_field(self) -> _typing.Sequence[int]:
         if self._fbthrift_inner__list_field is None:
             __python_val = self._fbthrift__inner.list_field
@@ -3032,7 +3033,7 @@ class AdaptedTypedefFields(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__list_field
 
-    @property
+    @_python__property
     def set_field(self) -> _typing.AbstractSet[int]:
         if self._fbthrift_inner__set_field is None:
             __python_val = self._fbthrift__inner.set_field
@@ -3040,7 +3041,7 @@ class AdaptedTypedefFields(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__set_field
 
-    @property
+    @_python__property
     def map_field(self) -> _typing.Mapping[int, int]:
         if self._fbthrift_inner__map_field is None:
             __python_val = self._fbthrift__inner.map_field
@@ -3048,7 +3049,7 @@ class AdaptedTypedefFields(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__map_field
 
-    @property
+    @_python__property
     def struct_field(self) -> SimpleStruct:
         if self._fbthrift_inner__struct_field is None:
             __python_val = self._fbthrift__inner.struct_field

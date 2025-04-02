@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence, Set
 import enum
 import importlib
+from builtins import property as _python__property
 
 import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
@@ -1452,7 +1453,7 @@ class decorated_struct(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.decorated_struct"
 
-    @property
+    @_python__property
     def field(self) -> str:
         return self._fbthrift__inner.field
 
@@ -1572,7 +1573,7 @@ class ContainerStruct(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.ContainerStruct"
 
-    @property
+    @_python__property
     def fieldA(self) -> _typing.Sequence[int]:
         if self._fbthrift_inner__fieldA is None:
             __python_val = self._fbthrift__inner.fieldA
@@ -1580,7 +1581,7 @@ class ContainerStruct(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__fieldA
 
-    @property
+    @_python__property
     def fieldB(self) -> _typing.Sequence[int]:
         if self._fbthrift_inner__fieldB is None:
             __python_val = self._fbthrift__inner.fieldB
@@ -1588,7 +1589,7 @@ class ContainerStruct(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__fieldB
 
-    @property
+    @_python__property
     def fieldC(self) -> _typing.Sequence[int]:
         if self._fbthrift_inner__fieldC is None:
             __python_val = self._fbthrift__inner.fieldC
@@ -1596,7 +1597,7 @@ class ContainerStruct(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__fieldC
 
-    @property
+    @_python__property
     def fieldD(self) -> _typing.Sequence[int]:
         if self._fbthrift_inner__fieldD is None:
             __python_val = self._fbthrift__inner.fieldD
@@ -1604,7 +1605,7 @@ class ContainerStruct(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__fieldD
 
-    @property
+    @_python__property
     def fieldE(self) -> _typing.Sequence[int]:
         if self._fbthrift_inner__fieldE is None:
             __python_val = self._fbthrift__inner.fieldE
@@ -1612,7 +1613,7 @@ class ContainerStruct(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__fieldE
 
-    @property
+    @_python__property
     def fieldF(self) -> _typing.AbstractSet[int]:
         if self._fbthrift_inner__fieldF is None:
             __python_val = self._fbthrift__inner.fieldF
@@ -1620,7 +1621,7 @@ class ContainerStruct(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__fieldF
 
-    @property
+    @_python__property
     def fieldG(self) -> _typing.Mapping[int, str]:
         if self._fbthrift_inner__fieldG is None:
             __python_val = self._fbthrift__inner.fieldG
@@ -1628,7 +1629,7 @@ class ContainerStruct(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__fieldG
 
-    @property
+    @_python__property
     def fieldH(self) -> _typing.Mapping[int, str]:
         if self._fbthrift_inner__fieldH is None:
             __python_val = self._fbthrift__inner.fieldH
@@ -1724,7 +1725,7 @@ class CppTypeStruct(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.CppTypeStruct"
 
-    @property
+    @_python__property
     def fieldA(self) -> _typing.Sequence[int]:
         if self._fbthrift_inner__fieldA is None:
             __python_val = self._fbthrift__inner.fieldA
@@ -1817,7 +1818,7 @@ class VirtualStruct(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.VirtualStruct"
 
-    @property
+    @_python__property
     def MyIntField(self) -> int:
         return self._fbthrift__inner.MyIntField
 
@@ -1913,7 +1914,7 @@ class MyStructWithForwardRefEnum(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.MyStructWithForwardRefEnum"
 
-    @property
+    @_python__property
     def a(self) -> MyForwardRefEnum:
         if self._fbthrift_inner__a is None:
             __python_val = self._fbthrift__inner.a
@@ -1921,7 +1922,7 @@ class MyStructWithForwardRefEnum(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__a
 
-    @property
+    @_python__property
     def b(self) -> MyForwardRefEnum:
         if self._fbthrift_inner__b is None:
             __python_val = self._fbthrift__inner.b
@@ -2015,11 +2016,11 @@ class TrivialNumeric(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.TrivialNumeric"
 
-    @property
+    @_python__property
     def a(self) -> int:
         return self._fbthrift__inner.a
 
-    @property
+    @_python__property
     def b(self) -> bool:
         return self._fbthrift__inner.b
 
@@ -2112,11 +2113,11 @@ class TrivialNestedWithDefault(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.TrivialNestedWithDefault"
 
-    @property
+    @_python__property
     def z(self) -> int:
         return self._fbthrift__inner.z
 
-    @property
+    @_python__property
     def n(self) -> TrivialNumeric:
         if self._fbthrift_inner__n is None:
             __python_val = self._fbthrift__inner.n
@@ -2213,11 +2214,11 @@ class ComplexString(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.ComplexString"
 
-    @property
+    @_python__property
     def a(self) -> str:
         return self._fbthrift__inner.a
 
-    @property
+    @_python__property
     def b(self) -> _typing.Mapping[str, int]:
         if self._fbthrift_inner__b is None:
             __python_val = self._fbthrift__inner.b
@@ -2314,11 +2315,11 @@ class ComplexNestedWithDefault(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.ComplexNestedWithDefault"
 
-    @property
+    @_python__property
     def z(self) -> str:
         return self._fbthrift__inner.z
 
-    @property
+    @_python__property
     def n(self) -> ComplexString:
         if self._fbthrift_inner__n is None:
             __python_val = self._fbthrift__inner.n
@@ -2415,23 +2416,23 @@ class MinPadding(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.MinPadding"
 
-    @property
+    @_python__property
     def small(self) -> int:
         return self._fbthrift__inner.small
 
-    @property
+    @_python__property
     def big(self) -> int:
         return self._fbthrift__inner.big
 
-    @property
+    @_python__property
     def medium(self) -> int:
         return self._fbthrift__inner.medium
 
-    @property
+    @_python__property
     def biggish(self) -> int:
         return self._fbthrift__inner.biggish
 
-    @property
+    @_python__property
     def tiny(self) -> int:
         return self._fbthrift__inner.tiny
 
@@ -2524,23 +2525,23 @@ class MinPaddingWithCustomType(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.MinPaddingWithCustomType"
 
-    @property
+    @_python__property
     def small(self) -> int:
         return self._fbthrift__inner.small
 
-    @property
+    @_python__property
     def biggish(self) -> int:
         return self._fbthrift__inner.biggish
 
-    @property
+    @_python__property
     def medium(self) -> int:
         return self._fbthrift__inner.medium
 
-    @property
+    @_python__property
     def big(self) -> int:
         return self._fbthrift__inner.big
 
-    @property
+    @_python__property
     def tiny(self) -> int:
         return self._fbthrift__inner.tiny
 
@@ -2635,19 +2636,19 @@ class MyStruct(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.MyStruct"
 
-    @property
+    @_python__property
     def MyIntField(self) -> int:
         return self._fbthrift__inner.MyIntField
 
-    @property
+    @_python__property
     def MyStringField(self) -> str:
         return self._fbthrift__inner.MyStringField
 
-    @property
+    @_python__property
     def majorVer(self) -> int:
         return self._fbthrift__inner.majorVer
 
-    @property
+    @_python__property
     def data(self) -> MyDataItem:
         if self._fbthrift_inner__data is None:
             __python_val = self._fbthrift__inner.data
@@ -2824,7 +2825,7 @@ class Renaming(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.Renaming"
 
-    @property
+    @_python__property
     def foo(self) -> int:
         return self._fbthrift__inner.foo
 
@@ -2917,11 +2918,11 @@ class AnnotatedTypes(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.AnnotatedTypes"
 
-    @property
+    @_python__property
     def binary_field(self) -> bytes:
         return self._fbthrift__inner.binary_field
 
-    @property
+    @_python__property
     def list_field(self) -> _typing.Sequence[_typing.Mapping[int, str]]:
         if self._fbthrift_inner__list_field is None:
             __python_val = self._fbthrift__inner.list_field
@@ -3021,7 +3022,7 @@ class ForwardUsageRoot(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.ForwardUsageRoot"
 
-    @property
+    @_python__property
     def ForwardUsageStruct(self) -> _typing.Optional[ForwardUsageStruct]:
         if self._fbthrift_inner__ForwardUsageStruct is None:
             __python_val = self._fbthrift__inner.ForwardUsageStruct
@@ -3031,7 +3032,7 @@ class ForwardUsageRoot(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__ForwardUsageStruct
 
-    @property
+    @_python__property
     def ForwardUsageByRef(self) -> _typing.Optional[ForwardUsageByRef]:
         if self._fbthrift_inner__ForwardUsageByRef is None:
             __python_val = self._fbthrift__inner.ForwardUsageByRef
@@ -3129,7 +3130,7 @@ class ForwardUsageStruct(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.ForwardUsageStruct"
 
-    @property
+    @_python__property
     def foo(self) -> _typing.Optional[ForwardUsageRoot]:
         if self._fbthrift_inner__foo is None:
             __python_val = self._fbthrift__inner.foo
@@ -3227,7 +3228,7 @@ class ForwardUsageByRef(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.ForwardUsageByRef"
 
-    @property
+    @_python__property
     def foo(self) -> _typing.Optional[ForwardUsageRoot]:
         if self._fbthrift_inner__foo is None:
             __python_val = self._fbthrift__inner.foo
@@ -3325,7 +3326,7 @@ class IncompleteMap(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.IncompleteMap"
 
-    @property
+    @_python__property
     def field(self) -> _typing.Optional[_typing.Mapping[int, IncompleteMapDep]]:
         if self._fbthrift_inner__field is None:
             __python_val = self._fbthrift__inner.field
@@ -3507,7 +3508,7 @@ class CompleteMap(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.CompleteMap"
 
-    @property
+    @_python__property
     def field(self) -> _typing.Optional[_typing.Mapping[int, CompleteMapDep]]:
         if self._fbthrift_inner__field is None:
             __python_val = self._fbthrift__inner.field
@@ -3689,7 +3690,7 @@ class IncompleteList(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.IncompleteList"
 
-    @property
+    @_python__property
     def field(self) -> _typing.Optional[_typing.Sequence[IncompleteListDep]]:
         if self._fbthrift_inner__field is None:
             __python_val = self._fbthrift__inner.field
@@ -3871,7 +3872,7 @@ class CompleteList(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.CompleteList"
 
-    @property
+    @_python__property
     def field(self) -> _typing.Optional[_typing.Sequence[CompleteListDep]]:
         if self._fbthrift_inner__field is None:
             __python_val = self._fbthrift__inner.field
@@ -4053,7 +4054,7 @@ class AdaptedList(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.AdaptedList"
 
-    @property
+    @_python__property
     def field(self) -> _typing.Optional[_typing.Sequence[AdaptedListDep]]:
         if self._fbthrift_inner__field is None:
             __python_val = self._fbthrift__inner.field
@@ -4151,7 +4152,7 @@ class DependentAdaptedList(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.DependentAdaptedList"
 
-    @property
+    @_python__property
     def field(self) -> _typing.Optional[_typing.Sequence[DependentAdaptedListDep]]:
         if self._fbthrift_inner__field is None:
             __python_val = self._fbthrift__inner.field
@@ -4261,7 +4262,7 @@ class AllocatorAware(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.AllocatorAware"
 
-    @property
+    @_python__property
     def aa_list(self) -> _typing.Sequence[int]:
         if self._fbthrift_inner__aa_list is None:
             __python_val = self._fbthrift__inner.aa_list
@@ -4269,7 +4270,7 @@ class AllocatorAware(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__aa_list
 
-    @property
+    @_python__property
     def aa_set(self) -> _typing.AbstractSet[int]:
         if self._fbthrift_inner__aa_set is None:
             __python_val = self._fbthrift__inner.aa_set
@@ -4277,7 +4278,7 @@ class AllocatorAware(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__aa_set
 
-    @property
+    @_python__property
     def aa_map(self) -> _typing.Mapping[int, int]:
         if self._fbthrift_inner__aa_map is None:
             __python_val = self._fbthrift__inner.aa_map
@@ -4285,19 +4286,19 @@ class AllocatorAware(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__aa_map
 
-    @property
+    @_python__property
     def aa_string(self) -> str:
         return self._fbthrift__inner.aa_string
 
-    @property
+    @_python__property
     def not_a_container(self) -> int:
         return self._fbthrift__inner.not_a_container
 
-    @property
+    @_python__property
     def aa_unique(self) -> _typing.Optional[int]:
         return self._fbthrift__inner.aa_unique
 
-    @property
+    @_python__property
     def aa_shared(self) -> _typing.Optional[int]:
         return self._fbthrift__inner.aa_shared
 
@@ -4387,11 +4388,11 @@ class AllocatorAware2(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.AllocatorAware2"
 
-    @property
+    @_python__property
     def not_a_container(self) -> int:
         return self._fbthrift__inner.not_a_container
 
-    @property
+    @_python__property
     def box_field(self) -> _typing.Optional[int]:
         return self._fbthrift__inner.box_field
 
@@ -4482,15 +4483,15 @@ class TypedefStruct(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.TypedefStruct"
 
-    @property
+    @_python__property
     def i32_field(self) -> int:
         return self._fbthrift__inner.i32_field
 
-    @property
+    @_python__property
     def IntTypedef_field(self) -> int:
         return self._fbthrift__inner.IntTypedef_field
 
-    @property
+    @_python__property
     def UintTypedef_field(self) -> int:
         return self._fbthrift__inner.UintTypedef_field
 
@@ -4579,7 +4580,7 @@ class StructWithDoubleUnderscores(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.StructWithDoubleUnderscores"
 
-    @property
+    @_python__property
     def __field(self) -> int:
         return self._fbthrift__inner.__field
 

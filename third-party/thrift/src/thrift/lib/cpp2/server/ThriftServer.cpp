@@ -740,7 +740,7 @@ void ThriftServer::setup() {
         socket->setZeroCopy(useZeroCopy);
         socket->setQueueTimeout(getSocketQueueTimeout());
         if (callbackAssignFunc_) {
-          socket->setCallbackAssignFunction(std::move(callbackAssignFunc_));
+          socket->setCallbackAssignFunction(callbackAssignFunc_);
         }
 
         try {

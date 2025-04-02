@@ -352,7 +352,7 @@ class hoist_annotated_types {
   struct typedef_info {
     std::string type;
     t_typedef* ptr;
-    std::string structured = "";
+    std::string structured;
   };
   std::map<std::string, typedef_info> typedefs_;
   codemod::file_manager fm_;

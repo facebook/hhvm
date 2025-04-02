@@ -461,8 +461,8 @@ TEST(DiffVisitorTest, Union) {
 
 TEST(DynamicPatch, List) {
   DynamicListPatch p;
-  p.push_back(badge, asValueStruct<type::i32_t>(1));
-  p.push_back(badge, asValueStruct<type::i32_t>(2));
+  p.push_back(asValueStruct<type::i32_t>(1));
+  p.push_back(asValueStruct<type::i32_t>(2));
 
   ValueList l;
 
@@ -478,7 +478,7 @@ TEST(DynamicPatch, List) {
   EXPECT_EQ(l[2].as_i32(), 1);
   EXPECT_EQ(l[3].as_i32(), 2);
 
-  p.assign(badge, {asValueStruct<type::i32_t>(5)});
+  p.assign({asValueStruct<type::i32_t>(5)});
   p.apply(badge, l);
   EXPECT_EQ(l.size(), 1);
   EXPECT_EQ(l[0].as_i32(), 5);
@@ -493,28 +493,27 @@ TEST(DynamicPatch, InvalidListPatch) {
     DynamicListPatch p;
     EXPECT_THROW(
         p.assign(
-            badge,
             {asValueStruct<type::i32_t>(1), asValueStruct<type::i64_t>(1)}),
         std::runtime_error);
   }
   {
     DynamicListPatch p;
-    p.push_back(badge, asValueStruct<type::i32_t>(1));
+    p.push_back(asValueStruct<type::i32_t>(1));
     EXPECT_THROW(
-        p.push_back(badge, asValueStruct<type::i64_t>(2)), std::runtime_error);
+        p.push_back(asValueStruct<type::i64_t>(2)), std::runtime_error);
   }
   {
     DynamicListPatch p;
-    p.assign(badge, asValueStruct<type::list<type::i32_t>>({1}).as_list());
+    p.assign(asValueStruct<type::list<type::i32_t>>({1}).as_list());
     EXPECT_THROW(
-        p.push_back(badge, asValueStruct<type::i64_t>(2)), std::runtime_error);
+        p.push_back(asValueStruct<type::i64_t>(2)), std::runtime_error);
   }
 }
 
 TEST(DynamicPatch, Set) {
   DynamicSetPatch p;
-  p.insert(badge, asValueStruct<type::i32_t>(1));
-  p.insert(badge, asValueStruct<type::i32_t>(2));
+  p.insert(asValueStruct<type::i32_t>(1));
+  p.insert(asValueStruct<type::i32_t>(2));
 
   ValueSet s;
 
@@ -528,7 +527,7 @@ TEST(DynamicPatch, Set) {
   EXPECT_TRUE(s.contains(asValueStruct<type::i32_t>(1)));
   EXPECT_TRUE(s.contains(asValueStruct<type::i32_t>(2)));
 
-  p.assign(badge, {asValueStruct<type::i32_t>(5)});
+  p.assign({asValueStruct<type::i32_t>(5)});
   p.apply(badge, s);
   EXPECT_EQ(s.size(), 1);
   EXPECT_TRUE(s.contains(asValueStruct<type::i32_t>(5)));
@@ -543,21 +542,18 @@ TEST(DynamicPatch, InvalidSetPatch) {
     DynamicSetPatch p;
     EXPECT_THROW(
         p.assign(
-            badge,
             {asValueStruct<type::i32_t>(1), asValueStruct<type::i64_t>(1)}),
         std::runtime_error);
   }
   {
     DynamicSetPatch p;
-    p.insert(badge, asValueStruct<type::i32_t>(1));
-    EXPECT_THROW(
-        p.insert(badge, asValueStruct<type::i64_t>(2)), std::runtime_error);
+    p.insert(asValueStruct<type::i32_t>(1));
+    EXPECT_THROW(p.insert(asValueStruct<type::i64_t>(2)), std::runtime_error);
   }
   {
     DynamicSetPatch p;
-    p.assign(badge, asValueStruct<type::set<type::i32_t>>({1}).as_set());
-    EXPECT_THROW(
-        p.insert(badge, asValueStruct<type::i64_t>(2)), std::runtime_error);
+    p.assign(asValueStruct<type::set<type::i32_t>>({1}).as_set());
+    EXPECT_THROW(p.insert(asValueStruct<type::i64_t>(2)), std::runtime_error);
   }
 }
 
@@ -660,8 +656,8 @@ struct StringVsBinaryTest : testing::Test {
     s.binarySet()->insert("foo");
     staticStringSetPatch.erase("foo");
     staticBinarySetPatch.erase("foo");
-    dynamicStringSetPatch.erase(badge, stringFoo());
-    dynamicBinarySetPatch.erase(badge, binaryFoo());
+    dynamicStringSetPatch.erase(stringFoo());
+    dynamicBinarySetPatch.erase(binaryFoo());
     stringSetValue.emplace_set().insert(stringFoo());
     binarySetValue.emplace_set().insert(binaryFoo());
   }
@@ -1126,10 +1122,22 @@ TEST(DynamicPatchTest, AnyPatch) {
 //   different.
 struct CheckAssign {
   void assign(auto&&) {}
-  void assign(detail::Badge, const auto& v) {
+  // Check whether the address of the first element is expected.
+  // This ensures that we moved the assign data to the patch (not copied).
+  void assign(const ValueList& v) {
     EXPECT_EQ(v.size(), 100);
-    // Check whether the address of the first element is expected.
-    // This ensures that we moved the assign data to the patch (not copied).
+    EXPECT_EQ(&*v.begin(), expected);
+  }
+  void assign(const ValueSet& v) {
+    EXPECT_EQ(v.size(), 100);
+    EXPECT_EQ(&*v.begin(), expected);
+  }
+  void assign(const ValueMap& v) {
+    EXPECT_EQ(v.size(), 100);
+    EXPECT_EQ(&*v.begin(), expected);
+  }
+  void assign(const Object& v) {
+    EXPECT_EQ(v.size(), 100);
     EXPECT_EQ(&*v.begin(), expected);
   }
   void push_back(auto&&...) {}
@@ -1160,32 +1168,17 @@ void testMergeMovedPatch(T t) {
 
   Patch p1, p2;
   // we moved `t` into p1's assign field
-  if constexpr (__FBTHRIFT_IS_VALID(p1, p1.assign(badge, std::move(t)))) {
-    p1.assign(badge, std::move(t));
-  } else {
-    p1.assign(std::move(t));
-  }
+  p1.assign(std::move(t));
 
-  if constexpr (__FBTHRIFT_IS_VALID(p1, p1.customVisit(badge, checkAssign))) {
-    p1.customVisit(badge, checkAssign);
+  p1.customVisit(checkAssign);
 
-    p2.merge(badge, std::move(p1)); // we moved assign field from p1 to p2
-    p2.customVisit(badge, checkAssign);
-  } else {
-    p1.customVisit(checkAssign);
-
-    p2.merge(badge, std::move(p1)); // we moved assign field from p1 to p2
-    p2.customVisit(checkAssign);
-  }
+  p2.merge(badge, std::move(p1)); // we moved assign field from p1 to p2
+  p2.customVisit(checkAssign);
 
   DynamicPatch dp{std::move(p2)};
   dp.visitPatch(folly::overload(
-      [&](const DynamicListPatch& patch) {
-        patch.customVisit(badge, checkAssign);
-      },
-      [&](const DynamicSetPatch& patch) {
-        patch.customVisit(badge, checkAssign);
-      },
+      [&](const DynamicListPatch& patch) { patch.customVisit(checkAssign); },
+      [&](const DynamicSetPatch& patch) { patch.customVisit(checkAssign); },
       [&](const DynamicMapPatch& patch) { patch.customVisit(checkAssign); },
       [&](const DynamicStructPatch& patch) { patch.customVisit(checkAssign); },
       [&](const auto&) {

@@ -921,12 +921,12 @@ DynamicListPatch DiffVisitorBase::diffList(
 
   auto it = std::search(dst.begin(), dst.end(), src.begin(), src.end());
   if (it != dst.begin()) {
-    patch.assign(badge, dst);
+    patch.assign(dst);
     return patch;
   }
 
   for (size_t i = src.size(); i < dst.size(); ++i) {
-    patch.push_back(badge, dst[i]);
+    patch.push_back(dst[i]);
   }
   return patch;
 }
@@ -944,22 +944,22 @@ DynamicSetPatch DiffVisitorBase::diffSet(
   // remove keys
   for (const auto& i : src) {
     if (!dst.contains(i)) {
-      patch.erase(badge, i);
+      patch.erase(i);
     }
   }
   if (dst.size() < patch.patchedElementCount(badge)) {
-    patch.assign(badge, dst);
+    patch.assign(dst);
     return patch;
   }
 
   // add keys
   for (const auto& i : dst) {
     if (!src.contains(i)) {
-      patch.insert(badge, i);
+      patch.insert(i);
     }
   }
   if (dst.size() < patch.patchedElementCount(badge)) {
-    patch.assign(badge, dst);
+    patch.assign(dst);
     return patch;
   }
 
@@ -1318,11 +1318,11 @@ void DiffVisitorBase::pop() {
 
 ExtractedMasksFromPatch DynamicListPatch::extractMaskFromPatch() const {
   struct Visitor {
-    void assign(detail::Badge, const ValueList&) {
+    void assign(const ValueList&) {
       masks = {protocol::noneMask(), protocol::allMask()};
     }
     void clear() { masks = {protocol::noneMask(), protocol::allMask()}; }
-    void push_back(detail::Badge, const Value&) {
+    void push_back(const Value&) {
       // TODO(dokwon): Consider optimizing by not using customVisit.
       masks = {protocol::allMask(), protocol::allMask()};
     }
@@ -1331,23 +1331,23 @@ ExtractedMasksFromPatch DynamicListPatch::extractMaskFromPatch() const {
         protocol::noneMask(), protocol::noneMask()};
   };
   Visitor v;
-  customVisit(badge, v);
+  customVisit(v);
   return std::move(v.masks);
 }
 
 ExtractedMasksFromPatch DynamicSetPatch::extractMaskFromPatch() const {
   struct Visitor {
-    void assign(detail::Badge, const ValueSet&) {
+    void assign(const ValueSet&) {
       masks = {protocol::noneMask(), protocol::allMask()};
     }
     void clear() { masks = {protocol::noneMask(), protocol::allMask()}; }
-    void addMulti(detail::Badge, const ValueSet& v) {
+    void addMulti(const ValueSet& v) {
       if (v.empty()) {
         return;
       }
       masks = {protocol::allMask(), protocol::allMask()};
     }
-    void removeMulti(detail::Badge, const ValueSet& v) {
+    void removeMulti(const ValueSet& v) {
       if (v.empty()) {
         return;
       }
@@ -1358,7 +1358,7 @@ ExtractedMasksFromPatch DynamicSetPatch::extractMaskFromPatch() const {
         protocol::noneMask(), protocol::noneMask()};
   };
   Visitor v;
-  customVisit(badge, v);
+  customVisit(v);
   return std::move(v.masks);
 }
 
@@ -1578,35 +1578,35 @@ ExtractedMasksFromPatch DynamicPatch::extractMaskFromPatch() const {
 
 void DynamicListPatch::apply(detail::Badge, ValueList& v) const {
   struct Visitor {
-    void assign(detail::Badge, ValueList v) {
+    void assign(ValueList v) {
       detail::convertStringToBinary(v);
       value = std::move(v);
     }
     void clear() { value.clear(); }
-    void push_back(detail::Badge, detail::Value v) {
+    void push_back(detail::Value v) {
       detail::convertStringToBinary(v);
       value.push_back(std::move(v));
     }
     ValueList& value;
   };
 
-  return customVisit(badge, Visitor{v});
+  return customVisit(Visitor{v});
 }
 
 void DynamicSetPatch::apply(detail::Badge, ValueSet& v) const {
   struct Visitor {
-    void assign(detail::Badge, ValueSet v) {
+    void assign(ValueSet v) {
       detail::convertStringToBinary(v);
       value = std::move(v);
     }
     void clear() { value.clear(); }
-    void addMulti(detail::Badge, const ValueSet& v) {
+    void addMulti(const ValueSet& v) {
       for (auto i : v) {
         detail::convertStringToBinary(i);
         value.insert(std::move(i));
       }
     }
-    void removeMulti(detail::Badge, const ValueSet& v) {
+    void removeMulti(const ValueSet& v) {
       for (auto i : v) {
         detail::convertStringToBinary(i);
         value.erase(i);
@@ -1615,7 +1615,7 @@ void DynamicSetPatch::apply(detail::Badge, ValueSet& v) const {
     ValueSet& value;
   };
 
-  return customVisit(badge, Visitor{v});
+  return customVisit(Visitor{v});
 }
 
 template <class Other>

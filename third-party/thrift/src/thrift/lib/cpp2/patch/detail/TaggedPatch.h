@@ -63,7 +63,7 @@ class TaggedPatchRef<type::list<Tag>> {
   void clear() { patch_.get().clear(); }
 
   void push_back(const typename type::native_type<Tag>& v) {
-    patch_.get().push_back(badge, asValueStruct<Tag>(v));
+    patch_.get().push_back(asValueStruct<Tag>(v));
   }
 
   void apply(value_type& v) { apply_impl(v); }
@@ -83,7 +83,7 @@ class TaggedPatchRef<type::list<Tag>> {
   }
   template <class Value>
   void assign_impl(const Value& v) {
-    patch_.get().assign(badge, asValueStruct<List>(v).as_list());
+    patch_.get().assign(asValueStruct<List>(v).as_list());
   }
 
  private:
@@ -109,11 +109,11 @@ class TaggedPatchRef<type::set<Tag>> {
   void clear() { patch_.get().clear(); }
 
   void insert(const typename type::native_type<Tag>& v) {
-    patch_.get().insert(badge, asValueStruct<Tag>(v));
+    patch_.get().insert(asValueStruct<Tag>(v));
   }
 
   void erase(const typename type::native_type<Tag>& v) {
-    patch_.get().erase(badge, asValueStruct<Tag>(v));
+    patch_.get().erase(asValueStruct<Tag>(v));
   }
 
   void apply(value_type& v) { apply_impl(v); }
@@ -133,7 +133,7 @@ class TaggedPatchRef<type::set<Tag>> {
   }
   template <class Value>
   void assign_impl(const Value& v) {
-    patch_.get().assign(badge, asValueStruct<Set>(v).as_set());
+    patch_.get().assign(asValueStruct<Set>(v).as_set());
   }
 
  private:

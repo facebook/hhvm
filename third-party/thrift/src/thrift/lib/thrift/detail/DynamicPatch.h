@@ -305,13 +305,13 @@ class DynamicUnknownPatch : public DynamicPatchBase {
 class DynamicListPatch : public DynamicPatchBase {
  public:
   using DynamicPatchBase::DynamicPatchBase;
-  void assign(detail::Badge, ValueList v) {
+  void assign(ValueList v) {
     checkHomogeneousContainer(v);
     patch_.members()->clear();
     get(op::PatchOp::Assign).emplace_list(std::move(v));
   }
 
-  void push_back(detail::Badge, Value v) {
+  void push_back(Value v) {
     if (auto assign = get_ptr(op::PatchOp::Assign)) {
       detail::checkCompatibleType(assign->as_list(), v);
       assign->as_list().push_back(std::move(v));
@@ -324,10 +324,10 @@ class DynamicListPatch : public DynamicPatchBase {
 
  private:
   template <class Self, class Visitor>
-  static void customVisitImpl(Self&& self, detail::Badge badge, Visitor&& v) {
+  static void customVisitImpl(Self&& self, Visitor&& v) {
     if (auto assign = self.get_ptr(op::PatchOp::Assign)) {
       std::forward<Visitor>(v).assign(
-          badge, folly::forward_like<Self>(assign->as_list()));
+          folly::forward_like<Self>(assign->as_list()));
       return;
     }
 
@@ -338,7 +338,7 @@ class DynamicListPatch : public DynamicPatchBase {
 
     if (auto put = self.get_ptr(op::PatchOp::Put)) {
       for (auto& i : put->as_list()) {
-        std::forward<Visitor>(v).push_back(badge, folly::forward_like<Self>(i));
+        std::forward<Visitor>(v).push_back(folly::forward_like<Self>(i));
       }
     }
   }
@@ -353,8 +353,8 @@ class DynamicListPatch : public DynamicPatchBase {
 
   template <class Next>
   detail::if_same_type_after_remove_cvref<Next, DynamicListPatch> merge(
-      detail::Badge badge, Next&& other) {
-    std::forward<Next>(other).customVisit(badge, *this);
+      detail::Badge, Next&& other) {
+    std::forward<Next>(other).customVisit(*this);
   }
 };
 
@@ -365,13 +365,13 @@ class DynamicListPatch : public DynamicPatchBase {
 class DynamicSetPatch : public DynamicPatchBase {
  public:
   using DynamicPatchBase::DynamicPatchBase;
-  void assign(detail::Badge, ValueSet v) {
+  void assign(ValueSet v) {
     detail::checkHomogeneousContainer(v);
     patch_.members()->clear();
     get(op::PatchOp::Assign).emplace_set(std::move(v));
   }
 
-  void insert(detail::Badge, Value v) {
+  void insert(Value v) {
     if (auto assign = get_ptr(op::PatchOp::Assign)) {
       detail::checkCompatibleType(assign->as_set(), v);
       assign->as_set().insert(std::move(v));
@@ -385,7 +385,7 @@ class DynamicSetPatch : public DynamicPatchBase {
     s.insert(std::move(v));
   }
 
-  void erase(detail::Badge, Value v) {
+  void erase(Value v) {
     if (auto assign = get_ptr(op::PatchOp::Assign)) {
       assign->as_set().erase(v);
       return;
@@ -396,23 +396,22 @@ class DynamicSetPatch : public DynamicPatchBase {
     get(op::PatchOp::Remove).ensure_set().insert(std::move(v));
   }
 
-  void addMulti(detail::Badge badge, ValueSet add) {
+  void addMulti(ValueSet add) {
     add.eraseInto(
-        add.begin(), add.end(), [&](auto&& k) { insert(badge, std::move(k)); });
+        add.begin(), add.end(), [&](auto&& k) { insert(std::move(k)); });
   }
 
-  void removeMulti(detail::Badge badge, ValueSet remove) {
-    remove.eraseInto(remove.begin(), remove.end(), [&](auto&& k) {
-      erase(badge, std::move(k));
-    });
+  void removeMulti(ValueSet remove) {
+    remove.eraseInto(
+        remove.begin(), remove.end(), [&](auto&& k) { erase(std::move(k)); });
   }
 
  private:
   template <class Self, class Visitor>
-  static void customVisitImpl(Self&& self, detail::Badge badge, Visitor&& v) {
+  static void customVisitImpl(Self&& self, Visitor&& v) {
     if (auto assign = self.get_ptr(op::PatchOp::Assign)) {
       std::forward<Visitor>(v).assign(
-          badge, folly::forward_like<Self>(assign->as_set()));
+          folly::forward_like<Self>(assign->as_set()));
       return;
     }
 
@@ -423,12 +422,12 @@ class DynamicSetPatch : public DynamicPatchBase {
 
     if (auto remove = self.get_ptr(op::PatchOp::Remove)) {
       std::forward<Visitor>(v).removeMulti(
-          badge, folly::forward_like<Self>(remove->as_set()));
+          folly::forward_like<Self>(remove->as_set()));
     }
 
     if (auto add = self.get_ptr(op::PatchOp::Add)) {
       std::forward<Visitor>(v).addMulti(
-          badge, folly::forward_like<Self>(add->as_set()));
+          folly::forward_like<Self>(add->as_set()));
     }
   }
 
@@ -442,8 +441,8 @@ class DynamicSetPatch : public DynamicPatchBase {
 
   template <class Next>
   detail::if_same_type_after_remove_cvref<Next, DynamicSetPatch> merge(
-      detail::Badge badge, Next&& other) {
-    std::forward<Next>(other).customVisit(badge, *this);
+      detail::Badge, Next&& other) {
+    std::forward<Next>(other).customVisit(*this);
   }
 };
 

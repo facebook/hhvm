@@ -301,7 +301,16 @@ class DynamicUnknownPatch : public DynamicPatchBase {
 /// DynamicPatch for a Thrift list.
 ///
 /// It consists of the following operations: `assign`, `clear`, and
-/// `appendMulti`.
+/// `push_back`.
+///
+/// For introspection, users should provide a visitor with the following methods
+/// for `customVisit`:
+///
+///     struct Visitor {
+///       void assign(const ValueList&);
+///       void clear();
+///       void push_back(const Value&);
+///     }
 class DynamicListPatch : public DynamicPatchBase {
  public:
   using DynamicPatchBase::DynamicPatchBase;
@@ -362,6 +371,16 @@ class DynamicListPatch : public DynamicPatchBase {
 ///
 /// It consists of the following operations: `assign`, `clear`, `addMulti`, and
 /// `removeMulti`.
+///
+/// For introspection, users should provide a visitor with the following methods
+/// for `customVisit`:
+///
+///     struct Visitor {
+///       void assign(const ValueSet&);
+///       void clear();
+///       void removeMulti(const ValueSet&);
+///       void addMulti(const ValueSet&);
+///     }
 class DynamicSetPatch : public DynamicPatchBase {
  public:
   using DynamicPatchBase::DynamicPatchBase;
@@ -455,7 +474,7 @@ class DynamicSetPatch : public DynamicPatchBase {
 /// for `customVisit`:
 ///
 ///     struct Visitor {
-///       void assign(const Object&);
+///       void assign(const ValueMap&);
 ///       void clear();
 ///       void putMulti(const ValueMap&);
 ///       void tryPutMulti(const ValueMap&);

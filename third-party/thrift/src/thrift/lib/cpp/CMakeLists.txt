@@ -37,7 +37,6 @@ add_library(
   concurrency/InitThreadFactory.cpp
   concurrency/PosixThreadFactory.cpp
   concurrency/ThreadManager.cpp
-  concurrency/TimerManager.cpp
   concurrency/Util.cpp
 )
 target_link_libraries(

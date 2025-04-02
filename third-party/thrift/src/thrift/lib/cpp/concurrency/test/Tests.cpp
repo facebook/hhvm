@@ -21,7 +21,6 @@
 #include <glog/logging.h>
 
 #include <thrift/lib/cpp/concurrency/test/ThreadFactoryTests.h>
-#include <thrift/lib/cpp/concurrency/test/TimerManagerTests.h>
 
 using namespace apache::thrift::concurrency;
 using namespace apache::thrift::concurrency::test;
@@ -96,15 +95,5 @@ int main(int argc, char** argv) {
 
     std::cout << "\t\t\tscall per ms: " << count / (time01 - time00)
               << std::endl;
-  }
-
-  if (runAll || args[0] == "timer-manager") {
-    std::cout << "TimerManager tests..." << std::endl;
-
-    std::cout << "\t\tTimerManager test00" << std::endl;
-
-    TimerManagerTests timerManagerTests;
-
-    DCHECK(timerManagerTests.test00());
   }
 }

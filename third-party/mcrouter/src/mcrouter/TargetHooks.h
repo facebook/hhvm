@@ -25,7 +25,7 @@ class StatsApi;
  */
 FOLLY_ATTR_WEAK bool gRIMReport(
     const std::vector<std::string>& tenancyHierarchyPath,
-    const std::unordered_map<std::string, uint64_t>& resourceUsageMap);
+    const std::unordered_map<std::string, double>& resourceUsageMap);
 
 /**
  * SR factory init hook

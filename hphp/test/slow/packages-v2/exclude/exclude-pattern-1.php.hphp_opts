@@ -1,0 +1,5 @@
+-vRuntime.Eval.ActiveDeployment="one"
+-vRuntime.Eval.PackageV2=true
+--dir=__DIR__
+--exclude-pattern=__tests__/.*
+

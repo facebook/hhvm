@@ -799,6 +799,12 @@ void logPhaseStats(const std::string& phase, const Package& package,
       std::chrono::duration_cast<std::chrono::microseconds>(*t).count()
     );
   }
+  if (auto const t = package.filteredPackageTime()) {
+    sample.setInt(
+      phase + "_filteredPackage_micros",
+      std::chrono::duration_cast<std::chrono::microseconds>(*t).count()
+    );
+  }
 
   stats.logSample(phase, sample);
 }
@@ -1331,14 +1337,20 @@ bool process(CompilerOptions &po) {
   // Emit a group of files that were parsed remotely
   auto const emitRemoteUnit = [&] (
       const std::vector<std::filesystem::path>& rpaths,
-      bool isOnDemand
+      bool forceInclusion
   ) -> coro::Task<Package::EmitCallBackResult> {
     Package::ParseMetaVec parseMetas;
     Package::ParseMetaItemsToSkipSet itemsToSkip;
 
     auto const shouldIncludeInBuild = [&] (const Package::ParseMeta& p) {
-      if (Cfg::Eval::ActiveDeployment.empty()) return true;
+      if (Cfg::Eval::ActiveDeployment.empty() || forceInclusion) return true;
       if (Cfg::Eval::PackageV2) {
+        // emit should never be invoked on files excluded from the build
+        // with --exclude-file or --exclude-pattern
+        auto file = p.m_filepath->toCppString();
+        always_assert(!Option::PackageExcludeFiles.count(file) &&
+          !Option::IsFileExcluded(file, Option::PackageExcludePatterns));
+
         if (p.m_packageOverride) {
           auto const& packageInfo =
             RepoOptions::forFile(po.inputDir.c_str()).packageInfo();
@@ -1348,9 +1360,9 @@ bool process(CompilerOptions &po) {
         }
         // match file with the include_path declarations and return
         // if most precise one that matches belongs to the active deployment
-        auto const file = p.m_filepath->toCppString();
         for (auto const& it : pathsInDeployment) {
-          if (file.size() >= it.first.size() && std::equal(it.first.begin(), it.first.end(), file.begin())) {
+          if (file.size() >= it.first.size() &&
+              std::equal(it.first.begin(), it.first.end(), file.begin())) {
             return it.second;
           }
         }
@@ -1358,7 +1370,6 @@ bool process(CompilerOptions &po) {
       }
       // If the unit defines any modules, then it is always included
       if (!p.m_definitions.m_modules.empty()) return true;
-      if (Option::ForceEnableSymbolRefs && isOnDemand) return true;
       return p.m_module_use && moduleInDeployment.contains(p.m_module_use);
     };
 

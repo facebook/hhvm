@@ -1,3 +1,0 @@
-I'm %s/exclude-tests/basic.inc.php
-
-Fatal error: Call to undefined function access_test_package_override() in %s/exclude-tests/basic-1.php on line 11

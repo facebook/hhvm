@@ -3,6 +3,9 @@
 [packages.foo]
 include_paths = ["//"]
 
+[packages.notfoo]
+include_paths = ["//intern/", "//__tests__/"]
+
 [deployments]
 
 [deployments.one]

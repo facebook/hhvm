@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.ForkJoinWorkerThread;
@@ -45,7 +46,7 @@ import reactor.core.scheduler.Schedulers;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
-public final class ForkJoinPoolScheduler implements StatsScheduler {
+public final class ForkJoinPoolScheduler implements ThriftScheduler {
   private static final org.slf4j.Logger LOGGER =
       LoggerFactory.getLogger(ForkJoinPoolScheduler.class);
   private static MethodHandle FORK_JOIN_POOL_CONSTRUCTOR;
@@ -262,6 +263,11 @@ public final class ForkJoinPoolScheduler implements StatsScheduler {
             + t.getThreadGroup().getName()
             + " failed with an uncaught exception",
         e);
+  }
+
+  @Override
+  public ExecutorService getExecutor() {
+    return pool;
   }
 
   private static class DisposableForkJoinTask implements Disposable {

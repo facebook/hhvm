@@ -37,6 +37,7 @@ import io.netty.util.ResourceLeakDetector;
 import io.netty.util.concurrent.EventExecutor;
 import io.rsocket.Closeable;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,8 +54,8 @@ class ResourcesHolder implements Closeable {
   private final HashedWheelTimer timer;
   private final EventLoopGroup eventLoopGroup;
   private final LoopResources loopResources;
-  private final StatsScheduler offLoopScheduler;
-  private final StatsScheduler clientOffLoopScheduler;
+  private final ThriftScheduler offLoopScheduler;
+  private final ThriftScheduler clientOffLoopScheduler;
 
   public ResourcesHolder() {
     this.timer = createHashedWheelTimer();
@@ -88,8 +89,16 @@ class ResourcesHolder implements Closeable {
     return offLoopScheduler;
   }
 
+  public ExecutorService getOffLoopExecutor() {
+    return offLoopScheduler.getExecutor();
+  }
+
   public Scheduler getClientOffLoopScheduler() {
     return clientOffLoopScheduler;
+  }
+
+  public ExecutorService getClientOffLoopExecutor() {
+    return clientOffLoopScheduler.getExecutor();
   }
 
   private HashedWheelTimer createHashedWheelTimer() {
@@ -117,7 +126,7 @@ class ResourcesHolder implements Closeable {
     }
   }
 
-  private StatsScheduler createOffLoopScheduler() {
+  private ThriftScheduler createOffLoopScheduler() {
     LOGGER.info("force execution off event loop enabled:  {}", forceExecutionOffEventLoop);
     if (enableForkJoinPool) {
       LOGGER.info("creating ForkJoinPoolScheduler scheduler");
@@ -135,7 +144,7 @@ class ResourcesHolder implements Closeable {
     }
   }
 
-  private StatsScheduler createClientOffLoopScheduler() {
+  private ThriftScheduler createClientOffLoopScheduler() {
     LOGGER.info("force client execution off event loop enabled:  {}", forceExecutionOffEventLoop);
 
     if (enableForkJoinPool) {

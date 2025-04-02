@@ -22,6 +22,7 @@ import io.airlift.stats.ExponentialDecay;
 import io.netty.util.internal.PlatformDependent;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -38,7 +39,7 @@ import reactor.core.scheduler.Schedulers;
  * reactor-core schedulers this will *not* create a new Worker to assign work to a particular
  * thread. All tasks are submitted to the underlying executor.
  */
-final class ThreadPoolScheduler extends AtomicBoolean implements StatsScheduler {
+final class ThreadPoolScheduler extends AtomicBoolean implements ThriftScheduler {
   private static final Logger LOGGER = LoggerFactory.getLogger(ThreadPoolScheduler.class);
 
   private final Distribution executionTime;
@@ -200,6 +201,11 @@ final class ThreadPoolScheduler extends AtomicBoolean implements StatsScheduler 
     stats.put("thrift_offloop.execution_time.p90", (long) executionTime.getP90());
 
     return stats;
+  }
+
+  @Override
+  public ExecutorService getExecutor() {
+    return threadPoolExecutor;
   }
 
   private class ThreadPoolSchedulerWorker implements Worker {

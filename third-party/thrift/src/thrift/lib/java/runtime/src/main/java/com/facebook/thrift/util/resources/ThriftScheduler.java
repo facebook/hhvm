@@ -17,8 +17,11 @@
 package com.facebook.thrift.util.resources;
 
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import reactor.core.scheduler.Scheduler;
 
-public interface StatsScheduler extends Scheduler {
+public interface ThriftScheduler extends Scheduler {
   Map<String, Long> getStats();
+
+  ExecutorService getExecutor();
 }

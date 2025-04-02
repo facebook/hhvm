@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <folly/stop_watch.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorBase.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorStorage.h>
 
@@ -64,7 +65,11 @@ class ServiceInterceptor : public ServiceInterceptorBase {
   }
 
   folly::coro::Task<void> internal_onRequest(
-      ConnectionInfo connectionInfo, RequestInfo requestInfo) final {
+      ConnectionInfo connectionInfo,
+      RequestInfo requestInfo,
+      const ServiceInterceptorQualifiedName& qualifiedName,
+      InterceptorMetricCallback& interceptorMetricCallback) final {
+    folly::stop_watch<std::chrono::milliseconds> onRequestTimer;
     auto* connectionState =
         getValueAsType<ConnectionState>(*connectionInfo.storage);
     auto* storage = requestInfo.storage;
@@ -72,6 +77,8 @@ class ServiceInterceptor : public ServiceInterceptorBase {
             co_await onRequest(connectionState, std::move(requestInfo))) {
       storage->emplace<RequestState>(std::move(*value));
     }
+    interceptorMetricCallback.onRequestComplete(
+        qualifiedName, onRequestTimer.elapsed());
   }
 
   folly::coro::Task<void> internal_onResponse(

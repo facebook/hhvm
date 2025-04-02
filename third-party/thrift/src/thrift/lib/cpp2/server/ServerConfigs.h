@@ -32,6 +32,7 @@
 #include <thrift/lib/cpp2/server/Overload.h>
 #include <thrift/lib/cpp2/server/PreprocessResult.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptorBase.h>
+#include <thrift/lib/cpp2/server/metrics/InterceptorMetricCallback.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift {
@@ -239,7 +240,7 @@ class ServerConfigs {
 
   struct ServiceInterceptorInfo {
     // The naming format is "{module_name}.{interceptor_name}"
-    std::string qualifiedName;
+    ServiceInterceptorQualifiedName qualifiedName;
     std::shared_ptr<ServiceInterceptorBase> interceptor;
   };
   virtual const std::vector<ServiceInterceptorInfo>& getServiceInterceptors()
@@ -248,6 +249,8 @@ class ServerConfigs {
         kEmpty;
     return *kEmpty;
   }
+
+  virtual InterceptorMetricCallback& getInterceptorMetricCallback() const = 0;
 
  private:
   folly::relaxed_atomic<int32_t> activeRequests_{0};

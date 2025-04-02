@@ -2478,13 +2478,15 @@ ThriftServer::processModulesSpecification(ModulesSpecification&& specs) {
 
       std::vector<ServiceInterceptorInfo> result;
       for (auto& interceptor : serviceInterceptors) {
-        auto qualifiedName =
-            fmt::format("{}.{}", moduleSpec.name, interceptor->getName());
-        if (seenNames_.find(qualifiedName) != seenNames_.end()) {
-          throw std::logic_error(
-              fmt::format("Duplicate ServiceInterceptor: {}", qualifiedName));
+        ServiceInterceptorQualifiedName qualifiedName{
+            .moduleName = moduleSpec.name,
+            .interceptorName = interceptor->getName()};
+        auto qualifiedNameStr = qualifiedName.toString();
+        if (seenNames_.find(qualifiedNameStr) != seenNames_.end()) {
+          throw std::logic_error(fmt::format(
+              "Duplicate ServiceInterceptor: {}", qualifiedNameStr));
         }
-        seenNames_.insert(qualifiedName);
+        seenNames_.insert(qualifiedNameStr);
         result.emplace_back(ServiceInterceptorInfo{
             std::move(qualifiedName), std::move(interceptor)});
       }

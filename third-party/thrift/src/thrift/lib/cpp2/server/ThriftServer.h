@@ -88,6 +88,7 @@
 #include <thrift/lib/cpp2/server/ThreadManagerLoggingWrapper.h>
 #include <thrift/lib/cpp2/server/ThriftServerConfig.h>
 #include <thrift/lib/cpp2/server/TransportRoutingHandler.h>
+#include <thrift/lib/cpp2/server/metrics/InterceptorMetricCallback.h>
 #include <thrift/lib/cpp2/server/metrics/StreamMetricCallback.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/parser/AllocatingParserStrategy.h>
@@ -964,6 +965,10 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
   // Interface for instrumenting streams
   std::shared_ptr<StreamMetricCallback> streamMetricCallback_{
       std::make_shared<NoopStreamMetricCallback>()};
+
+  // Interface for instrumenting interceptors
+  std::shared_ptr<InterceptorMetricCallback> interceptorMetricCallback_{
+      std::make_shared<NoopInterceptorMetricCallback>()};
 
   //! The type of thread manager to create.
   ThreadManagerType threadManagerType_{ThreadManagerType::PRIORITY};
@@ -2898,6 +2903,15 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     static const folly::Indestructible<std::vector<ServiceInterceptorInfo>>
         kEmpty;
     return kEmpty;
+  }
+
+  /**
+   * Get the InterceptorMetricCallback instance installed on this ThriftServer
+   * instance
+   */
+  InterceptorMetricCallback& getInterceptorMetricCallback() const override {
+    DCHECK(interceptorMetricCallback_);
+    return *interceptorMetricCallback_;
   }
 
   /**

@@ -21,6 +21,7 @@
 #include <folly/coro/Task.h>
 
 #include <thrift/lib/cpp2/server/ServiceInterceptorStorage.h>
+#include <thrift/lib/cpp2/server/metrics/InterceptorMetricCallback.h>
 
 namespace apache::thrift {
 
@@ -84,7 +85,10 @@ class ServiceInterceptorBase {
     const InterceptorFrameworkMetadataStorage* frameworkMetadata = nullptr;
   };
   virtual folly::coro::Task<void> internal_onRequest(
-      ConnectionInfo, RequestInfo) = 0;
+      ConnectionInfo,
+      RequestInfo,
+      const ServiceInterceptorQualifiedName&,
+      InterceptorMetricCallback&) = 0;
 
   struct ResponseInfo {
     const Cpp2RequestContext* context = nullptr;

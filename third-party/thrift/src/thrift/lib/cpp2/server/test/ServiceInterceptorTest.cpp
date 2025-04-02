@@ -29,6 +29,7 @@
 #include <thrift/lib/cpp2/server/ServerModule.h>
 #include <thrift/lib/cpp2/server/ServiceInterceptor.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
+#include <thrift/lib/cpp2/server/ThriftServerInternals.h>
 #include <thrift/lib/cpp2/server/test/gen-cpp2/ServiceInterceptor_clients.h>
 #include <thrift/lib/cpp2/server/test/gen-cpp2/ServiceInterceptor_handlers.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/MultiplexAsyncProcessor2_clients.h>
@@ -432,15 +433,32 @@ struct ServiceInterceptorLogResultTypeOnResponse
   std::vector<Entry> results;
 };
 
+class MockInterceptorMetricCallback : public InterceptorMetricCallback {
+ public:
+  MOCK_METHOD(
+      void,
+      onRequestComplete,
+      (const ServiceInterceptorQualifiedName& qualifiedName,
+       std::chrono::microseconds onResponseTime),
+      (override));
+};
+
 } // namespace
 
 CO_TEST_P(ServiceInterceptorTestP, BasicTM) {
   auto interceptor =
       std::make_shared<ServiceInterceptorCountWithRequestState>("Interceptor1");
+  auto interceptorMetricCallback =
+      std::make_shared<MockInterceptorMetricCallback>();
   auto runner =
       makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
         server.addModule(std::make_unique<TestModule>(interceptor));
+        detail::ThriftServerInternals(server).setInterceptorMetricCallback(
+            interceptorMetricCallback);
       });
+  EXPECT_CALL(*interceptorMetricCallback, onRequestComplete(_, _))
+      .Times(2)
+      .WillRepeatedly(Return());
 
   auto client =
       makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);

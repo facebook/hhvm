@@ -17,6 +17,7 @@
 #pragma once
 
 #include <thrift/lib/cpp2/server/ThriftServer.h>
+#include <thrift/lib/cpp2/server/metrics/InterceptorMetricCallback.h>
 #include <thrift/lib/cpp2/server/metrics/StreamMetricCallback.h>
 
 namespace apache::thrift::detail {
@@ -24,14 +25,22 @@ namespace apache::thrift::detail {
 class ThriftServerInternals {
  public:
   ThriftServerInternals(ThriftServer& server) : server_(server) {}
+
   void setStreamMetricCallback(
       std::shared_ptr<StreamMetricCallback> streamMetricCallback) {
     DCHECK(streamMetricCallback);
     server_.streamMetricCallback_ = std::move(streamMetricCallback);
   }
+
   StreamMetricCallback& getStreamMetricCallback() const {
     DCHECK(server_.streamMetricCallback_);
     return *server_.streamMetricCallback_;
+  }
+
+  void setInterceptorMetricCallback(
+      std::shared_ptr<InterceptorMetricCallback> interceptorMetricCallback) {
+    DCHECK(interceptorMetricCallback);
+    server_.interceptorMetricCallback_ = std::move(interceptorMetricCallback);
   }
 
   void allowDebugInterface(bool value) { server_.allowDebugInterface(value); }

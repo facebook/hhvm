@@ -1203,7 +1203,10 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
         reqCtx_->getInterceptorFrameworkMetadata()};
     try {
       co_await serviceInterceptorsInfo[i].interceptor->internal_onRequest(
-          std::move(connectionInfo), std::move(requestInfo));
+          connectionInfo,
+          requestInfo,
+          serviceInterceptorsInfo[i].qualifiedName,
+          server->getInterceptorMetricCallback());
     } catch (...) {
       exceptions.emplace_back(i, folly::current_exception());
     }
@@ -1211,12 +1214,12 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
   if (!exceptions.empty()) {
     std::string message = fmt::format(
         "ServiceInterceptor::onRequest threw exceptions:\n[{}] {}\n",
-        serviceInterceptorsInfo[exceptions[0].first].qualifiedName,
+        serviceInterceptorsInfo[exceptions[0].first].qualifiedName.toString(),
         folly::exceptionStr(exceptions[0].second));
     for (std::size_t i = 1; i < exceptions.size(); ++i) {
       message += fmt::format(
           "[{}] {}\n",
-          serviceInterceptorsInfo[exceptions[i].first].qualifiedName,
+          serviceInterceptorsInfo[exceptions[i].first].qualifiedName.toString(),
           folly::exceptionStr(exceptions[i].second));
     }
     co_yield folly::coro::co_error(TApplicationException(message));
@@ -1260,12 +1263,12 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse(
   if (!exceptions.empty()) {
     std::string message = fmt::format(
         "ServiceInterceptor::onResponse threw exceptions:\n[{}] {}\n",
-        serviceInterceptorsInfo[exceptions[0].first].qualifiedName,
+        serviceInterceptorsInfo[exceptions[0].first].qualifiedName.toString(),
         folly::exceptionStr(exceptions[0].second));
     for (std::size_t i = 1; i < exceptions.size(); ++i) {
       message += fmt::format(
           "[{}] {}\n",
-          serviceInterceptorsInfo[exceptions[i].first].qualifiedName,
+          serviceInterceptorsInfo[exceptions[i].first].qualifiedName.toString(),
           folly::exceptionStr(exceptions[i].second));
     }
     co_yield folly::coro::co_error(TApplicationException(message));

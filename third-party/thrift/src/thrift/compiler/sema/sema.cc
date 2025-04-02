@@ -243,6 +243,29 @@ void match_type_with_const_value(
     return;
   }
 
+  // Verify that the const value is correctly resolved at this point.
+  if (value && value->kind() == t_const_value::CV_IDENTIFIER) {
+    const std::string& value_id = value->get_identifier();
+    const scope::identifier id{value_id};
+    const t_const* constant;
+    if (type->get_type_value() == t_type::type::t_enum) {
+      // Try to resolve enum values from typedefs
+      // or enums defined after use.
+      constant = try_resolve_enum_by_id(id, *value);
+    } else {
+      constant = mctx.program().find<t_const>(id);
+    }
+
+    if (!constant) {
+      ctx.error(
+          value->ref_range().begin,
+          "use of undeclared identifier '{}'",
+          value_id);
+      return;
+    }
+    value->assign(t_const_value(*constant->value()));
+  }
+
   switch (type->get_type_value()) {
     case t_type::type::t_list: {
       auto* elem_type = dynamic_cast<const t_list*>(type)->get_elem_type();
@@ -285,18 +308,6 @@ void match_type_with_const_value(
               ttype->get_full_name());
         }
       }
-      if (value->kind() == t_const_value::CV_IDENTIFIER) {
-        const std::string& id = value->get_identifier();
-        const t_const* constant = mctx.program().find<t_const>(id);
-        if (!constant) {
-          ctx.error(
-              value->ref_range().begin,
-              "use of undeclared identifier '{}'",
-              id);
-          return;
-        }
-        value->assign(t_const_value(*constant->value()));
-      }
       if (value->kind() == t_const_value::CV_MAP) {
         for (const auto& [map_key, map_val] : value->get_map()) {
           bool resolved = map_key->kind() != t_const_value::CV_IDENTIFIER;
@@ -308,6 +319,7 @@ void match_type_with_const_value(
             return;
           }
           if (!resolved) {
+            // TODO(sadroeck) - Deprecate this behavior
             map_key->convert_identifier_to_string();
           }
           match_type_with_const_value(ctx, mctx, field->get_type(), map_val);
@@ -326,20 +338,6 @@ void match_type_with_const_value(
           if (const auto* enum_value = enm->find_value(value->get_integer())) {
             value->set_enum_value(enum_value);
           }
-        } else if (value->kind() == t_const_value::CV_IDENTIFIER) {
-          // Try to resolve enum values from typedefs
-          // or enums defined after use.
-          const std::string& value_id = value->get_identifier();
-          const scope::identifier id{value_id};
-          const t_const* constant = try_resolve_enum_by_id(id, *value);
-          if (!constant) {
-            ctx.error(
-                value->ref_range().begin,
-                "use of undeclared identifier '{}'",
-                value_id);
-            return;
-          }
-          value->assign(t_const_value(*constant->value()));
         }
       }
       break;

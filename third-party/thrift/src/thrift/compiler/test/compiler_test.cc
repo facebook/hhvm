@@ -841,7 +841,7 @@ TEST(CompilerTest, cpp_type_compatibility) {
 
     struct B {
       @cpp.Adapter{name="Adapter"} # expected-warning: At most one of @cpp.Type/@cpp.Adapter/cpp.type/cpp.template can be specified on a definition.
-      1: i32 (cpp.type = "std::uint32_t") field; 
+      1: i32 (cpp.type = "std::uint32_t") field;
       # expected-error@-2: Annotations are not allowed in this position. Extract the type into a named typedef instead.
       @cpp.Adapter{name="Adapter"} # expected-warning: At most one of @cpp.Type/@cpp.Adapter/cpp.type/cpp.template can be specified on a definition.
       @cpp.Type{name="std::uint32_t"}
@@ -2682,4 +2682,56 @@ TEST(CompilerTest, scope_resolution_duplicate_include_as_alias) {
   )";
 
   check_compile(name_contents_map, "foo.thrift");
+}
+
+TEST(CompilerTest, report_unresolved_identifiers_in_structured_annotations) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["foo.thrift"] = R"(
+    struct MyAnnot {
+      1: string name;
+      2: i32 id;
+      3: list<float> values;
+    }
+  )";
+
+  name_contents_map["main.thrift"] = R"(
+    include "foo.thrift"
+
+    @foo.MyAnnot{ name = foo.DOES_NOT_EXIST } # expected-error: use of undeclared identifier 'foo.DOES_NOT_EXIST'
+    struct S {}
+
+    @foo.MyAnnot{ id = foo.DOES_NOT_EXIST } # expected-error: use of undeclared identifier 'foo.DOES_NOT_EXIST'
+    struct S2 {}
+
+    @foo.MyAnnot{ values = [
+      foo.DOES_NOT_EXIST, # expected-error: use of undeclared identifier 'foo.DOES_NOT_EXIST'
+      ALSO_DOES_NOT_EXIST # expected-error: use of undeclared identifier 'ALSO_DOES_NOT_EXIST'
+    ] }
+    struct S3 {}
+  )";
+  check_compile(name_contents_map, "main.thrift");
+}
+
+TEST(CompilerTest, reported_unresolved_identifiers_in_constants) {
+  std::map<std::string, std::string> name_contents_map;
+  name_contents_map["foo.thrift"] = R"(
+  )";
+
+  name_contents_map["main.thrift"] = R"(
+    include "foo.thrift"
+
+    const i32 MY_CONST = foo.MY_CONST; # expected-error: use of undeclared identifier 'foo.MY_CONST'
+    const string MY_CONST2 = foo.MY_CONST; # expected-error: use of undeclared identifier 'foo.MY_CONST'
+    const list<i32> MY_CONST3 = foo.MY_CONST; # expected-error: use of undeclared identifier 'foo.MY_CONST'
+    const list<i32> MY_CONST4 = [
+      foo.MY_CONST, # expected-error: use of undeclared identifier 'foo.MY_CONST'
+      foo.MY_CONST2 # expected-error: use of undeclared identifier 'foo.MY_CONST2'
+    ];
+    const map<i32, i32> MY_CONST5 = foo.MY_CONST; # expected-error: use of undeclared identifier 'foo.MY_CONST'
+    const map<i32, i32> MY_CONST6 = { foo.MY_CONST_KEY: # expected-error: use of undeclared identifier 'foo.MY_CONST_KEY'
+      foo.MY_CONST_VALUE }; # expected-error: use of undeclared identifier 'foo.MY_CONST_VALUE'
+    const set<i32> MY_CONST7 = foo.MY_CONST; # expected-error: use of undeclared identifier 'foo.MY_CONST'
+    const set<i32> MY_CONST8 = [ foo.MY_CONST ]; # expected-error: use of undeclared identifier 'foo.MY_CONST'
+  )";
+  check_compile(name_contents_map, "main.thrift");
 }

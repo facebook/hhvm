@@ -238,6 +238,7 @@ class StructTestsParameterized(unittest.TestCase):
             self.easy(val=1, an_int=self.Integers(small=300), name=1)
 
     def test_iterate(self) -> None:
+        # pyre-ignore[28]: proving __mangled_str works
         x = self.Reserved(
             from_="hello",
             nonlocal_=3,
@@ -246,7 +247,7 @@ class StructTestsParameterized(unittest.TestCase):
             move="Qh4xe1",
             inst="foo",
             changes="bar",
-            _Reserved__mangled_str="secret",
+            __mangled_str="secret",
             _Reserved__mangled_int=42,
         )
         self.assertEqual(
@@ -310,6 +311,7 @@ class StructTestsParameterized(unittest.TestCase):
             x = x(bad_key="foo")
 
     def test_reserved(self) -> None:
+        # pyre-ignore[28]: proving the mangling is optional
         x = self.Reserved(
             from_="hello",
             nonlocal_=3,
@@ -319,7 +321,7 @@ class StructTestsParameterized(unittest.TestCase):
             inst="foo",
             changes="bar",
             _Reserved__mangled_str="secret",
-            _Reserved__mangled_int=42,
+            __mangled_int=42,
         )
         self.assertEqual(x.from_, "hello")
         self.assertEqual(x.nonlocal_, 3)

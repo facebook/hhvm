@@ -379,10 +379,12 @@ cdef class MutableStruct(MutableStructOrUnion):
         for name, value in kwargs.items():
             field_index = mutable_struct_info.name_to_index.get(name)
             if field_index is None:
-                raise TypeError(
-                    f"{type(self)} initialization error: unknown keyword argument "
-                    f"'{name}'."
-                )
+                field_index = _get_index_if_mangled(mutable_struct_info, self, name)
+                if field_index is None:
+                    raise TypeError(
+                        f"{type(self)} initialization error: unknown keyword argument "
+                        f"'{name}'."
+                    )
 
             if value is None:
                 continue
@@ -590,6 +592,13 @@ cdef class MutableStruct(MutableStructOrUnion):
         `MutableStruct` instance.
         """
         return len(fbthrift_data) and isinstance(fbthrift_data[-1], cls)
+
+# attributes that start with __ are mangled to _{{struct:name}}__{{field:py_name}}
+cdef inline _get_index_if_mangled(MutableStructInfo struct_info, instance, str name) noexcept:
+    if not name.startswith("__"):
+        return None
+    cdef str mangle = f"_{instance.__class__.__name__}{name}"
+    return struct_info.name_to_index.get(mangle)
 
 
 cdef class MutableStructInfo:

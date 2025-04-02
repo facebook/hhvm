@@ -1264,10 +1264,13 @@ cdef class Struct(StructOrUnion):
         for name, value in kwargs.items():
             field_index = struct_info.name_to_index.get(name)
             if field_index is None:
-                raise TypeError(
-                    f"{type(self)} initialization error: unknown keyword argument "
-                    f"'{name}'."
-                )
+                # try mangled name if leading dunder prefix
+                field_index = _get_index_if_mangled(struct_info, self, name)
+                if field_index is None:
+                    raise TypeError(
+                        f"{type(self)} initialization error: unknown keyword argument "
+                        f"'{name}'."
+                    )
 
             if value is None:
                 continue
@@ -1384,6 +1387,13 @@ cdef tuple _validate_union_init_kwargs(
     else:
         assert current_field_value is not None
         return (current_field_enum, current_field_value)
+
+# attributes that start with __ are mangled to _{{struct:name}}__{{field:py_name}}
+cdef inline _get_index_if_mangled(StructInfo struct_info, instance, str name) noexcept:
+    if not name.startswith("__"):
+        return None
+    cdef str mangle = f"_{instance.__class__.__name__}{name}"
+    return struct_info.name_to_index.get(mangle)
 
 cdef class Union(StructOrUnion):
     """

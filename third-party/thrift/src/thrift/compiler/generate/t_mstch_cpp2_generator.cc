@@ -794,7 +794,7 @@ class cpp_mstch_program : public mstch_program {
         sorted.end(),
         std::back_inserter(ret),
         [&](const t_type* node) -> mstch::node {
-          if (auto typedf = dynamic_cast<t_typedef const*>(node)) {
+          if (auto typedf = node->try_as<t_typedef>()) {
             return context_.typedef_factory->make_mstch_object(
                 typedf, context_);
           }
@@ -1099,11 +1099,11 @@ bool needs_op_encode(const t_type& type);
 
 bool check_container_needs_op_encode(const t_type& type) {
   const auto* true_type = type.get_true_type();
-  if (auto list_container = dynamic_cast<const t_list*>(true_type)) {
+  if (auto list_container = true_type->try_as<t_list>()) {
     return needs_op_encode(*list_container->elem_type());
-  } else if (auto set_container = dynamic_cast<const t_set*>(true_type)) {
+  } else if (auto set_container = true_type->try_as<t_set>()) {
     return needs_op_encode(*set_container->elem_type());
-  } else if (auto map_container = dynamic_cast<const t_map*>(true_type)) {
+  } else if (auto map_container = true_type->try_as<t_map>()) {
     return needs_op_encode(*map_container->key_type()) ||
         needs_op_encode(*map_container->val_type());
   }
@@ -1287,7 +1287,7 @@ class cpp_mstch_type : public mstch_type {
         type_, {"cpp.use_allocator"});
   }
   mstch::node is_non_empty_struct() {
-    auto as_struct = dynamic_cast<const t_struct*>(resolved_type_);
+    auto as_struct = resolved_type_->try_as<t_struct>();
     return as_struct && as_struct->has_fields();
   }
   mstch::node qualified_namespace() {
@@ -1439,7 +1439,7 @@ class cpp_mstch_struct : public mstch_struct {
           (type->is_container() && field->get_value() != nullptr &&
            !field->get_value()->is_empty()) ||
           (type->is_struct() &&
-           (struct_ != dynamic_cast<const t_struct*>(type)) &&
+           (struct_ != type->try_as<t_struct>()) &&
            ((field->get_value() && !field->get_value()->is_empty()) ||
             (cpp2::is_explicit_ref(field) &&
              field->get_req() != t_field::e_req::optional))) ||
@@ -1564,8 +1564,7 @@ class cpp_mstch_struct : public mstch_struct {
     if (!struct_->is_exception()) {
       return {};
     }
-    const auto* message_field =
-        dynamic_cast<const t_exception&>(*struct_).get_message_field();
+    const auto* message_field = struct_->as<t_exception>().get_message_field();
     if (!message_field) {
       return {};
     }
@@ -1759,8 +1758,7 @@ class cpp_mstch_struct : public mstch_struct {
       case t_type::type::t_float:
         return ret = 4;
       case t_type::type::t_enum:
-        return ret = compute_alignment(
-                   *dynamic_cast<const t_enum*>(type->get_true_type()));
+        return ret = compute_alignment(type->get_true_type()->as<t_enum>());
       case t_type::type::t_i64:
       case t_type::type::t_double:
       case t_type::type::t_string:
@@ -1771,10 +1769,8 @@ class cpp_mstch_struct : public mstch_struct {
         return ret = 8;
       case t_type::type::t_structured: {
         size_t align = 1;
-        const t_struct* strct =
-            dynamic_cast<const t_struct*>(type->get_true_type());
-        assert(strct);
-        for (const auto& field_2 : strct->fields()) {
+        const auto& strct = type->get_true_type()->as<t_struct>();
+        for (const auto& field_2 : strct.fields()) {
           size_t field_align = compute_alignment(&field_2, memo);
           align = std::max(align, field_align);
           if (align == kMaxAlign) {
@@ -2131,7 +2127,7 @@ class cpp_mstch_field : public mstch_field {
         {"cpp.noncopyable", "cpp2.noncopyable"});
   }
   mstch::node enum_has_value() {
-    if (auto enm = dynamic_cast<const t_enum*>(field_->get_type())) {
+    if (auto enm = field_->get_type()->try_as<t_enum>()) {
       const auto* const_value = field_->get_value();
       using cv = t_const_value::t_const_value_kind;
       if (const_value->kind() == cv::CV_INTEGER) {

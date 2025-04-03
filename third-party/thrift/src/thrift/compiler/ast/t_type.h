@@ -59,6 +59,33 @@ class t_type : public t_named {
    */
   const t_type* get_true_type() const;
 
+  // Conversions and checks to more specific types.
+  template <typename T>
+  bool is() const {
+    static_assert(std::is_same_v<std::decay_t<std::remove_pointer_t<T>>, T>);
+    return dynamic_cast<const T*>(this) != nullptr;
+  }
+  template <typename T>
+  T& as() {
+    static_assert(std::is_same_v<std::decay_t<std::remove_pointer_t<T>>, T>);
+    return dynamic_cast<T&>(*this);
+  }
+  template <typename T>
+  const T& as() const {
+    static_assert(std::is_same_v<std::decay_t<std::remove_pointer_t<T>>, T>);
+    return dynamic_cast<const T&>(*this);
+  }
+  template <typename T>
+  T* try_as() {
+    static_assert(std::is_same_v<std::decay_t<std::remove_pointer_t<T>>, T>);
+    return dynamic_cast<T*>(this);
+  }
+  template <typename T>
+  const T* try_as() const {
+    static_assert(std::is_same_v<std::decay_t<std::remove_pointer_t<T>>, T>);
+    return dynamic_cast<const T*>(this);
+  }
+
  protected:
   /**
    * Default constructor for t_type

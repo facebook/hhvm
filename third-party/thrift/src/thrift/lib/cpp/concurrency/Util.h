@@ -18,7 +18,6 @@
 #define _THRIFT_CONCURRENCY_UTIL_H_ 1
 
 #include <cstdint>
-#include <ctime>
 
 #include <folly/portability/SysTime.h>
 
@@ -43,17 +42,6 @@ class Util {
   static const int64_t NS_PER_MS = NS_PER_S / MS_PER_S;
   static const int64_t NS_PER_US = NS_PER_S / US_PER_S;
   static const int64_t US_PER_MS = US_PER_S / MS_PER_S;
-
-  /**
-   * Converts millisecond timestamp into a timespec struct
-   *
-   * @param result timespec& result
-   * @param value or duration in milliseconds
-   */
-  static void toTimespec(timespec& result, int64_t value) {
-    result.tv_sec = value / MS_PER_S; // ms to s
-    result.tv_nsec = (value % MS_PER_S) * NS_PER_MS; // ms to ns
-  }
 
   static void toTicks(
       int64_t& result,

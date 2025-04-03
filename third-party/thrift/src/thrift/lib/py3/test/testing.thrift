@@ -278,15 +278,24 @@ struct Runtime {
 }
 
 struct mixed {
+  // @lint-ignore THRIFTCHECKS
   1: optional string opt_field = "optional";
   3: string unq_field = "unqualified";
+  // @lint-ignore THRIFTCHECKS
   @cpp.Ref{type = cpp.RefType.Unique}
   4: optional easy opt_easy_ref;
+  // @lint-ignore THRIFTCHECKS
   @cpp.Ref{type = cpp.RefType.Shared}
   @cpp.AllowLegacyNonOptionalRef
   6: list<string> const_container_ref;
   @python.Name{name = "some_field_"}
   7: optional string some_field;
+  // @lint-ignore THRIFTCHECKS
+  8: optional float opt_float = 1.0;
+  // @lint-ignore THRIFTCHECKS
+  9: optional i32 opt_int = 1;
+  // @lint-ignore THRIFTCHECKS
+  10: optional Color opt_enum = Color.red;
 }
 
 struct numerical {

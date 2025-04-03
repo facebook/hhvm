@@ -29,6 +29,7 @@ from testing.types import (
     hard,
     Integers,
     Kind,
+    mixed,
     Nested1,
     Nested2,
     Nested3,
@@ -48,7 +49,7 @@ from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
     is_auto_migrated,
 )
 from thrift.py3.common import Protocol
-from thrift.py3.serializer import deserialize
+from thrift.py3.serializer import deserialize, serialize
 from thrift.py3.types import Struct
 
 
@@ -535,6 +536,29 @@ class NumericalConversionsTests(unittest.TestCase):
         self.assertIsInstance(c, OptionalFile)
         self.assertIsInstance(c, Struct)
         self.assertEqual(c.name, "bob")
+
+    def test_defaulted_optional_field(self) -> None:
+        def assert_mixed(m: mixed) -> None:
+            if is_auto_migrated():
+                self.assertIsNone(m.opt_field)
+                self.assertIsNone(m.opt_float)
+                self.assertIsNone(m.opt_int)
+                self.assertIsNone(m.opt_enum)
+            else:
+                self.assertEqual(m.opt_field, "optional")
+                self.assertEqual(m.opt_float, 1.0)
+                self.assertEqual(m.opt_int, 1)
+                self.assertEqual(m.opt_enum, Color.red)
+
+        m = mixed()
+        assert_mixed(m)
+
+        # call operator
+        m = m(some_field_="don't care")
+        assert_mixed(m)
+
+        m = deserialize(mixed, serialize(m))
+        assert_mixed(m)
 
 
 class TestSubclass(OptionalFile):

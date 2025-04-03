@@ -26,7 +26,6 @@ If approx_cancel_neg is true, then some unions with negations are treated over-a
 C<t> | not C simplifies to mixed. *)
 val union :
   env ->
-  ?coerce:Typing_logic.coercion_direction option ->
   ?reason:Typing_reason.t ->
   ?approx_cancel_neg:bool ->
   locl_ty ->

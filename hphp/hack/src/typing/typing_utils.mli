@@ -69,11 +69,7 @@ val is_sub_type :
   Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty -> bool
 
 val is_sub_type_for_union_ref :
-  (Typing_env_types.env ->
-  ?coerce:Typing_logic.coercion_direction option ->
-  Typing_defs.locl_ty ->
-  Typing_defs.locl_ty ->
-  bool)
+  (Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty -> bool)
   ref
 
 val is_sub_type_for_union_i_ref :
@@ -84,11 +80,7 @@ val is_sub_type_for_union_i_ref :
   ref
 
 val is_sub_type_for_union :
-  Typing_env_types.env ->
-  ?coerce:Typing_logic.coercion_direction option ->
-  Typing_defs.locl_ty ->
-  Typing_defs.locl_ty ->
-  bool
+  Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty -> bool
 
 val is_sub_type_for_union_i :
   Typing_env_types.env ->
@@ -247,7 +239,6 @@ val expand_typeconst : expand_typeconst
 
 type union =
   Typing_env_types.env ->
-  ?coerce:Typing_logic.coercion_direction option ->
   ?reason:Typing_reason.t ->
   ?approx_cancel_neg:bool ->
   Typing_defs.locl_ty ->
@@ -258,7 +249,6 @@ val union_ref : union ref
 
 val union :
   Typing_env_types.env ->
-  ?coerce:Typing_logic.coercion_direction option ->
   ?reason:Typing_reason.t ->
   ?approx_cancel_neg:bool ->
   Typing_defs.locl_ty ->

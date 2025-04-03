@@ -11,12 +11,7 @@ val is_dynamic_aware_sub_type : env -> locl_ty -> locl_ty -> bool
 
 val is_sub_type_ignore_generic_params : env -> locl_ty -> locl_ty -> bool
 
-val is_sub_type_for_union :
-  env ->
-  ?coerce:Typing_logic.coercion_direction option ->
-  locl_ty ->
-  locl_ty ->
-  bool
+val is_sub_type_for_union : env -> locl_ty -> locl_ty -> bool
 
 (** Determines whether the types are definitely disjoint, or whether they might
     overlap. *)

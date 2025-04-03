@@ -31,7 +31,6 @@
 #include <thrift/lib/cpp/concurrency/InitThreadFactory.h>
 #include <thrift/lib/cpp/concurrency/PosixThreadFactory.h>
 #include <thrift/lib/cpp/concurrency/Thread.h>
-#include <thrift/lib/cpp/concurrency/Util.h>
 #include <thrift/lib/cpp/thrift_config.h>
 
 namespace apache {
@@ -303,7 +302,7 @@ class ThreadFactoryTests {
     std::mutex mutex;
     std::condition_variable cond;
 
-    int64_t startTime = Util::currentTime();
+    auto startTime = std::chrono::steady_clock::now();
 
     for (size_t ix = 0; ix < count; ix++) {
       {
@@ -312,10 +311,12 @@ class ThreadFactoryTests {
       }
     }
 
-    int64_t endTime = Util::currentTime();
+    auto endTime = std::chrono::steady_clock::now();
+    auto elapsedTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(
+        endTime - startTime);
 
     double error =
-        ((endTime - startTime) - (count * timeout)) / (double)(count * timeout);
+        (elapsedTimeMs.count() - (count * timeout)) / (double)(count * timeout);
 
     if (error < 0.0) {
       error *= 1.0;
@@ -325,7 +326,7 @@ class ThreadFactoryTests {
 
     std::cout << "\t\t\t" << (success ? "Success" : "Failure")
               << "! expected time: " << count * timeout
-              << "ms elapsed time: " << endTime - startTime
+              << "ms elapsed time: " << elapsedTimeMs.count()
               << "ms error%: " << error * 100.0 << std::endl;
 
     return success;

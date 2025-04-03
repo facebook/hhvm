@@ -78,7 +78,7 @@ class IntervalTimer {
     if (rate == 0)
       intervalNsec_ = 0;
     else
-      intervalNsec_ = concurrency::Util::NS_PER_S / rate;
+      intervalNsec_ = std::nano::den / rate;
     if (intervalStart_ > std::chrono::steady_clock::time_point{}) {
       intervalStart_ = std::chrono::steady_clock::now();
     }

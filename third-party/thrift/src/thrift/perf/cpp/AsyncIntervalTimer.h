@@ -79,7 +79,7 @@ class AsyncIntervalTimer {
     if (rate == 0)
       intervalNsec_ = 0;
     else
-      intervalNsec_ = (concurrency::Util::NS_PER_S * threads) / rate;
+      intervalNsec_ = (std::nano::den * threads) / rate;
 
     // With interval per operation per thread, you know the time gap in which
     // all the threads should start, pick a random spot in that time gap

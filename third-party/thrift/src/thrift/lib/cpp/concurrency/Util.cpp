@@ -17,6 +17,7 @@
 #include <thrift/lib/cpp/concurrency/Util.h>
 
 #include <ctime>
+#include <ratio>
 
 #include <glog/logging.h>
 
@@ -31,17 +32,17 @@ int64_t Util::currentTime() {
   timespec now;
   int ret = clock_gettime(CLOCK_REALTIME, &now);
   auto subsec = now.tv_nsec;
-  int64_t oldTicksPerSec = NS_PER_S;
+  int64_t oldTicksPerSec = std::nano::den;
 #else
   timeval now;
   int ret = gettimeofday(&now, nullptr);
   auto subsec = now.tv_usec;
-  int64_t oldTicksPerSec = US_PER_S;
+  int64_t oldTicksPerSec = std::micro::den;
 #endif // defined(THRIFT_HAVE_CLOCK_GETTIME)
 
   DCHECK(ret == 0);
   int64_t result;
-  toTicks(result, now.tv_sec, subsec, oldTicksPerSec, MS_PER_S);
+  toTicks(result, now.tv_sec, subsec, oldTicksPerSec, std::milli::den);
   return result;
 }
 

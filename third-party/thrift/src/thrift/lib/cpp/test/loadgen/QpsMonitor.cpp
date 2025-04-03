@@ -33,7 +33,7 @@ namespace thrift {
 namespace loadgen {
 
 enum {
-  US_PER_S = concurrency::Util::US_PER_S,
+  US_PER_S = std::micro::den,
 };
 
 QpsMonitor::QpsMonitor(const std::shared_ptr<LoadConfig>& config)

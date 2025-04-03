@@ -35,14 +35,6 @@ namespace apache::thrift::concurrency {
  */
 class Util {
  public:
-  static const int64_t NS_PER_S = 1000000000LL;
-  static const int64_t US_PER_S = 1000000LL;
-  static const int64_t MS_PER_S = 1000LL;
-
-  static const int64_t NS_PER_MS = NS_PER_S / MS_PER_S;
-  static const int64_t NS_PER_US = NS_PER_S / US_PER_S;
-  static const int64_t US_PER_MS = US_PER_S / MS_PER_S;
-
   static void toTicks(
       int64_t& result,
       int64_t secs,

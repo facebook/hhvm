@@ -103,9 +103,9 @@ void Controller::startWorkers(uint32_t numThreads) {
 
 void Controller::runMonitor(double interval) {
   unsigned long intervalUsec =
-      static_cast<unsigned long>(interval * concurrency::Util::US_PER_S);
+      static_cast<unsigned long>(interval * std::micro::den);
   unsigned long intervalNsec =
-      static_cast<unsigned long>(interval * concurrency::Util::NS_PER_S);
+      static_cast<unsigned long>(interval * std::nano::den);
   IntervalTimer itimer(intervalNsec);
 
   itimer.start();

@@ -277,7 +277,8 @@ static void expireTestCallback(
   }
 }
 
-static void expireTest(size_t numWorkers, int64_t expirationTimeMs) {
+static void expireTest(
+    size_t numWorkers, std::chrono::milliseconds expirationTime) {
   size_t maxPendingTasks = numWorkers;
   size_t activeTasks = numWorkers + maxPendingTasks;
   std::mutex mutex;
@@ -301,11 +302,11 @@ static void expireTest(size_t numWorkers, int64_t expirationTimeMs) {
     auto task = std::make_shared<BlockTask>(
         &mutex, &cond, &bmutex, &bcond, &blocked, &activeTasks);
     tasks.push_back(task);
-    threadManager->add(task, 0, expirationTimeMs);
+    threadManager->add(task, 0, expirationTime.count());
   }
 
   // Sleep for more than the expiration time
-  usleep(expirationTimeMs * Util::US_PER_MS * 1.10);
+  usleep(std::chrono::microseconds(expirationTime).count() * 1.10);
 
   // Unblock the tasks
   {
@@ -335,8 +336,8 @@ static void expireTest(size_t numWorkers, int64_t expirationTimeMs) {
 // DO_BEFORE(aristidis,20250715): Test is flaky. Find owner or remove.
 TEST_F(ThreadManagerTest, DISABLED_ExpireTest) {
   size_t numWorkers = 100;
-  int64_t expireTimeMs = 50;
-  expireTest(numWorkers, expireTimeMs);
+  std::chrono::milliseconds expireTime(50);
+  expireTest(numWorkers, expireTime);
 }
 
 class AddRemoveTask : public Runnable,

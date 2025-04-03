@@ -26,6 +26,7 @@ using apache::thrift::concurrency::Util;
 
 namespace apache {
 namespace thrift {
+static constexpr int64_t US_PER_MS = std::micro::den / std::milli::den;
 
 void AsyncLoadHandler2::async_eb_noop(HandlerCallbackPtr<void> callback) {
   // Note that we could have done this with a sync function,
@@ -54,7 +55,7 @@ void AsyncLoadHandler2::async_eb_sleep(
               HandlerCallbackPtr<void>::UnsafelyFromRawPointer(), callbackp);
           cb->done();
         },
-        microseconds / Util::US_PER_MS);
+        microseconds / US_PER_MS);
   });
 }
 
@@ -63,8 +64,7 @@ void AsyncLoadHandler2::async_eb_onewaySleep(
   // May leak if task never finishes
   auto eb = callback->getEventBase();
   eb->runInEventBaseThread([=]() {
-    eb->tryRunAfterDelay(
-        [=]() { callback->done(); }, microseconds / Util::US_PER_MS);
+    eb->tryRunAfterDelay([=]() { callback->done(); }, microseconds / US_PER_MS);
   });
 }
 

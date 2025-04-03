@@ -38,6 +38,8 @@ typedef map<string, StrI32ListMap> StrStrIntListMapMap
 @cpp.Type{name = "folly::F14FastMap<std::string, folly::fbstring>"}
 typedef map<string, string> F14MapFollyString
 
+const map<string, i32> constant_map = {"1": 1, "2": 2, "3": 3};
+
 struct easy {
   3: optional string name;
   1: i32 val;

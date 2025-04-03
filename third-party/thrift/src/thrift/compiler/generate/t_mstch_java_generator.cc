@@ -572,8 +572,7 @@ class mstch_java_struct : public mstch_struct {
 
   mstch::node is_BigStruct() {
     return (
-        struct_->is_struct_or_union() &&
-        struct_->fields().size() > bigStructThreshold);
+        struct_->is_struct() && struct_->fields().size() > bigStructThreshold);
   }
 
   mstch::node java_capital_name() {
@@ -979,7 +978,7 @@ class mstch_java_field : public mstch_field {
 
   mstch::node is_object() {
     const t_type* field_type = field_->get_type()->get_true_type();
-    return field_type->is_struct_or_union() || field_type->is_exception() ||
+    return field_type->is_struct() || field_type->is_exception() ||
         field_type->is_union();
   }
 

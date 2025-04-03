@@ -269,7 +269,7 @@ class adapter_or_wrapper_checker {
         } else {
           break;
         }
-      } else if (type->is_struct_or_union()) {
+      } else if (type->is_struct()) {
         has_wrapper =
             type->has_structured_annotation(structured_wrapper_annotation);
         typedef_name = type->name();
@@ -561,7 +561,7 @@ void validate_boxed_field_attributes(sema_context& ctx, const t_field& node) {
 
   if (intern_box) {
     ctx.check(
-        node.type()->get_true_type()->is_struct_or_union(),
+        node.type()->get_true_type()->is_struct(),
         "The `@thrift.InternBox` annotation can only be used with a struct field.");
     // TODO(dokwon): Add support for custom defaults and remove this check.
     ctx.check(
@@ -1023,7 +1023,7 @@ void validate_cpp_deprecated_terse_write_annotation(
     return;
   }
   const t_type* type = field.get_type()->get_true_type();
-  if (type->is_struct_or_union() || type->is_exception() || type->is_union()) {
+  if (type->is_struct() || type->is_exception() || type->is_union()) {
     ctx.error(
         field,
         "@cpp.DeprecatedTerseWrite is not supported for structured types.");

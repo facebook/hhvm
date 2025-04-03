@@ -883,8 +883,7 @@ class mstch_type : public mstch_base {
     return resolved_type_->is_floating_point();
   }
   mstch::node is_struct() {
-    return resolved_type_->is_struct_or_union() ||
-        resolved_type_->is_exception();
+    return resolved_type_->is_struct() || resolved_type_->is_exception();
   }
   mstch::node is_union() { return resolved_type_->is_union(); }
   mstch::node is_enum() { return resolved_type_->is_enum(); }
@@ -1523,7 +1522,7 @@ class mstch_structured_annotation : public mstch_base {
   }
 
   mstch::node is_const_struct() {
-    return const_.type()->get_true_type()->is_struct_or_union();
+    return const_.type()->get_true_type()->is_struct();
   }
 
  protected:

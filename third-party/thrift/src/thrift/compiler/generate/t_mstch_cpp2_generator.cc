@@ -77,7 +77,7 @@ bool is_annotation_blacklisted_in_fatal(const std::string& key) {
 
 bool is_complex_return(const t_type* type) {
   return type->is_container() || type->is_string_or_binary() ||
-      type->is_struct_or_union() || type->is_exception();
+      type->is_struct() || type->is_exception();
 }
 
 bool same_types(const t_type* a, const t_type* b) {
@@ -199,8 +199,7 @@ bool should_mangle_field_storage_name_in_struct(const t_structured& s) {
 }
 
 bool resolves_to_container_or_struct(const t_type* type) {
-  return type->is_container() || type->is_struct_or_union() ||
-      type->is_exception();
+  return type->is_container() || type->is_struct() || type->is_exception();
 }
 
 bool is_runtime_annotation(const t_named& named) {
@@ -469,7 +468,7 @@ class cpp_mstch_program : public mstch_program {
       if (alias->is_typedef() &&
           alias->has_unstructured_annotation("cpp.type")) {
         const t_type* ttype = i->get_type()->get_true_type();
-        if ((ttype->is_struct_or_union() || ttype->is_exception()) &&
+        if ((ttype->is_struct() || ttype->is_exception()) &&
             !cpp_name_resolver::find_first_adapter(*ttype)) {
           result.push_back(i);
         }
@@ -1219,7 +1218,7 @@ class cpp_mstch_type : public mstch_type {
   mstch::node resolves_to_enum() { return resolved_type_->is_enum(); }
   mstch::node transitively_refers_to_struct() {
     // fast path is unnecessary but may avoid allocations
-    if (resolved_type_->is_struct_or_union()) {
+    if (resolved_type_->is_struct()) {
       return true;
     }
     if (!resolved_type_->is_container()) {
@@ -1231,7 +1230,7 @@ class cpp_mstch_type : public mstch_type {
     while (!queue.empty()) {
       auto next = queue.front();
       queue.pop();
-      if (next->is_struct_or_union()) {
+      if (next->is_struct()) {
         return true;
       }
       if (!next->is_container()) {
@@ -1439,7 +1438,7 @@ class cpp_mstch_struct : public mstch_struct {
           (type->is_string_or_binary() && field->get_value() != nullptr) ||
           (type->is_container() && field->get_value() != nullptr &&
            !field->get_value()->is_empty()) ||
-          (type->is_struct_or_union() &&
+          (type->is_struct() &&
            (struct_ != dynamic_cast<const t_struct*>(type)) &&
            ((field->get_value() && !field->get_value()->is_empty()) ||
             (cpp2::is_explicit_ref(field) &&

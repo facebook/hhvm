@@ -275,7 +275,7 @@ bool is_orderable_walk(
                         memo, next, &type, context, forceCustomTypeOrderable) &&
         (!(real().is_set() || real().is_map()) ||
          !has_disqualifying_annotation);
-  } else if (type.is_struct_or_union() || type.is_exception()) {
+  } else if (type.is_struct() || type.is_exception()) {
     const auto& as_struct = static_cast<t_struct const&>(type);
     return result = std::all_of(
                as_struct.fields().begin(),
@@ -456,7 +456,7 @@ bool is_eligible_for_constexpr::operator()(const t_type* type) {
         result = eligible::no;
         return false;
       } else if (result == eligible::unknown) {
-        if (!field->get_type()->is_struct_or_union()) {
+        if (!field->get_type()->is_struct()) {
           return false;
         }
         // Structs are eligible if all their fields are.
@@ -503,7 +503,7 @@ static void get_mixins_and_members_impl(
     std::vector<mixin_member>& out) {
   for (const auto& member : strct.fields()) {
     if (is_mixin(member)) {
-      assert(member.type()->get_true_type()->is_struct_or_union());
+      assert(member.type()->get_true_type()->is_struct());
       auto mixin_struct =
           static_cast<const t_struct*>(member.type()->get_true_type());
       const auto& mixin =
@@ -580,7 +580,7 @@ std::string get_gen_type_class_(
     return tc + "map<" + key_tc + ", " + val_tc + ">";
   } else if (type.is_union()) {
     return tc + "variant";
-  } else if (type.is_struct_or_union() || type.is_exception()) {
+  } else if (type.is_struct() || type.is_exception()) {
     return tc + "structure";
   } else {
     throw std::runtime_error("unknown type class for: " + type.get_full_name());
@@ -622,8 +622,7 @@ bool deprecated_terse_writes(const t_field* field) {
   // (e.g. i32/i64, empty strings/list/map)
   auto t = field->get_type()->get_true_type();
   return field->get_req() == t_field::e_req::opt_in_req_out &&
-      (cpp2::is_unique_ref(field) ||
-       (!t->is_struct_or_union() && !t->is_exception()));
+      (cpp2::is_unique_ref(field) || (!t->is_struct() && !t->is_exception()));
 }
 
 t_field_id get_internal_injected_field_id(t_field_id id) {

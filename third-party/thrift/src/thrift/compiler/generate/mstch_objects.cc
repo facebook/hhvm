@@ -93,7 +93,7 @@ mstch::node mstch_enum::values() {
 }
 
 mstch::node mstch_type::get_struct() {
-  if (type_->is_struct_or_union() || type_->is_exception()) {
+  if (type_->is_struct() || type_->is_exception()) {
     std::string id =
         type_->program()->name() + get_type_namespace(type_->program());
     return make_mstch_array_cached(
@@ -287,7 +287,7 @@ mstch::node mstch_const_value::is_const_struct() {
     return false;
   }
   const auto* type = const_value_->ttype()->get_true_type();
-  return type->is_struct_or_union() || type->is_exception();
+  return type->is_struct() || type->is_exception();
 }
 
 mstch::node mstch_const_value::const_struct_type() {
@@ -296,7 +296,7 @@ mstch::node mstch_const_value::const_struct_type() {
   }
 
   const auto* type = const_value_->ttype()->get_true_type();
-  if (type->is_struct_or_union() || type->is_exception()) {
+  if (type->is_struct() || type->is_exception()) {
     return context_.type_factory->make_mstch_object(type, context_);
   }
 
@@ -309,7 +309,7 @@ mstch::node mstch_const_value::const_struct() {
   mstch::array a;
 
   const auto* type = const_value_->ttype()->get_true_type();
-  if (type->is_struct_or_union() || type->is_exception()) {
+  if (type->is_struct() || type->is_exception()) {
     const auto* strct = dynamic_cast<const t_struct*>(type);
     for (auto member : const_value_->get_map()) {
       const auto* field = strct->get_field_by_name(member.first->get_string());

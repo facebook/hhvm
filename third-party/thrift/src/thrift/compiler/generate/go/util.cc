@@ -510,7 +510,7 @@ bool is_type_go_struct(const t_type* type) {
   //   * Thrift struct    - represented by Go struct pointer
   //   * Thrift union     - represented by Go struct pointer
   //   * Thrift exception - represented by Go struct pointer
-  return type->is_struct_or_union() || type->is_union() || type->is_exception();
+  return type->is_struct() || type->is_union() || type->is_exception();
 }
 
 bool is_type_go_nilable(const t_type* type) {
@@ -549,7 +549,7 @@ bool is_type_go_comparable(
     return false;
   }
 
-  if (real_type->is_struct_or_union()) {
+  if (real_type->is_struct()) {
     auto as_struct = dynamic_cast<const t_struct*>(real_type);
     if (as_struct != nullptr) {
       for (auto member : as_struct->get_members()) {

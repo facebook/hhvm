@@ -49,6 +49,7 @@
 
 TRACE_SET_MOD(mcg);
 
+extern "C" __attribute__((weak)) uint32_t __roar_api_pending_warmups();
 extern "C" __attribute__((weak)) int _roar_upcall_getWarmupStatus();
 
 namespace HPHP::jit::tc {
@@ -556,7 +557,15 @@ std::string warmupStatusString() {
   }
 
   // If we are running with ROAR, we also should wait for PGO/CSPGO to be
-  // complete before reporting warmed up.
+  // complete before reporting warmed up. Prefer using the thinlib api,
+  // but also try the message-based upcall in case this is an older ROAR.
+  if (status_str.empty() && __roar_api_pending_warmups) {
+    int roar_warmup_status = __roar_api_pending_warmups();
+    if (roar_warmup_status != 0) {
+      status_str = "Waiting on ROAR warmup.\n";
+    }
+  }
+
   if (status_str.empty() && _roar_upcall_getWarmupStatus) {
     int roar_warmup_status = _roar_upcall_getWarmupStatus();
     if (roar_warmup_status != 0) {

@@ -93,12 +93,11 @@ TSocket::TSocket(const folly::SocketAddress& address)
 }
 
 TSocket::TSocket(string path)
-    : host_(""), port_(0), path_(path), socket_(-1), maxRecvRetries_(5) {}
+    : port_(0), path_(path), socket_(-1), maxRecvRetries_(5) {}
 
-TSocket::TSocket() : host_(""), port_(0), socket_(-1), maxRecvRetries_(5) {}
+TSocket::TSocket() : port_(0), socket_(-1), maxRecvRetries_(5) {}
 
-TSocket::TSocket(int socket)
-    : host_(""), port_(0), socket_(socket), maxRecvRetries_(5) {}
+TSocket::TSocket(int socket) : port_(0), socket_(socket), maxRecvRetries_(5) {}
 
 TSocket::~TSocket() {
   close();

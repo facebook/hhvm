@@ -60,6 +60,7 @@
   test_new_file
   test_property_initializer
   test_property_initializer2
+  test_remove_enum_variant
   test_remove_method
   test_ide_hover
   test_serverConfig_overrides

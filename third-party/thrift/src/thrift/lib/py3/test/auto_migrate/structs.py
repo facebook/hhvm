@@ -550,15 +550,28 @@ class NumericalConversionsTests(unittest.TestCase):
                 self.assertEqual(m.opt_int, 1)
                 self.assertEqual(m.opt_enum, Color.red)
 
+        def assert_isset(m: mixed) -> None:
+            # pyre-fixme[6]: the pyre typing for this is broken in thrift-py3
+            isset = Struct.isset(m)
+
+            for fld_name, _ in mixed:
+                if not fld_name.startswith("opt_") or "ref" in fld_name:
+                    continue
+
+                self.assertFalse(getattr(isset, fld_name), fld_name)
+
         m = mixed()
         assert_mixed(m)
+        assert_isset(m)
 
         # call operator
         m = m(some_field_="don't care")
         assert_mixed(m)
+        assert_isset(m)
 
         m = deserialize(mixed, serialize(m))
         assert_mixed(m)
+        assert_isset(m)
 
 
 class TestSubclass(OptionalFile):

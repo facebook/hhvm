@@ -21,7 +21,7 @@ import copy
 import math
 import types
 import unittest
-from typing import Type, TypeVar
+from typing import Callable, cast, Type, TypeVar
 from unittest import mock
 
 import testing.thrift_mutable_types as mutable_test_types
@@ -48,6 +48,7 @@ from testing.thrift_types import (
     IOBufListStruct,
     Kind,
     ListTypes,
+    mixed,
     Nested1,
     Nested2,
     Nested3,
@@ -61,6 +62,7 @@ from testing.thrift_types import (
     StructuredAnnotation,
     UnusedError,
 )
+from thrift.python.exceptions import GeneratedError
 from thrift.python.mutable_types import (
     _isset as mutable_isset,
     _ThriftListWrapper,
@@ -71,7 +73,7 @@ from thrift.python.mutable_types import (
     to_thrift_set,
 )
 
-from thrift.python.types import isset, Struct, update_nested_field
+from thrift.python.types import isset, Struct, StructOrUnion, update_nested_field
 
 ListT = TypeVar("ListT")
 SetT = TypeVar("SetT")
@@ -107,6 +109,7 @@ class StructTestsParameterized(unittest.TestCase):
         self.StructuredAnnotation: Type[StructuredAnnotation] = (
             self.test_types.StructuredAnnotation
         )
+        self.mixed: Type[mixed] = self.test_types.mixed
         self.is_mutable_run: bool = self.test_types.__name__.endswith(
             "thrift_mutable_types"
         )
@@ -116,7 +119,10 @@ class StructTestsParameterized(unittest.TestCase):
         )
         # pyre-ignore[16]: has no attribute `serializer_module`
         self.serializer: types.ModuleType = self.serializer_module
-        self.isset = mutable_isset if self.is_mutable_run else isset
+        # pyre-ignore[8]: has no attribute `serializer_module`
+        self.isset: Callable[[StructOrUnion | GeneratedError], dict[str, bool]] = (
+            mutable_isset if self.is_mutable_run else isset
+        )
 
     def to_list(self, list_data: list[ListT]) -> list[ListT] | _ThriftListWrapper:
         return to_thrift_list(list_data) if self.is_mutable_run else list_data
@@ -136,13 +142,11 @@ class StructTestsParameterized(unittest.TestCase):
 
     def test_isset_Error(self) -> None:
         e = self.UnusedError(message="ACK")
-        # pyre-ignore[6]: `mutable_isset` expected ...
         self.assertTrue(self.isset(e)["message"])
 
     def test_isset_Union(self) -> None:
         i = self.Integers(large=2)
         with self.assertRaises(TypeError):
-            # pyre-ignore[6]: for test
             self.isset(i)["large"]
 
     def test_no_dict(self) -> None:
@@ -371,6 +375,33 @@ class StructTestsParameterized(unittest.TestCase):
         self.assertEqual(x.val_list, dif_list)
         dif_int = copy.copy(x.an_int)
         self.assertEqual(x.an_int, dif_int)
+
+    def test_defaulted_optional_field(self) -> None:
+        def assert_mixed(m: mixed) -> None:
+            self.assertIsNone(m.opt_field)
+            self.assertIsNone(m.opt_float)
+            self.assertIsNone(m.opt_int)
+            self.assertIsNone(m.opt_enum)
+
+        def assert_isset(m: mixed) -> None:
+            isset = self.isset(m)
+            for fld_name, _ in mixed:
+                if not fld_name.startswith("opt_"):
+                    continue
+                self.assertFalse(isset[fld_name], fld_name)
+
+        m = self.mixed()
+        assert_mixed(m)
+        assert_isset(m)
+
+        # call operator
+        m = m(some_field_="don't care")
+        assert_mixed(m)
+        assert_isset(m)
+
+        m = self.serializer.deserialize(self.mixed, self.serializer.serialize(m))
+        assert_mixed(m)
+        assert_isset(m)
 
 
 class StructTestsImmutable(unittest.TestCase):

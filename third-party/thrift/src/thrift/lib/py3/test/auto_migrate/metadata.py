@@ -139,8 +139,8 @@ class MetadataTests(unittest.TestCase):
 
         # Grab another struct of type Integers
         mixed_struct = gen_metadata(mixed)
-        _, _, easy_struct, *rest = mixed_struct.fields
-        _, _, _, other_integers, *rest = easy_struct.type.as_struct().fields
+        _, _, easy_struct, *_ = mixed_struct.fields
+        _, _, _, other_integers, *_ = easy_struct.type.as_struct().fields
         other_integers = other_integers.type.as_union()
 
         # Check an_int (type Integers) vs other_integers (type Integers)

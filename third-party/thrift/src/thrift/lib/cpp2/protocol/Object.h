@@ -217,6 +217,7 @@ bool isIntrinsicDefault(const Object& obj);
 folly::dynamic toDynamic(const Value& value);
 folly::dynamic toDynamic(const Object& obj);
 
+// Convert protocol::Value to Thrift Any with the given protocol.
 using detail::toAny;
 
 // Check whether a protocol object maybe a thrift.Any based on a heuristic field

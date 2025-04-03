@@ -208,7 +208,6 @@ class InterceptorFrameworkMetadataTest : public Test {
               server.addModule(
                   std::make_unique<TestModule>(serviceInterceptor_));
             })} {
-    using namespace detail;
     THRIFT_FLAG_SET_MOCK(enable_client_interceptor_framework_metadata, true);
     THRIFT_FLAG_SET_MOCK(enable_service_interceptor_framework_metadata, true);
   }

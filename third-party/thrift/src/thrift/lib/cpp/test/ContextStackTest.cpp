@@ -18,6 +18,7 @@
 
 #include <folly/Format.h>
 #include <thrift/lib/cpp/ContextStack.h>
+#include <thrift/lib/cpp2/async/InterceptorFlags.h>
 #include <thrift/lib/cpp2/test/util/TrackingTProcessorEventHandler.h>
 
 namespace apache::thrift {
@@ -167,7 +168,6 @@ TEST(ContextStack, ClientHeaders) {
 }
 
 TEST(ContextStack, FrameworkMetadataInitialized) {
-  using namespace apache::thrift::detail;
   THRIFT_FLAG_SET_MOCK(enable_client_interceptor_framework_metadata, true);
   auto handler1 = std::make_shared<TrackingTProcessorEventHandler>();
   auto handler2 = std::make_shared<TrackingTProcessorEventHandler>();

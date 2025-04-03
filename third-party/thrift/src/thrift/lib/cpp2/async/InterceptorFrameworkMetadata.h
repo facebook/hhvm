@@ -17,7 +17,6 @@
 #pragma once
 
 #include <folly/io/IOBuf.h>
-#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/async/RpcOptions.h>
 #include <thrift/lib/cpp2/util/TypeErasedValue.h>
@@ -35,10 +34,6 @@ using InterceptorFrameworkMetadataStorage =
     util::TypeErasedValue<1024, alignof(std::max_align_t)>;
 
 namespace detail {
-
-THRIFT_FLAG_DECLARE_bool(enable_client_interceptor_framework_metadata);
-
-THRIFT_FLAG_DECLARE_bool(enable_service_interceptor_framework_metadata);
 
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     InterceptorFrameworkMetadataStorage,

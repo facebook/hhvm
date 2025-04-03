@@ -18,10 +18,6 @@
 
 namespace apache::thrift::detail {
 
-THRIFT_FLAG_DEFINE_bool(enable_client_interceptor_framework_metadata, false);
-
-THRIFT_FLAG_DEFINE_bool(enable_service_interceptor_framework_metadata, false);
-
 THRIFT_PLUGGABLE_FUNC_REGISTER(
     InterceptorFrameworkMetadataStorage,
     initializeInterceptorFrameworkMetadataStorage) {

@@ -19,6 +19,7 @@
 
 #include <folly/tracing/StaticTracepoint.h>
 
+#include <thrift/lib/cpp2/async/InterceptorFlags.h>
 #include <thrift/lib/cpp2/detail/EventHandlerRuntime.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 

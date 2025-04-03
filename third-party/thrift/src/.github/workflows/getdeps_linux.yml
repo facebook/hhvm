@@ -79,9 +79,6 @@ jobs:
     - name: Fetch snappy
       if: ${{ steps.paths.outputs.snappy_SOURCE }}
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests snappy
-    - name: Fetch bz2
-      if: ${{ steps.paths.outputs.bz2_SOURCE }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests bz2
     - name: Fetch openssl
       if: ${{ steps.paths.outputs.openssl_SOURCE }}
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests openssl
@@ -118,15 +115,6 @@ jobs:
     - name: Fetch mvfst
       if: ${{ steps.paths.outputs.mvfst_SOURCE }}
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests mvfst
-    - name: Fetch libffi
-      if: ${{ steps.paths.outputs.libffi_SOURCE }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests libffi
-    - name: Fetch ncurses
-      if: ${{ steps.paths.outputs.ncurses_SOURCE }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests ncurses
-    - name: Fetch python
-      if: ${{ steps.paths.outputs.python_SOURCE }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests python
     - name: Fetch wangle
       if: ${{ steps.paths.outputs.wangle_SOURCE }}
       run: python3 build/fbcode_builder/getdeps.py --allow-system-packages fetch --no-tests wangle
@@ -386,22 +374,6 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.snappy_INSTALL }}
        key: ${{ steps.paths.outputs.snappy_CACHE_KEY }}-install
-    - name: Restore bz2 from cache
-      id: restore_bz2
-      if: ${{ steps.paths.outputs.bz2_SOURCE }}
-      uses: actions/cache/restore@v4
-      with:
-       path: ${{ steps.paths.outputs.bz2_INSTALL }}
-       key: ${{ steps.paths.outputs.bz2_CACHE_KEY }}-install
-    - name: Build bz2
-      if: ${{ steps.paths.outputs.bz2_SOURCE && ! steps.restore_bz2.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests bz2
-    - name: Save bz2 to cache
-      uses: actions/cache/save@v4
-      if: ${{ steps.paths.outputs.bz2_SOURCE && ! steps.restore_bz2.outputs.cache-hit }}
-      with:
-       path: ${{ steps.paths.outputs.bz2_INSTALL }}
-       key: ${{ steps.paths.outputs.bz2_CACHE_KEY }}-install
     - name: Restore openssl from cache
       id: restore_openssl
       if: ${{ steps.paths.outputs.openssl_SOURCE }}
@@ -594,54 +566,6 @@ jobs:
       with:
        path: ${{ steps.paths.outputs.mvfst_INSTALL }}
        key: ${{ steps.paths.outputs.mvfst_CACHE_KEY }}-install
-    - name: Restore libffi from cache
-      id: restore_libffi
-      if: ${{ steps.paths.outputs.libffi_SOURCE }}
-      uses: actions/cache/restore@v4
-      with:
-       path: ${{ steps.paths.outputs.libffi_INSTALL }}
-       key: ${{ steps.paths.outputs.libffi_CACHE_KEY }}-install
-    - name: Build libffi
-      if: ${{ steps.paths.outputs.libffi_SOURCE && ! steps.restore_libffi.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests libffi
-    - name: Save libffi to cache
-      uses: actions/cache/save@v4
-      if: ${{ steps.paths.outputs.libffi_SOURCE && ! steps.restore_libffi.outputs.cache-hit }}
-      with:
-       path: ${{ steps.paths.outputs.libffi_INSTALL }}
-       key: ${{ steps.paths.outputs.libffi_CACHE_KEY }}-install
-    - name: Restore ncurses from cache
-      id: restore_ncurses
-      if: ${{ steps.paths.outputs.ncurses_SOURCE }}
-      uses: actions/cache/restore@v4
-      with:
-       path: ${{ steps.paths.outputs.ncurses_INSTALL }}
-       key: ${{ steps.paths.outputs.ncurses_CACHE_KEY }}-install
-    - name: Build ncurses
-      if: ${{ steps.paths.outputs.ncurses_SOURCE && ! steps.restore_ncurses.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests ncurses
-    - name: Save ncurses to cache
-      uses: actions/cache/save@v4
-      if: ${{ steps.paths.outputs.ncurses_SOURCE && ! steps.restore_ncurses.outputs.cache-hit }}
-      with:
-       path: ${{ steps.paths.outputs.ncurses_INSTALL }}
-       key: ${{ steps.paths.outputs.ncurses_CACHE_KEY }}-install
-    - name: Restore python from cache
-      id: restore_python
-      if: ${{ steps.paths.outputs.python_SOURCE }}
-      uses: actions/cache/restore@v4
-      with:
-       path: ${{ steps.paths.outputs.python_INSTALL }}
-       key: ${{ steps.paths.outputs.python_CACHE_KEY }}-install
-    - name: Build python
-      if: ${{ steps.paths.outputs.python_SOURCE && ! steps.restore_python.outputs.cache-hit }}
-      run: python3 build/fbcode_builder/getdeps.py --allow-system-packages build --free-up-disk --no-tests python
-    - name: Save python to cache
-      uses: actions/cache/save@v4
-      if: ${{ steps.paths.outputs.python_SOURCE && ! steps.restore_python.outputs.cache-hit }}
-      with:
-       path: ${{ steps.paths.outputs.python_INSTALL }}
-       key: ${{ steps.paths.outputs.python_CACHE_KEY }}-install
     - name: Restore wangle from cache
       id: restore_wangle
       if: ${{ steps.paths.outputs.wangle_SOURCE }}

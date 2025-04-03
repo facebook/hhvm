@@ -1,7 +1,7 @@
 #  Copyright (c) 2018, Facebook, Inc.
 #  All rights reserved.
 
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.5)
 
 if (NOT DEFINED PACKAGE_VERSION)
   set(PACKAGE_VERSION "1.0.0")

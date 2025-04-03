@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.5)
 
 if (NOT DEFINED PACKAGE_VERSION)
   set(PACKAGE_VERSION "1.0.0")

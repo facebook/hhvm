@@ -40,7 +40,10 @@ final class LazyAny implements JsonSerializable {
           self::validateAny($serialized, $cls);
           $serializer = self::getSerializer($protocol ?? $serialized->protocol);
           return HH\classname_to_class($serializer)
-            |> $$::deserialize($serialized->data, new $cls());
+            |> $$::deserialize(
+              $serialized->data,
+              HH\classname_to_class($cls) |> new $$(),
+            );
         }
       },
       $deserialized ==> ArgAssert::isInstance($deserialized, $cls),

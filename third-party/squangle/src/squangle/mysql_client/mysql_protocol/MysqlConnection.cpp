@@ -448,6 +448,16 @@ uint64_t MysqlConnection::getAffectedRows() const {
   return ret;
 }
 
+std::optional<std::string> MysqlConnection::getMySQLInfo() const {
+  CHECK_THROW(mysql_ != nullptr, db::InvalidConnectionException);
+
+  if (auto ret = mysql_info(mysql_)) {
+    VLOG(4) << fmt::format("mysql_info({}) returned {}", (void*)mysql_, ret);
+    return std::string(ret);
+  }
+  return std::nullopt;
+}
+
 std::string MysqlConnection::getConnectStageName() const {
   auto stage = getMySqlConnectStage();
   if (auto optStageName = findConnectStageName(stage)) {

@@ -332,7 +332,7 @@ time_t RowBlock::getDateField(size_t row, size_t field_num) const {
 std::chrono::microseconds parseTimeOnly(
     folly::StringPiece mysql_time,
     enum_field_types field_type) {
-  static re2::RE2 time_pattern(
+  static const re2::RE2 time_pattern(
       "([-]?\\d{1,3}):(\\d{2}):(\\d{2})(?:\\.(\\d{1,6}))?");
   int hours = 0, minutes = 0, seconds = 0, microseconds = 0;
   std::string microseconds_str;
@@ -376,7 +376,7 @@ std::chrono::system_clock::time_point parseDateTime(
   switch (date_type) {
     case MYSQL_TYPE_TIMESTAMP:
     case MYSQL_TYPE_DATETIME:
-      static re2::RE2 timestamp_pattern(
+      static const re2::RE2 timestamp_pattern(
           "(\\d{4})-(\\d{2})-(\\d{2}) "
           "(\\d{2}):(\\d{2}):(\\d{2})(?:\\.(\\d{1,6}))?");
       parse_succeeded = re2::RE2::FullMatch(
@@ -391,7 +391,7 @@ std::chrono::system_clock::time_point parseDateTime(
           &microseconds_str);
       break;
     case MYSQL_TYPE_DATE:
-      static re2::RE2 date_pattern("(\\d{4})-(\\d{2})-(\\d{2})");
+      static const re2::RE2 date_pattern("(\\d{4})-(\\d{2})-(\\d{2})");
       parse_succeeded = re2::RE2::FullMatch(
           re2_datetime,
           date_pattern,

@@ -55,8 +55,11 @@ bool MultiQueryOperation::notifyQuerySuccess(bool) {
       FetchOperation::currentAffectedRows());
   current_query_result_->setLastInsertId(FetchOperation::currentLastInsertId());
   current_query_result_->setRecvGtid(FetchOperation::currentRecvGtid());
+  current_query_result_->setMysqlInfo(FetchOperation::currentMysqlInfo());
+  current_query_result_->setRowsMatched(FetchOperation::currentRowsMatched());
   current_query_result_->setResponseAttributes(
       FetchOperation::currentRespAttrs());
+  current_query_result_->setWasSlow(FetchOperation::wasSlow());
   current_query_result_->setWarningsCount(
       FetchOperation::currentWarningsCount());
 

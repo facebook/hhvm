@@ -335,6 +335,21 @@ class QueryResult {
     num_rows_affected_ = num_rows_affected;
   }
 
+  const std::optional<std::string>& mysqlInfo() const {
+    return mysql_info_;
+  }
+
+  void setMysqlInfo(const std::optional<std::string>& mysql_info) {
+    mysql_info_ = mysql_info;
+  }
+
+  const std::optional<uint64_t>& rowsMatched() const {
+    return rows_matched_;
+  }
+  void setRowsMatched(const std::optional<uint64_t> rows_matched) {
+    rows_matched_ = rows_matched;
+  }
+
   // Current GTID
   const std::string& recvGtid() const {
     return recv_gtid_;
@@ -476,6 +491,8 @@ class QueryResult {
   std::string recv_gtid_;
   RespAttrs resp_attrs_;
   unsigned int warnings_count_;
+  std::optional<std::string> mysql_info_;
+  std::optional<uint64_t> rows_matched_;
 
   OperationResult operation_result_;
 

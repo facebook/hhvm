@@ -114,6 +114,9 @@ void MysqlFetchOperationImpl::actionable() {
       current_affected_rows_ = 0;
       current_warnings_count_ = 0;
       current_recv_gtid_ = std::string();
+      current_mysql_info_ = std::nullopt;
+      current_rows_matched_ = std::nullopt;
+
       query_executed_ = true;
       if (status == ERROR) {
         setActiveFetchAction(FetchAction::CompleteQuery);
@@ -211,6 +214,18 @@ void MysqlFetchOperationImpl::actionable() {
       } else {
         current_last_insert_id_ = mysql_conn->getLastInsertId();
         current_affected_rows_ = mysql_conn->getAffectedRows();
+        current_mysql_info_ = mysql_conn->getMySQLInfo();
+        if (current_mysql_info_ && !current_mysql_info_->empty()) {
+          int matched_count = 0;
+          // Do a regex match on current_mysql_info_ to get the matched count
+          // for the query. This is used to calculate the number of rows
+          // affected by the query
+          static const RE2 rowsMatchedRegex("Rows matched: (\\d+)\\s+");
+          if (re2::RE2::PartialMatch(
+                  *current_mysql_info_, rowsMatchedRegex, &matched_count)) {
+            current_rows_matched_ = matched_count;
+          }
+        }
         current_warnings_count_ = mysql_conn->warningCount();
         if (auto optGtid = mysql_conn->getRecvGtid()) {
           current_recv_gtid_ = *optGtid;

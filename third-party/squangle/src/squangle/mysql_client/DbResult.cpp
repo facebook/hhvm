@@ -94,10 +94,16 @@ QueryResult::QueryResult(QueryResult&& other) noexcept
       last_insert_id_(other.last_insert_id_),
       recv_gtid_(std::move(other.recv_gtid_)),
       resp_attrs_(std::move(other.resp_attrs_)),
+      warnings_count_(other.warnings_count_),
+      mysql_info_(other.mysql_info_),
+      rows_matched_(other.rows_matched_),
       operation_result_(other.operation_result_),
       row_blocks_(std::move(other.row_blocks_)) {
   other.row_blocks_.clear();
   other.num_rows_ = 0;
+  other.warnings_count_ = 0;
+  other.mysql_info_ = std::nullopt;
+  other.rows_matched_ = std::nullopt;
 }
 
 QueryResult& QueryResult::operator=(QueryResult&& other) {
@@ -105,17 +111,23 @@ QueryResult& QueryResult::operator=(QueryResult&& other) {
     row_fields_info_ = other.row_fields_info_;
     query_num_ = other.query_num_;
     partial_ = other.partial_;
+    was_slow_ = other.was_slow_;
     num_rows_ = other.num_rows_;
     num_rows_affected_ = other.num_rows_affected_;
     last_insert_id_ = other.last_insert_id_;
     recv_gtid_ = std::move(other.recv_gtid_);
     resp_attrs_ = std::move(other.resp_attrs_);
+    warnings_count_ = other.warnings_count_;
+    mysql_info_ = std::move(other.mysql_info_),
+    rows_matched_ = other.rows_matched_,
     operation_result_ = other.operation_result_;
 
     row_blocks_ = std::move(other.row_blocks_);
     other.row_blocks_.clear();
     other.num_rows_ = 0;
-    was_slow_ = other.was_slow_;
+    other.warnings_count_ = 0;
+    other.mysql_info_ = std::nullopt;
+    other.rows_matched_ = std::nullopt;
   }
   return *this;
 }

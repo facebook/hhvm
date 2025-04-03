@@ -117,6 +117,16 @@ const std::string& FetchOperationImpl::currentRecvGtid() const {
   return current_recv_gtid_;
 }
 
+const std::optional<std::string>& FetchOperationImpl::currentMysqlInfo() const {
+  CHECK_THROW(isStreamAccessAllowed(), db::OperationStateException);
+  return current_mysql_info_;
+}
+
+const std::optional<uint64_t> FetchOperationImpl::currentRowsMatched() const {
+  CHECK_THROW(isStreamAccessAllowed(), db::OperationStateException);
+  return current_rows_matched_;
+}
+
 const AttributeMap& FetchOperationImpl::currentRespAttrs() const {
   CHECK_THROW(isStreamAccessAllowed(), db::OperationStateException);
   return current_resp_attrs_;

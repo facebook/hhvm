@@ -137,6 +137,8 @@ class FetchOperationImpl : virtual public OperationBase {
   uint64_t currentLastInsertId() const;
   uint64_t currentAffectedRows() const;
   const std::string& currentRecvGtid() const;
+  const std::optional<std::string>& currentMysqlInfo() const;
+  const std::optional<uint64_t> currentRowsMatched() const;
   const RespAttrs& currentRespAttrs() const;
   unsigned int currentWarningsCount() const;
 
@@ -215,6 +217,8 @@ class FetchOperationImpl : virtual public OperationBase {
   uint64_t current_last_insert_id_ = 0;
   unsigned int current_warnings_count_ = 0;
   std::string current_recv_gtid_;
+  std::optional<std::string> current_mysql_info_;
+  std::optional<uint64_t> current_rows_matched_;
   RespAttrs current_resp_attrs_;
 
   // When the Fetch gets paused, active fetch action moves to `WaitForConsumer`
@@ -269,6 +273,12 @@ class FetchOperation : public Operation {
   }
   const std::string& currentRecvGtid() const {
     return impl_->currentRecvGtid();
+  }
+  const std::optional<std::string>& currentMysqlInfo() const {
+    return impl_->currentMysqlInfo();
+  }
+  const std::optional<uint64_t> currentRowsMatched() const {
+    return impl_->currentRowsMatched();
   }
   const RespAttrs& currentRespAttrs() const {
     return impl_->currentRespAttrs();

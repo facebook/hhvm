@@ -183,6 +183,8 @@ class InternalConnection {
 
   virtual std::optional<std::string> getRecvGtid() const = 0;
 
+  virtual std::optional<std::string> getMySQLInfo() const = 0;
+
   virtual std::optional<std::string> getSchemaChanged() const = 0;
 
   virtual bool getNoIndexUsed() const = 0;

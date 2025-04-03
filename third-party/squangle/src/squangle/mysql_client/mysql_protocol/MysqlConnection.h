@@ -115,6 +115,8 @@ class MysqlConnection : public InternalConnection {
 
   [[nodiscard]] std::optional<std::string> getRecvGtid() const override;
 
+  [[nodiscard]] std::optional<std::string> getMySQLInfo() const override;
+
   [[nodiscard]] std::optional<std::string> getSchemaChanged() const override;
 
   [[nodiscard]] bool hasMoreResults() const;

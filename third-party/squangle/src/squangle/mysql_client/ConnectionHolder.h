@@ -227,6 +227,10 @@ class ConnectionHolder : public InternalConnection {
     return internalConn_->getRecvGtid();
   }
 
+  [[nodiscard]] std::optional<std::string> getMySQLInfo() const override {
+    return internalConn_->getMySQLInfo();
+  }
+
   [[nodiscard]] std::optional<std::string> getSchemaChanged() const override {
     return internalConn_->getSchemaChanged();
   }

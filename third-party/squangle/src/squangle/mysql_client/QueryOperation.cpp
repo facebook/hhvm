@@ -60,6 +60,8 @@ bool QueryOperation::notifyQuerySuccess(bool more_results) {
   query_result_->setNumRowsAffected(FetchOperation::currentAffectedRows());
   query_result_->setLastInsertId(FetchOperation::currentLastInsertId());
   query_result_->setRecvGtid(FetchOperation::currentRecvGtid());
+  query_result_->setMysqlInfo(FetchOperation::currentMysqlInfo());
+  query_result_->setRowsMatched(FetchOperation::currentRowsMatched());
   query_result_->setWasSlow(FetchOperation::wasSlow());
   query_result_->setResponseAttributes(FetchOperation::currentRespAttrs());
   query_result_->setWarningsCount(FetchOperation::currentWarningsCount());

@@ -83,6 +83,14 @@ class QueryOperation : public FetchOperation {
     return query_result_->recvGtid();
   }
 
+  const std::optional<std::string>& mysqlInfo() const {
+    return query_result_->mysqlInfo();
+  }
+
+  const std::optional<uint64_t>& rowsMatched() const {
+    return query_result_->rowsMatched();
+  }
+
   void setQueryResult(QueryResult query_result) {
     query_result_ = std::make_unique<QueryResult>(std::move(query_result));
   }

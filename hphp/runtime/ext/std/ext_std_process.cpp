@@ -514,7 +514,7 @@ HHVM_FUNCTION(proc_open, const String& cmd, const Array& descriptorspec,
 
   std::vector<DescriptorItem> items;
 
-  std::string scwd = "";
+  std::string scwd;
   if (!cwd.isNull() && cwd.isString() && !cwd.asCStrRef().empty()) {
     scwd = cwd.asCStrRef().c_str();
   } else if (!g_context->getCwd().empty()) {

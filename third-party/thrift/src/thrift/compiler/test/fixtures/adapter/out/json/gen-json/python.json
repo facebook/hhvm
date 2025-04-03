@@ -222,24 +222,6 @@
           "column" : 44
         }
       }
-    },
-    "NoIntBaseClassDeprecated" : {
-      "lineno" : 114,
-      "is_exception" : false,
-      "is_union" : false,
-      "fields" : {
-
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 114,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 115,
-          "column" : 35
-        }
-      }
     }
   }
 }

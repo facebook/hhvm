@@ -107,9 +107,3 @@ struct Py3EnableCppAdapter {}
 @scope.Struct
 @scope.Exception
 struct MigrationBlockingAllowInheritance {}
-
-/// In thrift-py3 only, disables `int` base for non-`Flag` enums.
-/// DEPRECATED! Do not add new usage.
-/// In thrift-python, all non-`Flag` enums have `int` base class.
-@scope.Enum
-struct NoIntBaseClassDeprecated {}

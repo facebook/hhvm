@@ -27,6 +27,21 @@
 
 namespace apache::thrift::concurrency {
 
+static void toTicks(
+    int64_t& result,
+    int64_t secs,
+    int64_t oldTicks,
+    int64_t oldTicksPerSec,
+    int64_t newTicksPerSec) {
+  result = secs * newTicksPerSec;
+  result += oldTicks * newTicksPerSec / oldTicksPerSec;
+
+  int64_t oldPerNew = oldTicksPerSec / newTicksPerSec;
+  if (oldPerNew && ((oldTicks % oldPerNew) >= (oldPerNew / 2))) {
+    ++result;
+  }
+}
+
 int64_t Util::currentTime() {
 #if defined(THRIFT_HAVE_CLOCK_GETTIME)
   timespec now;

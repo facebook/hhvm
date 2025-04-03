@@ -37,7 +37,6 @@
 #include <thrift/lib/cpp/concurrency/FunctionRunner.h>
 #include <thrift/lib/cpp/concurrency/PosixThreadFactory.h>
 #include <thrift/lib/cpp/concurrency/ThreadManager.h>
-#include <thrift/lib/cpp/concurrency/Util.h>
 
 using namespace apache::thrift::concurrency;
 

@@ -23,33 +23,9 @@
 
 namespace apache::thrift::concurrency {
 
-/**
- * Utility methods
- *
- * This class contains basic utility methods for converting time formats,
- * and other common platform-dependent concurrency operations.
- * It should not be included in API headers for other concurrency library
- * headers, since it will, by definition, pull in all sorts of horrid
- * platform dependent crap.  Rather it should be included directly in
- * concurrency library implementation source.
- */
+// DEPRECATED! Use chrono instead.
 class Util {
  public:
-  static void toTicks(
-      int64_t& result,
-      int64_t secs,
-      int64_t oldTicks,
-      int64_t oldTicksPerSec,
-      int64_t newTicksPerSec) {
-    result = secs * newTicksPerSec;
-    result += oldTicks * newTicksPerSec / oldTicksPerSec;
-
-    int64_t oldPerNew = oldTicksPerSec / newTicksPerSec;
-    if (oldPerNew && ((oldTicks % oldPerNew) >= (oldPerNew / 2))) {
-      ++result;
-    }
-  }
-
   /**
    * Get current time as milliseconds from epoch
    */

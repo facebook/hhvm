@@ -458,7 +458,7 @@ void mutate_inject_metadata_fields(
   const auto* structured = dynamic_cast<const t_structured*>(ttype);
   // We only allow injecting fields from a struct type.
   if (structured == nullptr || ttype->is_union() || ttype->is_exception() ||
-      ttype->is_paramlist()) {
+      ttype->is<t_paramlist>()) {
     ctx.error(
         "`{}` is not a struct type. `@internal.InjectMetadataFields` can be "
         "only used with a struct type.",

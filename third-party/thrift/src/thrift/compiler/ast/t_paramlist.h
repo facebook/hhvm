@@ -34,11 +34,6 @@ class t_paramlist : public t_struct {
  private:
   friend class t_structured;
   t_paramlist* clone_DO_NOT_USE() const override;
-
-  // TODO(afuller): Remove everything below this comment. It is only provided
-  // for backwards compatibility.
- public:
-  bool is_paramlist() const override { return true; }
 };
 
 } // namespace apache::thrift::compiler

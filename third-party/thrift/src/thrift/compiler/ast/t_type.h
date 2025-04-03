@@ -203,7 +203,6 @@ class t_type : public t_named {
   virtual bool is_set() const { return false; }
   virtual bool is_map() const { return false; }
   virtual bool is_binary() const { return false; }
-  virtual bool is_paramlist() const { return false; }
 
   bool is_string_or_binary() const { return is_string() || is_binary(); }
   bool is_any_int() const { return is_i16() || is_i32() || is_i64(); }

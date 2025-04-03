@@ -92,7 +92,6 @@ prototype<t_type>::ptr t_whisker_generator::make_prototype_for_type(
   def.property("set?",              mem_fn(&t_type::is_set));
   def.property("map?",              mem_fn(&t_type::is_map));
   def.property("binary?",           mem_fn(&t_type::is_binary));
-  def.property("paramlist?",        mem_fn(&t_type::is_paramlist));
   def.property("string_or_binary?", mem_fn(&t_type::is_string_or_binary));
   def.property("any_int?",          mem_fn(&t_type::is_any_int));
   def.property("floating_point?",   mem_fn(&t_type::is_floating_point));

@@ -4917,7 +4917,7 @@ std::string t_hack_generator::render_service_metadata_response(
         queue.push(field.get_type());
       }
 
-      if (!tstruct->program() || tstruct->is_paramlist()) {
+      if (!tstruct->program() || tstruct->is<t_paramlist>()) {
         continue;
       }
 

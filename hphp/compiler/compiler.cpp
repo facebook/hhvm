@@ -118,6 +118,7 @@ struct CompilerOptions {
   std::string filecache;
   bool coredump;
   std::string ondemandEdgesPath;
+  std::string filesInBuildPath;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -554,6 +555,9 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("report-ondemand-edges",
      value<std::string>(&po.ondemandEdgesPath),
      "Write parse-on-demand dependency edges to the specified file")
+    ("report-files-in-build",
+     value<std::string>(&po.filesInBuildPath),
+     "Write the list of files included in the build to the specified file")
     ;
 
   positional_options_description p;
@@ -1508,7 +1512,7 @@ bool process(CompilerOptions &po) {
     }
 
     if (!coro::blockingWait(package->emit(*index, emitRemoteUnit, emitLocalUnit,
-                                          po.ondemandEdgesPath))) {
+                                          po.ondemandEdgesPath, po.filesInBuildPath))) {
       return false;
     }
 

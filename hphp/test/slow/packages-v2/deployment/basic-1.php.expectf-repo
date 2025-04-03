@@ -1,3 +1,9 @@
+f basic-1.php
+f basic-2.php
+f basic-3.php
+f basic-4.php
+f prod/foo.inc.php
+f prod/internal_prod/zap.inc.php
 I am foo in prod/
 
 Fatal error: Call to undefined function bar() in %s/deployment/basic-1.php on line 6

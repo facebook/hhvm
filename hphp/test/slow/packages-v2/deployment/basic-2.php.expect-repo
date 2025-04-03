@@ -3,5 +3,8 @@ f basic-2.php
 f basic-3.php
 f basic-4.php
 f prod/foo.inc.php
+f prod/intern/bar.inc.php
 f prod/internal_prod/zap.inc.php
-Fatal error: Call to undefined function zot() in %s/deployment/basic-3.php on line 5
+f prod/zot.inc.php
+I am foo in prod/
+I am bar in prod/intern/

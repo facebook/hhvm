@@ -220,6 +220,10 @@ folly::dynamic toDynamic(const Object& obj);
 // Convert protocol::Value to Thrift Any with the given protocol.
 using detail::toAny;
 
+// Convert Thrift Any to Protocol Value. It only supports Compact and Binary
+// Protocol.
+using detail::parseValueFromAny;
+
 // Check whether a protocol object maybe a thrift.Any based on a heuristic field
 // id and type checking. A return value of
 // - true indicates that the object COULD be Any (but there may be false

@@ -24,25 +24,25 @@
 
 #include <thrift/lib/cpp/thrift_config.h>
 
-namespace apache {
-namespace thrift {
-namespace concurrency {
+namespace apache::thrift::concurrency {
 
 int64_t Util::currentTime() {
 #if defined(THRIFT_HAVE_CLOCK_GETTIME)
-  struct timespec now;
+  timespec now;
   int ret = clock_gettime(CLOCK_REALTIME, &now);
+  auto subsec = now.tv_nsec;
+  int64_t oldTicksPerSec = NS_PER_S;
 #else
-  struct timeval now;
+  timeval now;
   int ret = gettimeofday(&now, nullptr);
+  auto subsec = now.tv_usec;
+  int64_t oldTicksPerSec = US_PER_S;
 #endif // defined(THRIFT_HAVE_CLOCK_GETTIME)
 
   DCHECK(ret == 0);
   int64_t result;
-  toTicks(result, now, MS_PER_S);
+  toTicks(result, now.tv_sec, subsec, oldTicksPerSec, MS_PER_S);
   return result;
 }
 
-} // namespace concurrency
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::concurrency

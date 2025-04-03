@@ -20,12 +20,9 @@
 #include <cstdint>
 #include <ctime>
 
-#include <folly/Utility.h>
 #include <folly/portability/SysTime.h>
 
-namespace apache {
-namespace thrift {
-namespace concurrency {
+namespace apache::thrift::concurrency {
 
 /**
  * Utility methods
@@ -36,8 +33,6 @@ namespace concurrency {
  * headers, since it will, by definition, pull in all sorts of horrid
  * platform dependent crap.  Rather it should be included directly in
  * concurrency library implementation source.
- *
- * @version $Id:$
  */
 class Util {
  public:
@@ -55,7 +50,7 @@ class Util {
    * @param result timespec& result
    * @param value or duration in milliseconds
    */
-  static void toTimespec(struct timespec& result, int64_t value) {
+  static void toTimespec(timespec& result, int64_t value) {
     result.tv_sec = value / MS_PER_S; // ms to s
     result.tv_nsec = (value % MS_PER_S) * NS_PER_MS; // ms to ns
   }
@@ -74,35 +69,6 @@ class Util {
       ++result;
     }
   }
-  /**
-   * Converts struct timespec to arbitrary-sized ticks since epoch
-   */
-  static void toTicks(
-      int64_t& result, const struct timespec& value, int64_t ticksPerSec) {
-    return toTicks(result, value.tv_sec, value.tv_nsec, NS_PER_S, ticksPerSec);
-  }
-
-  /**
-   * Converts struct timeval to arbitrary-sized ticks since epoch
-   */
-  static void toTicks(
-      int64_t& result, const struct timeval& value, int64_t ticksPerSec) {
-    return toTicks(result, value.tv_sec, value.tv_usec, US_PER_S, ticksPerSec);
-  }
-
-  /**
-   * Converts struct timespec to milliseconds
-   */
-  static void toMilliseconds(int64_t& result, const struct timespec& value) {
-    return toTicks(result, value, MS_PER_S);
-  }
-
-  /**
-   * Converts struct timeval to milliseconds
-   */
-  static void toMilliseconds(int64_t& result, const struct timeval& value) {
-    return toTicks(result, value, MS_PER_S);
-  }
 
   /**
    * Get current time as milliseconds from epoch
@@ -110,8 +76,6 @@ class Util {
   static int64_t currentTime();
 };
 
-} // namespace concurrency
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::concurrency
 
 #endif // #ifndef _THRIFT_CONCURRENCY_UTIL_H_

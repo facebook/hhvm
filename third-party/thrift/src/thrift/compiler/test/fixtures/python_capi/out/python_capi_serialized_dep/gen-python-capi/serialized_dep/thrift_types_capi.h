@@ -14,13 +14,16 @@
 
 #include <thrift/compiler/test/fixtures/python_capi/gen-cpp2/serialized_dep_types.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace test__fixtures__python_capi__serialized_dep {
+
+struct NamespaceTag {};
+
+} // namespace test__fixtures__python_capi__serialized_dep
+
+namespace apache::thrift::python::capi {
 template <>
-struct Extractor<::test::fixtures::python_capi::SerializedStruct>
-    : public BaseExtractor<::test::fixtures::python_capi::SerializedStruct> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::SerializedStruct, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::SerializedStruct, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>> {
   static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::python_capi::SerializedStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -28,30 +31,30 @@ struct Extractor<::test::fixtures::python_capi::SerializedStruct>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::SerializedStruct>>
+        ::test::fixtures::python_capi::SerializedStruct, ::test__fixtures__python_capi__serialized_dep::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::SerializedStruct>> {
+        ::test::fixtures::python_capi::SerializedStruct, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>> {
   ExtractorResult<::test::fixtures::python_capi::SerializedStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::python_capi::SerializedStruct>
-    : public BaseConstructor<::test::fixtures::python_capi::SerializedStruct> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::SerializedStruct, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::SerializedStruct, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>> {
   static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::python_capi::SerializedStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::SerializedStruct>>
+        ::test::fixtures::python_capi::SerializedStruct, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::SerializedStruct>> {
+        ::test::fixtures::python_capi::SerializedStruct, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>> {
   PyObject* operator()(const ::test::fixtures::python_capi::SerializedStruct& val);
 };
 
 template <>
-struct Extractor<::test::fixtures::python_capi::SerializedUnion>
-    : public BaseExtractor<::test::fixtures::python_capi::SerializedUnion> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::SerializedUnion, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::SerializedUnion, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>> {
   static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::python_capi::SerializedUnion> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -59,30 +62,30 @@ struct Extractor<::test::fixtures::python_capi::SerializedUnion>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::SerializedUnion>>
+        ::test::fixtures::python_capi::SerializedUnion, ::test__fixtures__python_capi__serialized_dep::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::SerializedUnion>> {
+        ::test::fixtures::python_capi::SerializedUnion, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>> {
   ExtractorResult<::test::fixtures::python_capi::SerializedUnion> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::python_capi::SerializedUnion>
-    : public BaseConstructor<::test::fixtures::python_capi::SerializedUnion> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::SerializedUnion, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::SerializedUnion, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>> {
   static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::python_capi::SerializedUnion& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::SerializedUnion>>
+        ::test::fixtures::python_capi::SerializedUnion, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::SerializedUnion>> {
+        ::test::fixtures::python_capi::SerializedUnion, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>> {
   PyObject* operator()(const ::test::fixtures::python_capi::SerializedUnion& val);
 };
 
 template <>
-struct Extractor<::test::fixtures::python_capi::SerializedError>
-    : public BaseExtractor<::test::fixtures::python_capi::SerializedError> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::SerializedError, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::SerializedError, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>> {
   static const bool kUsingMarshal = false;
   ExtractorResult<::test::fixtures::python_capi::SerializedError> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -90,30 +93,30 @@ struct Extractor<::test::fixtures::python_capi::SerializedError>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::SerializedError>>
+        ::test::fixtures::python_capi::SerializedError, ::test__fixtures__python_capi__serialized_dep::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::SerializedError>> {
+        ::test::fixtures::python_capi::SerializedError, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>> {
   ExtractorResult<::test::fixtures::python_capi::SerializedError> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::python_capi::SerializedError>
-    : public BaseConstructor<::test::fixtures::python_capi::SerializedError> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::SerializedError, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::SerializedError, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>> {
   static const bool kUsingMarshal = false;
   PyObject* operator()(const ::test::fixtures::python_capi::SerializedError& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::SerializedError>>
+        ::test::fixtures::python_capi::SerializedError, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::SerializedError>> {
+        ::test::fixtures::python_capi::SerializedError, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>> {
   PyObject* operator()(const ::test::fixtures::python_capi::SerializedError& val);
 };
 
 template <>
-struct Extractor<::test::fixtures::python_capi::MarshalStruct>
-    : public BaseExtractor<::test::fixtures::python_capi::MarshalStruct> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::MarshalStruct, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::MarshalStruct, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::python_capi::MarshalStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -121,30 +124,30 @@ struct Extractor<::test::fixtures::python_capi::MarshalStruct>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::MarshalStruct>>
+        ::test::fixtures::python_capi::MarshalStruct, ::test__fixtures__python_capi__serialized_dep::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::MarshalStruct>> {
+        ::test::fixtures::python_capi::MarshalStruct, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>> {
   ExtractorResult<::test::fixtures::python_capi::MarshalStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::python_capi::MarshalStruct>
-    : public BaseConstructor<::test::fixtures::python_capi::MarshalStruct> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::MarshalStruct, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::MarshalStruct, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::python_capi::MarshalStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::MarshalStruct>>
+        ::test::fixtures::python_capi::MarshalStruct, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::MarshalStruct>> {
+        ::test::fixtures::python_capi::MarshalStruct, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>> {
   PyObject* operator()(const ::test::fixtures::python_capi::MarshalStruct& val);
 };
 
 template <>
-struct Extractor<::test::fixtures::python_capi::MarshalUnion>
-    : public BaseExtractor<::test::fixtures::python_capi::MarshalUnion> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::MarshalUnion, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::MarshalUnion, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::python_capi::MarshalUnion> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -152,30 +155,30 @@ struct Extractor<::test::fixtures::python_capi::MarshalUnion>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::MarshalUnion>>
+        ::test::fixtures::python_capi::MarshalUnion, ::test__fixtures__python_capi__serialized_dep::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::MarshalUnion>> {
+        ::test::fixtures::python_capi::MarshalUnion, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>> {
   ExtractorResult<::test::fixtures::python_capi::MarshalUnion> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::python_capi::MarshalUnion>
-    : public BaseConstructor<::test::fixtures::python_capi::MarshalUnion> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::MarshalUnion, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::MarshalUnion, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::python_capi::MarshalUnion& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::MarshalUnion>>
+        ::test::fixtures::python_capi::MarshalUnion, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::MarshalUnion>> {
+        ::test::fixtures::python_capi::MarshalUnion, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>> {
   PyObject* operator()(const ::test::fixtures::python_capi::MarshalUnion& val);
 };
 
 template <>
-struct Extractor<::test::fixtures::python_capi::MarshalError>
-    : public BaseExtractor<::test::fixtures::python_capi::MarshalError> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::MarshalError, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::MarshalError, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::python_capi::MarshalError> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -183,28 +186,25 @@ struct Extractor<::test::fixtures::python_capi::MarshalError>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::MarshalError>>
+        ::test::fixtures::python_capi::MarshalError, ::test__fixtures__python_capi__serialized_dep::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::MarshalError>> {
+        ::test::fixtures::python_capi::MarshalError, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>> {
   ExtractorResult<::test::fixtures::python_capi::MarshalError> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::python_capi::MarshalError>
-    : public BaseConstructor<::test::fixtures::python_capi::MarshalError> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::MarshalError, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::MarshalError, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::python_capi::MarshalError& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::MarshalError>>
+        ::test::fixtures::python_capi::MarshalError, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::MarshalError>> {
+        ::test::fixtures::python_capi::MarshalError, ::test__fixtures__python_capi__serialized_dep::NamespaceTag>> {
   PyObject* operator()(const ::test::fixtures::python_capi::MarshalError& val);
 };
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

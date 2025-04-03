@@ -30,10 +30,7 @@ Generated Cpp2 <-> Python converters for Thrift types
 #include "{{header_include}}"
 {{/program:capi_includes}}
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace apache::thrift::python::capi {
 namespace {
 {{#program:generate_capi?}}
 bool ensure_module_imported() {
@@ -50,7 +47,7 @@ bool ensure_module_imported() {
 {{#program:structs}}
 {{#struct:marshal_capi?}}
 ExtractorResult<{{struct:cpp_name}}>
-Extractor<{{struct:cpp_name}}>::operator()(PyObject* obj) {
+Extractor<{{> common/wrapped_struct }}>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -63,7 +60,7 @@ Extractor<{{struct:cpp_name}}>::operator()(PyObject* obj) {
   {{! getThriftData increments tuple struct refcnt}}
   StrongRef fbThriftData(get{{#struct:exception?}}Exception{{/struct:exception?}}ThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      {{struct:cpp_name}}>>{}(*fbThriftData);
+      {{struct:cpp_name}}, {{> common/namespace_tag}}>>{}(*fbThriftData);
   {{/struct:fields?}}
   {{^struct:fields?}}
   return {{struct:cpp_name}}{};
@@ -72,7 +69,7 @@ Extractor<{{struct:cpp_name}}>::operator()(PyObject* obj) {
 {{/struct:marshal_capi?}}
 {{^struct:marshal_capi?}}
 ExtractorResult<{{struct:cpp_name}}>
-Extractor<{{struct:cpp_name}}>::operator()(PyObject* obj) {
+Extractor<{{> common/wrapped_struct }}>::operator()(PyObject* obj) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return extractorError<{{struct:cpp_name}}>(
@@ -99,7 +96,7 @@ Extractor<{{struct:cpp_name}}>::operator()(PyObject* obj) {
 {{#struct:marshal_capi?}}
 ExtractorResult<{{struct:cpp_name}}>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    {{struct:cpp_name}}>>::operator()(PyObject* fbThriftData) {
+    {{struct:cpp_name}}, {{> common/namespace_tag}}>>::operator()(PyObject* fbThriftData) {
   {{struct:cpp_name}} cpp;
 {{#struct:fields?}}
   std::optional<std::string_view> error;
@@ -141,7 +138,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 {{^struct:marshal_capi?}}
 ExtractorResult<{{struct:cpp_name}}>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    {{struct:cpp_name}}>>::operator()(PyObject* fbthrift_data) {
+    {{struct:cpp_name}}, {{> common/namespace_tag }}>>::operator()(PyObject* fbthrift_data) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return extractorError<{{struct:cpp_name}}>(
@@ -152,11 +149,11 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       return extractorError<{{struct:cpp_name}}>(
           "Init from fbthrift error: {{struct:py_name}}");
   }
-  return Extractor<{{struct:cpp_name}}>{}(*obj);
+  return Extractor<{{> common/wrapped_struct }}>{}(*obj);
 }
 {{/struct:marshal_capi?}}
 
-int Extractor<{{struct:cpp_name}}>::typeCheck(PyObject* obj) {
+int Extractor<{{> common/wrapped_struct }}>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module {{program:module_path}} import error");
@@ -171,7 +168,7 @@ int Extractor<{{struct:cpp_name}}>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<{{struct:cpp_name}}>::operator()(
+PyObject* Constructor<{{> common/wrapped_struct }}>::operator()(
     const {{struct:cpp_name}}& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
@@ -179,7 +176,7 @@ PyObject* Constructor<{{struct:cpp_name}}>::operator()(
   }
   {{#struct:marshal_capi?}}
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        {{struct:cpp_name}}>> ctor;
+        {{struct:cpp_name}}, {{> common/namespace_tag }}>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -210,7 +207,7 @@ PyObject* Constructor<{{struct:cpp_name}}>::operator()(
 
 {{#struct:marshal_capi?}}
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        {{struct:cpp_name}}>>::operator()(
+        {{struct:cpp_name}}, {{> common/namespace_tag }}>>::operator()(
     [[maybe_unused]] const {{struct:cpp_name}}& val) {
   {{^struct:union?}}
   StrongRef fbthrift_data(createStructTuple({{struct:fields_size}}));
@@ -264,9 +261,9 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 {{^struct:marshal_capi?}}
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        {{struct:cpp_name}}>>::operator()(
+        {{struct:cpp_name}}, {{> common/namespace_tag }}>>::operator()(
     const {{struct:cpp_name}}& val) {
-  auto obj = StrongRef(Constructor<{{struct:cpp_name}}>{}(val));
+  auto obj = StrongRef(Constructor<{{> common/wrapped_struct }}>{}(val));
   if (!obj) {
     return nullptr;
   }
@@ -277,7 +274,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 {{/program:structs}}
 {{#program:enums}}
 ExtractorResult<{{program:cpp_namespaces}}::{{enum:cpp_name}}>
-Extractor<{{program:cpp_namespaces}}::{{enum:cpp_name}}>::operator()(PyObject* obj) {
+Extractor<{{> common/wrapped_enum }}>::operator()(PyObject* obj) {
   {{! thrift-python enums have int parent class}}
   long val = PyLong_AsLong(obj);
   if (val == -1 && PyErr_Occurred()) {
@@ -287,7 +284,7 @@ Extractor<{{program:cpp_namespaces}}::{{enum:cpp_name}}>::operator()(PyObject* o
   return static_cast<{{program:cpp_namespaces}}::{{enum:cpp_name}}>(val);
 }
 
-int Extractor<{{program:cpp_namespaces}}::{{enum:cpp_name}}>::typeCheck(PyObject* obj) {
+int Extractor<{{> common/wrapped_enum }}>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module {{program:module_path}} import error");
@@ -302,7 +299,7 @@ int Extractor<{{program:cpp_namespaces}}::{{enum:cpp_name}}>::typeCheck(PyObject
 }
 
 
-PyObject* Constructor<{{program:cpp_namespaces}}::{{enum:cpp_name}}>::operator()(
+PyObject* Constructor<{{> common/wrapped_enum }}>::operator()(
     {{program:cpp_namespaces}}::{{enum:cpp_name}} val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
@@ -317,7 +314,4 @@ PyObject* Constructor<{{program:cpp_namespaces}}::{{enum:cpp_name}}>::operator()
 }
 
 {{/program:enums}}
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

@@ -10,77 +10,77 @@ from thrift.python.capi.cpp_converter cimport cpp_to_python, python_to_cpp
 from libcpp.utility cimport move as cmove
 
 cdef extern from "thrift/compiler/test/fixtures/py3/gen-python-capi/module/thrift_types_capi.h":
-    pass
+    cdef cppclass _fbthrift__NamespaceTag "module::NamespaceTag"
 
 cdef cSimpleException SimpleException_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cSimpleException](inst))
+    return cmove(python_to_cpp[cSimpleException, _fbthrift__NamespaceTag](inst))
 
 cdef object SimpleException_from_cpp(const cSimpleException& c_struct):
-    return cpp_to_python[cSimpleException](c_struct)
+    return cpp_to_python[cSimpleException, _fbthrift__NamespaceTag](c_struct)
 
 cdef cOptionalRefStruct OptionalRefStruct_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cOptionalRefStruct](inst))
+    return cmove(python_to_cpp[cOptionalRefStruct, _fbthrift__NamespaceTag](inst))
 
 cdef object OptionalRefStruct_from_cpp(const cOptionalRefStruct& c_struct):
-    return cpp_to_python[cOptionalRefStruct](c_struct)
+    return cpp_to_python[cOptionalRefStruct, _fbthrift__NamespaceTag](c_struct)
 
 cdef cSimpleStruct SimpleStruct_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cSimpleStruct](inst))
+    return cmove(python_to_cpp[cSimpleStruct, _fbthrift__NamespaceTag](inst))
 
 cdef object SimpleStruct_from_cpp(const cSimpleStruct& c_struct):
-    return cpp_to_python[cSimpleStruct](c_struct)
+    return cpp_to_python[cSimpleStruct, _fbthrift__NamespaceTag](c_struct)
 
 cdef cHiddenTypeFieldsStruct HiddenTypeFieldsStruct_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cHiddenTypeFieldsStruct](inst))
+    return cmove(python_to_cpp[cHiddenTypeFieldsStruct, _fbthrift__NamespaceTag](inst))
 
 cdef object HiddenTypeFieldsStruct_from_cpp(const cHiddenTypeFieldsStruct& c_struct):
-    return cpp_to_python[cHiddenTypeFieldsStruct](c_struct)
+    return cpp_to_python[cHiddenTypeFieldsStruct, _fbthrift__NamespaceTag](c_struct)
 
 cdef cAdaptedUnion AdaptedUnion_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cAdaptedUnion](inst))
+    return cmove(python_to_cpp[cAdaptedUnion, _fbthrift__NamespaceTag](inst))
 
 cdef object AdaptedUnion_from_cpp(const cAdaptedUnion& c_struct):
-    return cpp_to_python[cAdaptedUnion](c_struct)
+    return cpp_to_python[cAdaptedUnion, _fbthrift__NamespaceTag](c_struct)
 
 cdef cHiddenException HiddenException_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cHiddenException](inst))
+    return cmove(python_to_cpp[cHiddenException, _fbthrift__NamespaceTag](inst))
 
 cdef object HiddenException_from_cpp(const cHiddenException& c_struct):
-    return cpp_to_python[cHiddenException](c_struct)
+    return cpp_to_python[cHiddenException, _fbthrift__NamespaceTag](c_struct)
 
 cdef cComplexStruct ComplexStruct_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cComplexStruct](inst))
+    return cmove(python_to_cpp[cComplexStruct, _fbthrift__NamespaceTag](inst))
 
 cdef object ComplexStruct_from_cpp(const cComplexStruct& c_struct):
-    return cpp_to_python[cComplexStruct](c_struct)
+    return cpp_to_python[cComplexStruct, _fbthrift__NamespaceTag](c_struct)
 
 cdef cBinaryUnion BinaryUnion_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cBinaryUnion](inst))
+    return cmove(python_to_cpp[cBinaryUnion, _fbthrift__NamespaceTag](inst))
 
 cdef object BinaryUnion_from_cpp(const cBinaryUnion& c_struct):
-    return cpp_to_python[cBinaryUnion](c_struct)
+    return cpp_to_python[cBinaryUnion, _fbthrift__NamespaceTag](c_struct)
 
 cdef cBinaryUnionStruct BinaryUnionStruct_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cBinaryUnionStruct](inst))
+    return cmove(python_to_cpp[cBinaryUnionStruct, _fbthrift__NamespaceTag](inst))
 
 cdef object BinaryUnionStruct_from_cpp(const cBinaryUnionStruct& c_struct):
-    return cpp_to_python[cBinaryUnionStruct](c_struct)
+    return cpp_to_python[cBinaryUnionStruct, _fbthrift__NamespaceTag](c_struct)
 
 cdef cCustomFields CustomFields_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cCustomFields](inst))
+    return cmove(python_to_cpp[cCustomFields, _fbthrift__NamespaceTag](inst))
 
 cdef object CustomFields_from_cpp(const cCustomFields& c_struct):
-    return cpp_to_python[cCustomFields](c_struct)
+    return cpp_to_python[cCustomFields, _fbthrift__NamespaceTag](c_struct)
 
 cdef cCustomTypedefFields CustomTypedefFields_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cCustomTypedefFields](inst))
+    return cmove(python_to_cpp[cCustomTypedefFields, _fbthrift__NamespaceTag](inst))
 
 cdef object CustomTypedefFields_from_cpp(const cCustomTypedefFields& c_struct):
-    return cpp_to_python[cCustomTypedefFields](c_struct)
+    return cpp_to_python[cCustomTypedefFields, _fbthrift__NamespaceTag](c_struct)
 
 cdef cAdaptedTypedefFields AdaptedTypedefFields_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cAdaptedTypedefFields](inst))
+    return cmove(python_to_cpp[cAdaptedTypedefFields, _fbthrift__NamespaceTag](inst))
 
 cdef object AdaptedTypedefFields_from_cpp(const cAdaptedTypedefFields& c_struct):
-    return cpp_to_python[cAdaptedTypedefFields](c_struct)
+    return cpp_to_python[cAdaptedTypedefFields, _fbthrift__NamespaceTag](c_struct)
 

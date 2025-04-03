@@ -16,10 +16,7 @@
 
 #include "thrift/compiler/test/fixtures/interactions/gen-python-capi/shared/thrift_types_capi.h"
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace apache::thrift::python::capi {
 namespace {
 bool ensure_module_imported() {
   static ::folly::python::import_cache_nocapture import((
@@ -35,7 +32,7 @@ bool ensure_module_imported() {
 } // namespace
 
 ExtractorResult<::cpp2::CustomException>
-Extractor<::cpp2::CustomException>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::CustomException, ::test__fixtures__interactions__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -46,12 +43,12 @@ Extractor<::cpp2::CustomException>::operator()(PyObject* obj) {
   }
   StrongRef fbThriftData(getExceptionThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::CustomException>>{}(*fbThriftData);
+      ::cpp2::CustomException, ::test__fixtures__interactions__module::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::cpp2::CustomException>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::CustomException>>::operator()(PyObject* fbThriftData) {
+    ::cpp2::CustomException, ::test__fixtures__interactions__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::CustomException cpp;
   std::optional<std::string_view> error;
   Extractor<Bytes>{}.extractInto(
@@ -65,7 +62,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::cpp2::CustomException>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::CustomException, ::test__fixtures__interactions__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.interactions.module import error");
@@ -80,14 +77,14 @@ int Extractor<::cpp2::CustomException>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<::cpp2::CustomException>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::CustomException, ::test__fixtures__interactions__module::NamespaceTag>>::operator()(
     const ::cpp2::CustomException& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::CustomException>> ctor;
+        ::cpp2::CustomException, ::test__fixtures__interactions__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -96,7 +93,7 @@ PyObject* Constructor<::cpp2::CustomException>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::CustomException>>::operator()(
+        ::cpp2::CustomException, ::test__fixtures__interactions__module::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::cpp2::CustomException& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__message(
@@ -114,7 +111,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::cpp2::ShouldBeBoxed>
-Extractor<::cpp2::ShouldBeBoxed>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ShouldBeBoxed, ::test__fixtures__interactions__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -125,12 +122,12 @@ Extractor<::cpp2::ShouldBeBoxed>::operator()(PyObject* obj) {
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::ShouldBeBoxed>>{}(*fbThriftData);
+      ::cpp2::ShouldBeBoxed, ::test__fixtures__interactions__module::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::cpp2::ShouldBeBoxed>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::ShouldBeBoxed>>::operator()(PyObject* fbThriftData) {
+    ::cpp2::ShouldBeBoxed, ::test__fixtures__interactions__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::ShouldBeBoxed cpp;
   std::optional<std::string_view> error;
   Extractor<Bytes>{}.extractInto(
@@ -144,7 +141,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::cpp2::ShouldBeBoxed>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ShouldBeBoxed, ::test__fixtures__interactions__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.interactions.module import error");
@@ -159,14 +156,14 @@ int Extractor<::cpp2::ShouldBeBoxed>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<::cpp2::ShouldBeBoxed>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ShouldBeBoxed, ::test__fixtures__interactions__module::NamespaceTag>>::operator()(
     const ::cpp2::ShouldBeBoxed& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::ShouldBeBoxed>> ctor;
+        ::cpp2::ShouldBeBoxed, ::test__fixtures__interactions__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -175,7 +172,7 @@ PyObject* Constructor<::cpp2::ShouldBeBoxed>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::ShouldBeBoxed>>::operator()(
+        ::cpp2::ShouldBeBoxed, ::test__fixtures__interactions__module::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::cpp2::ShouldBeBoxed& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__sessionId(
@@ -192,7 +189,4 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

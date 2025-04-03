@@ -10,47 +10,47 @@ from thrift.python.capi.cpp_converter cimport cpp_to_python, python_to_cpp
 from libcpp.utility cimport move as cmove
 
 cdef extern from "thrift/compiler/test/fixtures/exceptions/gen-python-capi/module/thrift_types_capi.h":
-    pass
+    cdef cppclass _fbthrift__NamespaceTag "module::NamespaceTag"
 
 cdef cFiery Fiery_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cFiery](inst))
+    return cmove(python_to_cpp[cFiery, _fbthrift__NamespaceTag](inst))
 
 cdef object Fiery_from_cpp(const cFiery& c_struct):
-    return cpp_to_python[cFiery](c_struct)
+    return cpp_to_python[cFiery, _fbthrift__NamespaceTag](c_struct)
 
 cdef cSerious Serious_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cSerious](inst))
+    return cmove(python_to_cpp[cSerious, _fbthrift__NamespaceTag](inst))
 
 cdef object Serious_from_cpp(const cSerious& c_struct):
-    return cpp_to_python[cSerious](c_struct)
+    return cpp_to_python[cSerious, _fbthrift__NamespaceTag](c_struct)
 
 cdef cComplexFieldNames ComplexFieldNames_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cComplexFieldNames](inst))
+    return cmove(python_to_cpp[cComplexFieldNames, _fbthrift__NamespaceTag](inst))
 
 cdef object ComplexFieldNames_from_cpp(const cComplexFieldNames& c_struct):
-    return cpp_to_python[cComplexFieldNames](c_struct)
+    return cpp_to_python[cComplexFieldNames, _fbthrift__NamespaceTag](c_struct)
 
 cdef cCustomFieldNames CustomFieldNames_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cCustomFieldNames](inst))
+    return cmove(python_to_cpp[cCustomFieldNames, _fbthrift__NamespaceTag](inst))
 
 cdef object CustomFieldNames_from_cpp(const cCustomFieldNames& c_struct):
-    return cpp_to_python[cCustomFieldNames](c_struct)
+    return cpp_to_python[cCustomFieldNames, _fbthrift__NamespaceTag](c_struct)
 
 cdef cExceptionWithPrimitiveField ExceptionWithPrimitiveField_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cExceptionWithPrimitiveField](inst))
+    return cmove(python_to_cpp[cExceptionWithPrimitiveField, _fbthrift__NamespaceTag](inst))
 
 cdef object ExceptionWithPrimitiveField_from_cpp(const cExceptionWithPrimitiveField& c_struct):
-    return cpp_to_python[cExceptionWithPrimitiveField](c_struct)
+    return cpp_to_python[cExceptionWithPrimitiveField, _fbthrift__NamespaceTag](c_struct)
 
 cdef cExceptionWithStructuredAnnotation ExceptionWithStructuredAnnotation_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cExceptionWithStructuredAnnotation](inst))
+    return cmove(python_to_cpp[cExceptionWithStructuredAnnotation, _fbthrift__NamespaceTag](inst))
 
 cdef object ExceptionWithStructuredAnnotation_from_cpp(const cExceptionWithStructuredAnnotation& c_struct):
-    return cpp_to_python[cExceptionWithStructuredAnnotation](c_struct)
+    return cpp_to_python[cExceptionWithStructuredAnnotation, _fbthrift__NamespaceTag](c_struct)
 
 cdef cBanal Banal_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cBanal](inst))
+    return cmove(python_to_cpp[cBanal, _fbthrift__NamespaceTag](inst))
 
 cdef object Banal_from_cpp(const cBanal& c_struct):
-    return cpp_to_python[cBanal](c_struct)
+    return cpp_to_python[cBanal, _fbthrift__NamespaceTag](c_struct)
 

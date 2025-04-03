@@ -14,13 +14,16 @@
 
 #include <thrift/compiler/test/fixtures/enums/gen-cpp2/module_types.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace test__fixtures__enums__module {
+
+struct NamespaceTag {};
+
+} // namespace test__fixtures__enums__module
+
+namespace apache::thrift::python::capi {
 template <>
-struct Extractor<::test::fixtures::enums::SomeStruct>
-    : public BaseExtractor<::test::fixtures::enums::SomeStruct> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::SomeStruct, ::test__fixtures__enums__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::SomeStruct, ::test__fixtures__enums__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::enums::SomeStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -28,30 +31,30 @@ struct Extractor<::test::fixtures::enums::SomeStruct>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::enums::SomeStruct>>
+        ::test::fixtures::enums::SomeStruct, ::test__fixtures__enums__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::enums::SomeStruct>> {
+        ::test::fixtures::enums::SomeStruct, ::test__fixtures__enums__module::NamespaceTag>> {
   ExtractorResult<::test::fixtures::enums::SomeStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::enums::SomeStruct>
-    : public BaseConstructor<::test::fixtures::enums::SomeStruct> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::SomeStruct, ::test__fixtures__enums__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::SomeStruct, ::test__fixtures__enums__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::enums::SomeStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::enums::SomeStruct>>
+        ::test::fixtures::enums::SomeStruct, ::test__fixtures__enums__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::enums::SomeStruct>> {
+        ::test::fixtures::enums::SomeStruct, ::test__fixtures__enums__module::NamespaceTag>> {
   PyObject* operator()(const ::test::fixtures::enums::SomeStruct& val);
 };
 
 template <>
-struct Extractor<::test::fixtures::enums::MyStruct>
-    : public BaseExtractor<::test::fixtures::enums::MyStruct> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyStruct, ::test__fixtures__enums__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyStruct, ::test__fixtures__enums__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::enums::MyStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -59,112 +62,109 @@ struct Extractor<::test::fixtures::enums::MyStruct>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::enums::MyStruct>>
+        ::test::fixtures::enums::MyStruct, ::test__fixtures__enums__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::enums::MyStruct>> {
+        ::test::fixtures::enums::MyStruct, ::test__fixtures__enums__module::NamespaceTag>> {
   ExtractorResult<::test::fixtures::enums::MyStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::enums::MyStruct>
-    : public BaseConstructor<::test::fixtures::enums::MyStruct> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyStruct, ::test__fixtures__enums__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyStruct, ::test__fixtures__enums__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::enums::MyStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::enums::MyStruct>>
+        ::test::fixtures::enums::MyStruct, ::test__fixtures__enums__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::enums::MyStruct>> {
+        ::test::fixtures::enums::MyStruct, ::test__fixtures__enums__module::NamespaceTag>> {
   PyObject* operator()(const ::test::fixtures::enums::MyStruct& val);
 };
 
 template <>
-struct Extractor<::test::fixtures::enums::Metasyntactic>
-    : public BaseExtractor<::test::fixtures::enums::Metasyntactic> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::Metasyntactic, ::test__fixtures__enums__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::Metasyntactic, ::test__fixtures__enums__module::NamespaceTag>> {
   ExtractorResult<::test::fixtures::enums::Metasyntactic> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::enums::Metasyntactic> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::Metasyntactic, ::test__fixtures__enums__module::NamespaceTag>> {
   PyObject* operator()(::test::fixtures::enums::Metasyntactic val);
 };
 
 template <>
-struct Extractor<::test::fixtures::enums::MyEnum1>
-    : public BaseExtractor<::test::fixtures::enums::MyEnum1> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyEnum1, ::test__fixtures__enums__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyEnum1, ::test__fixtures__enums__module::NamespaceTag>> {
   ExtractorResult<::test::fixtures::enums::MyEnum1> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::enums::MyEnum1> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyEnum1, ::test__fixtures__enums__module::NamespaceTag>> {
   PyObject* operator()(::test::fixtures::enums::MyEnum1 val);
 };
 
 template <>
-struct Extractor<::test::fixtures::enums::MyEnum2>
-    : public BaseExtractor<::test::fixtures::enums::MyEnum2> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyEnum2, ::test__fixtures__enums__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyEnum2, ::test__fixtures__enums__module::NamespaceTag>> {
   ExtractorResult<::test::fixtures::enums::MyEnum2> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::enums::MyEnum2> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyEnum2, ::test__fixtures__enums__module::NamespaceTag>> {
   PyObject* operator()(::test::fixtures::enums::MyEnum2 val);
 };
 
 template <>
-struct Extractor<::test::fixtures::enums::MyEnum3>
-    : public BaseExtractor<::test::fixtures::enums::MyEnum3> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyEnum3, ::test__fixtures__enums__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyEnum3, ::test__fixtures__enums__module::NamespaceTag>> {
   ExtractorResult<::test::fixtures::enums::MyEnum3> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::enums::MyEnum3> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyEnum3, ::test__fixtures__enums__module::NamespaceTag>> {
   PyObject* operator()(::test::fixtures::enums::MyEnum3 val);
 };
 
 template <>
-struct Extractor<::test::fixtures::enums::MyEnum4>
-    : public BaseExtractor<::test::fixtures::enums::MyEnum4> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyEnum4, ::test__fixtures__enums__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyEnum4, ::test__fixtures__enums__module::NamespaceTag>> {
   ExtractorResult<::test::fixtures::enums::MyEnum4> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::enums::MyEnum4> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyEnum4, ::test__fixtures__enums__module::NamespaceTag>> {
   PyObject* operator()(::test::fixtures::enums::MyEnum4 val);
 };
 
 template <>
-struct Extractor<::test::fixtures::enums::MyBitmaskEnum1>
-    : public BaseExtractor<::test::fixtures::enums::MyBitmaskEnum1> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyBitmaskEnum1, ::test__fixtures__enums__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyBitmaskEnum1, ::test__fixtures__enums__module::NamespaceTag>> {
   ExtractorResult<::test::fixtures::enums::MyBitmaskEnum1> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::enums::MyBitmaskEnum1> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyBitmaskEnum1, ::test__fixtures__enums__module::NamespaceTag>> {
   PyObject* operator()(::test::fixtures::enums::MyBitmaskEnum1 val);
 };
 
 template <>
-struct Extractor<::test::fixtures::enums::MyBitmaskEnum2>
-    : public BaseExtractor<::test::fixtures::enums::MyBitmaskEnum2> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyBitmaskEnum2, ::test__fixtures__enums__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyBitmaskEnum2, ::test__fixtures__enums__module::NamespaceTag>> {
   ExtractorResult<::test::fixtures::enums::MyBitmaskEnum2> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::enums::MyBitmaskEnum2> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyBitmaskEnum2, ::test__fixtures__enums__module::NamespaceTag>> {
   PyObject* operator()(::test::fixtures::enums::MyBitmaskEnum2 val);
 };
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

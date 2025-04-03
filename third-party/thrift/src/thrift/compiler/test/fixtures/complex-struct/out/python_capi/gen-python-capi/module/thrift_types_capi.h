@@ -14,13 +14,16 @@
 
 #include <thrift/compiler/test/fixtures/complex-struct/gen-cpp2/module_types.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace module {
+
+struct NamespaceTag {};
+
+} // namespace module
+
+namespace apache::thrift::python::capi {
 template <>
-struct Extractor<::cpp2::MyStructFloatFieldThrowExp>
-    : public BaseExtractor<::cpp2::MyStructFloatFieldThrowExp> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyStructFloatFieldThrowExp, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyStructFloatFieldThrowExp, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::MyStructFloatFieldThrowExp> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -28,30 +31,30 @@ struct Extractor<::cpp2::MyStructFloatFieldThrowExp>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyStructFloatFieldThrowExp>>
+        ::cpp2::MyStructFloatFieldThrowExp, ::module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyStructFloatFieldThrowExp>> {
+        ::cpp2::MyStructFloatFieldThrowExp, ::module::NamespaceTag>> {
   ExtractorResult<::cpp2::MyStructFloatFieldThrowExp> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::MyStructFloatFieldThrowExp>
-    : public BaseConstructor<::cpp2::MyStructFloatFieldThrowExp> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyStructFloatFieldThrowExp, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyStructFloatFieldThrowExp, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::MyStructFloatFieldThrowExp& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyStructFloatFieldThrowExp>>
+        ::cpp2::MyStructFloatFieldThrowExp, ::module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyStructFloatFieldThrowExp>> {
+        ::cpp2::MyStructFloatFieldThrowExp, ::module::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::MyStructFloatFieldThrowExp& val);
 };
 
 template <>
-struct Extractor<::cpp2::MyStructMapFloatThrowExp>
-    : public BaseExtractor<::cpp2::MyStructMapFloatThrowExp> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyStructMapFloatThrowExp, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyStructMapFloatThrowExp, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::MyStructMapFloatThrowExp> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -59,30 +62,30 @@ struct Extractor<::cpp2::MyStructMapFloatThrowExp>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyStructMapFloatThrowExp>>
+        ::cpp2::MyStructMapFloatThrowExp, ::module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyStructMapFloatThrowExp>> {
+        ::cpp2::MyStructMapFloatThrowExp, ::module::NamespaceTag>> {
   ExtractorResult<::cpp2::MyStructMapFloatThrowExp> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::MyStructMapFloatThrowExp>
-    : public BaseConstructor<::cpp2::MyStructMapFloatThrowExp> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyStructMapFloatThrowExp, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyStructMapFloatThrowExp, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::MyStructMapFloatThrowExp& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyStructMapFloatThrowExp>>
+        ::cpp2::MyStructMapFloatThrowExp, ::module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyStructMapFloatThrowExp>> {
+        ::cpp2::MyStructMapFloatThrowExp, ::module::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::MyStructMapFloatThrowExp& val);
 };
 
 template <>
-struct Extractor<::cpp2::MyStruct>
-    : public BaseExtractor<::cpp2::MyStruct> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyStruct, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyStruct, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::MyStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -90,30 +93,30 @@ struct Extractor<::cpp2::MyStruct>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyStruct>>
+        ::cpp2::MyStruct, ::module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyStruct>> {
+        ::cpp2::MyStruct, ::module::NamespaceTag>> {
   ExtractorResult<::cpp2::MyStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::MyStruct>
-    : public BaseConstructor<::cpp2::MyStruct> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyStruct, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyStruct, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::MyStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyStruct>>
+        ::cpp2::MyStruct, ::module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyStruct>> {
+        ::cpp2::MyStruct, ::module::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::MyStruct& val);
 };
 
 template <>
-struct Extractor<::cpp2::SimpleStruct>
-    : public BaseExtractor<::cpp2::SimpleStruct> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::SimpleStruct, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::SimpleStruct, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::SimpleStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -121,30 +124,30 @@ struct Extractor<::cpp2::SimpleStruct>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::SimpleStruct>>
+        ::cpp2::SimpleStruct, ::module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::SimpleStruct>> {
+        ::cpp2::SimpleStruct, ::module::NamespaceTag>> {
   ExtractorResult<::cpp2::SimpleStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::SimpleStruct>
-    : public BaseConstructor<::cpp2::SimpleStruct> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::SimpleStruct, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::SimpleStruct, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::SimpleStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::SimpleStruct>>
+        ::cpp2::SimpleStruct, ::module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::SimpleStruct>> {
+        ::cpp2::SimpleStruct, ::module::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::SimpleStruct& val);
 };
 
 template <>
-struct Extractor<::cpp2::defaultStruct>
-    : public BaseExtractor<::cpp2::defaultStruct> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::defaultStruct, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::defaultStruct, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::defaultStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -152,30 +155,30 @@ struct Extractor<::cpp2::defaultStruct>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::defaultStruct>>
+        ::cpp2::defaultStruct, ::module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::defaultStruct>> {
+        ::cpp2::defaultStruct, ::module::NamespaceTag>> {
   ExtractorResult<::cpp2::defaultStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::defaultStruct>
-    : public BaseConstructor<::cpp2::defaultStruct> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::defaultStruct, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::defaultStruct, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::defaultStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::defaultStruct>>
+        ::cpp2::defaultStruct, ::module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::defaultStruct>> {
+        ::cpp2::defaultStruct, ::module::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::defaultStruct& val);
 };
 
 template <>
-struct Extractor<::cpp2::MyStructTypeDef>
-    : public BaseExtractor<::cpp2::MyStructTypeDef> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyStructTypeDef, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyStructTypeDef, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::MyStructTypeDef> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -183,30 +186,30 @@ struct Extractor<::cpp2::MyStructTypeDef>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyStructTypeDef>>
+        ::cpp2::MyStructTypeDef, ::module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyStructTypeDef>> {
+        ::cpp2::MyStructTypeDef, ::module::NamespaceTag>> {
   ExtractorResult<::cpp2::MyStructTypeDef> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::MyStructTypeDef>
-    : public BaseConstructor<::cpp2::MyStructTypeDef> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyStructTypeDef, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyStructTypeDef, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::MyStructTypeDef& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyStructTypeDef>>
+        ::cpp2::MyStructTypeDef, ::module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyStructTypeDef>> {
+        ::cpp2::MyStructTypeDef, ::module::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::MyStructTypeDef& val);
 };
 
 template <>
-struct Extractor<::cpp2::MyDataItem>
-    : public BaseExtractor<::cpp2::MyDataItem> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyDataItem, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyDataItem, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::MyDataItem> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -214,30 +217,30 @@ struct Extractor<::cpp2::MyDataItem>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyDataItem>>
+        ::cpp2::MyDataItem, ::module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyDataItem>> {
+        ::cpp2::MyDataItem, ::module::NamespaceTag>> {
   ExtractorResult<::cpp2::MyDataItem> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::MyDataItem>
-    : public BaseConstructor<::cpp2::MyDataItem> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyDataItem, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyDataItem, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::MyDataItem& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyDataItem>>
+        ::cpp2::MyDataItem, ::module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyDataItem>> {
+        ::cpp2::MyDataItem, ::module::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::MyDataItem& val);
 };
 
 template <>
-struct Extractor<::cpp2::MyUnion>
-    : public BaseExtractor<::cpp2::MyUnion> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyUnion, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyUnion, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::MyUnion> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -245,30 +248,30 @@ struct Extractor<::cpp2::MyUnion>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyUnion>>
+        ::cpp2::MyUnion, ::module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyUnion>> {
+        ::cpp2::MyUnion, ::module::NamespaceTag>> {
   ExtractorResult<::cpp2::MyUnion> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::MyUnion>
-    : public BaseConstructor<::cpp2::MyUnion> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyUnion, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyUnion, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::MyUnion& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyUnion>>
+        ::cpp2::MyUnion, ::module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyUnion>> {
+        ::cpp2::MyUnion, ::module::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::MyUnion& val);
 };
 
 template <>
-struct Extractor<::cpp2::MyUnionFloatFieldThrowExp>
-    : public BaseExtractor<::cpp2::MyUnionFloatFieldThrowExp> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyUnionFloatFieldThrowExp, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyUnionFloatFieldThrowExp, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::MyUnionFloatFieldThrowExp> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -276,30 +279,30 @@ struct Extractor<::cpp2::MyUnionFloatFieldThrowExp>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyUnionFloatFieldThrowExp>>
+        ::cpp2::MyUnionFloatFieldThrowExp, ::module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyUnionFloatFieldThrowExp>> {
+        ::cpp2::MyUnionFloatFieldThrowExp, ::module::NamespaceTag>> {
   ExtractorResult<::cpp2::MyUnionFloatFieldThrowExp> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::MyUnionFloatFieldThrowExp>
-    : public BaseConstructor<::cpp2::MyUnionFloatFieldThrowExp> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyUnionFloatFieldThrowExp, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyUnionFloatFieldThrowExp, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::MyUnionFloatFieldThrowExp& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyUnionFloatFieldThrowExp>>
+        ::cpp2::MyUnionFloatFieldThrowExp, ::module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyUnionFloatFieldThrowExp>> {
+        ::cpp2::MyUnionFloatFieldThrowExp, ::module::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::MyUnionFloatFieldThrowExp& val);
 };
 
 template <>
-struct Extractor<::cpp2::ComplexNestedStruct>
-    : public BaseExtractor<::cpp2::ComplexNestedStruct> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ComplexNestedStruct, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ComplexNestedStruct, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::ComplexNestedStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -307,30 +310,30 @@ struct Extractor<::cpp2::ComplexNestedStruct>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::ComplexNestedStruct>>
+        ::cpp2::ComplexNestedStruct, ::module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::ComplexNestedStruct>> {
+        ::cpp2::ComplexNestedStruct, ::module::NamespaceTag>> {
   ExtractorResult<::cpp2::ComplexNestedStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::ComplexNestedStruct>
-    : public BaseConstructor<::cpp2::ComplexNestedStruct> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ComplexNestedStruct, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ComplexNestedStruct, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::ComplexNestedStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::ComplexNestedStruct>>
+        ::cpp2::ComplexNestedStruct, ::module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::ComplexNestedStruct>> {
+        ::cpp2::ComplexNestedStruct, ::module::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::ComplexNestedStruct& val);
 };
 
 template <>
-struct Extractor<::cpp2::TypeRemapped>
-    : public BaseExtractor<::cpp2::TypeRemapped> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::TypeRemapped, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::TypeRemapped, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::TypeRemapped> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -338,30 +341,30 @@ struct Extractor<::cpp2::TypeRemapped>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::TypeRemapped>>
+        ::cpp2::TypeRemapped, ::module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::TypeRemapped>> {
+        ::cpp2::TypeRemapped, ::module::NamespaceTag>> {
   ExtractorResult<::cpp2::TypeRemapped> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::TypeRemapped>
-    : public BaseConstructor<::cpp2::TypeRemapped> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::TypeRemapped, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::TypeRemapped, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::TypeRemapped& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::TypeRemapped>>
+        ::cpp2::TypeRemapped, ::module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::TypeRemapped>> {
+        ::cpp2::TypeRemapped, ::module::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::TypeRemapped& val);
 };
 
 template <>
-struct Extractor<::cpp2::emptyXcep>
-    : public BaseExtractor<::cpp2::emptyXcep> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::emptyXcep, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::emptyXcep, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::emptyXcep> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -369,30 +372,30 @@ struct Extractor<::cpp2::emptyXcep>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::emptyXcep>>
+        ::cpp2::emptyXcep, ::module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::emptyXcep>> {
+        ::cpp2::emptyXcep, ::module::NamespaceTag>> {
   ExtractorResult<::cpp2::emptyXcep> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::emptyXcep>
-    : public BaseConstructor<::cpp2::emptyXcep> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::emptyXcep, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::emptyXcep, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::emptyXcep& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::emptyXcep>>
+        ::cpp2::emptyXcep, ::module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::emptyXcep>> {
+        ::cpp2::emptyXcep, ::module::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::emptyXcep& val);
 };
 
 template <>
-struct Extractor<::cpp2::reqXcep>
-    : public BaseExtractor<::cpp2::reqXcep> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::reqXcep, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::reqXcep, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::reqXcep> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -400,30 +403,30 @@ struct Extractor<::cpp2::reqXcep>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::reqXcep>>
+        ::cpp2::reqXcep, ::module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::reqXcep>> {
+        ::cpp2::reqXcep, ::module::NamespaceTag>> {
   ExtractorResult<::cpp2::reqXcep> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::reqXcep>
-    : public BaseConstructor<::cpp2::reqXcep> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::reqXcep, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::reqXcep, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::reqXcep& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::reqXcep>>
+        ::cpp2::reqXcep, ::module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::reqXcep>> {
+        ::cpp2::reqXcep, ::module::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::reqXcep& val);
 };
 
 template <>
-struct Extractor<::cpp2::optXcep>
-    : public BaseExtractor<::cpp2::optXcep> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::optXcep, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::optXcep, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::optXcep> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -431,30 +434,30 @@ struct Extractor<::cpp2::optXcep>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::optXcep>>
+        ::cpp2::optXcep, ::module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::optXcep>> {
+        ::cpp2::optXcep, ::module::NamespaceTag>> {
   ExtractorResult<::cpp2::optXcep> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::optXcep>
-    : public BaseConstructor<::cpp2::optXcep> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::optXcep, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::optXcep, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::optXcep& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::optXcep>>
+        ::cpp2::optXcep, ::module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::optXcep>> {
+        ::cpp2::optXcep, ::module::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::optXcep& val);
 };
 
 template <>
-struct Extractor<::cpp2::complexException>
-    : public BaseExtractor<::cpp2::complexException> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::complexException, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::complexException, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::complexException> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -462,30 +465,30 @@ struct Extractor<::cpp2::complexException>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::complexException>>
+        ::cpp2::complexException, ::module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::complexException>> {
+        ::cpp2::complexException, ::module::NamespaceTag>> {
   ExtractorResult<::cpp2::complexException> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::complexException>
-    : public BaseConstructor<::cpp2::complexException> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::complexException, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::complexException, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::complexException& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::complexException>>
+        ::cpp2::complexException, ::module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::complexException>> {
+        ::cpp2::complexException, ::module::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::complexException& val);
 };
 
 template <>
-struct Extractor<::cpp2::Containers>
-    : public BaseExtractor<::cpp2::Containers> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Containers, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Containers, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::Containers> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -493,40 +496,37 @@ struct Extractor<::cpp2::Containers>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Containers>>
+        ::cpp2::Containers, ::module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Containers>> {
+        ::cpp2::Containers, ::module::NamespaceTag>> {
   ExtractorResult<::cpp2::Containers> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::Containers>
-    : public BaseConstructor<::cpp2::Containers> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Containers, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Containers, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::Containers& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Containers>>
+        ::cpp2::Containers, ::module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Containers>> {
+        ::cpp2::Containers, ::module::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::Containers& val);
 };
 
 template <>
-struct Extractor<::cpp2::MyEnum>
-    : public BaseExtractor<::cpp2::MyEnum> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyEnum, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyEnum, ::module::NamespaceTag>> {
   ExtractorResult<::cpp2::MyEnum> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::MyEnum> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyEnum, ::module::NamespaceTag>> {
   PyObject* operator()(::cpp2::MyEnum val);
 };
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

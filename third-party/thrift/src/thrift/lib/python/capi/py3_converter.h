@@ -23,17 +23,19 @@
 
 namespace apache::thrift::python::capi {
 
-template <typename CppThrift>
-PyObject* py3_to_python(std::shared_ptr<CppThrift> cppThrift) {
+template <typename CppThrift, typename PythonNamespaceTag>
+PyObject* py3_to_python(const std::shared_ptr<CppThrift>& cppThrift) {
   if (cppThrift) {
-    return Constructor<CppThrift>{}(*cppThrift);
+    return Constructor<PythonNamespaced<CppThrift, PythonNamespaceTag>>{}(
+        *cppThrift);
   }
   return nullptr;
 }
 
-template <typename CppThrift>
+template <typename CppThrift, typename PythonNamespaceTag>
 std::shared_ptr<CppThrift> python_to_py3(PyObject* obj) {
-  auto extracted = Extractor<CppThrift>{}(obj);
+  auto extracted =
+      Extractor<PythonNamespaced<CppThrift, PythonNamespaceTag>>{}(obj);
   if (extracted.hasValue()) {
     return std::make_shared<CppThrift>(std::move(*extracted));
   }

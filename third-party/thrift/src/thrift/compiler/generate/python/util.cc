@@ -179,5 +179,13 @@ std::unordered_set<std::string_view> extract_modules_and_insert_into(
   }
   return module_paths;
 }
+
+std::string gen_capi_module_prefix_impl(const t_program* program) {
+  std::string prefix =
+      get_py3_namespace_with_name_and_prefix(program, "", "__");
+  // kebab is not kosher in cpp fn names
+  std::replace(prefix.begin(), prefix.end(), '-', '_');
+  return prefix;
+}
 } // namespace python
 } // namespace apache::thrift::compiler

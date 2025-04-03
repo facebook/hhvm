@@ -27,23 +27,28 @@
 
 namespace apache::thrift::test {
 
-template <typename T>
+template <typename T, typename Py3Namespace>
 PyObject* __shim__roundtrip(PyObject* obj) {
-  auto cpp = python::capi::Extractor<T>{}(obj);
+  auto cpp = python::capi::Extractor<
+      python::capi::PythonNamespaced<T, Py3Namespace>>{}(obj);
   if (cpp.hasValue()) {
-    return python::capi::Constructor<T>{}(*cpp);
+    return python::capi::Constructor<
+        python::capi::PythonNamespaced<T, Py3Namespace>>{}(*cpp);
   }
   return nullptr;
 }
 
-template <typename T>
+template <typename T, typename Py3Namespace>
 int __shim__typeCheck(PyObject* obj) {
-  return python::capi::Extractor<T>{}.typeCheck(obj);
+  return python::capi::Extractor<
+             python::capi::PythonNamespaced<T, Py3Namespace>>{}
+      .typeCheck(obj);
 }
 
-template <typename T>
+template <typename T, typename Py3Namespace>
 PyObject* __shim__marshal_to_iobuf(PyObject* obj) {
-  auto cpp = python::capi::Extractor<T>{}(obj);
+  auto cpp = python::capi::Extractor<
+      python::capi::PythonNamespaced<T, Py3Namespace>>{}(obj);
   if (cpp.hasValue()) {
     return folly::python::make_python_iobuf(
         python::capi::detail::serialize_to_iobuf(*cpp));
@@ -62,8 +67,9 @@ PyObject* __shim__serialize_to_iobuf(PyObject* obj) {
 PyObject* __shim__gen_SerializedStruct(int64_t len) {
   ::thrift::test::python_capi::SerializedStruct s;
   s.s_ref() = std::string(len, '1');
-  return python::capi::Constructor<
-      ::thrift::test::python_capi::SerializedStruct>{}(s);
+  return python::capi::Constructor<python::capi::PythonNamespaced<
+      ::thrift::test::python_capi::SerializedStruct,
+      thrift__test__python_capi__serialized_dep::NamespaceTag>>{}(s);
 }
 
 std::string serializeTemplateLists() noexcept;
@@ -73,9 +79,10 @@ PyObject* constructTemplateSets() noexcept;
 std::string serializeTemplateMaps() noexcept;
 PyObject* constructTemplateMaps() noexcept;
 
-template <typename T>
+template <typename T, typename Py3Namespace>
 std::string extractAndSerialize(PyObject* obj) {
-  auto cpp = python::capi::Extractor<T>{}(obj);
+  auto cpp = python::capi::Extractor<
+      python::capi::PythonNamespaced<T, Py3Namespace>>{}(obj);
   if (!cpp.hasValue()) {
     return "";
   }

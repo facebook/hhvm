@@ -26,14 +26,17 @@ Generated Cpp2 <-> Python converters for Thrift types
 
 #include <{{program:includePrefix}}gen-cpp2/{{program:name}}_types.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace {{program:capi_module_prefix}} {
+
+struct NamespaceTag {};
+
+} // namespace {{program:capi_module_prefix}}
+
+namespace apache::thrift::python::capi {
 {{#program:structs}}
 template <>
-struct Extractor<{{struct:cpp_name}}>
-    : public BaseExtractor<{{struct:cpp_name}}> {
+struct Extractor<{{> common/wrapped_struct }}>
+    : public BaseExtractor<{{> common/wrapped_struct }}> {
   {{> common/using_capi }}
 
   ExtractorResult<{{struct:cpp_name}}> operator()(PyObject* obj);
@@ -42,15 +45,15 @@ struct Extractor<{{struct:cpp_name}}>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        {{struct:cpp_name}}>>
+        {{struct:cpp_name}}, {{> common/namespace_tag}} >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        {{struct:cpp_name}}>> {
+        {{struct:cpp_name}}, {{> common/namespace_tag}}>> {
   ExtractorResult<{{struct:cpp_name}}> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<{{struct:cpp_name}}>
-    : public BaseConstructor<{{struct:cpp_name}}> {
+struct Constructor<{{> common/wrapped_struct}}>
+    : public BaseConstructor<{{> common/wrapped_struct}}> {
   {{> common/using_capi }}
 
   PyObject* operator()(const {{struct:cpp_name}}& val);
@@ -58,28 +61,25 @@ struct Constructor<{{struct:cpp_name}}>
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        {{struct:cpp_name}}>>
+        {{struct:cpp_name}}, {{> common/namespace_tag}}>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        {{struct:cpp_name}}>> {
+        {{struct:cpp_name}}, {{> common/namespace_tag}}>> {
   PyObject* operator()(const {{struct:cpp_name}}& val);
 };
 
 {{/program:structs}}
 {{#program:enums}}
 template <>
-struct Extractor<{{program:cpp_namespaces}}::{{enum:cpp_name}}>
-    : public BaseExtractor<{{program:cpp_namespaces}}::{{enum:cpp_name}}> {
+struct Extractor<{{> common/wrapped_enum }}>
+    : public BaseExtractor<{{> common/wrapped_enum}}> {
   ExtractorResult<{{program:cpp_namespaces}}::{{enum:cpp_name}}> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
-struct Constructor<{{program:cpp_namespaces}}::{{enum:cpp_name}}> {
+struct Constructor<{{> common/wrapped_enum }}> {
   PyObject* operator()({{program:cpp_namespaces}}::{{enum:cpp_name}} val);
 };
 
 {{/program:enums}}
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

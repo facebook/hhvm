@@ -10,47 +10,47 @@ from thrift.python.capi.cpp_converter cimport cpp_to_python, python_to_cpp
 from libcpp.utility cimport move as cmove
 
 cdef extern from "thrift/compiler/test/fixtures/python_capi/gen-python-capi/containers/thrift_types_capi.h":
-    pass
+    cdef cppclass _fbthrift__NamespaceTag "test__fixtures__python_capi__containers::NamespaceTag"
 
 cdef cTemplateLists TemplateLists_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cTemplateLists](inst))
+    return cmove(python_to_cpp[cTemplateLists, _fbthrift__NamespaceTag](inst))
 
 cdef object TemplateLists_from_cpp(const cTemplateLists& c_struct):
-    return cpp_to_python[cTemplateLists](c_struct)
+    return cpp_to_python[cTemplateLists, _fbthrift__NamespaceTag](c_struct)
 
 cdef cTemplateSets TemplateSets_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cTemplateSets](inst))
+    return cmove(python_to_cpp[cTemplateSets, _fbthrift__NamespaceTag](inst))
 
 cdef object TemplateSets_from_cpp(const cTemplateSets& c_struct):
-    return cpp_to_python[cTemplateSets](c_struct)
+    return cpp_to_python[cTemplateSets, _fbthrift__NamespaceTag](c_struct)
 
 cdef cTemplateMaps TemplateMaps_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cTemplateMaps](inst))
+    return cmove(python_to_cpp[cTemplateMaps, _fbthrift__NamespaceTag](inst))
 
 cdef object TemplateMaps_from_cpp(const cTemplateMaps& c_struct):
-    return cpp_to_python[cTemplateMaps](c_struct)
+    return cpp_to_python[cTemplateMaps, _fbthrift__NamespaceTag](c_struct)
 
 cdef cTWrapped TWrapped_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cTWrapped](inst))
+    return cmove(python_to_cpp[cTWrapped, _fbthrift__NamespaceTag](inst))
 
 cdef object TWrapped_from_cpp(const cTWrapped& c_struct):
-    return cpp_to_python[cTWrapped](c_struct)
+    return cpp_to_python[cTWrapped, _fbthrift__NamespaceTag](c_struct)
 
 cdef cIndirectionA IndirectionA_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cIndirectionA](inst))
+    return cmove(python_to_cpp[cIndirectionA, _fbthrift__NamespaceTag](inst))
 
 cdef object IndirectionA_from_cpp(const cIndirectionA& c_struct):
-    return cpp_to_python[cIndirectionA](c_struct)
+    return cpp_to_python[cIndirectionA, _fbthrift__NamespaceTag](c_struct)
 
 cdef cIndirectionB IndirectionB_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cIndirectionB](inst))
+    return cmove(python_to_cpp[cIndirectionB, _fbthrift__NamespaceTag](inst))
 
 cdef object IndirectionB_from_cpp(const cIndirectionB& c_struct):
-    return cpp_to_python[cIndirectionB](c_struct)
+    return cpp_to_python[cIndirectionB, _fbthrift__NamespaceTag](c_struct)
 
 cdef cIndirectionC IndirectionC_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cIndirectionC](inst))
+    return cmove(python_to_cpp[cIndirectionC, _fbthrift__NamespaceTag](inst))
 
 cdef object IndirectionC_from_cpp(const cIndirectionC& c_struct):
-    return cpp_to_python[cIndirectionC](c_struct)
+    return cpp_to_python[cIndirectionC, _fbthrift__NamespaceTag](c_struct)
 

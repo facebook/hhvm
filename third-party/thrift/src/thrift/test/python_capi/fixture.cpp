@@ -21,47 +21,66 @@ namespace apache::thrift::test {
 using ::apache::thrift::python::capi::Constructor;
 
 namespace {
+template <typename T>
+using ModuleNamespaced = python::capi::
+    PythonNamespaced<T, ::thrift__test__python_capi__module::NamespaceTag>;
+template <typename T>
+using TemplateNamespaced = python::capi::
+    PythonNamespaced<T, ::thrift__test__python_capi__containers::NamespaceTag>;
 
 static_assert(
-    Constructor<::thrift::test::python_capi::MyStruct>::kUsingMarshal,
+    Constructor<
+        ModuleNamespaced<::thrift::test::python_capi::MyStruct>>::kUsingMarshal,
     "Should be marshaled because opt-in at module level");
 static_assert(
-    Constructor<::thrift::test::python_capi::PrimitiveStruct>::kUsingMarshal,
+    Constructor<ModuleNamespaced<
+        ::thrift::test::python_capi::PrimitiveStruct>>::kUsingMarshal,
     "Should be marshaled because opt-in at module level");
 static_assert(
-    Constructor<::thrift::test::python_capi::ListStruct>::kUsingMarshal,
+    Constructor<ModuleNamespaced<::thrift::test::python_capi::ListStruct>>::
+        kUsingMarshal,
     "Should be marshaled because opt-in at module level");
 static_assert(
-    Constructor<::thrift::test::python_capi::SetStruct>::kUsingMarshal,
+    Constructor<ModuleNamespaced<::thrift::test::python_capi::SetStruct>>::
+        kUsingMarshal,
     "Should be marshaled because opt-in at module level");
 static_assert(
-    Constructor<::thrift::test::python_capi::MapStruct>::kUsingMarshal,
+    Constructor<ModuleNamespaced<::thrift::test::python_capi::MapStruct>>::
+        kUsingMarshal,
     "Should be marshaled because opt-in at module level");
 static_assert(
-    Constructor<::thrift::test::python_capi::ComposeStruct>::kUsingMarshal,
+    Constructor<ModuleNamespaced<::thrift::test::python_capi::ComposeStruct>>::
+        kUsingMarshal,
     "Should be marshaled because opt-in at module level");
 static_assert(
-    Constructor<::thrift::test::python_capi::Shallot>::kUsingMarshal,
+    Constructor<
+        ModuleNamespaced<::thrift::test::python_capi::Shallot>>::kUsingMarshal,
     "Should be marshaled because opt-in at module level");
 
 static_assert(
-    Constructor<::thrift::test::python_capi::TemplateLists>::kUsingMarshal,
+    Constructor<TemplateNamespaced<
+        ::thrift::test::python_capi::TemplateLists>>::kUsingMarshal,
     "Should be marshaled because cpp.Type template is standard");
 static_assert(
-    Constructor<::thrift::test::python_capi::TemplateSets>::kUsingMarshal,
+    Constructor<TemplateNamespaced<::thrift::test::python_capi::TemplateSets>>::
+        kUsingMarshal,
     "Should be marshaled because cpp.Type template is standard");
 static_assert(
-    Constructor<::thrift::test::python_capi::TemplateMaps>::kUsingMarshal,
+    Constructor<TemplateNamespaced<::thrift::test::python_capi::TemplateMaps>>::
+        kUsingMarshal,
     "Should be marshaled because cpp.Type template is standard");
 
 static_assert(
-    !Constructor<::thrift::test::python_capi::IndirectionA>::kUsingMarshal,
+    !Constructor<TemplateNamespaced<
+        ::thrift::test::python_capi::IndirectionA>>::kUsingMarshal,
     "Should be serialized because list of cpp.Type override");
 static_assert(
-    !Constructor<::thrift::test::python_capi::IndirectionB>::kUsingMarshal,
+    !Constructor<TemplateNamespaced<
+        ::thrift::test::python_capi::IndirectionB>>::kUsingMarshal,
     "Should be serialized because list of cpp.Type override");
 static_assert(
-    !Constructor<::thrift::test::python_capi::IndirectionC>::kUsingMarshal,
+    !Constructor<TemplateNamespaced<
+        ::thrift::test::python_capi::IndirectionC>>::kUsingMarshal,
     "Should be serialized because list of cpp.Type override");
 
 template <typename Container>
@@ -170,7 +189,10 @@ std::string serializeStruct(const S& s) noexcept {
 
 template <typename S>
 PyObject* constructStruct(const S& s) noexcept {
-  Constructor<S> ctor;
+  Constructor<python::capi::PythonNamespaced<
+      S,
+      thrift__test__python_capi__containers::NamespaceTag>>
+      ctor;
   return ctor(s);
 }
 

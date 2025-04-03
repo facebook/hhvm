@@ -23,15 +23,17 @@ from thrift.python.capi.cpp_converter cimport cpp_to_python, python_to_cpp
 from libcpp.utility cimport move as cmove
 
 cdef extern from "{{program:includePrefix}}gen-python-capi/{{program:name}}/thrift_types_capi.h":
-    pass
+    {{! NB: aside from NamespaceTag, this include also required to "inject"
+        the Extractor and Constructors into cython cpp }}
+    cdef cppclass _fbthrift__NamespaceTag "{{program:capi_module_prefix}}::NamespaceTag"
 
 {{#program:structs}}
 {{! thrift-python replacement for py3_struct._cpp_obj, but no heap allocation }}
 cdef c{{struct:py_name}} {{struct:py_name}}_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[c{{struct:py_name}}](inst))
+    return cmove(python_to_cpp[c{{struct:py_name}}, _fbthrift__NamespaceTag](inst))
 
 {{! thrift-python replacement for Py3Struct._fbthrift_create }}
 cdef object {{struct:py_name}}_from_cpp(const c{{struct:py_name}}& c_struct):
-    return cpp_to_python[c{{struct:py_name}}](c_struct)
+    return cpp_to_python[c{{struct:py_name}}, _fbthrift__NamespaceTag](c_struct)
 
 {{/program:structs}}

@@ -14,13 +14,16 @@
 
 #include <thrift/compiler/test/fixtures/namespace_from_package_without_module_name/gen-cpp2/module_types.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace test__namespace_from_package_without_module_name__module {
+
+struct NamespaceTag {};
+
+} // namespace test__namespace_from_package_without_module_name__module
+
+namespace apache::thrift::python::capi {
 template <>
-struct Extractor<::test::namespace_from_package_without_module_name::Foo>
-    : public BaseExtractor<::test::namespace_from_package_without_module_name::Foo> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::namespace_from_package_without_module_name::Foo, ::test__namespace_from_package_without_module_name__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::namespace_from_package_without_module_name::Foo, ::test__namespace_from_package_without_module_name__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::test::namespace_from_package_without_module_name::Foo> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -28,28 +31,25 @@ struct Extractor<::test::namespace_from_package_without_module_name::Foo>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::namespace_from_package_without_module_name::Foo>>
+        ::test::namespace_from_package_without_module_name::Foo, ::test__namespace_from_package_without_module_name__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::namespace_from_package_without_module_name::Foo>> {
+        ::test::namespace_from_package_without_module_name::Foo, ::test__namespace_from_package_without_module_name__module::NamespaceTag>> {
   ExtractorResult<::test::namespace_from_package_without_module_name::Foo> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::namespace_from_package_without_module_name::Foo>
-    : public BaseConstructor<::test::namespace_from_package_without_module_name::Foo> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::namespace_from_package_without_module_name::Foo, ::test__namespace_from_package_without_module_name__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::test::namespace_from_package_without_module_name::Foo, ::test__namespace_from_package_without_module_name__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::namespace_from_package_without_module_name::Foo& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::namespace_from_package_without_module_name::Foo>>
+        ::test::namespace_from_package_without_module_name::Foo, ::test__namespace_from_package_without_module_name__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::namespace_from_package_without_module_name::Foo>> {
+        ::test::namespace_from_package_without_module_name::Foo, ::test__namespace_from_package_without_module_name__module::NamespaceTag>> {
   PyObject* operator()(const ::test::namespace_from_package_without_module_name::Foo& val);
 };
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

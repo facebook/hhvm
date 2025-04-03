@@ -14,13 +14,16 @@
 
 #include <thrift/compiler/test/fixtures/int_limits/gen-cpp2/module_types.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace module {
+
+struct NamespaceTag {};
+
+} // namespace module
+
+namespace apache::thrift::python::capi {
 template <>
-struct Extractor<::cpp2::Limits>
-    : public BaseExtractor<::cpp2::Limits> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Limits, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Limits, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::Limits> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -28,28 +31,25 @@ struct Extractor<::cpp2::Limits>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Limits>>
+        ::cpp2::Limits, ::module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Limits>> {
+        ::cpp2::Limits, ::module::NamespaceTag>> {
   ExtractorResult<::cpp2::Limits> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::Limits>
-    : public BaseConstructor<::cpp2::Limits> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Limits, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Limits, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::Limits& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Limits>>
+        ::cpp2::Limits, ::module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Limits>> {
+        ::cpp2::Limits, ::module::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::Limits& val);
 };
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

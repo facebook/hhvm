@@ -10,53 +10,53 @@ from thrift.python.capi.cpp_converter cimport cpp_to_python, python_to_cpp
 from libcpp.utility cimport move as cmove
 
 cdef extern from "thrift/compiler/test/fixtures/basic/gen-python-capi/module/thrift_types_capi.h":
-    pass
+    cdef cppclass _fbthrift__NamespaceTag "test__fixtures__basic__module::NamespaceTag"
 
 cdef cMyStruct MyStruct_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cMyStruct](inst))
+    return cmove(python_to_cpp[cMyStruct, _fbthrift__NamespaceTag](inst))
 
 cdef object MyStruct_from_cpp(const cMyStruct& c_struct):
-    return cpp_to_python[cMyStruct](c_struct)
+    return cpp_to_python[cMyStruct, _fbthrift__NamespaceTag](c_struct)
 
 cdef cContainers Containers_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cContainers](inst))
+    return cmove(python_to_cpp[cContainers, _fbthrift__NamespaceTag](inst))
 
 cdef object Containers_from_cpp(const cContainers& c_struct):
-    return cpp_to_python[cContainers](c_struct)
+    return cpp_to_python[cContainers, _fbthrift__NamespaceTag](c_struct)
 
 cdef cMyDataItem MyDataItem_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cMyDataItem](inst))
+    return cmove(python_to_cpp[cMyDataItem, _fbthrift__NamespaceTag](inst))
 
 cdef object MyDataItem_from_cpp(const cMyDataItem& c_struct):
-    return cpp_to_python[cMyDataItem](c_struct)
+    return cpp_to_python[cMyDataItem, _fbthrift__NamespaceTag](c_struct)
 
 cdef cMyUnion MyUnion_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cMyUnion](inst))
+    return cmove(python_to_cpp[cMyUnion, _fbthrift__NamespaceTag](inst))
 
 cdef object MyUnion_from_cpp(const cMyUnion& c_struct):
-    return cpp_to_python[cMyUnion](c_struct)
+    return cpp_to_python[cMyUnion, _fbthrift__NamespaceTag](c_struct)
 
 cdef cMyException MyException_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cMyException](inst))
+    return cmove(python_to_cpp[cMyException, _fbthrift__NamespaceTag](inst))
 
 cdef object MyException_from_cpp(const cMyException& c_struct):
-    return cpp_to_python[cMyException](c_struct)
+    return cpp_to_python[cMyException, _fbthrift__NamespaceTag](c_struct)
 
 cdef cMyExceptionWithMessage MyExceptionWithMessage_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cMyExceptionWithMessage](inst))
+    return cmove(python_to_cpp[cMyExceptionWithMessage, _fbthrift__NamespaceTag](inst))
 
 cdef object MyExceptionWithMessage_from_cpp(const cMyExceptionWithMessage& c_struct):
-    return cpp_to_python[cMyExceptionWithMessage](c_struct)
+    return cpp_to_python[cMyExceptionWithMessage, _fbthrift__NamespaceTag](c_struct)
 
 cdef cReservedKeyword ReservedKeyword_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cReservedKeyword](inst))
+    return cmove(python_to_cpp[cReservedKeyword, _fbthrift__NamespaceTag](inst))
 
 cdef object ReservedKeyword_from_cpp(const cReservedKeyword& c_struct):
-    return cpp_to_python[cReservedKeyword](c_struct)
+    return cpp_to_python[cReservedKeyword, _fbthrift__NamespaceTag](c_struct)
 
 cdef cUnionToBeRenamed UnionToBeRenamed_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cUnionToBeRenamed](inst))
+    return cmove(python_to_cpp[cUnionToBeRenamed, _fbthrift__NamespaceTag](inst))
 
 cdef object UnionToBeRenamed_from_cpp(const cUnionToBeRenamed& c_struct):
-    return cpp_to_python[cUnionToBeRenamed](c_struct)
+    return cpp_to_python[cUnionToBeRenamed, _fbthrift__NamespaceTag](c_struct)
 

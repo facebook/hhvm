@@ -14,13 +14,16 @@
 
 #include <thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/foo_types.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace foo {
+
+struct NamespaceTag {};
+
+} // namespace foo
+
+namespace apache::thrift::python::capi {
 template <>
-struct Extractor<::cpp2::Fields>
-    : public BaseExtractor<::cpp2::Fields> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Fields, ::foo::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Fields, ::foo::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::Fields> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -28,28 +31,25 @@ struct Extractor<::cpp2::Fields>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Fields>>
+        ::cpp2::Fields, ::foo::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Fields>> {
+        ::cpp2::Fields, ::foo::NamespaceTag>> {
   ExtractorResult<::cpp2::Fields> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::Fields>
-    : public BaseConstructor<::cpp2::Fields> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Fields, ::foo::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Fields, ::foo::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::Fields& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Fields>>
+        ::cpp2::Fields, ::foo::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Fields>> {
+        ::cpp2::Fields, ::foo::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::Fields& val);
 };
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

@@ -170,6 +170,8 @@ class py3_mstch_program : public mstch_program {
             {"program:has_stream?", &py3_mstch_program::hasStream},
             {"program:python_capi_converter?",
              &py3_mstch_program::capi_converter},
+            {"program:capi_module_prefix",
+             &py3_mstch_program::capi_module_prefix},
             {"program:intercompatible?", &py3_mstch_program::intercompatible},
             {"program:auto_migrate?", &py3_mstch_program::auto_migrate},
             {"program:gen_legacy_container_converters?",
@@ -310,6 +312,10 @@ class py3_mstch_program : public mstch_program {
   }
 
   mstch::node capi_converter() { return has_option("python_capi_converter"); }
+
+  mstch::node capi_module_prefix() {
+    return python::gen_capi_module_prefix_impl(program_);
+  }
 
   mstch::node intercompatible() { return has_option("intercompatible"); }
 

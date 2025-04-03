@@ -14,13 +14,16 @@
 
 #include <thrift/compiler/test/fixtures/service-schema/gen-cpp2/module_types.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace module {
+
+struct NamespaceTag {};
+
+} // namespace module
+
+namespace apache::thrift::python::capi {
 template <>
-struct Extractor<::cpp2::CustomException>
-    : public BaseExtractor<::cpp2::CustomException> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::CustomException, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::CustomException, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::CustomException> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -28,40 +31,37 @@ struct Extractor<::cpp2::CustomException>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::CustomException>>
+        ::cpp2::CustomException, ::module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::CustomException>> {
+        ::cpp2::CustomException, ::module::NamespaceTag>> {
   ExtractorResult<::cpp2::CustomException> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::CustomException>
-    : public BaseConstructor<::cpp2::CustomException> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::CustomException, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::CustomException, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::CustomException& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::CustomException>>
+        ::cpp2::CustomException, ::module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::CustomException>> {
+        ::cpp2::CustomException, ::module::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::CustomException& val);
 };
 
 template <>
-struct Extractor<::cpp2::Result>
-    : public BaseExtractor<::cpp2::Result> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Result, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Result, ::module::NamespaceTag>> {
   ExtractorResult<::cpp2::Result> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::Result> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Result, ::module::NamespaceTag>> {
   PyObject* operator()(::cpp2::Result val);
 };
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

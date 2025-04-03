@@ -14,11 +14,11 @@
 
 #include <thrift/compiler/test/fixtures/transitive-deps/gen-cpp2/b_types.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+namespace b {
+
+struct NamespaceTag {};
+
+} // namespace b
+
+namespace apache::thrift::python::capi {
+} // namespace apache::thrift::python::capi

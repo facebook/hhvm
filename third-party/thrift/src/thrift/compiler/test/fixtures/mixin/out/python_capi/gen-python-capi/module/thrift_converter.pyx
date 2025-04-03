@@ -10,29 +10,29 @@ from thrift.python.capi.cpp_converter cimport cpp_to_python, python_to_cpp
 from libcpp.utility cimport move as cmove
 
 cdef extern from "thrift/compiler/test/fixtures/mixin/gen-python-capi/module/thrift_types_capi.h":
-    pass
+    cdef cppclass _fbthrift__NamespaceTag "module::NamespaceTag"
 
 cdef cMixin1 Mixin1_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cMixin1](inst))
+    return cmove(python_to_cpp[cMixin1, _fbthrift__NamespaceTag](inst))
 
 cdef object Mixin1_from_cpp(const cMixin1& c_struct):
-    return cpp_to_python[cMixin1](c_struct)
+    return cpp_to_python[cMixin1, _fbthrift__NamespaceTag](c_struct)
 
 cdef cMixin2 Mixin2_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cMixin2](inst))
+    return cmove(python_to_cpp[cMixin2, _fbthrift__NamespaceTag](inst))
 
 cdef object Mixin2_from_cpp(const cMixin2& c_struct):
-    return cpp_to_python[cMixin2](c_struct)
+    return cpp_to_python[cMixin2, _fbthrift__NamespaceTag](c_struct)
 
 cdef cMixin3Base Mixin3Base_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cMixin3Base](inst))
+    return cmove(python_to_cpp[cMixin3Base, _fbthrift__NamespaceTag](inst))
 
 cdef object Mixin3Base_from_cpp(const cMixin3Base& c_struct):
-    return cpp_to_python[cMixin3Base](c_struct)
+    return cpp_to_python[cMixin3Base, _fbthrift__NamespaceTag](c_struct)
 
 cdef cFoo Foo_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cFoo](inst))
+    return cmove(python_to_cpp[cFoo, _fbthrift__NamespaceTag](inst))
 
 cdef object Foo_from_cpp(const cFoo& c_struct):
-    return cpp_to_python[cFoo](c_struct)
+    return cpp_to_python[cFoo, _fbthrift__NamespaceTag](c_struct)
 

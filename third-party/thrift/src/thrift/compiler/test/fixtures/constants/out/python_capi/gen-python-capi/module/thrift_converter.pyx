@@ -10,53 +10,53 @@ from thrift.python.capi.cpp_converter cimport cpp_to_python, python_to_cpp
 from libcpp.utility cimport move as cmove
 
 cdef extern from "thrift/compiler/test/fixtures/constants/gen-python-capi/module/thrift_types_capi.h":
-    pass
+    cdef cppclass _fbthrift__NamespaceTag "module::NamespaceTag"
 
 cdef cInternship Internship_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cInternship](inst))
+    return cmove(python_to_cpp[cInternship, _fbthrift__NamespaceTag](inst))
 
 cdef object Internship_from_cpp(const cInternship& c_struct):
-    return cpp_to_python[cInternship](c_struct)
+    return cpp_to_python[cInternship, _fbthrift__NamespaceTag](c_struct)
 
 cdef cRange Range_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cRange](inst))
+    return cmove(python_to_cpp[cRange, _fbthrift__NamespaceTag](inst))
 
 cdef object Range_from_cpp(const cRange& c_struct):
-    return cpp_to_python[cRange](c_struct)
+    return cpp_to_python[cRange, _fbthrift__NamespaceTag](c_struct)
 
 cdef cstruct1 struct1_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cstruct1](inst))
+    return cmove(python_to_cpp[cstruct1, _fbthrift__NamespaceTag](inst))
 
 cdef object struct1_from_cpp(const cstruct1& c_struct):
-    return cpp_to_python[cstruct1](c_struct)
+    return cpp_to_python[cstruct1, _fbthrift__NamespaceTag](c_struct)
 
 cdef cstruct2 struct2_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cstruct2](inst))
+    return cmove(python_to_cpp[cstruct2, _fbthrift__NamespaceTag](inst))
 
 cdef object struct2_from_cpp(const cstruct2& c_struct):
-    return cpp_to_python[cstruct2](c_struct)
+    return cpp_to_python[cstruct2, _fbthrift__NamespaceTag](c_struct)
 
 cdef cstruct3 struct3_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cstruct3](inst))
+    return cmove(python_to_cpp[cstruct3, _fbthrift__NamespaceTag](inst))
 
 cdef object struct3_from_cpp(const cstruct3& c_struct):
-    return cpp_to_python[cstruct3](c_struct)
+    return cpp_to_python[cstruct3, _fbthrift__NamespaceTag](c_struct)
 
 cdef cstruct4 struct4_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cstruct4](inst))
+    return cmove(python_to_cpp[cstruct4, _fbthrift__NamespaceTag](inst))
 
 cdef object struct4_from_cpp(const cstruct4& c_struct):
-    return cpp_to_python[cstruct4](c_struct)
+    return cpp_to_python[cstruct4, _fbthrift__NamespaceTag](c_struct)
 
 cdef cunion1 union1_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cunion1](inst))
+    return cmove(python_to_cpp[cunion1, _fbthrift__NamespaceTag](inst))
 
 cdef object union1_from_cpp(const cunion1& c_struct):
-    return cpp_to_python[cunion1](c_struct)
+    return cpp_to_python[cunion1, _fbthrift__NamespaceTag](c_struct)
 
 cdef cunion2 union2_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cunion2](inst))
+    return cmove(python_to_cpp[cunion2, _fbthrift__NamespaceTag](inst))
 
 cdef object union2_from_cpp(const cunion2& c_struct):
-    return cpp_to_python[cunion2](c_struct)
+    return cpp_to_python[cunion2, _fbthrift__NamespaceTag](c_struct)
 

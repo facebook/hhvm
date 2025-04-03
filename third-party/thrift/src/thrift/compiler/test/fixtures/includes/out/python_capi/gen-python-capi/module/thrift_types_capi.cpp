@@ -16,10 +16,7 @@
 
 #include "thrift/compiler/test/fixtures/includes/gen-python-capi/includes/thrift_types_capi.h"
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace apache::thrift::python::capi {
 namespace {
 bool ensure_module_imported() {
   static ::folly::python::import_cache_nocapture import((
@@ -32,7 +29,7 @@ bool ensure_module_imported() {
 } // namespace
 
 ExtractorResult<::cpp2::MyStruct>
-Extractor<::cpp2::MyStruct>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyStruct, ::module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -43,19 +40,19 @@ Extractor<::cpp2::MyStruct>::operator()(PyObject* obj) {
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::MyStruct>>{}(*fbThriftData);
+      ::cpp2::MyStruct, ::module::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::cpp2::MyStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::MyStruct>>::operator()(PyObject* fbThriftData) {
+    ::cpp2::MyStruct, ::module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::MyStruct cpp;
   std::optional<std::string_view> error;
-  Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Included>>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Included, ::includes::NamespaceTag>>{}.extractInto(
       cpp.MyIncludedField_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyStruct__tuple_pos[0]),
       error);
-  Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Included>>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Included, ::includes::NamespaceTag>>{}.extractInto(
       cpp.MyOtherIncludedField_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyStruct__tuple_pos[1]),
       error);
@@ -70,7 +67,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::cpp2::MyStruct>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyStruct, ::module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module module import error");
@@ -85,14 +82,14 @@ int Extractor<::cpp2::MyStruct>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<::cpp2::MyStruct>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::MyStruct, ::module::NamespaceTag>>::operator()(
     const ::cpp2::MyStruct& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyStruct>> ctor;
+        ::cpp2::MyStruct, ::module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -101,11 +98,11 @@ PyObject* Constructor<::cpp2::MyStruct>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::MyStruct>>::operator()(
+        ::cpp2::MyStruct, ::module::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::cpp2::MyStruct& val) {
   StrongRef fbthrift_data(createStructTuple(3));
   StrongRef _fbthrift__MyIncludedField(
-    Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Included>>{}
+    Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Included, ::includes::NamespaceTag>>{}
     .constructFrom(val.MyIncludedField_ref()));
   if (!_fbthrift__MyIncludedField ||
       setStructField(
@@ -115,7 +112,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__MyOtherIncludedField(
-    Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Included>>{}
+    Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Included, ::includes::NamespaceTag>>{}
     .constructFrom(val.MyOtherIncludedField_ref()));
   if (!_fbthrift__MyOtherIncludedField ||
       setStructField(
@@ -138,7 +135,4 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

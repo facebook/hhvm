@@ -10,89 +10,89 @@ from thrift.python.capi.cpp_converter cimport cpp_to_python, python_to_cpp
 from libcpp.utility cimport move as cmove
 
 cdef extern from "thrift/compiler/test/fixtures/python_capi/gen-python-capi/module/thrift_types_capi.h":
-    pass
+    cdef cppclass _fbthrift__NamespaceTag "test__fixtures__python_capi__module::NamespaceTag"
 
 cdef cMyStruct MyStruct_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cMyStruct](inst))
+    return cmove(python_to_cpp[cMyStruct, _fbthrift__NamespaceTag](inst))
 
 cdef object MyStruct_from_cpp(const cMyStruct& c_struct):
-    return cpp_to_python[cMyStruct](c_struct)
+    return cpp_to_python[cMyStruct, _fbthrift__NamespaceTag](c_struct)
 
 cdef cMyDataItem MyDataItem_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cMyDataItem](inst))
+    return cmove(python_to_cpp[cMyDataItem, _fbthrift__NamespaceTag](inst))
 
 cdef object MyDataItem_from_cpp(const cMyDataItem& c_struct):
-    return cpp_to_python[cMyDataItem](c_struct)
+    return cpp_to_python[cMyDataItem, _fbthrift__NamespaceTag](c_struct)
 
 cdef cTransitiveDoubler TransitiveDoubler_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cTransitiveDoubler](inst))
+    return cmove(python_to_cpp[cTransitiveDoubler, _fbthrift__NamespaceTag](inst))
 
 cdef object TransitiveDoubler_from_cpp(const cTransitiveDoubler& c_struct):
-    return cpp_to_python[cTransitiveDoubler](c_struct)
+    return cpp_to_python[cTransitiveDoubler, _fbthrift__NamespaceTag](c_struct)
 
 cdef cDoubledPair DoubledPair_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cDoubledPair](inst))
+    return cmove(python_to_cpp[cDoubledPair, _fbthrift__NamespaceTag](inst))
 
 cdef object DoubledPair_from_cpp(const cDoubledPair& c_struct):
-    return cpp_to_python[cDoubledPair](c_struct)
+    return cpp_to_python[cDoubledPair, _fbthrift__NamespaceTag](c_struct)
 
 cdef cStringPair StringPair_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cStringPair](inst))
+    return cmove(python_to_cpp[cStringPair, _fbthrift__NamespaceTag](inst))
 
 cdef object StringPair_from_cpp(const cStringPair& c_struct):
-    return cpp_to_python[cStringPair](c_struct)
+    return cpp_to_python[cStringPair, _fbthrift__NamespaceTag](c_struct)
 
 cdef cEmptyStruct EmptyStruct_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cEmptyStruct](inst))
+    return cmove(python_to_cpp[cEmptyStruct, _fbthrift__NamespaceTag](inst))
 
 cdef object EmptyStruct_from_cpp(const cEmptyStruct& c_struct):
-    return cpp_to_python[cEmptyStruct](c_struct)
+    return cpp_to_python[cEmptyStruct, _fbthrift__NamespaceTag](c_struct)
 
 cdef cPrimitiveStruct PrimitiveStruct_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cPrimitiveStruct](inst))
+    return cmove(python_to_cpp[cPrimitiveStruct, _fbthrift__NamespaceTag](inst))
 
 cdef object PrimitiveStruct_from_cpp(const cPrimitiveStruct& c_struct):
-    return cpp_to_python[cPrimitiveStruct](c_struct)
+    return cpp_to_python[cPrimitiveStruct, _fbthrift__NamespaceTag](c_struct)
 
 cdef cAdaptedFields AdaptedFields_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cAdaptedFields](inst))
+    return cmove(python_to_cpp[cAdaptedFields, _fbthrift__NamespaceTag](inst))
 
 cdef object AdaptedFields_from_cpp(const cAdaptedFields& c_struct):
-    return cpp_to_python[cAdaptedFields](c_struct)
+    return cpp_to_python[cAdaptedFields, _fbthrift__NamespaceTag](c_struct)
 
 cdef cListStruct ListStruct_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cListStruct](inst))
+    return cmove(python_to_cpp[cListStruct, _fbthrift__NamespaceTag](inst))
 
 cdef object ListStruct_from_cpp(const cListStruct& c_struct):
-    return cpp_to_python[cListStruct](c_struct)
+    return cpp_to_python[cListStruct, _fbthrift__NamespaceTag](c_struct)
 
 cdef cSetStruct SetStruct_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cSetStruct](inst))
+    return cmove(python_to_cpp[cSetStruct, _fbthrift__NamespaceTag](inst))
 
 cdef object SetStruct_from_cpp(const cSetStruct& c_struct):
-    return cpp_to_python[cSetStruct](c_struct)
+    return cpp_to_python[cSetStruct, _fbthrift__NamespaceTag](c_struct)
 
 cdef cMapStruct MapStruct_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cMapStruct](inst))
+    return cmove(python_to_cpp[cMapStruct, _fbthrift__NamespaceTag](inst))
 
 cdef object MapStruct_from_cpp(const cMapStruct& c_struct):
-    return cpp_to_python[cMapStruct](c_struct)
+    return cpp_to_python[cMapStruct, _fbthrift__NamespaceTag](c_struct)
 
 cdef cComposeStruct ComposeStruct_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cComposeStruct](inst))
+    return cmove(python_to_cpp[cComposeStruct, _fbthrift__NamespaceTag](inst))
 
 cdef object ComposeStruct_from_cpp(const cComposeStruct& c_struct):
-    return cpp_to_python[cComposeStruct](c_struct)
+    return cpp_to_python[cComposeStruct, _fbthrift__NamespaceTag](c_struct)
 
 cdef cOnion Onion_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cOnion](inst))
+    return cmove(python_to_cpp[cOnion, _fbthrift__NamespaceTag](inst))
 
 cdef object Onion_from_cpp(const cOnion& c_struct):
-    return cpp_to_python[cOnion](c_struct)
+    return cpp_to_python[cOnion, _fbthrift__NamespaceTag](c_struct)
 
 cdef cSomeBinary SomeBinary_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cSomeBinary](inst))
+    return cmove(python_to_cpp[cSomeBinary, _fbthrift__NamespaceTag](inst))
 
 cdef object SomeBinary_from_cpp(const cSomeBinary& c_struct):
-    return cpp_to_python[cSomeBinary](c_struct)
+    return cpp_to_python[cSomeBinary, _fbthrift__NamespaceTag](c_struct)
 

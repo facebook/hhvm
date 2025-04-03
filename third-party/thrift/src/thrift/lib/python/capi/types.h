@@ -143,12 +143,22 @@ struct native<ComposedEnum<T>> {
   using type = T;
 };
 
-template <typename T>
+template <typename T, typename NamespaceTag>
 struct ComposedStruct {};
 
-template <typename T>
-struct native<ComposedStruct<T>> {
+template <typename T, typename NamespaceTag>
+struct native<ComposedStruct<T, NamespaceTag>> {
   using type = T;
+};
+
+// A wrapper that adds a py3 namespace tag to avoid ODR
+// issues when namespace cpp2 is insufficiently unique.
+template <typename CppT, typename NamespaceTag>
+struct PythonNamespaced {};
+
+template <typename CppT, typename NamespaceTag>
+struct native<PythonNamespaced<CppT, NamespaceTag>> {
+  using type = CppT;
 };
 
 // T is the element type, CppT is the full type

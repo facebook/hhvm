@@ -15,10 +15,7 @@
 #include <thrift/compiler/test/fixtures/int_limits/gen-python-capi/module/thrift_types_capi.h>
 
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace apache::thrift::python::capi {
 namespace {
 bool ensure_module_imported() {
   static ::folly::python::import_cache_nocapture import((
@@ -31,7 +28,7 @@ bool ensure_module_imported() {
 } // namespace
 
 ExtractorResult<::cpp2::Limits>
-Extractor<::cpp2::Limits>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Limits, ::module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -42,12 +39,12 @@ Extractor<::cpp2::Limits>::operator()(PyObject* obj) {
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::Limits>>{}(*fbThriftData);
+      ::cpp2::Limits, ::module::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::cpp2::Limits>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::Limits>>::operator()(PyObject* fbThriftData) {
+    ::cpp2::Limits, ::module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::Limits cpp;
   std::optional<std::string_view> error;
   Extractor<int64_t>{}.extractInto(
@@ -89,7 +86,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::cpp2::Limits>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Limits, ::module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module module import error");
@@ -104,14 +101,14 @@ int Extractor<::cpp2::Limits>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<::cpp2::Limits>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Limits, ::module::NamespaceTag>>::operator()(
     const ::cpp2::Limits& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Limits>> ctor;
+        ::cpp2::Limits, ::module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -120,7 +117,7 @@ PyObject* Constructor<::cpp2::Limits>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Limits>>::operator()(
+        ::cpp2::Limits, ::module::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::cpp2::Limits& val) {
   StrongRef fbthrift_data(createStructTuple(8));
   StrongRef _fbthrift__max_i64_field(
@@ -207,7 +204,4 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

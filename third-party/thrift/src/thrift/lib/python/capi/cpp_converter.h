@@ -44,9 +44,10 @@ namespace apache::thrift::python::capi {
  * error is raised by `Constructor`. Cython will handle properly because
  * `object` returns are implicitly `except nullptr`.
  */
-template <typename CppThrift>
+template <typename CppThrift, typename PythonNamespaceTag>
 PyObject* cpp_to_python(const CppThrift& cppThrift) {
-  return Constructor<CppThrift>{}(cppThrift);
+  return Constructor<PythonNamespaced<CppThrift, PythonNamespaceTag>>{}(
+      cppThrift);
 }
 
 /**
@@ -56,9 +57,10 @@ PyObject* cpp_to_python(const CppThrift& cppThrift) {
  * but this should be ignored because error raised.
  * Should be used with `except *` in cython to ensure proper error handling.
  */
-template <typename CppThrift>
+template <typename CppThrift, typename PythonNamespaceTag>
 CppThrift python_to_cpp(PyObject* obj) {
-  auto extracted = Extractor<CppThrift>{}(obj);
+  auto extracted =
+      Extractor<PythonNamespaced<CppThrift, PythonNamespaceTag>>{}(obj);
   if (extracted.hasValue()) {
     return std::move(*extracted);
   }
@@ -74,9 +76,10 @@ CppThrift python_to_cpp(PyObject* obj) {
  * python error (and clearing it) in the process using PyErr_Fetch.
  * Should be used with `except +` in cython to ensure proper error handling.
  */
-template <typename CppThrift>
+template <typename CppThrift, typename PythonNamespaceTag>
 CppThrift python_to_cpp_throws(PyObject* obj) {
-  auto extracted = Extractor<CppThrift>{}(obj);
+  auto extracted =
+      Extractor<PythonNamespaced<CppThrift, PythonNamespaceTag>>{}(obj);
   if (extracted.hasValue()) {
     return std::move(*extracted);
   }

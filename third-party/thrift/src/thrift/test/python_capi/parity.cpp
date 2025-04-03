@@ -19,23 +19,34 @@
 
 namespace apache::thrift::test {
 
+template <typename T>
+using Namespaced = ::apache::thrift::python::capi::PythonNamespaced<
+    T,
+    ::thrift__test__python_capi__serialized_dep::NamespaceTag>;
+
 static_assert(
-    Constructor<::thrift::test::python_capi::MarshalStruct>::kUsingMarshal,
+    Constructor<
+        Namespaced<::thrift::test::python_capi::MarshalStruct>>::kUsingMarshal,
     "Should be marshaled due to UseCAPI annnotation");
 static_assert(
-    !Constructor<::thrift::test::python_capi::SerializedStruct>::kUsingMarshal,
+    !Constructor<Namespaced<::thrift::test::python_capi::SerializedStruct>>::
+        kUsingMarshal,
     "Should be serialized due to UseCAPI annnotation");
 static_assert(
-    Constructor<::thrift::test::python_capi::MarshalUnion>::kUsingMarshal,
+    Constructor<
+        Namespaced<::thrift::test::python_capi::MarshalUnion>>::kUsingMarshal,
     "Should be marshaled due to UseCAPI annnotation");
 static_assert(
-    !Constructor<::thrift::test::python_capi::SerializedUnion>::kUsingMarshal,
+    !Constructor<Namespaced<::thrift::test::python_capi::SerializedUnion>>::
+        kUsingMarshal,
     "Should be serialized due to UseCAPI annnotation");
 static_assert(
-    Constructor<::thrift::test::python_capi::MarshalError>::kUsingMarshal,
+    Constructor<
+        Namespaced<::thrift::test::python_capi::MarshalError>>::kUsingMarshal,
     "Should be marshaled due to UseCAPI annnotation");
 static_assert(
-    !Constructor<::thrift::test::python_capi::SerializedError>::kUsingMarshal,
+    !Constructor<Namespaced<::thrift::test::python_capi::SerializedError>>::
+        kUsingMarshal,
     "Should be serialized due to UseCAPI annnotation");
 
 } // namespace apache::thrift::test

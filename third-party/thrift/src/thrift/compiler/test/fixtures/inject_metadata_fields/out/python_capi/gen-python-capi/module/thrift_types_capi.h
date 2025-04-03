@@ -14,13 +14,16 @@
 
 #include <thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/module_types.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace module {
+
+struct NamespaceTag {};
+
+} // namespace module
+
+namespace apache::thrift::python::capi {
 template <>
-struct Extractor<::cpp2::Fields>
-    : public BaseExtractor<::cpp2::Fields> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Fields, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Fields, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::Fields> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -28,30 +31,30 @@ struct Extractor<::cpp2::Fields>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Fields>>
+        ::cpp2::Fields, ::module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Fields>> {
+        ::cpp2::Fields, ::module::NamespaceTag>> {
   ExtractorResult<::cpp2::Fields> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::Fields>
-    : public BaseConstructor<::cpp2::Fields> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Fields, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Fields, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::Fields& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Fields>>
+        ::cpp2::Fields, ::module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Fields>> {
+        ::cpp2::Fields, ::module::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::Fields& val);
 };
 
 template <>
-struct Extractor<::cpp2::FieldsInjectedToEmptyStruct>
-    : public BaseExtractor<::cpp2::FieldsInjectedToEmptyStruct> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::FieldsInjectedToEmptyStruct, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::FieldsInjectedToEmptyStruct, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::FieldsInjectedToEmptyStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -59,30 +62,30 @@ struct Extractor<::cpp2::FieldsInjectedToEmptyStruct>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::FieldsInjectedToEmptyStruct>>
+        ::cpp2::FieldsInjectedToEmptyStruct, ::module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::FieldsInjectedToEmptyStruct>> {
+        ::cpp2::FieldsInjectedToEmptyStruct, ::module::NamespaceTag>> {
   ExtractorResult<::cpp2::FieldsInjectedToEmptyStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::FieldsInjectedToEmptyStruct>
-    : public BaseConstructor<::cpp2::FieldsInjectedToEmptyStruct> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::FieldsInjectedToEmptyStruct, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::FieldsInjectedToEmptyStruct, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::FieldsInjectedToEmptyStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::FieldsInjectedToEmptyStruct>>
+        ::cpp2::FieldsInjectedToEmptyStruct, ::module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::FieldsInjectedToEmptyStruct>> {
+        ::cpp2::FieldsInjectedToEmptyStruct, ::module::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::FieldsInjectedToEmptyStruct& val);
 };
 
 template <>
-struct Extractor<::cpp2::FieldsInjectedToStruct>
-    : public BaseExtractor<::cpp2::FieldsInjectedToStruct> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::FieldsInjectedToStruct, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::FieldsInjectedToStruct, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::FieldsInjectedToStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -90,30 +93,30 @@ struct Extractor<::cpp2::FieldsInjectedToStruct>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::FieldsInjectedToStruct>>
+        ::cpp2::FieldsInjectedToStruct, ::module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::FieldsInjectedToStruct>> {
+        ::cpp2::FieldsInjectedToStruct, ::module::NamespaceTag>> {
   ExtractorResult<::cpp2::FieldsInjectedToStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::FieldsInjectedToStruct>
-    : public BaseConstructor<::cpp2::FieldsInjectedToStruct> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::FieldsInjectedToStruct, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::FieldsInjectedToStruct, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::FieldsInjectedToStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::FieldsInjectedToStruct>>
+        ::cpp2::FieldsInjectedToStruct, ::module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::FieldsInjectedToStruct>> {
+        ::cpp2::FieldsInjectedToStruct, ::module::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::FieldsInjectedToStruct& val);
 };
 
 template <>
-struct Extractor<::cpp2::FieldsInjectedWithIncludedStruct>
-    : public BaseExtractor<::cpp2::FieldsInjectedWithIncludedStruct> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::FieldsInjectedWithIncludedStruct, ::module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::FieldsInjectedWithIncludedStruct, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::FieldsInjectedWithIncludedStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -121,28 +124,25 @@ struct Extractor<::cpp2::FieldsInjectedWithIncludedStruct>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::FieldsInjectedWithIncludedStruct>>
+        ::cpp2::FieldsInjectedWithIncludedStruct, ::module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::FieldsInjectedWithIncludedStruct>> {
+        ::cpp2::FieldsInjectedWithIncludedStruct, ::module::NamespaceTag>> {
   ExtractorResult<::cpp2::FieldsInjectedWithIncludedStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::FieldsInjectedWithIncludedStruct>
-    : public BaseConstructor<::cpp2::FieldsInjectedWithIncludedStruct> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::FieldsInjectedWithIncludedStruct, ::module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::FieldsInjectedWithIncludedStruct, ::module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::FieldsInjectedWithIncludedStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::FieldsInjectedWithIncludedStruct>>
+        ::cpp2::FieldsInjectedWithIncludedStruct, ::module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::FieldsInjectedWithIncludedStruct>> {
+        ::cpp2::FieldsInjectedWithIncludedStruct, ::module::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::FieldsInjectedWithIncludedStruct& val);
 };
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

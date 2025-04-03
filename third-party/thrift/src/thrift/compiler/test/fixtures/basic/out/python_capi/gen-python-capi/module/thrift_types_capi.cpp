@@ -15,10 +15,7 @@
 #include <thrift/compiler/test/fixtures/basic/gen-python-capi/module/thrift_types_capi.h>
 
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace apache::thrift::python::capi {
 namespace {
 bool ensure_module_imported() {
   static ::folly::python::import_cache_nocapture import((
@@ -43,7 +40,7 @@ bool ensure_module_imported() {
 } // namespace
 
 ExtractorResult<::test::fixtures::basic::MyStruct>
-Extractor<::test::fixtures::basic::MyStruct>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyStruct, ::test__fixtures__basic__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -54,12 +51,12 @@ Extractor<::test::fixtures::basic::MyStruct>::operator()(PyObject* obj) {
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::test::fixtures::basic::MyStruct>>{}(*fbThriftData);
+      ::test::fixtures::basic::MyStruct, ::test__fixtures__basic__module::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::test::fixtures::basic::MyStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::basic::MyStruct>>::operator()(PyObject* fbThriftData) {
+    ::test::fixtures::basic::MyStruct, ::test__fixtures__basic__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::basic::MyStruct cpp;
   std::optional<std::string_view> error;
   Extractor<int64_t>{}.extractInto(
@@ -70,7 +67,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       cpp.MyStringField_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyStruct__tuple_pos[1]),
       error);
-  Extractor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyDataItem>>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyDataItem, ::test__fixtures__basic__module::NamespaceTag>>{}.extractInto(
       cpp.MyDataField_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyStruct__tuple_pos[2]),
       error);
@@ -105,7 +102,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::test::fixtures::basic::MyStruct>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyStruct, ::test__fixtures__basic__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.basic.module import error");
@@ -120,14 +117,14 @@ int Extractor<::test::fixtures::basic::MyStruct>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<::test::fixtures::basic::MyStruct>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyStruct, ::test__fixtures__basic__module::NamespaceTag>>::operator()(
     const ::test::fixtures::basic::MyStruct& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyStruct>> ctor;
+        ::test::fixtures::basic::MyStruct, ::test__fixtures__basic__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -136,7 +133,7 @@ PyObject* Constructor<::test::fixtures::basic::MyStruct>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyStruct>>::operator()(
+        ::test::fixtures::basic::MyStruct, ::test__fixtures__basic__module::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::test::fixtures::basic::MyStruct& val) {
   StrongRef fbthrift_data(createStructTuple(9));
   StrongRef _fbthrift__MyIntField(
@@ -160,7 +157,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__MyDataField(
-    Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyDataItem>>{}
+    Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyDataItem, ::test__fixtures__basic__module::NamespaceTag>>{}
     .constructFrom(val.MyDataField_ref()));
   if (!_fbthrift__MyDataField ||
       setStructField(
@@ -234,7 +231,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::test::fixtures::basic::Containers>
-Extractor<::test::fixtures::basic::Containers>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::Containers, ::test__fixtures__basic__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -245,12 +242,12 @@ Extractor<::test::fixtures::basic::Containers>::operator()(PyObject* obj) {
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::test::fixtures::basic::Containers>>{}(*fbThriftData);
+      ::test::fixtures::basic::Containers, ::test__fixtures__basic__module::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::test::fixtures::basic::Containers>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::basic::Containers>>::operator()(PyObject* fbThriftData) {
+    ::test::fixtures::basic::Containers, ::test__fixtures__basic__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::basic::Containers cpp;
   std::optional<std::string_view> error;
   Extractor<list<int32_t>>{}.extractInto(
@@ -272,7 +269,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::test::fixtures::basic::Containers>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::Containers, ::test__fixtures__basic__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.basic.module import error");
@@ -287,14 +284,14 @@ int Extractor<::test::fixtures::basic::Containers>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<::test::fixtures::basic::Containers>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::Containers, ::test__fixtures__basic__module::NamespaceTag>>::operator()(
     const ::test::fixtures::basic::Containers& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::Containers>> ctor;
+        ::test::fixtures::basic::Containers, ::test__fixtures__basic__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -303,7 +300,7 @@ PyObject* Constructor<::test::fixtures::basic::Containers>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::Containers>>::operator()(
+        ::test::fixtures::basic::Containers, ::test__fixtures__basic__module::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::test::fixtures::basic::Containers& val) {
   StrongRef fbthrift_data(createStructTuple(3));
   StrongRef _fbthrift__I32List(
@@ -341,7 +338,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::test::fixtures::basic::MyDataItem>
-Extractor<::test::fixtures::basic::MyDataItem>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyDataItem, ::test__fixtures__basic__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -355,14 +352,14 @@ Extractor<::test::fixtures::basic::MyDataItem>::operator()(PyObject* obj) {
 
 ExtractorResult<::test::fixtures::basic::MyDataItem>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::basic::MyDataItem>>::operator()(PyObject* fbThriftData) {
+    ::test::fixtures::basic::MyDataItem, ::test__fixtures__basic__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::basic::MyDataItem cpp;
   (void)fbThriftData;
   return cpp;
 }
 
 
-int Extractor<::test::fixtures::basic::MyDataItem>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyDataItem, ::test__fixtures__basic__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.basic.module import error");
@@ -377,14 +374,14 @@ int Extractor<::test::fixtures::basic::MyDataItem>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<::test::fixtures::basic::MyDataItem>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyDataItem, ::test__fixtures__basic__module::NamespaceTag>>::operator()(
     const ::test::fixtures::basic::MyDataItem& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyDataItem>> ctor;
+        ::test::fixtures::basic::MyDataItem, ::test__fixtures__basic__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -393,7 +390,7 @@ PyObject* Constructor<::test::fixtures::basic::MyDataItem>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyDataItem>>::operator()(
+        ::test::fixtures::basic::MyDataItem, ::test__fixtures__basic__module::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::test::fixtures::basic::MyDataItem& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
@@ -401,7 +398,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::test::fixtures::basic::MyUnion>
-Extractor<::test::fixtures::basic::MyUnion>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyUnion, ::test__fixtures__basic__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -412,12 +409,12 @@ Extractor<::test::fixtures::basic::MyUnion>::operator()(PyObject* obj) {
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::test::fixtures::basic::MyUnion>>{}(*fbThriftData);
+      ::test::fixtures::basic::MyUnion, ::test__fixtures__basic__module::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::test::fixtures::basic::MyUnion>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::basic::MyUnion>>::operator()(PyObject* fbThriftData) {
+    ::test::fixtures::basic::MyUnion, ::test__fixtures__basic__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::basic::MyUnion cpp;
   std::optional<std::string_view> error;
   auto type_tag = Extractor<int64_t>{}(PyTuple_GET_ITEM(fbThriftData, 0));
@@ -432,11 +429,11 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
           cpp.myEnum_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
     case 2:
-      Extractor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyStruct>>{}.extractInto(
+      Extractor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyStruct, ::test__fixtures__basic__module::NamespaceTag>>{}.extractInto(
           cpp.myStruct_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
     case 3:
-      Extractor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyDataItem>>{}.extractInto(
+      Extractor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyDataItem, ::test__fixtures__basic__module::NamespaceTag>>{}.extractInto(
           cpp.myDataItem_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
     case 4:
@@ -451,7 +448,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::test::fixtures::basic::MyUnion>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyUnion, ::test__fixtures__basic__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.basic.module import error");
@@ -466,14 +463,14 @@ int Extractor<::test::fixtures::basic::MyUnion>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<::test::fixtures::basic::MyUnion>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyUnion, ::test__fixtures__basic__module::NamespaceTag>>::operator()(
     const ::test::fixtures::basic::MyUnion& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyUnion>> ctor;
+        ::test::fixtures::basic::MyUnion, ::test__fixtures__basic__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -482,7 +479,7 @@ PyObject* Constructor<::test::fixtures::basic::MyUnion>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyUnion>>::operator()(
+        ::test::fixtures::basic::MyUnion, ::test__fixtures__basic__module::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::test::fixtures::basic::MyUnion& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
@@ -498,12 +495,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       break;
     case 2:
       py_val = StrongRef(
-          Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyStruct>>{}
+          Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyStruct, ::test__fixtures__basic__module::NamespaceTag>>{}
           .constructFrom(val.myStruct_ref()));
       break;
     case 3:
       py_val = StrongRef(
-          Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyDataItem>>{}
+          Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyDataItem, ::test__fixtures__basic__module::NamespaceTag>>{}
           .constructFrom(val.myDataItem_ref()));
       break;
     case 4:
@@ -520,7 +517,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::test::fixtures::basic::MyException>
-Extractor<::test::fixtures::basic::MyException>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyException, ::test__fixtures__basic__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -531,12 +528,12 @@ Extractor<::test::fixtures::basic::MyException>::operator()(PyObject* obj) {
   }
   StrongRef fbThriftData(getExceptionThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::test::fixtures::basic::MyException>>{}(*fbThriftData);
+      ::test::fixtures::basic::MyException, ::test__fixtures__basic__module::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::test::fixtures::basic::MyException>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::basic::MyException>>::operator()(PyObject* fbThriftData) {
+    ::test::fixtures::basic::MyException, ::test__fixtures__basic__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::basic::MyException cpp;
   std::optional<std::string_view> error;
   Extractor<int64_t>{}.extractInto(
@@ -547,11 +544,11 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       cpp.MyStringField_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyException__tuple_pos[1]),
       error);
-  Extractor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyStruct>>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyStruct, ::test__fixtures__basic__module::NamespaceTag>>{}.extractInto(
       cpp.myStruct_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyException__tuple_pos[2]),
       error);
-  Extractor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyUnion>>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyUnion, ::test__fixtures__basic__module::NamespaceTag>>{}.extractInto(
       cpp.myUnion_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyException__tuple_pos[3]),
       error);
@@ -562,7 +559,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::test::fixtures::basic::MyException>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyException, ::test__fixtures__basic__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.basic.module import error");
@@ -577,14 +574,14 @@ int Extractor<::test::fixtures::basic::MyException>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<::test::fixtures::basic::MyException>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyException, ::test__fixtures__basic__module::NamespaceTag>>::operator()(
     const ::test::fixtures::basic::MyException& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyException>> ctor;
+        ::test::fixtures::basic::MyException, ::test__fixtures__basic__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -593,7 +590,7 @@ PyObject* Constructor<::test::fixtures::basic::MyException>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyException>>::operator()(
+        ::test::fixtures::basic::MyException, ::test__fixtures__basic__module::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::test::fixtures::basic::MyException& val) {
   StrongRef fbthrift_data(createStructTuple(4));
   StrongRef _fbthrift__MyIntField(
@@ -617,7 +614,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__myStruct(
-    Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyStruct>>{}
+    Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyStruct, ::test__fixtures__basic__module::NamespaceTag>>{}
     .constructFrom(val.myStruct_ref()));
   if (!_fbthrift__myStruct ||
       setStructField(
@@ -627,7 +624,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__myUnion(
-    Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyUnion>>{}
+    Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyUnion, ::test__fixtures__basic__module::NamespaceTag>>{}
     .constructFrom(val.myUnion_ref()));
   if (!_fbthrift__myUnion ||
       setStructField(
@@ -641,7 +638,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::test::fixtures::basic::MyExceptionWithMessage>
-Extractor<::test::fixtures::basic::MyExceptionWithMessage>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyExceptionWithMessage, ::test__fixtures__basic__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -652,12 +649,12 @@ Extractor<::test::fixtures::basic::MyExceptionWithMessage>::operator()(PyObject*
   }
   StrongRef fbThriftData(getExceptionThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::test::fixtures::basic::MyExceptionWithMessage>>{}(*fbThriftData);
+      ::test::fixtures::basic::MyExceptionWithMessage, ::test__fixtures__basic__module::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::test::fixtures::basic::MyExceptionWithMessage>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::basic::MyExceptionWithMessage>>::operator()(PyObject* fbThriftData) {
+    ::test::fixtures::basic::MyExceptionWithMessage, ::test__fixtures__basic__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::basic::MyExceptionWithMessage cpp;
   std::optional<std::string_view> error;
   Extractor<int64_t>{}.extractInto(
@@ -668,11 +665,11 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       cpp.MyStringField_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyExceptionWithMessage__tuple_pos[1]),
       error);
-  Extractor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyStruct>>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyStruct, ::test__fixtures__basic__module::NamespaceTag>>{}.extractInto(
       cpp.myStruct_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyExceptionWithMessage__tuple_pos[2]),
       error);
-  Extractor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyUnion>>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyUnion, ::test__fixtures__basic__module::NamespaceTag>>{}.extractInto(
       cpp.myUnion_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__MyExceptionWithMessage__tuple_pos[3]),
       error);
@@ -683,7 +680,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::test::fixtures::basic::MyExceptionWithMessage>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyExceptionWithMessage, ::test__fixtures__basic__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.basic.module import error");
@@ -698,14 +695,14 @@ int Extractor<::test::fixtures::basic::MyExceptionWithMessage>::typeCheck(PyObje
 }
 
 
-PyObject* Constructor<::test::fixtures::basic::MyExceptionWithMessage>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyExceptionWithMessage, ::test__fixtures__basic__module::NamespaceTag>>::operator()(
     const ::test::fixtures::basic::MyExceptionWithMessage& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyExceptionWithMessage>> ctor;
+        ::test::fixtures::basic::MyExceptionWithMessage, ::test__fixtures__basic__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -714,7 +711,7 @@ PyObject* Constructor<::test::fixtures::basic::MyExceptionWithMessage>::operator
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyExceptionWithMessage>>::operator()(
+        ::test::fixtures::basic::MyExceptionWithMessage, ::test__fixtures__basic__module::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::test::fixtures::basic::MyExceptionWithMessage& val) {
   StrongRef fbthrift_data(createStructTuple(4));
   StrongRef _fbthrift__MyIntField(
@@ -738,7 +735,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__myStruct(
-    Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyStruct>>{}
+    Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyStruct, ::test__fixtures__basic__module::NamespaceTag>>{}
     .constructFrom(val.myStruct_ref()));
   if (!_fbthrift__myStruct ||
       setStructField(
@@ -748,7 +745,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__myUnion(
-    Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyUnion>>{}
+    Constructor<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::basic::MyUnion, ::test__fixtures__basic__module::NamespaceTag>>{}
     .constructFrom(val.myUnion_ref()));
   if (!_fbthrift__myUnion ||
       setStructField(
@@ -762,7 +759,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::test::fixtures::basic::ReservedKeyword>
-Extractor<::test::fixtures::basic::ReservedKeyword>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::ReservedKeyword, ::test__fixtures__basic__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -773,12 +770,12 @@ Extractor<::test::fixtures::basic::ReservedKeyword>::operator()(PyObject* obj) {
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::test::fixtures::basic::ReservedKeyword>>{}(*fbThriftData);
+      ::test::fixtures::basic::ReservedKeyword, ::test__fixtures__basic__module::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::test::fixtures::basic::ReservedKeyword>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::basic::ReservedKeyword>>::operator()(PyObject* fbThriftData) {
+    ::test::fixtures::basic::ReservedKeyword, ::test__fixtures__basic__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::basic::ReservedKeyword cpp;
   std::optional<std::string_view> error;
   Extractor<int32_t>{}.extractInto(
@@ -792,7 +789,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::test::fixtures::basic::ReservedKeyword>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::ReservedKeyword, ::test__fixtures__basic__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.basic.module import error");
@@ -807,14 +804,14 @@ int Extractor<::test::fixtures::basic::ReservedKeyword>::typeCheck(PyObject* obj
 }
 
 
-PyObject* Constructor<::test::fixtures::basic::ReservedKeyword>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::ReservedKeyword, ::test__fixtures__basic__module::NamespaceTag>>::operator()(
     const ::test::fixtures::basic::ReservedKeyword& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::ReservedKeyword>> ctor;
+        ::test::fixtures::basic::ReservedKeyword, ::test__fixtures__basic__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -823,7 +820,7 @@ PyObject* Constructor<::test::fixtures::basic::ReservedKeyword>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::ReservedKeyword>>::operator()(
+        ::test::fixtures::basic::ReservedKeyword, ::test__fixtures__basic__module::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::test::fixtures::basic::ReservedKeyword& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__reserved_field(
@@ -841,7 +838,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::test::fixtures::basic::UnionToBeRenamed>
-Extractor<::test::fixtures::basic::UnionToBeRenamed>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::UnionToBeRenamed, ::test__fixtures__basic__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -852,12 +849,12 @@ Extractor<::test::fixtures::basic::UnionToBeRenamed>::operator()(PyObject* obj) 
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::test::fixtures::basic::UnionToBeRenamed>>{}(*fbThriftData);
+      ::test::fixtures::basic::UnionToBeRenamed, ::test__fixtures__basic__module::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::test::fixtures::basic::UnionToBeRenamed>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::basic::UnionToBeRenamed>>::operator()(PyObject* fbThriftData) {
+    ::test::fixtures::basic::UnionToBeRenamed, ::test__fixtures__basic__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::basic::UnionToBeRenamed cpp;
   std::optional<std::string_view> error;
   auto type_tag = Extractor<int64_t>{}(PyTuple_GET_ITEM(fbThriftData, 0));
@@ -879,7 +876,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::test::fixtures::basic::UnionToBeRenamed>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::UnionToBeRenamed, ::test__fixtures__basic__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.basic.module import error");
@@ -894,14 +891,14 @@ int Extractor<::test::fixtures::basic::UnionToBeRenamed>::typeCheck(PyObject* ob
 }
 
 
-PyObject* Constructor<::test::fixtures::basic::UnionToBeRenamed>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::UnionToBeRenamed, ::test__fixtures__basic__module::NamespaceTag>>::operator()(
     const ::test::fixtures::basic::UnionToBeRenamed& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::UnionToBeRenamed>> ctor;
+        ::test::fixtures::basic::UnionToBeRenamed, ::test__fixtures__basic__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -910,7 +907,7 @@ PyObject* Constructor<::test::fixtures::basic::UnionToBeRenamed>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::UnionToBeRenamed>>::operator()(
+        ::test::fixtures::basic::UnionToBeRenamed, ::test__fixtures__basic__module::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::test::fixtures::basic::UnionToBeRenamed& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
@@ -933,7 +930,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::test::fixtures::basic::MyEnum>
-Extractor<::test::fixtures::basic::MyEnum>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyEnum, ::test__fixtures__basic__module::NamespaceTag>>::operator()(PyObject* obj) {
   long val = PyLong_AsLong(obj);
   if (val == -1 && PyErr_Occurred()) {
     return extractorError<::test::fixtures::basic::MyEnum>(
@@ -942,7 +939,7 @@ Extractor<::test::fixtures::basic::MyEnum>::operator()(PyObject* obj) {
   return static_cast<::test::fixtures::basic::MyEnum>(val);
 }
 
-int Extractor<::test::fixtures::basic::MyEnum>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyEnum, ::test__fixtures__basic__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.basic.module import error");
@@ -957,7 +954,7 @@ int Extractor<::test::fixtures::basic::MyEnum>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<::test::fixtures::basic::MyEnum>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyEnum, ::test__fixtures__basic__module::NamespaceTag>>::operator()(
     ::test::fixtures::basic::MyEnum val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
@@ -972,7 +969,7 @@ PyObject* Constructor<::test::fixtures::basic::MyEnum>::operator()(
 }
 
 ExtractorResult<::test::fixtures::basic::HackEnum>
-Extractor<::test::fixtures::basic::HackEnum>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::HackEnum, ::test__fixtures__basic__module::NamespaceTag>>::operator()(PyObject* obj) {
   long val = PyLong_AsLong(obj);
   if (val == -1 && PyErr_Occurred()) {
     return extractorError<::test::fixtures::basic::HackEnum>(
@@ -981,7 +978,7 @@ Extractor<::test::fixtures::basic::HackEnum>::operator()(PyObject* obj) {
   return static_cast<::test::fixtures::basic::HackEnum>(val);
 }
 
-int Extractor<::test::fixtures::basic::HackEnum>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::HackEnum, ::test__fixtures__basic__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.basic.module import error");
@@ -996,7 +993,7 @@ int Extractor<::test::fixtures::basic::HackEnum>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<::test::fixtures::basic::HackEnum>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::HackEnum, ::test__fixtures__basic__module::NamespaceTag>>::operator()(
     ::test::fixtures::basic::HackEnum val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
@@ -1010,7 +1007,4 @@ PyObject* Constructor<::test::fixtures::basic::HackEnum>::operator()(
   return ptr;
 }
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

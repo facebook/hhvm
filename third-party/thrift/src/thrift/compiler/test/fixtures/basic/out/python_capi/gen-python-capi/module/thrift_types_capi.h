@@ -14,13 +14,16 @@
 
 #include <thrift/compiler/test/fixtures/basic/gen-cpp2/module_types.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace test__fixtures__basic__module {
+
+struct NamespaceTag {};
+
+} // namespace test__fixtures__basic__module
+
+namespace apache::thrift::python::capi {
 template <>
-struct Extractor<::test::fixtures::basic::MyStruct>
-    : public BaseExtractor<::test::fixtures::basic::MyStruct> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyStruct, ::test__fixtures__basic__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyStruct, ::test__fixtures__basic__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::basic::MyStruct> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -28,30 +31,30 @@ struct Extractor<::test::fixtures::basic::MyStruct>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyStruct>>
+        ::test::fixtures::basic::MyStruct, ::test__fixtures__basic__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyStruct>> {
+        ::test::fixtures::basic::MyStruct, ::test__fixtures__basic__module::NamespaceTag>> {
   ExtractorResult<::test::fixtures::basic::MyStruct> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::basic::MyStruct>
-    : public BaseConstructor<::test::fixtures::basic::MyStruct> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyStruct, ::test__fixtures__basic__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyStruct, ::test__fixtures__basic__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::basic::MyStruct& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyStruct>>
+        ::test::fixtures::basic::MyStruct, ::test__fixtures__basic__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyStruct>> {
+        ::test::fixtures::basic::MyStruct, ::test__fixtures__basic__module::NamespaceTag>> {
   PyObject* operator()(const ::test::fixtures::basic::MyStruct& val);
 };
 
 template <>
-struct Extractor<::test::fixtures::basic::Containers>
-    : public BaseExtractor<::test::fixtures::basic::Containers> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::Containers, ::test__fixtures__basic__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::Containers, ::test__fixtures__basic__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::basic::Containers> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -59,30 +62,30 @@ struct Extractor<::test::fixtures::basic::Containers>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::Containers>>
+        ::test::fixtures::basic::Containers, ::test__fixtures__basic__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::Containers>> {
+        ::test::fixtures::basic::Containers, ::test__fixtures__basic__module::NamespaceTag>> {
   ExtractorResult<::test::fixtures::basic::Containers> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::basic::Containers>
-    : public BaseConstructor<::test::fixtures::basic::Containers> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::Containers, ::test__fixtures__basic__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::Containers, ::test__fixtures__basic__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::basic::Containers& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::Containers>>
+        ::test::fixtures::basic::Containers, ::test__fixtures__basic__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::Containers>> {
+        ::test::fixtures::basic::Containers, ::test__fixtures__basic__module::NamespaceTag>> {
   PyObject* operator()(const ::test::fixtures::basic::Containers& val);
 };
 
 template <>
-struct Extractor<::test::fixtures::basic::MyDataItem>
-    : public BaseExtractor<::test::fixtures::basic::MyDataItem> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyDataItem, ::test__fixtures__basic__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyDataItem, ::test__fixtures__basic__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::basic::MyDataItem> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -90,30 +93,30 @@ struct Extractor<::test::fixtures::basic::MyDataItem>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyDataItem>>
+        ::test::fixtures::basic::MyDataItem, ::test__fixtures__basic__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyDataItem>> {
+        ::test::fixtures::basic::MyDataItem, ::test__fixtures__basic__module::NamespaceTag>> {
   ExtractorResult<::test::fixtures::basic::MyDataItem> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::basic::MyDataItem>
-    : public BaseConstructor<::test::fixtures::basic::MyDataItem> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyDataItem, ::test__fixtures__basic__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyDataItem, ::test__fixtures__basic__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::basic::MyDataItem& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyDataItem>>
+        ::test::fixtures::basic::MyDataItem, ::test__fixtures__basic__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyDataItem>> {
+        ::test::fixtures::basic::MyDataItem, ::test__fixtures__basic__module::NamespaceTag>> {
   PyObject* operator()(const ::test::fixtures::basic::MyDataItem& val);
 };
 
 template <>
-struct Extractor<::test::fixtures::basic::MyUnion>
-    : public BaseExtractor<::test::fixtures::basic::MyUnion> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyUnion, ::test__fixtures__basic__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyUnion, ::test__fixtures__basic__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::basic::MyUnion> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -121,30 +124,30 @@ struct Extractor<::test::fixtures::basic::MyUnion>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyUnion>>
+        ::test::fixtures::basic::MyUnion, ::test__fixtures__basic__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyUnion>> {
+        ::test::fixtures::basic::MyUnion, ::test__fixtures__basic__module::NamespaceTag>> {
   ExtractorResult<::test::fixtures::basic::MyUnion> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::basic::MyUnion>
-    : public BaseConstructor<::test::fixtures::basic::MyUnion> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyUnion, ::test__fixtures__basic__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyUnion, ::test__fixtures__basic__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::basic::MyUnion& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyUnion>>
+        ::test::fixtures::basic::MyUnion, ::test__fixtures__basic__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyUnion>> {
+        ::test::fixtures::basic::MyUnion, ::test__fixtures__basic__module::NamespaceTag>> {
   PyObject* operator()(const ::test::fixtures::basic::MyUnion& val);
 };
 
 template <>
-struct Extractor<::test::fixtures::basic::MyException>
-    : public BaseExtractor<::test::fixtures::basic::MyException> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyException, ::test__fixtures__basic__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyException, ::test__fixtures__basic__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::basic::MyException> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -152,30 +155,30 @@ struct Extractor<::test::fixtures::basic::MyException>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyException>>
+        ::test::fixtures::basic::MyException, ::test__fixtures__basic__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyException>> {
+        ::test::fixtures::basic::MyException, ::test__fixtures__basic__module::NamespaceTag>> {
   ExtractorResult<::test::fixtures::basic::MyException> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::basic::MyException>
-    : public BaseConstructor<::test::fixtures::basic::MyException> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyException, ::test__fixtures__basic__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyException, ::test__fixtures__basic__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::basic::MyException& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyException>>
+        ::test::fixtures::basic::MyException, ::test__fixtures__basic__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyException>> {
+        ::test::fixtures::basic::MyException, ::test__fixtures__basic__module::NamespaceTag>> {
   PyObject* operator()(const ::test::fixtures::basic::MyException& val);
 };
 
 template <>
-struct Extractor<::test::fixtures::basic::MyExceptionWithMessage>
-    : public BaseExtractor<::test::fixtures::basic::MyExceptionWithMessage> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyExceptionWithMessage, ::test__fixtures__basic__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyExceptionWithMessage, ::test__fixtures__basic__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::basic::MyExceptionWithMessage> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -183,30 +186,30 @@ struct Extractor<::test::fixtures::basic::MyExceptionWithMessage>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyExceptionWithMessage>>
+        ::test::fixtures::basic::MyExceptionWithMessage, ::test__fixtures__basic__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyExceptionWithMessage>> {
+        ::test::fixtures::basic::MyExceptionWithMessage, ::test__fixtures__basic__module::NamespaceTag>> {
   ExtractorResult<::test::fixtures::basic::MyExceptionWithMessage> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::basic::MyExceptionWithMessage>
-    : public BaseConstructor<::test::fixtures::basic::MyExceptionWithMessage> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyExceptionWithMessage, ::test__fixtures__basic__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyExceptionWithMessage, ::test__fixtures__basic__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::basic::MyExceptionWithMessage& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyExceptionWithMessage>>
+        ::test::fixtures::basic::MyExceptionWithMessage, ::test__fixtures__basic__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::MyExceptionWithMessage>> {
+        ::test::fixtures::basic::MyExceptionWithMessage, ::test__fixtures__basic__module::NamespaceTag>> {
   PyObject* operator()(const ::test::fixtures::basic::MyExceptionWithMessage& val);
 };
 
 template <>
-struct Extractor<::test::fixtures::basic::ReservedKeyword>
-    : public BaseExtractor<::test::fixtures::basic::ReservedKeyword> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::ReservedKeyword, ::test__fixtures__basic__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::ReservedKeyword, ::test__fixtures__basic__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::basic::ReservedKeyword> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -214,30 +217,30 @@ struct Extractor<::test::fixtures::basic::ReservedKeyword>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::ReservedKeyword>>
+        ::test::fixtures::basic::ReservedKeyword, ::test__fixtures__basic__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::ReservedKeyword>> {
+        ::test::fixtures::basic::ReservedKeyword, ::test__fixtures__basic__module::NamespaceTag>> {
   ExtractorResult<::test::fixtures::basic::ReservedKeyword> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::basic::ReservedKeyword>
-    : public BaseConstructor<::test::fixtures::basic::ReservedKeyword> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::ReservedKeyword, ::test__fixtures__basic__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::ReservedKeyword, ::test__fixtures__basic__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::basic::ReservedKeyword& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::ReservedKeyword>>
+        ::test::fixtures::basic::ReservedKeyword, ::test__fixtures__basic__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::ReservedKeyword>> {
+        ::test::fixtures::basic::ReservedKeyword, ::test__fixtures__basic__module::NamespaceTag>> {
   PyObject* operator()(const ::test::fixtures::basic::ReservedKeyword& val);
 };
 
 template <>
-struct Extractor<::test::fixtures::basic::UnionToBeRenamed>
-    : public BaseExtractor<::test::fixtures::basic::UnionToBeRenamed> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::UnionToBeRenamed, ::test__fixtures__basic__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::UnionToBeRenamed, ::test__fixtures__basic__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::basic::UnionToBeRenamed> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -245,52 +248,49 @@ struct Extractor<::test::fixtures::basic::UnionToBeRenamed>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::UnionToBeRenamed>>
+        ::test::fixtures::basic::UnionToBeRenamed, ::test__fixtures__basic__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::UnionToBeRenamed>> {
+        ::test::fixtures::basic::UnionToBeRenamed, ::test__fixtures__basic__module::NamespaceTag>> {
   ExtractorResult<::test::fixtures::basic::UnionToBeRenamed> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::basic::UnionToBeRenamed>
-    : public BaseConstructor<::test::fixtures::basic::UnionToBeRenamed> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::UnionToBeRenamed, ::test__fixtures__basic__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::UnionToBeRenamed, ::test__fixtures__basic__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::basic::UnionToBeRenamed& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::UnionToBeRenamed>>
+        ::test::fixtures::basic::UnionToBeRenamed, ::test__fixtures__basic__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::basic::UnionToBeRenamed>> {
+        ::test::fixtures::basic::UnionToBeRenamed, ::test__fixtures__basic__module::NamespaceTag>> {
   PyObject* operator()(const ::test::fixtures::basic::UnionToBeRenamed& val);
 };
 
 template <>
-struct Extractor<::test::fixtures::basic::MyEnum>
-    : public BaseExtractor<::test::fixtures::basic::MyEnum> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyEnum, ::test__fixtures__basic__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyEnum, ::test__fixtures__basic__module::NamespaceTag>> {
   ExtractorResult<::test::fixtures::basic::MyEnum> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::basic::MyEnum> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::MyEnum, ::test__fixtures__basic__module::NamespaceTag>> {
   PyObject* operator()(::test::fixtures::basic::MyEnum val);
 };
 
 template <>
-struct Extractor<::test::fixtures::basic::HackEnum>
-    : public BaseExtractor<::test::fixtures::basic::HackEnum> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::HackEnum, ::test__fixtures__basic__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::HackEnum, ::test__fixtures__basic__module::NamespaceTag>> {
   ExtractorResult<::test::fixtures::basic::HackEnum> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::basic::HackEnum> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::basic::HackEnum, ::test__fixtures__basic__module::NamespaceTag>> {
   PyObject* operator()(::test::fixtures::basic::HackEnum val);
 };
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

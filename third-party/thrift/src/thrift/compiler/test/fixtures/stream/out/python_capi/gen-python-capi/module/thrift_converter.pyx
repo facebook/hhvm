@@ -10,23 +10,23 @@ from thrift.python.capi.cpp_converter cimport cpp_to_python, python_to_cpp
 from libcpp.utility cimport move as cmove
 
 cdef extern from "thrift/compiler/test/fixtures/stream/gen-python-capi/module/thrift_types_capi.h":
-    pass
+    cdef cppclass _fbthrift__NamespaceTag "module::NamespaceTag"
 
 cdef cFooStreamEx FooStreamEx_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cFooStreamEx](inst))
+    return cmove(python_to_cpp[cFooStreamEx, _fbthrift__NamespaceTag](inst))
 
 cdef object FooStreamEx_from_cpp(const cFooStreamEx& c_struct):
-    return cpp_to_python[cFooStreamEx](c_struct)
+    return cpp_to_python[cFooStreamEx, _fbthrift__NamespaceTag](c_struct)
 
 cdef cFooEx FooEx_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cFooEx](inst))
+    return cmove(python_to_cpp[cFooEx, _fbthrift__NamespaceTag](inst))
 
 cdef object FooEx_from_cpp(const cFooEx& c_struct):
-    return cpp_to_python[cFooEx](c_struct)
+    return cpp_to_python[cFooEx, _fbthrift__NamespaceTag](c_struct)
 
 cdef cFooEx2 FooEx2_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cFooEx2](inst))
+    return cmove(python_to_cpp[cFooEx2, _fbthrift__NamespaceTag](inst))
 
 cdef object FooEx2_from_cpp(const cFooEx2& c_struct):
-    return cpp_to_python[cFooEx2](c_struct)
+    return cpp_to_python[cFooEx2, _fbthrift__NamespaceTag](c_struct)
 

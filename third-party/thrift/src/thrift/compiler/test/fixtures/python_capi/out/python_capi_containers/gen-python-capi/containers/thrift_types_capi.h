@@ -14,13 +14,16 @@
 
 #include <thrift/compiler/test/fixtures/python_capi/gen-cpp2/containers_types.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace test__fixtures__python_capi__containers {
+
+struct NamespaceTag {};
+
+} // namespace test__fixtures__python_capi__containers
+
+namespace apache::thrift::python::capi {
 template <>
-struct Extractor<::test::fixtures::python_capi::TemplateLists>
-    : public BaseExtractor<::test::fixtures::python_capi::TemplateLists> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TemplateLists, ::test__fixtures__python_capi__containers::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TemplateLists, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::python_capi::TemplateLists> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -28,30 +31,30 @@ struct Extractor<::test::fixtures::python_capi::TemplateLists>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::TemplateLists>>
+        ::test::fixtures::python_capi::TemplateLists, ::test__fixtures__python_capi__containers::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::TemplateLists>> {
+        ::test::fixtures::python_capi::TemplateLists, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   ExtractorResult<::test::fixtures::python_capi::TemplateLists> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::python_capi::TemplateLists>
-    : public BaseConstructor<::test::fixtures::python_capi::TemplateLists> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TemplateLists, ::test__fixtures__python_capi__containers::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TemplateLists, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::python_capi::TemplateLists& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::TemplateLists>>
+        ::test::fixtures::python_capi::TemplateLists, ::test__fixtures__python_capi__containers::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::TemplateLists>> {
+        ::test::fixtures::python_capi::TemplateLists, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   PyObject* operator()(const ::test::fixtures::python_capi::TemplateLists& val);
 };
 
 template <>
-struct Extractor<::test::fixtures::python_capi::TemplateSets>
-    : public BaseExtractor<::test::fixtures::python_capi::TemplateSets> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TemplateSets, ::test__fixtures__python_capi__containers::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TemplateSets, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::python_capi::TemplateSets> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -59,30 +62,30 @@ struct Extractor<::test::fixtures::python_capi::TemplateSets>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::TemplateSets>>
+        ::test::fixtures::python_capi::TemplateSets, ::test__fixtures__python_capi__containers::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::TemplateSets>> {
+        ::test::fixtures::python_capi::TemplateSets, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   ExtractorResult<::test::fixtures::python_capi::TemplateSets> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::python_capi::TemplateSets>
-    : public BaseConstructor<::test::fixtures::python_capi::TemplateSets> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TemplateSets, ::test__fixtures__python_capi__containers::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TemplateSets, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::python_capi::TemplateSets& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::TemplateSets>>
+        ::test::fixtures::python_capi::TemplateSets, ::test__fixtures__python_capi__containers::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::TemplateSets>> {
+        ::test::fixtures::python_capi::TemplateSets, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   PyObject* operator()(const ::test::fixtures::python_capi::TemplateSets& val);
 };
 
 template <>
-struct Extractor<::test::fixtures::python_capi::TemplateMaps>
-    : public BaseExtractor<::test::fixtures::python_capi::TemplateMaps> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TemplateMaps, ::test__fixtures__python_capi__containers::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TemplateMaps, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::python_capi::TemplateMaps> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -90,30 +93,30 @@ struct Extractor<::test::fixtures::python_capi::TemplateMaps>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::TemplateMaps>>
+        ::test::fixtures::python_capi::TemplateMaps, ::test__fixtures__python_capi__containers::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::TemplateMaps>> {
+        ::test::fixtures::python_capi::TemplateMaps, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   ExtractorResult<::test::fixtures::python_capi::TemplateMaps> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::python_capi::TemplateMaps>
-    : public BaseConstructor<::test::fixtures::python_capi::TemplateMaps> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TemplateMaps, ::test__fixtures__python_capi__containers::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TemplateMaps, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::python_capi::TemplateMaps& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::TemplateMaps>>
+        ::test::fixtures::python_capi::TemplateMaps, ::test__fixtures__python_capi__containers::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::TemplateMaps>> {
+        ::test::fixtures::python_capi::TemplateMaps, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   PyObject* operator()(const ::test::fixtures::python_capi::TemplateMaps& val);
 };
 
 template <>
-struct Extractor<::test::fixtures::python_capi::TWrapped>
-    : public BaseExtractor<::test::fixtures::python_capi::TWrapped> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TWrapped, ::test__fixtures__python_capi__containers::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TWrapped, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::python_capi::TWrapped> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -121,30 +124,30 @@ struct Extractor<::test::fixtures::python_capi::TWrapped>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::TWrapped>>
+        ::test::fixtures::python_capi::TWrapped, ::test__fixtures__python_capi__containers::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::TWrapped>> {
+        ::test::fixtures::python_capi::TWrapped, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   ExtractorResult<::test::fixtures::python_capi::TWrapped> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::python_capi::TWrapped>
-    : public BaseConstructor<::test::fixtures::python_capi::TWrapped> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TWrapped, ::test__fixtures__python_capi__containers::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TWrapped, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::python_capi::TWrapped& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::TWrapped>>
+        ::test::fixtures::python_capi::TWrapped, ::test__fixtures__python_capi__containers::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::TWrapped>> {
+        ::test::fixtures::python_capi::TWrapped, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   PyObject* operator()(const ::test::fixtures::python_capi::TWrapped& val);
 };
 
 template <>
-struct Extractor<::test::fixtures::python_capi::IndirectionA>
-    : public BaseExtractor<::test::fixtures::python_capi::IndirectionA> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::IndirectionA, ::test__fixtures__python_capi__containers::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::IndirectionA, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::python_capi::IndirectionA> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -152,30 +155,30 @@ struct Extractor<::test::fixtures::python_capi::IndirectionA>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::IndirectionA>>
+        ::test::fixtures::python_capi::IndirectionA, ::test__fixtures__python_capi__containers::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::IndirectionA>> {
+        ::test::fixtures::python_capi::IndirectionA, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   ExtractorResult<::test::fixtures::python_capi::IndirectionA> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::python_capi::IndirectionA>
-    : public BaseConstructor<::test::fixtures::python_capi::IndirectionA> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::IndirectionA, ::test__fixtures__python_capi__containers::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::IndirectionA, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::python_capi::IndirectionA& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::IndirectionA>>
+        ::test::fixtures::python_capi::IndirectionA, ::test__fixtures__python_capi__containers::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::IndirectionA>> {
+        ::test::fixtures::python_capi::IndirectionA, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   PyObject* operator()(const ::test::fixtures::python_capi::IndirectionA& val);
 };
 
 template <>
-struct Extractor<::test::fixtures::python_capi::IndirectionB>
-    : public BaseExtractor<::test::fixtures::python_capi::IndirectionB> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::IndirectionB, ::test__fixtures__python_capi__containers::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::IndirectionB, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::python_capi::IndirectionB> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -183,30 +186,30 @@ struct Extractor<::test::fixtures::python_capi::IndirectionB>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::IndirectionB>>
+        ::test::fixtures::python_capi::IndirectionB, ::test__fixtures__python_capi__containers::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::IndirectionB>> {
+        ::test::fixtures::python_capi::IndirectionB, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   ExtractorResult<::test::fixtures::python_capi::IndirectionB> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::python_capi::IndirectionB>
-    : public BaseConstructor<::test::fixtures::python_capi::IndirectionB> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::IndirectionB, ::test__fixtures__python_capi__containers::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::IndirectionB, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::python_capi::IndirectionB& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::IndirectionB>>
+        ::test::fixtures::python_capi::IndirectionB, ::test__fixtures__python_capi__containers::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::IndirectionB>> {
+        ::test::fixtures::python_capi::IndirectionB, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   PyObject* operator()(const ::test::fixtures::python_capi::IndirectionB& val);
 };
 
 template <>
-struct Extractor<::test::fixtures::python_capi::IndirectionC>
-    : public BaseExtractor<::test::fixtures::python_capi::IndirectionC> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::IndirectionC, ::test__fixtures__python_capi__containers::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::IndirectionC, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::test::fixtures::python_capi::IndirectionC> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -214,28 +217,25 @@ struct Extractor<::test::fixtures::python_capi::IndirectionC>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::IndirectionC>>
+        ::test::fixtures::python_capi::IndirectionC, ::test__fixtures__python_capi__containers::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::IndirectionC>> {
+        ::test::fixtures::python_capi::IndirectionC, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   ExtractorResult<::test::fixtures::python_capi::IndirectionC> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::test::fixtures::python_capi::IndirectionC>
-    : public BaseConstructor<::test::fixtures::python_capi::IndirectionC> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::IndirectionC, ::test__fixtures__python_capi__containers::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::IndirectionC, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::test::fixtures::python_capi::IndirectionC& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::IndirectionC>>
+        ::test::fixtures::python_capi::IndirectionC, ::test__fixtures__python_capi__containers::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::IndirectionC>> {
+        ::test::fixtures::python_capi::IndirectionC, ::test__fixtures__python_capi__containers::NamespaceTag>> {
   PyObject* operator()(const ::test::fixtures::python_capi::IndirectionC& val);
 };
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

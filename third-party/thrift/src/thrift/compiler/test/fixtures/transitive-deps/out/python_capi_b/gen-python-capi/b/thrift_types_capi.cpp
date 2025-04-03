@@ -15,14 +15,8 @@
 #include <thrift/compiler/test/fixtures/transitive-deps/gen-python-capi/b/thrift_types_capi.h>
 
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace apache::thrift::python::capi {
 namespace {
 } // namespace
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

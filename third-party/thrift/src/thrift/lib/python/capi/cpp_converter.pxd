@@ -26,9 +26,9 @@
 
 cdef extern from "thrift/lib/python/capi/cpp_converter.h" namespace "apache::thrift::python::capi":
     # raises python error on failure
-    cdef object cpp_to_python[ThriftT](const ThriftT&)
+    cdef object cpp_to_python[ThriftT, NamespaceTag](const ThriftT&)
     # preserves python error raised on failure (e.g., OverflowError).
     # Prefer this to python_to_cpp_throws
-    cdef ThriftT python_to_cpp[ThriftT](object) except *
+    cdef ThriftT python_to_cpp[ThriftT, NamespaceTag](object) except *
     # throws C++ std::runtime_error on failure, which cython translates
-    cdef ThriftT python_to_cpp_throws[ThriftT](object) except +
+    cdef ThriftT python_to_cpp_throws[ThriftT, NamespaceTag](object) except +

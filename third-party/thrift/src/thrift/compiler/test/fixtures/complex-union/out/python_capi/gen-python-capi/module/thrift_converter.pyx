@@ -10,53 +10,53 @@ from thrift.python.capi.cpp_converter cimport cpp_to_python, python_to_cpp
 from libcpp.utility cimport move as cmove
 
 cdef extern from "thrift/compiler/test/fixtures/complex-union/gen-python-capi/module/thrift_types_capi.h":
-    pass
+    cdef cppclass _fbthrift__NamespaceTag "module::NamespaceTag"
 
 cdef cComplexUnion ComplexUnion_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cComplexUnion](inst))
+    return cmove(python_to_cpp[cComplexUnion, _fbthrift__NamespaceTag](inst))
 
 cdef object ComplexUnion_from_cpp(const cComplexUnion& c_struct):
-    return cpp_to_python[cComplexUnion](c_struct)
+    return cpp_to_python[cComplexUnion, _fbthrift__NamespaceTag](c_struct)
 
 cdef cListUnion ListUnion_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cListUnion](inst))
+    return cmove(python_to_cpp[cListUnion, _fbthrift__NamespaceTag](inst))
 
 cdef object ListUnion_from_cpp(const cListUnion& c_struct):
-    return cpp_to_python[cListUnion](c_struct)
+    return cpp_to_python[cListUnion, _fbthrift__NamespaceTag](c_struct)
 
 cdef cDataUnion DataUnion_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cDataUnion](inst))
+    return cmove(python_to_cpp[cDataUnion, _fbthrift__NamespaceTag](inst))
 
 cdef object DataUnion_from_cpp(const cDataUnion& c_struct):
-    return cpp_to_python[cDataUnion](c_struct)
+    return cpp_to_python[cDataUnion, _fbthrift__NamespaceTag](c_struct)
 
 cdef cVal Val_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cVal](inst))
+    return cmove(python_to_cpp[cVal, _fbthrift__NamespaceTag](inst))
 
 cdef object Val_from_cpp(const cVal& c_struct):
-    return cpp_to_python[cVal](c_struct)
+    return cpp_to_python[cVal, _fbthrift__NamespaceTag](c_struct)
 
 cdef cValUnion ValUnion_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cValUnion](inst))
+    return cmove(python_to_cpp[cValUnion, _fbthrift__NamespaceTag](inst))
 
 cdef object ValUnion_from_cpp(const cValUnion& c_struct):
-    return cpp_to_python[cValUnion](c_struct)
+    return cpp_to_python[cValUnion, _fbthrift__NamespaceTag](c_struct)
 
 cdef cVirtualComplexUnion VirtualComplexUnion_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cVirtualComplexUnion](inst))
+    return cmove(python_to_cpp[cVirtualComplexUnion, _fbthrift__NamespaceTag](inst))
 
 cdef object VirtualComplexUnion_from_cpp(const cVirtualComplexUnion& c_struct):
-    return cpp_to_python[cVirtualComplexUnion](c_struct)
+    return cpp_to_python[cVirtualComplexUnion, _fbthrift__NamespaceTag](c_struct)
 
 cdef cNonCopyableStruct NonCopyableStruct_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cNonCopyableStruct](inst))
+    return cmove(python_to_cpp[cNonCopyableStruct, _fbthrift__NamespaceTag](inst))
 
 cdef object NonCopyableStruct_from_cpp(const cNonCopyableStruct& c_struct):
-    return cpp_to_python[cNonCopyableStruct](c_struct)
+    return cpp_to_python[cNonCopyableStruct, _fbthrift__NamespaceTag](c_struct)
 
 cdef cNonCopyableUnion NonCopyableUnion_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cNonCopyableUnion](inst))
+    return cmove(python_to_cpp[cNonCopyableUnion, _fbthrift__NamespaceTag](inst))
 
 cdef object NonCopyableUnion_from_cpp(const cNonCopyableUnion& c_struct):
-    return cpp_to_python[cNonCopyableUnion](c_struct)
+    return cpp_to_python[cNonCopyableUnion, _fbthrift__NamespaceTag](c_struct)
 

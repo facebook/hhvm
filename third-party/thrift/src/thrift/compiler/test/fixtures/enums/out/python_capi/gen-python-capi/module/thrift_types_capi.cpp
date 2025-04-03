@@ -15,10 +15,7 @@
 #include <thrift/compiler/test/fixtures/enums/gen-python-capi/module/thrift_types_capi.h>
 
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace apache::thrift::python::capi {
 namespace {
 bool ensure_module_imported() {
   static ::folly::python::import_cache_nocapture import((
@@ -34,7 +31,7 @@ bool ensure_module_imported() {
 } // namespace
 
 ExtractorResult<::test::fixtures::enums::SomeStruct>
-Extractor<::test::fixtures::enums::SomeStruct>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::SomeStruct, ::test__fixtures__enums__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -45,12 +42,12 @@ Extractor<::test::fixtures::enums::SomeStruct>::operator()(PyObject* obj) {
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::test::fixtures::enums::SomeStruct>>{}(*fbThriftData);
+      ::test::fixtures::enums::SomeStruct, ::test__fixtures__enums__module::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::test::fixtures::enums::SomeStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::enums::SomeStruct>>::operator()(PyObject* fbThriftData) {
+    ::test::fixtures::enums::SomeStruct, ::test__fixtures__enums__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::enums::SomeStruct cpp;
   std::optional<std::string_view> error;
   Extractor<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::enums::Metasyntactic>>{}.extractInto(
@@ -76,7 +73,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::test::fixtures::enums::SomeStruct>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::SomeStruct, ::test__fixtures__enums__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.enums.module import error");
@@ -91,14 +88,14 @@ int Extractor<::test::fixtures::enums::SomeStruct>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<::test::fixtures::enums::SomeStruct>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::SomeStruct, ::test__fixtures__enums__module::NamespaceTag>>::operator()(
     const ::test::fixtures::enums::SomeStruct& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::enums::SomeStruct>> ctor;
+        ::test::fixtures::enums::SomeStruct, ::test__fixtures__enums__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -107,7 +104,7 @@ PyObject* Constructor<::test::fixtures::enums::SomeStruct>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::enums::SomeStruct>>::operator()(
+        ::test::fixtures::enums::SomeStruct, ::test__fixtures__enums__module::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::test::fixtures::enums::SomeStruct& val) {
   StrongRef fbthrift_data(createStructTuple(4));
   StrongRef _fbthrift__reasonable(
@@ -155,7 +152,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::test::fixtures::enums::MyStruct>
-Extractor<::test::fixtures::enums::MyStruct>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyStruct, ::test__fixtures__enums__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -166,12 +163,12 @@ Extractor<::test::fixtures::enums::MyStruct>::operator()(PyObject* obj) {
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::test::fixtures::enums::MyStruct>>{}(*fbThriftData);
+      ::test::fixtures::enums::MyStruct, ::test__fixtures__enums__module::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::test::fixtures::enums::MyStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::enums::MyStruct>>::operator()(PyObject* fbThriftData) {
+    ::test::fixtures::enums::MyStruct, ::test__fixtures__enums__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::enums::MyStruct cpp;
   std::optional<std::string_view> error;
   Extractor<::apache::thrift::python::capi::ComposedEnum<::test::fixtures::enums::MyEnum2>>{}.extractInto(
@@ -197,7 +194,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::test::fixtures::enums::MyStruct>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyStruct, ::test__fixtures__enums__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.enums.module import error");
@@ -212,14 +209,14 @@ int Extractor<::test::fixtures::enums::MyStruct>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<::test::fixtures::enums::MyStruct>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyStruct, ::test__fixtures__enums__module::NamespaceTag>>::operator()(
     const ::test::fixtures::enums::MyStruct& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::enums::MyStruct>> ctor;
+        ::test::fixtures::enums::MyStruct, ::test__fixtures__enums__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -228,7 +225,7 @@ PyObject* Constructor<::test::fixtures::enums::MyStruct>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::enums::MyStruct>>::operator()(
+        ::test::fixtures::enums::MyStruct, ::test__fixtures__enums__module::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::test::fixtures::enums::MyStruct& val) {
   StrongRef fbthrift_data(createStructTuple(4));
   StrongRef _fbthrift__me2_3(
@@ -276,7 +273,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::test::fixtures::enums::Metasyntactic>
-Extractor<::test::fixtures::enums::Metasyntactic>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::Metasyntactic, ::test__fixtures__enums__module::NamespaceTag>>::operator()(PyObject* obj) {
   long val = PyLong_AsLong(obj);
   if (val == -1 && PyErr_Occurred()) {
     return extractorError<::test::fixtures::enums::Metasyntactic>(
@@ -285,7 +282,7 @@ Extractor<::test::fixtures::enums::Metasyntactic>::operator()(PyObject* obj) {
   return static_cast<::test::fixtures::enums::Metasyntactic>(val);
 }
 
-int Extractor<::test::fixtures::enums::Metasyntactic>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::Metasyntactic, ::test__fixtures__enums__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.enums.module import error");
@@ -300,7 +297,7 @@ int Extractor<::test::fixtures::enums::Metasyntactic>::typeCheck(PyObject* obj) 
 }
 
 
-PyObject* Constructor<::test::fixtures::enums::Metasyntactic>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::Metasyntactic, ::test__fixtures__enums__module::NamespaceTag>>::operator()(
     ::test::fixtures::enums::Metasyntactic val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
@@ -315,7 +312,7 @@ PyObject* Constructor<::test::fixtures::enums::Metasyntactic>::operator()(
 }
 
 ExtractorResult<::test::fixtures::enums::MyEnum1>
-Extractor<::test::fixtures::enums::MyEnum1>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyEnum1, ::test__fixtures__enums__module::NamespaceTag>>::operator()(PyObject* obj) {
   long val = PyLong_AsLong(obj);
   if (val == -1 && PyErr_Occurred()) {
     return extractorError<::test::fixtures::enums::MyEnum1>(
@@ -324,7 +321,7 @@ Extractor<::test::fixtures::enums::MyEnum1>::operator()(PyObject* obj) {
   return static_cast<::test::fixtures::enums::MyEnum1>(val);
 }
 
-int Extractor<::test::fixtures::enums::MyEnum1>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyEnum1, ::test__fixtures__enums__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.enums.module import error");
@@ -339,7 +336,7 @@ int Extractor<::test::fixtures::enums::MyEnum1>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<::test::fixtures::enums::MyEnum1>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyEnum1, ::test__fixtures__enums__module::NamespaceTag>>::operator()(
     ::test::fixtures::enums::MyEnum1 val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
@@ -354,7 +351,7 @@ PyObject* Constructor<::test::fixtures::enums::MyEnum1>::operator()(
 }
 
 ExtractorResult<::test::fixtures::enums::MyEnum2>
-Extractor<::test::fixtures::enums::MyEnum2>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyEnum2, ::test__fixtures__enums__module::NamespaceTag>>::operator()(PyObject* obj) {
   long val = PyLong_AsLong(obj);
   if (val == -1 && PyErr_Occurred()) {
     return extractorError<::test::fixtures::enums::MyEnum2>(
@@ -363,7 +360,7 @@ Extractor<::test::fixtures::enums::MyEnum2>::operator()(PyObject* obj) {
   return static_cast<::test::fixtures::enums::MyEnum2>(val);
 }
 
-int Extractor<::test::fixtures::enums::MyEnum2>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyEnum2, ::test__fixtures__enums__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.enums.module import error");
@@ -378,7 +375,7 @@ int Extractor<::test::fixtures::enums::MyEnum2>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<::test::fixtures::enums::MyEnum2>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyEnum2, ::test__fixtures__enums__module::NamespaceTag>>::operator()(
     ::test::fixtures::enums::MyEnum2 val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
@@ -393,7 +390,7 @@ PyObject* Constructor<::test::fixtures::enums::MyEnum2>::operator()(
 }
 
 ExtractorResult<::test::fixtures::enums::MyEnum3>
-Extractor<::test::fixtures::enums::MyEnum3>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyEnum3, ::test__fixtures__enums__module::NamespaceTag>>::operator()(PyObject* obj) {
   long val = PyLong_AsLong(obj);
   if (val == -1 && PyErr_Occurred()) {
     return extractorError<::test::fixtures::enums::MyEnum3>(
@@ -402,7 +399,7 @@ Extractor<::test::fixtures::enums::MyEnum3>::operator()(PyObject* obj) {
   return static_cast<::test::fixtures::enums::MyEnum3>(val);
 }
 
-int Extractor<::test::fixtures::enums::MyEnum3>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyEnum3, ::test__fixtures__enums__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.enums.module import error");
@@ -417,7 +414,7 @@ int Extractor<::test::fixtures::enums::MyEnum3>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<::test::fixtures::enums::MyEnum3>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyEnum3, ::test__fixtures__enums__module::NamespaceTag>>::operator()(
     ::test::fixtures::enums::MyEnum3 val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
@@ -432,7 +429,7 @@ PyObject* Constructor<::test::fixtures::enums::MyEnum3>::operator()(
 }
 
 ExtractorResult<::test::fixtures::enums::MyEnum4>
-Extractor<::test::fixtures::enums::MyEnum4>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyEnum4, ::test__fixtures__enums__module::NamespaceTag>>::operator()(PyObject* obj) {
   long val = PyLong_AsLong(obj);
   if (val == -1 && PyErr_Occurred()) {
     return extractorError<::test::fixtures::enums::MyEnum4>(
@@ -441,7 +438,7 @@ Extractor<::test::fixtures::enums::MyEnum4>::operator()(PyObject* obj) {
   return static_cast<::test::fixtures::enums::MyEnum4>(val);
 }
 
-int Extractor<::test::fixtures::enums::MyEnum4>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyEnum4, ::test__fixtures__enums__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.enums.module import error");
@@ -456,7 +453,7 @@ int Extractor<::test::fixtures::enums::MyEnum4>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<::test::fixtures::enums::MyEnum4>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyEnum4, ::test__fixtures__enums__module::NamespaceTag>>::operator()(
     ::test::fixtures::enums::MyEnum4 val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
@@ -471,7 +468,7 @@ PyObject* Constructor<::test::fixtures::enums::MyEnum4>::operator()(
 }
 
 ExtractorResult<::test::fixtures::enums::MyBitmaskEnum1>
-Extractor<::test::fixtures::enums::MyBitmaskEnum1>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyBitmaskEnum1, ::test__fixtures__enums__module::NamespaceTag>>::operator()(PyObject* obj) {
   long val = PyLong_AsLong(obj);
   if (val == -1 && PyErr_Occurred()) {
     return extractorError<::test::fixtures::enums::MyBitmaskEnum1>(
@@ -480,7 +477,7 @@ Extractor<::test::fixtures::enums::MyBitmaskEnum1>::operator()(PyObject* obj) {
   return static_cast<::test::fixtures::enums::MyBitmaskEnum1>(val);
 }
 
-int Extractor<::test::fixtures::enums::MyBitmaskEnum1>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyBitmaskEnum1, ::test__fixtures__enums__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.enums.module import error");
@@ -495,7 +492,7 @@ int Extractor<::test::fixtures::enums::MyBitmaskEnum1>::typeCheck(PyObject* obj)
 }
 
 
-PyObject* Constructor<::test::fixtures::enums::MyBitmaskEnum1>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyBitmaskEnum1, ::test__fixtures__enums__module::NamespaceTag>>::operator()(
     ::test::fixtures::enums::MyBitmaskEnum1 val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
@@ -510,7 +507,7 @@ PyObject* Constructor<::test::fixtures::enums::MyBitmaskEnum1>::operator()(
 }
 
 ExtractorResult<::test::fixtures::enums::MyBitmaskEnum2>
-Extractor<::test::fixtures::enums::MyBitmaskEnum2>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyBitmaskEnum2, ::test__fixtures__enums__module::NamespaceTag>>::operator()(PyObject* obj) {
   long val = PyLong_AsLong(obj);
   if (val == -1 && PyErr_Occurred()) {
     return extractorError<::test::fixtures::enums::MyBitmaskEnum2>(
@@ -519,7 +516,7 @@ Extractor<::test::fixtures::enums::MyBitmaskEnum2>::operator()(PyObject* obj) {
   return static_cast<::test::fixtures::enums::MyBitmaskEnum2>(val);
 }
 
-int Extractor<::test::fixtures::enums::MyBitmaskEnum2>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyBitmaskEnum2, ::test__fixtures__enums__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.enums.module import error");
@@ -534,7 +531,7 @@ int Extractor<::test::fixtures::enums::MyBitmaskEnum2>::typeCheck(PyObject* obj)
 }
 
 
-PyObject* Constructor<::test::fixtures::enums::MyBitmaskEnum2>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::enums::MyBitmaskEnum2, ::test__fixtures__enums__module::NamespaceTag>>::operator()(
     ::test::fixtures::enums::MyBitmaskEnum2 val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
@@ -548,7 +545,4 @@ PyObject* Constructor<::test::fixtures::enums::MyBitmaskEnum2>::operator()(
   return ptr;
 }
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

@@ -18,10 +18,16 @@
 
 #include <thrift/lib/python/capi/constructor.h>
 #include <thrift/test/python_capi/gen-cpp2/serialized_dep_types.h>
+#include <thrift/test/python_capi/gen-python-capi/serialized_dep/thrift_types_capi.h>
 
 namespace apache::thrift::test {
 
 using ::apache::thrift::python::capi::Constructor;
+
+template <typename T>
+using Namespaced = ::apache::thrift::python::capi::PythonNamespaced<
+    T,
+    ::thrift__test__python_capi__serialized_dep::NamespaceTag>;
 
 // DO NOT USE.
 // IT IS VERY DANGER TO JUST YOLO ASSUME THE PYTHON TYPES ARE ALREADY IMPORTED
@@ -36,7 +42,7 @@ PyObject* makeStruct(bool setOptional) noexcept {
     s.os() = "Optional";
   }
   s.rs() = "World";
-  return Constructor<T>{}(s);
+  return Constructor<Namespaced<T>>{}(s);
 }
 
 template <typename T>
@@ -47,7 +53,7 @@ PyObject* makeError(bool setOptional) noexcept {
     s.os() = "Optional";
   }
   s.rs() = "Required";
-  return Constructor<T>{}(s);
+  return Constructor<Namespaced<T>>{}(s);
 }
 
 template <typename T>
@@ -58,12 +64,12 @@ PyObject* makeUnion(bool setString) {
   } else {
     u.i_ref() = 42;
   }
-  return Constructor<T>{}(u);
+  return Constructor<Namespaced<T>>{}(u);
 }
 
 template <typename T>
 PyObject* makeUnset() noexcept {
-  return Constructor<T>{}(T{});
+  return Constructor<Namespaced<T>>{}(T{});
 }
 
 } // namespace apache::thrift::test

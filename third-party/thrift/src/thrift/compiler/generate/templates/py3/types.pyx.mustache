@@ -538,13 +538,15 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
     {{#program:python_capi_converter?}}
     @staticmethod
     def from_python(object obj):
-        cdef shared_ptr[{{> types/current_module_cbindings}}.{{> types/c_struct }}] cpp_obj = __python_to_py3[{{> types/current_module_cbindings}}.{{> types/c_struct }}](obj)
+        cdef shared_ptr[{{> types/current_module_cbindings}}.{{> types/c_struct }}] cpp_obj = {{!
+            }}__python_to_py3[{{> types/current_module_cbindings}}.{{> types/c_struct }}, _fbthrift__NamespaceTag](obj)
         return {{struct:name}}._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
     {{/program:python_capi_converter?}}
 
     def _to_python(self):
     {{#program:python_capi_converter?}}
-        return __py3_to_python[{{> types/current_module_cbindings}}.{{> types/c_struct }}](self.{{> types/cpp_obj}})
+        return __py3_to_python[{{> types/current_module_cbindings}}.{{> types/c_struct }}, {{!
+            }}_fbthrift__NamespaceTag](self.{{> types/cpp_obj}})
     {{/program:python_capi_converter?}}
     {{^program:python_capi_converter?}}
         return thrift.python.converter.to_python_struct(

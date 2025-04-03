@@ -151,5 +151,9 @@ std::string get_py3_name_class_scope(
   return name;
 }
 
+// can put this back into python_capi when python_capi_converter removed from
+// thrift-py3
+std::string gen_capi_module_prefix_impl(const t_program* program);
+
 } // namespace python
 } // namespace apache::thrift::compiler

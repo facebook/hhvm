@@ -15,10 +15,7 @@
 #include <thrift/compiler/test/fixtures/terse_write/gen-python-capi/terse_write/thrift_types_capi.h>
 
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace apache::thrift::python::capi {
 namespace {
 bool ensure_module_imported() {
   static ::folly::python::import_cache_nocapture import((
@@ -40,7 +37,7 @@ bool ensure_module_imported() {
 } // namespace
 
 ExtractorResult<::facebook::thrift::test::terse_write::MyStruct>
-Extractor<::facebook::thrift::test::terse_write::MyStruct>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -54,14 +51,14 @@ Extractor<::facebook::thrift::test::terse_write::MyStruct>::operator()(PyObject*
 
 ExtractorResult<::facebook::thrift::test::terse_write::MyStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::terse_write::MyStruct>>::operator()(PyObject* fbThriftData) {
+    ::facebook::thrift::test::terse_write::MyStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::facebook::thrift::test::terse_write::MyStruct cpp;
   (void)fbThriftData;
   return cpp;
 }
 
 
-int Extractor<::facebook::thrift::test::terse_write::MyStruct>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module facebook.thrift.test.terse_write import error");
@@ -76,14 +73,14 @@ int Extractor<::facebook::thrift::test::terse_write::MyStruct>::typeCheck(PyObje
 }
 
 
-PyObject* Constructor<::facebook::thrift::test::terse_write::MyStruct>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(
     const ::facebook::thrift::test::terse_write::MyStruct& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::MyStruct>> ctor;
+        ::facebook::thrift::test::terse_write::MyStruct, ::facebook__thrift__test__terse_write::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -92,7 +89,7 @@ PyObject* Constructor<::facebook::thrift::test::terse_write::MyStruct>::operator
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::MyStruct>>::operator()(
+        ::facebook::thrift::test::terse_write::MyStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::facebook::thrift::test::terse_write::MyStruct& val) {
   StrongRef fbthrift_data(createStructTuple(0));
   return std::move(fbthrift_data).release();
@@ -100,7 +97,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::facebook::thrift::test::terse_write::MyUnion>
-Extractor<::facebook::thrift::test::terse_write::MyUnion>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyUnion, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -111,12 +108,12 @@ Extractor<::facebook::thrift::test::terse_write::MyUnion>::operator()(PyObject* 
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::facebook::thrift::test::terse_write::MyUnion>>{}(*fbThriftData);
+      ::facebook::thrift::test::terse_write::MyUnion, ::facebook__thrift__test__terse_write::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::facebook::thrift::test::terse_write::MyUnion>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::terse_write::MyUnion>>::operator()(PyObject* fbThriftData) {
+    ::facebook::thrift::test::terse_write::MyUnion, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::facebook::thrift::test::terse_write::MyUnion cpp;
   std::optional<std::string_view> error;
   auto type_tag = Extractor<int64_t>{}(PyTuple_GET_ITEM(fbThriftData, 0));
@@ -179,7 +176,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
           cpp.map_field_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
     case 14:
-      Extractor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyStruct>>{}.extractInto(
+      Extractor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>{}.extractInto(
           cpp.struct_field_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
   }
@@ -190,7 +187,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::facebook::thrift::test::terse_write::MyUnion>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyUnion, ::facebook__thrift__test__terse_write::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module facebook.thrift.test.terse_write import error");
@@ -205,14 +202,14 @@ int Extractor<::facebook::thrift::test::terse_write::MyUnion>::typeCheck(PyObjec
 }
 
 
-PyObject* Constructor<::facebook::thrift::test::terse_write::MyUnion>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyUnion, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(
     const ::facebook::thrift::test::terse_write::MyUnion& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::MyUnion>> ctor;
+        ::facebook::thrift::test::terse_write::MyUnion, ::facebook__thrift__test__terse_write::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -221,7 +218,7 @@ PyObject* Constructor<::facebook::thrift::test::terse_write::MyUnion>::operator(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::MyUnion>>::operator()(
+        ::facebook::thrift::test::terse_write::MyUnion, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::facebook::thrift::test::terse_write::MyUnion& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
@@ -297,7 +294,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       break;
     case 14:
       py_val = StrongRef(
-          Constructor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyStruct>>{}
+          Constructor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>{}
           .constructFrom(val.struct_field_ref()));
       break;
   }
@@ -309,7 +306,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>
-Extractor<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyStructWithCustomDefault, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -320,12 +317,12 @@ Extractor<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>::ope
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::facebook::thrift::test::terse_write::MyStructWithCustomDefault>>{}(*fbThriftData);
+      ::facebook::thrift::test::terse_write::MyStructWithCustomDefault, ::facebook__thrift__test__terse_write::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::terse_write::MyStructWithCustomDefault>>::operator()(PyObject* fbThriftData) {
+    ::facebook::thrift::test::terse_write::MyStructWithCustomDefault, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::facebook::thrift::test::terse_write::MyStructWithCustomDefault cpp;
   std::optional<std::string_view> error;
   Extractor<int64_t>{}.extractInto(
@@ -339,7 +336,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyStructWithCustomDefault, ::facebook__thrift__test__terse_write::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module facebook.thrift.test.terse_write import error");
@@ -354,14 +351,14 @@ int Extractor<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>:
 }
 
 
-PyObject* Constructor<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyStructWithCustomDefault, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(
     const ::facebook::thrift::test::terse_write::MyStructWithCustomDefault& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::MyStructWithCustomDefault>> ctor;
+        ::facebook::thrift::test::terse_write::MyStructWithCustomDefault, ::facebook__thrift__test__terse_write::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -370,7 +367,7 @@ PyObject* Constructor<::facebook::thrift::test::terse_write::MyStructWithCustomD
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::MyStructWithCustomDefault>>::operator()(
+        ::facebook::thrift::test::terse_write::MyStructWithCustomDefault, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::facebook::thrift::test::terse_write::MyStructWithCustomDefault& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__field1(
@@ -388,7 +385,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::facebook::thrift::test::terse_write::StructLevelTerseStruct>
-Extractor<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::StructLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -399,12 +396,12 @@ Extractor<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::operat
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::facebook::thrift::test::terse_write::StructLevelTerseStruct>>{}(*fbThriftData);
+      ::facebook::thrift::test::terse_write::StructLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::facebook::thrift::test::terse_write::StructLevelTerseStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::terse_write::StructLevelTerseStruct>>::operator()(PyObject* fbThriftData) {
+    ::facebook::thrift::test::terse_write::StructLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::facebook::thrift::test::terse_write::StructLevelTerseStruct cpp;
   std::optional<std::string_view> error;
   Extractor<bool>{}.extractInto(
@@ -459,11 +456,11 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       cpp.map_field_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__StructLevelTerseStruct__tuple_pos[12]),
       error);
-  Extractor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyStruct>>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>{}.extractInto(
       cpp.struct_field_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__StructLevelTerseStruct__tuple_pos[13]),
       error);
-  Extractor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyUnion>>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyUnion, ::facebook__thrift__test__terse_write::NamespaceTag>>{}.extractInto(
       cpp.union_field_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__StructLevelTerseStruct__tuple_pos[14]),
       error);
@@ -474,7 +471,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::StructLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module facebook.thrift.test.terse_write import error");
@@ -489,14 +486,14 @@ int Extractor<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::ty
 }
 
 
-PyObject* Constructor<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::StructLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(
     const ::facebook::thrift::test::terse_write::StructLevelTerseStruct& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::StructLevelTerseStruct>> ctor;
+        ::facebook::thrift::test::terse_write::StructLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -505,7 +502,7 @@ PyObject* Constructor<::facebook::thrift::test::terse_write::StructLevelTerseStr
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::StructLevelTerseStruct>>::operator()(
+        ::facebook::thrift::test::terse_write::StructLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::facebook::thrift::test::terse_write::StructLevelTerseStruct& val) {
   StrongRef fbthrift_data(createStructTuple(15));
   StrongRef _fbthrift__bool_field(
@@ -639,7 +636,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__struct_field(
-    Constructor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyStruct>>{}
+    Constructor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>{}
     .constructFrom(val.struct_field_ref()));
   if (!_fbthrift__struct_field ||
       setStructField(
@@ -649,7 +646,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__union_field(
-    Constructor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyUnion>>{}
+    Constructor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyUnion, ::facebook__thrift__test__terse_write::NamespaceTag>>{}
     .constructFrom(val.union_field_ref()));
   if (!_fbthrift__union_field ||
       setStructField(
@@ -663,7 +660,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>
-Extractor<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::FieldLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -674,12 +671,12 @@ Extractor<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::operato
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::facebook::thrift::test::terse_write::FieldLevelTerseStruct>>{}(*fbThriftData);
+      ::facebook::thrift::test::terse_write::FieldLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::terse_write::FieldLevelTerseStruct>>::operator()(PyObject* fbThriftData) {
+    ::facebook::thrift::test::terse_write::FieldLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::facebook::thrift::test::terse_write::FieldLevelTerseStruct cpp;
   std::optional<std::string_view> error;
   Extractor<bool>{}.extractInto(
@@ -734,11 +731,11 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       cpp.terse_map_field_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__FieldLevelTerseStruct__tuple_pos[12]),
       error);
-  Extractor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyStruct>>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>{}.extractInto(
       cpp.terse_struct_field_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__FieldLevelTerseStruct__tuple_pos[13]),
       error);
-  Extractor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyUnion>>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyUnion, ::facebook__thrift__test__terse_write::NamespaceTag>>{}.extractInto(
       cpp.terse_union_field_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__FieldLevelTerseStruct__tuple_pos[14]),
       error);
@@ -794,11 +791,11 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       cpp.map_field_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__FieldLevelTerseStruct__tuple_pos[27]),
       error);
-  Extractor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyStruct>>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>{}.extractInto(
       cpp.struct_field_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__FieldLevelTerseStruct__tuple_pos[28]),
       error);
-  Extractor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyUnion>>{}.extractInto(
+  Extractor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyUnion, ::facebook__thrift__test__terse_write::NamespaceTag>>{}.extractInto(
       cpp.union_field_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__FieldLevelTerseStruct__tuple_pos[29]),
       error);
@@ -809,7 +806,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::FieldLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module facebook.thrift.test.terse_write import error");
@@ -824,14 +821,14 @@ int Extractor<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::typ
 }
 
 
-PyObject* Constructor<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::FieldLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(
     const ::facebook::thrift::test::terse_write::FieldLevelTerseStruct& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::FieldLevelTerseStruct>> ctor;
+        ::facebook::thrift::test::terse_write::FieldLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -840,7 +837,7 @@ PyObject* Constructor<::facebook::thrift::test::terse_write::FieldLevelTerseStru
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::FieldLevelTerseStruct>>::operator()(
+        ::facebook::thrift::test::terse_write::FieldLevelTerseStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::facebook::thrift::test::terse_write::FieldLevelTerseStruct& val) {
   StrongRef fbthrift_data(createStructTuple(30));
   StrongRef _fbthrift__terse_bool_field(
@@ -974,7 +971,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__terse_struct_field(
-    Constructor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyStruct>>{}
+    Constructor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>{}
     .constructFrom(val.terse_struct_field_ref()));
   if (!_fbthrift__terse_struct_field ||
       setStructField(
@@ -984,7 +981,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__terse_union_field(
-    Constructor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyUnion>>{}
+    Constructor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyUnion, ::facebook__thrift__test__terse_write::NamespaceTag>>{}
     .constructFrom(val.terse_union_field_ref()));
   if (!_fbthrift__terse_union_field ||
       setStructField(
@@ -1124,7 +1121,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__struct_field(
-    Constructor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyStruct>>{}
+    Constructor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyStruct, ::facebook__thrift__test__terse_write::NamespaceTag>>{}
     .constructFrom(val.struct_field_ref()));
   if (!_fbthrift__struct_field ||
       setStructField(
@@ -1134,7 +1131,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
     return nullptr;
   }
   StrongRef _fbthrift__union_field(
-    Constructor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyUnion>>{}
+    Constructor<::apache::thrift::python::capi::ComposedStruct<::facebook::thrift::test::terse_write::MyUnion, ::facebook__thrift__test__terse_write::NamespaceTag>>{}
     .constructFrom(val.union_field_ref()));
   if (!_fbthrift__union_field ||
       setStructField(
@@ -1148,7 +1145,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::facebook::thrift::test::terse_write::AdaptedFields>
-Extractor<::facebook::thrift::test::terse_write::AdaptedFields>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::AdaptedFields, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(PyObject* obj) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return extractorError<::facebook::thrift::test::terse_write::AdaptedFields>(
@@ -1167,7 +1164,7 @@ Extractor<::facebook::thrift::test::terse_write::AdaptedFields>::operator()(PyOb
 
 ExtractorResult<::facebook::thrift::test::terse_write::AdaptedFields>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::terse_write::AdaptedFields>>::operator()(PyObject* fbthrift_data) {
+    ::facebook::thrift::test::terse_write::AdaptedFields, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(PyObject* fbthrift_data) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return extractorError<::facebook::thrift::test::terse_write::AdaptedFields>(
@@ -1178,10 +1175,10 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       return extractorError<::facebook::thrift::test::terse_write::AdaptedFields>(
           "Init from fbthrift error: AdaptedFields");
   }
-  return Extractor<::facebook::thrift::test::terse_write::AdaptedFields>{}(*obj);
+  return Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::AdaptedFields, ::facebook__thrift__test__terse_write::NamespaceTag>>{}(*obj);
 }
 
-int Extractor<::facebook::thrift::test::terse_write::AdaptedFields>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::AdaptedFields, ::facebook__thrift__test__terse_write::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module facebook.thrift.test.terse_write import error");
@@ -1196,7 +1193,7 @@ int Extractor<::facebook::thrift::test::terse_write::AdaptedFields>::typeCheck(P
 }
 
 
-PyObject* Constructor<::facebook::thrift::test::terse_write::AdaptedFields>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::AdaptedFields, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(
     const ::facebook::thrift::test::terse_write::AdaptedFields& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
@@ -1219,9 +1216,9 @@ PyObject* Constructor<::facebook::thrift::test::terse_write::AdaptedFields>::ope
 
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::AdaptedFields>>::operator()(
+        ::facebook::thrift::test::terse_write::AdaptedFields, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(
     const ::facebook::thrift::test::terse_write::AdaptedFields& val) {
-  auto obj = StrongRef(Constructor<::facebook::thrift::test::terse_write::AdaptedFields>{}(val));
+  auto obj = StrongRef(Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::AdaptedFields, ::facebook__thrift__test__terse_write::NamespaceTag>>{}(val));
   if (!obj) {
     return nullptr;
   }
@@ -1229,7 +1226,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 ExtractorResult<::facebook::thrift::test::terse_write::TerseException>
-Extractor<::facebook::thrift::test::terse_write::TerseException>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::TerseException, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -1240,12 +1237,12 @@ Extractor<::facebook::thrift::test::terse_write::TerseException>::operator()(PyO
   }
   StrongRef fbThriftData(getExceptionThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::facebook::thrift::test::terse_write::TerseException>>{}(*fbThriftData);
+      ::facebook::thrift::test::terse_write::TerseException, ::facebook__thrift__test__terse_write::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::facebook::thrift::test::terse_write::TerseException>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::facebook::thrift::test::terse_write::TerseException>>::operator()(PyObject* fbThriftData) {
+    ::facebook::thrift::test::terse_write::TerseException, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::facebook::thrift::test::terse_write::TerseException cpp;
   std::optional<std::string_view> error;
   Extractor<Bytes>{}.extractInto(
@@ -1259,7 +1256,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::facebook::thrift::test::terse_write::TerseException>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::TerseException, ::facebook__thrift__test__terse_write::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module facebook.thrift.test.terse_write import error");
@@ -1274,14 +1271,14 @@ int Extractor<::facebook::thrift::test::terse_write::TerseException>::typeCheck(
 }
 
 
-PyObject* Constructor<::facebook::thrift::test::terse_write::TerseException>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::TerseException, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(
     const ::facebook::thrift::test::terse_write::TerseException& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::TerseException>> ctor;
+        ::facebook::thrift::test::terse_write::TerseException, ::facebook__thrift__test__terse_write::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -1290,7 +1287,7 @@ PyObject* Constructor<::facebook::thrift::test::terse_write::TerseException>::op
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::facebook::thrift::test::terse_write::TerseException>>::operator()(
+        ::facebook::thrift::test::terse_write::TerseException, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::facebook::thrift::test::terse_write::TerseException& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__msg(
@@ -1308,7 +1305,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::facebook::thrift::test::terse_write::MyEnum>
-Extractor<::facebook::thrift::test::terse_write::MyEnum>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyEnum, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(PyObject* obj) {
   long val = PyLong_AsLong(obj);
   if (val == -1 && PyErr_Occurred()) {
     return extractorError<::facebook::thrift::test::terse_write::MyEnum>(
@@ -1317,7 +1314,7 @@ Extractor<::facebook::thrift::test::terse_write::MyEnum>::operator()(PyObject* o
   return static_cast<::facebook::thrift::test::terse_write::MyEnum>(val);
 }
 
-int Extractor<::facebook::thrift::test::terse_write::MyEnum>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyEnum, ::facebook__thrift__test__terse_write::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module facebook.thrift.test.terse_write import error");
@@ -1332,7 +1329,7 @@ int Extractor<::facebook::thrift::test::terse_write::MyEnum>::typeCheck(PyObject
 }
 
 
-PyObject* Constructor<::facebook::thrift::test::terse_write::MyEnum>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::facebook::thrift::test::terse_write::MyEnum, ::facebook__thrift__test__terse_write::NamespaceTag>>::operator()(
     ::facebook::thrift::test::terse_write::MyEnum val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
@@ -1346,7 +1343,4 @@ PyObject* Constructor<::facebook::thrift::test::terse_write::MyEnum>::operator()
   return ptr;
 }
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

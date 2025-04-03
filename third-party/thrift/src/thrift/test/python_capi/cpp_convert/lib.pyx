@@ -75,10 +75,10 @@ def unpack_python_union(object x):
 # include definitions of Extractor implementations used by python_to_cpp_throws
 # if python_to_cpp_throws weren't used, we wouldn't need this manual include
 cdef extern from "thrift/test/python_capi/gen-python-capi/thrift_dep/thrift_types_capi.h":
-    pass
+    cdef cppclass NamespaceTag "thrift__test__python_capi__thrift_dep::NamespaceTag"
 
 def unpack_python_union_throws(object x):
     return convert_return(
-        unpackUnion(python_to_cpp_throws[cUnion](x)),
+        unpackUnion(python_to_cpp_throws[cUnion, NamespaceTag](x)),
         x.type
     )

@@ -10,11 +10,11 @@ from thrift.python.capi.cpp_converter cimport cpp_to_python, python_to_cpp
 from libcpp.utility cimport move as cmove
 
 cdef extern from "thrift/compiler/test/fixtures/adapter/gen-python-capi/a/thrift_types_capi.h":
-    pass
+    cdef cppclass _fbthrift__NamespaceTag "a::NamespaceTag"
 
 cdef cMyStruct MyStruct_convert_to_cpp(object inst) except *:
-    return cmove(python_to_cpp[cMyStruct](inst))
+    return cmove(python_to_cpp[cMyStruct, _fbthrift__NamespaceTag](inst))
 
 cdef object MyStruct_from_cpp(const cMyStruct& c_struct):
-    return cpp_to_python[cMyStruct](c_struct)
+    return cpp_to_python[cMyStruct, _fbthrift__NamespaceTag](c_struct)
 

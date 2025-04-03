@@ -14,13 +14,16 @@
 
 #include <thrift/compiler/test/fixtures/interactions/gen-cpp2/module_types.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace test__fixtures__interactions__module {
+
+struct NamespaceTag {};
+
+} // namespace test__fixtures__interactions__module
+
+namespace apache::thrift::python::capi {
 template <>
-struct Extractor<::cpp2::CustomException>
-    : public BaseExtractor<::cpp2::CustomException> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::CustomException, ::test__fixtures__interactions__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::CustomException, ::test__fixtures__interactions__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::CustomException> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -28,30 +31,30 @@ struct Extractor<::cpp2::CustomException>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::CustomException>>
+        ::cpp2::CustomException, ::test__fixtures__interactions__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::CustomException>> {
+        ::cpp2::CustomException, ::test__fixtures__interactions__module::NamespaceTag>> {
   ExtractorResult<::cpp2::CustomException> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::CustomException>
-    : public BaseConstructor<::cpp2::CustomException> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::CustomException, ::test__fixtures__interactions__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::CustomException, ::test__fixtures__interactions__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::CustomException& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::CustomException>>
+        ::cpp2::CustomException, ::test__fixtures__interactions__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::CustomException>> {
+        ::cpp2::CustomException, ::test__fixtures__interactions__module::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::CustomException& val);
 };
 
 template <>
-struct Extractor<::cpp2::ShouldBeBoxed>
-    : public BaseExtractor<::cpp2::ShouldBeBoxed> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ShouldBeBoxed, ::test__fixtures__interactions__module::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ShouldBeBoxed, ::test__fixtures__interactions__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::ShouldBeBoxed> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -59,28 +62,25 @@ struct Extractor<::cpp2::ShouldBeBoxed>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::ShouldBeBoxed>>
+        ::cpp2::ShouldBeBoxed, ::test__fixtures__interactions__module::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::ShouldBeBoxed>> {
+        ::cpp2::ShouldBeBoxed, ::test__fixtures__interactions__module::NamespaceTag>> {
   ExtractorResult<::cpp2::ShouldBeBoxed> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::ShouldBeBoxed>
-    : public BaseConstructor<::cpp2::ShouldBeBoxed> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ShouldBeBoxed, ::test__fixtures__interactions__module::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ShouldBeBoxed, ::test__fixtures__interactions__module::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::ShouldBeBoxed& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::ShouldBeBoxed>>
+        ::cpp2::ShouldBeBoxed, ::test__fixtures__interactions__module::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::ShouldBeBoxed>> {
+        ::cpp2::ShouldBeBoxed, ::test__fixtures__interactions__module::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::ShouldBeBoxed& val);
 };
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

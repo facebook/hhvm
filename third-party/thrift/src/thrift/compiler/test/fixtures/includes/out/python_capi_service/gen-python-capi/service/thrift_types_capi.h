@@ -14,11 +14,11 @@
 
 #include <thrift/compiler/test/fixtures/includes/gen-cpp2/service_types.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+namespace service {
+
+struct NamespaceTag {};
+
+} // namespace service
+
+namespace apache::thrift::python::capi {
+} // namespace apache::thrift::python::capi

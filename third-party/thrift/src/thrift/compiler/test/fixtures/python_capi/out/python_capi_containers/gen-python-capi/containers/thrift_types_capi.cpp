@@ -15,10 +15,7 @@
 #include <thrift/compiler/test/fixtures/python_capi/gen-python-capi/containers/thrift_types_capi.h>
 
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace apache::thrift::python::capi {
 namespace {
 bool ensure_module_imported() {
   static ::folly::python::import_cache_nocapture import((
@@ -49,7 +46,7 @@ bool ensure_module_imported() {
 } // namespace
 
 ExtractorResult<::test::fixtures::python_capi::TemplateLists>
-Extractor<::test::fixtures::python_capi::TemplateLists>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TemplateLists, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -60,12 +57,12 @@ Extractor<::test::fixtures::python_capi::TemplateLists>::operator()(PyObject* ob
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::test::fixtures::python_capi::TemplateLists>>{}(*fbThriftData);
+      ::test::fixtures::python_capi::TemplateLists, ::test__fixtures__python_capi__containers::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::test::fixtures::python_capi::TemplateLists>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::python_capi::TemplateLists>>::operator()(PyObject* fbThriftData) {
+    ::test::fixtures::python_capi::TemplateLists, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::python_capi::TemplateLists cpp;
   std::optional<std::string_view> error;
   Extractor<list<Bytes, std::vector<native_t<Bytes>>>>{}.extractInto(
@@ -95,7 +92,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::test::fixtures::python_capi::TemplateLists>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TemplateLists, ::test__fixtures__python_capi__containers::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.python_capi.containers import error");
@@ -110,14 +107,14 @@ int Extractor<::test::fixtures::python_capi::TemplateLists>::typeCheck(PyObject*
 }
 
 
-PyObject* Constructor<::test::fixtures::python_capi::TemplateLists>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TemplateLists, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(
     const ::test::fixtures::python_capi::TemplateLists& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::TemplateLists>> ctor;
+        ::test::fixtures::python_capi::TemplateLists, ::test__fixtures__python_capi__containers::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -126,7 +123,7 @@ PyObject* Constructor<::test::fixtures::python_capi::TemplateLists>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::TemplateLists>>::operator()(
+        ::test::fixtures::python_capi::TemplateLists, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::test::fixtures::python_capi::TemplateLists& val) {
   StrongRef fbthrift_data(createStructTuple(5));
   StrongRef _fbthrift__std_string(
@@ -191,7 +188,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::test::fixtures::python_capi::TemplateSets>
-Extractor<::test::fixtures::python_capi::TemplateSets>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TemplateSets, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -202,12 +199,12 @@ Extractor<::test::fixtures::python_capi::TemplateSets>::operator()(PyObject* obj
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::test::fixtures::python_capi::TemplateSets>>{}(*fbThriftData);
+      ::test::fixtures::python_capi::TemplateSets, ::test__fixtures__python_capi__containers::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::test::fixtures::python_capi::TemplateSets>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::python_capi::TemplateSets>>::operator()(PyObject* fbThriftData) {
+    ::test::fixtures::python_capi::TemplateSets, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::python_capi::TemplateSets cpp;
   std::optional<std::string_view> error;
   Extractor<set<Bytes, std::set<native_t<Bytes>>>>{}.extractInto(
@@ -245,7 +242,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::test::fixtures::python_capi::TemplateSets>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TemplateSets, ::test__fixtures__python_capi__containers::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.python_capi.containers import error");
@@ -260,14 +257,14 @@ int Extractor<::test::fixtures::python_capi::TemplateSets>::typeCheck(PyObject* 
 }
 
 
-PyObject* Constructor<::test::fixtures::python_capi::TemplateSets>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TemplateSets, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(
     const ::test::fixtures::python_capi::TemplateSets& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::TemplateSets>> ctor;
+        ::test::fixtures::python_capi::TemplateSets, ::test__fixtures__python_capi__containers::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -276,7 +273,7 @@ PyObject* Constructor<::test::fixtures::python_capi::TemplateSets>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::TemplateSets>>::operator()(
+        ::test::fixtures::python_capi::TemplateSets, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::test::fixtures::python_capi::TemplateSets& val) {
   StrongRef fbthrift_data(createStructTuple(7));
   StrongRef _fbthrift__std_set(
@@ -354,7 +351,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::test::fixtures::python_capi::TemplateMaps>
-Extractor<::test::fixtures::python_capi::TemplateMaps>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TemplateMaps, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -365,12 +362,12 @@ Extractor<::test::fixtures::python_capi::TemplateMaps>::operator()(PyObject* obj
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::test::fixtures::python_capi::TemplateMaps>>{}(*fbThriftData);
+      ::test::fixtures::python_capi::TemplateMaps, ::test__fixtures__python_capi__containers::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::test::fixtures::python_capi::TemplateMaps>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::python_capi::TemplateMaps>>::operator()(PyObject* fbThriftData) {
+    ::test::fixtures::python_capi::TemplateMaps, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::python_capi::TemplateMaps cpp;
   std::optional<std::string_view> error;
   Extractor<map<Bytes, Bytes, std::map<native_t<Bytes>, native_t<Bytes>>>>{}.extractInto(
@@ -408,7 +405,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::test::fixtures::python_capi::TemplateMaps>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TemplateMaps, ::test__fixtures__python_capi__containers::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.python_capi.containers import error");
@@ -423,14 +420,14 @@ int Extractor<::test::fixtures::python_capi::TemplateMaps>::typeCheck(PyObject* 
 }
 
 
-PyObject* Constructor<::test::fixtures::python_capi::TemplateMaps>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TemplateMaps, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(
     const ::test::fixtures::python_capi::TemplateMaps& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::TemplateMaps>> ctor;
+        ::test::fixtures::python_capi::TemplateMaps, ::test__fixtures__python_capi__containers::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -439,7 +436,7 @@ PyObject* Constructor<::test::fixtures::python_capi::TemplateMaps>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::TemplateMaps>>::operator()(
+        ::test::fixtures::python_capi::TemplateMaps, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::test::fixtures::python_capi::TemplateMaps& val) {
   StrongRef fbthrift_data(createStructTuple(7));
   StrongRef _fbthrift__std_map(
@@ -517,7 +514,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::test::fixtures::python_capi::TWrapped>
-Extractor<::test::fixtures::python_capi::TWrapped>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TWrapped, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -528,12 +525,12 @@ Extractor<::test::fixtures::python_capi::TWrapped>::operator()(PyObject* obj) {
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::test::fixtures::python_capi::TWrapped>>{}(*fbThriftData);
+      ::test::fixtures::python_capi::TWrapped, ::test__fixtures__python_capi__containers::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::test::fixtures::python_capi::TWrapped>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::python_capi::TWrapped>>::operator()(PyObject* fbThriftData) {
+    ::test::fixtures::python_capi::TWrapped, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::python_capi::TWrapped cpp;
   std::optional<std::string_view> error;
   Extractor<Bytes>{}.extractInto(
@@ -551,7 +548,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::test::fixtures::python_capi::TWrapped>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TWrapped, ::test__fixtures__python_capi__containers::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.python_capi.containers import error");
@@ -566,14 +563,14 @@ int Extractor<::test::fixtures::python_capi::TWrapped>::typeCheck(PyObject* obj)
 }
 
 
-PyObject* Constructor<::test::fixtures::python_capi::TWrapped>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::TWrapped, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(
     const ::test::fixtures::python_capi::TWrapped& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::TWrapped>> ctor;
+        ::test::fixtures::python_capi::TWrapped, ::test__fixtures__python_capi__containers::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -582,7 +579,7 @@ PyObject* Constructor<::test::fixtures::python_capi::TWrapped>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::TWrapped>>::operator()(
+        ::test::fixtures::python_capi::TWrapped, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::test::fixtures::python_capi::TWrapped& val) {
   StrongRef fbthrift_data(createStructTuple(2));
   StrongRef _fbthrift__fieldA(
@@ -610,7 +607,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::test::fixtures::python_capi::IndirectionA>
-Extractor<::test::fixtures::python_capi::IndirectionA>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::IndirectionA, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -621,15 +618,15 @@ Extractor<::test::fixtures::python_capi::IndirectionA>::operator()(PyObject* obj
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::test::fixtures::python_capi::IndirectionA>>{}(*fbThriftData);
+      ::test::fixtures::python_capi::IndirectionA, ::test__fixtures__python_capi__containers::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::test::fixtures::python_capi::IndirectionA>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::python_capi::IndirectionA>>::operator()(PyObject* fbThriftData) {
+    ::test::fixtures::python_capi::IndirectionA, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::python_capi::IndirectionA cpp;
   std::optional<std::string_view> error;
-  Extractor<list<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::TWrapped>>>{}.extractInto(
+  Extractor<list<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::TWrapped, ::test__fixtures__python_capi__containers::NamespaceTag>>>{}.extractInto(
       cpp.lst_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__IndirectionA__tuple_pos[0]),
       error);
@@ -640,7 +637,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::test::fixtures::python_capi::IndirectionA>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::IndirectionA, ::test__fixtures__python_capi__containers::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.python_capi.containers import error");
@@ -655,14 +652,14 @@ int Extractor<::test::fixtures::python_capi::IndirectionA>::typeCheck(PyObject* 
 }
 
 
-PyObject* Constructor<::test::fixtures::python_capi::IndirectionA>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::IndirectionA, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(
     const ::test::fixtures::python_capi::IndirectionA& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::IndirectionA>> ctor;
+        ::test::fixtures::python_capi::IndirectionA, ::test__fixtures__python_capi__containers::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -671,11 +668,11 @@ PyObject* Constructor<::test::fixtures::python_capi::IndirectionA>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::IndirectionA>>::operator()(
+        ::test::fixtures::python_capi::IndirectionA, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::test::fixtures::python_capi::IndirectionA& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__lst(
-    Constructor<list<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::TWrapped>>>{}
+    Constructor<list<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::TWrapped, ::test__fixtures__python_capi__containers::NamespaceTag>>>{}
     .constructFrom(val.lst_ref()));
   if (!_fbthrift__lst ||
       setStructField(
@@ -689,7 +686,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::test::fixtures::python_capi::IndirectionB>
-Extractor<::test::fixtures::python_capi::IndirectionB>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::IndirectionB, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -700,15 +697,15 @@ Extractor<::test::fixtures::python_capi::IndirectionB>::operator()(PyObject* obj
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::test::fixtures::python_capi::IndirectionB>>{}(*fbThriftData);
+      ::test::fixtures::python_capi::IndirectionB, ::test__fixtures__python_capi__containers::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::test::fixtures::python_capi::IndirectionB>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::python_capi::IndirectionB>>::operator()(PyObject* fbThriftData) {
+    ::test::fixtures::python_capi::IndirectionB, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::python_capi::IndirectionB cpp;
   std::optional<std::string_view> error;
-  Extractor<list<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::TWrapped>, std::vector<native_t<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::TWrapped>>>>>{}.extractInto(
+  Extractor<list<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::TWrapped, ::test__fixtures__python_capi__containers::NamespaceTag>, std::vector<native_t<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::TWrapped, ::test__fixtures__python_capi__containers::NamespaceTag>>>>>{}.extractInto(
       cpp.lst_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__IndirectionB__tuple_pos[0]),
       error);
@@ -719,7 +716,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::test::fixtures::python_capi::IndirectionB>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::IndirectionB, ::test__fixtures__python_capi__containers::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.python_capi.containers import error");
@@ -734,14 +731,14 @@ int Extractor<::test::fixtures::python_capi::IndirectionB>::typeCheck(PyObject* 
 }
 
 
-PyObject* Constructor<::test::fixtures::python_capi::IndirectionB>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::IndirectionB, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(
     const ::test::fixtures::python_capi::IndirectionB& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::IndirectionB>> ctor;
+        ::test::fixtures::python_capi::IndirectionB, ::test__fixtures__python_capi__containers::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -750,11 +747,11 @@ PyObject* Constructor<::test::fixtures::python_capi::IndirectionB>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::IndirectionB>>::operator()(
+        ::test::fixtures::python_capi::IndirectionB, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::test::fixtures::python_capi::IndirectionB& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__lst(
-    Constructor<list<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::TWrapped>, std::vector<native_t<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::TWrapped>>>>>{}
+    Constructor<list<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::TWrapped, ::test__fixtures__python_capi__containers::NamespaceTag>, std::vector<native_t<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::TWrapped, ::test__fixtures__python_capi__containers::NamespaceTag>>>>>{}
     .constructFrom(val.lst_ref()));
   if (!_fbthrift__lst ||
       setStructField(
@@ -768,7 +765,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::test::fixtures::python_capi::IndirectionC>
-Extractor<::test::fixtures::python_capi::IndirectionC>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::IndirectionC, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -779,15 +776,15 @@ Extractor<::test::fixtures::python_capi::IndirectionC>::operator()(PyObject* obj
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::test::fixtures::python_capi::IndirectionC>>{}(*fbThriftData);
+      ::test::fixtures::python_capi::IndirectionC, ::test__fixtures__python_capi__containers::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::test::fixtures::python_capi::IndirectionC>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::fixtures::python_capi::IndirectionC>>::operator()(PyObject* fbThriftData) {
+    ::test::fixtures::python_capi::IndirectionC, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::fixtures::python_capi::IndirectionC cpp;
   std::optional<std::string_view> error;
-  Extractor<list<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::TWrapped>>>{}.extractInto(
+  Extractor<list<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::TWrapped, ::test__fixtures__python_capi__containers::NamespaceTag>>>{}.extractInto(
       cpp.lst_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__IndirectionC__tuple_pos[0]),
       error);
@@ -798,7 +795,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::test::fixtures::python_capi::IndirectionC>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::IndirectionC, ::test__fixtures__python_capi__containers::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.fixtures.python_capi.containers import error");
@@ -813,14 +810,14 @@ int Extractor<::test::fixtures::python_capi::IndirectionC>::typeCheck(PyObject* 
 }
 
 
-PyObject* Constructor<::test::fixtures::python_capi::IndirectionC>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::fixtures::python_capi::IndirectionC, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(
     const ::test::fixtures::python_capi::IndirectionC& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::IndirectionC>> ctor;
+        ::test::fixtures::python_capi::IndirectionC, ::test__fixtures__python_capi__containers::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -829,11 +826,11 @@ PyObject* Constructor<::test::fixtures::python_capi::IndirectionC>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::fixtures::python_capi::IndirectionC>>::operator()(
+        ::test::fixtures::python_capi::IndirectionC, ::test__fixtures__python_capi__containers::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::test::fixtures::python_capi::IndirectionC& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__lst(
-    Constructor<list<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::TWrapped>>>{}
+    Constructor<list<::apache::thrift::python::capi::ComposedStruct<::test::fixtures::python_capi::TWrapped, ::test__fixtures__python_capi__containers::NamespaceTag>>>{}
     .constructFrom(val.lst_ref()));
   if (!_fbthrift__lst ||
       setStructField(
@@ -846,7 +843,4 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

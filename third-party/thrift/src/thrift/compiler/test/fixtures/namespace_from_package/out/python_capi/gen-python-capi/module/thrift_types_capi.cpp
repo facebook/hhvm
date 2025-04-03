@@ -15,10 +15,7 @@
 #include <thrift/compiler/test/fixtures/namespace_from_package/gen-python-capi/module/thrift_types_capi.h>
 
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace apache::thrift::python::capi {
 namespace {
 bool ensure_module_imported() {
   static ::folly::python::import_cache_nocapture import((
@@ -31,7 +28,7 @@ bool ensure_module_imported() {
 } // namespace
 
 ExtractorResult<::test::namespace_from_package::module::Foo>
-Extractor<::test::namespace_from_package::module::Foo>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::namespace_from_package::module::Foo, ::test__namespace_from_package__module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -42,12 +39,12 @@ Extractor<::test::namespace_from_package::module::Foo>::operator()(PyObject* obj
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::test::namespace_from_package::module::Foo>>{}(*fbThriftData);
+      ::test::namespace_from_package::module::Foo, ::test__namespace_from_package__module::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::test::namespace_from_package::module::Foo>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::test::namespace_from_package::module::Foo>>::operator()(PyObject* fbThriftData) {
+    ::test::namespace_from_package::module::Foo, ::test__namespace_from_package__module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::test::namespace_from_package::module::Foo cpp;
   std::optional<std::string_view> error;
   Extractor<int64_t>{}.extractInto(
@@ -61,7 +58,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::test::namespace_from_package::module::Foo>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::test::namespace_from_package::module::Foo, ::test__namespace_from_package__module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module test.namespace_from_package.module import error");
@@ -76,14 +73,14 @@ int Extractor<::test::namespace_from_package::module::Foo>::typeCheck(PyObject* 
 }
 
 
-PyObject* Constructor<::test::namespace_from_package::module::Foo>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::test::namespace_from_package::module::Foo, ::test__namespace_from_package__module::NamespaceTag>>::operator()(
     const ::test::namespace_from_package::module::Foo& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::namespace_from_package::module::Foo>> ctor;
+        ::test::namespace_from_package::module::Foo, ::test__namespace_from_package__module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -92,7 +89,7 @@ PyObject* Constructor<::test::namespace_from_package::module::Foo>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::test::namespace_from_package::module::Foo>>::operator()(
+        ::test::namespace_from_package::module::Foo, ::test__namespace_from_package__module::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::test::namespace_from_package::module::Foo& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__MyInt(
@@ -109,7 +106,4 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

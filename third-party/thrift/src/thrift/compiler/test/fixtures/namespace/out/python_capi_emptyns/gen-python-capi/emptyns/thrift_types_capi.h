@@ -14,13 +14,16 @@
 
 #include <thrift/compiler/test/fixtures/namespace/gen-cpp2/emptyns_types.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace emptyns {
+
+struct NamespaceTag {};
+
+} // namespace emptyns
+
+namespace apache::thrift::python::capi {
 template <>
-struct Extractor<::cpp2::Foo>
-    : public BaseExtractor<::cpp2::Foo> {
+struct Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Foo, ::emptyns::NamespaceTag>>
+    : public BaseExtractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Foo, ::emptyns::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   ExtractorResult<::cpp2::Foo> operator()(PyObject* obj);
   int typeCheck(PyObject* obj);
@@ -28,28 +31,25 @@ struct Extractor<::cpp2::Foo>
 
 template <>
 struct Extractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Foo>>
+        ::cpp2::Foo, ::emptyns::NamespaceTag >>
     : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Foo>> {
+        ::cpp2::Foo, ::emptyns::NamespaceTag>> {
   ExtractorResult<::cpp2::Foo> operator()(PyObject* obj);
 };
 
 template <>
-struct Constructor<::cpp2::Foo>
-    : public BaseConstructor<::cpp2::Foo> {
+struct Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Foo, ::emptyns::NamespaceTag>>
+    : public BaseConstructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Foo, ::emptyns::NamespaceTag>> {
   static const bool kUsingMarshal = true;
   PyObject* operator()(const ::cpp2::Foo& val);
 };
 
 template <>
 struct Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Foo>>
+        ::cpp2::Foo, ::emptyns::NamespaceTag>>
     : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Foo>> {
+        ::cpp2::Foo, ::emptyns::NamespaceTag>> {
   PyObject* operator()(const ::cpp2::Foo& val);
 };
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

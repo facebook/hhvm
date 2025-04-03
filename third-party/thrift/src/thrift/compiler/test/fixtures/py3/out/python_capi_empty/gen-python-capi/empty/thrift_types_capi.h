@@ -14,11 +14,11 @@
 
 #include <thrift/compiler/test/fixtures/py3/gen-cpp2/empty_types.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+namespace empty {
+
+struct NamespaceTag {};
+
+} // namespace empty
+
+namespace apache::thrift::python::capi {
+} // namespace apache::thrift::python::capi

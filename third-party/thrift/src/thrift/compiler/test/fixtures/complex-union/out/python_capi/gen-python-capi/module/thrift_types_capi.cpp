@@ -15,10 +15,7 @@
 #include <thrift/compiler/test/fixtures/complex-union/gen-python-capi/module/thrift_types_capi.h>
 
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace apache::thrift::python::capi {
 namespace {
 bool ensure_module_imported() {
   static ::folly::python::import_cache_nocapture import((
@@ -34,7 +31,7 @@ bool ensure_module_imported() {
 } // namespace
 
 ExtractorResult<::cpp2::ComplexUnion>
-Extractor<::cpp2::ComplexUnion>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ComplexUnion, ::module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -45,12 +42,12 @@ Extractor<::cpp2::ComplexUnion>::operator()(PyObject* obj) {
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::ComplexUnion>>{}(*fbThriftData);
+      ::cpp2::ComplexUnion, ::module::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::cpp2::ComplexUnion>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::ComplexUnion>>::operator()(PyObject* fbThriftData) {
+    ::cpp2::ComplexUnion, ::module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::ComplexUnion cpp;
   std::optional<std::string_view> error;
   auto type_tag = Extractor<int64_t>{}(PyTuple_GET_ITEM(fbThriftData, 0));
@@ -92,7 +89,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::cpp2::ComplexUnion>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ComplexUnion, ::module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module module import error");
@@ -107,14 +104,14 @@ int Extractor<::cpp2::ComplexUnion>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<::cpp2::ComplexUnion>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ComplexUnion, ::module::NamespaceTag>>::operator()(
     const ::cpp2::ComplexUnion& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::ComplexUnion>> ctor;
+        ::cpp2::ComplexUnion, ::module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -123,7 +120,7 @@ PyObject* Constructor<::cpp2::ComplexUnion>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::ComplexUnion>>::operator()(
+        ::cpp2::ComplexUnion, ::module::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::cpp2::ComplexUnion& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
@@ -171,7 +168,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::cpp2::ListUnion>
-Extractor<::cpp2::ListUnion>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ListUnion, ::module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -182,12 +179,12 @@ Extractor<::cpp2::ListUnion>::operator()(PyObject* obj) {
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::ListUnion>>{}(*fbThriftData);
+      ::cpp2::ListUnion, ::module::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::cpp2::ListUnion>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::ListUnion>>::operator()(PyObject* fbThriftData) {
+    ::cpp2::ListUnion, ::module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::ListUnion cpp;
   std::optional<std::string_view> error;
   auto type_tag = Extractor<int64_t>{}(PyTuple_GET_ITEM(fbThriftData, 0));
@@ -213,7 +210,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::cpp2::ListUnion>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ListUnion, ::module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module module import error");
@@ -228,14 +225,14 @@ int Extractor<::cpp2::ListUnion>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<::cpp2::ListUnion>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ListUnion, ::module::NamespaceTag>>::operator()(
     const ::cpp2::ListUnion& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::ListUnion>> ctor;
+        ::cpp2::ListUnion, ::module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -244,7 +241,7 @@ PyObject* Constructor<::cpp2::ListUnion>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::ListUnion>>::operator()(
+        ::cpp2::ListUnion, ::module::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::cpp2::ListUnion& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
@@ -272,7 +269,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::cpp2::DataUnion>
-Extractor<::cpp2::DataUnion>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::DataUnion, ::module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -283,12 +280,12 @@ Extractor<::cpp2::DataUnion>::operator()(PyObject* obj) {
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::DataUnion>>{}(*fbThriftData);
+      ::cpp2::DataUnion, ::module::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::cpp2::DataUnion>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::DataUnion>>::operator()(PyObject* fbThriftData) {
+    ::cpp2::DataUnion, ::module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::DataUnion cpp;
   std::optional<std::string_view> error;
   auto type_tag = Extractor<int64_t>{}(PyTuple_GET_ITEM(fbThriftData, 0));
@@ -314,7 +311,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::cpp2::DataUnion>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::DataUnion, ::module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module module import error");
@@ -329,14 +326,14 @@ int Extractor<::cpp2::DataUnion>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<::cpp2::DataUnion>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::DataUnion, ::module::NamespaceTag>>::operator()(
     const ::cpp2::DataUnion& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::DataUnion>> ctor;
+        ::cpp2::DataUnion, ::module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -345,7 +342,7 @@ PyObject* Constructor<::cpp2::DataUnion>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::DataUnion>>::operator()(
+        ::cpp2::DataUnion, ::module::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::cpp2::DataUnion& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
@@ -373,7 +370,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::cpp2::Val>
-Extractor<::cpp2::Val>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Val, ::module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -384,12 +381,12 @@ Extractor<::cpp2::Val>::operator()(PyObject* obj) {
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::Val>>{}(*fbThriftData);
+      ::cpp2::Val, ::module::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::cpp2::Val>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::Val>>::operator()(PyObject* fbThriftData) {
+    ::cpp2::Val, ::module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::Val cpp;
   std::optional<std::string_view> error;
   Extractor<Bytes>{}.extractInto(
@@ -411,7 +408,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::cpp2::Val>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Val, ::module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module module import error");
@@ -426,14 +423,14 @@ int Extractor<::cpp2::Val>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<::cpp2::Val>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::Val, ::module::NamespaceTag>>::operator()(
     const ::cpp2::Val& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Val>> ctor;
+        ::cpp2::Val, ::module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -442,7 +439,7 @@ PyObject* Constructor<::cpp2::Val>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::Val>>::operator()(
+        ::cpp2::Val, ::module::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::cpp2::Val& val) {
   StrongRef fbthrift_data(createStructTuple(3));
   StrongRef _fbthrift__strVal(
@@ -480,7 +477,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::cpp2::ValUnion>
-Extractor<::cpp2::ValUnion>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ValUnion, ::module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -491,12 +488,12 @@ Extractor<::cpp2::ValUnion>::operator()(PyObject* obj) {
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::ValUnion>>{}(*fbThriftData);
+      ::cpp2::ValUnion, ::module::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::cpp2::ValUnion>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::ValUnion>>::operator()(PyObject* fbThriftData) {
+    ::cpp2::ValUnion, ::module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::ValUnion cpp;
   std::optional<std::string_view> error;
   auto type_tag = Extractor<int64_t>{}(PyTuple_GET_ITEM(fbThriftData, 0));
@@ -507,11 +504,11 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     case 0:
       break; // union is unset
     case 1:
-      Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Val>>{}.extractInto(
+      Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Val, ::module::NamespaceTag>>{}.extractInto(
           cpp.v1_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
     case 2:
-      Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Val>>{}.extractInto(
+      Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Val, ::module::NamespaceTag>>{}.extractInto(
           cpp.v2_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
   }
@@ -522,7 +519,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::cpp2::ValUnion>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ValUnion, ::module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module module import error");
@@ -537,14 +534,14 @@ int Extractor<::cpp2::ValUnion>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<::cpp2::ValUnion>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::ValUnion, ::module::NamespaceTag>>::operator()(
     const ::cpp2::ValUnion& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::ValUnion>> ctor;
+        ::cpp2::ValUnion, ::module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -553,7 +550,7 @@ PyObject* Constructor<::cpp2::ValUnion>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::ValUnion>>::operator()(
+        ::cpp2::ValUnion, ::module::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::cpp2::ValUnion& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
@@ -564,12 +561,12 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       break;
     case 1:
       py_val = StrongRef(
-          Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Val>>{}
+          Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Val, ::module::NamespaceTag>>{}
           .constructFrom(val.v1_ref()));
       break;
     case 2:
       py_val = StrongRef(
-          Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Val>>{}
+          Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::Val, ::module::NamespaceTag>>{}
           .constructFrom(val.v2_ref()));
       break;
   }
@@ -581,7 +578,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::cpp2::VirtualComplexUnion>
-Extractor<::cpp2::VirtualComplexUnion>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::VirtualComplexUnion, ::module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -592,12 +589,12 @@ Extractor<::cpp2::VirtualComplexUnion>::operator()(PyObject* obj) {
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::VirtualComplexUnion>>{}(*fbThriftData);
+      ::cpp2::VirtualComplexUnion, ::module::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::cpp2::VirtualComplexUnion>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::VirtualComplexUnion>>::operator()(PyObject* fbThriftData) {
+    ::cpp2::VirtualComplexUnion, ::module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::VirtualComplexUnion cpp;
   std::optional<std::string_view> error;
   auto type_tag = Extractor<int64_t>{}(PyTuple_GET_ITEM(fbThriftData, 0));
@@ -623,7 +620,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::cpp2::VirtualComplexUnion>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::VirtualComplexUnion, ::module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module module import error");
@@ -638,14 +635,14 @@ int Extractor<::cpp2::VirtualComplexUnion>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<::cpp2::VirtualComplexUnion>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::VirtualComplexUnion, ::module::NamespaceTag>>::operator()(
     const ::cpp2::VirtualComplexUnion& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::VirtualComplexUnion>> ctor;
+        ::cpp2::VirtualComplexUnion, ::module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -654,7 +651,7 @@ PyObject* Constructor<::cpp2::VirtualComplexUnion>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::VirtualComplexUnion>>::operator()(
+        ::cpp2::VirtualComplexUnion, ::module::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::cpp2::VirtualComplexUnion& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
@@ -682,7 +679,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::cpp2::NonCopyableStruct>
-Extractor<::cpp2::NonCopyableStruct>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::NonCopyableStruct, ::module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -693,12 +690,12 @@ Extractor<::cpp2::NonCopyableStruct>::operator()(PyObject* obj) {
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::NonCopyableStruct>>{}(*fbThriftData);
+      ::cpp2::NonCopyableStruct, ::module::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::cpp2::NonCopyableStruct>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::NonCopyableStruct>>::operator()(PyObject* fbThriftData) {
+    ::cpp2::NonCopyableStruct, ::module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::NonCopyableStruct cpp;
   std::optional<std::string_view> error;
   Extractor<int64_t>{}.extractInto(
@@ -712,7 +709,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::cpp2::NonCopyableStruct>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::NonCopyableStruct, ::module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module module import error");
@@ -727,14 +724,14 @@ int Extractor<::cpp2::NonCopyableStruct>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<::cpp2::NonCopyableStruct>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::NonCopyableStruct, ::module::NamespaceTag>>::operator()(
     const ::cpp2::NonCopyableStruct& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::NonCopyableStruct>> ctor;
+        ::cpp2::NonCopyableStruct, ::module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -743,7 +740,7 @@ PyObject* Constructor<::cpp2::NonCopyableStruct>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::NonCopyableStruct>>::operator()(
+        ::cpp2::NonCopyableStruct, ::module::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::cpp2::NonCopyableStruct& val) {
   StrongRef fbthrift_data(createStructTuple(1));
   StrongRef _fbthrift__num(
@@ -761,7 +758,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 
 
 ExtractorResult<::cpp2::NonCopyableUnion>
-Extractor<::cpp2::NonCopyableUnion>::operator()(PyObject* obj) {
+Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::NonCopyableUnion, ::module::NamespaceTag>>::operator()(PyObject* obj) {
   int tCheckResult = typeCheck(obj);
   if (tCheckResult != 1) {
       if (tCheckResult == 0) {
@@ -772,12 +769,12 @@ Extractor<::cpp2::NonCopyableUnion>::operator()(PyObject* obj) {
   }
   StrongRef fbThriftData(getThriftData(obj));
   return Extractor<::apache::thrift::python::capi::ComposedStruct<
-      ::cpp2::NonCopyableUnion>>{}(*fbThriftData);
+      ::cpp2::NonCopyableUnion, ::module::NamespaceTag>>{}(*fbThriftData);
 }
 
 ExtractorResult<::cpp2::NonCopyableUnion>
 Extractor<::apache::thrift::python::capi::ComposedStruct<
-    ::cpp2::NonCopyableUnion>>::operator()(PyObject* fbThriftData) {
+    ::cpp2::NonCopyableUnion, ::module::NamespaceTag>>::operator()(PyObject* fbThriftData) {
   ::cpp2::NonCopyableUnion cpp;
   std::optional<std::string_view> error;
   auto type_tag = Extractor<int64_t>{}(PyTuple_GET_ITEM(fbThriftData, 0));
@@ -788,7 +785,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
     case 0:
       break; // union is unset
     case 1:
-      Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::NonCopyableStruct>>{}.extractInto(
+      Extractor<::apache::thrift::python::capi::ComposedStruct<::cpp2::NonCopyableStruct, ::module::NamespaceTag>>{}.extractInto(
           cpp.s_ref(), PyTuple_GET_ITEM(fbThriftData, 1), error);
       break;
   }
@@ -799,7 +796,7 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-int Extractor<::cpp2::NonCopyableUnion>::typeCheck(PyObject* obj) {
+int Extractor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::NonCopyableUnion, ::module::NamespaceTag>>::typeCheck(PyObject* obj) {
   if (!ensure_module_imported()) {
     ::folly::python::handlePythonError(
       "Module module import error");
@@ -814,14 +811,14 @@ int Extractor<::cpp2::NonCopyableUnion>::typeCheck(PyObject* obj) {
 }
 
 
-PyObject* Constructor<::cpp2::NonCopyableUnion>::operator()(
+PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::cpp2::NonCopyableUnion, ::module::NamespaceTag>>::operator()(
     const ::cpp2::NonCopyableUnion& val) {
   if (!ensure_module_imported()) {
     DCHECK(PyErr_Occurred() != nullptr);
     return nullptr;
   }
   Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::NonCopyableUnion>> ctor;
+        ::cpp2::NonCopyableUnion, ::module::NamespaceTag>> ctor;
   StrongRef fbthrift_data(ctor(val));
   if (!fbthrift_data) {
     return nullptr;
@@ -830,7 +827,7 @@ PyObject* Constructor<::cpp2::NonCopyableUnion>::operator()(
 }
 
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
-        ::cpp2::NonCopyableUnion>>::operator()(
+        ::cpp2::NonCopyableUnion, ::module::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::cpp2::NonCopyableUnion& val) {
   int64_t type_key = static_cast<int64_t>(val.getType());
   StrongRef py_val;
@@ -841,7 +838,7 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
       break;
     case 1:
       py_val = StrongRef(
-          Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::NonCopyableStruct>>{}
+          Constructor<::apache::thrift::python::capi::ComposedStruct<::cpp2::NonCopyableStruct, ::module::NamespaceTag>>{}
           .constructFrom(val.s_ref()));
       break;
   }
@@ -852,7 +849,4 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

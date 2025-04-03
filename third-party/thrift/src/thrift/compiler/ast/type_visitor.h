@@ -59,7 +59,7 @@ decltype(auto) visit_type(const t_type& ty, Visitors&&... visitors) {
       return std::invoke(f, dynamic_cast<const t_enum&>(ty));
     case t_type::type::t_structured: {
       const t_structured* s = dynamic_cast<const t_structured*>(&ty);
-      if (s->is_struct()) {
+      if (s->is_struct_or_union()) {
         return std::invoke(f, dynamic_cast<const t_struct&>(ty));
       } else if (s->is_union()) {
         return std::invoke(f, dynamic_cast<const t_union&>(ty));

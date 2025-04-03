@@ -2062,6 +2062,7 @@ struct ListRedirectionsResponse {
 struct GetFileContentRequest {
   1: MountId mount;
   2: PathString filePath;
+  3: SyncBehavior sync;
 }
 
 struct GetFileContentResponse {

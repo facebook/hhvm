@@ -252,7 +252,7 @@ class TestRunner {
                                            "called or we didn't encounter "
                                            "error if it was expected!";
     if (!onRequest.isFinished() || onRequest.isFailed()) {
-      std::string info = "";
+      std::string info;
       for (auto range : data) {
         if (!info.empty()) {
           info += ", ";

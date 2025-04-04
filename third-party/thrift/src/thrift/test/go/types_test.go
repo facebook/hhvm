@@ -187,7 +187,11 @@ func TestFieldSerializationOrderDeterminism(t *testing.T) {
 }
 
 func TestSimpleJSONSerialization(t *testing.T) {
-	writeTarget := thrifttest.VariousFieldsStructConst1
+	writeTarget := thrifttest.NewVariousFieldsStruct()
+	err := thrift.DeepCopy(thrifttest.VariousFieldsStructConst1, writeTarget)
+	if err != nil {
+		t.Fatalf("failed to deep copy: %v", err)
+	}
 
 	data, err := thrift.EncodeSimpleJSON(writeTarget)
 	if err != nil {

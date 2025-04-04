@@ -34,7 +34,11 @@ func TestReflectCodec(t *testing.T) {
 	// "field53": {["hello1", "hello2", "hello3"]: "value1"},
 	// ....
 
-	writeTarget := thrifttest.VariousFieldsStructConst1
+	writeTarget := thrifttest.NewVariousFieldsStruct()
+	err := thrift.DeepCopy(thrifttest.VariousFieldsStructConst1, writeTarget)
+	if err != nil {
+		t.Fatalf("failed to deep copy: %v", err)
+	}
 	writeTarget.Field51 = map[thrifttest.ComparableStruct]string{
 		{Field1: 123}: "value1",
 	}

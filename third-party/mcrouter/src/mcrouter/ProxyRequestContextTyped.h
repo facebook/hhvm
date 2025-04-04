@@ -206,7 +206,8 @@ class ProxyRequestContextWithInfo : public ProxyRequestContext {
         poolIndex,
         getProductId(request),
         getRegionalizationEntity(request),
-        getUsecaseId(request));
+        getUsecaseId(request),
+        getReplySourceBitMask(reply));
     assert(logger_.hasValue());
     logger_->template log<Request>(loggerContext);
     assert(additionalLogger_.hasValue());

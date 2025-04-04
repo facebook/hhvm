@@ -261,5 +261,23 @@ uint64_t getQueryTagsIfExists(Message& message) {
   return detail::getQueryTagsImpl(HasQueryTagsTrait<Message>{}, message);
 }
 
+template <typename Message, typename = std::enable_if_t<true>>
+class HasReplySourceBitMaskTrait : public std::false_type {};
+template <typename Message>
+class HasReplySourceBitMaskTrait<
+    Message,
+    std::void_t<decltype(std::declval<Message>().replySourceBitMask_ref())>>
+    : public std::true_type {};
+
+template <typename Message>
+uint32_t getReplySourceBitMask(const Message& message) {
+  if constexpr (HasReplySourceBitMaskTrait<Message>::value) {
+    if (message.replySourceBitMask_ref().has_value()) {
+      return message.replySourceBitMask_ref().value();
+    }
+  }
+  return 0;
+}
+
 } // namespace memcache
 } // namespace facebook

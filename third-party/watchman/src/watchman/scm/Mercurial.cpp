@@ -165,7 +165,7 @@ w_string Mercurial::mergeBaseWith(
           [this, commit, requestId](const std::string&) {
             auto revset = fmt::format("ancestor(.,{})", commit);
             MercurialResult result;
-            if (cfg_get_bool("disable_hg_autopullcommits", false)) {
+            if (!cfg_get_bool("disable_hg_autopullcommits", false)) {
               result = runMercurial(
                   {hgExecutablePath(), "log", "-T", "{node}", "-r", revset},
                   makeHgOptions(requestId),

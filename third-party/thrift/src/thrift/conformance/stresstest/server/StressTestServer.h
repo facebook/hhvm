@@ -19,9 +19,7 @@
 #include <thrift/conformance/stresstest/server/StressTestHandler.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 
-namespace apache {
-namespace thrift {
-namespace stress {
+namespace apache::thrift::stress {
 
 std::shared_ptr<StressTestHandler> createStressTestHandler();
 
@@ -29,6 +27,4 @@ std::shared_ptr<ThriftServer> createStressTestServer(
     std::shared_ptr<apache::thrift::ServiceHandler<StressTest>> handler =
         nullptr);
 
-} // namespace stress
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::stress

@@ -18,9 +18,7 @@
 
 #include <thrift/conformance/stresstest/if/gen-cpp2/StressTest.h>
 
-namespace apache {
-namespace thrift {
-namespace stress {
+namespace apache::thrift::stress {
 
 class StressTestHandler : public apache::thrift::ServiceHandler<StressTest> {
  public:
@@ -71,6 +69,4 @@ class StressTestHandler : public apache::thrift::ServiceHandler<StressTest> {
   BasicResponse makeBasicResponse(int64_t payloadSize) const;
 };
 
-} // namespace stress
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::stress

@@ -21,9 +21,7 @@
 #include <folly/coro/Sleep.h>
 #include <folly/coro/Task.h>
 
-namespace apache {
-namespace thrift {
-namespace stress {
+namespace apache::thrift::stress {
 
 StressTestHandler::StressTestHandler() {}
 
@@ -205,6 +203,4 @@ folly::coro::Task<double> StressTestHandler::co_calculateSquares(
   co_return co_await fanOut();
 }
 
-} // namespace stress
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::stress

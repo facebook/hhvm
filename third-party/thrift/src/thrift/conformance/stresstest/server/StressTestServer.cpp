@@ -80,9 +80,7 @@ static int callback_assign_func(
 }
 #endif
 
-namespace apache {
-namespace thrift {
-namespace stress {
+namespace apache::thrift::stress {
 
 using namespace apache::thrift::rocket;
 
@@ -277,6 +275,4 @@ std::shared_ptr<ThriftServer> createStressTestServer(
   return server;
 }
 
-} // namespace stress
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::stress

@@ -73,27 +73,4 @@ int main(int argc, char** argv) {
 
     DCHECK(threadFactoryTests.initThreadFactoryTest());
   }
-
-  if (runAll || args[0] == "util") {
-    std::cout << "Util tests..." << std::endl;
-
-    std::cout << "\t\tUtil minimum time" << std::endl;
-
-    int64_t time00 = Util::currentTime();
-    int64_t time01 = Util::currentTime();
-
-    std::cout << "\t\t\tMinimum time: " << time01 - time00 << "ms" << std::endl;
-
-    time00 = Util::currentTime();
-    time01 = time00;
-    size_t count = 0;
-
-    while (time01 < time00 + 10) {
-      count++;
-      time01 = Util::currentTime();
-    }
-
-    std::cout << "\t\t\tscall per ms: " << count / (time01 - time00)
-              << std::endl;
-  }
 }

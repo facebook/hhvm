@@ -19,7 +19,6 @@
 #include <thrift/lib/cpp/test/loadgen/LatencyMonitor.h>
 
 #include <thrift/lib/cpp/Thrift.h>
-#include <thrift/lib/cpp/concurrency/Util.h>
 #include <thrift/lib/cpp/test/loadgen/WeightedLoadConfig.h>
 
 #include <gflags/gflags.h>

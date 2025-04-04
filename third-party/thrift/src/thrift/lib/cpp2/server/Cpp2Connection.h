@@ -25,7 +25,6 @@
 #include <folly/io/async/AsyncTransport.h>
 #include <folly/io/async/HHWheelTimer.h>
 #include <thrift/lib/cpp/TApplicationException.h>
-#include <thrift/lib/cpp/concurrency/Util.h>
 #include <thrift/lib/cpp2/GeneratedCodeHelper.h>
 #include <thrift/lib/cpp2/async/HeaderServerChannel.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>

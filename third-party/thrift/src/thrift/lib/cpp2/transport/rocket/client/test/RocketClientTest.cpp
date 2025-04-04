@@ -35,7 +35,6 @@
 #include <folly/observer/Observer.h>
 #include <folly/portability/GFlags.h>
 #include <folly/testing/TestUtil.h>
-#include <thrift/lib/cpp/concurrency/Util.h>
 #include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/FieldRef.h>

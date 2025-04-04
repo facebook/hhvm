@@ -18,11 +18,8 @@
 
 #include <folly/io/async/EventBase.h>
 #include <folly/portability/Unistd.h>
-#include <thrift/lib/cpp/concurrency/Util.h>
 
 using namespace apache::thrift::test;
-
-using apache::thrift::concurrency::Util;
 
 namespace apache {
 namespace thrift {

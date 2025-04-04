@@ -17,7 +17,6 @@
 #include <thrift/lib/cpp/test/loadgen/Controller.h>
 
 #include <thrift/lib/cpp/concurrency/PosixThreadFactory.h>
-#include <thrift/lib/cpp/concurrency/Util.h>
 #include <thrift/lib/cpp/test/loadgen/IntervalTimer.h>
 #include <thrift/lib/cpp/test/loadgen/Monitor.h>
 #include <thrift/lib/cpp/test/loadgen/WorkerIf.h>

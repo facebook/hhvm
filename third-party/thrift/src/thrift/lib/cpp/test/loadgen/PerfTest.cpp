@@ -21,8 +21,6 @@
  * loadgen library code.
  */
 
-#include <thrift/lib/cpp/concurrency/Util.h>
-
 #include <thrift/lib/cpp/test/loadgen/QpsMonitor.h>
 #include <thrift/lib/cpp/test/loadgen/Worker.h>
 #include <thrift/lib/cpp/test/loadgen/loadgen.h>

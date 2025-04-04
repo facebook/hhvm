@@ -18,7 +18,6 @@
 #define THRIFT_TEST_PERF_ASYNCINTERVALTIMER_H_ 1
 
 #include <thrift/lib/cpp/TLogging.h>
-#include <thrift/lib/cpp/concurrency/Util.h>
 #include <thrift/lib/cpp/test/loadgen/RNG.h>
 
 #include <chrono>

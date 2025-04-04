@@ -20,7 +20,6 @@
 #include <thrift/lib/cpp/test/loadgen/WorkerIf.h>
 
 #include <thrift/lib/cpp/TLogging.h>
-#include <thrift/lib/cpp/concurrency/Util.h>
 #include <thrift/lib/cpp/test/loadgen/IntervalTimer.h>
 #include <thrift/lib/cpp/test/loadgen/LoadConfig.h>
 #include <thrift/lib/cpp/test/loadgen/ScoreBoard.h>

@@ -18,7 +18,6 @@
 
 #include <thrift/lib/cpp/test/loadgen/QpsMonitor.h>
 
-#include <thrift/lib/cpp/concurrency/Util.h>
 #include <thrift/lib/cpp/test/loadgen/LoadConfig.h>
 
 #include <stdio.h>
@@ -26,7 +25,6 @@
 #include <chrono>
 
 using namespace boost;
-using namespace apache::thrift::concurrency;
 
 namespace apache {
 namespace thrift {

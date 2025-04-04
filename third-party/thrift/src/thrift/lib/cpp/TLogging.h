@@ -17,19 +17,16 @@
 #ifndef THRIFT_TLOGGING_H
 #define THRIFT_TLOGGING_H 1
 
-#include <thrift/lib/cpp/concurrency/Util.h>
+#include <chrono>
+#include <folly/portability/SysTime.h>
 #include <thrift/lib/cpp/thrift_config.h>
 
 #include <stdio.h>
 
 /**
  * Contains utility macros for debugging and logging.
- *
  */
 
-#ifdef THRIFT_HAVE_CLOCK_GETTIME
-#include <folly/portability/SysTime.h>
-#endif
 #include <time.h>
 
 #include <stdint.h>
@@ -57,34 +54,16 @@
  */
 #define T_DEBUG(format_string, ...) T_DEBUG_L(0, format_string, ##__VA_ARGS__)
 
-#define COMPUTE_TIME                                                \
-  int64_t nowMs = apache::thrift::concurrency::Util::currentTime(); \
-  time_t nowSec = (time_t)(nowMs / 1000);                           \
-  nowMs -= nowSec * 1000;                                           \
-  int ms = (int)nowMs;                                              \
-  char dbgtime[26];                                                 \
-  ctime_r(&nowSec, dbgtime);                                        \
+#define COMPUTE_TIME                                                       \
+  int64_t nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(   \
+                      std::chrono::system_clock::now().time_since_epoch()) \
+                      .count();                                            \
+  time_t nowSec = (time_t)(nowMs / 1000);                                  \
+  nowMs -= nowSec * 1000;                                                  \
+  int ms = (int)nowMs;                                                     \
+  char dbgtime[26];                                                        \
+  ctime_r(&nowSec, dbgtime);                                               \
   dbgtime[24] = '\0';
-
-/**
- * analogous to T_DEBUG but also prints the time
- *
- * @param string  format_string input: printf style format string
- */
-#define T_DEBUG_T(format_string, ...)                 \
-  do {                                                \
-    if (T_GLOBAL_DEBUGGING_LEVEL > 0) {               \
-      COMPUTE_TIME                                    \
-      fprintf(                                        \
-          stderr,                                     \
-          "[%s,%d] [%s, %d ms] " format_string " \n", \
-          __FILE__,                                   \
-          __LINE__,                                   \
-          dbgtime,                                    \
-          ms,                                         \
-          ##__VA_ARGS__);                             \
-    }                                                 \
-  } while (0)
 
 /**
  * analogous to T_DEBUG but uses input level to determine whether or not the

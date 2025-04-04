@@ -17,13 +17,6 @@
 #ifndef _LIB_CPP_THRIFT_CONFIG_H
 #define _LIB_CPP_THRIFT_CONFIG_H 1
 
-/* Define to 1 if you have the `clock_gettime' function. */
-#if defined(__linux__) || defined(__FreeBSD__)
-#ifndef THRIFT_HAVE_CLOCK_GETTIME
-#define THRIFT_HAVE_CLOCK_GETTIME 1
-#endif
-#endif // defined(__linux__) || defined(__FreeBSD__)
-
 /* Define to 1 if you have the `snappy' library (-lsnappy). */
 #ifndef THRIFT_HAVE_LIBSNAPPY
 #define THRIFT_HAVE_LIBSNAPPY 1

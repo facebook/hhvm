@@ -38,7 +38,6 @@
 #include <thrift/lib/cpp/concurrency/FunctionRunner.h>
 #include <thrift/lib/cpp/concurrency/PosixThreadFactory.h>
 #include <thrift/lib/cpp/concurrency/Thread.h>
-#include <thrift/lib/cpp/concurrency/Util.h>
 
 FOLLY_GFLAGS_DECLARE_bool(codel_enabled);
 

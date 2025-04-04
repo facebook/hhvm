@@ -21,7 +21,6 @@
 #include <folly/String.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBufQueue.h>
-#include <thrift/lib/cpp/concurrency/Util.h>
 #include <thrift/lib/cpp/transport/TTransportException.h>
 
 using namespace apache::thrift::transport;

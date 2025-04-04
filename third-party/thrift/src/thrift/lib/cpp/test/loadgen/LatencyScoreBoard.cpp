@@ -16,8 +16,6 @@
 
 #include <thrift/lib/cpp/test/loadgen/LatencyScoreBoard.h>
 
-#include <thrift/lib/cpp/concurrency/Util.h>
-
 #include <math.h>
 
 #include <gflags/gflags.h>

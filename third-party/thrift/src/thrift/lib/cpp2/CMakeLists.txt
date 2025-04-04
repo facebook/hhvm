@@ -307,6 +307,7 @@ add_library(
   transport/rocket/Types.cpp
   transport/rocket/compression/CompressionManager.cpp
   transport/rocket/compression/CompressionAlgorithmSelector.cpp
+  transport/rocket/compression/CustomCompressorRegistry.cpp
   transport/rocket/client/RequestContext.cpp
   transport/rocket/client/RequestContextQueue.cpp
   transport/rocket/client/RocketClient.cpp

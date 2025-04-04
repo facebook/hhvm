@@ -29,6 +29,7 @@ else()
   set_and_check(FBTHRIFT_COMPILER "@PACKAGE_BIN_INSTALL_DIR@/thrift1")
 endif()
 
+find_dependency(Xxhash REQUIRED)
 find_dependency(ZLIB REQUIRED)
 find_package(mvfst CONFIG REQUIRED)
 

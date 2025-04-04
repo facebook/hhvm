@@ -462,7 +462,7 @@ typename RouterInfo::RouteHandlePtr createCarbonLookasideRoute(
         "that is >= 10, < 1000, and 1000 must be a multiple of ttl.");
   }
 
-  std::string prefix = ""; // Defaults to no prefix.
+  std::string prefix; // Defaults to no prefix.
   if (auto jPrefix = json.get_ptr("prefix")) {
     checkLogic(
         jPrefix->isString(), "CarbonLookasideRoute: 'prefix' is not a string");

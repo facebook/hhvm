@@ -4650,7 +4650,7 @@ fn process_attribute_constructor_call<'a>(
     env: &mut Env<'a>,
 ) -> Result<ast::UserAttribute> {
     let name = pos_name(constructor_call_type, env)?;
-    let mut params = could_map(constructor_call_argument_list, env, |n, e| {
+    let params = could_map(constructor_call_argument_list, env, |n, e| {
         is_valid_attribute_arg(n, e, &name.1);
         p_expr(n, e)
     })?;
@@ -4677,18 +4677,6 @@ fn process_attribute_constructor_call<'a>(
                     &syntax_error::memoize_requires_label(&name.1),
                 );
             }
-        }
-
-        // If TreatNonAnnotatedMemoizeAsKBIC was supplied by config, add that to empty __Memoize
-        if env.parser_options.treat_non_annotated_memoize_as_kbic && params.is_empty() {
-            params.push(ast::Expr::new(
-                (),
-                env.mk_none_pos(),
-                ast::Expr_::EnumClassLabel(Box::new((
-                    None,
-                    sn::memoize_option::KEYED_BY_IC.to_string(),
-                ))),
-            ));
         }
 
         if list.len() > 1 {
@@ -5476,7 +5464,8 @@ fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
             let is_abstract = kinds.has(modifier::ABSTRACT);
             let is_external = !is_abstract && c.function_body.is_external();
             let fun_kind = mk_fun_kind(hdr.suspension_kind, body_has_yield);
-            let user_attributes = p_user_attributes(&c.attribute, env);
+            let mut user_attributes = p_user_attributes(&c.attribute, env);
+            populate_memoize_default(hdr.contexts.as_ref(), &mut user_attributes, env);
             check_effect_memoized(hdr.contexts.as_ref(), &user_attributes, "method", env);
             check_asio_lowpri(fun_kind, &user_attributes, env);
             let method = ast::Method_ {
@@ -5723,6 +5712,31 @@ fn is_memoize_attribute_with_flavor(u: &aast::UserAttribute<(), ()>, flavor: Opt
         })
 }
 
+fn populate_memoize_default<'a>(
+    contexts: Option<&ast::Contexts>,
+    user_attributes: &mut aast::UserAttributes<(), ()>,
+    env: &mut Env<'a>,
+) {
+    // If TreatNonAnnotatedMemoizeAsKBIC was supplied by config, add that to empty __Memoize
+    if env.parser_options.treat_non_annotated_memoize_as_kbic {
+        if let Some(u) = user_attributes
+            .iter_mut()
+            .find(|u| sn::user_attributes::is_memoized(&u.name.1))
+        {
+            if u.params.is_empty() && !contexts_cannot_access_ic(contexts) {
+                u.params.push(ast::Expr::new(
+                    (),
+                    env.mk_none_pos(),
+                    ast::Expr_::EnumClassLabel(Box::new((
+                        None,
+                        sn::memoize_option::KEYED_BY_IC.to_string(),
+                    ))),
+                ));
+            }
+        }
+    }
+}
+
 fn check_effect_memoized<'a>(
     contexts: Option<&ast::Contexts>,
     user_attributes: &[aast::UserAttribute<(), ()>],
@@ -5935,7 +5949,8 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 env.reset_for_function_body(body, hdr.suspension_kind, p_function_body)?
             };
             let fun_kind = mk_fun_kind(hdr.suspension_kind, yield_);
-            let user_attributes = p_user_attributes(attribute_spec, env);
+            let mut user_attributes = p_user_attributes(attribute_spec, env);
+            populate_memoize_default(hdr.contexts.as_ref(), &mut user_attributes, env);
             check_effect_memoized(hdr.contexts.as_ref(), &user_attributes, "function", env);
             check_context_has_this(hdr.contexts.as_ref(), env);
             check_asio_lowpri(fun_kind, &user_attributes, env);

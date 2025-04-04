@@ -261,7 +261,7 @@ string t_json_generator::to_string(const t_type* type) {
     }
   } else if (type->is_enum()) {
     return "ENUM";
-  } else if (type->is_struct() || type->is_exception()) {
+  } else if (type->is_struct_or_union() || type->is_exception()) {
     return "STRUCT";
   } else if (type->is_map()) {
     return "MAP";
@@ -297,7 +297,7 @@ string t_json_generator::to_spec_args(const t_type* type) {
   if (type->is_primitive_type()) {
     return "null";
   } else if (
-      type->is_struct() || type->is_exception() || type->is_enum() ||
+      type->is_struct_or_union() || type->is_exception() || type->is_enum() ||
       type->is_typedef()) {
     return to_spec_args_named(type);
   } else if (type->is_map()) {

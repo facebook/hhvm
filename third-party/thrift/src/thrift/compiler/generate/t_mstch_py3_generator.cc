@@ -93,7 +93,7 @@ const t_type* get_map_val_type(const t_type& type) {
 }
 
 bool type_needs_convert(const t_type* type) {
-  return type->is_enum() || type->is_struct() || type->is_union() ||
+  return type->is_enum() || type->is_struct_or_union() || type->is_union() ||
       type->is_exception() || type->is_container();
 }
 
@@ -804,8 +804,8 @@ class py3_mstch_type : public mstch_type {
 
   mstch::node resolves_to_complex_return() {
     return resolved_type_->is_container() ||
-        resolved_type_->is_string_or_binary() || resolved_type_->is_struct() ||
-        resolved_type_->is_exception();
+        resolved_type_->is_string_or_binary() ||
+        resolved_type_->is_struct_or_union() || resolved_type_->is_exception();
   }
 
   const std::string& get_flat_name() const { return cached_props_.flat_name(); }
@@ -870,7 +870,7 @@ class py3_mstch_type : public mstch_type {
 
   bool has_cython_type() const {
     return has_option("inplace_migrate")
-        ? !(type_->is_container() || type_->is_struct())
+        ? !(type_->is_container() || type_->is_struct_or_union())
         : !type_->is_container();
   }
 

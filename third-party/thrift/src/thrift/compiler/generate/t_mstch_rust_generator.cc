@@ -378,7 +378,7 @@ bool type_has_transitive_adapter(
           type_has_transitive_adapter(
                  map_type->get_val_type(), step_through_newtypes);
     }
-  } else if (type->is_struct()) {
+  } else if (type->is_struct_or_union()) {
     auto struct_type = dynamic_cast<const t_struct*>(type);
     if (struct_type) {
       return node_has_adapter(*struct_type);
@@ -1767,7 +1767,7 @@ class mstch_rust_value : public mstch_base {
   }
   mstch::node map_entries();
   mstch::node is_struct() {
-    return (underlying_type_->is_struct() ||
+    return (underlying_type_->is_struct_or_union() ||
             underlying_type_->is_exception()) &&
         !underlying_type_->is_union() &&
         const_value_->kind() == value_type::CV_MAP;
@@ -2084,7 +2084,7 @@ class rust_mstch_const : public mstch_const {
 
     auto type = const_->type()->get_true_type();
     return type->is_list() || type->is_map() || type->is_set() ||
-        type->is_struct();
+        type->is_struct_or_union();
   }
   mstch::node rust_typed_value() {
     unsigned depth = 0;

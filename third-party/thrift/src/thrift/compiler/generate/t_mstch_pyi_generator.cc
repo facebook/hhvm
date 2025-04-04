@@ -137,7 +137,7 @@ std::string to_flat_type_name(const t_type* type) {
 const std::string* get_py_adapter(const t_type* type) {
   assert(type != nullptr);
 
-  if (!type->get_true_type()->is_struct()) {
+  if (!type->get_true_type()->is_struct_or_union()) {
     return nullptr;
   }
 

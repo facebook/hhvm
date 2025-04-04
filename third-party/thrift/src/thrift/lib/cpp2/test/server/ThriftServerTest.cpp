@@ -2987,28 +2987,29 @@ TEST(ThriftServer, SSLPermittedAcceptsPlaintextAndSSL) {
 TEST(ThriftServer, ClientOnlyTimeouts) {
   class SendResponseInterface
       : public apache::thrift::ServiceHandler<TestService> {
-    void sync_sendResponse(
-        std::string& _return, int64_t shouldSleepMs) override {
+    void sync_sendResponse(std::string& ret, int64_t shouldSleepMs) override {
       auto header = getConnectionContext()->getHeader();
-      if (shouldSleepMs) {
+      if (shouldSleepMs != 0) {
         usleep(shouldSleepMs * 1000);
       }
-      _return = fmt::format(
+      ret = fmt::format(
           "{}:{}",
           header->getClientTimeout().count(),
           header->getClientQueueTimeout().count());
     }
   };
-  TestThriftServerFactory<SendResponseInterface> factory;
-  ScopedServerThread st(factory.create());
-
-  folly::EventBase base;
-  auto socket = folly::AsyncSocket::newSocket(&base, *st.getAddress());
-  TestServiceAsyncClient client(HeaderClientChannel::newChannel(
-      HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket)));
 
   for (bool clientOnly : {false, true}) {
     for (bool shouldTimeOut : {true, false}) {
+      TestThriftServerFactory<SendResponseInterface> factory;
+      ScopedServerThread st(factory.create());
+
+      folly::EventBase base;
+      auto socket = folly::AsyncSocket::newSocket(&base, *st.getAddress());
+      apache::thrift::Client<TestService> client(
+          HeaderClientChannel::newChannel(
+              HeaderClientChannel::WithoutRocketUpgrade{}, std::move(socket)));
+
       std::string response;
       RpcOptions rpcOpts;
       rpcOpts.setTimeout(std::chrono::milliseconds(30));
@@ -3025,9 +3026,10 @@ TEST(ThriftServer, ClientOnlyTimeouts) {
       } catch (...) {
         EXPECT_TRUE(shouldTimeOut);
       }
+
+      base.loop();
     }
   }
-  base.loop();
 }
 
 TEST(ThriftServerTest, QueueTimeHeaderTest) {

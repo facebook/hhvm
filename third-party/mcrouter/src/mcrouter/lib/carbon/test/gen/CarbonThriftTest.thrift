@@ -233,5 +233,5 @@ struct CustomReply {
 cpp.virtual
 )
 
-@cpp.Type{name = "Timestamp"}
-typedef i64 (cpp.indirection) Timestamp_i64
+@cpp.Adapter{name = "::apache::thrift::IndirectionAdapter<Timestamp>"}
+typedef i64 Timestamp_i64

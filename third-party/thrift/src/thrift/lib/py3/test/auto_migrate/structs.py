@@ -560,12 +560,31 @@ class NumericalConversionsTests(unittest.TestCase):
 
                 self.assertFalse(getattr(isset, fld_name), fld_name)
 
+        # constructor
         m = mixed()
         assert_mixed(m)
         assert_isset(m)
 
         # call operator
         m = m(some_field_="don't care")
+        assert_mixed(m)
+        assert_isset(m)
+
+        # serialization round-trip
+        m = deserialize(mixed, serialize(m))
+        assert_mixed(m)
+        assert_isset(m)
+
+        ### Now with explicit `None` set
+        # in py3, even setting the field explicitly to None:
+        #   - the field value is still the default (non-None)
+        #   - the issset value is still False
+        #  This is deeply regrettable.
+        m = mixed(opt_field=None)
+        assert_mixed(m)
+        assert_isset(m)
+
+        m = m(opt_field=None)
         assert_mixed(m)
         assert_isset(m)
 

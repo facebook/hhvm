@@ -390,6 +390,7 @@ class StructTestsParameterized(unittest.TestCase):
                     continue
                 self.assertFalse(isset[fld_name], fld_name)
 
+        # constructor
         m = self.mixed()
         assert_mixed(m)
         assert_isset(m)
@@ -399,9 +400,23 @@ class StructTestsParameterized(unittest.TestCase):
         assert_mixed(m)
         assert_isset(m)
 
+        # serialization round-trip
         m = self.serializer.deserialize(self.mixed, self.serializer.serialize(m))
         assert_mixed(m)
         assert_isset(m)
+
+        ### Now with explicit `None` set
+        m = self.mixed(opt_field=None)
+        self.assertIsNone(m.opt_field)
+        self.assertFalse(self.isset(m)["opt_field"])
+
+        m = m(opt_field=None)
+        self.assertIsNone(m.opt_field)
+        self.assertFalse(self.isset(m)["opt_field"])
+
+        m = self.serializer.deserialize(self.mixed, self.serializer.serialize(m))
+        self.assertIsNone(m.opt_field)
+        self.assertFalse(self.isset(m)["opt_field"])
 
 
 class StructTestsImmutable(unittest.TestCase):

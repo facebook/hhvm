@@ -1,0 +1,4 @@
+ERROR: File "needs_concrete_1.php", line 6, characters 13-14:
+Cannot access abstract member `A::m2`; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method. (Typing[4491])
+  File "needs_concrete_1.php", line 8, characters 35-36:
+  Declaration is here

@@ -310,6 +310,13 @@ val get_support_dynamic_type : env -> bool
 
 val get_no_auto_likes : env -> bool
 
+(** when true, the receiver of `static::foo()` is a concrete class
+ where "concrete" means that the class is
+  - non-abstract
+  - OR final+non-__ConsistentConstruct
+*)
+val static_points_to_concrete_class : env -> bool
+
 val set_self : env -> string -> locl_ty -> env
 
 (** Run a given function with self unset in the environment.

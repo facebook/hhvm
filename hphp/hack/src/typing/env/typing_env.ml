@@ -1021,6 +1021,29 @@ let get_support_dynamic_type env = env.genv.this_support_dynamic_type
 
 let get_no_auto_likes env = env.genv.no_auto_likes
 
+let containing_class_is_final_and_concrete env =
+  let is_final_non_abstract class_ =
+    Cls.final class_ && (not @@ Cls.abstract class_)
+  in
+  let is_final_non_consistent_construct class_ =
+    match snd @@ Cls.construct class_ with
+    | FinalClass -> true
+    | Inconsistent
+    | ConsistentConstruct ->
+      false
+  in
+  match get_self_class env |> Decl_entry.to_option with
+  | Some class_ ->
+    is_final_non_abstract class_ || is_final_non_consistent_construct class_
+  | None -> false
+
+let static_points_to_concrete_class env =
+  (* if we're in a __NeedsConcrete method, `static` points to a concrete class *)
+  env.genv.needs_concrete
+  (* if we're in an instance method or constructor then the class must be instantiable and therefore concrete *)
+  || (not @@ is_static env)
+  || containing_class_is_final_and_concrete env
+
 let set_self env self_id self_ty =
   let genv = env.genv in
   let genv = { genv with self = Some (self_id, self_ty) } in

@@ -779,6 +779,9 @@ module Typing = struct
     | NeedsConcreteOverride [@value 4487]
     | StringToClassPointer [@value 4488]
     | SwitchNeedsDefault [@value 4489]
+    | CallNeedsConcrete [@value 4490]
+    | AbstractAccessViaStatic [@value 4491]
+    | UninstantiableClassViaStatic [@value 4492]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

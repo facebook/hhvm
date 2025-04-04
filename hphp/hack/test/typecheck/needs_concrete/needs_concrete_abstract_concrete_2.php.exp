@@ -1,0 +1,8 @@
+ERROR: File "needs_concrete_abstract_concrete_2.php", line 20, characters 9-14:
+Cannot instantiate via `static`: `static` might refer to a non-concrete class here.`C2` (Typing[4492])
+  File "needs_concrete_abstract_concrete_2.php", line 17, characters 22-23:
+  Declaration is here
+ERROR: File "needs_concrete_abstract_concrete_2.php", line 21, characters 13-14:
+Cannot call `C2::nc` (a `<<__NeedsConcrete>>` method) via `static`. It requires `static` to refer to a concrete class but `static` may not be concrete. (Typing[4490])
+  File "needs_concrete_abstract_concrete_2.php", line 7, characters 26-27:
+  Declaration is here

@@ -1139,6 +1139,23 @@ let is_hack_collection env ty =
 
 let check_class_get
     env p def_pos cid mid ce (_, _cid_pos, e) function_pointer is_method =
+  let needs_concrete_is_enabled =
+    TypecheckerOptions.needs_concrete env.genv.tcopt
+  in
+  let is_concrete (class_ : Cls.t) =
+    let is_non_abstract = not (Cls.abstract class_) in
+    let is_final_non_consistent_construct =
+      match snd @@ Cls.construct class_ with
+      | FinalClass -> true
+      | Inconsistent
+      | ConsistentConstruct ->
+        false
+    in
+    is_non_abstract || is_final_non_consistent_construct
+  in
+  let callee_is_needs_concrete_method =
+    is_method && get_ce_readonly_prop_or_needs_concrete ce
+  in
   match e with
   | CIself when get_ce_abstract ce -> begin
     match Env.get_self_id env with
@@ -1214,6 +1231,23 @@ let check_class_get
         primary
         @@ Primary.Static_synthetic_method
              { class_name; meth_name = mid; pos = p; decl_pos = def_pos })
+  | CI _ when needs_concrete_is_enabled && callee_is_needs_concrete_method ->
+    Env.get_class env cid
+    |> Decl_entry.to_option
+    |> Option.iter ~f:(fun class_ ->
+           if not (is_concrete class_) then
+             Typing_error_utils.add_typing_error
+               ~env
+               Typing_error.(
+                 primary
+                 @@ Primary.Call_needs_concrete
+                      {
+                        call_pos = p;
+                        class_name = cid;
+                        meth_name = mid;
+                        decl_pos = def_pos;
+                        via = `Id;
+                      }))
   | CI (_, class_name) when is_method ->
     (match Env.get_class env class_name with
     | Decl_entry.NotYetAvailable
@@ -1252,6 +1286,69 @@ let check_class_get
                    })
         | _ -> ()
       end)
+  | CIself when needs_concrete_is_enabled && callee_is_needs_concrete_method ->
+    Env.get_self_class env
+    |> Decl_entry.to_option
+    |> Option.iter ~f:(fun class_ ->
+           if not (is_concrete class_) then
+             Typing_error_utils.add_typing_error
+               ~env
+               Typing_error.(
+                 primary
+                 @@ Primary.Call_needs_concrete
+                      {
+                        call_pos = p;
+                        class_name = cid;
+                        meth_name = mid;
+                        decl_pos = def_pos;
+                        via = `Self;
+                      }))
+  | CIparent when needs_concrete_is_enabled && callee_is_needs_concrete_method
+    ->
+    Env.get_parent_class env
+    |> Decl_entry.to_option
+    |> Option.iter ~f:(fun class_ ->
+           if not (is_concrete class_) then
+             Typing_error_utils.add_typing_error
+               ~env
+               Typing_error.(
+                 primary
+                 @@ Primary.Call_needs_concrete
+                      {
+                        call_pos = p;
+                        class_name = cid;
+                        meth_name = mid;
+                        decl_pos = def_pos;
+                        via = `Parent;
+                      }))
+  | CIstatic
+    when needs_concrete_is_enabled
+         && not (Env.static_points_to_concrete_class env) ->
+    if callee_is_needs_concrete_method then
+      Typing_error_utils.add_typing_error
+        ~env
+        Typing_error.(
+          primary
+          @@ Primary.Call_needs_concrete
+               {
+                 call_pos = p;
+                 class_name = cid;
+                 meth_name = mid;
+                 decl_pos = def_pos;
+                 via = `Static;
+               })
+    else if get_ce_abstract ce then
+      Typing_error_utils.add_typing_error
+        ~env
+        Typing_error.(
+          primary
+          @@ Primary.Abstract_access_via_static
+               {
+                 access_pos = p;
+                 class_name = cid;
+                 member_name = mid;
+                 decl_pos = def_pos;
+               })
   | _ -> ()
 
 let polymorphic_fun_type_of_id env ((use_pos, name) as fn_id) =
@@ -10421,28 +10518,63 @@ end = struct
     let (env, tal, te, classes) =
       class_id_for_new ~exact ~is_attribute ~is_catch p env cid explicit_targs
     in
-    List.iter classes ~f:(function
-        | `Dynamic -> ()
-        | `Class ((pos, name), class_info, c_ty) ->
-          let pos = Pos_or_decl.unsafe_to_raw_pos pos in
-          let kind = Cls.kind class_info in
-          if
-            Ast_defs.is_c_trait kind
-            || Ast_defs.is_c_enum kind
-            || Ast_defs.is_c_enum_class kind
-          then
-            match cid with
-            | CIexpr _
-            | CI _ ->
-              uninstantiable_error env p cid (Cls.pos class_info) name pos c_ty
-            | CIstatic
-            | CIparent
-            | CIself ->
-              ()
-          else if Ast_defs.is_c_abstract kind && Cls.final class_info then
-            uninstantiable_error env p cid (Cls.pos class_info) name pos c_ty
-          else
-            ());
+    begin
+      match cid with
+      | CIstatic
+        when TypecheckerOptions.needs_concrete env.genv.tcopt
+             && not (Env.static_points_to_concrete_class env) ->
+        Env.get_self_class env
+        |> Decl_entry.to_option
+        |> Option.iter ~f:(fun class_ ->
+               let err =
+                 Typing_error.(
+                   primary
+                   @@ Primary.Uninstantiable_class_via_static
+                        {
+                          usage_pos = p;
+                          class_name = Cls.name class_;
+                          decl_pos = Cls.pos class_;
+                        })
+               in
+               Typing_error_utils.add_typing_error ~env err)
+      | _ ->
+        List.iter classes ~f:(function
+            | `Dynamic -> ()
+            | `Class ((pos, name), class_info, c_ty) ->
+              let pos = Pos_or_decl.unsafe_to_raw_pos pos in
+              let kind = Cls.kind class_info in
+              if
+                Ast_defs.is_c_trait kind
+                || Ast_defs.is_c_enum kind
+                || Ast_defs.is_c_enum_class kind
+              then
+                match cid with
+                | CIexpr _
+                | CI _ ->
+                  uninstantiable_error
+                    env
+                    p
+                    cid
+                    (Cls.pos class_info)
+                    name
+                    pos
+                    c_ty
+                | CIstatic
+                | CIparent
+                | CIself ->
+                  ()
+              else if Ast_defs.is_c_abstract kind && Cls.final class_info then
+                uninstantiable_error
+                  env
+                  p
+                  cid
+                  (Cls.pos class_info)
+                  name
+                  pos
+                  c_ty
+              else
+                ())
+    end;
     (env, tal, te, classes)
 end
 

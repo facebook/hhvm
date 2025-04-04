@@ -1,0 +1,6 @@
+ERROR: File "needs_concrete_traits_2.php", line 12, characters 27-28:
+Some members in class `C2` are incompatible with those declared in type `C1` (Typing[4487])
+  File "needs_concrete_traits_2.php", line 9, characters 26-27:
+  Cannot declare this method as __NeedsConcrete, since it overrides a non-__NeedsConcrete method
+  File "needs_concrete_traits_2.php", line 4, characters 26-27:
+  Previously defined here

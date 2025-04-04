@@ -1384,6 +1384,24 @@ module Primary = struct
       }
     | Optional_parameter_not_supported of Pos.t
     | Optional_parameter_not_abstract of Pos.t
+    | Call_needs_concrete of {
+        call_pos: Pos.t;
+        class_name: string;
+        meth_name: string;
+        decl_pos: Pos_or_decl.t;
+        via: [ `Id | `Self | `Parent | `Static ];
+      }
+    | Abstract_access_via_static of {
+        access_pos: Pos.t;
+        class_name: string;
+        member_name: string;
+        decl_pos: Pos_or_decl.t;
+      }
+    | Uninstantiable_class_via_static of {
+        usage_pos: Pos.t;
+        class_name: string;
+        decl_pos: Pos_or_decl.t;
+      }
   [@@deriving show]
 end
 

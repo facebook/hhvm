@@ -1,0 +1,4 @@
+ERROR: File "needs_concrete_traits_1.php", line 16, characters 7-8:
+Cannot call `C1::m1` (a `<<__NeedsConcrete>>` method). It is expecting a concrete receiver but `C1` is not concrete. (Typing[4490])
+  File "needs_concrete_traits_1.php", line 5, characters 26-27:
+  Declaration is here

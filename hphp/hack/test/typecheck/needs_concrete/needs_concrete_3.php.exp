@@ -1,0 +1,4 @@
+ERROR: File "needs_concrete_3.php", line 15, characters 13-14:
+Cannot call `C1::m2` (a `<<__NeedsConcrete>>` method) via `parent`. It requires `static` to refer to a concrete class, but `parent` sets `static` to a class that may not be concrete. (Typing[4490])
+  File "needs_concrete_3.php", line 5, characters 26-27:
+  Declaration is here

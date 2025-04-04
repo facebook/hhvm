@@ -3744,7 +3744,7 @@ end = struct
       meth_name
       decl_pos
       (via : [ `Id | `Self | `Parent | `Static ]) =
-    ( Error_code.CallNeedsConcrete,
+    let claim =
       lazy
         begin
           let strip_ns_class_name = Render.strip_ns class_name in
@@ -3775,37 +3775,31 @@ end = struct
                 via
           in
           (call_pos, message)
-        end,
-      lazy [(decl_pos, "Declaration is here")],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        end
+    and reasons = lazy [(decl_pos, "Declaration is here")] in
+    create ~code:Error_code.CallNeedsConcrete ~claim ~reasons ()
 
   let abstract_access_via_static access_pos class_name member_name decl_pos =
-    ( Error_code.AbstractAccessViaStatic,
+    let claim =
       lazy
         ( access_pos,
           "Cannot access abstract member "
           ^ Markdown_lite.md_codify
               (Render.strip_ns class_name ^ "::" ^ member_name)
           ^ "; it may be abstract and `static` might refer to an abstract class here. Consider adding the `__NeedsConcrete` attribute to the containing method."
-        ),
-      lazy [(decl_pos, "Declaration is here")],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        )
+    and reasons = lazy [(decl_pos, "Declaration is here")] in
+    create ~code:Error_code.AbstractAccessViaStatic ~claim ~reasons ()
 
   let uninstantiable_class_via_static usage_pos class_name decl_pos =
-    ( Error_code.UninstantiableClassViaStatic,
+    let claim =
       lazy
         ( usage_pos,
           Printf.sprintf
             "Cannot instantiate via `static`: `static` might refer to a non-concrete class here."
-          ^ Markdown_lite.md_codify (Render.strip_ns class_name) ),
-      lazy [(decl_pos, "Declaration is here")],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+          ^ Markdown_lite.md_codify (Render.strip_ns class_name) )
+    and reasons = lazy [(decl_pos, "Declaration is here")] in
+    create ~code:Error_code.UninstantiableClassViaStatic ~claim ~reasons ()
 
   let optional_parameter_not_abstract p =
     let claim =

@@ -4963,3 +4963,39 @@ TEST_F(HTTP2DownstreamSessionTest, EnableServerEarlyResponse) {
   parseOutput(*clientCodec_);
   httpSession_->timeoutExpired();
 }
+TEST_F(HTTP2DownstreamSessionTest, IdleSessionDoubleGoawayReadTimeout) {
+  // Enable double GOAWAY drain
+  auto connMan =
+      wangle::ConnectionManager::makeUnique(&eventBase_, milliseconds(125));
+  connMan->addConnection(httpSession_);
+  httpSession_->enableDoubleGoawayDrain();
+
+  // Set up the controller to return a graceful shutdown timeout of 100ms
+  EXPECT_CALL(mockController_, getGracefulShutdownTimeout())
+      .WillRepeatedly(Return(std::chrono::milliseconds(100)));
+
+  // Simulate a read timeout on an idle session
+  httpSession_->timeoutExpired();
+
+  // Expect the first GOAWAY to be sent immediately
+  {
+    EXPECT_CALL(
+        callbacks_,
+        onGoaway(std::numeric_limits<int32_t>::max(), ErrorCode::NO_ERROR, _));
+    eventBase_.loopOnce();
+    parseOutput(*clientCodec_);
+  }
+  // Expect the second GOAWAY to be sent 100ms later
+  eventBase_.runAfterDelay(
+      [&] {
+        EXPECT_CALL(callbacks_, onGoaway(0, ErrorCode::NO_ERROR, _));
+        parseOutput(*clientCodec_);
+      },
+      200);
+
+  // Expect the session to close 100ms later
+  expectDetachSession();
+
+  // Run the event loop
+  eventBase_.loop();
+}

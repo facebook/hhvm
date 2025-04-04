@@ -435,6 +435,10 @@ void HTTPSession::closeWhenIdle() {
   if (!isBusy() && !hasMoreWrites()) {
     // if we're already idle, close now
     dropConnection();
+  } else if (isDownstream() && !readsShutdown()) {
+    auto to = getDrainTimeout();
+    VLOG(4) << "Starting drain timer t=" << to.count();
+    resetTimeoutTo(to);
   }
 }
 

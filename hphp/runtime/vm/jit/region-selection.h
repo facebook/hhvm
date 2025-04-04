@@ -385,7 +385,7 @@ private:
  * the region selected will necessarily be specialized for those types.
  */
 
-using LiveTypesVec = jit::small_vector<RegionDesc::TypedLocation, 1>;
+using LiveTypesVec = jit::small_vector<RegionDesc::TypedLocation, 10>;
 
 struct RegionContext {
   RegionContext(SrcKey sk, SBInvOffset spOff)

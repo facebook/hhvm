@@ -172,19 +172,19 @@ pub mod raiser {
     impl ::std::error::Error for DoRaiseError {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
-                Self::b(ref inner) => {
+                Self::b(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::f(ref inner) => {
+                Self::f(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::s(ref inner) => {
+                Self::s(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ApplicationException(ref inner) => {
+                Self::ApplicationException(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ThriftError(ref inner) => {
+                Self::ThriftError(inner) => {
                     ::std::option::Option::Some(inner.as_ref())
                 }
             }
@@ -458,19 +458,19 @@ pub mod raiser {
     impl ::std::error::Error for Get500Error {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
-                Self::f(ref inner) => {
+                Self::f(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::b(ref inner) => {
+                Self::b(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::s(ref inner) => {
+                Self::s(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ApplicationException(ref inner) => {
+                Self::ApplicationException(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ThriftError(ref inner) => {
+                Self::ThriftError(inner) => {
                     ::std::option::Option::Some(inner.as_ref())
                 }
             }

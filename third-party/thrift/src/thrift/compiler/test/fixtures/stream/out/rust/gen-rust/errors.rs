@@ -248,13 +248,13 @@ pub mod pub_sub_streaming_service {
     impl ::std::error::Error for StreamthrowsStreamError {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
-                Self::e(ref inner) => {
+                Self::e(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ApplicationException(ref inner) => {
+                Self::ApplicationException(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ThriftError(ref inner) => {
+                Self::ThriftError(inner) => {
                     ::std::option::Option::Some(inner.as_ref())
                 }
             }
@@ -393,13 +393,13 @@ pub mod pub_sub_streaming_service {
     impl ::std::error::Error for ServicethrowsError {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
-                Self::e(ref inner) => {
+                Self::e(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ApplicationException(ref inner) => {
+                Self::ApplicationException(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ThriftError(ref inner) => {
+                Self::ThriftError(inner) => {
                     ::std::option::Option::Some(inner.as_ref())
                 }
             }
@@ -619,16 +619,16 @@ pub mod pub_sub_streaming_service {
     impl ::std::error::Error for Servicethrows2Error {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
-                Self::e1(ref inner) => {
+                Self::e1(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::e2(ref inner) => {
+                Self::e2(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ApplicationException(ref inner) => {
+                Self::ApplicationException(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ThriftError(ref inner) => {
+                Self::ThriftError(inner) => {
                     ::std::option::Option::Some(inner.as_ref())
                 }
             }
@@ -864,13 +864,13 @@ pub mod pub_sub_streaming_service {
     impl ::std::error::Error for BoththrowsError {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
-                Self::e(ref inner) => {
+                Self::e(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ApplicationException(ref inner) => {
+                Self::ApplicationException(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ThriftError(ref inner) => {
+                Self::ThriftError(inner) => {
                     ::std::option::Option::Some(inner.as_ref())
                 }
             }
@@ -1025,13 +1025,13 @@ pub mod pub_sub_streaming_service {
     impl ::std::error::Error for BoththrowsStreamError {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
-                Self::e(ref inner) => {
+                Self::e(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ApplicationException(ref inner) => {
+                Self::ApplicationException(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ThriftError(ref inner) => {
+                Self::ThriftError(inner) => {
                     ::std::option::Option::Some(inner.as_ref())
                 }
             }
@@ -1226,13 +1226,13 @@ pub mod pub_sub_streaming_service {
     impl ::std::error::Error for ResponseandstreamstreamthrowsStreamError {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
-                Self::e(ref inner) => {
+                Self::e(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ApplicationException(ref inner) => {
+                Self::ApplicationException(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ThriftError(ref inner) => {
+                Self::ThriftError(inner) => {
                     ::std::option::Option::Some(inner.as_ref())
                 }
             }
@@ -1371,13 +1371,13 @@ pub mod pub_sub_streaming_service {
     impl ::std::error::Error for ResponseandstreamservicethrowsError {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
-                Self::e(ref inner) => {
+                Self::e(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ApplicationException(ref inner) => {
+                Self::ApplicationException(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ThriftError(ref inner) => {
+                Self::ThriftError(inner) => {
                     ::std::option::Option::Some(inner.as_ref())
                 }
             }
@@ -1595,13 +1595,13 @@ pub mod pub_sub_streaming_service {
     impl ::std::error::Error for ResponseandstreamboththrowsError {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
-                Self::e(ref inner) => {
+                Self::e(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ApplicationException(ref inner) => {
+                Self::ApplicationException(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ThriftError(ref inner) => {
+                Self::ThriftError(inner) => {
                     ::std::option::Option::Some(inner.as_ref())
                 }
             }
@@ -1762,13 +1762,13 @@ pub mod pub_sub_streaming_service {
     impl ::std::error::Error for ResponseandstreamboththrowsStreamError {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
-                Self::e(ref inner) => {
+                Self::e(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ApplicationException(ref inner) => {
+                Self::ApplicationException(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ThriftError(ref inner) => {
+                Self::ThriftError(inner) => {
                     ::std::option::Option::Some(inner.as_ref())
                 }
             }

@@ -93,14 +93,14 @@ pub mod {{service:snake}} {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
                 {{#function:exceptions}}
-                Self::{{field:rust_name}}(ref inner) => {
+                Self::{{field:rust_name}}(inner) => {
                     ::std::option::Option::Some(inner)
                 }
                 {{/function:exceptions}}
-                Self::ApplicationException(ref inner) => {
+                Self::ApplicationException(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ThriftError(ref inner) => {
+                Self::ThriftError(inner) => {
                     ::std::option::Option::Some(inner.as_ref())
                 }
             }
@@ -328,14 +328,14 @@ pub mod {{service:snake}} {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
                 {{#function:stream_exceptions}}
-                Self::{{field:rust_name}}(ref inner) => {
+                Self::{{field:rust_name}}(inner) => {
                     ::std::option::Option::Some(inner)
                 }
                 {{/function:stream_exceptions}}
-                Self::ApplicationException(ref inner) => {
+                Self::ApplicationException(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ThriftError(ref inner) => {
+                Self::ThriftError(inner) => {
                     ::std::option::Option::Some(inner.as_ref())
                 }
             }

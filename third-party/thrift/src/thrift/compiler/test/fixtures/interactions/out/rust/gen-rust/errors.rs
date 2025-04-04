@@ -67,13 +67,13 @@ pub mod my_interaction {
     impl ::std::error::Error for FrobnicateError {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
-                Self::ex(ref inner) => {
+                Self::ex(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ApplicationException(ref inner) => {
+                Self::ApplicationException(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ThriftError(ref inner) => {
+                Self::ThriftError(inner) => {
                     ::std::option::Option::Some(inner.as_ref())
                 }
             }

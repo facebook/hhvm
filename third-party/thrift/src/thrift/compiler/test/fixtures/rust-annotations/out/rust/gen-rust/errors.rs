@@ -247,13 +247,13 @@ pub mod all_methods {
     impl ::std::error::Error for BarError {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
-                Self::se(ref inner) => {
+                Self::se(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ApplicationException(ref inner) => {
+                Self::ApplicationException(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ThriftError(ref inner) => {
+                Self::ThriftError(inner) => {
                     ::std::option::Option::Some(inner.as_ref())
                 }
             }
@@ -489,13 +489,13 @@ pub mod one_method {
     impl ::std::error::Error for BarError {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
-                Self::se(ref inner) => {
+                Self::se(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ApplicationException(ref inner) => {
+                Self::ApplicationException(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ThriftError(ref inner) => {
+                Self::ThriftError(inner) => {
                     ::std::option::Option::Some(inner.as_ref())
                 }
             }
@@ -731,13 +731,13 @@ pub mod one_method_opt_out {
     impl ::std::error::Error for BarError {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
-                Self::se(ref inner) => {
+                Self::se(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ApplicationException(ref inner) => {
+                Self::ApplicationException(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ThriftError(ref inner) => {
+                Self::ThriftError(inner) => {
                     ::std::option::Option::Some(inner.as_ref())
                 }
             }

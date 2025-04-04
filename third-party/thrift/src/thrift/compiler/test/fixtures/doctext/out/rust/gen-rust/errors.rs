@@ -222,13 +222,13 @@ pub mod c {
     impl ::std::error::Error for ThingError {
         fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
             match self {
-                Self::bang(ref inner) => {
+                Self::bang(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ApplicationException(ref inner) => {
+                Self::ApplicationException(inner) => {
                     ::std::option::Option::Some(inner)
                 }
-                Self::ThriftError(ref inner) => {
+                Self::ThriftError(inner) => {
                     ::std::option::Option::Some(inner.as_ref())
                 }
             }

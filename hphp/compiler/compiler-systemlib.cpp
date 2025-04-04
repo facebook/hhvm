@@ -124,7 +124,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     std::cout << desc << "\n";
     return 1;
   }
-  if (vm.count("version")) {
+  if (vm.contains("version")) {
     std::cout << "HipHop Repo Compiler";
     std::cout << " " << HHVM_VERSION;
     std::cout << " (" << (debug ? "dbg" : "rel") << ")\n";
@@ -230,7 +230,7 @@ bool process(CompilerOptions &po) {
 
   for (auto extension : ExtensionRegistry::getExtensions()) {
     for (auto file : extension->hackFiles()) {
-      if (!files.count(file)) {
+      if (!files.contains(file)) {
         Logger::Error(
           "Error while compiling stdlib: %s not found in input files - did you add an extension without any hack files? If so, override hackFiles to return an empty vector.", file.c_str());
       }

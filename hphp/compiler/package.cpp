@@ -864,7 +864,7 @@ coro::Task<void> Package::parseGroup(
     auto const workItems = paths.size();
     for (size_t i = 0; i < workItems; i++) {
       auto const& fileName = metas[i].m_filename;
-      if (!m_extraStaticFiles.count(fileName)) {
+      if (!m_extraStaticFiles.contains(fileName)) {
         m_discoveredStaticFiles.emplace(
           fileName,
           Option::CachePHPFile ? paths[i] : ""
@@ -1000,7 +1000,7 @@ void Package::resolveOnDemand(OndemandInfo& out,
   auto const& onPath = [&] (const std::string& rpath,
                             const StringData* sym) {
     if (rpath.empty()) return;
-    if (Option::PackageExcludeFiles.count(rpath) > 0 ||
+    if (Option::PackageExcludeFiles.contains(rpath) ||
         Option::IsFileExcluded(rpath, Option::PackageExcludePatterns)) {
       // Found symbol in UnitIndex, but the corresponding file was excluded.
       Logger::FVerbose("excluding ondemand file {}", rpath);
@@ -1757,7 +1757,7 @@ coro::Task<Package::EmitInfo> Package::emitGroup(
     auto const workItems = group.m_files.size();
     for (size_t i = 0; i < workItems; i++) {
       auto const& fileName = group.m_files[i];
-      if (!m_extraStaticFiles.count(fileName)) {
+      if (!m_extraStaticFiles.contains(fileName)) {
         m_discoveredStaticFiles.emplace(
           fileName,
           Option::CachePHPFile ? createFullPath(fileName, m_root) : ""

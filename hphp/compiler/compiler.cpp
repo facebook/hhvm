@@ -603,7 +603,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     std::cout << desc << "\n";
     return 1;
   }
-  if (vm.count("version")) {
+  if (vm.contains("version")) {
     std::cout << "HipHop Repo Compiler";
     std::cout << " " << HHVM_VERSION;
     std::cout << " (" << (debug ? "dbg" : "rel") << ")\n";
@@ -612,12 +612,12 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     return 1;
   }
 
-  if (vm.count("compiler-id")) {
+  if (vm.contains("compiler-id")) {
     std::cout << compilerId() << "\n";
     return 1;
   }
 
-  if (vm.count("repo-schema")) {
+  if (vm.contains("repo-schema")) {
     std::cout << repoSchemaId() << "\n";
     return 1;
   }

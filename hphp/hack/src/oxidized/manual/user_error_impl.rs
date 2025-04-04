@@ -52,7 +52,6 @@ impl<PrimPos: WithErasedLines, Pos: WithErasedLines> WithErasedLines for UserErr
             reasons,
             quickfixes,
             is_fixmed,
-            flags,
             function_pos,
             custom_msgs: _,
             explanation: _,
@@ -69,7 +68,6 @@ impl<PrimPos: WithErasedLines, Pos: WithErasedLines> WithErasedLines for UserErr
                 .collect(),
             custom_msgs: vec![],
             is_fixmed,
-            flags,
             function_pos,
         }
     }

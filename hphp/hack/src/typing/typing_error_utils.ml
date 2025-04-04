@@ -10,14 +10,6 @@
 open Core
 module Error_code = Error_codes.Typing
 
-type error =
-  Error_code.t
-  * Pos.t Message.t Lazy.t
-  * Pos_or_decl.t Message.t list Lazy.t
-  * Pos_or_decl.t Explanation.t Lazy.t
-  * Pos.t Quickfix.t list
-  * User_error_flags.t
-
 module Common = struct
   let map2 ~f x y = Lazy.(x >>= fun x -> map ~f:(fun y -> f x y) y)
 
@@ -162,32 +154,6 @@ module Common = struct
            (current_span, badpos_message_2))
     in
     (claim, reasons)
-
-  let eval_assert
-      ctx
-      current_span
-      ((code, reasons, explanation, flags) :
-        Error_code.t
-        * Pos_or_decl.t Message.t list lazy_t
-        * Pos_or_decl.t Explanation.t lazy_t
-        * User_error_flags.t) : error option =
-    match Lazy.force reasons with
-    | (pos, msg) :: rest as reasons ->
-      let (claim, reasons) =
-        match
-          Pos_or_decl.fill_in_filename_if_in_current_decl
-            ~current_decl_and_file:ctx
-            pos
-        with
-        | Some pos -> (lazy (pos, msg), rest)
-        | _ ->
-          wrap_error_in_different_file
-            ~current_file:ctx.Pos_or_decl.file
-            ~current_span
-            reasons
-      in
-      Some (code, claim, lazy reasons, explanation, [], flags)
-    | _ -> None
 end
 
 module Eval_result : sig
@@ -302,8 +268,25 @@ end = struct
 end
 
 module Eval_primary : sig
-  val to_error : Typing_error.Primary.t -> env:'a -> error
+  type t = {
+    code: Error_code.t;
+    claim: Pos.t Message.t Lazy.t;
+    reasons: Pos_or_decl.t Message.t list Lazy.t;
+    quickfixes: Pos.t Quickfix.t list;
+  }
+
+  val to_error : Typing_error.Primary.t -> env:'a -> t
 end = struct
+  type t = {
+    code: Error_code.t;
+    claim: Pos.t Message.t Lazy.t;
+    reasons: Pos_or_decl.t Message.t list Lazy.t;
+    quickfixes: Pos.t Quickfix.t list;
+  }
+
+  let create ~code ~claim ?(reasons = lazy []) ?(quickfixes = []) () =
+    { code; claim; reasons; quickfixes }
+
   module Eval_shape = struct
     let invalid_shape_field_type pos ty_pos ty_name trail =
       let reasons =
@@ -313,12 +296,7 @@ end = struct
       and claim =
         lazy (pos, "A shape field name must be an `int` or `string`")
       in
-      ( Error_code.InvalidShapeFieldType,
-        claim,
-        reasons,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.InvalidShapeFieldType ~claim ~reasons ()
 
     let invalid_shape_field_name pos =
       let claim =
@@ -327,26 +305,16 @@ end = struct
             "Shape access requires a string literal, integer literal, or a class constant"
           )
       in
-      ( Error_code.InvalidShapeFieldName,
-        claim,
-        lazy [],
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.InvalidShapeFieldName ~claim ()
 
     let invalid_shape_field_name_empty pos =
       let claim = lazy (pos, "A shape field name cannot be an empty string") in
 
-      ( Error_code.InvalidShapeFieldNameEmpty,
-        claim,
-        lazy [],
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.InvalidShapeFieldNameEmpty ~claim ()
 
     let invalid_shape_field_literal pos witness_pos =
       let claim = lazy (pos, "Shape uses literal string as field name")
-      and reason =
+      and reasons =
         lazy
           [
             ( Pos_or_decl.of_raw_pos witness_pos,
@@ -354,16 +322,11 @@ end = struct
             );
           ]
       in
-      ( Error_code.InvalidShapeFieldLiteral,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.InvalidShapeFieldLiteral ~claim ~reasons ()
 
     let invalid_shape_field_const pos witness_pos =
       let claim = lazy (pos, "Shape uses class constant as field name")
-      and reason =
+      and reasons =
         lazy
           [
             ( Pos_or_decl.of_raw_pos witness_pos,
@@ -371,12 +334,7 @@ end = struct
             );
           ]
       in
-      ( Error_code.InvalidShapeFieldConst,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.InvalidShapeFieldConst ~claim ~reasons ()
 
     let shape_field_class_mismatch pos class_name witness_pos witness_class_name
         =
@@ -385,7 +343,7 @@ end = struct
           ( pos,
             "Shape field name is class constant from "
             ^ Markdown_lite.md_codify class_name )
-      and reason =
+      and reasons =
         lazy
           [
             ( Pos_or_decl.of_raw_pos witness_pos,
@@ -393,45 +351,30 @@ end = struct
               ^ Markdown_lite.md_codify witness_class_name );
           ]
       in
-      ( Error_code.ShapeFieldClassMismatch,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.ShapeFieldClassMismatch ~claim ~reasons ()
 
     let shape_field_type_mismatch pos ty_name witness_pos witness_ty_name =
       let claim =
         lazy
           (pos, "Shape field name is " ^ Lazy.force ty_name ^ " class constant")
-      and reason =
+      and reasons =
         lazy
           [
             ( Pos_or_decl.of_raw_pos witness_pos,
               "But expected " ^ Lazy.force witness_ty_name );
           ]
       in
-      ( Error_code.ShapeFieldTypeMismatch,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.ShapeFieldTypeMismatch ~claim ~reasons ()
 
     let invalid_shape_remove_key pos =
       let claim =
         lazy (pos, "You can only unset fields of **local** variables")
       in
-      ( Error_code.InvalidShapeRemoveKey,
-        claim,
-        lazy [],
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.InvalidShapeRemoveKey ~claim ()
 
     let shapes_key_exists_always_true pos field_name decl_pos =
       let claim = lazy (pos, "This `Shapes::keyExists()` check is always true")
-      and reason =
+      and reasons =
         lazy
           [
             ( decl_pos,
@@ -440,12 +383,7 @@ end = struct
               ^ " exists because of this definition" );
           ]
       in
-      ( Error_code.ShapesKeyExistsAlwaysTrue,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.ShapesKeyExistsAlwaysTrue ~claim ~reasons ()
 
     let shape_field_non_existence_reason pos name = function
       | `Undefined ->
@@ -466,15 +404,10 @@ end = struct
 
     let shapes_key_exists_always_false pos field_name decl_pos reason =
       let claim = lazy (pos, "This `Shapes::keyExists()` check is always false")
-      and reason =
+      and reasons =
         shape_field_non_existence_reason decl_pos field_name reason
       in
-      ( Error_code.ShapesKeyExistsAlwaysFalse,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.ShapesKeyExistsAlwaysFalse ~claim ~reasons ()
 
     let shapes_method_access_with_non_existent_field
         pos field_name method_name decl_pos reason =
@@ -484,27 +417,21 @@ end = struct
             "You are calling "
             ^ Markdown_lite.md_codify ("Shapes::" ^ method_name ^ "()")
             ^ " on a field known to not exist" )
-      and reason =
+      and reasons =
         shape_field_non_existence_reason decl_pos field_name reason
       in
-      ( Error_code.ShapesMethodAccessWithNonExistentField,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create
+        ~code:Error_code.ShapesMethodAccessWithNonExistentField
+        ~claim
+        ~reasons
+        ()
 
     let shapes_access_with_non_existent_field pos field_name decl_pos reason =
       let claim = lazy (pos, "You are accessing a field known to not exist")
-      and reason =
+      and reasons =
         shape_field_non_existence_reason decl_pos field_name reason
       in
-      ( Error_code.ShapeAccessWithNonExistentField,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.ShapeAccessWithNonExistentField ~claim ~reasons ()
 
     let to_error t ~env:_ =
       let open Typing_error.Primary.Shape in
@@ -562,12 +489,7 @@ end = struct
               ^ "." );
           ]
       in
-      ( Error_code.EnumSwitchNonexhaustive,
-        claim,
-        reasons,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.EnumSwitchNonexhaustive ~claim ~reasons ()
 
     let switch_needs_default ~switch_pos ~scrutinee_pos scrutinee_type =
       let claim =
@@ -588,12 +510,7 @@ end = struct
             );
           ]
       in
-      ( Error_code.SwitchNeedsDefault,
-        claim,
-        reasons,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.SwitchNeedsDefault ~claim ~reasons ()
 
     let to_error t ~env:_ =
       let open Typing_error.Primary.Switch in
@@ -627,12 +544,7 @@ end = struct
               );
             ]
       in
-      ( Error_code.UnifyError,
-        claim,
-        reasons,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.UnifyError ~claim ~reasons ()
 
     let enum_type_bad pos is_enum_class ty_name trail =
       let claim =
@@ -646,12 +558,7 @@ end = struct
             in
             (pos, msg ^ ty))
       and reasons = lazy (Common.reasons_of_trail trail) in
-      ( Error_code.EnumTypeBad,
-        claim,
-        reasons,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.EnumTypeBad ~claim ~reasons ()
 
     let enum_type_bad_case_type pos ty_name case_type_decl_pos =
       let claim =
@@ -662,12 +569,7 @@ end = struct
             let ty = Markdown_lite.md_codify ty_name in
             [(case_type_decl_pos, ty ^ " is declared as a case type here")])
       in
-      ( Error_code.EnumTypeBad,
-        claim,
-        reasons,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.EnumTypeBad ~claim ~reasons ()
 
     let enum_constant_type_bad pos ty_pos ty_name trail =
       let claim = lazy (pos, "Enum constants must be an `int` or `string`")
@@ -676,42 +578,27 @@ end = struct
             (ty_pos, "Not " ^ Markdown_lite.md_codify ty_name)
             :: Common.reasons_of_trail trail)
       in
-      ( Error_code.EnumConstantTypeBad,
-        claim,
-        reasons,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.EnumConstantTypeBad ~claim ~reasons ()
 
     let enum_type_typedef_nonnull pos =
       let claim =
         lazy (pos, "Can't use `typedef` that resolves to nonnull in enum")
       in
-      ( Error_code.EnumTypeTypedefNonnull,
-        claim,
-        lazy [],
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.EnumTypeTypedefNonnull ~claim ()
 
     let enum_switch_redundant pos first_pos const_name =
       let const_name =
         Typing_error.Primary.Enum.Const.(to_user_string const_name)
       in
       let claim = lazy (pos, "Redundant `case` statement")
-      and reason =
+      and reasons =
         lazy
           [
             ( Pos_or_decl.of_raw_pos first_pos,
               Markdown_lite.md_codify const_name ^ " already handled here" );
           ]
       in
-      ( Error_code.EnumSwitchRedundant,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.EnumSwitchRedundant ~claim ~reasons ()
 
     let enum_switch_nonexhaustive pos kind decl_pos missing =
       let open Typing_error.Primary.Enum.Const in
@@ -724,7 +611,7 @@ end = struct
                    x |> opt_to_user_string |> Markdown_lite.md_codify)
                  missing
               |> String.concat ~sep:", ") )
-      and reason =
+      and reasons =
         lazy
           begin
             match kind with
@@ -740,12 +627,7 @@ end = struct
                 []
           end
       in
-      ( Error_code.EnumSwitchNonexhaustive,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.EnumSwitchNonexhaustive ~claim ~reasons ()
 
     let enum_switch_redundant_default pos kind decl_pos =
       let claim =
@@ -755,13 +637,8 @@ end = struct
             ^ "detecting future errors. If your goal is to guard against "
             ^ "invalid values for this type, do an `is` check before the switch."
           )
-      and reason = lazy [(decl_pos, kind ^ " declared here")] in
-      ( Error_code.EnumSwitchRedundantDefault,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      and reasons = lazy [(decl_pos, kind ^ " declared here")] in
+      create ~code:Error_code.EnumSwitchRedundantDefault ~claim ~reasons ()
 
     let enum_switch_not_const pos =
       let claim =
@@ -770,12 +647,7 @@ end = struct
             "Case in `switch` must be either an enum constant or a literal expression."
           )
       in
-      ( Error_code.EnumSwitchNotConst,
-        claim,
-        lazy [],
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.EnumSwitchNotConst ~claim ()
 
     let enum_switch_wrong_class pos kind expected actual exp_pos =
       let expected = Lazy.map ~f:Markdown_lite.md_codify expected in
@@ -789,17 +661,12 @@ end = struct
                   ^ " but using constant from "
                   ^ Markdown_lite.md_codify actual )))
       in
-      let reason =
+      let reasons =
         Lazy.map expected ~f:(fun expected ->
             Option.value_map exp_pos ~default:[] ~f:(fun exp_pos ->
                 [(exp_pos, "expecting " ^ expected ^ " based on this")]))
       in
-      ( Error_code.EnumSwitchWrongClass,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.EnumSwitchWrongClass ~claim ~reasons ()
 
     let enum_switch_inconsistent_int_literal_format expected exp_pos actual pos
         =
@@ -811,7 +678,7 @@ end = struct
             ^ ", but was expecting it to be in "
             ^ Markdown_lite.md_codify expected )
       in
-      let reason =
+      let reasons =
         lazy
           [
             ( Pos_or_decl.of_raw_pos exp_pos,
@@ -819,12 +686,7 @@ end = struct
             );
           ]
       in
-      ( Error_code.EnumSwitchWrongClass,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.EnumSwitchWrongClass ~claim ~reasons ()
 
     let enum_class_label_as_expr pos =
       let claim =
@@ -833,12 +695,7 @@ end = struct
             "Not enough type information to infer the type of this enum class label."
           )
       in
-      ( Error_code.EnumClassLabelAsExpression,
-        claim,
-        lazy [],
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.EnumClassLabelAsExpression ~claim ()
 
     let incompatible_enum_inclusion_base pos classish_name src_classish_name =
       let claim =
@@ -850,12 +707,7 @@ end = struct
             ^ Render.strip_ns src_classish_name
             ^ " but their base types are incompatible" )
       in
-      ( Error_code.IncompatibleEnumInclusion,
-        claim,
-        lazy [],
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.IncompatibleEnumInclusion ~claim ()
 
     let incompatible_enum_inclusion_constraint
         pos classish_name src_classish_name =
@@ -868,12 +720,7 @@ end = struct
             ^ Render.strip_ns src_classish_name
             ^ " but their constraints are incompatible" )
       in
-      ( Error_code.IncompatibleEnumInclusion,
-        claim,
-        lazy [],
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.IncompatibleEnumInclusion ~claim ()
 
     let enum_inclusion_not_enum pos classish_name src_classish_name =
       let claim =
@@ -885,12 +732,7 @@ end = struct
             ^ Render.strip_ns src_classish_name
             ^ " which is not an enum" )
       in
-      ( Error_code.IncompatibleEnumInclusion,
-        claim,
-        lazy [],
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.IncompatibleEnumInclusion ~claim ()
 
     let to_error t ~env:_ =
       let open Typing_error.Primary.Enum in
@@ -938,13 +780,8 @@ end = struct
     let expression_tree_non_public_member pos decl_pos =
       let claim =
         lazy (pos, "Cannot access non-public members within expression trees.")
-      and reason = lazy [(decl_pos, "Member defined here")] in
-      ( Error_code.ExpressionTreeNonPublicProperty,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      and reasons = lazy [(decl_pos, "Member defined here")] in
+      create ~code:Error_code.ExpressionTreeNonPublicProperty ~claim ~reasons ()
 
     let reified_static_method_in_expr_tree pos =
       let claim =
@@ -953,21 +790,11 @@ end = struct
             "Static method calls on reified generics are not permitted in Expression Trees."
           )
       in
-      ( Error_code.ReifiedStaticMethodInExprTree,
-        claim,
-        lazy [],
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.ReifiedStaticMethodInExprTree ~claim ()
 
     let this_var_in_expr_tree pos =
       let claim = lazy (pos, "`$this` is not bound inside expression trees") in
-      ( Error_code.ThisVarOutsideClass,
-        claim,
-        lazy [],
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.ThisVarOutsideClass ~claim ()
 
     let experimental_expression_trees pos =
       let claim =
@@ -978,12 +805,7 @@ end = struct
             ^ "contain `<<file:__EnableUnstableFeatures('expression_trees')>>`."
           )
       in
-      ( Error_code.ExperimentalExpressionTrees,
-        claim,
-        lazy [],
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.ExperimentalExpressionTrees ~claim ()
 
     let expression_tree_unsupported_operator pos member_name class_name =
       let claim =
@@ -1006,12 +828,7 @@ end = struct
                 class_name
                 member_name )
       in
-      ( Error_code.MemberNotFound,
-        claim,
-        lazy [],
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.MemberNotFound ~claim ()
 
     let to_error t ~env:_ =
       let open Typing_error.Primary.Expr_tree in
@@ -1030,18 +847,13 @@ end = struct
     let readonly_modified pos reason_opt =
       let claim =
         lazy (pos, "This value is readonly, its properties cannot be modified")
-      and reason =
+      and reasons =
         Option.value_map
           reason_opt
           ~default:(lazy [])
           ~f:(Lazy.map ~f:List.return)
       in
-      ( Error_code.ReadonlyValueModified,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.ReadonlyValueModified ~claim ~reasons ()
 
     let readonly_mismatch pos what pos_sub pos_super =
       let (msg, msg_sub, msg_super) =
@@ -1062,19 +874,14 @@ end = struct
             "It is incompatible with this parameter, which is readonly" )
       in
       let claim = lazy (pos, Format.sprintf "Invalid %s" msg)
-      and reason =
+      and reasons =
         lazy
           [
             (pos_sub, Format.sprintf "This expression is %s" msg_sub);
             (pos_super, msg_super);
           ]
       in
-      ( Error_code.ReadonlyMismatch,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.ReadonlyMismatch ~claim ~reasons ()
 
     let readonly_invalid_as_mut pos =
       let claim =
@@ -1083,12 +890,7 @@ end = struct
             "Only value types and arrays can be converted to mutable. This value can never be a primitive."
           )
       in
-      ( Error_code.ReadonlyInvalidAsMut,
-        claim,
-        lazy [],
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.ReadonlyInvalidAsMut ~claim ()
 
     let readonly_exception pos =
       let claim =
@@ -1097,12 +899,7 @@ end = struct
             "This exception is readonly; throwing readonly exceptions is not currently supported."
           )
       in
-      ( Error_code.ReadonlyException,
-        claim,
-        lazy [],
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.ReadonlyException ~claim ()
 
     let explicit_readonly_cast pos decl_pos kind =
       let qf_pos = Pos.shrink_to_start pos in
@@ -1127,13 +924,15 @@ end = struct
             ^ kind_str
             ^ " returns a readonly value. It must be explicitly wrapped in a readonly expression."
           )
-      and reason = lazy [(decl_pos, "The " ^ kind_str ^ " is defined here.")] in
-      ( Error_code.ExplicitReadonlyCast,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        quickfixes,
-        User_error_flags.empty )
+      and reasons =
+        lazy [(decl_pos, "The " ^ kind_str ^ " is defined here.")]
+      in
+      create
+        ~code:Error_code.ExplicitReadonlyCast
+        ~claim
+        ~quickfixes
+        ~reasons
+        ()
 
     let readonly_method_call pos decl_pos =
       let claim =
@@ -1141,13 +940,8 @@ end = struct
           ( pos,
             "This expression is readonly, so it can only call readonly methods"
           )
-      and reason = lazy [(decl_pos, "This method is not readonly")] in
-      ( Error_code.ReadonlyMethodCall,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      and reasons = lazy [(decl_pos, "This method is not readonly")] in
+      create ~code:Error_code.ReadonlyMethodCall ~claim ~reasons ()
 
     let readonly_closure_call pos decl_pos suggestion =
       let claim =
@@ -1155,13 +949,8 @@ end = struct
           ( pos,
             "This function is readonly, so it must be marked readonly at declaration time to be called."
           )
-      and reason = lazy [(decl_pos, "Did you mean to " ^ suggestion ^ "?")] in
-      ( Error_code.ReadonlyClosureCall,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      and reasons = lazy [(decl_pos, "Did you mean to " ^ suggestion ^ "?")] in
+      create ~code:Error_code.ReadonlyClosureCall ~claim ~reasons ()
 
     let to_error t ~env:_ =
       let open Typing_error.Primary.Readonly in
@@ -1201,16 +990,10 @@ end = struct
             "This call is not allowed because its capabilities are incompatible with the context"
           )
       in
-      ( Error_code.CallCoeffects,
-        claim,
-        reasons,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.CallCoeffects ~claim ~reasons ()
 
     let op_coeffect_error
-        pos op_name required available_pos locally_available suggestion err_code
-        =
+        pos op_name required available_pos locally_available suggestion code =
       let reasons =
         Common.map2
           (Option.value ~default:(lazy []) suggestion)
@@ -1229,14 +1012,9 @@ end = struct
               ^ required
               ^ ", which is not provided by the context." ))
       in
-      ( err_code,
-        claim,
-        reasons,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code ~claim ~reasons ()
 
-    let to_error t ~env:_ : error =
+    let to_error t ~env:_ =
       let open Typing_error.Primary.Coeffect in
       match t with
       | Op_coeffect_error
@@ -1288,42 +1066,32 @@ end = struct
               (Pos_or_decl.unsafe_to_raw_pos hint_pos);
           ]
       in
+      let reasons = lazy [] in
       let claim = lazy (pos, "Invalid return type") in
+      create
+        ~code:Error_code.MissingReturnInNonVoidFunction
+        ~claim
+        ~reasons
+        ~quickfixes
+        ()
 
-      ( Error_code.MissingReturnInNonVoidFunction,
-        claim,
-        lazy [],
-        lazy Explanation.empty,
-        quickfixes,
-        User_error_flags.empty )
-
-    let void_usage pos reason =
+    let void_usage pos reasons =
       let claim =
         lazy (pos, "You are using the return value of a `void` function")
       in
-      ( Error_code.VoidUsage,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.VoidUsage ~claim ~reasons ()
 
-    let noreturn_usage pos reason =
+    let noreturn_usage pos reasons =
       let claim =
         lazy (pos, "You are using the return value of a `noreturn` function")
       in
-      ( Error_code.NoreturnUsage,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.NoreturnUsage ~claim ~reasons ()
 
     let returns_with_and_without_value pos with_value_pos without_value_pos_opt
         =
       let claim =
         lazy (pos, "This function can exit with and without returning a value")
-      and reason =
+      and reasons =
         lazy
           ((Pos_or_decl.of_raw_pos with_value_pos, "Returning a value here.")
           :: Option.value_map
@@ -1337,12 +1105,7 @@ end = struct
                  [(Pos_or_decl.of_raw_pos p, "Returning without a value here")])
           )
       in
-      ( Error_code.ReturnsWithAndWithoutValue,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.ReturnsWithAndWithoutValue ~claim ~reasons ()
 
     let non_void_annotation_on_return_void_function is_async hint_pos =
       let (async_indicator, return_type) =
@@ -1368,30 +1131,23 @@ end = struct
         ]
       in
 
-      ( Error_code.NonVoidAnnotationOnReturnVoidFun,
-        claim,
-        lazy [],
-        lazy Explanation.empty,
-        quickfixes,
-        User_error_flags.empty )
+      create
+        ~code:Error_code.NonVoidAnnotationOnReturnVoidFun
+        ~claim
+        ~quickfixes
+        ()
 
     let tuple_syntax p =
-      ( Error_code.TupleSyntax,
-        lazy (p, "Did you want a *tuple*? Try `(X,Y)`, not `tuple<X,Y>`"),
-        lazy [],
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      let claim =
+        lazy (p, "Did you want a *tuple*? Try `(X,Y)`, not `tuple<X,Y>`")
+      in
+      create ~code:Error_code.TupleSyntax ~claim ()
 
     let invalid_class_refinement pos =
-      ( Error_code.InvalidClassRefinement,
-        lazy (pos, "Invalid class refinement"),
-        lazy [],
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      let claim = lazy (pos, "Invalid class refinement") in
+      create ~code:Error_code.InvalidClassRefinement ~claim ()
 
-    let to_error t ~env:_ : error =
+    let to_error t ~env:_ =
       let open Typing_error.Primary.Wellformedness in
       match t with
       | Missing_return { pos; hint_pos; is_async } ->
@@ -1410,13 +1166,8 @@ end = struct
   module Eval_modules = struct
     let module_hint pos decl_pos =
       let claim = lazy (pos, "You cannot use this type in a public declaration.")
-      and reason = lazy [(decl_pos, "It is declared as `internal` here")] in
-      ( Error_code.ModuleHintError,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      and reasons = lazy [(decl_pos, "It is declared as `internal` here")] in
+      create ~code:Error_code.ModuleHintError ~claim ~reasons ()
 
     let module_mismatch pos current_module_opt decl_pos target_module =
       let claim =
@@ -1428,31 +1179,27 @@ end = struct
               (match current_module_opt with
               | Some m -> Printf.sprintf "in module `%s`" m
               | None -> "in the default module") )
-      and reason =
+      and reasons =
         lazy
           [(decl_pos, Printf.sprintf "This is from module `%s`" target_module)]
       in
-      ( Error_code.ModuleError,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.ModuleError ~claim ~reasons ()
 
     let module_unsafe_trait_access access_pos trait_pos =
-      ( Error_code.ModuleError,
+      let claim =
         lazy
           ( access_pos,
-            "Cannot access `internal` members inside a non-internal trait" ),
+            "Cannot access `internal` members inside a non-internal trait" )
+      and reasons =
         lazy
           [
             ( trait_pos,
               "This trait must be made `internal` to access other internal members"
             );
-          ],
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+          ]
+      in
+
+      create ~code:Error_code.ModuleError ~claim ~reasons ()
 
     let get_module_str m_opt =
       match m_opt with
@@ -1483,7 +1230,7 @@ end = struct
               "Cannot reference this CrossPackage method defined in package %s from %s"
               target_package
               current_package )
-      and reason =
+      and reasons =
         lazy
           [
             ( decl_pos,
@@ -1494,12 +1241,7 @@ end = struct
                 target_package );
           ]
       in
-      ( Error_code.InvalidCrossPackage,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.InvalidCrossPackage ~claim ~reasons ()
 
     let module_cross_pkg_access
         (pos : Pos.t)
@@ -1530,7 +1272,7 @@ end = struct
               "Cannot access a public element which belongs to %s from %s"
               target_package
               current_package )
-      and reason =
+      and reasons =
         lazy
           [
             ( decl_pos,
@@ -1558,20 +1300,15 @@ end = struct
                 target_package );
           ]
       in
-      let error_code =
+      let code =
         if soft then
           Error_code.InvalidCrossPackageSoft
         else
           Error_code.InvalidCrossPackage
       in
-      ( error_code,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code ~claim ~reasons ()
 
-    let to_error t ~env:_ : error =
+    let to_error t ~env:_ =
       let open Typing_error.Primary.Modules in
       match t with
       | Module_hint { pos; decl_pos } -> module_hint pos decl_pos
@@ -1664,7 +1401,7 @@ end = struct
               "Cannot access an element which belongs to %s from %s"
               target_package
               current_package )
-      and reason =
+      and reasons =
         lazy
           [
             (decl_pos, Printf.sprintf "This is from %s" target_filename);
@@ -1682,18 +1419,13 @@ end = struct
                 target_package );
           ]
       in
-      let error_code =
+      let code =
         if soft then
           Error_code.InvalidCrossPackageSoft
         else
           Error_code.InvalidCrossPackage
       in
-      ( error_code,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code ~claim ~reasons ()
 
     let cross_pkg_access_with_requirepackage
         (pos : Pos.t)
@@ -1714,7 +1446,7 @@ end = struct
               "Cannot reference this RequirePackage method defined in package %s from %s"
               target_package
               current_package )
-      and reason =
+      and reasons =
         lazy
           [
             ( decl_pos,
@@ -1726,12 +1458,7 @@ end = struct
                 target_package );
           ]
       in
-      ( Error_code.InvalidCrossPackage,
-        claim,
-        reason,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.InvalidCrossPackage ~claim ~reasons ()
 
     let to_error t ~env:_ =
       let open Typing_error.Primary.Package in
@@ -1794,24 +1521,17 @@ end = struct
   module Eval_xhp = struct
     let xhp_required pos why_xhp ty_reason_msg =
       let claim = lazy (pos, "An XHP instance was expected") in
-      ( Error_code.XhpRequired,
-        claim,
+      let reasons =
         Lazy.map ty_reason_msg ~f:(fun ty_reason_msg ->
-            (Pos_or_decl.of_raw_pos pos, why_xhp) :: ty_reason_msg),
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+            (Pos_or_decl.of_raw_pos pos, why_xhp) :: ty_reason_msg)
+      in
+      create ~code:Error_code.XhpRequired ~claim ~reasons ()
 
-    let illegal_xhp_child pos ty_reason_msg =
+    let illegal_xhp_child pos reasons =
       let claim = lazy (pos, "XHP children must be compatible with XHPChild") in
-      ( Error_code.IllegalXhpChild,
-        claim,
-        ty_reason_msg,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.IllegalXhpChild ~claim ~reasons ()
 
-    let missing_xhp_required_attr pos attr ty_reason_msg =
+    let missing_xhp_required_attr pos attr reasons =
       let claim =
         lazy
           ( pos,
@@ -1819,15 +1539,10 @@ end = struct
             ^ Markdown_lite.md_codify attr
             ^ " is missing." )
       in
-      ( Error_code.MissingXhpRequiredAttr,
-        claim,
-        ty_reason_msg,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.MissingXhpRequiredAttr ~claim ~reasons ()
 
     let attribute_value pos attr_name valid_values =
-      ( Error_code.InvalidXhpAttributeValue,
+      let claim =
         lazy
           ( pos,
             let valid_values =
@@ -1836,13 +1551,11 @@ end = struct
             Printf.sprintf
               "Invalid value for %s, expected one of %s."
               (Markdown_lite.md_codify attr_name)
-              (String.concat ~sep:", " valid_values) ),
-        lazy [],
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+              (String.concat ~sep:", " valid_values) )
+      in
+      create ~code:Error_code.InvalidXhpAttributeValue ~claim ()
 
-    let to_error t ~env:_ : error =
+    let to_error t ~env:_ =
       let open Typing_error.Primary.Xhp in
       match t with
       | Xhp_required { pos; why_xhp; ty_reason_msg } ->
@@ -1856,7 +1569,7 @@ end = struct
   end
 
   module Eval_casetype = struct
-    let overlapping_variant_types pos name why =
+    let overlapping_variant_types pos name reasons =
       let claim =
         lazy
           ( pos,
@@ -1865,12 +1578,7 @@ end = struct
             ^ Markdown_lite.md_codify name
             ^ " could contain values with the same runtime tag" )
       in
-      ( Error_code.IllegalCaseTypeVariants,
-        claim,
-        why,
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.IllegalCaseTypeVariants ~claim ~reasons ()
 
     let invalid_recursive pos name =
       let claim =
@@ -1880,12 +1588,7 @@ end = struct
               "This recursive case type is not supported. %s should not be at the top-level."
               (Markdown_lite.md_codify @@ Utils.strip_ns name) )
       in
-      ( Error_code.InvalidRecursiveType,
-        claim,
-        lazy [],
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create ~code:Error_code.InvalidRecursiveType ~claim ()
 
     let to_error t ~env:_ =
       let open Typing_error.Primary.CaseType in
@@ -1896,35 +1599,19 @@ end = struct
   end
 
   let unify_error pos msg_opt reasons_opt =
-    let claim = lazy (pos, Option.value ~default:"Typing error" msg_opt)
-    and reasons = Option.value ~default:(lazy []) reasons_opt in
-    ( Error_code.UnifyError,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    let claim = lazy (pos, Option.value ~default:"Typing error" msg_opt) in
+    create ~code:Error_code.UnifyError ~claim ?reasons:reasons_opt ()
 
   let generic_unify pos msg =
     let claim = lazy (pos, msg) in
-    ( Error_code.GenericUnify,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.GenericUnify ~claim ()
 
   let unresolved_tyvar pos =
     let claim =
       lazy
         (pos, "The type of this expression contains an unresolved type variable")
     in
-    ( Error_code.UnresolvedTypeVariable,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.UnresolvedTypeVariable ~claim ()
 
   let using_error pos has_await =
     let claim =
@@ -1941,20 +1628,11 @@ end = struct
              note
              cls ))
     in
-    ( Error_code.UnifyError,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.UnifyError ~claim ()
 
   let bad_enum_decl pos =
-    ( Error_code.BadEnumExtends,
-      lazy (pos, "This enum declaration is invalid."),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    let claim = lazy (pos, "This enum declaration is invalid.") in
+    create ~code:Error_code.BadEnumExtends ~claim ()
 
   let bad_conditional_support_dynamic pos child parent ty_name self_ty_name =
     let claim =
@@ -1976,31 +1654,24 @@ end = struct
             ^ ":\n"
             ^ statement ))
     in
-    ( Error_code.BadConditionalSupportDynamic,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.BadConditionalSupportDynamic ~claim ()
 
   let bad_decl_override ~name ~parent_pos ~parent_name =
     let name = Render.strip_ns name |> Markdown_lite.md_codify in
     let parent_name = Render.strip_ns parent_name |> Markdown_lite.md_codify in
-    ( Error_code.BadDeclOverride,
+    let claim =
       lazy
         ( parent_pos,
           Printf.sprintf
             "Some members in class %s are incompatible with those declared in type %s"
             name
-            parent_name ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+            parent_name )
+    in
+    create ~code:Error_code.BadDeclOverride ~claim ()
 
   let explain_where_constraint pos decl_pos in_class =
-    ( Error_code.TypeConstraintViolation,
-      lazy (pos, "A `where` type constraint is violated here"),
+    let claim = lazy (pos, "A `where` type constraint is violated here")
+    and reasons =
       lazy
         [
           ( decl_pos,
@@ -2010,34 +1681,21 @@ end = struct
               "class"
             else
               "method" );
-        ],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        ]
+    in
+    create ~code:Error_code.TypeConstraintViolation ~claim ~reasons ()
 
   let explain_constraint pos =
-    ( Error_code.TypeConstraintViolation,
-      lazy (pos, "Some type arguments violate their constraints"),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    let claim = lazy (pos, "Some type arguments violate their constraints") in
+    create ~code:Error_code.TypeConstraintViolation ~claim ()
 
   let rigid_tvar_escape pos what =
-    ( Error_code.RigidTVarEscape,
-      lazy (pos, "Rigid type variable escapes its " ^ what),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    let claim = lazy (pos, "Rigid type variable escapes its " ^ what) in
+    create ~code:Error_code.RigidTVarEscape ~claim ()
 
   let invalid_type_hint pos =
-    ( Error_code.InvalidTypeHint,
-      lazy (pos, "Invalid type hint"),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    let claim = lazy (pos, "Invalid type hint") in
+    create ~code:Error_code.InvalidTypeHint ~claim ()
 
   let unsatisfied_req pos trait_pos req_name req_pos =
     let reasons =
@@ -2057,12 +1715,7 @@ end = struct
           "This class does not satisfy all the requirements of its traits or interfaces."
         )
     in
-    ( Error_code.UnsatisfiedReq,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.UnsatisfiedReq ~claim ~reasons ()
 
   let unsatisfied_req_class pos trait_pos req_name req_pos =
     let reasons =
@@ -2080,12 +1733,7 @@ end = struct
           "This class does not satisfy all the requirements of its traits or interfaces."
         )
     in
-    ( Error_code.UnsatisfiedReq,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.UnsatisfiedReq ~claim ~reasons ()
 
   let unsatisfied_req_this_as pos trait_pos req_name req_pos =
     let reasons =
@@ -2104,12 +1752,7 @@ end = struct
           "This class does not satisfy all the requirements of its traits or interfaces."
         )
     in
-    ( Error_code.UnsatisfiedReq,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.UnsatisfiedReq ~claim ~reasons ()
 
   let req_class_not_final pos trait_pos req_pos =
     let reasons =
@@ -2127,12 +1770,7 @@ end = struct
           "This class must be final because it uses a trait with a require class constraint."
         )
     in
-    ( Error_code.UnsatisfiedReq,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.UnsatisfiedReq ~claim ~reasons ()
 
   let incompatible_reqs pos req_name req_class_pos req_extends_pos =
     let reasons =
@@ -2148,12 +1786,7 @@ end = struct
          [r1; r2])
     in
     let claim = lazy (pos, "This trait defines incompatible requirements.") in
-    ( Error_code.UnsatisfiedReq,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.UnsatisfiedReq ~claim ~reasons ()
 
   let trait_not_used pos trait_name req_class_pos class_pos class_name =
     let class_name = Render.strip_ns class_name in
@@ -2175,12 +1808,7 @@ end = struct
           ^ Render.strip_ns class_name
           ^ " does not use it. Either use the trait or delete it." )
     in
-    ( Error_code.TraitNotUsed,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.TraitNotUsed ~claim ~reasons ()
 
   let invalid_echo_argument pos =
     let claim =
@@ -2192,12 +1820,7 @@ end = struct
           ^ Markdown_lite.md_codify "print"
           ^ " argument" )
     in
-    ( Error_code.InvalidEchoArgument,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.InvalidEchoArgument ~claim ()
 
   let index_type_mismatch pos is_covariant_container msg_opt reasons_opt =
     let code =
@@ -2208,7 +1831,7 @@ end = struct
     and claim =
       lazy (pos, Option.value ~default:"Invalid index expression" msg_opt)
     and reasons = Option.value reasons_opt ~default:(lazy []) in
-    (code, claim, reasons, lazy Explanation.empty, [], User_error_flags.empty)
+    create ~code ~claim ~reasons ()
 
   let member_not_found pos kind member_name class_name class_pos hint reason =
     let kind_str =
@@ -2258,12 +1881,7 @@ end = struct
               pos;
           ])
     in
-    ( Error_code.MemberNotFound,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      quickfixes,
-      User_error_flags.empty )
+    create ~code:Error_code.MemberNotFound ~claim ~reasons ~quickfixes ()
 
   let construct_not_instance_method pos =
     let claim =
@@ -2272,12 +1890,7 @@ end = struct
           "`__construct` is not an instance method and shouldn't be invoked directly"
         )
     in
-    ( Error_code.ConstructNotInstanceMethod,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.ConstructNotInstanceMethod ~claim ()
 
   let ambiguous_inheritance pos origin class_name =
     let claim =
@@ -2289,12 +1902,7 @@ end = struct
           ^ Markdown_lite.md_codify class_name
           ^ " with a compatible signature." )
     in
-    ( Error_code.UnifyError,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.UnifyError ~claim ()
 
   let expected_tparam pos n decl_pos =
     let claim =
@@ -2307,22 +1915,12 @@ end = struct
           | 1 -> "exactly one type parameter"
           | n -> string_of_int n ^ " type parameters" )
     and reasons = lazy [(decl_pos, "Definition is here")] in
-    ( Error_code.ExpectedTparam,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.ExpectedTparam ~claim ~reasons ()
 
   let typeconst_concrete_concrete_override pos decl_pos =
     let reasons = lazy [(decl_pos, "Previously defined here")]
     and claim = lazy (pos, "Cannot re-declare this type constant") in
-    ( Error_code.TypeconstConcreteConcreteOverride,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.TypeconstConcreteConcreteOverride ~claim ~reasons ()
 
   let constant_multiple_concrete_conflict pos name definitions =
     let reasons =
@@ -2355,26 +1953,16 @@ end = struct
             "Constant %s is defined concretely in multiple ancestors"
             name )
     in
-    ( Error_code.ConcreteConstInterfaceOverride,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.ConcreteConstInterfaceOverride ~claim ~reasons ()
 
-  let invalid_memoized_param pos reason =
+  let invalid_memoized_param pos reasons =
     let claim =
       lazy
         ( pos,
           "Parameters to memoized function must be null, bool, int, float, string, an object deriving IMemoizeParam, or a Container thereof. See also http://docs.hhvm.com/hack/attributes/special#__memoize"
         )
     in
-    ( Error_code.InvalidMemoizedParam,
-      claim,
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.InvalidMemoizedParam ~claim ~reasons ()
 
   let invalid_arraykey
       pos container_pos container_ty_name key_pos key_ty_name ctxt =
@@ -2395,7 +1983,7 @@ end = struct
         | `read -> IndexTypeMismatch
         | `write -> InvalidArrayKeyWrite)
     in
-    (code, claim, reasons, lazy Explanation.empty, [], User_error_flags.empty)
+    create ~code ~claim ~reasons ()
 
   let invalid_keyset_value
       pos container_pos container_ty_name value_pos value_ty_name =
@@ -2406,12 +1994,7 @@ end = struct
           (value_pos, String.capitalize value_ty_name ^ " is not an arraykey");
         ]
     and claim = lazy (pos, "Keyset values must be arraykeys") in
-    ( Error_code.IndexTypeMismatch,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.IndexTypeMismatch ~claim ~reasons ()
 
   let invalid_set_value
       pos container_pos container_ty_name value_pos value_ty_name =
@@ -2422,12 +2005,7 @@ end = struct
           (value_pos, String.capitalize value_ty_name ^ " is not an arraykey");
         ]
     and claim = lazy (pos, "Set values must be arraykeys") in
-    ( Error_code.IndexTypeMismatch,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.IndexTypeMismatch ~claim ~reasons ()
 
   let hkt_alias_with_implicit_constraints
       pos
@@ -2464,12 +2042,11 @@ end = struct
             "The type %s implicitly imposes constraints on its type parameters. Therefore, it cannot be used as a higher-kinded type at this time."
           @@ Render.strip_ns typedef_name )
     in
-    ( Error_code.HigherKindedTypesUnsupportedFeature,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.HigherKindedTypesUnsupportedFeature
+      ~claim
+      ~reasons
+      ()
 
   let hkt_wildcard pos =
     let claim =
@@ -2479,12 +2056,7 @@ end = struct
           ^ " We cannot infer higher-kinded type arguments at this time, please state the actual type."
         )
     in
-    ( Error_code.HigherKindedTypesUnsupportedFeature,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.HigherKindedTypesUnsupportedFeature ~claim ()
 
   let hkt_implicit_argument pos decl_pos param_name =
     let param_desc =
@@ -2512,12 +2084,11 @@ end = struct
               param_desc );
         ]
     in
-    ( Error_code.HigherKindedTypesUnsupportedFeature,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.HigherKindedTypesUnsupportedFeature
+      ~claim
+      ~reasons
+      ()
 
   let invalid_substring pos ty_name =
     let claim =
@@ -2526,42 +2097,26 @@ end = struct
           "Expected an object convertible to string but got "
           ^ Lazy.force ty_name )
     in
-    ( Error_code.InvalidSubString,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.InvalidSubString ~claim ()
 
   let nullable_cast pos ty_pos ty_name =
     let reasons =
       Lazy.map ty_name ~f:(fun ty_name ->
           [(ty_pos, "This is " ^ Markdown_lite.md_codify ty_name)])
     and claim = lazy (pos, "Casting from a nullable type is forbidden") in
-    ( Error_code.NullableCast,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.NullableCast ~claim ~reasons ()
 
   let hh_expect pos equivalent =
-    let (claim, error_code) =
+    let (claim, code) =
       if equivalent then
         ( lazy (pos, "hh_expect_equivalent type mismatch"),
           Error_code.HHExpectEquivalentFailure )
       else
         (lazy (pos, "hh_expect type mismatch"), Error_code.HHExpectFailure)
     in
+    create ~code ~claim ()
 
-    ( error_code,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
-
-  let null_member pos ~obj_pos_opt ctxt kind member_name reason =
+  let null_member pos ~obj_pos_opt ctxt kind member_name reasons =
     let claim =
       lazy
         ( pos,
@@ -2572,7 +2127,7 @@ end = struct
             | `property -> "property")
             (Markdown_lite.md_codify member_name) )
     in
-    let error_code =
+    let code =
       match ctxt with
       | `read -> Error_code.NullMemberRead
       | `write -> Error_code.NullMemberWrite
@@ -2607,24 +2162,19 @@ end = struct
           []
       | None -> []
     in
-    ( error_code,
-      claim,
-      reason,
-      lazy Explanation.empty,
-      quickfixes,
-      User_error_flags.empty )
+    create ~code ~claim ~reasons ~quickfixes ()
 
   let typing_too_many_args pos decl_pos actual expected =
     let (code, claim, reasons) =
       Common.typing_too_many_args pos decl_pos actual expected
     in
-    (code, claim, reasons, lazy Explanation.empty, [], User_error_flags.empty)
+    create ~code ~claim ~reasons ()
 
   let typing_too_few_args pos decl_pos actual expected =
     let (code, claim, reasons) =
       Common.typing_too_few_args pos decl_pos actual expected
     in
-    (code, claim, reasons, lazy Explanation.empty, [], User_error_flags.empty)
+    create ~code ~claim ~reasons ()
 
   let non_object_member pos ctxt ty_name member_name kind decl_pos =
     let (code, claim, reasons) =
@@ -2636,7 +2186,7 @@ end = struct
         kind
         decl_pos
     in
-    (code, claim, reasons, lazy Explanation.empty, [], User_error_flags.empty)
+    create ~code ~claim ~reasons ()
 
   let static_instance_intersection
       class_pos instance_pos static_pos member_name kind =
@@ -2644,9 +2194,7 @@ end = struct
       lazy
         ( class_pos,
           "This class overrides some members with a different staticness" )
-    in
-    ( Error_code.StaticDynamic,
-      claim,
+    and reasons =
       lazy
         [
           ( Lazy.force instance_pos,
@@ -2659,10 +2207,9 @@ end = struct
             ^ " is declared as non-static here" );
           ( Lazy.force static_pos,
             "But it conflicts with an inherited static declaration here" );
-        ],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        ]
+    in
+    create ~code:Error_code.StaticDynamic ~claim ~reasons ()
 
   let nullsafe_property_write_context pos =
     let claim =
@@ -2671,12 +2218,7 @@ end = struct
           "`?->` syntax not supported here, this function effectively does a write"
         )
     in
-    ( Error_code.NullsafePropertyWriteContext,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.NullsafePropertyWriteContext ~claim ()
 
   let uninstantiable_class pos class_name reason_ty_opt decl_pos =
     let default_claim =
@@ -2701,12 +2243,7 @@ end = struct
         (claim, reasons)
       | _ -> (default_claim, default_reasons)
     in
-    ( Error_code.UninstantiableClass,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.UninstantiableClass ~claim ~reasons ()
 
   let abstract_const_usage pos name decl_pos =
     let claim =
@@ -2715,13 +2252,8 @@ end = struct
           "Cannot reference abstract constant "
           ^ Markdown_lite.md_codify (Render.strip_ns name)
           ^ " directly" )
-    and reason = lazy [(decl_pos, "Declaration is here")] in
-    ( Error_code.AbstractConstUsage,
-      claim,
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    and reasons = lazy [(decl_pos, "Declaration is here")] in
+    create ~code:Error_code.AbstractConstUsage ~claim ~reasons ()
 
   let type_arity_mismatch pos decl_pos actual expected =
     let claim =
@@ -2732,12 +2264,7 @@ end = struct
             expected
             actual )
     and reasons = lazy [(decl_pos, "Definition is here")] in
-    ( Error_code.TypeArityMismatch,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.TypeArityMismatch ~claim ~reasons ()
 
   let member_not_implemented parent_pos member_name decl_pos quickfixes =
     let claim = lazy (parent_pos, "This interface is not properly implemented")
@@ -2750,12 +2277,7 @@ end = struct
               (Markdown_lite.md_codify member_name) );
         ]
     in
-    ( Error_code.MemberNotImplemented,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      quickfixes,
-      User_error_flags.empty )
+    create ~code:Error_code.MemberNotImplemented ~claim ~reasons ~quickfixes ()
 
   let kind_mismatch pos decl_pos tparam_name expected_kind actual_kind =
     let claim =
@@ -2766,7 +2288,7 @@ end = struct
           ^ ", but "
           ^ expected_kind
           ^ " was expected here." )
-    and reason =
+    and reasons =
       lazy
         [
           ( decl_pos,
@@ -2777,12 +2299,7 @@ end = struct
             ^ " here." );
         ]
     in
-    ( Error_code.KindMismatch,
-      claim,
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.KindMismatch ~claim ~reasons ()
 
   let trait_parent_construct_inconsistent pos decl_pos =
     let claim =
@@ -2790,13 +2307,8 @@ end = struct
         ( pos,
           "This use of `parent::__construct` requires that the parent class be marked <<__ConsistentConstruct>>"
         )
-    and reason = lazy [(decl_pos, "Parent definition is here")] in
-    ( Error_code.TraitParentConstructInconsistent,
-      claim,
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    and reasons = lazy [(decl_pos, "Parent definition is here")] in
+    create ~code:Error_code.TraitParentConstructInconsistent ~claim ~reasons ()
 
   let top_member pos ctxt ty_name decl_pos kind name is_nullable ty_reasons =
     let claim =
@@ -2812,7 +2324,7 @@ end = struct
               kind_str
               (Markdown_lite.md_codify name)
               ty_name ))
-    and reason =
+    and reasons =
       lazy
         begin
           let reasons = Lazy.force ty_reasons in
@@ -2829,7 +2341,7 @@ end = struct
         | `read -> NonObjectMemberRead
         | `write -> NonObjectMemberWrite)
     in
-    (code, claim, reason, lazy Explanation.empty, [], User_error_flags.empty)
+    create ~code ~claim ~reasons ()
 
   let unresolved_tyvar_projection pos proj_pos tconst_name =
     let claim =
@@ -2838,7 +2350,7 @@ end = struct
           "Can't access a type constant "
           ^ tconst_name
           ^ " from an unresolved type" )
-    and reason =
+    and reasons =
       lazy
         [
           (proj_pos, "Access happens here");
@@ -2846,12 +2358,7 @@ end = struct
             "Disambiguate the types using explicit type annotations here." );
         ]
     in
-    ( Error_code.UnresolvedTypeVariableProjection,
-      claim,
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.UnresolvedTypeVariableProjection ~claim ~reasons ()
 
   let cyclic_class_constant pos class_name const_name =
     let claim =
@@ -2862,33 +2369,30 @@ end = struct
           ^ " in "
           ^ Render.strip_ns class_name )
     in
-    ( Error_code.CyclicClassConstant,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.CyclicClassConstant ~claim ()
 
   let inout_annotation_missing pos1 pos2 =
     let claim = lazy (pos1, "This argument should be annotated with `inout`") in
-    let reason = lazy [(pos2, "Because this is an `inout` parameter")] in
+    let reasons = lazy [(pos2, "Because this is an `inout` parameter")] in
     let pos = Pos.shrink_to_start pos1 in
-
-    ( Error_code.InoutAnnotationMissing,
-      claim,
-      reason,
-      lazy Explanation.empty,
+    let quickfixes =
       [
         Quickfix.make_eager_default_hint_style
           ~title:"Insert `inout` annotation"
           ~new_text:"inout "
           pos;
-      ],
-      User_error_flags.empty )
+      ]
+    in
+    create
+      ~code:Error_code.InoutAnnotationMissing
+      ~claim
+      ~reasons
+      ~quickfixes
+      ()
 
   let inout_annotation_unexpected pos1 pos2 pos2_is_variadic pos3 =
     let claim = lazy (pos1, "Unexpected `inout` annotation for argument") in
-    let reason =
+    let reasons =
       lazy
         [
           ( pos2,
@@ -2898,17 +2402,20 @@ end = struct
               "This is a normal parameter (does not have `inout`)" );
         ]
     in
-    ( Error_code.InoutAnnotationUnexpected,
-      claim,
-      reason,
-      lazy Explanation.empty,
+    let quickfixes =
       [
         Quickfix.make_eager_default_hint_style
           ~title:"Remove `inout` annotation"
           ~new_text:""
           pos3;
-      ],
-      User_error_flags.empty )
+      ]
+    in
+    create
+      ~code:Error_code.InoutAnnotationUnexpected
+      ~claim
+      ~reasons
+      ~quickfixes
+      ()
 
   let inout_argument_bad_type pos reasons =
     let claim =
@@ -2918,12 +2425,7 @@ end = struct
           ^ "a value-typed container (e.g. vec, dict, keyset, array). "
           ^ "To use `inout` here, assign to/from a temporary local variable." )
     in
-    ( Error_code.InoutArgumentBadType,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.InoutArgumentBadType ~claim ~reasons ()
 
   let invalid_meth_caller_calling_convention pos decl_pos convention =
     let claim =
@@ -2932,7 +2434,7 @@ end = struct
           "`meth_caller` does not support methods with the "
           ^ convention
           ^ " calling convention" )
-    and reason =
+    and reasons =
       lazy
         [
           ( decl_pos,
@@ -2940,12 +2442,11 @@ end = struct
           );
         ]
     in
-    ( Error_code.InvalidMethCallerCallingConvention,
-      claim,
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.InvalidMethCallerCallingConvention
+      ~claim
+      ~reasons
+      ()
 
   let invalid_meth_caller_readonly_return pos decl_pos =
     let claim =
@@ -2954,19 +2455,14 @@ end = struct
           "`meth_caller` does not support methods that return `readonly` objects"
         )
     in
-    let reason =
+    let reasons =
       lazy
         [
           ( decl_pos,
             "This is why I think this method returns a `readonly` object" );
         ]
     in
-    ( Error_code.InvalidMethCallerReadonlyReturn,
-      claim,
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.InvalidMethCallerReadonlyReturn ~claim ~reasons ()
 
   let invalid_new_disposable pos =
     let claim =
@@ -2975,12 +2471,7 @@ end = struct
           "Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>`"
         )
     in
-    ( Error_code.InvalidNewDisposable,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.InvalidNewDisposable ~claim ()
 
   let invalid_return_disposable pos =
     let claim =
@@ -2989,12 +2480,7 @@ end = struct
           "Return expression must be new disposable in function marked `<<__ReturnDisposable>>`"
         )
     in
-    ( Error_code.InvalidReturnDisposable,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.InvalidReturnDisposable ~claim ()
 
   let invalid_disposable_hint pos class_name =
     let claim =
@@ -3006,12 +2492,7 @@ end = struct
           ^ "Please use `<<__AcceptDisposable>>` attribute or create disposable object with `using` statement instead."
         )
     in
-    ( Error_code.InvalidDisposableHint,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.InvalidDisposableHint ~claim ()
 
   let invalid_disposable_return_hint pos class_name =
     let claim =
@@ -3022,12 +2503,7 @@ end = struct
           ^ " must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute."
         )
     in
-    ( Error_code.InvalidDisposableReturnHint,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.InvalidDisposableReturnHint ~claim ()
 
   let ambiguous_lambda pos uses =
     let claim =
@@ -3035,7 +2511,7 @@ end = struct
         ( pos,
           "Lambda has parameter types that could not be determined at definition site."
         )
-    and reason =
+    and reasons =
       Lazy.map uses ~f:(fun uses ->
           ( Pos_or_decl.of_raw_pos pos,
             Printf.sprintf
@@ -3044,27 +2520,17 @@ end = struct
           :: List.map uses ~f:(fun (pos, ty) ->
                  (pos, "This use has type " ^ Markdown_lite.md_codify ty)))
     in
-    ( Error_code.AmbiguousLambda,
-      claim,
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.AmbiguousLambda ~claim ~reasons ()
 
   let smember_not_found
       pos kind member_name class_name class_pos hint quickfixes =
     let (code, claim, reasons) =
       Common.smember_not_found pos kind member_name class_name class_pos hint
     in
-    ( code,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      quickfixes,
-      User_error_flags.empty )
+    create ~code ~claim ~reasons ~quickfixes ()
 
   let wrong_extend_kind pos kind name parent_pos parent_kind parent_name =
-    let reason =
+    let reasons =
       lazy
         (let parent_kind_str = Ast_defs.string_of_classish_kind parent_kind in
          [(parent_pos, "This is " ^ parent_kind_str ^ ".")])
@@ -3114,17 +2580,12 @@ end = struct
          in
          (pos, child_msg))
     in
-    ( Error_code.WrongExtendKind,
-      claim,
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.WrongExtendKind ~claim ~reasons ()
 
   let wrong_use_kind pos name parent_pos parent_name =
     let parent_name = Render.strip_ns parent_name in
     let child_name = Render.strip_ns name in
-    let reason =
+    let reasons =
       lazy [(parent_pos, "Trait " ^ parent_name ^ " is internal.")]
     in
     let claim =
@@ -3132,12 +2593,7 @@ end = struct
         ( pos,
           "Module level trait " ^ child_name ^ " cannot use internal traits." )
     in
-    ( Error_code.WrongUseKind,
-      claim,
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.WrongUseKind ~claim ~reasons ()
 
   let cyclic_class_def pos stack =
     let claim =
@@ -3152,14 +2608,9 @@ end = struct
 
          (pos, "Cyclic class definition : " ^ stack))
     in
-    ( Error_code.CyclicClassDef,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.CyclicClassDef ~claim ()
 
-  let trait_reuse_with_final_method use_pos trait_name parent_cls_name trace =
+  let trait_reuse_with_final_method use_pos trait_name parent_cls_name reasons =
     let claim =
       lazy
         ( use_pos,
@@ -3168,12 +2619,7 @@ end = struct
             (Render.strip_ns trait_name)
             (Render.strip_ns parent_cls_name) )
     in
-    ( Error_code.TraitReuse,
-      claim,
-      trace,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.TraitReuse ~claim ~reasons ()
 
   let trait_reuse_inside_class c_pos c_name trait occurrences =
     let claim =
@@ -3185,12 +2631,8 @@ end = struct
          in
          (c_pos, err))
     in
-    ( Error_code.TraitReuseInsideClass,
-      claim,
-      lazy (List.map ~f:(fun p -> (p, "used here")) occurrences),
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    let reasons = lazy (List.map ~f:(fun p -> (p, "used here")) occurrences) in
+    create ~code:Error_code.TraitReuseInsideClass ~claim ~reasons ()
 
   let invalid_is_as_expression_hint hint_pos op reasons =
     let op =
@@ -3210,15 +2652,11 @@ end = struct
                 ^ " operator cannot be used with "
                 ^ ty_str )))
     in
-    ( Error_code.InvalidIsAsExpressionHint,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.InvalidIsAsExpressionHint ~claim ~reasons ()
 
   let invalid_enforceable_type targ_pos ty_info kind tp_pos tp_name =
-    let reason =
+    let claim = lazy (targ_pos, "Invalid type")
+    and reasons =
       Lazy.map ty_info ~f:(fun ty_info ->
           let kind_str =
             match kind with
@@ -3236,12 +2674,7 @@ end = struct
             (ty_pos, "This type is not enforceable because it has " ^ ty_str);
           ])
     in
-    ( Error_code.InvalidEnforceableTypeArgument,
-      lazy (targ_pos, "Invalid type"),
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.InvalidEnforceableTypeArgument ~claim ~reasons ()
 
   let reifiable_attr attr_pos kind decl_pos ty_info =
     let claim =
@@ -3254,7 +2687,7 @@ end = struct
          in
          (decl_pos, "Invalid " ^ decl_kind))
     in
-    let reason =
+    let reasons =
       Lazy.map ty_info ~f:(fun ty_info ->
           let (ty_pos, ty_msg) = List.hd_exn ty_info in
           [
@@ -3262,29 +2695,24 @@ end = struct
             (ty_pos, "It cannot contain " ^ ty_msg);
           ])
     in
-    ( Error_code.DisallowPHPArraysAttr,
-      claim,
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.DisallowPHPArraysAttr ~claim ~reasons ()
 
   let invalid_newable_type_argument pos tp_pos tp_name =
-    ( Error_code.InvalidNewableTypeArgument,
+    let claim =
       lazy
         ( pos,
           "A newable type argument must be a concrete class or a newable type parameter."
-        ),
+        )
+    and reasons =
       lazy
         [
           ( tp_pos,
             "Type parameter "
             ^ Markdown_lite.md_codify tp_name
             ^ " was declared `__Newable` here" );
-        ],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        ]
+    in
+    create ~code:Error_code.InvalidNewableTypeArgument ~claim ~reasons ()
 
   let invalid_newable_type_param_constraints
       (tparam_pos, tparam_name) constraint_list =
@@ -3310,12 +2738,7 @@ end = struct
          in
          (tparam_pos, msg))
     in
-    ( Error_code.InvalidNewableTypeParamConstraints,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.InvalidNewableTypeParamConstraints ~claim ()
 
   let override_per_trait class_name meth_name trait_name m_pos =
     let claim =
@@ -3330,31 +2753,26 @@ end = struct
              meth_name
          in
          (c_pos, err_msg))
-    in
-    ( Error_code.OverridePerTrait,
-      claim,
+    and reasons =
       lazy
         [
           ( m_pos,
             "Declaration of " ^ Markdown_lite.md_codify meth_name ^ " is here"
           );
-        ],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        ]
+    in
+    create ~code:Error_code.OverridePerTrait ~claim ~reasons ()
 
   let should_not_be_override pos class_id id =
-    ( Error_code.ShouldNotBeOverride,
+    let claim =
       lazy
         ( pos,
           Printf.sprintf
             "%s has no parent class with a method %s to override"
             (Render.strip_ns class_id |> Markdown_lite.md_codify)
-            (Markdown_lite.md_codify id) ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+            (Markdown_lite.md_codify id) )
+    in
+    create ~code:Error_code.ShouldNotBeOverride ~claim ()
 
   let typedef_trail_entry pos = (pos, "Typedef definition comes from here")
 
@@ -3370,7 +2788,7 @@ end = struct
          in
          let msg = sprintf "This expression is always %s" b in
          (p, msg))
-    and reason =
+    and reasons =
       Lazy.(
         left >>= fun left ->
         right >>= fun right ->
@@ -3378,14 +2796,9 @@ end = struct
         let right_trail = List.map right_trail ~f:typedef_trail_entry in
         return (left @ left_trail @ right @ right_trail))
     in
-    ( Error_code.TrivialStrictEq,
-      claim,
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.TrivialStrictEq ~claim ~reasons ()
 
-  let trivial_strict_not_nullable_compare_null p result type_reason =
+  let trivial_strict_not_nullable_compare_null p result reasons =
     let claim =
       lazy
         (let b =
@@ -3398,22 +2811,12 @@ end = struct
          let msg = sprintf "This expression is always %s" b in
          (p, msg))
     in
-    ( Error_code.NotNullableCompareNullTrivial,
-      claim,
-      type_reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.NotNullableCompareNullTrivial ~claim ~reasons ()
 
   let eq_incompatible_types p left right =
     let claim = lazy (p, "This equality test has incompatible types")
-    and reason = lazy (left @ right) in
-    ( Error_code.EqIncompatibleTypes,
-      claim,
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    and reasons = lazy (left @ right) in
+    create ~code:Error_code.EqIncompatibleTypes ~claim ~reasons ()
 
   let comparison_invalid_types p left right =
     let claim =
@@ -3421,13 +2824,8 @@ end = struct
         ( p,
           "This comparison has invalid types.  Only comparisons in which both arguments are strings, nums, DateTime, or DateTimeImmutable are allowed"
         )
-    and reason = lazy (left @ right) in
-    ( Error_code.ComparisonInvalidTypes,
-      claim,
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    and reasons = lazy (left @ right) in
+    create ~code:Error_code.ComparisonInvalidTypes ~claim ~reasons ()
 
   let strict_eq_value_incompatible_types p left right =
     let claim =
@@ -3435,48 +2833,34 @@ end = struct
         ( p,
           "The arguments to this value equality test are not the same types or are not the allowed types (int, bool, float, string, vec, keyset, dict). The behavior for this test is changing and will soon either be universally false or throw an exception."
         )
-    and reason = lazy (left @ right) in
-    ( Error_code.StrictEqValueIncompatibleTypes,
-      claim,
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    and reasons = lazy (left @ right) in
+    create ~code:Error_code.StrictEqValueIncompatibleTypes ~claim ~reasons ()
 
   let deprecated_use pos ?(pos_def = None) msg =
-    let reason =
+    let claim = lazy (pos, msg)
+    and reasons =
       lazy
         (match pos_def with
         | Some pos_def -> [(pos_def, "Definition is here")]
         | None -> [])
     in
-    ( Error_code.DeprecatedUse,
-      lazy (pos, msg),
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.DeprecatedUse ~claim ~reasons ()
 
   let cannot_declare_constant pos (class_pos, class_name) =
-    ( Error_code.CannotDeclareConstant,
-      lazy (pos, "Cannot declare a constant in an enum"),
+    let claim = lazy (pos, "Cannot declare a constant in an enum")
+    and reasons =
       lazy
         [
           ( Pos_or_decl.of_raw_pos class_pos,
             (Render.strip_ns class_name |> Markdown_lite.md_codify)
             ^ " was defined as an enum here" );
-        ],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        ]
+    in
+    create ~code:Error_code.CannotDeclareConstant ~claim ~reasons ()
 
   let invalid_classname p =
-    ( Error_code.InvalidClassname,
-      lazy (p, "Not a valid class name"),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    let claim = lazy (p, "Not a valid class name") in
+    create ~code:Error_code.InvalidClassname ~claim ()
 
   let illegal_type_structure pos msg =
     let claim =
@@ -3490,12 +2874,7 @@ end = struct
          in
          (pos, msg))
     in
-    ( Error_code.IllegalTypeStructure,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.IllegalTypeStructure ~claim ()
 
   let illegal_typeconst_direct_access pos =
     let claim =
@@ -3506,12 +2885,7 @@ end = struct
          in
          (pos, msg))
     in
-    ( Error_code.IllegalTypeStructure,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.IllegalTypeStructure ~claim ()
 
   let wrong_expression_kind_attribute
       expr_kind pos attr attr_class_pos attr_class_name intf_name =
@@ -3523,7 +2897,7 @@ end = struct
             (Render.strip_ns attr |> Markdown_lite.md_codify)
             expr_kind )
     in
-    let reason =
+    let reasons =
       lazy
         [
           ( attr_class_pos,
@@ -3534,16 +2908,11 @@ end = struct
               (Render.strip_ns intf_name |> Markdown_lite.md_codify) );
         ]
     in
-    ( Error_code.WrongExpressionKindAttribute,
-      claim,
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.WrongExpressionKindAttribute ~claim ~reasons ()
 
   let ambiguous_object_access
       pos name self_pos vis subclass_pos class_self class_subclass =
-    let reason =
+    let reasons =
       lazy
         (let class_self = Render.strip_ns class_self in
          let class_subclass = Render.strip_ns class_subclass in
@@ -3558,39 +2927,33 @@ end = struct
              ^ Markdown_lite.md_codify class_subclass );
          ])
     in
-    ( Error_code.AmbiguousObjectAccess,
+    let claim =
       lazy
         ( pos,
           "This object access to "
           ^ Markdown_lite.md_codify name
-          ^ " is ambiguous" ),
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+          ^ " is ambiguous" )
+    in
+    create ~code:Error_code.AmbiguousObjectAccess ~claim ~reasons ()
 
   let unserializable_type pos message =
-    ( Error_code.UnserializableType,
+    let claim =
       lazy
         ( pos,
           "Unserializable type (could not be converted to JSON and back again): "
-          ^ message ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+          ^ message )
+    in
+    create ~code:Error_code.UnserializableType ~claim ()
 
   let invalid_arraykey_constraint pos t =
-    ( Error_code.InvalidArrayKeyConstraint,
+    let claim =
       lazy
         ( pos,
           "This type is "
           ^ t
-          ^ ", which cannot be used as an arraykey (string | int)" ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+          ^ ", which cannot be used as an arraykey (string | int)" )
+    in
+    create ~code:Error_code.InvalidArrayKeyConstraint ~claim ()
 
   let redundant_generic pos variance msg suggest =
     let variance_msg =
@@ -3598,7 +2961,7 @@ end = struct
       | `Co -> "covariant (output)"
       | `Contra -> "contravariant (input)"
     in
-    ( Error_code.RedundantGeneric,
+    let claim =
       lazy
         ( pos,
           Printf.sprintf
@@ -3607,61 +2970,53 @@ end = struct
           ^ msg
           ^ ". Consider replacing uses of generic parameter with "
           ^ Markdown_lite.md_codify suggest
-          ^ " or specifying `<<__Explicit>>` on the generic parameter" ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+          ^ " or specifying `<<__Explicit>>` on the generic parameter" )
+    in
+    create ~code:Error_code.RedundantGeneric ~claim ()
 
   let meth_caller_trait pos trait_name =
-    ( Error_code.MethCallerTrait,
+    let claim =
       lazy
         ( pos,
           (Render.strip_ns trait_name |> Markdown_lite.md_codify)
           ^ " is a trait which cannot be used with `meth_caller`. Use a class instead."
-        ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        )
+    in
+    create ~code:Error_code.MethCallerTrait ~claim ()
 
   let duplicate_interface pos name others =
-    ( Error_code.DuplicateInterface,
+    let claim =
       lazy
         ( pos,
           Printf.sprintf
             "Interface %s is used more than once in this declaration."
-            (Render.strip_ns name |> Markdown_lite.md_codify) ),
-      lazy (List.map others ~f:(fun pos -> (pos, "Here is another occurrence"))),
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+            (Render.strip_ns name |> Markdown_lite.md_codify) )
+    and reasons =
+      lazy (List.map others ~f:(fun pos -> (pos, "Here is another occurrence")))
+    in
+    create ~code:Error_code.DuplicateInterface ~claim ~reasons ()
 
   let reified_function_reference call_pos =
-    ( Error_code.ReifiedFunctionReference,
+    let claim =
       lazy
         ( call_pos,
           "Invalid function reference. This function requires reified generics. Prefer using a lambda instead."
-        ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        )
+    in
+    create ~code:Error_code.ReifiedFunctionReference ~claim ()
 
   let class_meth_abstract_call cname meth_name call_pos decl_pos =
     let cname = Render.strip_ns cname in
-    ( Error_code.ClassMethAbstractCall,
+    let claim =
       lazy
         ( call_pos,
           "Cannot create a class_meth of "
           ^ cname
           ^ "::"
           ^ meth_name
-          ^ "; it is abstract." ),
-      lazy [(decl_pos, "Declaration is here")],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+          ^ "; it is abstract." )
+    and reasons = lazy [(decl_pos, "Declaration is here")] in
+    create ~code:Error_code.ClassMethAbstractCall ~claim ~reasons ()
 
   let reinheriting_classish_const
       dest_classish_pos
@@ -3670,23 +3025,23 @@ end = struct
       src_classish_name
       existing_const_origin
       const_name =
-    ( Error_code.RedeclaringClassishConstant,
+    let claim =
       lazy
         ( src_classish_pos,
           Render.strip_ns dest_classish_name
           ^ " cannot re-inherit constant "
           ^ const_name
           ^ " from "
-          ^ Render.strip_ns src_classish_name ),
+          ^ Render.strip_ns src_classish_name )
+    and reasons =
       lazy
         [
           ( Pos_or_decl.of_raw_pos dest_classish_pos,
             "because it already inherited it via "
             ^ Render.strip_ns existing_const_origin );
-        ],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        ]
+    in
+    create ~code:Error_code.RedeclaringClassishConstant ~claim ~reasons ()
 
   let redeclaring_classish_const
       classish_pos
@@ -3694,33 +3049,31 @@ end = struct
       redeclaration_pos
       existing_const_origin
       const_name =
-    ( Error_code.RedeclaringClassishConstant,
+    let claim =
       lazy
         ( redeclaration_pos,
           Render.strip_ns classish_name
           ^ " cannot re-declare constant "
-          ^ const_name ),
+          ^ const_name )
+    and reasons =
       lazy
         [
           ( Pos_or_decl.of_raw_pos classish_pos,
             "because it already inherited it via "
             ^ Render.strip_ns existing_const_origin );
-        ],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        ]
+    in
+    create ~code:Error_code.RedeclaringClassishConstant ~claim ~reasons ()
 
   let abstract_function_pointer cname meth_name call_pos decl_pos =
-    ( Error_code.AbstractFunctionPointer,
+    let claim =
       lazy
         ( call_pos,
           "Cannot create a function pointer to "
           ^ Markdown_lite.md_codify (Render.strip_ns cname ^ "::" ^ meth_name)
-          ^ "; it is abstract" ),
-      lazy [(decl_pos, "Declaration is here")],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+          ^ "; it is abstract" )
+    and reasons = lazy [(decl_pos, "Declaration is here")] in
+    create ~code:Error_code.AbstractFunctionPointer ~claim ~reasons ()
 
   let inherited_class_member_with_different_case
       member_type name name_prev p child_class prev_class prev_class_pos =
@@ -3756,12 +3109,7 @@ end = struct
              ^ member_type );
          ])
     in
-    ( Error_code.InheritedMethodCaseDiffers,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.InheritedMethodCaseDiffers ~claim ~reasons ()
 
   let multiple_inherited_class_member_with_different_case
       ~member_type ~name1 ~name2 ~class1 ~class2 ~child_class ~child_p ~p1 ~p2 =
@@ -3799,12 +3147,7 @@ end = struct
             ^ "s to the same casing." );
         ]
     in
-    ( Error_code.InheritedMethodCaseDiffers,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.InheritedMethodCaseDiffers ~claim ~reasons ()
 
   let multiple_instantiation_inheritence
       type_name
@@ -3910,12 +3253,7 @@ end = struct
                 losing_instantiation );
           ])
     in
-    ( Error_code.MultipleInstantiationInheritence,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.MultipleInstantiationInheritence ~claim ~reasons ()
 
   let classish_kind_to_string = function
     | Ast_defs.Cclass _ -> "class "
@@ -3967,12 +3305,7 @@ end = struct
            else
              "" ))
     in
-    ( Error_code.ImplementsDynamic,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.ImplementsDynamic ~claim ()
 
   let property_is_not_enforceable pos prop_name class_name (prop_pos, prop_type)
       =
@@ -3988,17 +3321,12 @@ end = struct
            ^ " cannot support dynamic because property "
            ^ prop_name
            ^ " does not have an enforceable type" ))
-    and reason =
+    and reasons =
       lazy
         (let prop_type = Markdown_lite.md_codify prop_type in
          [(prop_pos, "Property " ^ prop_name ^ " has type " ^ prop_type)])
     in
-    ( Error_code.ImplementsDynamic,
-      claim,
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.ImplementsDynamic ~claim ~reasons ()
 
   let property_is_not_dynamic pos prop_name class_name (prop_pos, prop_type) =
     let prop_name = Markdown_lite.md_codify prop_name in
@@ -4013,17 +3341,12 @@ end = struct
            ^ " cannot support dynamic because property "
            ^ prop_name
            ^ " cannot be assigned to dynamic" ))
-    and reason =
+    and reasons =
       lazy
         (let prop_type = Markdown_lite.md_codify prop_type in
          [(prop_pos, "Property " ^ prop_name ^ " has type " ^ prop_type)])
     in
-    ( Error_code.ImplementsDynamic,
-      claim,
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.ImplementsDynamic ~claim ~reasons ()
 
   let private_property_is_not_enforceable
       pos prop_name class_name (prop_pos, prop_type) =
@@ -4040,18 +3363,13 @@ end = struct
            ^ " through dynamic type because private property in "
            ^ class_name
            ^ " does not have an enforceable type" ))
-    and reason =
+    and reasons =
       lazy
         (let prop_type = Markdown_lite.md_codify prop_type in
 
          [(prop_pos, "Property " ^ prop_name ^ " has type " ^ prop_type)])
     in
-    ( Error_code.PrivateDynamicWrite,
-      claim,
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.PrivateDynamicWrite ~claim ~reasons ()
 
   let private_property_is_not_dynamic
       pos prop_name class_name (prop_pos, prop_type) =
@@ -4068,44 +3386,35 @@ end = struct
            ^ " through dynamic type because private property in "
            ^ class_name
            ^ " cannot be assigned to dynamic" ))
-    and reason =
+    and reasons =
       lazy
         (let prop_type = Markdown_lite.md_codify prop_type in
 
          [(prop_pos, "Property " ^ prop_name ^ " has type " ^ prop_type)])
     in
-    ( Error_code.PrivateDynamicRead,
-      claim,
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.PrivateDynamicRead ~claim ~reasons ()
 
   let immutable_local pos =
-    ( Error_code.ImmutableLocal,
+    let claim =
       lazy
         ( pos,
           (* TODO: generalize this error message in the future for arbitrary immutable locals *)
           "This variable cannot be reassigned because it is used for a dependent context"
-        ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        )
+    in
+    create ~code:Error_code.ImmutableLocal ~claim ()
 
   let nonsense_member_selection pos kind =
-    ( Error_code.NonsenseMemberSelection,
+    let claim =
       lazy
         ( pos,
           "Dynamic member access requires a local variable, not `" ^ kind ^ "`."
-        ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        )
+    in
+    create ~code:Error_code.NonsenseMemberSelection ~claim ()
 
   let consider_meth_caller pos class_name meth_name =
-    ( Error_code.ConsiderMethCaller,
+    let claim =
       lazy
         ( pos,
           "Function pointer syntax requires a static method. "
@@ -4113,11 +3422,9 @@ end = struct
           ^ Render.strip_ns class_name
           ^ "::class, '"
           ^ meth_name
-          ^ "')` to create a function pointer to the instance method" ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+          ^ "')` to create a function pointer to the instance method" )
+    in
+    create ~code:Error_code.ConsiderMethCaller ~claim ()
 
   let method_import_via_diamond
       pos class_name method_pos method_name trace1 trace2 =
@@ -4138,19 +3445,14 @@ end = struct
            ^ class_name
            ^ ", remove the multiple paths, or override the method" ))
     in
-    let reason =
+    let reasons =
       Lazy.(
         trace1 >>= fun trace1 ->
         trace2 >>= fun trace2 ->
         return
           (((method_pos, "Trait method is defined here") :: trace1) @ trace2))
     in
-    ( Error_code.DiamondTraitMethod,
-      claim,
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.DiamondTraitMethod ~claim ~reasons ()
 
   let property_import_via_diamond
       generic pos class_name property_pos property_name trace1 trace2 =
@@ -4184,66 +3486,53 @@ end = struct
            else
              "" ))
     in
-    let reason =
+    let reasons =
       Lazy.(
         trace1 >>= fun trace1 ->
         trace2 >>= fun trace2 ->
         return
           (((property_pos, "Trait property is defined here") :: trace1) @ trace2))
     in
-    ( Error_code.DiamondTraitProperty,
-      claim,
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.DiamondTraitProperty ~claim ~reasons ()
 
   let unification_cycle pos ty =
-    ( Error_code.UnificationCycle,
+    let claim =
       lazy
         ( pos,
           "Type circularity: in order to type-check this expression it "
           ^ "is necessary for a type [rec] to be equal to type "
-          ^ Markdown_lite.md_codify ty ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+          ^ Markdown_lite.md_codify ty )
+    in
+    create ~code:Error_code.UnificationCycle ~claim ()
 
   let method_variance pos =
-    ( Error_code.MethodVariance,
+    let claim =
       lazy
         ( pos,
           "Covariance or contravariance is not allowed in type parameters of methods or functions."
-        ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        )
+    in
+    create ~code:Error_code.MethodVariance ~claim ()
 
   let explain_tconst_where_constraint use_pos definition_pos msgl =
     let claim = lazy (use_pos, "A `where` type constraint is violated here")
-    and reason =
+    and reasons =
       Lazy.map msgl ~f:(fun msgl ->
           ( definition_pos,
             "This method's `where` constraints contain a generic type access" )
           :: msgl)
     in
-    ( Error_code.TypeConstraintViolation,
-      claim,
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.TypeConstraintViolation ~claim ~reasons ()
 
   let format_string pos snippet s class_pos fname class_suggest =
-    ( Error_code.FormatString,
+    let claim =
       lazy
         ( pos,
           "Invalid format string "
           ^ Markdown_lite.md_codify snippet
           ^ " in "
-          ^ Markdown_lite.md_codify ("\"" ^ s ^ "\"") ),
+          ^ Markdown_lite.md_codify ("\"" ^ s ^ "\"") )
+    and reasons =
       lazy
         [
           ( class_pos,
@@ -4251,18 +3540,14 @@ end = struct
             ^ Markdown_lite.md_codify (fname ^ "()")
             ^ " to "
             ^ Markdown_lite.md_codify class_suggest );
-        ],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        ]
+    in
+
+    create ~code:Error_code.FormatString ~claim ~reasons ()
 
   let expected_literal_format_string pos =
-    ( Error_code.ExpectedLiteralFormatString,
-      lazy (pos, "This argument must be a literal format string"),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    let claim = lazy (pos, "This argument must be a literal format string") in
+    create ~code:Error_code.ExpectedLiteralFormatString ~claim ()
 
   let re_prefixed_non_string pos reason =
     let claim =
@@ -4274,12 +3559,7 @@ end = struct
          in
          (pos, non_strings ^ " are not allowed to be to be `re`-prefixed"))
     in
-    ( Error_code.RePrefixedNonString,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.RePrefixedNonString ~claim ()
 
   let bad_regex_pattern pos reason =
     let claim =
@@ -4293,20 +3573,13 @@ end = struct
          in
          (pos, "Bad regex pattern; " ^ s ^ "."))
     in
-    ( Error_code.BadRegexPattern,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.BadRegexPattern ~claim ()
 
   let generic_array_strict p =
-    ( Error_code.GenericArrayStrict,
-      lazy (p, "You cannot have an array without generics in strict mode"),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    let claim =
+      lazy (p, "You cannot have an array without generics in strict mode")
+    in
+    create ~code:Error_code.GenericArrayStrict ~claim ()
 
   let option_return_only_typehint p kind =
     let claim =
@@ -4322,58 +3595,39 @@ end = struct
            ^ reason
            ^ " and return null." ))
     in
-    ( Error_code.OptionReturnOnlyTypehint,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.OptionReturnOnlyTypehint ~claim ()
 
   let redeclaring_missing_method p trait_method =
-    ( Error_code.RedeclaringMissingMethod,
+    let claim =
       lazy
         ( p,
           "Attempting to redeclare a trait method "
           ^ Markdown_lite.md_codify trait_method
           ^ " which was never inherited. "
           ^ "You might be trying to redeclare a non-static method as `static` or vice-versa."
-        ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        )
+    in
+    create ~code:Error_code.RedeclaringMissingMethod ~claim ()
 
   let expecting_type_hint p =
-    ( Error_code.ExpectingTypeHint,
-      lazy (p, "Was expecting a type hint"),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    let claim = lazy (p, "Was expecting a type hint") in
+    create ~code:Error_code.ExpectingTypeHint ~claim ()
 
   let expecting_type_hint_variadic p =
-    ( Error_code.ExpectingTypeHintVariadic,
-      lazy (p, "Was expecting a type hint on this variadic parameter"),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    let claim =
+      lazy (p, "Was expecting a type hint on this variadic parameter")
+    in
+    create ~code:Error_code.ExpectingTypeHintVariadic ~claim ()
 
   let expecting_return_type_hint p =
-    ( Error_code.ExpectingReturnTypeHint,
-      lazy (p, "Was expecting a return type hint"),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    let claim = lazy (p, "Was expecting a return type hint") in
+    create ~code:Error_code.ExpectingReturnTypeHint ~claim ()
 
   let duplicate_using_var pos =
-    ( Error_code.DuplicateUsingVar,
-      lazy (pos, "Local variable already used in `using` statement"),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    let claim =
+      lazy (pos, "Local variable already used in `using` statement")
+    in
+    create ~code:Error_code.DuplicateUsingVar ~claim ()
 
   let illegal_disposable pos verb =
     let claim =
@@ -4386,67 +3640,53 @@ end = struct
            "Disposable objects must only be " ^ verb ^ " in a `using` statement"
          ))
     in
-    ( Error_code.IllegalDisposable,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.IllegalDisposable ~claim ()
 
   let escaping_disposable pos =
-    ( Error_code.EscapingDisposable,
+    let claim =
       lazy
         ( pos,
           "Variable from `using` clause may only be used as receiver in method invocation "
           ^ "or passed to function with `<<__AcceptDisposable>>` parameter attribute"
-        ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        )
+    in
+    create ~code:Error_code.EscapingDisposable ~claim ()
 
   let escaping_disposable_parameter pos =
-    ( Error_code.EscapingDisposableParameter,
+    let claim =
       lazy
         ( pos,
           "Parameter with `<<__AcceptDisposable>>` attribute may only be used as receiver in method invocation "
           ^ "or passed to another function with `<<__AcceptDisposable>>` parameter attribute"
-        ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        )
+    in
+    create ~code:Error_code.EscapingDisposableParameter ~claim ()
 
   let escaping_this pos =
-    ( Error_code.EscapingThis,
+    let claim =
       lazy
         ( pos,
           "`$this` implementing `IDisposable` or `IAsyncDisposable` may only be used as receiver in method invocation "
           ^ "or passed to another function with `<<__AcceptDisposable>>` parameter attribute"
-        ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        )
+    in
+    create ~code:Error_code.EscapingThis ~claim ()
 
   let must_extend_disposable pos =
-    ( Error_code.MustExtendDisposable,
+    let claim =
       lazy
         ( pos,
           "A disposable type may not extend a class or use a trait that is not disposable"
-        ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        )
+    in
+    create ~code:Error_code.MustExtendDisposable ~claim ()
 
   let field_kinds pos1 pos2 =
-    ( Error_code.FieldKinds,
-      lazy (pos1, "You cannot use this kind of field (value)"),
-      lazy [(pos2, "Mixed with this kind of field (key => value)")],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    let claim = lazy (pos1, "You cannot use this kind of field (value)")
+    and reasons =
+      lazy [(pos2, "Mixed with this kind of field (key => value)")]
+    in
+    create ~code:Error_code.FieldKinds ~claim ~reasons ()
 
   let unbound_name_typing pos name class_exists =
     let quickfixes =
@@ -4461,50 +3701,42 @@ end = struct
         ]
       | false -> []
     in
-    ( Error_code.UnboundNameTyping,
+    let claim =
       lazy
         ( pos,
           "Unbound name (typing): "
-          ^ Markdown_lite.md_codify (Render.strip_ns name) ),
-      lazy [],
-      lazy Explanation.empty,
-      quickfixes,
-      User_error_flags.empty )
+          ^ Markdown_lite.md_codify (Render.strip_ns name) )
+    in
+    create ~code:Error_code.UnboundNameTyping ~claim ~quickfixes ()
 
   let previous_default p =
-    ( Error_code.PreviousDefault,
+    let claim =
       lazy
         ( p,
           "A previous parameter has a default value.\n"
           ^ "Remove all the default values for the preceding parameters,\n"
-          ^ "or add a default value to this one." ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+          ^ "or add a default value to this one." )
+    in
+    create ~code:Error_code.PreviousDefault ~claim ()
 
   let previous_default_or_optional p =
-    ( Error_code.PreviousDefault,
+    let claim =
       lazy
         ( p,
           "A previous parameter has a default value or is optional.\n"
           ^ "Remove all the optional or default values for the preceding parameters,\n"
-          ^ "or add a default value or optional to this one." ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+          ^ "or add a default value or optional to this one." )
+    in
+    create ~code:Error_code.PreviousDefault ~claim ()
 
   let optional_parameter_not_supported p =
-    ( Error_code.OptionalParameterNotSupported,
+    let claim =
       lazy
         ( p,
           "Optional parameters are not supported. Use a default value instead.\n"
-        ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        )
+    in
+    create ~code:Error_code.OptionalParameterNotSupported ~claim ()
 
   let call_needs_concrete
       call_pos
@@ -4576,111 +3808,82 @@ end = struct
       User_error_flags.empty )
 
   let optional_parameter_not_abstract p =
-    ( Error_code.OptionalParameterNotSupported,
+    let claim =
       lazy
         ( p,
           "Optional parameters are not supported on top-level functions or non-abstract methods. Use a default value instead.\n"
-        ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        )
+    in
+    create ~code:Error_code.OptionalParameterNotSupported ~claim ()
 
   let return_in_void pos1 pos2 =
-    ( Error_code.ReturnInVoid,
-      lazy (pos1, "You cannot return a value"),
-      lazy [(Pos_or_decl.of_raw_pos pos2, "This is a `void` function")],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    let claim = lazy (pos1, "You cannot return a value")
+    and reasons =
+      lazy [(Pos_or_decl.of_raw_pos pos2, "This is a `void` function")]
+    in
+    create ~code:Error_code.ReturnInVoid ~claim ~reasons ()
 
   let this_var_outside_class p =
-    ( Error_code.ThisVarOutsideClass,
-      lazy (p, "Can't use `$this` outside of a class"),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    let claim = lazy (p, "Can't use `$this` outside of a class") in
+    create ~code:Error_code.ThisVarOutsideClass ~claim ()
 
   let unbound_global cst_pos =
-    ( Error_code.UnboundGlobal,
-      lazy (cst_pos, "Unbound global constant (Typing)"),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    let claim = lazy (cst_pos, "Unbound global constant (Typing)") in
+    create ~code:Error_code.UnboundGlobal ~claim ()
 
   let private_meth_caller use_pos def_pos =
-    ( Error_code.PrivateMethCaller,
+    let claim =
       lazy
         ( use_pos,
           "You cannot access this method with `meth_caller` (even from the same class hierarchy)"
-        ),
-      lazy [(def_pos, "It is declared as `private` here")],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        )
+    and reasons = lazy [(def_pos, "It is declared as `private` here")] in
+    create ~code:Error_code.PrivateMethCaller ~claim ~reasons ()
 
   let protected_meth_caller use_pos def_pos =
-    ( Error_code.ProtectedMethCaller,
+    let claim =
       lazy
         ( use_pos,
           "You cannot access this method with `meth_caller` (even from the same class hierarchy)"
-        ),
-      lazy [(def_pos, "It is declared as `protected` here")],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        )
+    and reasons = lazy [(def_pos, "It is declared as `protected` here")] in
+    create ~code:Error_code.ProtectedMethCaller ~claim ~reasons ()
 
   let internal_meth_caller use_pos def_pos =
-    ( Error_code.InternalMethCaller,
+    let claim =
       lazy
         ( use_pos,
           "You cannot access this method with `meth_caller` (even from the same module)"
-        ),
-      lazy [(def_pos, "It is declared as `internal` here")],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        )
+    and reasons = lazy [(def_pos, "It is declared as `internal` here")] in
+    create ~code:Error_code.InternalMethCaller ~claim ~reasons ()
 
   let array_cast pos =
-    ( Error_code.ArrayCast,
+    let claim =
       lazy
         ( pos,
           "(array) cast forbidden; arrays with unspecified key and value types are not allowed"
-        ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        )
+    in
+    create ~code:Error_code.ArrayCast ~claim ()
 
   let string_cast pos ty =
-    ( Error_code.StringCast,
+    let claim =
       lazy
         ( pos,
           Printf.sprintf
             "Cannot cast a value of type %s to string. Only primitives may be used in a `(string)` cast."
-            (Markdown_lite.md_codify ty) ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+            (Markdown_lite.md_codify ty) )
+    in
+    create ~code:Error_code.StringCast ~claim ()
 
   let static_outside_class pos =
-    ( Error_code.StaticOutsideClass,
-      lazy (pos, "`static` is undefined outside of a class"),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    let claim = lazy (pos, "`static` is undefined outside of a class") in
+    create ~code:Error_code.StaticOutsideClass ~claim ()
 
   let self_outside_class pos =
-    ( Error_code.SelfOutsideClass,
-      lazy (pos, "`self` is undefined outside of a class"),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    let claim = lazy (pos, "`self` is undefined outside of a class") in
+    create ~code:Error_code.SelfOutsideClass ~claim ()
 
   let new_inconsistent_construct new_pos (cpos, cname) kind =
     let claim =
@@ -4699,37 +3902,29 @@ end = struct
            ^ "; `__construct` arguments are not guaranteed to be consistent in child classes"
          ))
     in
-    ( Error_code.NewStaticInconsistent,
-      claim,
+    let reasons =
       lazy
         [
           ( cpos,
             "This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute"
           );
-        ],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        ]
+    in
+    create ~code:Error_code.NewStaticInconsistent ~claim ~reasons ()
 
   let parent_outside_class pos =
-    ( Error_code.ParentOutsideClass,
-      lazy (pos, "`parent` is undefined outside of a class"),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    let claim = lazy (pos, "`parent` is undefined outside of a class") in
+    create ~code:Error_code.ParentOutsideClass ~claim ()
 
   let parent_abstract_call call_pos meth_name decl_pos =
-    ( Error_code.AbstractCall,
+    let claim =
       lazy
         ( call_pos,
           "Cannot call "
           ^ Markdown_lite.md_codify ("parent::" ^ meth_name ^ "()")
-          ^ "; it is abstract" ),
-      lazy [(decl_pos, "Declaration is here")],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+          ^ "; it is abstract" )
+    and reasons = lazy [(decl_pos, "Declaration is here")] in
+    create ~code:Error_code.AbstractCall ~claim ~reasons ()
 
   let self_abstract_call call_pos meth_name self_pos decl_pos =
     let quickfixes =
@@ -4741,35 +3936,31 @@ end = struct
           self_pos;
       ]
     in
-    ( Error_code.AbstractCall,
+    let claim =
       lazy
         ( call_pos,
           "Cannot call "
           ^ Markdown_lite.md_codify ("self::" ^ meth_name ^ "()")
           ^ "; it is abstract. Did you mean "
           ^ Markdown_lite.md_codify ("static::" ^ meth_name ^ "()")
-          ^ "?" ),
-      lazy [(decl_pos, "Declaration is here")],
-      lazy Explanation.empty,
-      quickfixes,
-      User_error_flags.empty )
+          ^ "?" )
+    and reasons = lazy [(decl_pos, "Declaration is here")] in
+    create ~code:Error_code.AbstractCall ~claim ~reasons ~quickfixes ()
 
   let classname_abstract_call call_pos meth_name cname decl_pos =
-    ( Error_code.AbstractCall,
+    let claim =
       lazy
         ( call_pos,
           "Cannot call "
           ^ Markdown_lite.md_codify
               (Render.strip_ns cname ^ "::" ^ meth_name ^ "()")
-          ^ "; it is abstract" ),
-      lazy [(decl_pos, "Declaration is here")],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+          ^ "; it is abstract" )
+    and reasons = lazy [(decl_pos, "Declaration is here")] in
+    create ~code:Error_code.AbstractCall ~claim ~reasons ()
 
   let static_synthetic_method call_pos meth_name cname decl_pos =
     let cname = Render.strip_ns cname in
-    ( Error_code.StaticSyntheticMethod,
+    let claim =
       lazy
         ( call_pos,
           "Cannot call "
@@ -4777,11 +3968,9 @@ end = struct
           ^ "; "
           ^ Markdown_lite.md_codify meth_name
           ^ " is not defined in "
-          ^ Markdown_lite.md_codify cname ),
-      lazy [(decl_pos, "Declaration is here")],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+          ^ Markdown_lite.md_codify cname )
+    and reasons = lazy [(decl_pos, "Declaration is here")] in
+    create ~code:Error_code.StaticSyntheticMethod ~claim ~reasons ()
 
   let static_call_on_trait_require_non_strict
       call_pos meth_name trait_name req_constraint_name req_constraint_kind =
@@ -4789,229 +3978,205 @@ end = struct
     let req_constraint_name = Render.strip_ns req_constraint_name in
     match req_constraint_kind with
     | `class_ ->
-      ( Error_code.StaticCallOnTraitRequireClass,
-        lazy
-          ( call_pos,
-            "Invoking static methods on traits is dangerous and must be avoided. Since trait "
-            ^ trait_name
-            ^ " has a "
-            ^ Markdown_lite.md_codify ("require class " ^ req_constraint_name)
-            ^ " constraint, replace "
-            ^ Markdown_lite.md_codify (trait_name ^ "::" ^ meth_name ^ "(...)")
-            ^ " with "
-            ^ Markdown_lite.md_codify
-                (req_constraint_name ^ "::" ^ meth_name ^ "(...)")
-            ^ "." ),
-        lazy [],
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create
+        ~code:Error_code.StaticCallOnTraitRequireClass
+        ~claim:
+          (lazy
+            ( call_pos,
+              "Invoking static methods on traits is dangerous and must be avoided. Since trait "
+              ^ trait_name
+              ^ " has a "
+              ^ Markdown_lite.md_codify ("require class " ^ req_constraint_name)
+              ^ " constraint, replace "
+              ^ Markdown_lite.md_codify (trait_name ^ "::" ^ meth_name ^ "(...)")
+              ^ " with "
+              ^ Markdown_lite.md_codify
+                  (req_constraint_name ^ "::" ^ meth_name ^ "(...)")
+              ^ "." ))
+        ()
     | `this_as ->
-      ( Error_code.StaticCallOnTraitRequireThisAs,
-        lazy
-          ( call_pos,
-            "Invoking static methods on traits is dangerous and is forbidden on trait "
-            ^ trait_name
-            ^ " because it has a "
-            ^ Markdown_lite.md_codify ("require this as " ^ req_constraint_name)
-            ^ " constraint." ),
-        lazy [],
-        lazy Explanation.empty,
-        [],
-        User_error_flags.empty )
+      create
+        ~code:Error_code.StaticCallOnTraitRequireThisAs
+        ~claim:
+          (lazy
+            ( call_pos,
+              "Invoking static methods on traits is dangerous and is forbidden on trait "
+              ^ trait_name
+              ^ " because it has a "
+              ^ Markdown_lite.md_codify
+                  ("require this as " ^ req_constraint_name)
+              ^ " constraint." ))
+        ()
 
   let isset_in_strict pos =
-    ( Error_code.IssetEmptyInStrict,
-      lazy
-        ( pos,
-          "`isset` tends to hide errors due to variable typos and so is limited to dynamic checks in "
-          ^ "`strict` mode" ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.IssetEmptyInStrict
+      ~claim:
+        (lazy
+          ( pos,
+            "`isset` tends to hide errors due to variable typos and so is limited to dynamic checks in "
+            ^ "`strict` mode" ))
+      ()
 
   let isset_inout_arg pos =
-    ( Error_code.InoutInPseudofunction,
-      lazy (pos, "`isset` does not allow arguments to be passed by `inout`"),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.InoutInPseudofunction
+      ~claim:
+        (lazy (pos, "`isset` does not allow arguments to be passed by `inout`"))
+      ()
 
-  let unset_nonidx_in_strict pos msgs =
-    ( Error_code.UnsetNonidxInStrict,
-      lazy
-        ( pos,
-          "In `strict` mode, `unset` is banned except on dynamic, "
-          ^ "darray, keyset, or dict indexing" ),
-      msgs,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+  let unset_nonidx_in_strict pos reasons =
+    create
+      ~code:Error_code.UnsetNonidxInStrict
+      ~claim:
+        (lazy
+          ( pos,
+            "In `strict` mode, `unset` is banned except on dynamic, "
+            ^ "darray, keyset, or dict indexing" ))
+      ~reasons
+      ()
 
   let unpacking_disallowed_builtin_function pos name =
-    ( Error_code.UnpackingDisallowed,
-      lazy
-        ( pos,
-          "Arg unpacking is disallowed for "
-          ^ Markdown_lite.md_codify (Render.strip_ns name) ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.UnpackingDisallowed
+      ~claim:
+        (lazy
+          ( pos,
+            "Arg unpacking is disallowed for "
+            ^ Markdown_lite.md_codify (Render.strip_ns name) ))
+      ()
 
   let array_get_arity pos1 name pos2 =
-    ( Error_code.ArrayGetArity,
-      lazy
-        ( pos1,
-          "You cannot use this "
-          ^ (Render.strip_ns name |> Markdown_lite.md_codify) ),
-      lazy [(pos2, "It is missing its type parameters")],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.ArrayGetArity
+      ~claim:
+        (lazy
+          ( pos1,
+            "You cannot use this "
+            ^ (Render.strip_ns name |> Markdown_lite.md_codify) ))
+      ~reasons:(lazy [(pos2, "It is missing its type parameters")])
+      ()
 
   let undefined_field use_pos name shape_type_pos =
-    ( Error_code.UndefinedField,
+    let claim =
       lazy
         ( use_pos,
-          "This shape doesn't have a field " ^ Markdown_lite.md_codify name ),
-      lazy [(shape_type_pos, "The shape is defined here")],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+          "This shape doesn't have a field " ^ Markdown_lite.md_codify name )
+    and reasons = lazy [(shape_type_pos, "The shape is defined here")] in
+    create ~code:Error_code.UndefinedField ~claim ~reasons ()
 
   let array_access code pos1 pos2 ty =
-    ( code,
-      lazy
-        (pos1, "This is not an object of type `KeyedContainer`, this is " ^ ty),
-      lazy
-        (if not Pos_or_decl.(equal pos2 none) then
-          [(pos2, "Definition is here")]
-        else
-          []),
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code
+      ~claim:
+        (lazy
+          (pos1, "This is not an object of type `KeyedContainer`, this is " ^ ty))
+      ~reasons:
+        (lazy
+          (if not Pos_or_decl.(equal pos2 none) then
+            [(pos2, "Definition is here")]
+          else
+            []))
+      ()
 
   let array_access_read = array_access Error_code.ArrayAccessRead
 
   let array_access_write = array_access Error_code.ArrayAccessWrite
 
   let keyset_set pos1 pos2 =
-    ( Error_code.KeysetSet,
-      lazy (pos1, "Elements in a keyset cannot be assigned, use append instead."),
+    let claim =
+      lazy (pos1, "Elements in a keyset cannot be assigned, use append instead.")
+    and reasons =
       lazy
         (if not Pos_or_decl.(equal pos2 none) then
           [(pos2, "Definition is here")]
         else
-          []),
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+          [])
+    in
+    create ~code:Error_code.KeysetSet ~claim ~reasons ()
 
   let array_append pos1 pos2 ty =
-    ( Error_code.ArrayAppend,
-      lazy (pos1, ty ^ " does not allow array append"),
+    let claim = lazy (pos1, ty ^ " does not allow array append")
+    and reasons =
       lazy
         (if not Pos_or_decl.(equal pos2 none) then
           [(pos2, "Definition is here")]
         else
-          []),
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+          [])
+    in
+    create ~code:Error_code.ArrayAppend ~claim ~reasons ()
 
   let const_mutation pos1 pos2 ty =
-    ( Error_code.ConstMutation,
-      lazy (pos1, "You cannot mutate this"),
+    let claim = lazy (pos1, "You cannot mutate this")
+    and reasons =
       lazy
         (if not Pos_or_decl.(equal pos2 none) then
           [(pos2, "This is " ^ ty)]
         else
-          []),
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+          [])
+    in
+    create ~code:Error_code.ConstMutation ~claim ~reasons ()
 
   let expected_class pos suffix =
-    ( Error_code.ExpectedClass,
-      lazy (pos, "Was expecting a class" ^ suffix),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.ExpectedClass
+      ~claim:(lazy (pos, "Was expecting a class" ^ suffix))
+      ()
 
-  let unknown_type pos description r =
+  let unknown_type pos description reasons =
     let claim =
       lazy (pos, "Was expecting " ^ description ^ " but type is unknown")
     in
-    ( Error_code.UnknownType,
-      claim,
-      r,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.UnknownType ~claim ~reasons ()
 
   let parent_in_trait pos =
-    ( Error_code.ParentInTrait,
-      lazy
-        ( pos,
-          "You can only use `parent::` in traits that `require extends`, `require class` "
-          ^ "or `require this as` a valid class" ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.ParentInTrait
+      ~claim:
+        (lazy
+          ( pos,
+            "You can only use `parent::` in traits that `require extends`, `require class` "
+            ^ "or `require this as` a valid class" ))
+      ()
 
   let parent_undefined pos trait_reqs =
-    ( Error_code.ParentUndefined,
-      lazy (pos, "parent is undefined"),
-      (match trait_reqs with
+    let claim = lazy (pos, "parent is undefined")
+    and reasons =
+      match trait_reqs with
       | Some reqs ->
         lazy
           (List.map reqs ~f:(fun p ->
                (p, "The class required here has no parent")))
-      | None -> lazy []),
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+      | None -> lazy []
+    in
+    create ~code:Error_code.ParentUndefined ~claim ~reasons ()
 
   let constructor_no_args pos =
-    ( Error_code.ConstructorNoArgs,
-      lazy (pos, "This constructor expects no argument"),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.ConstructorNoArgs
+      ~claim:(lazy (pos, "This constructor expects no argument"))
+      ()
 
   let visibility p msg1 p_vis msg2 =
-    ( Error_code.Visibility,
-      lazy (p, msg1),
-      lazy [(p_vis, msg2)],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    let claim = lazy (p, msg1) and reasons = lazy [(p_vis, msg2)] in
+    create ~code:Error_code.Visibility ~claim ~reasons ()
 
   let bad_call pos ty =
-    ( Error_code.BadCall,
-      lazy (pos, "This call is invalid, this is not a function, it is " ^ ty),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.BadCall
+      ~claim:
+        (lazy
+          (pos, "This call is invalid, this is not a function, it is " ^ ty))
+      ()
 
   let extend_final extend_pos decl_pos name =
-    ( Error_code.ExtendFinal,
+    let claim =
       lazy
         ( extend_pos,
           "You cannot extend final class "
-          ^ Markdown_lite.md_codify (Render.strip_ns name) ),
-      lazy [(decl_pos, "Declaration is here")],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+          ^ Markdown_lite.md_codify (Render.strip_ns name) )
+    and reasons = lazy [(decl_pos, "Declaration is here")] in
+    create ~code:Error_code.ExtendFinal ~claim ~reasons ()
 
   let extend_sealed child_pos parent_pos parent_name parent_kind verb =
     let claim =
@@ -5036,13 +4201,8 @@ end = struct
            ^ parent_kind
            ^ " "
            ^ Markdown_lite.md_codify name ))
-    in
-    ( Error_code.ExtendSealed,
-      claim,
-      lazy [(parent_pos, "Declaration is here")],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    and reasons = lazy [(parent_pos, "Declaration is here")] in
+    create ~code:Error_code.ExtendSealed ~claim ~reasons ()
 
   let sealed_not_subtype parent_pos parent_name child_name child_kind child_pos
       =
@@ -5068,28 +4228,21 @@ end = struct
            ^ verb
            ^ " "
            ^ Markdown_lite.md_codify parent_name ))
-    in
-
-    ( Error_code.SealedNotSubtype,
-      claim,
-      lazy [(child_pos, "Definition is here")],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    and reasons = lazy [(child_pos, "Definition is here")] in
+    create ~code:Error_code.SealedNotSubtype ~claim ~reasons ()
 
   let trait_prop_const_class pos x =
-    ( Error_code.TraitPropConstClass,
-      lazy
-        ( pos,
-          "Trait declaration of non-const property "
-          ^ Markdown_lite.md_codify x
-          ^ " is incompatible with a const class" ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.TraitPropConstClass
+      ~claim:
+        (lazy
+          ( pos,
+            "Trait declaration of non-const property "
+            ^ Markdown_lite.md_codify x
+            ^ " is incompatible with a const class" ))
+      ()
 
-  let implement_abstract pos1 is_final pos2 x kind qfxs trace =
+  let implement_abstract pos1 is_final pos2 x kind quickfixes trace =
     let kind =
       match kind with
       | `meth -> "method"
@@ -5109,15 +4262,12 @@ end = struct
              ^ name
          in
          (pos1, msg1))
-    in
-    ( Error_code.ImplementAbstract,
-      claim,
+    and reasons =
       lazy
         (Lazy.force trace
-        @ [(pos2, Printf.sprintf "The %s is defined here" kind)]),
-      lazy Explanation.empty,
-      qfxs,
-      User_error_flags.empty )
+        @ [(pos2, Printf.sprintf "The %s is defined here" kind)])
+    in
+    create ~code:Error_code.ImplementAbstract ~claim ~reasons ~quickfixes ()
 
   let abstract_member_in_concrete_class
       ~member_pos ~class_name_pos ~is_final member_kind member_name =
@@ -5152,77 +4302,61 @@ end = struct
                 "") );
         ]
     in
-    ( Error_code.AbstractMemberInConcreteClass,
-      claim,
-      reasons,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.AbstractMemberInConcreteClass ~claim ~reasons ()
 
   let generic_static pos x =
-    ( Error_code.GenericStatic,
-      lazy
-        ( pos,
-          "This static variable cannot use the type parameter "
-          ^ Markdown_lite.md_codify x
-          ^ "." ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.GenericStatic
+      ~claim:
+        (lazy
+          ( pos,
+            "This static variable cannot use the type parameter "
+            ^ Markdown_lite.md_codify x
+            ^ "." ))
+      ()
 
   let object_string pos1 pos2 =
-    ( Error_code.ObjectString,
-      lazy (pos1, "You cannot use this object as a string"),
-      lazy [(pos2, "This object doesn't implement `__toString`")],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    let claim = lazy (pos1, "You cannot use this object as a string")
+    and reasons = lazy [(pos2, "This object doesn't implement `__toString`")] in
+    create ~code:Error_code.ObjectString ~claim ~reasons ()
 
   let object_string_deprecated pos =
-    ( Error_code.ObjectString,
-      lazy
-        ( pos,
-          "You cannot use this object as a string\nImplicit conversions of Stringish objects to string are deprecated."
-        ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.ObjectString
+      ~claim:
+        (lazy
+          ( pos,
+            "You cannot use this object as a string\nImplicit conversions of Stringish objects to string are deprecated."
+          ))
+      ()
 
   let cyclic_typedef def_pos use_pos =
-    ( Error_code.CyclicTypedef,
-      lazy (def_pos, "Cyclic type definition"),
-      lazy [(use_pos, "Cyclic use is here")],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    let claim = lazy (def_pos, "Cyclic type definition")
+    and reasons = lazy [(use_pos, "Cyclic use is here")] in
+    create ~code:Error_code.CyclicTypedef ~claim ~reasons ()
 
   let require_args_reify arg_pos def_pos =
-    ( Error_code.RequireArgsReify,
+    let claim =
       lazy
         ( arg_pos,
           "All type arguments must be specified because a type parameter is reified"
-        ),
-      lazy [(def_pos, "Definition is here")],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        )
+    and reasons = lazy [(def_pos, "Definition is here")] in
+    create ~code:Error_code.RequireArgsReify ~claim ~reasons ()
 
   let require_generic_explicit arg_pos def_pos def_name =
-    ( Error_code.RequireGenericExplicit,
+    let claim =
       lazy
         ( arg_pos,
           "Illegal wildcard (`_`): generic type parameter "
           ^ Markdown_lite.md_codify def_name
-          ^ " must be specified explicitly" ),
-      lazy [(def_pos, "Definition is here")],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+          ^ " must be specified explicitly" )
+    and reasons = lazy [(def_pos, "Definition is here")] in
+    create ~code:Error_code.RequireGenericExplicit ~claim ~reasons ()
 
   let invalid_reified_argument hint_pos def_name def_pos arg_info =
-    let reason =
+    let claim = lazy (hint_pos, "Invalid reified hint")
+    and reasons =
       Lazy.map arg_info ~f:(fun arg_info ->
           let (arg_pos, arg_kind) = List.hd_exn arg_info in
           [
@@ -5233,25 +4367,20 @@ end = struct
             (def_pos, Markdown_lite.md_codify def_name ^ " is reified");
           ])
     in
-    ( Error_code.InvalidReifiedArgument,
-      lazy (hint_pos, "Invalid reified hint"),
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.InvalidReifiedArgument ~claim ~reasons ()
 
   let invalid_reified_argument_reifiable arg_pos def_name def_pos ty_pos ty_msg
       =
-    ( Error_code.InvalidReifiedArgument,
-      lazy (arg_pos, "PHP arrays cannot be used as a reified type argument"),
+    let claim =
+      lazy (arg_pos, "PHP arrays cannot be used as a reified type argument")
+    and reasons =
       lazy
         [
           (ty_pos, String.capitalize ty_msg);
           (def_pos, Markdown_lite.md_codify def_name ^ " is reified");
-        ],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        ]
+    in
+    create ~code:Error_code.InvalidReifiedArgument ~claim ~reasons ()
 
   let new_class_reified pos class_type suggested_class =
     let claim =
@@ -5269,95 +4398,82 @@ end = struct
              class_type
              suggestion ))
     in
-    ( Error_code.NewClassReified,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.NewClassReified ~claim ()
 
   let class_get_reified pos =
-    ( Error_code.ClassGetReified,
-      lazy (pos, "Cannot access static properties on reified generics"),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.ClassGetReified
+      ~claim:(lazy (pos, "Cannot access static properties on reified generics"))
+      ()
 
   let static_meth_with_class_reified_generic meth_pos generic_pos =
-    ( Error_code.StaticMethWithClassReifiedGeneric,
+    let claim =
       lazy
         ( meth_pos,
           "Static methods cannot use generics reified at the class level. Try reifying them at the static method itself."
-        ),
+        )
+    and reasons =
       lazy
         [
           ( Pos_or_decl.of_raw_pos generic_pos,
             "Class-level reified generic used here." );
-        ],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        ]
+    in
+    create ~code:Error_code.StaticMethWithClassReifiedGeneric ~claim ~reasons ()
 
   let consistent_construct_reified pos =
-    ( Error_code.ConsistentConstructReified,
-      lazy
-        ( pos,
-          "This class or one of its ancestors is annotated with `<<__ConsistentConstruct>>`. It cannot have reified generics."
-        ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.ConsistentConstructReified
+      ~claim:
+        (lazy
+          ( pos,
+            "This class or one of its ancestors is annotated with `<<__ConsistentConstruct>>`. It cannot have reified generics."
+          ))
+      ()
 
   let bad_function_pointer_construction pos =
-    ( Error_code.BadFunctionPointerConstruction,
-      lazy (pos, "Function pointers must be explicitly named"),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.BadFunctionPointerConstruction
+      ~claim:(lazy (pos, "Function pointers must be explicitly named"))
+      ()
 
   let reified_generics_not_allowed pos =
-    ( Error_code.InvalidReifiedFunctionPointer,
-      lazy
-        ( pos,
-          "Creating function pointers with reified generics is not currently allowed"
-        ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.InvalidReifiedFunctionPointer
+      ~claim:
+        (lazy
+          ( pos,
+            "Creating function pointers with reified generics is not currently allowed"
+          ))
+      ()
 
   let new_without_newable pos name =
-    ( Error_code.NewWithoutNewable,
-      lazy
-        ( pos,
-          Markdown_lite.md_codify name
-          ^ " cannot be used with `new` because it does not have the `<<__Newable>>` attribute"
-        ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.NewWithoutNewable
+      ~claim:
+        (lazy
+          ( pos,
+            Markdown_lite.md_codify name
+            ^ " cannot be used with `new` because it does not have the `<<__Newable>>` attribute"
+          ))
+      ()
 
   let discarded_awaitable pos1 pos2 =
-    ( Error_code.DiscardedAwaitable,
+    let claim =
       lazy
         ( pos1,
           "This expression is of type `Awaitable`, but it's "
           ^ "either being discarded or used in a dangerous way before "
-          ^ "being awaited" ),
-      lazy [(pos2, "This is why I think it is `Awaitable`")],
-      lazy Explanation.empty,
-      [ (* We add a quickfix for this error in Quickfixes_from_refactors *) ],
-      User_error_flags.empty )
+          ^ "being awaited" )
+    and reasons = lazy [(pos2, "This is why I think it is `Awaitable`")] in
+    (* We add a quickfix for this error in Quickfixes_from_refactors *)
+    create ~code:Error_code.DiscardedAwaitable ~claim ~reasons ()
 
   let elt_type_to_string = function
     | `meth -> "method"
     | `prop -> "property"
 
-  let unknown_object_member pos s elt r =
+  let unknown_object_member pos s elt reasons =
     let claim =
       lazy
         (let elt = elt_type_to_string elt in
@@ -5369,12 +4485,7 @@ end = struct
          in
          (pos, msg))
     in
-    ( Error_code.UnknownObjectMember,
-      claim,
-      r,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.UnknownObjectMember ~claim ~reasons ()
 
   let non_class_member pos1 s elt ty pos2 =
     let claim =
@@ -5388,27 +4499,21 @@ end = struct
              ty
          in
          (pos1, msg))
-    in
-    ( Error_code.NonClassMember,
-      claim,
-      lazy [(pos2, "Definition is here")],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    and reasons = lazy [(pos2, "Definition is here")] in
+    create ~code:Error_code.NonClassMember ~claim ~reasons ()
 
-  let null_container p null_witness =
-    ( Error_code.NullContainer,
+  let null_container p reasons =
+    let claim =
       lazy
         ( p,
           "You are trying to access an element of this container"
-          ^ " but the container could be `null`. " ),
-      null_witness,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+          ^ " but the container could be `null`. " )
+    in
+    create ~code:Error_code.NullContainer ~claim ~reasons ()
 
   let declared_covariant pos1 pos2 emsg =
-    let reason =
+    let claim = lazy (pos2, "Illegal usage of a covariant type parameter")
+    and reasons =
       Lazy.map emsg ~f:(fun emsg ->
           [
             ( Pos_or_decl.of_raw_pos pos1,
@@ -5416,15 +4521,11 @@ end = struct
           ]
           @ List.map emsg ~f:(Message.map ~f:Pos_or_decl.of_raw_pos))
     in
-    ( Error_code.DeclaredCovariant,
-      lazy (pos2, "Illegal usage of a covariant type parameter"),
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.DeclaredCovariant ~claim ~reasons ()
 
   let declared_contravariant pos1 pos2 emsg =
-    let reason =
+    let claim = lazy (pos2, "Illegal usage of a contravariant type parameter")
+    and reasons =
       Lazy.map emsg ~f:(fun emsg ->
           [
             ( Pos_or_decl.of_raw_pos pos1,
@@ -5432,43 +4533,37 @@ end = struct
           ]
           @ List.map emsg ~f:(Message.map ~f:Pos_or_decl.of_raw_pos))
     in
-    ( Error_code.DeclaredContravariant,
-      lazy (pos2, "Illegal usage of a contravariant type parameter"),
-      reason,
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.DeclaredContravariant ~claim ~reasons ()
 
   let static_property_type_generic_param generic_pos class_pos var_type_pos =
-    ( Error_code.ClassVarTypeGenericParam,
+    let claim =
       lazy
         ( generic_pos,
           "A generic parameter cannot be used in the type of a static property"
-        ),
+        )
+    and reasons =
       lazy
         [
           ( var_type_pos,
             "This is where the type of the static property was declared" );
           (class_pos, "This is the class containing the static property");
-        ],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+        ]
+    in
+    create ~code:Error_code.ClassVarTypeGenericParam ~claim ~reasons ()
 
   let contravariant_this pos class_name tp =
-    ( Error_code.ContravariantThis,
-      lazy
-        ( pos,
-          "The `this` type cannot be used in this "
-          ^ "contravariant position because its enclosing class "
-          ^ Markdown_lite.md_codify class_name
-          ^ " "
-          ^ "is final and has a variant type parameter "
-          ^ Markdown_lite.md_codify tp ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.ContravariantThis
+      ~claim:
+        (lazy
+          ( pos,
+            "The `this` type cannot be used in this "
+            ^ "contravariant position because its enclosing class "
+            ^ Markdown_lite.md_codify class_name
+            ^ " "
+            ^ "is final and has a variant type parameter "
+            ^ Markdown_lite.md_codify tp ))
+      ()
 
   let cyclic_typeconst pos sl =
     let claim =
@@ -5479,12 +4574,7 @@ end = struct
          in
          (pos, "Cyclic type constant:\n  " ^ String.concat ~sep:" -> " sl))
     in
-    ( Error_code.CyclicTypeconst,
-      claim,
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create ~code:Error_code.CyclicTypeconst ~claim ()
 
   let array_get_with_optional_field
       ~(field_pos : Pos.t) ~(recv_pos : Pos.t) ~decl_pos name =
@@ -5511,101 +4601,99 @@ end = struct
           ]
       in
       [Quickfix.make ~title:"Change to `Shapes::idx()`" ~edits ~hint_styles:[]]
-    in
-    ( Error_code.ArrayGetWithOptionalField,
+    and claim =
       lazy
         ( field_pos,
           Printf.sprintf
             "The field %s may not be present in this shape. Use `??` or `Shapes::idx()` instead."
-            (Markdown_lite.md_codify name) ),
-      lazy [(decl_pos, "This is where the field was declared as optional.")],
-      lazy Explanation.empty,
-      quickfixes,
-      User_error_flags.empty )
+            (Markdown_lite.md_codify name) )
+    and reasons =
+      lazy [(decl_pos, "This is where the field was declared as optional.")]
+    in
+    create
+      ~code:Error_code.ArrayGetWithOptionalField
+      ~claim
+      ~reasons
+      ~quickfixes
+      ()
 
   let mutating_const_property pos =
-    ( Error_code.AssigningToConst,
-      lazy (pos, "Cannot mutate a `__Const` property"),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.AssigningToConst
+      ~claim:(lazy (pos, "Cannot mutate a `__Const` property"))
+      ()
 
   let self_const_parent_not pos =
-    ( Error_code.SelfConstParentNot,
-      lazy (pos, "A `__Const` class may only extend other `__Const` classes"),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.SelfConstParentNot
+      ~claim:
+        (lazy
+          (pos, "A `__Const` class may only extend other `__Const` classes"))
+      ()
 
   let unexpected_ty_in_tast pos ~actual_ty ~expected_ty =
-    ( Error_code.UnexpectedTy,
-      lazy
-        ( pos,
-          "Unexpected type in TAST: expected "
-          ^ Markdown_lite.md_codify expected_ty
-          ^ ", got "
-          ^ Markdown_lite.md_codify actual_ty ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.UnexpectedTy
+      ~claim:
+        (lazy
+          ( pos,
+            "Unexpected type in TAST: expected "
+            ^ Markdown_lite.md_codify expected_ty
+            ^ ", got "
+            ^ Markdown_lite.md_codify actual_ty ))
+      ()
 
   let call_lvalue pos =
-    ( Error_code.CallLvalue,
-      lazy
-        ( pos,
-          "Array updates cannot be applied to function results. Use a local variable instead."
-        ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.CallLvalue
+      ~claim:
+        (lazy
+          ( pos,
+            "Array updates cannot be applied to function results. Use a local variable instead."
+          ))
+      ()
 
   let unsafe_cast_await pos =
-    ( Error_code.UnsafeCastAwait,
-      lazy
-        (pos, "UNSAFE_CAST cannot be used as the operand of an await operation"),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.UnsafeCastAwait
+      ~claim:
+        (lazy
+          ( pos,
+            "UNSAFE_CAST cannot be used as the operand of an await operation" ))
+      ()
 
   let match_not_exhaustive pos ty =
     let backticks ty = "`" ^ ty ^ "`" in
-    ( Error_code.MatchNotExhaustive,
-      lazy
-        ( pos,
-          "This match statement is not exhaustive: there is no arm matching values of type "
-          ^ backticks ty ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.MatchNotExhaustive
+      ~claim:
+        (lazy
+          ( pos,
+            "This match statement is not exhaustive: there is no arm matching values of type "
+            ^ backticks ty ))
+      ()
 
   let match_on_unsupported_type pos expr_ty unsupported_tys =
     let backticks ty = "`" ^ ty ^ "`" in
-    ( Error_code.MatchOnUnsupportedType,
-      lazy
-        ( pos,
-          "This expression has type "
-          ^ backticks expr_ty
-          ^ ", which is not supported in match statements"
-          ^
-          match unsupported_tys with
-          | [] -> ""
-          | [ty] when String.equal ty expr_ty -> ""
-          | [ty] -> " because it contains the type " ^ backticks ty
-          | _ ->
-            " because it contains the following types: "
-            ^ (unsupported_tys
-              |> List.map ~f:backticks
-              |> String.concat ~sep:", ") ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.MatchOnUnsupportedType
+      ~claim:
+        (lazy
+          ( pos,
+            "This expression has type "
+            ^ backticks expr_ty
+            ^ ", which is not supported in match statements"
+            ^
+            match unsupported_tys with
+            | [] -> ""
+            | [ty] when String.equal ty expr_ty -> ""
+            | [ty] -> " because it contains the type " ^ backticks ty
+            | _ ->
+              " because it contains the following types: "
+              ^ (unsupported_tys
+                |> List.map ~f:backticks
+                |> String.concat ~sep:", ") ))
+      ()
 
   let class_const_to_string pos cid_str =
     let cid_str = Utils.strip_ns cid_str in
@@ -5618,35 +4706,31 @@ end = struct
           ~new_text:nameof
           pos;
       ]
-    in
-    ( Error_code.ClassPointerToString,
+    and claim =
       lazy
         ( pos,
           "Using `"
           ^ cid_str
           ^ "::class` in this position will trigger an implicit runtime conversion to string, please use "
-          ^ nameof_md ),
-      lazy [],
-      lazy Explanation.empty,
-      quickfixes,
-      User_error_flags.empty )
+          ^ nameof_md )
+    in
+    create ~code:Error_code.ClassPointerToString ~claim ~quickfixes ()
 
   let class_pointer_to_string pos ty =
     let class_to_classname = "HH\\class_to_classname" in
     let class_to_classname_md = Markdown_lite.md_codify class_to_classname in
-    ( Error_code.ClassPointerToString,
-      lazy
-        ( pos,
-          "Using "
-          ^ ty
-          ^ " in this position will trigger an implicit runtime conversion to string. "
-          ^ "You may use "
-          ^ class_to_classname_md
-          ^ " to get the class name as a string." ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.ClassPointerToString
+      ~claim:
+        (lazy
+          ( pos,
+            "Using "
+            ^ ty
+            ^ " in this position will trigger an implicit runtime conversion to string. "
+            ^ "You may use "
+            ^ class_to_classname_md
+            ^ " to get the class name as a string." ))
+      ()
 
   let string_to_class_pointer pos cls_name =
     let cls_name = Utils.strip_ns cls_name in
@@ -5654,20 +4738,19 @@ end = struct
     let classname_ty_md = Markdown_lite.md_codify classname_ty in
     let class_ptr_ty = Printf.sprintf "class<%s>" cls_name in
     let class_ptr_ty_md = Markdown_lite.md_codify class_ptr_ty in
-    ( Error_code.ClassPointerToString,
-      lazy
-        ( pos,
-          "It is no longer allowed to use a "
-          ^ classname_ty_md
-          ^ " in this position. Please use a "
-          ^ class_ptr_ty_md
-          ^ " instead." ),
-      lazy [],
-      lazy Explanation.empty,
-      [],
-      User_error_flags.empty )
+    create
+      ~code:Error_code.ClassPointerToString
+      ~claim:
+        (lazy
+          ( pos,
+            "It is no longer allowed to use a "
+            ^ classname_ty_md
+            ^ " in this position. Please use a "
+            ^ class_ptr_ty_md
+            ^ " instead." ))
+      ()
 
-  let to_error t ~env : error =
+  let to_error t ~env =
     let open Typing_error.Primary in
     match t with
     | Coeffect err -> Eval_coeffect.to_error err ~env
@@ -6267,11 +5350,30 @@ end = struct
 end
 
 module rec Eval_error : sig
+  type t = {
+    code: Error_code.t;
+    claim: Pos.t Message.t Lazy.t;
+    reasons: Pos_or_decl.t Message.t list Lazy.t;
+    explanation: Pos_or_decl.t Explanation.t Lazy.t;
+    quickfixes: Pos.t Quickfix.t list;
+  }
+
+  type partial = {
+    code_opt: Error_code.t option;
+    claim: Pos.t Message.t Lazy.t;
+    reasons_opt: Pos_or_decl.t Message.t list Lazy.t option;
+    explanation_opt: Pos_or_decl.t Explanation.t Lazy.t option;
+    quickfixes_opt: Pos.t Quickfix.t list option;
+  }
+
+  val of_eval_secondary_opt :
+    Pos_or_decl.ctx -> Pos.t -> Eval_secondary.t -> t option
+
   val eval :
     Typing_error.Error.t ->
     env:Typing_env_types.env ->
     current_span:Pos.t ->
-    error Eval_result.t
+    t Eval_result.t
 
   val to_user_error :
     Typing_error.Error.t ->
@@ -6279,18 +5381,55 @@ module rec Eval_error : sig
     current_span:Pos.t ->
     (Pos.t, Pos_or_decl.t) User_error.t Eval_result.t
 end = struct
+  type t = {
+    code: Error_code.t;
+    claim: Pos.t Message.t Lazy.t;
+    reasons: Pos_or_decl.t Message.t list Lazy.t;
+    explanation: Pos_or_decl.t Explanation.t Lazy.t;
+    quickfixes: Pos.t Quickfix.t list;
+  }
+
+  type partial = {
+    code_opt: Error_code.t option;
+    claim: Pos.t Message.t Lazy.t;
+    reasons_opt: Pos_or_decl.t Message.t list Lazy.t option;
+    explanation_opt: Pos_or_decl.t Explanation.t Lazy.t option;
+    quickfixes_opt: Pos.t Quickfix.t list option;
+  }
+
+  let of_eval_primary Eval_primary.{ code; claim; reasons; quickfixes } =
+    { code; claim; reasons; quickfixes; explanation = lazy Explanation.empty }
+
+  let of_eval_secondary_opt
+      ctx current_span Eval_secondary.{ code; reasons; explanation } =
+    match Lazy.force reasons with
+    | (pos, msg) :: rest as reasons ->
+      let (claim, reasons) =
+        match
+          Pos_or_decl.fill_in_filename_if_in_current_decl
+            ~current_decl_and_file:ctx
+            pos
+        with
+        | Some pos -> (lazy (pos, msg), rest)
+        | _ ->
+          Common.wrap_error_in_different_file
+            ~current_file:ctx.Pos_or_decl.file
+            ~current_span
+            reasons
+      in
+      Some { code; claim; reasons = lazy reasons; explanation; quickfixes = [] }
+    | _ -> None
+
   let eval t ~env ~current_span =
     let open Typing_error.Error in
     let rec aux ~k = function
       | Primary base ->
-        k @@ Eval_result.single @@ Eval_primary.to_error base ~env
+        k
+        @@ Eval_result.single
+             (of_eval_primary @@ Eval_primary.to_error base ~env)
       | With_code (t, code) ->
         aux t ~k:(fun res ->
-            k
-            @@ Eval_result.map
-                 res
-                 ~f:(fun (_, claim, reason, explanation, qfx, flags) ->
-                   (code, claim, reason, explanation, qfx, flags)))
+            k @@ Eval_result.map res ~f:(fun t -> { t with code }))
       | Intersection ts -> auxs ~k:(fun xs -> k @@ Eval_result.intersect xs) ts
       | Union ts -> auxs ~k:(fun xs -> k @@ Eval_result.union xs) ts
       | Multiple ts -> auxs ~k:(fun xs -> k @@ Eval_result.multiple xs) ts
@@ -6299,34 +5438,31 @@ end = struct
             k
             @@ Eval_result.bind
                  t
-                 ~f:(fun (code, claim, reasons, explanation, quickfixes, flags)
+                 ~f:(fun
+                      Eval_error.
+                        { code; claim; reasons; explanation; quickfixes }
                     ->
                    Eval_result.single
                    @@ Eval_callback.apply
+                        Eval_error.
+                          {
+                            claim;
+                            code_opt = Some code;
+                            reasons_opt = Some reasons;
+                            explanation_opt = Some explanation;
+                            quickfixes_opt = Some quickfixes;
+                          }
                         cb
-                        ~env
-                        ~code
-                        ~claim
-                        ~reasons
-                        ~explanation
-                        ~flags
-                        ~quickfixes))
+                        ~env))
       | Apply_reasons (cb, snd_err) ->
         k
-        @@ Eval_result.bind ~f:(fun (code, reasons, explanation, flags) ->
-               Eval_reasons_callback.apply_help
-                 cb
-                 ~code
-                 ~reasons
-                 ~explanation
-                 ~flags
-                 ~env
-                 ~current_span)
+        @@ Eval_result.bind ~f:(fun eval_snd ->
+               Eval_reasons_callback.apply_help eval_snd cb ~env ~current_span)
         @@ Eval_secondary.eval snd_err ~env ~current_span
       | Assert_in_current_decl (snd_err, ctx) ->
         k
         @@ Eval_result.bind ~f:(fun e ->
-               Eval_result.of_option @@ Common.eval_assert ctx current_span e)
+               Eval_result.of_option @@ of_eval_secondary_opt ctx current_span e)
         @@ Eval_secondary.eval snd_err ~env ~current_span
     and auxs ~k = function
       | [] -> k []
@@ -6336,7 +5472,7 @@ end = struct
     aux ~k:Fn.id t
 
   let make_error
-      (code, claim, reasons, explanation, quickfixes, flags)
+      { code; claim; reasons; explanation; quickfixes }
       ~custom_msgs
       ~function_pos =
     User_error.make_err
@@ -6344,7 +5480,6 @@ end = struct
       (Lazy.force claim)
       (Lazy.force reasons)
       (Lazy.force explanation)
-      ~flags
       ~quickfixes
       ~custom_msgs
       ~function_pos
@@ -6379,16 +5514,28 @@ end = struct
 end
 
 and Eval_secondary : sig
+  type t = {
+    code: Error_code.t;
+    reasons: Pos_or_decl.t Message.t list Lazy.t;
+    explanation: Pos_or_decl.t Explanation.t Lazy.t;
+  }
+
   val eval :
     Typing_error.Secondary.t ->
     env:Typing_env_types.env ->
     current_span:Pos.t ->
-    (Error_code.t
-    * Pos_or_decl.t Message.t list Lazy.t
-    * Pos_or_decl.t Explanation.t Lazy.t
-    * User_error_flags.t)
-    Eval_result.t
+    t Eval_result.t
 end = struct
+  type t = {
+    code: Error_code.t;
+    reasons: Pos_or_decl.t Message.t list Lazy.t;
+    explanation: Pos_or_decl.t Explanation.t Lazy.t;
+  }
+
+  let create
+      ~code ?(reasons = lazy []) ?(explanation = lazy Explanation.empty) () =
+    { code; reasons; explanation }
+
   let fun_too_many_args pos decl_pos actual expected =
     let reasons =
       lazy
@@ -6401,10 +5548,7 @@ end = struct
           (decl_pos, "Because of this definition");
         ]
     in
-    ( Error_code.FunTooManyArgs,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.FunTooManyArgs ~reasons ()
 
   let fun_too_few_args pos decl_pos actual expected =
     let reasons =
@@ -6418,10 +5562,7 @@ end = struct
           (decl_pos, "Because of this definition");
         ]
     in
-    ( Error_code.FunTooFewArgs,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.FunTooFewArgs ~reasons ()
 
   let fun_unexpected_nonvariadic pos decl_pos =
     let reasons =
@@ -6431,10 +5572,7 @@ end = struct
           (decl_pos, "Because of this definition");
         ]
     in
-    ( Error_code.FunUnexpectedNonvariadic,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.FunUnexpectedNonvariadic ~reasons ()
 
   let fun_variadicity_hh_vs_php56 pos decl_pos =
     let reasons =
@@ -6444,10 +5582,7 @@ end = struct
           (decl_pos, "Because of this definition");
         ]
     in
-    ( Error_code.FunVariadicityHhVsPhp56,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.FunVariadicityHhVsPhp56 ~reasons ()
 
   let type_arity_mismatch pos actual decl_pos expected =
     let reasons =
@@ -6457,10 +5592,7 @@ end = struct
           (decl_pos, "This one has " ^ string_of_int expected);
         ]
     in
-    ( Error_code.TypeArityMismatch,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.TypeArityMismatch ~reasons ()
 
   let describe_coeffect env ty =
     lazy
@@ -6641,14 +5773,11 @@ end = struct
     in
     (reasons, explanation)
 
-  let subtyping_error is_coeffect stripped_existential ~ty_sub ~ty_sup env =
+  let subtyping_error is_coeffect ~ty_sub ~ty_sup env =
     let (reasons, explanation) =
       explain_subtype_failure is_coeffect ~ty_sub ~ty_sup env
     in
-    ( Error_code.UnifyError,
-      reasons,
-      explanation,
-      User_error_flags.create ~stripped_existential () )
+    create ~code:Error_code.UnifyError ~reasons ~explanation ()
 
   let violated_constraint cstrs is_coeffect ~ty_sub ~ty_sup env =
     let (reasons, explanation) =
@@ -6669,10 +5798,7 @@ end = struct
           let msgs = List.concat_map ~f cstrs in
           msgs @ reasons)
     in
-    ( Error_code.TypeConstraintViolation,
-      reasons,
-      explanation,
-      User_error_flags.empty )
+    create ~code:Error_code.TypeConstraintViolation ~reasons ~explanation ()
 
   let concrete_const_interface_override pos parent_pos name parent_origin =
     let reasons =
@@ -6689,10 +5815,7 @@ end = struct
             ^ "." );
         ]
     in
-    ( Error_code.ConcreteConstInterfaceOverride,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.ConcreteConstInterfaceOverride ~reasons ()
 
   let interface_or_trait_const_multiple_defs
       pos origin parent_pos parent_origin name =
@@ -6716,10 +5839,7 @@ end = struct
              ^ "." );
          ])
     in
-    ( Error_code.ConcreteConstInterfaceOverride,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.ConcreteConstInterfaceOverride ~reasons ()
 
   let interface_typeconst_multiple_defs
       pos parent_pos name origin parent_origin is_abstract =
@@ -6752,10 +5872,7 @@ end = struct
              ^ "." );
          ])
     in
-    ( Error_code.ConcreteConstInterfaceOverride,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.ConcreteConstInterfaceOverride ~reasons ()
 
   let missing_field pos name decl_pos reason_sub reason_super env =
     let reasons =
@@ -6784,7 +5901,7 @@ end = struct
       | GlobalOptions.Debug ->
         lazy Typing_reason.(debug_reason ~sub:reason_sub ~super:reason_super)
     in
-    (Error_code.MissingField, reasons, explanation, User_error_flags.empty)
+    create ~code:Error_code.MissingField ~reasons ~explanation ()
 
   let shape_fields_unknown pos decl_pos =
     let reasons =
@@ -6798,10 +5915,7 @@ end = struct
           );
         ]
     in
-    ( Error_code.ShapeFieldsUnknown,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.ShapeFieldsUnknown ~reasons ()
 
   let abstract_tconst_not_allowed pos decl_pos tconst_name =
     let reasons =
@@ -6817,10 +5931,7 @@ end = struct
               (Markdown_lite.md_codify tconst_name) );
         ]
     in
-    ( Error_code.AbstractTconstNotAllowed,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.AbstractTconstNotAllowed ~reasons ()
 
   let invalid_destructure pos decl_pos ty_name =
     let reasons =
@@ -6832,10 +5943,7 @@ end = struct
           (decl_pos, "This is " ^ Markdown_lite.md_codify @@ Lazy.force ty_name);
         ]
     in
-    ( Error_code.InvalidDestructure,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.InvalidDestructure ~reasons ()
 
   let unpack_array_required_argument pos decl_pos =
     let reasons =
@@ -6847,10 +5955,7 @@ end = struct
           (decl_pos, "Definition is here");
         ]
     in
-    ( Error_code.SplatArrayRequired,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.SplatArrayRequired ~reasons ()
 
   let unpack_array_variadic_argument pos decl_pos =
     let reasons =
@@ -6862,10 +5967,7 @@ end = struct
           (decl_pos, "Definition is here");
         ]
     in
-    ( Error_code.SplatArrayRequired,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.SplatArrayRequired ~reasons ()
 
   let overriding_prop_const_mismatch pos is_const parent_pos =
     let reasons =
@@ -6878,10 +5980,7 @@ end = struct
          in
          [(pos, msg); (parent_pos, reason_msg)])
     in
-    ( Error_code.OverridingPropConstMismatch,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.OverridingPropConstMismatch ~reasons ()
 
   let visibility_extends pos vis parent_pos parent_vis =
     let reasons =
@@ -6891,10 +5990,7 @@ end = struct
           (parent_pos, Markdown_lite.md_codify parent_vis ^ " was expected");
         ]
     in
-    ( Error_code.VisibilityExtends,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.VisibilityExtends ~reasons ()
 
   let visibility_override_internal pos module_name parent_module parent_pos =
     let reasons =
@@ -6916,17 +6012,11 @@ end = struct
                parent_module );
          ])
     in
-    ( Error_code.ModuleError,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.ModuleError ~reasons ()
 
   let missing_constructor pos =
     let reasons = lazy [(pos, "The constructor is not implemented")] in
-    ( Error_code.MissingConstructor,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.MissingConstructor ~reasons ()
 
   let accept_disposable_invariant pos decl_pos =
     let reasons =
@@ -6936,10 +6026,7 @@ end = struct
           (decl_pos, "This parameter is not marked `<<__AcceptDisposable>>`");
         ]
     in
-    ( Error_code.AcceptDisposableInvariant,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.AcceptDisposableInvariant ~reasons ()
 
   let required_field_is_optional pos name decl_pos def_pos r_sub r_super env =
     let reasons =
@@ -6968,10 +6055,7 @@ end = struct
       | GlobalOptions.Debug ->
         lazy Typing_reason.(debug_reason ~sub:r_sub ~super:r_super)
     in
-    ( Error_code.RequiredFieldIsOptional,
-      reasons,
-      explanation,
-      User_error_flags.empty )
+    create ~code:Error_code.RequiredFieldIsOptional ~reasons ~explanation ()
 
   let return_disposable_mismatch pos_sub is_marked_return_disposable pos_super =
     let reasons =
@@ -6986,10 +6070,7 @@ end = struct
          in
          [(pos_super, msg); (pos_sub, reason_msg)])
     in
-    ( Error_code.ReturnDisposableMismatch,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.ReturnDisposableMismatch ~reasons ()
 
   let override_final pos parent_pos =
     let reasons =
@@ -6999,10 +6080,7 @@ end = struct
           (parent_pos, "It was declared as final");
         ]
     in
-    ( Error_code.OverrideFinal,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.OverrideFinal ~reasons ()
 
   let override_async pos parent_pos =
     let reasons =
@@ -7012,10 +6090,7 @@ end = struct
           (parent_pos, "It was declared as async");
         ]
     in
-    ( Error_code.OverrideAsync,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.OverrideAsync ~reasons ()
 
   let override_lsb pos member_name parent_pos =
     let reasons =
@@ -7028,10 +6103,7 @@ end = struct
           (parent_pos, "This is being overridden");
         ]
     in
-    ( Error_code.OverrideLSB,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.OverrideLSB ~reasons ()
 
   let multiple_concrete_defs pos origin name parent_pos parent_origin class_name
       =
@@ -7060,17 +6132,11 @@ end = struct
              ^ " with a compatible signature." );
          ])
     in
-    ( Error_code.MultipleConcreteDefs,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.MultipleConcreteDefs ~reasons ()
 
   let cyclic_enum_constraint pos =
     let reasons = lazy [(pos, "Cyclic enum constraint")] in
-    ( Error_code.CyclicEnumConstraint,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.CyclicEnumConstraint ~reasons ()
 
   let inoutness_mismatch pos decl_pos =
     let reasons =
@@ -7080,10 +6146,7 @@ end = struct
           (decl_pos, "It is incompatible with a normal parameter");
         ]
     in
-    ( Error_code.InoutnessMismatch,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.InoutnessMismatch ~reasons ()
 
   let bad_lateinit_override pos parent_pos parent_is_lateinit =
     let reasons =
@@ -7102,10 +6165,7 @@ end = struct
          ])
     in
 
-    ( Error_code.BadLateInitOverride,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.BadLateInitOverride ~reasons ()
 
   let bad_xhp_attr_required_override pos parent_pos parent_tag tag =
     let reasons =
@@ -7117,10 +6177,7 @@ end = struct
           );
         ]
     in
-    ( Error_code.BadXhpAttrRequiredOverride,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.BadXhpAttrRequiredOverride ~reasons ()
 
   let coeffect_subtyping pos cap pos_expected cap_expected =
     let reasons =
@@ -7131,10 +6188,7 @@ end = struct
           (pos, "But got a function that requires " ^ Lazy.force cap);
         ]
     in
-    ( Error_code.SubtypeCoeffects,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.SubtypeCoeffects ~reasons ()
 
   let not_sub_dynamic pos ty_name dynamic_part =
     let reasons =
@@ -7148,10 +6202,7 @@ end = struct
               );
             ])
     in
-    ( Error_code.UnifyError,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.UnifyError ~reasons ()
 
   let override_method_support_dynamic_type
       pos method_name parent_origin parent_pos =
@@ -7167,10 +6218,7 @@ end = struct
           (parent_pos, "Overridden method is defined here.");
         ]
     in
-    ( Error_code.ImplementsDynamic,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.ImplementsDynamic ~reasons ()
 
   let readonly_mismatch pos kind reason_sub reason_super =
     let reasons =
@@ -7186,10 +6234,7 @@ end = struct
            :: reason_sub
           @ reason_super))
     in
-    ( Error_code.ReadonlyMismatch,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.ReadonlyMismatch ~reasons ()
 
   let cross_package_mismatch pos reason_sub reason_super =
     let reasons =
@@ -7198,10 +6243,7 @@ end = struct
         reason_super >>= fun reason_super ->
         return (((pos, "Cross package mismatch") :: reason_sub) @ reason_super))
     in
-    ( Error_code.InvalidCrossPackage,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.InvalidCrossPackage ~reasons ()
 
   let typing_too_many_args pos decl_pos actual expected =
     let (code, claim, reasons) =
@@ -7212,7 +6254,7 @@ end = struct
         claim >>= fun x ->
         reasons >>= fun xs -> return (x :: xs))
     in
-    (code, reasons, lazy Explanation.empty, User_error_flags.empty)
+    create ~code ~reasons ()
 
   let typing_too_few_args pos decl_pos actual expected =
     let (code, claim, reasons) =
@@ -7223,7 +6265,7 @@ end = struct
         claim >>= fun x ->
         reasons >>= fun xs -> return (x :: xs))
     in
-    (code, reasons, lazy Explanation.empty, User_error_flags.empty)
+    create ~code ~reasons ()
 
   let non_object_member pos ctxt ty_name member_name kind decl_pos =
     let (code, claim, reasons) =
@@ -7240,13 +6282,13 @@ end = struct
         claim >>= fun x ->
         reasons >>= fun xs -> return (x :: xs))
     in
-    (code, reasons, lazy Explanation.empty, User_error_flags.empty)
+    create ~code ~reasons ()
 
   let rigid_tvar_escape pos name =
-    ( Error_code.RigidTVarEscape,
-      lazy [(pos, "Rigid type variable " ^ name ^ " is escaping")],
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    let reasons =
+      lazy [(pos, "Rigid type variable " ^ name ^ " is escaping")]
+    in
+    create ~code:Error_code.RigidTVarEscape ~reasons ()
 
   let smember_not_found pos kind member_name class_name class_pos hint =
     let (code, claim, reasons) =
@@ -7257,7 +6299,7 @@ end = struct
         claim >>= fun x ->
         reasons >>= fun xs -> return (x :: xs))
     in
-    (code, reasons, lazy Explanation.empty, User_error_flags.empty)
+    create ~code ~reasons ()
 
   let bad_method_override pos ~member_name =
     let member_name = Render.strip_ns member_name |> Markdown_lite.md_codify in
@@ -7270,10 +6312,7 @@ end = struct
               member_name );
         ]
     in
-    ( Error_code.BadMethodOverride,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.BadMethodOverride ~reasons ()
 
   let bad_member_override_not_subtype
       ~is_method
@@ -7340,10 +6379,7 @@ end = struct
               member_parent_type );
         ]
     in
-    ( Error_code.BadMethodOverride,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.BadMethodOverride ~reasons ()
 
   let bad_prop_override pos member_name =
     let reasons =
@@ -7355,10 +6391,7 @@ end = struct
             ^ " has the wrong type" );
         ]
     in
-    ( Error_code.BadMethodOverride,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.BadMethodOverride ~reasons ()
 
   let method_not_dynamically_callable pos parent_pos =
     let reasons =
@@ -7368,10 +6401,7 @@ end = struct
           (pos, "This method is **not**.");
         ]
     in
-    ( Error_code.BadMethodOverride,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.BadMethodOverride ~reasons ()
 
   let this_final pos_sub pos_super class_name =
     let reasons =
@@ -7381,20 +6411,17 @@ end = struct
          let message2 = "this might not be a " ^ n in
          [(pos_super, message1); (pos_sub, message2)])
     in
-    ( Error_code.ThisFinal,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.ThisFinal ~reasons ()
 
   let typeconst_concrete_concrete_override pos parent_pos =
-    ( Error_code.TypeconstConcreteConcreteOverride,
+    let reasons =
       lazy
         [
           (pos, "Cannot re-declare this type constant");
           (parent_pos, "Previously defined here");
-        ],
-      lazy Explanation.empty,
-      User_error_flags.empty )
+        ]
+    in
+    create ~code:Error_code.TypeconstConcreteConcreteOverride ~reasons ()
 
   let abstract_concrete_override pos parent_pos kind =
     let reasons =
@@ -7411,31 +6438,28 @@ end = struct
            (parent_pos, "Previously defined here");
          ])
     in
-    ( Error_code.AbstractConcreteOverride,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.AbstractConcreteOverride ~reasons ()
 
   let override_no_default_typeconst pos parent_pos =
-    ( Error_code.OverrideNoDefaultTypeconst,
+    let reasons =
       lazy
         [
           (pos, "This abstract type constant does not have a default type");
           ( parent_pos,
             "It cannot override an abstract type constant that has a default type"
           );
-        ],
-      lazy Explanation.empty,
-      User_error_flags.empty )
+        ]
+    in
+    create ~code:Error_code.OverrideNoDefaultTypeconst ~reasons ()
 
   let unsupported_refinement pos =
-    ( Error_code.UnsupportedRefinement,
-      lazy [(pos, "Unsupported refinement, only class types can be refined")],
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    let reasons =
+      lazy [(pos, "Unsupported refinement, only class types can be refined")]
+    in
+    create ~code:Error_code.UnsupportedRefinement ~reasons ()
 
   let missing_class_constant pos class_name const_name =
-    ( Error_code.SmemberNotFound,
+    let reasons =
       lazy
         [
           ( pos,
@@ -7443,13 +6467,13 @@ end = struct
               "Class %s has no constant %s"
               (Render.strip_ns class_name |> Markdown_lite.md_codify)
               (Markdown_lite.md_codify const_name) );
-        ],
-      lazy Explanation.empty,
-      User_error_flags.empty )
+        ]
+    in
+    create ~code:Error_code.SmemberNotFound ~reasons ()
 
   let invalid_refined_const_kind
       pos class_name const_name correct_kind wrong_kind =
-    ( Error_code.InvalidRefinedConstKind,
+    let reasons =
       lazy
         [
           ( pos,
@@ -7459,19 +6483,19 @@ end = struct
               (Render.strip_ns class_name |> Markdown_lite.md_codify)
               wrong_kind
               correct_kind );
-        ],
-      lazy Explanation.empty,
-      User_error_flags.empty )
+        ]
+    in
+    create ~code:Error_code.InvalidRefinedConstKind ~reasons ()
 
   let inexact_tconst_access pos id =
-    ( Error_code.InexactTConstAccess,
+    let reasons =
       lazy
         [
           (fst id, "Type member `" ^ snd id ^ "` cannot be accessed");
           (pos, "  on a loose refinement");
-        ],
-      lazy Explanation.empty,
-      User_error_flags.empty )
+        ]
+    in
+    create ~code:Error_code.InexactTConstAccess ~reasons ()
 
   let violated_refinement_constraint (kind, pos) =
     let kind =
@@ -7479,10 +6503,10 @@ end = struct
       | `As -> "`as` or `=`"
       | `Super -> "`super`"
     in
-    ( Error_code.UnifyError,
-      lazy [(pos, "This " ^ kind ^ " refinement constraint is violated")],
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    let reasons =
+      lazy [(pos, "This " ^ kind ^ " refinement constraint is violated")]
+    in
+    create ~code:Error_code.UnifyError ~reasons ()
 
   let label_unknown enum_name decl_pos most_similar =
     let reasons =
@@ -7502,10 +6526,7 @@ end = struct
           | None -> [])
         end
     in
-    ( Error_code.EnumClassLabelUnknown,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.EnumClassLabelUnknown ~reasons ()
 
   let needs_concrete_override pos parent_pos =
     let reasons =
@@ -7517,17 +6538,14 @@ end = struct
           (parent_pos, "Previously defined here");
         ]
     in
-    ( Error_code.NeedsConcreteOverride,
-      reasons,
-      lazy Explanation.empty,
-      User_error_flags.empty )
+    create ~code:Error_code.NeedsConcreteOverride ~reasons ()
 
   let eval t ~env ~current_span =
     let open Typing_error.Secondary in
     match t with
     | Of_error err ->
       Eval_result.map
-        ~f:(fun (code, claim, reasons, explanation, _quickfixes, flags) ->
+        ~f:(fun Eval_error.{ code; claim; reasons; explanation; _ } ->
           (* We discard quickfixes here because a secondary error
              can be in a decl and it doesn't make sense to quickfix a decl *)
           let reasons =
@@ -7536,7 +6554,7 @@ end = struct
               reasons >>= fun xs ->
               return (Message.map ~f:Pos_or_decl.of_raw_pos x :: xs))
           in
-          (code, reasons, explanation, flags))
+          { code; reasons; explanation })
       @@ Eval_error.eval err ~env ~current_span
     | Fun_too_many_args { pos; decl_pos; actual; expected } ->
       Eval_result.single (fun_too_many_args pos decl_pos actual expected)
@@ -7707,9 +6725,8 @@ end = struct
            ~member_parent_origin_type)
     | Bad_prop_override { pos; member_name } ->
       Eval_result.single (bad_prop_override pos member_name)
-    | Subtyping_error { ty_sub; ty_sup; is_coeffect; stripped_existential } ->
-      Eval_result.single
-        (subtyping_error is_coeffect stripped_existential ~ty_sub ~ty_sup env)
+    | Subtyping_error { ty_sub; ty_sup; is_coeffect } ->
+      Eval_result.single (subtyping_error is_coeffect ~ty_sub ~ty_sup env)
     | Method_not_dynamically_callable { pos; parent_pos } ->
       Eval_result.single (method_not_dynamically_callable pos parent_pos)
     | This_final { pos_sub; pos_super; class_name } ->
@@ -7745,15 +6762,10 @@ end
 
 and Eval_callback : sig
   val apply :
-    ?code:Error_code.t ->
-    ?reasons:Pos_or_decl.t Message.t list Lazy.t ->
-    ?explanation:Pos_or_decl.t Explanation.t Lazy.t ->
-    ?flags:User_error_flags.t ->
-    ?quickfixes:Pos.t Quickfix.t list ->
+    Eval_error.partial ->
     Typing_error.Callback.t ->
     env:Typing_env_types.env ->
-    claim:Pos.t Message.t Lazy.t ->
-    error
+    Eval_error.t
 end = struct
   type error_state = {
     code_opt: Error_code.t option;
@@ -7761,8 +6773,19 @@ end = struct
     reasons: Pos_or_decl.t Message.t list Lazy.t;
     explanation: Pos_or_decl.t Explanation.t Lazy.t;
     quickfixes: Pos.t Quickfix.t list;
-    flags_opt: User_error_flags.t option;
   }
+
+  let error_state_of_error_eval_partial
+      Eval_error.
+        { code_opt; claim; reasons_opt; explanation_opt; quickfixes_opt } =
+    {
+      code_opt;
+      claim_opt = Some claim;
+      reasons = Option.value reasons_opt ~default:(lazy []);
+      explanation =
+        Option.value explanation_opt ~default:(lazy Explanation.empty);
+      quickfixes = Option.value quickfixes_opt ~default:[];
+    }
 
   let rec eval t ~env ~st =
     let open Typing_error.Callback in
@@ -7771,20 +6794,19 @@ end = struct
       eff ();
       eval t ~env ~st
     | Always err ->
-      let (code, claim, reasons, explanation, quickfixes, flags) =
+      let Eval_primary.{ code; claim; reasons; quickfixes; _ } =
         Eval_primary.to_error err ~env
       in
-      (code, Some claim, reasons, explanation, quickfixes, Some flags)
+      (code, Some claim, reasons, lazy Explanation.empty, quickfixes)
     | Of_primary err ->
-      let (code, _claim, _reasons, _explanation, qfs, flags) =
+      let Eval_primary.{ code; quickfixes; _ } =
         Eval_primary.to_error err ~env
       in
       ( Option.value ~default:code st.code_opt,
         st.claim_opt,
         st.reasons,
         st.explanation,
-        qfs @ st.quickfixes,
-        Some flags )
+        quickfixes @ st.quickfixes )
     | With_claim_as_reason (err, claim_from) ->
       let reasons =
         Option.value_map
@@ -7796,71 +6818,39 @@ end = struct
               return (Tuple2.map_fst ~f:Pos_or_decl.of_raw_pos claim :: reasons)))
           st.claim_opt
       in
-      let (_, claim, _, _, _, flags) = Eval_primary.to_error claim_from ~env in
-      eval
-        err
-        ~env
-        ~st:{ st with claim_opt = Some claim; reasons; flags_opt = Some flags }
+      let Eval_primary.{ claim; _ } = Eval_primary.to_error claim_from ~env in
+      eval err ~env ~st:{ st with claim_opt = Some claim; reasons }
     | Retain_code t -> eval t ~env ~st:{ st with code_opt = None }
     | With_code (code, qfs) ->
       ( Option.value ~default:code st.code_opt,
         st.claim_opt,
         st.reasons,
         st.explanation,
-        qfs @ st.quickfixes,
-        st.flags_opt )
+        qfs @ st.quickfixes )
 
-  let apply
-      ?code
-      ?(reasons = lazy [])
-      ?(explanation = lazy Explanation.empty)
-      ?flags
-      ?(quickfixes = [])
-      t
-      ~env
-      ~claim =
-    let st =
+  let apply eval_partial t ~env =
+    let st = error_state_of_error_eval_partial eval_partial in
+    let (code, claim_opt, reasons, explanation, quickfixes) = eval t ~env ~st in
+    Eval_error.
       {
-        code_opt = code;
-        claim_opt = Some claim;
+        code;
+        claim = Option.value ~default:eval_partial.claim claim_opt;
         reasons;
         explanation;
         quickfixes;
-        flags_opt = flags;
       }
-    in
-    let (code, claim_opt, reasons, explanation, quickfixes, flags) =
-      eval t ~env ~st
-    in
-
-    ( code,
-      Option.value ~default:claim claim_opt,
-      reasons,
-      explanation,
-      quickfixes,
-      Option.value ~default:User_error_flags.empty flags )
 end
 
 and Eval_reasons_callback : sig
   val apply_help :
-    ?code:Error_code.t ->
-    ?claim:Pos.t Message.t Lazy.t ->
-    ?reasons:Pos_or_decl.t Message.t list Lazy.t ->
-    ?explanation:Pos_or_decl.t Explanation.t Lazy.t ->
-    ?flags:User_error_flags.t ->
-    ?quickfixes:Pos.t Quickfix.t list ->
+    Eval_secondary.t ->
     Typing_error.Reasons_callback.t ->
     env:Typing_env_types.env ->
     current_span:Pos.t ->
-    error Eval_result.t
+    Eval_error.t Eval_result.t
 
   val apply :
-    ?code:Error_code.t ->
-    ?claim:Pos.t Message.t Lazy.t ->
-    ?reasons:Pos_or_decl.t Message.t list Lazy.t ->
-    ?explanation:Pos_or_decl.t Explanation.t Lazy.t ->
-    ?flags:User_error_flags.t ->
-    ?quickfixes:Pos.t Quickfix.t list ->
+    Eval_secondary.t ->
     Typing_error.Reasons_callback.t ->
     env:Typing_env_types.env ->
     current_span:Pos.t ->
@@ -7873,7 +6863,6 @@ end = struct
       reasons_opt: Pos_or_decl.t Message.t list Lazy.t option;
       explanation_opt: Pos_or_decl.t Explanation.t Lazy.t option;
       quickfixes_opt: Pos.t Quickfix.t list option;
-      flags_opt: User_error_flags.t option;
     }
 
     let with_code t code_opt =
@@ -7884,7 +6873,7 @@ end = struct
         =
       Eval_result.map
         (Eval_secondary.eval snd_err ~env ~current_span)
-        ~f:(fun (code, reasons, explanation, flags) ->
+        ~f:(fun Eval_secondary.{ code; reasons; explanation } ->
           let reasons_opt =
             Some
               (match reasons_opt with
@@ -7900,31 +6889,24 @@ end = struct
             reasons_opt;
             explanation_opt = Some explanation;
             quickfixes_opt;
-            flags_opt = Some flags;
           })
 
     (** Replace any missing values in the error state with those of the error *)
     let with_defaults
-        {
-          code_opt;
-          claim_opt;
-          reasons_opt;
-          explanation_opt;
-          quickfixes_opt;
-          flags_opt;
-        }
+        { code_opt; claim_opt; reasons_opt; explanation_opt; quickfixes_opt }
         err
         ~env
         ~current_span =
       Eval_result.map
-        ~f:(fun (code, claim, reasons, explanation, quickfixes, flags) ->
-          Option.
-            ( value code_opt ~default:code,
-              value claim_opt ~default:claim,
-              value reasons_opt ~default:reasons,
-              value explanation_opt ~default:explanation,
-              value quickfixes_opt ~default:quickfixes,
-              value flags_opt ~default:flags ))
+        ~f:(fun Eval_error.{ code; claim; reasons; explanation; quickfixes } ->
+          Eval_error.
+            {
+              code = Option.value code_opt ~default:code;
+              claim = Option.value claim_opt ~default:claim;
+              reasons = Option.value reasons_opt ~default:reasons;
+              explanation = Option.value explanation_opt ~default:explanation;
+              quickfixes = Option.value quickfixes_opt ~default:quickfixes;
+            })
       @@ Eval_error.eval err ~env ~current_span
   end
 
@@ -7934,12 +6916,9 @@ end = struct
       ~env
       ~claim =
     Eval_callback.apply
-      ?code:code_opt
-      ?reasons:reasons_opt
-      ?quickfixes:quickfixes_opt
-      ?explanation:explanation_opt
+      Eval_error.
+        { code_opt; claim; reasons_opt; explanation_opt; quickfixes_opt }
       ~env
-      ~claim
       k
 
   let eval t ~env ~st ~current_span =
@@ -7962,41 +6941,41 @@ end = struct
           reasons_opt;
           explanation_opt;
           quickfixes_opt;
-          flags_opt;
         } =
           st
         in
-        let (code, claim, reasons, explanation, quickfixes, flags) =
+        let Eval_primary.{ code; claim; reasons; quickfixes } =
           Eval_primary.to_error prim ~env
         in
         let code = Option.value code_opt ~default:code in
         let claim = Option.value claim_opt ~default:claim in
-        let flags = Option.value flags_opt ~default:flags in
         let reasons =
           match reasons_opt with
           | None -> reasons
           | Some st_reasons -> lazy (Lazy.force reasons @ Lazy.force st_reasons)
         in
-        let explanation = Option.value explanation_opt ~default:explanation in
+        let explanation =
+          Option.value explanation_opt ~default:(lazy Explanation.Empty)
+        in
         let quickfixes = quickfixes @ Option.value quickfixes_opt ~default:[] in
-        Eval_result.single (code, claim, reasons, explanation, quickfixes, flags)
+        Eval_result.single
+          Eval_error.{ code; claim; reasons; explanation; quickfixes }
       | Of_error err -> Error_state.with_defaults st err ~env ~current_span
       | Of_callback (k, claim) ->
         Eval_result.single @@ eval_callback k st ~env ~claim
       | Assert_in_current_decl (default, ctx) ->
-        let Error_state.{ code_opt; reasons_opt; explanation_opt; flags_opt; _ }
-            =
-          st
+        let Error_state.{ code_opt; reasons_opt; explanation_opt; _ } = st in
+        let eval_snd =
+          Eval_secondary.
+            {
+              code = Option.value ~default code_opt;
+              reasons = Option.value ~default:(lazy []) reasons_opt;
+              explanation =
+                Option.value ~default:(lazy Explanation.empty) explanation_opt;
+            }
         in
-        let crs =
-          Option.
-            ( value ~default code_opt,
-              value ~default:(lazy []) reasons_opt,
-              value ~default:(lazy Explanation.empty) explanation_opt,
-              value ~default:User_error_flags.empty flags_opt )
-        in
-        let res_opt = Common.eval_assert ctx current_span crs in
-        Eval_result.of_option res_opt
+        Eval_result.of_option
+          (Eval_error.of_eval_secondary_opt ctx current_span eval_snd)
       | With_code (err, code) ->
         let st = Error_state.with_code st @@ Some code in
         aux err st
@@ -8016,24 +6995,19 @@ end = struct
       | Add_reason (err, op, reason) -> aux_reason_op op err reason st
       | Retain (t, comp) -> aux_retain t comp st
       | Incoming_reasons (err, op) ->
-        Eval_result.map
-          ~f:(fun ((code, claim, reasons, explanation, qfxs, flags) as err) ->
+        Eval_result.map ~f:(fun (Eval_error.{ reasons; _ } as err) ->
             match (st.Error_state.reasons_opt, op) with
             | (None, _) -> err
             | (Some rs, Append) ->
-              ( code,
-                claim,
-                Common.map2 ~f:(fun x y -> x @ y) reasons rs,
-                explanation,
-                qfxs,
-                flags )
+              {
+                err with
+                reasons = Common.map2 ~f:(fun x y -> x @ y) reasons rs;
+              }
             | (Some rs, Prepend) ->
-              ( code,
-                claim,
-                Common.map2 ~f:(fun x y -> x @ y) rs reasons,
-                explanation,
-                qfxs,
-                flags ))
+              {
+                err with
+                reasons = Common.map2 ~f:(fun x y -> x @ y) rs reasons;
+              })
         @@ aux err Error_state.{ st with reasons_opt = None }
       | Prepend_on_apply (t, snd_err) ->
         Eval_result.bind
@@ -8071,57 +7045,32 @@ end = struct
     aux t st
 
   let apply_help
-      ?code ?claim ?reasons ?explanation ?flags ?quickfixes t ~env ~current_span
-      =
-    let claim =
-      Option.map claim ~f:(Lazy.map ~f:(Message.map ~f:Pos_or_decl.of_raw_pos))
-    in
-    let reasons_opt =
-      match (claim, reasons) with
-      | (Some claim, Some reasons) ->
-        Some (Common.map2 claim reasons ~f:(fun x xs -> x :: xs))
-      | (Some claim, _) -> Some (Lazy.map ~f:(fun claim -> [claim]) claim)
-      | _ -> reasons
-    in
+      Eval_secondary.{ code; reasons; explanation } t ~env ~current_span =
     eval
       t
       ~env
       ~st:
         Error_state.
           {
-            code_opt = code;
+            code_opt = Some code;
             claim_opt = None;
-            reasons_opt;
-            explanation_opt = explanation;
-            quickfixes_opt = quickfixes;
-            flags_opt = flags;
+            reasons_opt = Some reasons;
+            explanation_opt = Some explanation;
+            quickfixes_opt = None;
           }
       ~current_span
 
-  let apply
-      ?code ?claim ?reasons ?explanation ?flags ?quickfixes t ~env ~current_span
-      =
-    let f (code, claim, reasons, explanation, quickfixes, flags) =
+  let apply eval_snd t ~env ~current_span =
+    let f Eval_error.{ code; claim; reasons; explanation; quickfixes } =
       User_error.make_err
         (Error_code.to_enum code)
         ~is_fixmed:false
         ~quickfixes
-        ~flags
         (Lazy.force claim)
         (Lazy.force reasons)
         (Lazy.force explanation)
     in
-    Eval_result.map ~f
-    @@ apply_help
-         ?code
-         ?claim
-         ?reasons
-         ?explanation
-         ?flags
-         ?quickfixes
-         t
-         ~env
-         ~current_span
+    Eval_result.map ~f @@ apply_help eval_snd t ~env ~current_span
 end
 
 let is_suppressed error = Errors.is_suppressed error
@@ -8137,48 +7086,24 @@ let add_typing_error err ~env =
 (* Until we return a list of errors from typing, we have to apply
    'client errors' to a callback for using in subtyping *)
 let apply_callback_to_errors errors on_error ~env =
-  let on_error
-      User_error.
-        {
-          severity =
-            (* Applying a callback will always result in severity `Err`.
-               We don't use this mechanism for warnings anyway. *)
-            _;
-          code;
-          claim;
-          reasons;
-          explanation;
-          custom_msgs = _;
-          quickfixes = _;
-          flags = _;
-          is_fixmed = _;
-          function_pos = _;
-        } =
+  let on_error User_error.{ code; reasons; explanation; _ } =
     let code = Option.value_exn (Error_code.of_enum code) in
     Eval_result.iter ~f:Errors.add_error
     @@ Eval_result.suppress_intersection ~is_suppressed
     @@ Eval_reasons_callback.apply
+         Eval_secondary.
+           { code; reasons = lazy reasons; explanation = lazy explanation }
          on_error
-         ~code
-         ~claim:(lazy claim)
-         ~reasons:(lazy reasons)
-         ~explanation:(lazy explanation)
          ~env
          ~current_span:(Errors.get_current_span ())
   in
   Errors.iter errors ~f:on_error
 
-let apply_error_from_reasons_callback
-    ?code ?claim ?reasons ?explanation ?flags ?quickfixes err ~env =
+let apply_error_from_reasons_callback eval_snd err ~env =
   Eval_result.iter ~f:Errors.add_error
   @@ Eval_result.suppress_intersection ~is_suppressed
   @@ Eval_reasons_callback.apply
-       ?code
-       ?claim
-       ?reasons
-       ?explanation
-       ?flags
-       ?quickfixes
+       eval_snd
        err
        ~env
        ~current_span:(Errors.get_current_span ())
@@ -8189,21 +7114,7 @@ let claim_as_reason : Pos.t Message.t -> Pos_or_decl.t Message.t =
 (** TODO: Remove use of `User_error.t` representation for nested error &
     callback application *)
 let ambiguous_inheritance pos class_ origin error on_error ~env =
-  let User_error.
-        {
-          severity = _;
-          code;
-          claim;
-          reasons;
-          explanation;
-          flags;
-          custom_msgs = _;
-          quickfixes = _;
-          is_fixmed = _;
-          function_pos = _;
-        } =
-    error
-  in
+  let User_error.{ code; claim; reasons; explanation; _ } = error in
   let origin = Render.strip_ns origin in
   let class_ = Render.strip_ns class_ in
   let message =
@@ -8215,9 +7126,11 @@ let ambiguous_inheritance pos class_ origin error on_error ~env =
   in
   let code = Option.value_exn (Error_codes.Typing.of_enum code) in
   apply_error_from_reasons_callback
+    Eval_secondary.
+      {
+        code;
+        reasons = lazy ((claim_as_reason claim :: reasons) @ [(pos, message)]);
+        explanation = lazy explanation;
+      }
     on_error
-    ~code
-    ~reasons:(lazy ((claim_as_reason claim :: reasons) @ [(pos, message)]))
-    ~explanation:(lazy explanation)
-    ~flags
     ~env

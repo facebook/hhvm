@@ -103,74 +103,7 @@ module Pretty : sig
     Typing_env_types.env ->
     Typing_defs.internal_type ->
     string
-
-  val _strip_existential :
-    ity_sub:Typing_defs.internal_type ->
-    ity_sup:Typing_defs.internal_type ->
-    (Typing_defs.internal_type * Typing_defs.internal_type) option
 end = struct
-  let strip_existential_help ty =
-    let strip ty k =
-      match deref ty with
-      | (_, Tdependent (_, ty)) -> Some (k ty)
-      | (r, Tgeneric (nm, tys)) when DependentKind.is_generic_dep_ty nm ->
-        Option.map ~f:(fun nm -> k @@ mk (r, Tgeneric (nm, tys)))
-        @@ DependentKind.strip_generic_dep_ty nm
-      | _ -> None
-    in
-    (* We only want to recurse to a fixed depth so have a flag here to control
-       recursion into unions and intersections *)
-    let rec strip_nested ty ~recurse =
-      match deref ty with
-      | (r, Taccess (inner_ty, pos)) ->
-        strip inner_ty (fun ty -> mk (r, Taccess (ty, pos)))
-      | (r, Toption inner_ty) -> strip inner_ty (fun ty -> mk (r, Toption ty))
-      | (r, Tunion ts) when recurse ->
-        strip_all ts (fun ts -> mk (r, Tunion ts))
-      | (r, Tintersection ts) when recurse ->
-        strip_all ts (fun ts -> mk (r, Tintersection ts))
-      | _ -> strip ty (fun ty -> ty)
-    and strip_all tys k =
-      let (tys_rev, stripped) =
-        List.fold_left tys ~init:([], false) ~f:(fun (tys, stripped) ty ->
-            match strip_nested ty ~recurse:false with
-            | None -> (ty :: tys, stripped)
-            | Some ty -> (ty :: tys, true))
-      in
-      if stripped then
-        Some (k @@ List.rev tys_rev)
-      else
-        None
-    in
-    strip_nested ty ~recurse:true
-
-  (* For reporting purposes we remove top-level existential types and
-     existentials in type accesses when they don't occur on both subtype and
-     supertype since they don't contribute to underlying error *)
-  let _strip_existential ~ity_sub ~ity_sup =
-    match (ity_sub, ity_sup) with
-    | (LoclType lty_sub, LoclType lty_sup) ->
-      (match
-         (strip_existential_help lty_sub, strip_existential_help lty_sup)
-       with
-      (* We shouldn't remove if both sub and supertype are existentially quantified *)
-      | (Some _, Some _)
-      (* There is nothing to do if neither side was existentially quantified *)
-      | (None, None) ->
-        None
-      (* If we have an existential one only side we remove it *)
-      | (Some lty_sub, _) -> Some (LoclType lty_sub, ity_sup)
-      | (_, Some lty_sup) -> Some (ity_sub, LoclType lty_sup))
-    (* The only type to appear in 'ConstraintType' is null so we can always remove
-       if we have one LoclType and on ConstraintType, for some reason *)
-    | (LoclType lty_sub, ConstraintType _) ->
-      Option.map ~f:(fun lty_sub -> (LoclType lty_sub, ity_sup))
-      @@ strip_existential_help lty_sub
-    | (ConstraintType _, LoclType lty_sup) ->
-      Option.map ~f:(fun lty_sup -> (ity_sub, LoclType lty_sup))
-      @@ strip_existential_help lty_sup
-    | (ConstraintType _, ConstraintType _) -> None
-
   let describe_ty_default env ty =
     Typing_print.full_strip_ns_i ~hide_internals:true env ty
 
@@ -396,9 +329,8 @@ module Subtype_env = struct
       =
     match tparam_constraints with
     | [] ->
-      let stripped_existential = false in
       Typing_error.Secondary.Subtyping_error
-        { ty_sub; ty_sup = ty_super; is_coeffect; stripped_existential }
+        { ty_sub; ty_sup = ty_super; is_coeffect }
     | cstrs ->
       Typing_error.Secondary.Violated_constraint
         { cstrs; ty_sub; ty_sup = ty_super; is_coeffect }

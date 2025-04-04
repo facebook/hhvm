@@ -11,7 +11,7 @@ JSON for selected code action:
         "entrypoint":"FixLintErrorCodeAction",
         "extras":{
           "legacyUserPrompt":"Given the following snippet of Hack code that is part of the file:\n<SNIPPET>\n```hack\n 12 |   public function __construct(int $a, string $b, ISender<int, null> $sender) {\n 13 |     parent::__construct($a, $b, [DIAGNOSTIC_START]$sender[DIAGNOSTIC_END]);\n 14 |     //                             ^ at-caret\n 15 |   }\n```\n</SNIPPET>\n<DIAGNOSTIC>\nInvalid argument\n</DIAGNOSTIC>\n<HINT>\nExpected `null`\nlocation uri:on_method.php\n</HINT>\n<HINT>\nBut got `string`\nlocation uri:on_method.php\n</HINT>\nEdit <SNIPPET> in a way that would fix that lint.\n   If there are multiple ways to fix this issue, please return in the code section the most strightforward one that is part of <SNIPPET>,\n   any further suggestions can be added in the explanation section.",
-          "lineAgnosticHash":"5dc069b1ac9cd80f"
+          "lineAgnosticHash":"47e6746e3a86b25b"
         },
         "overrideSelection":{"end":{"character":3,"line":14},"start":{"character":2,"line":11}},
         "predefinedPrompt":{

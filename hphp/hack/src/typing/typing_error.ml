@@ -1806,7 +1806,6 @@ and Secondary : sig
         ty_sub: Typing_defs_core.internal_type;
         ty_sup: Typing_defs_core.internal_type;
         is_coeffect: bool;
-        stripped_existential: bool;
       }
     | Method_not_dynamically_callable of {
         pos: Pos_or_decl.t;
@@ -2109,7 +2108,6 @@ end = struct
         ty_sub: Typing_defs_core.internal_type;
         ty_sup: Typing_defs_core.internal_type;
         is_coeffect: bool;
-        stripped_existential: bool;
       }
     | Method_not_dynamically_callable of {
         pos: Pos_or_decl.t;

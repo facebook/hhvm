@@ -76,7 +76,6 @@ fn to_lint_message(e: &UserError<Pos, Pos>, ctx: &RelativePathCtx) -> LintMessag
         quickfixes: _,
         custom_msgs: _,
         is_fixmed: _,
-        flags: _,
         function_pos: _,
     } = e;
     let Message(pos, claim_descr) = claim;

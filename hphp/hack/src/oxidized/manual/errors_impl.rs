@@ -13,7 +13,6 @@ use crate::quickfix::Edits;
 use crate::quickfix::Quickfix;
 use crate::user_error::Severity;
 use crate::user_error::UserError;
-use crate::user_error_flags::UserErrorFlags;
 
 impl<PP, P> UserError<PP, P> {
     pub fn new(
@@ -24,7 +23,6 @@ impl<PP, P> UserError<PP, P> {
         explanation: Explanation<P>,
         custom_msgs: Vec<String>,
         quickfixes: Vec<Quickfix<PP>>,
-        flags: UserErrorFlags,
     ) -> Self {
         Self {
             severity,
@@ -35,7 +33,6 @@ impl<PP, P> UserError<PP, P> {
             quickfixes,
             custom_msgs,
             is_fixmed: false,
-            flags,
             function_pos: None,
         }
     }
@@ -67,7 +64,6 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> UserError<PP, P> {
             custom_msgs: _,
             quickfixes: _,
             is_fixmed: _,
-            flags: _,
             function_pos: _,
         } = self;
         let Self {
@@ -79,7 +75,6 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> UserError<PP, P> {
             custom_msgs: _,
             quickfixes: _,
             is_fixmed: _,
-            flags: _,
             function_pos: _,
         } = other;
         let self_phase = self_code / 1000;
@@ -141,7 +136,6 @@ impl Naming {
             Explanation::Empty,
             vec![],
             vec![],
-            Default::default(),
         )
     }
 
@@ -161,7 +155,6 @@ impl Naming {
                 edits: Edits::Eager(vec![(correct_name.into(), p)]),
                 hint_styles: vec![],
             }],
-            Default::default(),
         )
     }
 
@@ -204,7 +197,6 @@ impl Naming {
                     hint_styles: vec![],
                 },
             ],
-            Default::default(),
         )
     }
 
@@ -220,7 +212,6 @@ impl Naming {
             Explanation::Empty,
             vec![],
             vec![],
-            Default::default(),
         )
     }
 
@@ -236,7 +227,6 @@ impl Naming {
             Explanation::Empty,
             vec![],
             vec![],
-            Default::default(),
         )
     }
 }
@@ -255,7 +245,6 @@ impl NastCheck {
             Explanation::Empty,
             vec![],
             vec![],
-            Default::default(),
         )
     }
 
@@ -271,7 +260,6 @@ impl NastCheck {
             Explanation::Empty,
             vec![],
             vec![],
-            Default::default(),
         )
     }
 
@@ -291,7 +279,6 @@ impl NastCheck {
             Explanation::Empty,
             vec![],
             vec![],
-            Default::default(),
         )
     }
 }

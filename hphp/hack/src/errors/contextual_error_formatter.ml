@@ -213,7 +213,6 @@ let to_string
     explanation = _;
     custom_msgs;
     quickfixes = _;
-    flags = _;
     is_fixmed = _;
     function_pos = _;
   } =

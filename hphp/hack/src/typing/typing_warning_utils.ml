@@ -604,7 +604,6 @@ let add tcopt (type a x) ((pos, kind, warning) : (x, a) Typing_warning.t) : unit
         reasons = M.reasons warning;
         explanation = Explanation.empty;
         quickfixes = M.quickfixes warning;
-        flags = User_error_flags.empty;
         custom_msgs = [];
         is_fixmed = false;
         function_pos = None;

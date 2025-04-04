@@ -52,8 +52,7 @@
     render
     message
     quickfix
-    user_error
-    user_error_flags)
+    user_error)
   (libraries
     core_kernel
     classish_positions

@@ -1164,7 +1164,6 @@ let ide_diagnostics_to_lsp_diagnostics
       explanation = _;
       custom_msgs;
       is_fixmed = _;
-      flags = _;
       quickfixes = _;
       function_pos = _;
     } =

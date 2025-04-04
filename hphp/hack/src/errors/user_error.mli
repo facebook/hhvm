@@ -28,7 +28,6 @@ type ('prim_pos, 'pos) t = {
   quickfixes: 'prim_pos Quickfix.t list; [@hash.ignore]
   custom_msgs: string list;
   is_fixmed: bool;
-  flags: User_error_flags.t;
   function_pos: 'prim_pos option;
 }
 [@@deriving eq, hash, ord, show]
@@ -41,7 +40,6 @@ val make :
   ?is_fixmed:bool ->
   ?quickfixes:'a Quickfix.t list ->
   ?custom_msgs:string list ->
-  ?flags:User_error_flags.t ->
   ?function_pos:'a ->
   'a Message.t ->
   'b Message.t list ->
@@ -54,7 +52,6 @@ val make_err :
   ?is_fixmed:bool ->
   ?quickfixes:'a Quickfix.t list ->
   ?custom_msgs:string list ->
-  ?flags:User_error_flags.t ->
   ?function_pos:'a ->
   'a Message.t ->
   'b Message.t list ->
@@ -67,7 +64,6 @@ val make_warning :
   ?is_fixmed:bool ->
   ?quickfixes:'a Quickfix.t list ->
   ?custom_msgs:string list ->
-  ?flags:User_error_flags.t ->
   'a Message.t ->
   'b Message.t list ->
   ('a, 'b) t

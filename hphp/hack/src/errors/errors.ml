@@ -195,7 +195,6 @@ let try_with_result (f1 : unit -> 'res) (f2 : 'res -> error -> 'res) : 'res =
           explanation;
           quickfixes;
           custom_msgs;
-          flags;
           function_pos;
           is_fixmed = _;
         } ->
@@ -220,7 +219,6 @@ let try_with_result (f1 : unit -> 'res) (f2 : 'res -> error -> 'res) : 'res =
          explanation
          ~quickfixes
          ~custom_msgs
-         ~flags
          ?function_pos
 
 let try_with_result_pure ~fail f g =
@@ -324,7 +322,6 @@ let compare_internal (x : ('a, 'b) User_error.t) (y : ('a, 'b) User_error.t) :
           custom_msgs = _;
           quickfixes = _;
           is_fixmed = _;
-          flags = _;
           function_pos = _;
         } =
     x
@@ -339,7 +336,6 @@ let compare_internal (x : ('a, 'b) User_error.t) (y : ('a, 'b) User_error.t) :
           custom_msgs = _;
           quickfixes = _;
           is_fixmed = _;
-          flags = _;
           function_pos = _;
         } =
     y
@@ -705,7 +701,6 @@ let add_error_with_fixme_error error explanation ~fixme_pos =
           explanation = _;
           quickfixes;
           custom_msgs;
-          flags;
           function_pos;
           is_fixmed = _;
         } =
@@ -721,7 +716,6 @@ let add_error_with_fixme_error error explanation ~fixme_pos =
        Explanation.empty
        ~quickfixes
        ~custom_msgs
-       ~flags
        ?function_pos
 
 let add_applied_fixme error =
@@ -836,7 +830,6 @@ let add_error (error : error) =
           explanation;
           quickfixes;
           custom_msgs;
-          flags;
           function_pos;
           is_fixmed = _;
         } =
@@ -852,7 +845,6 @@ let add_error (error : error) =
       explanation
       ~quickfixes
       ~custom_msgs
-      ~flags
       ?function_pos
   in
 
@@ -1352,7 +1344,6 @@ let convert_errors_to_string ?(include_filename = false) (errors : error list) :
               explanation = _;
               quickfixes = _;
               is_fixmed = _;
-              flags = _;
               function_pos = _;
             } =
         err

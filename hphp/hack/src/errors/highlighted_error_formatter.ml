@@ -571,7 +571,6 @@ let to_string (error : Errors.finalized_error) : string =
     custom_msgs;
     explanation = _;
     quickfixes = _;
-    flags = _;
     is_fixmed = _;
     function_pos = _;
   } =

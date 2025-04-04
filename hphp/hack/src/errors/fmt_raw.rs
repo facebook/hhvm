@@ -30,7 +30,6 @@ impl<'a> std::fmt::Display for FmtRaw<'a> {
                 custom_msgs,
                 quickfixes: _,
                 is_fixmed: _,
-                flags: _,
                 function_pos: _,
             },
             ctx,

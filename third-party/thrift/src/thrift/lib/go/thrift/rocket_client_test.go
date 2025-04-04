@@ -18,7 +18,10 @@ package thrift
 
 import (
 	"context"
+	"crypto/rand"
+	"fmt"
 	"net"
+	"os"
 	"runtime"
 	"testing"
 	"time"
@@ -79,7 +82,8 @@ func TestRocketClientClose(t *testing.T) {
 func TestRocketClientUnix(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	errChan := make(chan error)
-	path := t.TempDir() + "/test.sock"
+	path := fmt.Sprintf("/tmp/test%s.sock", rand.Text())
+	defer os.Remove(path)
 	listener, err := net.Listen("unix", path)
 	require.NoError(t, err)
 
@@ -140,8 +144,7 @@ func TestFDRelease(t *testing.T) {
 
 	// Run GC to ensure it releases the underlying FDs
 	runtime.GC()
-	fdCount, err := getNumFileDesciptors()
-	require.NoError(t, err)
+	fdCount := getNumFileDesciptors(t)
 
 	// Because we run alongside other tests concurrently - we cannot assert zero.
 	// But it is sufficient to assert that we are down to below 200 FDs.

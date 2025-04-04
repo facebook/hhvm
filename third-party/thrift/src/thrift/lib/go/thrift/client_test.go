@@ -18,9 +18,7 @@ package thrift
 
 import (
 	"context"
-	"fmt"
 	"net"
-	"os"
 	"runtime"
 	"testing"
 	"time"
@@ -72,8 +70,7 @@ func TestNewClientConnectionScenarios(t *testing.T) {
 	require.ErrorContains(t, err, expectedErrMsg)
 
 	// Testing unsuccessful client connection (can connect, but cannot create client)
-	fdCountBefore, err := getNumFileDesciptors()
-	require.NoError(t, err)
+	fdCountBefore := getNumFileDesciptors(t)
 	client, err = NewClient(
 		WithRocket(),
 		// Invalid protocol that intentionally breaks client creation
@@ -89,29 +86,13 @@ func TestNewClientConnectionScenarios(t *testing.T) {
 	// upon protocol error, actual FD closing is done by the garbage collector.
 	// Without the GC call below - the FD may still linger and affect test results.
 	runtime.GC()
-	fdCountAfter, err := getNumFileDesciptors()
-	require.NoError(t, err)
+	fdCountAfter := getNumFileDesciptors(t)
 	require.LessOrEqual(t, fdCountAfter, fdCountBefore, "FDs got leaked: %d (before), %d (after)", fdCountBefore, fdCountAfter)
 
 	// Shut down server.
 	serverCancel()
 	err = serverEG.Wait()
 	require.ErrorIs(t, err, context.Canceled)
-}
-
-func getNumFileDesciptors() (int, error) {
-	fdDir, err := os.Open(fmt.Sprintf("/proc/%d/fd", os.Getpid()))
-	if err != nil {
-		return -1, err
-	}
-	defer fdDir.Close()
-
-	files, err := fdDir.Readdirnames(-1)
-	if err != nil {
-		return -1, err
-	}
-
-	return len(files), nil
 }
 
 func TestNewClientCreation(t *testing.T) {

@@ -18,7 +18,10 @@ package thrift
 
 import (
 	"context"
+	"crypto/rand"
+	"fmt"
 	"net"
+	"os"
 	"testing"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
@@ -44,7 +47,8 @@ func TestCloseWithoutSendingMessages(t *testing.T) {
 func TestUpgradeToRocketClientUnix(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	errChan := make(chan error)
-	path := t.TempDir() + "/test.sock"
+	path := fmt.Sprintf("/tmp/test%s.sock", rand.Text())
+	defer os.Remove(path)
 	addr, err := net.ResolveUnixAddr("unix", path)
 	require.NoError(t, err)
 

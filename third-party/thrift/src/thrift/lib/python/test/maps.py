@@ -84,8 +84,7 @@ class ImmutableMapTests(unittest.TestCase):
             TypeError,
             "'thrift.python.types.Map' object does not support item assignment",
         ):
-            # TODO: This should trigger a Pyre error. The type of the map constant
-            # is currently specified as `Dict`, which needs to be corrected.
+            # pyre-ignore[16]: `typing.Mapping` has no attribute `__setitem__`
             constant_map["4"] = 4
 
 

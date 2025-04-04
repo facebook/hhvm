@@ -15,7 +15,7 @@
   limitations under the License.
 
 }}{{!
-This is for typedef/constants PEP484 type
+This is for constants PEP484 type
 }}{{#type:container?}}{{!
     }}{{#type:list?}}_typing.List[{{!
         }}{{#type:list_elem_type}}{{> types/pep484_type}}{{/type:list_elem_type}}{{!
@@ -23,7 +23,7 @@ This is for typedef/constants PEP484 type
     }}{{#type:set?}}_typing.Set[{{!
         }}{{#type:set_elem_type}}{{> types/pep484_type}}{{/type:set_elem_type}}{{!
     }}]{{/type:set?}}{{!
-    }}{{#type:map?}}_typing.Dict[{{!
+    }}{{#type:map?}}_typing.Mapping[{{!
         }}{{#type:key_type}}{{> types/pep484_type}}{{/type:key_type}}, {{!
         }}{{#type:value_type}}{{> types/pep484_type}}{{/type:value_type}}{{!
     }}]{{/type:map?}}{{!

@@ -84,7 +84,11 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
     cdef inline object real_impl(self)
     cdef inline object smaller_real_impl(self)
     cdef inline object something_impl(self)
+    cdef inline object opt_default_int_impl(self)
+    cdef inline object opt_default_str_impl(self)
+    cdef inline object opt_default_enum_impl(self)
     cdef object __fbthrift_cached_something
+    cdef object __fbthrift_cached_opt_default_enum
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cSimpleStruct])

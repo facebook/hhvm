@@ -97,8 +97,20 @@ class SimpleStruct(_abc.ABC):
     @_fbthrift_builtins.property
     @_abc.abstractmethod
     def something(self) -> _typing.Mapping[int, int]: ...
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[bool, int, int, int, int, float, float, int, _typing.Mapping[int, int]]]]: ...
+    def opt_default_int(self) -> _typing.Optional[int]: ...
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
+    @_abc.abstractmethod
+    def opt_default_str(self) -> _typing.Optional[str]: ...
+    # pyre-ignore[16]: Module `_fbthrift_builtins` has no attribute `property`.
+    @_fbthrift_builtins.property
+    @_abc.abstractmethod
+    def opt_default_enum(self) -> _typing.Optional[_fbthrift_AnEnum]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[bool, int, int, int, int, float, float, int, _typing.Mapping[int, int], int, str, _fbthrift_AnEnum]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.SimpleStruct": ...  # type: ignore
     @_abc.abstractmethod

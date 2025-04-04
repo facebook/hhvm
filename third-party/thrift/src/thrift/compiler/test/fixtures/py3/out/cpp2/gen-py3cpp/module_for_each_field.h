@@ -42,6 +42,9 @@ struct ForEachField<::py3::simple::SimpleStruct> {
     f(6, static_cast<T&&>(t).smaller_real_ref()...);
     f(7, static_cast<T&&>(t).something_ref()...);
     f(8, static_cast<T&&>(t).hidden_field_ref()...);
+    f(9, static_cast<T&&>(t).opt_default_int_ref()...);
+    f(10, static_cast<T&&>(t).opt_default_str_ref()...);
+    f(11, static_cast<T&&>(t).opt_default_enum_ref()...);
   }
 };
 

@@ -380,6 +380,9 @@ cdef extern from "thrift/compiler/test/fixtures/py3/gen-cpp2/module_types_custom
         __field_ref[double] real_ref "real_ref" ()
         __field_ref[float] smaller_real_ref "smaller_real_ref" ()
         __field_ref[_std_unordered_map[cint32_t,cint32_t]] something_ref "something_ref" ()
+        __optional_field_ref[cint32_t] opt_default_int_ref "opt_default_int_ref" ()
+        __optional_field_ref[string] opt_default_str_ref "opt_default_str_ref" ()
+        __optional_field_ref[cAnEnum] opt_default_enum_ref "opt_default_enum_ref" ()
 
 
     cdef cppclass cHiddenTypeFieldsStruct "::py3::simple::HiddenTypeFieldsStruct":

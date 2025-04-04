@@ -356,6 +356,9 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
           "real": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).real_ref().has_value(),
           "smaller_real": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).smaller_real_ref().has_value(),
           "something": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).something_ref().has_value(),
+          "opt_default_int": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_default_int_ref().has_value(),
+          "opt_default_str": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_default_str_ref().has_value(),
+          "opt_default_enum": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_default_enum_ref().has_value(),
         })
 
     @staticmethod
@@ -422,6 +425,29 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
     def something(self):
         return self.something_impl()
 
+    cdef inline opt_default_int_impl(self):
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_default_int_ref().value_unchecked()
+
+    @property
+    def opt_default_int(self):
+        return self.opt_default_int_impl()
+
+    cdef inline opt_default_str_impl(self):
+        return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_default_str_ref().value_unchecked()).decode('UTF-8')
+
+    @property
+    def opt_default_str(self):
+        return self.opt_default_str_impl()
+
+    cdef inline opt_default_enum_impl(self):
+        if self.__fbthrift_cached_opt_default_enum is None:
+            self.__fbthrift_cached_opt_default_enum = translate_cpp_enum_to_python(AnEnum, <int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).opt_default_enum_ref().value_unchecked()))
+        return self.__fbthrift_cached_opt_default_enum
+
+    @property
+    def opt_default_enum(self):
+        return self.opt_default_enum_impl()
+
 
     def __hash__(SimpleStruct self):
         return super().__hash__()
@@ -469,6 +495,9 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
         'real',
         'smaller_real',
         'something',
+        'opt_default_int',
+        'opt_default_str',
+        'opt_default_enum',
     ]
 
     @classmethod
@@ -477,7 +506,7 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
-        return 8
+        return 11
 
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(SimpleStruct self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data

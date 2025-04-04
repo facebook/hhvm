@@ -28,8 +28,8 @@ bool ensure_module_imported() {
   static constexpr std::int16_t _fbthrift__OptionalRefStruct__tuple_pos[1] = {
     1
   };
-  static constexpr std::int16_t _fbthrift__SimpleStruct__tuple_pos[9] = {
-    1, 2, 3, 4, 5, 6, 7, 9, 8
+  static constexpr std::int16_t _fbthrift__SimpleStruct__tuple_pos[12] = {
+    1, 2, 3, 4, 5, 6, 7, 9, 8, 10, 11, 12
   };
   static constexpr std::int16_t _fbthrift__HiddenException__tuple_pos[1] = {
     1
@@ -260,6 +260,18 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       cpp.hidden_field_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__SimpleStruct__tuple_pos[8]),
       error);
+  Extractor<int32_t>{}.extractInto(
+      cpp.opt_default_int_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__SimpleStruct__tuple_pos[9]),
+      error);
+  Extractor<Bytes>{}.extractInto(
+      cpp.opt_default_str_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__SimpleStruct__tuple_pos[10]),
+      error);
+  Extractor<::apache::thrift::python::capi::ComposedEnum<::py3::simple::AnEnum>>{}.extractInto(
+      cpp.opt_default_enum_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__SimpleStruct__tuple_pos[11]),
+      error);
   if (error) {
     return folly::makeUnexpected(*error);
   }
@@ -300,7 +312,7 @@ PyObject* Constructor<::apache::thrift::python::capi::PythonNamespaced<::py3::si
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::py3::simple::SimpleStruct, ::module::NamespaceTag>>::operator()(
     [[maybe_unused]] const ::py3::simple::SimpleStruct& val) {
-  StrongRef fbthrift_data(createStructTuple(9));
+  StrongRef fbthrift_data(createStructTuple(12));
   StrongRef _fbthrift__is_on(
     Constructor<bool>{}
     .constructFrom(val.is_on_ref()));
@@ -389,6 +401,57 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
           *fbthrift_data,
           _fbthrift__SimpleStruct__tuple_pos[8],
           *_fbthrift__hidden_field) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__opt_default_int(
+    Constructor<int32_t>{}
+    .constructFrom(val.opt_default_int_ref()));
+  if (_fbthrift__opt_default_int.isNone()) {
+    Py_INCREF(Py_None);
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__SimpleStruct__tuple_pos[9],
+      Py_None);
+  } else
+  if (!_fbthrift__opt_default_int ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__SimpleStruct__tuple_pos[9],
+          *_fbthrift__opt_default_int) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__opt_default_str(
+    Constructor<Bytes>{}
+    .constructFrom(val.opt_default_str_ref()));
+  if (_fbthrift__opt_default_str.isNone()) {
+    Py_INCREF(Py_None);
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__SimpleStruct__tuple_pos[10],
+      Py_None);
+  } else
+  if (!_fbthrift__opt_default_str ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__SimpleStruct__tuple_pos[10],
+          *_fbthrift__opt_default_str) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__opt_default_enum(
+    Constructor<::apache::thrift::python::capi::ComposedEnum<::py3::simple::AnEnum>>{}
+    .constructFrom(val.opt_default_enum_ref()));
+  if (_fbthrift__opt_default_enum.isNone()) {
+    Py_INCREF(Py_None);
+    PyTuple_SET_ITEM(
+      *fbthrift_data,
+      _fbthrift__SimpleStruct__tuple_pos[11],
+      Py_None);
+  } else
+  if (!_fbthrift__opt_default_enum ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__SimpleStruct__tuple_pos[11],
+          *_fbthrift__opt_default_enum) == -1) {
     return nullptr;
   }
   return std::move(fbthrift_data).release();

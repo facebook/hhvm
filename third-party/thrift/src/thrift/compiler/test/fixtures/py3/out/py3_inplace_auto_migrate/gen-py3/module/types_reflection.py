@@ -73,6 +73,7 @@ def get_reflection__SimpleStruct() -> __StructSpec:
         annotations={
         },
     )
+    defaults = _module_types.SimpleStruct()
     spec.add_field(
         __FieldSpec._fbthrift_create(
             id=1,
@@ -173,6 +174,45 @@ def get_reflection__SimpleStruct() -> __StructSpec:
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=10,
+            name="opt_default_int",
+            py_name="opt_default_int",
+            type=int,
+            kind=__NumberType.I32,
+            qualifier=__Qualifier.OPTIONAL,
+            default=defaults.opt_default_int,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=11,
+            name="opt_default_str",
+            py_name="opt_default_str",
+            type=str,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.OPTIONAL,
+            default=defaults.opt_default_str,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=12,
+            name="opt_default_enum",
+            py_name="opt_default_enum",
+            type=_module_types.AnEnum,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.OPTIONAL,
+            default=defaults.opt_default_enum,
             annotations={
             },
         ),

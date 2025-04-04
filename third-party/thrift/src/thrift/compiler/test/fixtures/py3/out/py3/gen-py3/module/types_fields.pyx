@@ -100,6 +100,9 @@ cdef class __SimpleStruct_FieldsSetter(__StructFieldsSetter):
         __fbthrift_inst._setters[__cstring_view(<const char*>"real")] = __SimpleStruct_FieldsSetter._set_field_5
         __fbthrift_inst._setters[__cstring_view(<const char*>"smaller_real")] = __SimpleStruct_FieldsSetter._set_field_6
         __fbthrift_inst._setters[__cstring_view(<const char*>"something")] = __SimpleStruct_FieldsSetter._set_field_7
+        __fbthrift_inst._setters[__cstring_view(<const char*>"opt_default_int")] = __SimpleStruct_FieldsSetter._set_field_8
+        __fbthrift_inst._setters[__cstring_view(<const char*>"opt_default_str")] = __SimpleStruct_FieldsSetter._set_field_9
+        __fbthrift_inst._setters[__cstring_view(<const char*>"opt_default_enum")] = __SimpleStruct_FieldsSetter._set_field_10
         return __fbthrift_inst
 
     cdef void set_field(__SimpleStruct_FieldsSetter self, const char* name, object value) except *:
@@ -182,6 +185,39 @@ cdef class __SimpleStruct_FieldsSetter(__StructFieldsSetter):
             __reset_field[_module_cbindings.cSimpleStruct](deref(self._struct_cpp_obj), 7)
             return
         deref(self._struct_cpp_obj).something_ref().assign(_module_types._std_unordered_map__Map__i32_i32__make_instance(_fbthrift_value))
+
+    cdef void _set_field_8(self, _fbthrift_value) except *:
+        # for field opt_default_int
+        if _fbthrift_value is None:
+            __reset_field[_module_cbindings.cSimpleStruct](deref(self._struct_cpp_obj), 8)
+            return
+        if not isinstance(_fbthrift_value, int):
+            raise TypeError(f'opt_default_int is not a { int !r}.')
+        _fbthrift_value = <cint32_t> _fbthrift_value
+        deref(self._struct_cpp_obj).opt_default_int_ref().assign(_fbthrift_value)
+
+    cdef void _set_field_9(self, _fbthrift_value) except *:
+        # for field opt_default_str
+        if _fbthrift_value is None:
+            __reset_field[_module_cbindings.cSimpleStruct](deref(self._struct_cpp_obj), 9)
+            return
+        if not isinstance(_fbthrift_value, str):
+            raise TypeError(f'opt_default_str is not a { str !r}.')
+        deref(self._struct_cpp_obj).opt_default_str_ref().assign(cmove(bytes_to_string(_fbthrift_value.encode('utf-8'))))
+
+    cdef void _set_field_10(self, _fbthrift_value) except *:
+        # for field opt_default_enum
+        if _fbthrift_value is None:
+            __reset_field[_module_cbindings.cSimpleStruct](deref(self._struct_cpp_obj), 10)
+            return
+        if not isinstance(_fbthrift_value, _fbthrift_BadEnum) and not isinstance(_fbthrift_value, _module_types.AnEnum):
+            if _is_python_enum(_fbthrift_value):
+                _fbthrift_value = _fbthrift_value._to_py3()
+                if not isinstance(_fbthrift_value, _module_types.AnEnum):
+                    raise TypeError(f'field opt_default_enum value: {repr(_fbthrift_value)} is a thrift-python enum that can not be converted to enum type { _module_types.AnEnum }.')
+            else:
+                raise TypeError(f'field opt_default_enum value: {repr(_fbthrift_value)} is not of the enum type { _module_types.AnEnum }.')
+        deref(self._struct_cpp_obj).opt_default_enum_ref().assign(<_module_cbindings.cAnEnum><int>_fbthrift_value)
 
 
 @__cython.auto_pickle(False)

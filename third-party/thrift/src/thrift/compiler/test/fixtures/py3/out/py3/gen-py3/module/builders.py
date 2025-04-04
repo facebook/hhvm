@@ -46,6 +46,9 @@ class SimpleStruct_Builder(thrift.py3.builder.StructBuilder):
         self.real: _typing.Optional[float] = None
         self.smaller_real: _typing.Optional[float] = None
         self.something: _typing.Optional[dict] = None
+        self.opt_default_int: _typing.Optional[int] = None
+        self.opt_default_str: _typing.Optional[str] = None
+        self.opt_default_enum: _typing.Optional[_module_types.AnEnum] = None
 
     def __iter__(self):
         yield "is_on", self.is_on
@@ -56,6 +59,9 @@ class SimpleStruct_Builder(thrift.py3.builder.StructBuilder):
         yield "real", self.real
         yield "smaller_real", self.smaller_real
         yield "something", self.something
+        yield "opt_default_int", self.opt_default_int
+        yield "opt_default_str", self.opt_default_str
+        yield "opt_default_enum", self.opt_default_enum
 
 _fbthrift_struct_type__HiddenTypeFieldsStruct = _module_types.HiddenTypeFieldsStruct
 class HiddenTypeFieldsStruct_Builder(thrift.py3.builder.StructBuilder):

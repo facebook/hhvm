@@ -2101,6 +2101,7 @@ class SimpleStruct(thrift.py3.types.Struct):
     __slots__ = (
         "_fbthrift__inner",
         "_fbthrift_inner__something",
+        "_fbthrift_inner__opt_default_enum",
     )
     _FBTHRIFT__PYTHON_CLASS = _fbthrift_python_types.SimpleStruct
     _FBTHRIFT__FIELD_NAMES = (
@@ -2112,9 +2113,13 @@ class SimpleStruct(thrift.py3.types.Struct):
         "real",
         "smaller_real",
         "something",
+        "opt_default_int",
+        "opt_default_str",
+        "opt_default_enum",
     )
     _fbthrift__inner : _fbthrift_python_types.SimpleStruct
     _fbthrift_inner__something : _typing.Mapping[int, int] | None
+    _fbthrift_inner__opt_default_enum : AnEnum | None
 
 
     def __init__(self, *args, **kwargs) -> None:
@@ -2123,6 +2128,7 @@ class SimpleStruct(thrift.py3.types.Struct):
     def __new__(cls, *args, **kwargs) -> SimpleStruct:
         instance = super().__new__(cls)
         instance._fbthrift_inner__something = None
+        instance._fbthrift_inner__opt_default_enum = None
         return instance
 
     def __call__(self, **kwargs) -> SimpleStruct:
@@ -2195,6 +2201,24 @@ class SimpleStruct(thrift.py3.types.Struct):
 
         return self._fbthrift_inner__something
 
+    @_python__property
+    def opt_default_int(self) -> int:
+        return self._fbthrift__inner.opt_default_int
+
+    @_python__property
+    def opt_default_str(self) -> str:
+        return self._fbthrift__inner.opt_default_str
+
+    @_python__property
+    def opt_default_enum(self) -> AnEnum:
+        if self._fbthrift_inner__opt_default_enum is None:
+            __python_val = self._fbthrift__inner.opt_default_enum
+            if __python_val is None:
+                return None
+            self._fbthrift_inner__opt_default_enum = AnEnum.from_python(__python_val)
+
+        return self._fbthrift_inner__opt_default_enum
+
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx: int) -> str:
@@ -2202,7 +2226,7 @@ class SimpleStruct(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_struct_size(cls) -> int:
-        return 8
+        return 11
 
     def __eq__(self, other):
         return isinstance(other, SimpleStruct) and self._fbthrift__inner == other._fbthrift__inner

@@ -117,6 +117,9 @@ class SimpleStruct(thrift.py3.types.Struct, _typing.Hashable):
         real: bool
         smaller_real: bool
         something: bool
+        opt_default_int: bool
+        opt_default_str: bool
+        opt_default_enum: bool
         pass
 
     is_on: _typing.Final[bool] = ...
@@ -127,6 +130,9 @@ class SimpleStruct(thrift.py3.types.Struct, _typing.Hashable):
     real: _typing.Final[float] = ...
     smaller_real: _typing.Final[float] = ...
     something: _typing.Final[_typing.Mapping[int, int]] = ...
+    opt_default_int: _typing.Final[int] = ...
+    opt_default_str: _typing.Final[str] = ...
+    opt_default_enum: _typing.Final[AnEnum] = ...
 
     def __init__(
         self, *,
@@ -137,7 +143,10 @@ class SimpleStruct(thrift.py3.types.Struct, _typing.Hashable):
         big_int: _typing.Optional[int]=None,
         real: _typing.Optional[float]=None,
         smaller_real: _typing.Optional[float]=None,
-        something: _typing.Optional[_typing.Mapping[int, int]]=None
+        something: _typing.Optional[_typing.Mapping[int, int]]=None,
+        opt_default_int: _typing.Optional[int]=None,
+        opt_default_str: _typing.Optional[str]=None,
+        opt_default_enum: _typing.Optional[AnEnum]=None
     ) -> None: ...
 
     def __call__(
@@ -149,7 +158,10 @@ class SimpleStruct(thrift.py3.types.Struct, _typing.Hashable):
         big_int: _typing.Union[int, None]=None,
         real: _typing.Union[float, None]=None,
         smaller_real: _typing.Union[float, None]=None,
-        something: _typing.Union[_typing.Mapping[int, int], None]=None
+        something: _typing.Union[_typing.Mapping[int, int], None]=None,
+        opt_default_int: _typing.Union[int, None]=None,
+        opt_default_str: _typing.Union[str, None]=None,
+        opt_default_enum: _typing.Union[AnEnum, None]=None
     ) -> SimpleStruct: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['SimpleStruct'], bytes]]: ...

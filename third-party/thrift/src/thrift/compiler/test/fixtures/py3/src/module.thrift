@@ -71,6 +71,12 @@ struct SimpleStruct {
   // The next field should not show up anywhere in the generated code.
   @python.Py3Hidden{}
   8: i16 hidden_field;
+  // @lint-ignore THRIFTCHECKS
+  10: optional i32 opt_default_int = 2;
+  // @lint-ignore THRIFTCHECKS
+  11: optional string opt_default_str = "2";
+  // @lint-ignore THRIFTCHECKS
+  12: optional AnEnum opt_default_enum = AnEnum.THREE;
 }
 
 @cpp.Adapter{name = "Adapter"}

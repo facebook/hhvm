@@ -480,6 +480,45 @@ _readField_hidden_field:
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           8,
+          10,
+          apache::thrift::protocol::T_I32))) {
+    goto _advance_failure;
+  }
+_readField_opt_default_int:
+  {
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, this->__fbthrift_field_opt_default_int, _readState);
+  }
+ this->__isset.set(9, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          10,
+          11,
+          apache::thrift::protocol::T_STRING))) {
+    goto _advance_failure;
+  }
+_readField_opt_default_str:
+  {
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->__fbthrift_field_opt_default_str, _readState);
+  }
+ this->__isset.set(10, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          11,
+          12,
+          apache::thrift::protocol::T_I32))) {
+    goto _advance_failure;
+  }
+_readField_opt_default_enum:
+  {
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::py3::simple::AnEnum>::readWithContext(*iprot, this->__fbthrift_field_opt_default_enum, _readState);
+  }
+ this->__isset.set(11, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          12,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _advance_failure;
@@ -574,6 +613,30 @@ _loop:
         goto _skip;
       }
     }
+    case 10:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32))) {
+        goto _readField_opt_default_int;
+      } else {
+        goto _skip;
+      }
+    }
+    case 11:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRING))) {
+        goto _readField_opt_default_str;
+      } else {
+        goto _skip;
+      }
+    }
+    case 12:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32))) {
+        goto _readField_opt_default_enum;
+      } else {
+        goto _skip;
+      }
+    }
     default:
     {
 _skip:
@@ -625,6 +688,18 @@ uint32_t SimpleStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("hidden_field", apache::thrift::protocol::T_I16, 8);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::serializedSize<false>(*prot_, this->__fbthrift_field_hidden_field);
   }
+  if (this->__isset.get(9)) {
+    xfer += prot_->serializedFieldSize("opt_default_int", apache::thrift::protocol::T_I32, 10);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, this->__fbthrift_field_opt_default_int);
+  }
+  if (this->__isset.get(10)) {
+    xfer += prot_->serializedFieldSize("opt_default_str", apache::thrift::protocol::T_STRING, 11);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->__fbthrift_field_opt_default_str);
+  }
+  if (this->__isset.get(11)) {
+    xfer += prot_->serializedFieldSize("opt_default_enum", apache::thrift::protocol::T_I32, 12);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::py3::simple::AnEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_opt_default_enum);
+  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -668,6 +743,18 @@ uint32_t SimpleStruct::serializedSizeZC(Protocol_ const* prot_) const {
   {
     xfer += prot_->serializedFieldSize("hidden_field", apache::thrift::protocol::T_I16, 8);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::serializedSize<false>(*prot_, this->__fbthrift_field_hidden_field);
+  }
+  if (this->__isset.get(9)) {
+    xfer += prot_->serializedFieldSize("opt_default_int", apache::thrift::protocol::T_I32, 10);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, this->__fbthrift_field_opt_default_int);
+  }
+  if (this->__isset.get(10)) {
+    xfer += prot_->serializedFieldSize("opt_default_str", apache::thrift::protocol::T_STRING, 11);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->__fbthrift_field_opt_default_str);
+  }
+  if (this->__isset.get(11)) {
+    xfer += prot_->serializedFieldSize("opt_default_enum", apache::thrift::protocol::T_I32, 12);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::py3::simple::AnEnum>::serializedSize<false>(*prot_, this->__fbthrift_field_opt_default_enum);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -740,6 +827,33 @@ uint32_t SimpleStruct::write(Protocol_* prot_) const {
     previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::write(*prot_, this->__fbthrift_field_hidden_field);
     xfer += prot_->writeFieldEnd();
+  }
+  if (this->__isset.get(9)) {
+    constexpr int16_t kPrevFieldId = 8;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I32, 10, kPrevFieldId>(*prot_, "opt_default_int", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::write(*prot_, this->__fbthrift_field_opt_default_int);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
+  }
+  if (this->__isset.get(10)) {
+    constexpr int16_t kPrevFieldId = 10;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRING, 11, kPrevFieldId>(*prot_, "opt_default_str", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->__fbthrift_field_opt_default_str);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
+  }
+  if (this->__isset.get(11)) {
+    constexpr int16_t kPrevFieldId = 11;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I32, 12, kPrevFieldId>(*prot_, "opt_default_enum", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::py3::simple::AnEnum>::write(*prot_, this->__fbthrift_field_opt_default_enum);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();

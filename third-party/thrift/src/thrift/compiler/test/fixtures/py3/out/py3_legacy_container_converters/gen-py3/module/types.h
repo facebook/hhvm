@@ -66,6 +66,15 @@ inline void reset_field<::py3::simple::SimpleStruct>(
     case 7:
       obj.something_ref().copy_from(default_inst<::py3::simple::SimpleStruct>().something_ref());
       return;
+    case 8:
+      obj.opt_default_int_ref().copy_from(default_inst<::py3::simple::SimpleStruct>().opt_default_int_ref());
+      return;
+    case 9:
+      obj.opt_default_str_ref().copy_from(default_inst<::py3::simple::SimpleStruct>().opt_default_str_ref());
+      return;
+    case 10:
+      obj.opt_default_enum_ref().copy_from(default_inst<::py3::simple::SimpleStruct>().opt_default_enum_ref());
+      return;
   }
 }
 

@@ -240,6 +240,39 @@ class SimpleStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             False, # field type is primitive
             16, # IDL type (see BaseTypeEnum)
         ),
+        _fbthrift_python_types.FieldInfo(
+            10,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "opt_default_int",  # name
+            "opt_default_int",  # python name (from @python.Name annotation)
+            _fbthrift_python_types.typeinfo_i32,  # typeinfo
+            2,  # default value
+            None,  # adapter info
+            True, # field type is primitive
+            4, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            11,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "opt_default_str",  # name
+            "opt_default_str",  # python name (from @python.Name annotation)
+            _fbthrift_python_types.typeinfo_string,  # typeinfo
+            "2",  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            12,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "opt_default_enum",  # name
+            "opt_default_enum",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.EnumTypeInfo(AnEnum),  # typeinfo
+            lambda: AnEnum.THREE,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            10, # IDL type (see BaseTypeEnum)
+        ),
     )
 
     @staticmethod

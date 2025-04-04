@@ -118,7 +118,7 @@ template <> struct TStructDataStorage<::py3::simple::OptionalRefStruct> {
 };
 
 template <> struct TStructDataStorage<::py3::simple::SimpleStruct> {
-  static constexpr const std::size_t fields_size = 9;
+  static constexpr const std::size_t fields_size = 12;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;

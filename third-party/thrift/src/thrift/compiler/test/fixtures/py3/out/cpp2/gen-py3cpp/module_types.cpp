@@ -328,7 +328,10 @@ SimpleStruct::SimpleStruct() :
     __fbthrift_field_big_int(),
     __fbthrift_field_real(),
     __fbthrift_field_smaller_real(),
-    __fbthrift_field_hidden_field() {
+    __fbthrift_field_hidden_field(),
+    __fbthrift_field_opt_default_int(static_cast<::std::int32_t>(2)),
+    __fbthrift_field_opt_default_str(apache::thrift::StringTraits<std::string>::fromStringLiteral("2")),
+    __fbthrift_field_opt_default_enum( ::py3::simple::AnEnum::THREE) {
 }
 
 
@@ -344,6 +347,9 @@ SimpleStruct::SimpleStruct([[maybe_unused]] SimpleStruct&& other) noexcept :
     __fbthrift_field_smaller_real(std::move(other.__fbthrift_field_smaller_real)),
     __fbthrift_field_something(std::move(other.__fbthrift_field_something)),
     __fbthrift_field_hidden_field(std::move(other.__fbthrift_field_hidden_field)),
+    __fbthrift_field_opt_default_int(std::move(other.__fbthrift_field_opt_default_int)),
+    __fbthrift_field_opt_default_str(std::move(other.__fbthrift_field_opt_default_str)),
+    __fbthrift_field_opt_default_enum(std::move(other.__fbthrift_field_opt_default_enum)),
     __isset(other.__isset) {
 }
 
@@ -357,12 +363,15 @@ SimpleStruct& SimpleStruct::operator=([[maybe_unused]] SimpleStruct&& other) noe
     this->__fbthrift_field_smaller_real = std::move(other.__fbthrift_field_smaller_real);
     this->__fbthrift_field_something = std::move(other.__fbthrift_field_something);
     this->__fbthrift_field_hidden_field = std::move(other.__fbthrift_field_hidden_field);
+    this->__fbthrift_field_opt_default_int = std::move(other.__fbthrift_field_opt_default_int);
+    this->__fbthrift_field_opt_default_str = std::move(other.__fbthrift_field_opt_default_str);
+    this->__fbthrift_field_opt_default_enum = std::move(other.__fbthrift_field_opt_default_enum);
     __isset = other.__isset;
     return *this;
 }
 
 
-SimpleStruct::SimpleStruct(apache::thrift::FragileConstructor, bool is_on__arg, ::std::int8_t tiny_int__arg, ::std::int16_t small_int__arg, ::std::int32_t nice_sized_int__arg, ::std::int64_t big_int__arg, double real__arg, float smaller_real__arg, ::std::unordered_map<::std::int32_t, ::std::int32_t> something__arg, ::std::int16_t hidden_field__arg) :
+SimpleStruct::SimpleStruct(apache::thrift::FragileConstructor, bool is_on__arg, ::std::int8_t tiny_int__arg, ::std::int16_t small_int__arg, ::std::int32_t nice_sized_int__arg, ::std::int64_t big_int__arg, double real__arg, float smaller_real__arg, ::std::unordered_map<::std::int32_t, ::std::int32_t> something__arg, ::std::int16_t hidden_field__arg, ::std::int32_t opt_default_int__arg, ::std::string opt_default_str__arg, ::py3::simple::AnEnum opt_default_enum__arg) :
     __fbthrift_field_is_on(std::move(is_on__arg)),
     __fbthrift_field_tiny_int(std::move(tiny_int__arg)),
     __fbthrift_field_small_int(std::move(small_int__arg)),
@@ -371,7 +380,10 @@ SimpleStruct::SimpleStruct(apache::thrift::FragileConstructor, bool is_on__arg, 
     __fbthrift_field_real(std::move(real__arg)),
     __fbthrift_field_smaller_real(std::move(smaller_real__arg)),
     __fbthrift_field_something(std::move(something__arg)),
-    __fbthrift_field_hidden_field(std::move(hidden_field__arg)) { 
+    __fbthrift_field_hidden_field(std::move(hidden_field__arg)),
+    __fbthrift_field_opt_default_int(std::move(opt_default_int__arg)),
+    __fbthrift_field_opt_default_str(std::move(opt_default_str__arg)),
+    __fbthrift_field_opt_default_enum(std::move(opt_default_enum__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -381,6 +393,9 @@ SimpleStruct::SimpleStruct(apache::thrift::FragileConstructor, bool is_on__arg, 
   __isset.set(folly::index_constant<6>(), true);
   __isset.set(folly::index_constant<7>(), true);
   __isset.set(folly::index_constant<8>(), true);
+  __isset.set(folly::index_constant<9>(), true);
+  __isset.set(folly::index_constant<10>(), true);
+  __isset.set(folly::index_constant<11>(), true);
 }
 
 
@@ -395,6 +410,9 @@ void SimpleStruct::__fbthrift_clear() {
   this->__fbthrift_field_smaller_real = float();
   this->__fbthrift_field_something.clear();
   this->__fbthrift_field_hidden_field = ::std::int16_t();
+  this->__fbthrift_field_opt_default_int = ::std::int32_t();
+  this->__fbthrift_field_opt_default_str = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_opt_default_enum = ::py3::simple::AnEnum();
   __isset = {};
 }
 
@@ -490,6 +508,40 @@ const ::std::unordered_map<::std::int32_t, ::std::int32_t>& SimpleStruct::get_so
   return __fbthrift_field_hidden_field;
 }
 
+const ::std::int32_t* SimpleStruct::get_opt_default_int() const& {
+  return opt_default_int_ref().has_value() ? std::addressof(__fbthrift_field_opt_default_int) : nullptr;
+}
+
+::std::int32_t* SimpleStruct::get_opt_default_int() & {
+  return opt_default_int_ref().has_value() ? std::addressof(__fbthrift_field_opt_default_int) : nullptr;
+}
+
+::std::int32_t& SimpleStruct::set_opt_default_int(::std::int32_t opt_default_int_) {
+  opt_default_int_ref() = opt_default_int_;
+  return __fbthrift_field_opt_default_int;
+}
+
+const ::std::string* SimpleStruct::get_opt_default_str() const& {
+  return opt_default_str_ref().has_value() ? std::addressof(__fbthrift_field_opt_default_str) : nullptr;
+}
+
+::std::string* SimpleStruct::get_opt_default_str() & {
+  return opt_default_str_ref().has_value() ? std::addressof(__fbthrift_field_opt_default_str) : nullptr;
+}
+
+const ::py3::simple::AnEnum* SimpleStruct::get_opt_default_enum() const& {
+  return opt_default_enum_ref().has_value() ? std::addressof(__fbthrift_field_opt_default_enum) : nullptr;
+}
+
+::py3::simple::AnEnum* SimpleStruct::get_opt_default_enum() & {
+  return opt_default_enum_ref().has_value() ? std::addressof(__fbthrift_field_opt_default_enum) : nullptr;
+}
+
+::py3::simple::AnEnum& SimpleStruct::set_opt_default_enum(::py3::simple::AnEnum opt_default_enum_) {
+  opt_default_enum_ref() = opt_default_enum_;
+  return __fbthrift_field_opt_default_enum;
+}
+
 void swap([[maybe_unused]] SimpleStruct& a, [[maybe_unused]] SimpleStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_is_on, b.__fbthrift_field_is_on);
@@ -501,6 +553,9 @@ void swap([[maybe_unused]] SimpleStruct& a, [[maybe_unused]] SimpleStruct& b) {
   swap(a.__fbthrift_field_smaller_real, b.__fbthrift_field_smaller_real);
   swap(a.__fbthrift_field_something, b.__fbthrift_field_something);
   swap(a.__fbthrift_field_hidden_field, b.__fbthrift_field_hidden_field);
+  swap(a.__fbthrift_field_opt_default_int, b.__fbthrift_field_opt_default_int);
+  swap(a.__fbthrift_field_opt_default_str, b.__fbthrift_field_opt_default_str);
+  swap(a.__fbthrift_field_opt_default_enum, b.__fbthrift_field_opt_default_enum);
   swap(a.__isset, b.__isset);
 }
 

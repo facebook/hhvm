@@ -62,6 +62,12 @@ struct VisitByFieldId<::py3::simple::SimpleStruct> {
       return f(7, static_cast<T&&>(t).something_ref());
     case 8:
       return f(8, static_cast<T&&>(t).hidden_field_ref());
+    case 10:
+      return f(9, static_cast<T&&>(t).opt_default_int_ref());
+    case 11:
+      return f(10, static_cast<T&&>(t).opt_default_str_ref());
+    case 12:
+      return f(11, static_cast<T&&>(t).opt_default_enum_ref());
     default:
       throwInvalidThriftId(fieldId, "::py3::simple::SimpleStruct");
     }

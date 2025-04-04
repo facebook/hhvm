@@ -90,6 +90,12 @@ def _fbthrift_gen_metadata_struct_SimpleStruct(metadata_struct: _fbthrift_metada
         _fbthrift_metadata.ThriftField(id=9, type=_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType(keyType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE),valueType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE))), name="something", is_optional=False, structured_annotations=[
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Type"), fields= { "template": _fbthrift_metadata.ThriftConstValue(cv_string="::std::unordered_map"),  }),
         ]),
+        _fbthrift_metadata.ThriftField(id=10, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE), name="opt_default_int", is_optional=True, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftField(id=11, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="opt_default_str", is_optional=True, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftField(id=12, type=_fbthrift_metadata.ThriftType(t_enum=_fbthrift_metadata.ThriftEnumType(name="module.AnEnum")), name="opt_default_enum", is_optional=True, structured_annotations=[
+        ]),
     ]
     struct_dict = dict(metadata_struct.structs)
     struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
@@ -108,7 +114,10 @@ def _fbthrift_gen_metadata_struct_SimpleStruct(metadata_struct: _fbthrift_metada
         # something
      # key
      # val     # hidden_field
-    
+        # opt_default_int
+        # opt_default_str
+        # opt_default_enum
+    new_struct = module.thrift_enums._fbthrift_gen_metadata_enum_AnEnum(new_struct)
     return new_struct
 def gen_metadata_struct_SimpleStruct() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_SimpleStruct(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))

@@ -24,6 +24,9 @@ struct real;
 struct smaller_real;
 struct something;
 struct hidden_field;
+struct opt_default_int;
+struct opt_default_str;
+struct opt_default_enum;
 struct field1;
 struct field2;
 struct field3;
@@ -112,6 +115,18 @@ APACHE_THRIFT_DEFINE_ACCESSOR(something);
 #ifndef APACHE_THRIFT_ACCESSOR_hidden_field
 #define APACHE_THRIFT_ACCESSOR_hidden_field
 APACHE_THRIFT_DEFINE_ACCESSOR(hidden_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_opt_default_int
+#define APACHE_THRIFT_ACCESSOR_opt_default_int
+APACHE_THRIFT_DEFINE_ACCESSOR(opt_default_int);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_opt_default_str
+#define APACHE_THRIFT_ACCESSOR_opt_default_str
+APACHE_THRIFT_DEFINE_ACCESSOR(opt_default_str);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_opt_default_enum
+#define APACHE_THRIFT_ACCESSOR_opt_default_enum
+APACHE_THRIFT_DEFINE_ACCESSOR(opt_default_enum);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_field1
 #define APACHE_THRIFT_ACCESSOR_field1
@@ -494,10 +509,13 @@ class SimpleStruct final  {
     ::apache::thrift::ident::real,
     ::apache::thrift::ident::smaller_real,
     ::apache::thrift::ident::something,
-    ::apache::thrift::ident::hidden_field
+    ::apache::thrift::ident::hidden_field,
+    ::apache::thrift::ident::opt_default_int,
+    ::apache::thrift::ident::opt_default_str,
+    ::apache::thrift::ident::opt_default_enum
   >;
 
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,9,8};
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,9,8,10,11,12};
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::bool_t,
     ::apache::thrift::type::byte_t,
@@ -507,10 +525,13 @@ class SimpleStruct final  {
     ::apache::thrift::type::double_t,
     ::apache::thrift::type::float_t,
     ::apache::thrift::type::cpp_type<::std::unordered_map<::std::int32_t, ::std::int32_t>, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::i32_t>>,
-    ::apache::thrift::type::i16_t
+    ::apache::thrift::type::i16_t,
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::string_t,
+    ::apache::thrift::type::enum_t<::py3::simple::AnEnum>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 9;
+  static constexpr std::size_t __fbthrift_field_size_v = 12;
 
   template<class T>
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
@@ -546,7 +567,7 @@ class SimpleStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  SimpleStruct(apache::thrift::FragileConstructor, bool is_on__arg, ::std::int8_t tiny_int__arg, ::std::int16_t small_int__arg, ::std::int32_t nice_sized_int__arg, ::std::int64_t big_int__arg, double real__arg, float smaller_real__arg, ::std::unordered_map<::std::int32_t, ::std::int32_t> something__arg, ::std::int16_t hidden_field__arg);
+  SimpleStruct(apache::thrift::FragileConstructor, bool is_on__arg, ::std::int8_t tiny_int__arg, ::std::int16_t small_int__arg, ::std::int32_t nice_sized_int__arg, ::std::int64_t big_int__arg, double real__arg, float smaller_real__arg, ::std::unordered_map<::std::int32_t, ::std::int32_t> something__arg, ::std::int16_t hidden_field__arg, ::std::int32_t opt_default_int__arg, ::std::string opt_default_str__arg, ::py3::simple::AnEnum opt_default_enum__arg);
 
   SimpleStruct(SimpleStruct&&) noexcept;
 
@@ -577,7 +598,13 @@ class SimpleStruct final  {
  private:
   ::std::int16_t __fbthrift_field_hidden_field;
  private:
-  apache::thrift::detail::isset_bitset<9, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+  ::std::int32_t __fbthrift_field_opt_default_int;
+ private:
+  ::std::string __fbthrift_field_opt_default_str;
+ private:
+  ::py3::simple::AnEnum __fbthrift_field_opt_default_enum;
+ private:
+  apache::thrift::detail::isset_bitset<12, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
@@ -1016,6 +1043,150 @@ class SimpleStruct final  {
     return {static_cast<fbthrift_T&&>(this->__fbthrift_field_hidden_field), __isset.at(8), __isset.bit(8)};
   }
 
+  /** Glean { "field": "opt_default_int" } */
+  template <typename..., typename fbthrift_T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const fbthrift_T&> opt_default_int_ref() const& {
+    return {this->__fbthrift_field_opt_default_int, __isset.at(9), __isset.bit(9)};
+  }
+
+  /** Glean { "field": "opt_default_int" } */
+  template <typename..., typename fbthrift_T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const fbthrift_T&&> opt_default_int_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_opt_default_int), __isset.at(9), __isset.bit(9)};
+  }
+
+  /** Glean { "field": "opt_default_int" } */
+  template <typename..., typename fbthrift_T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<fbthrift_T&> opt_default_int_ref() & {
+    return {this->__fbthrift_field_opt_default_int, __isset.at(9), __isset.bit(9)};
+  }
+
+  /** Glean { "field": "opt_default_int" } */
+  template <typename..., typename fbthrift_T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<fbthrift_T&&> opt_default_int_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_opt_default_int), __isset.at(9), __isset.bit(9)};
+  }
+
+  /** Glean { "field": "opt_default_int" } */
+  template <typename..., typename fbthrift_T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const fbthrift_T&> opt_default_int() const& {
+    return {this->__fbthrift_field_opt_default_int, __isset.at(9), __isset.bit(9)};
+  }
+
+  /** Glean { "field": "opt_default_int" } */
+  template <typename..., typename fbthrift_T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const fbthrift_T&&> opt_default_int() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_opt_default_int), __isset.at(9), __isset.bit(9)};
+  }
+
+  /** Glean { "field": "opt_default_int" } */
+  template <typename..., typename fbthrift_T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<fbthrift_T&> opt_default_int() & {
+    return {this->__fbthrift_field_opt_default_int, __isset.at(9), __isset.bit(9)};
+  }
+
+  /** Glean { "field": "opt_default_int" } */
+  template <typename..., typename fbthrift_T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<fbthrift_T&&> opt_default_int() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_opt_default_int), __isset.at(9), __isset.bit(9)};
+  }
+
+  /** Glean { "field": "opt_default_str" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const fbthrift_T&> opt_default_str_ref() const& {
+    return {this->__fbthrift_field_opt_default_str, __isset.at(10), __isset.bit(10)};
+  }
+
+  /** Glean { "field": "opt_default_str" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const fbthrift_T&&> opt_default_str_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_opt_default_str), __isset.at(10), __isset.bit(10)};
+  }
+
+  /** Glean { "field": "opt_default_str" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<fbthrift_T&> opt_default_str_ref() & {
+    return {this->__fbthrift_field_opt_default_str, __isset.at(10), __isset.bit(10)};
+  }
+
+  /** Glean { "field": "opt_default_str" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<fbthrift_T&&> opt_default_str_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_opt_default_str), __isset.at(10), __isset.bit(10)};
+  }
+
+  /** Glean { "field": "opt_default_str" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const fbthrift_T&> opt_default_str() const& {
+    return {this->__fbthrift_field_opt_default_str, __isset.at(10), __isset.bit(10)};
+  }
+
+  /** Glean { "field": "opt_default_str" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const fbthrift_T&&> opt_default_str() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_opt_default_str), __isset.at(10), __isset.bit(10)};
+  }
+
+  /** Glean { "field": "opt_default_str" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<fbthrift_T&> opt_default_str() & {
+    return {this->__fbthrift_field_opt_default_str, __isset.at(10), __isset.bit(10)};
+  }
+
+  /** Glean { "field": "opt_default_str" } */
+  template <typename..., typename fbthrift_T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<fbthrift_T&&> opt_default_str() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_opt_default_str), __isset.at(10), __isset.bit(10)};
+  }
+
+  /** Glean { "field": "opt_default_enum" } */
+  template <typename..., typename fbthrift_T = ::py3::simple::AnEnum>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const fbthrift_T&> opt_default_enum_ref() const& {
+    return {this->__fbthrift_field_opt_default_enum, __isset.at(11), __isset.bit(11)};
+  }
+
+  /** Glean { "field": "opt_default_enum" } */
+  template <typename..., typename fbthrift_T = ::py3::simple::AnEnum>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const fbthrift_T&&> opt_default_enum_ref() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_opt_default_enum), __isset.at(11), __isset.bit(11)};
+  }
+
+  /** Glean { "field": "opt_default_enum" } */
+  template <typename..., typename fbthrift_T = ::py3::simple::AnEnum>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<fbthrift_T&> opt_default_enum_ref() & {
+    return {this->__fbthrift_field_opt_default_enum, __isset.at(11), __isset.bit(11)};
+  }
+
+  /** Glean { "field": "opt_default_enum" } */
+  template <typename..., typename fbthrift_T = ::py3::simple::AnEnum>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<fbthrift_T&&> opt_default_enum_ref() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_opt_default_enum), __isset.at(11), __isset.bit(11)};
+  }
+
+  /** Glean { "field": "opt_default_enum" } */
+  template <typename..., typename fbthrift_T = ::py3::simple::AnEnum>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const fbthrift_T&> opt_default_enum() const& {
+    return {this->__fbthrift_field_opt_default_enum, __isset.at(11), __isset.bit(11)};
+  }
+
+  /** Glean { "field": "opt_default_enum" } */
+  template <typename..., typename fbthrift_T = ::py3::simple::AnEnum>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const fbthrift_T&&> opt_default_enum() const&& {
+    return {static_cast<const fbthrift_T&&>(this->__fbthrift_field_opt_default_enum), __isset.at(11), __isset.bit(11)};
+  }
+
+  /** Glean { "field": "opt_default_enum" } */
+  template <typename..., typename fbthrift_T = ::py3::simple::AnEnum>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<fbthrift_T&> opt_default_enum() & {
+    return {this->__fbthrift_field_opt_default_enum, __isset.at(11), __isset.bit(11)};
+  }
+
+  /** Glean { "field": "opt_default_enum" } */
+  template <typename..., typename fbthrift_T = ::py3::simple::AnEnum>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<fbthrift_T&&> opt_default_enum() && {
+    return {static_cast<fbthrift_T&&>(this->__fbthrift_field_opt_default_enum), __isset.at(11), __isset.bit(11)};
+  }
+
   /** Glean { "field": "is_on" } */
   [[deprecated("Use `FOO.is_on().value()` instead of `FOO.get_is_on()`")]]
   bool get_is_on() const;
@@ -1095,6 +1266,52 @@ class SimpleStruct final  {
   /** Glean { "field": "hidden_field" } */
   [[deprecated("Use `FOO.hidden_field() = BAR` instead of `FOO.set_hidden_field(BAR)`")]]
   ::std::int16_t& set_hidden_field(::std::int16_t hidden_field_);
+
+  /** Glean { "field": "opt_default_int" } */
+  [[deprecated("Use `FOO.opt_default_int().value()` instead of `FOO.get_opt_default_int()`")]]
+  const ::std::int32_t* get_opt_default_int() const&;
+
+  /** Glean { "field": "opt_default_int" } */
+  [[deprecated("Use `FOO.opt_default_int().value()` instead of `FOO.get_opt_default_int()`")]]
+  ::std::int32_t* get_opt_default_int() &;
+
+  ::std::int32_t* get_opt_default_int() && = delete;
+
+  /** Glean { "field": "opt_default_int" } */
+  [[deprecated("Use `FOO.opt_default_int() = BAR` instead of `FOO.set_opt_default_int(BAR)`")]]
+  ::std::int32_t& set_opt_default_int(::std::int32_t opt_default_int_);
+
+  /** Glean { "field": "opt_default_str" } */
+  [[deprecated("Use `FOO.opt_default_str().value()` instead of `FOO.get_opt_default_str()`")]]
+  const ::std::string* get_opt_default_str() const&;
+
+  /** Glean { "field": "opt_default_str" } */
+  [[deprecated("Use `FOO.opt_default_str().value()` instead of `FOO.get_opt_default_str()`")]]
+  ::std::string* get_opt_default_str() &;
+
+  ::std::string* get_opt_default_str() && = delete;
+
+  /** Glean { "field": "opt_default_str" } */
+  template <typename T_SimpleStruct_opt_default_str_struct_setter = ::std::string>
+  [[deprecated("Use `FOO.opt_default_str() = BAR` instead of `FOO.set_opt_default_str(BAR)`")]]
+  ::std::string& set_opt_default_str(T_SimpleStruct_opt_default_str_struct_setter&& opt_default_str_) {
+    opt_default_str_ref() = std::forward<T_SimpleStruct_opt_default_str_struct_setter>(opt_default_str_);
+    return __fbthrift_field_opt_default_str;
+  }
+
+  /** Glean { "field": "opt_default_enum" } */
+  [[deprecated("Use `FOO.opt_default_enum().value()` instead of `FOO.get_opt_default_enum()`")]]
+  const ::py3::simple::AnEnum* get_opt_default_enum() const&;
+
+  /** Glean { "field": "opt_default_enum" } */
+  [[deprecated("Use `FOO.opt_default_enum().value()` instead of `FOO.get_opt_default_enum()`")]]
+  ::py3::simple::AnEnum* get_opt_default_enum() &;
+
+  ::py3::simple::AnEnum* get_opt_default_enum() && = delete;
+
+  /** Glean { "field": "opt_default_enum" } */
+  [[deprecated("Use `FOO.opt_default_enum() = BAR` instead of `FOO.set_opt_default_enum(BAR)`")]]
+  ::py3::simple::AnEnum& set_opt_default_enum(::py3::simple::AnEnum opt_default_enum_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

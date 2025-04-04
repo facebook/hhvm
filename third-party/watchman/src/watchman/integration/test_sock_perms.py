@@ -9,8 +9,10 @@
 
 import os
 import random
+import re
 import stat
 import string
+import subprocess
 import sys
 import time
 import unittest
@@ -266,6 +268,23 @@ class TestSockPerms(unittest.TestCase):
         self.assertFileGID(instance.user_dir, gid)
         self.assertFileGID(instance.sock_file, gid)
 
+    def test_sock_access_via_acl(self) -> None:
+        gid = self._get_custom_gid()
+        group = grp.getgrgid(gid)
+        instance = self._new_instance({"secondary_sock_group": group.gr_name})
+        instance.start()
+        instance.stop()
+
+        self.assertFileACL(instance.sock_file, group)
+
+    def test_sock_access_via_acl_user_not_in_sock_group(self) -> None:
+        group = self._get_non_member_group()
+        instance = self._new_instance({"secondary_sock_group": group.gr_name})
+        instance.start()
+        instance.stop()
+
+        self.assertFileACL(instance.sock_file, group)
+
     def assertFileMode(self, f, mode) -> None:
         st = os.lstat(f)
         self.assertEqual(stat.S_IMODE(st.st_mode), mode)
@@ -273,3 +292,14 @@ class TestSockPerms(unittest.TestCase):
     def assertFileGID(self, f, gid) -> None:
         st = os.lstat(f)
         self.assertEqual(st.st_gid, gid)
+
+    def assertFileACL(self, f, group) -> None:
+        getfacl_result = subprocess.run(
+            ["/usr/bin/getfacl", f], capture_output=True, text=True, check=True
+        ).stdout
+
+        group_pattern = re.compile(f"group:{group.gr_name}:rw-")
+        self.assertIsNotNone(
+            group_pattern.search(getfacl_result),
+            f"Group '{group.gr_name}' does not have expected 'rw-' permissions, acl result:\n {getfacl_result}",
+        )

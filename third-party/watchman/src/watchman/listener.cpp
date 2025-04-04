@@ -23,6 +23,7 @@
 #include "watchman/Shutdown.h"
 #include "watchman/SignalHandler.h"
 #include "watchman/WatchmanConfig.h"
+#include "watchman/XattrUtils.h"
 #include "watchman/portability/WinError.h"
 #include "watchman/sockname.h"
 #include "watchman/state.h"
@@ -97,6 +98,23 @@ static FileDescriptor get_listener_unix_domain_socket(const char* path) {
     logf(ERR, "chmod({}, {:o}): {}", path, perms, folly::errnoStr(errno));
     return FileDescriptor();
   }
+#ifdef __linux__
+  // Allow setting an ACL on the sock file, this method does not require the
+  // owner to be a member of the target group.
+  const char* secondary_sock_group =
+      cfg_get_string("secondary_sock_group", nullptr);
+
+  if (secondary_sock_group) {
+    if (!watchman::setFileSecondaryGroupACL(
+            path,
+            secondary_sock_group,
+            true /* read bits */,
+            true /* write bits */,
+            false /* execute bits */)) {
+      return FileDescriptor();
+    }
+  }
+#endif
 
   // Double-check that the socket has the right permissions. This can happen
   // when the containing directory was created in a previous run, with a group

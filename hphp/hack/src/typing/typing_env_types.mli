@@ -106,6 +106,8 @@ and genv = {
       (** Is the definition that we are checking marked <<__SupportDynamicType>>? *)
   no_auto_likes: bool;
       (** Is the definition that we are checking marked <<__NoAutoLikes>>? *)
+  needs_concrete: bool;
+      (** Is the definition that we are checking marked <<__NeedsConcrete>>? *)
 }
 
 val empty :

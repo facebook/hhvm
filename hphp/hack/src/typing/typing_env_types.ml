@@ -71,6 +71,7 @@ and genv = {
   this_internal: bool;
   this_support_dynamic_type: bool;
   no_auto_likes: bool;
+  needs_concrete: bool;
 }
 
 let initial_local tpenv =
@@ -121,6 +122,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
         this_internal = false;
         this_support_dynamic_type = false;
         no_auto_likes = false;
+        needs_concrete = false;
       };
     tpenv = Type_parameter_env.empty;
     log_levels = TypecheckerOptions.log_levels (Provider_context.get_tcopt ctx);

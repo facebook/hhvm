@@ -532,6 +532,7 @@ let genv_as_value env genv =
     this_internal;
     this_support_dynamic_type;
     no_auto_likes;
+    needs_concrete;
   } =
     genv
   in
@@ -549,6 +550,7 @@ let genv_as_value env genv =
        ("this_internal", bool_as_value this_internal);
        ("this_support_dynamic_type", bool_as_value this_support_dynamic_type);
        ("no_auto_likes", bool_as_value no_auto_likes);
+       ("needs_concrete", bool_as_value needs_concrete);
      ]
     @ (match current_module with
       | Some current_module ->

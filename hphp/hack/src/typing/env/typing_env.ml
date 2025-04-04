@@ -1007,6 +1007,9 @@ let set_support_dynamic_type env b =
 let set_no_auto_likes env b =
   { env with genv = { env.genv with no_auto_likes = b } }
 
+let set_needs_concrete env b =
+  { env with genv = { env.genv with needs_concrete = b } }
+
 let set_everything_sdt env b =
   map_tcopt
     ~f:(fun tcopt ->

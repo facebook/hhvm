@@ -49,21 +49,6 @@ struct BasicRefsShared {
   1: HasInt def_field;
 }
 
-@cpp.Type{name = "WrappedTypeField<Basic>"}
-typedef Basic (cpp.indirection) BasicIndirection
-
-@cpp.Type{name = "WrappedTypeField<folly::IOBuf>"}
-typedef binary (cpp.indirection) t_foo
-@cpp.Type{name = "WrappedTypeField<std::string>"}
-typedef binary (cpp.indirection) t_bar
-@cpp.Type{name = "WrappedTypeMethod<folly::IOBuf>"}
-typedef binary (cpp.indirection) t_baz
-struct IOBufIndirection {
-  1: t_foo foo;
-  2: t_bar bar;
-  3: t_baz baz;
-}
-
 struct HasSmallSortedVector {
   @cpp.Type{template = "SmallSortedVectorSet"}
   1: set<i32> set_field;

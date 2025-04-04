@@ -256,28 +256,6 @@ const NestedBoxExample kNestedBoxExample = {
   "nil": {},
 };
 
-@cpp.Type{name = "CppHasANumber"}
-typedef i32 (cpp.indirection) HasANumber
-
-struct Indirection {
-  1: i32 real;
-  2: HasANumber fake;
-}
-
-struct IndirectionExample {
-  1: Indirection src;
-  2: Indirection dst;
-  3: Indirection exp;
-  4: Indirection nil;
-}
-
-const IndirectionExample kIndirectionExample = {
-  "src": {"real": 45, "fake": 33},
-  "dst": {},
-  "exp": {"real": 45, "fake": 33},
-  "nil": {"real": 45, "fake": 33},
-};
-
 union BasicUnion {
   1: i32 a;
   2: string b;

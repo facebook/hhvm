@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-cpp_include "thrift/test/reflection/fatal_legacy_reflection_types.h"
-
 namespace cpp2 apache.thrift.test
 namespace hack ""
 
 include "thrift/annotation/cpp.thrift"
 
 include "thrift/annotation/thrift.thrift"
-
-@cpp.Type{name = "CppHasANumber"}
-typedef i32 (cpp.indirection) HasANumber
 
 enum SampleEnum {
   kSampleEnumFoo = 0,
@@ -61,7 +56,6 @@ struct SampleStruct {
   19: list<float> list_float_field;
   20: list<binary> list_binary_field;
   21: string annotated_string_field (ann_key = 'ann_value');
-  22: HasANumber i32_indirection_field;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.AllowLegacyNonOptionalRef
   23: SampleSubStruct struct_ref_field;

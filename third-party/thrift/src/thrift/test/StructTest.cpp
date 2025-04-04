@@ -604,14 +604,6 @@ TEST_F(StructTest, less_refs_shared) {
   }
 }
 
-TEST_F(StructTest, custom_indirection) {
-  IOBufIndirection a;
-  a.foo()->raw = folly::IOBuf(folly::IOBuf::COPY_BUFFER, "test");
-  a.bar()->raw = "test2";
-  IOBufIndirection b = a;
-  EXPECT_EQ(a, b);
-}
-
 TEST_F(StructTest, small_sorted_vector) {
   using Set = SmallSortedVectorSet<int32_t>;
   using Map = SmallSortedVectorMap<int32_t, int32_t>;
@@ -656,17 +648,6 @@ TEST_F(StructTest, clear) {
   EXPECT_EQ(0, *obj.def_field());
   EXPECT_EQ(0, *obj.req_field());
   EXPECT_FALSE(obj.opt_field());
-}
-
-TEST_F(StructTest, BasicIndirection) {
-  BasicIndirection obj;
-  obj.raw.def_field() = 7;
-  obj.raw.req_field() = 8;
-  obj.raw.opt_field() = 9;
-  apache::thrift::CompactSerializer ser;
-  auto obj2 =
-      ser.deserialize<BasicIndirection>(ser.serialize<std::string>(obj));
-  EXPECT_EQ(obj.raw, obj2.raw);
 }
 
 TEST_F(StructTest, EmptiableOptionalFieldsStruct) {

@@ -40,6 +40,7 @@ from apache.thrift.metadata.cbindings cimport (
     cThriftService,
     cThriftEnum,
 )
+from apache.thrift.metadata.thrift_types import ThriftEnum as ThriftPythonEnum
 from apache.thrift.metadata.types import (
     ThriftMetadata,
     ThriftStruct,
@@ -454,7 +455,10 @@ def gen_metadata(obj_or_cls):
         return python_gen_metadata(cls._FBTHRIFT__PYTHON_CLASS)
 
     if use_python_metadata(cls):
-        return python_gen_metadata(cls)
+        meta = python_gen_metadata(cls)
+        if isinstance(meta, ThriftPythonEnum):
+            meta = meta._to_py3()
+        return meta
 
     if not issubclass(cls, (Struct, GeneratedError, ServiceInterface, Client, CompiledEnum)):
         raise TypeError(f'{cls!r} is not a thrift-py3 type.')

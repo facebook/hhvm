@@ -85,12 +85,6 @@ struct DynamicPatchOptions {
   bool doNotConvertStringToBinary = false;
 };
 
-// Note: this function is half-baked.
-// Currently we only implemented struct/union for internal use cases.
-// Ideally we should also support primitive types (e.g., i32 --> I32Patch).
-// External users should use toPatchUri/fromPatchUri instead for now.
-type::Type toPatchType(type::Type input);
-
 void checkSameType(
     const apache::thrift::protocol::Value& v1,
     const apache::thrift::protocol::Value& v2);
@@ -1114,8 +1108,12 @@ class DiffVisitorBase {
 // Convert a normal struct uri to patch uri
 std::string toPatchUri(std::string s);
 std::string fromPatchUri(std::string s);
-// Convert a struct/union type to SafePatch type
-type::Type toSafePatchType(type::Type input);
 /// @endcond
+
+/// Convert a struct/union type to SafePatch type.
+type::Type toSafePatchType(type::Type input);
+/// Convert a struct/union type to Patch type.
+/// Currently, it does not support primitive types (e.g., i32 --> I32Patch).
+type::Type toPatchType(type::Type input);
 
 } // namespace apache::thrift::protocol

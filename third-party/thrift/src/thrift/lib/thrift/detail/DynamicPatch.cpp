@@ -194,32 +194,6 @@ void convertStringToBinary(Value& v) {
   }
 }
 
-type::Type toPatchType(type::Type input) {
-  auto& name = input.toThrift().name().value();
-  auto handleUri = [&](auto& type) {
-    if (auto p = type.uri_ref()) {
-      *p = toPatchUri(*p);
-      return std::move(input);
-    }
-    folly::throw_exception<std::runtime_error>(fmt::format(
-        "Unsupported Uri: {}",
-        apache::thrift::util::enumNameSafe(type.getType())));
-  };
-
-  if (auto structType = name.structType_ref()) {
-    return handleUri(*structType);
-  } else if (auto unionType = name.unionType_ref()) {
-    // All Thrift Patch is struct type.
-    auto temp = std::move(*unionType);
-    name.structType_ref() = std::move(temp);
-    return handleUri(*name.structType_ref());
-  }
-
-  folly::throw_exception<std::runtime_error>(fmt::format(
-      "Unsupported type: {}",
-      apache::thrift::util::enumNameSafe(name.getType())));
-}
-
 void checkSameType(
     const apache::thrift::protocol::Value& v1,
     const apache::thrift::protocol::Value& v2) {
@@ -315,7 +289,6 @@ std::string fromPatchUri(std::string s) {
 }
 /// @endcond
 
-/// @cond
 type::Type toSafePatchType(type::Type input) {
   auto& name = input.toThrift().name().value();
   auto handleUri = [&](auto& type) {
@@ -341,7 +314,32 @@ type::Type toSafePatchType(type::Type input) {
       "Unsupported type: {}",
       apache::thrift::util::enumNameSafe(name.getType())));
 }
-/// @endcond
+
+type::Type toPatchType(type::Type input) {
+  auto& name = input.toThrift().name().value();
+  auto handleUri = [&](auto& type) {
+    if (auto p = type.uri_ref()) {
+      *p = toPatchUri(*p);
+      return std::move(input);
+    }
+    folly::throw_exception<std::runtime_error>(fmt::format(
+        "Unsupported Uri: {}",
+        apache::thrift::util::enumNameSafe(type.getType())));
+  };
+
+  if (auto structType = name.structType_ref()) {
+    return handleUri(*structType);
+  } else if (auto unionType = name.unionType_ref()) {
+    // All Thrift Patch is struct type.
+    auto temp = std::move(*unionType);
+    name.structType_ref() = std::move(temp);
+    return handleUri(*name.structType_ref());
+  }
+
+  folly::throw_exception<std::runtime_error>(fmt::format(
+      "Unsupported type: {}",
+      apache::thrift::util::enumNameSafe(name.getType())));
+}
 
 DynamicListPatch& DynamicPatch::getStoredPatchByTag(type::list_c) {
   return getStoredPatch<DynamicListPatch>();
@@ -1205,7 +1203,7 @@ op::AnyPatch DiffVisitorBase::diffAny(
     anySubPatch.protocol() = type::StandardProtocol::Compact;
     anySubPatch.data() =
         *serializeObject<CompactProtocolWriter>(subPatch.toObject());
-    anySubPatch.type() = detail::toPatchType(*src.type());
+    anySubPatch.type() = toPatchType(*src.type());
     patch.patchIfTypeIs(*src.type(), std::move(anySubPatch));
   }
 
@@ -1979,7 +1977,7 @@ type::AnyStruct DynamicPatch::toAny(detail::Badge, type::Type type) const {
   type::AnyStruct any;
   any.protocol() = type::StandardProtocol::Compact;
   any.data() = *protocol::serializeObject<CompactProtocolWriter>(toObject());
-  any.type() = protocol::detail::toPatchType(type);
+  any.type() = toPatchType(type);
   return any;
 }
 

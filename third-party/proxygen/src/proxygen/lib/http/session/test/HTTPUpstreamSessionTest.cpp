@@ -71,28 +71,6 @@ class TestPriorityAdapter : public HTTPUpstreamSession::PriorityAdapter {
   HTTPMessage::HTTP2Priority loPri_{std::make_tuple(0, false, 0)};
 };
 
-std::unique_ptr<HTTPUpstreamSession::PriorityAdapter>
-TestPriorityMapBuilder::createVirtualStreams(
-    HTTPPriorityMapFactoryProvider* session) const {
-  std::unique_ptr<TestPriorityAdapter> a =
-      std::make_unique<TestPriorityAdapter>();
-  a->parentId_ = session->sendPriority({0, false, 1});
-
-  std::get<0>(a->hiPri_) = a->parentId_;
-  std::get<2>(a->hiPri_) = hiPriWeight_;
-  a->hiPriId_ = session->sendPriority({a->parentId_, false, hiPriWeight_});
-  a->priorityMap_[hiPriLevel_] = a->hiPri_;
-
-  std::get<0>(a->loPri_) = a->parentId_;
-  std::get<2>(a->loPri_) = loPriWeight_;
-  a->loPriId_ = session->sendPriority({a->parentId_, false, loPriWeight_});
-  a->priorityMap_[loPriLevel_] = a->loPri_;
-
-  a->minPriority_ = a->loPri_;
-
-  return std::move(a);
-}
-
 namespace {
 HTTPMessage getUpgradePostRequest(uint32_t bodyLen,
                                   const std::string& upgradeHeader,

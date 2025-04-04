@@ -210,20 +210,6 @@ class HTTPSession
   size_t sendPing() override;
 
   /**
-   * Sends a priority message on this session.  If the underlying protocol
-   * doesn't support priority, this is a no-op.  A new stream identifier will
-   * be selected and returned.
-   */
-  HTTPCodec::StreamID sendPriority(http2::PriorityUpdate pri) override;
-
-  /**
-   * As above, but updates an existing priority node.  Do not use for
-   * real nodes, prefer HTTPTransaction::changePriority.
-   */
-  size_t sendPriority(HTTPCodec::StreamID id,
-                      http2::PriorityUpdate pri) override;
-
-  /**
    * Send a CERTIFICATE_REQUEST frame. If the underlying protocol doesn't
    * support secondary authentication, this is a no-op and 0 is returned.
    */
@@ -407,14 +393,6 @@ class HTTPSession
                                  bool egressEOM);
 
   size_t getCodecSendWindowSize() const;
-
-  /**
-   * Sends a priority message on this session.  If the underlying protocol
-   * doesn't support priority, this is a no-op.  Returns the number of bytes
-   * written on the transport
-   */
-  size_t sendPriorityImpl(HTTPCodec::StreamID streamID,
-                          http2::PriorityUpdate pri);
 
   bool onNativeProtocolUpgradeImpl(HTTPCodec::StreamID txn,
                                    std::unique_ptr<HTTPCodec> codec,

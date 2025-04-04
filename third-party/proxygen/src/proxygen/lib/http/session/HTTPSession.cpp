@@ -2698,36 +2698,6 @@ void HTTPSession::PingProber::onPingReply(uint64_t pingVal) {
   refreshTimeout(/*onIngress=*/false);
 }
 
-HTTPCodec::StreamID HTTPSession::sendPriority(http2::PriorityUpdate pri) {
-  if (!codec_->supportsParallelRequests()) {
-    // For HTTP/1.1, don't call createStream()
-    return 0;
-  }
-  auto id = codec_->createStream();
-  sendPriority(id, pri);
-  return id;
-}
-
-size_t HTTPSession::sendPriority(HTTPCodec::StreamID id,
-                                 http2::PriorityUpdate pri) {
-  auto res = sendPriorityImpl(id, pri);
-  txnEgressQueue_.addOrUpdatePriorityNode(id, pri);
-  return res;
-}
-
-size_t HTTPSession::sendPriorityImpl(HTTPCodec::StreamID id,
-                                     http2::PriorityUpdate pri) {
-  CHECK_NE(id, 0);
-  const size_t bytes = codec_->generatePriority(
-      writeBuf_,
-      id,
-      std::make_tuple(pri.streamDependency, pri.exclusive, pri.weight));
-  if (bytes) {
-    scheduleWrite();
-  }
-  return bytes;
-}
-
 HTTPTransaction* HTTPSession::findTransaction(HTTPCodec::StreamID streamID) {
   if (lastTxn_ && streamID == lastTxn_->getID()) {
     return lastTxn_;

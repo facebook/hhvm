@@ -33,7 +33,6 @@ constexpr uint32_t kDefaultMaxConcurrentOutgoingStreams = 100;
 class HTTPPriorityMapFactoryProvider {
  public:
   virtual ~HTTPPriorityMapFactoryProvider() = default;
-  virtual HTTPCodec::StreamID sendPriority(http2::PriorityUpdate pri) = 0;
 };
 
 class HTTPSessionBase : public wangle::ManagedConnection {
@@ -334,22 +333,6 @@ class HTTPSessionBase : public wangle::ManagedConnection {
   virtual size_t sendPing() = 0;
 
   virtual size_t sendPing(uint64_t data) = 0;
-
-  /**
-   * Sends a priority message on this session.  If the underlying protocol
-   * doesn't support priority, this is a no-op.  A new stream identifier will
-   * be selected and returned.
-   */
-  virtual HTTPCodec::StreamID sendPriority(http2::PriorityUpdate pri)
-      /*override*/
-      = 0;
-
-  /**
-   * As above, but updates an existing priority node.  Do not use for
-   * real nodes, prefer HTTPTransaction::changePriority.
-   */
-  virtual size_t sendPriority(HTTPCodec::StreamID id,
-                              http2::PriorityUpdate pri) = 0;
 
   /**
    * Send a CERTIFICATE_REQUEST frame. If the underlying protocol doesn't

@@ -377,24 +377,6 @@ class HQSession
     return sock_->setKnob(knobSpace, knobId, std::move(knobBlob));
   }
 
-  /**
-   * Sends a priority message on this session.  If the underlying protocol
-   * doesn't support priority, this is a no-op.  A new stream identifier will
-   * be selected and returned.
-   */
-  HTTPCodec::StreamID sendPriority(http2::PriorityUpdate /*pri*/) override {
-    return 0;
-  }
-
-  /**
-   * As above, but updates an existing priority node.  Do not use for
-   * real nodes, prefer HTTPTransaction::changePriority.
-   */
-  size_t sendPriority(HTTPCodec::StreamID /*id*/,
-                      http2::PriorityUpdate /*pri*/) override {
-    return 0;
-  }
-
   size_t sendPriority(HTTPCodec::StreamID id, HTTPPriority pri);
   size_t sendPushPriority(hq::PushId pushId, HTTPPriority pri);
 

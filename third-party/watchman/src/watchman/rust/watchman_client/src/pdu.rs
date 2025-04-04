@@ -696,7 +696,7 @@ pub struct UnsubscribeResponse {
 /// A clock can also encoded metadata describing the state of source
 /// control to work with source control aware queries:
 /// <https://facebook.github.io/watchman/docs/scm-query.html>
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(untagged)]
 pub enum Clock {
     /// Just a basic ClockSpec
@@ -714,7 +714,7 @@ pub enum Clock {
 /// about the relationship between any two ClockSpec's.
 ///
 /// <https://facebook.github.io/watchman/docs/clockspec.html>
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(untagged)]
 pub enum ClockSpec {
     StringClock(String),
@@ -786,7 +786,7 @@ impl From<ClockSpec> for Value {
 /// Holds extended clock data that includes source control aware
 /// query metadata.
 /// <https://facebook.github.io/watchman/docs/scm-query.html>
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct FatClockData {
     pub clock: ClockSpec,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -796,7 +796,7 @@ pub struct FatClockData {
 /// Holds extended clock data that includes source control aware
 /// query metadata.
 /// <https://facebook.github.io/watchman/docs/scm-query.html>
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct ScmAwareClockData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub mergebase: Option<String>,
@@ -812,7 +812,7 @@ pub struct ScmAwareClockData {
 /// Holds extended clock data that includes source control aware
 /// query metadata.
 /// <https://facebook.github.io/watchman/docs/scm-query.html>
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct SavedStateClockData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub storage: Option<String>,

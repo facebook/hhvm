@@ -4689,14 +4689,6 @@ fn process_attribute_constructor_call<'a>(
                     sn::memoize_option::KEYED_BY_IC.to_string(),
                 ))),
             ));
-        } else if env.parser_options.disallow_non_annotated_memoize && params.is_empty() {
-            // if DisallowNonAnnotatedMemoize was supplied by config, plain <<__Memoize>>
-            // are not allowed. This only matters if TreatNonAnnotatedMemoizeAsKBIC was not supplied
-            raise_parsing_error(
-                node,
-                env,
-                &syntax_error::memoize_without_annotation_disabled(&name.1),
-            );
         }
 
         if list.len() > 1 {
@@ -5804,18 +5796,32 @@ fn check_effect_memoized<'a>(
             )
         }
     }
-    // functions whose contexts prevent getting the IC (effectively <= [leak_safe, globals])
-    // cannot pass a memoize argument
-    if contexts_cannot_access_ic(contexts) {
-        if let Some(u) = user_attributes
-            .iter()
-            .find(|u| sn::user_attributes::is_memoized(&u.name.1) && !u.params.is_empty())
+    if let Some(u) = user_attributes
+        .iter()
+        .find(|u| sn::user_attributes::is_memoized(&u.name.1))
+    {
+        if contexts_cannot_access_ic(contexts) {
+            // functions whose contexts prevent getting the IC (effectively <= [leak_safe, globals])
+            // cannot pass a memoize argument
+            if !u.params.is_empty() {
+                raise_parsing_error_pos(
+                    &u.name.0,
+                    env,
+                    &syntax_error::memoize_category_without_implicit_policy_capability(kind),
+                )
+            }
+        } else if env.parser_options.disallow_non_annotated_memoize
+            && !env.parser_options.treat_non_annotated_memoize_as_kbic
+            && u.params.is_empty()
         {
+            // if DisallowNonAnnotatedMemoize was supplied by config and coeffects allow
+            // <<__Memoize>> to be categorized, then plain <<__Memoize>> are not allowed.
+            // This only matters if TreatNonAnnotatedMemoizeAsKBIC was not supplied
             raise_parsing_error_pos(
                 &u.name.0,
                 env,
-                &syntax_error::memoize_category_without_implicit_policy_capability(kind),
-            )
+                &syntax_error::memoize_without_annotation_disabled(&u.name.1),
+            );
         }
     }
 }

@@ -50,6 +50,12 @@ class ServiceInterceptor : public ServiceInterceptorBase {
   }
   virtual void onConnectionClosed(ConnectionState*, ConnectionInfo) noexcept {}
 
+  const ServiceInterceptorQualifiedName& getQualifiedName() const final {
+    CHECK(qualifiedName_.has_value())
+        << "Broken Invariant: ServiceInterceptor::getQualifiedName() was called before ServiceInterceptor::setModuleName()";
+    return *qualifiedName_;
+  }
+
  private:
   void internal_onConnection(ConnectionInfo connectionInfo) final {
     auto* storage = connectionInfo.storage;
@@ -67,7 +73,6 @@ class ServiceInterceptor : public ServiceInterceptorBase {
   folly::coro::Task<void> internal_onRequest(
       ConnectionInfo connectionInfo,
       RequestInfo requestInfo,
-      const ServiceInterceptorQualifiedName& qualifiedName,
       InterceptorMetricCallback& interceptorMetricCallback) final {
     folly::stop_watch<std::chrono::milliseconds> onRequestTimer;
     auto* connectionState =
@@ -78,7 +83,7 @@ class ServiceInterceptor : public ServiceInterceptorBase {
       storage->emplace<RequestState>(std::move(*value));
     }
     interceptorMetricCallback.onRequestComplete(
-        qualifiedName, onRequestTimer.elapsed());
+        getQualifiedName(), onRequestTimer.elapsed());
   }
 
   folly::coro::Task<void> internal_onResponse(
@@ -88,6 +93,14 @@ class ServiceInterceptor : public ServiceInterceptorBase {
         getValueAsType<ConnectionState>(*connectionInfo.storage);
     co_await onResponse(requestState, connectionState, std::move(responseInfo));
   }
+
+  void setModuleName(const std::string& moduleName) final {
+    CHECK(!qualifiedName_.has_value())
+        << "Broken Invariant: ServiceInterceptor::setModuleName() was called more than once";
+    qualifiedName_ = {.moduleName = moduleName, .interceptorName = getName()};
+  }
+
+  std::optional<ServiceInterceptorQualifiedName> qualifiedName_;
 };
 
 } // namespace apache::thrift

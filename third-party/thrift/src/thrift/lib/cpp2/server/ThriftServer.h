@@ -2109,7 +2109,8 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
         coalescedLegacyEventHandlers;
     std::vector<std::shared_ptr<server::TServerEventHandler>>
         coalescedLegacyServerEventHandlers;
-    std::vector<ServiceInterceptorInfo> coalescedServiceInterceptors;
+    std::vector<std::shared_ptr<ServiceInterceptorBase>>
+        coalescedServiceInterceptors;
   };
   static ProcessedModuleSet processModulesSpecification(ModulesSpecification&&);
 
@@ -2895,12 +2896,13 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
    * Gets all ServiceInterceptors installed on this ThriftServer instance via
    * addModule().
    */
-  const std::vector<ServiceInterceptorInfo>& getServiceInterceptors()
-      const override {
+  const std::vector<std::shared_ptr<ServiceInterceptorBase>>&
+  getServiceInterceptors() const override {
     if (auto* description = processedServiceDescription_.get()) {
       return description->modules.coalescedServiceInterceptors;
     }
-    static const folly::Indestructible<std::vector<ServiceInterceptorInfo>>
+    static const folly::Indestructible<
+        std::vector<std::shared_ptr<ServiceInterceptorBase>>>
         kEmpty;
     return kEmpty;
   }

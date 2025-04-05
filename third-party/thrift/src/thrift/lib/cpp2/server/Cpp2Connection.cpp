@@ -166,14 +166,13 @@ Cpp2Connection::~Cpp2Connection() {
 
 void Cpp2Connection::invokeServiceInterceptorsOnConnectionClosed() noexcept {
 #if FOLLY_HAS_COROUTINES
-  const auto& serviceInterceptorsInfo =
+  const auto& serviceInterceptors =
       worker_->getServer()->getServiceInterceptors();
-  for (std::size_t i = 0; i < serviceInterceptorsInfo.size(); ++i) {
+  for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
     ServiceInterceptorBase::ConnectionInfo connectionInfo{
         &context_,
         context_.getStorageForServiceInterceptorOnConnectionByIndex(i)};
-    serviceInterceptorsInfo[i].interceptor->internal_onConnectionClosed(
-        connectionInfo);
+    serviceInterceptors[i]->internal_onConnectionClosed(connectionInfo);
   }
 #endif // FOLLY_HAS_COROUTINES
 }

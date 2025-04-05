@@ -1184,11 +1184,11 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
   const apache::thrift::server::ServerConfigs* server =
       reqCtx_->getConnectionContext()->getWorkerContext()->getServerContext();
   DCHECK(server);
-  const std::vector<server::ServerConfigs::ServiceInterceptorInfo>&
-      serviceInterceptorsInfo = server->getServiceInterceptors();
+  const std::vector<std::shared_ptr<ServiceInterceptorBase>>&
+      serviceInterceptors = server->getServiceInterceptors();
   std::vector<std::pair<std::size_t, std::exception_ptr>> exceptions;
 
-  for (std::size_t i = 0; i < serviceInterceptorsInfo.size(); ++i) {
+  for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
     auto* connectionCtx = reqCtx_->getConnectionContext();
     auto connectionInfo = ServiceInterceptorBase::ConnectionInfo{
         connectionCtx,
@@ -1202,11 +1202,8 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
         methodName_,
         reqCtx_->getInterceptorFrameworkMetadata()};
     try {
-      co_await serviceInterceptorsInfo[i].interceptor->internal_onRequest(
-          connectionInfo,
-          requestInfo,
-          serviceInterceptorsInfo[i].qualifiedName,
-          server->getInterceptorMetricCallback());
+      co_await serviceInterceptors[i]->internal_onRequest(
+          connectionInfo, requestInfo, server->getInterceptorMetricCallback());
     } catch (...) {
       exceptions.emplace_back(i, folly::current_exception());
     }
@@ -1214,12 +1211,14 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
   if (!exceptions.empty()) {
     std::string message = fmt::format(
         "ServiceInterceptor::onRequest threw exceptions:\n[{}] {}\n",
-        serviceInterceptorsInfo[exceptions[0].first].qualifiedName.toString(),
+        serviceInterceptors[exceptions[0].first]->getQualifiedName().toString(),
         folly::exceptionStr(exceptions[0].second));
     for (std::size_t i = 1; i < exceptions.size(); ++i) {
       message += fmt::format(
           "[{}] {}\n",
-          serviceInterceptorsInfo[exceptions[i].first].qualifiedName.toString(),
+          serviceInterceptors[exceptions[i].first]
+              ->getQualifiedName()
+              .toString(),
           folly::exceptionStr(exceptions[i].second));
     }
     co_yield folly::coro::co_error(TApplicationException(message));
@@ -1235,12 +1234,11 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse(
   const apache::thrift::server::ServerConfigs* server =
       reqCtx_->getConnectionContext()->getWorkerContext()->getServerContext();
   DCHECK(server);
-  const std::vector<server::ServerConfigs::ServiceInterceptorInfo>&
-      serviceInterceptorsInfo = server->getServiceInterceptors();
+  const std::vector<std::shared_ptr<ServiceInterceptorBase>>&
+      serviceInterceptors = server->getServiceInterceptors();
   std::vector<std::pair<std::size_t, std::exception_ptr>> exceptions;
 
-  for (auto i = std::ptrdiff_t(serviceInterceptorsInfo.size()) - 1; i >= 0;
-       --i) {
+  for (auto i = std::ptrdiff_t(serviceInterceptors.size()) - 1; i >= 0; --i) {
     auto* connectionCtx = reqCtx_->getConnectionContext();
     auto connectionInfo = ServiceInterceptorBase::ConnectionInfo{
         connectionCtx,
@@ -1253,7 +1251,7 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse(
         definingServiceName_,
         methodName_};
     try {
-      co_await serviceInterceptorsInfo[i].interceptor->internal_onResponse(
+      co_await serviceInterceptors[i]->internal_onResponse(
           std::move(connectionInfo), std::move(responseInfo));
     } catch (...) {
       exceptions.emplace_back(i, folly::current_exception());
@@ -1263,12 +1261,14 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse(
   if (!exceptions.empty()) {
     std::string message = fmt::format(
         "ServiceInterceptor::onResponse threw exceptions:\n[{}] {}\n",
-        serviceInterceptorsInfo[exceptions[0].first].qualifiedName.toString(),
+        serviceInterceptors[exceptions[0].first]->getQualifiedName().toString(),
         folly::exceptionStr(exceptions[0].second));
     for (std::size_t i = 1; i < exceptions.size(); ++i) {
       message += fmt::format(
           "[{}] {}\n",
-          serviceInterceptorsInfo[exceptions[i].first].qualifiedName.toString(),
+          serviceInterceptors[exceptions[i].first]
+              ->getQualifiedName()
+              .toString(),
           folly::exceptionStr(exceptions[i].second));
     }
     co_yield folly::coro::co_error(TApplicationException(message));

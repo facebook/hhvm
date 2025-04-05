@@ -1731,8 +1731,8 @@ void ThriftServer::callOnStartServing() {
   {
     ServiceInterceptorBase::InitParams initParams;
     std::vector<folly::coro::Task<void>> tasks;
-    for (const auto& info : getServiceInterceptors()) {
-      tasks.emplace_back(info.interceptor->co_onStartServing(initParams));
+    for (const auto& interceptor : getServiceInterceptors()) {
+      tasks.emplace_back(interceptor->co_onStartServing(initParams));
     }
     folly::coro::blockingWait(folly::coro::collectAllRange(std::move(tasks)));
   }
@@ -2476,24 +2476,21 @@ ThriftServer::processModulesSpecification(ModulesSpecification&& specs) {
       std::vector<std::shared_ptr<ServiceInterceptorBase>> serviceInterceptors =
           moduleSpec.module->getServiceInterceptors();
 
-      std::vector<ServiceInterceptorInfo> result;
+      std::vector<std::shared_ptr<ServiceInterceptorBase>> result;
       for (auto& interceptor : serviceInterceptors) {
-        ServiceInterceptorQualifiedName qualifiedName{
-            .moduleName = moduleSpec.name,
-            .interceptorName = interceptor->getName()};
-        auto qualifiedNameStr = qualifiedName.toString();
+        interceptor->setModuleName(moduleSpec.name);
+        auto qualifiedNameStr = interceptor->getQualifiedName().toString();
         if (seenNames_.find(qualifiedNameStr) != seenNames_.end()) {
           throw std::logic_error(fmt::format(
               "Duplicate ServiceInterceptor: {}", qualifiedNameStr));
         }
         seenNames_.insert(qualifiedNameStr);
-        result.emplace_back(ServiceInterceptorInfo{
-            std::move(qualifiedName), std::move(interceptor)});
+        result.emplace_back(std::move(interceptor));
       }
       interceptorsByModule_.emplace_back(std::move(result));
     }
 
-    std::vector<ServiceInterceptorInfo> coalesce() && {
+    std::vector<std::shared_ptr<ServiceInterceptorBase>> coalesce() && {
       if constexpr (folly::kIsDebug) {
         // Our contract guarantees ordering of interceptors within a module, but
         // not across modules. In debug mode, let's shuffle order across modules
@@ -2505,7 +2502,7 @@ ThriftServer::processModulesSpecification(ModulesSpecification&& specs) {
             folly::Random::DefaultGenerator());
       }
 
-      std::vector<ServiceInterceptorInfo> result;
+      std::vector<std::shared_ptr<ServiceInterceptorBase>> result;
       for (auto& interceptors : interceptorsByModule_) {
         result.insert(
             result.end(),
@@ -2516,14 +2513,17 @@ ThriftServer::processModulesSpecification(ModulesSpecification&& specs) {
     }
 
    private:
-    std::vector<std::vector<ServiceInterceptorInfo>> interceptorsByModule_;
+    std::vector<std::vector<std::shared_ptr<ServiceInterceptorBase>>>
+        interceptorsByModule_;
     std::unordered_set<std::string> seenNames_;
   };
 #else
   class ServiceInterceptorsCollector {
    public:
     void addModule(const ModulesSpecification::Info&) {}
-    std::vector<ServiceInterceptorInfo> coalesce() && { return {}; }
+    std::vector<std::shared_ptr<ServiceInterceptorBase>> coalesce() && {
+      return {};
+    }
   };
 #endif // FOLLY_HAS_COROUTINES
   ServiceInterceptorsCollector serviceInterceptorsCollector;

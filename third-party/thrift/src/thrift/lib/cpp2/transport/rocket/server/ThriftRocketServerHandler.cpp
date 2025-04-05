@@ -1005,18 +1005,17 @@ void ThriftRocketServerHandler::onBeforeHandleFrame() {
 void ThriftRocketServerHandler::invokeServiceInterceptorsOnConnection(
     RocketServerConnection& connection) noexcept {
 #if FOLLY_HAS_COROUTINES
-  const auto& serviceInterceptorsInfo =
+  const auto& serviceInterceptors =
       worker_->getServer()->getServiceInterceptors();
   std::vector<std::pair<std::size_t, std::exception_ptr>> exceptions;
   didExecuteServiceInterceptorsOnConnection_ = true;
 
-  for (std::size_t i = 0; i < serviceInterceptorsInfo.size(); ++i) {
+  for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
     ServiceInterceptorBase::ConnectionInfo connectionInfo{
         &connContext_,
         connContext_.getStorageForServiceInterceptorOnConnectionByIndex(i)};
     try {
-      serviceInterceptorsInfo[i].interceptor->internal_onConnection(
-          std::move(connectionInfo));
+      serviceInterceptors[i]->internal_onConnection(std::move(connectionInfo));
     } catch (...) {
       exceptions.emplace_back(i, folly::current_exception());
     }
@@ -1024,12 +1023,14 @@ void ThriftRocketServerHandler::invokeServiceInterceptorsOnConnection(
   if (!exceptions.empty()) {
     std::string message = fmt::format(
         "ServiceInterceptor::onConnection threw exceptions:\n[{}] {}\n",
-        serviceInterceptorsInfo[exceptions[0].first].qualifiedName.toString(),
+        serviceInterceptors[exceptions[0].first]->getQualifiedName().toString(),
         folly::exceptionStr(exceptions[0].second));
     for (std::size_t i = 1; i < exceptions.size(); ++i) {
       message += fmt::format(
           "[{}] {}\n",
-          serviceInterceptorsInfo[exceptions[i].first].qualifiedName.toString(),
+          serviceInterceptors[exceptions[i].first]
+              ->getQualifiedName()
+              .toString(),
           folly::exceptionStr(exceptions[i].second));
     }
     return connection.close(folly::make_exception_wrapper<RocketException>(
@@ -1042,14 +1043,13 @@ void ThriftRocketServerHandler::
     invokeServiceInterceptorsOnConnectionClosed() noexcept {
 #if FOLLY_HAS_COROUTINES
   if (didExecuteServiceInterceptorsOnConnection_) {
-    const auto& serviceInterceptorsInfo =
+    const auto& serviceInterceptors =
         worker_->getServer()->getServiceInterceptors();
-    for (std::size_t i = 0; i < serviceInterceptorsInfo.size(); ++i) {
+    for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
       ServiceInterceptorBase::ConnectionInfo connectionInfo{
           &connContext_,
           connContext_.getStorageForServiceInterceptorOnConnectionByIndex(i)};
-      serviceInterceptorsInfo[i].interceptor->internal_onConnectionClosed(
-          connectionInfo);
+      serviceInterceptors[i]->internal_onConnectionClosed(connectionInfo);
     }
   }
 #endif // FOLLY_HAS_COROUTINES

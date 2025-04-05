@@ -201,16 +201,15 @@ void Cpp2Worker::invokeServiceInterceptorsOnConnectionForHeader(
     [[maybe_unused]] Cpp2Connection& connection) noexcept {
 #if FOLLY_HAS_COROUTINES
   Cpp2ConnContext& context = connection.getContext();
-  const auto& serviceInterceptorsInfo = server_->getServiceInterceptors();
+  const auto& serviceInterceptors = server_->getServiceInterceptors();
   bool didServiceInterceptorOnConnectionThrow = false;
 
-  for (std::size_t i = 0; i < serviceInterceptorsInfo.size(); ++i) {
+  for (std::size_t i = 0; i < serviceInterceptors.size(); ++i) {
     ServiceInterceptorBase::ConnectionInfo connectionInfo{
         &context,
         context.getStorageForServiceInterceptorOnConnectionByIndex(i)};
     try {
-      serviceInterceptorsInfo[i].interceptor->internal_onConnection(
-          std::move(connectionInfo));
+      serviceInterceptors[i]->internal_onConnection(std::move(connectionInfo));
     } catch (...) {
       didServiceInterceptorOnConnectionThrow = true;
     }

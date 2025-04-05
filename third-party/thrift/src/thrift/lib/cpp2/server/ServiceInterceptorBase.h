@@ -42,7 +42,19 @@ class ServiceInterceptorBase {
  public:
   virtual ~ServiceInterceptorBase() = default;
 
+  /**
+   * This method returns the name of the interceptor itself. This is use as
+   * part of the interceptor's qualified name.
+   */
   virtual std::string getName() const = 0;
+
+  /**
+   * At runtime, ServiceInterceptors are uniquely identified by
+   * {module name}.{interceptor name}. This methods returns
+   * ServiceInterceptorQualifiedName which encapsulates this identifier. If
+   * this is called prior to the module being set, this will fatal
+   */
+  virtual const ServiceInterceptorQualifiedName& getQualifiedName() const = 0;
 
   struct InitParams {};
   virtual folly::coro::Task<void> co_onStartServing(InitParams);
@@ -85,10 +97,7 @@ class ServiceInterceptorBase {
     const InterceptorFrameworkMetadataStorage* frameworkMetadata = nullptr;
   };
   virtual folly::coro::Task<void> internal_onRequest(
-      ConnectionInfo,
-      RequestInfo,
-      const ServiceInterceptorQualifiedName&,
-      InterceptorMetricCallback&) = 0;
+      ConnectionInfo, RequestInfo, InterceptorMetricCallback&) = 0;
 
   struct ResponseInfo {
     const Cpp2RequestContext* context = nullptr;
@@ -115,6 +124,14 @@ class ServiceInterceptorBase {
   };
   virtual folly::coro::Task<void> internal_onResponse(
       ConnectionInfo, ResponseInfo) = 0;
+
+  /**
+   * This methods is called by ThriftServer to set the module name for the
+   * interceptor. This method is expected to be called prior to to the
+   * the interceptor methods being executed on any request, as it performs
+   * various secondary intitialization requiring module name to be known.
+   */
+  virtual void setModuleName(const std::string& moduleName) = 0;
 
   static constexpr std::size_t kMaxRequestStateSize =
       detail::ServiceInterceptorOnRequestStorage::max_size();

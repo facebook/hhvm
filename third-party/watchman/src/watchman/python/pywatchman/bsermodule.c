@@ -8,6 +8,7 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h> // @manual=fbsource//third-party/python:python
 #include <bytesobject.h> // @manual=fbsource//third-party/python:python
+#include <folly/CPortability.h>
 #ifdef _MSC_VER
 #define inline __inline
 #if _MSC_VER >= 1800
@@ -604,6 +605,10 @@ static PyObject* bser_load(PyObject* self, PyObject* args, PyObject* kw) {
   return string;
 }
 
+FOLLY_PUSH_WARNING
+#if defined(__clang__) && FOLLY_HAS_WARNING("-Wcast-function-type-mismatch")
+FOLLY_GNU_DISABLE_WARNING("-Wcast-function-type-mismatch")
+#endif
 // clang-format off
 static PyMethodDef bser_methods[] = {
   {"loads", (PyCFunction)bser_loads, METH_VARARGS | METH_KEYWORDS,
@@ -618,6 +623,7 @@ static PyMethodDef bser_methods[] = {
    "Serialize string."},
   {NULL, NULL, 0, NULL}
 };
+FOLLY_POP_WARNING
 
 #if PY_MAJOR_VERSION >= 3
 static struct PyModuleDef bser_module = {

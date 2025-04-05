@@ -24,7 +24,6 @@
 #include <folly/portability/GFlags.h>
 #include <thrift/lib/cpp/protocol/TProtocol.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
-
 FOLLY_GFLAGS_DECLARE_int32(thrift_cpp2_protocol_reader_string_limit);
 FOLLY_GFLAGS_DECLARE_int32(thrift_cpp2_protocol_reader_container_limit);
 
@@ -62,6 +61,8 @@ class BinaryProtocolWriter : public detail::ProtocolBase {
 
   static constexpr bool kHasIndexSupport() { return true; }
 
+  static constexpr bool kSupportsArithmeticVectors() { return true; }
+
   /**
    * ...
    * The IOBuf itself is managed by the caller.
@@ -98,6 +99,8 @@ class BinaryProtocolWriter : public detail::ProtocolBase {
   uint32_t writeI16(int16_t i16);
   uint32_t writeI32(int32_t i32);
   uint32_t writeI64(int64_t i64);
+  template <typename T>
+  size_t writeArithmeticVector(const T* inputPtr, size_t numElements);
   uint32_t writeDouble(double dub);
   uint32_t writeFloat(float flt);
   uint32_t writeString(folly::StringPiece str);
@@ -204,6 +207,8 @@ class BinaryProtocolReader : public detail::ProtocolBase {
 
   static constexpr bool kHasDeferredRead() { return false; }
 
+  static constexpr bool kSupportsArithmeticVectors() { return true; }
+
   void setStringSizeLimit(int32_t string_limit) {
     string_limit_ = string_limit;
   }
@@ -245,6 +250,8 @@ class BinaryProtocolReader : public detail::ProtocolBase {
   void readI16(int16_t& i16);
   void readI32(int32_t& i32);
   void readI64(int64_t& i64);
+  template <typename T>
+  void readArithmeticVector(T* outputPtr, size_t numElements);
   void readDouble(double& dub);
   void readFloat(float& flt);
   template <typename StrType>

@@ -60,8 +60,28 @@ struct SmallListInt {
   1: list<i32> lst;
 }
 
+struct BigListByte {
+  1: list<byte> lst;
+}
+
+struct BigListShort {
+  1: list<i16> lst;
+}
+
 struct BigListInt {
   1: list<i32> lst;
+}
+
+struct BigListBigInt {
+  1: list<i64> lst;
+}
+
+struct BigListFloat {
+  1: list<float> lst;
+}
+
+struct BigListDouble {
+  1: list<double> lst;
 }
 
 struct BigListMixed {

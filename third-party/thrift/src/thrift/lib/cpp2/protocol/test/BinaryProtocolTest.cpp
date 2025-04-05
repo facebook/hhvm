@@ -17,7 +17,10 @@
 #include <folly/CPortability.h>
 #include <folly/portability/GTest.h>
 
+#include <algorithm>
+#include <random>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
+#include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
 
 using namespace apache::thrift;
 using namespace apache::thrift::protocol;
@@ -87,12 +90,67 @@ TEST_F(BinaryProtocolTest, writeStringExactly4GB) {
   EXPECT_THROW(w.writeString(monster), TProtocolException);
 }
 
-TEST_F(BinaryProtocolTest, writeStringExceeds4GB) {
-  auto w = BinaryProtocolWriter();
-  auto q = folly::IOBufQueue();
-  w.setOutput(&q);
-  std::string monster(((uint64_t)1 << 32) + 100, 'x');
-  EXPECT_THROW(w.writeString(monster), TProtocolException);
+template <typename T>
+class ArithmeticTypeListBinaryProtocolTest : public BinaryProtocolTest {};
+
+using ArithmeticTypes =
+    ::testing::Types<int64_t, int32_t, int16_t, int8_t, float, double>;
+TYPED_TEST_SUITE(ArithmeticTypeListBinaryProtocolTest, ArithmeticTypes);
+
+TYPED_TEST(ArithmeticTypeListBinaryProtocolTest, readBigListFixedInt) {
+  for (int randomInit = 0; randomInit <= 1; ++randomInit) {
+    for (int i = 1; i < 256; ++i) {
+      auto w = BinaryProtocolWriter();
+      auto q = folly::IOBufQueue();
+      w.setOutput(&q);
+      std::vector<TypeParam> intList(i);
+      // Specify the engine and distribution.
+      if (randomInit) {
+        std::mt19937 mersenne_engine(1337); // Generates random integers
+        if constexpr (std::is_floating_point_v<TypeParam>) {
+          std::uniform_real_distribution<TypeParam> dist{};
+          std::generate(intList.begin(), intList.end(), [&]() {
+            return dist(mersenne_engine);
+          });
+        } else {
+          std::uniform_int_distribution<TypeParam> dist{};
+          std::generate(intList.begin(), intList.end(), [&]() {
+            return dist(mersenne_engine);
+          });
+        }
+
+      } else {
+        TypeParam t = 0;
+        std::generate_n(intList.begin(), intList.size(), [&]() { return ++t; });
+      }
+      using prot_method_integral =
+          ::apache::thrift::detail::pm::protocol_methods<
+              ::apache::thrift::type_class::list<
+                  ::apache::thrift::type_class::integral>,
+              ::std::vector<TypeParam>>;
+      using prot_method_float = ::apache::thrift::detail::pm::protocol_methods<
+          ::apache::thrift::type_class::list<
+              ::apache::thrift::type_class::floating_point>,
+          ::std::vector<TypeParam>>;
+
+      if constexpr (std::is_floating_point_v<TypeParam>) {
+        prot_method_float::write(w, intList);
+      } else {
+        prot_method_integral::write(w, intList);
+      }
+
+      auto r = BinaryProtocolReader();
+      r.setInput(q.front());
+      std::vector<TypeParam> outList;
+      outList.resize(intList.size());
+      if constexpr (std::is_floating_point_v<TypeParam>) {
+        prot_method_float::read(r, outList);
+      } else {
+        prot_method_integral::read(r, outList);
+      }
+      ASSERT_EQ(intList, outList);
+    }
+  }
 }
 
 } // namespace

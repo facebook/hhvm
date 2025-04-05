@@ -1316,6 +1316,8 @@ namespace HH {
     OF_NULL = 28;
     OF_NOTHING = 29;
     OF_DYNAMIC = 30;
+    OF_UNION = 31;
+    OF_RECURSIVE_UNION = 32;
     OF_CLASS_PTR = 33;
     OF_CLASS_OR_CLASSNAME = 34;
     OF_UNRESOLVED = 101; // for type aliases only

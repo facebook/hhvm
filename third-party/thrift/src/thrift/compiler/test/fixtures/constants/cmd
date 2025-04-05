@@ -7,6 +7,7 @@ rust: mstch_rust src/module.thrift
 java: mstch_java src/module.thrift
 pyi: mstch_pyi src/module.thrift
 py3: mstch_py3 src/module.thrift
+py3_inplace: mstch_py3:inplace_migrate src/module.thrift
 json: json src/module.thrift
 python: mstch_python src/module.thrift
 python_capi: mstch_python_capi src/module.thrift

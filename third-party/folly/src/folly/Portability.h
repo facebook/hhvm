@@ -484,6 +484,12 @@ constexpr auto kIsMobile = true;
 constexpr auto kIsMobile = false;
 #endif
 
+#if defined(FOLLY_IS_AR_VR) && FOLLY_IS_AR_VR
+constexpr auto kIsArVr = true;
+#else
+constexpr auto kIsArVr = false;
+#endif
+
 #if defined(__linux__) && !FOLLY_MOBILE
 constexpr auto kIsLinux = true;
 #else

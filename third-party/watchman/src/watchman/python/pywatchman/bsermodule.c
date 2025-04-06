@@ -8,7 +8,6 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h> // @manual=fbsource//third-party/python:python
 #include <bytesobject.h> // @manual=fbsource//third-party/python:python
-#include <folly/CPortability.h>
 #ifdef _MSC_VER
 #define inline __inline
 #if _MSC_VER >= 1800
@@ -605,25 +604,40 @@ static PyObject* bser_load(PyObject* self, PyObject* args, PyObject* kw) {
   return string;
 }
 
-FOLLY_PUSH_WARNING
-#if defined(__clang__) && FOLLY_HAS_WARNING("-Wcast-function-type-mismatch")
-FOLLY_GNU_DISABLE_WARNING("-Wcast-function-type-mismatch")
-#endif
 // clang-format off
 static PyMethodDef bser_methods[] = {
-  {"loads", (PyCFunction)bser_loads, METH_VARARGS | METH_KEYWORDS,
-   "Deserialize string."},
-  {"load", (PyCFunction)bser_load, METH_VARARGS | METH_KEYWORDS,
-   "Deserialize a file object"},
-  {"pdu_info", (PyCFunction)bser_pdu_info, METH_VARARGS,
-   "Extract PDU information."},
-  {"pdu_len", (PyCFunction)bser_pdu_len, METH_VARARGS,
-   "Extract total PDU length."},
-  {"dumps",  (PyCFunction)bser_dumps, METH_VARARGS | METH_KEYWORDS,
-   "Serialize string."},
+  {
+    "loads",
+    (void *)(PyCFunctionWithKeywords)bser_loads,
+    METH_VARARGS | METH_KEYWORDS,
+    "Deserialize string."
+  },
+  {
+    "load",
+    (void *)(PyCFunctionWithKeywords)bser_load,
+    METH_VARARGS | METH_KEYWORDS,
+    "Deserialize a file object"
+  },
+  {
+    "pdu_info",
+    (PyCFunction)bser_pdu_info,
+    METH_VARARGS,
+    "Extract PDU information."
+  },
+  {
+    "pdu_len",
+    (PyCFunction)bser_pdu_len,
+    METH_VARARGS,
+    "Extract total PDU length."
+  },
+  {
+    "dumps",
+    (void *)(PyCFunctionWithKeywords)bser_dumps,
+    METH_VARARGS | METH_KEYWORDS,
+    "Serialize string."
+  },
   {NULL, NULL, 0, NULL}
 };
-FOLLY_POP_WARNING
 
 #if PY_MAJOR_VERSION >= 3
 static struct PyModuleDef bser_module = {
